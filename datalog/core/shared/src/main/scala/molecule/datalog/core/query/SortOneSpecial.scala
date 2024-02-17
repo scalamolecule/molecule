@@ -1,11 +1,10 @@
 package molecule.datalog.core.query
 
-import java.lang.{Boolean => jBoolean, Double => jDouble, Long => jLong}
-import java.math.{BigDecimal => jBigDecimal}
-import java.util.{Map => jMap, Set => jSet}
+import java.lang.{Boolean => jBoolean, Double => jDouble, Float => jFloat, Integer => jInteger, Long => jLong}
+import java.math.{BigDecimal => jBigDecimal, BigInteger => jBigInt}
+import java.util.{Map => jMap}
 import molecule.boilerplate.ast.Model._
 import molecule.core.util.AggrUtils
-
 
 trait SortOneSpecial[Tpl]
   extends SortOne_[Tpl]
@@ -207,32 +206,38 @@ trait SortOneSpecial[Tpl]
     }
   }
 
-  protected def sortOneDoublePossiblyMedianSet(
+  protected def sortMedian(
     attr: Attr,
     attrIndex: Int
   ): Option[(Int, Int => (Row, Row) => Int)] = {
-    def median(rawSet: AnyRef): Double = {
-//      getMedian(rawSet.asInstanceOf[jSet[_]].toArray.map(_.toString.toDouble).toSet)
-      getMedian(rawSet.asInstanceOf[jSet[_]].toArray.map(_.toString.toDouble).toList)
-    }
-    if (attr.op == Fn("median", None) && attr.sort.nonEmpty) {
-      attr.sort.map { sort =>
-        (
-          sort.last.toString.toInt,
-          sort.head match {
-            case 'a' => (nestedIdsCount: Int) =>
-              val i = nestedIdsCount + attrIndex
-              (a: Row, b: Row) => median(a.get(i)).compareTo(median(b.get(i)))
-
-            case 'd' => (nestedIdsCount: Int) =>
-              val i = nestedIdsCount + attrIndex
-              (a: Row, b: Row) => median(b.get(i)).compareTo(median(a.get(i)))
-          }
-        )
-      }
-    } else {
-      // normal sorting
-      sortOneDouble(attr, attrIndex)
+    attr.sort.map { sort =>
+      (
+        sort.last.toString.toInt,
+        sort.head match {
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              a.get(i) match {
+                case v: jInteger    => v.compareTo(b.get(i).asInstanceOf[jInteger])
+                case v: jLong       => v.compareTo(b.get(i).asInstanceOf[jLong])
+                case v: jDouble     => v.compareTo(b.get(i).asInstanceOf[jDouble])
+                case v: jFloat      => v.compareTo(b.get(i).asInstanceOf[jFloat])
+                case v: jBigInt     => v.compareTo(b.get(i).asInstanceOf[jBigInt])
+                case v: jBigDecimal => v.compareTo(b.get(i).asInstanceOf[jBigDecimal])
+              }
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              b.get(i) match {
+                case v: jInteger    => v.compareTo(a.get(i).asInstanceOf[jInteger])
+                case v: jLong       => v.compareTo(a.get(i).asInstanceOf[jLong])
+                case v: jDouble     => v.compareTo(a.get(i).asInstanceOf[jDouble])
+                case v: jFloat      => v.compareTo(a.get(i).asInstanceOf[jFloat])
+                case v: jBigInt     => v.compareTo(a.get(i).asInstanceOf[jBigInt])
+                case v: jBigDecimal => v.compareTo(a.get(i).asInstanceOf[jBigDecimal])
+              }
+        }
+      )
     }
   }
 }

@@ -1,6 +1,5 @@
 package molecule.datalog.core.query
 
-import java.util.{Set => jSet}
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import scala.reflect.ClassTag
@@ -19,7 +18,7 @@ trait ResolveExprOne[Tpl]
       case at: AttrOneManInt            => man(attr, e, a, at.vs, resInt, intSorter(at, attrIndex))
       case at: AttrOneManLong           => man(attr, e, a, at.vs, resLong, sortOneLong(at, attrIndex))
       case at: AttrOneManFloat          => man(attr, e, a, at.vs, resFloat, floatSorter(at, attrIndex))
-      case at: AttrOneManDouble         => man(attr, e, a, at.vs, resDouble, sortOneDoublePossiblyMedianSet(at, attrIndex))
+      case at: AttrOneManDouble         => man(attr, e, a, at.vs, resDouble, sortOneDouble(at, attrIndex))
       case at: AttrOneManBoolean        => man(attr, e, a, at.vs, resBoolean, sortOneBoolean(at, attrIndex))
       case at: AttrOneManBigInt         => man(attr, e, a, at.vs, resBigInt, bigIntSorter(at, attrIndex))
       case at: AttrOneManBigDecimal     => man(attr, e, a, at.vs, resBigDecimal, sortOneBigDecimal(at, attrIndex))
@@ -84,7 +83,7 @@ trait ResolveExprOne[Tpl]
       case at: AttrOneOptInt            => opt(attr, e, a, at.vs, resOptInt, sortOneOptInt(at, attrIndex), sortOneInt(at, attrIndex))
       case at: AttrOneOptLong           => opt(attr, e, a, at.vs, resOptLong, sorterOneOptLong(at, attrIndex), sorterOneLong(at, attrIndex))
       case at: AttrOneOptFloat          => opt(attr, e, a, at.vs, resOptFloat, sortOneOptFloat(at, attrIndex), sortOneFloat(at, attrIndex))
-      case at: AttrOneOptDouble         => opt(attr, e, a, at.vs, resOptDouble, sortOneOptDouble(at, attrIndex), sortOneDoublePossiblyMedianSet(at, attrIndex))
+      case at: AttrOneOptDouble         => opt(attr, e, a, at.vs, resOptDouble, sortOneOptDouble(at, attrIndex), sortOneDouble(at, attrIndex))
       case at: AttrOneOptBoolean        => opt(attr, e, a, at.vs, resOptBoolean, sortOneOptBoolean(at, attrIndex), sortOneBoolean(at, attrIndex))
       case at: AttrOneOptBigInt         => opt(attr, e, a, at.vs, resOptBigInt, sortOneOptBigInt(at, attrIndex), sortOneBigInt(at, attrIndex))
       case at: AttrOneOptBigDecimal     => opt(attr, e, a, at.vs, resOptBigDecimal, sortOneOptBigDecimal(at, attrIndex), sortOneBigDecimal(at, attrIndex))
@@ -133,6 +132,9 @@ trait ResolveExprOne[Tpl]
   private def addSort(sorter: Option[(Int, Int => (Row, Row) => Int)]): Unit = {
     sorter.foreach(s => sortss = sortss.init :+ (sortss.last :+ s))
   }
+  private def replaceSort(sorter: Option[(Int, Int => (Row, Row) => Int)]): Unit = {
+    sorter.foreach(s => sortss = sortss.init :+ (sortss.last.init :+ s))
+  }
 
   private def man[T: ClassTag](
     attr: Attr,
@@ -142,25 +144,16 @@ trait ResolveExprOne[Tpl]
     res: ResOne[T],
     sorter: Option[(Int, Int => (Row, Row) => Int)]
   ): Unit = {
-    //    println("---------------------------------------------------- man  " + a)
-    //    println(attr)
     addCast(res.j2s)
     addSort(sorter)
-//    val v = getVar(attr)
     val v = getVar(attr)
     find += v
     attr.filterAttr.fold {
-//      println(s"---------------------- man 1  $e  $a  $v      $path")
-      expr(e, a, v, attr.op, args, res)
+      expr(attr, e, a, v, attr.op, args, res)
       filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
       filterAttrVars2.get(a).foreach(_(e, v))
-
     } { case (_, filterPath, filterAttr) =>
-      val w = getVar(filterAttr, filterPath)
-
-//      println(s"---------------------- man 2  $e  $a  $v  $w  $path    $filterPath")
-      expr2(e, a, v, w, attr.op)
-      //      expr2(e, a, v, getVar(filterAttr), attr.op)
+      expr2(e, a, v, getVar(filterAttr, filterPath), attr.op)
     }
     refConfirmed = true
   }
@@ -172,38 +165,25 @@ trait ResolveExprOne[Tpl]
     args: Seq[T],
     res: ResOne[T],
   ): Unit = {
-    //    println("---------------------------------------------------- tac  " + a)
-//    val v = getVar(attr)
-    val v = getVar(attr)
-
-    //    val v = filterAttrVars.getOrElse(path :+ attr.attr, vv)
+    val v = getVar(attr, cache = attr.op == V)
     attr.filterAttr.fold {
-//      println(s"---------------------- tac 1  $e  $a  $v  " + path)
-      expr(e, a, v, attr.op, args, res)
+      expr(attr, e, a, v, attr.op, args, res)
       filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
       filterAttrVars2.get(a).foreach(_(e, v))
-
     } { case (_, filterPath, filterAttr) =>
-      //      val w = getVar(filterAttr)
-      //      val w = getFilterVar(filterPath :+ filterAttr.attr)
-      //      val w = filterAttrVars.getOrElse(filterPath :+ filterAttr.attr, vv)
-      val w = getVar(filterAttr, filterPath)
-
-
-//      println(s"---------------------- tac 2  $e  $a  $v  $w  $path    $filterPath  ")
-      expr2(e, a, v, w, attr.op)
-      //      expr2(e, a, v, getFilterVar(attr), attr.op)
+      expr2(e, a, v, getVar(filterAttr, filterPath), attr.op)
     }
     refConfirmed = true
   }
 
   private def expr[T: ClassTag](
+    at: Attr,
     e: Var,
     a: Att,
     v: Var,
     op: Op,
     args: Seq[T],
-    res: ResOne[T],
+    res: ResOne[T]
   ): Unit = {
     op match {
       case V          => attr(e, a, v)
@@ -214,7 +194,7 @@ trait ResolveExprOne[Tpl]
       case Le         => compare(e, a, v, args.head, "<=", res.s2j)
       case Ge         => compare(e, a, v, args.head, ">=", res.s2j)
       case NoValue    => noValue(e, a)
-      case Fn(kw, n)  => aggr(e, a, v, kw, n, res)
+      case Fn(kw, n)  => aggr(at, e, a, v, kw, n, res)
       case StartsWith => stringOp(e, a, v, args.head, "starts-with?")
       case EndsWith   => stringOp(e, a, v, args.head, "ends-with?")
       case Contains   => stringOp(e, a, v, args.head, "includes?")
@@ -409,7 +389,9 @@ trait ResolveExprOne[Tpl]
 
   // aggregation ---------------------------------------------------------------
 
-  private def aggr[T](e: Var, a: Att, v: Var, fn: String, optN: Option[Int], res: ResOne[T]): Unit = {
+  private def aggr[T](
+    at: Attr, e: Var, a: Att, v: Var, fn: String, optN: Option[Int], res: ResOne[T]
+  ): Unit = {
     checkAggrOne()
     lazy val n = optN.getOrElse(0)
     // Replace find/casting with aggregate function/cast
@@ -460,6 +442,7 @@ trait ResolveExprOne[Tpl]
         find += s"(median $v)"
         // Force whole number to cast as double according to aggregate type for median/avg/variance/stddev)
         replaceCast((v: AnyRef) => v.toString.toDouble.asInstanceOf[AnyRef])
+        replaceSort(sortMedian(at, attrIndex))
 
       // OBS! Datomic rounds down to nearest whole number
       // when calculating the median for multiple numbers instead of

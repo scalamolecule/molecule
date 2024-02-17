@@ -63,7 +63,7 @@ trait SqlQueryBase extends Model2QueryBase with BaseHelpers with JavaConversions
 
   // Query variables
   final protected var filterAttrVars      = Map.empty[List[String], String]
-  final protected val expectedFilterAttrs = mutable.Set.empty[String]
+//  final protected val expectedFilterAttrs = mutable.Set.empty[String]
 
   final protected def getCol(attr: Attr): String = {
     exts(attr.ns).fold(attr.name)(ext => attr.ns + ext + "." + attr.attr)

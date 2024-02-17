@@ -116,9 +116,7 @@ trait Insert_datomic
     (tpl: Product) =>
       tpl.productElement(tplIndex).asInstanceOf[Set[_]] match {
         case set if set.isEmpty =>
-//          unusedRefIds += e
-//          usedRefIds -= e
-        case set                =>
+        case set =>
           unusedRefIds -= e
           usedRefIds += e
           set.foreach { value =>
@@ -197,12 +195,13 @@ trait Insert_datomic
     countValueAttrs(nestedElements) match {
       case 1 => // Nested arity-1 values
         (tpl: Product) => {
-          val values = tpl.productElement(tplIndex).asInstanceOf[Seq[Any]]
+          val values       = tpl.productElement(tplIndex).asInstanceOf[Seq[Any]]
           val nestedBaseId = e
           values.foreach { value =>
             e = nestedBaseId
             val nestedTpl = Tuple1(value)
             addRef(ns, refAttr, refNs, CardOne, owner)(nestedTpl)
+            unusedRefIds -= e
             e0 = e
             nested2stmts(nestedTpl)
           }
@@ -213,25 +212,31 @@ trait Insert_datomic
       case _ if lastIsSet =>
         val lastTplIndex = nestedElements.collect { case _: Attr => 1 }.sum - 1
         (tpl: Product) => {
-          val nestedTpls = tpl.productElement(tplIndex).asInstanceOf[Seq[Product]]
+          val nestedTpls   = tpl.productElement(tplIndex).asInstanceOf[Seq[Product]]
           val nestedBaseId = e
           nestedTpls.foreach { nestedTpl =>
-            if (nestedTpl.productElement(lastTplIndex).asInstanceOf[Set[_]].nonEmpty) {
+            def process(): Unit = {
               e = nestedBaseId
               addRef(ns, refAttr, refNs, CardOne, owner)(nestedTpl)
               e0 = e
               nested2stmts(nestedTpl)
+            }
+            nestedTpl.productElement(lastTplIndex) match {
+              case set: Set[_] if set.nonEmpty => process()
+              case _: Option[_]                => process()
+              case _                           =>
             }
           }
         }
 
       case _ =>
         (tpl: Product) => {
-          val nestedTpls = tpl.productElement(tplIndex).asInstanceOf[Seq[Product]]
+          val nestedTpls   = tpl.productElement(tplIndex).asInstanceOf[Seq[Product]]
           val nestedBaseId = e
           nestedTpls.foreach { nestedTpl =>
             e = nestedBaseId
             addRef(ns, refAttr, refNs, CardOne, owner)(nestedTpl)
+            unusedRefIds -= e
             e0 = e
             nested2stmts(nestedTpl)
           }

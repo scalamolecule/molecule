@@ -28,9 +28,11 @@ trait ModelUtils {
 
   final protected def getInitialNs(elements: List[Element]): String = {
     elements.head match {
-      case a: Attr => a.ns
-      case b: Ref  => b.ns
-      case other   => throw ModelError("Unexpected head element: " + other)
+      case a: Attr                              => a.ns
+      case b: Ref                               => b.ns
+      case Nested(Ref(ns, _, _, _, _, _), _)    => ns
+      case NestedOpt(Ref(ns, _, _, _, _, _), _) => ns
+      case other                                => throw ModelError("Unexpected head element: " + other)
     }
   }
 

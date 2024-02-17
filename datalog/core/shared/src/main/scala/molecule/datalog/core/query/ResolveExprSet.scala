@@ -1,6 +1,5 @@
 package molecule.datalog.core.query
 
-import java.util.{Set => jSet}
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import scala.reflect.ClassTag
@@ -237,7 +236,6 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
 
       if (card == "one") {
         find += s"(distinct $v4)"
-//        where += s"[$e0 $refAttr $refId]" -> wClause
         where +=
           s"""[(datomic.api/q
              |          "[:find (pull $e1 [{$refAttr [$a]}] :limit nil)
@@ -245,11 +243,9 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
         where += s"[(if (nil? $v1) {$refAttr {$a []}} $v1) $v2]" -> wClause
         where += s"[($refAttr $v2) $v3]" -> wClause
         where += s"[($a $v3) $v4]" -> wClause
-//        where += s"[(not-empty $v4)]" -> wClause
 
       } else {
         find += s"(distinct $v5)"
-//        where += s"[$e0 $refAttr $refId]" -> wClause
         where +=
           s"""[(datomic.api/q
              |          "[:find (pull $e1 [{$refAttr [$a]}] :limit nil)
@@ -258,7 +254,6 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
         where += s"[($refAttr $v2) $v3]" -> wClause
         where += s"[(first $v3) $v4]" -> wClause
         where += s"[($a $v4) $v5]" -> wClause
-//        where += s"[(not-empty $v5)]" -> wClause
       }
     }
     replaceCast(resOpt.optAttr2s)

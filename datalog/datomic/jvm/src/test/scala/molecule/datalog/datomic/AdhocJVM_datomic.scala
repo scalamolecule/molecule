@@ -14,8 +14,15 @@ import scala.language.implicitConversions
 
 object AdhocJVM_datomic extends TestSuite_datomic {
 
-  implicit val tolerant: Equality[Int] = tolerantIntEquality(toleranceInt)
+  implicit val tolerantInt   : Equality[Int]    = tolerantIntEquality(toleranceInt)
+  implicit val tolerantDouble: Equality[Double] = tolerantDoubleEquality(toleranceDouble)
 
+
+  // Use whole decimal numbers since only sorting is checked here
+  override lazy val (float1, float2, float3, float4)                     = (1.0f, 2.0f, 3.0f, 4.0f)
+  override lazy val (double1, double2, double3, double4)                 = (1.0, 2.0, 3.0, 4.0)
+  override lazy val (bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4) =
+    (BigDecimal(1.0), BigDecimal(2.0), BigDecimal(3.0), BigDecimal(4.0))
 
   override lazy val tests = Tests {
 
@@ -23,49 +30,14 @@ object AdhocJVM_datomic extends TestSuite_datomic {
       import molecule.coreTests.dataModels.core.dsl.Types._
       for {
 
-        _ <- Ns.int.ints(Ref.ints_).Ref.ints.not(Set(2, 3)).int.query.get
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Cardinality-set filter attributes (Ref.ints) not allowed to do additional filtering."
-          }
-        _ <- Ns.int.ints.not(Set(2, 3)).Ref.ints(Ns.ints_).int.query.get
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Cardinality-set filter attributes (Ns.ints) not allowed to do additional filtering."
-          }
-
-        _ <- Ns.int.ints.not(Ref.ints_).Ref.ints.not(Set(2, 3)).int.query.get
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Cardinality-set filter attributes (Ref.ints) not allowed to do additional filtering."
-          }
-        _ <- Ns.int.ints.not(Set(2, 3)).Ref.ints.not(Ns.ints_).int.query.get
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Cardinality-set filter attributes (Ns.ints) not allowed to do additional filtering."
-          }
-
-        _ <- Ns.int.ints.has(Ref.ints_).Ref.ints.not(Set(2, 3)).int.query.get
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Cardinality-set filter attributes (Ref.ints) not allowed to do additional filtering."
-          }
-        _ <- Ns.int.ints.not(Set(2, 3)).Ref.ints.has(Ns.ints_).int.query.get
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Cardinality-set filter attributes (Ns.ints) not allowed to do additional filtering."
-          }
-
-        _ <- Ns.int.ints.hasNo(Ref.ints_).Ref.ints.not(Set(2, 3)).int.query.get
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Cardinality-set filter attributes (Ref.ints) not allowed to do additional filtering."
-          }
-        _ <- Ns.int.ints.not(Set(2, 3)).Ref.ints.hasNo(Ns.ints_).int.query.get
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Cardinality-set filter attributes (Ns.ints) not allowed to do additional filtering."
-          }
+        _ <- Ns.i.int.insert(
+          (1, int1),
+          (1, int2),
+          (1, int3),
+          (2, int4),
+        ).transact
 
 
-        //        List(a, b, c) <- Ns.i.ints_?.insert(
-        //          (1, None),
-        //          (1, Some(Set(2))),
-        //          (2, Some(Set(3))),
-        //        ).i.transact.map(_.ids)
-        //
         //
         ////        _ <- rawQuery(
         ////          """[:find  ?b
@@ -80,24 +52,7 @@ object AdhocJVM_datomic extends TestSuite_datomic {
         ////            |        ]
         ////            |""".stripMargin).map(println)
         //
-        //        _ = {
-        //          println("-------")
-        //          Peer.q(
-        //            """[:find  ?b
-        //              |        ;;(distinct ?c3)
-        //              |        ?c3
-        //              | :where [?a :Ns/i ?b]
-        //              |        [(datomic.api/q
-        //              |          "[:find (pull ?a1 [[:Ns/ints :limit nil]])
-        //              |            :in $ ?a1]" $ ?a) [[?c1]]]
-        //              |        [(if (nil? ?c1) {:Ns/ints []} ?c1) ?c2]
-        //              |        [(:Ns/ints ?c2) ?c3]
-        //              |
-        //              |        ]""".stripMargin,
-        //            conn.db
-        //          ).forEach { r => println(r) }
-        //        }
-        //
+
         //        _ <- Ns.i.ints_?.query.i.get.map(_.toSet ==> Set( // (since we can't sort by Sets)
         //          (1, None),
         //          (1, Some(Set(2))),
@@ -129,35 +84,19 @@ object AdhocJVM_datomic extends TestSuite_datomic {
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
 
-        //        _ = {
-        //          println("------- 2")
-        //          Peer.q(
-        //            """[:find  ?c ?a ?e
-        //              | :where [?b :A/s ?c]
-        //              |        [?b :A/i ?a]
-        //              |        [?b :A/b ?d]
-        //              |        [?d :B/i ?a]
-        //              |        [(identity ?a) ?e]]
-        //              |""".stripMargin,
-        //            conn.db
-        //          ).forEach { r => println(r) }
-        //
-        ////          println("------- 3")
-        ////          Peer.q(
-        ////            """[:find  ?c ?a ?a
-        ////              | :where [?b :A/s ?c]
-        ////              |        [?b :A/i ?a]
-        ////              |        [?b :A/b ?d]
-        ////              |        [?d :B/i ?a]]
-        ////              |""".stripMargin,
-        ////            conn.db
-        ////          ).forEach { r => println(r) }
-        //        }
 
-        _ <- A.s.i(B.i_).Bb.*?(B.i).query.get
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Filter attributes not allowed in optional nested queries."
-          }
+        _ <- A.i.Bb.*(B.i.C.i.Dd.*(D.i.E.i)).insert(
+          (0, Nil),
+          (1, List(
+            (1, 1, Nil),
+          )),
+          (2, List(
+            (1, 1, Nil),
+            (2, 2, List((1, 2))),
+            (3, 3, List((1, 2), (3, 4))),
+          )),
+        ).transact
+
 
         //        _ <- rawQuery(
         //          """
