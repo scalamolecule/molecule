@@ -38,20 +38,7 @@ object AdhocJVM_datomic extends TestSuite_datomic {
         ).transact
 
 
-        //
-        ////        _ <- rawQuery(
-        ////          """[:find  ?b
-        ////            |        (distinct ?c3)
-        ////            | :where [?a :Ns/i ?b]
-        ////            |        [(datomic.api/q
-        ////            |          "[:find (pull ?a1 [[:Ns/ints :limit nil]])
-        ////            |            :in $ ?a1]" $ ?a) [[?c1]]]
-        ////            |        [(if (nil? ?c1) {:Ns/ints []} ?c1) ?c2]
-        ////            |        [(:Ns/ints ?c2) ?c3]
-        ////            |
-        ////            |        ]
-        ////            |""".stripMargin).map(println)
-        //
+
 
         //        _ <- Ns.i.ints_?.query.i.get.map(_.toSet ==> Set( // (since we can't sort by Sets)
         //          (1, None),
@@ -85,28 +72,36 @@ object AdhocJVM_datomic extends TestSuite_datomic {
       for {
 
 
-        _ <- A.i.Bb.*(B.i.C.i.Dd.*(D.i.E.i)).insert(
-          (0, Nil),
-          (1, List(
-            (1, 1, Nil),
-          )),
-          (2, List(
-            (1, 1, Nil),
-            (2, 2, List((1, 2))),
-            (3, 3, List((1, 2), (3, 4))),
-          )),
-        ).transact
+        _ <- A.i.Bb.*(B.i.ii).insert((1, List((2, Set.empty[Int])))).transact
 
+        // A.i was inserted
+        _ <- A.i.query.get.map(_ ==> List(1))
 
-        //        _ <- rawQuery(
-        //          """
-        //            |[:find  ?id0
-        //            |        (distinct ?d)
-        //            | :where [(identity ?a) ?id0]
-        //            |        [?a :A/bb ?b]
-        //            |        [?b :B/c ?c]
-        //            |        [?c :C/ii ?d]]
-        //            |""".stripMargin).map(println)
+        _ <- A.i.Bb.*?(B.i.ii).query.get.map(_ ==> List((1, Nil)))
+        _ <- A.i.Bb.*(B.i.ii).query.get.map(_ ==> Nil)
+
+        // No optional B.ii value
+        _ <- A.i.Bb.i.ii_?.query.get.map(_ ==> List((1, 2, None)))
+        _ <- A.i.Bb.i.ii.query.get.map(_ ==> Nil)
+
+//        _ = {
+//          println("-------")
+//          Peer.q(
+//            """[:find  ?b ?d
+//              |      ;;  (distinct ?e3)
+//              | :where [?a :A/i ?b]
+//              |        [?a :A/bb ?c]
+//              |        [?c :B/i ?d]
+//              |     ;;   [(datomic.api/q
+//              |     ;;     "[:find (pull ?c1 [[:B/ii :limit nil]])
+//              |     ;;       :in $ ?c1]" $ ?c) [[?e1]]]
+//              |     ;;   [(if (nil? ?e1) {:B/ii []} ?e1) ?e2]
+//              |     ;;   [(:B/ii ?e2) ?e3]
+//              |        ]
+//              |""".stripMargin,
+//            conn.db
+//          ).forEach { r => println(r) }
+//        }
 
       } yield ()
     }

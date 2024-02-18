@@ -110,14 +110,17 @@ trait InsertSemantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
       "Nested with other attribute" - refs { implicit conn =>
         for {
-          _ <- A.i.B.i.ii.insert((1, 2, Set.empty[Int])).transact
+          _ <- A.i.Bb.*(B.i.ii).insert((1, List((2, Set.empty[Int])))).transact
 
-          // Relationship to B was created
-          _ <- A.i.B.i.query.get.map(_ ==> List((1, 2)))
+          // A.i was inserted
+          _ <- A.i.query.get.map(_ ==> List(1))
 
-          // But B.ii was not inserted
-          _ <- A.i.B.i.ii_?.query.get.map(_ ==> List((1, 2, None)))
-          _ <- A.i.B.i.ii.query.get.map(_ ==> Nil)
+          _ <- A.i.Bb.*?(B.i.ii).query.get.map(_ ==> List((1, Nil)))
+          _ <- A.i.Bb.*(B.i.ii).query.get.map(_ ==> Nil)
+
+          // No optional B.ii value
+          _ <- A.i.Bb.i.ii_?.query.get.map(_ ==> List((1, 2, None)))
+          _ <- A.i.Bb.i.ii.query.get.map(_ ==> Nil)
         } yield ()
       }
     }

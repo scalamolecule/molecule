@@ -14,8 +14,7 @@ import scala.collection.mutable.ListBuffer
 
 
 abstract class Model2SqlQuery[Tpl](elements0: List[Element])
-  extends Model2QueryBase
-    with ResolveRef
+  extends ResolveRef
     with CastNestedBranch_
     with CastRow2Tpl_
     with Nest[Tpl]
@@ -222,7 +221,8 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
       )
     }
     exts(refNs) = exts.get(refNs).fold(Option.empty[String])(_ => Some("_" + refAttr))
-    resolveRef(ref)
+    val singleOptSet = tail.length == 1 && tail.head.isInstanceOf[AttrSetOpt]
+    resolveRef(ref, singleOptSet)
     resolve(tail)
   }
 

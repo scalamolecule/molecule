@@ -6,7 +6,7 @@ import molecule.boilerplate.ast.Model._
 
 trait ResolveRef { self: SqlQueryBase =>
 
-  protected def resolveRef(ref: Ref): Unit = {
+  protected def resolveRef(ref: Ref, singleOptSet: Boolean): Unit = {
     val (ns, refAttr, refNs) = (ref.ns, ref.refAttr, ref.refNs)
     val (refAs, refExt)      = exts(refNs).fold(("", ""))(ext => (refNs + ext, ext))
     val nsExt                = if (ns == refNs)
@@ -24,8 +24,9 @@ trait ResolveRef { self: SqlQueryBase =>
       val (id1, id2) = if (ns == refNs) ("1_id", "2_id") else ("id", "id")
       val ns_id1     = ss(ns, id1)
       val refNs_id2  = ss(refNs, id2)
-      joins += (("INNER JOIN", joinTable, "", s"$ns$nsExt.id", s"= $joinTable.$ns_id1"))
-      joins += (("INNER JOIN", refNs, refAs, s"$joinTable.$refNs_id2", s"= $refNs$refExt.id"))
+      val joinTpe = if(singleOptSet) "LEFT" else "INNER"
+      joins += ((s"$joinTpe JOIN", joinTable, "", s"$ns$nsExt.id", s"= $joinTable.$ns_id1"))
+      joins += ((s"$joinTpe JOIN", refNs, refAs, s"$joinTable.$refNs_id2", s"= $refNs$refExt.id"))
       exts(refNs) = Some(refExt)
     }
   }

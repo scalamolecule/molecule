@@ -56,58 +56,46 @@ object AdhocJVM_h2 extends TestSuite_h2 {
 
 
 
-        _ <- A.i.Bb.*(B.i.C.ii).insert(
-          (0, Nil),
-          (1, List(
-            (1, Set.empty[Int])
-          )),
-          (2, List(
-            (1, Set.empty[Int]),
-            (2, Set(1)),
-            (3, Set(1, 2)),
-          )),
-        ).transact
+        _ <- A.i.Bb.*(B.ii).insert(
+          (1, List(Set.empty[Int])),
+//          (2, List(Set(3)))
+        ).i.transact
+//        _ <- A.i.Bb.*(B.ii).insert((1, List(Set(7)))).transact
+
+        // A.i was inserted
+//        _ <- A.i.query.get.map(_ ==> List(1))
+
+//        _ <- A.i.Bb.*?(B.ii).query.get.map(_ ==> List((1, Nil)))
+//        _ <- A.i.Bb.*(B.ii).query.get.map(_ ==> Nil)
 
 
-        _ <- A.i.Bb.*?(B.i.C.ii).query.get.map(_ ==> List(
-          (0, Nil),
-          (1, Nil),
-          (2, List(
-            (2, Set(1)),
-            (3, Set(1, 2)),
-          )),
-        ))
-        _ <- A.i.Bb.*(B.i.C.ii).query.get.map(_ ==> List(
-          (2, List(
-            (2, Set(1)),
-            (3, Set(1, 2)),
-          )),
-        ))
+        _ <- rawQuery(
+          """SELECT DISTINCT
+            |  A.i,
+            |  ARRAY_AGG(B.ii)
+            |FROM A
+            |  Left JOIN A_bb_B ON A.id        = A_bb_B.A_id
+            |  left JOIN B      ON A_bb_B.B_id = B.id
+            |WHERE
+            |  A.i IS NOT NULL
+            |GROUP BY A.i;
+            |""".stripMargin, true)
 
-        _ <- A.i.a1.Bb.*?(B.C.ii).query.get.map(_ ==> List(
-          (0, Nil),
-          (1, Nil),
-          (2, List(
-            Set(1, 2), // Set(1) and Set(1, 2) coalesced to one Set
-          )),
-        ))
-        _ <- A.i.Bb.*(B.C.ii).query.get.map(_ ==> List(
-          (2, List(
-            Set(1, 2), // Set(1) and Set(1, 2) coalesced to one Set
-          )),
-        ))
+        _ <- rawQuery(
+          """SELECT DISTINCT
+            |  A.i,
+            |  ARRAY_AGG(B.ii)
+            |FROM A
+            |  INNER JOIN A_bb_B ON A.id        = A_bb_B.A_id
+            |  INNER JOIN B      ON A_bb_B.B_id = B.id
+            |WHERE
+            |  A.i IS NOT NULL
+            |GROUP BY A.i;
+            |""".stripMargin, true)
 
-        _ <- A.Bb.*?(B.C.ii).query.i.get.map(_ ==> List(
-//          Nil,
-          List(
-            Set(1, 2), // Set(1) and Set(1, 2) coalesced to one Set
-          ),
-        ))
-        _ <- A.Bb.*(B.C.ii).query.i.get.map(_ ==> List(
-          List(
-            Set(1, 2), // Set(1) and Set(1, 2) coalesced to one Set
-          ),
-        ))
+        // No optional B.ii value
+        _ <- A.i.Bb.ii_?.query.i.get.map(_ ==> List((1, None)))
+//        _ <- A.i.Bb.ii.query.get.map(_ ==> Nil)
 
       } yield ()
     }
