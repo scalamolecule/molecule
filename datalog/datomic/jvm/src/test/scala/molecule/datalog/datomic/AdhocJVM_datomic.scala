@@ -71,124 +71,17 @@ object AdhocJVM_datomic extends TestSuite_datomic {
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
 
+        List(a1, a2) <- A.i.Bb.*(B.i.C.i).insert(
+          (1, List((1, 2), (3, 4))),
+          (2, Nil),
+        ).i.transact.map(_.ids)
 
-        //        _ <- A.i.Bb.*(B.i.C.ii).insert(
-        _ <- A.i.Bb.*(B.i.ii).insert(
-          //          (0, Nil),
-          //          (1, List(
-          //            (1, Set.empty[Int])
-          //          )),
-          (2, List(
-            (1, Set.empty[Int]),
-            (2, Set(1)),
-            //            (3, Set(1, 2)),
-          )),
-        ).i.transact
-
-
-        //        _ <- rawTransact(
-        //          """[
-        //            |  [:db/add #db/id[db.part/user -1] :A/i 0]
-        //            |
-        //            |  [:db/add #db/id[db.part/user -2] :A/i 1]
-        //            | ;; [:db/add #db/id[db.part/user -2] :A/bb #db/id[db.part/user -3]]
-        //            | ;; [:db/add #db/id[db.part/user -3] :B/i 1]
-        //            |
-        //            |  [:db/add #db/id[db.part/user -5] :A/i 2]
-        //            | ;; [:db/add #db/id[db.part/user -5] :A/bb #db/id[db.part/user -6]]
-        //            | ;; [:db/add #db/id[db.part/user -6] :B/i 1]
-        //            |  [:db/add #db/id[db.part/user -5] :A/bb #db/id[db.part/user -8]]
-        //            |  [:db/add #db/id[db.part/user -8] :B/i 2]
-        //            |  [:db/add #db/id[db.part/user -8] :B/c #db/id[db.part/user -9]]
-        //            |  [:db/add #db/id[db.part/user -9] :C/ii 1]
-        //            |  [:db/add #db/id[db.part/user -5] :A/bb #db/id[db.part/user -10]]
-        //            |  [:db/add #db/id[db.part/user -10] :B/i 3]
-        //            |  [:db/add #db/id[db.part/user -10] :B/c #db/id[db.part/user -11]]
-        //            |  [:db/add #db/id[db.part/user -11] :C/ii 1]
-        //            |  [:db/add #db/id[db.part/user -11] :C/ii 2]
-        //            |]
-        //            |""".stripMargin)
-
-
-        _ = {
-          println("-------")
-          Peer.q(
-            """[:find  ?b
-              |        (pull ?id0 [
-              |          {(:A/bb :limit nil :default "__none__") [
-              |            (:B/i :limit nil :default "__none__")
-              |            (:B/ii :limit nil :default "__none__")]}])
-              | :where [?a :A/i ?b]
-              |        [(identity ?a) ?id0]]
-              |""".stripMargin,
-            conn.db
-          ).forEach { r => println(r) }
-        }
-
-
-        //        _ <- A.i.Bb.*?(B.i.C.ii).query.i.get.map(_ ==> List(
-        _ <- A.i.Bb.*?(B.i.ii).query.i.get.map(_ ==> List(
-          //          (0, Nil),
-          //          (1, Nil),
-          (2, List(
-            (2, Set(1)),
-            //            (3, Set(1, 2)),
-          )),
+        _ <- A.id(a1, a2).i.a1.Bb.*?(B.i.a1.C.i).query.get.map(_ ==> List(
+          (a1, 1, List((1, 2), (3, 4))),
+          (a2, 2, Nil),
         ))
 
 
-
-        //        _ <- A.i.Bb.*(B.i.C.ii).insert(
-        //          (0, Nil),
-        //          (1, List(
-        //            (1, Set.empty[Int]) // not inserted
-        //          )),
-        //          (2, List(
-        //            (1, Set.empty[Int]), // not inserted
-        //            (2, Set(1)),
-        //            (3, Set(1, 2)),
-        //          )),
-        //        ).transact
-        //
-        //
-        //        _ <- A.i.Bb.*?(B.i.C.ii).query.get.map(_ ==> List(
-        //          (0, Nil),
-        //          (1, Nil),
-        //          (2, List(
-        //            (2, Set(1)),
-        //            (3, Set(1, 2)),
-        //          )),
-        //        ))
-        //        _ <- A.i.Bb.*(B.i.C.ii).query.get.map(_ ==> List(
-        //          (2, List(
-        //            (2, Set(1)),
-        //            (3, Set(1, 2)),
-        //          )),
-        //        ))
-        //
-        //        _ <- A.i.a1.Bb.*?(B.C.ii).query.get.map(_ ==> List(
-        //          (0, Nil),
-        //          (1, Nil),
-        //          (2, List(
-        //            Set(1, 2), // Set(1) and Set(1, 2) coalesced to one Set
-        //          )),
-        //        ))
-        //        _ <- A.i.Bb.*(B.C.ii).query.get.map(_ ==> List(
-        //          (2, List(
-        //            Set(1, 2), // Set(1) and Set(1, 2) coalesced to one Set
-        //          )),
-        //        ))
-        //
-        //        _ <- A.Bb.*?(B.C.ii).query.i.get.map(_ ==> List(
-        //          List(
-        //            Set(1, 2), // Set(1) and Set(1, 2) coalesced to one Set
-        //          ),
-        //        ))
-        //        _ <- A.Bb.*(B.C.ii).query.i.get.map(_ ==> List(
-        //          List(
-        //            Set(1, 2), // Set(1) and Set(1, 2) coalesced to one Set
-        //          ),
-        //        ))
 
         //        _ <- A.i.Bb.*(B.i.ii).insert((1, List((2, Set.empty[Int])))).transact
         //

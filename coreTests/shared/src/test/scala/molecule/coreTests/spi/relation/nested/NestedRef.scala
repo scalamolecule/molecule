@@ -124,7 +124,7 @@ trait NestedRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           )),
           (2, List(
             (1, Set.empty[Int]),
-            (2, Set(1)),
+            (2, Set(0)),
             (3, Set(1, 2)),
           )),
         ).transact
@@ -134,13 +134,13 @@ trait NestedRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (0, Nil),
           (1, Nil),
           (2, List(
-            (2, Set(1)),
+            (2, Set(0)),
             (3, Set(1, 2)),
           )),
         ))
         _ <- A.i.Bb.*(B.i.C.ii).query.get.map(_ ==> List(
           (2, List(
-            (2, Set(1)),
+            (2, Set(0)),
             (3, Set(1, 2)),
           )),
         ))
@@ -149,23 +149,23 @@ trait NestedRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (0, Nil),
           (1, Nil),
           (2, List(
-            Set(1, 2), // Set(1) and Set(1, 2) coalesced to one Set
+            Set(0, 1, 2), // Set(0) and Set(1, 2) coalesced to one Set
           )),
         ))
         _ <- A.i.Bb.*(B.C.ii).query.get.map(_ ==> List(
           (2, List(
-            Set(1, 2), // Set(1) and Set(1, 2) coalesced to one Set
+            Set(0, 1, 2), // Set(0) and Set(1, 2) coalesced to one Set
           )),
         ))
 
         _ <- A.Bb.*?(B.C.ii).query.i.get.map(_ ==> List(
           List(
-            Set(1, 2), // Set(1) and Set(1, 2) coalesced to one Set
+            Set(0, 1, 2), // Set(0) and Set(1, 2) coalesced to one Set
           ),
         ))
         _ <- A.Bb.*(B.C.ii).query.i.get.map(_ ==> List(
           List(
-            Set(1, 2), // Set(1) and Set(1, 2) coalesced to one Set
+            Set(0, 1, 2), // Set(0) and Set(1, 2) coalesced to one Set
           ),
         ))
       } yield ()

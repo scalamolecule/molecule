@@ -43,69 +43,53 @@ object AdhocJVM_mongodb extends TestSuite_mongodb with AggrUtils {
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
 
-        _ <- A.s.i
-          .B.i._A
-          .OwnB.i
-          .insert(
-            ("a", 1, 1, 0),
-            ("b", 1, 0, 1),
-          ).transact
-
-        //        // Filter attribute B.i needs qualifying
-        //        _ <- A.s.i_(B.i_) // Ambiguous if B points to A.B or A.OwnB
-        //          .B.i_._A
-        //          .OwnB.i_
-        //          .query.get.map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-        //            err ==>
-        //              """Please qualify filter attribute B.i to an unambiguous path:
-        //                |  A.B.i
-        //                |  A.OwnB.i""".stripMargin
-        //          }
-
-
-        //        _ <- rawQuery(
-        //          """SELECT DISTINCT
-        //            |  A.s
-        //            |FROM A
-        //            |  INNER JOIN B           ON A.b    = B.id
-        //            |  INNER JOIN B AS B_ownB ON A.ownB = B_ownB.id
-        //            |WHERE
-        //            |  A.i      = B.i AND
-        //            |  A.s      IS NOT NULL AND
-        //            |  A.i      IS NOT NULL AND
-        //            |  B.i      IS NOT NULL AND
-        //            |  B_ownB.i IS NOT NULL;
-        //            |""".stripMargin, true)
-        //
-        //        _ <- rawQuery(
-        //          """SELECT DISTINCT
-        //            |  A.s
-        //            |FROM A
-        //            |  INNER JOIN B           ON A.b    = B.id
-        //            |  INNER JOIN B AS B_ownB ON A.ownB = B_ownB.id
-        //            |WHERE
-        //            |  A.i      = B_ownB.i AND
-        //            |  A.s      IS NOT NULL AND
-        //            |  A.i      IS NOT NULL AND
-        //            |  B.i      IS NOT NULL AND
-        //            |  B_ownB.i IS NOT NULL;
-        //            |""".stripMargin, true)
+//        //        _ <- A.i.Bb.*(B.i.C.ii).insert(
+//        _ <- A.i.Bb.*(B.i.ii).insert(
+//          //          (0, Nil),
+//          //          (1, List(
+//          //            (1, Set.empty[Int])
+//          //          )),
+//          (2, List(
+//            (1, Set.empty[Int]),
+//            (2, Set(1)),
+//            //            (3, Set(1, 2)),
+//          )),
+//        ).i.transact
+//
+//        //        _ <- A.i.Bb.*?(B.i.C.ii).query.i.get.map(_ ==> List(
+//        _ <- A.i.Bb.*?(B.i.ii).query.i.get.map(_ ==> List(
+//          //          (0, Nil),
+//          //          (1, Nil),
+//          (2, List(
+//            (2, Set(1)),
+//            //            (3, Set(1, 2)),
+//          )),
+//        ))
 
 
-        //        _ <- A.s.i_(A.B.i_)
-        //          .B.i_._A
-        //          .OwnB.i_
-        //          .query.i.get.map(_ ==> List("a"))
 
-        _ <- A.s.i_(A.OwnB.i_)
-          .B.i_._A
-          .OwnB.i_
-          .query.i.get.map(_ ==> List("b"))
+        //        _ <- A.i.Bb.*(B.i.C.ii).insert(
+        _ <- A.i.Bb.*(B.ii.i).insert(
+          //          (0, Nil),
+          //          (1, List(
+          //            (1, Set.empty[Int])
+          //          )),
+          (2, List(
+            (Set.empty[Int], 3),
+            (Set(5), 4),
+            //            (3, Set(1, 2)),
+          )),
+        ).i.transact
 
-        _ <- A.s.i_(A.OwnB.i_)
-          .OwnB.i_._A
-          .B.i_
-          .query.i.get.map(_ ==> List("b"))
+        //        _ <- A.i.Bb.*?(B.i.C.ii).query.i.get.map(_ ==> List(
+        _ <- A.i.Bb.*?(B.ii.i).query.i.get.map(_ ==> List(
+          //          (0, Nil),
+          //          (1, Nil),
+          (2, List(
+            (Set(5), 4),
+            //            (3, Set(1, 2)),
+          )),
+        ))
 
       } yield ()
     }

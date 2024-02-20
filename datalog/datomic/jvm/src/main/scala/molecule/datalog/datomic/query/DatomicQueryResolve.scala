@@ -151,7 +151,7 @@ abstract class DatomicQueryResolve[Tpl](
           if (!forward) Collections.reverse(sortedRows)
           val count          = getCount(limit, forward, totalCount)
           val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(true), m2q.pullRow2tpl)
-          val tpls           = if (forward) tuples else tuples.reverse
+          val tpls           = (if (forward) tuples else tuples.reverse).filterNot(_ == Nil)
           val cursor         = nextCursor(tpls, allTokens)
           (tpls, cursor, more > 0)
 

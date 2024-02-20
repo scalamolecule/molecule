@@ -38,11 +38,6 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
     val elements          = if (altElements.isEmpty) elements0 else altElements
     val (elements1, _, _) = validateQueryModel(elements, Some(addFilterAttrCallback))
 
-//    filterAttrVars.foreach(println)
-//    println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-
-
-
     // Remember first entity id variable
     firstId = vv
     varPath = List(firstId)

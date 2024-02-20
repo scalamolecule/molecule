@@ -93,7 +93,7 @@ case class DatomicQueryResolveCursor[Tpl](
         } else {
           val selectedRows = sortedRows.subList(0, limitAbs)
           selectedRows.forEach(row => tuples += m2q.pullRow2tpl(row))
-          val tpls   = if (forward) tuples.toList else tuples.toList.reverse
+          val tpls   = (if (forward) tuples.toList else tuples.toList.reverse).filterNot(_ == Nil)
           val cursor = initialCursor(conn, elements, tpls)
           (tpls, cursor, hasMore)
         }

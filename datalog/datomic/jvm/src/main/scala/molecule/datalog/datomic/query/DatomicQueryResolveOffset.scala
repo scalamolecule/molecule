@@ -56,7 +56,7 @@ case class DatomicQueryResolveOffset[Tpl](
         offsetRaw(sortedRows, fromUntil).forEach { row =>
           tuples += m2q.pullRow2tpl(row)
         }
-        (tuples.toList, totalCount, hasMore)
+        (tuples.toList.filterNot(_ == Nil), totalCount, hasMore)
 
       } else {
         val row2tpl = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0, None)

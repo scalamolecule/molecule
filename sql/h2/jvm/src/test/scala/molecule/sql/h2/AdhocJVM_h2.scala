@@ -54,91 +54,53 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
 
-        //        _ <- A.s.i.B.i._A.OwnB.i.insert(
-        //          ("a", 1, 1, 0),
-        //          ("b", 1, 0, 1),
-        //          ("c", 0, 1, 1),
-        //        ).transact
-        //
-        //        // Unambiguous when pointing backwards from branches
-        //
-        //        _ <- A.s.i_
-        //          .B.i_(A.i_)._A // point back to A from A.B branch
-        //          .OwnB.i_
-        //          .query.i.get.map(_ ==> List("a"))
-        /*
-SELECT DISTINCT
-  A.s
-FROM A
-  INNER JOIN B           ON A.b = B.id
-  INNER JOIN B AS B_ownB ON A.ownB = B_ownB.id
-WHERE
-  B.i = A.i AND
-  A.s IS NOT NULL AND
-  A.i IS NOT NULL AND
-  B.i IS NOT NULL;
-         */
-
-        //        _ <- A.s.i_
-        //          .B.i_._A
-        //          .OwnB.i_(A.i_) // point back to A from A.OwnB branch
-        //          .query.get.map(_ ==> List("b"))
+//        //        _ <- A.i.Bb.*(B.i.C.ii).insert(
+//        _ <- A.i.Bb.*(B.i.ii).insert(
+//          //          (0, Nil),
+//          //          (1, List(
+//          //            (1, Set.empty[Int])
+//          //          )),
+//          (2, List(
+//            (1, Set.empty[Int]),
+//            (2, Set(1)),
+//            //            (3, Set(1, 2)),
+//          )),
+//        ).i.transact
+//
+//        //        _ <- A.i.Bb.*?(B.i.C.ii).query.i.get.map(_ ==> List(
+//        _ <- A.i.Bb.*?(B.i.ii).query.i.get.map(_ ==> List(
+//          //          (0, Nil),
+//          //          (1, Nil),
+//          (2, List(
+//            (2, Set(1)),
+//            //            (3, Set(1, 2)),
+//          )),
+//        ))
 
 
 
-        _ <- A.s.i
-          .B.i._A
-          .OwnB.i
-          .insert(
-            ("a", 1, 1, 0),
-            ("b", 1, 0, 1),
-          ).transact
+        //        _ <- A.i.Bb.*(B.i.C.ii).insert(
+        _ <- A.i.Bb.*(B.ii.i).insert(
+          //          (0, Nil),
+          //          (1, List(
+          //            (1, Set.empty[Int])
+          //          )),
+          (2, List(
+            (Set.empty[Int], 3),
+            (Set(5), 4),
+            //            (3, Set(1, 2)),
+          )),
+        ).i.transact
 
-//        _ <- rawQuery(
-//          """SELECT DISTINCT
-//            |  A.s
-//            |FROM A
-//            |  INNER JOIN B           ON A.b    = B.id
-//            |  INNER JOIN B AS B_ownB ON A.ownB = B_ownB.id
-//            |WHERE
-//            |  A.i      = B_ownB.i AND
-//            |  A.s      IS NOT NULL AND
-//            |  A.i      IS NOT NULL AND
-//            |  B.i      IS NOT NULL AND
-//            |  B_ownB.i IS NOT NULL;
-//            |""".stripMargin, true)
-
-        //        _ <- rawQuery(
-        //          """SELECT DISTINCT
-        //            |  A.s
-        //            |FROM A
-        //            |  INNER JOIN B AS B_b ON A.b    = B_b.id
-        //            |  INNER JOIN B        ON A.ownB = B.id
-        //            |WHERE
-        //            |  A.i      = B_b.i AND
-        //            |  A.s      IS NOT NULL AND
-        //            |  A.i      IS NOT NULL AND
-        //            |  B.i      IS NOT NULL AND
-        //            |  B.i IS NOT NULL;
-        //            |""".stripMargin, true)
-
-
-
-        _ <- A.s.i_(A.OwnB.i_)
-          .B.i_._A
-          .OwnB.i_
-          .query.i.get.map(_ ==> List("b"))
-
-        //        _ <- A.s.i_(A.OwnB.i_)
-        //          .OwnB.i_._A
-        //          .B.i_
-        //          .query.i.get.map(_ ==> List("b"))
-        //
-        //
-        //        _ <- A.s.i_(A.B.i_)
-        //          .B.i_._A
-        //          .OwnB.i_
-        //          .query.i.get.map(_ ==> List("a"))
+        //        _ <- A.i.Bb.*?(B.i.C.ii).query.i.get.map(_ ==> List(
+        _ <- A.i.Bb.*?(B.ii.i).query.i.get.map(_ ==> List(
+          //          (0, Nil),
+          //          (1, Nil),
+          (2, List(
+            (Set(5), 4),
+            //            (3, Set(1, 2)),
+          )),
+        ))
 
       } yield ()
     }

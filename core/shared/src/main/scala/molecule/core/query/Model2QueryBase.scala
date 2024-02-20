@@ -19,6 +19,8 @@ trait Model2QueryBase extends ModelUtils {
 
   lazy protected val noIdFiltering = "Filter attributes not allowed to involve entity ids."
 
+  protected var optNestedLeafIsSet = Option.empty[Boolean]
+
 
   def validateQueryModel(
     elements: List[Element],
