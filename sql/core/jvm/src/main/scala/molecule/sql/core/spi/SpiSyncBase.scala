@@ -113,7 +113,8 @@ trait SpiSyncBase
   ): Unit = {
     tryInspect("query", elements) {
       val query = getModel2SqlQuery[Any](elements).getSqlQuery(Nil, optLimit, optOffset, optProxy)
-      printRaw(label, elements, query)
+      printRaw(label, Nil, query)
+//      printRaw(label, elements, query)
     }
   }
 

@@ -72,36 +72,136 @@ object AdhocJVM_datomic extends TestSuite_datomic {
       for {
 
 
-        _ <- A.i.Bb.*(B.i.ii).insert((1, List((2, Set.empty[Int])))).transact
+        //        _ <- A.i.Bb.*(B.i.C.ii).insert(
+        _ <- A.i.Bb.*(B.i.ii).insert(
+          //          (0, Nil),
+          //          (1, List(
+          //            (1, Set.empty[Int])
+          //          )),
+          (2, List(
+            (1, Set.empty[Int]),
+            (2, Set(1)),
+            //            (3, Set(1, 2)),
+          )),
+        ).i.transact
 
-        // A.i was inserted
-        _ <- A.i.query.get.map(_ ==> List(1))
 
-        _ <- A.i.Bb.*?(B.i.ii).query.get.map(_ ==> List((1, Nil)))
-        _ <- A.i.Bb.*(B.i.ii).query.get.map(_ ==> Nil)
+        //        _ <- rawTransact(
+        //          """[
+        //            |  [:db/add #db/id[db.part/user -1] :A/i 0]
+        //            |
+        //            |  [:db/add #db/id[db.part/user -2] :A/i 1]
+        //            | ;; [:db/add #db/id[db.part/user -2] :A/bb #db/id[db.part/user -3]]
+        //            | ;; [:db/add #db/id[db.part/user -3] :B/i 1]
+        //            |
+        //            |  [:db/add #db/id[db.part/user -5] :A/i 2]
+        //            | ;; [:db/add #db/id[db.part/user -5] :A/bb #db/id[db.part/user -6]]
+        //            | ;; [:db/add #db/id[db.part/user -6] :B/i 1]
+        //            |  [:db/add #db/id[db.part/user -5] :A/bb #db/id[db.part/user -8]]
+        //            |  [:db/add #db/id[db.part/user -8] :B/i 2]
+        //            |  [:db/add #db/id[db.part/user -8] :B/c #db/id[db.part/user -9]]
+        //            |  [:db/add #db/id[db.part/user -9] :C/ii 1]
+        //            |  [:db/add #db/id[db.part/user -5] :A/bb #db/id[db.part/user -10]]
+        //            |  [:db/add #db/id[db.part/user -10] :B/i 3]
+        //            |  [:db/add #db/id[db.part/user -10] :B/c #db/id[db.part/user -11]]
+        //            |  [:db/add #db/id[db.part/user -11] :C/ii 1]
+        //            |  [:db/add #db/id[db.part/user -11] :C/ii 2]
+        //            |]
+        //            |""".stripMargin)
 
-        // No optional B.ii value
-        _ <- A.i.Bb.i.ii_?.query.get.map(_ ==> List((1, 2, None)))
-        _ <- A.i.Bb.i.ii.query.get.map(_ ==> Nil)
 
-//        _ = {
-//          println("-------")
-//          Peer.q(
-//            """[:find  ?b ?d
-//              |      ;;  (distinct ?e3)
-//              | :where [?a :A/i ?b]
-//              |        [?a :A/bb ?c]
-//              |        [?c :B/i ?d]
-//              |     ;;   [(datomic.api/q
-//              |     ;;     "[:find (pull ?c1 [[:B/ii :limit nil]])
-//              |     ;;       :in $ ?c1]" $ ?c) [[?e1]]]
-//              |     ;;   [(if (nil? ?e1) {:B/ii []} ?e1) ?e2]
-//              |     ;;   [(:B/ii ?e2) ?e3]
-//              |        ]
-//              |""".stripMargin,
-//            conn.db
-//          ).forEach { r => println(r) }
-//        }
+        _ = {
+          println("-------")
+          Peer.q(
+            """[:find  ?b
+              |        (pull ?id0 [
+              |          {(:A/bb :limit nil :default "__none__") [
+              |            (:B/i :limit nil :default "__none__")
+              |            (:B/ii :limit nil :default "__none__")]}])
+              | :where [?a :A/i ?b]
+              |        [(identity ?a) ?id0]]
+              |""".stripMargin,
+            conn.db
+          ).forEach { r => println(r) }
+        }
+
+
+        //        _ <- A.i.Bb.*?(B.i.C.ii).query.i.get.map(_ ==> List(
+        _ <- A.i.Bb.*?(B.i.ii).query.i.get.map(_ ==> List(
+          //          (0, Nil),
+          //          (1, Nil),
+          (2, List(
+            (2, Set(1)),
+            //            (3, Set(1, 2)),
+          )),
+        ))
+
+
+
+        //        _ <- A.i.Bb.*(B.i.C.ii).insert(
+        //          (0, Nil),
+        //          (1, List(
+        //            (1, Set.empty[Int]) // not inserted
+        //          )),
+        //          (2, List(
+        //            (1, Set.empty[Int]), // not inserted
+        //            (2, Set(1)),
+        //            (3, Set(1, 2)),
+        //          )),
+        //        ).transact
+        //
+        //
+        //        _ <- A.i.Bb.*?(B.i.C.ii).query.get.map(_ ==> List(
+        //          (0, Nil),
+        //          (1, Nil),
+        //          (2, List(
+        //            (2, Set(1)),
+        //            (3, Set(1, 2)),
+        //          )),
+        //        ))
+        //        _ <- A.i.Bb.*(B.i.C.ii).query.get.map(_ ==> List(
+        //          (2, List(
+        //            (2, Set(1)),
+        //            (3, Set(1, 2)),
+        //          )),
+        //        ))
+        //
+        //        _ <- A.i.a1.Bb.*?(B.C.ii).query.get.map(_ ==> List(
+        //          (0, Nil),
+        //          (1, Nil),
+        //          (2, List(
+        //            Set(1, 2), // Set(1) and Set(1, 2) coalesced to one Set
+        //          )),
+        //        ))
+        //        _ <- A.i.Bb.*(B.C.ii).query.get.map(_ ==> List(
+        //          (2, List(
+        //            Set(1, 2), // Set(1) and Set(1, 2) coalesced to one Set
+        //          )),
+        //        ))
+        //
+        //        _ <- A.Bb.*?(B.C.ii).query.i.get.map(_ ==> List(
+        //          List(
+        //            Set(1, 2), // Set(1) and Set(1, 2) coalesced to one Set
+        //          ),
+        //        ))
+        //        _ <- A.Bb.*(B.C.ii).query.i.get.map(_ ==> List(
+        //          List(
+        //            Set(1, 2), // Set(1) and Set(1, 2) coalesced to one Set
+        //          ),
+        //        ))
+
+        //        _ <- A.i.Bb.*(B.i.ii).insert((1, List((2, Set.empty[Int])))).transact
+        //
+        //        // A.i was inserted
+        //        _ <- A.i.query.get.map(_ ==> List(1))
+        //
+        //        _ <- A.i.Bb.*?(B.i.ii).query.get.map(_ ==> List((1, Nil)))
+        //        _ <- A.i.Bb.*(B.i.ii).query.get.map(_ ==> Nil)
+        //
+        //        // No optional B.ii value
+        //        _ <- A.i.Bb.i.ii_?.query.get.map(_ ==> List((1, 2, None)))
+        //        _ <- A.i.Bb.i.ii.query.get.map(_ ==> Nil)
+
 
       } yield ()
     }

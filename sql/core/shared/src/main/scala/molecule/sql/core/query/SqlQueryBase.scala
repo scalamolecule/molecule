@@ -53,7 +53,11 @@ trait SqlQueryBase extends Model2QueryBase with BaseHelpers with JavaConversions
   final protected val nestedIds   = new ArrayBuffer[String]
   final protected var level       = 0
   final protected val args        = new ArrayBuffer[AnyRef]
-  final protected val exts        = mutable.Map.empty[String, Option[String]]
+
+
+  final protected var prevRefNss = Set.empty[String]
+  final protected val preExts    = mutable.Map.empty[List[String], Option[String]]
+  final protected val exts       = mutable.Map.empty[List[String], Option[String]]
 
   // Current path: List(Ns, refAttrNs2, Ns2, refAttrNs3, Ns3 ...)
   final protected var path = List.empty[String]
@@ -62,11 +66,30 @@ trait SqlQueryBase extends Model2QueryBase with BaseHelpers with JavaConversions
   final protected var hasOptAttr = false
 
   // Query variables
-  final protected var filterAttrVars      = Map.empty[List[String], String]
-//  final protected val expectedFilterAttrs = mutable.Set.empty[String]
+  final protected var filterAttrVars = Map.empty[List[String], String]
 
-  final protected def getCol(attr: Attr): String = {
-    exts(attr.ns).fold(attr.name)(ext => attr.ns + ext + "." + attr.attr)
+
+  final protected def getCol(attr: Attr, path: List[String] = path): String = {
+    val ext = getOptExt(path).getOrElse("")
+    s"${attr.ns}$ext.${attr.attr}"
+  }
+
+  protected def getOptExt(path: List[String] = path): Option[String] = {
+    exts.getOrElse(path, Option.empty[String])
+  }
+
+  protected def handleRef(refAttr: String, refNs: String): Unit = {
+    path = path ++ List(refAttr, refNs)
+    if (prevRefNss.contains(refNs)) {
+      preExts(path) = preExts.getOrElse(path, Some("_" + refAttr))
+    } else {
+      preExts(path) = preExts.getOrElse(path, None)
+    }
+    prevRefNss += refNs
+  }
+
+  protected def handleBackRef(): Unit = {
+    path = path.dropRight(2)
   }
 
   final protected def addCast(cast: (Row, Int) => Any): Unit = {

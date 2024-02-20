@@ -28,25 +28,155 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     optOffset: Option[Int],
     optProxy: Option[ConnProxy]
   ): String = {
-    val elements1                 = if (altElements.isEmpty) elements0 else altElements
-    val (elements2, initialNs, _) = validateQueryModel(elements1, Some(addFilterAttrCallback))
-
+    val elements1 = if (altElements.isEmpty) elements0 else altElements
     optProxy.foreach(p => attrMap = p.attrMap)
-    from = initialNs
-    exts += from -> None
-
-    // Recursively resolve molecule elements
-    resolve(elements2)
+    resolveElements(elements1)
     renderSqlQuery(optLimit, optOffset)
   }
 
-  final private def addFilterAttrCallback: (List[String], Model.Attr) => Unit =
-    (pathAttr: List[String], a: Attr) => {
-      filterAttrVars.get(pathAttr).fold {
-        // Create datomic variable for this expression attribute
-        filterAttrVars = filterAttrVars + (pathAttr -> a.cleanName)
-      }(_ => throw ModelError(s"Can't refer to ambiguous filter attribute $pathAttr"))
+  final private def resolveElements(elements1: List[Element]): Unit = {
+    from = getInitialNs(elements1)
+    path = List(from)
+    preExts += path -> None
+
+    val (elements2, _, _) = validateQueryModel(elements1, None, Some(handleRef), Some(handleBackRef))
+
+    //    println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+    //    preExts.foreach(println)
+
+    path = List(from)
+    exts ++= preExts
+
+    // Recursively resolve molecule elements
+    resolve(elements2)
+
+    //    println("================================================================================")
+    //    exts.foreach(println)
+  }
+
+
+  private[molecule] def getWhereClauses: ListBuffer[(String, String)] = {
+    //    from = getInitialNonGenericNs(elements0)
+    //    exts += from -> None
+    //    resolve(elements0)
+
+    resolveElements(elements0)
+    where
+  }
+
+
+  @tailrec
+  final private def resolve(elements: List[Element]): Unit = elements match {
+    case element :: tail => element match {
+      case a: AttrOne                      =>
+        if (a.attr == "id" && a.filterAttr.nonEmpty || a.attr != "id" && a.filterAttr.exists(_._3.attr == "id")) {
+          throw ModelError(noIdFiltering)
+        }
+        a match {
+          case a: AttrOneMan => resolveAttrOneMan(a); resolve(tail)
+          case a: AttrOneOpt => resolveAttrOneOpt(a); resolve(tail)
+          case a: AttrOneTac => resolveAttrOneTac(a); resolve(tail)
+        }
+      case a: AttrSet if a.refNs.isDefined => a match {
+        case a: AttrSetMan => resolveRefAttrSetMan(a); resolve(tail)
+        case a: AttrSetOpt => resolveRefAttrSetOpt(a); resolve(tail)
+        case a: AttrSetTac => resolveRefAttrSetTac(a); resolve(tail)
+      }
+      case a: AttrSet                      => a match {
+        case a: AttrSetMan => resolveAttrSetMan(a); resolve(tail)
+        case a: AttrSetOpt => resolveAttrSetOpt(a); resolve(tail)
+        case a: AttrSetTac => resolveAttrSetTac(a); resolve(tail)
+      }
+      case ref: Ref                        => resolveRef0(ref, tail)
+      case backRef: BackRef                => resolveBackRef(backRef, tail)
+      case Nested(ref, nestedElements)     => resolveNested(ref, nestedElements, tail)
+      case NestedOpt(ref, nestedElements)  => resolveNestedOpt(ref, nestedElements, tail)
     }
+    case Nil             => ()
+  }
+
+
+  final private def resolveRef0(ref: Ref, tail: List[Element]): Unit = {
+    val Ref(_, refAttr, refNs, card, _, _) = ref
+    if (isNestedOpt && card == CardSet) {
+      throw ModelError(
+        "Only cardinality-one refs allowed in optional nested queries. Found: " + ref
+      )
+    }
+
+    handleRef(refAttr, refNs)
+
+    val singleOptSet = tail.length == 1 && tail.head.isInstanceOf[AttrSetOpt]
+    resolveRef(ref, singleOptSet)
+    resolve(tail)
+  }
+
+  final private def resolveBackRef(bRef: BackRef, tail: List[Element]): Unit = {
+    if (isNestedMan || isNestedOpt) {
+      val BackRef(backRef, _, _) = bRef
+      tail.head match {
+        case a: Attr => throw ModelError(
+          s"Expected ref after backref _$backRef. " +
+            s"Please add attribute ${a.ns}.${a.attr} to initial namespace ${a.ns} " +
+            s"instead of after backref _$backRef."
+        )
+        case _       => ()
+      }
+    }
+    //    path = path.dropRight(2)
+    handleBackRef()
+    resolve(tail)
+  }
+
+  final private def resolveNested(ref: Ref, nestedElements: List[Element], tail: List[Element]): Unit = {
+    level += 1
+    isNestedMan = true
+    if (isNestedOpt) {
+      noMixedNestedModes
+    }
+    validateRefNs(ref, nestedElements)
+
+    val Ref(_, refAttr, refNs, _, _, _) = ref
+    handleRef(refAttr, refNs)
+
+    aritiesNested()
+    resolveNestedRef(ref)
+    resolve(nestedElements)
+    resolve(tail)
+  }
+
+  final private def resolveNestedOpt(ref: Ref, nestedElements: List[Element], tail: List[Element]): Unit = {
+    level += 1
+    isNestedOpt = true
+    if (isNestedMan) {
+      noMixedNestedModes
+    }
+    if (expectedFilterAttrs.nonEmpty) {
+      throw ModelError("Filter attributes not allowed in optional nested queries.")
+    }
+    validateRefNs(ref, nestedElements)
+
+    val Ref(_, refAttr, refNs, _, _, _) = ref
+    handleRef(refAttr, refNs)
+
+    aritiesNested()
+    resolveNestedOptRef(ref)
+    resolve(nestedElements)
+    resolve(tail)
+  }
+
+  final private def validateRefNs(ref: Ref, nestedElements: List[Element]): Unit = {
+    val refName  = ref.refAttr.capitalize
+    val nestedNs = nestedElements.head match {
+      case a: Attr => a.ns
+      case r: Ref  => r.ns
+      case other   => unexpectedElement(other)
+    }
+    if (ref.refNs != nestedNs) {
+      throw ModelError(s"`$refName` can only nest to `${ref.refNs}`. Found: `$nestedNs`")
+    }
+  }
+
 
   final private def renderSqlQuery(
     optLimit: Option[Int],
@@ -171,120 +301,5 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
 
     s"""SELECT COUNT($table.id)
        |FROM $table$joins_$where_$having_;""".stripMargin
-  }
-
-
-  private[molecule] def getWhereClauses: ListBuffer[(String, String)] = {
-    from = getInitialNonGenericNs(elements0)
-    exts += from -> None
-    resolve(elements0)
-    where
-  }
-
-
-  @tailrec
-  final private def resolve(elements: List[Element]): Unit = elements match {
-    case element :: tail => element match {
-      case a: AttrOne                      =>
-        if (a.attr == "id" && a.filterAttr.nonEmpty || a.attr != "id" && a.filterAttr.exists(_._3.attr == "id")) {
-          throw ModelError(noIdFiltering)
-        }
-        a match {
-          case a: AttrOneMan => resolveAttrOneMan(a); resolve(tail)
-          case a: AttrOneOpt => resolveAttrOneOpt(a); resolve(tail)
-          case a: AttrOneTac => resolveAttrOneTac(a); resolve(tail)
-        }
-      case a: AttrSet if a.refNs.isDefined => a match {
-        case a: AttrSetMan => resolveRefAttrSetMan(a); resolve(tail)
-        case a: AttrSetOpt => resolveRefAttrSetOpt(a); resolve(tail)
-        case a: AttrSetTac => resolveRefAttrSetTac(a); resolve(tail)
-      }
-      case a: AttrSet                      => a match {
-        case a: AttrSetMan => resolveAttrSetMan(a); resolve(tail)
-        case a: AttrSetOpt => resolveAttrSetOpt(a); resolve(tail)
-        case a: AttrSetTac => resolveAttrSetTac(a); resolve(tail)
-      }
-      case ref: Ref                        => resolveRef0(ref, tail)
-      case backRef: BackRef                => resolveBackRef(backRef, tail)
-      case Nested(ref, nestedElements)     => resolveNested(ref, nestedElements, tail)
-      case NestedOpt(ref, nestedElements)  => resolveNestedOpt(ref, nestedElements, tail)
-    }
-    case Nil             => ()
-  }
-
-
-  final private def resolveRef0(ref: Ref, tail: List[Element]): Unit = {
-    val Ref(_, refAttr, refNs, card, _, _) = ref
-    if (isNestedOpt && card == CardSet) {
-      throw ModelError(
-        "Only cardinality-one refs allowed in optional nested queries. Found: " + ref
-      )
-    }
-    exts(refNs) = exts.get(refNs).fold(Option.empty[String])(_ => Some("_" + refAttr))
-    val singleOptSet = tail.length == 1 && tail.head.isInstanceOf[AttrSetOpt]
-    resolveRef(ref, singleOptSet)
-    resolve(tail)
-  }
-
-  final private def resolveBackRef(bRef: BackRef, tail: List[Element]): Unit = {
-    if (isNestedMan || isNestedOpt) {
-      val BackRef(backRef, _, _) = bRef
-      tail.head match {
-        case a: Attr => throw ModelError(
-          s"Expected ref after backref _$backRef. " +
-            s"Please add attribute ${a.ns}.${a.attr} to initial namespace ${a.ns} " +
-            s"instead of after backref _$backRef."
-        )
-        case _       => ()
-      }
-    }
-    resolve(tail)
-  }
-
-  final private def resolveNested(ref: Ref, nestedElements: List[Element], tail: List[Element]): Unit = {
-    level += 1
-    isNestedMan = true
-    if (isNestedOpt) {
-      noMixedNestedModes
-    }
-    validateRefNs(ref, nestedElements)
-
-    val Ref(_, refAttr, refNs, _, _, _) = ref
-    exts(refNs) = exts.get(refNs).fold(Option.empty[String])(_ => Some("_" + refAttr))
-    aritiesNested()
-    resolveNestedRef(ref)
-    resolve(nestedElements)
-    resolve(tail)
-  }
-
-  final private def resolveNestedOpt(ref: Ref, nestedElements: List[Element], tail: List[Element]): Unit = {
-    level += 1
-    isNestedOpt = true
-    if (isNestedMan) {
-      noMixedNestedModes
-    }
-    if (expectedFilterAttrs.nonEmpty) {
-      throw ModelError("Filter attributes not allowed in optional nested queries.")
-    }
-    validateRefNs(ref, nestedElements)
-
-    val Ref(_, refAttr, refNs, _, _, _) = ref
-    exts(refNs) = exts.get(refNs).fold(Option.empty[String])(_ => Some("_" + refAttr))
-    aritiesNested()
-    resolveNestedOptRef(ref)
-    resolve(nestedElements)
-    resolve(tail)
-  }
-
-  final private def validateRefNs(ref: Ref, nestedElements: List[Element]): Unit = {
-    val refName  = ref.refAttr.capitalize
-    val nestedNs = nestedElements.head match {
-      case a: Attr => a.ns
-      case r: Ref  => r.ns
-      case other   => unexpectedElement(other)
-    }
-    if (ref.refNs != nestedNs) {
-      throw ModelError(s"`$refName` can only nest to `${ref.refNs}`. Found: `$nestedNs`")
-    }
   }
 }

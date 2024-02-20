@@ -8,13 +8,14 @@ trait ResolveRef { self: SqlQueryBase =>
 
   protected def resolveRef(ref: Ref, singleOptSet: Boolean): Unit = {
     val (ns, refAttr, refNs) = (ref.ns, ref.refAttr, ref.refNs)
-    val (refAs, refExt)      = exts(refNs).fold(("", ""))(ext => (refNs + ext, ext))
-    val nsExt                = if (ns == refNs)
+    val (refAs, refExt)      = getOptExt().fold(("", ""))(ext => (refNs + ext, ext))
+
+    val nsExt = if (ns == refNs)
       "" // self-joins
     else
-      exts(ns).getOrElse("")
+      getOptExt(path.dropRight(2)).getOrElse("")
 
-    //    println(s"----- $ns  $refAttr  $refNs  $refAs  $refExt  $nsExt")
+    //    println(s"  $ns  $refAttr  $refNs   ---   $refAs  ,  $refExt  ,  $nsExt")
 
     if (ref.card == CardOne) {
       val joinType = if (isNestedOpt) "LEFT" else "INNER"
@@ -24,17 +25,17 @@ trait ResolveRef { self: SqlQueryBase =>
       val (id1, id2) = if (ns == refNs) ("1_id", "2_id") else ("id", "id")
       val ns_id1     = ss(ns, id1)
       val refNs_id2  = ss(refNs, id2)
-      val joinTpe = if(singleOptSet) "LEFT" else "INNER"
-      joins += ((s"$joinTpe JOIN", joinTable, "", s"$ns$nsExt.id", s"= $joinTable.$ns_id1"))
-      joins += ((s"$joinTpe JOIN", refNs, refAs, s"$joinTable.$refNs_id2", s"= $refNs$refExt.id"))
-      exts(refNs) = Some(refExt)
+      val joinType   = if (singleOptSet) "LEFT" else "INNER"
+      joins += ((s"$joinType JOIN", joinTable, "", s"$ns$nsExt.id", s"= $joinTable.$ns_id1"))
+      joins += ((s"$joinType JOIN", refNs, refAs, s"$joinTable.$refNs_id2", s"= $refNs$refExt.id"))
     }
   }
 
   protected def resolveNestedRef(ref: Ref): Unit = {
     val Ref(ns, refAttr, refNs, _, _, _) = ref
-    val (as, ext)                        = exts(refNs).fold(("", ""))(ext => (refNs + ext, ext))
-    val nsExt                            = exts(ns).getOrElse("")
+
+    val (as, ext) = getOptExt().fold(("", ""))(ext => (refNs + ext, ext))
+    val nsExt     = getOptExt(path.dropRight(2)).getOrElse("")
 
     val id = s"$ns.id"
     nestedIds += id
@@ -51,8 +52,9 @@ trait ResolveRef { self: SqlQueryBase =>
 
   protected def resolveNestedOptRef(nestedRef: Ref): Unit = {
     val Ref(ns, refAttr, refNs, _, _, _) = nestedRef
-    val (as, ext)                        = exts(refNs).fold(("", ""))(ext => (refNs + ext, ext))
-    val nsExt                            = exts(ns).getOrElse("")
+
+    val (as, ext) = getOptExt().fold(("", ""))(ext => (refNs + ext, ext))
+    val nsExt     = getOptExt(path.dropRight(2)).getOrElse("")
 
     val id = s"$ns.id"
     nestedIds += id

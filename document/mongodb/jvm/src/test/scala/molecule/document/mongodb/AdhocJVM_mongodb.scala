@@ -43,17 +43,69 @@ object AdhocJVM_mongodb extends TestSuite_mongodb with AggrUtils {
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
 
-        _ <- A.i.Bb.*(B.i.ii).insert((1, List((2, Set.empty[Int])))).transact
+        _ <- A.s.i
+          .B.i._A
+          .OwnB.i
+          .insert(
+            ("a", 1, 1, 0),
+            ("b", 1, 0, 1),
+          ).transact
 
-        // A.i was inserted
-        _ <- A.i.query.get.map(_ ==> List(1))
+        //        // Filter attribute B.i needs qualifying
+        //        _ <- A.s.i_(B.i_) // Ambiguous if B points to A.B or A.OwnB
+        //          .B.i_._A
+        //          .OwnB.i_
+        //          .query.get.map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+        //            err ==>
+        //              """Please qualify filter attribute B.i to an unambiguous path:
+        //                |  A.B.i
+        //                |  A.OwnB.i""".stripMargin
+        //          }
 
-        _ <- A.i.Bb.*?(B.i.ii).query.get.map(_ ==> List((1, Nil)))
-        _ <- A.i.Bb.*(B.i.ii).query.get.map(_ ==> Nil)
 
-        // No optional B.ii value
-        _ <- A.i.Bb.i.ii_?.query.get.map(_ ==> List((1, 2, None)))
-        _ <- A.i.Bb.i.ii.query.get.map(_ ==> Nil)
+        //        _ <- rawQuery(
+        //          """SELECT DISTINCT
+        //            |  A.s
+        //            |FROM A
+        //            |  INNER JOIN B           ON A.b    = B.id
+        //            |  INNER JOIN B AS B_ownB ON A.ownB = B_ownB.id
+        //            |WHERE
+        //            |  A.i      = B.i AND
+        //            |  A.s      IS NOT NULL AND
+        //            |  A.i      IS NOT NULL AND
+        //            |  B.i      IS NOT NULL AND
+        //            |  B_ownB.i IS NOT NULL;
+        //            |""".stripMargin, true)
+        //
+        //        _ <- rawQuery(
+        //          """SELECT DISTINCT
+        //            |  A.s
+        //            |FROM A
+        //            |  INNER JOIN B           ON A.b    = B.id
+        //            |  INNER JOIN B AS B_ownB ON A.ownB = B_ownB.id
+        //            |WHERE
+        //            |  A.i      = B_ownB.i AND
+        //            |  A.s      IS NOT NULL AND
+        //            |  A.i      IS NOT NULL AND
+        //            |  B.i      IS NOT NULL AND
+        //            |  B_ownB.i IS NOT NULL;
+        //            |""".stripMargin, true)
+
+
+        //        _ <- A.s.i_(A.B.i_)
+        //          .B.i_._A
+        //          .OwnB.i_
+        //          .query.i.get.map(_ ==> List("a"))
+
+        _ <- A.s.i_(A.OwnB.i_)
+          .B.i_._A
+          .OwnB.i_
+          .query.i.get.map(_ ==> List("b"))
+
+        _ <- A.s.i_(A.OwnB.i_)
+          .OwnB.i_._A
+          .B.i_
+          .query.i.get.map(_ ==> List("b"))
 
       } yield ()
     }

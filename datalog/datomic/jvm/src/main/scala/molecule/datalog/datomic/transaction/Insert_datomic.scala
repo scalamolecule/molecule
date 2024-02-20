@@ -116,7 +116,7 @@ trait Insert_datomic
     (tpl: Product) =>
       tpl.productElement(tplIndex).asInstanceOf[Set[_]] match {
         case set if set.isEmpty =>
-        case set =>
+        case set                =>
           unusedRefIds -= e
           usedRefIds += e
           set.foreach { value =>
@@ -212,12 +212,10 @@ trait Insert_datomic
       case _ if lastIsSet =>
         val lastTplIndex = nestedElements.collect { case _: Attr => 1 }.sum - 1
         (tpl: Product) => {
-          val multiple = tpl.productArity > 1
+          val multiple     = tpl.productArity > 1
           val nestedTpls   = tpl.productElement(tplIndex).asInstanceOf[Seq[Product]]
           val nestedBaseId = e
           nestedTpls.foreach { nestedTpl =>
-            println("==== " + nestedTpl)
-
             def process(): Unit = {
               e = nestedBaseId
               addRef(ns, refAttr, refNs, CardOne, owner)(nestedTpl)
@@ -225,18 +223,9 @@ trait Insert_datomic
               nested2stmts(nestedTpl)
             }
             nestedTpl.productElement(lastTplIndex) match {
-              case set: Set[_] if set.nonEmpty || multiple =>
-                println("  1  " + set)
-                process()
-              case v: Option[_]                =>
-                println("  2  " + v)
-
-                process()
-              case x                           =>
-                println("  3  " + x)
-
-//          println("----- hmm..")
-
+              case set: Set[_] if set.nonEmpty || multiple => process()
+              case _: Option[_]                            => process()
+              case _                                       => ()
             }
           }
         }

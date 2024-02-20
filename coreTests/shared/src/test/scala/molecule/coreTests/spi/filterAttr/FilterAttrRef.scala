@@ -25,7 +25,6 @@ trait FilterAttrRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         // Same as pointing backwards to A
         _ <- A.s.i_.B.i_(A.i_).query.get.map(_ ==> List("b"))
-
       } yield ()
     }
 

@@ -117,22 +117,31 @@ trait ResolveExprOne extends ResolveExpr { self: SqlQueryBase with LambdasOne =>
       notNull += col
     }
     addSort(attr, col)
-    attr.filterAttr.fold(
+    attr.filterAttr.fold {
+      //      println(s"------------------------- man 1  $col  $path  ${attr.name}")
       expr(col, attr.op, args, res)
-    ) { case (dir, filterPath, filterAttr) =>
+    } { case (dir, filterPath, filterAttr) =>
       expr2(col, attr.op, filterAttr.name)
     }
   }
 
   protected def tac[T: ClassTag](attr: Attr, args: Seq[T], res: ResOne[T]): Unit = {
+    //    val col = getCol(attr: Attr, cache = attr.op == V)
     val col = getCol(attr: Attr)
     if (!isNestedOpt) {
       notNull += col
     }
     attr.filterAttr.fold {
+
+      //      println(s"------------------------- tac 1  $col  $path  ${attr.name}")
+
       expr(col, attr.op, args, res)
     } { case (dir, filterPath, filterAttr) =>
-      expr2(col, attr.op, filterAttr.name)
+
+      val filterCol = getCol(filterAttr, filterPath)
+      //      println(s"------------------------- tac 2  $col  $path  ${attr.name}  ---  $filterCol  $filterPath  ${filterAttr.name}")
+
+      expr2(col, attr.op, filterCol)
     }
   }
 

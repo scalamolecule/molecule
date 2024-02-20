@@ -38,6 +38,11 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
     val elements          = if (altElements.isEmpty) elements0 else altElements
     val (elements1, _, _) = validateQueryModel(elements, Some(addFilterAttrCallback))
 
+//    filterAttrVars.foreach(println)
+//    println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+
+
+
     // Remember first entity id variable
     firstId = vv
     varPath = List(firstId)
@@ -75,13 +80,14 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
     (preQuery, mainQuery, queryStrs)
   }
 
-  final private def addFilterAttrCallback: (List[String], Model.Attr) => Unit =
+  final private def addFilterAttrCallback: (List[String], Model.Attr) => Unit = {
     (pathAttr: List[String], a: Attr) => {
       filterAttrVars.get(pathAttr).fold {
         // Create datomic variable for this filter attribute
         filterAttrVars = filterAttrVars + (pathAttr -> vv)
       }(_ => throw ModelError(s"Can't refer to ambiguous filter attribute $pathAttr"))
     }
+  }
 
   final def getIdQueryWithInputs: (Att, Seq[AnyRef]) = {
     (getDatomicQueries(false)._2, inputs)

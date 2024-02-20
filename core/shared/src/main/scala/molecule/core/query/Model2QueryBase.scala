@@ -14,80 +14,59 @@ trait Model2QueryBase extends ModelUtils {
   private var hasAggr       = false
   private var hasAggrSet    = false
 
+  protected var hasFilterAttr       = false
   protected val expectedFilterAttrs = mutable.Set.empty[String]
+
+  lazy protected val noIdFiltering = "Filter attributes not allowed to involve entity ids."
 
 
   def validateQueryModel(
     elements: List[Element],
-    addFilterAttr: Option[(List[String], Attr) => Unit] = None
+    addFilterAttr: Option[(List[String], Attr) => Unit] = None,
+    optHandleRef: Option[(String, String) => Unit] = None,
+    optHandleBackRef: Option[() => Unit] = None,
   ): (List[Element], String, Boolean) = {
-    //    var hasBinding    = false
-    var hasFilterAttr = false
-
-    // Generic validation of model for queries
-
-    // We don't do this validation in ModelTransformations_ since we want to catch
-    // exceptions within the api action call and not already while composing molecules.
-    @tailrec
-    def validate(elements: List[Element], prevElements: List[Element] = Nil): Unit = {
-      elements match {
-        case element :: tail =>
-          element match {
-            case a: Attr          => validateAttr(a); validate(tail, prevElements :+ a)
-            case Nested(_, es)    => validateNested(es, prevElements)
-            case NestedOpt(_, es) => validateNestedOpt(es, prevElements)
-            //            case _: Ref           => hasBinding = true; validate(tail, prevElements)
-            case _: Ref => validate(tail, prevElements)
-            case _      => validate(tail, prevElements)
-          }
-        case Nil             => ()
-      }
-    }
-
-    def validateAttr(a: Attr): Unit = {
-      if (a.sort.nonEmpty) {
-        sortsPerLevel(level) = sortsPerLevel(level) :+ a.sort.get.substring(1, 2).toInt
-      }
-      a.filterAttr.foreach(_ => hasFilterAttr = true)
-      //      if (a.isInstanceOf[Mandatory]) {
-      //        hasBinding = true
-      //      }
-    }
-
-    def validateNested(es: List[Element], prevElements: List[Element]): Unit = {
-      level += 1
-      sortsPerLevel += level -> Nil
-      // Nested is the last element, so we can just validate next level elements
-      validate(es, prevElements)
-    }
-
-    def validateNestedOpt(es: List[Element], prevElements: List[Element]): Unit = {
-      level += 1
-      sortsPerLevel += level -> Nil
-      if (prevElements.length == 1) {
-        prevElements.head match {
-          case _: AttrOneOpt => throw ModelError(
-            s"Single optional attribute before optional nested data structure is not allowed."
-          )
-          case _             => ()
-        }
-      }
-      // Nested is the last element, so we can just validate next level elements
-      validate(es, prevElements)
-    }
-
-    // Traverse model
     elements match {
       case List(a: Attr) if a.attr == "id" => throw ModelError(
         "Querying for the entity id only is not allowed. " +
           "Please add at least one attribute (can be tacit).")
 
-      case _ => validate(elements)
-    }
+      case _ if optHandleRef.isDefined && optHandleBackRef.isDefined =>
+        val handleRef     = optHandleRef.get
+        val handleBackRef = optHandleBackRef.get
 
-    //    if (!hasBinding) {
-    //      throw ModelError("Please add at least 1 mandatory attribute.")
-    //    }
+        @tailrec
+        def validate(elements: List[Element], prevElements: List[Element] = Nil): Unit = {
+          elements match {
+            case element :: tail =>
+              element match {
+                case a: Attr          => validateAttr(a); validate(tail, prevElements :+ a)
+                case r: Ref           => handleRef(r.refAttr, r.refNs); validate(tail, prevElements)
+                case _: BackRef       => handleBackRef(); validate(tail, prevElements)
+                case Nested(_, es)    => validateNested(); validate(es, prevElements)
+                case NestedOpt(_, es) => validateNestedOpt(prevElements); validate(es, prevElements)
+              }
+            case Nil             => ()
+          }
+        }
+        validate(elements)
+
+      case _ =>
+        @tailrec
+        def validate(elements: List[Element], prevElements: List[Element] = Nil): Unit = {
+          elements match {
+            case element :: tail =>
+              element match {
+                case a: Attr          => validateAttr(a); validate(tail, prevElements :+ a)
+                case Nested(_, es)    => validateNested(); validate(es, prevElements)
+                case NestedOpt(_, es) => validateNestedOpt(prevElements); validate(es, prevElements)
+                case _                => validate(tail, prevElements)
+              }
+            case Nil             => ()
+          }
+        }
+        validate(elements)
+    }
 
     sortsPerLevel.foreach {
       case (_, Nil)         => ()
@@ -122,6 +101,31 @@ trait Model2QueryBase extends ModelUtils {
     (elements1, initialNs, hasFilterAttr)
   }
 
+  private def validateAttr(a: Attr): Unit = {
+    if (a.sort.nonEmpty) {
+      sortsPerLevel(level) = sortsPerLevel(level) :+ a.sort.get.substring(1, 2).toInt
+    }
+    a.filterAttr.foreach(_ => hasFilterAttr = true)
+  }
+
+  private def validateNested(): Unit = {
+    level += 1
+    sortsPerLevel += level -> Nil
+  }
+
+  private def validateNestedOpt(prevElements: List[Element]): Unit = {
+    level += 1
+    sortsPerLevel += level -> Nil
+    if (prevElements.length == 1) {
+      prevElements.head match {
+        case _: AttrOneOpt => throw ModelError(
+          s"Single optional attribute before optional nested data structure is not allowed."
+        )
+        case _             => ()
+      }
+    }
+  }
+
   protected def checkAggrOne(): Unit = {
     if (hasAggrSet) {
       noMultiAggrSet()
@@ -136,11 +140,9 @@ trait Model2QueryBase extends ModelUtils {
     hasAggrSet = true
   }
 
-  private def noMultiAggrSet() = {
-    throw ModelError(
-      "Only a single aggregation is allowed with card-set attributes."
-    )
-  }
+  private def noMultiAggrSet() = throw ModelError(
+    "Only a single aggregation is allowed with card-set attributes."
+  )
 
   private def checkFilterAttrs(
     elements: List[Element],
@@ -456,6 +458,4 @@ trait Model2QueryBase extends ModelUtils {
 
     prepare(elements, Nil)
   }
-
-  lazy val noIdFiltering = "Filter attributes not allowed to involve entity ids."
 }
