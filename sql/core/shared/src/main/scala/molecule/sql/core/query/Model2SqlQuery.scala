@@ -57,10 +57,6 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
 
 
   private[molecule] def getWhereClauses: ListBuffer[(String, String)] = {
-    //    from = getInitialNonGenericNs(elements0)
-    //    exts += from -> None
-    //    resolve(elements0)
-
     resolveElements(elements0)
     where
   }

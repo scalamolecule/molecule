@@ -69,17 +69,54 @@ object AdhocJVM_datomic extends TestSuite_datomic {
 
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
+      val a = (1, Set(1, 2), Set(1, 2, 3), 3)
+      val b = (2, Set(2, 3), Set(2, 3), 3)
+      val c = (2, Set(4), Set(4), 4)
+
+      val d = (2, Set(4), Set(3), 4)
+
+
       for {
 
-        List(a1, a2) <- A.i.Bb.*(B.i.C.i).insert(
-          (1, List((1, 2), (3, 4))),
-          (2, Nil),
-        ).i.transact.map(_.ids)
 
-        _ <- A.id(a1, a2).i.a1.Bb.*?(B.i.a1.C.i).query.get.map(_ ==> List(
-          (a1, 1, List((1, 2), (3, 4))),
-          (a2, 2, Nil),
+        List(_, a2, a3) <- A.i.ii.B.ii.i.insert(a, b, c).transact.map(_.ids)
+
+
+        _ = {
+          println("-------")
+          Peer.q(
+            """[:find  ?c
+              |        (distinct ?f)
+              | :where [?b :A/i ?c]
+              |        [?b :A/ii ?d]
+              |        [?b :A/b ?e]
+              |        [?e :B/ii ?f]
+              |        [(datomic.api/q
+              |          "[:find (distinct ?f1)
+              |            :in $ ?e1
+              |            :where [?e1 :B/ii ?f1]]" $ ?e) [[?f2]]]
+              |        [(datomic.api/q
+              |          "[:find (distinct ?d1)
+              |            :in $ ?b1
+              |            :where [?b1 :A/ii ?d1]]" $ ?b) [[?d2]]]
+              |        [(= ?f2 ?d2)]]
+              |        """.stripMargin,
+            conn.db
+          ).forEach { r => println(r) }
+        }
+
+        //        _ <- A.i.ii_(B.ii_).B.ii.query.get.map(_ ==> List(
+        //          (2, Set(2, 3, 4)) // Set(2, 3) and Set(4) are coalesced to one Set
+        //        ))
+        _ <- A.i.ii_.B.ii(A.ii_).query.i.get.map(_ ==> List(
+          (2, Set(2, 3, 4))
         ))
+
+
+
+
+
+
 
 
 

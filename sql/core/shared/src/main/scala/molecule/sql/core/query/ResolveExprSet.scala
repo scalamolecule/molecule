@@ -115,8 +115,8 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
       setExpr(col, attr.op, args, res, true)
     } {
       case (dir, filterPath, filterAttr) => filterAttr match {
-        case filterAttr: AttrOne => setExpr2(col, attr.op, filterAttr.name, true, tpe)
-        case filterAttr          => setExpr2(col, attr.op, filterAttr.name, false, tpe)
+        case filterAttr: AttrOne => setExpr2(col, attr.op, filterAttr.name, true, tpe, res, true)
+        case filterAttr          => setExpr2(col, attr.op, filterAttr.name, false, tpe, res, true)
       }
     }
   }
@@ -130,8 +130,8 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
       setExpr(col, attr.op, args, res, false)
     } { case (dir, filterPath, filterAttr) =>
       filterAttr match {
-        case filterAttr: AttrOne => setExpr2(col, attr.op, filterAttr.name, true, tpe)
-        case filterAttr          => setExpr2(col, attr.op, filterAttr.name, false, tpe)
+        case filterAttr: AttrOne => setExpr2(col, attr.op, filterAttr.name, true, tpe, res, false)
+        case filterAttr          => setExpr2(col, attr.op, filterAttr.name, false, tpe, res, false)
       }
     }
   }
@@ -151,14 +151,16 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     }
   }
 
-  protected def setExpr2(
-    col: String, op: Op, filterAttr: String, cardOne: Boolean, tpe: String
+  protected def setExpr2[T](
+    col: String, op: Op,
+    filterAttr: String, cardOne: Boolean, tpe: String,
+    res: ResSet[T], mandatory: Boolean
   ): Unit = {
     op match {
-      case Eq    => setEqual2(col, filterAttr)
+      case Eq    => setEqual2(col, filterAttr, res, mandatory)
       case Neq   => setNeq2(col, filterAttr)
-      case Has   => has2(col, filterAttr, cardOne, tpe)
-      case HasNo => hasNo2(col, filterAttr, cardOne, tpe)
+      case Has   => has2(col, filterAttr, cardOne, tpe, res, mandatory)
+      case HasNo => hasNo2(col, filterAttr, cardOne, tpe, res, mandatory)
       case other => unexpectedOp(other)
     }
   }
@@ -556,7 +558,16 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
 
   // Filter attribute filters --------------------------------------------------
 
-  protected def setEqual2(col: String, filterAttr: String): Unit = {
+  protected def setEqual2[T](
+    col: String, filterAttr: String, res: ResSet[T], mandatory: Boolean
+  ): Unit = {
+    if (mandatory) {
+      select -= col
+      select += s"ARRAY_AGG($col)"
+      having += "COUNT(*) > 0"
+      aggregate = true
+      replaceCast(res.nestedArray2coalescedSet)
+    }
     where += ((col, "= " + filterAttr))
   }
 
@@ -564,20 +575,37 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     where += ((col, "<> " + filterAttr))
   }
 
-  protected def has2(
-    col: String, filterAttr: String, cardOne: Boolean, tpe: String
+  protected def has2[T](
+    col: String, filterAttr: String, filterCardOne: Boolean, tpe: String,
+    res: ResSet[T], mandatory: Boolean
   ): Unit = {
-    if (cardOne) {
+
+    if (filterCardOne) {
       where += (("", s"ARRAY_CONTAINS($col, $filterAttr)"))
     } else {
+      if (mandatory) {
+        select -= col
+        select += s"ARRAY_AGG($col)"
+        having += "COUNT(*) > 0"
+        aggregate = true
+        replaceCast(res.nestedArray2coalescedSet)
+      }
       where += (("", s"has_$tpe($col, $filterAttr)"))
     }
   }
 
-  protected def hasNo2(
-    col: String, filterAttr: String, cardOne: Boolean, tpe: String
+  protected def hasNo2[T](
+    col: String, filterAttr: String, filterCardOne: Boolean, tpe: String,
+    res: ResSet[T], mandatory: Boolean
   ): Unit = {
-    if (cardOne) {
+    if (filterCardOne) {
+      if (mandatory) {
+        select -= col
+        select += s"ARRAY_AGG($col)"
+        having += "COUNT(*) > 0"
+        aggregate = true
+        replaceCast(res.nestedArray2coalescedSet)
+      }
       where += (("", s"NOT ARRAY_CONTAINS($col, $filterAttr)"))
     } else {
       where += (("", s"hasNo_$tpe($col, $filterAttr)"))

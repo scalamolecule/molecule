@@ -3,6 +3,7 @@ package molecule.sql.core.query.casting
 import java.lang.{Long => jLong}
 import molecule.core.query.Model2QueryBase
 import molecule.sql.core.query.SqlQueryBase
+import scala.collection.mutable.ListBuffer
 
 
 trait NestOpt[Tpl] { self: Model2QueryBase
@@ -85,29 +86,34 @@ trait NestOpt[Tpl] { self: Model2QueryBase
   }
 
   final private def flatten(list: List[Any]): List[Any] = {
-    list.flatMap {
-      case null                       => None
-      case set: Set[_] if set.isEmpty => None
-      case Some(v)                    => Some(Some(v))
-      case None                       => None
+    val buf = new ListBuffer[Any]
+    val it  = list.iterator
+    while (it.hasNext) {
+      it.next() match {
+        case null                       => ()
+        case set: Set[_] if set.isEmpty => ()
+        case Some(v)                    => buf += Some(v)
+        case None                       => ()
+        case tpl: Product               =>
+          var hasEmptySet = false
+          val allEmpty    = (0 until tpl.productArity).foldLeft(0) {
+            case (acc, i) =>
+              val el = tpl.productElement(i)
+              el match {
+                case set: Set[_] if set.isEmpty => hasEmptySet = true; acc
+                case None                       => acc
+                case Nil                        => acc
+                case null                       => acc
+                case _                          => acc + 1
+              }
+          } == 0
+          if (!allEmpty && !hasEmptySet)
+            buf += tpl
 
-      case tpl: Product =>
-        var hasEmptySet = false
-        val allEmpty    = (0 until tpl.productArity).foldLeft(true) {
-          case (_, i) =>
-            val el = tpl.productElement(i)
-            el match {
-              case set: Set[_] if set.isEmpty => hasEmptySet = true; true
-              case None                       => true
-              case Nil                        => true
-              case null                       => true
-              case _                          => false
-            }
-        }
-        if (allEmpty || hasEmptySet) None else Some(tpl)
-
-      case v => Some(v)
+        case v => buf += v
+      }
     }
+    buf.toList
   }
 
   final private def rows2nested1(rows: Row): List[Tpl] = {

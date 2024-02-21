@@ -62,37 +62,55 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       for {
 
 
+//        List(_, a2, a3) <- A.i.ii.B.ii.i.insert(a, b, c).transact.map(_.ids)
+
 //        _ <- rawQuery(
-//          """
-//            |SELECT DISTINCT
+//          """SELECT DISTINCT
 //            |  A.i,
-//            |  A_a.i
+//            |  ARRAY_AGG(B.ii)
 //            |FROM A
-//            |  INNER JOIN A AS A_a ON A.a = A_a.id
+//            |  INNER JOIN B ON A.b = B.id
 //            |WHERE
-//            |  A.i   IS NOT NULL AND
-//            |  A_a.i IS NOT NULL;
+//            |  A.ii = B.ii AND
+//            |  A.i  IS NOT NULL AND
+//            |  A.ii IS NOT NULL AND
+//            |  B.ii IS NOT NULL
+//            |GROUP BY A.i
+//            |HAVING COUNT(*) > 0;
+//            |  """.stripMargin
+//        ).map(println(_))
+//
+//        _ = println("---------------")
+//
+//        _ <- rawQuery(
+//          """SELECT DISTINCT
+//            |  A.i,
+//            |  B.ii
+//            |FROM A
+//            |  INNER JOIN B ON A.b = B.id
+//            |WHERE
+//            |  B.ii = A.ii AND
+//            |  A.i  IS NOT NULL AND
+//            |  A.ii IS NOT NULL AND
+//            |  B.ii IS NOT NULL;
 //            |  """.stripMargin
 //        ).map(println(_))
 
-        List(_, a2, a3) <- A.i.ii.B.ii.i.insert(a, b, c).transact.map(_.ids)
 
-        _ <- A.i.ii_(B.ii_).B.ii.query.get.map(_ ==> List(
-          (2, Set(2, 3, 4)) // Set(2, 3) and Set(4) are coalesced to one Set
-        ))
-        _ <- A.i.ii_.B.ii(A.ii_).query.get.map(_ ==> List(
-          (2, Set(2, 3, 4))
-        ))
+        _ <- A.i.Bb.*(B.i.C.i._B.C1.s.D.i).insert(0, List((1, 2, "a", 3))).transact
+        _ <- A.i_.Bb.*(B.i.C.i._B.C1.s.D.i).query.get.map(_ ==> List(List((1, 2, "a", 3))))
+        _ <- A.i_.Bb.*?(B.i.C.i._B.C1.s.D.i).query.get.map(_ ==> List(List((1, 2, "a", 3))))
 
-//        // To get un-coalesced Sets, separate by ids
-//        _ <- A.id.a1.i.ii_(B.ii_).B.ii.query.get.map(_ ==> List(
-//          (a2, 2, Set(2, 3)),
-//          (a3, 2, Set(4))
-//        ))
-//        _ <- A.id.a1.i.ii_.B.ii(A.ii_).query.get.map(_ ==> List(
-//          (a2, 2, Set(2, 3)),
-//          (a3, 2, Set(4))
-//        ))
+//        _ <- A.i_.Bb.*(B.i.C.i._B.C1.D.i).query.get.map(_ ==> List(List((1, 2, 3))))
+//        _ <- A.i_.Bb.*?(B.i.C.i._B.C1.D.i).query.get.map(_ ==> List(List((1, 2, 3))))
+//
+//        _ <- A.i.Bb.*(B.i.C.i._B.C1.s.D.i.Ee.*(E.i.F.i)).insert(1, List((1, 2, "a", 3, List((4, 5))))).transact
+//        _ <- A.i_(1).Bb.*(B.i.C.i._B.C1.s.D.i.Ee.*(E.i.F.i)).query.get.map(_ ==> List(List((1, 2, "a", 3, List((4, 5))))))
+//        _ <- A.i_(1).Bb.*?(B.i.C.i._B.C1.s.D.i.Ee.*?(E.i.F.i)).query.get.map(_ ==> List(List((1, 2, "a", 3, List((4, 5))))))
+//
+//        _ <- A.i.Bb.*(B.i.C.i.Dd.*(D.i.E.i._D.E1.s.F.i)).insert(2, List((1, 2, List((3, 4, "a", 5))))).transact
+//        _ <- A.i_(2).Bb.*(B.i.C.i.Dd.*(D.i.E.i._D.E1.s.F.i)).query.get.map(_ ==> List(List((1, 2, List((3, 4, "a", 5))))))
+//        _ <- A.i_(2).Bb.*?(B.i.C.i.Dd.*?(D.i.E.i._D.E1.s.F.i)).query.get.map(_ ==> List(List((1, 2, List((3, 4, "a", 5))))))
 
       } yield ()
     }
