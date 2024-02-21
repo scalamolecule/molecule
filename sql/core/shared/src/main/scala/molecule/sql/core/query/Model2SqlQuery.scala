@@ -36,6 +36,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
 
   final private def resolveElements(elements1: List[Element]): Unit = {
     from = getInitialNs(elements1)
+    prevRefNss = Set(from)
     path = List(from)
     preExts += path -> None
 

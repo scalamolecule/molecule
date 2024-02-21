@@ -52,55 +52,47 @@ object AdhocJVM_h2 extends TestSuite_h2 {
 
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
+      val a = (1, Set(1, 2), Set(1, 2, 3), 3)
+      val b = (2, Set(2, 3), Set(2, 3), 3)
+      val c = (2, Set(4), Set(4), 4)
+
+      val d = (2, Set(4), Set(3), 4)
+
+
       for {
 
-//        //        _ <- A.i.Bb.*(B.i.C.ii).insert(
-//        _ <- A.i.Bb.*(B.i.ii).insert(
-//          //          (0, Nil),
-//          //          (1, List(
-//          //            (1, Set.empty[Int])
-//          //          )),
-//          (2, List(
-//            (1, Set.empty[Int]),
-//            (2, Set(1)),
-//            //            (3, Set(1, 2)),
-//          )),
-//        ).i.transact
-//
-//        //        _ <- A.i.Bb.*?(B.i.C.ii).query.i.get.map(_ ==> List(
-//        _ <- A.i.Bb.*?(B.i.ii).query.i.get.map(_ ==> List(
-//          //          (0, Nil),
-//          //          (1, Nil),
-//          (2, List(
-//            (2, Set(1)),
-//            //            (3, Set(1, 2)),
-//          )),
-//        ))
 
+//        _ <- rawQuery(
+//          """
+//            |SELECT DISTINCT
+//            |  A.i,
+//            |  A_a.i
+//            |FROM A
+//            |  INNER JOIN A AS A_a ON A.a = A_a.id
+//            |WHERE
+//            |  A.i   IS NOT NULL AND
+//            |  A_a.i IS NOT NULL;
+//            |  """.stripMargin
+//        ).map(println(_))
 
+        List(_, a2, a3) <- A.i.ii.B.ii.i.insert(a, b, c).transact.map(_.ids)
 
-        //        _ <- A.i.Bb.*(B.i.C.ii).insert(
-        _ <- A.i.Bb.*(B.ii.i).insert(
-          //          (0, Nil),
-          //          (1, List(
-          //            (1, Set.empty[Int])
-          //          )),
-          (2, List(
-            (Set.empty[Int], 3),
-            (Set(5), 4),
-            //            (3, Set(1, 2)),
-          )),
-        ).i.transact
-
-        //        _ <- A.i.Bb.*?(B.i.C.ii).query.i.get.map(_ ==> List(
-        _ <- A.i.Bb.*?(B.ii.i).query.i.get.map(_ ==> List(
-          //          (0, Nil),
-          //          (1, Nil),
-          (2, List(
-            (Set(5), 4),
-            //            (3, Set(1, 2)),
-          )),
+        _ <- A.i.ii_(B.ii_).B.ii.query.get.map(_ ==> List(
+          (2, Set(2, 3, 4)) // Set(2, 3) and Set(4) are coalesced to one Set
         ))
+        _ <- A.i.ii_.B.ii(A.ii_).query.get.map(_ ==> List(
+          (2, Set(2, 3, 4))
+        ))
+
+//        // To get un-coalesced Sets, separate by ids
+//        _ <- A.id.a1.i.ii_(B.ii_).B.ii.query.get.map(_ ==> List(
+//          (a2, 2, Set(2, 3)),
+//          (a3, 2, Set(4))
+//        ))
+//        _ <- A.id.a1.i.ii_.B.ii(A.ii_).query.get.map(_ ==> List(
+//          (a2, 2, Set(2, 3)),
+//          (a3, 2, Set(4))
+//        ))
 
       } yield ()
     }
