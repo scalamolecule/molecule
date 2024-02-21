@@ -42,11 +42,27 @@ trait Model2QueryBase extends ModelUtils {
           elements match {
             case element :: tail =>
               element match {
-                case a: Attr          => validateAttr(a); validate(tail, prevElements :+ a)
-                case r: Ref           => handleRef(r.refAttr, r.refNs); validate(tail, prevElements)
-                case _: BackRef       => handleBackRef(); validate(tail, prevElements)
-                case Nested(_, es)    => validateNested(); validate(es, prevElements)
-                case NestedOpt(_, es) => validateNestedOpt(prevElements); validate(es, prevElements)
+                case a: Attr =>
+                  validateAttr(a)
+                  validate(tail, prevElements :+ a)
+
+                case r: Ref =>
+                  handleRef(r.refAttr, r.refNs)
+                  validate(tail, prevElements)
+
+                case _: BackRef =>
+                  handleBackRef()
+                  validate(tail, prevElements)
+
+                case Nested(r, es) =>
+                  handleRef(r.refAttr, r.refNs)
+                  validateNested()
+                  validate(es, prevElements)
+
+                case NestedOpt(r, es) =>
+                  handleRef(r.refAttr, r.refNs)
+                  validateNestedOpt(prevElements)
+                  validate(es, prevElements)
               }
             case Nil             => ()
           }

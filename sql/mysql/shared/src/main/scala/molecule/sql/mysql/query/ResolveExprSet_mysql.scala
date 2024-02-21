@@ -35,8 +35,8 @@ trait ResolveExprSet_mysql
       setExpr(col, attr.op, args, res, true)
     } {
       case (dir, filterPath, filterAttr) => filterAttr match {
-        case filterAttr: AttrOne => setExpr2(col, attr.op, filterAttr.name, true, tpe)
-        case filterAttr          => setExpr2(col, attr.op, filterAttr.name, false, tpe)
+        case filterAttr: AttrOne => setExpr2(col, attr.op, filterAttr.name, true, tpe, res, true)
+        case filterAttr          => setExpr2(col, attr.op, filterAttr.name, false, tpe, res, true)
       }
     }
   }

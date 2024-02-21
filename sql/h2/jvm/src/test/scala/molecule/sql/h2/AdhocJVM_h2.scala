@@ -98,9 +98,29 @@ object AdhocJVM_h2 extends TestSuite_h2 {
 
 
         _ <- A.i.Bb.*(B.i.C.i._B.C1.s.D.i).insert(0, List((1, 2, "a", 3))).transact
+        /*
+SELECT DISTINCT
+  A.id,
+  B.i,
+  C.i,
+  C_c1.s,
+  D.i
+FROM A
+  INNER JOIN A_bb_B         ON A.id = A_bb_B.A_id
+  INNER JOIN B              ON A_bb_B.B_id = B.id
+  INNER JOIN C              ON B.c = C.id
+  INNER JOIN C      AS C_c1 ON B.c1 = C_c1.id
+  INNER JOIN D              ON C_c1.d = D.id
+WHERE
+  A.i    IS NOT NULL AND
+  B.i    IS NOT NULL AND
+  C.i    IS NOT NULL AND
+  C_c1.s IS NOT NULL AND
+  D.i    IS NOT NULL;
+         */
         _ <- A.i_.Bb.*(B.i.C.i._B.C1.s.D.i).query.get.map(_ ==> List(List((1, 2, "a", 3))))
-        _ <- A.i_.Bb.*?(B.i.C.i._B.C1.s.D.i).query.get.map(_ ==> List(List((1, 2, "a", 3))))
-
+//        _ <- A.i_.Bb.*?(B.i.C.i._B.C1.s.D.i).query.get.map(_ ==> List(List((1, 2, "a", 3))))
+//
 //        _ <- A.i_.Bb.*(B.i.C.i._B.C1.D.i).query.get.map(_ ==> List(List((1, 2, 3))))
 //        _ <- A.i_.Bb.*?(B.i.C.i._B.C1.D.i).query.get.map(_ ==> List(List((1, 2, 3))))
 //

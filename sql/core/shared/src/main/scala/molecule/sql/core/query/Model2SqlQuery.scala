@@ -120,7 +120,6 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
         case _       => ()
       }
     }
-    //    path = path.dropRight(2)
     handleBackRef()
     resolve(tail)
   }
