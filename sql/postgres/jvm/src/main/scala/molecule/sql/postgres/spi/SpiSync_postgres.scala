@@ -160,9 +160,9 @@ trait SpiSync_postgres extends SpiSyncBase {
       var n = 1
       row.clear()
       while (n <= columnsNumber) {
-        val col     = rsmd.getColumnName(n)
-        val sqlType = rsmd.getColumnTypeName(n)
-//        debug("TPE: " + sqlType)
+        val col               = rsmd.getColumnName(n)
+        val sqlType           = rsmd.getColumnTypeName(n)
+        //        debug("TPE: " + sqlType)
         val tpe               = sqlType match {
           case "text"      => value(rowsResultSet.getString(n), "String/URI")
           case "int4"      => value(rowsResultSet.getInt(n), "Int")
@@ -178,13 +178,13 @@ trait SpiSync_postgres extends SpiSyncBase {
           case "bigserial" => value(rowsResultSet.getLong(n), "Long id")
           case "jsonb"     =>
 
-            import org.postgresql.jdbc.PgArray
+            //            import org.postgresql.jdbc.PgArray
 
             //            println("1  " + rowsResultSet.)
-//            println("1  " + rowsResultSet.getArray(n))
+            //            println("1  " + rowsResultSet.getArray(n))
             //            println("1  " + rowsResultSet.getArray(n).getArray)
-//            println("1  " + rowsResultSet.getArray(n).getClass)
-            println("1  " + rowsResultSet.getString(n))
+            //            println("1  " + rowsResultSet.getArray(n).getClass)
+            //            println("1  " + rowsResultSet.getString(n))
             //            println("2  " + rowsResultSet.getArray(n).getResultSet)
             //            println("3  " + rowsResultSet.getArray(n).getArray.asInstanceOf[Array[_]].toList)
 

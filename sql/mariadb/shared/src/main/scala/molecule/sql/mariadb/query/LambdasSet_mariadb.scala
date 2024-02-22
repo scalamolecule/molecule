@@ -31,9 +31,11 @@ trait LambdasSet_mariadb extends LambdasSet { self: SqlQueryBase =>
   override protected lazy val tpeDbChar          : String = "CHAR"
 
 
-  override protected lazy val valueDate     : Row => Date           = (rs: Row) => new Date(rs.getLong(2))
-  override protected lazy val json2oneDate  : String => Date        = (v: String) => new Date(v.toLong)
+  override protected lazy val valueDate     : RS => Date     = (rs: RS) => new Date(rs.getLong(2))
+  override protected lazy val json2oneDate  : String => Date = (v: String) => new Date(v.toLong)
   override protected lazy val one2jsonDate  : Date => String        = (v: Date) => s"${v.getTime}"
   override protected lazy val json2arrayDate: String => Array[Date] = (json: String) => json.substring(1, json.length - 1).split(", ?").map(json2oneDate)
   override protected lazy val one2sqlDate   : Date => String        = (v: Date) => s"${v.getTime}"
+
+  override protected lazy val one2sqlBoolean: Boolean => String = (v: Boolean) => if (v) "1" else "0"
 }

@@ -35,9 +35,9 @@ trait LambdasBase extends BaseHelpers with AggrUtils { self: SqlQueryBase =>
   protected lazy val one2sqlChar          : Char => String           = (v: Char) => s"'${v.toString}'"
 
 
-  lazy val toInt: (Row, Int) => Int = (row: Row, paramIndex: Int) => row.getLong(paramIndex).toInt
+  lazy val toInt: (RS, Int) => Int = (row: RS, paramIndex: Int) => row.getLong(paramIndex).toInt
 
-  protected def sqlArray2set[T](row: Row, paramIndex: Int, getValue: Row => T): Set[T] = {
+  protected def sqlArray2set[T](row: RS, paramIndex: Int, getValue: RS => T): Set[T] = {
     val array = row.getArray(paramIndex)
     if (row.wasNull()) {
       Set.empty[T]
@@ -45,60 +45,63 @@ trait LambdasBase extends BaseHelpers with AggrUtils { self: SqlQueryBase =>
       val arrayResultSet = array.getResultSet
       var set            = Set.empty[T]
       while (arrayResultSet.next()) {
-        set += getValue(arrayResultSet)
+        val value = getValue(arrayResultSet)
+        if (!arrayResultSet.wasNull()) {
+          set += value
+        }
       }
       set
     }
   }
 
-  protected lazy val valueId            : Row => String         = (rs: Row) => rs.getLong(2).toString
-  protected lazy val valueString        : Row => String         = (rs: Row) => rs.getString(2)
-  protected lazy val valueInt           : Row => Int            = (rs: Row) => rs.getInt(2)
-  protected lazy val valueLong          : Row => Long           = (rs: Row) => rs.getLong(2)
-  protected lazy val valueFloat         : Row => Float          = (rs: Row) => rs.getFloat(2)
-  protected lazy val valueDouble        : Row => Double         = (rs: Row) => rs.getDouble(2)
-  protected lazy val valueBoolean       : Row => Boolean        = (rs: Row) => rs.getBoolean(2)
-  protected lazy val valueBigInt        : Row => BigInt         = (rs: Row) => rs.getBigDecimal(2).toBigInteger
-  protected lazy val valueBigDecimal    : Row => BigDecimal     = (rs: Row) => rs.getBigDecimal(2)
-  protected lazy val valueDate          : Row => Date           = (rs: Row) => new Date(rs.getLong(2))
-  protected lazy val valueDuration      : Row => Duration       = (rs: Row) => Duration.parse(rs.getString(2))
-  protected lazy val valueInstant       : Row => Instant        = (rs: Row) => Instant.parse(rs.getString(2))
-  protected lazy val valueLocalDate     : Row => LocalDate      = (rs: Row) => LocalDate.parse(rs.getString(2))
-  protected lazy val valueLocalTime     : Row => LocalTime      = (rs: Row) => LocalTime.parse(rs.getString(2))
-  protected lazy val valueLocalDateTime : Row => LocalDateTime  = (rs: Row) => LocalDateTime.parse(rs.getString(2))
-  protected lazy val valueOffsetTime    : Row => OffsetTime     = (rs: Row) => OffsetTime.parse(rs.getString(2))
-  protected lazy val valueOffsetDateTime: Row => OffsetDateTime = (rs: Row) => OffsetDateTime.parse(rs.getString(2))
-  protected lazy val valueZonedDateTime : Row => ZonedDateTime  = (rs: Row) => ZonedDateTime.parse(rs.getString(2))
-  protected lazy val valueUUID          : Row => UUID           = (rs: Row) => UUID.fromString(rs.getString(2))
-  protected lazy val valueURI           : Row => URI            = (rs: Row) => new URI(rs.getString(2))
-  protected lazy val valueByte          : Row => Byte           = (rs: Row) => rs.getByte(2)
-  protected lazy val valueShort         : Row => Short          = (rs: Row) => rs.getShort(2)
-  protected lazy val valueChar          : Row => Char           = (rs: Row) => rs.getString(2).charAt(0)
+  protected lazy val valueId            : RS => String         = (rs: RS) => rs.getLong(2).toString
+  protected lazy val valueString        : RS => String         = (rs: RS) => rs.getString(2)
+  protected lazy val valueInt           : RS => Int            = (rs: RS) => rs.getInt(2)
+  protected lazy val valueLong          : RS => Long           = (rs: RS) => rs.getLong(2)
+  protected lazy val valueFloat         : RS => Float          = (rs: RS) => rs.getFloat(2)
+  protected lazy val valueDouble        : RS => Double         = (rs: RS) => rs.getDouble(2)
+  protected lazy val valueBoolean       : RS => Boolean        = (rs: RS) => rs.getBoolean(2)
+  protected lazy val valueBigInt        : RS => BigInt         = (rs: RS) => rs.getBigDecimal(2).toBigInteger
+  protected lazy val valueBigDecimal    : RS => BigDecimal     = (rs: RS) => rs.getBigDecimal(2)
+  protected lazy val valueDate          : RS => Date           = (rs: RS) => new Date(rs.getLong(2))
+  protected lazy val valueDuration      : RS => Duration       = (rs: RS) => Duration.parse(rs.getString(2))
+  protected lazy val valueInstant       : RS => Instant        = (rs: RS) => Instant.parse(rs.getString(2))
+  protected lazy val valueLocalDate     : RS => LocalDate      = (rs: RS) => LocalDate.parse(rs.getString(2))
+  protected lazy val valueLocalTime     : RS => LocalTime      = (rs: RS) => LocalTime.parse(rs.getString(2))
+  protected lazy val valueLocalDateTime : RS => LocalDateTime  = (rs: RS) => LocalDateTime.parse(rs.getString(2))
+  protected lazy val valueOffsetTime    : RS => OffsetTime     = (rs: RS) => OffsetTime.parse(rs.getString(2))
+  protected lazy val valueOffsetDateTime: RS => OffsetDateTime = (rs: RS) => OffsetDateTime.parse(rs.getString(2))
+  protected lazy val valueZonedDateTime : RS => ZonedDateTime  = (rs: RS) => ZonedDateTime.parse(rs.getString(2))
+  protected lazy val valueUUID          : RS => UUID           = (rs: RS) => UUID.fromString(rs.getString(2))
+  protected lazy val valueURI           : RS => URI            = (rs: RS) => new URI(rs.getString(2))
+  protected lazy val valueByte          : RS => Byte           = (rs: RS) => rs.getByte(2)
+  protected lazy val valueShort         : RS => Short          = (rs: RS) => rs.getShort(2)
+  protected lazy val valueChar          : RS => Char           = (rs: RS) => rs.getString(2).charAt(0)
 
 
-  protected lazy val array2setId            : (Row, Int) => Set[String]         = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueId)
-  protected lazy val array2setString        : (Row, Int) => Set[String]         = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueString)
-  protected lazy val array2setInt           : (Row, Int) => Set[Int]            = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueInt)
-  protected lazy val array2setLong          : (Row, Int) => Set[Long]           = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueLong)
-  protected lazy val array2setFloat         : (Row, Int) => Set[Float]          = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueFloat)
-  protected lazy val array2setDouble        : (Row, Int) => Set[Double]         = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueDouble)
-  protected lazy val array2setBoolean       : (Row, Int) => Set[Boolean]        = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueBoolean)
-  protected lazy val array2setBigInt        : (Row, Int) => Set[BigInt]         = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueBigInt)
-  protected lazy val array2setBigDecimal    : (Row, Int) => Set[BigDecimal]     = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueBigDecimal)
-  protected lazy val array2setDate          : (Row, Int) => Set[Date]           = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueDate)
-  protected lazy val array2setDuration      : (Row, Int) => Set[Duration]       = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueDuration)
-  protected lazy val array2setInstant       : (Row, Int) => Set[Instant]        = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueInstant)
-  protected lazy val array2setLocalDate     : (Row, Int) => Set[LocalDate]      = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueLocalDate)
-  protected lazy val array2setLocalTime     : (Row, Int) => Set[LocalTime]      = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueLocalTime)
-  protected lazy val array2setLocalDateTime : (Row, Int) => Set[LocalDateTime]  = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueLocalDateTime)
-  protected lazy val array2setOffsetTime    : (Row, Int) => Set[OffsetTime]     = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueOffsetTime)
-  protected lazy val array2setOffsetDateTime: (Row, Int) => Set[OffsetDateTime] = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueOffsetDateTime)
-  protected lazy val array2setZonedDateTime : (Row, Int) => Set[ZonedDateTime]  = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueZonedDateTime)
-  protected lazy val array2setUUID          : (Row, Int) => Set[UUID]           = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueUUID)
-  protected lazy val array2setURI           : (Row, Int) => Set[URI]            = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueURI)
-  protected lazy val array2setByte          : (Row, Int) => Set[Byte]           = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueByte)
-  protected lazy val array2setShort         : (Row, Int) => Set[Short]          = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueShort)
-  protected lazy val array2setChar          : (Row, Int) => Set[Char]           = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueChar)
+  protected lazy val array2setId            : (RS, Int) => Set[String]         = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueId)
+  protected lazy val array2setString        : (RS, Int) => Set[String]         = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueString)
+  protected lazy val array2setInt           : (RS, Int) => Set[Int]            = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueInt)
+  protected lazy val array2setLong          : (RS, Int) => Set[Long]           = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueLong)
+  protected lazy val array2setFloat         : (RS, Int) => Set[Float]          = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueFloat)
+  protected lazy val array2setDouble        : (RS, Int) => Set[Double]         = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueDouble)
+  protected lazy val array2setBoolean       : (RS, Int) => Set[Boolean]        = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueBoolean)
+  protected lazy val array2setBigInt        : (RS, Int) => Set[BigInt]         = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueBigInt)
+  protected lazy val array2setBigDecimal    : (RS, Int) => Set[BigDecimal]     = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueBigDecimal)
+  protected lazy val array2setDate          : (RS, Int) => Set[Date]           = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueDate)
+  protected lazy val array2setDuration      : (RS, Int) => Set[Duration]       = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueDuration)
+  protected lazy val array2setInstant       : (RS, Int) => Set[Instant]        = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueInstant)
+  protected lazy val array2setLocalDate     : (RS, Int) => Set[LocalDate]      = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueLocalDate)
+  protected lazy val array2setLocalTime     : (RS, Int) => Set[LocalTime]      = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueLocalTime)
+  protected lazy val array2setLocalDateTime : (RS, Int) => Set[LocalDateTime]  = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueLocalDateTime)
+  protected lazy val array2setOffsetTime    : (RS, Int) => Set[OffsetTime]     = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueOffsetTime)
+  protected lazy val array2setOffsetDateTime: (RS, Int) => Set[OffsetDateTime] = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueOffsetDateTime)
+  protected lazy val array2setZonedDateTime : (RS, Int) => Set[ZonedDateTime]  = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueZonedDateTime)
+  protected lazy val array2setUUID          : (RS, Int) => Set[UUID]           = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueUUID)
+  protected lazy val array2setURI           : (RS, Int) => Set[URI]            = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueURI)
+  protected lazy val array2setByte          : (RS, Int) => Set[Byte]           = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueByte)
+  protected lazy val array2setShort         : (RS, Int) => Set[Short]          = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueShort)
+  protected lazy val array2setChar          : (RS, Int) => Set[Char]           = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueChar)
 
 
   protected lazy val json2oneId            : String => String         = (v: String) => v
@@ -111,7 +114,7 @@ trait LambdasBase extends BaseHelpers with AggrUtils { self: SqlQueryBase =>
   protected lazy val json2oneBigInt        : String => BigInt         = (v: String) => BigInt(v)
   protected lazy val json2oneBigDecimal    : String => BigDecimal     = (v: String) => BigDecimal(v)
   protected lazy val json2oneDate          : String => Date           = (v: String) => new Date(v.toLong)
-  protected lazy val json2oneDuration      : String => Duration       = (v: String) => Duration.parse(v)
+  protected lazy val json2oneDuration      : String => Duration       = (v: String) => {println("hej: " + v); Duration.parse(v)}
   protected lazy val json2oneInstant       : String => Instant        = (v: String) => Instant.parse(v)
   protected lazy val json2oneLocalDate     : String => LocalDate      = (v: String) => LocalDate.parse(v)
   protected lazy val json2oneLocalTime     : String => LocalTime      = (v: String) => LocalTime.parse(v)
@@ -127,11 +130,13 @@ trait LambdasBase extends BaseHelpers with AggrUtils { self: SqlQueryBase =>
 
 
   private def jsonArray2optArray[T: ClassTag](array: Array[String], decode: String => T): Option[Array[T]] = {
-    val vs = array.flatMap {
-      case "null" => None
-      case v      => Some(decode(v))
+    if (array.isEmpty) None else {
+      val vs = array.flatMap {
+        case "null" => None
+        case v      => Some(decode(v))
+      }
+      if (vs.nonEmpty) Some(vs) else None
     }
-    if (vs.nonEmpty) Some(vs) else None
   }
 
   protected lazy val json2optArrayId            : String => Option[Array[String]]         = (json: String) => jsonArray2optArray(jsonArrayId(json), json2oneId)
@@ -158,8 +163,19 @@ trait LambdasBase extends BaseHelpers with AggrUtils { self: SqlQueryBase =>
   protected lazy val json2optArrayShort         : String => Option[Array[Short]]          = (json: String) => jsonArray2optArray(jsonArrayShort(json), json2oneShort)
   protected lazy val json2optArrayChar          : String => Option[Array[Char]]           = (json: String) => jsonArray2optArray(jsonArrayChar(json), json2oneChar)
 
+
+  private def str(json: String): String = {
+    val length = json.length
+    (json(1), json(length - 2)) match {
+      case ('"', '"') => json.substring(2, length - 2) // ["x", ..., "y"]
+      case ('"', _)   => json.substring(2, length - 1) // ["x", ..., null]
+      case (_, '"')   => json.substring(1, length - 2) // [null, ..., "y"]
+      case (_, _)     => json.substring(1, length - 1) // [null, ..., null]
+    }
+  }
+
   private lazy val jsonArrayId            : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
-  private lazy val jsonArrayString        : String => Array[String] = (json: String) => json.substring(2, json.length - 2).split("\", ?\"")
+  private lazy val jsonArrayString        : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
   private lazy val jsonArrayInt           : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
   private lazy val jsonArrayLong          : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
   private lazy val jsonArrayFloat         : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
@@ -168,43 +184,50 @@ trait LambdasBase extends BaseHelpers with AggrUtils { self: SqlQueryBase =>
   private lazy val jsonArrayBigInt        : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
   private lazy val jsonArrayBigDecimal    : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
   private lazy val jsonArrayDate          : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
-  private lazy val jsonArrayDuration      : String => Array[String] = (json: String) => json.substring(2, json.length - 2).split("\", ?\"")
-  private lazy val jsonArrayInstant       : String => Array[String] = (json: String) => json.substring(2, json.length - 2).split("\", ?\"")
-  private lazy val jsonArrayLocalDate     : String => Array[String] = (json: String) => json.substring(2, json.length - 2).split("\", ?\"")
-  private lazy val jsonArrayLocalTime     : String => Array[String] = (json: String) => json.substring(2, json.length - 2).split("\", ?\"")
-  private lazy val jsonArrayLocalDateTime : String => Array[String] = (json: String) => json.substring(2, json.length - 2).split("\", ?\"")
-  private lazy val jsonArrayOffsetTime    : String => Array[String] = (json: String) => json.substring(2, json.length - 2).split("\", ?\"")
-  private lazy val jsonArrayOffsetDateTime: String => Array[String] = (json: String) => json.substring(2, json.length - 2).split("\", ?\"")
-  private lazy val jsonArrayZonedDateTime : String => Array[String] = (json: String) => json.substring(2, json.length - 2).split("\", ?\"")
-  private lazy val jsonArrayUUID          : String => Array[String] = (json: String) => json.substring(2, json.length - 2).split("\", ?\"")
-  private lazy val jsonArrayURI           : String => Array[String] = (json: String) => json.substring(2, json.length - 2).split("\", ?\"")
+  private lazy val jsonArrayDuration      : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
+  private lazy val jsonArrayInstant       : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
+  private lazy val jsonArrayLocalDate     : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
+  private lazy val jsonArrayLocalTime     : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
+  private lazy val jsonArrayLocalDateTime : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
+  private lazy val jsonArrayOffsetTime    : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
+  private lazy val jsonArrayOffsetDateTime: String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
+  private lazy val jsonArrayZonedDateTime : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
+  private lazy val jsonArrayUUID          : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
+  private lazy val jsonArrayURI           : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
   private lazy val jsonArrayByte          : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
   private lazy val jsonArrayShort         : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
-  private lazy val jsonArrayChar          : String => Array[String] = (json: String) => json.substring(2, json.length - 2).split("\", ?\"")
+  private lazy val jsonArrayChar          : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
 
-  protected lazy val json2arrayId            : String => Array[String]         = (json: String) => jsonArrayId(json).map(json2oneId)
-  protected lazy val json2arrayString        : String => Array[String]         = (json: String) => jsonArrayString(json).map(json2oneString)
-  protected lazy val json2arrayInt           : String => Array[Int]            = (json: String) => jsonArrayInt(json).map(json2oneInt)
-  protected lazy val json2arrayLong          : String => Array[Long]           = (json: String) => jsonArrayLong(json).map(json2oneLong)
-  protected lazy val json2arrayFloat         : String => Array[Float]          = (json: String) => jsonArrayFloat(json).map(json2oneFloat)
-  protected lazy val json2arrayDouble        : String => Array[Double]         = (json: String) => jsonArrayDouble(json).map(json2oneDouble)
-  protected lazy val json2arrayBoolean       : String => Array[Boolean]        = (json: String) => jsonArrayBoolean(json).map(json2oneBoolean)
-  protected lazy val json2arrayBigInt        : String => Array[BigInt]         = (json: String) => jsonArrayBigInt(json).map(json2oneBigInt)
-  protected lazy val json2arrayBigDecimal    : String => Array[BigDecimal]     = (json: String) => jsonArrayBigDecimal(json).map(json2oneBigDecimal)
-  protected lazy val json2arrayDate          : String => Array[Date]           = (json: String) => jsonArrayDate(json).map(json2oneDate)
-  protected lazy val json2arrayDuration      : String => Array[Duration]       = (json: String) => jsonArrayDuration(json).map(json2oneDuration)
-  protected lazy val json2arrayInstant       : String => Array[Instant]        = (json: String) => jsonArrayInstant(json).map(json2oneInstant)
-  protected lazy val json2arrayLocalDate     : String => Array[LocalDate]      = (json: String) => jsonArrayLocalDate(json).map(json2oneLocalDate)
-  protected lazy val json2arrayLocalTime     : String => Array[LocalTime]      = (json: String) => jsonArrayLocalTime(json).map(json2oneLocalTime)
-  protected lazy val json2arrayLocalDateTime : String => Array[LocalDateTime]  = (json: String) => jsonArrayLocalDateTime(json).map(json2oneLocalDateTime)
-  protected lazy val json2arrayOffsetTime    : String => Array[OffsetTime]     = (json: String) => jsonArrayOffsetTime(json).map(json2oneOffsetTime)
-  protected lazy val json2arrayOffsetDateTime: String => Array[OffsetDateTime] = (json: String) => jsonArrayOffsetDateTime(json).map(json2oneOffsetDateTime)
-  protected lazy val json2arrayZonedDateTime : String => Array[ZonedDateTime]  = (json: String) => jsonArrayZonedDateTime(json).map(json2oneZonedDateTime)
-  protected lazy val json2arrayUUID          : String => Array[UUID]           = (json: String) => jsonArrayUUID(json).map(json2oneUUID)
-  protected lazy val json2arrayURI           : String => Array[URI]            = (json: String) => jsonArrayURI(json).map(json2oneURI)
-  protected lazy val json2arrayByte          : String => Array[Byte]           = (json: String) => jsonArrayByte(json).map(json2oneByte)
-  protected lazy val json2arrayShort         : String => Array[Short]          = (json: String) => jsonArrayShort(json).map(json2oneShort)
-  protected lazy val json2arrayChar          : String => Array[Char]           = (json: String) => jsonArrayChar(json).map(json2oneChar)
+  private def jsonArray2array[T: ClassTag](array: Array[String], decode: String => T): Array[T] = {
+    array.flatMap {
+      case "null" => None
+      case v      => Some(decode(v))
+    }
+  }
+
+  protected lazy val json2arrayId            : String => Array[String]         = (json: String) => if (json == "[null]") Array.empty[String] else jsonArray2array(jsonArrayId(json), json2oneId)
+  protected lazy val json2arrayString        : String => Array[String]         = (json: String) => if (json == "[null]") Array.empty[String] else jsonArray2array(jsonArrayString(json), json2oneString)
+  protected lazy val json2arrayInt           : String => Array[Int]            = (json: String) => if (json == "[null]") Array.empty[Int] else jsonArray2array(jsonArrayInt(json), json2oneInt)
+  protected lazy val json2arrayLong          : String => Array[Long]           = (json: String) => if (json == "[null]") Array.empty[Long] else jsonArray2array(jsonArrayLong(json), json2oneLong)
+  protected lazy val json2arrayFloat         : String => Array[Float]          = (json: String) => if (json == "[null]") Array.empty[Float] else jsonArray2array(jsonArrayFloat(json), json2oneFloat)
+  protected lazy val json2arrayDouble        : String => Array[Double]         = (json: String) => if (json == "[null]") Array.empty[Double] else jsonArray2array(jsonArrayDouble(json), json2oneDouble)
+  protected lazy val json2arrayBoolean       : String => Array[Boolean]        = (json: String) => if (json == "[null]") Array.empty[Boolean] else jsonArray2array(jsonArrayBoolean(json), json2oneBoolean)
+  protected lazy val json2arrayBigInt        : String => Array[BigInt]         = (json: String) => if (json == "[null]") Array.empty[BigInt] else jsonArray2array(jsonArrayBigInt(json), json2oneBigInt)
+  protected lazy val json2arrayBigDecimal    : String => Array[BigDecimal]     = (json: String) => if (json == "[null]") Array.empty[BigDecimal] else jsonArray2array(jsonArrayBigDecimal(json), json2oneBigDecimal)
+  protected lazy val json2arrayDate          : String => Array[Date]           = (json: String) => if (json == "[null]") Array.empty[Date] else jsonArray2array(jsonArrayDate(json), json2oneDate)
+  protected lazy val json2arrayDuration      : String => Array[Duration]       = (json: String) => if (json == "[null]") Array.empty[Duration] else jsonArray2array(jsonArrayDuration(json), json2oneDuration)
+  protected lazy val json2arrayInstant       : String => Array[Instant]        = (json: String) => if (json == "[null]") Array.empty[Instant] else jsonArray2array(jsonArrayInstant(json), json2oneInstant)
+  protected lazy val json2arrayLocalDate     : String => Array[LocalDate]      = (json: String) => if (json == "[null]") Array.empty[LocalDate] else jsonArray2array(jsonArrayLocalDate(json), json2oneLocalDate)
+  protected lazy val json2arrayLocalTime     : String => Array[LocalTime]      = (json: String) => if (json == "[null]") Array.empty[LocalTime] else jsonArray2array(jsonArrayLocalTime(json), json2oneLocalTime)
+  protected lazy val json2arrayLocalDateTime : String => Array[LocalDateTime]  = (json: String) => if (json == "[null]") Array.empty[LocalDateTime] else jsonArray2array(jsonArrayLocalDateTime(json), json2oneLocalDateTime)
+  protected lazy val json2arrayOffsetTime    : String => Array[OffsetTime]     = (json: String) => if (json == "[null]") Array.empty[OffsetTime] else jsonArray2array(jsonArrayOffsetTime(json), json2oneOffsetTime)
+  protected lazy val json2arrayOffsetDateTime: String => Array[OffsetDateTime] = (json: String) => if (json == "[null]") Array.empty[OffsetDateTime] else jsonArray2array(jsonArrayOffsetDateTime(json), json2oneOffsetDateTime)
+  protected lazy val json2arrayZonedDateTime : String => Array[ZonedDateTime]  = (json: String) => if (json == "[null]") Array.empty[ZonedDateTime] else jsonArray2array(jsonArrayZonedDateTime(json), json2oneZonedDateTime)
+  protected lazy val json2arrayUUID          : String => Array[UUID]           = (json: String) => if (json == "[null]") Array.empty[UUID] else jsonArray2array(jsonArrayUUID(json), json2oneUUID)
+  protected lazy val json2arrayURI           : String => Array[URI]            = (json: String) => if (json == "[null]") Array.empty[URI] else jsonArray2array(jsonArrayURI(json), json2oneURI)
+  protected lazy val json2arrayByte          : String => Array[Byte]           = (json: String) => if (json == "[null]") Array.empty[Byte] else jsonArray2array(jsonArrayByte(json), json2oneByte)
+  protected lazy val json2arrayShort         : String => Array[Short]          = (json: String) => if (json == "[null]") Array.empty[Short] else jsonArray2array(jsonArrayShort(json), json2oneShort)
+  protected lazy val json2arrayChar          : String => Array[Char]           = (json: String) => if (json == "[null]") Array.empty[Char] else jsonArray2array(jsonArrayChar(json), json2oneChar)
 
 
   protected lazy val one2jsonId            : String => String         = (v: String) => v

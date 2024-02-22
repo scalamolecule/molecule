@@ -15,7 +15,7 @@ trait ResolveExprSetRefAttr_mysql
     joins += (("INNER JOIN", joinTable, "", s"$nsId", s"= $joinTable.$ns_id"))
     groupBy += nsId
     addCast(
-      (row: Row, paramIndex: Int) =>
+      (row: RS, paramIndex: Int) =>
         res.json2array(row.getString(paramIndex)).toSet
     )
 
@@ -41,7 +41,7 @@ trait ResolveExprSetRefAttr_mysql
     select += s"JSON_ARRAYAGG($joinTable.$ref_id) $refIds"
     joins += (("LEFT JOIN", joinTable, "", s"$nsId", s"= $joinTable.$ns_id"))
     groupBy += nsId
-    addCast((row: Row, paramIndex: Int) => {
+    addCast((row: RS, paramIndex: Int) => {
       row.getString(paramIndex) match {
         case "[null]" => Option.empty[Set[T]]
         case json     => Some(res.json2array(json).toSet)

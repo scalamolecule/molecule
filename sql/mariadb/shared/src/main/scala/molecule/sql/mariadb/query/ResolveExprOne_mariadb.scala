@@ -38,7 +38,7 @@ trait ResolveExprOne_mariadb extends ResolveExprOne with LambdasOne_mariadb { se
         select += s"JSON_ARRAYAGG($col)"
         groupByCols -= col
         aggregate = true
-        replaceCast((row: Row, paramIndex: Int) => res.json2array(row.getString(paramIndex)).toSet)
+        replaceCast((row: RS, paramIndex: Int) => res.json2array(row.getString(paramIndex)).toSet)
 
       case "min" =>
         select += s"MIN($col)"
@@ -49,7 +49,7 @@ trait ResolveExprOne_mariadb extends ResolveExprOne with LambdasOne_mariadb { se
         select += s"GROUP_CONCAT(DISTINCT $col SEPARATOR $sep)"
         groupByCols -= col
         aggregate = true
-        replaceCast((row: Row, paramIndex: Int) =>
+        replaceCast((row: RS, paramIndex: Int) =>
           row.getString(paramIndex).split(sepChar).map(res.json2tpe).take(n).toSet
         )
 
@@ -62,7 +62,7 @@ trait ResolveExprOne_mariadb extends ResolveExprOne with LambdasOne_mariadb { se
         select += s"GROUP_CONCAT(DISTINCT $col ORDER BY $col DESC SEPARATOR $sep)"
         groupByCols -= col
         aggregate = true
-        replaceCast((row: Row, paramIndex: Int) =>
+        replaceCast((row: RS, paramIndex: Int) =>
           row.getString(paramIndex).split(sepChar).map(res.json2tpe).take(n).toSet
         )
 
@@ -70,7 +70,7 @@ trait ResolveExprOne_mariadb extends ResolveExprOne with LambdasOne_mariadb { se
         select += s"JSON_ARRAYAGG($col)"
         groupByCols -= col
         aggregate = true
-        replaceCast((row: Row, paramIndex: Int) => {
+        replaceCast((row: RS, paramIndex: Int) => {
           val array = res.json2array(row.getString(paramIndex))
           val rnd   = new Random().nextInt(array.length)
           array(rnd)
@@ -80,7 +80,7 @@ trait ResolveExprOne_mariadb extends ResolveExprOne with LambdasOne_mariadb { se
         select += s"JSON_ARRAYAGG($col)"
         groupByCols -= col
         aggregate = true
-        replaceCast((row: Row, paramIndex: Int) => {
+        replaceCast((row: RS, paramIndex: Int) => {
           val array = res.json2array(row.getString(paramIndex))
           Random.shuffle(array.toSet).take(n)
         })
@@ -112,7 +112,7 @@ trait ResolveExprOne_mariadb extends ResolveExprOne with LambdasOne_mariadb { se
         groupByCols -= col
         aggregate = true
         replaceCast(
-          (row: Row, paramIndex: Int) => {
+          (row: RS, paramIndex: Int) => {
             val json = row.getString(paramIndex)
             getMedian(json.substring(1, json.length - 1).split(",").map(_.toDouble).toList)
           }
@@ -137,7 +137,7 @@ trait ResolveExprOne_mariadb extends ResolveExprOne with LambdasOne_mariadb { se
         aggregate = true
         select += s"JSON_ARRAYAGG($col)"
         replaceCast(
-          (row: Row, paramIndex: Int) => {
+          (row: RS, paramIndex: Int) => {
             val json    = row.getString(paramIndex)
             val doubles = json.substring(1, json.length - 1).split(",").map(_.toDouble)
             varianceOf(doubles: _*)
@@ -152,7 +152,7 @@ trait ResolveExprOne_mariadb extends ResolveExprOne with LambdasOne_mariadb { se
         aggregate = true
         select += s"JSON_ARRAYAGG($col)"
         replaceCast(
-          (row: Row, paramIndex: Int) => {
+          (row: RS, paramIndex: Int) => {
             val json    = row.getString(paramIndex)
             val doubles = json.substring(1, json.length - 1).split(",").map(_.toDouble)
             stdDevOf(doubles: _*)

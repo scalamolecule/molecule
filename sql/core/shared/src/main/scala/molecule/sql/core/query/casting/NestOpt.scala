@@ -45,21 +45,21 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
   private var rowCount                                  = -1
   private lazy val rowIndexTx                           = 1 + rowCount - txAttrs // 1-based indexes for jdbc ResultSet
-  private lazy val tplBranch0: (Row, NestedTpls) => Tpl = castBranch[Tpl](aritiess(0), castss(0), i0, rowIndexTx)
-  private lazy val tplBranch1: (Row, NestedTpls) => Any = castBranch[Any](aritiess(1), castss(1), i1, 0)
-  private lazy val tplBranch2: (Row, NestedTpls) => Any = castBranch[Any](aritiess(2), castss(2), i2, 0)
-  private lazy val tplBranch3: (Row, NestedTpls) => Any = castBranch[Any](aritiess(3), castss(3), i3, 0)
-  private lazy val tplBranch4: (Row, NestedTpls) => Any = castBranch[Any](aritiess(4), castss(4), i4, 0)
-  private lazy val tplBranch5: (Row, NestedTpls) => Any = castBranch[Any](aritiess(5), castss(5), i5, 0)
-  private lazy val tplBranch6: (Row, NestedTpls) => Any = castBranch[Any](aritiess(6), castss(6), i6, 0)
+  private lazy val tplBranch0: (RS, NestedTpls) => Tpl = castBranch[Tpl](aritiess(0), castss(0), i0, rowIndexTx)
+  private lazy val tplBranch1: (RS, NestedTpls) => Any        = castBranch[Any](aritiess(1), castss(1), i1, 0)
+  private lazy val tplBranch2: (RS, NestedTpls) => Any        = castBranch[Any](aritiess(2), castss(2), i2, 0)
+  private lazy val tplBranch3: (RS, NestedTpls) => Any        = castBranch[Any](aritiess(3), castss(3), i3, 0)
+  private lazy val tplBranch4: (RS, NestedTpls) => Any        = castBranch[Any](aritiess(4), castss(4), i4, 0)
+  private lazy val tplBranch5: (RS, NestedTpls) => Any        = castBranch[Any](aritiess(5), castss(5), i5, 0)
+  private lazy val tplBranch6: (RS, NestedTpls) => Any        = castBranch[Any](aritiess(6), castss(6), i6, 0)
 
-  private lazy val tplLeaf1: Row => Any = castRow2AnyTpl(aritiess(1), castss(1), i1, None)
-  private lazy val tplLeaf2: Row => Any = castRow2AnyTpl(aritiess(2), castss(2), i2, None)
-  private lazy val tplLeaf3: Row => Any = castRow2AnyTpl(aritiess(3), castss(3), i3, None)
-  private lazy val tplLeaf4: Row => Any = castRow2AnyTpl(aritiess(4), castss(4), i4, None)
-  private lazy val tplLeaf5: Row => Any = castRow2AnyTpl(aritiess(5), castss(5), i5, None)
-  private lazy val tplLeaf6: Row => Any = castRow2AnyTpl(aritiess(6), castss(6), i6, None)
-  private lazy val tplLeaf7: Row => Any = castRow2AnyTpl(aritiess(7), castss(7), i7, None)
+  private lazy val tplLeaf1: RS => Any = castRow2AnyTpl(aritiess(1), castss(1), i1, None)
+  private lazy val tplLeaf2: RS => Any = castRow2AnyTpl(aritiess(2), castss(2), i2, None)
+  private lazy val tplLeaf3: RS => Any = castRow2AnyTpl(aritiess(3), castss(3), i3, None)
+  private lazy val tplLeaf4: RS => Any = castRow2AnyTpl(aritiess(4), castss(4), i4, None)
+  private lazy val tplLeaf5: RS => Any = castRow2AnyTpl(aritiess(5), castss(5), i5, None)
+  private lazy val tplLeaf6: RS => Any = castRow2AnyTpl(aritiess(6), castss(6), i6, None)
+  private lazy val tplLeaf7: RS => Any = castRow2AnyTpl(aritiess(7), castss(7), i7, None)
 
   private var acc0: List[Tpl] = List.empty[Tpl]
   private var acc1: List[Any] = List.empty[Any]
@@ -71,7 +71,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
   private var acc7: List[Any] = List.empty[Any]
 
 
-  final def rows2nestedOpt(rows: Row): List[Tpl] = {
+  final def rows2nestedOpt(rows: RS): List[Tpl] = {
     val result = nestedLevels match {
       case 1 => rows2nested1(rows)
       case 2 => rows2nested2(rows)
@@ -116,7 +116,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
     buf.toList
   }
 
-  final private def rows2nested1(rows: Row): List[Tpl] = {
+  final private def rows2nested1(rows: RS): List[Tpl] = {
     rowCount = getRowCount(rows)
 
     if (rowCount == 1) {
@@ -166,7 +166,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
   }
 
 
-  final private def rows2nested2(rows: Row): List[Tpl] = {
+  final private def rows2nested2(rows: RS): List[Tpl] = {
     rowCount = getRowCount(rows)
 
     if (rowCount == 1) {
@@ -240,7 +240,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
   }
 
 
-  final private def rows2nested3(rows: Row): List[Tpl] = {
+  final private def rows2nested3(rows: RS): List[Tpl] = {
     rowCount = getRowCount(rows)
 
     if (rowCount == 1) {
@@ -343,7 +343,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
   }
 
 
-  final private def rows2nested4(rows: Row): List[Tpl] = {
+  final private def rows2nested4(rows: RS): List[Tpl] = {
     rowCount = getRowCount(rows)
 
     if (rowCount == 1) {
@@ -480,7 +480,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
   }
 
 
-  final private def rows2nested5(rows: Row): List[Tpl] = {
+  final private def rows2nested5(rows: RS): List[Tpl] = {
     rowCount = getRowCount(rows)
 
     if (rowCount == 1) {
@@ -656,7 +656,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
   }
 
 
-  final private def rows2nested6(rows: Row): List[Tpl] = {
+  final private def rows2nested6(rows: RS): List[Tpl] = {
     rowCount = getRowCount(rows)
 
     if (rowCount == 1) {
@@ -875,7 +875,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
     acc0
   }
 
-  final private def rows2nested7(rows: Row): List[Tpl] = {
+  final private def rows2nested7(rows: RS): List[Tpl] = {
     rowCount = getRowCount(rows)
 
     if (rowCount == 1) {

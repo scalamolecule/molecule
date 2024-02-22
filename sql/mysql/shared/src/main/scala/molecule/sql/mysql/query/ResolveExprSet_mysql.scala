@@ -21,7 +21,7 @@ trait ResolveExprSet_mysql
     if (!isNestedOpt) {
       notNull += col
     }
-    addCast((row: Row, paramIndex: Int) =>
+    addCast((row: RS, paramIndex: Int) =>
       res.json2array(row.getString(paramIndex)).toSet
     )
 
@@ -65,7 +65,7 @@ trait ResolveExprSet_mysql
     val col = getCol(attr: Attr)
     select += col
     groupByCols += col // if we later need to group by non-aggregated columns
-    addCast((row: Row, paramIndex: Int) => row.getString(paramIndex) match {
+    addCast((row: RS, paramIndex: Int) => row.getString(paramIndex) match {
       case null | "[]" => Option.empty[Set[T]]
       case json        => Some(res.json2array(json).toSet)
     })
@@ -86,23 +86,23 @@ trait ResolveExprSet_mysql
     col: String, res: ResSet[T], mandatory: Boolean
   ): Unit = {
     if (mandatory) {
-      select -= col
       selectWithOrder(col, res.tpeDb, "JSON_ARRAYAGG")
+      select -= col
       groupByCols -= col
       having += "COUNT(*) > 0"
       aggregate = true
-      replaceCast((row: Row, paramIndex: Int) =>
+      replaceCast((row: RS, paramIndex: Int) =>
         res.json2array(row.getString(paramIndex)).toSet
       )
     }
   }
 
   override protected def setOptAttr[T](col: String, res: ResSet[T]): Unit = {
-    select -= col
     selectWithOrder(col, res.tpeDb, "JSON_ARRAYAGG", optional = true)
+    select -= col
     groupByCols -= col
     aggregate = true
-    replaceCast((row: Row, paramIndex: Int) =>
+    replaceCast((row: RS, paramIndex: Int) =>
       res.json2optArray(row.getString(paramIndex)).map(_.toSet)
     )
   }
@@ -126,7 +126,7 @@ trait ResolveExprSet_mysql
       where += ((col, s"IS NULL"))
     } { sets =>
       setEqual(col, sets, res)
-      replaceCast((row: Row, paramIndex: Int) =>
+      replaceCast((row: RS, paramIndex: Int) =>
         res.json2optArray(row.getString(paramIndex)).map(_.toSet)
       )
     }
@@ -139,8 +139,8 @@ trait ResolveExprSet_mysql
     col: String, sets: Seq[Set[T]], res: ResSet[T], mandatory: Boolean
   ): Unit = {
     if (mandatory) {
-      select -= col
       selectWithOrder(col, res.tpeDb, "JSON_ARRAYAGG", optional = true)
+      select -= col
       groupByCols -= col
       aggregate = true
     }
@@ -151,11 +151,6 @@ trait ResolveExprSet_mysql
       case _ => where += (("", "NOT (" + matchArrays(col, setsNonEmpty, res.one2json) + ")"))
     }
   }
-
-  override protected def setNeq2(col: String, filterAttr: String): Unit = {
-    where += ((col, "<> " + filterAttr))
-  }
-
   override protected def setOptNeq[T](
     col: String, optSets: Option[Seq[Set[T]]], res: ResSet[T]
   ): Unit = {
@@ -166,7 +161,7 @@ trait ResolveExprSet_mysql
 
       case Some(sets) => setNeq(col, sets, res, true)
         setNeq(col, sets, res, true)
-        replaceCast((row: Row, paramIndex: Int) =>
+        replaceCast((row: RS, paramIndex: Int) =>
           res.json2optArray(row.getString(paramIndex)).map(_.toSet)
         )
     }
@@ -183,8 +178,8 @@ trait ResolveExprSet_mysql
       s"JSON_CONTAINS($col, JSON_ARRAY($jsonValues))"
     }
     if (mandatory) {
-      select -= col
       selectWithOrder(col, res.tpeDb, "JSON_ARRAYAGG", optional = true)
+      select -= col
       groupByCols -= col
       aggregate = true
     }
@@ -205,16 +200,6 @@ trait ResolveExprSet_mysql
     }
   }
 
-  override protected def has2(
-    col: String, filterAttr: String, cardOne: Boolean, tpe: String
-  ): Unit = {
-    if (cardOne) {
-      where += (("", s"JSON_CONTAINS($col, JSON_ARRAY($filterAttr))"))
-    } else {
-      where += (("", s"JSON_CONTAINS($col, $filterAttr)"))
-    }
-  }
-
   override protected def optHas[T: ClassTag](
     col: String,
     optSets: Option[Seq[Set[T]]],
@@ -225,7 +210,7 @@ trait ResolveExprSet_mysql
       where += ((col, s"IS NULL"))
     } { sets =>
       has(col, sets, res, one2sql, true)
-      replaceCast((row: Row, paramIndex: Int) =>
+      replaceCast((row: RS, paramIndex: Int) =>
         res.json2optArray(row.getString(paramIndex)).map(_.toSet)
       )
     }
@@ -243,8 +228,8 @@ trait ResolveExprSet_mysql
       s"NOT JSON_CONTAINS($col, JSON_ARRAY($jsonValues))"
     }
     if (mandatory) {
-      select -= col
       selectWithOrder(col, res.tpeDb, "JSON_ARRAYAGG", optional = true)
+      select -= col
       groupByCols -= col
       aggregate = true
     }
@@ -266,16 +251,6 @@ trait ResolveExprSet_mysql
     }
   }
 
-  override protected def hasNo2(
-    col: String, filterAttr: String, cardOne: Boolean, tpe: String
-  ): Unit = {
-    if (cardOne) {
-      where += (("", s"NOT JSON_CONTAINS($col, JSON_ARRAY($filterAttr))"))
-    } else {
-      where += (("", s"NOT JSON_OVERLAPS($col, $filterAttr)"))
-    }
-  }
-
   override protected def optHasNo[T: ClassTag](
     col: String,
     optSets: Option[Seq[Set[T]]],
@@ -286,7 +261,7 @@ trait ResolveExprSet_mysql
       setOptAttr(col, res)
     } { sets =>
       hasNo(col, sets, res, one2sql, true)
-      replaceCast((row: Row, paramIndex: Int) =>
+      replaceCast((row: RS, paramIndex: Int) =>
         res.json2optArray(row.getString(paramIndex)).map(_.toSet)
       )
     }
@@ -312,7 +287,7 @@ trait ResolveExprSet_mysql
         select += s"JSON_ARRAYAGG($col)"
         groupByCols -= col
         aggregate = true
-        replaceCast((row: Row, paramIndex: Int) => {
+        replaceCast((row: RS, paramIndex: Int) => {
           val json = row.getString(paramIndex)
           if (row.wasNull()) {
             Set.empty[Set[T]]
@@ -332,7 +307,7 @@ trait ResolveExprSet_mysql
         selectWithOrder(col, tpeDb, "MIN")
         groupByCols -= col
         aggregate = true
-        replaceCast((row: Row, paramIndex: Int) =>
+        replaceCast((row: RS, paramIndex: Int) =>
           Set(res.json2tpe(row.getString(paramIndex)))
         )
 
@@ -340,10 +315,10 @@ trait ResolveExprSet_mysql
         noBooleanSetAggr(res)
         groupByCols -= col
         aggregate = true
-        val i = select.size + 1
+        val i = getIndex
         select += s"GROUP_CONCAT(DISTINCT t_$i.vs SEPARATOR $sep)"
         tempTables += s"JSON_TABLE($col, '$$[*]' COLUMNS (vs $tpeDb PATH '$$')) t_$i"
-        replaceCast((row: Row, paramIndex: Int) =>
+        replaceCast((row: RS, paramIndex: Int) =>
           row.getString(paramIndex).split(sepChar)
             .map(res.json2tpe).take(n).toSet
         )
@@ -353,7 +328,7 @@ trait ResolveExprSet_mysql
         selectWithOrder(col, tpeDb, "MAX")
         groupByCols -= col
         aggregate = true
-        replaceCast((row: Row, paramIndex: Int) =>
+        replaceCast((row: RS, paramIndex: Int) =>
           Set(res.json2tpe(row.getString(paramIndex)))
         )
 
@@ -361,10 +336,10 @@ trait ResolveExprSet_mysql
         noBooleanSetAggr(res)
         groupByCols -= col
         aggregate = true
-        val i = select.size + 1
+        val i = getIndex
         select += s"GROUP_CONCAT(DISTINCT t_$i.vs ORDER BY t_$i.vs DESC SEPARATOR $sep)"
         tempTables += s"JSON_TABLE($col, '$$[*]' COLUMNS (vs $tpeDb PATH '$$')) t_$i"
-        replaceCast((row: Row, paramIndex: Int) =>
+        replaceCast((row: RS, paramIndex: Int) =>
           row.getString(paramIndex).split(sepChar)
             .map(res.json2tpe).take(n).toSet
         )
@@ -374,7 +349,7 @@ trait ResolveExprSet_mysql
         selectWithOrder(col, tpeDb, "JSON_ARRAYAGG")
         groupByCols -= col
         aggregate = true
-        replaceCast((row: Row, paramIndex: Int) => {
+        replaceCast((row: RS, paramIndex: Int) => {
           val array = res.json2array(row.getString(paramIndex))
           val rnd   = new Random().nextInt(array.length)
           Set(array(rnd))
@@ -385,7 +360,7 @@ trait ResolveExprSet_mysql
         groupByCols -= col
         aggregate = true
         selectWithOrder(col, tpeDb, "JSON_ARRAYAGG")
-        replaceCast((row: Row, paramIndex: Int) => {
+        replaceCast((row: RS, paramIndex: Int) => {
           val array = res.json2array(row.getString(paramIndex))
           Random.shuffle(array.toSet).take(n)
         })
@@ -395,7 +370,7 @@ trait ResolveExprSet_mysql
         select += s"GROUP_CONCAT($col)"
         groupByCols -= col
         aggregate = true
-        replaceCast((row: Row, paramIndex: Int) => {
+        replaceCast((row: RS, paramIndex: Int) => {
           val json = row.getString(paramIndex)
           if (row.wasNull()) {
             0
@@ -407,7 +382,8 @@ trait ResolveExprSet_mysql
       case "countDistinct" =>
         noBooleanSetCounts(n)
         // Count of unique values (Set semantics)
-        selectWithOrder(col, dbType(col), "COUNT", "DISTINCT ")
+        //        selectWithOrder(col, dbType(col), "COUNT", "DISTINCT ")
+        selectWithOrder(col, tpeDb, "COUNT", "DISTINCT ")
         groupByCols -= col
         aggregate = true
         replaceCast(toInt)
@@ -416,7 +392,7 @@ trait ResolveExprSet_mysql
         groupByCols -= col
         aggregate = true
         select += s"GROUP_CONCAT($col)"
-        replaceCast((row: Row, paramIndex: Int) => {
+        replaceCast((row: RS, paramIndex: Int) => {
           val json = row.getString(paramIndex)
           if (row.wasNull()) {
             Set.empty[T]
@@ -433,7 +409,7 @@ trait ResolveExprSet_mysql
         selectWithOrder(col, tpeDb, "JSON_ARRAYAGG")
         groupByCols -= col
         aggregate = true
-        replaceCast((row: Row, paramIndex: Int) =>
+        replaceCast((row: RS, paramIndex: Int) =>
           getMedian(res.json2array(row.getString(paramIndex))
             .map(_.toString.toDouble).toList)
         )
@@ -442,7 +418,7 @@ trait ResolveExprSet_mysql
         selectWithOrder(col, tpeDb, "AVG")
         groupByCols -= col
         aggregate = true
-        replaceCast((row: Row, paramIndex: Int) =>
+        replaceCast((row: RS, paramIndex: Int) =>
           row.getString(paramIndex).toDouble
         )
 
@@ -450,7 +426,7 @@ trait ResolveExprSet_mysql
         selectWithOrder(col, tpeDb, "JSON_ARRAYAGG")
         groupByCols -= col
         aggregate = true
-        replaceCast((row: Row, paramIndex: Int) => {
+        replaceCast((row: RS, paramIndex: Int) => {
           val doubles = res.json2array(row.getString(paramIndex))
             .map(_.toString.toDouble).toList
           varianceOf(doubles: _*)
@@ -460,13 +436,102 @@ trait ResolveExprSet_mysql
         selectWithOrder(col, tpeDb, "JSON_ARRAYAGG")
         groupByCols -= col
         aggregate = true
-        replaceCast((row: Row, paramIndex: Int) => {
+        replaceCast((row: RS, paramIndex: Int) => {
           val doubles = res.json2array(row.getString(paramIndex))
             .map(_.toString.toDouble).toList
           stdDevOf(doubles: _*)
         })
 
       case other => unexpectedKw(other)
+    }
+  }
+
+
+  // Filter attribute filters --------------------------------------------------
+
+  override protected def setEqual2[T](
+    col: String, filterAttr: String, res: ResSet[T], mandatory: Boolean
+  ): Unit = {
+    //    if (mandatory) {
+    ////      select -= col
+    ////      select += s"JSON_ARRAYAGG($col)"
+    ////      select += s"JSON_ARRAYAGG(t_3.vs)"
+    //
+    ////      having += "COUNT(*) > 0"
+    ////      aggregate = true
+    //
+    ////      replaceCast(res.nestedArray2coalescedSet)
+    //    }
+
+    if (mandatory) {
+      val i  = getIndex
+      val vs = s"t_$i.vs"
+      select -= col
+      select += s"JSON_ARRAYAGG($vs)"
+      having += "COUNT(*) > 0"
+      aggregate = true
+      groupByCols -= col
+      val tpeDb = res.tpeDb
+      tempTables += s"JSON_TABLE($col, '$$[*]' COLUMNS (vs $tpeDb PATH '$$')) t_$i"
+    }
+    where += ((col, "= " + filterAttr))
+  }
+
+  override protected def setNeq2(col: String, filterAttr: String): Unit = {
+    where += ((col, "<> " + filterAttr))
+  }
+
+  override protected def has2[T](
+    col: String, filterAttr: String, filterCardOne: Boolean, tpe: String,
+    res: ResSet[T], mandatory: Boolean
+  ): Unit = {
+    if (filterCardOne) {
+      where += (("", s"JSON_CONTAINS($col, JSON_ARRAY($filterAttr))"))
+    } else {
+      if (mandatory) {
+        //        select -= col
+        //        select += s"ARRAY_AGG($col)"
+        //        having += "COUNT(*) > 0"
+        //        aggregate = true
+        //        replaceCast(res.nestedArray2coalescedSet)
+
+        val i = getIndex
+        select -= col
+        select += s"JSON_ARRAYAGG(t_$i.vs)"
+        having += "COUNT(*) > 0"
+        aggregate = true
+        groupByCols -= col
+        val tpeDb = res.tpeDb
+        tempTables += s"JSON_TABLE($col, '$$[*]' COLUMNS (vs $tpeDb PATH '$$')) t_$i"
+      }
+      where += (("", s"JSON_CONTAINS($col, $filterAttr)"))
+    }
+  }
+
+  override protected def hasNo2[T](
+    col: String, filterAttr: String, filterCardOne: Boolean, tpe: String,
+    res: ResSet[T], mandatory: Boolean
+  ): Unit = {
+    if (filterCardOne) {
+      if (mandatory) {
+        //        select -= col
+        //        select += s"ARRAY_AGG($col)"
+        //        having += "COUNT(*) > 0"
+        //        aggregate = true
+        //        replaceCast(res.nestedArray2coalescedSet)
+
+        val i = getIndex
+        select -= col
+        select += s"JSON_ARRAYAGG(t_$i.vs)"
+        having += "COUNT(*) > 0"
+        aggregate = true
+        groupByCols -= col
+        val tpeDb = res.tpeDb
+        tempTables += s"JSON_TABLE($col, '$$[*]' COLUMNS (vs $tpeDb PATH '$$')) t_$i"
+      }
+      where += (("", s"NOT JSON_CONTAINS($col, JSON_ARRAY($filterAttr))"))
+    } else {
+      where += (("", s"NOT JSON_OVERLAPS($col, $filterAttr)"))
     }
   }
 
@@ -480,7 +545,7 @@ trait ResolveExprSet_mysql
     distinct: String = "",
     optional: Boolean = false
   ): Unit = {
-    val i  = select.size + 1
+    val i  = getIndex
     val vs = s"t_$i.vs"
     if (orderBy.nonEmpty && orderBy.last._3 == col) {
       // order by aggregate alias instead
@@ -502,33 +567,12 @@ trait ResolveExprSet_mysql
       ))
 
     } else {
-      tempTables += s"JSON_TABLE($col, '$$[*]' COLUMNS (vs $tpeDb PATH '$$')) t_$i"
+      tempTables +=
+        s"""JSON_TABLE(
+           |    IF($col IS NULL, '[null]', $col),
+           |    '$$[*]' COLUMNS (vs $tpeDb PATH '$$')
+           |  ) t_$i""".stripMargin
     }
-  }
-
-  private def dbType(col: String): String = attrMap(col)._2 match {
-    case "String"         => "LONGTEXT"
-    case "Int"            => "INT"
-    case "Long"           => "BIGINT"
-    case "Float"          => "REAL"
-    case "Double"         => "DOUBLE"
-    case "Boolean"        => "TINYINT(1)"
-    case "BigInt"         => "DECIMAL(65, 0)"
-    case "BigDecimal"     => "DECIMAL(65, 30)"
-    case "Date"           => "BIGINT"
-    case "Duration"       => "TINYTEXT"
-    case "Instant"        => "TINYTEXT"
-    case "LocalDate"      => "TINYTEXT"
-    case "LocalTime"      => "TINYTEXT"
-    case "LocalDateTime"  => "TINYTEXT"
-    case "OffsetTime"     => "TINYTEXT"
-    case "OffsetDateTime" => "TINYTEXT"
-    case "ZonedDateTime"  => "TINYTEXT"
-    case "UUID"           => "TINYTEXT"
-    case "URI"            => "TEXT"
-    case "Byte"           => "TINYINT"
-    case "Short"          => "SMALLINT"
-    case "Char"           => "CHAR"
   }
 
   private def matchArray[T](col: String, set: Set[T], one2json: T => String): String = {

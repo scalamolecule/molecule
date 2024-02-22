@@ -1,5 +1,8 @@
 package molecule.sql.mariadb
 
+import java.net.URI
+import java.time.{Duration, Instant, LocalDate, LocalDateTime, LocalTime, OffsetDateTime, OffsetTime, ZonedDateTime}
+import java.util.{Date, UUID}
 import molecule.base.error.ModelError
 import molecule.core.util.Executor._
 import molecule.sql.mariadb.async._
@@ -14,58 +17,46 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+
+      val all = Set(duration1, duration2, duration3, duration4)
       for {
+        _ <- Ns.duration.insert(List(duration1, duration2, duration3)).transact
+        _ <- Ns.duration(sample).query.get.map(res => all.contains(res.head) ==> true)
+
+        //        _ <- Ns.i.ii.ints.insert(a, b, c).transact
+        //
+        ////        _ <- rawQuery(
+        ////          """SELECT DISTINCT
+        ////            |  Ns.i,
+        ////            |  Ns.ii,
+        ////            |  JSON_ARRAYAGG(t_3.vs)
+        ////            |FROM Ns,
+        ////            |  JSON_TABLE(
+        ////            |    IF(Ns.ints IS NULL, '[null]', Ns.ints),
+        ////            |    '$[*]' COLUMNS (vs INT PATH '$')
+        ////            |  ) t_3
+        ////            |WHERE
+        ////            |  Ns.ii   = Ns.ints AND
+        ////            |  Ns.i    IS NOT NULL AND
+        ////            |  Ns.ii   IS NOT NULL AND
+        ////            |  Ns.ints IS NOT NULL
+        ////            |GROUP BY Ns.i, Ns.ii
+        ////            |HAVING COUNT(*) > 0;
+        ////            |""".stripMargin, true)
+        //
+        //        _ <- Ns.i.ii(Ns.ints).query.i.get.map(_ ==> List(b))
 
 
-        _ <- Ns.i.ints.insert(List(
-          (1, Set(int1, int2)),
-          (2, Set(int2, int3)),
-          (2, Set(int3, int4)),
-          (2, Set(int3, int4)),
-        )).transact
-
-//        _ <- Ns.i(count).query.get.map(_ ==> List(4))
-//        _ <- Ns.i(countDistinct).query.get.map(_ ==> List(2))
-
-        _ <- Ns.ints(count).query.i.get.map(_ ==> List(8))
-//        _ <- Ns.ints(countDistinct).query.get.map(_ ==> List(4))
+//        id <- Ns.ints.insert(Set(1)).transact.map(_.id)
+//        _ <- Ns.ints.query.get.map(_ ==> List(Set(1)))
 //
-//        _ <- Ns.i.a1.ints(count).query.get.map(_ ==> List(
-//          (1, 2),
-//          (2, 6)
-//        ))
-//        _ <- Ns.i.a1.ints(countDistinct).query.get.map(_ ==> List(
-//          (1, 2),
-//          (2, 3)
-//        ))
-
-
-//        _ <- rawQuery(
-//          """SELECT DISTINCT
-//            |  Ns.i,
-//            |  AVG(t_2.vs)
-//            |FROM Ns,
-//            |  JSON_TABLE(Ns.ints, '$[*]' COLUMNS (vs DOUBLE PATH '$')) t_2
-//            |WHERE
-//            |  Ns.i    IS NOT NULL AND
-//            |  Ns.ints IS NOT NULL
-//            |GROUP BY Ns.i;
-//            |""".stripMargin, true)
+//        _ <- Ns(id).ints(Set(2)).update.transact
+//        _ <- Ns.ints.query.get.map(_ ==> List(Set(2)))
 //
-//        _ <- rawQuery(
-//          """SELECT distinct
-//            |  Ns.i,
-//            |  sum(t_2.vs)
-//            |FROM Ns,
-//            |  JSON_TABLE(Ns.ints, '$[*]' COLUMNS (vs DOUBLE PATH '$')) t_2
-//            |WHERE
-//            |  Ns.i    IS NOT NULL AND
-//            |  Ns.ints IS NOT NULL
-//            |GROUP BY Ns.i;
-//            |""".stripMargin, true)
+//        // Updating a non-asserted attribute has no effect
+//        _ <- Ns(id).strings(Set("a")).update.transact
+//        _ <- Ns.ints.strings_?.query.get.map(_ ==> List((Set(2), None)))
 
-        //        _ <- Ns.int.insert(1).i.transact
-        //        _ <- Ns.int.query.get.map(_ ==> List(1))
       } yield ()
     }
 
@@ -73,43 +64,74 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
 
-      val all  = 1 + 2 + 2 + 3 + 3 + 4 + 3 + 4
-      val all2 = 2 + 3 + 3 + 4 + 3 + 4
-
       for {
-        //            id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
-        //            _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
 
-        _ <- A.i.B.i._A.C.ii.insert(List(
-          (1, 1, Set(1, 2)),
-          (2, 2, Set(2)),
-          (2, 2, Set(3, 4)),
-          (2, 2, Set(3, 4)),
-        )).transact
+        List(a, b, c, d) <- A.i.ii_?.insert(
+          (1, None),
+          (1, Some(Set(2))),
+          (1, Some(Set(3))),
+          (2, Some(Set(4, 5))),
+        ).transact.map(_.ids)
 
-        all = Set(1, 2, 3, 4)
+        _ <- rawQuery(
+          """SELECT DISTINCT
+            |  A.i,
+            |  JSON_ARRAYAGG(DISTINCT t_1.vs)
+            |FROM A
+            |  LEFT OUTER JOIN JSON_TABLE(A.ii, '$[*]' COLUMNS (vs INT PATH '$')) t_1 ON true
+            |WHERE
+            |  A.i IS NOT NULL
+            |GROUP BY A.i
+            |ORDER BY A.i;
+            |""".stripMargin, true)
 
+        _ <- A.i.a1.ii_?.query.i.get.map(_ ==> List( // (since we can't sort by Sets)
+          // (1, None), // coalesced with Set(2) and Set(3)
+          (1, Some(Set(2, 3))), // coalesced Set(2) and Set(3)
+          (2, Some(Set(4, 5))),
+        ))
+
+
+
+        //        _ <- A.i.Bb.*(B.i.C.ii).insert(
+        //          (0, Nil),
+        //          (1, List(
+        //            (1, Set.empty[Int])
+        //          )),
+        //          (2, List(
+        //            (1, Set.empty[Int]),
+        //            (2, Set(0)),
+        //            (3, Set(1, 2)),
+        //          )),
+        //        ).transact
+        //
         //        _ <- rawQuery(
         //          """SELECT DISTINCT
-        //            |  B.i,
-        //            |  JSON_ARRAYAGG(t_2.vs)
+        //            |  A.id,
+        //            |  A.i,
+        //            |  JSON_ARRAYAGG(t_1.vs)
         //            |FROM A
-        //            |  INNER JOIN B ON A.b = B.id
-        //            |  INNER JOIN C ON A.c = C.id,
-        //            |  JSON_TABLE(C.ii, '$[*]' COLUMNS (vs INT PATH '$')) t_2
+        //            |  LEFT JOIN A_bb_B ON A.id        = A_bb_B.A_id
+        //            |  LEFT JOIN B      ON A_bb_B.B_id = B.id
+        //            |  LEFT JOIN C      ON B.c         = C.id,
+        //            |  JSON_TABLE(
+        //            |    IF(C.ii IS NULL, '[null]', C.ii),
+        //            |    '$[*]' COLUMNS (vs INT PATH '$')
+        //            |  ) t_1
         //            |WHERE
-        //            |  B.i  IS NOT NULL AND
-        //            |  C.ii IS NOT NULL;
+        //            |  A.i IS NOT NULL
+        //            |GROUP BY A.id, A.i
+        //            |HAVING COUNT(*) > 0
+        //            |ORDER BY A.i;
         //            |""".stripMargin, true)
-
-
-        _ <- A.B.i._A.C.ii(sample).query.i.get.map {
-          _.map {
-            case (_, set) => all.contains(set.head) ==> true
-          }
-        }
-
-
+        //
+        //        _ <- A.i.a1.Bb.*?(B.C.ii).query.i.get.map(_ ==> List(
+        //          (0, Nil),
+        //          (1, Nil),
+        //          (2, List(
+        //            Set(0, 1, 2), // Set(0) and Set(1, 2) coalesced to one Set
+        //          )),
+        //        ))
 
       } yield ()
     }

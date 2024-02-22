@@ -15,81 +15,84 @@ object AdhocJVM_postgres extends TestSuite_postgres {
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+      val a = (1, Set(0, 1, 2), Set(1, 2, 3))
+      val b = (2, Set(2, 3), Set(2, 3))
+      val c = (3, Set(4), Set(3))
       for {
 
-//        _ <- rawQuery(
-//          """SELECT DISTINCT
-//            |  Ns.i,
-//            |  array_AGG(distinct Ns_ints)
-//            |FROM Ns
-//            |  , unnest(Ns.ints) as Ns_ints
-//            |WHERE
-//            |  Ns.i    IS NOT NULL AND
-//            |  Ns.ints IS NOT NULL
-//            |GROUP BY Ns.i
-//            |ORDER BY Ns.i NULLS FIRST;
-//            |""".stripMargin, true)
 
-        _ <- Ns.i.shorts.insert(List(
-          (1, Set(short1, short2)),
-          (2, Set(short2)),
-          (2, Set(short3, short4)),
-          (2, Set(short3, short4)),
-        )).transact
+        _ <- Ns.i.ii.ints.insert(a, b, c).transact
 
-        // Matching values coalesced shorto one Set
+        //        _ <- rawQuery(
+        //          """SELECT DISTINCT
+        //            |  Ns.i,
+        //            |  Ns.ii,
+        //            |  JSON_ARRAYAGG(t_3.vs)
+        //            |FROM Ns,
+        //            |  JSON_TABLE(
+        //            |    IF(Ns.ints IS NULL, '[null]', Ns.ints),
+        //            |    '$[*]' COLUMNS (vs INT PATH '$')
+        //            |  ) t_3
+        //            |WHERE
+        //            |  Ns.ii   = Ns.ints AND
+        //            |  Ns.i    IS NOT NULL AND
+        //            |  Ns.ii   IS NOT NULL AND
+        //            |  Ns.ints IS NOT NULL
+        //            |GROUP BY Ns.i, Ns.ii
+        //            |HAVING COUNT(*) > 0;
+        //            |""".stripMargin, true)
 
-        _ <- Ns.shorts(min).query.get.map(_ ==> List(Set(short1)))
-        _ <- Ns.shorts(min(1)).query.get.map(_ ==> List(Set(short1)))
 
-        //        _ <- Ns.int.insert(1).transact
-        //        _ <- Ns.int.query.get.map(_ ==> List(1))
+        _ <- Ns.i.ii(Ns.ints).query.i.get.map(_ ==> List(b))
 
       } yield ()
     }
 
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
+      val a = (1, Set(1, 2), Set(1, 2, 3), 3)
+      val b = (2, Set(2, 3), Set(2, 3), 3)
+      val c = (2, Set(4), Set(4), 4)
+
+      val d = (2, Set(4), Set(3), 4)
+
       for {
-        //            id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
-        //            _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
+        List(_, a2, a3) <- A.i.ii.B.ii.i.insert(a, b, c).transact.map(_.ids)
+
+        _ <- rawQuery(
+          """SELECT DISTINCT
+            |  A.i,
+            |  ARRAY_AGG(x)
+            |FROM A
+            |  INNER JOIN B ON A.b = B.id,
+            |  unnest(B.ii) as x
+            |WHERE
+            |  A.ii <> '{}' AND
+            |  B.ii = A.ii AND
+            |  A.i  IS NOT NULL AND
+            |  A.ii IS NOT NULL AND
+            |  B.ii IS NOT NULL
+            |GROUP BY A.i
+            |HAVING COUNT(*) > 0;
+            |""".stripMargin, true)
 
 
-        //        _ <- rawQuery(
-        //          """SELECT DISTINCT
-        //            |  Ns.i,
-        //            |  array_AGG(DISTINCT array_to_string(Ns.ints, chr(29)))
-        //            |FROM Ns
-        //            |WHERE
-        //            |  Ns.i    IS NOT NULL AND
-        //            |  Ns.ints IS NOT NULL
-        //            |GROUP BY Ns.i
-        //            |ORDER BY Ns.i NULLS FIRST;
-        //            |""".stripMargin, true)
-        _ <- A.i.B.ii.insert(List(
-          (1, Set(1, 2)),
-          (2, Set(2)),
-          (2, Set(3, 4)),
-          (2, Set(3, 4)),
-        )).transact
-        //        all = Set(1, 2, 3, 4)
-        all = List(
-          Set(1, 2),
-          Set(2),
-          Set(3, 4),
-        )
+        _ <- A.i.ii_(B.ii_).B.ii.query.get.map(_ ==> List(
+          (2, Set(2, 3, 4)) // Set(2, 3) and Set(4) are coalesced to one Set
+        ))
+        _ <- A.i.ii_.B.ii(A.ii_).query.i.get.map(_ ==> List(
+          (2, Set(2, 3, 4))
+        ))
 
-        //        _ <- A.B.ii(sample).query.get.map(res => all.contains(res.head.head) ==> true)
-        //        _ <- A.B.ii(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-
-        x: B_1[Set[Int], Int] = A.B.ii.apply(sample)
-        y: B_1[Set[Int], Int] = A.B.ii.apply(sample(2))
-        _ <- A.B.ii.apply(sample(2)).query.get.map { res =>
-          println("------")
-          println(res.head)
-//          all.intersect(res.head).nonEmpty ==> true
-          all.contains(res.head) ==> true
-        }
+        // To get un-coalesced Sets, separate by ids
+        _ <- A.id.a1.i.ii_(B.ii_).B.ii.query.get.map(_ ==> List(
+          (a2, 2, Set(2, 3)),
+          (a3, 2, Set(4))
+        ))
+        _ <- A.id.a1.i.ii_.B.ii(A.ii_).query.get.map(_ ==> List(
+          (a2, 2, Set(2, 3)),
+          (a3, 2, Set(4))
+        ))
 
       } yield ()
     }

@@ -9,37 +9,37 @@ trait LambdasOne extends LambdasBase { self: SqlQueryBase =>
 
   case class ResOne[T](
     tpe: String,
-    sql2one: (Row, ParamIndex) => T,
-    sql2oneOrNull: (Row, ParamIndex) => Any, // Allow null in optional nested rows
+    sql2one: (RS, ParamIndex) => T,
+    sql2oneOrNull: (RS, ParamIndex) => Any, // Allow null in optional nested rows
     one2sql: T => String,
-    array2set: (Row, Int) => AnyRef,
+    array2set: (RS, Int) => AnyRef,
     json2tpe: String => T,
     json2array: String => Array[T]
   )
 
-  protected lazy val sql2oneId            : (Row, Int) => String         = (row: Row, paramIndex: Int) => row.getLong(paramIndex).toString
-  protected lazy val sql2oneString        : (Row, Int) => String         = (row: Row, paramIndex: Int) => row.getString(paramIndex)
-  protected lazy val sql2oneInt           : (Row, Int) => Int            = (row: Row, paramIndex: Int) => row.getInt(paramIndex)
-  protected lazy val sql2oneLong          : (Row, Int) => Long           = (row: Row, paramIndex: Int) => row.getLong(paramIndex)
-  protected lazy val sql2oneFloat         : (Row, Int) => Float          = (row: Row, paramIndex: Int) => row.getFloat(paramIndex)
-  protected lazy val sql2oneDouble        : (Row, Int) => Double         = (row: Row, paramIndex: Int) => row.getDouble(paramIndex)
-  protected lazy val sql2oneBoolean       : (Row, Int) => Boolean        = (row: Row, paramIndex: Int) => row.getBoolean(paramIndex)
-  protected lazy val sql2oneBigInt        : (Row, Int) => BigInt         = (row: Row, paramIndex: Int) => row.getBigDecimal(paramIndex).toBigInteger
-  protected lazy val sql2oneBigDecimal    : (Row, Int) => BigDecimal     = (row: Row, paramIndex: Int) => row.getBigDecimal(paramIndex)
-  protected lazy val sql2oneDate          : (Row, Int) => Date           = (row: Row, paramIndex: Int) => new Date(row.getLong(paramIndex))
-  protected lazy val sql2oneDuration      : (Row, Int) => Duration       = (row: Row, paramIndex: Int) => Duration.parse(row.getString(paramIndex))
-  protected lazy val sql2oneInstant       : (Row, Int) => Instant        = (row: Row, paramIndex: Int) => Instant.parse(row.getString(paramIndex))
-  protected lazy val sql2oneLocalDate     : (Row, Int) => LocalDate      = (row: Row, paramIndex: Int) => LocalDate.parse(row.getString(paramIndex))
-  protected lazy val sql2oneLocalTime     : (Row, Int) => LocalTime      = (row: Row, paramIndex: Int) => LocalTime.parse(row.getString(paramIndex))
-  protected lazy val sql2oneLocalDateTime : (Row, Int) => LocalDateTime  = (row: Row, paramIndex: Int) => LocalDateTime.parse(row.getString(paramIndex))
-  protected lazy val sql2oneOffsetTime    : (Row, Int) => OffsetTime     = (row: Row, paramIndex: Int) => OffsetTime.parse(row.getString(paramIndex))
-  protected lazy val sql2oneOffsetDateTime: (Row, Int) => OffsetDateTime = (row: Row, paramIndex: Int) => OffsetDateTime.parse(row.getString(paramIndex))
-  protected lazy val sql2oneZonedDateTime : (Row, Int) => ZonedDateTime  = (row: Row, paramIndex: Int) => ZonedDateTime.parse(row.getString(paramIndex))
-  protected lazy val sql2oneUUID          : (Row, Int) => UUID           = (row: Row, paramIndex: Int) => UUID.fromString(row.getString(paramIndex))
-  protected lazy val sql2oneURI           : (Row, Int) => URI            = (row: Row, paramIndex: Int) => new URI(row.getString(paramIndex))
-  protected lazy val sql2oneByte          : (Row, Int) => Byte           = (row: Row, paramIndex: Int) => row.getByte(paramIndex)
-  protected lazy val sql2oneShort         : (Row, Int) => Short          = (row: Row, paramIndex: Int) => row.getShort(paramIndex)
-  protected lazy val sql2oneChar          : (Row, Int) => Char           = (row: Row, paramIndex: Int) => row.getString(paramIndex).charAt(0)
+  protected lazy val sql2oneId            : (RS, Int) => String         = (row: RS, paramIndex: Int) => row.getLong(paramIndex).toString
+  protected lazy val sql2oneString        : (RS, Int) => String         = (row: RS, paramIndex: Int) => row.getString(paramIndex)
+  protected lazy val sql2oneInt           : (RS, Int) => Int            = (row: RS, paramIndex: Int) => row.getInt(paramIndex)
+  protected lazy val sql2oneLong          : (RS, Int) => Long           = (row: RS, paramIndex: Int) => row.getLong(paramIndex)
+  protected lazy val sql2oneFloat         : (RS, Int) => Float          = (row: RS, paramIndex: Int) => row.getFloat(paramIndex)
+  protected lazy val sql2oneDouble        : (RS, Int) => Double         = (row: RS, paramIndex: Int) => row.getDouble(paramIndex)
+  protected lazy val sql2oneBoolean       : (RS, Int) => Boolean        = (row: RS, paramIndex: Int) => row.getBoolean(paramIndex)
+  protected lazy val sql2oneBigInt        : (RS, Int) => BigInt         = (row: RS, paramIndex: Int) => row.getBigDecimal(paramIndex).toBigInteger
+  protected lazy val sql2oneBigDecimal    : (RS, Int) => BigDecimal     = (row: RS, paramIndex: Int) => row.getBigDecimal(paramIndex)
+  protected lazy val sql2oneDate          : (RS, Int) => Date           = (row: RS, paramIndex: Int) => new Date(row.getLong(paramIndex))
+  protected lazy val sql2oneDuration      : (RS, Int) => Duration       = (row: RS, paramIndex: Int) => Duration.parse(row.getString(paramIndex))
+  protected lazy val sql2oneInstant       : (RS, Int) => Instant        = (row: RS, paramIndex: Int) => Instant.parse(row.getString(paramIndex))
+  protected lazy val sql2oneLocalDate     : (RS, Int) => LocalDate      = (row: RS, paramIndex: Int) => LocalDate.parse(row.getString(paramIndex))
+  protected lazy val sql2oneLocalTime     : (RS, Int) => LocalTime      = (row: RS, paramIndex: Int) => LocalTime.parse(row.getString(paramIndex))
+  protected lazy val sql2oneLocalDateTime : (RS, Int) => LocalDateTime  = (row: RS, paramIndex: Int) => LocalDateTime.parse(row.getString(paramIndex))
+  protected lazy val sql2oneOffsetTime    : (RS, Int) => OffsetTime     = (row: RS, paramIndex: Int) => OffsetTime.parse(row.getString(paramIndex))
+  protected lazy val sql2oneOffsetDateTime: (RS, Int) => OffsetDateTime = (row: RS, paramIndex: Int) => OffsetDateTime.parse(row.getString(paramIndex))
+  protected lazy val sql2oneZonedDateTime : (RS, Int) => ZonedDateTime  = (row: RS, paramIndex: Int) => ZonedDateTime.parse(row.getString(paramIndex))
+  protected lazy val sql2oneUUID          : (RS, Int) => UUID           = (row: RS, paramIndex: Int) => UUID.fromString(row.getString(paramIndex))
+  protected lazy val sql2oneURI           : (RS, Int) => URI            = (row: RS, paramIndex: Int) => new URI(row.getString(paramIndex))
+  protected lazy val sql2oneByte          : (RS, Int) => Byte           = (row: RS, paramIndex: Int) => row.getByte(paramIndex)
+  protected lazy val sql2oneShort         : (RS, Int) => Short          = (row: RS, paramIndex: Int) => row.getShort(paramIndex)
+  protected lazy val sql2oneChar          : (RS, Int) => Char           = (row: RS, paramIndex: Int) => row.getString(paramIndex).charAt(0)
 
   protected lazy val resId1            : ResOne[String]         = ResOne("String", sql2oneId, sql2oneIdOrNull, one2sqlId, array2setId, json2oneId, json2arrayId)
   protected lazy val resString1        : ResOne[String]         = ResOne("String", sql2oneString, sql2oneStringOrNull, one2sqlString, array2setString, json2oneString, json2arrayString)
@@ -65,33 +65,33 @@ trait LambdasOne extends LambdasBase { self: SqlQueryBase =>
   protected lazy val resShort1         : ResOne[Short]          = ResOne("Short", sql2oneShort, sql2oneShortOrNull, one2sqlShort, array2setShort, json2oneShort, json2arrayShort)
   protected lazy val resChar1          : ResOne[Char]           = ResOne("Char", sql2oneChar, sql2oneCharOrNull, one2sqlChar, array2setChar, json2oneChar, json2arrayChar)
 
-  protected lazy val sql2oneIdOrNull            : (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getLong(paramIndex); if (row.wasNull()) null else v.toString }
-  protected lazy val sql2oneStringOrNull        : (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getString(paramIndex); if (row.wasNull()) null else v }
-  protected lazy val sql2oneIntOrNull           : (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getInt(paramIndex); if (row.wasNull()) null else v }
-  protected lazy val sql2oneLongOrNull          : (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getLong(paramIndex); if (row.wasNull()) null else v }
-  protected lazy val sql2oneFloatOrNull         : (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getFloat(paramIndex); if (row.wasNull()) null else v }
-  protected lazy val sql2oneDoubleOrNull        : (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getDouble(paramIndex); if (row.wasNull()) null else v }
-  protected lazy val sql2oneBooleanOrNull       : (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getBoolean(paramIndex); if (row.wasNull()) null else v }
-  protected lazy val sql2oneBigIntOrNull        : (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getBigDecimal(paramIndex); if (row.wasNull()) null else BigInt(v.toBigInteger) }
-  protected lazy val sql2oneBigDecimalOrNull    : (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getBigDecimal(paramIndex); if (row.wasNull()) null else BigDecimal(v) }
-  protected lazy val sql2oneDateOrNull          : (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getLong(paramIndex); if (row.wasNull()) null else new Date(v) }
-  protected lazy val sql2oneDurationOrNull      : (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getString(paramIndex); if (row.wasNull()) null else Duration.parse(v) }
-  protected lazy val sql2oneInstantOrNull       : (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getString(paramIndex); if (row.wasNull()) null else Instant.parse(v) }
-  protected lazy val sql2oneLocalDateOrNull     : (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getString(paramIndex); if (row.wasNull()) null else LocalDate.parse(v) }
-  protected lazy val sql2oneLocalTimeOrNull     : (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getString(paramIndex); if (row.wasNull()) null else LocalTime.parse(v) }
-  protected lazy val sql2oneLocalDateTimeOrNull : (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getString(paramIndex); if (row.wasNull()) null else LocalDateTime.parse(v) }
-  protected lazy val sql2oneOffsetTimeOrNull    : (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getString(paramIndex); if (row.wasNull()) null else OffsetTime.parse(v) }
-  protected lazy val sql2oneOffsetDateTimeOrNull: (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getString(paramIndex); if (row.wasNull()) null else OffsetDateTime.parse(v) }
-  protected lazy val sql2oneZonedDateTimeOrNull : (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getString(paramIndex); if (row.wasNull()) null else ZonedDateTime.parse(v) }
-  protected lazy val sql2oneUUIDOrNull          : (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getString(paramIndex); if (row.wasNull()) null else UUID.fromString(v) }
-  protected lazy val sql2oneURIOrNull           : (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getString(paramIndex); if (row.wasNull()) null else new URI(v) }
-  protected lazy val sql2oneByteOrNull          : (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getByte(paramIndex); if (row.wasNull()) null else v }
-  protected lazy val sql2oneShortOrNull         : (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getShort(paramIndex); if (row.wasNull()) null else v }
-  protected lazy val sql2oneCharOrNull          : (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getString(paramIndex); if (row.wasNull()) null else v.charAt(0) }
+  protected lazy val sql2oneIdOrNull            : (RS, Int) => Any = { (row: RS, paramIndex: Int) => val v = row.getLong(paramIndex); if (row.wasNull()) null else v.toString }
+  protected lazy val sql2oneStringOrNull        : (RS, Int) => Any = { (row: RS, paramIndex: Int) => val v = row.getString(paramIndex); if (row.wasNull()) null else v }
+  protected lazy val sql2oneIntOrNull           : (RS, Int) => Any = { (row: RS, paramIndex: Int) => val v = row.getInt(paramIndex); if (row.wasNull()) null else v }
+  protected lazy val sql2oneLongOrNull          : (RS, Int) => Any = { (row: RS, paramIndex: Int) => val v = row.getLong(paramIndex); if (row.wasNull()) null else v }
+  protected lazy val sql2oneFloatOrNull         : (RS, Int) => Any = { (row: RS, paramIndex: Int) => val v = row.getFloat(paramIndex); if (row.wasNull()) null else v }
+  protected lazy val sql2oneDoubleOrNull        : (RS, Int) => Any = { (row: RS, paramIndex: Int) => val v = row.getDouble(paramIndex); if (row.wasNull()) null else v }
+  protected lazy val sql2oneBooleanOrNull       : (RS, Int) => Any = { (row: RS, paramIndex: Int) => val v = row.getBoolean(paramIndex); if (row.wasNull()) null else v }
+  protected lazy val sql2oneBigIntOrNull        : (RS, Int) => Any = { (row: RS, paramIndex: Int) => val v = row.getBigDecimal(paramIndex); if (row.wasNull()) null else BigInt(v.toBigInteger) }
+  protected lazy val sql2oneBigDecimalOrNull    : (RS, Int) => Any = { (row: RS, paramIndex: Int) => val v = row.getBigDecimal(paramIndex); if (row.wasNull()) null else BigDecimal(v) }
+  protected lazy val sql2oneDateOrNull          : (RS, Int) => Any = { (row: RS, paramIndex: Int) => val v = row.getLong(paramIndex); if (row.wasNull()) null else new Date(v) }
+  protected lazy val sql2oneDurationOrNull      : (RS, Int) => Any = { (row: RS, paramIndex: Int) => val v = row.getString(paramIndex); if (row.wasNull()) null else Duration.parse(v) }
+  protected lazy val sql2oneInstantOrNull       : (RS, Int) => Any = { (row: RS, paramIndex: Int) => val v = row.getString(paramIndex); if (row.wasNull()) null else Instant.parse(v) }
+  protected lazy val sql2oneLocalDateOrNull     : (RS, Int) => Any = { (row: RS, paramIndex: Int) => val v = row.getString(paramIndex); if (row.wasNull()) null else LocalDate.parse(v) }
+  protected lazy val sql2oneLocalTimeOrNull     : (RS, Int) => Any = { (row: RS, paramIndex: Int) => val v = row.getString(paramIndex); if (row.wasNull()) null else LocalTime.parse(v) }
+  protected lazy val sql2oneLocalDateTimeOrNull : (RS, Int) => Any = { (row: RS, paramIndex: Int) => val v = row.getString(paramIndex); if (row.wasNull()) null else LocalDateTime.parse(v) }
+  protected lazy val sql2oneOffsetTimeOrNull    : (RS, Int) => Any = { (row: RS, paramIndex: Int) => val v = row.getString(paramIndex); if (row.wasNull()) null else OffsetTime.parse(v) }
+  protected lazy val sql2oneOffsetDateTimeOrNull: (RS, Int) => Any = { (row: RS, paramIndex: Int) => val v = row.getString(paramIndex); if (row.wasNull()) null else OffsetDateTime.parse(v) }
+  protected lazy val sql2oneZonedDateTimeOrNull : (RS, Int) => Any = { (row: RS, paramIndex: Int) => val v = row.getString(paramIndex); if (row.wasNull()) null else ZonedDateTime.parse(v) }
+  protected lazy val sql2oneUUIDOrNull          : (RS, Int) => Any = { (row: RS, paramIndex: Int) => val v = row.getString(paramIndex); if (row.wasNull()) null else UUID.fromString(v) }
+  protected lazy val sql2oneURIOrNull           : (RS, Int) => Any = { (row: RS, paramIndex: Int) => val v = row.getString(paramIndex); if (row.wasNull()) null else new URI(v) }
+  protected lazy val sql2oneByteOrNull          : (RS, Int) => Any = { (row: RS, paramIndex: Int) => val v = row.getByte(paramIndex); if (row.wasNull()) null else v }
+  protected lazy val sql2oneShortOrNull         : (RS, Int) => Any = { (row: RS, paramIndex: Int) => val v = row.getShort(paramIndex); if (row.wasNull()) null else v }
+  protected lazy val sql2oneCharOrNull          : (RS, Int) => Any = { (row: RS, paramIndex: Int) => val v = row.getString(paramIndex); if (row.wasNull()) null else v.charAt(0) }
 
   case class ResOneOpt[T](
     tpe: String,
-    sql2oneOpt: (Row, ParamIndex) => Option[T],
+    sql2oneOpt: (RS, ParamIndex) => Option[T],
     one2sql: T => String
   )
 
@@ -150,95 +150,95 @@ trait LambdasOne extends LambdasBase { self: SqlQueryBase =>
   //  protected lazy val sql2oneOptChar          : (Row, Int) => Option[Char]           = sql2oneOpt((r: Row, p: Int) => r.getString(p), (v: Char) => v.toString)
 
 
-  protected lazy val sql2oneOptId            : (Row, Int) => Option[String]         = (row: Row, paramIndex: Int) => {
+  protected lazy val sql2oneOptId            : (RS, Int) => Option[String]         = (row: RS, paramIndex: Int) => {
     val v = row.getLong(paramIndex)
     if (row.wasNull()) Option.empty[String] else Some(v.toString)
   }
-  protected lazy val sql2oneOptString        : (Row, Int) => Option[String]         = (row: Row, paramIndex: Int) => {
+  protected lazy val sql2oneOptString        : (RS, Int) => Option[String]         = (row: RS, paramIndex: Int) => {
     val v = row.getString(paramIndex)
     if (row.wasNull()) Option.empty[String] else Some(v)
   }
-  protected lazy val sql2oneOptInt           : (Row, Int) => Option[Int]            = (row: Row, paramIndex: Int) => {
+  protected lazy val sql2oneOptInt           : (RS, Int) => Option[Int]            = (row: RS, paramIndex: Int) => {
     val v = row.getInt(paramIndex)
     if (row.wasNull()) Option.empty[Int] else Some(v)
   }
-  protected lazy val sql2oneOptLong          : (Row, Int) => Option[Long]           = (row: Row, paramIndex: Int) => {
+  protected lazy val sql2oneOptLong          : (RS, Int) => Option[Long]           = (row: RS, paramIndex: Int) => {
     val v = row.getLong(paramIndex)
     if (row.wasNull()) Option.empty[Long] else Some(v)
   }
-  protected lazy val sql2oneOptFloat         : (Row, Int) => Option[Float]          = (row: Row, paramIndex: Int) => {
+  protected lazy val sql2oneOptFloat         : (RS, Int) => Option[Float]          = (row: RS, paramIndex: Int) => {
     val v = row.getFloat(paramIndex)
     if (row.wasNull()) Option.empty[Float] else Some(v)
   }
-  protected lazy val sql2oneOptDouble        : (Row, Int) => Option[Double]         = (row: Row, paramIndex: Int) => {
+  protected lazy val sql2oneOptDouble        : (RS, Int) => Option[Double]         = (row: RS, paramIndex: Int) => {
     val v = row.getDouble(paramIndex)
     if (row.wasNull()) Option.empty[Double] else Some(v)
   }
-  protected lazy val sql2oneOptBoolean       : (Row, Int) => Option[Boolean]        = (row: Row, paramIndex: Int) => {
+  protected lazy val sql2oneOptBoolean       : (RS, Int) => Option[Boolean]        = (row: RS, paramIndex: Int) => {
     val v = row.getBoolean(paramIndex)
     if (row.wasNull()) Option.empty[Boolean] else Some(v)
   }
-  protected lazy val sql2oneOptBigInt        : (Row, Int) => Option[BigInt]         = (row: Row, paramIndex: Int) => {
+  protected lazy val sql2oneOptBigInt        : (RS, Int) => Option[BigInt]         = (row: RS, paramIndex: Int) => {
     val v = row.getBigDecimal(paramIndex)
     if (row.wasNull()) Option.empty[BigInt] else Some(v.toBigInteger)
   }
-  protected lazy val sql2oneOptBigDecimal    : (Row, Int) => Option[BigDecimal]     = (row: Row, paramIndex: Int) => {
+  protected lazy val sql2oneOptBigDecimal    : (RS, Int) => Option[BigDecimal]     = (row: RS, paramIndex: Int) => {
     val v = row.getBigDecimal(paramIndex)
     if (row.wasNull()) Option.empty[BigDecimal] else Some(v)
   }
-  protected lazy val sql2oneOptDate          : (Row, Int) => Option[Date]           = (row: Row, paramIndex: Int) => {
+  protected lazy val sql2oneOptDate          : (RS, Int) => Option[Date]           = (row: RS, paramIndex: Int) => {
     val v = row.getLong(paramIndex)
     if (row.wasNull()) Option.empty[Date] else Some(new Date(v))
   }
-  protected lazy val sql2oneOptDuration      : (Row, Int) => Option[Duration]       = (row: Row, paramIndex: Int) => {
+  protected lazy val sql2oneOptDuration      : (RS, Int) => Option[Duration]       = (row: RS, paramIndex: Int) => {
     val v = row.getString(paramIndex)
     if (row.wasNull()) Option.empty[Duration] else Some(Duration.parse(v))
   }
-  protected lazy val sql2oneOptInstant       : (Row, Int) => Option[Instant]        = (row: Row, paramIndex: Int) => {
+  protected lazy val sql2oneOptInstant       : (RS, Int) => Option[Instant]        = (row: RS, paramIndex: Int) => {
     val v = row.getString(paramIndex)
     if (row.wasNull()) Option.empty[Instant] else Some(Instant.parse(v))
   }
-  protected lazy val sql2oneOptLocalDate     : (Row, Int) => Option[LocalDate]      = (row: Row, paramIndex: Int) => {
+  protected lazy val sql2oneOptLocalDate     : (RS, Int) => Option[LocalDate]      = (row: RS, paramIndex: Int) => {
     val v = row.getString(paramIndex)
     if (row.wasNull()) Option.empty[LocalDate] else Some(LocalDate.parse(v))
   }
-  protected lazy val sql2oneOptLocalTime     : (Row, Int) => Option[LocalTime]      = (row: Row, paramIndex: Int) => {
+  protected lazy val sql2oneOptLocalTime     : (RS, Int) => Option[LocalTime]      = (row: RS, paramIndex: Int) => {
     val v = row.getString(paramIndex)
     if (row.wasNull()) Option.empty[LocalTime] else Some(LocalTime.parse(v))
   }
-  protected lazy val sql2oneOptLocalDateTime : (Row, Int) => Option[LocalDateTime]  = (row: Row, paramIndex: Int) => {
+  protected lazy val sql2oneOptLocalDateTime : (RS, Int) => Option[LocalDateTime]  = (row: RS, paramIndex: Int) => {
     val v = row.getString(paramIndex)
     if (row.wasNull()) Option.empty[LocalDateTime] else Some(LocalDateTime.parse(v))
   }
-  protected lazy val sql2oneOptOffsetTime    : (Row, Int) => Option[OffsetTime]     = (row: Row, paramIndex: Int) => {
+  protected lazy val sql2oneOptOffsetTime    : (RS, Int) => Option[OffsetTime]     = (row: RS, paramIndex: Int) => {
     val v = row.getString(paramIndex)
     if (row.wasNull()) Option.empty[OffsetTime] else Some(OffsetTime.parse(v))
   }
-  protected lazy val sql2oneOptOffsetDateTime: (Row, Int) => Option[OffsetDateTime] = (row: Row, paramIndex: Int) => {
+  protected lazy val sql2oneOptOffsetDateTime: (RS, Int) => Option[OffsetDateTime] = (row: RS, paramIndex: Int) => {
     val v = row.getString(paramIndex)
     if (row.wasNull()) Option.empty[OffsetDateTime] else Some(OffsetDateTime.parse(v))
   }
-  protected lazy val sql2oneOptZonedDateTime : (Row, Int) => Option[ZonedDateTime]  = (row: Row, paramIndex: Int) => {
+  protected lazy val sql2oneOptZonedDateTime : (RS, Int) => Option[ZonedDateTime]  = (row: RS, paramIndex: Int) => {
     val v = row.getString(paramIndex)
     if (row.wasNull()) Option.empty[ZonedDateTime] else Some(ZonedDateTime.parse(v))
   }
-  protected lazy val sql2oneOptUUID          : (Row, Int) => Option[UUID]           = (row: Row, paramIndex: Int) => {
+  protected lazy val sql2oneOptUUID          : (RS, Int) => Option[UUID]           = (row: RS, paramIndex: Int) => {
     val v = row.getString(paramIndex)
     if (row.wasNull()) Option.empty[UUID] else Some(UUID.fromString(v))
   }
-  protected lazy val sql2oneOptURI           : (Row, Int) => Option[URI]            = (row: Row, paramIndex: Int) => {
+  protected lazy val sql2oneOptURI           : (RS, Int) => Option[URI]            = (row: RS, paramIndex: Int) => {
     val v = row.getString(paramIndex)
     if (row.wasNull()) Option.empty[URI] else Some(new URI(v))
   }
-  protected lazy val sql2oneOptByte          : (Row, Int) => Option[Byte]           = (row: Row, paramIndex: Int) => {
+  protected lazy val sql2oneOptByte          : (RS, Int) => Option[Byte]           = (row: RS, paramIndex: Int) => {
     val v = row.getByte(paramIndex)
     if (row.wasNull()) Option.empty[Byte] else Some(v)
   }
-  protected lazy val sql2oneOptShort         : (Row, Int) => Option[Short]          = (row: Row, paramIndex: Int) => {
+  protected lazy val sql2oneOptShort         : (RS, Int) => Option[Short]          = (row: RS, paramIndex: Int) => {
     val v = row.getShort(paramIndex)
     if (row.wasNull()) Option.empty[Short] else Some(v)
   }
-  protected lazy val sql2oneOptChar          : (Row, Int) => Option[Char]           = (row: Row, paramIndex: Int) => {
+  protected lazy val sql2oneOptChar          : (RS, Int) => Option[Char]           = (row: RS, paramIndex: Int) => {
     val v = row.getString(paramIndex)
     if (row.wasNull()) Option.empty[Char] else Some(v.charAt(0))
   }

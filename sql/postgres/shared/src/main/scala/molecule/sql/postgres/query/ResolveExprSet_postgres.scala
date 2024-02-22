@@ -37,8 +37,8 @@ trait ResolveExprSet_postgres
       setExpr(col, attr.op, args, res, true)
     } {
       case (dir, filterPath, filterAttr) => filterAttr match {
-        case filterAttr: AttrOne => setExpr2(col, attr.op, filterAttr.name, true, tpe)
-        case filterAttr          => setExpr2(col, attr.op, filterAttr.name, false, tpe)
+        case filterAttr: AttrOne => setExpr2(col, attr.op, filterAttr.name, true, tpe, res, true)
+        case filterAttr          => setExpr2(col, attr.op, filterAttr.name, false, tpe, res, true)
       }
     }
   }
@@ -123,17 +123,6 @@ trait ResolveExprSet_postgres
     }
   }
 
-  override protected def has2(
-    col: String, filterAttr: String, cardOne: Boolean, tpe: String
-  ): Unit = {
-    if (cardOne) {
-      where += (("", s"$col @> ARRAY(SELECT $filterAttr)"))
-    } else {
-      where += (("", s"$col @> $filterAttr"))
-    }
-  }
-
-
 
   // hasNo ---------------------------------------------------------------------
 
@@ -160,17 +149,6 @@ trait ResolveExprSet_postgres
         where += (("", expr))
     }
   }
-
-  override protected def hasNo2(
-    col: String, filterAttr: String, cardOne: Boolean, tpe: String
-  ): Unit = {
-    if (cardOne) {
-      where += (("", s"ARRAY(SELECT UNNEST($col) INTERSECT SELECT $filterAttr) = '{}'"))
-    } else {
-      where += (("", s"ARRAY(SELECT UNNEST($col) INTERSECT SELECT UNNEST($filterAttr)) = '{}'"))
-    }
-  }
-
 
   override protected def optHasNo[T: ClassTag](
     col: String,
@@ -207,7 +185,7 @@ trait ResolveExprSet_postgres
         groupByCols -= col
         aggregate = true
         replaceCast(
-          (row: Row, paramIndex: Int) => {
+          (row: RS, paramIndex: Int) => {
             row.getArray(paramIndex).getArray.asInstanceOf[Array[String]]
               .map(jsonArray =>
                 jsonArray.split(invisibleSeparator).toSet // separate values in each array/set
@@ -260,7 +238,7 @@ trait ResolveExprSet_postgres
         groupByCols -= col
         aggregate = true
         replaceCast(
-          (row: Row, paramIndex: Int) => {
+          (row: RS, paramIndex: Int) => {
             val sets = row.getArray(paramIndex).getArray.asInstanceOf[Array[String]]
               .flatMap(jsonArray =>
                 jsonArray.split(invisibleSeparator).toSet // separate values in each array/set
@@ -278,7 +256,7 @@ trait ResolveExprSet_postgres
         groupByCols -= col
         aggregate = true
         replaceCast(
-          (row: Row, paramIndex: Int) => {
+          (row: RS, paramIndex: Int) => {
             val resultSet = row.getArray(paramIndex).getResultSet
             var count     = 0
             while (resultSet.next()) {
@@ -295,7 +273,7 @@ trait ResolveExprSet_postgres
         groupByCols -= col
         aggregate = true
         replaceCast(
-          (row: Row, paramIndex: Int) => {
+          (row: RS, paramIndex: Int) => {
             val resultSet = row.getArray(paramIndex).getResultSet
             var count     = 0
             while (resultSet.next()) {
@@ -310,7 +288,7 @@ trait ResolveExprSet_postgres
         tempTables += s"UNNEST($col) AS $colAlias"
         groupByCols -= col
         aggregate = true
-        replaceCast((row: Row, paramIndex: Int) => {
+        replaceCast((row: RS, paramIndex: Int) => {
           val json = row.getString(paramIndex)
           if (row.wasNull()) {
             Set.empty[T]
@@ -328,7 +306,7 @@ trait ResolveExprSet_postgres
         tempTables += s"UNNEST($col) AS $colAlias"
         groupByCols -= col
         aggregate = true
-        replaceCast((row: Row, paramIndex: Int) =>
+        replaceCast((row: RS, paramIndex: Int) =>
           getMedian(res.json2array(row.getString(paramIndex))
             .map(_.toString.toDouble).toList)
         )
@@ -339,7 +317,7 @@ trait ResolveExprSet_postgres
         groupByCols -= col
         aggregate = true
         replaceCast(
-          (row: Row, paramIndex: Int) => {
+          (row: RS, paramIndex: Int) => {
             val resultSet = row.getArray(paramIndex).getResultSet
             val list      = ListBuffer.empty[Double]
             while (resultSet.next()) {
@@ -355,7 +333,7 @@ trait ResolveExprSet_postgres
         groupByCols -= col
         aggregate = true
         replaceCast(
-          (row: Row, paramIndex: Int) => {
+          (row: RS, paramIndex: Int) => {
             val resultSet = row.getArray(paramIndex).getResultSet
             val list      = ListBuffer.empty[Double]
             while (resultSet.next()) {
@@ -371,7 +349,7 @@ trait ResolveExprSet_postgres
         groupByCols -= col
         aggregate = true
         replaceCast(
-          (row: Row, paramIndex: Int) => {
+          (row: RS, paramIndex: Int) => {
             val resultSet = row.getArray(paramIndex).getResultSet
             val list      = ListBuffer.empty[Double]
             while (resultSet.next()) {
@@ -385,6 +363,59 @@ trait ResolveExprSet_postgres
     }
   }
 
+
+  // Filter attribute filters --------------------------------------------------
+
+  override protected def setEqual2[T](
+    col: String, filterAttr: String, res: ResSet[T], mandatory: Boolean
+  ): Unit = {
+    if (mandatory) {
+      val colAlias = col.replace(".", "_")
+      select -= col
+      groupByCols -= col
+      select += s"ARRAY_AGG($colAlias)"
+      tempTables += s"UNNEST($col) AS $colAlias"
+      having += "COUNT(*) > 0"
+      aggregate = true
+    }
+    where += ((col, "= " + filterAttr))
+  }
+
+  override protected def has2[T](
+    col: String, filterAttr: String, cardOne: Boolean, tpe: String,
+    res: ResSet[T], mandatory: Boolean
+  ): Unit = {
+    if (cardOne) {
+      where += (("", s"$col @> ARRAY(SELECT $filterAttr)"))
+    } else {
+      if (mandatory) {
+        select -= col
+        select += s"ARRAY_AGG($col)"
+        having += "COUNT(*) > 0"
+        aggregate = true
+        replaceCast(res.nestedArray2coalescedSet)
+      }
+      where += (("", s"$col @> $filterAttr"))
+    }
+  }
+
+  override protected def hasNo2[T](
+    col: String, filterAttr: String, cardOne: Boolean, tpe: String,
+    res: ResSet[T], mandatory: Boolean
+  ): Unit = {
+    if (cardOne) {
+      if (mandatory) {
+        select -= col
+        select += s"ARRAY_AGG($col)"
+        having += "COUNT(*) > 0"
+        aggregate = true
+        replaceCast(res.nestedArray2coalescedSet)
+      }
+      where += (("", s"ARRAY(SELECT UNNEST($col) INTERSECT SELECT $filterAttr) = '{}'"))
+    } else {
+      where += (("", s"ARRAY(SELECT UNNEST($col) INTERSECT SELECT UNNEST($filterAttr)) = '{}'"))
+    }
+  }
 
   // helpers -------------------------------------------------------------------
 
@@ -402,11 +433,15 @@ trait ResolveExprSet_postgres
       mode match {
         case "man" =>
           select += s"ARRAY_AGG(DISTINCT $colAlias)"
-          tempTables += s"UNNEST($col) AS $colAlias"
-          where += (("", s"$col <> '{}'"))
+//          val tpe = dbType(col)
+          val tpe = res.tpeDb
+          tempTables += s"UNNEST(CASE WHEN $col IS NULL THEN array[null]::$tpe[] ELSE $col END) AS $colAlias"
+//          tempTables += s"UNNEST($col) AS $colAlias"
+//          where += (("", s"$col <> '{}'"))
           replaceCast(res.array2set)
 
         case "opt" =>
+//          select += s"COALESCE(ARRAY_AGG($col) FILTER (WHERE $col IS NOT NULL), '{}')"
           select += s"COALESCE(ARRAY_AGG($col) FILTER (WHERE $col IS NOT NULL), '{}')"
           replaceCast(res.nestedArray2optCoalescedSet)
 
@@ -426,5 +461,4 @@ trait ResolveExprSet_postgres
       matchArray((set2sqlArray(set), set.size), col)
     ).mkString("(\n    ", " OR\n    ", "\n  )")
   }
-
 }

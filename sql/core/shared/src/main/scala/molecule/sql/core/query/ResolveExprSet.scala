@@ -450,7 +450,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
         groupByCols -= col
         aggregate = true
         replaceCast(
-          (row: Row, paramIndex: Int) => {
+          (row: RS, paramIndex: Int) => {
             val outerArrayResultSet = row.getArray(paramIndex).getResultSet
             var count               = 0
             while (outerArrayResultSet.next()) {
@@ -467,7 +467,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
         groupByCols -= col
         aggregate = true
         replaceCast(
-          (row: Row, paramIndex: Int) => {
+          (row: RS, paramIndex: Int) => {
             val outerArrayResultSet = row.getArray(paramIndex).getResultSet
             var set                 = Set.empty[Any]
             while (outerArrayResultSet.next()) {
@@ -492,7 +492,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
         groupByCols -= col
         aggregate = true
         replaceCast(
-          (row: Row, paramIndex: Int) => {
+          (row: RS, paramIndex: Int) => {
             val outerArrayResultSet = row.getArray(paramIndex).getResultSet
             val list                = ListBuffer.empty[Double]
             while (outerArrayResultSet.next()) {
@@ -508,7 +508,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
         groupByCols -= col
         aggregate = true
         replaceCast(
-          (row: Row, paramIndex: Int) => {
+          (row: RS, paramIndex: Int) => {
             val outerArrayResultSet = row.getArray(paramIndex).getResultSet
             val list                = ListBuffer.empty[Double]
             while (outerArrayResultSet.next()) {
@@ -524,7 +524,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
         groupByCols -= col
         aggregate = true
         replaceCast(
-          (row: Row, paramIndex: Int) => {
+          (row: RS, paramIndex: Int) => {
             val outerArrayResultSet = row.getArray(paramIndex).getResultSet
             val list                = ListBuffer.empty[Double]
             while (outerArrayResultSet.next()) {
@@ -540,7 +540,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
         groupByCols -= col
         aggregate = true
         replaceCast(
-          (row: Row, paramIndex: Int) => {
+          (row: RS, paramIndex: Int) => {
             val outerArrayResultSet = row.getArray(paramIndex).getResultSet
             val list                = ListBuffer.empty[Double]
             while (outerArrayResultSet.next()) {
@@ -579,7 +579,6 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     col: String, filterAttr: String, filterCardOne: Boolean, tpe: String,
     res: ResSet[T], mandatory: Boolean
   ): Unit = {
-
     if (filterCardOne) {
       where += (("", s"ARRAY_CONTAINS($col, $filterAttr)"))
     } else {

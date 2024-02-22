@@ -13,13 +13,11 @@ import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
 trait SqlQueryBase extends Model2QueryBase with BaseHelpers with JavaConversions {
 
-  // This type represents both all rows and the individual row where the
-  // internal cursor is positioned
-  type Row = ResultSetInterface
+  type RS = ResultSetInterface
   type ParamIndex = Int
   type NestedTpls = List[Any]
 
-  def getRowCount(resultSet: Row): Int = {
+  def getRowCount(resultSet: RS): Int = {
     resultSet.last()
     val size = resultSet.getRow
     resultSet.beforeFirst()
@@ -28,6 +26,12 @@ trait SqlQueryBase extends Model2QueryBase with BaseHelpers with JavaConversions
 
   // Lookup original type of aggregate attributes
   final protected var attrMap = Map.empty[String, (Card, String, Seq[String])]
+
+  private var index = 0
+  def getIndex = {
+    index += 1
+    index
+  }
 
   // Main query
   final protected val select      = new ListBuffer[String]
@@ -46,7 +50,7 @@ trait SqlQueryBase extends Model2QueryBase with BaseHelpers with JavaConversions
   final protected var hardLimit   = 0
 
   // Input args and cast lambdas
-  final           var castss      = List(List.empty[(Row, Int) => Any])
+  final           var castss      = List(List.empty[(RS, Int) => Any])
   final           var aritiess    = List(List.empty[List[Int]])
   final           var isNestedMan = false
   final           var isNestedOpt = false
@@ -92,7 +96,7 @@ trait SqlQueryBase extends Model2QueryBase with BaseHelpers with JavaConversions
     path = path.dropRight(2)
   }
 
-  final protected def addCast(cast: (Row, Int) => Any): Unit = {
+  final protected def addCast(cast: (RS, Int) => Any): Unit = {
     castss = castss.init :+ (castss.last :+ cast)
   }
 
@@ -100,7 +104,7 @@ trait SqlQueryBase extends Model2QueryBase with BaseHelpers with JavaConversions
     castss = castss.init :+ castss.last.init
   }
 
-  final protected def replaceCast(cast: (Row, Int) => Any): Unit = {
+  final protected def replaceCast(cast: (RS, Int) => Any): Unit = {
     removeLastCast()
     addCast(cast)
   }

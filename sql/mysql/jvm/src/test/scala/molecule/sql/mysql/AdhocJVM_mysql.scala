@@ -18,43 +18,36 @@ object AdhocJVM_mysql extends TestSuite_mysql {
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+      val a = (1, Set(0, 1, 2), Set(1, 2, 3))
+      val b = (2, Set(2, 3), Set(2, 3))
+      val c = (3, Set(4), Set(3))
       for {
-        _ <- Ns.i.int.insert(List(
-          (1, int1),
-          (1, int2),
-          (2, int2),
-          (2, int3),
-          (2, int4),
-        )).transact
-
-        _ <- Ns.int(avg).query.i.get.map(
-          _.head ==~ (int1 + int2 + int2 + int3 + int4).toDouble / 5.0
-        )
-
-        _ <- Ns.i.int(avg).query.get.map(_.map {
-          case (1, avg) => avg ==~ (int1 + int2).toDouble / 2.0
-          case (2, avg) => avg ==~ (int2 + int3 + int4).toDouble / 3.0
-        })
-
-        _ <- Ns.s.i.ii.ints.insert(List(
-          ("a", 1, Set(1, 2, 3), Set(1, 2, 3)),
-          ("b", 1, Set(3, 4, 5), Set(3, 4, 5)),
-          ("b", 2, Set(2, 3, 4), Set(2, 3, 4)),
-        )).transact
 
 
+        _ <- Ns.i.ii.ints.insert(a, b, c).transact
+
+//        _ <- rawQuery(
+//          """SELECT DISTINCT
+//            |  Ns.i,
+//            |  Ns.ii,
+//            |  JSON_ARRAYAGG(t_3.vs)
+//            |FROM Ns,
+//            |  JSON_TABLE(
+//            |    IF(Ns.ints IS NULL, '[null]', Ns.ints),
+//            |    '$[*]' COLUMNS (vs INT PATH '$')
+//            |  ) t_3
+//            |WHERE
+//            |  Ns.ii   = Ns.ints AND
+//            |  Ns.i    IS NOT NULL AND
+//            |  Ns.ii   IS NOT NULL AND
+//            |  Ns.ints IS NOT NULL
+//            |GROUP BY Ns.i, Ns.ii
+//            |HAVING COUNT(*) > 0;
+//            |""".stripMargin, true)
 
 
-
-        //        _ <- Ns.ints.insert(Set(1, 2)).transact
-        //        _ <- Ns.ints.query.get.map(_ ==> List(Set(1, 2)))
-
-
-        //        _ <- rawQuery(
-        //          """SELECT JSON_ARRAYAGG(t1.v)
-        //            |FROM Ns, JSON_TABLE(Ns.ints, '$[*]' COLUMNS (v int PATH '$')) t1
-        //            |WHERE t1.v NOT IN(6)
-        //            |""".stripMargin, true)
+//        _ <- Ns.i.ii(Ns.ints).query.i.get.map(_ ==> List(b))
+        _ <- Ns.i.ii.has(Ns.ints).query.get.map(_ ==> List(b)) // Ns.ii and Ref.ints
 
       } yield ()
     }
@@ -62,66 +55,51 @@ object AdhocJVM_mysql extends TestSuite_mysql {
 
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
-      val all  = 1 + 2 + 2 + 3 + 3 + 4 + 3 + 4
-      val all2 = 2 + 3 + 3 + 4 + 3 + 4
+      val a = (1, Set(1, 2), Set(1, 2, 3), 3)
+      val b = (2, Set(2, 3), Set(2, 3), 3)
+      val c = (2, Set(4), Set(4), 4)
+
+      val d = (2, Set(4), Set(3), 4)
 
       for {
-        //        id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
-        //        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
+        List(_, a2, a3) <- A.i.ii.B.ii.i.insert(a, b, c).transact.map(_.ids)
 
 
-        _ <- A.i.B.i._A.C.ii.insert(List(
-          (1, 1, Set(1, 2)),
-          (2, 2, Set(2)),
-          (2, 2, Set(3, 4)),
-          (2, 2, Set(3, 4)),
-        )).transact
-
-        all = Set(1, 2, 3, 4)
-
-//        _ <- rawQuery(
-//          """SELECT DISTINCT
-//            |  B.i,
-//            |  JSON_ARRAYAGG(t_2.vs)
-//            |FROM A
-//            |  INNER JOIN B ON A.b = B.id
-//            |  INNER JOIN C ON A.c = C.id,
-//            |  JSON_TABLE(C.ii, '$[*]' COLUMNS (vs INT PATH '$')) t_2
-//            |WHERE
-//            |  B.i  IS NOT NULL AND
-//            |  C.ii IS NOT NULL;
-//            |""".stripMargin, true)
-
-        /*
-SELECT DISTINCT
-  B.i,
-  JSON_ARRAYAGG(t_2.vs)
-FROM A
-  INNER JOIN B ON A.b = B.id
-  INNER JOIN C ON A.c = C.id,
-  JSON_TABLE(C.ii, '$[*]' COLUMNS (vs INT PATH '$')) t_2
-WHERE
-  B.i  IS NOT NULL AND
-  C.ii IS NOT NULL;
-         */
+        //        _ <- rawQuery(
+        //          """SELECT DISTINCT
+        //            |  A.id,
+        //            |  A.i,
+        //            |  JSON_ARRAYAGG(t_2.vs)
+        //            |FROM A
+        //            |  LEFT JOIN A_bb_B ON A.id        = A_bb_B.A_id
+        //            |  LEFT JOIN B      ON A_bb_B.B_id = B.id,
+        //            |  JSON_TABLE(
+        //            |    IF(B.ii is null, '[null]', B.ii),
+        //            |    '$[*]' COLUMNS (vs INT PATH '$')
+        //            |  ) t_2
+        //            |WHERE
+        //            |  A.i IS NOT NULL
+        //            |GROUP BY A.id, A.i
+        //            |/*HAVING COUNT(*) > 0;*/
+        //            |""".stripMargin, true)
 
 
-        _ <- A.B.i._A.C.ii(sample).query.i.get.map {
-          _.map {
-            case (_, set) => all.contains(set.head) ==> true
-          }
-        }
+        _ <- A.i.ii_(B.ii_).B.ii.query.get.map(_ ==> List(
+          (2, Set(2, 3, 4)) // Set(2, 3) and Set(4) are coalesced to one Set
+        ))
+        _ <- A.i.ii_.B.ii(A.ii_).query.get.map(_ ==> List(
+          (2, Set(2, 3, 4))
+        ))
 
-        _ <- A.B.i._A.C.ii(sample(1)).query.get.map {
-          _.map {
-            case (_, set) => all.intersect(set).nonEmpty ==> true
-          }
-        }
-        _ <- A.B.i._A.C.ii(sample(2)).query.get.map {
-          _.map {
-            case (_, set) => all.intersect(set).nonEmpty ==> true
-          }
-        }
+        // To get un-coalesced Sets, separate by ids
+        _ <- A.id.a1.i.ii_(B.ii_).B.ii.query.get.map(_ ==> List(
+          (a2, 2, Set(2, 3)),
+          (a3, 2, Set(4))
+        ))
+        _ <- A.id.a1.i.ii_.B.ii(A.ii_).query.get.map(_ ==> List(
+          (a2, 2, Set(2, 3)),
+          (a3, 2, Set(4))
+        ))
 
       } yield ()
     }

@@ -46,13 +46,13 @@ trait InsertSemantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             (2, Some(Set(4, 5))),
           ).transact.map(_.ids)
 
-          _ <- A.i.a1.ii_?.query.i.get.map(_ ==> List( // (since we can't sort by Sets)
+          _ <- A.i.a1.ii_?.query.get.map(_ ==> List( // (since we can't sort by Sets)
             // (1, None), // coalesced with Set(2) and Set(3)
             (1, Some(Set(2, 3))), // coalesced Set(2) and Set(3)
             (2, Some(Set(4, 5))),
           ))
 
-          _ <- A.i.a1.ii.query.i.get.map(_ ==> List( // (since we can't sort by Sets)
+          _ <- A.i.a1.ii.query.get.map(_ ==> List( // (since we can't sort by Sets)
             (1, Set(2, 3)),
             (2, Set(4, 5)),
           ))
