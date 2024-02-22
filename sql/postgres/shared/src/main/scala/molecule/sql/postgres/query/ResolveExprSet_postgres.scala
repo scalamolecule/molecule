@@ -433,15 +433,11 @@ trait ResolveExprSet_postgres
       mode match {
         case "man" =>
           select += s"ARRAY_AGG(DISTINCT $colAlias)"
-//          val tpe = dbType(col)
           val tpe = res.tpeDb
           tempTables += s"UNNEST(CASE WHEN $col IS NULL THEN array[null]::$tpe[] ELSE $col END) AS $colAlias"
-//          tempTables += s"UNNEST($col) AS $colAlias"
-//          where += (("", s"$col <> '{}'"))
           replaceCast(res.array2set)
 
         case "opt" =>
-//          select += s"COALESCE(ARRAY_AGG($col) FILTER (WHERE $col IS NOT NULL), '{}')"
           select += s"COALESCE(ARRAY_AGG($col) FILTER (WHERE $col IS NOT NULL), '{}')"
           replaceCast(res.nestedArray2optCoalescedSet)
 

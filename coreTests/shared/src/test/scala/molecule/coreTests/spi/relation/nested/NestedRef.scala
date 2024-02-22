@@ -23,32 +23,32 @@ trait NestedRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, List((3, 4), (5, 6))),
         ).transact
 
-        _ <- A.i.a1.Bb.*?(B.i.C.i).query.get.map(_ ==> List(
+        _ <- A.i.a1.Bb.*?(B.i.a1.C.i).query.get.map(_ ==> List(
           (0, Nil),
           (1, List((1, 2))),
           (2, List((3, 4), (5, 6))),
         ))
-        _ <- A.i.a1.Bb.*(B.i.C.i).query.get.map(_ ==> List(
+        _ <- A.i.a1.Bb.*(B.i.a1.C.i).query.get.map(_ ==> List(
           (1, List((1, 2))),
           (2, List((3, 4), (5, 6))),
         ))
 
-        _ <- A.i.a1.Bb.*?(B.C.i).query.get.map(_ ==> List(
+        _ <- A.i.a1.Bb.*?(B.C.i.a1).query.get.map(_ ==> List(
           (0, Nil),
           (1, List(2)),
           (2, List(4, 6)),
         ))
-        _ <- A.i.a1.Bb.*(B.C.i).query.get.map(_ ==> List(
+        _ <- A.i.a1.Bb.*(B.C.i.a1).query.get.map(_ ==> List(
           (1, List(2)),
           (2, List(4, 6)),
         ))
 
-        _ <- A.Bb.*?(B.C.i).query.get.map(_ ==> List(
+        _ <- A.Bb.*?(B.C.i.a1).query.get.map(_ ==> List(
           // List(), // empty list is not returned when no attributes are present before nesting
           List(2),
           List(4, 6),
         ))
-        _ <- A.Bb.*(B.C.i).query.get.map(_ ==> List(
+        _ <- A.Bb.*(B.C.i.a1).query.get.map(_ ==> List(
           List(2),
           List(4, 6),
         ))
@@ -70,7 +70,7 @@ trait NestedRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           )),
         ).transact
 
-        _ <- A.i.Bb.*?(B.i.C.i.Dd.*?(D.i.E.i)).query.get.map(_ ==> List(
+        _ <- A.i.Bb.*?(B.i.a1.C.i.Dd.*?(D.i.a1.E.i)).query.get.map(_ ==> List(
           (0, Nil),
           (1, List(
             (1, 1, Nil),
@@ -82,7 +82,7 @@ trait NestedRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           )),
         ))
 
-        _ <- A.i.Bb.*(B.i.C.i.Dd.*(D.i.a1.E.i)).query.get.map(_ ==> List(
+        _ <- A.i.Bb.*(B.i.a1.C.i.Dd.*(D.i.a1.E.i)).query.get.map(_ ==> List(
           (2, List(
             (2, 2, List((1, 2))),
             (3, 3, List((1, 2), (3, 4))),
@@ -101,13 +101,13 @@ trait NestedRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, 2, List(1, 2)),
         ).transact
 
-        _ <- A.i.B.i.Cc.*?(C.i).query.get.map(_ ==> List(
+        _ <- A.i.B.i.Cc.*?(C.i.a1).query.get.map(_ ==> List(
           (0, 0, Nil),
           (1, 1, List(1)),
           (2, 2, List(1, 2)),
         ))
 
-        _ <- A.i.B.i.Cc.*(C.i).query.get.map(_ ==> List(
+        _ <- A.i.B.i.Cc.*(C.i.a1).query.get.map(_ ==> List(
           (1, 1, List(1)),
           (2, 2, List(1, 2)),
         ))

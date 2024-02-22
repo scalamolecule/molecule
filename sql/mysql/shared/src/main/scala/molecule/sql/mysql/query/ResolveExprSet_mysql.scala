@@ -382,8 +382,8 @@ trait ResolveExprSet_mysql
       case "countDistinct" =>
         noBooleanSetCounts(n)
         // Count of unique values (Set semantics)
-        //        selectWithOrder(col, dbType(col), "COUNT", "DISTINCT ")
-        selectWithOrder(col, tpeDb, "COUNT", "DISTINCT ")
+                selectWithOrder(col, dbType(col), "COUNT", "DISTINCT ")
+//        selectWithOrder(col, tpeDb, "COUNT", "DISTINCT ")
         groupByCols -= col
         aggregate = true
         replaceCast(toInt)
@@ -573,6 +573,31 @@ trait ResolveExprSet_mysql
            |    '$$[*]' COLUMNS (vs $tpeDb PATH '$$')
            |  ) t_$i""".stripMargin
     }
+  }
+
+  private def dbType(col: String): String = attrMap(col)._2 match {
+    case "String"         => "LONGTEXT"
+    case "Int"            => "INT"
+    case "Long"           => "BIGINT"
+    case "Float"          => "REAL"
+    case "Double"         => "DOUBLE"
+    case "Boolean"        => "TINYINT(1)"
+    case "BigInt"         => "DECIMAL(65, 0)"
+    case "BigDecimal"     => "DECIMAL(65, 30)"
+    case "Date"           => "BIGINT"
+    case "Duration"       => "TINYTEXT"
+    case "Instant"        => "TINYTEXT"
+    case "LocalDate"      => "TINYTEXT"
+    case "LocalTime"      => "TINYTEXT"
+    case "LocalDateTime"  => "TINYTEXT"
+    case "OffsetTime"     => "TINYTEXT"
+    case "OffsetDateTime" => "TINYTEXT"
+    case "ZonedDateTime"  => "TINYTEXT"
+    case "UUID"           => "TINYTEXT"
+    case "URI"            => "TEXT"
+    case "Byte"           => "TINYINT"
+    case "Short"          => "SMALLINT"
+    case "Char"           => "CHAR"
   }
 
   private def matchArray[T](col: String, set: Set[T], one2json: T => String): String = {
