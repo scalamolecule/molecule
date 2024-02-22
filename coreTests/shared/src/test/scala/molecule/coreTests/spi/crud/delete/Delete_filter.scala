@@ -51,14 +51,14 @@ trait Delete_filter extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         for {
           _ <- Ns.int.insert(int1, int2, int3).transact
           _ <- Ns.int_(int0).delete.transact
-          _ <- Ns.int.query.get.map(_ ==> List(int1, int2, int3))
+          _ <- Ns.int.a1.query.get.map(_ ==> List(int1, int2, int3))
         } yield ()
       }
       "equal 2" - types { implicit conn =>
         for {
           _ <- Ns.int.insert(int1, int2, int3).transact
           _ <- Ns.int_(int2).delete.transact
-          _ <- Ns.int.query.get.map(_ ==> List(int1, int3))
+          _ <- Ns.int.a1.query.get.map(_ ==> List(int1, int3))
         } yield ()
       }
       "equal 1 2" - types { implicit conn =>
@@ -88,7 +88,7 @@ trait Delete_filter extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         for {
           _ <- Ns.int.insert(int1, int2, int3).transact
           _ <- Ns.int_.not(int1, int2).delete.transact
-          _ <- Ns.int.query.get.map(_ ==> List(int1, int2))
+          _ <- Ns.int.a1.query.get.map(_ ==> List(int1, int2))
         } yield ()
       }
 
@@ -97,7 +97,7 @@ trait Delete_filter extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         for {
           _ <- Ns.int.insert(int1, int2, int3).transact
           _ <- Ns.int_.<(int2).delete.transact
-          _ <- Ns.int.query.get.map(_ ==> List(int2, int3))
+          _ <- Ns.int.a1.query.get.map(_ ==> List(int2, int3))
         } yield ()
       }
 
@@ -115,7 +115,7 @@ trait Delete_filter extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         for {
           _ <- Ns.int.insert(int1, int2, int3).transact
           _ <- Ns.int_.>(int2).delete.transact
-          _ <- Ns.int.query.get.map(_ ==> List(int1, int2))
+          _ <- Ns.int.a1.query.get.map(_ ==> List(int1, int2))
         } yield ()
       }
 
@@ -160,7 +160,7 @@ trait Delete_filter extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- A.i.B.i.insert((2, 20), (3, 30)).transact
 
         _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
-        _ <- A.i.B.i.query.get.map(_ ==> List((2, 20), (3, 30)))
+        _ <- A.i.a1.B.i.query.get.map(_ ==> List((2, 20), (3, 30)))
 
         // Nothing deleted since entity 1 doesn't have a ref
         _ <- A.i_(1).B.i_.delete.transact
@@ -169,7 +169,7 @@ trait Delete_filter extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Second entity has a ref and will be deleted
         _ <- A.i_(2).B.i_.delete.transact
         _ <- A.i.a1.query.get.map(_ ==> List(1, 3))
-        _ <- A.i.B.i.query.get.map(_ ==> List((3, 30)))
+        _ <- A.i.a1.B.i.query.get.map(_ ==> List((3, 30)))
 
         // Note that B.int entity is a separate entity and is not deleted.
         // Only the entity of the initial namespace is deleted
@@ -194,7 +194,7 @@ trait Delete_filter extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- A.i.OwnB.i.insert((2, 20), (3, 30)).transact
 
         _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
-        _ <- A.i.OwnB.i.query.get.map(_ ==> List((2, 20), (3, 30)))
+        _ <- A.i.a1.OwnB.i.query.get.map(_ ==> List((2, 20), (3, 30)))
 
         // Nothing deleted since entity 1 doesn't have a ref
         _ <- A.i_(1).OwnB.i_.delete.transact

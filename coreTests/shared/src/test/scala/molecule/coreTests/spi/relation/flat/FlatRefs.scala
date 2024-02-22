@@ -31,8 +31,8 @@ trait FlatRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         ).i.transact
 
         // A.i was inserted
-        _ <- A.i.query.get.map(_ ==> List(1, 3))
-        _ <- B.i.query.get.map(_ ==> List(2, 4))
+        _ <- A.i.a1.query.get.map(_ ==> List(1, 3))
+        _ <- B.i.a1.query.get.map(_ ==> List(2, 4))
 
         _ <- A.i.a1.B.i.ii_?.query.i.get.map(_ ==> List(
           (1, 2, None), // Relationship to B exists since B.i has value 2
@@ -58,7 +58,7 @@ trait FlatRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         ).i.transact
 
         // A.i was inserted
-        _ <- A.i.query.get.map(_ ==> List(1, 3))
+        _ <- A.i.a1.query.get.map(_ ==> List(1, 3))
 
         _ <- A.i.a1.B.ii_?.query.i.get.map(_ ==> List(
           (1, None),

@@ -29,6 +29,8 @@ trait ResolveExprOne_postgres extends ResolveExprOne with LambdasOne_postgres { 
     lazy val n = optN.getOrElse(0)
     // Replace find/casting with aggregate function/cast
     select -= col
+    lazy val colAlias           = col.replace('.', '_')
+
     fn match {
       case "distinct" =>
         select += s"ARRAY_AGG(DISTINCT $col)"
@@ -113,7 +115,7 @@ trait ResolveExprOne_postgres extends ResolveExprOne with LambdasOne_postgres { 
       case "median" =>
         groupByCols -= col
         aggregate = true
-        select += s"percentile_cont(0.5) WITHIN GROUP (ORDER BY $col)"
+        selectWithOrder(col, "percentile_cont", "0.5) WITHIN GROUP (ORDER BY ")
 
       case "avg" =>
         groupByCols -= col

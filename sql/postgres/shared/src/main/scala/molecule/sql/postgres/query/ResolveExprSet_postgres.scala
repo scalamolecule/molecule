@@ -98,6 +98,24 @@ trait ResolveExprSet_postgres
   }
 
 
+  override protected def setOptNeq[T](
+    col: String, optSets: Option[Seq[Set[T]]], res: ResSet[T]
+  ): Unit = {
+    optSets match {
+      case None | Some(Nil) =>
+        setOptAttr(col, res)
+      //        replaceCast(res.array2optSet)
+      case Some(sets) =>
+        setNeq(col, sets, res, true)
+        //        replaceCast(res.nestedArray2optCoalescedSet)
+        replaceCast(res.array2optSet)
+    }
+
+    // Only asserted values
+    notNull += col
+  }
+
+
   // has -----------------------------------------------------------------------
 
   override protected def has[T: ClassTag](
@@ -107,19 +125,45 @@ trait ResolveExprSet_postgres
     def containsSet(set: Set[T]): String = set.map(contains).mkString(" AND ")
     coalesce(col, res, if (mandatory) "man" else "tac")
     sets.length match {
-      case 0 => where += (("FALSE", ""))
+      case 0 =>
+        where += (("FALSE", ""))
       case 1 =>
         val set = sets.head
         set.size match {
-          case 0 => where += (("FALSE", ""))
-          case 1 => where += (("", contains(set.head)))
-          case _ => where += (("", containsSet(set)))
+          case 0 =>
+            where += (("FALSE", ""))
+          case 1 =>
+            where += (("", contains(set.head)))
+          case _ =>
+            where += (("", containsSet(set)))
         }
+
       case _ =>
         val expr = sets
           .filterNot(_.isEmpty)
           .map(containsSet).mkString("(\n    ", " OR\n    ", "\n  )")
         where += (("", expr))
+    }
+
+  }
+
+  override protected def optHas[T: ClassTag](
+    col: String,
+    optSets: Option[Seq[Set[T]]],
+    res: ResSet[T],
+    one2sql: T => String,
+  ): Unit = {
+    optSets.fold[Unit] {
+      where += ((col, s"IS NULL"))
+    } { sets =>
+      val setsWithValues = sets.filterNot(_.isEmpty)
+      if (setsWithValues.nonEmpty) {
+        has(col, sets, res, one2sql, true)
+        //        replaceCast(res.nestedArray2optCoalescedSet)
+        replaceCast(res.array2optSet)
+      } else {
+        where += (("FALSE", ""))
+      }
     }
   }
 
@@ -161,6 +205,8 @@ trait ResolveExprSet_postgres
     } { sets =>
       hasNo(col, sets, res, one2sql, true)
       coalesce(col, res, "opt")
+      replaceCast(res.array2optSet)
+
     }
     // Only asserted values
     notNull += col
@@ -389,11 +435,15 @@ trait ResolveExprSet_postgres
       where += (("", s"$col @> ARRAY(SELECT $filterAttr)"))
     } else {
       if (mandatory) {
+        val colAlias = col.replace(".", "_")
         select -= col
-        select += s"ARRAY_AGG($col)"
+        select += s"ARRAY_AGG($colAlias)"
+        tempTables += s"UNNEST($col) AS $colAlias"
+        groupByCols -= col
         having += "COUNT(*) > 0"
         aggregate = true
-        replaceCast(res.nestedArray2coalescedSet)
+//        replaceCast(res.nestedArray2coalescedSet)
+        replaceCast(res.array2set)
       }
       where += (("", s"$col @> $filterAttr"))
     }
@@ -405,11 +455,15 @@ trait ResolveExprSet_postgres
   ): Unit = {
     if (cardOne) {
       if (mandatory) {
+        val colAlias = col.replace(".", "_")
         select -= col
-        select += s"ARRAY_AGG($col)"
+        select += s"ARRAY_AGG($colAlias)"
+        tempTables += s"UNNEST($col) AS $colAlias"
+        groupByCols -= col
         having += "COUNT(*) > 0"
         aggregate = true
-        replaceCast(res.nestedArray2coalescedSet)
+//        replaceCast(res.nestedArray2coalescedSet)
+        replaceCast(res.array2set)
       }
       where += (("", s"ARRAY(SELECT UNNEST($col) INTERSECT SELECT $filterAttr) = '{}'"))
     } else {
@@ -423,28 +477,29 @@ trait ResolveExprSet_postgres
     val colAlias = col.replace(".", "_")
     select -= col
     groupByCols -= col
-    if (res.tpe == "Boolean" && !expectedFilterAttrs.contains(col) && !isNestedMan && !isNestedOpt) {
-      // If we don't apply this hack, Boolean sets throw
-      // ERROR: cannot accumulate arrays of different dimensionality
-      // https://stackoverflow.com/questions/46849237/postgresql-array-agginteger/46849678#46849678
-      select += s"ARRAY_AGG(DISTINCT $colAlias)"
-      tempTables += s"UNNEST($col) AS $colAlias"
-    } else {
-      mode match {
-        case "man" =>
-          select += s"ARRAY_AGG(DISTINCT $colAlias)"
-          val tpe = res.tpeDb
-          tempTables += s"UNNEST(CASE WHEN $col IS NULL THEN array[null]::$tpe[] ELSE $col END) AS $colAlias"
-          replaceCast(res.array2set)
+    //    if (res.tpe == "Boolean" && !expectedFilterAttrs.contains(col) && !isNestedMan && !isNestedOpt) {
+    //      // If we don't apply this hack, Boolean sets throw
+    //      // ERROR: cannot accumulate arrays of different dimensionality
+    //      // https://stackoverflow.com/questions/46849237/postgresql-array-agginteger/46849678#46849678
+    //      select += s"ARRAY_AGG(DISTINCT $colAlias)"
+    //      tempTables += s"UNNEST($col) AS $colAlias"
+    //    } else {
+    mode match {
+      case "man" =>
+        select += s"ARRAY_AGG(DISTINCT $colAlias)"
+        val tpe = res.tpeDb
+        tempTables += s"UNNEST(CASE WHEN $col IS NULL THEN array[null]::$tpe[] ELSE $col END) AS $colAlias"
+        replaceCast(res.array2set)
 
-        case "opt" =>
-          select += s"COALESCE(ARRAY_AGG($col) FILTER (WHERE $col IS NOT NULL), '{}')"
-          replaceCast(res.nestedArray2optCoalescedSet)
+      case "opt" =>
+        //          select += s"COALESCE(ARRAY_AGG($col) FILTER (WHERE $col IS NOT NULL), '{}')"
+        select += s"COALESCE(ARRAY_AGG($col) FILTER (WHERE $col <> '{}'), '{}')"
+        replaceCast(res.nestedArray2optCoalescedSet)
 
-        case "tac" =>
-          where += (("", s"$col <> '{}'"))
-      }
+      case "tac" =>
+        where += (("", s"$col <> '{}'"))
     }
+    //    }
     aggregate = true
   }
 
