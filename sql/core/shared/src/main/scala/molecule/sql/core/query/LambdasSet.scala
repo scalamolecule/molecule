@@ -317,13 +317,7 @@ trait LambdasSet extends LambdasBase with JavaConversions { self: SqlQueryBase =
     if (row.wasNull()) {
       Set.empty[T]
     } else {
-      //      val outerArrayResultSet = array.getResultSet
       var set = Set.empty[T]
-      //      while (outerArrayResultSet.next()) {
-      //        outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]].foreach { value =>
-      //          set += j2s(value)
-      //        }
-      //      }
       array.getArray.asInstanceOf[Array[_]].foreach { value =>
         set += j2s(value)
       }

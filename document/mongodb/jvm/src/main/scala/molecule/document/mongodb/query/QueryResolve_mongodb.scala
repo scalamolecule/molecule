@@ -98,7 +98,7 @@ abstract class QueryResolve_mongodb[Tpl](
   protected def addFilterAttr(elements: List[Element], filterAttr: Attr): List[Element] = {
     var found     = false
     val elements1 = elements.flatMap {
-      case a: Attr if a.cleanName == filterAttr.cleanName =>
+      case a: Attr if a.name == filterAttr.name =>
         found = true
         // Add filter attribute after matching attribute so that the main
         // attribute is not suffixed in expressions, projection etc.

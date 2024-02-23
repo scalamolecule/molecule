@@ -22,7 +22,7 @@ trait ResolveExprSetRefAttr_mariadb
     )
 
     attr.filterAttr.fold {
-      val pathAttr = path :+ attr.cleanAttr
+      val pathAttr = path :+ attr.attr
 //      if (filterAttrVars.contains(attr.name) && attr.op != V) {
       if (filterAttrVars.contains(pathAttr) && attr.op != V) {
         // Runtime check needed since we can't type infer it

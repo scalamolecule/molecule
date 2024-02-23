@@ -39,20 +39,12 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     prevRefNss = Set(from)
     path = List(from)
     preExts += path -> None
-
     val (elements2, _, _) = validateQueryModel(elements1, None, Some(handleRef), Some(handleBackRef))
-
-    //    println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-    //    preExts.foreach(println)
-
     path = List(from)
     exts ++= preExts
 
     // Recursively resolve molecule elements
     resolve(elements2)
-
-    //    println("================================================================================")
-    //    exts.foreach(println)
   }
 
 

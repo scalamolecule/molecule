@@ -132,7 +132,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     attr.filterAttr.fold {
       if (hasFilterAttr) {
         // Add filter if this attribute is a filter attribute pointed to
-        postFilters.get(path :+ attr.cleanAttr).foreach(_(b))
+        postFilters.get(path :+ attr.attr).foreach(_(b))
       }
       expr(uniqueField, field, attr.op, args, resSet, mandatory)
     } { filterAttr =>
@@ -507,7 +507,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     field: String, filterAttr0: (Int, List[String], Attr), mandatory: Boolean
   ): Unit = {
     val (dir, filterPath, filterAttr1) = filterAttr0
-    val filterAttr                     = filterAttr1.cleanAttr
+    val filterAttr                     = filterAttr1.attr
     val args                           = new BsonArray()
     val cardOne                        = filterAttr1.isInstanceOf[AttrOne]
     dir match {
@@ -564,7 +564,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     field: String, filterAttr0: (Int, List[String], Attr), mandatory: Boolean
   ): Unit = {
     val (dir, filterPath, filterAttr1) = filterAttr0
-    val filterAttr                     = filterAttr1.cleanAttr
+    val filterAttr                     = filterAttr1.attr
     val fields                         = new BsonArray()
     val cardOne                        = filterAttr1.isInstanceOf[AttrOne]
     dir match {
@@ -635,7 +635,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
   ): Unit = {
     //        println(topBranch)
     val (dir, filterPath, filterAttr1) = filterAttr0
-    val filterAttr                     = filterAttr1.cleanAttr
+    val filterAttr                     = filterAttr1.attr
     val args                           = new BsonArray()
     dir match {
       case 0 => // Same namespace

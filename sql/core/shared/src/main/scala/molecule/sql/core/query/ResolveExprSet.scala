@@ -106,7 +106,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     }
     addCast(res.sql2set)
     attr.filterAttr.fold {
-      val pathAttr = path :+ attr.cleanAttr
+      val pathAttr = path :+ attr.attr
       if (filterAttrVars.contains(pathAttr) && attr.op != V) {
         // Runtime check needed since we can't type infer it
         throw ModelError(s"Cardinality-set filter attributes not allowed to " +
