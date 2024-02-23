@@ -1,7 +1,7 @@
 package molecule.boilerplate.util
 
-import scribe._
 import scribe.format._
+import scribe.{Level, Logging}
 
 trait MoleculeLogging extends Logging {
 

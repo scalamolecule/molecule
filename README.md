@@ -144,13 +144,13 @@ Add the following to your build files:
 `project/build.properties`:
 
 ```
-sbt.version = 1.9.6
+sbt.version = 1.9.8
 ```
 
 `project/plugins.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.6.0")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.7.0")
 ```
 
 `build.sbt`:
@@ -161,13 +161,14 @@ lazy val yourProject = project.in(file("app"))
   .settings(
     libraryDependencies ++= Seq(
       // One or more of:
-      "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.7.0",
-      "org.scalamolecule" %%% "molecule-sql-postgres" % "0.7.0",
-      "org.scalamolecule" %%% "molecule-sql-mysql" % "0.7.0",
-      "org.scalamolecule" %%% "molecule-sql-mariadb" % "0.7.0",
-      "org.scalamolecule" %%% "molecule-sql-h2" % "0.7.0",
+      "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.8.0",
+      "org.scalamolecule" %%% "molecule-document-mongodb" % "0.8.0",
+      "org.scalamolecule" %%% "molecule-sql-h2" % "0.8.0",
+      "org.scalamolecule" %%% "molecule-sql-mariadb" % "0.8.0",
+      "org.scalamolecule" %%% "molecule-sql-mysql" % "0.8.0",
+      "org.scalamolecule" %%% "molecule-sql-postgres" % "0.8.0",
     ),
-    moleculeSchemas := Seq("app") // paths to your data model definitions...
+    moleculeSchemas := Seq("app") // paths to your data model definitions
   )
 ```
 
@@ -182,10 +183,11 @@ in order to offer all functionality of Molecule.
 Run the same test suite on jvm targeting both Datomic and SQL databases:
 
     sbt datalogDatomicJVM/test
-    sbt sqlPostgresJVM/test
-    sbt sqlMysqlJVM/test
-    sbt sqlMariadbJVM/test
+    sbt documentMongodbJVM/test
     sbt sqlH2JVM/test
+    sbt sqlMariadbJVM/test
+    sbt sqlMysqlJVM/test
+    sbt sqlPostgresJVM/test
 
 ### Run js tests
 

@@ -113,7 +113,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
     find += s"(distinct $v)"
     addCast(res.j2s)
     attr.filterAttr.fold {
-      val pathAttr = varPath :+ attr.attr
+      val pathAttr = varPath :+ attr.cleanAttr
       if (filterAttrVars.contains(pathAttr) && attr.op != V) {
         // Runtime check needed since we can't type infer it
         throw ModelError(s"Cardinality-set filter attributes not allowed to " +

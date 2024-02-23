@@ -10,8 +10,8 @@ val allScala = Seq(scala212, scala213, scala3)
 
 val akkaVersion          = "2.8.3"
 val zioVersion           = "2.0.15"
-val testContainerVersion = "0.41.0"
-val logbackVersion       = "1.3.8"
+val testContainerVersion = "0.41.3"
+val logbackVersion       = "1.5.0"
 
 inThisBuild(
   List(
@@ -78,9 +78,9 @@ lazy val boilerplate = crossProject(JSPlatform, JVMPlatform)
   .settings(doPublish)
   .settings(
     libraryDependencies ++= Seq(
-      "com.lihaoyi" %%% "utest" % "0.8.1",
-      "com.outr" %%% "scribe" % "3.11.8", // Logging
-      "org.scalactic" %%% "scalactic" % "3.2.16", // Tolerant roundings with triple equal on js platform
+      "com.lihaoyi" %%% "utest" % "0.8.2",
+      "com.outr" %%% "scribe" % "3.13.0", // Logging
+      "org.scalactic" %%% "scalactic" % "3.2.18", // Tolerant roundings with triple equal on js platform
       "io.github.cquiroz" %%% "scala-java-time" % "2.5.0"
     ),
     testFrameworks += new TestFramework("utest.runner.Framework")
@@ -103,7 +103,7 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
   )
   .jsSettings(
     libraryDependencies ++= Seq(
-      "org.scala-js" %%% "scalajs-dom" % "2.6.0",
+      "org.scala-js" %%% "scalajs-dom" % "2.8.0",
       "org.scala-js" %%% "scala-js-macrotask-executor" % "1.1.1",
       "org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0" cross CrossVersion.for3Use2_13
     )
@@ -174,7 +174,7 @@ lazy val datalogCore = crossProject(JSPlatform, JVMPlatform)
     )
   )
   .jvmSettings(
-    libraryDependencies += "com.datomic" % "peer" % "1.0.6735"
+    libraryDependencies += "com.datomic" % "peer" % "1.0.7075"
   )
   .jsSettings(jsEnvironment)
 
@@ -272,8 +272,8 @@ lazy val documentMongodb = crossProject(JSPlatform, JVMPlatform)
       //      ("org.mongodb.scala" %% "mongo-scala-driver" % "4.11.0" % Test).cross(CrossVersion.for3Use2_13),
 
 
-      "org.testcontainers" % "mongodb" % "1.19.1",
-      "org.mongodb" % "mongodb-driver-sync" % "4.11.0",
+      "org.testcontainers" % "mongodb" % "1.19.6",
+      "org.mongodb" % "mongodb-driver-sync" % "4.11.1",
 
       "ch.qos.logback" % "logback-classic" % logbackVersion % Test
     ),
@@ -311,7 +311,7 @@ lazy val sqlH2 = crossProject(JSPlatform, JVMPlatform)
   .jsSettings(jsEnvironment)
   .jvmSettings(
     libraryDependencies ++= Seq(
-      "com.h2database" % "h2" % "2.2.220"
+      "com.h2database" % "h2" % "2.2.224"
     )
   )
 
@@ -332,7 +332,7 @@ lazy val sqlMariadb = crossProject(JSPlatform, JVMPlatform)
   .jvmSettings(
     libraryDependencies ++= Seq(
       "com.dimafeng" %% "testcontainers-scala-mariadb" % testContainerVersion,
-      "org.mariadb.jdbc" % "mariadb-java-client" % "3.2.0",
+      "org.mariadb.jdbc" % "mariadb-java-client" % "3.3.3",
       "ch.qos.logback" % "logback-classic" % logbackVersion % Test
     ),
     Test / fork := true
@@ -378,7 +378,7 @@ lazy val sqlPostgres = crossProject(JSPlatform, JVMPlatform)
   .jvmSettings(
     libraryDependencies ++= Seq(
       "com.dimafeng" %% "testcontainers-scala-postgresql" % testContainerVersion,
-      "org.postgresql" % "postgresql" % "42.6.0",
+      "org.postgresql" % "postgresql" % "42.7.2",
       "ch.qos.logback" % "logback-classic" % logbackVersion % Test
     ),
     Test / fork := true

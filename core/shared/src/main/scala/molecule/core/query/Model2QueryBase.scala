@@ -191,13 +191,13 @@ trait Model2QueryBase extends ModelUtils {
     }
 
     def checkAttr(a: Attr): Unit = {
-      val nsAttr = a.name
+      val nsAttr = a.cleanName
       nsAttrPaths(nsAttr) = nsAttrPaths.get(nsAttr).fold(List(path)) {
         case paths if !paths.contains(path) => paths :+ path
         case paths                          => paths
       }
 
-      qualifiedPath = path :+ a.attr
+      qualifiedPath = path :+ a.cleanAttr
       qualifiedPaths(qualifiedPath) = qualifiedPaths.get(qualifiedPath).fold(List(path)) {
         case paths if !paths.contains(path) => paths :+ path
         case paths                          => paths
@@ -207,11 +207,11 @@ trait Model2QueryBase extends ModelUtils {
 
       if (a.filterAttr.nonEmpty) {
         val (_, filterPath, fa) = a.filterAttr.get
-        val filterNsAttr        = fa.name
+        val filterNsAttr        = fa.cleanName
 
         if (fa.filterAttr.nonEmpty) {
           throw ModelError(s"Filter attributes inside filter attributes not allowed in ${a.ns}.${a.attr}")
-        } else if (filterPath :+ fa.attr == path :+ a.attr) {
+        } else if (filterPath :+ fa.cleanAttr == path :+ a.cleanAttr) {
           throw ModelError(s"Can't filter by the same attribute `${a.name}`")
         } else if (fa.isInstanceOf[Mandatory]) {
           throw ModelError(s"Filter attribute $filterNsAttr pointing to other namespace should be tacit.")
@@ -219,11 +219,11 @@ trait Model2QueryBase extends ModelUtils {
           throw ModelError("Filtering inside cross-namespace attribute filter not allowed.")
         } else {
           // Expect filter attribute in other namespace
-          expectedFilterAttrs += fa.name
+          expectedFilterAttrs += fa.cleanName
         }
 
         // Callback (if any) from implementation
-        val pathAttr = filterPath :+ fa.attr
+        val pathAttr = filterPath :+ fa.cleanAttr
         addFilterAttr.foreach(_(pathAttr, a))
 
         filterAttrVars.get(pathAttr).fold {
@@ -270,7 +270,7 @@ trait Model2QueryBase extends ModelUtils {
     }
     def prepareAttr(a: Attr): List[Attr] = {
       i += 1
-      val attrName = a.name
+      val attrName = a.cleanName
       if (prevWasFilterCallee && prevAttrName == attrName && qualifiedPath != path) {
         // Omit attribute that turned out not to he adjacent
         Nil
@@ -279,21 +279,21 @@ trait Model2QueryBase extends ModelUtils {
         a.filterAttr.fold {
           prevWasFilterCallee = false
           qualifiedPath = Nil
-          val nsAttr = path.takeRight(1) :+ a.attr
+          val nsAttr = path.takeRight(1) :+ a.cleanAttr
           if (a.isInstanceOf[AttrSetMan] && filterAttrVars.contains(nsAttr) && a.op != V) {
             throw ModelError(s"Cardinality-set filter attributes ($attrName) not allowed to do additional filtering.")
           }
           List(a)
         } { case (_, filterPath, filterAttr) =>
-          if (filterAttr.attr == "id") {
+          if (filterAttr.cleanAttr == "id") {
             throw ModelError(noIdFiltering)
           }
 
           prevWasFilterCallee = true
           qualifiedPath = filterPath
 
-          val filterPathAttr      = filterPath :+ filterAttr.attr
-          val filterAttrName      = filterAttr.name
+          val filterPathAttr      = filterPath :+ filterAttr.cleanAttr
+          val filterAttrName      = filterAttr.cleanName
           val qualifiedFilterPath = qualifiedPaths.get(filterPathAttr).fold {
             val nsPaths = nsAttrPaths.getOrElse(filterAttrName,
               throw ModelError(s"Please add missing filter attribute $filterAttrName")
@@ -312,7 +312,7 @@ trait Model2QueryBase extends ModelUtils {
                       even = !even
                     case _             => even = !even
                   }
-                  prefix + "." + filterAttr.attr
+                  prefix + "." + filterAttr.cleanAttr
                 }
                 throw ModelError(
                   s"Please qualify filter attribute $filterAttrName to an unambiguous path:\n  " +
@@ -332,7 +332,7 @@ trait Model2QueryBase extends ModelUtils {
             }
           }
 
-          val fullFilterAttrPath  = qualifiedFilterPath :+ filterAttr.attr
+          val fullFilterAttrPath  = qualifiedFilterPath :+ filterAttr.cleanAttr
           val dir                 = directions.indexOf(fullFilterAttrPath) match {
             case -1                                   =>
               throw ModelError(s"Unexpectedly couldn't find direction index for $fullFilterAttrPath")

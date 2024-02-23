@@ -99,7 +99,7 @@ class ResolveUpdate(
       case a if a.attr == "id" => throw ModelError(
         s"Generic id attribute not allowed in update molecule. Found:\n" + a)
 
-      case a if proxy.uniqueAttrs.contains(a.name) => handleUniqueFilterAttr(a)
+      case a if proxy.uniqueAttrs.contains(a.cleanName) => handleUniqueFilterAttr(a)
       case a                                            => handleFilterAttr(a)
     }
   }

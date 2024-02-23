@@ -149,7 +149,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
     attr.filterAttr.fold {
       if (hasFilterAttr) {
         // Add filter if this attribute is a filter attribute pointed to
-        postFilters.get(path :+ attr.attr).foreach(_(b))
+        postFilters.get(path :+ attr.cleanAttr).foreach(_(b))
       }
       expr(uniqueField, field, attr.op, args, res)
     } { filterAttr =>
@@ -458,7 +458,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
     field: String, op: String, filterAttr0: (Int, List[String], Attr)
   ): Unit = {
     val (dir, filterPath, filterAttr1) = filterAttr0
-    val filterAttr                     = filterAttr1.attr
+    val filterAttr                     = filterAttr1.cleanAttr
     dir match {
       case 0  =>
         val b1 = b

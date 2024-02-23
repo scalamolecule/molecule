@@ -70,7 +70,7 @@ trait NestedRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           )),
         ).transact
 
-        _ <- A.i.Bb.*?(B.i.a1.C.i.Dd.*?(D.i.a1.E.i)).query.get.map(_ ==> List(
+        _ <- A.i.a1.Bb.*?(B.i.a1.C.i.Dd.*?(D.i.a1.E.i)).query.get.map(_ ==> List(
           (0, Nil),
           (1, List(
             (1, 1, Nil),
@@ -101,13 +101,13 @@ trait NestedRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, 2, List(1, 2)),
         ).transact
 
-        _ <- A.i.B.i.Cc.*?(C.i.a1).query.get.map(_ ==> List(
+        _ <- A.i.a1.B.i.Cc.*?(C.i.a1).query.get.map(_ ==> List(
           (0, 0, Nil),
           (1, 1, List(1)),
           (2, 2, List(1, 2)),
         ))
 
-        _ <- A.i.B.i.Cc.*(C.i.a1).query.get.map(_ ==> List(
+        _ <- A.i.a1.B.i.Cc.*(C.i.a1).query.get.map(_ ==> List(
           (1, 1, List(1)),
           (2, 2, List(1, 2)),
         ))
@@ -117,7 +117,7 @@ trait NestedRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Nested ref with card-set attr" - refs { implicit conn =>
       for {
-        _ <- A.i.Bb.*(B.i.C.ii).insert(
+        _ <- A.i.a1.Bb.*(B.i.C.ii).insert(
           (0, Nil),
           (1, List(
             (1, Set.empty[Int])

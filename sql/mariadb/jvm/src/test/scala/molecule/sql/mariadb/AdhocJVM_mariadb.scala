@@ -19,62 +19,21 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
-      def q(attr: String): String =
-        s"""SELECT DISTINCT
-           |  JSON_ARRAYAGG(t_1.vs)
-           |FROM Ns,
-           |  JSON_TABLE(Ns.$attr, '$$[*]' COLUMNS (vs LONGTEXT PATH '$$')) t_1
-           |WHERE
-           |  Ns.$attr IS NOT NULL
-           |HAVING COUNT(*) > 0;
-           |""".stripMargin
+
 
       for {
-        _ <- Ns.strings(Set(string1)).save.transact
-        _ <- Ns.ints(Set(int1)).save.transact
-        _ <- Ns.longs(Set(long1)).save.transact
-        _ <- Ns.floats(Set(float1)).save.transact
-        _ <- Ns.doubles(Set(double1)).save.transact
-        _ <- Ns.booleans(Set(boolean1)).save.transact
-        _ <- Ns.bigInts(Set(bigInt1)).save.transact
-        _ <- Ns.bigDecimals(Set(bigDecimal1)).save.transact
-        _ <- Ns.dates(Set(date1)).save.transact
-        _ <- Ns.durations(Set(duration1)).save.transact
-        _ <- Ns.instants(Set(instant1)).save.transact
-        _ <- Ns.localDates(Set(localDate1)).save.transact
-        _ <- Ns.localTimes(Set(localTime1)).save.transact
-        _ <- Ns.localDateTimes(Set(localDateTime1)).save.transact
-        _ <- Ns.offsetTimes(Set(offsetTime1)).save.transact
-        _ <- Ns.offsetDateTimes(Set(offsetDateTime1)).save.transact
-        _ <- Ns.zonedDateTimes(Set(zonedDateTime1)).save.transact
-        _ <- Ns.uuids(Set(uuid1)).save.transact
-        _ <- Ns.uris(Set(uri1)).save.transact
-        _ <- Ns.bytes(Set(byte1)).save.transact
-        _ <- Ns.shorts(Set(short1)).save.transact
-        _ <- Ns.chars(Set(char1)).save.transact
 
-        _ <- rawQuery(q("strings")).map(_.head ==> List(Set(string1)))
-        _ <- rawQuery(q("ints")).map(_.head ==> List(Set(int1.toString)))
-        _ <- rawQuery(q("longs")).map(_.head ==> List(Set(long1.toString)))
-        _ <- rawQuery(q("floats")).map(_.head ==> List(Set(float1.toString)))
-        _ <- rawQuery(q("doubles")).map(_.head ==> List(Set(double1.toString)))
-        _ <- rawQuery(q("booleans")).map(_.head ==> List(Set("0")))
-        _ <- rawQuery(q("bigInts")).map(_.head ==> List(Set("1")))
-        _ <- rawQuery(q("bigDecimals")).map(_.head ==> List(Set("1.1")))
-        _ <- rawQuery(q("dates")).map(_.head ==> List(Set(date1.getTime.toString)))
-        _ <- rawQuery(q("durations")).map(_.head ==> List(Set(duration1.toString)))
-        _ <- rawQuery(q("instants")).map(_.head ==> List(Set(instant1.toString)))
-        _ <- rawQuery(q("localDates")).map(_.head ==> List(Set(localDate1.toString)))
-        _ <- rawQuery(q("localTimes")).map(_.head ==> List(Set(localTime1.toString)))
-        _ <- rawQuery(q("localDateTimes")).map(_.head ==> List(Set(localDateTime1.toString)))
-        _ <- rawQuery(q("offsetTimes")).map(_.head ==> List(Set(offsetTime1.toString)))
-        _ <- rawQuery(q("offsetDateTimes")).map(_.head ==> List(Set(offsetDateTime1.toString)))
-        _ <- rawQuery(q("zonedDateTimes")).map(_.head ==> List(Set(zonedDateTime1.toString)))
-        _ <- rawQuery(q("uuids")).map(_.head ==> List(Set(uuid1.toString)))
-        _ <- rawQuery(q("uris")).map(_.head ==> List(Set(uri1.toString)))
-        _ <- rawQuery(q("bytes")).map(_.head ==> List(Set(byte1.toString)))
-        _ <- rawQuery(q("shorts")).map(_.head ==> List(Set(short1.toString)))
-        _ <- rawQuery(q("chars")).map(_.head ==> List(Set(char1.toString)))
+//        _ <- Ref.i.int.insert(1, 2).i.transact
+//        _ <- Ref.i.int_.query.i.get.map(_ ==> List(1))
+//        _ <- Ref.i.int_.query.inspect
+
+//        _ <- Ns.int(Ref.int_).query.inspect
+        _ <- Ns.int(Ref.int_).query.i.get
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Please add missing filter attribute Ref.int"
+          }
+
+
 
       } yield ()
     }
@@ -85,31 +44,36 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
 
       for {
 
-        List(a, b, c, d) <- A.i.ii_?.insert(
-          (1, None),
-          (1, Some(Set(2))),
-          (1, Some(Set(3))),
-          (2, Some(Set(4, 5))),
-        ).transact.map(_.ids)
+        _ <- A.i.Bb.*(B.i.C.i.Dd.*(D.i.E.i)).insert(
+          (0, Nil),
+          (1, List(
+            (1, 1, Nil),
+          )),
+          (2, List(
+            (1, 1, Nil),
+            (2, 2, List((1, 2))),
+            (3, 3, List((1, 2), (3, 4))),
+          )),
+        ).transact
 
-        _ <- rawQuery(
-          """SELECT DISTINCT
-            |  A.i,
-            |  JSON_ARRAYAGG(DISTINCT t_1.vs)
-            |FROM A
-            |  LEFT OUTER JOIN JSON_TABLE(A.ii, '$[*]' COLUMNS (vs INT PATH '$')) t_1 ON true
-            |WHERE
-            |  A.i IS NOT NULL
-            |GROUP BY A.i
-            |ORDER BY A.i;
-            |""".stripMargin, true)
-
-        _ <- A.i.a1.ii_?.query.i.get.map(_ ==> List( // (since we can't sort by Sets)
-          // (1, None), // coalesced with Set(2) and Set(3)
-          (1, Some(Set(2, 3))), // coalesced Set(2) and Set(3)
-          (2, Some(Set(4, 5))),
+        _ <- A.i.a1.Bb.*?(B.i.a1.C.i.Dd.*?(D.i.a1.E.i)).query.get.map(_ ==> List(
+          (0, Nil),
+          (1, List(
+            (1, 1, Nil),
+          )),
+          (2, List(
+            (1, 1, Nil),
+            (2, 2, List((1, 2))),
+            (3, 3, List((1, 2), (3, 4))),
+          )),
         ))
 
+        _ <- A.i.Bb.*(B.i.a1.C.i.Dd.*(D.i.a1.E.i)).query.get.map(_ ==> List(
+          (2, List(
+            (2, 2, List((1, 2))),
+            (3, 3, List((1, 2), (3, 4))),
+          )),
+        ))
 
 
         //        _ <- A.i.Bb.*(B.i.C.ii).insert(
@@ -156,15 +120,68 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
     }
 
 
-    //    "unique" - unique { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Uniques._
-    //      for {
-    //        _ <- Uniques.i(1).save.transact
-    //
-    //      } yield ()
-    //    }
-    //
-    //
+        "unique" - unique { implicit conn =>
+          import molecule.coreTests.dataModels.core.dsl.Uniques._
+          val attr = database match {
+            case "Mysql" => "string_"
+            case _       => "string"
+          }
+
+
+          for {
+
+//            _ <- Uniques.i(1).i(2).int_(1).update.transact
+//              .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+//                err ==> "Can't transact duplicate attribute Uniques.i"
+//              }
+//
+//            _ <- Uniques.i_(1).i(2).update.transact
+//
+//            _ <- Uniques.int_(1).string_("x").s("c").update.transact
+//              .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+//                err ==> "Can only apply one unique attribute value for update. Found:\n" +
+//                  s"""AttrOneTacString("Uniques", "$attr", Eq, Seq("x"), None, None, Nil, Nil, None, None, Seq(0, 3))"""
+//              }
+//
+//            _ <- Uniques.ints_(1).s("b").update.transact
+//              .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+//                err ==> "Can only lookup entity with card-one attribute value. Found:\n" +
+//                  """AttrSetTacInt("Uniques", "ints", Eq, Seq(Set(1)), None, None, Nil, Nil, None, None, Seq(0, 25))"""
+//              }
+
+
+
+
+
+
+//
+//            _ <- Uniques.int.insert(1, 2, 3).transact
+//
+//            c1 <- Uniques.int.a1.query.from("").limit(2).get.map { case (List(1, 2), c, true) => c }
+//
+//            // Turning around with first cursor leads nowhere
+//            _ <- Uniques.int.a1.query.from(c1).limit(-2).get.map { case (Nil, _, false) => () }
+
+
+
+
+            _ <- Uniques.int.insert(1, 2).transact
+
+            c1 <- Uniques.int.a1.query.from("").limit(2).get.map { case (List(1, 2), c, false) => c }
+
+            // No following rows yet
+            _ <- Uniques.int.a1.query.from(c1).limit(2).get.map { case (Nil, _, false) => () }
+
+            // New row
+            _ <- Uniques.int.insert(3).transact
+
+            // Now there are new rows
+            _ <- Uniques.int.a1.query.from(c1).limit(2).get.map { case (List(3), _, false) => () }
+
+          } yield ()
+        }
+
+
     //    "validation" - validation { implicit conn =>
     //      import molecule.coreTests.dataModels.core.dsl.Validation._
     //      for {

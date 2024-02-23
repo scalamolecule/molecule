@@ -305,7 +305,7 @@ trait SpiSync_mongodb
 
   private def getCurSetValues(conn: MongoConn_JVM): Attr => Set[Any] = (attr: Attr) => {
     try {
-      val field = attr.attr
+      val field = attr.cleanAttr
 
       val pipeline = new util.ArrayList[Bson]()
       val and      = new BsonArray()
@@ -313,7 +313,7 @@ trait SpiSync_mongodb
       and.add(new BsonDocument(field, new BsonDocument("$ne", new BsonArray())))
       pipeline.add(new BsonDocument("$match", new BsonDocument("$and", and)))
 
-      val collectionName = attr.ns
+      val collectionName = attr.cleanNs
       val collection     = conn.mongoDb.getCollection(collectionName, classOf[BsonDocument])
       val it             = collection.aggregate(pipeline).iterator
       if (it.hasNext) {
