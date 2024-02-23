@@ -139,28 +139,28 @@ object RawQuery extends TestSuite_mariadb {
         _ <- Ns.shorts(Set(short1)).save.transact
         _ <- Ns.chars(Set(char1)).save.transact
 
-//        _ <- rawQuery(q("strings")).map(_.head ==> List(Set(string1)))
-//        _ <- rawQuery(q("ints")).map(_.head ==> List(Set(int1.toString)))
-//        _ <- rawQuery(q("longs")).map(_.head ==> List(Set(long1.toString)))
-//        _ <- rawQuery(q("floats")).map(_.head ==> List(Set(float1.toString)))
-//        _ <- rawQuery(q("doubles")).map(_.head ==> List(Set(double1.toString)))
-//        _ <- rawQuery(q("booleans")).map(_.head ==> List(Set("0")))
-//        _ <- rawQuery(q("bigInts")).map(_.head ==> List(Set("1")))
-//        _ <- rawQuery(q("bigDecimals")).map(_.head ==> List(Set("1.1")))
-//        _ <- rawQuery(q("dates")).map(_.head ==> List(Set(date1.getTime.toString)))
-//        _ <- rawQuery(q("durations")).map(_.head ==> List(Set(duration1.toString)))
-//        _ <- rawQuery(q("instants")).map(_.head ==> List(Set(instant1.toString)))
-//        _ <- rawQuery(q("localDates")).map(_.head ==> List(Set(localDate1.toString)))
-//        _ <- rawQuery(q("localTimes")).map(_.head ==> List(Set(localTime1.toString)))
-//        _ <- rawQuery(q("localDateTimes")).map(_.head ==> List(Set(localDateTime1.toString)))
-//        _ <- rawQuery(q("offsetTimes")).map(_.head ==> List(Set(offsetTime1.toString)))
-//        _ <- rawQuery(q("offsetDateTimes")).map(_.head ==> List(Set(offsetDateTime1.toString)))
-//        _ <- rawQuery(q("zonedDateTimes")).map(_.head ==> List(Set(zonedDateTime1.toString)))
-//        _ <- rawQuery(q("uuids")).map(_.head ==> List(Set(uuid1.toString)))
-//        _ <- rawQuery(q("uris")).map(_.head ==> List(Set(uri1.toString)))
-//        _ <- rawQuery(q("bytes")).map(_.head ==> List(Set(byte1.toString)))
-//        _ <- rawQuery(q("shorts")).map(_.head ==> List(Set(short1.toString)))
-//        _ <- rawQuery(q("chars")).map(_.head ==> List(Set(char1.toString)))
+        _ <- rawQuery(q("strings")).map(_.head ==> List(Set(string1)))
+        _ <- rawQuery(q("ints")).map(_.head ==> List(Set(int1.toString)))
+        _ <- rawQuery(q("longs")).map(_.head ==> List(Set(long1.toString)))
+        _ <- rawQuery(q("floats")).map(_.head ==> List(Set(float1.toString)))
+        _ <- rawQuery(q("doubles")).map(_.head ==> List(Set(double1.toString)))
+        _ <- rawQuery(q("booleans")).map(_.head ==> List(Set("0")))
+        _ <- rawQuery(q("bigInts")).map(_.head ==> List(Set("1")))
+        _ <- rawQuery(q("bigDecimals")).map(_.head ==> List(Set("1.1")))
+        _ <- rawQuery(q("dates")).map(_.head ==> List(Set(date1.getTime.toString)))
+        _ <- rawQuery(q("durations")).map(_.head ==> List(Set(duration1.toString)))
+        _ <- rawQuery(q("instants")).map(_.head ==> List(Set(instant1.toString)))
+        _ <- rawQuery(q("localDates")).map(_.head ==> List(Set(localDate1.toString)))
+        _ <- rawQuery(q("localTimes")).map(_.head ==> List(Set(localTime1.toString)))
+        _ <- rawQuery(q("localDateTimes")).map(_.head ==> List(Set(localDateTime1.toString)))
+        _ <- rawQuery(q("offsetTimes")).map(_.head ==> List(Set(offsetTime1.toString)))
+        _ <- rawQuery(q("offsetDateTimes")).map(_.head ==> List(Set(offsetDateTime1.toString)))
+        _ <- rawQuery(q("zonedDateTimes")).map(_.head ==> List(Set(zonedDateTime1.toString)))
+        _ <- rawQuery(q("uuids")).map(_.head ==> List(Set(uuid1.toString)))
+        _ <- rawQuery(q("uris")).map(_.head ==> List(Set(uri1.toString)))
+        _ <- rawQuery(q("bytes")).map(_.head ==> List(Set(byte1.toString)))
+        _ <- rawQuery(q("shorts")).map(_.head ==> List(Set(short1.toString)))
+        _ <- rawQuery(q("chars")).map(_.head ==> List(Set(char1.toString)))
       } yield ()
     }
 
@@ -171,18 +171,18 @@ object RawQuery extends TestSuite_mariadb {
 
         _ <- Ns.i.int(distinct).query.i.get.map(_.head ==> (1, Set(2)))
 
-//        _ <- rawQuery(
-//          """SELECT DISTINCT
-//            |  Ns.i,
-//            |  JSON_ARRAYAGG(Ns.int_)
-//            |FROM Ns
-//            |WHERE
-//            |  Ns.i    IS NOT NULL AND
-//            |  Ns.int_ IS NOT NULL
-//            |GROUP BY Ns.i;
-//            |""".stripMargin,
-//          true // debug
-//        ).map(_.head ==> List(1, Set("2"))) // All json values are Strings
+        _ <- rawQuery(
+          """SELECT DISTINCT
+            |  Ns.i,
+            |  JSON_ARRAYAGG(Ns.int_)
+            |FROM Ns
+            |WHERE
+            |  Ns.i    IS NOT NULL AND
+            |  Ns.int_ IS NOT NULL
+            |GROUP BY Ns.i;
+            |""".stripMargin,
+          true // debug
+        ).map(_.head ==> List(1, Set("2"))) // All json values are Strings
       } yield ()
     }
 
@@ -201,21 +201,21 @@ object RawQuery extends TestSuite_mariadb {
           (3, Some(Set(string1, string2)))
         ))
 
-//        _ <- rawQuery(
-//          """SELECT DISTINCT
-//            |  Ns.i,
-//            |  Ns.strings
-//            |FROM Ns
-//            |WHERE
-//            |  Ns.i IS NOT NULL
-//            |ORDER BY Ns.i;
-//            |""".stripMargin,
-//          true // debug
-//        ).map(_ ==> List(
-//          List(1, null),
-//          List(2, null),
-//          List(3, Set(string1, string2))
-//        ))
+        _ <- rawQuery(
+          """SELECT DISTINCT
+            |  Ns.i,
+            |  Ns.strings
+            |FROM Ns
+            |WHERE
+            |  Ns.i IS NOT NULL
+            |ORDER BY Ns.i;
+            |""".stripMargin,
+          true // debug
+        ).map(_ ==> List(
+          List(1, null),
+          List(2, null),
+          List(3, Set(string1, string2))
+        ))
       } yield ()
     }
 
@@ -234,24 +234,24 @@ object RawQuery extends TestSuite_mariadb {
           (3, Some(Set(ref1, ref2)))
         ))
 
-//        _ <- rawQuery(
-//          """SELECT DISTINCT
-//            |  Ns.i,
-//            |  JSON_ARRAYAGG(Ns_refs_Ref.Ref_id) Ns_refs
-//            |FROM Ns
-//            |  LEFT JOIN Ns_refs_Ref ON Ns.id = Ns_refs_Ref.Ns_id
-//            |WHERE
-//            |  Ns.i IS NOT NULL
-//            |GROUP BY Ns.id
-//            |ORDER BY Ns.i;
-//            |""".stripMargin,
-//          true // debug
-//        ).map(_ ==> List(
-//          // All json values are Strings, even nulls
-//          List(1, Set("null")),
-//          List(2, Set("null")),
-//          List(3, Set(ref1, ref2))
-//        ))
+        _ <- rawQuery(
+          """SELECT DISTINCT
+            |  Ns.i,
+            |  JSON_ARRAYAGG(Ns_refs_Ref.Ref_id) Ns_refs
+            |FROM Ns
+            |  LEFT JOIN Ns_refs_Ref ON Ns.id = Ns_refs_Ref.Ns_id
+            |WHERE
+            |  Ns.i IS NOT NULL
+            |GROUP BY Ns.id
+            |ORDER BY Ns.i;
+            |""".stripMargin,
+          true // debug
+        ).map(_ ==> List(
+          // All json values are Strings, even nulls
+          List(1, Set("null")),
+          List(2, Set("null")),
+          List(3, Set(ref1, ref2))
+        ))
       } yield ()
     }
   }

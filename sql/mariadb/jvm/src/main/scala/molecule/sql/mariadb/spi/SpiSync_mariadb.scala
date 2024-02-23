@@ -90,8 +90,6 @@ trait SpiSync_mariadb extends SpiSyncBase {
         ("null", baseTpe)
       } else {
         val value = if (isStr) rawValue.toString.replace(29.toChar, ',') else rawValue
-        //        debug("######### " + value)
-        //        debug("######### " + value.getClass)
         row += value
         (value, baseTpe)
       }
@@ -102,13 +100,10 @@ trait SpiSync_mariadb extends SpiSyncBase {
         row += null
         ("null", baseTpe)
       } else {
-        //        debug("@@@@@@@@@ " + value0)
-        //        debug("######### " + value0.getClass)
-        //        debug("@@@@@@@@@ " + value.head.getClass)
         val value = if (value0(1) == '"') {
-          value0.substring(2, value0.length - 2).split("\", ?\"").toList
+          value0.substring(2, value0.length - 2).split("\", ?\"").toSet
         } else {
-          value0.substring(1, value0.length - 1).split(", ?").toList
+          value0.substring(1, value0.length - 1).split(", ?").toSet
         }
         row += value
         (value, baseTpe)

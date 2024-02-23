@@ -1,4 +1,4 @@
-package molecule.datalog.datomic.fallback
+package molecule.datalog.datomic.compliance.fallback
 
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._

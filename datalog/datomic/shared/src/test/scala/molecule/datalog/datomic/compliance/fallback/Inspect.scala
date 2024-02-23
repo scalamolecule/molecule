@@ -1,4 +1,4 @@
-package molecule.datalog.datomic.fallback
+package molecule.datalog.datomic.compliance.fallback
 
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
@@ -34,7 +34,7 @@ object Inspect extends TestSuite_datomic {
       "Inspect and query" - types { implicit conn =>
         for {
           _ <- Ns.string("a").int(1).save.transact
-          _ <- Ns.string.int.query.i.get.map(_ ==> List(("a", 1)))
+          _ <- Ns.string.int.query.i.get.map(_ ==> List(("a", 1))) // returns query result
           /*
           ========================================
           QUERY:

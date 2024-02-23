@@ -1,4 +1,4 @@
-package molecule.datalog.datomic.fallback
+package molecule.datalog.datomic.compliance.fallback
 
 import java.math.{BigDecimal => jBigDecimal}
 import molecule.core.util.Executor._
