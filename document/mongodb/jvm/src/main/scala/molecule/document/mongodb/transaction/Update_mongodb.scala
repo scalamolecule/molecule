@@ -52,7 +52,7 @@ trait Update_mongodb
 
   // Initial namespace data container
   var d  = RefData()
-  val dd = ListBuffer.empty[RefData].addOne(d)
+  val dd = ListBuffer.empty[RefData] += d
 
   var conn: MongoConn_JVM = null
 
@@ -174,12 +174,8 @@ trait Update_mongodb
     }
     lazy val pathAttr = if (path.isEmpty) attr else path.mkString("", ".", "." + attr)
     vs match {
-      case Seq(v) =>
-        //        set(pathAttr, transformValue(v).asInstanceOf[BsonValue])
-        d.setDoc.append(pathAttr, transformValue(v).asInstanceOf[BsonValue])
-      case Nil    =>
-        //        set(pathAttr, new BsonNull())
-        d.setDoc.append(pathAttr, new BsonNull())
+      case Seq(v) => d.setDoc.append(pathAttr, transformValue(v).asInstanceOf[BsonValue])
+      case Nil    => d.setDoc.append(pathAttr, new BsonNull())
       case vs     =>
         val cleanAttr = attr.replace("_", "")
         throw ExecutionError(

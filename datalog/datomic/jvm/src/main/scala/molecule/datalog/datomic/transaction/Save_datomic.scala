@@ -21,7 +21,6 @@ trait Save_datomic
     init: Boolean = true,
     idIndex: Int = 0
   ): Data = {
-    //    elements.foreach(println)
     if (init) {
       initTxBase(elements, idIndex)
     }

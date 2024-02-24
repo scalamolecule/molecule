@@ -11,8 +11,8 @@ import molecule.sql.mariadb.setup.{Connection_mariadb => c}
 
 trait TestSuite_mariadb extends CoreTestSuite with BaseHelpers {
 
-  override val database = "MariaDB"
   override val platform = "jvm"
+  override val database = "MariaDB"
 
   override def inMem[T](test: Conn => T, schema: Schema): T = {
     val conn = schema match {

@@ -23,7 +23,7 @@ trait AggrSetNum_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(short2)),
           (2, Set(short3, short4)),
           (2, Set(short3, short4)),
-        )).i.transact
+        )).transact
 
         // Sum of all values
         _ <- Ns.shorts(sum).query.get.map(

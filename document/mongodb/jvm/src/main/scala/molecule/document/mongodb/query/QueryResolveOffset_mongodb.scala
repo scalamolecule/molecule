@@ -30,7 +30,8 @@ case class QueryResolveOffset_mongodb[Tpl](
   def getListFromOffset_sync(implicit conn: MongoConn_JVM)
   : (List[Tpl], Int, Boolean) = {
     val (isPaginated, forward) = paginationCoords(optLimit, optOffset)
-    val elements1              = if (isPaginated && !forward) reverseTopLevelSorting(elements) else elements
+    val elements1              = if (isPaginated && !forward)
+      reverseTopLevelSorting(elements) else elements
     val bsonDocs               = getData(conn, elements1, optLimit, optOffset)
 
     //    elements.foreach(println)
@@ -47,8 +48,7 @@ case class QueryResolveOffset_mongodb[Tpl](
       val it = bsonDoc.entrySet.iterator
       if (isSingleAttr && it.hasNext) {
         it.next.getValue match {
-          case a: BsonArray if a.asArray.isEmpty =>
-            ()
+          case a: BsonArray if a.asArray.isEmpty => ()
           case _                                 =>
             tuples += bson2tpl(bsonDoc).asInstanceOf[Tpl]
         }

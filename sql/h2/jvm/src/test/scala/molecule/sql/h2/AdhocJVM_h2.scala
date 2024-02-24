@@ -25,34 +25,20 @@ object AdhocJVM_h2 extends TestSuite_h2 {
 
         // Sets with one or more values matching
 
+
         //        _ <- rawQuery(
         //          """SELECT DISTINCT
         //            |  Ns.i,
-        //            |  ARRAY_AGG(Ns.booleans)
+        //            |  JSON_ARRAYAGG(t_2.vs)
         //            |FROM Ns
+        //            |  LEFT OUTER JOIN JSON_TABLE(Ns.booleans, '$[*]' COLUMNS (vs TINYINT(1) PATH '$')) t_2 ON true
         //            |WHERE
-        //            |  ARRAY_CONTAINS(Ns.booleans, true) AND
+        //            |  JSON_CONTAINS(Ns.booleans, JSON_ARRAY(true)) AND
         //            |  Ns.i        IS NOT NULL AND
         //            |  Ns.booleans IS NOT NULL
         //            |GROUP BY Ns.i
         //            |ORDER BY Ns.i;
         //            |""".stripMargin, true)
-
-
-        _ <- rawQuery(
-          """SELECT DISTINCT
-            |  Ns.i,
-            |  JSON_ARRAYAGG(t_2.vs)
-            |FROM Ns
-            |  LEFT OUTER JOIN JSON_TABLE(Ns.booleans, '$[*]' COLUMNS (vs TINYINT(1) PATH '$')) t_2 ON true
-            |WHERE
-            |  JSON_CONTAINS(Ns.booleans, JSON_ARRAY(true)) AND
-            |  Ns.i        IS NOT NULL AND
-            |  Ns.booleans IS NOT NULL
-            |GROUP BY Ns.i
-            |ORDER BY Ns.i;
-            |""".stripMargin, true)
-
 
 
         // "Has this value"
@@ -71,22 +57,6 @@ object AdhocJVM_h2 extends TestSuite_h2 {
 
       for {
         List(_, a2, a3) <- A.i.ii.B.ii.i.insert(a, b, c).transact.map(_.ids)
-
-
-        _ <- rawQuery(
-          """SELECT DISTINCT
-            |  A.i,
-            |  ARRAY_AGG(B.ii)
-            |FROM A
-            |  INNER JOIN B ON A.b = B.id
-            |WHERE
-            |  B.ii = A.ii AND
-            |  A.i  IS NOT NULL AND
-            |  A.ii IS NOT NULL AND
-            |  B.ii IS NOT NULL
-            |GROUP BY A.i
-            |HAVING COUNT(*) > 0;
-            |""".stripMargin, true)
 
 
         //        _ <- A.i.ii_(B.ii_).B.ii.query.get.map(_ ==> List(

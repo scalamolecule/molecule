@@ -11,8 +11,8 @@ import scala.util.Random
 
 trait ZioSpec_h2 extends CoreTestZioSpec {
 
-  override val database = "H2"
   override val platform = "jvm"
+  override val database = "H2"
 
   override def inMem[T](schema: Schema): ZLayer[T, Throwable, Conn] = {
     val url   = s"jdbc:h2:mem:test_database_" + Random.nextInt()

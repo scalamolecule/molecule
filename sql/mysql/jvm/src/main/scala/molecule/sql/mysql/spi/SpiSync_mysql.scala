@@ -90,8 +90,6 @@ trait SpiSync_mysql extends SpiSyncBase {
         ("null", baseTpe)
       } else {
         val value = if (isStr) rawValue.toString.replace(29.toChar, ',') else rawValue
-        //        debug("######### " + value)
-        //        debug("######### " + value.getClass)
         row += value
         (value, baseTpe)
       }
@@ -107,9 +105,6 @@ trait SpiSync_mysql extends SpiSyncBase {
         } else {
           value0.substring(1, value0.length - 1).split(", ?").toSet
         }
-        //        debug("@@@@@@@@@ " + value)
-        //        debug("@@@@@@@@@ " + value.head.getClass)
-        //        debug("######### " + value.getClass)
         row += value
         (value, baseTpe)
       }

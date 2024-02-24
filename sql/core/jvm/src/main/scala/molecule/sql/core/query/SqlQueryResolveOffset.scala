@@ -40,11 +40,6 @@ case class SqlQueryResolveOffset[Tpl](
       val topLevelCount = nestedRows.length
       val fromUntil     = getFromUntil(topLevelCount, optLimit, optOffset)
       val hasMore       = fromUntil.fold(totalCount > 0)(_._3)
-
-
-      //      println("************ " + nestedRows.length)
-      //      nestedRows.foreach(println)
-
       (offsetList(nestedRows, fromUntil), topLevelCount, hasMore)
 
     } else {

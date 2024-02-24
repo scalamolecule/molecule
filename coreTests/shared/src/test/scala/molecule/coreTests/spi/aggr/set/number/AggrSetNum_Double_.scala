@@ -23,7 +23,7 @@ trait AggrSetNum_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(double2)),
           (2, Set(double3, double4)),
           (2, Set(double3, double4)),
-        )).i.transact
+        )).transact
 
         // Sum of all values
         _ <- Ns.doubles(sum).query.get.map(

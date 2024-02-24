@@ -10,8 +10,8 @@ import scala.util.Random
 
 trait TestSuite_postgres extends CoreTestSuite {
 
-  override val database = "Postgres"
   override val platform = "js"
+  override val database = "Postgres"
 
   val recreateSchema =
     s"""DROP SCHEMA IF EXISTS public CASCADE;
@@ -19,11 +19,10 @@ trait TestSuite_postgres extends CoreTestSuite {
        |""".stripMargin
 
   override def inMem[T](test: Conn => T, schema: Schema): T = {
+    // Using the same db causes contention between tests since tests are run in parallel with rpc.
+    // So we create a new database for each test
     val n   = Random.nextInt().abs
     val url = s"jdbc:tc:postgresql:15://localhost:5432/test$n?preparedStatementCacheQueries=0"
-
-    // Using the same db causes contention between tests since tests are run in parallel with rpc
-    val url1 = s"jdbc:tc:postgresql:15://localhost:5432/test?preparedStatementCacheQueries=0"
 
     val proxy = JdbcProxy(
       url,

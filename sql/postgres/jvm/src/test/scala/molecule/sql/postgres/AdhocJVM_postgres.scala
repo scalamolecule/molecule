@@ -23,20 +23,6 @@ object AdhocJVM_postgres extends TestSuite_postgres {
         ).transact
 
 
-
-        _ <- rawQuery(
-          """SELECT DISTINCT
-            |  Ns.i,
-            |  percentile_cont(0.5) WITHIN GROUP (ORDER BY Ns.int) as xx
-            |FROM Ns
-            |WHERE
-            |  Ns.i   IS NOT NULL AND
-            |  Ns.int IS NOT NULL
-            |GROUP BY Ns.i
-            |ORDER BY xx NULLS FIRST;
-            |""".stripMargin, true)
-
-
       } yield ()
     }
 
@@ -58,7 +44,7 @@ object AdhocJVM_postgres extends TestSuite_postgres {
         ).transact
 
 
-        _ <- A.i.Bb.*?(B.i.C.ii).query.get.map(_ ==> List(
+        _ <- A.i.a1.Bb.*?(B.i.C.ii).query.get.map(_ ==> List(
           (0, Nil),
           (1, Nil),
           (2, List(

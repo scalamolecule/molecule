@@ -23,7 +23,8 @@ trait Base_JVM_mongodb extends DataType_JVM_mongodb with ModelUtils with BaseHel
   protected var doPrint = false
   protected def debug(s: Any) = if (doPrint) println(s) else ()
 
-  protected val nsDocs               = mutable.Map.empty[String, BsonArray]
+  protected var nsIndex              = 0
+  protected val nsDocs = mutable.Map.empty[String, (Int, BsonArray)]
   protected var path                 = List.empty[String]
   protected var doc                  = new BsonDocument()
   protected var docs                 = List(List(doc))
@@ -36,8 +37,6 @@ trait Base_JVM_mongodb extends DataType_JVM_mongodb with ModelUtils with BaseHel
   protected var level     = 0
   protected var selfJoins = 0
   protected var initialNs = ""
-//  protected val refIdss   = new BsonArray()
-//  protected var refIds    = new BsonArray()
 
   // "Connection pool" ---------------------------------------------
 

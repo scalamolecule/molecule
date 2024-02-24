@@ -28,8 +28,6 @@ trait SqlUpdate
   }
 
   protected def addRowSetterToTables(): Unit = {
-    //    debug("updates      : " + updates)
-    //    debug("colSettersMap: " + colSettersMap.keys.toList)
     updates.foreach {
       case (refPath, _) =>
         val table         = refPath.last

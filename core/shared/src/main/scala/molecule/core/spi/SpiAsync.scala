@@ -56,13 +56,17 @@ trait SpiAsync  {
   def delete_transact(delete: Delete)(implicit conn: Conn, ec: EC): Future[TxReport]
   def delete_inspect(delete: Delete)(implicit conn: Conn, ec: EC): Future[Unit]
 
+
+  private def noJS(method: String): Nothing =
+    throw new Exception(s"Fallback method '$method' not available from JS platform")
+
   def fallback_rawQuery(
     query: String,
     debug: Boolean = false,
-  )(implicit conn: Conn, ec: EC): Future[List[List[Any]]]
+  )(implicit conn: Conn, ec: EC): Future[List[List[Any]]] = noJS("rawQuery")
 
   def fallback_rawTransact(
     txData: String,
     debug: Boolean = false
-  )(implicit conn: Conn, ec: EC): Future[TxReport]
+  )(implicit conn: Conn, ec: EC): Future[TxReport] = noJS("rawTransact")
 }

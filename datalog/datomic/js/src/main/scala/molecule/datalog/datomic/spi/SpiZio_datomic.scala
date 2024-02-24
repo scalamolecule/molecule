@@ -112,19 +112,6 @@ trait SpiZio_datomic extends SpiZio with DatomicSpiZioBase with ApiZio with Futu
   }
 
 
-
-  // Fallbacks --------------------------------------------------------
-
-  override def fallback_rawQuery(
-    query: String,
-    debug: Boolean = false,
-  ): ZIO[Conn, MoleculeError, List[List[Any]]] = ??? // todo
-
-  override def fallback_rawTransact(
-    txData: String,
-    debug: Boolean = false
-  ): ZIO[Conn, MoleculeError, TxReport] = ??? // todo
-
   // Helpers ---------
 
   private def async2zio[T](run: (DatomicConn_JS, EC) => Future[T]): ZIO[Conn, MoleculeError, T] = {

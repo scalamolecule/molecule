@@ -23,7 +23,6 @@ trait ResolveExprSetRefAttr_mariadb
 
     attr.filterAttr.fold {
       val pathAttr = path :+ attr.cleanAttr
-//      if (filterAttrVars.contains(attr.name) && attr.op != V) {
       if (filterAttrVars.contains(pathAttr) && attr.op != V) {
         // Runtime check needed since we can't type infer it
         throw ModelError(s"Cardinality-set filter attributes not allowed to " +
@@ -88,10 +87,6 @@ trait ResolveExprSetRefAttr_mariadb
       case _ => where += (("", refMatchArrays(setsNonEmpty, res.one2json)))
     }
   }
-  //
-  //  protected def refEqual2(col: String, filterAttr: String): Unit = {
-  //    where += ((col, "= " + filterAttr))
-  //  }
 
   override protected def refOptEqual[T](optSets: Option[Seq[Set[T]]], res: ResSet[T]): Unit = {
     optSets.fold[Unit] {
@@ -119,10 +114,6 @@ trait ResolveExprSetRefAttr_mariadb
         ")"))
     }
   }
-  //
-  //  protected def refNeq2(col: String, filterAttr: String): Unit = {
-  //    where += ((col, "<> " + filterAttr))
-  //  }
 
   override protected def refOptNeq[T](optSets: Option[Seq[Set[T]]], res: ResSet[T]): Unit = {
     if (optSets.isDefined && optSets.get.nonEmpty) {
@@ -180,8 +171,4 @@ trait ResolveExprSetRefAttr_mariadb
       }
     }
   }
-  //
-  //  protected def refHasNo2(col: String, filterAttr: String): Unit = {
-  //    where += (("", s"NOT ARRAY_CONTAINS($col, $filterAttr)"))
-  //  }
 }

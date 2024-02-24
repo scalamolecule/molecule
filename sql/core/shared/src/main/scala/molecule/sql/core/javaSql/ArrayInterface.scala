@@ -5,5 +5,5 @@ trait ArrayInterface {
   def getBaseType: Int
   def getResultSet: ResultSetInterface
   def getArray: AnyRef
-  def getUnderlyingArray: java.sql.Array
+  def getUnderlyingArray: AnyRef
 }

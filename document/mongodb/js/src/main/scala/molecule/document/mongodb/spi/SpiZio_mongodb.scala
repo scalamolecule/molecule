@@ -108,19 +108,6 @@ trait SpiZio_mongodb extends SpiZio with SpiZioBase_mongodb {
   }
 
 
-  // Fallbacks --------------------------------------------------------
-
-  override def fallback_rawQuery(
-    query: String,
-    debug: Boolean = false,
-  ): ZIO[Conn, MoleculeError, List[List[Any]]] = ??? // todo
-
-  override def fallback_rawTransact(
-    txData: String,
-    debug: Boolean = false
-  ): ZIO[Conn, MoleculeError, TxReport] = ??? // todo
-
-
   // Helpers ---------
 
   private def async2zio[T](run: (MongoConn_JS, EC) => Future[T]): ZIO[Conn, MoleculeError, T] = {

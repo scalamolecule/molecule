@@ -292,7 +292,7 @@ trait SaveRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "ids, ref" - refs { implicit conn =>
       for {
         // Card one
-        List(a1) <- A.i(1).B.i(2).save.i.transact.map(_.ids)
+        List(a1) <- A.i(1).B.i(2).save.transact.map(_.ids)
 
         _ <- A(a1).i.query.get.map(_ ==> List(1))
 

@@ -28,7 +28,7 @@ trait CoreTestSuiteBase
   override def utestFormatter: Formatter = new Formatter {
     override def formatIcon(success: Boolean): ufansi.Str = {
       formatResultColor(success)(
-        (if (success) "+ " else "X ") + platform
+        (if (success) "+ " else "X ") + platform + " " + database
       )
     }
   }

@@ -23,7 +23,7 @@ trait AggrSetNum_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(byte2)),
           (2, Set(byte3, byte4)),
           (2, Set(byte3, byte4)),
-        )).i.transact
+        )).transact
 
         // Sum of all values
         _ <- Ns.bytes(sum).query.get.map(

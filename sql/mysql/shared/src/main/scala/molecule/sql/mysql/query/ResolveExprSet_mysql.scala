@@ -452,17 +452,6 @@ trait ResolveExprSet_mysql
   override protected def setEqual2[T](
     col: String, filterAttr: String, res: ResSet[T], mandatory: Boolean
   ): Unit = {
-    //    if (mandatory) {
-    ////      select -= col
-    ////      select += s"JSON_ARRAYAGG($col)"
-    ////      select += s"JSON_ARRAYAGG(t_3.vs)"
-    //
-    ////      having += "COUNT(*) > 0"
-    ////      aggregate = true
-    //
-    ////      replaceCast(res.nestedArray2coalescedSet)
-    //    }
-
     if (mandatory) {
       val i  = getIndex
       val vs = s"t_$i.vs"
@@ -489,12 +478,6 @@ trait ResolveExprSet_mysql
       where += (("", s"JSON_CONTAINS($col, JSON_ARRAY($filterAttr))"))
     } else {
       if (mandatory) {
-        //        select -= col
-        //        select += s"ARRAY_AGG($col)"
-        //        having += "COUNT(*) > 0"
-        //        aggregate = true
-        //        replaceCast(res.nestedArray2coalescedSet)
-
         val i = getIndex
         select -= col
         select += s"JSON_ARRAYAGG(t_$i.vs)"
@@ -514,12 +497,6 @@ trait ResolveExprSet_mysql
   ): Unit = {
     if (filterCardOne) {
       if (mandatory) {
-        //        select -= col
-        //        select += s"ARRAY_AGG($col)"
-        //        having += "COUNT(*) > 0"
-        //        aggregate = true
-        //        replaceCast(res.nestedArray2coalescedSet)
-
         val i = getIndex
         select -= col
         select += s"JSON_ARRAYAGG(t_$i.vs)"

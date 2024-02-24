@@ -12,15 +12,8 @@ import molecule.document.mongodb.setup.{Connection_mongodb => c}
 
 trait TestSuite_mongodb extends CoreTestSuite with BaseHelpers {
 
-  override val database = "MongoDB"
   override val platform = "jvm"
-
-
-  //  override def utestAfterAll(): Unit = {
-  //    //    println("====== closing MongoDB client ======")
-  //    // c.mongoClient.close() // needed for tests?
-  //  }
-
+  override val database = "MongoDB"
 
   override def inMem[T](test: Conn => T, schema: Schema): T = {
     val conn = schema match {

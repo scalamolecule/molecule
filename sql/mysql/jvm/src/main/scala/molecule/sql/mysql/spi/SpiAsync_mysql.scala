@@ -11,11 +11,11 @@ trait SpiAsync_mysql extends SpiAsync with ModelUtils {
 
   override def query_get[Tpl](q: Query[Tpl])
                              (implicit conn: Conn, ec: EC): Future[List[Tpl]] = Future {
-//    // Check that rawQuery can handle all SPI queries
-//    val q1  = q.copy(elements = noKeywords(q.elements, Some(conn.proxy)))
-//    val m2q = getModel2SqlQuery[Tpl](q1.elements)
-//    val qu  = m2q.getSqlQuery(q1.elements, None, None)
-//    SpiSync_mysql.fallback_rawQuery(qu, true, true)
+    //    // Check that rawQuery can handle all SPI queries
+    //    val q1  = q.copy(elements = noKeywords(q.elements, Some(conn.proxy)))
+    //    val m2q = getModel2SqlQuery[Tpl](q1.elements)
+    //    val qu  = m2q.getSqlQuery(q1.elements, None, None)
+    //    SpiSync_mysql.fallback_rawQuery(qu, true, true)
 
     SpiSync_mysql.query_get(q)
   }

@@ -56,15 +56,19 @@ trait SpiZio  {
   def delete_transact(delete: Delete): ZIO[Conn, MoleculeError, TxReport]
   def delete_inspect(delete: Delete): ZIO[Conn, MoleculeError, Unit]
 
+
+  private def noJS(method: String): Nothing =
+    throw new Exception(s"Fallback method '$method' not available from JS platform")
+
   def fallback_rawQuery(
     query: String,
     debug: Boolean = false,
-  ): ZIO[Conn, MoleculeError, List[List[Any]]]
+  ): ZIO[Conn, MoleculeError, List[List[Any]]] = noJS("rawQuery")
 
   def fallback_rawTransact(
     txData: String,
     debug: Boolean = false
-  ): ZIO[Conn, MoleculeError, TxReport]
+  ): ZIO[Conn, MoleculeError, TxReport] = noJS("rawTransact")
 
   protected def mapError[T](result: Task[T]): ZIO[Conn, MoleculeError, T] = {
     result.mapError {

@@ -23,7 +23,6 @@ case class JdbcConn_JVM(
   override lazy val sqlConn: Connection = sqlConn0
 
   doPrint = false
-  //  doPrint = true
 
   override def transact_async(data: (List[Table], List[JoinTable]))
                              (implicit ec: ExecutionContext): Future[TxReport] = {
@@ -34,21 +33,17 @@ case class JdbcConn_JVM(
     atomicTransaction(() => populateStmts(data))
   }
 
-  //  def atomicTransaction(executions: () => Map[List[String], List[Long]]): TxReport = {
   def atomicTransaction(executions: () => List[Long]): TxReport = {
     try {
       // Atomic transaction of all statements
       sqlConn.setAutoCommit(false)
 
       // Execute batches
-      //      val idsMap = executions()
       val ids = executions()
 
       // transact all
       sqlConn.commit()
 
-      //      val entityIdsInvolved = idsMap.values.toList.reverse.flatten
-      //      TxReport(entityIdsInvolved.map(_.toString))
       TxReport(ids.map(_.toString))
     } catch {
       // re-throw errors to keep stacktrace back to original error
@@ -68,17 +63,8 @@ case class JdbcConn_JVM(
     }
   }
 
-  //  def populateStmts(data: Data): Map[List[String], List[Long]] = {
   def populateStmts(data: Data): List[Long] = {
-    val tables = data._1
-
-
-    //    tables.foreach { t =>
-    //      println(t)
-    //      println("--------------------------------------")
-    //    }
-
-
+    val tables     = data._1
     val joinTables = data._2
     var idsMap     = Map.empty[List[String], List[Long]]
     var ids        = List.empty[Long]
@@ -120,9 +106,6 @@ case class JdbcConn_JVM(
         idsMap = idsMap + (refPath -> ids)
         debug("idsMap 2: " + idsMap)
     }
-
-    //    println("++++++++++++")
-    //    println(idsMap)
 
     joinTables.foreach {
       case JoinTable(stmt, ps, leftPath, rightPath, rightCounts) =>

@@ -42,8 +42,6 @@ class NestedEmbed(
     addMatches()
     subBranches.foreach(ref => stages.addAll(ref.getStages))
 
-    //    group(stages)
-
     if (parent.isEmpty) {
       addStage("$project", projection)
     }

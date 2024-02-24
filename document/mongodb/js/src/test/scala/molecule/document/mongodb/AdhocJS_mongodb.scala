@@ -13,10 +13,10 @@ object AdhocJS_mongodb extends TestSuite_mongodb {
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
-//      for {
-//        _ <- Ns.int.insert(1).transact
-//        _ <- Ns.int.query.get.map(_ ==> List(1))
-//      } yield ()
+      for {
+        _ <- Ns.int.insert(1).transact
+        _ <- Ns.int.query.get.map(_ ==> List(1))
+      } yield ()
     }
 
 

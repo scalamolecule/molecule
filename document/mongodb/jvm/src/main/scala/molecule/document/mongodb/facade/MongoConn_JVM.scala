@@ -40,11 +40,6 @@ case class MongoConn_JVM(
     //    println(data.toJson(pretty))
     //    println("")
     data.get("_action").asString.getValue match {
-//      case "save" => data.size match {
-//        case 2 => insertEmbedded(data)
-//        case _ => insertReferenced(data)
-//      }
-
       case "insert" => data.size match {
         case 1 => TxReport(Nil)
         case 2 => insertEmbedded(data)
@@ -90,8 +85,8 @@ case class MongoConn_JVM(
                 // Add ids of initial namespace
                 val idsMap = insertResult.getInsertedIds
                 idsMap.forEach {
-                  case (k, v) if v.isString => firstNsIds.addOne(v.asString.getValue)
-                  case (k, v)               => firstNsIds.addOne(v.asObjectId.getValue.toHexString)
+                  case (k, v) if v.isString => firstNsIds += v.asString.getValue
+                  case (k, v)               => firstNsIds += v.asObjectId.getValue.toHexString
                 }
                 firstNs = false
               }
@@ -137,7 +132,7 @@ case class MongoConn_JVM(
         val idsMap       = insertResult.getInsertedIds
         if (first) {
           idsMap.forEach {
-            case (k, v) => insertedIds.addOne(v.asObjectId().getValue.toHexString)
+            case (k, v) => insertedIds += v.asObjectId().getValue.toHexString
           }
           first = false
         }

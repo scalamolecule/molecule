@@ -127,12 +127,9 @@ trait SqlBase_JVM extends SqlDataType_JVM with ModelUtils with BaseHelpers {
       val paramIndex = paramIndexes(curPath, refAttr)
       var rowIndex   = 0
       (_: T) => {
-        //        println("++++++++++++ " + tpl)
         val colSetter: Setter = {
           (ps: PS, idsMap: IdsMap, _: RowIndex) => {
-            //            val refId = idsMap(refPath)(rowIndex)
             val refId = idsMap(refPath)(rowIndex)
-            //            println(s"   #########################  $rowIndex  $refId  $refPath   $rowIndex")
             rowIndex += 1
             ps.setLong(paramIndex, refId)
           }

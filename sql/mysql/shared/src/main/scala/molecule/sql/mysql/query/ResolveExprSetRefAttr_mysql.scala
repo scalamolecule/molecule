@@ -84,10 +84,6 @@ trait ResolveExprSetRefAttr_mysql
       case _ => where += (("", refMatchArrays(setsNonEmpty, res.one2json)))
     }
   }
-  //
-  //  protected def refEqual2(col: String, filterAttr: String): Unit = {
-  //    where += ((col, "= " + filterAttr))
-  //  }
 
   override protected def refOptEqual[T](optSets: Option[Seq[Set[T]]], res: ResSet[T]): Unit = {
     optSets.fold[Unit] {
@@ -115,10 +111,6 @@ trait ResolveExprSetRefAttr_mysql
         ")"))
     }
   }
-  //
-  //  protected def refNeq2(col: String, filterAttr: String): Unit = {
-  //    where += ((col, "<> " + filterAttr))
-  //  }
 
   override protected def refOptNeq[T](optSets: Option[Seq[Set[T]]], res: ResSet[T]): Unit = {
     if (optSets.isDefined && optSets.get.nonEmpty) {
@@ -176,8 +168,4 @@ trait ResolveExprSetRefAttr_mysql
       }
     }
   }
-  //
-  //  protected def refHasNo2(col: String, filterAttr: String): Unit = {
-  //    where += (("", s"NOT ARRAY_CONTAINS($col, $filterAttr)"))
-  //  }
 }

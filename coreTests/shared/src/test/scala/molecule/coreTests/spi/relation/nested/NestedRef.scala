@@ -158,12 +158,12 @@ trait NestedRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           )),
         ))
 
-        _ <- A.Bb.*?(B.C.ii).query.i.get.map(_ ==> List(
+        _ <- A.Bb.*?(B.C.ii).query.get.map(_ ==> List(
           List(
             Set(0, 1, 2), // Set(0) and Set(1, 2) coalesced to one Set
           ),
         ))
-        _ <- A.Bb.*(B.C.ii).query.i.get.map(_ ==> List(
+        _ <- A.Bb.*(B.C.ii).query.get.map(_ ==> List(
           List(
             Set(0, 1, 2), // Set(0) and Set(1, 2) coalesced to one Set
           ),

@@ -311,7 +311,7 @@ trait InsertRefsOwned extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         List(a1, a2) <- A.i.OwnB.i.insert(
           (1, 2),
           (3, 4),
-        ).i.transact.map(_.ids)
+        ).transact.map(_.ids)
 
         _ <- A(a1).i.query.get.map(_ ==> List(1))
         _ <- A(a2).i.query.get.map(_ ==> List(3))
@@ -421,7 +421,7 @@ trait InsertRefsOwned extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           List(a1, a2) <- A.i.OwnB.i.insert(
             (1, 2),
             (3, 4),
-          ).i.transact.map(_.ids)
+          ).transact.map(_.ids)
 
           _ <- A(a1).i.query.get.map(_ ==> List(1))
           _ <- A(a2).i.query.get.map(_ ==> List(3))
@@ -473,107 +473,12 @@ trait InsertRefsOwned extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "ids, backref" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
-      //      if (database == "MongoDB") {
-      //        for {
-      //          // ref - ref
-      //          List(a1, b1, c1, a2, b2, c2) <- A.i.OwnB.i._A.C.i.insert(
-      //            (1, 2, 3),
-      //            (4, 5, 6),
-      //          ).i.transact.map(_.ids)
-      //
-      //          _ <- A.id.i.a1.OwnB.id.i._A.C.id.i.query.get.map(_ ==> List(
-      //            (a1, 1, b1, 2, c1, 3),
-      //            (a2, 4, b2, 5, c2, 6),
-      //          ))
-      //
-      //          // ref - own
-      //          List(a1, b1, a2, b2) <- A.i.OwnB.i._A.OwnC.i.insert(
-      //            (1, 2, 3),
-      //            (4, 5, 6),
-      //          ).i.transact.map(_.ids)
-      //
-      //          _ <- A.id.i.a1.OwnB.id.i._A.OwnC.i.query.get.map(_ ==> List(
-      //            (a1, 1, b1, 2, 3),
-      //            (a2, 4, b2, 5, 6),
-      //          ))
-      //
-      //          // own - ref
-      //          List(a1, c1, a2, c2) <- A.i.OwnB.i._A.C.i.insert(
-      //            (1, 2, 3),
-      //            (4, 5, 6),
-      //          ).i.transact.map(_.ids)
-      //
-      //          _ <- A.id.i.a1.OwnB.i._A.C.id.i.query.get.map(_ ==> List(
-      //            (a1, 1, 2, c1, 3),
-      //            (a2, 4, 5, c2, 6),
-      //          ))
-      //
-      //          // own - own
-      //          List(a1, a2) <- A.i.OwnB.i._A.OwnC.i.insert(
-      //            (1, 2, 3),
-      //            (4, 5, 6),
-      //          ).i.transact.map(_.ids)
-      //
-      //          _ <- A.id.i.a1.OwnB.i._A.OwnC.i.query.get.map(_ ==> List(
-      //            (a1, 1, 2, 3),
-      //            (a2, 4, 5, 6),
-      //          ))
-      //        } yield ()
-      //
-      //      } else {
-      //        for {
-      //        // ref - ref
-      //          List(a1, b1, c1, a2, b2, c2) <- A.i.OwnB.i._A.C.i.insert(
-      //            (1, 2, 3),
-      //            (4, 5, 6),
-      //          ).i.transact.map(_.ids)
-      //
-      //          _ <- A.id.i.a1.OwnB.id.i._A.C.id.i.query.get.map(_ ==> List(
-      //            (a1, 1, b1, 2, c1, 3),
-      //            (a2, 4, b2, 5, c2, 6),
-      //          ))
-      //
-      //          // ref - own
-      //          List(a1, b1, c1, a2, b2, c2) <- A.i.OwnB.i._A.OwnC.i.insert(
-      //            (1, 2, 3),
-      //            (4, 5, 6),
-      //          ).i.transact.map(_.ids)
-      //
-      //          _ <- A.id.i.a1.OwnB.id.i._A.OwnC.id.i.query.get.map(_ ==> List(
-      //            (a1, 1, b1, 2, c1, 3),
-      //            (a2, 4, b2, 5, c2, 6),
-      //          ))
-      //
-      //          // own - ref
-      //          List(a1, b1, c1, a2, b2, c2) <- A.i.OwnB.i._A.C.i.insert(
-      //            (1, 2, 3),
-      //            (4, 5, 6),
-      //          ).i.transact.map(_.ids)
-      //
-      //          _ <- A.id.i.a1.OwnB.id.i._A.C.id.i.query.get.map(_ ==> List(
-      //            (a1, 1, b1, 2, c1, 3),
-      //            (a2, 4, b2, 5, c2, 6),
-      //          ))
-      //
-      //          // own - own
-      //          List(a1, b1, c1, a2, b2, c2) <- A.i.OwnB.i._A.OwnC.i.insert(
-      //            (1, 2, 3),
-      //            (4, 5, 6),
-      //          ).i.transact.map(_.ids)
-      //
-      //          _ <- A.id.i.a1.OwnB.id.i._A.OwnC.id.i.query.get.map(_ ==> List(
-      //            (a1, 1, b1, 2, c1, 3),
-      //            (a2, 4, b2, 5, c2, 6),
-      //          ))
-      //        } yield ()
-      //      }
-
       for {
         // ref - own
         List(a1, a2) <- A.i.B.i._A.OwnC.i.insert(
           (1, 2, 3),
           (4, 5, 6),
-        ).i.transact.map(_.ids)
+        ).transact.map(_.ids)
 
         _ <- A.id.i.a1.B.i._A.OwnC.i.query.get.map(_ ==> List(
           (a1, 1, 2, 3),
@@ -584,7 +489,7 @@ trait InsertRefsOwned extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         List(a1, a2) <- A.i.OwnB.i._A.C.i.insert(
           (1, 2, 3),
           (4, 5, 6),
-        ).i.transact.map(_.ids)
+        ).transact.map(_.ids)
 
         _ <- A.id.i.a1.OwnB.i._A.C.i.query.get.map(_ ==> List(
           (a1, 1, 2, 3),
@@ -595,7 +500,7 @@ trait InsertRefsOwned extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         List(a1, a2) <- A.i.OwnB.i._A.OwnC.i.insert(
           (1, 2, 3),
           (4, 5, 6),
-        ).i.transact.map(_.ids)
+        ).transact.map(_.ids)
 
         _ <- A.id.i.a1.OwnB.i._A.OwnC.i.query.get.map(_ ==> List(
           (a1, 1, 2, 3),
@@ -611,7 +516,7 @@ trait InsertRefsOwned extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         List(a1, a2) <- A.i.OwnBb.*(B.i).insert(
           (1, List(1, 2)),
           (2, Nil),
-        ).i.transact.map(_.ids)
+        ).transact.map(_.ids)
 
         _ <- A.id.i.a1.OwnBb.*?(B.i.a1).query.get.map(_ ==> List(
           (a1, 1, List(1, 2)),
@@ -627,7 +532,7 @@ trait InsertRefsOwned extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         List(a1, a2) <- A.i.OwnBb.*(B.i.C.i).insert(
           (1, List((1, 2), (3, 4))),
           (2, Nil),
-        ).i.transact.map(_.ids)
+        ).transact.map(_.ids)
 
         _ <- A.id(a1, a2).i.a1.OwnBb.*?(B.i.a1.C.i).query.get.map(_ ==> List(
           (a1, 1, List((1, 2), (3, 4))),

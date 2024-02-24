@@ -23,7 +23,7 @@ trait AggrSetNum_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(long2)),
           (2, Set(long3, long4)),
           (2, Set(long3, long4)),
-        )).i.transact
+        )).transact
 
         // Sum of all values
         _ <- Ns.longs(sum).query.get.map(

@@ -1,13 +1,13 @@
-package molecule.sql.h2.compliance.fallback
+package molecule.sql.mariadb.compliance.inspect
 
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
-import molecule.sql.h2.async._
-import molecule.sql.h2.setup.TestSuite_h2
+import molecule.sql.mariadb.async._
+import molecule.sql.mariadb.setup.TestSuite_mariadb
 import utest._
 import scala.language.implicitConversions
 
-object Inspect extends TestSuite_h2 {
+object Inspect extends TestSuite_mariadb {
 
   override lazy val tests = Tests {
 
@@ -249,18 +249,21 @@ object Inspect extends TestSuite_h2 {
           /*
           ========================================
           UPDATE:
-          AttrOneTacID("Ns", "id", Eq, Seq("42"), None, None, Nil, Nil, None, None, Seq(0, 0))
+          AttrOneTacID("Ns", "id", Eq, Seq("1"), None, None, Nil, Nil, None, None, Seq(0, 0))
           AttrSetManInt("Ns", "ints", Swap, Seq(Set(3), Set(4), Set(6), Set(7)), None, None, Nil, Nil, None, None, Seq(0, 30))
 
           UPDATE Ns
           SET
-            Ns.ints = ARRAY(
-              SELECT CASE
-                WHEN v = ? THEN ?
-                WHEN v = ? THEN ?
-                ELSE v
-              END
-              FROM TABLE(v INT = (SELECT Ns.ints FROM Ns WHERE Ns.id IN (1)))
+            ints = (
+              SELECT
+                JSON_ARRAYAGG(
+                  CASE
+                    WHEN table_1.v = 3 THEN 6
+                    WHEN table_1.v = 4 THEN 7
+                    ELSE table_1.v
+                  END
+                )
+              FROM JSON_TABLE(Ns.ints, '$[*]' COLUMNS (v INT PATH '$')) table_1
             )
           WHERE Ns.id IN(1)
           ----------------------------------------

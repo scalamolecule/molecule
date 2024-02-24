@@ -10,14 +10,21 @@ import zio.ZLayer
 
 trait ZioSpec_mariadb extends CoreTestZioSpecBase {
 
-  override val database = "MariaDB"
   override val platform = "js"
+  override val database = "MariaDB"
 
   override def inMem[T](schema: Schema): ZLayer[T, Throwable, Conn] = {
-    val url   = "jdbc:tc:mariadb:latest:///test?allowMultiQueries=true"
+    val url   = "jdbc:tc:mariadb:latest:///test?allowMultiQueries=true&user=root&password=foo"
+
+    val recreateSchema1 =
+      s"""drop database if exists test;
+         |create database test;
+         |use test;
+         |""".stripMargin
+
     val proxy = JdbcProxy(
       url,
-      schema.sqlSchema_mariadb,
+      recreateSchema1 + schema.sqlSchema_mariadb,
       schema.metaSchema,
       schema.nsMap,
       schema.attrMap,

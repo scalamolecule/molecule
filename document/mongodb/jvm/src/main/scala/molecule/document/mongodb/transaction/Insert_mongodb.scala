@@ -34,37 +34,41 @@ trait Insert_mongodb
     val tpl2bson = getResolver(nsMap, elements)
 
     // Prepare adding ns Data to namespaces
-    val nssDocs = mutable.Map.empty[String, BsonArray]
-    nss.foreach(ns => nssDocs(ns) = new BsonArray())
+    val nssDocs = mutable.Map.empty[String, (Int, BsonArray)]
+    nss.zipWithIndex.foreach{ case (ns, i) => nssDocs(ns) = (i, new BsonArray()) }
 
     var first  = true
     var nsData = new BsonArray()
+
     tpls.foreach { tpl =>
       level = 0
-      //      refIds = new BsonArray()
       doc = new BsonDocument()
       docs = List(List(doc))
       nsData = new BsonArray()
       nsData.add(doc)
       nsDocs.clear()
-      nsDocs(initialNs) = nsData
+      nsIndex = 0
+      nsDocs(initialNs) = (nsIndex, nsData)
 
       // Convert tpl to bson
       tpl2bson(tpl)
 
       // Add docs in namespaces
-      nsDocs.foreach { case (ns, nsData) =>
-        nssDocs(ns).addAll(nsData)
+      nsDocs.toList.sortBy(_._2._1).foreach { case (ns, (_, nsData)) =>
+        nssDocs(ns)._2.addAll(nsData)
       }
       first = false
     }
 
     val data = new BsonDocument("_action", new BsonString("insert"))
-    if (!nssDocs.head._2.isEmpty) {
+
+    val nssDocsList = nssDocs.toList.sortBy(_._2._1)
+    if (!nssDocsList.head._2._2.isEmpty) {
       data.append("_selfJoins", new BsonInt32(selfJoins))
       // Loop referenced namespaces
-      nssDocs.collect {
-        case (ns, nsDocs: BsonArray) if !nsDocs.isEmpty => data.append(ns, nsDocs)
+      nssDocsList.collect {
+        case (ns, (_, nsDocs: BsonArray)) if !nsDocs.isEmpty =>
+          data.append(ns, nsDocs)
       }
     }
     data
@@ -177,10 +181,6 @@ trait Insert_mongodb
       (_: Product) => {
         // Reference document
         val refId = new BsonObjectId()
-        //        if (level == 0 && initialNs != refNs) {
-        //          // Add top level ref id if not a self-join
-        //          refIds.add(refId)
-        //        }
         val ref   = card match {
           case CardOne => refId
           case _       =>
@@ -197,9 +197,12 @@ trait Insert_mongodb
         // Step into referenced document
         docs = docs.init :+ (docs.last :+ doc)
 
-        val nsData = nsDocs.getOrElse(refNs, new BsonArray())
-        nsData.add(doc)
-        nsDocs(refNs) = nsData
+        val (i, nsData2) = nsDocs.getOrElse(refNs, {
+          nsIndex += 1
+          (nsIndex, new BsonArray())
+        })
+        nsData2.add(doc)
+        nsDocs(refNs) = (i, nsData2)
       }
     }
   }
@@ -267,7 +270,10 @@ trait Insert_mongodb
         doc.append(refAttr, refIds)
         docs = docs :+ Nil
 
-        val referencedDocs = nsDocs.getOrElse(refNs, new BsonArray())
+        val (i, referencedDocs) = nsDocs.getOrElse(refNs, {
+          nsIndex += 1
+          (nsIndex, new BsonArray())
+        })
         nestedTuples.foreach { nestedTpl =>
 
           // Referenced document
@@ -299,7 +305,7 @@ trait Insert_mongodb
             docs = docs.init
           }
         }
-        nsDocs(refNs) = referencedDocs
+        nsDocs(refNs) = (i, referencedDocs)
       }
     }
   }

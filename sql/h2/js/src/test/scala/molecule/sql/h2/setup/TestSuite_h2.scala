@@ -10,8 +10,8 @@ import scala.util.Random
 
 trait TestSuite_h2 extends CoreTestSuite {
 
-  override val database = "H2"
   override val platform = "js"
+  override val database = "H2"
 
   override def inMem[T](test: Conn => T, schema: Schema): T = {
     val url   = s"jdbc:h2:mem:test_database_" + Random.nextInt()
@@ -26,5 +26,4 @@ trait TestSuite_h2 extends CoreTestSuite {
     )
     test(JdbcConn_JS(proxy, RpcRequest.request))
   }
-
 }

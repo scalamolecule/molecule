@@ -11,8 +11,8 @@ import zio.{ZIO, ZLayer}
 
 trait ZioSpec_mongodb extends CoreTestZioSpec {
 
-  override val database = "MongoDB"
   override val platform = "jvm"
+  override val database = "MongoDB"
 
   override def inMem[T](schema: Schema): ZLayer[T, Throwable, Conn] = {
     ZLayer.scoped(

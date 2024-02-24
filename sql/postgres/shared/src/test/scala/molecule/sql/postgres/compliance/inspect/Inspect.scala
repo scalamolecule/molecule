@@ -1,13 +1,13 @@
-package molecule.sql.mariadb.compliance.fallback
+package molecule.sql.postgres.compliance.inspect
 
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
-import molecule.sql.mariadb.async._
-import molecule.sql.mariadb.setup.TestSuite_mariadb
+import molecule.sql.postgres.async._
+import molecule.sql.postgres.setup.TestSuite_postgres
 import utest._
 import scala.language.implicitConversions
 
-object Inspect extends TestSuite_mariadb {
+object Inspect extends TestSuite_postgres {
 
   override lazy val tests = Tests {
 
@@ -254,17 +254,7 @@ object Inspect extends TestSuite_mariadb {
 
           UPDATE Ns
           SET
-            ints = (
-              SELECT
-                JSON_ARRAYAGG(
-                  CASE
-                    WHEN table_1.v = 3 THEN 6
-                    WHEN table_1.v = 4 THEN 7
-                    ELSE table_1.v
-                  END
-                )
-              FROM JSON_TABLE(Ns.ints, '$[*]' COLUMNS (v INT PATH '$')) table_1
-            )
+            ints = ARRAY_REPLACE(ARRAY_REPLACE(ints, ?, ?), ?, ?)
           WHERE Ns.id IN(1)
           ----------------------------------------
           */

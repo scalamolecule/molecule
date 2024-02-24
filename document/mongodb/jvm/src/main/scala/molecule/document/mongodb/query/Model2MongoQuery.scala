@@ -36,7 +36,6 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     val elements1                              = if (altElements.isEmpty) elements0 else altElements
     val (elements2, initialNs, hasFilterAttr0) = validateQueryModel(elements1)
     hasFilterAttr = hasFilterAttr0
-    //    elements2.foreach(println)
 
     topBranch = new FlatEmbed(ns = initialNs, cardMany = true)
     b = topBranch
@@ -55,8 +54,6 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     topStages.addAll(topBranch.getStages)
 
     pagination(topStages, optOffset, optLimit)
-
-    //    println(topBranch)
 
     // Return elements with possible filter attribute resolutions
     (initialNs, topStages)

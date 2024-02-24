@@ -1,13 +1,13 @@
-package molecule.sql.postgres.compliance.fallback
+package molecule.sql.h2.compliance.inspect
 
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
-import molecule.sql.postgres.async._
-import molecule.sql.postgres.setup.TestSuite_postgres
+import molecule.sql.h2.async._
+import molecule.sql.h2.setup.TestSuite_h2
 import utest._
 import scala.language.implicitConversions
 
-object Inspect extends TestSuite_postgres {
+object Inspect extends TestSuite_h2 {
 
   override lazy val tests = Tests {
 
@@ -249,12 +249,19 @@ object Inspect extends TestSuite_postgres {
           /*
           ========================================
           UPDATE:
-          AttrOneTacID("Ns", "id", Eq, Seq("1"), None, None, Nil, Nil, None, None, Seq(0, 0))
+          AttrOneTacID("Ns", "id", Eq, Seq("42"), None, None, Nil, Nil, None, None, Seq(0, 0))
           AttrSetManInt("Ns", "ints", Swap, Seq(Set(3), Set(4), Set(6), Set(7)), None, None, Nil, Nil, None, None, Seq(0, 30))
 
           UPDATE Ns
           SET
-            ints = ARRAY_REPLACE(ARRAY_REPLACE(ints, ?, ?), ?, ?)
+            Ns.ints = ARRAY(
+              SELECT CASE
+                WHEN v = ? THEN ?
+                WHEN v = ? THEN ?
+                ELSE v
+              END
+              FROM TABLE(v INT = (SELECT Ns.ints FROM Ns WHERE Ns.id IN (1)))
+            )
           WHERE Ns.id IN(1)
           ----------------------------------------
           */

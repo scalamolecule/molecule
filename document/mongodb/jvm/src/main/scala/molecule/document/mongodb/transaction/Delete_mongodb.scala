@@ -31,7 +31,6 @@ trait Delete_mongodb
       optIds.get
     } else if (filterElements.nonEmpty) {
       val filterElements1 = AttrOneManID(ns, "id", V) +: filterElements
-      SpiSync_mongodb.query_inspect[String](Query(filterElements1))(conn)
       SpiSync_mongodb.query_get[String](Query(filterElements1))(conn)
     } else {
       throw ModelError("Missing filters in delete molecule:\n" + elements.mkString("\n"))

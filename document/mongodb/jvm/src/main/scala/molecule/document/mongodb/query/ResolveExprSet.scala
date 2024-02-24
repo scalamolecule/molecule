@@ -155,11 +155,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     mandatory: Boolean
   ): Unit = {
     op match {
-      case V         =>
-
-
-
-        attr(uniqueField, field, mandatory)
+      case V         => attr(uniqueField, field, mandatory)
       case Eq        => equal(field, sets, res)
       case Neq       => neq(uniqueField, field, sets, res, mandatory)
       case Has       => has(uniqueField, field, sets, res, mandatory)

@@ -25,7 +25,7 @@ object AttrToString extends TestSuite with Validations {
           """AttrOneManInt("Ns", "int", V, Seq(1, 2), None, None, Nil, Nil, None, Some("a1"), Nil)"""
 
         attr.AttrOneManLong("Ns", "long", V, Seq(1L, 2L), None, None, Nil, Nil, Some("ref"), Some("a1"), Nil).toString ==>
-          """AttrOneManLong("Ns", "long", V, Seq(1L, 2L), None, Nil, Nil , Some("ref"), Some("a1"), Nil)"""
+          """AttrOneManLong("Ns", "long", V, Seq(1L, 2L), None, None, Nil, Nil, Some("ref"), Some("a1"), Nil)"""
 
         attr.AttrOneManFloat("Ns", "float", V, Seq(1.1f, 2.2f), None, None, Nil, Nil, None, Some("a1")).toString === // tolerate js precision
           """AttrOneManFloat("Ns", "float", V, Seq(1.1f, 2.2f), None, None, Nil, Nil, None, Some("a1"), Nil)"""
@@ -69,7 +69,7 @@ object AttrToString extends TestSuite with Validations {
           """AttrOneTacInt("Ns", "int", V, Seq(1, 2), None, None, Nil, Nil, None, Some("a1"), Nil)"""
 
         attr.AttrOneTacLong("Ns", "long", V, Seq(1L, 2L), None, None, Nil, Nil, Some("ref"), Some("a1"), Nil).toString ==>
-          """AttrOneTacLong("Ns", "long", V, Seq(1L, 2L), None, Nil, Nil, Some("ref"), Some("a1"), Nil)"""
+          """AttrOneTacLong("Ns", "long", V, Seq(1L, 2L), None, None, Nil, Nil, Some("ref"), Some("a1"), Nil)"""
 
         attr.AttrOneTacFloat("Ns", "float", V, Seq(1.1f, 2.2f), None, None, Nil, Nil, None, Some("a1")).toString ===
           """AttrOneTacFloat("Ns", "float", V, Seq(1.1f, 2.2f), None, None, Nil, Nil, None, Some("a1"), Nil)"""
@@ -113,7 +113,7 @@ object AttrToString extends TestSuite with Validations {
           """AttrOneOptInt("Ns", "int", V, Some(Seq(1, 2)), None, None, Nil, Nil, None, Some("a1"), Nil)"""
 
         attr.AttrOneOptLong("Ns", "long", V, Some(Seq(1L, 2L)), None, None, Nil, Nil, Some("ref"), Some("a1"), Nil).toString ==>
-          """AttrOneOptLong("Ns", "long", V, Some(Seq(1L, 2L)), None, Nil, Nil, Some("ref"), Some("a1"), Nil)"""
+          """AttrOneOptLong("Ns", "long", V, Some(Seq(1L, 2L)), None, None, Nil, Nil, Some("ref"), Some("a1"), Nil)"""
 
         attr.AttrOneOptFloat("Ns", "float", V, Some(Seq(1.1f, 2.2f)), None, None, Nil, Nil, None, Some("a1")).toString ===
           """AttrOneOptFloat("Ns", "float", V, Some(Seq(1.1f, 2.2f)), None, None, Nil, Nil, None, Some("a1"), Nil)"""
@@ -295,7 +295,7 @@ object AttrToString extends TestSuite with Validations {
           """AttrSetManInt("Ns", "int", V, Seq(Set(1, 2), Set(3)), None, None, Nil, Nil, None, Some("a1"), Nil)"""
 
         attr.AttrSetManLong("Ns", "long", V, Seq(Set(1L, 2L), Set(3L)), None, None, Nil, Nil, Some("ref"), Some("a1"), Nil).toString ==>
-          """AttrSetManLong("Ns", "long", V, Seq(Set(1L, 2L), Set(3L)), None, Nil, Nil, Some("ref"), Some("a1"), Nil)"""
+          """AttrSetManLong("Ns", "long", V, Seq(Set(1L, 2L), Set(3L)), None, None, Nil, Nil, Some("ref"), Some("a1"), Nil)"""
 
         attr.AttrSetManFloat("Ns", "float", V, Seq(Set(1.1f, 2.2f), Set(3.3f)), None, None, Nil, Nil, None, Some("a1")).toString ===
           """AttrSetManFloat("Ns", "float", V, Seq(Set(1.1f, 2.2f), Set(3.3f)), None, None, Nil, Nil, None, Some("a1"), Nil)"""
@@ -339,7 +339,7 @@ object AttrToString extends TestSuite with Validations {
           """AttrSetTacInt("Ns", "int", V, Seq(Set(1, 2), Set(3)), None, None, Nil, Nil, None, Some("a1"), Nil)"""
 
         attr.AttrSetTacLong("Ns", "long", V, Seq(Set(1L, 2L), Set(3L)), None, None, Nil, Nil, Some("ref"), Some("a1"), Nil).toString ==>
-          """AttrSetTacLong("Ns", "long", V, Seq(Set(1L, 2L), Set(3L)), None, Nil, Nil, Some("ref"), Some("a1"), Nil)"""
+          """AttrSetTacLong("Ns", "long", V, Seq(Set(1L, 2L), Set(3L)), None, None, Nil, Nil, Some("ref"), Some("a1"), Nil)"""
 
         attr.AttrSetTacFloat("Ns", "float", V, Seq(Set(1.1f, 2.2f), Set(3.3f)), None, None, Nil, Nil, None, Some("a1")).toString ===
           """AttrSetTacFloat("Ns", "float", V, Seq(Set(1.1f, 2.2f), Set(3.3f)), None, None, Nil, Nil, None, Some("a1"), Nil)"""
@@ -383,7 +383,7 @@ object AttrToString extends TestSuite with Validations {
           """AttrSetOptInt("Ns", "int", V, Some(Seq(Set(1, 2), Set(3))), None, None, Nil, Nil, None, Some("a1"), Nil)"""
 
         attr.AttrSetOptLong("Ns", "long", V, Some(Seq(Set(1L, 2L), Set(3L))), None, None, Nil, Nil, Some("ref"), Some("a1"), Nil).toString ==>
-          """AttrSetOptLong("Ns", "long", V, Some(Seq(Set(1L, 2L), Set(3L))), None, Nil, Nil, Some("ref"), Some("a1"), Nil)"""
+          """AttrSetOptLong("Ns", "long", V, Some(Seq(Set(1L, 2L), Set(3L))), None, None, Nil, Nil, Some("ref"), Some("a1"), Nil)"""
 
         attr.AttrSetOptFloat("Ns", "float", V, Some(Seq(Set(1.1f, 2.2f), Set(3.3f))), None, None, Nil, Nil, None, Some("a1")).toString ===
           """AttrSetOptFloat("Ns", "float", V, Some(Seq(Set(1.1f, 2.2f), Set(3.3f))), None, None, Nil, Nil, None, Some("a1"), Nil)"""

@@ -114,7 +114,7 @@ trait LambdasBase extends BaseHelpers with AggrUtils { self: SqlQueryBase =>
   protected lazy val json2oneBigInt        : String => BigInt         = (v: String) => BigInt(v)
   protected lazy val json2oneBigDecimal    : String => BigDecimal     = (v: String) => BigDecimal(v)
   protected lazy val json2oneDate          : String => Date           = (v: String) => new Date(v.toLong)
-  protected lazy val json2oneDuration      : String => Duration       = (v: String) => {println("hej: " + v); Duration.parse(v)}
+  protected lazy val json2oneDuration      : String => Duration       = (v: String) => Duration.parse(v)
   protected lazy val json2oneInstant       : String => Instant        = (v: String) => Instant.parse(v)
   protected lazy val json2oneLocalDate     : String => LocalDate      = (v: String) => LocalDate.parse(v)
   protected lazy val json2oneLocalTime     : String => LocalTime      = (v: String) => LocalTime.parse(v)

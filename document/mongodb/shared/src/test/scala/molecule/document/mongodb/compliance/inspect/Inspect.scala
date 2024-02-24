@@ -1,4 +1,4 @@
-package molecule.document.mongodb.compliance.fallback
+package molecule.document.mongodb.compliance.inspect
 
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._

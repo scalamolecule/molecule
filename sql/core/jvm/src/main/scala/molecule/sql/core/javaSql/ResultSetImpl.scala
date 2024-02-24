@@ -2,7 +2,6 @@ package molecule.sql.core.javaSql
 
 import java.net.URL
 import java.sql.ResultSet
-import java.util.Date
 
 class ResultSetImpl(val underlying: ResultSet) extends ResultSetInterface {
 

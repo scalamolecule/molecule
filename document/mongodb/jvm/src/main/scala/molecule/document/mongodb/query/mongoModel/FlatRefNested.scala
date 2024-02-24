@@ -93,38 +93,6 @@ class FlatRefNested(
 
 
     postStages.add(new BsonDocument("$lookup", lookup))
-
-    // We might need the following..
-
-    //    val dot1 = if (parent0.get.isEmbedded) dot else ""
-    //    val refNotEmpty  = new BsonDocument(dot1 + refAttr, new BsonDocument("$ne", new BsonArray))
-    //    val outerMatches = if (parent0.get.filterMatches.isEmpty) {
-    //      refNotEmpty
-    //    } else {
-    //      val all = new BsonArray()
-    //      all.add(refNotEmpty)
-    //      parent0.get.filterMatches.forEach(m => all.add(m.toBsonDocument))
-    //      new BsonDocument("$and", all)
-    //    }
-    //    postStages.add(new BsonDocument("$match", outerMatches))
-    //
-    //    // Get head document of ref array
-    //    postStages.add(
-    //      new BsonDocument("$addFields",
-    //        new BsonDocument(dot1 + refAttr,
-    //          new BsonDocument("$first", new BsonString("$" + dot1 + refAttr))
-    //        )
-    //      )
-    //    )
-    //
-    //    // Match filter attribute with flattened ref fields
-    //    addStage("$match", postMatches)
-    //
-    //    if (parent0.nonEmpty && projection.isEmpty) {
-    //      // Remove empty projections with only tacit attributes (or no attributes)
-    //      parent0.get.projection.remove(refAttr)
-    //    }
-
     postStages
   }
 

@@ -6,7 +6,6 @@ import java.util.{Date, UUID}
 import molecule.base.error.ModelError
 import molecule.core.util.Executor._
 import molecule.sql.mariadb.async._
-import molecule.sql.mariadb.compliance.fallback.RawQuery.{bigDecimal1, bigInt1, boolean1, byte1, char1, date1, double1, duration1, float1, instant1, int1, localDate1, localDateTime1, localTime1, long1, offsetDateTime1, offsetTime1, ref1, ref2, short1, string1, string2, uri1, uuid1, zonedDateTime1}
 import molecule.sql.mariadb.setup.TestSuite_mariadb
 import utest._
 import scala.language.implicitConversions
@@ -18,8 +17,6 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
-
-
 
       for {
 

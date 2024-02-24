@@ -74,20 +74,21 @@ object Rpc_datomic
 
   override def insert(
     proxy: ConnProxy,
-    tplElements: List[Element],
+    elements: List[Element],
     tplsSerialized: Array[Byte],
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
-      tplsEither = UnpickleTpls[Any](tplElements, ByteBuffer.wrap(tplsSerialized)).unpickle
-      tplProducts = tplsEither match {
+      tplsEither = UnpickleTpls[Any](elements, ByteBuffer.wrap(tplsSerialized)).unpickle
+      tpls = tplsEither match {
         case Right(tpls) =>
-          (if (countValueAttrs(tplElements) == 1) {
+          (if (countValueAttrs(elements) == 1) {
             tpls.map(Tuple1(_))
           } else tpls).asInstanceOf[Seq[Product]]
         case Left(err)   => throw err // catched in outer either wrapper
       }
-      stmts = (new ResolveInsert with Insert_datomic).getStmts(proxy.nsMap, tplElements, tplProducts)
+      stmts = (new ResolveInsert with Insert_datomic)
+        .getStmts(proxy.nsMap, elements, tpls)
       txReport <- conn.transact_async(stmts)
     } yield txReport
   }

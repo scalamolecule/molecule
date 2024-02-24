@@ -23,7 +23,7 @@ trait AggrSetNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
           (2, Set(bigDecimal2)),
           (2, Set(bigDecimal3, bigDecimal4)),
           (2, Set(bigDecimal3, bigDecimal4)),
-        )).i.transact
+        )).transact
 
         // Sum of all values
         _ <- Ns.bigDecimals(sum).query.get.map(

@@ -23,7 +23,7 @@ trait AggrSetNum_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(bigInt2)),
           (2, Set(bigInt3, bigInt4)),
           (2, Set(bigInt3, bigInt4)),
-        )).i.transact
+        )).transact
 
         // Sum of all values
         _ <- Ns.bigInts(sum).query.get.map(

@@ -19,15 +19,18 @@ trait Save_mongodb
     val nsData = new BsonArray()
     nsData.add(doc) // 1 row of data to save
     initialNs = getInitialNs(elements)
-    nsDocs(initialNs) = nsData
+    nsIndex = 0
+    nsDocs(initialNs) = (nsIndex, nsData)
 
     resolve(elements)
 
     val data = new BsonDocument("_action", new BsonString("insert"))
-    if (!nsDocs.head._2.isEmpty) {
+
+    val nssDocsList = nsDocs.toList.sortBy(_._2._1)
+    if (!nssDocsList.head._2._2.isEmpty) {
       data.append("_selfJoins", new BsonInt32(selfJoins))
       // Loop referenced namespaces
-      nsDocs.foreach { case (ns, nsData) =>
+      nsDocs.foreach { case (ns, (_, nsData)) =>
         data.append(ns, nsData)
       }
     }
@@ -94,12 +97,7 @@ trait Save_mongodb
         // Count top level self joins for correct id insertions in MongoConn_JVM.insertReferenced
         selfJoins += 1
       }
-//      else {
-//        // Add top level ref id if not a self-join
-//        refIds.add(refId)
-//      }
 
-      //      refIds.add(refId)
       val ref = card match {
         case CardOne => refId
         case _       =>
@@ -117,9 +115,12 @@ trait Save_mongodb
       docs = docs.init :+ (docs.last :+ doc)
 
       // Add doc to namespace docs
-      val nsData = nsDocs.getOrElse(refNs, new BsonArray())
+      val (i, nsData) = nsDocs.getOrElse(refNs, {
+        nsIndex += 1
+        (nsIndex, new BsonArray())
+      })
       nsData.add(doc)
-      nsDocs(refNs) = nsData
+      nsDocs(refNs) = (i, nsData)
     }
   }
 

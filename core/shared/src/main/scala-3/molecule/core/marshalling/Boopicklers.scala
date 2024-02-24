@@ -113,6 +113,7 @@ object Boopicklers extends MoleculeLogging {
   pickleValue.addConcreteType[OneChar]
 
   implicit val pickleAttr: CompositePickler[Attr] = compositePickler[Attr]
+  pickleAttr.addConcreteType[AttrOneManID]
   pickleAttr.addConcreteType[AttrOneManString]
   pickleAttr.addConcreteType[AttrOneManInt]
   pickleAttr.addConcreteType[AttrOneManLong]
@@ -136,6 +137,7 @@ object Boopicklers extends MoleculeLogging {
   pickleAttr.addConcreteType[AttrOneManFloat]
   pickleAttr.addConcreteType[AttrOneManChar]
 
+  pickleAttr.addConcreteType[AttrOneOptID]
   pickleAttr.addConcreteType[AttrOneOptString]
   pickleAttr.addConcreteType[AttrOneOptInt]
   pickleAttr.addConcreteType[AttrOneOptLong]
@@ -159,6 +161,7 @@ object Boopicklers extends MoleculeLogging {
   pickleAttr.addConcreteType[AttrOneOptFloat]
   pickleAttr.addConcreteType[AttrOneOptChar]
 
+  pickleAttr.addConcreteType[AttrOneTacID]
   pickleAttr.addConcreteType[AttrOneTacString]
   pickleAttr.addConcreteType[AttrOneTacInt]
   pickleAttr.addConcreteType[AttrOneTacLong]
@@ -182,6 +185,7 @@ object Boopicklers extends MoleculeLogging {
   pickleAttr.addConcreteType[AttrOneTacFloat]
   pickleAttr.addConcreteType[AttrOneTacChar]
 
+  pickleAttr.addConcreteType[AttrSetManID]
   pickleAttr.addConcreteType[AttrSetManString]
   pickleAttr.addConcreteType[AttrSetManInt]
   pickleAttr.addConcreteType[AttrSetManLong]
@@ -205,6 +209,7 @@ object Boopicklers extends MoleculeLogging {
   pickleAttr.addConcreteType[AttrSetManFloat]
   pickleAttr.addConcreteType[AttrSetManChar]
 
+  pickleAttr.addConcreteType[AttrSetOptID]
   pickleAttr.addConcreteType[AttrSetOptString]
   pickleAttr.addConcreteType[AttrSetOptInt]
   pickleAttr.addConcreteType[AttrSetOptLong]
@@ -228,6 +233,7 @@ object Boopicklers extends MoleculeLogging {
   pickleAttr.addConcreteType[AttrSetOptFloat]
   pickleAttr.addConcreteType[AttrSetOptChar]
 
+  pickleAttr.addConcreteType[AttrSetTacID]
   pickleAttr.addConcreteType[AttrSetTacString]
   pickleAttr.addConcreteType[AttrSetTacInt]
   pickleAttr.addConcreteType[AttrSetTacLong]
@@ -258,6 +264,7 @@ object Boopicklers extends MoleculeLogging {
   pickleElement.addConcreteType[Nested]
   pickleElement.addConcreteType[NestedOpt]
 
+  pickleElement.addConcreteType[AttrOneManID]
   pickleElement.addConcreteType[AttrOneManString]
   pickleElement.addConcreteType[AttrOneManInt]
   pickleElement.addConcreteType[AttrOneManLong]
@@ -281,6 +288,7 @@ object Boopicklers extends MoleculeLogging {
   pickleElement.addConcreteType[AttrOneManFloat]
   pickleElement.addConcreteType[AttrOneManChar]
 
+  pickleElement.addConcreteType[AttrOneOptID]
   pickleElement.addConcreteType[AttrOneOptString]
   pickleElement.addConcreteType[AttrOneOptInt]
   pickleElement.addConcreteType[AttrOneOptLong]
@@ -304,6 +312,7 @@ object Boopicklers extends MoleculeLogging {
   pickleElement.addConcreteType[AttrOneOptFloat]
   pickleElement.addConcreteType[AttrOneOptChar]
 
+  pickleElement.addConcreteType[AttrOneTacID]
   pickleElement.addConcreteType[AttrOneTacString]
   pickleElement.addConcreteType[AttrOneTacInt]
   pickleElement.addConcreteType[AttrOneTacLong]
@@ -327,6 +336,7 @@ object Boopicklers extends MoleculeLogging {
   pickleElement.addConcreteType[AttrOneTacFloat]
   pickleElement.addConcreteType[AttrOneTacChar]
 
+  pickleElement.addConcreteType[AttrSetManID]
   pickleElement.addConcreteType[AttrSetManString]
   pickleElement.addConcreteType[AttrSetManInt]
   pickleElement.addConcreteType[AttrSetManLong]
@@ -350,6 +360,7 @@ object Boopicklers extends MoleculeLogging {
   pickleElement.addConcreteType[AttrSetManFloat]
   pickleElement.addConcreteType[AttrSetManChar]
 
+  pickleElement.addConcreteType[AttrSetOptID]
   pickleElement.addConcreteType[AttrSetOptString]
   pickleElement.addConcreteType[AttrSetOptInt]
   pickleElement.addConcreteType[AttrSetOptLong]
@@ -373,6 +384,7 @@ object Boopicklers extends MoleculeLogging {
   pickleElement.addConcreteType[AttrSetOptFloat]
   pickleElement.addConcreteType[AttrSetOptChar]
 
+  pickleElement.addConcreteType[AttrSetTacID]
   pickleElement.addConcreteType[AttrSetTacString]
   pickleElement.addConcreteType[AttrSetTacInt]
   pickleElement.addConcreteType[AttrSetTacLong]
@@ -396,7 +408,6 @@ object Boopicklers extends MoleculeLogging {
   pickleElement.addConcreteType[AttrSetTacFloat]
   pickleElement.addConcreteType[AttrSetTacChar]
 
-
   implicit val pickleInsertError: CompositePickler[InsertError] =
     compositePickler[InsertError]
 
@@ -414,5 +425,6 @@ object Boopicklers extends MoleculeLogging {
   implicit val pickleConnProxy: CompositePickler[ConnProxy] =
     compositePickler[ConnProxy]
       .addConcreteType[DatomicProxy]
+      .addConcreteType[MongoProxy]
       .addConcreteType[JdbcProxy]
 }

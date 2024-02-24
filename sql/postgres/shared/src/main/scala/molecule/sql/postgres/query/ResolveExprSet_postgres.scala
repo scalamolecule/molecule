@@ -104,13 +104,10 @@ trait ResolveExprSet_postgres
     optSets match {
       case None | Some(Nil) =>
         setOptAttr(col, res)
-      //        replaceCast(res.array2optSet)
       case Some(sets) =>
         setNeq(col, sets, res, true)
-        //        replaceCast(res.nestedArray2optCoalescedSet)
         replaceCast(res.array2optSet)
     }
-
     // Only asserted values
     notNull += col
   }
@@ -130,12 +127,9 @@ trait ResolveExprSet_postgres
       case 1 =>
         val set = sets.head
         set.size match {
-          case 0 =>
-            where += (("FALSE", ""))
-          case 1 =>
-            where += (("", contains(set.head)))
-          case _ =>
-            where += (("", containsSet(set)))
+          case 0 => where += (("FALSE", ""))
+          case 1 => where += (("", contains(set.head)))
+          case _ => where += (("", containsSet(set)))
         }
 
       case _ =>
@@ -159,7 +153,6 @@ trait ResolveExprSet_postgres
       val setsWithValues = sets.filterNot(_.isEmpty)
       if (setsWithValues.nonEmpty) {
         has(col, sets, res, one2sql, true)
-        //        replaceCast(res.nestedArray2optCoalescedSet)
         replaceCast(res.array2optSet)
       } else {
         where += (("FALSE", ""))
@@ -442,7 +435,6 @@ trait ResolveExprSet_postgres
         groupByCols -= col
         having += "COUNT(*) > 0"
         aggregate = true
-//        replaceCast(res.nestedArray2coalescedSet)
         replaceCast(res.array2set)
       }
       where += (("", s"$col @> $filterAttr"))
@@ -462,7 +454,6 @@ trait ResolveExprSet_postgres
         groupByCols -= col
         having += "COUNT(*) > 0"
         aggregate = true
-//        replaceCast(res.nestedArray2coalescedSet)
         replaceCast(res.array2set)
       }
       where += (("", s"ARRAY(SELECT UNNEST($col) INTERSECT SELECT $filterAttr) = '{}'"))
@@ -477,13 +468,6 @@ trait ResolveExprSet_postgres
     val colAlias = col.replace(".", "_")
     select -= col
     groupByCols -= col
-    //    if (res.tpe == "Boolean" && !expectedFilterAttrs.contains(col) && !isNestedMan && !isNestedOpt) {
-    //      // If we don't apply this hack, Boolean sets throw
-    //      // ERROR: cannot accumulate arrays of different dimensionality
-    //      // https://stackoverflow.com/questions/46849237/postgresql-array-agginteger/46849678#46849678
-    //      select += s"ARRAY_AGG(DISTINCT $colAlias)"
-    //      tempTables += s"UNNEST($col) AS $colAlias"
-    //    } else {
     mode match {
       case "man" =>
         select += s"ARRAY_AGG(DISTINCT $colAlias)"
@@ -492,14 +476,12 @@ trait ResolveExprSet_postgres
         replaceCast(res.array2set)
 
       case "opt" =>
-        //          select += s"COALESCE(ARRAY_AGG($col) FILTER (WHERE $col IS NOT NULL), '{}')"
         select += s"COALESCE(ARRAY_AGG($col) FILTER (WHERE $col <> '{}'), '{}')"
         replaceCast(res.nestedArray2optCoalescedSet)
 
       case "tac" =>
         where += (("", s"$col <> '{}'"))
     }
-    //    }
     aggregate = true
   }
 

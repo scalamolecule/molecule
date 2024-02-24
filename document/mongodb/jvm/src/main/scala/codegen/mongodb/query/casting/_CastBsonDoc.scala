@@ -36,8 +36,7 @@ object _CastBsonDoc extends MongoGenBase("CastBsonDoc", "/query/casting") {
        |        (outerDoc: BsonDocument) => {
        |          // Traverse to sub document
        |          val subDoc = refAttrPath.foldLeft(outerDoc) {
-       |            case (curDoc, refAttr) =>
-       |              curDoc.get(refAttr).asDocument()
+       |            case (curDoc, refAttr) => curDoc.get(refAttr).asDocument()
        |          }
        |          fieldCast(subDoc)
        |        }
@@ -56,21 +55,26 @@ object _CastBsonDoc extends MongoGenBase("CastBsonDoc", "/query/casting") {
        |    level += 1
        |    val nestedRefAttr      = nestedCasts.head.head._1.get
        |    val castNestedDocument = levelCaster(nestedCasts)
+       |    val singleNestedOpt    = nestedCasts.last.last._3.size == 1
+       |
        |    (outerDoc: BsonDocument) => {
        |      level += 1
        |      val nestedRows = ListBuffer.empty[Any]
        |      val doc        = lastAttrPath match {
        |        case Nil => outerDoc
        |        case _   => lastAttrPath.foldLeft(outerDoc) {
-       |          case (curDoc, refAttr) =>
-       |            curDoc.get(refAttr).asDocument()
+       |          case (curDoc, refAttr) => curDoc.get(refAttr).asDocument()
        |        }
        |      }
        |      curLevelDocs.clear()
        |      doc.get(nestedRefAttr).asArray().forEach { nestedRow =>
        |        nestedRows += castNestedDocument(nestedRow.asDocument())
        |      }
-       |      nestedRows.toList
+       |      if (singleNestedOpt && nestedRows.nonEmpty && nestedRows.head.isInstanceOf[Set[_]]) {
+       |        List(nestedRows.asInstanceOf[ListBuffer[Set[_]]].flatten.toSet)
+       |      } else {
+       |        nestedRows.toList
+       |      }
        |    }
        |  }
        |

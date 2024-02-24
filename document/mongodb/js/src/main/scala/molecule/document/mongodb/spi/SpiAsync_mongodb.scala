@@ -18,10 +18,8 @@ object SpiAsync_mongodb extends SpiAsync_mongodb
 trait SpiAsync_mongodb extends SpiAsync with Renderer with FutureUtils {
 
   protected def printInspectQuery(label: String, elements: List[Element])
-                                          (implicit ec: EC): Future[Unit] = Future {
-//    val query = new Model2MongoQuery(elements).getBsonQuery(Nil, None, None, None)
-//    printRaw(label, Nil, query)
-    ???
+                                 (implicit ec: EC): Future[Unit] = Future {
+    printRaw(label, elements)
   }
 
 
@@ -191,25 +189,10 @@ trait SpiAsync_mongodb extends SpiAsync with Renderer with FutureUtils {
   }
 
 
-  // Fallbacks --------------------------------------------------------
-
-  override def fallback_rawQuery(
-    query: String,
-    debug: Boolean = false,
-  )(implicit conn: Conn, ec: EC): Future[List[List[Any]]] = ???
-
-  override def fallback_rawTransact(
-    txData: String,
-    debug: Boolean = false
-  )(implicit conn: Conn, ec: EC): Future[TxReport] = ???
-
   // Util --------------------------------------
 
   private def printInspectTx(label: String, elements: List[Element])
                             (implicit ec: EC): Future[Unit] = {
     Future(printRaw("RPC " + label, elements))
   }
-
-//  protected def printInspectQuery(label: String, elements: List[Element])
-//                                 (implicit ec: EC): Future[Unit]
 }

@@ -9,8 +9,8 @@ import molecule.datalog.datomic.facade.DatomicConn_JS
 
 trait TestSuite_datomic extends CoreTestSuite {
 
-  override val database = "Datomic"
   override val platform = "js"
+  override val database = "Datomic"
 
   override def inMem[T](test: Conn => T, schema: Schema): T = {
     val proxy = DatomicProxy(

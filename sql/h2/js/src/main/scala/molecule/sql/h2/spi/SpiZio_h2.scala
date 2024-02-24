@@ -108,19 +108,6 @@ trait SpiZio_h2 extends SpiZio with SpiZioBase_h2 {
   }
 
 
-  // Fallbacks --------------------------------------------------------
-
-  override def fallback_rawQuery(
-    query: String,
-    debug: Boolean = false,
-  ): ZIO[Conn, MoleculeError, List[List[Any]]] = ??? // todo
-
-  override def fallback_rawTransact(
-    txData: String,
-    debug: Boolean = false
-  ): ZIO[Conn, MoleculeError, TxReport] = ??? // todo
-
-
   // Helpers ---------
 
   private def async2zio[T](run: (JdbcConn_JS, EC) => Future[T]): ZIO[Conn, MoleculeError, T] = {

@@ -2,7 +2,6 @@
 package molecule.document.mongodb.query.casting
 
 import molecule.base.util.BaseHelpers
-import molecule.document.mongodb.sync.pretty
 import org.bson._
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
@@ -49,19 +48,7 @@ trait CastBsonDoc_ extends BaseHelpers {
     val castNestedDocument = levelCaster(nestedCasts)
     val singleNestedOpt    = nestedCasts.last.last._3.size == 1
 
-    //    debugCasts(nestedCasts)
-
-    //    if(nestedCasts.last.last._3.size == 1) {
-    //
-    //    }
-
-
     (outerDoc: BsonDocument) => {
-
-      //      println("=====================================")
-      //      println(outerDoc.toJson(pretty))
-
-
       level += 1
       val nestedRows = ListBuffer.empty[Any]
       val doc        = lastAttrPath match {
@@ -74,12 +61,12 @@ trait CastBsonDoc_ extends BaseHelpers {
       doc.get(nestedRefAttr).asArray().forEach { nestedRow =>
         nestedRows += castNestedDocument(nestedRow.asDocument())
       }
-
-      //      println(nestedRows)
-
       if (singleNestedOpt && nestedRows.nonEmpty && nestedRows.head.isInstanceOf[Set[_]]) {
-//        println("A")
-        List(nestedRows.asInstanceOf[ListBuffer[Set[_]]].flatten.toSet)
+        // (can't flatten like this with Scala 2.12.18)
+        //        List(nestedRows.asInstanceOf[ListBuffer[Set[_]]].flatten.toSet)
+        val set = mutable.Set.empty[Any]
+        nestedRows.asInstanceOf[ListBuffer[Set[Any]]].foreach(s => set ++= s)
+        List(set)
       } else {
         nestedRows.toList
       }

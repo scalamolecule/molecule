@@ -23,7 +23,7 @@ trait AggrSetNum_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(float2)),
           (2, Set(float3, float4)),
           (2, Set(float3, float4)),
-        )).i.transact
+        )).transact
 
         // Sum of all values
         _ <- Ns.floats(sum).query.get.map(

@@ -10,8 +10,8 @@ import zio.ZLayer
 
 trait ZioSpec_mysql extends CoreTestZioSpecBase {
 
-  override val database = "Mysql"
   override val platform = "js"
+  override val database = "Mysql"
 
   override def inMem[T](schema: Schema): ZLayer[T, Throwable, Conn] = {
     val url   = "jdbc:tc:mysql:8.1://localhost:3306/test?allowMultiQueries=true"

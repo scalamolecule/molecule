@@ -1,6 +1,6 @@
 package molecule.sql.core.query
 
-import molecule.base.ast.{Card, MetaNs}
+import molecule.base.ast.Card
 import molecule.base.error._
 import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._

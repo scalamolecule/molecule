@@ -9,7 +9,7 @@ import scala.io.StdIn
  *
  * Run with
  *
- * sbt sqlH2JVM/run
+ * sbt documentMongodbJVM/run
  */
 object RpcServer_mongodb extends MoleculeRpcServer_AkkaHttp(Rpc_mongodb) with App {
 

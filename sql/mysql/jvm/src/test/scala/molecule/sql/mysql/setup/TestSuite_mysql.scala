@@ -11,8 +11,8 @@ import molecule.sql.mysql.setup.{Connection_mysql => c}
 
 trait TestSuite_mysql extends CoreTestSuite with BaseHelpers {
 
-  override val database = "Mysql"
   override val platform = "jvm"
+  override val database = "Mysql"
 
   override def inMem[T](test: Conn => T, schema: Schema): T = {
     val conn = schema match {

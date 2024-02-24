@@ -132,7 +132,6 @@ trait SpiSync_mongodb
   }
 
   override def save_inspect(save: Save)(implicit conn0: Conn): Unit = {
-    //    val conn = conn0.asInstanceOf[MongoConn_JVM]
     tryInspect("save", save.elements) {
       printInspectTx("SAVE", save.elements, save_getData(save))
     }

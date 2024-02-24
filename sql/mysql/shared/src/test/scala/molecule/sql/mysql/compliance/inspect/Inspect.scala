@@ -1,13 +1,13 @@
-package molecule.datalog.datomic.compliance.fallback
+package molecule.sql.mysql.compliance.inspect
 
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
-import molecule.datalog.datomic.async._
-import molecule.datalog.datomic.setup.TestSuite_datomic
+import molecule.sql.mysql.async._
+import molecule.sql.mysql.setup.TestSuite_mysql
 import utest._
 import scala.language.implicitConversions
 
-object Inspect extends TestSuite_datomic {
+object Inspect extends TestSuite_mysql {
 
   override lazy val tests = Tests {
 
@@ -23,9 +23,13 @@ object Inspect extends TestSuite_datomic {
           AttrOneManString("Ns", "string", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 5))
           AttrOneManInt("Ns", "int", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 6))
 
-          [:find  ?b ?c
-           :where [?a :Ns/string ?b]
-                  [?a :Ns/int ?c]]
+          SELECT DISTINCT
+            Ns.string,
+            Ns.int
+          FROM Ns
+          WHERE
+            Ns.string IS NOT NULL AND
+            Ns.int    IS NOT NULL;
           ----------------------------------------
           */
         } yield ()
@@ -34,16 +38,20 @@ object Inspect extends TestSuite_datomic {
       "Inspect and query" - types { implicit conn =>
         for {
           _ <- Ns.string("a").int(1).save.transact
-          _ <- Ns.string.int.query.i.get.map(_ ==> List(("a", 1))) // returns query result
+          _ <- Ns.string.int.query.i.get.map(_ ==> List(("a", 1)))
           /*
           ========================================
           QUERY:
           AttrOneManString("Ns", "string", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 5))
           AttrOneManInt("Ns", "int", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 6))
 
-          [:find  ?b ?c
-           :where [?a :Ns/string ?b]
-                  [?a :Ns/int ?c]]
+          SELECT DISTINCT
+            Ns.string,
+            Ns.int
+          FROM Ns
+          WHERE
+            Ns.string IS NOT NULL AND
+            Ns.int    IS NOT NULL;
           ----------------------------------------
           */
         } yield ()
@@ -62,16 +70,21 @@ object Inspect extends TestSuite_datomic {
             List(
               AttrOneManString("Ref", "string", Eq, Seq("foo"), None, None, Nil, Nil, None, None, Seq(1, 55))))
 
-          [:find  ?id0 ?b
-                  (avg ?c) ?e
-           :in    $ [?e ...]
-           :where [?a :Ns/i ?b]
-                  [?a :Ns/int ?c]
-                  [(identity ?a) ?id0]
-                  [?a :Ns/refs ?d]
-                  [?d :Ref/string ?e]]
-
-          List(foo)
+          SELECT DISTINCT
+            Ns.id,
+            Ns.i,
+            AVG(DISTINCT Ns.int) Ns_int_avg,
+            Ref.string
+          FROM Ns
+            INNER JOIN Ns_refs_Ref ON Ns.id = Ns_refs_Ref.Ns_id
+            INNER JOIN Ref         ON Ns_refs_Ref.Ref_id = Ref.id
+          WHERE
+            Ref.string = 'foo' AND
+            Ns.i       IS NOT NULL AND
+            Ns.int     IS NOT NULL AND
+            Ref.string IS NOT NULL
+          GROUP BY Ns.i, Ref.string
+          ORDER BY Ns_int_avg;
           ----------------------------------------
           */
         } yield ()
@@ -90,12 +103,13 @@ object Inspect extends TestSuite_datomic {
           AttrOneManString("Ns", "string", Eq, Seq("a"), None, None, Nil, Nil, None, None, Seq(0, 5))
           AttrOneManInt("Ns", "int", Eq, Seq(1), None, None, Nil, Nil, None, None, Seq(0, 6))
 
-          [
-            [:db/add #db/id[db.part/user -1] :Ns/string a]
-            [:db/add #db/id[db.part/user -1] :Ns/int 1]
-          ]
+          INSERT INTO Ns (
+            string,
+            int
+          ) VALUES (?, ?)
           ----------------------------------------
           */
+          // (values are visible in the model elements)
 
           // Save action was inspected without saving
           _ <- Ns.string.int.query.get.map(_ ==> Nil)
@@ -111,12 +125,13 @@ object Inspect extends TestSuite_datomic {
           AttrOneManString("Ns", "string", Eq, Seq("a"), None, None, Nil, Nil, None, None, Seq(0, 5))
           AttrOneManInt("Ns", "int", Eq, Seq(1), None, None, Nil, Nil, None, None, Seq(0, 6))
 
-          [
-            [:db/add #db/id[db.part/user -1] :Ns/string a]
-            [:db/add #db/id[db.part/user -1] :Ns/int 1]
-          ]
+          INSERT INTO Ns (
+            string,
+            int
+          ) VALUES (?, ?)
           ----------------------------------------
           */
+          // (values are visible in the model elements)
 
           // Save action was inspected and data saved
           _ <- Ns.string.int.query.get.map(_ ==> List(("a", 1)))
@@ -134,14 +149,15 @@ object Inspect extends TestSuite_datomic {
           ========================================
           INSERT:
           AttrOneManString("Ns", "string", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 5))
-          AttrOneManInt("Ns", "int", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 6))
+          AttrOneManInt("Ns", "int_", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 6))
 
-          [
-            [:db/add #db/id[db.part/user -1] :Ns/string a]
-            [:db/add #db/id[db.part/user -1] :Ns/int 1]
-            [:db/add #db/id[db.part/user -2] :Ns/string b]
-            [:db/add #db/id[db.part/user -2] :Ns/int 2]
-          ]
+          INSERT INTO Ns (
+            string,
+            int_
+          ) VALUES (?, ?)
+
+          (a,1)
+          (b,2)
           ----------------------------------------
           */
 
@@ -157,14 +173,15 @@ object Inspect extends TestSuite_datomic {
           ========================================
           INSERT:
           AttrOneManString("Ns", "string", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 5))
-          AttrOneManInt("Ns", "int", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 6))
+          AttrOneManInt("Ns", "int_", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 6))
 
-          [
-            [:db/add #db/id[db.part/user -1] :Ns/string a]
-            [:db/add #db/id[db.part/user -1] :Ns/int 1]
-            [:db/add #db/id[db.part/user -2] :Ns/string b]
-            [:db/add #db/id[db.part/user -2] :Ns/int 2]
-          ]
+          INSERT INTO Ns (
+            string,
+            int_
+          ) VALUES (?, ?)
+
+          (a,1)
+          (b,2)
           ----------------------------------------
           */
 
@@ -184,14 +201,17 @@ object Inspect extends TestSuite_datomic {
           /*
           ========================================
           UPDATE:
-          AttrOneTacID("Ns", "id", Eq, Seq("17592186045418"), None, None, Nil, Nil, None, None, Seq(0, 0))
+          AttrOneTacID("Ns", "id", Eq, Seq("1"), None, None, Nil, Nil, None, None, Seq(0, 0))
           AttrOneManString("Ns", "string", Eq, Seq("ZZZ"), None, None, Nil, Nil, None, None, Seq(0, 5))
 
-          [
-            [:db/add 17592186045418 :Ns/string ZZZ]
-          ]
+          UPDATE Ns
+          SET
+            string = ?
+          WHERE Ns.id IN(1) AND
+            Ns.string IS NOT NULL
           ----------------------------------------
           */
+          // (values are visible in the model elements)
 
           // Update was inspected without updating
           _ <- Ns.string.int.query.get.map(_ ==> List(("a", 1)))
@@ -205,14 +225,17 @@ object Inspect extends TestSuite_datomic {
           /*
           ========================================
           UPDATE:
-          AttrOneTacID("Ns", "id", Eq, Seq("17592186045418"), None, None, Nil, Nil, None, None, Seq(0, 0))
+          AttrOneTacID("Ns", "id", Eq, Seq("1"), None, None, Nil, Nil, None, None, Seq(0, 0))
           AttrOneManString("Ns", "string", Eq, Seq("ZZZ"), None, None, Nil, Nil, None, None, Seq(0, 5))
 
-          [
-            [:db/add 17592186045418 :Ns/string ZZZ]
-          ]
+          UPDATE Ns
+          SET
+            string = ?
+          WHERE Ns.id IN(1) AND
+            Ns.string IS NOT NULL
           ----------------------------------------
           */
+          // (values are visible in the model elements)
 
           // Update was inspected and date updated
           _ <- Ns.string.int.query.get.map(_ ==> List(("ZZZ", 1)))
@@ -226,17 +249,26 @@ object Inspect extends TestSuite_datomic {
           /*
           ========================================
           UPDATE:
-          AttrOneTacID("Ns", "id", Eq, Seq("17592186045418"), None, None, Nil, Nil, None, None, Seq(0, 0))
+          AttrOneTacID("Ns", "id", Eq, Seq("1"), None, None, Nil, Nil, None, None, Seq(0, 0))
           AttrSetManInt("Ns", "ints", Swap, Seq(Set(3), Set(4), Set(6), Set(7)), None, None, Nil, Nil, None, None, Seq(0, 30))
 
-          [
-            [:db/retract 17592186045418 :Ns/ints 3]
-            [:db/retract 17592186045418 :Ns/ints 4]
-            [:db/add 17592186045418 :Ns/ints 6]
-            [:db/add 17592186045418 :Ns/ints 7]
-          ]
+          UPDATE Ns
+          SET
+            ints = (
+              SELECT
+                JSON_ARRAYAGG(
+                  CASE
+                    WHEN table_1.v = 3 THEN 6
+                    WHEN table_1.v = 4 THEN 7
+                    ELSE table_1.v
+                  END
+                )
+              FROM JSON_TABLE(Ns.ints, '$[*]' COLUMNS (v INT PATH '$')) table_1
+            )
+          WHERE Ns.id IN(1)
           ----------------------------------------
           */
+          // (values are visible in the model elements)
         } yield ()
       }
     }
@@ -249,14 +281,15 @@ object Inspect extends TestSuite_datomic {
           List(a, b) <- Ns.string.int.insert(("a", 1), ("b", 2)).transact.map(_.ids)
           _ <- Ns(a).delete.inspect
 
+          // Deletions make sure not to orphan possible joins involving the deleted ids
           /*
           ========================================
           DELETE:
-          AttrOneTacID("Ns", "id", Eq, Seq("17592186045418"), None, None, Nil, Nil, None, None, Seq(0, 0))
+          AttrOneTacID("Ns", "id", Eq, Seq("1"), None, None, Nil, Nil, None, None, Seq(0, 0))
 
-          [
-            [:db/retractEntity 17592186045418]
-          ]
+          DELETE FROM Ns_refs_Ref WHERE Ns_id IN (1)
+          --------
+          DELETE FROM Ns WHERE Ns.id IN (1)
           ----------------------------------------
           */
 
@@ -272,11 +305,11 @@ object Inspect extends TestSuite_datomic {
           /*
           ========================================
           DELETE:
-          AttrOneTacID("Ns", "id", Eq, Seq("17592186045418"), None, None, Nil, Nil, None, None, Seq(0, 0))
+          AttrOneTacID("Ns", "id", Eq, Seq("1"), None, None, Nil, Nil, None, None, Seq(0, 0))
 
-          [
-            [:db/retractEntity 17592186045418]
-          ]
+          DELETE FROM Ns_refs_Ref WHERE Ns_id IN (1)
+          --------
+          DELETE FROM Ns WHERE Ns.id IN (1)
           ----------------------------------------
           */
 

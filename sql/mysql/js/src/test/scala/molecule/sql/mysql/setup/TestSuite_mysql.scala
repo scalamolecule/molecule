@@ -10,8 +10,8 @@ import scala.util.Random
 
 trait TestSuite_mysql extends CoreTestSuite {
 
-  override val database = "Mysql"
   override val platform = "js"
+  override val database = "Mysql"
 
   override def inMem[T](test: Conn => T, schema: Schema): T = {
     val n              = Random.nextInt().abs

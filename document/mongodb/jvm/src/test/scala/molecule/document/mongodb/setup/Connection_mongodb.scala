@@ -10,14 +10,6 @@ import org.testcontainers.utility.DockerImageName
 
 object Connection_mongodb {
 
-  //  // Scala test container setup
-  //  val mongoDBContainer = MongoDBContainer(DockerImageName.parse("mongo").withTag("latest"))
-  //  mongoDBContainer.start()
-  //  // Scala testcontainer shifts port, so we need to get the generated port
-  //  val mongoClient = MongoClient(mongoDBContainer.replicaSetUrl)
-  //  val collection = mongoClient.getDatabase("test").getCollection[BsonDocument]("testCollection")
-
-  // Java test container setup
   val container: MongoDBContainer = new MongoDBContainer(
     DockerImageName.parse("mongo").withTag("latest")
   )

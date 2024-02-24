@@ -81,7 +81,6 @@ abstract class Branch(
     }
     pathFields += dot + uniqueField
 
-    //    println(s"--- $dot   $uniqueField")
     uniqueField
   }
 

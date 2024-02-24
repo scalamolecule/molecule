@@ -90,8 +90,8 @@ trait SpiSync_postgres extends SpiSyncBase {
     val columnsNumber = rsmd.getColumnCount
 
     val debug = if (debugFlag) (s: String) => println(s) else (_: String) => ()
-    debug("\n=============================================================================")
-    debug(query)
+    //    debug("\n=============================================================================")
+    //    debug(query)
 
     val rows = ListBuffer.empty[List[Any]]
     val row  = ListBuffer.empty[Any]
@@ -109,23 +109,23 @@ trait SpiSync_postgres extends SpiSyncBase {
       try {
         val arrayN = rowsResultSet.getArray(n)
         if (arrayN == null) {
-          debug("  A  " + arrayN)
+          //          debug("  A  " + arrayN)
           row += null
         } else {
           val arrayRS = arrayN.getResultSet
           if (arrayRS.wasNull()) {
-            debug("  B  " + arrayRS)
+            //            debug("  B  " + arrayRS)
             row += null
           } else {
-            debug("  C  " + arrayRS)
+            //            debug("  C  " + arrayRS)
             arrayRS.next()
             val array2 = arrayRS.getArray(2)
             if (array2 == null) {
-              debug("  C1  null")
+              //              debug("  C1  null")
               row += null
             } else {
               val set = arrayRS.getArray(2).getArray.asInstanceOf[Array[_]].toSet
-              debug("  C2  " + set)
+              //              debug("  C2  " + set)
               row += set
             }
           }
@@ -139,8 +139,6 @@ trait SpiSync_postgres extends SpiSyncBase {
               row += null
             } else {
               val set = arrayN.getArray.asInstanceOf[Array[_]].toSet
-              //              debug("@@@@@@@@@ " + set)
-              //              debug("@@@@@@@@@ " + set.head.getClass)
               //              debug("  E  " + set)
               row += set
             }
@@ -156,7 +154,7 @@ trait SpiSync_postgres extends SpiSyncBase {
     }
 
     while (rowsResultSet.next) {
-      debug("-----------------------------------------------")
+      //      debug("-----------------------------------------------")
       var n = 1
       row.clear()
       while (n <= columnsNumber) {

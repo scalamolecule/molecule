@@ -89,22 +89,22 @@ object Rpc_mariadb
 
   override def insert(
     proxy: ConnProxy,
-    tplElements: List[Element],
+    elements: List[Element],
     tplsSerialized: Array[Byte],
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
-      tplsEither = UnpickleTpls[Any](tplElements, ByteBuffer.wrap(tplsSerialized)).unpickle
-      tplProducts = tplsEither match {
+      tplsEither = UnpickleTpls[Any](elements, ByteBuffer.wrap(tplsSerialized)).unpickle
+      tpls = tplsEither match {
         case Right(tpls) =>
-          (if (countValueAttrs(tplElements) == 1) {
+          (if (countValueAttrs(elements) == 1) {
             tpls.map(Tuple1(_))
           } else tpls).asInstanceOf[Seq[Product]]
         case Left(err)   => throw err // catched in outer either wrapper
       }
       data = new ResolveInsert with Insert_mariadb {
         override lazy val sqlConn: Connection = conn.sqlConn
-      }.getData(proxy.nsMap, tplElements, tplProducts)
+      }.getData(proxy.nsMap, elements, tpls)
       txReport <- conn.transact_async(data)
     } yield txReport
   }
@@ -147,13 +147,11 @@ object Rpc_mariadb
   private def refUpdates(
     elements: List[Element],
     isUpsert: Boolean = false
-//  )(implicit conn: JdbcConn_JVM, ec: EC): Future[() => Map[List[String], List[Long]]] = {
   )(implicit conn: JdbcConn_JVM, ec: EC): Future[() => List[Long]] = {
     val (idQuery, updateModels) = getIdQuery(elements, isUpsert)
     idQuery.get.map { refIdsResult =>
       val refIds: List[Long] = getRefIds(refIdsResult)
       () => {
-//        val refIdMaps = refIds.zipWithIndex.map {
         val ids = refIds.zipWithIndex.map {
           case (refId: Long, i) =>
             val updateModel = updateModels(i)(refId)
@@ -163,7 +161,6 @@ object Rpc_mariadb
             conn.populateStmts(data)
         }
         // Return TxReport with initial update ids
-//        refIdMaps.head
         ids.head
       }
     }

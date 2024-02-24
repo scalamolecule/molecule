@@ -200,43 +200,4 @@ abstract class DatomicQueryResolve[Tpl](
     findFrom(identifiers)
     (tuples.toList, more)
   }
-
-
-  //  def inspect(implicit conn0: DatomicConn_JVM, ec: ExecutionContext): Future[Unit] = {
-  //    val conn = conn0.asInstanceOf[DatomicConn_JVM]
-  //    isFree = conn.isFreeVersion
-  //    val (preQuery, query) = getQueries(conn.optimizeQuery)
-  //    val queries           = if (preQuery.isEmpty) query else {
-  //      val preInp = if (preInputs.isEmpty) "" else
-  //        s"\n\nPRE-INPUTS:\n" + preInputs.mkString("\n")
-  //
-  //      val preQ = if (preQuery.isEmpty) "" else
-  //        s"\n\nPRE-Query:\n" + preQuery + preInp + "\n\n"
-  //
-  //      val inp = if (inputs.isEmpty) "" else
-  //        s"\n\nINPUTS:\n" + inputs.mkString("\n")
-  //
-  //      s"""${preQ}QUERY:
-  //         |$query$inp
-  //         |
-  //         |""".stripMargin
-  //    }
-  //    getList.map { rows =>
-  //      val output = rows._1.take(100).zipWithIndex.map { case (row, i) =>
-  //        s"ROW ${i + 1}:".padTo(7, ' ') + row
-  //      }.mkString("\n")
-  //      logger.info(
-  //        s"""
-  //           |--------------------------------------------------------------------------
-  //           |${elements.mkString("\n")}
-  //           |
-  //           |$queries
-  //           |
-  //           |$output
-  //           |(showing up to 100 rows)
-  //           |--------------------------------------------------------------------------
-  //      """.stripMargin
-  //      )
-  //    }
-  //  }
 }

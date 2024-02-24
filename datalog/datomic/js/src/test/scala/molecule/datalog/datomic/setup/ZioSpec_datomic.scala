@@ -10,8 +10,8 @@ import zio.ZLayer
 
 trait ZioSpec_datomic extends CoreTestZioSpec {
 
-  override val database = "Datomic"
   override val platform = "js"
+  override val database = "Datomic"
 
   override def inMem[T](schema: Schema): ZLayer[T, Throwable, Conn] = {
     val proxy = DatomicProxy(

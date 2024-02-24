@@ -38,8 +38,6 @@ object AdhocJVM_datomic extends TestSuite_datomic {
         ).transact
 
 
-
-
         //        _ <- Ns.i.ints_?.query.i.get.map(_.toSet ==> Set( // (since we can't sort by Sets)
         //          (1, None),
         //          (1, Some(Set(2))),
@@ -79,42 +77,8 @@ object AdhocJVM_datomic extends TestSuite_datomic {
       for {
 
 
-        List(_, a2, a3) <- A.i.ii.B.ii.i.insert(a, b, c).transact.map(_.ids)
-
-
-        _ = {
-          println("-------")
-          Peer.q(
-            """[:find  ?c
-              |        (distinct ?f)
-              | :where [?b :A/i ?c]
-              |        [?b :A/ii ?d]
-              |        [?b :A/b ?e]
-              |        [?e :B/ii ?f]
-              |        [(datomic.api/q
-              |          "[:find (distinct ?f1)
-              |            :in $ ?e1
-              |            :where [?e1 :B/ii ?f1]]" $ ?e) [[?f2]]]
-              |        [(datomic.api/q
-              |          "[:find (distinct ?d1)
-              |            :in $ ?b1
-              |            :where [?b1 :A/ii ?d1]]" $ ?b) [[?d2]]]
-              |        [(= ?f2 ?d2)]]
-              |        """.stripMargin,
-            conn.db
-          ).forEach { r => println(r) }
-        }
-
-        //        _ <- A.i.ii_(B.ii_).B.ii.query.get.map(_ ==> List(
-        //          (2, Set(2, 3, 4)) // Set(2, 3) and Set(4) are coalesced to one Set
-        //        ))
-        _ <- A.i.ii_.B.ii(A.ii_).query.i.get.map(_ ==> List(
-          (2, Set(2, 3, 4))
-        ))
-
-
-
-
+        _ <- A.i.Bb.*(B.ii).insert(List((2, List(Set(3, 4))))).transact
+        _ <- A.i.Bb.*(B.ii).query.get.map(_ ==> List((2, List(Set(3, 4)))))
 
 
 

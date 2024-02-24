@@ -1,8 +1,6 @@
 package molecule.document.mongodb.query
 
 import java.util
-import com.mongodb.MongoClientSettings
-import com.mongodb.client.model.Filters
 import molecule.base.ast.Card
 import molecule.base.error._
 import molecule.base.util.BaseHelpers
@@ -11,7 +9,7 @@ import molecule.core.query.Model2QueryBase
 import molecule.core.util.JavaConversions
 import molecule.document.mongodb.query.mongoModel.{Branch, FlatEmbed}
 import org.bson.conversions.Bson
-import org.bson.{BsonArray, BsonDocument, BsonInt32, BsonString, BsonValue}
+import org.bson.{BsonDocument, BsonInt32, BsonString, BsonValue}
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
@@ -25,7 +23,6 @@ trait MongoQueryBase extends Model2QueryBase with BaseHelpers with JavaConversio
 
   final protected val branchesByPath     = mutable.Map.empty[List[String], Branch]
   final protected var nestedLevel        = 0
-//  final protected var hasFilterAttr      = false
   final protected val postFilters        = mutable.Map.empty[List[String], Branch => Boolean]
   final protected var path               = List.empty[String]
   final protected var pathLevels         = mutable.Map.empty[List[String], Int]

@@ -181,18 +181,6 @@ trait SpiAsyncBase extends SpiAsync with Renderer with FutureUtils {
   }
 
 
-  // Fallbacks --------------------------------------------------------
-
-  override def fallback_rawQuery(
-    query: String,
-    debug: Boolean = false,
-  )(implicit conn: Conn, ec: EC): Future[List[List[Any]]] = ???
-
-  override def fallback_rawTransact(
-    txData: String,
-    debug: Boolean = false
-  )(implicit conn: Conn, ec: EC): Future[TxReport] = ???
-
   // Util --------------------------------------
 
   private def printInspectTx(label: String, elements: List[Element])

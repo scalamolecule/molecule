@@ -10,12 +10,12 @@ import scala.util.Random
 
 trait TestSuite_mariadb extends CoreTestSuite {
 
-  override val database = "MariaDB"
   override val platform = "js"
+  override val database = "MariaDB"
 
   override def inMem[T](test: Conn => T, schema: Schema): T = {
     val n              = Random.nextInt().abs
-    val url            = "jdbc:tc:mariadb:latest:///test?allowMultiQueries=true"
+    val url            = s"jdbc:tc:mariadb:latest:///test$n?allowMultiQueries=true&autoReconnect=true&user=root&password="
     val recreateSchema =
       s"""drop database if exists test$n;
          |create database test$n;
