@@ -56,9 +56,7 @@ trait SpiZio_h2 extends SpiZio with SpiZioBase_h2 with ModelUtils {
       txReport <- mapError(
         ZIO.attemptBlocking(
           errors match {
-            case errors if errors.isEmpty => SpiSync_h2.save_transact(
-              save.copy(elements = noKeywords(save.elements, Some(conn.proxy)))
-            )(conn)
+            case errors if errors.isEmpty => SpiSync_h2.save_transact(save)(conn)
             case errors                   => throw ValidationErrors(errors)
           }
         )
@@ -85,9 +83,7 @@ trait SpiZio_h2 extends SpiZio with SpiZioBase_h2 with ModelUtils {
       txReport <- mapError(
         ZIO.attemptBlocking(
           errors match {
-            case errors if errors.isEmpty => SpiSync_h2.insert_transact(
-              insert.copy(elements = noKeywords(insert.elements, Some(conn.proxy)))
-            )(conn)
+            case errors if errors.isEmpty => SpiSync_h2.insert_transact(insert)(conn)
             case errors                   => throw InsertErrors(errors)
           }
         )
@@ -114,9 +110,7 @@ trait SpiZio_h2 extends SpiZio with SpiZioBase_h2 with ModelUtils {
       txReport <- mapError(
         ZIO.attemptBlocking(
           errors match {
-            case errors if errors.isEmpty => SpiSync_h2.update_transact(
-              update.copy(elements = noKeywords(update.elements, Some(conn.proxy)))
-            )(conn)
+            case errors if errors.isEmpty => SpiSync_h2.update_transact(update)(conn)
             case errors                   => throw ValidationErrors(errors)
           }
         )
@@ -141,9 +135,7 @@ trait SpiZio_h2 extends SpiZio with SpiZioBase_h2 with ModelUtils {
       conn = conn0.asInstanceOf[JdbcConn_JVM]
       txReport <- mapError(
         ZIO.attemptBlocking(
-          SpiSync_h2.delete_transact(
-            delete.copy(elements = noKeywords(delete.elements, Some(conn.proxy)))
-          )(conn)
+          SpiSync_h2.delete_transact(delete)(conn)
         )
       )
     } yield txReport

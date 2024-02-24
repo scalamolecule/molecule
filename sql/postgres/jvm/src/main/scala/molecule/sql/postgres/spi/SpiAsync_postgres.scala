@@ -29,7 +29,7 @@ trait SpiAsync_postgres extends SpiAsync with ModelUtils {
   }
   override def query_inspect[Tpl](q: Query[Tpl])
                                  (implicit conn: Conn, ec: EC): Future[Unit] = Future {
-    SpiSync_postgres.query_inspect(q.copy(elements = noKeywords(q.elements, Some(conn.proxy))))
+    SpiSync_postgres.query_inspect(q)
   }
 
   override def queryOffset_get[Tpl](q: QueryOffset[Tpl])
@@ -38,7 +38,7 @@ trait SpiAsync_postgres extends SpiAsync with ModelUtils {
   }
   override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])
                                        (implicit conn: Conn, ec: EC): Future[Unit] = Future {
-    SpiSync_postgres.queryOffset_inspect(q.copy(elements = noKeywords(q.elements, Some(conn.proxy))))
+    SpiSync_postgres.queryOffset_inspect(q)
   }
 
   override def queryCursor_get[Tpl](q: QueryCursor[Tpl])
@@ -47,7 +47,7 @@ trait SpiAsync_postgres extends SpiAsync with ModelUtils {
   }
   override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])
                                        (implicit conn: Conn, ec: EC): Future[Unit] = Future {
-    SpiSync_postgres.queryCursor_inspect(q.copy(elements = noKeywords(q.elements, Some(conn.proxy))))
+    SpiSync_postgres.queryCursor_inspect(q)
   }
 
 
@@ -55,20 +55,20 @@ trait SpiAsync_postgres extends SpiAsync with ModelUtils {
     SpiSync_postgres.save_transact(save)
   }
   override def save_inspect(save: Save)(implicit conn: Conn, ec: EC): Future[Unit] = Future {
-    SpiSync_postgres.save_inspect(save.copy(elements = noKeywords(save.elements, Some(conn.proxy))))
+    SpiSync_postgres.save_inspect(save)
   }
   override def save_validate(save: Save)(implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = Future {
-    SpiSync_postgres.save_validate(save.copy(elements = noKeywords(save.elements, Some(conn.proxy))))
+    SpiSync_postgres.save_validate(save)
   }
 
   override def insert_transact(insert: Insert)(implicit conn: Conn, ec: EC): Future[TxReport] = Future {
     SpiSync_postgres.insert_transact(insert)
   }
   override def insert_inspect(insert: Insert)(implicit conn: Conn, ec: EC): Future[Unit] = Future {
-    SpiSync_postgres.insert_inspect(insert.copy(elements = noKeywords(insert.elements, Some(conn.proxy))))
+    SpiSync_postgres.insert_inspect(insert)
   }
   override def insert_validate(insert: Insert)(implicit conn: Conn, ec: EC): Future[Seq[(Int, Seq[InsertError])]] = Future {
-    SpiSync_postgres.insert_validate(insert.copy(elements = noKeywords(insert.elements, Some(conn.proxy))))
+    SpiSync_postgres.insert_validate(insert)
   }
 
 
@@ -76,10 +76,10 @@ trait SpiAsync_postgres extends SpiAsync with ModelUtils {
     SpiSync_postgres.update_transact(update)
   }
   override def update_inspect(update: Update)(implicit conn: Conn, ec: EC): Future[Unit] = Future {
-    SpiSync_postgres.update_inspect(update.copy(elements = noKeywords(update.elements, Some(conn.proxy))))
+    SpiSync_postgres.update_inspect(update)
   }
   override def update_validate(update: Update)(implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = Future {
-    SpiSync_postgres.update_validate(update.copy(elements = noKeywords(update.elements, Some(conn.proxy))))
+    SpiSync_postgres.update_validate(update)
   }
 
 
@@ -87,7 +87,7 @@ trait SpiAsync_postgres extends SpiAsync with ModelUtils {
     SpiSync_postgres.delete_transact(delete)
   }
   override def delete_inspect(delete: Delete)(implicit conn: Conn, ec: EC): Future[Unit] = Future {
-    SpiSync_postgres.delete_inspect(delete.copy(elements = noKeywords(delete.elements, Some(conn.proxy))))
+    SpiSync_postgres.delete_inspect(delete)
   }
 
   override def fallback_rawQuery(

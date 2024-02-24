@@ -86,7 +86,7 @@ trait Delete_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
       "Card-many" - refs { implicit conn =>
         for {
-          e1 <- A.i.Bb.*(B.i).insert(
+          e1 <- A.i.Bb.*(B.i).insert.apply(
             (1, Seq(10, 11)),
             (2, Seq(20, 21))
           ).transact.map(_.id)

@@ -26,25 +26,25 @@ trait ApiAsync extends ModelUtils { spi: SpiAsync =>
     def inspect(implicit conn: Conn, ec: EC): Future[Unit] = queryCursor_inspect(q)
   }
 
-  implicit class SaveApiAsync[Tpl](save: Save) {
+  implicit class SaveApiAsync(save: Save) {
     def transact(implicit conn: Conn, ec: EC): Future[TxReport] = save_transact(save)
     def inspect(implicit conn: Conn, ec: EC): Future[Unit] = save_inspect(save)
     def validate(implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = save_validate(save)
   }
 
-  implicit class InsertApiAsync[Tpl](insert: Insert) {
+  implicit class InsertApiAsync(insert: Insert) {
     def transact(implicit conn: Conn, ec: EC): Future[TxReport] = insert_transact(insert)
     def inspect(implicit conn: Conn, ec: EC): Future[Unit] = insert_inspect(insert)
     def validate(implicit conn: Conn, ec: EC): Future[Seq[(Int, Seq[InsertError])]] = insert_validate(insert)
   }
 
-  implicit class UpdateApiAsync[Tpl](update: Update) {
+  implicit class UpdateApiAsync(update: Update) {
     def transact(implicit conn0: Conn, ec: EC): Future[TxReport] = update_transact(update)
     def inspect(implicit conn0: Conn, ec: EC): Future[Unit] = update_inspect(update)
     def validate(implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = update_validate(update)
   }
 
-  implicit class DeleteApiAsync[Tpl](delete: Delete) {
+  implicit class DeleteApiAsync(delete: Delete) {
     def transact(implicit conn0: Conn, ec: EC): Future[TxReport] = delete_transact(delete)
     def inspect(implicit conn0: Conn, ec: EC): Future[Unit] = delete_inspect(delete)
   }

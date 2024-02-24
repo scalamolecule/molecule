@@ -56,9 +56,7 @@ trait SpiZio_mysql extends SpiZio with SpiZioBase_mysql with ModelUtils {
       txReport <- mapError(
         ZIO.attemptBlocking(
           errors match {
-            case errors if errors.isEmpty => SpiSync_mysql.save_transact(
-              save.copy(elements = noKeywords(save.elements, Some(conn.proxy)))
-            )(conn)
+            case errors if errors.isEmpty => SpiSync_mysql.save_transact(save)(conn)
             case errors                   => throw ValidationErrors(errors)
           }
         )
@@ -85,9 +83,7 @@ trait SpiZio_mysql extends SpiZio with SpiZioBase_mysql with ModelUtils {
       txReport <- mapError(
         ZIO.attemptBlocking(
           errors match {
-            case errors if errors.isEmpty => SpiSync_mysql.insert_transact(
-              insert.copy(elements = noKeywords(insert.elements, Some(conn.proxy)))
-            )(conn)
+            case errors if errors.isEmpty => SpiSync_mysql.insert_transact(insert)(conn)
             case errors                   => throw InsertErrors(errors)
           }
         )
@@ -114,9 +110,7 @@ trait SpiZio_mysql extends SpiZio with SpiZioBase_mysql with ModelUtils {
       txReport <- mapError(
         ZIO.attemptBlocking(
           errors match {
-            case errors if errors.isEmpty => SpiSync_mysql.update_transact(
-              update.copy(elements = noKeywords(update.elements, Some(conn.proxy)))
-            )(conn)
+            case errors if errors.isEmpty => SpiSync_mysql.update_transact(update)(conn)
             case errors                   => throw ValidationErrors(errors)
           }
         )
@@ -141,9 +135,7 @@ trait SpiZio_mysql extends SpiZio with SpiZioBase_mysql with ModelUtils {
       conn = conn0.asInstanceOf[JdbcConn_JVM]
       txReport <- mapError(
         ZIO.attemptBlocking(
-          SpiSync_mysql.delete_transact(
-            delete.copy(elements = noKeywords(delete.elements, Some(conn.proxy)))
-          )(conn)
+          SpiSync_mysql.delete_transact(delete)(conn)
         )
       )
     } yield txReport

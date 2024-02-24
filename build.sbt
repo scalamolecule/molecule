@@ -20,8 +20,8 @@ inThisBuild(
     organizationHomepage := Some(url("http://www.scalamolecule.org")),
     version := "0.8.0-SNAPSHOT",
     versionScheme := Some("early-semver"),
-    scalaVersion := scala212,
-//        scalaVersion := scala213,
+    //    scalaVersion := scala212,
+    scalaVersion := scala213,
     //    scalaVersion := scala3,
     crossScalaVersions := allScala,
 
@@ -129,7 +129,7 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
   .settings(
     // Generate Molecule boilerplate code for tests with `sbt clean compile -Dmolecule=true`
     moleculePluginActive := sys.props.get("molecule").contains("true"),
-    //    moleculeMakeJars := !sys.props.get("moleculeJars").contains("false"), // default: true
+    moleculeMakeJars := !sys.props.get("moleculeJars").contains("false"), // default: true
     //    moleculeMakeJars := false, // default: true
 
     // Multiple directories with data models

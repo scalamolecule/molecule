@@ -20,15 +20,7 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
 
       for {
 
-//        _ <- Ref.i.int.insert(1, 2).i.transact
-//        _ <- Ref.i.int_.query.i.get.map(_ ==> List(1))
-//        _ <- Ref.i.int_.query.inspect
-
-//        _ <- Ns.int(Ref.int_).query.inspect
-        _ <- Ns.int(Ref.int_).query.i.get
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Please add missing filter attribute Ref.int"
-          }
+        List(a, b) <- Ns.int.insert(1, 2).i.transact.map(_.ids)
 
 
 

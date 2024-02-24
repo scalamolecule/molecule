@@ -117,8 +117,9 @@ trait SpiSync_mongodb
 
   // Save --------------------------------------------------------
 
-  override def save_transact(save: Save)(implicit conn0: Conn): TxReport = {
+  override def save_transact(save0: Save)(implicit conn0: Conn): TxReport = {
     val conn = conn0.asInstanceOf[MongoConn_JVM]
+    val save = save0.copy(elements = noKeywords(save0.elements, Some(conn.proxy)))
     if (save.doInspect)
       save_inspect(save)
     val errors = save_validate(save)
