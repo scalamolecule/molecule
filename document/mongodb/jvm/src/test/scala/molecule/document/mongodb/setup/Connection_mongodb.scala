@@ -35,4 +35,5 @@ object Connection_mongodb {
   val conn_Refs       = MongoConn_JVM(proxy(RefsSchema), mongoClient, dbName, mongoDb)
   val conn_Uniques    = MongoConn_JVM(proxy(UniquesSchema), mongoClient, dbName, mongoDb)
   val conn_Validation = MongoConn_JVM(proxy(ValidationSchema), mongoClient, dbName, mongoDb)
+  val conn_Partitions = MongoConn_JVM(proxy(PartitionsSchema), mongoClient, dbName, mongoDb)
 }

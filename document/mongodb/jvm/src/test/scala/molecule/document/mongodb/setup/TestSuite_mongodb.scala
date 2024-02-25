@@ -21,6 +21,7 @@ trait TestSuite_mongodb extends CoreTestSuite with BaseHelpers {
       case RefsSchema       => MongoHandler_JVM.recreateDb(c.conn_Refs)
       case UniquesSchema    => MongoHandler_JVM.recreateDb(c.conn_Uniques)
       case ValidationSchema => MongoHandler_JVM.recreateDb(c.conn_Validation)
+      case PartitionsSchema => MongoHandler_JVM.recreateDb(c.conn_Partitions)
     }
     test(conn)
   }

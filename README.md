@@ -1,15 +1,10 @@
+
+
 ![](project/resources/Molecule-logo.png)
 
 
 
-Molecule is a library to write type-inferred intuitive Scala code that translates to queries and
-transactions for
-
-
-Write vanilla Scala code with your domain terms to access various databases:
-
-
-![img.png](img.png)
+Molecule is a Scala library to build queries and transactions with the words of your domain for various databases:
 
 - Document
     - [MongoDB](http://www.mongodb.com)    
@@ -22,12 +17,23 @@ Write vanilla Scala code with your domain terms to access various databases:
     - [H2](https://h2database.com/html/main.html)
 
 
+Molecule generates boilerplate code from your domain data model. You can then access multiple databases in a uniform way with
+"molecules" like this:
+
+```scala
+val persons = Person.name.age.Adress.street.query.get
+```
+The returned `persons` are typed as `List[(String, Int, String)]` and can also be fetched asynchronously as a `Future` or a `ZIO`. 
+Notice how the relationship from Person to Adress is easily created. Much more complex queries can also be created 
+easily without knowing the query languages of the underlying databases.
+
+
 ### Features
 
 - Targets Scala 3.3, 2.13 and 2.12 on JVM and JS platforms
 - Typed database calls directly from Client with no need for Server implementation or JSON encoding/decoding
 - Fast transparent binary serialization between Client and Server with [Boopickle](https://boopickle.suzaku.io) (no manual setup)
-- Single SPI of ~1700 tests adhered to by each database implementation
+- Single SPI of +1800 tests adhered to by each database implementation
 - No macros
 - No complex type class implicits
 - Maximum type inference
@@ -65,18 +71,19 @@ Write vanilla Scala code with your domain terms to access various databases:
 - Pagination (offset/cursor)
 - Sorting
 - Subscriptions 
-- Fallback API for native database inspection/query/transaction
 
 Documentation at [scalamolecule.org](http://scalamolecule.org) still documents the old macro-based version of molecule
 but will be updated to the new version. Most concepts overlap.
 
 ### How does it work?
 
-Run `sbt compile -Dmolecule=true` once to generate molecule-enabling boilerplate code from
+1) Define a domain data model.
+2) Run `sbt compile -Dmolecule=true` once to generate molecule-enabling boilerplate code from
 your [domain data model definition](https://github.com/scalamolecule/molecule/tree/main/coreTests/shared/src/main/scala/molecule/coreTests/dataModels/core/dataModel).
 The [sbt-molecule](https://github.com/scalamolecule/sbt-molecule) plugin automatically also creates database schemas for
 all database types. Now you can easily read and write data to/from a database with plain vanilla Scala code in a fluent
 style (see examples below).
+3) Write molecule transactions/queries.
 
 ### Examples
 
@@ -176,8 +183,8 @@ lazy val yourProject = project.in(file("app"))
   .settings(
     libraryDependencies ++= Seq(
       // One or more of:
-      "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.8.0",
       "org.scalamolecule" %%% "molecule-document-mongodb" % "0.8.0",
+      "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.8.0",
       "org.scalamolecule" %%% "molecule-sql-h2" % "0.8.0",
       "org.scalamolecule" %%% "molecule-sql-mariadb" % "0.8.0",
       "org.scalamolecule" %%% "molecule-sql-mysql" % "0.8.0",

@@ -45,9 +45,11 @@ object Connection_mysql {
   val conn_Refs       = JdbcConn_JVM(proxy(RefsSchema), sqlConn)
   val conn_Uniques    = JdbcConn_JVM(proxy(UniquesSchema), sqlConn)
   val conn_Validation = JdbcConn_JVM(proxy(ValidationSchema), sqlConn)
+  val conn_Partitions = JdbcConn_JVM(proxy(PartitionsSchema), sqlConn)
 
   val recreateStmt_Types      = recreationStmt(TypesSchema)
   val recreateStmt_Refs       = recreationStmt(RefsSchema)
   val recreateStmt_Uniques    = recreationStmt(UniquesSchema)
   val recreateStmt_Validation = recreationStmt(ValidationSchema)
+  val recreateStmt_Partitions = recreationStmt(PartitionsSchema)
 }

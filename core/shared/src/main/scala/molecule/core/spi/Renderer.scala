@@ -12,8 +12,8 @@ trait Renderer {
   ): Unit = {
     val render = List(
       if (elements.isEmpty) None else Some(elements.mkString("\n").trim),
-      if (dbString.isBlank) None else Some(dbString),
-      if (dataString.isBlank) None else Some(dataString),
+      if (dbString.isEmpty) None else Some(dbString),
+      if (dataString.isEmpty) None else Some(dataString),
     ).flatten.mkString("\n\n")
     println(
       s"""========================================

@@ -1,13 +1,9 @@
 package molecule.sql.h2
 
-import molecule.base.error.ModelError
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.core.dsl.Types.Ns
 import molecule.sql.h2.async._
 import molecule.sql.h2.setup.TestSuite_h2
 import utest._
-import scala.collection.immutable.List
-import scala.concurrent.Future
 import scala.language.implicitConversions
 
 object AdhocJVM_h2 extends TestSuite_h2 {
@@ -22,8 +18,6 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       val tf = (3, Set(true, false))
       for {
         _ <- Ns.i.booleans.insert(List(t, f, tf)).transact
-
-        // Sets with one or more values matching
 
 
         //        _ <- rawQuery(
@@ -49,32 +43,10 @@ object AdhocJVM_h2 extends TestSuite_h2 {
 
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
-      val a = (1, Set(1, 2), Set(1, 2, 3), 3)
-      val b = (2, Set(2, 3), Set(2, 3), 3)
-      val c = (2, Set(4), Set(4), 4)
-
-      val d = (2, Set(4), Set(3), 4)
-
       for {
-        List(_, a2, a3) <- A.i.ii.B.ii.i.insert(a, b, c).transact.map(_.ids)
 
-
-        //        _ <- A.i.ii_(B.ii_).B.ii.query.get.map(_ ==> List(
-        //          (2, Set(2, 3, 4)) // Set(2, 3) and Set(4) are coalesced to one Set
-        //        ))
-        _ <- A.i.ii_.B.ii(A.ii_).query.i.get.map(_ ==> List(
-          (2, Set(2, 3, 4))
-        ))
-
-        //        // To get un-coalesced Sets, separate by ids
-        //        _ <- A.id.a1.i.ii_(B.ii_).B.ii.query.get.map(_ ==> List(
-        //          (a2, 2, Set(2, 3)),
-        //          (a3, 2, Set(4))
-        //        ))
-        //        _ <- A.id.a1.i.ii_.B.ii(A.ii_).query.get.map(_ ==> List(
-        //          (a2, 2, Set(2, 3)),
-        //          (a3, 2, Set(4))
-        //        ))
+        _ <- A.s.Bb.s.Cc.*(C.s)
+          .insert("book", "Jan", List("Musician")).transact
 
       } yield ()
     }
@@ -97,6 +69,16 @@ object AdhocJVM_h2 extends TestSuite_h2 {
     //      for {
     //        List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)
     //
+    //
+    //      } yield ()
+    //    }
+    //
+    //    "partitions" - partition { implicit conn =>
+    //      import molecule.coreTests.dataModels.core.dsl.Partitions._
+    //      for {
+    //
+    //        _ <- lit_Book.title.Reviewers.name.Professions.*(gen_Profession.name)
+    //          .insert("book", "Jan", List("Musician")).transact
     //
     //      } yield ()
     //    }

@@ -20,6 +20,7 @@ trait TestSuite_mariadb extends CoreTestSuite with BaseHelpers {
       case RefsSchema       => JdbcHandler_JVM.recreateDb(c.conn_Refs, c.recreateStmt_Refs)
       case UniquesSchema    => JdbcHandler_JVM.recreateDb(c.conn_Uniques, c.recreateStmt_Uniques)
       case ValidationSchema => JdbcHandler_JVM.recreateDb(c.conn_Validation, c.recreateStmt_Validation)
+      case PartitionsSchema => JdbcHandler_JVM.recreateDb(c.conn_Partitions, c.recreateStmt_Partitions)
     }
     test(conn)
   }

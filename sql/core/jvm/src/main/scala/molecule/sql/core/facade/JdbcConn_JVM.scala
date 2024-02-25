@@ -85,10 +85,15 @@ case class JdbcConn_JVM(
         try {
           val resultSet = ps.getGeneratedKeys
           ids = List.empty[Long]
-          if (!refPath.last.init.contains("_")) { // no join tables, but still "_"-suffixed tables
+
+          // No join tables (also without collision prevention "_"-suffix of table names)
+          // ns_join_ref             2 glues
+          // part_ns_join_part_ref   4 glues
+          val glues = refPath.last.init.count(_ == '_')
+          if (glues != 2 && glues != 4) {
             while (resultSet.next()) {
               //              val id = resultSet.getLong(1)
-              //              debug("D  ################# " + id)
+              //              debug("  ################# " + id)
               //              ids = ids :+ id
               ids = ids :+ resultSet.getLong(1)
             }
