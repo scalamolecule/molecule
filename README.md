@@ -21,11 +21,11 @@ Molecule generates boilerplate code from your domain data model. You can then ac
 "molecules" like this:
 
 ```scala
-val persons = Person.name.age.Adress.street.query.get
+val persons = Person.name.age.Address.street.query.get
 ```
 The returned `persons` are typed as `List[(String, Int, String)]` and can also be fetched asynchronously as a `Future` or a `ZIO`. 
-Notice how the relationship from Person to Adress is easily created. Much more complex queries can also be created 
-easily without knowing the query languages of the underlying databases.
+Notice how the relationship from Person to Address is intuitively created. Much more complex queries can also be created 
+easily without having to know the query languages of the underlying databases. 
 
 
 ### Features
@@ -95,7 +95,7 @@ Synchronous API, Datomic
 import molecule.datalog.datomic.sync._
 
 val persons: List[(String, Int, String)] =
-  Person.name.age.Adress.street.query.get
+  Person.name.age.Address.street.query.get
 ```
 
 Synchronous API, PostgreSQL
@@ -104,7 +104,7 @@ Synchronous API, PostgreSQL
 import molecule.sql.postgres.sync._
 
 val persons: List[(String, Int, String)] =
-  Person.name.age.Adress.street.query.get
+  Person.name.age.Address.street.query.get
 ```
 
 Asynchronous API
@@ -113,7 +113,7 @@ Asynchronous API
 import molecule.sql.postgres.async._
 
 val persons: Future[List[(String, Int, String)]] =
-  Person.name.age.Adress.street.query.get
+  Person.name.age.Address.street.query.get
 ```
 
 ZIO API
@@ -122,19 +122,19 @@ ZIO API
 import molecule.sql.postgres.zio._
 
 val persons: ZIO[Conn, MoleculeError, List[(String, Int, String)]] =
-  Person.name.age.Adress.street.query.get
+  Person.name.age.Address.street.query.get
 ```
 
 Save one entity
 
 ```scala
-Person.name("Bob").age(42).Adress.street("Baker st").save.transact
+Person.name("Bob").age(42).Address.street("Baker st").save.transact
 ```
 
 Insert multiple entities
 
 ```scala
-Person.name.age.Adress.street.insert(
+Person.name.age.Address.street.insert(
   ("Bob", 42, "Baker st"),
   ("Liz", 38, "Bond road")
 ).transact
@@ -201,6 +201,9 @@ how molecule can be used. This forms the Service Provider Interface that each da
 in order to offer all functionality of Molecule.
 
 ### Run jvm tests
+
+Make sure Docker is running to run tests for MongoDB, MariaDB, Mysql and Postgress (Datomic and H2 run in-memory). 
+For instance on a mac you can start Docker Desktop. 
 
 Run the same test suite on jvm targeting various databases:
 
