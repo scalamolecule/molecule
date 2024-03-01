@@ -27,10 +27,10 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                 Map(
                   "Type.strings" -> Seq(
                     s"""Type.strings with value `a` doesn't satisfy validation:
-                       |  _ > "c"
+                       |_ > "c"
                        |""".stripMargin,
                     s"""Type.strings with value `b` doesn't satisfy validation:
-                       |  _ > "c"
+                       |_ > "c"
                        |""".stripMargin
                     // (value b is ok)
                   )
@@ -43,10 +43,10 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
                 s"""Type.strings with value `a` doesn't satisfy validation:
-                   |  _ > "c"
+                   |_ > "c"
                    |""".stripMargin,
                 s"""Type.strings with value `b` doesn't satisfy validation:
-                   |  _ > "c"
+                   |_ > "c"
                    |""".stripMargin
                 // (value b is ok)
               )
@@ -62,10 +62,10 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
                 s"""Type.ints with value `1` doesn't satisfy validation:
-                   |  _ > 3
+                   |_ > 3
                    |""".stripMargin,
                 s"""Type.ints with value `2` doesn't satisfy validation:
-                   |  _ > 3
+                   |_ > 3
                    |""".stripMargin
               )
           }
@@ -80,10 +80,10 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
                 s"""Type.longs with value `1` doesn't satisfy validation:
-                   |  _ > 3L
+                   |_ > 3L
                    |""".stripMargin,
                 s"""Type.longs with value `2` doesn't satisfy validation:
-                   |  _ > 3L
+                   |_ > 3L
                    |""".stripMargin
               )
           }
@@ -98,10 +98,10 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
                 s"""Type.floats with value `$float1` doesn't satisfy validation:
-                   |  _ > 3.3f
+                   |_ > 3.3f
                    |""".stripMargin,
                 s"""Type.floats with value `$float2` doesn't satisfy validation:
-                   |  _ > 3.3f
+                   |_ > 3.3f
                    |""".stripMargin
               )
           }
@@ -116,10 +116,10 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
                 s"""Type.doubles with value `$double1` doesn't satisfy validation:
-                   |  _ > 3.3
+                   |_ > 3.3
                    |""".stripMargin,
                 s"""Type.doubles with value `$double2` doesn't satisfy validation:
-                   |  _ > 3.3
+                   |_ > 3.3
                    |""".stripMargin
               )
           }
@@ -134,7 +134,7 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
                 s"""Type.booleans with value `true` doesn't satisfy validation:
-                   |  _ == false
+                   |_ == false
                    |""".stripMargin
               )
           }
@@ -149,10 +149,10 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
                 s"""Type.bigInts with value `$bigInt1` doesn't satisfy validation:
-                   |  _ > BigInt(3)
+                   |_ > BigInt(3)
                    |""".stripMargin,
                 s"""Type.bigInts with value `$bigInt2` doesn't satisfy validation:
-                   |  _ > BigInt(3)
+                   |_ > BigInt(3)
                    |""".stripMargin
               )
           }
@@ -167,10 +167,10 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
                 s"""Type.bigDecimals with value `$bigDecimal1` doesn't satisfy validation:
-                   |  _ > BigDecimal(3.3)
+                   |_ > BigDecimal(3.3)
                    |""".stripMargin,
                 s"""Type.bigDecimals with value `$bigDecimal2` doesn't satisfy validation:
-                   |  _ > BigDecimal(3.3)
+                   |_ > BigDecimal(3.3)
                    |""".stripMargin
               )
           }
@@ -185,10 +185,10 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
                 s"""Type.dates with value `$date1` doesn't satisfy validation:
-                   |  _.after(new Date(1057010400000L))
+                   |_.after(new Date(1057010400000L))
                    |""".stripMargin,
                 s"""Type.dates with value `$date2` doesn't satisfy validation:
-                   |  _.after(new Date(1057010400000L))
+                   |_.after(new Date(1057010400000L))
                    |""".stripMargin
               )
           }
@@ -203,10 +203,10 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
                 s"""Type.durations with value `$duration1` doesn't satisfy validation:
-                   |  _.compareTo(Duration.ofMinutes(2)) > 0
+                   |_.compareTo(Duration.ofMinutes(2)) > 0
                    |""".stripMargin,
                 s"""Type.durations with value `$duration2` doesn't satisfy validation:
-                   |  _.compareTo(Duration.ofMinutes(2)) > 0
+                   |_.compareTo(Duration.ofMinutes(2)) > 0
                    |""".stripMargin
               )
           }
@@ -221,10 +221,10 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
                 s"""Type.instants with value `$instant1` doesn't satisfy validation:
-                   |  _.compareTo(Instant.ofEpochSecond(2)) > 0
+                   |_.compareTo(Instant.ofEpochSecond(2)) > 0
                    |""".stripMargin,
                 s"""Type.instants with value `$instant2` doesn't satisfy validation:
-                   |  _.compareTo(Instant.ofEpochSecond(2)) > 0
+                   |_.compareTo(Instant.ofEpochSecond(2)) > 0
                    |""".stripMargin
               )
           }
@@ -239,10 +239,10 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
                 s"""Type.localDates with value `$localDate1` doesn't satisfy validation:
-                   |  _.compareTo(LocalDate.of(2002, 1, 1)) > 0
+                   |_.compareTo(LocalDate.of(2002, 1, 1)) > 0
                    |""".stripMargin,
                 s"""Type.localDates with value `$localDate2` doesn't satisfy validation:
-                   |  _.compareTo(LocalDate.of(2002, 1, 1)) > 0
+                   |_.compareTo(LocalDate.of(2002, 1, 1)) > 0
                    |""".stripMargin
               )
           }
@@ -257,10 +257,10 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
                 s"""Type.localTimes with value `$localTime1` doesn't satisfy validation:
-                   |  _.compareTo(LocalTime.of(2, 2)) > 0
+                   |_.compareTo(LocalTime.of(2, 2)) > 0
                    |""".stripMargin,
                 s"""Type.localTimes with value `$localTime2` doesn't satisfy validation:
-                   |  _.compareTo(LocalTime.of(2, 2)) > 0
+                   |_.compareTo(LocalTime.of(2, 2)) > 0
                    |""".stripMargin
               )
           }
@@ -275,10 +275,10 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
                 s"""Type.localDateTimes with value `$localDateTime1` doesn't satisfy validation:
-                   |  _.compareTo(LocalDateTime.of(2002, 1, 1, 1, 2)) > 0
+                   |_.compareTo(LocalDateTime.of(2002, 1, 1, 1, 2)) > 0
                    |""".stripMargin,
                 s"""Type.localDateTimes with value `$localDateTime2` doesn't satisfy validation:
-                   |  _.compareTo(LocalDateTime.of(2002, 1, 1, 1, 2)) > 0
+                   |_.compareTo(LocalDateTime.of(2002, 1, 1, 1, 2)) > 0
                    |""".stripMargin
               )
           }
@@ -293,10 +293,10 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
                 s"""Type.offsetTimes with value `$offsetTime1` doesn't satisfy validation:
-                   |  _.compareTo(OffsetTime.of(2, 2, 2, 2, ZoneOffset.ofHours(2))) > 0
+                   |_.compareTo(OffsetTime.of(2, 2, 2, 2, ZoneOffset.ofHours(2))) > 0
                    |""".stripMargin,
                 s"""Type.offsetTimes with value `$offsetTime2` doesn't satisfy validation:
-                   |  _.compareTo(OffsetTime.of(2, 2, 2, 2, ZoneOffset.ofHours(2))) > 0
+                   |_.compareTo(OffsetTime.of(2, 2, 2, 2, ZoneOffset.ofHours(2))) > 0
                    |""".stripMargin
               )
           }
@@ -311,10 +311,10 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
                 s"""Type.offsetDateTimes with value `$offsetDateTime1` doesn't satisfy validation:
-                   |  _.compareTo(OffsetDateTime.of(2002, 1, 1, 1, 1, 1, 1, ZoneOffset.ofHours(2))) > 0
+                   |_.compareTo(OffsetDateTime.of(2002, 1, 1, 1, 1, 1, 1, ZoneOffset.ofHours(2))) > 0
                    |""".stripMargin,
                 s"""Type.offsetDateTimes with value `$offsetDateTime2` doesn't satisfy validation:
-                   |  _.compareTo(OffsetDateTime.of(2002, 1, 1, 1, 1, 1, 1, ZoneOffset.ofHours(2))) > 0
+                   |_.compareTo(OffsetDateTime.of(2002, 1, 1, 1, 1, 1, 1, ZoneOffset.ofHours(2))) > 0
                    |""".stripMargin
               )
           }
@@ -329,10 +329,10 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
                 s"""Type.zonedDateTimes with value `$zonedDateTime1` doesn't satisfy validation:
-                   |  _.compareTo(ZonedDateTime.of(2002, 1, 1, 1, 1, 1, 1, ZoneOffset.ofHours(2))) > 0
+                   |_.compareTo(ZonedDateTime.of(2002, 1, 1, 1, 1, 1, 1, ZoneOffset.ofHours(2))) > 0
                    |""".stripMargin,
                 s"""Type.zonedDateTimes with value `$zonedDateTime2` doesn't satisfy validation:
-                   |  _.compareTo(ZonedDateTime.of(2002, 1, 1, 1, 1, 1, 1, ZoneOffset.ofHours(2))) > 0
+                   |_.compareTo(ZonedDateTime.of(2002, 1, 1, 1, 1, 1, 1, ZoneOffset.ofHours(2))) > 0
                    |""".stripMargin
               )
           }
@@ -347,7 +347,7 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
                 s"""Type.uuids with value `aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa` doesn't satisfy validation:
-                   |  _.toString != "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+                   |_.toString != "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
                    |""".stripMargin
               )
           }
@@ -365,10 +365,10 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
                 s"""Type.uris with value `a` doesn't satisfy validation:
-                   |  _.toString.length > 3
+                   |_.toString.length > 3
                    |""".stripMargin,
                 s"""Type.uris with value `ab` doesn't satisfy validation:
-                   |  _.toString.length > 3
+                   |_.toString.length > 3
                    |""".stripMargin
               )
           }
@@ -383,10 +383,10 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
                 s"""Type.bytes with value `$byte1` doesn't satisfy validation:
-                   |  _ > $byte3
+                   |_ > $byte3
                    |""".stripMargin,
                 s"""Type.bytes with value `$byte2` doesn't satisfy validation:
-                   |  _ > $byte3
+                   |_ > $byte3
                    |""".stripMargin
               )
           }
@@ -401,10 +401,10 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
                 s"""Type.shorts with value `$short1` doesn't satisfy validation:
-                   |  _ > $short3
+                   |_ > $short3
                    |""".stripMargin,
                 s"""Type.shorts with value `$short2` doesn't satisfy validation:
-                   |  _ > $short3
+                   |_ > $short3
                    |""".stripMargin
               )
           }
@@ -419,10 +419,10 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
                 s"""Type.chars with value `a` doesn't satisfy validation:
-                   |  _ > 'c'
+                   |_ > 'c'
                    |""".stripMargin,
                 s"""Type.chars with value `b` doesn't satisfy validation:
-                   |  _ > 'c'
+                   |_ > 'c'
                    |""".stripMargin
               )
           }

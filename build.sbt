@@ -2,10 +2,9 @@ import org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv
 import org.scalajs.linker.interface.ESVersion
 import sbt.Keys.crossScalaVersions
 
-
 val scala212 = "2.12.18"
-val scala213 = "2.13.12"
-val scala3   = "3.3.1"
+val scala213 = "2.13.13"
+val scala3   = "3.3.2"
 val allScala = Seq(scala212, scala213, scala3)
 
 val akkaVersion          = "2.8.3"
@@ -19,11 +18,8 @@ inThisBuild(
     organizationName := "ScalaMolecule",
     organizationHomepage := Some(url("http://www.scalamolecule.org")),
     versionScheme := Some("early-semver"),
-    //    version := "0.8.0",
-    version := "0.9.0-SNAPSHOT",
-    //    scalaVersion := scala212,
+    version := "0.8.1-SNAPSHOT",
     scalaVersion := scala213,
-    //    scalaVersion := scala3,
     crossScalaVersions := allScala,
 
     // Run tests for all systems sequentially to avoid data locks with db
@@ -75,7 +71,6 @@ lazy val base = crossProject(JSPlatform, JVMPlatform)
 lazy val boilerplate = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .settings(name := "molecule-boilerplate")
-  .dependsOn(base)
   .settings(doPublish)
   .settings(
     libraryDependencies ++= Seq(
@@ -86,12 +81,12 @@ lazy val boilerplate = crossProject(JSPlatform, JVMPlatform)
     ),
     testFrameworks += new TestFramework("utest.runner.Framework")
   )
+  .dependsOn(base)
 
 
 lazy val core = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .settings(name := "molecule-core")
-  .dependsOn(boilerplate)
   .settings(doPublish)
   .settings(
     libraryDependencies ++= Seq(
@@ -119,12 +114,12 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
       "org.slf4j" % "slf4j-nop" % "1.7.36"
     )
   )
+  .dependsOn(boilerplate)
 
 
 lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .settings(name := "molecule-coreTests")
-  .dependsOn(core)
   .settings(publish / skip := true)
   .enablePlugins(MoleculePlugin)
   .settings(
@@ -159,6 +154,25 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
     testFrameworks += new TestFramework("utest.runner.Framework"),
   )
   .jsSettings(jsEnvironment)
+  .dependsOn(core)
+
+
+lazy val graphql = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
+  .in(file("graphql/client"))
+  .settings(name := "molecule-graphql-client")
+  .settings(doPublish)
+  .settings(testFrameworks := testingFrameworks)
+  .settings(
+    libraryDependencies ++= Seq(
+//      "com.github.ghostdogpr" %% "caliban" % "2.5.2",
+      "com.github.ghostdogpr" %% "caliban-tools" % "2.5.2",
+      "com.github.ghostdogpr" %% "caliban-client" % "2.5.2",
+    ),
+  )
+  .jsSettings(jsEnvironment)
+  .dependsOn(core)
+  .dependsOn(coreTests % "compile->compile;test->test")
 
 
 lazy val datalogCore = crossProject(JSPlatform, JVMPlatform)
@@ -166,83 +180,32 @@ lazy val datalogCore = crossProject(JSPlatform, JVMPlatform)
   .in(file("datalog/core"))
   .settings(name := "molecule-datalog-core")
   .settings(doPublish)
-  .dependsOn(core)
-  .dependsOn(coreTests % "test->test")
-  .settings(
-    testFrameworks := Seq(
-      new TestFramework("utest.runner.Framework"),
-      new TestFramework("zio.test.sbt.ZTestFramework")
-    )
-  )
+  .settings(testFrameworks := testingFrameworks)
   .jvmSettings(
     libraryDependencies += "com.datomic" % "peer" % "1.0.7075"
   )
   .jsSettings(jsEnvironment)
+  .dependsOn(core)
+  .dependsOn(coreTests % "compile->compile;test->test")
+
 
 lazy val datalogDatomic = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("datalog/datomic"))
   .settings(name := "molecule-datalog-datomic")
   .settings(doPublish)
-  .dependsOn(datalogCore)
-  .dependsOn(coreTests % "test->test")
-  .settings(
-    // Temporarily limit number of tests to be compiled by sbt (comment out this whole sbt setting to test all)
-    // Note that intellij doesn't recognize this setting - there you can right click on files and exclude
-    //    unmanagedSources / excludeFilter := {
-    //      val test = "src/test/scala/molecule/datalog/datomic"
-    //      def path(platform: String) = (baseDirectory.value / s"../$platform/$test").getCanonicalPath
-    //      val jsTests     = path("js")
-    //      val jvmTests    = path("jvm")
-    //      val sharedTests = path("shared")
-    //      val allowed     = Seq(
-    //        //        jvmTests + "/restore",
-    //        //        sharedTests + "/aggr",
-    //        //        sharedTests + "/api",
-    //        sharedTests + "/composite",
-    //        //        sharedTests + "/crud",
-    //        //        sharedTests + "/expr",
-    //        //        sharedTests + "/pagination",
-    //        //        sharedTests + "/relation",
-    //        //        sharedTests + "/sort",
-    //        //        sharedTests + "/SyncApi.scala"
-    //        //        sharedTests + "/txMetaData",
-    //        //        sharedTests + "/validation",
-    //        //                sharedTests + "/time",
-    //        //        sharedTests,
-    //        //        jvmTests,
-    //        //        jsTests,
-    //        jvmTests + "/AdhocJVM_datomic.scala",
-    //        sharedTests + "/AdhocDatomic.scala",
-    //      )
-    //      new SimpleFileFilter(f =>
-    //        (f.getCanonicalPath.startsWith(jsTests)
-    //          || f.getCanonicalPath.startsWith(jvmTests)
-    //          || f.getCanonicalPath.startsWith(sharedTests)) &&
-    //          !allowed.exists(p => f.getCanonicalPath.startsWith(p))
-    //      )
-    //    },
-
-    testFrameworks := Seq(
-      new TestFramework("utest.runner.Framework"),
-      new TestFramework("zio.test.sbt.ZTestFramework")
-    )
-  )
+  .settings(testFrameworks := testingFrameworks)
   .jsSettings(jsEnvironment)
+  .dependsOn(datalogCore)
+  .dependsOn(coreTests % "compile->compile;test->test")
+
 
 lazy val documentMongodb = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("document/mongodb"))
   .settings(name := "molecule-document-mongodb")
   .settings(doPublish)
-  .dependsOn(core)
-  .dependsOn(coreTests % "test->test")
-  .settings(
-    testFrameworks := Seq(
-      new TestFramework("utest.runner.Framework"),
-      new TestFramework("zio.test.sbt.ZTestFramework")
-    )
-  )
+  .settings(testFrameworks := testingFrameworks)
   .jsSettings(jsEnvironment)
   .jvmSettings(
     libraryDependencies ++= Seq(
@@ -250,57 +213,44 @@ lazy val documentMongodb = crossProject(JSPlatform, JVMPlatform)
       "org.mongodb" % "mongodb-driver-sync" % "4.11.1",
       "ch.qos.logback" % "logback-classic" % logbackVersion % Test
     ),
-    Test / fork := true
   )
+  .dependsOn(core)
+  .dependsOn(coreTests % "compile->compile;test->test")
+
 
 lazy val sqlCore = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("sql/core"))
   .settings(name := "molecule-sql-core")
   .settings(doPublish)
-  .dependsOn(core)
-  .dependsOn(coreTests % "test->test")
-  .settings(
-    testFrameworks := Seq(
-      new TestFramework("utest.runner.Framework"),
-      new TestFramework("zio.test.sbt.ZTestFramework")
-    )
-  )
+  .settings(testFrameworks := testingFrameworks)
   .jsSettings(jsEnvironment)
+  .dependsOn(core)
+  .dependsOn(coreTests % "compile->compile;test->test")
+
 
 lazy val sqlH2 = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("sql/h2"))
   .settings(name := "molecule-sql-h2")
+  .settings(testFrameworks := testingFrameworks)
   .settings(doPublish)
-  .dependsOn(sqlCore)
-  .dependsOn(coreTests % "test->test")
-  .settings(
-    testFrameworks := Seq(
-      new TestFramework("utest.runner.Framework"),
-      new TestFramework("zio.test.sbt.ZTestFramework")
-    )
-  )
   .jsSettings(jsEnvironment)
   .jvmSettings(
     libraryDependencies ++= Seq(
       "com.h2database" % "h2" % "2.2.224"
     )
   )
+  .dependsOn(sqlCore)
+  .dependsOn(coreTests % "compile->compile;test->test")
+
 
 lazy val sqlMariadb = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("sql/mariadb"))
   .settings(name := "molecule-sql-mariadb")
   .settings(doPublish)
-  .dependsOn(sqlCore)
-  .dependsOn(coreTests % "test->test")
-  .settings(
-    testFrameworks := Seq(
-      new TestFramework("utest.runner.Framework"),
-      new TestFramework("zio.test.sbt.ZTestFramework")
-    )
-  )
+  .settings(testFrameworks := testingFrameworks)
   .jsSettings(jsEnvironment)
   .jvmSettings(
     libraryDependencies ++= Seq(
@@ -310,28 +260,25 @@ lazy val sqlMariadb = crossProject(JSPlatform, JVMPlatform)
     ),
     Test / fork := true
   )
+  .dependsOn(sqlCore)
+  .dependsOn(coreTests % "compile->compile;test->test")
+
 
 lazy val sqlMysql = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("sql/mysql"))
   .settings(name := "molecule-sql-mysql")
   .settings(doPublish)
-  .dependsOn(sqlCore)
-  .dependsOn(coreTests % "test->test")
-  .settings(
-    testFrameworks := Seq(
-      new TestFramework("utest.runner.Framework"),
-      new TestFramework("zio.test.sbt.ZTestFramework")
-    )
-  )
+  .settings(testFrameworks := testingFrameworks)
   .jsSettings(jsEnvironment)
   .jvmSettings(
     libraryDependencies ++= Seq(
       "com.dimafeng" %% "testcontainers-scala-mysql" % testContainerVersion,
       "mysql" % "mysql-connector-java" % "8.0.33",
     ),
-    Test / fork := true
   )
+  .dependsOn(sqlCore)
+  .dependsOn(coreTests % "compile->compile;test->test")
 
 
 lazy val sqlPostgres = crossProject(JSPlatform, JVMPlatform)
@@ -339,14 +286,7 @@ lazy val sqlPostgres = crossProject(JSPlatform, JVMPlatform)
   .in(file("sql/postgres"))
   .settings(name := "molecule-sql-postgres")
   .settings(doPublish)
-  .dependsOn(sqlCore)
-  .dependsOn(coreTests % "test->test")
-  .settings(
-    testFrameworks := Seq(
-      new TestFramework("utest.runner.Framework"),
-      new TestFramework("zio.test.sbt.ZTestFramework")
-    )
-  )
+  .settings(testFrameworks := testingFrameworks)
   .jsSettings(jsEnvironment)
   .jvmSettings(
     libraryDependencies ++= Seq(
@@ -354,9 +294,15 @@ lazy val sqlPostgres = crossProject(JSPlatform, JVMPlatform)
       "org.postgresql" % "postgresql" % "42.7.2",
       "ch.qos.logback" % "logback-classic" % logbackVersion % Test
     ),
-    Test / fork := true
   )
+  .dependsOn(sqlCore)
+  .dependsOn(coreTests % "compile->compile;test->test")
 
+
+lazy val testingFrameworks = Seq(
+  new TestFramework("utest.runner.Framework"),
+  new TestFramework("zio.test.sbt.ZTestFramework")
+)
 
 lazy val jsEnvironment = {
   Seq(

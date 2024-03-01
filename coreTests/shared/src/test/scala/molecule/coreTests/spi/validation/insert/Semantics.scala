@@ -28,7 +28,7 @@ trait Semantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                       "Type.int",
                       Seq(
                         s"""Type.int with value `1` doesn't satisfy validation:
-                           |  _ > 2
+                           |_ > 2
                            |""".stripMargin
                       ),
                       Nil // nested errors
@@ -55,7 +55,7 @@ trait Semantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                       "Type.int",
                       Seq(
                         s"""Type.int with value `1` doesn't satisfy validation:
-                           |  _ > 2
+                           |_ > 2
                            |""".stripMargin
                       ),
                       Nil
@@ -65,7 +65,7 @@ trait Semantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                       "Type.long",
                       Seq(
                         s"""Type.long with value `1` doesn't satisfy validation:
-                           |  _ > 2L
+                           |_ > 2L
                            |""".stripMargin
                       ),
                       Nil
@@ -95,7 +95,7 @@ trait Semantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                       "Type.int",
                       Seq(
                         s"""Type.int with value `0` doesn't satisfy validation:
-                           |  _ > 2
+                           |_ > 2
                            |""".stripMargin
                       ),
                       Nil
@@ -105,7 +105,7 @@ trait Semantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                       "Type.long",
                       Seq(
                         s"""Type.long with value `0` doesn't satisfy validation:
-                           |  _ > 2L
+                           |_ > 2L
                            |""".stripMargin
                       ),
                       Nil
@@ -120,7 +120,7 @@ trait Semantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                       "Type.int",
                       Seq(
                         s"""Type.int with value `1` doesn't satisfy validation:
-                           |  _ > 2
+                           |_ > 2
                            |""".stripMargin
                       ),
                       Nil
@@ -130,7 +130,7 @@ trait Semantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                       "Type.long",
                       Seq(
                         s"""Type.long with value `1` doesn't satisfy validation:
-                           |  _ > 2L
+                           |_ > 2L
                            |""".stripMargin
                       ),
                       Nil
@@ -162,7 +162,7 @@ trait Semantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                       "Type.int",
                       Seq(
                         s"""Type.int with value `1` doesn't satisfy validation:
-                           |  _ > 2
+                           |_ > 2
                            |""".stripMargin
                       ),
                       Nil
@@ -181,7 +181,7 @@ trait Semantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                       "Type.int",
                       Seq(
                         s"""Type.int with value `0` doesn't satisfy validation:
-                           |  _ > 2
+                           |_ > 2
                            |""".stripMargin
                       ),
                       Nil
@@ -191,7 +191,7 @@ trait Semantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                       "Type.long",
                       Seq(
                         s"""Type.long with value `1` doesn't satisfy validation:
-                           |  _ > 2L
+                           |_ > 2L
                            |""".stripMargin
                       ),
                       Nil

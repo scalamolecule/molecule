@@ -1,4 +1,4 @@
-To test sql with h2 in the terminal:
+To test sql with h2 in the terminal (not related to molecule, just for separate H2 query testing):
 
 download h2 at https://www.h2database.com/html/main.html
 

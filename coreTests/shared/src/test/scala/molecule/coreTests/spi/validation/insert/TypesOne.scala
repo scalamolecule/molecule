@@ -31,7 +31,7 @@ trait TypesOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                         "Type.string",
                         Seq(
                           s"""Type.string with value `a` doesn't satisfy validation:
-                             |  _ > "b"
+                             |_ > "b"
                              |""".stripMargin
                         ),
                         Nil // nested errors
@@ -47,7 +47,7 @@ trait TypesOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors.head ==>
                 s"""Type.string with value `a` doesn't satisfy validation:
-                   |  _ > "b"
+                   |_ > "b"
                    |""".stripMargin
           }
 
@@ -61,7 +61,7 @@ trait TypesOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors.head ==>
                 s"""Type.int with value `1` doesn't satisfy validation:
-                   |  _ > 2
+                   |_ > 2
                    |""".stripMargin
           }
       } yield ()
@@ -74,7 +74,7 @@ trait TypesOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors.head ==>
                 s"""Type.long with value `1` doesn't satisfy validation:
-                   |  _ > 2L
+                   |_ > 2L
                    |""".stripMargin
           }
       } yield ()
@@ -87,7 +87,7 @@ trait TypesOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors.head ==>
                 s"""Type.float with value `$float1` doesn't satisfy validation:
-                   |  _ > 2.2f
+                   |_ > 2.2f
                    |""".stripMargin
           }
       } yield ()
@@ -100,7 +100,7 @@ trait TypesOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors.head ==>
                 s"""Type.double with value `$double1` doesn't satisfy validation:
-                   |  _ > 2.2
+                   |_ > 2.2
                    |""".stripMargin
           }
       } yield ()
@@ -113,7 +113,7 @@ trait TypesOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors.head ==>
                 s"""Type.boolean with value `true` doesn't satisfy validation:
-                   |  _ == false
+                   |_ == false
                    |""".stripMargin
           }
       } yield ()
@@ -126,7 +126,7 @@ trait TypesOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors.head ==>
                 s"""Type.bigInt with value `$bigInt1` doesn't satisfy validation:
-                   |  _ > BigInt(2)
+                   |_ > BigInt(2)
                    |""".stripMargin
           }
       } yield ()
@@ -139,7 +139,7 @@ trait TypesOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors.head ==>
                 s"""Type.bigDecimal with value `$bigDecimal1` doesn't satisfy validation:
-                   |  _ > BigDecimal(2.2)
+                   |_ > BigDecimal(2.2)
                    |""".stripMargin
           }
       } yield ()
@@ -152,7 +152,7 @@ trait TypesOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors.head ==>
                 s"""Type.date with value `$date1` doesn't satisfy validation:
-                   |  _.after(new Date(993942000000L))
+                   |_.after(new Date(993942000000L))
                    |""".stripMargin
           }
       } yield ()
@@ -165,7 +165,7 @@ trait TypesOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors.head ==>
                 s"""Type.duration with value `$duration1` doesn't satisfy validation:
-                   |  _.compareTo(Duration.ofMinutes(2)) > 0
+                   |_.compareTo(Duration.ofMinutes(2)) > 0
                    |""".stripMargin
           }
       } yield ()
@@ -178,7 +178,7 @@ trait TypesOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors.head ==>
                 s"""Type.instant with value `$instant1` doesn't satisfy validation:
-                   |  _.compareTo(Instant.ofEpochSecond(2)) > 0
+                   |_.compareTo(Instant.ofEpochSecond(2)) > 0
                    |""".stripMargin
           }
       } yield ()
@@ -191,7 +191,7 @@ trait TypesOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors.head ==>
                 s"""Type.localDate with value `$localDate1` doesn't satisfy validation:
-                   |  _.compareTo(LocalDate.of(2002, 1, 1)) > 0
+                   |_.compareTo(LocalDate.of(2002, 1, 1)) > 0
                    |""".stripMargin
           }
       } yield ()
@@ -204,7 +204,7 @@ trait TypesOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors.head ==>
                 s"""Type.localTime with value `$localTime1` doesn't satisfy validation:
-                   |  _.compareTo(LocalTime.of(2, 2)) > 0
+                   |_.compareTo(LocalTime.of(2, 2)) > 0
                    |""".stripMargin
           }
       } yield ()
@@ -217,7 +217,7 @@ trait TypesOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors.head ==>
                 s"""Type.localDateTime with value `$localDateTime1` doesn't satisfy validation:
-                   |  _.compareTo(LocalDateTime.of(2002, 1, 1, 1, 2)) > 0
+                   |_.compareTo(LocalDateTime.of(2002, 1, 1, 1, 2)) > 0
                    |""".stripMargin
           }
       } yield ()
@@ -230,7 +230,7 @@ trait TypesOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors.head ==>
                 s"""Type.offsetTime with value `$offsetTime1` doesn't satisfy validation:
-                   |  _.compareTo(OffsetTime.of(2, 2, 2, 2, ZoneOffset.ofHours(2))) > 0
+                   |_.compareTo(OffsetTime.of(2, 2, 2, 2, ZoneOffset.ofHours(2))) > 0
                    |""".stripMargin
           }
       } yield ()
@@ -243,7 +243,7 @@ trait TypesOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors.head ==>
                 s"""Type.offsetDateTime with value `$offsetDateTime1` doesn't satisfy validation:
-                   |  _.compareTo(OffsetDateTime.of(2002, 1, 1, 1, 1, 1, 1, ZoneOffset.ofHours(2))) > 0
+                   |_.compareTo(OffsetDateTime.of(2002, 1, 1, 1, 1, 1, 1, ZoneOffset.ofHours(2))) > 0
                    |""".stripMargin
           }
       } yield ()
@@ -256,7 +256,7 @@ trait TypesOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors.head ==>
                 s"""Type.zonedDateTime with value `$zonedDateTime1` doesn't satisfy validation:
-                   |  _.compareTo(ZonedDateTime.of(2002, 1, 1, 1, 1, 1, 1, ZoneOffset.ofHours(2))) > 0
+                   |_.compareTo(ZonedDateTime.of(2002, 1, 1, 1, 1, 1, 1, ZoneOffset.ofHours(2))) > 0
                    |""".stripMargin
           }
       } yield ()
@@ -269,7 +269,7 @@ trait TypesOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors.head ==>
                 s"""Type.uuid with value `aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa` doesn't satisfy validation:
-                   |  _.toString != "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+                   |_.toString != "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
                    |""".stripMargin
           }
       } yield ()
@@ -283,7 +283,7 @@ trait TypesOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors.head ==>
                 s"""Type.uri with value `x` doesn't satisfy validation:
-                   |  _.toString.length > 2
+                   |_.toString.length > 2
                    |""".stripMargin
           }
       } yield ()
@@ -296,7 +296,7 @@ trait TypesOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors.head ==>
                 s"""Type.byte with value `$byte1` doesn't satisfy validation:
-                   |  _ > $byte2
+                   |_ > $byte2
                    |""".stripMargin
           }
       } yield ()
@@ -309,7 +309,7 @@ trait TypesOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors.head ==>
                 s"""Type.short with value `$short1` doesn't satisfy validation:
-                   |  _ > $short2
+                   |_ > $short2
                    |""".stripMargin
           }
       } yield ()
@@ -322,7 +322,7 @@ trait TypesOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors.head ==>
                 s"""Type.char with value `a` doesn't satisfy validation:
-                   |  _ > 'b'
+                   |_ > 'b'
                    |""".stripMargin
           }
       } yield ()

@@ -38,14 +38,14 @@ trait ZioApi extends CoreTestZioSpec with ApiZio { spi: SpiZio =>
           case ValidationErrors(errorMap) => assertTrue(
             errorMap.head._2.head ==
               s"""Type.string with value `a` doesn't satisfy validation:
-                 |  _ > "b"
+                 |_ > "b"
                  |""".stripMargin
           )
         } && Type.string.insert("a").transact.flip.map {
           case InsertErrors(errors, _) => assertTrue(
             errors.head._2.head.errors.head ==
               s"""Type.string with value `a` doesn't satisfy validation:
-                 |  _ > "b"
+                 |_ > "b"
                  |""".stripMargin
           )
         } && Type.string("c").save.transact.flatMap { txReport =>
@@ -54,7 +54,7 @@ trait ZioApi extends CoreTestZioSpec with ApiZio { spi: SpiZio =>
             case ValidationErrors(errorMap) => assertTrue(
               errorMap.head._2.head ==
                 s"""Type.string with value `a` doesn't satisfy validation:
-                   |  _ > "b"
+                   |_ > "b"
                    |""".stripMargin
             )
           }

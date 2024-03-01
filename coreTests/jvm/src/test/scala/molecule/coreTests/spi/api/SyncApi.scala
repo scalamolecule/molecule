@@ -36,7 +36,7 @@ trait SyncApi extends CoreTestSuite with ApiSync { spi: SpiSync =>
           case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==>
               s"""Type.string with value `a` doesn't satisfy validation:
-                 |  _ > "b"
+                 |_ > "b"
                  |""".stripMargin
         }
         intercept[InsertErrors](
@@ -45,7 +45,7 @@ trait SyncApi extends CoreTestSuite with ApiSync { spi: SpiSync =>
           case InsertErrors(errors, _) =>
             errors.head._2.head.errors.head ==
               s"""Type.string with value `a` doesn't satisfy validation:
-                 |  _ > "b"
+                 |_ > "b"
                  |""".stripMargin
         }
 
@@ -56,7 +56,7 @@ trait SyncApi extends CoreTestSuite with ApiSync { spi: SpiSync =>
           case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==>
               s"""Type.string with value `a` doesn't satisfy validation:
-                 |  _ > "b"
+                 |_ > "b"
                  |""".stripMargin
         }
       }

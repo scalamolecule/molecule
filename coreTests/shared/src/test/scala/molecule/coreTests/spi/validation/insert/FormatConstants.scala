@@ -32,7 +32,7 @@ trait FormatConstants extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                       "Constants.noErrorMsg",
                       Seq(
                         s"""Constants.noErrorMsg with value `1` doesn't satisfy validation:
-                           |  _ > 2
+                           |_ > 2
                            |""".stripMargin
                       ),
                       Nil // nested errors
@@ -49,7 +49,7 @@ trait FormatConstants extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors ==> Seq(
                 s"""Constants.noErrorMsg with value `1` doesn't satisfy validation:
-                   |  _ > 2
+                   |_ > 2
                    |""".stripMargin
               )
           }
@@ -163,11 +163,10 @@ trait FormatConstants extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors ==> Seq(
                 """Constants.multiLine with value `1` doesn't satisfy validation:
-                  |  { v =>
-                  |    val data   = 22
-                  |    val result = data % 10
-                  |    v > result
-                  |  }
+                  |v =>
+                  |  val data   = 22
+                  |  val result = data % 10
+                  |  v > result
                   |""".stripMargin
               )
           }

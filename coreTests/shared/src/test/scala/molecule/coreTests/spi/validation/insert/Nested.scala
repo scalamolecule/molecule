@@ -34,7 +34,7 @@ trait Nested extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                       "Type.int",
                       Seq(
                         s"""Type.int with value `1` doesn't satisfy validation:
-                           |  _ > 2
+                           |_ > 2
                            |""".stripMargin
                       ),
                       Nil // nested errors
@@ -141,7 +141,7 @@ trait Nested extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                       "Type.int",
                       Seq(
                         s"""Type.int with value `1` doesn't satisfy validation:
-                           |  _ > 2
+                           |_ > 2
                            |""".stripMargin
                       ),
                       Nil // nested errors
@@ -190,7 +190,7 @@ trait Nested extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                       "Type.int",
                       Seq(
                         s"""Type.int with value `1` doesn't satisfy validation:
-                           |  _ > 2
+                           |_ > 2
                            |""".stripMargin
                       ),
                       Nil // nested errors
@@ -291,7 +291,7 @@ trait Nested extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                       "Type.int",
                       Seq(
                         s"""Type.int with value `1` doesn't satisfy validation:
-                           |  _ > 2
+                           |_ > 2
                            |""".stripMargin
                       ),
                       Nil // nested errors
@@ -356,7 +356,7 @@ trait Nested extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                       "Type.int",
                       Seq(
                         s"""Type.int with value `1` doesn't satisfy validation:
-                           |  _ > 2
+                           |_ > 2
                            |""".stripMargin
                       ),
                       Seq()

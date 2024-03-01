@@ -39,7 +39,7 @@ object AdhocDatomic extends TestSuite_datomic {
     //              Map(
     //                "AttrValue.low" -> Seq(
     //                  s"""AttrValue.low with value `5` doesn't satisfy validation:
-    //                     |  _ < high.value
+    //                     |_ < high.value
     //                     |""".stripMargin
     //                )
     //              )

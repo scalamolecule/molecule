@@ -28,7 +28,7 @@ trait FormatVariables extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                   "Variables.noErrorMsg" -> Seq(
                     // Default error message is used when no custom error message is defined
                     """Variables.noErrorMsg with value `1` doesn't satisfy validation:
-                      |  _ > int
+                      |_ > int
                       |""".stripMargin
                   )
                 )
@@ -42,7 +42,7 @@ trait FormatVariables extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
               errorMap.head._2 ==> Seq(
                 // Default error message is used when no custom error message is defined
                 """Variables.noErrorMsg with value `1` doesn't satisfy validation:
-                  |  _ > int
+                  |_ > int
                   |""".stripMargin
               )
           }
@@ -104,11 +104,10 @@ trait FormatVariables extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
                 """Variables.multiLine with value `1` doesn't satisfy validation:
-                  |  { v =>
-                  |    val data   = 22
-                  |    val result = data % int4
-                  |    v > result
-                  |  }
+                  |v =>
+                  |  val data   = 22
+                  |  val result = data % int4
+                  |  v > result
                   |""".stripMargin
               )
           }
