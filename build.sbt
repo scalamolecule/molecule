@@ -2,7 +2,7 @@ import org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv
 import org.scalajs.linker.interface.ESVersion
 import sbt.Keys.crossScalaVersions
 
-val scala212 = "2.12.18"
+val scala212 = "2.12.19"
 val scala213 = "2.13.13"
 val scala3   = "3.3.2"
 val allScala = Seq(scala212, scala213, scala3)
@@ -49,6 +49,8 @@ lazy val root = project
     datalogDatomic.jvm,
     documentMongodb.js,
     documentMongodb.jvm,
+    graphql.js,
+    graphql.jvm,
     sqlCore.js,
     sqlCore.jvm,
     sqlH2.js,
@@ -151,7 +153,9 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
         case _             => file(unmanagedBase.value.getPath ++ "/3.3")
       }
     },
-    testFrameworks += new TestFramework("utest.runner.Framework"),
+
+    // Not running SPI test suite from coreTests module
+//    testFrameworks += new TestFramework("utest.runner.Framework"),
   )
   .jsSettings(jsEnvironment)
   .dependsOn(core)
@@ -162,16 +166,47 @@ lazy val graphql = crossProject(JSPlatform, JVMPlatform)
   .in(file("graphql/client"))
   .settings(name := "molecule-graphql-client")
   .settings(doPublish)
+  .enablePlugins(MoleculePlugin)
+  .settings(
+    // Generate Molecule boilerplate code for tests with `sbt clean compile -Dmolecule=true`
+    moleculePluginActive := sys.props.get("molecule").contains("true"),
+    //    moleculeMakeJars := !sys.props.get("moleculeJars").contains("false"), // default: true
+    moleculeMakeJars := false, // default: true
+
+    // Multiple directories with data models
+    moleculeDataModelPaths := Seq(
+      "molecule/graphql/client"
+    ),
+
+    // Suppress "un-used" keys warning
+    Global / excludeLintKeys ++= Set(
+      moleculePluginActive,
+      moleculeDataModelPaths,
+      moleculeMakeJars
+    ),
+
+    // Let IntelliJ detect sbt-molecule-created jars in unmanaged lib directories
+    exportJars := true,
+
+    // Find scala version specific jars in respective libs
+    unmanagedBase := {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, 13)) => file(unmanagedBase.value.getPath ++ "/2.13")
+        case Some((2, 12)) => file(unmanagedBase.value.getPath ++ "/2.12")
+        case _             => file(unmanagedBase.value.getPath ++ "/3.3")
+      }
+    },
+    //    testFrameworks += new TestFramework("utest.runner.Framework"),
+  )
   .settings(testFrameworks := testingFrameworks)
   .settings(
     libraryDependencies ++= Seq(
-//      "com.github.ghostdogpr" %% "caliban" % "2.5.2",
+      //      "com.github.ghostdogpr" %% "caliban" % "2.5.2",
       "com.github.ghostdogpr" %% "caliban-tools" % "2.5.2",
       "com.github.ghostdogpr" %% "caliban-client" % "2.5.2",
     ),
   )
   .jsSettings(jsEnvironment)
-  .dependsOn(core)
   .dependsOn(coreTests % "compile->compile;test->test")
 
 
