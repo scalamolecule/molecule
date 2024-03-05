@@ -15,7 +15,8 @@ trait TestSuite_graphql extends CoreTestSuite with BaseHelpers {
 
   override def inMem[T](test: Conn => T, schema: Schema): T = {
     val conn = schema match {
-      case StarwarsSchema      => ??? //JdbcHandler_JVM.recreateDb(c.conn_Types, c.recreateStmt_Types)
+      case StarwarsSchema => ??? //JdbcHandler_JVM.recreateDb(c.conn_Types, c.recreateStmt_Types)
+//      case _              => ??? //JdbcHandler_JVM.recreateDb(c.conn_Types, c.recreateStmt_Types)
     }
     test(conn)
   }

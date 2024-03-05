@@ -43,6 +43,7 @@ trait Human_base {
 }
 
 private object Human extends Human_0[Nothing](Nil) {
+//object Human extends Human_0[Nothing](Nil) {
   final def apply(id: String, ids: String*)                       = new Human_0[String](List(AttrOneTacID("Human", "id", Eq, id +: ids                  , coord = Seq(2, 9))))
   final def apply(ids: Iterable[String])                          = new Human_0[String](List(AttrOneTacID("Human", "id", Eq, ids.toSeq                  , coord = Seq(2, 9))))
   final def apply(id: Long, ids: Long*)                           = new Human_0[String](List(AttrOneTacID("Human", "id", Eq, (id +: ids).map(_.toString), coord = Seq(2, 9))))

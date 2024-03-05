@@ -1,6 +1,5 @@
 import org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv
 import org.scalajs.linker.interface.ESVersion
-import sbt.Keys.crossScalaVersions
 
 val scala212 = "2.12.19"
 val scala213 = "2.13.13"
@@ -155,7 +154,7 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
     },
 
     // Not running SPI test suite from coreTests module
-//    testFrameworks += new TestFramework("utest.runner.Framework"),
+    //    testFrameworks += new TestFramework("utest.runner.Framework"),
   )
   .jsSettings(jsEnvironment)
   .dependsOn(core)
@@ -201,7 +200,6 @@ lazy val graphql = crossProject(JSPlatform, JVMPlatform)
   .settings(testFrameworks := testingFrameworks)
   .settings(
     libraryDependencies ++= Seq(
-      //      "com.github.ghostdogpr" %% "caliban" % "2.5.2",
       "com.github.ghostdogpr" %% "caliban-tools" % "2.5.2",
       "com.github.ghostdogpr" %% "caliban-client" % "2.5.2",
     ),
@@ -408,7 +406,7 @@ lazy val releases =
 lazy val doPublish =
   if (sys.props.get("docs").contains("true")) withDocs else withoutDocs
 
-lazy val withDocs = Seq(
+lazy val withDocs = Def.settings(
   publishMavenStyle := true,
   publishTo := (if (isSnapshot.value) Some(snapshots) else Some(releases)),
   Test / publishArtifact := false,
@@ -446,7 +444,7 @@ lazy val withDocs = Seq(
   )
 )
 
-lazy val withoutDocs = Seq(
+lazy val withoutDocs = Def.settings(
   Test / publishArtifact := false,
   doc / sources := Seq.empty,
   packageDoc / publishArtifact := false

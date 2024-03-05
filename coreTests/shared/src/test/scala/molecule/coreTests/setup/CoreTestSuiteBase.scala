@@ -18,6 +18,7 @@ trait CoreTestSuiteBase
 
   def inMem[T](test: Conn => T, schemaTx: Schema): T
 
+  def graphql[T](schema: Schema)(test: Conn => T): T = inMem(test, schema)
   def types[T](test: Conn => T): T = inMem(test, TypesSchema)
   def refs[T](test: Conn => T): T = inMem(test, RefsSchema)
   def unique[T](test: Conn => T): T = inMem(test, UniquesSchema)

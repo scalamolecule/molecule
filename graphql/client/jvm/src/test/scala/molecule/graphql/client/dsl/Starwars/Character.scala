@@ -41,9 +41,7 @@ trait Character_base {
 
 //private[Starwars] object Character extends Character_0[Nothing](Nil) {
 private object Character extends Character_0[Nothing](Nil) {
-//private object Character {
 //object Character extends Character_0[Nothing](Nil) {
-//object Character {
   final def apply(id: String, ids: String*)                       = new Character_0[String](List(AttrOneTacID("Character", "id", Eq, id +: ids                  , coord = Seq(0, 0))))
   final def apply(ids: Iterable[String])                          = new Character_0[String](List(AttrOneTacID("Character", "id", Eq, ids.toSeq                  , coord = Seq(0, 0))))
   final def apply(id: Long, ids: Long*)                           = new Character_0[String](List(AttrOneTacID("Character", "id", Eq, (id +: ids).map(_.toString), coord = Seq(0, 0))))
