@@ -39,7 +39,7 @@ object _ExprSetTac extends BoilerplateGenBase("ExprSetTac", "/api/expression") {
       s"""
          |
          |trait ${fileName}Ops_$arity[${`A..V, `}t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]] extends ExprAttr_$arity[${`A..V, `}t, Ns1, Ns2] {
-         |  protected def _exprSetTac(op: Op, vs: Seq[Set[t]]): Ns1[${`A..V, `}t] = ???
+         |  protected def _exprSetTac(op: Op, sets: Seq[Set[t]]): Ns1[${`A..V, `}t] = ???
          |}
          |
          |trait $fileName_$arity[${`A..V, `}t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]]
