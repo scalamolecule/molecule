@@ -1,7 +1,6 @@
 // GENERATED CODE ********************************
 package molecule.coreTests.spi.crud.update.set.ops
 
-import molecule.base.error._
 import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
@@ -72,52 +71,6 @@ trait UpdateSetOps_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "swap" - types { implicit conn =>
-      for {
-        id <- Ns.shorts(Set(short1, short2, short3, short4, short5, short6)).save.transact.map(_.id)
-
-        // Replace value
-        _ <- Ns(id).shorts.swap(short6 -> short8).update.transact
-        _ <- Ns.shorts.query.get.map(_.head ==> Set(short1, short2, short3, short4, short5, short8))
-
-        // Replacing value to existing value simply deletes it
-        _ <- Ns(id).shorts.swap(short5 -> short8).update.transact
-        _ <- Ns.shorts.query.get.map(_.head ==> Set(short1, short2, short3, short4, short8))
-
-        // Replace multiple values (vararg)
-        _ <- Ns(id).shorts.swap(short3 -> short6, short4 -> short7).update.transact
-        _ <- Ns.shorts.query.get.map(_.head ==> Set(short1, short2, short6, short7, short8))
-
-        // Updating missing old value (null) has no effect
-        _ <- Ns(id).shorts.swap(short4 -> short9).update.transact
-        _ <- Ns.shorts.query.get.map(_.head ==> Set(short1, short2, short6, short7, short8))
-
-        // Upserting missing old value (null) inserts the new value
-        _ <- Ns(id).shorts.swap(short4 -> short9).upsert.transact
-        _ <- Ns.shorts.query.get.map(_.head ==> Set(short1, short2, short6, short7, short8, short9))
-
-        // Replace with Seq of oldValue->newValue pairs
-        _ <- Ns(id).shorts.swap(Seq(short2 -> short5)).update.transact
-        _ <- Ns.shorts.query.get.map(_.head ==> Set(short1, short5, short6, short7, short8, short9))
-
-        // Replacing with empty Seq of oldValue->newValue pairs has no effect
-        _ <- Ns(id).shorts.swap(Seq.empty[(Short, Short)]).update.transact
-        _ <- Ns.shorts.query.get.map(_.head ==> Set(short1, short5, short6, short7, short8, short9))
-
-        // Can't swap duplicate from/to values
-        _ <- Ns("42").shorts.swap(short1 -> short2, short1 -> short3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can't swap from duplicate retract values."
-          }
-
-        _ <- Ns("42").shorts.swap(short1 -> short3, short2 -> short3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can't swap to duplicate replacement values."
-          }
-      } yield ()
-    }
-
-
     "remove" - types { implicit conn =>
       for {
         id <- Ns.shorts(Set(short1, short2, short3, short4, short5, short6)).save.transact.map(_.id)
@@ -146,7 +99,7 @@ trait UpdateSetOps_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).shorts.remove(Seq.empty[Short]).update.transact
         _ <- Ns.shorts.query.get.map(_.head ==> Set(short1))
 
-        // Removing all elements is like deleting the attribute
+        // Removing all elements retracts the attribute
         _ <- Ns(id).shorts.remove(Seq(short1)).update.transact
         _ <- Ns.shorts.query.get.map(_ ==> Nil)
       } yield ()

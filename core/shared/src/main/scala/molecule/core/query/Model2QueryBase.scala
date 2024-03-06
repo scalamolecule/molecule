@@ -450,7 +450,12 @@ trait Model2QueryBase extends ModelUtils {
                 }
                 case other         => other
               }
-            case other      => other
+
+
+            //            case a: AttrArr => ???
+            //            case a: AttrMap => ???
+
+            case other => other
           }
           List(qualifiedFilterAttr)
         }

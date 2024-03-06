@@ -148,7 +148,7 @@ trait DataModelApi {
   object setShort extends setShort
   object setChar extends setChar
 
-  trait setString extends stringOptions[oneString, Set[String]]
+  trait setString extends stringOptions[setString, Set[String]]
   trait setInt extends Options[setInt, Set[Int], Int]
   trait setLong extends Options[setLong, Set[Long], Long]
   trait setFloat extends Options[setFloat, Set[Float], Float]
@@ -170,6 +170,104 @@ trait DataModelApi {
   trait setByte extends Options[setByte, Set[Byte], Byte]
   trait setShort extends Options[setShort, Set[Short], Short]
   trait setChar extends Options[setChar, Set[Char], Char]
+
+
+  object arrString extends arrString
+  object arrInt extends arrInt
+  object arrLong extends arrLong
+  object arrFloat extends arrFloat
+  object arrDouble extends arrDouble
+  object arrBoolean extends arrBoolean
+  object arrBigInt extends arrBigInt
+  object arrBigDecimal extends arrBigDecimal {
+    def apply(precision: Int, scale: Int): oneBigDecimal = ???
+  }
+  object arrDate extends arrDate
+  object arrDuration extends arrDuration
+  object arrInstant extends arrInstant
+  object arrLocalDate extends arrLocalDate
+  object arrLocalTime extends arrLocalTime
+  object arrLocalDateTime extends arrLocalDateTime
+  object arrOffsetTime extends arrOffsetTime
+  object arrOffsetDateTime extends arrOffsetDateTime
+  object arrZonedDateTime extends arrZonedDateTime
+  object arrUUID extends arrUUID
+  object arrURI extends arrURI
+  object arrByte extends arrByte
+  object arrShort extends arrShort
+  object arrChar extends arrChar
+
+  trait arrString extends stringOptions[arrString, Array[String]]
+  trait arrInt extends Options[arrInt, Array[Int], Int]
+  trait arrLong extends Options[arrLong, Array[Long], Long]
+  trait arrFloat extends Options[arrFloat, Array[Float], Float]
+  trait arrDouble extends Options[arrDouble, Array[Double], Double]
+  trait arrBoolean extends Options[arrBoolean, Array[Boolean], Boolean]
+  trait arrBigInt extends Options[arrBigInt, Array[BigInt], BigInt]
+  trait arrBigDecimal extends Options[arrBigDecimal, Array[BigDecimal], BigDecimal]
+  trait arrDate extends Options[arrDate, Array[Date], Date]
+  trait arrDuration extends Options[arrDuration, Array[Duration], Duration]
+  trait arrInstant extends Options[arrInstant, Array[Instant], Instant]
+  trait arrLocalDate extends Options[arrLocalDate, Array[LocalDate], LocalDate]
+  trait arrLocalTime extends Options[arrLocalTime, Array[LocalTime], LocalTime]
+  trait arrLocalDateTime extends Options[arrLocalDateTime, Array[LocalDateTime], LocalDateTime]
+  trait arrOffsetTime extends Options[arrOffsetTime, Array[OffsetTime], OffsetTime]
+  trait arrOffsetDateTime extends Options[arrOffsetDateTime, Array[OffsetDateTime], OffsetDateTime]
+  trait arrZonedDateTime extends Options[arrZonedDateTime, Array[ZonedDateTime], ZonedDateTime]
+  trait arrUUID extends Options[arrUUID, Array[UUID], UUID]
+  trait arrURI extends Options[arrURI, Array[URI], URI]
+  trait arrByte extends Options[arrByte, Array[Byte], Byte]
+  trait arrShort extends Options[arrShort, Array[Short], Short]
+  trait arrChar extends Options[arrChar, Array[Char], Char]
+
+
+  object mapString extends mapString
+  object mapInt extends mapInt
+  object mapLong extends mapLong
+  object mapFloat extends mapFloat
+  object mapDouble extends mapDouble
+  object mapBoolean extends mapBoolean
+  object mapBigInt extends mapBigInt
+  object mapBigDecimal extends mapBigDecimal {
+    def apply(precision: Int, scale: Int): oneBigDecimal = ???
+  }
+  object mapDate extends mapDate
+  object mapDuration extends mapDuration
+  object mapInstant extends mapInstant
+  object mapLocalDate extends mapLocalDate
+  object mapLocalTime extends mapLocalTime
+  object mapLocalDateTime extends mapLocalDateTime
+  object mapOffsetTime extends mapOffsetTime
+  object mapOffsetDateTime extends mapOffsetDateTime
+  object mapZonedDateTime extends mapZonedDateTime
+  object mapUUID extends mapUUID
+  object mapURI extends mapURI
+  object mapByte extends mapByte
+  object mapShort extends mapShort
+  object mapChar extends mapChar
+
+  trait mapString extends stringOptions[mapString, Map[String, String]]
+  trait mapInt extends Options[mapInt, Map[String, Int], Int]
+  trait mapLong extends Options[mapLong, Map[String, Long], Long]
+  trait mapFloat extends Options[mapFloat, Map[String, Float], Float]
+  trait mapDouble extends Options[mapDouble, Map[String, Double], Double]
+  trait mapBoolean extends Options[mapBoolean, Map[String, Boolean], Boolean]
+  trait mapBigInt extends Options[mapBigInt, Map[String, BigInt], BigInt]
+  trait mapBigDecimal extends Options[mapBigDecimal, Map[String, BigDecimal], BigDecimal]
+  trait mapDate extends Options[mapDate, Map[String, Date], Date]
+  trait mapDuration extends Options[mapDuration, Map[String, Duration], Duration]
+  trait mapInstant extends Options[mapInstant, Map[String, Instant], Instant]
+  trait mapLocalDate extends Options[mapLocalDate, Map[String, LocalDate], LocalDate]
+  trait mapLocalTime extends Options[mapLocalTime, Map[String, LocalTime], LocalTime]
+  trait mapLocalDateTime extends Options[mapLocalDateTime, Map[String, LocalDateTime], LocalDateTime]
+  trait mapOffsetTime extends Options[mapOffsetTime, Map[String, OffsetTime], OffsetTime]
+  trait mapOffsetDateTime extends Options[mapOffsetDateTime, Map[String, OffsetDateTime], OffsetDateTime]
+  trait mapZonedDateTime extends Options[mapZonedDateTime, Map[String, ZonedDateTime], ZonedDateTime]
+  trait mapUUID extends Options[mapUUID, Map[String, UUID], UUID]
+  trait mapURI extends Options[mapURI, Map[String, URI], URI]
+  trait mapByte extends Options[mapByte, Map[String, Byte], Byte]
+  trait mapShort extends Options[mapShort, Map[String, Short], Short]
+  trait mapChar extends Options[mapChar, Map[String, Char], Char]
 
 
   // Refs ..................................................

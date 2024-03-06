@@ -11,7 +11,6 @@ object _ExprOneTac extends BoilerplateGenBase("ExprOneTac", "/api/expression") {
        |
        |import molecule.base.ast._
        |import molecule.boilerplate.api._
-       |import molecule.boilerplate.api.Keywords.unify
        |import molecule.boilerplate.ast.Model._
        |$traits
        |""".stripMargin
@@ -53,7 +52,6 @@ object _ExprOneTac extends BoilerplateGenBase("ExprOneTac", "/api/expression") {
          |trait $fileName_$arity[${`A..V, `}t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]]
          |  extends ${fileName}Ops_$arity[${`A..V, `}t, Ns1, Ns2] {
          |  def apply()                : Ns1[${`A..V, `}t] with CardOne = _exprOneTac(NoValue, Nil       )
-         |  def apply(unify: unify    ): Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Unify  , Nil       )
          |  def apply(v    : t, vs: t*): Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Eq     , v +: vs   )
          |  def apply(vs   : Seq[t]   ): Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Eq     , vs        )
          |  def not  (v    : t, vs: t*): Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Neq    , v +: vs   )
@@ -75,9 +73,5 @@ object _ExprOneTac extends BoilerplateGenBase("ExprOneTac", "/api/expression") {
          |  def even                       : Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Even      , Nil                    )
          |  def odd                        : Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Odd       , Nil                    )
          |}""".stripMargin
-//         |trait $fileName_${arity}_Decimal[${`A..V, `}t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]] extends $fileName_$arity[${`A..V, `}t, Ns1, Ns2] {
-//         |  def whole                      : Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Whole     , Nil)
-//         |  def fractional                 : Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Fractional, Nil)
-//         |}""".stripMargin
   }
 }

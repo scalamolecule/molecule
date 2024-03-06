@@ -2,7 +2,6 @@
 package molecule.coreTests.spi.crud.update.set.ops
 
 import java.util.Date
-import molecule.base.error._
 import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
@@ -73,52 +72,6 @@ trait UpdateSetOps_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "swap" - types { implicit conn =>
-      for {
-        id <- Ns.dates(Set(date1, date2, date3, date4, date5, date6)).save.transact.map(_.id)
-
-        // Replace value
-        _ <- Ns(id).dates.swap(date6 -> date8).update.transact
-        _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2, date3, date4, date5, date8))
-
-        // Replacing value to existing value simply deletes it
-        _ <- Ns(id).dates.swap(date5 -> date8).update.transact
-        _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2, date3, date4, date8))
-
-        // Replace multiple values (vararg)
-        _ <- Ns(id).dates.swap(date3 -> date6, date4 -> date7).update.transact
-        _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2, date6, date7, date8))
-
-        // Updating missing old value (null) has no effect
-        _ <- Ns(id).dates.swap(date4 -> date9).update.transact
-        _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2, date6, date7, date8))
-
-        // Upserting missing old value (null) inserts the new value
-        _ <- Ns(id).dates.swap(date4 -> date9).upsert.transact
-        _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2, date6, date7, date8, date9))
-
-        // Replace with Seq of oldValue->newValue pairs
-        _ <- Ns(id).dates.swap(Seq(date2 -> date5)).update.transact
-        _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date5, date6, date7, date8, date9))
-
-        // Replacing with empty Seq of oldValue->newValue pairs has no effect
-        _ <- Ns(id).dates.swap(Seq.empty[(Date, Date)]).update.transact
-        _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date5, date6, date7, date8, date9))
-
-        // Can't swap duplicate from/to values
-        _ <- Ns("42").dates.swap(date1 -> date2, date1 -> date3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can't swap from duplicate retract values."
-          }
-
-        _ <- Ns("42").dates.swap(date1 -> date3, date2 -> date3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can't swap to duplicate replacement values."
-          }
-      } yield ()
-    }
-
-
     "remove" - types { implicit conn =>
       for {
         id <- Ns.dates(Set(date1, date2, date3, date4, date5, date6)).save.transact.map(_.id)
@@ -147,7 +100,7 @@ trait UpdateSetOps_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).dates.remove(Seq.empty[Date]).update.transact
         _ <- Ns.dates.query.get.map(_.head ==> Set(date1))
 
-        // Removing all elements is like deleting the attribute
+        // Removing all elements retracts the attribute
         _ <- Ns(id).dates.remove(Seq(date1)).update.transact
         _ <- Ns.dates.query.get.map(_ ==> Nil)
       } yield ()

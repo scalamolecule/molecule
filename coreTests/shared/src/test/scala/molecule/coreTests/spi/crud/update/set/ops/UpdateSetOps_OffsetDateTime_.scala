@@ -2,7 +2,6 @@
 package molecule.coreTests.spi.crud.update.set.ops
 
 import java.time.OffsetDateTime
-import molecule.base.error._
 import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
@@ -73,52 +72,6 @@ trait UpdateSetOps_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: Sp
     }
 
 
-    "swap" - types { implicit conn =>
-      for {
-        id <- Ns.offsetDateTimes(Set(offsetDateTime1, offsetDateTime2, offsetDateTime3, offsetDateTime4, offsetDateTime5, offsetDateTime6)).save.transact.map(_.id)
-
-        // Replace value
-        _ <- Ns(id).offsetDateTimes.swap(offsetDateTime6 -> offsetDateTime8).update.transact
-        _ <- Ns.offsetDateTimes.query.get.map(_.head ==> Set(offsetDateTime1, offsetDateTime2, offsetDateTime3, offsetDateTime4, offsetDateTime5, offsetDateTime8))
-
-        // Replacing value to existing value simply deletes it
-        _ <- Ns(id).offsetDateTimes.swap(offsetDateTime5 -> offsetDateTime8).update.transact
-        _ <- Ns.offsetDateTimes.query.get.map(_.head ==> Set(offsetDateTime1, offsetDateTime2, offsetDateTime3, offsetDateTime4, offsetDateTime8))
-
-        // Replace multiple values (vararg)
-        _ <- Ns(id).offsetDateTimes.swap(offsetDateTime3 -> offsetDateTime6, offsetDateTime4 -> offsetDateTime7).update.transact
-        _ <- Ns.offsetDateTimes.query.get.map(_.head ==> Set(offsetDateTime1, offsetDateTime2, offsetDateTime6, offsetDateTime7, offsetDateTime8))
-
-        // Updating missing old value (null) has no effect
-        _ <- Ns(id).offsetDateTimes.swap(offsetDateTime4 -> offsetDateTime9).update.transact
-        _ <- Ns.offsetDateTimes.query.get.map(_.head ==> Set(offsetDateTime1, offsetDateTime2, offsetDateTime6, offsetDateTime7, offsetDateTime8))
-
-        // Upserting missing old value (null) inserts the new value
-        _ <- Ns(id).offsetDateTimes.swap(offsetDateTime4 -> offsetDateTime9).upsert.transact
-        _ <- Ns.offsetDateTimes.query.get.map(_.head ==> Set(offsetDateTime1, offsetDateTime2, offsetDateTime6, offsetDateTime7, offsetDateTime8, offsetDateTime9))
-
-        // Replace with Seq of oldValue->newValue pairs
-        _ <- Ns(id).offsetDateTimes.swap(Seq(offsetDateTime2 -> offsetDateTime5)).update.transact
-        _ <- Ns.offsetDateTimes.query.get.map(_.head ==> Set(offsetDateTime1, offsetDateTime5, offsetDateTime6, offsetDateTime7, offsetDateTime8, offsetDateTime9))
-
-        // Replacing with empty Seq of oldValue->newValue pairs has no effect
-        _ <- Ns(id).offsetDateTimes.swap(Seq.empty[(OffsetDateTime, OffsetDateTime)]).update.transact
-        _ <- Ns.offsetDateTimes.query.get.map(_.head ==> Set(offsetDateTime1, offsetDateTime5, offsetDateTime6, offsetDateTime7, offsetDateTime8, offsetDateTime9))
-
-        // Can't swap duplicate from/to values
-        _ <- Ns("42").offsetDateTimes.swap(offsetDateTime1 -> offsetDateTime2, offsetDateTime1 -> offsetDateTime3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can't swap from duplicate retract values."
-          }
-
-        _ <- Ns("42").offsetDateTimes.swap(offsetDateTime1 -> offsetDateTime3, offsetDateTime2 -> offsetDateTime3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can't swap to duplicate replacement values."
-          }
-      } yield ()
-    }
-
-
     "remove" - types { implicit conn =>
       for {
         id <- Ns.offsetDateTimes(Set(offsetDateTime1, offsetDateTime2, offsetDateTime3, offsetDateTime4, offsetDateTime5, offsetDateTime6)).save.transact.map(_.id)
@@ -147,7 +100,7 @@ trait UpdateSetOps_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: Sp
         _ <- Ns(id).offsetDateTimes.remove(Seq.empty[OffsetDateTime]).update.transact
         _ <- Ns.offsetDateTimes.query.get.map(_.head ==> Set(offsetDateTime1))
 
-        // Removing all elements is like deleting the attribute
+        // Removing all elements retracts the attribute
         _ <- Ns(id).offsetDateTimes.remove(Seq(offsetDateTime1)).update.transact
         _ <- Ns.offsetDateTimes.query.get.map(_ ==> Nil)
       } yield ()

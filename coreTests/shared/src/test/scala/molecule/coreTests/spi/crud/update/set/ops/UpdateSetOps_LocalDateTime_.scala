@@ -2,7 +2,6 @@
 package molecule.coreTests.spi.crud.update.set.ops
 
 import java.time.LocalDateTime
-import molecule.base.error._
 import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
@@ -73,52 +72,6 @@ trait UpdateSetOps_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: Spi
     }
 
 
-    "swap" - types { implicit conn =>
-      for {
-        id <- Ns.localDateTimes(Set(localDateTime1, localDateTime2, localDateTime3, localDateTime4, localDateTime5, localDateTime6)).save.transact.map(_.id)
-
-        // Replace value
-        _ <- Ns(id).localDateTimes.swap(localDateTime6 -> localDateTime8).update.transact
-        _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime1, localDateTime2, localDateTime3, localDateTime4, localDateTime5, localDateTime8))
-
-        // Replacing value to existing value simply deletes it
-        _ <- Ns(id).localDateTimes.swap(localDateTime5 -> localDateTime8).update.transact
-        _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime1, localDateTime2, localDateTime3, localDateTime4, localDateTime8))
-
-        // Replace multiple values (vararg)
-        _ <- Ns(id).localDateTimes.swap(localDateTime3 -> localDateTime6, localDateTime4 -> localDateTime7).update.transact
-        _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime1, localDateTime2, localDateTime6, localDateTime7, localDateTime8))
-
-        // Updating missing old value (null) has no effect
-        _ <- Ns(id).localDateTimes.swap(localDateTime4 -> localDateTime9).update.transact
-        _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime1, localDateTime2, localDateTime6, localDateTime7, localDateTime8))
-
-        // Upserting missing old value (null) inserts the new value
-        _ <- Ns(id).localDateTimes.swap(localDateTime4 -> localDateTime9).upsert.transact
-        _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime1, localDateTime2, localDateTime6, localDateTime7, localDateTime8, localDateTime9))
-
-        // Replace with Seq of oldValue->newValue pairs
-        _ <- Ns(id).localDateTimes.swap(Seq(localDateTime2 -> localDateTime5)).update.transact
-        _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime1, localDateTime5, localDateTime6, localDateTime7, localDateTime8, localDateTime9))
-
-        // Replacing with empty Seq of oldValue->newValue pairs has no effect
-        _ <- Ns(id).localDateTimes.swap(Seq.empty[(LocalDateTime, LocalDateTime)]).update.transact
-        _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime1, localDateTime5, localDateTime6, localDateTime7, localDateTime8, localDateTime9))
-
-        // Can't swap duplicate from/to values
-        _ <- Ns("42").localDateTimes.swap(localDateTime1 -> localDateTime2, localDateTime1 -> localDateTime3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can't swap from duplicate retract values."
-          }
-
-        _ <- Ns("42").localDateTimes.swap(localDateTime1 -> localDateTime3, localDateTime2 -> localDateTime3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can't swap to duplicate replacement values."
-          }
-      } yield ()
-    }
-
-
     "remove" - types { implicit conn =>
       for {
         id <- Ns.localDateTimes(Set(localDateTime1, localDateTime2, localDateTime3, localDateTime4, localDateTime5, localDateTime6)).save.transact.map(_.id)
@@ -147,7 +100,7 @@ trait UpdateSetOps_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: Spi
         _ <- Ns(id).localDateTimes.remove(Seq.empty[LocalDateTime]).update.transact
         _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime1))
 
-        // Removing all elements is like deleting the attribute
+        // Removing all elements retracts the attribute
         _ <- Ns(id).localDateTimes.remove(Seq(localDateTime1)).update.transact
         _ <- Ns.localDateTimes.query.get.map(_ ==> Nil)
       } yield ()

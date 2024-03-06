@@ -177,47 +177,6 @@ trait Update_datomic
 
   private val new2oldPairs = mutable.Map.empty[Any, Any]
 
-  override def updateSetSwap[T](
-    ns: String,
-    attr: String,
-    sets: Seq[Set[T]],
-    refNs: Option[String],
-    owner: Boolean,
-    transform: T => Any,
-    handleValue: T => Any,
-    exts: List[String],
-    value2json: (StringBuffer, T) => StringBuffer,
-    one2json: T => String
-  ): Unit = {
-    val (retracts0, adds0) = sets.splitAt(sets.length / 2)
-    val (retracts, adds)   = (retracts0.flatten, adds0.flatten)
-    if (retracts.length != retracts.distinct.length) {
-      throw ExecutionError(s"Can't swap from duplicate retract values.")
-    }
-    if (adds.length != adds.distinct.length) {
-      throw ExecutionError(s"Can't swap to duplicate replacement values.")
-    }
-    if (retracts.nonEmpty) {
-      if (retracts.size != adds.size) {
-        throw ExecutionError(
-          s"""Can't swap duplicate keys/values:
-             |  RETRACTS: $retracts
-             |  ADDS    : $adds
-             |""".stripMargin
-        )
-      }
-      val (retracts1, adds1) = adds.zip(retracts).map {
-        case (add, retract) =>
-          new2oldPairs(transform(add)) = transform(retract)
-          (transform(retract).asInstanceOf[AnyRef], transform(add).asInstanceOf[AnyRef])
-      }.unzip
-      data = data ++ Seq(
-        ("retract", ns, attr, retracts1, false),
-        ("add", ns, attr, adds1, false),
-      )
-    }
-  }
-
   override def updateSetRemove[T](
     ns: String,
     attr: String,

@@ -6,6 +6,7 @@ import molecule.sql.h2.setup.TestSuite_h2
 import utest._
 import scala.language.implicitConversions
 
+
 object AdhocJVM_h2 extends TestSuite_h2 {
 
   override lazy val tests = Tests {
@@ -13,30 +14,14 @@ object AdhocJVM_h2 extends TestSuite_h2 {
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
-      val t  = (1, Set(true))
-      val f  = (2, Set(false))
-      val tf = (3, Set(true, false))
+
+
+//      val ns0 = Ns
+//      val ns = new Ns_0[Int](Nil)
+
       for {
-        _ <- Ns.i.booleans.insert(List(t, f, tf)).transact
-
-
-        //        _ <- rawQuery(
-        //          """SELECT DISTINCT
-        //            |  Ns.i,
-        //            |  JSON_ARRAYAGG(t_2.vs)
-        //            |FROM Ns
-        //            |  LEFT OUTER JOIN JSON_TABLE(Ns.booleans, '$[*]' COLUMNS (vs TINYINT(1) PATH '$')) t_2 ON true
-        //            |WHERE
-        //            |  JSON_CONTAINS(Ns.booleans, JSON_ARRAY(true)) AND
-        //            |  Ns.i        IS NOT NULL AND
-        //            |  Ns.booleans IS NOT NULL
-        //            |GROUP BY Ns.i
-        //            |ORDER BY Ns.i;
-        //            |""".stripMargin, true)
-
-
-        // "Has this value"
-        _ <- Ns.i.a1.booleans.has(true).query.i.get.map(_ ==> List(t, tf))
+        _ <- Ns.i(1).save.transact
+        _ <- Ns.i.query.i.get.map(_ ==> List(1))
 
       } yield ()
     }

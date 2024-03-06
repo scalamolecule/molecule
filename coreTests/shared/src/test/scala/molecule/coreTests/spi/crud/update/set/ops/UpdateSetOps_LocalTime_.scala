@@ -2,7 +2,6 @@
 package molecule.coreTests.spi.crud.update.set.ops
 
 import java.time.LocalTime
-import molecule.base.error._
 import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
@@ -73,52 +72,6 @@ trait UpdateSetOps_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
     }
 
 
-    "swap" - types { implicit conn =>
-      for {
-        id <- Ns.localTimes(Set(localTime1, localTime2, localTime3, localTime4, localTime5, localTime6)).save.transact.map(_.id)
-
-        // Replace value
-        _ <- Ns(id).localTimes.swap(localTime6 -> localTime8).update.transact
-        _ <- Ns.localTimes.query.get.map(_.head ==> Set(localTime1, localTime2, localTime3, localTime4, localTime5, localTime8))
-
-        // Replacing value to existing value simply deletes it
-        _ <- Ns(id).localTimes.swap(localTime5 -> localTime8).update.transact
-        _ <- Ns.localTimes.query.get.map(_.head ==> Set(localTime1, localTime2, localTime3, localTime4, localTime8))
-
-        // Replace multiple values (vararg)
-        _ <- Ns(id).localTimes.swap(localTime3 -> localTime6, localTime4 -> localTime7).update.transact
-        _ <- Ns.localTimes.query.get.map(_.head ==> Set(localTime1, localTime2, localTime6, localTime7, localTime8))
-
-        // Updating missing old value (null) has no effect
-        _ <- Ns(id).localTimes.swap(localTime4 -> localTime9).update.transact
-        _ <- Ns.localTimes.query.get.map(_.head ==> Set(localTime1, localTime2, localTime6, localTime7, localTime8))
-
-        // Upserting missing old value (null) inserts the new value
-        _ <- Ns(id).localTimes.swap(localTime4 -> localTime9).upsert.transact
-        _ <- Ns.localTimes.query.get.map(_.head ==> Set(localTime1, localTime2, localTime6, localTime7, localTime8, localTime9))
-
-        // Replace with Seq of oldValue->newValue pairs
-        _ <- Ns(id).localTimes.swap(Seq(localTime2 -> localTime5)).update.transact
-        _ <- Ns.localTimes.query.get.map(_.head ==> Set(localTime1, localTime5, localTime6, localTime7, localTime8, localTime9))
-
-        // Replacing with empty Seq of oldValue->newValue pairs has no effect
-        _ <- Ns(id).localTimes.swap(Seq.empty[(LocalTime, LocalTime)]).update.transact
-        _ <- Ns.localTimes.query.get.map(_.head ==> Set(localTime1, localTime5, localTime6, localTime7, localTime8, localTime9))
-
-        // Can't swap duplicate from/to values
-        _ <- Ns("42").localTimes.swap(localTime1 -> localTime2, localTime1 -> localTime3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can't swap from duplicate retract values."
-          }
-
-        _ <- Ns("42").localTimes.swap(localTime1 -> localTime3, localTime2 -> localTime3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can't swap to duplicate replacement values."
-          }
-      } yield ()
-    }
-
-
     "remove" - types { implicit conn =>
       for {
         id <- Ns.localTimes(Set(localTime1, localTime2, localTime3, localTime4, localTime5, localTime6)).save.transact.map(_.id)
@@ -147,7 +100,7 @@ trait UpdateSetOps_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
         _ <- Ns(id).localTimes.remove(Seq.empty[LocalTime]).update.transact
         _ <- Ns.localTimes.query.get.map(_.head ==> Set(localTime1))
 
-        // Removing all elements is like deleting the attribute
+        // Removing all elements retracts the attribute
         _ <- Ns(id).localTimes.remove(Seq(localTime1)).update.transact
         _ <- Ns.localTimes.query.get.map(_ ==> Nil)
       } yield ()

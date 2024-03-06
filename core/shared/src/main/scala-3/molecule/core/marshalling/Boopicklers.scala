@@ -58,10 +58,9 @@ object Boopicklers extends MoleculeLogging {
   pickleOp.addConcreteType[Odd.type]
   pickleOp.addConcreteType[Has.type]
   pickleOp.addConcreteType[HasNo.type]
+  pickleOp.addConcreteType[GetV.type]
   pickleOp.addConcreteType[Add.type]
-  pickleOp.addConcreteType[Swap.type]
   pickleOp.addConcreteType[Remove.type]
-  pickleOp.addConcreteType[Unify.type]
   pickleOp.addConcreteType[Fn]
 
   implicit val pickleValidator: CompositePickler[Validator] = compositePickler[Validator]

@@ -2,7 +2,6 @@
 package molecule.coreTests.spi.crud.update.set.ops
 
 import java.time.Instant
-import molecule.base.error._
 import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
@@ -73,52 +72,6 @@ trait UpdateSetOps_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
     }
 
 
-    "swap" - types { implicit conn =>
-      for {
-        id <- Ns.instants(Set(instant1, instant2, instant3, instant4, instant5, instant6)).save.transact.map(_.id)
-
-        // Replace value
-        _ <- Ns(id).instants.swap(instant6 -> instant8).update.transact
-        _ <- Ns.instants.query.get.map(_.head ==> Set(instant1, instant2, instant3, instant4, instant5, instant8))
-
-        // Replacing value to existing value simply deletes it
-        _ <- Ns(id).instants.swap(instant5 -> instant8).update.transact
-        _ <- Ns.instants.query.get.map(_.head ==> Set(instant1, instant2, instant3, instant4, instant8))
-
-        // Replace multiple values (vararg)
-        _ <- Ns(id).instants.swap(instant3 -> instant6, instant4 -> instant7).update.transact
-        _ <- Ns.instants.query.get.map(_.head ==> Set(instant1, instant2, instant6, instant7, instant8))
-
-        // Updating missing old value (null) has no effect
-        _ <- Ns(id).instants.swap(instant4 -> instant9).update.transact
-        _ <- Ns.instants.query.get.map(_.head ==> Set(instant1, instant2, instant6, instant7, instant8))
-
-        // Upserting missing old value (null) inserts the new value
-        _ <- Ns(id).instants.swap(instant4 -> instant9).upsert.transact
-        _ <- Ns.instants.query.get.map(_.head ==> Set(instant1, instant2, instant6, instant7, instant8, instant9))
-
-        // Replace with Seq of oldValue->newValue pairs
-        _ <- Ns(id).instants.swap(Seq(instant2 -> instant5)).update.transact
-        _ <- Ns.instants.query.get.map(_.head ==> Set(instant1, instant5, instant6, instant7, instant8, instant9))
-
-        // Replacing with empty Seq of oldValue->newValue pairs has no effect
-        _ <- Ns(id).instants.swap(Seq.empty[(Instant, Instant)]).update.transact
-        _ <- Ns.instants.query.get.map(_.head ==> Set(instant1, instant5, instant6, instant7, instant8, instant9))
-
-        // Can't swap duplicate from/to values
-        _ <- Ns("42").instants.swap(instant1 -> instant2, instant1 -> instant3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can't swap from duplicate retract values."
-          }
-
-        _ <- Ns("42").instants.swap(instant1 -> instant3, instant2 -> instant3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can't swap to duplicate replacement values."
-          }
-      } yield ()
-    }
-
-
     "remove" - types { implicit conn =>
       for {
         id <- Ns.instants(Set(instant1, instant2, instant3, instant4, instant5, instant6)).save.transact.map(_.id)
@@ -147,7 +100,7 @@ trait UpdateSetOps_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
         _ <- Ns(id).instants.remove(Seq.empty[Instant]).update.transact
         _ <- Ns.instants.query.get.map(_.head ==> Set(instant1))
 
-        // Removing all elements is like deleting the attribute
+        // Removing all elements retracts the attribute
         _ <- Ns(id).instants.remove(Seq(instant1)).update.transact
         _ <- Ns.instants.query.get.map(_ ==> Nil)
       } yield ()

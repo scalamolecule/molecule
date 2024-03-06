@@ -218,27 +218,6 @@ object Inspect extends TestSuite_datomic {
           _ <- Ns.string.int.query.get.map(_ ==> List(("ZZZ", 1)))
         } yield ()
       }
-
-      "Inspect more complex update" - types { implicit conn =>
-        for {
-          id <- Ns.ints(Set(3, 4)).save.transact.map(_.id)
-          _ <- Ns(id).ints.swap(3 -> 6, 4 -> 7).update.inspect
-          /*
-          ========================================
-          UPDATE:
-          AttrOneTacID("Ns", "id", Eq, Seq("17592186045418"), None, None, Nil, Nil, None, None, Seq(0, 0))
-          AttrSetManInt("Ns", "ints", Swap, Seq(Set(3), Set(4), Set(6), Set(7)), None, None, Nil, Nil, None, None, Seq(0, 30))
-
-          [
-            [:db/retract 17592186045418 :Ns/ints 3]
-            [:db/retract 17592186045418 :Ns/ints 4]
-            [:db/add 17592186045418 :Ns/ints 6]
-            [:db/add 17592186045418 :Ns/ints 7]
-          ]
-          ----------------------------------------
-          */
-        } yield ()
-      }
     }
 
 

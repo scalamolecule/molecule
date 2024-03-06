@@ -60,7 +60,7 @@ trait SpiHelpers extends ModelUtils {
           case a: AttrOneTac => idsModel += a
 
           case a: AttrSetMan =>
-            if (a.op == Eq || a.op == Add || a.op == Swap || a.op == Remove) {
+            if (a.op == Eq || a.op == Add || a.op == Remove) {
               prevNs = a.ns
               a match {
                 case a: AttrSetManID             => idsModel += AttrSetTacID(a.ns, a.attr, coord = a.coord)
@@ -92,9 +92,13 @@ trait SpiHelpers extends ModelUtils {
               throw ModelError(s"Unexpected $update operation for card-many attribute. Found:\n" + a)
             }
 
+
           case _: AttrOneOpt => throw ModelError(s"Can't $update optional values. Found:\n" + a)
           case _: AttrSetTac => throw ModelError("Can only lookup entity with card-one attribute value. Found:\n" + a)
           case _: AttrSetOpt => throw ModelError(s"Can't $update optional values. Found:\n" + a)
+
+          case a: AttrArr => ???
+          case a: AttrMap => ???
         }
 
       case ref@Ref(_, _, _, CardOne, _, coord) =>

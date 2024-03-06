@@ -14,6 +14,7 @@ import molecule.boilerplate.api._
 import molecule.boilerplate.api.expression._
 import molecule.boilerplate.ast.Model
 import molecule.boilerplate.ast.Model._
+import scala.reflect.ClassTag
 
 
 trait Human_base {
@@ -51,7 +52,7 @@ private object Human extends Human_0[Nothing](Nil) {
 }
 
 
-class Human_0[t](override val elements: List[Element]) extends Human_base with ModelOps_0[t, Human_0, Human_1] {
+class Human_0[t: ClassTag](override val elements: List[Element]) extends Human_base with ModelOps_0[t, Human_0, Human_1] {
   lazy val id           = new Human_1[String             , String](elements :+ id_man        ) with ExprOneMan_1        [String             , String, Human_1, Human_2] with CardOne
   lazy val name         = new Human_1[String             , String](elements :+ name_man      ) with ExprOneMan_1_String [String             , String, Human_1, Human_2] with CardOne
   lazy val friends      = new Human_1[Set[String]        , String](elements :+ friends_man   ) with ExprSetMan_1        [Set[String]        , String, Human_1, Human_2] with CardSet
@@ -69,8 +70,13 @@ class Human_0[t](override val elements: List[Element]) extends Human_base with M
   lazy val appearsIn_   = new Human_0[                     String](elements :+ appearsIn_tac ) with ExprSetTac_0        [                     String, Human_0, Human_1] with CardSet
   lazy val homePlanet_  = new Human_0[                     String](elements :+ homePlanet_tac) with ExprOneTac_0_String [                     String, Human_0, Human_1] with CardOne
 
-  override protected def _exprOneTac(op: Op, vs: Seq[t]     ) = new Human_0[t](addOne(elements, op, vs)) with CardOne
-  override protected def _exprSetTac(op: Op, vs: Seq[Set[t]]) = new Human_0[t](addSet(elements, op, vs)) with CardSet
+  override protected def _exprOneTac(op: Op, vs  : Seq[t]             ) = new Human_0[t](addOne(elements, op, vs)) with CardOne
+  override protected def _exprSetTac(op: Op, vs  : Seq[Set[t]]        ) = new Human_0[t](addSet(elements, op, vs)) with CardSet
+//  override protected def _exprArrTac[t1 <: t: ClassTag](op: Op, vs  : Seq[Array[t]]      ) = new Human_0[t](addArr(elements, op, vs)) with CardSet
+//  override protected def _exprMapTac(op: Op, maps: Seq[Map[String, t]]) = new Human_0[t](addMap(elements, op, maps)) with CardMap
+//  override protected def _exprMapTaK(op: Op, keys: Seq[String        ]) = new Human_0[t](addMap(elements, op, Seq(keys.map(k => k -> null.asInstanceOf[t]).toMap))) with CardMap
+//  override protected def _exprMapTaV(op: Op, vs  : Seq[t             ]) = new Human_0[t](addMap(elements, op, Seq(vs.zipWithIndex.map { case (v, i) => s"_k$i" -> v }.toMap))) with CardMap
+
 
   override protected def _attrTac[   ns1[_]   , ns2[_, _]   ](op: Op, a: ModelOps_0[   t, ns1, ns2]) = new Human_0[   t](filterAttr(elements, op, a))
   override protected def _attrMan[X, ns1[_, _], ns2[_, _, _]](op: Op, a: ModelOps_1[X, t, ns1, ns2]) = new Human_1[X, t](filterAttr(elements, op, a))
@@ -89,12 +95,7 @@ class Human_1[A, t](override val elements: List[Element]) extends Human_base wit
   lazy val name         = new Human_2[A, String             , String](elements :+ name_man      ) with ExprOneMan_2_String [A, String             , String, Human_2, Human_3] with CardOne
   lazy val friends      = new Human_2[A, Set[String]        , String](elements :+ friends_man   ) with ExprSetMan_2        [A, Set[String]        , String, Human_2, Human_3] with CardSet
   lazy val appearsIn    = new Human_2[A, Set[String]        , String](elements :+ appearsIn_man ) with ExprSetMan_2        [A, Set[String]        , String, Human_2, Human_3] with CardSet
-  lazy val homePlanet   = new Human_2[A, String             , String](elements :+ homePlanet_man) with ExprOneMan_2_String [A, String             , String, Human_2, Human_3] with CardOne{
-//  lazy val homePlanet   = new Human_2[A, String             , String](elements :+ homePlanet_man)  with CardOne{
-    // Optional equality argument
-    def apply(planet: String)   = new Human_2[A, String             , String](elements :+ homePlanet_man) with ExprOneMan_2_String [A, String             , String, Human_2, Human_3] with CardOne
-  }
-//  def homePlanet(planet: String)(implicit ev: DummyImplicit)   = new Human_2[A, String             , String](elements :+ homePlanet_man) with ExprOneMan_2_String [A, String             , String, Human_2, Human_3] with CardOne
+  lazy val homePlanet   = new Human_2[A, String             , String](elements :+ homePlanet_man) with ExprOneMan_2_String [A, String             , String, Human_2, Human_3] with CardOne
 
   lazy val name_?       = new Human_2[A, Option[String]     , String](elements :+ name_opt      ) with ExprOneOpt_2        [A, Option[String]     , String, Human_2, Human_3] with CardOne
   lazy val friends_?    = new Human_2[A, Option[Set[String]], String](elements :+ friends_opt   ) with ExprSetOpt_2        [A, Option[Set[String]], String, Human_2, Human_3] with CardSet
@@ -107,19 +108,34 @@ class Human_1[A, t](override val elements: List[Element]) extends Human_base wit
   lazy val appearsIn_   = new Human_1[A                     , String](elements :+ appearsIn_tac ) with ExprSetTac_1        [A                     , String, Human_1, Human_2] with CardSet
   lazy val homePlanet_  = new Human_1[A                     , String](elements :+ homePlanet_tac) with ExprOneTac_1_String [A                     , String, Human_1, Human_2] with CardOne
 
-  override protected def _aggrInt   (kw: Kw                         ) = new Human_1[Int   , Int   ](toInt    (elements, kw    )) with SortAttrs_1[Int   , Int   , Human_1]
-  override protected def _aggrDouble(kw: Kw                         ) = new Human_1[Double, Double](toDouble (elements, kw    )) with SortAttrs_1[Double, Double, Human_1]
-  override protected def _aggrDist  (kw: Kw                         ) = new Human_1[Set[A], t     ](asIs     (elements, kw    ))
-  override protected def _aggrSet   (kw: Kw, n: Option[Int]         ) = new Human_1[Set[t], t     ](asIs     (elements, kw, n ))
-  override protected def _aggrTsort (kw: Kw                         ) = new Human_1[A     , t     ](asIs     (elements, kw    )) with SortAttrs_1[A     , t     , Human_1]
-  override protected def _aggrT     (kw: Kw                         ) = new Human_1[A     , t     ](asIs     (elements, kw    ))
-  override protected def _exprOneMan(op: Op, vs: Seq[t]             ) = new Human_1[A     , t     ](addOne   (elements, op, vs)) with SortAttrs_1[A     , t     , Human_1] with CardOne
-  override protected def _exprOneOpt(op: Op, vs: Option[Seq[t]]     ) = new Human_1[A     , t     ](addOptOne(elements, op, vs)) with SortAttrs_1[A     , t     , Human_1]
-  override protected def _exprOneTac(op: Op, vs: Seq[t]             ) = new Human_1[A     , t     ](addOne   (elements, op, vs)) with CardOne
-  override protected def _exprSetMan(op: Op, vs: Seq[Set[t]]        ) = new Human_1[A     , t     ](addSet   (elements, op, vs)) with CardSet
-  override protected def _exprSetOpt(op: Op, vs: Option[Seq[Set[t]]]) = new Human_1[A     , t     ](addOptSet(elements, op, vs))
-  override protected def _exprSetTac(op: Op, vs: Seq[Set[t]]        ) = new Human_1[A     , t     ](addSet   (elements, op, vs)) with CardSet
-  override protected def _sort      (sort: String                   ) = new Human_1[A     , t     ](addSort  (elements, sort  ))
+  override protected def _aggrInt   (kw: Kw                           ) = new Human_1[Int   , Int   ](toInt    (elements, kw    )) with SortAttrs_1[Int   , Int   , Human_1]
+  override protected def _aggrDouble(kw: Kw                           ) = new Human_1[Double, Double](toDouble (elements, kw    )) with SortAttrs_1[Double, Double, Human_1]
+  override protected def _aggrDist  (kw: Kw                           ) = new Human_1[Set[A], t     ](asIs     (elements, kw    ))
+  override protected def _aggrSet   (kw: Kw, n: Option[Int]           ) = new Human_1[Set[t], t     ](asIs     (elements, kw, n ))
+  override protected def _aggrTsort (kw: Kw                           ) = new Human_1[A     , t     ](asIs     (elements, kw    )) with SortAttrs_1[A     , t     , Human_1]
+  override protected def _aggrT     (kw: Kw                           ) = new Human_1[A     , t     ](asIs     (elements, kw    ))
+
+  override protected def _exprOneMan(op: Op, vs: Seq[t]               ) = new Human_1[A     , t     ](addOne   (elements, op, vs)) with SortAttrs_1[A     , t     , Human_1] with CardOne
+  override protected def _exprOneTac(op: Op, vs: Seq[t]               ) = new Human_1[A     , t     ](addOne   (elements, op, vs)) with CardOne
+  override protected def _exprOneOpt(op: Op, vs: Option[Seq[t]]       ) = new Human_1[A     , t     ](addOptOne(elements, op, vs)) with SortAttrs_1[A     , t     , Human_1]
+
+  override protected def _exprSetMan(op: Op, vs: Seq[Set[t]]          ) = new Human_1[A     , t     ](addSet   (elements, op, vs)) with CardSet
+  override protected def _exprSetTac(op: Op, vs: Seq[Set[t]]          ) = new Human_1[A     , t     ](addSet   (elements, op, vs)) with CardSet
+  override protected def _exprSetOpt(op: Op, vs: Option[Seq[Set[t]]]  ) = new Human_1[A     , t     ](addOptSet(elements, op, vs))
+
+//  override protected def _exprArrMan(op: Op, vs: Seq[Array[t]]        ) = new Human_1[A     , t    ](addArr   (elements, op, vs)) with CardArr
+//  override protected def _exprArrTac(op: Op, vs: Seq[Array[t]]        ) = new Human_1[A     , t    ](addArr   (elements, op, vs)) with CardArr
+//  override protected def _exprArrOpt(op: Op, vs: Option[Seq[Array[t]]]) = new Human_1[A     , t    ](addOptArr(elements, op, vs))
+
+//  override protected def _exprMapMan(op: Op, maps: Seq[Map[String, t]]) = new Human_1[A     , t     ](addMap   (elements, op, maps)) with CardMap
+//  override protected def _exprMapMaK(op: Op, keys: Seq[String        ]) = new Human_1[A     , t     ](addMap   (elements, op, Seq(keys.map(k => k -> null.asInstanceOf[t]).toMap))) with CardMap
+//  override protected def _exprMapMaV(op: Op, vs  : Seq[t             ]) = new Human_1[A     , t     ](addMap   (elements, op, Seq(vs.zipWithIndex.map { case (v, i) => s"_k$i" -> v }.toMap))) with CardMap
+//  override protected def _exprMapTac(op: Op, maps: Seq[Map[String, t]]) = new Human_1[A     , t     ](addMap   (elements, op, maps)) with CardMap
+//  override protected def _exprMapTaK(op: Op, keys: Seq[String        ]) = new Human_1[A     , t     ](addMap   (elements, op, Seq(keys.map(k => k -> null.asInstanceOf[t]).toMap))) with CardMap
+//  override protected def _exprMapTaV(op: Op, vs  : Seq[t             ]) = new Human_1[A     , t     ](addMap   (elements, op, Seq(vs.zipWithIndex.map { case (v, i) => s"_k$i" -> v }.toMap))) with CardMap
+//  override protected def _exprMapOpK(op: Op, keys: Option[Seq[String]]) = new Human_1[A     , t     ](addOptMap(elements, op, keys.map(keys => Seq(keys.map(k => k -> null.asInstanceOf[t]).toMap))))
+
+  override protected def _sort(sort: String) = new Human_1[A, t](addSort(elements, sort))
 
   override protected def _attrSortTac[   ns1[_]   , ns2[_, _]   ](op: Op, a: ModelOps_0[   t, ns1, ns2] with CardOne) = new Human_1[A,    t](filterAttr(elements, op, a)) with SortAttrs_1[A,    t, Human_1]
   override protected def _attrSortMan[   ns1[_, _], ns2[_, _, _]](op: Op, a: ModelOps_1[A, t, ns1, ns2]             ) = new Human_2[A, A, t](filterAttr(elements, op, a)) with SortAttrs_2[A, A, t, Human_2]

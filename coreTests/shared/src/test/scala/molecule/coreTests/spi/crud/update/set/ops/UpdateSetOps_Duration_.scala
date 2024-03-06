@@ -2,7 +2,6 @@
 package molecule.coreTests.spi.crud.update.set.ops
 
 import java.time.Duration
-import molecule.base.error._
 import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
@@ -73,52 +72,6 @@ trait UpdateSetOps_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
     }
 
 
-    "swap" - types { implicit conn =>
-      for {
-        id <- Ns.durations(Set(duration1, duration2, duration3, duration4, duration5, duration6)).save.transact.map(_.id)
-
-        // Replace value
-        _ <- Ns(id).durations.swap(duration6 -> duration8).update.transact
-        _ <- Ns.durations.query.get.map(_.head ==> Set(duration1, duration2, duration3, duration4, duration5, duration8))
-
-        // Replacing value to existing value simply deletes it
-        _ <- Ns(id).durations.swap(duration5 -> duration8).update.transact
-        _ <- Ns.durations.query.get.map(_.head ==> Set(duration1, duration2, duration3, duration4, duration8))
-
-        // Replace multiple values (vararg)
-        _ <- Ns(id).durations.swap(duration3 -> duration6, duration4 -> duration7).update.transact
-        _ <- Ns.durations.query.get.map(_.head ==> Set(duration1, duration2, duration6, duration7, duration8))
-
-        // Updating missing old value (null) has no effect
-        _ <- Ns(id).durations.swap(duration4 -> duration9).update.transact
-        _ <- Ns.durations.query.get.map(_.head ==> Set(duration1, duration2, duration6, duration7, duration8))
-
-        // Upserting missing old value (null) inserts the new value
-        _ <- Ns(id).durations.swap(duration4 -> duration9).upsert.transact
-        _ <- Ns.durations.query.get.map(_.head ==> Set(duration1, duration2, duration6, duration7, duration8, duration9))
-
-        // Replace with Seq of oldValue->newValue pairs
-        _ <- Ns(id).durations.swap(Seq(duration2 -> duration5)).update.transact
-        _ <- Ns.durations.query.get.map(_.head ==> Set(duration1, duration5, duration6, duration7, duration8, duration9))
-
-        // Replacing with empty Seq of oldValue->newValue pairs has no effect
-        _ <- Ns(id).durations.swap(Seq.empty[(Duration, Duration)]).update.transact
-        _ <- Ns.durations.query.get.map(_.head ==> Set(duration1, duration5, duration6, duration7, duration8, duration9))
-
-        // Can't swap duplicate from/to values
-        _ <- Ns("42").durations.swap(duration1 -> duration2, duration1 -> duration3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can't swap from duplicate retract values."
-          }
-
-        _ <- Ns("42").durations.swap(duration1 -> duration3, duration2 -> duration3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can't swap to duplicate replacement values."
-          }
-      } yield ()
-    }
-
-
     "remove" - types { implicit conn =>
       for {
         id <- Ns.durations(Set(duration1, duration2, duration3, duration4, duration5, duration6)).save.transact.map(_.id)
@@ -147,7 +100,7 @@ trait UpdateSetOps_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
         _ <- Ns(id).durations.remove(Seq.empty[Duration]).update.transact
         _ <- Ns.durations.query.get.map(_.head ==> Set(duration1))
 
-        // Removing all elements is like deleting the attribute
+        // Removing all elements retracts the attribute
         _ <- Ns(id).durations.remove(Seq(duration1)).update.transact
         _ <- Ns.durations.query.get.map(_ ==> Nil)
       } yield ()

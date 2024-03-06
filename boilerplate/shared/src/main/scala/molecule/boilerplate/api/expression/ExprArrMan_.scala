@@ -29,11 +29,8 @@ trait ExprArrMan_1[A, t0, Ns1[_, _], Ns2[_, _, _]]
   def hasNo [t <: t0: ClassTag](vs    : Seq[t]                     )(implicit x: X): Ns1[A, t] = _exprArrMan(HasNo , vs.map(v => Array(v))       )
   def hasNo [t <: t0: ClassTag](array : Array[t], arrays: Array[t]*)(implicit x: X): Ns1[A, t] = _exprArrMan(HasNo , array +: arrays             )
   def hasNo [t <: t0: ClassTag](arrays: Seq[Array[t]]              )               : Ns1[A, t] = _exprArrMan(HasNo , arrays                      )
-
   def add   [t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, t] = _exprArrMan(Add   , Seq((v +: vs).toArray)      )
   def add   [t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, t] = _exprArrMan(Add   , Seq(vs.toArray)             )
-  def swap  [t <: t0: ClassTag](ab    : (t, t), abs: (t, t)*       )               : Ns1[A, t] = _exprArrMan(Swap  , abs2arrays(ab +: abs)       )
-  def swap  [t <: t0: ClassTag](abs   : Seq[(t, t)]                )               : Ns1[A, t] = _exprArrMan(Swap  , abs2arrays(abs)             )
   def remove[t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, t] = _exprArrMan(Remove, Seq((v +: vs).toArray)      )
   def remove[t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, t] = _exprArrMan(Remove, Seq(vs.toArray)             )
   
@@ -71,11 +68,8 @@ trait ExprArrMan_2[A, B, t0, Ns1[_, _, _], Ns2[_, _, _, _]]
   def hasNo [t <: t0: ClassTag](vs    : Seq[t]                     )(implicit x: X): Ns1[A, B, t] = _exprArrMan(HasNo , vs.map(v => Array(v))       )
   def hasNo [t <: t0: ClassTag](array : Array[t], arrays: Array[t]*)(implicit x: X): Ns1[A, B, t] = _exprArrMan(HasNo , array +: arrays             )
   def hasNo [t <: t0: ClassTag](arrays: Seq[Array[t]]              )               : Ns1[A, B, t] = _exprArrMan(HasNo , arrays                      )
-
   def add   [t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, t] = _exprArrMan(Add   , Seq((v +: vs).toArray)      )
   def add   [t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, t] = _exprArrMan(Add   , Seq(vs.toArray)             )
-  def swap  [t <: t0: ClassTag](ab    : (t, t), abs: (t, t)*       )               : Ns1[A, B, t] = _exprArrMan(Swap  , abs2arrays(ab +: abs)       )
-  def swap  [t <: t0: ClassTag](abs   : Seq[(t, t)]                )               : Ns1[A, B, t] = _exprArrMan(Swap  , abs2arrays(abs)             )
   def remove[t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, t] = _exprArrMan(Remove, Seq((v +: vs).toArray)      )
   def remove[t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, t] = _exprArrMan(Remove, Seq(vs.toArray)             )
   
@@ -113,11 +107,8 @@ trait ExprArrMan_3[A, B, C, t0, Ns1[_, _, _, _], Ns2[_, _, _, _, _]]
   def hasNo [t <: t0: ClassTag](vs    : Seq[t]                     )(implicit x: X): Ns1[A, B, C, t] = _exprArrMan(HasNo , vs.map(v => Array(v))       )
   def hasNo [t <: t0: ClassTag](array : Array[t], arrays: Array[t]*)(implicit x: X): Ns1[A, B, C, t] = _exprArrMan(HasNo , array +: arrays             )
   def hasNo [t <: t0: ClassTag](arrays: Seq[Array[t]]              )               : Ns1[A, B, C, t] = _exprArrMan(HasNo , arrays                      )
-
   def add   [t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, t] = _exprArrMan(Add   , Seq((v +: vs).toArray)      )
   def add   [t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, t] = _exprArrMan(Add   , Seq(vs.toArray)             )
-  def swap  [t <: t0: ClassTag](ab    : (t, t), abs: (t, t)*       )               : Ns1[A, B, C, t] = _exprArrMan(Swap  , abs2arrays(ab +: abs)       )
-  def swap  [t <: t0: ClassTag](abs   : Seq[(t, t)]                )               : Ns1[A, B, C, t] = _exprArrMan(Swap  , abs2arrays(abs)             )
   def remove[t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, t] = _exprArrMan(Remove, Seq((v +: vs).toArray)      )
   def remove[t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, t] = _exprArrMan(Remove, Seq(vs.toArray)             )
   
@@ -155,11 +146,8 @@ trait ExprArrMan_4[A, B, C, D, t0, Ns1[_, _, _, _, _], Ns2[_, _, _, _, _, _]]
   def hasNo [t <: t0: ClassTag](vs    : Seq[t]                     )(implicit x: X): Ns1[A, B, C, D, t] = _exprArrMan(HasNo , vs.map(v => Array(v))       )
   def hasNo [t <: t0: ClassTag](array : Array[t], arrays: Array[t]*)(implicit x: X): Ns1[A, B, C, D, t] = _exprArrMan(HasNo , array +: arrays             )
   def hasNo [t <: t0: ClassTag](arrays: Seq[Array[t]]              )               : Ns1[A, B, C, D, t] = _exprArrMan(HasNo , arrays                      )
-
   def add   [t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, t] = _exprArrMan(Add   , Seq((v +: vs).toArray)      )
   def add   [t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, t] = _exprArrMan(Add   , Seq(vs.toArray)             )
-  def swap  [t <: t0: ClassTag](ab    : (t, t), abs: (t, t)*       )               : Ns1[A, B, C, D, t] = _exprArrMan(Swap  , abs2arrays(ab +: abs)       )
-  def swap  [t <: t0: ClassTag](abs   : Seq[(t, t)]                )               : Ns1[A, B, C, D, t] = _exprArrMan(Swap  , abs2arrays(abs)             )
   def remove[t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, t] = _exprArrMan(Remove, Seq((v +: vs).toArray)      )
   def remove[t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, t] = _exprArrMan(Remove, Seq(vs.toArray)             )
   
@@ -197,11 +185,8 @@ trait ExprArrMan_5[A, B, C, D, E, t0, Ns1[_, _, _, _, _, _], Ns2[_, _, _, _, _, 
   def hasNo [t <: t0: ClassTag](vs    : Seq[t]                     )(implicit x: X): Ns1[A, B, C, D, E, t] = _exprArrMan(HasNo , vs.map(v => Array(v))       )
   def hasNo [t <: t0: ClassTag](array : Array[t], arrays: Array[t]*)(implicit x: X): Ns1[A, B, C, D, E, t] = _exprArrMan(HasNo , array +: arrays             )
   def hasNo [t <: t0: ClassTag](arrays: Seq[Array[t]]              )               : Ns1[A, B, C, D, E, t] = _exprArrMan(HasNo , arrays                      )
-
   def add   [t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, t] = _exprArrMan(Add   , Seq((v +: vs).toArray)      )
   def add   [t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, t] = _exprArrMan(Add   , Seq(vs.toArray)             )
-  def swap  [t <: t0: ClassTag](ab    : (t, t), abs: (t, t)*       )               : Ns1[A, B, C, D, E, t] = _exprArrMan(Swap  , abs2arrays(ab +: abs)       )
-  def swap  [t <: t0: ClassTag](abs   : Seq[(t, t)]                )               : Ns1[A, B, C, D, E, t] = _exprArrMan(Swap  , abs2arrays(abs)             )
   def remove[t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, t] = _exprArrMan(Remove, Seq((v +: vs).toArray)      )
   def remove[t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, t] = _exprArrMan(Remove, Seq(vs.toArray)             )
   
@@ -239,11 +224,8 @@ trait ExprArrMan_6[A, B, C, D, E, F, t0, Ns1[_, _, _, _, _, _, _], Ns2[_, _, _, 
   def hasNo [t <: t0: ClassTag](vs    : Seq[t]                     )(implicit x: X): Ns1[A, B, C, D, E, F, t] = _exprArrMan(HasNo , vs.map(v => Array(v))       )
   def hasNo [t <: t0: ClassTag](array : Array[t], arrays: Array[t]*)(implicit x: X): Ns1[A, B, C, D, E, F, t] = _exprArrMan(HasNo , array +: arrays             )
   def hasNo [t <: t0: ClassTag](arrays: Seq[Array[t]]              )               : Ns1[A, B, C, D, E, F, t] = _exprArrMan(HasNo , arrays                      )
-
   def add   [t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, F, t] = _exprArrMan(Add   , Seq((v +: vs).toArray)      )
   def add   [t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, F, t] = _exprArrMan(Add   , Seq(vs.toArray)             )
-  def swap  [t <: t0: ClassTag](ab    : (t, t), abs: (t, t)*       )               : Ns1[A, B, C, D, E, F, t] = _exprArrMan(Swap  , abs2arrays(ab +: abs)       )
-  def swap  [t <: t0: ClassTag](abs   : Seq[(t, t)]                )               : Ns1[A, B, C, D, E, F, t] = _exprArrMan(Swap  , abs2arrays(abs)             )
   def remove[t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, F, t] = _exprArrMan(Remove, Seq((v +: vs).toArray)      )
   def remove[t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, F, t] = _exprArrMan(Remove, Seq(vs.toArray)             )
   
@@ -281,11 +263,8 @@ trait ExprArrMan_7[A, B, C, D, E, F, G, t0, Ns1[_, _, _, _, _, _, _, _], Ns2[_, 
   def hasNo [t <: t0: ClassTag](vs    : Seq[t]                     )(implicit x: X): Ns1[A, B, C, D, E, F, G, t] = _exprArrMan(HasNo , vs.map(v => Array(v))       )
   def hasNo [t <: t0: ClassTag](array : Array[t], arrays: Array[t]*)(implicit x: X): Ns1[A, B, C, D, E, F, G, t] = _exprArrMan(HasNo , array +: arrays             )
   def hasNo [t <: t0: ClassTag](arrays: Seq[Array[t]]              )               : Ns1[A, B, C, D, E, F, G, t] = _exprArrMan(HasNo , arrays                      )
-
   def add   [t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, F, G, t] = _exprArrMan(Add   , Seq((v +: vs).toArray)      )
   def add   [t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, F, G, t] = _exprArrMan(Add   , Seq(vs.toArray)             )
-  def swap  [t <: t0: ClassTag](ab    : (t, t), abs: (t, t)*       )               : Ns1[A, B, C, D, E, F, G, t] = _exprArrMan(Swap  , abs2arrays(ab +: abs)       )
-  def swap  [t <: t0: ClassTag](abs   : Seq[(t, t)]                )               : Ns1[A, B, C, D, E, F, G, t] = _exprArrMan(Swap  , abs2arrays(abs)             )
   def remove[t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, F, G, t] = _exprArrMan(Remove, Seq((v +: vs).toArray)      )
   def remove[t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, F, G, t] = _exprArrMan(Remove, Seq(vs.toArray)             )
   
@@ -323,11 +302,8 @@ trait ExprArrMan_8[A, B, C, D, E, F, G, H, t0, Ns1[_, _, _, _, _, _, _, _, _], N
   def hasNo [t <: t0: ClassTag](vs    : Seq[t]                     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, t] = _exprArrMan(HasNo , vs.map(v => Array(v))       )
   def hasNo [t <: t0: ClassTag](array : Array[t], arrays: Array[t]*)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, t] = _exprArrMan(HasNo , array +: arrays             )
   def hasNo [t <: t0: ClassTag](arrays: Seq[Array[t]]              )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprArrMan(HasNo , arrays                      )
-
   def add   [t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprArrMan(Add   , Seq((v +: vs).toArray)      )
   def add   [t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprArrMan(Add   , Seq(vs.toArray)             )
-  def swap  [t <: t0: ClassTag](ab    : (t, t), abs: (t, t)*       )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprArrMan(Swap  , abs2arrays(ab +: abs)       )
-  def swap  [t <: t0: ClassTag](abs   : Seq[(t, t)]                )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprArrMan(Swap  , abs2arrays(abs)             )
   def remove[t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprArrMan(Remove, Seq((v +: vs).toArray)      )
   def remove[t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprArrMan(Remove, Seq(vs.toArray)             )
   
@@ -365,11 +341,8 @@ trait ExprArrMan_9[A, B, C, D, E, F, G, H, I, t0, Ns1[_, _, _, _, _, _, _, _, _,
   def hasNo [t <: t0: ClassTag](vs    : Seq[t]                     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, t] = _exprArrMan(HasNo , vs.map(v => Array(v))       )
   def hasNo [t <: t0: ClassTag](array : Array[t], arrays: Array[t]*)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, t] = _exprArrMan(HasNo , array +: arrays             )
   def hasNo [t <: t0: ClassTag](arrays: Seq[Array[t]]              )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprArrMan(HasNo , arrays                      )
-
   def add   [t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprArrMan(Add   , Seq((v +: vs).toArray)      )
   def add   [t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprArrMan(Add   , Seq(vs.toArray)             )
-  def swap  [t <: t0: ClassTag](ab    : (t, t), abs: (t, t)*       )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprArrMan(Swap  , abs2arrays(ab +: abs)       )
-  def swap  [t <: t0: ClassTag](abs   : Seq[(t, t)]                )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprArrMan(Swap  , abs2arrays(abs)             )
   def remove[t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprArrMan(Remove, Seq((v +: vs).toArray)      )
   def remove[t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprArrMan(Remove, Seq(vs.toArray)             )
   
@@ -407,11 +380,8 @@ trait ExprArrMan_10[A, B, C, D, E, F, G, H, I, J, t0, Ns1[_, _, _, _, _, _, _, _
   def hasNo [t <: t0: ClassTag](vs    : Seq[t]                     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprArrMan(HasNo , vs.map(v => Array(v))       )
   def hasNo [t <: t0: ClassTag](array : Array[t], arrays: Array[t]*)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprArrMan(HasNo , array +: arrays             )
   def hasNo [t <: t0: ClassTag](arrays: Seq[Array[t]]              )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprArrMan(HasNo , arrays                      )
-
   def add   [t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprArrMan(Add   , Seq((v +: vs).toArray)      )
   def add   [t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprArrMan(Add   , Seq(vs.toArray)             )
-  def swap  [t <: t0: ClassTag](ab    : (t, t), abs: (t, t)*       )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprArrMan(Swap  , abs2arrays(ab +: abs)       )
-  def swap  [t <: t0: ClassTag](abs   : Seq[(t, t)]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprArrMan(Swap  , abs2arrays(abs)             )
   def remove[t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprArrMan(Remove, Seq((v +: vs).toArray)      )
   def remove[t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprArrMan(Remove, Seq(vs.toArray)             )
   
@@ -449,11 +419,8 @@ trait ExprArrMan_11[A, B, C, D, E, F, G, H, I, J, K, t0, Ns1[_, _, _, _, _, _, _
   def hasNo [t <: t0: ClassTag](vs    : Seq[t]                     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprArrMan(HasNo , vs.map(v => Array(v))       )
   def hasNo [t <: t0: ClassTag](array : Array[t], arrays: Array[t]*)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprArrMan(HasNo , array +: arrays             )
   def hasNo [t <: t0: ClassTag](arrays: Seq[Array[t]]              )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprArrMan(HasNo , arrays                      )
-
   def add   [t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprArrMan(Add   , Seq((v +: vs).toArray)      )
   def add   [t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprArrMan(Add   , Seq(vs.toArray)             )
-  def swap  [t <: t0: ClassTag](ab    : (t, t), abs: (t, t)*       )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprArrMan(Swap  , abs2arrays(ab +: abs)       )
-  def swap  [t <: t0: ClassTag](abs   : Seq[(t, t)]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprArrMan(Swap  , abs2arrays(abs)             )
   def remove[t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprArrMan(Remove, Seq((v +: vs).toArray)      )
   def remove[t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprArrMan(Remove, Seq(vs.toArray)             )
   
@@ -491,11 +458,8 @@ trait ExprArrMan_12[A, B, C, D, E, F, G, H, I, J, K, L, t0, Ns1[_, _, _, _, _, _
   def hasNo [t <: t0: ClassTag](vs    : Seq[t]                     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprArrMan(HasNo , vs.map(v => Array(v))       )
   def hasNo [t <: t0: ClassTag](array : Array[t], arrays: Array[t]*)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprArrMan(HasNo , array +: arrays             )
   def hasNo [t <: t0: ClassTag](arrays: Seq[Array[t]]              )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprArrMan(HasNo , arrays                      )
-
   def add   [t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprArrMan(Add   , Seq((v +: vs).toArray)      )
   def add   [t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprArrMan(Add   , Seq(vs.toArray)             )
-  def swap  [t <: t0: ClassTag](ab    : (t, t), abs: (t, t)*       )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprArrMan(Swap  , abs2arrays(ab +: abs)       )
-  def swap  [t <: t0: ClassTag](abs   : Seq[(t, t)]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprArrMan(Swap  , abs2arrays(abs)             )
   def remove[t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprArrMan(Remove, Seq((v +: vs).toArray)      )
   def remove[t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprArrMan(Remove, Seq(vs.toArray)             )
   
@@ -533,11 +497,8 @@ trait ExprArrMan_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t0, Ns1[_, _, _, _, _
   def hasNo [t <: t0: ClassTag](vs    : Seq[t]                     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprArrMan(HasNo , vs.map(v => Array(v))       )
   def hasNo [t <: t0: ClassTag](array : Array[t], arrays: Array[t]*)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprArrMan(HasNo , array +: arrays             )
   def hasNo [t <: t0: ClassTag](arrays: Seq[Array[t]]              )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprArrMan(HasNo , arrays                      )
-
   def add   [t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprArrMan(Add   , Seq((v +: vs).toArray)      )
   def add   [t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprArrMan(Add   , Seq(vs.toArray)             )
-  def swap  [t <: t0: ClassTag](ab    : (t, t), abs: (t, t)*       )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprArrMan(Swap  , abs2arrays(ab +: abs)       )
-  def swap  [t <: t0: ClassTag](abs   : Seq[(t, t)]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprArrMan(Swap  , abs2arrays(abs)             )
   def remove[t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprArrMan(Remove, Seq((v +: vs).toArray)      )
   def remove[t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprArrMan(Remove, Seq(vs.toArray)             )
   
@@ -575,11 +536,8 @@ trait ExprArrMan_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t0, Ns1[_, _, _, _
   def hasNo [t <: t0: ClassTag](vs    : Seq[t]                     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprArrMan(HasNo , vs.map(v => Array(v))       )
   def hasNo [t <: t0: ClassTag](array : Array[t], arrays: Array[t]*)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprArrMan(HasNo , array +: arrays             )
   def hasNo [t <: t0: ClassTag](arrays: Seq[Array[t]]              )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprArrMan(HasNo , arrays                      )
-
   def add   [t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprArrMan(Add   , Seq((v +: vs).toArray)      )
   def add   [t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprArrMan(Add   , Seq(vs.toArray)             )
-  def swap  [t <: t0: ClassTag](ab    : (t, t), abs: (t, t)*       )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprArrMan(Swap  , abs2arrays(ab +: abs)       )
-  def swap  [t <: t0: ClassTag](abs   : Seq[(t, t)]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprArrMan(Swap  , abs2arrays(abs)             )
   def remove[t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprArrMan(Remove, Seq((v +: vs).toArray)      )
   def remove[t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprArrMan(Remove, Seq(vs.toArray)             )
   
@@ -617,11 +575,8 @@ trait ExprArrMan_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t0, Ns1[_, _, _
   def hasNo [t <: t0: ClassTag](vs    : Seq[t]                     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprArrMan(HasNo , vs.map(v => Array(v))       )
   def hasNo [t <: t0: ClassTag](array : Array[t], arrays: Array[t]*)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprArrMan(HasNo , array +: arrays             )
   def hasNo [t <: t0: ClassTag](arrays: Seq[Array[t]]              )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprArrMan(HasNo , arrays                      )
-
   def add   [t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprArrMan(Add   , Seq((v +: vs).toArray)      )
   def add   [t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprArrMan(Add   , Seq(vs.toArray)             )
-  def swap  [t <: t0: ClassTag](ab    : (t, t), abs: (t, t)*       )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprArrMan(Swap  , abs2arrays(ab +: abs)       )
-  def swap  [t <: t0: ClassTag](abs   : Seq[(t, t)]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprArrMan(Swap  , abs2arrays(abs)             )
   def remove[t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprArrMan(Remove, Seq((v +: vs).toArray)      )
   def remove[t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprArrMan(Remove, Seq(vs.toArray)             )
   
@@ -659,11 +614,8 @@ trait ExprArrMan_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t0, Ns1[_, _
   def hasNo [t <: t0: ClassTag](vs    : Seq[t]                     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprArrMan(HasNo , vs.map(v => Array(v))       )
   def hasNo [t <: t0: ClassTag](array : Array[t], arrays: Array[t]*)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprArrMan(HasNo , array +: arrays             )
   def hasNo [t <: t0: ClassTag](arrays: Seq[Array[t]]              )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprArrMan(HasNo , arrays                      )
-
   def add   [t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprArrMan(Add   , Seq((v +: vs).toArray)      )
   def add   [t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprArrMan(Add   , Seq(vs.toArray)             )
-  def swap  [t <: t0: ClassTag](ab    : (t, t), abs: (t, t)*       )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprArrMan(Swap  , abs2arrays(ab +: abs)       )
-  def swap  [t <: t0: ClassTag](abs   : Seq[(t, t)]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprArrMan(Swap  , abs2arrays(abs)             )
   def remove[t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprArrMan(Remove, Seq((v +: vs).toArray)      )
   def remove[t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprArrMan(Remove, Seq(vs.toArray)             )
   
@@ -701,11 +653,8 @@ trait ExprArrMan_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t0, Ns1[_
   def hasNo [t <: t0: ClassTag](vs    : Seq[t]                     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprArrMan(HasNo , vs.map(v => Array(v))       )
   def hasNo [t <: t0: ClassTag](array : Array[t], arrays: Array[t]*)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprArrMan(HasNo , array +: arrays             )
   def hasNo [t <: t0: ClassTag](arrays: Seq[Array[t]]              )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprArrMan(HasNo , arrays                      )
-
   def add   [t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprArrMan(Add   , Seq((v +: vs).toArray)      )
   def add   [t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprArrMan(Add   , Seq(vs.toArray)             )
-  def swap  [t <: t0: ClassTag](ab    : (t, t), abs: (t, t)*       )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprArrMan(Swap  , abs2arrays(ab +: abs)       )
-  def swap  [t <: t0: ClassTag](abs   : Seq[(t, t)]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprArrMan(Swap  , abs2arrays(abs)             )
   def remove[t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprArrMan(Remove, Seq((v +: vs).toArray)      )
   def remove[t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprArrMan(Remove, Seq(vs.toArray)             )
   
@@ -743,11 +692,8 @@ trait ExprArrMan_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t0, Ns
   def hasNo [t <: t0: ClassTag](vs    : Seq[t]                     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprArrMan(HasNo , vs.map(v => Array(v))       )
   def hasNo [t <: t0: ClassTag](array : Array[t], arrays: Array[t]*)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprArrMan(HasNo , array +: arrays             )
   def hasNo [t <: t0: ClassTag](arrays: Seq[Array[t]]              )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprArrMan(HasNo , arrays                      )
-
   def add   [t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprArrMan(Add   , Seq((v +: vs).toArray)      )
   def add   [t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprArrMan(Add   , Seq(vs.toArray)             )
-  def swap  [t <: t0: ClassTag](ab    : (t, t), abs: (t, t)*       )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprArrMan(Swap  , abs2arrays(ab +: abs)       )
-  def swap  [t <: t0: ClassTag](abs   : Seq[(t, t)]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprArrMan(Swap  , abs2arrays(abs)             )
   def remove[t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprArrMan(Remove, Seq((v +: vs).toArray)      )
   def remove[t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprArrMan(Remove, Seq(vs.toArray)             )
   
@@ -785,11 +731,8 @@ trait ExprArrMan_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t0,
   def hasNo [t <: t0: ClassTag](vs    : Seq[t]                     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprArrMan(HasNo , vs.map(v => Array(v))       )
   def hasNo [t <: t0: ClassTag](array : Array[t], arrays: Array[t]*)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprArrMan(HasNo , array +: arrays             )
   def hasNo [t <: t0: ClassTag](arrays: Seq[Array[t]]              )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprArrMan(HasNo , arrays                      )
-
   def add   [t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprArrMan(Add   , Seq((v +: vs).toArray)      )
   def add   [t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprArrMan(Add   , Seq(vs.toArray)             )
-  def swap  [t <: t0: ClassTag](ab    : (t, t), abs: (t, t)*       )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprArrMan(Swap  , abs2arrays(ab +: abs)       )
-  def swap  [t <: t0: ClassTag](abs   : Seq[(t, t)]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprArrMan(Swap  , abs2arrays(abs)             )
   def remove[t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprArrMan(Remove, Seq((v +: vs).toArray)      )
   def remove[t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprArrMan(Remove, Seq(vs.toArray)             )
   
@@ -827,11 +770,8 @@ trait ExprArrMan_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, 
   def hasNo [t <: t0: ClassTag](vs    : Seq[t]                     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprArrMan(HasNo , vs.map(v => Array(v))       )
   def hasNo [t <: t0: ClassTag](array : Array[t], arrays: Array[t]*)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprArrMan(HasNo , array +: arrays             )
   def hasNo [t <: t0: ClassTag](arrays: Seq[Array[t]]              )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprArrMan(HasNo , arrays                      )
-
   def add   [t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprArrMan(Add   , Seq((v +: vs).toArray)      )
   def add   [t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprArrMan(Add   , Seq(vs.toArray)             )
-  def swap  [t <: t0: ClassTag](ab    : (t, t), abs: (t, t)*       )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprArrMan(Swap  , abs2arrays(ab +: abs)       )
-  def swap  [t <: t0: ClassTag](abs   : Seq[(t, t)]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprArrMan(Swap  , abs2arrays(abs)             )
   def remove[t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprArrMan(Remove, Seq((v +: vs).toArray)      )
   def remove[t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprArrMan(Remove, Seq(vs.toArray)             )
   
@@ -869,11 +809,8 @@ trait ExprArrMan_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, 
   def hasNo [t <: t0: ClassTag](vs    : Seq[t]                     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprArrMan(HasNo , vs.map(v => Array(v))       )
   def hasNo [t <: t0: ClassTag](array : Array[t], arrays: Array[t]*)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprArrMan(HasNo , array +: arrays             )
   def hasNo [t <: t0: ClassTag](arrays: Seq[Array[t]]              )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprArrMan(HasNo , arrays                      )
-
   def add   [t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprArrMan(Add   , Seq((v +: vs).toArray)      )
   def add   [t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprArrMan(Add   , Seq(vs.toArray)             )
-  def swap  [t <: t0: ClassTag](ab    : (t, t), abs: (t, t)*       )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprArrMan(Swap  , abs2arrays(ab +: abs)       )
-  def swap  [t <: t0: ClassTag](abs   : Seq[(t, t)]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprArrMan(Swap  , abs2arrays(abs)             )
   def remove[t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprArrMan(Remove, Seq((v +: vs).toArray)      )
   def remove[t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprArrMan(Remove, Seq(vs.toArray)             )
   
@@ -911,11 +848,8 @@ trait ExprArrMan_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, 
   def hasNo [t <: t0: ClassTag](vs    : Seq[t]                     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprArrMan(HasNo , vs.map(v => Array(v))       )
   def hasNo [t <: t0: ClassTag](array : Array[t], arrays: Array[t]*)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprArrMan(HasNo , array +: arrays             )
   def hasNo [t <: t0: ClassTag](arrays: Seq[Array[t]]              )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprArrMan(HasNo , arrays                      )
-
   def add   [t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprArrMan(Add   , Seq((v +: vs).toArray)      )
   def add   [t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprArrMan(Add   , Seq(vs.toArray)             )
-  def swap  [t <: t0: ClassTag](ab    : (t, t), abs: (t, t)*       )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprArrMan(Swap  , abs2arrays(ab +: abs)       )
-  def swap  [t <: t0: ClassTag](abs   : Seq[(t, t)]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprArrMan(Swap  , abs2arrays(abs)             )
   def remove[t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprArrMan(Remove, Seq((v +: vs).toArray)      )
   def remove[t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprArrMan(Remove, Seq(vs.toArray)             )
   

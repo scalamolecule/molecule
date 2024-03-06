@@ -39,31 +39,28 @@ object _ExprMapTac extends BoilerplateGenBase("ExprMapTac", "/api/expression") {
       s"""
          |
          |trait ${fileName}Ops_$arity[${`A..V, `}t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]] extends ExprAttr_$arity[${`A..V, `}t, Ns1, Ns2] {
-         |  protected def _exprMapTac (op: Op, maps: Seq[Map[String, t]]): Ns1[${`A..V, `}t] = ???
-         |  protected def _exprMapTacK(op: Op, keys: Seq[String        ]): Ns1[${`A..V, `}t] = ???
-         |  protected def _exprMapTacV(op: Op, vs  : Seq[t             ]): Ns1[${`A..V, `}t] = ???
+         |  protected def _exprMapTac(op: Op, maps: Seq[Map[String, t]]): Ns1[${`A..V, `}t] = ???
+         |  protected def _exprMapTaK(op: Op, keys: Seq[String        ]): Ns1[${`A..V, `}t] = ???
+         |  protected def _exprMapTaV(op: Op, vs  : Seq[t             ]): Ns1[${`A..V, `}t] = ???
          |}
          |
          |trait $fileName_$arity[${`A..V, `}t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]]
          |  extends ${fileName}Ops_$arity[${`A..V, `}t, Ns1, Ns2] {
-         |  def apply (                                           ): Ns1[${`A..V, `}t] = _exprMapTacK(NoValue, Nil                       )
-         |  def apply (key  : String, keys: String*               ): Ns1[${`A..V, `}t] = _exprMapTacK(Eq     , key +: keys               )
-         |  def apply (keys : Seq[String]                         ): Ns1[${`A..V, `}t] = _exprMapTacK(Eq     , keys                      )
-         |  def not   (key  : String, keys: String*               ): Ns1[${`A..V, `}t] = _exprMapTacK(Neq    , key +: keys               )
-         |  def not   (keys : Seq[String]                         ): Ns1[${`A..V, `}t] = _exprMapTacK(Neq    , keys                      )
-         |  def has   (key  : String, keys: String*               ): Ns1[${`A..V, `}t] = _exprMapTacK(Has    , key +: keys               )
-         |  def has   (keys : Seq[String]                         ): Ns1[${`A..V, `}t] = _exprMapTacK(Has    , keys                      )
-         |  def hasNo (key  : String, keys: String*               ): Ns1[${`A..V, `}t] = _exprMapTacK(HasNo  , key +: keys               )
-         |  def hasNo (keys : Seq[String]                         ): Ns1[${`A..V, `}t] = _exprMapTacK(HasNo  , keys                      )
-         |  def v     (v    : t, vs: t*                           ): Ns1[${`A..V, `}t] = _exprMapTacV(HasNo  , v +: vs                   )
-         |  def v     (vs   : Seq[t]                              ): Ns1[${`A..V, `}t] = _exprMapTacV(HasNo  , vs                        )
-         |
-         |  def add   (pair : (String, t), pairs: (String, t)*    ): Ns1[${`A..V, `}t] = _exprMapTac (Add    , Seq((pair +: pairs).toMap))
-         |  def add   (pairs: Iterable[(String, t)]               ): Ns1[${`A..V, `}t] = _exprMapTac (Add    , Seq(pairs.toMap)          )
-         |  def swap  (ab   : (String, t, t), abs: (String, t, t)*): Ns1[${`A..V, `}t] = _exprMapTac (Swap   , abs2maps(ab +: abs)       )
-         |  def swap  (abs  : Seq[(String, t, t)]                 ): Ns1[${`A..V, `}t] = _exprMapTac (Swap   , abs2maps(abs)             )
-         |  def remove(key  : String, keys: String*               ): Ns1[${`A..V, `}t] = _exprMapTacK(Remove , key +: keys               )
-         |  def remove(keys : Seq[String]                         ): Ns1[${`A..V, `}t] = _exprMapTacK(Remove , keys                      )
+         |  def apply (                                           ): Ns1[${`A..V, `}t] = _exprMapTaK(NoValue, Nil                       )
+         |  def apply (key  : String, keys: String*               ): Ns1[${`A..V, `}t] = _exprMapTaK(Eq     , key +: keys               )
+         |  def apply (keys : Seq[String]                         ): Ns1[${`A..V, `}t] = _exprMapTaK(Eq     , keys                      )
+         |  def not   (key  : String, keys: String*               ): Ns1[${`A..V, `}t] = _exprMapTaK(Neq    , key +: keys               )
+         |  def not   (keys : Seq[String]                         ): Ns1[${`A..V, `}t] = _exprMapTaK(Neq    , keys                      )
+         |  def has   (key  : String, keys: String*               ): Ns1[${`A..V, `}t] = _exprMapTaK(Has    , key +: keys               )
+         |  def has   (keys : Seq[String]                         ): Ns1[${`A..V, `}t] = _exprMapTaK(Has    , keys                      )
+         |  def hasNo (key  : String, keys: String*               ): Ns1[${`A..V, `}t] = _exprMapTaK(HasNo  , key +: keys               )
+         |  def hasNo (keys : Seq[String]                         ): Ns1[${`A..V, `}t] = _exprMapTaK(HasNo  , keys                      )
+         |  def getV  (v    : t, vs: t*                           ): Ns1[${`A..V, `}t] = _exprMapTaV(GetV   , v +: vs                   )
+         |  def getV  (vs   : Seq[t]                              ): Ns1[${`A..V, `}t] = _exprMapTaV(GetV   , vs                        )
+         |  def add   (pair : (String, t), pairs: (String, t)*    ): Ns1[${`A..V, `}t] = _exprMapTac(Add    , Seq((pair +: pairs).toMap))
+         |  def add   (pairs: Iterable[(String, t)]               ): Ns1[${`A..V, `}t] = _exprMapTac(Add    , Seq(pairs.toMap)          )
+         |  def remove(key  : String, keys: String*               ): Ns1[${`A..V, `}t] = _exprMapTaK(Remove , key +: keys               )
+         |  def remove(keys : Seq[String]                         ): Ns1[${`A..V, `}t] = _exprMapTaK(Remove , keys                      )
          |  $attrExprs
          |}""".stripMargin
   }

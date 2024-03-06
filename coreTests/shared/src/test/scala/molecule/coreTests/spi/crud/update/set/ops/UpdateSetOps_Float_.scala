@@ -1,7 +1,6 @@
 // GENERATED CODE ********************************
 package molecule.coreTests.spi.crud.update.set.ops
 
-import molecule.base.error._
 import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
@@ -72,52 +71,6 @@ trait UpdateSetOps_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "swap" - types { implicit conn =>
-      for {
-        id <- Ns.floats(Set(float1, float2, float3, float4, float5, float6)).save.transact.map(_.id)
-
-        // Replace value
-        _ <- Ns(id).floats.swap(float6 -> float8).update.transact
-        _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float2, float3, float4, float5, float8))
-
-        // Replacing value to existing value simply deletes it
-        _ <- Ns(id).floats.swap(float5 -> float8).update.transact
-        _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float2, float3, float4, float8))
-
-        // Replace multiple values (vararg)
-        _ <- Ns(id).floats.swap(float3 -> float6, float4 -> float7).update.transact
-        _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float2, float6, float7, float8))
-
-        // Updating missing old value (null) has no effect
-        _ <- Ns(id).floats.swap(float4 -> float9).update.transact
-        _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float2, float6, float7, float8))
-
-        // Upserting missing old value (null) inserts the new value
-        _ <- Ns(id).floats.swap(float4 -> float9).upsert.transact
-        _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float2, float6, float7, float8, float9))
-
-        // Replace with Seq of oldValue->newValue pairs
-        _ <- Ns(id).floats.swap(Seq(float2 -> float5)).update.transact
-        _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float5, float6, float7, float8, float9))
-
-        // Replacing with empty Seq of oldValue->newValue pairs has no effect
-        _ <- Ns(id).floats.swap(Seq.empty[(Float, Float)]).update.transact
-        _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float5, float6, float7, float8, float9))
-
-        // Can't swap duplicate from/to values
-        _ <- Ns("42").floats.swap(float1 -> float2, float1 -> float3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can't swap from duplicate retract values."
-          }
-
-        _ <- Ns("42").floats.swap(float1 -> float3, float2 -> float3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can't swap to duplicate replacement values."
-          }
-      } yield ()
-    }
-
-
     "remove" - types { implicit conn =>
       for {
         id <- Ns.floats(Set(float1, float2, float3, float4, float5, float6)).save.transact.map(_.id)
@@ -146,7 +99,7 @@ trait UpdateSetOps_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).floats.remove(Seq.empty[Float]).update.transact
         _ <- Ns.floats.query.get.map(_.head ==> Set(float1))
 
-        // Removing all elements is like deleting the attribute
+        // Removing all elements retracts the attribute
         _ <- Ns(id).floats.remove(Seq(float1)).update.transact
         _ <- Ns.floats.query.get.map(_ ==> Nil)
       } yield ()

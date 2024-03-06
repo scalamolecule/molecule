@@ -1,7 +1,5 @@
 package molecule.core.transaction.ops
 
-import java.net.URI
-import java.util.{Date, UUID}
 import molecule.boilerplate.ast.Model._
 import molecule.core.transaction.Action2Data
 
@@ -38,19 +36,6 @@ trait UpdateOps extends Action2Data with BaseOps {
     set2array: Set[Any] => Array[AnyRef],
     exts: List[String],
     value2json: (StringBuffer, T) => StringBuffer
-  ): Unit
-
-  def updateSetSwap[T](
-    ns: String,
-    attr: String,
-    sets: Seq[Set[T]],
-    refNs: Option[String],
-    owner: Boolean,
-    transform: T => Any,
-    handleValue: T => Any,
-    exts: List[String],
-    value2json: (StringBuffer, T) => StringBuffer,
-    one2json: T => String
   ): Unit
 
   def updateSetRemove[T](

@@ -146,6 +146,9 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
           case a: AttrSetOpt => resolve(resolveAttrSetOpt(es, a), tail)
           case a: AttrSetTac => resolve(resolveAttrSetTac(es, a), tail)
         }
+
+      case a: AttrArr => ???
+      case a: AttrMap => ???
       case ref: Ref                             => resolve(resolveRef(es, ref), tail)
       case _: BackRef                           => resolve(resolveBackRef(es), tail)
       case Nested(ref, nestedElements)          => resolve(resolveNested(es, ref, nestedElements), tail)

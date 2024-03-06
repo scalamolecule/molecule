@@ -1,6 +1,5 @@
 package molecule.coreTests.spi.crud.update.set.ops
 
-import molecule.base.error._
 import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
@@ -67,52 +66,6 @@ trait UpdateSetOps_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Add empty Seq of values (no effect)
         _ <- Ns(id).ints.add(Seq.empty[Int]).update.transact
         _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4, int5, int6, int7))
-      } yield ()
-    }
-
-
-    "swap" - types { implicit conn =>
-      for {
-        id <- Ns.ints(Set(int1, int2, int3, int4, int5, int6)).save.transact.map(_.id)
-
-        // Replace value
-        _ <- Ns(id).ints.swap(int6 -> int8).update.transact
-        _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4, int5, int8))
-
-        // Replacing value to existing value simply deletes it
-        _ <- Ns(id).ints.swap(int5 -> int8).update.transact
-        _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4, int8))
-
-        // Replace multiple values (vararg)
-        _ <- Ns(id).ints.swap(int3 -> int6, int4 -> int7).update.transact
-        _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int6, int7, int8))
-
-        // Updating missing old value (null) has no effect
-        _ <- Ns(id).ints.swap(int4 -> int9).update.transact
-        _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int6, int7, int8))
-
-        // Upserting missing old value (null) inserts the new value
-        _ <- Ns(id).ints.swap(int4 -> int9).upsert.transact
-        _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int6, int7, int8, int9))
-
-        // Replace with Seq of oldValue->newValue pairs
-        _ <- Ns(id).ints.swap(Seq(int2 -> int5)).update.transact
-        _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int5, int6, int7, int8, int9))
-
-        // Replacing with empty Seq of oldValue->newValue pairs has no effect
-        _ <- Ns(id).ints.swap(Seq.empty[(Int, Int)]).update.transact
-        _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int5, int6, int7, int8, int9))
-
-        // Can't swap duplicate from/to values
-        _ <- Ns("42").ints.swap(int1 -> int2, int1 -> int3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can't swap from duplicate retract values."
-          }
-
-        _ <- Ns("42").ints.swap(int1 -> int3, int2 -> int3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can't swap to duplicate replacement values."
-          }
       } yield ()
     }
 

@@ -28,11 +28,8 @@ trait ExprSetMan_1[A, t, Ns1[_, _], Ns2[_, _, _]]
   def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, t] = _exprSetMan(HasNo , set +: sets               )
   def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, t] = _exprSetMan(HasNo , sets                      )
-
   def add   (v    : t, vs: t*             )               : Ns1[A, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]           )               : Ns1[A, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)*  )               : Ns1[A, t] = _exprSetMan(Swap  , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
   
@@ -70,11 +67,8 @@ trait ExprSetMan_2[A, B, t, Ns1[_, _, _], Ns2[_, _, _, _]]
   def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, t] = _exprSetMan(HasNo , set +: sets               )
   def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, t] = _exprSetMan(HasNo , sets                      )
-
   def add   (v    : t, vs: t*             )               : Ns1[A, B, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]           )               : Ns1[A, B, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)*  )               : Ns1[A, B, t] = _exprSetMan(Swap  , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
   
@@ -112,11 +106,8 @@ trait ExprSetMan_3[A, B, C, t, Ns1[_, _, _, _], Ns2[_, _, _, _, _]]
   def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, t] = _exprSetMan(HasNo , set +: sets               )
   def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, t] = _exprSetMan(HasNo , sets                      )
-
   def add   (v    : t, vs: t*             )               : Ns1[A, B, C, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)*  )               : Ns1[A, B, C, t] = _exprSetMan(Swap  , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
   
@@ -154,11 +145,8 @@ trait ExprSetMan_4[A, B, C, D, t, Ns1[_, _, _, _, _], Ns2[_, _, _, _, _, _]]
   def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, t] = _exprSetMan(HasNo , set +: sets               )
   def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, t] = _exprSetMan(HasNo , sets                      )
-
   def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)*  )               : Ns1[A, B, C, D, t] = _exprSetMan(Swap  , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
   
@@ -196,11 +184,8 @@ trait ExprSetMan_5[A, B, C, D, E, t, Ns1[_, _, _, _, _, _], Ns2[_, _, _, _, _, _
   def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, t] = _exprSetMan(HasNo , set +: sets               )
   def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, t] = _exprSetMan(HasNo , sets                      )
-
   def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)*  )               : Ns1[A, B, C, D, E, t] = _exprSetMan(Swap  , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
   
@@ -238,11 +223,8 @@ trait ExprSetMan_6[A, B, C, D, E, F, t, Ns1[_, _, _, _, _, _, _], Ns2[_, _, _, _
   def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, t] = _exprSetMan(HasNo , set +: sets               )
   def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, t] = _exprSetMan(HasNo , sets                      )
-
   def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)*  )               : Ns1[A, B, C, D, E, F, t] = _exprSetMan(Swap  , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, F, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
   
@@ -280,11 +262,8 @@ trait ExprSetMan_7[A, B, C, D, E, F, G, t, Ns1[_, _, _, _, _, _, _, _], Ns2[_, _
   def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetMan(HasNo , set +: sets               )
   def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetMan(HasNo , sets                      )
-
   def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)*  )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetMan(Swap  , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
   
@@ -322,11 +301,8 @@ trait ExprSetMan_8[A, B, C, D, E, F, G, H, t, Ns1[_, _, _, _, _, _, _, _, _], Ns
   def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetMan(HasNo , set +: sets               )
   def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetMan(HasNo , sets                      )
-
   def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)*  )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetMan(Swap  , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
   
@@ -364,11 +340,8 @@ trait ExprSetMan_9[A, B, C, D, E, F, G, H, I, t, Ns1[_, _, _, _, _, _, _, _, _, 
   def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetMan(HasNo , set +: sets               )
   def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetMan(HasNo , sets                      )
-
   def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)*  )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetMan(Swap  , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
   
@@ -406,11 +379,8 @@ trait ExprSetMan_10[A, B, C, D, E, F, G, H, I, J, t, Ns1[_, _, _, _, _, _, _, _,
   def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetMan(HasNo , set +: sets               )
   def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetMan(HasNo , sets                      )
-
   def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)*  )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetMan(Swap  , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
   
@@ -448,11 +418,8 @@ trait ExprSetMan_11[A, B, C, D, E, F, G, H, I, J, K, t, Ns1[_, _, _, _, _, _, _,
   def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetMan(HasNo , set +: sets               )
   def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetMan(HasNo , sets                      )
-
   def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)*  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetMan(Swap  , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
   
@@ -490,11 +457,8 @@ trait ExprSetMan_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns1[_, _, _, _, _, _,
   def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetMan(HasNo , set +: sets               )
   def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetMan(HasNo , sets                      )
-
   def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)*  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetMan(Swap  , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
   
@@ -532,11 +496,8 @@ trait ExprSetMan_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns1[_, _, _, _, _,
   def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetMan(HasNo , set +: sets               )
   def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetMan(HasNo , sets                      )
-
   def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)*  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetMan(Swap  , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
   
@@ -574,11 +535,8 @@ trait ExprSetMan_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns1[_, _, _, _,
   def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetMan(HasNo , set +: sets               )
   def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetMan(HasNo , sets                      )
-
   def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)*  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetMan(Swap  , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
   
@@ -616,11 +574,8 @@ trait ExprSetMan_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns1[_, _, _,
   def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetMan(HasNo , set +: sets               )
   def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetMan(HasNo , sets                      )
-
   def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)*  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetMan(Swap  , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
   
@@ -658,11 +613,8 @@ trait ExprSetMan_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns1[_, _,
   def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetMan(HasNo , set +: sets               )
   def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetMan(HasNo , sets                      )
-
   def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)*  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetMan(Swap  , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
   
@@ -700,11 +652,8 @@ trait ExprSetMan_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns1[_,
   def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetMan(HasNo , set +: sets               )
   def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetMan(HasNo , sets                      )
-
   def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)*  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetMan(Swap  , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
   
@@ -742,11 +691,8 @@ trait ExprSetMan_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Ns1
   def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetMan(HasNo , set +: sets               )
   def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetMan(HasNo , sets                      )
-
   def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)*  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetMan(Swap  , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
   
@@ -784,11 +730,8 @@ trait ExprSetMan_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, 
   def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetMan(HasNo , set +: sets               )
   def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetMan(HasNo , sets                      )
-
   def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)*  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetMan(Swap  , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
   
@@ -826,11 +769,8 @@ trait ExprSetMan_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, 
   def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetMan(HasNo , set +: sets               )
   def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetMan(HasNo , sets                      )
-
   def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)*  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetMan(Swap  , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
   
@@ -868,11 +808,8 @@ trait ExprSetMan_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, 
   def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetMan(HasNo , set +: sets               )
   def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetMan(HasNo , sets                      )
-
   def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)*  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetMan(Swap  , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
   
@@ -910,11 +847,8 @@ trait ExprSetMan_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, 
   def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetMan(HasNo , set +: sets               )
   def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetMan(HasNo , sets                      )
-
   def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)*  )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetMan(Swap  , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
   

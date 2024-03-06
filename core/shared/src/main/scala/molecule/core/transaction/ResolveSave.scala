@@ -32,6 +32,9 @@ class ResolveSave
                 case a: AttrSetOpt => resolveAttrSetOpt(a); resolve(tail)
                 case a: AttrSetTac => resolveAttrSetTac(a); resolve(tail)
               }
+
+            case a: AttrArr => ???
+            case a: AttrMap => ???
           }
 
         case Ref(ns, refAttr, refNs, card, owner, _) =>

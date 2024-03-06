@@ -57,6 +57,9 @@ class ResolveInsert
                   "Can't use tacit attributes in insert molecule (except in tx meta data part). Found: " + a
                 )
               }
+
+            case a: AttrArr => ???
+            case a: AttrMap => ???
           }
 
         case Ref(ns, refAttr, refNs, card, owner, _) =>

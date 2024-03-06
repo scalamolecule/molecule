@@ -241,33 +241,6 @@ object Inspect extends TestSuite_h2 {
           _ <- Ns.string.int.query.get.map(_ ==> List(("ZZZ", 1)))
         } yield ()
       }
-
-      "Inspect more complex update" - types { implicit conn =>
-        for {
-          id <- Ns.ints(Set(3, 4)).save.transact.map(_.id)
-          _ <- Ns(id).ints.swap(3 -> 6, 4 -> 7).update.inspect
-          /*
-          ========================================
-          UPDATE:
-          AttrOneTacID("Ns", "id", Eq, Seq("42"), None, None, Nil, Nil, None, None, Seq(0, 0))
-          AttrSetManInt("Ns", "ints", Swap, Seq(Set(3), Set(4), Set(6), Set(7)), None, None, Nil, Nil, None, None, Seq(0, 30))
-
-          UPDATE Ns
-          SET
-            Ns.ints = ARRAY(
-              SELECT CASE
-                WHEN v = ? THEN ?
-                WHEN v = ? THEN ?
-                ELSE v
-              END
-              FROM TABLE(v INT = (SELECT Ns.ints FROM Ns WHERE Ns.id IN (1)))
-            )
-          WHERE Ns.id IN(1)
-          ----------------------------------------
-          */
-          // (values are visible in the model elements)
-        } yield ()
-      }
     }
 
 

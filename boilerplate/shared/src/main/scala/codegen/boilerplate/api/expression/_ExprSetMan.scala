@@ -60,11 +60,8 @@ object _ExprSetMan extends BoilerplateGenBase( "ExprSetMan", "/api/expression") 
          |  def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[${`A..V`}, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
          |  def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[${`A..V`}, t] = _exprSetMan(HasNo , set +: sets               )
          |  def hasNo (sets : Seq[Set[t]]           )               : Ns1[${`A..V`}, t] = _exprSetMan(HasNo , sets                      )
-         |
          |  def add   (v    : t, vs: t*             )               : Ns1[${`A..V`}, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
          |  def add   (vs   : Iterable[t]           )               : Ns1[${`A..V`}, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-         |  def swap  (ab   : (t, t), abs: (t, t)*  )               : Ns1[${`A..V`}, t] = _exprSetMan(Swap  , abs2sets(ab +: abs)       )
-         |  def swap  (abs  : Seq[(t, t)]           )               : Ns1[${`A..V`}, t] = _exprSetMan(Swap  , abs2sets(abs)             )
          |  def remove(v    : t, vs: t*             )               : Ns1[${`A..V`}, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
          |  def remove(vs   : Iterable[t]           )               : Ns1[${`A..V`}, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
          |  $attrExprs

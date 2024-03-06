@@ -1,7 +1,6 @@
 // GENERATED CODE ********************************
 package molecule.coreTests.spi.crud.update.set.ops
 
-import molecule.base.error._
 import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
@@ -72,52 +71,6 @@ trait UpdateSetOps_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
     }
 
 
-    "swap" - types { implicit conn =>
-      for {
-        id <- Ns.strings(Set(string1, string2, string3, string4, string5, string6)).save.transact.map(_.id)
-
-        // Replace value
-        _ <- Ns(id).strings.swap(string6 -> string8).update.transact
-        _ <- Ns.strings.query.get.map(_.head ==> Set(string1, string2, string3, string4, string5, string8))
-
-        // Replacing value to existing value simply deletes it
-        _ <- Ns(id).strings.swap(string5 -> string8).update.transact
-        _ <- Ns.strings.query.get.map(_.head ==> Set(string1, string2, string3, string4, string8))
-
-        // Replace multiple values (vararg)
-        _ <- Ns(id).strings.swap(string3 -> string6, string4 -> string7).update.transact
-        _ <- Ns.strings.query.get.map(_.head ==> Set(string1, string2, string6, string7, string8))
-
-        // Updating missing old value (null) has no effect
-        _ <- Ns(id).strings.swap(string4 -> string9).update.transact
-        _ <- Ns.strings.query.get.map(_.head ==> Set(string1, string2, string6, string7, string8))
-
-        // Upserting missing old value (null) inserts the new value
-        _ <- Ns(id).strings.swap(string4 -> string9).upsert.transact
-        _ <- Ns.strings.query.get.map(_.head ==> Set(string1, string2, string6, string7, string8, string9))
-
-        // Replace with Seq of oldValue->newValue pairs
-        _ <- Ns(id).strings.swap(Seq(string2 -> string5)).update.transact
-        _ <- Ns.strings.query.get.map(_.head ==> Set(string1, string5, string6, string7, string8, string9))
-
-        // Replacing with empty Seq of oldValue->newValue pairs has no effect
-        _ <- Ns(id).strings.swap(Seq.empty[(String, String)]).update.transact
-        _ <- Ns.strings.query.get.map(_.head ==> Set(string1, string5, string6, string7, string8, string9))
-
-        // Can't swap duplicate from/to values
-        _ <- Ns("42").strings.swap(string1 -> string2, string1 -> string3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can't swap from duplicate retract values."
-          }
-
-        _ <- Ns("42").strings.swap(string1 -> string3, string2 -> string3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can't swap to duplicate replacement values."
-          }
-      } yield ()
-    }
-
-
     "remove" - types { implicit conn =>
       for {
         id <- Ns.strings(Set(string1, string2, string3, string4, string5, string6)).save.transact.map(_.id)
@@ -146,7 +99,7 @@ trait UpdateSetOps_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
         _ <- Ns(id).strings.remove(Seq.empty[String]).update.transact
         _ <- Ns.strings.query.get.map(_.head ==> Set(string1))
 
-        // Removing all elements is like deleting the attribute
+        // Removing all elements retracts the attribute
         _ <- Ns(id).strings.remove(Seq(string1)).update.transact
         _ <- Ns.strings.query.get.map(_ ==> Nil)
       } yield ()

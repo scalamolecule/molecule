@@ -27,11 +27,8 @@ trait ExprSetTac_0[t, Ns1[_], Ns2[_, _]]
   def hasNo (vs   : Seq[t]               )(implicit x: X): Ns1[t] = _exprSetTac(HasNo  , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]*)               : Ns1[t] = _exprSetTac(HasNo  , set +: sets               )
   def hasNo (sets : Seq[Set[t]]          )               : Ns1[t] = _exprSetTac(HasNo  , sets                      )
-
   def add   (v    : t, vs: t*            )               : Ns1[t] = _exprSetTac(Add    , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]          )               : Ns1[t] = _exprSetTac(Add    , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)* )               : Ns1[t] = _exprSetTac(Swap   , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]          )               : Ns1[t] = _exprSetTac(Swap   , abs2sets(abs)             )
   def remove(v    : t, vs: t*            )               : Ns1[t] = _exprSetTac(Remove , Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]          )               : Ns1[t] = _exprSetTac(Remove , Seq(vs.toSet)             )
   
@@ -68,11 +65,8 @@ trait ExprSetTac_1[A, t, Ns1[_, _], Ns2[_, _, _]]
   def hasNo (vs   : Seq[t]               )(implicit x: X): Ns1[A, t] = _exprSetTac(HasNo  , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]*)               : Ns1[A, t] = _exprSetTac(HasNo  , set +: sets               )
   def hasNo (sets : Seq[Set[t]]          )               : Ns1[A, t] = _exprSetTac(HasNo  , sets                      )
-
   def add   (v    : t, vs: t*            )               : Ns1[A, t] = _exprSetTac(Add    , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]          )               : Ns1[A, t] = _exprSetTac(Add    , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)* )               : Ns1[A, t] = _exprSetTac(Swap   , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]          )               : Ns1[A, t] = _exprSetTac(Swap   , abs2sets(abs)             )
   def remove(v    : t, vs: t*            )               : Ns1[A, t] = _exprSetTac(Remove , Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]          )               : Ns1[A, t] = _exprSetTac(Remove , Seq(vs.toSet)             )
   
@@ -109,11 +103,8 @@ trait ExprSetTac_2[A, B, t, Ns1[_, _, _], Ns2[_, _, _, _]]
   def hasNo (vs   : Seq[t]               )(implicit x: X): Ns1[A, B, t] = _exprSetTac(HasNo  , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]*)               : Ns1[A, B, t] = _exprSetTac(HasNo  , set +: sets               )
   def hasNo (sets : Seq[Set[t]]          )               : Ns1[A, B, t] = _exprSetTac(HasNo  , sets                      )
-
   def add   (v    : t, vs: t*            )               : Ns1[A, B, t] = _exprSetTac(Add    , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]          )               : Ns1[A, B, t] = _exprSetTac(Add    , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)* )               : Ns1[A, B, t] = _exprSetTac(Swap   , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]          )               : Ns1[A, B, t] = _exprSetTac(Swap   , abs2sets(abs)             )
   def remove(v    : t, vs: t*            )               : Ns1[A, B, t] = _exprSetTac(Remove , Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]          )               : Ns1[A, B, t] = _exprSetTac(Remove , Seq(vs.toSet)             )
   
@@ -150,11 +141,8 @@ trait ExprSetTac_3[A, B, C, t, Ns1[_, _, _, _], Ns2[_, _, _, _, _]]
   def hasNo (vs   : Seq[t]               )(implicit x: X): Ns1[A, B, C, t] = _exprSetTac(HasNo  , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]*)               : Ns1[A, B, C, t] = _exprSetTac(HasNo  , set +: sets               )
   def hasNo (sets : Seq[Set[t]]          )               : Ns1[A, B, C, t] = _exprSetTac(HasNo  , sets                      )
-
   def add   (v    : t, vs: t*            )               : Ns1[A, B, C, t] = _exprSetTac(Add    , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]          )               : Ns1[A, B, C, t] = _exprSetTac(Add    , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)* )               : Ns1[A, B, C, t] = _exprSetTac(Swap   , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]          )               : Ns1[A, B, C, t] = _exprSetTac(Swap   , abs2sets(abs)             )
   def remove(v    : t, vs: t*            )               : Ns1[A, B, C, t] = _exprSetTac(Remove , Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]          )               : Ns1[A, B, C, t] = _exprSetTac(Remove , Seq(vs.toSet)             )
   
@@ -191,11 +179,8 @@ trait ExprSetTac_4[A, B, C, D, t, Ns1[_, _, _, _, _], Ns2[_, _, _, _, _, _]]
   def hasNo (vs   : Seq[t]               )(implicit x: X): Ns1[A, B, C, D, t] = _exprSetTac(HasNo  , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]*)               : Ns1[A, B, C, D, t] = _exprSetTac(HasNo  , set +: sets               )
   def hasNo (sets : Seq[Set[t]]          )               : Ns1[A, B, C, D, t] = _exprSetTac(HasNo  , sets                      )
-
   def add   (v    : t, vs: t*            )               : Ns1[A, B, C, D, t] = _exprSetTac(Add    , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]          )               : Ns1[A, B, C, D, t] = _exprSetTac(Add    , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)* )               : Ns1[A, B, C, D, t] = _exprSetTac(Swap   , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]          )               : Ns1[A, B, C, D, t] = _exprSetTac(Swap   , abs2sets(abs)             )
   def remove(v    : t, vs: t*            )               : Ns1[A, B, C, D, t] = _exprSetTac(Remove , Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]          )               : Ns1[A, B, C, D, t] = _exprSetTac(Remove , Seq(vs.toSet)             )
   
@@ -232,11 +217,8 @@ trait ExprSetTac_5[A, B, C, D, E, t, Ns1[_, _, _, _, _, _], Ns2[_, _, _, _, _, _
   def hasNo (vs   : Seq[t]               )(implicit x: X): Ns1[A, B, C, D, E, t] = _exprSetTac(HasNo  , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]*)               : Ns1[A, B, C, D, E, t] = _exprSetTac(HasNo  , set +: sets               )
   def hasNo (sets : Seq[Set[t]]          )               : Ns1[A, B, C, D, E, t] = _exprSetTac(HasNo  , sets                      )
-
   def add   (v    : t, vs: t*            )               : Ns1[A, B, C, D, E, t] = _exprSetTac(Add    , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, t] = _exprSetTac(Add    , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)* )               : Ns1[A, B, C, D, E, t] = _exprSetTac(Swap   , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]          )               : Ns1[A, B, C, D, E, t] = _exprSetTac(Swap   , abs2sets(abs)             )
   def remove(v    : t, vs: t*            )               : Ns1[A, B, C, D, E, t] = _exprSetTac(Remove , Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, t] = _exprSetTac(Remove , Seq(vs.toSet)             )
   
@@ -273,11 +255,8 @@ trait ExprSetTac_6[A, B, C, D, E, F, t, Ns1[_, _, _, _, _, _, _], Ns2[_, _, _, _
   def hasNo (vs   : Seq[t]               )(implicit x: X): Ns1[A, B, C, D, E, F, t] = _exprSetTac(HasNo  , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]*)               : Ns1[A, B, C, D, E, F, t] = _exprSetTac(HasNo  , set +: sets               )
   def hasNo (sets : Seq[Set[t]]          )               : Ns1[A, B, C, D, E, F, t] = _exprSetTac(HasNo  , sets                      )
-
   def add   (v    : t, vs: t*            )               : Ns1[A, B, C, D, E, F, t] = _exprSetTac(Add    , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, F, t] = _exprSetTac(Add    , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)* )               : Ns1[A, B, C, D, E, F, t] = _exprSetTac(Swap   , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]          )               : Ns1[A, B, C, D, E, F, t] = _exprSetTac(Swap   , abs2sets(abs)             )
   def remove(v    : t, vs: t*            )               : Ns1[A, B, C, D, E, F, t] = _exprSetTac(Remove , Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, F, t] = _exprSetTac(Remove , Seq(vs.toSet)             )
   
@@ -314,11 +293,8 @@ trait ExprSetTac_7[A, B, C, D, E, F, G, t, Ns1[_, _, _, _, _, _, _, _], Ns2[_, _
   def hasNo (vs   : Seq[t]               )(implicit x: X): Ns1[A, B, C, D, E, F, G, t] = _exprSetTac(HasNo  , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]*)               : Ns1[A, B, C, D, E, F, G, t] = _exprSetTac(HasNo  , set +: sets               )
   def hasNo (sets : Seq[Set[t]]          )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetTac(HasNo  , sets                      )
-
   def add   (v    : t, vs: t*            )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetTac(Add    , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetTac(Add    , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)* )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetTac(Swap   , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]          )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetTac(Swap   , abs2sets(abs)             )
   def remove(v    : t, vs: t*            )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetTac(Remove , Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetTac(Remove , Seq(vs.toSet)             )
   
@@ -355,11 +331,8 @@ trait ExprSetTac_8[A, B, C, D, E, F, G, H, t, Ns1[_, _, _, _, _, _, _, _, _], Ns
   def hasNo (vs   : Seq[t]               )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, t] = _exprSetTac(HasNo  , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]*)               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetTac(HasNo  , set +: sets               )
   def hasNo (sets : Seq[Set[t]]          )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetTac(HasNo  , sets                      )
-
   def add   (v    : t, vs: t*            )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetTac(Add    , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetTac(Add    , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)* )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetTac(Swap   , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]          )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetTac(Swap   , abs2sets(abs)             )
   def remove(v    : t, vs: t*            )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetTac(Remove , Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetTac(Remove , Seq(vs.toSet)             )
   
@@ -396,11 +369,8 @@ trait ExprSetTac_9[A, B, C, D, E, F, G, H, I, t, Ns1[_, _, _, _, _, _, _, _, _, 
   def hasNo (vs   : Seq[t]               )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetTac(HasNo  , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]*)               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetTac(HasNo  , set +: sets               )
   def hasNo (sets : Seq[Set[t]]          )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetTac(HasNo  , sets                      )
-
   def add   (v    : t, vs: t*            )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetTac(Add    , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetTac(Add    , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)* )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetTac(Swap   , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]          )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetTac(Swap   , abs2sets(abs)             )
   def remove(v    : t, vs: t*            )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetTac(Remove , Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetTac(Remove , Seq(vs.toSet)             )
   
@@ -437,11 +407,8 @@ trait ExprSetTac_10[A, B, C, D, E, F, G, H, I, J, t, Ns1[_, _, _, _, _, _, _, _,
   def hasNo (vs   : Seq[t]               )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetTac(HasNo  , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]*)               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetTac(HasNo  , set +: sets               )
   def hasNo (sets : Seq[Set[t]]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetTac(HasNo  , sets                      )
-
   def add   (v    : t, vs: t*            )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetTac(Add    , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetTac(Add    , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)* )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetTac(Swap   , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetTac(Swap   , abs2sets(abs)             )
   def remove(v    : t, vs: t*            )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetTac(Remove , Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetTac(Remove , Seq(vs.toSet)             )
   
@@ -478,11 +445,8 @@ trait ExprSetTac_11[A, B, C, D, E, F, G, H, I, J, K, t, Ns1[_, _, _, _, _, _, _,
   def hasNo (vs   : Seq[t]               )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetTac(HasNo  , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]*)               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetTac(HasNo  , set +: sets               )
   def hasNo (sets : Seq[Set[t]]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetTac(HasNo  , sets                      )
-
   def add   (v    : t, vs: t*            )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetTac(Add    , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetTac(Add    , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetTac(Swap   , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetTac(Swap   , abs2sets(abs)             )
   def remove(v    : t, vs: t*            )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetTac(Remove , Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetTac(Remove , Seq(vs.toSet)             )
   
@@ -519,11 +483,8 @@ trait ExprSetTac_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns1[_, _, _, _, _, _,
   def hasNo (vs   : Seq[t]               )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetTac(HasNo  , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]*)               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetTac(HasNo  , set +: sets               )
   def hasNo (sets : Seq[Set[t]]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetTac(HasNo  , sets                      )
-
   def add   (v    : t, vs: t*            )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetTac(Add    , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetTac(Add    , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetTac(Swap   , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetTac(Swap   , abs2sets(abs)             )
   def remove(v    : t, vs: t*            )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetTac(Remove , Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetTac(Remove , Seq(vs.toSet)             )
   
@@ -560,11 +521,8 @@ trait ExprSetTac_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns1[_, _, _, _, _,
   def hasNo (vs   : Seq[t]               )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetTac(HasNo  , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]*)               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetTac(HasNo  , set +: sets               )
   def hasNo (sets : Seq[Set[t]]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetTac(HasNo  , sets                      )
-
   def add   (v    : t, vs: t*            )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetTac(Add    , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetTac(Add    , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetTac(Swap   , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetTac(Swap   , abs2sets(abs)             )
   def remove(v    : t, vs: t*            )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetTac(Remove , Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetTac(Remove , Seq(vs.toSet)             )
   
@@ -601,11 +559,8 @@ trait ExprSetTac_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns1[_, _, _, _,
   def hasNo (vs   : Seq[t]               )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetTac(HasNo  , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]*)               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetTac(HasNo  , set +: sets               )
   def hasNo (sets : Seq[Set[t]]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetTac(HasNo  , sets                      )
-
   def add   (v    : t, vs: t*            )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetTac(Add    , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetTac(Add    , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetTac(Swap   , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetTac(Swap   , abs2sets(abs)             )
   def remove(v    : t, vs: t*            )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetTac(Remove , Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetTac(Remove , Seq(vs.toSet)             )
   
@@ -642,11 +597,8 @@ trait ExprSetTac_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns1[_, _, _,
   def hasNo (vs   : Seq[t]               )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetTac(HasNo  , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]*)               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetTac(HasNo  , set +: sets               )
   def hasNo (sets : Seq[Set[t]]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetTac(HasNo  , sets                      )
-
   def add   (v    : t, vs: t*            )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetTac(Add    , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetTac(Add    , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetTac(Swap   , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetTac(Swap   , abs2sets(abs)             )
   def remove(v    : t, vs: t*            )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetTac(Remove , Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetTac(Remove , Seq(vs.toSet)             )
   
@@ -683,11 +635,8 @@ trait ExprSetTac_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns1[_, _,
   def hasNo (vs   : Seq[t]               )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetTac(HasNo  , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]*)               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetTac(HasNo  , set +: sets               )
   def hasNo (sets : Seq[Set[t]]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetTac(HasNo  , sets                      )
-
   def add   (v    : t, vs: t*            )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetTac(Add    , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetTac(Add    , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetTac(Swap   , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetTac(Swap   , abs2sets(abs)             )
   def remove(v    : t, vs: t*            )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetTac(Remove , Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetTac(Remove , Seq(vs.toSet)             )
   
@@ -724,11 +673,8 @@ trait ExprSetTac_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns1[_,
   def hasNo (vs   : Seq[t]               )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetTac(HasNo  , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]*)               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetTac(HasNo  , set +: sets               )
   def hasNo (sets : Seq[Set[t]]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetTac(HasNo  , sets                      )
-
   def add   (v    : t, vs: t*            )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetTac(Add    , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetTac(Add    , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetTac(Swap   , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetTac(Swap   , abs2sets(abs)             )
   def remove(v    : t, vs: t*            )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetTac(Remove , Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetTac(Remove , Seq(vs.toSet)             )
   
@@ -765,11 +711,8 @@ trait ExprSetTac_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Ns1
   def hasNo (vs   : Seq[t]               )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetTac(HasNo  , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]*)               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetTac(HasNo  , set +: sets               )
   def hasNo (sets : Seq[Set[t]]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetTac(HasNo  , sets                      )
-
   def add   (v    : t, vs: t*            )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetTac(Add    , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetTac(Add    , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetTac(Swap   , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetTac(Swap   , abs2sets(abs)             )
   def remove(v    : t, vs: t*            )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetTac(Remove , Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetTac(Remove , Seq(vs.toSet)             )
   
@@ -806,11 +749,8 @@ trait ExprSetTac_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, 
   def hasNo (vs   : Seq[t]               )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetTac(HasNo  , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]*)               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetTac(HasNo  , set +: sets               )
   def hasNo (sets : Seq[Set[t]]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetTac(HasNo  , sets                      )
-
   def add   (v    : t, vs: t*            )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetTac(Add    , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetTac(Add    , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetTac(Swap   , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetTac(Swap   , abs2sets(abs)             )
   def remove(v    : t, vs: t*            )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetTac(Remove , Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetTac(Remove , Seq(vs.toSet)             )
   
@@ -847,11 +787,8 @@ trait ExprSetTac_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, 
   def hasNo (vs   : Seq[t]               )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetTac(HasNo  , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]*)               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetTac(HasNo  , set +: sets               )
   def hasNo (sets : Seq[Set[t]]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetTac(HasNo  , sets                      )
-
   def add   (v    : t, vs: t*            )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetTac(Add    , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetTac(Add    , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetTac(Swap   , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetTac(Swap   , abs2sets(abs)             )
   def remove(v    : t, vs: t*            )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetTac(Remove , Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetTac(Remove , Seq(vs.toSet)             )
   
@@ -888,11 +825,8 @@ trait ExprSetTac_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, 
   def hasNo (vs   : Seq[t]               )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetTac(HasNo  , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]*)               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetTac(HasNo  , set +: sets               )
   def hasNo (sets : Seq[Set[t]]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetTac(HasNo  , sets                      )
-
   def add   (v    : t, vs: t*            )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetTac(Add    , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetTac(Add    , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetTac(Swap   , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetTac(Swap   , abs2sets(abs)             )
   def remove(v    : t, vs: t*            )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetTac(Remove , Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetTac(Remove , Seq(vs.toSet)             )
   
@@ -929,11 +863,8 @@ trait ExprSetTac_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, 
   def hasNo (vs   : Seq[t]               )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetTac(HasNo  , vs.map(v => Set(v))       )
   def hasNo (set  : Set[t], sets: Set[t]*)               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetTac(HasNo  , set +: sets               )
   def hasNo (sets : Seq[Set[t]]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetTac(HasNo  , sets                      )
-
   def add   (v    : t, vs: t*            )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetTac(Add    , Seq((v +: vs).toSet)      )
   def add   (vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetTac(Add    , Seq(vs.toSet)             )
-  def swap  (ab   : (t, t), abs: (t, t)* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetTac(Swap   , abs2sets(ab +: abs)       )
-  def swap  (abs  : Seq[(t, t)]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetTac(Swap   , abs2sets(abs)             )
   def remove(v    : t, vs: t*            )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetTac(Remove , Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetTac(Remove , Seq(vs.toSet)             )
   

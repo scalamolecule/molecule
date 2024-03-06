@@ -122,6 +122,10 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
           case a: AttrSetOpt => resolveAttrSetOpt(a); resolve(tail)
           case a: AttrSetTac => resolveAttrSetTac(a); resolve(tail)
         }
+
+      case a: AttrArr => ???
+      case a: AttrMap => ???
+
       case ref: Ref                       =>
         resolveRef(ref);
         resolve(tail)

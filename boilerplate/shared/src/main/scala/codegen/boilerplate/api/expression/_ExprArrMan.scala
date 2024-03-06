@@ -3,7 +3,7 @@ package codegen.boilerplate.api.expression
 import codegen.BoilerplateGenBase
 
 
-object _ExprArrMan extends BoilerplateGenBase( "ExprArrMan", "/api/expression") {
+object _ExprArrMan extends BoilerplateGenBase("ExprArrMan", "/api/expression") {
   val content = {
     val traits = (1 to 22).map(arity => Trait(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************
@@ -36,6 +36,7 @@ object _ExprArrMan extends BoilerplateGenBase( "ExprArrMan", "/api/expression") 
          |  def has  [X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X        , t0, ns1, ns2] with Card   ): Ns2[${`A..V`}, X        , t0] = _attrMan(Has  , a)
          |  def hasNo[X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X        , t0, ns1, ns2] with Card   ): Ns2[${`A..V`}, X        , t0] = _attrMan(HasNo, a)""".stripMargin
     }
+
     val body =
       s"""
          |
@@ -61,11 +62,8 @@ object _ExprArrMan extends BoilerplateGenBase( "ExprArrMan", "/api/expression") 
          |  def hasNo [t <: t0: ClassTag](vs    : Seq[t]                     )(implicit x: X): Ns1[${`A..V`}, t] = _exprArrMan(HasNo , vs.map(v => Array(v))       )
          |  def hasNo [t <: t0: ClassTag](array : Array[t], arrays: Array[t]*)(implicit x: X): Ns1[${`A..V`}, t] = _exprArrMan(HasNo , array +: arrays             )
          |  def hasNo [t <: t0: ClassTag](arrays: Seq[Array[t]]              )               : Ns1[${`A..V`}, t] = _exprArrMan(HasNo , arrays                      )
-         |
          |  def add   [t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[${`A..V`}, t] = _exprArrMan(Add   , Seq((v +: vs).toArray)      )
          |  def add   [t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[${`A..V`}, t] = _exprArrMan(Add   , Seq(vs.toArray)             )
-         |  def swap  [t <: t0: ClassTag](ab    : (t, t), abs: (t, t)*       )               : Ns1[${`A..V`}, t] = _exprArrMan(Swap  , abs2arrays(ab +: abs)       )
-         |  def swap  [t <: t0: ClassTag](abs   : Seq[(t, t)]                )               : Ns1[${`A..V`}, t] = _exprArrMan(Swap  , abs2arrays(abs)             )
          |  def remove[t <: t0: ClassTag](v     : t, vs: t*                  )               : Ns1[${`A..V`}, t] = _exprArrMan(Remove, Seq((v +: vs).toArray)      )
          |  def remove[t <: t0: ClassTag](vs    : Iterable[t]                )               : Ns1[${`A..V`}, t] = _exprArrMan(Remove, Seq(vs.toArray)             )
          |  $attrExprs

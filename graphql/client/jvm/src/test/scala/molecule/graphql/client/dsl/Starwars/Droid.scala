@@ -14,6 +14,7 @@ import molecule.boilerplate.api._
 import molecule.boilerplate.api.expression._
 import molecule.boilerplate.ast.Model
 import molecule.boilerplate.ast.Model._
+import scala.reflect.ClassTag
 
 
 trait Droid_base {
@@ -50,7 +51,7 @@ private object Droid extends Droid_0[Nothing](Nil) {
 }
 
 
-class Droid_0[t](override val elements: List[Element]) extends Droid_base with ModelOps_0[t, Droid_0, Droid_1] {
+class Droid_0[t: ClassTag](override val elements: List[Element]) extends Droid_base with ModelOps_0[t, Droid_0, Droid_1] {
   lazy val id                = new Droid_1[String             , String](elements :+ id_man             ) with ExprOneMan_1        [String             , String, Droid_1, Droid_2] with CardOne
   lazy val name              = new Droid_1[String             , String](elements :+ name_man           ) with ExprOneMan_1_String [String             , String, Droid_1, Droid_2] with CardOne
   lazy val friends           = new Droid_1[Set[String]        , String](elements :+ friends_man        ) with ExprSetMan_1        [Set[String]        , String, Droid_1, Droid_2] with CardSet

@@ -59,11 +59,8 @@ object _ExprSetTac extends BoilerplateGenBase("ExprSetTac", "/api/expression") {
          |  def hasNo (vs   : Seq[t]               )(implicit x: X): Ns1[${`A..V, `}t] = _exprSetTac(HasNo  , vs.map(v => Set(v))       )
          |  def hasNo (set  : Set[t], sets: Set[t]*)               : Ns1[${`A..V, `}t] = _exprSetTac(HasNo  , set +: sets               )
          |  def hasNo (sets : Seq[Set[t]]          )               : Ns1[${`A..V, `}t] = _exprSetTac(HasNo  , sets                      )
-         |
          |  def add   (v    : t, vs: t*            )               : Ns1[${`A..V, `}t] = _exprSetTac(Add    , Seq((v +: vs).toSet)      )
          |  def add   (vs   : Iterable[t]          )               : Ns1[${`A..V, `}t] = _exprSetTac(Add    , Seq(vs.toSet)             )
-         |  def swap  (ab   : (t, t), abs: (t, t)* )               : Ns1[${`A..V, `}t] = _exprSetTac(Swap   , abs2sets(ab +: abs)       )
-         |  def swap  (abs  : Seq[(t, t)]          )               : Ns1[${`A..V, `}t] = _exprSetTac(Swap   , abs2sets(abs)             )
          |  def remove(v    : t, vs: t*            )               : Ns1[${`A..V, `}t] = _exprSetTac(Remove , Seq((v +: vs).toSet)      )
          |  def remove(vs   : Iterable[t]          )               : Ns1[${`A..V, `}t] = _exprSetTac(Remove , Seq(vs.toSet)             )
          |  $attrExprs

@@ -1,7 +1,6 @@
 // GENERATED CODE ********************************
 package molecule.coreTests.spi.crud.update.set.ops
 
-import molecule.base.error._
 import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
@@ -72,52 +71,6 @@ trait UpdateSetOps_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
     }
 
 
-    "swap" - types { implicit conn =>
-      for {
-        id <- Ns.bigDecimals(Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal5, bigDecimal6)).save.transact.map(_.id)
-
-        // Replace value
-        _ <- Ns(id).bigDecimals.swap(bigDecimal6 -> bigDecimal8).update.transact
-        _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal5, bigDecimal8))
-
-        // Replacing value to existing value simply deletes it
-        _ <- Ns(id).bigDecimals.swap(bigDecimal5 -> bigDecimal8).update.transact
-        _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal8))
-
-        // Replace multiple values (vararg)
-        _ <- Ns(id).bigDecimals.swap(bigDecimal3 -> bigDecimal6, bigDecimal4 -> bigDecimal7).update.transact
-        _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2, bigDecimal6, bigDecimal7, bigDecimal8))
-
-        // Updating missing old value (null) has no effect
-        _ <- Ns(id).bigDecimals.swap(bigDecimal4 -> bigDecimal9).update.transact
-        _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2, bigDecimal6, bigDecimal7, bigDecimal8))
-
-        // Upserting missing old value (null) inserts the new value
-        _ <- Ns(id).bigDecimals.swap(bigDecimal4 -> bigDecimal9).upsert.transact
-        _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2, bigDecimal6, bigDecimal7, bigDecimal8, bigDecimal9))
-
-        // Replace with Seq of oldValue->newValue pairs
-        _ <- Ns(id).bigDecimals.swap(Seq(bigDecimal2 -> bigDecimal5)).update.transact
-        _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal5, bigDecimal6, bigDecimal7, bigDecimal8, bigDecimal9))
-
-        // Replacing with empty Seq of oldValue->newValue pairs has no effect
-        _ <- Ns(id).bigDecimals.swap(Seq.empty[(BigDecimal, BigDecimal)]).update.transact
-        _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal5, bigDecimal6, bigDecimal7, bigDecimal8, bigDecimal9))
-
-        // Can't swap duplicate from/to values
-        _ <- Ns("42").bigDecimals.swap(bigDecimal1 -> bigDecimal2, bigDecimal1 -> bigDecimal3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can't swap from duplicate retract values."
-          }
-
-        _ <- Ns("42").bigDecimals.swap(bigDecimal1 -> bigDecimal3, bigDecimal2 -> bigDecimal3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can't swap to duplicate replacement values."
-          }
-      } yield ()
-    }
-
-
     "remove" - types { implicit conn =>
       for {
         id <- Ns.bigDecimals(Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal5, bigDecimal6)).save.transact.map(_.id)
@@ -146,7 +99,7 @@ trait UpdateSetOps_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
         _ <- Ns(id).bigDecimals.remove(Seq.empty[BigDecimal]).update.transact
         _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1))
 
-        // Removing all elements is like deleting the attribute
+        // Removing all elements retracts the attribute
         _ <- Ns(id).bigDecimals.remove(Seq(bigDecimal1)).update.transact
         _ <- Ns.bigDecimals.query.get.map(_ ==> Nil)
       } yield ()

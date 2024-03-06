@@ -45,6 +45,8 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |    val last = es.last match {
        |      case a: AttrOneMan => AttrOneManDouble(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs, coord = a.coord)
        |      case a: AttrSetMan => AttrSetManDouble(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs, coord = a.coord)
+       |      case a: AttrArrMan => AttrArrManDouble(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs, coord = a.coord)
+       |      case a: AttrMapMan => AttrMapManDouble(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs, coord = a.coord)
        |      case a             => unexpected(a)
        |    }
        |    es.init :+ last
@@ -57,6 +59,12 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |      }
        |      case a: AttrSetMan => a match {
        |        ${asIs("Set")}
+       |      }
+       |      case a: AttrArrMan => a match {
+       |        ${asIs("Arr")}
+       |      }
+       |      case a: AttrMapMan => a match {
+       |        ${asIs("Map")}
        |      }
        |      case a             => unexpected(a)
        |    }
@@ -103,6 +111,52 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |    val last = es.last match {
        |      case a: AttrSetOpt => a match {
        |        $addOptSet
+       |      }
+       |      case a             => unexpected(a)
+       |    }
+       |    es.init :+ last
+       |  }
+       |
+       |  protected def addArr[T](es: List[Element], op: Op, vs: Seq[Array[T]]): List[Element] = {
+       |    val last = es.last match {
+       |      case a: AttrArrMan => a match {
+       |        ${addArr("Man")}
+       |      }
+       |      case a: AttrArrTac => a match {
+       |        ${addArr("Tac")}
+       |      }
+       |      case a             => unexpected(a)
+       |    }
+       |    es.init :+ last
+       |  }
+       |
+       |  protected def addOptArr[T](es: List[Element], op: Op, vs: Option[Seq[Array[T]]]): List[Element] = {
+       |    val last = es.last match {
+       |      case a: AttrArrOpt => a match {
+       |        $addOptArr
+       |      }
+       |      case a             => unexpected(a)
+       |    }
+       |    es.init :+ last
+       |  }
+       |
+       |  protected def addMap[T](es: List[Element], op: Op, vs: Seq[Map[String, T]]): List[Element] = {
+       |    val last = es.last match {
+       |      case a: AttrMapMan => a match {
+       |        ${addMap("Man")}
+       |      }
+       |      case a: AttrMapTac => a match {
+       |        ${addMap("Tac")}
+       |      }
+       |      case a             => unexpected(a)
+       |    }
+       |    es.init :+ last
+       |  }
+       |
+       |  protected def addOptMap[T](es: List[Element], op: Op, vs: Option[Seq[Map[String, T]]]): List[Element] = {
+       |    val last = es.last match {
+       |      case a: AttrMapOpt => a match {
+       |        $addOptMap
        |      }
        |      case a             => unexpected(a)
        |    }
@@ -178,6 +232,14 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |              case a: AttrSetManID             => AttrSetTacID(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.refNs, a.sort, a.coord, a.owner)
        |              ${liftFilterAttr("Set")}
        |            }
+       |            case a: AttrArrMan => a match {
+       |              case a: AttrArrManID             => AttrArrTacID(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.refNs, a.sort, a.coord, a.owner)
+       |              ${liftFilterAttr("Arr")}
+       |            }
+       |            case a: AttrMapMan => a match {
+       |              case a: AttrMapManID             => AttrMapTacID(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.refNs, a.sort, a.coord, a.owner)
+       |              ${liftFilterAttr("Map")}
+       |            }
        |            case other         => other
        |          }
        |          (tacitAttr, List(filterAttr0))
@@ -195,12 +257,33 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |            }
        |            case a             => unexpected(a)
        |          }
+       |
        |          case a: AttrSet => a match {
        |            case a: AttrSetMan => a match {
        |              ${addFilterAttr("Set", "Man")}
        |            }
        |            case a: AttrSetTac => a match {
        |              ${addFilterAttr("Set", "Tac")}
+       |            }
+       |            case a             => unexpected(a)
+       |          }
+       |
+       |          case a: AttrArr => a match {
+       |            case a: AttrArrMan => a match {
+       |              ${addFilterAttr("Arr", "Man")}
+       |            }
+       |            case a: AttrArrTac => a match {
+       |              ${addFilterAttr("Arr", "Tac")}
+       |            }
+       |            case a             => unexpected(a)
+       |          }
+       |
+       |          case a: AttrMap => a match {
+       |            case a: AttrMapMan => a match {
+       |              ${addFilterAttr("Map", "Man")}
+       |            }
+       |            case a: AttrMapTac => a match {
+       |              ${addFilterAttr("Map", "Tac")}
        |            }
        |            case a             => unexpected(a)
        |          }
@@ -254,6 +337,26 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |            ${clean("Set", "Opt")}
        |          }
        |        }
+       |
+       |        case a: AttrArr => a match {
+       |          case a: AttrArrTac => a
+       |          case a: AttrArrMan => a match {
+       |            ${clean("Arr", "Man")}
+       |          }
+       |          case a: AttrArrOpt => a match {
+       |            ${clean("Arr", "Opt")}
+       |          }
+       |        }
+       |
+       |        case a: AttrMap => a match {
+       |          case a: AttrMapTac => a
+       |          case a: AttrMapMan => a match {
+       |            ${clean("Map", "Man")}
+       |          }
+       |          case a: AttrMapOpt => a match {
+       |            ${clean("Map", "Opt")}
+       |          }
+       |        }
        |      }
        |      case other   => other
        |    }
@@ -271,6 +374,16 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |        case a: AttrSet       => a match {
        |          case _: AttrSetMan => topLevelAttrCount(tail, count + 1)
        |          case _: AttrSetOpt => topLevelAttrCount(tail, count + 1)
+       |          case _             => topLevelAttrCount(tail, count)
+       |        }
+       |        case a: AttrArr       => a match {
+       |          case _: AttrArrMan => topLevelAttrCount(tail, count + 1)
+       |          case _: AttrArrOpt => topLevelAttrCount(tail, count + 1)
+       |          case _             => topLevelAttrCount(tail, count)
+       |        }
+       |        case a: AttrMap       => a match {
+       |          case _: AttrMapMan => topLevelAttrCount(tail, count + 1)
+       |          case _: AttrMapOpt => topLevelAttrCount(tail, count + 1)
        |          case _             => topLevelAttrCount(tail, count)
        |        }
        |        case _: Ref           => topLevelAttrCount(tail, count)
@@ -342,6 +455,62 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
          |            sets.get.flatMap(set => set.flatMap(v => validator.validate(v)))
          |          }
          |          a.copy(op = op, vs = sets, errors = errors1)""".stripMargin
+    }.mkString("\n\n        ")
+  }
+
+  private def addArr(mode: String): String = {
+    baseTypes.map { baseTpe =>
+      val tpe = if (baseTpe == "ID") "String" else baseTpe
+      s"""case a: AttrArr$mode$baseTpe =>
+         |          val arrays  = vs.asInstanceOf[Seq[Array[$tpe]]]
+         |          val errors1 = if (arrays.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+         |            val validator = a.validator.get
+         |            arrays.flatMap(array => array.flatMap(v => validator.validate(v)))
+         |          }
+         |          a.copy(op = op, vs = arrays, errors = errors1)""".stripMargin
+    }.mkString("\n\n        ")
+  }
+
+  private def addOptArr: String = {
+    baseTypes.map { baseTpe =>
+      val tpe = if (baseTpe == "ID") "String" else baseTpe
+      s"""case a: AttrArrOpt$baseTpe =>
+         |          val arrays    = vs.asInstanceOf[Option[Seq[Array[$tpe]]]]
+         |          val errors1 = if (arrays.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+         |            val validator = a.validator.get
+         |            arrays.get.flatMap(array => array.flatMap(v => validator.validate(v)))
+         |          }
+         |          a.copy(op = op, vs = arrays, errors = errors1)""".stripMargin
+    }.mkString("\n\n        ")
+  }
+
+  private def addMap(mode: String): String = {
+    baseTypes.map { baseTpe =>
+      val tpe = if (baseTpe == "ID") "String" else baseTpe
+      s"""case a: AttrMap$mode$baseTpe =>
+         |          val maps    = vs.asInstanceOf[Seq[Map[String, $tpe]]]
+         |          val errors1 = if (maps.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+         |            val validator = a.validator.get
+         |            maps.flatMap(map => map.flatMap { case (k, v) => validator.validate(v) })
+         |          }
+         |          a.copy(op = op, vs = maps, errors = errors1)""".stripMargin
+    }.mkString("\n\n        ")
+  }
+
+  private def addOptMap: String = {
+    baseTypes.map { baseTpe =>
+      val tpe = if (baseTpe == "ID") "String" else baseTpe
+      s"""case a: AttrMapOpt$baseTpe =>
+         |          val optMaps = vs.asInstanceOf[Option[Seq[Map[String, $tpe]]]]
+         |          val errors1 = if (optMaps.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+         |            val validator = a.validator.get
+         |            optMaps.fold(Seq.empty[String]) { maps =>
+         |              maps.flatMap { map =>
+         |                map.values.toSeq.flatMap(validator.validate)
+         |              }
+         |            }
+         |          }
+         |          a.copy(op = op, vs = optMaps, errors = errors1)""".stripMargin
     }.mkString("\n\n        ")
   }
 

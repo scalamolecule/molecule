@@ -327,6 +327,10 @@ trait ModelUtils {
             case a: AttrSetTacChar           => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
           }
       }
+
+
+      case a: AttrArr => ???
+      case a: AttrMap => ???
     }
   }
 }

@@ -34,13 +34,15 @@ class ResolveUpdate(
                 case a: AttrSetMan => a.op match {
                   case Eq     => resolveAttrSetMan(a); resolve(tail)
                   case Add    => resolveAttrSetAdd(a); resolve(tail)
-                  case Swap   => resolveAttrSetSwap(a); resolve(tail)
                   case Remove => resolveAttrSetRemove(a); resolve(tail)
                   case _      => throw ModelError(s"Unexpected $update operation for card-many attribute. Found:\n" + a)
                 }
                 case _: AttrSetTac => throw ModelError("Can only lookup entity with card-one attribute value. Found:\n" + a)
                 case _: AttrSetOpt => throw ModelError(s"Can't $update optional values. Found:\n" + a)
               }
+
+            case a: AttrArr => ???
+            case a: AttrMap => ???
           }
 
         case r@Ref(_, _, _, CardOne, _, _) => handleRefNs(r); resolve(tail)
@@ -159,35 +161,6 @@ class ResolveUpdate(
       case a: AttrSetManByte           => updateSetAdd(ns, attr, a.vs, a.refNs, a.owner, transformByte, set2arrayByte, extsByte, value2jsonByte)
       case a: AttrSetManShort          => updateSetAdd(ns, attr, a.vs, a.refNs, a.owner, transformShort, set2arrayShort, extsShort, value2jsonShort)
       case a: AttrSetManChar           => updateSetAdd(ns, attr, a.vs, a.refNs, a.owner, transformChar, set2arrayChar, extsChar, value2jsonChar)
-    }
-  }
-
-  private def resolveAttrSetSwap(a: AttrSetMan): Unit = {
-    val (ns, attr) = (a.ns, a.attr)
-    a match {
-      case a: AttrSetManID             => updateSetSwap(ns, attr, a.vs, a.refNs, a.owner, transformID, handleID, extsID, value2jsonID, one2jsonID)
-      case a: AttrSetManString         => updateSetSwap(ns, attr, a.vs, a.refNs, a.owner, transformString, handleString, extsString, value2jsonString, one2jsonString)
-      case a: AttrSetManInt            => updateSetSwap(ns, attr, a.vs, a.refNs, a.owner, transformInt, handleInt, extsInt, value2jsonInt, one2jsonInt)
-      case a: AttrSetManLong           => updateSetSwap(ns, attr, a.vs, a.refNs, a.owner, transformLong, handleLong, extsLong, value2jsonLong, one2jsonLong)
-      case a: AttrSetManFloat          => updateSetSwap(ns, attr, a.vs, a.refNs, a.owner, transformFloat, handleFloat, extsFloat, value2jsonFloat, one2jsonFloat)
-      case a: AttrSetManDouble         => updateSetSwap(ns, attr, a.vs, a.refNs, a.owner, transformDouble, handleDouble, extsDouble, value2jsonDouble, one2jsonDouble)
-      case a: AttrSetManBoolean        => updateSetSwap(ns, attr, a.vs, a.refNs, a.owner, transformBoolean, handleBoolean, extsBoolean, value2jsonBoolean, one2jsonBoolean)
-      case a: AttrSetManBigInt         => updateSetSwap(ns, attr, a.vs, a.refNs, a.owner, transformBigInt, handleBigInt, extsBigInt, value2jsonBigInt, one2jsonBigInt)
-      case a: AttrSetManBigDecimal     => updateSetSwap(ns, attr, a.vs, a.refNs, a.owner, transformBigDecimal, handleBigDecimal, extsBigDecimal, value2jsonBigDecimal, one2jsonBigDecimal)
-      case a: AttrSetManDate           => updateSetSwap(ns, attr, a.vs, a.refNs, a.owner, transformDate, handleDate, extsDate, value2jsonDate, one2jsonDate)
-      case a: AttrSetManDuration       => updateSetSwap(ns, attr, a.vs, a.refNs, a.owner, transformDuration, handleDuration, extsDuration, value2jsonDuration, one2jsonDuration)
-      case a: AttrSetManInstant        => updateSetSwap(ns, attr, a.vs, a.refNs, a.owner, transformInstant, handleInstant, extsInstant, value2jsonInstant, one2jsonInstant)
-      case a: AttrSetManLocalDate      => updateSetSwap(ns, attr, a.vs, a.refNs, a.owner, transformLocalDate, handleLocalDate, extsLocalDate, value2jsonLocalDate, one2jsonLocalDate)
-      case a: AttrSetManLocalTime      => updateSetSwap(ns, attr, a.vs, a.refNs, a.owner, transformLocalTime, handleLocalTime, extsLocalTime, value2jsonLocalTime, one2jsonLocalTime)
-      case a: AttrSetManLocalDateTime  => updateSetSwap(ns, attr, a.vs, a.refNs, a.owner, transformLocalDateTime, handleLocalDateTime, extsLocalDateTime, value2jsonLocalDateTime, one2jsonLocalDateTime)
-      case a: AttrSetManOffsetTime     => updateSetSwap(ns, attr, a.vs, a.refNs, a.owner, transformOffsetTime, handleOffsetTime, extsOffsetTime, value2jsonOffsetTime, one2jsonOffsetTime)
-      case a: AttrSetManOffsetDateTime => updateSetSwap(ns, attr, a.vs, a.refNs, a.owner, transformOffsetDateTime, handleOffsetDateTime, extsOffsetDateTime, value2jsonOffsetDateTime, one2jsonOffsetDateTime)
-      case a: AttrSetManZonedDateTime  => updateSetSwap(ns, attr, a.vs, a.refNs, a.owner, transformZonedDateTime, handleZonedDateTime, extsZonedDateTime, value2jsonZonedDateTime, one2jsonZonedDateTime)
-      case a: AttrSetManUUID           => updateSetSwap(ns, attr, a.vs, a.refNs, a.owner, transformUUID, handleUUID, extsUUID, value2jsonUUID, one2jsonUUID)
-      case a: AttrSetManURI            => updateSetSwap(ns, attr, a.vs, a.refNs, a.owner, transformURI, handleURI, extsURI, value2jsonURI, one2jsonURI)
-      case a: AttrSetManByte           => updateSetSwap(ns, attr, a.vs, a.refNs, a.owner, transformByte, handleByte, extsByte, value2jsonByte, one2jsonByte)
-      case a: AttrSetManShort          => updateSetSwap(ns, attr, a.vs, a.refNs, a.owner, transformShort, handleShort, extsShort, value2jsonShort, one2jsonShort)
-      case a: AttrSetManChar           => updateSetSwap(ns, attr, a.vs, a.refNs, a.owner, transformChar, handleChar, extsChar, value2jsonChar, one2jsonChar)
     }
   }
 
