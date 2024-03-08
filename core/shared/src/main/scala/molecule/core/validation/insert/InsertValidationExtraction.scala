@@ -10,6 +10,7 @@ import scala.annotation.tailrec
 trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { self: InsertValidationResolvers_ =>
 
   private var curElements: List[Element] = List.empty[Element]
+  private def noEmpty(a: Attr) = throw new Exception("Can't use tacit attributes in insert molecule. Found: " + a)
 
   @tailrec
   final override def getValidators(
@@ -29,36 +30,51 @@ trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { sel
             throw ModelError("Can't insert attributes with an applied value. Found:\n" + a)
           }
           a match {
-            case a: AttrOne =>
-              a match {
-                case a: AttrOneMan => getValidators(nsMap, tail, validators :+
-                  resolveAttrOneMan(a, tplIndex), tplIndex + 1, prevRefs)
+            case a: AttrOne => a match {
+              case a: AttrOneMan => getValidators(nsMap, tail, validators :+
+                resolveAttrOneMan(a, tplIndex), tplIndex + 1, prevRefs)
 
-                case a: AttrOneOpt => getValidators(nsMap, tail, validators :+
-                  resolveAttrOneOpt(a, tplIndex), tplIndex + 1, prevRefs)
+              case a: AttrOneOpt => getValidators(nsMap, tail, validators :+
+                resolveAttrOneOpt(a, tplIndex), tplIndex + 1, prevRefs)
 
-                case a: AttrOneTac => throw new Exception(
-                  "Can't use tacit attributes in insert molecule (except in tx meta data part). Found: " + a
-                )
-              }
-            case a: AttrSet =>
-              a match {
-                case a: AttrSetMan =>
-                  val mandatory = nsMap(a.ns).mandatoryAttrs.contains(a.attr)
-                  getValidators(nsMap, tail, validators :+
-                    resolveAttrSetMan(a, tplIndex, mandatory), tplIndex + 1, prevRefs)
+              case a => noEmpty(a)
+            }
 
-                case a: AttrSetOpt => getValidators(nsMap, tail, validators :+
-                  resolveAttrSetOpt(a, tplIndex), tplIndex + 1, prevRefs)
+            case a: AttrSet => a match {
+              case a: AttrSetMan =>
+                val mandatory = nsMap(a.ns).mandatoryAttrs.contains(a.attr)
+                getValidators(nsMap, tail, validators :+
+                  resolveAttrSetMan(a, tplIndex, mandatory), tplIndex + 1, prevRefs)
 
-                case a: AttrSetTac => throw new Exception(
-                  "Can't use tacit attributes in insert molecule (except in tx meta data part). Found: " + a
-                )
-              }
+              case a: AttrSetOpt => getValidators(nsMap, tail, validators :+
+                resolveAttrSetOpt(a, tplIndex), tplIndex + 1, prevRefs)
 
+              case a => noEmpty(a)
+            }
 
-            case a: AttrArr => ???
-            case a: AttrMap => ???
+            case a: AttrArr => a match {
+              case a: AttrArrMan =>
+                val mandatory = nsMap(a.ns).mandatoryAttrs.contains(a.attr)
+                getValidators(nsMap, tail, validators :+
+                  resolveAttrArrMan(a, tplIndex, mandatory), tplIndex + 1, prevRefs)
+
+              case a: AttrArrOpt => getValidators(nsMap, tail, validators :+
+                resolveAttrArrOpt(a, tplIndex), tplIndex + 1, prevRefs)
+
+              case a => noEmpty(a)
+            }
+
+            case a: AttrMap => a match {
+              case a: AttrMapMan =>
+                val mandatory = nsMap(a.ns).mandatoryAttrs.contains(a.attr)
+                getValidators(nsMap, tail, validators :+
+                  resolveAttrMapMan(a, tplIndex, mandatory), tplIndex + 1, prevRefs)
+
+              case a: AttrMapOpt => getValidators(nsMap, tail, validators :+
+                resolveAttrMapOpt(a, tplIndex), tplIndex + 1, prevRefs)
+
+              case a => noEmpty(a)
+            }
           }
 
         case Ref(_, refAttr, _, _, _, _) =>
@@ -69,7 +85,7 @@ trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { sel
             case Ref(_, refAttr, _, _, _, _) if prevRefs.contains(refAttr) => throw ModelError(
               s"Can't re-use previous namespace ${refAttr.capitalize} after backref _$backRefNs."
             )
-            case _                                                      => // ok
+            case _                                                         => // ok
           }
           getValidators(nsMap, tail, validators, tplIndex, prevRefs)
 
@@ -119,7 +135,7 @@ trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { sel
     }
   }
 
-  def validatorV[T](
+  private def validatorV[T](
     ns: String,
     attr: String,
     tplIndex: Int,
@@ -165,7 +181,7 @@ trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { sel
   }
 
 
-  def validatorOptV[T](
+  private def validatorOptV[T](
     ns: String,
     attr: String,
     tplIndex: Int,
@@ -211,12 +227,12 @@ trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { sel
     }
   }
 
-  def noEmptySet(ns: String, attr: String, tplIndex: Int): Seq[InsertError] = Seq(
+  private def noEmptyCollection(collection: String, ns: String, attr: String, tplIndex: Int): Seq[InsertError] = Seq(
     InsertError(tplIndex, ns + "." + attr,
-      Seq("Can't insert empty Set for mandatory attribute"), Nil)
+      Seq(s"Can't insert empty $collection for mandatory attribute"), Nil)
   )
 
-  def validatorSet[T](
+  private def validatorSet[T](
     ns: String,
     attr: String,
     tplIndex: Int,
@@ -226,14 +242,14 @@ trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { sel
     optValidator.fold {
       (tpl: Product) =>
         if (mandatory && tpl.productElement(tplIndex).asInstanceOf[Set[_]].isEmpty)
-          noEmptySet(ns, attr, tplIndex) else Nil
+          noEmptyCollection("Set", ns, attr, tplIndex) else Nil
 
     } { validator =>
       (tpl: Product) =>
         val validate = validator(tpl)
         val set      = tpl.productElement(tplIndex).asInstanceOf[Set[_]]
         if (mandatory && set.isEmpty) {
-          noEmptySet(ns, attr, tplIndex)
+          noEmptyCollection("Set", ns, attr, tplIndex)
         } else {
           val errors = set.flatMap(value => validate(value.asInstanceOf[T])).toSeq
           if (errors.isEmpty) Nil else
@@ -270,7 +286,7 @@ trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { sel
     }
   }
 
-  def validatorOptSet[T](
+  private def validatorOptSet[T](
     ns: String,
     attr: String,
     tplIndex: Int,
@@ -314,6 +330,208 @@ trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { sel
       case a: AttrSetOptByte           => validatorOptSet(ns, attr, tplIndex, validatorByte(a.validator, a, curElements))
       case a: AttrSetOptShort          => validatorOptSet(ns, attr, tplIndex, validatorShort(a.validator, a, curElements))
       case a: AttrSetOptChar           => validatorOptSet(ns, attr, tplIndex, validatorChar(a.validator, a, curElements))
+    }
+  }
+
+  private def validatorArray[T](
+    ns: String,
+    attr: String,
+    tplIndex: Int,
+    mandatory: Boolean,
+    optValidator: Option[Product => T => Seq[String]],
+  ): Product => Seq[InsertError] = {
+    optValidator.fold {
+      (tpl: Product) =>
+        if (mandatory && tpl.productElement(tplIndex).asInstanceOf[Array[_]].isEmpty)
+          noEmptyCollection("Array", ns, attr, tplIndex) else Nil
+
+    } { validator =>
+      (tpl: Product) =>
+        val validate = validator(tpl)
+        val array    = tpl.productElement(tplIndex).asInstanceOf[Array[_]]
+        if (mandatory && array.isEmpty) {
+          noEmptyCollection("Array", ns, attr, tplIndex)
+        } else {
+          val errors = array.flatMap(value => validate(value.asInstanceOf[T])).toSeq
+          if (errors.isEmpty) Nil else
+            Seq(InsertError(tplIndex, ns + "." + attr, errors, Nil))
+        }
+    }
+  }
+  private def resolveAttrArrMan(a: AttrArrMan, tplIndex: Int, mandatory: Boolean): Product => Seq[InsertError] = {
+    val (ns, attr) = (a.ns, a.attr)
+    a match {
+      case a: AttrArrManID             => validatorArray(ns, attr, tplIndex, mandatory, validatorID(a.validator, a, curElements))
+      case a: AttrArrManString         => validatorArray(ns, attr, tplIndex, mandatory, validatorString(a.validator, a, curElements))
+      case a: AttrArrManInt            => validatorArray(ns, attr, tplIndex, mandatory, validatorInt(a.validator, a, curElements))
+      case a: AttrArrManLong           => validatorArray(ns, attr, tplIndex, mandatory, validatorLong(a.validator, a, curElements))
+      case a: AttrArrManFloat          => validatorArray(ns, attr, tplIndex, mandatory, validatorFloat(a.validator, a, curElements))
+      case a: AttrArrManDouble         => validatorArray(ns, attr, tplIndex, mandatory, validatorDouble(a.validator, a, curElements))
+      case a: AttrArrManBoolean        => validatorArray(ns, attr, tplIndex, mandatory, validatorBoolean(a.validator, a, curElements))
+      case a: AttrArrManBigInt         => validatorArray(ns, attr, tplIndex, mandatory, validatorBigInt(a.validator, a, curElements))
+      case a: AttrArrManBigDecimal     => validatorArray(ns, attr, tplIndex, mandatory, validatorBigDecimal(a.validator, a, curElements))
+      case a: AttrArrManDate           => validatorArray(ns, attr, tplIndex, mandatory, validatorDate(a.validator, a, curElements))
+      case a: AttrArrManDuration       => validatorArray(ns, attr, tplIndex, mandatory, validatorDuration(a.validator, a, curElements))
+      case a: AttrArrManInstant        => validatorArray(ns, attr, tplIndex, mandatory, validatorInstant(a.validator, a, curElements))
+      case a: AttrArrManLocalDate      => validatorArray(ns, attr, tplIndex, mandatory, validatorLocalDate(a.validator, a, curElements))
+      case a: AttrArrManLocalTime      => validatorArray(ns, attr, tplIndex, mandatory, validatorLocalTime(a.validator, a, curElements))
+      case a: AttrArrManLocalDateTime  => validatorArray(ns, attr, tplIndex, mandatory, validatorLocalDateTime(a.validator, a, curElements))
+      case a: AttrArrManOffsetTime     => validatorArray(ns, attr, tplIndex, mandatory, validatorOffsetTime(a.validator, a, curElements))
+      case a: AttrArrManOffsetDateTime => validatorArray(ns, attr, tplIndex, mandatory, validatorOffsetDateTime(a.validator, a, curElements))
+      case a: AttrArrManZonedDateTime  => validatorArray(ns, attr, tplIndex, mandatory, validatorZonedDateTime(a.validator, a, curElements))
+      case a: AttrArrManUUID           => validatorArray(ns, attr, tplIndex, mandatory, validatorUUID(a.validator, a, curElements))
+      case a: AttrArrManURI            => validatorArray(ns, attr, tplIndex, mandatory, validatorURI(a.validator, a, curElements))
+      case a: AttrArrManByte           => validatorArray(ns, attr, tplIndex, mandatory, validatorByte(a.validator, a, curElements))
+      case a: AttrArrManShort          => validatorArray(ns, attr, tplIndex, mandatory, validatorShort(a.validator, a, curElements))
+      case a: AttrArrManChar           => validatorArray(ns, attr, tplIndex, mandatory, validatorChar(a.validator, a, curElements))
+    }
+  }
+
+  private def validatorOptArr[T](
+    ns: String,
+    attr: String,
+    tplIndex: Int,
+    optValidator: Option[Product => T => Seq[String]],
+  ): Product => Seq[InsertError] = {
+    optValidator.fold((_: Product) => Seq.empty[InsertError]) { validator =>
+      (tpl: Product) =>
+        val validate = validator(tpl)
+        tpl.productElement(tplIndex) match {
+          case Some(array: Array[_]) =>
+            val errors = array.flatMap(value => validate(value.asInstanceOf[T]))
+            if (errors.isEmpty) Nil else
+              Seq(InsertError(tplIndex, ns + "." + attr, errors, Nil))
+          case None                  => Nil
+        }
+    }
+  }
+  private def resolveAttrArrOpt(a: AttrArrOpt, tplIndex: Int): Product => Seq[InsertError] = {
+    val (ns, attr) = (a.ns, a.attr)
+    a match {
+      case a: AttrArrOptID             => validatorOptArr(ns, attr, tplIndex, validatorID(a.validator, a, curElements))
+      case a: AttrArrOptString         => validatorOptArr(ns, attr, tplIndex, validatorString(a.validator, a, curElements))
+      case a: AttrArrOptInt            => validatorOptArr(ns, attr, tplIndex, validatorInt(a.validator, a, curElements))
+      case a: AttrArrOptLong           => validatorOptArr(ns, attr, tplIndex, validatorLong(a.validator, a, curElements))
+      case a: AttrArrOptFloat          => validatorOptArr(ns, attr, tplIndex, validatorFloat(a.validator, a, curElements))
+      case a: AttrArrOptDouble         => validatorOptArr(ns, attr, tplIndex, validatorDouble(a.validator, a, curElements))
+      case a: AttrArrOptBoolean        => validatorOptArr(ns, attr, tplIndex, validatorBoolean(a.validator, a, curElements))
+      case a: AttrArrOptBigInt         => validatorOptArr(ns, attr, tplIndex, validatorBigInt(a.validator, a, curElements))
+      case a: AttrArrOptBigDecimal     => validatorOptArr(ns, attr, tplIndex, validatorBigDecimal(a.validator, a, curElements))
+      case a: AttrArrOptDate           => validatorOptArr(ns, attr, tplIndex, validatorDate(a.validator, a, curElements))
+      case a: AttrArrOptDuration       => validatorOptArr(ns, attr, tplIndex, validatorDuration(a.validator, a, curElements))
+      case a: AttrArrOptInstant        => validatorOptArr(ns, attr, tplIndex, validatorInstant(a.validator, a, curElements))
+      case a: AttrArrOptLocalDate      => validatorOptArr(ns, attr, tplIndex, validatorLocalDate(a.validator, a, curElements))
+      case a: AttrArrOptLocalTime      => validatorOptArr(ns, attr, tplIndex, validatorLocalTime(a.validator, a, curElements))
+      case a: AttrArrOptLocalDateTime  => validatorOptArr(ns, attr, tplIndex, validatorLocalDateTime(a.validator, a, curElements))
+      case a: AttrArrOptOffsetTime     => validatorOptArr(ns, attr, tplIndex, validatorOffsetTime(a.validator, a, curElements))
+      case a: AttrArrOptOffsetDateTime => validatorOptArr(ns, attr, tplIndex, validatorOffsetDateTime(a.validator, a, curElements))
+      case a: AttrArrOptZonedDateTime  => validatorOptArr(ns, attr, tplIndex, validatorZonedDateTime(a.validator, a, curElements))
+      case a: AttrArrOptUUID           => validatorOptArr(ns, attr, tplIndex, validatorUUID(a.validator, a, curElements))
+      case a: AttrArrOptURI            => validatorOptArr(ns, attr, tplIndex, validatorURI(a.validator, a, curElements))
+      case a: AttrArrOptByte           => validatorOptArr(ns, attr, tplIndex, validatorByte(a.validator, a, curElements))
+      case a: AttrArrOptShort          => validatorOptArr(ns, attr, tplIndex, validatorShort(a.validator, a, curElements))
+      case a: AttrArrOptChar           => validatorOptArr(ns, attr, tplIndex, validatorChar(a.validator, a, curElements))
+    }
+  }
+
+  private def validatorMap[T](
+    ns: String,
+    attr: String,
+    tplIndex: Int,
+    mandatory: Boolean,
+    optValidator: Option[Product => T => Seq[String]],
+  ): Product => Seq[InsertError] = {
+    optValidator.fold {
+      (tpl: Product) =>
+        if (mandatory && tpl.productElement(tplIndex).asInstanceOf[Map[String, _]].isEmpty)
+          noEmptyCollection("Array", ns, attr, tplIndex) else Nil
+
+    } { validator =>
+      (tpl: Product) =>
+        val validate = validator(tpl)
+        val map      = tpl.productElement(tplIndex).asInstanceOf[Map[String, _]]
+        if (mandatory && map.isEmpty) {
+          noEmptyCollection("Array", ns, attr, tplIndex)
+        } else {
+          val errors = map.flatMap(value => validate(value.asInstanceOf[T])).toSeq
+          if (errors.isEmpty) Nil else
+            Seq(InsertError(tplIndex, ns + "." + attr, errors, Nil))
+        }
+    }
+  }
+  private def resolveAttrMapMan(a: AttrMapMan, tplIndex: Int, mandatory: Boolean): Product => Seq[InsertError] = {
+    val (ns, attr) = (a.ns, a.attr)
+    a match {
+      case a: AttrMapManID             => validatorMap(ns, attr, tplIndex, mandatory, validatorID(a.validator, a, curElements))
+      case a: AttrMapManString         => validatorMap(ns, attr, tplIndex, mandatory, validatorString(a.validator, a, curElements))
+      case a: AttrMapManInt            => validatorMap(ns, attr, tplIndex, mandatory, validatorInt(a.validator, a, curElements))
+      case a: AttrMapManLong           => validatorMap(ns, attr, tplIndex, mandatory, validatorLong(a.validator, a, curElements))
+      case a: AttrMapManFloat          => validatorMap(ns, attr, tplIndex, mandatory, validatorFloat(a.validator, a, curElements))
+      case a: AttrMapManDouble         => validatorMap(ns, attr, tplIndex, mandatory, validatorDouble(a.validator, a, curElements))
+      case a: AttrMapManBoolean        => validatorMap(ns, attr, tplIndex, mandatory, validatorBoolean(a.validator, a, curElements))
+      case a: AttrMapManBigInt         => validatorMap(ns, attr, tplIndex, mandatory, validatorBigInt(a.validator, a, curElements))
+      case a: AttrMapManBigDecimal     => validatorMap(ns, attr, tplIndex, mandatory, validatorBigDecimal(a.validator, a, curElements))
+      case a: AttrMapManDate           => validatorMap(ns, attr, tplIndex, mandatory, validatorDate(a.validator, a, curElements))
+      case a: AttrMapManDuration       => validatorMap(ns, attr, tplIndex, mandatory, validatorDuration(a.validator, a, curElements))
+      case a: AttrMapManInstant        => validatorMap(ns, attr, tplIndex, mandatory, validatorInstant(a.validator, a, curElements))
+      case a: AttrMapManLocalDate      => validatorMap(ns, attr, tplIndex, mandatory, validatorLocalDate(a.validator, a, curElements))
+      case a: AttrMapManLocalTime      => validatorMap(ns, attr, tplIndex, mandatory, validatorLocalTime(a.validator, a, curElements))
+      case a: AttrMapManLocalDateTime  => validatorMap(ns, attr, tplIndex, mandatory, validatorLocalDateTime(a.validator, a, curElements))
+      case a: AttrMapManOffsetTime     => validatorMap(ns, attr, tplIndex, mandatory, validatorOffsetTime(a.validator, a, curElements))
+      case a: AttrMapManOffsetDateTime => validatorMap(ns, attr, tplIndex, mandatory, validatorOffsetDateTime(a.validator, a, curElements))
+      case a: AttrMapManZonedDateTime  => validatorMap(ns, attr, tplIndex, mandatory, validatorZonedDateTime(a.validator, a, curElements))
+      case a: AttrMapManUUID           => validatorMap(ns, attr, tplIndex, mandatory, validatorUUID(a.validator, a, curElements))
+      case a: AttrMapManURI            => validatorMap(ns, attr, tplIndex, mandatory, validatorURI(a.validator, a, curElements))
+      case a: AttrMapManByte           => validatorMap(ns, attr, tplIndex, mandatory, validatorByte(a.validator, a, curElements))
+      case a: AttrMapManShort          => validatorMap(ns, attr, tplIndex, mandatory, validatorShort(a.validator, a, curElements))
+      case a: AttrMapManChar           => validatorMap(ns, attr, tplIndex, mandatory, validatorChar(a.validator, a, curElements))
+    }
+  }
+
+  private def validatorOptMap[T](
+    ns: String,
+    attr: String,
+    tplIndex: Int,
+    optValidator: Option[Product => T => Seq[String]],
+  ): Product => Seq[InsertError] = {
+    optValidator.fold((_: Product) => Seq.empty[InsertError]) { validator =>
+      (tpl: Product) =>
+        val validate = validator(tpl)
+        tpl.productElement(tplIndex) match {
+          case Some(map: Map[_, _]) =>
+            val errors = map.toList.flatMap { case (k, v) => validate(v.asInstanceOf[T]) }
+            if (errors.isEmpty) Nil else
+              Seq(InsertError(tplIndex, ns + "." + attr, errors, Nil))
+          case None                      => Nil
+        }
+    }
+  }
+  private def resolveAttrMapOpt(a: AttrMapOpt, tplIndex: Int): Product => Seq[InsertError] = {
+    val (ns, attr) = (a.ns, a.attr)
+    a match {
+      case a: AttrMapOptID             => validatorOptMap(ns, attr, tplIndex, validatorID(a.validator, a, curElements))
+      case a: AttrMapOptString         => validatorOptMap(ns, attr, tplIndex, validatorString(a.validator, a, curElements))
+      case a: AttrMapOptInt            => validatorOptMap(ns, attr, tplIndex, validatorInt(a.validator, a, curElements))
+      case a: AttrMapOptLong           => validatorOptMap(ns, attr, tplIndex, validatorLong(a.validator, a, curElements))
+      case a: AttrMapOptFloat          => validatorOptMap(ns, attr, tplIndex, validatorFloat(a.validator, a, curElements))
+      case a: AttrMapOptDouble         => validatorOptMap(ns, attr, tplIndex, validatorDouble(a.validator, a, curElements))
+      case a: AttrMapOptBoolean        => validatorOptMap(ns, attr, tplIndex, validatorBoolean(a.validator, a, curElements))
+      case a: AttrMapOptBigInt         => validatorOptMap(ns, attr, tplIndex, validatorBigInt(a.validator, a, curElements))
+      case a: AttrMapOptBigDecimal     => validatorOptMap(ns, attr, tplIndex, validatorBigDecimal(a.validator, a, curElements))
+      case a: AttrMapOptDate           => validatorOptMap(ns, attr, tplIndex, validatorDate(a.validator, a, curElements))
+      case a: AttrMapOptDuration       => validatorOptMap(ns, attr, tplIndex, validatorDuration(a.validator, a, curElements))
+      case a: AttrMapOptInstant        => validatorOptMap(ns, attr, tplIndex, validatorInstant(a.validator, a, curElements))
+      case a: AttrMapOptLocalDate      => validatorOptMap(ns, attr, tplIndex, validatorLocalDate(a.validator, a, curElements))
+      case a: AttrMapOptLocalTime      => validatorOptMap(ns, attr, tplIndex, validatorLocalTime(a.validator, a, curElements))
+      case a: AttrMapOptLocalDateTime  => validatorOptMap(ns, attr, tplIndex, validatorLocalDateTime(a.validator, a, curElements))
+      case a: AttrMapOptOffsetTime     => validatorOptMap(ns, attr, tplIndex, validatorOffsetTime(a.validator, a, curElements))
+      case a: AttrMapOptOffsetDateTime => validatorOptMap(ns, attr, tplIndex, validatorOffsetDateTime(a.validator, a, curElements))
+      case a: AttrMapOptZonedDateTime  => validatorOptMap(ns, attr, tplIndex, validatorZonedDateTime(a.validator, a, curElements))
+      case a: AttrMapOptUUID           => validatorOptMap(ns, attr, tplIndex, validatorUUID(a.validator, a, curElements))
+      case a: AttrMapOptURI            => validatorOptMap(ns, attr, tplIndex, validatorURI(a.validator, a, curElements))
+      case a: AttrMapOptByte           => validatorOptMap(ns, attr, tplIndex, validatorByte(a.validator, a, curElements))
+      case a: AttrMapOptShort          => validatorOptMap(ns, attr, tplIndex, validatorShort(a.validator, a, curElements))
+      case a: AttrMapOptChar           => validatorOptMap(ns, attr, tplIndex, validatorChar(a.validator, a, curElements))
     }
   }
 }

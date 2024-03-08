@@ -115,7 +115,7 @@ trait Insert_datomic
     backRefs = backRefs + (ns -> e)
     (tpl: Product) =>
       tpl.productElement(tplIndex).asInstanceOf[Set[_]] match {
-        case set if set.isEmpty =>
+        case set if set.isEmpty => ()
         case set                =>
           unusedRefIds -= e
           usedRefIds += e
@@ -146,6 +146,74 @@ trait Insert_datomic
             appendStmt(add, e, a, transformValue(value.asInstanceOf[T]).asInstanceOf[AnyRef])
           )
         case None              =>
+          if (!usedRefIds.contains(e)) {
+            unusedRefIds += e
+          }
+          () // no statement to insert
+      }
+  }
+
+  override protected def addArr[T](
+    ns: String,
+    attr: String,
+    set2array: Set[Any] => Array[AnyRef],
+    refNs: Option[String],
+    tplIndex: Int,
+    transformValue: T => Any,
+    exts: List[String] = Nil,
+    value2json: (StringBuffer, T) => StringBuffer
+  ): Product => Unit = {
+    val a   = kw(ns, attr)
+    val a_i = kw(s"$ns.$attr", "i_")
+    val a_v = kw(s"$ns.$attr", attr)
+    backRefs = backRefs + (ns -> e)
+    (tpl: Product) =>
+      tpl.productElement(tplIndex).asInstanceOf[Array[_]] match {
+        case array if array.isEmpty => ()
+        case array                  =>
+          unusedRefIds -= e
+          usedRefIds += e
+          var i      = 0
+          val length = array.length
+          while (i < length) {
+            val ref = newId
+            appendStmt(add, e, a, ref)
+            appendStmt(add, ref, a_i, i.asInstanceOf[AnyRef])
+            appendStmt(add, ref, a_v, transformValue(array(i).asInstanceOf[T]).asInstanceOf[AnyRef])
+            i += 1
+          }
+      }
+  }
+
+  override protected def addArrOpt[T](
+    ns: String,
+    attr: String,
+    set2array: Set[Any] => Array[AnyRef],
+    refNs: Option[String],
+    tplIndex: Int,
+    transformValue: T => Any,
+    exts: List[String] = Nil,
+    value2json: (StringBuffer, T) => StringBuffer
+  ): Product => Unit = {
+    val a   = kw(ns, attr)
+    val a_i = kw(s"$ns.$attr", "i_")
+    val a_v = kw(s"$ns.$attr", attr)
+    backRefs = backRefs + (ns -> e)
+    (tpl: Product) =>
+      tpl.productElement(tplIndex) match {
+        case Some(array: Array[_]) =>
+          unusedRefIds -= e
+          usedRefIds += e
+          var i      = 0
+          val length = array.length
+          while (i < length) {
+            val ref = newId
+            appendStmt(add, e, a, ref)
+            appendStmt(add, ref, a_i, i.asInstanceOf[AnyRef])
+            appendStmt(add, ref, a_v, transformValue(array(i).asInstanceOf[T]).asInstanceOf[AnyRef])
+            i += 1
+          }
+        case None                  =>
           if (!usedRefIds.contains(e)) {
             unusedRefIds += e
           }

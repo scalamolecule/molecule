@@ -4,99 +4,99 @@ import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import scala.reflect.ClassTag
 
-trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
+trait ResolveExprArr[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasArr =>
 
-  protected def resolveAttrSetMan(es: List[Var], attr: AttrSetMan): List[Var] = {
+  protected def resolveAttrArrMan(es: List[Var], attr: AttrArrMan): List[Var] = {
     aritiesAttr()
     attrIndex += 1
-    val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
+    val (e, ns, at, a) = (es.last, attr.ns, attr.attr, s":${attr.ns}/${attr.attr}")
     attr match {
-      case at: AttrSetManID             => man(attr, e, a, at.vs, resSetId)
-      case at: AttrSetManString         => man(attr, e, a, at.vs, resSetString)
-      case at: AttrSetManInt            => man(attr, e, a, at.vs, resSetInt)
-      case at: AttrSetManLong           => man(attr, e, a, at.vs, resSetLong)
-      case at: AttrSetManFloat          => man(attr, e, a, at.vs, resSetFloat)
-      case at: AttrSetManDouble         => man(attr, e, a, at.vs, resSetDouble)
-      case at: AttrSetManBoolean        => man(attr, e, a, at.vs, resSetBoolean)
-      case at: AttrSetManBigInt         => man(attr, e, a, at.vs, resSetBigInt)
-      case at: AttrSetManBigDecimal     => man(attr, e, a, at.vs, resSetBigDecimal)
-      case at: AttrSetManDate           => man(attr, e, a, at.vs, resSetDate)
-      case at: AttrSetManDuration       => man(attr, e, a, at.vs, resSetDuration)
-      case at: AttrSetManInstant        => man(attr, e, a, at.vs, resSetInstant)
-      case at: AttrSetManLocalDate      => man(attr, e, a, at.vs, resSetLocalDate)
-      case at: AttrSetManLocalTime      => man(attr, e, a, at.vs, resSetLocalTime)
-      case at: AttrSetManLocalDateTime  => man(attr, e, a, at.vs, resSetLocalDateTime)
-      case at: AttrSetManOffsetTime     => man(attr, e, a, at.vs, resSetOffsetTime)
-      case at: AttrSetManOffsetDateTime => man(attr, e, a, at.vs, resSetOffsetDateTime)
-      case at: AttrSetManZonedDateTime  => man(attr, e, a, at.vs, resSetZonedDateTime)
-      case at: AttrSetManUUID           => man(attr, e, a, at.vs, resSetUUID)
-      case at: AttrSetManURI            => man(attr, e, a, at.vs, resSetURI)
-      case at: AttrSetManByte           => man(attr, e, a, at.vs, resSetByte)
-      case at: AttrSetManShort          => man(attr, e, a, at.vs, resSetShort)
-      case at: AttrSetManChar           => man(attr, e, a, at.vs, resSetChar)
+      case att: AttrArrManID             => man(attr, e, ns, at, a, att.vs, resArrId)
+      case att: AttrArrManString         => man(attr, e, ns, at, a, att.vs, resArrString)
+      case att: AttrArrManInt            => man(attr, e, ns, at, a, att.vs, resArrInt)
+      case att: AttrArrManLong           => man(attr, e, ns, at, a, att.vs, resArrLong)
+      case att: AttrArrManFloat          => man(attr, e, ns, at, a, att.vs, resArrFloat)
+      case att: AttrArrManDouble         => man(attr, e, ns, at, a, att.vs, resArrDouble)
+      case att: AttrArrManBoolean        => man(attr, e, ns, at, a, att.vs, resArrBoolean)
+      case att: AttrArrManBigInt         => man(attr, e, ns, at, a, att.vs, resArrBigInt)
+      case att: AttrArrManBigDecimal     => man(attr, e, ns, at, a, att.vs, resArrBigDecimal)
+      case att: AttrArrManDate           => man(attr, e, ns, at, a, att.vs, resArrDate)
+      case att: AttrArrManDuration       => man(attr, e, ns, at, a, att.vs, resArrDuration)
+      case att: AttrArrManInstant        => man(attr, e, ns, at, a, att.vs, resArrInstant)
+      case att: AttrArrManLocalDate      => man(attr, e, ns, at, a, att.vs, resArrLocalDate)
+      case att: AttrArrManLocalTime      => man(attr, e, ns, at, a, att.vs, resArrLocalTime)
+      case att: AttrArrManLocalDateTime  => man(attr, e, ns, at, a, att.vs, resArrLocalDateTime)
+      case att: AttrArrManOffsetTime     => man(attr, e, ns, at, a, att.vs, resArrOffsetTime)
+      case att: AttrArrManOffsetDateTime => man(attr, e, ns, at, a, att.vs, resArrOffsetDateTime)
+      case att: AttrArrManZonedDateTime  => man(attr, e, ns, at, a, att.vs, resArrZonedDateTime)
+      case att: AttrArrManUUID           => man(attr, e, ns, at, a, att.vs, resArrUUID)
+      case att: AttrArrManURI            => man(attr, e, ns, at, a, att.vs, resArrURI)
+      case att: AttrArrManByte           => man(attr, e, ns, at, a, att.vs, resArrByte)
+      case att: AttrArrManShort          => man(attr, e, ns, at, a, att.vs, resArrShort)
+      case att: AttrArrManChar           => man(attr, e, ns, at, a, att.vs, resArrChar)
     }
     es
   }
 
-  protected def resolveAttrSetTac(es: List[Var], attr: AttrSetTac): List[Var] = {
-    val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
+  protected def resolveAttrArrTac(es: List[Var], attr: AttrArrTac): List[Var] = {
+    val (e, ns, at, a) = (es.last, attr.ns, attr.attr, s":${attr.ns}/${attr.attr}")
     attr match {
-      case at: AttrSetTacID             => tac(attr, e, a, at.vs, resSetId)
-      case at: AttrSetTacString         => tac(attr, e, a, at.vs, resSetString)
-      case at: AttrSetTacInt            => tac(attr, e, a, at.vs, resSetInt)
-      case at: AttrSetTacLong           => tac(attr, e, a, at.vs, resSetLong)
-      case at: AttrSetTacFloat          => tac(attr, e, a, at.vs, resSetFloat)
-      case at: AttrSetTacDouble         => tac(attr, e, a, at.vs, resSetDouble)
-      case at: AttrSetTacBoolean        => tac(attr, e, a, at.vs, resSetBoolean)
-      case at: AttrSetTacBigInt         => tac(attr, e, a, at.vs, resSetBigInt)
-      case at: AttrSetTacBigDecimal     => tac(attr, e, a, at.vs, resSetBigDecimal)
-      case at: AttrSetTacDate           => tac(attr, e, a, at.vs, resSetDate)
-      case at: AttrSetTacDuration       => tac(attr, e, a, at.vs, resSetDuration)
-      case at: AttrSetTacInstant        => tac(attr, e, a, at.vs, resSetInstant)
-      case at: AttrSetTacLocalDate      => tac(attr, e, a, at.vs, resSetLocalDate)
-      case at: AttrSetTacLocalTime      => tac(attr, e, a, at.vs, resSetLocalTime)
-      case at: AttrSetTacLocalDateTime  => tac(attr, e, a, at.vs, resSetLocalDateTime)
-      case at: AttrSetTacOffsetTime     => tac(attr, e, a, at.vs, resSetOffsetTime)
-      case at: AttrSetTacOffsetDateTime => tac(attr, e, a, at.vs, resSetOffsetDateTime)
-      case at: AttrSetTacZonedDateTime  => tac(attr, e, a, at.vs, resSetZonedDateTime)
-      case at: AttrSetTacUUID           => tac(attr, e, a, at.vs, resSetUUID)
-      case at: AttrSetTacURI            => tac(attr, e, a, at.vs, resSetURI)
-      case at: AttrSetTacByte           => tac(attr, e, a, at.vs, resSetByte)
-      case at: AttrSetTacShort          => tac(attr, e, a, at.vs, resSetShort)
-      case at: AttrSetTacChar           => tac(attr, e, a, at.vs, resSetChar)
+      case att: AttrArrTacID             => tac(attr, e, ns, at, a, att.vs, resArrId)
+      case att: AttrArrTacString         => tac(attr, e, ns, at, a, att.vs, resArrString)
+      case att: AttrArrTacInt            => tac(attr, e, ns, at, a, att.vs, resArrInt)
+      case att: AttrArrTacLong           => tac(attr, e, ns, at, a, att.vs, resArrLong)
+      case att: AttrArrTacFloat          => tac(attr, e, ns, at, a, att.vs, resArrFloat)
+      case att: AttrArrTacDouble         => tac(attr, e, ns, at, a, att.vs, resArrDouble)
+      case att: AttrArrTacBoolean        => tac(attr, e, ns, at, a, att.vs, resArrBoolean)
+      case att: AttrArrTacBigInt         => tac(attr, e, ns, at, a, att.vs, resArrBigInt)
+      case att: AttrArrTacBigDecimal     => tac(attr, e, ns, at, a, att.vs, resArrBigDecimal)
+      case att: AttrArrTacDate           => tac(attr, e, ns, at, a, att.vs, resArrDate)
+      case att: AttrArrTacDuration       => tac(attr, e, ns, at, a, att.vs, resArrDuration)
+      case att: AttrArrTacInstant        => tac(attr, e, ns, at, a, att.vs, resArrInstant)
+      case att: AttrArrTacLocalDate      => tac(attr, e, ns, at, a, att.vs, resArrLocalDate)
+      case att: AttrArrTacLocalTime      => tac(attr, e, ns, at, a, att.vs, resArrLocalTime)
+      case att: AttrArrTacLocalDateTime  => tac(attr, e, ns, at, a, att.vs, resArrLocalDateTime)
+      case att: AttrArrTacOffsetTime     => tac(attr, e, ns, at, a, att.vs, resArrOffsetTime)
+      case att: AttrArrTacOffsetDateTime => tac(attr, e, ns, at, a, att.vs, resArrOffsetDateTime)
+      case att: AttrArrTacZonedDateTime  => tac(attr, e, ns, at, a, att.vs, resArrZonedDateTime)
+      case att: AttrArrTacUUID           => tac(attr, e, ns, at, a, att.vs, resArrUUID)
+      case att: AttrArrTacURI            => tac(attr, e, ns, at, a, att.vs, resArrURI)
+      case att: AttrArrTacByte           => tac(attr, e, ns, at, a, att.vs, resArrByte)
+      case att: AttrArrTacShort          => tac(attr, e, ns, at, a, att.vs, resArrShort)
+      case att: AttrArrTacChar           => tac(attr, e, ns, at, a, att.vs, resArrChar)
     }
     es
   }
 
-  protected def resolveAttrSetOpt(es: List[Var], attr: AttrSetOpt): List[Var] = {
+  protected def resolveAttrArrOpt(es: List[Var], attr: AttrArrOpt): List[Var] = {
     aritiesAttr()
     attrIndex += 1
     hasOptAttr = true // to avoid redundant None's
-    val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
+    val (e, ns, at, a) = (es.last, attr.ns, attr.attr, s":${attr.ns}/${attr.attr}")
     attr match {
-      case at: AttrSetOptID             => opt(e, a, at.op, at.vs, resOptSetId)
-      case at: AttrSetOptString         => opt(e, a, at.op, at.vs, resOptSetString)
-      case at: AttrSetOptInt            => opt(e, a, at.op, at.vs, resOptSetInt)
-      case at: AttrSetOptLong           => opt(e, a, at.op, at.vs, resOptSetLong)
-      case at: AttrSetOptFloat          => opt(e, a, at.op, at.vs, resOptSetFloat)
-      case at: AttrSetOptDouble         => opt(e, a, at.op, at.vs, resOptSetDouble)
-      case at: AttrSetOptBoolean        => opt(e, a, at.op, at.vs, resOptSetBoolean)
-      case at: AttrSetOptBigInt         => opt(e, a, at.op, at.vs, resOptSetBigInt)
-      case at: AttrSetOptBigDecimal     => opt(e, a, at.op, at.vs, resOptSetBigDecimal)
-      case at: AttrSetOptDate           => opt(e, a, at.op, at.vs, resOptSetDate)
-      case at: AttrSetOptDuration       => opt(e, a, at.op, at.vs, resOptSetDuration)
-      case at: AttrSetOptInstant        => opt(e, a, at.op, at.vs, resOptSetInstant)
-      case at: AttrSetOptLocalDate      => opt(e, a, at.op, at.vs, resOptSetLocalDate)
-      case at: AttrSetOptLocalTime      => opt(e, a, at.op, at.vs, resOptSetLocalTime)
-      case at: AttrSetOptLocalDateTime  => opt(e, a, at.op, at.vs, resOptSetLocalDateTime)
-      case at: AttrSetOptOffsetTime     => opt(e, a, at.op, at.vs, resOptSetOffsetTime)
-      case at: AttrSetOptOffsetDateTime => opt(e, a, at.op, at.vs, resOptSetOffsetDateTime)
-      case at: AttrSetOptZonedDateTime  => opt(e, a, at.op, at.vs, resOptSetZonedDateTime)
-      case at: AttrSetOptUUID           => opt(e, a, at.op, at.vs, resOptSetUUID)
-      case at: AttrSetOptURI            => opt(e, a, at.op, at.vs, resOptSetURI)
-      case at: AttrSetOptByte           => opt(e, a, at.op, at.vs, resOptSetByte)
-      case at: AttrSetOptShort          => opt(e, a, at.op, at.vs, resOptSetShort)
-      case at: AttrSetOptChar           => opt(e, a, at.op, at.vs, resOptSetChar)
+      case att: AttrArrOptID             => opt(e, ns, at, a, att.op, att.vs, resOptArrId)
+      case att: AttrArrOptString         => opt(e, ns, at, a, att.op, att.vs, resOptArrString)
+      case att: AttrArrOptInt            => opt(e, ns, at, a, att.op, att.vs, resOptArrInt)
+      case att: AttrArrOptLong           => opt(e, ns, at, a, att.op, att.vs, resOptArrLong)
+      case att: AttrArrOptFloat          => opt(e, ns, at, a, att.op, att.vs, resOptArrFloat)
+      case att: AttrArrOptDouble         => opt(e, ns, at, a, att.op, att.vs, resOptArrDouble)
+      case att: AttrArrOptBoolean        => opt(e, ns, at, a, att.op, att.vs, resOptArrBoolean)
+      case att: AttrArrOptBigInt         => opt(e, ns, at, a, att.op, att.vs, resOptArrBigInt)
+      case att: AttrArrOptBigDecimal     => opt(e, ns, at, a, att.op, att.vs, resOptArrBigDecimal)
+      case att: AttrArrOptDate           => opt(e, ns, at, a, att.op, att.vs, resOptArrDate)
+      case att: AttrArrOptDuration       => opt(e, ns, at, a, att.op, att.vs, resOptArrDuration)
+      case att: AttrArrOptInstant        => opt(e, ns, at, a, att.op, att.vs, resOptArrInstant)
+      case att: AttrArrOptLocalDate      => opt(e, ns, at, a, att.op, att.vs, resOptArrLocalDate)
+      case att: AttrArrOptLocalTime      => opt(e, ns, at, a, att.op, att.vs, resOptArrLocalTime)
+      case att: AttrArrOptLocalDateTime  => opt(e, ns, at, a, att.op, att.vs, resOptArrLocalDateTime)
+      case att: AttrArrOptOffsetTime     => opt(e, ns, at, a, att.op, att.vs, resOptArrOffsetTime)
+      case att: AttrArrOptOffsetDateTime => opt(e, ns, at, a, att.op, att.vs, resOptArrOffsetDateTime)
+      case att: AttrArrOptZonedDateTime  => opt(e, ns, at, a, att.op, att.vs, resOptArrZonedDateTime)
+      case att: AttrArrOptUUID           => opt(e, ns, at, a, att.op, att.vs, resOptArrUUID)
+      case att: AttrArrOptURI            => opt(e, ns, at, a, att.op, att.vs, resOptArrURI)
+      case att: AttrArrOptByte           => opt(e, ns, at, a, att.op, att.vs, resOptArrByte)
+      case att: AttrArrOptShort          => opt(e, ns, at, a, att.op, att.vs, resOptArrShort)
+      case att: AttrArrOptChar           => opt(e, ns, at, a, att.op, att.vs, resOptArrChar)
     }
     es
   }
@@ -105,13 +105,15 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
   private def man[T: ClassTag](
     attr: Attr,
     e: Var,
+    ns: String,
+    at: String,
     a: Att,
-    args: Seq[Set[T]],
-    res: ResSet[T],
+    args: Seq[Array[T]],
+    res: ResArr[T],
   ): Unit = {
     val v = vv
-    find += s"(distinct $v)"
-    addCast(res.j2s)
+    find += s"(distinct ${v}_$at)"
+    addCast(res.pairs2array)
     attr.filterAttr.fold {
       val pathAttr = varPath :+ attr.cleanAttr
       if (filterAttrVars.contains(pathAttr) && attr.op != V) {
@@ -119,11 +121,11 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
         throw ModelError(s"Cardinality-set filter attributes not allowed to " +
           s"do additional filtering. Found:\n  " + attr)
       }
-      expr(e, a, v, attr.op, args, res)
+      expr(e, ns, at, a, v, attr.op, args, res)
       filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
       filterAttrVars2.get(a).foreach(_(e, v))
     } { case (dir, filterPath, filterAttr) =>
-      expr2(e, a, v, attr.op, s":${filterAttr.ns}/${filterAttr.attr}")
+      expr2(e, ns, at, a, v, attr.op, s":${filterAttr.ns}/${filterAttr.attr}")
     }
     refConfirmed = true
   }
@@ -131,31 +133,35 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
   private def tac[T: ClassTag](
     attr: Attr,
     e: Var,
+    ns: String,
+    at: String,
     a: Att,
-    args: Seq[Set[T]],
-    res: ResSet[T],
+    args: Seq[Array[T]],
+    res: ResArr[T],
   ): Unit = {
     val v = vv
     attr.filterAttr.fold {
-      expr(e, a, v, attr.op, args, res)
+      expr(e, ns, at, a, v, attr.op, args, res)
       filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
       filterAttrVars2.get(a).foreach(_(e, v))
     } { case (dir, filterPath, filterAttr) =>
-      expr2(e, a, v, attr.op, s":${filterAttr.ns}/${filterAttr.attr}")
+      expr2(e, ns, at, a, v, attr.op, s":${filterAttr.ns}/${filterAttr.attr}")
     }
     refConfirmed = true
   }
 
   private def expr[T: ClassTag](
     e: Var,
+    ns: String,
+    at: String,
     a: Att,
     v: Var,
     op: Op,
-    sets: Seq[Set[T]],
-    res: ResSet[T],
+    sets: Seq[Array[T]],
+    res: ResArr[T],
   ): Unit = {
     op match {
-      case V         => attr(e, a, v)
+      case V         => attr(e, ns, at, a, v)
       case Eq        => equal(e, a, v, sets, res.s2j)
       case Neq       => neq(e, a, v, sets, res.s2j)
       case Has       => has(e, a, v, sets, res.tpe, res.toDatalog)
@@ -172,6 +178,8 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
 
   private def expr2(
     e: Var,
+    ns: String,
+    at: String,
     a: Att,
     v: Var,
     op: Op,
@@ -188,10 +196,12 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
 
   private def opt[T: ClassTag](
     e: Var,
+    ns: String,
+    at: String,
     a: Att,
     op: Op,
-    optSets: Option[Seq[Set[T]]],
-    resOpt: ResSetOpt[T],
+    optSets: Option[Seq[Array[T]]],
+    resOpt: ResArrOpt[T],
   ): Unit = {
     val v = vv
     addCast(resOpt.j2s)
@@ -208,11 +218,14 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
 
   // attr ----------------------------------------------------------------------
 
-  private def attr(e: Var, a: Att, v: Var): Unit = {
-    where += s"[$e $a $v]" -> wClause
+  private def attr(e: Var, ns: String, at: String, a: Att, r: Var): Unit = {
+    where += s"[$e $a $r]" -> wClause
+    where += s"[$r $ns.$at/i_ ${r}_i]" -> wClause
+    where += s"[$r $ns.$at/$at ${r}_v]" -> wClause
+    where += s"[(vector ${r}_i ${r}_v) ${r}_$at]" -> wClause
   }
 
-  private def optAttr[T](e: Var, a: Att, v: Var, resOpt: ResSetOpt[T]): Unit = {
+  private def optAttr[T](e: Var, a: Att, v: Var, resOpt: ResArrOpt[T]): Unit = {
     if (refConfirmed) {
       val (e1, v1, v2, v3) = (e + 1, v + 1, v + 2, v + 3)
       find += s"(distinct $v3)"
@@ -263,7 +276,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
   // eq ------------------------------------------------------------------------
 
   private def equal[T](
-    e: Var, a: Att, v: Var, sets: Seq[Set[T]], fromScala: Any => Any
+    e: Var, a: Att, v: Var, sets: Seq[Array[T]], fromScala: Any => Any
   ): Unit = {
     val (set, v1, v2, e1) = (v + "-set", v + 1, v + 2, e + 1)
     val aa                = a.split("/").last
@@ -280,13 +293,13 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
          |            :in $$ $e1
          |            :where [$e1 $a $v1]]" $$ $e) [[$v2]]]""".stripMargin -> wClause
     where += s"[(= $v2 $set)]" -> wClause
-    args += sets.map(set => set.map(fromScala).asJava).asJava
+    args += sets.map(set => set.map(fromScala)).asJava
   }
 
   private def optEqual[T](
     e: Var, a: Att, v: Var,
-    optSets: Option[Seq[Set[T]]],
-    resOpt: ResSetOpt[T],
+    optSets: Option[Seq[Array[T]]],
+    resOpt: ResArrOpt[T],
     fromScala: Any => Any
   ): Unit = {
     optSets.fold[Unit] {
@@ -301,7 +314,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
   // neq -----------------------------------------------------------------------
 
   private def neq[T](
-    e: Var, a: Att, v: Var, sets: Seq[Set[T]], fromScala: Any => Any
+    e: Var, a: Att, v: Var, sets: Seq[Array[T]], fromScala: Any => Any
   ): Unit = {
     where += s"[$e $a $v]" -> wClause
     if (sets.nonEmpty && sets.flatten.nonEmpty) {
@@ -318,7 +331,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
            |            :where [$e1 $a $v1]]" $$ $e) [[$v2]]]""".stripMargin -> wClause
       preWhere += s"[(into #{} $set) $set1]" -> wClause
       preWhere += s"[(= $v2 $set1)]" -> wClause
-      preArgs += sets.map(set => set.map(fromScala).asJava).asJava
+      preArgs += sets.map(set => set.map(fromScala)).asJava
 
       // Main query
       inPost += blacklist
@@ -329,7 +342,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
 
   private def optNeq[T](
     e: Var, a: Att, v: Var,
-    optSets: Option[Seq[Set[T]]],
+    optSets: Option[Seq[Array[T]]],
     fromScala: Any => Any
   ): Unit = {
     find += s"(distinct $v)"
@@ -344,7 +357,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
   // has -----------------------------------------------------------------------
 
   private def has[T: ClassTag](
-    e: Var, a: Att, v: Var, sets: Seq[Set[T]], tpe: String, toDatalog: T => String
+    e: Var, a: Att, v: Var, sets: Seq[Array[T]], tpe: String, toDatalog: T => String
   ): Unit = {
     where += s"[$e $a $v]" -> wClause
     if (sets.nonEmpty && sets.flatten.nonEmpty) {
@@ -357,9 +370,9 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
 
   private def optHas[T: ClassTag](
     e: Var, a: Att, v: Var,
-    optSets: Option[Seq[Set[T]]],
+    optSets: Option[Seq[Array[T]]],
     tpe: String,
-    resOpt: ResSetOpt[T],
+    resOpt: ResArrOpt[T],
     toDatalog: T => String
   ): Unit = {
     optSets.fold[Unit] {
@@ -374,7 +387,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
   // hasNo ---------------------------------------------------------------------
 
   private def hasNo[T](
-    e: Var, a: Att, v: Var, sets: Seq[Set[T]], tpe: String, toDatalog: T => String
+    e: Var, a: Att, v: Var, sets: Seq[Array[T]], tpe: String, toDatalog: T => String
   ): Unit = {
     // Common for pre-query and main query
     where += s"[$e $a $v]" -> wClause
@@ -395,7 +408,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
 
   private def optHasNo[T](
     e: Var, a: Att, v: Var,
-    optSets: Option[Seq[Set[T]]],
+    optSets: Option[Seq[Array[T]]],
     tpe: String,
     toDatalog: T => String
   ): Unit = {
@@ -429,7 +442,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
   // aggregation ---------------------------------------------------------------
 
   private def aggr[T](
-    e: Var, a: Att, v: Var, fn: String, optN: Option[Int], res: ResSet[T]
+    e: Var, a: Att, v: Var, fn: String, optN: Option[Int], res: ResArr[T]
   ): Unit = {
     checkAggrSet()
     lazy val n = optN.getOrElse(0)
@@ -493,7 +506,8 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
       case "sum" =>
         widh += e
         find += s"(sum $v)"
-        replaceCast(res.j2sSet)
+//        replaceCast(res.j2sSet)
+        ???
 
       case "median" =>
         widh += e
@@ -512,7 +526,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
       //        find += s"(distinct $v)"
       //        val medianConverter: AnyRef => Double = {
       //          (v: AnyRef) =>
-      //            getMedian(v.asInstanceOf[jSet[_]].toArray
+      //            getMedian(v.asInstanceOf[jArray[_]].toArray
       //              .map(_.toString.toDouble).toSet)
       //        }
       //        replaceCast(medianConverter.asInstanceOf[AnyRef => AnyRef])
@@ -647,7 +661,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
 
   // helpers -------------------------------------------------------------------
 
-  private def none[T](e: Var, a: Att, v: Var, resOpt: ResSetOpt[T]): Unit = {
+  private def none[T](e: Var, a: Att, v: Var, resOpt: ResArrOpt[T]): Unit = {
     if (refConfirmed) {
       find += s"(pull $e-$v [[$a :limit nil]])"
       where += s"[(identity $e) $e-$v]" -> wGround
@@ -669,7 +683,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
   }
 
   private def mkRules[T](
-    e: Var, a: Att, v: Var, sets: Seq[Set[T]], tpe: String, toDatalog: T => String
+    e: Var, a: Att, v: Var, sets: Seq[Array[T]], tpe: String, toDatalog: T => String
   ): Seq[String] = {
     tpe match {
       case "Float" =>
@@ -703,7 +717,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
     }
   }
 
-  private def noBooleanSetAggr[T](res: ResSet[T]): Unit = {
+  private def noBooleanSetAggr[T](res: ResArr[T]): Unit = {
     if (res.tpe == "Boolean")
       throw ModelError("Aggregate functions not implemented for Sets of boolean values.")
   }

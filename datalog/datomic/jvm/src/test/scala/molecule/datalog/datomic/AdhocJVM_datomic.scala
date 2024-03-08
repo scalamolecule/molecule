@@ -20,34 +20,41 @@ object AdhocJVM_datomic extends TestSuite_datomic {
       import molecule.coreTests.dataModels.core.dsl.Types._
       for {
 
-        _ <- Ns.intArray.insert(Array(1, 2, 3)).transact
-        _ <- Ns.intArray.query.get.map(_ ==> List(Array(1, 2, 3)))
+        //        _ <- rawTransact(
+        //          """[
+        //            |  ;;[:db/add #db/id[db.part/user -1] :Ns/i 42]
+        //            |  [:db/add #db/id[db.part/user -1] :Ns/intArray #db/id[db.part/user -2]]
+        //            |  [:db/add #db/id[db.part/user -2] :Ns.intArray/i_ 0]
+        //            |  [:db/add #db/id[db.part/user -2] :Ns.intArray/intArray 5]
+        //            |  [:db/add #db/id[db.part/user -1] :Ns/intArray #db/id[db.part/user -3]]
+        //            |  [:db/add #db/id[db.part/user -3] :Ns.intArray/i_ 1]
+        //            |  [:db/add #db/id[db.part/user -3] :Ns.intArray/intArray 7]
+        //            |  [:db/add #db/id[db.part/user -1] :Ns/intArray #db/id[db.part/user -4]]
+        //            |  [:db/add #db/id[db.part/user -4] :Ns.intArray/i_ 2]
+        //            |  [:db/add #db/id[db.part/user -4] :Ns.intArray/intArray 7]
+        //            |]
+        //            |""".stripMargin)
 
-//        _ <- Ns.intArray.insert(Array(3, 2, 1)).transact
-//        _ <- Ns.intArray.query.get.map(_ ==> List(Array(3, 2, 1)))
+
+        //        _ = {
+        //          val res = datomic.Peer.q(
+        //            """[:find  (distinct ?b_intArray)
+        //              | :where
+        //              |        [?a :Ns/intArray ?b]
+        //              |        [?b :Ns.intArray/i_ ?b_i]
+        //              |        [?b :Ns.intArray/intArray ?b_v]
+        //              |        [(vector ?b_i ?b_v) ?b_intArray]
+        //              |        ]
+        //              |""".stripMargin, conn.db)
+        //          println(res)
+        //        }
 
 
-        //        _ <- Ns.i.ints_?.query.i.get.map(_.toSet ==> Set( // (since we can't sort by Sets)
-        //          (1, None),
-        //          (1, Some(Set(2))),
-        //          (2, Some(Set(3))),
-        //        ))
 
-        //        // Update all entities where non-unique attribute i is 1
-        //        _ <- Ns.i_(1).ints(Set(4)).update.transact
-        //        _ <- Ns.id.a1.i.ints_?.query.get.map(_ ==> List(
-        //          (a, 1, None), // not updated since there were no previous value
-        //          (b, 1, Some(Set(4))), // 2 updated to 4
-        //          (c, 2, Some(Set(3))),
-        //        ))
-        //
-        //        // Upsert all entities where non-unique attribute i is 1
-        //        _ <- Ns.i_(1).ints(Set(5)).upsert.transact
-        //        _ <- Ns.id.a1.i.ints_?.query.get.map(_ ==> List(
-        //          (a, 1, Some(Set(5))), // 5 inserted
-        //          (b, 1, Some(Set(5))), // 4 updated to 5
-        //          (c, 2, Some(Set(3))),
-        //        ))
+        _ <- Ns.intArray.insert(Array(5, 7, 7)).i.transact
+
+        // order and duplicate values preserved
+        _ <- Ns.intArray.query.i.get.map(_.head ==> Array(5, 7, 7))
 
 
       } yield ()
@@ -56,13 +63,6 @@ object AdhocJVM_datomic extends TestSuite_datomic {
 
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
-      val a = (1, Set(1, 2), Set(1, 2, 3), 3)
-      val b = (2, Set(2, 3), Set(2, 3), 3)
-      val c = (2, Set(4), Set(4), 4)
-
-      val d = (2, Set(4), Set(3), 4)
-
-
       for {
 
 

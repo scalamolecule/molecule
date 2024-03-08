@@ -14,6 +14,7 @@ trait ResolveNestedPull[Tpl]
     with SortOneSpecial[Tpl]
     with LambdasOne
     with LambdasSet
+    with LambdasArr
     with ModelUtils
     with MoleculeLogging { self: Model2DatomicQuery[Tpl] =>
 

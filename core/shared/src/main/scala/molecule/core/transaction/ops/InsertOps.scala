@@ -45,6 +45,50 @@ trait InsertOps extends BaseOps {
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit
 
+  protected def addArr[T](
+    ns: String,
+    attr: String,
+    set2array: Set[Any] => Array[AnyRef],
+    refNs: Option[String],
+    tplIndex: Int,
+    transformValue: T => Any,
+    exts: List[String],
+    value2json: (StringBuffer, T) => StringBuffer
+  ): Product => Unit = ???
+
+  protected def addArrOpt[T](
+    ns: String,
+    attr: String,
+    set2array: Set[Any] => Array[AnyRef],
+    refNs: Option[String],
+    tplIndex: Int,
+    transformValue: T => Any,
+    exts: List[String],
+    value2json: (StringBuffer, T) => StringBuffer
+  ): Product => Unit = ???
+
+  protected def addMap[T](
+    ns: String,
+    attr: String,
+    set2array: Set[Any] => Array[AnyRef],
+    refNs: Option[String],
+    tplIndex: Int,
+    transformValue: T => Any,
+    exts: List[String],
+    value2json: (StringBuffer, T) => StringBuffer
+  ): Product => Unit = ???
+
+  protected def addMapOpt[T](
+    ns: String,
+    attr: String,
+    set2array: Set[Any] => Array[AnyRef],
+    refNs: Option[String],
+    tplIndex: Int,
+    transformValue: T => Any,
+    exts: List[String],
+    value2json: (StringBuffer, T) => StringBuffer
+  ): Product => Unit = ???
+
   protected def addRef(
     ns: String,
     refAttr: String,
