@@ -14,28 +14,17 @@ import scala.language.implicitConversions
 
 object AdhocJVM_datomic extends TestSuite_datomic {
 
-  implicit val tolerantInt   : Equality[Int]    = tolerantIntEquality(toleranceInt)
-  implicit val tolerantDouble: Equality[Double] = tolerantDoubleEquality(toleranceDouble)
-
-
-  // Use whole decimal numbers since only sorting is checked here
-  override lazy val (float1, float2, float3, float4)                     = (1.0f, 2.0f, 3.0f, 4.0f)
-  override lazy val (double1, double2, double3, double4)                 = (1.0, 2.0, 3.0, 4.0)
-  override lazy val (bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4) =
-    (BigDecimal(1.0), BigDecimal(2.0), BigDecimal(3.0), BigDecimal(4.0))
-
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       for {
 
-        _ <- Ns.i.int.insert(
-          (1, int1),
-          (1, int2),
-          (1, int3),
-          (2, int4),
-        ).transact
+        _ <- Ns.intArray.insert(Array(1, 2, 3)).transact
+        _ <- Ns.intArray.query.get.map(_ ==> List(Array(1, 2, 3)))
+
+//        _ <- Ns.intArray.insert(Array(3, 2, 1)).transact
+//        _ <- Ns.intArray.query.get.map(_ ==> List(Array(3, 2, 1)))
 
 
         //        _ <- Ns.i.ints_?.query.i.get.map(_.toSet ==> Set( // (since we can't sort by Sets)

@@ -4,21 +4,21 @@ object BoilerplateGenerator extends App {
 
   //  boilerplate.api.expression._ExprAttr.generate()
   //
-//    boilerplate.api.expression._ExprOneMan.generate()
-//    boilerplate.api.expression._ExprOneOpt.generate()
-//    boilerplate.api.expression._ExprOneTac.generate()
+  //  boilerplate.api.expression._ExprOneMan.generate()
+  //  boilerplate.api.expression._ExprOneOpt.generate()
+  //  boilerplate.api.expression._ExprOneTac.generate()
   //
   //  boilerplate.api.expression._ExprSetMan.generate()
   //  boilerplate.api.expression._ExprSetOpt.generate()
   //  boilerplate.api.expression._ExprSetTac.generate()
   //
-//    boilerplate.api.expression._ExprArrMan.generate()
-//    boilerplate.api.expression._ExprArrOpt.generate()
-//    boilerplate.api.expression._ExprArrTac.generate()
+  //  boilerplate.api.expression._ExprArrMan.generate()
+  //  boilerplate.api.expression._ExprArrOpt.generate()
+  //  boilerplate.api.expression._ExprArrTac.generate()
   //
-//    boilerplate.api.expression._ExprMapMan.generate()
-//    boilerplate.api.expression._ExprMapOpt.generate()
-//    boilerplate.api.expression._ExprMapTac.generate()
+  //  boilerplate.api.expression._ExprMapMan.generate()
+  //  boilerplate.api.expression._ExprMapOpt.generate()
+  //  boilerplate.api.expression._ExprMapTac.generate()
   //
   //  boilerplate.api._Aggregates.generate()
   //  boilerplate.api._ModelOps.generate()
@@ -26,5 +26,5 @@ object BoilerplateGenerator extends App {
   //  boilerplate.api._SortAttrs.generate()
   //
   //  boilerplate.ast._Model.generate()
-    boilerplate.ops._ModelTransformations.generate()
+  //  boilerplate.ops._ModelTransformations.generate()
 }

@@ -10,7 +10,7 @@ object Types extends DataModel(5) {
     val s  = oneString
     val u  = oneInt.unique
 
-    // Cardinality one
+    // Single values
     val string         = oneString
     val int            = oneInt
     val long           = oneLong
@@ -36,7 +36,7 @@ object Types extends DataModel(5) {
     val ref            = one[Ref]
     val other          = one[Other]
 
-    // Cardinality many (Set)
+    // Set
     val strings         = setString
     val ints            = setInt
     val longs           = setLong
@@ -60,6 +60,54 @@ object Types extends DataModel(5) {
     val shorts          = setShort
     val chars           = setChar
     val refs            = many[Ref]
+
+    // Array
+    val stringArray         = arrString
+    val intArray            = arrInt
+    val longArray           = arrLong
+    val floatArray          = arrFloat
+    val doubleArray         = arrDouble
+    val booleanArray        = arrBoolean
+    val bigIntArray         = arrBigInt
+    val bigDecimalArray     = arrBigDecimal
+    val dateArray           = arrDate
+    val durationArray       = arrDuration
+    val instantArray        = arrInstant
+    val localDateArray      = arrLocalDate
+    val localTimeArray      = arrLocalTime
+    val localDateTimeArray  = arrLocalDateTime
+    val offsetTimeArray     = arrOffsetTime
+    val offsetDateTimeArray = arrOffsetDateTime
+    val zonedDateTimeArray  = arrZonedDateTime
+    val uuidArray           = arrUUID
+    val uriArray            = arrURI
+    val byteArray           = arrByte
+    val shortArray          = arrShort
+    val charArray           = arrChar
+
+    // Map
+    val stringMap         = mapString
+    val intMap            = mapInt
+    val longMap           = mapLong
+    val floatMap          = mapFloat
+    val doubleMap         = mapDouble
+    val booleanMap        = mapBoolean
+    val bigIntMap         = mapBigInt
+    val bigDecimalMap     = mapBigDecimal
+    val dateMap           = mapDate
+    val durationMap       = mapDuration
+    val instantMap        = mapInstant
+    val localDateMap      = mapLocalDate
+    val localTimeMap      = mapLocalTime
+    val localDateTimeMap  = mapLocalDateTime
+    val offsetTimeMap     = mapOffsetTime
+    val offsetDateTimeMap = mapOffsetDateTime
+    val zonedDateTimeMap  = mapZonedDateTime
+    val uuidMap           = mapUUID
+    val uriMap            = mapURI
+    val byteMap           = mapByte
+    val shortMap          = mapShort
+    val charMap           = mapChar
   }
 
   trait Ref {
