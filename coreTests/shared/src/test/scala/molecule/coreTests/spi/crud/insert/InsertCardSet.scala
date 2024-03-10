@@ -186,7 +186,7 @@ trait InsertCardSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "Tacit" - types { implicit conn =>
       for {
         // Can't insert tacit attributes
-        _ <- Future(compileError("Ns.i.string_.insert(1, string1)"))
+        _ <- Future(compileError("Ns.i.strings_.insert(1, Set(string1))"))
       } yield ()
     }
   }

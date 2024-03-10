@@ -17,21 +17,18 @@ trait UpdateSetOps_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
     "apply (replace/add all)" - types { implicit conn =>
       for {
         id <- Ns.offsetTimes(Set(offsetTime1, offsetTime2)).save.transact.map(_.id)
+        _ <- Ns.offsetTimes.query.get.map(_.head ==> Set(offsetTime1, offsetTime2))
 
+        // Applying Set of values replaces previous Set
         _ <- Ns(id).offsetTimes(Set(offsetTime3, offsetTime4)).update.transact
         _ <- Ns.offsetTimes.query.get.map(_.head ==> Set(offsetTime3, offsetTime4))
 
-        // Apply Seq of values
-        _ <- Ns(id).offsetTimes(Set(offsetTime4, offsetTime5)).update.transact
-        _ <- Ns.offsetTimes.query.get.map(_.head ==> Set(offsetTime4, offsetTime5))
-
-        // Apply empty Seq of values (deleting all values!)
+        // Applying empty Set of values deletes previous Set
         _ <- Ns(id).offsetTimes(Seq.empty[OffsetTime]).update.transact
         _ <- Ns.offsetTimes.query.get.map(_ ==> Nil)
 
-        _ <- Ns(id).offsetTimes(Set(offsetTime1, offsetTime2)).update.transact
-
-        // Delete all (apply no values)
+        id <- Ns.offsetTimes(Set(offsetTime1, offsetTime2)).save.transact.map(_.id)
+        // Applying empty value deletes previous Set
         _ <- Ns(id).offsetTimes().update.transact
         _ <- Ns.offsetTimes.query.get.map(_ ==> Nil)
       } yield ()
@@ -46,7 +43,7 @@ trait UpdateSetOps_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
         _ <- Ns(id).offsetTimes.add(offsetTime2).update.transact
         _ <- Ns.offsetTimes.query.get.map(_.head ==> Set(offsetTime1, offsetTime2))
 
-        // Add existing value (no effect)
+        // Adding existing value has no effect (Set semantics of only unique values)
         _ <- Ns(id).offsetTimes.add(offsetTime2).update.transact
         _ <- Ns.offsetTimes.query.get.map(_.head ==> Set(offsetTime1, offsetTime2))
 
@@ -65,7 +62,7 @@ trait UpdateSetOps_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
         _ <- Ns(id).offsetTimes.add(Iterable(offsetTime7)).update.transact
         _ <- Ns.offsetTimes.query.get.map(_.head ==> Set(offsetTime1, offsetTime2, offsetTime3, offsetTime4, offsetTime5, offsetTime6, offsetTime7))
 
-        // Add empty Seq of values (no effect)
+        // Adding empty Iterable of values has no effect
         _ <- Ns(id).offsetTimes.add(Seq.empty[OffsetTime]).update.transact
         _ <- Ns.offsetTimes.query.get.map(_.head ==> Set(offsetTime1, offsetTime2, offsetTime3, offsetTime4, offsetTime5, offsetTime6, offsetTime7))
       } yield ()
@@ -92,11 +89,11 @@ trait UpdateSetOps_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
         _ <- Ns(id).offsetTimes.remove(offsetTime3, offsetTime4).update.transact
         _ <- Ns.offsetTimes.query.get.map(_.head ==> Set(offsetTime1, offsetTime2))
 
-        // Remove Seq of values
+        // Remove Iterable of values
         _ <- Ns(id).offsetTimes.remove(Seq(offsetTime2)).update.transact
         _ <- Ns.offsetTimes.query.get.map(_.head ==> Set(offsetTime1))
 
-        // Removing empty Seq of values has no effect
+        // Removing empty Iterable of values has no effect
         _ <- Ns(id).offsetTimes.remove(Seq.empty[OffsetTime]).update.transact
         _ <- Ns.offsetTimes.query.get.map(_.head ==> Set(offsetTime1))
 

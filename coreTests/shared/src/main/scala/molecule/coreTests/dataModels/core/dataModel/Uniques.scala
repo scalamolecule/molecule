@@ -33,7 +33,9 @@ object Uniques extends DataModel(3) {
     val char           = oneChar.unique
 
     // Cardinality many (Set)
-    val ints = setInt.unique
+    val ints     = setInt.unique
+    val intArray = arrayInt.unique
+    val intMap   = mapInt.unique
 
     val ref  = one[Ref]
     val refs = many[Ref]

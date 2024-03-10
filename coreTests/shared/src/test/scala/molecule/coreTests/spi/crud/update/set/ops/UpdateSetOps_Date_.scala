@@ -17,21 +17,18 @@ trait UpdateSetOps_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "apply (replace/add all)" - types { implicit conn =>
       for {
         id <- Ns.dates(Set(date1, date2)).save.transact.map(_.id)
+        _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2))
 
+        // Applying Set of values replaces previous Set
         _ <- Ns(id).dates(Set(date3, date4)).update.transact
         _ <- Ns.dates.query.get.map(_.head ==> Set(date3, date4))
 
-        // Apply Seq of values
-        _ <- Ns(id).dates(Set(date4, date5)).update.transact
-        _ <- Ns.dates.query.get.map(_.head ==> Set(date4, date5))
-
-        // Apply empty Seq of values (deleting all values!)
+        // Applying empty Set of values deletes previous Set
         _ <- Ns(id).dates(Seq.empty[Date]).update.transact
         _ <- Ns.dates.query.get.map(_ ==> Nil)
 
-        _ <- Ns(id).dates(Set(date1, date2)).update.transact
-
-        // Delete all (apply no values)
+        id <- Ns.dates(Set(date1, date2)).save.transact.map(_.id)
+        // Applying empty value deletes previous Set
         _ <- Ns(id).dates().update.transact
         _ <- Ns.dates.query.get.map(_ ==> Nil)
       } yield ()
@@ -46,7 +43,7 @@ trait UpdateSetOps_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).dates.add(date2).update.transact
         _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2))
 
-        // Add existing value (no effect)
+        // Adding existing value has no effect (Set semantics of only unique values)
         _ <- Ns(id).dates.add(date2).update.transact
         _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2))
 
@@ -65,7 +62,7 @@ trait UpdateSetOps_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).dates.add(Iterable(date7)).update.transact
         _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2, date3, date4, date5, date6, date7))
 
-        // Add empty Seq of values (no effect)
+        // Adding empty Iterable of values has no effect
         _ <- Ns(id).dates.add(Seq.empty[Date]).update.transact
         _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2, date3, date4, date5, date6, date7))
       } yield ()
@@ -92,11 +89,11 @@ trait UpdateSetOps_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).dates.remove(date3, date4).update.transact
         _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2))
 
-        // Remove Seq of values
+        // Remove Iterable of values
         _ <- Ns(id).dates.remove(Seq(date2)).update.transact
         _ <- Ns.dates.query.get.map(_.head ==> Set(date1))
 
-        // Removing empty Seq of values has no effect
+        // Removing empty Iterable of values has no effect
         _ <- Ns(id).dates.remove(Seq.empty[Date]).update.transact
         _ <- Ns.dates.query.get.map(_.head ==> Set(date1))
 

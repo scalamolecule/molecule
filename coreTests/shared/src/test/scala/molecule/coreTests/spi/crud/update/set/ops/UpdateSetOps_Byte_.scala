@@ -16,21 +16,18 @@ trait UpdateSetOps_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "apply (replace/add all)" - types { implicit conn =>
       for {
         id <- Ns.bytes(Set(byte1, byte2)).save.transact.map(_.id)
+        _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2))
 
+        // Applying Set of values replaces previous Set
         _ <- Ns(id).bytes(Set(byte3, byte4)).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte3, byte4))
 
-        // Apply Seq of values
-        _ <- Ns(id).bytes(Set(byte4, byte5)).update.transact
-        _ <- Ns.bytes.query.get.map(_.head ==> Set(byte4, byte5))
-
-        // Apply empty Seq of values (deleting all values!)
+        // Applying empty Set of values deletes previous Set
         _ <- Ns(id).bytes(Seq.empty[Byte]).update.transact
         _ <- Ns.bytes.query.get.map(_ ==> Nil)
 
-        _ <- Ns(id).bytes(Set(byte1, byte2)).update.transact
-
-        // Delete all (apply no values)
+        id <- Ns.bytes(Set(byte1, byte2)).save.transact.map(_.id)
+        // Applying empty value deletes previous Set
         _ <- Ns(id).bytes().update.transact
         _ <- Ns.bytes.query.get.map(_ ==> Nil)
       } yield ()
@@ -45,7 +42,7 @@ trait UpdateSetOps_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).bytes.add(byte2).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2))
 
-        // Add existing value (no effect)
+        // Adding existing value has no effect (Set semantics of only unique values)
         _ <- Ns(id).bytes.add(byte2).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2))
 
@@ -64,7 +61,7 @@ trait UpdateSetOps_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).bytes.add(Iterable(byte7)).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2, byte3, byte4, byte5, byte6, byte7))
 
-        // Add empty Seq of values (no effect)
+        // Adding empty Iterable of values has no effect
         _ <- Ns(id).bytes.add(Seq.empty[Byte]).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2, byte3, byte4, byte5, byte6, byte7))
       } yield ()
@@ -91,11 +88,11 @@ trait UpdateSetOps_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).bytes.remove(byte3, byte4).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2))
 
-        // Remove Seq of values
+        // Remove Iterable of values
         _ <- Ns(id).bytes.remove(Seq(byte2)).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1))
 
-        // Removing empty Seq of values has no effect
+        // Removing empty Iterable of values has no effect
         _ <- Ns(id).bytes.remove(Seq.empty[Byte]).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1))
 

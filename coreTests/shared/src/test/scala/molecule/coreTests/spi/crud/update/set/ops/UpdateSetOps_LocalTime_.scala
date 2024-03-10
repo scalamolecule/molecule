@@ -17,21 +17,18 @@ trait UpdateSetOps_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
     "apply (replace/add all)" - types { implicit conn =>
       for {
         id <- Ns.localTimes(Set(localTime1, localTime2)).save.transact.map(_.id)
+        _ <- Ns.localTimes.query.get.map(_.head ==> Set(localTime1, localTime2))
 
+        // Applying Set of values replaces previous Set
         _ <- Ns(id).localTimes(Set(localTime3, localTime4)).update.transact
         _ <- Ns.localTimes.query.get.map(_.head ==> Set(localTime3, localTime4))
 
-        // Apply Seq of values
-        _ <- Ns(id).localTimes(Set(localTime4, localTime5)).update.transact
-        _ <- Ns.localTimes.query.get.map(_.head ==> Set(localTime4, localTime5))
-
-        // Apply empty Seq of values (deleting all values!)
+        // Applying empty Set of values deletes previous Set
         _ <- Ns(id).localTimes(Seq.empty[LocalTime]).update.transact
         _ <- Ns.localTimes.query.get.map(_ ==> Nil)
 
-        _ <- Ns(id).localTimes(Set(localTime1, localTime2)).update.transact
-
-        // Delete all (apply no values)
+        id <- Ns.localTimes(Set(localTime1, localTime2)).save.transact.map(_.id)
+        // Applying empty value deletes previous Set
         _ <- Ns(id).localTimes().update.transact
         _ <- Ns.localTimes.query.get.map(_ ==> Nil)
       } yield ()
@@ -46,7 +43,7 @@ trait UpdateSetOps_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
         _ <- Ns(id).localTimes.add(localTime2).update.transact
         _ <- Ns.localTimes.query.get.map(_.head ==> Set(localTime1, localTime2))
 
-        // Add existing value (no effect)
+        // Adding existing value has no effect (Set semantics of only unique values)
         _ <- Ns(id).localTimes.add(localTime2).update.transact
         _ <- Ns.localTimes.query.get.map(_.head ==> Set(localTime1, localTime2))
 
@@ -65,7 +62,7 @@ trait UpdateSetOps_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
         _ <- Ns(id).localTimes.add(Iterable(localTime7)).update.transact
         _ <- Ns.localTimes.query.get.map(_.head ==> Set(localTime1, localTime2, localTime3, localTime4, localTime5, localTime6, localTime7))
 
-        // Add empty Seq of values (no effect)
+        // Adding empty Iterable of values has no effect
         _ <- Ns(id).localTimes.add(Seq.empty[LocalTime]).update.transact
         _ <- Ns.localTimes.query.get.map(_.head ==> Set(localTime1, localTime2, localTime3, localTime4, localTime5, localTime6, localTime7))
       } yield ()
@@ -92,11 +89,11 @@ trait UpdateSetOps_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
         _ <- Ns(id).localTimes.remove(localTime3, localTime4).update.transact
         _ <- Ns.localTimes.query.get.map(_.head ==> Set(localTime1, localTime2))
 
-        // Remove Seq of values
+        // Remove Iterable of values
         _ <- Ns(id).localTimes.remove(Seq(localTime2)).update.transact
         _ <- Ns.localTimes.query.get.map(_.head ==> Set(localTime1))
 
-        // Removing empty Seq of values has no effect
+        // Removing empty Iterable of values has no effect
         _ <- Ns(id).localTimes.remove(Seq.empty[LocalTime]).update.transact
         _ <- Ns.localTimes.query.get.map(_.head ==> Set(localTime1))
 

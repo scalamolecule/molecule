@@ -33,7 +33,6 @@ trait DatomicBase_JVM extends DatomicDataType_JVM with ModelUtils {
 
   protected var ids            = Seq.empty[AnyRef]
   protected var filterElements = List.empty[Element]
-  protected var data           = List.empty[(String, String, String, Seq[AnyRef], Boolean)]
 
   protected var stmt        : jList[AnyRef]       = null
   protected var backRefs    : Map[String, AnyRef] = Map.empty[String, AnyRef]

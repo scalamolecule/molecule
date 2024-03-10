@@ -16,21 +16,18 @@ trait UpdateSetOps_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "apply (replace/add all)" - types { implicit conn =>
       for {
         id <- Ns.shorts(Set(short1, short2)).save.transact.map(_.id)
+        _ <- Ns.shorts.query.get.map(_.head ==> Set(short1, short2))
 
+        // Applying Set of values replaces previous Set
         _ <- Ns(id).shorts(Set(short3, short4)).update.transact
         _ <- Ns.shorts.query.get.map(_.head ==> Set(short3, short4))
 
-        // Apply Seq of values
-        _ <- Ns(id).shorts(Set(short4, short5)).update.transact
-        _ <- Ns.shorts.query.get.map(_.head ==> Set(short4, short5))
-
-        // Apply empty Seq of values (deleting all values!)
+        // Applying empty Set of values deletes previous Set
         _ <- Ns(id).shorts(Seq.empty[Short]).update.transact
         _ <- Ns.shorts.query.get.map(_ ==> Nil)
 
-        _ <- Ns(id).shorts(Set(short1, short2)).update.transact
-
-        // Delete all (apply no values)
+        id <- Ns.shorts(Set(short1, short2)).save.transact.map(_.id)
+        // Applying empty value deletes previous Set
         _ <- Ns(id).shorts().update.transact
         _ <- Ns.shorts.query.get.map(_ ==> Nil)
       } yield ()
@@ -45,7 +42,7 @@ trait UpdateSetOps_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).shorts.add(short2).update.transact
         _ <- Ns.shorts.query.get.map(_.head ==> Set(short1, short2))
 
-        // Add existing value (no effect)
+        // Adding existing value has no effect (Set semantics of only unique values)
         _ <- Ns(id).shorts.add(short2).update.transact
         _ <- Ns.shorts.query.get.map(_.head ==> Set(short1, short2))
 
@@ -64,7 +61,7 @@ trait UpdateSetOps_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).shorts.add(Iterable(short7)).update.transact
         _ <- Ns.shorts.query.get.map(_.head ==> Set(short1, short2, short3, short4, short5, short6, short7))
 
-        // Add empty Seq of values (no effect)
+        // Adding empty Iterable of values has no effect
         _ <- Ns(id).shorts.add(Seq.empty[Short]).update.transact
         _ <- Ns.shorts.query.get.map(_.head ==> Set(short1, short2, short3, short4, short5, short6, short7))
       } yield ()
@@ -91,11 +88,11 @@ trait UpdateSetOps_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).shorts.remove(short3, short4).update.transact
         _ <- Ns.shorts.query.get.map(_.head ==> Set(short1, short2))
 
-        // Remove Seq of values
+        // Remove Iterable of values
         _ <- Ns(id).shorts.remove(Seq(short2)).update.transact
         _ <- Ns.shorts.query.get.map(_.head ==> Set(short1))
 
-        // Removing empty Seq of values has no effect
+        // Removing empty Iterable of values has no effect
         _ <- Ns(id).shorts.remove(Seq.empty[Short]).update.transact
         _ <- Ns.shorts.query.get.map(_.head ==> Set(short1))
 

@@ -166,7 +166,7 @@ Add the following to your build files:
 `project/build.properties`:
 
 ```
-sbt.version = 1.9.8
+sbt.version = 1.9.9
 ```
 
 `project/plugins.sbt`:
@@ -196,7 +196,7 @@ lazy val yourProject = project.in(file("app"))
 
 ## Explore
 
-The `coreTests` module in this repo has several data model definitions and more than 1600 tests that show all details of
+The `coreTests` module in this repo has several data model definitions and more than 1800 tests that show all details of
 how molecule can be used. This forms the Service Provider Interface that each database implementation needs to comply to
 in order to offer all functionality of Molecule.
 
@@ -235,8 +235,8 @@ To be completely up-to-date, you can pull the latest changes from Github and pub
 
 Or target other Scala versions:
 
-    sbt ++3.3.1 publishLocal
-    sbt ++2.12.18 publishLocal
+    sbt ++3.3.3 publishLocal
+    sbt ++2.12.19 publishLocal
 
 ### Author
 

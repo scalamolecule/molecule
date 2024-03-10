@@ -1,23 +1,23 @@
 package molecule.datalog.datomic
 
-import datomic.{Peer, Util}
-import molecule.base.error.ModelError
+import java.net.URI
+import java.time._
+import java.util.{Date, UUID}
+import molecule.base.error.ExecutionError
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.core.dsl.Refs.A
-import molecule.coreTests.dataModels.core.dsl.Types.Ns
+import molecule.coreTests.util.Array2List
 import molecule.datalog.datomic.async._
 import molecule.datalog.datomic.setup.TestSuite_datomic
-import org.scalactic.Equality
 import utest._
-import scala.concurrent.Future
 import scala.language.implicitConversions
 
-object AdhocJVM_datomic extends TestSuite_datomic {
+object AdhocJVM_datomic extends TestSuite_datomic with Array2List {
 
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
+
       for {
 
         //        _ <- rawTransact(
@@ -35,28 +35,75 @@ object AdhocJVM_datomic extends TestSuite_datomic {
         //            |]
         //            |""".stripMargin)
 
-
         //        _ = {
-        //          val res = datomic.Peer.q(
-        //            """[:find  (distinct ?b_intArray)
-        //              | :where
-        //              |        [?a :Ns/intArray ?b]
-        //              |        [?b :Ns.intArray/i_ ?b_i]
-        //              |        [?b :Ns.intArray/intArray ?b_v]
-        //              |        [(vector ?b_i ?b_v) ?b_intArray]
+        //          println(datomic.Peer.q(
+        //            """[:find  ?b
+        //              |        (distinct ?c4)
+        //              | :where [?a :Ns/i ?b]
+        //              |        [(datomic.api/q
+        //              |          "[:find (pull ?a [
+        //              |              {(:Ns/stringArray :limit nil) [
+        //              |                  :Ns.stringArray/i_
+        //              |                  :Ns.stringArray/v_
+        //              |                ]}
+        //              |             ])
+        //              |            :in $ ?a]" $ ?a) [[?c1]]]
+        //              |        [(if (nil? ?c1) {:Ns/stringArray []} ?c1) ?c2]
+        //              |        [(:Ns/stringArray ?c2) ?c3]
+        //              |        [(map vals  ?c3) ?c4]
         //              |        ]
-        //              |""".stripMargin, conn.db)
-        //          println(res)
+        //              |""".stripMargin, conn.db))
+        //          println("-----------")
         //        }
 
 
 
-        _ <- Ns.intArray.insert(Array(5, 7, 7)).i.transact
 
-        // order and duplicate values preserved
-        _ <- Ns.intArray.query.i.get.map(_.head ==> Array(5, 7, 7))
+        _ <- Ns.i(1).stringArray_(Array(string1, string2)).save.transact
+        _ <- Ns.i(1).intArray_(Array(int1, int2)).save.transact
+        _ <- Ns.i(1).longArray_(Array(long1, long2)).save.transact
+        _ <- Ns.i(1).floatArray_(Array(float1, float2)).save.transact
+        _ <- Ns.i(1).doubleArray_(Array(double1, double2)).save.transact
+        _ <- Ns.i(1).booleanArray_(Array(boolean1, boolean2)).save.transact
+        _ <- Ns.i(1).bigIntArray_(Array(bigInt1, bigInt2)).save.transact
+        _ <- Ns.i(1).bigDecimalArray_(Array(bigDecimal1, bigDecimal2)).save.transact
+        _ <- Ns.i(1).dateArray_(Array(date1, date2)).save.transact
+        _ <- Ns.i(1).durationArray_(Array(duration1, duration2)).save.transact
+        _ <- Ns.i(1).instantArray_(Array(instant1, instant2)).save.transact
+        _ <- Ns.i(1).localDateArray_(Array(localDate1, localDate2)).save.transact
+        _ <- Ns.i(1).localTimeArray_(Array(localTime1, localTime2)).save.transact
+        _ <- Ns.i(1).localDateTimeArray_(Array(localDateTime1, localDateTime2)).save.transact
+        _ <- Ns.i(1).offsetTimeArray_(Array(offsetTime1, offsetTime2)).save.transact
+        _ <- Ns.i(1).offsetDateTimeArray_(Array(offsetDateTime1, offsetDateTime2)).save.transact
+        _ <- Ns.i(1).zonedDateTimeArray_(Array(zonedDateTime1, zonedDateTime2)).save.transact
+        _ <- Ns.i(1).uuidArray_(Array(uuid1, uuid2)).save.transact
+        _ <- Ns.i(1).uriArray_(Array(uri1, uri2)).save.transact
+        _ <- Ns.i(1).byteArray_(Array(byte1, byte2)).save.transact
+        _ <- Ns.i(1).shortArray_(Array(short1, short2)).save.transact
+        _ <- Ns.i(1).charArray_(Array(char1, char2)).save.transact
 
-
+        _ <- Ns.i.stringArray.query.get.map(_.head ==> (1, Array(string1, string2)))
+        _ <- Ns.i.intArray.query.get.map(_.head ==> (1, Array(int1, int2)))
+        _ <- Ns.i.longArray.query.get.map(_.head ==> (1, Array(long1, long2)))
+        _ <- Ns.i.floatArray.query.get.map(_.head ==> (1, Array(float1, float2)))
+        _ <- Ns.i.doubleArray.query.get.map(_.head ==> (1, Array(double1, double2)))
+        _ <- Ns.i.booleanArray.query.get.map(_.head ==> (1, Array(boolean1, boolean2)))
+        _ <- Ns.i.bigIntArray.query.get.map(_.head ==> (1, Array(bigInt1, bigInt2)))
+        _ <- Ns.i.bigDecimalArray.query.get.map(_.head ==> (1, Array(bigDecimal1, bigDecimal2)))
+        _ <- Ns.i.dateArray.query.get.map(_.head ==> (1, Array(date1, date2)))
+        _ <- Ns.i.durationArray.query.get.map(_.head ==> (1, Array(duration1, duration2)))
+        _ <- Ns.i.instantArray.query.get.map(_.head ==> (1, Array(instant1, instant2)))
+        _ <- Ns.i.localDateArray.query.get.map(_.head ==> (1, Array(localDate1, localDate2)))
+        _ <- Ns.i.localTimeArray.query.get.map(_.head ==> (1, Array(localTime1, localTime2)))
+        _ <- Ns.i.localDateTimeArray.query.get.map(_.head ==> (1, Array(localDateTime1, localDateTime2)))
+        _ <- Ns.i.offsetTimeArray.query.get.map(_.head ==> (1, Array(offsetTime1, offsetTime2)))
+        _ <- Ns.i.offsetDateTimeArray.query.get.map(_.head ==> (1, Array(offsetDateTime1, offsetDateTime2)))
+        _ <- Ns.i.zonedDateTimeArray.query.get.map(_.head ==> (1, Array(zonedDateTime1, zonedDateTime2)))
+        _ <- Ns.i.uuidArray.query.get.map(_.head ==> (1, Array(uuid1, uuid2)))
+        _ <- Ns.i.uriArray.query.get.map(_.head ==> (1, Array(uri1, uri2)))
+        _ <- Ns.i.byteArray.query.get.map(_.head ==> (1, Array(byte1, byte2)))
+        _ <- Ns.i.shortArray.query.get.map(_.head ==> (1, Array(short1, short2)))
+        _ <- Ns.i.charArray.query.get.map(_.head ==> (1, Array(char1, char2)))
       } yield ()
     }
 

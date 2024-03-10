@@ -15,7 +15,6 @@ import molecule.core.transaction.ops.UpdateOps
 import molecule.core.validation.TxModelValidation
 import molecule.datalog.core.query.Model2DatomicQuery
 import molecule.datalog.datomic.facade.DatomicConn_JVM
-import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 trait Update_datomic
@@ -23,6 +22,8 @@ trait Update_datomic
     with UpdateOps
     with ModelTransformations_
     with MoleculeLogging { self: ResolveUpdate =>
+
+  private val data = new ListBuffer[(String, String, String, Seq[AnyRef], Boolean, String)]
 
   def getStmts(
     conn: DatomicConn_JVM,
@@ -34,6 +35,7 @@ trait Update_datomic
     //    elements.foreach(println)
 
     val db = conn.peerConn.db()
+
 
     if (isRpcCall) {
       // Check against db on jvm if rpc from client
@@ -75,11 +77,11 @@ trait Update_datomic
       val filterElements1 = AttrOneManID(filterNs, "id", V) +: filterElements
       val (query, inputs) = new Model2DatomicQuery[Any](filterElements1).getIdQueryWithInputs
       val idRows          = Peer.q(query, db +: inputs: _*)
-      val addStmts        = id2stmts(data, db)
+      val addStmts        = id2stmts(db)
       idRows.forEach(idRow => addStmts(idRow.get(0)))
 
     } else if (isUpsert) {
-      val addStmts = id2stmts(data, db, isUpsert)
+      val addStmts = id2stmts(db, isUpsert)
       ids.foreach(addStmts)
 
     } else {
@@ -89,7 +91,7 @@ trait Update_datomic
       val filterElements1 = AttrOneManID(filterNs, "id", V) +: cleanElements
       val (query, inputs) = new Model2DatomicQuery[Any](filterElements1).getIdQueryWithInputs
       val idRows          = Peer.q(query, db +: inputs: _*)
-      val addStmts        = id2stmts(data, db, isUpsert)
+      val addStmts        = id2stmts(db, isUpsert)
       idRows.forEach(row => addStmts(row.get(0)))
     }
 
@@ -113,13 +115,14 @@ trait Update_datomic
       filterElements = filterElements :+ dummyFilterAttr
     }
     vs match {
-      case Seq(v) => data = data :+ (("add", ns, attr, Seq(transformValue(v).asInstanceOf[AnyRef]), false))
-      case Nil    => data = data :+ (("retract", ns, attr, Nil, false))
+      case Seq(v) => data += (("add", ns, attr, Seq(transformValue(v).asInstanceOf[AnyRef]), false, ""))
+      case Nil    => data += (("retract", ns, attr, Nil, false, ""))
       case vs     => throw ExecutionError(
         s"Can only $update one value for attribute `$ns.$attr`. Found: " + vs.mkString(", ")
       )
     }
   }
+
 
   override def updateSetEq[T](
     ns: String,
@@ -138,11 +141,11 @@ trait Update_datomic
     }
     sets match {
       case Seq(set) =>
-        val add = ("add", ns, attr, set.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, true)
-        data = data :+ add
+        val add = ("add", ns, attr, set.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, true, "")
+        data += add
 
       case Nil =>
-        data = data :+ (("retract", ns, attr, Nil, true))
+        data += (("retract", ns, attr, Nil, true, ""))
 
       case vs => throw ExecutionError(
         s"Can only $update one Set of values for Set attribute `$ns.$attr`. Found: " + vs.mkString(", ")
@@ -163,19 +166,17 @@ trait Update_datomic
   ): Unit = {
     sets match {
       case Seq(set) =>
-        val add = ("add", ns, attr, set.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, false)
-        data = data :+ add
+        val add = ("add", ns, attr, set.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, false, "")
+        data += add
 
       case Nil =>
-        data = data :+ (("retract", ns, attr, Nil, false))
+        data += (("retract", ns, attr, Nil, false, ""))
 
       case vs => throw ExecutionError(
         s"Can only $update one Set of values for Set attribute `$ns.$attr`. Found: " + vs.mkString(", ")
       )
     }
   }
-
-  private val new2oldPairs = mutable.Map.empty[Any, Any]
 
   override def updateSetRemove[T](
     ns: String,
@@ -189,8 +190,99 @@ trait Update_datomic
     one2json: T => String
   ): Unit = {
     if (set.nonEmpty) {
-      data = data :+ (("retract", ns, attr, set.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, false))
+      data += (("retract", ns, attr, set.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, false, ""))
       Seq(("retract", ns, attr, set.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, false))
+    }
+  }
+
+
+  override def updateArrayEq[T](
+    ns: String,
+    attr: String,
+    arrays: Seq[Array[T]],
+    refNs: Option[String],
+    owner: Boolean,
+    transform: T => Any,
+    //    set2array: Set[Any] => Array[AnyRef],
+    //    exts: List[String],
+    //    value2json: (StringBuffer, T) => StringBuffer
+  ): Unit = {
+    if (isUpdate) {
+      val dummyFilterAttr = AttrOneTacInt(ns, attr)
+      filterElements = filterElements :+ dummyFilterAttr
+    }
+    arrays match {
+      case Seq(array) =>
+        val add = ("add", ns, attr, array.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, true, "array")
+        data += add
+
+      case Nil =>
+        data += (("retract", ns, attr, Nil, true, "array"))
+
+      case vs => throw ExecutionError(
+        s"Can only $update one Array of values for Array attribute `$ns.$attr`."
+      )
+    }
+  }
+
+  override def updateByteArray(
+    ns: String,
+    attr: String,
+    byteArrays: Seq[Array[Byte]],
+  ): Unit = {
+    byteArrays match {
+      case Seq(byteArray) =>
+        val add = ("add", ns, attr, Seq(byteArray), true, "") // Treat byte array as single value
+        data += add
+
+      case Nil =>
+        data += (("retract", ns, attr, Nil, true, "array"))
+
+      case vs => throw ExecutionError(
+        s"Can only $update one Byte Array for `$ns.$attr`."
+      )
+    }
+  }
+
+  override def updateArrayAdd[T](
+    ns: String,
+    attr: String,
+    arrays: Seq[Array[T]],
+    refNs: Option[String],
+    owner: Boolean,
+    transform: T => Any,
+    //    set2array: Set[Any] => Array[AnyRef],
+    //    exts: List[String],
+    //    value2json: (StringBuffer, T) => StringBuffer
+  ): Unit = {
+    arrays match {
+      case Seq(array) =>
+        val add = ("add", ns, attr, array.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, false, "array")
+        data += add
+
+      case Nil =>
+        data += (("retract", ns, attr, Nil, false, "array"))
+
+      case vs => throw ExecutionError(
+        s"Can only $update one Array of values for Array attribute `$ns.$attr`."
+      )
+    }
+  }
+
+  override def updateArrayRemove[T](
+    ns: String,
+    attr: String,
+    array: Array[T],
+    refNs: Option[String],
+    owner: Boolean,
+    transform: T => Any,
+    //    handleValue: T => Any,
+    //    exts: List[String],
+    //    one2json: T => String
+  ): Unit = {
+    if (array.nonEmpty) {
+      data += (("retract", ns, attr, array.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, false, "array"))
+      Seq(("retract", ns, attr, array.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, false))
     }
   }
 
@@ -216,84 +308,186 @@ trait Update_datomic
   }
 
   override def handleRefNs(ref: Ref): Unit = {
-    data = data :+ (("ref", ref.ns, ref.refAttr, Nil, false))
+    data += (("ref", ref.ns, ref.refAttr, Nil, false, ""))
   }
 
   override def handleBackRef(backRef: BackRef): Unit = {
-    data = data :+ (("backref", backRef.prevNs, "", Nil, false))
+    data += (("backref", backRef.prevNs, "", Nil, false, ""))
   }
 
-  private def id2stmts(
-    data: List[(String, String, String, Seq[AnyRef], Boolean)],
-    db: Database,
-    addNewValues: Boolean = true
-  ): AnyRef => Unit = {
+  //  private val new2oldPairs = mutable.Map.empty[Any, Any]
+  //  override def updateSetSwap[T](
+  //    ns: String,
+  //    attr: String,
+  //    sets: Seq[Set[T]],
+  //    refNs: Option[String],
+  //    owner: Boolean,
+  //    transform: T => Any,
+  //    handleValue: T => Any,
+  //    exts: List[String],
+  //    value2json: (StringBuffer, T) => StringBuffer,
+  //    one2json: T => String
+  //  ): Unit = {
+  //    val (retracts0, adds0) = sets.splitAt(sets.length / 2)
+  //    val (retracts, adds)   = (retracts0.flatten, adds0.flatten)
+  //    if (retracts.length != retracts.distinct.length) {
+  //      throw ExecutionError(s"Can't swap from duplicate retract values.")
+  //    }
+  //    if (adds.length != adds.distinct.length) {
+  //      throw ExecutionError(s"Can't swap to duplicate replacement values.")
+  //    }
+  //    if (retracts.nonEmpty) {
+  //      if (retracts.size != adds.size) {
+  //        throw ExecutionError(
+  //          s"""Can't swap duplicate keys/values:
+  //             |  RETRACTS: $retracts
+  //             |  ADDS    : $adds
+  //             |""".stripMargin
+  //        )
+  //      }
+  //      val (retracts1, adds1) = adds.zip(retracts).map {
+  //        case (add, retract) =>
+  //          new2oldPairs(transform(add)) = transform(retract)
+  //          (transform(retract).asInstanceOf[AnyRef], transform(add).asInstanceOf[AnyRef])
+  //      }.unzip
+  //      data = data ++ Seq(
+  //        ("retract", ns, attr, retracts1, false),
+  //        ("add", ns, attr, adds1, false),
+  //      )
+  //    }
+  //  }
+  private def id2stmts(db: Database, addNewValues: Boolean = true): AnyRef => Unit = {
     (id0: AnyRef) => {
       var id      : AnyRef          = id0
       var entity  : EntityMap       = db.entity(id).asInstanceOf[EntityMap]
       var entities: List[EntityMap] = List(entity)
       data.foreach {
-        case ("add", ns, attr, newValues, retractCur) =>
-          val a         = kw(ns, attr)
-          val id1       = id
-          val curValues = ListBuffer.empty[AnyRef]
-          // todo: optimize with one query for all ids
-          Peer.q("[:find ?v :in $ ?e ?a :where [?e ?a ?v]]", db, id1, a).forEach { row =>
-            curValues += row.get(0)
-          }
-          if (retractCur) {
-            curValues.foreach { curValue =>
-              if (!newValues.contains(curValue)) {
-                appendStmt(retract, id1, a, curValue)
-              }
-            }
-          }
-          if (addNewValues || entity.get(a) != null) {
-            newValues.foreach { newValue =>
-              if (isUpdate && new2oldPairs.nonEmpty && !curValues.contains(new2oldPairs(newValue))) {
-                // Don't update/swap to new value if retract value is not already there
-                ()
-              } else {
-                appendStmt(add, id, a, newValue)
-              }
-            }
-          }
+        case ("add", ns, attr, newValues, retractCur, "") =>
+          addOneOrToSet(ns, attr, newValues, retractCur)
 
-        case ("retract", ns, attr, retractValues, _) =>
-          val a = kw(ns, attr)
-          if (retractValues.isEmpty) {
-            val cur = entity.get(a)
-            if (cur != null) {
-              cur match {
-                case set: jSet[_]         =>
-                  set.forEach {
-                    case kw: Keyword          => appendStmt(retract, id, a, db.entity(kw).get(":db/id"))
-                    case entityMap: EntityMap => appendStmt(retract, id, a, entityMap.get(":db/id"))
-                    case v                    => appendStmt(retract, id, a, v.asInstanceOf[AnyRef])
-                  }
-                case kw: Keyword          => appendStmt(retract, id, a, db.entity(kw).get(":db/id"))
-                case entityMap: EntityMap => appendStmt(retract, id, a, entityMap.get(":db/id"))
-                case v                    => appendStmt(retract, id, a, v)
-              }
-            }
-          } else {
-            retractValues.foreach(retractValue =>
-              appendStmt(retract, id, a, retractValue)
-            )
-          }
+        case ("add", ns, attr, newValues, retractCur, "array") =>
+          addToArray(ns, attr, newValues, retractCur)
 
-        case ("backref", _, _, _, _) =>
+        case ("add", ns, attr, newValues, retractCur, "byteArray") =>
+          addToArray(ns, attr, newValues, retractCur)
+
+        case ("retract", ns, attr, retractValues, _, kind) =>
+          doRetract(ns, attr, retractValues, kind)
+
+        case ("backref", _, _, _, _, _) =>
           entities = entities.init
           entity = entities.last
           id = entity.get(dbId)
 
-        case ("ref", ns, refAttr, _, _) =>
+        case ("ref", ns, refAttr, _, _, _) =>
           val a = kw(ns, refAttr)
           entity = entities.last.get(a).asInstanceOf[EntityMap]
           entities = entities :+ entity
           id = entity.get(dbId)
 
         case other => throw ModelError("Unexpected data in update: " + other)
+      }
+
+      def addOneOrToSet(ns: String, attr: String, newValues: Seq[AnyRef], retractCur: Boolean) = {
+        val a   = kw(ns, attr)
+        val id1 = id
+        val curValues = ListBuffer.empty[AnyRef]
+        Peer.q("[:find ?v :in $ ?e ?a :where [?e ?a ?v]]", db, id1, a).forEach { row =>
+          curValues += row.get(0)
+        }
+        if (retractCur) {
+          curValues.foreach { curValue =>
+            if (!newValues.contains(curValue)) {
+              appendStmt(retract, id1, a, curValue)
+            }
+          }
+        }
+        if (addNewValues || entity.get(a) != null) {
+          newValues.foreach(newValue => appendStmt(add, id, a, newValue))
+        }
+      }
+
+      def addToArray(ns: String, attr: String, newValues: Seq[AnyRef], retractCur: Boolean) = {
+        val a         = kw(ns, attr)
+        val id1       = id
+        var nextIndex = 0
+        Peer.q("[:find ?ref :in $ ?e ?a :where [?e ?a ?ref]]", db, id1, a).forEach { row =>
+          if (retractCur) {
+            addRetractEntityStmt(row.get(0))
+          } else {
+            nextIndex += 1
+          }
+        }
+        if (addNewValues || entity.get(a) != null) {
+          val a_i = kw(s"$ns.$attr", "i_")
+          val a_v = kw(s"$ns.$attr", "v_")
+          var i   = nextIndex
+          newValues.foreach { newValue =>
+            val ref = newId
+            appendStmt(add, id, a, ref)
+            appendStmt(add, ref, a_i, i.asInstanceOf[AnyRef])
+            appendStmt(add, ref, a_v, newValue)
+            i += 1
+          }
+        }
+      }
+
+
+      def doRetract(ns: String, attr: String, retractValues: Seq[AnyRef], kind: String) = {
+        val a = kw(ns, attr)
+        if (retractValues.isEmpty) {
+          val cur = entity.get(a)
+          if (cur != null) {
+            cur match {
+              case set: jSet[_]         =>
+                set.forEach {
+                  case kw: Keyword          => appendStmt(retract, id, a, db.entity(kw).get(":db/id"))
+                  case entityMap: EntityMap => appendStmt(retract, id, a, entityMap.get(":db/id"))
+                  case v                    => appendStmt(retract, id, a, v.asInstanceOf[AnyRef])
+                }
+              case kw: Keyword          => appendStmt(retract, id, a, db.entity(kw).get(":db/id"))
+              case entityMap: EntityMap => appendStmt(retract, id, a, entityMap.get(":db/id"))
+              case v                    => appendStmt(retract, id, a, v)
+            }
+          }
+        } else {
+          kind match {
+            case "" =>
+              retractValues.foreach(retractValue =>
+                appendStmt(retract, id, a, retractValue)
+              )
+
+            case "array" =>
+              val a_i       = kw(s"$ns.$attr", "i_")
+              val a_v       = kw(s"$ns.$attr", "v_")
+              val remaining = ListBuffer.empty[(AnyRef, Int, AnyRef)]
+              // Get current Array ref entities with index and value
+              Peer.q(
+                s"""[:find ?ref ?i ?v
+                   | :in $$ ?e ?a
+                   | :where [?e ?a ?ref]
+                   |        [?ref $a_i ?i]
+                   |        [?ref $a_v ?v]]""".stripMargin, db, id, a
+              ).forEach { row =>
+                val (ref, i, v) = (row.get(0), row.get(1).asInstanceOf[Integer].toInt, row.get(2))
+                if (retractValues.contains(v)) {
+                  // Retract Array ref entity having value to be removed
+                  addRetractEntityStmt(ref)
+                } else {
+                  // Cache remaining value and index for re-ordering
+                  remaining += ((ref, i, v))
+                }
+              }
+              // Re-index order for remaining values
+              var i = 0
+              remaining.sortBy(_._2).foreach { case (ref, _, _) =>
+                appendStmt(add, ref, a_i, i.asInstanceOf[AnyRef])
+                i += 1
+              }
+
+            case "map" => ???
+          }
+        }
       }
     }
   }

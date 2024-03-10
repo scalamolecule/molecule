@@ -172,53 +172,53 @@ trait DataModelApi {
   trait setChar extends Options[setChar, Set[Char], Char]
 
 
-  object arrString extends arrString
-  object arrInt extends arrInt
-  object arrLong extends arrLong
-  object arrFloat extends arrFloat
-  object arrDouble extends arrDouble
-  object arrBoolean extends arrBoolean
-  object arrBigInt extends arrBigInt
-  object arrBigDecimal extends arrBigDecimal {
+  object arrayString extends arrayString
+  object arrayInt extends arrayInt
+  object arrayLong extends arrayLong
+  object arrayFloat extends arrayFloat
+  object arrayDouble extends arrayDouble
+  object arrayBoolean extends arrayBoolean
+  object arrayBigInt extends arrayBigInt
+  object arrayBigDecimal extends arrayBigDecimal {
     def apply(precision: Int, scale: Int): oneBigDecimal = ???
   }
-  object arrDate extends arrDate
-  object arrDuration extends arrDuration
-  object arrInstant extends arrInstant
-  object arrLocalDate extends arrLocalDate
-  object arrLocalTime extends arrLocalTime
-  object arrLocalDateTime extends arrLocalDateTime
-  object arrOffsetTime extends arrOffsetTime
-  object arrOffsetDateTime extends arrOffsetDateTime
-  object arrZonedDateTime extends arrZonedDateTime
-  object arrUUID extends arrUUID
-  object arrURI extends arrURI
-  object arrByte extends arrByte
-  object arrShort extends arrShort
-  object arrChar extends arrChar
+  object arrayDate extends arrayDate
+  object arrayDuration extends arrayDuration
+  object arrayInstant extends arrayInstant
+  object arrayLocalDate extends arrayLocalDate
+  object arrayLocalTime extends arrayLocalTime
+  object arrayLocalDateTime extends arrayLocalDateTime
+  object arrayOffsetTime extends arrayOffsetTime
+  object arrayOffsetDateTime extends arrayOffsetDateTime
+  object arrayZonedDateTime extends arrayZonedDateTime
+  object arrayUUID extends arrayUUID
+  object arrayURI extends arrayURI
+  object arrayByte extends arrayByte
+  object arrayShort extends arrayShort
+  object arrayChar extends arrayChar
 
-  trait arrString extends stringOptions[arrString, Array[String]]
-  trait arrInt extends Options[arrInt, Array[Int], Int]
-  trait arrLong extends Options[arrLong, Array[Long], Long]
-  trait arrFloat extends Options[arrFloat, Array[Float], Float]
-  trait arrDouble extends Options[arrDouble, Array[Double], Double]
-  trait arrBoolean extends Options[arrBoolean, Array[Boolean], Boolean]
-  trait arrBigInt extends Options[arrBigInt, Array[BigInt], BigInt]
-  trait arrBigDecimal extends Options[arrBigDecimal, Array[BigDecimal], BigDecimal]
-  trait arrDate extends Options[arrDate, Array[Date], Date]
-  trait arrDuration extends Options[arrDuration, Array[Duration], Duration]
-  trait arrInstant extends Options[arrInstant, Array[Instant], Instant]
-  trait arrLocalDate extends Options[arrLocalDate, Array[LocalDate], LocalDate]
-  trait arrLocalTime extends Options[arrLocalTime, Array[LocalTime], LocalTime]
-  trait arrLocalDateTime extends Options[arrLocalDateTime, Array[LocalDateTime], LocalDateTime]
-  trait arrOffsetTime extends Options[arrOffsetTime, Array[OffsetTime], OffsetTime]
-  trait arrOffsetDateTime extends Options[arrOffsetDateTime, Array[OffsetDateTime], OffsetDateTime]
-  trait arrZonedDateTime extends Options[arrZonedDateTime, Array[ZonedDateTime], ZonedDateTime]
-  trait arrUUID extends Options[arrUUID, Array[UUID], UUID]
-  trait arrURI extends Options[arrURI, Array[URI], URI]
-  trait arrByte extends Options[arrByte, Array[Byte], Byte]
-  trait arrShort extends Options[arrShort, Array[Short], Short]
-  trait arrChar extends Options[arrChar, Array[Char], Char]
+  trait arrayString extends stringOptions[arrayString, Array[String]]
+  trait arrayInt extends Options[arrayInt, Array[Int], Int]
+  trait arrayLong extends Options[arrayLong, Array[Long], Long]
+  trait arrayFloat extends Options[arrayFloat, Array[Float], Float]
+  trait arrayDouble extends Options[arrayDouble, Array[Double], Double]
+  trait arrayBoolean extends Options[arrayBoolean, Array[Boolean], Boolean]
+  trait arrayBigInt extends Options[arrayBigInt, Array[BigInt], BigInt]
+  trait arrayBigDecimal extends Options[arrayBigDecimal, Array[BigDecimal], BigDecimal]
+  trait arrayDate extends Options[arrayDate, Array[Date], Date]
+  trait arrayDuration extends Options[arrayDuration, Array[Duration], Duration]
+  trait arrayInstant extends Options[arrayInstant, Array[Instant], Instant]
+  trait arrayLocalDate extends Options[arrayLocalDate, Array[LocalDate], LocalDate]
+  trait arrayLocalTime extends Options[arrayLocalTime, Array[LocalTime], LocalTime]
+  trait arrayLocalDateTime extends Options[arrayLocalDateTime, Array[LocalDateTime], LocalDateTime]
+  trait arrayOffsetTime extends Options[arrayOffsetTime, Array[OffsetTime], OffsetTime]
+  trait arrayOffsetDateTime extends Options[arrayOffsetDateTime, Array[OffsetDateTime], OffsetDateTime]
+  trait arrayZonedDateTime extends Options[arrayZonedDateTime, Array[ZonedDateTime], ZonedDateTime]
+  trait arrayUUID extends Options[arrayUUID, Array[UUID], UUID]
+  trait arrayURI extends Options[arrayURI, Array[URI], URI]
+  trait arrayByte extends Options[arrayByte, Array[Byte], Byte]
+  trait arrayShort extends Options[arrayShort, Array[Short], Short]
+  trait arrayChar extends Options[arrayChar, Array[Char], Char]
 
 
   object mapString extends mapString

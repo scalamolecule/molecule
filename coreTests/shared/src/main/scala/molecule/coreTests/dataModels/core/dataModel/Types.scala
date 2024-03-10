@@ -62,28 +62,28 @@ object Types extends DataModel(5) {
     val refs            = many[Ref]
 
     // Array
-    val stringArray         = arrString
-    val intArray            = arrInt
-    val longArray           = arrLong
-    val floatArray          = arrFloat
-    val doubleArray         = arrDouble
-    val booleanArray        = arrBoolean
-    val bigIntArray         = arrBigInt
-    val bigDecimalArray     = arrBigDecimal
-    val dateArray           = arrDate
-    val durationArray       = arrDuration
-    val instantArray        = arrInstant
-    val localDateArray      = arrLocalDate
-    val localTimeArray      = arrLocalTime
-    val localDateTimeArray  = arrLocalDateTime
-    val offsetTimeArray     = arrOffsetTime
-    val offsetDateTimeArray = arrOffsetDateTime
-    val zonedDateTimeArray  = arrZonedDateTime
-    val uuidArray           = arrUUID
-    val uriArray            = arrURI
-    val byteArray           = arrByte
-    val shortArray          = arrShort
-    val charArray           = arrChar
+    val stringArray         = arrayString
+    val intArray            = arrayInt
+    val longArray           = arrayLong
+    val floatArray          = arrayFloat
+    val doubleArray         = arrayDouble
+    val booleanArray        = arrayBoolean
+    val bigIntArray         = arrayBigInt
+    val bigDecimalArray     = arrayBigDecimal
+    val dateArray           = arrayDate
+    val durationArray       = arrayDuration
+    val instantArray        = arrayInstant
+    val localDateArray      = arrayLocalDate
+    val localTimeArray      = arrayLocalTime
+    val localDateTimeArray  = arrayLocalDateTime
+    val offsetTimeArray     = arrayOffsetTime
+    val offsetDateTimeArray = arrayOffsetDateTime
+    val zonedDateTimeArray  = arrayZonedDateTime
+    val uuidArray           = arrayUUID
+    val uriArray            = arrayURI
+    val byteArray           = arrayByte
+    val shortArray          = arrayShort
+    val charArray           = arrayChar
 
     // Map
     val stringMap         = mapString

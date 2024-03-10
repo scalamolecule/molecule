@@ -31,7 +31,7 @@ trait ResolveExprArr[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasArr =>
       case att: AttrArrManZonedDateTime  => man(attr, e, ns, at, a, att.vs, resArrZonedDateTime)
       case att: AttrArrManUUID           => man(attr, e, ns, at, a, att.vs, resArrUUID)
       case att: AttrArrManURI            => man(attr, e, ns, at, a, att.vs, resArrURI)
-      case att: AttrArrManByte           => man(attr, e, ns, at, a, att.vs, resArrByte)
+      case att: AttrArrManByte           => manByteArray(attr, e, a)
       case att: AttrArrManShort          => man(attr, e, ns, at, a, att.vs, resArrShort)
       case att: AttrArrManChar           => man(attr, e, ns, at, a, att.vs, resArrChar)
     }
@@ -61,7 +61,7 @@ trait ResolveExprArr[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasArr =>
       case att: AttrArrTacZonedDateTime  => tac(attr, e, ns, at, a, att.vs, resArrZonedDateTime)
       case att: AttrArrTacUUID           => tac(attr, e, ns, at, a, att.vs, resArrUUID)
       case att: AttrArrTacURI            => tac(attr, e, ns, at, a, att.vs, resArrURI)
-      case att: AttrArrTacByte           => tac(attr, e, ns, at, a, att.vs, resArrByte)
+      case att: AttrArrTacByte           => tacByteArray(attr, e, a)
       case att: AttrArrTacShort          => tac(attr, e, ns, at, a, att.vs, resArrShort)
       case att: AttrArrTacChar           => tac(attr, e, ns, at, a, att.vs, resArrChar)
     }
@@ -94,7 +94,7 @@ trait ResolveExprArr[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasArr =>
       case att: AttrArrOptZonedDateTime  => opt(e, ns, at, a, att.op, att.vs, resOptArrZonedDateTime)
       case att: AttrArrOptUUID           => opt(e, ns, at, a, att.op, att.vs, resOptArrUUID)
       case att: AttrArrOptURI            => opt(e, ns, at, a, att.op, att.vs, resOptArrURI)
-      case att: AttrArrOptByte           => opt(e, ns, at, a, att.op, att.vs, resOptArrByte)
+      case att: AttrArrOptByte           => optByteArray(e, a, resOptArrByte)
       case att: AttrArrOptShort          => opt(e, ns, at, a, att.op, att.vs, resOptArrShort)
       case att: AttrArrOptChar           => opt(e, ns, at, a, att.op, att.vs, resOptArrChar)
     }
@@ -206,7 +206,7 @@ trait ResolveExprArr[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasArr =>
     val v = vv
     addCast(resOpt.j2s)
     op match {
-      case V     => optAttr(e, a, v, resOpt)
+      case V     => optAttr(e, ns, at, a, v, resOpt)
       case Eq    => optEqual(e, a, v, optSets, resOpt, resOpt.s2j)
       case Neq   => optNeq(e, a, v, optSets, resOpt.s2j)
       case Has   => optHas(e, a, v, optSets, resOpt.tpe, resOpt, resOpt.toDatalog)
@@ -216,25 +216,69 @@ trait ResolveExprArr[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasArr =>
   }
 
 
-  // attr ----------------------------------------------------------------------
 
-  private def attr(e: Var, ns: String, at: String, a: Att, r: Var): Unit = {
-    where += s"[$e $a $r]" -> wClause
-    where += s"[$r $ns.$at/i_ ${r}_i]" -> wClause
-    where += s"[$r $ns.$at/$at ${r}_v]" -> wClause
-    where += s"[(vector ${r}_i ${r}_v) ${r}_$at]" -> wClause
+  private def manByteArray(attr: Attr, e: Var, a: Att): Unit = {
+    val v = vv
+    find += v
+    addCast(identity)
+    attr.filterAttr.fold {
+      attr.op match {
+        case V => where += s"[$e $a $v]" -> wClause
+        case _ => throw ModelError(
+          s"Byte arrays can only be retrieved as-is. Filters not allowed.")
+      }
+    } { _ =>
+      throw ModelError(s"Filter attributes not allowed with byte arrays.")
+    }
+    refConfirmed = true
   }
 
-  private def optAttr[T](e: Var, a: Att, v: Var, resOpt: ResArrOpt[T]): Unit = {
+  private def tacByteArray(attr: Attr, e: Var, a: Att): Unit = {
+    val v = vv
+    attr.filterAttr.fold {
+      attr.op match {
+        case V => where += s"[$e $a $v]" -> wClause
+        case _ => throw ModelError(
+          s"Byte arrays can only be retrieved as-is. Filters not allowed.")
+      }
+    } { _ =>
+      throw ModelError(s"Filter attributes not allowed with byte arrays.")
+    }
+    refConfirmed = true
+  }
+
+  private def optByteArray(e: Var, a: Att, resArr: ResArrOpt[Byte]): Unit = {
+    val v = vv
+    addCast(resArr.optAttr2s)
+    find += s"(pull $e-$v [[$a :limit nil]]) "
+    where += s"[(identity $e) $e-$v]" -> wGround
+  }
+
+  // attr ----------------------------------------------------------------------
+
+  private def attr(e: Var, ns: String, at: String, a: Att, v: Var): Unit = {
+    where += s"[$e $a $v]" -> wClause
+    where += s"[$v $ns.$at/i_ ${v}_i]" -> wClause
+    where += s"[$v $ns.$at/v_ ${v}_v]" -> wClause
+    where += s"[(vector ${v}_i ${v}_v) ${v}_$at]" -> wClause
+  }
+
+  private def optAttr[T](e: Var, ns: String, at: String, a: Att, v: Var, resOpt: ResArrOpt[T]): Unit = {
     if (refConfirmed) {
-      val (e1, v1, v2, v3) = (e + 1, v + 1, v + 2, v + 3)
-      find += s"(distinct $v3)"
+      val (e1, v1, v2, v3, v4) = (e + 1, v + 1, v + 2, v + 3, v + 4)
+      find += s"(distinct $v4)"
       where +=
         s"""[(datomic.api/q
-           |          "[:find (pull $e1 [[$a :limit nil]])
-           |            :in $$ $e1]" $$ $e) [[$v1]]]""".stripMargin -> wClause
-      where += s"[(if (nil? $v1) {$a []} $v1) $v2]" -> wClause
-      where += s"[($a $v2) $v3]" -> wClause
+           |          "[:find (pull $e [
+           |              {(:$ns/$at :limit nil) [
+           |                  :$ns.$at/i_
+           |                  :$ns.$at/v_
+           |                ]}
+           |             ])
+           |            :in $$ $e]" $$ $e) [[$v1]]]""".stripMargin -> wClause
+      where += s"[(if (nil? $v1) {:$ns/$at []} $v1) $v2]" -> wClause
+      where += s"[(:$ns/$at $v2) $v3]" -> wClause
+      where += s"[(map vals $v3) $v4]" -> wClause
 
     } else {
       val List(e0, card, refAttr, refId) = varPath.takeRight(4)
@@ -261,10 +305,15 @@ trait ResolveExprArr[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasArr =>
         find += s"(distinct $v5)"
         where +=
           s"""[(datomic.api/q
-             |          "[:find (pull $e1 [{$refAttr [$a]}] :limit nil)
-             |            :in $$ $e1]" $$ $e) [[$v1]]]""".stripMargin -> wClause
-        where += s"[(if (nil? $v1) {$refAttr [{$a []}]} $v1) $v2]" -> wClause
-        where += s"[($refAttr $v2) $v3]" -> wClause
+             |          "[:find (pull $e [
+             |             {(:$ns/$at :limit nil) [
+             |                 (:$ns.$at/i_)
+             |                 (:$ns.$at/v_)
+             |               ]}
+             |            ])
+             |            :in $$ $e]" $$ $e) [[$v1]]]""".stripMargin -> wClause
+        where += s"[(if (nil? $v1) {:$ns/$at [{$a []}]} $v1) $v2]" -> wClause
+        where += s"[(:$ns/$at $v2) $v3]" -> wClause
         where += s"[(first $v3) $v4]" -> wClause
         where += s"[($a $v4) $v5]" -> wClause
       }
@@ -506,7 +555,7 @@ trait ResolveExprArr[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasArr =>
       case "sum" =>
         widh += e
         find += s"(sum $v)"
-//        replaceCast(res.j2sSet)
+        //        replaceCast(res.j2sSet)
         ???
 
       case "median" =>

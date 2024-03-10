@@ -153,19 +153,19 @@ trait Insert_datomic
       }
   }
 
-  override protected def addArr[T](
+  override protected def addArray[T](
     ns: String,
     attr: String,
-    set2array: Set[Any] => Array[AnyRef],
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
-    exts: List[String] = Nil,
-    value2json: (StringBuffer, T) => StringBuffer
+//    set2array: Set[Any] => Array[AnyRef],
+//    exts: List[String] = Nil,
+//    value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
     val a   = kw(ns, attr)
     val a_i = kw(s"$ns.$attr", "i_")
-    val a_v = kw(s"$ns.$attr", attr)
+    val a_v = kw(s"$ns.$attr", "v_")
     backRefs = backRefs + (ns -> e)
     (tpl: Product) =>
       tpl.productElement(tplIndex).asInstanceOf[Array[_]] match {
@@ -185,19 +185,19 @@ trait Insert_datomic
       }
   }
 
-  override protected def addArrOpt[T](
+  override protected def addArrayOpt[T](
     ns: String,
     attr: String,
-    set2array: Set[Any] => Array[AnyRef],
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
-    exts: List[String] = Nil,
-    value2json: (StringBuffer, T) => StringBuffer
+//    set2array: Set[Any] => Array[AnyRef],
+//    exts: List[String] = Nil,
+//    value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
     val a   = kw(ns, attr)
     val a_i = kw(s"$ns.$attr", "i_")
-    val a_v = kw(s"$ns.$attr", attr)
+    val a_v = kw(s"$ns.$attr", "v_")
     backRefs = backRefs + (ns -> e)
     (tpl: Product) =>
       tpl.productElement(tplIndex) match {

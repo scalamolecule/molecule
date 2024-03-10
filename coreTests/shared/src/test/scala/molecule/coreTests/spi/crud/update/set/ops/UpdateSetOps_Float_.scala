@@ -16,21 +16,18 @@ trait UpdateSetOps_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "apply (replace/add all)" - types { implicit conn =>
       for {
         id <- Ns.floats(Set(float1, float2)).save.transact.map(_.id)
+        _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float2))
 
+        // Applying Set of values replaces previous Set
         _ <- Ns(id).floats(Set(float3, float4)).update.transact
         _ <- Ns.floats.query.get.map(_.head ==> Set(float3, float4))
 
-        // Apply Seq of values
-        _ <- Ns(id).floats(Set(float4, float5)).update.transact
-        _ <- Ns.floats.query.get.map(_.head ==> Set(float4, float5))
-
-        // Apply empty Seq of values (deleting all values!)
+        // Applying empty Set of values deletes previous Set
         _ <- Ns(id).floats(Seq.empty[Float]).update.transact
         _ <- Ns.floats.query.get.map(_ ==> Nil)
 
-        _ <- Ns(id).floats(Set(float1, float2)).update.transact
-
-        // Delete all (apply no values)
+        id <- Ns.floats(Set(float1, float2)).save.transact.map(_.id)
+        // Applying empty value deletes previous Set
         _ <- Ns(id).floats().update.transact
         _ <- Ns.floats.query.get.map(_ ==> Nil)
       } yield ()
@@ -45,7 +42,7 @@ trait UpdateSetOps_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).floats.add(float2).update.transact
         _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float2))
 
-        // Add existing value (no effect)
+        // Adding existing value has no effect (Set semantics of only unique values)
         _ <- Ns(id).floats.add(float2).update.transact
         _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float2))
 
@@ -64,7 +61,7 @@ trait UpdateSetOps_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).floats.add(Iterable(float7)).update.transact
         _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float2, float3, float4, float5, float6, float7))
 
-        // Add empty Seq of values (no effect)
+        // Adding empty Iterable of values has no effect
         _ <- Ns(id).floats.add(Seq.empty[Float]).update.transact
         _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float2, float3, float4, float5, float6, float7))
       } yield ()
@@ -91,11 +88,11 @@ trait UpdateSetOps_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).floats.remove(float3, float4).update.transact
         _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float2))
 
-        // Remove Seq of values
+        // Remove Iterable of values
         _ <- Ns(id).floats.remove(Seq(float2)).update.transact
         _ <- Ns.floats.query.get.map(_.head ==> Set(float1))
 
-        // Removing empty Seq of values has no effect
+        // Removing empty Iterable of values has no effect
         _ <- Ns(id).floats.remove(Seq.empty[Float]).update.transact
         _ <- Ns.floats.query.get.map(_.head ==> Set(float1))
 

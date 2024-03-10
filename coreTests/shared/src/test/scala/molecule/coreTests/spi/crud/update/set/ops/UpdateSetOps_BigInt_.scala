@@ -16,21 +16,18 @@ trait UpdateSetOps_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
     "apply (replace/add all)" - types { implicit conn =>
       for {
         id <- Ns.bigInts(Set(bigInt1, bigInt2)).save.transact.map(_.id)
+        _ <- Ns.bigInts.query.get.map(_.head ==> Set(bigInt1, bigInt2))
 
+        // Applying Set of values replaces previous Set
         _ <- Ns(id).bigInts(Set(bigInt3, bigInt4)).update.transact
         _ <- Ns.bigInts.query.get.map(_.head ==> Set(bigInt3, bigInt4))
 
-        // Apply Seq of values
-        _ <- Ns(id).bigInts(Set(bigInt4, bigInt5)).update.transact
-        _ <- Ns.bigInts.query.get.map(_.head ==> Set(bigInt4, bigInt5))
-
-        // Apply empty Seq of values (deleting all values!)
+        // Applying empty Set of values deletes previous Set
         _ <- Ns(id).bigInts(Seq.empty[BigInt]).update.transact
         _ <- Ns.bigInts.query.get.map(_ ==> Nil)
 
-        _ <- Ns(id).bigInts(Set(bigInt1, bigInt2)).update.transact
-
-        // Delete all (apply no values)
+        id <- Ns.bigInts(Set(bigInt1, bigInt2)).save.transact.map(_.id)
+        // Applying empty value deletes previous Set
         _ <- Ns(id).bigInts().update.transact
         _ <- Ns.bigInts.query.get.map(_ ==> Nil)
       } yield ()
@@ -45,7 +42,7 @@ trait UpdateSetOps_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
         _ <- Ns(id).bigInts.add(bigInt2).update.transact
         _ <- Ns.bigInts.query.get.map(_.head ==> Set(bigInt1, bigInt2))
 
-        // Add existing value (no effect)
+        // Adding existing value has no effect (Set semantics of only unique values)
         _ <- Ns(id).bigInts.add(bigInt2).update.transact
         _ <- Ns.bigInts.query.get.map(_.head ==> Set(bigInt1, bigInt2))
 
@@ -64,7 +61,7 @@ trait UpdateSetOps_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
         _ <- Ns(id).bigInts.add(Iterable(bigInt7)).update.transact
         _ <- Ns.bigInts.query.get.map(_.head ==> Set(bigInt1, bigInt2, bigInt3, bigInt4, bigInt5, bigInt6, bigInt7))
 
-        // Add empty Seq of values (no effect)
+        // Adding empty Iterable of values has no effect
         _ <- Ns(id).bigInts.add(Seq.empty[BigInt]).update.transact
         _ <- Ns.bigInts.query.get.map(_.head ==> Set(bigInt1, bigInt2, bigInt3, bigInt4, bigInt5, bigInt6, bigInt7))
       } yield ()
@@ -91,11 +88,11 @@ trait UpdateSetOps_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
         _ <- Ns(id).bigInts.remove(bigInt3, bigInt4).update.transact
         _ <- Ns.bigInts.query.get.map(_.head ==> Set(bigInt1, bigInt2))
 
-        // Remove Seq of values
+        // Remove Iterable of values
         _ <- Ns(id).bigInts.remove(Seq(bigInt2)).update.transact
         _ <- Ns.bigInts.query.get.map(_.head ==> Set(bigInt1))
 
-        // Removing empty Seq of values has no effect
+        // Removing empty Iterable of values has no effect
         _ <- Ns(id).bigInts.remove(Seq.empty[BigInt]).update.transact
         _ <- Ns.bigInts.query.get.map(_.head ==> Set(bigInt1))
 

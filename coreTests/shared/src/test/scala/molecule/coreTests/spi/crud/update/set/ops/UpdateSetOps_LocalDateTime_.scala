@@ -17,21 +17,18 @@ trait UpdateSetOps_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: Spi
     "apply (replace/add all)" - types { implicit conn =>
       for {
         id <- Ns.localDateTimes(Set(localDateTime1, localDateTime2)).save.transact.map(_.id)
+        _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime1, localDateTime2))
 
+        // Applying Set of values replaces previous Set
         _ <- Ns(id).localDateTimes(Set(localDateTime3, localDateTime4)).update.transact
         _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime3, localDateTime4))
 
-        // Apply Seq of values
-        _ <- Ns(id).localDateTimes(Set(localDateTime4, localDateTime5)).update.transact
-        _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime4, localDateTime5))
-
-        // Apply empty Seq of values (deleting all values!)
+        // Applying empty Set of values deletes previous Set
         _ <- Ns(id).localDateTimes(Seq.empty[LocalDateTime]).update.transact
         _ <- Ns.localDateTimes.query.get.map(_ ==> Nil)
 
-        _ <- Ns(id).localDateTimes(Set(localDateTime1, localDateTime2)).update.transact
-
-        // Delete all (apply no values)
+        id <- Ns.localDateTimes(Set(localDateTime1, localDateTime2)).save.transact.map(_.id)
+        // Applying empty value deletes previous Set
         _ <- Ns(id).localDateTimes().update.transact
         _ <- Ns.localDateTimes.query.get.map(_ ==> Nil)
       } yield ()
@@ -46,7 +43,7 @@ trait UpdateSetOps_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: Spi
         _ <- Ns(id).localDateTimes.add(localDateTime2).update.transact
         _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime1, localDateTime2))
 
-        // Add existing value (no effect)
+        // Adding existing value has no effect (Set semantics of only unique values)
         _ <- Ns(id).localDateTimes.add(localDateTime2).update.transact
         _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime1, localDateTime2))
 
@@ -65,7 +62,7 @@ trait UpdateSetOps_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: Spi
         _ <- Ns(id).localDateTimes.add(Iterable(localDateTime7)).update.transact
         _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime1, localDateTime2, localDateTime3, localDateTime4, localDateTime5, localDateTime6, localDateTime7))
 
-        // Add empty Seq of values (no effect)
+        // Adding empty Iterable of values has no effect
         _ <- Ns(id).localDateTimes.add(Seq.empty[LocalDateTime]).update.transact
         _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime1, localDateTime2, localDateTime3, localDateTime4, localDateTime5, localDateTime6, localDateTime7))
       } yield ()
@@ -92,11 +89,11 @@ trait UpdateSetOps_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: Spi
         _ <- Ns(id).localDateTimes.remove(localDateTime3, localDateTime4).update.transact
         _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime1, localDateTime2))
 
-        // Remove Seq of values
+        // Remove Iterable of values
         _ <- Ns(id).localDateTimes.remove(Seq(localDateTime2)).update.transact
         _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime1))
 
-        // Removing empty Seq of values has no effect
+        // Removing empty Iterable of values has no effect
         _ <- Ns(id).localDateTimes.remove(Seq.empty[LocalDateTime]).update.transact
         _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime1))
 

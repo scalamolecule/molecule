@@ -16,21 +16,18 @@ trait UpdateSetOps_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
     "apply (replace/add all)" - types { implicit conn =>
       for {
         id <- Ns.doubles(Set(double1, double2)).save.transact.map(_.id)
+        _ <- Ns.doubles.query.get.map(_.head ==> Set(double1, double2))
 
+        // Applying Set of values replaces previous Set
         _ <- Ns(id).doubles(Set(double3, double4)).update.transact
         _ <- Ns.doubles.query.get.map(_.head ==> Set(double3, double4))
 
-        // Apply Seq of values
-        _ <- Ns(id).doubles(Set(double4, double5)).update.transact
-        _ <- Ns.doubles.query.get.map(_.head ==> Set(double4, double5))
-
-        // Apply empty Seq of values (deleting all values!)
+        // Applying empty Set of values deletes previous Set
         _ <- Ns(id).doubles(Seq.empty[Double]).update.transact
         _ <- Ns.doubles.query.get.map(_ ==> Nil)
 
-        _ <- Ns(id).doubles(Set(double1, double2)).update.transact
-
-        // Delete all (apply no values)
+        id <- Ns.doubles(Set(double1, double2)).save.transact.map(_.id)
+        // Applying empty value deletes previous Set
         _ <- Ns(id).doubles().update.transact
         _ <- Ns.doubles.query.get.map(_ ==> Nil)
       } yield ()
@@ -45,7 +42,7 @@ trait UpdateSetOps_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
         _ <- Ns(id).doubles.add(double2).update.transact
         _ <- Ns.doubles.query.get.map(_.head ==> Set(double1, double2))
 
-        // Add existing value (no effect)
+        // Adding existing value has no effect (Set semantics of only unique values)
         _ <- Ns(id).doubles.add(double2).update.transact
         _ <- Ns.doubles.query.get.map(_.head ==> Set(double1, double2))
 
@@ -64,7 +61,7 @@ trait UpdateSetOps_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
         _ <- Ns(id).doubles.add(Iterable(double7)).update.transact
         _ <- Ns.doubles.query.get.map(_.head ==> Set(double1, double2, double3, double4, double5, double6, double7))
 
-        // Add empty Seq of values (no effect)
+        // Adding empty Iterable of values has no effect
         _ <- Ns(id).doubles.add(Seq.empty[Double]).update.transact
         _ <- Ns.doubles.query.get.map(_.head ==> Set(double1, double2, double3, double4, double5, double6, double7))
       } yield ()
@@ -91,11 +88,11 @@ trait UpdateSetOps_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
         _ <- Ns(id).doubles.remove(double3, double4).update.transact
         _ <- Ns.doubles.query.get.map(_.head ==> Set(double1, double2))
 
-        // Remove Seq of values
+        // Remove Iterable of values
         _ <- Ns(id).doubles.remove(Seq(double2)).update.transact
         _ <- Ns.doubles.query.get.map(_.head ==> Set(double1))
 
-        // Removing empty Seq of values has no effect
+        // Removing empty Iterable of values has no effect
         _ <- Ns(id).doubles.remove(Seq.empty[Double]).update.transact
         _ <- Ns.doubles.query.get.map(_.head ==> Set(double1))
 

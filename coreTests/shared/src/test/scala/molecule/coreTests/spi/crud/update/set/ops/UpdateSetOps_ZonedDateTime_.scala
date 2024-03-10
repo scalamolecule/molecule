@@ -17,21 +17,18 @@ trait UpdateSetOps_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: Spi
     "apply (replace/add all)" - types { implicit conn =>
       for {
         id <- Ns.zonedDateTimes(Set(zonedDateTime1, zonedDateTime2)).save.transact.map(_.id)
+        _ <- Ns.zonedDateTimes.query.get.map(_.head ==> Set(zonedDateTime1, zonedDateTime2))
 
+        // Applying Set of values replaces previous Set
         _ <- Ns(id).zonedDateTimes(Set(zonedDateTime3, zonedDateTime4)).update.transact
         _ <- Ns.zonedDateTimes.query.get.map(_.head ==> Set(zonedDateTime3, zonedDateTime4))
 
-        // Apply Seq of values
-        _ <- Ns(id).zonedDateTimes(Set(zonedDateTime4, zonedDateTime5)).update.transact
-        _ <- Ns.zonedDateTimes.query.get.map(_.head ==> Set(zonedDateTime4, zonedDateTime5))
-
-        // Apply empty Seq of values (deleting all values!)
+        // Applying empty Set of values deletes previous Set
         _ <- Ns(id).zonedDateTimes(Seq.empty[ZonedDateTime]).update.transact
         _ <- Ns.zonedDateTimes.query.get.map(_ ==> Nil)
 
-        _ <- Ns(id).zonedDateTimes(Set(zonedDateTime1, zonedDateTime2)).update.transact
-
-        // Delete all (apply no values)
+        id <- Ns.zonedDateTimes(Set(zonedDateTime1, zonedDateTime2)).save.transact.map(_.id)
+        // Applying empty value deletes previous Set
         _ <- Ns(id).zonedDateTimes().update.transact
         _ <- Ns.zonedDateTimes.query.get.map(_ ==> Nil)
       } yield ()
@@ -46,7 +43,7 @@ trait UpdateSetOps_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: Spi
         _ <- Ns(id).zonedDateTimes.add(zonedDateTime2).update.transact
         _ <- Ns.zonedDateTimes.query.get.map(_.head ==> Set(zonedDateTime1, zonedDateTime2))
 
-        // Add existing value (no effect)
+        // Adding existing value has no effect (Set semantics of only unique values)
         _ <- Ns(id).zonedDateTimes.add(zonedDateTime2).update.transact
         _ <- Ns.zonedDateTimes.query.get.map(_.head ==> Set(zonedDateTime1, zonedDateTime2))
 
@@ -65,7 +62,7 @@ trait UpdateSetOps_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: Spi
         _ <- Ns(id).zonedDateTimes.add(Iterable(zonedDateTime7)).update.transact
         _ <- Ns.zonedDateTimes.query.get.map(_.head ==> Set(zonedDateTime1, zonedDateTime2, zonedDateTime3, zonedDateTime4, zonedDateTime5, zonedDateTime6, zonedDateTime7))
 
-        // Add empty Seq of values (no effect)
+        // Adding empty Iterable of values has no effect
         _ <- Ns(id).zonedDateTimes.add(Seq.empty[ZonedDateTime]).update.transact
         _ <- Ns.zonedDateTimes.query.get.map(_.head ==> Set(zonedDateTime1, zonedDateTime2, zonedDateTime3, zonedDateTime4, zonedDateTime5, zonedDateTime6, zonedDateTime7))
       } yield ()
@@ -92,11 +89,11 @@ trait UpdateSetOps_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: Spi
         _ <- Ns(id).zonedDateTimes.remove(zonedDateTime3, zonedDateTime4).update.transact
         _ <- Ns.zonedDateTimes.query.get.map(_.head ==> Set(zonedDateTime1, zonedDateTime2))
 
-        // Remove Seq of values
+        // Remove Iterable of values
         _ <- Ns(id).zonedDateTimes.remove(Seq(zonedDateTime2)).update.transact
         _ <- Ns.zonedDateTimes.query.get.map(_.head ==> Set(zonedDateTime1))
 
-        // Removing empty Seq of values has no effect
+        // Removing empty Iterable of values has no effect
         _ <- Ns(id).zonedDateTimes.remove(Seq.empty[ZonedDateTime]).update.transact
         _ <- Ns.zonedDateTimes.query.get.map(_.head ==> Set(zonedDateTime1))
 

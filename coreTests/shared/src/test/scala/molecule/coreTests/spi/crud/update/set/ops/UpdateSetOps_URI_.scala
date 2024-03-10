@@ -17,21 +17,18 @@ trait UpdateSetOps_URI_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "apply (replace/add all)" - types { implicit conn =>
       for {
         id <- Ns.uris(Set(uri1, uri2)).save.transact.map(_.id)
+        _ <- Ns.uris.query.get.map(_.head ==> Set(uri1, uri2))
 
+        // Applying Set of values replaces previous Set
         _ <- Ns(id).uris(Set(uri3, uri4)).update.transact
         _ <- Ns.uris.query.get.map(_.head ==> Set(uri3, uri4))
 
-        // Apply Seq of values
-        _ <- Ns(id).uris(Set(uri4, uri5)).update.transact
-        _ <- Ns.uris.query.get.map(_.head ==> Set(uri4, uri5))
-
-        // Apply empty Seq of values (deleting all values!)
+        // Applying empty Set of values deletes previous Set
         _ <- Ns(id).uris(Seq.empty[URI]).update.transact
         _ <- Ns.uris.query.get.map(_ ==> Nil)
 
-        _ <- Ns(id).uris(Set(uri1, uri2)).update.transact
-
-        // Delete all (apply no values)
+        id <- Ns.uris(Set(uri1, uri2)).save.transact.map(_.id)
+        // Applying empty value deletes previous Set
         _ <- Ns(id).uris().update.transact
         _ <- Ns.uris.query.get.map(_ ==> Nil)
       } yield ()
@@ -46,7 +43,7 @@ trait UpdateSetOps_URI_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).uris.add(uri2).update.transact
         _ <- Ns.uris.query.get.map(_.head ==> Set(uri1, uri2))
 
-        // Add existing value (no effect)
+        // Adding existing value has no effect (Set semantics of only unique values)
         _ <- Ns(id).uris.add(uri2).update.transact
         _ <- Ns.uris.query.get.map(_.head ==> Set(uri1, uri2))
 
@@ -65,7 +62,7 @@ trait UpdateSetOps_URI_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).uris.add(Iterable(uri7)).update.transact
         _ <- Ns.uris.query.get.map(_.head ==> Set(uri1, uri2, uri3, uri4, uri5, uri6, uri7))
 
-        // Add empty Seq of values (no effect)
+        // Adding empty Iterable of values has no effect
         _ <- Ns(id).uris.add(Seq.empty[URI]).update.transact
         _ <- Ns.uris.query.get.map(_.head ==> Set(uri1, uri2, uri3, uri4, uri5, uri6, uri7))
       } yield ()
@@ -92,11 +89,11 @@ trait UpdateSetOps_URI_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).uris.remove(uri3, uri4).update.transact
         _ <- Ns.uris.query.get.map(_.head ==> Set(uri1, uri2))
 
-        // Remove Seq of values
+        // Remove Iterable of values
         _ <- Ns(id).uris.remove(Seq(uri2)).update.transact
         _ <- Ns.uris.query.get.map(_.head ==> Set(uri1))
 
-        // Removing empty Seq of values has no effect
+        // Removing empty Iterable of values has no effect
         _ <- Ns(id).uris.remove(Seq.empty[URI]).update.transact
         _ <- Ns.uris.query.get.map(_.head ==> Set(uri1))
 

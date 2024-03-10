@@ -17,21 +17,18 @@ trait UpdateSetOps_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: Sp
     "apply (replace/add all)" - types { implicit conn =>
       for {
         id <- Ns.offsetDateTimes(Set(offsetDateTime1, offsetDateTime2)).save.transact.map(_.id)
+        _ <- Ns.offsetDateTimes.query.get.map(_.head ==> Set(offsetDateTime1, offsetDateTime2))
 
+        // Applying Set of values replaces previous Set
         _ <- Ns(id).offsetDateTimes(Set(offsetDateTime3, offsetDateTime4)).update.transact
         _ <- Ns.offsetDateTimes.query.get.map(_.head ==> Set(offsetDateTime3, offsetDateTime4))
 
-        // Apply Seq of values
-        _ <- Ns(id).offsetDateTimes(Set(offsetDateTime4, offsetDateTime5)).update.transact
-        _ <- Ns.offsetDateTimes.query.get.map(_.head ==> Set(offsetDateTime4, offsetDateTime5))
-
-        // Apply empty Seq of values (deleting all values!)
+        // Applying empty Set of values deletes previous Set
         _ <- Ns(id).offsetDateTimes(Seq.empty[OffsetDateTime]).update.transact
         _ <- Ns.offsetDateTimes.query.get.map(_ ==> Nil)
 
-        _ <- Ns(id).offsetDateTimes(Set(offsetDateTime1, offsetDateTime2)).update.transact
-
-        // Delete all (apply no values)
+        id <- Ns.offsetDateTimes(Set(offsetDateTime1, offsetDateTime2)).save.transact.map(_.id)
+        // Applying empty value deletes previous Set
         _ <- Ns(id).offsetDateTimes().update.transact
         _ <- Ns.offsetDateTimes.query.get.map(_ ==> Nil)
       } yield ()
@@ -46,7 +43,7 @@ trait UpdateSetOps_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: Sp
         _ <- Ns(id).offsetDateTimes.add(offsetDateTime2).update.transact
         _ <- Ns.offsetDateTimes.query.get.map(_.head ==> Set(offsetDateTime1, offsetDateTime2))
 
-        // Add existing value (no effect)
+        // Adding existing value has no effect (Set semantics of only unique values)
         _ <- Ns(id).offsetDateTimes.add(offsetDateTime2).update.transact
         _ <- Ns.offsetDateTimes.query.get.map(_.head ==> Set(offsetDateTime1, offsetDateTime2))
 
@@ -65,7 +62,7 @@ trait UpdateSetOps_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: Sp
         _ <- Ns(id).offsetDateTimes.add(Iterable(offsetDateTime7)).update.transact
         _ <- Ns.offsetDateTimes.query.get.map(_.head ==> Set(offsetDateTime1, offsetDateTime2, offsetDateTime3, offsetDateTime4, offsetDateTime5, offsetDateTime6, offsetDateTime7))
 
-        // Add empty Seq of values (no effect)
+        // Adding empty Iterable of values has no effect
         _ <- Ns(id).offsetDateTimes.add(Seq.empty[OffsetDateTime]).update.transact
         _ <- Ns.offsetDateTimes.query.get.map(_.head ==> Set(offsetDateTime1, offsetDateTime2, offsetDateTime3, offsetDateTime4, offsetDateTime5, offsetDateTime6, offsetDateTime7))
       } yield ()
@@ -92,11 +89,11 @@ trait UpdateSetOps_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: Sp
         _ <- Ns(id).offsetDateTimes.remove(offsetDateTime3, offsetDateTime4).update.transact
         _ <- Ns.offsetDateTimes.query.get.map(_.head ==> Set(offsetDateTime1, offsetDateTime2))
 
-        // Remove Seq of values
+        // Remove Iterable of values
         _ <- Ns(id).offsetDateTimes.remove(Seq(offsetDateTime2)).update.transact
         _ <- Ns.offsetDateTimes.query.get.map(_.head ==> Set(offsetDateTime1))
 
-        // Removing empty Seq of values has no effect
+        // Removing empty Iterable of values has no effect
         _ <- Ns(id).offsetDateTimes.remove(Seq.empty[OffsetDateTime]).update.transact
         _ <- Ns.offsetDateTimes.query.get.map(_.head ==> Set(offsetDateTime1))
 

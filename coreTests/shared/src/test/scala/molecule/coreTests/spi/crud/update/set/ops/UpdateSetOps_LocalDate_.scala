@@ -17,21 +17,18 @@ trait UpdateSetOps_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
     "apply (replace/add all)" - types { implicit conn =>
       for {
         id <- Ns.localDates(Set(localDate1, localDate2)).save.transact.map(_.id)
+        _ <- Ns.localDates.query.get.map(_.head ==> Set(localDate1, localDate2))
 
+        // Applying Set of values replaces previous Set
         _ <- Ns(id).localDates(Set(localDate3, localDate4)).update.transact
         _ <- Ns.localDates.query.get.map(_.head ==> Set(localDate3, localDate4))
 
-        // Apply Seq of values
-        _ <- Ns(id).localDates(Set(localDate4, localDate5)).update.transact
-        _ <- Ns.localDates.query.get.map(_.head ==> Set(localDate4, localDate5))
-
-        // Apply empty Seq of values (deleting all values!)
+        // Applying empty Set of values deletes previous Set
         _ <- Ns(id).localDates(Seq.empty[LocalDate]).update.transact
         _ <- Ns.localDates.query.get.map(_ ==> Nil)
 
-        _ <- Ns(id).localDates(Set(localDate1, localDate2)).update.transact
-
-        // Delete all (apply no values)
+        id <- Ns.localDates(Set(localDate1, localDate2)).save.transact.map(_.id)
+        // Applying empty value deletes previous Set
         _ <- Ns(id).localDates().update.transact
         _ <- Ns.localDates.query.get.map(_ ==> Nil)
       } yield ()
@@ -46,7 +43,7 @@ trait UpdateSetOps_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
         _ <- Ns(id).localDates.add(localDate2).update.transact
         _ <- Ns.localDates.query.get.map(_.head ==> Set(localDate1, localDate2))
 
-        // Add existing value (no effect)
+        // Adding existing value has no effect (Set semantics of only unique values)
         _ <- Ns(id).localDates.add(localDate2).update.transact
         _ <- Ns.localDates.query.get.map(_.head ==> Set(localDate1, localDate2))
 
@@ -65,7 +62,7 @@ trait UpdateSetOps_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
         _ <- Ns(id).localDates.add(Iterable(localDate7)).update.transact
         _ <- Ns.localDates.query.get.map(_.head ==> Set(localDate1, localDate2, localDate3, localDate4, localDate5, localDate6, localDate7))
 
-        // Add empty Seq of values (no effect)
+        // Adding empty Iterable of values has no effect
         _ <- Ns(id).localDates.add(Seq.empty[LocalDate]).update.transact
         _ <- Ns.localDates.query.get.map(_.head ==> Set(localDate1, localDate2, localDate3, localDate4, localDate5, localDate6, localDate7))
       } yield ()
@@ -92,11 +89,11 @@ trait UpdateSetOps_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
         _ <- Ns(id).localDates.remove(localDate3, localDate4).update.transact
         _ <- Ns.localDates.query.get.map(_.head ==> Set(localDate1, localDate2))
 
-        // Remove Seq of values
+        // Remove Iterable of values
         _ <- Ns(id).localDates.remove(Seq(localDate2)).update.transact
         _ <- Ns.localDates.query.get.map(_.head ==> Set(localDate1))
 
-        // Removing empty Seq of values has no effect
+        // Removing empty Iterable of values has no effect
         _ <- Ns(id).localDates.remove(Seq.empty[LocalDate]).update.transact
         _ <- Ns.localDates.query.get.map(_.head ==> Set(localDate1))
 

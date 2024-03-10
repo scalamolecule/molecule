@@ -8,10 +8,12 @@ import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ResolveSave
 import molecule.core.transaction.ops.SaveOps
+import molecule.core.util.JavaConversions
 
 trait Save_datomic
   extends DatomicBase_JVM
     with SaveOps
+    with JavaConversions
     with MoleculeLogging { self: ResolveSave =>
 
   def getRawStmts(
@@ -68,8 +70,48 @@ trait Save_datomic
     optSet.foreach { set =>
       val a = kw(ns, attr)
       set.foreach { v =>
+        // Values have already been transformed in core.transaction.ResolveSave
         appendStmt(add, e, a, v.asInstanceOf[AnyRef])
       }
+    }
+  }
+
+  override protected def addArray[T](
+    ns: String,
+    attr: String,
+    refNs: Option[String],
+    optArray: Option[Array[Any]],
+    transformValue: T => Any,
+    //    set2array: Set[Any] => Array[AnyRef],
+    //    exts: List[String] = Nil,
+    //    value2json: (StringBuffer, T) => StringBuffer
+  ): Unit = {
+    optArray.foreach { array =>
+      val a   = kw(ns, attr)
+      val a_i = kw(s"$ns.$attr", "i_")
+      val a_v = kw(s"$ns.$attr", "v_")
+      unusedRefIds -= e
+      usedRefIds += e
+      var i      = 0
+      val length = array.length
+      while (i < length) {
+        val ref = newId
+        appendStmt(add, e, a, ref)
+        appendStmt(add, ref, a_i, i.asInstanceOf[AnyRef])
+        // Values have already been transformed in core.transaction.ResolveSave
+        appendStmt(add, ref, a_v, array(i).asInstanceOf[AnyRef])
+        i += 1
+      }
+    }
+  }
+
+  override protected def addByteArray(
+    ns: String,
+    attr: String,
+    optArray: Option[Array[Byte]],
+  ): Unit = {
+    optArray.foreach { array =>
+      appendStmt(add, e, kw(ns, attr), array.asInstanceOf[AnyRef])
     }
   }
 
@@ -99,8 +141,8 @@ trait Save_datomic
   }
 
   // Save Int as Long in Datomic
-  override protected lazy val transformID     = (v: String) => v.toLong
-  override protected lazy val transformString = (v: String) => v
+  override protected lazy val transformID             = (v: String) => v.toLong
+  override protected lazy val transformString         = (v: String) => v
   override protected lazy val transformInt            = (v: Int) => v
   override protected lazy val transformLong           = (v: Long) => v
   override protected lazy val transformFloat          = (v: Float) => v

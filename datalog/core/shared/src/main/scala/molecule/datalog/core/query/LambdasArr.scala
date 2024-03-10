@@ -1,11 +1,12 @@
 package molecule.datalog.core.query
 
-import java.lang.{Double => jDouble, Float => jFloat, Long => jLong, Integer => jInteger}
+import java.lang.{Double => jDouble, Float => jFloat, Integer => jInteger, Long => jLong}
 import java.math.{BigDecimal => jBigDecimal, BigInteger => jBigInt}
 import java.net.URI
 import java.time._
 import java.util.{Date, UUID, Iterator => jIterator, List => jList, Map => jMap, Set => jSet}
 import molecule.core.util.JavaConversions
+import scala.collection.mutable.ArrayBuffer
 import scala.reflect.ClassTag
 
 trait LambdasArr extends ResolveBase with JavaConversions {
@@ -345,24 +346,22 @@ trait LambdasArr extends ResolveBase with JavaConversions {
   }
 
   private def optAttr2sOptArray[T: ClassTag](decode: Any => T) = (v: AnyRef) => {
-    //    val set = v.asInstanceOf[Array[_]]
+    val array = ArrayBuffer.empty[(Int, T)]
+    val pairs = v.asInstanceOf[jSet[_]].iterator.next.asInstanceOf[jList[_]].iterator
+    while (pairs.hasNext) {
+      val pair = pairs.next.asInstanceOf[jList[_]]
+      array.addOne(pair.get(0).asInstanceOf[Integer].toInt -> decode(pair.get(1)))
+    }
+    if (array.isEmpty) Option.empty[Array[T]] else Some(array.sortBy(_._1).map(_._2).toList)
+  }
 
-    //    println(" B " + set)
-
-    val set = v.asInstanceOf[Array[_]].flatMap(_.asInstanceOf[jList[_]].asScala.map(decode))
-
-    if (set.isEmpty) Option.empty[Array[T]] else Some(set)
-
-    //    println(" C " + coalescedArray)
-    //    if (set.iterator.next.asInstanceOf[jList[_]].isEmpty)
-    //      Option.empty[Array[T]]
-    //    else
-    //      Some(set.asScala.flatMap(_.asInstanceOf[jList[_]].asScala.map(decode)).toArray)
-    //
-    //    set.asScala.flatMap(_.asInstanceOf[jList[_]].asScala.map(decode)).toArray match{
-    //      case set if set.isEmpty => Option.empty[Array[T]]
-    //      case set
-    //    }
+  private def optByteAttr2sOptByteArray(decode: Any => Byte) = (v: AnyRef) => {
+    if (v == null) {
+      Option.empty[Array[Byte]]
+    } else {
+      val array = v.asInstanceOf[jMap[_, _]].values.iterator.next.asInstanceOf[Array[Byte]]
+      if (array.isEmpty) Option.empty[Array[Byte]] else Some(array)
+    }
   }
 
   private lazy val jOptArrayAttr2sOptArrayId             = optAttr2sOptArrayID
@@ -385,7 +384,7 @@ trait LambdasArr extends ResolveBase with JavaConversions {
   private lazy val jOptArrayAttr2sOptArrayZonedDateTime  = optAttr2sOptArray(j2ZonedDateTime)
   private lazy val jOptArrayAttr2sOptArrayUUID           = optAttr2sOptArray(j2UUID)
   private lazy val jOptArrayAttr2sOptArrayURI            = optAttr2sOptArray(j2URI)
-  private lazy val jOptArrayAttr2sOptArrayByte           = optAttr2sOptArray(j2Byte)
+  private lazy val jOptArrayAttr2sOptArrayByte           = optByteAttr2sOptByteArray(j2Byte)
   private lazy val jOptArrayAttr2sOptArrayShort          = optAttr2sOptArray(j2Short)
   private lazy val jOptArrayAttr2sOptArrayChar           = optAttr2sOptArray(j2Char)
 

@@ -7,6 +7,7 @@ object Refs extends DataModel(10) {
   trait A {
     val i    = oneInt
     val ii   = setInt
+    val ia   = arrayInt
     val s    = oneString
     val bool = oneBoolean
 
@@ -35,6 +36,7 @@ object Refs extends DataModel(10) {
   trait B {
     val i  = oneInt
     val ii = setInt
+    val ia = arrayInt
     val s  = oneString
 
     val a  = one[A]
@@ -56,6 +58,7 @@ object Refs extends DataModel(10) {
     val i  = oneInt
     val s  = oneString
     val ii = setInt
+    val ia = arrayInt
     val a  = one[A]
     val d  = one[D]
     val dd = many[D]

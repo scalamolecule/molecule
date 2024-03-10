@@ -15,13 +15,13 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
-
-//      val ns0 = Ns
-//      val ns = new Ns_0[Int](Nil)
-
       for {
-        _ <- Ns.i(1).save.transact
-        _ <- Ns.i.query.i.get.map(_ ==> List(1))
+//        _ <- Ns.i(1).save.transact
+//        _ <- Ns.i.query.i.get.map(_ ==> List(1))
+
+        id <- Ns.ints(Set(int1, int2)).save.transact.map(_.id)
+
+        _ <- Ns(id).ints(Set(int3, int4)).update.i.transact
 
       } yield ()
     }
