@@ -310,6 +310,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
       val (set, set1, v1, v2, e1) = (v + "-set", v + "-set1", v + 1, v + 2, e + 1)
 
       // Pre-query
+      preArgs += sets.map(set => set.map(fromScala).asJava).asJava
       preIn += s"[$set ...]"
       preWhere +=
         s"""[(datomic.api/q
@@ -318,7 +319,6 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
            |            :where [$e1 $a $v1]]" $$ $e) [[$v2]]]""".stripMargin -> wClause
       preWhere += s"[(into #{} $set) $set1]" -> wClause
       preWhere += s"[(= $v2 $set1)]" -> wClause
-      preArgs += sets.map(set => set.map(fromScala).asJava).asJava
 
       // Main query
       inPost += blacklist

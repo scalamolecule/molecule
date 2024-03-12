@@ -231,16 +231,8 @@ trait Update_datomic
     byteArrays: Seq[Array[Byte]],
   ): Unit = {
     byteArrays match {
-      case Seq(byteArray) =>
-        val add = ("add", ns, attr, Seq(byteArray), true, "") // Treat byte array as single value
-        data += add
-
-      case Nil =>
-        data += (("retract", ns, attr, Nil, true, "array"))
-
-      case vs => throw ExecutionError(
-        s"Can only $update one Byte Array for `$ns.$attr`."
-      )
+      case Seq(byteArray) if byteArray.nonEmpty => data += (("add", ns, attr, Seq(byteArray), true, ""))
+      case _                                    => data += (("retract", ns, attr, Nil, true, "array"))
     }
   }
 
@@ -257,7 +249,7 @@ trait Update_datomic
   ): Unit = {
     seqs match {
       case Seq(array) =>
-        val add = ("add", ns, attr, array.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, false, "array")
+        val add = ("add", ns, attr, array.map(v => transform(v).asInstanceOf[AnyRef]), false, "array")
         data += add
 
       case Nil =>
@@ -281,8 +273,8 @@ trait Update_datomic
     //    one2json: T => String
   ): Unit = {
     if (seqs.nonEmpty) {
-      data += (("retract", ns, attr, seqs.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, false, "array"))
-      Seq(("retract", ns, attr, seqs.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, false))
+      data += (("retract", ns, attr, seqs.map(v => transform(v).asInstanceOf[AnyRef]), false, "array"))
+      Seq(("retract", ns, attr, seqs.map(v => transform(v).asInstanceOf[AnyRef]), false))
     }
   }
 
@@ -389,8 +381,8 @@ trait Update_datomic
       }
 
       def addOneOrToSet(ns: String, attr: String, newValues: Seq[AnyRef], retractCur: Boolean) = {
-        val a   = kw(ns, attr)
-        val id1 = id
+        val a         = kw(ns, attr)
+        val id1       = id
         val curValues = ListBuffer.empty[AnyRef]
         Peer.q("[:find ?v :in $ ?e ?a :where [?e ?a ?v]]", db, id1, a).forEach { row =>
           curValues += row.get(0)

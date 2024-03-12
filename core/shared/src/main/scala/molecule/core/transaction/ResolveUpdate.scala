@@ -224,14 +224,9 @@ class ResolveUpdate(
       case a: AttrSeqManZonedDateTime  => updateSeqEq(ns, attr, a.vs, a.refNs, a.owner, transformZonedDateTime) //, set2arrayZonedDateTime, extsZonedDateTime, value2jsonZonedDateTime)
       case a: AttrSeqManUUID           => updateSeqEq(ns, attr, a.vs, a.refNs, a.owner, transformUUID) //, set2arrayUUID, extsUUID, value2jsonUUID)
       case a: AttrSeqManURI            => updateSeqEq(ns, attr, a.vs, a.refNs, a.owner, transformURI) //, set2arrayURI, extsURI, value2jsonURI)
-      case a: AttrSeqManByte           =>
-        updateByteArray(ns, attr, a.vs)
-
-
-
+      case a: AttrSeqManByte           => updateByteArray(ns, attr, a.vs)
       case a: AttrSeqManShort          => updateSeqEq(ns, attr, a.vs, a.refNs, a.owner, transformShort) //, set2arrayShort, extsShort, value2jsonShort)
       case a: AttrSeqManChar           => updateSeqEq(ns, attr, a.vs, a.refNs, a.owner, transformChar) //, set2arrayChar, extsChar, value2jsonChar)
-//      case a: AttrSeqManByte           => updateByteArray(ns, attr, a.vs)
     }
   }
 
@@ -258,13 +253,7 @@ class ResolveUpdate(
       case a: AttrSeqManZonedDateTime  => updateSeqAdd(ns, attr, a.vs, a.refNs, a.owner, transformZonedDateTime) //, set2arrayZonedDateTime, extsZonedDateTime, value2jsonZonedDateTime)
       case a: AttrSeqManUUID           => updateSeqAdd(ns, attr, a.vs, a.refNs, a.owner, transformUUID) //, set2arrayUUID, extsUUID, value2jsonUUID)
       case a: AttrSeqManURI            => updateSeqAdd(ns, attr, a.vs, a.refNs, a.owner, transformURI) //, set2arrayURI, extsURI, value2jsonURI)
-//      case a: AttrSeqManByte           =>
-//        updateSeqAdd(ns, attr, a.vs, a.refNs, a.owner, transformByte) //, set2arrayByte, extsByte, value2jsonByte)
-//        updateByteArray(ns, attr, a.vs)
-
       case a: AttrSeqManByte           => throw ModelError(s"Operations on byte arrays (${a.ns}.${a.attr}) not allowed.")
-
-
       case a: AttrSeqManShort          => updateSeqAdd(ns, attr, a.vs, a.refNs, a.owner, transformShort) //, set2arrayShort, extsShort, value2jsonShort)
       case a: AttrSeqManChar           => updateSeqAdd(ns, attr, a.vs, a.refNs, a.owner, transformChar) //, set2arrayChar, extsChar, value2jsonChar)
     }
@@ -293,12 +282,7 @@ class ResolveUpdate(
       case a: AttrSeqManZonedDateTime  => updateSeqRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformZonedDateTime) //, handleZonedDateTime, extsZonedDateTime, one2jsonZonedDateTime)
       case a: AttrSeqManUUID           => updateSeqRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformUUID) //, handleUUID, extsUUID, one2jsonUUID)
       case a: AttrSeqManURI            => updateSeqRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformURI) //, handleURI, extsURI, one2jsonURI)
-//      case a: AttrSeqManByte           =>
-//        updateSeqRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformByte) //, handleByte, extsByte, one2jsonByte)
-
       case a: AttrSeqManByte           => throw ModelError(s"Operations on byte arrays (${a.ns}.${a.attr}) not allowed.")
-
-
       case a: AttrSeqManShort          => updateSeqRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformShort) //, handleShort, extsShort, one2jsonShort)
       case a: AttrSeqManChar           => updateSeqRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformChar) //, handleChar, extsChar, one2jsonChar)
     }

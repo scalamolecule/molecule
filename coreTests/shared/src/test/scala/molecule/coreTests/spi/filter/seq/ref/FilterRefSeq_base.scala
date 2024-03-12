@@ -1,4 +1,4 @@
-package molecule.coreTests.spi.filter.set.ref
+package molecule.coreTests.spi.filter.seq.ref
 
 import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
@@ -8,7 +8,7 @@ import molecule.coreTests.dataModels.core.dsl.Refs._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
-trait FilterRefSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
+trait FilterRefSeq_base extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 

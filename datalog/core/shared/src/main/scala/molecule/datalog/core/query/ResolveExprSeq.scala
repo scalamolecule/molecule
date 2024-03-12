@@ -6,36 +6,36 @@ import scala.reflect.ClassTag
 import java.util.{Date, UUID, Iterator => jIterator, List => jList, Map => jMap, Set => jSet}
 import molecule.core.util.JavaConversions
 
-trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl] with LambdasArr =>
+trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl] with LambdasSeq =>
 
   protected def resolveAttrSeqMan(es: List[Var], attr: AttrSeqMan): List[Var] = {
     aritiesAttr()
     attrIndex += 1
     val e = es.last
     attr match {
-      case att: AttrSeqManID             => man(attr, e, att.vs, resArrId)
-      case att: AttrSeqManString         => man(attr, e, att.vs, resArrString)
-      case att: AttrSeqManInt            => man(attr, e, att.vs, resArrInt)
-      case att: AttrSeqManLong           => man(attr, e, att.vs, resArrLong)
-      case att: AttrSeqManFloat          => man(attr, e, att.vs, resArrFloat)
-      case att: AttrSeqManDouble         => man(attr, e, att.vs, resArrDouble)
-      case att: AttrSeqManBoolean        => man(attr, e, att.vs, resArrBoolean)
-      case att: AttrSeqManBigInt         => man(attr, e, att.vs, resArrBigInt)
-      case att: AttrSeqManBigDecimal     => man(attr, e, att.vs, resArrBigDecimal)
-      case att: AttrSeqManDate           => man(attr, e, att.vs, resArrDate)
-      case att: AttrSeqManDuration       => man(attr, e, att.vs, resArrDuration)
-      case att: AttrSeqManInstant        => man(attr, e, att.vs, resArrInstant)
-      case att: AttrSeqManLocalDate      => man(attr, e, att.vs, resArrLocalDate)
-      case att: AttrSeqManLocalTime      => man(attr, e, att.vs, resArrLocalTime)
-      case att: AttrSeqManLocalDateTime  => man(attr, e, att.vs, resArrLocalDateTime)
-      case att: AttrSeqManOffsetTime     => man(attr, e, att.vs, resArrOffsetTime)
-      case att: AttrSeqManOffsetDateTime => man(attr, e, att.vs, resArrOffsetDateTime)
-      case att: AttrSeqManZonedDateTime  => man(attr, e, att.vs, resArrZonedDateTime)
-      case att: AttrSeqManUUID           => man(attr, e, att.vs, resArrUUID)
-      case att: AttrSeqManURI            => man(attr, e, att.vs, resArrURI)
+      case att: AttrSeqManID             => man(attr, e, att.vs, resSeqId)
+      case att: AttrSeqManString         => man(attr, e, att.vs, resSeqString)
+      case att: AttrSeqManInt            => man(attr, e, att.vs, resSeqInt)
+      case att: AttrSeqManLong           => man(attr, e, att.vs, resSeqLong)
+      case att: AttrSeqManFloat          => man(attr, e, att.vs, resSeqFloat)
+      case att: AttrSeqManDouble         => man(attr, e, att.vs, resSeqDouble)
+      case att: AttrSeqManBoolean        => man(attr, e, att.vs, resSeqBoolean)
+      case att: AttrSeqManBigInt         => man(attr, e, att.vs, resSeqBigInt)
+      case att: AttrSeqManBigDecimal     => man(attr, e, att.vs, resSeqBigDecimal)
+      case att: AttrSeqManDate           => man(attr, e, att.vs, resSeqDate)
+      case att: AttrSeqManDuration       => man(attr, e, att.vs, resSeqDuration)
+      case att: AttrSeqManInstant        => man(attr, e, att.vs, resSeqInstant)
+      case att: AttrSeqManLocalDate      => man(attr, e, att.vs, resSeqLocalDate)
+      case att: AttrSeqManLocalTime      => man(attr, e, att.vs, resSeqLocalTime)
+      case att: AttrSeqManLocalDateTime  => man(attr, e, att.vs, resSeqLocalDateTime)
+      case att: AttrSeqManOffsetTime     => man(attr, e, att.vs, resSeqOffsetTime)
+      case att: AttrSeqManOffsetDateTime => man(attr, e, att.vs, resSeqOffsetDateTime)
+      case att: AttrSeqManZonedDateTime  => man(attr, e, att.vs, resSeqZonedDateTime)
+      case att: AttrSeqManUUID           => man(attr, e, att.vs, resSeqUUID)
+      case att: AttrSeqManURI            => man(attr, e, att.vs, resSeqURI)
       case att: AttrSeqManByte           => manByteArray(attr, e) // Byte Array only semantics
-      case att: AttrSeqManShort          => man(attr, e, att.vs, resArrShort)
-      case att: AttrSeqManChar           => man(attr, e, att.vs, resArrChar)
+      case att: AttrSeqManShort          => man(attr, e, att.vs, resSeqShort)
+      case att: AttrSeqManChar           => man(attr, e, att.vs, resSeqChar)
     }
     es
   }
@@ -43,29 +43,29 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
   protected def resolveAttrSeqTac(es: List[Var], attr: AttrSeqTac): List[Var] = {
     val e = es.last
     attr match {
-      case att: AttrSeqTacID             => tac(attr, e, att.vs, resArrId)
-      case att: AttrSeqTacString         => tac(attr, e, att.vs, resArrString)
-      case att: AttrSeqTacInt            => tac(attr, e, att.vs, resArrInt)
-      case att: AttrSeqTacLong           => tac(attr, e, att.vs, resArrLong)
-      case att: AttrSeqTacFloat          => tac(attr, e, att.vs, resArrFloat)
-      case att: AttrSeqTacDouble         => tac(attr, e, att.vs, resArrDouble)
-      case att: AttrSeqTacBoolean        => tac(attr, e, att.vs, resArrBoolean)
-      case att: AttrSeqTacBigInt         => tac(attr, e, att.vs, resArrBigInt)
-      case att: AttrSeqTacBigDecimal     => tac(attr, e, att.vs, resArrBigDecimal)
-      case att: AttrSeqTacDate           => tac(attr, e, att.vs, resArrDate)
-      case att: AttrSeqTacDuration       => tac(attr, e, att.vs, resArrDuration)
-      case att: AttrSeqTacInstant        => tac(attr, e, att.vs, resArrInstant)
-      case att: AttrSeqTacLocalDate      => tac(attr, e, att.vs, resArrLocalDate)
-      case att: AttrSeqTacLocalTime      => tac(attr, e, att.vs, resArrLocalTime)
-      case att: AttrSeqTacLocalDateTime  => tac(attr, e, att.vs, resArrLocalDateTime)
-      case att: AttrSeqTacOffsetTime     => tac(attr, e, att.vs, resArrOffsetTime)
-      case att: AttrSeqTacOffsetDateTime => tac(attr, e, att.vs, resArrOffsetDateTime)
-      case att: AttrSeqTacZonedDateTime  => tac(attr, e, att.vs, resArrZonedDateTime)
-      case att: AttrSeqTacUUID           => tac(attr, e, att.vs, resArrUUID)
-      case att: AttrSeqTacURI            => tac(attr, e, att.vs, resArrURI)
+      case att: AttrSeqTacID             => tac(attr, e, att.vs, resSeqId)
+      case att: AttrSeqTacString         => tac(attr, e, att.vs, resSeqString)
+      case att: AttrSeqTacInt            => tac(attr, e, att.vs, resSeqInt)
+      case att: AttrSeqTacLong           => tac(attr, e, att.vs, resSeqLong)
+      case att: AttrSeqTacFloat          => tac(attr, e, att.vs, resSeqFloat)
+      case att: AttrSeqTacDouble         => tac(attr, e, att.vs, resSeqDouble)
+      case att: AttrSeqTacBoolean        => tac(attr, e, att.vs, resSeqBoolean)
+      case att: AttrSeqTacBigInt         => tac(attr, e, att.vs, resSeqBigInt)
+      case att: AttrSeqTacBigDecimal     => tac(attr, e, att.vs, resSeqBigDecimal)
+      case att: AttrSeqTacDate           => tac(attr, e, att.vs, resSeqDate)
+      case att: AttrSeqTacDuration       => tac(attr, e, att.vs, resSeqDuration)
+      case att: AttrSeqTacInstant        => tac(attr, e, att.vs, resSeqInstant)
+      case att: AttrSeqTacLocalDate      => tac(attr, e, att.vs, resSeqLocalDate)
+      case att: AttrSeqTacLocalTime      => tac(attr, e, att.vs, resSeqLocalTime)
+      case att: AttrSeqTacLocalDateTime  => tac(attr, e, att.vs, resSeqLocalDateTime)
+      case att: AttrSeqTacOffsetTime     => tac(attr, e, att.vs, resSeqOffsetTime)
+      case att: AttrSeqTacOffsetDateTime => tac(attr, e, att.vs, resSeqOffsetDateTime)
+      case att: AttrSeqTacZonedDateTime  => tac(attr, e, att.vs, resSeqZonedDateTime)
+      case att: AttrSeqTacUUID           => tac(attr, e, att.vs, resSeqUUID)
+      case att: AttrSeqTacURI            => tac(attr, e, att.vs, resSeqURI)
       case att: AttrSeqTacByte           => tacByteArray(attr, e) // Byte Array only semantics
-      case att: AttrSeqTacShort          => tac(attr, e, att.vs, resArrShort)
-      case att: AttrSeqTacChar           => tac(attr, e, att.vs, resArrChar)
+      case att: AttrSeqTacShort          => tac(attr, e, att.vs, resSeqShort)
+      case att: AttrSeqTacChar           => tac(attr, e, att.vs, resSeqChar)
     }
     es
   }
@@ -76,29 +76,29 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     hasOptAttr = true // to avoid redundant None's
     val e = es.last
     attr match {
-      case att: AttrSeqOptID             => opt(attr, e, att.op, att.vs, resOptArrId, resArrId)
-      case att: AttrSeqOptString         => opt(attr, e, att.op, att.vs, resOptArrString, resArrString)
-      case att: AttrSeqOptInt            => opt(attr, e, att.op, att.vs, resOptArrInt, resArrInt)
-      case att: AttrSeqOptLong           => opt(attr, e, att.op, att.vs, resOptArrLong, resArrLong)
-      case att: AttrSeqOptFloat          => opt(attr, e, att.op, att.vs, resOptArrFloat, resArrFloat)
-      case att: AttrSeqOptDouble         => opt(attr, e, att.op, att.vs, resOptArrDouble, resArrDouble)
-      case att: AttrSeqOptBoolean        => opt(attr, e, att.op, att.vs, resOptArrBoolean, resArrBoolean)
-      case att: AttrSeqOptBigInt         => opt(attr, e, att.op, att.vs, resOptArrBigInt, resArrBigInt)
-      case att: AttrSeqOptBigDecimal     => opt(attr, e, att.op, att.vs, resOptArrBigDecimal, resArrBigDecimal)
-      case att: AttrSeqOptDate           => opt(attr, e, att.op, att.vs, resOptArrDate, resArrDate)
-      case att: AttrSeqOptDuration       => opt(attr, e, att.op, att.vs, resOptArrDuration, resArrDuration)
-      case att: AttrSeqOptInstant        => opt(attr, e, att.op, att.vs, resOptArrInstant, resArrInstant)
-      case att: AttrSeqOptLocalDate      => opt(attr, e, att.op, att.vs, resOptArrLocalDate, resArrLocalDate)
-      case att: AttrSeqOptLocalTime      => opt(attr, e, att.op, att.vs, resOptArrLocalTime, resArrLocalTime)
-      case att: AttrSeqOptLocalDateTime  => opt(attr, e, att.op, att.vs, resOptArrLocalDateTime, resArrLocalDateTime)
-      case att: AttrSeqOptOffsetTime     => opt(attr, e, att.op, att.vs, resOptArrOffsetTime, resArrOffsetTime)
-      case att: AttrSeqOptOffsetDateTime => opt(attr, e, att.op, att.vs, resOptArrOffsetDateTime, resArrOffsetDateTime)
-      case att: AttrSeqOptZonedDateTime  => opt(attr, e, att.op, att.vs, resOptArrZonedDateTime, resArrZonedDateTime)
-      case att: AttrSeqOptUUID           => opt(attr, e, att.op, att.vs, resOptArrUUID, resArrUUID)
-      case att: AttrSeqOptURI            => opt(attr, e, att.op, att.vs, resOptArrURI, resArrURI)
-      case att: AttrSeqOptByte           => optByteArray(attr, e, resOptArrByte) // Byte Array only semantics
-      case att: AttrSeqOptShort          => opt(attr, e, att.op, att.vs, resOptArrShort, resArrShort)
-      case att: AttrSeqOptChar           => opt(attr, e, att.op, att.vs, resOptArrChar, resArrChar)
+      case att: AttrSeqOptID             => opt(attr, e, att.op, att.vs, resOptSeqId, resSeqId)
+      case att: AttrSeqOptString         => opt(attr, e, att.op, att.vs, resOptSeqString, resSeqString)
+      case att: AttrSeqOptInt            => opt(attr, e, att.op, att.vs, resOptSeqInt, resSeqInt)
+      case att: AttrSeqOptLong           => opt(attr, e, att.op, att.vs, resOptSeqLong, resSeqLong)
+      case att: AttrSeqOptFloat          => opt(attr, e, att.op, att.vs, resOptSeqFloat, resSeqFloat)
+      case att: AttrSeqOptDouble         => opt(attr, e, att.op, att.vs, resOptSeqDouble, resSeqDouble)
+      case att: AttrSeqOptBoolean        => opt(attr, e, att.op, att.vs, resOptSeqBoolean, resSeqBoolean)
+      case att: AttrSeqOptBigInt         => opt(attr, e, att.op, att.vs, resOptSeqBigInt, resSeqBigInt)
+      case att: AttrSeqOptBigDecimal     => opt(attr, e, att.op, att.vs, resOptSeqBigDecimal, resSeqBigDecimal)
+      case att: AttrSeqOptDate           => opt(attr, e, att.op, att.vs, resOptSeqDate, resSeqDate)
+      case att: AttrSeqOptDuration       => opt(attr, e, att.op, att.vs, resOptSeqDuration, resSeqDuration)
+      case att: AttrSeqOptInstant        => opt(attr, e, att.op, att.vs, resOptSeqInstant, resSeqInstant)
+      case att: AttrSeqOptLocalDate      => opt(attr, e, att.op, att.vs, resOptSeqLocalDate, resSeqLocalDate)
+      case att: AttrSeqOptLocalTime      => opt(attr, e, att.op, att.vs, resOptSeqLocalTime, resSeqLocalTime)
+      case att: AttrSeqOptLocalDateTime  => opt(attr, e, att.op, att.vs, resOptSeqLocalDateTime, resSeqLocalDateTime)
+      case att: AttrSeqOptOffsetTime     => opt(attr, e, att.op, att.vs, resOptSeqOffsetTime, resSeqOffsetTime)
+      case att: AttrSeqOptOffsetDateTime => opt(attr, e, att.op, att.vs, resOptSeqOffsetDateTime, resSeqOffsetDateTime)
+      case att: AttrSeqOptZonedDateTime  => opt(attr, e, att.op, att.vs, resOptSeqZonedDateTime, resSeqZonedDateTime)
+      case att: AttrSeqOptUUID           => opt(attr, e, att.op, att.vs, resOptSeqUUID, resSeqUUID)
+      case att: AttrSeqOptURI            => opt(attr, e, att.op, att.vs, resOptSeqURI, resSeqURI)
+      case att: AttrSeqOptByte           => optByteArray(attr, e, resOptSeqByte) // Byte Array only semantics
+      case att: AttrSeqOptShort          => opt(attr, e, att.op, att.vs, resOptSeqShort, resSeqShort)
+      case att: AttrSeqOptChar           => opt(attr, e, att.op, att.vs, resOptSeqChar, resSeqChar)
     }
     es
   }
@@ -107,22 +107,21 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     val (ns, at) = (attr.ns, attr.attr)
     (
       s":$ns/$at", s":$ns.$at/i_", s":$ns.$at/v_",
-      v + "_i", v + "_v",
+      v + "-i", v + "-v",
       v + 1, v + 2, v + 3, v + 4, v + 5, v + 6,
-      v + "_pair", v + "_pair2",
-      v + "_array",
+      v + "-pair"
     )
   }
   private def nsAttr(attr: Attr): String = s":${attr.ns}/${attr.attr}"
 
   private def man[T: ClassTag](
     attr: Attr, e: Var,
-    arrays: Seq[Seq[T]],
-    resArr: ResArr[T],
+    seqs: Seq[Seq[T]],
+    resSeq: ResSeq[T],
   ): Unit = {
     val v = vv
     val a = nsAttr(attr)
-    //    find += s"(distinct ${v}_pair)" // position index -> value
+    //    find += s"(distinct ${v}-pair)" // position index -> value
     //    addCast(res.seq2array)
     attr.filterAttr.fold {
       val pathAttr = varPath :+ attr.cleanAttr
@@ -131,7 +130,7 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
         throw ModelError(s"Cardinality-set filter attributes not allowed to " +
           s"do additional filtering. Found:\n  " + attr)
       }
-      expr(attr, e, v, attr.op, arrays, resArr)
+      expr(attr, e, v, attr.op, seqs, resSeq)
       filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
       filterAttrVars2.get(a).foreach(_(e, v))
     } { case (dir, filterPath, filterAttr) =>
@@ -142,13 +141,13 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
 
   private def tac[T: ClassTag](
     attr: Attr, e: Var,
-    arrays: Seq[Seq[T]],
-    resArr: ResArr[T],
+    seqs: Seq[Seq[T]],
+    resSeq: ResSeq[T],
   ): Unit = {
     val v = vv
     val a = nsAttr(attr)
     attr.filterAttr.fold {
-      expr(attr, e, v, attr.op, arrays, resArr)
+      expr(attr, e, v, attr.op, seqs, resSeq)
       filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
       filterAttrVars2.get(a).foreach(_(e, v))
     } { case (dir, filterPath, filterAttr) =>
@@ -159,21 +158,21 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
 
   private def expr[T: ClassTag](
     attr: Attr, e: Var, v: Var, op: Op,
-    arrays: Seq[Seq[T]],
-    resArr: ResArr[T],
+    seqs: Seq[Seq[T]],
+    resSeq: ResSeq[T],
   ): Unit = {
     op match {
-      case V         => attrib(attr, e, v, resArr)
-      case Eq        => equal(attr, e, v, arrays, resArr)
-      case Neq       => neq(attr, e, v, arrays, resArr.s2j)
-      case Has       => has(attr, e, v, arrays, resArr.tpe, resArr.toDatalog)
-      case HasNo     => hasNo(attr, e, v, arrays, resArr.tpe, resArr.toDatalog)
+      case V         => attrib(attr, e, v, resSeq)
+      case Eq        => equal(attr, e, v, seqs, resSeq)
+      case Neq       => neq(attr, e, v, seqs, resSeq.s2j, resSeq)
+      case Has       => has(attr, e, v, seqs, resSeq.tpe, resSeq.toDatalog)
+      case HasNo     => hasNo(attr, e, v, seqs, resSeq.tpe, resSeq.toDatalog)
       case NoValue   => noValue(attr, e)
       case Fn(kw, n) =>
         if (isRefAttr)
           throw ModelError("Aggregating Sets of ref ids not supported.")
         else
-          aggr(attr, e, v, kw, n, resArr)
+          aggr(attr, e, v, kw, n, resSeq)
       case other     => unexpectedOp(other)
     }
   }
@@ -192,18 +191,18 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
 
   private def opt[T: ClassTag](
     attr: Attr, e: Var, op: Op,
-    optArrays: Option[Seq[Seq[T]]],
-    resArrOpt: ResArrOpt[T],
-    resArr: ResArr[T],
+    optSeqs: Option[Seq[Seq[T]]],
+    resSeqOpt: ResSeqOpt[T],
+    resSeq: ResSeq[T],
   ): Unit = {
     val v = vv
-    addCast(resArrOpt.j2s)
+    addCast(resSeqOpt.j2s)
     op match {
-      case V     => optAttr(attr, e, v, resArrOpt)
-      case Eq    => optEqual(attr, e, v, optArrays, resArrOpt, resArr)
-      case Neq   => optNeq(attr, e, v, optArrays, resArrOpt.s2j)
-      case Has   => optHas(attr, e, v, optArrays, resArrOpt.tpe, resArrOpt, resArrOpt.toDatalog)
-      case HasNo => optHasNo(attr, e, v, optArrays, resArrOpt.tpe, resArrOpt.toDatalog)
+      case V     => optAttr(attr, e, v, resSeqOpt)
+      case Eq    => optEqual(attr, e, v, optSeqs, resSeqOpt, resSeq)
+      case Neq   => optNeq(attr, e, v, optSeqs, resSeqOpt.s2j, resSeq)
+      case Has   => optHas(attr, e, v, optSeqs, resSeqOpt.tpe, resSeqOpt, resSeqOpt.toDatalog)
+      case HasNo => optHasNo(attr, e, v, optSeqs, resSeqOpt.tpe, resSeqOpt.toDatalog)
       case other => unexpectedOp(other)
     }
   }
@@ -213,16 +212,6 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     val v = vv
     val a = nsAttr(attr)
     find += v
-    //    addCast(identity)
-    addCast { (array: AnyRef) =>
-      println(array)
-      println(array.asInstanceOf[Array[_]].toList)
-
-
-
-      array.asInstanceOf[Array[Byte]].toList
-    }
-
     attr.filterAttr.fold {
       attr.op match {
         case V => where += s"[$e $a $v]" -> wClause
@@ -233,6 +222,7 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
       throw ModelError(s"Filter attributes not allowed with byte arrays.")
     }
     refConfirmed = true
+    addCast(identity) // return array as-is
   }
 
   private def tacByteArray(attr: Attr, e: Var): Unit = {
@@ -250,31 +240,30 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     refConfirmed = true
   }
 
-  private def optByteArray(attr: Attr, e: Var, resArrOpt: ResArrOpt[Byte]): Unit = {
+  private def optByteArray(attr: Attr, e: Var, resSeqOpt: ResSeqOpt[Byte]): Unit = {
     val v = vv
     val a = nsAttr(attr)
     find += s"(pull $e-$v [[$a :limit nil]]) "
     where += s"[(identity $e) $e-$v]" -> wGround
-    addCast(resArrOpt.optAttr2s)
+    addCast(resSeqOpt.optAttr2s)
   }
 
   // attr ----------------------------------------------------------------------
 
-  private def attrib[T](attr: Attr, e: Var, v: Var, resArr: ResArr[T]): Unit = {
-    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair, pair2, array) = vars(attr, v)
+  private def attrib[T](attr: Attr, e: Var, v: Var, resSeq: ResSeq[T]): Unit = {
+    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
     find += s"(distinct $pair)" // position index -> value
     where += s"[$e $a $v]" -> wClause
     where += s"[$v $ai $i_]" -> wClause
     where += s"[$v $av $v_]" -> wClause
     where += s"[(vector $i_ $v_) $pair]" -> wClause
-    addCast(resArr.pairs2array)
-
+    addCast(resSeq.pairs2list)
   }
 
   private def optAttr[T](
-    attr: Attr, e: Var, v: Var, resArrOpt: ResArrOpt[T]
+    attr: Attr, e: Var, v: Var, resSeqOpt: ResSeqOpt[T]
   ): Unit = {
-    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair, pair2, array) = vars(attr, v)
+    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
     if (refConfirmed) {
       find += v6
       where +=
@@ -320,7 +309,7 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
         where += s"[(map vals $v4) $v5]" -> wClause
       }
     }
-    replaceCast(resArrOpt.optAttr2s)
+    replaceCast(resSeqOpt.optAttr2s)
   }
 
 
@@ -328,12 +317,13 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
 
   private def equal[T](
     attr: Attr, e: Var, v: Var,
-    arrays: Seq[Seq[T]],
-    resArr: ResArr[T],
+    seqs: Seq[Seq[T]],
+    resSeq: ResSeq[T],
   ): Unit = {
-    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair, pair2, array) = vars(attr, v)
+    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
     find += v3
-    in += s"[$array ...]"
+    args += seqs.map(seq => seq.toSeq.map(resSeq.s2j).asJava).asJava
+    in += s"[$v4 ...]"
     where +=
       s"""[(datomic.api/q
          |          "[:find (distinct $pair)
@@ -344,22 +334,20 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
          |                   [(vector $i_ $v_) $pair]]" $$ $e) [[$v1]]]""".stripMargin -> wClause
     where += s"[(sort-by first $v1) $v2]" -> wClause
     where += s"[(map second $v2) $v3]" -> wClause
-    where += s"[(= $array $v3)]" -> wClause
-    args += arrays.map(array => array.toSeq.map(resArr.s2j).asJava).asJava
-    addCast(resArr.seq2array)
+    where += s"[(= $v3 $v4)]" -> wClause
+    addCast(resSeq.jList2list)
   }
 
   private def optEqual[T](
     attr: Attr, e: Var, v: Var,
-    optArrays: Option[Seq[Seq[T]]],
-    resArrOpt: ResArrOpt[T],
-    resArr: ResArr[T],
+    optSeqs: Option[Seq[Seq[T]]],
+    resSeqOpt: ResSeqOpt[T],
+    resSeq: ResSeq[T],
   ): Unit = {
-    optArrays.fold[Unit] {
-      none(attr, e, v, resArrOpt)
-    } { arrays =>
-      //      find += s"(distinct $v)"
-      equal(attr, e, v, arrays, resArr)
+    optSeqs.fold[Unit] {
+      none(attr, e, v, resSeqOpt)
+    } { seqs =>
+      equal(attr, e, v, seqs, resSeq)
     }
   }
 
@@ -367,46 +355,71 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
   // neq -----------------------------------------------------------------------
 
   private def neq[T](
-    attr: Attr, e: Var, v: Var, arrays: Seq[Seq[T]], fromScala: Any => Any
+    attr: Attr, e: Var, v: Var,
+    seqs: Seq[Seq[T]],
+    fromScala: Any => Any,
+    resSeq: ResSeq[T],
   ): Unit = {
-    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair, pair2, array) = vars(attr, v)
+    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
+    if (seqs.nonEmpty && seqs.flatten.nonEmpty) {
+      val blacklist   = v + "-blacklist"
+      val blacklisted = v + "-blacklisted"
 
-    find += v3
-    where += s"[$e $a $v]" -> wClause
-    if (arrays.nonEmpty && arrays.flatten.nonEmpty) {
-      val blacklist               = v + "-blacklist"
-      val blacklisted             = v + "-blacklisted"
-      val (set, set1, v1, v2, e1) = (v + "-set", v + "-set1", v + 1, v + 2, e + 1)
+      // In both pre- and main query
+      where += s"[$e $a $v]" -> wClause
 
       // Pre-query
-      preIn += s"[$set ...]"
+      preArgs += seqs.map(seq => seq.map(fromScala).asJava).asJava
+      preIn += s"[$v4 ...]"
+      // Find blacklisted entities that match input Seqs
       preWhere +=
         s"""[(datomic.api/q
-           |          "[:find (distinct $v1)
-           |            :in $$ $e1
-           |            :where [$e1 $a $v1]]" $$ $e) [[$v2]]]""".stripMargin -> wClause
-      preWhere += s"[(into #{} $set) $set1]" -> wClause
-      preWhere += s"[(= $v2 $set1)]" -> wClause
-      preArgs += arrays.map(set => set.map(fromScala)).asJava
+           |          "[:find (distinct $pair)
+           |            :in $$ $e
+           |            :where [$e $a $v]
+           |                   [$v $ai $i_]
+           |                   [$v $av $v_]
+           |                   [(vector $i_ $v_) $pair]]" $$ $e) [[$v1]]]""".stripMargin -> wClause
+      preWhere += s"[(sort-by first $v1) $v2]" -> wClause
+      preWhere += s"[(map second $v2) $v3]" -> wClause
+      preWhere += s"[(= $v3 $v4)]" -> wClause
 
       // Main query
+      find += v3
       inPost += blacklist
+      // filter out blacklisted entities
       wherePost += s"[(contains? $blacklist $firstId) $blacklisted]" -> wClause
       wherePost += s"[(not $blacklisted)]" -> wClause
+      // now get whitelisted list
+      wherePost +=
+        s"""[(datomic.api/q
+           |          "[:find (distinct $pair)
+           |            :in $$ $e
+           |            :where [$e $a $v]
+           |                   [$v $ai $i_]
+           |                   [$v $av $v_]
+           |                   [(vector $i_ $v_) $pair]]" $$ $e) [[$v1]]]""".stripMargin -> wClause
+      wherePost += s"[(sort-by first $v1) $v2]" -> wClause
+      wherePost += s"[(map second $v2) $v3]" -> wClause
+      addCast(resSeq.jList2list)
+    } else {
+      // Get all
+      attrib(attr,e,v,resSeq)
     }
   }
 
   private def optNeq[T](
     attr: Attr, e: Var, v: Var,
-    optArrays: Option[Seq[Seq[T]]],
-    fromScala: Any => Any
+    optSeqs: Option[Seq[Seq[T]]],
+    fromScala: Any => Any,
+    resSeq: ResSeq[T],
   ): Unit = {
-    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair, pair2, array) = vars(attr, v)
+    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
     find += s"(distinct $v)"
-    optArrays.fold[Unit] {
+    optSeqs.fold[Unit] {
       where += s"[$e $a $v]" -> wClause
     } { sets =>
-      neq(attr, e, v, sets, fromScala)
+      neq(attr, e, v, sets, fromScala, resSeq)
     }
   }
 
@@ -415,13 +428,13 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
 
   private def has[T: ClassTag](
     attr: Attr, e: Var, v: Var,
-    arrays: Seq[Seq[T]], tpe: String, toDatalog: T => String
+    seqs: Seq[Seq[T]], tpe: String, toDatalog: T => String
   ): Unit = {
-    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair, pair2, array) = vars(attr, v)
+    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
     where += s"[$e $a $v]" -> wClause
-    if (arrays.nonEmpty && arrays.flatten.nonEmpty) {
+    if (seqs.nonEmpty && seqs.flatten.nonEmpty) {
       where += s"(rule$v $e)" -> wClause
-      rules ++= mkRules(attr, e, v, arrays, tpe, toDatalog)
+      rules ++= mkRules(attr, e, v, seqs, tpe, toDatalog)
     } else {
       where += s"[(ground nil) $v]" -> wGround
     }
@@ -429,14 +442,14 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
 
   private def optHas[T: ClassTag](
     attr: Attr, e: Var, v: Var,
-    optArrays: Option[Seq[Seq[T]]],
+    optSeqs: Option[Seq[Seq[T]]],
     tpe: String,
-    resArrOpt: ResArrOpt[T],
+    resSeqOpt: ResSeqOpt[T],
     toDatalog: T => String
   ): Unit = {
-    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair, pair2, array) = vars(attr, v)
-    optArrays.fold[Unit] {
-      none(attr, e, v, resArrOpt)
+    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
+    optSeqs.fold[Unit] {
+      none(attr, e, v, resSeqOpt)
     } { sets =>
       find += s"(distinct $v)"
       has(attr, e, v, sets, tpe, toDatalog)
@@ -448,16 +461,16 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
 
   private def hasNo[T](
     attr: Attr, e: Var, v: Var,
-    arrays: Seq[Seq[T]], tpe: String, toDatalog: T => String
+    seqs: Seq[Seq[T]], tpe: String, toDatalog: T => String
   ): Unit = {
-    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair, pair2, array) = vars(attr, v)
+    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
     // Common for pre-query and main query
     where += s"[$e $a $v]" -> wClause
 
-    if (arrays.nonEmpty && arrays.flatten.nonEmpty) {
+    if (seqs.nonEmpty && seqs.flatten.nonEmpty) {
       // Pre-query
       preWhere += s"(rule$v $e)" -> wClause
-      preRules ++= mkRules(attr, e, v, arrays, tpe, toDatalog)
+      preRules ++= mkRules(attr, e, v, seqs, tpe, toDatalog)
 
       // Main query
       val blacklist   = v + "-blacklist"
@@ -470,14 +483,14 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
 
   private def optHasNo[T](
     attr: Attr, e: Var, v: Var,
-    optArrays: Option[Seq[Seq[T]]],
+    optSeqs: Option[Seq[Seq[T]]],
     tpe: String,
     toDatalog: T => String
   ): Unit = {
-    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair, pair2, array) = vars(attr, v)
+    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
     find += s"(distinct $v)"
-    if (optArrays.isDefined) {
-      hasNo(attr, e, v, optArrays.get, tpe, toDatalog)
+    if (optSeqs.isDefined) {
+      hasNo(attr, e, v, optSeqs.get, tpe, toDatalog)
     } else {
       where += s"[$e $a $v]" -> wClause
     }
@@ -487,7 +500,7 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
   // no value -----------------------------------------------------------------
 
   private def noValue(attr: Attr, e: Var): Unit = {
-    //    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair, pair2, array) = vars(attr, v)
+    //    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
 
     val a = nsAttr(attr)
     if (refConfirmed) {
@@ -508,16 +521,16 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
   // aggregation ---------------------------------------------------------------
 
   private def aggr[T](
-    attr: Attr, e: Var, v: Var, fn: String, optN: Option[Int], resArr: ResArr[T]
+    attr: Attr, e: Var, v: Var, fn: String, optN: Option[Int], resSeq: ResSeq[T]
   ): Unit = {
-    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair, pair2, array) = vars(attr, v)
+    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
     checkAggrSet()
     lazy val n = optN.getOrElse(0)
     // Replace find/casting with aggregate function/cast
     find -= s"(distinct $v)"
     fn match {
       case "distinct" =>
-        noBooleanSetAggr(resArr)
+        noBooleanSetAggr(resSeq)
         val (v1, v2, e1) = (v + 1, v + 2, e + 1)
         find += s"(distinct $v2)"
         where += s"[$e $a $v]" -> wClause
@@ -526,37 +539,37 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
              |          "[:find (distinct $v1)
              |            :in $$ $e1
              |            :where [$e1 $a $v1]]" $$ $e) [[$v2]]]""".stripMargin -> wClause
-        replaceCast(resArr.set2sets)
+        replaceCast(resSeq.set2sets)
 
       case "min" =>
-        noBooleanSetAggr(resArr)
+        noBooleanSetAggr(resSeq)
         find += s"(min 1 $v)"
-        replaceCast(resArr.vector2set)
+        replaceCast(resSeq.vector2set)
 
       case "mins" =>
-        noBooleanSetAggr(resArr)
+        noBooleanSetAggr(resSeq)
         find += s"(min $n $v)"
-        replaceCast(resArr.vector2set)
+        replaceCast(resSeq.vector2set)
 
       case "max" =>
-        noBooleanSetAggr(resArr)
+        noBooleanSetAggr(resSeq)
         find += s"(max 1 $v)"
-        replaceCast(resArr.vector2set)
+        replaceCast(resSeq.vector2set)
 
       case "maxs" =>
-        noBooleanSetAggr(resArr)
+        noBooleanSetAggr(resSeq)
         find += s"(max $n $v)"
-        replaceCast(resArr.vector2set)
+        replaceCast(resSeq.vector2set)
 
       case "sample" =>
-        noBooleanSetAggr(resArr)
+        noBooleanSetAggr(resSeq)
         find += s"(sample 1 $v)"
-        replaceCast(resArr.vector2set)
+        replaceCast(resSeq.vector2set)
 
       case "samples" =>
-        noBooleanSetAggr(resArr)
+        noBooleanSetAggr(resSeq)
         find += s"(sample $n $v)"
-        replaceCast(resArr.vector2set)
+        replaceCast(resSeq.vector2set)
 
       case "count" =>
         noBooleanSetCounts(n)
@@ -625,7 +638,7 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
   private def equal2(
     attr: Attr, e: Var, v: Var, filterAttr: String
   ): Unit = {
-    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair, pair2, array) = vars(attr, v)
+    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
     preFind = e
     where += s"[$e $a $v]" -> wClause
     where +=
@@ -650,7 +663,7 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
   private def neq2(
     attr: Attr, e: Var, v: Var, filterAttr: String
   ): Unit = {
-    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair, pair2, array) = vars(attr, v)
+    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
     where += s"[$e $a $v]" -> wClause
     val process: (Var, Var) => Unit = (e1: Var, v1: Var) => {
       val blacklist   = v1 + "-blacklist"
@@ -684,7 +697,7 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
 
 
   private def has2(attr: Attr, e: Var, v: Var, filterAttr: String): Unit = {
-    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair, pair2, array) = vars(attr, v)
+    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
     where += s"[$e $a $v]" -> wClause
     val process: (Var, Var) => Unit = (e1: Var, v1: Var) => {
       where +=
@@ -709,7 +722,7 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
 
 
   private def hasNo2(attr: Attr, e: Var, v: Var, filterAttr: String): Unit = {
-    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair, pair2, array) = vars(attr, v)
+    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
     // Common for pre-query and main query
     where += s"[$e $a $v]" -> wClause
     val process: (Var, Var) => Unit = (e1: Var, v1: Var) => {
@@ -736,8 +749,8 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
 
   // helpers -------------------------------------------------------------------
 
-  private def none[T](attr: Attr, e: Var, v: Var, resArrOpt: ResArrOpt[T]): Unit = {
-    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair, pair2, array) = vars(attr, v)
+  private def none[T](attr: Attr, e: Var, v: Var, resSeqOpt: ResSeqOpt[T]): Unit = {
+    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
     if (refConfirmed) {
       find += s"(pull $e-$v [[$a :limit nil]])"
       where += s"[(identity $e) $e-$v]" -> wGround
@@ -754,18 +767,18 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
       find += s"$v"
       where += s"(not [$e0 $refAttr])" -> wNeqOne
       where += s"[(ground #{[]}) $v]" -> wNeqOne
-      replaceCast(resArrOpt.optAttr2s)
+      replaceCast(resSeqOpt.optAttr2s)
     }
   }
 
   private def mkRules[T](
     attr: Attr, e: Var, v: Var,
-    arrays: Seq[Seq[T]], tpe: String, toDatalog: T => String
+    seqs: Seq[Seq[T]], tpe: String, toDatalog: T => String
   ): Seq[String] = {
-    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair, pair2, array) = vars(attr, v)
+    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
     tpe match {
       case "Float" =>
-        arrays.flatMap {
+        seqs.flatMap {
           case set if set.isEmpty => None
           case set                => Some(
             set.zipWithIndex.map { case (arg, i) =>
@@ -776,7 +789,7 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
           )
         }
       case "URI"   =>
-        arrays.flatMap {
+        seqs.flatMap {
           case set if set.isEmpty => None
           case set                => Some(
             set.zipWithIndex.map { case (arg, i) =>
@@ -785,7 +798,7 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
           )
         }
       case _       =>
-        arrays.flatMap {
+        seqs.flatMap {
           case set if set.isEmpty => None
           case set                => Some(
             set.map(arg => s"[$e $a ${toDatalog(arg)}]")
@@ -795,8 +808,8 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     }
   }
 
-  private def noBooleanSetAggr[T](resArr: ResArr[T]): Unit = {
-    if (resArr.tpe == "Boolean")
+  private def noBooleanSetAggr[T](resSeq: ResSeq[T]): Unit = {
+    if (resSeq.tpe == "Boolean")
       throw ModelError("Aggregate functions not implemented for Sets of boolean values.")
   }
   private def noBooleanSetCounts(n: Int): Unit = {

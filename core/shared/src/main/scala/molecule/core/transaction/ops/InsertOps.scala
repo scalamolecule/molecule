@@ -51,9 +51,9 @@ trait InsertOps extends BaseOps {
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
-//    set2array: Set[Any] => Array[AnyRef],
-//    exts: List[String],
-//    value2json: (StringBuffer, T) => StringBuffer
+    //    set2array: Set[Any] => Array[AnyRef],
+    //    exts: List[String],
+    //    value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = ???
 
   protected def addSeqOpt[T](
@@ -62,9 +62,9 @@ trait InsertOps extends BaseOps {
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
-//    set2array: Set[Any] => Array[AnyRef],
-//    exts: List[String],
-//    value2json: (StringBuffer, T) => StringBuffer
+    //    set2array: Set[Any] => Array[AnyRef],
+    //    exts: List[String],
+    //    value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = ???
 
   protected def addMap[T](

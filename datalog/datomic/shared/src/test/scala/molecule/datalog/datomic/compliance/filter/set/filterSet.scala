@@ -30,7 +30,7 @@ object FilterSet_Char_ extends FilterSet_Char_ with TestAsync_datomic
 object FilterSet_ref_ extends FilterSet_ref with TestAsync_datomic
 
 
-object FilterRefSet extends FilterRefSet with TestAsync_datomic
+object FilterRefSet_base extends FilterRefSet_base with TestAsync_datomic
 object FilterRefSet_Card1Ref extends FilterRefSet_Card1Ref with TestAsync_datomic
 object FilterRefSet_Card1RefOwned extends FilterRefSet_Card1RefOwned with TestAsync_datomic
 object FilterRefSet_Card2Ref extends FilterRefSet_Card2Ref with TestAsync_datomic

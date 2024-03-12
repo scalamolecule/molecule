@@ -22,40 +22,40 @@ trait UpdateByteArrayOps_Byte extends CoreTestSuite with Array2List with ApiAsyn
         id <- Ns.byteSeq(Array(byte1, byte2, byte2)).save.transact.map(_.id)
         _ <- Ns.byteSeq.query.get.map(_.head ==> Array(byte1, byte2, byte2))
 
-        // Applying Array of values replaces previous Array
+        // Applying Byte Array replaces previous Array
         _ <- Ns(id).byteSeq(Array(byte3, byte4, byte4)).update.transact
         _ <- Ns.byteSeq.query.get.map(_.head ==> Array(byte3, byte4, byte4))
 
-        // Applying empty Array of values deletes previous Array - todo...
+        // Applying empty Byte Array deletes previous Array
         _ <- Ns(id).byteSeq(Array.empty[Byte]).update.transact
         _ <- Ns.byteSeq.query.get.map(_ ==> Nil)
 
         id <- Ns.byteSeq(Array(byte1, byte2, byte2)).save.transact.map(_.id)
-        // Applying empty value deletes previous Array
+        // Applying empty value deletes previous Byte Array
         _ <- Ns(id).byteSeq().update.transact
         _ <- Ns.byteSeq.query.get.map(_ ==> Nil)
       } yield ()
     }
 
 
-//    "add" - types { implicit conn =>
-//      for {
-//        id <- Ns.byteSeq(Array(byte1)).save.transact.map(_.id)
-//
-//        // Operations on byte arrays not allowed
-//        _ <- Future(compileError("Ns(id).byteSeq.add(byte2)"))
-//
-//      } yield ()
-//    }
-//
-//
-//    "remove" - types { implicit conn =>
-//      for {
-//        id <- Ns.byteSeq(Array(byte1, byte2)).save.transact.map(_.id)
-//
-//        // Operations on byte arrays not allowed
-//        _ <- Future(compileError("Ns(id).byteSeq.remove(byte2)"))
-//      } yield ()
-//    }
+    "add" - types { implicit conn =>
+      for {
+        id <- Ns.byteSeq(Array(byte1)).save.transact.map(_.id)
+
+        // Operations on byte arrays not allowed
+        _ <- Future(compileError("Ns(id).byteSeq.add(byte2)"))
+
+      } yield ()
+    }
+
+
+    "remove" - types { implicit conn =>
+      for {
+        id <- Ns.byteSeq(Array(byte1, byte2)).save.transact.map(_.id)
+
+        // Operations on byte arrays not allowed
+        _ <- Future(compileError("Ns(id).byteSeq.remove(byte2)"))
+      } yield ()
+    }
   }
 }
