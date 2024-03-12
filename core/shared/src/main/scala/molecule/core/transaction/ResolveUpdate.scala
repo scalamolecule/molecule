@@ -39,15 +39,15 @@ class ResolveUpdate(
               case _: AttrSetOpt => throw ModelError(s"Can't $update optional values. Found:\n" + a)
             }
 
-            case a: AttrArr => a match {
-              case a: AttrArrMan => a.op match {
-                case Eq     => resolveAttrArrMan(a); resolve(tail)
-                case Add    => resolveAttrArrAdd(a); resolve(tail)
-                case Remove => resolveAttrArrRemove(a); resolve(tail)
+            case a: AttrSeq => a match {
+              case a: AttrSeqMan => a.op match {
+                case Eq     => resolveAttrSeqMan(a); resolve(tail)
+                case Add    => resolveAttrSeqAdd(a); resolve(tail)
+                case Remove => resolveAttrSeqRemove(a); resolve(tail)
                 case _      => throw ModelError(s"Unexpected $update operation for card-many attribute. Found:\n" + a)
               }
-              case _: AttrArrTac => throw ModelError("Can only lookup entity with card-one attribute value. Found:\n" + a)
-              case _: AttrArrOpt => throw ModelError(s"Can't $update optional values. Found:\n" + a)
+              case _: AttrSeqTac => throw ModelError("Can only lookup entity with card-one attribute value. Found:\n" + a)
+              case _: AttrSeqOpt => throw ModelError(s"Can't $update optional values. Found:\n" + a)
             }
 
             case a: AttrMap => ???
@@ -201,90 +201,106 @@ class ResolveUpdate(
     }
   }
 
-  private def resolveAttrArrMan(a: AttrArrMan): Unit = {
+  private def resolveAttrSeqMan(a: AttrSeqMan): Unit = {
     val (ns, attr) = (a.ns, a.attr)
     a match {
-      case a: AttrArrManID             => updateArrayEq(ns, attr, a.vs, a.refNs, a.owner, transformID) //, set2arrayID, extsID, value2jsonID)
-      case a: AttrArrManString         => updateArrayEq(ns, attr, a.vs, a.refNs, a.owner, transformString) //, set2arrayString, extsString, value2jsonString)
-      case a: AttrArrManInt            => updateArrayEq(ns, attr, a.vs, a.refNs, a.owner, transformInt) //, set2arrayInt, extsInt, value2jsonInt)
-      case a: AttrArrManLong           => updateArrayEq(ns, attr, a.vs, a.refNs, a.owner, transformLong) //, set2arrayLong, extsLong, value2jsonLong)
-      case a: AttrArrManFloat          => updateArrayEq(ns, attr, a.vs, a.refNs, a.owner, transformFloat) //, set2arrayFloat, extsFloat, value2jsonFloat)
-      case a: AttrArrManDouble         => updateArrayEq(ns, attr, a.vs, a.refNs, a.owner, transformDouble) //, set2arrayDouble, extsDouble, value2jsonDouble)
-      case a: AttrArrManBoolean        => updateArrayEq(ns, attr, a.vs, a.refNs, a.owner, transformBoolean) //, set2arrayBoolean, extsBoolean, value2jsonBoolean)
-      case a: AttrArrManBigInt         => updateArrayEq(ns, attr, a.vs, a.refNs, a.owner, transformBigInt) //, set2arrayBigInt, extsBigInt, value2jsonBigInt)
-      case a: AttrArrManBigDecimal     => updateArrayEq(ns, attr, a.vs, a.refNs, a.owner, transformBigDecimal) //, set2arrayBigDecimal, extsBigDecimal, value2jsonBigDecimal)
-      case a: AttrArrManDate           => updateArrayEq(ns, attr, a.vs, a.refNs, a.owner, transformDate) //, set2arrayDate, extsDate, value2jsonDate)
-      case a: AttrArrManDuration       => updateArrayEq(ns, attr, a.vs, a.refNs, a.owner, transformDuration) //, set2arrayDuration, extsDuration, value2jsonDuration)
-      case a: AttrArrManInstant        => updateArrayEq(ns, attr, a.vs, a.refNs, a.owner, transformInstant) //, set2arrayInstant, extsInstant, value2jsonInstant)
-      case a: AttrArrManLocalDate      => updateArrayEq(ns, attr, a.vs, a.refNs, a.owner, transformLocalDate) //, set2arrayLocalDate, extsLocalDate, value2jsonLocalDate)
-      case a: AttrArrManLocalTime      => updateArrayEq(ns, attr, a.vs, a.refNs, a.owner, transformLocalTime) //, set2arrayLocalTime, extsLocalTime, value2jsonLocalTime)
-      case a: AttrArrManLocalDateTime  => updateArrayEq(ns, attr, a.vs, a.refNs, a.owner, transformLocalDateTime) //, set2arrayLocalDateTime, extsLocalDateTime, value2jsonLocalDateTime)
-      case a: AttrArrManOffsetTime     => updateArrayEq(ns, attr, a.vs, a.refNs, a.owner, transformOffsetTime) //, set2arrayOffsetTime, extsOffsetTime, value2jsonOffsetTime)
-      case a: AttrArrManOffsetDateTime => updateArrayEq(ns, attr, a.vs, a.refNs, a.owner, transformOffsetDateTime) //, set2arrayOffsetDateTime, extsOffsetDateTime, value2jsonOffsetDateTime)
-      case a: AttrArrManZonedDateTime  => updateArrayEq(ns, attr, a.vs, a.refNs, a.owner, transformZonedDateTime) //, set2arrayZonedDateTime, extsZonedDateTime, value2jsonZonedDateTime)
-      case a: AttrArrManUUID           => updateArrayEq(ns, attr, a.vs, a.refNs, a.owner, transformUUID) //, set2arrayUUID, extsUUID, value2jsonUUID)
-      case a: AttrArrManURI            => updateArrayEq(ns, attr, a.vs, a.refNs, a.owner, transformURI) //, set2arrayURI, extsURI, value2jsonURI)
-      case a: AttrArrManByte           => updateByteArray(ns, attr, a.vs)
-      case a: AttrArrManShort          => updateArrayEq(ns, attr, a.vs, a.refNs, a.owner, transformShort) //, set2arrayShort, extsShort, value2jsonShort)
-      case a: AttrArrManChar           => updateArrayEq(ns, attr, a.vs, a.refNs, a.owner, transformChar) //, set2arrayChar, extsChar, value2jsonChar)
+      case a: AttrSeqManID             => updateSeqEq(ns, attr, a.vs, a.refNs, a.owner, transformID) //, set2arrayID, extsID, value2jsonID)
+      case a: AttrSeqManString         => updateSeqEq(ns, attr, a.vs, a.refNs, a.owner, transformString) //, set2arrayString, extsString, value2jsonString)
+      case a: AttrSeqManInt            => updateSeqEq(ns, attr, a.vs, a.refNs, a.owner, transformInt) //, set2arrayInt, extsInt, value2jsonInt)
+      case a: AttrSeqManLong           => updateSeqEq(ns, attr, a.vs, a.refNs, a.owner, transformLong) //, set2arrayLong, extsLong, value2jsonLong)
+      case a: AttrSeqManFloat          => updateSeqEq(ns, attr, a.vs, a.refNs, a.owner, transformFloat) //, set2arrayFloat, extsFloat, value2jsonFloat)
+      case a: AttrSeqManDouble         => updateSeqEq(ns, attr, a.vs, a.refNs, a.owner, transformDouble) //, set2arrayDouble, extsDouble, value2jsonDouble)
+      case a: AttrSeqManBoolean        => updateSeqEq(ns, attr, a.vs, a.refNs, a.owner, transformBoolean) //, set2arrayBoolean, extsBoolean, value2jsonBoolean)
+      case a: AttrSeqManBigInt         => updateSeqEq(ns, attr, a.vs, a.refNs, a.owner, transformBigInt) //, set2arrayBigInt, extsBigInt, value2jsonBigInt)
+      case a: AttrSeqManBigDecimal     => updateSeqEq(ns, attr, a.vs, a.refNs, a.owner, transformBigDecimal) //, set2arrayBigDecimal, extsBigDecimal, value2jsonBigDecimal)
+      case a: AttrSeqManDate           => updateSeqEq(ns, attr, a.vs, a.refNs, a.owner, transformDate) //, set2arrayDate, extsDate, value2jsonDate)
+      case a: AttrSeqManDuration       => updateSeqEq(ns, attr, a.vs, a.refNs, a.owner, transformDuration) //, set2arrayDuration, extsDuration, value2jsonDuration)
+      case a: AttrSeqManInstant        => updateSeqEq(ns, attr, a.vs, a.refNs, a.owner, transformInstant) //, set2arrayInstant, extsInstant, value2jsonInstant)
+      case a: AttrSeqManLocalDate      => updateSeqEq(ns, attr, a.vs, a.refNs, a.owner, transformLocalDate) //, set2arrayLocalDate, extsLocalDate, value2jsonLocalDate)
+      case a: AttrSeqManLocalTime      => updateSeqEq(ns, attr, a.vs, a.refNs, a.owner, transformLocalTime) //, set2arrayLocalTime, extsLocalTime, value2jsonLocalTime)
+      case a: AttrSeqManLocalDateTime  => updateSeqEq(ns, attr, a.vs, a.refNs, a.owner, transformLocalDateTime) //, set2arrayLocalDateTime, extsLocalDateTime, value2jsonLocalDateTime)
+      case a: AttrSeqManOffsetTime     => updateSeqEq(ns, attr, a.vs, a.refNs, a.owner, transformOffsetTime) //, set2arrayOffsetTime, extsOffsetTime, value2jsonOffsetTime)
+      case a: AttrSeqManOffsetDateTime => updateSeqEq(ns, attr, a.vs, a.refNs, a.owner, transformOffsetDateTime) //, set2arrayOffsetDateTime, extsOffsetDateTime, value2jsonOffsetDateTime)
+      case a: AttrSeqManZonedDateTime  => updateSeqEq(ns, attr, a.vs, a.refNs, a.owner, transformZonedDateTime) //, set2arrayZonedDateTime, extsZonedDateTime, value2jsonZonedDateTime)
+      case a: AttrSeqManUUID           => updateSeqEq(ns, attr, a.vs, a.refNs, a.owner, transformUUID) //, set2arrayUUID, extsUUID, value2jsonUUID)
+      case a: AttrSeqManURI            => updateSeqEq(ns, attr, a.vs, a.refNs, a.owner, transformURI) //, set2arrayURI, extsURI, value2jsonURI)
+      case a: AttrSeqManByte           =>
+        updateByteArray(ns, attr, a.vs)
+
+
+
+      case a: AttrSeqManShort          => updateSeqEq(ns, attr, a.vs, a.refNs, a.owner, transformShort) //, set2arrayShort, extsShort, value2jsonShort)
+      case a: AttrSeqManChar           => updateSeqEq(ns, attr, a.vs, a.refNs, a.owner, transformChar) //, set2arrayChar, extsChar, value2jsonChar)
+//      case a: AttrSeqManByte           => updateByteArray(ns, attr, a.vs)
     }
   }
 
-  private def resolveAttrArrAdd(a: AttrArrMan): Unit = {
+  private def resolveAttrSeqAdd(a: AttrSeqMan): Unit = {
     val (ns, attr) = (a.ns, a.attr)
     a match {
-      case a: AttrArrManID             => updateArrayAdd(ns, attr, a.vs, a.refNs, a.owner, transformID) //, set2arrayID, extsID, value2jsonID)
-      case a: AttrArrManString         => updateArrayAdd(ns, attr, a.vs, a.refNs, a.owner, transformString) //, set2arrayString, extsString, value2jsonString)
-      case a: AttrArrManInt            => updateArrayAdd(ns, attr, a.vs, a.refNs, a.owner, transformInt) //, set2arrayInt, extsInt, value2jsonInt)
-      case a: AttrArrManLong           => updateArrayAdd(ns, attr, a.vs, a.refNs, a.owner, transformLong) //, set2arrayLong, extsLong, value2jsonLong)
-      case a: AttrArrManFloat          => updateArrayAdd(ns, attr, a.vs, a.refNs, a.owner, transformFloat) //, set2arrayFloat, extsFloat, value2jsonFloat)
-      case a: AttrArrManDouble         => updateArrayAdd(ns, attr, a.vs, a.refNs, a.owner, transformDouble) //, set2arrayDouble, extsDouble, value2jsonDouble)
-      case a: AttrArrManBoolean        => updateArrayAdd(ns, attr, a.vs, a.refNs, a.owner, transformBoolean) //, set2arrayBoolean, extsBoolean, value2jsonBoolean)
-      case a: AttrArrManBigInt         => updateArrayAdd(ns, attr, a.vs, a.refNs, a.owner, transformBigInt) //, set2arrayBigInt, extsBigInt, value2jsonBigInt)
-      case a: AttrArrManBigDecimal     => updateArrayAdd(ns, attr, a.vs, a.refNs, a.owner, transformBigDecimal) //, set2arrayBigDecimal, extsBigDecimal, value2jsonBigDecimal)
-      case a: AttrArrManDate           => updateArrayAdd(ns, attr, a.vs, a.refNs, a.owner, transformDate) //, set2arrayDate, extsDate, value2jsonDate)
-      case a: AttrArrManDuration       => updateArrayAdd(ns, attr, a.vs, a.refNs, a.owner, transformDuration) //, set2arrayDuration, extsDuration, value2jsonDuration)
-      case a: AttrArrManInstant        => updateArrayAdd(ns, attr, a.vs, a.refNs, a.owner, transformInstant) //, set2arrayInstant, extsInstant, value2jsonInstant)
-      case a: AttrArrManLocalDate      => updateArrayAdd(ns, attr, a.vs, a.refNs, a.owner, transformLocalDate) //, set2arrayLocalDate, extsLocalDate, value2jsonLocalDate)
-      case a: AttrArrManLocalTime      => updateArrayAdd(ns, attr, a.vs, a.refNs, a.owner, transformLocalTime) //, set2arrayLocalTime, extsLocalTime, value2jsonLocalTime)
-      case a: AttrArrManLocalDateTime  => updateArrayAdd(ns, attr, a.vs, a.refNs, a.owner, transformLocalDateTime) //, set2arrayLocalDateTime, extsLocalDateTime, value2jsonLocalDateTime)
-      case a: AttrArrManOffsetTime     => updateArrayAdd(ns, attr, a.vs, a.refNs, a.owner, transformOffsetTime) //, set2arrayOffsetTime, extsOffsetTime, value2jsonOffsetTime)
-      case a: AttrArrManOffsetDateTime => updateArrayAdd(ns, attr, a.vs, a.refNs, a.owner, transformOffsetDateTime) //, set2arrayOffsetDateTime, extsOffsetDateTime, value2jsonOffsetDateTime)
-      case a: AttrArrManZonedDateTime  => updateArrayAdd(ns, attr, a.vs, a.refNs, a.owner, transformZonedDateTime) //, set2arrayZonedDateTime, extsZonedDateTime, value2jsonZonedDateTime)
-      case a: AttrArrManUUID           => updateArrayAdd(ns, attr, a.vs, a.refNs, a.owner, transformUUID) //, set2arrayUUID, extsUUID, value2jsonUUID)
-      case a: AttrArrManURI            => updateArrayAdd(ns, attr, a.vs, a.refNs, a.owner, transformURI) //, set2arrayURI, extsURI, value2jsonURI)
-      case a: AttrArrManByte           => throw ModelError(s"Operations on byte arrays (${a.ns}.${a.attr}) not allowed.")
-      case a: AttrArrManShort          => updateArrayAdd(ns, attr, a.vs, a.refNs, a.owner, transformShort) //, set2arrayShort, extsShort, value2jsonShort)
-      case a: AttrArrManChar           => updateArrayAdd(ns, attr, a.vs, a.refNs, a.owner, transformChar) //, set2arrayChar, extsChar, value2jsonChar)
+      case a: AttrSeqManID             => updateSeqAdd(ns, attr, a.vs, a.refNs, a.owner, transformID) //, set2arrayID, extsID, value2jsonID)
+      case a: AttrSeqManString         => updateSeqAdd(ns, attr, a.vs, a.refNs, a.owner, transformString) //, set2arrayString, extsString, value2jsonString)
+      case a: AttrSeqManInt            => updateSeqAdd(ns, attr, a.vs, a.refNs, a.owner, transformInt) //, set2arrayInt, extsInt, value2jsonInt)
+      case a: AttrSeqManLong           => updateSeqAdd(ns, attr, a.vs, a.refNs, a.owner, transformLong) //, set2arrayLong, extsLong, value2jsonLong)
+      case a: AttrSeqManFloat          => updateSeqAdd(ns, attr, a.vs, a.refNs, a.owner, transformFloat) //, set2arrayFloat, extsFloat, value2jsonFloat)
+      case a: AttrSeqManDouble         => updateSeqAdd(ns, attr, a.vs, a.refNs, a.owner, transformDouble) //, set2arrayDouble, extsDouble, value2jsonDouble)
+      case a: AttrSeqManBoolean        => updateSeqAdd(ns, attr, a.vs, a.refNs, a.owner, transformBoolean) //, set2arrayBoolean, extsBoolean, value2jsonBoolean)
+      case a: AttrSeqManBigInt         => updateSeqAdd(ns, attr, a.vs, a.refNs, a.owner, transformBigInt) //, set2arrayBigInt, extsBigInt, value2jsonBigInt)
+      case a: AttrSeqManBigDecimal     => updateSeqAdd(ns, attr, a.vs, a.refNs, a.owner, transformBigDecimal) //, set2arrayBigDecimal, extsBigDecimal, value2jsonBigDecimal)
+      case a: AttrSeqManDate           => updateSeqAdd(ns, attr, a.vs, a.refNs, a.owner, transformDate) //, set2arrayDate, extsDate, value2jsonDate)
+      case a: AttrSeqManDuration       => updateSeqAdd(ns, attr, a.vs, a.refNs, a.owner, transformDuration) //, set2arrayDuration, extsDuration, value2jsonDuration)
+      case a: AttrSeqManInstant        => updateSeqAdd(ns, attr, a.vs, a.refNs, a.owner, transformInstant) //, set2arrayInstant, extsInstant, value2jsonInstant)
+      case a: AttrSeqManLocalDate      => updateSeqAdd(ns, attr, a.vs, a.refNs, a.owner, transformLocalDate) //, set2arrayLocalDate, extsLocalDate, value2jsonLocalDate)
+      case a: AttrSeqManLocalTime      => updateSeqAdd(ns, attr, a.vs, a.refNs, a.owner, transformLocalTime) //, set2arrayLocalTime, extsLocalTime, value2jsonLocalTime)
+      case a: AttrSeqManLocalDateTime  => updateSeqAdd(ns, attr, a.vs, a.refNs, a.owner, transformLocalDateTime) //, set2arrayLocalDateTime, extsLocalDateTime, value2jsonLocalDateTime)
+      case a: AttrSeqManOffsetTime     => updateSeqAdd(ns, attr, a.vs, a.refNs, a.owner, transformOffsetTime) //, set2arrayOffsetTime, extsOffsetTime, value2jsonOffsetTime)
+      case a: AttrSeqManOffsetDateTime => updateSeqAdd(ns, attr, a.vs, a.refNs, a.owner, transformOffsetDateTime) //, set2arrayOffsetDateTime, extsOffsetDateTime, value2jsonOffsetDateTime)
+      case a: AttrSeqManZonedDateTime  => updateSeqAdd(ns, attr, a.vs, a.refNs, a.owner, transformZonedDateTime) //, set2arrayZonedDateTime, extsZonedDateTime, value2jsonZonedDateTime)
+      case a: AttrSeqManUUID           => updateSeqAdd(ns, attr, a.vs, a.refNs, a.owner, transformUUID) //, set2arrayUUID, extsUUID, value2jsonUUID)
+      case a: AttrSeqManURI            => updateSeqAdd(ns, attr, a.vs, a.refNs, a.owner, transformURI) //, set2arrayURI, extsURI, value2jsonURI)
+//      case a: AttrSeqManByte           =>
+//        updateSeqAdd(ns, attr, a.vs, a.refNs, a.owner, transformByte) //, set2arrayByte, extsByte, value2jsonByte)
+//        updateByteArray(ns, attr, a.vs)
+
+      case a: AttrSeqManByte           => throw ModelError(s"Operations on byte arrays (${a.ns}.${a.attr}) not allowed.")
+
+
+      case a: AttrSeqManShort          => updateSeqAdd(ns, attr, a.vs, a.refNs, a.owner, transformShort) //, set2arrayShort, extsShort, value2jsonShort)
+      case a: AttrSeqManChar           => updateSeqAdd(ns, attr, a.vs, a.refNs, a.owner, transformChar) //, set2arrayChar, extsChar, value2jsonChar)
     }
   }
 
-  private def resolveAttrArrRemove(a: AttrArrMan): Unit = {
+  private def resolveAttrSeqRemove(a: AttrSeqMan): Unit = {
     val (ns, attr) = (a.ns, a.attr)
     a match {
-      case a: AttrArrManID             => updateArrayRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformID) //, handleID, extsID, one2jsonID)
-      case a: AttrArrManString         => updateArrayRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformString) //, handleString, extsString, one2jsonString)
-      case a: AttrArrManInt            => updateArrayRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformInt) //, handleInt, extsInt, one2jsonInt)
-      case a: AttrArrManLong           => updateArrayRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformLong) //, handleLong, extsLong, one2jsonLong)
-      case a: AttrArrManFloat          => updateArrayRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformFloat) //, handleFloat, extsFloat, one2jsonFloat)
-      case a: AttrArrManDouble         => updateArrayRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformDouble) //, handleDouble, extsDouble, one2jsonDouble)
-      case a: AttrArrManBoolean        => updateArrayRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformBoolean) //, handleBoolean, extsBoolean, one2jsonBoolean)
-      case a: AttrArrManBigInt         => updateArrayRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformBigInt) //, handleBigInt, extsBigInt, one2jsonBigInt)
-      case a: AttrArrManBigDecimal     => updateArrayRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformBigDecimal) //, handleBigDecimal, extsBigDecimal, one2jsonBigDecimal)
-      case a: AttrArrManDate           => updateArrayRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformDate) //, handleDate, extsDate, one2jsonDate)
-      case a: AttrArrManDuration       => updateArrayRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformDuration) //, handleDuration, extsDuration, one2jsonDuration)
-      case a: AttrArrManInstant        => updateArrayRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformInstant) //, handleInstant, extsInstant, one2jsonInstant)
-      case a: AttrArrManLocalDate      => updateArrayRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformLocalDate) //, handleLocalDate, extsLocalDate, one2jsonLocalDate)
-      case a: AttrArrManLocalTime      => updateArrayRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformLocalTime) //, handleLocalTime, extsLocalTime, one2jsonLocalTime)
-      case a: AttrArrManLocalDateTime  => updateArrayRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformLocalDateTime) //, handleLocalDateTime, extsLocalDateTime, one2jsonLocalDateTime)
-      case a: AttrArrManOffsetTime     => updateArrayRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformOffsetTime) //, handleOffsetTime, extsOffsetTime, one2jsonOffsetTime)
-      case a: AttrArrManOffsetDateTime => updateArrayRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformOffsetDateTime) //, handleOffsetDateTime, extsOffsetDateTime, one2jsonOffsetDateTime)
-      case a: AttrArrManZonedDateTime  => updateArrayRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformZonedDateTime) //, handleZonedDateTime, extsZonedDateTime, one2jsonZonedDateTime)
-      case a: AttrArrManUUID           => updateArrayRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformUUID) //, handleUUID, extsUUID, one2jsonUUID)
-      case a: AttrArrManURI            => updateArrayRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformURI) //, handleURI, extsURI, one2jsonURI)
-      case a: AttrArrManByte           => throw ModelError(s"Operations on byte arrays (${a.ns}.${a.attr}) not allowed.")
-      case a: AttrArrManShort          => updateArrayRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformShort) //, handleShort, extsShort, one2jsonShort)
-      case a: AttrArrManChar           => updateArrayRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformChar) //, handleChar, extsChar, one2jsonChar)
+      case a: AttrSeqManID             => updateSeqRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformID) //, handleID, extsID, one2jsonID)
+      case a: AttrSeqManString         => updateSeqRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformString) //, handleString, extsString, one2jsonString)
+      case a: AttrSeqManInt            => updateSeqRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformInt) //, handleInt, extsInt, one2jsonInt)
+      case a: AttrSeqManLong           => updateSeqRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformLong) //, handleLong, extsLong, one2jsonLong)
+      case a: AttrSeqManFloat          => updateSeqRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformFloat) //, handleFloat, extsFloat, one2jsonFloat)
+      case a: AttrSeqManDouble         => updateSeqRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformDouble) //, handleDouble, extsDouble, one2jsonDouble)
+      case a: AttrSeqManBoolean        => updateSeqRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformBoolean) //, handleBoolean, extsBoolean, one2jsonBoolean)
+      case a: AttrSeqManBigInt         => updateSeqRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformBigInt) //, handleBigInt, extsBigInt, one2jsonBigInt)
+      case a: AttrSeqManBigDecimal     => updateSeqRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformBigDecimal) //, handleBigDecimal, extsBigDecimal, one2jsonBigDecimal)
+      case a: AttrSeqManDate           => updateSeqRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformDate) //, handleDate, extsDate, one2jsonDate)
+      case a: AttrSeqManDuration       => updateSeqRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformDuration) //, handleDuration, extsDuration, one2jsonDuration)
+      case a: AttrSeqManInstant        => updateSeqRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformInstant) //, handleInstant, extsInstant, one2jsonInstant)
+      case a: AttrSeqManLocalDate      => updateSeqRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformLocalDate) //, handleLocalDate, extsLocalDate, one2jsonLocalDate)
+      case a: AttrSeqManLocalTime      => updateSeqRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformLocalTime) //, handleLocalTime, extsLocalTime, one2jsonLocalTime)
+      case a: AttrSeqManLocalDateTime  => updateSeqRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformLocalDateTime) //, handleLocalDateTime, extsLocalDateTime, one2jsonLocalDateTime)
+      case a: AttrSeqManOffsetTime     => updateSeqRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformOffsetTime) //, handleOffsetTime, extsOffsetTime, one2jsonOffsetTime)
+      case a: AttrSeqManOffsetDateTime => updateSeqRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformOffsetDateTime) //, handleOffsetDateTime, extsOffsetDateTime, one2jsonOffsetDateTime)
+      case a: AttrSeqManZonedDateTime  => updateSeqRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformZonedDateTime) //, handleZonedDateTime, extsZonedDateTime, one2jsonZonedDateTime)
+      case a: AttrSeqManUUID           => updateSeqRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformUUID) //, handleUUID, extsUUID, one2jsonUUID)
+      case a: AttrSeqManURI            => updateSeqRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformURI) //, handleURI, extsURI, one2jsonURI)
+//      case a: AttrSeqManByte           =>
+//        updateSeqRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformByte) //, handleByte, extsByte, one2jsonByte)
+
+      case a: AttrSeqManByte           => throw ModelError(s"Operations on byte arrays (${a.ns}.${a.attr}) not allowed.")
+
+
+      case a: AttrSeqManShort          => updateSeqRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformShort) //, handleShort, extsShort, one2jsonShort)
+      case a: AttrSeqManChar           => updateSeqRemove(ns, attr, a.vs.head, a.refNs, a.owner, transformChar) //, handleChar, extsChar, one2jsonChar)
     }
   }
 }

@@ -97,7 +97,7 @@ trait SpiHelpers extends ModelUtils {
           case _: AttrSetTac => throw ModelError("Can only lookup entity with card-one attribute value. Found:\n" + a)
           case _: AttrSetOpt => throw ModelError(s"Can't $update optional values. Found:\n" + a)
 
-          case a: AttrArr => ???
+          case a: AttrSeq => ???
           case a: AttrMap => ???
         }
 

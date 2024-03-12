@@ -76,11 +76,11 @@ trait Save_datomic
     }
   }
 
-  override protected def addArray[T](
+  override protected def addSeq[T](
     ns: String,
     attr: String,
     refNs: Option[String],
-    optArray: Option[Array[Any]],
+    optArray: Option[Seq[Any]],
     transformValue: T => Any,
     //    set2array: Set[Any] => Array[AnyRef],
     //    exts: List[String] = Nil,

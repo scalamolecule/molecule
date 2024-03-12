@@ -45,7 +45,7 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |    val last = es.last match {
        |      case a: AttrOneMan => AttrOneManDouble(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs, coord = a.coord)
        |      case a: AttrSetMan => AttrSetManDouble(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs, coord = a.coord)
-       |      case a: AttrArrMan => AttrArrManDouble(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs, coord = a.coord)
+       |      case a: AttrSeqMan => AttrSeqManDouble(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs, coord = a.coord)
        |      case a: AttrMapMan => AttrMapManDouble(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs, coord = a.coord)
        |      case a             => unexpected(a)
        |    }
@@ -60,8 +60,8 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |      case a: AttrSetMan => a match {
        |        ${asIs("Set")}
        |      }
-       |      case a: AttrArrMan => a match {
-       |        ${asIs("Arr")}
+       |      case a: AttrSeqMan => a match {
+       |        ${asIs("Seq")}
        |      }
        |      case a: AttrMapMan => a match {
        |        ${asIs("Map")}
@@ -117,27 +117,49 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |    es.init :+ last
        |  }
        |
-       |  protected def addArr[T](es: List[Element], op: Op, vs: Seq[Array[T]]): List[Element] = {
+       |  protected def addSeq[T](es: List[Element], op: Op, vs: Seq[Seq[T]]): List[Element] = {
        |    val last = es.last match {
-       |      case a: AttrArrMan => a match {
-       |        ${addArr("Man")}
+       |      case a: AttrSeqMan => a match {
+       |        ${addSeq("Man")}
+       |
+       |        case a: AttrSeqManByte => ???
        |      }
-       |      case a: AttrArrTac => a match {
-       |        ${addArr("Tac")}
+       |      case a: AttrSeqTac => a match {
+       |        ${addSeq("Tac")}
+       |
+       |        case a: AttrSeqTacByte => ???
        |      }
        |      case a             => unexpected(a)
        |    }
        |    es.init :+ last
        |  }
        |
-       |  protected def addOptArr[T](es: List[Element], op: Op, vs: Option[Seq[Array[T]]]): List[Element] = {
+       |  protected def addOptSeq[T](es: List[Element], op: Op, vs: Option[Seq[Seq[T]]]): List[Element] = {
        |    val last = es.last match {
-       |      case a: AttrArrOpt => a match {
-       |        $addOptArr
+       |      case a: AttrSeqOpt => a match {
+       |        $addOptSeq
+       |
+       |        case a: AttrSeqOptByte => ???
        |      }
        |      case a             => unexpected(a)
        |    }
        |    es.init :+ last
+       |  }
+       |
+       |  protected def addBAr[T](es: List[Element], op: Op, ba: Seq[Array[T]]): List[Element] = {
+       |    es.init :+ (es.last match {
+       |      case a: AttrSeqManByte => a.copy(op = op, vs = ba.asInstanceOf[Seq[Array[Byte]]])
+       |      case a: AttrSeqTacByte => a.copy(op = op, vs = ba.asInstanceOf[Seq[Array[Byte]]])
+       |      case e                 => throw ModelError("Unexpected Element for adding byte array: " + e)
+       |    })
+       |  }
+       |
+       |  protected def addOptBAr[T](es: List[Element], op: Op, optBA: Option[Array[T]]): List[Element] = {
+       |    es.init :+ (es.last match {
+       |      case a: AttrSeqOptByte =>
+       |        a.copy(op = op, vs = optBA.asInstanceOf[Option[Array[Byte]]].map(array => Seq(array)))
+       |      case e                 => throw ModelError("Unexpected Element for adding byte array: " + e)
+       |    })
        |  }
        |
        |  protected def addMap[T](es: List[Element], op: Op, vs: Seq[Map[String, T]]): List[Element] = {
@@ -232,9 +254,9 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |              case a: AttrSetManID             => AttrSetTacID(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.refNs, a.sort, a.coord, a.owner)
        |              ${liftFilterAttr("Set")}
        |            }
-       |            case a: AttrArrMan => a match {
-       |              case a: AttrArrManID             => AttrArrTacID(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.refNs, a.sort, a.coord, a.owner)
-       |              ${liftFilterAttr("Arr")}
+       |            case a: AttrSeqMan => a match {
+       |              case a: AttrSeqManID             => AttrSeqTacID(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.refNs, a.sort, a.coord, a.owner)
+       |              ${liftFilterAttr("Seq")}
        |            }
        |            case a: AttrMapMan => a match {
        |              case a: AttrMapManID             => AttrMapTacID(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.refNs, a.sort, a.coord, a.owner)
@@ -268,12 +290,12 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |            case a             => unexpected(a)
        |          }
        |
-       |          case a: AttrArr => a match {
-       |            case a: AttrArrMan => a match {
-       |              ${addFilterAttr("Arr", "Man")}
+       |          case a: AttrSeq => a match {
+       |            case a: AttrSeqMan => a match {
+       |              ${addFilterAttr("Seq", "Man")}
        |            }
-       |            case a: AttrArrTac => a match {
-       |              ${addFilterAttr("Arr", "Tac")}
+       |            case a: AttrSeqTac => a match {
+       |              ${addFilterAttr("Seq", "Tac")}
        |            }
        |            case a             => unexpected(a)
        |          }
@@ -338,13 +360,13 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |          }
        |        }
        |
-       |        case a: AttrArr => a match {
-       |          case a: AttrArrTac => a
-       |          case a: AttrArrMan => a match {
-       |            ${clean("Arr", "Man")}
+       |        case a: AttrSeq => a match {
+       |          case a: AttrSeqTac => a
+       |          case a: AttrSeqMan => a match {
+       |            ${clean("Seq", "Man")}
        |          }
-       |          case a: AttrArrOpt => a match {
-       |            ${clean("Arr", "Opt")}
+       |          case a: AttrSeqOpt => a match {
+       |            ${clean("Seq", "Opt")}
        |          }
        |        }
        |
@@ -376,9 +398,9 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |          case _: AttrSetOpt => topLevelAttrCount(tail, count + 1)
        |          case _             => topLevelAttrCount(tail, count)
        |        }
-       |        case a: AttrArr       => a match {
-       |          case _: AttrArrMan => topLevelAttrCount(tail, count + 1)
-       |          case _: AttrArrOpt => topLevelAttrCount(tail, count + 1)
+       |        case a: AttrSeq       => a match {
+       |          case _: AttrSeqMan => topLevelAttrCount(tail, count + 1)
+       |          case _: AttrSeqOpt => topLevelAttrCount(tail, count + 1)
        |          case _             => topLevelAttrCount(tail, count)
        |        }
        |        case a: AttrMap       => a match {
@@ -458,29 +480,29 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
     }.mkString("\n\n        ")
   }
 
-  private def addArr(mode: String): String = {
-    baseTypes.map { baseTpe =>
+  private def addSeq(mode: String): String = {
+    baseTypes.filterNot(_ == "Byte").map { baseTpe =>
       val tpe = if (baseTpe == "ID") "String" else baseTpe
-      s"""case a: AttrArr$mode$baseTpe =>
-         |          val arrays  = vs.asInstanceOf[Seq[Array[$tpe]]]
-         |          val errors1 = if (arrays.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+      s"""case a: AttrSeq$mode$baseTpe =>
+         |          val seqs  = vs.asInstanceOf[Seq[Seq[$tpe]]]
+         |          val errors1 = if (seqs.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
          |            val validator = a.validator.get
-         |            arrays.flatMap(array => array.flatMap(v => validator.validate(v)))
+         |            seqs.flatMap(seq => seq.flatMap(v => validator.validate(v)))
          |          }
-         |          a.copy(op = op, vs = arrays, errors = errors1)""".stripMargin
+         |          a.copy(op = op, vs = seqs, errors = errors1)""".stripMargin
     }.mkString("\n\n        ")
   }
 
-  private def addOptArr: String = {
-    baseTypes.map { baseTpe =>
+  private def addOptSeq: String = {
+    baseTypes.filterNot(_ == "Byte").map { baseTpe =>
       val tpe = if (baseTpe == "ID") "String" else baseTpe
-      s"""case a: AttrArrOpt$baseTpe =>
-         |          val arrays    = vs.asInstanceOf[Option[Seq[Array[$tpe]]]]
-         |          val errors1 = if (arrays.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+      s"""case a: AttrSeqOpt$baseTpe =>
+         |          val seqs    = vs.asInstanceOf[Option[Seq[Seq[$tpe]]]]
+         |          val errors1 = if (seqs.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
          |            val validator = a.validator.get
-         |            arrays.get.flatMap(array => array.flatMap(v => validator.validate(v)))
+         |            seqs.get.flatMap(seq => seq.flatMap(v => validator.validate(v)))
          |          }
-         |          a.copy(op = op, vs = arrays, errors = errors1)""".stripMargin
+         |          a.copy(op = op, vs = seqs, errors = errors1)""".stripMargin
     }.mkString("\n\n        ")
   }
 

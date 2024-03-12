@@ -18,11 +18,11 @@ trait CardSet extends Card {
 }
 case object CardSet extends CardSet
 
-trait CardArr extends Card {
-  override def _marker = "Arr"
-  override def _tpe = "Array"
+trait CardSeq extends Card {
+  override def _marker = "Seq"
+  override def _tpe = "Seq"
 }
-case object CardArr extends CardArr
+case object CardSeq extends CardSeq
 
 trait CardMap extends Card {
   override def _marker = "Map"

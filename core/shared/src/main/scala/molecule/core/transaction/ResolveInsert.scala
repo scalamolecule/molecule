@@ -54,13 +54,13 @@ class ResolveInsert
               case a => noEmpty(a)
             }
 
-            case a: AttrArr => a match {
-              case a: AttrArrMan =>
-                val attrsSetManResolver = resolveAttrArrayMan(a, tplIndex)
+            case a: AttrSeq => a match {
+              case a: AttrSeqMan =>
+                val attrsSetManResolver = resolveAttrSeqMan(a, tplIndex)
                 resolve(nsMap, tail, resolvers :+ attrsSetManResolver, tplIndex + 1)
 
-              case a: AttrArrOpt =>
-                val attrSetOptResolver = resolveAttrArrayOpt(a, tplIndex)
+              case a: AttrSeqOpt =>
+                val attrSetOptResolver = resolveAttrSeqOpt(a, tplIndex)
                 resolve(nsMap, tail, resolvers :+ attrSetOptResolver, tplIndex + 1)
 
               case a => noEmpty(a)
@@ -225,61 +225,61 @@ class ResolveInsert
     }
   }
 
-  private def resolveAttrArrayMan(a: AttrArrMan, tplIndex: Int): Product => Unit = {
+  private def resolveAttrSeqMan(a: AttrSeqMan, tplIndex: Int): Product => Unit = {
     val (ns, attr, refNs) = (a.ns, a.attr, a.refNs)
     a match {
-      case _: AttrArrManID             => addArray(ns, attr, refNs, tplIndex, transformID) //, set2arrayID, extsID, value2jsonID)
-      case _: AttrArrManString         => addArray(ns, attr, refNs, tplIndex, transformString) //, set2arrayString, extsString, value2jsonString)
-      case _: AttrArrManInt            => addArray(ns, attr, refNs, tplIndex, transformInt) //, set2arrayInt, extsInt, value2jsonInt)
-      case _: AttrArrManLong           => addArray(ns, attr, refNs, tplIndex, transformLong) //, set2arrayLong, extsLong, value2jsonLong)
-      case _: AttrArrManFloat          => addArray(ns, attr, refNs, tplIndex, transformFloat) //, set2arrayFloat, extsFloat, value2jsonFloat)
-      case _: AttrArrManDouble         => addArray(ns, attr, refNs, tplIndex, transformDouble) //, set2arrayDouble, extsDouble, value2jsonDouble)
-      case _: AttrArrManBoolean        => addArray(ns, attr, refNs, tplIndex, transformBoolean) //, set2arrayBoolean, extsBoolean, value2jsonBoolean)
-      case _: AttrArrManBigInt         => addArray(ns, attr, refNs, tplIndex, transformBigInt) //, set2arrayBigInt, extsBigInt, value2jsonBigInt)
-      case _: AttrArrManBigDecimal     => addArray(ns, attr, refNs, tplIndex, transformBigDecimal) //, set2arrayBigDecimal, extsBigDecimal, value2jsonBigDecimal)
-      case _: AttrArrManDate           => addArray(ns, attr, refNs, tplIndex, transformDate) //, set2arrayDate, extsDate, value2jsonDate)
-      case _: AttrArrManDuration       => addArray(ns, attr, refNs, tplIndex, transformDuration) //, set2arrayDuration, extsDuration, value2jsonDuration)
-      case _: AttrArrManInstant        => addArray(ns, attr, refNs, tplIndex, transformInstant) //, set2arrayInstant, extsInstant, value2jsonInstant)
-      case _: AttrArrManLocalDate      => addArray(ns, attr, refNs, tplIndex, transformLocalDate) //, set2arrayLocalDate, extsLocalDate, value2jsonLocalDate)
-      case _: AttrArrManLocalTime      => addArray(ns, attr, refNs, tplIndex, transformLocalTime) //, set2arrayLocalTime, extsLocalTime, value2jsonLocalTime)
-      case _: AttrArrManLocalDateTime  => addArray(ns, attr, refNs, tplIndex, transformLocalDateTime) //, set2arrayLocalDateTime, extsLocalDateTime, value2jsonLocalDateTime)
-      case _: AttrArrManOffsetTime     => addArray(ns, attr, refNs, tplIndex, transformOffsetTime) //, set2arrayOffsetTime, extsOffsetTime, value2jsonOffsetTime)
-      case _: AttrArrManOffsetDateTime => addArray(ns, attr, refNs, tplIndex, transformOffsetDateTime) //, set2arrayOffsetDateTime, extsOffsetDateTime, value2jsonOffsetDateTime)
-      case _: AttrArrManZonedDateTime  => addArray(ns, attr, refNs, tplIndex, transformZonedDateTime) //, set2arrayZonedDateTime, extsZonedDateTime, value2jsonZonedDateTime)
-      case _: AttrArrManUUID           => addArray(ns, attr, refNs, tplIndex, transformUUID) //, set2arrayUUID, extsUUID, value2jsonUUID)
-      case _: AttrArrManURI            => addArray(ns, attr, refNs, tplIndex, transformURI) //, set2arrayURI, extsURI, value2jsonURI)
-      case _: AttrArrManByte           => addArray(ns, attr, refNs, tplIndex, transformByte) //, set2arrayByte, extsByte, value2jsonByte)
-      case _: AttrArrManShort          => addArray(ns, attr, refNs, tplIndex, transformShort) //, set2arrayShort, extsShort, value2jsonShort)
-      case _: AttrArrManChar           => addArray(ns, attr, refNs, tplIndex, transformChar) //, set2arrayChar, extsChar, value2jsonChar)
+      case _: AttrSeqManID             => addSeq(ns, attr, refNs, tplIndex, transformID) //, set2arrayID, extsID, value2jsonID)
+      case _: AttrSeqManString         => addSeq(ns, attr, refNs, tplIndex, transformString) //, set2arrayString, extsString, value2jsonString)
+      case _: AttrSeqManInt            => addSeq(ns, attr, refNs, tplIndex, transformInt) //, set2arrayInt, extsInt, value2jsonInt)
+      case _: AttrSeqManLong           => addSeq(ns, attr, refNs, tplIndex, transformLong) //, set2arrayLong, extsLong, value2jsonLong)
+      case _: AttrSeqManFloat          => addSeq(ns, attr, refNs, tplIndex, transformFloat) //, set2arrayFloat, extsFloat, value2jsonFloat)
+      case _: AttrSeqManDouble         => addSeq(ns, attr, refNs, tplIndex, transformDouble) //, set2arrayDouble, extsDouble, value2jsonDouble)
+      case _: AttrSeqManBoolean        => addSeq(ns, attr, refNs, tplIndex, transformBoolean) //, set2arrayBoolean, extsBoolean, value2jsonBoolean)
+      case _: AttrSeqManBigInt         => addSeq(ns, attr, refNs, tplIndex, transformBigInt) //, set2arrayBigInt, extsBigInt, value2jsonBigInt)
+      case _: AttrSeqManBigDecimal     => addSeq(ns, attr, refNs, tplIndex, transformBigDecimal) //, set2arrayBigDecimal, extsBigDecimal, value2jsonBigDecimal)
+      case _: AttrSeqManDate           => addSeq(ns, attr, refNs, tplIndex, transformDate) //, set2arrayDate, extsDate, value2jsonDate)
+      case _: AttrSeqManDuration       => addSeq(ns, attr, refNs, tplIndex, transformDuration) //, set2arrayDuration, extsDuration, value2jsonDuration)
+      case _: AttrSeqManInstant        => addSeq(ns, attr, refNs, tplIndex, transformInstant) //, set2arrayInstant, extsInstant, value2jsonInstant)
+      case _: AttrSeqManLocalDate      => addSeq(ns, attr, refNs, tplIndex, transformLocalDate) //, set2arrayLocalDate, extsLocalDate, value2jsonLocalDate)
+      case _: AttrSeqManLocalTime      => addSeq(ns, attr, refNs, tplIndex, transformLocalTime) //, set2arrayLocalTime, extsLocalTime, value2jsonLocalTime)
+      case _: AttrSeqManLocalDateTime  => addSeq(ns, attr, refNs, tplIndex, transformLocalDateTime) //, set2arrayLocalDateTime, extsLocalDateTime, value2jsonLocalDateTime)
+      case _: AttrSeqManOffsetTime     => addSeq(ns, attr, refNs, tplIndex, transformOffsetTime) //, set2arrayOffsetTime, extsOffsetTime, value2jsonOffsetTime)
+      case _: AttrSeqManOffsetDateTime => addSeq(ns, attr, refNs, tplIndex, transformOffsetDateTime) //, set2arrayOffsetDateTime, extsOffsetDateTime, value2jsonOffsetDateTime)
+      case _: AttrSeqManZonedDateTime  => addSeq(ns, attr, refNs, tplIndex, transformZonedDateTime) //, set2arrayZonedDateTime, extsZonedDateTime, value2jsonZonedDateTime)
+      case _: AttrSeqManUUID           => addSeq(ns, attr, refNs, tplIndex, transformUUID) //, set2arrayUUID, extsUUID, value2jsonUUID)
+      case _: AttrSeqManURI            => addSeq(ns, attr, refNs, tplIndex, transformURI) //, set2arrayURI, extsURI, value2jsonURI)
+      case _: AttrSeqManByte           => addSeq(ns, attr, refNs, tplIndex, transformByte) //, set2arrayByte, extsByte, value2jsonByte)
+      case _: AttrSeqManShort          => addSeq(ns, attr, refNs, tplIndex, transformShort) //, set2arrayShort, extsShort, value2jsonShort)
+      case _: AttrSeqManChar           => addSeq(ns, attr, refNs, tplIndex, transformChar) //, set2arrayChar, extsChar, value2jsonChar)
     }
   }
 
-  private def resolveAttrArrayOpt(a: AttrArrOpt, tplIndex: Int): Product => Unit = {
+  private def resolveAttrSeqOpt(a: AttrSeqOpt, tplIndex: Int): Product => Unit = {
     val (ns, attr, refNs) = (a.ns, a.attr, a.refNs)
     a match {
-      case _: AttrArrOptID             => addArrayOpt(ns, attr, refNs, tplIndex, transformID) //, set2arrayID,  extsID, value2jsonID)
-      case _: AttrArrOptString         => addArrayOpt(ns, attr, refNs, tplIndex, transformString) //, set2arrayString,  extsString, value2jsonString)
-      case _: AttrArrOptInt            => addArrayOpt(ns, attr, refNs, tplIndex, transformInt) //, set2arrayInt,  extsInt, value2jsonInt)
-      case _: AttrArrOptLong           => addArrayOpt(ns, attr, refNs, tplIndex, transformLong) //, set2arrayLong,  extsLong, value2jsonLong)
-      case _: AttrArrOptFloat          => addArrayOpt(ns, attr, refNs, tplIndex, transformFloat) //, set2arrayFloat,  extsFloat, value2jsonFloat)
-      case _: AttrArrOptDouble         => addArrayOpt(ns, attr, refNs, tplIndex, transformDouble) //, set2arrayDouble,  extsDouble, value2jsonDouble)
-      case _: AttrArrOptBoolean        => addArrayOpt(ns, attr, refNs, tplIndex, transformBoolean) //, set2arrayBoolean,  extsBoolean, value2jsonBoolean)
-      case _: AttrArrOptBigInt         => addArrayOpt(ns, attr, refNs, tplIndex, transformBigInt) //, set2arrayBigInt,  extsBigInt, value2jsonBigInt)
-      case _: AttrArrOptBigDecimal     => addArrayOpt(ns, attr, refNs, tplIndex, transformBigDecimal) //, set2arrayBigDecimal,  extsBigDecimal, value2jsonBigDecimal)
-      case _: AttrArrOptDate           => addArrayOpt(ns, attr, refNs, tplIndex, transformDate) //, set2arrayDate,  extsDate, value2jsonDate)
-      case _: AttrArrOptDuration       => addArrayOpt(ns, attr, refNs, tplIndex, transformDuration) //, set2arrayDuration,  extsDuration, value2jsonDuration)
-      case _: AttrArrOptInstant        => addArrayOpt(ns, attr, refNs, tplIndex, transformInstant) //, set2arrayInstant,  extsInstant, value2jsonInstant)
-      case _: AttrArrOptLocalDate      => addArrayOpt(ns, attr, refNs, tplIndex, transformLocalDate) //, set2arrayLocalDate,  extsLocalDate, value2jsonLocalDate)
-      case _: AttrArrOptLocalTime      => addArrayOpt(ns, attr, refNs, tplIndex, transformLocalTime) //, set2arrayLocalTime,  extsLocalTime, value2jsonLocalTime)
-      case _: AttrArrOptLocalDateTime  => addArrayOpt(ns, attr, refNs, tplIndex, transformLocalDateTime) //, set2arrayLocalDateTime,  extsLocalDateTime, value2jsonLocalDateTime)
-      case _: AttrArrOptOffsetTime     => addArrayOpt(ns, attr, refNs, tplIndex, transformOffsetTime) //, set2arrayOffsetTime,  extsOffsetTime, value2jsonOffsetTime)
-      case _: AttrArrOptOffsetDateTime => addArrayOpt(ns, attr, refNs, tplIndex, transformOffsetDateTime) //, set2arrayOffsetDateTime,  extsOffsetDateTime, value2jsonOffsetDateTime)
-      case _: AttrArrOptZonedDateTime  => addArrayOpt(ns, attr, refNs, tplIndex, transformZonedDateTime) //, set2arrayZonedDateTime,  extsZonedDateTime, value2jsonZonedDateTime)
-      case _: AttrArrOptUUID           => addArrayOpt(ns, attr, refNs, tplIndex, transformUUID) //, set2arrayUUID,  extsUUID, value2jsonUUID)
-      case _: AttrArrOptURI            => addArrayOpt(ns, attr, refNs, tplIndex, transformURI) //, set2arrayURI,  extsURI, value2jsonURI)
-      case _: AttrArrOptByte           => addArrayOpt(ns, attr, refNs, tplIndex, transformByte) //, set2arrayByte,  extsByte, value2jsonByte)
-      case _: AttrArrOptShort          => addArrayOpt(ns, attr, refNs, tplIndex, transformShort) //, set2arrayShort,  extsShort, value2jsonShort)
-      case _: AttrArrOptChar           => addArrayOpt(ns, attr, refNs, tplIndex, transformChar) //, set2arrayChar,  extsChar, value2jsonChar)
+      case _: AttrSeqOptID             => addSeqOpt(ns, attr, refNs, tplIndex, transformID) //, set2arrayID,  extsID, value2jsonID)
+      case _: AttrSeqOptString         => addSeqOpt(ns, attr, refNs, tplIndex, transformString) //, set2arrayString,  extsString, value2jsonString)
+      case _: AttrSeqOptInt            => addSeqOpt(ns, attr, refNs, tplIndex, transformInt) //, set2arrayInt,  extsInt, value2jsonInt)
+      case _: AttrSeqOptLong           => addSeqOpt(ns, attr, refNs, tplIndex, transformLong) //, set2arrayLong,  extsLong, value2jsonLong)
+      case _: AttrSeqOptFloat          => addSeqOpt(ns, attr, refNs, tplIndex, transformFloat) //, set2arrayFloat,  extsFloat, value2jsonFloat)
+      case _: AttrSeqOptDouble         => addSeqOpt(ns, attr, refNs, tplIndex, transformDouble) //, set2arrayDouble,  extsDouble, value2jsonDouble)
+      case _: AttrSeqOptBoolean        => addSeqOpt(ns, attr, refNs, tplIndex, transformBoolean) //, set2arrayBoolean,  extsBoolean, value2jsonBoolean)
+      case _: AttrSeqOptBigInt         => addSeqOpt(ns, attr, refNs, tplIndex, transformBigInt) //, set2arrayBigInt,  extsBigInt, value2jsonBigInt)
+      case _: AttrSeqOptBigDecimal     => addSeqOpt(ns, attr, refNs, tplIndex, transformBigDecimal) //, set2arrayBigDecimal,  extsBigDecimal, value2jsonBigDecimal)
+      case _: AttrSeqOptDate           => addSeqOpt(ns, attr, refNs, tplIndex, transformDate) //, set2arrayDate,  extsDate, value2jsonDate)
+      case _: AttrSeqOptDuration       => addSeqOpt(ns, attr, refNs, tplIndex, transformDuration) //, set2arrayDuration,  extsDuration, value2jsonDuration)
+      case _: AttrSeqOptInstant        => addSeqOpt(ns, attr, refNs, tplIndex, transformInstant) //, set2arrayInstant,  extsInstant, value2jsonInstant)
+      case _: AttrSeqOptLocalDate      => addSeqOpt(ns, attr, refNs, tplIndex, transformLocalDate) //, set2arrayLocalDate,  extsLocalDate, value2jsonLocalDate)
+      case _: AttrSeqOptLocalTime      => addSeqOpt(ns, attr, refNs, tplIndex, transformLocalTime) //, set2arrayLocalTime,  extsLocalTime, value2jsonLocalTime)
+      case _: AttrSeqOptLocalDateTime  => addSeqOpt(ns, attr, refNs, tplIndex, transformLocalDateTime) //, set2arrayLocalDateTime,  extsLocalDateTime, value2jsonLocalDateTime)
+      case _: AttrSeqOptOffsetTime     => addSeqOpt(ns, attr, refNs, tplIndex, transformOffsetTime) //, set2arrayOffsetTime,  extsOffsetTime, value2jsonOffsetTime)
+      case _: AttrSeqOptOffsetDateTime => addSeqOpt(ns, attr, refNs, tplIndex, transformOffsetDateTime) //, set2arrayOffsetDateTime,  extsOffsetDateTime, value2jsonOffsetDateTime)
+      case _: AttrSeqOptZonedDateTime  => addSeqOpt(ns, attr, refNs, tplIndex, transformZonedDateTime) //, set2arrayZonedDateTime,  extsZonedDateTime, value2jsonZonedDateTime)
+      case _: AttrSeqOptUUID           => addSeqOpt(ns, attr, refNs, tplIndex, transformUUID) //, set2arrayUUID,  extsUUID, value2jsonUUID)
+      case _: AttrSeqOptURI            => addSeqOpt(ns, attr, refNs, tplIndex, transformURI) //, set2arrayURI,  extsURI, value2jsonURI)
+      case _: AttrSeqOptByte           => addSeqOpt(ns, attr, refNs, tplIndex, transformByte) //, set2arrayByte,  extsByte, value2jsonByte)
+      case _: AttrSeqOptShort          => addSeqOpt(ns, attr, refNs, tplIndex, transformShort) //, set2arrayShort,  extsShort, value2jsonShort)
+      case _: AttrSeqOptChar           => addSeqOpt(ns, attr, refNs, tplIndex, transformChar) //, set2arrayChar,  extsChar, value2jsonChar)
     }
   }
 

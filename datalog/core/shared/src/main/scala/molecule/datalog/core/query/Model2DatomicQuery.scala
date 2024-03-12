@@ -15,7 +15,7 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
     with ResolveExprOne[Tpl]
     with ResolveExprOne_id[Tpl]
     with ResolveExprSet[Tpl]
-    with ResolveExprArr[Tpl]
+    with ResolveExprSeq[Tpl]
     with ResolveRef[Tpl]
     with ResolveNestedPull[Tpl]
     with DatomicQueryBase
@@ -148,12 +148,12 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
           case a: AttrSetTac => resolve(resolveAttrSetTac(es, a), tail)
         }
 
-      case a: AttrArr =>
+      case a: AttrSeq =>
         isRefAttr = a.refNs.isDefined
         a match {
-          case a: AttrArrMan => resolve(resolveAttrArrMan(es, a), tail)
-          case a: AttrArrOpt => resolve(resolveAttrArrOpt(es, a), tail)
-          case a: AttrArrTac => resolve(resolveAttrArrTac(es, a), tail)
+          case a: AttrSeqMan => resolve(resolveAttrSeqMan(es, a), tail)
+          case a: AttrSeqOpt => resolve(resolveAttrSeqOpt(es, a), tail)
+          case a: AttrSeqTac => resolve(resolveAttrSeqTac(es, a), tail)
         }
 
       case a: AttrMap => ???

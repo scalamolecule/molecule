@@ -156,16 +156,7 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
 
             _ <- Uniques.int.insert(1, 2).transact
 
-            c1 <- Uniques.int.a1.query.from("").limit(2).get.map { case (List(1, 2), c, false) => c }
 
-            // No following rows yet
-            _ <- Uniques.int.a1.query.from(c1).limit(2).get.map { case (Nil, _, false) => () }
-
-            // New row
-            _ <- Uniques.int.insert(3).transact
-
-            // Now there are new rows
-            _ <- Uniques.int.a1.query.from(c1).limit(2).get.map { case (List(3), _, false) => () }
 
           } yield ()
         }

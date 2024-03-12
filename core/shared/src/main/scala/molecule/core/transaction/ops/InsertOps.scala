@@ -45,7 +45,7 @@ trait InsertOps extends BaseOps {
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit
 
-  protected def addArray[T](
+  protected def addSeq[T](
     ns: String,
     attr: String,
     refNs: Option[String],
@@ -56,7 +56,7 @@ trait InsertOps extends BaseOps {
 //    value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = ???
 
-  protected def addArrayOpt[T](
+  protected def addSeqOpt[T](
     ns: String,
     attr: String,
     refNs: Option[String],

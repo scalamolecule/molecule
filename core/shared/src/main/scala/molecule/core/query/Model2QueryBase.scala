@@ -452,7 +452,7 @@ trait Model2QueryBase extends ModelUtils {
               }
 
 
-            //            case a: AttrArr => ???
+            //            case a: AttrSeq => ???
             //            case a: AttrMap => ???
 
             case other => other

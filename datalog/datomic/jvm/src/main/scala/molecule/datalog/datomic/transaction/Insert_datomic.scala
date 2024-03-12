@@ -153,7 +153,7 @@ trait Insert_datomic
       }
   }
 
-  override protected def addArray[T](
+  override protected def addSeq[T](
     ns: String,
     attr: String,
     refNs: Option[String],
@@ -168,7 +168,13 @@ trait Insert_datomic
     val a_v = kw(s"$ns.$attr", "v_")
     backRefs = backRefs + (ns -> e)
     (tpl: Product) =>
-      tpl.productElement(tplIndex).asInstanceOf[Array[_]] match {
+
+
+//          println(tpl.productElement(tplIndex))
+//          println(tpl.productElement(tplIndex).getClass)
+
+      tpl.productElement(tplIndex).asInstanceOf[Seq[_]] match {
+//        case array  => ()
         case array if array.isEmpty => ()
         case array                  =>
           unusedRefIds -= e
@@ -185,7 +191,7 @@ trait Insert_datomic
       }
   }
 
-  override protected def addArrayOpt[T](
+  override protected def addSeqOpt[T](
     ns: String,
     attr: String,
     refNs: Option[String],
@@ -201,7 +207,7 @@ trait Insert_datomic
     backRefs = backRefs + (ns -> e)
     (tpl: Product) =>
       tpl.productElement(tplIndex) match {
-        case Some(array: Array[_]) =>
+        case Some(array: Seq[_]) =>
           unusedRefIds -= e
           usedRefIds += e
           var i      = 0

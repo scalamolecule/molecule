@@ -172,53 +172,53 @@ trait DataModelApi {
   trait setChar extends Options[setChar, Set[Char], Char]
 
 
-  object arrayString extends arrayString
-  object arrayInt extends arrayInt
-  object arrayLong extends arrayLong
-  object arrayFloat extends arrayFloat
-  object arrayDouble extends arrayDouble
-  object arrayBoolean extends arrayBoolean
-  object arrayBigInt extends arrayBigInt
-  object arrayBigDecimal extends arrayBigDecimal {
+  object seqString extends seqString
+  object seqInt extends seqInt
+  object seqLong extends seqLong
+  object seqFloat extends seqFloat
+  object seqDouble extends seqDouble
+  object seqBoolean extends seqBoolean
+  object seqBigInt extends seqBigInt
+  object seqBigDecimal extends seqBigDecimal {
     def apply(precision: Int, scale: Int): oneBigDecimal = ???
   }
-  object arrayDate extends arrayDate
-  object arrayDuration extends arrayDuration
-  object arrayInstant extends arrayInstant
-  object arrayLocalDate extends arrayLocalDate
-  object arrayLocalTime extends arrayLocalTime
-  object arrayLocalDateTime extends arrayLocalDateTime
-  object arrayOffsetTime extends arrayOffsetTime
-  object arrayOffsetDateTime extends arrayOffsetDateTime
-  object arrayZonedDateTime extends arrayZonedDateTime
-  object arrayUUID extends arrayUUID
-  object arrayURI extends arrayURI
-  object arrayByte extends arrayByte
-  object arrayShort extends arrayShort
-  object arrayChar extends arrayChar
+  object seqDate extends seqDate
+  object seqDuration extends seqDuration
+  object seqInstant extends seqInstant
+  object seqLocalDate extends seqLocalDate
+  object seqLocalTime extends seqLocalTime
+  object seqLocalDateTime extends seqLocalDateTime
+  object seqOffsetTime extends seqOffsetTime
+  object seqOffsetDateTime extends seqOffsetDateTime
+  object seqZonedDateTime extends seqZonedDateTime
+  object seqUUID extends seqUUID
+  object seqURI extends seqURI
+  object seqByte extends seqByte
+  object seqShort extends seqShort
+  object seqChar extends seqChar
 
-  trait arrayString extends stringOptions[arrayString, Array[String]]
-  trait arrayInt extends Options[arrayInt, Array[Int], Int]
-  trait arrayLong extends Options[arrayLong, Array[Long], Long]
-  trait arrayFloat extends Options[arrayFloat, Array[Float], Float]
-  trait arrayDouble extends Options[arrayDouble, Array[Double], Double]
-  trait arrayBoolean extends Options[arrayBoolean, Array[Boolean], Boolean]
-  trait arrayBigInt extends Options[arrayBigInt, Array[BigInt], BigInt]
-  trait arrayBigDecimal extends Options[arrayBigDecimal, Array[BigDecimal], BigDecimal]
-  trait arrayDate extends Options[arrayDate, Array[Date], Date]
-  trait arrayDuration extends Options[arrayDuration, Array[Duration], Duration]
-  trait arrayInstant extends Options[arrayInstant, Array[Instant], Instant]
-  trait arrayLocalDate extends Options[arrayLocalDate, Array[LocalDate], LocalDate]
-  trait arrayLocalTime extends Options[arrayLocalTime, Array[LocalTime], LocalTime]
-  trait arrayLocalDateTime extends Options[arrayLocalDateTime, Array[LocalDateTime], LocalDateTime]
-  trait arrayOffsetTime extends Options[arrayOffsetTime, Array[OffsetTime], OffsetTime]
-  trait arrayOffsetDateTime extends Options[arrayOffsetDateTime, Array[OffsetDateTime], OffsetDateTime]
-  trait arrayZonedDateTime extends Options[arrayZonedDateTime, Array[ZonedDateTime], ZonedDateTime]
-  trait arrayUUID extends Options[arrayUUID, Array[UUID], UUID]
-  trait arrayURI extends Options[arrayURI, Array[URI], URI]
-  trait arrayByte extends Options[arrayByte, Array[Byte], Byte]
-  trait arrayShort extends Options[arrayShort, Array[Short], Short]
-  trait arrayChar extends Options[arrayChar, Array[Char], Char]
+  trait seqString extends stringOptions[seqString, Seq[String]]
+  trait seqInt extends Options[seqInt, Seq[Int], Int]
+  trait seqLong extends Options[seqLong, Seq[Long], Long]
+  trait seqFloat extends Options[seqFloat, Seq[Float], Float]
+  trait seqDouble extends Options[seqDouble, Seq[Double], Double]
+  trait seqBoolean extends Options[seqBoolean, Seq[Boolean], Boolean]
+  trait seqBigInt extends Options[seqBigInt, Seq[BigInt], BigInt]
+  trait seqBigDecimal extends Options[seqBigDecimal, Seq[BigDecimal], BigDecimal]
+  trait seqDate extends Options[seqDate, Seq[Date], Date]
+  trait seqDuration extends Options[seqDuration, Seq[Duration], Duration]
+  trait seqInstant extends Options[seqInstant, Seq[Instant], Instant]
+  trait seqLocalDate extends Options[seqLocalDate, Seq[LocalDate], LocalDate]
+  trait seqLocalTime extends Options[seqLocalTime, Seq[LocalTime], LocalTime]
+  trait seqLocalDateTime extends Options[seqLocalDateTime, Seq[LocalDateTime], LocalDateTime]
+  trait seqOffsetTime extends Options[seqOffsetTime, Seq[OffsetTime], OffsetTime]
+  trait seqOffsetDateTime extends Options[seqOffsetDateTime, Seq[OffsetDateTime], OffsetDateTime]
+  trait seqZonedDateTime extends Options[seqZonedDateTime, Seq[ZonedDateTime], ZonedDateTime]
+  trait seqUUID extends Options[seqUUID, Seq[UUID], UUID]
+  trait seqURI extends Options[seqURI, Seq[URI], URI]
+  trait seqByte extends Options[seqByte, Seq[Byte], Byte]
+  trait seqShort extends Options[seqShort, Seq[Short], Short]
+  trait seqChar extends Options[seqChar, Seq[Char], Char]
 
 
   object mapString extends mapString

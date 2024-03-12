@@ -196,10 +196,10 @@ trait Update_datomic
   }
 
 
-  override def updateArrayEq[T](
+  override def updateSeqEq[T](
     ns: String,
     attr: String,
-    arrays: Seq[Array[T]],
+    seqs: Seq[Seq[T]],
     refNs: Option[String],
     owner: Boolean,
     transform: T => Any,
@@ -211,7 +211,7 @@ trait Update_datomic
       val dummyFilterAttr = AttrOneTacInt(ns, attr)
       filterElements = filterElements :+ dummyFilterAttr
     }
-    arrays match {
+    seqs match {
       case Seq(array) =>
         val add = ("add", ns, attr, array.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, true, "array")
         data += add
@@ -220,7 +220,7 @@ trait Update_datomic
         data += (("retract", ns, attr, Nil, true, "array"))
 
       case vs => throw ExecutionError(
-        s"Can only $update one Array of values for Array attribute `$ns.$attr`."
+        s"Can only $update one Seq of values for Seq attribute `$ns.$attr`."
       )
     }
   }
@@ -244,10 +244,10 @@ trait Update_datomic
     }
   }
 
-  override def updateArrayAdd[T](
+  override def updateSeqAdd[T](
     ns: String,
     attr: String,
-    arrays: Seq[Array[T]],
+    seqs: Seq[Seq[T]],
     refNs: Option[String],
     owner: Boolean,
     transform: T => Any,
@@ -255,7 +255,7 @@ trait Update_datomic
     //    exts: List[String],
     //    value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    arrays match {
+    seqs match {
       case Seq(array) =>
         val add = ("add", ns, attr, array.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, false, "array")
         data += add
@@ -264,15 +264,15 @@ trait Update_datomic
         data += (("retract", ns, attr, Nil, false, "array"))
 
       case vs => throw ExecutionError(
-        s"Can only $update one Array of values for Array attribute `$ns.$attr`."
+        s"Can only $update one Seq of values for Seq attribute `$ns.$attr`."
       )
     }
   }
 
-  override def updateArrayRemove[T](
+  override def updateSeqRemove[T](
     ns: String,
     attr: String,
-    array: Array[T],
+    seqs: Seq[T],
     refNs: Option[String],
     owner: Boolean,
     transform: T => Any,
@@ -280,9 +280,9 @@ trait Update_datomic
     //    exts: List[String],
     //    one2json: T => String
   ): Unit = {
-    if (array.nonEmpty) {
-      data += (("retract", ns, attr, array.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, false, "array"))
-      Seq(("retract", ns, attr, array.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, false))
+    if (seqs.nonEmpty) {
+      data += (("retract", ns, attr, seqs.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, false, "array"))
+      Seq(("retract", ns, attr, seqs.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, false))
     }
   }
 

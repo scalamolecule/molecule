@@ -61,29 +61,29 @@ object Types extends DataModel(5) {
     val chars           = setChar
     val refs            = many[Ref]
 
-    // Array
-    val stringArray         = arrayString
-    val intArray            = arrayInt
-    val longArray           = arrayLong
-    val floatArray          = arrayFloat
-    val doubleArray         = arrayDouble
-    val booleanArray        = arrayBoolean
-    val bigIntArray         = arrayBigInt
-    val bigDecimalArray     = arrayBigDecimal
-    val dateArray           = arrayDate
-    val durationArray       = arrayDuration
-    val instantArray        = arrayInstant
-    val localDateArray      = arrayLocalDate
-    val localTimeArray      = arrayLocalTime
-    val localDateTimeArray  = arrayLocalDateTime
-    val offsetTimeArray     = arrayOffsetTime
-    val offsetDateTimeArray = arrayOffsetDateTime
-    val zonedDateTimeArray  = arrayZonedDateTime
-    val uuidArray           = arrayUUID
-    val uriArray            = arrayURI
-    val byteArray           = arrayByte
-    val shortArray          = arrayShort
-    val charArray           = arrayChar
+    // Seq
+    val stringSeq         = seqString
+    val intSeq            = seqInt
+    val longSeq           = seqLong
+    val floatSeq          = seqFloat
+    val doubleSeq         = seqDouble
+    val booleanSeq        = seqBoolean
+    val bigIntSeq         = seqBigInt
+    val bigDecimalSeq     = seqBigDecimal
+    val dateSeq           = seqDate
+    val durationSeq       = seqDuration
+    val instantSeq        = seqInstant
+    val localDateSeq      = seqLocalDate
+    val localTimeSeq      = seqLocalTime
+    val localDateTimeSeq  = seqLocalDateTime
+    val offsetTimeSeq     = seqOffsetTime
+    val offsetDateTimeSeq = seqOffsetDateTime
+    val zonedDateTimeSeq  = seqZonedDateTime
+    val uuidSeq           = seqUUID
+    val uriSeq            = seqURI
+    val byteSeq           = seqByte
+    val shortSeq          = seqShort
+    val charSeq           = seqChar
 
     // Map
     val stringMap         = mapString

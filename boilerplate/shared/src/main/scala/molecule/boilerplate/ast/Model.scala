@@ -51,7 +51,7 @@ trait Model extends Validations with Values with BaseHelpers {
 
   sealed trait AttrOne extends Attr
   sealed trait AttrSet extends Attr
-  sealed trait AttrArr extends Attr
+  sealed trait AttrSeq extends Attr
   sealed trait AttrMap extends Attr
 
 
@@ -138,9 +138,9 @@ trait Model extends Validations with Values with BaseHelpers {
 
 
   // GENERATED from here and below (edit in _Model generator) ======================================
-
+  
   sealed trait AttrOneMan extends AttrOne with Mandatory
-
+  
   case class AttrOneManID(
     override val ns: String,
     override val attr: String,
@@ -601,7 +601,7 @@ trait Model extends Validations with Values with BaseHelpers {
 
 
   sealed trait AttrOneOpt extends AttrOne with Optional
-
+  
   case class AttrOneOptID(
     override val ns: String,
     override val attr: String,
@@ -1062,7 +1062,7 @@ trait Model extends Validations with Values with BaseHelpers {
 
 
   sealed trait AttrOneTac extends AttrOne with Tacit
-
+  
   case class AttrOneTacID(
     override val ns: String,
     override val attr: String,
@@ -1523,7 +1523,7 @@ trait Model extends Validations with Values with BaseHelpers {
 
 
   sealed trait AttrSetMan extends AttrSet with Mandatory
-
+  
   case class AttrSetManID(
     override val ns: String,
     override val attr: String,
@@ -1984,7 +1984,7 @@ trait Model extends Validations with Values with BaseHelpers {
 
 
   sealed trait AttrSetOpt extends AttrSet with Optional
-
+  
   case class AttrSetOptID(
     override val ns: String,
     override val attr: String,
@@ -2445,7 +2445,7 @@ trait Model extends Validations with Values with BaseHelpers {
 
 
   sealed trait AttrSetTac extends AttrSet with Tacit
-
+  
   case class AttrSetTacID(
     override val ns: String,
     override val attr: String,
@@ -2905,13 +2905,13 @@ trait Model extends Validations with Values with BaseHelpers {
   }
 
 
-  sealed trait AttrArrMan extends AttrArr with Mandatory
-
-  case class AttrArrManID(
+  sealed trait AttrSeqMan extends AttrSeq with Mandatory
+  
+  case class AttrSeqManID(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[String]] = Nil,
+    vs: Seq[Seq[String]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateID] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -2920,19 +2920,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil,
     override val owner: Boolean = false
-  ) extends AttrArrMan {
+  ) extends AttrSeqMan {
     override def toString: String = {
       def format(v: String): String = "\"" + escStr(v) + "\""
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrManID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords, $owner)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqManID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords, $owner)"""
     }
   }
 
-  case class AttrArrManString(
+  case class AttrSeqManString(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[String]] = Nil,
+    vs: Seq[Seq[String]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateString] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -2940,19 +2940,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrMan {
+  ) extends AttrSeqMan {
     override def toString: String = {
       def format(v: String): String = "\"" + escStr(v) + "\""
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrManString("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqManString("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrManInt(
+  case class AttrSeqManInt(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[Int]] = Nil,
+    vs: Seq[Seq[Int]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateInt] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -2960,18 +2960,18 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrMan {
+  ) extends AttrSeqMan {
     override def toString: String = {
-      def vss: String = vs.map(array => array.mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrManInt("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqManInt("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrManLong(
+  case class AttrSeqManLong(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[Long]] = Nil,
+    vs: Seq[Seq[Long]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateLong] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -2979,19 +2979,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrMan {
+  ) extends AttrSeqMan {
     override def toString: String = {
       def format(v: Long): String = v.toString + "L"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrManLong("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqManLong("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrManFloat(
+  case class AttrSeqManFloat(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[Float]] = Nil,
+    vs: Seq[Seq[Float]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateFloat] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -2999,19 +2999,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrMan {
+  ) extends AttrSeqMan {
     override def toString: String = {
       def format(v: Float): String = v.toString + "f"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrManFloat("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqManFloat("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrManDouble(
+  case class AttrSeqManDouble(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[Double]] = Nil,
+    vs: Seq[Seq[Double]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateDouble] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3019,18 +3019,18 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrMan {
+  ) extends AttrSeqMan {
     override def toString: String = {
-      def vss: String = vs.map(array => array.mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrManDouble("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqManDouble("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrManBoolean(
+  case class AttrSeqManBoolean(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[Boolean]] = Nil,
+    vs: Seq[Seq[Boolean]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateBoolean] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3038,18 +3038,18 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrMan {
+  ) extends AttrSeqMan {
     override def toString: String = {
-      def vss: String = vs.map(array => array.mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrManBoolean("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqManBoolean("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrManBigInt(
+  case class AttrSeqManBigInt(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[BigInt]] = Nil,
+    vs: Seq[Seq[BigInt]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateBigInt] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3057,19 +3057,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrMan {
+  ) extends AttrSeqMan {
     override def toString: String = {
       def format(v: BigInt): String = "BigInt(" + v + ")"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrManBigInt("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqManBigInt("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrManBigDecimal(
+  case class AttrSeqManBigDecimal(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[BigDecimal]] = Nil,
+    vs: Seq[Seq[BigDecimal]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateBigDecimal] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3077,19 +3077,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrMan {
+  ) extends AttrSeqMan {
     override def toString: String = {
       def format(v: BigDecimal): String = "BigDecimal(" + v + ")"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrManBigDecimal("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqManBigDecimal("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrManDate(
+  case class AttrSeqManDate(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[Date]] = Nil,
+    vs: Seq[Seq[Date]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateDate] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3097,19 +3097,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrMan {
+  ) extends AttrSeqMan {
     override def toString: String = {
       def format(v: Date): String = "new Date(" + v.getTime + ")"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrManDate("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqManDate("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrManDuration(
+  case class AttrSeqManDuration(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[Duration]] = Nil,
+    vs: Seq[Seq[Duration]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateDuration] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3117,19 +3117,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrMan {
+  ) extends AttrSeqMan {
     override def toString: String = {
       def format(v: Duration): String = "Duration.ofSeconds(" + v.getSeconds + ", " + v.getNano + ")"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrManDuration("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqManDuration("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrManInstant(
+  case class AttrSeqManInstant(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[Instant]] = Nil,
+    vs: Seq[Seq[Instant]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateInstant] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3137,19 +3137,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrMan {
+  ) extends AttrSeqMan {
     override def toString: String = {
       def format(v: Instant): String = "Instant.ofEpochSecond(" + v.getEpochSecond + ", " + v.getNano + ")"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrManInstant("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqManInstant("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrManLocalDate(
+  case class AttrSeqManLocalDate(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[LocalDate]] = Nil,
+    vs: Seq[Seq[LocalDate]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateLocalDate] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3157,19 +3157,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrMan {
+  ) extends AttrSeqMan {
     override def toString: String = {
       def format(v: LocalDate): String = "LocalDate.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ")"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrManLocalDate("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqManLocalDate("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrManLocalTime(
+  case class AttrSeqManLocalTime(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[LocalTime]] = Nil,
+    vs: Seq[Seq[LocalTime]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateLocalTime] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3177,19 +3177,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrMan {
+  ) extends AttrSeqMan {
     override def toString: String = {
       def format(v: LocalTime): String = "LocalTime.of(" + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ")"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrManLocalTime("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqManLocalTime("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrManLocalDateTime(
+  case class AttrSeqManLocalDateTime(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[LocalDateTime]] = Nil,
+    vs: Seq[Seq[LocalDateTime]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateLocalDateTime] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3197,19 +3197,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrMan {
+  ) extends AttrSeqMan {
     override def toString: String = {
       def format(v: LocalDateTime): String = "LocalDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ")"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrManLocalDateTime("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqManLocalDateTime("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrManOffsetTime(
+  case class AttrSeqManOffsetTime(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[OffsetTime]] = Nil,
+    vs: Seq[Seq[OffsetTime]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateOffsetTime] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3217,19 +3217,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrMan {
+  ) extends AttrSeqMan {
     override def toString: String = {
       def format(v: OffsetTime): String = "OffsetTime.of(" + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getOffset + ")"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrManOffsetTime("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqManOffsetTime("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrManOffsetDateTime(
+  case class AttrSeqManOffsetDateTime(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[OffsetDateTime]] = Nil,
+    vs: Seq[Seq[OffsetDateTime]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateOffsetDateTime] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3237,19 +3237,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrMan {
+  ) extends AttrSeqMan {
     override def toString: String = {
       def format(v: OffsetDateTime): String = "OffsetDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getOffset + ")"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrManOffsetDateTime("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqManOffsetDateTime("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrManZonedDateTime(
+  case class AttrSeqManZonedDateTime(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[ZonedDateTime]] = Nil,
+    vs: Seq[Seq[ZonedDateTime]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateZonedDateTime] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3257,19 +3257,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrMan {
+  ) extends AttrSeqMan {
     override def toString: String = {
       def format(v: ZonedDateTime): String = "ZonedDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getZone + ")"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrManZonedDateTime("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqManZonedDateTime("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrManUUID(
+  case class AttrSeqManUUID(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[UUID]] = Nil,
+    vs: Seq[Seq[UUID]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateUUID] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3277,19 +3277,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrMan {
+  ) extends AttrSeqMan {
     override def toString: String = {
       def format(v: UUID): String = "UUID.fromString(\"" + v.toString + "\")"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrManUUID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqManUUID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrManURI(
+  case class AttrSeqManURI(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[URI]] = Nil,
+    vs: Seq[Seq[URI]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateURI] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3297,15 +3297,15 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrMan {
+  ) extends AttrSeqMan {
     override def toString: String = {
       def format(v: URI): String = "new URI(\"" + v.toString + "\")"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrManURI("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqManURI("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrManByte(
+  case class AttrSeqManByte(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
@@ -3317,19 +3317,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrMan {
+  ) extends AttrSeqMan {
     override def toString: String = {
       def format(v: Byte): String = s"$v.toByte"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrManByte("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqManByte("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrManShort(
+  case class AttrSeqManShort(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[Short]] = Nil,
+    vs: Seq[Seq[Short]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateShort] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3337,19 +3337,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrMan {
+  ) extends AttrSeqMan {
     override def toString: String = {
       def format(v: Short): String = s"$v.toShort"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrManShort("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqManShort("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrManChar(
+  case class AttrSeqManChar(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[Char]] = Nil,
+    vs: Seq[Seq[Char]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateChar] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3357,22 +3357,22 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrMan {
+  ) extends AttrSeqMan {
     override def toString: String = {
       def format(v: Char): String = s"'$v'"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrManChar("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqManChar("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
 
-  sealed trait AttrArrOpt extends AttrArr with Optional
-
-  case class AttrArrOptID(
+  sealed trait AttrSeqOpt extends AttrSeq with Optional
+  
+  case class AttrSeqOptID(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Option[Seq[Array[String]]] = None,
+    vs: Option[Seq[Seq[String]]] = None,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateID] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3381,19 +3381,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil,
     override val owner: Boolean = false
-  ) extends AttrArrOpt {
+  ) extends AttrSeqOpt {
     override def toString: String = {
       def format(v: String): String = "\"" + escStr(v) + "\""
-      def vss: String = vs.fold("None")(_.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrArrOptID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords, $owner)"""
+      def vss: String = vs.fold("None")(_.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrSeqOptID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords, $owner)"""
     }
   }
 
-  case class AttrArrOptString(
+  case class AttrSeqOptString(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Option[Seq[Array[String]]] = None,
+    vs: Option[Seq[Seq[String]]] = None,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateString] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3401,19 +3401,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrOpt {
+  ) extends AttrSeqOpt {
     override def toString: String = {
       def format(v: String): String = "\"" + escStr(v) + "\""
-      def vss: String = vs.fold("None")(_.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrArrOptString("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.fold("None")(_.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrSeqOptString("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrOptInt(
+  case class AttrSeqOptInt(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Option[Seq[Array[Int]]] = None,
+    vs: Option[Seq[Seq[Int]]] = None,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateInt] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3421,18 +3421,18 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrOpt {
+  ) extends AttrSeqOpt {
     override def toString: String = {
-      def vss: String = vs.fold("None")(_.map(_.mkString("Array(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrArrOptInt("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.fold("None")(_.map(_.mkString("Seq(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrSeqOptInt("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrOptLong(
+  case class AttrSeqOptLong(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Option[Seq[Array[Long]]] = None,
+    vs: Option[Seq[Seq[Long]]] = None,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateLong] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3440,19 +3440,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrOpt {
+  ) extends AttrSeqOpt {
     override def toString: String = {
       def format(v: Long): String = v.toString + "L"
-      def vss: String = vs.fold("None")(_.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrArrOptLong("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.fold("None")(_.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrSeqOptLong("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrOptFloat(
+  case class AttrSeqOptFloat(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Option[Seq[Array[Float]]] = None,
+    vs: Option[Seq[Seq[Float]]] = None,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateFloat] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3460,19 +3460,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrOpt {
+  ) extends AttrSeqOpt {
     override def toString: String = {
       def format(v: Float): String = v.toString + "f"
-      def vss: String = vs.fold("None")(_.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrArrOptFloat("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.fold("None")(_.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrSeqOptFloat("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrOptDouble(
+  case class AttrSeqOptDouble(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Option[Seq[Array[Double]]] = None,
+    vs: Option[Seq[Seq[Double]]] = None,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateDouble] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3480,18 +3480,18 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrOpt {
+  ) extends AttrSeqOpt {
     override def toString: String = {
-      def vss: String = vs.fold("None")(_.map(_.mkString("Array(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrArrOptDouble("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.fold("None")(_.map(_.mkString("Seq(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrSeqOptDouble("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrOptBoolean(
+  case class AttrSeqOptBoolean(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Option[Seq[Array[Boolean]]] = None,
+    vs: Option[Seq[Seq[Boolean]]] = None,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateBoolean] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3499,18 +3499,18 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrOpt {
+  ) extends AttrSeqOpt {
     override def toString: String = {
-      def vss: String = vs.fold("None")(_.map(_.mkString("Array(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrArrOptBoolean("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.fold("None")(_.map(_.mkString("Seq(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrSeqOptBoolean("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrOptBigInt(
+  case class AttrSeqOptBigInt(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Option[Seq[Array[BigInt]]] = None,
+    vs: Option[Seq[Seq[BigInt]]] = None,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateBigInt] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3518,19 +3518,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrOpt {
+  ) extends AttrSeqOpt {
     override def toString: String = {
       def format(v: BigInt): String = "BigInt(" + v + ")"
-      def vss: String = vs.fold("None")(_.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrArrOptBigInt("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.fold("None")(_.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrSeqOptBigInt("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrOptBigDecimal(
+  case class AttrSeqOptBigDecimal(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Option[Seq[Array[BigDecimal]]] = None,
+    vs: Option[Seq[Seq[BigDecimal]]] = None,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateBigDecimal] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3538,19 +3538,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrOpt {
+  ) extends AttrSeqOpt {
     override def toString: String = {
       def format(v: BigDecimal): String = "BigDecimal(" + v + ")"
-      def vss: String = vs.fold("None")(_.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrArrOptBigDecimal("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.fold("None")(_.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrSeqOptBigDecimal("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrOptDate(
+  case class AttrSeqOptDate(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Option[Seq[Array[Date]]] = None,
+    vs: Option[Seq[Seq[Date]]] = None,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateDate] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3558,19 +3558,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrOpt {
+  ) extends AttrSeqOpt {
     override def toString: String = {
       def format(v: Date): String = "new Date(" + v.getTime + ")"
-      def vss: String = vs.fold("None")(_.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrArrOptDate("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.fold("None")(_.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrSeqOptDate("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrOptDuration(
+  case class AttrSeqOptDuration(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Option[Seq[Array[Duration]]] = None,
+    vs: Option[Seq[Seq[Duration]]] = None,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateDuration] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3578,19 +3578,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrOpt {
+  ) extends AttrSeqOpt {
     override def toString: String = {
       def format(v: Duration): String = "Duration.ofSeconds(" + v.getSeconds + ", " + v.getNano + ")"
-      def vss: String = vs.fold("None")(_.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrArrOptDuration("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.fold("None")(_.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrSeqOptDuration("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrOptInstant(
+  case class AttrSeqOptInstant(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Option[Seq[Array[Instant]]] = None,
+    vs: Option[Seq[Seq[Instant]]] = None,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateInstant] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3598,19 +3598,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrOpt {
+  ) extends AttrSeqOpt {
     override def toString: String = {
       def format(v: Instant): String = "Instant.ofEpochSecond(" + v.getEpochSecond + ", " + v.getNano + ")"
-      def vss: String = vs.fold("None")(_.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrArrOptInstant("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.fold("None")(_.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrSeqOptInstant("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrOptLocalDate(
+  case class AttrSeqOptLocalDate(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Option[Seq[Array[LocalDate]]] = None,
+    vs: Option[Seq[Seq[LocalDate]]] = None,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateLocalDate] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3618,19 +3618,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrOpt {
+  ) extends AttrSeqOpt {
     override def toString: String = {
       def format(v: LocalDate): String = "LocalDate.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ")"
-      def vss: String = vs.fold("None")(_.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrArrOptLocalDate("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.fold("None")(_.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrSeqOptLocalDate("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrOptLocalTime(
+  case class AttrSeqOptLocalTime(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Option[Seq[Array[LocalTime]]] = None,
+    vs: Option[Seq[Seq[LocalTime]]] = None,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateLocalTime] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3638,19 +3638,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrOpt {
+  ) extends AttrSeqOpt {
     override def toString: String = {
       def format(v: LocalTime): String = "LocalTime.of(" + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ")"
-      def vss: String = vs.fold("None")(_.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrArrOptLocalTime("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.fold("None")(_.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrSeqOptLocalTime("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrOptLocalDateTime(
+  case class AttrSeqOptLocalDateTime(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Option[Seq[Array[LocalDateTime]]] = None,
+    vs: Option[Seq[Seq[LocalDateTime]]] = None,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateLocalDateTime] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3658,19 +3658,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrOpt {
+  ) extends AttrSeqOpt {
     override def toString: String = {
       def format(v: LocalDateTime): String = "LocalDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ")"
-      def vss: String = vs.fold("None")(_.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrArrOptLocalDateTime("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.fold("None")(_.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrSeqOptLocalDateTime("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrOptOffsetTime(
+  case class AttrSeqOptOffsetTime(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Option[Seq[Array[OffsetTime]]] = None,
+    vs: Option[Seq[Seq[OffsetTime]]] = None,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateOffsetTime] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3678,19 +3678,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrOpt {
+  ) extends AttrSeqOpt {
     override def toString: String = {
       def format(v: OffsetTime): String = "OffsetTime.of(" + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getOffset + ")"
-      def vss: String = vs.fold("None")(_.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrArrOptOffsetTime("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.fold("None")(_.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrSeqOptOffsetTime("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrOptOffsetDateTime(
+  case class AttrSeqOptOffsetDateTime(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Option[Seq[Array[OffsetDateTime]]] = None,
+    vs: Option[Seq[Seq[OffsetDateTime]]] = None,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateOffsetDateTime] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3698,19 +3698,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrOpt {
+  ) extends AttrSeqOpt {
     override def toString: String = {
       def format(v: OffsetDateTime): String = "OffsetDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getOffset + ")"
-      def vss: String = vs.fold("None")(_.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrArrOptOffsetDateTime("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.fold("None")(_.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrSeqOptOffsetDateTime("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrOptZonedDateTime(
+  case class AttrSeqOptZonedDateTime(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Option[Seq[Array[ZonedDateTime]]] = None,
+    vs: Option[Seq[Seq[ZonedDateTime]]] = None,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateZonedDateTime] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3718,19 +3718,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrOpt {
+  ) extends AttrSeqOpt {
     override def toString: String = {
       def format(v: ZonedDateTime): String = "ZonedDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getZone + ")"
-      def vss: String = vs.fold("None")(_.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrArrOptZonedDateTime("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.fold("None")(_.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrSeqOptZonedDateTime("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrOptUUID(
+  case class AttrSeqOptUUID(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Option[Seq[Array[UUID]]] = None,
+    vs: Option[Seq[Seq[UUID]]] = None,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateUUID] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3738,19 +3738,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrOpt {
+  ) extends AttrSeqOpt {
     override def toString: String = {
       def format(v: UUID): String = "UUID.fromString(\"" + v.toString + "\")"
-      def vss: String = vs.fold("None")(_.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrArrOptUUID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.fold("None")(_.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrSeqOptUUID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrOptURI(
+  case class AttrSeqOptURI(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Option[Seq[Array[URI]]] = None,
+    vs: Option[Seq[Seq[URI]]] = None,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateURI] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3758,15 +3758,15 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrOpt {
+  ) extends AttrSeqOpt {
     override def toString: String = {
       def format(v: URI): String = "new URI(\"" + v.toString + "\")"
-      def vss: String = vs.fold("None")(_.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrArrOptURI("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.fold("None")(_.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrSeqOptURI("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrOptByte(
+  case class AttrSeqOptByte(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
@@ -3778,19 +3778,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrOpt {
+  ) extends AttrSeqOpt {
     override def toString: String = {
       def format(v: Byte): String = s"$v.toByte"
-      def vss: String = vs.fold("None")(_.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrArrOptByte("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.fold("None")(_.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrSeqOptByte("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrOptShort(
+  case class AttrSeqOptShort(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Option[Seq[Array[Short]]] = None,
+    vs: Option[Seq[Seq[Short]]] = None,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateShort] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3798,19 +3798,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrOpt {
+  ) extends AttrSeqOpt {
     override def toString: String = {
       def format(v: Short): String = s"$v.toShort"
-      def vss: String = vs.fold("None")(_.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrArrOptShort("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.fold("None")(_.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrSeqOptShort("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrOptChar(
+  case class AttrSeqOptChar(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Option[Seq[Array[Char]]] = None,
+    vs: Option[Seq[Seq[Char]]] = None,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateChar] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3818,22 +3818,22 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrOpt {
+  ) extends AttrSeqOpt {
     override def toString: String = {
       def format(v: Char): String = s"'$v'"
-      def vss: String = vs.fold("None")(_.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrArrOptChar("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.fold("None")(_.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrSeqOptChar("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
 
-  sealed trait AttrArrTac extends AttrArr with Tacit
+  sealed trait AttrSeqTac extends AttrSeq with Tacit
   
-  case class AttrArrTacID(
+  case class AttrSeqTacID(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[String]] = Nil,
+    vs: Seq[Seq[String]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateID] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3842,19 +3842,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil,
     override val owner: Boolean = false
-  ) extends AttrArrTac {
+  ) extends AttrSeqTac {
     override def toString: String = {
       def format(v: String): String = "\"" + escStr(v) + "\""
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrTacID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords, $owner)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqTacID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords, $owner)"""
     }
   }
 
-  case class AttrArrTacString(
+  case class AttrSeqTacString(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[String]] = Nil,
+    vs: Seq[Seq[String]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateString] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3862,19 +3862,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrTac {
+  ) extends AttrSeqTac {
     override def toString: String = {
       def format(v: String): String = "\"" + escStr(v) + "\""
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrTacString("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqTacString("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrTacInt(
+  case class AttrSeqTacInt(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[Int]] = Nil,
+    vs: Seq[Seq[Int]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateInt] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3882,18 +3882,18 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrTac {
+  ) extends AttrSeqTac {
     override def toString: String = {
-      def vss: String = vs.map(array => array.mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrTacInt("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqTacInt("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrTacLong(
+  case class AttrSeqTacLong(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[Long]] = Nil,
+    vs: Seq[Seq[Long]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateLong] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3901,19 +3901,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrTac {
+  ) extends AttrSeqTac {
     override def toString: String = {
       def format(v: Long): String = v.toString + "L"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrTacLong("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqTacLong("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrTacFloat(
+  case class AttrSeqTacFloat(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[Float]] = Nil,
+    vs: Seq[Seq[Float]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateFloat] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3921,19 +3921,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrTac {
+  ) extends AttrSeqTac {
     override def toString: String = {
       def format(v: Float): String = v.toString + "f"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrTacFloat("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqTacFloat("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrTacDouble(
+  case class AttrSeqTacDouble(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[Double]] = Nil,
+    vs: Seq[Seq[Double]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateDouble] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3941,18 +3941,18 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrTac {
+  ) extends AttrSeqTac {
     override def toString: String = {
-      def vss: String = vs.map(array => array.mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrTacDouble("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqTacDouble("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrTacBoolean(
+  case class AttrSeqTacBoolean(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[Boolean]] = Nil,
+    vs: Seq[Seq[Boolean]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateBoolean] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3960,18 +3960,18 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrTac {
+  ) extends AttrSeqTac {
     override def toString: String = {
-      def vss: String = vs.map(array => array.mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrTacBoolean("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqTacBoolean("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrTacBigInt(
+  case class AttrSeqTacBigInt(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[BigInt]] = Nil,
+    vs: Seq[Seq[BigInt]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateBigInt] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3979,19 +3979,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrTac {
+  ) extends AttrSeqTac {
     override def toString: String = {
       def format(v: BigInt): String = "BigInt(" + v + ")"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrTacBigInt("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqTacBigInt("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrTacBigDecimal(
+  case class AttrSeqTacBigDecimal(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[BigDecimal]] = Nil,
+    vs: Seq[Seq[BigDecimal]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateBigDecimal] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3999,19 +3999,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrTac {
+  ) extends AttrSeqTac {
     override def toString: String = {
       def format(v: BigDecimal): String = "BigDecimal(" + v + ")"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrTacBigDecimal("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqTacBigDecimal("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrTacDate(
+  case class AttrSeqTacDate(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[Date]] = Nil,
+    vs: Seq[Seq[Date]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateDate] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -4019,19 +4019,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrTac {
+  ) extends AttrSeqTac {
     override def toString: String = {
       def format(v: Date): String = "new Date(" + v.getTime + ")"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrTacDate("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqTacDate("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrTacDuration(
+  case class AttrSeqTacDuration(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[Duration]] = Nil,
+    vs: Seq[Seq[Duration]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateDuration] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -4039,19 +4039,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrTac {
+  ) extends AttrSeqTac {
     override def toString: String = {
       def format(v: Duration): String = "Duration.ofSeconds(" + v.getSeconds + ", " + v.getNano + ")"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrTacDuration("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqTacDuration("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrTacInstant(
+  case class AttrSeqTacInstant(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[Instant]] = Nil,
+    vs: Seq[Seq[Instant]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateInstant] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -4059,19 +4059,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrTac {
+  ) extends AttrSeqTac {
     override def toString: String = {
       def format(v: Instant): String = "Instant.ofEpochSecond(" + v.getEpochSecond + ", " + v.getNano + ")"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrTacInstant("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqTacInstant("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrTacLocalDate(
+  case class AttrSeqTacLocalDate(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[LocalDate]] = Nil,
+    vs: Seq[Seq[LocalDate]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateLocalDate] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -4079,19 +4079,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrTac {
+  ) extends AttrSeqTac {
     override def toString: String = {
       def format(v: LocalDate): String = "LocalDate.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ")"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrTacLocalDate("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqTacLocalDate("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrTacLocalTime(
+  case class AttrSeqTacLocalTime(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[LocalTime]] = Nil,
+    vs: Seq[Seq[LocalTime]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateLocalTime] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -4099,19 +4099,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrTac {
+  ) extends AttrSeqTac {
     override def toString: String = {
       def format(v: LocalTime): String = "LocalTime.of(" + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ")"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrTacLocalTime("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqTacLocalTime("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrTacLocalDateTime(
+  case class AttrSeqTacLocalDateTime(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[LocalDateTime]] = Nil,
+    vs: Seq[Seq[LocalDateTime]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateLocalDateTime] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -4119,19 +4119,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrTac {
+  ) extends AttrSeqTac {
     override def toString: String = {
       def format(v: LocalDateTime): String = "LocalDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ")"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrTacLocalDateTime("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqTacLocalDateTime("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrTacOffsetTime(
+  case class AttrSeqTacOffsetTime(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[OffsetTime]] = Nil,
+    vs: Seq[Seq[OffsetTime]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateOffsetTime] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -4139,19 +4139,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrTac {
+  ) extends AttrSeqTac {
     override def toString: String = {
       def format(v: OffsetTime): String = "OffsetTime.of(" + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getOffset + ")"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrTacOffsetTime("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqTacOffsetTime("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrTacOffsetDateTime(
+  case class AttrSeqTacOffsetDateTime(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[OffsetDateTime]] = Nil,
+    vs: Seq[Seq[OffsetDateTime]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateOffsetDateTime] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -4159,19 +4159,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrTac {
+  ) extends AttrSeqTac {
     override def toString: String = {
       def format(v: OffsetDateTime): String = "OffsetDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getOffset + ")"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrTacOffsetDateTime("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqTacOffsetDateTime("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrTacZonedDateTime(
+  case class AttrSeqTacZonedDateTime(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[ZonedDateTime]] = Nil,
+    vs: Seq[Seq[ZonedDateTime]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateZonedDateTime] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -4179,19 +4179,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrTac {
+  ) extends AttrSeqTac {
     override def toString: String = {
       def format(v: ZonedDateTime): String = "ZonedDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getZone + ")"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrTacZonedDateTime("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqTacZonedDateTime("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrTacUUID(
+  case class AttrSeqTacUUID(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[UUID]] = Nil,
+    vs: Seq[Seq[UUID]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateUUID] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -4199,19 +4199,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrTac {
+  ) extends AttrSeqTac {
     override def toString: String = {
       def format(v: UUID): String = "UUID.fromString(\"" + v.toString + "\")"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrTacUUID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqTacUUID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrTacURI(
+  case class AttrSeqTacURI(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[URI]] = Nil,
+    vs: Seq[Seq[URI]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateURI] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -4219,15 +4219,15 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrTac {
+  ) extends AttrSeqTac {
     override def toString: String = {
       def format(v: URI): String = "new URI(\"" + v.toString + "\")"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrTacURI("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqTacURI("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrTacByte(
+  case class AttrSeqTacByte(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
@@ -4239,19 +4239,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrTac {
+  ) extends AttrSeqTac {
     override def toString: String = {
       def format(v: Byte): String = s"$v.toByte"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrTacByte("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqTacByte("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrTacShort(
+  case class AttrSeqTacShort(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[Short]] = Nil,
+    vs: Seq[Seq[Short]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateShort] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -4259,19 +4259,19 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrTac {
+  ) extends AttrSeqTac {
     override def toString: String = {
       def format(v: Short): String = s"$v.toShort"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrTacShort("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqTacShort("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
-  case class AttrArrTacChar(
+  case class AttrSeqTacChar(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Array[Char]] = Nil,
+    vs: Seq[Seq[Char]] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateChar] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -4279,11 +4279,11 @@ trait Model extends Validations with Values with BaseHelpers {
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
     override val coord: Seq[Int] = Nil
-  ) extends AttrArrTac {
+  ) extends AttrSeqTac {
     override def toString: String = {
       def format(v: Char): String = s"'$v'"
-      def vss: String = vs.map(array => array.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrArrTacChar("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSeqTacChar("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 

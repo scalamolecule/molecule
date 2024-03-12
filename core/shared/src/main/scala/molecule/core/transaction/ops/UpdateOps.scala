@@ -50,10 +50,10 @@ trait UpdateOps extends Action2Data with BaseOps {
     one2json: T => String
   ): Unit
 
-  def updateArrayEq[T](
+  def updateSeqEq[T](
     ns: String,
     attr: String,
-    arrays: Seq[Array[T]],
+    seqs: Seq[Seq[T]],
     refNs: Option[String],
     owner: Boolean,
     transform: T => Any,
@@ -68,10 +68,10 @@ trait UpdateOps extends Action2Data with BaseOps {
     byteArrays: Seq[Array[Byte]],
   ): Unit = ???
 
-  def updateArrayAdd[T](
+  def updateSeqAdd[T](
     ns: String,
     attr: String,
-    arrays: Seq[Array[T]],
+    seqs: Seq[Seq[T]],
     refNs: Option[String],
     owner: Boolean,
     transform: T => Any,
@@ -80,10 +80,10 @@ trait UpdateOps extends Action2Data with BaseOps {
     //    value2json: (StringBuffer, T) => StringBuffer
   ): Unit = ???
 
-  def updateArrayRemove[T](
+  def updateSeqRemove[T](
     ns: String,
     attr: String,
-    array: Array[T],
+    seqs: Seq[T],
     refNs: Option[String],
     owner: Boolean,
     transform: T => Any,

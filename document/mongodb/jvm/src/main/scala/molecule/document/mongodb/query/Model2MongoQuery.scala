@@ -123,7 +123,7 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
           case a: AttrSetTac => resolveAttrSetTac(a); resolve(tail)
         }
 
-      case a: AttrArr => ???
+      case a: AttrSeq => ???
       case a: AttrMap => ???
 
       case ref: Ref                       =>

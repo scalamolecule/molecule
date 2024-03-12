@@ -329,7 +329,7 @@ trait ModelUtils {
       }
 
 
-      case a: AttrArr => ???
+      case a: AttrSeq => ???
       case a: AttrMap => ???
     }
   }

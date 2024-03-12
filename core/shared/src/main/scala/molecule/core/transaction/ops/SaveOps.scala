@@ -24,11 +24,11 @@ trait SaveOps extends Action2Data with BaseOps {
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit
 
-  protected def addArray[T](
+  protected def addSeq[T](
     ns: String,
     attr: String,
     refNs: Option[String],
-    optArray: Option[Array[Any]],
+    optSeq: Option[Seq[Any]],
     transformValue: T => Any,
 //    set2array: Array[Any] => Array[AnyRef],
 //    exts: List[String],

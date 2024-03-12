@@ -132,9 +132,9 @@ case class TxModelValidation(
         case _: AttrSetMan => "man"
         case _: AttrSetOpt => "opt"
         case _: AttrSetTac => "tac"
-        case _: AttrArrMan => "man"
-        case _: AttrArrOpt => "opt"
-        case _: AttrArrTac => "tac"
+        case _: AttrSeqMan => "man"
+        case _: AttrSeqOpt => "opt"
+        case _: AttrSeqTac => "tac"
         case _: AttrMapMan => "man"
         case _: AttrMapOpt => "opt"
         case _: AttrMapTac => "tac"
@@ -164,7 +164,7 @@ case class TxModelValidation(
         case a1: Attr if a1.attr == attr =>
           a1 match {
             //            case _: AttrOneMan | _: AttrSetMan =>
-            case _: AttrOneMan | _: AttrSetMan | _: AttrArrMan | _: AttrMapMan =>
+            case _: AttrOneMan | _: AttrSetMan | _: AttrSeqMan | _: AttrMapMan =>
               requiredAttrs -= attr
               attr -> a1
 
@@ -255,7 +255,7 @@ case class TxModelValidation(
         case _: AttrSetTac | _: AttrSetOpt => onlyMandatory(a)
 
 
-        case a: AttrArr => ???
+        case a: AttrSeq => ???
         case a: AttrMap => ???
       }
     }

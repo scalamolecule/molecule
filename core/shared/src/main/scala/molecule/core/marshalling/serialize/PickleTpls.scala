@@ -104,11 +104,11 @@ case class PickleTpls(
                 case a: AttrSetOpt => resolvePicklers(tail, picklers :+ pickleAttrSetOpt(a, tplIndex), tplIndex + 1)
                 case _: AttrSetTac => resolvePicklers(tail, picklers, tplIndex)
               }
-            case a: AttrArr =>
+            case a: AttrSeq =>
               a match {
-                case a: AttrArrMan => resolvePicklers(tail, picklers :+ pickleAttrArrMan(a, tplIndex), tplIndex + 1)
-                case a: AttrArrOpt => resolvePicklers(tail, picklers :+ pickleAttrArrOpt(a, tplIndex), tplIndex + 1)
-                case _: AttrArrTac => resolvePicklers(tail, picklers, tplIndex)
+                case a: AttrSeqMan => resolvePicklers(tail, picklers :+ pickleAttrSeqMan(a, tplIndex), tplIndex + 1)
+                case a: AttrSeqOpt => resolvePicklers(tail, picklers :+ pickleAttrSeqOpt(a, tplIndex), tplIndex + 1)
+                case _: AttrSeqTac => resolvePicklers(tail, picklers, tplIndex)
               }
             case a: AttrMap =>
               a match {
@@ -224,11 +224,55 @@ case class PickleTpls(
 
     def writeSets[T](tplIndex: Int, writer: T => Unit): Product => Unit = {
       (tpl: Product) => {
-        val sets = tpl.productElement(tplIndex).asInstanceOf[Set[Set[T]]]
+        val sets = tpl.productElement(tplIndex).asInstanceOf[Seq[Set[T]]]
         enc.writeInt(sets.size)
         sets.foreach { set =>
           enc.writeInt(set.size)
           set.foreach(v => writer(v))
+        }
+      }
+    }
+
+    def writeSeq[T](tplIndex: Int, writer: T => Unit): Product => Unit = {
+      (tpl: Product) => {
+        val seq = tpl.productElement(tplIndex).asInstanceOf[Seq[T]]
+        enc.writeInt(seq.size)
+        seq.foreach(v => writer(v))
+      }
+    }
+
+    def writeSeqs[T](tplIndex: Int, writer: T => Unit): Product => Unit = {
+      (tpl: Product) => {
+        val seqs = tpl.productElement(tplIndex).asInstanceOf[Seq[Seq[T]]]
+        enc.writeInt(seqs.size)
+        seqs.foreach { seq =>
+          enc.writeInt(seq.size)
+          seq.foreach(v => writer(v))
+        }
+      }
+    }
+
+    def writeMap[T](tplIndex: Int, writer: T => Unit): Product => Unit = {
+      (tpl: Product) => {
+        val map = tpl.productElement(tplIndex).asInstanceOf[Map[String, T]]
+        enc.writeInt(map.size)
+        map.foreach{ case (k, v) =>
+          enc.writeString(k)
+          writer(v)
+        }
+      }
+    }
+
+    def writeMaps[T](tplIndex: Int, writer: T => Unit): Product => Unit = {
+      (tpl: Product) => {
+        val maps = tpl.productElement(tplIndex).asInstanceOf[Seq[Map[String, T]]]
+        enc.writeInt(maps.size)
+        maps.foreach { map =>
+          enc.writeInt(map.size)
+          map.foreach{ case (k, v) =>
+            enc.writeString(k)
+            writer(v)
+          }
         }
       }
     }
@@ -254,6 +298,37 @@ case class PickleTpls(
             enc.writeInt(2)
             enc.writeInt(set.size)
             set.foreach(v => writer(v))
+          case None      =>
+            enc.writeInt(1)
+        }
+      }
+    }
+
+    def writeOptSeq[T](tplIndex: Int, writer: T => Unit): Product => Unit = {
+      (tpl: Product) => {
+        val opt = tpl.productElement(tplIndex).asInstanceOf[Option[Seq[T]]]
+        opt match {
+          case Some(seq) =>
+            enc.writeInt(2)
+            enc.writeInt(seq.size)
+            seq.foreach(v => writer(v))
+          case None      =>
+            enc.writeInt(1)
+        }
+      }
+    }
+
+    def writeOptMap[T](tplIndex: Int, writer: T => Unit): Product => Unit = {
+      (tpl: Product) => {
+        val opt = tpl.productElement(tplIndex).asInstanceOf[Option[Map[String, T]]]
+        opt match {
+          case Some(map) =>
+            enc.writeInt(2)
+            enc.writeInt(map.size)
+            map.foreach{ case (k, v) =>
+              enc.writeString(k)
+              writer(v)
+            }
           case None      =>
             enc.writeInt(1)
         }
@@ -461,101 +536,101 @@ case class PickleTpls(
     }
   }
 
-  private def pickleAttrArrMan(a: AttrArrMan, tplIndex: Int): Product => Unit = {
+  private def pickleAttrSeqMan(a: AttrSeqMan, tplIndex: Int): Product => Unit = {
     a.op match {
       case Fn(kw, _) => kw match {
-        case "count" | "countDistinct"                => pickleAttrArrManInt(tplIndex)
-        case "distinct"                               => pickleAttrArrManArr(a, tplIndex)
-        case "mins" | "maxs" | "samples"              => pickleAttrArrManV(a, tplIndex)
+        case "count" | "countDistinct"                => pickleAttrSeqManInt(tplIndex)
+        case "distinct"                               => pickleAttrSeqManArr(a, tplIndex)
+        case "mins" | "maxs" | "samples"              => pickleAttrSeqManV(a, tplIndex)
         case "median" | "avg" | "variance" | "stddev" => pickleAttrOneManDouble(tplIndex)
-        case _                                        => pickleAttrArrManV(a, tplIndex)
+        case _                                        => pickleAttrSeqManV(a, tplIndex)
       }
-      case _         => pickleAttrArrManV(a, tplIndex)
+      case _         => pickleAttrSeqManV(a, tplIndex)
     }
   }
-  private def pickleAttrArrManInt(tplIndex: Int): Product => Unit = {
+  private def pickleAttrSeqManInt(tplIndex: Int): Product => Unit = {
     (tpl: Product) => enk.writeInt(tpl.productElement(tplIndex).toString.toInt)
   }
-  private def pickleAttrArrManV(a: AttrArrMan, tplIndex: Int): Product => Unit = {
+  private def pickleAttrSeqManV(a: AttrSeqMan, tplIndex: Int): Product => Unit = {
     a match {
-      case _: AttrArrManID             => enk.writeSet[String](tplIndex, enk.writeString)
-      case _: AttrArrManString         => enk.writeSet[String](tplIndex, enk.writeString)
-      case _: AttrArrManInt            => enk.writeSet[Int](tplIndex, enk.writeInt)
-      case _: AttrArrManLong           => enk.writeSet[Long](tplIndex, enk.writeLong)
-      case _: AttrArrManFloat          => enk.writeSet[Float](tplIndex, enk.writeFloat)
-      case _: AttrArrManDouble         => enk.writeSet[Double](tplIndex, enk.writeDouble)
-      case _: AttrArrManBoolean        => enk.writeSet[Boolean](tplIndex, enk.writeBoolean)
-      case _: AttrArrManBigInt         => enk.writeSet[BigInt](tplIndex, enk.writeBigInt)
-      case _: AttrArrManBigDecimal     => enk.writeSet[BigDecimal](tplIndex, enk.writeBigDecimal)
-      case _: AttrArrManDate           => enk.writeSet[Date](tplIndex, enk.writeDate)
-      case _: AttrArrManDuration       => enk.writeSet[Duration](tplIndex, enk.writeDuration)
-      case _: AttrArrManInstant        => enk.writeSet[Instant](tplIndex, enk.writeInstant)
-      case _: AttrArrManLocalDate      => enk.writeSet[LocalDate](tplIndex, enk.writeLocalDate)
-      case _: AttrArrManLocalTime      => enk.writeSet[LocalTime](tplIndex, enk.writeLocalTime)
-      case _: AttrArrManLocalDateTime  => enk.writeSet[LocalDateTime](tplIndex, enk.writeLocalDateTime)
-      case _: AttrArrManOffsetTime     => enk.writeSet[OffsetTime](tplIndex, enk.writeOffsetTime)
-      case _: AttrArrManOffsetDateTime => enk.writeSet[OffsetDateTime](tplIndex, enk.writeOffsetDateTime)
-      case _: AttrArrManZonedDateTime  => enk.writeSet[ZonedDateTime](tplIndex, enk.writeZonedDateTime)
-      case _: AttrArrManUUID           => enk.writeSet[UUID](tplIndex, enk.writeUUID)
-      case _: AttrArrManURI            => enk.writeSet[URI](tplIndex, enk.writeURI)
-      case _: AttrArrManByte           => enk.writeSet[Byte](tplIndex, enk.writeByte)
-      case _: AttrArrManShort          => enk.writeSet[Short](tplIndex, enk.writeShort)
-      case _: AttrArrManChar           => enk.writeSet[Char](tplIndex, enk.writeChar)
+      case _: AttrSeqManID             => enk.writeSeq[String](tplIndex, enk.writeString)
+      case _: AttrSeqManString         => enk.writeSeq[String](tplIndex, enk.writeString)
+      case _: AttrSeqManInt            => enk.writeSeq[Int](tplIndex, enk.writeInt)
+      case _: AttrSeqManLong           => enk.writeSeq[Long](tplIndex, enk.writeLong)
+      case _: AttrSeqManFloat          => enk.writeSeq[Float](tplIndex, enk.writeFloat)
+      case _: AttrSeqManDouble         => enk.writeSeq[Double](tplIndex, enk.writeDouble)
+      case _: AttrSeqManBoolean        => enk.writeSeq[Boolean](tplIndex, enk.writeBoolean)
+      case _: AttrSeqManBigInt         => enk.writeSeq[BigInt](tplIndex, enk.writeBigInt)
+      case _: AttrSeqManBigDecimal     => enk.writeSeq[BigDecimal](tplIndex, enk.writeBigDecimal)
+      case _: AttrSeqManDate           => enk.writeSeq[Date](tplIndex, enk.writeDate)
+      case _: AttrSeqManDuration       => enk.writeSeq[Duration](tplIndex, enk.writeDuration)
+      case _: AttrSeqManInstant        => enk.writeSeq[Instant](tplIndex, enk.writeInstant)
+      case _: AttrSeqManLocalDate      => enk.writeSeq[LocalDate](tplIndex, enk.writeLocalDate)
+      case _: AttrSeqManLocalTime      => enk.writeSeq[LocalTime](tplIndex, enk.writeLocalTime)
+      case _: AttrSeqManLocalDateTime  => enk.writeSeq[LocalDateTime](tplIndex, enk.writeLocalDateTime)
+      case _: AttrSeqManOffsetTime     => enk.writeSeq[OffsetTime](tplIndex, enk.writeOffsetTime)
+      case _: AttrSeqManOffsetDateTime => enk.writeSeq[OffsetDateTime](tplIndex, enk.writeOffsetDateTime)
+      case _: AttrSeqManZonedDateTime  => enk.writeSeq[ZonedDateTime](tplIndex, enk.writeZonedDateTime)
+      case _: AttrSeqManUUID           => enk.writeSeq[UUID](tplIndex, enk.writeUUID)
+      case _: AttrSeqManURI            => enk.writeSeq[URI](tplIndex, enk.writeURI)
+      case _: AttrSeqManByte           => enk.writeSeq[Byte](tplIndex, enk.writeByte)
+      case _: AttrSeqManShort          => enk.writeSeq[Short](tplIndex, enk.writeShort)
+      case _: AttrSeqManChar           => enk.writeSeq[Char](tplIndex, enk.writeChar)
     }
   }
-  private def pickleAttrArrManArr(a: AttrArrMan, tplIndex: Int): Product => Unit = {
+  private def pickleAttrSeqManArr(a: AttrSeqMan, tplIndex: Int): Product => Unit = {
     a match {
-      case _: AttrArrManID             => enk.writeSets[String](tplIndex, enk.writeString)
-      case _: AttrArrManString         => enk.writeSets[String](tplIndex, enk.writeString)
-      case _: AttrArrManInt            => enk.writeSets[Int](tplIndex, enk.writeInt)
-      case _: AttrArrManLong           => enk.writeSets[Long](tplIndex, enk.writeLong)
-      case _: AttrArrManFloat          => enk.writeSets[Float](tplIndex, enk.writeFloat)
-      case _: AttrArrManDouble         => enk.writeSets[Double](tplIndex, enk.writeDouble)
-      case _: AttrArrManBoolean        => enk.writeSets[Boolean](tplIndex, enk.writeBoolean)
-      case _: AttrArrManBigInt         => enk.writeSets[BigInt](tplIndex, enk.writeBigInt)
-      case _: AttrArrManBigDecimal     => enk.writeSets[BigDecimal](tplIndex, enk.writeBigDecimal)
-      case _: AttrArrManDate           => enk.writeSets[Date](tplIndex, enk.writeDate)
-      case _: AttrArrManDuration       => enk.writeSets[Duration](tplIndex, enk.writeDuration)
-      case _: AttrArrManInstant        => enk.writeSets[Instant](tplIndex, enk.writeInstant)
-      case _: AttrArrManLocalDate      => enk.writeSets[LocalDate](tplIndex, enk.writeLocalDate)
-      case _: AttrArrManLocalTime      => enk.writeSets[LocalTime](tplIndex, enk.writeLocalTime)
-      case _: AttrArrManLocalDateTime  => enk.writeSets[LocalDateTime](tplIndex, enk.writeLocalDateTime)
-      case _: AttrArrManOffsetTime     => enk.writeSets[OffsetTime](tplIndex, enk.writeOffsetTime)
-      case _: AttrArrManOffsetDateTime => enk.writeSets[OffsetDateTime](tplIndex, enk.writeOffsetDateTime)
-      case _: AttrArrManZonedDateTime  => enk.writeSets[ZonedDateTime](tplIndex, enk.writeZonedDateTime)
-      case _: AttrArrManUUID           => enk.writeSets[UUID](tplIndex, enk.writeUUID)
-      case _: AttrArrManURI            => enk.writeSets[URI](tplIndex, enk.writeURI)
-      case _: AttrArrManByte           => enk.writeSets[Byte](tplIndex, enk.writeByte)
-      case _: AttrArrManShort          => enk.writeSets[Short](tplIndex, enk.writeShort)
-      case _: AttrArrManChar           => enk.writeSets[Char](tplIndex, enk.writeChar)
+      case _: AttrSeqManID             => enk.writeSeqs[String](tplIndex, enk.writeString)
+      case _: AttrSeqManString         => enk.writeSeqs[String](tplIndex, enk.writeString)
+      case _: AttrSeqManInt            => enk.writeSeqs[Int](tplIndex, enk.writeInt)
+      case _: AttrSeqManLong           => enk.writeSeqs[Long](tplIndex, enk.writeLong)
+      case _: AttrSeqManFloat          => enk.writeSeqs[Float](tplIndex, enk.writeFloat)
+      case _: AttrSeqManDouble         => enk.writeSeqs[Double](tplIndex, enk.writeDouble)
+      case _: AttrSeqManBoolean        => enk.writeSeqs[Boolean](tplIndex, enk.writeBoolean)
+      case _: AttrSeqManBigInt         => enk.writeSeqs[BigInt](tplIndex, enk.writeBigInt)
+      case _: AttrSeqManBigDecimal     => enk.writeSeqs[BigDecimal](tplIndex, enk.writeBigDecimal)
+      case _: AttrSeqManDate           => enk.writeSeqs[Date](tplIndex, enk.writeDate)
+      case _: AttrSeqManDuration       => enk.writeSeqs[Duration](tplIndex, enk.writeDuration)
+      case _: AttrSeqManInstant        => enk.writeSeqs[Instant](tplIndex, enk.writeInstant)
+      case _: AttrSeqManLocalDate      => enk.writeSeqs[LocalDate](tplIndex, enk.writeLocalDate)
+      case _: AttrSeqManLocalTime      => enk.writeSeqs[LocalTime](tplIndex, enk.writeLocalTime)
+      case _: AttrSeqManLocalDateTime  => enk.writeSeqs[LocalDateTime](tplIndex, enk.writeLocalDateTime)
+      case _: AttrSeqManOffsetTime     => enk.writeSeqs[OffsetTime](tplIndex, enk.writeOffsetTime)
+      case _: AttrSeqManOffsetDateTime => enk.writeSeqs[OffsetDateTime](tplIndex, enk.writeOffsetDateTime)
+      case _: AttrSeqManZonedDateTime  => enk.writeSeqs[ZonedDateTime](tplIndex, enk.writeZonedDateTime)
+      case _: AttrSeqManUUID           => enk.writeSeqs[UUID](tplIndex, enk.writeUUID)
+      case _: AttrSeqManURI            => enk.writeSeqs[URI](tplIndex, enk.writeURI)
+      case _: AttrSeqManByte           => enk.writeSeqs[Byte](tplIndex, enk.writeByte)
+      case _: AttrSeqManShort          => enk.writeSeqs[Short](tplIndex, enk.writeShort)
+      case _: AttrSeqManChar           => enk.writeSeqs[Char](tplIndex, enk.writeChar)
     }
   }
 
-  private def pickleAttrArrOpt(a: AttrArrOpt, tplIndex: Int): Product => Unit = {
+  private def pickleAttrSeqOpt(a: AttrSeqOpt, tplIndex: Int): Product => Unit = {
     a match {
-      case _: AttrArrOptID             => enk.writeOptSet[String](tplIndex, enk.writeString)
-      case _: AttrArrOptString         => enk.writeOptSet[String](tplIndex, enk.writeString)
-      case _: AttrArrOptInt            => enk.writeOptSet[Int](tplIndex, enk.writeInt)
-      case _: AttrArrOptLong           => enk.writeOptSet[Long](tplIndex, enk.writeLong)
-      case _: AttrArrOptFloat          => enk.writeOptSet[Float](tplIndex, enk.writeFloat)
-      case _: AttrArrOptDouble         => enk.writeOptSet[Double](tplIndex, enk.writeDouble)
-      case _: AttrArrOptBoolean        => enk.writeOptSet[Boolean](tplIndex, enk.writeBoolean)
-      case _: AttrArrOptBigInt         => enk.writeOptSet[BigInt](tplIndex, enk.writeBigInt)
-      case _: AttrArrOptBigDecimal     => enk.writeOptSet[BigDecimal](tplIndex, enk.writeBigDecimal)
-      case _: AttrArrOptDate           => enk.writeOptSet[Date](tplIndex, enk.writeDate)
-      case _: AttrArrOptDuration       => enk.writeOptSet[Duration](tplIndex, enk.writeDuration)
-      case _: AttrArrOptInstant        => enk.writeOptSet[Instant](tplIndex, enk.writeInstant)
-      case _: AttrArrOptLocalDate      => enk.writeOptSet[LocalDate](tplIndex, enk.writeLocalDate)
-      case _: AttrArrOptLocalTime      => enk.writeOptSet[LocalTime](tplIndex, enk.writeLocalTime)
-      case _: AttrArrOptLocalDateTime  => enk.writeOptSet[LocalDateTime](tplIndex, enk.writeLocalDateTime)
-      case _: AttrArrOptOffsetTime     => enk.writeOptSet[OffsetTime](tplIndex, enk.writeOffsetTime)
-      case _: AttrArrOptOffsetDateTime => enk.writeOptSet[OffsetDateTime](tplIndex, enk.writeOffsetDateTime)
-      case _: AttrArrOptZonedDateTime  => enk.writeOptSet[ZonedDateTime](tplIndex, enk.writeZonedDateTime)
-      case _: AttrArrOptUUID           => enk.writeOptSet[UUID](tplIndex, enk.writeUUID)
-      case _: AttrArrOptURI            => enk.writeOptSet[URI](tplIndex, enk.writeURI)
-      case _: AttrArrOptByte           => enk.writeOptSet[Byte](tplIndex, enk.writeByte)
-      case _: AttrArrOptShort          => enk.writeOptSet[Short](tplIndex, enk.writeShort)
-      case _: AttrArrOptChar           => enk.writeOptSet[Char](tplIndex, enk.writeChar)
+      case _: AttrSeqOptID             => enk.writeOptSeq[String](tplIndex, enk.writeString)
+      case _: AttrSeqOptString         => enk.writeOptSeq[String](tplIndex, enk.writeString)
+      case _: AttrSeqOptInt            => enk.writeOptSeq[Int](tplIndex, enk.writeInt)
+      case _: AttrSeqOptLong           => enk.writeOptSeq[Long](tplIndex, enk.writeLong)
+      case _: AttrSeqOptFloat          => enk.writeOptSeq[Float](tplIndex, enk.writeFloat)
+      case _: AttrSeqOptDouble         => enk.writeOptSeq[Double](tplIndex, enk.writeDouble)
+      case _: AttrSeqOptBoolean        => enk.writeOptSeq[Boolean](tplIndex, enk.writeBoolean)
+      case _: AttrSeqOptBigInt         => enk.writeOptSeq[BigInt](tplIndex, enk.writeBigInt)
+      case _: AttrSeqOptBigDecimal     => enk.writeOptSeq[BigDecimal](tplIndex, enk.writeBigDecimal)
+      case _: AttrSeqOptDate           => enk.writeOptSeq[Date](tplIndex, enk.writeDate)
+      case _: AttrSeqOptDuration       => enk.writeOptSeq[Duration](tplIndex, enk.writeDuration)
+      case _: AttrSeqOptInstant        => enk.writeOptSeq[Instant](tplIndex, enk.writeInstant)
+      case _: AttrSeqOptLocalDate      => enk.writeOptSeq[LocalDate](tplIndex, enk.writeLocalDate)
+      case _: AttrSeqOptLocalTime      => enk.writeOptSeq[LocalTime](tplIndex, enk.writeLocalTime)
+      case _: AttrSeqOptLocalDateTime  => enk.writeOptSeq[LocalDateTime](tplIndex, enk.writeLocalDateTime)
+      case _: AttrSeqOptOffsetTime     => enk.writeOptSeq[OffsetTime](tplIndex, enk.writeOffsetTime)
+      case _: AttrSeqOptOffsetDateTime => enk.writeOptSeq[OffsetDateTime](tplIndex, enk.writeOffsetDateTime)
+      case _: AttrSeqOptZonedDateTime  => enk.writeOptSeq[ZonedDateTime](tplIndex, enk.writeZonedDateTime)
+      case _: AttrSeqOptUUID           => enk.writeOptSeq[UUID](tplIndex, enk.writeUUID)
+      case _: AttrSeqOptURI            => enk.writeOptSeq[URI](tplIndex, enk.writeURI)
+      case _: AttrSeqOptByte           => enk.writeOptSeq[Byte](tplIndex, enk.writeByte)
+      case _: AttrSeqOptShort          => enk.writeOptSeq[Short](tplIndex, enk.writeShort)
+      case _: AttrSeqOptChar           => enk.writeOptSeq[Char](tplIndex, enk.writeChar)
     }
   }
 
@@ -578,84 +653,84 @@ case class PickleTpls(
   }
   private def pickleAttrMapManV(a: AttrMapMan, tplIndex: Int): Product => Unit = {
     a match {
-      case _: AttrMapManID             => enk.writeSet[String](tplIndex, enk.writeString)
-      case _: AttrMapManString         => enk.writeSet[String](tplIndex, enk.writeString)
-      case _: AttrMapManInt            => enk.writeSet[Int](tplIndex, enk.writeInt)
-      case _: AttrMapManLong           => enk.writeSet[Long](tplIndex, enk.writeLong)
-      case _: AttrMapManFloat          => enk.writeSet[Float](tplIndex, enk.writeFloat)
-      case _: AttrMapManDouble         => enk.writeSet[Double](tplIndex, enk.writeDouble)
-      case _: AttrMapManBoolean        => enk.writeSet[Boolean](tplIndex, enk.writeBoolean)
-      case _: AttrMapManBigInt         => enk.writeSet[BigInt](tplIndex, enk.writeBigInt)
-      case _: AttrMapManBigDecimal     => enk.writeSet[BigDecimal](tplIndex, enk.writeBigDecimal)
-      case _: AttrMapManDate           => enk.writeSet[Date](tplIndex, enk.writeDate)
-      case _: AttrMapManDuration       => enk.writeSet[Duration](tplIndex, enk.writeDuration)
-      case _: AttrMapManInstant        => enk.writeSet[Instant](tplIndex, enk.writeInstant)
-      case _: AttrMapManLocalDate      => enk.writeSet[LocalDate](tplIndex, enk.writeLocalDate)
-      case _: AttrMapManLocalTime      => enk.writeSet[LocalTime](tplIndex, enk.writeLocalTime)
-      case _: AttrMapManLocalDateTime  => enk.writeSet[LocalDateTime](tplIndex, enk.writeLocalDateTime)
-      case _: AttrMapManOffsetTime     => enk.writeSet[OffsetTime](tplIndex, enk.writeOffsetTime)
-      case _: AttrMapManOffsetDateTime => enk.writeSet[OffsetDateTime](tplIndex, enk.writeOffsetDateTime)
-      case _: AttrMapManZonedDateTime  => enk.writeSet[ZonedDateTime](tplIndex, enk.writeZonedDateTime)
-      case _: AttrMapManUUID           => enk.writeSet[UUID](tplIndex, enk.writeUUID)
-      case _: AttrMapManURI            => enk.writeSet[URI](tplIndex, enk.writeURI)
-      case _: AttrMapManByte           => enk.writeSet[Byte](tplIndex, enk.writeByte)
-      case _: AttrMapManShort          => enk.writeSet[Short](tplIndex, enk.writeShort)
-      case _: AttrMapManChar           => enk.writeSet[Char](tplIndex, enk.writeChar)
+      case _: AttrMapManID             => enk.writeMap[String](tplIndex, enk.writeString)
+      case _: AttrMapManString         => enk.writeMap[String](tplIndex, enk.writeString)
+      case _: AttrMapManInt            => enk.writeMap[Int](tplIndex, enk.writeInt)
+      case _: AttrMapManLong           => enk.writeMap[Long](tplIndex, enk.writeLong)
+      case _: AttrMapManFloat          => enk.writeMap[Float](tplIndex, enk.writeFloat)
+      case _: AttrMapManDouble         => enk.writeMap[Double](tplIndex, enk.writeDouble)
+      case _: AttrMapManBoolean        => enk.writeMap[Boolean](tplIndex, enk.writeBoolean)
+      case _: AttrMapManBigInt         => enk.writeMap[BigInt](tplIndex, enk.writeBigInt)
+      case _: AttrMapManBigDecimal     => enk.writeMap[BigDecimal](tplIndex, enk.writeBigDecimal)
+      case _: AttrMapManDate           => enk.writeMap[Date](tplIndex, enk.writeDate)
+      case _: AttrMapManDuration       => enk.writeMap[Duration](tplIndex, enk.writeDuration)
+      case _: AttrMapManInstant        => enk.writeMap[Instant](tplIndex, enk.writeInstant)
+      case _: AttrMapManLocalDate      => enk.writeMap[LocalDate](tplIndex, enk.writeLocalDate)
+      case _: AttrMapManLocalTime      => enk.writeMap[LocalTime](tplIndex, enk.writeLocalTime)
+      case _: AttrMapManLocalDateTime  => enk.writeMap[LocalDateTime](tplIndex, enk.writeLocalDateTime)
+      case _: AttrMapManOffsetTime     => enk.writeMap[OffsetTime](tplIndex, enk.writeOffsetTime)
+      case _: AttrMapManOffsetDateTime => enk.writeMap[OffsetDateTime](tplIndex, enk.writeOffsetDateTime)
+      case _: AttrMapManZonedDateTime  => enk.writeMap[ZonedDateTime](tplIndex, enk.writeZonedDateTime)
+      case _: AttrMapManUUID           => enk.writeMap[UUID](tplIndex, enk.writeUUID)
+      case _: AttrMapManURI            => enk.writeMap[URI](tplIndex, enk.writeURI)
+      case _: AttrMapManByte           => enk.writeMap[Byte](tplIndex, enk.writeByte)
+      case _: AttrMapManShort          => enk.writeMap[Short](tplIndex, enk.writeShort)
+      case _: AttrMapManChar           => enk.writeMap[Char](tplIndex, enk.writeChar)
     }
   }
   private def pickleAttrMapManMap(a: AttrMapMan, tplIndex: Int): Product => Unit = {
     a match {
-      case _: AttrMapManID             => enk.writeSets[String](tplIndex, enk.writeString)
-      case _: AttrMapManString         => enk.writeSets[String](tplIndex, enk.writeString)
-      case _: AttrMapManInt            => enk.writeSets[Int](tplIndex, enk.writeInt)
-      case _: AttrMapManLong           => enk.writeSets[Long](tplIndex, enk.writeLong)
-      case _: AttrMapManFloat          => enk.writeSets[Float](tplIndex, enk.writeFloat)
-      case _: AttrMapManDouble         => enk.writeSets[Double](tplIndex, enk.writeDouble)
-      case _: AttrMapManBoolean        => enk.writeSets[Boolean](tplIndex, enk.writeBoolean)
-      case _: AttrMapManBigInt         => enk.writeSets[BigInt](tplIndex, enk.writeBigInt)
-      case _: AttrMapManBigDecimal     => enk.writeSets[BigDecimal](tplIndex, enk.writeBigDecimal)
-      case _: AttrMapManDate           => enk.writeSets[Date](tplIndex, enk.writeDate)
-      case _: AttrMapManDuration       => enk.writeSets[Duration](tplIndex, enk.writeDuration)
-      case _: AttrMapManInstant        => enk.writeSets[Instant](tplIndex, enk.writeInstant)
-      case _: AttrMapManLocalDate      => enk.writeSets[LocalDate](tplIndex, enk.writeLocalDate)
-      case _: AttrMapManLocalTime      => enk.writeSets[LocalTime](tplIndex, enk.writeLocalTime)
-      case _: AttrMapManLocalDateTime  => enk.writeSets[LocalDateTime](tplIndex, enk.writeLocalDateTime)
-      case _: AttrMapManOffsetTime     => enk.writeSets[OffsetTime](tplIndex, enk.writeOffsetTime)
-      case _: AttrMapManOffsetDateTime => enk.writeSets[OffsetDateTime](tplIndex, enk.writeOffsetDateTime)
-      case _: AttrMapManZonedDateTime  => enk.writeSets[ZonedDateTime](tplIndex, enk.writeZonedDateTime)
-      case _: AttrMapManUUID           => enk.writeSets[UUID](tplIndex, enk.writeUUID)
-      case _: AttrMapManURI            => enk.writeSets[URI](tplIndex, enk.writeURI)
-      case _: AttrMapManByte           => enk.writeSets[Byte](tplIndex, enk.writeByte)
-      case _: AttrMapManShort          => enk.writeSets[Short](tplIndex, enk.writeShort)
-      case _: AttrMapManChar           => enk.writeSets[Char](tplIndex, enk.writeChar)
+      case _: AttrMapManID             => enk.writeMaps[String](tplIndex, enk.writeString)
+      case _: AttrMapManString         => enk.writeMaps[String](tplIndex, enk.writeString)
+      case _: AttrMapManInt            => enk.writeMaps[Int](tplIndex, enk.writeInt)
+      case _: AttrMapManLong           => enk.writeMaps[Long](tplIndex, enk.writeLong)
+      case _: AttrMapManFloat          => enk.writeMaps[Float](tplIndex, enk.writeFloat)
+      case _: AttrMapManDouble         => enk.writeMaps[Double](tplIndex, enk.writeDouble)
+      case _: AttrMapManBoolean        => enk.writeMaps[Boolean](tplIndex, enk.writeBoolean)
+      case _: AttrMapManBigInt         => enk.writeMaps[BigInt](tplIndex, enk.writeBigInt)
+      case _: AttrMapManBigDecimal     => enk.writeMaps[BigDecimal](tplIndex, enk.writeBigDecimal)
+      case _: AttrMapManDate           => enk.writeMaps[Date](tplIndex, enk.writeDate)
+      case _: AttrMapManDuration       => enk.writeMaps[Duration](tplIndex, enk.writeDuration)
+      case _: AttrMapManInstant        => enk.writeMaps[Instant](tplIndex, enk.writeInstant)
+      case _: AttrMapManLocalDate      => enk.writeMaps[LocalDate](tplIndex, enk.writeLocalDate)
+      case _: AttrMapManLocalTime      => enk.writeMaps[LocalTime](tplIndex, enk.writeLocalTime)
+      case _: AttrMapManLocalDateTime  => enk.writeMaps[LocalDateTime](tplIndex, enk.writeLocalDateTime)
+      case _: AttrMapManOffsetTime     => enk.writeMaps[OffsetTime](tplIndex, enk.writeOffsetTime)
+      case _: AttrMapManOffsetDateTime => enk.writeMaps[OffsetDateTime](tplIndex, enk.writeOffsetDateTime)
+      case _: AttrMapManZonedDateTime  => enk.writeMaps[ZonedDateTime](tplIndex, enk.writeZonedDateTime)
+      case _: AttrMapManUUID           => enk.writeMaps[UUID](tplIndex, enk.writeUUID)
+      case _: AttrMapManURI            => enk.writeMaps[URI](tplIndex, enk.writeURI)
+      case _: AttrMapManByte           => enk.writeMaps[Byte](tplIndex, enk.writeByte)
+      case _: AttrMapManShort          => enk.writeMaps[Short](tplIndex, enk.writeShort)
+      case _: AttrMapManChar           => enk.writeMaps[Char](tplIndex, enk.writeChar)
     }
   }
 
   private def pickleAttrMapOpt(a: AttrMapOpt, tplIndex: Int): Product => Unit = {
     a match {
-      case _: AttrMapOptID             => enk.writeOptSet[String](tplIndex, enk.writeString)
-      case _: AttrMapOptString         => enk.writeOptSet[String](tplIndex, enk.writeString)
-      case _: AttrMapOptInt            => enk.writeOptSet[Int](tplIndex, enk.writeInt)
-      case _: AttrMapOptLong           => enk.writeOptSet[Long](tplIndex, enk.writeLong)
-      case _: AttrMapOptFloat          => enk.writeOptSet[Float](tplIndex, enk.writeFloat)
-      case _: AttrMapOptDouble         => enk.writeOptSet[Double](tplIndex, enk.writeDouble)
-      case _: AttrMapOptBoolean        => enk.writeOptSet[Boolean](tplIndex, enk.writeBoolean)
-      case _: AttrMapOptBigInt         => enk.writeOptSet[BigInt](tplIndex, enk.writeBigInt)
-      case _: AttrMapOptBigDecimal     => enk.writeOptSet[BigDecimal](tplIndex, enk.writeBigDecimal)
-      case _: AttrMapOptDate           => enk.writeOptSet[Date](tplIndex, enk.writeDate)
-      case _: AttrMapOptDuration       => enk.writeOptSet[Duration](tplIndex, enk.writeDuration)
-      case _: AttrMapOptInstant        => enk.writeOptSet[Instant](tplIndex, enk.writeInstant)
-      case _: AttrMapOptLocalDate      => enk.writeOptSet[LocalDate](tplIndex, enk.writeLocalDate)
-      case _: AttrMapOptLocalTime      => enk.writeOptSet[LocalTime](tplIndex, enk.writeLocalTime)
-      case _: AttrMapOptLocalDateTime  => enk.writeOptSet[LocalDateTime](tplIndex, enk.writeLocalDateTime)
-      case _: AttrMapOptOffsetTime     => enk.writeOptSet[OffsetTime](tplIndex, enk.writeOffsetTime)
-      case _: AttrMapOptOffsetDateTime => enk.writeOptSet[OffsetDateTime](tplIndex, enk.writeOffsetDateTime)
-      case _: AttrMapOptZonedDateTime  => enk.writeOptSet[ZonedDateTime](tplIndex, enk.writeZonedDateTime)
-      case _: AttrMapOptUUID           => enk.writeOptSet[UUID](tplIndex, enk.writeUUID)
-      case _: AttrMapOptURI            => enk.writeOptSet[URI](tplIndex, enk.writeURI)
-      case _: AttrMapOptByte           => enk.writeOptSet[Byte](tplIndex, enk.writeByte)
-      case _: AttrMapOptShort          => enk.writeOptSet[Short](tplIndex, enk.writeShort)
-      case _: AttrMapOptChar           => enk.writeOptSet[Char](tplIndex, enk.writeChar)
+      case _: AttrMapOptID             => enk.writeOptMap[String](tplIndex, enk.writeString)
+      case _: AttrMapOptString         => enk.writeOptMap[String](tplIndex, enk.writeString)
+      case _: AttrMapOptInt            => enk.writeOptMap[Int](tplIndex, enk.writeInt)
+      case _: AttrMapOptLong           => enk.writeOptMap[Long](tplIndex, enk.writeLong)
+      case _: AttrMapOptFloat          => enk.writeOptMap[Float](tplIndex, enk.writeFloat)
+      case _: AttrMapOptDouble         => enk.writeOptMap[Double](tplIndex, enk.writeDouble)
+      case _: AttrMapOptBoolean        => enk.writeOptMap[Boolean](tplIndex, enk.writeBoolean)
+      case _: AttrMapOptBigInt         => enk.writeOptMap[BigInt](tplIndex, enk.writeBigInt)
+      case _: AttrMapOptBigDecimal     => enk.writeOptMap[BigDecimal](tplIndex, enk.writeBigDecimal)
+      case _: AttrMapOptDate           => enk.writeOptMap[Date](tplIndex, enk.writeDate)
+      case _: AttrMapOptDuration       => enk.writeOptMap[Duration](tplIndex, enk.writeDuration)
+      case _: AttrMapOptInstant        => enk.writeOptMap[Instant](tplIndex, enk.writeInstant)
+      case _: AttrMapOptLocalDate      => enk.writeOptMap[LocalDate](tplIndex, enk.writeLocalDate)
+      case _: AttrMapOptLocalTime      => enk.writeOptMap[LocalTime](tplIndex, enk.writeLocalTime)
+      case _: AttrMapOptLocalDateTime  => enk.writeOptMap[LocalDateTime](tplIndex, enk.writeLocalDateTime)
+      case _: AttrMapOptOffsetTime     => enk.writeOptMap[OffsetTime](tplIndex, enk.writeOffsetTime)
+      case _: AttrMapOptOffsetDateTime => enk.writeOptMap[OffsetDateTime](tplIndex, enk.writeOffsetDateTime)
+      case _: AttrMapOptZonedDateTime  => enk.writeOptMap[ZonedDateTime](tplIndex, enk.writeZonedDateTime)
+      case _: AttrMapOptUUID           => enk.writeOptMap[UUID](tplIndex, enk.writeUUID)
+      case _: AttrMapOptURI            => enk.writeOptMap[URI](tplIndex, enk.writeURI)
+      case _: AttrMapOptByte           => enk.writeOptMap[Byte](tplIndex, enk.writeByte)
+      case _: AttrMapOptShort          => enk.writeOptMap[Short](tplIndex, enk.writeShort)
+      case _: AttrMapOptChar           => enk.writeOptMap[Char](tplIndex, enk.writeChar)
     }
   }
 }

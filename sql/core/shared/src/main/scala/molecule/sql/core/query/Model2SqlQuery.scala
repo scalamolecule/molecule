@@ -77,7 +77,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
         case a: AttrSetTac => resolveAttrSetTac(a); resolve(tail)
       }
 
-      case a: AttrArr => ???
+      case a: AttrSeq => ???
       case a: AttrMap => ???
 
       case ref: Ref                        => resolveRef0(ref, tail)
