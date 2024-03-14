@@ -31,7 +31,7 @@ object AdhocJVM_graphql extends TestSuite_graphql {
 
         _ <- character(1001).name.Friends.name.query.get
         //        _ <- character(1001).name.Friends.__typename("Human").name.query.get
-        _ <- character(1001).name.Friends.__typename.name.query.get
+//        _ <- character(1001).name.Friends.__typename.name.query.get
 
         _ <- human(1001).name.homePlanet.query.get
         _ <- human(1001).name.homePlanet("EARTH").query.get

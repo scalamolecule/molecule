@@ -48,7 +48,7 @@ trait UpdateSet_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         for {
           id <- A.i(1).OwnBb.i(2).save.transact.map(_.id)
 
-          _ <- A(id).ownBb("123456789012345678901234").update.transact
+          _ <- A(id).ownBb(Set("123456789012345678901234")).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
               err ==> "Can't update non-existing ids of embedded documents in MongoDB."
             }
@@ -70,7 +70,7 @@ trait UpdateSet_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (c, Set(3)),
         ))
 
-        _ <- Ns(List(b, c)).ints(4).update.transact
+        _ <- Ns(List(b, c)).ints(Set(4)).update.transact
         _ <- Ns.id.a1.ints.query.get.map(_ ==> List(
           (a, Set(1)),
           (b, Set(4)),
@@ -80,7 +80,7 @@ trait UpdateSet_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "Delete individual attribute value(s) with update" - types { implicit conn =>
+    "Delete set" - types { implicit conn =>
       for {
         id <- Ns.ints.strings.insert(Set(1), Set("a")).transact.map(_.id)
         _ <- Ns.ints.strings.query.get.map(_ ==> List((Set(1), Set("a"))))
@@ -92,14 +92,15 @@ trait UpdateSet_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "Update multiple attributes" - types { implicit conn =>
+    "Update set" - types { implicit conn =>
       for {
         id <- Ns.ints.strings.insert(Set(1), Set("a")).transact.map(_.id)
         _ <- Ns.ints.strings.query.get.map(_ ==> List((Set(1), Set("a"))))
 
-        // Apply empty value to delete attribute of entity (entity remains)
-        _ <- Ns(id).ints(2).strings("b").update.transact
-        _ <- Ns.ints.strings.query.get.map(_ ==> List((Set(2), Set("b"))))
+        // Apply new value(s) to replace old value(s)
+//        _ <- Ns(id).ints.apply(2).strings.apply("b", "c").update.transact
+        _ <- Ns(id).ints.apply(Set(2)).strings.apply(Set("b", "c")).update.transact
+        _ <- Ns.ints.strings.query.get.map(_ ==> List((Set(2), Set("b", "c"))))
       } yield ()
     }
 
@@ -141,106 +142,106 @@ trait UpdateSet_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "OwnB" - refs { implicit conn =>
       for {
-        id <- A.ii(Set(1)).B.ii(Set(2)).C.ii(Set(3)).save.transact.map(_.id)
-        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(1), Set(2), Set(3))))
+        id <- A.ii(Set(1)).OwnB.ii(Set(2)).C.ii(Set(3)).save.transact.map(_.id)
+        _ <- A.ii.OwnB.ii.C.ii.query.get.map(_ ==> List((Set(1), Set(2), Set(3))))
 
         // A
         _ <- A(id).ii(Set(10)).update.transact
-        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(10), Set(2), Set(3))))
+        _ <- A.ii.OwnB.ii.C.ii.query.get.map(_ ==> List((Set(10), Set(2), Set(3))))
 
         // A + B
-        _ <- A(id).ii(Set(11)).B.ii(Set(20)).update.transact
-        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(11), Set(20), Set(3))))
+        _ <- A(id).ii(Set(11)).OwnB.ii(Set(20)).update.transact
+        _ <- A.ii.OwnB.ii.C.ii.query.get.map(_ ==> List((Set(11), Set(20), Set(3))))
 
         // B
-        _ <- A(id).B.ii(Set(21)).update.transact
-        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(11), Set(21), Set(3))))
+        _ <- A(id).OwnB.ii(Set(21)).update.transact
+        _ <- A.ii.OwnB.ii.C.ii.query.get.map(_ ==> List((Set(11), Set(21), Set(3))))
 
         // A + B + C
-        _ <- A(id).ii(Set(12)).B.ii(Set(22)).C.ii(Set(30)).update.transact
-        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(12), Set(22), Set(30))))
+        _ <- A(id).ii(Set(12)).OwnB.ii(Set(22)).C.ii(Set(30)).update.transact
+        _ <- A.ii.OwnB.ii.C.ii.query.get.map(_ ==> List((Set(12), Set(22), Set(30))))
 
         // A + C
-        _ <- A(id).ii(Set(13)).B.C.ii(Set(31)).update.transact
-        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(13), Set(22), Set(31))))
+        _ <- A(id).ii(Set(13)).OwnB.C.ii(Set(31)).update.transact
+        _ <- A.ii.OwnB.ii.C.ii.query.get.map(_ ==> List((Set(13), Set(22), Set(31))))
 
         // B + C
-        _ <- A(id).B.ii(Set(23)).C.ii(Set(32)).update.transact
-        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(13), Set(23), Set(32))))
+        _ <- A(id).OwnB.ii(Set(23)).C.ii(Set(32)).update.transact
+        _ <- A.ii.OwnB.ii.C.ii.query.get.map(_ ==> List((Set(13), Set(23), Set(32))))
 
         // C
-        _ <- A(id).B.C.ii(Set(33)).update.transact
-        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(13), Set(23), Set(33))))
+        _ <- A(id).OwnB.C.ii(Set(33)).update.transact
+        _ <- A.ii.OwnB.ii.C.ii.query.get.map(_ ==> List((Set(13), Set(23), Set(33))))
       } yield ()
     }
 
     "OwnC" - refs { implicit conn =>
       for {
-        id <- A.ii(Set(1)).B.ii(Set(2)).C.ii(Set(3)).save.transact.map(_.id)
-        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(1), Set(2), Set(3))))
+        id <- A.ii(Set(1)).B.ii(Set(2)).OwnC.ii(Set(3)).save.transact.map(_.id)
+        _ <- A.ii.B.ii.OwnC.ii.query.get.map(_ ==> List((Set(1), Set(2), Set(3))))
 
         // A
         _ <- A(id).ii(Set(10)).update.transact
-        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(10), Set(2), Set(3))))
+        _ <- A.ii.B.ii.OwnC.ii.query.get.map(_ ==> List((Set(10), Set(2), Set(3))))
 
         // A + B
         _ <- A(id).ii(Set(11)).B.ii(Set(20)).update.transact
-        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(11), Set(20), Set(3))))
+        _ <- A.ii.B.ii.OwnC.ii.query.get.map(_ ==> List((Set(11), Set(20), Set(3))))
 
         // B
         _ <- A(id).B.ii(Set(21)).update.transact
-        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(11), Set(21), Set(3))))
+        _ <- A.ii.B.ii.OwnC.ii.query.get.map(_ ==> List((Set(11), Set(21), Set(3))))
 
         // A + B + C
-        _ <- A(id).ii(Set(12)).B.ii(Set(22)).C.ii(Set(30)).update.transact
-        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(12), Set(22), Set(30))))
+        _ <- A(id).ii(Set(12)).B.ii(Set(22)).OwnC.ii(Set(30)).update.transact
+        _ <- A.ii.B.ii.OwnC.ii.query.get.map(_ ==> List((Set(12), Set(22), Set(30))))
 
         // A + C
-        _ <- A(id).ii(Set(13)).B.C.ii(Set(31)).update.transact
-        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(13), Set(22), Set(31))))
+        _ <- A(id).ii(Set(13)).B.OwnC.ii(Set(31)).update.transact
+        _ <- A.ii.B.ii.OwnC.ii.query.get.map(_ ==> List((Set(13), Set(22), Set(31))))
 
         // B + C
-        _ <- A(id).B.ii(Set(23)).C.ii(Set(32)).update.transact
-        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(13), Set(23), Set(32))))
+        _ <- A(id).B.ii(Set(23)).OwnC.ii(Set(32)).update.transact
+        _ <- A.ii.B.ii.OwnC.ii.query.get.map(_ ==> List((Set(13), Set(23), Set(32))))
 
         // C
-        _ <- A(id).B.C.ii(Set(33)).update.transact
-        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(13), Set(23), Set(33))))
+        _ <- A(id).B.OwnC.ii(Set(33)).update.transact
+        _ <- A.ii.B.ii.OwnC.ii.query.get.map(_ ==> List((Set(13), Set(23), Set(33))))
       } yield ()
     }
 
     "OwnB OwnC" - refs { implicit conn =>
       for {
-        id <- A.ii(Set(1)).B.ii(Set(2)).C.ii(Set(3)).save.transact.map(_.id)
-        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(1), Set(2), Set(3))))
+        id <- A.ii(Set(1)).OwnB.ii(Set(2)).OwnC.ii(Set(3)).save.transact.map(_.id)
+        _ <- A.ii.OwnB.ii.OwnC.ii.query.get.map(_ ==> List((Set(1), Set(2), Set(3))))
 
         // A
         _ <- A(id).ii(Set(10)).update.transact
-        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(10), Set(2), Set(3))))
+        _ <- A.ii.OwnB.ii.OwnC.ii.query.get.map(_ ==> List((Set(10), Set(2), Set(3))))
 
         // A + B
-        _ <- A(id).ii(Set(11)).B.ii(Set(20)).update.transact
-        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(11), Set(20), Set(3))))
+        _ <- A(id).ii(Set(11)).OwnB.ii(Set(20)).update.transact
+        _ <- A.ii.OwnB.ii.OwnC.ii.query.get.map(_ ==> List((Set(11), Set(20), Set(3))))
 
         // B
-        _ <- A(id).B.ii(Set(21)).update.transact
-        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(11), Set(21), Set(3))))
+        _ <- A(id).OwnB.ii(Set(21)).update.transact
+        _ <- A.ii.OwnB.ii.OwnC.ii.query.get.map(_ ==> List((Set(11), Set(21), Set(3))))
 
         // A + B + C
-        _ <- A(id).ii(Set(12)).B.ii(Set(22)).C.ii(Set(30)).update.transact
-        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(12), Set(22), Set(30))))
+        _ <- A(id).ii(Set(12)).OwnB.ii(Set(22)).OwnC.ii(Set(30)).update.transact
+        _ <- A.ii.OwnB.ii.OwnC.ii.query.get.map(_ ==> List((Set(12), Set(22), Set(30))))
 
         // A + C
-        _ <- A(id).ii(Set(13)).B.C.ii(Set(31)).update.transact
-        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(13), Set(22), Set(31))))
+        _ <- A(id).ii(Set(13)).OwnB.OwnC.ii(Set(31)).update.transact
+        _ <- A.ii.OwnB.ii.OwnC.ii.query.get.map(_ ==> List((Set(13), Set(22), Set(31))))
 
         // B + C
-        _ <- A(id).B.ii(Set(23)).C.ii(Set(32)).update.transact
-        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(13), Set(23), Set(32))))
+        _ <- A(id).OwnB.ii(Set(23)).OwnC.ii(Set(32)).update.transact
+        _ <- A.ii.OwnB.ii.OwnC.ii.query.get.map(_ ==> List((Set(13), Set(23), Set(32))))
 
         // C
-        _ <- A(id).B.C.ii(Set(33)).update.transact
-        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(13), Set(23), Set(33))))
+        _ <- A(id).OwnB.OwnC.ii(Set(33)).update.transact
+        _ <- A.ii.OwnB.ii.OwnC.ii.query.get.map(_ ==> List((Set(13), Set(23), Set(33))))
       } yield ()
     }
 
@@ -268,12 +269,6 @@ trait UpdateSet_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Same as
           _ <- Ns("42").ints(Set(1), Set(2)).update.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-              err ==> "Can only update one Set of values for Set attribute `Ns.ints`. Found: Set(1), Set(2)"
-            }
-
-          // Same as
-          _ <- Ns("42").ints(1, 2).update.transact
             .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
               err ==> "Can only update one Set of values for Set attribute `Ns.ints`. Found: Set(1), Set(2)"
             }

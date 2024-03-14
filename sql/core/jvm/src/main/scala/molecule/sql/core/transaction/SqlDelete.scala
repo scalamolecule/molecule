@@ -197,6 +197,9 @@ trait SqlDelete
                   processedNss1,
                   ownedTables ++ ownedTables1,
                   nsIds)
+
+              case _: CardSeq => ???
+              case _: CardMap => ???
             }
 
           case _ :: tail => deleteOwned(refPath, nsMap, List(MetaNs(ns, tail)), processedNss1, ownedTables, nsIds)

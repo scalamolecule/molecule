@@ -74,7 +74,7 @@ trait UpdateSeq_filter extends CoreTestSuite with Array2List with ApiAsync { spi
 
     "Update filter value itself" - types { implicit conn =>
       for {
-        _ <- Ns.intSeq_(42).intSeq(1).update.transact
+        _ <- Ns.intSeq_(Seq(42)).intSeq(Seq(1)).update.transact
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Can only lookup entity with card-one attribute value. Found:\n" +
               """AttrSeqTacInt("Ns", "intSeq", Eq, Seq(Seq(42)), None, None, Nil, Nil, None, None, Seq(0, 53))"""

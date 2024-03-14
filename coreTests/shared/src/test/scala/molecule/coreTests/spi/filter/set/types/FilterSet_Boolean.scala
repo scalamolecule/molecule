@@ -135,35 +135,8 @@ trait FilterSet_Boolean extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.booleans.has(Seq(true, false)).query.get.map(_ ==> List(t, f, tf))
 
 
-          // AND semantics when multiple values in a _Set_
-
-          // "Has this AND that"
-          _ <- Ns.i.a1.booleans.has(Set(true)).query.get.map(_ ==> List(t, tf))
-          _ <- Ns.i.a1.booleans.has(Set(false)).query.get.map(_ ==> List(f, tf))
-          _ <- Ns.i.a1.booleans.has(Set(true, false)).query.get.map(_ ==> List(tf))
-          // Same as
-          _ <- Ns.i.a1.booleans.has(Seq(Set(true))).query.get.map(_ ==> List(t, tf))
-          _ <- Ns.i.a1.booleans.has(Seq(Set(false))).query.get.map(_ ==> List(f, tf))
-          _ <- Ns.i.a1.booleans.has(Seq(Set(true, false))).query.get.map(_ ==> List(tf))
-
-
-          // AND/OR semantics with multiple Sets
-
-          // "(has this AND that) OR (has this AND that)"
-          _ <- Ns.i.a1.booleans.has(Set(true, false), Set(true)).query.get.map(_ ==> List(t, tf))
-          _ <- Ns.i.a1.booleans.has(Set(true, false), Set(false)).query.get.map(_ ==> List(f, tf))
-          // Same as
-          _ <- Ns.i.a1.booleans.has(Seq(Set(true, false), Set(true))).query.get.map(_ ==> List(t, tf))
-          _ <- Ns.i.a1.booleans.has(Seq(Set(true, false), Set(false))).query.get.map(_ ==> List(f, tf))
-
-
           // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.booleans.has(Set(true), Set.empty[Boolean]).query.get.map(_ ==> List(t, tf))
-          _ <- Ns.i.a1.booleans.has(Set(false), Set.empty[Boolean]).query.get.map(_ ==> List(f, tf))
-          _ <- Ns.i.a1.booleans.has(Set(true, false), Set.empty[Boolean]).query.get.map(_ ==> List(tf))
           _ <- Ns.i.a1.booleans.has(Seq.empty[Boolean]).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.booleans.has(Set.empty[Boolean]).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.booleans.has(Seq.empty[Set[Boolean]]).query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -192,36 +165,8 @@ trait FilterSet_Boolean extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           // Same as
           _ <- Ns.i.a1.booleans.hasNo(Seq(true, false)).query.get.map(_ ==> List())
 
-
-          // AND semantics when multiple values in a _Set_
-
-          // "Not (has this AND that)"
-          _ <- Ns.i.a1.booleans.hasNo(Set(true)).query.get.map(_ ==> List(f))
-          _ <- Ns.i.a1.booleans.hasNo(Set(false)).query.get.map(_ ==> List(t))
-          _ <- Ns.i.a1.booleans.hasNo(Set(true, false)).query.get.map(_ ==> List(t, f))
-          // Same as
-          _ <- Ns.i.a1.booleans.hasNo(Seq(Set(true))).query.get.map(_ ==> List(f))
-          _ <- Ns.i.a1.booleans.hasNo(Seq(Set(false))).query.get.map(_ ==> List(t))
-          _ <- Ns.i.a1.booleans.hasNo(Seq(Set(true, false))).query.get.map(_ ==> List(t, f))
-
-
-          // AND/OR semantics with multiple Sets
-
-          // "Not ((has this AND that) OR (has this AND that))"
-          _ <- Ns.i.a1.booleans.hasNo(Set(true, false), Set(true)).query.get.map(_ ==> List(f))
-          _ <- Ns.i.a1.booleans.hasNo(Set(true, false), Set(false)).query.get.map(_ ==> List(t))
-          // Same as
-          _ <- Ns.i.a1.booleans.hasNo(Seq(Set(true, false), Set(true))).query.get.map(_ ==> List(f))
-          _ <- Ns.i.a1.booleans.hasNo(Seq(Set(true, false), Set(false))).query.get.map(_ ==> List(t))
-
           // Negating empty Seqs/Sets has no effect
-          _ <- Ns.i.a1.booleans.hasNo(Set(true), Set.empty[Boolean]).query.get.map(_ ==> List(f))
-          _ <- Ns.i.a1.booleans.hasNo(Set(false), Set.empty[Boolean]).query.get.map(_ ==> List(t))
-          _ <- Ns.i.a1.booleans.hasNo(Set(true, false), Set.empty[Boolean]).query.get.map(_ ==> List(t, f))
           _ <- Ns.i.a1.booleans.hasNo(Seq.empty[Boolean]).query.get.map(_ ==> List(t, f, tf))
-          _ <- Ns.i.a1.booleans.hasNo(Set.empty[Boolean]).query.get.map(_ ==> List(t, f, tf))
-          _ <- Ns.i.a1.booleans.hasNo(Seq.empty[Set[Boolean]]).query.get.map(_ ==> List(t, f, tf))
-          _ <- Ns.i.a1.booleans.hasNo(Seq(Set.empty[Boolean])).query.get.map(_ ==> List(t, f, tf))
         } yield ()
       }
     }
@@ -355,35 +300,8 @@ trait FilterSet_Boolean extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.booleans_.has(Seq(true, false)).query.get.map(_ ==> List(t, f, tf))
 
 
-          // AND semantics when multiple values in a _Set_
-
-          // "Has this AND that"
-          _ <- Ns.i.a1.booleans_.has(Set(true)).query.get.map(_ ==> List(t, tf))
-          _ <- Ns.i.a1.booleans_.has(Set(false)).query.get.map(_ ==> List(f, tf))
-          _ <- Ns.i.a1.booleans_.has(Set(true, false)).query.get.map(_ ==> List(tf))
-          // Same as
-          _ <- Ns.i.a1.booleans_.has(Seq(Set(true))).query.get.map(_ ==> List(t, tf))
-          _ <- Ns.i.a1.booleans_.has(Seq(Set(false))).query.get.map(_ ==> List(f, tf))
-          _ <- Ns.i.a1.booleans_.has(Seq(Set(true, false))).query.get.map(_ ==> List(tf))
-
-
-          // AND/OR semantics with multiple Sets
-
-          // "(has this AND that) OR (has this AND that)"
-          _ <- Ns.i.a1.booleans_.has(Set(true, false), Set(true)).query.get.map(_ ==> List(t, tf))
-          _ <- Ns.i.a1.booleans_.has(Set(true, false), Set(false)).query.get.map(_ ==> List(f, tf))
-          // Same as
-          _ <- Ns.i.a1.booleans_.has(Seq(Set(true, false), Set(true))).query.get.map(_ ==> List(t, tf))
-          _ <- Ns.i.a1.booleans_.has(Seq(Set(true, false), Set(false))).query.get.map(_ ==> List(f, tf))
-
-
           // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.booleans_.has(Set(true), Set.empty[Boolean]).query.get.map(_ ==> List(t, tf))
-          _ <- Ns.i.a1.booleans_.has(Set(false), Set.empty[Boolean]).query.get.map(_ ==> List(f, tf))
-          _ <- Ns.i.a1.booleans_.has(Set(true, false), Set.empty[Boolean]).query.get.map(_ ==> List(tf))
           _ <- Ns.i.a1.booleans_.has(Seq.empty[Boolean]).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.booleans_.has(Set.empty[Boolean]).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.booleans_.has(Seq.empty[Set[Boolean]]).query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -415,36 +333,8 @@ trait FilterSet_Boolean extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.booleans_.hasNo(Seq(true, false)).query.get.map(_ ==> List())
 
 
-          // AND semantics when multiple values in a _Set_
-
-          // "Not (has this AND that)"
-          _ <- Ns.i.a1.booleans_.hasNo(Set(true)).query.get.map(_ ==> List(f))
-          _ <- Ns.i.a1.booleans_.hasNo(Set(false)).query.get.map(_ ==> List(t))
-          _ <- Ns.i.a1.booleans_.hasNo(Set(true, false)).query.get.map(_ ==> List(t, f))
-          // Same as
-          _ <- Ns.i.a1.booleans_.hasNo(Seq(Set(true))).query.get.map(_ ==> List(f))
-          _ <- Ns.i.a1.booleans_.hasNo(Seq(Set(false))).query.get.map(_ ==> List(t))
-          _ <- Ns.i.a1.booleans_.hasNo(Seq(Set(true, false))).query.get.map(_ ==> List(t, f))
-
-
-          // AND/OR semantics with multiple Sets
-
-          // "Not ((has this AND that) OR (has this AND that))"
-          _ <- Ns.i.a1.booleans_.hasNo(Set(true, false), Set(true)).query.get.map(_ ==> List(f))
-          _ <- Ns.i.a1.booleans_.hasNo(Set(true, false), Set(false)).query.get.map(_ ==> List(t))
-          // Same as
-          _ <- Ns.i.a1.booleans_.hasNo(Seq(Set(true, false), Set(true))).query.get.map(_ ==> List(f))
-          _ <- Ns.i.a1.booleans_.hasNo(Seq(Set(true, false), Set(false))).query.get.map(_ ==> List(t))
-
-
           // Negating empty Seqs/Sets has no effect
-          _ <- Ns.i.a1.booleans_.hasNo(Set(true), Set.empty[Boolean]).query.get.map(_ ==> List(f))
-          _ <- Ns.i.a1.booleans_.hasNo(Set(false), Set.empty[Boolean]).query.get.map(_ ==> List(t))
-          _ <- Ns.i.a1.booleans_.hasNo(Set(true, false), Set.empty[Boolean]).query.get.map(_ ==> List(t, f))
           _ <- Ns.i.a1.booleans_.hasNo(Seq.empty[Boolean]).query.get.map(_ ==> List(t, f, tf))
-          _ <- Ns.i.a1.booleans_.hasNo(Set.empty[Boolean]).query.get.map(_ ==> List(t, f, tf))
-          _ <- Ns.i.a1.booleans_.hasNo(Seq.empty[Set[Boolean]]).query.get.map(_ ==> List(t, f, tf))
-          _ <- Ns.i.a1.booleans_.hasNo(Seq(Set.empty[Boolean])).query.get.map(_ ==> List(t, f, tf))
         } yield ()
       }
     }
@@ -572,36 +462,12 @@ trait FilterSet_Boolean extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.booleans_?.has(Some(Seq(true, false))).query.get.map(_ ==> List(t, f, tf))
 
 
-          // AND semantics when multiple values in a _Set_
-
-          // "Has this AND that"
-          _ <- Ns.i.a1.booleans_?.has(Some(Set(true))).query.get.map(_ ==> List(t, tf))
-          _ <- Ns.i.a1.booleans_?.has(Some(Set(false))).query.get.map(_ ==> List(f, tf))
-          _ <- Ns.i.a1.booleans_?.has(Some(Set(true, false))).query.get.map(_ ==> List(tf))
-          // Same as
-          _ <- Ns.i.a1.booleans_?.has(Some(Seq(Set(true)))).query.get.map(_ ==> List(t, tf))
-          _ <- Ns.i.a1.booleans_?.has(Some(Seq(Set(false)))).query.get.map(_ ==> List(f, tf))
-          _ <- Ns.i.a1.booleans_?.has(Some(Seq(Set(true, false)))).query.get.map(_ ==> List(tf))
-
-
-          // AND/OR semantics with multiple Sets
-
-          // "(has this AND that) OR (has this AND that)"
-          _ <- Ns.i.a1.booleans_?.has(Some(Seq(Set(true, false), Set(true)))).query.get.map(_ ==> List(t, tf))
-          _ <- Ns.i.a1.booleans_?.has(Some(Seq(Set(true, false), Set(false)))).query.get.map(_ ==> List(f, tf))
-
-
           // Empty Seq/Sets match nothing
           _ <- Ns.i.a1.booleans_?.has(Some(Seq.empty[Boolean])).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.booleans_?.has(Some(Set.empty[Boolean])).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.booleans_?.has(Some(Seq.empty[Set[Boolean]])).query.get.map(_ ==> List())
-
 
           // None matches non-asserted values
           _ <- Ns.i.a1.booleans_?.has(Option.empty[Boolean]).query.get.map(_ ==> List(x))
           _ <- Ns.i.a1.booleans_?.has(Option.empty[Seq[Boolean]]).query.get.map(_ ==> List(x))
-          _ <- Ns.i.a1.booleans_?.has(Option.empty[Set[Boolean]]).query.get.map(_ ==> List(x))
-          _ <- Ns.i.a1.booleans_?.has(Option.empty[Seq[Set[Boolean]]]).query.get.map(_ ==> List(x))
         } yield ()
       }
 
@@ -630,37 +496,12 @@ trait FilterSet_Boolean extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.booleans_?.hasNo(Some(Seq(true, false))).query.get.map(_ ==> List())
 
 
-          // AND semantics when multiple values in a _Set_
-
-          // "Not (has this AND that)"
-          _ <- Ns.i.a1.booleans_?.hasNo(Some(Set(true))).query.get.map(_ ==> List(f))
-          _ <- Ns.i.a1.booleans_?.hasNo(Some(Set(false))).query.get.map(_ ==> List(t))
-          _ <- Ns.i.a1.booleans_?.hasNo(Some(Set(true, false))).query.get.map(_ ==> List(t, f))
-          // Same as
-          _ <- Ns.i.a1.booleans_?.hasNo(Some(Seq(Set(true)))).query.get.map(_ ==> List(f))
-          _ <- Ns.i.a1.booleans_?.hasNo(Some(Seq(Set(false)))).query.get.map(_ ==> List(t))
-          _ <- Ns.i.a1.booleans_?.hasNo(Some(Seq(Set(true, false)))).query.get.map(_ ==> List(t, f))
-
-
-          // AND/OR semantics with multiple Sets
-
-          // "Not ((has this AND that) OR (has this AND that))"
-          _ <- Ns.i.a1.booleans_?.hasNo(Some(Seq(Set(true, false), Set(true)))).query.get.map(_ ==> List(f))
-          _ <- Ns.i.a1.booleans_?.hasNo(Some(Seq(Set(true, false), Set(false)))).query.get.map(_ ==> List(t))
-
-
           // Negating empty Seqs/Sets has no effect
           _ <- Ns.i.a1.booleans_?.hasNo(Some(Seq.empty[Boolean])).query.get.map(_ ==> List(t, f, tf))
-          _ <- Ns.i.a1.booleans_?.hasNo(Some(Set.empty[Boolean])).query.get.map(_ ==> List(t, f, tf))
-          _ <- Ns.i.a1.booleans_?.hasNo(Some(Seq.empty[Set[Boolean]])).query.get.map(_ ==> List(t, f, tf))
-          _ <- Ns.i.a1.booleans_?.hasNo(Some(Seq(Set.empty[Boolean]))).query.get.map(_ ==> List(t, f, tf))
-
 
           // Negating None returns all asserted
           _ <- Ns.i.a1.booleans_?.hasNo(Option.empty[Boolean]).query.get.map(_ ==> List(t, f, tf))
           _ <- Ns.i.a1.booleans_?.hasNo(Option.empty[Seq[Boolean]]).query.get.map(_ ==> List(t, f, tf))
-          _ <- Ns.i.a1.booleans_?.hasNo(Option.empty[Set[Boolean]]).query.get.map(_ ==> List(t, f, tf))
-          _ <- Ns.i.a1.booleans_?.hasNo(Option.empty[Seq[Set[Boolean]]]).query.get.map(_ ==> List(t, f, tf))
         } yield ()
       }
     }

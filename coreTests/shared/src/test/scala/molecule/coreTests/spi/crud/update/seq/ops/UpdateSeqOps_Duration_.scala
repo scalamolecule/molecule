@@ -51,20 +51,13 @@ trait UpdateSeqOps_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
         _ <- Ns(id).durationSeq.add(duration3, duration4).update.transact
         _ <- Ns.durationSeq.query.get.map(_.head ==> List(duration1, duration2, duration1, duration3, duration4))
 
-        // Add Iterable of values
-        // Seq
-        _ <- Ns(id).durationSeq.add(Seq(duration4, duration5)).update.transact
+        // Add multiple values (Seq)
+        _ <- Ns(id).durationSeq.add(List(duration4, duration5)).update.transact
         _ <- Ns.durationSeq.query.get.map(_.head ==> List(duration1, duration2, duration1, duration3, duration4, duration4, duration5))
-        // Array
-        _ <- Ns(id).durationSeq.add(List(duration6)).update.transact
-        _ <- Ns.durationSeq.query.get.map(_.head ==> List(duration1, duration2, duration1, duration3, duration4, duration4, duration5, duration6))
-        // Iterable
-        _ <- Ns(id).durationSeq.add(Iterable(duration7)).update.transact
-        _ <- Ns.durationSeq.query.get.map(_.head ==> List(duration1, duration2, duration1, duration3, duration4, duration4, duration5, duration6, duration7))
 
-        // Adding empty Iterable of values has no effect
+        // Adding empty Seq of values has no effect
         _ <- Ns(id).durationSeq.add(List.empty[Duration]).update.transact
-        _ <- Ns.durationSeq.query.get.map(_.head ==> List(duration1, duration2, duration1, duration3, duration4, duration4, duration5, duration6, duration7))
+        _ <- Ns.durationSeq.query.get.map(_.head ==> List(duration1, duration2, duration1, duration3, duration4, duration4, duration5))
       } yield ()
     }
 
@@ -104,14 +97,8 @@ trait UpdateSeqOps_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
           duration1, duration2, duration3,
         ))
 
-        // Remove Iterable of values
-        _ <- Ns(id).durationSeq.remove(List(duration3)).update.transact
-        _ <- Ns.durationSeq.query.get.map(_.head ==> List(
-          duration1, duration2,
-          duration1, duration2,
-        ))
-
-        _ <- Ns(id).durationSeq.remove(Seq(duration2)).update.transact
+        // Remove multiple values (Seq)
+        _ <- Ns(id).durationSeq.remove(List(duration2, duration3)).update.transact
         _ <- Ns.durationSeq.query.get.map(_.head ==> List(
           duration1,
           duration1
@@ -121,7 +108,7 @@ trait UpdateSeqOps_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
         _ <- Ns(id).durationSeq.remove(List.empty[Duration]).update.transact
         _ <- Ns.durationSeq.query.get.map(_.head ==> List(duration1, duration1))
 
-        // Removing all elements retracts the attribute
+        // Removing all remaining elements deletes the attribute
         _ <- Ns(id).durationSeq.remove(Seq(duration1)).update.transact
         _ <- Ns.durationSeq.query.get.map(_ ==> Nil)
       } yield ()

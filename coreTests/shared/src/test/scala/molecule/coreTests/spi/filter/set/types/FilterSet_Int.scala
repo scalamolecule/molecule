@@ -141,43 +141,43 @@ trait FilterSet_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.ints.has(Seq(int1, int2, int3)).query.get.map(_ ==> List(a, b))
 
 
-          // AND semantics when multiple values in a _Set_
-
-          // "Has this AND that"
-          _ <- Ns.i.a1.ints.has(Set(int1)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.ints.has(Set(int1, int2)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.ints.has(Set(int1, int2, int3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.ints.has(Set(int2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.ints.has(Set(int2, int3)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.ints.has(Set(int2, int3, int4)).query.get.map(_ ==> List(b))
-          // Same as
-          _ <- Ns.i.a1.ints.has(Seq(Set(int1))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.ints.has(Seq(Set(int1, int2))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.ints.has(Seq(Set(int1, int2, int3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.ints.has(Seq(Set(int2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.ints.has(Seq(Set(int2, int3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.ints.has(Seq(Set(int2, int3, int4))).query.get.map(_ ==> List(b))
-
-
-          // AND/OR semantics with multiple Sets
-
-          // "(has this AND that) OR (has this AND that)"
-          _ <- Ns.i.a1.ints.has(Set(int1, int2), Set(int0)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.ints.has(Set(int1, int2), Set(int0, int3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.ints.has(Set(int1, int2), Set(int2, int3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.ints.has(Set(int1, int2), Set(int2, int3, int4)).query.get.map(_ ==> List(a, b))
-          // Same as
-          _ <- Ns.i.a1.ints.has(Seq(Set(int1, int2), Set(int0))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.ints.has(Seq(Set(int1, int2), Set(int0, int3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.ints.has(Seq(Set(int1, int2), Set(int2, int3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.ints.has(Seq(Set(int1, int2), Set(int2, int3, int4))).query.get.map(_ ==> List(a, b))
+//          // AND semantics when multiple values in a _Set_
+//
+//          // "Has this AND that"
+//          _ <- Ns.i.a1.ints.has(Set(int1)).query.get.map(_ ==> List(a))
+//          _ <- Ns.i.a1.ints.has(Set(int1, int2)).query.get.map(_ ==> List(a))
+//          _ <- Ns.i.a1.ints.has(Set(int1, int2, int3)).query.get.map(_ ==> List())
+//          _ <- Ns.i.a1.ints.has(Set(int2)).query.get.map(_ ==> List(a, b))
+//          _ <- Ns.i.a1.ints.has(Set(int2, int3)).query.get.map(_ ==> List(b))
+//          _ <- Ns.i.a1.ints.has(Set(int2, int3, int4)).query.get.map(_ ==> List(b))
+//          // Same as
+//          _ <- Ns.i.a1.ints.has(Seq(Set(int1))).query.get.map(_ ==> List(a))
+//          _ <- Ns.i.a1.ints.has(Seq(Set(int1, int2))).query.get.map(_ ==> List(a))
+//          _ <- Ns.i.a1.ints.has(Seq(Set(int1, int2, int3))).query.get.map(_ ==> List())
+//          _ <- Ns.i.a1.ints.has(Seq(Set(int2))).query.get.map(_ ==> List(a, b))
+//          _ <- Ns.i.a1.ints.has(Seq(Set(int2, int3))).query.get.map(_ ==> List(b))
+//          _ <- Ns.i.a1.ints.has(Seq(Set(int2, int3, int4))).query.get.map(_ ==> List(b))
+//
+//
+//          // AND/OR semantics with multiple Sets
+//
+//          // "(has this AND that) OR (has this AND that)"
+//          _ <- Ns.i.a1.ints.has(Set(int1, int2), Set(int0)).query.get.map(_ ==> List(a))
+//          _ <- Ns.i.a1.ints.has(Set(int1, int2), Set(int0, int3)).query.get.map(_ ==> List(a))
+//          _ <- Ns.i.a1.ints.has(Set(int1, int2), Set(int2, int3)).query.get.map(_ ==> List(a, b))
+//          _ <- Ns.i.a1.ints.has(Set(int1, int2), Set(int2, int3, int4)).query.get.map(_ ==> List(a, b))
+//          // Same as
+//          _ <- Ns.i.a1.ints.has(Seq(Set(int1, int2), Set(int0))).query.get.map(_ ==> List(a))
+//          _ <- Ns.i.a1.ints.has(Seq(Set(int1, int2), Set(int0, int3))).query.get.map(_ ==> List(a))
+//          _ <- Ns.i.a1.ints.has(Seq(Set(int1, int2), Set(int2, int3))).query.get.map(_ ==> List(a, b))
+//          _ <- Ns.i.a1.ints.has(Seq(Set(int1, int2), Set(int2, int3, int4))).query.get.map(_ ==> List(a, b))
 
 
           // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.ints.has(Set(int1, int2), Set.empty[Int]).query.get.map(_ ==> List(a))
+//          _ <- Ns.i.a1.ints.has(Set(int1, int2), Set.empty[Int]).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.ints.has(Seq.empty[Int]).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.ints.has(Set.empty[Int]).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.ints.has(Seq.empty[Set[Int]]).query.get.map(_ ==> List())
+//          _ <- Ns.i.a1.ints.has(Set.empty[Int]).query.get.map(_ ==> List())
+//          _ <- Ns.i.a1.ints.has(Seq.empty[Set[Int]]).query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -220,44 +220,8 @@ trait FilterSet_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.ints.hasNo(Seq(int1, int5)).query.get.map(_ ==> List(b))
 
 
-          // AND semantics when multiple values in a _Set_
-
-          // "Not (has this AND that)"
-          _ <- Ns.i.a1.ints.hasNo(Set(int1)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.ints.hasNo(Set(int1, int2)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.ints.hasNo(Set(int1, int2, int3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.ints.hasNo(Set(int2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.ints.hasNo(Set(int2, int3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.ints.hasNo(Set(int2, int3, int4)).query.get.map(_ ==> List(a))
-          // Same as
-          _ <- Ns.i.a1.ints.hasNo(Seq(Set(int1))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.ints.hasNo(Seq(Set(int1, int2))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.ints.hasNo(Seq(Set(int1, int2, int3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.ints.hasNo(Seq(Set(int2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.ints.hasNo(Seq(Set(int2, int3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.ints.hasNo(Seq(Set(int2, int3, int4))).query.get.map(_ ==> List(a))
-
-
-          // AND/OR semantics with multiple Sets
-
-          // "Not ((has this AND that) OR (has this AND that))"
-          _ <- Ns.i.a1.ints.hasNo(Set(int1, int2), Set(int0)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.ints.hasNo(Set(int1, int2), Set(int0, int3)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.ints.hasNo(Set(int1, int2), Set(int2, int3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.ints.hasNo(Set(int1, int2), Set(int2, int3, int4)).query.get.map(_ ==> List())
-          // Same as
-          _ <- Ns.i.a1.ints.hasNo(Seq(Set(int1, int2), Set(int0))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.ints.hasNo(Seq(Set(int1, int2), Set(int0, int3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.ints.hasNo(Seq(Set(int1, int2), Set(int2, int3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.ints.hasNo(Seq(Set(int1, int2), Set(int2, int3, int4))).query.get.map(_ ==> List())
-
-
           // Negating empty Seqs/Sets has no effect
-          _ <- Ns.i.a1.ints.hasNo(Set(int1, int2), Set.empty[Int]).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.ints.hasNo(Seq.empty[Int]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.ints.hasNo(Set.empty[Int]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.ints.hasNo(Seq.empty[Set[Int]]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.ints.hasNo(Seq(Set.empty[Int])).query.get.map(_ ==> List(a, b))
         } yield ()
       }
     }
@@ -403,43 +367,8 @@ trait FilterSet_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.ints_.has(Seq(int1, int2, int3)).query.get.map(_ ==> List(1, 2))
 
 
-          // AND semantics when multiple values in a _Set_
-
-          // "Has this AND that"
-          _ <- Ns.i.a1.ints_.has(Set(int1)).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.ints_.has(Set(int1, int2)).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.ints_.has(Set(int1, int2, int3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.ints_.has(Set(int2)).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.ints_.has(Set(int2, int3)).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.ints_.has(Set(int2, int3, int4)).query.get.map(_ ==> List(2))
-          // Same as
-          _ <- Ns.i.a1.ints_.has(Seq(Set(int1))).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.ints_.has(Seq(Set(int1, int2))).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.ints_.has(Seq(Set(int1, int2, int3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.ints_.has(Seq(Set(int2))).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.ints_.has(Seq(Set(int2, int3))).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.ints_.has(Seq(Set(int2, int3, int4))).query.get.map(_ ==> List(2))
-
-
-          // AND/OR semantics with multiple Sets
-
-          // "(has this AND that) OR (has this AND that)"
-          _ <- Ns.i.a1.ints_.has(Set(int1, int2), Set(int0)).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.ints_.has(Set(int1, int2), Set(int0, int3)).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.ints_.has(Set(int1, int2), Set(int2, int3)).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.ints_.has(Set(int1, int2), Set(int2, int3, int4)).query.get.map(_ ==> List(1, 2))
-          // Same as
-          _ <- Ns.i.a1.ints_.has(Seq(Set(int1, int2), Set(int0))).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.ints_.has(Seq(Set(int1, int2), Set(int0, int3))).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.ints_.has(Seq(Set(int1, int2), Set(int2, int3))).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.ints_.has(Seq(Set(int1, int2), Set(int2, int3, int4))).query.get.map(_ ==> List(1, 2))
-
-
           // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.ints_.has(Set(int1, int2), Set.empty[Int]).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.ints_.has(Seq.empty[Int]).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.ints_.has(Set.empty[Int]).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.ints_.has(Seq.empty[Set[Int]]).query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -484,44 +413,8 @@ trait FilterSet_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.ints_.hasNo(Seq(int1, int5)).query.get.map(_ ==> List(2))
 
 
-          // AND semantics when multiple values in a _Set_
-
-          // "Not (has this AND that)"
-          _ <- Ns.i.a1.ints_.hasNo(Set(int1)).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.ints_.hasNo(Set(int1, int2)).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.ints_.hasNo(Set(int1, int2, int3)).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.ints_.hasNo(Set(int2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.ints_.hasNo(Set(int2, int3)).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.ints_.hasNo(Set(int2, int3, int4)).query.get.map(_ ==> List(1))
-          // Same as
-          _ <- Ns.i.a1.ints_.hasNo(Seq(Set(int1))).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.ints_.hasNo(Seq(Set(int1, int2))).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.ints_.hasNo(Seq(Set(int1, int2, int3))).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.ints_.hasNo(Seq(Set(int2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.ints_.hasNo(Seq(Set(int2, int3))).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.ints_.hasNo(Seq(Set(int2, int3, int4))).query.get.map(_ ==> List(1))
-
-
-          // AND/OR semantics with multiple Sets
-
-          // "Not ((has this AND that) OR (has this AND that))"
-          _ <- Ns.i.a1.ints_.hasNo(Set(int1, int2), Set(int0)).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.ints_.hasNo(Set(int1, int2), Set(int0, int3)).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.ints_.hasNo(Set(int1, int2), Set(int2, int3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.ints_.hasNo(Set(int1, int2), Set(int2, int3, int4)).query.get.map(_ ==> List())
-          // Same as
-          _ <- Ns.i.a1.ints_.hasNo(Seq(Set(int1, int2), Set(int0))).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.ints_.hasNo(Seq(Set(int1, int2), Set(int0, int3))).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.ints_.hasNo(Seq(Set(int1, int2), Set(int2, int3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.ints_.hasNo(Seq(Set(int1, int2), Set(int2, int3, int4))).query.get.map(_ ==> List())
-
-
           // Negating empty Seqs/Sets has no effect
-          _ <- Ns.i.a1.ints_.hasNo(Set(int1, int2), Set.empty[Int]).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.ints_.hasNo(Seq.empty[Int]).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.ints_.hasNo(Set.empty[Int]).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.ints_.hasNo(Seq.empty[Set[Int]]).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.ints_.hasNo(Seq(Set.empty[Int])).query.get.map(_ ==> List(1, 2))
         } yield ()
       }
     }
@@ -657,45 +550,12 @@ trait FilterSet_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.ints_?.has(Some(Seq(int2, int3))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.ints_?.has(Some(Seq(int1, int2, int3))).query.get.map(_ ==> List(a, b))
 
-
-          // AND semantics when multiple values in a _Set_
-
-          // "Has this AND that"
-          _ <- Ns.i.a1.ints_?.has(Some(Set(int1))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.ints_?.has(Some(Set(int1, int2))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.ints_?.has(Some(Set(int1, int2, int3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.ints_?.has(Some(Set(int2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.ints_?.has(Some(Set(int2, int3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.ints_?.has(Some(Set(int2, int3, int4))).query.get.map(_ ==> List(b))
-          // Same as
-          _ <- Ns.i.a1.ints_?.has(Some(Seq(Set(int1)))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.ints_?.has(Some(Seq(Set(int1, int2)))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.ints_?.has(Some(Seq(Set(int1, int2, int3)))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.ints_?.has(Some(Seq(Set(int2)))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.ints_?.has(Some(Seq(Set(int2, int3)))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.ints_?.has(Some(Seq(Set(int2, int3, int4)))).query.get.map(_ ==> List(b))
-
-
-          // AND/OR semantics with multiple Sets
-
-          // "(has this AND that) OR (has this AND that)"
-          _ <- Ns.i.a1.ints_?.has(Some(Seq(Set(int1, int2), Set(int0)))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.ints_?.has(Some(Seq(Set(int1, int2), Set(int0, int3)))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.ints_?.has(Some(Seq(Set(int1, int2), Set(int2, int3)))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.ints_?.has(Some(Seq(Set(int1, int2), Set(int2, int3, int4)))).query.get.map(_ ==> List(a, b))
-
-
           // Empty Seq/Sets match nothing
           _ <- Ns.i.a1.ints_?.has(Some(Seq.empty[Int])).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.ints_?.has(Some(Set.empty[Int])).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.ints_?.has(Some(Seq.empty[Set[Int]])).query.get.map(_ ==> List())
-
 
           // None matches non-asserted values
           _ <- Ns.i.a1.ints_?.has(Option.empty[Int]).query.get.map(_ ==> List(c))
           _ <- Ns.i.a1.ints_?.has(Option.empty[Seq[Int]]).query.get.map(_ ==> List(c))
-          _ <- Ns.i.a1.ints_?.has(Option.empty[Set[Int]]).query.get.map(_ ==> List(c))
-          _ <- Ns.i.a1.ints_?.has(Option.empty[Seq[Set[Int]]]).query.get.map(_ ==> List(c))
         } yield ()
       }
 
@@ -734,45 +594,12 @@ trait FilterSet_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.ints_?.hasNo(Some(Seq(int1, int5))).query.get.map(_ ==> List(b))
 
 
-          // AND semantics when multiple values in a _Set_
-
-          // "Not (has this AND that)"
-          _ <- Ns.i.a1.ints_?.hasNo(Some(Set(int1))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.ints_?.hasNo(Some(Set(int1, int2))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.ints_?.hasNo(Some(Set(int1, int2, int3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.ints_?.hasNo(Some(Set(int2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.ints_?.hasNo(Some(Set(int2, int3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.ints_?.hasNo(Some(Set(int2, int3, int4))).query.get.map(_ ==> List(a))
-          // Same as
-          _ <- Ns.i.a1.ints_?.hasNo(Some(Seq(Set(int1)))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.ints_?.hasNo(Some(Seq(Set(int1, int2)))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.ints_?.hasNo(Some(Seq(Set(int1, int2, int3)))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.ints_?.hasNo(Some(Seq(Set(int2)))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.ints_?.hasNo(Some(Seq(Set(int2, int3)))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.ints_?.hasNo(Some(Seq(Set(int2, int3, int4)))).query.get.map(_ ==> List(a))
-
-
-          // AND/OR semantics with multiple Sets
-
-          // "Not ((has this AND that) OR (has this AND that))"
-          _ <- Ns.i.a1.ints_?.hasNo(Some(Seq(Set(int1, int2), Set(int0)))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.ints_?.hasNo(Some(Seq(Set(int1, int2), Set(int0, int3)))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.ints_?.hasNo(Some(Seq(Set(int1, int2), Set(int2, int3)))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.ints_?.hasNo(Some(Seq(Set(int1, int2), Set(int2, int3, int4)))).query.get.map(_ ==> List())
-
-
           // Negating empty Seqs/Sets has no effect
           _ <- Ns.i.a1.ints_?.hasNo(Some(Seq.empty[Int])).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.ints_?.hasNo(Some(Set.empty[Int])).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.ints_?.hasNo(Some(Seq.empty[Set[Int]])).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.ints_?.hasNo(Some(Seq(Set.empty[Int]))).query.get.map(_ ==> List(a, b))
-
 
           // Negating None returns all asserted
           _ <- Ns.i.a1.ints_?.hasNo(Option.empty[Int]).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.ints_?.hasNo(Option.empty[Seq[Int]]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.ints_?.hasNo(Option.empty[Set[Int]]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.ints_?.hasNo(Option.empty[Seq[Set[Int]]]).query.get.map(_ ==> List(a, b))
         } yield ()
       }
     }

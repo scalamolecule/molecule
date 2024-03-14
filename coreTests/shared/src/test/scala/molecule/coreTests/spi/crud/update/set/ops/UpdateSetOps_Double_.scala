@@ -23,7 +23,7 @@ trait UpdateSetOps_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
         _ <- Ns.doubles.query.get.map(_.head ==> Set(double3, double4))
 
         // Applying empty Set of values deletes previous Set
-        _ <- Ns(id).doubles(Seq.empty[Double]).update.transact
+        _ <- Ns(id).doubles(Set.empty[Double]).update.transact
         _ <- Ns.doubles.query.get.map(_ ==> Nil)
 
         id <- Ns.doubles(Set(double1, double2)).save.transact.map(_.id)
@@ -50,53 +50,46 @@ trait UpdateSetOps_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
         _ <- Ns(id).doubles.add(double3, double4).update.transact
         _ <- Ns.doubles.query.get.map(_.head ==> Set(double1, double2, double3, double4))
 
-        // Add Iterable of values (existing values unaffected)
-        // Seq
-        _ <- Ns(id).doubles.add(Seq(double4, double5)).update.transact
-        _ <- Ns.doubles.query.get.map(_.head ==> Set(double1, double2, double3, double4, double5))
-        // Set
-        _ <- Ns(id).doubles.add(Set(double6)).update.transact
+        // Add multiple values (Seq)
+        _ <- Ns(id).doubles.add(Seq(double5, double6)).update.transact
         _ <- Ns.doubles.query.get.map(_.head ==> Set(double1, double2, double3, double4, double5, double6))
-        // Iterable
-        _ <- Ns(id).doubles.add(Iterable(double7)).update.transact
-        _ <- Ns.doubles.query.get.map(_.head ==> Set(double1, double2, double3, double4, double5, double6, double7))
 
-        // Adding empty Iterable of values has no effect
+        // Adding empty Seq of values has no effect
         _ <- Ns(id).doubles.add(Seq.empty[Double]).update.transact
-        _ <- Ns.doubles.query.get.map(_.head ==> Set(double1, double2, double3, double4, double5, double6, double7))
+        _ <- Ns.doubles.query.get.map(_.head ==> Set(double1, double2, double3, double4, double5, double6))
       } yield ()
     }
 
 
     "remove" - types { implicit conn =>
       for {
-        id <- Ns.doubles(Set(double1, double2, double3, double4, double5, double6)).save.transact.map(_.id)
+        id <- Ns.doubles(Set(double1, double2, double3, double4, double5, double6, double7)).save.transact.map(_.id)
 
         // Remove value
-        _ <- Ns(id).doubles.remove(double6).update.transact
-        _ <- Ns.doubles.query.get.map(_.head ==> Set(double1, double2, double3, double4, double5))
+        _ <- Ns(id).doubles.remove(double7).update.transact
+        _ <- Ns.doubles.query.get.map(_.head ==> Set(double1, double2, double3, double4, double5, double6))
 
         // Removing non-existing value has no effect
-        _ <- Ns(id).doubles.remove(double7).update.transact
-        _ <- Ns.doubles.query.get.map(_.head ==> Set(double1, double2, double3, double4, double5))
+        _ <- Ns(id).doubles.remove(double9).update.transact
+        _ <- Ns.doubles.query.get.map(_.head ==> Set(double1, double2, double3, double4, double5, double6))
 
         // Removing duplicate values removes the distinct value
-        _ <- Ns(id).doubles.remove(double5, double5).update.transact
-        _ <- Ns.doubles.query.get.map(_.head ==> Set(double1, double2, double3, double4))
+        _ <- Ns(id).doubles.remove(double6, double6).update.transact
+        _ <- Ns.doubles.query.get.map(_.head ==> Set(double1, double2, double3, double4, double5))
 
         // Remove multiple values (vararg)
-        _ <- Ns(id).doubles.remove(double3, double4).update.transact
-        _ <- Ns.doubles.query.get.map(_.head ==> Set(double1, double2))
+        _ <- Ns(id).doubles.remove(double4, double5).update.transact
+        _ <- Ns.doubles.query.get.map(_.head ==> Set(double1, double2, double3))
 
-        // Remove Iterable of values
-        _ <- Ns(id).doubles.remove(Seq(double2)).update.transact
+        // Remove multiple values (Seq)
+        _ <- Ns(id).doubles.remove(Seq(double2, double3)).update.transact
         _ <- Ns.doubles.query.get.map(_.head ==> Set(double1))
 
-        // Removing empty Iterable of values has no effect
+        // Removing empty Seq of values has no effect
         _ <- Ns(id).doubles.remove(Seq.empty[Double]).update.transact
         _ <- Ns.doubles.query.get.map(_.head ==> Set(double1))
 
-        // Removing all elements retracts the attribute
+        // Removing all remaining elements deletes the attribute
         _ <- Ns(id).doubles.remove(Seq(double1)).update.transact
         _ <- Ns.doubles.query.get.map(_ ==> Nil)
       } yield ()

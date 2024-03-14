@@ -147,43 +147,8 @@ trait FilterSet_ref extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.refs.has(Seq(ref1, ref2, ref3)).query.get.map(_ ==> List(a, b))
 
 
-          // AND semantics when multiple values in a _Set_
-
-          // "Has this AND that"
-          _ <- Ns.i.a1.refs.has(Set(ref1)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs.has(Set(ref1, ref2)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs.has(Set(ref1, ref2, ref3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs.has(Set(ref2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs.has(Set(ref2, ref3)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs.has(Set(ref2, ref3, ref4)).query.get.map(_ ==> List(b))
-          // Same as
-          _ <- Ns.i.a1.refs.has(Seq(Set(ref1))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs.has(Seq(Set(ref1, ref2))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs.has(Seq(Set(ref1, ref2, ref3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs.has(Seq(Set(ref2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs.has(Seq(Set(ref2, ref3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs.has(Seq(Set(ref2, ref3, ref4))).query.get.map(_ ==> List(b))
-
-
-          // AND/OR semantics with multiple Sets
-
-          // "(has this AND that) OR (has this AND that)"
-          _ <- Ns.i.a1.refs.has(Set(ref1, ref2), Set(ref0)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs.has(Set(ref1, ref2), Set(ref0, ref3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs.has(Set(ref1, ref2), Set(ref2, ref3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs.has(Set(ref1, ref2), Set(ref2, ref3, ref4)).query.get.map(_ ==> List(a, b))
-          // Same as
-          _ <- Ns.i.a1.refs.has(Seq(Set(ref1, ref2), Set(ref0))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs.has(Seq(Set(ref1, ref2), Set(ref0, ref3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs.has(Seq(Set(ref1, ref2), Set(ref2, ref3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs.has(Seq(Set(ref1, ref2), Set(ref2, ref3, ref4))).query.get.map(_ ==> List(a, b))
-
-
           // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.refs.has(Set(ref1, ref2), Set.empty[String]).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.refs.has(Seq.empty[String]).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs.has(Set.empty[String]).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs.has(Seq.empty[Set[String]]).query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -226,44 +191,8 @@ trait FilterSet_ref extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.refs.hasNo(Seq(ref1, ref5)).query.get.map(_ ==> List(b))
 
 
-          // AND semantics when multiple values in a _Set_
-
-          // "Not (has this AND that)"
-          _ <- Ns.i.a1.refs.hasNo(Set(ref1)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs.hasNo(Set(ref1, ref2)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs.hasNo(Set(ref1, ref2, ref3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs.hasNo(Set(ref2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs.hasNo(Set(ref2, ref3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs.hasNo(Set(ref2, ref3, ref4)).query.get.map(_ ==> List(a))
-          // Same as
-          _ <- Ns.i.a1.refs.hasNo(Seq(Set(ref1))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs.hasNo(Seq(Set(ref1, ref2))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs.hasNo(Seq(Set(ref1, ref2, ref3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs.hasNo(Seq(Set(ref2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs.hasNo(Seq(Set(ref2, ref3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs.hasNo(Seq(Set(ref2, ref3, ref4))).query.get.map(_ ==> List(a))
-
-
-          // AND/OR semantics with multiple Sets
-
-          // "Not ((has this AND that) OR (has this AND that))"
-          _ <- Ns.i.a1.refs.hasNo(Set(ref1, ref2), Set(ref0)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs.hasNo(Set(ref1, ref2), Set(ref0, ref3)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs.hasNo(Set(ref1, ref2), Set(ref2, ref3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs.hasNo(Set(ref1, ref2), Set(ref2, ref3, ref4)).query.get.map(_ ==> List())
-          // Same as
-          _ <- Ns.i.a1.refs.hasNo(Seq(Set(ref1, ref2), Set(ref0))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs.hasNo(Seq(Set(ref1, ref2), Set(ref0, ref3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs.hasNo(Seq(Set(ref1, ref2), Set(ref2, ref3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs.hasNo(Seq(Set(ref1, ref2), Set(ref2, ref3, ref4))).query.get.map(_ ==> List())
-
-
           // Negating empty Seqs/Sets has no effect
-          _ <- Ns.i.a1.refs.hasNo(Set(ref1, ref2), Set.empty[String]).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.refs.hasNo(Seq.empty[String]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs.hasNo(Set.empty[String]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs.hasNo(Seq.empty[Set[String]]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs.hasNo(Seq(Set.empty[String])).query.get.map(_ ==> List(a, b))
         } yield ()
       }
     }
@@ -409,43 +338,8 @@ trait FilterSet_ref extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.refs_.has(Seq(ref1, ref2, ref3)).query.get.map(_ ==> List(1, 2))
 
 
-          // AND semantics when multiple values in a _Set_
-
-          // "Has this AND that"
-          _ <- Ns.i.a1.refs_.has(Set(ref1)).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.refs_.has(Set(ref1, ref2)).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.refs_.has(Set(ref1, ref2, ref3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_.has(Set(ref2)).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.refs_.has(Set(ref2, ref3)).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.refs_.has(Set(ref2, ref3, ref4)).query.get.map(_ ==> List(2))
-          // Same as
-          _ <- Ns.i.a1.refs_.has(Seq(Set(ref1))).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.refs_.has(Seq(Set(ref1, ref2))).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.refs_.has(Seq(Set(ref1, ref2, ref3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_.has(Seq(Set(ref2))).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.refs_.has(Seq(Set(ref2, ref3))).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.refs_.has(Seq(Set(ref2, ref3, ref4))).query.get.map(_ ==> List(2))
-
-
-          // AND/OR semantics with multiple Sets
-
-          // "(has this AND that) OR (has this AND that)"
-          _ <- Ns.i.a1.refs_.has(Set(ref1, ref2), Set(ref0)).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.refs_.has(Set(ref1, ref2), Set(ref0, ref3)).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.refs_.has(Set(ref1, ref2), Set(ref2, ref3)).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.refs_.has(Set(ref1, ref2), Set(ref2, ref3, ref4)).query.get.map(_ ==> List(1, 2))
-          // Same as
-          _ <- Ns.i.a1.refs_.has(Seq(Set(ref1, ref2), Set(ref0))).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.refs_.has(Seq(Set(ref1, ref2), Set(ref0, ref3))).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.refs_.has(Seq(Set(ref1, ref2), Set(ref2, ref3))).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.refs_.has(Seq(Set(ref1, ref2), Set(ref2, ref3, ref4))).query.get.map(_ ==> List(1, 2))
-
-
           // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.refs_.has(Set(ref1, ref2), Set.empty[String]).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.refs_.has(Seq.empty[String]).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_.has(Set.empty[String]).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_.has(Seq.empty[Set[String]]).query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -490,44 +384,8 @@ trait FilterSet_ref extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.refs_.hasNo(Seq(ref1, ref5)).query.get.map(_ ==> List(2))
 
 
-          // AND semantics when multiple values in a _Set_
-
-          // "Not (has this AND that)"
-          _ <- Ns.i.a1.refs_.hasNo(Set(ref1)).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.refs_.hasNo(Set(ref1, ref2)).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.refs_.hasNo(Set(ref1, ref2, ref3)).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.refs_.hasNo(Set(ref2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_.hasNo(Set(ref2, ref3)).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.refs_.hasNo(Set(ref2, ref3, ref4)).query.get.map(_ ==> List(1))
-          // Same as
-          _ <- Ns.i.a1.refs_.hasNo(Seq(Set(ref1))).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.refs_.hasNo(Seq(Set(ref1, ref2))).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.refs_.hasNo(Seq(Set(ref1, ref2, ref3))).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.refs_.hasNo(Seq(Set(ref2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_.hasNo(Seq(Set(ref2, ref3))).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.refs_.hasNo(Seq(Set(ref2, ref3, ref4))).query.get.map(_ ==> List(1))
-
-
-          // AND/OR semantics with multiple Sets
-
-          // "Not ((has this AND that) OR (has this AND that))"
-          _ <- Ns.i.a1.refs_.hasNo(Set(ref1, ref2), Set(ref0)).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.refs_.hasNo(Set(ref1, ref2), Set(ref0, ref3)).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.refs_.hasNo(Set(ref1, ref2), Set(ref2, ref3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_.hasNo(Set(ref1, ref2), Set(ref2, ref3, ref4)).query.get.map(_ ==> List())
-          // Same as
-          _ <- Ns.i.a1.refs_.hasNo(Seq(Set(ref1, ref2), Set(ref0))).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.refs_.hasNo(Seq(Set(ref1, ref2), Set(ref0, ref3))).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.refs_.hasNo(Seq(Set(ref1, ref2), Set(ref2, ref3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_.hasNo(Seq(Set(ref1, ref2), Set(ref2, ref3, ref4))).query.get.map(_ ==> List())
-
-
           // Negating empty Seqs/Sets has no effect
-          _ <- Ns.i.a1.refs_.hasNo(Set(ref1, ref2), Set.empty[String]).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.refs_.hasNo(Seq.empty[String]).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.refs_.hasNo(Set.empty[String]).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.refs_.hasNo(Seq.empty[Set[String]]).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.refs_.hasNo(Seq(Set.empty[String])).query.get.map(_ ==> List(1, 2))
         } yield ()
       }
     }
@@ -670,44 +528,12 @@ trait FilterSet_ref extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.refs_?.has(Some(Seq(ref1, ref2, ref3))).query.get.map(_ ==> List(a, b))
 
 
-          // AND semantics when multiple values in a _Set_
-
-          // "Has this AND that"
-          _ <- Ns.i.a1.refs_?.has(Some(Set(ref1))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs_?.has(Some(Set(ref1, ref2))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs_?.has(Some(Set(ref1, ref2, ref3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_?.has(Some(Set(ref2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_?.has(Some(Set(ref2, ref3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs_?.has(Some(Set(ref2, ref3, ref4))).query.get.map(_ ==> List(b))
-          // Same as
-          _ <- Ns.i.a1.refs_?.has(Some(Seq(Set(ref1)))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs_?.has(Some(Seq(Set(ref1, ref2)))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs_?.has(Some(Seq(Set(ref1, ref2, ref3)))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_?.has(Some(Seq(Set(ref2)))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_?.has(Some(Seq(Set(ref2, ref3)))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs_?.has(Some(Seq(Set(ref2, ref3, ref4)))).query.get.map(_ ==> List(b))
-
-
-          // AND/OR semantics with multiple Sets
-
-          // "(has this AND that) OR (has this AND that)"
-          _ <- Ns.i.a1.refs_?.has(Some(Seq(Set(ref1, ref2), Set(ref0)))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs_?.has(Some(Seq(Set(ref1, ref2), Set(ref0, ref3)))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs_?.has(Some(Seq(Set(ref1, ref2), Set(ref2, ref3)))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_?.has(Some(Seq(Set(ref1, ref2), Set(ref2, ref3, ref4)))).query.get.map(_ ==> List(a, b))
-
-
           // Empty Seq/Sets match nothing
           _ <- Ns.i.a1.refs_?.has(Some(Seq.empty[String])).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_?.has(Some(Set.empty[String])).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_?.has(Some(Seq.empty[Set[String]])).query.get.map(_ ==> List())
-
 
           // None matches non-asserted values
           _ <- Ns.i.a1.refs_?.has(Option.empty[String]).query.get.map(_ ==> List(c))
           _ <- Ns.i.a1.refs_?.has(Option.empty[Seq[String]]).query.get.map(_ ==> List(c))
-          _ <- Ns.i.a1.refs_?.has(Option.empty[Set[String]]).query.get.map(_ ==> List(c))
-          _ <- Ns.i.a1.refs_?.has(Option.empty[Seq[Set[String]]]).query.get.map(_ ==> List(c))
         } yield ()
       }
 
@@ -746,45 +572,12 @@ trait FilterSet_ref extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.refs_?.hasNo(Some(Seq(ref1, ref5))).query.get.map(_ ==> List(b))
 
 
-          // AND semantics when multiple values in a _Set_
-
-          // "Not (has this AND that)"
-          _ <- Ns.i.a1.refs_?.hasNo(Some(Set(ref1))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs_?.hasNo(Some(Set(ref1, ref2))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs_?.hasNo(Some(Set(ref1, ref2, ref3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_?.hasNo(Some(Set(ref2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_?.hasNo(Some(Set(ref2, ref3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs_?.hasNo(Some(Set(ref2, ref3, ref4))).query.get.map(_ ==> List(a))
-          // Same as
-          _ <- Ns.i.a1.refs_?.hasNo(Some(Seq(Set(ref1)))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs_?.hasNo(Some(Seq(Set(ref1, ref2)))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs_?.hasNo(Some(Seq(Set(ref1, ref2, ref3)))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_?.hasNo(Some(Seq(Set(ref2)))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_?.hasNo(Some(Seq(Set(ref2, ref3)))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs_?.hasNo(Some(Seq(Set(ref2, ref3, ref4)))).query.get.map(_ ==> List(a))
-
-
-          // AND/OR semantics with multiple Sets
-
-          // "Not ((has this AND that) OR (has this AND that))"
-          _ <- Ns.i.a1.refs_?.hasNo(Some(Seq(Set(ref1, ref2), Set(ref0)))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs_?.hasNo(Some(Seq(Set(ref1, ref2), Set(ref0, ref3)))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs_?.hasNo(Some(Seq(Set(ref1, ref2), Set(ref2, ref3)))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_?.hasNo(Some(Seq(Set(ref1, ref2), Set(ref2, ref3, ref4)))).query.get.map(_ ==> List())
-
-
           // Negating empty Seqs/Sets has no effect
           _ <- Ns.i.a1.refs_?.hasNo(Some(Seq.empty[String])).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_?.hasNo(Some(Set.empty[String])).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_?.hasNo(Some(Seq.empty[Set[String]])).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_?.hasNo(Some(Seq(Set.empty[String]))).query.get.map(_ ==> List(a, b))
-
 
           // Negating None returns all asserted
           _ <- Ns.i.a1.refs_?.hasNo(Option.empty[String]).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.refs_?.hasNo(Option.empty[Seq[String]]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_?.hasNo(Option.empty[Set[String]]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_?.hasNo(Option.empty[Seq[Set[String]]]).query.get.map(_ ==> List(a, b))
         } yield ()
       }
     }

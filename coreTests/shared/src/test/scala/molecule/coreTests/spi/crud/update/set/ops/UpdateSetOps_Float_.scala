@@ -23,7 +23,7 @@ trait UpdateSetOps_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.floats.query.get.map(_.head ==> Set(float3, float4))
 
         // Applying empty Set of values deletes previous Set
-        _ <- Ns(id).floats(Seq.empty[Float]).update.transact
+        _ <- Ns(id).floats(Set.empty[Float]).update.transact
         _ <- Ns.floats.query.get.map(_ ==> Nil)
 
         id <- Ns.floats(Set(float1, float2)).save.transact.map(_.id)
@@ -50,53 +50,46 @@ trait UpdateSetOps_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).floats.add(float3, float4).update.transact
         _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float2, float3, float4))
 
-        // Add Iterable of values (existing values unaffected)
-        // Seq
-        _ <- Ns(id).floats.add(Seq(float4, float5)).update.transact
-        _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float2, float3, float4, float5))
-        // Set
-        _ <- Ns(id).floats.add(Set(float6)).update.transact
+        // Add multiple values (Seq)
+        _ <- Ns(id).floats.add(Seq(float5, float6)).update.transact
         _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float2, float3, float4, float5, float6))
-        // Iterable
-        _ <- Ns(id).floats.add(Iterable(float7)).update.transact
-        _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float2, float3, float4, float5, float6, float7))
 
-        // Adding empty Iterable of values has no effect
+        // Adding empty Seq of values has no effect
         _ <- Ns(id).floats.add(Seq.empty[Float]).update.transact
-        _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float2, float3, float4, float5, float6, float7))
+        _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float2, float3, float4, float5, float6))
       } yield ()
     }
 
 
     "remove" - types { implicit conn =>
       for {
-        id <- Ns.floats(Set(float1, float2, float3, float4, float5, float6)).save.transact.map(_.id)
+        id <- Ns.floats(Set(float1, float2, float3, float4, float5, float6, float7)).save.transact.map(_.id)
 
         // Remove value
-        _ <- Ns(id).floats.remove(float6).update.transact
-        _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float2, float3, float4, float5))
+        _ <- Ns(id).floats.remove(float7).update.transact
+        _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float2, float3, float4, float5, float6))
 
         // Removing non-existing value has no effect
-        _ <- Ns(id).floats.remove(float7).update.transact
-        _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float2, float3, float4, float5))
+        _ <- Ns(id).floats.remove(float9).update.transact
+        _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float2, float3, float4, float5, float6))
 
         // Removing duplicate values removes the distinct value
-        _ <- Ns(id).floats.remove(float5, float5).update.transact
-        _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float2, float3, float4))
+        _ <- Ns(id).floats.remove(float6, float6).update.transact
+        _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float2, float3, float4, float5))
 
         // Remove multiple values (vararg)
-        _ <- Ns(id).floats.remove(float3, float4).update.transact
-        _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float2))
+        _ <- Ns(id).floats.remove(float4, float5).update.transact
+        _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float2, float3))
 
-        // Remove Iterable of values
-        _ <- Ns(id).floats.remove(Seq(float2)).update.transact
+        // Remove multiple values (Seq)
+        _ <- Ns(id).floats.remove(Seq(float2, float3)).update.transact
         _ <- Ns.floats.query.get.map(_.head ==> Set(float1))
 
-        // Removing empty Iterable of values has no effect
+        // Removing empty Seq of values has no effect
         _ <- Ns(id).floats.remove(Seq.empty[Float]).update.transact
         _ <- Ns.floats.query.get.map(_.head ==> Set(float1))
 
-        // Removing all elements retracts the attribute
+        // Removing all remaining elements deletes the attribute
         _ <- Ns(id).floats.remove(Seq(float1)).update.transact
         _ <- Ns.floats.query.get.map(_ ==> Nil)
       } yield ()

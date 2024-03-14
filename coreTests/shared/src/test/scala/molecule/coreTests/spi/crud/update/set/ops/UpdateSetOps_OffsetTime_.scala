@@ -24,7 +24,7 @@ trait UpdateSetOps_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
         _ <- Ns.offsetTimes.query.get.map(_.head ==> Set(offsetTime3, offsetTime4))
 
         // Applying empty Set of values deletes previous Set
-        _ <- Ns(id).offsetTimes(Seq.empty[OffsetTime]).update.transact
+        _ <- Ns(id).offsetTimes(Set.empty[OffsetTime]).update.transact
         _ <- Ns.offsetTimes.query.get.map(_ ==> Nil)
 
         id <- Ns.offsetTimes(Set(offsetTime1, offsetTime2)).save.transact.map(_.id)
@@ -51,53 +51,46 @@ trait UpdateSetOps_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
         _ <- Ns(id).offsetTimes.add(offsetTime3, offsetTime4).update.transact
         _ <- Ns.offsetTimes.query.get.map(_.head ==> Set(offsetTime1, offsetTime2, offsetTime3, offsetTime4))
 
-        // Add Iterable of values (existing values unaffected)
-        // Seq
-        _ <- Ns(id).offsetTimes.add(Seq(offsetTime4, offsetTime5)).update.transact
-        _ <- Ns.offsetTimes.query.get.map(_.head ==> Set(offsetTime1, offsetTime2, offsetTime3, offsetTime4, offsetTime5))
-        // Set
-        _ <- Ns(id).offsetTimes.add(Set(offsetTime6)).update.transact
+        // Add multiple values (Seq)
+        _ <- Ns(id).offsetTimes.add(Seq(offsetTime5, offsetTime6)).update.transact
         _ <- Ns.offsetTimes.query.get.map(_.head ==> Set(offsetTime1, offsetTime2, offsetTime3, offsetTime4, offsetTime5, offsetTime6))
-        // Iterable
-        _ <- Ns(id).offsetTimes.add(Iterable(offsetTime7)).update.transact
-        _ <- Ns.offsetTimes.query.get.map(_.head ==> Set(offsetTime1, offsetTime2, offsetTime3, offsetTime4, offsetTime5, offsetTime6, offsetTime7))
 
-        // Adding empty Iterable of values has no effect
+        // Adding empty Seq of values has no effect
         _ <- Ns(id).offsetTimes.add(Seq.empty[OffsetTime]).update.transact
-        _ <- Ns.offsetTimes.query.get.map(_.head ==> Set(offsetTime1, offsetTime2, offsetTime3, offsetTime4, offsetTime5, offsetTime6, offsetTime7))
+        _ <- Ns.offsetTimes.query.get.map(_.head ==> Set(offsetTime1, offsetTime2, offsetTime3, offsetTime4, offsetTime5, offsetTime6))
       } yield ()
     }
 
 
     "remove" - types { implicit conn =>
       for {
-        id <- Ns.offsetTimes(Set(offsetTime1, offsetTime2, offsetTime3, offsetTime4, offsetTime5, offsetTime6)).save.transact.map(_.id)
+        id <- Ns.offsetTimes(Set(offsetTime1, offsetTime2, offsetTime3, offsetTime4, offsetTime5, offsetTime6, offsetTime7)).save.transact.map(_.id)
 
         // Remove value
-        _ <- Ns(id).offsetTimes.remove(offsetTime6).update.transact
-        _ <- Ns.offsetTimes.query.get.map(_.head ==> Set(offsetTime1, offsetTime2, offsetTime3, offsetTime4, offsetTime5))
+        _ <- Ns(id).offsetTimes.remove(offsetTime7).update.transact
+        _ <- Ns.offsetTimes.query.get.map(_.head ==> Set(offsetTime1, offsetTime2, offsetTime3, offsetTime4, offsetTime5, offsetTime6))
 
         // Removing non-existing value has no effect
-        _ <- Ns(id).offsetTimes.remove(offsetTime7).update.transact
-        _ <- Ns.offsetTimes.query.get.map(_.head ==> Set(offsetTime1, offsetTime2, offsetTime3, offsetTime4, offsetTime5))
+        _ <- Ns(id).offsetTimes.remove(offsetTime9).update.transact
+        _ <- Ns.offsetTimes.query.get.map(_.head ==> Set(offsetTime1, offsetTime2, offsetTime3, offsetTime4, offsetTime5, offsetTime6))
 
         // Removing duplicate values removes the distinct value
-        _ <- Ns(id).offsetTimes.remove(offsetTime5, offsetTime5).update.transact
-        _ <- Ns.offsetTimes.query.get.map(_.head ==> Set(offsetTime1, offsetTime2, offsetTime3, offsetTime4))
+        _ <- Ns(id).offsetTimes.remove(offsetTime6, offsetTime6).update.transact
+        _ <- Ns.offsetTimes.query.get.map(_.head ==> Set(offsetTime1, offsetTime2, offsetTime3, offsetTime4, offsetTime5))
 
         // Remove multiple values (vararg)
-        _ <- Ns(id).offsetTimes.remove(offsetTime3, offsetTime4).update.transact
-        _ <- Ns.offsetTimes.query.get.map(_.head ==> Set(offsetTime1, offsetTime2))
+        _ <- Ns(id).offsetTimes.remove(offsetTime4, offsetTime5).update.transact
+        _ <- Ns.offsetTimes.query.get.map(_.head ==> Set(offsetTime1, offsetTime2, offsetTime3))
 
-        // Remove Iterable of values
-        _ <- Ns(id).offsetTimes.remove(Seq(offsetTime2)).update.transact
+        // Remove multiple values (Seq)
+        _ <- Ns(id).offsetTimes.remove(Seq(offsetTime2, offsetTime3)).update.transact
         _ <- Ns.offsetTimes.query.get.map(_.head ==> Set(offsetTime1))
 
-        // Removing empty Iterable of values has no effect
+        // Removing empty Seq of values has no effect
         _ <- Ns(id).offsetTimes.remove(Seq.empty[OffsetTime]).update.transact
         _ <- Ns.offsetTimes.query.get.map(_.head ==> Set(offsetTime1))
 
-        // Removing all elements retracts the attribute
+        // Removing all remaining elements deletes the attribute
         _ <- Ns(id).offsetTimes.remove(Seq(offsetTime1)).update.transact
         _ <- Ns.offsetTimes.query.get.map(_ ==> Nil)
       } yield ()

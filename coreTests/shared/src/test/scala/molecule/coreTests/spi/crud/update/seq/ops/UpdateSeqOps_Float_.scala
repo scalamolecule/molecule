@@ -50,20 +50,13 @@ trait UpdateSeqOps_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).floatSeq.add(float3, float4).update.transact
         _ <- Ns.floatSeq.query.get.map(_.head ==> List(float1, float2, float1, float3, float4))
 
-        // Add Iterable of values
-        // Seq
-        _ <- Ns(id).floatSeq.add(Seq(float4, float5)).update.transact
+        // Add multiple values (Seq)
+        _ <- Ns(id).floatSeq.add(List(float4, float5)).update.transact
         _ <- Ns.floatSeq.query.get.map(_.head ==> List(float1, float2, float1, float3, float4, float4, float5))
-        // Array
-        _ <- Ns(id).floatSeq.add(List(float6)).update.transact
-        _ <- Ns.floatSeq.query.get.map(_.head ==> List(float1, float2, float1, float3, float4, float4, float5, float6))
-        // Iterable
-        _ <- Ns(id).floatSeq.add(Iterable(float7)).update.transact
-        _ <- Ns.floatSeq.query.get.map(_.head ==> List(float1, float2, float1, float3, float4, float4, float5, float6, float7))
 
-        // Adding empty Iterable of values has no effect
+        // Adding empty Seq of values has no effect
         _ <- Ns(id).floatSeq.add(List.empty[Float]).update.transact
-        _ <- Ns.floatSeq.query.get.map(_.head ==> List(float1, float2, float1, float3, float4, float4, float5, float6, float7))
+        _ <- Ns.floatSeq.query.get.map(_.head ==> List(float1, float2, float1, float3, float4, float4, float5))
       } yield ()
     }
 
@@ -103,14 +96,8 @@ trait UpdateSeqOps_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           float1, float2, float3,
         ))
 
-        // Remove Iterable of values
-        _ <- Ns(id).floatSeq.remove(List(float3)).update.transact
-        _ <- Ns.floatSeq.query.get.map(_.head ==> List(
-          float1, float2,
-          float1, float2,
-        ))
-
-        _ <- Ns(id).floatSeq.remove(Seq(float2)).update.transact
+        // Remove multiple values (Seq)
+        _ <- Ns(id).floatSeq.remove(List(float2, float3)).update.transact
         _ <- Ns.floatSeq.query.get.map(_.head ==> List(
           float1,
           float1
@@ -120,7 +107,7 @@ trait UpdateSeqOps_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).floatSeq.remove(List.empty[Float]).update.transact
         _ <- Ns.floatSeq.query.get.map(_.head ==> List(float1, float1))
 
-        // Removing all elements retracts the attribute
+        // Removing all remaining elements deletes the attribute
         _ <- Ns(id).floatSeq.remove(Seq(float1)).update.transact
         _ <- Ns.floatSeq.query.get.map(_ ==> Nil)
       } yield ()

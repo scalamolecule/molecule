@@ -440,6 +440,43 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     }
   }
 
+  private def mkRules[T](
+    attr: Attr, e: Var, v: Var,
+    seqs: Seq[Seq[T]], tpe: String, toDatalog: T => String
+  ): Seq[String] = {
+    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
+    tpe match {
+      case "Float" =>
+        seqs.flatMap {
+          case set if set.isEmpty => None
+          case set                => Some(
+            set.zipWithIndex.map { case (arg, i) =>
+              // Coerce Datomic float values for correct comparison (don't know why this is necessary)
+              // See example: https://clojurians-log.clojureverse.org/datomic/2019-10-29
+              s"""[$e $a $v$i] [(float $v$i) $v$i-float] [(= $v$i-float (float $arg))]"""
+            }.mkString(s"[(rule$v $e)\n    ", "\n    ", "]")
+          )
+        }
+      case "URI"   =>
+        seqs.flatMap {
+          case set if set.isEmpty => None
+          case set                => Some(
+            set.zipWithIndex.map { case (arg, i) =>
+              s"""[(ground (new java.net.URI "$arg")) $v$i-uri] [$e $a $v$i-uri]"""
+            }.mkString(s"[(rule$v $e)\n    ", "\n    ", "]")
+          )
+        }
+      case _       =>
+        seqs.flatMap {
+          case set if set.isEmpty => None
+          case set                => Some(
+            set.map(arg => s"[$e $a ${toDatalog(arg)}]")
+              .mkString(s"[(rule$v $e)\n    ", "\n    ", "]")
+          )
+        }
+    }
+  }
+
   private def optHas[T: ClassTag](
     attr: Attr, e: Var, v: Var,
     optSeqs: Option[Seq[Seq[T]]],
@@ -771,42 +808,42 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     }
   }
 
-  private def mkRules[T](
-    attr: Attr, e: Var, v: Var,
-    seqs: Seq[Seq[T]], tpe: String, toDatalog: T => String
-  ): Seq[String] = {
-    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
-    tpe match {
-      case "Float" =>
-        seqs.flatMap {
-          case set if set.isEmpty => None
-          case set                => Some(
-            set.zipWithIndex.map { case (arg, i) =>
-              // Coerce Datomic float values for correct comparison (don't know why this is necessary)
-              // See example: https://clojurians-log.clojureverse.org/datomic/2019-10-29
-              s"""[$e $a $v$i] [(float $v$i) $v$i-float] [(= $v$i-float (float $arg))]"""
-            }.mkString(s"[(rule$v $e)\n    ", "\n    ", "]")
-          )
-        }
-      case "URI"   =>
-        seqs.flatMap {
-          case set if set.isEmpty => None
-          case set                => Some(
-            set.zipWithIndex.map { case (arg, i) =>
-              s"""[(ground (new java.net.URI "$arg")) $v$i-uri] [$e $a $v$i-uri]"""
-            }.mkString(s"[(rule$v $e)\n    ", "\n    ", "]")
-          )
-        }
-      case _       =>
-        seqs.flatMap {
-          case set if set.isEmpty => None
-          case set                => Some(
-            set.map(arg => s"[$e $a ${toDatalog(arg)}]")
-              .mkString(s"[(rule$v $e)\n    ", "\n    ", "]")
-          )
-        }
-    }
-  }
+//  private def mkRules[T](
+//    attr: Attr, e: Var, v: Var,
+//    seqs: Seq[Seq[T]], tpe: String, toDatalog: T => String
+//  ): Seq[String] = {
+//    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
+//    tpe match {
+//      case "Float" =>
+//        seqs.flatMap {
+//          case set if set.isEmpty => None
+//          case set                => Some(
+//            set.zipWithIndex.map { case (arg, i) =>
+//              // Coerce Datomic float values for correct comparison (don't know why this is necessary)
+//              // See example: https://clojurians-log.clojureverse.org/datomic/2019-10-29
+//              s"""[$e $a $v$i] [(float $v$i) $v$i-float] [(= $v$i-float (float $arg))]"""
+//            }.mkString(s"[(rule$v $e)\n    ", "\n    ", "]")
+//          )
+//        }
+//      case "URI"   =>
+//        seqs.flatMap {
+//          case set if set.isEmpty => None
+//          case set                => Some(
+//            set.zipWithIndex.map { case (arg, i) =>
+//              s"""[(ground (new java.net.URI "$arg")) $v$i-uri] [$e $a $v$i-uri]"""
+//            }.mkString(s"[(rule$v $e)\n    ", "\n    ", "]")
+//          )
+//        }
+//      case _       =>
+//        seqs.flatMap {
+//          case set if set.isEmpty => None
+//          case set                => Some(
+//            set.map(arg => s"[$e $a ${toDatalog(arg)}]")
+//              .mkString(s"[(rule$v $e)\n    ", "\n    ", "]")
+//          )
+//        }
+//    }
+//  }
 
   private def noBooleanSetAggr[T](resSeq: ResSeq[T]): Unit = {
     if (resSeq.tpe == "Boolean")

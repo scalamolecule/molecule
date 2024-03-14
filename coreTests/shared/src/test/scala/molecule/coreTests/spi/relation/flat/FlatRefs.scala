@@ -130,7 +130,12 @@ trait FlatRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- A.i(0).bb(Set(b1, b2)).save.transact
 
           // Saving individual ref ids (not in a Set) is not allowed
-          _ <- A.i(0).bb(b1, b2).save.transact
+          _ <- A.i(0).bb(Seq(Set(b1), Set(b2))).save.transact
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
+              err ==> "Can only save one Set of values for Set attribute `A.bb`. " +
+                s"Found: Set($b1), Set($b2)"
+            }
+          _ <- A.i(0).bb(Set(b1), Set(b2)).save.transact
             .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
               err ==> "Can only save one Set of values for Set attribute `A.bb`. " +
                 s"Found: Set($b1), Set($b2)"

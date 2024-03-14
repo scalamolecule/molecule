@@ -24,18 +24,14 @@ object _ExprSeqOpt extends BoilerplateGenBase( "ExprSeqOpt", "/api/expression") 
          |
          |trait $fileName_$arity[${`A..V`}, t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]]
          |  extends ${fileName}Ops_$arity[${`A..V`}, t, Ns1, Ns2]{
-         |  def apply(v   : Option[t]          )(implicit x: X)      : Ns1[${`A..V`}, t] = _exprSeqOpt(Eq   , v.map(v => Seq(Seq(v)))    )
-         |  def apply(seq : Option[Seq[t]]     )(implicit x: X, y: X): Ns1[${`A..V`}, t] = _exprSeqOpt(Eq   , seq.map(seq => Seq(seq))   )
-         |  def apply(seqs: Option[Seq[Seq[t]]])                     : Ns1[${`A..V`}, t] = _exprSeqOpt(Eq   , seqs                       )
-         |  def not  (v   : Option[t]          )(implicit x: X)      : Ns1[${`A..V`}, t] = _exprSeqOpt(Neq  , v.map(v => Seq(Seq(v)))    )
-         |  def not  (seq : Option[Seq[t]]     )(implicit x: X, y: X): Ns1[${`A..V`}, t] = _exprSeqOpt(Neq  , seq.map(seq => Seq(seq))   )
-         |  def not  (seqs: Option[Seq[Seq[t]]])                     : Ns1[${`A..V`}, t] = _exprSeqOpt(Neq  , seqs                       )
-         |  def has  (v   : Option[t]          )(implicit x: X)      : Ns1[${`A..V`}, t] = _exprSeqOpt(Has  , v.map(v => Seq(Seq(v)))    )
-         |  def has  (seq : Option[Seq[t]]     )(implicit x: X, y: X): Ns1[${`A..V`}, t] = _exprSeqOpt(Has  , seq.map(_.map(v => Seq(v))))
-         |  def has  (seqs: Option[Seq[Seq[t]]])                     : Ns1[${`A..V`}, t] = _exprSeqOpt(Has  , seqs                       )
-         |  def hasNo(v   : Option[t]          )(implicit x: X)      : Ns1[${`A..V`}, t] = _exprSeqOpt(HasNo, v.map(v => Seq(Seq(v)))    )
-         |  def hasNo(seq : Option[Seq[t]]     )(implicit x: X, y: X): Ns1[${`A..V`}, t] = _exprSeqOpt(HasNo, seq.map(seq => Seq(seq))   )
-         |  def hasNo(seqs: Option[Seq[Seq[t]]])                     : Ns1[${`A..V`}, t] = _exprSeqOpt(HasNo, seqs                       )
+         |  def apply(seq : Option[Seq[t]]     )               : Ns1[${`A..V`}, t] = _exprSeqOpt(Eq   , seq.map(seq => Seq(seq))  )
+         |  def apply(seqs: Option[Seq[Seq[t]]])(implicit x: X): Ns1[${`A..V`}, t] = _exprSeqOpt(Eq   , seqs                      )
+         |  def not  (seq : Option[Seq[t]]     )               : Ns1[${`A..V`}, t] = _exprSeqOpt(Neq  , seq.map(seq => Seq(seq))  )
+         |  def not  (seqs: Option[Seq[Seq[t]]])(implicit x: X): Ns1[${`A..V`}, t] = _exprSeqOpt(Neq  , seqs                      )
+         |  def has  (v   : Option[t]          )               : Ns1[${`A..V`}, t] = _exprSeqOpt(Has  , v.map(v => Seq(Seq(v)))   )
+         |  def has  (vs  : Option[Seq[t]]     )(implicit x: X): Ns1[${`A..V`}, t] = _exprSeqOpt(Has  , vs.map(_.map(v => Seq(v))))
+         |  def hasNo(v   : Option[t]          )               : Ns1[${`A..V`}, t] = _exprSeqOpt(HasNo, v.map(v => Seq(Seq(v)))   )
+         |  def hasNo(vs  : Option[Seq[t]]     )(implicit x: X): Ns1[${`A..V`}, t] = _exprSeqOpt(HasNo, vs.map(seq => Seq(seq))   )
          |}""".stripMargin
   }
 }

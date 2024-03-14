@@ -21,13 +21,13 @@ object _ExprBArTac extends BoilerplateGenBase("ExprBArTac", "/api/expression") {
       s"""
          |
          |trait ${fileName}Ops_$arity[${`A..V, `}t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]] extends ExprAttr_$arity[${`A..V, `}t, Ns1, Ns2] {
-         |  protected def _exprBArTac(op: Op, ba: Seq[Array[t]]): Ns1[${`A..V, `}t] = ???
+         |  protected def _exprBAr(op: Op, ba: Seq[Array[t]]): Ns1[${`A..V, `}t] = ???
          |}
          |
          |trait $fileName_$arity[${`A..V, `}t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]]
          |  extends ${fileName}Ops_$arity[${`A..V, `}t, Ns1, Ns2] {
-         |  def apply(            ): Ns1[${`A..V, `}t] = _exprBArTac(Eq, Nil    )
-         |  def apply(ba: Array[t]): Ns1[${`A..V, `}t] = _exprBArTac(Eq, Seq(ba))
+         |  def apply(            ): Ns1[${`A..V, `}t] = _exprBAr(Eq, Nil    )
+         |  def apply(ba: Array[t]): Ns1[${`A..V, `}t] = _exprBAr(Eq, Seq(ba))
          |}""".stripMargin
   }
 }

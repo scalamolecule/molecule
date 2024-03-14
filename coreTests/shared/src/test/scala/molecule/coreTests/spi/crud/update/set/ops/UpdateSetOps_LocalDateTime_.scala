@@ -24,7 +24,7 @@ trait UpdateSetOps_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: Spi
         _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime3, localDateTime4))
 
         // Applying empty Set of values deletes previous Set
-        _ <- Ns(id).localDateTimes(Seq.empty[LocalDateTime]).update.transact
+        _ <- Ns(id).localDateTimes(Set.empty[LocalDateTime]).update.transact
         _ <- Ns.localDateTimes.query.get.map(_ ==> Nil)
 
         id <- Ns.localDateTimes(Set(localDateTime1, localDateTime2)).save.transact.map(_.id)
@@ -51,53 +51,46 @@ trait UpdateSetOps_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: Spi
         _ <- Ns(id).localDateTimes.add(localDateTime3, localDateTime4).update.transact
         _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime1, localDateTime2, localDateTime3, localDateTime4))
 
-        // Add Iterable of values (existing values unaffected)
-        // Seq
-        _ <- Ns(id).localDateTimes.add(Seq(localDateTime4, localDateTime5)).update.transact
-        _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime1, localDateTime2, localDateTime3, localDateTime4, localDateTime5))
-        // Set
-        _ <- Ns(id).localDateTimes.add(Set(localDateTime6)).update.transact
+        // Add multiple values (Seq)
+        _ <- Ns(id).localDateTimes.add(Seq(localDateTime5, localDateTime6)).update.transact
         _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime1, localDateTime2, localDateTime3, localDateTime4, localDateTime5, localDateTime6))
-        // Iterable
-        _ <- Ns(id).localDateTimes.add(Iterable(localDateTime7)).update.transact
-        _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime1, localDateTime2, localDateTime3, localDateTime4, localDateTime5, localDateTime6, localDateTime7))
 
-        // Adding empty Iterable of values has no effect
+        // Adding empty Seq of values has no effect
         _ <- Ns(id).localDateTimes.add(Seq.empty[LocalDateTime]).update.transact
-        _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime1, localDateTime2, localDateTime3, localDateTime4, localDateTime5, localDateTime6, localDateTime7))
+        _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime1, localDateTime2, localDateTime3, localDateTime4, localDateTime5, localDateTime6))
       } yield ()
     }
 
 
     "remove" - types { implicit conn =>
       for {
-        id <- Ns.localDateTimes(Set(localDateTime1, localDateTime2, localDateTime3, localDateTime4, localDateTime5, localDateTime6)).save.transact.map(_.id)
+        id <- Ns.localDateTimes(Set(localDateTime1, localDateTime2, localDateTime3, localDateTime4, localDateTime5, localDateTime6, localDateTime7)).save.transact.map(_.id)
 
         // Remove value
-        _ <- Ns(id).localDateTimes.remove(localDateTime6).update.transact
-        _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime1, localDateTime2, localDateTime3, localDateTime4, localDateTime5))
+        _ <- Ns(id).localDateTimes.remove(localDateTime7).update.transact
+        _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime1, localDateTime2, localDateTime3, localDateTime4, localDateTime5, localDateTime6))
 
         // Removing non-existing value has no effect
-        _ <- Ns(id).localDateTimes.remove(localDateTime7).update.transact
-        _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime1, localDateTime2, localDateTime3, localDateTime4, localDateTime5))
+        _ <- Ns(id).localDateTimes.remove(localDateTime9).update.transact
+        _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime1, localDateTime2, localDateTime3, localDateTime4, localDateTime5, localDateTime6))
 
         // Removing duplicate values removes the distinct value
-        _ <- Ns(id).localDateTimes.remove(localDateTime5, localDateTime5).update.transact
-        _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime1, localDateTime2, localDateTime3, localDateTime4))
+        _ <- Ns(id).localDateTimes.remove(localDateTime6, localDateTime6).update.transact
+        _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime1, localDateTime2, localDateTime3, localDateTime4, localDateTime5))
 
         // Remove multiple values (vararg)
-        _ <- Ns(id).localDateTimes.remove(localDateTime3, localDateTime4).update.transact
-        _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime1, localDateTime2))
+        _ <- Ns(id).localDateTimes.remove(localDateTime4, localDateTime5).update.transact
+        _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime1, localDateTime2, localDateTime3))
 
-        // Remove Iterable of values
-        _ <- Ns(id).localDateTimes.remove(Seq(localDateTime2)).update.transact
+        // Remove multiple values (Seq)
+        _ <- Ns(id).localDateTimes.remove(Seq(localDateTime2, localDateTime3)).update.transact
         _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime1))
 
-        // Removing empty Iterable of values has no effect
+        // Removing empty Seq of values has no effect
         _ <- Ns(id).localDateTimes.remove(Seq.empty[LocalDateTime]).update.transact
         _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime1))
 
-        // Removing all elements retracts the attribute
+        // Removing all remaining elements deletes the attribute
         _ <- Ns(id).localDateTimes.remove(Seq(localDateTime1)).update.transact
         _ <- Ns.localDateTimes.query.get.map(_ ==> Nil)
       } yield ()

@@ -22,7 +22,7 @@ trait UpdateSetOps_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.ints.query.get.map(_.head ==> Set(int3, int4))
 
         // Applying empty Set of values deletes previous Set
-        _ <- Ns(id).ints(Seq.empty[Int]).update.transact
+        _ <- Ns(id).ints(Set.empty[Int]).update.transact
         _ <- Ns.ints.query.get.map(_ ==> Nil)
 
         id <- Ns.ints(Set(int1, int2)).save.transact.map(_.id)
@@ -49,53 +49,46 @@ trait UpdateSetOps_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).ints.add(int3, int4).update.transact
         _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4))
 
-        // Add Iterable of values (existing values unaffected)
-        // Seq
-        _ <- Ns(id).ints.add(Seq(int4, int5)).update.transact
-        _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4, int5))
-        // Set
-        _ <- Ns(id).ints.add(Set(int6)).update.transact
+        // Add multiple values (Seq)
+        _ <- Ns(id).ints.add(Seq(int5, int6)).update.transact
         _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4, int5, int6))
-        // Iterable
-        _ <- Ns(id).ints.add(Iterable(int7)).update.transact
-        _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4, int5, int6, int7))
 
-        // Adding empty Iterable of values has no effect
+        // Adding empty Seq of values has no effect
         _ <- Ns(id).ints.add(Seq.empty[Int]).update.transact
-        _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4, int5, int6, int7))
+        _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4, int5, int6))
       } yield ()
     }
 
 
     "remove" - types { implicit conn =>
       for {
-        id <- Ns.ints(Set(int1, int2, int3, int4, int5, int6)).save.transact.map(_.id)
+        id <- Ns.ints(Set(int1, int2, int3, int4, int5, int6, int7)).save.transact.map(_.id)
 
         // Remove value
-        _ <- Ns(id).ints.remove(int6).update.transact
-        _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4, int5))
+        _ <- Ns(id).ints.remove(int7).update.transact
+        _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4, int5, int6))
 
         // Removing non-existing value has no effect
-        _ <- Ns(id).ints.remove(int7).update.transact
-        _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4, int5))
+        _ <- Ns(id).ints.remove(int9).update.transact
+        _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4, int5, int6))
 
         // Removing duplicate values removes the distinct value
-        _ <- Ns(id).ints.remove(int5, int5).update.transact
-        _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4))
+        _ <- Ns(id).ints.remove(int6, int6).update.transact
+        _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4, int5))
 
         // Remove multiple values (vararg)
-        _ <- Ns(id).ints.remove(int3, int4).update.transact
-        _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2))
+        _ <- Ns(id).ints.remove(int4, int5).update.transact
+        _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3))
 
-        // Remove Iterable of values
-        _ <- Ns(id).ints.remove(Seq(int2)).update.transact
+        // Remove multiple values (Seq)
+        _ <- Ns(id).ints.remove(Seq(int2, int3)).update.transact
         _ <- Ns.ints.query.get.map(_.head ==> Set(int1))
 
-        // Removing empty Iterable of values has no effect
+        // Removing empty Seq of values has no effect
         _ <- Ns(id).ints.remove(Seq.empty[Int]).update.transact
         _ <- Ns.ints.query.get.map(_.head ==> Set(int1))
 
-        // Removing all elements retracts the attribute
+        // Removing all remaining elements deletes the attribute
         _ <- Ns(id).ints.remove(Seq(int1)).update.transact
         _ <- Ns.ints.query.get.map(_ ==> Nil)
       } yield ()

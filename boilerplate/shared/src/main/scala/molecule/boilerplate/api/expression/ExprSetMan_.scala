@@ -6,32 +6,22 @@ import molecule.boilerplate.api._
 import molecule.boilerplate.ast.Model._
 
 
-trait ExprSetManOps_1[A, t, Ns1[_, _], Ns2[_, _, _]] extends ExprAttr_1[A, t, Ns1, Ns2] {
-  protected def _exprSetMan(op: Op, sets: Seq[Set[t]]): Ns1[A, t] = ???
-}
-
 trait ExprSetMan_1[A, t, Ns1[_, _], Ns2[_, _, _]]
-  extends ExprSetManOps_1[A, t, Ns1, Ns2]
+  extends ExprSetTacOps_1[A, t, Ns1, Ns2]
     with Aggregates_1[A, t, Ns1] {
-  def apply (                             )               : Ns1[A, t] = _exprSetMan(Eq    , Nil                       )
-  def apply (v    : t, vs: t*             )               : Ns1[A, t] = _exprSetMan(Eq    , (v +: vs).map(v => Set(v)))
-  def apply (vs   : Seq[t]                )(implicit x: X): Ns1[A, t] = _exprSetMan(Eq    , vs.map(v => Set(v))       )
-  def apply (set  : Set[t], sets: Set[t]* )               : Ns1[A, t] = _exprSetMan(Eq    , set +: sets               )
-  def apply (sets : Seq[Set[t]]           )               : Ns1[A, t] = _exprSetMan(Eq    , sets                      )
-  def not   (set  : Set[t], sets: Set[t]* )               : Ns1[A, t] = _exprSetMan(Neq   , set +: sets               )
-  def not   (sets : Seq[Set[t]]           )               : Ns1[A, t] = _exprSetMan(Neq   , sets                      )
-  def has   (v    : t, vs: t*             )               : Ns1[A, t] = _exprSetMan(Has   , (v +: vs).map(v => Set(v)))
-  def has   (vs   : Seq[t]                )(implicit x: X): Ns1[A, t] = _exprSetMan(Has   , vs.map(v => Set(v))       )
-  def has   (set  : Set[t], sets: Set[t]* )               : Ns1[A, t] = _exprSetMan(Has   , set +: sets               )
-  def has   (sets : Seq[Set[t]]           )               : Ns1[A, t] = _exprSetMan(Has   , sets                      )
-  def hasNo (v    : t, vs: t*             )               : Ns1[A, t] = _exprSetMan(HasNo , (v +: vs).map(v => Set(v)))
-  def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
-  def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, t] = _exprSetMan(HasNo , set +: sets               )
-  def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, t] = _exprSetMan(HasNo , sets                      )
-  def add   (v    : t, vs: t*             )               : Ns1[A, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
-  def add   (vs   : Iterable[t]           )               : Ns1[A, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def remove(v    : t, vs: t*             )               : Ns1[A, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
-  def remove(vs   : Iterable[t]           )               : Ns1[A, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
+  def apply (                             ): Ns1[A, t] = _exprSet(Eq    , Nil                       )
+  def apply (set  : Set[t], sets: Set[t]* ): Ns1[A, t] = _exprSet(Eq    , set +: sets               )
+  def apply (sets : Seq[Set[t]]           ): Ns1[A, t] = _exprSet(Eq    , sets                      )
+  def not   (set  : Set[t], sets: Set[t]* ): Ns1[A, t] = _exprSet(Neq   , set +: sets               )
+  def not   (sets : Seq[Set[t]]           ): Ns1[A, t] = _exprSet(Neq   , sets                      )
+  def has   (v    : t, vs: t*             ): Ns1[A, t] = _exprSet(Has   , (v +: vs).map(v => Set(v)))
+  def has   (vs   : Seq[t]                ): Ns1[A, t] = _exprSet(Has   , vs.map(v => Set(v))       )
+  def hasNo (v    : t, vs: t*             ): Ns1[A, t] = _exprSet(HasNo , (v +: vs).map(v => Set(v)))
+  def hasNo (vs   : Seq[t]                ): Ns1[A, t] = _exprSet(HasNo , vs.map(v => Set(v))       )
+  def add   (v    : t, vs: t*             ): Ns1[A, t] = _exprSet(Add   , Seq((v +: vs).toSet)      )
+  def add   (vs   : Seq[t]                ): Ns1[A, t] = _exprSet(Add   , Seq(vs.toSet)             )
+  def remove(v    : t, vs: t*             ): Ns1[A, t] = _exprSet(Remove, Seq((v +: vs).toSet)      )
+  def remove(vs   : Seq[t]                ): Ns1[A, t] = _exprSet(Remove, Seq(vs.toSet)             )
   
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, t] = _attrTac(Neq  , a)
@@ -45,32 +35,22 @@ trait ExprSetMan_1[A, t, Ns1[_, _], Ns2[_, _, _]]
 }
 
 
-trait ExprSetManOps_2[A, B, t, Ns1[_, _, _], Ns2[_, _, _, _]] extends ExprAttr_2[A, B, t, Ns1, Ns2] {
-  protected def _exprSetMan(op: Op, sets: Seq[Set[t]]): Ns1[A, B, t] = ???
-}
-
 trait ExprSetMan_2[A, B, t, Ns1[_, _, _], Ns2[_, _, _, _]]
-  extends ExprSetManOps_2[A, B, t, Ns1, Ns2]
+  extends ExprSetTacOps_2[A, B, t, Ns1, Ns2]
     with Aggregates_2[A, B, t, Ns1] {
-  def apply (                             )               : Ns1[A, B, t] = _exprSetMan(Eq    , Nil                       )
-  def apply (v    : t, vs: t*             )               : Ns1[A, B, t] = _exprSetMan(Eq    , (v +: vs).map(v => Set(v)))
-  def apply (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, t] = _exprSetMan(Eq    , vs.map(v => Set(v))       )
-  def apply (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, t] = _exprSetMan(Eq    , set +: sets               )
-  def apply (sets : Seq[Set[t]]           )               : Ns1[A, B, t] = _exprSetMan(Eq    , sets                      )
-  def not   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, t] = _exprSetMan(Neq   , set +: sets               )
-  def not   (sets : Seq[Set[t]]           )               : Ns1[A, B, t] = _exprSetMan(Neq   , sets                      )
-  def has   (v    : t, vs: t*             )               : Ns1[A, B, t] = _exprSetMan(Has   , (v +: vs).map(v => Set(v)))
-  def has   (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, t] = _exprSetMan(Has   , vs.map(v => Set(v))       )
-  def has   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, t] = _exprSetMan(Has   , set +: sets               )
-  def has   (sets : Seq[Set[t]]           )               : Ns1[A, B, t] = _exprSetMan(Has   , sets                      )
-  def hasNo (v    : t, vs: t*             )               : Ns1[A, B, t] = _exprSetMan(HasNo , (v +: vs).map(v => Set(v)))
-  def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
-  def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, t] = _exprSetMan(HasNo , set +: sets               )
-  def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, t] = _exprSetMan(HasNo , sets                      )
-  def add   (v    : t, vs: t*             )               : Ns1[A, B, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
-  def add   (vs   : Iterable[t]           )               : Ns1[A, B, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def remove(v    : t, vs: t*             )               : Ns1[A, B, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
-  def remove(vs   : Iterable[t]           )               : Ns1[A, B, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
+  def apply (                             ): Ns1[A, B, t] = _exprSet(Eq    , Nil                       )
+  def apply (set  : Set[t], sets: Set[t]* ): Ns1[A, B, t] = _exprSet(Eq    , set +: sets               )
+  def apply (sets : Seq[Set[t]]           ): Ns1[A, B, t] = _exprSet(Eq    , sets                      )
+  def not   (set  : Set[t], sets: Set[t]* ): Ns1[A, B, t] = _exprSet(Neq   , set +: sets               )
+  def not   (sets : Seq[Set[t]]           ): Ns1[A, B, t] = _exprSet(Neq   , sets                      )
+  def has   (v    : t, vs: t*             ): Ns1[A, B, t] = _exprSet(Has   , (v +: vs).map(v => Set(v)))
+  def has   (vs   : Seq[t]                ): Ns1[A, B, t] = _exprSet(Has   , vs.map(v => Set(v))       )
+  def hasNo (v    : t, vs: t*             ): Ns1[A, B, t] = _exprSet(HasNo , (v +: vs).map(v => Set(v)))
+  def hasNo (vs   : Seq[t]                ): Ns1[A, B, t] = _exprSet(HasNo , vs.map(v => Set(v))       )
+  def add   (v    : t, vs: t*             ): Ns1[A, B, t] = _exprSet(Add   , Seq((v +: vs).toSet)      )
+  def add   (vs   : Seq[t]                ): Ns1[A, B, t] = _exprSet(Add   , Seq(vs.toSet)             )
+  def remove(v    : t, vs: t*             ): Ns1[A, B, t] = _exprSet(Remove, Seq((v +: vs).toSet)      )
+  def remove(vs   : Seq[t]                ): Ns1[A, B, t] = _exprSet(Remove, Seq(vs.toSet)             )
   
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, t] = _attrTac(Neq  , a)
@@ -84,32 +64,22 @@ trait ExprSetMan_2[A, B, t, Ns1[_, _, _], Ns2[_, _, _, _]]
 }
 
 
-trait ExprSetManOps_3[A, B, C, t, Ns1[_, _, _, _], Ns2[_, _, _, _, _]] extends ExprAttr_3[A, B, C, t, Ns1, Ns2] {
-  protected def _exprSetMan(op: Op, sets: Seq[Set[t]]): Ns1[A, B, C, t] = ???
-}
-
 trait ExprSetMan_3[A, B, C, t, Ns1[_, _, _, _], Ns2[_, _, _, _, _]]
-  extends ExprSetManOps_3[A, B, C, t, Ns1, Ns2]
+  extends ExprSetTacOps_3[A, B, C, t, Ns1, Ns2]
     with Aggregates_3[A, B, C, t, Ns1] {
-  def apply (                             )               : Ns1[A, B, C, t] = _exprSetMan(Eq    , Nil                       )
-  def apply (v    : t, vs: t*             )               : Ns1[A, B, C, t] = _exprSetMan(Eq    , (v +: vs).map(v => Set(v)))
-  def apply (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, t] = _exprSetMan(Eq    , vs.map(v => Set(v))       )
-  def apply (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, t] = _exprSetMan(Eq    , set +: sets               )
-  def apply (sets : Seq[Set[t]]           )               : Ns1[A, B, C, t] = _exprSetMan(Eq    , sets                      )
-  def not   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, t] = _exprSetMan(Neq   , set +: sets               )
-  def not   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, t] = _exprSetMan(Neq   , sets                      )
-  def has   (v    : t, vs: t*             )               : Ns1[A, B, C, t] = _exprSetMan(Has   , (v +: vs).map(v => Set(v)))
-  def has   (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, t] = _exprSetMan(Has   , vs.map(v => Set(v))       )
-  def has   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, t] = _exprSetMan(Has   , set +: sets               )
-  def has   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, t] = _exprSetMan(Has   , sets                      )
-  def hasNo (v    : t, vs: t*             )               : Ns1[A, B, C, t] = _exprSetMan(HasNo , (v +: vs).map(v => Set(v)))
-  def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
-  def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, t] = _exprSetMan(HasNo , set +: sets               )
-  def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, t] = _exprSetMan(HasNo , sets                      )
-  def add   (v    : t, vs: t*             )               : Ns1[A, B, C, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
-  def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def remove(v    : t, vs: t*             )               : Ns1[A, B, C, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
-  def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
+  def apply (                             ): Ns1[A, B, C, t] = _exprSet(Eq    , Nil                       )
+  def apply (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, t] = _exprSet(Eq    , set +: sets               )
+  def apply (sets : Seq[Set[t]]           ): Ns1[A, B, C, t] = _exprSet(Eq    , sets                      )
+  def not   (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, t] = _exprSet(Neq   , set +: sets               )
+  def not   (sets : Seq[Set[t]]           ): Ns1[A, B, C, t] = _exprSet(Neq   , sets                      )
+  def has   (v    : t, vs: t*             ): Ns1[A, B, C, t] = _exprSet(Has   , (v +: vs).map(v => Set(v)))
+  def has   (vs   : Seq[t]                ): Ns1[A, B, C, t] = _exprSet(Has   , vs.map(v => Set(v))       )
+  def hasNo (v    : t, vs: t*             ): Ns1[A, B, C, t] = _exprSet(HasNo , (v +: vs).map(v => Set(v)))
+  def hasNo (vs   : Seq[t]                ): Ns1[A, B, C, t] = _exprSet(HasNo , vs.map(v => Set(v))       )
+  def add   (v    : t, vs: t*             ): Ns1[A, B, C, t] = _exprSet(Add   , Seq((v +: vs).toSet)      )
+  def add   (vs   : Seq[t]                ): Ns1[A, B, C, t] = _exprSet(Add   , Seq(vs.toSet)             )
+  def remove(v    : t, vs: t*             ): Ns1[A, B, C, t] = _exprSet(Remove, Seq((v +: vs).toSet)      )
+  def remove(vs   : Seq[t]                ): Ns1[A, B, C, t] = _exprSet(Remove, Seq(vs.toSet)             )
   
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, t] = _attrTac(Neq  , a)
@@ -123,32 +93,22 @@ trait ExprSetMan_3[A, B, C, t, Ns1[_, _, _, _], Ns2[_, _, _, _, _]]
 }
 
 
-trait ExprSetManOps_4[A, B, C, D, t, Ns1[_, _, _, _, _], Ns2[_, _, _, _, _, _]] extends ExprAttr_4[A, B, C, D, t, Ns1, Ns2] {
-  protected def _exprSetMan(op: Op, sets: Seq[Set[t]]): Ns1[A, B, C, D, t] = ???
-}
-
 trait ExprSetMan_4[A, B, C, D, t, Ns1[_, _, _, _, _], Ns2[_, _, _, _, _, _]]
-  extends ExprSetManOps_4[A, B, C, D, t, Ns1, Ns2]
+  extends ExprSetTacOps_4[A, B, C, D, t, Ns1, Ns2]
     with Aggregates_4[A, B, C, D, t, Ns1] {
-  def apply (                             )               : Ns1[A, B, C, D, t] = _exprSetMan(Eq    , Nil                       )
-  def apply (v    : t, vs: t*             )               : Ns1[A, B, C, D, t] = _exprSetMan(Eq    , (v +: vs).map(v => Set(v)))
-  def apply (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, t] = _exprSetMan(Eq    , vs.map(v => Set(v))       )
-  def apply (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, t] = _exprSetMan(Eq    , set +: sets               )
-  def apply (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, t] = _exprSetMan(Eq    , sets                      )
-  def not   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, t] = _exprSetMan(Neq   , set +: sets               )
-  def not   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, t] = _exprSetMan(Neq   , sets                      )
-  def has   (v    : t, vs: t*             )               : Ns1[A, B, C, D, t] = _exprSetMan(Has   , (v +: vs).map(v => Set(v)))
-  def has   (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, t] = _exprSetMan(Has   , vs.map(v => Set(v))       )
-  def has   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, t] = _exprSetMan(Has   , set +: sets               )
-  def has   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, t] = _exprSetMan(Has   , sets                      )
-  def hasNo (v    : t, vs: t*             )               : Ns1[A, B, C, D, t] = _exprSetMan(HasNo , (v +: vs).map(v => Set(v)))
-  def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
-  def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, t] = _exprSetMan(HasNo , set +: sets               )
-  def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, t] = _exprSetMan(HasNo , sets                      )
-  def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
-  def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
-  def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
+  def apply (                             ): Ns1[A, B, C, D, t] = _exprSet(Eq    , Nil                       )
+  def apply (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, t] = _exprSet(Eq    , set +: sets               )
+  def apply (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, t] = _exprSet(Eq    , sets                      )
+  def not   (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, t] = _exprSet(Neq   , set +: sets               )
+  def not   (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, t] = _exprSet(Neq   , sets                      )
+  def has   (v    : t, vs: t*             ): Ns1[A, B, C, D, t] = _exprSet(Has   , (v +: vs).map(v => Set(v)))
+  def has   (vs   : Seq[t]                ): Ns1[A, B, C, D, t] = _exprSet(Has   , vs.map(v => Set(v))       )
+  def hasNo (v    : t, vs: t*             ): Ns1[A, B, C, D, t] = _exprSet(HasNo , (v +: vs).map(v => Set(v)))
+  def hasNo (vs   : Seq[t]                ): Ns1[A, B, C, D, t] = _exprSet(HasNo , vs.map(v => Set(v))       )
+  def add   (v    : t, vs: t*             ): Ns1[A, B, C, D, t] = _exprSet(Add   , Seq((v +: vs).toSet)      )
+  def add   (vs   : Seq[t]                ): Ns1[A, B, C, D, t] = _exprSet(Add   , Seq(vs.toSet)             )
+  def remove(v    : t, vs: t*             ): Ns1[A, B, C, D, t] = _exprSet(Remove, Seq((v +: vs).toSet)      )
+  def remove(vs   : Seq[t]                ): Ns1[A, B, C, D, t] = _exprSet(Remove, Seq(vs.toSet)             )
   
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, t] = _attrTac(Neq  , a)
@@ -162,32 +122,22 @@ trait ExprSetMan_4[A, B, C, D, t, Ns1[_, _, _, _, _], Ns2[_, _, _, _, _, _]]
 }
 
 
-trait ExprSetManOps_5[A, B, C, D, E, t, Ns1[_, _, _, _, _, _], Ns2[_, _, _, _, _, _, _]] extends ExprAttr_5[A, B, C, D, E, t, Ns1, Ns2] {
-  protected def _exprSetMan(op: Op, sets: Seq[Set[t]]): Ns1[A, B, C, D, E, t] = ???
-}
-
 trait ExprSetMan_5[A, B, C, D, E, t, Ns1[_, _, _, _, _, _], Ns2[_, _, _, _, _, _, _]]
-  extends ExprSetManOps_5[A, B, C, D, E, t, Ns1, Ns2]
+  extends ExprSetTacOps_5[A, B, C, D, E, t, Ns1, Ns2]
     with Aggregates_5[A, B, C, D, E, t, Ns1] {
-  def apply (                             )               : Ns1[A, B, C, D, E, t] = _exprSetMan(Eq    , Nil                       )
-  def apply (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, t] = _exprSetMan(Eq    , (v +: vs).map(v => Set(v)))
-  def apply (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, t] = _exprSetMan(Eq    , vs.map(v => Set(v))       )
-  def apply (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, t] = _exprSetMan(Eq    , set +: sets               )
-  def apply (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, t] = _exprSetMan(Eq    , sets                      )
-  def not   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, t] = _exprSetMan(Neq   , set +: sets               )
-  def not   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, t] = _exprSetMan(Neq   , sets                      )
-  def has   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, t] = _exprSetMan(Has   , (v +: vs).map(v => Set(v)))
-  def has   (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, t] = _exprSetMan(Has   , vs.map(v => Set(v))       )
-  def has   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, t] = _exprSetMan(Has   , set +: sets               )
-  def has   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, t] = _exprSetMan(Has   , sets                      )
-  def hasNo (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, t] = _exprSetMan(HasNo , (v +: vs).map(v => Set(v)))
-  def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
-  def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, t] = _exprSetMan(HasNo , set +: sets               )
-  def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, t] = _exprSetMan(HasNo , sets                      )
-  def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
-  def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
-  def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
+  def apply (                             ): Ns1[A, B, C, D, E, t] = _exprSet(Eq    , Nil                       )
+  def apply (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, t] = _exprSet(Eq    , set +: sets               )
+  def apply (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, t] = _exprSet(Eq    , sets                      )
+  def not   (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, t] = _exprSet(Neq   , set +: sets               )
+  def not   (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, t] = _exprSet(Neq   , sets                      )
+  def has   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, t] = _exprSet(Has   , (v +: vs).map(v => Set(v)))
+  def has   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, t] = _exprSet(Has   , vs.map(v => Set(v))       )
+  def hasNo (v    : t, vs: t*             ): Ns1[A, B, C, D, E, t] = _exprSet(HasNo , (v +: vs).map(v => Set(v)))
+  def hasNo (vs   : Seq[t]                ): Ns1[A, B, C, D, E, t] = _exprSet(HasNo , vs.map(v => Set(v))       )
+  def add   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, t] = _exprSet(Add   , Seq((v +: vs).toSet)      )
+  def add   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, t] = _exprSet(Add   , Seq(vs.toSet)             )
+  def remove(v    : t, vs: t*             ): Ns1[A, B, C, D, E, t] = _exprSet(Remove, Seq((v +: vs).toSet)      )
+  def remove(vs   : Seq[t]                ): Ns1[A, B, C, D, E, t] = _exprSet(Remove, Seq(vs.toSet)             )
   
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, E, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, E, t] = _attrTac(Neq  , a)
@@ -201,32 +151,22 @@ trait ExprSetMan_5[A, B, C, D, E, t, Ns1[_, _, _, _, _, _], Ns2[_, _, _, _, _, _
 }
 
 
-trait ExprSetManOps_6[A, B, C, D, E, F, t, Ns1[_, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _]] extends ExprAttr_6[A, B, C, D, E, F, t, Ns1, Ns2] {
-  protected def _exprSetMan(op: Op, sets: Seq[Set[t]]): Ns1[A, B, C, D, E, F, t] = ???
-}
-
 trait ExprSetMan_6[A, B, C, D, E, F, t, Ns1[_, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _]]
-  extends ExprSetManOps_6[A, B, C, D, E, F, t, Ns1, Ns2]
+  extends ExprSetTacOps_6[A, B, C, D, E, F, t, Ns1, Ns2]
     with Aggregates_6[A, B, C, D, E, F, t, Ns1] {
-  def apply (                             )               : Ns1[A, B, C, D, E, F, t] = _exprSetMan(Eq    , Nil                       )
-  def apply (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, t] = _exprSetMan(Eq    , (v +: vs).map(v => Set(v)))
-  def apply (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, t] = _exprSetMan(Eq    , vs.map(v => Set(v))       )
-  def apply (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, t] = _exprSetMan(Eq    , set +: sets               )
-  def apply (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, t] = _exprSetMan(Eq    , sets                      )
-  def not   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, t] = _exprSetMan(Neq   , set +: sets               )
-  def not   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, t] = _exprSetMan(Neq   , sets                      )
-  def has   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, t] = _exprSetMan(Has   , (v +: vs).map(v => Set(v)))
-  def has   (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, t] = _exprSetMan(Has   , vs.map(v => Set(v))       )
-  def has   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, t] = _exprSetMan(Has   , set +: sets               )
-  def has   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, t] = _exprSetMan(Has   , sets                      )
-  def hasNo (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, t] = _exprSetMan(HasNo , (v +: vs).map(v => Set(v)))
-  def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
-  def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, t] = _exprSetMan(HasNo , set +: sets               )
-  def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, t] = _exprSetMan(HasNo , sets                      )
-  def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
-  def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
-  def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
+  def apply (                             ): Ns1[A, B, C, D, E, F, t] = _exprSet(Eq    , Nil                       )
+  def apply (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, F, t] = _exprSet(Eq    , set +: sets               )
+  def apply (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, F, t] = _exprSet(Eq    , sets                      )
+  def not   (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, F, t] = _exprSet(Neq   , set +: sets               )
+  def not   (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, F, t] = _exprSet(Neq   , sets                      )
+  def has   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, t] = _exprSet(Has   , (v +: vs).map(v => Set(v)))
+  def has   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, t] = _exprSet(Has   , vs.map(v => Set(v))       )
+  def hasNo (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, t] = _exprSet(HasNo , (v +: vs).map(v => Set(v)))
+  def hasNo (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, t] = _exprSet(HasNo , vs.map(v => Set(v))       )
+  def add   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, t] = _exprSet(Add   , Seq((v +: vs).toSet)      )
+  def add   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, t] = _exprSet(Add   , Seq(vs.toSet)             )
+  def remove(v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, t] = _exprSet(Remove, Seq((v +: vs).toSet)      )
+  def remove(vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, t] = _exprSet(Remove, Seq(vs.toSet)             )
   
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, E, F, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, E, F, t] = _attrTac(Neq  , a)
@@ -240,32 +180,22 @@ trait ExprSetMan_6[A, B, C, D, E, F, t, Ns1[_, _, _, _, _, _, _], Ns2[_, _, _, _
 }
 
 
-trait ExprSetManOps_7[A, B, C, D, E, F, G, t, Ns1[_, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _]] extends ExprAttr_7[A, B, C, D, E, F, G, t, Ns1, Ns2] {
-  protected def _exprSetMan(op: Op, sets: Seq[Set[t]]): Ns1[A, B, C, D, E, F, G, t] = ???
-}
-
 trait ExprSetMan_7[A, B, C, D, E, F, G, t, Ns1[_, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _]]
-  extends ExprSetManOps_7[A, B, C, D, E, F, G, t, Ns1, Ns2]
+  extends ExprSetTacOps_7[A, B, C, D, E, F, G, t, Ns1, Ns2]
     with Aggregates_7[A, B, C, D, E, F, G, t, Ns1] {
-  def apply (                             )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetMan(Eq    , Nil                       )
-  def apply (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetMan(Eq    , (v +: vs).map(v => Set(v)))
-  def apply (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, t] = _exprSetMan(Eq    , vs.map(v => Set(v))       )
-  def apply (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetMan(Eq    , set +: sets               )
-  def apply (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetMan(Eq    , sets                      )
-  def not   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetMan(Neq   , set +: sets               )
-  def not   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetMan(Neq   , sets                      )
-  def has   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetMan(Has   , (v +: vs).map(v => Set(v)))
-  def has   (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, t] = _exprSetMan(Has   , vs.map(v => Set(v))       )
-  def has   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetMan(Has   , set +: sets               )
-  def has   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetMan(Has   , sets                      )
-  def hasNo (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetMan(HasNo , (v +: vs).map(v => Set(v)))
-  def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
-  def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetMan(HasNo , set +: sets               )
-  def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetMan(HasNo , sets                      )
-  def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
-  def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
-  def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
+  def apply (                             ): Ns1[A, B, C, D, E, F, G, t] = _exprSet(Eq    , Nil                       )
+  def apply (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, F, G, t] = _exprSet(Eq    , set +: sets               )
+  def apply (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, F, G, t] = _exprSet(Eq    , sets                      )
+  def not   (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, F, G, t] = _exprSet(Neq   , set +: sets               )
+  def not   (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, F, G, t] = _exprSet(Neq   , sets                      )
+  def has   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, t] = _exprSet(Has   , (v +: vs).map(v => Set(v)))
+  def has   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, t] = _exprSet(Has   , vs.map(v => Set(v))       )
+  def hasNo (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, t] = _exprSet(HasNo , (v +: vs).map(v => Set(v)))
+  def hasNo (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, t] = _exprSet(HasNo , vs.map(v => Set(v))       )
+  def add   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, t] = _exprSet(Add   , Seq((v +: vs).toSet)      )
+  def add   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, t] = _exprSet(Add   , Seq(vs.toSet)             )
+  def remove(v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, t] = _exprSet(Remove, Seq((v +: vs).toSet)      )
+  def remove(vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, t] = _exprSet(Remove, Seq(vs.toSet)             )
   
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, E, F, G, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, E, F, G, t] = _attrTac(Neq  , a)
@@ -279,32 +209,22 @@ trait ExprSetMan_7[A, B, C, D, E, F, G, t, Ns1[_, _, _, _, _, _, _, _], Ns2[_, _
 }
 
 
-trait ExprSetManOps_8[A, B, C, D, E, F, G, H, t, Ns1[_, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _]] extends ExprAttr_8[A, B, C, D, E, F, G, H, t, Ns1, Ns2] {
-  protected def _exprSetMan(op: Op, sets: Seq[Set[t]]): Ns1[A, B, C, D, E, F, G, H, t] = ???
-}
-
 trait ExprSetMan_8[A, B, C, D, E, F, G, H, t, Ns1[_, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetManOps_8[A, B, C, D, E, F, G, H, t, Ns1, Ns2]
+  extends ExprSetTacOps_8[A, B, C, D, E, F, G, H, t, Ns1, Ns2]
     with Aggregates_8[A, B, C, D, E, F, G, H, t, Ns1] {
-  def apply (                             )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetMan(Eq    , Nil                       )
-  def apply (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetMan(Eq    , (v +: vs).map(v => Set(v)))
-  def apply (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, t] = _exprSetMan(Eq    , vs.map(v => Set(v))       )
-  def apply (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetMan(Eq    , set +: sets               )
-  def apply (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetMan(Eq    , sets                      )
-  def not   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetMan(Neq   , set +: sets               )
-  def not   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetMan(Neq   , sets                      )
-  def has   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetMan(Has   , (v +: vs).map(v => Set(v)))
-  def has   (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, t] = _exprSetMan(Has   , vs.map(v => Set(v))       )
-  def has   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetMan(Has   , set +: sets               )
-  def has   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetMan(Has   , sets                      )
-  def hasNo (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetMan(HasNo , (v +: vs).map(v => Set(v)))
-  def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
-  def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetMan(HasNo , set +: sets               )
-  def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetMan(HasNo , sets                      )
-  def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
-  def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
-  def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
+  def apply (                             ): Ns1[A, B, C, D, E, F, G, H, t] = _exprSet(Eq    , Nil                       )
+  def apply (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, F, G, H, t] = _exprSet(Eq    , set +: sets               )
+  def apply (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, F, G, H, t] = _exprSet(Eq    , sets                      )
+  def not   (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, F, G, H, t] = _exprSet(Neq   , set +: sets               )
+  def not   (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, F, G, H, t] = _exprSet(Neq   , sets                      )
+  def has   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, t] = _exprSet(Has   , (v +: vs).map(v => Set(v)))
+  def has   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, t] = _exprSet(Has   , vs.map(v => Set(v))       )
+  def hasNo (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, t] = _exprSet(HasNo , (v +: vs).map(v => Set(v)))
+  def hasNo (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, t] = _exprSet(HasNo , vs.map(v => Set(v))       )
+  def add   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, t] = _exprSet(Add   , Seq((v +: vs).toSet)      )
+  def add   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, t] = _exprSet(Add   , Seq(vs.toSet)             )
+  def remove(v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, t] = _exprSet(Remove, Seq((v +: vs).toSet)      )
+  def remove(vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, t] = _exprSet(Remove, Seq(vs.toSet)             )
   
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, t] = _attrTac(Neq  , a)
@@ -318,32 +238,22 @@ trait ExprSetMan_8[A, B, C, D, E, F, G, H, t, Ns1[_, _, _, _, _, _, _, _, _], Ns
 }
 
 
-trait ExprSetManOps_9[A, B, C, D, E, F, G, H, I, t, Ns1[_, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_9[A, B, C, D, E, F, G, H, I, t, Ns1, Ns2] {
-  protected def _exprSetMan(op: Op, sets: Seq[Set[t]]): Ns1[A, B, C, D, E, F, G, H, I, t] = ???
-}
-
 trait ExprSetMan_9[A, B, C, D, E, F, G, H, I, t, Ns1[_, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetManOps_9[A, B, C, D, E, F, G, H, I, t, Ns1, Ns2]
+  extends ExprSetTacOps_9[A, B, C, D, E, F, G, H, I, t, Ns1, Ns2]
     with Aggregates_9[A, B, C, D, E, F, G, H, I, t, Ns1] {
-  def apply (                             )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetMan(Eq    , Nil                       )
-  def apply (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetMan(Eq    , (v +: vs).map(v => Set(v)))
-  def apply (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetMan(Eq    , vs.map(v => Set(v))       )
-  def apply (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetMan(Eq    , set +: sets               )
-  def apply (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetMan(Eq    , sets                      )
-  def not   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetMan(Neq   , set +: sets               )
-  def not   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetMan(Neq   , sets                      )
-  def has   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetMan(Has   , (v +: vs).map(v => Set(v)))
-  def has   (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetMan(Has   , vs.map(v => Set(v))       )
-  def has   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetMan(Has   , set +: sets               )
-  def has   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetMan(Has   , sets                      )
-  def hasNo (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetMan(HasNo , (v +: vs).map(v => Set(v)))
-  def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
-  def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetMan(HasNo , set +: sets               )
-  def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetMan(HasNo , sets                      )
-  def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
-  def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
-  def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
+  def apply (                             ): Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSet(Eq    , Nil                       )
+  def apply (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSet(Eq    , set +: sets               )
+  def apply (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSet(Eq    , sets                      )
+  def not   (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSet(Neq   , set +: sets               )
+  def not   (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSet(Neq   , sets                      )
+  def has   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSet(Has   , (v +: vs).map(v => Set(v)))
+  def has   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSet(Has   , vs.map(v => Set(v))       )
+  def hasNo (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSet(HasNo , (v +: vs).map(v => Set(v)))
+  def hasNo (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSet(HasNo , vs.map(v => Set(v))       )
+  def add   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSet(Add   , Seq((v +: vs).toSet)      )
+  def add   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSet(Add   , Seq(vs.toSet)             )
+  def remove(v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSet(Remove, Seq((v +: vs).toSet)      )
+  def remove(vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSet(Remove, Seq(vs.toSet)             )
   
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, t] = _attrTac(Neq  , a)
@@ -357,32 +267,22 @@ trait ExprSetMan_9[A, B, C, D, E, F, G, H, I, t, Ns1[_, _, _, _, _, _, _, _, _, 
 }
 
 
-trait ExprSetManOps_10[A, B, C, D, E, F, G, H, I, J, t, Ns1[_, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_10[A, B, C, D, E, F, G, H, I, J, t, Ns1, Ns2] {
-  protected def _exprSetMan(op: Op, sets: Seq[Set[t]]): Ns1[A, B, C, D, E, F, G, H, I, J, t] = ???
-}
-
 trait ExprSetMan_10[A, B, C, D, E, F, G, H, I, J, t, Ns1[_, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetManOps_10[A, B, C, D, E, F, G, H, I, J, t, Ns1, Ns2]
+  extends ExprSetTacOps_10[A, B, C, D, E, F, G, H, I, J, t, Ns1, Ns2]
     with Aggregates_10[A, B, C, D, E, F, G, H, I, J, t, Ns1] {
-  def apply (                             )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetMan(Eq    , Nil                       )
-  def apply (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetMan(Eq    , (v +: vs).map(v => Set(v)))
-  def apply (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetMan(Eq    , vs.map(v => Set(v))       )
-  def apply (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetMan(Eq    , set +: sets               )
-  def apply (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetMan(Eq    , sets                      )
-  def not   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetMan(Neq   , set +: sets               )
-  def not   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetMan(Neq   , sets                      )
-  def has   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetMan(Has   , (v +: vs).map(v => Set(v)))
-  def has   (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetMan(Has   , vs.map(v => Set(v))       )
-  def has   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetMan(Has   , set +: sets               )
-  def has   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetMan(Has   , sets                      )
-  def hasNo (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetMan(HasNo , (v +: vs).map(v => Set(v)))
-  def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
-  def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetMan(HasNo , set +: sets               )
-  def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetMan(HasNo , sets                      )
-  def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
-  def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
-  def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
+  def apply (                             ): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSet(Eq    , Nil                       )
+  def apply (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSet(Eq    , set +: sets               )
+  def apply (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSet(Eq    , sets                      )
+  def not   (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSet(Neq   , set +: sets               )
+  def not   (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSet(Neq   , sets                      )
+  def has   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSet(Has   , (v +: vs).map(v => Set(v)))
+  def has   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSet(Has   , vs.map(v => Set(v))       )
+  def hasNo (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSet(HasNo , (v +: vs).map(v => Set(v)))
+  def hasNo (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSet(HasNo , vs.map(v => Set(v))       )
+  def add   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSet(Add   , Seq((v +: vs).toSet)      )
+  def add   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSet(Add   , Seq(vs.toSet)             )
+  def remove(v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSet(Remove, Seq((v +: vs).toSet)      )
+  def remove(vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSet(Remove, Seq(vs.toSet)             )
   
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _attrTac(Neq  , a)
@@ -396,32 +296,22 @@ trait ExprSetMan_10[A, B, C, D, E, F, G, H, I, J, t, Ns1[_, _, _, _, _, _, _, _,
 }
 
 
-trait ExprSetManOps_11[A, B, C, D, E, F, G, H, I, J, K, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_11[A, B, C, D, E, F, G, H, I, J, K, t, Ns1, Ns2] {
-  protected def _exprSetMan(op: Op, sets: Seq[Set[t]]): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = ???
-}
-
 trait ExprSetMan_11[A, B, C, D, E, F, G, H, I, J, K, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetManOps_11[A, B, C, D, E, F, G, H, I, J, K, t, Ns1, Ns2]
+  extends ExprSetTacOps_11[A, B, C, D, E, F, G, H, I, J, K, t, Ns1, Ns2]
     with Aggregates_11[A, B, C, D, E, F, G, H, I, J, K, t, Ns1] {
-  def apply (                             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetMan(Eq    , Nil                       )
-  def apply (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetMan(Eq    , (v +: vs).map(v => Set(v)))
-  def apply (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetMan(Eq    , vs.map(v => Set(v))       )
-  def apply (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetMan(Eq    , set +: sets               )
-  def apply (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetMan(Eq    , sets                      )
-  def not   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetMan(Neq   , set +: sets               )
-  def not   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetMan(Neq   , sets                      )
-  def has   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetMan(Has   , (v +: vs).map(v => Set(v)))
-  def has   (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetMan(Has   , vs.map(v => Set(v))       )
-  def has   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetMan(Has   , set +: sets               )
-  def has   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetMan(Has   , sets                      )
-  def hasNo (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetMan(HasNo , (v +: vs).map(v => Set(v)))
-  def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
-  def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetMan(HasNo , set +: sets               )
-  def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetMan(HasNo , sets                      )
-  def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
-  def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
-  def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
+  def apply (                             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSet(Eq    , Nil                       )
+  def apply (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSet(Eq    , set +: sets               )
+  def apply (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSet(Eq    , sets                      )
+  def not   (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSet(Neq   , set +: sets               )
+  def not   (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSet(Neq   , sets                      )
+  def has   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSet(Has   , (v +: vs).map(v => Set(v)))
+  def has   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSet(Has   , vs.map(v => Set(v))       )
+  def hasNo (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSet(HasNo , (v +: vs).map(v => Set(v)))
+  def hasNo (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSet(HasNo , vs.map(v => Set(v))       )
+  def add   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSet(Add   , Seq((v +: vs).toSet)      )
+  def add   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSet(Add   , Seq(vs.toSet)             )
+  def remove(v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSet(Remove, Seq((v +: vs).toSet)      )
+  def remove(vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSet(Remove, Seq(vs.toSet)             )
   
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _attrTac(Neq  , a)
@@ -435,32 +325,22 @@ trait ExprSetMan_11[A, B, C, D, E, F, G, H, I, J, K, t, Ns1[_, _, _, _, _, _, _,
 }
 
 
-trait ExprSetManOps_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns1, Ns2] {
-  protected def _exprSetMan(op: Op, sets: Seq[Set[t]]): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = ???
-}
-
 trait ExprSetMan_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetManOps_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns1, Ns2]
+  extends ExprSetTacOps_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns1, Ns2]
     with Aggregates_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns1] {
-  def apply (                             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetMan(Eq    , Nil                       )
-  def apply (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetMan(Eq    , (v +: vs).map(v => Set(v)))
-  def apply (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetMan(Eq    , vs.map(v => Set(v))       )
-  def apply (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetMan(Eq    , set +: sets               )
-  def apply (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetMan(Eq    , sets                      )
-  def not   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetMan(Neq   , set +: sets               )
-  def not   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetMan(Neq   , sets                      )
-  def has   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetMan(Has   , (v +: vs).map(v => Set(v)))
-  def has   (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetMan(Has   , vs.map(v => Set(v))       )
-  def has   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetMan(Has   , set +: sets               )
-  def has   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetMan(Has   , sets                      )
-  def hasNo (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetMan(HasNo , (v +: vs).map(v => Set(v)))
-  def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
-  def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetMan(HasNo , set +: sets               )
-  def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetMan(HasNo , sets                      )
-  def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
-  def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
-  def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
+  def apply (                             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSet(Eq    , Nil                       )
+  def apply (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSet(Eq    , set +: sets               )
+  def apply (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSet(Eq    , sets                      )
+  def not   (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSet(Neq   , set +: sets               )
+  def not   (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSet(Neq   , sets                      )
+  def has   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSet(Has   , (v +: vs).map(v => Set(v)))
+  def has   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSet(Has   , vs.map(v => Set(v))       )
+  def hasNo (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSet(HasNo , (v +: vs).map(v => Set(v)))
+  def hasNo (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSet(HasNo , vs.map(v => Set(v))       )
+  def add   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSet(Add   , Seq((v +: vs).toSet)      )
+  def add   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSet(Add   , Seq(vs.toSet)             )
+  def remove(v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSet(Remove, Seq((v +: vs).toSet)      )
+  def remove(vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSet(Remove, Seq(vs.toSet)             )
   
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _attrTac(Neq  , a)
@@ -474,32 +354,22 @@ trait ExprSetMan_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns1[_, _, _, _, _, _,
 }
 
 
-trait ExprSetManOps_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns1, Ns2] {
-  protected def _exprSetMan(op: Op, sets: Seq[Set[t]]): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = ???
-}
-
 trait ExprSetMan_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetManOps_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns1, Ns2]
+  extends ExprSetTacOps_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns1, Ns2]
     with Aggregates_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns1] {
-  def apply (                             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetMan(Eq    , Nil                       )
-  def apply (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetMan(Eq    , (v +: vs).map(v => Set(v)))
-  def apply (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetMan(Eq    , vs.map(v => Set(v))       )
-  def apply (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetMan(Eq    , set +: sets               )
-  def apply (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetMan(Eq    , sets                      )
-  def not   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetMan(Neq   , set +: sets               )
-  def not   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetMan(Neq   , sets                      )
-  def has   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetMan(Has   , (v +: vs).map(v => Set(v)))
-  def has   (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetMan(Has   , vs.map(v => Set(v))       )
-  def has   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetMan(Has   , set +: sets               )
-  def has   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetMan(Has   , sets                      )
-  def hasNo (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetMan(HasNo , (v +: vs).map(v => Set(v)))
-  def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
-  def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetMan(HasNo , set +: sets               )
-  def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetMan(HasNo , sets                      )
-  def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
-  def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
-  def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
+  def apply (                             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSet(Eq    , Nil                       )
+  def apply (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSet(Eq    , set +: sets               )
+  def apply (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSet(Eq    , sets                      )
+  def not   (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSet(Neq   , set +: sets               )
+  def not   (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSet(Neq   , sets                      )
+  def has   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSet(Has   , (v +: vs).map(v => Set(v)))
+  def has   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSet(Has   , vs.map(v => Set(v))       )
+  def hasNo (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSet(HasNo , (v +: vs).map(v => Set(v)))
+  def hasNo (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSet(HasNo , vs.map(v => Set(v))       )
+  def add   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSet(Add   , Seq((v +: vs).toSet)      )
+  def add   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSet(Add   , Seq(vs.toSet)             )
+  def remove(v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSet(Remove, Seq((v +: vs).toSet)      )
+  def remove(vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSet(Remove, Seq(vs.toSet)             )
   
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _attrTac(Neq  , a)
@@ -513,32 +383,22 @@ trait ExprSetMan_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns1[_, _, _, _, _,
 }
 
 
-trait ExprSetManOps_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns1, Ns2] {
-  protected def _exprSetMan(op: Op, sets: Seq[Set[t]]): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = ???
-}
-
 trait ExprSetMan_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetManOps_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns1, Ns2]
+  extends ExprSetTacOps_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns1, Ns2]
     with Aggregates_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns1] {
-  def apply (                             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetMan(Eq    , Nil                       )
-  def apply (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetMan(Eq    , (v +: vs).map(v => Set(v)))
-  def apply (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetMan(Eq    , vs.map(v => Set(v))       )
-  def apply (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetMan(Eq    , set +: sets               )
-  def apply (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetMan(Eq    , sets                      )
-  def not   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetMan(Neq   , set +: sets               )
-  def not   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetMan(Neq   , sets                      )
-  def has   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetMan(Has   , (v +: vs).map(v => Set(v)))
-  def has   (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetMan(Has   , vs.map(v => Set(v))       )
-  def has   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetMan(Has   , set +: sets               )
-  def has   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetMan(Has   , sets                      )
-  def hasNo (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetMan(HasNo , (v +: vs).map(v => Set(v)))
-  def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
-  def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetMan(HasNo , set +: sets               )
-  def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetMan(HasNo , sets                      )
-  def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
-  def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
-  def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
+  def apply (                             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSet(Eq    , Nil                       )
+  def apply (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSet(Eq    , set +: sets               )
+  def apply (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSet(Eq    , sets                      )
+  def not   (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSet(Neq   , set +: sets               )
+  def not   (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSet(Neq   , sets                      )
+  def has   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSet(Has   , (v +: vs).map(v => Set(v)))
+  def has   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSet(Has   , vs.map(v => Set(v))       )
+  def hasNo (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSet(HasNo , (v +: vs).map(v => Set(v)))
+  def hasNo (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSet(HasNo , vs.map(v => Set(v))       )
+  def add   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSet(Add   , Seq((v +: vs).toSet)      )
+  def add   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSet(Add   , Seq(vs.toSet)             )
+  def remove(v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSet(Remove, Seq((v +: vs).toSet)      )
+  def remove(vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSet(Remove, Seq(vs.toSet)             )
   
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _attrTac(Neq  , a)
@@ -552,32 +412,22 @@ trait ExprSetMan_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns1[_, _, _, _,
 }
 
 
-trait ExprSetManOps_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns1, Ns2] {
-  protected def _exprSetMan(op: Op, sets: Seq[Set[t]]): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = ???
-}
-
 trait ExprSetMan_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetManOps_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns1, Ns2]
+  extends ExprSetTacOps_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns1, Ns2]
     with Aggregates_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns1] {
-  def apply (                             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetMan(Eq    , Nil                       )
-  def apply (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetMan(Eq    , (v +: vs).map(v => Set(v)))
-  def apply (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetMan(Eq    , vs.map(v => Set(v))       )
-  def apply (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetMan(Eq    , set +: sets               )
-  def apply (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetMan(Eq    , sets                      )
-  def not   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetMan(Neq   , set +: sets               )
-  def not   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetMan(Neq   , sets                      )
-  def has   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetMan(Has   , (v +: vs).map(v => Set(v)))
-  def has   (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetMan(Has   , vs.map(v => Set(v))       )
-  def has   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetMan(Has   , set +: sets               )
-  def has   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetMan(Has   , sets                      )
-  def hasNo (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetMan(HasNo , (v +: vs).map(v => Set(v)))
-  def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
-  def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetMan(HasNo , set +: sets               )
-  def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetMan(HasNo , sets                      )
-  def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
-  def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
-  def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
+  def apply (                             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSet(Eq    , Nil                       )
+  def apply (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSet(Eq    , set +: sets               )
+  def apply (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSet(Eq    , sets                      )
+  def not   (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSet(Neq   , set +: sets               )
+  def not   (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSet(Neq   , sets                      )
+  def has   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSet(Has   , (v +: vs).map(v => Set(v)))
+  def has   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSet(Has   , vs.map(v => Set(v))       )
+  def hasNo (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSet(HasNo , (v +: vs).map(v => Set(v)))
+  def hasNo (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSet(HasNo , vs.map(v => Set(v))       )
+  def add   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSet(Add   , Seq((v +: vs).toSet)      )
+  def add   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSet(Add   , Seq(vs.toSet)             )
+  def remove(v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSet(Remove, Seq((v +: vs).toSet)      )
+  def remove(vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSet(Remove, Seq(vs.toSet)             )
   
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _attrTac(Neq  , a)
@@ -591,32 +441,22 @@ trait ExprSetMan_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns1[_, _, _,
 }
 
 
-trait ExprSetManOps_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns1, Ns2] {
-  protected def _exprSetMan(op: Op, sets: Seq[Set[t]]): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = ???
-}
-
 trait ExprSetMan_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetManOps_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns1, Ns2]
+  extends ExprSetTacOps_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns1, Ns2]
     with Aggregates_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns1] {
-  def apply (                             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetMan(Eq    , Nil                       )
-  def apply (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetMan(Eq    , (v +: vs).map(v => Set(v)))
-  def apply (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetMan(Eq    , vs.map(v => Set(v))       )
-  def apply (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetMan(Eq    , set +: sets               )
-  def apply (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetMan(Eq    , sets                      )
-  def not   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetMan(Neq   , set +: sets               )
-  def not   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetMan(Neq   , sets                      )
-  def has   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetMan(Has   , (v +: vs).map(v => Set(v)))
-  def has   (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetMan(Has   , vs.map(v => Set(v))       )
-  def has   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetMan(Has   , set +: sets               )
-  def has   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetMan(Has   , sets                      )
-  def hasNo (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetMan(HasNo , (v +: vs).map(v => Set(v)))
-  def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
-  def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetMan(HasNo , set +: sets               )
-  def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetMan(HasNo , sets                      )
-  def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
-  def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
-  def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
+  def apply (                             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSet(Eq    , Nil                       )
+  def apply (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSet(Eq    , set +: sets               )
+  def apply (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSet(Eq    , sets                      )
+  def not   (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSet(Neq   , set +: sets               )
+  def not   (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSet(Neq   , sets                      )
+  def has   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSet(Has   , (v +: vs).map(v => Set(v)))
+  def has   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSet(Has   , vs.map(v => Set(v))       )
+  def hasNo (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSet(HasNo , (v +: vs).map(v => Set(v)))
+  def hasNo (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSet(HasNo , vs.map(v => Set(v))       )
+  def add   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSet(Add   , Seq((v +: vs).toSet)      )
+  def add   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSet(Add   , Seq(vs.toSet)             )
+  def remove(v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSet(Remove, Seq((v +: vs).toSet)      )
+  def remove(vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSet(Remove, Seq(vs.toSet)             )
   
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _attrTac(Neq  , a)
@@ -630,32 +470,22 @@ trait ExprSetMan_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns1[_, _,
 }
 
 
-trait ExprSetManOps_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns1, Ns2] {
-  protected def _exprSetMan(op: Op, sets: Seq[Set[t]]): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = ???
-}
-
 trait ExprSetMan_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetManOps_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns1, Ns2]
+  extends ExprSetTacOps_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns1, Ns2]
     with Aggregates_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns1] {
-  def apply (                             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetMan(Eq    , Nil                       )
-  def apply (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetMan(Eq    , (v +: vs).map(v => Set(v)))
-  def apply (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetMan(Eq    , vs.map(v => Set(v))       )
-  def apply (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetMan(Eq    , set +: sets               )
-  def apply (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetMan(Eq    , sets                      )
-  def not   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetMan(Neq   , set +: sets               )
-  def not   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetMan(Neq   , sets                      )
-  def has   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetMan(Has   , (v +: vs).map(v => Set(v)))
-  def has   (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetMan(Has   , vs.map(v => Set(v))       )
-  def has   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetMan(Has   , set +: sets               )
-  def has   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetMan(Has   , sets                      )
-  def hasNo (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetMan(HasNo , (v +: vs).map(v => Set(v)))
-  def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
-  def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetMan(HasNo , set +: sets               )
-  def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetMan(HasNo , sets                      )
-  def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
-  def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
-  def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
+  def apply (                             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSet(Eq    , Nil                       )
+  def apply (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSet(Eq    , set +: sets               )
+  def apply (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSet(Eq    , sets                      )
+  def not   (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSet(Neq   , set +: sets               )
+  def not   (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSet(Neq   , sets                      )
+  def has   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSet(Has   , (v +: vs).map(v => Set(v)))
+  def has   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSet(Has   , vs.map(v => Set(v))       )
+  def hasNo (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSet(HasNo , (v +: vs).map(v => Set(v)))
+  def hasNo (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSet(HasNo , vs.map(v => Set(v))       )
+  def add   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSet(Add   , Seq((v +: vs).toSet)      )
+  def add   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSet(Add   , Seq(vs.toSet)             )
+  def remove(v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSet(Remove, Seq((v +: vs).toSet)      )
+  def remove(vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSet(Remove, Seq(vs.toSet)             )
   
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _attrTac(Neq  , a)
@@ -669,32 +499,22 @@ trait ExprSetMan_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns1[_,
 }
 
 
-trait ExprSetManOps_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Ns1, Ns2] {
-  protected def _exprSetMan(op: Op, sets: Seq[Set[t]]): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = ???
-}
-
 trait ExprSetMan_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetManOps_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Ns1, Ns2]
+  extends ExprSetTacOps_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Ns1, Ns2]
     with Aggregates_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Ns1] {
-  def apply (                             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetMan(Eq    , Nil                       )
-  def apply (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetMan(Eq    , (v +: vs).map(v => Set(v)))
-  def apply (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetMan(Eq    , vs.map(v => Set(v))       )
-  def apply (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetMan(Eq    , set +: sets               )
-  def apply (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetMan(Eq    , sets                      )
-  def not   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetMan(Neq   , set +: sets               )
-  def not   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetMan(Neq   , sets                      )
-  def has   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetMan(Has   , (v +: vs).map(v => Set(v)))
-  def has   (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetMan(Has   , vs.map(v => Set(v))       )
-  def has   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetMan(Has   , set +: sets               )
-  def has   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetMan(Has   , sets                      )
-  def hasNo (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetMan(HasNo , (v +: vs).map(v => Set(v)))
-  def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
-  def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetMan(HasNo , set +: sets               )
-  def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetMan(HasNo , sets                      )
-  def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
-  def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
-  def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
+  def apply (                             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSet(Eq    , Nil                       )
+  def apply (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSet(Eq    , set +: sets               )
+  def apply (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSet(Eq    , sets                      )
+  def not   (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSet(Neq   , set +: sets               )
+  def not   (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSet(Neq   , sets                      )
+  def has   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSet(Has   , (v +: vs).map(v => Set(v)))
+  def has   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSet(Has   , vs.map(v => Set(v))       )
+  def hasNo (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSet(HasNo , (v +: vs).map(v => Set(v)))
+  def hasNo (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSet(HasNo , vs.map(v => Set(v))       )
+  def add   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSet(Add   , Seq((v +: vs).toSet)      )
+  def add   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSet(Add   , Seq(vs.toSet)             )
+  def remove(v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSet(Remove, Seq((v +: vs).toSet)      )
+  def remove(vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSet(Remove, Seq(vs.toSet)             )
   
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _attrTac(Neq  , a)
@@ -708,32 +528,22 @@ trait ExprSetMan_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Ns1
 }
 
 
-trait ExprSetManOps_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Ns1, Ns2] {
-  protected def _exprSetMan(op: Op, sets: Seq[Set[t]]): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = ???
-}
-
 trait ExprSetMan_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetManOps_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Ns1, Ns2]
+  extends ExprSetTacOps_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Ns1, Ns2]
     with Aggregates_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Ns1] {
-  def apply (                             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetMan(Eq    , Nil                       )
-  def apply (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetMan(Eq    , (v +: vs).map(v => Set(v)))
-  def apply (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetMan(Eq    , vs.map(v => Set(v))       )
-  def apply (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetMan(Eq    , set +: sets               )
-  def apply (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetMan(Eq    , sets                      )
-  def not   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetMan(Neq   , set +: sets               )
-  def not   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetMan(Neq   , sets                      )
-  def has   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetMan(Has   , (v +: vs).map(v => Set(v)))
-  def has   (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetMan(Has   , vs.map(v => Set(v))       )
-  def has   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetMan(Has   , set +: sets               )
-  def has   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetMan(Has   , sets                      )
-  def hasNo (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetMan(HasNo , (v +: vs).map(v => Set(v)))
-  def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
-  def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetMan(HasNo , set +: sets               )
-  def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetMan(HasNo , sets                      )
-  def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
-  def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
-  def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
+  def apply (                             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSet(Eq    , Nil                       )
+  def apply (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSet(Eq    , set +: sets               )
+  def apply (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSet(Eq    , sets                      )
+  def not   (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSet(Neq   , set +: sets               )
+  def not   (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSet(Neq   , sets                      )
+  def has   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSet(Has   , (v +: vs).map(v => Set(v)))
+  def has   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSet(Has   , vs.map(v => Set(v))       )
+  def hasNo (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSet(HasNo , (v +: vs).map(v => Set(v)))
+  def hasNo (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSet(HasNo , vs.map(v => Set(v))       )
+  def add   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSet(Add   , Seq((v +: vs).toSet)      )
+  def add   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSet(Add   , Seq(vs.toSet)             )
+  def remove(v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSet(Remove, Seq((v +: vs).toSet)      )
+  def remove(vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSet(Remove, Seq(vs.toSet)             )
   
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _attrTac(Neq  , a)
@@ -747,32 +557,22 @@ trait ExprSetMan_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, 
 }
 
 
-trait ExprSetManOps_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Ns1, Ns2] {
-  protected def _exprSetMan(op: Op, sets: Seq[Set[t]]): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = ???
-}
-
 trait ExprSetMan_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetManOps_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Ns1, Ns2]
+  extends ExprSetTacOps_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Ns1, Ns2]
     with Aggregates_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Ns1] {
-  def apply (                             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetMan(Eq    , Nil                       )
-  def apply (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetMan(Eq    , (v +: vs).map(v => Set(v)))
-  def apply (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetMan(Eq    , vs.map(v => Set(v))       )
-  def apply (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetMan(Eq    , set +: sets               )
-  def apply (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetMan(Eq    , sets                      )
-  def not   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetMan(Neq   , set +: sets               )
-  def not   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetMan(Neq   , sets                      )
-  def has   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetMan(Has   , (v +: vs).map(v => Set(v)))
-  def has   (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetMan(Has   , vs.map(v => Set(v))       )
-  def has   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetMan(Has   , set +: sets               )
-  def has   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetMan(Has   , sets                      )
-  def hasNo (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetMan(HasNo , (v +: vs).map(v => Set(v)))
-  def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
-  def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetMan(HasNo , set +: sets               )
-  def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetMan(HasNo , sets                      )
-  def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
-  def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
-  def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
+  def apply (                             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSet(Eq    , Nil                       )
+  def apply (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSet(Eq    , set +: sets               )
+  def apply (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSet(Eq    , sets                      )
+  def not   (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSet(Neq   , set +: sets               )
+  def not   (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSet(Neq   , sets                      )
+  def has   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSet(Has   , (v +: vs).map(v => Set(v)))
+  def has   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSet(Has   , vs.map(v => Set(v))       )
+  def hasNo (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSet(HasNo , (v +: vs).map(v => Set(v)))
+  def hasNo (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSet(HasNo , vs.map(v => Set(v))       )
+  def add   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSet(Add   , Seq((v +: vs).toSet)      )
+  def add   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSet(Add   , Seq(vs.toSet)             )
+  def remove(v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSet(Remove, Seq((v +: vs).toSet)      )
+  def remove(vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSet(Remove, Seq(vs.toSet)             )
   
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _attrTac(Neq  , a)
@@ -786,32 +586,22 @@ trait ExprSetMan_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, 
 }
 
 
-trait ExprSetManOps_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Ns1, Ns2] {
-  protected def _exprSetMan(op: Op, sets: Seq[Set[t]]): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = ???
-}
-
 trait ExprSetMan_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetManOps_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Ns1, Ns2]
+  extends ExprSetTacOps_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Ns1, Ns2]
     with Aggregates_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Ns1] {
-  def apply (                             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetMan(Eq    , Nil                       )
-  def apply (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetMan(Eq    , (v +: vs).map(v => Set(v)))
-  def apply (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetMan(Eq    , vs.map(v => Set(v))       )
-  def apply (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetMan(Eq    , set +: sets               )
-  def apply (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetMan(Eq    , sets                      )
-  def not   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetMan(Neq   , set +: sets               )
-  def not   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetMan(Neq   , sets                      )
-  def has   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetMan(Has   , (v +: vs).map(v => Set(v)))
-  def has   (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetMan(Has   , vs.map(v => Set(v))       )
-  def has   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetMan(Has   , set +: sets               )
-  def has   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetMan(Has   , sets                      )
-  def hasNo (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetMan(HasNo , (v +: vs).map(v => Set(v)))
-  def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
-  def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetMan(HasNo , set +: sets               )
-  def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetMan(HasNo , sets                      )
-  def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
-  def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
-  def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
+  def apply (                             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSet(Eq    , Nil                       )
+  def apply (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSet(Eq    , set +: sets               )
+  def apply (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSet(Eq    , sets                      )
+  def not   (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSet(Neq   , set +: sets               )
+  def not   (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSet(Neq   , sets                      )
+  def has   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSet(Has   , (v +: vs).map(v => Set(v)))
+  def has   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSet(Has   , vs.map(v => Set(v))       )
+  def hasNo (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSet(HasNo , (v +: vs).map(v => Set(v)))
+  def hasNo (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSet(HasNo , vs.map(v => Set(v))       )
+  def add   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSet(Add   , Seq((v +: vs).toSet)      )
+  def add   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSet(Add   , Seq(vs.toSet)             )
+  def remove(v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSet(Remove, Seq((v +: vs).toSet)      )
+  def remove(vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSet(Remove, Seq(vs.toSet)             )
   
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _attrTac(Neq  , a)
@@ -825,32 +615,22 @@ trait ExprSetMan_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, 
 }
 
 
-trait ExprSetManOps_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Ns1, Ns2] {
-  protected def _exprSetMan(op: Op, sets: Seq[Set[t]]): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = ???
-}
-
 trait ExprSetMan_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetManOps_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Ns1, Ns2]
+  extends ExprSetTacOps_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Ns1, Ns2]
     with Aggregates_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Ns1] {
-  def apply (                             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetMan(Eq    , Nil                       )
-  def apply (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetMan(Eq    , (v +: vs).map(v => Set(v)))
-  def apply (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetMan(Eq    , vs.map(v => Set(v))       )
-  def apply (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetMan(Eq    , set +: sets               )
-  def apply (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetMan(Eq    , sets                      )
-  def not   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetMan(Neq   , set +: sets               )
-  def not   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetMan(Neq   , sets                      )
-  def has   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetMan(Has   , (v +: vs).map(v => Set(v)))
-  def has   (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetMan(Has   , vs.map(v => Set(v))       )
-  def has   (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetMan(Has   , set +: sets               )
-  def has   (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetMan(Has   , sets                      )
-  def hasNo (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetMan(HasNo , (v +: vs).map(v => Set(v)))
-  def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
-  def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetMan(HasNo , set +: sets               )
-  def hasNo (sets : Seq[Set[t]]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetMan(HasNo , sets                      )
-  def add   (v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
-  def add   (vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetMan(Add   , Seq(vs.toSet)             )
-  def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
-  def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
+  def apply (                             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSet(Eq    , Nil                       )
+  def apply (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSet(Eq    , set +: sets               )
+  def apply (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSet(Eq    , sets                      )
+  def not   (set  : Set[t], sets: Set[t]* ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSet(Neq   , set +: sets               )
+  def not   (sets : Seq[Set[t]]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSet(Neq   , sets                      )
+  def has   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSet(Has   , (v +: vs).map(v => Set(v)))
+  def has   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSet(Has   , vs.map(v => Set(v))       )
+  def hasNo (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSet(HasNo , (v +: vs).map(v => Set(v)))
+  def hasNo (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSet(HasNo , vs.map(v => Set(v))       )
+  def add   (v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSet(Add   , Seq((v +: vs).toSet)      )
+  def add   (vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSet(Add   , Seq(vs.toSet)             )
+  def remove(v    : t, vs: t*             ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSet(Remove, Seq((v +: vs).toSet)      )
+  def remove(vs   : Seq[t]                ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSet(Remove, Seq(vs.toSet)             )
   
   def apply[ns1[_]](a: ModelOps_0[t, ns1, X2]): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _attrTac(Eq   , a)
   def not  [ns1[_]](a: ModelOps_0[t, ns1, X2]): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _attrTac(Neq  , a)

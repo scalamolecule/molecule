@@ -24,7 +24,7 @@ trait UpdateSetOps_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid3, uuid4))
 
         // Applying empty Set of values deletes previous Set
-        _ <- Ns(id).uuids(Seq.empty[UUID]).update.transact
+        _ <- Ns(id).uuids(Set.empty[UUID]).update.transact
         _ <- Ns.uuids.query.get.map(_ ==> Nil)
 
         id <- Ns.uuids(Set(uuid1, uuid2)).save.transact.map(_.id)
@@ -51,53 +51,46 @@ trait UpdateSetOps_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).uuids.add(uuid3, uuid4).update.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2, uuid3, uuid4))
 
-        // Add Iterable of values (existing values unaffected)
-        // Seq
-        _ <- Ns(id).uuids.add(Seq(uuid4, uuid5)).update.transact
-        _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2, uuid3, uuid4, uuid5))
-        // Set
-        _ <- Ns(id).uuids.add(Set(uuid6)).update.transact
+        // Add multiple values (Seq)
+        _ <- Ns(id).uuids.add(Seq(uuid5, uuid6)).update.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2, uuid3, uuid4, uuid5, uuid6))
-        // Iterable
-        _ <- Ns(id).uuids.add(Iterable(uuid7)).update.transact
-        _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2, uuid3, uuid4, uuid5, uuid6, uuid7))
 
-        // Adding empty Iterable of values has no effect
+        // Adding empty Seq of values has no effect
         _ <- Ns(id).uuids.add(Seq.empty[UUID]).update.transact
-        _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2, uuid3, uuid4, uuid5, uuid6, uuid7))
+        _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2, uuid3, uuid4, uuid5, uuid6))
       } yield ()
     }
 
 
     "remove" - types { implicit conn =>
       for {
-        id <- Ns.uuids(Set(uuid1, uuid2, uuid3, uuid4, uuid5, uuid6)).save.transact.map(_.id)
+        id <- Ns.uuids(Set(uuid1, uuid2, uuid3, uuid4, uuid5, uuid6, uuid7)).save.transact.map(_.id)
 
         // Remove value
-        _ <- Ns(id).uuids.remove(uuid6).update.transact
-        _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2, uuid3, uuid4, uuid5))
+        _ <- Ns(id).uuids.remove(uuid7).update.transact
+        _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2, uuid3, uuid4, uuid5, uuid6))
 
         // Removing non-existing value has no effect
-        _ <- Ns(id).uuids.remove(uuid7).update.transact
-        _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2, uuid3, uuid4, uuid5))
+        _ <- Ns(id).uuids.remove(uuid9).update.transact
+        _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2, uuid3, uuid4, uuid5, uuid6))
 
         // Removing duplicate values removes the distinct value
-        _ <- Ns(id).uuids.remove(uuid5, uuid5).update.transact
-        _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2, uuid3, uuid4))
+        _ <- Ns(id).uuids.remove(uuid6, uuid6).update.transact
+        _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2, uuid3, uuid4, uuid5))
 
         // Remove multiple values (vararg)
-        _ <- Ns(id).uuids.remove(uuid3, uuid4).update.transact
-        _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2))
+        _ <- Ns(id).uuids.remove(uuid4, uuid5).update.transact
+        _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2, uuid3))
 
-        // Remove Iterable of values
-        _ <- Ns(id).uuids.remove(Seq(uuid2)).update.transact
+        // Remove multiple values (Seq)
+        _ <- Ns(id).uuids.remove(Seq(uuid2, uuid3)).update.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1))
 
-        // Removing empty Iterable of values has no effect
+        // Removing empty Seq of values has no effect
         _ <- Ns(id).uuids.remove(Seq.empty[UUID]).update.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1))
 
-        // Removing all elements retracts the attribute
+        // Removing all remaining elements deletes the attribute
         _ <- Ns(id).uuids.remove(Seq(uuid1)).update.transact
         _ <- Ns.uuids.query.get.map(_ ==> Nil)
       } yield ()

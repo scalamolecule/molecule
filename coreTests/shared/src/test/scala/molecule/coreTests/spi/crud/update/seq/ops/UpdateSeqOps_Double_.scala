@@ -50,20 +50,13 @@ trait UpdateSeqOps_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
         _ <- Ns(id).doubleSeq.add(double3, double4).update.transact
         _ <- Ns.doubleSeq.query.get.map(_.head ==> List(double1, double2, double1, double3, double4))
 
-        // Add Iterable of values
-        // Seq
-        _ <- Ns(id).doubleSeq.add(Seq(double4, double5)).update.transact
+        // Add multiple values (Seq)
+        _ <- Ns(id).doubleSeq.add(List(double4, double5)).update.transact
         _ <- Ns.doubleSeq.query.get.map(_.head ==> List(double1, double2, double1, double3, double4, double4, double5))
-        // Array
-        _ <- Ns(id).doubleSeq.add(List(double6)).update.transact
-        _ <- Ns.doubleSeq.query.get.map(_.head ==> List(double1, double2, double1, double3, double4, double4, double5, double6))
-        // Iterable
-        _ <- Ns(id).doubleSeq.add(Iterable(double7)).update.transact
-        _ <- Ns.doubleSeq.query.get.map(_.head ==> List(double1, double2, double1, double3, double4, double4, double5, double6, double7))
 
-        // Adding empty Iterable of values has no effect
+        // Adding empty Seq of values has no effect
         _ <- Ns(id).doubleSeq.add(List.empty[Double]).update.transact
-        _ <- Ns.doubleSeq.query.get.map(_.head ==> List(double1, double2, double1, double3, double4, double4, double5, double6, double7))
+        _ <- Ns.doubleSeq.query.get.map(_.head ==> List(double1, double2, double1, double3, double4, double4, double5))
       } yield ()
     }
 
@@ -103,14 +96,8 @@ trait UpdateSeqOps_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
           double1, double2, double3,
         ))
 
-        // Remove Iterable of values
-        _ <- Ns(id).doubleSeq.remove(List(double3)).update.transact
-        _ <- Ns.doubleSeq.query.get.map(_.head ==> List(
-          double1, double2,
-          double1, double2,
-        ))
-
-        _ <- Ns(id).doubleSeq.remove(Seq(double2)).update.transact
+        // Remove multiple values (Seq)
+        _ <- Ns(id).doubleSeq.remove(List(double2, double3)).update.transact
         _ <- Ns.doubleSeq.query.get.map(_.head ==> List(
           double1,
           double1
@@ -120,7 +107,7 @@ trait UpdateSeqOps_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
         _ <- Ns(id).doubleSeq.remove(List.empty[Double]).update.transact
         _ <- Ns.doubleSeq.query.get.map(_.head ==> List(double1, double1))
 
-        // Removing all elements retracts the attribute
+        // Removing all remaining elements deletes the attribute
         _ <- Ns(id).doubleSeq.remove(Seq(double1)).update.transact
         _ <- Ns.doubleSeq.query.get.map(_ ==> Nil)
       } yield ()

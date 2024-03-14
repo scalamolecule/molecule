@@ -50,20 +50,13 @@ trait UpdateSeqOps_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
         _ <- Ns(id).bigIntSeq.add(bigInt3, bigInt4).update.transact
         _ <- Ns.bigIntSeq.query.get.map(_.head ==> List(bigInt1, bigInt2, bigInt1, bigInt3, bigInt4))
 
-        // Add Iterable of values
-        // Seq
-        _ <- Ns(id).bigIntSeq.add(Seq(bigInt4, bigInt5)).update.transact
+        // Add multiple values (Seq)
+        _ <- Ns(id).bigIntSeq.add(List(bigInt4, bigInt5)).update.transact
         _ <- Ns.bigIntSeq.query.get.map(_.head ==> List(bigInt1, bigInt2, bigInt1, bigInt3, bigInt4, bigInt4, bigInt5))
-        // Array
-        _ <- Ns(id).bigIntSeq.add(List(bigInt6)).update.transact
-        _ <- Ns.bigIntSeq.query.get.map(_.head ==> List(bigInt1, bigInt2, bigInt1, bigInt3, bigInt4, bigInt4, bigInt5, bigInt6))
-        // Iterable
-        _ <- Ns(id).bigIntSeq.add(Iterable(bigInt7)).update.transact
-        _ <- Ns.bigIntSeq.query.get.map(_.head ==> List(bigInt1, bigInt2, bigInt1, bigInt3, bigInt4, bigInt4, bigInt5, bigInt6, bigInt7))
 
-        // Adding empty Iterable of values has no effect
+        // Adding empty Seq of values has no effect
         _ <- Ns(id).bigIntSeq.add(List.empty[BigInt]).update.transact
-        _ <- Ns.bigIntSeq.query.get.map(_.head ==> List(bigInt1, bigInt2, bigInt1, bigInt3, bigInt4, bigInt4, bigInt5, bigInt6, bigInt7))
+        _ <- Ns.bigIntSeq.query.get.map(_.head ==> List(bigInt1, bigInt2, bigInt1, bigInt3, bigInt4, bigInt4, bigInt5))
       } yield ()
     }
 
@@ -103,14 +96,8 @@ trait UpdateSeqOps_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
           bigInt1, bigInt2, bigInt3,
         ))
 
-        // Remove Iterable of values
-        _ <- Ns(id).bigIntSeq.remove(List(bigInt3)).update.transact
-        _ <- Ns.bigIntSeq.query.get.map(_.head ==> List(
-          bigInt1, bigInt2,
-          bigInt1, bigInt2,
-        ))
-
-        _ <- Ns(id).bigIntSeq.remove(Seq(bigInt2)).update.transact
+        // Remove multiple values (Seq)
+        _ <- Ns(id).bigIntSeq.remove(List(bigInt2, bigInt3)).update.transact
         _ <- Ns.bigIntSeq.query.get.map(_.head ==> List(
           bigInt1,
           bigInt1
@@ -120,7 +107,7 @@ trait UpdateSeqOps_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
         _ <- Ns(id).bigIntSeq.remove(List.empty[BigInt]).update.transact
         _ <- Ns.bigIntSeq.query.get.map(_.head ==> List(bigInt1, bigInt1))
 
-        // Removing all elements retracts the attribute
+        // Removing all remaining elements deletes the attribute
         _ <- Ns(id).bigIntSeq.remove(Seq(bigInt1)).update.transact
         _ <- Ns.bigIntSeq.query.get.map(_ ==> Nil)
       } yield ()

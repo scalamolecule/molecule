@@ -30,13 +30,20 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
       placeHolders = placeHolders :+ s"$attr = ?"
       val colSetter = sets match {
         case Seq(set) =>
-          if (!isUpsert) {
-            addToUpdateCols(ns, attr)
-          }
-          val json = set2json(set, value2json)
-          (ps: PS, _: IdsMap, _: RowIndex) => {
-            ps.setString(curParamIndex, json)
-            curParamIndex += 1
+          if (set.nonEmpty) {
+            if (!isUpsert) {
+              addToUpdateCols(ns, attr)
+            }
+            val json = set2json(set, value2json)
+            (ps: PS, _: IdsMap, _: RowIndex) => {
+              ps.setString(curParamIndex, json)
+              curParamIndex += 1
+            }
+          } else {
+            (ps: PS, _: IdsMap, _: RowIndex) => {
+              ps.setNull(curParamIndex, 0)
+              curParamIndex += 1
+            }
           }
         case Nil      =>
           (ps: PS, _: IdsMap, _: RowIndex) => {
@@ -58,11 +65,16 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
       val id        = getUpdateId
       sets match {
         case Seq(set) =>
-          // Tables are reversed in JdbcConn_JVM and we want to delete first
-          manualTableDatas = List(
-            addJoins(joinTable, ns_id, refNs_id, id, set.map(_.asInstanceOf[String].toLong)),
-            deleteJoins(joinTable, ns_id, id)
-          )
+          if (set.nonEmpty) {
+            // Tables are reversed in JdbcConn_JVM and we want to delete first
+            manualTableDatas = List(
+              addJoins(joinTable, ns_id, refNs_id, id, set.map(_.asInstanceOf[String].toLong)),
+              deleteJoins(joinTable, ns_id, id)
+            )
+          } else {
+            // Delete all joins when no ref ids are applied
+            manualTableDatas = List(deleteJoins(joinTable, ns_id, id))
+          }
         case Nil      =>
           // Delete all joins when no ref ids are applied
           manualTableDatas = List(deleteJoins(joinTable, ns_id, id))

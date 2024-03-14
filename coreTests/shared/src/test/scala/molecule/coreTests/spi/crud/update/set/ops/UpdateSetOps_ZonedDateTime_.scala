@@ -24,7 +24,7 @@ trait UpdateSetOps_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: Spi
         _ <- Ns.zonedDateTimes.query.get.map(_.head ==> Set(zonedDateTime3, zonedDateTime4))
 
         // Applying empty Set of values deletes previous Set
-        _ <- Ns(id).zonedDateTimes(Seq.empty[ZonedDateTime]).update.transact
+        _ <- Ns(id).zonedDateTimes(Set.empty[ZonedDateTime]).update.transact
         _ <- Ns.zonedDateTimes.query.get.map(_ ==> Nil)
 
         id <- Ns.zonedDateTimes(Set(zonedDateTime1, zonedDateTime2)).save.transact.map(_.id)
@@ -51,53 +51,46 @@ trait UpdateSetOps_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: Spi
         _ <- Ns(id).zonedDateTimes.add(zonedDateTime3, zonedDateTime4).update.transact
         _ <- Ns.zonedDateTimes.query.get.map(_.head ==> Set(zonedDateTime1, zonedDateTime2, zonedDateTime3, zonedDateTime4))
 
-        // Add Iterable of values (existing values unaffected)
-        // Seq
-        _ <- Ns(id).zonedDateTimes.add(Seq(zonedDateTime4, zonedDateTime5)).update.transact
-        _ <- Ns.zonedDateTimes.query.get.map(_.head ==> Set(zonedDateTime1, zonedDateTime2, zonedDateTime3, zonedDateTime4, zonedDateTime5))
-        // Set
-        _ <- Ns(id).zonedDateTimes.add(Set(zonedDateTime6)).update.transact
+        // Add multiple values (Seq)
+        _ <- Ns(id).zonedDateTimes.add(Seq(zonedDateTime5, zonedDateTime6)).update.transact
         _ <- Ns.zonedDateTimes.query.get.map(_.head ==> Set(zonedDateTime1, zonedDateTime2, zonedDateTime3, zonedDateTime4, zonedDateTime5, zonedDateTime6))
-        // Iterable
-        _ <- Ns(id).zonedDateTimes.add(Iterable(zonedDateTime7)).update.transact
-        _ <- Ns.zonedDateTimes.query.get.map(_.head ==> Set(zonedDateTime1, zonedDateTime2, zonedDateTime3, zonedDateTime4, zonedDateTime5, zonedDateTime6, zonedDateTime7))
 
-        // Adding empty Iterable of values has no effect
+        // Adding empty Seq of values has no effect
         _ <- Ns(id).zonedDateTimes.add(Seq.empty[ZonedDateTime]).update.transact
-        _ <- Ns.zonedDateTimes.query.get.map(_.head ==> Set(zonedDateTime1, zonedDateTime2, zonedDateTime3, zonedDateTime4, zonedDateTime5, zonedDateTime6, zonedDateTime7))
+        _ <- Ns.zonedDateTimes.query.get.map(_.head ==> Set(zonedDateTime1, zonedDateTime2, zonedDateTime3, zonedDateTime4, zonedDateTime5, zonedDateTime6))
       } yield ()
     }
 
 
     "remove" - types { implicit conn =>
       for {
-        id <- Ns.zonedDateTimes(Set(zonedDateTime1, zonedDateTime2, zonedDateTime3, zonedDateTime4, zonedDateTime5, zonedDateTime6)).save.transact.map(_.id)
+        id <- Ns.zonedDateTimes(Set(zonedDateTime1, zonedDateTime2, zonedDateTime3, zonedDateTime4, zonedDateTime5, zonedDateTime6, zonedDateTime7)).save.transact.map(_.id)
 
         // Remove value
-        _ <- Ns(id).zonedDateTimes.remove(zonedDateTime6).update.transact
-        _ <- Ns.zonedDateTimes.query.get.map(_.head ==> Set(zonedDateTime1, zonedDateTime2, zonedDateTime3, zonedDateTime4, zonedDateTime5))
+        _ <- Ns(id).zonedDateTimes.remove(zonedDateTime7).update.transact
+        _ <- Ns.zonedDateTimes.query.get.map(_.head ==> Set(zonedDateTime1, zonedDateTime2, zonedDateTime3, zonedDateTime4, zonedDateTime5, zonedDateTime6))
 
         // Removing non-existing value has no effect
-        _ <- Ns(id).zonedDateTimes.remove(zonedDateTime7).update.transact
-        _ <- Ns.zonedDateTimes.query.get.map(_.head ==> Set(zonedDateTime1, zonedDateTime2, zonedDateTime3, zonedDateTime4, zonedDateTime5))
+        _ <- Ns(id).zonedDateTimes.remove(zonedDateTime9).update.transact
+        _ <- Ns.zonedDateTimes.query.get.map(_.head ==> Set(zonedDateTime1, zonedDateTime2, zonedDateTime3, zonedDateTime4, zonedDateTime5, zonedDateTime6))
 
         // Removing duplicate values removes the distinct value
-        _ <- Ns(id).zonedDateTimes.remove(zonedDateTime5, zonedDateTime5).update.transact
-        _ <- Ns.zonedDateTimes.query.get.map(_.head ==> Set(zonedDateTime1, zonedDateTime2, zonedDateTime3, zonedDateTime4))
+        _ <- Ns(id).zonedDateTimes.remove(zonedDateTime6, zonedDateTime6).update.transact
+        _ <- Ns.zonedDateTimes.query.get.map(_.head ==> Set(zonedDateTime1, zonedDateTime2, zonedDateTime3, zonedDateTime4, zonedDateTime5))
 
         // Remove multiple values (vararg)
-        _ <- Ns(id).zonedDateTimes.remove(zonedDateTime3, zonedDateTime4).update.transact
-        _ <- Ns.zonedDateTimes.query.get.map(_.head ==> Set(zonedDateTime1, zonedDateTime2))
+        _ <- Ns(id).zonedDateTimes.remove(zonedDateTime4, zonedDateTime5).update.transact
+        _ <- Ns.zonedDateTimes.query.get.map(_.head ==> Set(zonedDateTime1, zonedDateTime2, zonedDateTime3))
 
-        // Remove Iterable of values
-        _ <- Ns(id).zonedDateTimes.remove(Seq(zonedDateTime2)).update.transact
+        // Remove multiple values (Seq)
+        _ <- Ns(id).zonedDateTimes.remove(Seq(zonedDateTime2, zonedDateTime3)).update.transact
         _ <- Ns.zonedDateTimes.query.get.map(_.head ==> Set(zonedDateTime1))
 
-        // Removing empty Iterable of values has no effect
+        // Removing empty Seq of values has no effect
         _ <- Ns(id).zonedDateTimes.remove(Seq.empty[ZonedDateTime]).update.transact
         _ <- Ns.zonedDateTimes.query.get.map(_.head ==> Set(zonedDateTime1))
 
-        // Removing all elements retracts the attribute
+        // Removing all remaining elements deletes the attribute
         _ <- Ns(id).zonedDateTimes.remove(Seq(zonedDateTime1)).update.transact
         _ <- Ns.zonedDateTimes.query.get.map(_ ==> Nil)
       } yield ()

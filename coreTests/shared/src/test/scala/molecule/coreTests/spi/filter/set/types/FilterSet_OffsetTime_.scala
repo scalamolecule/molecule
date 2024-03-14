@@ -39,12 +39,10 @@ trait FilterSet_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           // "Is exactly this AND that"
           _ <- Ns.i.a1.offsetTimes(Set(offsetTime1)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetTimes(Set(offsetTime1, offsetTime2)).query.get.map(_ ==> List(a)) // include exact match
-          _ <- Ns.i.a1.offsetTimes(Set(offsetTime2, offsetTime1)).query.get.map(_ ==> List(a)) // include exact match
           _ <- Ns.i.a1.offsetTimes(Set(offsetTime1, offsetTime2, offsetTime3)).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.offsetTimes(Seq(Set(offsetTime1))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetTimes(Seq(Set(offsetTime1, offsetTime2))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetTimes(Seq(Set(offsetTime2, offsetTime1))).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.offsetTimes(Seq(Set(offsetTime1, offsetTime2, offsetTime3))).query.get.map(_ ==> List())
 
 
@@ -53,16 +51,16 @@ trait FilterSet_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.offsetTimes(Set(offsetTime1), Set(offsetTime2, offsetTime3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetTimes(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetTimes(Set(offsetTime2, offsetTime1), Set(offsetTime4, offsetTime3, offsetTime2)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.offsetTimes(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3, offsetTime4)).query.get.map(_ ==> List(a, b))
           // Same as
           _ <- Ns.i.a1.offsetTimes(Seq(Set(offsetTime1), Set(offsetTime2, offsetTime3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetTimes(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetTimes(Seq(Set(offsetTime2, offsetTime1), Set(offsetTime4, offsetTime3, offsetTime2))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.offsetTimes(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3, offsetTime4))).query.get.map(_ ==> List(a, b))
 
 
           // Empty Seq/Sets match nothing
           _ <- Ns.i.a1.offsetTimes(Set(offsetTime1, offsetTime2), Set.empty[OffsetTime]).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetTimes(Set.empty[OffsetTime], Set(offsetTime2, offsetTime1)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.offsetTimes(Set.empty[OffsetTime], Set(offsetTime1, offsetTime2)).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.offsetTimes(Set.empty[OffsetTime], Set.empty[OffsetTime]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetTimes(Set.empty[OffsetTime]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetTimes(Seq.empty[Set[OffsetTime]]).query.get.map(_ ==> List())
@@ -83,12 +81,11 @@ trait FilterSet_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           // "Not (exactly this AND that)"
           _ <- Ns.i.a1.offsetTimes.not(Set(offsetTime1)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.offsetTimes.not(Set(offsetTime1, offsetTime2)).query.get.map(_ ==> List(b)) // exclude exact match
-          _ <- Ns.i.a1.offsetTimes.not(Set(offsetTime2, offsetTime1)).query.get.map(_ ==> List(b)) // exclude exact match
           _ <- Ns.i.a1.offsetTimes.not(Set(offsetTime1, offsetTime2, offsetTime3)).query.get.map(_ ==> List(a, b))
           // Same as
           _ <- Ns.i.a1.offsetTimes.not(Seq(Set(offsetTime1))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.offsetTimes.not(Seq(Set(offsetTime1, offsetTime2))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.offsetTimes.not(Seq(Set(offsetTime2, offsetTime1))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.offsetTimes.not(Seq(Set(offsetTime1, offsetTime2))).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.offsetTimes.not(Seq(Set(offsetTime1, offsetTime2, offsetTime3))).query.get.map(_ ==> List(a, b))
 
 
@@ -97,11 +94,11 @@ trait FilterSet_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           // "NEITHER (exactly this AND that) NOR (exactly this AND that)"
           _ <- Ns.i.a1.offsetTimes.not(Set(offsetTime1), Set(offsetTime2, offsetTime3)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.offsetTimes.not(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.offsetTimes.not(Set(offsetTime2, offsetTime1), Set(offsetTime4, offsetTime3, offsetTime2)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.offsetTimes.not(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3, offsetTime4)).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.offsetTimes.not(Seq(Set(offsetTime1), Set(offsetTime2, offsetTime3))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.offsetTimes.not(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.offsetTimes.not(Seq(Set(offsetTime2, offsetTime1), Set(offsetTime4, offsetTime3, offsetTime2))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.offsetTimes.not(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3, offsetTime4))).query.get.map(_ ==> List())
 
 
           // Empty Seq/Sets
@@ -146,43 +143,43 @@ trait FilterSet_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           _ <- Ns.i.a1.offsetTimes.has(Seq(offsetTime1, offsetTime2, offsetTime3)).query.get.map(_ ==> List(a, b))
 
 
-          // AND semantics when multiple values in a _Set_
-
-          // "Has this AND that"
-          _ <- Ns.i.a1.offsetTimes.has(Set(offsetTime1)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetTimes.has(Set(offsetTime1, offsetTime2)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetTimes.has(Set(offsetTime1, offsetTime2, offsetTime3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetTimes.has(Set(offsetTime2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetTimes.has(Set(offsetTime2, offsetTime3)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.offsetTimes.has(Set(offsetTime2, offsetTime3, offsetTime4)).query.get.map(_ ==> List(b))
-          // Same as
-          _ <- Ns.i.a1.offsetTimes.has(Seq(Set(offsetTime1))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetTimes.has(Seq(Set(offsetTime1, offsetTime2))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetTimes.has(Seq(Set(offsetTime1, offsetTime2, offsetTime3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetTimes.has(Seq(Set(offsetTime2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetTimes.has(Seq(Set(offsetTime2, offsetTime3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.offsetTimes.has(Seq(Set(offsetTime2, offsetTime3, offsetTime4))).query.get.map(_ ==> List(b))
-
-
-          // AND/OR semantics with multiple Sets
-
-          // "(has this AND that) OR (has this AND that)"
-          _ <- Ns.i.a1.offsetTimes.has(Set(offsetTime1, offsetTime2), Set(offsetTime0)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetTimes.has(Set(offsetTime1, offsetTime2), Set(offsetTime0, offsetTime3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetTimes.has(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetTimes.has(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3, offsetTime4)).query.get.map(_ ==> List(a, b))
-          // Same as
-          _ <- Ns.i.a1.offsetTimes.has(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime0))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetTimes.has(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime0, offsetTime3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetTimes.has(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetTimes.has(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3, offsetTime4))).query.get.map(_ ==> List(a, b))
+//          // AND semantics when multiple values in a _Set_
+//
+//          // "Has this AND that"
+//          _ <- Ns.i.a1.offsetTimes.has(Set(offsetTime1)).query.get.map(_ ==> List(a))
+//          _ <- Ns.i.a1.offsetTimes.has(Set(offsetTime1, offsetTime2)).query.get.map(_ ==> List(a))
+//          _ <- Ns.i.a1.offsetTimes.has(Set(offsetTime1, offsetTime2, offsetTime3)).query.get.map(_ ==> List())
+//          _ <- Ns.i.a1.offsetTimes.has(Set(offsetTime2)).query.get.map(_ ==> List(a, b))
+//          _ <- Ns.i.a1.offsetTimes.has(Set(offsetTime2, offsetTime3)).query.get.map(_ ==> List(b))
+//          _ <- Ns.i.a1.offsetTimes.has(Set(offsetTime2, offsetTime3, offsetTime4)).query.get.map(_ ==> List(b))
+//          // Same as
+//          _ <- Ns.i.a1.offsetTimes.has(Seq(Set(offsetTime1))).query.get.map(_ ==> List(a))
+//          _ <- Ns.i.a1.offsetTimes.has(Seq(Set(offsetTime1, offsetTime2))).query.get.map(_ ==> List(a))
+//          _ <- Ns.i.a1.offsetTimes.has(Seq(Set(offsetTime1, offsetTime2, offsetTime3))).query.get.map(_ ==> List())
+//          _ <- Ns.i.a1.offsetTimes.has(Seq(Set(offsetTime2))).query.get.map(_ ==> List(a, b))
+//          _ <- Ns.i.a1.offsetTimes.has(Seq(Set(offsetTime2, offsetTime3))).query.get.map(_ ==> List(b))
+//          _ <- Ns.i.a1.offsetTimes.has(Seq(Set(offsetTime2, offsetTime3, offsetTime4))).query.get.map(_ ==> List(b))
+//
+//
+//          // AND/OR semantics with multiple Sets
+//
+//          // "(has this AND that) OR (has this AND that)"
+//          _ <- Ns.i.a1.offsetTimes.has(Set(offsetTime1, offsetTime2), Set(offsetTime0)).query.get.map(_ ==> List(a))
+//          _ <- Ns.i.a1.offsetTimes.has(Set(offsetTime1, offsetTime2), Set(offsetTime0, offsetTime3)).query.get.map(_ ==> List(a))
+//          _ <- Ns.i.a1.offsetTimes.has(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3)).query.get.map(_ ==> List(a, b))
+//          _ <- Ns.i.a1.offsetTimes.has(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3, offsetTime4)).query.get.map(_ ==> List(a, b))
+//          // Same as
+//          _ <- Ns.i.a1.offsetTimes.has(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime0))).query.get.map(_ ==> List(a))
+//          _ <- Ns.i.a1.offsetTimes.has(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime0, offsetTime3))).query.get.map(_ ==> List(a))
+//          _ <- Ns.i.a1.offsetTimes.has(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3))).query.get.map(_ ==> List(a, b))
+//          _ <- Ns.i.a1.offsetTimes.has(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3, offsetTime4))).query.get.map(_ ==> List(a, b))
 
 
           // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.offsetTimes.has(Set(offsetTime1, offsetTime2), Set.empty[OffsetTime]).query.get.map(_ ==> List(a))
+//          _ <- Ns.i.a1.offsetTimes.has(Set(offsetTime1, offsetTime2), Set.empty[OffsetTime]).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.offsetTimes.has(Seq.empty[OffsetTime]).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetTimes.has(Set.empty[OffsetTime]).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetTimes.has(Seq.empty[Set[OffsetTime]]).query.get.map(_ ==> List())
+//          _ <- Ns.i.a1.offsetTimes.has(Set.empty[OffsetTime]).query.get.map(_ ==> List())
+//          _ <- Ns.i.a1.offsetTimes.has(Seq.empty[Set[OffsetTime]]).query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -225,44 +222,8 @@ trait FilterSet_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           _ <- Ns.i.a1.offsetTimes.hasNo(Seq(offsetTime1, offsetTime5)).query.get.map(_ ==> List(b))
 
 
-          // AND semantics when multiple values in a _Set_
-
-          // "Not (has this AND that)"
-          _ <- Ns.i.a1.offsetTimes.hasNo(Set(offsetTime1)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.offsetTimes.hasNo(Set(offsetTime1, offsetTime2)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.offsetTimes.hasNo(Set(offsetTime1, offsetTime2, offsetTime3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetTimes.hasNo(Set(offsetTime2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetTimes.hasNo(Set(offsetTime2, offsetTime3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetTimes.hasNo(Set(offsetTime2, offsetTime3, offsetTime4)).query.get.map(_ ==> List(a))
-          // Same as
-          _ <- Ns.i.a1.offsetTimes.hasNo(Seq(Set(offsetTime1))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.offsetTimes.hasNo(Seq(Set(offsetTime1, offsetTime2))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.offsetTimes.hasNo(Seq(Set(offsetTime1, offsetTime2, offsetTime3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetTimes.hasNo(Seq(Set(offsetTime2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetTimes.hasNo(Seq(Set(offsetTime2, offsetTime3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetTimes.hasNo(Seq(Set(offsetTime2, offsetTime3, offsetTime4))).query.get.map(_ ==> List(a))
-
-
-          // AND/OR semantics with multiple Sets
-
-          // "Not ((has this AND that) OR (has this AND that))"
-          _ <- Ns.i.a1.offsetTimes.hasNo(Set(offsetTime1, offsetTime2), Set(offsetTime0)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.offsetTimes.hasNo(Set(offsetTime1, offsetTime2), Set(offsetTime0, offsetTime3)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.offsetTimes.hasNo(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetTimes.hasNo(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3, offsetTime4)).query.get.map(_ ==> List())
-          // Same as
-          _ <- Ns.i.a1.offsetTimes.hasNo(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime0))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.offsetTimes.hasNo(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime0, offsetTime3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.offsetTimes.hasNo(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetTimes.hasNo(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3, offsetTime4))).query.get.map(_ ==> List())
-
-
           // Negating empty Seqs/Sets has no effect
-          _ <- Ns.i.a1.offsetTimes.hasNo(Set(offsetTime1, offsetTime2), Set.empty[OffsetTime]).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.offsetTimes.hasNo(Seq.empty[OffsetTime]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetTimes.hasNo(Set.empty[OffsetTime]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetTimes.hasNo(Seq.empty[Set[OffsetTime]]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetTimes.hasNo(Seq(Set.empty[OffsetTime])).query.get.map(_ ==> List(a, b))
         } yield ()
       }
     }
@@ -279,6 +240,8 @@ trait FilterSet_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           )).transact
 
           _ <- Ns.i.a1.query.get.map(_ ==> List(0, 1, 2))
+
+          // offsetTimes not asserted for i = 0
           _ <- Ns.i.a1.offsetTimes_.query.get.map(_ ==> List(1, 2))
         } yield ()
       }
@@ -292,18 +255,19 @@ trait FilterSet_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
             (2, Some(Set(offsetTime2, offsetTime3, offsetTime4))),
           )).transact
 
+          // Match non-asserted attribute (null)
+          _ <- Ns.i.a1.offsetTimes_().query.get.map(_ ==> List(0))
+
           // Exact Set matches
 
           // AND semantics
           // "Is exactly this AND that"
           _ <- Ns.i.a1.offsetTimes_(Set(offsetTime1)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetTimes_(Set(offsetTime1, offsetTime2)).query.get.map(_ ==> List(1)) // include exact match
-          _ <- Ns.i.a1.offsetTimes_(Set(offsetTime2, offsetTime1)).query.get.map(_ ==> List(1)) // include exact match
           _ <- Ns.i.a1.offsetTimes_(Set(offsetTime1, offsetTime2, offsetTime3)).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.offsetTimes_(Seq(Set(offsetTime1))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetTimes_(Seq(Set(offsetTime1, offsetTime2))).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.offsetTimes_(Seq(Set(offsetTime2, offsetTime1))).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.offsetTimes_(Seq(Set(offsetTime1, offsetTime2, offsetTime3))).query.get.map(_ ==> List())
 
 
@@ -312,11 +276,11 @@ trait FilterSet_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.offsetTimes_(Set(offsetTime1), Set(offsetTime2, offsetTime3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetTimes_(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3)).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.offsetTimes_(Set(offsetTime2, offsetTime1), Set(offsetTime4, offsetTime3, offsetTime2)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.offsetTimes_(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3, offsetTime4)).query.get.map(_ ==> List(1, 2))
           // Same as
           _ <- Ns.i.a1.offsetTimes_(Seq(Set(offsetTime1), Set(offsetTime2, offsetTime3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetTimes_(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3))).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.offsetTimes_(Seq(Set(offsetTime2, offsetTime1), Set(offsetTime4, offsetTime3, offsetTime2))).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.offsetTimes_(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3, offsetTime4))).query.get.map(_ ==> List(1, 2))
 
 
           // Empty Seq/Sets match nothing
@@ -342,12 +306,10 @@ trait FilterSet_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           // "Not (exactly this AND that)"
           _ <- Ns.i.a1.offsetTimes_.not(Set(offsetTime1)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.offsetTimes_.not(Set(offsetTime1, offsetTime2)).query.get.map(_ ==> List(2)) // exclude exact match
-          _ <- Ns.i.a1.offsetTimes_.not(Set(offsetTime2, offsetTime1)).query.get.map(_ ==> List(2)) // exclude exact match
           _ <- Ns.i.a1.offsetTimes_.not(Set(offsetTime1, offsetTime2, offsetTime3)).query.get.map(_ ==> List(1, 2))
           // Same as
           _ <- Ns.i.a1.offsetTimes_.not(Seq(Set(offsetTime1))).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.offsetTimes_.not(Seq(Set(offsetTime1, offsetTime2))).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.offsetTimes_.not(Seq(Set(offsetTime2, offsetTime1))).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.offsetTimes_.not(Seq(Set(offsetTime1, offsetTime2, offsetTime3))).query.get.map(_ ==> List(1, 2))
 
 
@@ -356,11 +318,11 @@ trait FilterSet_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           // "NEITHER (exactly this AND that) NOR (exactly this AND that)"
           _ <- Ns.i.a1.offsetTimes_.not(Set(offsetTime1), Set(offsetTime2, offsetTime3)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.offsetTimes_.not(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3)).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.offsetTimes_.not(Set(offsetTime2, offsetTime1), Set(offsetTime4, offsetTime3, offsetTime2)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.offsetTimes_.not(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3, offsetTime4)).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.offsetTimes_.not(Seq(Set(offsetTime1), Set(offsetTime2, offsetTime3))).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.offsetTimes_.not(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3))).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.offsetTimes_.not(Seq(Set(offsetTime2, offsetTime1), Set(offsetTime4, offsetTime3, offsetTime2))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.offsetTimes_.not(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3, offsetTime4))).query.get.map(_ ==> List())
 
 
           // Empty Seq/Sets
@@ -407,43 +369,8 @@ trait FilterSet_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           _ <- Ns.i.a1.offsetTimes_.has(Seq(offsetTime1, offsetTime2, offsetTime3)).query.get.map(_ ==> List(1, 2))
 
 
-          // AND semantics when multiple values in a _Set_
-
-          // "Has this AND that"
-          _ <- Ns.i.a1.offsetTimes_.has(Set(offsetTime1)).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.offsetTimes_.has(Set(offsetTime1, offsetTime2)).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.offsetTimes_.has(Set(offsetTime1, offsetTime2, offsetTime3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetTimes_.has(Set(offsetTime2)).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.offsetTimes_.has(Set(offsetTime2, offsetTime3)).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.offsetTimes_.has(Set(offsetTime2, offsetTime3, offsetTime4)).query.get.map(_ ==> List(2))
-          // Same as
-          _ <- Ns.i.a1.offsetTimes_.has(Seq(Set(offsetTime1))).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.offsetTimes_.has(Seq(Set(offsetTime1, offsetTime2))).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.offsetTimes_.has(Seq(Set(offsetTime1, offsetTime2, offsetTime3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetTimes_.has(Seq(Set(offsetTime2))).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.offsetTimes_.has(Seq(Set(offsetTime2, offsetTime3))).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.offsetTimes_.has(Seq(Set(offsetTime2, offsetTime3, offsetTime4))).query.get.map(_ ==> List(2))
-
-
-          // AND/OR semantics with multiple Sets
-
-          // "(has this AND that) OR (has this AND that)"
-          _ <- Ns.i.a1.offsetTimes_.has(Set(offsetTime1, offsetTime2), Set(offsetTime0)).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.offsetTimes_.has(Set(offsetTime1, offsetTime2), Set(offsetTime0, offsetTime3)).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.offsetTimes_.has(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3)).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.offsetTimes_.has(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3, offsetTime4)).query.get.map(_ ==> List(1, 2))
-          // Same as
-          _ <- Ns.i.a1.offsetTimes_.has(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime0))).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.offsetTimes_.has(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime0, offsetTime3))).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.offsetTimes_.has(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3))).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.offsetTimes_.has(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3, offsetTime4))).query.get.map(_ ==> List(1, 2))
-
-
           // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.offsetTimes_.has(Set(offsetTime1, offsetTime2), Set.empty[OffsetTime]).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.offsetTimes_.has(Seq.empty[OffsetTime]).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetTimes_.has(Set.empty[OffsetTime]).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetTimes_.has(Seq.empty[Set[OffsetTime]]).query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -488,44 +415,8 @@ trait FilterSet_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           _ <- Ns.i.a1.offsetTimes_.hasNo(Seq(offsetTime1, offsetTime5)).query.get.map(_ ==> List(2))
 
 
-          // AND semantics when multiple values in a _Set_
-
-          // "Not (has this AND that)"
-          _ <- Ns.i.a1.offsetTimes_.hasNo(Set(offsetTime1)).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.offsetTimes_.hasNo(Set(offsetTime1, offsetTime2)).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.offsetTimes_.hasNo(Set(offsetTime1, offsetTime2, offsetTime3)).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.offsetTimes_.hasNo(Set(offsetTime2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetTimes_.hasNo(Set(offsetTime2, offsetTime3)).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.offsetTimes_.hasNo(Set(offsetTime2, offsetTime3, offsetTime4)).query.get.map(_ ==> List(1))
-          // Same as
-          _ <- Ns.i.a1.offsetTimes_.hasNo(Seq(Set(offsetTime1))).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.offsetTimes_.hasNo(Seq(Set(offsetTime1, offsetTime2))).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.offsetTimes_.hasNo(Seq(Set(offsetTime1, offsetTime2, offsetTime3))).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.offsetTimes_.hasNo(Seq(Set(offsetTime2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetTimes_.hasNo(Seq(Set(offsetTime2, offsetTime3))).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.offsetTimes_.hasNo(Seq(Set(offsetTime2, offsetTime3, offsetTime4))).query.get.map(_ ==> List(1))
-
-
-          // AND/OR semantics with multiple Sets
-
-          // "Not ((has this AND that) OR (has this AND that))"
-          _ <- Ns.i.a1.offsetTimes_.hasNo(Set(offsetTime1, offsetTime2), Set(offsetTime0)).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.offsetTimes_.hasNo(Set(offsetTime1, offsetTime2), Set(offsetTime0, offsetTime3)).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.offsetTimes_.hasNo(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetTimes_.hasNo(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3, offsetTime4)).query.get.map(_ ==> List())
-          // Same as
-          _ <- Ns.i.a1.offsetTimes_.hasNo(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime0))).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.offsetTimes_.hasNo(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime0, offsetTime3))).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.offsetTimes_.hasNo(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetTimes_.hasNo(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3, offsetTime4))).query.get.map(_ ==> List())
-
-
           // Negating empty Seqs/Sets has no effect
-          _ <- Ns.i.a1.offsetTimes_.hasNo(Set(offsetTime1, offsetTime2), Set.empty[OffsetTime]).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.offsetTimes_.hasNo(Seq.empty[OffsetTime]).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.offsetTimes_.hasNo(Set.empty[OffsetTime]).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.offsetTimes_.hasNo(Seq.empty[Set[OffsetTime]]).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.offsetTimes_.hasNo(Seq(Set.empty[OffsetTime])).query.get.map(_ ==> List(1, 2))
         } yield ()
       }
     }
@@ -565,12 +456,10 @@ trait FilterSet_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           // "Is exactly this AND that"
           _ <- Ns.i.a1.offsetTimes_?(Some(Set(offsetTime1))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetTimes_?(Some(Set(offsetTime1, offsetTime2))).query.get.map(_ ==> List(a)) // include exact match
-          _ <- Ns.i.a1.offsetTimes_?(Some(Set(offsetTime2, offsetTime1))).query.get.map(_ ==> List(a)) // include exact match
           _ <- Ns.i.a1.offsetTimes_?(Some(Set(offsetTime1, offsetTime2, offsetTime3))).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.offsetTimes_?(Some(Seq(Set(offsetTime1)))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetTimes_?(Some(Seq(Set(offsetTime1, offsetTime2)))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetTimes_?(Some(Seq(Set(offsetTime2, offsetTime1)))).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.offsetTimes_?(Some(Seq(Set(offsetTime1, offsetTime2, offsetTime3)))).query.get.map(_ ==> List())
 
 
@@ -579,7 +468,7 @@ trait FilterSet_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.offsetTimes_?(Some(Seq(Set(offsetTime1), Set(offsetTime2, offsetTime3)))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetTimes_?(Some(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3)))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetTimes_?(Some(Seq(Set(offsetTime2, offsetTime1), Set(offsetTime4, offsetTime3, offsetTime2)))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.offsetTimes_?(Some(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3, offsetTime4)))).query.get.map(_ ==> List(a, b))
 
 
           // Empty Seq/Sets match nothing
@@ -608,12 +497,10 @@ trait FilterSet_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           // "Not (exactly this AND that)"
           _ <- Ns.i.a1.offsetTimes_?.not(Some(Set(offsetTime1))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.offsetTimes_?.not(Some(Set(offsetTime1, offsetTime2))).query.get.map(_ ==> List(b)) // exclude exact match
-          _ <- Ns.i.a1.offsetTimes_?.not(Some(Set(offsetTime2, offsetTime1))).query.get.map(_ ==> List(b)) // exclude exact match
           _ <- Ns.i.a1.offsetTimes_?.not(Some(Set(offsetTime1, offsetTime2, offsetTime3))).query.get.map(_ ==> List(a, b))
           // Same as
           _ <- Ns.i.a1.offsetTimes_?.not(Some(Seq(Set(offsetTime1)))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.offsetTimes_?.not(Some(Seq(Set(offsetTime1, offsetTime2)))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.offsetTimes_?.not(Some(Seq(Set(offsetTime2, offsetTime1)))).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.offsetTimes_?.not(Some(Seq(Set(offsetTime1, offsetTime2, offsetTime3)))).query.get.map(_ ==> List(a, b))
 
 
@@ -622,18 +509,16 @@ trait FilterSet_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           // "NEITHER (exactly this AND that) NOR (exactly this AND that)"
           _ <- Ns.i.a1.offsetTimes_?.not(Some(Seq(Set(offsetTime1), Set(offsetTime2, offsetTime3)))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.offsetTimes_?.not(Some(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3)))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.offsetTimes_?.not(Some(Seq(Set(offsetTime2, offsetTime1), Set(offsetTime4, offsetTime3, offsetTime2)))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.offsetTimes_?.not(Some(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3, offsetTime4)))).query.get.map(_ ==> List())
 
-
-          // Empty Seq/Sets
+          // Empty Sets are ignored
           _ <- Ns.i.a1.offsetTimes_?.not(Some(Seq(Set(offsetTime1, offsetTime2), Set.empty[OffsetTime]))).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.offsetTimes_?.not(Some(Set.empty[OffsetTime])).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.offsetTimes_?.not(Some(Seq.empty[Set[OffsetTime]])).query.get.map(_ ==> List(a, b))
 
-
-          // None matches non-asserted values
-          _ <- Ns.i.a1.offsetTimes_?(Option.empty[Set[OffsetTime]]).query.get.map(_ ==> List(c))
-          _ <- Ns.i.a1.offsetTimes_?(Option.empty[Seq[Set[OffsetTime]]]).query.get.map(_ ==> List(c))
+          // Negation of None matches all asserted
+          _ <- Ns.i.a1.offsetTimes_?.not(Option.empty[Set[OffsetTime]]).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.offsetTimes_?.not(Option.empty[Seq[Set[OffsetTime]]]).query.get.map(_ ==> List(a, b))
         } yield ()
       }
 
@@ -667,45 +552,12 @@ trait FilterSet_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           _ <- Ns.i.a1.offsetTimes_?.has(Some(Seq(offsetTime2, offsetTime3))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.offsetTimes_?.has(Some(Seq(offsetTime1, offsetTime2, offsetTime3))).query.get.map(_ ==> List(a, b))
 
-
-          // AND semantics when multiple values in a _Set_
-
-          // "Has this AND that"
-          _ <- Ns.i.a1.offsetTimes_?.has(Some(Set(offsetTime1))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetTimes_?.has(Some(Set(offsetTime1, offsetTime2))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetTimes_?.has(Some(Set(offsetTime1, offsetTime2, offsetTime3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetTimes_?.has(Some(Set(offsetTime2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetTimes_?.has(Some(Set(offsetTime2, offsetTime3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.offsetTimes_?.has(Some(Set(offsetTime2, offsetTime3, offsetTime4))).query.get.map(_ ==> List(b))
-          // Same as
-          _ <- Ns.i.a1.offsetTimes_?.has(Some(Seq(Set(offsetTime1)))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetTimes_?.has(Some(Seq(Set(offsetTime1, offsetTime2)))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetTimes_?.has(Some(Seq(Set(offsetTime1, offsetTime2, offsetTime3)))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetTimes_?.has(Some(Seq(Set(offsetTime2)))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetTimes_?.has(Some(Seq(Set(offsetTime2, offsetTime3)))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.offsetTimes_?.has(Some(Seq(Set(offsetTime2, offsetTime3, offsetTime4)))).query.get.map(_ ==> List(b))
-
-
-          // AND/OR semantics with multiple Sets
-
-          // "(has this AND that) OR (has this AND that)"
-          _ <- Ns.i.a1.offsetTimes_?.has(Some(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime0)))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetTimes_?.has(Some(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime0, offsetTime3)))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetTimes_?.has(Some(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3)))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetTimes_?.has(Some(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3, offsetTime4)))).query.get.map(_ ==> List(a, b))
-
-
           // Empty Seq/Sets match nothing
           _ <- Ns.i.a1.offsetTimes_?.has(Some(Seq.empty[OffsetTime])).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetTimes_?.has(Some(Set.empty[OffsetTime])).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetTimes_?.has(Some(Seq.empty[Set[OffsetTime]])).query.get.map(_ ==> List())
-
 
           // None matches non-asserted values
           _ <- Ns.i.a1.offsetTimes_?.has(Option.empty[OffsetTime]).query.get.map(_ ==> List(c))
           _ <- Ns.i.a1.offsetTimes_?.has(Option.empty[Seq[OffsetTime]]).query.get.map(_ ==> List(c))
-          _ <- Ns.i.a1.offsetTimes_?.has(Option.empty[Set[OffsetTime]]).query.get.map(_ ==> List(c))
-          _ <- Ns.i.a1.offsetTimes_?.has(Option.empty[Seq[Set[OffsetTime]]]).query.get.map(_ ==> List(c))
         } yield ()
       }
 
@@ -744,45 +596,12 @@ trait FilterSet_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           _ <- Ns.i.a1.offsetTimes_?.hasNo(Some(Seq(offsetTime1, offsetTime5))).query.get.map(_ ==> List(b))
 
 
-          // AND semantics when multiple values in a _Set_
-
-          // "Not (has this AND that)"
-          _ <- Ns.i.a1.offsetTimes_?.hasNo(Some(Set(offsetTime1))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.offsetTimes_?.hasNo(Some(Set(offsetTime1, offsetTime2))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.offsetTimes_?.hasNo(Some(Set(offsetTime1, offsetTime2, offsetTime3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetTimes_?.hasNo(Some(Set(offsetTime2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetTimes_?.hasNo(Some(Set(offsetTime2, offsetTime3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetTimes_?.hasNo(Some(Set(offsetTime2, offsetTime3, offsetTime4))).query.get.map(_ ==> List(a))
-          // Same as
-          _ <- Ns.i.a1.offsetTimes_?.hasNo(Some(Seq(Set(offsetTime1)))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.offsetTimes_?.hasNo(Some(Seq(Set(offsetTime1, offsetTime2)))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.offsetTimes_?.hasNo(Some(Seq(Set(offsetTime1, offsetTime2, offsetTime3)))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetTimes_?.hasNo(Some(Seq(Set(offsetTime2)))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetTimes_?.hasNo(Some(Seq(Set(offsetTime2, offsetTime3)))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetTimes_?.hasNo(Some(Seq(Set(offsetTime2, offsetTime3, offsetTime4)))).query.get.map(_ ==> List(a))
-
-
-          // AND/OR semantics with multiple Sets
-
-          // "Not ((has this AND that) OR (has this AND that))"
-          _ <- Ns.i.a1.offsetTimes_?.hasNo(Some(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime0)))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.offsetTimes_?.hasNo(Some(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime0, offsetTime3)))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.offsetTimes_?.hasNo(Some(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3)))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetTimes_?.hasNo(Some(Seq(Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3, offsetTime4)))).query.get.map(_ ==> List())
-
-
           // Negating empty Seqs/Sets has no effect
           _ <- Ns.i.a1.offsetTimes_?.hasNo(Some(Seq.empty[OffsetTime])).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetTimes_?.hasNo(Some(Set.empty[OffsetTime])).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetTimes_?.hasNo(Some(Seq.empty[Set[OffsetTime]])).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetTimes_?.hasNo(Some(Seq(Set.empty[OffsetTime]))).query.get.map(_ ==> List(a, b))
-
 
           // Negating None returns all asserted
           _ <- Ns.i.a1.offsetTimes_?.hasNo(Option.empty[OffsetTime]).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.offsetTimes_?.hasNo(Option.empty[Seq[OffsetTime]]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetTimes_?.hasNo(Option.empty[Set[OffsetTime]]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetTimes_?.hasNo(Option.empty[Seq[Set[OffsetTime]]]).query.get.map(_ ==> List(a, b))
         } yield ()
       }
     }

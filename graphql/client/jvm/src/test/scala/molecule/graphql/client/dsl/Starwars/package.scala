@@ -2,7 +2,7 @@ package molecule.graphql.client.dsl
 
 
 package object Starwars {
-  def hero(episode: String) = Character.appearsIn(episode)
+  def hero(episode: String) = Character.appearsIn(Set(episode))
 
   def character(id: String) = Character(id)
   def character(id: Int) = Character(id)

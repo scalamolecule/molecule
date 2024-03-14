@@ -161,7 +161,7 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "BigDecimal" - validation { implicit conn =>
       for {
-        id <- Type.bigDecimals(bigDecimal4).save.transact.map(_.id)
+        id <- Type.bigDecimals_?(Some(Set(bigDecimal4))).save.transact.map(_.id)
         _ <- Type(id).bigDecimals_?(Some(Set(bigDecimal1, bigDecimal2, bigDecimal4))).update.transact
           .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>
@@ -179,7 +179,7 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Date" - validation { implicit conn =>
       for {
-        id <- Type.dates(date4).save.transact.map(_.id)
+        id <- Type.dates_?(Some(Set(date4))).save.transact.map(_.id)
         _ <- Type(id).dates_?(Some(Set(date1, date2, date4))).update.transact
           .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>
@@ -197,7 +197,7 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Duration" - validation { implicit conn =>
       for {
-        id <- Type.durations(duration4).save.transact.map(_.id)
+        id <- Type.durations_?(Some(Set(duration4))).save.transact.map(_.id)
         _ <- Type(id).durations_?(Some(Set(duration1, duration2, duration4))).update.transact
           .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>
@@ -215,7 +215,7 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Instant" - validation { implicit conn =>
       for {
-        id <- Type.instants(instant4).save.transact.map(_.id)
+        id <- Type.instants_?(Some(Set(instant4))).save.transact.map(_.id)
         _ <- Type(id).instants_?(Some(Set(instant1, instant2, instant4))).update.transact
           .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>
@@ -233,7 +233,7 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "LocalDate" - validation { implicit conn =>
       for {
-        id <- Type.localDates(localDate4).save.transact.map(_.id)
+        id <- Type.localDates_?(Some(Set(localDate4))).save.transact.map(_.id)
         _ <- Type(id).localDates_?(Some(Set(localDate1, localDate2, localDate4))).update.transact
           .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>
@@ -251,7 +251,7 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "LocalTime" - validation { implicit conn =>
       for {
-        id <- Type.localTimes(localTime4).save.transact.map(_.id)
+        id <- Type.localTimes_?(Some(Set(localTime4))).save.transact.map(_.id)
         _ <- Type(id).localTimes_?(Some(Set(localTime1, localTime2, localTime4))).update.transact
           .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>
@@ -269,7 +269,7 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "LocalDateTime" - validation { implicit conn =>
       for {
-        id <- Type.localDateTimes(localDateTime4).save.transact.map(_.id)
+        id <- Type.localDateTimes_?(Some(Set(localDateTime4))).save.transact.map(_.id)
         _ <- Type(id).localDateTimes_?(Some(Set(localDateTime1, localDateTime2, localDateTime4))).update.transact
           .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>
@@ -287,7 +287,7 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "OffsetTime" - validation { implicit conn =>
       for {
-        id <- Type.offsetTimes(offsetTime4).save.transact.map(_.id)
+        id <- Type.offsetTimes_?(Some(Set(offsetTime4))).save.transact.map(_.id)
         _ <- Type(id).offsetTimes_?(Some(Set(offsetTime1, offsetTime2, offsetTime4))).update.transact
           .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>
@@ -305,7 +305,7 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "OffsetDateTime" - validation { implicit conn =>
       for {
-        id <- Type.offsetDateTimes(offsetDateTime4).save.transact.map(_.id)
+        id <- Type.offsetDateTimes_?(Some(Set(offsetDateTime4))).save.transact.map(_.id)
         _ <- Type(id).offsetDateTimes_?(Some(Set(offsetDateTime1, offsetDateTime2, offsetDateTime4))).update.transact
           .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>
@@ -323,7 +323,7 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "ZonedDateTime" - validation { implicit conn =>
       for {
-        id <- Type.zonedDateTimes(zonedDateTime4).save.transact.map(_.id)
+        id <- Type.zonedDateTimes_?(Some(Set(zonedDateTime4))).save.transact.map(_.id)
         _ <- Type(id).zonedDateTimes_?(Some(Set(zonedDateTime1, zonedDateTime2, zonedDateTime4))).update.transact
           .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>

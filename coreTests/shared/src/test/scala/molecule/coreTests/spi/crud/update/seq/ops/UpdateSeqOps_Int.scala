@@ -49,20 +49,13 @@ trait UpdateSeqOps_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).intSeq.add(int3, int4).update.transact
         _ <- Ns.intSeq.query.get.map(_.head ==> List(int1, int2, int1, int3, int4))
 
-        // Add Iterable of values
-        // Seq
-        _ <- Ns(id).intSeq.add(Seq(int4, int5)).update.transact
+        // Add multiple values (Seq)
+        _ <- Ns(id).intSeq.add(List(int4, int5)).update.transact
         _ <- Ns.intSeq.query.get.map(_.head ==> List(int1, int2, int1, int3, int4, int4, int5))
-        // Array
-        _ <- Ns(id).intSeq.add(List(int6)).update.transact
-        _ <- Ns.intSeq.query.get.map(_.head ==> List(int1, int2, int1, int3, int4, int4, int5, int6))
-        // Iterable
-        _ <- Ns(id).intSeq.add(Iterable(int7)).update.transact
-        _ <- Ns.intSeq.query.get.map(_.head ==> List(int1, int2, int1, int3, int4, int4, int5, int6, int7))
 
-        // Adding empty Iterable of values has no effect
+        // Adding empty Seq of values has no effect
         _ <- Ns(id).intSeq.add(List.empty[Int]).update.transact
-        _ <- Ns.intSeq.query.get.map(_.head ==> List(int1, int2, int1, int3, int4, int4, int5, int6, int7))
+        _ <- Ns.intSeq.query.get.map(_.head ==> List(int1, int2, int1, int3, int4, int4, int5))
       } yield ()
     }
 
@@ -102,14 +95,8 @@ trait UpdateSeqOps_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           int1, int2, int3,
         ))
 
-        // Remove Iterable of values
-        _ <- Ns(id).intSeq.remove(List(int3)).update.transact
-        _ <- Ns.intSeq.query.get.map(_.head ==> List(
-          int1, int2,
-          int1, int2,
-        ))
-
-        _ <- Ns(id).intSeq.remove(Seq(int2)).update.transact
+        // Remove multiple values (Seq)
+        _ <- Ns(id).intSeq.remove(List(int2, int3)).update.transact
         _ <- Ns.intSeq.query.get.map(_.head ==> List(
           int1,
           int1
@@ -119,7 +106,7 @@ trait UpdateSeqOps_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).intSeq.remove(List.empty[Int]).update.transact
         _ <- Ns.intSeq.query.get.map(_.head ==> List(int1, int1))
 
-        // Removing all elements retracts the attribute
+        // Removing all remaining elements deletes the attribute
         _ <- Ns(id).intSeq.remove(Seq(int1)).update.transact
         _ <- Ns.intSeq.query.get.map(_ ==> Nil)
       } yield ()

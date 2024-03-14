@@ -23,7 +23,7 @@ trait UpdateSetOps_ref_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.refs.query.get.map(_.head ==> Set(ref3, ref4))
 
         // Applying empty Set of values deletes previous Set
-        _ <- Ns(id).refs(Seq.empty[String]).update.transact
+        _ <- Ns(id).refs(Set.empty[String]).update.transact
         _ <- Ns.refs.query.get.map(_ ==> Nil)
 
         id <- Ns.refs(Set(ref1, ref2)).save.transact.map(_.id)
@@ -50,53 +50,46 @@ trait UpdateSetOps_ref_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).refs.add(ref3, ref4).update.transact
         _ <- Ns.refs.query.get.map(_.head ==> Set(ref1, ref2, ref3, ref4))
 
-        // Add Iterable of values (existing values unaffected)
-        // Seq
-        _ <- Ns(id).refs.add(Seq(ref4, ref5)).update.transact
-        _ <- Ns.refs.query.get.map(_.head ==> Set(ref1, ref2, ref3, ref4, ref5))
-        // Set
-        _ <- Ns(id).refs.add(Set(ref6)).update.transact
+        // Add multiple values (Seq)
+        _ <- Ns(id).refs.add(Seq(ref5, ref6)).update.transact
         _ <- Ns.refs.query.get.map(_.head ==> Set(ref1, ref2, ref3, ref4, ref5, ref6))
-        // Iterable
-        _ <- Ns(id).refs.add(Iterable(ref7)).update.transact
-        _ <- Ns.refs.query.get.map(_.head ==> Set(ref1, ref2, ref3, ref4, ref5, ref6, ref7))
 
-        // Adding empty Iterable of values has no effect
+        // Adding empty Seq of values has no effect
         _ <- Ns(id).refs.add(Seq.empty[String]).update.transact
-        _ <- Ns.refs.query.get.map(_.head ==> Set(ref1, ref2, ref3, ref4, ref5, ref6, ref7))
+        _ <- Ns.refs.query.get.map(_.head ==> Set(ref1, ref2, ref3, ref4, ref5, ref6))
       } yield ()
     }
 
 
     "remove" - types { implicit conn =>
       for {
-        id <- Ns.refs(Set(ref1, ref2, ref3, ref4, ref5, ref6)).save.transact.map(_.id)
+        id <- Ns.refs(Set(ref1, ref2, ref3, ref4, ref5, ref6, ref7)).save.transact.map(_.id)
 
         // Remove value
-        _ <- Ns(id).refs.remove(ref6).update.transact
-        _ <- Ns.refs.query.get.map(_.head ==> Set(ref1, ref2, ref3, ref4, ref5))
+        _ <- Ns(id).refs.remove(ref7).update.transact
+        _ <- Ns.refs.query.get.map(_.head ==> Set(ref1, ref2, ref3, ref4, ref5, ref6))
 
         // Removing non-existing value has no effect
-        _ <- Ns(id).refs.remove(ref7).update.transact
-        _ <- Ns.refs.query.get.map(_.head ==> Set(ref1, ref2, ref3, ref4, ref5))
+        _ <- Ns(id).refs.remove(ref9).update.transact
+        _ <- Ns.refs.query.get.map(_.head ==> Set(ref1, ref2, ref3, ref4, ref5, ref6))
 
         // Removing duplicate values removes the distinct value
-        _ <- Ns(id).refs.remove(ref5, ref5).update.transact
-        _ <- Ns.refs.query.get.map(_.head ==> Set(ref1, ref2, ref3, ref4))
+        _ <- Ns(id).refs.remove(ref6, ref6).update.transact
+        _ <- Ns.refs.query.get.map(_.head ==> Set(ref1, ref2, ref3, ref4, ref5))
 
         // Remove multiple values (vararg)
-        _ <- Ns(id).refs.remove(ref3, ref4).update.transact
-        _ <- Ns.refs.query.get.map(_.head ==> Set(ref1, ref2))
+        _ <- Ns(id).refs.remove(ref4, ref5).update.transact
+        _ <- Ns.refs.query.get.map(_.head ==> Set(ref1, ref2, ref3))
 
-        // Remove Iterable of values
-        _ <- Ns(id).refs.remove(Seq(ref2)).update.transact
+        // Remove multiple values (Seq)
+        _ <- Ns(id).refs.remove(Seq(ref2, ref3)).update.transact
         _ <- Ns.refs.query.get.map(_.head ==> Set(ref1))
 
-        // Removing empty Iterable of values has no effect
+        // Removing empty Seq of values has no effect
         _ <- Ns(id).refs.remove(Seq.empty[String]).update.transact
         _ <- Ns.refs.query.get.map(_.head ==> Set(ref1))
 
-        // Removing all elements retracts the attribute
+        // Removing all remaining elements deletes the attribute
         _ <- Ns(id).refs.remove(Seq(ref1)).update.transact
         _ <- Ns.refs.query.get.map(_ ==> Nil)
       } yield ()

@@ -11,5 +11,5 @@ object SpiTestGenerator extends App {
   //  test.crud.update.seq.ops._UpdateSeqOps.generate()
   //  test.filter.one.types._FilterOne.generate()
   //  test.filter.set.types._FilterSet.generate()
-  test.filter.seq.types._FilterSeq.generate()
+  //  test.filter.seq.types._FilterSeq.generate()
 }

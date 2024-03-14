@@ -232,33 +232,17 @@ trait FilterRefSet_Card1RefOwned extends CoreTestSuite with ApiAsync { spi: SpiA
           (2, Some(Set(2))),
           (3, Some(Set(3))),
         ))
-        // has 2 and 3
-        _ <- A.i.a1.OwnB.ii_?.has(Some(Set(2, 3))).query.get.map(_ ==> List(
-
-        ))
-        // has 1 and 2
-        _ <- A.i.a1.OwnB.ii_?.has(Some(Set(1, 2))).query.get.map(_ ==> List(
-          (1, Some(Set(1, 2))),
-        ))
 
         // None matches non-asserted values
-        _ <- A.i.a1.OwnB.ii_?.has(Option.empty[Set[Int]]).query.get.map(_ ==> List((4, None)))
-        _ <- A.i.a1.OwnB.ii_?.has(Option.empty[Seq[Set[Int]]]).query.get.map(_ ==> List((4, None)))
+        _ <- A.i.a1.OwnB.ii_?.has(Option.empty[Seq[Int]]).query.get.map(_ ==> List((4, None)))
 
         // Empty Sets match nothing
-        _ <- A.i.a1.OwnB.ii_?.has(Some(Set.empty[Int])).query.get.map(_ ==> Nil)
-        _ <- A.i.a1.OwnB.ii_?.has(Some(Seq.empty[Set[Int]])).query.get.map(_ ==> Nil)
-        _ <- A.i.a1.OwnB.ii_?.has(Some(Seq(Set.empty[Int]))).query.get.map(_ ==> Nil)
+        _ <- A.i.a1.OwnB.ii_?.has(Some(Seq.empty[Int])).query.get.map(_ ==> Nil)
 
 
         // hasNo
 
         _ <- A.i.a1.OwnB.ii_?.hasNo(Some(1)).query.get.map(_ ==> List(
-          (2, Some(Set(2, 7))),
-          (3, Some(Set(3))),
-        ))
-        // When 1 value in set, then the same as
-        _ <- A.i.a1.OwnB.ii_?.hasNo(Some(Set(1))).query.get.map(_ ==> List(
           (2, Some(Set(2, 7))),
           (3, Some(Set(3))),
         ))
@@ -270,24 +254,12 @@ trait FilterRefSet_Card1RefOwned extends CoreTestSuite with ApiAsync { spi: SpiA
           (1, Some(Set(1, 2))),
           (2, Some(Set(2, 7)))
         ))
-        _ <- A.i.a1.OwnB.ii_?.hasNo(Some(Set(1, 2))).query.get.map(_ ==> List(
-          (2, Some(Set(2, 7))),
-          (3, Some(Set(3))),
-        ))
-        _ <- A.i.a1.OwnB.ii_?.hasNo(Some(Set(1, 3))).query.get.map(_ ==> List(
-          (1, Some(Set(1, 2))),
-          (2, Some(Set(2, 7))),
-          (3, Some(Set(3))),
-        ))
 
         // Negating None matches all asserted values
-        _ <- A.i.a1.OwnB.ii_?.hasNo(Option.empty[Set[Int]]).query.get.map(_ ==> allAssertedOptional)
-        _ <- A.i.a1.OwnB.ii_?.hasNo(Option.empty[Seq[Set[Int]]]).query.get.map(_ ==> allAssertedOptional)
+        _ <- A.i.a1.OwnB.ii_?.hasNo(Option.empty[Seq[Int]]).query.get.map(_ ==> allAssertedOptional)
 
         // Negating empty Sets match nothing
-        _ <- A.i.a1.OwnB.ii_?.hasNo(Some(Set.empty[Int])).query.get.map(_ ==> allAssertedOptional)
-        _ <- A.i.a1.OwnB.ii_?.hasNo(Some(Seq.empty[Set[Int]])).query.get.map(_ ==> allAssertedOptional)
-        _ <- A.i.a1.OwnB.ii_?.hasNo(Some(Seq(Set.empty[Int]))).query.get.map(_ ==> allAssertedOptional)
+        _ <- A.i.a1.OwnB.ii_?.hasNo(Some(Seq.empty[Int])).query.get.map(_ ==> allAssertedOptional)
       } yield ()
     }
   }

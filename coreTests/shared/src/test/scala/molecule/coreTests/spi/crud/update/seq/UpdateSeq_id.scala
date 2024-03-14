@@ -49,7 +49,7 @@ trait UpdateSeq_id extends CoreTestSuite with Array2List with ApiAsync { spi: Sp
         for {
           id <- A.i(1).OwnBb.i(2).save.transact.map(_.id)
 
-          _ <- A(id).ownBb("123456789012345678901234").update.transact
+          _ <- A(id).ownBb(Set("123456789012345678901234")).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
               err ==> "Can't update non-existing ids of embedded documents in MongoDB."
             }
@@ -71,7 +71,7 @@ trait UpdateSeq_id extends CoreTestSuite with Array2List with ApiAsync { spi: Sp
           (c, List(3)),
         ))
 
-        _ <- Ns(List(b, c)).intSeq(4).update.transact
+        _ <- Ns(List(b, c)).intSeq(Seq(4)).update.transact
         _ <- Ns.id.a1.intSeq.query.get.map(_ ==> List(
           (a, List(1)),
           (b, List(4)),
@@ -99,8 +99,8 @@ trait UpdateSeq_id extends CoreTestSuite with Array2List with ApiAsync { spi: Sp
         _ <- Ns.intSeq.stringSeq.query.get.map(_ ==> List((List(1), List("a"))))
 
         // Apply empty value to delete attribute of entity (entity remains)
-        _ <- Ns(id).intSeq(2).stringSeq("b").update.transact
-        _ <- Ns.intSeq.stringSeq.query.get.map(_ ==> List((List(2), List("b"))))
+        _ <- Ns(id).intSeq(Seq(2)).stringSeq(Seq("b", "c")).update.transact
+        _ <- Ns.intSeq.stringSeq.query.get.map(_ ==> List((List(2), List("b", "c"))))
       } yield ()
     }
 
@@ -262,19 +262,19 @@ trait UpdateSeq_id extends CoreTestSuite with Array2List with ApiAsync { spi: Sp
 
       "Can't update multiple values for one card-one attribute" - types { implicit conn =>
         for {
-          _ <- Ns("42").intSeq(Seq(List(1), List(2))).update.transact
+          _ <- Ns("42").intSeq(Seq(Seq(1), Seq(2))).update.transact
             .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
               err ==> "Can only update one Seq of values for Seq attribute `Ns.intSeq`."
             }
 
           // Same as
-          _ <- Ns("42").intSeq(List(1), List(2)).update.transact
+          _ <- Ns("42").intSeq(Seq(1), Seq(2)).update.transact
             .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
               err ==> "Can only update one Seq of values for Seq attribute `Ns.intSeq`."
             }
 
           // Same as
-          _ <- Ns("42").intSeq(1, 2).update.transact
+          _ <- Ns("42").intSeq(Seq(1), Seq(2)).update.transact
             .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
               err ==> "Can only update one Seq of values for Seq attribute `Ns.intSeq`."
             }

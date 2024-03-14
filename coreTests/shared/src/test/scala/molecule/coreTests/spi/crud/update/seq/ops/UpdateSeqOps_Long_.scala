@@ -50,20 +50,13 @@ trait UpdateSeqOps_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).longSeq.add(long3, long4).update.transact
         _ <- Ns.longSeq.query.get.map(_.head ==> List(long1, long2, long1, long3, long4))
 
-        // Add Iterable of values
-        // Seq
-        _ <- Ns(id).longSeq.add(Seq(long4, long5)).update.transact
+        // Add multiple values (Seq)
+        _ <- Ns(id).longSeq.add(List(long4, long5)).update.transact
         _ <- Ns.longSeq.query.get.map(_.head ==> List(long1, long2, long1, long3, long4, long4, long5))
-        // Array
-        _ <- Ns(id).longSeq.add(List(long6)).update.transact
-        _ <- Ns.longSeq.query.get.map(_.head ==> List(long1, long2, long1, long3, long4, long4, long5, long6))
-        // Iterable
-        _ <- Ns(id).longSeq.add(Iterable(long7)).update.transact
-        _ <- Ns.longSeq.query.get.map(_.head ==> List(long1, long2, long1, long3, long4, long4, long5, long6, long7))
 
-        // Adding empty Iterable of values has no effect
+        // Adding empty Seq of values has no effect
         _ <- Ns(id).longSeq.add(List.empty[Long]).update.transact
-        _ <- Ns.longSeq.query.get.map(_.head ==> List(long1, long2, long1, long3, long4, long4, long5, long6, long7))
+        _ <- Ns.longSeq.query.get.map(_.head ==> List(long1, long2, long1, long3, long4, long4, long5))
       } yield ()
     }
 
@@ -103,14 +96,8 @@ trait UpdateSeqOps_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           long1, long2, long3,
         ))
 
-        // Remove Iterable of values
-        _ <- Ns(id).longSeq.remove(List(long3)).update.transact
-        _ <- Ns.longSeq.query.get.map(_.head ==> List(
-          long1, long2,
-          long1, long2,
-        ))
-
-        _ <- Ns(id).longSeq.remove(Seq(long2)).update.transact
+        // Remove multiple values (Seq)
+        _ <- Ns(id).longSeq.remove(List(long2, long3)).update.transact
         _ <- Ns.longSeq.query.get.map(_.head ==> List(
           long1,
           long1
@@ -120,7 +107,7 @@ trait UpdateSeqOps_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).longSeq.remove(List.empty[Long]).update.transact
         _ <- Ns.longSeq.query.get.map(_.head ==> List(long1, long1))
 
-        // Removing all elements retracts the attribute
+        // Removing all remaining elements deletes the attribute
         _ <- Ns(id).longSeq.remove(Seq(long1)).update.transact
         _ <- Ns.longSeq.query.get.map(_ ==> Nil)
       } yield ()

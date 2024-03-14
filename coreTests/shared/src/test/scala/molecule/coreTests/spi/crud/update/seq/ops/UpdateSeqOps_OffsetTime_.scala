@@ -51,20 +51,13 @@ trait UpdateSeqOps_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
         _ <- Ns(id).offsetTimeSeq.add(offsetTime3, offsetTime4).update.transact
         _ <- Ns.offsetTimeSeq.query.get.map(_.head ==> List(offsetTime1, offsetTime2, offsetTime1, offsetTime3, offsetTime4))
 
-        // Add Iterable of values
-        // Seq
-        _ <- Ns(id).offsetTimeSeq.add(Seq(offsetTime4, offsetTime5)).update.transact
+        // Add multiple values (Seq)
+        _ <- Ns(id).offsetTimeSeq.add(List(offsetTime4, offsetTime5)).update.transact
         _ <- Ns.offsetTimeSeq.query.get.map(_.head ==> List(offsetTime1, offsetTime2, offsetTime1, offsetTime3, offsetTime4, offsetTime4, offsetTime5))
-        // Array
-        _ <- Ns(id).offsetTimeSeq.add(List(offsetTime6)).update.transact
-        _ <- Ns.offsetTimeSeq.query.get.map(_.head ==> List(offsetTime1, offsetTime2, offsetTime1, offsetTime3, offsetTime4, offsetTime4, offsetTime5, offsetTime6))
-        // Iterable
-        _ <- Ns(id).offsetTimeSeq.add(Iterable(offsetTime7)).update.transact
-        _ <- Ns.offsetTimeSeq.query.get.map(_.head ==> List(offsetTime1, offsetTime2, offsetTime1, offsetTime3, offsetTime4, offsetTime4, offsetTime5, offsetTime6, offsetTime7))
 
-        // Adding empty Iterable of values has no effect
+        // Adding empty Seq of values has no effect
         _ <- Ns(id).offsetTimeSeq.add(List.empty[OffsetTime]).update.transact
-        _ <- Ns.offsetTimeSeq.query.get.map(_.head ==> List(offsetTime1, offsetTime2, offsetTime1, offsetTime3, offsetTime4, offsetTime4, offsetTime5, offsetTime6, offsetTime7))
+        _ <- Ns.offsetTimeSeq.query.get.map(_.head ==> List(offsetTime1, offsetTime2, offsetTime1, offsetTime3, offsetTime4, offsetTime4, offsetTime5))
       } yield ()
     }
 
@@ -104,14 +97,8 @@ trait UpdateSeqOps_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
           offsetTime1, offsetTime2, offsetTime3,
         ))
 
-        // Remove Iterable of values
-        _ <- Ns(id).offsetTimeSeq.remove(List(offsetTime3)).update.transact
-        _ <- Ns.offsetTimeSeq.query.get.map(_.head ==> List(
-          offsetTime1, offsetTime2,
-          offsetTime1, offsetTime2,
-        ))
-
-        _ <- Ns(id).offsetTimeSeq.remove(Seq(offsetTime2)).update.transact
+        // Remove multiple values (Seq)
+        _ <- Ns(id).offsetTimeSeq.remove(List(offsetTime2, offsetTime3)).update.transact
         _ <- Ns.offsetTimeSeq.query.get.map(_.head ==> List(
           offsetTime1,
           offsetTime1
@@ -121,7 +108,7 @@ trait UpdateSeqOps_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
         _ <- Ns(id).offsetTimeSeq.remove(List.empty[OffsetTime]).update.transact
         _ <- Ns.offsetTimeSeq.query.get.map(_.head ==> List(offsetTime1, offsetTime1))
 
-        // Removing all elements retracts the attribute
+        // Removing all remaining elements deletes the attribute
         _ <- Ns(id).offsetTimeSeq.remove(Seq(offsetTime1)).update.transact
         _ <- Ns.offsetTimeSeq.query.get.map(_ ==> Nil)
       } yield ()

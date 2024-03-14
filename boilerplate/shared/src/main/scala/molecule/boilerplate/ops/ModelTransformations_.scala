@@ -529,7 +529,7 @@ trait ModelTransformations_ {
     es.init :+ last
   }
 
-  protected def addOptOne[T](es: List[Element], op: Op, vs: Option[Seq[T]]): List[Element] = {
+  protected def addOneOpt[T](es: List[Element], op: Op, vs: Option[Seq[T]]): List[Element] = {
     val last = es.last match {
       case a: AttrOneOpt => a match {
         case a: AttrOneOptID =>
@@ -1098,7 +1098,7 @@ trait ModelTransformations_ {
     es.init :+ last
   }
 
-  protected def addOptSet[T](es: List[Element], op: Op, vs: Option[Seq[Set[T]]]): List[Element] = {
+  protected def addSetOpt[T](es: List[Element], op: Op, vs: Option[Seq[Set[T]]]): List[Element] = {
     val last = es.last match {
       case a: AttrSetOpt => a match {
         case a: AttrSetOptID =>
@@ -1655,7 +1655,7 @@ trait ModelTransformations_ {
     es.init :+ last
   }
 
-  protected def addOptSeq[T](es: List[Element], op: Op, vs: Option[Seq[Seq[T]]]): List[Element] = {
+  protected def addSeqOpt[T](es: List[Element], op: Op, vs: Option[Seq[Seq[T]]]): List[Element] = {
     val last = es.last match {
       case a: AttrSeqOpt => a match {
         case a: AttrSeqOptID =>
@@ -1849,7 +1849,7 @@ trait ModelTransformations_ {
     })
   }
 
-  protected def addOptBAr[T](es: List[Element], op: Op, optBA: Option[Array[T]]): List[Element] = {
+  protected def addBArOpt[T](es: List[Element], op: Op, optBA: Option[Array[T]]): List[Element] = {
     es.init :+ (es.last match {
       case a: AttrSeqOptByte =>
         a.copy(op = op, vs = optBA.asInstanceOf[Option[Array[Byte]]].map(array => Seq(array)))
@@ -2234,7 +2234,7 @@ trait ModelTransformations_ {
     es.init :+ last
   }
 
-  protected def addOptMap[T](es: List[Element], op: Op, vs: Option[Seq[Map[String, T]]]): List[Element] = {
+  protected def addMapOpt[T](es: List[Element], op: Op, vs: Option[Seq[Map[String, T]]]): List[Element] = {
     val last = es.last match {
       case a: AttrMapOpt => a match {
         case a: AttrMapOptID =>

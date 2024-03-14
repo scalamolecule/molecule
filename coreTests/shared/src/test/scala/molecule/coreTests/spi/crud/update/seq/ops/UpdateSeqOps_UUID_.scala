@@ -51,20 +51,13 @@ trait UpdateSeqOps_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).uuidSeq.add(uuid3, uuid4).update.transact
         _ <- Ns.uuidSeq.query.get.map(_.head ==> List(uuid1, uuid2, uuid1, uuid3, uuid4))
 
-        // Add Iterable of values
-        // Seq
-        _ <- Ns(id).uuidSeq.add(Seq(uuid4, uuid5)).update.transact
+        // Add multiple values (Seq)
+        _ <- Ns(id).uuidSeq.add(List(uuid4, uuid5)).update.transact
         _ <- Ns.uuidSeq.query.get.map(_.head ==> List(uuid1, uuid2, uuid1, uuid3, uuid4, uuid4, uuid5))
-        // Array
-        _ <- Ns(id).uuidSeq.add(List(uuid6)).update.transact
-        _ <- Ns.uuidSeq.query.get.map(_.head ==> List(uuid1, uuid2, uuid1, uuid3, uuid4, uuid4, uuid5, uuid6))
-        // Iterable
-        _ <- Ns(id).uuidSeq.add(Iterable(uuid7)).update.transact
-        _ <- Ns.uuidSeq.query.get.map(_.head ==> List(uuid1, uuid2, uuid1, uuid3, uuid4, uuid4, uuid5, uuid6, uuid7))
 
-        // Adding empty Iterable of values has no effect
+        // Adding empty Seq of values has no effect
         _ <- Ns(id).uuidSeq.add(List.empty[UUID]).update.transact
-        _ <- Ns.uuidSeq.query.get.map(_.head ==> List(uuid1, uuid2, uuid1, uuid3, uuid4, uuid4, uuid5, uuid6, uuid7))
+        _ <- Ns.uuidSeq.query.get.map(_.head ==> List(uuid1, uuid2, uuid1, uuid3, uuid4, uuid4, uuid5))
       } yield ()
     }
 
@@ -104,14 +97,8 @@ trait UpdateSeqOps_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           uuid1, uuid2, uuid3,
         ))
 
-        // Remove Iterable of values
-        _ <- Ns(id).uuidSeq.remove(List(uuid3)).update.transact
-        _ <- Ns.uuidSeq.query.get.map(_.head ==> List(
-          uuid1, uuid2,
-          uuid1, uuid2,
-        ))
-
-        _ <- Ns(id).uuidSeq.remove(Seq(uuid2)).update.transact
+        // Remove multiple values (Seq)
+        _ <- Ns(id).uuidSeq.remove(List(uuid2, uuid3)).update.transact
         _ <- Ns.uuidSeq.query.get.map(_.head ==> List(
           uuid1,
           uuid1
@@ -121,7 +108,7 @@ trait UpdateSeqOps_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).uuidSeq.remove(List.empty[UUID]).update.transact
         _ <- Ns.uuidSeq.query.get.map(_.head ==> List(uuid1, uuid1))
 
-        // Removing all elements retracts the attribute
+        // Removing all remaining elements deletes the attribute
         _ <- Ns(id).uuidSeq.remove(Seq(uuid1)).update.transact
         _ <- Ns.uuidSeq.query.get.map(_ ==> Nil)
       } yield ()

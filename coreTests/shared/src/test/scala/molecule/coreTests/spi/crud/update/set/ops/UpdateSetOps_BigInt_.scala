@@ -23,7 +23,7 @@ trait UpdateSetOps_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
         _ <- Ns.bigInts.query.get.map(_.head ==> Set(bigInt3, bigInt4))
 
         // Applying empty Set of values deletes previous Set
-        _ <- Ns(id).bigInts(Seq.empty[BigInt]).update.transact
+        _ <- Ns(id).bigInts(Set.empty[BigInt]).update.transact
         _ <- Ns.bigInts.query.get.map(_ ==> Nil)
 
         id <- Ns.bigInts(Set(bigInt1, bigInt2)).save.transact.map(_.id)
@@ -50,53 +50,46 @@ trait UpdateSetOps_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
         _ <- Ns(id).bigInts.add(bigInt3, bigInt4).update.transact
         _ <- Ns.bigInts.query.get.map(_.head ==> Set(bigInt1, bigInt2, bigInt3, bigInt4))
 
-        // Add Iterable of values (existing values unaffected)
-        // Seq
-        _ <- Ns(id).bigInts.add(Seq(bigInt4, bigInt5)).update.transact
-        _ <- Ns.bigInts.query.get.map(_.head ==> Set(bigInt1, bigInt2, bigInt3, bigInt4, bigInt5))
-        // Set
-        _ <- Ns(id).bigInts.add(Set(bigInt6)).update.transact
+        // Add multiple values (Seq)
+        _ <- Ns(id).bigInts.add(Seq(bigInt5, bigInt6)).update.transact
         _ <- Ns.bigInts.query.get.map(_.head ==> Set(bigInt1, bigInt2, bigInt3, bigInt4, bigInt5, bigInt6))
-        // Iterable
-        _ <- Ns(id).bigInts.add(Iterable(bigInt7)).update.transact
-        _ <- Ns.bigInts.query.get.map(_.head ==> Set(bigInt1, bigInt2, bigInt3, bigInt4, bigInt5, bigInt6, bigInt7))
 
-        // Adding empty Iterable of values has no effect
+        // Adding empty Seq of values has no effect
         _ <- Ns(id).bigInts.add(Seq.empty[BigInt]).update.transact
-        _ <- Ns.bigInts.query.get.map(_.head ==> Set(bigInt1, bigInt2, bigInt3, bigInt4, bigInt5, bigInt6, bigInt7))
+        _ <- Ns.bigInts.query.get.map(_.head ==> Set(bigInt1, bigInt2, bigInt3, bigInt4, bigInt5, bigInt6))
       } yield ()
     }
 
 
     "remove" - types { implicit conn =>
       for {
-        id <- Ns.bigInts(Set(bigInt1, bigInt2, bigInt3, bigInt4, bigInt5, bigInt6)).save.transact.map(_.id)
+        id <- Ns.bigInts(Set(bigInt1, bigInt2, bigInt3, bigInt4, bigInt5, bigInt6, bigInt7)).save.transact.map(_.id)
 
         // Remove value
-        _ <- Ns(id).bigInts.remove(bigInt6).update.transact
-        _ <- Ns.bigInts.query.get.map(_.head ==> Set(bigInt1, bigInt2, bigInt3, bigInt4, bigInt5))
+        _ <- Ns(id).bigInts.remove(bigInt7).update.transact
+        _ <- Ns.bigInts.query.get.map(_.head ==> Set(bigInt1, bigInt2, bigInt3, bigInt4, bigInt5, bigInt6))
 
         // Removing non-existing value has no effect
-        _ <- Ns(id).bigInts.remove(bigInt7).update.transact
-        _ <- Ns.bigInts.query.get.map(_.head ==> Set(bigInt1, bigInt2, bigInt3, bigInt4, bigInt5))
+        _ <- Ns(id).bigInts.remove(bigInt9).update.transact
+        _ <- Ns.bigInts.query.get.map(_.head ==> Set(bigInt1, bigInt2, bigInt3, bigInt4, bigInt5, bigInt6))
 
         // Removing duplicate values removes the distinct value
-        _ <- Ns(id).bigInts.remove(bigInt5, bigInt5).update.transact
-        _ <- Ns.bigInts.query.get.map(_.head ==> Set(bigInt1, bigInt2, bigInt3, bigInt4))
+        _ <- Ns(id).bigInts.remove(bigInt6, bigInt6).update.transact
+        _ <- Ns.bigInts.query.get.map(_.head ==> Set(bigInt1, bigInt2, bigInt3, bigInt4, bigInt5))
 
         // Remove multiple values (vararg)
-        _ <- Ns(id).bigInts.remove(bigInt3, bigInt4).update.transact
-        _ <- Ns.bigInts.query.get.map(_.head ==> Set(bigInt1, bigInt2))
+        _ <- Ns(id).bigInts.remove(bigInt4, bigInt5).update.transact
+        _ <- Ns.bigInts.query.get.map(_.head ==> Set(bigInt1, bigInt2, bigInt3))
 
-        // Remove Iterable of values
-        _ <- Ns(id).bigInts.remove(Seq(bigInt2)).update.transact
+        // Remove multiple values (Seq)
+        _ <- Ns(id).bigInts.remove(Seq(bigInt2, bigInt3)).update.transact
         _ <- Ns.bigInts.query.get.map(_.head ==> Set(bigInt1))
 
-        // Removing empty Iterable of values has no effect
+        // Removing empty Seq of values has no effect
         _ <- Ns(id).bigInts.remove(Seq.empty[BigInt]).update.transact
         _ <- Ns.bigInts.query.get.map(_.head ==> Set(bigInt1))
 
-        // Removing all elements retracts the attribute
+        // Removing all remaining elements deletes the attribute
         _ <- Ns(id).bigInts.remove(Seq(bigInt1)).update.transact
         _ <- Ns.bigInts.query.get.map(_ ==> Nil)
       } yield ()

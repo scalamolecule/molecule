@@ -50,20 +50,13 @@ trait UpdateSeqOps_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
         _ <- Ns(id).bigDecimalSeq.add(bigDecimal3, bigDecimal4).update.transact
         _ <- Ns.bigDecimalSeq.query.get.map(_.head ==> List(bigDecimal1, bigDecimal2, bigDecimal1, bigDecimal3, bigDecimal4))
 
-        // Add Iterable of values
-        // Seq
-        _ <- Ns(id).bigDecimalSeq.add(Seq(bigDecimal4, bigDecimal5)).update.transact
+        // Add multiple values (Seq)
+        _ <- Ns(id).bigDecimalSeq.add(List(bigDecimal4, bigDecimal5)).update.transact
         _ <- Ns.bigDecimalSeq.query.get.map(_.head ==> List(bigDecimal1, bigDecimal2, bigDecimal1, bigDecimal3, bigDecimal4, bigDecimal4, bigDecimal5))
-        // Array
-        _ <- Ns(id).bigDecimalSeq.add(List(bigDecimal6)).update.transact
-        _ <- Ns.bigDecimalSeq.query.get.map(_.head ==> List(bigDecimal1, bigDecimal2, bigDecimal1, bigDecimal3, bigDecimal4, bigDecimal4, bigDecimal5, bigDecimal6))
-        // Iterable
-        _ <- Ns(id).bigDecimalSeq.add(Iterable(bigDecimal7)).update.transact
-        _ <- Ns.bigDecimalSeq.query.get.map(_.head ==> List(bigDecimal1, bigDecimal2, bigDecimal1, bigDecimal3, bigDecimal4, bigDecimal4, bigDecimal5, bigDecimal6, bigDecimal7))
 
-        // Adding empty Iterable of values has no effect
+        // Adding empty Seq of values has no effect
         _ <- Ns(id).bigDecimalSeq.add(List.empty[BigDecimal]).update.transact
-        _ <- Ns.bigDecimalSeq.query.get.map(_.head ==> List(bigDecimal1, bigDecimal2, bigDecimal1, bigDecimal3, bigDecimal4, bigDecimal4, bigDecimal5, bigDecimal6, bigDecimal7))
+        _ <- Ns.bigDecimalSeq.query.get.map(_.head ==> List(bigDecimal1, bigDecimal2, bigDecimal1, bigDecimal3, bigDecimal4, bigDecimal4, bigDecimal5))
       } yield ()
     }
 
@@ -103,14 +96,8 @@ trait UpdateSeqOps_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
           bigDecimal1, bigDecimal2, bigDecimal3,
         ))
 
-        // Remove Iterable of values
-        _ <- Ns(id).bigDecimalSeq.remove(List(bigDecimal3)).update.transact
-        _ <- Ns.bigDecimalSeq.query.get.map(_.head ==> List(
-          bigDecimal1, bigDecimal2,
-          bigDecimal1, bigDecimal2,
-        ))
-
-        _ <- Ns(id).bigDecimalSeq.remove(Seq(bigDecimal2)).update.transact
+        // Remove multiple values (Seq)
+        _ <- Ns(id).bigDecimalSeq.remove(List(bigDecimal2, bigDecimal3)).update.transact
         _ <- Ns.bigDecimalSeq.query.get.map(_.head ==> List(
           bigDecimal1,
           bigDecimal1
@@ -120,7 +107,7 @@ trait UpdateSeqOps_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
         _ <- Ns(id).bigDecimalSeq.remove(List.empty[BigDecimal]).update.transact
         _ <- Ns.bigDecimalSeq.query.get.map(_.head ==> List(bigDecimal1, bigDecimal1))
 
-        // Removing all elements retracts the attribute
+        // Removing all remaining elements deletes the attribute
         _ <- Ns(id).bigDecimalSeq.remove(Seq(bigDecimal1)).update.transact
         _ <- Ns.bigDecimalSeq.query.get.map(_ ==> Nil)
       } yield ()

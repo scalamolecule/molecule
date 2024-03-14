@@ -24,19 +24,19 @@ trait SaveCardSeq extends CoreTestSuite with Array2List with ApiAsync { spi: Spi
           |List(2)""".stripMargin
       for {
         // Can't save multiple Sets of values (use insert for that)
-        _ <- Ns.intSeq(List(List(1), Seq(2))).save.transact
+        _ <- Ns.intSeq(Seq(Seq(1), Seq(2))).save.transact
           .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> multipleArrays
           }
 
         // Same as
-        _ <- Ns.intSeq(List(1), Seq(2)).save.transact
+        _ <- Ns.intSeq(Seq(1), Seq(2)).save.transact
           .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> multipleArrays
           }
 
         // Same as
-        _ <- Ns.intSeq(1, 2).save.transact
+        _ <- Ns.intSeq(Seq(1), Seq(2)).save.transact
           .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> multipleArrays
           }

@@ -50,20 +50,13 @@ trait UpdateSeqOps_Char_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).charSeq.add(char3, char4).update.transact
         _ <- Ns.charSeq.query.get.map(_.head ==> List(char1, char2, char1, char3, char4))
 
-        // Add Iterable of values
-        // Seq
-        _ <- Ns(id).charSeq.add(Seq(char4, char5)).update.transact
+        // Add multiple values (Seq)
+        _ <- Ns(id).charSeq.add(List(char4, char5)).update.transact
         _ <- Ns.charSeq.query.get.map(_.head ==> List(char1, char2, char1, char3, char4, char4, char5))
-        // Array
-        _ <- Ns(id).charSeq.add(List(char6)).update.transact
-        _ <- Ns.charSeq.query.get.map(_.head ==> List(char1, char2, char1, char3, char4, char4, char5, char6))
-        // Iterable
-        _ <- Ns(id).charSeq.add(Iterable(char7)).update.transact
-        _ <- Ns.charSeq.query.get.map(_.head ==> List(char1, char2, char1, char3, char4, char4, char5, char6, char7))
 
-        // Adding empty Iterable of values has no effect
+        // Adding empty Seq of values has no effect
         _ <- Ns(id).charSeq.add(List.empty[Char]).update.transact
-        _ <- Ns.charSeq.query.get.map(_.head ==> List(char1, char2, char1, char3, char4, char4, char5, char6, char7))
+        _ <- Ns.charSeq.query.get.map(_.head ==> List(char1, char2, char1, char3, char4, char4, char5))
       } yield ()
     }
 
@@ -103,14 +96,8 @@ trait UpdateSeqOps_Char_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           char1, char2, char3,
         ))
 
-        // Remove Iterable of values
-        _ <- Ns(id).charSeq.remove(List(char3)).update.transact
-        _ <- Ns.charSeq.query.get.map(_.head ==> List(
-          char1, char2,
-          char1, char2,
-        ))
-
-        _ <- Ns(id).charSeq.remove(Seq(char2)).update.transact
+        // Remove multiple values (Seq)
+        _ <- Ns(id).charSeq.remove(List(char2, char3)).update.transact
         _ <- Ns.charSeq.query.get.map(_.head ==> List(
           char1,
           char1
@@ -120,7 +107,7 @@ trait UpdateSeqOps_Char_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).charSeq.remove(List.empty[Char]).update.transact
         _ <- Ns.charSeq.query.get.map(_.head ==> List(char1, char1))
 
-        // Removing all elements retracts the attribute
+        // Removing all remaining elements deletes the attribute
         _ <- Ns(id).charSeq.remove(Seq(char1)).update.transact
         _ <- Ns.charSeq.query.get.map(_ ==> Nil)
       } yield ()

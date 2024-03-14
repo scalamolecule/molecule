@@ -30,6 +30,11 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
       placeHolders = placeHolders :+ s"$attr = ?"
       val colSetter = sets match {
         case Seq(set) =>
+          if (set.nonEmpty) {
+
+          } else {
+
+          }
           if (!isUpsert) {
             addToUpdateCols(ns, attr)
           }
@@ -58,11 +63,21 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
       val id        = getUpdateId
       sets match {
         case Seq(set) =>
-          // Tables are reversed in JdbcConn_JVM and we want to delete first
-          manualTableDatas = List(
-            addJoins(joinTable, ns_id, refNs_id, id, set.map(_.asInstanceOf[String].toLong)),
-            deleteJoins(joinTable, ns_id, id)
-          )
+          if (set.nonEmpty) {
+
+          } else {
+
+          }
+          if (set.nonEmpty) {
+            // Tables are reversed in JdbcConn_JVM and we want to delete first
+            manualTableDatas = List(
+              addJoins(joinTable, ns_id, refNs_id, id, set.map(_.asInstanceOf[String].toLong)),
+              deleteJoins(joinTable, ns_id, id)
+            )
+          } else {
+            // Delete all joins when no ref ids are applied
+            manualTableDatas = List(deleteJoins(joinTable, ns_id, id))
+          }
         case Nil      =>
           // Delete all joins when no ref ids are applied
           manualTableDatas = List(deleteJoins(joinTable, ns_id, id))

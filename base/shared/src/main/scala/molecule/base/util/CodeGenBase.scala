@@ -80,7 +80,7 @@ trait CodeGenBase extends BaseHelpers {
     "Char" -> "String",
   )
 
-  // All types except Int
+  // All types except Int and Boolean
   val tpeVarImp = List(
     ("String", "String", "string", ""),
     ("Long", "Long", "long", ""),

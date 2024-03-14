@@ -37,9 +37,9 @@ trait Model extends Validations with Values with BaseHelpers {
     val owner: Boolean = false
 
     def name: String = ns + "." + attr
-    def cleanNs: String = ns.replace("_", "")
 
     // skip underscore from keyword collision prevention re-namings in schemas
+    def cleanNs: String = ns.replace("_", "")
     def cleanAttr: String = attr.replace("_", "")
     def cleanName: String = cleanNs + "." + cleanAttr
 
@@ -138,9 +138,9 @@ trait Model extends Validations with Values with BaseHelpers {
 
 
   // GENERATED from here and below (edit in _Model generator) ======================================
-  
+
   sealed trait AttrOneMan extends AttrOne with Mandatory
-  
+
   case class AttrOneManID(
     override val ns: String,
     override val attr: String,
@@ -601,7 +601,7 @@ trait Model extends Validations with Values with BaseHelpers {
 
 
   sealed trait AttrOneOpt extends AttrOne with Optional
-  
+
   case class AttrOneOptID(
     override val ns: String,
     override val attr: String,
@@ -1062,7 +1062,7 @@ trait Model extends Validations with Values with BaseHelpers {
 
 
   sealed trait AttrOneTac extends AttrOne with Tacit
-  
+
   case class AttrOneTacID(
     override val ns: String,
     override val attr: String,
@@ -1523,7 +1523,7 @@ trait Model extends Validations with Values with BaseHelpers {
 
 
   sealed trait AttrSetMan extends AttrSet with Mandatory
-  
+
   case class AttrSetManID(
     override val ns: String,
     override val attr: String,
@@ -1984,7 +1984,7 @@ trait Model extends Validations with Values with BaseHelpers {
 
 
   sealed trait AttrSetOpt extends AttrSet with Optional
-  
+
   case class AttrSetOptID(
     override val ns: String,
     override val attr: String,
@@ -2445,7 +2445,7 @@ trait Model extends Validations with Values with BaseHelpers {
 
 
   sealed trait AttrSetTac extends AttrSet with Tacit
-  
+
   case class AttrSetTacID(
     override val ns: String,
     override val attr: String,
@@ -2906,7 +2906,7 @@ trait Model extends Validations with Values with BaseHelpers {
 
 
   sealed trait AttrSeqMan extends AttrSeq with Mandatory
-  
+
   case class AttrSeqManID(
     override val ns: String,
     override val attr: String,
@@ -3367,7 +3367,7 @@ trait Model extends Validations with Values with BaseHelpers {
 
 
   sealed trait AttrSeqOpt extends AttrSeq with Optional
-  
+
   case class AttrSeqOptID(
     override val ns: String,
     override val attr: String,
@@ -3828,7 +3828,7 @@ trait Model extends Validations with Values with BaseHelpers {
 
 
   sealed trait AttrSeqTac extends AttrSeq with Tacit
-  
+
   case class AttrSeqTacID(
     override val ns: String,
     override val attr: String,
@@ -4289,7 +4289,7 @@ trait Model extends Validations with Values with BaseHelpers {
 
 
   sealed trait AttrMapMan extends AttrMap with Mandatory
-  
+
   case class AttrMapManID(
     override val ns: String,
     override val attr: String,
@@ -4750,7 +4750,7 @@ trait Model extends Validations with Values with BaseHelpers {
 
 
   sealed trait AttrMapOpt extends AttrMap with Optional
-  
+
   case class AttrMapOptID(
     override val ns: String,
     override val attr: String,
@@ -5211,7 +5211,7 @@ trait Model extends Validations with Values with BaseHelpers {
 
 
   sealed trait AttrMapTac extends AttrMap with Tacit
-  
+
   case class AttrMapTacID(
     override val ns: String,
     override val attr: String,

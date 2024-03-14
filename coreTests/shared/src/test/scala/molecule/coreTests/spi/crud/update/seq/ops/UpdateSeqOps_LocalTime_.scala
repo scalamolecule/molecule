@@ -51,20 +51,13 @@ trait UpdateSeqOps_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
         _ <- Ns(id).localTimeSeq.add(localTime3, localTime4).update.transact
         _ <- Ns.localTimeSeq.query.get.map(_.head ==> List(localTime1, localTime2, localTime1, localTime3, localTime4))
 
-        // Add Iterable of values
-        // Seq
-        _ <- Ns(id).localTimeSeq.add(Seq(localTime4, localTime5)).update.transact
+        // Add multiple values (Seq)
+        _ <- Ns(id).localTimeSeq.add(List(localTime4, localTime5)).update.transact
         _ <- Ns.localTimeSeq.query.get.map(_.head ==> List(localTime1, localTime2, localTime1, localTime3, localTime4, localTime4, localTime5))
-        // Array
-        _ <- Ns(id).localTimeSeq.add(List(localTime6)).update.transact
-        _ <- Ns.localTimeSeq.query.get.map(_.head ==> List(localTime1, localTime2, localTime1, localTime3, localTime4, localTime4, localTime5, localTime6))
-        // Iterable
-        _ <- Ns(id).localTimeSeq.add(Iterable(localTime7)).update.transact
-        _ <- Ns.localTimeSeq.query.get.map(_.head ==> List(localTime1, localTime2, localTime1, localTime3, localTime4, localTime4, localTime5, localTime6, localTime7))
 
-        // Adding empty Iterable of values has no effect
+        // Adding empty Seq of values has no effect
         _ <- Ns(id).localTimeSeq.add(List.empty[LocalTime]).update.transact
-        _ <- Ns.localTimeSeq.query.get.map(_.head ==> List(localTime1, localTime2, localTime1, localTime3, localTime4, localTime4, localTime5, localTime6, localTime7))
+        _ <- Ns.localTimeSeq.query.get.map(_.head ==> List(localTime1, localTime2, localTime1, localTime3, localTime4, localTime4, localTime5))
       } yield ()
     }
 
@@ -104,14 +97,8 @@ trait UpdateSeqOps_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
           localTime1, localTime2, localTime3,
         ))
 
-        // Remove Iterable of values
-        _ <- Ns(id).localTimeSeq.remove(List(localTime3)).update.transact
-        _ <- Ns.localTimeSeq.query.get.map(_.head ==> List(
-          localTime1, localTime2,
-          localTime1, localTime2,
-        ))
-
-        _ <- Ns(id).localTimeSeq.remove(Seq(localTime2)).update.transact
+        // Remove multiple values (Seq)
+        _ <- Ns(id).localTimeSeq.remove(List(localTime2, localTime3)).update.transact
         _ <- Ns.localTimeSeq.query.get.map(_.head ==> List(
           localTime1,
           localTime1
@@ -121,7 +108,7 @@ trait UpdateSeqOps_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
         _ <- Ns(id).localTimeSeq.remove(List.empty[LocalTime]).update.transact
         _ <- Ns.localTimeSeq.query.get.map(_.head ==> List(localTime1, localTime1))
 
-        // Removing all elements retracts the attribute
+        // Removing all remaining elements deletes the attribute
         _ <- Ns(id).localTimeSeq.remove(Seq(localTime1)).update.transact
         _ <- Ns.localTimeSeq.query.get.map(_ ==> Nil)
       } yield ()

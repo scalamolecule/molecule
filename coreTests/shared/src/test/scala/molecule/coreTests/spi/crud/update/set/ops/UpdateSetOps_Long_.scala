@@ -23,7 +23,7 @@ trait UpdateSetOps_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.longs.query.get.map(_.head ==> Set(long3, long4))
 
         // Applying empty Set of values deletes previous Set
-        _ <- Ns(id).longs(Seq.empty[Long]).update.transact
+        _ <- Ns(id).longs(Set.empty[Long]).update.transact
         _ <- Ns.longs.query.get.map(_ ==> Nil)
 
         id <- Ns.longs(Set(long1, long2)).save.transact.map(_.id)
@@ -50,53 +50,46 @@ trait UpdateSetOps_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).longs.add(long3, long4).update.transact
         _ <- Ns.longs.query.get.map(_.head ==> Set(long1, long2, long3, long4))
 
-        // Add Iterable of values (existing values unaffected)
-        // Seq
-        _ <- Ns(id).longs.add(Seq(long4, long5)).update.transact
-        _ <- Ns.longs.query.get.map(_.head ==> Set(long1, long2, long3, long4, long5))
-        // Set
-        _ <- Ns(id).longs.add(Set(long6)).update.transact
+        // Add multiple values (Seq)
+        _ <- Ns(id).longs.add(Seq(long5, long6)).update.transact
         _ <- Ns.longs.query.get.map(_.head ==> Set(long1, long2, long3, long4, long5, long6))
-        // Iterable
-        _ <- Ns(id).longs.add(Iterable(long7)).update.transact
-        _ <- Ns.longs.query.get.map(_.head ==> Set(long1, long2, long3, long4, long5, long6, long7))
 
-        // Adding empty Iterable of values has no effect
+        // Adding empty Seq of values has no effect
         _ <- Ns(id).longs.add(Seq.empty[Long]).update.transact
-        _ <- Ns.longs.query.get.map(_.head ==> Set(long1, long2, long3, long4, long5, long6, long7))
+        _ <- Ns.longs.query.get.map(_.head ==> Set(long1, long2, long3, long4, long5, long6))
       } yield ()
     }
 
 
     "remove" - types { implicit conn =>
       for {
-        id <- Ns.longs(Set(long1, long2, long3, long4, long5, long6)).save.transact.map(_.id)
+        id <- Ns.longs(Set(long1, long2, long3, long4, long5, long6, long7)).save.transact.map(_.id)
 
         // Remove value
-        _ <- Ns(id).longs.remove(long6).update.transact
-        _ <- Ns.longs.query.get.map(_.head ==> Set(long1, long2, long3, long4, long5))
+        _ <- Ns(id).longs.remove(long7).update.transact
+        _ <- Ns.longs.query.get.map(_.head ==> Set(long1, long2, long3, long4, long5, long6))
 
         // Removing non-existing value has no effect
-        _ <- Ns(id).longs.remove(long7).update.transact
-        _ <- Ns.longs.query.get.map(_.head ==> Set(long1, long2, long3, long4, long5))
+        _ <- Ns(id).longs.remove(long9).update.transact
+        _ <- Ns.longs.query.get.map(_.head ==> Set(long1, long2, long3, long4, long5, long6))
 
         // Removing duplicate values removes the distinct value
-        _ <- Ns(id).longs.remove(long5, long5).update.transact
-        _ <- Ns.longs.query.get.map(_.head ==> Set(long1, long2, long3, long4))
+        _ <- Ns(id).longs.remove(long6, long6).update.transact
+        _ <- Ns.longs.query.get.map(_.head ==> Set(long1, long2, long3, long4, long5))
 
         // Remove multiple values (vararg)
-        _ <- Ns(id).longs.remove(long3, long4).update.transact
-        _ <- Ns.longs.query.get.map(_.head ==> Set(long1, long2))
+        _ <- Ns(id).longs.remove(long4, long5).update.transact
+        _ <- Ns.longs.query.get.map(_.head ==> Set(long1, long2, long3))
 
-        // Remove Iterable of values
-        _ <- Ns(id).longs.remove(Seq(long2)).update.transact
+        // Remove multiple values (Seq)
+        _ <- Ns(id).longs.remove(Seq(long2, long3)).update.transact
         _ <- Ns.longs.query.get.map(_.head ==> Set(long1))
 
-        // Removing empty Iterable of values has no effect
+        // Removing empty Seq of values has no effect
         _ <- Ns(id).longs.remove(Seq.empty[Long]).update.transact
         _ <- Ns.longs.query.get.map(_.head ==> Set(long1))
 
-        // Removing all elements retracts the attribute
+        // Removing all remaining elements deletes the attribute
         _ <- Ns(id).longs.remove(Seq(long1)).update.transact
         _ <- Ns.longs.query.get.map(_ ==> Nil)
       } yield ()

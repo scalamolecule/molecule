@@ -51,20 +51,13 @@ trait UpdateSeqOps_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
         _ <- Ns(id).localDateSeq.add(localDate3, localDate4).update.transact
         _ <- Ns.localDateSeq.query.get.map(_.head ==> List(localDate1, localDate2, localDate1, localDate3, localDate4))
 
-        // Add Iterable of values
-        // Seq
-        _ <- Ns(id).localDateSeq.add(Seq(localDate4, localDate5)).update.transact
+        // Add multiple values (Seq)
+        _ <- Ns(id).localDateSeq.add(List(localDate4, localDate5)).update.transact
         _ <- Ns.localDateSeq.query.get.map(_.head ==> List(localDate1, localDate2, localDate1, localDate3, localDate4, localDate4, localDate5))
-        // Array
-        _ <- Ns(id).localDateSeq.add(List(localDate6)).update.transact
-        _ <- Ns.localDateSeq.query.get.map(_.head ==> List(localDate1, localDate2, localDate1, localDate3, localDate4, localDate4, localDate5, localDate6))
-        // Iterable
-        _ <- Ns(id).localDateSeq.add(Iterable(localDate7)).update.transact
-        _ <- Ns.localDateSeq.query.get.map(_.head ==> List(localDate1, localDate2, localDate1, localDate3, localDate4, localDate4, localDate5, localDate6, localDate7))
 
-        // Adding empty Iterable of values has no effect
+        // Adding empty Seq of values has no effect
         _ <- Ns(id).localDateSeq.add(List.empty[LocalDate]).update.transact
-        _ <- Ns.localDateSeq.query.get.map(_.head ==> List(localDate1, localDate2, localDate1, localDate3, localDate4, localDate4, localDate5, localDate6, localDate7))
+        _ <- Ns.localDateSeq.query.get.map(_.head ==> List(localDate1, localDate2, localDate1, localDate3, localDate4, localDate4, localDate5))
       } yield ()
     }
 
@@ -104,14 +97,8 @@ trait UpdateSeqOps_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
           localDate1, localDate2, localDate3,
         ))
 
-        // Remove Iterable of values
-        _ <- Ns(id).localDateSeq.remove(List(localDate3)).update.transact
-        _ <- Ns.localDateSeq.query.get.map(_.head ==> List(
-          localDate1, localDate2,
-          localDate1, localDate2,
-        ))
-
-        _ <- Ns(id).localDateSeq.remove(Seq(localDate2)).update.transact
+        // Remove multiple values (Seq)
+        _ <- Ns(id).localDateSeq.remove(List(localDate2, localDate3)).update.transact
         _ <- Ns.localDateSeq.query.get.map(_.head ==> List(
           localDate1,
           localDate1
@@ -121,7 +108,7 @@ trait UpdateSeqOps_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
         _ <- Ns(id).localDateSeq.remove(List.empty[LocalDate]).update.transact
         _ <- Ns.localDateSeq.query.get.map(_.head ==> List(localDate1, localDate1))
 
-        // Removing all elements retracts the attribute
+        // Removing all remaining elements deletes the attribute
         _ <- Ns(id).localDateSeq.remove(Seq(localDate1)).update.transact
         _ <- Ns.localDateSeq.query.get.map(_ ==> Nil)
       } yield ()

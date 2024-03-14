@@ -20,15 +20,11 @@ object _ExprBArMan extends BoilerplateGenBase("ExprBArMan", "/api/expression") {
     val body =
       s"""
          |
-         |trait ${fileName}Ops_$arity[${`A..V`}, t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]] extends ExprAttr_$arity[${`A..V, `}t, Ns1, Ns2] {
-         |  protected def _exprBArMan(op: Op, ba: Seq[Array[t]]): Ns1[${`A..V`}, t] = ???
-         |}
-         |
          |trait $fileName_$arity[${`A..V`}, t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]]
-         |  extends ${fileName}Ops_$arity[${`A..V`}, t, Ns1, Ns2]
+         |  extends ExprBArTacOps_$arity[${`A..V`}, t, Ns1, Ns2]
          |    with Aggregates_$arity[${`A..V`}, t, Ns1] {
-         |  def apply(            ): Ns1[${`A..V`}, t] = _exprBArMan(Eq, Nil    )
-         |  def apply(ba: Array[t]): Ns1[${`A..V`}, t] = _exprBArMan(Eq, Seq(ba))
+         |  def apply(            ): Ns1[${`A..V`}, t] = _exprBAr(Eq, Nil    )
+         |  def apply(ba: Array[t]): Ns1[${`A..V`}, t] = _exprBAr(Eq, Seq(ba))
          |}""".stripMargin
   }
 }

@@ -51,20 +51,13 @@ trait UpdateSeqOps_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: Spi
         _ <- Ns(id).localDateTimeSeq.add(localDateTime3, localDateTime4).update.transact
         _ <- Ns.localDateTimeSeq.query.get.map(_.head ==> List(localDateTime1, localDateTime2, localDateTime1, localDateTime3, localDateTime4))
 
-        // Add Iterable of values
-        // Seq
-        _ <- Ns(id).localDateTimeSeq.add(Seq(localDateTime4, localDateTime5)).update.transact
+        // Add multiple values (Seq)
+        _ <- Ns(id).localDateTimeSeq.add(List(localDateTime4, localDateTime5)).update.transact
         _ <- Ns.localDateTimeSeq.query.get.map(_.head ==> List(localDateTime1, localDateTime2, localDateTime1, localDateTime3, localDateTime4, localDateTime4, localDateTime5))
-        // Array
-        _ <- Ns(id).localDateTimeSeq.add(List(localDateTime6)).update.transact
-        _ <- Ns.localDateTimeSeq.query.get.map(_.head ==> List(localDateTime1, localDateTime2, localDateTime1, localDateTime3, localDateTime4, localDateTime4, localDateTime5, localDateTime6))
-        // Iterable
-        _ <- Ns(id).localDateTimeSeq.add(Iterable(localDateTime7)).update.transact
-        _ <- Ns.localDateTimeSeq.query.get.map(_.head ==> List(localDateTime1, localDateTime2, localDateTime1, localDateTime3, localDateTime4, localDateTime4, localDateTime5, localDateTime6, localDateTime7))
 
-        // Adding empty Iterable of values has no effect
+        // Adding empty Seq of values has no effect
         _ <- Ns(id).localDateTimeSeq.add(List.empty[LocalDateTime]).update.transact
-        _ <- Ns.localDateTimeSeq.query.get.map(_.head ==> List(localDateTime1, localDateTime2, localDateTime1, localDateTime3, localDateTime4, localDateTime4, localDateTime5, localDateTime6, localDateTime7))
+        _ <- Ns.localDateTimeSeq.query.get.map(_.head ==> List(localDateTime1, localDateTime2, localDateTime1, localDateTime3, localDateTime4, localDateTime4, localDateTime5))
       } yield ()
     }
 
@@ -104,14 +97,8 @@ trait UpdateSeqOps_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: Spi
           localDateTime1, localDateTime2, localDateTime3,
         ))
 
-        // Remove Iterable of values
-        _ <- Ns(id).localDateTimeSeq.remove(List(localDateTime3)).update.transact
-        _ <- Ns.localDateTimeSeq.query.get.map(_.head ==> List(
-          localDateTime1, localDateTime2,
-          localDateTime1, localDateTime2,
-        ))
-
-        _ <- Ns(id).localDateTimeSeq.remove(Seq(localDateTime2)).update.transact
+        // Remove multiple values (Seq)
+        _ <- Ns(id).localDateTimeSeq.remove(List(localDateTime2, localDateTime3)).update.transact
         _ <- Ns.localDateTimeSeq.query.get.map(_.head ==> List(
           localDateTime1,
           localDateTime1
@@ -121,7 +108,7 @@ trait UpdateSeqOps_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: Spi
         _ <- Ns(id).localDateTimeSeq.remove(List.empty[LocalDateTime]).update.transact
         _ <- Ns.localDateTimeSeq.query.get.map(_.head ==> List(localDateTime1, localDateTime1))
 
-        // Removing all elements retracts the attribute
+        // Removing all remaining elements deletes the attribute
         _ <- Ns(id).localDateTimeSeq.remove(Seq(localDateTime1)).update.transact
         _ <- Ns.localDateTimeSeq.query.get.map(_ ==> Nil)
       } yield ()

@@ -1,13 +1,9 @@
-
-
 ![](project/resources/Molecule-logo.png)
-
-
 
 Molecule is a Scala library to build queries and transactions with the words of your domain for various databases:
 
 - Document
-    - [MongoDB](http://www.mongodb.com)    
+    - [MongoDB](http://www.mongodb.com)
 - Datalog
     - [Datomic](http://www.datomic.com)
 - SQL
@@ -16,23 +12,25 @@ Molecule is a Scala library to build queries and transactions with the words of 
     - [MariaDB](https://mariadb.com)
     - [H2](https://h2database.com/html/main.html)
 
-
-Molecule generates boilerplate code from your domain data model. You can then access multiple databases in a uniform way with
+Molecule generates boilerplate code from your domain data model. You can then access multiple databases in a uniform way
+with
 "molecules" like this:
 
 ```scala
 val persons = Person.name.age.Address.street.query.get
 ```
-The returned `persons` are typed as `List[(String, Int, String)]` and can also be fetched asynchronously as a `Future` or a `ZIO`. 
-Notice how the relationship from Person to Address is intuitively created. Much more complex queries can also be created 
-easily without having to know the query languages of the underlying databases. 
 
+The returned `persons` are typed as `List[(String, Int, String)]` and can also be fetched asynchronously as a `Future`
+or a `ZIO`.
+Notice how the relationship from Person to Address is intuitively created. Much more complex queries can also be created
+easily without having to know the query languages of the underlying databases.
 
 ### Features
 
 - Targets Scala 3.3, 2.13 and 2.12 on JVM and JS platforms
 - Typed database calls directly from Client with no need for Server implementation or JSON encoding/decoding
-- Fast transparent binary serialization between Client and Server with [Boopickle](https://boopickle.suzaku.io) (no manual setup)
+- Fast transparent binary serialization between Client and Server with [Boopickle](https://boopickle.suzaku.io) (no
+  manual setup)
 - Single SPI of +1800 tests adhered to by each database implementation
 - No macros
 - No complex type class implicits
@@ -70,7 +68,7 @@ easily without having to know the query languages of the underlying databases.
 - Validation
 - Pagination (offset/cursor)
 - Sorting
-- Subscriptions 
+- Subscriptions
 
 Documentation at [scalamolecule.org](http://scalamolecule.org) still documents the old macro-based version of molecule
 but will be updated to the new version. Most concepts overlap.
@@ -79,10 +77,12 @@ but will be updated to the new version. Most concepts overlap.
 
 1) Define a domain data model.
 2) Run `sbt compile -Dmolecule=true` once to generate molecule-enabling boilerplate code from
-your [domain data model definition](https://github.com/scalamolecule/molecule/tree/main/coreTests/shared/src/main/scala/molecule/coreTests/dataModels/core/dataModel).
-The [sbt-molecule](https://github.com/scalamolecule/sbt-molecule) plugin automatically also creates database schemas for
-all database types. Now you can easily read and write data to/from a database with plain vanilla Scala code in a fluent
-style (see examples below).
+   your [domain data model definition](https://github.com/scalamolecule/molecule/tree/main/coreTests/shared/src/main/scala/molecule/coreTests/dataModels/core/dataModel).
+   The [sbt-molecule](https://github.com/scalamolecule/sbt-molecule) plugin automatically also creates database schemas
+   for
+   all database types. Now you can easily read and write data to/from a database with plain vanilla Scala code in a
+   fluent
+   style (see examples below).
 3) Write molecule transactions/queries.
 
 ### Examples
@@ -202,8 +202,8 @@ in order to offer all functionality of Molecule.
 
 ### Run jvm tests
 
-Make sure Docker is running to run tests for MongoDB, MariaDB, Mysql and Postgress (Datomic and H2 run in-memory). 
-For instance on a mac you can start Docker Desktop. 
+Make sure Docker is running to run tests for MongoDB, MariaDB, Mysql and Postgress (Datomic and H2 run in-memory).
+For instance on a mac you can start Docker Desktop.
 
 Run the same test suite on jvm targeting various databases:
 
@@ -226,17 +226,33 @@ Then in another process/terminal window:
 
 (Scalajs tests don't work with Scala 3.x yet)
 
-### Publish locally
+### Test latest snapshot locally
 
-To be completely up-to-date, you can pull the latest changes from Github and publish molecule locally (for Scala 2.13):
+To be completely up-to-date, you can pull the latest snapshot from Github.
+Initially you clone the `sbt-molecule` and `molecule` repositories
 
+    git clone https://github.com/scalamolecule/sbt-molecule.git
+    cd ..
+    git clone https://github.com/scalamolecule/molecule.git
+
+And hereafter you can just pull the latest changes in each repository directory
+
+    cd sbt-molecule
     git pull
-    sbt publishLocal
+    cd ../molecule
+    git pull
 
-Or target other Scala versions:
+To generate the boilerplate code with the latest plugin, run the following commands:
 
-    sbt ++3.3.3 publishLocal
-    sbt ++2.12.19 publishLocal
+    cd molecule
+    sbt ++2.12.19 "project baseJVM" publishLocal  # Used by sbt-molecule
+    cd ../sbt-molecule
+    sbt publishLocal                              # Make the plugin available
+    cd ../molecule
+    sbt compile -Dmolecule=true                   # Generate boilerplate code
+
+Now the boilerplate code for the core tests is generated and the various test suites can be run from your IDE
+(be prepared that it takes a while to compile all the tests for all SPI implementations).
 
 ### Author
 

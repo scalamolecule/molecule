@@ -9,6 +9,8 @@ object _ExprSeqTac extends BoilerplateGenBase("ExprSeqTac", "/api/expression") {
     s"""// GENERATED CODE ********************************
        |package molecule.boilerplate.api.expression
        |
+       |import molecule.base.ast._
+       |import molecule.boilerplate.api._
        |import molecule.boilerplate.ast.Model._
        |$traits
        |""".stripMargin
@@ -38,28 +40,24 @@ object _ExprSeqTac extends BoilerplateGenBase("ExprSeqTac", "/api/expression") {
       s"""
          |
          |trait ${fileName}Ops_$arity[${`A..V, `}t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]] extends ExprAttr_$arity[${`A..V, `}t, Ns1, Ns2] {
-         |  protected def _exprSeqTac(op: Op, seqs: Seq[Seq[t]]): Ns1[${`A..V, `}t] = ???
+         |  protected def _exprSeq(op: Op, seqs: Seq[Seq[t]]): Ns1[${`A..V, `}t] = ???
          |}
          |
          |trait $fileName_$arity[${`A..V, `}t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]]
          |  extends ${fileName}Ops_$arity[${`A..V, `}t, Ns1, Ns2] {
-         |  def apply (                           ): Ns1[${`A..V, `}t] = _exprSeqTac(NoValue, Nil                       )
-         |  def apply (v   : t, vs: t*            ): Ns1[${`A..V, `}t] = _exprSeqTac(Eq     , (v +: vs).map(v => Seq(v)))
-         |  def apply (seq : Seq[t], seqs: Seq[t]*): Ns1[${`A..V, `}t] = _exprSeqTac(Eq     , seq +: seqs               )
-         |  def apply (seqs: Seq[Seq[t]]          ): Ns1[${`A..V, `}t] = _exprSeqTac(Eq     , seqs                      )
-         |  def not   (v   : t, vs: t*            ): Ns1[${`A..V, `}t] = _exprSeqTac(Neq    , (v +: vs).map(v => Seq(v)))
-         |  def not   (seq : Seq[t], seqs: Seq[t]*): Ns1[${`A..V, `}t] = _exprSeqTac(Neq    , seq +: seqs               )
-         |  def not   (seqs: Seq[Seq[t]]          ): Ns1[${`A..V, `}t] = _exprSeqTac(Neq    , seqs                      )
-         |  def has   (v   : t, vs: t*            ): Ns1[${`A..V, `}t] = _exprSeqTac(Has    , (v +: vs).map(v => Seq(v)))
-         |  def has   (seq : Seq[t], seqs: Seq[t]*): Ns1[${`A..V, `}t] = _exprSeqTac(Has    , seq +: seqs               )
-         |  def has   (seqs: Seq[Seq[t]]          ): Ns1[${`A..V, `}t] = _exprSeqTac(Has    , seqs                      )
-         |  def hasNo (v   : t, vs: t*            ): Ns1[${`A..V, `}t] = _exprSeqTac(HasNo  , (v +: vs).map(v => Seq(v)))
-         |  def hasNo (seq : Seq[t], seqs: Seq[t]*): Ns1[${`A..V, `}t] = _exprSeqTac(HasNo  , seq +: seqs               )
-         |  def hasNo (seqs: Seq[Seq[t]]          ): Ns1[${`A..V, `}t] = _exprSeqTac(HasNo  , seqs                      )
-         |  def add   (v   : t, vs: t*            ): Ns1[${`A..V, `}t] = _exprSeqTac(Add    , Seq(v +: vs)              )
-         |  def add   (vs  : Iterable[t]          ): Ns1[${`A..V, `}t] = _exprSeqTac(Add    , Seq(vs.toSeq)             )
-         |  def remove(v   : t, vs: t*            ): Ns1[${`A..V, `}t] = _exprSeqTac(Remove , Seq(v +: vs)              )
-         |  def remove(vs  : Iterable[t]          ): Ns1[${`A..V, `}t] = _exprSeqTac(Remove , Seq(vs.toSeq)             )
+         |  def apply (                           ): Ns1[${`A..V, `}t] = _exprSeq(NoValue, Nil                       )
+         |  def apply (seq : Seq[t], seqs: Seq[t]*): Ns1[${`A..V, `}t] = _exprSeq(Eq     , seq +: seqs               )
+         |  def apply (seqs: Seq[Seq[t]]          ): Ns1[${`A..V, `}t] = _exprSeq(Eq     , seqs                      )
+         |  def not   (seq : Seq[t], seqs: Seq[t]*): Ns1[${`A..V, `}t] = _exprSeq(Neq    , seq +: seqs               )
+         |  def not   (seqs: Seq[Seq[t]]          ): Ns1[${`A..V, `}t] = _exprSeq(Neq    , seqs                      )
+         |  def has   (v   : t, vs: t*            ): Ns1[${`A..V, `}t] = _exprSeq(Has    , (v +: vs).map(v => Seq(v)))
+         |  def has   (seq : Seq[t]               ): Ns1[${`A..V, `}t] = _exprSeq(Has    , Seq(seq)                  )
+         |  def hasNo (v   : t, vs: t*            ): Ns1[${`A..V, `}t] = _exprSeq(HasNo  , (v +: vs).map(v => Seq(v)))
+         |  def hasNo (seq : Seq[t]               ): Ns1[${`A..V, `}t] = _exprSeq(HasNo  , Seq(seq)                  )
+         |  def add   (v   : t, vs: t*            ): Ns1[${`A..V, `}t] = _exprSeq(Add    , Seq(v +: vs)              )
+         |  def add   (vs  : Seq[t]               ): Ns1[${`A..V, `}t] = _exprSeq(Add    , Seq(vs.toSeq)             )
+         |  def remove(v   : t, vs: t*            ): Ns1[${`A..V, `}t] = _exprSeq(Remove , Seq(v +: vs)              )
+         |  def remove(vs  : Seq[t]               ): Ns1[${`A..V, `}t] = _exprSeq(Remove , Seq(vs.toSeq)             )
          |  $attrExprs
          |}""".stripMargin
   }

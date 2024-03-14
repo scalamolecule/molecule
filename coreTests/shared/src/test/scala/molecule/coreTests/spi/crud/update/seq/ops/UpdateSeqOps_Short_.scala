@@ -50,20 +50,13 @@ trait UpdateSeqOps_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).shortSeq.add(short3, short4).update.transact
         _ <- Ns.shortSeq.query.get.map(_.head ==> List(short1, short2, short1, short3, short4))
 
-        // Add Iterable of values
-        // Seq
-        _ <- Ns(id).shortSeq.add(Seq(short4, short5)).update.transact
+        // Add multiple values (Seq)
+        _ <- Ns(id).shortSeq.add(List(short4, short5)).update.transact
         _ <- Ns.shortSeq.query.get.map(_.head ==> List(short1, short2, short1, short3, short4, short4, short5))
-        // Array
-        _ <- Ns(id).shortSeq.add(List(short6)).update.transact
-        _ <- Ns.shortSeq.query.get.map(_.head ==> List(short1, short2, short1, short3, short4, short4, short5, short6))
-        // Iterable
-        _ <- Ns(id).shortSeq.add(Iterable(short7)).update.transact
-        _ <- Ns.shortSeq.query.get.map(_.head ==> List(short1, short2, short1, short3, short4, short4, short5, short6, short7))
 
-        // Adding empty Iterable of values has no effect
+        // Adding empty Seq of values has no effect
         _ <- Ns(id).shortSeq.add(List.empty[Short]).update.transact
-        _ <- Ns.shortSeq.query.get.map(_.head ==> List(short1, short2, short1, short3, short4, short4, short5, short6, short7))
+        _ <- Ns.shortSeq.query.get.map(_.head ==> List(short1, short2, short1, short3, short4, short4, short5))
       } yield ()
     }
 
@@ -103,14 +96,8 @@ trait UpdateSeqOps_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           short1, short2, short3,
         ))
 
-        // Remove Iterable of values
-        _ <- Ns(id).shortSeq.remove(List(short3)).update.transact
-        _ <- Ns.shortSeq.query.get.map(_.head ==> List(
-          short1, short2,
-          short1, short2,
-        ))
-
-        _ <- Ns(id).shortSeq.remove(Seq(short2)).update.transact
+        // Remove multiple values (Seq)
+        _ <- Ns(id).shortSeq.remove(List(short2, short3)).update.transact
         _ <- Ns.shortSeq.query.get.map(_.head ==> List(
           short1,
           short1
@@ -120,7 +107,7 @@ trait UpdateSeqOps_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).shortSeq.remove(List.empty[Short]).update.transact
         _ <- Ns.shortSeq.query.get.map(_.head ==> List(short1, short1))
 
-        // Removing all elements retracts the attribute
+        // Removing all remaining elements deletes the attribute
         _ <- Ns(id).shortSeq.remove(Seq(short1)).update.transact
         _ <- Ns.shortSeq.query.get.map(_ ==> Nil)
       } yield ()

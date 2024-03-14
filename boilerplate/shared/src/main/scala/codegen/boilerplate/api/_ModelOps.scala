@@ -30,21 +30,18 @@ object _ModelOps extends BoilerplateGenBase("ModelOps", "/api") {
          |  extends Molecule_$n0[${`A..V`}]
          |    with ModelTransformations_
          |    with AggregatesOps_$arity[${`A..V`}, t, Ns1]
-         |    with ExprBArManOps_$arity[${`A..V`}, t, Ns1, Ns2]
-         |    with ExprBArOptOps_$arity[${`A..V`}, t, Ns1, Ns2]
          |    with ExprBArTacOps_$arity[${`A..V`}, t, Ns1, Ns2]
+         |    with ExprBArOptOps_$arity[${`A..V`}, t, Ns1, Ns2]
          |    with ExprOneManOps_$arity[${`A..V`}, t, Ns1, Ns2]
-         |    with ExprOneOptOps_$arity[${`A..V`}, t, Ns1, Ns2]
          |    with ExprOneTacOps_$arity[${`A..V`}, t, Ns1, Ns2]
-         |    with ExprSetManOps_$arity[${`A..V`}, t, Ns1, Ns2]
-         |    with ExprSetOptOps_$arity[${`A..V`}, t, Ns1, Ns2]
+         |    with ExprOneOptOps_$arity[${`A..V`}, t, Ns1, Ns2]
          |    with ExprSetTacOps_$arity[${`A..V`}, t, Ns1, Ns2]
-         |    with ExprSeqManOps_$arity[${`A..V`}, t, Ns1, Ns2]
-         |    with ExprSeqOptOps_$arity[${`A..V`}, t, Ns1, Ns2]
+         |    with ExprSetOptOps_$arity[${`A..V`}, t, Ns1, Ns2]
          |    with ExprSeqTacOps_$arity[${`A..V`}, t, Ns1, Ns2]
+         |    with ExprSeqOptOps_$arity[${`A..V`}, t, Ns1, Ns2]
          |    with ExprMapManOps_$arity[${`A..V`}, t, Ns1, Ns2]
-         |    with ExprMapOptOps_$arity[${`A..V`}, t, Ns1, Ns2]
          |    with ExprMapTacOps_$arity[${`A..V`}, t, Ns1, Ns2]
+         |    with ExprMapOptOps_$arity[${`A..V`}, t, Ns1, Ns2]
          |    with SortAttrsOps_$arity[${`A..V`}, t, Ns1]""".stripMargin
   }
 }

@@ -24,7 +24,7 @@ trait UpdateSetOps_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
         _ <- Ns.durations.query.get.map(_.head ==> Set(duration3, duration4))
 
         // Applying empty Set of values deletes previous Set
-        _ <- Ns(id).durations(Seq.empty[Duration]).update.transact
+        _ <- Ns(id).durations(Set.empty[Duration]).update.transact
         _ <- Ns.durations.query.get.map(_ ==> Nil)
 
         id <- Ns.durations(Set(duration1, duration2)).save.transact.map(_.id)
@@ -51,53 +51,46 @@ trait UpdateSetOps_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
         _ <- Ns(id).durations.add(duration3, duration4).update.transact
         _ <- Ns.durations.query.get.map(_.head ==> Set(duration1, duration2, duration3, duration4))
 
-        // Add Iterable of values (existing values unaffected)
-        // Seq
-        _ <- Ns(id).durations.add(Seq(duration4, duration5)).update.transact
-        _ <- Ns.durations.query.get.map(_.head ==> Set(duration1, duration2, duration3, duration4, duration5))
-        // Set
-        _ <- Ns(id).durations.add(Set(duration6)).update.transact
+        // Add multiple values (Seq)
+        _ <- Ns(id).durations.add(Seq(duration5, duration6)).update.transact
         _ <- Ns.durations.query.get.map(_.head ==> Set(duration1, duration2, duration3, duration4, duration5, duration6))
-        // Iterable
-        _ <- Ns(id).durations.add(Iterable(duration7)).update.transact
-        _ <- Ns.durations.query.get.map(_.head ==> Set(duration1, duration2, duration3, duration4, duration5, duration6, duration7))
 
-        // Adding empty Iterable of values has no effect
+        // Adding empty Seq of values has no effect
         _ <- Ns(id).durations.add(Seq.empty[Duration]).update.transact
-        _ <- Ns.durations.query.get.map(_.head ==> Set(duration1, duration2, duration3, duration4, duration5, duration6, duration7))
+        _ <- Ns.durations.query.get.map(_.head ==> Set(duration1, duration2, duration3, duration4, duration5, duration6))
       } yield ()
     }
 
 
     "remove" - types { implicit conn =>
       for {
-        id <- Ns.durations(Set(duration1, duration2, duration3, duration4, duration5, duration6)).save.transact.map(_.id)
+        id <- Ns.durations(Set(duration1, duration2, duration3, duration4, duration5, duration6, duration7)).save.transact.map(_.id)
 
         // Remove value
-        _ <- Ns(id).durations.remove(duration6).update.transact
-        _ <- Ns.durations.query.get.map(_.head ==> Set(duration1, duration2, duration3, duration4, duration5))
+        _ <- Ns(id).durations.remove(duration7).update.transact
+        _ <- Ns.durations.query.get.map(_.head ==> Set(duration1, duration2, duration3, duration4, duration5, duration6))
 
         // Removing non-existing value has no effect
-        _ <- Ns(id).durations.remove(duration7).update.transact
-        _ <- Ns.durations.query.get.map(_.head ==> Set(duration1, duration2, duration3, duration4, duration5))
+        _ <- Ns(id).durations.remove(duration9).update.transact
+        _ <- Ns.durations.query.get.map(_.head ==> Set(duration1, duration2, duration3, duration4, duration5, duration6))
 
         // Removing duplicate values removes the distinct value
-        _ <- Ns(id).durations.remove(duration5, duration5).update.transact
-        _ <- Ns.durations.query.get.map(_.head ==> Set(duration1, duration2, duration3, duration4))
+        _ <- Ns(id).durations.remove(duration6, duration6).update.transact
+        _ <- Ns.durations.query.get.map(_.head ==> Set(duration1, duration2, duration3, duration4, duration5))
 
         // Remove multiple values (vararg)
-        _ <- Ns(id).durations.remove(duration3, duration4).update.transact
-        _ <- Ns.durations.query.get.map(_.head ==> Set(duration1, duration2))
+        _ <- Ns(id).durations.remove(duration4, duration5).update.transact
+        _ <- Ns.durations.query.get.map(_.head ==> Set(duration1, duration2, duration3))
 
-        // Remove Iterable of values
-        _ <- Ns(id).durations.remove(Seq(duration2)).update.transact
+        // Remove multiple values (Seq)
+        _ <- Ns(id).durations.remove(Seq(duration2, duration3)).update.transact
         _ <- Ns.durations.query.get.map(_.head ==> Set(duration1))
 
-        // Removing empty Iterable of values has no effect
+        // Removing empty Seq of values has no effect
         _ <- Ns(id).durations.remove(Seq.empty[Duration]).update.transact
         _ <- Ns.durations.query.get.map(_.head ==> Set(duration1))
 
-        // Removing all elements retracts the attribute
+        // Removing all remaining elements deletes the attribute
         _ <- Ns(id).durations.remove(Seq(duration1)).update.transact
         _ <- Ns.durations.query.get.map(_ ==> Nil)
       } yield ()

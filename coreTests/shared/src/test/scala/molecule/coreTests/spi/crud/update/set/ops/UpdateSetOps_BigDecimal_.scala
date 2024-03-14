@@ -23,7 +23,7 @@ trait UpdateSetOps_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
         _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal3, bigDecimal4))
 
         // Applying empty Set of values deletes previous Set
-        _ <- Ns(id).bigDecimals(Seq.empty[BigDecimal]).update.transact
+        _ <- Ns(id).bigDecimals(Set.empty[BigDecimal]).update.transact
         _ <- Ns.bigDecimals.query.get.map(_ ==> Nil)
 
         id <- Ns.bigDecimals(Set(bigDecimal1, bigDecimal2)).save.transact.map(_.id)
@@ -50,53 +50,46 @@ trait UpdateSetOps_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
         _ <- Ns(id).bigDecimals.add(bigDecimal3, bigDecimal4).update.transact
         _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4))
 
-        // Add Iterable of values (existing values unaffected)
-        // Seq
-        _ <- Ns(id).bigDecimals.add(Seq(bigDecimal4, bigDecimal5)).update.transact
-        _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal5))
-        // Set
-        _ <- Ns(id).bigDecimals.add(Set(bigDecimal6)).update.transact
+        // Add multiple values (Seq)
+        _ <- Ns(id).bigDecimals.add(Seq(bigDecimal5, bigDecimal6)).update.transact
         _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal5, bigDecimal6))
-        // Iterable
-        _ <- Ns(id).bigDecimals.add(Iterable(bigDecimal7)).update.transact
-        _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal5, bigDecimal6, bigDecimal7))
 
-        // Adding empty Iterable of values has no effect
+        // Adding empty Seq of values has no effect
         _ <- Ns(id).bigDecimals.add(Seq.empty[BigDecimal]).update.transact
-        _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal5, bigDecimal6, bigDecimal7))
+        _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal5, bigDecimal6))
       } yield ()
     }
 
 
     "remove" - types { implicit conn =>
       for {
-        id <- Ns.bigDecimals(Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal5, bigDecimal6)).save.transact.map(_.id)
+        id <- Ns.bigDecimals(Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal5, bigDecimal6, bigDecimal7)).save.transact.map(_.id)
 
         // Remove value
-        _ <- Ns(id).bigDecimals.remove(bigDecimal6).update.transact
-        _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal5))
+        _ <- Ns(id).bigDecimals.remove(bigDecimal7).update.transact
+        _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal5, bigDecimal6))
 
         // Removing non-existing value has no effect
-        _ <- Ns(id).bigDecimals.remove(bigDecimal7).update.transact
-        _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal5))
+        _ <- Ns(id).bigDecimals.remove(bigDecimal9).update.transact
+        _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal5, bigDecimal6))
 
         // Removing duplicate values removes the distinct value
-        _ <- Ns(id).bigDecimals.remove(bigDecimal5, bigDecimal5).update.transact
-        _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4))
+        _ <- Ns(id).bigDecimals.remove(bigDecimal6, bigDecimal6).update.transact
+        _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal5))
 
         // Remove multiple values (vararg)
-        _ <- Ns(id).bigDecimals.remove(bigDecimal3, bigDecimal4).update.transact
-        _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2))
+        _ <- Ns(id).bigDecimals.remove(bigDecimal4, bigDecimal5).update.transact
+        _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2, bigDecimal3))
 
-        // Remove Iterable of values
-        _ <- Ns(id).bigDecimals.remove(Seq(bigDecimal2)).update.transact
+        // Remove multiple values (Seq)
+        _ <- Ns(id).bigDecimals.remove(Seq(bigDecimal2, bigDecimal3)).update.transact
         _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1))
 
-        // Removing empty Iterable of values has no effect
+        // Removing empty Seq of values has no effect
         _ <- Ns(id).bigDecimals.remove(Seq.empty[BigDecimal]).update.transact
         _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1))
 
-        // Removing all elements retracts the attribute
+        // Removing all remaining elements deletes the attribute
         _ <- Ns(id).bigDecimals.remove(Seq(bigDecimal1)).update.transact
         _ <- Ns.bigDecimals.query.get.map(_ ==> Nil)
       } yield ()

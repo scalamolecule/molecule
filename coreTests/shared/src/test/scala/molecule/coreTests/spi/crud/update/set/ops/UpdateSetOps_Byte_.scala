@@ -23,7 +23,7 @@ trait UpdateSetOps_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte3, byte4))
 
         // Applying empty Set of values deletes previous Set
-        _ <- Ns(id).bytes(Seq.empty[Byte]).update.transact
+        _ <- Ns(id).bytes(Set.empty[Byte]).update.transact
         _ <- Ns.bytes.query.get.map(_ ==> Nil)
 
         id <- Ns.bytes(Set(byte1, byte2)).save.transact.map(_.id)
@@ -50,53 +50,46 @@ trait UpdateSetOps_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).bytes.add(byte3, byte4).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2, byte3, byte4))
 
-        // Add Iterable of values (existing values unaffected)
-        // Seq
-        _ <- Ns(id).bytes.add(Seq(byte4, byte5)).update.transact
-        _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2, byte3, byte4, byte5))
-        // Set
-        _ <- Ns(id).bytes.add(Set(byte6)).update.transact
+        // Add multiple values (Seq)
+        _ <- Ns(id).bytes.add(Seq(byte5, byte6)).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2, byte3, byte4, byte5, byte6))
-        // Iterable
-        _ <- Ns(id).bytes.add(Iterable(byte7)).update.transact
-        _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2, byte3, byte4, byte5, byte6, byte7))
 
-        // Adding empty Iterable of values has no effect
+        // Adding empty Seq of values has no effect
         _ <- Ns(id).bytes.add(Seq.empty[Byte]).update.transact
-        _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2, byte3, byte4, byte5, byte6, byte7))
+        _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2, byte3, byte4, byte5, byte6))
       } yield ()
     }
 
 
     "remove" - types { implicit conn =>
       for {
-        id <- Ns.bytes(Set(byte1, byte2, byte3, byte4, byte5, byte6)).save.transact.map(_.id)
+        id <- Ns.bytes(Set(byte1, byte2, byte3, byte4, byte5, byte6, byte7)).save.transact.map(_.id)
 
         // Remove value
-        _ <- Ns(id).bytes.remove(byte6).update.transact
-        _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2, byte3, byte4, byte5))
+        _ <- Ns(id).bytes.remove(byte7).update.transact
+        _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2, byte3, byte4, byte5, byte6))
 
         // Removing non-existing value has no effect
-        _ <- Ns(id).bytes.remove(byte7).update.transact
-        _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2, byte3, byte4, byte5))
+        _ <- Ns(id).bytes.remove(byte9).update.transact
+        _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2, byte3, byte4, byte5, byte6))
 
         // Removing duplicate values removes the distinct value
-        _ <- Ns(id).bytes.remove(byte5, byte5).update.transact
-        _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2, byte3, byte4))
+        _ <- Ns(id).bytes.remove(byte6, byte6).update.transact
+        _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2, byte3, byte4, byte5))
 
         // Remove multiple values (vararg)
-        _ <- Ns(id).bytes.remove(byte3, byte4).update.transact
-        _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2))
+        _ <- Ns(id).bytes.remove(byte4, byte5).update.transact
+        _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2, byte3))
 
-        // Remove Iterable of values
-        _ <- Ns(id).bytes.remove(Seq(byte2)).update.transact
+        // Remove multiple values (Seq)
+        _ <- Ns(id).bytes.remove(Seq(byte2, byte3)).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1))
 
-        // Removing empty Iterable of values has no effect
+        // Removing empty Seq of values has no effect
         _ <- Ns(id).bytes.remove(Seq.empty[Byte]).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1))
 
-        // Removing all elements retracts the attribute
+        // Removing all remaining elements deletes the attribute
         _ <- Ns(id).bytes.remove(Seq(byte1)).update.transact
         _ <- Ns.bytes.query.get.map(_ ==> Nil)
       } yield ()

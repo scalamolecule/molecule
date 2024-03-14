@@ -51,20 +51,13 @@ trait UpdateSeqOps_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
         _ <- Ns(id).instantSeq.add(instant3, instant4).update.transact
         _ <- Ns.instantSeq.query.get.map(_.head ==> List(instant1, instant2, instant1, instant3, instant4))
 
-        // Add Iterable of values
-        // Seq
-        _ <- Ns(id).instantSeq.add(Seq(instant4, instant5)).update.transact
+        // Add multiple values (Seq)
+        _ <- Ns(id).instantSeq.add(List(instant4, instant5)).update.transact
         _ <- Ns.instantSeq.query.get.map(_.head ==> List(instant1, instant2, instant1, instant3, instant4, instant4, instant5))
-        // Array
-        _ <- Ns(id).instantSeq.add(List(instant6)).update.transact
-        _ <- Ns.instantSeq.query.get.map(_.head ==> List(instant1, instant2, instant1, instant3, instant4, instant4, instant5, instant6))
-        // Iterable
-        _ <- Ns(id).instantSeq.add(Iterable(instant7)).update.transact
-        _ <- Ns.instantSeq.query.get.map(_.head ==> List(instant1, instant2, instant1, instant3, instant4, instant4, instant5, instant6, instant7))
 
-        // Adding empty Iterable of values has no effect
+        // Adding empty Seq of values has no effect
         _ <- Ns(id).instantSeq.add(List.empty[Instant]).update.transact
-        _ <- Ns.instantSeq.query.get.map(_.head ==> List(instant1, instant2, instant1, instant3, instant4, instant4, instant5, instant6, instant7))
+        _ <- Ns.instantSeq.query.get.map(_.head ==> List(instant1, instant2, instant1, instant3, instant4, instant4, instant5))
       } yield ()
     }
 
@@ -104,14 +97,8 @@ trait UpdateSeqOps_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           instant1, instant2, instant3,
         ))
 
-        // Remove Iterable of values
-        _ <- Ns(id).instantSeq.remove(List(instant3)).update.transact
-        _ <- Ns.instantSeq.query.get.map(_.head ==> List(
-          instant1, instant2,
-          instant1, instant2,
-        ))
-
-        _ <- Ns(id).instantSeq.remove(Seq(instant2)).update.transact
+        // Remove multiple values (Seq)
+        _ <- Ns(id).instantSeq.remove(List(instant2, instant3)).update.transact
         _ <- Ns.instantSeq.query.get.map(_.head ==> List(
           instant1,
           instant1
@@ -121,7 +108,7 @@ trait UpdateSeqOps_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
         _ <- Ns(id).instantSeq.remove(List.empty[Instant]).update.transact
         _ <- Ns.instantSeq.query.get.map(_.head ==> List(instant1, instant1))
 
-        // Removing all elements retracts the attribute
+        // Removing all remaining elements deletes the attribute
         _ <- Ns(id).instantSeq.remove(Seq(instant1)).update.transact
         _ <- Ns.instantSeq.query.get.map(_ ==> Nil)
       } yield ()

@@ -24,7 +24,7 @@ trait UpdateSetOps_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.dates.query.get.map(_.head ==> Set(date3, date4))
 
         // Applying empty Set of values deletes previous Set
-        _ <- Ns(id).dates(Seq.empty[Date]).update.transact
+        _ <- Ns(id).dates(Set.empty[Date]).update.transact
         _ <- Ns.dates.query.get.map(_ ==> Nil)
 
         id <- Ns.dates(Set(date1, date2)).save.transact.map(_.id)
@@ -51,53 +51,46 @@ trait UpdateSetOps_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).dates.add(date3, date4).update.transact
         _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2, date3, date4))
 
-        // Add Iterable of values (existing values unaffected)
-        // Seq
-        _ <- Ns(id).dates.add(Seq(date4, date5)).update.transact
-        _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2, date3, date4, date5))
-        // Set
-        _ <- Ns(id).dates.add(Set(date6)).update.transact
+        // Add multiple values (Seq)
+        _ <- Ns(id).dates.add(Seq(date5, date6)).update.transact
         _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2, date3, date4, date5, date6))
-        // Iterable
-        _ <- Ns(id).dates.add(Iterable(date7)).update.transact
-        _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2, date3, date4, date5, date6, date7))
 
-        // Adding empty Iterable of values has no effect
+        // Adding empty Seq of values has no effect
         _ <- Ns(id).dates.add(Seq.empty[Date]).update.transact
-        _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2, date3, date4, date5, date6, date7))
+        _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2, date3, date4, date5, date6))
       } yield ()
     }
 
 
     "remove" - types { implicit conn =>
       for {
-        id <- Ns.dates(Set(date1, date2, date3, date4, date5, date6)).save.transact.map(_.id)
+        id <- Ns.dates(Set(date1, date2, date3, date4, date5, date6, date7)).save.transact.map(_.id)
 
         // Remove value
-        _ <- Ns(id).dates.remove(date6).update.transact
-        _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2, date3, date4, date5))
+        _ <- Ns(id).dates.remove(date7).update.transact
+        _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2, date3, date4, date5, date6))
 
         // Removing non-existing value has no effect
-        _ <- Ns(id).dates.remove(date7).update.transact
-        _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2, date3, date4, date5))
+        _ <- Ns(id).dates.remove(date9).update.transact
+        _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2, date3, date4, date5, date6))
 
         // Removing duplicate values removes the distinct value
-        _ <- Ns(id).dates.remove(date5, date5).update.transact
-        _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2, date3, date4))
+        _ <- Ns(id).dates.remove(date6, date6).update.transact
+        _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2, date3, date4, date5))
 
         // Remove multiple values (vararg)
-        _ <- Ns(id).dates.remove(date3, date4).update.transact
-        _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2))
+        _ <- Ns(id).dates.remove(date4, date5).update.transact
+        _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2, date3))
 
-        // Remove Iterable of values
-        _ <- Ns(id).dates.remove(Seq(date2)).update.transact
+        // Remove multiple values (Seq)
+        _ <- Ns(id).dates.remove(Seq(date2, date3)).update.transact
         _ <- Ns.dates.query.get.map(_.head ==> Set(date1))
 
-        // Removing empty Iterable of values has no effect
+        // Removing empty Seq of values has no effect
         _ <- Ns(id).dates.remove(Seq.empty[Date]).update.transact
         _ <- Ns.dates.query.get.map(_.head ==> Set(date1))
 
-        // Removing all elements retracts the attribute
+        // Removing all remaining elements deletes the attribute
         _ <- Ns(id).dates.remove(Seq(date1)).update.transact
         _ <- Ns.dates.query.get.map(_ ==> Nil)
       } yield ()

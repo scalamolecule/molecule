@@ -51,20 +51,13 @@ trait UpdateSeqOps_URI_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).uriSeq.add(uri3, uri4).update.transact
         _ <- Ns.uriSeq.query.get.map(_.head ==> List(uri1, uri2, uri1, uri3, uri4))
 
-        // Add Iterable of values
-        // Seq
-        _ <- Ns(id).uriSeq.add(Seq(uri4, uri5)).update.transact
+        // Add multiple values (Seq)
+        _ <- Ns(id).uriSeq.add(List(uri4, uri5)).update.transact
         _ <- Ns.uriSeq.query.get.map(_.head ==> List(uri1, uri2, uri1, uri3, uri4, uri4, uri5))
-        // Array
-        _ <- Ns(id).uriSeq.add(List(uri6)).update.transact
-        _ <- Ns.uriSeq.query.get.map(_.head ==> List(uri1, uri2, uri1, uri3, uri4, uri4, uri5, uri6))
-        // Iterable
-        _ <- Ns(id).uriSeq.add(Iterable(uri7)).update.transact
-        _ <- Ns.uriSeq.query.get.map(_.head ==> List(uri1, uri2, uri1, uri3, uri4, uri4, uri5, uri6, uri7))
 
-        // Adding empty Iterable of values has no effect
+        // Adding empty Seq of values has no effect
         _ <- Ns(id).uriSeq.add(List.empty[URI]).update.transact
-        _ <- Ns.uriSeq.query.get.map(_.head ==> List(uri1, uri2, uri1, uri3, uri4, uri4, uri5, uri6, uri7))
+        _ <- Ns.uriSeq.query.get.map(_.head ==> List(uri1, uri2, uri1, uri3, uri4, uri4, uri5))
       } yield ()
     }
 
@@ -104,14 +97,8 @@ trait UpdateSeqOps_URI_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           uri1, uri2, uri3,
         ))
 
-        // Remove Iterable of values
-        _ <- Ns(id).uriSeq.remove(List(uri3)).update.transact
-        _ <- Ns.uriSeq.query.get.map(_.head ==> List(
-          uri1, uri2,
-          uri1, uri2,
-        ))
-
-        _ <- Ns(id).uriSeq.remove(Seq(uri2)).update.transact
+        // Remove multiple values (Seq)
+        _ <- Ns(id).uriSeq.remove(List(uri2, uri3)).update.transact
         _ <- Ns.uriSeq.query.get.map(_.head ==> List(
           uri1,
           uri1
@@ -121,7 +108,7 @@ trait UpdateSeqOps_URI_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).uriSeq.remove(List.empty[URI]).update.transact
         _ <- Ns.uriSeq.query.get.map(_.head ==> List(uri1, uri1))
 
-        // Removing all elements retracts the attribute
+        // Removing all remaining elements deletes the attribute
         _ <- Ns(id).uriSeq.remove(Seq(uri1)).update.transact
         _ <- Ns.uriSeq.query.get.map(_ ==> Nil)
       } yield ()
