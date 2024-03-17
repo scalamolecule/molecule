@@ -56,11 +56,11 @@ trait Directions extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.date.insert(date1, date2, date3, date4, date5).transact
 
           // Sorted by unique int attribute
-          c1 <- query.from(x).limit(2).get.map { case (dates, c, true) if dates == List(date1, date2) => c }
-          c2 <- query.from(c1).limit(2).get.map { case (dates, c, true) if dates == List(date3, date4) => c }
-          c3 <- query.from(c2).limit(2).get.map { case (dates, c, false) if dates == List(date5) => c }
-          c2 <- query.from(c3).limit(-2).get.map { case (dates, c, true) if dates == List(date3, date4) => c }
-          _ <- query.from(c2).limit(-2).get.map { case (dates, _, false) if dates == List(date1, date2) => () }
+          c1 <- query.from(x).limit(2).get.map { case (dateSet, c, true) if dateSet == List(date1, date2) => c }
+          c2 <- query.from(c1).limit(2).get.map { case (dateSet, c, true) if dateSet == List(date3, date4) => c }
+          c3 <- query.from(c2).limit(2).get.map { case (dateSet, c, false) if dateSet == List(date5) => c }
+          c2 <- query.from(c3).limit(-2).get.map { case (dateSet, c, true) if dateSet == List(date3, date4) => c }
+          _ <- query.from(c2).limit(-2).get.map { case (dateSet, _, false) if dateSet == List(date1, date2) => () }
         } yield ()
       }
 
@@ -68,11 +68,11 @@ trait Directions extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         for {
           _ <- Ns.date.insert(date1, date2, date3, date4, date5).transact
 
-          c1 <- query.from(x).limit(-2).get.map { case (dates, c, true) if dates == List(date4, date5) => c }
-          c2 <- query.from(c1).limit(-2).get.map { case (dates, c, true) if dates == List(date2, date3) => c }
-          c3 <- query.from(c2).limit(-2).get.map { case (dates, c, false) if dates == List(date1) => c }
-          c2 <- query.from(c3).limit(2).get.map { case (dates, c, true) if dates == List(date2, date3) => c }
-          _ <- query.from(c2).limit(2).get.map { case (dates, _, false) if dates == List(date4, date5) => () }
+          c1 <- query.from(x).limit(-2).get.map { case (dateSet, c, true) if dateSet == List(date4, date5) => c }
+          c2 <- query.from(c1).limit(-2).get.map { case (dateSet, c, true) if dateSet == List(date2, date3) => c }
+          c3 <- query.from(c2).limit(-2).get.map { case (dateSet, c, false) if dateSet == List(date1) => c }
+          c2 <- query.from(c3).limit(2).get.map { case (dateSet, c, true) if dateSet == List(date2, date3) => c }
+          _ <- query.from(c2).limit(2).get.map { case (dateSet, _, false) if dateSet == List(date4, date5) => () }
         } yield ()
       }
     }

@@ -195,12 +195,12 @@ trait FilterAttrNested extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Card-Set filter attributes not allowed in nested" - refs { implicit conn =>
       for {
-        _ <- A.s.ii(B.ii_).Bb.*(B.ii).query.get
+        _ <- A.s.iSet(B.iSet_).Bb.*(B.iSet).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Card-Set filter attributes not allowed in nested molecules."
           }
 
-        _ <- A.s.ii.Bb.*(B.ii(A.ii_)).query.get
+        _ <- A.s.iSet.Bb.*(B.iSet(A.iSet_)).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Card-Set filter attributes not allowed in nested molecules."
           }

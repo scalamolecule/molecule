@@ -161,10 +161,10 @@ trait UpdateOne_uniqueAttr extends CoreTestSuite with ApiAsync { spi: SpiAsync =
               s"""AttrOneTacString("Uniques", "$attr", Eq, Seq("x"), None, None, Nil, Nil, None, None, Seq(0, 3))"""
           }
 
-        _ <- Uniques.ints_(Set(1)).s("b").update.transact
+        _ <- Uniques.intSet_(Set(1)).s("b").update.transact
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Can only lookup entity with card-one attribute value. Found:\n" +
-              """AttrSetTacInt("Uniques", "ints", Eq, Seq(Set(1)), None, None, Nil, Nil, None, None, Seq(0, 25))"""
+              """AttrSetTacInt("Uniques", "intSet", Eq, Seq(Set(1)), None, None, Nil, Nil, None, None, Seq(0, 25))"""
           }
       } yield ()
     }

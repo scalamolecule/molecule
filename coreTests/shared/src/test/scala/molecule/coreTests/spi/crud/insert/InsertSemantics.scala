@@ -17,47 +17,47 @@ trait InsertSemantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
       "Alone" - refs { implicit conn =>
         for {
-          _ <- A.ii.insert(Set.empty[Int]).transact
+          _ <- A.iSet.insert(Set.empty[Int]).transact
 
-          // A.ii was not inserted
-          _ <- A.ii.query.get.map(_ ==> Nil)
+          // A.iSet was not inserted
+          _ <- A.iSet.query.get.map(_ ==> Nil)
         } yield ()
       }
 
       "With other attribute" - refs { implicit conn =>
         for {
-          _ <- A.i.ii.insert((1, Set.empty[Int])).transact
+          _ <- A.i.iSet.insert((1, Set.empty[Int])).transact
 
           // A.i was inserted
           _ <- A.i.query.get.map(_ ==> List(1))
 
-          // A.ii was not inserted
-          _ <- A.i.ii_?.query.get.map(_ ==> List((1, None)))
-          _ <- A.i.ii.query.get.map(_ ==> Nil)
+          // A.iSet was not inserted
+          _ <- A.i.iSet_?.query.get.map(_ ==> List((1, None)))
+          _ <- A.i.iSet.query.get.map(_ ==> Nil)
         } yield ()
       }
 
       "Optional with other attribute" - refs { implicit conn =>
         for {
-          List(a, b, c, d) <- A.i.ii_?.insert(
+          List(a, b, c, d) <- A.i.iSet_?.insert(
             (1, None),
             (1, Some(Set(2))),
             (1, Some(Set(3))),
             (2, Some(Set(4, 5))),
           ).transact.map(_.ids)
 
-          _ <- A.i.a1.ii_?.query.get.map(_ ==> List( // (since we can't sort by Sets)
+          _ <- A.i.a1.iSet_?.query.get.map(_ ==> List( // (since we can't sort by Sets)
             // (1, None), // coalesced with Set(2) and Set(3)
             (1, Some(Set(2, 3))), // coalesced Set(2) and Set(3)
             (2, Some(Set(4, 5))),
           ))
 
-          _ <- A.i.a1.ii.query.get.map(_ ==> List( // (since we can't sort by Sets)
+          _ <- A.i.a1.iSet.query.get.map(_ ==> List( // (since we can't sort by Sets)
             (1, Set(2, 3)),
             (2, Set(4, 5)),
           ))
 
-          _ <- A.id.a1.i.ii_?.query.get.map(_ ==> List(
+          _ <- A.id.a1.i.iSet_?.query.get.map(_ ==> List(
             (a, 1, None),
             (b, 1, Some(Set(2))),
             (c, 1, Some(Set(3))),
@@ -68,59 +68,59 @@ trait InsertSemantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
       "Alone after ref" - refs { implicit conn =>
         for {
-          _ <- A.i.B.ii.insert((1, Set.empty[Int])).transact
+          _ <- A.i.B.iSet.insert((1, Set.empty[Int])).transact
 
           // A.i was inserted
           _ <- A.i.query.get.map(_ ==> List(1))
 
-          // B.ii was not inserted
-          _ <- A.i.B.ii_?.query.get.map(_ ==> Nil)
-          _ <- A.i.B.ii.query.get.map(_ ==> Nil)
+          // B.iSet was not inserted
+          _ <- A.i.B.iSet_?.query.get.map(_ ==> Nil)
+          _ <- A.i.B.iSet.query.get.map(_ ==> Nil)
         } yield ()
       }
 
       "With other attribute after ref" - refs { implicit conn =>
         for {
-          _ <- A.i.B.i.ii.insert((1, 2, Set.empty[Int])).transact
+          _ <- A.i.B.i.iSet.insert((1, 2, Set.empty[Int])).transact
 
           // Relationship to B was created
           _ <- A.i.B.i.query.get.map(_ ==> List((1, 2)))
 
-          // But B.ii was not inserted
-          _ <- A.i.B.i.ii_?.query.get.map(_ ==> List((1, 2, None)))
-          _ <- A.i.B.i.ii.query.get.map(_ ==> Nil)
+          // But B.iSet was not inserted
+          _ <- A.i.B.i.iSet_?.query.get.map(_ ==> List((1, 2, None)))
+          _ <- A.i.B.i.iSet.query.get.map(_ ==> Nil)
         } yield ()
       }
 
       "Nested alone" - refs { implicit conn =>
         for {
-          _ <- A.i.Bb.*(B.ii).insert((1, List(Set.empty[Int]))).transact
+          _ <- A.i.Bb.*(B.iSet).insert((1, List(Set.empty[Int]))).transact
 
           // A.i was inserted
           _ <- A.i.query.get.map(_ ==> List(1))
 
-          _ <- A.i.Bb.*?(B.ii).query.get.map(_ ==> List((1, Nil)))
-          _ <- A.i.Bb.*(B.ii).query.get.map(_ ==> Nil)
+          _ <- A.i.Bb.*?(B.iSet).query.get.map(_ ==> List((1, Nil)))
+          _ <- A.i.Bb.*(B.iSet).query.get.map(_ ==> Nil)
 
-          // No optional B.ii value since no relationship was created
-          _ <- A.i.Bb.ii_?.query.get.map(_ ==> Nil)
-          _ <- A.i.Bb.ii.query.get.map(_ ==> Nil)
+          // No optional B.iSet value since no relationship was created
+          _ <- A.i.Bb.iSet_?.query.get.map(_ ==> Nil)
+          _ <- A.i.Bb.iSet.query.get.map(_ ==> Nil)
         } yield ()
       }
 
       "Nested with other attribute" - refs { implicit conn =>
         for {
-          _ <- A.i.Bb.*(B.i.ii).insert((1, List((2, Set.empty[Int])))).transact
+          _ <- A.i.Bb.*(B.i.iSet).insert((1, List((2, Set.empty[Int])))).transact
 
           // A.i was inserted
           _ <- A.i.query.get.map(_ ==> List(1))
 
-          _ <- A.i.Bb.*?(B.i.ii).query.get.map(_ ==> List((1, Nil)))
-          _ <- A.i.Bb.*(B.i.ii).query.get.map(_ ==> Nil)
+          _ <- A.i.Bb.*?(B.i.iSet).query.get.map(_ ==> List((1, Nil)))
+          _ <- A.i.Bb.*(B.i.iSet).query.get.map(_ ==> Nil)
 
-          // No optional B.ii value (but relationship was created)
-          _ <- A.i.Bb.i.ii_?.query.get.map(_ ==> List((1, 2, None)))
-          _ <- A.i.Bb.i.ii.query.get.map(_ ==> Nil)
+          // No optional B.iSet value (but relationship was created)
+          _ <- A.i.Bb.i.iSet_?.query.get.map(_ ==> List((1, 2, None)))
+          _ <- A.i.Bb.i.iSet.query.get.map(_ ==> Nil)
         } yield ()
       }
     }

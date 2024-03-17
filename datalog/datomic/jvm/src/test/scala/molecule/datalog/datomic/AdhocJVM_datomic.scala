@@ -204,12 +204,12 @@ object AdhocJVM_datomic extends TestSuiteArray_datomic with Array2List {
     //          |        (distinct ?c4)
     //          | :where [?a :A/i ?b]
     //          |        [(datomic.api/q
-    //          |          "[:find  (pull ?a-?c [[:A/ii :limit nil]])
+    //          |          "[:find  (pull ?a-?c [[:A/iSet :limit nil]])
     //          |            :in $ ?a1
     //          |            :where [?a1 :A/i ?b1]
     //          |                   [(identity ?a1) ?a-?c]]" $ ?a ) [[?c2]]]
-    //          |        [(if (nil? ?c2) {:A/ii []} ?c2) ?c3]
-    //          |        [(:A/ii ?c3) ?c4]
+    //          |        [(if (nil? ?c2) {:A/iSet []} ?c2) ?c3]
+    //          |        [(:A/iSet ?c3) ?c4]
     //          |        ]""".stripMargin,
     //        conn.db
     //      ).forEach { r => println(r) }
@@ -242,7 +242,7 @@ object AdhocJVM_datomic extends TestSuiteArray_datomic with Array2List {
 
     //    "set" - typesSet { implicit conn =>
     //
-    //      NsSet.n.ints.insert(List(
+    //      NsSet.n.intSet.insert(List(
     //        (1, Set(int1, int2)),
     //        (2, Set(int2, int3)),
     //        (2, Set(int3, int4)),
@@ -253,7 +253,7 @@ object AdhocJVM_datomic extends TestSuiteArray_datomic with Array2List {
     //      println("------ A")
     //      val rows = Peer.q(
     //        """[:find  ?a (distinct ?b)
-    //          | :where [?a :NsSet/ints ?b]]""".stripMargin,
+    //          | :where [?a :NsSet/intSet ?b]]""".stripMargin,
     //        conn.db
     //      )
     //      rows.forEach { r => println(r) }
@@ -269,11 +269,11 @@ object AdhocJVM_datomic extends TestSuiteArray_datomic with Array2List {
     //        """[:find  ?n (distinct ?set)
     //          | :in    $ [?set ...]
     //          | :where [?a :NsSet/n ?n]
-    //          |        [?a :NsSet/ints ?b]
+    //          |        [?a :NsSet/intSet ?b]
     //          |        [(datomic.api/q
     //          |          "[:find (distinct ?c1)
     //          |            :in $ ?a
-    //          |            :where [?a :NsSet/ints ?c1]]" $ ?a) [[?c2]]]
+    //          |            :where [?a :NsSet/intSet ?c1]]" $ ?a) [[?c2]]]
     //          |         [(= ?c2 ?set)]
     //          | ]""".stripMargin,
     //        conn.db,
@@ -285,16 +285,16 @@ object AdhocJVM_datomic extends TestSuiteArray_datomic with Array2List {
     //      Peer.q(
     //        """[:find  ?n (distinct ?c2)
     //          | :where [?a :NsSet/n ?n]
-    //          |        [?a :NsSet/ints ?b]
+    //          |        [?a :NsSet/intSet ?b]
     //          |        [(datomic.api/q
     //          |          "[:find (distinct ?c1)
     //          |            :in $ ?a1
-    //          |            :where [?a1 :NsSet/ints ?c1]]" $ ?a) [[?c2]]]
+    //          |            :where [?a1 :NsSet/intSet ?c1]]" $ ?a) [[?c2]]]
     //          | ]""".stripMargin,
     //        conn.db
     //      ).forEach { r => println(r) }
     //
-    //      NsSet.n.a1.ints(distinct).query.get ==> List(
+    //      NsSet.n.a1.intSet(distinct).query.get ==> List(
     //        (1, Set(Set(int1, int2))),
     //        (2, Set(
     //          Set(int2, int3),
@@ -310,9 +310,9 @@ object AdhocJVM_datomic extends TestSuiteArray_datomic with Array2List {
     //      //      val txr = conn.asInstanceOf[DatomicConn_JVM].peerConn.transact(
     //      //        datomic.Util.list(
     //      //          datomic.Util.list(":db/add", e1, ":NsSet/n", 1),
-    //      //          datomic.Util.list(":db/add", e1, ":NsSet/booleans", true.asInstanceOf[java.lang.Boolean]),
+    //      //          datomic.Util.list(":db/add", e1, ":NsSet/booleanSet", true.asInstanceOf[java.lang.Boolean]),
     //      //          datomic.Util.list(":db/add", e2, ":NsSet/n", 2),
-    //      //          datomic.Util.list(":db/add", e2, ":NsSet/booleans", false.asInstanceOf[java.lang.Boolean])
+    //      //          datomic.Util.list(":db/add", e2, ":NsSet/booleanSet", false.asInstanceOf[java.lang.Boolean])
     //      //        )
     //      //      )
     //      //      println(txr.get())

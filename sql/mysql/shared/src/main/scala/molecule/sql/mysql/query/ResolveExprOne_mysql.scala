@@ -137,8 +137,8 @@ trait ResolveExprOne_mysql extends ResolveExprOne with LambdasOne_mysql { self: 
         replaceCast(
           (row: RS, paramIndex: Int) => {
             val json    = row.getString(paramIndex)
-            val doubles = json.substring(1, json.length - 1).split(", ").map(_.toDouble)
-            varianceOf(doubles.toList: _*)
+            val doubleSet = json.substring(1, json.length - 1).split(", ").map(_.toDouble)
+            varianceOf(doubleSet.toList: _*)
           }
         )
 
@@ -152,9 +152,9 @@ trait ResolveExprOne_mysql extends ResolveExprOne with LambdasOne_mysql { self: 
         replaceCast(
           (row: RS, paramIndex: Int) => {
             val json    = row.getString(paramIndex)
-            val doubles = json.substring(1, json.length - 1).split(", ").map(_.toDouble)
-            stdDevOf(doubles.toList: _*)
-            //            stdDevOf(doubles.toSet.toList: _*)
+            val doubleSet = json.substring(1, json.length - 1).split(", ").map(_.toDouble)
+            stdDevOf(doubleSet.toList: _*)
+            //            stdDevOf(doubleSet.toSet.toList: _*)
           }
         )
 

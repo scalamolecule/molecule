@@ -47,8 +47,8 @@ trait NestedBasic extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       "set" - refs { implicit conn =>
         import molecule.coreTests.dataModels.core.dsl.Refs._
         for {
-          _ <- A.i.Bb.*(B.ii).insert(List((2, List(Set(3, 4))))).transact
-          _ <- A.i.Bb.*(B.ii).query.get.map(_ ==> List((2, List(Set(3, 4)))))
+          _ <- A.i.Bb.*(B.iSet).insert(List((2, List(Set(3, 4))))).transact
+          _ <- A.i.Bb.*(B.iSet).query.get.map(_ ==> List((2, List(Set(3, 4)))))
         } yield ()
       }
     }
@@ -67,8 +67,8 @@ trait NestedBasic extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       "set" - refs { implicit conn =>
         import molecule.coreTests.dataModels.core.dsl.Refs._
         for {
-          _ <- A.i.OwnBb.*(B.ii).insert(List((2, List(Set(3, 4))))).transact
-          _ <- A.i.OwnBb.*(B.ii).query.get.map(_ ==> List((2, List(Set(3, 4)))))
+          _ <- A.i.OwnBb.*(B.iSet).insert(List((2, List(Set(3, 4))))).transact
+          _ <- A.i.OwnBb.*(B.iSet).query.get.map(_ ==> List((2, List(Set(3, 4)))))
         } yield ()
       }
     }

@@ -17,7 +17,7 @@ trait Schema {
 
   val uniqueAttrs: List[String]
 
-  /** Edn data strings to transact Datomic Peer schema. */
+  /** Edn data stringSet to transact Datomic Peer schema. */
   val datomicPartitions: String
   val datomicSchema    : String
   val datomicAliases   : String

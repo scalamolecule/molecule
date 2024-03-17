@@ -23,15 +23,15 @@ trait AggrSetRefNum_median extends CoreTestSuite with ApiAsync { spi: SpiAsync =
     "1st ref" - refs { implicit conn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
-        _ <- A.i.B.ii.insert(List(
+        _ <- A.i.B.iSet.insert(List(
           (1, Set(1, 2)),
           (2, Set(2)),
           (2, Set(5, 9)),
         )).transact
 
-        _ <- A.B.ii(median).query.get.map(_.head ==~ 2)
+        _ <- A.B.iSet(median).query.get.map(_.head ==~ 2)
 
-        _ <- A.i.B.ii(median).query.get.map(_.map {
+        _ <- A.i.B.iSet(median).query.get.map(_.map {
           case (1, median) => median ==~ wholeOrAverage
           case (2, median) => median ==~ 5.0
         })
@@ -42,15 +42,15 @@ trait AggrSetRefNum_median extends CoreTestSuite with ApiAsync { spi: SpiAsync =
     "2nd ref" - refs { implicit conn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
-        _ <- A.i.B.i.C.ii.insert(List(
+        _ <- A.i.B.i.C.iSet.insert(List(
           (1, 1, Set(1, 2)),
           (2, 2, Set(2)),
           (2, 2, Set(5, 9)),
         )).transact
 
-        _ <- A.B.C.ii(median).query.get.map(_.head ==~ 2)
+        _ <- A.B.C.iSet(median).query.get.map(_.head ==~ 2)
 
-        _ <- A.i.B.i.C.ii(median).query.get.map(_.map {
+        _ <- A.i.B.i.C.iSet(median).query.get.map(_.map {
           case (1, 1, median) => median ==~ wholeOrAverage
           case (2, 2, median) => median ==~ 5.0
         })
@@ -61,13 +61,13 @@ trait AggrSetRefNum_median extends CoreTestSuite with ApiAsync { spi: SpiAsync =
     "backref" - refs { implicit conn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
-        _ <- A.i.B.i._A.C.ii.insert(List(
+        _ <- A.i.B.i._A.C.iSet.insert(List(
           (1, 1, Set(1, 2)),
           (2, 2, Set(2)),
           (2, 2, Set(5, 9)),
         )).transact
 
-        _ <- A.i.B.i._A.C.ii(median).query.get.map(_.map {
+        _ <- A.i.B.i._A.C.iSet(median).query.get.map(_.map {
           case (1, 1, median) => median ==~ wholeOrAverage
           case (2, 2, median) => median ==~ 5.0
         })

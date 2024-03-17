@@ -14,7 +14,7 @@ trait AggrSetRef_min extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "1st ref" - refs { implicit conn =>
       for {
-        _ <- A.i.B.ii.insert(List(
+        _ <- A.i.B.iSet.insert(List(
           (1, Set(1, 2)),
           (2, Set(2)),
           (2, Set(3, 4)),
@@ -23,27 +23,27 @@ trait AggrSetRef_min extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         // Matching values coalesced into one Set
 
-        _ <- A.B.ii(min).query.get.map(_ ==> List(Set(1)))
-        _ <- A.B.ii(min(1)).query.get.map(_ ==> List(Set(1)))
-        _ <- A.B.ii(min(2)).query.get.map(_ ==> List(Set(1, 2)))
-        _ <- A.B.ii(min(3)).query.get.map(_ ==> List(Set(1, 2, 3)))
+        _ <- A.B.iSet(min).query.get.map(_ ==> List(Set(1)))
+        _ <- A.B.iSet(min(1)).query.get.map(_ ==> List(Set(1)))
+        _ <- A.B.iSet(min(2)).query.get.map(_ ==> List(Set(1, 2)))
+        _ <- A.B.iSet(min(3)).query.get.map(_ ==> List(Set(1, 2, 3)))
 
-        _ <- A.i.a1.B.ii(min).query.get.map(_ ==> List(
+        _ <- A.i.a1.B.iSet(min).query.get.map(_ ==> List(
           (1, Set(1)),
           (2, Set(2)),
         ))
         // Same as
-        _ <- A.i.a1.B.ii(min(1)).query.get.map(_ ==> List(
+        _ <- A.i.a1.B.iSet(min(1)).query.get.map(_ ==> List(
           (1, Set(1)),
           (2, Set(2)),
         ))
 
-        _ <- A.i.a1.B.ii(min(2)).query.get.map(_ ==> List(
+        _ <- A.i.a1.B.iSet(min(2)).query.get.map(_ ==> List(
           (1, Set(1, 2)),
           (2, Set(2, 3)),
         ))
 
-        _ <- A.i.a1.B.ii(min(3)).query.get.map(_ ==> List(
+        _ <- A.i.a1.B.iSet(min(3)).query.get.map(_ ==> List(
           (1, Set(1, 2)),
           (2, Set(2, 3, 4)),
         ))
@@ -53,34 +53,34 @@ trait AggrSetRef_min extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "2nd ref" - refs { implicit conn =>
       for {
-        _ <- A.i.B.i.C.ii.insert(List(
+        _ <- A.i.B.i.C.iSet.insert(List(
           (1, 1, Set(1, 2)),
           (2, 2, Set(2)),
           (2, 2, Set(3, 4)),
           (2, 2, Set(3, 4)),
         )).transact
 
-        _ <- A.B.C.ii(min).query.get.map(_ ==> List(Set(1)))
-        _ <- A.B.C.ii(min(1)).query.get.map(_ ==> List(Set(1)))
-        _ <- A.B.C.ii(min(2)).query.get.map(_ ==> List(Set(1, 2)))
-        _ <- A.B.C.ii(min(3)).query.get.map(_ ==> List(Set(1, 2, 3)))
+        _ <- A.B.C.iSet(min).query.get.map(_ ==> List(Set(1)))
+        _ <- A.B.C.iSet(min(1)).query.get.map(_ ==> List(Set(1)))
+        _ <- A.B.C.iSet(min(2)).query.get.map(_ ==> List(Set(1, 2)))
+        _ <- A.B.C.iSet(min(3)).query.get.map(_ ==> List(Set(1, 2, 3)))
 
-        _ <- A.i.a1.B.i.C.ii(min).query.get.map(_ ==> List(
+        _ <- A.i.a1.B.i.C.iSet(min).query.get.map(_ ==> List(
           (1, 1, Set(1)),
           (2, 2, Set(2)),
         ))
         // Same as
-        _ <- A.i.a1.B.i.C.ii(min(1)).query.get.map(_ ==> List(
+        _ <- A.i.a1.B.i.C.iSet(min(1)).query.get.map(_ ==> List(
           (1, 1, Set(1)),
           (2, 2, Set(2)),
         ))
 
-        _ <- A.i.a1.B.i.C.ii(min(2)).query.get.map(_ ==> List(
+        _ <- A.i.a1.B.i.C.iSet(min(2)).query.get.map(_ ==> List(
           (1, 1, Set(1, 2)),
           (2, 2, Set(2, 3)),
         ))
 
-        _ <- A.i.a1.B.i.C.ii(min(3)).query.get.map(_ ==> List(
+        _ <- A.i.a1.B.i.C.iSet(min(3)).query.get.map(_ ==> List(
           (1, 1, Set(1, 2)),
           (2, 2, Set(2, 3, 4)),
         ))
@@ -90,29 +90,29 @@ trait AggrSetRef_min extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "backref" - refs { implicit conn =>
       for {
-        _ <- A.i.B.i._A.C.ii.insert(List(
+        _ <- A.i.B.i._A.C.iSet.insert(List(
           (1, 1, Set(1, 2)),
           (2, 2, Set(2)),
           (2, 2, Set(3, 4)),
           (2, 2, Set(3, 4)),
         )).transact
 
-        _ <- A.i.a1.B.i._A.C.ii(min).query.get.map(_ ==> List(
+        _ <- A.i.a1.B.i._A.C.iSet(min).query.get.map(_ ==> List(
           (1, 1, Set(1)),
           (2, 2, Set(2)),
         ))
         // Same as
-        _ <- A.i.a1.B.i._A.C.ii(min(1)).query.get.map(_ ==> List(
+        _ <- A.i.a1.B.i._A.C.iSet(min(1)).query.get.map(_ ==> List(
           (1, 1, Set(1)),
           (2, 2, Set(2)),
         ))
 
-        _ <- A.i.a1.B.i._A.C.ii(min(2)).query.get.map(_ ==> List(
+        _ <- A.i.a1.B.i._A.C.iSet(min(2)).query.get.map(_ ==> List(
           (1, 1, Set(1, 2)),
           (2, 2, Set(2, 3)),
         ))
 
-        _ <- A.i.a1.B.i._A.C.ii(min(3)).query.get.map(_ ==> List(
+        _ <- A.i.a1.B.i._A.C.iSet(min(3)).query.get.map(_ ==> List(
           (1, 1, Set(1, 2)),
           (2, 2, Set(2, 3, 4)),
         ))

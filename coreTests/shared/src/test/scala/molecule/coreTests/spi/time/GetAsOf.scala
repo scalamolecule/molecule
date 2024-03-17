@@ -91,7 +91,7 @@ trait GetAsOf extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         for {
           _ <- Ns.int(1).save.transact
           d1 = new Date()
-          _ <- delay(2)(()) // Ensure dates are not within the same ms
+          _ <- delay(2)(()) // Ensure dateSet are not within the same ms
           _ <- Ns.int(2).save.transact
           d2 = new Date()
           _ <- delay(2)(())

@@ -15,7 +15,7 @@ trait AggrSet_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "distinct" - types { implicit conn =>
       for {
-        _ <- Ns.i.doubles.insert(List(
+        _ <- Ns.i.doubleSet.insert(List(
           (1, Set(double1, double2)),
           (2, Set(double2)),
           (2, Set(double3, double4)),
@@ -23,13 +23,13 @@ trait AggrSet_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         )).transact
 
         // Non-aggregated card-many Set of attribute values coalesce
-        _ <- Ns.i.a1.doubles.query.get.map(_ ==> List(
+        _ <- Ns.i.a1.doubleSet.query.get.map(_ ==> List(
           (1, Set(double1, double2)),
           (2, Set(double2, double3, double4)), // 3 rows coalesced
         ))
 
         // Use `distinct` keyword to retrieve unique Sets of Sets
-        _ <- Ns.i.a1.doubles(distinct).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.doubleSet(distinct).query.get.map(_ ==> List(
           (1, Set(Set(double1, double2))),
           (2, Set(
             Set(double2),
@@ -37,7 +37,7 @@ trait AggrSet_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           ))
         ))
 
-        _ <- Ns.doubles(distinct).query.get.map(_ ==> List(
+        _ <- Ns.doubleSet(distinct).query.get.map(_ ==> List(
           Set(
             Set(double1, double2),
             Set(double2),
@@ -50,7 +50,7 @@ trait AggrSet_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "min" - types { implicit conn =>
       for {
-        _ <- Ns.i.doubles.insert(List(
+        _ <- Ns.i.doubleSet.insert(List(
           (1, Set(double1, double2)),
           (2, Set(double2)),
           (2, Set(double3, double4)),
@@ -59,27 +59,27 @@ trait AggrSet_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         // Matching values coalesced doubleo one Set
 
-        _ <- Ns.doubles(min).query.get.map(_ ==> List(Set(double1)))
-        _ <- Ns.doubles(min(1)).query.get.map(_ ==> List(Set(double1)))
-        _ <- Ns.doubles(min(2)).query.get.map(_ ==> List(Set(double1, double2)))
-        _ <- Ns.doubles(min(3)).query.get.map(_ ==> List(Set(double1, double2, double3)))
+        _ <- Ns.doubleSet(min).query.get.map(_ ==> List(Set(double1)))
+        _ <- Ns.doubleSet(min(1)).query.get.map(_ ==> List(Set(double1)))
+        _ <- Ns.doubleSet(min(2)).query.get.map(_ ==> List(Set(double1, double2)))
+        _ <- Ns.doubleSet(min(3)).query.get.map(_ ==> List(Set(double1, double2, double3)))
 
-        _ <- Ns.i.a1.doubles(min).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.doubleSet(min).query.get.map(_ ==> List(
           (1, Set(double1)),
           (2, Set(double2)),
         ))
         // Same as
-        _ <- Ns.i.a1.doubles(min(1)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.doubleSet(min(1)).query.get.map(_ ==> List(
           (1, Set(double1)),
           (2, Set(double2)),
         ))
 
-        _ <- Ns.i.a1.doubles(min(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.doubleSet(min(2)).query.get.map(_ ==> List(
           (1, Set(double1, double2)),
           (2, Set(double2, double3)),
         ))
 
-        _ <- Ns.i.a1.doubles(min(3)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.doubleSet(min(3)).query.get.map(_ ==> List(
           (1, Set(double1, double2)),
           (2, Set(double2, double3, double4)),
         ))
@@ -89,7 +89,7 @@ trait AggrSet_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "max" - types { implicit futConn =>
       for {
-        _ <- Ns.i.doubles.insert(List(
+        _ <- Ns.i.doubleSet.insert(List(
           (1, Set(double1, double2)),
           (2, Set(double2)),
           (2, Set(double3, double4)),
@@ -98,27 +98,27 @@ trait AggrSet_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         // Matching values coalesced doubleo one Set
 
-        _ <- Ns.doubles(max).query.get.map(_ ==> List(Set(double4)))
-        _ <- Ns.doubles(max(1)).query.get.map(_ ==> List(Set(double4)))
-        _ <- Ns.doubles(max(2)).query.get.map(_ ==> List(Set(double3, double4)))
-        _ <- Ns.doubles(max(3)).query.get.map(_ ==> List(Set(double2, double3, double4)))
+        _ <- Ns.doubleSet(max).query.get.map(_ ==> List(Set(double4)))
+        _ <- Ns.doubleSet(max(1)).query.get.map(_ ==> List(Set(double4)))
+        _ <- Ns.doubleSet(max(2)).query.get.map(_ ==> List(Set(double3, double4)))
+        _ <- Ns.doubleSet(max(3)).query.get.map(_ ==> List(Set(double2, double3, double4)))
 
-        _ <- Ns.i.a1.doubles(max).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.doubleSet(max).query.get.map(_ ==> List(
           (1, Set(double2)),
           (2, Set(double4)),
         ))
         // Same as
-        _ <- Ns.i.a1.doubles(max(1)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.doubleSet(max(1)).query.get.map(_ ==> List(
           (1, Set(double2)),
           (2, Set(double4)),
         ))
 
-        _ <- Ns.i.a1.doubles(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.doubleSet(max(2)).query.get.map(_ ==> List(
           (1, Set(double1, double2)),
           (2, Set(double3, double4)),
         ))
 
-        _ <- Ns.i.a1.doubles(max(3)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.doubleSet(max(3)).query.get.map(_ ==> List(
           (1, Set(double1, double2)),
           (2, Set(double2, double3, double4)),
         ))
@@ -128,23 +128,23 @@ trait AggrSet_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "sample" - types { implicit futConn =>
       for {
-        _ <- Ns.i.doubles.insert(List(
+        _ <- Ns.i.doubleSet.insert(List(
           (1, Set(double1, double2)),
           (2, Set(double2)),
           (2, Set(double3, double4)),
           (2, Set(double3, double4)),
         )).transact
         all = Set(double1, double2, double3, double4)
-        _ <- Ns.doubles(sample).query.get.map(res => all.contains(res.head.head) ==> true)
-        _ <- Ns.doubles(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- Ns.doubles(sample(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
+        _ <- Ns.doubleSet(sample).query.get.map(res => all.contains(res.head.head) ==> true)
+        _ <- Ns.doubleSet(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
+        _ <- Ns.doubleSet(sample(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
       } yield ()
     }
 
 
     "count countDistinct" - types { implicit conn =>
       for {
-        _ <- Ns.i.doubles.insert(List(
+        _ <- Ns.i.doubleSet.insert(List(
           (1, Set(double1, double2)),
           (2, Set(double2)),
           (2, Set(double3, double4)),
@@ -154,14 +154,14 @@ trait AggrSet_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i(count).query.get.map(_ ==> List(4))
         _ <- Ns.i(countDistinct).query.get.map(_ ==> List(2))
 
-        _ <- Ns.doubles(count).query.get.map(_ ==> List(7))
-        _ <- Ns.doubles(countDistinct).query.get.map(_ ==> List(4))
+        _ <- Ns.doubleSet(count).query.get.map(_ ==> List(7))
+        _ <- Ns.doubleSet(countDistinct).query.get.map(_ ==> List(4))
 
-        _ <- Ns.i.a1.doubles(count).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.doubleSet(count).query.get.map(_ ==> List(
           (1, 2),
           (2, 5)
         ))
-        _ <- Ns.i.a1.doubles(countDistinct).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.doubleSet(countDistinct).query.get.map(_ ==> List(
           (1, 2),
           (2, 3)
         ))

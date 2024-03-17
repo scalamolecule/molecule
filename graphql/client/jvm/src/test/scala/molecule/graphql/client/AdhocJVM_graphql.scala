@@ -56,11 +56,11 @@ object AdhocJVM_graphql extends TestSuite_graphql {
 
 
 //      println("------------------")
-      val doc = Parser.parseQueryEither(source).right.get
+//      val doc = Parser.parseQueryEither(source).right.get
 
 //      println("XXX ------------------\n" + doc.map(_.objectTypeDefinitions))
 //      println("XXX ------------------\n" + doc.objectTypeDefinitions)
-      println("XXX ------------------\n" + doc.enumTypeDefinitions.mkString("\n-----\n"))
+//      println("XXX ------------------\n" + doc.enumTypeDefinitions.mkString("\n-----\n"))
 //      for{
 ////        doc <- Parser.parseQuery(source)
 //        doc <- Parser.parseQueryEither(source)

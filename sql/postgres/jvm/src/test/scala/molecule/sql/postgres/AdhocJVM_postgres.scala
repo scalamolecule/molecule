@@ -31,7 +31,7 @@ object AdhocJVM_postgres extends TestSuite_postgres {
 
       for {
 
-        _ <- A.i.Bb.*(B.i.C.ii).insert(
+        _ <- A.i.Bb.*(B.i.C.iSet).insert(
           (0, Nil),
           (1, List(
             (1, Set.empty[Int])
@@ -44,7 +44,7 @@ object AdhocJVM_postgres extends TestSuite_postgres {
         ).transact
 
 
-        _ <- A.i.a1.Bb.*?(B.i.C.ii).query.get.map(_ ==> List(
+        _ <- A.i.a1.Bb.*?(B.i.C.iSet).query.get.map(_ ==> List(
           (0, Nil),
           (1, Nil),
           (2, List(

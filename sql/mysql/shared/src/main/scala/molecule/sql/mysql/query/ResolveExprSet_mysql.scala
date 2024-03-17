@@ -427,9 +427,9 @@ trait ResolveExprSet_mysql
         groupByCols -= col
         aggregate = true
         replaceCast((row: RS, paramIndex: Int) => {
-          val doubles = res.json2array(row.getString(paramIndex))
+          val doubleSet = res.json2array(row.getString(paramIndex))
             .map(_.toString.toDouble).toList
-          varianceOf(doubles: _*)
+          varianceOf(doubleSet: _*)
         })
 
       case "stddev" =>
@@ -437,9 +437,9 @@ trait ResolveExprSet_mysql
         groupByCols -= col
         aggregate = true
         replaceCast((row: RS, paramIndex: Int) => {
-          val doubles = res.json2array(row.getString(paramIndex))
+          val doubleSet = res.json2array(row.getString(paramIndex))
             .map(_.toString.toDouble).toList
-          stdDevOf(doubles: _*)
+          stdDevOf(doubleSet: _*)
         })
 
       case other => unexpectedKw(other)

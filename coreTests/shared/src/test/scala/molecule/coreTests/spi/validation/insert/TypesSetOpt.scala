@@ -18,7 +18,7 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "String" - validation { implicit conn =>
       for {
-        _ <- Type.strings_?.insert(Some(Set("a", "b", "d"))).transact
+        _ <- Type.stringSet_?.insert(Some(Set("a", "b", "d"))).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(indexedInsertErrors, _) =>
               indexedInsertErrors ==>
@@ -28,12 +28,12 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                     Seq(
                       InsertError(
                         0, // tuple index
-                        "Type.strings",
+                        "Type.stringSet",
                         Seq(
-                          s"""Type.strings with value `a` doesn't satisfy validation:
+                          s"""Type.stringSet with value `a` doesn't satisfy validation:
                              |_ > "c"
                              |""".stripMargin,
-                          s"""Type.strings with value `b` doesn't satisfy validation:
+                          s"""Type.stringSet with value `b` doesn't satisfy validation:
                              |_ > "c"
                              |""".stripMargin
                           // (value d is ok)
@@ -46,14 +46,14 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           }
 
         // Isolate expected errors
-        _ <- Type.strings_?.insert(Some(Set("a", "b", "d"))).transact
+        _ <- Type.stringSet_?.insert(Some(Set("a", "b", "d"))).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors ==> Seq(
-                s"""Type.strings with value `a` doesn't satisfy validation:
+                s"""Type.stringSet with value `a` doesn't satisfy validation:
                    |_ > "c"
                    |""".stripMargin,
-                s"""Type.strings with value `b` doesn't satisfy validation:
+                s"""Type.stringSet with value `b` doesn't satisfy validation:
                    |_ > "c"
                    |""".stripMargin
               )
@@ -64,14 +64,14 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Int" - validation { implicit conn =>
       for {
-        _ <- Type.ints_?.insert(Some(Set(1, 2, 4))).transact
+        _ <- Type.intSet_?.insert(Some(Set(1, 2, 4))).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors ==> Seq(
-                s"""Type.ints with value `1` doesn't satisfy validation:
+                s"""Type.intSet with value `1` doesn't satisfy validation:
                    |_ > 3
                    |""".stripMargin,
-                s"""Type.ints with value `2` doesn't satisfy validation:
+                s"""Type.intSet with value `2` doesn't satisfy validation:
                    |_ > 3
                    |""".stripMargin
               )
@@ -81,14 +81,14 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Long" - validation { implicit conn =>
       for {
-        _ <- Type.longs_?.insert(Some(Set(1L, 2L, 4L))).transact
+        _ <- Type.longSet_?.insert(Some(Set(1L, 2L, 4L))).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors ==> Seq(
-                s"""Type.longs with value `1` doesn't satisfy validation:
+                s"""Type.longSet with value `1` doesn't satisfy validation:
                    |_ > 3L
                    |""".stripMargin,
-                s"""Type.longs with value `2` doesn't satisfy validation:
+                s"""Type.longSet with value `2` doesn't satisfy validation:
                    |_ > 3L
                    |""".stripMargin
               )
@@ -98,14 +98,14 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Float" - validation { implicit conn =>
       for {
-        _ <- Type.floats_?.insert(Some(Set(float1, float2, float4))).transact
+        _ <- Type.floatSet_?.insert(Some(Set(float1, float2, float4))).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors ==> Seq(
-                s"""Type.floats with value `$float1` doesn't satisfy validation:
+                s"""Type.floatSet with value `$float1` doesn't satisfy validation:
                    |_ > 3.3f
                    |""".stripMargin,
-                s"""Type.floats with value `$float2` doesn't satisfy validation:
+                s"""Type.floatSet with value `$float2` doesn't satisfy validation:
                    |_ > 3.3f
                    |""".stripMargin
               )
@@ -115,14 +115,14 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Double" - validation { implicit conn =>
       for {
-        _ <- Type.doubles_?.insert(Some(Set(double1, double2, double4))).transact
+        _ <- Type.doubleSet_?.insert(Some(Set(double1, double2, double4))).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors ==> Seq(
-                s"""Type.doubles with value `$double1` doesn't satisfy validation:
+                s"""Type.doubleSet with value `$double1` doesn't satisfy validation:
                    |_ > 3.3
                    |""".stripMargin,
-                s"""Type.doubles with value `$double2` doesn't satisfy validation:
+                s"""Type.doubleSet with value `$double2` doesn't satisfy validation:
                    |_ > 3.3
                    |""".stripMargin
               )
@@ -132,11 +132,11 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Boolean" - validation { implicit conn =>
       for {
-        _ <- Type.booleans_?.insert(Some(Set(true, false))).transact
+        _ <- Type.booleanSet_?.insert(Some(Set(true, false))).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors ==> Seq(
-                s"""Type.booleans with value `true` doesn't satisfy validation:
+                s"""Type.booleanSet with value `true` doesn't satisfy validation:
                    |_ == false
                    |""".stripMargin
               )
@@ -146,14 +146,14 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "BigInt" - validation { implicit conn =>
       for {
-        _ <- Type.bigInts_?.insert(Some(Set(bigInt1, bigInt2, bigInt4))).transact
+        _ <- Type.bigIntSet_?.insert(Some(Set(bigInt1, bigInt2, bigInt4))).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors ==> Seq(
-                s"""Type.bigInts with value `$bigInt1` doesn't satisfy validation:
+                s"""Type.bigIntSet with value `$bigInt1` doesn't satisfy validation:
                    |_ > BigInt(3)
                    |""".stripMargin,
-                s"""Type.bigInts with value `$bigInt2` doesn't satisfy validation:
+                s"""Type.bigIntSet with value `$bigInt2` doesn't satisfy validation:
                    |_ > BigInt(3)
                    |""".stripMargin
               )
@@ -163,14 +163,14 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "BigDecimal" - validation { implicit conn =>
       for {
-        _ <- Type.bigDecimals_?.insert(Some(Set(bigDecimal1, bigDecimal2, bigDecimal4))).transact
+        _ <- Type.bigDecimalSet_?.insert(Some(Set(bigDecimal1, bigDecimal2, bigDecimal4))).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors ==> Seq(
-                s"""Type.bigDecimals with value `$bigDecimal1` doesn't satisfy validation:
+                s"""Type.bigDecimalSet with value `$bigDecimal1` doesn't satisfy validation:
                    |_ > BigDecimal(3.3)
                    |""".stripMargin,
-                s"""Type.bigDecimals with value `$bigDecimal2` doesn't satisfy validation:
+                s"""Type.bigDecimalSet with value `$bigDecimal2` doesn't satisfy validation:
                    |_ > BigDecimal(3.3)
                    |""".stripMargin
               )
@@ -180,14 +180,14 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Date" - validation { implicit conn =>
       for {
-        _ <- Type.dates_?.insert(Some(Set(date1, date2, date4))).transact
+        _ <- Type.dateSet_?.insert(Some(Set(date1, date2, date4))).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors ==> Seq(
-                s"""Type.dates with value `$date1` doesn't satisfy validation:
+                s"""Type.dateSet with value `$date1` doesn't satisfy validation:
                    |_.after(new Date(1057010400000L))
                    |""".stripMargin,
-                s"""Type.dates with value `$date2` doesn't satisfy validation:
+                s"""Type.dateSet with value `$date2` doesn't satisfy validation:
                    |_.after(new Date(1057010400000L))
                    |""".stripMargin
               )
@@ -197,14 +197,14 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Duration" - validation { implicit conn =>
       for {
-        _ <- Type.durations_?.insert(Some(Set(duration1, duration2, duration4))).transact
+        _ <- Type.durationSet_?.insert(Some(Set(duration1, duration2, duration4))).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors ==> Seq(
-                s"""Type.durations with value `$duration1` doesn't satisfy validation:
+                s"""Type.durationSet with value `$duration1` doesn't satisfy validation:
                    |_.compareTo(Duration.ofMinutes(2)) > 0
                    |""".stripMargin,
-                s"""Type.durations with value `$duration2` doesn't satisfy validation:
+                s"""Type.durationSet with value `$duration2` doesn't satisfy validation:
                    |_.compareTo(Duration.ofMinutes(2)) > 0
                    |""".stripMargin
               )
@@ -214,14 +214,14 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Instant" - validation { implicit conn =>
       for {
-        _ <- Type.instants_?.insert(Some(Set(instant1, instant2, instant4))).transact
+        _ <- Type.instantSet_?.insert(Some(Set(instant1, instant2, instant4))).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors ==> Seq(
-                s"""Type.instants with value `$instant1` doesn't satisfy validation:
+                s"""Type.instantSet with value `$instant1` doesn't satisfy validation:
                    |_.compareTo(Instant.ofEpochSecond(2)) > 0
                    |""".stripMargin,
-                s"""Type.instants with value `$instant2` doesn't satisfy validation:
+                s"""Type.instantSet with value `$instant2` doesn't satisfy validation:
                    |_.compareTo(Instant.ofEpochSecond(2)) > 0
                    |""".stripMargin
               )
@@ -231,14 +231,14 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "LocalDate" - validation { implicit conn =>
       for {
-        _ <- Type.localDates_?.insert(Some(Set(localDate1, localDate2, localDate4))).transact
+        _ <- Type.localDateSet_?.insert(Some(Set(localDate1, localDate2, localDate4))).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors ==> Seq(
-                s"""Type.localDates with value `$localDate1` doesn't satisfy validation:
+                s"""Type.localDateSet with value `$localDate1` doesn't satisfy validation:
                    |_.compareTo(LocalDate.of(2002, 1, 1)) > 0
                    |""".stripMargin,
-                s"""Type.localDates with value `$localDate2` doesn't satisfy validation:
+                s"""Type.localDateSet with value `$localDate2` doesn't satisfy validation:
                    |_.compareTo(LocalDate.of(2002, 1, 1)) > 0
                    |""".stripMargin
               )
@@ -248,14 +248,14 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "LocalTime" - validation { implicit conn =>
       for {
-        _ <- Type.localTimes_?.insert(Some(Set(localTime1, localTime2, localTime4))).transact
+        _ <- Type.localTimeSet_?.insert(Some(Set(localTime1, localTime2, localTime4))).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors ==> Seq(
-                s"""Type.localTimes with value `$localTime1` doesn't satisfy validation:
+                s"""Type.localTimeSet with value `$localTime1` doesn't satisfy validation:
                    |_.compareTo(LocalTime.of(2, 2)) > 0
                    |""".stripMargin,
-                s"""Type.localTimes with value `$localTime2` doesn't satisfy validation:
+                s"""Type.localTimeSet with value `$localTime2` doesn't satisfy validation:
                    |_.compareTo(LocalTime.of(2, 2)) > 0
                    |""".stripMargin
               )
@@ -265,14 +265,14 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "LocalDateTime" - validation { implicit conn =>
       for {
-        _ <- Type.localDateTimes_?.insert(Some(Set(localDateTime1, localDateTime2, localDateTime4))).transact
+        _ <- Type.localDateTimeSet_?.insert(Some(Set(localDateTime1, localDateTime2, localDateTime4))).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors ==> Seq(
-                s"""Type.localDateTimes with value `$localDateTime1` doesn't satisfy validation:
+                s"""Type.localDateTimeSet with value `$localDateTime1` doesn't satisfy validation:
                    |_.compareTo(LocalDateTime.of(2002, 1, 1, 1, 2)) > 0
                    |""".stripMargin,
-                s"""Type.localDateTimes with value `$localDateTime2` doesn't satisfy validation:
+                s"""Type.localDateTimeSet with value `$localDateTime2` doesn't satisfy validation:
                    |_.compareTo(LocalDateTime.of(2002, 1, 1, 1, 2)) > 0
                    |""".stripMargin
               )
@@ -282,14 +282,14 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "OffsetTime" - validation { implicit conn =>
       for {
-        _ <- Type.offsetTimes_?.insert(Some(Set(offsetTime1, offsetTime2, offsetTime4))).transact
+        _ <- Type.offsetTimeSet_?.insert(Some(Set(offsetTime1, offsetTime2, offsetTime4))).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors ==> Seq(
-                s"""Type.offsetTimes with value `$offsetTime1` doesn't satisfy validation:
+                s"""Type.offsetTimeSet with value `$offsetTime1` doesn't satisfy validation:
                    |_.compareTo(OffsetTime.of(2, 2, 2, 2, ZoneOffset.ofHours(2))) > 0
                    |""".stripMargin,
-                s"""Type.offsetTimes with value `$offsetTime2` doesn't satisfy validation:
+                s"""Type.offsetTimeSet with value `$offsetTime2` doesn't satisfy validation:
                    |_.compareTo(OffsetTime.of(2, 2, 2, 2, ZoneOffset.ofHours(2))) > 0
                    |""".stripMargin
               )
@@ -299,14 +299,14 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "OffsetDateTime" - validation { implicit conn =>
       for {
-        _ <- Type.offsetDateTimes_?.insert(Some(Set(offsetDateTime1, offsetDateTime2, offsetDateTime4))).transact
+        _ <- Type.offsetDateTimeSet_?.insert(Some(Set(offsetDateTime1, offsetDateTime2, offsetDateTime4))).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors ==> Seq(
-                s"""Type.offsetDateTimes with value `$offsetDateTime1` doesn't satisfy validation:
+                s"""Type.offsetDateTimeSet with value `$offsetDateTime1` doesn't satisfy validation:
                    |_.compareTo(OffsetDateTime.of(2002, 1, 1, 1, 1, 1, 1, ZoneOffset.ofHours(2))) > 0
                    |""".stripMargin,
-                s"""Type.offsetDateTimes with value `$offsetDateTime2` doesn't satisfy validation:
+                s"""Type.offsetDateTimeSet with value `$offsetDateTime2` doesn't satisfy validation:
                    |_.compareTo(OffsetDateTime.of(2002, 1, 1, 1, 1, 1, 1, ZoneOffset.ofHours(2))) > 0
                    |""".stripMargin
               )
@@ -316,14 +316,14 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "ZonedDateTime" - validation { implicit conn =>
       for {
-        _ <- Type.zonedDateTimes_?.insert(Some(Set(zonedDateTime1, zonedDateTime2, zonedDateTime4))).transact
+        _ <- Type.zonedDateTimeSet_?.insert(Some(Set(zonedDateTime1, zonedDateTime2, zonedDateTime4))).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors ==> Seq(
-                s"""Type.zonedDateTimes with value `$zonedDateTime1` doesn't satisfy validation:
+                s"""Type.zonedDateTimeSet with value `$zonedDateTime1` doesn't satisfy validation:
                    |_.compareTo(ZonedDateTime.of(2002, 1, 1, 1, 1, 1, 1, ZoneOffset.ofHours(2))) > 0
                    |""".stripMargin,
-                s"""Type.zonedDateTimes with value `$zonedDateTime2` doesn't satisfy validation:
+                s"""Type.zonedDateTimeSet with value `$zonedDateTime2` doesn't satisfy validation:
                    |_.compareTo(ZonedDateTime.of(2002, 1, 1, 1, 1, 1, 1, ZoneOffset.ofHours(2))) > 0
                    |""".stripMargin
               )
@@ -333,14 +333,14 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "UUID" - validation { implicit conn =>
       for {
-        _ <- Type.uuids.insert(Set(
+        _ <- Type.uuidSet.insert(Set(
             UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
             UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-bbbbbbbbbbbb")
           )).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors ==> Seq(
-                s"""Type.uuids with value `aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa` doesn't satisfy validation:
+                s"""Type.uuidSet with value `aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa` doesn't satisfy validation:
                    |_.toString != "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
                    |""".stripMargin
               )
@@ -353,14 +353,14 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       val uri1 = new URI("ab")
       val uri2 = new URI("abcd")
       for {
-        _ <- Type.uris_?.insert(Some(Set(uri0, uri1, uri2))).transact
+        _ <- Type.uriSet_?.insert(Some(Set(uri0, uri1, uri2))).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors ==> Seq(
-                s"""Type.uris with value `a` doesn't satisfy validation:
+                s"""Type.uriSet with value `a` doesn't satisfy validation:
                    |_.toString.length > 3
                    |""".stripMargin,
-                s"""Type.uris with value `ab` doesn't satisfy validation:
+                s"""Type.uriSet with value `ab` doesn't satisfy validation:
                    |_.toString.length > 3
                    |""".stripMargin
               )
@@ -370,14 +370,14 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Byte" - validation { implicit conn =>
       for {
-        _ <- Type.bytes_?.insert(Some(Set(byte1, byte2, byte4))).transact
+        _ <- Type.byteSet_?.insert(Some(Set(byte1, byte2, byte4))).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors ==> Seq(
-                s"""Type.bytes with value `$byte1` doesn't satisfy validation:
+                s"""Type.byteSet with value `$byte1` doesn't satisfy validation:
                    |_ > $byte3
                    |""".stripMargin,
-                s"""Type.bytes with value `$byte2` doesn't satisfy validation:
+                s"""Type.byteSet with value `$byte2` doesn't satisfy validation:
                    |_ > $byte3
                    |""".stripMargin
               )
@@ -387,14 +387,14 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Short" - validation { implicit conn =>
       for {
-        _ <- Type.shorts_?.insert(Some(Set(short1, short2, short4))).transact
+        _ <- Type.shortSet_?.insert(Some(Set(short1, short2, short4))).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors ==> Seq(
-                s"""Type.shorts with value `$short1` doesn't satisfy validation:
+                s"""Type.shortSet with value `$short1` doesn't satisfy validation:
                    |_ > $short3
                    |""".stripMargin,
-                s"""Type.shorts with value `$short2` doesn't satisfy validation:
+                s"""Type.shortSet with value `$short2` doesn't satisfy validation:
                    |_ > $short3
                    |""".stripMargin
               )
@@ -404,14 +404,14 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Char" - validation { implicit conn =>
       for {
-        _ <- Type.chars_?.insert(Some(Set('a', 'b', 'd'))).transact
+        _ <- Type.charSet_?.insert(Some(Set('a', 'b', 'd'))).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors ==> Seq(
-                s"""Type.chars with value `a` doesn't satisfy validation:
+                s"""Type.charSet with value `a` doesn't satisfy validation:
                    |_ > 'c'
                    |""".stripMargin,
-                s"""Type.chars with value `b` doesn't satisfy validation:
+                s"""Type.charSet with value `b` doesn't satisfy validation:
                    |_ > 'c'
                    |""".stripMargin
               )

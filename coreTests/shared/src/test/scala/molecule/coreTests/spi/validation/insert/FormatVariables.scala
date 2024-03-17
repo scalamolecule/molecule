@@ -167,16 +167,16 @@ trait FormatVariables extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "Multiple validations, missing value attrs" - validation { implicit conn =>
       for {
         // Valid values passing all 5 tests
-        _ <- Variables.multipleErrors.int8.str.ints.strs.insert(5, 3, "hello", Set(10), Set("hi", "there")).transact
+        _ <- Variables.multipleErrors.int8.str.intSet.strs.insert(5, 3, "hello", Set(10), Set("hi", "there")).transact
 
         // Missing value attributes needed for tests
-        _ <- Variables.multipleErrors.int8.str.ints.insert(7, 3, "hello", Set(10)).transact
+        _ <- Variables.multipleErrors.int8.str.intSet.insert(7, 3, "hello", Set(10)).transact
           .map(_ ==> "Unexpected success").recover {
             case ModelError(error) =>
               error ==>
                 """Attribute `Variables.multipleErrors` is missing some attributes needed for its validations:
-                  |  Needs  : int8, ints, str, strs
-                  |  Found  : int8, ints, str
+                  |  Needs  : int8, intSet, str, strs
+                  |  Found  : int8, intSet, str
                   |  Missing: strs
                   |""".stripMargin
           }
@@ -186,9 +186,9 @@ trait FormatVariables extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case ModelError(error) =>
               error ==>
                 """Attribute `Variables.multipleErrors` is missing some attributes needed for its validations:
-                  |  Needs  : int8, ints, str, strs
+                  |  Needs  : int8, intSet, str, strs
                   |  Found  : int8, str
-                  |  Missing: ints, strs
+                  |  Missing: intSet, strs
                   |""".stripMargin
           }
 
@@ -197,9 +197,9 @@ trait FormatVariables extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case ModelError(error) =>
               error ==>
                 """Attribute `Variables.multipleErrors` is missing some attributes needed for its validations:
-                  |  Needs  : int8, ints, str, strs
+                  |  Needs  : int8, intSet, str, strs
                   |  Found  : int8
-                  |  Missing: ints, str, strs
+                  |  Missing: intSet, str, strs
                   |""".stripMargin
           }
 
@@ -208,9 +208,9 @@ trait FormatVariables extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case ModelError(error) =>
               error ==>
                 """Attribute `Variables.multipleErrors` is missing some attributes needed for its validations:
-                  |  Needs  : int8, ints, str, strs
+                  |  Needs  : int8, intSet, str, strs
                   |  Found  :
-                  |  Missing: int8, ints, str, strs
+                  |  Missing: int8, intSet, str, strs
                   |""".stripMargin
           }
       } yield ()
@@ -219,7 +219,7 @@ trait FormatVariables extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Multiple validations" - validation { implicit conn =>
       for {
-        _ <- Variables.multipleErrors.int8.str.ints.strs.insert(3, 3, "hello", Set(10), Set("hi", "there")).transact
+        _ <- Variables.multipleErrors.int8.str.intSet.strs.insert(3, 3, "hello", Set(10), Set("hi", "there")).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors ==> Seq(
@@ -228,7 +228,7 @@ trait FormatVariables extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
               )
           }
 
-        _ <- Variables.multipleErrors.int8.str.ints.strs.insert(11, 3, "hello", Set(10), Set("hi", "there")).transact
+        _ <- Variables.multipleErrors.int8.str.intSet.strs.insert(11, 3, "hello", Set(10), Set("hi", "there")).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors ==> Seq(
@@ -236,20 +236,20 @@ trait FormatVariables extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
               )
           }
 
-        _ <- Variables.multipleErrors.int8.str.ints.strs.insert(7, 3, "hello", Set(10), Set("hi", "there")).transact
+        _ <- Variables.multipleErrors.int8.str.intSet.strs.insert(7, 3, "hello", Set(10), Set("hi", "there")).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors ==> Seq(
-                "Test 4: Number must not be `ints` head value `10` minus 3. Found: 7"
+                "Test 4: Number must not be `intSet` head value `10` minus 3. Found: 7"
               )
           }
 
-        _ <- Variables.multipleErrors.int8.str.ints.strs.insert(4, 3, "hello", Set(7), Set("hi", "there")).transact
+        _ <- Variables.multipleErrors.int8.str.intSet.strs.insert(4, 3, "hello", Set(7), Set("hi", "there")).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
               errors.head._2.head.errors ==> Seq(
                 "Test 1: Number must be bigger than 4. Found: 4",
-                "Test 4: Number must not be `ints` head value `7` minus 3. Found: 4",
+                "Test 4: Number must not be `intSet` head value `7` minus 3. Found: 4",
                 """Test 5: Number must
                   |be odd. Found: 4""".stripMargin
               )

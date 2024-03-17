@@ -173,148 +173,148 @@ trait NestedTypes extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Card set mandatory" - types { implicit conn =>
       for {
-        _ <- Ref.i.Nss.*(Ns.strings).insert(1, List(Set(string1, string2))).transact
-        _ <- Ref.i.Nss.*(Ns.ints).insert(2, List(Set(int1, int2))).transact
-        _ <- Ref.i.Nss.*(Ns.longs).insert(3, List(Set(long1, long2))).transact
-        _ <- Ref.i.Nss.*(Ns.floats).insert(4, List(Set(float1, float2))).transact
-        _ <- Ref.i.Nss.*(Ns.doubles).insert(5, List(Set(double1, double2))).transact
-        _ <- Ref.i.Nss.*(Ns.booleans).insert(6, List(Set(boolean1, boolean2))).transact
-        _ <- Ref.i.Nss.*(Ns.bigInts).insert(7, List(Set(bigInt1, bigInt2))).transact
-        _ <- Ref.i.Nss.*(Ns.bigDecimals).insert(8, List(Set(bigDecimal1, bigDecimal2))).transact
-        _ <- Ref.i.Nss.*(Ns.dates).insert(9, List(Set(date1, date2))).transact
-        _ <- Ref.i.Nss.*(Ns.durations).insert(10, List(Set(duration1, duration2))).transact
-        _ <- Ref.i.Nss.*(Ns.instants).insert(11, List(Set(instant1, instant2))).transact
-        _ <- Ref.i.Nss.*(Ns.localDates).insert(12, List(Set(localDate1, localDate2))).transact
-        _ <- Ref.i.Nss.*(Ns.localTimes).insert(13, List(Set(localTime1, localTime2))).transact
-        _ <- Ref.i.Nss.*(Ns.localDateTimes).insert(14, List(Set(localDateTime1, localDateTime2))).transact
-        _ <- Ref.i.Nss.*(Ns.offsetTimes).insert(15, List(Set(offsetTime1, offsetTime2))).transact
-        _ <- Ref.i.Nss.*(Ns.offsetDateTimes).insert(16, List(Set(offsetDateTime1, offsetDateTime2))).transact
-        _ <- Ref.i.Nss.*(Ns.zonedDateTimes).insert(17, List(Set(zonedDateTime1, zonedDateTime2))).transact
-        _ <- Ref.i.Nss.*(Ns.uuids).insert(18, List(Set(uuid1, uuid2))).transact
-        _ <- Ref.i.Nss.*(Ns.uris).insert(19, List(Set(uri1, uri2))).transact
-        _ <- Ref.i.Nss.*(Ns.chars).insert(20, List(Set(char1, char2))).transact
-        _ <- Ref.i.Nss.*(Ns.bytes).insert(21, List(Set(byte1, byte2))).transact
-        _ <- Ref.i.Nss.*(Ns.shorts).insert(22, List(Set(short1, short2))).transact
+        _ <- Ref.i.Nss.*(Ns.stringSet).insert(1, List(Set(string1, string2))).transact
+        _ <- Ref.i.Nss.*(Ns.intSet).insert(2, List(Set(int1, int2))).transact
+        _ <- Ref.i.Nss.*(Ns.longSet).insert(3, List(Set(long1, long2))).transact
+        _ <- Ref.i.Nss.*(Ns.floatSet).insert(4, List(Set(float1, float2))).transact
+        _ <- Ref.i.Nss.*(Ns.doubleSet).insert(5, List(Set(double1, double2))).transact
+        _ <- Ref.i.Nss.*(Ns.booleanSet).insert(6, List(Set(boolean1, boolean2))).transact
+        _ <- Ref.i.Nss.*(Ns.bigIntSet).insert(7, List(Set(bigInt1, bigInt2))).transact
+        _ <- Ref.i.Nss.*(Ns.bigDecimalSet).insert(8, List(Set(bigDecimal1, bigDecimal2))).transact
+        _ <- Ref.i.Nss.*(Ns.dateSet).insert(9, List(Set(date1, date2))).transact
+        _ <- Ref.i.Nss.*(Ns.durationSet).insert(10, List(Set(duration1, duration2))).transact
+        _ <- Ref.i.Nss.*(Ns.instantSet).insert(11, List(Set(instant1, instant2))).transact
+        _ <- Ref.i.Nss.*(Ns.localDateSet).insert(12, List(Set(localDate1, localDate2))).transact
+        _ <- Ref.i.Nss.*(Ns.localTimeSet).insert(13, List(Set(localTime1, localTime2))).transact
+        _ <- Ref.i.Nss.*(Ns.localDateTimeSet).insert(14, List(Set(localDateTime1, localDateTime2))).transact
+        _ <- Ref.i.Nss.*(Ns.offsetTimeSet).insert(15, List(Set(offsetTime1, offsetTime2))).transact
+        _ <- Ref.i.Nss.*(Ns.offsetDateTimeSet).insert(16, List(Set(offsetDateTime1, offsetDateTime2))).transact
+        _ <- Ref.i.Nss.*(Ns.zonedDateTimeSet).insert(17, List(Set(zonedDateTime1, zonedDateTime2))).transact
+        _ <- Ref.i.Nss.*(Ns.uuidSet).insert(18, List(Set(uuid1, uuid2))).transact
+        _ <- Ref.i.Nss.*(Ns.uriSet).insert(19, List(Set(uri1, uri2))).transact
+        _ <- Ref.i.Nss.*(Ns.charSet).insert(20, List(Set(char1, char2))).transact
+        _ <- Ref.i.Nss.*(Ns.byteSet).insert(21, List(Set(byte1, byte2))).transact
+        _ <- Ref.i.Nss.*(Ns.shortSet).insert(22, List(Set(short1, short2))).transact
 
-        _ <- Ref.i_.Nss.*(Ns.strings).query.get.map(_ ==> List(List(Set(string1, string2))))
-        _ <- Ref.i_.Nss.*(Ns.ints).query.get.map(_ ==> List(List(Set(int1, int2))))
-        _ <- Ref.i_.Nss.*(Ns.longs).query.get.map(_ ==> List(List(Set(long1, long2))))
-        _ <- Ref.i_.Nss.*(Ns.floats).query.get.map(_ ==> List(List(Set(float1, float2))))
-        _ <- Ref.i_.Nss.*(Ns.doubles).query.get.map(_ ==> List(List(Set(double1, double2))))
-        _ <- Ref.i_.Nss.*(Ns.booleans).query.get.map(_ ==> List(List(Set(boolean1, boolean2))))
-        _ <- Ref.i_.Nss.*(Ns.bigInts).query.get.map(_ ==> List(List(Set(bigInt1, bigInt2))))
-        _ <- Ref.i_.Nss.*(Ns.bigDecimals).query.get.map(_ ==> List(List(Set(bigDecimal1, bigDecimal2))))
-        _ <- Ref.i_.Nss.*(Ns.dates).query.get.map(_ ==> List(List(Set(date1, date2))))
-        _ <- Ref.i_.Nss.*(Ns.durations).query.get.map(_ ==> List(List(Set(duration1, duration2))))
-        _ <- Ref.i_.Nss.*(Ns.instants).query.get.map(_ ==> List(List(Set(instant1, instant2))))
-        _ <- Ref.i_.Nss.*(Ns.localDates).query.get.map(_ ==> List(List(Set(localDate1, localDate2))))
-        _ <- Ref.i_.Nss.*(Ns.localTimes).query.get.map(_ ==> List(List(Set(localTime1, localTime2))))
-        _ <- Ref.i_.Nss.*(Ns.localDateTimes).query.get.map(_ ==> List(List(Set(localDateTime1, localDateTime2))))
-        _ <- Ref.i_.Nss.*(Ns.offsetTimes).query.get.map(_ ==> List(List(Set(offsetTime1, offsetTime2))))
-        _ <- Ref.i_.Nss.*(Ns.offsetDateTimes).query.get.map(_ ==> List(List(Set(offsetDateTime1, offsetDateTime2))))
-        _ <- Ref.i_.Nss.*(Ns.zonedDateTimes).query.get.map(_ ==> List(List(Set(zonedDateTime1, zonedDateTime2))))
-        _ <- Ref.i_.Nss.*(Ns.uuids).query.get.map(_ ==> List(List(Set(uuid1, uuid2))))
-        _ <- Ref.i_.Nss.*(Ns.uris).query.get.map(_ ==> List(List(Set(uri1, uri2))))
-        _ <- Ref.i_.Nss.*(Ns.chars).query.get.map(_ ==> List(List(Set(char1, char2))))
-        _ <- Ref.i_.Nss.*(Ns.bytes).query.get.map(_ ==> List(List(Set(byte1, byte2))))
-        _ <- Ref.i_.Nss.*(Ns.shorts).query.get.map(_ ==> List(List(Set(short1, short2))))
+        _ <- Ref.i_.Nss.*(Ns.stringSet).query.get.map(_ ==> List(List(Set(string1, string2))))
+        _ <- Ref.i_.Nss.*(Ns.intSet).query.get.map(_ ==> List(List(Set(int1, int2))))
+        _ <- Ref.i_.Nss.*(Ns.longSet).query.get.map(_ ==> List(List(Set(long1, long2))))
+        _ <- Ref.i_.Nss.*(Ns.floatSet).query.get.map(_ ==> List(List(Set(float1, float2))))
+        _ <- Ref.i_.Nss.*(Ns.doubleSet).query.get.map(_ ==> List(List(Set(double1, double2))))
+        _ <- Ref.i_.Nss.*(Ns.booleanSet).query.get.map(_ ==> List(List(Set(boolean1, boolean2))))
+        _ <- Ref.i_.Nss.*(Ns.bigIntSet).query.get.map(_ ==> List(List(Set(bigInt1, bigInt2))))
+        _ <- Ref.i_.Nss.*(Ns.bigDecimalSet).query.get.map(_ ==> List(List(Set(bigDecimal1, bigDecimal2))))
+        _ <- Ref.i_.Nss.*(Ns.dateSet).query.get.map(_ ==> List(List(Set(date1, date2))))
+        _ <- Ref.i_.Nss.*(Ns.durationSet).query.get.map(_ ==> List(List(Set(duration1, duration2))))
+        _ <- Ref.i_.Nss.*(Ns.instantSet).query.get.map(_ ==> List(List(Set(instant1, instant2))))
+        _ <- Ref.i_.Nss.*(Ns.localDateSet).query.get.map(_ ==> List(List(Set(localDate1, localDate2))))
+        _ <- Ref.i_.Nss.*(Ns.localTimeSet).query.get.map(_ ==> List(List(Set(localTime1, localTime2))))
+        _ <- Ref.i_.Nss.*(Ns.localDateTimeSet).query.get.map(_ ==> List(List(Set(localDateTime1, localDateTime2))))
+        _ <- Ref.i_.Nss.*(Ns.offsetTimeSet).query.get.map(_ ==> List(List(Set(offsetTime1, offsetTime2))))
+        _ <- Ref.i_.Nss.*(Ns.offsetDateTimeSet).query.get.map(_ ==> List(List(Set(offsetDateTime1, offsetDateTime2))))
+        _ <- Ref.i_.Nss.*(Ns.zonedDateTimeSet).query.get.map(_ ==> List(List(Set(zonedDateTime1, zonedDateTime2))))
+        _ <- Ref.i_.Nss.*(Ns.uuidSet).query.get.map(_ ==> List(List(Set(uuid1, uuid2))))
+        _ <- Ref.i_.Nss.*(Ns.uriSet).query.get.map(_ ==> List(List(Set(uri1, uri2))))
+        _ <- Ref.i_.Nss.*(Ns.charSet).query.get.map(_ ==> List(List(Set(char1, char2))))
+        _ <- Ref.i_.Nss.*(Ns.byteSet).query.get.map(_ ==> List(List(Set(byte1, byte2))))
+        _ <- Ref.i_.Nss.*(Ns.shortSet).query.get.map(_ ==> List(List(Set(short1, short2))))
 
-        _ <- Ref.i_(1).Nss.*?(Ns.strings).query.get.map(_ ==> List(List(Set(string1, string2))))
-        _ <- Ref.i_(2).Nss.*?(Ns.ints).query.get.map(_ ==> List(List(Set(int1, int2))))
-        _ <- Ref.i_(3).Nss.*?(Ns.longs).query.get.map(_ ==> List(List(Set(long1, long2))))
-        _ <- Ref.i_(4).Nss.*?(Ns.floats).query.get.map(_ ==> List(List(Set(float1, float2))))
-        _ <- Ref.i_(5).Nss.*?(Ns.doubles).query.get.map(_ ==> List(List(Set(double1, double2))))
-        _ <- Ref.i_(6).Nss.*?(Ns.booleans).query.get.map(_ ==> List(List(Set(boolean1, boolean2))))
-        _ <- Ref.i_(7).Nss.*?(Ns.bigInts).query.get.map(_ ==> List(List(Set(bigInt1, bigInt2))))
-        _ <- Ref.i_(8).Nss.*?(Ns.bigDecimals).query.get.map(_ ==> List(List(Set(bigDecimal1, bigDecimal2))))
-        _ <- Ref.i_(9).Nss.*?(Ns.dates).query.get.map(_ ==> List(List(Set(date1, date2))))
-        _ <- Ref.i_(10).Nss.*?(Ns.durations).query.get.map(_ ==> List(List(Set(duration1, duration2))))
-        _ <- Ref.i_(11).Nss.*?(Ns.instants).query.get.map(_ ==> List(List(Set(instant1, instant2))))
-        _ <- Ref.i_(12).Nss.*?(Ns.localDates).query.get.map(_ ==> List(List(Set(localDate1, localDate2))))
-        _ <- Ref.i_(13).Nss.*?(Ns.localTimes).query.get.map(_ ==> List(List(Set(localTime1, localTime2))))
-        _ <- Ref.i_(14).Nss.*?(Ns.localDateTimes).query.get.map(_ ==> List(List(Set(localDateTime1, localDateTime2))))
-        _ <- Ref.i_(15).Nss.*?(Ns.offsetTimes).query.get.map(_ ==> List(List(Set(offsetTime1, offsetTime2))))
-        _ <- Ref.i_(16).Nss.*?(Ns.offsetDateTimes).query.get.map(_ ==> List(List(Set(offsetDateTime1, offsetDateTime2))))
-        _ <- Ref.i_(17).Nss.*?(Ns.zonedDateTimes).query.get.map(_ ==> List(List(Set(zonedDateTime1, zonedDateTime2))))
-        _ <- Ref.i_(18).Nss.*?(Ns.uuids).query.get.map(_ ==> List(List(Set(uuid1, uuid2))))
-        _ <- Ref.i_(19).Nss.*?(Ns.uris).query.get.map(_ ==> List(List(Set(uri1, uri2))))
-        _ <- Ref.i_(20).Nss.*?(Ns.chars).query.get.map(_ ==> List(List(Set(char1, char2))))
-        _ <- Ref.i_(21).Nss.*?(Ns.bytes).query.get.map(_ ==> List(List(Set(byte1, byte2))))
-        _ <- Ref.i_(22).Nss.*?(Ns.shorts).query.get.map(_ ==> List(List(Set(short1, short2))))
+        _ <- Ref.i_(1).Nss.*?(Ns.stringSet).query.get.map(_ ==> List(List(Set(string1, string2))))
+        _ <- Ref.i_(2).Nss.*?(Ns.intSet).query.get.map(_ ==> List(List(Set(int1, int2))))
+        _ <- Ref.i_(3).Nss.*?(Ns.longSet).query.get.map(_ ==> List(List(Set(long1, long2))))
+        _ <- Ref.i_(4).Nss.*?(Ns.floatSet).query.get.map(_ ==> List(List(Set(float1, float2))))
+        _ <- Ref.i_(5).Nss.*?(Ns.doubleSet).query.get.map(_ ==> List(List(Set(double1, double2))))
+        _ <- Ref.i_(6).Nss.*?(Ns.booleanSet).query.get.map(_ ==> List(List(Set(boolean1, boolean2))))
+        _ <- Ref.i_(7).Nss.*?(Ns.bigIntSet).query.get.map(_ ==> List(List(Set(bigInt1, bigInt2))))
+        _ <- Ref.i_(8).Nss.*?(Ns.bigDecimalSet).query.get.map(_ ==> List(List(Set(bigDecimal1, bigDecimal2))))
+        _ <- Ref.i_(9).Nss.*?(Ns.dateSet).query.get.map(_ ==> List(List(Set(date1, date2))))
+        _ <- Ref.i_(10).Nss.*?(Ns.durationSet).query.get.map(_ ==> List(List(Set(duration1, duration2))))
+        _ <- Ref.i_(11).Nss.*?(Ns.instantSet).query.get.map(_ ==> List(List(Set(instant1, instant2))))
+        _ <- Ref.i_(12).Nss.*?(Ns.localDateSet).query.get.map(_ ==> List(List(Set(localDate1, localDate2))))
+        _ <- Ref.i_(13).Nss.*?(Ns.localTimeSet).query.get.map(_ ==> List(List(Set(localTime1, localTime2))))
+        _ <- Ref.i_(14).Nss.*?(Ns.localDateTimeSet).query.get.map(_ ==> List(List(Set(localDateTime1, localDateTime2))))
+        _ <- Ref.i_(15).Nss.*?(Ns.offsetTimeSet).query.get.map(_ ==> List(List(Set(offsetTime1, offsetTime2))))
+        _ <- Ref.i_(16).Nss.*?(Ns.offsetDateTimeSet).query.get.map(_ ==> List(List(Set(offsetDateTime1, offsetDateTime2))))
+        _ <- Ref.i_(17).Nss.*?(Ns.zonedDateTimeSet).query.get.map(_ ==> List(List(Set(zonedDateTime1, zonedDateTime2))))
+        _ <- Ref.i_(18).Nss.*?(Ns.uuidSet).query.get.map(_ ==> List(List(Set(uuid1, uuid2))))
+        _ <- Ref.i_(19).Nss.*?(Ns.uriSet).query.get.map(_ ==> List(List(Set(uri1, uri2))))
+        _ <- Ref.i_(20).Nss.*?(Ns.charSet).query.get.map(_ ==> List(List(Set(char1, char2))))
+        _ <- Ref.i_(21).Nss.*?(Ns.byteSet).query.get.map(_ ==> List(List(Set(byte1, byte2))))
+        _ <- Ref.i_(22).Nss.*?(Ns.shortSet).query.get.map(_ ==> List(List(Set(short1, short2))))
       } yield ()
     }
 
 
     "Card set optional" - types { implicit conn =>
       for {
-        _ <- Ref.i.Nss.*(Ns.i.strings_?).insert(1, List((1, Some(Set(string1, string2))), (2, None))).transact
-        _ <- Ref.i.Nss.*(Ns.i.ints_?).insert(2, List((1, Some(Set(int1, int2))), (2, None))).transact
-        _ <- Ref.i.Nss.*(Ns.i.longs_?).insert(3, List((1, Some(Set(long1, long2))), (2, None))).transact
-        _ <- Ref.i.Nss.*(Ns.i.floats_?).insert(4, List((1, Some(Set(float1, float2))), (2, None))).transact
-        _ <- Ref.i.Nss.*(Ns.i.doubles_?).insert(5, List((1, Some(Set(double1, double2))), (2, None))).transact
-        _ <- Ref.i.Nss.*(Ns.i.booleans_?).insert(6, List((1, Some(Set(boolean1, boolean2))), (2, None))).transact
-        _ <- Ref.i.Nss.*(Ns.i.bigInts_?).insert(7, List((1, Some(Set(bigInt1, bigInt2))), (2, None))).transact
-        _ <- Ref.i.Nss.*(Ns.i.bigDecimals_?).insert(8, List((1, Some(Set(bigDecimal1, bigDecimal2))), (2, None))).transact
-        _ <- Ref.i.Nss.*(Ns.i.dates_?).insert(9, List((1, Some(Set(date1, date2))), (2, None))).transact
-        _ <- Ref.i.Nss.*(Ns.i.durations_?).insert(10, List((1, Some(Set(duration1, duration2))), (2, None))).transact
-        _ <- Ref.i.Nss.*(Ns.i.instants_?).insert(11, List((1, Some(Set(instant1, instant2))), (2, None))).transact
-        _ <- Ref.i.Nss.*(Ns.i.localDates_?).insert(12, List((1, Some(Set(localDate1, localDate2))), (2, None))).transact
-        _ <- Ref.i.Nss.*(Ns.i.localTimes_?).insert(13, List((1, Some(Set(localTime1, localTime2))), (2, None))).transact
-        _ <- Ref.i.Nss.*(Ns.i.localDateTimes_?).insert(14, List((1, Some(Set(localDateTime1, localDateTime2))), (2, None))).transact
-        _ <- Ref.i.Nss.*(Ns.i.offsetTimes_?).insert(15, List((1, Some(Set(offsetTime1, offsetTime2))), (2, None))).transact
-        _ <- Ref.i.Nss.*(Ns.i.offsetDateTimes_?).insert(16, List((1, Some(Set(offsetDateTime1, offsetDateTime2))), (2, None))).transact
-        _ <- Ref.i.Nss.*(Ns.i.zonedDateTimes_?).insert(17, List((1, Some(Set(zonedDateTime1, zonedDateTime2))), (2, None))).transact
-        _ <- Ref.i.Nss.*(Ns.i.uuids_?).insert(18, List((1, Some(Set(uuid1, uuid2))), (2, None))).transact
-        _ <- Ref.i.Nss.*(Ns.i.uris_?).insert(19, List((1, Some(Set(uri1, uri2))), (2, None))).transact
-        _ <- Ref.i.Nss.*(Ns.i.chars_?).insert(20, List((1, Some(Set(char1, char2))), (2, None))).transact
-        _ <- Ref.i.Nss.*(Ns.i.bytes_?).insert(21, List((1, Some(Set(byte1, byte2))), (2, None))).transact
-        _ <- Ref.i.Nss.*(Ns.i.shorts_?).insert(22, List((1, Some(Set(short1, short2))), (2, None))).transact
+        _ <- Ref.i.Nss.*(Ns.i.stringSet_?).insert(1, List((1, Some(Set(string1, string2))), (2, None))).transact
+        _ <- Ref.i.Nss.*(Ns.i.intSet_?).insert(2, List((1, Some(Set(int1, int2))), (2, None))).transact
+        _ <- Ref.i.Nss.*(Ns.i.longSet_?).insert(3, List((1, Some(Set(long1, long2))), (2, None))).transact
+        _ <- Ref.i.Nss.*(Ns.i.floatSet_?).insert(4, List((1, Some(Set(float1, float2))), (2, None))).transact
+        _ <- Ref.i.Nss.*(Ns.i.doubleSet_?).insert(5, List((1, Some(Set(double1, double2))), (2, None))).transact
+        _ <- Ref.i.Nss.*(Ns.i.booleanSet_?).insert(6, List((1, Some(Set(boolean1, boolean2))), (2, None))).transact
+        _ <- Ref.i.Nss.*(Ns.i.bigIntSet_?).insert(7, List((1, Some(Set(bigInt1, bigInt2))), (2, None))).transact
+        _ <- Ref.i.Nss.*(Ns.i.bigDecimalSet_?).insert(8, List((1, Some(Set(bigDecimal1, bigDecimal2))), (2, None))).transact
+        _ <- Ref.i.Nss.*(Ns.i.dateSet_?).insert(9, List((1, Some(Set(date1, date2))), (2, None))).transact
+        _ <- Ref.i.Nss.*(Ns.i.durationSet_?).insert(10, List((1, Some(Set(duration1, duration2))), (2, None))).transact
+        _ <- Ref.i.Nss.*(Ns.i.instantSet_?).insert(11, List((1, Some(Set(instant1, instant2))), (2, None))).transact
+        _ <- Ref.i.Nss.*(Ns.i.localDateSet_?).insert(12, List((1, Some(Set(localDate1, localDate2))), (2, None))).transact
+        _ <- Ref.i.Nss.*(Ns.i.localTimeSet_?).insert(13, List((1, Some(Set(localTime1, localTime2))), (2, None))).transact
+        _ <- Ref.i.Nss.*(Ns.i.localDateTimeSet_?).insert(14, List((1, Some(Set(localDateTime1, localDateTime2))), (2, None))).transact
+        _ <- Ref.i.Nss.*(Ns.i.offsetTimeSet_?).insert(15, List((1, Some(Set(offsetTime1, offsetTime2))), (2, None))).transact
+        _ <- Ref.i.Nss.*(Ns.i.offsetDateTimeSet_?).insert(16, List((1, Some(Set(offsetDateTime1, offsetDateTime2))), (2, None))).transact
+        _ <- Ref.i.Nss.*(Ns.i.zonedDateTimeSet_?).insert(17, List((1, Some(Set(zonedDateTime1, zonedDateTime2))), (2, None))).transact
+        _ <- Ref.i.Nss.*(Ns.i.uuidSet_?).insert(18, List((1, Some(Set(uuid1, uuid2))), (2, None))).transact
+        _ <- Ref.i.Nss.*(Ns.i.uriSet_?).insert(19, List((1, Some(Set(uri1, uri2))), (2, None))).transact
+        _ <- Ref.i.Nss.*(Ns.i.charSet_?).insert(20, List((1, Some(Set(char1, char2))), (2, None))).transact
+        _ <- Ref.i.Nss.*(Ns.i.byteSet_?).insert(21, List((1, Some(Set(byte1, byte2))), (2, None))).transact
+        _ <- Ref.i.Nss.*(Ns.i.shortSet_?).insert(22, List((1, Some(Set(short1, short2))), (2, None))).transact
 
-        _ <- Ref.i(1).Nss.*(Ns.i.a1.strings_?).query.get.map(_ ==> List((1, List((1, Some(Set(string1, string2))), (2, None)))))
-        _ <- Ref.i(2).Nss.*(Ns.i.a1.ints_?).query.get.map(_ ==> List((2, List((1, Some(Set(int1, int2))), (2, None)))))
-        _ <- Ref.i(3).Nss.*(Ns.i.a1.longs_?).query.get.map(_ ==> List((3, List((1, Some(Set(long1, long2))), (2, None)))))
-        _ <- Ref.i(4).Nss.*(Ns.i.a1.floats_?).query.get.map(_ ==> List((4, List((1, Some(Set(float1, float2))), (2, None)))))
-        _ <- Ref.i(5).Nss.*(Ns.i.a1.doubles_?).query.get.map(_ ==> List((5, List((1, Some(Set(double1, double2))), (2, None)))))
-        _ <- Ref.i(6).Nss.*(Ns.i.a1.booleans_?).query.get.map(_ ==> List((6, List((1, Some(Set(boolean1, boolean2))), (2, None)))))
-        _ <- Ref.i(7).Nss.*(Ns.i.a1.bigInts_?).query.get.map(_ ==> List((7, List((1, Some(Set(bigInt1, bigInt2))), (2, None)))))
-        _ <- Ref.i(8).Nss.*(Ns.i.a1.bigDecimals_?).query.get.map(_ ==> List((8, List((1, Some(Set(bigDecimal1, bigDecimal2))), (2, None)))))
-        _ <- Ref.i(9).Nss.*(Ns.i.a1.dates_?).query.get.map(_ ==> List((9, List((1, Some(Set(date1, date2))), (2, None)))))
-        _ <- Ref.i(10).Nss.*(Ns.i.a1.durations_?).query.get.map(_ ==> List((10, List((1, Some(Set(duration1, duration2))), (2, None)))))
-        _ <- Ref.i(11).Nss.*(Ns.i.a1.instants_?).query.get.map(_ ==> List((11, List((1, Some(Set(instant1, instant2))), (2, None)))))
-        _ <- Ref.i(12).Nss.*(Ns.i.a1.localDates_?).query.get.map(_ ==> List((12, List((1, Some(Set(localDate1, localDate2))), (2, None)))))
-        _ <- Ref.i(13).Nss.*(Ns.i.a1.localTimes_?).query.get.map(_ ==> List((13, List((1, Some(Set(localTime1, localTime2))), (2, None)))))
-        _ <- Ref.i(14).Nss.*(Ns.i.a1.localDateTimes_?).query.get.map(_ ==> List((14, List((1, Some(Set(localDateTime1, localDateTime2))), (2, None)))))
-        _ <- Ref.i(15).Nss.*(Ns.i.a1.offsetTimes_?).query.get.map(_ ==> List((15, List((1, Some(Set(offsetTime1, offsetTime2))), (2, None)))))
-        _ <- Ref.i(16).Nss.*(Ns.i.a1.offsetDateTimes_?).query.get.map(_ ==> List((16, List((1, Some(Set(offsetDateTime1, offsetDateTime2))), (2, None)))))
-        _ <- Ref.i(17).Nss.*(Ns.i.a1.zonedDateTimes_?).query.get.map(_ ==> List((17, List((1, Some(Set(zonedDateTime1, zonedDateTime2))), (2, None)))))
-        _ <- Ref.i(18).Nss.*(Ns.i.a1.uuids_?).query.get.map(_ ==> List((18, List((1, Some(Set(uuid1, uuid2))), (2, None)))))
-        _ <- Ref.i(19).Nss.*(Ns.i.a1.uris_?).query.get.map(_ ==> List((19, List((1, Some(Set(uri1, uri2))), (2, None)))))
-        _ <- Ref.i(20).Nss.*(Ns.i.a1.chars_?).query.get.map(_ ==> List((20, List((1, Some(Set(char1, char2))), (2, None)))))
-        _ <- Ref.i(21).Nss.*(Ns.i.a1.bytes_?).query.get.map(_ ==> List((21, List((1, Some(Set(byte1, byte2))), (2, None)))))
-        _ <- Ref.i(22).Nss.*(Ns.i.a1.shorts_?).query.get.map(_ ==> List((22, List((1, Some(Set(short1, short2))), (2, None)))))
+        _ <- Ref.i(1).Nss.*(Ns.i.a1.stringSet_?).query.get.map(_ ==> List((1, List((1, Some(Set(string1, string2))), (2, None)))))
+        _ <- Ref.i(2).Nss.*(Ns.i.a1.intSet_?).query.get.map(_ ==> List((2, List((1, Some(Set(int1, int2))), (2, None)))))
+        _ <- Ref.i(3).Nss.*(Ns.i.a1.longSet_?).query.get.map(_ ==> List((3, List((1, Some(Set(long1, long2))), (2, None)))))
+        _ <- Ref.i(4).Nss.*(Ns.i.a1.floatSet_?).query.get.map(_ ==> List((4, List((1, Some(Set(float1, float2))), (2, None)))))
+        _ <- Ref.i(5).Nss.*(Ns.i.a1.doubleSet_?).query.get.map(_ ==> List((5, List((1, Some(Set(double1, double2))), (2, None)))))
+        _ <- Ref.i(6).Nss.*(Ns.i.a1.booleanSet_?).query.get.map(_ ==> List((6, List((1, Some(Set(boolean1, boolean2))), (2, None)))))
+        _ <- Ref.i(7).Nss.*(Ns.i.a1.bigIntSet_?).query.get.map(_ ==> List((7, List((1, Some(Set(bigInt1, bigInt2))), (2, None)))))
+        _ <- Ref.i(8).Nss.*(Ns.i.a1.bigDecimalSet_?).query.get.map(_ ==> List((8, List((1, Some(Set(bigDecimal1, bigDecimal2))), (2, None)))))
+        _ <- Ref.i(9).Nss.*(Ns.i.a1.dateSet_?).query.get.map(_ ==> List((9, List((1, Some(Set(date1, date2))), (2, None)))))
+        _ <- Ref.i(10).Nss.*(Ns.i.a1.durationSet_?).query.get.map(_ ==> List((10, List((1, Some(Set(duration1, duration2))), (2, None)))))
+        _ <- Ref.i(11).Nss.*(Ns.i.a1.instantSet_?).query.get.map(_ ==> List((11, List((1, Some(Set(instant1, instant2))), (2, None)))))
+        _ <- Ref.i(12).Nss.*(Ns.i.a1.localDateSet_?).query.get.map(_ ==> List((12, List((1, Some(Set(localDate1, localDate2))), (2, None)))))
+        _ <- Ref.i(13).Nss.*(Ns.i.a1.localTimeSet_?).query.get.map(_ ==> List((13, List((1, Some(Set(localTime1, localTime2))), (2, None)))))
+        _ <- Ref.i(14).Nss.*(Ns.i.a1.localDateTimeSet_?).query.get.map(_ ==> List((14, List((1, Some(Set(localDateTime1, localDateTime2))), (2, None)))))
+        _ <- Ref.i(15).Nss.*(Ns.i.a1.offsetTimeSet_?).query.get.map(_ ==> List((15, List((1, Some(Set(offsetTime1, offsetTime2))), (2, None)))))
+        _ <- Ref.i(16).Nss.*(Ns.i.a1.offsetDateTimeSet_?).query.get.map(_ ==> List((16, List((1, Some(Set(offsetDateTime1, offsetDateTime2))), (2, None)))))
+        _ <- Ref.i(17).Nss.*(Ns.i.a1.zonedDateTimeSet_?).query.get.map(_ ==> List((17, List((1, Some(Set(zonedDateTime1, zonedDateTime2))), (2, None)))))
+        _ <- Ref.i(18).Nss.*(Ns.i.a1.uuidSet_?).query.get.map(_ ==> List((18, List((1, Some(Set(uuid1, uuid2))), (2, None)))))
+        _ <- Ref.i(19).Nss.*(Ns.i.a1.uriSet_?).query.get.map(_ ==> List((19, List((1, Some(Set(uri1, uri2))), (2, None)))))
+        _ <- Ref.i(20).Nss.*(Ns.i.a1.charSet_?).query.get.map(_ ==> List((20, List((1, Some(Set(char1, char2))), (2, None)))))
+        _ <- Ref.i(21).Nss.*(Ns.i.a1.byteSet_?).query.get.map(_ ==> List((21, List((1, Some(Set(byte1, byte2))), (2, None)))))
+        _ <- Ref.i(22).Nss.*(Ns.i.a1.shortSet_?).query.get.map(_ ==> List((22, List((1, Some(Set(short1, short2))), (2, None)))))
 
-        _ <- Ref.i(1).Nss.*?(Ns.i.a1.strings_?).query.get.map(_ ==> List((1, List((1, Some(Set(string1, string2))), (2, None)))))
-        _ <- Ref.i(2).Nss.*?(Ns.i.a1.ints_?).query.get.map(_ ==> List((2, List((1, Some(Set(int1, int2))), (2, None)))))
-        _ <- Ref.i(3).Nss.*?(Ns.i.a1.longs_?).query.get.map(_ ==> List((3, List((1, Some(Set(long1, long2))), (2, None)))))
-        _ <- Ref.i(4).Nss.*?(Ns.i.a1.floats_?).query.get.map(_ ==> List((4, List((1, Some(Set(float1, float2))), (2, None)))))
-        _ <- Ref.i(5).Nss.*?(Ns.i.a1.doubles_?).query.get.map(_ ==> List((5, List((1, Some(Set(double1, double2))), (2, None)))))
-        _ <- Ref.i(6).Nss.*?(Ns.i.a1.booleans_?).query.get.map(_ ==> List((6, List((1, Some(Set(boolean1, boolean2))), (2, None)))))
-        _ <- Ref.i(7).Nss.*?(Ns.i.a1.bigInts_?).query.get.map(_ ==> List((7, List((1, Some(Set(bigInt1, bigInt2))), (2, None)))))
-        _ <- Ref.i(8).Nss.*?(Ns.i.a1.bigDecimals_?).query.get.map(_ ==> List((8, List((1, Some(Set(bigDecimal1, bigDecimal2))), (2, None)))))
-        _ <- Ref.i(9).Nss.*?(Ns.i.a1.dates_?).query.get.map(_ ==> List((9, List((1, Some(Set(date1, date2))), (2, None)))))
-        _ <- Ref.i(10).Nss.*?(Ns.i.a1.durations_?).query.get.map(_ ==> List((10, List((1, Some(Set(duration1, duration2))), (2, None)))))
-        _ <- Ref.i(11).Nss.*?(Ns.i.a1.instants_?).query.get.map(_ ==> List((11, List((1, Some(Set(instant1, instant2))), (2, None)))))
-        _ <- Ref.i(12).Nss.*?(Ns.i.a1.localDates_?).query.get.map(_ ==> List((12, List((1, Some(Set(localDate1, localDate2))), (2, None)))))
-        _ <- Ref.i(13).Nss.*?(Ns.i.a1.localTimes_?).query.get.map(_ ==> List((13, List((1, Some(Set(localTime1, localTime2))), (2, None)))))
-        _ <- Ref.i(14).Nss.*?(Ns.i.a1.localDateTimes_?).query.get.map(_ ==> List((14, List((1, Some(Set(localDateTime1, localDateTime2))), (2, None)))))
-        _ <- Ref.i(15).Nss.*?(Ns.i.a1.offsetTimes_?).query.get.map(_ ==> List((15, List((1, Some(Set(offsetTime1, offsetTime2))), (2, None)))))
-        _ <- Ref.i(16).Nss.*?(Ns.i.a1.offsetDateTimes_?).query.get.map(_ ==> List((16, List((1, Some(Set(offsetDateTime1, offsetDateTime2))), (2, None)))))
-        _ <- Ref.i(17).Nss.*?(Ns.i.a1.zonedDateTimes_?).query.get.map(_ ==> List((17, List((1, Some(Set(zonedDateTime1, zonedDateTime2))), (2, None)))))
-        _ <- Ref.i(18).Nss.*?(Ns.i.a1.uuids_?).query.get.map(_ ==> List((18, List((1, Some(Set(uuid1, uuid2))), (2, None)))))
-        _ <- Ref.i(19).Nss.*?(Ns.i.a1.uris_?).query.get.map(_ ==> List((19, List((1, Some(Set(uri1, uri2))), (2, None)))))
-        _ <- Ref.i(20).Nss.*?(Ns.i.a1.chars_?).query.get.map(_ ==> List((20, List((1, Some(Set(char1, char2))), (2, None)))))
-        _ <- Ref.i(21).Nss.*?(Ns.i.a1.bytes_?).query.get.map(_ ==> List((21, List((1, Some(Set(byte1, byte2))), (2, None)))))
-        _ <- Ref.i(22).Nss.*?(Ns.i.a1.shorts_?).query.get.map(_ ==> List((22, List((1, Some(Set(short1, short2))), (2, None)))))
+        _ <- Ref.i(1).Nss.*?(Ns.i.a1.stringSet_?).query.get.map(_ ==> List((1, List((1, Some(Set(string1, string2))), (2, None)))))
+        _ <- Ref.i(2).Nss.*?(Ns.i.a1.intSet_?).query.get.map(_ ==> List((2, List((1, Some(Set(int1, int2))), (2, None)))))
+        _ <- Ref.i(3).Nss.*?(Ns.i.a1.longSet_?).query.get.map(_ ==> List((3, List((1, Some(Set(long1, long2))), (2, None)))))
+        _ <- Ref.i(4).Nss.*?(Ns.i.a1.floatSet_?).query.get.map(_ ==> List((4, List((1, Some(Set(float1, float2))), (2, None)))))
+        _ <- Ref.i(5).Nss.*?(Ns.i.a1.doubleSet_?).query.get.map(_ ==> List((5, List((1, Some(Set(double1, double2))), (2, None)))))
+        _ <- Ref.i(6).Nss.*?(Ns.i.a1.booleanSet_?).query.get.map(_ ==> List((6, List((1, Some(Set(boolean1, boolean2))), (2, None)))))
+        _ <- Ref.i(7).Nss.*?(Ns.i.a1.bigIntSet_?).query.get.map(_ ==> List((7, List((1, Some(Set(bigInt1, bigInt2))), (2, None)))))
+        _ <- Ref.i(8).Nss.*?(Ns.i.a1.bigDecimalSet_?).query.get.map(_ ==> List((8, List((1, Some(Set(bigDecimal1, bigDecimal2))), (2, None)))))
+        _ <- Ref.i(9).Nss.*?(Ns.i.a1.dateSet_?).query.get.map(_ ==> List((9, List((1, Some(Set(date1, date2))), (2, None)))))
+        _ <- Ref.i(10).Nss.*?(Ns.i.a1.durationSet_?).query.get.map(_ ==> List((10, List((1, Some(Set(duration1, duration2))), (2, None)))))
+        _ <- Ref.i(11).Nss.*?(Ns.i.a1.instantSet_?).query.get.map(_ ==> List((11, List((1, Some(Set(instant1, instant2))), (2, None)))))
+        _ <- Ref.i(12).Nss.*?(Ns.i.a1.localDateSet_?).query.get.map(_ ==> List((12, List((1, Some(Set(localDate1, localDate2))), (2, None)))))
+        _ <- Ref.i(13).Nss.*?(Ns.i.a1.localTimeSet_?).query.get.map(_ ==> List((13, List((1, Some(Set(localTime1, localTime2))), (2, None)))))
+        _ <- Ref.i(14).Nss.*?(Ns.i.a1.localDateTimeSet_?).query.get.map(_ ==> List((14, List((1, Some(Set(localDateTime1, localDateTime2))), (2, None)))))
+        _ <- Ref.i(15).Nss.*?(Ns.i.a1.offsetTimeSet_?).query.get.map(_ ==> List((15, List((1, Some(Set(offsetTime1, offsetTime2))), (2, None)))))
+        _ <- Ref.i(16).Nss.*?(Ns.i.a1.offsetDateTimeSet_?).query.get.map(_ ==> List((16, List((1, Some(Set(offsetDateTime1, offsetDateTime2))), (2, None)))))
+        _ <- Ref.i(17).Nss.*?(Ns.i.a1.zonedDateTimeSet_?).query.get.map(_ ==> List((17, List((1, Some(Set(zonedDateTime1, zonedDateTime2))), (2, None)))))
+        _ <- Ref.i(18).Nss.*?(Ns.i.a1.uuidSet_?).query.get.map(_ ==> List((18, List((1, Some(Set(uuid1, uuid2))), (2, None)))))
+        _ <- Ref.i(19).Nss.*?(Ns.i.a1.uriSet_?).query.get.map(_ ==> List((19, List((1, Some(Set(uri1, uri2))), (2, None)))))
+        _ <- Ref.i(20).Nss.*?(Ns.i.a1.charSet_?).query.get.map(_ ==> List((20, List((1, Some(Set(char1, char2))), (2, None)))))
+        _ <- Ref.i(21).Nss.*?(Ns.i.a1.byteSet_?).query.get.map(_ ==> List((21, List((1, Some(Set(byte1, byte2))), (2, None)))))
+        _ <- Ref.i(22).Nss.*?(Ns.i.a1.shortSet_?).query.get.map(_ ==> List((22, List((1, Some(Set(short1, short2))), (2, None)))))
       } yield ()
     }
   }

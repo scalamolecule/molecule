@@ -65,7 +65,7 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
         ))
 
 
-        //        _ <- A.i.Bb.*(B.i.C.ii).insert(
+        //        _ <- A.i.Bb.*(B.i.C.iSet).insert(
         //          (0, Nil),
         //          (1, List(
         //            (1, Set.empty[Int])
@@ -87,7 +87,7 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
         //            |  LEFT JOIN B      ON A_bb_B.B_id = B.id
         //            |  LEFT JOIN C      ON B.c         = C.id,
         //            |  JSON_TABLE(
-        //            |    IF(C.ii IS NULL, '[null]', C.ii),
+        //            |    IF(C.iSet IS NULL, '[null]', C.iSet),
         //            |    '$[*]' COLUMNS (vs INT PATH '$')
         //            |  ) t_1
         //            |WHERE
@@ -97,7 +97,7 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
         //            |ORDER BY A.i;
         //            |""".stripMargin, true)
         //
-        //        _ <- A.i.a1.Bb.*?(B.C.ii).query.i.get.map(_ ==> List(
+        //        _ <- A.i.a1.Bb.*?(B.C.iSet).query.i.get.map(_ ==> List(
         //          (0, Nil),
         //          (1, Nil),
         //          (2, List(
@@ -132,10 +132,10 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
 //                  s"""AttrOneTacString("Uniques", "$attr", Eq, Seq("x"), None, None, Nil, Nil, None, None, Seq(0, 3))"""
 //              }
 //
-//            _ <- Uniques.ints_(1).s("b").update.transact
+//            _ <- Uniques.intSet_(1).s("b").update.transact
 //              .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
 //                err ==> "Can only lookup entity with card-one attribute value. Found:\n" +
-//                  """AttrSetTacInt("Uniques", "ints", Eq, Seq(Set(1)), None, None, Nil, Nil, None, None, Seq(0, 25))"""
+//                  """AttrSetTacInt("Uniques", "intSet", Eq, Seq(Set(1)), None, None, Nil, Nil, None, None, Seq(0, 25))"""
 //              }
 
 

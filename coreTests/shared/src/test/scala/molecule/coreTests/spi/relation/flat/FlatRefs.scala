@@ -25,7 +25,7 @@ trait FlatRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "ref with Set attribute" - refs { implicit conn =>
       for {
-        _ <- A.i.B.i.ii.insert(
+        _ <- A.i.B.i.iSet.insert(
           (1, 2, Set.empty[Int]),
           (3, 4, Set(5, 6)),
         ).transact
@@ -34,16 +34,16 @@ trait FlatRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- A.i.a1.query.get.map(_ ==> List(1, 3))
         _ <- B.i.a1.query.get.map(_ ==> List(2, 4))
 
-        _ <- A.i.a1.B.i.ii_?.query.get.map(_ ==> List(
+        _ <- A.i.a1.B.i.iSet_?.query.get.map(_ ==> List(
           (1, 2, None), // Relationship to B exists since B.i has value 2
           (3, 4, Some(Set(5, 6)))
         ))
 
-        _ <- A.i.a1.B.ii_?.query.get.map(_ ==> List(
+        _ <- A.i.a1.B.iSet_?.query.get.map(_ ==> List(
           (1, None),
           (3, Some(Set(5, 6))),
         ))
-        _ <- A.i.B.ii.query.get.map(_ ==> List(
+        _ <- A.i.B.iSet.query.get.map(_ ==> List(
           (3, Set(5, 6))
         ))
       } yield ()
@@ -52,7 +52,7 @@ trait FlatRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "ref with only Set attribute" - refs { implicit conn =>
       for {
-        _ <- A.i.B.ii.insert(
+        _ <- A.i.B.iSet.insert(
           (1, Set.empty[Int]),
           (3, Set(5, 6)),
         ).transact
@@ -60,11 +60,11 @@ trait FlatRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Two A.i values were inserted
         _ <- A.i.a1.query.get.map(_ ==> List(1, 3))
 
-        _ <- A.i.a1.B.ii_?.query.get.map(_ ==> List(
+        _ <- A.i.a1.B.iSet_?.query.get.map(_ ==> List(
           // (1, None), // Not returned since there's no relationship to B
           (3, Some(Set(5, 6)))
         ))
-        _ <- A.i.B.ii.query.get.map(_ ==> List(
+        _ <- A.i.B.iSet.query.get.map(_ ==> List(
           (3, Set(5, 6))
         ))
       } yield ()
@@ -165,8 +165,8 @@ trait FlatRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       "one-set" - refs { implicit conn =>
         import molecule.coreTests.dataModels.core.dsl.Refs._
         for {
-          _ <- A.i.OwnB.ii.insert(List((2, Set(3, 4)))).transact
-          _ <- A.i.OwnB.ii.query.get.map(_ ==> List((2, Set(3, 4))))
+          _ <- A.i.OwnB.iSet.insert(List((2, Set(3, 4)))).transact
+          _ <- A.i.OwnB.iSet.query.get.map(_ ==> List((2, Set(3, 4))))
         } yield ()
       }
 
@@ -181,8 +181,8 @@ trait FlatRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       "many-set" - refs { implicit conn =>
         import molecule.coreTests.dataModels.core.dsl.Refs._
         for {
-          _ <- A.i.OwnBb.ii.insert(List((2, Set(3, 4)))).transact
-          _ <- A.i.OwnBb.ii.query.get.map(_ ==> List((2, Set(3, 4))))
+          _ <- A.i.OwnBb.iSet.insert(List((2, Set(3, 4)))).transact
+          _ <- A.i.OwnBb.iSet.query.get.map(_ ==> List((2, Set(3, 4))))
         } yield ()
       }
     }

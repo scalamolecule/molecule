@@ -15,7 +15,7 @@ trait Semantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Only single card-set aggregation" - types { implicit conn =>
       for {
-        _ <- Ns.s.i.ii.ints.insert(List(
+        _ <- Ns.s.i.iSet.intSet.insert(List(
           ("a", 1, Set(1, 2, 3), Set(1, 2, 3)),
           ("b", 1, Set(2, 3, 4), Set(2, 3, 4)),
           ("b", 2, Set(3, 4, 5), Set(3, 4, 5)),
@@ -27,13 +27,13 @@ trait Semantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         ))
 
         // Mixing cardinality-one/set aggregations not allowed
-        _ <- Ns.i(min).ii(max(2)).query.get
+        _ <- Ns.i(min).iSet(max(2)).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Only a single aggregation is allowed with card-set attributes."
           }
 
         // Multiple cardinality-set aggregations not allowed
-        _ <- Ns.ii(min(2)).ints(max(2)).query.get
+        _ <- Ns.iSet(min(2)).intSet(max(2)).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Only a single aggregation is allowed with card-set attributes."
           }

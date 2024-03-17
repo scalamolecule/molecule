@@ -16,83 +16,83 @@ trait UpdateSetOps_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "apply (replace/add all)" - types { implicit conn =>
       for {
-        id <- Ns.dates(Set(date1, date2)).save.transact.map(_.id)
-        _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2))
+        id <- Ns.dateSet(Set(date1, date2)).save.transact.map(_.id)
+        _ <- Ns.dateSet.query.get.map(_.head ==> Set(date1, date2))
 
         // Applying Set of values replaces previous Set
-        _ <- Ns(id).dates(Set(date3, date4)).update.transact
-        _ <- Ns.dates.query.get.map(_.head ==> Set(date3, date4))
+        _ <- Ns(id).dateSet(Set(date3, date4)).update.transact
+        _ <- Ns.dateSet.query.get.map(_.head ==> Set(date3, date4))
 
         // Applying empty Set of values deletes previous Set
-        _ <- Ns(id).dates(Set.empty[Date]).update.transact
-        _ <- Ns.dates.query.get.map(_ ==> Nil)
+        _ <- Ns(id).dateSet(Set.empty[Date]).update.transact
+        _ <- Ns.dateSet.query.get.map(_ ==> Nil)
 
-        id <- Ns.dates(Set(date1, date2)).save.transact.map(_.id)
+        id <- Ns.dateSet(Set(date1, date2)).save.transact.map(_.id)
         // Applying empty value deletes previous Set
-        _ <- Ns(id).dates().update.transact
-        _ <- Ns.dates.query.get.map(_ ==> Nil)
+        _ <- Ns(id).dateSet().update.transact
+        _ <- Ns.dateSet.query.get.map(_ ==> Nil)
       } yield ()
     }
 
 
     "add" - types { implicit conn =>
       for {
-        id <- Ns.dates(Set(date1)).save.transact.map(_.id)
+        id <- Ns.dateSet(Set(date1)).save.transact.map(_.id)
 
         // Add value
-        _ <- Ns(id).dates.add(date2).update.transact
-        _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2))
+        _ <- Ns(id).dateSet.add(date2).update.transact
+        _ <- Ns.dateSet.query.get.map(_.head ==> Set(date1, date2))
 
         // Adding existing value has no effect (Set semantics of only unique values)
-        _ <- Ns(id).dates.add(date2).update.transact
-        _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2))
+        _ <- Ns(id).dateSet.add(date2).update.transact
+        _ <- Ns.dateSet.query.get.map(_.head ==> Set(date1, date2))
 
         // Add multiple values (vararg)
-        _ <- Ns(id).dates.add(date3, date4).update.transact
-        _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2, date3, date4))
+        _ <- Ns(id).dateSet.add(date3, date4).update.transact
+        _ <- Ns.dateSet.query.get.map(_.head ==> Set(date1, date2, date3, date4))
 
         // Add multiple values (Seq)
-        _ <- Ns(id).dates.add(Seq(date5, date6)).update.transact
-        _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2, date3, date4, date5, date6))
+        _ <- Ns(id).dateSet.add(Seq(date5, date6)).update.transact
+        _ <- Ns.dateSet.query.get.map(_.head ==> Set(date1, date2, date3, date4, date5, date6))
 
         // Adding empty Seq of values has no effect
-        _ <- Ns(id).dates.add(Seq.empty[Date]).update.transact
-        _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2, date3, date4, date5, date6))
+        _ <- Ns(id).dateSet.add(Seq.empty[Date]).update.transact
+        _ <- Ns.dateSet.query.get.map(_.head ==> Set(date1, date2, date3, date4, date5, date6))
       } yield ()
     }
 
 
     "remove" - types { implicit conn =>
       for {
-        id <- Ns.dates(Set(date1, date2, date3, date4, date5, date6, date7)).save.transact.map(_.id)
+        id <- Ns.dateSet(Set(date1, date2, date3, date4, date5, date6, date7)).save.transact.map(_.id)
 
         // Remove value
-        _ <- Ns(id).dates.remove(date7).update.transact
-        _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2, date3, date4, date5, date6))
+        _ <- Ns(id).dateSet.remove(date7).update.transact
+        _ <- Ns.dateSet.query.get.map(_.head ==> Set(date1, date2, date3, date4, date5, date6))
 
         // Removing non-existing value has no effect
-        _ <- Ns(id).dates.remove(date9).update.transact
-        _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2, date3, date4, date5, date6))
+        _ <- Ns(id).dateSet.remove(date9).update.transact
+        _ <- Ns.dateSet.query.get.map(_.head ==> Set(date1, date2, date3, date4, date5, date6))
 
         // Removing duplicate values removes the distinct value
-        _ <- Ns(id).dates.remove(date6, date6).update.transact
-        _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2, date3, date4, date5))
+        _ <- Ns(id).dateSet.remove(date6, date6).update.transact
+        _ <- Ns.dateSet.query.get.map(_.head ==> Set(date1, date2, date3, date4, date5))
 
         // Remove multiple values (vararg)
-        _ <- Ns(id).dates.remove(date4, date5).update.transact
-        _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2, date3))
+        _ <- Ns(id).dateSet.remove(date4, date5).update.transact
+        _ <- Ns.dateSet.query.get.map(_.head ==> Set(date1, date2, date3))
 
         // Remove multiple values (Seq)
-        _ <- Ns(id).dates.remove(Seq(date2, date3)).update.transact
-        _ <- Ns.dates.query.get.map(_.head ==> Set(date1))
+        _ <- Ns(id).dateSet.remove(Seq(date2, date3)).update.transact
+        _ <- Ns.dateSet.query.get.map(_.head ==> Set(date1))
 
         // Removing empty Seq of values has no effect
-        _ <- Ns(id).dates.remove(Seq.empty[Date]).update.transact
-        _ <- Ns.dates.query.get.map(_.head ==> Set(date1))
+        _ <- Ns(id).dateSet.remove(Seq.empty[Date]).update.transact
+        _ <- Ns.dateSet.query.get.map(_.head ==> Set(date1))
 
         // Removing all remaining elements deletes the attribute
-        _ <- Ns(id).dates.remove(Seq(date1)).update.transact
-        _ <- Ns.dates.query.get.map(_ ==> Nil)
+        _ <- Ns(id).dateSet.remove(Seq(date1)).update.transact
+        _ <- Ns.dateSet.query.get.map(_ ==> Nil)
       } yield ()
     }
   }

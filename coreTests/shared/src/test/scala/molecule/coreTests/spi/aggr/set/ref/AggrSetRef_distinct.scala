@@ -14,7 +14,7 @@ trait AggrSetRef_distinct extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "1st ref" - refs { implicit conn =>
       for {
-        _ <- A.i.B.ii.insert(List(
+        _ <- A.i.B.iSet.insert(List(
           (1, Set(1, 2)),
           (2, Set(2)),
           (2, Set(3, 4)),
@@ -23,12 +23,12 @@ trait AggrSetRef_distinct extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         // Matching values coalesced into one Set
 
-        _ <- A.i.a1.B.ii.query.get.map(_ ==> List(
+        _ <- A.i.a1.B.iSet.query.get.map(_ ==> List(
           (1, Set(1, 2)),
           (2, Set(2, 3, 4)), // 3 rows coalesced
         ))
 
-        _ <- A.i.a1.B.ii(distinct).query.get.map(_ ==> List(
+        _ <- A.i.a1.B.iSet(distinct).query.get.map(_ ==> List(
           (1, Set(Set(1, 2))),
           (2, Set(
             Set(2),
@@ -36,7 +36,7 @@ trait AggrSetRef_distinct extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           ))
         ))
 
-        _ <- A.B.ii(distinct).query.get.map(_ ==> List(
+        _ <- A.B.iSet(distinct).query.get.map(_ ==> List(
           Set(
             Set(1, 2),
             Set(2),
@@ -49,14 +49,14 @@ trait AggrSetRef_distinct extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "2nd ref" - refs { implicit conn =>
       for {
-        _ <- A.i.B.i.C.ii.insert(List(
+        _ <- A.i.B.i.C.iSet.insert(List(
           (1, 1, Set(1, 2)),
           (2, 2, Set(2)),
           (2, 2, Set(3, 4)),
           (2, 2, Set(3, 4)),
         )).transact
 
-        _ <- A.i.a1.B.i.C.ii(distinct).query.get.map(_ ==> List(
+        _ <- A.i.a1.B.i.C.iSet(distinct).query.get.map(_ ==> List(
           (1, 1, Set(Set(1, 2))),
           (2, 2, Set(
             Set(2),
@@ -64,7 +64,7 @@ trait AggrSetRef_distinct extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           ))
         ))
 
-        _ <- A.B.C.ii(distinct).query.get.map(_ ==> List(
+        _ <- A.B.C.iSet(distinct).query.get.map(_ ==> List(
           Set(
             Set(1, 2),
             Set(2),
@@ -77,14 +77,14 @@ trait AggrSetRef_distinct extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "backref" - refs { implicit conn =>
       for {
-        _ <- A.i.B.i._A.C.ii.insert(List(
+        _ <- A.i.B.i._A.C.iSet.insert(List(
           (1, 1, Set(1, 2)),
           (2, 2, Set(2)),
           (2, 2, Set(3, 4)),
           (2, 2, Set(3, 4)),
         )).transact
 
-        _ <- A.i.a1.B.i._A.C.ii(distinct).query.get.map(_ ==> List(
+        _ <- A.i.a1.B.i._A.C.iSet(distinct).query.get.map(_ ==> List(
           (1, 1, Set(Set(1, 2))),
           (2, 2, Set(Set(2), Set(3, 4))),
         ))

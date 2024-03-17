@@ -26,9 +26,9 @@ object AdhocJVM_mongodb extends TestSuite_mongodb with AggrUtils {
       val b = (2, Some(Set(int2, int3, int4)))
       val c = (3, None)
       for {
-        _ <- Ns.i.ints_?.insert(a, b, c).transact
+        _ <- Ns.i.intSet_?.insert(a, b, c).transact
 
-        _ <- Ns.i.a1.ints_?.query.get.map(_ ==> List(a, b, c))
+        _ <- Ns.i.a1.intSet_?.query.get.map(_ ==> List(a, b, c))
 
 
         //        _ <- Ns.i(1).save.transact

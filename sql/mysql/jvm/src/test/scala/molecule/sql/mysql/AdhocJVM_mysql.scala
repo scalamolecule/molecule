@@ -24,30 +24,30 @@ object AdhocJVM_mysql extends TestSuite_mysql {
       for {
 
 
-        _ <- Ns.i.ii.ints.insert(a, b, c).transact
+        _ <- Ns.i.iSet.intSet.insert(a, b, c).transact
 
 //        _ <- rawQuery(
 //          """SELECT DISTINCT
 //            |  Ns.i,
-//            |  Ns.ii,
+//            |  Ns.iSet,
 //            |  JSON_ARRAYAGG(t_3.vs)
 //            |FROM Ns,
 //            |  JSON_TABLE(
-//            |    IF(Ns.ints IS NULL, '[null]', Ns.ints),
+//            |    IF(Ns.intSet IS NULL, '[null]', Ns.intSet),
 //            |    '$[*]' COLUMNS (vs INT PATH '$')
 //            |  ) t_3
 //            |WHERE
-//            |  Ns.ii   = Ns.ints AND
+//            |  Ns.iSet   = Ns.intSet AND
 //            |  Ns.i    IS NOT NULL AND
-//            |  Ns.ii   IS NOT NULL AND
-//            |  Ns.ints IS NOT NULL
-//            |GROUP BY Ns.i, Ns.ii
+//            |  Ns.iSet   IS NOT NULL AND
+//            |  Ns.intSet IS NOT NULL
+//            |GROUP BY Ns.i, Ns.iSet
 //            |HAVING COUNT(*) > 0;
 //            |""".stripMargin, true)
 
 
-//        _ <- Ns.i.ii(Ns.ints).query.i.get.map(_ ==> List(b))
-        _ <- Ns.i.ii.has(Ns.ints).query.get.map(_ ==> List(b)) // Ns.ii and Ref.ints
+//        _ <- Ns.i.iSet(Ns.intSet).query.i.get.map(_ ==> List(b))
+        _ <- Ns.i.iSet.has(Ns.intSet).query.get.map(_ ==> List(b)) // Ns.iSet and Ref.intSet
 
       } yield ()
     }
@@ -62,7 +62,7 @@ object AdhocJVM_mysql extends TestSuite_mysql {
       val d = (2, Set(4), Set(3), 4)
 
       for {
-        List(_, a2, a3) <- A.i.ii.B.ii.i.insert(a, b, c).transact.map(_.ids)
+        List(_, a2, a3) <- A.i.iSet.B.iSet.i.insert(a, b, c).transact.map(_.ids)
 
 
         //        _ <- rawQuery(
@@ -74,7 +74,7 @@ object AdhocJVM_mysql extends TestSuite_mysql {
         //            |  LEFT JOIN A_bb_B ON A.id        = A_bb_B.A_id
         //            |  LEFT JOIN B      ON A_bb_B.B_id = B.id,
         //            |  JSON_TABLE(
-        //            |    IF(B.ii is null, '[null]', B.ii),
+        //            |    IF(B.iSet is null, '[null]', B.iSet),
         //            |    '$[*]' COLUMNS (vs INT PATH '$')
         //            |  ) t_2
         //            |WHERE
@@ -84,19 +84,19 @@ object AdhocJVM_mysql extends TestSuite_mysql {
         //            |""".stripMargin, true)
 
 
-        _ <- A.i.ii_(B.ii_).B.ii.query.get.map(_ ==> List(
+        _ <- A.i.iSet_(B.iSet_).B.iSet.query.get.map(_ ==> List(
           (2, Set(2, 3, 4)) // Set(2, 3) and Set(4) are coalesced to one Set
         ))
-        _ <- A.i.ii_.B.ii(A.ii_).query.get.map(_ ==> List(
+        _ <- A.i.iSet_.B.iSet(A.iSet_).query.get.map(_ ==> List(
           (2, Set(2, 3, 4))
         ))
 
         // To get un-coalesced Sets, separate by ids
-        _ <- A.id.a1.i.ii_(B.ii_).B.ii.query.get.map(_ ==> List(
+        _ <- A.id.a1.i.iSet_(B.iSet_).B.iSet.query.get.map(_ ==> List(
           (a2, 2, Set(2, 3)),
           (a3, 2, Set(4))
         ))
-        _ <- A.id.a1.i.ii_.B.ii(A.ii_).query.get.map(_ ==> List(
+        _ <- A.id.a1.i.iSet_.B.iSet(A.iSet_).query.get.map(_ ==> List(
           (a2, 2, Set(2, 3)),
           (a3, 2, Set(4))
         ))

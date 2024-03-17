@@ -18,16 +18,16 @@ trait TypesSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "String" - validation { implicit conn =>
       for {
-        _ <- Type.strings(Set("a", "b", "d")).save.transact
+        _ <- Type.stringSet(Set("a", "b", "d")).save.transact
           .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>
               errorMap ==>
                 Map(
-                  "Type.strings" -> Seq(
-                    s"""Type.strings with value `a` doesn't satisfy validation:
+                  "Type.stringSet" -> Seq(
+                    s"""Type.stringSet with value `a` doesn't satisfy validation:
                        |_ > "c"
                        |""".stripMargin,
-                    s"""Type.strings with value `b` doesn't satisfy validation:
+                    s"""Type.stringSet with value `b` doesn't satisfy validation:
                        |_ > "c"
                        |""".stripMargin
                     // (value d is ok)
@@ -36,14 +36,14 @@ trait TypesSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           }
         // Focusing only on the first (and only) error message
         // (See ValidationFormatting tests for multi-error validations)
-        _ <- Type.strings(Set("a", "b", "d")).save.transact
+        _ <- Type.stringSet(Set("a", "b", "d")).save.transact
           .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
-                s"""Type.strings with value `a` doesn't satisfy validation:
+                s"""Type.stringSet with value `a` doesn't satisfy validation:
                    |_ > "c"
                    |""".stripMargin,
-                s"""Type.strings with value `b` doesn't satisfy validation:
+                s"""Type.stringSet with value `b` doesn't satisfy validation:
                    |_ > "c"
                    |""".stripMargin
               )
@@ -53,14 +53,14 @@ trait TypesSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Int" - validation { implicit conn =>
       for {
-        _ <- Type.ints(Set(1, 2, 4)).save.transact
+        _ <- Type.intSet(Set(1, 2, 4)).save.transact
           .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>
               errorMap.head._2.sorted ==> Seq(
-                s"""Type.ints with value `1` doesn't satisfy validation:
+                s"""Type.intSet with value `1` doesn't satisfy validation:
                    |_ > 3
                    |""".stripMargin,
-                s"""Type.ints with value `2` doesn't satisfy validation:
+                s"""Type.intSet with value `2` doesn't satisfy validation:
                    |_ > 3
                    |""".stripMargin
               )
@@ -70,14 +70,14 @@ trait TypesSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Long" - validation { implicit conn =>
       for {
-        _ <- Type.longs(Set(1L, 2L, 4L)).save.transact
+        _ <- Type.longSet(Set(1L, 2L, 4L)).save.transact
           .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
-                s"""Type.longs with value `1` doesn't satisfy validation:
+                s"""Type.longSet with value `1` doesn't satisfy validation:
                    |_ > 3L
                    |""".stripMargin,
-                s"""Type.longs with value `2` doesn't satisfy validation:
+                s"""Type.longSet with value `2` doesn't satisfy validation:
                    |_ > 3L
                    |""".stripMargin
               )
@@ -87,14 +87,14 @@ trait TypesSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Float" - validation { implicit conn =>
       for {
-        _ <- Type.floats(Set(float1, float2, float4)).save.transact
+        _ <- Type.floatSet(Set(float1, float2, float4)).save.transact
           .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
-                s"""Type.floats with value `$float1` doesn't satisfy validation:
+                s"""Type.floatSet with value `$float1` doesn't satisfy validation:
                    |_ > 3.3f
                    |""".stripMargin,
-                s"""Type.floats with value `$float2` doesn't satisfy validation:
+                s"""Type.floatSet with value `$float2` doesn't satisfy validation:
                    |_ > 3.3f
                    |""".stripMargin
               )
@@ -104,14 +104,14 @@ trait TypesSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Double" - validation { implicit conn =>
       for {
-        _ <- Type.doubles(Set(double1, double2, double4)).save.transact
+        _ <- Type.doubleSet(Set(double1, double2, double4)).save.transact
           .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
-                s"""Type.doubles with value `$double1` doesn't satisfy validation:
+                s"""Type.doubleSet with value `$double1` doesn't satisfy validation:
                    |_ > 3.3
                    |""".stripMargin,
-                s"""Type.doubles with value `$double2` doesn't satisfy validation:
+                s"""Type.doubleSet with value `$double2` doesn't satisfy validation:
                    |_ > 3.3
                    |""".stripMargin
               )
@@ -121,11 +121,11 @@ trait TypesSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Boolean" - validation { implicit conn =>
       for {
-        _ <- Type.booleans(Set(true, false)).save.transact
+        _ <- Type.booleanSet(Set(true, false)).save.transact
           .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
-                s"""Type.booleans with value `true` doesn't satisfy validation:
+                s"""Type.booleanSet with value `true` doesn't satisfy validation:
                    |_ == false
                    |""".stripMargin
               )
@@ -135,14 +135,14 @@ trait TypesSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "BigInt" - validation { implicit conn =>
       for {
-        _ <- Type.bigInts(Set(bigInt1, bigInt2, bigInt4)).save.transact
+        _ <- Type.bigIntSet(Set(bigInt1, bigInt2, bigInt4)).save.transact
           .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
-                s"""Type.bigInts with value `$bigInt1` doesn't satisfy validation:
+                s"""Type.bigIntSet with value `$bigInt1` doesn't satisfy validation:
                    |_ > BigInt(3)
                    |""".stripMargin,
-                s"""Type.bigInts with value `$bigInt2` doesn't satisfy validation:
+                s"""Type.bigIntSet with value `$bigInt2` doesn't satisfy validation:
                    |_ > BigInt(3)
                    |""".stripMargin
               )
@@ -152,14 +152,14 @@ trait TypesSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "BigDecimal" - validation { implicit conn =>
       for {
-        _ <- Type.bigDecimals(Set(bigDecimal1, bigDecimal2, bigDecimal4)).save.transact
+        _ <- Type.bigDecimalSet(Set(bigDecimal1, bigDecimal2, bigDecimal4)).save.transact
           .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
-                s"""Type.bigDecimals with value `$bigDecimal1` doesn't satisfy validation:
+                s"""Type.bigDecimalSet with value `$bigDecimal1` doesn't satisfy validation:
                    |_ > BigDecimal(3.3)
                    |""".stripMargin,
-                s"""Type.bigDecimals with value `$bigDecimal2` doesn't satisfy validation:
+                s"""Type.bigDecimalSet with value `$bigDecimal2` doesn't satisfy validation:
                    |_ > BigDecimal(3.3)
                    |""".stripMargin
               )
@@ -169,14 +169,14 @@ trait TypesSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Date" - validation { implicit conn =>
       for {
-        _ <- Type.dates(Set(date1, date2, date4)).save.transact
+        _ <- Type.dateSet(Set(date1, date2, date4)).save.transact
           .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
-                s"""Type.dates with value `$date1` doesn't satisfy validation:
+                s"""Type.dateSet with value `$date1` doesn't satisfy validation:
                    |_.after(new Date(1057010400000L))
                    |""".stripMargin,
-                s"""Type.dates with value `$date2` doesn't satisfy validation:
+                s"""Type.dateSet with value `$date2` doesn't satisfy validation:
                    |_.after(new Date(1057010400000L))
                    |""".stripMargin
               )
@@ -186,14 +186,14 @@ trait TypesSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Duration" - validation { implicit conn =>
       for {
-        _ <- Type.durations(Set(duration1, duration2, duration4)).save.transact
+        _ <- Type.durationSet(Set(duration1, duration2, duration4)).save.transact
           .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
-                s"""Type.durations with value `$duration1` doesn't satisfy validation:
+                s"""Type.durationSet with value `$duration1` doesn't satisfy validation:
                    |_.compareTo(Duration.ofMinutes(2)) > 0
                    |""".stripMargin,
-                s"""Type.durations with value `$duration2` doesn't satisfy validation:
+                s"""Type.durationSet with value `$duration2` doesn't satisfy validation:
                    |_.compareTo(Duration.ofMinutes(2)) > 0
                    |""".stripMargin
               )
@@ -203,14 +203,14 @@ trait TypesSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Instant" - validation { implicit conn =>
       for {
-        _ <- Type.instants(Set(instant1, instant2, instant4)).save.transact
+        _ <- Type.instantSet(Set(instant1, instant2, instant4)).save.transact
           .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
-                s"""Type.instants with value `$instant1` doesn't satisfy validation:
+                s"""Type.instantSet with value `$instant1` doesn't satisfy validation:
                    |_.compareTo(Instant.ofEpochSecond(2)) > 0
                    |""".stripMargin,
-                s"""Type.instants with value `$instant2` doesn't satisfy validation:
+                s"""Type.instantSet with value `$instant2` doesn't satisfy validation:
                    |_.compareTo(Instant.ofEpochSecond(2)) > 0
                    |""".stripMargin
               )
@@ -220,14 +220,14 @@ trait TypesSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "LocalDate" - validation { implicit conn =>
       for {
-        _ <- Type.localDates(Set(localDate1, localDate2, localDate4)).save.transact
+        _ <- Type.localDateSet(Set(localDate1, localDate2, localDate4)).save.transact
           .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
-                s"""Type.localDates with value `$localDate1` doesn't satisfy validation:
+                s"""Type.localDateSet with value `$localDate1` doesn't satisfy validation:
                    |_.compareTo(LocalDate.of(2002, 1, 1)) > 0
                    |""".stripMargin,
-                s"""Type.localDates with value `$localDate2` doesn't satisfy validation:
+                s"""Type.localDateSet with value `$localDate2` doesn't satisfy validation:
                    |_.compareTo(LocalDate.of(2002, 1, 1)) > 0
                    |""".stripMargin
               )
@@ -237,14 +237,14 @@ trait TypesSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "LocalTime" - validation { implicit conn =>
       for {
-        _ <- Type.localTimes(Set(localTime1, localTime2, localTime4)).save.transact
+        _ <- Type.localTimeSet(Set(localTime1, localTime2, localTime4)).save.transact
           .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
-                s"""Type.localTimes with value `$localTime1` doesn't satisfy validation:
+                s"""Type.localTimeSet with value `$localTime1` doesn't satisfy validation:
                    |_.compareTo(LocalTime.of(2, 2)) > 0
                    |""".stripMargin,
-                s"""Type.localTimes with value `$localTime2` doesn't satisfy validation:
+                s"""Type.localTimeSet with value `$localTime2` doesn't satisfy validation:
                    |_.compareTo(LocalTime.of(2, 2)) > 0
                    |""".stripMargin
               )
@@ -254,14 +254,14 @@ trait TypesSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "LocalDateTime" - validation { implicit conn =>
       for {
-        _ <- Type.localDateTimes(Set(localDateTime1, localDateTime2, localDateTime4)).save.transact
+        _ <- Type.localDateTimeSet(Set(localDateTime1, localDateTime2, localDateTime4)).save.transact
           .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
-                s"""Type.localDateTimes with value `$localDateTime1` doesn't satisfy validation:
+                s"""Type.localDateTimeSet with value `$localDateTime1` doesn't satisfy validation:
                    |_.compareTo(LocalDateTime.of(2002, 1, 1, 1, 2)) > 0
                    |""".stripMargin,
-                s"""Type.localDateTimes with value `$localDateTime2` doesn't satisfy validation:
+                s"""Type.localDateTimeSet with value `$localDateTime2` doesn't satisfy validation:
                    |_.compareTo(LocalDateTime.of(2002, 1, 1, 1, 2)) > 0
                    |""".stripMargin
               )
@@ -271,14 +271,14 @@ trait TypesSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "OffsetTime" - validation { implicit conn =>
       for {
-        _ <- Type.offsetTimes(Set(offsetTime1, offsetTime2, offsetTime4)).save.transact
+        _ <- Type.offsetTimeSet(Set(offsetTime1, offsetTime2, offsetTime4)).save.transact
           .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
-                s"""Type.offsetTimes with value `$offsetTime1` doesn't satisfy validation:
+                s"""Type.offsetTimeSet with value `$offsetTime1` doesn't satisfy validation:
                    |_.compareTo(OffsetTime.of(2, 2, 2, 2, ZoneOffset.ofHours(2))) > 0
                    |""".stripMargin,
-                s"""Type.offsetTimes with value `$offsetTime2` doesn't satisfy validation:
+                s"""Type.offsetTimeSet with value `$offsetTime2` doesn't satisfy validation:
                    |_.compareTo(OffsetTime.of(2, 2, 2, 2, ZoneOffset.ofHours(2))) > 0
                    |""".stripMargin
               )
@@ -288,14 +288,14 @@ trait TypesSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "OffsetDateTime" - validation { implicit conn =>
       for {
-        _ <- Type.offsetDateTimes(Set(offsetDateTime1, offsetDateTime2, offsetDateTime4)).save.transact
+        _ <- Type.offsetDateTimeSet(Set(offsetDateTime1, offsetDateTime2, offsetDateTime4)).save.transact
           .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
-                s"""Type.offsetDateTimes with value `$offsetDateTime1` doesn't satisfy validation:
+                s"""Type.offsetDateTimeSet with value `$offsetDateTime1` doesn't satisfy validation:
                    |_.compareTo(OffsetDateTime.of(2002, 1, 1, 1, 1, 1, 1, ZoneOffset.ofHours(2))) > 0
                    |""".stripMargin,
-                s"""Type.offsetDateTimes with value `$offsetDateTime2` doesn't satisfy validation:
+                s"""Type.offsetDateTimeSet with value `$offsetDateTime2` doesn't satisfy validation:
                    |_.compareTo(OffsetDateTime.of(2002, 1, 1, 1, 1, 1, 1, ZoneOffset.ofHours(2))) > 0
                    |""".stripMargin
               )
@@ -305,14 +305,14 @@ trait TypesSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "ZonedDateTime" - validation { implicit conn =>
       for {
-        _ <- Type.zonedDateTimes(Set(zonedDateTime1, zonedDateTime2, zonedDateTime4)).save.transact
+        _ <- Type.zonedDateTimeSet(Set(zonedDateTime1, zonedDateTime2, zonedDateTime4)).save.transact
           .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
-                s"""Type.zonedDateTimes with value `$zonedDateTime1` doesn't satisfy validation:
+                s"""Type.zonedDateTimeSet with value `$zonedDateTime1` doesn't satisfy validation:
                    |_.compareTo(ZonedDateTime.of(2002, 1, 1, 1, 1, 1, 1, ZoneOffset.ofHours(2))) > 0
                    |""".stripMargin,
-                s"""Type.zonedDateTimes with value `$zonedDateTime2` doesn't satisfy validation:
+                s"""Type.zonedDateTimeSet with value `$zonedDateTime2` doesn't satisfy validation:
                    |_.compareTo(ZonedDateTime.of(2002, 1, 1, 1, 1, 1, 1, ZoneOffset.ofHours(2))) > 0
                    |""".stripMargin
               )
@@ -322,14 +322,14 @@ trait TypesSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "UUID" - validation { implicit conn =>
       for {
-        _ <- Type.uuids(Set(
+        _ <- Type.uuidSet(Set(
             UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
             UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-bbbbbbbbbbbb")
           )).save.transact
           .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
-                s"""Type.uuids with value `aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa` doesn't satisfy validation:
+                s"""Type.uuidSet with value `aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa` doesn't satisfy validation:
                    |_.toString != "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
                    |""".stripMargin
               )
@@ -342,14 +342,14 @@ trait TypesSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       val uri1 = new URI("ab")
       val uri2 = new URI("abcd")
       for {
-        _ <- Type.uris(Set(uri0, uri1, uri2)).save.transact
+        _ <- Type.uriSet(Set(uri0, uri1, uri2)).save.transact
           .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
-                s"""Type.uris with value `a` doesn't satisfy validation:
+                s"""Type.uriSet with value `a` doesn't satisfy validation:
                    |_.toString.length > 3
                    |""".stripMargin,
-                s"""Type.uris with value `ab` doesn't satisfy validation:
+                s"""Type.uriSet with value `ab` doesn't satisfy validation:
                    |_.toString.length > 3
                    |""".stripMargin
               )
@@ -359,14 +359,14 @@ trait TypesSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Byte" - validation { implicit conn =>
       for {
-        _ <- Type.bytes(Set(byte1, byte2, byte4)).save.transact
+        _ <- Type.byteSet(Set(byte1, byte2, byte4)).save.transact
           .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
-                s"""Type.bytes with value `$byte1` doesn't satisfy validation:
+                s"""Type.byteSet with value `$byte1` doesn't satisfy validation:
                    |_ > $byte3
                    |""".stripMargin,
-                s"""Type.bytes with value `$byte2` doesn't satisfy validation:
+                s"""Type.byteSet with value `$byte2` doesn't satisfy validation:
                    |_ > $byte3
                    |""".stripMargin
               )
@@ -376,14 +376,14 @@ trait TypesSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Short" - validation { implicit conn =>
       for {
-        _ <- Type.shorts(Set(short1, short2, short4)).save.transact
+        _ <- Type.shortSet(Set(short1, short2, short4)).save.transact
           .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
-                s"""Type.shorts with value `$short1` doesn't satisfy validation:
+                s"""Type.shortSet with value `$short1` doesn't satisfy validation:
                    |_ > $short3
                    |""".stripMargin,
-                s"""Type.shorts with value `$short2` doesn't satisfy validation:
+                s"""Type.shortSet with value `$short2` doesn't satisfy validation:
                    |_ > $short3
                    |""".stripMargin
               )
@@ -393,14 +393,14 @@ trait TypesSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Char" - validation { implicit conn =>
       for {
-        _ <- Type.chars(Set('a', 'b', 'd')).save.transact
+        _ <- Type.charSet(Set('a', 'b', 'd')).save.transact
           .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>
               errorMap.head._2 ==> Seq(
-                s"""Type.chars with value `a` doesn't satisfy validation:
+                s"""Type.charSet with value `a` doesn't satisfy validation:
                    |_ > 'c'
                    |""".stripMargin,
-                s"""Type.chars with value `b` doesn't satisfy validation:
+                s"""Type.charSet with value `b` doesn't satisfy validation:
                    |_ > 'c'
                    |""".stripMargin
               )

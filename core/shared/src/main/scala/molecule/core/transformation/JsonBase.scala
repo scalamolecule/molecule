@@ -8,7 +8,7 @@ trait JsonBase {
 
   protected def appendEscapedString(buf: StringBuffer, s: String): Unit = {
     /**
-     * Ranges of chars that should be escaped if this JSON is to be evaluated
+     * Ranges of charSet that should be escaped if this JSON is to be evaluated
      * directly as JavaScript (rather than by a valid JSON parser).
      */
     val jsEscapeChars: Set[Char] =

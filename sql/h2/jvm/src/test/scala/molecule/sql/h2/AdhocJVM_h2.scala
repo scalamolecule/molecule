@@ -19,12 +19,12 @@ object AdhocJVM_h2 extends TestSuite_h2 {
 //        _ <- Ns.i(1).save.transact
 //        _ <- Ns.i.query.i.get.map(_ ==> List(1))
 
-        id <- Ns.ints(Set(int1, int2)).save.transact.map(_.id)
-        _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2))
+        id <- Ns.intSet(Set(int1, int2)).save.transact.map(_.id)
+        _ <- Ns.intSet.query.get.map(_.head ==> Set(int1, int2))
 
         // Applying empty Set of values deletes previous Set
-        _ <- Ns(id).ints(Set.empty[Int]).update.i.transact
-        _ <- Ns.ints.query.get.map(_ ==> Nil)
+        _ <- Ns(id).intSet(Set.empty[Int]).update.i.transact
+        _ <- Ns.intSet.query.get.map(_ ==> Nil)
 
       } yield ()
     }

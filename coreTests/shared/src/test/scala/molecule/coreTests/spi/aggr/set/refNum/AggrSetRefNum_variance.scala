@@ -17,16 +17,16 @@ trait AggrSetRefNum_variance extends CoreTestSuite with ApiAsync { spi: SpiAsync
     "1st ref" - refs { implicit conn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
-        _ <- A.i.B.ii.insert(List(
+        _ <- A.i.B.iSet.insert(List(
           (1, Set(1, 2)),
           (2, Set(2)),
           (2, Set(3, 4)),
           (2, Set(3, 4)),
         )).transact
 
-        _ <- A.B.ii(variance).query.get.map(_.head ==~ varianceOf(1, 2, 2, 3, 4, 3, 4))
+        _ <- A.B.iSet(variance).query.get.map(_.head ==~ varianceOf(1, 2, 2, 3, 4, 3, 4))
 
-        _ <- A.i.B.ii(variance).query.get.map(_.map {
+        _ <- A.i.B.iSet(variance).query.get.map(_.map {
           case (1, variance) => variance ==~ varianceOf(1, 2)
           case (2, variance) => variance ==~ varianceOf(2, 3, 4, 3, 4)
         })
@@ -37,16 +37,16 @@ trait AggrSetRefNum_variance extends CoreTestSuite with ApiAsync { spi: SpiAsync
     "2nd ref" - refs { implicit conn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
-        _ <- A.i.B.i.C.ii.insert(List(
+        _ <- A.i.B.i.C.iSet.insert(List(
           (1, 1, Set(1, 2)),
           (2, 2, Set(2)),
           (2, 2, Set(3, 4)),
           (2, 2, Set(3, 4)),
         )).transact
 
-        _ <- A.B.C.ii(variance).query.get.map(_.head ==~ varianceOf(1, 2, 2, 3, 4, 3, 4))
+        _ <- A.B.C.iSet(variance).query.get.map(_.head ==~ varianceOf(1, 2, 2, 3, 4, 3, 4))
 
-        _ <- A.i.B.i.C.ii(variance).query.get.map(_.map {
+        _ <- A.i.B.i.C.iSet(variance).query.get.map(_.map {
           case (1, 1, variance) => variance ==~ varianceOf(1, 2)
           case (2, 2, variance) => variance ==~ varianceOf(2, 3, 4, 3, 4)
         })
@@ -57,14 +57,14 @@ trait AggrSetRefNum_variance extends CoreTestSuite with ApiAsync { spi: SpiAsync
     "backref" - refs { implicit conn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
-        _ <- A.i.B.i._A.C.ii.insert(List(
+        _ <- A.i.B.i._A.C.iSet.insert(List(
           (1, 1, Set(1, 2)),
           (2, 2, Set(2)),
           (2, 2, Set(3, 4)),
           (2, 2, Set(3, 4)),
         )).transact
 
-        _ <- A.i.B.i._A.C.ii(variance).query.get.map(_.map {
+        _ <- A.i.B.i._A.C.iSet(variance).query.get.map(_.map {
           case (1, 1, variance) => variance ==~ varianceOf(1, 2)
           case (2, 2, variance) => variance ==~ varianceOf(2, 3, 4, 3, 4)
         })

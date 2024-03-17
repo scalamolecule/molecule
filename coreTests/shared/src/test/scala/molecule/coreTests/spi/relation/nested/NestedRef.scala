@@ -117,7 +117,7 @@ trait NestedRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Nested ref with card-set attr" - refs { implicit conn =>
       for {
-        _ <- A.i.a1.Bb.*(B.i.C.ii).insert(
+        _ <- A.i.a1.Bb.*(B.i.C.iSet).insert(
           (0, Nil),
           (1, List(
             (1, Set.empty[Int])
@@ -130,7 +130,7 @@ trait NestedRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         ).transact
 
 
-        _ <- A.i.a1.Bb.*?(B.i.C.ii).query.get.map(_ ==> List(
+        _ <- A.i.a1.Bb.*?(B.i.C.iSet).query.get.map(_ ==> List(
           (0, Nil),
           (1, Nil),
           (2, List(
@@ -138,32 +138,32 @@ trait NestedRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             (3, Set(1, 2)),
           )),
         ))
-        _ <- A.i.Bb.*(B.i.a1.C.ii).query.get.map(_ ==> List(
+        _ <- A.i.Bb.*(B.i.a1.C.iSet).query.get.map(_ ==> List(
           (2, List(
             (2, Set(0)),
             (3, Set(1, 2)),
           )),
         ))
 
-        _ <- A.i.a1.Bb.*?(B.C.ii).query.get.map(_ ==> List(
+        _ <- A.i.a1.Bb.*?(B.C.iSet).query.get.map(_ ==> List(
           (0, Nil),
           (1, Nil),
           (2, List(
             Set(0, 1, 2), // Set(0) and Set(1, 2) coalesced to one Set
           )),
         ))
-        _ <- A.i.Bb.*(B.C.ii).query.get.map(_ ==> List(
+        _ <- A.i.Bb.*(B.C.iSet).query.get.map(_ ==> List(
           (2, List(
             Set(0, 1, 2), // Set(0) and Set(1, 2) coalesced to one Set
           )),
         ))
 
-        _ <- A.Bb.*?(B.C.ii).query.get.map(_ ==> List(
+        _ <- A.Bb.*?(B.C.iSet).query.get.map(_ ==> List(
           List(
             Set(0, 1, 2), // Set(0) and Set(1, 2) coalesced to one Set
           ),
         ))
-        _ <- A.Bb.*(B.C.ii).query.get.map(_ ==> List(
+        _ <- A.Bb.*(B.C.iSet).query.get.map(_ ==> List(
           List(
             Set(0, 1, 2), // Set(0) and Set(1, 2) coalesced to one Set
           ),

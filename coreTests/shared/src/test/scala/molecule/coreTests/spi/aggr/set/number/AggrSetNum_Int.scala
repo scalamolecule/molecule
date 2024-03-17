@@ -17,7 +17,7 @@ trait AggrSetNum_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "sum" - types { implicit conn =>
       implicit val tolerant = tolerantIntEquality(toleranceInt)
       for {
-        _ <- Ns.i.ints.insert(List(
+        _ <- Ns.i.intSet.insert(List(
           (1, Set(int1, int2)),
           (2, Set(int2)),
           (2, Set(int3, int4)),
@@ -25,7 +25,7 @@ trait AggrSetNum_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         )).transact
 
         // Sum of all values
-        _ <- Ns.ints(sum).query.get.map(
+        _ <- Ns.intSet(sum).query.get.map(
           _.head.head ==~ (
             int1 + int2 +
               int2 +
@@ -34,7 +34,7 @@ trait AggrSetNum_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             )
         )
 
-        _ <- Ns.i.ints(sum).query.get.map(_.map {
+        _ <- Ns.i.intSet(sum).query.get.map(_.map {
           case (1, setWithSum) => setWithSum.head ==~ int1 + int2
           case (2, setWithSum) => setWithSum.head ==~ (
             int2 +
@@ -52,7 +52,7 @@ trait AggrSetNum_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       database match {
         case "Datomic" =>
           for {
-            _ <- Ns.i.ints.insert(List(
+            _ <- Ns.i.intSet.insert(List(
               (1, Set(int1, int2)),
               (2, Set(int2)),
               (2, Set(int5, int9)),
@@ -61,9 +61,9 @@ trait AggrSetNum_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             // Median of all values - middle number used if odd number of values
             // 1  2  2  5  9
             //       ^
-            _ <- Ns.ints(median).query.get.map(_.head ==~ int2.toString.toDouble) // whole middle number
+            _ <- Ns.intSet(median).query.get.map(_.head ==~ int2.toString.toDouble) // whole middle number
 
-            _ <- Ns.i.ints(median).query.get.map(_.map {
+            _ <- Ns.i.intSet(median).query.get.map(_.map {
               case (1, median) => median ==~ int1.toDouble.floor // lower whole number
               case (2, median) => median ==~ int5.toString.toDouble // whole middle number
             })
@@ -71,15 +71,15 @@ trait AggrSetNum_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         case "MongoDB" =>
           for {
-            _ <- Ns.i.ints.insert(List(
+            _ <- Ns.i.intSet.insert(List(
               (1, Set(int1, int2)),
               (2, Set(int2)),
               (2, Set(int5, int9)),
             )).transact
 
-            _ <- Ns.ints(median).query.get.map(_.head ==~ int2.toString.toDouble) // whole middle number
+            _ <- Ns.intSet(median).query.get.map(_.head ==~ int2.toString.toDouble) // whole middle number
 
-            _ <- Ns.i.ints(median).query.get.map(_.map {
+            _ <- Ns.i.intSet(median).query.get.map(_.map {
               case (1, median) => median ==~ int1.toDouble // lower number
               case (2, median) => median ==~ int5.toString.toDouble // whole middle number
             })
@@ -87,15 +87,15 @@ trait AggrSetNum_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         case _ =>
           for {
-            _ <- Ns.i.ints.insert(List(
+            _ <- Ns.i.intSet.insert(List(
               (1, Set(int1, int2)),
               (2, Set(int2)),
               (2, Set(int5, int9)),
             )).transact
 
-            _ <- Ns.ints(median).query.get.map(_.head ==~ int2.toString.toDouble) // middle number
+            _ <- Ns.intSet(median).query.get.map(_.head ==~ int2.toString.toDouble) // middle number
 
-            _ <- Ns.i.ints(median).query.get.map(_.map {
+            _ <- Ns.i.intSet(median).query.get.map(_.map {
               case (1, median) => median ==~ (int1 + int2).toDouble / 2.0 // average of 2 middle numbers
               case (2, median) => median ==~ int5.toString.toDouble // middle number
             })
@@ -107,7 +107,7 @@ trait AggrSetNum_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "avg" - types { implicit conn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
-        _ <- Ns.i.ints.insert(List(
+        _ <- Ns.i.intSet.insert(List(
           (1, Set(int1, int2)),
           (2, Set(int2)),
           (2, Set(int3, int4)),
@@ -115,14 +115,14 @@ trait AggrSetNum_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         )).transact
 
         // Average of all values
-        _ <- Ns.ints(avg).query.get.map(_.head ==~ (
+        _ <- Ns.intSet(avg).query.get.map(_.head ==~ (
           int1 + int2 +
             int2 +
             int3 + int4 +
             int3 + int4
           ).toDouble / 7.0)
 
-        _ <- Ns.i.ints(avg).query.get.map(_.map {
+        _ <- Ns.i.intSet(avg).query.get.map(_.map {
           case (1, avg) => avg ==~ (int1 + int2).toDouble / 2.0
           case (2, avg) => avg ==~ (
             int2 +
@@ -137,7 +137,7 @@ trait AggrSetNum_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "variance" - types { implicit conn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
-        _ <- Ns.i.ints.insert(List(
+        _ <- Ns.i.intSet.insert(List(
           (1, Set(int1, int2)),
           (2, Set(int2)),
           (2, Set(int3, int4)),
@@ -145,14 +145,14 @@ trait AggrSetNum_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         )).transact
 
         // Variance of all values
-        _ <- Ns.ints(variance).query.get.map(_.head ==~ varianceOf(
+        _ <- Ns.intSet(variance).query.get.map(_.head ==~ varianceOf(
           int1, int2,
           int2,
           int3, int4,
           int3, int4
         ))
 
-        _ <- Ns.i.ints(variance).query.get.map(_.map {
+        _ <- Ns.i.intSet(variance).query.get.map(_.map {
           case (1, variance) => variance ==~ varianceOf(int1, int2)
           case (2, variance) => variance ==~ varianceOf(
             int2,
@@ -167,7 +167,7 @@ trait AggrSetNum_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "stddev" - types { implicit conn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
-        _ <- Ns.i.ints.insert(List(
+        _ <- Ns.i.intSet.insert(List(
           (1, Set(int1, int2)),
           (2, Set(int2)),
           (2, Set(int3, int4)),
@@ -176,14 +176,14 @@ trait AggrSetNum_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
         // Standard deviation of all values
-        _ <- Ns.ints(stddev).query.get.map(_.head ==~ stdDevOf(
+        _ <- Ns.intSet(stddev).query.get.map(_.head ==~ stdDevOf(
           int1, int2,
           int2,
           int3, int4,
           int3, int4
         ))
 
-        _ <- Ns.i.ints(stddev).query.get.map(_.map {
+        _ <- Ns.i.intSet(stddev).query.get.map(_.map {
           case (1, stddev) => stddev ==~ stdDevOf(int1, int2)
           case (2, stddev) => stddev ==~ stdDevOf(
             int2,

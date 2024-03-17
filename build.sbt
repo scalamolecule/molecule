@@ -162,6 +162,52 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(core)
 
 
+
+lazy val datalogCore = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
+  .in(file("datalog/core"))
+  .settings(name := "molecule-datalog-core")
+  .settings(doPublish)
+  .settings(compilerArgs)
+  .settings(testFrameworks := testingFrameworks)
+  .jvmSettings(
+    libraryDependencies += "com.datomic" % "peer" % "1.0.7075"
+  )
+  .jsSettings(jsEnvironment)
+  .dependsOn(coreTests)
+
+
+lazy val datalogDatomic = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
+  .in(file("datalog/datomic"))
+  .settings(name := "molecule-datalog-datomic")
+  .settings(doPublish)
+  .settings(compilerArgs)
+  .settings(testFrameworks := testingFrameworks)
+  .jsSettings(jsEnvironment)
+  .dependsOn(datalogCore % "compile->compile;test->test")
+
+
+lazy val documentMongodb = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
+  .in(file("document/mongodb"))
+  .settings(name := "molecule-document-mongodb")
+  .settings(doPublish)
+  .settings(compilerArgs)
+  .settings(testFrameworks := testingFrameworks)
+  .jsSettings(jsEnvironment)
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      "org.testcontainers" % "mongodb" % "1.19.6",
+      "org.mongodb" % "mongodb-driver-sync" % "4.11.1",
+      "ch.qos.logback" % "logback-classic" % logbackVersion % Test
+    ),
+  )
+  .dependsOn(core)
+  .dependsOn(coreTests % "compile->compile;test->test")
+
+
+
 lazy val graphql = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("graphql/client"))
@@ -209,51 +255,6 @@ lazy val graphql = crossProject(JSPlatform, JVMPlatform)
   )
   .jsSettings(jsEnvironment)
   .dependsOn(coreTests % "compile->compile;test->test")
-
-
-lazy val datalogCore = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Full)
-  .in(file("datalog/core"))
-  .settings(name := "molecule-datalog-core")
-  .settings(doPublish)
-  .settings(compilerArgs)
-  .settings(testFrameworks := testingFrameworks)
-  .jvmSettings(
-    libraryDependencies += "com.datomic" % "peer" % "1.0.7075"
-  )
-  .jsSettings(jsEnvironment)
-  .dependsOn(coreTests)
-
-
-lazy val datalogDatomic = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Full)
-  .in(file("datalog/datomic"))
-  .settings(name := "molecule-datalog-datomic")
-  .settings(doPublish)
-  .settings(compilerArgs)
-  .settings(testFrameworks := testingFrameworks)
-  .jsSettings(jsEnvironment)
-  .dependsOn(datalogCore % "compile->compile;test->test")
-
-
-lazy val documentMongodb = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Full)
-  .in(file("document/mongodb"))
-  .settings(name := "molecule-document-mongodb")
-  .settings(doPublish)
-  .settings(compilerArgs)
-  .settings(testFrameworks := testingFrameworks)
-  .jsSettings(jsEnvironment)
-  .jvmSettings(
-    libraryDependencies ++= Seq(
-      "org.testcontainers" % "mongodb" % "1.19.6",
-      "org.mongodb" % "mongodb-driver-sync" % "4.11.1",
-      "ch.qos.logback" % "logback-classic" % logbackVersion % Test
-    ),
-  )
-  .dependsOn(core)
-  .dependsOn(coreTests % "compile->compile;test->test")
-
 
 lazy val sqlCore = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)

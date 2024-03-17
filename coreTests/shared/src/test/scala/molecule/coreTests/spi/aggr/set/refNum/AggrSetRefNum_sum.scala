@@ -18,16 +18,16 @@ trait AggrSetRefNum_sum extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "1st ref" - refs { implicit conn =>
       for {
-        _ <- A.i.B.ii.insert(List(
+        _ <- A.i.B.iSet.insert(List(
           (1, Set(1, 2)),
           (2, Set(2)),
           (2, Set(3, 4)),
           (2, Set(3, 4)),
         )).transact
 
-        _ <- A.B.ii(sum).query.get.map(_.head.head ==~ all)
+        _ <- A.B.iSet(sum).query.get.map(_.head.head ==~ all)
 
-        _ <- A.i.B.ii(sum).query.get.map(_.map {
+        _ <- A.i.B.iSet(sum).query.get.map(_.map {
           case (1, setWithSum) => setWithSum.head ==~ 1 + 2
           case (2, setWithSum) => setWithSum.head ==~ all2
         })
@@ -37,16 +37,16 @@ trait AggrSetRefNum_sum extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "2nd ref" - refs { implicit conn =>
       for {
-        _ <- A.i.B.i.C.ii.insert(List(
+        _ <- A.i.B.i.C.iSet.insert(List(
           (1, 1, Set(1, 2)),
           (2, 2, Set(2)),
           (2, 2, Set(3, 4)),
           (2, 2, Set(3, 4)),
         )).transact
 
-        _ <- A.B.C.ii(sum).query.get.map(_.head.head ==~ all)
+        _ <- A.B.C.iSet(sum).query.get.map(_.head.head ==~ all)
 
-        _ <- A.i.B.i.C.ii(sum).query.get.map(_.map {
+        _ <- A.i.B.i.C.iSet(sum).query.get.map(_.map {
           case (1, 1, setWithSum) => setWithSum.head ==~ 1 + 2
           case (2, 2, setWithSum) => setWithSum.head ==~ all2
         })
@@ -56,14 +56,14 @@ trait AggrSetRefNum_sum extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "backref" - refs { implicit conn =>
       for {
-        _ <- A.i.B.i._A.C.ii.insert(List(
+        _ <- A.i.B.i._A.C.iSet.insert(List(
           (1, 1, Set(1, 2)),
           (2, 2, Set(2)),
           (2, 2, Set(3, 4)),
           (2, 2, Set(3, 4)),
         )).transact
 
-        _ <- A.i.B.i._A.C.ii(sum).query.get.map(_.map {
+        _ <- A.i.B.i._A.C.iSet(sum).query.get.map(_.map {
           case (1, 1, setWithSum) => setWithSum.head ==~ 1 + 2
           case (2, 2, setWithSum) => setWithSum.head ==~ all2
         })

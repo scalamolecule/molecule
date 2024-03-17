@@ -16,7 +16,7 @@ trait AggrSet_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
 
     "distinct" - types { implicit conn =>
       for {
-        _ <- Ns.i.localDateTimes.insert(List(
+        _ <- Ns.i.localDateTimeSet.insert(List(
           (1, Set(localDateTime1, localDateTime2)),
           (2, Set(localDateTime2)),
           (2, Set(localDateTime3, localDateTime4)),
@@ -24,13 +24,13 @@ trait AggrSet_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
         )).transact
 
         // Non-aggregated card-many Set of attribute values coalesce
-        _ <- Ns.i.a1.localDateTimes.query.get.map(_ ==> List(
+        _ <- Ns.i.a1.localDateTimeSet.query.get.map(_ ==> List(
           (1, Set(localDateTime1, localDateTime2)),
           (2, Set(localDateTime2, localDateTime3, localDateTime4)), // 3 rows coalesced
         ))
 
         // Use `distinct` keyword to retrieve unique Sets of Sets
-        _ <- Ns.i.a1.localDateTimes(distinct).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.localDateTimeSet(distinct).query.get.map(_ ==> List(
           (1, Set(Set(localDateTime1, localDateTime2))),
           (2, Set(
             Set(localDateTime2),
@@ -38,7 +38,7 @@ trait AggrSet_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
           ))
         ))
 
-        _ <- Ns.localDateTimes(distinct).query.get.map(_ ==> List(
+        _ <- Ns.localDateTimeSet(distinct).query.get.map(_ ==> List(
           Set(
             Set(localDateTime1, localDateTime2),
             Set(localDateTime2),
@@ -51,7 +51,7 @@ trait AggrSet_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
 
     "min" - types { implicit conn =>
       for {
-        _ <- Ns.i.localDateTimes.insert(List(
+        _ <- Ns.i.localDateTimeSet.insert(List(
           (1, Set(localDateTime1, localDateTime2)),
           (2, Set(localDateTime2)),
           (2, Set(localDateTime3, localDateTime4)),
@@ -60,27 +60,27 @@ trait AggrSet_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
 
         // Matching values coalesced localDateTimeo one Set
 
-        _ <- Ns.localDateTimes(min).query.get.map(_ ==> List(Set(localDateTime1)))
-        _ <- Ns.localDateTimes(min(1)).query.get.map(_ ==> List(Set(localDateTime1)))
-        _ <- Ns.localDateTimes(min(2)).query.get.map(_ ==> List(Set(localDateTime1, localDateTime2)))
-        _ <- Ns.localDateTimes(min(3)).query.get.map(_ ==> List(Set(localDateTime1, localDateTime2, localDateTime3)))
+        _ <- Ns.localDateTimeSet(min).query.get.map(_ ==> List(Set(localDateTime1)))
+        _ <- Ns.localDateTimeSet(min(1)).query.get.map(_ ==> List(Set(localDateTime1)))
+        _ <- Ns.localDateTimeSet(min(2)).query.get.map(_ ==> List(Set(localDateTime1, localDateTime2)))
+        _ <- Ns.localDateTimeSet(min(3)).query.get.map(_ ==> List(Set(localDateTime1, localDateTime2, localDateTime3)))
 
-        _ <- Ns.i.a1.localDateTimes(min).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.localDateTimeSet(min).query.get.map(_ ==> List(
           (1, Set(localDateTime1)),
           (2, Set(localDateTime2)),
         ))
         // Same as
-        _ <- Ns.i.a1.localDateTimes(min(1)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.localDateTimeSet(min(1)).query.get.map(_ ==> List(
           (1, Set(localDateTime1)),
           (2, Set(localDateTime2)),
         ))
 
-        _ <- Ns.i.a1.localDateTimes(min(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.localDateTimeSet(min(2)).query.get.map(_ ==> List(
           (1, Set(localDateTime1, localDateTime2)),
           (2, Set(localDateTime2, localDateTime3)),
         ))
 
-        _ <- Ns.i.a1.localDateTimes(min(3)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.localDateTimeSet(min(3)).query.get.map(_ ==> List(
           (1, Set(localDateTime1, localDateTime2)),
           (2, Set(localDateTime2, localDateTime3, localDateTime4)),
         ))
@@ -90,7 +90,7 @@ trait AggrSet_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
 
     "max" - types { implicit futConn =>
       for {
-        _ <- Ns.i.localDateTimes.insert(List(
+        _ <- Ns.i.localDateTimeSet.insert(List(
           (1, Set(localDateTime1, localDateTime2)),
           (2, Set(localDateTime2)),
           (2, Set(localDateTime3, localDateTime4)),
@@ -99,27 +99,27 @@ trait AggrSet_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
 
         // Matching values coalesced localDateTimeo one Set
 
-        _ <- Ns.localDateTimes(max).query.get.map(_ ==> List(Set(localDateTime4)))
-        _ <- Ns.localDateTimes(max(1)).query.get.map(_ ==> List(Set(localDateTime4)))
-        _ <- Ns.localDateTimes(max(2)).query.get.map(_ ==> List(Set(localDateTime3, localDateTime4)))
-        _ <- Ns.localDateTimes(max(3)).query.get.map(_ ==> List(Set(localDateTime2, localDateTime3, localDateTime4)))
+        _ <- Ns.localDateTimeSet(max).query.get.map(_ ==> List(Set(localDateTime4)))
+        _ <- Ns.localDateTimeSet(max(1)).query.get.map(_ ==> List(Set(localDateTime4)))
+        _ <- Ns.localDateTimeSet(max(2)).query.get.map(_ ==> List(Set(localDateTime3, localDateTime4)))
+        _ <- Ns.localDateTimeSet(max(3)).query.get.map(_ ==> List(Set(localDateTime2, localDateTime3, localDateTime4)))
 
-        _ <- Ns.i.a1.localDateTimes(max).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.localDateTimeSet(max).query.get.map(_ ==> List(
           (1, Set(localDateTime2)),
           (2, Set(localDateTime4)),
         ))
         // Same as
-        _ <- Ns.i.a1.localDateTimes(max(1)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.localDateTimeSet(max(1)).query.get.map(_ ==> List(
           (1, Set(localDateTime2)),
           (2, Set(localDateTime4)),
         ))
 
-        _ <- Ns.i.a1.localDateTimes(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.localDateTimeSet(max(2)).query.get.map(_ ==> List(
           (1, Set(localDateTime1, localDateTime2)),
           (2, Set(localDateTime3, localDateTime4)),
         ))
 
-        _ <- Ns.i.a1.localDateTimes(max(3)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.localDateTimeSet(max(3)).query.get.map(_ ==> List(
           (1, Set(localDateTime1, localDateTime2)),
           (2, Set(localDateTime2, localDateTime3, localDateTime4)),
         ))
@@ -129,23 +129,23 @@ trait AggrSet_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
 
     "sample" - types { implicit futConn =>
       for {
-        _ <- Ns.i.localDateTimes.insert(List(
+        _ <- Ns.i.localDateTimeSet.insert(List(
           (1, Set(localDateTime1, localDateTime2)),
           (2, Set(localDateTime2)),
           (2, Set(localDateTime3, localDateTime4)),
           (2, Set(localDateTime3, localDateTime4)),
         )).transact
         all = Set(localDateTime1, localDateTime2, localDateTime3, localDateTime4)
-        _ <- Ns.localDateTimes(sample).query.get.map(res => all.contains(res.head.head) ==> true)
-        _ <- Ns.localDateTimes(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- Ns.localDateTimes(sample(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
+        _ <- Ns.localDateTimeSet(sample).query.get.map(res => all.contains(res.head.head) ==> true)
+        _ <- Ns.localDateTimeSet(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
+        _ <- Ns.localDateTimeSet(sample(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
       } yield ()
     }
 
 
     "count countDistinct" - types { implicit conn =>
       for {
-        _ <- Ns.i.localDateTimes.insert(List(
+        _ <- Ns.i.localDateTimeSet.insert(List(
           (1, Set(localDateTime1, localDateTime2)),
           (2, Set(localDateTime2)),
           (2, Set(localDateTime3, localDateTime4)),
@@ -155,14 +155,14 @@ trait AggrSet_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
         _ <- Ns.i(count).query.get.map(_ ==> List(4))
         _ <- Ns.i(countDistinct).query.get.map(_ ==> List(2))
 
-        _ <- Ns.localDateTimes(count).query.get.map(_ ==> List(7))
-        _ <- Ns.localDateTimes(countDistinct).query.get.map(_ ==> List(4))
+        _ <- Ns.localDateTimeSet(count).query.get.map(_ ==> List(7))
+        _ <- Ns.localDateTimeSet(countDistinct).query.get.map(_ ==> List(4))
 
-        _ <- Ns.i.a1.localDateTimes(count).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.localDateTimeSet(count).query.get.map(_ ==> List(
           (1, 2),
           (2, 5)
         ))
-        _ <- Ns.i.a1.localDateTimes(countDistinct).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.localDateTimeSet(countDistinct).query.get.map(_ ==> List(
           (1, 2),
           (2, 3)
         ))

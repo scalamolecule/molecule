@@ -6,7 +6,7 @@ object Refs extends DataModel(10) {
 
   trait A {
     val i    = oneInt
-    val ii   = setInt
+    val iSet = setInt
     val iSeq = seqInt
     val s    = oneString
     val bool = oneBoolean
@@ -35,7 +35,7 @@ object Refs extends DataModel(10) {
 
   trait B {
     val i    = oneInt
-    val ii   = setInt
+    val iSet = setInt
     val iSeq = seqInt
     val s    = oneString
 
@@ -57,7 +57,7 @@ object Refs extends DataModel(10) {
   trait C {
     val i    = oneInt
     val s    = oneString
-    val ii   = setInt
+    val iSet = setInt
     val iSeq = seqInt
     val a    = one[A]
     val d    = one[D]

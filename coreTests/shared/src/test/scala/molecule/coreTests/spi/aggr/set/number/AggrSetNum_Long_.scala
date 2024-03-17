@@ -18,7 +18,7 @@ trait AggrSetNum_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "sum" - types { implicit conn =>
       implicit val tolerant = tolerantLongEquality(toleranceLong)
       for {
-        _ <- Ns.i.longs.insert(List(
+        _ <- Ns.i.longSet.insert(List(
           (1, Set(long1, long2)),
           (2, Set(long2)),
           (2, Set(long3, long4)),
@@ -26,7 +26,7 @@ trait AggrSetNum_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         )).transact
 
         // Sum of all values
-        _ <- Ns.longs(sum).query.get.map(
+        _ <- Ns.longSet(sum).query.get.map(
           _.head.head ==~ (
             long1 + long2 +
               long2 +
@@ -35,7 +35,7 @@ trait AggrSetNum_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             )
         )
 
-        _ <- Ns.i.longs(sum).query.get.map(_.map {
+        _ <- Ns.i.longSet(sum).query.get.map(_.map {
           case (1, setWithSum) => setWithSum.head ==~ long1 + long2
           case (2, setWithSum) => setWithSum.head ==~ (
             long2 +
@@ -53,7 +53,7 @@ trait AggrSetNum_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       database match {
         case "Datomic" =>
           for {
-            _ <- Ns.i.longs.insert(List(
+            _ <- Ns.i.longSet.insert(List(
               (1, Set(long1, long2)),
               (2, Set(long2)),
               (2, Set(long5, long9)),
@@ -62,9 +62,9 @@ trait AggrSetNum_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             // Median of all values - middle number used if odd number of values
             // 1  2  2  5  9
             //       ^
-            _ <- Ns.longs(median).query.get.map(_.head ==~ long2.toString.toDouble) // whole middle number
+            _ <- Ns.longSet(median).query.get.map(_.head ==~ long2.toString.toDouble) // whole middle number
 
-            _ <- Ns.i.longs(median).query.get.map(_.map {
+            _ <- Ns.i.longSet(median).query.get.map(_.map {
               case (1, median) => median ==~ long1.toDouble.floor // lower whole number
               case (2, median) => median ==~ long5.toString.toDouble // whole middle number
             })
@@ -72,15 +72,15 @@ trait AggrSetNum_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         case "MongoDB" =>
           for {
-            _ <- Ns.i.longs.insert(List(
+            _ <- Ns.i.longSet.insert(List(
               (1, Set(long1, long2)),
               (2, Set(long2)),
               (2, Set(long5, long9)),
             )).transact
 
-            _ <- Ns.longs(median).query.get.map(_.head ==~ long2.toString.toDouble) // whole middle number
+            _ <- Ns.longSet(median).query.get.map(_.head ==~ long2.toString.toDouble) // whole middle number
 
-            _ <- Ns.i.longs(median).query.get.map(_.map {
+            _ <- Ns.i.longSet(median).query.get.map(_.map {
               case (1, median) => median ==~ long1.toDouble // lower number
               case (2, median) => median ==~ long5.toString.toDouble // whole middle number
             })
@@ -88,15 +88,15 @@ trait AggrSetNum_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         case _ =>
           for {
-            _ <- Ns.i.longs.insert(List(
+            _ <- Ns.i.longSet.insert(List(
               (1, Set(long1, long2)),
               (2, Set(long2)),
               (2, Set(long5, long9)),
             )).transact
 
-            _ <- Ns.longs(median).query.get.map(_.head ==~ long2.toString.toDouble) // middle number
+            _ <- Ns.longSet(median).query.get.map(_.head ==~ long2.toString.toDouble) // middle number
 
-            _ <- Ns.i.longs(median).query.get.map(_.map {
+            _ <- Ns.i.longSet(median).query.get.map(_.map {
               case (1, median) => median ==~ (long1 + long2).toDouble / 2.0 // average of 2 middle numbers
               case (2, median) => median ==~ long5.toString.toDouble // middle number
             })
@@ -108,7 +108,7 @@ trait AggrSetNum_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "avg" - types { implicit conn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
-        _ <- Ns.i.longs.insert(List(
+        _ <- Ns.i.longSet.insert(List(
           (1, Set(long1, long2)),
           (2, Set(long2)),
           (2, Set(long3, long4)),
@@ -116,14 +116,14 @@ trait AggrSetNum_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         )).transact
 
         // Average of all values
-        _ <- Ns.longs(avg).query.get.map(_.head ==~ (
+        _ <- Ns.longSet(avg).query.get.map(_.head ==~ (
           long1 + long2 +
             long2 +
             long3 + long4 +
             long3 + long4
           ).toDouble / 7.0)
 
-        _ <- Ns.i.longs(avg).query.get.map(_.map {
+        _ <- Ns.i.longSet(avg).query.get.map(_.map {
           case (1, avg) => avg ==~ (long1 + long2).toDouble / 2.0
           case (2, avg) => avg ==~ (
             long2 +
@@ -138,7 +138,7 @@ trait AggrSetNum_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "variance" - types { implicit conn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
-        _ <- Ns.i.longs.insert(List(
+        _ <- Ns.i.longSet.insert(List(
           (1, Set(long1, long2)),
           (2, Set(long2)),
           (2, Set(long3, long4)),
@@ -146,14 +146,14 @@ trait AggrSetNum_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         )).transact
 
         // Variance of all values
-        _ <- Ns.longs(variance).query.get.map(_.head ==~ varianceOf(
+        _ <- Ns.longSet(variance).query.get.map(_.head ==~ varianceOf(
           long1, long2,
           long2,
           long3, long4,
           long3, long4
         ))
 
-        _ <- Ns.i.longs(variance).query.get.map(_.map {
+        _ <- Ns.i.longSet(variance).query.get.map(_.map {
           case (1, variance) => variance ==~ varianceOf(long1, long2)
           case (2, variance) => variance ==~ varianceOf(
             long2,
@@ -168,7 +168,7 @@ trait AggrSetNum_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "stddev" - types { implicit conn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
-        _ <- Ns.i.longs.insert(List(
+        _ <- Ns.i.longSet.insert(List(
           (1, Set(long1, long2)),
           (2, Set(long2)),
           (2, Set(long3, long4)),
@@ -177,14 +177,14 @@ trait AggrSetNum_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
         // Standard deviation of all values
-        _ <- Ns.longs(stddev).query.get.map(_.head ==~ stdDevOf(
+        _ <- Ns.longSet(stddev).query.get.map(_.head ==~ stdDevOf(
           long1, long2,
           long2,
           long3, long4,
           long3, long4
         ))
 
-        _ <- Ns.i.longs(stddev).query.get.map(_.map {
+        _ <- Ns.i.longSet(stddev).query.get.map(_.map {
           case (1, stddev) => stddev ==~ stdDevOf(long1, long2)
           case (2, stddev) => stddev ==~ stdDevOf(
             long2,

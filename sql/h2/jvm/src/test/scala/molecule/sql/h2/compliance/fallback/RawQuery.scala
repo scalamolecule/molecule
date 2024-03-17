@@ -116,51 +116,51 @@ object RawQuery extends TestSuite_h2 {
            |""".stripMargin
 
       for {
-        _ <- Ns.strings(Set(string1, string2)).save.transact
-        _ <- Ns.ints(Set(int1, int2)).save.transact
-        _ <- Ns.longs(Set(long1, long2)).save.transact
-        _ <- Ns.floats(Set(float1, float2)).save.transact
-        _ <- Ns.doubles(Set(double1, double2)).save.transact
-        _ <- Ns.booleans(Set(boolean1, boolean2)).save.transact
-        _ <- Ns.bigInts(Set(bigInt1, bigInt2)).save.transact
-        _ <- Ns.bigDecimals(Set(bigDecimal1, bigDecimal2)).save.transact
-        _ <- Ns.dates(Set(date1, date2)).save.transact
-        _ <- Ns.durations(Set(duration1, duration2)).save.transact
-        _ <- Ns.instants(Set(instant1, instant2)).save.transact
-        _ <- Ns.localDates(Set(localDate1, localDate2)).save.transact
-        _ <- Ns.localTimes(Set(localTime1, localTime2)).save.transact
-        _ <- Ns.localDateTimes(Set(localDateTime1, localDateTime2)).save.transact
-        _ <- Ns.offsetTimes(Set(offsetTime1, offsetTime2)).save.transact
-        _ <- Ns.offsetDateTimes(Set(offsetDateTime1, offsetDateTime2)).save.transact
-        _ <- Ns.zonedDateTimes(Set(zonedDateTime1, zonedDateTime2)).save.transact
-        _ <- Ns.uuids(Set(uuid1, uuid2)).save.transact
-        _ <- Ns.uris(Set(uri1, uri2)).save.transact
-        _ <- Ns.bytes(Set(byte1, byte2)).save.transact
-        _ <- Ns.shorts(Set(short1, short2)).save.transact
-        _ <- Ns.chars(Set(char1, char2)).save.transact
+        _ <- Ns.stringSet(Set(string1, string2)).save.transact
+        _ <- Ns.intSet(Set(int1, int2)).save.transact
+        _ <- Ns.longSet(Set(long1, long2)).save.transact
+        _ <- Ns.floatSet(Set(float1, float2)).save.transact
+        _ <- Ns.doubleSet(Set(double1, double2)).save.transact
+        _ <- Ns.booleanSet(Set(boolean1, boolean2)).save.transact
+        _ <- Ns.bigIntSet(Set(bigInt1, bigInt2)).save.transact
+        _ <- Ns.bigDecimalSet(Set(bigDecimal1, bigDecimal2)).save.transact
+        _ <- Ns.dateSet(Set(date1, date2)).save.transact
+        _ <- Ns.durationSet(Set(duration1, duration2)).save.transact
+        _ <- Ns.instantSet(Set(instant1, instant2)).save.transact
+        _ <- Ns.localDateSet(Set(localDate1, localDate2)).save.transact
+        _ <- Ns.localTimeSet(Set(localTime1, localTime2)).save.transact
+        _ <- Ns.localDateTimeSet(Set(localDateTime1, localDateTime2)).save.transact
+        _ <- Ns.offsetTimeSet(Set(offsetTime1, offsetTime2)).save.transact
+        _ <- Ns.offsetDateTimeSet(Set(offsetDateTime1, offsetDateTime2)).save.transact
+        _ <- Ns.zonedDateTimeSet(Set(zonedDateTime1, zonedDateTime2)).save.transact
+        _ <- Ns.uuidSet(Set(uuid1, uuid2)).save.transact
+        _ <- Ns.uriSet(Set(uri1, uri2)).save.transact
+        _ <- Ns.byteSet(Set(byte1, byte2)).save.transact
+        _ <- Ns.shortSet(Set(short1, short2)).save.transact
+        _ <- Ns.charSet(Set(char1, char2)).save.transact
 
-        _ <- rawQuery(q("strings")).map(_.head ==> List(Set(string1, string2)))
-        _ <- rawQuery(q("ints")).map(_.head ==> List(Set(int1, int2)))
-        _ <- rawQuery(q("longs")).map(_.head ==> List(Set(long1, long2)))
-        _ <- rawQuery(q("floats")).map(_.head ==> List(Set(float1, float2)))
-        _ <- rawQuery(q("doubles")).map(_.head ==> List(Set(double1, double2)))
-        _ <- rawQuery(q("booleans")).map(_.head ==> List(Set(boolean1, boolean2)))
-        _ <- rawQuery(q("bigInts")).map(_.head ==> List(Set(new jBigDecimal(bigInt1.bigInteger), new jBigDecimal(bigInt2.bigInteger))))
-        _ <- rawQuery(q("bigDecimals")).map(_.head ==> List(Set(bigDecimal1.bigDecimal.setScale(25), bigDecimal2.bigDecimal.setScale(25))))
-        _ <- rawQuery(q("dates")).map(_.head ==> List(Set(date1.getTime, date2.getTime)))
-        _ <- rawQuery(q("durations")).map(_.head ==> List(Set(duration1.toString, duration2.toString)))
-        _ <- rawQuery(q("instants")).map(_.head ==> List(Set(instant1.toString, instant2.toString)))
-        _ <- rawQuery(q("localDates")).map(_.head ==> List(Set(localDate1.toString, localDate2.toString)))
-        _ <- rawQuery(q("localTimes")).map(_.head ==> List(Set(localTime1.toString, localTime2.toString)))
-        _ <- rawQuery(q("localDateTimes")).map(_.head ==> List(Set(localDateTime1.toString, localDateTime2.toString)))
-        _ <- rawQuery(q("offsetTimes")).map(_.head ==> List(Set(offsetTime1.toString, offsetTime2.toString)))
-        _ <- rawQuery(q("offsetDateTimes")).map(_.head ==> List(Set(offsetDateTime1.toString, offsetDateTime2.toString)))
-        _ <- rawQuery(q("zonedDateTimes")).map(_.head ==> List(Set(zonedDateTime1.toString, zonedDateTime2.toString)))
-        _ <- rawQuery(q("uuids")).map(_.head ==> List(Set(uuid1, uuid2)))
-        _ <- rawQuery(q("uris")).map(_.head ==> List(Set(uri1.toString, uri2.toString)))
-        _ <- rawQuery(q("bytes")).map(_.head ==> List(Set(byte1, byte2)))
-        _ <- rawQuery(q("shorts")).map(_.head ==> List(Set(short1, short2)))
-        _ <- rawQuery(q("chars")).map(_.head ==> List(Set(char1.toString, char2.toString)))
+        _ <- rawQuery(q("stringSet")).map(_.head ==> List(Set(string1, string2)))
+        _ <- rawQuery(q("intSet")).map(_.head ==> List(Set(int1, int2)))
+        _ <- rawQuery(q("longSet")).map(_.head ==> List(Set(long1, long2)))
+        _ <- rawQuery(q("floatSet")).map(_.head ==> List(Set(float1, float2)))
+        _ <- rawQuery(q("doubleSet")).map(_.head ==> List(Set(double1, double2)))
+        _ <- rawQuery(q("booleanSet")).map(_.head ==> List(Set(boolean1, boolean2)))
+        _ <- rawQuery(q("bigIntSet")).map(_.head ==> List(Set(new jBigDecimal(bigInt1.bigInteger), new jBigDecimal(bigInt2.bigInteger))))
+        _ <- rawQuery(q("bigDecimalSet")).map(_.head ==> List(Set(bigDecimal1.bigDecimal.setScale(25), bigDecimal2.bigDecimal.setScale(25))))
+        _ <- rawQuery(q("dateSet")).map(_.head ==> List(Set(date1.getTime, date2.getTime)))
+        _ <- rawQuery(q("durationSet")).map(_.head ==> List(Set(duration1.toString, duration2.toString)))
+        _ <- rawQuery(q("instantSet")).map(_.head ==> List(Set(instant1.toString, instant2.toString)))
+        _ <- rawQuery(q("localDateSet")).map(_.head ==> List(Set(localDate1.toString, localDate2.toString)))
+        _ <- rawQuery(q("localTimeSet")).map(_.head ==> List(Set(localTime1.toString, localTime2.toString)))
+        _ <- rawQuery(q("localDateTimeSet")).map(_.head ==> List(Set(localDateTime1.toString, localDateTime2.toString)))
+        _ <- rawQuery(q("offsetTimeSet")).map(_.head ==> List(Set(offsetTime1.toString, offsetTime2.toString)))
+        _ <- rawQuery(q("offsetDateTimeSet")).map(_.head ==> List(Set(offsetDateTime1.toString, offsetDateTime2.toString)))
+        _ <- rawQuery(q("zonedDateTimeSet")).map(_.head ==> List(Set(zonedDateTime1.toString, zonedDateTime2.toString)))
+        _ <- rawQuery(q("uuidSet")).map(_.head ==> List(Set(uuid1, uuid2)))
+        _ <- rawQuery(q("uriSet")).map(_.head ==> List(Set(uri1.toString, uri2.toString)))
+        _ <- rawQuery(q("byteSet")).map(_.head ==> List(Set(byte1, byte2)))
+        _ <- rawQuery(q("shortSet")).map(_.head ==> List(Set(short1, short2)))
+        _ <- rawQuery(q("charSet")).map(_.head ==> List(Set(char1.toString, char2.toString)))
       } yield ()
     }
 
@@ -190,13 +190,13 @@ object RawQuery extends TestSuite_h2 {
 
     "Optional Set" - types { implicit conn =>
       for {
-        _ <- Ns.i.strings_?.insert(
+        _ <- Ns.i.stringSet_?.insert(
           (1, Option.empty[Set[String]]),
           (2, Some(Set.empty[String])),
           (3, Some(Set(string1, string2))),
         ).transact
 
-        _ <- Ns.i.a1.strings_?.query.i.get.map(_ ==> List(
+        _ <- Ns.i.a1.stringSet_?.query.i.get.map(_ ==> List(
           (1, None),
           (2, None),
           (3, Some(Set(string1, string2)))
@@ -205,7 +205,7 @@ object RawQuery extends TestSuite_h2 {
         _ <- rawQuery(
           """SELECT DISTINCT
             |  Ns.i,
-            |  Ns.strings
+            |  Ns.stringSet
             |FROM Ns
             |WHERE
             |  Ns.i IS NOT NULL

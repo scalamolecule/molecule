@@ -14,39 +14,39 @@ trait AggrSetRef_sample extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "1st ref" - refs { implicit conn =>
       for {
-        _ <- A.i.B.ii.insert(List(
+        _ <- A.i.B.iSet.insert(List(
           (1, Set(1, 2)),
           (2, Set(2)),
           (2, Set(3, 4)),
           (2, Set(3, 4)),
         )).transact
         all = Set(1, 2, 3, 4)
-        _ <- A.B.ii(sample).query.get.map(res => all.contains(res.head.head) ==> true)
-        _ <- A.B.ii(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- A.B.ii(sample(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
+        _ <- A.B.iSet(sample).query.get.map(res => all.contains(res.head.head) ==> true)
+        _ <- A.B.iSet(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
+        _ <- A.B.iSet(sample(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
       } yield ()
     }
 
 
     "2nd ref" - refs { implicit conn =>
       for {
-        _ <- A.i.B.C.ii.insert(List(
+        _ <- A.i.B.C.iSet.insert(List(
           (1, Set(1, 2)),
           (2, Set(2)),
           (2, Set(3, 4)),
           (2, Set(3, 4)),
         )).transact
         all = Set(1, 2, 3, 4)
-        _ <- A.B.C.ii(sample).query.get.map(res => all.contains(res.head.head) ==> true)
-        _ <- A.B.C.ii(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- A.B.C.ii(sample(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
+        _ <- A.B.C.iSet(sample).query.get.map(res => all.contains(res.head.head) ==> true)
+        _ <- A.B.C.iSet(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
+        _ <- A.B.C.iSet(sample(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
       } yield ()
     }
 
 
     "backref" - refs { implicit conn =>
       for {
-        _ <- A.i.B.i._A.C.ii.insert(List(
+        _ <- A.i.B.i._A.C.iSet.insert(List(
           (1, 1, Set(1, 2)),
           (2, 2, Set(2)),
           (2, 2, Set(3, 4)),
@@ -55,17 +55,17 @@ trait AggrSetRef_sample extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         all = Set(1, 2, 3, 4)
 
-        _ <- A.B.i._A.C.ii(sample).query.get.map {
+        _ <- A.B.i._A.C.iSet(sample).query.get.map {
           _.map {
             case (_, set) => all.contains(set.head) ==> true
           }
         }
-        _ <- A.B.i._A.C.ii(sample(1)).query.get.map {
+        _ <- A.B.i._A.C.iSet(sample(1)).query.get.map {
           _.map {
             case (_, set) => all.intersect(set).nonEmpty ==> true
           }
         }
-        _ <- A.B.i._A.C.ii(sample(2)).query.get.map {
+        _ <- A.B.i._A.C.iSet(sample(2)).query.get.map {
           _.map {
             case (_, set) => all.intersect(set).nonEmpty ==> true
           }
