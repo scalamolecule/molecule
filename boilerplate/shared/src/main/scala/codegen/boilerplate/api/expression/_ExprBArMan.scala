@@ -9,7 +9,6 @@ object _ExprBArMan extends BoilerplateGenBase("ExprBArMan", "/api/expression") {
     s"""// GENERATED CODE ********************************
        |package molecule.boilerplate.api.expression
        |
-       |import molecule.base.ast._
        |import molecule.boilerplate.api._
        |import molecule.boilerplate.ast.Model._
        |$traits
@@ -21,10 +20,10 @@ object _ExprBArMan extends BoilerplateGenBase("ExprBArMan", "/api/expression") {
       s"""
          |
          |trait $fileName_$arity[${`A..V`}, t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]]
-         |  extends ExprBArTacOps_$arity[${`A..V`}, t, Ns1, Ns2]
-         |    with Aggregates_$arity[${`A..V`}, t, Ns1] {
-         |  def apply(            ): Ns1[${`A..V`}, t] = _exprBAr(Eq, Nil    )
-         |  def apply(ba: Array[t]): Ns1[${`A..V`}, t] = _exprBAr(Eq, Seq(ba))
+         |  extends ExprBArTacOps_$arity[${`A..V`}, t, Ns1, Ns2] {
+         |  def apply(            ): Ns1[${`A..V`}, t] = _exprBAr(Eq , Nil    )
+         |  def apply(ba: Array[t]): Ns1[${`A..V`}, t] = _exprBAr(Eq , Seq(ba))
+         |  def not  (ba: Array[t]): Ns1[${`A..V`}, t] = _exprBAr(Neq, Seq(ba))
          |}""".stripMargin
   }
 }

@@ -320,21 +320,21 @@ class ResolveSave
     }
   }
 
-  private def oneByteArray(
-    ns: String,
-    attr: String,
-    arrays: Seq[Array[Byte]],
-  ): Option[Array[Byte]] = {
-    arrays match {
-      case Seq(array)     => Some(array)
-      case Nil            => None
-      case multipleArrays =>
-        throw ExecutionError(
-          s"Can only save one Seq of values for Seq attribute `$ns.$attr`. Found multiple seqs:\n" +
-            multipleArrays.map(_.mkString("Array(", ", ", ")")).mkString("\n")
-        )
-    }
-  }
+//  private def optByteArray(
+//    ns: String,
+//    attr: String,
+//    arrays: Seq[Array[Byte]],
+//  ): Option[Array[Byte]] = {
+//    arrays match {
+//      case Seq(array)     => Some(array)
+//      case Nil            => None
+//      case multipleArrays =>
+//        throw ExecutionError(
+//          s"Can only save one Seq of values for Seq attribute `$ns.$attr`. Found multiple seqs:\n" +
+//            multipleArrays.map(_.mkString("Array(", ", ", ")")).mkString("\n")
+//        )
+//    }
+//  }
 
   private def resolveAttrSeqMan(a: AttrSeqMan): Unit = {
     val (ns, attr, refNs) = (a.ns, a.attr, a.refNs)
@@ -359,20 +359,9 @@ class ResolveSave
       case a: AttrSeqManZonedDateTime  => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs, transformZonedDateTime), transformZonedDateTime) //, set2arrayZonedDateTime, extsZonedDateTime, value2jsonZonedDateTime)
       case a: AttrSeqManUUID           => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs, transformUUID), transformUUID) //, set2arrayUUID, extsUUID, value2jsonUUID)
       case a: AttrSeqManURI            => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs, transformURI), transformURI) //, set2arrayURI, extsURI, value2jsonURI)
-      case a: AttrSeqManByte           =>
-
-        addByteArray(ns, attr, oneByteArray(ns, attr, a.vs))
-
-      //        a.vs.headOption match {
-      //        case Some(arraySeq: ArraySeq[_]) => addByteArray(ns, attr, oneByteArray(ns, attr, Seq(arraySeq.unsafeArray.asInstanceOf[Array[Byte]])))
-      //        case _                           =>
-      //          addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs, transformByte), transformByte)
-      //          throw ExecutionError(
-      //            s"Only Array of Bytes is allowed for attribute `$ns.$attr`."
-      //          )
-      //      }
-      case a: AttrSeqManShort => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs, transformShort), transformShort) //, set2arrayShort, extsShort, value2jsonShort)
-      case a: AttrSeqManChar  => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs, transformChar), transformChar) //, set2arrayChar, extsChar, value2jsonChar)
+      case a: AttrSeqManByte           => addByteArray(ns, attr, optByteArray(ns, attr, a.vs))
+      case a: AttrSeqManShort          => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs, transformShort), transformShort) //, set2arrayShort, extsShort, value2jsonShort)
+      case a: AttrSeqManChar           => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs, transformChar), transformChar) //, set2arrayChar, extsChar, value2jsonChar)
     }
   }
   private def resolveAttrSeqTac(a: AttrSeqTac): Unit = {
@@ -398,14 +387,9 @@ class ResolveSave
       case a: AttrSeqTacZonedDateTime  => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs, transformZonedDateTime), transformZonedDateTime) //, set2arrayZonedDateTime, extsZonedDateTime, value2jsonZonedDateTime)
       case a: AttrSeqTacUUID           => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs, transformUUID), transformUUID) //, set2arrayUUID, extsUUID, value2jsonUUID)
       case a: AttrSeqTacURI            => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs, transformURI), transformURI) //, set2arrayURI, extsURI, value2jsonURI)
-      case a: AttrSeqTacByte           =>
-        //        addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs, transformByte), transformByte) //, set2arrayURI, extsURI, value2jsonURI)
-        addByteArray(ns, attr, oneByteArray(ns, attr, a.vs))
-
-
-      case a: AttrSeqTacShort => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs, transformShort), transformShort) //, set2arrayShort, extsShort, value2jsonShort)
-      case a: AttrSeqTacChar  => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs, transformChar), transformChar) //, set2arrayChar, extsChar, value2jsonChar)
-      //      case a: AttrSeqTacByte           => addByteSeq(ns, attr, oneByteArray(ns, attr, a.vs))
+      case a: AttrSeqTacByte           => addByteArray(ns, attr, optByteArray(ns, attr, a.vs))
+      case a: AttrSeqTacShort          => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs, transformShort), transformShort) //, set2arrayShort, extsShort, value2jsonShort)
+      case a: AttrSeqTacChar           => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs, transformChar), transformChar) //, set2arrayChar, extsChar, value2jsonChar)
     }
   }
 
@@ -419,22 +403,6 @@ class ResolveSave
       case Seq(seq)     => Some(seq.map(transformValue))
       case Nil          => None
       case multipleSeqs => noMultipleSeqs(ns, attr, multipleSeqs)
-    }
-  }
-  private def oneOptByteArray(
-    ns: String,
-    attr: String,
-    optArrays: Option[Seq[Array[Byte]]]
-  ): Option[Array[Byte]] = {
-    optArrays.flatMap {
-      case Seq(array)     => Some(array)
-      case Nil            => None
-      case multipleArrays =>
-        //          noMultipleSeqs(ns, attr, multipleArrays)
-        throw ExecutionError(
-          s"Can only save one Seq of values for Seq attribute `$ns.$attr`. Found multiple seqs:\n" +
-            multipleArrays.map(_.mkString("Array(", ", ", ")")).mkString("\n")
-        )
     }
   }
 
@@ -461,16 +429,9 @@ class ResolveSave
       case a: AttrSeqOptZonedDateTime  => addSeq(ns, attr, refNs, oneOptSeq(ns, attr, a.vs, transformZonedDateTime), handleZonedDateTime) //, set2arrayZonedDateTime, extsZonedDateTime, value2jsonZonedDateTime)
       case a: AttrSeqOptUUID           => addSeq(ns, attr, refNs, oneOptSeq(ns, attr, a.vs, transformUUID), handleUUID) //, set2arrayUUID, extsUUID, value2jsonUUID)
       case a: AttrSeqOptURI            => addSeq(ns, attr, refNs, oneOptSeq(ns, attr, a.vs, transformURI), handleURI) //, set2arrayURI, extsURI, value2jsonURI)
-      case a: AttrSeqOptByte           =>
-
-
-
-        addByteArray(ns, attr, oneOptByteArray(ns, attr, a.vs))
-      //        ???
-
-      //      case a: AttrSeqOptByte           => addSeq(ns, attr, refNs, oneOptSeq(ns, attr, a.vs, transformByte), handleByte) //, set2arrayURI, extsURI, value2jsonURI)
-      case a: AttrSeqOptShort => addSeq(ns, attr, refNs, oneOptSeq(ns, attr, a.vs, transformShort), handleShort) //, set2arrayShort, extsShort, value2jsonShort)
-      case a: AttrSeqOptChar  => addSeq(ns, attr, refNs, oneOptSeq(ns, attr, a.vs, transformChar), handleChar) //, set2arrayChar, extsChar, value2jsonChar)
+      case a: AttrSeqOptByte           => addByteArray(ns, attr, a.vs.flatMap(vs => optByteArray(ns, attr, vs)))
+      case a: AttrSeqOptShort          => addSeq(ns, attr, refNs, oneOptSeq(ns, attr, a.vs, transformShort), handleShort) //, set2arrayShort, extsShort, value2jsonShort)
+      case a: AttrSeqOptChar           => addSeq(ns, attr, refNs, oneOptSeq(ns, attr, a.vs, transformChar), handleChar) //, set2arrayChar, extsChar, value2jsonChar)
     }
   }
 

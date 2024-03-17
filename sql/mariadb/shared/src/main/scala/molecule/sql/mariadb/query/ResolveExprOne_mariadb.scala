@@ -139,7 +139,7 @@ trait ResolveExprOne_mariadb extends ResolveExprOne with LambdasOne_mariadb { se
         replaceCast(
           (row: RS, paramIndex: Int) => {
             val json    = row.getString(paramIndex)
-            val doubles = json.substring(1, json.length - 1).split(",").map(_.toDouble)
+            val doubles = json.substring(1, json.length - 1).split(",").map(_.toDouble).toSeq
             varianceOf(doubles: _*)
           }
         )
@@ -154,7 +154,7 @@ trait ResolveExprOne_mariadb extends ResolveExprOne with LambdasOne_mariadb { se
         replaceCast(
           (row: RS, paramIndex: Int) => {
             val json    = row.getString(paramIndex)
-            val doubles = json.substring(1, json.length - 1).split(",").map(_.toDouble)
+            val doubles = json.substring(1, json.length - 1).split(",").map(_.toDouble).toSeq
             stdDevOf(doubles: _*)
           }
         )

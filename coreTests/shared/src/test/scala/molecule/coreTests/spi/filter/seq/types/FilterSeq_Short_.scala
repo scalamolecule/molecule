@@ -64,6 +64,9 @@ trait FilterSeq_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.shortSeq(List.empty[Short]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shortSeq(List.empty[List[Short]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shortSeq(List(List.empty[Short])).query.get.map(_ ==> List())
+
+          // Applying nothing matches nothing
+          _ <- Ns.i.a1.shortSeq().query.get.map(_ ==> List())
         } yield ()
       }
 

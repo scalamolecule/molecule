@@ -7,165 +7,61 @@ import molecule.base.error.ExecutionError
 import molecule.core.util.Executor._
 import molecule.coreTests.util.Array2List
 import molecule.datalog.datomic.async._
-import molecule.datalog.datomic.setup.TestSuite_datomic
+import molecule.datalog.datomic.setup.{TestSuiteArray_datomic, TestSuite_datomic}
 import utest._
 import scala.language.implicitConversions
 
-object AdhocJVM_datomic extends TestSuite_datomic with Array2List {
+object AdhocJVM_datomic extends TestSuiteArray_datomic with Array2List {
+  //object AdhocJVM_datomic extends TestSuite_datomic {
 
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
-      val a = (1, List(int1, int2))
-      val b = (2, List(int2, int3, int3))
-
-      val a1 = (1, Set(int1, int2))
-      val b1 = (2, Set(int2, int3, int4))
+      val a = (1, Some(Array(byte1, byte2)))
+      val b = (2, Some(Array(byte2, byte3, byte3)))
+      val c = (3, None)
       for {
 
-        _ <- Ns.i.ints.insert(List(
-          (1, Set(int1, int2)),
-          (2, Set(int2, int3, int4))
-        )).transact
+        id <- Ns.intSeq(List(int1, int2, int2)).save.transact.map(_.id)
 
-//        _ <- Ns.i.a1.ints.has(int1, 2).query.i.get.map(_ ==> List(a1))
-
-
-        _ <- Ns.i.intSeq.insert(List(a, b)).transact
 
         _ = {
+          println("----------- 2")
           datomic.Peer.q(
-            """[:find  ?b
-              |        (distinct ?c)
-              | :in    $ %
-              | :where [?a :Ns/i ?b]
-              |        [?a :Ns/ints ?c]
-              |        (rule?c ?a)]
+            """[:find  ?b3
+              | :where [?a :Ns/intSeq _]
+              |        [(datomic.api/q
+              |          "[:find (distinct ?b-pair)
+              |            :in $ ?a
+              |            :where [?a :Ns/intSeq ?b]
+              |                   [?b :Ns.intSeq/i_ ?b-i]
+              |                   [?b :Ns.intSeq/v_ ?b-v]
+              |                   [(vector ?b-i ?b-v) ?b-pair]]" $ ?a) [[?b1]]]
+              |        [(sort-by first ?b1) ?b2]
+              |        [(map second ?b2) ?b3]]
               |""".stripMargin, conn.db,
-            """[
-              |  [(rule?c ?a)
-              |    [?a :Ns/ints 1]]
-              |  [(rule?c ?a)
-              |    [?a :Ns/ints 2]]
-              |]
-              |""".stripMargin
-
+            //            Seq(true, false).asJava
           ).forEach(r => println(r))
-          println("-----------")
 
-
-          datomic.Peer.q(
-            """[:find  ?b
-              |        (distinct ?c)
-              | :in    $ %
-              | :where [?a :Ns/i ?b]
-              |        [?a :Ns/ints ?c]
-              |        (rule?c ?a)]
-              |""".stripMargin, conn.db,
-            """[
-              |  [(rule?c ?a)
-              |    [?a :Ns/ints 1]]
-              |]
-              |""".stripMargin
-
-          ).forEach(r => println(r))
-          println("-----------")
-
+          //          println("----------- 3")
           //          datomic.Peer.q(
-          //            """[:find  ?b ?c3
-          //              | :in    $ ?c-blacklist
-          //              | :where [?a :Ns/i ?b]
-          //              |        [?a :Ns/intSeq ?c]
-          //              |   ;;     [(into #{} ?c-blacklist) ?c-blackset]
-          //              |        [(contains? ?c-blacklist ?a) ?c-blacklisted]
-          //              |        [(not ?c-blacklisted)]
-          //              |        [(datomic.api/q
-          //              |          "[:find (distinct ?c-pair)
+          //            """[:find  ?b3
+          //              | :where [(datomic.api/q
+          //              |          "[:find (distinct ?b-pair)
           //              |            :in $ ?a
-          //              |            :where
-          //              |                   [?a :Ns/intSeq ?c]
-          //              |                   [?c :Ns.intSeq/i_ ?c-i]
-          //              |                   [?c :Ns.intSeq/v_ ?c-v]
-          //              |                   [(vector ?c-i ?c-v) ?c-pair]]" $ ?a) [[?c1]]]
-          //              |        [(sort-by first ?c1) ?c2]
-          //              |        [(map second ?c2) ?c3]
-          //              |        ]
-          //              |""".stripMargin, conn.db, Set(17592186045418L).asJava).forEach(r => println("-- B -- " + r))
+          //              |            :where [?a :Ns/intSeq ?b]
+          //              |                   [?b :Ns.intSeq/i_ ?b-i]
+          //              |                   [?b :Ns.intSeq/v_ ?b-v]
+          //              |                   [(vector ?b-i ?b-v) ?b-pair]]" $ ?a) [[?b1]]]
+          //              |        [(sort-by first ?b1) ?b2]
+          //              |        [(map second ?b2) ?b3]]
+          //              |""".stripMargin, conn.db,
+          //            //            Seq(false).asJava
+          //          ).forEach(r => println(r))
         }
 
-
-
-
-
-        _ <- Ns.i.a1.intSeq.has(int0).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.intSeq.has(int1).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.intSeq.has(int2).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.intSeq.has(int3).query.get.map(_ ==> List(b))
-        // Same as
-        _ <- Ns.i.a1.intSeq.has(List(int0)).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.intSeq.has(List(int1)).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.intSeq.has(List(int2)).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.intSeq.has(List(int3)).query.get.map(_ ==> List(b))
-
-
-        // OR semantics when multiple values
-
-        // "Has this OR that"
-        _ <- Ns.i.a1.intSeq.has(int1, int2).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.intSeq.has(int1, int3).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.intSeq.has(int2, int3).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.intSeq.has(int1, int2, int3).query.get.map(_ ==> List(a, b))
-        // Same as
-        _ <- Ns.i.a1.intSeq.has(List(int1, int2)).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.intSeq.has(List(int1, int3)).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.intSeq.has(List(int2, int3)).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.intSeq.has(List(int1, int2, int3)).query.get.map(_ ==> List(a, b))
-
-
-        // Empty Seq/Seqs match nothing
-        _ <- Ns.i.a1.intSeq.has(List.empty[Int]).query.get.map(_ ==> List())
-
-        // Exact Array matches
-
-        // AND semantics
-        // "Is exactly this AND that"
-        //        _ <- Ns.i.a1.intList(List(int1)).query.i.get.map(_ ==> List())
-        //
-        //
-        //
-        //
-        //
-        //
-        //        _ <- Ns.i.a1.intSeq.query.i.get.map(_ ==> List(a)) // include exact match
-        //        _ <- Ns.i.a1.intList(List(int1, int2)).query.i.get.map(_ ==> List(a)) // include exact match
-        //        _ <- Ns.i.a1.intList(List(int1, int2, int3)).query.get.map(_ ==> List())
-        //        // Same as
-        //        _ <- Ns.i.a1.intList(Seq(List(int1))).query.get.map(_ ==> List())
-        //        _ <- Ns.i.a1.intList(Seq(List(int1, int2))).query.get.map(_ ==> List(a))
-        //        _ <- Ns.i.a1.intList(Seq(List(int1, int2, int3))).query.get.map(_ ==> List())
-        //
-        //
-        //        // AND/OR semantics with multiple Arrays
-        //
-        //        // "(exactly this AND that) OR (exactly this AND that)"
-        //        _ <- Ns.i.a1.intList(List(int1), List(int2, int3)).query.get.map(_ ==> List())
-        //        _ <- Ns.i.a1.intList(List(int1, int2), List(int2, int3)).query.get.map(_ ==> List(a))
-        //        _ <- Ns.i.a1.intList(List(int1, int2), List(int2, int3, int4)).query.get.map(_ ==> List(a, b))
-        //        // Same as
-        //        _ <- Ns.i.a1.intList(Seq(List(int1), List(int2, int3))).query.get.map(_ ==> List())
-        //        _ <- Ns.i.a1.intList(Seq(List(int1, int2), List(int2, int3))).query.get.map(_ ==> List(a))
-        //        _ <- Ns.i.a1.intList(Seq(List(int1, int2), List(int2, int3, int4))).query.get.map(_ ==> List(a, b))
-        //
-        //
-        //        // Empty Seq/Arrays match nothing
-        //        _ <- Ns.i.a1.intList(List(int1, int2), Seq.empty[Int]).query.get.map(_ ==> List(a))
-        //        _ <- Ns.i.a1.intList(Seq.empty[Int], List(int1, int2)).query.get.map(_ ==> List(a))
-        //        _ <- Ns.i.a1.intList(Seq.empty[Int], Seq.empty[Int]).query.get.map(_ ==> List())
-        //        _ <- Ns.i.a1.intList(Seq.empty[Int]).query.get.map(_ ==> List())
-        //        _ <- Ns.i.a1.intList(Seq.empty[Array[Int]]).query.get.map(_ ==> List())
-        //        _ <- Ns.i.a1.intList(Seq(Seq.empty[Int])).query.get.map(_ ==> List())
-        //
+        _ <- Ns.intSeq.query.i.get.map(_.head ==> List(int1, int2, int2))
 
       } yield ()
     }
@@ -173,27 +69,74 @@ object AdhocJVM_datomic extends TestSuite_datomic with Array2List {
 
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
+
       for {
 
+        _ <- A.i.B.i_?.iSeq.insert(
+          (1, Some(1), List(1, 2, 2)),
+          (2, Some(1), List(2)),
+          (2, Some(1), List(7)),
+          (3, Some(1), List(3)),
+          (4, Some(1), List()), // relationship created since 1 is saved in B namespace
+          (5, None, List()) //     relationship not created
+        ).transact
 
-        _ <- A.i.Bb.*(B.ii).insert(List((2, List(Set(3, 4))))).transact
-        _ <- A.i.Bb.*(B.ii).query.get.map(_ ==> List((2, List(Set(3, 4)))))
+        _ = {
+          println("----------- 1")
+          val res = datomic.Peer.q(
+            """[:find  ?a
+              | :in    $ [?c4 ...]
+              | :where [?a :A/i ?b]
+              |        [?a :A/iSeq ?c]
+              |        [(datomic.api/q
+              |          "[:find (distinct ?c-pair)
+              |            :in $ ?a
+              |            :where [?a :A/iSeq ?c]
+              |                   [?c :A.iSeq/i_ ?c-i]
+              |                   [?c :A.iSeq/v_ ?c-v]
+              |                   [(vector ?c-i ?c-v) ?c-pair]]" $ ?a) [[?c1]]]
+              |        [(sort-by first ?c1) ?c2]
+              |        [(map second ?c2) ?c3]
+              |        [(= ?c3 ?c4)]]
+              |""".stripMargin, conn.db,
+            //            Seq(Seq(1, 2, 2).asJava).asJava
+            Seq(1, 2, 2).asJava
+          )
+          res.forEach(r => println(r))
+
+          println("----------- 2")
+          datomic.Peer.q(
+            """[:find  ?b ?c3
+              | :in    $ ?c-blacklist
+              | :where [?a :A/i ?b]
+              |        [?a :A/iSeq ?c]
+              |        [(contains? ?c-blacklist ?a) ?c-blacklisted]
+              |        [(not ?c-blacklisted)]
+              |        [(datomic.api/q
+              |          "[:find (distinct ?c-pair)
+              |            :in $ ?a
+              |            :where [?a :A/iSeq ?c]
+              |                   [?c :A.iSeq/i_ ?c-i]
+              |                   [?c :A.iSeq/v_ ?c-v]
+              |                   [(vector ?c-i ?c-v) ?c-pair]]" $ ?a) [[?c1]]]
+              |        [(sort-by first ?c1) ?c2]
+              |        [(map second ?c2) ?c3]]
+              |""".stripMargin, conn.db,
+            res
+            //            Seq(false).asJava
+          ).forEach(r => println(r))
+        }
 
 
-
-
-
-        //        _ <- A.i.Bb.*(B.i.ii).insert((1, List((2, Set.empty[Int])))).transact
-        //
-        //        // A.i was inserted
-        //        _ <- A.i.query.get.map(_ ==> List(1))
-        //
-        //        _ <- A.i.Bb.*?(B.i.ii).query.get.map(_ ==> List((1, Nil)))
-        //        _ <- A.i.Bb.*(B.i.ii).query.get.map(_ ==> Nil)
-        //
-        //        // No optional B.ii value
-        //        _ <- A.i.Bb.i.ii_?.query.get.map(_ ==> List((1, 2, None)))
-        //        _ <- A.i.Bb.i.ii.query.get.map(_ ==> Nil)
+        // All
+        _ <- A.i.a1.B.iSeq_?.query.get.map(_ ==> List(
+          (1, Some(List(1, 2, 2))),
+          (2, Some(List(2))),
+          (2, Some(List(7))),
+          (3, Some(List(3))),
+          (4, None), // retrieved since there's a relationship to B (but no iSeq value)
+          // (5, None) // not retrieved since there's no relationship to B
+        ))
 
 
       } yield ()

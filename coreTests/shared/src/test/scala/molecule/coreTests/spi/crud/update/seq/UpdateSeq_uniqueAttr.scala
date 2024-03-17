@@ -11,7 +11,7 @@ import molecule.coreTests.util.Array2List
 import utest._
 
 
-trait UpdateSeq_uniqueAttr extends CoreTestSuite with Array2List with ApiAsync { spi: SpiAsync =>
+trait UpdateSeq_uniqueAttr extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
   override lazy val tests = Tests {

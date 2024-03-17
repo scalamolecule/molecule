@@ -159,35 +159,46 @@ trait Insert_datomic
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
-//    set2array: Set[Any] => Array[AnyRef],
-//    exts: List[String] = Nil,
-//    value2json: (StringBuffer, T) => StringBuffer
+    //    set2array: Set[Any] => Array[AnyRef],
+    //    exts: List[String] = Nil,
+    //    value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
     val a   = kw(ns, attr)
     val a_i = kw(s"$ns.$attr", "i_")
     val a_v = kw(s"$ns.$attr", "v_")
     backRefs = backRefs + (ns -> e)
     (tpl: Product) =>
-
-
-//          println(tpl.productElement(tplIndex))
-//          println(tpl.productElement(tplIndex).getClass)
-
       tpl.productElement(tplIndex).asInstanceOf[Seq[_]] match {
-//        case array  => ()
-        case array if array.isEmpty => ()
-        case array                  =>
+        case seq if seq.nonEmpty =>
           unusedRefIds -= e
           usedRefIds += e
-          var i      = 0
-          val length = array.length
-          while (i < length) {
+          var i = 0
+          seq.foreach { value =>
             val ref = newId
             appendStmt(add, e, a, ref)
             appendStmt(add, ref, a_i, i.asInstanceOf[AnyRef])
-            appendStmt(add, ref, a_v, transformValue(array(i).asInstanceOf[T]).asInstanceOf[AnyRef])
+            appendStmt(add, ref, a_v, transformValue(value.asInstanceOf[T]).asInstanceOf[AnyRef])
             i += 1
           }
+
+        case _ => () // no statement to insert
+      }
+  }
+
+
+  override protected def addByteArray(
+    ns: String,
+    attr: String,
+    tplIndex: Int,
+    optArray: Option[Array[Byte]],
+  ): Product => Unit = {
+    val a = kw(ns, attr)
+    backRefs = backRefs + (ns -> e)
+    (tpl: Product) =>
+      tpl.productElement(tplIndex) match {
+        case array: Array[_] if array.nonEmpty => appendStmt(add, e, a, array.asInstanceOf[AnyRef])
+        case Some(array: Array[_])             => appendStmt(add, e, a, array.asInstanceOf[AnyRef])
+        case _                                 => () // no statement to insert
       }
   }
 
@@ -197,9 +208,9 @@ trait Insert_datomic
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
-//    set2array: Set[Any] => Array[AnyRef],
-//    exts: List[String] = Nil,
-//    value2json: (StringBuffer, T) => StringBuffer
+    //    set2array: Set[Any] => Array[AnyRef],
+    //    exts: List[String] = Nil,
+    //    value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
     val a   = kw(ns, attr)
     val a_i = kw(s"$ns.$attr", "i_")
@@ -207,23 +218,19 @@ trait Insert_datomic
     backRefs = backRefs + (ns -> e)
     (tpl: Product) =>
       tpl.productElement(tplIndex) match {
-        case Some(array: Seq[_]) =>
+        case Some(seq: Seq[_]) if seq.nonEmpty =>
           unusedRefIds -= e
           usedRefIds += e
-          var i      = 0
-          val length = array.length
-          while (i < length) {
+          var i = 0
+          seq.foreach { value =>
             val ref = newId
             appendStmt(add, e, a, ref)
             appendStmt(add, ref, a_i, i.asInstanceOf[AnyRef])
-            appendStmt(add, ref, a_v, transformValue(array(i).asInstanceOf[T]).asInstanceOf[AnyRef])
+            appendStmt(add, ref, a_v, transformValue(value.asInstanceOf[T]).asInstanceOf[AnyRef])
             i += 1
           }
-        case None                  =>
-          if (!usedRefIds.contains(e)) {
-            unusedRefIds += e
-          }
-          () // no statement to insert
+
+        case _ => () // no statement to insert
       }
   }
 

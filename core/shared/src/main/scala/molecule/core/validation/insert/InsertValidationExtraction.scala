@@ -398,7 +398,7 @@ trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { sel
         val validate = validator(tpl)
         tpl.productElement(tplIndex) match {
           case Some(array: Array[_]) =>
-            val errors = array.flatMap(value => validate(value.asInstanceOf[T]))
+            val errors = array.flatMap(value => validate(value.asInstanceOf[T])).toSeq
             if (errors.isEmpty) Nil else
               Seq(InsertError(tplIndex, ns + "." + attr, errors, Nil))
           case None                  => Nil

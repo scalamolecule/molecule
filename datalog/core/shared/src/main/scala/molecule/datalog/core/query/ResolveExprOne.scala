@@ -260,9 +260,9 @@ trait ResolveExprOne[Tpl]
   // eq ------------------------------------------------------------------------
 
   private def equal[T: ClassTag](e: Var, a: Att, v: Var, argValues: Seq[T], fromScala: Any => Any): Unit = {
+    args += argValues.map(fromScala).toArray
     in += s"[$v ...]"
     where += s"[$e $a $v]" -> wClause
-    args += argValues.map(fromScala).toArray
   }
 
   private def optEqual[T: ClassTag](

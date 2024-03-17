@@ -64,6 +64,9 @@ trait FilterSet_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.longs(Set.empty[Long]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.longs(Seq.empty[Set[Long]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.longs(Seq(Set.empty[Long])).query.get.map(_ ==> List())
+
+          // Applying nothing matches nothing
+          _ <- Ns.i.a1.longs().query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -141,44 +144,8 @@ trait FilterSet_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.longs.has(Seq(long2, long3)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.longs.has(Seq(long1, long2, long3)).query.get.map(_ ==> List(a, b))
 
-
-//          // AND semantics when multiple values in a _Set_
-//
-//          // "Has this AND that"
-//          _ <- Ns.i.a1.longs.has(Set(long1)).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.longs.has(Set(long1, long2)).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.longs.has(Set(long1, long2, long3)).query.get.map(_ ==> List())
-//          _ <- Ns.i.a1.longs.has(Set(long2)).query.get.map(_ ==> List(a, b))
-//          _ <- Ns.i.a1.longs.has(Set(long2, long3)).query.get.map(_ ==> List(b))
-//          _ <- Ns.i.a1.longs.has(Set(long2, long3, long4)).query.get.map(_ ==> List(b))
-//          // Same as
-//          _ <- Ns.i.a1.longs.has(Seq(Set(long1))).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.longs.has(Seq(Set(long1, long2))).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.longs.has(Seq(Set(long1, long2, long3))).query.get.map(_ ==> List())
-//          _ <- Ns.i.a1.longs.has(Seq(Set(long2))).query.get.map(_ ==> List(a, b))
-//          _ <- Ns.i.a1.longs.has(Seq(Set(long2, long3))).query.get.map(_ ==> List(b))
-//          _ <- Ns.i.a1.longs.has(Seq(Set(long2, long3, long4))).query.get.map(_ ==> List(b))
-//
-//
-//          // AND/OR semantics with multiple Sets
-//
-//          // "(has this AND that) OR (has this AND that)"
-//          _ <- Ns.i.a1.longs.has(Set(long1, long2), Set(long0)).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.longs.has(Set(long1, long2), Set(long0, long3)).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.longs.has(Set(long1, long2), Set(long2, long3)).query.get.map(_ ==> List(a, b))
-//          _ <- Ns.i.a1.longs.has(Set(long1, long2), Set(long2, long3, long4)).query.get.map(_ ==> List(a, b))
-//          // Same as
-//          _ <- Ns.i.a1.longs.has(Seq(Set(long1, long2), Set(long0))).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.longs.has(Seq(Set(long1, long2), Set(long0, long3))).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.longs.has(Seq(Set(long1, long2), Set(long2, long3))).query.get.map(_ ==> List(a, b))
-//          _ <- Ns.i.a1.longs.has(Seq(Set(long1, long2), Set(long2, long3, long4))).query.get.map(_ ==> List(a, b))
-
-
           // Empty Seq/Sets match nothing
-//          _ <- Ns.i.a1.longs.has(Set(long1, long2), Set.empty[Long]).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.longs.has(Seq.empty[Long]).query.get.map(_ ==> List())
-//          _ <- Ns.i.a1.longs.has(Set.empty[Long]).query.get.map(_ ==> List())
-//          _ <- Ns.i.a1.longs.has(Seq.empty[Set[Long]]).query.get.map(_ ==> List())
         } yield ()
       }
 

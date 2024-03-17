@@ -64,6 +64,9 @@ trait FilterSet_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.bytes(Set.empty[Byte]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bytes(Seq.empty[Set[Byte]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bytes(Seq(Set.empty[Byte])).query.get.map(_ ==> List())
+
+          // Applying nothing matches nothing
+          _ <- Ns.i.a1.bytes().query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -141,44 +144,8 @@ trait FilterSet_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.bytes.has(Seq(byte2, byte3)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.bytes.has(Seq(byte1, byte2, byte3)).query.get.map(_ ==> List(a, b))
 
-
-//          // AND semantics when multiple values in a _Set_
-//
-//          // "Has this AND that"
-//          _ <- Ns.i.a1.bytes.has(Set(byte1)).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.bytes.has(Set(byte1, byte2)).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.bytes.has(Set(byte1, byte2, byte3)).query.get.map(_ ==> List())
-//          _ <- Ns.i.a1.bytes.has(Set(byte2)).query.get.map(_ ==> List(a, b))
-//          _ <- Ns.i.a1.bytes.has(Set(byte2, byte3)).query.get.map(_ ==> List(b))
-//          _ <- Ns.i.a1.bytes.has(Set(byte2, byte3, byte4)).query.get.map(_ ==> List(b))
-//          // Same as
-//          _ <- Ns.i.a1.bytes.has(Seq(Set(byte1))).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.bytes.has(Seq(Set(byte1, byte2))).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.bytes.has(Seq(Set(byte1, byte2, byte3))).query.get.map(_ ==> List())
-//          _ <- Ns.i.a1.bytes.has(Seq(Set(byte2))).query.get.map(_ ==> List(a, b))
-//          _ <- Ns.i.a1.bytes.has(Seq(Set(byte2, byte3))).query.get.map(_ ==> List(b))
-//          _ <- Ns.i.a1.bytes.has(Seq(Set(byte2, byte3, byte4))).query.get.map(_ ==> List(b))
-//
-//
-//          // AND/OR semantics with multiple Sets
-//
-//          // "(has this AND that) OR (has this AND that)"
-//          _ <- Ns.i.a1.bytes.has(Set(byte1, byte2), Set(byte0)).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.bytes.has(Set(byte1, byte2), Set(byte0, byte3)).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.bytes.has(Set(byte1, byte2), Set(byte2, byte3)).query.get.map(_ ==> List(a, b))
-//          _ <- Ns.i.a1.bytes.has(Set(byte1, byte2), Set(byte2, byte3, byte4)).query.get.map(_ ==> List(a, b))
-//          // Same as
-//          _ <- Ns.i.a1.bytes.has(Seq(Set(byte1, byte2), Set(byte0))).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.bytes.has(Seq(Set(byte1, byte2), Set(byte0, byte3))).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.bytes.has(Seq(Set(byte1, byte2), Set(byte2, byte3))).query.get.map(_ ==> List(a, b))
-//          _ <- Ns.i.a1.bytes.has(Seq(Set(byte1, byte2), Set(byte2, byte3, byte4))).query.get.map(_ ==> List(a, b))
-
-
           // Empty Seq/Sets match nothing
-//          _ <- Ns.i.a1.bytes.has(Set(byte1, byte2), Set.empty[Byte]).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.bytes.has(Seq.empty[Byte]).query.get.map(_ ==> List())
-//          _ <- Ns.i.a1.bytes.has(Set.empty[Byte]).query.get.map(_ ==> List())
-//          _ <- Ns.i.a1.bytes.has(Seq.empty[Set[Byte]]).query.get.map(_ ==> List())
         } yield ()
       }
 

@@ -64,6 +64,9 @@ trait FilterSeq_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.stringSeq(List.empty[String]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.stringSeq(List.empty[List[String]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.stringSeq(List(List.empty[String])).query.get.map(_ ==> List())
+
+          // Applying nothing matches nothing
+          _ <- Ns.i.a1.stringSeq().query.get.map(_ ==> List())
         } yield ()
       }
 

@@ -65,6 +65,9 @@ trait FilterSeq_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.uuidSeq(List.empty[UUID]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uuidSeq(List.empty[List[UUID]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uuidSeq(List(List.empty[UUID])).query.get.map(_ ==> List())
+
+          // Applying nothing matches nothing
+          _ <- Ns.i.a1.uuidSeq().query.get.map(_ ==> List())
         } yield ()
       }
 

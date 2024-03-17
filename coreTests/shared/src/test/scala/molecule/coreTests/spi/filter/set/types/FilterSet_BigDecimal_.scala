@@ -64,6 +64,9 @@ trait FilterSet_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           _ <- Ns.i.a1.bigDecimals(Set.empty[BigDecimal]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigDecimals(Seq.empty[Set[BigDecimal]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigDecimals(Seq(Set.empty[BigDecimal])).query.get.map(_ ==> List())
+
+          // Applying nothing matches nothing
+          _ <- Ns.i.a1.bigDecimals().query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -141,44 +144,8 @@ trait FilterSet_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           _ <- Ns.i.a1.bigDecimals.has(Seq(bigDecimal2, bigDecimal3)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.bigDecimals.has(Seq(bigDecimal1, bigDecimal2, bigDecimal3)).query.get.map(_ ==> List(a, b))
 
-
-//          // AND semantics when multiple values in a _Set_
-//
-//          // "Has this AND that"
-//          _ <- Ns.i.a1.bigDecimals.has(Set(bigDecimal1)).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.bigDecimals.has(Set(bigDecimal1, bigDecimal2)).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.bigDecimals.has(Set(bigDecimal1, bigDecimal2, bigDecimal3)).query.get.map(_ ==> List())
-//          _ <- Ns.i.a1.bigDecimals.has(Set(bigDecimal2)).query.get.map(_ ==> List(a, b))
-//          _ <- Ns.i.a1.bigDecimals.has(Set(bigDecimal2, bigDecimal3)).query.get.map(_ ==> List(b))
-//          _ <- Ns.i.a1.bigDecimals.has(Set(bigDecimal2, bigDecimal3, bigDecimal4)).query.get.map(_ ==> List(b))
-//          // Same as
-//          _ <- Ns.i.a1.bigDecimals.has(Seq(Set(bigDecimal1))).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.bigDecimals.has(Seq(Set(bigDecimal1, bigDecimal2))).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.bigDecimals.has(Seq(Set(bigDecimal1, bigDecimal2, bigDecimal3))).query.get.map(_ ==> List())
-//          _ <- Ns.i.a1.bigDecimals.has(Seq(Set(bigDecimal2))).query.get.map(_ ==> List(a, b))
-//          _ <- Ns.i.a1.bigDecimals.has(Seq(Set(bigDecimal2, bigDecimal3))).query.get.map(_ ==> List(b))
-//          _ <- Ns.i.a1.bigDecimals.has(Seq(Set(bigDecimal2, bigDecimal3, bigDecimal4))).query.get.map(_ ==> List(b))
-//
-//
-//          // AND/OR semantics with multiple Sets
-//
-//          // "(has this AND that) OR (has this AND that)"
-//          _ <- Ns.i.a1.bigDecimals.has(Set(bigDecimal1, bigDecimal2), Set(bigDecimal0)).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.bigDecimals.has(Set(bigDecimal1, bigDecimal2), Set(bigDecimal0, bigDecimal3)).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.bigDecimals.has(Set(bigDecimal1, bigDecimal2), Set(bigDecimal2, bigDecimal3)).query.get.map(_ ==> List(a, b))
-//          _ <- Ns.i.a1.bigDecimals.has(Set(bigDecimal1, bigDecimal2), Set(bigDecimal2, bigDecimal3, bigDecimal4)).query.get.map(_ ==> List(a, b))
-//          // Same as
-//          _ <- Ns.i.a1.bigDecimals.has(Seq(Set(bigDecimal1, bigDecimal2), Set(bigDecimal0))).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.bigDecimals.has(Seq(Set(bigDecimal1, bigDecimal2), Set(bigDecimal0, bigDecimal3))).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.bigDecimals.has(Seq(Set(bigDecimal1, bigDecimal2), Set(bigDecimal2, bigDecimal3))).query.get.map(_ ==> List(a, b))
-//          _ <- Ns.i.a1.bigDecimals.has(Seq(Set(bigDecimal1, bigDecimal2), Set(bigDecimal2, bigDecimal3, bigDecimal4))).query.get.map(_ ==> List(a, b))
-
-
           // Empty Seq/Sets match nothing
-//          _ <- Ns.i.a1.bigDecimals.has(Set(bigDecimal1, bigDecimal2), Set.empty[BigDecimal]).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.bigDecimals.has(Seq.empty[BigDecimal]).query.get.map(_ ==> List())
-//          _ <- Ns.i.a1.bigDecimals.has(Set.empty[BigDecimal]).query.get.map(_ ==> List())
-//          _ <- Ns.i.a1.bigDecimals.has(Seq.empty[Set[BigDecimal]]).query.get.map(_ ==> List())
         } yield ()
       }
 

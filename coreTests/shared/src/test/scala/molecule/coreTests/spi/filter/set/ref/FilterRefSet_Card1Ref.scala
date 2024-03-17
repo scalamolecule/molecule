@@ -142,7 +142,8 @@ trait FilterRefSet_Card1Ref extends CoreTestSuite with ApiAsync { spi: SpiAsync 
         _ <- A.i.a1.B.ii_.hasNo(3).query.get.map(_ ==> List(1, 2))
 
         // no value - match non-asserted attribute (null)
-        _ <- A.i.a1.B.ii_().query.get.map(_ ==> List(4))
+        // Nothing returned since there's no relationship to B
+        _ <- A.i.a1.B.ii_().query.get.map(_ ==> Nil)
       } yield ()
     }
 
@@ -154,12 +155,13 @@ trait FilterRefSet_Card1Ref extends CoreTestSuite with ApiAsync { spi: SpiAsync 
         (3, Some(Set(3))),
       )
       for {
-        _ <- A.i.B.ii.insert(
-          (1, Set(1, 2)),
-          (2, Set(2)),
-          (2, Set(7)),
-          (3, Set(3)),
-          (4, Set())
+        _ <- A.i.B.i_?.ii.insert(
+          (1, Some(1), Set(1, 2)),
+          (2, Some(1), Set(2)),
+          (2, Some(1), Set(7)),
+          (3, Some(1), Set(3)),
+          (4, Some(1), Set()), // relationship created since 1 is saved in B namespace
+          (5, None, Set()) //     relationship not created
         ).transact
 
         // All
@@ -167,7 +169,8 @@ trait FilterRefSet_Card1Ref extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           (1, Some(Set(1, 2))),
           (2, Some(Set(2, 7))),
           (3, Some(Set(3))),
-          (4, None)
+          (4, None), // retrieved since there's a relationship to B (but no ii value)
+          // (5, None) // not retrieved since there's no relationship to B
         ))
 
 

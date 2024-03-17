@@ -65,6 +65,9 @@ trait FilterSeq_URI_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.uriSeq(List.empty[URI]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uriSeq(List.empty[List[URI]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uriSeq(List(List.empty[URI])).query.get.map(_ ==> List())
+
+          // Applying nothing matches nothing
+          _ <- Ns.i.a1.uriSeq().query.get.map(_ ==> List())
         } yield ()
       }
 

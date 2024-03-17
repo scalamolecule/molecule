@@ -213,49 +213,14 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
   }
 
   private def optAttr[T](e: Var, a: Att, v: Var, resOpt: ResSetOpt[T]): Unit = {
-    if (refConfirmed) {
-      val (e1, v1, v2, v3) = (e + 1, v + 1, v + 2, v + 3)
-      find += s"(distinct $v3)"
-      where +=
-        s"""[(datomic.api/q
-           |          "[:find (pull $e1 [[$a :limit nil]])
-           |            :in $$ $e1]" $$ $e) [[$v1]]]""".stripMargin -> wClause
-      where += s"[(if (nil? $v1) {$a []} $v1) $v2]" -> wClause
-      where += s"[($a $v2) $v3]" -> wClause
-
-    } else {
-      val List(e0, card, refAttr, refId) = varPath.takeRight(4)
-      val refDatom                       = s"[$e0 $refAttr $refId]"
-      if (where.last == refDatom -> wClause) {
-        // cancel previous ref Datom since we will pull it instead
-        where.remove(where.size - 1)
-        varPath = varPath.dropRight(3)
-      }
-      val e                        = varPath.last
-      val (e1, v1, v2, v3, v4, v5) = (e0 + 1, v + 1, v + 2, v + 3, v + 4, v + 5)
-
-      if (card == "one") {
-        find += s"(distinct $v4)"
-        where +=
-          s"""[(datomic.api/q
-             |          "[:find (pull $e1 [{$refAttr [$a]}] :limit nil)
-             |            :in $$ $e1]" $$ $e) [[$v1]]]""".stripMargin -> wClause
-        where += s"[(if (nil? $v1) {$refAttr {$a []}} $v1) $v2]" -> wClause
-        where += s"[($refAttr $v2) $v3]" -> wClause
-        where += s"[($a $v3) $v4]" -> wClause
-
-      } else {
-        find += s"(distinct $v5)"
-        where +=
-          s"""[(datomic.api/q
-             |          "[:find (pull $e1 [{$refAttr [$a]}] :limit nil)
-             |            :in $$ $e1]" $$ $e) [[$v1]]]""".stripMargin -> wClause
-        where += s"[(if (nil? $v1) {$refAttr [{$a []}]} $v1) $v2]" -> wClause
-        where += s"[($refAttr $v2) $v3]" -> wClause
-        where += s"[(first $v3) $v4]" -> wClause
-        where += s"[($a $v4) $v5]" -> wClause
-      }
-    }
+    val (e1, v1, v2, v3) = (e + 1, v + 1, v + 2, v + 3)
+    find += s"(distinct $v3)"
+    where +=
+      s"""[(datomic.api/q
+         |          "[:find (pull $e1 [[$a :limit nil]])
+         |            :in $$ $e1]" $$ $e) [[$v1]]]""".stripMargin -> wClause
+    where += s"[(if (nil? $v1) {$a []} $v1) $v2]" -> wClause
+    where += s"[($a $v2) $v3]" -> wClause
     replaceCast(resOpt.optAttr2s)
   }
 
@@ -295,6 +260,12 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
       find += s"(distinct $v)"
       equal(e, a, v, sets, fromScala)
     }
+  }
+
+  private def none[T](e: Var, a: Att, v: Var, resOpt: ResSetOpt[T]): Unit = {
+    find += s"(pull $e-$v [[$a :limit nil]])"
+    where += s"[(identity $e) $e-$v]" -> wGround
+    where += s"(not [$e $a])" -> wNeqOne
   }
 
 
@@ -411,18 +382,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
   // no value -----------------------------------------------------------------
 
   private def noValue(e: Var, a: Att): Unit = {
-    if (refConfirmed) {
-      where += s"(not [$e $a])" -> wNeqOne
-    } else {
-      val List(e0, _, refAttr, refId) = varPath.takeRight(4)
-      val refDatom                    = s"[$e0 $refAttr $refId]"
-      if (where.last == refDatom -> wClause) {
-        // cancel previous ref Datom since we will pull it instead
-        where.remove(where.size - 1)
-        varPath = varPath.dropRight(3)
-      }
-      where += s"(not [$e0 $refAttr])" -> wNeqOne
-    }
+    where += s"(not [$e $a])" -> wNeqOne
   }
 
 
@@ -646,27 +606,6 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
 
 
   // helpers -------------------------------------------------------------------
-
-  private def none[T](e: Var, a: Att, v: Var, resOpt: ResSetOpt[T]): Unit = {
-    if (refConfirmed) {
-      find += s"(pull $e-$v [[$a :limit nil]])"
-      where += s"[(identity $e) $e-$v]" -> wGround
-      where += s"(not [$e $a])" -> wNeqOne
-
-    } else {
-      val List(e0, _, refAttr, refId) = varPath.takeRight(4)
-      val refDatom                    = s"[$e0 $refAttr $refId]"
-      if (where.last == refDatom -> wClause) {
-        // cancel previous ref Datom since we will pull it instead
-        where.remove(where.size - 1)
-        varPath = varPath.dropRight(3)
-      }
-      find += s"$v"
-      where += s"(not [$e0 $refAttr])" -> wNeqOne
-      where += s"[(ground #{[]}) $v]" -> wNeqOne
-      replaceCast(resOpt.optAttr2s)
-    }
-  }
 
   private def mkRules[T](
     e: Var, a: Att, v: Var, sets: Seq[Set[T]], tpe: String, toDatalog: T => String

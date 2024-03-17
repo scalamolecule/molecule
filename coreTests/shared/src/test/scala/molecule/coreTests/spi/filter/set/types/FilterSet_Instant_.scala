@@ -65,6 +65,9 @@ trait FilterSet_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.instants(Set.empty[Instant]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.instants(Seq.empty[Set[Instant]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.instants(Seq(Set.empty[Instant])).query.get.map(_ ==> List())
+
+          // Applying nothing matches nothing
+          _ <- Ns.i.a1.instants().query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -142,44 +145,8 @@ trait FilterSet_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.instants.has(Seq(instant2, instant3)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.instants.has(Seq(instant1, instant2, instant3)).query.get.map(_ ==> List(a, b))
 
-
-//          // AND semantics when multiple values in a _Set_
-//
-//          // "Has this AND that"
-//          _ <- Ns.i.a1.instants.has(Set(instant1)).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.instants.has(Set(instant1, instant2)).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.instants.has(Set(instant1, instant2, instant3)).query.get.map(_ ==> List())
-//          _ <- Ns.i.a1.instants.has(Set(instant2)).query.get.map(_ ==> List(a, b))
-//          _ <- Ns.i.a1.instants.has(Set(instant2, instant3)).query.get.map(_ ==> List(b))
-//          _ <- Ns.i.a1.instants.has(Set(instant2, instant3, instant4)).query.get.map(_ ==> List(b))
-//          // Same as
-//          _ <- Ns.i.a1.instants.has(Seq(Set(instant1))).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.instants.has(Seq(Set(instant1, instant2))).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.instants.has(Seq(Set(instant1, instant2, instant3))).query.get.map(_ ==> List())
-//          _ <- Ns.i.a1.instants.has(Seq(Set(instant2))).query.get.map(_ ==> List(a, b))
-//          _ <- Ns.i.a1.instants.has(Seq(Set(instant2, instant3))).query.get.map(_ ==> List(b))
-//          _ <- Ns.i.a1.instants.has(Seq(Set(instant2, instant3, instant4))).query.get.map(_ ==> List(b))
-//
-//
-//          // AND/OR semantics with multiple Sets
-//
-//          // "(has this AND that) OR (has this AND that)"
-//          _ <- Ns.i.a1.instants.has(Set(instant1, instant2), Set(instant0)).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.instants.has(Set(instant1, instant2), Set(instant0, instant3)).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.instants.has(Set(instant1, instant2), Set(instant2, instant3)).query.get.map(_ ==> List(a, b))
-//          _ <- Ns.i.a1.instants.has(Set(instant1, instant2), Set(instant2, instant3, instant4)).query.get.map(_ ==> List(a, b))
-//          // Same as
-//          _ <- Ns.i.a1.instants.has(Seq(Set(instant1, instant2), Set(instant0))).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.instants.has(Seq(Set(instant1, instant2), Set(instant0, instant3))).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.instants.has(Seq(Set(instant1, instant2), Set(instant2, instant3))).query.get.map(_ ==> List(a, b))
-//          _ <- Ns.i.a1.instants.has(Seq(Set(instant1, instant2), Set(instant2, instant3, instant4))).query.get.map(_ ==> List(a, b))
-
-
           // Empty Seq/Sets match nothing
-//          _ <- Ns.i.a1.instants.has(Set(instant1, instant2), Set.empty[Instant]).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.instants.has(Seq.empty[Instant]).query.get.map(_ ==> List())
-//          _ <- Ns.i.a1.instants.has(Set.empty[Instant]).query.get.map(_ ==> List())
-//          _ <- Ns.i.a1.instants.has(Seq.empty[Set[Instant]]).query.get.map(_ ==> List())
         } yield ()
       }
 

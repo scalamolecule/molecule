@@ -65,6 +65,9 @@ trait FilterSeq_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
           _ <- Ns.i.a1.zonedDateTimeSeq(List.empty[ZonedDateTime]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.zonedDateTimeSeq(List.empty[List[ZonedDateTime]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.zonedDateTimeSeq(List(List.empty[ZonedDateTime])).query.get.map(_ ==> List())
+
+          // Applying nothing matches nothing
+          _ <- Ns.i.a1.zonedDateTimeSeq().query.get.map(_ ==> List())
         } yield ()
       }
 

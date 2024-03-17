@@ -9,11 +9,11 @@ import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Types._
-import molecule.coreTests.setup.CoreTestSuite
+import molecule.coreTests.setup.CoreTestSuiteBase
 import molecule.coreTests.util.Array2List
 import utest._
 
-trait SaveCardSeq extends CoreTestSuite with Array2List with ApiAsync { spi: SpiAsync =>
+trait SaveCardSeq extends CoreTestSuiteBase with Array2List with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 
@@ -66,7 +66,7 @@ trait SaveCardSeq extends CoreTestSuite with Array2List with ApiAsync { spi: Spi
         _ <- Ns.i(1).zonedDateTimeSeq(List(zonedDateTime1, zonedDateTime2)).save.transact
         _ <- Ns.i(1).uuidSeq(List(uuid1, uuid2)).save.transact
         _ <- Ns.i(1).uriSeq(List(uri1, uri2)).save.i.transact
-        _ <- Ns.i(1).byteSeq(Array(byte1, byte2)).save.i.transact
+        _ <- Ns.i(1).byteArray(Array(byte1, byte2)).save.i.transact // Note that Bytes are saved in Arrays
         _ <- Ns.i(1).shortSeq(List(short1, short2)).save.transact
         _ <- Ns.i(1).charSeq(List(char1, char2)).save.transact
 
@@ -91,7 +91,7 @@ trait SaveCardSeq extends CoreTestSuite with Array2List with ApiAsync { spi: Spi
         _ <- Ns.i.zonedDateTimeSeq.query.get.map(_ ==> List((1, List(zonedDateTime1, zonedDateTime2))))
         _ <- Ns.i.uuidSeq.query.get.map(_ ==> List((1, List(uuid1, uuid2))))
         _ <- Ns.i.uriSeq.query.get.map(_ ==> List((1, List(uri1, uri2))))
-        _ <- Ns.i.byteSeq.query.get.map(_ ==> List((1, Array(byte1, byte2))))
+        _ <- Ns.i.byteArray.query.get.map(_ ==> List((1, Array(byte1, byte2)))) // Note that Bytes are saved in Arrays
         _ <- Ns.i.shortSeq.query.get.map(_ ==> List((1, List(short1, short2))))
         _ <- Ns.i.charSeq.query.get.map(_ ==> List((1, List(char1, char2))))
 
@@ -134,7 +134,7 @@ trait SaveCardSeq extends CoreTestSuite with Array2List with ApiAsync { spi: Spi
         _ <- Ns.int(17).i(1).zonedDateTimeSeq_?(Option.empty[List[ZonedDateTime]]).save.transact
         _ <- Ns.int(18).i(1).uuidSeq_?(Option.empty[List[UUID]]).save.transact
         _ <- Ns.int(19).i(1).uriSeq_?(Option.empty[List[URI]]).save.transact
-        _ <- Ns.int(20).i(1).byteSeq_?(Option.empty[Array[Byte]]).save.transact
+        _ <- Ns.int(20).i(1).byteArray_?(Option.empty[Array[Byte]]).save.transact
         _ <- Ns.int(21).i(1).shortSeq_?(Option.empty[List[Short]]).save.transact
         _ <- Ns.int(22).i(1).charSeq_?(Option.empty[List[Char]]).save.transact
 
@@ -157,7 +157,7 @@ trait SaveCardSeq extends CoreTestSuite with Array2List with ApiAsync { spi: Spi
         _ <- Ns.int(17).i(2).zonedDateTimeSeq_?(Some(List.empty[ZonedDateTime])).save.transact
         _ <- Ns.int(18).i(2).uuidSeq_?(Some(List.empty[UUID])).save.transact
         _ <- Ns.int(19).i(2).uriSeq_?(Some(List.empty[URI])).save.transact
-        _ <- Ns.int(20).i(2).byteSeq_?(Some(Array.empty[Byte])).save.transact
+        _ <- Ns.int(20).i(2).byteArray_?(Some(Array.empty[Byte])).save.transact
         _ <- Ns.int(21).i(2).shortSeq_?(Some(List.empty[Short])).save.transact
         _ <- Ns.int(22).i(2).charSeq_?(Some(List.empty[Char])).save.transact
 
@@ -180,7 +180,7 @@ trait SaveCardSeq extends CoreTestSuite with Array2List with ApiAsync { spi: Spi
         _ <- Ns.int(17).i(3).zonedDateTimeSeq_?(Some(List(zonedDateTime1, zonedDateTime2))).save.transact
         _ <- Ns.int(18).i(3).uuidSeq_?(Some(List(uuid1, uuid2))).save.transact
         _ <- Ns.int(19).i(3).uriSeq_?(Some(List(uri1, uri2))).save.transact
-        _ <- Ns.int(20).i(3).byteSeq_?(Some(Array(byte1, byte2))).save.transact
+        _ <- Ns.int(20).i(3).byteArray_?(Some(Array(byte1, byte2))).save.transact
         _ <- Ns.int(21).i(3).shortSeq_?(Some(List(short1, short2))).save.transact
         _ <- Ns.int(22).i(3).charSeq_?(Some(List(char1, char2))).save.transact
 
@@ -203,7 +203,7 @@ trait SaveCardSeq extends CoreTestSuite with Array2List with ApiAsync { spi: Spi
         _ <- Ns.int_(17).i.a1.zonedDateTimeSeq_?.query.get.map(_ ==> List((1, None), (2, None), (3, Some(List(zonedDateTime1, zonedDateTime2)))))
         _ <- Ns.int_(18).i.a1.uuidSeq_?.query.get.map(_ ==> List((1, None), (2, None), (3, Some(List(uuid1, uuid2)))))
         _ <- Ns.int_(19).i.a1.uriSeq_?.query.get.map(_ ==> List((1, None), (2, None), (3, Some(List(uri1, uri2)))))
-        _ <- Ns.int_(20).i.a1.byteSeq_?.query.get.map(_ ==> List((1, None), (2, None), (3, Some(Array(byte1, byte2)))))
+        _ <- Ns.int_(20).i.a1.byteArray_?.query.get.map(_ ==> List((1, None), (2, None), (3, Some(Array(byte1, byte2)))))
         _ <- Ns.int_(21).i.a1.shortSeq_?.query.get.map(_ ==> List((1, None), (2, None), (3, Some(List(short1, short2)))))
         _ <- Ns.int_(22).i.a1.charSeq_?.query.get.map(_ ==> List((1, None), (2, None), (3, Some(List(char1, char2)))))
       } yield ()
@@ -231,7 +231,7 @@ trait SaveCardSeq extends CoreTestSuite with Array2List with ApiAsync { spi: Spi
         _ <- Ns.i(1).zonedDateTimeSeq_(List(zonedDateTime1, zonedDateTime2)).save.transact
         _ <- Ns.i(1).uuidSeq_(List(uuid1, uuid2)).save.transact
         _ <- Ns.i(1).uriSeq_(List(uri1, uri2)).save.transact
-        _ <- Ns.i(1).byteSeq_(Array(byte1, byte2)).save.transact
+        _ <- Ns.i(1).byteArray_(Array(byte1, byte2)).save.transact
         _ <- Ns.i(1).shortSeq_(List(short1, short2)).save.transact
         _ <- Ns.i(1).charSeq_(List(char1, char2)).save.transact
 
@@ -254,7 +254,7 @@ trait SaveCardSeq extends CoreTestSuite with Array2List with ApiAsync { spi: Spi
         _ <- Ns.i.zonedDateTimeSeq.query.get.map(_.head ==> (1, List(zonedDateTime1, zonedDateTime2)))
         _ <- Ns.i.uuidSeq.query.get.map(_.head ==> (1, List(uuid1, uuid2)))
         _ <- Ns.i.uriSeq.query.get.map(_.head ==> (1, List(uri1, uri2)))
-        _ <- Ns.i.byteSeq.query.get.map(_.head ==> (1, Array(byte1, byte2)))
+        _ <- Ns.i.byteArray.query.get.map(_.head ==> (1, Array(byte1, byte2)))
         _ <- Ns.i.shortSeq.query.get.map(_.head ==> (1, List(short1, short2)))
         _ <- Ns.i.charSeq.query.get.map(_.head ==> (1, List(char1, char2)))
       } yield ()

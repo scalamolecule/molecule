@@ -65,6 +65,9 @@ trait FilterSet_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
           _ <- Ns.i.a1.zonedDateTimes(Set.empty[ZonedDateTime]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.zonedDateTimes(Seq.empty[Set[ZonedDateTime]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.zonedDateTimes(Seq(Set.empty[ZonedDateTime])).query.get.map(_ ==> List())
+
+          // Applying nothing matches nothing
+          _ <- Ns.i.a1.zonedDateTimes().query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -142,44 +145,8 @@ trait FilterSet_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
           _ <- Ns.i.a1.zonedDateTimes.has(Seq(zonedDateTime2, zonedDateTime3)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.zonedDateTimes.has(Seq(zonedDateTime1, zonedDateTime2, zonedDateTime3)).query.get.map(_ ==> List(a, b))
 
-
-//          // AND semantics when multiple values in a _Set_
-//
-//          // "Has this AND that"
-//          _ <- Ns.i.a1.zonedDateTimes.has(Set(zonedDateTime1)).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.zonedDateTimes.has(Set(zonedDateTime1, zonedDateTime2)).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.zonedDateTimes.has(Set(zonedDateTime1, zonedDateTime2, zonedDateTime3)).query.get.map(_ ==> List())
-//          _ <- Ns.i.a1.zonedDateTimes.has(Set(zonedDateTime2)).query.get.map(_ ==> List(a, b))
-//          _ <- Ns.i.a1.zonedDateTimes.has(Set(zonedDateTime2, zonedDateTime3)).query.get.map(_ ==> List(b))
-//          _ <- Ns.i.a1.zonedDateTimes.has(Set(zonedDateTime2, zonedDateTime3, zonedDateTime4)).query.get.map(_ ==> List(b))
-//          // Same as
-//          _ <- Ns.i.a1.zonedDateTimes.has(Seq(Set(zonedDateTime1))).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.zonedDateTimes.has(Seq(Set(zonedDateTime1, zonedDateTime2))).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.zonedDateTimes.has(Seq(Set(zonedDateTime1, zonedDateTime2, zonedDateTime3))).query.get.map(_ ==> List())
-//          _ <- Ns.i.a1.zonedDateTimes.has(Seq(Set(zonedDateTime2))).query.get.map(_ ==> List(a, b))
-//          _ <- Ns.i.a1.zonedDateTimes.has(Seq(Set(zonedDateTime2, zonedDateTime3))).query.get.map(_ ==> List(b))
-//          _ <- Ns.i.a1.zonedDateTimes.has(Seq(Set(zonedDateTime2, zonedDateTime3, zonedDateTime4))).query.get.map(_ ==> List(b))
-//
-//
-//          // AND/OR semantics with multiple Sets
-//
-//          // "(has this AND that) OR (has this AND that)"
-//          _ <- Ns.i.a1.zonedDateTimes.has(Set(zonedDateTime1, zonedDateTime2), Set(zonedDateTime0)).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.zonedDateTimes.has(Set(zonedDateTime1, zonedDateTime2), Set(zonedDateTime0, zonedDateTime3)).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.zonedDateTimes.has(Set(zonedDateTime1, zonedDateTime2), Set(zonedDateTime2, zonedDateTime3)).query.get.map(_ ==> List(a, b))
-//          _ <- Ns.i.a1.zonedDateTimes.has(Set(zonedDateTime1, zonedDateTime2), Set(zonedDateTime2, zonedDateTime3, zonedDateTime4)).query.get.map(_ ==> List(a, b))
-//          // Same as
-//          _ <- Ns.i.a1.zonedDateTimes.has(Seq(Set(zonedDateTime1, zonedDateTime2), Set(zonedDateTime0))).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.zonedDateTimes.has(Seq(Set(zonedDateTime1, zonedDateTime2), Set(zonedDateTime0, zonedDateTime3))).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.zonedDateTimes.has(Seq(Set(zonedDateTime1, zonedDateTime2), Set(zonedDateTime2, zonedDateTime3))).query.get.map(_ ==> List(a, b))
-//          _ <- Ns.i.a1.zonedDateTimes.has(Seq(Set(zonedDateTime1, zonedDateTime2), Set(zonedDateTime2, zonedDateTime3, zonedDateTime4))).query.get.map(_ ==> List(a, b))
-
-
           // Empty Seq/Sets match nothing
-//          _ <- Ns.i.a1.zonedDateTimes.has(Set(zonedDateTime1, zonedDateTime2), Set.empty[ZonedDateTime]).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.zonedDateTimes.has(Seq.empty[ZonedDateTime]).query.get.map(_ ==> List())
-//          _ <- Ns.i.a1.zonedDateTimes.has(Set.empty[ZonedDateTime]).query.get.map(_ ==> List())
-//          _ <- Ns.i.a1.zonedDateTimes.has(Seq.empty[Set[ZonedDateTime]]).query.get.map(_ ==> List())
         } yield ()
       }
 

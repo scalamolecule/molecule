@@ -64,6 +64,9 @@ trait FilterSeq_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.floatSeq(List.empty[Float]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.floatSeq(List.empty[List[Float]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.floatSeq(List(List.empty[Float])).query.get.map(_ ==> List())
+
+          // Applying nothing matches nothing
+          _ <- Ns.i.a1.floatSeq().query.get.map(_ ==> List())
         } yield ()
       }
 

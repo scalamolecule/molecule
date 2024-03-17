@@ -64,6 +64,9 @@ trait FilterSeq_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           _ <- Ns.i.a1.bigDecimalSeq(List.empty[BigDecimal]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigDecimalSeq(List.empty[List[BigDecimal]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigDecimalSeq(List(List.empty[BigDecimal])).query.get.map(_ ==> List())
+
+          // Applying nothing matches nothing
+          _ <- Ns.i.a1.bigDecimalSeq().query.get.map(_ ==> List())
         } yield ()
       }
 

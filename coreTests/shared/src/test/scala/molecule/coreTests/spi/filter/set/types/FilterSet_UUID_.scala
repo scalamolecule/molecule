@@ -65,6 +65,9 @@ trait FilterSet_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.uuids(Set.empty[UUID]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uuids(Seq.empty[Set[UUID]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uuids(Seq(Set.empty[UUID])).query.get.map(_ ==> List())
+
+          // Applying nothing matches nothing
+          _ <- Ns.i.a1.uuids().query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -142,44 +145,8 @@ trait FilterSet_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.uuids.has(Seq(uuid2, uuid3)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.uuids.has(Seq(uuid1, uuid2, uuid3)).query.get.map(_ ==> List(a, b))
 
-
-//          // AND semantics when multiple values in a _Set_
-//
-//          // "Has this AND that"
-//          _ <- Ns.i.a1.uuids.has(Set(uuid1)).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.uuids.has(Set(uuid1, uuid2)).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.uuids.has(Set(uuid1, uuid2, uuid3)).query.get.map(_ ==> List())
-//          _ <- Ns.i.a1.uuids.has(Set(uuid2)).query.get.map(_ ==> List(a, b))
-//          _ <- Ns.i.a1.uuids.has(Set(uuid2, uuid3)).query.get.map(_ ==> List(b))
-//          _ <- Ns.i.a1.uuids.has(Set(uuid2, uuid3, uuid4)).query.get.map(_ ==> List(b))
-//          // Same as
-//          _ <- Ns.i.a1.uuids.has(Seq(Set(uuid1))).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.uuids.has(Seq(Set(uuid1, uuid2))).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.uuids.has(Seq(Set(uuid1, uuid2, uuid3))).query.get.map(_ ==> List())
-//          _ <- Ns.i.a1.uuids.has(Seq(Set(uuid2))).query.get.map(_ ==> List(a, b))
-//          _ <- Ns.i.a1.uuids.has(Seq(Set(uuid2, uuid3))).query.get.map(_ ==> List(b))
-//          _ <- Ns.i.a1.uuids.has(Seq(Set(uuid2, uuid3, uuid4))).query.get.map(_ ==> List(b))
-//
-//
-//          // AND/OR semantics with multiple Sets
-//
-//          // "(has this AND that) OR (has this AND that)"
-//          _ <- Ns.i.a1.uuids.has(Set(uuid1, uuid2), Set(uuid0)).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.uuids.has(Set(uuid1, uuid2), Set(uuid0, uuid3)).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.uuids.has(Set(uuid1, uuid2), Set(uuid2, uuid3)).query.get.map(_ ==> List(a, b))
-//          _ <- Ns.i.a1.uuids.has(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4)).query.get.map(_ ==> List(a, b))
-//          // Same as
-//          _ <- Ns.i.a1.uuids.has(Seq(Set(uuid1, uuid2), Set(uuid0))).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.uuids.has(Seq(Set(uuid1, uuid2), Set(uuid0, uuid3))).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.uuids.has(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3))).query.get.map(_ ==> List(a, b))
-//          _ <- Ns.i.a1.uuids.has(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4))).query.get.map(_ ==> List(a, b))
-
-
           // Empty Seq/Sets match nothing
-//          _ <- Ns.i.a1.uuids.has(Set(uuid1, uuid2), Set.empty[UUID]).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.uuids.has(Seq.empty[UUID]).query.get.map(_ ==> List())
-//          _ <- Ns.i.a1.uuids.has(Set.empty[UUID]).query.get.map(_ ==> List())
-//          _ <- Ns.i.a1.uuids.has(Seq.empty[Set[UUID]]).query.get.map(_ ==> List())
         } yield ()
       }
 

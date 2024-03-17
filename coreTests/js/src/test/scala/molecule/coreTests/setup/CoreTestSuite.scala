@@ -16,4 +16,31 @@ trait CoreTestSuite extends CoreTestSuiteBase {
     )
     promise.future
   }
+
+
+  private def showResult(lhs: Any, rhs: Any): String = {
+    s"""
+       |Got     : $lhs
+       |Expected: $rhs
+       |""".stripMargin
+  }
+
+  implicit class ArrowAssert(lhs: Any) {
+    def ==>[V](rhs: V) = {
+      (lhs, rhs) match {
+        // Hack to make Arrays compare sanely; at some point we may want some
+        // custom, extensible, typesafe equality check but for now this will do
+        case (lhs: Array[_], rhs: Array[_]) =>
+          Predef.assert(lhs.toSeq == rhs.toSeq,
+            //            s"==> assertion failed: ${lhs.toSeq} != ${rhs.toSeq}"
+            showResult(lhs.toSeq, rhs.toSeq)
+          )
+        case (lhs, rhs)                     =>
+          Predef.assert(lhs == rhs,
+            //            s"==> assertion failed: $lhs != $rhs"
+            showResult(lhs, rhs)
+          )
+      }
+    }
+  }
 }

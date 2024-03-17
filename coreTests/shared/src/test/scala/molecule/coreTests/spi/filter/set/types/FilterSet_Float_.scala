@@ -64,6 +64,9 @@ trait FilterSet_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.floats(Set.empty[Float]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.floats(Seq.empty[Set[Float]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.floats(Seq(Set.empty[Float])).query.get.map(_ ==> List())
+
+          // Applying nothing matches nothing
+          _ <- Ns.i.a1.floats().query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -141,44 +144,8 @@ trait FilterSet_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.floats.has(Seq(float2, float3)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.floats.has(Seq(float1, float2, float3)).query.get.map(_ ==> List(a, b))
 
-
-//          // AND semantics when multiple values in a _Set_
-//
-//          // "Has this AND that"
-//          _ <- Ns.i.a1.floats.has(Set(float1)).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.floats.has(Set(float1, float2)).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.floats.has(Set(float1, float2, float3)).query.get.map(_ ==> List())
-//          _ <- Ns.i.a1.floats.has(Set(float2)).query.get.map(_ ==> List(a, b))
-//          _ <- Ns.i.a1.floats.has(Set(float2, float3)).query.get.map(_ ==> List(b))
-//          _ <- Ns.i.a1.floats.has(Set(float2, float3, float4)).query.get.map(_ ==> List(b))
-//          // Same as
-//          _ <- Ns.i.a1.floats.has(Seq(Set(float1))).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.floats.has(Seq(Set(float1, float2))).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.floats.has(Seq(Set(float1, float2, float3))).query.get.map(_ ==> List())
-//          _ <- Ns.i.a1.floats.has(Seq(Set(float2))).query.get.map(_ ==> List(a, b))
-//          _ <- Ns.i.a1.floats.has(Seq(Set(float2, float3))).query.get.map(_ ==> List(b))
-//          _ <- Ns.i.a1.floats.has(Seq(Set(float2, float3, float4))).query.get.map(_ ==> List(b))
-//
-//
-//          // AND/OR semantics with multiple Sets
-//
-//          // "(has this AND that) OR (has this AND that)"
-//          _ <- Ns.i.a1.floats.has(Set(float1, float2), Set(float0)).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.floats.has(Set(float1, float2), Set(float0, float3)).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.floats.has(Set(float1, float2), Set(float2, float3)).query.get.map(_ ==> List(a, b))
-//          _ <- Ns.i.a1.floats.has(Set(float1, float2), Set(float2, float3, float4)).query.get.map(_ ==> List(a, b))
-//          // Same as
-//          _ <- Ns.i.a1.floats.has(Seq(Set(float1, float2), Set(float0))).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.floats.has(Seq(Set(float1, float2), Set(float0, float3))).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.floats.has(Seq(Set(float1, float2), Set(float2, float3))).query.get.map(_ ==> List(a, b))
-//          _ <- Ns.i.a1.floats.has(Seq(Set(float1, float2), Set(float2, float3, float4))).query.get.map(_ ==> List(a, b))
-
-
           // Empty Seq/Sets match nothing
-//          _ <- Ns.i.a1.floats.has(Set(float1, float2), Set.empty[Float]).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.floats.has(Seq.empty[Float]).query.get.map(_ ==> List())
-//          _ <- Ns.i.a1.floats.has(Set.empty[Float]).query.get.map(_ ==> List())
-//          _ <- Ns.i.a1.floats.has(Seq.empty[Set[Float]]).query.get.map(_ ==> List())
         } yield ()
       }
 

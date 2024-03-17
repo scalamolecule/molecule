@@ -63,6 +63,9 @@ trait FilterSeq_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.intSeq(List.empty[Int]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.intSeq(List.empty[List[Int]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.intSeq(List(List.empty[Int])).query.get.map(_ ==> List())
+
+          // Applying nothing matches nothing
+          _ <- Ns.i.a1.intSeq().query.get.map(_ ==> List())
         } yield ()
       }
 

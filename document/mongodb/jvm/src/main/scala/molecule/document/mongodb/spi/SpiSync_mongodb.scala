@@ -290,7 +290,7 @@ trait SpiSync_mongodb
 
     bsonDocs.forEach { doc =>
       debug(doc.toJson(pretty))
-      row.clear
+      row.clear()
       val docIterator = doc.asDocument().entrySet().iterator()
       while (docIterator.hasNext) {
         val pair           = docIterator.next()

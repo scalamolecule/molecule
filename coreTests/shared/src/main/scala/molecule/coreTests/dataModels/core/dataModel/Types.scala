@@ -81,7 +81,7 @@ object Types extends DataModel(5) {
     val zonedDateTimeSeq  = seqZonedDateTime
     val uuidSeq           = seqUUID
     val uriSeq            = seqURI
-    val byteSeq           = seqByte
+    val byteArray         = arrayByte
     val shortSeq          = seqShort
     val charSeq           = seqChar
 

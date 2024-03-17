@@ -248,7 +248,7 @@ class ResolveInsert
       case _: AttrSeqManZonedDateTime  => addSeq(ns, attr, refNs, tplIndex, transformZonedDateTime) //, set2arrayZonedDateTime, extsZonedDateTime, value2jsonZonedDateTime)
       case _: AttrSeqManUUID           => addSeq(ns, attr, refNs, tplIndex, transformUUID) //, set2arrayUUID, extsUUID, value2jsonUUID)
       case _: AttrSeqManURI            => addSeq(ns, attr, refNs, tplIndex, transformURI) //, set2arrayURI, extsURI, value2jsonURI)
-      case _: AttrSeqManByte           => addSeq(ns, attr, refNs, tplIndex, transformByte) //, set2arrayByte, extsByte, value2jsonByte)
+      case a: AttrSeqManByte           => addByteArray(ns, attr, tplIndex, optByteArray(ns, attr, a.vs)) //, set2arrayByte, extsByte, value2jsonByte)
       case _: AttrSeqManShort          => addSeq(ns, attr, refNs, tplIndex, transformShort) //, set2arrayShort, extsShort, value2jsonShort)
       case _: AttrSeqManChar           => addSeq(ns, attr, refNs, tplIndex, transformChar) //, set2arrayChar, extsChar, value2jsonChar)
     }
@@ -277,7 +277,7 @@ class ResolveInsert
       case _: AttrSeqOptZonedDateTime  => addSeqOpt(ns, attr, refNs, tplIndex, transformZonedDateTime) //, set2arrayZonedDateTime,  extsZonedDateTime, value2jsonZonedDateTime)
       case _: AttrSeqOptUUID           => addSeqOpt(ns, attr, refNs, tplIndex, transformUUID) //, set2arrayUUID,  extsUUID, value2jsonUUID)
       case _: AttrSeqOptURI            => addSeqOpt(ns, attr, refNs, tplIndex, transformURI) //, set2arrayURI,  extsURI, value2jsonURI)
-      case _: AttrSeqOptByte           => addSeqOpt(ns, attr, refNs, tplIndex, transformByte) //, set2arrayByte,  extsByte, value2jsonByte)
+      case a: AttrSeqOptByte           => addByteArray(ns, attr, tplIndex, a.vs.flatMap(vs => optByteArray(ns, attr, vs))) //, set2arrayByte, extsByte, value2jsonByte)
       case _: AttrSeqOptShort          => addSeqOpt(ns, attr, refNs, tplIndex, transformShort) //, set2arrayShort,  extsShort, value2jsonShort)
       case _: AttrSeqOptChar           => addSeqOpt(ns, attr, refNs, tplIndex, transformChar) //, set2arrayChar,  extsChar, value2jsonChar)
     }

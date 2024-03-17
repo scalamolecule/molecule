@@ -22,7 +22,7 @@ trait InsertCardSeq extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.intSeq.query.get.map(_ ==> Nil)
 
         // Inserting empty list/set of values is ignored
-        // (See InsertSemantic for further details)
+        // (See InsertSemantics for further details)
         _ <- Ns.intSeq.insert(List.empty[List[Int]]).transact
         _ <- Ns.intSeq.insert(List(List.empty[Int])).transact
         _ <- Ns.intSeq.query.get.map(_ ==> List())
@@ -46,10 +46,7 @@ trait InsertCardSeq extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.zonedDateTimeSeq.insert(1, List(zonedDateTime1, zonedDateTime2)).transact
         _ <- Ns.i.uuidSeq.insert(1, List(uuid1, uuid2)).transact
         _ <- Ns.i.uriSeq.insert(1, List(uri1, uri2)).transact
-
-//        _ <- Ns.i.byteSeq.insert(1, List(byte1, byte2)).transact
-        _ <- Ns.i.byteSeq.insert(1, Array(byte1, byte2)).transact
-
+        _ <- Ns.i.byteArray.insert(1, Array(byte1, byte2)).transact
         _ <- Ns.i.shortSeq.insert(1, List(short1, short2)).transact
         _ <- Ns.i.charSeq.insert(1, List(char1, char2)).transact
 
@@ -72,7 +69,7 @@ trait InsertCardSeq extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.zonedDateTimeSeq.query.get.map(_ ==> List((1, List(zonedDateTime1, zonedDateTime2))))
         _ <- Ns.i.uuidSeq.query.get.map(_ ==> List((1, List(uuid1, uuid2))))
         _ <- Ns.i.uriSeq.query.get.map(_ ==> List((1, List(uri1, uri2))))
-        _ <- Ns.i.byteSeq.query.get.map(_ ==> List((1, Array(byte1, byte2))))
+        _ <- Ns.i.byteArray.query.get.map(_ ==> List((1, Array(byte1, byte2))))
         _ <- Ns.i.shortSeq.query.get.map(_ ==> List((1, List(short1, short2))))
         _ <- Ns.i.charSeq.query.get.map(_ ==> List((1, List(char1, char2))))
 
@@ -102,7 +99,7 @@ trait InsertCardSeq extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.int.i.zonedDateTimeSeq_?.insert(17, 1, Option.empty[List[ZonedDateTime]]).transact
         _ <- Ns.int.i.uuidSeq_?.insert(18, 1, Option.empty[List[UUID]]).transact
         _ <- Ns.int.i.uriSeq_?.insert(19, 1, Option.empty[List[URI]]).transact
-        _ <- Ns.int.i.byteSeq_?.insert(20, 1, Option.empty[Array[Byte]]).transact
+        _ <- Ns.int.i.byteArray_?.insert(20, 1, Option.empty[Array[Byte]]).transact
         _ <- Ns.int.i.shortSeq_?.insert(21, 1, Option.empty[List[Short]]).transact
         _ <- Ns.int.i.charSeq_?.insert(22, 1, Option.empty[List[Char]]).transact
 
@@ -125,7 +122,7 @@ trait InsertCardSeq extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.int.i.zonedDateTimeSeq_?.insert(17, 2, Some(List.empty[ZonedDateTime])).transact
         _ <- Ns.int.i.uuidSeq_?.insert(18, 2, Some(List.empty[UUID])).transact
         _ <- Ns.int.i.uriSeq_?.insert(19, 2, Some(List.empty[URI])).transact
-        _ <- Ns.int.i.byteSeq_?.insert(20, 2, Some(Array.empty[Byte])).transact
+        _ <- Ns.int.i.byteArray_?.insert(20, 2, Some(Array.empty[Byte])).transact
         _ <- Ns.int.i.shortSeq_?.insert(21, 2, Some(List.empty[Short])).transact
         _ <- Ns.int.i.charSeq_?.insert(22, 2, Some(List.empty[Char])).transact
 
@@ -148,7 +145,7 @@ trait InsertCardSeq extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.int.i.zonedDateTimeSeq_?.insert(17, 3, Some(List(zonedDateTime1, zonedDateTime2))).transact
         _ <- Ns.int.i.uuidSeq_?.insert(18, 3, Some(List(uuid1, uuid2))).transact
         _ <- Ns.int.i.uriSeq_?.insert(19, 3, Some(List(uri1, uri2))).transact
-        _ <- Ns.int.i.byteSeq_?.insert(20, 3, Some(Array(byte1, byte2))).transact
+        _ <- Ns.int.i.byteArray_?.insert(20, 3, Some(Array(byte1, byte2))).transact
         _ <- Ns.int.i.shortSeq_?.insert(21, 3, Some(List(short1, short2))).transact
         _ <- Ns.int.i.charSeq_?.insert(22, 3, Some(List(char1, char2))).transact
 
@@ -171,7 +168,7 @@ trait InsertCardSeq extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.int_(17).i.a1.zonedDateTimeSeq_?.query.get.map(_ ==> List((1, None), (2, None), (3, Some(List(zonedDateTime1, zonedDateTime2)))))
         _ <- Ns.int_(18).i.a1.uuidSeq_?.query.get.map(_ ==> List((1, None), (2, None), (3, Some(List(uuid1, uuid2)))))
         _ <- Ns.int_(19).i.a1.uriSeq_?.query.get.map(_ ==> List((1, None), (2, None), (3, Some(List(uri1, uri2)))))
-        _ <- Ns.int_(20).i.a1.byteSeq_?.query.get.map(_ ==> List((1, None), (2, None), (3, Some(Array(byte1, byte2)))))
+        _ <- Ns.int_(20).i.a1.byteArray_?.query.get.map(_ ==> List((1, None), (2, None), (3, Some(Array(byte1, byte2)))))
         _ <- Ns.int_(21).i.a1.shortSeq_?.query.get.map(_ ==> List((1, None), (2, None), (3, Some(List(short1, short2)))))
         _ <- Ns.int_(22).i.a1.charSeq_?.query.get.map(_ ==> List((1, None), (2, None), (3, Some(List(char1, char2)))))
       } yield ()

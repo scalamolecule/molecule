@@ -65,6 +65,9 @@ trait FilterSeq_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.dateSeq(List.empty[Date]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.dateSeq(List.empty[List[Date]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.dateSeq(List(List.empty[Date])).query.get.map(_ ==> List())
+
+          // Applying nothing matches nothing
+          _ <- Ns.i.a1.dateSeq().query.get.map(_ ==> List())
         } yield ()
       }
 

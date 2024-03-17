@@ -65,6 +65,9 @@ trait FilterSeq_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
           _ <- Ns.i.a1.localDateTimeSeq(List.empty[LocalDateTime]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localDateTimeSeq(List.empty[List[LocalDateTime]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localDateTimeSeq(List(List.empty[LocalDateTime])).query.get.map(_ ==> List())
+
+          // Applying nothing matches nothing
+          _ <- Ns.i.a1.localDateTimeSeq().query.get.map(_ ==> List())
         } yield ()
       }
 

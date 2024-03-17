@@ -64,6 +64,9 @@ trait FilterSeq_Char_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.charSeq(List.empty[Char]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.charSeq(List.empty[List[Char]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.charSeq(List(List.empty[Char])).query.get.map(_ ==> List())
+
+          // Applying nothing matches nothing
+          _ <- Ns.i.a1.charSeq().query.get.map(_ ==> List())
         } yield ()
       }
 

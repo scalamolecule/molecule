@@ -64,6 +64,9 @@ trait FilterSeq_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.bigIntSeq(List.empty[BigInt]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigIntSeq(List.empty[List[BigInt]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigIntSeq(List(List.empty[BigInt])).query.get.map(_ ==> List())
+
+          // Applying nothing matches nothing
+          _ <- Ns.i.a1.bigIntSeq().query.get.map(_ ==> List())
         } yield ()
       }
 

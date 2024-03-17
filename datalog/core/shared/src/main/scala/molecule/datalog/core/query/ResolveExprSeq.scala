@@ -33,7 +33,7 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
       case att: AttrSeqManZonedDateTime  => man(attr, e, att.vs, resSeqZonedDateTime)
       case att: AttrSeqManUUID           => man(attr, e, att.vs, resSeqUUID)
       case att: AttrSeqManURI            => man(attr, e, att.vs, resSeqURI)
-      case att: AttrSeqManByte           => manByteArray(attr, e) // Byte Array only semantics
+      case att: AttrSeqManByte           => manByteArray(attr, e, att.vs) // Byte Array only semantics
       case att: AttrSeqManShort          => man(attr, e, att.vs, resSeqShort)
       case att: AttrSeqManChar           => man(attr, e, att.vs, resSeqChar)
     }
@@ -63,7 +63,7 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
       case att: AttrSeqTacZonedDateTime  => tac(attr, e, att.vs, resSeqZonedDateTime)
       case att: AttrSeqTacUUID           => tac(attr, e, att.vs, resSeqUUID)
       case att: AttrSeqTacURI            => tac(attr, e, att.vs, resSeqURI)
-      case att: AttrSeqTacByte           => tacByteArray(attr, e) // Byte Array only semantics
+      case att: AttrSeqTacByte           => tacByteArray(attr, e, att.vs) // Byte Array only semantics
       case att: AttrSeqTacShort          => tac(attr, e, att.vs, resSeqShort)
       case att: AttrSeqTacChar           => tac(attr, e, att.vs, resSeqChar)
     }
@@ -96,7 +96,7 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
       case att: AttrSeqOptZonedDateTime  => opt(attr, e, att.op, att.vs, resOptSeqZonedDateTime, resSeqZonedDateTime)
       case att: AttrSeqOptUUID           => opt(attr, e, att.op, att.vs, resOptSeqUUID, resSeqUUID)
       case att: AttrSeqOptURI            => opt(attr, e, att.op, att.vs, resOptSeqURI, resSeqURI)
-      case att: AttrSeqOptByte           => optByteArray(attr, e, resOptSeqByte) // Byte Array only semantics
+      case att: AttrSeqOptByte           => optByteArray(attr, e, att.vs, resOptSeqByte) // Byte Array only semantics
       case att: AttrSeqOptShort          => opt(attr, e, att.op, att.vs, resOptSeqShort, resSeqShort)
       case att: AttrSeqOptChar           => opt(attr, e, att.op, att.vs, resOptSeqChar, resSeqChar)
     }
@@ -165,8 +165,8 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
       case V         => attrib(attr, e, v, resSeq)
       case Eq        => equal(attr, e, v, seqs, resSeq)
       case Neq       => neq(attr, e, v, seqs, resSeq.s2j, resSeq)
-      case Has       => has(attr, e, v, seqs, resSeq.tpe, resSeq.toDatalog)
-      case HasNo     => hasNo(attr, e, v, seqs, resSeq.tpe, resSeq.toDatalog)
+      case Has       => has(attr, e, v, seqs, resSeq.tpe, resSeq.toDatalog, resSeq)
+      case HasNo     => hasNo(attr, e, v, seqs, resSeq.tpe, resSeq.toDatalog, resSeq)
       case NoValue   => noValue(attr, e)
       case Fn(kw, n) =>
         if (isRefAttr)
@@ -196,121 +196,104 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     resSeq: ResSeq[T],
   ): Unit = {
     val v = vv
-    addCast(resSeqOpt.j2s)
     op match {
       case V     => optAttr(attr, e, v, resSeqOpt)
       case Eq    => optEqual(attr, e, v, optSeqs, resSeqOpt, resSeq)
-      case Neq   => optNeq(attr, e, v, optSeqs, resSeqOpt.s2j, resSeq)
-      case Has   => optHas(attr, e, v, optSeqs, resSeqOpt.tpe, resSeqOpt, resSeqOpt.toDatalog)
-      case HasNo => optHasNo(attr, e, v, optSeqs, resSeqOpt.tpe, resSeqOpt.toDatalog)
+      case Neq   => optNeq(attr, e, v, optSeqs, resSeqOpt, resSeq)
+      case Has   => optHas(attr, e, v, optSeqs, resSeqOpt.tpe, resSeqOpt, resSeqOpt.toDatalog, resSeq)
+      case HasNo => optHasNo(attr, e, v, optSeqs, resSeqOpt.tpe, resSeqOpt.toDatalog, resSeq, resSeqOpt)
       case other => unexpectedOp(other)
     }
   }
 
 
-  private def manByteArray(attr: Attr, e: Var): Unit = {
-    val v = vv
-    val a = nsAttr(attr)
-    find += v
-    attr.filterAttr.fold {
-      attr.op match {
-        case V => where += s"[$e $a $v]" -> wClause
-        case _ => throw ModelError(
-          s"Byte arrays can only be retrieved as-is. Filters not allowed.")
-      }
-    } { _ =>
-      throw ModelError(s"Filter attributes not allowed with byte arrays.")
-    }
-    refConfirmed = true
-    addCast(identity) // return array as-is
-  }
-
-  private def tacByteArray(attr: Attr, e: Var): Unit = {
-    val v = vv
-    val a = nsAttr(attr)
-    attr.filterAttr.fold {
-      attr.op match {
-        case V => where += s"[$e $a $v]" -> wClause
-        case _ => throw ModelError(
-          s"Byte arrays can only be retrieved as-is. Filters not allowed.")
-      }
-    } { _ =>
-      throw ModelError(s"Filter attributes not allowed with byte arrays.")
-    }
-    refConfirmed = true
-  }
-
-  private def optByteArray(attr: Attr, e: Var, resSeqOpt: ResSeqOpt[Byte]): Unit = {
-    val v = vv
-    val a = nsAttr(attr)
-    find += s"(pull $e-$v [[$a :limit nil]]) "
-    where += s"[(identity $e) $e-$v]" -> wGround
-    addCast(resSeqOpt.optAttr2s)
-  }
-
   // attr ----------------------------------------------------------------------
 
   private def attrib[T](attr: Attr, e: Var, v: Var, resSeq: ResSeq[T]): Unit = {
     val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
-    find += s"(distinct $pair)" // position index -> value
-    where += s"[$e $a $v]" -> wClause
-    where += s"[$v $ai $i_]" -> wClause
-    where += s"[$v $av $v_]" -> wClause
-    where += s"[(vector $i_ $v_) $pair]" -> wClause
-    addCast(resSeq.pairs2list)
+    find += v3
+    where += s"[$e $a _]" -> wClause
+    where +=
+      s"""[(datomic.api/q
+         |          "[:find (distinct $pair)
+         |            :in $$ $e
+         |            :where [$e $a $v]
+         |                   [$v $ai $i_]
+         |                   [$v $av $v_]
+         |                   [(vector $i_ $v_) $pair]]" $$ $e) [[$v1]]]""".stripMargin -> wClause
+    where += s"[(sort-by first $v1) $v2]" -> wClause
+    where += s"[(map second $v2) $v3]" -> wClause
+    addCast(resSeq.jList2list)
   }
 
   private def optAttr[T](
     attr: Attr, e: Var, v: Var, resSeqOpt: ResSeqOpt[T]
   ): Unit = {
     val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
-    if (refConfirmed) {
-      find += v6
-      where +=
-        s"""[(datomic.api/q
-           |          "[:find (pull $e [{($a :limit nil) [$ai $av]}])
-           |            :in $$ $e]" $$ $e) [[$v1]]]""".stripMargin -> wClause
-      where += s"[(if (nil? $v1) {$a []} $v1) $v2]" -> wClause
-      where += s"[($a $v2) $v3]" -> wClause
-      where += s"[(map vals $v3) $v4]" -> wClause
-      where += s"[(sort-by first $v4) $v5]" -> wClause
-      where += s"[(map second $v5) $v6]" -> wClause
+    find += v6
+    where +=
+      s"""[(datomic.api/q
+         |          "[:find (pull $e [{($a :limit nil) [$ai $av]}])
+         |            :in $$ $e]" $$ $e) [[$v1]]]""".stripMargin -> wClause
+    where += s"[(if (nil? $v1) {$a []} $v1) $v2]" -> wClause
+    where += s"[($a $v2) $v3]" -> wClause
+    where += s"[(map vals $v3) $v4]" -> wClause
+    where += s"[(sort-by first $v4) $v5]" -> wClause
+    where += s"[(map second $v5) $v6]" -> wClause
 
-    } else {
-      val List(e0, card, refAttr, refId) = varPath.takeRight(4)
-      val refDatom                       = s"[$e0 $refAttr $refId]"
-      if (where.last == refDatom -> wClause) {
-        // cancel previous ref Datom since we will pull it instead
-        where.remove(where.size - 1)
-        varPath = varPath.dropRight(3)
-      }
-      val e = varPath.last
-      if (card == "one") {
-        find += s"(distinct $v4)"
-        where +=
-          s"""[(datomic.api/q
-             |          "[:find (pull $e [{$refAttr [$a]}] :limit nil)
-             |            :in $$ $e]" $$ $e) [[$v1]]]""".stripMargin -> wClause
-        where += s"[(if (nil? $v1) {$refAttr {$a []}} $v1) $v2]" -> wClause
-        where += s"[($refAttr $v2) $v3]" -> wClause
-        where += s"[($a $v3) $v4]" -> wClause
-        where += s"[(map vals $v4) $v5]" -> wClause
-
-      } else {
-        find += s"(distinct $v6)"
-        where +=
-          s"""[(datomic.api/q
-             |          "[:find (pull $e [{($a :limit nil) [$ai $av]}])
-             |            :in $$ $e]" $$ $e) [[$v1]]]""".stripMargin -> wClause
-        where += s"[(if (nil? $v1) {$a [{$a []}]} $v1) $v2]" -> wClause
-        where += s"[($a $v2) $v3]" -> wClause
-        where += s"[(first $v3) $v4]" -> wClause
-        where += s"[($a $v4) $v5]" -> wClause
-        where += s"[(map vals $v4) $v5]" -> wClause
-      }
-    }
-    replaceCast(resSeqOpt.optAttr2s)
+    addCast(resSeqOpt.j2sOptList)
   }
+  //  private def optAttrOLD[T](
+  //    attr: Attr, e: Var, v: Var, resSeqOpt: ResSeqOpt[T]
+  //  ): Unit = {
+  //    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
+  //    if (refConfirmed) {
+  //      find += v6
+  //      where +=
+  //        s"""[(datomic.api/q
+  //           |          "[:find (pull $e [{($a :limit nil) [$ai $av]}])
+  //           |            :in $$ $e]" $$ $e) [[$v1]]]""".stripMargin -> wClause
+  //      where += s"[(if (nil? $v1) {$a []} $v1) $v2]" -> wClause
+  //      where += s"[($a $v2) $v3]" -> wClause
+  //      where += s"[(map vals $v3) $v4]" -> wClause
+  //      where += s"[(sort-by first $v4) $v5]" -> wClause
+  //      where += s"[(map second $v5) $v6]" -> wClause
+  //
+  //    } else {
+  //      val List(e0, card, refAttr, refId) = varPath.takeRight(4)
+  //      val refDatom                       = s"[$e0 $refAttr $refId]"
+  //      if (where.last == refDatom -> wClause) {
+  //        // cancel previous ref Datom since we will pull it instead
+  //        where.remove(where.size - 1)
+  //        varPath = varPath.dropRight(3)
+  //      }
+  //      val e = varPath.last
+  //      if (card == "one") {
+  //        find += s"(distinct $v4)"
+  //        where +=
+  //          s"""[(datomic.api/q
+  //             |          "[:find (pull $e [{$refAttr [$a]}] :limit nil)
+  //             |            :in $$ $e]" $$ $e) [[$v1]]]""".stripMargin -> wClause
+  //        where += s"[(if (nil? $v1) {$refAttr {$a []}} $v1) $v2]" -> wClause
+  //        where += s"[($refAttr $v2) $v3]" -> wClause
+  //        where += s"[($a $v3) $v4]" -> wClause
+  //        where += s"[(map vals $v4) $v5]" -> wClause
+  //
+  //      } else {
+  //        find += s"(distinct $v6)"
+  //        where +=
+  //          s"""[(datomic.api/q
+  //             |          "[:find (pull $e [{($a :limit nil) [$ai $av]}])
+  //             |            :in $$ $e]" $$ $e) [[$v1]]]""".stripMargin -> wClause
+  //        where += s"[(if (nil? $v1) {$a [{$a []}]} $v1) $v2]" -> wClause
+  //        where += s"[($a $v2) $v3]" -> wClause
+  //        where += s"[(first $v3) $v4]" -> wClause
+  //        where += s"[($a $v4) $v5]" -> wClause
+  //        where += s"[(map vals $v4) $v5]" -> wClause
+  //      }
+  //    }
+  //    addCast(resSeqOpt.j2sOptList)
+  //  }
 
 
   // eq ------------------------------------------------------------------------
@@ -348,6 +331,7 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
       none(attr, e, v, resSeqOpt)
     } { seqs =>
       equal(attr, e, v, seqs, resSeq)
+      replaceCast(resSeqOpt.j2sOptList)
     }
   }
 
@@ -357,7 +341,7 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
   private def neq[T](
     attr: Attr, e: Var, v: Var,
     seqs: Seq[Seq[T]],
-    fromScala: Any => Any,
+    s2j: Any => Any,
     resSeq: ResSeq[T],
   ): Unit = {
     val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
@@ -369,7 +353,7 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
       where += s"[$e $a $v]" -> wClause
 
       // Pre-query
-      preArgs += seqs.map(seq => seq.map(fromScala).asJava).asJava
+      preArgs += seqs.map(seq => seq.map(s2j).asJava).asJava
       preIn += s"[$v4 ...]"
       // Find blacklisted entities that match input Seqs
       preWhere +=
@@ -404,23 +388,32 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
       addCast(resSeq.jList2list)
     } else {
       // Get all
-      attrib(attr,e,v,resSeq)
+      attrib(attr, e, v, resSeq)
     }
   }
 
   private def optNeq[T](
     attr: Attr, e: Var, v: Var,
     optSeqs: Option[Seq[Seq[T]]],
-    fromScala: Any => Any,
+    resSeqOpt: ResSeqOpt[T],
     resSeq: ResSeq[T],
   ): Unit = {
-    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
-    find += s"(distinct $v)"
-    optSeqs.fold[Unit] {
-      where += s"[$e $a $v]" -> wClause
-    } { sets =>
-      neq(attr, e, v, sets, fromScala, resSeq)
+    optSeqs match {
+      case Some(seqs) if seqs.nonEmpty && seqs.flatten.nonEmpty =>
+        neq(attr, e, v, seqs, resSeq.s2j, resSeq)
+        replaceCast(resSeqOpt.j2sOptList)
+
+      case _ =>
+        // Ignore empty seqs
+        optWithoutNone(attr, e, v, resSeqOpt)
     }
+  }
+
+  private def optWithoutNone[T](attr: Attr, e: Var, v: Var, resSeqOpt: ResSeqOpt[T]): Unit = {
+    // Ignore empty seqs
+    where += s"[(nil? ${v}1) ${v}1-empty]" -> wClause
+    where += s"[(not ${v}1-empty)]" -> wClause
+    optAttr(attr, e, v, resSeqOpt) // Get all available
   }
 
 
@@ -428,53 +421,44 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
 
   private def has[T: ClassTag](
     attr: Attr, e: Var, v: Var,
-    seqs: Seq[Seq[T]], tpe: String, toDatalog: T => String
+    seqs: Seq[Seq[T]], tpe: String, toDatalog: T => String,
+    resSeq: ResSeq[T],
   ): Unit = {
     val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
-    where += s"[$e $a $v]" -> wClause
     if (seqs.nonEmpty && seqs.flatten.nonEmpty) {
-      where += s"(rule$v $e)" -> wClause
-      rules ++= mkRules(attr, e, v, seqs, tpe, toDatalog)
+      find += v3
+      args += seqs.flatten.map(resSeq.s2j).asJava
+      in += v5
+      where +=
+        s"""[(datomic.api/q
+           |          "[:find (distinct $pair)
+           |            :in $$ $e
+           |            :where [$e $a $v]
+           |                   [$v $ai $i_]
+           |                   [$v $av $v_]
+           |                   [(vector $i_ $v_) $pair]]" $$ $e) [[$v1]]]""".stripMargin -> wClause
+      where += s"[(sort-by first $v1) $v2]" -> wClause
+      where += s"[(map second $v2) $v3]" -> wClause
+      resSeq.tpe match {
+        case "Boolean" =>
+          // Need to convert to sets of Strings for `some` to work on boolean false (maybe a bug?)
+          where += s"[(map str $v3) $v3-list]" -> wClause
+          where += s"[(set $v3-list) $v3-set]" -> wClause
+          where += s"[(map str $v5) $v5-list]" -> wClause
+          where += s"[(set $v5-list) $v5-set]" -> wClause
+          where += s"[(some $v3-set $v5-set)]" -> wClause
+
+        case _ =>
+          where += s"[(set $v3) $v4]" -> wClause
+          where += s"[(some $v4 $v5)]" -> wClause
+      }
+
     } else {
+      // Match nothing
+      find += v
       where += s"[(ground nil) $v]" -> wGround
     }
-  }
-
-  private def mkRules[T](
-    attr: Attr, e: Var, v: Var,
-    seqs: Seq[Seq[T]], tpe: String, toDatalog: T => String
-  ): Seq[String] = {
-    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
-    tpe match {
-      case "Float" =>
-        seqs.flatMap {
-          case set if set.isEmpty => None
-          case set                => Some(
-            set.zipWithIndex.map { case (arg, i) =>
-              // Coerce Datomic float values for correct comparison (don't know why this is necessary)
-              // See example: https://clojurians-log.clojureverse.org/datomic/2019-10-29
-              s"""[$e $a $v$i] [(float $v$i) $v$i-float] [(= $v$i-float (float $arg))]"""
-            }.mkString(s"[(rule$v $e)\n    ", "\n    ", "]")
-          )
-        }
-      case "URI"   =>
-        seqs.flatMap {
-          case set if set.isEmpty => None
-          case set                => Some(
-            set.zipWithIndex.map { case (arg, i) =>
-              s"""[(ground (new java.net.URI "$arg")) $v$i-uri] [$e $a $v$i-uri]"""
-            }.mkString(s"[(rule$v $e)\n    ", "\n    ", "]")
-          )
-        }
-      case _       =>
-        seqs.flatMap {
-          case set if set.isEmpty => None
-          case set                => Some(
-            set.map(arg => s"[$e $a ${toDatalog(arg)}]")
-              .mkString(s"[(rule$v $e)\n    ", "\n    ", "]")
-          )
-        }
-    }
+    addCast(resSeq.jList2list)
   }
 
   private def optHas[T: ClassTag](
@@ -482,14 +466,24 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     optSeqs: Option[Seq[Seq[T]]],
     tpe: String,
     resSeqOpt: ResSeqOpt[T],
-    toDatalog: T => String
+    toDatalog: T => String,
+    resSeq: ResSeq[T],
   ): Unit = {
-    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
-    optSeqs.fold[Unit] {
-      none(attr, e, v, resSeqOpt)
-    } { sets =>
-      find += s"(distinct $v)"
-      has(attr, e, v, sets, tpe, toDatalog)
+    optSeqs match {
+      case Some(seqs) if seqs.nonEmpty && seqs.flatten.nonEmpty =>
+        has(attr, e, v, seqs, resSeq.tpe, resSeq.toDatalog, resSeq)
+        replaceCast(resSeqOpt.j2sOptList)
+
+      case Some(emptySeqs) =>
+        // Match nothing
+        find += v
+        where += s"[(ground nil) $v]" -> wGround
+        addCast(resSeqOpt.j2sOptList)
+
+      case _ =>
+        // Match non-asserted Seqs
+        none(attr, e, v, resSeqOpt)
+      //        addCast(resSeqOpt.j2sOptList)
     }
   }
 
@@ -498,38 +492,59 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
 
   private def hasNo[T](
     attr: Attr, e: Var, v: Var,
-    seqs: Seq[Seq[T]], tpe: String, toDatalog: T => String
+    seqs: Seq[Seq[T]], tpe: String, toDatalog: T => String,
+    resSeq: ResSeq[T],
   ): Unit = {
     val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
-    // Common for pre-query and main query
-    where += s"[$e $a $v]" -> wClause
-
     if (seqs.nonEmpty && seqs.flatten.nonEmpty) {
-      // Pre-query
-      preWhere += s"(rule$v $e)" -> wClause
-      preRules ++= mkRules(attr, e, v, seqs, tpe, toDatalog)
+      find += v3
+      args += seqs.flatten.map(resSeq.s2j).asJava
+      in += v5
+      where +=
+        s"""[(datomic.api/q
+           |          "[:find (distinct $pair)
+           |            :in $$ $e
+           |            :where [$e $a $v]
+           |                   [$v $ai $i_]
+           |                   [$v $av $v_]
+           |                   [(vector $i_ $v_) $pair]]" $$ $e) [[$v1]]]""".stripMargin -> wClause
+      where += s"[(sort-by first $v1) $v2]" -> wClause
+      where += s"[(map second $v2) $v3]" -> wClause
+      resSeq.tpe match {
+        case "Boolean" =>
+          // Need to convert to sets of Strings for `some` to work on boolean false (maybe a bug?)
+          where += s"[(map str $v3) $v3-list]" -> wClause
+          where += s"[(set $v3-list) $v3-set]" -> wClause
+          where += s"[(map str $v5) $v5-list]" -> wClause
+          where += s"[(set $v5-list) $v5-set]" -> wClause
+          where += s"[(not-any? $v3-set $v5-set)]" -> wClause
 
-      // Main query
-      val blacklist   = v + "-blacklist"
-      val blacklisted = v + "-blacklisted"
-      inPost += blacklist
-      wherePost += s"[(contains? $blacklist $firstId) $blacklisted]" -> wClause
-      wherePost += s"[(not $blacklisted)]" -> wClause
+        case _ =>
+          where += s"[(set $v3) $v4]" -> wClause
+          where += s"[(not-any? $v4 $v5)]" -> wClause
+      }
+
+    } else {
+      // Get all
+      attrib(attr, e, v, resSeq)
     }
+    addCast(resSeq.jList2list)
   }
 
   private def optHasNo[T](
     attr: Attr, e: Var, v: Var,
     optSeqs: Option[Seq[Seq[T]]],
     tpe: String,
-    toDatalog: T => String
+    toDatalog: T => String,
+    resSeq: ResSeq[T],
+    resSeqOpt: ResSeqOpt[T],
   ): Unit = {
-    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
-    find += s"(distinct $v)"
-    if (optSeqs.isDefined) {
-      hasNo(attr, e, v, optSeqs.get, tpe, toDatalog)
-    } else {
-      where += s"[$e $a $v]" -> wClause
+    optSeqs match {
+      case Some(seqs) if seqs.nonEmpty && seqs.flatten.nonEmpty =>
+        hasNo(attr, e, v, optSeqs.get, tpe, toDatalog, resSeq)
+        replaceCast(resSeqOpt.j2sOptList)
+
+      case _ => optWithoutNone(attr, e, v, resSeqOpt)
     }
   }
 
@@ -537,8 +552,6 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
   // no value -----------------------------------------------------------------
 
   private def noValue(attr: Attr, e: Var): Unit = {
-    //    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
-
     val a = nsAttr(attr)
     if (refConfirmed) {
       where += s"(not [$e $a])" -> wNeqOne
@@ -784,66 +797,134 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
   }
 
 
+  // byte array ----------------------------------------------------------------
+
+  private def manByteArray(attr: Attr, e: Var, vs: Seq[Array[Byte]]): Unit = {
+    val v = vv
+    val a = nsAttr(attr)
+    find += v
+    attr.filterAttr.fold {
+      where += s"[$e $a $v]" -> wClause
+      byteArrayOps(attr, e, v, vs)
+
+    } { _ =>
+      throw ModelError(s"Filter attributes not allowed with byte arrays.")
+    }
+    refConfirmed = true
+    addCast(identity) // return Byte array as-is
+  }
+
+  private def tacByteArray(attr: Attr, e: Var, vs: Seq[Array[Byte]]): Unit = {
+    val v = vv
+    val a = nsAttr(attr)
+    attr.filterAttr.fold {
+      where += s"[$e $a $v]" -> wClause
+      byteArrayOps(attr, e, v, vs)
+    } { _ =>
+      throw ModelError(s"Filter attributes not allowed with byte arrays.")
+    }
+    refConfirmed = true
+  }
+
+
+  private def optByteArray(
+    attr: Attr, e: Var, optVs: Option[Seq[Array[Byte]]], resSeqOpt: ResSeqOpt[Byte]
+  ): Unit = {
+    val v = vv
+    val a = nsAttr(attr)
+    attr.op match {
+      case V =>
+        find += s"(pull $e-$v [[$a :limit nil]]) "
+        where += s"[(identity $e) $e-$v]" -> wGround
+
+      case Eq =>
+        optVs match {
+          case Some(arrays) if arrays.nonEmpty && arrays.flatten.nonEmpty =>
+            args += arrays.head
+            find += v
+            in += s"$v-input"
+            where += s"[$e $a $v]" -> wClause
+            where += s"[(java.util.Arrays/equals ^bytes $v ^bytes $v-input)]" -> wClause
+
+          case Some(emptyArrays) =>
+            find += v
+            where += s"[(ground nil) $v]" -> wGround
+
+          case _ =>
+            none(attr, e, v, resSeqOpt)
+        }
+
+      case Neq =>
+        find += v
+        where += s"[$e $a $v]" -> wClause
+        optVs.collect {
+          case arrays if arrays.nonEmpty && arrays.flatten.nonEmpty =>
+            args += arrays.head
+            in += s"$v-input"
+            where += s"[(java.util.Arrays/equals ^bytes $v ^bytes $v-input) $v-equal]" -> wClause
+            where += s"[(not $v-equal)]" -> wClause
+        }
+
+      case _ => throw ModelError(
+        s"Byte arrays can only be retrieved as-is. Filters not allowed.")
+    }
+    addCast(resSeqOpt.j2sOptList) // delegates to specialized cast for byte arrays
+  }
+
+
+  private def byteArrayOps(attr: Attr, e: Var, v: Var, vs: Seq[Array[Byte]]) = {
+    attr.op match {
+      case V   => ()
+      case Eq  =>
+        if (vs.nonEmpty && vs.flatten.nonEmpty) {
+          args += vs.head
+          in += s"$v-input"
+          where += s"[(java.util.Arrays/equals ^bytes $v ^bytes $v-input)]" -> wClause
+        } else {
+          // Get none
+          where += s"[(ground nil) $v]" -> wGround
+        }
+      case Neq =>
+        if (vs.nonEmpty && vs.flatten.nonEmpty) {
+          args += vs.head
+          in += s"$v-input"
+          where += s"[(java.util.Arrays/equals ^bytes $v ^bytes $v-input) $v-equal]" -> wClause
+          where += s"[(not $v-equal)]" -> wClause
+        } else {
+          // get all
+        }
+
+      case _ => throw ModelError(
+        s"Byte arrays can only be retrieved as-is. Filters not allowed.")
+    }
+  }
+
+
   // helpers -------------------------------------------------------------------
 
   private def none[T](attr: Attr, e: Var, v: Var, resSeqOpt: ResSeqOpt[T]): Unit = {
     val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
-    if (refConfirmed) {
+//    if (refConfirmed) {
       find += s"(pull $e-$v [[$a :limit nil]])"
       where += s"[(identity $e) $e-$v]" -> wGround
       where += s"(not [$e $a])" -> wNeqOne
+      //      addCast(resSeqOpt.j2sOptList)
 
-    } else {
-      val List(e0, _, refAttr, refId) = varPath.takeRight(4)
-      val refDatom                    = s"[$e0 $refAttr $refId]"
-      if (where.last == refDatom -> wClause) {
-        // cancel previous ref Datom since we will pull it instead
-        where.remove(where.size - 1)
-        varPath = varPath.dropRight(3)
-      }
-      find += s"$v"
-      where += s"(not [$e0 $refAttr])" -> wNeqOne
-      where += s"[(ground #{[]}) $v]" -> wNeqOne
-      replaceCast(resSeqOpt.optAttr2s)
-    }
-  }
-
-//  private def mkRules[T](
-//    attr: Attr, e: Var, v: Var,
-//    seqs: Seq[Seq[T]], tpe: String, toDatalog: T => String
-//  ): Seq[String] = {
-//    val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
-//    tpe match {
-//      case "Float" =>
-//        seqs.flatMap {
-//          case set if set.isEmpty => None
-//          case set                => Some(
-//            set.zipWithIndex.map { case (arg, i) =>
-//              // Coerce Datomic float values for correct comparison (don't know why this is necessary)
-//              // See example: https://clojurians-log.clojureverse.org/datomic/2019-10-29
-//              s"""[$e $a $v$i] [(float $v$i) $v$i-float] [(= $v$i-float (float $arg))]"""
-//            }.mkString(s"[(rule$v $e)\n    ", "\n    ", "]")
-//          )
-//        }
-//      case "URI"   =>
-//        seqs.flatMap {
-//          case set if set.isEmpty => None
-//          case set                => Some(
-//            set.zipWithIndex.map { case (arg, i) =>
-//              s"""[(ground (new java.net.URI "$arg")) $v$i-uri] [$e $a $v$i-uri]"""
-//            }.mkString(s"[(rule$v $e)\n    ", "\n    ", "]")
-//          )
-//        }
-//      case _       =>
-//        seqs.flatMap {
-//          case set if set.isEmpty => None
-//          case set                => Some(
-//            set.map(arg => s"[$e $a ${toDatalog(arg)}]")
-//              .mkString(s"[(rule$v $e)\n    ", "\n    ", "]")
-//          )
-//        }
+//    } else {
+//      val List(e0, _, refAttr, refId) = varPath.takeRight(4)
+//      val refDatom                    = s"[$e0 $refAttr $refId]"
+//      if (where.last == refDatom -> wClause) {
+//        // cancel previous ref Datom since we will pull it instead
+//        where.remove(where.size - 1)
+//        varPath = varPath.dropRight(3)
+//      }
+//      find += s"$v"
+//      where += s"(not [$e0 $refAttr])" -> wNeqOne
+//      where += s"[(ground #{[]}) $v]" -> wNeqOne
+//      //      replaceCast(resSeqOpt.j2sOptList)
 //    }
-//  }
+    addCast(resSeqOpt.j2sOptList)
+  }
 
   private def noBooleanSetAggr[T](resSeq: ResSeq[T]): Unit = {
     if (resSeq.tpe == "Boolean")

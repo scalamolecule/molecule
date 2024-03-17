@@ -1,7 +1,9 @@
 package molecule.datalog.datomic.compliance.crud
 
 import molecule.coreTests.spi.crud.update.seq.ops._
-import molecule.datalog.datomic.setup.TestAsync_datomic
+import molecule.datalog.datomic.setup._
+import molecule.datalog.datomic.spi.SpiAsync_datomic
+import scala.concurrent.Future
 
 object UpdateSeqOps_String_ extends UpdateSeqOps_String_ with TestAsync_datomic
 object UpdateSeqOps_Int extends UpdateSeqOps_Int with TestAsync_datomic
@@ -21,6 +23,6 @@ object UpdateSeqOps_OffsetDateTime_ extends UpdateSeqOps_OffsetDateTime_ with Te
 object UpdateSeqOps_ZonedDateTime_ extends UpdateSeqOps_ZonedDateTime_ with TestAsync_datomic
 object UpdateSeqOps_UUID_ extends UpdateSeqOps_UUID_ with TestAsync_datomic
 object UpdateSeqOps_URI_ extends UpdateSeqOps_URI_ with TestAsync_datomic
-object UpdateSeqOps_Byte_ extends UpdateByteArrayOps_Byte with TestAsync_datomic
+object UpdateSeqOps_Byte_ extends UpdateByteArrayOps_Byte with TestSuiteArray_datomic with SpiAsync_datomic
 object UpdateSeqOps_Short_ extends UpdateSeqOps_Short_ with TestAsync_datomic
 object UpdateSeqOps_Char_ extends UpdateSeqOps_Char_ with TestAsync_datomic

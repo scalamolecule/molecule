@@ -65,6 +65,9 @@ trait FilterSet_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
           _ <- Ns.i.a1.localTimes(Set.empty[LocalTime]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localTimes(Seq.empty[Set[LocalTime]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localTimes(Seq(Set.empty[LocalTime])).query.get.map(_ ==> List())
+
+          // Applying nothing matches nothing
+          _ <- Ns.i.a1.localTimes().query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -142,44 +145,8 @@ trait FilterSet_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
           _ <- Ns.i.a1.localTimes.has(Seq(localTime2, localTime3)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.localTimes.has(Seq(localTime1, localTime2, localTime3)).query.get.map(_ ==> List(a, b))
 
-
-//          // AND semantics when multiple values in a _Set_
-//
-//          // "Has this AND that"
-//          _ <- Ns.i.a1.localTimes.has(Set(localTime1)).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.localTimes.has(Set(localTime1, localTime2)).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.localTimes.has(Set(localTime1, localTime2, localTime3)).query.get.map(_ ==> List())
-//          _ <- Ns.i.a1.localTimes.has(Set(localTime2)).query.get.map(_ ==> List(a, b))
-//          _ <- Ns.i.a1.localTimes.has(Set(localTime2, localTime3)).query.get.map(_ ==> List(b))
-//          _ <- Ns.i.a1.localTimes.has(Set(localTime2, localTime3, localTime4)).query.get.map(_ ==> List(b))
-//          // Same as
-//          _ <- Ns.i.a1.localTimes.has(Seq(Set(localTime1))).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.localTimes.has(Seq(Set(localTime1, localTime2))).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.localTimes.has(Seq(Set(localTime1, localTime2, localTime3))).query.get.map(_ ==> List())
-//          _ <- Ns.i.a1.localTimes.has(Seq(Set(localTime2))).query.get.map(_ ==> List(a, b))
-//          _ <- Ns.i.a1.localTimes.has(Seq(Set(localTime2, localTime3))).query.get.map(_ ==> List(b))
-//          _ <- Ns.i.a1.localTimes.has(Seq(Set(localTime2, localTime3, localTime4))).query.get.map(_ ==> List(b))
-//
-//
-//          // AND/OR semantics with multiple Sets
-//
-//          // "(has this AND that) OR (has this AND that)"
-//          _ <- Ns.i.a1.localTimes.has(Set(localTime1, localTime2), Set(localTime0)).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.localTimes.has(Set(localTime1, localTime2), Set(localTime0, localTime3)).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.localTimes.has(Set(localTime1, localTime2), Set(localTime2, localTime3)).query.get.map(_ ==> List(a, b))
-//          _ <- Ns.i.a1.localTimes.has(Set(localTime1, localTime2), Set(localTime2, localTime3, localTime4)).query.get.map(_ ==> List(a, b))
-//          // Same as
-//          _ <- Ns.i.a1.localTimes.has(Seq(Set(localTime1, localTime2), Set(localTime0))).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.localTimes.has(Seq(Set(localTime1, localTime2), Set(localTime0, localTime3))).query.get.map(_ ==> List(a))
-//          _ <- Ns.i.a1.localTimes.has(Seq(Set(localTime1, localTime2), Set(localTime2, localTime3))).query.get.map(_ ==> List(a, b))
-//          _ <- Ns.i.a1.localTimes.has(Seq(Set(localTime1, localTime2), Set(localTime2, localTime3, localTime4))).query.get.map(_ ==> List(a, b))
-
-
           // Empty Seq/Sets match nothing
-//          _ <- Ns.i.a1.localTimes.has(Set(localTime1, localTime2), Set.empty[LocalTime]).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.localTimes.has(Seq.empty[LocalTime]).query.get.map(_ ==> List())
-//          _ <- Ns.i.a1.localTimes.has(Set.empty[LocalTime]).query.get.map(_ ==> List())
-//          _ <- Ns.i.a1.localTimes.has(Seq.empty[Set[LocalTime]]).query.get.map(_ ==> List())
         } yield ()
       }
 

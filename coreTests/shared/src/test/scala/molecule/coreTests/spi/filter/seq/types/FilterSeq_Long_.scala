@@ -64,6 +64,9 @@ trait FilterSeq_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.longSeq(List.empty[Long]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.longSeq(List.empty[List[Long]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.longSeq(List(List.empty[Long])).query.get.map(_ ==> List())
+
+          // Applying nothing matches nothing
+          _ <- Ns.i.a1.longSeq().query.get.map(_ ==> List())
         } yield ()
       }
 

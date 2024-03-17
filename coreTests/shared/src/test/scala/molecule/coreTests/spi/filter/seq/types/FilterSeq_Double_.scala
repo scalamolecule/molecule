@@ -64,6 +64,9 @@ trait FilterSeq_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.doubleSeq(List.empty[Double]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.doubleSeq(List.empty[List[Double]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.doubleSeq(List(List.empty[Double])).query.get.map(_ ==> List())
+
+          // Applying nothing matches nothing
+          _ <- Ns.i.a1.doubleSeq().query.get.map(_ ==> List())
         } yield ()
       }
 

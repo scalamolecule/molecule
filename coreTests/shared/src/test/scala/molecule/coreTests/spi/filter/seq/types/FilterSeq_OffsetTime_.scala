@@ -65,6 +65,9 @@ trait FilterSeq_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           _ <- Ns.i.a1.offsetTimeSeq(List.empty[OffsetTime]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetTimeSeq(List.empty[List[OffsetTime]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetTimeSeq(List(List.empty[OffsetTime])).query.get.map(_ ==> List())
+
+          // Applying nothing matches nothing
+          _ <- Ns.i.a1.offsetTimeSeq().query.get.map(_ ==> List())
         } yield ()
       }
 

@@ -3,7 +3,7 @@ import org.scalajs.linker.interface.ESVersion
 
 val scala212 = "2.12.19"
 val scala213 = "2.13.13"
-val scala3   = "3.3.2"
+val scala3   = "3.3.3"
 val allScala = Seq(scala212, scala213, scala3)
 
 val akkaVersion          = "2.8.3"
@@ -89,6 +89,7 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .settings(name := "molecule-core")
   .settings(doPublish)
+  .settings(compilerArgs)
   .settings(
     libraryDependencies ++= Seq(
       "io.suzaku" %%% "boopickle" % "1.4.0",
@@ -122,6 +123,7 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .settings(name := "molecule-coreTests")
   .settings(publish / skip := true)
+  .settings(compilerArgs)
   .enablePlugins(MoleculePlugin)
   .settings(
     // Generate Molecule boilerplate code for tests with `sbt clean compile -Dmolecule=true`
@@ -165,6 +167,7 @@ lazy val graphql = crossProject(JSPlatform, JVMPlatform)
   .in(file("graphql/client"))
   .settings(name := "molecule-graphql-client")
   .settings(doPublish)
+  .settings(compilerArgs)
   .enablePlugins(MoleculePlugin)
   .settings(
     // Generate Molecule boilerplate code for tests with `sbt clean compile -Dmolecule=true`
@@ -213,13 +216,13 @@ lazy val datalogCore = crossProject(JSPlatform, JVMPlatform)
   .in(file("datalog/core"))
   .settings(name := "molecule-datalog-core")
   .settings(doPublish)
+  .settings(compilerArgs)
   .settings(testFrameworks := testingFrameworks)
   .jvmSettings(
     libraryDependencies += "com.datomic" % "peer" % "1.0.7075"
   )
   .jsSettings(jsEnvironment)
-  .dependsOn(core)
-  .dependsOn(coreTests % "compile->compile;test->test")
+  .dependsOn(coreTests)
 
 
 lazy val datalogDatomic = crossProject(JSPlatform, JVMPlatform)
@@ -227,10 +230,10 @@ lazy val datalogDatomic = crossProject(JSPlatform, JVMPlatform)
   .in(file("datalog/datomic"))
   .settings(name := "molecule-datalog-datomic")
   .settings(doPublish)
+  .settings(compilerArgs)
   .settings(testFrameworks := testingFrameworks)
   .jsSettings(jsEnvironment)
-  .dependsOn(datalogCore)
-  .dependsOn(coreTests % "compile->compile;test->test")
+  .dependsOn(datalogCore % "compile->compile;test->test")
 
 
 lazy val documentMongodb = crossProject(JSPlatform, JVMPlatform)
@@ -238,6 +241,7 @@ lazy val documentMongodb = crossProject(JSPlatform, JVMPlatform)
   .in(file("document/mongodb"))
   .settings(name := "molecule-document-mongodb")
   .settings(doPublish)
+  .settings(compilerArgs)
   .settings(testFrameworks := testingFrameworks)
   .jsSettings(jsEnvironment)
   .jvmSettings(
@@ -256,6 +260,7 @@ lazy val sqlCore = crossProject(JSPlatform, JVMPlatform)
   .in(file("sql/core"))
   .settings(name := "molecule-sql-core")
   .settings(doPublish)
+  .settings(compilerArgs)
   .settings(testFrameworks := testingFrameworks)
   .jsSettings(jsEnvironment)
   .dependsOn(core)
@@ -268,6 +273,7 @@ lazy val sqlH2 = crossProject(JSPlatform, JVMPlatform)
   .settings(name := "molecule-sql-h2")
   .settings(testFrameworks := testingFrameworks)
   .settings(doPublish)
+  .settings(compilerArgs)
   .jsSettings(jsEnvironment)
   .jvmSettings(
     libraryDependencies ++= Seq(
@@ -283,6 +289,7 @@ lazy val sqlMariadb = crossProject(JSPlatform, JVMPlatform)
   .in(file("sql/mariadb"))
   .settings(name := "molecule-sql-mariadb")
   .settings(doPublish)
+  .settings(compilerArgs)
   .settings(testFrameworks := testingFrameworks)
   .jsSettings(jsEnvironment)
   .jvmSettings(
@@ -302,6 +309,7 @@ lazy val sqlMysql = crossProject(JSPlatform, JVMPlatform)
   .in(file("sql/mysql"))
   .settings(name := "molecule-sql-mysql")
   .settings(doPublish)
+  .settings(compilerArgs)
   .settings(testFrameworks := testingFrameworks)
   .jsSettings(jsEnvironment)
   .jvmSettings(
@@ -319,6 +327,7 @@ lazy val sqlPostgres = crossProject(JSPlatform, JVMPlatform)
   .in(file("sql/postgres"))
   .settings(name := "molecule-sql-postgres")
   .settings(doPublish)
+  .settings(compilerArgs)
   .settings(testFrameworks := testingFrameworks)
   .jsSettings(jsEnvironment)
   .jvmSettings(

@@ -65,6 +65,9 @@ trait FilterSeq_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.durationSeq(List.empty[Duration]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.durationSeq(List.empty[List[Duration]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.durationSeq(List(List.empty[Duration])).query.get.map(_ ==> List())
+
+          // Applying nothing matches nothing
+          _ <- Ns.i.a1.durationSeq().query.get.map(_ ==> List())
         } yield ()
       }
 

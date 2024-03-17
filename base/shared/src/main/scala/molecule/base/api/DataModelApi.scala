@@ -193,7 +193,7 @@ trait DataModelApi {
   object seqZonedDateTime extends seqZonedDateTime
   object seqUUID extends seqUUID
   object seqURI extends seqURI
-  object seqByte extends seqByte
+  object arrayByte extends arrayByte
   object seqShort extends seqShort
   object seqChar extends seqChar
 
@@ -216,7 +216,7 @@ trait DataModelApi {
   trait seqZonedDateTime extends Options[seqZonedDateTime, Seq[ZonedDateTime], ZonedDateTime]
   trait seqUUID extends Options[seqUUID, Seq[UUID], UUID]
   trait seqURI extends Options[seqURI, Seq[URI], URI]
-  trait seqByte extends Options[seqByte, Seq[Byte], Byte]
+  trait arrayByte extends Options[arrayByte, Seq[Byte], Byte]
   trait seqShort extends Options[seqShort, Seq[Short], Short]
   trait seqChar extends Options[seqChar, Seq[Char], Char]
 
