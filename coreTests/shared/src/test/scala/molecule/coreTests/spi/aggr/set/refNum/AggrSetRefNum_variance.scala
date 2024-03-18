@@ -26,10 +26,14 @@ trait AggrSetRefNum_variance extends CoreTestSuite with ApiAsync { spi: SpiAsync
 
         _ <- A.B.iSet(variance).query.get.map(_.head ==~ varianceOf(1, 2, 2, 3, 4, 3, 4))
 
-        _ <- A.i.B.iSet(variance).query.get.map(_.map {
-          case (1, variance) => variance ==~ varianceOf(1, 2)
-          case (2, variance) => variance ==~ varianceOf(2, 3, 4, 3, 4)
-        })
+        _ <- A.i.B.iSet(variance).a1.query.get.map(_ ==> List(
+          (1, varianceOf(1, 2)),
+          (2, varianceOf(2, 3, 4, 3, 4)),
+        ))
+        _ <- A.i.B.iSet(variance).d1.query.get.map(_ ==> List(
+          (2, varianceOf(2, 3, 4, 3, 4)),
+          (1, varianceOf(1, 2)),
+        ))
       } yield ()
     }
 
@@ -46,10 +50,14 @@ trait AggrSetRefNum_variance extends CoreTestSuite with ApiAsync { spi: SpiAsync
 
         _ <- A.B.C.iSet(variance).query.get.map(_.head ==~ varianceOf(1, 2, 2, 3, 4, 3, 4))
 
-        _ <- A.i.B.i.C.iSet(variance).query.get.map(_.map {
-          case (1, 1, variance) => variance ==~ varianceOf(1, 2)
-          case (2, 2, variance) => variance ==~ varianceOf(2, 3, 4, 3, 4)
-        })
+        _ <- A.i.B.i.C.iSet(variance).a1.query.get.map(_ ==> List(
+          (1, 1, varianceOf(1, 2)),
+          (2, 2, varianceOf(2, 3, 4, 3, 4)),
+        ))
+        _ <- A.i.B.i.C.iSet(variance).d1.query.get.map(_ ==> List(
+          (2, 2, varianceOf(2, 3, 4, 3, 4)),
+          (1, 1, varianceOf(1, 2)),
+        ))
       } yield ()
     }
 
@@ -64,10 +72,14 @@ trait AggrSetRefNum_variance extends CoreTestSuite with ApiAsync { spi: SpiAsync
           (2, 2, Set(3, 4)),
         )).transact
 
-        _ <- A.i.B.i._A.C.iSet(variance).query.get.map(_.map {
-          case (1, 1, variance) => variance ==~ varianceOf(1, 2)
-          case (2, 2, variance) => variance ==~ varianceOf(2, 3, 4, 3, 4)
-        })
+        _ <- A.i.B.i._A.C.iSet(variance).a1.query.get.map(_ ==> List(
+          (1, 1, varianceOf(1, 2)),
+          (2, 2, varianceOf(2, 3, 4, 3, 4)),
+        ))
+        _ <- A.i.B.i._A.C.iSet(variance).d1.query.get.map(_ ==> List(
+          (2, 2, varianceOf(2, 3, 4, 3, 4)),
+          (1, 1, varianceOf(1, 2)),
+        ))
       } yield ()
     }
   }

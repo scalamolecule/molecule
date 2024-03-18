@@ -10,26 +10,30 @@ import utest._
 
 trait AggrSeqRefNum_variance extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
-  // Variance of unique values (Set semantics)
+  // Variance of unique values (Seq semantics)
 
   override lazy val tests = Tests {
 
     "1st ref" - refs { implicit conn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
-        _ <- A.i.B.iSet.insert(List(
-          (1, Set(1, 2)),
-          (2, Set(2)),
-          (2, Set(3, 4)),
-          (2, Set(3, 4)),
+        _ <- A.i.B.iSeq.insert(List(
+          (1, Seq(1, 2)),
+          (2, Seq(2)),
+          (2, Seq(3, 4)),
+          (2, Seq(3, 4)),
         )).transact
 
-        _ <- A.B.iSet(variance).query.get.map(_.head ==~ varianceOf(1, 2, 2, 3, 4, 3, 4))
+        _ <- A.B.iSeq(variance).query.get.map(_.head ==~ varianceOf(1, 2, 2, 3, 4, 3, 4))
 
-        _ <- A.i.B.iSet(variance).query.get.map(_.map {
-          case (1, variance) => variance ==~ varianceOf(1, 2)
-          case (2, variance) => variance ==~ varianceOf(2, 3, 4, 3, 4)
-        })
+        _ <- A.i.B.iSeq(variance).a1.query.get.map(_ ==~ List(
+          (1, varianceOf(1, 2)),
+          (2, varianceOf(2, 3, 4, 3, 4)),
+        ))
+        _ <- A.i.B.iSeq(variance).d1.query.get.map(_ ==~ List(
+          (2, varianceOf(2, 3, 4, 3, 4)),
+          (1, varianceOf(1, 2)),
+        ))
       } yield ()
     }
 
@@ -37,19 +41,23 @@ trait AggrSeqRefNum_variance extends CoreTestSuite with ApiAsync { spi: SpiAsync
     "2nd ref" - refs { implicit conn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
-        _ <- A.i.B.i.C.iSet.insert(List(
-          (1, 1, Set(1, 2)),
-          (2, 2, Set(2)),
-          (2, 2, Set(3, 4)),
-          (2, 2, Set(3, 4)),
+        _ <- A.i.B.i.C.iSeq.insert(List(
+          (1, 1, Seq(1, 2)),
+          (2, 2, Seq(2)),
+          (2, 2, Seq(3, 4)),
+          (2, 2, Seq(3, 4)),
         )).transact
 
-        _ <- A.B.C.iSet(variance).query.get.map(_.head ==~ varianceOf(1, 2, 2, 3, 4, 3, 4))
+        _ <- A.B.C.iSeq(variance).query.get.map(_.head ==~ varianceOf(1, 2, 2, 3, 4, 3, 4))
 
-        _ <- A.i.B.i.C.iSet(variance).query.get.map(_.map {
-          case (1, 1, variance) => variance ==~ varianceOf(1, 2)
-          case (2, 2, variance) => variance ==~ varianceOf(2, 3, 4, 3, 4)
-        })
+        _ <- A.i.B.i.C.iSeq(variance).a1.query.get.map(_ ==~ List(
+          (1, 1, varianceOf(1, 2)),
+          (2, 2, varianceOf(2, 3, 4, 3, 4)),
+        ))
+        _ <- A.i.B.i.C.iSeq(variance).d1.query.get.map(_ ==~ List(
+          (2, 2, varianceOf(2, 3, 4, 3, 4)),
+          (1, 1, varianceOf(1, 2)),
+        ))
       } yield ()
     }
 
@@ -57,17 +65,21 @@ trait AggrSeqRefNum_variance extends CoreTestSuite with ApiAsync { spi: SpiAsync
     "backref" - refs { implicit conn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
-        _ <- A.i.B.i._A.C.iSet.insert(List(
-          (1, 1, Set(1, 2)),
-          (2, 2, Set(2)),
-          (2, 2, Set(3, 4)),
-          (2, 2, Set(3, 4)),
+        _ <- A.i.B.i._A.C.iSeq.insert(List(
+          (1, 1, Seq(1, 2)),
+          (2, 2, Seq(2)),
+          (2, 2, Seq(3, 4)),
+          (2, 2, Seq(3, 4)),
         )).transact
 
-        _ <- A.i.B.i._A.C.iSet(variance).query.get.map(_.map {
-          case (1, 1, variance) => variance ==~ varianceOf(1, 2)
-          case (2, 2, variance) => variance ==~ varianceOf(2, 3, 4, 3, 4)
-        })
+        _ <- A.i.B.i._A.C.iSeq(variance).a1.query.get.map(_ ==~ List(
+          (1, 1, varianceOf(1, 2)),
+          (2, 2, varianceOf(2, 3, 4, 3, 4)),
+        ))
+        _ <- A.i.B.i._A.C.iSeq(variance).d1.query.get.map(_ ==~ List(
+          (2, 2, varianceOf(2, 3, 4, 3, 4)),
+          (1, 1, varianceOf(1, 2)),
+        ))
       } yield ()
     }
   }

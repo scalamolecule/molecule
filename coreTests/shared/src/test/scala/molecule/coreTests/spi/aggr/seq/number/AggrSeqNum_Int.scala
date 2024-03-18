@@ -17,31 +17,29 @@ trait AggrSeqNum_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "sum" - types { implicit conn =>
       implicit val tolerant = tolerantIntEquality(toleranceInt)
       for {
-        _ <- Ns.i.intSet.insert(List(
-          (1, Set(int1, int2)),
-          (2, Set(int2)),
-          (2, Set(int3, int4)),
-          (2, Set(int3, int4)),
+        _ <- Ns.i.intSeq.insert(List(
+          (1, List(int1, int2, int2)),
+          (2, List(int2)),
+          (2, List(int3, int4)),
+          (2, List(int3, int4)),
         )).transact
 
         // Sum of all values
-        _ <- Ns.intSet(sum).query.get.map(
-          _.head.head ==~ (
-            int1 + int2 +
-              int2 +
-              int3 + int4 +
-              int3 + int4
-            )
-        )
-
-        _ <- Ns.i.intSet(sum).query.get.map(_.map {
-          case (1, setWithSum) => setWithSum.head ==~ int1 + int2
-          case (2, setWithSum) => setWithSum.head ==~ (
+        _ <- Ns.intSeq(sum).query.get.map(_.head ==~ (
+          int1 + int2 + int2 +
             int2 +
-              int3 + int4 +
-              int3 + int4
-            )
-        })
+            int3 + int4 +
+            int3 + int4))
+
+        // Sort by sum
+        _ <- Ns.i.intSeq(sum).a1.query.get.map(_ ==~ List(
+          (1, int1 + int2 + int2),
+          (2, int2 + int3 + int4 + int3 + int4),
+        ))
+        _ <- Ns.i.intSeq(sum).d1.query.get.map(_ ==~ List(
+          (2, int2 + int3 + int4 + int3 + int4),
+          (1, int1 + int2 + int2),
+        ))
       } yield ()
     }
 
@@ -52,53 +50,68 @@ trait AggrSeqNum_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       database match {
         case "Datomic" =>
           for {
-            _ <- Ns.i.intSet.insert(List(
-              (1, Set(int1, int2)),
-              (2, Set(int2)),
-              (2, Set(int5, int9)),
+            _ <- Ns.i.intSeq.insert(List(
+              (1, List(int1, int2)),
+              (2, List(int2)),
+              (2, List(int5, int9)),
             )).transact
 
             // Median of all values - middle number used if odd number of values
             // 1  2  2  5  9
             //       ^
-            _ <- Ns.intSet(median).query.get.map(_.head ==~ int2.toString.toDouble) // whole middle number
+            _ <- Ns.intSeq(median).query.get.map(_.head ==~ int2.toString.toDouble) // whole middle number
 
-            _ <- Ns.i.intSet(median).query.get.map(_.map {
-              case (1, median) => median ==~ int1.toDouble.floor // lower whole number
-              case (2, median) => median ==~ int5.toString.toDouble // whole middle number
-            })
+            // Sort by median
+            _ <- Ns.i.intSeq(median).a1.query.get.map(_ ==~ List(
+              (1, int1.toDouble.floor), // lower whole number
+              (2, int5.toString.toDouble), // whole middle number
+            ))
+            _ <- Ns.i.intSeq(median).d1.query.get.map(_ ==~ List(
+              (2, int5.toString.toDouble), // whole middle number
+              (1, int1.toDouble.floor), // lower whole number
+            ))
           } yield ()
 
         case "MongoDB" =>
           for {
-            _ <- Ns.i.intSet.insert(List(
-              (1, Set(int1, int2)),
-              (2, Set(int2)),
-              (2, Set(int5, int9)),
+            _ <- Ns.i.intSeq.insert(List(
+              (1, List(int1, int2)),
+              (2, List(int2)),
+              (2, List(int5, int9)),
             )).transact
 
-            _ <- Ns.intSet(median).query.get.map(_.head ==~ int2.toString.toDouble) // whole middle number
+            _ <- Ns.intSeq(median).query.get.map(_.head ==~ int2.toString.toDouble) // whole middle number
 
-            _ <- Ns.i.intSet(median).query.get.map(_.map {
-              case (1, median) => median ==~ int1.toDouble // lower number
-              case (2, median) => median ==~ int5.toString.toDouble // whole middle number
-            })
+            // Sort by median
+            _ <- Ns.i.intSeq(median).a1.query.get.map(_ ==~ List(
+              (1, int1.toDouble), // lower number
+              (2, int5.toString.toDouble), // whole middle number
+            ))
+            _ <- Ns.i.intSeq(median).d1.query.get.map(_ ==~ List(
+              (2, int5.toString.toDouble), // whole middle number
+              (1, int1.toDouble), // lower number
+            ))
           } yield ()
 
         case _ =>
           for {
-            _ <- Ns.i.intSet.insert(List(
-              (1, Set(int1, int2)),
-              (2, Set(int2)),
-              (2, Set(int5, int9)),
+            _ <- Ns.i.intSeq.insert(List(
+              (1, List(int1, int2)),
+              (2, List(int2)),
+              (2, List(int5, int9)),
             )).transact
 
-            _ <- Ns.intSet(median).query.get.map(_.head ==~ int2.toString.toDouble) // middle number
+            _ <- Ns.intSeq(median).query.get.map(_.head ==~ int2.toString.toDouble) // middle number
 
-            _ <- Ns.i.intSet(median).query.get.map(_.map {
-              case (1, median) => median ==~ (int1 + int2).toDouble / 2.0 // average of 2 middle numbers
-              case (2, median) => median ==~ int5.toString.toDouble // middle number
-            })
+            // Sort by median
+            _ <- Ns.i.intSeq(median).a1.query.get.map(_ ==~ List(
+              (1, (int1 + int2 + int2).toDouble / 2.0), // average of 2 middle numbers
+              (2, int5.toString.toDouble), // middle number
+            ))
+            _ <- Ns.i.intSeq(median).d1.query.get.map(_ ==~ List(
+              (2, int5.toString.toDouble), // middle number
+              (1, (int1 + int2 + int2).toDouble / 2.0), // average of 2 middle numbers
+            ))
           } yield ()
       }
     }
@@ -107,29 +120,30 @@ trait AggrSeqNum_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "avg" - types { implicit conn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
-        _ <- Ns.i.intSet.insert(List(
-          (1, Set(int1, int2)),
-          (2, Set(int2)),
-          (2, Set(int3, int4)),
-          (2, Set(int3, int4)),
+        _ <- Ns.i.intSeq.insert(List(
+          (1, List(int1, int2, int2)),
+          (2, List(int2)),
+          (2, List(int3, int4)),
+          (2, List(int3, int4)),
         )).transact
 
         // Average of all values
-        _ <- Ns.intSet(avg).query.get.map(_.head ==~ (
-          int1 + int2 +
+        _ <- Ns.intSeq(avg).query.get.map(_.head ==~ (
+          int1 + int2 + int2 +
             int2 +
             int3 + int4 +
             int3 + int4
-          ).toDouble / 7.0)
+          ).toDouble / 8.0)
 
-        _ <- Ns.i.intSet(avg).query.get.map(_.map {
-          case (1, avg) => avg ==~ (int1 + int2).toDouble / 2.0
-          case (2, avg) => avg ==~ (
-            int2 +
-              int3 + int4 +
-              int3 + int4
-            ).toDouble / 5.0
-        })
+        // Sort by average
+        _ <- Ns.i.intSeq(avg).a1.query.get.map(_ ==~ List(
+          (1, (int1 + int2 + int2).toDouble / 3.0),
+          (2, (int2 + int3 + int4 + int3 + int4).toDouble / 5.0),
+        ))
+        _ <- Ns.i.intSeq(avg).d1.query.get.map(_ ==~ List(
+          (2, (int2 + int3 + int4 + int3 + int4).toDouble / 5.0),
+          (1, (int1 + int2 + int2).toDouble / 3.0),
+        ))
       } yield ()
     }
 
@@ -137,29 +151,30 @@ trait AggrSeqNum_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "variance" - types { implicit conn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
-        _ <- Ns.i.intSet.insert(List(
-          (1, Set(int1, int2)),
-          (2, Set(int2)),
-          (2, Set(int3, int4)),
-          (2, Set(int3, int4)),
+        _ <- Ns.i.intSeq.insert(List(
+          (1, List(int1, int2, int2)),
+          (2, List(int2)),
+          (2, List(int3, int4)),
+          (2, List(int3, int4)),
         )).transact
 
         // Variance of all values
-        _ <- Ns.intSet(variance).query.get.map(_.head ==~ varianceOf(
-          int1, int2,
+        _ <- Ns.intSeq(variance).query.get.map(_.head ==~ varianceOf(
+          int1, int2, int2,
           int2,
           int3, int4,
           int3, int4
         ))
 
-        _ <- Ns.i.intSet(variance).query.get.map(_.map {
-          case (1, variance) => variance ==~ varianceOf(int1, int2)
-          case (2, variance) => variance ==~ varianceOf(
-            int2,
-            int3, int4,
-            int3, int4
-          )
-        })
+        // Sort by variance
+        _ <- Ns.i.intSeq(variance).a1.query.get.map(_ ==~ List(
+          (1, varianceOf(int1, int2, int2)),
+          (2, varianceOf(int2, int3, int4, int3, int4)),
+        ))
+        _ <- Ns.i.intSeq(variance).d1.query.get.map(_ ==~ List(
+          (2, varianceOf(int2, int3, int4, int3, int4)),
+          (1, varianceOf(int1, int2, int2)),
+        ))
       } yield ()
     }
 
@@ -167,30 +182,31 @@ trait AggrSeqNum_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "stddev" - types { implicit conn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
-        _ <- Ns.i.intSet.insert(List(
-          (1, Set(int1, int2)),
-          (2, Set(int2)),
-          (2, Set(int3, int4)),
-          (2, Set(int3, int4)),
+        _ <- Ns.i.intSeq.insert(List(
+          (1, List(int1, int2, int2)),
+          (2, List(int2)),
+          (2, List(int3, int4)),
+          (2, List(int3, int4)),
         )).transact
 
 
         // Standard deviation of all values
-        _ <- Ns.intSet(stddev).query.get.map(_.head ==~ stdDevOf(
-          int1, int2,
+        _ <- Ns.intSeq(stddev).query.get.map(_.head ==~ stdDevOf(
+          int1, int2, int2,
           int2,
           int3, int4,
           int3, int4
         ))
 
-        _ <- Ns.i.intSet(stddev).query.get.map(_.map {
-          case (1, stddev) => stddev ==~ stdDevOf(int1, int2)
-          case (2, stddev) => stddev ==~ stdDevOf(
-            int2,
-            int3, int4,
-            int3, int4
-          )
-        })
+        // Sort by standard deviation
+        _ <- Ns.i.intSeq(stddev).a1.query.get.map(_ ==~ List(
+          (1, stdDevOf(int1, int2, int2)),
+          (2, stdDevOf(int2, int3, int4, int3, int4)),
+        ))
+        _ <- Ns.i.intSeq(stddev).d1.query.get.map(_ ==~ List(
+          (2, stdDevOf(int2, int3, int4, int3, int4)),
+          (1, stdDevOf(int1, int2, int2)),
+        ))
       } yield ()
     }
   }

@@ -26,23 +26,21 @@ trait AggrSetNum_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         )).transact
 
         // Sum of all values
-        _ <- Ns.longSet(sum).query.get.map(
-          _.head.head ==~ (
-            long1 + long2 +
-              long2 +
-              long3 + long4 +
-              long3 + long4
-            )
-        )
-
-        _ <- Ns.i.longSet(sum).query.get.map(_.map {
-          case (1, setWithSum) => setWithSum.head ==~ long1 + long2
-          case (2, setWithSum) => setWithSum.head ==~ (
+        _ <- Ns.longSet(sum).query.get.map(_.head ==~ (
+          long1 + long2 +
             long2 +
-              long3 + long4 +
-              long3 + long4
-            )
-        })
+            long3 + long4 +
+            long3 + long4))
+
+        // Sort by sum
+        _ <- Ns.i.longSet(sum).a1.query.get.map(_ ==~ List(
+          (1, long1 + long2),
+          (2, long2 + long3 + long4 + long3 + long4),
+        ))
+        _ <- Ns.i.longSet(sum).d1.query.get.map(_ ==~ List(
+          (2, long2 + long3 + long4 + long3 + long4),
+          (1, long1 + long2),
+        ))
       } yield ()
     }
 
@@ -64,10 +62,15 @@ trait AggrSetNum_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             //       ^
             _ <- Ns.longSet(median).query.get.map(_.head ==~ long2.toString.toDouble) // whole middle number
 
-            _ <- Ns.i.longSet(median).query.get.map(_.map {
-              case (1, median) => median ==~ long1.toDouble.floor // lower whole number
-              case (2, median) => median ==~ long5.toString.toDouble // whole middle number
-            })
+            // Sort by median
+            _ <- Ns.i.longSet(median).a1.query.get.map(_ ==~ List(
+              (1, long1.toDouble.floor), // lower whole number
+              (2, long5.toString.toDouble), // whole middle number
+            ))
+            _ <- Ns.i.longSet(median).d1.query.get.map(_ ==~ List(
+              (2, long5.toString.toDouble), // whole middle number
+              (1, long1.toDouble.floor), // lower whole number
+            ))
           } yield ()
 
         case "MongoDB" =>
@@ -80,10 +83,15 @@ trait AggrSetNum_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
             _ <- Ns.longSet(median).query.get.map(_.head ==~ long2.toString.toDouble) // whole middle number
 
-            _ <- Ns.i.longSet(median).query.get.map(_.map {
-              case (1, median) => median ==~ long1.toDouble // lower number
-              case (2, median) => median ==~ long5.toString.toDouble // whole middle number
-            })
+            // Sort by median
+            _ <- Ns.i.longSet(median).a1.query.get.map(_ ==~ List(
+              (1, long1.toDouble), // lower number
+              (2, long5.toString.toDouble), // whole middle number
+            ))
+            _ <- Ns.i.longSet(median).d1.query.get.map(_ ==~ List(
+              (2, long5.toString.toDouble), // whole middle number
+              (1, long1.toDouble), // lower number
+            ))
           } yield ()
 
         case _ =>
@@ -96,10 +104,15 @@ trait AggrSetNum_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
             _ <- Ns.longSet(median).query.get.map(_.head ==~ long2.toString.toDouble) // middle number
 
-            _ <- Ns.i.longSet(median).query.get.map(_.map {
-              case (1, median) => median ==~ (long1 + long2).toDouble / 2.0 // average of 2 middle numbers
-              case (2, median) => median ==~ long5.toString.toDouble // middle number
-            })
+            // Sort by median
+            _ <- Ns.i.longSet(median).a1.query.get.map(_ ==~ List(
+              (1, (long1 + long2).toDouble / 2.0), // average of 2 middle numbers
+              (2, long5.toString.toDouble), // middle number
+            ))
+            _ <- Ns.i.longSet(median).d1.query.get.map(_ ==~ List(
+              (1, (long1 + long2).toDouble / 2.0), // average of 2 middle numbers
+              (2, long5.toString.toDouble), // middle number
+            ))
           } yield ()
       }
     }
@@ -123,14 +136,15 @@ trait AggrSetNum_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             long3 + long4
           ).toDouble / 7.0)
 
-        _ <- Ns.i.longSet(avg).query.get.map(_.map {
-          case (1, avg) => avg ==~ (long1 + long2).toDouble / 2.0
-          case (2, avg) => avg ==~ (
-            long2 +
-              long3 + long4 +
-              long3 + long4
-            ).toDouble / 5.0
-        })
+        // Sort by average
+        _ <- Ns.i.longSet(avg).a1.query.get.map(_ ==~ List(
+          (1, (long1 + long2).toDouble / 2.0),
+          (2, (long2 + long3 + long4 + long3 + long4).toDouble / 5.0),
+        ))
+        _ <- Ns.i.longSet(avg).d1.query.get.map(_ ==~ List(
+          (2, (long2 + long3 + long4 + long3 + long4).toDouble / 5.0),
+          (1, (long1 + long2).toDouble / 2.0),
+        ))
       } yield ()
     }
 
@@ -153,14 +167,15 @@ trait AggrSetNum_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           long3, long4
         ))
 
-        _ <- Ns.i.longSet(variance).query.get.map(_.map {
-          case (1, variance) => variance ==~ varianceOf(long1, long2)
-          case (2, variance) => variance ==~ varianceOf(
-            long2,
-            long3, long4,
-            long3, long4
-          )
-        })
+        // Sort by variance
+        _ <- Ns.i.longSet(variance).a1.query.get.map(_ ==~ List(
+          (1, varianceOf(long1, long2)),
+          (2, varianceOf(long2, long3, long4, long3, long4)),
+        ))
+        _ <- Ns.i.longSet(variance).d1.query.get.map(_ ==~ List(
+          (2, varianceOf(long2, long3, long4, long3, long4)),
+          (1, varianceOf(long1, long2)),
+        ))
       } yield ()
     }
 
@@ -175,7 +190,6 @@ trait AggrSetNum_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(long3, long4)),
         )).transact
 
-
         // Standard deviation of all values
         _ <- Ns.longSet(stddev).query.get.map(_.head ==~ stdDevOf(
           long1, long2,
@@ -184,14 +198,15 @@ trait AggrSetNum_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           long3, long4
         ))
 
-        _ <- Ns.i.longSet(stddev).query.get.map(_.map {
-          case (1, stddev) => stddev ==~ stdDevOf(long1, long2)
-          case (2, stddev) => stddev ==~ stdDevOf(
-            long2,
-            long3, long4,
-            long3, long4
-          )
-        })
+        // Sort by standard deviation
+        _ <- Ns.i.longSet(stddev).a1.query.get.map(_ ==~ List(
+          (1, stdDevOf(long1, long2)),
+          (2, stdDevOf(long2, long3, long4, long3, long4)),
+        ))
+        _ <- Ns.i.longSet(stddev).d1.query.get.map(_ ==~ List(
+          (2, stdDevOf(long2, long3, long4, long3, long4)),
+          (1, stdDevOf(long1, long2)),
+        ))
       } yield ()
     }
   }

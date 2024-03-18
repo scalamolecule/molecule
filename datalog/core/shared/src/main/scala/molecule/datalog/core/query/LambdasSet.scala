@@ -9,77 +9,29 @@ import molecule.core.util.JavaConversions
 
 trait LambdasSet extends ResolveBase with JavaConversions {
 
-  protected lazy val j2sSetId            : AnyRef => AnyRef = (v: AnyRef) => Set(v.toString)
-  protected lazy val j2sSetString        : AnyRef => AnyRef = (v: AnyRef) => Set(v)
-  // Datomic can return both Integer or Long
-  protected lazy val j2sSetInt           : AnyRef => AnyRef = (v: AnyRef) => Set(v.toString.toInt)
-  protected lazy val j2sSetLong          : AnyRef => AnyRef = (v: AnyRef) => Set(v)
-  protected lazy val j2sSetFloat         : AnyRef => AnyRef = {
-    case v: jFloat  => Set(v.asInstanceOf[AnyRef])
-    case v: jDouble => Set(v.toFloat.asInstanceOf[AnyRef])
-  }
-  protected lazy val j2sSetDouble        : AnyRef => AnyRef = (v: AnyRef) => Set(v)
-  protected lazy val j2sSetBoolean       : AnyRef => AnyRef = (v: AnyRef) => Set(v)
-  protected lazy val j2sSetBigInt        : AnyRef => AnyRef = {
-    case v: jBigInt => Set(BigInt(v))
-    case v          => Set(BigInt(v.toString))
-  }
-  protected lazy val j2sSetBigDecimal    : AnyRef => AnyRef =
-    (v: AnyRef) => Set(BigDecimal(v.asInstanceOf[jBigDecimal]))
-  protected lazy val j2sSetDate          : AnyRef => AnyRef = (v: AnyRef) => Set(v)
-  protected lazy val j2sSetDuration      : AnyRef => AnyRef = (v: AnyRef) => Set(Duration.parse(v.toString))
-  protected lazy val j2sSetInstant       : AnyRef => AnyRef = (v: AnyRef) => Set(Instant.parse(v.toString))
-  protected lazy val j2sSetLocalDate     : AnyRef => AnyRef = (v: AnyRef) => Set(LocalDate.parse(v.toString))
-  protected lazy val j2sSetLocalTime     : AnyRef => AnyRef = (v: AnyRef) => Set(LocalTime.parse(v.toString))
-  protected lazy val j2sSetLocalDateTime : AnyRef => AnyRef = (v: AnyRef) => Set(LocalDateTime.parse(v.toString))
-  protected lazy val j2sSetOffsetTime    : AnyRef => AnyRef = (v: AnyRef) => Set(OffsetTime.parse(v.toString))
-  protected lazy val j2sSetOffsetDateTime: AnyRef => AnyRef = (v: AnyRef) => Set(OffsetDateTime.parse(v.toString))
-  protected lazy val j2sSetZonedDateTime : AnyRef => AnyRef = (v: AnyRef) => Set(ZonedDateTime.parse(v.toString))
-  protected lazy val j2sSetUUID          : AnyRef => AnyRef = (v: AnyRef) => Set(v)
-  protected lazy val j2sSetURI           : AnyRef => AnyRef = (v: AnyRef) => Set(v)
-  protected lazy val j2sSetByte          : AnyRef => AnyRef = {
-    case v: Integer => Set(v.toByte)
-    case v: jLong   => Set(v.toByte)
-  }
-  protected lazy val j2sSetShort         : AnyRef => AnyRef = {
-    case v: Integer => Set(v.toShort)
-    case v: jLong   => Set(v.toShort)
-  }
-  protected lazy val j2sSetChar          : AnyRef => AnyRef =
-    (v: AnyRef) => Set(v.asInstanceOf[String].charAt(0))
-
-  private lazy val set2setId            : AnyRef => AnyRef = jset2set((v: AnyRef) => v.toString)
-  private lazy val set2setString        : AnyRef => AnyRef = jset2set
-  private lazy val set2setInt           : AnyRef => AnyRef = jset2set((v: AnyRef) => v.toString.toInt)
-  private lazy val set2setLong          : AnyRef => AnyRef = jset2set
-  private lazy val set2setFloat         : AnyRef => AnyRef = jset2set
-  private lazy val set2setDouble        : AnyRef => AnyRef = jset2set
-  private lazy val set2setBoolean       : AnyRef => AnyRef = jset2set
-  private lazy val set2setBigInt        : AnyRef => AnyRef = jset2set((v: AnyRef) => BigInt(v.toString))
-  private lazy val set2setBigDecimal    : AnyRef => AnyRef = jset2set((v: AnyRef) => BigDecimal(v.toString))
-  private lazy val set2setDate          : AnyRef => AnyRef = jset2set
-  private lazy val set2setDuration      : AnyRef => AnyRef = jset2set((v: AnyRef) => Duration.parse(v.asInstanceOf[String]))
-  private lazy val set2setInstant       : AnyRef => AnyRef = jset2set((v: AnyRef) => Instant.parse(v.asInstanceOf[String]))
-  private lazy val set2setLocalDate     : AnyRef => AnyRef = jset2set((v: AnyRef) => LocalDate.parse(v.asInstanceOf[String]))
-  private lazy val set2setLocalTime     : AnyRef => AnyRef = jset2set((v: AnyRef) => LocalTime.parse(v.asInstanceOf[String]))
-  private lazy val set2setLocalDateTime : AnyRef => AnyRef = jset2set((v: AnyRef) => LocalDateTime.parse(v.asInstanceOf[String]))
-  private lazy val set2setOffsetTime    : AnyRef => AnyRef = jset2set((v: AnyRef) => OffsetTime.parse(v.asInstanceOf[String]))
-  private lazy val set2setOffsetDateTime: AnyRef => AnyRef = jset2set((v: AnyRef) => OffsetDateTime.parse(v.asInstanceOf[String]))
-  private lazy val set2setZonedDateTime : AnyRef => AnyRef = jset2set((v: AnyRef) => ZonedDateTime.parse(v.asInstanceOf[String]))
-  private lazy val set2setUUID          : AnyRef => AnyRef = jset2set
-  private lazy val set2setURI           : AnyRef => AnyRef = jset2set
-  private lazy val set2setByte          : AnyRef => AnyRef = jset2set({
-    case v: Integer => v.toByte
-    case v: jLong   => v.toByte
-  })
-  private lazy val set2setShort         : AnyRef => AnyRef = jset2set({
-    case v: Integer => v.toByte
-    case v: jLong   => v.toByte
-  })
-  private lazy val set2setChar          : AnyRef => AnyRef = jset2set((v: AnyRef) => v.asInstanceOf[String].charAt(0))
-
-  private def jset2set: AnyRef => AnyRef =
-    (v: AnyRef) => v.asInstanceOf[jSet[_]].toArray.toSet
+  private lazy val set2setId            : AnyRef => AnyRef = jset2set(j2sId)
+  private lazy val set2setString        : AnyRef => AnyRef = jset2set(j2sString)
+  private lazy val set2setInt           : AnyRef => AnyRef = jset2set(j2sInt)
+  private lazy val set2setLong          : AnyRef => AnyRef = jset2set(j2sLong)
+  private lazy val set2setFloat         : AnyRef => AnyRef = jset2set(j2sFloat)
+  private lazy val set2setDouble        : AnyRef => AnyRef = jset2set(j2sDouble)
+  private lazy val set2setBoolean       : AnyRef => AnyRef = jset2set(j2sBoolean)
+  private lazy val set2setBigInt        : AnyRef => AnyRef = jset2set(j2sBigInt)
+  private lazy val set2setBigDecimal    : AnyRef => AnyRef = jset2set(j2sBigDecimal)
+  private lazy val set2setDate          : AnyRef => AnyRef = jset2set(j2sDate)
+  private lazy val set2setDuration      : AnyRef => AnyRef = jset2set(j2sDuration)
+  private lazy val set2setInstant       : AnyRef => AnyRef = jset2set(j2sInstant)
+  private lazy val set2setLocalDate     : AnyRef => AnyRef = jset2set(j2sLocalDate)
+  private lazy val set2setLocalTime     : AnyRef => AnyRef = jset2set(j2sLocalTime)
+  private lazy val set2setLocalDateTime : AnyRef => AnyRef = jset2set(j2sLocalDateTime)
+  private lazy val set2setOffsetTime    : AnyRef => AnyRef = jset2set(j2sOffsetTime)
+  private lazy val set2setOffsetDateTime: AnyRef => AnyRef = jset2set(j2sOffsetDateTime)
+  private lazy val set2setZonedDateTime : AnyRef => AnyRef = jset2set(j2sZonedDateTime)
+  private lazy val set2setUUID          : AnyRef => AnyRef = jset2set(j2sUUID)
+  private lazy val set2setURI           : AnyRef => AnyRef = jset2set(j2sURI)
+  private lazy val set2setByte          : AnyRef => AnyRef = jset2set(j2sByte)
+  private lazy val set2setShort         : AnyRef => AnyRef = jset2set(j2sShort)
+  private lazy val set2setChar          : AnyRef => AnyRef = jset2set(j2sChar)
 
   private def jset2set(value: AnyRef => Any): AnyRef => AnyRef =
     (v: AnyRef) => v.asInstanceOf[jSet[_]].toArray.map(value).toSet
@@ -149,43 +101,45 @@ trait LambdasSet extends ResolveBase with JavaConversions {
   case class ResSet[T](
     tpe: String,
     toDatalog: T => String,
-    s2j: Any => Any,
     j2s: AnyRef => AnyRef,
+    jSet2s: AnyRef => AnyRef,
+    s2j: Any => Any,
+    j2sSet: AnyRef => AnyRef,
     set2sets: AnyRef => AnyRef,
     vector2set: AnyRef => AnyRef,
-    j2sSet: AnyRef => AnyRef
+//    j2sSetOne: AnyRef => AnyRef
   )
 
-  lazy val resSetId            : ResSet[String]         = ResSet("String", dId, s2jId, set2setId, set2setsId, vector2setId, j2sSetId)
-  lazy val resSetString        : ResSet[String]         = ResSet("String", dString, s2jString, set2setString, set2setsString, vector2setString, j2sSetString)
-  lazy val resSetInt           : ResSet[Int]            = ResSet("Int", dInt, s2jInt, set2setInt, set2setsInt, vector2setInt, j2sSetInt)
-  lazy val resSetLong          : ResSet[Long]           = ResSet("Long", dLong, s2jLong, set2setLong, set2setsLong, vector2setLong, j2sSetLong)
-  lazy val resSetFloat         : ResSet[Float]          = ResSet("Float", dFloat, s2jFloat, set2setFloat, set2setsFloat, vector2setFloat, j2sSetFloat)
-  lazy val resSetDouble        : ResSet[Double]         = ResSet("Double", dDouble, s2jDouble, set2setDouble, set2setsDouble, vector2setDouble, j2sSetDouble)
-  lazy val resSetBoolean       : ResSet[Boolean]        = ResSet("Boolean", dBoolean, s2jBoolean, set2setBoolean, set2setsBoolean, vector2setBoolean, j2sSetBoolean)
-  lazy val resSetBigInt        : ResSet[BigInt]         = ResSet("BigInt", dBigInt, s2jBigInt, set2setBigInt, set2setsBigInt, vector2setBigInt, j2sSetBigInt)
-  lazy val resSetBigDecimal    : ResSet[BigDecimal]     = ResSet("BigDecimal", dBigDecimal, s2jBigDecimal, set2setBigDecimal, set2setsBigDecimal, vector2setBigDecimal, j2sSetBigDecimal)
-  lazy val resSetDate          : ResSet[Date]           = ResSet("Date", dDate, s2jDate, set2setDate, set2setsDate, vector2setDate, j2sSetDate)
-  lazy val resSetDuration      : ResSet[Duration]       = ResSet("Duration", dDuration, s2jDuration, set2setDuration, set2setsDuration, vector2setDuration, j2sSetDuration)
-  lazy val resSetInstant       : ResSet[Instant]        = ResSet("Instant", dInstant, s2jInstant, set2setInstant, set2setsInstant, vector2setInstant, j2sSetInstant)
-  lazy val resSetLocalDate     : ResSet[LocalDate]      = ResSet("LocalDate", dLocalDate, s2jLocalDate, set2setLocalDate, set2setsLocalDate, vector2setLocalDate, j2sSetLocalDate)
-  lazy val resSetLocalTime     : ResSet[LocalTime]      = ResSet("LocalTime", dLocalTime, s2jLocalTime, set2setLocalTime, set2setsLocalTime, vector2setLocalTime, j2sSetLocalTime)
-  lazy val resSetLocalDateTime : ResSet[LocalDateTime]  = ResSet("LocalDateTime", dLocalDateTime, s2jLocalDateTime, set2setLocalDateTime, set2setsLocalDateTime, vector2setLocalDateTime, j2sSetLocalDateTime)
-  lazy val resSetOffsetTime    : ResSet[OffsetTime]     = ResSet("OffsetTime", dOffsetTime, s2jOffsetTime, set2setOffsetTime, set2setsOffsetTime, vector2setOffsetTime, j2sSetOffsetTime)
-  lazy val resSetOffsetDateTime: ResSet[OffsetDateTime] = ResSet("OffsetDateTime", dOffsetDateTime, s2jOffsetDateTime, set2setOffsetDateTime, set2setsOffsetDateTime, vector2setOffsetDateTime, j2sSetOffsetDateTime)
-  lazy val resSetZonedDateTime : ResSet[ZonedDateTime]  = ResSet("ZonedDateTime", dZonedDateTime, s2jZonedDateTime, set2setZonedDateTime, set2setsZonedDateTime, vector2setZonedDateTime, j2sSetZonedDateTime)
-  lazy val resSetUUID          : ResSet[UUID]           = ResSet("UUID", dUUID, s2jUUID, set2setUUID, set2setsUUID, vector2setUUID, j2sSetUUID)
-  lazy val resSetURI           : ResSet[URI]            = ResSet("URI", dURI, s2jURI, set2setURI, set2setsURI, vector2setURI, j2sSetURI)
-  lazy val resSetByte          : ResSet[Byte]           = ResSet("Byte", dByte, s2jByte, set2setByte, set2setsByte, vector2setByte, j2sSetByte)
-  lazy val resSetShort         : ResSet[Short]          = ResSet("Short", dShort, s2jShort, set2setShort, set2setsShort, vector2setShort, j2sSetShort)
-  lazy val resSetChar          : ResSet[Char]           = ResSet("Char", dChar, s2jChar, set2setChar, set2setsChar, vector2setChar, j2sSetChar)
+  lazy val resSetId            : ResSet[String]         = ResSet("String", dId, j2sId, jSet2sId, s2jId, set2setId, set2setsId, vector2setId)
+  lazy val resSetString        : ResSet[String]         = ResSet("String", dString, j2sString, jSet2sString, s2jString, set2setString, set2setsString, vector2setString)
+  lazy val resSetInt           : ResSet[Int]            = ResSet("Int", dInt, j2sInt, jSet2sInt, s2jInt, set2setInt, set2setsInt, vector2setInt)
+  lazy val resSetLong          : ResSet[Long]           = ResSet("Long", dLong, j2sLong, jSet2sLong, s2jLong, set2setLong, set2setsLong, vector2setLong)
+  lazy val resSetFloat         : ResSet[Float]          = ResSet("Float", dFloat, j2sFloat, jSet2sFloat, s2jFloat, set2setFloat, set2setsFloat, vector2setFloat)
+  lazy val resSetDouble        : ResSet[Double]         = ResSet("Double", dDouble, j2sDouble, jSet2sDouble, s2jDouble, set2setDouble, set2setsDouble, vector2setDouble)
+  lazy val resSetBoolean       : ResSet[Boolean]        = ResSet("Boolean", dBoolean, j2sBoolean, jSet2sBoolean, s2jBoolean, set2setBoolean, set2setsBoolean, vector2setBoolean)
+  lazy val resSetBigInt        : ResSet[BigInt]         = ResSet("BigInt", dBigInt, j2sBigInt, jSet2sBigInt, s2jBigInt, set2setBigInt, set2setsBigInt, vector2setBigInt)
+  lazy val resSetBigDecimal    : ResSet[BigDecimal]     = ResSet("BigDecimal", dBigDecimal, j2sBigDecimal, jSet2sBigDecimal, s2jBigDecimal, set2setBigDecimal, set2setsBigDecimal, vector2setBigDecimal)
+  lazy val resSetDate          : ResSet[Date]           = ResSet("Date", dDate, j2sDate, jSet2sDate, s2jDate, set2setDate, set2setsDate, vector2setDate)
+  lazy val resSetDuration      : ResSet[Duration]       = ResSet("Duration", dDuration, j2sDuration, jSet2sDuration, s2jDuration, set2setDuration, set2setsDuration, vector2setDuration)
+  lazy val resSetInstant       : ResSet[Instant]        = ResSet("Instant", dInstant, j2sInstant, jSet2sInstant, s2jInstant, set2setInstant, set2setsInstant, vector2setInstant)
+  lazy val resSetLocalDate     : ResSet[LocalDate]      = ResSet("LocalDate", dLocalDate, j2sLocalDate, jSet2sLocalDate, s2jLocalDate, set2setLocalDate, set2setsLocalDate, vector2setLocalDate)
+  lazy val resSetLocalTime     : ResSet[LocalTime]      = ResSet("LocalTime", dLocalTime, j2sLocalTime, jSet2sLocalTime, s2jLocalTime, set2setLocalTime, set2setsLocalTime, vector2setLocalTime)
+  lazy val resSetLocalDateTime : ResSet[LocalDateTime]  = ResSet("LocalDateTime", dLocalDateTime, j2sLocalDateTime, jSet2sLocalDateTime, s2jLocalDateTime, set2setLocalDateTime, set2setsLocalDateTime, vector2setLocalDateTime)
+  lazy val resSetOffsetTime    : ResSet[OffsetTime]     = ResSet("OffsetTime", dOffsetTime, j2sOffsetTime, jSet2sOffsetTime, s2jOffsetTime, set2setOffsetTime, set2setsOffsetTime, vector2setOffsetTime)
+  lazy val resSetOffsetDateTime: ResSet[OffsetDateTime] = ResSet("OffsetDateTime", dOffsetDateTime, j2sOffsetDateTime, jSet2sOffsetDateTime, s2jOffsetDateTime, set2setOffsetDateTime, set2setsOffsetDateTime, vector2setOffsetDateTime)
+  lazy val resSetZonedDateTime : ResSet[ZonedDateTime]  = ResSet("ZonedDateTime", dZonedDateTime, j2sZonedDateTime, jSet2sZonedDateTime, s2jZonedDateTime, set2setZonedDateTime, set2setsZonedDateTime, vector2setZonedDateTime)
+  lazy val resSetUUID          : ResSet[UUID]           = ResSet("UUID", dUUID, j2sUUID, jSet2sUUID, s2jUUID, set2setUUID, set2setsUUID, vector2setUUID)
+  lazy val resSetURI           : ResSet[URI]            = ResSet("URI", dURI, j2sURI, jSet2sURI, s2jURI, set2setURI, set2setsURI, vector2setURI)
+  lazy val resSetByte          : ResSet[Byte]           = ResSet("Byte", dByte, j2sByte, jSet2sByte, s2jByte, set2setByte, set2setsByte, vector2setByte)
+  lazy val resSetShort         : ResSet[Short]          = ResSet("Short", dShort, j2sShort, jSet2sShort, s2jShort, set2setShort, set2setsShort, vector2setShort)
+  lazy val resSetChar          : ResSet[Char]           = ResSet("Char", dChar, j2sChar, jSet2sChar, s2jChar, set2setChar, set2setsChar, vector2setChar)
 
 
   lazy val any2double: AnyRef => AnyRef = {
     ((v: AnyRef) => v.toString.toDouble).asInstanceOf[AnyRef => AnyRef]
   }
 
-  private lazy val j2sOpSetId = (v: AnyRef) => v match {
+  private lazy val j2sOpSet_Id = (v: AnyRef) => v match {
     case null            => Option.empty[Set[String]]
     case set: jSet[_]    => Some(set.asScala.map(_.toString))
     case map: jMap[_, _] =>
@@ -224,7 +178,7 @@ trait LambdasSet extends ResolveBase with JavaConversions {
       }
   }
 
-  private lazy val j2sOpSetLong = (v: AnyRef) => v match {
+  private lazy val j2sOpSet_Long = (v: AnyRef) => v match {
     case null            => Option.empty[Set[Long]]
     case set: jSet[_]    => Some(set.asScala.map(_.asInstanceOf[Long]))
     case map: jMap[_, _] =>
@@ -271,10 +225,10 @@ trait LambdasSet extends ResolveBase with JavaConversions {
     }
   }
 
-  //  private lazy val j2sOpSetId             = j2sOpSet(j2Id)
+  private lazy val j2sOpSetId             = j2sOpSet_Id
   private lazy val j2sOpSetString         = j2sOpSet(j2String)
   private lazy val j2sOpSetInt            = j2sOpSet(j2Int)
-  //  private lazy val j2sOpSetLong           = j2sOpSet(j2Long)
+  private lazy val j2sOpSetLong           = j2sOpSet_Long
   private lazy val j2sOpSetFloat          = j2sOpSet(j2Float)
   private lazy val j2sOpSetDouble         = j2sOpSet(j2Double)
   private lazy val j2sOpSetBoolean        = j2sOpSet(j2Boolean)
@@ -311,24 +265,8 @@ trait LambdasSet extends ResolveBase with JavaConversions {
   }
 
   private def optAttr2sOptSet[T](decode: Any => T) = (v: AnyRef) => {
-//    val set = v.asInstanceOf[jSet[_]]
-
-    //    println(" B " + set)
-
     val set = v.asInstanceOf[jSet[_]].asScala.flatMap(_.asInstanceOf[jList[_]].asScala.map(decode)).toSet
-
     if (set.isEmpty) Option.empty[Set[T]] else Some(set)
-
-    //    println(" C " + coalescedSet)
-    //    if (set.iterator.next.asInstanceOf[jList[_]].isEmpty)
-    //      Option.empty[Set[T]]
-    //    else
-    //      Some(set.asScala.flatMap(_.asInstanceOf[jList[_]].asScala.map(decode)).toSet)
-    //
-    //    set.asScala.flatMap(_.asInstanceOf[jList[_]].asScala.map(decode)).toSet match{
-    //      case set if set.isEmpty => Option.empty[Set[T]]
-    //      case set
-    //    }
   }
 
   private lazy val jOptSetAttr2sOptSetId             = optAttr2sOptSetID

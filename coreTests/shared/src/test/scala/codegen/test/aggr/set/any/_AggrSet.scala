@@ -19,6 +19,7 @@ object _AggrSet extends CodeGenBase with BaseHelpers {
           .replace("package", "// GENERATED CODE ********************************\npackage")
           .replace("[Int]", s"[$tpe]")
           .replace("Int extends", name + "_ extends")
+          .replace(": Int", s": $tpe")
           .replace("int", v)
           .replace(v + "ersect", "intersect")
 

@@ -1,0 +1,27 @@
+package molecule.datalog.datomic.compliance.aggr.seq
+
+import molecule.coreTests.spi.aggr.seq.any._
+import molecule.datalog.datomic.setup.TestAsync_datomic
+
+object AggrSeq_String_ extends AggrSeq_String_ with TestAsync_datomic
+object AggrSeq_Int extends AggrSeq_Int with TestAsync_datomic
+object AggrSeq_Long_ extends AggrSeq_Long_ with TestAsync_datomic
+object AggrSeq_Float_ extends AggrSeq_Float_ with TestAsync_datomic
+object AggrSeq_Double_ extends AggrSeq_Double_ with TestAsync_datomic
+object AggrSeq_Boolean extends AggrSeq_Boolean with TestAsync_datomic
+object AggrSeq_BigInt_ extends AggrSeq_BigInt_ with TestAsync_datomic
+object AggrSeq_BigDecimal_ extends AggrSeq_BigDecimal_ with TestAsync_datomic
+object AggrSeq_Date_ extends AggrSeq_Date_ with TestAsync_datomic
+object AggrSeq_Duration_ extends AggrSeq_Duration_ with TestAsync_datomic
+object AggrSeq_Instant_ extends AggrSeq_Instant_ with TestAsync_datomic
+object AggrSeq_LocalDate_ extends AggrSeq_LocalDate_ with TestAsync_datomic
+object AggrSeq_LocalTime_ extends AggrSeq_LocalTime_ with TestAsync_datomic
+object AggrSeq_LocalDateTime_ extends AggrSeq_LocalDateTime_ with TestAsync_datomic
+object AggrSeq_OffsetTime_ extends AggrSeq_OffsetTime_ with TestAsync_datomic
+object AggrSeq_OffsetDateTime_ extends AggrSeq_OffsetDateTime_ with TestAsync_datomic
+object AggrSeq_ZonedDateTime_ extends AggrSeq_ZonedDateTime_ with TestAsync_datomic
+object AggrSeq_UUID_ extends AggrSeq_UUID_ with TestAsync_datomic
+object AggrSeq_URI_ extends AggrSeq_URI_ with TestAsync_datomic
+object AggrByteArray extends AggrByteArray with TestAsync_datomic
+object AggrSeq_Short_ extends AggrSeq_Short_ with TestAsync_datomic
+object AggrSeq_Char_ extends AggrSeq_Char_ with TestAsync_datomic

@@ -25,12 +25,16 @@ trait AggrSetRefNum_sum extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(3, 4)),
         )).transact
 
-        _ <- A.B.iSet(sum).query.get.map(_.head.head ==~ all)
+        _ <- A.B.iSet(sum).query.get.map(_.head ==~ all)
 
-        _ <- A.i.B.iSet(sum).query.get.map(_.map {
-          case (1, setWithSum) => setWithSum.head ==~ 1 + 2
-          case (2, setWithSum) => setWithSum.head ==~ all2
-        })
+        _ <- A.i.B.iSet(sum).a1.query.get.map(_ ==> List(
+          (1, 1 + 2),
+          (2, all2),
+        ))
+        _ <- A.i.B.iSet(sum).d1.query.get.map(_ ==> List(
+          (2, all2),
+          (1, 1 + 2),
+        ))
       } yield ()
     }
 
@@ -44,12 +48,16 @@ trait AggrSetRefNum_sum extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, 2, Set(3, 4)),
         )).transact
 
-        _ <- A.B.C.iSet(sum).query.get.map(_.head.head ==~ all)
+        _ <- A.B.C.iSet(sum).query.get.map(_.head ==~ all)
 
-        _ <- A.i.B.i.C.iSet(sum).query.get.map(_.map {
-          case (1, 1, setWithSum) => setWithSum.head ==~ 1 + 2
-          case (2, 2, setWithSum) => setWithSum.head ==~ all2
-        })
+        _ <- A.i.B.i.C.iSet(sum).a1.query.get.map(_ ==> List(
+          (1, 1, 1 + 2),
+          (2, 2, all2),
+        ))
+        _ <- A.i.B.i.C.iSet(sum).d1.query.get.map(_ ==> List(
+          (2, 2, all2),
+          (1, 1, 1 + 2),
+        ))
       } yield ()
     }
 
@@ -63,10 +71,14 @@ trait AggrSetRefNum_sum extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, 2, Set(3, 4)),
         )).transact
 
-        _ <- A.i.B.i._A.C.iSet(sum).query.get.map(_.map {
-          case (1, 1, setWithSum) => setWithSum.head ==~ 1 + 2
-          case (2, 2, setWithSum) => setWithSum.head ==~ all2
-        })
+        _ <- A.i.B.i._A.C.iSet(sum).a1.query.get.map(_ ==> List(
+          (1, 1, 1 + 2),
+          (2, 2, all2),
+        ))
+        _ <- A.i.B.i._A.C.iSet(sum).d1.query.get.map(_ ==> List(
+          (2, 2, all2),
+          (1, 1, 1 + 2),
+        ))
       } yield ()
     }
   }

@@ -13,12 +13,12 @@ trait Semantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 
-    "Only single card-set aggregation" - types { implicit conn =>
+    "Only single card-seq aggregation" - types { implicit conn =>
       for {
-        _ <- Ns.s.i.iSet.intSet.insert(List(
-          ("a", 1, Set(1, 2, 3), Set(1, 2, 3)),
-          ("b", 1, Set(2, 3, 4), Set(2, 3, 4)),
-          ("b", 2, Set(3, 4, 5), Set(3, 4, 5)),
+        _ <- Ns.s.i.longSeq.intSeq.insert(List(
+          ("a", 1, Seq(1L, 2L, 3L), Seq(1, 2, 3)),
+          ("b", 1, Seq(2L, 3L, 4L), Seq(2, 3, 4)),
+          ("b", 2, Seq(3L, 4L, 5L), Seq(3, 4, 5)),
         )).transact
 
         // Multiple cardinality-one aggregations ok
@@ -27,13 +27,13 @@ trait Semantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         ))
 
         // Mixing cardinality-one/set aggregations not allowed
-        _ <- Ns.i(min).iSet(max(2)).query.get
+        _ <- Ns.i(min).intSeq(max(2)).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Only a single aggregation is allowed with card-set attributes."
           }
 
         // Multiple cardinality-set aggregations not allowed
-        _ <- Ns.iSet(min(2)).intSet(max(2)).query.get
+        _ <- Ns.longSeq(min(2)).intSeq(max(2)).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Only a single aggregation is allowed with card-set attributes."
           }

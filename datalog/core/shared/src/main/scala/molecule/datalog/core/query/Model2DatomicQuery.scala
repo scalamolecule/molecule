@@ -211,4 +211,14 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
       throw ModelError(s"`$refName` can only nest to `${ref.refNs}`. Found: `$nestedNs`")
   }
 
+
+  final protected def sorterOneOptLong(
+    at: Attr,
+    attrIndex: Int
+  ): Option[(Int, Int => (Row, Row) => Int)] = {
+    if (at.refNs.isDefined)
+      sortOneOptLongRef(at, attrIndex)
+    else
+      sortOneOptLong(at, attrIndex)
+  }
 }

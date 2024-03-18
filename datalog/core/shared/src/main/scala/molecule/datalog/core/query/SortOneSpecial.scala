@@ -2,7 +2,8 @@ package molecule.datalog.core.query
 
 import java.lang.{Boolean => jBoolean, Double => jDouble, Float => jFloat, Integer => jInteger, Long => jLong}
 import java.math.{BigDecimal => jBigDecimal, BigInteger => jBigInt}
-import java.util.{Map => jMap}
+import java.net.URI
+import java.util.{Date, UUID, List => jList, Map => jMap}
 import molecule.boilerplate.ast.Model._
 import molecule.core.util.AggrUtils
 
@@ -24,58 +25,58 @@ trait SortOneSpecial[Tpl]
     }
   }
 
-  protected def intSorter(at: AttrOneManInt, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
-    at.op match {
+  protected def intSorter(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.op match {
       case Fn(kw, _) => kw match {
-        case "sum"    => sortOneLong(at, attrIndex)
-        case "median" => sortOneLongString(at, attrIndex)
-        case _        => sortOneInt(at, attrIndex)
+        case "sum"    => sortOneLong(attr, attrIndex)
+        case "median" => sortOneLongString(attr, attrIndex)
+        case _        => sortOneInt(attr, attrIndex)
       }
-      case _         => sortOneInt(at, attrIndex)
+      case _         => sortOneInt(attr, attrIndex)
     }
   }
 
-  protected def floatSorter(at: AttrOneManFloat, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
-    at.op match {
+  protected def floatSorter(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.op match {
       case Fn(kw, _) => kw match {
-        case "sum"    => sortOneDouble(at, attrIndex)
-        case "median" => sortOneDoubleString(at, attrIndex)
-        case _        => sortOneFloat(at, attrIndex)
+        case "sum"    => sortOneDouble(attr, attrIndex)
+        case "median" => sortOneDoubleString(attr, attrIndex)
+        case _        => sortOneFloat(attr, attrIndex)
       }
-      case _         => sortOneFloat(at, attrIndex)
+      case _         => sortOneFloat(attr, attrIndex)
     }
   }
 
-  protected def bigIntSorter(at: AttrOneManBigInt, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
-    at.op match {
+  protected def bigIntSorter(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.op match {
       case Fn(kw, _) => kw match {
-        case "sum"    => sortOneBigDecimalString(at, attrIndex)
-        case "median" => sortOneBigDecimalString(at, attrIndex)
-        case _        => sortOneBigInt(at, attrIndex)
+        case "sum"    => sortOneBigDecimalString(attr, attrIndex)
+        case "median" => sortOneBigDecimalString(attr, attrIndex)
+        case _        => sortOneBigInt(attr, attrIndex)
       }
-      case _         => sortOneBigInt(at, attrIndex)
+      case _         => sortOneBigInt(attr, attrIndex)
     }
   }
 
-  protected def byteSorter(at: AttrOneManByte, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
-    at.op match {
+  protected def byteSorter(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.op match {
       case Fn(kw, _) => kw match {
-        case "sum"    => sortOneLong(at, attrIndex)
-        case "median" => sortOneLongString(at, attrIndex)
-        case _        => sortOneByte(at, attrIndex)
+        case "sum"    => sortOneLong(attr, attrIndex)
+        case "median" => sortOneLongString(attr, attrIndex)
+        case _        => sortOneByte(attr, attrIndex)
       }
-      case _         => sortOneByte(at, attrIndex)
+      case _         => sortOneByte(attr, attrIndex)
     }
   }
 
-  protected def shortSorter(at: AttrOneManShort, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
-    at.op match {
+  protected def shortSorter(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.op match {
       case Fn(kw, _) => kw match {
-        case "sum"    => sortOneLong(at, attrIndex)
-        case "median" => sortOneLongString(at, attrIndex)
-        case _        => sortOneShort(at, attrIndex)
+        case "sum"    => sortOneLong(attr, attrIndex)
+        case "median" => sortOneLongString(attr, attrIndex)
+        case _        => sortOneShort(attr, attrIndex)
       }
-      case _         => sortOneShort(at, attrIndex)
+      case _         => sortOneShort(attr, attrIndex)
     }
   }
 
@@ -206,6 +207,51 @@ trait SortOneSpecial[Tpl]
     }
   }
 
+  protected def sortSample(
+    attr: Attr,
+    attrIndex: Int
+  ): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.sort.map { sort =>
+      (
+        sort.last.toString.toInt,
+        sort.head match {
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              a.get(i).asInstanceOf[jList[_]].iterator().next() match {
+                case v: String      => v.compareTo(b.get(i).asInstanceOf[jList[String]].iterator.next())
+                case v: jInteger    => v.compareTo(b.get(i).asInstanceOf[jList[jInteger]].iterator.next())
+                case v: jLong       => v.compareTo(b.get(i).asInstanceOf[jList[jLong]].iterator.next())
+                case v: jFloat      => v.compareTo(b.get(i).asInstanceOf[jList[jFloat]].iterator.next())
+                case v: jDouble     => v.compareTo(b.get(i).asInstanceOf[jList[jDouble]].iterator.next())
+                case v: jBoolean    => v.compareTo(b.get(i).asInstanceOf[jList[jBoolean]].iterator.next())
+                case v: jBigInt     => v.compareTo(b.get(i).asInstanceOf[jList[jBigInt]].iterator.next())
+                case v: jBigDecimal => v.compareTo(b.get(i).asInstanceOf[jList[jBigDecimal]].iterator.next())
+                case v: Date        => v.compareTo(b.get(i).asInstanceOf[jList[Date]].iterator.next())
+                case v: UUID        => v.compareTo(b.get(i).asInstanceOf[jList[UUID]].iterator.next())
+                case v: URI         => v.compareTo(b.get(i).asInstanceOf[jList[URI]].iterator.next())
+              }
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              b.get(i).asInstanceOf[jList[_]].iterator().next() match {
+                case v: String      => v.compareTo(a.get(i).asInstanceOf[jList[String]].iterator.next())
+                case v: jInteger    => v.compareTo(a.get(i).asInstanceOf[jList[jInteger]].iterator.next())
+                case v: jLong       => v.compareTo(a.get(i).asInstanceOf[jList[jLong]].iterator.next())
+                case v: jFloat      => v.compareTo(a.get(i).asInstanceOf[jList[jFloat]].iterator.next())
+                case v: jDouble     => v.compareTo(a.get(i).asInstanceOf[jList[jDouble]].iterator.next())
+                case v: jBoolean    => v.compareTo(a.get(i).asInstanceOf[jList[jBoolean]].iterator.next())
+                case v: jBigInt     => v.compareTo(a.get(i).asInstanceOf[jList[jBigInt]].iterator.next())
+                case v: jBigDecimal => v.compareTo(a.get(i).asInstanceOf[jList[jBigDecimal]].iterator.next())
+                case v: Date        => v.compareTo(a.get(i).asInstanceOf[jList[Date]].iterator.next())
+                case v: UUID        => v.compareTo(a.get(i).asInstanceOf[jList[UUID]].iterator.next())
+                case v: URI         => v.compareTo(a.get(i).asInstanceOf[jList[URI]].iterator.next())
+              }
+        }
+      )
+    }
+  }
+
   protected def sortMedian(
     attr: Attr,
     attrIndex: Int
@@ -217,25 +263,11 @@ trait SortOneSpecial[Tpl]
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              a.get(i) match {
-                case v: jInteger    => v.compareTo(b.get(i).asInstanceOf[jInteger])
-                case v: jLong       => v.compareTo(b.get(i).asInstanceOf[jLong])
-                case v: jDouble     => v.compareTo(b.get(i).asInstanceOf[jDouble])
-                case v: jFloat      => v.compareTo(b.get(i).asInstanceOf[jFloat])
-                case v: jBigInt     => v.compareTo(b.get(i).asInstanceOf[jBigInt])
-                case v: jBigDecimal => v.compareTo(b.get(i).asInstanceOf[jBigDecimal])
-              }
+              a.get(i).toString.toDouble.compareTo(b.get(i).toString.toDouble)
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              b.get(i) match {
-                case v: jInteger    => v.compareTo(a.get(i).asInstanceOf[jInteger])
-                case v: jLong       => v.compareTo(a.get(i).asInstanceOf[jLong])
-                case v: jDouble     => v.compareTo(a.get(i).asInstanceOf[jDouble])
-                case v: jFloat      => v.compareTo(a.get(i).asInstanceOf[jFloat])
-                case v: jBigInt     => v.compareTo(a.get(i).asInstanceOf[jBigInt])
-                case v: jBigDecimal => v.compareTo(a.get(i).asInstanceOf[jBigDecimal])
-              }
+              b.get(i).toString.toDouble.compareTo(a.get(i).toString.toDouble)
         }
       )
     }

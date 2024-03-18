@@ -1,6 +1,5 @@
 package molecule.datalog.core.query
 
-import java.util.{Set => jSet}
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import scala.reflect.ClassTag
@@ -36,10 +35,6 @@ trait ResolveExprOne_id[Tpl]
       case _                    => unexpectedElement(attr)
     }
     es
-  }
-
-  private def addSort(sorter: Option[(Int, Int => (Row, Row) => Int)]): Unit = {
-    sorter.foreach(s => sortss = sortss.init :+ (sortss.last :+ s))
   }
 
   private def man[T: ClassTag](
@@ -132,8 +127,7 @@ trait ResolveExprOne_id[Tpl]
 
       case "median" =>
         find += s"(median $e)"
-        // Force whole number to cast as double according to aggregate type for median/avg/variance/stddev)
-        replaceCast((v: AnyRef) => v.toString.toDouble.asInstanceOf[AnyRef])
+        replaceCast(any2double)
 
       // OBS! Datomic rounds down to nearest whole number
       // when calculating the median for multiple numbers instead of

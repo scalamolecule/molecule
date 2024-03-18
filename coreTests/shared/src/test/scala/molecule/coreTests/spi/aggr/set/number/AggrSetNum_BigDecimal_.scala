@@ -26,23 +26,21 @@ trait AggrSetNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
         )).transact
 
         // Sum of all values
-        _ <- Ns.bigDecimalSet(sum).query.get.map(
-          _.head.head ==~ (
-            bigDecimal1 + bigDecimal2 +
-              bigDecimal2 +
-              bigDecimal3 + bigDecimal4 +
-              bigDecimal3 + bigDecimal4
-            )
-        )
-
-        _ <- Ns.i.bigDecimalSet(sum).query.get.map(_.map {
-          case (1, setWithSum) => setWithSum.head ==~ bigDecimal1 + bigDecimal2
-          case (2, setWithSum) => setWithSum.head ==~ (
+        _ <- Ns.bigDecimalSet(sum).query.get.map(_.head ==~ (
+          bigDecimal1 + bigDecimal2 +
             bigDecimal2 +
-              bigDecimal3 + bigDecimal4 +
-              bigDecimal3 + bigDecimal4
-            )
-        })
+            bigDecimal3 + bigDecimal4 +
+            bigDecimal3 + bigDecimal4))
+
+        // Sort by sum
+        _ <- Ns.i.bigDecimalSet(sum).a1.query.get.map(_ ==~ List(
+          (1, bigDecimal1 + bigDecimal2),
+          (2, bigDecimal2 + bigDecimal3 + bigDecimal4 + bigDecimal3 + bigDecimal4),
+        ))
+        _ <- Ns.i.bigDecimalSet(sum).d1.query.get.map(_ ==~ List(
+          (2, bigDecimal2 + bigDecimal3 + bigDecimal4 + bigDecimal3 + bigDecimal4),
+          (1, bigDecimal1 + bigDecimal2),
+        ))
       } yield ()
     }
 
@@ -64,10 +62,15 @@ trait AggrSetNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
             //       ^
             _ <- Ns.bigDecimalSet(median).query.get.map(_.head ==~ bigDecimal2.toString.toDouble) // whole middle number
 
-            _ <- Ns.i.bigDecimalSet(median).query.get.map(_.map {
-              case (1, median) => median ==~ bigDecimal1.toDouble.floor // lower whole number
-              case (2, median) => median ==~ bigDecimal5.toString.toDouble // whole middle number
-            })
+            // Sort by median
+            _ <- Ns.i.bigDecimalSet(median).a1.query.get.map(_ ==~ List(
+              (1, bigDecimal1.toDouble.floor), // lower whole number
+              (2, bigDecimal5.toString.toDouble), // whole middle number
+            ))
+            _ <- Ns.i.bigDecimalSet(median).d1.query.get.map(_ ==~ List(
+              (2, bigDecimal5.toString.toDouble), // whole middle number
+              (1, bigDecimal1.toDouble.floor), // lower whole number
+            ))
           } yield ()
 
         case "MongoDB" =>
@@ -80,10 +83,15 @@ trait AggrSetNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
 
             _ <- Ns.bigDecimalSet(median).query.get.map(_.head ==~ bigDecimal2.toString.toDouble) // whole middle number
 
-            _ <- Ns.i.bigDecimalSet(median).query.get.map(_.map {
-              case (1, median) => median ==~ bigDecimal1.toDouble // lower number
-              case (2, median) => median ==~ bigDecimal5.toString.toDouble // whole middle number
-            })
+            // Sort by median
+            _ <- Ns.i.bigDecimalSet(median).a1.query.get.map(_ ==~ List(
+              (1, bigDecimal1.toDouble), // lower number
+              (2, bigDecimal5.toString.toDouble), // whole middle number
+            ))
+            _ <- Ns.i.bigDecimalSet(median).d1.query.get.map(_ ==~ List(
+              (2, bigDecimal5.toString.toDouble), // whole middle number
+              (1, bigDecimal1.toDouble), // lower number
+            ))
           } yield ()
 
         case _ =>
@@ -96,10 +104,15 @@ trait AggrSetNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
 
             _ <- Ns.bigDecimalSet(median).query.get.map(_.head ==~ bigDecimal2.toString.toDouble) // middle number
 
-            _ <- Ns.i.bigDecimalSet(median).query.get.map(_.map {
-              case (1, median) => median ==~ (bigDecimal1 + bigDecimal2).toDouble / 2.0 // average of 2 middle numbers
-              case (2, median) => median ==~ bigDecimal5.toString.toDouble // middle number
-            })
+            // Sort by median
+            _ <- Ns.i.bigDecimalSet(median).a1.query.get.map(_ ==~ List(
+              (1, (bigDecimal1 + bigDecimal2).toDouble / 2.0), // average of 2 middle numbers
+              (2, bigDecimal5.toString.toDouble), // middle number
+            ))
+            _ <- Ns.i.bigDecimalSet(median).d1.query.get.map(_ ==~ List(
+              (1, (bigDecimal1 + bigDecimal2).toDouble / 2.0), // average of 2 middle numbers
+              (2, bigDecimal5.toString.toDouble), // middle number
+            ))
           } yield ()
       }
     }
@@ -123,14 +136,15 @@ trait AggrSetNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
             bigDecimal3 + bigDecimal4
           ).toDouble / 7.0)
 
-        _ <- Ns.i.bigDecimalSet(avg).query.get.map(_.map {
-          case (1, avg) => avg ==~ (bigDecimal1 + bigDecimal2).toDouble / 2.0
-          case (2, avg) => avg ==~ (
-            bigDecimal2 +
-              bigDecimal3 + bigDecimal4 +
-              bigDecimal3 + bigDecimal4
-            ).toDouble / 5.0
-        })
+        // Sort by average
+        _ <- Ns.i.bigDecimalSet(avg).a1.query.get.map(_ ==~ List(
+          (1, (bigDecimal1 + bigDecimal2).toDouble / 2.0),
+          (2, (bigDecimal2 + bigDecimal3 + bigDecimal4 + bigDecimal3 + bigDecimal4).toDouble / 5.0),
+        ))
+        _ <- Ns.i.bigDecimalSet(avg).d1.query.get.map(_ ==~ List(
+          (2, (bigDecimal2 + bigDecimal3 + bigDecimal4 + bigDecimal3 + bigDecimal4).toDouble / 5.0),
+          (1, (bigDecimal1 + bigDecimal2).toDouble / 2.0),
+        ))
       } yield ()
     }
 
@@ -153,14 +167,15 @@ trait AggrSetNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
           bigDecimal3, bigDecimal4
         ))
 
-        _ <- Ns.i.bigDecimalSet(variance).query.get.map(_.map {
-          case (1, variance) => variance ==~ varianceOf(bigDecimal1, bigDecimal2)
-          case (2, variance) => variance ==~ varianceOf(
-            bigDecimal2,
-            bigDecimal3, bigDecimal4,
-            bigDecimal3, bigDecimal4
-          )
-        })
+        // Sort by variance
+        _ <- Ns.i.bigDecimalSet(variance).a1.query.get.map(_ ==~ List(
+          (1, varianceOf(bigDecimal1, bigDecimal2)),
+          (2, varianceOf(bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal3, bigDecimal4)),
+        ))
+        _ <- Ns.i.bigDecimalSet(variance).d1.query.get.map(_ ==~ List(
+          (2, varianceOf(bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal3, bigDecimal4)),
+          (1, varianceOf(bigDecimal1, bigDecimal2)),
+        ))
       } yield ()
     }
 
@@ -175,7 +190,6 @@ trait AggrSetNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
           (2, Set(bigDecimal3, bigDecimal4)),
         )).transact
 
-
         // Standard deviation of all values
         _ <- Ns.bigDecimalSet(stddev).query.get.map(_.head ==~ stdDevOf(
           bigDecimal1, bigDecimal2,
@@ -184,14 +198,15 @@ trait AggrSetNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
           bigDecimal3, bigDecimal4
         ))
 
-        _ <- Ns.i.bigDecimalSet(stddev).query.get.map(_.map {
-          case (1, stddev) => stddev ==~ stdDevOf(bigDecimal1, bigDecimal2)
-          case (2, stddev) => stddev ==~ stdDevOf(
-            bigDecimal2,
-            bigDecimal3, bigDecimal4,
-            bigDecimal3, bigDecimal4
-          )
-        })
+        // Sort by standard deviation
+        _ <- Ns.i.bigDecimalSet(stddev).a1.query.get.map(_ ==~ List(
+          (1, stdDevOf(bigDecimal1, bigDecimal2)),
+          (2, stdDevOf(bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal3, bigDecimal4)),
+        ))
+        _ <- Ns.i.bigDecimalSet(stddev).d1.query.get.map(_ ==~ List(
+          (2, stdDevOf(bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal3, bigDecimal4)),
+          (1, stdDevOf(bigDecimal1, bigDecimal2)),
+        ))
       } yield ()
     }
   }

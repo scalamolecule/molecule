@@ -21,28 +21,30 @@ trait AggrSetRef_max extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(3, 4)),
         )).transact
 
-        // Matching values coalesced into one Set
+        _ <- A.B.iSet(max).query.get.map(_ ==> List(4))
 
-        _ <- A.B.iSet(max).query.get.map(_ ==> List(Set(4)))
+        _ <- A.i.B.iSet(max).a1.query.get.map(_ ==> List(
+          (1, 2),
+          (2, 4),
+        ))
+        _ <- A.i.B.iSet(max).d1.query.get.map(_ ==> List(
+          (2, 4),
+          (1, 2),
+        ))
+
+
         _ <- A.B.iSet(max(1)).query.get.map(_ ==> List(Set(4)))
         _ <- A.B.iSet(max(2)).query.get.map(_ ==> List(Set(3, 4)))
         _ <- A.B.iSet(max(3)).query.get.map(_ ==> List(Set(2, 3, 4)))
 
-        _ <- A.i.a1.B.iSet(max).query.get.map(_ ==> List(
-          (1, Set(2)),
-          (2, Set(4)),
-        ))
-        // Same as
         _ <- A.i.a1.B.iSet(max(1)).query.get.map(_ ==> List(
           (1, Set(2)),
           (2, Set(4)),
         ))
-
         _ <- A.i.a1.B.iSet(max(2)).query.get.map(_ ==> List(
           (1, Set(1, 2)),
           (2, Set(3, 4)),
         ))
-
         _ <- A.i.a1.B.iSet(max(3)).query.get.map(_ ==> List(
           (1, Set(1, 2)),
           (2, Set(2, 3, 4)),
@@ -60,26 +62,30 @@ trait AggrSetRef_max extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, 2, Set(3, 4)),
         )).transact
 
-        _ <- A.B.C.iSet(max).query.get.map(_ ==> List(Set(4)))
+        _ <- A.B.C.iSet(max).query.get.map(_ ==> List(4))
+
+        _ <- A.i.B.i.C.iSet(max).a1.query.get.map(_ ==> List(
+          (1, 1, 2),
+          (2, 2, 4),
+        ))
+        _ <- A.i.B.i.C.iSet(max).d1.query.get.map(_ ==> List(
+          (2, 2, 4),
+          (1, 1, 2),
+        ))
+
+
         _ <- A.B.C.iSet(max(1)).query.get.map(_ ==> List(Set(4)))
         _ <- A.B.C.iSet(max(2)).query.get.map(_ ==> List(Set(3, 4)))
         _ <- A.B.C.iSet(max(3)).query.get.map(_ ==> List(Set(2, 3, 4)))
 
-        _ <- A.i.a1.B.i.C.iSet(max).query.get.map(_ ==> List(
-          (1, 1, Set(2)),
-          (2, 2, Set(4)),
-        ))
-        // Same as
         _ <- A.i.a1.B.i.C.iSet(max(1)).query.get.map(_ ==> List(
           (1, 1, Set(2)),
           (2, 2, Set(4)),
         ))
-
         _ <- A.i.a1.B.i.C.iSet(max(2)).query.get.map(_ ==> List(
           (1, 1, Set(1, 2)),
           (2, 2, Set(3, 4)),
         ))
-
         _ <- A.i.a1.B.i.C.iSet(max(3)).query.get.map(_ ==> List(
           (1, 1, Set(1, 2)),
           (2, 2, Set(2, 3, 4)),
@@ -97,26 +103,30 @@ trait AggrSetRef_max extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, 2, Set(3, 4)),
         )).transact
 
-        _ <- A.B._A.C.iSet(max).query.get.map(_ ==> List(Set(4)))
+        _ <- A.B._A.C.iSet(max).query.get.map(_ ==> List(4))
+
+        _ <- A.i.B.i._A.C.iSet(max).a1.query.get.map(_ ==> List(
+          (1, 1, 2),
+          (2, 2, 4),
+        ))
+        _ <- A.i.B.i._A.C.iSet(max).d1.query.get.map(_ ==> List(
+          (2, 2, 4),
+          (1, 1, 2),
+        ))
+
+
         _ <- A.B._A.C.iSet(max(1)).query.get.map(_ ==> List(Set(4)))
         _ <- A.B._A.C.iSet(max(2)).query.get.map(_ ==> List(Set(3, 4)))
         _ <- A.B._A.C.iSet(max(3)).query.get.map(_ ==> List(Set(2, 3, 4)))
 
-        _ <- A.i.a1.B.i._A.C.iSet(max).query.get.map(_ ==> List(
-          (1, 1, Set(2)),
-          (2, 2, Set(4)),
-        ))
-        // Same as
         _ <- A.i.a1.B.i._A.C.iSet(max(1)).query.get.map(_ ==> List(
           (1, 1, Set(2)),
           (2, 2, Set(4)),
         ))
-
         _ <- A.i.a1.B.i._A.C.iSet(max(2)).query.get.map(_ ==> List(
           (1, 1, Set(1, 2)),
           (2, 2, Set(3, 4)),
         ))
-
         _ <- A.i.a1.B.i._A.C.iSet(max(3)).query.get.map(_ ==> List(
           (1, 1,  Set(1, 2)),
           (2, 2, Set(2, 3, 4)),

@@ -20,10 +20,13 @@ trait AggrSetRef_sample extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(3, 4)),
           (2, Set(3, 4)),
         )).transact
+
         all = Set(1, 2, 3, 4)
-        _ <- A.B.iSet(sample).query.get.map(res => all.contains(res.head.head) ==> true)
-        _ <- A.B.iSet(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- A.B.iSet(sample(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
+
+        _ <- A.B.iSet(sample).query.get.map(rows => all.contains(rows.head) ==> true)
+
+        _ <- A.B.iSet(sample(1)).query.get.map(rows => all.intersect(rows.head).nonEmpty ==> true)
+        _ <- A.B.iSet(sample(2)).query.get.map(rows => all.intersect(rows.head).nonEmpty ==> true)
       } yield ()
     }
 
@@ -36,10 +39,13 @@ trait AggrSetRef_sample extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(3, 4)),
           (2, Set(3, 4)),
         )).transact
+
         all = Set(1, 2, 3, 4)
-        _ <- A.B.C.iSet(sample).query.get.map(res => all.contains(res.head.head) ==> true)
-        _ <- A.B.C.iSet(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- A.B.C.iSet(sample(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
+
+        _ <- A.B.C.iSet(sample).query.get.map(rows => all.contains(rows.head) ==> true)
+
+        _ <- A.B.C.iSet(sample(1)).query.get.map(rows => all.intersect(rows.head).nonEmpty ==> true)
+        _ <- A.B.C.iSet(sample(2)).query.get.map(rows => all.intersect(rows.head).nonEmpty ==> true)
       } yield ()
     }
 
@@ -57,17 +63,18 @@ trait AggrSetRef_sample extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         _ <- A.B.i._A.C.iSet(sample).query.get.map {
           _.map {
-            case (_, set) => all.contains(set.head) ==> true
+            case (_, sample) => all.contains(sample) ==> true
           }
         }
+
         _ <- A.B.i._A.C.iSet(sample(1)).query.get.map {
           _.map {
-            case (_, set) => all.intersect(set).nonEmpty ==> true
+            case (_, sampleSet) => all.intersect(sampleSet).nonEmpty ==> true
           }
         }
         _ <- A.B.i._A.C.iSet(sample(2)).query.get.map {
           _.map {
-            case (_, set) => all.intersect(set).nonEmpty ==> true
+            case (_, sampleSet) => all.intersect(sampleSet).nonEmpty ==> true
           }
         }
       } yield ()

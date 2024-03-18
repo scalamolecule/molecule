@@ -8,72 +8,30 @@ import java.util.{Date, UUID, Iterator => jIterator, List => jList, Map => jMap,
 
 trait LambdasOne extends ResolveBase {
 
-  // Datomic Java to Scala
-  protected lazy val j2sId            : AnyRef => AnyRef =  (v: AnyRef) => v.toString
-  protected lazy val j2sString        : AnyRef => AnyRef = identity
-  // Datomic can return both Integer or Long
-  protected lazy val j2sInt           : AnyRef => AnyRef = (v: AnyRef) => v.toString.toInt.asInstanceOf[AnyRef]
-  protected lazy val j2sLong          : AnyRef => AnyRef = identity
-  protected lazy val j2sFloat         : AnyRef => AnyRef = {
-    case v: jFloat  => v.asInstanceOf[AnyRef]
-    case v: jDouble => v.toFloat.asInstanceOf[AnyRef]
-  }
-  protected lazy val j2sDouble        : AnyRef => AnyRef = identity
-  protected lazy val j2sBoolean       : AnyRef => AnyRef = identity
-  protected lazy val j2sBigInt        : AnyRef => AnyRef = {
-    case v: jBigInt => BigInt(v)
-    case v          => BigInt(v.toString)
-  }
-  protected lazy val j2sBigDecimal    : AnyRef => AnyRef =
-    (v: AnyRef) => BigDecimal(v.asInstanceOf[jBigDecimal])
-  protected lazy val j2sDate          : AnyRef => AnyRef = identity
-  protected lazy val j2sDuration      : AnyRef => AnyRef = (v: AnyRef) => Duration.parse(v.asInstanceOf[String])
-  protected lazy val j2sInstant       : AnyRef => AnyRef = (v: AnyRef) => Instant.parse(v.asInstanceOf[String])
-  protected lazy val j2sLocalDate     : AnyRef => AnyRef = (v: AnyRef) => LocalDate.parse(v.asInstanceOf[String])
-  protected lazy val j2sLocalTime     : AnyRef => AnyRef = (v: AnyRef) => LocalTime.parse(v.asInstanceOf[String])
-  protected lazy val j2sLocalDateTime : AnyRef => AnyRef = (v: AnyRef) => LocalDateTime.parse(v.asInstanceOf[String])
-  protected lazy val j2sOffsetTime    : AnyRef => AnyRef = (v: AnyRef) => OffsetTime.parse(v.asInstanceOf[String])
-  protected lazy val j2sOffsetDateTime: AnyRef => AnyRef = (v: AnyRef) => OffsetDateTime.parse(v.asInstanceOf[String])
-  protected lazy val j2sZonedDateTime : AnyRef => AnyRef = (v: AnyRef) => ZonedDateTime.parse(v.asInstanceOf[String])
-  protected lazy val j2sUUID          : AnyRef => AnyRef = identity
-  protected lazy val j2sURI           : AnyRef => AnyRef = identity
-  protected lazy val j2sByte          : AnyRef => AnyRef = {
-    case v: Integer => v.toByte.asInstanceOf[AnyRef]
-    case v: jLong   => v.toByte.asInstanceOf[AnyRef]
-  }
-  protected lazy val j2sShort         : AnyRef => AnyRef = {
-    case v: Integer => v.toShort.asInstanceOf[AnyRef]
-    case v: jLong   => v.toShort.asInstanceOf[AnyRef]
-  }
-  protected lazy val j2sChar          : AnyRef => AnyRef =
-    (v: AnyRef) => v.asInstanceOf[String].charAt(0).asInstanceOf[AnyRef]
-
-
   // Single sample value extracted from clojure LazySeq
-  protected lazy val firstIdx           : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).toString.asInstanceOf[AnyRef]
-  protected lazy val firstString        : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
-  protected lazy val firstInt           : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).toString.toInt.asInstanceOf[AnyRef]
-  protected lazy val firstLong          : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
-  protected lazy val firstFloat         : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
-  protected lazy val firstDouble        : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
-  protected lazy val firstBoolean       : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
-  protected lazy val firstBigInt        : AnyRef => AnyRef = (v: AnyRef) => BigInt(v.asInstanceOf[jList[_]].get(0).asInstanceOf[jBigInt]).asInstanceOf[AnyRef]
-  protected lazy val firstBigDecimal    : AnyRef => AnyRef = (v: AnyRef) => BigDecimal(v.asInstanceOf[jList[_]].get(0).asInstanceOf[jBigDecimal]).asInstanceOf[AnyRef]
-  protected lazy val firstDate          : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
-  protected lazy val firstDuration      : AnyRef => AnyRef = (v: AnyRef) => Duration.parse(v.asInstanceOf[jList[_]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
-  protected lazy val firstInstant       : AnyRef => AnyRef = (v: AnyRef) => Instant.parse(v.asInstanceOf[jList[_]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
-  protected lazy val firstLocalDate     : AnyRef => AnyRef = (v: AnyRef) => LocalDate.parse(v.asInstanceOf[jList[_]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
-  protected lazy val firstLocalTime     : AnyRef => AnyRef = (v: AnyRef) => LocalTime.parse(v.asInstanceOf[jList[_]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
-  protected lazy val firstLocalDateTime : AnyRef => AnyRef = (v: AnyRef) => LocalDateTime.parse(v.asInstanceOf[jList[_]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
-  protected lazy val firstOffsetTime    : AnyRef => AnyRef = (v: AnyRef) => OffsetTime.parse(v.asInstanceOf[jList[_]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
-  protected lazy val firstOffsetDateTime: AnyRef => AnyRef = (v: AnyRef) => OffsetDateTime.parse(v.asInstanceOf[jList[_]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
-  protected lazy val firstZonedDateTime : AnyRef => AnyRef = (v: AnyRef) => ZonedDateTime.parse(v.asInstanceOf[jList[_]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
-  protected lazy val firstUUID          : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
-  protected lazy val firstURI           : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
-  protected lazy val firstByte          : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[Integer].toByte.asInstanceOf[AnyRef]
-  protected lazy val firstShort         : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[Integer].toShort.asInstanceOf[AnyRef]
-  protected lazy val firstChar          : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[String].charAt(0).asInstanceOf[AnyRef]
-
+  private lazy val firstIdx           : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).toString.asInstanceOf[AnyRef]
+  private lazy val firstString        : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
+  private lazy val firstInt           : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).toString.toInt.asInstanceOf[AnyRef]
+  private lazy val firstLong          : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
+  private lazy val firstFloat         : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
+  private lazy val firstDouble        : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
+  private lazy val firstBoolean       : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
+  private lazy val firstBigInt        : AnyRef => AnyRef = (v: AnyRef) => BigInt(v.asInstanceOf[jList[_]].get(0).asInstanceOf[jBigInt]).asInstanceOf[AnyRef]
+  private lazy val firstBigDecimal    : AnyRef => AnyRef = (v: AnyRef) => BigDecimal(v.asInstanceOf[jList[_]].get(0).asInstanceOf[jBigDecimal]).asInstanceOf[AnyRef]
+  private lazy val firstDate          : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
+  private lazy val firstDuration      : AnyRef => AnyRef = (v: AnyRef) => Duration.parse(v.asInstanceOf[jList[_]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
+  private lazy val firstInstant       : AnyRef => AnyRef = (v: AnyRef) => Instant.parse(v.asInstanceOf[jList[_]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
+  private lazy val firstLocalDate     : AnyRef => AnyRef = (v: AnyRef) => LocalDate.parse(v.asInstanceOf[jList[_]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
+  private lazy val firstLocalTime     : AnyRef => AnyRef = (v: AnyRef) => LocalTime.parse(v.asInstanceOf[jList[_]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
+  private lazy val firstLocalDateTime : AnyRef => AnyRef = (v: AnyRef) => LocalDateTime.parse(v.asInstanceOf[jList[_]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
+  private lazy val firstOffsetTime    : AnyRef => AnyRef = (v: AnyRef) => OffsetTime.parse(v.asInstanceOf[jList[_]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
+  private lazy val firstOffsetDateTime: AnyRef => AnyRef = (v: AnyRef) => OffsetDateTime.parse(v.asInstanceOf[jList[_]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
+  private lazy val firstZonedDateTime : AnyRef => AnyRef = (v: AnyRef) => ZonedDateTime.parse(v.asInstanceOf[jList[_]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
+  private lazy val firstUUID          : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
+  private lazy val firstURI           : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
+  private lazy val firstByte          : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[Integer].toByte.asInstanceOf[AnyRef]
+  private lazy val firstShort         : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[Integer].toShort.asInstanceOf[AnyRef]
+  private lazy val firstChar          : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[String].charAt(0).asInstanceOf[AnyRef]
 
   protected lazy val set2setId            : AnyRef => AnyRef = set2set((v: AnyRef) => v.toString)
   protected lazy val set2setString        : AnyRef => AnyRef = set2set

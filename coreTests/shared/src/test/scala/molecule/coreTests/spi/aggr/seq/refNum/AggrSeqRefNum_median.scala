@@ -11,7 +11,7 @@ import utest._
 
 trait AggrSeqRefNum_median extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
-  // Median of unique values (Set semantics)
+  // Median of unique values (Seq semantics)
 
   override lazy val tests = Tests {
     // Different databases have different ways of calculating a median
@@ -23,18 +23,22 @@ trait AggrSeqRefNum_median extends CoreTestSuite with ApiAsync { spi: SpiAsync =
     "1st ref" - refs { implicit conn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
-        _ <- A.i.B.iSet.insert(List(
-          (1, Set(1, 2)),
-          (2, Set(2)),
-          (2, Set(5, 9)),
+        _ <- A.i.B.iSeq.insert(List(
+          (1, Seq(1, 2)),
+          (2, Seq(2)),
+          (2, Seq(5, 9)),
         )).transact
 
-        _ <- A.B.iSet(median).query.get.map(_.head ==~ 2)
+        _ <- A.B.iSeq(median).query.get.map(_.head ==~ 2)
 
-        _ <- A.i.B.iSet(median).query.get.map(_.map {
-          case (1, median) => median ==~ wholeOrAverage
-          case (2, median) => median ==~ 5.0
-        })
+        _ <- A.i.B.iSeq(median).a1.query.get.map(_ ==~ List(
+          (1, wholeOrAverage),
+          (2, 5.0),
+        ))
+        _ <- A.i.B.iSeq(median).d1.query.get.map(_ ==~ List(
+          (2, 5.0),
+          (1, wholeOrAverage),
+        ))
       } yield ()
     }
 
@@ -42,18 +46,22 @@ trait AggrSeqRefNum_median extends CoreTestSuite with ApiAsync { spi: SpiAsync =
     "2nd ref" - refs { implicit conn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
-        _ <- A.i.B.i.C.iSet.insert(List(
-          (1, 1, Set(1, 2)),
-          (2, 2, Set(2)),
-          (2, 2, Set(5, 9)),
+        _ <- A.i.B.i.C.iSeq.insert(List(
+          (1, 1, Seq(1, 2)),
+          (2, 2, Seq(2)),
+          (2, 2, Seq(5, 9)),
         )).transact
 
-        _ <- A.B.C.iSet(median).query.get.map(_.head ==~ 2)
+        _ <- A.B.C.iSeq(median).query.get.map(_.head ==~ 2)
 
-        _ <- A.i.B.i.C.iSet(median).query.get.map(_.map {
-          case (1, 1, median) => median ==~ wholeOrAverage
-          case (2, 2, median) => median ==~ 5.0
-        })
+        _ <- A.i.B.i.C.iSeq(median).a1.query.get.map(_ ==~ List(
+          (1, 1, wholeOrAverage),
+          (2, 2, 5.0),
+        ))
+        _ <- A.i.B.i.C.iSeq(median).d1.query.get.map(_ ==~ List(
+          (2, 2, 5.0),
+          (1, 1, wholeOrAverage),
+        ))
       } yield ()
     }
 
@@ -61,16 +69,20 @@ trait AggrSeqRefNum_median extends CoreTestSuite with ApiAsync { spi: SpiAsync =
     "backref" - refs { implicit conn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
-        _ <- A.i.B.i._A.C.iSet.insert(List(
-          (1, 1, Set(1, 2)),
-          (2, 2, Set(2)),
-          (2, 2, Set(5, 9)),
+        _ <- A.i.B.i._A.C.iSeq.insert(List(
+          (1, 1, Seq(1, 2)),
+          (2, 2, Seq(2)),
+          (2, 2, Seq(5, 9)),
         )).transact
 
-        _ <- A.i.B.i._A.C.iSet(median).query.get.map(_.map {
-          case (1, 1, median) => median ==~ wholeOrAverage
-          case (2, 2, median) => median ==~ 5.0
-        })
+        _ <- A.i.B.i._A.C.iSeq(median).a1.query.get.map(_ ==~ List(
+          (1, 1, wholeOrAverage),
+          (2, 2, 5.0),
+        ))
+        _ <- A.i.B.i._A.C.iSeq(median).d1.query.get.map(_ ==~ List(
+          (2, 2, 5.0),
+          (1, 1, wholeOrAverage),
+        ))
       } yield ()
     }
   }

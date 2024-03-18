@@ -14,33 +14,34 @@ trait AggrSeqRef_distinct extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "1st ref" - refs { implicit conn =>
       for {
-        _ <- A.i.B.iSet.insert(List(
-          (1, Set(1, 2)),
-          (2, Set(2)),
-          (2, Set(3, 4)),
-          (2, Set(3, 4)),
+        _ <- A.i.B.iSeq.insert(List(
+          (1, List(1, 2)),
+          (2, List(2)),
+          (2, List(3, 4)),
+          (2, List(3, 4)),
         )).transact
 
-        // Matching values coalesced into one Set
+        // Matching values coalesced into one Seq
 
-        _ <- A.i.a1.B.iSet.query.get.map(_ ==> List(
-          (1, Set(1, 2)),
-          (2, Set(2, 3, 4)), // 3 rows coalesced
+        _ <- A.i.a1.B.iSeq.query.get.map(_ ==> List(
+          (1, List(1, 2)),
+          (2, List(2)),
+          (2, List(3, 4)), // 2 rows coalsedced
         ))
 
-        _ <- A.i.a1.B.iSet(distinct).query.get.map(_ ==> List(
-          (1, Set(Set(1, 2))),
+        _ <- A.i.a1.B.iSeq(distinct).query.get.map(_ ==> List(
+          (1, Set(List(1, 2))),
           (2, Set(
-            Set(2),
-            Set(3, 4) // 2 rows coalesced
+            List(2),
+            List(3, 4) // 2 rows coalesced
           ))
         ))
 
-        _ <- A.B.iSet(distinct).query.get.map(_ ==> List(
+        _ <- A.B.iSeq(distinct).query.get.map(_ ==> List(
           Set(
-            Set(1, 2),
-            Set(2),
-            Set(3, 4),
+            List(1, 2),
+            List(2),
+            List(3, 4),
           )
         ))
       } yield ()
@@ -49,26 +50,26 @@ trait AggrSeqRef_distinct extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "2nd ref" - refs { implicit conn =>
       for {
-        _ <- A.i.B.i.C.iSet.insert(List(
-          (1, 1, Set(1, 2)),
-          (2, 2, Set(2)),
-          (2, 2, Set(3, 4)),
-          (2, 2, Set(3, 4)),
+        _ <- A.i.B.i.C.iSeq.insert(List(
+          (1, 1, List(1, 2)),
+          (2, 2, List(2)),
+          (2, 2, List(3, 4)),
+          (2, 2, List(3, 4)),
         )).transact
 
-        _ <- A.i.a1.B.i.C.iSet(distinct).query.get.map(_ ==> List(
-          (1, 1, Set(Set(1, 2))),
+        _ <- A.i.a1.B.i.C.iSeq(distinct).query.get.map(_ ==> List(
+          (1, 1, Set(List(1, 2))),
           (2, 2, Set(
-            Set(2),
-            Set(3, 4) // 2 rows coalesced
+            List(2),
+            List(3, 4) // 2 rows coalesced
           ))
         ))
 
-        _ <- A.B.C.iSet(distinct).query.get.map(_ ==> List(
+        _ <- A.B.C.iSeq(distinct).query.get.map(_ ==> List(
           Set(
-            Set(1, 2),
-            Set(2),
-            Set(3, 4),
+            List(1, 2),
+            List(2),
+            List(3, 4),
           )
         ))
       } yield ()
@@ -77,16 +78,16 @@ trait AggrSeqRef_distinct extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "backref" - refs { implicit conn =>
       for {
-        _ <- A.i.B.i._A.C.iSet.insert(List(
-          (1, 1, Set(1, 2)),
-          (2, 2, Set(2)),
-          (2, 2, Set(3, 4)),
-          (2, 2, Set(3, 4)),
+        _ <- A.i.B.i._A.C.iSeq.insert(List(
+          (1, 1, List(1, 2)),
+          (2, 2, List(2)),
+          (2, 2, List(3, 4)),
+          (2, 2, List(3, 4)),
         )).transact
 
-        _ <- A.i.a1.B.i._A.C.iSet(distinct).query.get.map(_ ==> List(
-          (1, 1, Set(Set(1, 2))),
-          (2, 2, Set(Set(2), Set(3, 4))),
+        _ <- A.i.a1.B.i._A.C.iSeq(distinct).query.get.map(_ ==> List(
+          (1, 1, Set(List(1, 2))),
+          (2, 2, Set(List(2), List(3, 4))),
         ))
       } yield ()
     }

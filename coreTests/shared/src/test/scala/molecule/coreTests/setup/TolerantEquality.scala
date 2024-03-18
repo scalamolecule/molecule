@@ -1,18 +1,88 @@
 package molecule.coreTests.setup
 
 import org.scalactic.{Equality, TripleEquals}
-import utest._
 
 
 trait TolerantEquality extends TripleEquals {
 
-  implicit class tolerantEquality[T](left: T) {
-    def ==~(right: Any)(implicit equality: Equality[T]): Unit = {
-      if (left !== right) {
-        // fallback from unsuccessful tolerant check to strict test in order to show left/right values
-        left ==> right
+
+  implicit class tolerantEquality[T](lhs: T) {
+    def ==~(rhs: Any)(implicit equality: Equality[T]): Unit = {
+      (lhs, rhs) match {
+
+        // Simple hack to allow tolerant-comparing Lists of small tuples
+        case (l: List[_], r: List[_]) if l.nonEmpty && r.nonEmpty => l.head match {
+          case _: Product3[_, _, _] =>
+            l.zip(r).foreach {
+              case ((a, b, c), (x, y, z)) =>
+                try {
+                  check(a, x)
+                  check(b, y)
+                  check(c, z)
+                } catch {
+                  case _: Exception => hardCheck(lhs, rhs)
+                }
+            }
+          case _: Product2[_, _]    =>
+            l.zip(r).foreach {
+              case ((a, b), (x, y)) =>
+                try {
+                  check(a, x)
+                  check(b, y)
+                } catch {
+                  case _: Exception => hardCheck(lhs, rhs)
+                }
+            }
+          case _                    =>
+            l.zip(r).foreach {
+              case (a, x) =>
+                try {
+                  check(a, x)
+                } catch {
+                  case _: Exception => hardCheck(lhs, rhs)
+                }
+            }
+        }
+
+        case _ =>
+          if (lhs !== rhs) {
+            hardCheck(lhs, rhs)
+          }
       }
     }
+  }
+
+  private def check(lhs: Any, rhs: Any): Unit = {
+    lhs match {
+      case v: Float      =>
+        implicit val tolerance = tolerantFloatEquality(0.001F)
+        if (v !== rhs) {
+          throw new Exception("tolerant check failed")
+        }
+      case v: Double     =>
+        implicit val tolerance = tolerantDoubleEquality(0.001)
+        if (v !== rhs) {
+          throw new Exception("tolerant check failed")
+        }
+      case v: BigDecimal =>
+        implicit val tolerance = tolerantBigDecimalEquality(BigDecimal(0.001))
+        if (v !== rhs) {
+          throw new Exception("tolerant check failed")
+        }
+      case v             =>
+        if (v !== rhs) {
+          throw new Exception("tolerant check failed")
+        }
+    }
+  }
+
+  private def hardCheck(lhs: Any, rhs: Any): Unit = {
+    Predef.assert(lhs == rhs,
+      s"""
+         |Got     : $lhs
+         |Expected: $rhs
+         |""".stripMargin
+    )
   }
 
 
@@ -111,4 +181,13 @@ trait TolerantEquality extends TripleEquals {
       override def toString: String = s"TolerantByteEquality($tolerance)"
     }
   }
+
+
+  //  private def check[T](lhs: T, rhs: Any)(implicit equality: Equality[T]): Unit = {
+  //    //  private def check[T](lhs: T, rhs: Any): Unit = {
+  //    if (lhs !== rhs) {
+  //      // fallback from unsuccessful tolerant check to strict test in order to show left/right values
+  //      lhs ==> rhs
+  //    }
+  //  }
 }

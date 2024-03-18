@@ -29,10 +29,14 @@ trait AggrSetRefNum_avg extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         _ <- A.B.iSet(avg).query.get.map(_.head ==~ all.toDouble / 7.0)
 
-        _ <- A.i.B.iSet(avg).query.get.map(_.map {
-          case (1, avg) => avg ==~ (1 + 2).toDouble / 2.0
-          case (2, avg) => avg ==~ all2.toDouble / 5.0
-        })
+        _ <- A.i.B.iSet(avg).a1.query.get.map(_ ==> List(
+          (1, (1 + 2).toDouble / 2.0),
+          (2, all2.toDouble / 5.0),
+        ))
+        _ <- A.i.B.iSet(avg).d1.query.get.map(_ ==> List(
+          (2, all2.toDouble / 5.0),
+          (1, (1 + 2).toDouble / 2.0),
+        ))
       } yield ()
     }
 
@@ -49,10 +53,14 @@ trait AggrSetRefNum_avg extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         _ <- A.B.C.iSet(avg).query.get.map(_.head ==~ all.toDouble / 7.0)
 
-        _ <- A.i.B.i.C.iSet(avg).query.get.map(_.map {
-          case (1, 1, avg) => avg ==~ (1 + 2).toDouble / 2.0
-          case (2, 2, avg) => avg ==~ all2.toDouble / 5.0
-        })
+        _ <- A.i.B.i.C.iSet(avg).a1.query.get.map(_ ==> List(
+          (1, 1, (1 + 2).toDouble / 2.0),
+          (2, 2, all2.toDouble / 5.0),
+        ))
+        _ <- A.i.B.i.C.iSet(avg).d1.query.get.map(_ ==> List(
+          (2, 2, all2.toDouble / 5.0),
+          (1, 1, (1 + 2).toDouble / 2.0),
+        ))
       } yield ()
     }
 
@@ -67,10 +75,14 @@ trait AggrSetRefNum_avg extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, 2, Set(3, 4)),
         )).transact
 
-        _ <- A.i.B.i._A.C.iSet(avg).query.get.map(_.map {
-          case (1, 1, avg) => avg ==~ (1 + 2).toDouble / 2.0
-          case (2, 2, avg) => avg ==~ all2.toDouble / 5.0
-        })
+        _ <- A.i.B.i._A.C.iSet(avg).a1.query.get.map(_ ==> List(
+          (1, 1, (1 + 2).toDouble / 2.0),
+          (2, 2, all2.toDouble / 5.0),
+        ))
+        _ <- A.i.B.i._A.C.iSet(avg).d1.query.get.map(_ ==> List(
+          (2, 2, all2.toDouble / 5.0),
+          (1, 1, (1 + 2).toDouble / 2.0),
+        ))
       } yield ()
     }
   }

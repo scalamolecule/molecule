@@ -31,10 +31,14 @@ trait AggrSetRefNum_median extends CoreTestSuite with ApiAsync { spi: SpiAsync =
 
         _ <- A.B.iSet(median).query.get.map(_.head ==~ 2)
 
-        _ <- A.i.B.iSet(median).query.get.map(_.map {
-          case (1, median) => median ==~ wholeOrAverage
-          case (2, median) => median ==~ 5.0
-        })
+        _ <- A.i.B.iSet(median).a1.query.get.map(_ ==> List(
+          (1, wholeOrAverage),
+          (2, 5.0),
+        ))
+        _ <- A.i.B.iSet(median).d1.query.get.map(_ ==> List(
+          (2, 5.0),
+          (1, wholeOrAverage),
+        ))
       } yield ()
     }
 
@@ -50,10 +54,14 @@ trait AggrSetRefNum_median extends CoreTestSuite with ApiAsync { spi: SpiAsync =
 
         _ <- A.B.C.iSet(median).query.get.map(_.head ==~ 2)
 
-        _ <- A.i.B.i.C.iSet(median).query.get.map(_.map {
-          case (1, 1, median) => median ==~ wholeOrAverage
-          case (2, 2, median) => median ==~ 5.0
-        })
+        _ <- A.i.B.i.C.iSet(median).a1.query.get.map(_ ==> List(
+          (1, 1, wholeOrAverage),
+          (2, 2, 5.0),
+        ))
+        _ <- A.i.B.i.C.iSet(median).d1.query.get.map(_ ==> List(
+          (2, 2, 5.0),
+          (1, 1, wholeOrAverage),
+        ))
       } yield ()
     }
 
@@ -67,10 +75,14 @@ trait AggrSetRefNum_median extends CoreTestSuite with ApiAsync { spi: SpiAsync =
           (2, 2, Set(5, 9)),
         )).transact
 
-        _ <- A.i.B.i._A.C.iSet(median).query.get.map(_.map {
-          case (1, 1, median) => median ==~ wholeOrAverage
-          case (2, 2, median) => median ==~ 5.0
-        })
+        _ <- A.i.B.i._A.C.iSet(median).a1.query.get.map(_ ==> List(
+          (1, 1, wholeOrAverage),
+          (2, 2, 5.0),
+        ))
+        _ <- A.i.B.i._A.C.iSet(median).d1.query.get.map(_ ==> List(
+          (2, 2, 5.0),
+          (1, 1, wholeOrAverage),
+        ))
       } yield ()
     }
   }

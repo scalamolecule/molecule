@@ -26,23 +26,21 @@ trait AggrSetNum_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         )).transact
 
         // Sum of all values
-        _ <- Ns.byteSet(sum).query.get.map(
-          _.head.head ==~ (
-            byte1 + byte2 +
-              byte2 +
-              byte3 + byte4 +
-              byte3 + byte4
-            )
-        )
-
-        _ <- Ns.i.byteSet(sum).query.get.map(_.map {
-          case (1, setWithSum) => setWithSum.head ==~ byte1 + byte2
-          case (2, setWithSum) => setWithSum.head ==~ (
+        _ <- Ns.byteSet(sum).query.get.map(_.head ==~ (
+          byte1 + byte2 +
             byte2 +
-              byte3 + byte4 +
-              byte3 + byte4
-            )
-        })
+            byte3 + byte4 +
+            byte3 + byte4))
+
+        // Sort by sum
+        _ <- Ns.i.byteSet(sum).a1.query.get.map(_ ==~ List(
+          (1, byte1 + byte2),
+          (2, byte2 + byte3 + byte4 + byte3 + byte4),
+        ))
+        _ <- Ns.i.byteSet(sum).d1.query.get.map(_ ==~ List(
+          (2, byte2 + byte3 + byte4 + byte3 + byte4),
+          (1, byte1 + byte2),
+        ))
       } yield ()
     }
 
@@ -64,10 +62,15 @@ trait AggrSetNum_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             //       ^
             _ <- Ns.byteSet(median).query.get.map(_.head ==~ byte2.toString.toDouble) // whole middle number
 
-            _ <- Ns.i.byteSet(median).query.get.map(_.map {
-              case (1, median) => median ==~ byte1.toDouble.floor // lower whole number
-              case (2, median) => median ==~ byte5.toString.toDouble // whole middle number
-            })
+            // Sort by median
+            _ <- Ns.i.byteSet(median).a1.query.get.map(_ ==~ List(
+              (1, byte1.toDouble.floor), // lower whole number
+              (2, byte5.toString.toDouble), // whole middle number
+            ))
+            _ <- Ns.i.byteSet(median).d1.query.get.map(_ ==~ List(
+              (2, byte5.toString.toDouble), // whole middle number
+              (1, byte1.toDouble.floor), // lower whole number
+            ))
           } yield ()
 
         case "MongoDB" =>
@@ -80,10 +83,15 @@ trait AggrSetNum_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
             _ <- Ns.byteSet(median).query.get.map(_.head ==~ byte2.toString.toDouble) // whole middle number
 
-            _ <- Ns.i.byteSet(median).query.get.map(_.map {
-              case (1, median) => median ==~ byte1.toDouble // lower number
-              case (2, median) => median ==~ byte5.toString.toDouble // whole middle number
-            })
+            // Sort by median
+            _ <- Ns.i.byteSet(median).a1.query.get.map(_ ==~ List(
+              (1, byte1.toDouble), // lower number
+              (2, byte5.toString.toDouble), // whole middle number
+            ))
+            _ <- Ns.i.byteSet(median).d1.query.get.map(_ ==~ List(
+              (2, byte5.toString.toDouble), // whole middle number
+              (1, byte1.toDouble), // lower number
+            ))
           } yield ()
 
         case _ =>
@@ -96,10 +104,15 @@ trait AggrSetNum_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
             _ <- Ns.byteSet(median).query.get.map(_.head ==~ byte2.toString.toDouble) // middle number
 
-            _ <- Ns.i.byteSet(median).query.get.map(_.map {
-              case (1, median) => median ==~ (byte1 + byte2).toDouble / 2.0 // average of 2 middle numbers
-              case (2, median) => median ==~ byte5.toString.toDouble // middle number
-            })
+            // Sort by median
+            _ <- Ns.i.byteSet(median).a1.query.get.map(_ ==~ List(
+              (1, (byte1 + byte2).toDouble / 2.0), // average of 2 middle numbers
+              (2, byte5.toString.toDouble), // middle number
+            ))
+            _ <- Ns.i.byteSet(median).d1.query.get.map(_ ==~ List(
+              (1, (byte1 + byte2).toDouble / 2.0), // average of 2 middle numbers
+              (2, byte5.toString.toDouble), // middle number
+            ))
           } yield ()
       }
     }
@@ -123,14 +136,15 @@ trait AggrSetNum_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             byte3 + byte4
           ).toDouble / 7.0)
 
-        _ <- Ns.i.byteSet(avg).query.get.map(_.map {
-          case (1, avg) => avg ==~ (byte1 + byte2).toDouble / 2.0
-          case (2, avg) => avg ==~ (
-            byte2 +
-              byte3 + byte4 +
-              byte3 + byte4
-            ).toDouble / 5.0
-        })
+        // Sort by average
+        _ <- Ns.i.byteSet(avg).a1.query.get.map(_ ==~ List(
+          (1, (byte1 + byte2).toDouble / 2.0),
+          (2, (byte2 + byte3 + byte4 + byte3 + byte4).toDouble / 5.0),
+        ))
+        _ <- Ns.i.byteSet(avg).d1.query.get.map(_ ==~ List(
+          (2, (byte2 + byte3 + byte4 + byte3 + byte4).toDouble / 5.0),
+          (1, (byte1 + byte2).toDouble / 2.0),
+        ))
       } yield ()
     }
 
@@ -153,14 +167,15 @@ trait AggrSetNum_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           byte3, byte4
         ))
 
-        _ <- Ns.i.byteSet(variance).query.get.map(_.map {
-          case (1, variance) => variance ==~ varianceOf(byte1, byte2)
-          case (2, variance) => variance ==~ varianceOf(
-            byte2,
-            byte3, byte4,
-            byte3, byte4
-          )
-        })
+        // Sort by variance
+        _ <- Ns.i.byteSet(variance).a1.query.get.map(_ ==~ List(
+          (1, varianceOf(byte1, byte2)),
+          (2, varianceOf(byte2, byte3, byte4, byte3, byte4)),
+        ))
+        _ <- Ns.i.byteSet(variance).d1.query.get.map(_ ==~ List(
+          (2, varianceOf(byte2, byte3, byte4, byte3, byte4)),
+          (1, varianceOf(byte1, byte2)),
+        ))
       } yield ()
     }
 
@@ -175,7 +190,6 @@ trait AggrSetNum_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(byte3, byte4)),
         )).transact
 
-
         // Standard deviation of all values
         _ <- Ns.byteSet(stddev).query.get.map(_.head ==~ stdDevOf(
           byte1, byte2,
@@ -184,14 +198,15 @@ trait AggrSetNum_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           byte3, byte4
         ))
 
-        _ <- Ns.i.byteSet(stddev).query.get.map(_.map {
-          case (1, stddev) => stddev ==~ stdDevOf(byte1, byte2)
-          case (2, stddev) => stddev ==~ stdDevOf(
-            byte2,
-            byte3, byte4,
-            byte3, byte4
-          )
-        })
+        // Sort by standard deviation
+        _ <- Ns.i.byteSet(stddev).a1.query.get.map(_ ==~ List(
+          (1, stdDevOf(byte1, byte2)),
+          (2, stdDevOf(byte2, byte3, byte4, byte3, byte4)),
+        ))
+        _ <- Ns.i.byteSet(stddev).d1.query.get.map(_ ==~ List(
+          (2, stdDevOf(byte2, byte3, byte4, byte3, byte4)),
+          (1, stdDevOf(byte1, byte2)),
+        ))
       } yield ()
     }
   }

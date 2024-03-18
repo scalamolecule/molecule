@@ -101,6 +101,13 @@ trait DatomicQueryBase extends BaseHelpers with JavaConversions { self: Model2Qu
     addCast(cast)
   }
 
+  final protected def addSort(sorter: Option[(Int, Int => (Row, Row) => Int)]): Unit = {
+    sorter.foreach(s => sortss = sortss.init :+ (sortss.last :+ s))
+  }
+  final protected def replaceSort(sorter: Option[(Int, Int => (Row, Row) => Int)]): Unit = {
+    sorter.foreach(s => sortss = sortss.init :+ (sortss.last.init :+ s))
+  }
+
   final protected def aritiesNested(): Unit = {
     val newLevel           = Nil
     val curLevel           = aritiess.last

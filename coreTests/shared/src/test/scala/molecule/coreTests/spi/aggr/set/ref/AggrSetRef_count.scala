@@ -21,18 +21,25 @@ trait AggrSetRef_count extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(3, 4)),
         )).transact
 
-        // Matching values coalesced into one Set
-
         _ <- A.B.iSet(count).query.get.map(_ ==> List(7))
         _ <- A.B.iSet(countDistinct).query.get.map(_ ==> List(4))
 
-        _ <- A.i.a1.B.iSet(count).query.get.map(_ ==> List(
+        _ <- A.i.B.iSet(count).a1.query.get.map(_ ==> List(
           (1, 2),
-          (2, 5)
+          (2, 5),
         ))
-        _ <- A.i.a1.B.iSet(countDistinct).query.get.map(_ ==> List(
+        _ <- A.i.B.iSet(count).d1.query.get.map(_ ==> List(
+          (2, 5),
           (1, 2),
-          (2, 3)
+        ))
+
+        _ <- A.i.B.iSet(countDistinct).a1.query.get.map(_ ==> List(
+          (1, 2),
+          (2, 3),
+        ))
+        _ <- A.i.B.iSet(countDistinct).d1.query.get.map(_ ==> List(
+          (2, 3),
+          (1, 2),
         ))
       } yield ()
     }
@@ -50,13 +57,22 @@ trait AggrSetRef_count extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- A.B.C.iSet(count).query.get.map(_ ==> List(7))
         _ <- A.B.C.iSet(countDistinct).query.get.map(_ ==> List(4))
 
-        _ <- A.i.a1.B.i.C.iSet(count).query.get.map(_ ==> List(
+        _ <- A.i.B.i.C.iSet(count).a1.query.get.map(_ ==> List(
           (1, 1, 2),
-          (2, 2, 5)
+          (2, 2, 5),
         ))
-        _ <- A.i.a1.B.i.C.iSet(countDistinct).query.get.map(_ ==> List(
+        _ <- A.i.B.i.C.iSet(count).d1.query.get.map(_ ==> List(
+          (2, 2, 5),
           (1, 1, 2),
-          (2, 2, 3)
+        ))
+
+        _ <- A.i.B.i.C.iSet(countDistinct).a1.query.get.map(_ ==> List(
+          (1, 1, 2),
+          (2, 2, 3),
+        ))
+        _ <- A.i.B.i.C.iSet(countDistinct).d1.query.get.map(_ ==> List(
+          (2, 2, 3),
+          (1, 1, 2),
         ))
       } yield ()
     }
@@ -71,13 +87,22 @@ trait AggrSetRef_count extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, 2, Set(3, 4)),
         )).transact
 
-        _ <- A.i.a1.B.i._A.C.iSet(count).query.get.map(_ ==> List(
+        _ <- A.i.B.i._A.C.iSet(count).a1.query.get.map(_ ==> List(
           (1, 1, 2),
-          (2, 2, 5)
+          (2, 2, 5),
         ))
-        _ <- A.i.a1.B.i._A.C.iSet(countDistinct).query.get.map(_ ==> List(
+        _ <- A.i.B.i._A.C.iSet(count).d1.query.get.map(_ ==> List(
+          (2, 2, 5),
           (1, 1, 2),
-          (2, 2, 3)
+        ))
+
+        _ <- A.i.B.i._A.C.iSet(countDistinct).a1.query.get.map(_ ==> List(
+          (1, 1, 2),
+          (2, 2, 3),
+        ))
+        _ <- A.i.B.i._A.C.iSet(countDistinct).d1.query.get.map(_ ==> List(
+          (2, 2, 3),
+          (1, 1, 2),
         ))
       } yield ()
     }

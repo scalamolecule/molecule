@@ -27,10 +27,14 @@ trait AggrSetRefNum_stddev extends CoreTestSuite with ApiAsync { spi: SpiAsync =
 
         _ <- A.B.iSet(stddev).query.get.map(_.head ==~ stdDevOf(1, 2, 2, 3, 4, 3, 4))
 
-        _ <- A.i.B.iSet(stddev).query.get.map(_.map {
-          case (1, stddev) => stddev ==~ stdDevOf(1, 2)
-          case (2, stddev) => stddev ==~ stdDevOf(2, 3, 4, 3, 4)
-        })
+        _ <- A.i.B.iSet(stddev).a1.query.get.map(_ ==> List(
+          (1, stdDevOf(1, 2)),
+          (2, stdDevOf(2, 3, 4, 3, 4)),
+        ))
+        _ <- A.i.B.iSet(stddev).d1.query.get.map(_ ==> List(
+          (2, stdDevOf(2, 3, 4, 3, 4)),
+          (1, stdDevOf(1, 2)),
+        ))
       } yield ()
     }
 
@@ -47,10 +51,14 @@ trait AggrSetRefNum_stddev extends CoreTestSuite with ApiAsync { spi: SpiAsync =
 
         _ <- A.B.C.iSet(stddev).query.get.map(_.head ==~ stdDevOf(1, 2, 2, 3, 4, 3, 4))
 
-        _ <- A.i.B.i.C.iSet(stddev).query.get.map(_.map {
-          case (1, 1, stddev) => stddev ==~ stdDevOf(1, 2)
-          case (2, 2, stddev) => stddev ==~ stdDevOf(2, 3, 4, 3, 4)
-        })
+        _ <- A.i.B.i.C.iSet(stddev).a1.query.get.map(_ ==> List(
+          (1, 1, stdDevOf(1, 2)),
+          (2, 2, stdDevOf(2, 3, 4, 3, 4)),
+        ))
+        _ <- A.i.B.i.C.iSet(stddev).d1.query.get.map(_ ==> List(
+          (2, 2, stdDevOf(2, 3, 4, 3, 4)),
+          (1, 1, stdDevOf(1, 2)),
+        ))
       } yield ()
     }
 
@@ -65,10 +73,14 @@ trait AggrSetRefNum_stddev extends CoreTestSuite with ApiAsync { spi: SpiAsync =
           (2, 2, Set(3, 4)),
         )).transact
 
-        _ <- A.i.B.i._A.C.iSet(stddev).query.get.map(_.map {
-          case (1, 1, stddev) => stddev ==~ stdDevOf(1, 2)
-          case (2, 2, stddev) => stddev ==~ stdDevOf(2, 3, 4, 3, 4)
-        })
+        _ <- A.i.B.i._A.C.iSet(stddev).a1.query.get.map(_ ==> List(
+          (1, 1, stdDevOf(1, 2)),
+          (2, 2, stdDevOf(2, 3, 4, 3, 4)),
+        ))
+        _ <- A.i.B.i._A.C.iSet(stddev).d1.query.get.map(_ ==> List(
+          (2, 2, stdDevOf(2, 3, 4, 3, 4)),
+          (1, 1, stdDevOf(1, 2)),
+        ))
       } yield ()
     }
   }
