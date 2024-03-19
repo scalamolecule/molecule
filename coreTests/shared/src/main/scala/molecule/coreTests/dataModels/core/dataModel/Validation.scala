@@ -74,6 +74,28 @@ object Validation extends DataModel(5) {
     val shortSet          = setShort.validate(_ > 3)
     val charSet           = setChar.validate(_ > 'c')
     val refs              = many[Strings]
+
+    val stringSeq         = seqString.validate(_ > "c")
+    val intSeq            = seqInt.validate(_ > 3)
+    val longSeq           = seqLong.validate(_ > 3L)
+    val floatSeq          = seqFloat.validate(_ > 3.3f)
+    val doubleSeq         = seqDouble.validate(_ > 3.3)
+    val booleanSeq        = seqBoolean.validate(_ == false)
+    val bigIntSeq         = seqBigInt.validate(_ > BigInt(3))
+    val bigDecimalSeq     = seqBigDecimal.validate(_ > BigDecimal(3.3))
+    val dateSeq           = seqDate.validate(_.after(new Date(1057010400000L)))
+    val durationSeq       = seqDuration.validate(_.compareTo(Duration.ofMinutes(2)) > 0)
+    val instantSeq        = seqInstant.validate(_.compareTo(Instant.ofEpochSecond(2)) > 0)
+    val localDateSeq      = seqLocalDate.validate(_.compareTo(LocalDate.of(2002, 1, 1)) > 0)
+    val localTimeSeq      = seqLocalTime.validate(_.compareTo(LocalTime.of(2, 2)) > 0)
+    val localDateTimeSeq  = seqLocalDateTime.validate(_.compareTo(LocalDateTime.of(2002, 1, 1, 1, 2)) > 0)
+    val offsetTimeSeq     = seqOffsetTime.validate(_.compareTo(OffsetTime.of(2, 2, 2, 2, ZoneOffset.ofHours(2))) > 0)
+    val offsetDateTimeSeq = seqOffsetDateTime.validate(_.compareTo(OffsetDateTime.of(2002, 1, 1, 1, 1, 1, 1, ZoneOffset.ofHours(2))) > 0)
+    val zonedDateTimeSeq  = seqZonedDateTime.validate(_.compareTo(ZonedDateTime.of(2002, 1, 1, 1, 1, 1, 1, ZoneOffset.ofHours(2))) > 0)
+    val uuidSeq           = seqUUID.validate(_.toString != "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
+    val uriSeq            = seqURI.validate(_.toString.length > 3)
+    val shortSeq          = seqShort.validate(_ > 3)
+    val charSeq           = seqChar.validate(_ > 'c')
   }
 
   trait Constants {

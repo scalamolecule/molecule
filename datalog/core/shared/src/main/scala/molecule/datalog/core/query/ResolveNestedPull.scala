@@ -51,6 +51,14 @@ trait ResolveNestedPull[Tpl]
               resolveAttrSetOpt(a)
               addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(i, a))
 
+            case a: AttrSeqMan =>
+              resolveAttrSeqMan(a)
+              addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(i, a))
+
+            case a: AttrSeqOpt =>
+              resolveAttrSeqOpt(a)
+              addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(i, a))
+
             case ref: Ref             => (acc, Some(ref), tail, attrIndex)
             case backRef: BackRef     => (acc, Some(backRef), tail, attrIndex)
             case nestedOpt: NestedOpt => (acc, Some(nestedOpt), Nil, attrIndex)
@@ -137,10 +145,18 @@ trait ResolveNestedPull[Tpl]
 
 
   private def renderPull(indent: String, a: Attr): String = {
-    if (a.attr == "id")
+    if (a.attr == "id") {
       s"""\n$indent:db/id"""
-    else
+    } else if (a.isInstanceOf[AttrSeq] && !a.isInstanceOf[AttrSeqManByte] && !a.isInstanceOf[AttrSeqOptByte]) {
+      val (ns, attr) = (a.ns, a.attr)
+      s"""
+         |$indent{(:$ns/$attr :limit nil :default "__none__") [
+         |$indent  :$ns.$attr/i_ :$ns.$attr/v_]}""".stripMargin
+    } else {
       s"""\n$indent(:${a.ns}/${a.attr} :limit nil :default "$none")"""
+    }
+
+
   }
 
   private def add(
@@ -163,9 +179,7 @@ trait ResolveNestedPull[Tpl]
       case a: AttrOneManLong           => add(sortOneLong(a, attrIndex), it2Long)
       case a: AttrOneManFloat          => add(floatSorter(a, attrIndex), it2Float)
       case a: AttrOneManDouble         => add(sortOneDouble(a, attrIndex), it2Double)
-      case a: AttrOneManBoolean        =>
-        // add(sortOneBooleanOptNested(a, attrIndex), it2Boolean)
-        datomicFreePullBooleanBug
+      case a: AttrOneManBoolean        => add(sortOneBooleanOptNested(a, attrIndex), it2Boolean)
       case a: AttrOneManBigInt         => add(bigIntSorter(a, attrIndex), it2BigInt)
       case a: AttrOneManBigDecimal     => add(sortOneBigDecimal(a, attrIndex), it2BigDecimal)
       case a: AttrOneManDate           => add(sortOneDate(a, attrIndex), it2Date)
@@ -194,9 +208,7 @@ trait ResolveNestedPull[Tpl]
       case _: AttrOneOptLong           => add(sortOneOptFlatLong(a, attrIndex), it2OptLong)
       case _: AttrOneOptFloat          => add(sortOneOptFlatFloat(a, attrIndex), it2OptFloat)
       case _: AttrOneOptDouble         => add(sortOneOptFlatDouble(a, attrIndex), it2OptDouble)
-      case _: AttrOneOptBoolean        =>
-        // add(sortOneOptFlatBoolean(a, attrIndex), it2Boolean)
-        datomicFreePullBooleanBug
+      case _: AttrOneOptBoolean        => add(sortOneOptFlatBoolean(a, attrIndex), it2Boolean)
       case _: AttrOneOptBigInt         => add(sortOneOptFlatBigInt(a, attrIndex), it2OptBigInt)
       case _: AttrOneOptBigDecimal     => add(sortOneOptFlatBigDecimal(a, attrIndex), it2OptBigDecimal)
       case _: AttrOneOptDate           => add(sortOneOptFlatDate(a, attrIndex), it2OptDate)
@@ -271,6 +283,64 @@ trait ResolveNestedPull[Tpl]
       case _: AttrSetOptByte           => it2OptSetByte
       case _: AttrSetOptShort          => it2OptSetShort
       case _: AttrSetOptChar           => it2OptSetChar
+    })
+  }
+
+  private def resolveAttrSeqMan(a: AttrSeqMan): Unit = {
+    aritiesAttr()
+    pullCasts += (a match {
+      case _: AttrSeqManID             => it2ListId
+      case _: AttrSeqManString         => it2ListString
+      case _: AttrSeqManInt            => it2ListInt
+      case _: AttrSeqManLong           => it2ListLong
+      case _: AttrSeqManFloat          => it2ListFloat
+      case _: AttrSeqManDouble         => it2ListDouble
+      case _: AttrSeqManBoolean        => it2ListBoolean
+      case _: AttrSeqManBigInt         => it2ListBigInt
+      case _: AttrSeqManBigDecimal     => it2ListBigDecimal
+      case _: AttrSeqManDate           => it2ListDate
+      case _: AttrSeqManDuration       => it2ListDuration
+      case _: AttrSeqManInstant        => it2ListInstant
+      case _: AttrSeqManLocalDate      => it2ListLocalDate
+      case _: AttrSeqManLocalTime      => it2ListLocalTime
+      case _: AttrSeqManLocalDateTime  => it2ListLocalDateTime
+      case _: AttrSeqManOffsetTime     => it2ListOffsetTime
+      case _: AttrSeqManOffsetDateTime => it2ListOffsetDateTime
+      case _: AttrSeqManZonedDateTime  => it2ListZonedDateTime
+      case _: AttrSeqManUUID           => it2ListUUID
+      case _: AttrSeqManURI            => it2ListURI
+      case _: AttrSeqManByte           => it2ListByte
+      case _: AttrSeqManShort          => it2ListShort
+      case _: AttrSeqManChar           => it2ListChar
+    })
+  }
+
+  private def resolveAttrSeqOpt(a: AttrSeqOpt): Unit = {
+    aritiesAttr()
+    pullCasts += (a match {
+      case _: AttrSeqOptID             => it2OptListId
+      case _: AttrSeqOptString         => it2OptListString
+      case _: AttrSeqOptInt            => it2OptListInt
+      case _: AttrSeqOptLong           => it2OptListLong
+      case _: AttrSeqOptFloat          => it2OptListFloat
+      case _: AttrSeqOptDouble         => it2OptListDouble
+      case _: AttrSeqOptBoolean        => it2OptListBoolean
+      case _: AttrSeqOptBigInt         => it2OptListBigInt
+      case _: AttrSeqOptBigDecimal     => it2OptListBigDecimal
+      case _: AttrSeqOptDate           => it2OptListDate
+      case _: AttrSeqOptDuration       => it2OptListDuration
+      case _: AttrSeqOptInstant        => it2OptListInstant
+      case _: AttrSeqOptLocalDate      => it2OptListLocalDate
+      case _: AttrSeqOptLocalTime      => it2OptListLocalTime
+      case _: AttrSeqOptLocalDateTime  => it2OptListLocalDateTime
+      case _: AttrSeqOptOffsetTime     => it2OptListOffsetTime
+      case _: AttrSeqOptOffsetDateTime => it2OptListOffsetDateTime
+      case _: AttrSeqOptZonedDateTime  => it2OptListZonedDateTime
+      case _: AttrSeqOptUUID           => it2OptListUUID
+      case _: AttrSeqOptURI            => it2OptListURI
+      case _: AttrSeqOptByte           => it2OptListByte
+      case _: AttrSeqOptShort          => it2OptListShort
+      case _: AttrSeqOptChar           => it2OptListChar
     })
   }
 }

@@ -133,10 +133,6 @@ trait DatomicQueryBase extends BaseHelpers with JavaConversions { self: Model2Qu
     "Can't mix mandatory/optional nested queries."
   )
 
-  final protected def datomicFreePullBooleanBug: Nothing = {
-    throw ExecutionError("Datomic has a bug that pulls boolean `false` values as nil.")
-  }
-
   final protected def vv: Var = {
     varIndex += 1
     vars(varIndex)

@@ -13,8 +13,8 @@ import molecule.datalog.datomic.setup.{TestSuiteArray_datomic, TestSuite_datomic
 import utest._
 import scala.language.implicitConversions
 
-//object AdhocJVM_datomic extends TestSuiteArray_datomic with Array2List {
-object AdhocJVM_datomic extends TestSuite_datomic {
+object AdhocJVM_datomic extends TestSuiteArray_datomic with Array2List {
+//object AdhocJVM_datomic extends TestSuite_datomic {
 
   override lazy val tests = Tests {
 
@@ -23,108 +23,66 @@ object AdhocJVM_datomic extends TestSuite_datomic {
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
 
-      val a = (1, List(0, 1, 2), List(1, 2, 3))
-      val b = (2, List(2, 3), List(2, 3))
-      val c = (3, List(4), List(3))
-
       for {
 
 
-        _ <- Ns.s.iSeq.i.insert(
-          ("a", List(1, 2), 1),
-          ("b", List(3), 2),
-        ).transact
+        //        _ <- Ref.i.Nss.*(Ns.i.stringSet).insert(1, List((2, Set(string1, string2)))).transact
+//        _ <- Ref.i.Nss.*(Ns.stringSeq).insert(1, List(List(string1, string2))).transact
+//        _ <- Ref.i.Nss.*(Ns.byteArray).insert(20, List(Array(byte1, byte2))).transact
 
-        _ = {
-          println("----------- 2")
-          val res = datomic.Peer.q(
-            """[:find  ?c ?d3 ?a
-              | :where [?b :Ns/s ?c]
-              |        [?b :Ns/iSeq _]
-              |        [(datomic.api/q
-              |          "[:find (distinct ?d-pair)
-              |            :in $ ?b
-              |            :where [?b :Ns/iSeq ?d]
-              |                   [?d :Ns.iSeq/i_ ?d-i]
-              |                   [?d :Ns.iSeq/v_ ?d-v]
-              |                   [(vector ?d-i ?d-v) ?d-pair]]" $ ?b) [[?d1]]]
-              |        [(sort-by first ?d1) ?d2]
-              |        [(map second ?d2) ?d3]
-              |        [?b :Ns/i ?a]
-              |        [(set ?d3) ?d4]
-              |        [(contains? ?d4 ?a)]]
-              |""".stripMargin, conn.db,
-            //            Seq(true, false).asJava
-          )
-          res.forEach(r => println(r))
-
-          //          println("----------- 3")
-          //          datomic.Peer.q(
-          //            """[:find  ?c ?d3 ?e3
-          //              | :in    $ ?e-blacklist
-          //              | :where [?b :Ns/i ?c]
-          //              |        [?b :Ns/iSeq _]
-          //              |        [(datomic.api/q
-          //              |          "[:find (distinct ?d-pair)
-          //              |            :in $ ?b
-          //              |            :where [?b :Ns/iSeq ?d]
-          //              |                   [?d :Ns.iSeq/i_ ?d-i]
-          //              |                   [?d :Ns.iSeq/v_ ?d-v]
-          //              |                   [(vector ?d-i ?d-v) ?d-pair]]" $ ?b) [[?d1]]]
-          //              |        [(sort-by first ?d1) ?d2]
-          //              |        [(map second ?d2) ?d3]
-          //              |        [?b :Ns/intSeq _]
-          //              |        [(datomic.api/q
-          //              |          "[:find (distinct ?e-pair)
-          //              |            :in $ ?b
-          //              |            :where [?b :Ns/intSeq ?e]
-          //              |                   [?e :Ns.intSeq/i_ ?e-i]
-          //              |                   [?e :Ns.intSeq/v_ ?e-v]
-          //              |                   [(vector ?e-i ?e-v) ?e-pair]]" $ ?b) [[?e1]]]
-          //              |        [(sort-by first ?e1) ?e2]
-          //              |        [(map second ?e2) ?e3]
-          //              |        [(contains? ?e-blacklist ?b) ?e-blacklisted]
-          //              |        [(not ?e-blacklisted)]]
-          //              |""".stripMargin, conn.db,
-          //            //            Seq(false).asJava
-          //            res
-          //          ).forEach(r => println(r))
-        }
+        _ <- Ref.i.Nss.*(Ns.i.byteArray_?).insert(20, List((1, Some(Array(byte1, byte2))), (2, None))).transact
 
 
-        _ <- Ns.s.iSeq.hasNo(Ns.i).query.i.get.map(_ ==> List(("b", List(3), 2)))
-        _ <- Ns.s.iSeq.hasNo(Ns.i_).query.get.map(_ ==> List(("b", List(3))))
-        _ <- Ns.s.iSeq_.hasNo(Ns.i).query.get.map(_ ==> List(("b", 2)))
-        _ <- Ns.s.iSeq_.hasNo(Ns.i_).query.get.map(_ ==> List("b"))
+//        _ = {
+//          println("----------- 1")
+//          val res = datomic.Peer.q(
+//            """[:find  (pull ?id0 [
+//              |          {(:Ref/nss) [
+//              |            (:Ns/i)
+//              |            (:Ns/stringSeq)]}])
+//              | :where [?a :Ref/i ?b]
+//              |        [(identity ?a) ?id0]]
+//              |""".stripMargin, conn.db,
+//            //            Seq(true, false).asJava
+//          )
+//          res.forEach(r => println(r))
+//
+//          println("----------- 2")
+//          datomic.Peer.q(
+//            """[:find  (pull ?id0 [
+//              |          {
+//              |            (:Ref/nss) [
+//              |              (:Ns/i)
+//              |
+//              |              {
+//              |                (:Ns/stringSeq :limit nil :default "__none__") [
+//              |                  :Ns.stringSeq/i_
+//              |                  :Ns.stringSeq/v_
+//              |                ]
+//              |              }
+//              |
+//              |            ]
+//              |          }
+//              |        ])
+//              | :where [?a :Ref/i ?b]
+//              |        [(identity ?a) ?id0]]
+//              |""".stripMargin, conn.db,
+//            //            Seq(true, false).asJava
+//          ).forEach(r => println(r))
+//        }
 
-        // Filter compare attribute itself
-        _ <- Ns.s.iSeq.hasNo(Ns.i(1)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq.hasNo(Ns.i.not(1)).query.get.map(_ ==> List(("b", List(3), 2)))
-        _ <- Ns.s.iSeq.hasNo(Ns.i.<(2)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq.hasNo(Ns.i.<=(2)).query.get.map(_ ==> List(("b", List(3), 2)))
-        _ <- Ns.s.iSeq.hasNo(Ns.i.>(2)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq.hasNo(Ns.i.>=(2)).query.get.map(_ ==> List(("b", List(3), 2)))
 
-        _ <- Ns.s.iSeq.hasNo(Ns.i_(1)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq.hasNo(Ns.i_.not(1)).query.get.map(_ ==> List(("b", List(3))))
-        _ <- Ns.s.iSeq.hasNo(Ns.i_.<(2)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq.hasNo(Ns.i_.<=(2)).query.get.map(_ ==> List(("b", List(3))))
-        _ <- Ns.s.iSeq.hasNo(Ns.i_.>(2)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq.hasNo(Ns.i_.>=(2)).query.get.map(_ ==> List(("b", List(3))))
+        //        _ <- Ref.i.Nss.*?(Ns.i.stringSet).query.i.get
+//        _ <- Ref.i_(1).Nss.*?(Ns.stringSeq).query.i.get.map(_ ==> List(List(List(string1, string2))))
 
-        _ <- Ns.s.iSeq_.hasNo(Ns.i(1)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq_.hasNo(Ns.i.not(1)).query.get.map(_ ==> List(("b", 2)))
-        _ <- Ns.s.iSeq_.hasNo(Ns.i.<(2)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq_.hasNo(Ns.i.<=(2)).query.get.map(_ ==> List(("b", 2)))
-        _ <- Ns.s.iSeq_.hasNo(Ns.i.>(2)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq_.hasNo(Ns.i.>=(2)).query.get.map(_ ==> List(("b", 2)))
+//        _ <- Ref.i_(20).Nss.*?(Ns.byteArray).query.i.get.map(_.head.head ==> Array(byte1, byte2))
+//        _ <- Ref.i_(20).Nss.*?(Ns.byteArray).query.i.get.map(_.head ==> List(Array(byte1, byte2)))
+//        _ <- Ref.i_(20).Nss.*?(Ns.byteArray).query.i.get.map(_ ==> List(List(Array(byte1, byte2))))
 
-        _ <- Ns.s.iSeq_.hasNo(Ns.i_(1)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq_.hasNo(Ns.i_.not(1)).query.get.map(_ ==> List("b"))
-        _ <- Ns.s.iSeq_.hasNo(Ns.i_.<(2)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq_.hasNo(Ns.i_.<=(2)).query.get.map(_ ==> List("b"))
-        _ <- Ns.s.iSeq_.hasNo(Ns.i_.>(2)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq_.hasNo(Ns.i_.>=(2)).query.get.map(_ ==> List("b"))
+        _ <- Ref.i(20).Nss.*?(Ns.i.a1.byteArray_?).query.i.get
+          .map(_ ==> List((20, List((1, Some(Array(byte1, byte2))), (2, None)))))
+
+
 
       } yield ()
     }

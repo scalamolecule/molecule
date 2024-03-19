@@ -107,7 +107,7 @@ trait LambdasSet extends ResolveBase with JavaConversions {
     j2sSet: AnyRef => AnyRef,
     set2sets: AnyRef => AnyRef,
     vector2set: AnyRef => AnyRef,
-//    j2sSetOne: AnyRef => AnyRef
+    //    j2sSetOne: AnyRef => AnyRef
   )
 
   lazy val resSetId            : ResSet[String]         = ResSet("String", dId, j2sId, jSet2sId, s2jId, j2sSetId, set2setsId, vector2setId)
