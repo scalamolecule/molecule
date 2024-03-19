@@ -133,7 +133,6 @@ trait ResolveExprOne[Tpl]
     } { case (_, filterPath, filterAttr) =>
       expr2(e, a, v, getVar(filterAttr, filterPath), attr.op)
     }
-    refConfirmed = true
   }
 
   private def tac[T: ClassTag](
@@ -151,7 +150,6 @@ trait ResolveExprOne[Tpl]
     } { case (_, filterPath, filterAttr) =>
       expr2(e, a, v, getVar(filterAttr, filterPath), attr.op)
     }
-    refConfirmed = true
   }
 
   private def expr[T: ClassTag](
@@ -250,7 +248,7 @@ trait ResolveExprOne[Tpl]
     v: Var,
     optArgs: Option[Seq[T]],
     fromScala: Any => Any,
-    sortMan: Option[(Int, Int => (Row, Row) => Int)]
+    sortMan: Option[(Int, Int => (Row, Row) => Int)],
   ): Unit = {
     optArgs.fold[Unit] {
       addSort(dummySorter(attr))

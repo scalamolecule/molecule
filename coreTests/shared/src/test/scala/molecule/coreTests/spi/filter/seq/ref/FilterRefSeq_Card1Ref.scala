@@ -156,7 +156,8 @@ trait FilterRefSeq_Card1Ref extends CoreTestSuite with ApiAsync { spi: SpiAsync 
         _ <- A.i.a1.B.iSeq_.hasNo(3).query.get.map(_ ==> List(1, 2, 2))
 
         // no value - match non-asserted attribute (null)
-        _ <- A.i.a1.B.iSeq_().query.get.map(_ ==> List(4))
+        // Nothing returned since there's no relationship to B
+        _ <- A.i.a1.B.iSeq_().query.get.map(_ ==> Nil)
       } yield ()
     }
 

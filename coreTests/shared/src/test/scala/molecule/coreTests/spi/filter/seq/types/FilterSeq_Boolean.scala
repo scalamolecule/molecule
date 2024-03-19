@@ -212,8 +212,8 @@ trait FilterSeq_Boolean extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           // "Is exactly this AND that"
           _ <- Ns.i.a1.booleanSeq_(List(true)).query.get.map(_ ==> List(t))
           _ <- Ns.i.a1.booleanSeq_(List(false)).query.get.map(_ ==> List(f))
-          _ <- Ns.i.a1.booleanSeq_(List(true, false)).query.i.get.map(_ ==> List())
-          _ <- Ns.i.a1.booleanSeq_(List(true, false, false)).query.i.get.map(_ ==> List(tf))
+          _ <- Ns.i.a1.booleanSeq_(List(true, false)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.booleanSeq_(List(true, false, false)).query.get.map(_ ==> List(tf))
           // Same as
           _ <- Ns.i.a1.booleanSeq_(List(List(true))).query.get.map(_ ==> List(t))
           _ <- Ns.i.a1.booleanSeq_(List(List(false))).query.get.map(_ ==> List(f))

@@ -144,38 +144,38 @@ trait Semantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.int.intSet(Ref.intSet_).Ref.intSet.not(Set(2, 3)).int.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Cardinality-set filter attributes (Ref.intSet) not allowed to do additional filtering."
+            err ==> "Cardinality-many filter attributes (Ref.intSet) not allowed to do additional filtering."
           }
         _ <- Ns.int.intSet.not(Set(2, 3)).Ref.intSet(Ns.intSet_).int.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Cardinality-set filter attributes (Ns.intSet) not allowed to do additional filtering."
+            err ==> "Cardinality-many filter attributes (Ns.intSet) not allowed to do additional filtering."
           }
 
         _ <- Ns.int.intSet.not(Ref.intSet_).Ref.intSet.not(Set(2, 3)).int.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Cardinality-set filter attributes (Ref.intSet) not allowed to do additional filtering."
+            err ==> "Cardinality-many filter attributes (Ref.intSet) not allowed to do additional filtering."
           }
         _ <- Ns.int.intSet.not(Set(2, 3)).Ref.intSet.not(Ns.intSet_).int.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Cardinality-set filter attributes (Ns.intSet) not allowed to do additional filtering."
+            err ==> "Cardinality-many filter attributes (Ns.intSet) not allowed to do additional filtering."
           }
 
         _ <- Ns.int.intSet.has(Ref.intSet_).Ref.intSet.not(Set(2, 3)).int.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Cardinality-set filter attributes (Ref.intSet) not allowed to do additional filtering."
+            err ==> "Cardinality-many filter attributes (Ref.intSet) not allowed to do additional filtering."
           }
         _ <- Ns.int.intSet.not(Set(2, 3)).Ref.intSet.has(Ns.intSet_).int.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Cardinality-set filter attributes (Ns.intSet) not allowed to do additional filtering."
+            err ==> "Cardinality-many filter attributes (Ns.intSet) not allowed to do additional filtering."
           }
 
         _ <- Ns.int.intSet.hasNo(Ref.intSet_).Ref.intSet.not(Set(2, 3)).int.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Cardinality-set filter attributes (Ref.intSet) not allowed to do additional filtering."
+            err ==> "Cardinality-many filter attributes (Ref.intSet) not allowed to do additional filtering."
           }
         _ <- Ns.int.intSet.not(Set(2, 3)).Ref.intSet.hasNo(Ns.intSet_).int.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Cardinality-set filter attributes (Ns.intSet) not allowed to do additional filtering."
+            err ==> "Cardinality-many filter attributes (Ns.intSet) not allowed to do additional filtering."
           }
       } yield ()
     }

@@ -121,21 +121,22 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     sortT: Option[(Int, Int => (Row, Row) => Int)]
   ): Unit = {
     val v = vv
+    find += s"${v}3"
+    addCast(resSeq.j2sList)
     val a = nsAttr(attr)
     attr.filterAttr.fold {
       val pathAttr = varPath :+ attr.cleanAttr
       if (filterAttrVars.contains(pathAttr) && attr.op != V) {
         // Runtime check needed since we can't type infer it
-        throw ModelError(s"Cardinality-set filter attributes not allowed to " +
+        throw ModelError(s"Cardinality-seq filter attributes not allowed to " +
           s"do additional filtering. Found:\n  " + attr)
       }
-      expr(attr, e, v, attr.op, seqs, resSeq, sortT)
+      expr(false, attr, e, v, attr.op, seqs, resSeq, sortT)
       filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
       filterAttrVars2.get(a).foreach(_(e, v))
     } { case (dir, filterPath, filterAttr) =>
-      expr2(attr, e, v, attr.op, s":${filterAttr.ns}/${filterAttr.attr}")
+      expr2(attr, e, v, attr.op, s":${filterAttr.ns}/${filterAttr.attr}", resSeq)
     }
-    refConfirmed = true
   }
 
   private def tac[T: ClassTag](
@@ -146,27 +147,27 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     val v = vv
     val a = nsAttr(attr)
     attr.filterAttr.fold {
-      expr(attr, e, v, attr.op, seqs, resSeq, None)
+      expr(true, attr, e, v, attr.op, seqs, resSeq, None)
       filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
       filterAttrVars2.get(a).foreach(_(e, v))
     } { case (dir, filterPath, filterAttr) =>
-      expr2(attr, e, v, attr.op, s":${filterAttr.ns}/${filterAttr.attr}")
+      expr2(attr, e, v, attr.op, s":${filterAttr.ns}/${filterAttr.attr}", resSeq)
     }
-    refConfirmed = true
   }
 
   private def expr[T: ClassTag](
+    tacit: Boolean,
     attr: Attr, e: Var, v: Var, op: Op,
     seqs: Seq[Seq[T]],
     resSeq: ResSeq[T],
     sortT: Option[(Int, Int => (Row, Row) => Int)]
   ): Unit = {
     op match {
-      case V         => attrib(attr, e, v, resSeq)
+      case V         => attrV(tacit, attr, e, v)
       case Eq        => equal(attr, e, v, seqs, resSeq)
-      case Neq       => neq(attr, e, v, seqs, resSeq.s2j, resSeq)
-      case Has       => has(attr, e, v, seqs, resSeq.tpe, resSeq.toDatalog, resSeq)
-      case HasNo     => hasNo(attr, e, v, seqs, resSeq.tpe, resSeq.toDatalog, resSeq)
+      case Neq       => neq(tacit, attr, e, v, seqs, resSeq.s2j)
+      case Has       => has(tacit, attr, e, v, seqs, resSeq)
+      case HasNo     => hasNo(attr, e, v, seqs, resSeq)
       case NoValue   => noValue(attr, e)
       case Fn(kw, n) =>
         if (isRefAttr)
@@ -177,14 +178,14 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     }
   }
 
-  private def expr2(
-    attr: Attr, e: Var, v: Var, op: Op, filterAttr: String
+  private def expr2[T](
+    attr: Attr, e: Var, v: Var, op: Op, filterAttr: String, resSeq: ResSeq[T],
   ): Unit = {
     op match {
-      case Eq    => equal2(attr, e, v, filterAttr)
-      case Neq   => neq2(attr, e, v, filterAttr)
-      case Has   => has2(attr, e, v, filterAttr)
-      case HasNo => hasNo2(attr, e, v, filterAttr)
+      case Eq    => equal2(attr, e, v, filterAttr, resSeq)
+      case Neq   => neq2(attr, e, v, filterAttr, resSeq)
+      case Has   => has2(attr, e, v, filterAttr, resSeq)
+      case HasNo => hasNo2(attr, e, v, filterAttr, resSeq)
       case other => unexpectedOp(other)
     }
   }
@@ -198,12 +199,13 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     sortT: Option[(Int, Int => (Row, Row) => Int)]
   ): Unit = {
     val v = vv
+    addCast(resSeqOpt.j2sOptList)
     op match {
-      case V     => optAttr(attr, e, v, resSeqOpt)
+      case V     => optAttr(attr, e, v)
       case Eq    => optEqual(attr, e, v, optSeqs, resSeqOpt, resSeq)
       case Neq   => optNeq(attr, e, v, optSeqs, resSeqOpt, resSeq)
-      case Has   => optHas(attr, e, v, optSeqs, resSeqOpt.tpe, resSeqOpt, resSeqOpt.toDatalog, resSeq)
-      case HasNo => optHasNo(attr, e, v, optSeqs, resSeqOpt.tpe, resSeqOpt.toDatalog, resSeq, resSeqOpt)
+      case Has   => optHas(attr, e, v, optSeqs, resSeqOpt, resSeq)
+      case HasNo => optHasNo(attr, e, v, optSeqs, resSeq, resSeqOpt)
       case other => unexpectedOp(other)
     }
   }
@@ -211,9 +213,10 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
 
   // attr ----------------------------------------------------------------------
 
-  private def attrib[T](attr: Attr, e: Var, v: Var, resSeq: ResSeq[T]): Unit = {
+  private def attrV[T](
+    tacit: Boolean, attr: Attr, e: Var, v: Var
+  ): Unit = {
     val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
-    find += v3
     where += s"[$e $a _]" -> wClause
     where +=
       s"""[(datomic.api/q
@@ -225,11 +228,13 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
          |                   [(vector $i_ $v_) $pair]]" $$ $e) [[$v1]]]""".stripMargin -> wClause
     where += s"[(sort-by first $v1) $v2]" -> wClause
     where += s"[(map second $v2) $v3]" -> wClause
-    addCast(resSeq.jList2list)
+    if (tacit) {
+      widh += v3 // Don't coalesce List to Set
+    }
   }
 
   private def optAttr[T](
-    attr: Attr, e: Var, v: Var, resSeqOpt: ResSeqOpt[T]
+    attr: Attr, e: Var, v: Var
   ): Unit = {
     val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
     find += v6
@@ -242,8 +247,6 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     where += s"[(map vals $v3) $v4]" -> wClause
     where += s"[(sort-by first $v4) $v5]" -> wClause
     where += s"[(map second $v5) $v6]" -> wClause
-
-    addCast(resSeqOpt.j2sOptList)
   }
 
 
@@ -255,9 +258,9 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     resSeq: ResSeq[T],
   ): Unit = {
     val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
-    find += v3
     args += seqs.map(seq => seq.toSeq.map(resSeq.s2j).asJava).asJava
     in += s"[$v4 ...]"
+    where += s"[$e $a _]" -> wClause
     where +=
       s"""[(datomic.api/q
          |          "[:find (distinct $pair)
@@ -269,7 +272,6 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     where += s"[(sort-by first $v1) $v2]" -> wClause
     where += s"[(map second $v2) $v3]" -> wClause
     where += s"[(= $v3 $v4)]" -> wClause
-    addCast(resSeq.jList2list)
   }
 
   private def optEqual[T](
@@ -281,6 +283,7 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     optSeqs.fold[Unit] {
       none(attr, e, v, resSeqOpt)
     } { seqs =>
+      find += v + 3
       equal(attr, e, v, seqs, resSeq)
       replaceCast(resSeqOpt.j2sOptList)
     }
@@ -290,10 +293,10 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
   // neq -----------------------------------------------------------------------
 
   private def neq[T](
+    tacit: Boolean,
     attr: Attr, e: Var, v: Var,
     seqs: Seq[Seq[T]],
     s2j: Any => Any,
-    resSeq: ResSeq[T],
   ): Unit = {
     val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
     if (seqs.nonEmpty && seqs.flatten.nonEmpty) {
@@ -301,7 +304,7 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
       val blacklisted = v + "-blacklisted"
 
       // In both pre- and main query
-      where += s"[$e $a $v]" -> wClause
+      where += s"[$e $a _]" -> wClause
 
       // Pre-query
       preArgs += seqs.map(seq => seq.map(s2j).asJava).asJava
@@ -320,7 +323,6 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
       preWhere += s"[(= $v3 $v4)]" -> wClause
 
       // Main query
-      find += v3
       inPost += blacklist
       // filter out blacklisted entities
       wherePost += s"[(contains? $blacklist $firstId) $blacklisted]" -> wClause
@@ -336,10 +338,12 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
            |                   [(vector $i_ $v_) $pair]]" $$ $e) [[$v1]]]""".stripMargin -> wClause
       wherePost += s"[(sort-by first $v1) $v2]" -> wClause
       wherePost += s"[(map second $v2) $v3]" -> wClause
-      addCast(resSeq.jList2list)
     } else {
       // Get all
-      attrib(attr, e, v, resSeq)
+      attrV(false, attr, e, v)
+    }
+    if (tacit) {
+      widh += v3 // Don't coalesce List to Set
     }
   }
 
@@ -351,7 +355,8 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
   ): Unit = {
     optSeqs match {
       case Some(seqs) if seqs.nonEmpty && seqs.flatten.nonEmpty =>
-        neq(attr, e, v, seqs, resSeq.s2j, resSeq)
+        find += v + 3
+        neq(false, attr, e, v, seqs, resSeq.s2j)
         replaceCast(resSeqOpt.j2sOptList)
 
       case _ =>
@@ -360,26 +365,17 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     }
   }
 
-  private def optWithoutNone[T](
-    attr: Attr, e: Var, v: Var, resSeqOpt: ResSeqOpt[T]
-  ): Unit = {
-    // Ignore empty seqs
-    where += s"[(nil? ${v}1) ${v}1-empty]" -> wClause
-    where += s"[(not ${v}1-empty)]" -> wClause
-    optAttr(attr, e, v, resSeqOpt) // Get all available
-  }
-
 
   // has -----------------------------------------------------------------------
 
   private def has[T: ClassTag](
+    tacit: Boolean,
     attr: Attr, e: Var, v: Var,
-    seqs: Seq[Seq[T]], tpe: String, toDatalog: T => String,
+    seqs: Seq[Seq[T]],
     resSeq: ResSeq[T],
   ): Unit = {
     val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
     if (seqs.nonEmpty && seqs.flatten.nonEmpty) {
-      find += v3
       args += seqs.flatten.map(resSeq.s2j).asJava
       in += v5
       where +=
@@ -408,34 +404,25 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
 
     } else {
       // Match nothing
-      find += v
-      where += s"[(ground nil) $v]" -> wGround
+      where += s"[$e $a $v3]" -> wClause
+      where += s"[(ground nil) $v3]" -> wGround
     }
-    addCast(resSeq.jList2list)
+    if (tacit) {
+      widh += v3 // Don't coalesce List to Set
+    }
   }
 
   private def optHas[T: ClassTag](
     attr: Attr, e: Var, v: Var,
     optSeqs: Option[Seq[Seq[T]]],
-    tpe: String,
     resSeqOpt: ResSeqOpt[T],
-    toDatalog: T => String,
     resSeq: ResSeq[T],
   ): Unit = {
-    optSeqs match {
-      case Some(seqs) if seqs.nonEmpty && seqs.flatten.nonEmpty =>
-        has(attr, e, v, seqs, resSeq.tpe, resSeq.toDatalog, resSeq)
-        replaceCast(resSeqOpt.j2sOptList)
-
-      case Some(emptySeqs) =>
-        // Match nothing
-        find += v
-        where += s"[(ground nil) $v]" -> wGround
-        addCast(resSeqOpt.j2sOptList)
-
-      case _ =>
-        // Match non-asserted Seqs
-        none(attr, e, v, resSeqOpt)
+    optSeqs.fold[Unit] {
+      none(attr, e, v, resSeqOpt)
+    } { seqs =>
+      find += v + 3
+      has(false, attr, e, v, seqs, resSeq)
     }
   }
 
@@ -444,7 +431,7 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
 
   private def hasNo[T](
     attr: Attr, e: Var, v: Var,
-    seqs: Seq[Seq[T]], tpe: String, toDatalog: T => String,
+    seqs: Seq[Seq[T]],
     resSeq: ResSeq[T],
   ): Unit = {
     val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
@@ -478,22 +465,19 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
 
     } else {
       // Get all
-      attrib(attr, e, v, resSeq)
+      attrV(false, attr, e, v)
     }
-    addCast(resSeq.jList2list)
   }
 
   private def optHasNo[T](
     attr: Attr, e: Var, v: Var,
     optSeqs: Option[Seq[Seq[T]]],
-    tpe: String,
-    toDatalog: T => String,
     resSeq: ResSeq[T],
     resSeqOpt: ResSeqOpt[T],
   ): Unit = {
     optSeqs match {
       case Some(seqs) if seqs.nonEmpty && seqs.flatten.nonEmpty =>
-        hasNo(attr, e, v, optSeqs.get, tpe, toDatalog, resSeq)
+        hasNo(attr, e, v, optSeqs.get, resSeq)
         replaceCast(resSeqOpt.j2sOptList)
 
       case _ => optWithoutNone(attr, e, v, resSeqOpt)
@@ -505,18 +489,7 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
 
   private def noValue(attr: Attr, e: Var): Unit = {
     val a = nsAttr(attr)
-    if (refConfirmed) {
-      where += s"(not [$e $a])" -> wNeqOne
-    } else {
-      val List(e0, _, refAttr, refId) = varPath.takeRight(4)
-      val refDatom                    = s"[$e0 $refAttr $refId]"
-      if (where.last == refDatom -> wClause) {
-        // cancel previous ref Datom since we will pull it instead
-        where.remove(where.size - 1)
-        varPath = varPath.dropRight(3)
-      }
-      where += s"(not [$e0 $refAttr])" -> wNeqOne
-    }
+    where += s"(not [$e $a])" -> wNeqOne
   }
 
 
@@ -529,6 +502,8 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
     checkAggrSet()
     lazy val n = optN.getOrElse(0)
+    // Replace find/casting with aggregate function/cast
+    find -= v3
     fn match {
       case "count" =>
         noBooleanSetCounts(n)
@@ -537,7 +512,7 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
         where += s"[$e $a $v]" -> wClause
         where += s"[$v $av $v_]" -> wClause
         addSort(sortOneInt(attr, attrIndex))
-        addCast(toInt)
+        replaceCast(toInt)
 
       case "countDistinct" =>
         noBooleanSetCounts(n)
@@ -546,15 +521,15 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
         where += s"[$e $a $v]" -> wClause
         where += s"[$v $av $v_]" -> wClause
         addSort(sortOneInt(attr, attrIndex))
-        addCast(toInt)
+        replaceCast(toInt)
 
       case "sum" =>
-        widh += v
         find += s"(sum $v_)"
+        widh += v
         where += s"[$e $a $v]" -> wClause
         where += s"[$v $av $v_]" -> wClause
         addSort(sortT)
-        addCast(resSeq.j2s)
+        replaceCast(resSeq.j2s)
 
       case "min" =>
         noBooleanSetAggr(resSeq)
@@ -562,7 +537,7 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
         where += s"[$e $a $v]" -> wClause
         where += s"[$v $av $v_]" -> wClause
         addSort(sortT)
-        addCast(resSeq.j2s)
+        replaceCast(resSeq.j2s)
 
       case "max" =>
         noBooleanSetAggr(resSeq)
@@ -570,7 +545,7 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
         where += s"[$e $a $v]" -> wClause
         where += s"[$v $av $v_]" -> wClause
         addSort(sortT)
-        addCast(resSeq.j2s)
+        replaceCast(resSeq.j2s)
 
       case "sample" =>
         noBooleanSetAggr(resSeq)
@@ -578,15 +553,15 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
         where += s"[$e $a $v]" -> wClause
         where += s"[$v $av $v_]" -> wClause
         addSort(sortSample(attr, attrIndex))
-        addCast(resSeq.jSet2s)
+        replaceCast(resSeq.jSet2s)
 
       case "median" =>
-        widh += e
         find += s"(median $v_)"
+        widh += e
         where += s"[$e $a $v]" -> wClause
         where += s"[$v $av $v_]" -> wClause
         addSort(sortMedian(attr, attrIndex))
-        addCast(any2double)
+        replaceCast(any2double)
 
       // OBS! Datomic rounds down to nearest whole number
       // when calculating the median for multiple numbers instead of
@@ -602,52 +577,52 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
       //            getMedian(v.asInstanceOf[jArray[_]].toArray
       //              .map(_.toString.toDouble).toSet)
       //        }
-      //        addCast(medianConverter.asInstanceOf[AnyRef => AnyRef])
+      //        replaceCast(medianConverter.asInstanceOf[AnyRef => AnyRef])
 
       case "avg" =>
-        widh += v
         find += s"(avg $v_)"
+        widh += v
         where += s"[$e $a $v]" -> wClause
         where += s"[$v $av $v_]" -> wClause
         addSort(sortOneDouble(attr, attrIndex))
-        addCast(any2double)
+        replaceCast(any2double)
 
       case "variance" =>
-        widh += v
         find += s"(variance $v_)"
+        widh += v
         where += s"[$e $a $v]" -> wClause
         where += s"[$v $av $v_]" -> wClause
         addSort(sortOneDouble(attr, attrIndex))
-        addCast(any2double)
+        replaceCast(any2double)
 
       case "stddev" =>
-        widh += v
         find += s"(stddev $v_)"
+        widh += v
         where += s"[$e $a $v]" -> wClause
         where += s"[$v $av $v_]" -> wClause
         addSort(sortOneDouble(attr, attrIndex))
-        addCast(any2double)
+        replaceCast(any2double)
 
       case "mins" =>
         noBooleanSetAggr(resSeq)
         find += s"(min $n $v_)"
         where += s"[$e $a $v]" -> wClause
         where += s"[$v $av $v_]" -> wClause
-        addCast(resSeq.vector2set)
+        replaceCast(resSeq.vector2set)
 
       case "maxs" =>
         noBooleanSetAggr(resSeq)
         find += s"(max $n $v_)"
         where += s"[$e $a $v]" -> wClause
         where += s"[$v $av $v_]" -> wClause
-        addCast(resSeq.vector2set)
+        replaceCast(resSeq.vector2set)
 
       case "samples" =>
         noBooleanSetAggr(resSeq)
         find += s"(sample $n $v_)"
         where += s"[$e $a $v]" -> wClause
         where += s"[$v $av $v_]" -> wClause
-        addCast(resSeq.vector2set)
+        replaceCast(resSeq.vector2set)
 
       case "distinct" =>
         noBooleanSetAggr(resSeq)
@@ -663,7 +638,7 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
              |                   [(vector $i_ $v_) $pair]]" $$ $e) [[$v1]]]""".stripMargin -> wClause
         where += s"[(sort-by first $v1) $v2]" -> wClause
         where += s"[(map second $v2) $v3]" -> wClause
-        addCast(resSeq.jSetOfLists2s)
+        replaceCast(resSeq.jSetOfLists2s)
 
       case other => unexpectedKw(other)
     }
@@ -672,57 +647,60 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
 
   // Filter attribute filters --------------------------------------------------
 
-  private def equal2(
-    attr: Attr, e: Var, v: Var, filterAttr: String
+  private def equal2[T](
+    attr: Attr, e: Var, v: Var, filterAttr: String, resSeq: ResSeq[T]
   ): Unit = {
     val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
-    preFind = e
-    where += s"[$e $a $v]" -> wClause
+    where += s"[$e $a _]" -> wClause
     where +=
       s"""[(datomic.api/q
-         |          "[:find (distinct ${v}1)
-         |            :in $$ ${e}1
-         |            :where [${e}1 $a ${v}1]]" $$ $e) [[${v}2]]]""".stripMargin -> wClause
-    val link: (Var, Var) => Unit = (e1: Var, v1: Var) => {
-      where +=
-        s"""[(datomic.api/q
-           |          "[:find (distinct ${v1}1)
-           |            :in $$ ${e1}1
-           |            :where [${e1}1 $filterAttr ${v1}1]]" $$ $e1) [[${v1}2]]]""".stripMargin -> wClause
-      where += s"[(= ${v}2 ${v1}2)]" -> wClause
+         |          "[:find (distinct $pair)
+         |            :in $$ $e
+         |            :where [$e $a $v]
+         |                   [$v $ai $i_]
+         |                   [$v $av $v_]
+         |                   [(vector $i_ $v_) $pair]]" $$ $e) [[$v1]]]""".stripMargin -> wClause
+    where += s"[(sort-by first $v1) $v2]" -> wClause
+    where += s"[(map second $v2) $v3]" -> wClause
+
+    val process: (Var, Var) => Unit = (_: Var, w: Var) => {
+      where += s"[(= $v3 ${w}3)]" -> wClause
     }
     filterAttrVars1.get(filterAttr).fold {
-      filterAttrVars2 = filterAttrVars2 + (filterAttr -> link)
-    } { case (e, a) => link(e, a) }
+      filterAttrVars2 = filterAttrVars2 + (filterAttr -> process)
+    } { case (e, a) => process(e, a) }
   }
 
 
-  private def neq2(
-    attr: Attr, e: Var, v: Var, filterAttr: String
+  private def neq2[T](
+    attr: Attr, e: Var, v: Var, filterAttr: String, resSeq: ResSeq[T]
   ): Unit = {
     val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
-    where += s"[$e $a $v]" -> wClause
-    val process: (Var, Var) => Unit = (e1: Var, v1: Var) => {
-      val blacklist   = v1 + "-blacklist"
-      val blacklisted = v1 + "-blacklisted"
 
-      // Pre-query
-      preFind = e1
-      preWhere +=
-        s"""[(datomic.api/q
-           |          "[:find (distinct ${v}1)
-           |            :in $$ ${e}1
-           |            :where [${e}1 $a ${v}1]]" $$ $e) [[${v}2]]]""".stripMargin -> wClause
-      preWhere +=
-        s"""[(datomic.api/q
-           |          "[:find (distinct ${v1}1)
-           |            :in $$ ${e1}1
-           |            :where [${e1}1 $filterAttr ${v1}1]]" $$ $e1) [[${v1}2]]]""".stripMargin -> wClause
-      preWhere += s"[(= ${v}2 ${v1}2)]" -> wClause
+    // Common for pre-query and main query
+    where += s"[$e $a _]" -> wClause
+    where +=
+      s"""[(datomic.api/q
+         |          "[:find (distinct $pair)
+         |            :in $$ $e
+         |            :where [$e $a $v]
+         |                   [$v $ai $i_]
+         |                   [$v $av $v_]
+         |                   [(vector $i_ $v_) $pair]]" $$ $e) [[$v1]]]""".stripMargin -> wClause
+    where += s"[(sort-by first $v1) $v2]" -> wClause
+    where += s"[(map second $v2) $v3]" -> wClause
+
+    val process: (Var, Var) => Unit = (f: Var, w: Var) => {
+      val blacklist   = w + "-blacklist"
+      val blacklisted = w + "-blacklisted"
+
+      // Pre-query (merged with `when` clauses)
+      preFind = f
+      preWhere += s"[(= $v3 ${w}3)]" -> wClause
 
       // Main query
       inPost += blacklist
-      wherePost += s"[(contains? $blacklist $e1) $blacklisted]" -> wClause
+      wherePost += s"[(contains? $blacklist $f) $blacklisted]" -> wClause
       wherePost += s"[(not $blacklisted)]" -> wClause
     }
     filterAttrVars1.get(filterAttr).fold {
@@ -733,22 +711,43 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
   }
 
 
-  private def has2(attr: Attr, e: Var, v: Var, filterAttr: String): Unit = {
+  private def has2[T](
+    attr: Attr, e: Var, v: Var, filterAttr: String, resSeq: ResSeq[T]
+  ): Unit = {
     val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
-    where += s"[$e $a $v]" -> wClause
-    val process: (Var, Var) => Unit = (e1: Var, v1: Var) => {
-      where +=
-        s"""[(datomic.api/q
-           |          "[:find (distinct ${v}1)
-           |            :in $$ ${e}1
-           |            :where [${e}1 $a ${v}1]]" $$ $e) [[${v}2]]]""".stripMargin -> wClause
-      where +=
-        s"""[(datomic.api/q
-           |          "[:find (distinct ${v1}1)
-           |            :in $$ ${e1}1
-           |            :where [${e1}1 $filterAttr ${v1}1]]" $$ $e1) [[${v1}2]]]""".stripMargin -> wClause
-      where += s"[(clojure.set/intersection ${v}2 ${v1}2) $v1-intersection]" -> wClause
-      where += s"[(= ${v1}2 $v1-intersection)]" -> wClause
+    where += s"[$e $a _]" -> wClause
+    where +=
+      s"""[(datomic.api/q
+         |          "[:find (distinct $pair)
+         |            :in $$ $e
+         |            :where [$e $a $v]
+         |                   [$v $ai $i_]
+         |                   [$v $av $v_]
+         |                   [(vector $i_ $v_) $pair]]" $$ $e) [[$v1]]]""".stripMargin -> wClause
+    where += s"[(sort-by first $v1) $v2]" -> wClause
+    where += s"[(map second $v2) $v3]" -> wClause
+
+    val process: (Var, Var) => Unit = if (attr.filterAttr.get._3.isInstanceOf[AttrOne]) {
+      (_: Var, w: Var) =>
+        where += s"[(set $v3) $v4]" -> wClause
+        where += s"[(contains? $v4 $w)]" -> wClause
+
+    } else if (resSeq.tpe == "Boolean") {
+      (_: Var, w: Var) =>
+        // Need to convert to sets of Strings for `some` to work on boolean false (maybe a bug?)
+        where += s"[(map str $v3) $v3-list]" -> wClause
+        where += s"[(set $v3-list) $v3-set]" -> wClause
+        where += s"[(map str ${w}3) ${w}3-list]" -> wClause
+        where += s"[(set ${w}3-list) ${w}3-set]" -> wClause
+        where += s"[(clojure.set/intersection $v3-set ${w}3-set) $w-intersection]" -> wClause
+        where += s"[(= ${w}3-set $w-intersection)]" -> wClause
+
+    } else {
+      (_: Var, w: Var) =>
+        where += s"[(set $v3) $v4]" -> wClause
+        where += s"[(set ${w}3) ${w}4]" -> wClause
+        where += s"[(clojure.set/intersection $v4 ${w}4) $w-intersection]" -> wClause
+        where += s"[(= ${w}4 $w-intersection)]" -> wClause
     }
     filterAttrVars1.get(filterAttr).fold {
       filterAttrVars2 = filterAttrVars2 + (filterAttr -> process)
@@ -758,24 +757,47 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
   }
 
 
-  private def hasNo2(attr: Attr, e: Var, v: Var, filterAttr: String): Unit = {
+  private def hasNo2[T](
+    attr: Attr, e: Var, v: Var, filterAttr: String, resSeq: ResSeq[T]
+  ): Unit = {
     val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
-    // Common for pre-query and main query
-    where += s"[$e $a $v]" -> wClause
-    val process: (Var, Var) => Unit = (e1: Var, v1: Var) => {
-      where +=
-        s"""[(datomic.api/q
-           |          "[:find (distinct ${v}1)
-           |            :in $$ ${e}1
-           |            :where [${e}1 $a ${v}1]]" $$ $e) [[${v}2]]]""".stripMargin -> wClause
-      where +=
-        s"""[(datomic.api/q
-           |          "[:find (distinct ${v1}1)
-           |            :in $$ ${e1}1
-           |            :where [${e1}1 $filterAttr ${v1}1]]" $$ $e1) [[${v1}2]]]""".stripMargin -> wClause
-      where += s"[(clojure.set/intersection ${v}2 ${v1}2) $v1-intersection]" -> wClause
-      where += s"[(empty? $v1-intersection)]" -> wClause
+    where += s"[$e $a _]" -> wClause
+    where +=
+      s"""[(datomic.api/q
+         |          "[:find (distinct $pair)
+         |            :in $$ $e
+         |            :where [$e $a $v]
+         |                   [$v $ai $i_]
+         |                   [$v $av $v_]
+         |                   [(vector $i_ $v_) $pair]]" $$ $e) [[$v1]]]""".stripMargin -> wClause
+    where += s"[(sort-by first $v1) $v2]" -> wClause
+    where += s"[(map second $v2) $v3]" -> wClause
+
+    val process: (Var, Var) => Unit = if (attr.filterAttr.get._3.isInstanceOf[AttrOne]) {
+      (_: Var, w: Var) => {
+        where += s"[(set $v3) $v4]" -> wClause
+        where += s"[(contains? $v4 $w) $v5]" -> wClause
+        where += s"[(not $v5)]" -> wClause
+      }
+
+    } else if (resSeq.tpe == "Boolean") {
+      (_: Var, w: Var) =>
+        // Need to convert to sets of Strings for `some` to work on boolean false (maybe a bug?)
+        where += s"[(map str $v3) $v3-list]" -> wClause
+        where += s"[(set $v3-list) $v3-set]" -> wClause
+        where += s"[(map str ${w}3) ${w}3-list]" -> wClause
+        where += s"[(set ${w}3-list) ${w}3-set]" -> wClause
+        where += s"[(clojure.set/intersection $v3-set ${w}3-set) $w-intersection]" -> wClause
+        where += s"[(empty? $w-intersection)]" -> wClause
+
+    } else {
+      (_: Var, w: Var) =>
+        where += s"[(set $v3) $v4]" -> wClause
+        where += s"[(set ${w}3) ${w}4]" -> wClause
+        where += s"[(clojure.set/intersection $v4 ${w}4) $w-intersection]" -> wClause
+        where += s"[(empty? $w-intersection)]" -> wClause
     }
+
     filterAttrVars1.get(filterAttr).fold {
       filterAttrVars2 = filterAttrVars2 + (filterAttr -> process)
     } { case (e, a) =>
@@ -797,7 +819,6 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     } { _ =>
       throw ModelError(s"Filter attributes not allowed with byte arrays.")
     }
-    refConfirmed = true
     addCast(identity) // return Byte array as-is
   }
 
@@ -810,7 +831,6 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     } { _ =>
       throw ModelError(s"Filter attributes not allowed with byte arrays.")
     }
-    refConfirmed = true
   }
 
 
@@ -894,7 +914,15 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     find += s"(pull $e-$v [[$a :limit nil]])"
     where += s"[(identity $e) $e-$v]" -> wGround
     where += s"(not [$e $a])" -> wNeqOne
-    addCast(resSeqOpt.j2sOptList)
+  }
+
+  private def optWithoutNone[T](
+    attr: Attr, e: Var, v: Var, resSeqOpt: ResSeqOpt[T]
+  ): Unit = {
+    // Ignore empty seqs
+    where += s"[(nil? ${v}1) ${v}1-empty]" -> wClause
+    where += s"[(not ${v}1-empty)]" -> wClause
+    optAttr(attr, e, v) // Get all available
   }
 
   private def noBooleanSetAggr[T](resSeq: ResSeq[T]): Unit = {

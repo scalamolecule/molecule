@@ -286,7 +286,7 @@ trait UpdateSeq_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns("42").intSeq_?(Some(List(1))).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
               err ==> "Can't update optional values. Found:\n" +
-                """AttrSeqOptInt("Ns", "intSeq", Eq, Some(Seq(Seq(1))), None, None, Nil, Nil, None, None, Seq(0, 53))"""
+                """AttrSeqOptInt("Ns", "intSeq", Eq, Some(Seq(Seq(1))), None, None, Nil, Nil, None, None, Seq(0, 54))"""
             }
         } yield ()
       }

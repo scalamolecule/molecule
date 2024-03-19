@@ -43,29 +43,29 @@ trait FilterRefSeq_base extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         // not
 
-        _ <- A.i.a1.iSeq.not(List(1)).query.get.map(_ ==> List(
+        _ <- A.i.iSeq.not(List(1)).query.get.map(_.sortBy(t => (t._1, t._2.head)) ==> List(
           (1, List(1, 2, 2)),
           (2, List(2)),
           (2, List(7)),
           (3, List(3)),
         ))
-        _ <- A.i.a1.iSeq.not(List(2)).query.get.map(_ ==> List(
+        _ <- A.i.iSeq.not(List(2)).query.get.map(_.sortBy(t => (t._1, t._2.head)) ==> List(
           (1, List(1, 2, 2)),
           (2, List(7)),
           (3, List(3)),
         ))
-        _ <- A.i.a1.iSeq.not(List(1, 2)).query.get.map(_ ==> List(
+        _ <- A.i.iSeq.not(List(1, 2)).query.get.map(_.sortBy(t => (t._1, t._2.head)) ==> List(
           (1, List(1, 2, 2)),
           (2, List(2)),
           (2, List(7)),
           (3, List(3)),
         ))
-        _ <- A.i.a1.iSeq.not(List(1, 2, 2)).query.get.map(_ ==> List(
+        _ <- A.i.iSeq.not(List(1, 2, 2)).query.get.map(_.sortBy(t => (t._1, t._2.head)) ==> List(
           (2, List(2)),
           (2, List(7)),
           (3, List(3)),
         ))
-        _ <- A.i.a1.iSeq.not(List.empty[Int]).query.get.map(_ ==> List(
+        _ <- A.i.iSeq.not(List.empty[Int]).query.get.map(_.sortBy(t => (t._1, t._2.head)) ==> List(
           (1, List(1, 2, 2)),
           (2, List(2)),
           (2, List(7)),
@@ -75,24 +75,24 @@ trait FilterRefSeq_base extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         // has
 
-        _ <- A.i.a1.iSeq.has(1).query.get.map(_ ==> List(
+        _ <- A.i.iSeq.has(1).query.get.map(_.sortBy(t => (t._1, t._2.head)) ==> List(
           (1, List(1, 2, 2)),
         ))
-        _ <- A.i.a1.iSeq.has(2).query.get.map(_ ==> List(
+        _ <- A.i.iSeq.has(2).query.get.map(_.sortBy(t => (t._1, t._2.head)) ==> List(
           (1, List(1, 2, 2)),
           (2, List(2)),
         ))
 
-        _ <- A.i.a1.iSeq.has(2, 1).query.get.map(_ ==> List(
+        _ <- A.i.iSeq.has(2, 1).query.get.map(_.sortBy(t => (t._1, t._2.head)) ==> List(
           (1, List(1, 2, 2)),
           (2, List(2)),
         ))
-        _ <- A.i.a1.iSeq.has(2, 7).query.get.map(_ ==> List(
+        _ <- A.i.iSeq.has(2, 7).query.get.map(_.sortBy(t => (t._1, t._2.head)) ==> List(
           (1, List(1, 2, 2)),
           (2, List(2)),
           (2, List(7)),
         ))
-        _ <- A.i.a1.iSeq.has(2, 3).query.get.map(_ ==> List(
+        _ <- A.i.iSeq.has(2, 3).query.get.map(_.sortBy(t => (t._1, t._2.head)) ==> List(
           (1, List(1, 2, 2)),
           (2, List(2)),
           (3, List(3)),
@@ -101,16 +101,16 @@ trait FilterRefSeq_base extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         // hasNo
 
-        _ <- A.i.a1.iSeq.hasNo(1).query.get.map(_ ==> List(
+        _ <- A.i.iSeq.hasNo(1).query.get.map(_.sortBy(t => (t._1, t._2.head)) ==> List(
           (2, List(2)),
           (2, List(7)),
           (3, List(3)),
         ))
-        _ <- A.i.a1.iSeq.hasNo(2).query.get.map(_ ==> List(
+        _ <- A.i.iSeq.hasNo(2).query.get.map(_.sortBy(t => (t._1, t._2.head)) ==> List(
           (2, List(7)),
           (3, List(3)),
         ))
-        _ <- A.i.a1.iSeq.hasNo(3).query.get.map(_ ==> List(
+        _ <- A.i.iSeq.hasNo(3).query.get.map(_.sortBy(t => (t._1, t._2.head)) ==> List(
           (1, List(1, 2, 2)),
           (2, List(2)),
           (2, List(7)),

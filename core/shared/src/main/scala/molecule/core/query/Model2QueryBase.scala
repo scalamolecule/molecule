@@ -280,8 +280,8 @@ trait Model2QueryBase extends ModelUtils {
           prevWasFilterCallee = false
           qualifiedPath = Nil
           val nsAttr = path.takeRight(1) :+ a.cleanAttr
-          if (a.isInstanceOf[AttrSetMan] && filterAttrVars.contains(nsAttr) && a.op != V) {
-            throw ModelError(s"Cardinality-set filter attributes ($attrName) not allowed to do additional filtering.")
+          if ((a.isInstanceOf[AttrSetMan] || a.isInstanceOf[AttrSeqMan]) && filterAttrVars.contains(nsAttr) && a.op != V) {
+            throw ModelError(s"Cardinality-many filter attributes ($attrName) not allowed to do additional filtering.")
           }
           List(a)
         } { case (_, filterPath, filterAttr) =>

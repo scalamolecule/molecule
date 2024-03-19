@@ -432,7 +432,7 @@ trait FilterSet_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.intSet_?(Some(Seq(Set(int1), Set(int2, int3)))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.intSet_?(Some(Seq(Set(int1, int2), Set(int2, int3)))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.intSet_?.apply(Some(Seq(Set(int1, int2), Set(int2, int3)))).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.intSet_?(Some(Seq(Set(int1, int2), Set(int2, int3, int4)))).query.get.map(_ ==> List(a, b))
 
 

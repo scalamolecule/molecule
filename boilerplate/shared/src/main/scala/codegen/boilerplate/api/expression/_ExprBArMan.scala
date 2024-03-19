@@ -9,7 +9,6 @@ object _ExprBArMan extends BoilerplateGenBase("ExprBArMan", "/api/expression") {
     s"""// GENERATED CODE ********************************
        |package molecule.boilerplate.api.expression
        |
-       |import molecule.boilerplate.api._
        |import molecule.boilerplate.ast.Model._
        |$traits
        |""".stripMargin

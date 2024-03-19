@@ -7,6 +7,7 @@ object Types extends DataModel(5) {
   trait Ns {
     val i    = oneInt
     val iSet = setInt
+    val iSeq = seqInt
     val s    = oneString
     val u    = oneInt.unique
 
@@ -140,6 +141,7 @@ object Types extends DataModel(5) {
     val char           = oneChar
 
     val iSet = setInt
+    val iSeq = seqInt
     val sSet = setString
 
     val stringSet         = setString
@@ -164,6 +166,29 @@ object Types extends DataModel(5) {
     val byteSet           = setByte
     val shortSet          = setShort
     val charSet           = setChar
+
+    val stringSeq         = seqString
+    val intSeq            = seqInt
+    val longSeq           = seqLong
+    val floatSeq          = seqFloat
+    val doubleSeq         = seqDouble
+    val booleanSeq        = seqBoolean
+    val bigIntSeq         = seqBigInt
+    val bigDecimalSeq     = seqBigDecimal
+    val dateSeq           = seqDate
+    val durationSeq       = seqDuration
+    val instantSeq        = seqInstant
+    val localDateSeq      = seqLocalDate
+    val localTimeSeq      = seqLocalTime
+    val localDateTimeSeq  = seqLocalDateTime
+    val offsetTimeSeq     = seqOffsetTime
+    val offsetDateTimeSeq = seqOffsetDateTime
+    val zonedDateTimeSeq  = seqZonedDateTime
+    val uuidSeq           = seqUUID
+    val uriSeq            = seqURI
+    val byteArray         = arrayByte
+    val shortSeq          = seqShort
+    val charSeq           = seqChar
 
     val nss = many[Ns]
   }

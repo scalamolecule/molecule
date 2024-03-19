@@ -52,9 +52,9 @@ object _ExprSeqMan extends BoilerplateGenBase("ExprSeqMan", "/api/expression") {
          |  def hasNo (v   : t, vs: t*            ): Ns1[${`A..V`}, t] = _exprSeq(HasNo , (v +: vs).map(v => Seq(v)))
          |  def hasNo (seq : Seq[t]               ): Ns1[${`A..V`}, t] = _exprSeq(HasNo , Seq(seq)                  )
          |  def add   (v   : t, vs: t*            ): Ns1[${`A..V`}, t] = _exprSeq(Add   , Seq(v +: vs)              )
-         |  def add   (vs  : Seq[t]               ): Ns1[${`A..V`}, t] = _exprSeq(Add   , Seq(vs.toSeq)             )
+         |  def add   (vs  : Seq[t]               ): Ns1[${`A..V`}, t] = _exprSeq(Add   , Seq(vs)                   )
          |  def remove(v   : t, vs: t*            ): Ns1[${`A..V`}, t] = _exprSeq(Remove, Seq(v +: vs)              )
-         |  def remove(vs  : Seq[t]               ): Ns1[${`A..V`}, t] = _exprSeq(Remove, Seq(vs.toSeq)             )
+         |  def remove(vs  : Seq[t]               ): Ns1[${`A..V`}, t] = _exprSeq(Remove, Seq(vs)                   )
          |  $attrExprs
          |}""".stripMargin
   }
