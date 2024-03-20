@@ -120,7 +120,7 @@ trait FilterSeq_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
 
           // Seqs with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.localTimeSeq.has(localTime0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localTimeSeq.has(localTime1).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.localTimeSeq.has(localTime2).query.get.map(_ ==> List(a, b))
@@ -160,7 +160,7 @@ trait FilterSeq_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
 
           // Seqs without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.localTimeSeq.hasNo(localTime0).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.localTimeSeq.hasNo(localTime1).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.localTimeSeq.hasNo(localTime2).query.get.map(_ ==> List())
@@ -178,7 +178,7 @@ trait FilterSeq_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.localTimeSeq.hasNo(localTime1, localTime2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localTimeSeq.hasNo(localTime1, localTime3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localTimeSeq.hasNo(localTime1, localTime3).query.get.map(_ ==> List())
@@ -311,7 +311,7 @@ trait FilterSeq_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
 
           // Seqs with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.localTimeSeq_.has(localTime0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localTimeSeq_.has(localTime1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.localTimeSeq_.has(localTime2).query.get.map(_ ==> List(1, 2))
@@ -353,7 +353,7 @@ trait FilterSeq_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
 
           // Seqs without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.localTimeSeq_.hasNo(localTime0).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.localTimeSeq_.hasNo(localTime1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.localTimeSeq_.hasNo(localTime2).query.get.map(_ ==> List())
@@ -371,7 +371,7 @@ trait FilterSeq_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.localTimeSeq_.hasNo(localTime1, localTime2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localTimeSeq_.hasNo(localTime1, localTime3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localTimeSeq_.hasNo(localTime1, localTime3).query.get.map(_ ==> List())
@@ -501,7 +501,7 @@ trait FilterSeq_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
 
           // Seqs with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.localTimeSeq_?.has(Some(localTime0)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localTimeSeq_?.has(Some(localTime1)).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.localTimeSeq_?.has(Some(localTime2)).query.get.map(_ ==> List(a, b))
@@ -541,7 +541,7 @@ trait FilterSeq_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
 
           // Seqs without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.localTimeSeq_?.hasNo(Some(localTime0)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.localTimeSeq_?.hasNo(Some(localTime1)).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.localTimeSeq_?.hasNo(Some(localTime2)).query.get.map(_ ==> List())
@@ -559,7 +559,7 @@ trait FilterSeq_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.localTimeSeq_?.hasNo(Some(List(localTime1, localTime2))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localTimeSeq_?.hasNo(Some(List(localTime1, localTime3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localTimeSeq_?.hasNo(Some(List(localTime1, localTime3))).query.get.map(_ ==> List())

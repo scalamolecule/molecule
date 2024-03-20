@@ -120,7 +120,7 @@ trait FilterSet_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.instantSet.has(instant0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.instantSet.has(instant1).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.instantSet.has(instant2).query.get.map(_ ==> List(a, b))
@@ -159,7 +159,7 @@ trait FilterSet_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.instantSet.hasNo(instant0).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.instantSet.hasNo(instant1).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.instantSet.hasNo(instant2).query.get.map(_ ==> List())
@@ -177,7 +177,7 @@ trait FilterSet_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.instantSet.hasNo(instant1, instant2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.instantSet.hasNo(instant1, instant3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.instantSet.hasNo(instant1, instant4).query.get.map(_ ==> List())
@@ -310,7 +310,7 @@ trait FilterSet_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.instantSet_.has(instant0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.instantSet_.has(instant1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.instantSet_.has(instant2).query.get.map(_ ==> List(1, 2))
@@ -352,7 +352,7 @@ trait FilterSet_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.instantSet_.hasNo(instant0).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.instantSet_.hasNo(instant1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.instantSet_.hasNo(instant2).query.get.map(_ ==> List())
@@ -370,7 +370,7 @@ trait FilterSet_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.instantSet_.hasNo(instant1, instant2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.instantSet_.hasNo(instant1, instant3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.instantSet_.hasNo(instant1, instant4).query.get.map(_ ==> List())
@@ -434,7 +434,7 @@ trait FilterSet_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.instantSet_?(Some(Seq(Set(instant1), Set(instant2, instant3)))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.instantSet_?(Some(Seq(Set(instant1, instant2), Set(instant2, instant3)))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.instantSet_?.apply(Some(Seq(Set(instant1, instant2), Set(instant2, instant3)))).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.instantSet_?(Some(Seq(Set(instant1, instant2), Set(instant2, instant3, instant4)))).query.get.map(_ ==> List(a, b))
 
 
@@ -499,7 +499,7 @@ trait FilterSet_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.instantSet_?.has(Some(instant0)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.instantSet_?.has(Some(instant1)).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.instantSet_?.has(Some(instant2)).query.get.map(_ ==> List(a, b))
@@ -538,7 +538,7 @@ trait FilterSet_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.instantSet_?.hasNo(Some(instant0)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.instantSet_?.hasNo(Some(instant1)).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.instantSet_?.hasNo(Some(instant2)).query.get.map(_ ==> List())
@@ -556,7 +556,7 @@ trait FilterSet_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.instantSet_?.hasNo(Some(Seq(instant1, instant2))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.instantSet_?.hasNo(Some(Seq(instant1, instant3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.instantSet_?.hasNo(Some(Seq(instant1, instant4))).query.get.map(_ ==> List())

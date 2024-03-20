@@ -119,7 +119,7 @@ trait FilterSet_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.floatSet.has(float0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.floatSet.has(float1).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.floatSet.has(float2).query.get.map(_ ==> List(a, b))
@@ -158,7 +158,7 @@ trait FilterSet_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.floatSet.hasNo(float0).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.floatSet.hasNo(float1).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.floatSet.hasNo(float2).query.get.map(_ ==> List())
@@ -176,7 +176,7 @@ trait FilterSet_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.floatSet.hasNo(float1, float2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.floatSet.hasNo(float1, float3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.floatSet.hasNo(float1, float4).query.get.map(_ ==> List())
@@ -309,7 +309,7 @@ trait FilterSet_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.floatSet_.has(float0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.floatSet_.has(float1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.floatSet_.has(float2).query.get.map(_ ==> List(1, 2))
@@ -351,7 +351,7 @@ trait FilterSet_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.floatSet_.hasNo(float0).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.floatSet_.hasNo(float1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.floatSet_.hasNo(float2).query.get.map(_ ==> List())
@@ -369,7 +369,7 @@ trait FilterSet_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.floatSet_.hasNo(float1, float2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.floatSet_.hasNo(float1, float3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.floatSet_.hasNo(float1, float4).query.get.map(_ ==> List())
@@ -433,7 +433,7 @@ trait FilterSet_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.floatSet_?(Some(Seq(Set(float1), Set(float2, float3)))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.floatSet_?(Some(Seq(Set(float1, float2), Set(float2, float3)))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.floatSet_?.apply(Some(Seq(Set(float1, float2), Set(float2, float3)))).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.floatSet_?(Some(Seq(Set(float1, float2), Set(float2, float3, float4)))).query.get.map(_ ==> List(a, b))
 
 
@@ -498,7 +498,7 @@ trait FilterSet_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.floatSet_?.has(Some(float0)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.floatSet_?.has(Some(float1)).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.floatSet_?.has(Some(float2)).query.get.map(_ ==> List(a, b))
@@ -537,7 +537,7 @@ trait FilterSet_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.floatSet_?.hasNo(Some(float0)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.floatSet_?.hasNo(Some(float1)).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.floatSet_?.hasNo(Some(float2)).query.get.map(_ ==> List())
@@ -555,7 +555,7 @@ trait FilterSet_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.floatSet_?.hasNo(Some(Seq(float1, float2))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.floatSet_?.hasNo(Some(Seq(float1, float3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.floatSet_?.hasNo(Some(Seq(float1, float4))).query.get.map(_ ==> List())

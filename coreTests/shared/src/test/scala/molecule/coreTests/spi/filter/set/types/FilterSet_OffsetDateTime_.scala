@@ -120,7 +120,7 @@ trait FilterSet_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAs
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.offsetDateTimeSet.has(offsetDateTime0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetDateTimeSet.has(offsetDateTime1).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.offsetDateTimeSet.has(offsetDateTime2).query.get.map(_ ==> List(a, b))
@@ -159,7 +159,7 @@ trait FilterSet_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAs
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.offsetDateTimeSet.hasNo(offsetDateTime0).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.offsetDateTimeSet.hasNo(offsetDateTime1).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.offsetDateTimeSet.hasNo(offsetDateTime2).query.get.map(_ ==> List())
@@ -177,7 +177,7 @@ trait FilterSet_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAs
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.offsetDateTimeSet.hasNo(offsetDateTime1, offsetDateTime2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetDateTimeSet.hasNo(offsetDateTime1, offsetDateTime3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetDateTimeSet.hasNo(offsetDateTime1, offsetDateTime4).query.get.map(_ ==> List())
@@ -310,7 +310,7 @@ trait FilterSet_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAs
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.offsetDateTimeSet_.has(offsetDateTime0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetDateTimeSet_.has(offsetDateTime1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.offsetDateTimeSet_.has(offsetDateTime2).query.get.map(_ ==> List(1, 2))
@@ -352,7 +352,7 @@ trait FilterSet_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAs
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.offsetDateTimeSet_.hasNo(offsetDateTime0).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.offsetDateTimeSet_.hasNo(offsetDateTime1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.offsetDateTimeSet_.hasNo(offsetDateTime2).query.get.map(_ ==> List())
@@ -370,7 +370,7 @@ trait FilterSet_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAs
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.offsetDateTimeSet_.hasNo(offsetDateTime1, offsetDateTime2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetDateTimeSet_.hasNo(offsetDateTime1, offsetDateTime3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetDateTimeSet_.hasNo(offsetDateTime1, offsetDateTime4).query.get.map(_ ==> List())
@@ -434,7 +434,7 @@ trait FilterSet_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAs
 
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.offsetDateTimeSet_?(Some(Seq(Set(offsetDateTime1), Set(offsetDateTime2, offsetDateTime3)))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetDateTimeSet_?(Some(Seq(Set(offsetDateTime1, offsetDateTime2), Set(offsetDateTime2, offsetDateTime3)))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.offsetDateTimeSet_?.apply(Some(Seq(Set(offsetDateTime1, offsetDateTime2), Set(offsetDateTime2, offsetDateTime3)))).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.offsetDateTimeSet_?(Some(Seq(Set(offsetDateTime1, offsetDateTime2), Set(offsetDateTime2, offsetDateTime3, offsetDateTime4)))).query.get.map(_ ==> List(a, b))
 
 
@@ -499,7 +499,7 @@ trait FilterSet_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAs
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.offsetDateTimeSet_?.has(Some(offsetDateTime0)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetDateTimeSet_?.has(Some(offsetDateTime1)).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.offsetDateTimeSet_?.has(Some(offsetDateTime2)).query.get.map(_ ==> List(a, b))
@@ -538,7 +538,7 @@ trait FilterSet_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAs
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.offsetDateTimeSet_?.hasNo(Some(offsetDateTime0)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.offsetDateTimeSet_?.hasNo(Some(offsetDateTime1)).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.offsetDateTimeSet_?.hasNo(Some(offsetDateTime2)).query.get.map(_ ==> List())
@@ -556,7 +556,7 @@ trait FilterSet_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAs
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.offsetDateTimeSet_?.hasNo(Some(Seq(offsetDateTime1, offsetDateTime2))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetDateTimeSet_?.hasNo(Some(Seq(offsetDateTime1, offsetDateTime3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetDateTimeSet_?.hasNo(Some(Seq(offsetDateTime1, offsetDateTime4))).query.get.map(_ ==> List())

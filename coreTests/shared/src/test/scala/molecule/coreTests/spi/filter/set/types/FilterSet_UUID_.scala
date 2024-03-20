@@ -120,7 +120,7 @@ trait FilterSet_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.uuidSet.has(uuid0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uuidSet.has(uuid1).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.uuidSet.has(uuid2).query.get.map(_ ==> List(a, b))
@@ -159,7 +159,7 @@ trait FilterSet_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.uuidSet.hasNo(uuid0).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.uuidSet.hasNo(uuid1).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.uuidSet.hasNo(uuid2).query.get.map(_ ==> List())
@@ -177,7 +177,7 @@ trait FilterSet_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.uuidSet.hasNo(uuid1, uuid2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uuidSet.hasNo(uuid1, uuid3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uuidSet.hasNo(uuid1, uuid4).query.get.map(_ ==> List())
@@ -310,7 +310,7 @@ trait FilterSet_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.uuidSet_.has(uuid0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uuidSet_.has(uuid1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.uuidSet_.has(uuid2).query.get.map(_ ==> List(1, 2))
@@ -352,7 +352,7 @@ trait FilterSet_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.uuidSet_.hasNo(uuid0).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.uuidSet_.hasNo(uuid1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.uuidSet_.hasNo(uuid2).query.get.map(_ ==> List())
@@ -370,7 +370,7 @@ trait FilterSet_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.uuidSet_.hasNo(uuid1, uuid2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uuidSet_.hasNo(uuid1, uuid3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uuidSet_.hasNo(uuid1, uuid4).query.get.map(_ ==> List())
@@ -434,7 +434,7 @@ trait FilterSet_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.uuidSet_?(Some(Seq(Set(uuid1), Set(uuid2, uuid3)))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uuidSet_?(Some(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3)))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uuidSet_?.apply(Some(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3)))).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.uuidSet_?(Some(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4)))).query.get.map(_ ==> List(a, b))
 
 
@@ -499,7 +499,7 @@ trait FilterSet_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.uuidSet_?.has(Some(uuid0)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uuidSet_?.has(Some(uuid1)).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.uuidSet_?.has(Some(uuid2)).query.get.map(_ ==> List(a, b))
@@ -538,7 +538,7 @@ trait FilterSet_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.uuidSet_?.hasNo(Some(uuid0)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.uuidSet_?.hasNo(Some(uuid1)).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.uuidSet_?.hasNo(Some(uuid2)).query.get.map(_ ==> List())
@@ -556,7 +556,7 @@ trait FilterSet_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.uuidSet_?.hasNo(Some(Seq(uuid1, uuid2))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uuidSet_?.hasNo(Some(Seq(uuid1, uuid3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uuidSet_?.hasNo(Some(Seq(uuid1, uuid4))).query.get.map(_ ==> List())

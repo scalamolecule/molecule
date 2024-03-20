@@ -39,13 +39,11 @@ class ResolveSave
               case a: AttrSeqTac => resolveAttrSeqTac(a); resolve(tail)
             }
 
-            case a: AttrMap =>
-              //              a match {
-              //                case a: AttrMapMan => resolveAttrMapMan(a); resolve(tail)
-              //                case a: AttrMapOpt => resolveAttrMapOpt(a); resolve(tail)
-              //                case a: AttrMapTac => resolveAttrMapTac(a); resolve(tail)
-              //              }
-              ???
+            case a: AttrMap => a match {
+              case a: AttrMapMan => resolveAttrMapMan(a); resolve(tail)
+              case a: AttrMapOpt => resolveAttrMapOpt(a); resolve(tail)
+              case a: AttrMapTac => resolveAttrMapTac(a); resolve(tail)
+            }
           }
 
         case Ref(ns, refAttr, refNs, card, owner, _) =>
@@ -320,22 +318,6 @@ class ResolveSave
     }
   }
 
-//  private def optByteArray(
-//    ns: String,
-//    attr: String,
-//    arrays: Seq[Array[Byte]],
-//  ): Option[Array[Byte]] = {
-//    arrays match {
-//      case Seq(array)     => Some(array)
-//      case Nil            => None
-//      case multipleArrays =>
-//        throw ExecutionError(
-//          s"Can only save one Seq of values for Seq attribute `$ns.$attr`. Found multiple seqs:\n" +
-//            multipleArrays.map(_.mkString("Array(", ", ", ")")).mkString("\n")
-//        )
-//    }
-//  }
-
   private def resolveAttrSeqMan(a: AttrSeqMan): Unit = {
     val (ns, attr, refNs) = (a.ns, a.attr, a.refNs)
     a match {
@@ -436,118 +418,90 @@ class ResolveSave
   }
 
 
-  //  private def oneMap[T](
-  //    ns: String,
-  //    attr: String,
-  //    sets: Seq[Map[String, T]],
-  //    transformValue: T => Any
-  //  ): Option[Map[String, Any]] = {
-  //    sets match {
-  //      case Seq(set)     => Some(set.map(transformValue))
-  //      case Nil          => None
-  //      case multipleSets => throw ExecutionError(
-  //        s"Can only save one Set of values for Set attribute `$ns.$attr`. Found: " + multipleSets.mkString(", ")
-  //      )
-  //    }
-  //  }
-  //  private def resolveAttrMapMan(a: AttrMapMan): Unit = {
-  //    val (ns, attr, refNs) = (a.ns, a.attr, a.refNs)
-  //    a match {
-  //      case a: AttrMapManID             => addMap(ns, attr, oneMap(ns, attr, a.vs, transformID), transformID, set2arrayID, refNs, extsID, value2jsonID)
-  //      case a: AttrMapManString         => addMap(ns, attr, oneMap(ns, attr, a.vs, transformString), transformString, set2arrayString, refNs, extsString, value2jsonString)
-  //      case a: AttrMapManInt            => addMap(ns, attr, oneMap(ns, attr, a.vs, transformInt), transformInt, set2arrayInt, refNs, extsInt, value2jsonInt)
-  //      case a: AttrMapManLong           => addMap(ns, attr, oneMap(ns, attr, a.vs, transformLong), transformLong, set2arrayLong, refNs, extsLong, value2jsonLong)
-  //      case a: AttrMapManFloat          => addMap(ns, attr, oneMap(ns, attr, a.vs, transformFloat), transformFloat, set2arrayFloat, refNs, extsFloat, value2jsonFloat)
-  //      case a: AttrMapManDouble         => addMap(ns, attr, oneMap(ns, attr, a.vs, transformDouble), transformDouble, set2arrayDouble, refNs, extsDouble, value2jsonDouble)
-  //      case a: AttrMapManBoolean        => addMap(ns, attr, oneMap(ns, attr, a.vs, transformBoolean), transformBoolean, set2arrayBoolean, refNs, extsBoolean, value2jsonBoolean)
-  //      case a: AttrMapManBigInt         => addMap(ns, attr, oneMap(ns, attr, a.vs, transformBigInt), transformBigInt, set2arrayBigInt, refNs, extsBigInt, value2jsonBigInt)
-  //      case a: AttrMapManBigDecimal     => addMap(ns, attr, oneMap(ns, attr, a.vs, transformBigDecimal), transformBigDecimal, set2arrayBigDecimal, refNs, extsBigDecimal, value2jsonBigDecimal)
-  //      case a: AttrMapManDate           => addMap(ns, attr, oneMap(ns, attr, a.vs, transformDate), transformDate, set2arrayDate, refNs, extsDate, value2jsonDate)
-  //      case a: AttrMapManDuration       => addMap(ns, attr, oneMap(ns, attr, a.vs, transformDuration), transformDuration, set2arrayDuration, refNs, extsDuration, value2jsonDuration)
-  //      case a: AttrMapManInstant        => addMap(ns, attr, oneMap(ns, attr, a.vs, transformInstant), transformInstant, set2arrayInstant, refNs, extsInstant, value2jsonInstant)
-  //      case a: AttrMapManLocalDate      => addMap(ns, attr, oneMap(ns, attr, a.vs, transformLocalDate), transformLocalDate, set2arrayLocalDate, refNs, extsLocalDate, value2jsonLocalDate)
-  //      case a: AttrMapManLocalTime      => addMap(ns, attr, oneMap(ns, attr, a.vs, transformLocalTime), transformLocalTime, set2arrayLocalTime, refNs, extsLocalTime, value2jsonLocalTime)
-  //      case a: AttrMapManLocalDateTime  => addMap(ns, attr, oneMap(ns, attr, a.vs, transformLocalDateTime), transformLocalDateTime, set2arrayLocalDateTime, refNs, extsLocalDateTime, value2jsonLocalDateTime)
-  //      case a: AttrMapManOffsetTime     => addMap(ns, attr, oneMap(ns, attr, a.vs, transformOffsetTime), transformOffsetTime, set2arrayOffsetTime, refNs, extsOffsetTime, value2jsonOffsetTime)
-  //      case a: AttrMapManOffsetDateTime => addMap(ns, attr, oneMap(ns, attr, a.vs, transformOffsetDateTime), transformOffsetDateTime, set2arrayOffsetDateTime, refNs, extsOffsetDateTime, value2jsonOffsetDateTime)
-  //      case a: AttrMapManZonedDateTime  => addMap(ns, attr, oneMap(ns, attr, a.vs, transformZonedDateTime), transformZonedDateTime, set2arrayZonedDateTime, refNs, extsZonedDateTime, value2jsonZonedDateTime)
-  //      case a: AttrMapManUUID           => addMap(ns, attr, oneMap(ns, attr, a.vs, transformUUID), transformUUID, set2arrayUUID, refNs, extsUUID, value2jsonUUID)
-  //      case a: AttrMapManURI            => addMap(ns, attr, oneMap(ns, attr, a.vs, transformURI), transformURI, set2arrayURI, refNs, extsURI, value2jsonURI)
-  //      case a: AttrMapManByte           => addMap(ns, attr, oneMap(ns, attr, a.vs, transformByte), transformByte, set2arrayByte, refNs, extsByte, value2jsonByte)
-  //      case a: AttrMapManShort          => addMap(ns, attr, oneMap(ns, attr, a.vs, transformShort), transformShort, set2arrayShort, refNs, extsShort, value2jsonShort)
-  //      case a: AttrMapManChar           => addMap(ns, attr, oneMap(ns, attr, a.vs, transformChar), transformChar, set2arrayChar, refNs, extsChar, value2jsonChar)
-  //    }
-  //  }
-  //  private def resolveAttrMapTac(a: AttrMapTac): Unit = {
-  //    val (ns, attr, refNs) = (a.ns, a.attr, a.refNs)
-  //    a match {
-  //      case a: AttrMapTacID             => addMap(ns, attr, oneMap(ns, attr, a.vs, transformID), transformID, set2arrayID, refNs, extsID, value2jsonID)
-  //      case a: AttrMapTacString         => addMap(ns, attr, oneMap(ns, attr, a.vs, transformString), transformString, set2arrayString, refNs, extsString, value2jsonString)
-  //      case a: AttrMapTacInt            => addMap(ns, attr, oneMap(ns, attr, a.vs, transformInt), transformInt, set2arrayInt, refNs, extsInt, value2jsonInt)
-  //      case a: AttrMapTacLong           => addMap(ns, attr, oneMap(ns, attr, a.vs, transformLong), transformLong, set2arrayLong, refNs, extsLong, value2jsonLong)
-  //      case a: AttrMapTacFloat          => addMap(ns, attr, oneMap(ns, attr, a.vs, transformFloat), transformFloat, set2arrayFloat, refNs, extsFloat, value2jsonFloat)
-  //      case a: AttrMapTacDouble         => addMap(ns, attr, oneMap(ns, attr, a.vs, transformDouble), transformDouble, set2arrayDouble, refNs, extsDouble, value2jsonDouble)
-  //      case a: AttrMapTacBoolean        => addMap(ns, attr, oneMap(ns, attr, a.vs, transformBoolean), transformBoolean, set2arrayBoolean, refNs, extsBoolean, value2jsonBoolean)
-  //      case a: AttrMapTacBigInt         => addMap(ns, attr, oneMap(ns, attr, a.vs, transformBigInt), transformBigInt, set2arrayBigInt, refNs, extsBigInt, value2jsonBigInt)
-  //      case a: AttrMapTacBigDecimal     => addMap(ns, attr, oneMap(ns, attr, a.vs, transformBigDecimal), transformBigDecimal, set2arrayBigDecimal, refNs, extsBigDecimal, value2jsonBigDecimal)
-  //      case a: AttrMapTacDate           => addMap(ns, attr, oneMap(ns, attr, a.vs, transformDate), transformDate, set2arrayDate, refNs, extsDate, value2jsonDate)
-  //      case a: AttrMapTacDuration       => addMap(ns, attr, oneMap(ns, attr, a.vs, transformDuration), transformDuration, set2arrayDuration, refNs, extsDuration, value2jsonDuration)
-  //      case a: AttrMapTacInstant        => addMap(ns, attr, oneMap(ns, attr, a.vs, transformInstant), transformInstant, set2arrayInstant, refNs, extsInstant, value2jsonInstant)
-  //      case a: AttrMapTacLocalDate      => addMap(ns, attr, oneMap(ns, attr, a.vs, transformLocalDate), transformLocalDate, set2arrayLocalDate, refNs, extsLocalDate, value2jsonLocalDate)
-  //      case a: AttrMapTacLocalTime      => addMap(ns, attr, oneMap(ns, attr, a.vs, transformLocalTime), transformLocalTime, set2arrayLocalTime, refNs, extsLocalTime, value2jsonLocalTime)
-  //      case a: AttrMapTacLocalDateTime  => addMap(ns, attr, oneMap(ns, attr, a.vs, transformLocalDateTime), transformLocalDateTime, set2arrayLocalDateTime, refNs, extsLocalDateTime, value2jsonLocalDateTime)
-  //      case a: AttrMapTacOffsetTime     => addMap(ns, attr, oneMap(ns, attr, a.vs, transformOffsetTime), transformOffsetTime, set2arrayOffsetTime, refNs, extsOffsetTime, value2jsonOffsetTime)
-  //      case a: AttrMapTacOffsetDateTime => addMap(ns, attr, oneMap(ns, attr, a.vs, transformOffsetDateTime), transformOffsetDateTime, set2arrayOffsetDateTime, refNs, extsOffsetDateTime, value2jsonOffsetDateTime)
-  //      case a: AttrMapTacZonedDateTime  => addMap(ns, attr, oneMap(ns, attr, a.vs, transformZonedDateTime), transformZonedDateTime, set2arrayZonedDateTime, refNs, extsZonedDateTime, value2jsonZonedDateTime)
-  //      case a: AttrMapTacUUID           => addMap(ns, attr, oneMap(ns, attr, a.vs, transformUUID), transformUUID, set2arrayUUID, refNs, extsUUID, value2jsonUUID)
-  //      case a: AttrMapTacURI            => addMap(ns, attr, oneMap(ns, attr, a.vs, transformURI), transformURI, set2arrayURI, refNs, extsURI, value2jsonURI)
-  //      case a: AttrMapTacByte           => addMap(ns, attr, oneMap(ns, attr, a.vs, transformByte), transformByte, set2arrayByte, refNs, extsByte, value2jsonByte)
-  //      case a: AttrMapTacShort          => addMap(ns, attr, oneMap(ns, attr, a.vs, transformShort), transformShort, set2arrayShort, refNs, extsShort, value2jsonShort)
-  //      case a: AttrMapTacChar           => addMap(ns, attr, oneMap(ns, attr, a.vs, transformChar), transformChar, set2arrayChar, refNs, extsChar, value2jsonChar)
-  //    }
-  //  }
-  //
-  //  private def oneOptMap[T](
-  //    ns: String,
-  //    attr: String,
-  //    optSets: Option[Seq[Map[String, T]]],
-  //    transformValue: T => Any
-  //  ): Option[Map[String, Any]] = {
-  //    optSets.flatMap {
-  //      case Seq(set) => Some(set.map(transformValue))
-  //      case Nil      => None
-  //      case vs       => throw ExecutionError(
-  //        s"Can only save one Set of values for optional Set attribute `$ns.$attr`. Found: " + vs.mkString(", ")
-  //      )
-  //    }
-  //  }
-  //
-  //  private def resolveAttrMapOpt(a: AttrMapOpt): Unit = {
-  //    val (ns, attr, refNs) = (a.ns, a.attr, a.refNs)
-  //    a match {
-  //      case a: AttrMapOptID             => addMap(ns, attr, oneOptMap(ns, attr, a.vs, transformID), handleID, set2arrayID, refNs, extsID, value2jsonID)
-  //      case a: AttrMapOptString         => addMap(ns, attr, oneOptMap(ns, attr, a.vs, transformString), handleString, set2arrayString, refNs, extsString, value2jsonString)
-  //      case a: AttrMapOptInt            => addMap(ns, attr, oneOptMap(ns, attr, a.vs, transformInt), handleInt, set2arrayInt, refNs, extsInt, value2jsonInt)
-  //      case a: AttrMapOptLong           => addMap(ns, attr, oneOptMap(ns, attr, a.vs, transformLong), handleLong, set2arrayLong, refNs, extsLong, value2jsonLong)
-  //      case a: AttrMapOptFloat          => addMap(ns, attr, oneOptMap(ns, attr, a.vs, transformFloat), handleFloat, set2arrayFloat, refNs, extsFloat, value2jsonFloat)
-  //      case a: AttrMapOptDouble         => addMap(ns, attr, oneOptMap(ns, attr, a.vs, transformDouble), handleDouble, set2arrayDouble, refNs, extsDouble, value2jsonDouble)
-  //      case a: AttrMapOptBoolean        => addMap(ns, attr, oneOptMap(ns, attr, a.vs, transformBoolean), handleBoolean, set2arrayBoolean, refNs, extsBoolean, value2jsonBoolean)
-  //      case a: AttrMapOptBigInt         => addMap(ns, attr, oneOptMap(ns, attr, a.vs, transformBigInt), handleBigInt, set2arrayBigInt, refNs, extsBigInt, value2jsonBigInt)
-  //      case a: AttrMapOptBigDecimal     => addMap(ns, attr, oneOptMap(ns, attr, a.vs, transformBigDecimal), handleBigDecimal, set2arrayBigDecimal, refNs, extsBigDecimal, value2jsonBigDecimal)
-  //      case a: AttrMapOptDate           => addMap(ns, attr, oneOptMap(ns, attr, a.vs, transformDate), handleDate, set2arrayDate, refNs, extsDate, value2jsonDate)
-  //      case a: AttrMapOptDuration       => addMap(ns, attr, oneOptMap(ns, attr, a.vs, transformDuration), handleDuration, set2arrayDuration, refNs, extsDuration, value2jsonDuration)
-  //      case a: AttrMapOptInstant        => addMap(ns, attr, oneOptMap(ns, attr, a.vs, transformInstant), handleInstant, set2arrayInstant, refNs, extsInstant, value2jsonInstant)
-  //      case a: AttrMapOptLocalDate      => addMap(ns, attr, oneOptMap(ns, attr, a.vs, transformLocalDate), handleLocalDate, set2arrayLocalDate, refNs, extsLocalDate, value2jsonLocalDate)
-  //      case a: AttrMapOptLocalTime      => addMap(ns, attr, oneOptMap(ns, attr, a.vs, transformLocalTime), handleLocalTime, set2arrayLocalTime, refNs, extsLocalTime, value2jsonLocalTime)
-  //      case a: AttrMapOptLocalDateTime  => addMap(ns, attr, oneOptMap(ns, attr, a.vs, transformLocalDateTime), handleLocalDateTime, set2arrayLocalDateTime, refNs, extsLocalDateTime, value2jsonLocalDateTime)
-  //      case a: AttrMapOptOffsetTime     => addMap(ns, attr, oneOptMap(ns, attr, a.vs, transformOffsetTime), handleOffsetTime, set2arrayOffsetTime, refNs, extsOffsetTime, value2jsonOffsetTime)
-  //      case a: AttrMapOptOffsetDateTime => addMap(ns, attr, oneOptMap(ns, attr, a.vs, transformOffsetDateTime), handleOffsetDateTime, set2arrayOffsetDateTime, refNs, extsOffsetDateTime, value2jsonOffsetDateTime)
-  //      case a: AttrMapOptZonedDateTime  => addMap(ns, attr, oneOptMap(ns, attr, a.vs, transformZonedDateTime), handleZonedDateTime, set2arrayZonedDateTime, refNs, extsZonedDateTime, value2jsonZonedDateTime)
-  //      case a: AttrMapOptUUID           => addMap(ns, attr, oneOptMap(ns, attr, a.vs, transformUUID), handleUUID, set2arrayUUID, refNs, extsUUID, value2jsonUUID)
-  //      case a: AttrMapOptURI            => addMap(ns, attr, oneOptMap(ns, attr, a.vs, transformURI), handleURI, set2arrayURI, refNs, extsURI, value2jsonURI)
-  //      case a: AttrMapOptByte           => addMap(ns, attr, oneOptMap(ns, attr, a.vs, transformByte), handleByte, set2arrayByte, refNs, extsByte, value2jsonByte)
-  //      case a: AttrMapOptShort          => addMap(ns, attr, oneOptMap(ns, attr, a.vs, transformShort), handleShort, set2arrayShort, refNs, extsShort, value2jsonShort)
-  //      case a: AttrMapOptChar           => addMap(ns, attr, oneOptMap(ns, attr, a.vs, transformChar), handleChar, set2arrayChar, refNs, extsChar, value2jsonChar)
-  //    }
-  //  }
+  private def oneMap[T](map: Map[String, T], transformValue: T => Any): Option[Map[String, Any]] = {
+    if (map.nonEmpty) {
+      Some(map.map { case (k, v) => k -> transformValue(v) })
+    } else None
+  }
+  private def resolveAttrMapMan(a: AttrMapMan): Unit = a match {
+    case a: AttrMapManID             => addMap(a.ns, a.attr, oneMap(a.vs, transformID), transformID) //, set2arrayID, refNs, extsID, value2jsonID)
+    case a: AttrMapManString         => addMap(a.ns, a.attr, oneMap(a.vs, transformString), transformString) //, set2arrayString, refNs, extsString, value2jsonString)
+    case a: AttrMapManInt            => addMap(a.ns, a.attr, oneMap(a.vs, transformInt), transformInt) //, set2arrayInt, refNs, extsInt, value2jsonInt)
+    case a: AttrMapManLong           => addMap(a.ns, a.attr, oneMap(a.vs, transformLong), transformLong) //, set2arrayLong, refNs, extsLong, value2jsonLong)
+    case a: AttrMapManFloat          => addMap(a.ns, a.attr, oneMap(a.vs, transformFloat), transformFloat) //, set2arrayFloat, refNs, extsFloat, value2jsonFloat)
+    case a: AttrMapManDouble         => addMap(a.ns, a.attr, oneMap(a.vs, transformDouble), transformDouble) //, set2arrayDouble, refNs, extsDouble, value2jsonDouble)
+    case a: AttrMapManBoolean        => addMap(a.ns, a.attr, oneMap(a.vs, transformBoolean), transformBoolean) //, set2arrayBoolean, refNs, extsBoolean, value2jsonBoolean)
+    case a: AttrMapManBigInt         => addMap(a.ns, a.attr, oneMap(a.vs, transformBigInt), transformBigInt) //, set2arrayBigInt, refNs, extsBigInt, value2jsonBigInt)
+    case a: AttrMapManBigDecimal     => addMap(a.ns, a.attr, oneMap(a.vs, transformBigDecimal), transformBigDecimal) //, set2arrayBigDecimal, refNs, extsBigDecimal, value2jsonBigDecimal)
+    case a: AttrMapManDate           => addMap(a.ns, a.attr, oneMap(a.vs, transformDate), transformDate) //, set2arrayDate, refNs, extsDate, value2jsonDate)
+    case a: AttrMapManDuration       => addMap(a.ns, a.attr, oneMap(a.vs, transformDuration), transformDuration) //, set2arrayDuration, refNs, extsDuration, value2jsonDuration)
+    case a: AttrMapManInstant        => addMap(a.ns, a.attr, oneMap(a.vs, transformInstant), transformInstant) //, set2arrayInstant, refNs, extsInstant, value2jsonInstant)
+    case a: AttrMapManLocalDate      => addMap(a.ns, a.attr, oneMap(a.vs, transformLocalDate), transformLocalDate) //, set2arrayLocalDate, refNs, extsLocalDate, value2jsonLocalDate)
+    case a: AttrMapManLocalTime      => addMap(a.ns, a.attr, oneMap(a.vs, transformLocalTime), transformLocalTime) //, set2arrayLocalTime, refNs, extsLocalTime, value2jsonLocalTime)
+    case a: AttrMapManLocalDateTime  => addMap(a.ns, a.attr, oneMap(a.vs, transformLocalDateTime), transformLocalDateTime) //, set2arrayLocalDateTime, refNs, extsLocalDateTime, value2jsonLocalDateTime)
+    case a: AttrMapManOffsetTime     => addMap(a.ns, a.attr, oneMap(a.vs, transformOffsetTime), transformOffsetTime) //, set2arrayOffsetTime, refNs, extsOffsetTime, value2jsonOffsetTime)
+    case a: AttrMapManOffsetDateTime => addMap(a.ns, a.attr, oneMap(a.vs, transformOffsetDateTime), transformOffsetDateTime) //, set2arrayOffsetDateTime, refNs, extsOffsetDateTime, value2jsonOffsetDateTime)
+    case a: AttrMapManZonedDateTime  => addMap(a.ns, a.attr, oneMap(a.vs, transformZonedDateTime), transformZonedDateTime) //, set2arrayZonedDateTime, refNs, extsZonedDateTime, value2jsonZonedDateTime)
+    case a: AttrMapManUUID           => addMap(a.ns, a.attr, oneMap(a.vs, transformUUID), transformUUID) //, set2arrayUUID, refNs, extsUUID, value2jsonUUID)
+    case a: AttrMapManURI            => addMap(a.ns, a.attr, oneMap(a.vs, transformURI), transformURI) //, set2arrayURI, refNs, extsURI, value2jsonURI)
+    case a: AttrMapManByte           => addMap(a.ns, a.attr, oneMap(a.vs, transformByte), transformByte) //, set2arrayByte, refNs, extsByte, value2jsonByte)
+    case a: AttrMapManShort          => addMap(a.ns, a.attr, oneMap(a.vs, transformShort), transformShort) //, set2arrayShort, refNs, extsShort, value2jsonShort)
+    case a: AttrMapManChar           => addMap(a.ns, a.attr, oneMap(a.vs, transformChar), transformChar) //, set2arrayChar, refNs, extsChar, value2jsonChar)
+  }
+  private def resolveAttrMapTac(a: AttrMapTac): Unit = a match {
+    case a: AttrMapTacID             => addMap(a.ns, a.attr, oneMap(a.vs, transformID), transformID) //, set2arrayID, refNs, extsID, value2jsonID)
+    case a: AttrMapTacString         => addMap(a.ns, a.attr, oneMap(a.vs, transformString), transformString) //, set2arrayString, refNs, extsString, value2jsonString)
+    case a: AttrMapTacInt            => addMap(a.ns, a.attr, oneMap(a.vs, transformInt), transformInt) //, set2arrayInt, refNs, extsInt, value2jsonInt)
+    case a: AttrMapTacLong           => addMap(a.ns, a.attr, oneMap(a.vs, transformLong), transformLong) //, set2arrayLong, refNs, extsLong, value2jsonLong)
+    case a: AttrMapTacFloat          => addMap(a.ns, a.attr, oneMap(a.vs, transformFloat), transformFloat) //, set2arrayFloat, refNs, extsFloat, value2jsonFloat)
+    case a: AttrMapTacDouble         => addMap(a.ns, a.attr, oneMap(a.vs, transformDouble), transformDouble) //, set2arrayDouble, refNs, extsDouble, value2jsonDouble)
+    case a: AttrMapTacBoolean        => addMap(a.ns, a.attr, oneMap(a.vs, transformBoolean), transformBoolean) //, set2arrayBoolean, refNs, extsBoolean, value2jsonBoolean)
+    case a: AttrMapTacBigInt         => addMap(a.ns, a.attr, oneMap(a.vs, transformBigInt), transformBigInt) //, set2arrayBigInt, refNs, extsBigInt, value2jsonBigInt)
+    case a: AttrMapTacBigDecimal     => addMap(a.ns, a.attr, oneMap(a.vs, transformBigDecimal), transformBigDecimal) //, set2arrayBigDecimal, refNs, extsBigDecimal, value2jsonBigDecimal)
+    case a: AttrMapTacDate           => addMap(a.ns, a.attr, oneMap(a.vs, transformDate), transformDate) //, set2arrayDate, refNs, extsDate, value2jsonDate)
+    case a: AttrMapTacDuration       => addMap(a.ns, a.attr, oneMap(a.vs, transformDuration), transformDuration) //, set2arrayDuration, refNs, extsDuration, value2jsonDuration)
+    case a: AttrMapTacInstant        => addMap(a.ns, a.attr, oneMap(a.vs, transformInstant), transformInstant) //, set2arrayInstant, refNs, extsInstant, value2jsonInstant)
+    case a: AttrMapTacLocalDate      => addMap(a.ns, a.attr, oneMap(a.vs, transformLocalDate), transformLocalDate) //, set2arrayLocalDate, refNs, extsLocalDate, value2jsonLocalDate)
+    case a: AttrMapTacLocalTime      => addMap(a.ns, a.attr, oneMap(a.vs, transformLocalTime), transformLocalTime) //, set2arrayLocalTime, refNs, extsLocalTime, value2jsonLocalTime)
+    case a: AttrMapTacLocalDateTime  => addMap(a.ns, a.attr, oneMap(a.vs, transformLocalDateTime), transformLocalDateTime) //, set2arrayLocalDateTime, refNs, extsLocalDateTime, value2jsonLocalDateTime)
+    case a: AttrMapTacOffsetTime     => addMap(a.ns, a.attr, oneMap(a.vs, transformOffsetTime), transformOffsetTime) //, set2arrayOffsetTime, refNs, extsOffsetTime, value2jsonOffsetTime)
+    case a: AttrMapTacOffsetDateTime => addMap(a.ns, a.attr, oneMap(a.vs, transformOffsetDateTime), transformOffsetDateTime) //, set2arrayOffsetDateTime, refNs, extsOffsetDateTime, value2jsonOffsetDateTime)
+    case a: AttrMapTacZonedDateTime  => addMap(a.ns, a.attr, oneMap(a.vs, transformZonedDateTime), transformZonedDateTime) //, set2arrayZonedDateTime, refNs, extsZonedDateTime, value2jsonZonedDateTime)
+    case a: AttrMapTacUUID           => addMap(a.ns, a.attr, oneMap(a.vs, transformUUID), transformUUID) //, set2arrayUUID, refNs, extsUUID, value2jsonUUID)
+    case a: AttrMapTacURI            => addMap(a.ns, a.attr, oneMap(a.vs, transformURI), transformURI) //, set2arrayURI, refNs, extsURI, value2jsonURI)
+    case a: AttrMapTacByte           => addMap(a.ns, a.attr, oneMap(a.vs, transformByte), transformByte) //, set2arrayByte, refNs, extsByte, value2jsonByte)
+    case a: AttrMapTacShort          => addMap(a.ns, a.attr, oneMap(a.vs, transformShort), transformShort) //, set2arrayShort, refNs, extsShort, value2jsonShort)
+    case a: AttrMapTacChar           => addMap(a.ns, a.attr, oneMap(a.vs, transformChar), transformChar) //, set2arrayChar, refNs, extsChar, value2jsonChar)
+  }
+
+  private def oneOptMap[T](optMap: Option[Map[String, T]], transformValue: T => Any): Option[Map[String, Any]] = {
+    optMap.map(_.map { case (k, v) => k -> transformValue(v) })
+  }
+  private def resolveAttrMapOpt(a: AttrMapOpt): Unit = {
+    a match {
+      case a: AttrMapOptID             => addMap(a.ns, a.attr, oneOptMap(a.vs, transformID), handleID) //, set2arrayID, refNs, extsID, value2jsonID)
+      case a: AttrMapOptString         => addMap(a.ns, a.attr, oneOptMap(a.vs, transformString), handleString) //, set2arrayString, refNs, extsString, value2jsonString)
+      case a: AttrMapOptInt            => addMap(a.ns, a.attr, oneOptMap(a.vs, transformInt), handleInt) //, set2arrayInt, refNs, extsInt, value2jsonInt)
+      case a: AttrMapOptLong           => addMap(a.ns, a.attr, oneOptMap(a.vs, transformLong), handleLong) //, set2arrayLong, refNs, extsLong, value2jsonLong)
+      case a: AttrMapOptFloat          => addMap(a.ns, a.attr, oneOptMap(a.vs, transformFloat), handleFloat) //, set2arrayFloat, refNs, extsFloat, value2jsonFloat)
+      case a: AttrMapOptDouble         => addMap(a.ns, a.attr, oneOptMap(a.vs, transformDouble), handleDouble) //, set2arrayDouble, refNs, extsDouble, value2jsonDouble)
+      case a: AttrMapOptBoolean        => addMap(a.ns, a.attr, oneOptMap(a.vs, transformBoolean), handleBoolean) //, set2arrayBoolean, refNs, extsBoolean, value2jsonBoolean)
+      case a: AttrMapOptBigInt         => addMap(a.ns, a.attr, oneOptMap(a.vs, transformBigInt), handleBigInt) //, set2arrayBigInt, refNs, extsBigInt, value2jsonBigInt)
+      case a: AttrMapOptBigDecimal     => addMap(a.ns, a.attr, oneOptMap(a.vs, transformBigDecimal), handleBigDecimal) //, set2arrayBigDecimal, refNs, extsBigDecimal, value2jsonBigDecimal)
+      case a: AttrMapOptDate           => addMap(a.ns, a.attr, oneOptMap(a.vs, transformDate), handleDate) //, set2arrayDate, refNs, extsDate, value2jsonDate)
+      case a: AttrMapOptDuration       => addMap(a.ns, a.attr, oneOptMap(a.vs, transformDuration), handleDuration) //, set2arrayDuration, refNs, extsDuration, value2jsonDuration)
+      case a: AttrMapOptInstant        => addMap(a.ns, a.attr, oneOptMap(a.vs, transformInstant), handleInstant) //, set2arrayInstant, refNs, extsInstant, value2jsonInstant)
+      case a: AttrMapOptLocalDate      => addMap(a.ns, a.attr, oneOptMap(a.vs, transformLocalDate), handleLocalDate) //, set2arrayLocalDate, refNs, extsLocalDate, value2jsonLocalDate)
+      case a: AttrMapOptLocalTime      => addMap(a.ns, a.attr, oneOptMap(a.vs, transformLocalTime), handleLocalTime) //, set2arrayLocalTime, refNs, extsLocalTime, value2jsonLocalTime)
+      case a: AttrMapOptLocalDateTime  => addMap(a.ns, a.attr, oneOptMap(a.vs, transformLocalDateTime), handleLocalDateTime) //, set2arrayLocalDateTime, refNs, extsLocalDateTime, value2jsonLocalDateTime)
+      case a: AttrMapOptOffsetTime     => addMap(a.ns, a.attr, oneOptMap(a.vs, transformOffsetTime), handleOffsetTime) //, set2arrayOffsetTime, refNs, extsOffsetTime, value2jsonOffsetTime)
+      case a: AttrMapOptOffsetDateTime => addMap(a.ns, a.attr, oneOptMap(a.vs, transformOffsetDateTime), handleOffsetDateTime) //, set2arrayOffsetDateTime, refNs, extsOffsetDateTime, value2jsonOffsetDateTime)
+      case a: AttrMapOptZonedDateTime  => addMap(a.ns, a.attr, oneOptMap(a.vs, transformZonedDateTime), handleZonedDateTime) //, set2arrayZonedDateTime, refNs, extsZonedDateTime, value2jsonZonedDateTime)
+      case a: AttrMapOptUUID           => addMap(a.ns, a.attr, oneOptMap(a.vs, transformUUID), handleUUID) //, set2arrayUUID, refNs, extsUUID, value2jsonUUID)
+      case a: AttrMapOptURI            => addMap(a.ns, a.attr, oneOptMap(a.vs, transformURI), handleURI) //, set2arrayURI, refNs, extsURI, value2jsonURI)
+      case a: AttrMapOptByte           => addMap(a.ns, a.attr, oneOptMap(a.vs, transformByte), handleByte) //, set2arrayByte, refNs, extsByte, value2jsonByte)
+      case a: AttrMapOptShort          => addMap(a.ns, a.attr, oneOptMap(a.vs, transformShort), handleShort) //, set2arrayShort, refNs, extsShort, value2jsonShort)
+      case a: AttrMapOptChar           => addMap(a.ns, a.attr, oneOptMap(a.vs, transformChar), handleChar) //, set2arrayChar, refNs, extsChar, value2jsonChar)
+    }
+  }
 }

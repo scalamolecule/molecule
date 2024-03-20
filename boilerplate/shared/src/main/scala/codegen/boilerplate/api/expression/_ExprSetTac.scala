@@ -53,10 +53,6 @@ object _ExprSetTac extends BoilerplateGenBase("ExprSetTac", "/api/expression") {
          |  def has   (vs   : Seq[t]               ): Ns1[${`A..V, `}t] = _exprSet(Has    , vs.map(v => Set(v))       )
          |  def hasNo (v    : t, vs: t*            ): Ns1[${`A..V, `}t] = _exprSet(HasNo  , (v +: vs).map(v => Set(v)))
          |  def hasNo (vs   : Seq[t]               ): Ns1[${`A..V, `}t] = _exprSet(HasNo  , vs.map(v => Set(v))       )
-         |  def add   (v    : t, vs: t*            ): Ns1[${`A..V, `}t] = _exprSet(Add    , Seq((v +: vs).toSet)      )
-         |  def add   (vs   : Seq[t]               ): Ns1[${`A..V, `}t] = _exprSet(Add    , Seq(vs.toSet)             )
-         |  def remove(v    : t, vs: t*            ): Ns1[${`A..V, `}t] = _exprSet(Remove , Seq((v +: vs).toSet)      )
-         |  def remove(vs   : Seq[t]               ): Ns1[${`A..V, `}t] = _exprSet(Remove , Seq(vs.toSet)             )
          |  $attrExprs
          |}""".stripMargin
   }

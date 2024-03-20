@@ -128,7 +128,7 @@ trait FilterSeq_Boolean extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Lists with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.booleanSeq.has(true).query.get.map(_ ==> List(t, tf))
           _ <- Ns.i.a1.booleanSeq.has(false).query.get.map(_ ==> List(f, tf))
           // Same as
@@ -169,7 +169,7 @@ trait FilterSeq_Boolean extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.booleanSeq.hasNo(true, false).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.booleanSeq.hasNo(List(true, false)).query.get.map(_ ==> List())
@@ -342,7 +342,7 @@ trait FilterSeq_Boolean extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.booleanSeq_.hasNo(true, false).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.booleanSeq_.hasNo(List(true, false)).query.get.map(_ ==> List())
@@ -512,7 +512,7 @@ trait FilterSeq_Boolean extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.booleanSeq_?.hasNo(Some(List(true, false))).query.get.map(_ ==> List())
 
 

@@ -35,8 +35,9 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |
        |        case _ => AttrSetManInt(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs, coord = a.coord)
        |      }
-       |
-       |      case a => unexpected(a)
+       |      case a: AttrSeqMan => AttrSeqManInt(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs, sort = a.sort, coord = a.coord)
+       |      case a: AttrMapMan => AttrMapManInt(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs, sort = a.sort, coord = a.coord)
+       |      case a             => unexpected(a)
        |    }
        |    es.init :+ last
        |  }
@@ -162,7 +163,7 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |    })
        |  }
        |
-       |  protected def addMap[T](es: List[Element], op: Op, vs: Seq[Map[String, T]]): List[Element] = {
+       |  protected def addMap[T](es: List[Element], op: Op, vs: Map[String, T]): List[Element] = {
        |    val last = es.last match {
        |      case a: AttrMapMan => a match {
        |        ${addMap("Man")}
@@ -170,13 +171,6 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |      case a: AttrMapTac => a match {
        |        ${addMap("Tac")}
        |      }
-       |      case a             => unexpected(a)
-       |    }
-       |    es.init :+ last
-       |  }
-       |
-       |  protected def addMapOpt[T](es: List[Element], op: Op, vs: Option[Seq[Map[String, T]]]): List[Element] = {
-       |    val last = es.last match {
        |      case a: AttrMapOpt => a match {
        |        $addOptMap
        |      }
@@ -209,10 +203,24 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |  private def setSort(e: Element, sort: String): Element = {
        |    e match {
        |      case a: AttrOneMan => a match {
-       |        ${addSort("Man")}
+       |        ${addSort("One", "Man")}
        |      }
        |      case a: AttrOneOpt => a match {
-       |        ${addSort("Opt")}
+       |        ${addSort("One", "Opt")}
+       |      }
+       |
+       |      case a: AttrSetMan => a match {
+       |        ${addSort("Set", "Man")}
+       |      }
+       |      case a: AttrSetOpt => a match {
+       |        ${addSort("Set", "Opt")}
+       |      }
+       |
+       |      case a: AttrSeqMan => a match {
+       |        ${addSort("Seq", "Man")}
+       |      }
+       |      case a: AttrSeqOpt => a match {
+       |        ${addSort("Seq", "Opt")}
        |      }
        |
        |      case e => e
@@ -510,12 +518,12 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
     baseTypes.map { baseTpe =>
       val tpe = if (baseTpe == "ID") "String" else baseTpe
       s"""case a: AttrMap$mode$baseTpe =>
-         |          val maps    = vs.asInstanceOf[Seq[Map[String, $tpe]]]
-         |          val errors1 = if (maps.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+         |          val map     = vs.asInstanceOf[Map[String, $tpe]]
+         |          val errors1 = if (map.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
          |            val validator = a.validator.get
-         |            maps.flatMap(map => map.flatMap { case (k, v) => validator.validate(v) })
+         |            map.values.toSeq.flatMap(validator.validate)
          |          }
-         |          a.copy(op = op, vs = maps, errors = errors1)""".stripMargin
+         |          a.copy(op = op, vs = map, errors = errors1)""".stripMargin
     }.mkString("\n\n        ")
   }
 
@@ -523,22 +531,19 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
     baseTypes.map { baseTpe =>
       val tpe = if (baseTpe == "ID") "String" else baseTpe
       s"""case a: AttrMapOpt$baseTpe =>
-         |          val optMaps = vs.asInstanceOf[Option[Seq[Map[String, $tpe]]]]
-         |          val errors1 = if (optMaps.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+         |          val map     = vs.asInstanceOf[Map[String, $tpe]]
+         |          val errors1 = if (map.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
          |            val validator = a.validator.get
-         |            optMaps.fold(Seq.empty[String]) { maps =>
-         |              maps.flatMap { map =>
-         |                map.values.toSeq.flatMap(validator.validate)
-         |              }
-         |            }
+         |            map.values.toSeq.flatMap(validator.validate)
          |          }
-         |          a.copy(op = op, vs = optMaps, errors = errors1)""".stripMargin
+         |          val optMap  = if (map.nonEmpty) Some(map) else None
+         |          a.copy(op = op, vs = optMap, errors = errors1)""".stripMargin
     }.mkString("\n\n        ")
   }
 
-  private def addSort(mode: String): String = {
+  private def addSort(card: String, mode: String): String = {
     baseTypesWithSpaces.map { case (baseTpe, space) =>
-      s"case a: AttrOne$mode$baseTpe $space=> a.copy(sort = Some(sort))"
+      s"case a: Attr$card$mode$baseTpe $space=> a.copy(sort = Some(sort))"
     }.mkString("\n        ")
   }
 

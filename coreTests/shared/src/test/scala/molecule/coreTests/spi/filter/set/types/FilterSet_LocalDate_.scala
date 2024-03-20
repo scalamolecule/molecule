@@ -120,7 +120,7 @@ trait FilterSet_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.localDateSet.has(localDate0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localDateSet.has(localDate1).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.localDateSet.has(localDate2).query.get.map(_ ==> List(a, b))
@@ -159,7 +159,7 @@ trait FilterSet_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.localDateSet.hasNo(localDate0).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.localDateSet.hasNo(localDate1).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.localDateSet.hasNo(localDate2).query.get.map(_ ==> List())
@@ -177,7 +177,7 @@ trait FilterSet_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.localDateSet.hasNo(localDate1, localDate2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localDateSet.hasNo(localDate1, localDate3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localDateSet.hasNo(localDate1, localDate4).query.get.map(_ ==> List())
@@ -310,7 +310,7 @@ trait FilterSet_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.localDateSet_.has(localDate0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localDateSet_.has(localDate1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.localDateSet_.has(localDate2).query.get.map(_ ==> List(1, 2))
@@ -352,7 +352,7 @@ trait FilterSet_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.localDateSet_.hasNo(localDate0).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.localDateSet_.hasNo(localDate1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.localDateSet_.hasNo(localDate2).query.get.map(_ ==> List())
@@ -370,7 +370,7 @@ trait FilterSet_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.localDateSet_.hasNo(localDate1, localDate2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localDateSet_.hasNo(localDate1, localDate3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localDateSet_.hasNo(localDate1, localDate4).query.get.map(_ ==> List())
@@ -434,7 +434,7 @@ trait FilterSet_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
 
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.localDateSet_?(Some(Seq(Set(localDate1), Set(localDate2, localDate3)))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.localDateSet_?(Some(Seq(Set(localDate1, localDate2), Set(localDate2, localDate3)))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.localDateSet_?.apply(Some(Seq(Set(localDate1, localDate2), Set(localDate2, localDate3)))).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.localDateSet_?(Some(Seq(Set(localDate1, localDate2), Set(localDate2, localDate3, localDate4)))).query.get.map(_ ==> List(a, b))
 
 
@@ -499,7 +499,7 @@ trait FilterSet_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.localDateSet_?.has(Some(localDate0)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localDateSet_?.has(Some(localDate1)).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.localDateSet_?.has(Some(localDate2)).query.get.map(_ ==> List(a, b))
@@ -538,7 +538,7 @@ trait FilterSet_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.localDateSet_?.hasNo(Some(localDate0)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.localDateSet_?.hasNo(Some(localDate1)).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.localDateSet_?.hasNo(Some(localDate2)).query.get.map(_ ==> List())
@@ -556,7 +556,7 @@ trait FilterSet_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.localDateSet_?.hasNo(Some(Seq(localDate1, localDate2))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localDateSet_?.hasNo(Some(Seq(localDate1, localDate3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localDateSet_?.hasNo(Some(Seq(localDate1, localDate4))).query.get.map(_ ==> List())

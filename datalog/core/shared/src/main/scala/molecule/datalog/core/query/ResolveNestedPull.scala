@@ -15,6 +15,7 @@ trait ResolveNestedPull[Tpl]
     with LambdasOne
     with LambdasSet
     with LambdasSeq
+    with LambdasMap
     with ModelUtils
     with MoleculeLogging { self: Model2DatomicQuery[Tpl] =>
 
@@ -34,7 +35,6 @@ trait ResolveNestedPull[Tpl]
             case a: Attr if a.op != V => throw ModelError(
               "Expressions not allowed in optional nested queries. Found:\n  " + a
             )
-
             case a: AttrOneMan =>
               resolveAttrOneMan(a, attrIndex)
               addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(i, a))
@@ -57,6 +57,14 @@ trait ResolveNestedPull[Tpl]
 
             case a: AttrSeqOpt =>
               resolveAttrSeqOpt(a)
+              addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(i, a))
+
+            case a: AttrMapMan =>
+              resolveAttrMapMan(a)
+              addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(i, a))
+
+            case a: AttrMapOpt =>
+              resolveAttrMapOpt(a)
               addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(i, a))
 
             case ref: Ref             => (acc, Some(ref), tail, attrIndex)
@@ -147,13 +155,19 @@ trait ResolveNestedPull[Tpl]
   private def renderPull(indent: String, a: Attr): String = {
     if (a.attr == "id") {
       s"""\n$indent:db/id"""
-    } else if (a.isInstanceOf[AttrSeq] && !a.isInstanceOf[AttrSeqManByte] && !a.isInstanceOf[AttrSeqOptByte]) {
-      val (ns, attr) = (a.ns, a.attr)
-      s"""
-         |$indent{(:$ns/$attr :limit nil :default "__none__") [
-         |$indent  :$ns.$attr/i_ :$ns.$attr/v_]}""".stripMargin
-    } else {
-      s"""\n$indent(:${a.ns}/${a.attr} :limit nil :default "$none")"""
+    } else a match {
+      case _: AttrSeq if !a.isInstanceOf[AttrSeqManByte] && !a.isInstanceOf[AttrSeqOptByte] =>
+        val (ns, attr) = (a.ns, a.attr)
+        s"""
+           |$indent{(:$ns/$attr :limit nil :default "__none__") [
+           |$indent  :$ns.$attr/i_ :$ns.$attr/v_]}""".stripMargin
+      case _: AttrMap                                                                       =>
+        val (ns, attr) = (a.ns, a.attr)
+        s"""
+           |$indent{(:$ns/$attr :limit nil :default "__none__") [
+           |$indent  :$ns.$attr/k_ :$ns.$attr/v_]}""".stripMargin
+      case _                                                                                =>
+        s"""\n$indent(:${a.ns}/${a.attr} :limit nil :default "$none")"""
     }
 
 
@@ -341,6 +355,64 @@ trait ResolveNestedPull[Tpl]
       case _: AttrSeqOptByte           => it2OptListByte
       case _: AttrSeqOptShort          => it2OptListShort
       case _: AttrSeqOptChar           => it2OptListChar
+    })
+  }
+
+  private def resolveAttrMapMan(a: AttrMapMan): Unit = {
+    aritiesAttr()
+    pullCasts += (a match {
+      case _: AttrMapManID             => it2MapId
+      case _: AttrMapManString         => it2MapString
+      case _: AttrMapManInt            => it2MapInt
+      case _: AttrMapManLong           => it2MapLong
+      case _: AttrMapManFloat          => it2MapFloat
+      case _: AttrMapManDouble         => it2MapDouble
+      case _: AttrMapManBoolean        => it2MapBoolean
+      case _: AttrMapManBigInt         => it2MapBigInt
+      case _: AttrMapManBigDecimal     => it2MapBigDecimal
+      case _: AttrMapManDate           => it2MapDate
+      case _: AttrMapManDuration       => it2MapDuration
+      case _: AttrMapManInstant        => it2MapInstant
+      case _: AttrMapManLocalDate      => it2MapLocalDate
+      case _: AttrMapManLocalTime      => it2MapLocalTime
+      case _: AttrMapManLocalDateTime  => it2MapLocalDateTime
+      case _: AttrMapManOffsetTime     => it2MapOffsetTime
+      case _: AttrMapManOffsetDateTime => it2MapOffsetDateTime
+      case _: AttrMapManZonedDateTime  => it2MapZonedDateTime
+      case _: AttrMapManUUID           => it2MapUUID
+      case _: AttrMapManURI            => it2MapURI
+      case _: AttrMapManByte           => it2MapByte
+      case _: AttrMapManShort          => it2MapShort
+      case _: AttrMapManChar           => it2MapChar
+    })
+  }
+
+  private def resolveAttrMapOpt(a: AttrMapOpt): Unit = {
+    aritiesAttr()
+    pullCasts += (a match {
+      case _: AttrMapOptID             => it2OptMapId
+      case _: AttrMapOptString         => it2OptMapString
+      case _: AttrMapOptInt            => it2OptMapInt
+      case _: AttrMapOptLong           => it2OptMapLong
+      case _: AttrMapOptFloat          => it2OptMapFloat
+      case _: AttrMapOptDouble         => it2OptMapDouble
+      case _: AttrMapOptBoolean        => it2OptMapBoolean
+      case _: AttrMapOptBigInt         => it2OptMapBigInt
+      case _: AttrMapOptBigDecimal     => it2OptMapBigDecimal
+      case _: AttrMapOptDate           => it2OptMapDate
+      case _: AttrMapOptDuration       => it2OptMapDuration
+      case _: AttrMapOptInstant        => it2OptMapInstant
+      case _: AttrMapOptLocalDate      => it2OptMapLocalDate
+      case _: AttrMapOptLocalTime      => it2OptMapLocalTime
+      case _: AttrMapOptLocalDateTime  => it2OptMapLocalDateTime
+      case _: AttrMapOptOffsetTime     => it2OptMapOffsetTime
+      case _: AttrMapOptOffsetDateTime => it2OptMapOffsetDateTime
+      case _: AttrMapOptZonedDateTime  => it2OptMapZonedDateTime
+      case _: AttrMapOptUUID           => it2OptMapUUID
+      case _: AttrMapOptURI            => it2OptMapURI
+      case _: AttrMapOptByte           => it2OptMapByte
+      case _: AttrMapOptShort          => it2OptMapShort
+      case _: AttrMapOptChar           => it2OptMapChar
     })
   }
 }

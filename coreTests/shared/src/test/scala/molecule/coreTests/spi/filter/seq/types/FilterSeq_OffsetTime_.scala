@@ -120,7 +120,7 @@ trait FilterSeq_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
 
           // Seqs with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.offsetTimeSeq.has(offsetTime0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetTimeSeq.has(offsetTime1).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.offsetTimeSeq.has(offsetTime2).query.get.map(_ ==> List(a, b))
@@ -160,7 +160,7 @@ trait FilterSeq_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
 
           // Seqs without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.offsetTimeSeq.hasNo(offsetTime0).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.offsetTimeSeq.hasNo(offsetTime1).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.offsetTimeSeq.hasNo(offsetTime2).query.get.map(_ ==> List())
@@ -178,7 +178,7 @@ trait FilterSeq_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.offsetTimeSeq.hasNo(offsetTime1, offsetTime2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetTimeSeq.hasNo(offsetTime1, offsetTime3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetTimeSeq.hasNo(offsetTime1, offsetTime3).query.get.map(_ ==> List())
@@ -311,7 +311,7 @@ trait FilterSeq_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
 
           // Seqs with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.offsetTimeSeq_.has(offsetTime0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetTimeSeq_.has(offsetTime1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.offsetTimeSeq_.has(offsetTime2).query.get.map(_ ==> List(1, 2))
@@ -353,7 +353,7 @@ trait FilterSeq_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
 
           // Seqs without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.offsetTimeSeq_.hasNo(offsetTime0).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.offsetTimeSeq_.hasNo(offsetTime1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.offsetTimeSeq_.hasNo(offsetTime2).query.get.map(_ ==> List())
@@ -371,7 +371,7 @@ trait FilterSeq_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.offsetTimeSeq_.hasNo(offsetTime1, offsetTime2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetTimeSeq_.hasNo(offsetTime1, offsetTime3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetTimeSeq_.hasNo(offsetTime1, offsetTime3).query.get.map(_ ==> List())
@@ -501,7 +501,7 @@ trait FilterSeq_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
 
           // Seqs with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.offsetTimeSeq_?.has(Some(offsetTime0)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetTimeSeq_?.has(Some(offsetTime1)).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.offsetTimeSeq_?.has(Some(offsetTime2)).query.get.map(_ ==> List(a, b))
@@ -541,7 +541,7 @@ trait FilterSeq_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
 
           // Seqs without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.offsetTimeSeq_?.hasNo(Some(offsetTime0)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.offsetTimeSeq_?.hasNo(Some(offsetTime1)).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.offsetTimeSeq_?.hasNo(Some(offsetTime2)).query.get.map(_ ==> List())
@@ -559,7 +559,7 @@ trait FilterSeq_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.offsetTimeSeq_?.hasNo(Some(List(offsetTime1, offsetTime2))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetTimeSeq_?.hasNo(Some(List(offsetTime1, offsetTime3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetTimeSeq_?.hasNo(Some(List(offsetTime1, offsetTime3))).query.get.map(_ ==> List())

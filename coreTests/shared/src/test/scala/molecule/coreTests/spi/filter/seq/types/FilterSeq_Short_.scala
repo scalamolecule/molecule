@@ -119,7 +119,7 @@ trait FilterSeq_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Seqs with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.shortSeq.has(short0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shortSeq.has(short1).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.shortSeq.has(short2).query.get.map(_ ==> List(a, b))
@@ -159,7 +159,7 @@ trait FilterSeq_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Seqs without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.shortSeq.hasNo(short0).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.shortSeq.hasNo(short1).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.shortSeq.hasNo(short2).query.get.map(_ ==> List())
@@ -177,7 +177,7 @@ trait FilterSeq_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.shortSeq.hasNo(short1, short2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shortSeq.hasNo(short1, short3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shortSeq.hasNo(short1, short3).query.get.map(_ ==> List())
@@ -310,7 +310,7 @@ trait FilterSeq_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Seqs with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.shortSeq_.has(short0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shortSeq_.has(short1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.shortSeq_.has(short2).query.get.map(_ ==> List(1, 2))
@@ -352,7 +352,7 @@ trait FilterSeq_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Seqs without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.shortSeq_.hasNo(short0).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.shortSeq_.hasNo(short1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.shortSeq_.hasNo(short2).query.get.map(_ ==> List())
@@ -370,7 +370,7 @@ trait FilterSeq_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.shortSeq_.hasNo(short1, short2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shortSeq_.hasNo(short1, short3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shortSeq_.hasNo(short1, short3).query.get.map(_ ==> List())
@@ -500,7 +500,7 @@ trait FilterSeq_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Seqs with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.shortSeq_?.has(Some(short0)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shortSeq_?.has(Some(short1)).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.shortSeq_?.has(Some(short2)).query.get.map(_ ==> List(a, b))
@@ -540,7 +540,7 @@ trait FilterSeq_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Seqs without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.shortSeq_?.hasNo(Some(short0)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.shortSeq_?.hasNo(Some(short1)).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.shortSeq_?.hasNo(Some(short2)).query.get.map(_ ==> List())
@@ -558,7 +558,7 @@ trait FilterSeq_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.shortSeq_?.hasNo(Some(List(short1, short2))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shortSeq_?.hasNo(Some(List(short1, short3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shortSeq_?.hasNo(Some(List(short1, short3))).query.get.map(_ ==> List())

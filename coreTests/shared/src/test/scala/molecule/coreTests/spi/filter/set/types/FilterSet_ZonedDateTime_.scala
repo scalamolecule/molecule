@@ -120,7 +120,7 @@ trait FilterSet_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.zonedDateTimeSet.has(zonedDateTime0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.zonedDateTimeSet.has(zonedDateTime1).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.zonedDateTimeSet.has(zonedDateTime2).query.get.map(_ ==> List(a, b))
@@ -159,7 +159,7 @@ trait FilterSet_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.zonedDateTimeSet.hasNo(zonedDateTime0).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.zonedDateTimeSet.hasNo(zonedDateTime1).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.zonedDateTimeSet.hasNo(zonedDateTime2).query.get.map(_ ==> List())
@@ -177,7 +177,7 @@ trait FilterSet_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.zonedDateTimeSet.hasNo(zonedDateTime1, zonedDateTime2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.zonedDateTimeSet.hasNo(zonedDateTime1, zonedDateTime3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.zonedDateTimeSet.hasNo(zonedDateTime1, zonedDateTime4).query.get.map(_ ==> List())
@@ -310,7 +310,7 @@ trait FilterSet_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.zonedDateTimeSet_.has(zonedDateTime0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.zonedDateTimeSet_.has(zonedDateTime1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.zonedDateTimeSet_.has(zonedDateTime2).query.get.map(_ ==> List(1, 2))
@@ -352,7 +352,7 @@ trait FilterSet_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.zonedDateTimeSet_.hasNo(zonedDateTime0).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.zonedDateTimeSet_.hasNo(zonedDateTime1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.zonedDateTimeSet_.hasNo(zonedDateTime2).query.get.map(_ ==> List())
@@ -370,7 +370,7 @@ trait FilterSet_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.zonedDateTimeSet_.hasNo(zonedDateTime1, zonedDateTime2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.zonedDateTimeSet_.hasNo(zonedDateTime1, zonedDateTime3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.zonedDateTimeSet_.hasNo(zonedDateTime1, zonedDateTime4).query.get.map(_ ==> List())
@@ -434,7 +434,7 @@ trait FilterSet_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
 
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.zonedDateTimeSet_?(Some(Seq(Set(zonedDateTime1), Set(zonedDateTime2, zonedDateTime3)))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.zonedDateTimeSet_?(Some(Seq(Set(zonedDateTime1, zonedDateTime2), Set(zonedDateTime2, zonedDateTime3)))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.zonedDateTimeSet_?.apply(Some(Seq(Set(zonedDateTime1, zonedDateTime2), Set(zonedDateTime2, zonedDateTime3)))).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.zonedDateTimeSet_?(Some(Seq(Set(zonedDateTime1, zonedDateTime2), Set(zonedDateTime2, zonedDateTime3, zonedDateTime4)))).query.get.map(_ ==> List(a, b))
 
 
@@ -499,7 +499,7 @@ trait FilterSet_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.zonedDateTimeSet_?.has(Some(zonedDateTime0)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.zonedDateTimeSet_?.has(Some(zonedDateTime1)).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.zonedDateTimeSet_?.has(Some(zonedDateTime2)).query.get.map(_ ==> List(a, b))
@@ -538,7 +538,7 @@ trait FilterSet_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.zonedDateTimeSet_?.hasNo(Some(zonedDateTime0)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.zonedDateTimeSet_?.hasNo(Some(zonedDateTime1)).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.zonedDateTimeSet_?.hasNo(Some(zonedDateTime2)).query.get.map(_ ==> List())
@@ -556,7 +556,7 @@ trait FilterSet_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.zonedDateTimeSet_?.hasNo(Some(Seq(zonedDateTime1, zonedDateTime2))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.zonedDateTimeSet_?.hasNo(Some(Seq(zonedDateTime1, zonedDateTime3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.zonedDateTimeSet_?.hasNo(Some(Seq(zonedDateTime1, zonedDateTime4))).query.get.map(_ ==> List())

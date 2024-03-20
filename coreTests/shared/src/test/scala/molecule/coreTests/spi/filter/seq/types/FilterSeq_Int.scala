@@ -118,7 +118,7 @@ trait FilterSeq_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Seqs with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.intSeq.has(int0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.intSeq.has(int1).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.intSeq.has(int2).query.get.map(_ ==> List(a, b))
@@ -158,7 +158,7 @@ trait FilterSeq_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Seqs without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.intSeq.hasNo(int0).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.intSeq.hasNo(int1).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.intSeq.hasNo(int2).query.get.map(_ ==> List())
@@ -176,7 +176,7 @@ trait FilterSeq_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.intSeq.hasNo(int1, int2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.intSeq.hasNo(int1, int3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.intSeq.hasNo(int1, int3).query.get.map(_ ==> List())
@@ -309,7 +309,7 @@ trait FilterSeq_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Seqs with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.intSeq_.has(int0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.intSeq_.has(int1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.intSeq_.has(int2).query.get.map(_ ==> List(1, 2))
@@ -351,7 +351,7 @@ trait FilterSeq_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Seqs without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.intSeq_.hasNo(int0).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.intSeq_.hasNo(int1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.intSeq_.hasNo(int2).query.get.map(_ ==> List())
@@ -369,7 +369,7 @@ trait FilterSeq_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.intSeq_.hasNo(int1, int2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.intSeq_.hasNo(int1, int3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.intSeq_.hasNo(int1, int3).query.get.map(_ ==> List())
@@ -499,7 +499,7 @@ trait FilterSeq_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Seqs with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.intSeq_?.has(Some(int0)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.intSeq_?.has(Some(int1)).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.intSeq_?.has(Some(int2)).query.get.map(_ ==> List(a, b))
@@ -539,7 +539,7 @@ trait FilterSeq_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Seqs without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.intSeq_?.hasNo(Some(int0)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.intSeq_?.hasNo(Some(int1)).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.intSeq_?.hasNo(Some(int2)).query.get.map(_ ==> List())
@@ -557,7 +557,7 @@ trait FilterSeq_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.intSeq_?.hasNo(Some(List(int1, int2))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.intSeq_?.hasNo(Some(List(int1, int3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.intSeq_?.hasNo(Some(List(int1, int3))).query.get.map(_ ==> List())

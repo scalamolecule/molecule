@@ -39,7 +39,6 @@ object _ModelOps extends BoilerplateGenBase("ModelOps", "/api") {
          |    with ExprSetOptOps_$arity[${`A..V`}, t, Ns1, Ns2]
          |    with ExprSeqTacOps_$arity[${`A..V`}, t, Ns1, Ns2]
          |    with ExprSeqOptOps_$arity[${`A..V`}, t, Ns1, Ns2]
-         |    with ExprMapManOps_$arity[${`A..V`}, t, Ns1, Ns2]
          |    with ExprMapTacOps_$arity[${`A..V`}, t, Ns1, Ns2]
          |    with ExprMapOptOps_$arity[${`A..V`}, t, Ns1, Ns2]
          |    with SortAttrsOps_$arity[${`A..V`}, t, Ns1]""".stripMargin

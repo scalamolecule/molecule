@@ -160,7 +160,7 @@ trait FilterSet_Boolean extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.booleanSet.hasNo(true, false).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.booleanSet.hasNo(Seq(true, false)).query.get.map(_ ==> List())
@@ -327,7 +327,7 @@ trait FilterSet_Boolean extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.booleanSet_.hasNo(true, false).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.booleanSet_.hasNo(Seq(true, false)).query.get.map(_ ==> List())
@@ -492,7 +492,7 @@ trait FilterSet_Boolean extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.booleanSet_?.hasNo(Some(Seq(true, false))).query.get.map(_ ==> List())
 
 

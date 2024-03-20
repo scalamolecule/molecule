@@ -80,26 +80,25 @@ trait Save_datomic
     ns: String,
     attr: String,
     refNs: Option[String],
-    optArray: Option[Seq[Any]],
+    optSeq: Option[Seq[Any]],
     transformValue: T => Any,
     //    set2array: Set[Any] => Array[AnyRef],
     //    exts: List[String] = Nil,
     //    value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    optArray.foreach { array =>
+    optSeq.foreach { seq =>
       val a   = kw(ns, attr)
       val a_i = kw(s"$ns.$attr", "i_")
       val a_v = kw(s"$ns.$attr", "v_")
       unusedRefIds -= e
       usedRefIds += e
-      var i      = 0
-      val length = array.length
-      while (i < length) {
+      var i = 0
+      seq.foreach { v =>
         val ref = newId
         appendStmt(add, e, a, ref)
         appendStmt(add, ref, a_i, i.asInstanceOf[AnyRef])
         // Values have already been transformed in core.transaction.ResolveSave
-        appendStmt(add, ref, a_v, array(i).asInstanceOf[AnyRef])
+        appendStmt(add, ref, a_v, v.asInstanceOf[AnyRef])
         i += 1
       }
     }
@@ -112,6 +111,34 @@ trait Save_datomic
   ): Unit = {
     optArray.foreach { array =>
       appendStmt(add, e, kw(ns, attr), array.asInstanceOf[AnyRef])
+    }
+  }
+
+  override protected def addMap[T](
+    ns: String,
+    attr: String,
+    optMap: Option[Map[String, Any]],
+    transformValue: T => Any,
+    //    set2map: Set[Any] => Map[String, AnyRef],
+    //    refNs: Option[String],
+    //    exts: List[String],
+    //    value2json: (StringBuffer, T) => StringBuffer
+  ): Unit = {
+    optMap.foreach { map =>
+      val a   = kw(ns, attr)
+      val a_k = kw(s"$ns.$attr", "k_")
+      val a_v = kw(s"$ns.$attr", "v_")
+      unusedRefIds -= e
+      usedRefIds += e
+      var i    = 0
+      map.foreach { case (k, v) =>
+        val ref = newId
+        appendStmt(add, e, a, ref)
+        appendStmt(add, ref, a_k, k.asInstanceOf[AnyRef])
+        // Values have already been transformed in core.transaction.ResolveSave
+        appendStmt(add, ref, a_v, v.asInstanceOf[AnyRef])
+        i += 1
+      }
     }
   }
 

@@ -120,7 +120,7 @@ trait FilterSet_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.dateSet.has(date0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.dateSet.has(date1).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.dateSet.has(date2).query.get.map(_ ==> List(a, b))
@@ -159,7 +159,7 @@ trait FilterSet_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.dateSet.hasNo(date0).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.dateSet.hasNo(date1).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.dateSet.hasNo(date2).query.get.map(_ ==> List())
@@ -177,7 +177,7 @@ trait FilterSet_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.dateSet.hasNo(date1, date2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.dateSet.hasNo(date1, date3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.dateSet.hasNo(date1, date4).query.get.map(_ ==> List())
@@ -310,7 +310,7 @@ trait FilterSet_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.dateSet_.has(date0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.dateSet_.has(date1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.dateSet_.has(date2).query.get.map(_ ==> List(1, 2))
@@ -352,7 +352,7 @@ trait FilterSet_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.dateSet_.hasNo(date0).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.dateSet_.hasNo(date1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.dateSet_.hasNo(date2).query.get.map(_ ==> List())
@@ -370,7 +370,7 @@ trait FilterSet_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.dateSet_.hasNo(date1, date2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.dateSet_.hasNo(date1, date3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.dateSet_.hasNo(date1, date4).query.get.map(_ ==> List())
@@ -434,7 +434,7 @@ trait FilterSet_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.dateSet_?(Some(Seq(Set(date1), Set(date2, date3)))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.dateSet_?(Some(Seq(Set(date1, date2), Set(date2, date3)))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.dateSet_?.apply(Some(Seq(Set(date1, date2), Set(date2, date3)))).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.dateSet_?(Some(Seq(Set(date1, date2), Set(date2, date3, date4)))).query.get.map(_ ==> List(a, b))
 
 
@@ -499,7 +499,7 @@ trait FilterSet_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.dateSet_?.has(Some(date0)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.dateSet_?.has(Some(date1)).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.dateSet_?.has(Some(date2)).query.get.map(_ ==> List(a, b))
@@ -538,7 +538,7 @@ trait FilterSet_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.dateSet_?.hasNo(Some(date0)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.dateSet_?.hasNo(Some(date1)).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.dateSet_?.hasNo(Some(date2)).query.get.map(_ ==> List())
@@ -556,7 +556,7 @@ trait FilterSet_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.dateSet_?.hasNo(Some(Seq(date1, date2))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.dateSet_?.hasNo(Some(Seq(date1, date3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.dateSet_?.hasNo(Some(Seq(date1, date4))).query.get.map(_ ==> List())

@@ -119,7 +119,7 @@ trait FilterSet_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.byteSet.has(byte0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.byteSet.has(byte1).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.byteSet.has(byte2).query.get.map(_ ==> List(a, b))
@@ -158,7 +158,7 @@ trait FilterSet_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.byteSet.hasNo(byte0).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.byteSet.hasNo(byte1).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.byteSet.hasNo(byte2).query.get.map(_ ==> List())
@@ -176,7 +176,7 @@ trait FilterSet_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.byteSet.hasNo(byte1, byte2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.byteSet.hasNo(byte1, byte3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.byteSet.hasNo(byte1, byte4).query.get.map(_ ==> List())
@@ -309,7 +309,7 @@ trait FilterSet_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.byteSet_.has(byte0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.byteSet_.has(byte1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.byteSet_.has(byte2).query.get.map(_ ==> List(1, 2))
@@ -351,7 +351,7 @@ trait FilterSet_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.byteSet_.hasNo(byte0).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.byteSet_.hasNo(byte1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.byteSet_.hasNo(byte2).query.get.map(_ ==> List())
@@ -369,7 +369,7 @@ trait FilterSet_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.byteSet_.hasNo(byte1, byte2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.byteSet_.hasNo(byte1, byte3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.byteSet_.hasNo(byte1, byte4).query.get.map(_ ==> List())
@@ -433,7 +433,7 @@ trait FilterSet_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.byteSet_?(Some(Seq(Set(byte1), Set(byte2, byte3)))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.byteSet_?(Some(Seq(Set(byte1, byte2), Set(byte2, byte3)))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.byteSet_?.apply(Some(Seq(Set(byte1, byte2), Set(byte2, byte3)))).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.byteSet_?(Some(Seq(Set(byte1, byte2), Set(byte2, byte3, byte4)))).query.get.map(_ ==> List(a, b))
 
 
@@ -498,7 +498,7 @@ trait FilterSet_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.byteSet_?.has(Some(byte0)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.byteSet_?.has(Some(byte1)).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.byteSet_?.has(Some(byte2)).query.get.map(_ ==> List(a, b))
@@ -537,7 +537,7 @@ trait FilterSet_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.byteSet_?.hasNo(Some(byte0)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.byteSet_?.hasNo(Some(byte1)).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.byteSet_?.hasNo(Some(byte2)).query.get.map(_ ==> List())
@@ -555,7 +555,7 @@ trait FilterSet_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.byteSet_?.hasNo(Some(Seq(byte1, byte2))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.byteSet_?.hasNo(Some(Seq(byte1, byte3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.byteSet_?.hasNo(Some(Seq(byte1, byte4))).query.get.map(_ ==> List())

@@ -119,7 +119,7 @@ trait FilterSet_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.stringSet.has(string0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.stringSet.has(string1).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.stringSet.has(string2).query.get.map(_ ==> List(a, b))
@@ -158,7 +158,7 @@ trait FilterSet_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.stringSet.hasNo(string0).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.stringSet.hasNo(string1).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.stringSet.hasNo(string2).query.get.map(_ ==> List())
@@ -176,7 +176,7 @@ trait FilterSet_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.stringSet.hasNo(string1, string2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.stringSet.hasNo(string1, string3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.stringSet.hasNo(string1, string4).query.get.map(_ ==> List())
@@ -309,7 +309,7 @@ trait FilterSet_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.stringSet_.has(string0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.stringSet_.has(string1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.stringSet_.has(string2).query.get.map(_ ==> List(1, 2))
@@ -351,7 +351,7 @@ trait FilterSet_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.stringSet_.hasNo(string0).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.stringSet_.hasNo(string1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.stringSet_.hasNo(string2).query.get.map(_ ==> List())
@@ -369,7 +369,7 @@ trait FilterSet_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.stringSet_.hasNo(string1, string2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.stringSet_.hasNo(string1, string3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.stringSet_.hasNo(string1, string4).query.get.map(_ ==> List())
@@ -433,7 +433,7 @@ trait FilterSet_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.stringSet_?(Some(Seq(Set(string1), Set(string2, string3)))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.stringSet_?(Some(Seq(Set(string1, string2), Set(string2, string3)))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.stringSet_?.apply(Some(Seq(Set(string1, string2), Set(string2, string3)))).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.stringSet_?(Some(Seq(Set(string1, string2), Set(string2, string3, string4)))).query.get.map(_ ==> List(a, b))
 
 
@@ -498,7 +498,7 @@ trait FilterSet_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.stringSet_?.has(Some(string0)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.stringSet_?.has(Some(string1)).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.stringSet_?.has(Some(string2)).query.get.map(_ ==> List(a, b))
@@ -537,7 +537,7 @@ trait FilterSet_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.stringSet_?.hasNo(Some(string0)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.stringSet_?.hasNo(Some(string1)).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.stringSet_?.hasNo(Some(string2)).query.get.map(_ ==> List())
@@ -555,7 +555,7 @@ trait FilterSet_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.stringSet_?.hasNo(Some(Seq(string1, string2))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.stringSet_?.hasNo(Some(Seq(string1, string3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.stringSet_?.hasNo(Some(Seq(string1, string4))).query.get.map(_ ==> List())

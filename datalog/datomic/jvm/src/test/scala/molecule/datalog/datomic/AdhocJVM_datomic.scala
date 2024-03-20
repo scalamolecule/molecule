@@ -5,16 +5,18 @@ import java.time._
 import java.util.{Date, UUID}
 import molecule.base.error.ExecutionError
 import molecule.core.action.Query
+import molecule.core.spi.TxReport
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types.Ns
 import molecule.coreTests.util.Array2List
 import molecule.datalog.datomic.async._
 import molecule.datalog.datomic.setup.{TestSuiteArray_datomic, TestSuite_datomic}
 import utest._
+import scala.concurrent.Future
 import scala.language.implicitConversions
 
 object AdhocJVM_datomic extends TestSuiteArray_datomic with Array2List {
-//object AdhocJVM_datomic extends TestSuite_datomic {
+  //object AdhocJVM_datomic extends TestSuite_datomic {
 
   override lazy val tests = Tests {
 
@@ -22,66 +24,145 @@ object AdhocJVM_datomic extends TestSuiteArray_datomic with Array2List {
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
+      //      // Get map
+      //      val a1: Future[List[Map[String, Int]]] = Ns.intMap.query.get
+      //
+      //      // Delete map
+      //      val a2: Future[List[Map[String, Int]]] = Ns.intMap.apply().query.get
+      //      val a3: Future[List[Int]]              = Ns.intMap_.apply().i.query.get
+      //
+      //
+      //      // value of "en" (as calling apply with a key on a Scala Map)
+      //      val b0: Future[List[Int]] = Ns.intMap.apply("en").query.get
+      //
+      //      // Optional value of "en" (as calling get with a key on a Scala Map)
+      //      val b3: Future[List[Option[Int]]] = Ns.intMap_?.apply("en").query.get
+      //
+      //      // maps having certain key(s)
+      //      val b4: Future[List[String]] = Ns.intMap_.apply("en", "fr", "da").s.query.get
+      //      val b5: Future[List[String]] = Ns.intMap_.apply(Seq("en", "fr", "da")).s.query.get
+      //
+      //
+      //      // maps without certain key(s)
+      //      val d1: Future[List[Map[String, Int]]] = Ns.intMap.not("en", "da").query.get
+      //      val d2: Future[List[Map[String, Int]]] = Ns.intMap.not(Seq("en", "da")).query.get
+      //
+      //      val d3: Future[List[Int]] = Ns.intMap_.not("en", "da").i.query.get
+      //      val d4: Future[List[Int]] = Ns.intMap_.not(Seq("en", "da")).i.query.get
+      //
+      //      //      val d5: Future[List[Option[Map[String, Int]]]] = Ns.intMap_?.not("en", "da").query.get
+      //      //      val d6: Future[List[Option[Map[String, Int]]]] = Ns.intMap_?.not(Seq("en", "da")).query.get
+      //
+      //
+      //      // Has certain value(s)
+      //      val e1: Future[List[Map[String, Int]]] = Ns.intMap.has(42, 43).query.get
+      //      val e2: Future[List[Map[String, Int]]] = Ns.intMap.has(Seq(1, 2)).query.get
+      //
+      //      val e3: Future[List[Int]] = Ns.intMap_.has(42, 43).i.query.get
+      //      val e4: Future[List[Int]] = Ns.intMap_.has(Seq(1, 2)).i.query.get
+      //
+      //
+      //      // Has no such value(s)
+      //      val f1: Future[List[Map[String, Int]]] = Ns.intMap.hasNo(42, 43).query.get
+      //      val f2: Future[List[Map[String, Int]]] = Ns.intMap.hasNo(Seq(1, 2)).query.get
+      //
+      //      val f3: Future[List[Int]] = Ns.intMap_.hasNo(42, 43).i.query.get
+      //      val f4: Future[List[Int]] = Ns.intMap_.hasNo(Seq(1, 2)).i.query.get
+      //
+      //
+      //      // overwrites existing key(s)
+      //      val h1: Future[List[Map[String, Int]]] = Ns.intMap.add("en" -> 1, "da" -> 2).query.get
+      //      val h2: Future[List[Map[String, Int]]] = Ns.intMap.add(Seq("en" -> 1, "da" -> 2)).query.get
+      //
+      //      val i1: Future[List[Int]] = Ns.intMap.remove("en", "da").query.get
+      //      val i2: Future[List[Int]] = Ns.intMap.remove(Seq("en", "da")).query.get
+      //
+      //      // Match map ? (primarily used for crud
+      //      val j2: Future[List[Map[String, Int]]] = Ns.intMap(Map("en" -> 1, "da" -> 2)).query.get
+      //      //      val j2: Future[List[Map[String, Int]]] = Ns.intMap(Map("en" -> 1, "da" -> 2)).query.get
+      //
+      //      // Replace map
+      //      val j3: Future[TxReport] = Ns.intMap(Map("en" -> 1, "da" -> 2)).update.transact
+
+
+      //      val j1: Future[List[Map[String, Int]]] = Ns.intMap.apply(Ns.intMap).int.query.get
+
+
+      //      val k1: Future[List[Set[Int]]] = Ns.intSet.add(1).query.get
 
       for {
 
-
-        //        _ <- Ref.i.Nss.*(Ns.i.stringSet).insert(1, List((2, Set(string1, string2)))).transact
-//        _ <- Ref.i.Nss.*(Ns.stringSeq).insert(1, List(List(string1, string2))).transact
-//        _ <- Ref.i.Nss.*(Ns.byteArray).insert(20, List(Array(byte1, byte2))).transact
-
-        _ <- Ref.i.Nss.*(Ns.i.byteArray_?).insert(20, List((1, Some(Array(byte1, byte2))), (2, None))).transact
+        _ <- Ns.intMap(Map("a" -> int1, "b" -> int2)).save.transact
+        _ <- Ns.intMap.query.i.get.map(_ ==> List(Map("a" -> int1, "b" -> int2)))
 
 
-//        _ = {
-//          println("----------- 1")
-//          val res = datomic.Peer.q(
-//            """[:find  (pull ?id0 [
-//              |          {(:Ref/nss) [
-//              |            (:Ns/i)
-//              |            (:Ns/stringSeq)]}])
-//              | :where [?a :Ref/i ?b]
-//              |        [(identity ?a) ?id0]]
-//              |""".stripMargin, conn.db,
-//            //            Seq(true, false).asJava
-//          )
-//          res.forEach(r => println(r))
-//
-//          println("----------- 2")
-//          datomic.Peer.q(
-//            """[:find  (pull ?id0 [
-//              |          {
-//              |            (:Ref/nss) [
-//              |              (:Ns/i)
-//              |
-//              |              {
-//              |                (:Ns/stringSeq :limit nil :default "__none__") [
-//              |                  :Ns.stringSeq/i_
-//              |                  :Ns.stringSeq/v_
-//              |                ]
-//              |              }
-//              |
-//              |            ]
-//              |          }
-//              |        ])
-//              | :where [?a :Ref/i ?b]
-//              |        [(identity ?a) ?id0]]
-//              |""".stripMargin, conn.db,
-//            //            Seq(true, false).asJava
-//          ).forEach(r => println(r))
-//        }
+        //        _ = {
+        //          println("----------- 1")
+        //          val res = datomic.Peer.q(
+        //            """[:find  (pull ?id0 [
+        //              |          {(:Ref/nss) [
+        //              |            (:Ns/i)
+        //              |            (:Ns/stringSeq)]}])
+        //              | :where [?a :Ref/i ?b]
+        //              |        [(identity ?a) ?id0]]
+        //              |""".stripMargin, conn.db,
+        //            //            Seq(true, false).asJava
+        //          )
+        //          res.forEach(r => println(r))
+        //
+        //          println("----------- 2")
+        //          datomic.Peer.q(
+        //            """[:find  (pull ?id0 [
+        //              |          {
+        //              |            (:Ref/nss) [
+        //              |              (:Ns/i)
+        //              |
+        //              |              {
+        //              |                (:Ns/stringSeq :limit nil :default "__none__") [
+        //              |                  :Ns.stringSeq/i_
+        //              |                  :Ns.stringSeq/v_
+        //              |                ]
+        //              |              }
+        //              |
+        //              |            ]
+        //              |          }
+        //              |        ])
+        //              | :where [?a :Ref/i ?b]
+        //              |        [(identity ?a) ?id0]]
+        //              |""".stripMargin, conn.db,
+        //            //            Seq(true, false).asJava
+        //          ).forEach(r => println(r))
+        //        }
 
 
-        //        _ <- Ref.i.Nss.*?(Ns.i.stringSet).query.i.get
-//        _ <- Ref.i_(1).Nss.*?(Ns.stringSeq).query.i.get.map(_ ==> List(List(List(string1, string2))))
+        //        _ <- Ns.intMap.query.get
 
-//        _ <- Ref.i_(20).Nss.*?(Ns.byteArray).query.i.get.map(_.head.head ==> Array(byte1, byte2))
-//        _ <- Ref.i_(20).Nss.*?(Ns.byteArray).query.i.get.map(_.head ==> List(Array(byte1, byte2)))
-//        _ <- Ref.i_(20).Nss.*?(Ns.byteArray).query.i.get.map(_ ==> List(List(Array(byte1, byte2))))
+        //        _ <- Ns.intMap.apply("en", "da").query.get
+        //        _ <- Ns.intMap.apply(Seq("en", "da")).query.get
 
-        _ <- Ref.i(20).Nss.*?(Ns.i.a1.byteArray_?).query.i.get
-          .map(_ ==> List((20, List((1, Some(Array(byte1, byte2))), (2, None)))))
+        //        _ <- Ns.intMap_?.apply("en", "da").query.get
+        //        _ <- Ns.intMap_?.apply(Seq("en", "da")).query.get
 
+        //        _ <- Ns.intMap.not("en", "da").query.get
+        //        _ <- Ns.intMap.not(Seq("en", "da")).query.get
+
+        //        _ <- Ns.intMap.has("en", "da").query.get
+        //        _ <- Ns.intMap.has(Seq("en", "da")).query.get
+        //
+        //        _ <- Ns.intMap.hasNo("en", "da").query.get
+        //        _ <- Ns.intMap.hasNo(Seq("en", "da")).query.get
+        //
+        //        _ <- Ns.intMap.getV(1, 2).query.get
+        //        _ <- Ns.intMap.getV(Seq(1, 2)).query.get
+        //
+        //        _ <- Ns.intMap.add("en" -> 1, "da" -> 2).query.get
+        //        _ <- Ns.intMap.add(Seq("en" -> 1, "da" -> 2)).query.get
+        //
+        //        _ <- Ns.intMap.remove("en", "da").query.get
+        //        _ <- Ns.intMap.remove(Seq("en", "da")).query.get
+
+
+        //        _ <- Ns.intMap.apply(Ns.intMap).int.query.get
 
 
       } yield ()

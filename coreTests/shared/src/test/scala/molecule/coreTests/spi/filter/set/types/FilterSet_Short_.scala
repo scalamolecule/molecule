@@ -119,7 +119,7 @@ trait FilterSet_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.shortSet.has(short0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shortSet.has(short1).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.shortSet.has(short2).query.get.map(_ ==> List(a, b))
@@ -158,7 +158,7 @@ trait FilterSet_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.shortSet.hasNo(short0).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.shortSet.hasNo(short1).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.shortSet.hasNo(short2).query.get.map(_ ==> List())
@@ -176,7 +176,7 @@ trait FilterSet_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.shortSet.hasNo(short1, short2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shortSet.hasNo(short1, short3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shortSet.hasNo(short1, short4).query.get.map(_ ==> List())
@@ -309,7 +309,7 @@ trait FilterSet_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.shortSet_.has(short0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shortSet_.has(short1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.shortSet_.has(short2).query.get.map(_ ==> List(1, 2))
@@ -351,7 +351,7 @@ trait FilterSet_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.shortSet_.hasNo(short0).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.shortSet_.hasNo(short1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.shortSet_.hasNo(short2).query.get.map(_ ==> List())
@@ -369,7 +369,7 @@ trait FilterSet_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.shortSet_.hasNo(short1, short2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shortSet_.hasNo(short1, short3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shortSet_.hasNo(short1, short4).query.get.map(_ ==> List())
@@ -433,7 +433,7 @@ trait FilterSet_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.shortSet_?(Some(Seq(Set(short1), Set(short2, short3)))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.shortSet_?(Some(Seq(Set(short1, short2), Set(short2, short3)))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.shortSet_?.apply(Some(Seq(Set(short1, short2), Set(short2, short3)))).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.shortSet_?(Some(Seq(Set(short1, short2), Set(short2, short3, short4)))).query.get.map(_ ==> List(a, b))
 
 
@@ -498,7 +498,7 @@ trait FilterSet_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.shortSet_?.has(Some(short0)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shortSet_?.has(Some(short1)).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.shortSet_?.has(Some(short2)).query.get.map(_ ==> List(a, b))
@@ -537,7 +537,7 @@ trait FilterSet_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.shortSet_?.hasNo(Some(short0)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.shortSet_?.hasNo(Some(short1)).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.shortSet_?.hasNo(Some(short2)).query.get.map(_ ==> List())
@@ -555,7 +555,7 @@ trait FilterSet_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.shortSet_?.hasNo(Some(Seq(short1, short2))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shortSet_?.hasNo(Some(Seq(short1, short3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shortSet_?.hasNo(Some(Seq(short1, short4))).query.get.map(_ ==> List())

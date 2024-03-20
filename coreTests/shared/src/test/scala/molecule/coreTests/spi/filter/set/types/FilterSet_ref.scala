@@ -179,7 +179,7 @@ trait FilterSet_ref extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.refs.hasNo(ref1, ref2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.refs.hasNo(ref1, ref3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.refs.hasNo(ref1, ref4).query.get.map(_ ==> List())
@@ -372,7 +372,7 @@ trait FilterSet_ref extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.refs_.hasNo(ref1, ref2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.refs_.hasNo(ref1, ref3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.refs_.hasNo(ref1, ref4).query.get.map(_ ==> List())
@@ -565,7 +565,7 @@ trait FilterSet_ref extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.refs_?.hasNo(Some(Seq(ref1, ref2))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.refs_?.hasNo(Some(Seq(ref1, ref3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.refs_?.hasNo(Some(Seq(ref1, ref4))).query.get.map(_ ==> List())

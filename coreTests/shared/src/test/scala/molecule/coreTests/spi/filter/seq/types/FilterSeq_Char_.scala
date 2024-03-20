@@ -119,7 +119,7 @@ trait FilterSeq_Char_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Seqs with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.charSeq.has(char0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.charSeq.has(char1).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.charSeq.has(char2).query.get.map(_ ==> List(a, b))
@@ -159,7 +159,7 @@ trait FilterSeq_Char_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Seqs without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.charSeq.hasNo(char0).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.charSeq.hasNo(char1).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.charSeq.hasNo(char2).query.get.map(_ ==> List())
@@ -177,7 +177,7 @@ trait FilterSeq_Char_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.charSeq.hasNo(char1, char2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.charSeq.hasNo(char1, char3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.charSeq.hasNo(char1, char3).query.get.map(_ ==> List())
@@ -310,7 +310,7 @@ trait FilterSeq_Char_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Seqs with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.charSeq_.has(char0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.charSeq_.has(char1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.charSeq_.has(char2).query.get.map(_ ==> List(1, 2))
@@ -352,7 +352,7 @@ trait FilterSeq_Char_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Seqs without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.charSeq_.hasNo(char0).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.charSeq_.hasNo(char1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.charSeq_.hasNo(char2).query.get.map(_ ==> List())
@@ -370,7 +370,7 @@ trait FilterSeq_Char_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.charSeq_.hasNo(char1, char2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.charSeq_.hasNo(char1, char3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.charSeq_.hasNo(char1, char3).query.get.map(_ ==> List())
@@ -500,7 +500,7 @@ trait FilterSeq_Char_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Seqs with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.charSeq_?.has(Some(char0)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.charSeq_?.has(Some(char1)).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.charSeq_?.has(Some(char2)).query.get.map(_ ==> List(a, b))
@@ -540,7 +540,7 @@ trait FilterSeq_Char_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Seqs without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.charSeq_?.hasNo(Some(char0)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.charSeq_?.hasNo(Some(char1)).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.charSeq_?.hasNo(Some(char2)).query.get.map(_ ==> List())
@@ -558,7 +558,7 @@ trait FilterSeq_Char_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.charSeq_?.hasNo(Some(List(char1, char2))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.charSeq_?.hasNo(Some(List(char1, char3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.charSeq_?.hasNo(Some(List(char1, char3))).query.get.map(_ ==> List())

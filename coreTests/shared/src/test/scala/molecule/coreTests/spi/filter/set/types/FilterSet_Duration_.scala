@@ -120,7 +120,7 @@ trait FilterSet_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.durationSet.has(duration0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.durationSet.has(duration1).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.durationSet.has(duration2).query.get.map(_ ==> List(a, b))
@@ -159,7 +159,7 @@ trait FilterSet_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.durationSet.hasNo(duration0).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.durationSet.hasNo(duration1).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.durationSet.hasNo(duration2).query.get.map(_ ==> List())
@@ -177,7 +177,7 @@ trait FilterSet_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.durationSet.hasNo(duration1, duration2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.durationSet.hasNo(duration1, duration3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.durationSet.hasNo(duration1, duration4).query.get.map(_ ==> List())
@@ -310,7 +310,7 @@ trait FilterSet_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.durationSet_.has(duration0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.durationSet_.has(duration1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.durationSet_.has(duration2).query.get.map(_ ==> List(1, 2))
@@ -352,7 +352,7 @@ trait FilterSet_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.durationSet_.hasNo(duration0).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.durationSet_.hasNo(duration1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.durationSet_.hasNo(duration2).query.get.map(_ ==> List())
@@ -370,7 +370,7 @@ trait FilterSet_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.durationSet_.hasNo(duration1, duration2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.durationSet_.hasNo(duration1, duration3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.durationSet_.hasNo(duration1, duration4).query.get.map(_ ==> List())
@@ -434,7 +434,7 @@ trait FilterSet_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.durationSet_?(Some(Seq(Set(duration1), Set(duration2, duration3)))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.durationSet_?(Some(Seq(Set(duration1, duration2), Set(duration2, duration3)))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.durationSet_?.apply(Some(Seq(Set(duration1, duration2), Set(duration2, duration3)))).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.durationSet_?(Some(Seq(Set(duration1, duration2), Set(duration2, duration3, duration4)))).query.get.map(_ ==> List(a, b))
 
 
@@ -499,7 +499,7 @@ trait FilterSet_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.durationSet_?.has(Some(duration0)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.durationSet_?.has(Some(duration1)).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.durationSet_?.has(Some(duration2)).query.get.map(_ ==> List(a, b))
@@ -538,7 +538,7 @@ trait FilterSet_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.durationSet_?.hasNo(Some(duration0)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.durationSet_?.hasNo(Some(duration1)).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.durationSet_?.hasNo(Some(duration2)).query.get.map(_ ==> List())
@@ -556,7 +556,7 @@ trait FilterSet_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.durationSet_?.hasNo(Some(Seq(duration1, duration2))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.durationSet_?.hasNo(Some(Seq(duration1, duration3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.durationSet_?.hasNo(Some(Seq(duration1, duration4))).query.get.map(_ ==> List())

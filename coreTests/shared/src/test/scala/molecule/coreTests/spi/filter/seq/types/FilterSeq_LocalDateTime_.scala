@@ -120,7 +120,7 @@ trait FilterSeq_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
 
           // Seqs with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.localDateTimeSeq.has(localDateTime0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localDateTimeSeq.has(localDateTime1).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.localDateTimeSeq.has(localDateTime2).query.get.map(_ ==> List(a, b))
@@ -160,7 +160,7 @@ trait FilterSeq_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
 
           // Seqs without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.localDateTimeSeq.hasNo(localDateTime0).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.localDateTimeSeq.hasNo(localDateTime1).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.localDateTimeSeq.hasNo(localDateTime2).query.get.map(_ ==> List())
@@ -178,7 +178,7 @@ trait FilterSeq_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.localDateTimeSeq.hasNo(localDateTime1, localDateTime2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localDateTimeSeq.hasNo(localDateTime1, localDateTime3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localDateTimeSeq.hasNo(localDateTime1, localDateTime3).query.get.map(_ ==> List())
@@ -311,7 +311,7 @@ trait FilterSeq_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
 
           // Seqs with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.localDateTimeSeq_.has(localDateTime0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localDateTimeSeq_.has(localDateTime1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.localDateTimeSeq_.has(localDateTime2).query.get.map(_ ==> List(1, 2))
@@ -353,7 +353,7 @@ trait FilterSeq_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
 
           // Seqs without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.localDateTimeSeq_.hasNo(localDateTime0).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.localDateTimeSeq_.hasNo(localDateTime1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.localDateTimeSeq_.hasNo(localDateTime2).query.get.map(_ ==> List())
@@ -371,7 +371,7 @@ trait FilterSeq_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.localDateTimeSeq_.hasNo(localDateTime1, localDateTime2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localDateTimeSeq_.hasNo(localDateTime1, localDateTime3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localDateTimeSeq_.hasNo(localDateTime1, localDateTime3).query.get.map(_ ==> List())
@@ -501,7 +501,7 @@ trait FilterSeq_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
 
           // Seqs with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.localDateTimeSeq_?.has(Some(localDateTime0)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localDateTimeSeq_?.has(Some(localDateTime1)).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.localDateTimeSeq_?.has(Some(localDateTime2)).query.get.map(_ ==> List(a, b))
@@ -541,7 +541,7 @@ trait FilterSeq_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
 
           // Seqs without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.localDateTimeSeq_?.hasNo(Some(localDateTime0)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.localDateTimeSeq_?.hasNo(Some(localDateTime1)).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.localDateTimeSeq_?.hasNo(Some(localDateTime2)).query.get.map(_ ==> List())
@@ -559,7 +559,7 @@ trait FilterSeq_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.localDateTimeSeq_?.hasNo(Some(List(localDateTime1, localDateTime2))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localDateTimeSeq_?.hasNo(Some(List(localDateTime1, localDateTime3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localDateTimeSeq_?.hasNo(Some(List(localDateTime1, localDateTime3))).query.get.map(_ ==> List())

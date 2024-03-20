@@ -119,7 +119,7 @@ trait FilterSeq_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Seqs with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.stringSeq.has(string0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.stringSeq.has(string1).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.stringSeq.has(string2).query.get.map(_ ==> List(a, b))
@@ -159,7 +159,7 @@ trait FilterSeq_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Seqs without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.stringSeq.hasNo(string0).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.stringSeq.hasNo(string1).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.stringSeq.hasNo(string2).query.get.map(_ ==> List())
@@ -177,7 +177,7 @@ trait FilterSeq_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.stringSeq.hasNo(string1, string2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.stringSeq.hasNo(string1, string3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.stringSeq.hasNo(string1, string3).query.get.map(_ ==> List())
@@ -310,7 +310,7 @@ trait FilterSeq_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Seqs with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.stringSeq_.has(string0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.stringSeq_.has(string1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.stringSeq_.has(string2).query.get.map(_ ==> List(1, 2))
@@ -352,7 +352,7 @@ trait FilterSeq_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Seqs without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.stringSeq_.hasNo(string0).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.stringSeq_.hasNo(string1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.stringSeq_.hasNo(string2).query.get.map(_ ==> List())
@@ -370,7 +370,7 @@ trait FilterSeq_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.stringSeq_.hasNo(string1, string2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.stringSeq_.hasNo(string1, string3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.stringSeq_.hasNo(string1, string3).query.get.map(_ ==> List())
@@ -500,7 +500,7 @@ trait FilterSeq_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Seqs with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.stringSeq_?.has(Some(string0)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.stringSeq_?.has(Some(string1)).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.stringSeq_?.has(Some(string2)).query.get.map(_ ==> List(a, b))
@@ -540,7 +540,7 @@ trait FilterSeq_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Seqs without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.stringSeq_?.hasNo(Some(string0)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.stringSeq_?.hasNo(Some(string1)).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.stringSeq_?.hasNo(Some(string2)).query.get.map(_ ==> List())
@@ -558,7 +558,7 @@ trait FilterSeq_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.stringSeq_?.hasNo(Some(List(string1, string2))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.stringSeq_?.hasNo(Some(List(string1, string3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.stringSeq_?.hasNo(Some(List(string1, string3))).query.get.map(_ ==> List())

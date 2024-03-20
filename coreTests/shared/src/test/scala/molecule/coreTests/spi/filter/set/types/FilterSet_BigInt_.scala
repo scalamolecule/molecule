@@ -119,7 +119,7 @@ trait FilterSet_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.bigIntSet.has(bigInt0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigIntSet.has(bigInt1).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.bigIntSet.has(bigInt2).query.get.map(_ ==> List(a, b))
@@ -158,7 +158,7 @@ trait FilterSet_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.bigIntSet.hasNo(bigInt0).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.bigIntSet.hasNo(bigInt1).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.bigIntSet.hasNo(bigInt2).query.get.map(_ ==> List())
@@ -176,7 +176,7 @@ trait FilterSet_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.bigIntSet.hasNo(bigInt1, bigInt2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigIntSet.hasNo(bigInt1, bigInt3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigIntSet.hasNo(bigInt1, bigInt4).query.get.map(_ ==> List())
@@ -309,7 +309,7 @@ trait FilterSet_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.bigIntSet_.has(bigInt0).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigIntSet_.has(bigInt1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.bigIntSet_.has(bigInt2).query.get.map(_ ==> List(1, 2))
@@ -351,7 +351,7 @@ trait FilterSet_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.bigIntSet_.hasNo(bigInt0).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.bigIntSet_.hasNo(bigInt1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.bigIntSet_.hasNo(bigInt2).query.get.map(_ ==> List())
@@ -369,7 +369,7 @@ trait FilterSet_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.bigIntSet_.hasNo(bigInt1, bigInt2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigIntSet_.hasNo(bigInt1, bigInt3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigIntSet_.hasNo(bigInt1, bigInt4).query.get.map(_ ==> List())
@@ -433,7 +433,7 @@ trait FilterSet_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.bigIntSet_?(Some(Seq(Set(bigInt1), Set(bigInt2, bigInt3)))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigIntSet_?(Some(Seq(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3)))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.bigIntSet_?.apply(Some(Seq(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3)))).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.bigIntSet_?(Some(Seq(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3, bigInt4)))).query.get.map(_ ==> List(a, b))
 
 
@@ -498,7 +498,7 @@ trait FilterSet_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets with one or more values matching
 
-          // "Has this value"
+          // "Has this"
           _ <- Ns.i.a1.bigIntSet_?.has(Some(bigInt0)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigIntSet_?.has(Some(bigInt1)).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.bigIntSet_?.has(Some(bigInt2)).query.get.map(_ ==> List(a, b))
@@ -537,7 +537,7 @@ trait FilterSet_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Sets without one or more values matching
 
-          // "Doesn't have this value"
+          // "Doesn't have this"
           _ <- Ns.i.a1.bigIntSet_?.hasNo(Some(bigInt0)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.bigIntSet_?.hasNo(Some(bigInt1)).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.bigIntSet_?.hasNo(Some(bigInt2)).query.get.map(_ ==> List())
@@ -555,7 +555,7 @@ trait FilterSet_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // OR semantics when multiple values
 
-          // "Not (has this OR that)"
+          // "Has neither this OR that"
           _ <- Ns.i.a1.bigIntSet_?.hasNo(Some(Seq(bigInt1, bigInt2))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigIntSet_?.hasNo(Some(Seq(bigInt1, bigInt3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigIntSet_?.hasNo(Some(Seq(bigInt1, bigInt4))).query.get.map(_ ==> List())
