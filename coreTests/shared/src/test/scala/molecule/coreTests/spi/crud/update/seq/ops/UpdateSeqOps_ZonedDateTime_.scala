@@ -19,16 +19,16 @@ trait UpdateSeqOps_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: Spi
         id <- Ns.zonedDateTimeSeq(List(zonedDateTime1, zonedDateTime2, zonedDateTime2)).save.transact.map(_.id)
         _ <- Ns.zonedDateTimeSeq.query.get.map(_.head ==> List(zonedDateTime1, zonedDateTime2, zonedDateTime2))
 
-        // Applying Array of values replaces previous Array
+        // Applying Seq of values replaces previous Seq
         _ <- Ns(id).zonedDateTimeSeq(List(zonedDateTime3, zonedDateTime4, zonedDateTime4)).update.transact
         _ <- Ns.zonedDateTimeSeq.query.get.map(_.head ==> List(zonedDateTime3, zonedDateTime4, zonedDateTime4))
 
-        // Applying empty Array of values deletes previous Array
+        // Applying empty Seq of values deletes previous Seq
         _ <- Ns(id).zonedDateTimeSeq(List.empty[ZonedDateTime]).update.transact
         _ <- Ns.zonedDateTimeSeq.query.get.map(_ ==> Nil)
 
         id <- Ns.zonedDateTimeSeq(List(zonedDateTime1, zonedDateTime2, zonedDateTime2)).save.transact.map(_.id)
-        // Applying empty value deletes previous Array
+        // Applying empty value deletes previous Seq
         _ <- Ns(id).zonedDateTimeSeq().update.transact
         _ <- Ns.zonedDateTimeSeq.query.get.map(_ ==> Nil)
       } yield ()
@@ -39,7 +39,7 @@ trait UpdateSeqOps_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: Spi
       for {
         id <- Ns.zonedDateTimeSeq(List(zonedDateTime1)).save.transact.map(_.id)
 
-        // Add value to end of Array
+        // Add value to end of Seq
         _ <- Ns(id).zonedDateTimeSeq.add(zonedDateTime2).update.transact
         _ <- Ns.zonedDateTimeSeq.query.get.map(_.head ==> List(zonedDateTime1, zonedDateTime2))
 

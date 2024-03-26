@@ -8,11 +8,12 @@ import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Types._
-import molecule.coreTests.setup.CoreTestSuite
+import molecule.coreTests.setup.{CoreTestSuite, CoreTestSuiteBase}
+import molecule.coreTests.util.Array2List
 import utest._
 import scala.concurrent.Future
 
-trait InsertCardSeq extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
+trait InsertCardSeq extends CoreTestSuiteBase with Array2List with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 

@@ -18,16 +18,16 @@ trait UpdateSeqOps_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
         id <- Ns.doubleSeq(List(double1, double2, double2)).save.transact.map(_.id)
         _ <- Ns.doubleSeq.query.get.map(_.head ==> List(double1, double2, double2))
 
-        // Applying Array of values replaces previous Array
+        // Applying Seq of values replaces previous Seq
         _ <- Ns(id).doubleSeq(List(double3, double4, double4)).update.transact
         _ <- Ns.doubleSeq.query.get.map(_.head ==> List(double3, double4, double4))
 
-        // Applying empty Array of values deletes previous Array
+        // Applying empty Seq of values deletes previous Seq
         _ <- Ns(id).doubleSeq(List.empty[Double]).update.transact
         _ <- Ns.doubleSeq.query.get.map(_ ==> Nil)
 
         id <- Ns.doubleSeq(List(double1, double2, double2)).save.transact.map(_.id)
-        // Applying empty value deletes previous Array
+        // Applying empty value deletes previous Seq
         _ <- Ns(id).doubleSeq().update.transact
         _ <- Ns.doubleSeq.query.get.map(_ ==> Nil)
       } yield ()
@@ -38,7 +38,7 @@ trait UpdateSeqOps_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
       for {
         id <- Ns.doubleSeq(List(double1)).save.transact.map(_.id)
 
-        // Add value to end of Array
+        // Add value to end of Seq
         _ <- Ns(id).doubleSeq.add(double2).update.transact
         _ <- Ns.doubleSeq.query.get.map(_.head ==> List(double1, double2))
 

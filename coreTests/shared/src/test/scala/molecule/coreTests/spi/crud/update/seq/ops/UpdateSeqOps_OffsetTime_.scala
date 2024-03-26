@@ -19,16 +19,16 @@ trait UpdateSeqOps_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
         id <- Ns.offsetTimeSeq(List(offsetTime1, offsetTime2, offsetTime2)).save.transact.map(_.id)
         _ <- Ns.offsetTimeSeq.query.get.map(_.head ==> List(offsetTime1, offsetTime2, offsetTime2))
 
-        // Applying Array of values replaces previous Array
+        // Applying Seq of values replaces previous Seq
         _ <- Ns(id).offsetTimeSeq(List(offsetTime3, offsetTime4, offsetTime4)).update.transact
         _ <- Ns.offsetTimeSeq.query.get.map(_.head ==> List(offsetTime3, offsetTime4, offsetTime4))
 
-        // Applying empty Array of values deletes previous Array
+        // Applying empty Seq of values deletes previous Seq
         _ <- Ns(id).offsetTimeSeq(List.empty[OffsetTime]).update.transact
         _ <- Ns.offsetTimeSeq.query.get.map(_ ==> Nil)
 
         id <- Ns.offsetTimeSeq(List(offsetTime1, offsetTime2, offsetTime2)).save.transact.map(_.id)
-        // Applying empty value deletes previous Array
+        // Applying empty value deletes previous Seq
         _ <- Ns(id).offsetTimeSeq().update.transact
         _ <- Ns.offsetTimeSeq.query.get.map(_ ==> Nil)
       } yield ()
@@ -39,7 +39,7 @@ trait UpdateSeqOps_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
       for {
         id <- Ns.offsetTimeSeq(List(offsetTime1)).save.transact.map(_.id)
 
-        // Add value to end of Array
+        // Add value to end of Seq
         _ <- Ns(id).offsetTimeSeq.add(offsetTime2).update.transact
         _ <- Ns.offsetTimeSeq.query.get.map(_.head ==> List(offsetTime1, offsetTime2))
 

@@ -19,16 +19,16 @@ trait UpdateSeqOps_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: Sp
         id <- Ns.offsetDateTimeSeq(List(offsetDateTime1, offsetDateTime2, offsetDateTime2)).save.transact.map(_.id)
         _ <- Ns.offsetDateTimeSeq.query.get.map(_.head ==> List(offsetDateTime1, offsetDateTime2, offsetDateTime2))
 
-        // Applying Array of values replaces previous Array
+        // Applying Seq of values replaces previous Seq
         _ <- Ns(id).offsetDateTimeSeq(List(offsetDateTime3, offsetDateTime4, offsetDateTime4)).update.transact
         _ <- Ns.offsetDateTimeSeq.query.get.map(_.head ==> List(offsetDateTime3, offsetDateTime4, offsetDateTime4))
 
-        // Applying empty Array of values deletes previous Array
+        // Applying empty Seq of values deletes previous Seq
         _ <- Ns(id).offsetDateTimeSeq(List.empty[OffsetDateTime]).update.transact
         _ <- Ns.offsetDateTimeSeq.query.get.map(_ ==> Nil)
 
         id <- Ns.offsetDateTimeSeq(List(offsetDateTime1, offsetDateTime2, offsetDateTime2)).save.transact.map(_.id)
-        // Applying empty value deletes previous Array
+        // Applying empty value deletes previous Seq
         _ <- Ns(id).offsetDateTimeSeq().update.transact
         _ <- Ns.offsetDateTimeSeq.query.get.map(_ ==> Nil)
       } yield ()
@@ -39,7 +39,7 @@ trait UpdateSeqOps_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: Sp
       for {
         id <- Ns.offsetDateTimeSeq(List(offsetDateTime1)).save.transact.map(_.id)
 
-        // Add value to end of Array
+        // Add value to end of Seq
         _ <- Ns(id).offsetDateTimeSeq.add(offsetDateTime2).update.transact
         _ <- Ns.offsetDateTimeSeq.query.get.map(_.head ==> List(offsetDateTime1, offsetDateTime2))
 

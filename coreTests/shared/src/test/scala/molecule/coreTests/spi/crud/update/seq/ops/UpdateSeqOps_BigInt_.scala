@@ -18,16 +18,16 @@ trait UpdateSeqOps_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
         id <- Ns.bigIntSeq(List(bigInt1, bigInt2, bigInt2)).save.transact.map(_.id)
         _ <- Ns.bigIntSeq.query.get.map(_.head ==> List(bigInt1, bigInt2, bigInt2))
 
-        // Applying Array of values replaces previous Array
+        // Applying Seq of values replaces previous Seq
         _ <- Ns(id).bigIntSeq(List(bigInt3, bigInt4, bigInt4)).update.transact
         _ <- Ns.bigIntSeq.query.get.map(_.head ==> List(bigInt3, bigInt4, bigInt4))
 
-        // Applying empty Array of values deletes previous Array
+        // Applying empty Seq of values deletes previous Seq
         _ <- Ns(id).bigIntSeq(List.empty[BigInt]).update.transact
         _ <- Ns.bigIntSeq.query.get.map(_ ==> Nil)
 
         id <- Ns.bigIntSeq(List(bigInt1, bigInt2, bigInt2)).save.transact.map(_.id)
-        // Applying empty value deletes previous Array
+        // Applying empty value deletes previous Seq
         _ <- Ns(id).bigIntSeq().update.transact
         _ <- Ns.bigIntSeq.query.get.map(_ ==> Nil)
       } yield ()
@@ -38,7 +38,7 @@ trait UpdateSeqOps_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
       for {
         id <- Ns.bigIntSeq(List(bigInt1)).save.transact.map(_.id)
 
-        // Add value to end of Array
+        // Add value to end of Seq
         _ <- Ns(id).bigIntSeq.add(bigInt2).update.transact
         _ <- Ns.bigIntSeq.query.get.map(_.head ==> List(bigInt1, bigInt2))
 

@@ -102,7 +102,7 @@ trait SaveCardSeq extends CoreTestSuiteBase with Array2List with ApiAsync { spi:
 
     "optional" - types { implicit conn =>
       for {
-        // Can't save multiple Arrays of values (use insert for that)
+        // Can't save multiple Seqs of values (use insert for that)
         _ <- Ns.intSeq_?(Some(List(List(1), List(2)))).save.transact
           .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==>
@@ -111,7 +111,7 @@ trait SaveCardSeq extends CoreTestSuiteBase with Array2List with ApiAsync { spi:
                 |List(2)""".stripMargin
           }
 
-        // Empty option of Array of values saves nothing
+        // Empty option of Seq of values saves nothing
         _ <- Ns.intSeq_?(Option.empty[List[List[Int]]]).save.transact
         _ <- Ns.intSeq.query.get.map(_ ==> List())
 
@@ -211,6 +211,7 @@ trait SaveCardSeq extends CoreTestSuiteBase with Array2List with ApiAsync { spi:
 
 
     "Tacit" - types { implicit conn =>
+      // Applying value to tacit or mandatory attribute has same effect
       for {
         _ <- Ns.i(1).stringSeq_(List(string1, string2)).save.transact
         _ <- Ns.i(1).intSeq_(List(int1, int2)).save.transact

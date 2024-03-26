@@ -361,7 +361,7 @@ trait ResolveNestedPull[Tpl]
   private def resolveAttrMapMan(a: AttrMapMan): Unit = {
     aritiesAttr()
     pullCasts += (a match {
-      case _: AttrMapManID             => it2MapId
+      case _: AttrMapManID             => noId
       case _: AttrMapManString         => it2MapString
       case _: AttrMapManInt            => it2MapInt
       case _: AttrMapManLong           => it2MapLong
@@ -390,7 +390,7 @@ trait ResolveNestedPull[Tpl]
   private def resolveAttrMapOpt(a: AttrMapOpt): Unit = {
     aritiesAttr()
     pullCasts += (a match {
-      case _: AttrMapOptID             => it2OptMapId
+      case _: AttrMapOptID             => noId
       case _: AttrMapOptString         => it2OptMapString
       case _: AttrMapOptInt            => it2OptMapInt
       case _: AttrMapOptLong           => it2OptMapLong

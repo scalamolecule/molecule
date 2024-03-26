@@ -171,6 +171,13 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |      case a: AttrMapTac => a match {
        |        ${addMap("Tac")}
        |      }
+       |      case a             => unexpected(a)
+       |    }
+       |    es.init :+ last
+       |  }
+       |
+       |  protected def addMapOpt[T](es: List[Element], op: Op, vs: Option[Map[String, T]]): List[Element] = {
+       |    val last = es.last match {
        |      case a: AttrMapOpt => a match {
        |        $addOptMap
        |      }
@@ -531,13 +538,12 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
     baseTypes.map { baseTpe =>
       val tpe = if (baseTpe == "ID") "String" else baseTpe
       s"""case a: AttrMapOpt$baseTpe =>
-         |          val map     = vs.asInstanceOf[Map[String, $tpe]]
+         |          val map     = vs.asInstanceOf[Option[Map[String, $tpe]]]
          |          val errors1 = if (map.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
          |            val validator = a.validator.get
-         |            map.values.toSeq.flatMap(validator.validate)
+         |            map.get.values.toSeq.flatMap(validator.validate)
          |          }
-         |          val optMap  = if (map.nonEmpty) Some(map) else None
-         |          a.copy(op = op, vs = optMap, errors = errors1)""".stripMargin
+         |          a.copy(op = op, vs = map, errors = errors1)""".stripMargin
     }.mkString("\n\n        ")
   }
 

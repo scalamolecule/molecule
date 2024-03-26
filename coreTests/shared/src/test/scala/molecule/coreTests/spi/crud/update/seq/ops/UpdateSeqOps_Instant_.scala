@@ -19,16 +19,16 @@ trait UpdateSeqOps_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
         id <- Ns.instantSeq(List(instant1, instant2, instant2)).save.transact.map(_.id)
         _ <- Ns.instantSeq.query.get.map(_.head ==> List(instant1, instant2, instant2))
 
-        // Applying Array of values replaces previous Array
+        // Applying Seq of values replaces previous Seq
         _ <- Ns(id).instantSeq(List(instant3, instant4, instant4)).update.transact
         _ <- Ns.instantSeq.query.get.map(_.head ==> List(instant3, instant4, instant4))
 
-        // Applying empty Array of values deletes previous Array
+        // Applying empty Seq of values deletes previous Seq
         _ <- Ns(id).instantSeq(List.empty[Instant]).update.transact
         _ <- Ns.instantSeq.query.get.map(_ ==> Nil)
 
         id <- Ns.instantSeq(List(instant1, instant2, instant2)).save.transact.map(_.id)
-        // Applying empty value deletes previous Array
+        // Applying empty value deletes previous Seq
         _ <- Ns(id).instantSeq().update.transact
         _ <- Ns.instantSeq.query.get.map(_ ==> Nil)
       } yield ()
@@ -39,7 +39,7 @@ trait UpdateSeqOps_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
       for {
         id <- Ns.instantSeq(List(instant1)).save.transact.map(_.id)
 
-        // Add value to end of Array
+        // Add value to end of Seq
         _ <- Ns(id).instantSeq.add(instant2).update.transact
         _ <- Ns.instantSeq.query.get.map(_.head ==> List(instant1, instant2))
 

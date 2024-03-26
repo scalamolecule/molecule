@@ -83,7 +83,44 @@ trait UpdateOps extends Action2Data with BaseOps {
   def updateSeqRemove[T](
     ns: String,
     attr: String,
-    seqs: Seq[T],
+    seq: Seq[T],
+    refNs: Option[String],
+    owner: Boolean,
+    transform: T => Any,
+    //    handleValue: T => Any,
+    //    exts: List[String],
+    //    one2json: T => String
+  ): Unit = ???
+
+  def updateMapEq[T](
+    ns: String,
+    attr: String,
+    map: Map[String, T],
+    noValue: Boolean,
+    refNs: Option[String],
+    owner: Boolean,
+    transform: T => Any,
+    //    set2array: Set[Any] => Array[AnyRef],
+    //    exts: List[String],
+    //    value2json: (StringBuffer, T) => StringBuffer
+  ): Unit = ???
+
+  def updateMapAdd[T](
+    ns: String,
+    attr: String,
+    map: Map[String, T],
+    refNs: Option[String],
+    owner: Boolean,
+    transform: T => Any,
+    //    set2array: Set[Any] => Array[AnyRef],
+    //    exts: List[String],
+    //    value2json: (StringBuffer, T) => StringBuffer
+  ): Unit = ???
+
+  def updateMapRemove[T](
+    ns: String,
+    attr: String,
+    map: Map[String, T],
     refNs: Option[String],
     owner: Boolean,
     transform: T => Any,

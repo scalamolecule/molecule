@@ -18,16 +18,16 @@ trait UpdateSeqOps_Char_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         id <- Ns.charSeq(List(char1, char2, char2)).save.transact.map(_.id)
         _ <- Ns.charSeq.query.get.map(_.head ==> List(char1, char2, char2))
 
-        // Applying Array of values replaces previous Array
+        // Applying Seq of values replaces previous Seq
         _ <- Ns(id).charSeq(List(char3, char4, char4)).update.transact
         _ <- Ns.charSeq.query.get.map(_.head ==> List(char3, char4, char4))
 
-        // Applying empty Array of values deletes previous Array
+        // Applying empty Seq of values deletes previous Seq
         _ <- Ns(id).charSeq(List.empty[Char]).update.transact
         _ <- Ns.charSeq.query.get.map(_ ==> Nil)
 
         id <- Ns.charSeq(List(char1, char2, char2)).save.transact.map(_.id)
-        // Applying empty value deletes previous Array
+        // Applying empty value deletes previous Seq
         _ <- Ns(id).charSeq().update.transact
         _ <- Ns.charSeq.query.get.map(_ ==> Nil)
       } yield ()
@@ -38,7 +38,7 @@ trait UpdateSeqOps_Char_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         id <- Ns.charSeq(List(char1)).save.transact.map(_.id)
 
-        // Add value to end of Array
+        // Add value to end of Seq
         _ <- Ns(id).charSeq.add(char2).update.transact
         _ <- Ns.charSeq.query.get.map(_.head ==> List(char1, char2))
 

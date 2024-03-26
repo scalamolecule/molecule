@@ -234,6 +234,67 @@ trait Insert_datomic
       }
   }
 
+
+  override protected def addMap[T](
+    ns: String,
+    attr: String,
+    refNs: Option[String],
+    tplIndex: Int,
+    transformValue: T => Any,
+    //    set2array: Set[Any] => Array[AnyRef],
+    //    exts: List[String] = Nil,
+    //    value2json: (StringBuffer, T) => StringBuffer
+  ): Product => Unit = {
+    val a   = kw(ns, attr)
+    val a_k = kw(s"$ns.$attr", "k_")
+    val a_v = kw(s"$ns.$attr", "v_")
+    backRefs = backRefs + (ns -> e)
+    (tpl: Product) =>
+      tpl.productElement(tplIndex).asInstanceOf[Map[String, _]] match {
+        case map if map.nonEmpty =>
+          unusedRefIds -= e
+          usedRefIds += e
+          map.foreach { case (k, v) =>
+            val ref = newId
+            appendStmt(add, e, a, ref)
+            appendStmt(add, ref, a_k, k)
+            appendStmt(add, ref, a_v, transformValue(v.asInstanceOf[T]).asInstanceOf[AnyRef])
+          }
+
+        case _ => () // no statement to insert
+      }
+  }
+
+  override protected def addMapOpt[T](
+    ns: String,
+    attr: String,
+    refNs: Option[String],
+    tplIndex: Int,
+    transformValue: T => Any,
+    //    set2array: Set[Any] => Array[AnyRef],
+    //    exts: List[String] = Nil,
+    //    value2json: (StringBuffer, T) => StringBuffer
+  ): Product => Unit = {
+    val a   = kw(ns, attr)
+    val a_k = kw(s"$ns.$attr", "k_")
+    val a_v = kw(s"$ns.$attr", "v_")
+    backRefs = backRefs + (ns -> e)
+    (tpl: Product) =>
+      tpl.productElement(tplIndex) match {
+        case Some(map: Map[_, _]) if map.nonEmpty =>
+          unusedRefIds -= e
+          usedRefIds += e
+          map.foreach { case (k, v) =>
+            val ref = newId
+            appendStmt(add, e, a, ref)
+            appendStmt(add, ref, a_k, k.asInstanceOf[String])
+            appendStmt(add, ref, a_v, transformValue(v.asInstanceOf[T]).asInstanceOf[AnyRef])
+          }
+
+        case _ => () // no statement to insert
+      }
+  }
+
   override protected def addRef(
     ns: String,
     refAttr: String,

@@ -1,0 +1,98 @@
+// GENERATED CODE ********************************
+package molecule.coreTests.spi.crud.update.map.ops
+
+import molecule.core.api.ApiAsync
+import molecule.core.spi.SpiAsync
+import molecule.core.util.Executor._
+import molecule.coreTests.async._
+import molecule.coreTests.dataModels.core.dsl.Types._
+import molecule.coreTests.setup.CoreTestSuite
+import utest._
+
+trait UpdateMapOps_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
+
+  override lazy val tests = Tests {
+
+    "apply (replace/add all)" - types { implicit conn =>
+      for {
+        id <- Ns.longMap(Map(plong1, plong2)).save.transact.map(_.id)
+        _ <- Ns.longMap.query.get.map(_.head ==> Map(plong1, plong2))
+
+        // Applying Map of pairs replaces map
+        _ <- Ns(id).longMap(Map(plong3, plong4)).update.transact
+        _ <- Ns.longMap.query.get.map(_.head ==> Map(plong3, plong4))
+
+        // Applying empty Map of pairs deletes map
+        _ <- Ns(id).longMap(Map.empty[String, Long]).update.transact
+        _ <- Ns.longMap.query.get.map(_ ==> Nil)
+
+        id <- Ns.longMap(Map(plong1, plong2)).save.transact.map(_.id)
+        // Applying empty value deletes map
+        _ <- Ns(id).longMap().update.transact
+        _ <- Ns.longMap.query.get.map(_ ==> Nil)
+      } yield ()
+    }
+
+
+    "add" - types { implicit conn =>
+      for {
+        id <- Ns.longMap(Map(plong1)).save.transact.map(_.id)
+
+        // Add pair
+        _ <- Ns(id).longMap.add(plong2).update.transact
+        _ <- Ns.longMap.query.get.map(_.head ==> Map(plong1, plong2))
+
+        // Adding existing pair has no effect (Map semantics of only unique pairs)
+        _ <- Ns(id).longMap.add(plong2).update.transact
+        _ <- Ns.longMap.query.get.map(_.head ==> Map(plong1, plong2))
+
+        // Add multiple pairs (vararg)
+        _ <- Ns(id).longMap.add(plong3, plong4).update.transact
+        _ <- Ns.longMap.query.get.map(_.head ==> Map(plong1, plong2, plong3, plong4))
+
+        // Add multiple pairs (Seq)
+        _ <- Ns(id).longMap.add(Seq(plong5, plong6)).update.transact
+        _ <- Ns.longMap.query.get.map(_.head ==> Map(plong1, plong2, plong3, plong4, plong5, plong6))
+
+        // Adding empty Seq of pairs has no effect
+        _ <- Ns(id).longMap.add(Seq.empty[(String, Long)]).update.transact
+        _ <- Ns.longMap.query.get.map(_.head ==> Map(plong1, plong2, plong3, plong4, plong5, plong6))
+      } yield ()
+    }
+
+
+    "remove" - types { implicit conn =>
+      for {
+        id <- Ns.longMap(Map(plong1, plong2, plong3, plong4, plong5, plong6, plong7)).save.transact.map(_.id)
+
+        // Remove pair by String key
+        _ <- Ns(id).longMap.remove(string7).update.transact
+        _ <- Ns.longMap.query.get.map(_.head ==> Map(plong1, plong2, plong3, plong4, plong5, plong6))
+
+        // Removing non-existing key has no effect
+        _ <- Ns(id).longMap.remove(string9).update.transact
+        _ <- Ns.longMap.query.get.map(_.head ==> Map(plong1, plong2, plong3, plong4, plong5, plong6))
+
+        // Removing duplicate keys removes the distinct pair
+        _ <- Ns(id).longMap.remove(string6, string6).update.transact
+        _ <- Ns.longMap.query.get.map(_.head ==> Map(plong1, plong2, plong3, plong4, plong5))
+
+        // Remove multiple keys (vararg)
+        _ <- Ns(id).longMap.remove(string4, string5).update.transact
+        _ <- Ns.longMap.query.get.map(_.head ==> Map(plong1, plong2, plong3))
+
+        // Remove multiple keys (Seq)
+        _ <- Ns(id).longMap.remove(Seq(string2, string3)).update.transact
+        _ <- Ns.longMap.query.get.map(_.head ==> Map(plong1))
+
+        // Removing empty Seq of keys has no effect
+        _ <- Ns(id).longMap.remove(Seq.empty[String]).update.transact
+        _ <- Ns.longMap.query.get.map(_.head ==> Map(plong1))
+
+        // Removing all remaining keys deletes the attribute
+        _ <- Ns(id).longMap.remove(Seq(string1)).update.transact
+        _ <- Ns.longMap.query.get.map(_ ==> Nil)
+      } yield ()
+    }
+  }
+}

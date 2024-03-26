@@ -19,16 +19,16 @@ trait UpdateSeqOps_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         id <- Ns.dateSeq(List(date1, date2, date2)).save.transact.map(_.id)
         _ <- Ns.dateSeq.query.get.map(_.head ==> List(date1, date2, date2))
 
-        // Applying Array of values replaces previous Array
+        // Applying Seq of values replaces previous Seq
         _ <- Ns(id).dateSeq(List(date3, date4, date4)).update.transact
         _ <- Ns.dateSeq.query.get.map(_.head ==> List(date3, date4, date4))
 
-        // Applying empty Array of values deletes previous Array
+        // Applying empty Seq of values deletes previous Seq
         _ <- Ns(id).dateSeq(List.empty[Date]).update.transact
         _ <- Ns.dateSeq.query.get.map(_ ==> Nil)
 
         id <- Ns.dateSeq(List(date1, date2, date2)).save.transact.map(_.id)
-        // Applying empty value deletes previous Array
+        // Applying empty value deletes previous Seq
         _ <- Ns(id).dateSeq().update.transact
         _ <- Ns.dateSeq.query.get.map(_ ==> Nil)
       } yield ()
@@ -39,7 +39,7 @@ trait UpdateSeqOps_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         id <- Ns.dateSeq(List(date1)).save.transact.map(_.id)
 
-        // Add value to end of Array
+        // Add value to end of Seq
         _ <- Ns(id).dateSeq.add(date2).update.transact
         _ <- Ns.dateSeq.query.get.map(_.head ==> List(date1, date2))
 

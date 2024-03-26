@@ -8,6 +8,7 @@ object Refs extends DataModel(10) {
     val i    = oneInt
     val iSet = setInt
     val iSeq = seqInt
+    val iMap = mapInt
     val s    = oneString
     val bool = oneBoolean
 
@@ -37,6 +38,7 @@ object Refs extends DataModel(10) {
     val i    = oneInt
     val iSet = setInt
     val iSeq = seqInt
+    val iMap = mapInt
     val s    = oneString
 
     val a  = one[A]
@@ -59,6 +61,7 @@ object Refs extends DataModel(10) {
     val s    = oneString
     val iSet = setInt
     val iSeq = seqInt
+    val iMap = mapInt
     val a    = one[A]
     val d    = one[D]
     val dd   = many[D]

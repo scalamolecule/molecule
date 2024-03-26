@@ -7,12 +7,13 @@ import scala.reflect.ClassTag
 
 trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl] with LambdasMap =>
 
+
   protected def resolveAttrMapMan(es: List[Var], attr: AttrMapMan): List[Var] = {
     aritiesAttr()
     attrIndex += 1
     val e = es.last
     attr match {
-      case at: AttrMapManID             => man(attr, e, at.vs, resMapId, sortOneID(at, attrIndex))
+      case at: AttrMapManID             => noId
       case at: AttrMapManString         => man(attr, e, at.vs, resMapString, sortOneString(at, attrIndex))
       case at: AttrMapManInt            => man(attr, e, at.vs, resMapInt, intSorter(at, attrIndex))
       case at: AttrMapManLong           => man(attr, e, at.vs, resMapLong, sortOneLong(at, attrIndex))
@@ -42,7 +43,7 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
   protected def resolveAttrMapTac(es: List[Var], attr: AttrMapTac): List[Var] = {
     val e = es.last
     attr match {
-      case at: AttrMapTacID             => tac(attr, e, at.vs, resMapId)
+      case at: AttrMapTacID             => noId
       case at: AttrMapTacString         => tac(attr, e, at.vs, resMapString)
       case at: AttrMapTacInt            => tac(attr, e, at.vs, resMapInt)
       case at: AttrMapTacLong           => tac(attr, e, at.vs, resMapLong)
@@ -75,7 +76,7 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     hasOptAttr = true // to avoid redundant None's
     val e = es.last
     attr match {
-      case at: AttrMapOptID             => opt(attr, e, at.op, at.vs, resOptMapId, resMapId)
+      case at: AttrMapOptID             => noId
       case at: AttrMapOptString         => opt(attr, e, at.op, at.vs, resOptMapString, resMapString)
       case at: AttrMapOptInt            => opt(attr, e, at.op, at.vs, resOptMapInt, resMapInt)
       case at: AttrMapOptLong           => opt(attr, e, at.op, at.vs, resOptMapLong, resMapLong)
@@ -198,7 +199,7 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     resMap: ResMap[T],
   ): Unit = {
     val v = vv
-    addCast(resMapOpt.j2sOptList)
+    addCast(resMapOpt.j2optMap)
     op match {
       case V     => optAttr(attr, e, v)
       case Eq    => optEqual(attr, e, v, optMap, resMapOpt, resMap)
@@ -225,8 +226,6 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
          |                   [$v $ak $k_]
          |                   [$v $av $v_]
          |                   [(vector $k_ $v_) $pair]]" $$ $e) [[$v]]]""".stripMargin -> wClause
-//    where += s"[(sort-by first $v1) $v2]" -> wClause
-//    where += s"[(map second $v2) $v3]" -> wClause
     if (tacit) {
       widh += v // Don't coalesce List to Set
     }
@@ -236,16 +235,13 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     attr: Attr, e: Var, v: Var
   ): Unit = {
     val (a, ak, av, k_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
-    find += v6
+    find += v3
     where +=
       s"""[(datomic.api/q
          |          "[:find (pull $e [{($a :limit nil) [$ak $av]}])
          |            :in $$ $e]" $$ $e) [[$v1]]]""".stripMargin -> wClause
     where += s"[(if (nil? $v1) {$a []} $v1) $v2]" -> wClause
     where += s"[($a $v2) $v3]" -> wClause
-    where += s"[(map vals $v3) $v4]" -> wClause
-    where += s"[(sort-by first $v4) $v5]" -> wClause
-    where += s"[(map second $v5) $v6]" -> wClause
   }
 
 
@@ -284,7 +280,7 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     } { maps =>
       find += v + 3
       equal(attr, e, v, maps, resMap)
-      replaceCast(resMapOpt.j2sOptList)
+      replaceCast(resMapOpt.j2optMap)
     }
   }
 
@@ -356,7 +352,7 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
       case Some(maps) if maps.nonEmpty =>
         find += v + 3
         neq(false, attr, e, v, maps, resMap.s2j)
-        replaceCast(resMapOpt.j2sOptList)
+        replaceCast(resMapOpt.j2optMap)
 
       case _ =>
         // Ignore empty maps
@@ -476,7 +472,7 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     optMap match {
       case Some(maps) if maps.nonEmpty =>
         hasNo(attr, e, v, optMap.get, resMap)
-        replaceCast(resMapOpt.j2sOptList)
+        replaceCast(resMapOpt.j2optMap)
 
       case _ => optWithoutNone(attr, e, v)
     }

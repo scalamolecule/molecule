@@ -19,16 +19,16 @@ trait UpdateSeqOps_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
         id <- Ns.durationSeq(List(duration1, duration2, duration2)).save.transact.map(_.id)
         _ <- Ns.durationSeq.query.get.map(_.head ==> List(duration1, duration2, duration2))
 
-        // Applying Array of values replaces previous Array
+        // Applying Seq of values replaces previous Seq
         _ <- Ns(id).durationSeq(List(duration3, duration4, duration4)).update.transact
         _ <- Ns.durationSeq.query.get.map(_.head ==> List(duration3, duration4, duration4))
 
-        // Applying empty Array of values deletes previous Array
+        // Applying empty Seq of values deletes previous Seq
         _ <- Ns(id).durationSeq(List.empty[Duration]).update.transact
         _ <- Ns.durationSeq.query.get.map(_ ==> Nil)
 
         id <- Ns.durationSeq(List(duration1, duration2, duration2)).save.transact.map(_.id)
-        // Applying empty value deletes previous Array
+        // Applying empty value deletes previous Seq
         _ <- Ns(id).durationSeq().update.transact
         _ <- Ns.durationSeq.query.get.map(_ ==> Nil)
       } yield ()
@@ -39,7 +39,7 @@ trait UpdateSeqOps_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
       for {
         id <- Ns.durationSeq(List(duration1)).save.transact.map(_.id)
 
-        // Add value to end of Array
+        // Add value to end of Seq
         _ <- Ns(id).durationSeq.add(duration2).update.transact
         _ <- Ns.durationSeq.query.get.map(_.head ==> List(duration1, duration2))
 

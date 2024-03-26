@@ -19,16 +19,16 @@ trait UpdateSeqOps_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
         id <- Ns.localDateSeq(List(localDate1, localDate2, localDate2)).save.transact.map(_.id)
         _ <- Ns.localDateSeq.query.get.map(_.head ==> List(localDate1, localDate2, localDate2))
 
-        // Applying Array of values replaces previous Array
+        // Applying Seq of values replaces previous Seq
         _ <- Ns(id).localDateSeq(List(localDate3, localDate4, localDate4)).update.transact
         _ <- Ns.localDateSeq.query.get.map(_.head ==> List(localDate3, localDate4, localDate4))
 
-        // Applying empty Array of values deletes previous Array
+        // Applying empty Seq of values deletes previous Seq
         _ <- Ns(id).localDateSeq(List.empty[LocalDate]).update.transact
         _ <- Ns.localDateSeq.query.get.map(_ ==> Nil)
 
         id <- Ns.localDateSeq(List(localDate1, localDate2, localDate2)).save.transact.map(_.id)
-        // Applying empty value deletes previous Array
+        // Applying empty value deletes previous Seq
         _ <- Ns(id).localDateSeq().update.transact
         _ <- Ns.localDateSeq.query.get.map(_ ==> Nil)
       } yield ()
@@ -39,7 +39,7 @@ trait UpdateSeqOps_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
       for {
         id <- Ns.localDateSeq(List(localDate1)).save.transact.map(_.id)
 
-        // Add value to end of Array
+        // Add value to end of Seq
         _ <- Ns(id).localDateSeq.add(localDate2).update.transact
         _ <- Ns.localDateSeq.query.get.map(_.head ==> List(localDate1, localDate2))
 

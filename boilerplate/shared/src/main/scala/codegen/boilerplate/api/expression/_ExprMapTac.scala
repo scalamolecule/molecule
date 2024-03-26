@@ -27,6 +27,7 @@ object _ExprMapTac extends BoilerplateGenBase("ExprMapTac", "/api/expression") {
          |trait $fileName_$arity[${`A..V, `}t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]]
          |  extends ${fileName}Ops_$arity[${`A..V, `}t, Ns1, Ns2] {
          |  def apply(                           ): Ns1[${`A..V, `}t] = _exprMap (NoValue, Map.empty[String, t])
+         |  def apply(map : Map[String, t]       ): Ns1[${`A..V, `}t] = _exprMap (Eq     , map                  )
          |  def apply(key : String, keys: String*): Ns1[${`A..t, `}t] = _exprMapK(Eq     , key +: keys         )
          |  def apply(keys: Seq[String]          ): Ns1[${`A..t, `}t] = _exprMapK(Eq     , keys                )
          |  def not  (key : String, keys: String*): Ns1[${`A..V, `}t] = _exprMap (Neq    , mapK[t](key +: keys))

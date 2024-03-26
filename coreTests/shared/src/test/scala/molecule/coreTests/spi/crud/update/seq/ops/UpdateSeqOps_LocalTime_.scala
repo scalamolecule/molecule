@@ -19,16 +19,16 @@ trait UpdateSeqOps_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
         id <- Ns.localTimeSeq(List(localTime1, localTime2, localTime2)).save.transact.map(_.id)
         _ <- Ns.localTimeSeq.query.get.map(_.head ==> List(localTime1, localTime2, localTime2))
 
-        // Applying Array of values replaces previous Array
+        // Applying Seq of values replaces previous Seq
         _ <- Ns(id).localTimeSeq(List(localTime3, localTime4, localTime4)).update.transact
         _ <- Ns.localTimeSeq.query.get.map(_.head ==> List(localTime3, localTime4, localTime4))
 
-        // Applying empty Array of values deletes previous Array
+        // Applying empty Seq of values deletes previous Seq
         _ <- Ns(id).localTimeSeq(List.empty[LocalTime]).update.transact
         _ <- Ns.localTimeSeq.query.get.map(_ ==> Nil)
 
         id <- Ns.localTimeSeq(List(localTime1, localTime2, localTime2)).save.transact.map(_.id)
-        // Applying empty value deletes previous Array
+        // Applying empty value deletes previous Seq
         _ <- Ns(id).localTimeSeq().update.transact
         _ <- Ns.localTimeSeq.query.get.map(_ ==> Nil)
       } yield ()
@@ -39,7 +39,7 @@ trait UpdateSeqOps_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
       for {
         id <- Ns.localTimeSeq(List(localTime1)).save.transact.map(_.id)
 
-        // Add value to end of Array
+        // Add value to end of Seq
         _ <- Ns(id).localTimeSeq.add(localTime2).update.transact
         _ <- Ns.localTimeSeq.query.get.map(_.head ==> List(localTime1, localTime2))
 

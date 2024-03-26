@@ -18,16 +18,16 @@ trait UpdateSeqOps_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         id <- Ns.floatSeq(List(float1, float2, float2)).save.transact.map(_.id)
         _ <- Ns.floatSeq.query.get.map(_.head ==> List(float1, float2, float2))
 
-        // Applying Array of values replaces previous Array
+        // Applying Seq of values replaces previous Seq
         _ <- Ns(id).floatSeq(List(float3, float4, float4)).update.transact
         _ <- Ns.floatSeq.query.get.map(_.head ==> List(float3, float4, float4))
 
-        // Applying empty Array of values deletes previous Array
+        // Applying empty Seq of values deletes previous Seq
         _ <- Ns(id).floatSeq(List.empty[Float]).update.transact
         _ <- Ns.floatSeq.query.get.map(_ ==> Nil)
 
         id <- Ns.floatSeq(List(float1, float2, float2)).save.transact.map(_.id)
-        // Applying empty value deletes previous Array
+        // Applying empty value deletes previous Seq
         _ <- Ns(id).floatSeq().update.transact
         _ <- Ns.floatSeq.query.get.map(_ ==> Nil)
       } yield ()
@@ -38,7 +38,7 @@ trait UpdateSeqOps_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         id <- Ns.floatSeq(List(float1)).save.transact.map(_.id)
 
-        // Add value to end of Array
+        // Add value to end of Seq
         _ <- Ns(id).floatSeq.add(float2).update.transact
         _ <- Ns.floatSeq.query.get.map(_.head ==> List(float1, float2))
 

@@ -18,16 +18,16 @@ trait UpdateSeqOps_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         id <- Ns.longSeq(List(long1, long2, long2)).save.transact.map(_.id)
         _ <- Ns.longSeq.query.get.map(_.head ==> List(long1, long2, long2))
 
-        // Applying Array of values replaces previous Array
+        // Applying Seq of values replaces previous Seq
         _ <- Ns(id).longSeq(List(long3, long4, long4)).update.transact
         _ <- Ns.longSeq.query.get.map(_.head ==> List(long3, long4, long4))
 
-        // Applying empty Array of values deletes previous Array
+        // Applying empty Seq of values deletes previous Seq
         _ <- Ns(id).longSeq(List.empty[Long]).update.transact
         _ <- Ns.longSeq.query.get.map(_ ==> Nil)
 
         id <- Ns.longSeq(List(long1, long2, long2)).save.transact.map(_.id)
-        // Applying empty value deletes previous Array
+        // Applying empty value deletes previous Seq
         _ <- Ns(id).longSeq().update.transact
         _ <- Ns.longSeq.query.get.map(_ ==> Nil)
       } yield ()
@@ -38,7 +38,7 @@ trait UpdateSeqOps_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         id <- Ns.longSeq(List(long1)).save.transact.map(_.id)
 
-        // Add value to end of Array
+        // Add value to end of Seq
         _ <- Ns(id).longSeq.add(long2).update.transact
         _ <- Ns.longSeq.query.get.map(_.head ==> List(long1, long2))
 

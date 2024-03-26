@@ -18,16 +18,16 @@ trait UpdateSeqOps_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
         id <- Ns.bigDecimalSeq(List(bigDecimal1, bigDecimal2, bigDecimal2)).save.transact.map(_.id)
         _ <- Ns.bigDecimalSeq.query.get.map(_.head ==> List(bigDecimal1, bigDecimal2, bigDecimal2))
 
-        // Applying Array of values replaces previous Array
+        // Applying Seq of values replaces previous Seq
         _ <- Ns(id).bigDecimalSeq(List(bigDecimal3, bigDecimal4, bigDecimal4)).update.transact
         _ <- Ns.bigDecimalSeq.query.get.map(_.head ==> List(bigDecimal3, bigDecimal4, bigDecimal4))
 
-        // Applying empty Array of values deletes previous Array
+        // Applying empty Seq of values deletes previous Seq
         _ <- Ns(id).bigDecimalSeq(List.empty[BigDecimal]).update.transact
         _ <- Ns.bigDecimalSeq.query.get.map(_ ==> Nil)
 
         id <- Ns.bigDecimalSeq(List(bigDecimal1, bigDecimal2, bigDecimal2)).save.transact.map(_.id)
-        // Applying empty value deletes previous Array
+        // Applying empty value deletes previous Seq
         _ <- Ns(id).bigDecimalSeq().update.transact
         _ <- Ns.bigDecimalSeq.query.get.map(_ ==> Nil)
       } yield ()
@@ -38,7 +38,7 @@ trait UpdateSeqOps_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
       for {
         id <- Ns.bigDecimalSeq(List(bigDecimal1)).save.transact.map(_.id)
 
-        // Add value to end of Array
+        // Add value to end of Seq
         _ <- Ns(id).bigDecimalSeq.add(bigDecimal2).update.transact
         _ <- Ns.bigDecimalSeq.query.get.map(_.head ==> List(bigDecimal1, bigDecimal2))
 

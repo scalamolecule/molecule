@@ -15,8 +15,8 @@ import utest._
 import scala.concurrent.Future
 import scala.language.implicitConversions
 
-object AdhocJVM_datomic extends TestSuiteArray_datomic with Array2List {
-  //object AdhocJVM_datomic extends TestSuite_datomic {
+//object AdhocJVM_datomic extends TestSuiteArray_datomic with Array2List {
+object AdhocJVM_datomic extends TestSuite_datomic {
 
   override lazy val tests = Tests {
 
@@ -82,7 +82,8 @@ object AdhocJVM_datomic extends TestSuiteArray_datomic with Array2List {
       //      //      val j2: Future[List[Map[String, Int]]] = Ns.intMap(Map("en" -> 1, "da" -> 2)).query.get
       //
       //      // Replace map
-      //      val j3: Future[TxReport] = Ns.intMap(Map("en" -> 1, "da" -> 2)).update.transact
+      //      val j3: Future[TxReport] = Ns(42).intMap.apply(Map("en" -> 1, "da" -> 2)).update.transact
+      //      val j4: Future[TxReport] = Ns(42).i(1).intMap_.apply(Map("en" -> 1, "da" -> 2)).update.transact
 
 
       //      val j1: Future[List[Map[String, Int]]] = Ns.intMap.apply(Ns.intMap).int.query.get
@@ -92,77 +93,30 @@ object AdhocJVM_datomic extends TestSuiteArray_datomic with Array2List {
 
       for {
 
-        _ <- Ns.intMap(Map("a" -> int1, "b" -> int2)).save.transact
-        _ <- Ns.intMap.query.i.get.map(_ ==> List(Map("a" -> int1, "b" -> int2)))
+        id <- Ns.intMap.stringMap.insert(Map(pint1), Map(pstring1)).transact.map(_.id)
+        _ <- Ns.intMap.stringMap.query.get.map(_ ==> List((Map(pint1), Map(pstring1))))
 
+        // Apply empty value to delete attribute of entity (entity remains)
+        _ <- Ns(id).stringMap().update.transact
+        _ <- Ns.intMap.stringMap_?.query.get.map(_ ==> List((Map(pint1), None)))
 
         //        _ = {
         //          println("----------- 1")
         //          val res = datomic.Peer.q(
-        //            """[:find  (pull ?id0 [
-        //              |          {(:Ref/nss) [
-        //              |            (:Ns/i)
-        //              |            (:Ns/stringSeq)]}])
-        //              | :where [?a :Ref/i ?b]
-        //              |        [(identity ?a) ?id0]]
+        //            """[:find  ?c ?d3
+        //              | :in    $ [?b ...]
+        //              | :where [?a :Ns/int ?b]
+        //              |        [?a :Ns/i ?c]
+        //              |        [(datomic.api/q
+        //              |          "[:find (pull ?a [{(:Ns/intMap :limit nil) [:Ns.intMap/k_ :Ns.intMap/v_]}])
+        //              |            :in $ ?a]" $ ?a) [[?d1]]]
+        //              |        [(if (nil? ?d1) {:Ns/intMap []} ?d1) ?d2]
+        //              |        [(:Ns/intMap ?d2) ?d3]
+        //              |        ]
         //              |""".stripMargin, conn.db,
         //            //            Seq(true, false).asJava
-        //          )
-        //          res.forEach(r => println(r))
-        //
-        //          println("----------- 2")
-        //          datomic.Peer.q(
-        //            """[:find  (pull ?id0 [
-        //              |          {
-        //              |            (:Ref/nss) [
-        //              |              (:Ns/i)
-        //              |
-        //              |              {
-        //              |                (:Ns/stringSeq :limit nil :default "__none__") [
-        //              |                  :Ns.stringSeq/i_
-        //              |                  :Ns.stringSeq/v_
-        //              |                ]
-        //              |              }
-        //              |
-        //              |            ]
-        //              |          }
-        //              |        ])
-        //              | :where [?a :Ref/i ?b]
-        //              |        [(identity ?a) ?id0]]
-        //              |""".stripMargin, conn.db,
-        //            //            Seq(true, false).asJava
-        //          ).forEach(r => println(r))
+        //            Seq(2).asJava
         //        }
-
-
-        //        _ <- Ns.intMap.query.get
-
-        //        _ <- Ns.intMap.apply("en", "da").query.get
-        //        _ <- Ns.intMap.apply(Seq("en", "da")).query.get
-
-        //        _ <- Ns.intMap_?.apply("en", "da").query.get
-        //        _ <- Ns.intMap_?.apply(Seq("en", "da")).query.get
-
-        //        _ <- Ns.intMap.not("en", "da").query.get
-        //        _ <- Ns.intMap.not(Seq("en", "da")).query.get
-
-        //        _ <- Ns.intMap.has("en", "da").query.get
-        //        _ <- Ns.intMap.has(Seq("en", "da")).query.get
-        //
-        //        _ <- Ns.intMap.hasNo("en", "da").query.get
-        //        _ <- Ns.intMap.hasNo(Seq("en", "da")).query.get
-        //
-        //        _ <- Ns.intMap.getV(1, 2).query.get
-        //        _ <- Ns.intMap.getV(Seq(1, 2)).query.get
-        //
-        //        _ <- Ns.intMap.add("en" -> 1, "da" -> 2).query.get
-        //        _ <- Ns.intMap.add(Seq("en" -> 1, "da" -> 2)).query.get
-        //
-        //        _ <- Ns.intMap.remove("en", "da").query.get
-        //        _ <- Ns.intMap.remove(Seq("en", "da")).query.get
-
-
-        //        _ <- Ns.intMap.apply(Ns.intMap).int.query.get
 
 
       } yield ()

@@ -19,16 +19,16 @@ trait UpdateSeqOps_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         id <- Ns.uuidSeq(List(uuid1, uuid2, uuid2)).save.transact.map(_.id)
         _ <- Ns.uuidSeq.query.get.map(_.head ==> List(uuid1, uuid2, uuid2))
 
-        // Applying Array of values replaces previous Array
+        // Applying Seq of values replaces previous Seq
         _ <- Ns(id).uuidSeq(List(uuid3, uuid4, uuid4)).update.transact
         _ <- Ns.uuidSeq.query.get.map(_.head ==> List(uuid3, uuid4, uuid4))
 
-        // Applying empty Array of values deletes previous Array
+        // Applying empty Seq of values deletes previous Seq
         _ <- Ns(id).uuidSeq(List.empty[UUID]).update.transact
         _ <- Ns.uuidSeq.query.get.map(_ ==> Nil)
 
         id <- Ns.uuidSeq(List(uuid1, uuid2, uuid2)).save.transact.map(_.id)
-        // Applying empty value deletes previous Array
+        // Applying empty value deletes previous Seq
         _ <- Ns(id).uuidSeq().update.transact
         _ <- Ns.uuidSeq.query.get.map(_ ==> Nil)
       } yield ()
@@ -39,7 +39,7 @@ trait UpdateSeqOps_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         id <- Ns.uuidSeq(List(uuid1)).save.transact.map(_.id)
 
-        // Add value to end of Array
+        // Add value to end of Seq
         _ <- Ns(id).uuidSeq.add(uuid2).update.transact
         _ <- Ns.uuidSeq.query.get.map(_.head ==> List(uuid1, uuid2))
 

@@ -178,6 +178,7 @@ trait SaveCardOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
     "Tacit" - types { implicit conn =>
+      // Applying value to tacit or mandatory attribute has same effect
       for {
         _ <- Ns.i(1).string_(string1).save.transact
         _ <- Ns.i(1).int_(int1).save.transact

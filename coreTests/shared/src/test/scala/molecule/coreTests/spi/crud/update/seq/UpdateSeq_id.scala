@@ -44,24 +44,6 @@ trait UpdateSeq_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "Ownership (Mongo)" - refs { implicit conn =>
-      if (database == "MongoDB") {
-        for {
-          id <- A.i(1).OwnBb.i(2).save.transact.map(_.id)
-
-          _ <- A(id).ownBb(Set("123456789012345678901234")).update.transact
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-              err ==> "Can't update non-existing ids of embedded documents in MongoDB."
-            }
-          _ <- A.i.ownBb_?.query.get
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-              err ==> "Can't query for non-existing set of ids of embedded documents in MongoDB."
-            }
-        } yield ()
-      }
-    }
-
-
     "Multiple entities updated" - types { implicit conn =>
       for {
         List(a, b, c) <- Ns.intSeq.insert(List(1), List(2), List(3)).transact.map(_.ids)

@@ -203,6 +203,7 @@ trait SaveCardSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
     "Tacit" - types { implicit conn =>
+      // Applying value to tacit or mandatory attribute has same effect
       for {
         _ <- Ns.i(1).stringSet_(Set(string1, string2)).save.transact
         _ <- Ns.i(1).intSet_(Set(int1, int2)).save.transact
