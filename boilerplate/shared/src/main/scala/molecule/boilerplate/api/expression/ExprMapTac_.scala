@@ -13,7 +13,7 @@ trait ExprMapTacOps_0[t, Ns1[_], Ns2[_, _]] extends ExprBase {
 trait ExprMapTac_0[t, Ns1[_], Ns2[_, _]]
   extends ExprMapTacOps_0[t, Ns1, Ns2] {
   def apply(                           ): Ns1[t] = _exprMap (NoValue, Map.empty[String, t])
-  def apply(map : Map[String, t]       ): Ns1[t] = _exprMap (Eq     , map                  )
+//  def apply(map : Map[String, t]       ): Ns1[t] = _exprMap (Eq     , map                  )
   def apply(key : String, keys: String*): Ns1[t] = _exprMapK(Eq     , key +: keys         )
   def apply(keys: Seq[String]          ): Ns1[t] = _exprMapK(Eq     , keys                )
   def not  (key : String, keys: String*): Ns1[t] = _exprMap (Neq    , mapK[t](key +: keys))
@@ -34,7 +34,7 @@ trait ExprMapTacOps_1[A, t, Ns1[_, _], Ns2[_, _, _]] extends ExprBase {
 trait ExprMapTac_1[A, t, Ns1[_, _], Ns2[_, _, _]]
   extends ExprMapTacOps_1[A, t, Ns1, Ns2] {
   def apply(                           ): Ns1[A, t] = _exprMap (NoValue, Map.empty[String, t])
-  def apply(map : Map[String, t]       ): Ns1[A, t] = _exprMap (Eq     , map                  )
+//  def apply(map : Map[String, t]       ): Ns1[A, t] = _exprMap (Eq     , map                  )
   def apply(key : String, keys: String*): Ns1[t, t] = _exprMapK(Eq     , key +: keys         )
   def apply(keys: Seq[String]          ): Ns1[t, t] = _exprMapK(Eq     , keys                )
   def not  (key : String, keys: String*): Ns1[A, t] = _exprMap (Neq    , mapK[t](key +: keys))
@@ -55,11 +55,11 @@ trait ExprMapTacOps_2[A, B, t, Ns1[_, _, _], Ns2[_, _, _, _]] extends ExprBase {
 trait ExprMapTac_2[A, B, t, Ns1[_, _, _], Ns2[_, _, _, _]]
   extends ExprMapTacOps_2[A, B, t, Ns1, Ns2] {
   def apply(                           ): Ns1[A, B, t] = _exprMap (NoValue, Map.empty[String, t])
-  def apply(map : Map[String, t]       ): Ns1[A, B, t] = _exprMap (Eq     , map                  )
-  def apply(key : String, keys: String*): Ns1[A, t, t] = _exprMapK(Eq     , key +: keys         )
-  def apply(keys: Seq[String]          ): Ns1[A, t, t] = _exprMapK(Eq     , keys                )
-  def not  (key : String, keys: String*): Ns1[A, B, t] = _exprMap (Neq    , mapK[t](key +: keys))
-  def not  (keys: Seq[String]          ): Ns1[A, B, t] = _exprMap (Neq    , mapK[t](keys)       )
+//  def apply(map : Map[String, t]       ): Ns1[A, B, t] = _exprMap (Eq     , map                  )
+//  def apply(key : String, keys: String*): Ns1[A, t, t] = _exprMapK(Eq     , key +: keys         )
+//  def apply(keys: Seq[String]          ): Ns1[A, t, t] = _exprMapK(Eq     , keys                )
+//  def not  (key : String, keys: String*): Ns1[A, B, t] = _exprMap (Neq    , mapK[t](key +: keys))
+//  def not  (keys: Seq[String]          ): Ns1[A, B, t] = _exprMap (Neq    , mapK[t](keys)       )
   def has  (v : t, vs: t*              ): Ns1[A, B, t] = _exprMapV(Has    , v +: vs             )
   def has  (vs: Seq[t]                 ): Ns1[A, B, t] = _exprMapV(Has    , vs                  )
   def hasNo(v : t, vs: t*              ): Ns1[A, B, t] = _exprMapV(HasNo  , v +: vs             )

@@ -9,7 +9,6 @@ object _ExprMapMan extends BoilerplateGenBase("ExprMapMan", "/api/expression") {
     s"""// GENERATED CODE ********************************
        |package molecule.boilerplate.api.expression
        |
-       |import molecule.boilerplate.api._
        |import molecule.boilerplate.ast.Model._
        |$traits
        |""".stripMargin
@@ -20,8 +19,7 @@ object _ExprMapMan extends BoilerplateGenBase("ExprMapMan", "/api/expression") {
       s"""
          |
          |trait $fileName_$arity[${`A..V`}, t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]]
-         |  extends ExprMapTacOps_$arity[${`A..V`}, t, Ns1, Ns2]
-         |    with Aggregates_$arity[${`A..V`}, t, Ns1] {
+         |  extends ExprMapTacOps_$arity[${`A..V`}, t, Ns1, Ns2] {
          |  def apply (                                       ): Ns1[${`A..V`}, t] = _exprMap (NoValue, Map.empty[String, t] )
          |  def apply (map  : Map[String, t]                  ): Ns1[${`A..V`}, t] = _exprMap (Eq     , map                  )
          |  def apply (key  : String                          ): Ns1[${`A..t`}, t] = _exprMapK(Eq     , Seq(key)             )

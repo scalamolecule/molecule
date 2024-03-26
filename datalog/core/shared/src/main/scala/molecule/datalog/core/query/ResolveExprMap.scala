@@ -1,5 +1,6 @@
 package molecule.datalog.core.query
 
+import java.lang
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.core.util.JavaConversions
@@ -14,28 +15,28 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     val e = es.last
     attr match {
       case at: AttrMapManID             => noId
-      case at: AttrMapManString         => man(attr, e, at.vs, resMapString, sortOneString(at, attrIndex))
-      case at: AttrMapManInt            => man(attr, e, at.vs, resMapInt, intSorter(at, attrIndex))
-      case at: AttrMapManLong           => man(attr, e, at.vs, resMapLong, sortOneLong(at, attrIndex))
-      case at: AttrMapManFloat          => man(attr, e, at.vs, resMapFloat, floatSorter(at, attrIndex))
-      case at: AttrMapManDouble         => man(attr, e, at.vs, resMapDouble, sortOneDouble(at, attrIndex))
-      case at: AttrMapManBoolean        => man(attr, e, at.vs, resMapBoolean, sortOneBoolean(at, attrIndex))
-      case at: AttrMapManBigInt         => man(attr, e, at.vs, resMapBigInt, bigIntSorter(at, attrIndex))
-      case at: AttrMapManBigDecimal     => man(attr, e, at.vs, resMapBigDecimal, sortOneBigDecimal(at, attrIndex))
-      case at: AttrMapManDate           => man(attr, e, at.vs, resMapDate, sortOneDate(at, attrIndex))
-      case at: AttrMapManDuration       => man(attr, e, at.vs, resMapDuration, sortOneDuration(at, attrIndex))
-      case at: AttrMapManInstant        => man(attr, e, at.vs, resMapInstant, sortOneInstant(at, attrIndex))
-      case at: AttrMapManLocalDate      => man(attr, e, at.vs, resMapLocalDate, sortOneLocalDate(at, attrIndex))
-      case at: AttrMapManLocalTime      => man(attr, e, at.vs, resMapLocalTime, sortOneLocalTime(at, attrIndex))
-      case at: AttrMapManLocalDateTime  => man(attr, e, at.vs, resMapLocalDateTime, sortOneLocalDateTime(at, attrIndex))
-      case at: AttrMapManOffsetTime     => man(attr, e, at.vs, resMapOffsetTime, sortOneOffsetTime(at, attrIndex))
-      case at: AttrMapManOffsetDateTime => man(attr, e, at.vs, resMapOffsetDateTime, sortOneOffsetDateTime(at, attrIndex))
-      case at: AttrMapManZonedDateTime  => man(attr, e, at.vs, resMapZonedDateTime, sortOneZonedDateTime(at, attrIndex))
-      case at: AttrMapManUUID           => man(attr, e, at.vs, resMapUUID, sortOneUUID(at, attrIndex))
-      case at: AttrMapManURI            => man(attr, e, at.vs, resMapURI, sortOneURI(at, attrIndex))
-      case at: AttrMapManByte           => man(attr, e, at.vs, resMapByte, sortOneByte(at, attrIndex))
-      case at: AttrMapManShort          => man(attr, e, at.vs, resMapShort, shortSorter(at, attrIndex))
-      case at: AttrMapManChar           => man(attr, e, at.vs, resMapChar, sortOneChar(at, attrIndex))
+      case at: AttrMapManString         => man(attr, e, at.vs, resMapString)
+      case at: AttrMapManInt            => man(attr, e, at.vs, resMapInt)
+      case at: AttrMapManLong           => man(attr, e, at.vs, resMapLong)
+      case at: AttrMapManFloat          => man(attr, e, at.vs, resMapFloat)
+      case at: AttrMapManDouble         => man(attr, e, at.vs, resMapDouble)
+      case at: AttrMapManBoolean        => man(attr, e, at.vs, resMapBoolean)
+      case at: AttrMapManBigInt         => man(attr, e, at.vs, resMapBigInt)
+      case at: AttrMapManBigDecimal     => man(attr, e, at.vs, resMapBigDecimal)
+      case at: AttrMapManDate           => man(attr, e, at.vs, resMapDate)
+      case at: AttrMapManDuration       => man(attr, e, at.vs, resMapDuration)
+      case at: AttrMapManInstant        => man(attr, e, at.vs, resMapInstant)
+      case at: AttrMapManLocalDate      => man(attr, e, at.vs, resMapLocalDate)
+      case at: AttrMapManLocalTime      => man(attr, e, at.vs, resMapLocalTime)
+      case at: AttrMapManLocalDateTime  => man(attr, e, at.vs, resMapLocalDateTime)
+      case at: AttrMapManOffsetTime     => man(attr, e, at.vs, resMapOffsetTime)
+      case at: AttrMapManOffsetDateTime => man(attr, e, at.vs, resMapOffsetDateTime)
+      case at: AttrMapManZonedDateTime  => man(attr, e, at.vs, resMapZonedDateTime)
+      case at: AttrMapManUUID           => man(attr, e, at.vs, resMapUUID)
+      case at: AttrMapManURI            => man(attr, e, at.vs, resMapURI)
+      case at: AttrMapManByte           => man(attr, e, at.vs, resMapByte)
+      case at: AttrMapManShort          => man(attr, e, at.vs, resMapShort)
+      case at: AttrMapManChar           => man(attr, e, at.vs, resMapChar)
     }
     es
   }
@@ -119,25 +120,22 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     attr: Attr, e: Var,
     map: Map[String, T],
     resMap: ResMap[T],
-    sortT: Option[(Int, Int => (Row, Row) => Int)]
   ): Unit = {
     val v = vv
-//    find += s"${v}3"
     find += v
     addCast(resMap.j2sMap)
-    val a = nsAttr(attr)
-    attr.filterAttr.fold {
-      val pathAttr = varPath :+ attr.cleanAttr
-      if (filterAttrVars.contains(pathAttr) && attr.op != V) {
-        // Runtime check needed since we can't type infer it
-        throw ModelError(s"Cardinality-map filter attributes not allowed to " +
-          s"do additional filtering. Found:\n  " + attr)
-      }
-      expr(false, attr, e, v, attr.op, map, resMap, sortT)
-      filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
-      filterAttrVars2.get(a).foreach(_(e, v))
-    } { case (dir, filterPath, filterAttr) =>
-      expr2(attr, e, v, attr.op, s":${filterAttr.ns}/${filterAttr.attr}", resMap)
+    //    expr(false, attr, e, v, attr.op, map, resMap)
+
+    attr.op match {
+      case V       => attrV(false, attr, e, v)
+      case Has     => has(false, attr, e, v, map, resMap)
+      case Eq      => throw ModelError(
+        s"Matching/applying a map for map attribute `${attr.cleanName}` is not supported in queries."
+      )
+//      case Neq     => throw ModelError("Matching the whole Map is not supported for map attributes.")
+//      case HasNo   => throw ModelError("Matching the whole Map is not supported for map attributes.")
+//      case NoValue => throw ModelError("Matching the whole Map is not supported for map attributes.")
+      case other   => unexpectedOp(other)
     }
   }
 
@@ -147,50 +145,34 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     resMap: ResMap[T],
   ): Unit = {
     val v = vv
-    val a = nsAttr(attr)
-    attr.filterAttr.fold {
-      expr(true, attr, e, v, attr.op, map, resMap, None)
-      filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
-      filterAttrVars2.get(a).foreach(_(e, v))
-    } { case (dir, filterPath, filterAttr) =>
-      expr2(attr, e, v, attr.op, s":${filterAttr.ns}/${filterAttr.attr}", resMap)
+    //    expr(true, attr, e, v, attr.op, map, resMap)
+    attr.op match {
+      case V       => attrV(true, attr, e, v)
+      case Eq      => equal(attr, e, v, map, resMap)
+      case Neq     => neq(true, attr, e, v, map, resMap.s2j)
+      case Has     => has(true, attr, e, v, map, resMap)
+      case HasNo   => hasNo(attr, e, v, map, resMap)
+      case NoValue => noValue(attr, e)
+      case other   => unexpectedOp(other)
     }
   }
 
-  private def expr[T: ClassTag](
-    tacit: Boolean,
-    attr: Attr, e: Var, v: Var, op: Op,
-    map: Map[String, T],
-    resMap: ResMap[T],
-    sortT: Option[(Int, Int => (Row, Row) => Int)]
-  ): Unit = {
-    op match {
-      case V         => attrV(tacit, attr, e, v)
-      case Eq        => equal(attr, e, v, map, resMap)
-      case Neq       => neq(tacit, attr, e, v, map, resMap.s2j)
-      case Has       => has(tacit, attr, e, v, map, resMap)
-      case HasNo     => hasNo(attr, e, v, map, resMap)
-      case NoValue   => noValue(attr, e)
-      case Fn(kw, n) =>
-        if (isRefAttr)
-          throw ModelError("Aggregating Sets of ref ids not supported.")
-        else
-          aggr(attr, e, v, kw, n, resMap, sortT)
-      case other     => unexpectedOp(other)
-    }
-  }
-
-  private def expr2[T](
-    attr: Attr, e: Var, v: Var, op: Op, filterAttr: String, resMap: ResMap[T],
-  ): Unit = {
-    op match {
-      case Eq    => equal2(attr, e, v, filterAttr)
-      case Neq   => neq2(attr, e, v, filterAttr)
-      case Has   => has2(attr, e, v, filterAttr, resMap)
-      case HasNo => hasNo2(attr, e, v, filterAttr, resMap)
-      case other => unexpectedOp(other)
-    }
-  }
+  //  private def expr[T: ClassTag](
+  //    tacit: Boolean,
+  //    attr: Attr, e: Var, v: Var, op: Op,
+  //    map: Map[String, T],
+  //    resMap: ResMap[T],
+  //  ): Unit = {
+  //    op match {
+  //      case V         => attrV(tacit, attr, e, v)
+  //      case Eq        => equal(attr, e, v, map, resMap)
+  //      case Neq       => neq(tacit, attr, e, v, map, resMap.s2j)
+  //      case Has       => has(tacit, attr, e, v, map, resMap)
+  //      case HasNo     => hasNo(attr, e, v, map, resMap)
+  //      case NoValue   => noValue(attr, e)
+  //      case other     => unexpectedOp(other)
+  //    }
+  //  }
 
   private def opt[T: ClassTag](
     attr: Attr, e: Var, op: Op,
@@ -202,10 +184,10 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     addCast(resMapOpt.j2optMap)
     op match {
       case V     => optAttr(attr, e, v)
-      case Eq    => optEqual(attr, e, v, optMap, resMapOpt, resMap)
-      case Neq   => optNeq(attr, e, v, optMap, resMapOpt, resMap)
       case Has   => optHas(attr, e, v, optMap, resMap)
-      case HasNo => optHasNo(attr, e, v, optMap, resMap, resMapOpt)
+//      case Eq    => optEqual(attr, e, v, optMap, resMapOpt, resMap)
+//      case Neq   => optNeq(attr, e, v, optMap, resMapOpt, resMap)
+//      case HasNo => optHasNo(attr, e, v, optMap, resMap, resMapOpt)
       case other => unexpectedOp(other)
     }
   }
@@ -253,8 +235,10 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     resMap: ResMap[T],
   ): Unit = {
     val (a, ak, av, k_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
-    args += map.map(resMap.s2j).asJava
-    in += s"[$v4 ...]"
+    //    val xx: lang.Iterable[Any]                            =  map.map(resMap.s2j).asJava
+    args += map.toList.map(pair => resMap.sPair2jVector(pair)).asJava
+    in += s"[$v2 ...]"
+    //    in += s"[[$v1]]"
     where += s"[$e $a _]" -> wClause
     where +=
       s"""[(datomic.api/q
@@ -263,10 +247,10 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
          |            :where [$e $a $v]
          |                   [$v $ak $k_]
          |                   [$v $av $v_]
-         |                   [(vector $k_ $v_) $pair]]" $$ $e) [[$v1]]]""".stripMargin -> wClause
-    where += s"[(sort-by first $v1) $v2]" -> wClause
-    where += s"[(map second $v2) $v3]" -> wClause
-    where += s"[(= $v3 $v4)]" -> wClause
+         |                   [(vector $k_ $v_) $pair]]" $$ $e) [[$v]]]""".stripMargin -> wClause
+    //    where += s"[(sort-by first $v1) $v2]" -> wClause
+    //    where += s"[(map second $v2) $v3]" -> wClause
+    where += s"[(= $v $v2)]" -> wClause
   }
 
   private def optEqual[T](
@@ -486,318 +470,6 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     where += s"(not [$e $a])" -> wNeqOne
   }
 
-
-  // aggregation ---------------------------------------------------------------
-
-  private def aggr[T](
-    attr: Attr, e: Var, v: Var, fn: String, optN: Option[Int], resMap: ResMap[T],
-    sortT: Option[(Int, Int => (Row, Row) => Int)]
-  ): Unit = {
-    val (a, ak, av, k_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
-    checkAggrSet()
-    lazy val n = optN.getOrElse(0)
-    // Replace find/casting with aggregate function/cast
-    find -= v3
-    fn match {
-      case "count" =>
-        noBooleanSetCounts(n)
-        find += s"(count $v_)"
-        widh += v
-        where += s"[$e $a $v]" -> wClause
-        where += s"[$v $av $v_]" -> wClause
-        addSort(sortOneInt(attr, attrIndex))
-        replaceCast(toInt)
-
-      case "countDistinct" =>
-        noBooleanSetCounts(n)
-        find += s"(count-distinct $v_)"
-        widh += v
-        where += s"[$e $a $v]" -> wClause
-        where += s"[$v $av $v_]" -> wClause
-        addSort(sortOneInt(attr, attrIndex))
-        replaceCast(toInt)
-
-      case "sum" =>
-        find += s"(sum $v_)"
-        widh += v
-        where += s"[$e $a $v]" -> wClause
-        where += s"[$v $av $v_]" -> wClause
-        addSort(sortT)
-        replaceCast(resMap.j2s)
-
-      case "min" =>
-        noBooleanSetAggr(resMap)
-        find += s"(min $v_)"
-        where += s"[$e $a $v]" -> wClause
-        where += s"[$v $av $v_]" -> wClause
-        addSort(sortT)
-        replaceCast(resMap.j2s)
-
-      case "max" =>
-        noBooleanSetAggr(resMap)
-        find += s"(max $v_)"
-        where += s"[$e $a $v]" -> wClause
-        where += s"[$v $av $v_]" -> wClause
-        addSort(sortT)
-        replaceCast(resMap.j2s)
-
-      case "sample" =>
-        noBooleanSetAggr(resMap)
-        find += s"(sample 1 $v_)"
-        where += s"[$e $a $v]" -> wClause
-        where += s"[$v $av $v_]" -> wClause
-        addSort(sortSample(attr, attrIndex))
-        replaceCast(resMap.jSet2s)
-
-      case "median" =>
-        find += s"(median $v_)"
-        widh += e
-        where += s"[$e $a $v]" -> wClause
-        where += s"[$v $av $v_]" -> wClause
-        addSort(sortMedian(attr, attrIndex))
-        replaceCast(any2double)
-
-      // OBS! Datomic rounds down to nearest whole number
-      // when calculating the median for multiple numbers instead of
-      // following the semantic described on wikipedia:
-      // https://en.wikipedia.org/wiki/Median
-      // See also
-      // https://forum.datomic.com/t/unexpected-median-rounding/517
-      // So we calculate the correct median value manually instead:
-      //        widh += e
-      //        find += s"(distinct $v)"
-      //        val medianConverter: AnyRef => Double = {
-      //          (v: AnyRef) =>
-      //            getMedian(v.asInstanceOf[jArray[_]].toArray
-      //              .map(_.toString.toDouble).toSet)
-      //        }
-      //        replaceCast(medianConverter.asInstanceOf[AnyRef => AnyRef])
-
-      case "avg" =>
-        find += s"(avg $v_)"
-        widh += v
-        where += s"[$e $a $v]" -> wClause
-        where += s"[$v $av $v_]" -> wClause
-        addSort(sortOneDouble(attr, attrIndex))
-        replaceCast(any2double)
-
-      case "variance" =>
-        find += s"(variance $v_)"
-        widh += v
-        where += s"[$e $a $v]" -> wClause
-        where += s"[$v $av $v_]" -> wClause
-        addSort(sortOneDouble(attr, attrIndex))
-        replaceCast(any2double)
-
-      case "stddev" =>
-        find += s"(stddev $v_)"
-        widh += v
-        where += s"[$e $a $v]" -> wClause
-        where += s"[$v $av $v_]" -> wClause
-        addSort(sortOneDouble(attr, attrIndex))
-        replaceCast(any2double)
-
-      case "mins" =>
-        noBooleanSetAggr(resMap)
-        find += s"(min $n $v_)"
-        where += s"[$e $a $v]" -> wClause
-        where += s"[$v $av $v_]" -> wClause
-        replaceCast(resMap.vector2set)
-
-      case "maxs" =>
-        noBooleanSetAggr(resMap)
-        find += s"(max $n $v_)"
-        where += s"[$e $a $v]" -> wClause
-        where += s"[$v $av $v_]" -> wClause
-        replaceCast(resMap.vector2set)
-
-      case "samples" =>
-        noBooleanSetAggr(resMap)
-        find += s"(sample $n $v_)"
-        where += s"[$e $a $v]" -> wClause
-        where += s"[$v $av $v_]" -> wClause
-        replaceCast(resMap.vector2set)
-
-      case "distinct" =>
-        noBooleanSetAggr(resMap)
-        find += s"(distinct $v3)"
-        where += s"[$e $a _]" -> wClause
-        where +=
-          s"""[(datomic.api/q
-             |          "[:find (distinct $pair)
-             |            :in $$ $e
-             |            :where [$e $a $v]
-             |                   [$v $ak $k_]
-             |                   [$v $av $v_]
-             |                   [(vector $k_ $v_) $pair]]" $$ $e) [[$v1]]]""".stripMargin -> wClause
-        where += s"[(sort-by first $v1) $v2]" -> wClause
-        where += s"[(map second $v2) $v3]" -> wClause
-        replaceCast(resMap.jSetOfLists2s)
-
-      case other => unexpectedKw(other)
-    }
-  }
-
-
-  // Filter attribute filters --------------------------------------------------
-
-  private def equal2(
-    attr: Attr, e: Var, v: Var, filterAttr: String
-  ): Unit = {
-    val (a, ak, av, k_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
-    where += s"[$e $a _]" -> wClause
-    where +=
-      s"""[(datomic.api/q
-         |          "[:find (distinct $pair)
-         |            :in $$ $e
-         |            :where [$e $a $v]
-         |                   [$v $ak $k_]
-         |                   [$v $av $v_]
-         |                   [(vector $k_ $v_) $pair]]" $$ $e) [[$v1]]]""".stripMargin -> wClause
-    where += s"[(sort-by first $v1) $v2]" -> wClause
-    where += s"[(map second $v2) $v3]" -> wClause
-
-    val process: (Var, Var) => Unit = (_: Var, w: Var) => {
-      where += s"[(= $v3 ${w}3)]" -> wClause
-    }
-    filterAttrVars1.get(filterAttr).fold {
-      filterAttrVars2 = filterAttrVars2 + (filterAttr -> process)
-    } { case (e, a) => process(e, a) }
-  }
-
-
-  private def neq2(
-    attr: Attr, e: Var, v: Var, filterAttr: String
-  ): Unit = {
-    val (a, ak, av, k_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
-
-    // Common for pre-query and main query
-    where += s"[$e $a _]" -> wClause
-    where +=
-      s"""[(datomic.api/q
-         |          "[:find (distinct $pair)
-         |            :in $$ $e
-         |            :where [$e $a $v]
-         |                   [$v $ak $k_]
-         |                   [$v $av $v_]
-         |                   [(vector $k_ $v_) $pair]]" $$ $e) [[$v1]]]""".stripMargin -> wClause
-    where += s"[(sort-by first $v1) $v2]" -> wClause
-    where += s"[(map second $v2) $v3]" -> wClause
-
-    val process: (Var, Var) => Unit = (f: Var, w: Var) => {
-      val blacklist   = w + "-blacklist"
-      val blacklisted = w + "-blacklisted"
-
-      // Pre-query (merged with `when` clauses)
-      preFind = f
-      preWhere += s"[(= $v3 ${w}3)]" -> wClause
-
-      // Main query
-      inPost += blacklist
-      wherePost += s"[(contains? $blacklist $f) $blacklisted]" -> wClause
-      wherePost += s"[(not $blacklisted)]" -> wClause
-    }
-    filterAttrVars1.get(filterAttr).fold {
-      filterAttrVars2 = filterAttrVars2 + (filterAttr -> process)
-    } { case (e, a) =>
-      process(e, a)
-    }
-  }
-
-
-  private def has2[T](
-    attr: Attr, e: Var, v: Var, filterAttr: String, resMap: ResMap[T]
-  ): Unit = {
-    val (a, ak, av, k_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
-    where += s"[$e $a _]" -> wClause
-    where +=
-      s"""[(datomic.api/q
-         |          "[:find (distinct $pair)
-         |            :in $$ $e
-         |            :where [$e $a $v]
-         |                   [$v $ak $k_]
-         |                   [$v $av $v_]
-         |                   [(vector $k_ $v_) $pair]]" $$ $e) [[$v1]]]""".stripMargin -> wClause
-    where += s"[(sort-by first $v1) $v2]" -> wClause
-    where += s"[(map second $v2) $v3]" -> wClause
-
-    val process: (Var, Var) => Unit = if (attr.filterAttr.get._3.isInstanceOf[AttrOne]) {
-      (_: Var, w: Var) =>
-        where += s"[(set $v3) $v4]" -> wClause
-        where += s"[(contains? $v4 $w)]" -> wClause
-
-    } else if (resMap.tpe == "Boolean") {
-      (_: Var, w: Var) =>
-        // Need to convert to sets of Strings for `some` to work on boolean false (maybe a bug?)
-        where += s"[(map str $v3) $v3-list]" -> wClause
-        where += s"[(set $v3-list) $v3-set]" -> wClause
-        where += s"[(map str ${w}3) ${w}3-list]" -> wClause
-        where += s"[(set ${w}3-list) ${w}3-set]" -> wClause
-        where += s"[(clojure.set/intersection $v3-set ${w}3-set) $w-intersection]" -> wClause
-        where += s"[(= ${w}3-set $w-intersection)]" -> wClause
-
-    } else {
-      (_: Var, w: Var) =>
-        where += s"[(set $v3) $v4]" -> wClause
-        where += s"[(set ${w}3) ${w}4]" -> wClause
-        where += s"[(clojure.set/intersection $v4 ${w}4) $w-intersection]" -> wClause
-        where += s"[(= ${w}4 $w-intersection)]" -> wClause
-    }
-    filterAttrVars1.get(filterAttr).fold {
-      filterAttrVars2 = filterAttrVars2 + (filterAttr -> process)
-    } { case (e, a) =>
-      process(e, a)
-    }
-  }
-
-
-  private def hasNo2[T](
-    attr: Attr, e: Var, v: Var, filterAttr: String, resMap: ResMap[T]
-  ): Unit = {
-    val (a, ak, av, k_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
-    where += s"[$e $a _]" -> wClause
-    where +=
-      s"""[(datomic.api/q
-         |          "[:find (distinct $pair)
-         |            :in $$ $e
-         |            :where [$e $a $v]
-         |                   [$v $ak $k_]
-         |                   [$v $av $v_]
-         |                   [(vector $k_ $v_) $pair]]" $$ $e) [[$v1]]]""".stripMargin -> wClause
-    where += s"[(sort-by first $v1) $v2]" -> wClause
-    where += s"[(map second $v2) $v3]" -> wClause
-
-    val process: (Var, Var) => Unit = if (attr.filterAttr.get._3.isInstanceOf[AttrOne]) {
-      (_: Var, w: Var) => {
-        where += s"[(set $v3) $v4]" -> wClause
-        where += s"[(contains? $v4 $w) $v5]" -> wClause
-        where += s"[(not $v5)]" -> wClause
-      }
-
-    } else if (resMap.tpe == "Boolean") {
-      (_: Var, w: Var) =>
-        // Need to convert to sets of Strings for `some` to work on boolean false (maybe a bug?)
-        where += s"[(map str $v3) $v3-list]" -> wClause
-        where += s"[(set $v3-list) $v3-set]" -> wClause
-        where += s"[(map str ${w}3) ${w}3-list]" -> wClause
-        where += s"[(set ${w}3-list) ${w}3-set]" -> wClause
-        where += s"[(clojure.set/intersection $v3-set ${w}3-set) $w-intersection]" -> wClause
-        where += s"[(empty? $w-intersection)]" -> wClause
-
-    } else {
-      (_: Var, w: Var) =>
-        where += s"[(set $v3) $v4]" -> wClause
-        where += s"[(set ${w}3) ${w}4]" -> wClause
-        where += s"[(clojure.set/intersection $v4 ${w}4) $w-intersection]" -> wClause
-        where += s"[(empty? $w-intersection)]" -> wClause
-    }
-
-    filterAttrVars1.get(filterAttr).fold {
-      filterAttrVars2 = filterAttrVars2 + (filterAttr -> process)
-    } { case (e, a) =>
-      process(e, a)
-    }
-  }
 
 
   // helpers -------------------------------------------------------------------

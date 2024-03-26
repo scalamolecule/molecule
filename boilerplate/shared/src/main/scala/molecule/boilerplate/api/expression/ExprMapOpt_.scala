@@ -11,8 +11,8 @@ trait ExprMapOptOps_1[A, t, Ns1[_, _], Ns2[_, _, _]] extends ExprBase {
 
 trait ExprMapOpt_1[A, t, Ns1[_, _], Ns2[_, _, _]]
   extends ExprMapOptOps_1[A, t, Ns1, Ns2]{
-  def apply(map: Option[Map[String, t]]): Ns1[A,         t] = _exprMapOpt(Eq, map)
-  def apply(key: String                ): Ns1[Option[t], t] = _exprMapOpK(Eq, key)
+  def apply(map: Option[Map[String, t]]): Ns1[A,         t] = _exprMapOpt(Eq , map)
+  def apply(key: String                ): Ns1[Option[t], t] = _exprMapOpK(Has, key)
 }
 
 

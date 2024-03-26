@@ -155,42 +155,98 @@ trait LambdasMap extends ResolveBase with JavaConversions {
   }
 
   case class ResMap[T](
-    j2sMap: AnyRef => Map[String, T],
     tpe: String,
     toDatalog: T => String,
+    j2sMap: AnyRef => Map[String, T],
+    sPair2jVector: ((String, T)) => Array[AnyRef],
+
     s2j: Any => Any,
-    j2s: AnyRef => AnyRef,
-    jSet2sSet: AnyRef => AnyRef,
-    jSet2s: AnyRef => AnyRef,
-    jSetOfLists2s: AnyRef => AnyRef,
-    vector2list: AnyRef => AnyRef,
-    vector2set: AnyRef => AnyRef,
+
+
+    //    j2s: AnyRef => AnyRef,
+    //    jSet2sSet: AnyRef => AnyRef,
+    //    jSet2s: AnyRef => AnyRef,
+    //    jSetOfLists2s: AnyRef => AnyRef,
+    //    vector2list: AnyRef => AnyRef,
+    //    vector2set: AnyRef => AnyRef,
 
     //    j2sArray: AnyRef => AnyRef
   )
 
-  lazy val resMapString        : ResMap[String]         = ResMap(j2sMapString, "String", dString, s2jString, j2sString, set2setString, jSet2sString, jSetOfLists2sString, vector2listString, vector2setString)
-  lazy val resMapInt           : ResMap[Int]            = ResMap(j2sMapInt, "Int", dInt, s2jInt, j2sInt, set2setInt, jSet2sInt, jSetOfLists2sInt, vector2listInt, vector2setInt)
-  lazy val resMapLong          : ResMap[Long]           = ResMap(j2sMapLong, "Long", dLong, s2jLong, j2sLong, set2setLong, jSet2sLong, jSetOfLists2sLong, vector2listLong, vector2setLong)
-  lazy val resMapFloat         : ResMap[Float]          = ResMap(j2sMapFloat, "Float", dFloat, s2jFloat, j2sFloat, set2setFloat, jSet2sFloat, jSetOfLists2sFloat, vector2listFloat, vector2setFloat)
-  lazy val resMapDouble        : ResMap[Double]         = ResMap(j2sMapDouble, "Double", dDouble, s2jDouble, j2sDouble, set2setDouble, jSet2sDouble, jSetOfLists2sDouble, vector2listDouble, vector2setDouble)
-  lazy val resMapBoolean       : ResMap[Boolean]        = ResMap(j2sMapBoolean, "Boolean", dBoolean, s2jBoolean, j2sBoolean, set2setBoolean, jSet2sBoolean, jSetOfLists2sBoolean, vector2listBoolean, vector2setBoolean)
-  lazy val resMapBigInt        : ResMap[BigInt]         = ResMap(j2sMapBigInt, "BigInt", dBigInt, s2jBigInt, j2sBigInt, set2setBigInt, jSet2sBigInt, jSetOfLists2sBigInt, vector2listBigInt, vector2setBigInt)
-  lazy val resMapBigDecimal    : ResMap[BigDecimal]     = ResMap(j2sMapBigDecimal, "BigDecimal", dBigDecimal, s2jBigDecimal, j2sBigDecimal, set2setBigDecimal, jSet2sBigDecimal, jSetOfLists2sBigDecimal, vector2listBigDecimal, vector2setBigDecimal)
-  lazy val resMapDate          : ResMap[Date]           = ResMap(j2sMapDate, "Date", dDate, s2jDate, j2sDate, set2setDate, jSet2sDate, jSetOfLists2sDate, vector2listDate, vector2setDate)
-  lazy val resMapDuration      : ResMap[Duration]       = ResMap(j2sMapDuration, "Duration", dDuration, s2jDuration, j2sDuration, set2setDuration, jSet2sDuration, jSetOfLists2sDuration, vector2listDuration, vector2setDuration)
-  lazy val resMapInstant       : ResMap[Instant]        = ResMap(j2sMapInstant, "Instant", dInstant, s2jInstant, j2sInstant, set2setInstant, jSet2sInstant, jSetOfLists2sInstant, vector2listInstant, vector2setInstant)
-  lazy val resMapLocalDate     : ResMap[LocalDate]      = ResMap(j2sMapLocalDate, "LocalDate", dLocalDate, s2jLocalDate, j2sLocalDate, set2setLocalDate, jSet2sLocalDate, jSetOfLists2sLocalDate, vector2listLocalDate, vector2setLocalDate)
-  lazy val resMapLocalTime     : ResMap[LocalTime]      = ResMap(j2sMapLocalTime, "LocalTime", dLocalTime, s2jLocalTime, j2sLocalTime, set2setLocalTime, jSet2sLocalTime, jSetOfLists2sLocalTime, vector2listLocalTime, vector2setLocalTime)
-  lazy val resMapLocalDateTime : ResMap[LocalDateTime]  = ResMap(j2sMapLocalDateTime, "LocalDateTime", dLocalDateTime, s2jLocalDateTime, j2sLocalDateTime, set2setLocalDateTime, jSet2sLocalDateTime, jSetOfLists2sLocalDateTime, vector2listLocalDateTime, vector2setLocalDateTime)
-  lazy val resMapOffsetTime    : ResMap[OffsetTime]     = ResMap(j2sMapOffsetTime, "OffsetTime", dOffsetTime, s2jOffsetTime, j2sOffsetTime, set2setOffsetTime, jSet2sOffsetTime, jSetOfLists2sOffsetTime, vector2listOffsetTime, vector2setOffsetTime)
-  lazy val resMapOffsetDateTime: ResMap[OffsetDateTime] = ResMap(j2sMapOffsetDateTime, "OffsetDateTime", dOffsetDateTime, s2jOffsetDateTime, j2sOffsetDateTime, set2setOffsetDateTime, jSet2sOffsetDateTime, jSetOfLists2sOffsetDateTime, vector2listOffsetDateTime, vector2setOffsetDateTime)
-  lazy val resMapZonedDateTime : ResMap[ZonedDateTime]  = ResMap(j2sMapZonedDateTime, "ZonedDateTime", dZonedDateTime, s2jZonedDateTime, j2sZonedDateTime, set2setZonedDateTime, jSet2sZonedDateTime, jSetOfLists2sZonedDateTime, vector2listZonedDateTime, vector2setZonedDateTime)
-  lazy val resMapUUID          : ResMap[UUID]           = ResMap(j2sMapUUID, "UUID", dUUID, s2jUUID, j2sUUID, set2setUUID, jSet2sUUID, jSetOfLists2sUUID, vector2listUUID, vector2setUUID)
-  lazy val resMapURI           : ResMap[URI]            = ResMap(j2sMapURI, "URI", dURI, s2jURI, j2sURI, set2setURI, jSet2sURI, jSetOfLists2sURI, vector2listURI, vector2setURI)
-  lazy val resMapByte          : ResMap[Byte]           = ResMap(j2sMapByte, "Byte", dByte, s2jByte, j2sByte, set2setByte, jSet2sByte, jSetOfLists2sByte, vector2listByte, vector2setByte)
-  lazy val resMapShort         : ResMap[Short]          = ResMap(j2sMapShort, "Short", dShort, s2jShort, j2sShort, set2setShort, jSet2sShort, jSetOfLists2sShort, vector2listShort, vector2setShort)
-  lazy val resMapChar          : ResMap[Char]           = ResMap(j2sMapChar, "Char", dChar, s2jChar, j2sChar, set2setChar, jSet2sChar, jSetOfLists2sChar, vector2listChar, vector2setChar)
+  lazy val resMapString        : ResMap[String]         = ResMap("String", dString, j2sMapString, sPair2jVectorString, s2jString) //, j2sString, set2setString, jSet2sString, jSetOfLists2sString, vector2listString, vector2setString)
+  lazy val resMapInt           : ResMap[Int]            = ResMap("Int", dInt, j2sMapInt, sPair2jVectorInt, s2jInt) //, j2sInt, set2setInt, jSet2sInt, jSetOfLists2sInt, vector2listInt, vector2setInt)
+  lazy val resMapLong          : ResMap[Long]           = ResMap("Long", dLong, j2sMapLong, sPair2jVectorLong, s2jLong) //, j2sLong, set2setLong, jSet2sLong, jSetOfLists2sLong, vector2listLong, vector2setLong)
+  lazy val resMapFloat         : ResMap[Float]          = ResMap("Float", dFloat, j2sMapFloat, sPair2jVectorFloat, s2jFloat) //, j2sFloat, set2setFloat, jSet2sFloat, jSetOfLists2sFloat, vector2listFloat, vector2setFloat)
+  lazy val resMapDouble        : ResMap[Double]         = ResMap("Double", dDouble, j2sMapDouble, sPair2jVectorDouble, s2jDouble) //, j2sDouble, set2setDouble, jSet2sDouble, jSetOfLists2sDouble, vector2listDouble, vector2setDouble)
+  lazy val resMapBoolean       : ResMap[Boolean]        = ResMap("Boolean", dBoolean, j2sMapBoolean, sPair2jVectorBoolean, s2jBoolean) //, j2sBoolean, set2setBoolean, jSet2sBoolean, jSetOfLists2sBoolean, vector2listBoolean, vector2setBoolean)
+  lazy val resMapBigInt        : ResMap[BigInt]         = ResMap("BigInt", dBigInt, j2sMapBigInt, sPair2jVectorBigInt, s2jBigInt) //, j2sBigInt, set2setBigInt, jSet2sBigInt, jSetOfLists2sBigInt, vector2listBigInt, vector2setBigInt)
+  lazy val resMapBigDecimal    : ResMap[BigDecimal]     = ResMap("BigDecimal", dBigDecimal, j2sMapBigDecimal, sPair2jVectorBigDecimal, s2jBigDecimal) //, j2sBigDecimal, set2setBigDecimal, jSet2sBigDecimal, jSetOfLists2sBigDecimal, vector2listBigDecimal, vector2setBigDecimal)
+  lazy val resMapDate          : ResMap[Date]           = ResMap("Date", dDate, j2sMapDate, sPair2jVectorDate, s2jDate) //, j2sDate, set2setDate, jSet2sDate, jSetOfLists2sDate, vector2listDate, vector2setDate)
+  lazy val resMapDuration      : ResMap[Duration]       = ResMap("Duration", dDuration, j2sMapDuration, sPair2jVectorDuration, s2jDuration) //, j2sDuration, set2setDuration, jSet2sDuration, jSetOfLists2sDuration, vector2listDuration, vector2setDuration)
+  lazy val resMapInstant       : ResMap[Instant]        = ResMap("Instant", dInstant, j2sMapInstant, sPair2jVectorInstant, s2jInstant) //, j2sInstant, set2setInstant, jSet2sInstant, jSetOfLists2sInstant, vector2listInstant, vector2setInstant)
+  lazy val resMapLocalDate     : ResMap[LocalDate]      = ResMap("LocalDate", dLocalDate, j2sMapLocalDate, sPair2jVectorLocalDate, s2jLocalDate) //, j2sLocalDate, set2setLocalDate, jSet2sLocalDate, jSetOfLists2sLocalDate, vector2listLocalDate, vector2setLocalDate)
+  lazy val resMapLocalTime     : ResMap[LocalTime]      = ResMap("LocalTime", dLocalTime, j2sMapLocalTime, sPair2jVectorLocalTime, s2jLocalTime) //, j2sLocalTime, set2setLocalTime, jSet2sLocalTime, jSetOfLists2sLocalTime, vector2listLocalTime, vector2setLocalTime)
+  lazy val resMapLocalDateTime : ResMap[LocalDateTime]  = ResMap("LocalDateTime", dLocalDateTime, j2sMapLocalDateTime, sPair2jVectorLocalDateTime, s2jLocalDateTime) //, j2sLocalDateTime, set2setLocalDateTime, jSet2sLocalDateTime, jSetOfLists2sLocalDateTime, vector2listLocalDateTime, vector2setLocalDateTime)
+  lazy val resMapOffsetTime    : ResMap[OffsetTime]     = ResMap("OffsetTime", dOffsetTime, j2sMapOffsetTime, sPair2jVectorOffsetTime, s2jOffsetTime) //, j2sOffsetTime, set2setOffsetTime, jSet2sOffsetTime, jSetOfLists2sOffsetTime, vector2listOffsetTime, vector2setOffsetTime)
+  lazy val resMapOffsetDateTime: ResMap[OffsetDateTime] = ResMap("OffsetDateTime", dOffsetDateTime, j2sMapOffsetDateTime, sPair2jVectorOffsetDateTime, s2jOffsetDateTime) //, j2sOffsetDateTime, set2setOffsetDateTime, jSet2sOffsetDateTime, jSetOfLists2sOffsetDateTime, vector2listOffsetDateTime, vector2setOffsetDateTime)
+  lazy val resMapZonedDateTime : ResMap[ZonedDateTime]  = ResMap("ZonedDateTime", dZonedDateTime, j2sMapZonedDateTime, sPair2jVectorZonedDateTime, s2jZonedDateTime) //, j2sZonedDateTime, set2setZonedDateTime, jSet2sZonedDateTime, jSetOfLists2sZonedDateTime, vector2listZonedDateTime, vector2setZonedDateTime)
+  lazy val resMapUUID          : ResMap[UUID]           = ResMap("UUID", dUUID, j2sMapUUID, sPair2jVectorUUID, s2jUUID) //, j2sUUID, set2setUUID, jSet2sUUID, jSetOfLists2sUUID, vector2listUUID, vector2setUUID)
+  lazy val resMapURI           : ResMap[URI]            = ResMap("URI", dURI, j2sMapURI, sPair2jVectorURI, s2jURI) //, j2sURI, set2setURI, jSet2sURI, jSetOfLists2sURI, vector2listURI, vector2setURI)
+  lazy val resMapByte          : ResMap[Byte]           = ResMap("Byte", dByte, j2sMapByte, sPair2jVectorByte, s2jByte) //, j2sByte, set2setByte, jSet2sByte, jSetOfLists2sByte, vector2listByte, vector2setByte)
+  lazy val resMapShort         : ResMap[Short]          = ResMap("Short", dShort, j2sMapShort, sPair2jVectorShort, s2jShort) //, j2sShort, set2setShort, jSet2sShort, jSetOfLists2sShort, vector2listShort, vector2setShort)
+  lazy val resMapChar          : ResMap[Char]           = ResMap("Char", dChar, j2sMapChar, sPair2jVectorChar, s2jChar) //, j2sChar, set2setChar, jSet2sChar, jSetOfLists2sChar, vector2listChar, vector2setChar)
+
+
+  // Scala to Java
+  private lazy val s2jAnyRefString        : String => AnyRef         = (v: String) => v.asInstanceOf[AnyRef]
+  private lazy val s2jAnyRefInt           : Int => AnyRef            = (v: Int) => v.toLong.asInstanceOf[AnyRef]
+  private lazy val s2jAnyRefLong          : Long => AnyRef           = (v: Long) => v.asInstanceOf[AnyRef]
+  private lazy val s2jAnyRefFloat         : Float => AnyRef          = (v: Float) => v.asInstanceOf[AnyRef]
+  private lazy val s2jAnyRefDouble        : Double => AnyRef         = (v: Double) => v.asInstanceOf[AnyRef]
+  private lazy val s2jAnyRefBoolean       : Boolean => AnyRef        = (v: Boolean) => v.asInstanceOf[AnyRef]
+  private lazy val s2jAnyRefBigInt        : BigInt => AnyRef         = (v: BigInt) => v.bigInteger.asInstanceOf[AnyRef]
+  private lazy val s2jAnyRefBigDecimal    : BigDecimal => AnyRef     = (v: BigDecimal) => v.bigDecimal.asInstanceOf[AnyRef]
+  private lazy val s2jAnyRefDate          : Date => AnyRef           = (v: Date) => v.asInstanceOf[AnyRef]
+  private lazy val s2jAnyRefDuration      : Duration => AnyRef       = (v: Duration) => v.toString
+  private lazy val s2jAnyRefInstant       : Instant => AnyRef        = (v: Instant) => v.toString
+  private lazy val s2jAnyRefLocalDate     : LocalDate => AnyRef      = (v: LocalDate) => v.toString
+  private lazy val s2jAnyRefLocalTime     : LocalTime => AnyRef      = (v: LocalTime) => v.toString
+  private lazy val s2jAnyRefLocalDateTime : LocalDateTime => AnyRef  = (v: LocalDateTime) => v.toString
+  private lazy val s2jAnyRefOffsetTime    : OffsetTime => AnyRef     = (v: OffsetTime) => v.toString
+  private lazy val s2jAnyRefOffsetDateTime: OffsetDateTime => AnyRef = (v: OffsetDateTime) => v.toString
+  private lazy val s2jAnyRefZonedDateTime : ZonedDateTime => AnyRef  = (v: ZonedDateTime) => v.toString
+  private lazy val s2jAnyRefUUID          : UUID => AnyRef           = (v: UUID) => v.asInstanceOf[AnyRef]
+  private lazy val s2jAnyRefURI           : URI => AnyRef            = (v: URI) => v.asInstanceOf[AnyRef]
+  private lazy val s2jAnyRefByte          : Byte => AnyRef           = (v: Byte) => v.toInt.asInstanceOf[AnyRef]
+  private lazy val s2jAnyRefShort         : Short => AnyRef          = (v: Short) => v.toInt.asInstanceOf[AnyRef]
+  private lazy val s2jAnyRefChar          : Char => AnyRef           = (v: Char) => v.toString.asInstanceOf[AnyRef]
+
+  private lazy val sPair2jVectorString        : ((String, String)) => Array[AnyRef]         = sPair2jVector(s2jAnyRefString)
+  private lazy val sPair2jVectorInt           : ((String, Int)) => Array[AnyRef]            = sPair2jVector(s2jAnyRefInt)
+  private lazy val sPair2jVectorLong          : ((String, Long)) => Array[AnyRef]           = sPair2jVector(s2jAnyRefLong)
+  private lazy val sPair2jVectorFloat         : ((String, Float)) => Array[AnyRef]          = sPair2jVector(s2jAnyRefFloat)
+  private lazy val sPair2jVectorDouble        : ((String, Double)) => Array[AnyRef]         = sPair2jVector(s2jAnyRefDouble)
+  private lazy val sPair2jVectorBoolean       : ((String, Boolean)) => Array[AnyRef]        = sPair2jVector(s2jAnyRefBoolean)
+  private lazy val sPair2jVectorBigInt        : ((String, BigInt)) => Array[AnyRef]         = sPair2jVector(s2jAnyRefBigInt)
+  private lazy val sPair2jVectorBigDecimal    : ((String, BigDecimal)) => Array[AnyRef]     = sPair2jVector(s2jAnyRefBigDecimal)
+  private lazy val sPair2jVectorDate          : ((String, Date)) => Array[AnyRef]           = sPair2jVector(s2jAnyRefDate)
+  private lazy val sPair2jVectorDuration      : ((String, Duration)) => Array[AnyRef]       = sPair2jVector(s2jAnyRefDuration)
+  private lazy val sPair2jVectorInstant       : ((String, Instant)) => Array[AnyRef]        = sPair2jVector(s2jAnyRefInstant)
+  private lazy val sPair2jVectorLocalDate     : ((String, LocalDate)) => Array[AnyRef]      = sPair2jVector(s2jAnyRefLocalDate)
+  private lazy val sPair2jVectorLocalTime     : ((String, LocalTime)) => Array[AnyRef]      = sPair2jVector(s2jAnyRefLocalTime)
+  private lazy val sPair2jVectorLocalDateTime : ((String, LocalDateTime)) => Array[AnyRef]  = sPair2jVector(s2jAnyRefLocalDateTime)
+  private lazy val sPair2jVectorOffsetTime    : ((String, OffsetTime)) => Array[AnyRef]     = sPair2jVector(s2jAnyRefOffsetTime)
+  private lazy val sPair2jVectorOffsetDateTime: ((String, OffsetDateTime)) => Array[AnyRef] = sPair2jVector(s2jAnyRefOffsetDateTime)
+  private lazy val sPair2jVectorZonedDateTime : ((String, ZonedDateTime)) => Array[AnyRef]  = sPair2jVector(s2jAnyRefZonedDateTime)
+  private lazy val sPair2jVectorUUID          : ((String, UUID)) => Array[AnyRef]           = sPair2jVector(s2jAnyRefUUID)
+  private lazy val sPair2jVectorURI           : ((String, URI)) => Array[AnyRef]            = sPair2jVector(s2jAnyRefURI)
+  private lazy val sPair2jVectorByte          : ((String, Byte)) => Array[AnyRef]           = sPair2jVector(s2jAnyRefByte)
+  private lazy val sPair2jVectorShort         : ((String, Short)) => Array[AnyRef]          = sPair2jVector(s2jAnyRefShort)
+  private lazy val sPair2jVectorChar          : ((String, Char)) => Array[AnyRef]           = sPair2jVector(s2jAnyRefChar)
+
+  private def sPair2jVector[T](encode: T => AnyRef): ((String, T)) => Array[AnyRef] = {
+    (pair: (String, T)) => Array(pair._1, encode(pair._2))
+  }
 
 
   private lazy val j2sOptListIdOLD = (v: AnyRef) => v match {

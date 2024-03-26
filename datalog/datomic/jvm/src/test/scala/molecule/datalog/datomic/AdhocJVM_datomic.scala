@@ -2,6 +2,7 @@ package molecule.datalog.datomic
 
 import java.net.URI
 import java.time._
+import java.util
 import java.util.{Date, UUID}
 import molecule.base.error.ExecutionError
 import molecule.core.action.Query
@@ -17,6 +18,18 @@ import scala.language.implicitConversions
 
 //object AdhocJVM_datomic extends TestSuiteArray_datomic with Array2List {
 object AdhocJVM_datomic extends TestSuite_datomic {
+
+
+
+val x = new java.util.Vector[Any]
+x.add("a")
+x.add(1)
+
+val y = new java.util.Vector[Any]
+y.add("b")
+y.add(2)
+//  val z: util.List[Int] = Vector(1, 2).asJava
+
 
   override lazy val tests = Tests {
 
@@ -86,37 +99,65 @@ object AdhocJVM_datomic extends TestSuite_datomic {
       //      val j4: Future[TxReport] = Ns(42).i(1).intMap_.apply(Map("en" -> 1, "da" -> 2)).update.transact
 
 
+      //      val k2 = Ns.intMap.apply(min).query.get
+
       //      val j1: Future[List[Map[String, Int]]] = Ns.intMap.apply(Ns.intMap).int.query.get
 
 
       //      val k1: Future[List[Set[Int]]] = Ns.intSet.add(1).query.get
 
+      val a = (1, Map("a" -> int1, "b" -> int2))
+      val b = (2, Map("a" -> int2, "b" -> int3, "c" -> int4))
       for {
+        _ <- Ns.i.intMap.insert(List(a, b)).transact
 
-        id <- Ns.intMap.stringMap.insert(Map(pint1), Map(pstring1)).transact.map(_.id)
-        _ <- Ns.intMap.stringMap.query.get.map(_ ==> List((Map(pint1), Map(pstring1))))
 
-        // Apply empty value to delete attribute of entity (entity remains)
-        _ <- Ns(id).stringMap().update.transact
-        _ <- Ns.intMap.stringMap_?.query.get.map(_ ==> List((Map(pint1), None)))
 
-        //        _ = {
-        //          println("----------- 1")
-        //          val res = datomic.Peer.q(
-        //            """[:find  ?c ?d3
-        //              | :in    $ [?b ...]
-        //              | :where [?a :Ns/int ?b]
-        //              |        [?a :Ns/i ?c]
-        //              |        [(datomic.api/q
-        //              |          "[:find (pull ?a [{(:Ns/intMap :limit nil) [:Ns.intMap/k_ :Ns.intMap/v_]}])
-        //              |            :in $ ?a]" $ ?a) [[?d1]]]
-        //              |        [(if (nil? ?d1) {:Ns/intMap []} ?d1) ?d2]
-        //              |        [(:Ns/intMap ?d2) ?d3]
-        //              |        ]
-        //              |""".stripMargin, conn.db,
-        //            //            Seq(true, false).asJava
-        //            Seq(2).asJava
-        //        }
+        _ = {
+          println("----------- 1")
+          val res = datomic.Peer.q(
+            """[:find  ?b ?c2 ?c
+              | :in    $ ?c2
+              | :where [?a :Ns/i ?b]
+              |        [?a :Ns/intMap _]
+              |        [(datomic.api/q
+              |          "[:find (distinct ?c-pair)
+              |            :in $ ?a
+              |            :where [?a :Ns/intMap ?c]
+              |                   [?c :Ns.intMap/k_ ?c-k]
+              |                   [?c :Ns.intMap/v_ ?c-v]
+              |                   [(vector ?c-k ?c-v) ?c-pair]
+              |
+              |
+              |                   ]" $ ?a) [[?c]]]
+              |        ;;[(= (set ?c) (set ?c2)) ?x]
+              |        ;;[(clojure.set/intersection ?c ?c2) ?y]
+              |        ;;[(map vector ?c2) ?y]
+              |        ;;[(.contains ?c2 ?c) ?x]
+              |        ]
+              |""".stripMargin, conn.db,
+            //            Seq(true, false).asJava
+//            Seq(Set(List("a", 1).asJava, List("b", 2).asJava).asJava).asJava
+//            Set(List("a", 1).asJava, List("b", 2).asJava).asJava
+//            Set(x, y).asJava
+            Set(y, x).asJava
+//            """#{["b" 2] ["a" 1]}"""
+          )
+          res.forEach(r => println(r))
+        }
+
+
+
+
+
+        _ <- Ns.i.a1.intMap(Map(pint1)).query.i.get.map(_ ==> List())
+        _ <- Ns.i.a1.intMap(Map(pint1, pint2)).query.get.map(_ ==> List(a))
+        _ <- Ns.i.a1.intMap(Map(pint1, pint2, pint3)).query.get.map(_ ==> List())
+
+        _ <- Ns.i.a1.intMap(Map.empty[String, Int]).query.get.map(_ ==> List())
+
+        // Applying nothing matches nothing
+        _ <- Ns.i.a1.intMap().query.get.map(_ ==> List())
 
 
       } yield ()

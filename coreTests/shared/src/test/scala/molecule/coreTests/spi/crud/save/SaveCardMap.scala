@@ -10,6 +10,7 @@ import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
+import scala.concurrent.Future
 
 trait SaveCardMap extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
@@ -173,53 +174,9 @@ trait SaveCardMap extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
     "Tacit" - types { implicit conn =>
-      // Applying value to tacit or mandatory attribute has same effect
       for {
-        _ <- Ns.i(1).stringMap_(Map(pstring1, pstring2)).save.transact
-        _ <- Ns.i(1).intMap_(Map(pint1, pint2)).save.transact
-        _ <- Ns.i(1).longMap_(Map(plong1, plong2)).save.transact
-        _ <- Ns.i(1).floatMap_(Map(pfloat1, pfloat2)).save.transact
-        _ <- Ns.i(1).doubleMap_(Map(pdouble1, pdouble2)).save.transact
-        _ <- Ns.i(1).booleanMap_(Map(pboolean1, pboolean2)).save.transact
-        _ <- Ns.i(1).bigIntMap_(Map(pbigInt1, pbigInt2)).save.transact
-        _ <- Ns.i(1).bigDecimalMap_(Map(pbigDecimal1, pbigDecimal2)).save.transact
-        _ <- Ns.i(1).dateMap_(Map(pdate1, pdate2)).save.transact
-        _ <- Ns.i(1).durationMap_(Map(pduration1, pduration2)).save.transact
-        _ <- Ns.i(1).instantMap_(Map(pinstant1, pinstant2)).save.transact
-        _ <- Ns.i(1).localDateMap_(Map(plocalDate1, plocalDate2)).save.transact
-        _ <- Ns.i(1).localTimeMap_(Map(plocalTime1, plocalTime2)).save.transact
-        _ <- Ns.i(1).localDateTimeMap_(Map(plocalDateTime1, plocalDateTime2)).save.transact
-        _ <- Ns.i(1).offsetTimeMap_(Map(poffsetTime1, poffsetTime2)).save.transact
-        _ <- Ns.i(1).offsetDateTimeMap_(Map(poffsetDateTime1, poffsetDateTime2)).save.transact
-        _ <- Ns.i(1).zonedDateTimeMap_(Map(pzonedDateTime1, pzonedDateTime2)).save.transact
-        _ <- Ns.i(1).uuidMap_(Map(puuid1, puuid2)).save.transact
-        _ <- Ns.i(1).uriMap_(Map(puri1, puri2)).save.transact
-        _ <- Ns.i(1).byteMap_(Map(pbyte1, pbyte2)).save.transact
-        _ <- Ns.i(1).shortMap_(Map(pshort1, pshort2)).save.transact
-        _ <- Ns.i(1).charMap_(Map(pchar1, pchar2)).save.transact
-
-        _ <- Ns.i.stringMap.query.get.map(_.head ==> (1, Map(pstring1, pstring2)))
-        _ <- Ns.i.intMap.query.get.map(_.head ==> (1, Map(pint1, pint2)))
-        _ <- Ns.i.longMap.query.get.map(_.head ==> (1, Map(plong1, plong2)))
-        _ <- Ns.i.floatMap.query.get.map(_.head ==> (1, Map(pfloat1, pfloat2)))
-        _ <- Ns.i.doubleMap.query.get.map(_.head ==> (1, Map(pdouble1, pdouble2)))
-        _ <- Ns.i.booleanMap.query.get.map(_.head ==> (1, Map(pboolean1, pboolean2)))
-        _ <- Ns.i.bigIntMap.query.get.map(_.head ==> (1, Map(pbigInt1, pbigInt2)))
-        _ <- Ns.i.bigDecimalMap.query.get.map(_.head ==> (1, Map(pbigDecimal1, pbigDecimal2)))
-        _ <- Ns.i.dateMap.query.get.map(_.head ==> (1, Map(pdate1, pdate2)))
-        _ <- Ns.i.durationMap.query.get.map(_.head ==> (1, Map(pduration1, pduration2)))
-        _ <- Ns.i.instantMap.query.get.map(_.head ==> (1, Map(pinstant1, pinstant2)))
-        _ <- Ns.i.localDateMap.query.get.map(_.head ==> (1, Map(plocalDate1, plocalDate2)))
-        _ <- Ns.i.localTimeMap.query.get.map(_.head ==> (1, Map(plocalTime1, plocalTime2)))
-        _ <- Ns.i.localDateTimeMap.query.get.map(_.head ==> (1, Map(plocalDateTime1, plocalDateTime2)))
-        _ <- Ns.i.offsetTimeMap.query.get.map(_.head ==> (1, Map(poffsetTime1, poffsetTime2)))
-        _ <- Ns.i.offsetDateTimeMap.query.get.map(_.head ==> (1, Map(poffsetDateTime1, poffsetDateTime2)))
-        _ <- Ns.i.zonedDateTimeMap.query.get.map(_.head ==> (1, Map(pzonedDateTime1, pzonedDateTime2)))
-        _ <- Ns.i.uuidMap.query.get.map(_.head ==> (1, Map(puuid1, puuid2)))
-        _ <- Ns.i.uriMap.query.get.map(_.head ==> (1, Map(puri1, puri2)))
-        _ <- Ns.i.byteMap.query.get.map(_.head ==> (1, Map(pbyte1, pbyte2)))
-        _ <- Ns.i.shortMap.query.get.map(_.head ==> (1, Map(pshort1, pshort2)))
-        _ <- Ns.i.charMap.query.get.map(_.head ==> (1, Map(pchar1, pchar2)))
+        // Can't save map with tacit map attribute
+        _ <- Future(compileError("Ns.i(1).stringMap_(Map(pstring1, pstring2)).save"))
       } yield ()
     }
   }

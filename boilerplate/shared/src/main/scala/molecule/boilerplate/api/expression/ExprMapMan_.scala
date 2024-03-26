@@ -1,22 +1,20 @@
 // GENERATED CODE ********************************
 package molecule.boilerplate.api.expression
 
-import molecule.boilerplate.api._
 import molecule.boilerplate.ast.Model._
 
 
 trait ExprMapMan_1[A, t, Ns1[_, _], Ns2[_, _, _]]
-  extends ExprMapTacOps_1[A, t, Ns1, Ns2]
-    with Aggregates_1[A, t, Ns1] {
+  extends ExprMapTacOps_1[A, t, Ns1, Ns2] {
   def apply (                                       ): Ns1[A, t] = _exprMap (NoValue, Map.empty[String, t] )
   def apply (map  : Map[String, t]                  ): Ns1[A, t] = _exprMap (Eq     , map                  )
-  def apply (key  : String                          ): Ns1[t, t] = _exprMapK(Eq     , Seq(key)             )
-  def not   (key  : String, keys  : String*         ): Ns1[A, t] = _exprMap (Neq    , mapK[t](key +: keys) )
-  def not   (keys : Seq[String]                     ): Ns1[A, t] = _exprMap (Neq    , mapK[t](keys)        )
-  def has   (v    : t, vs: t*                       ): Ns1[A, t] = _exprMapV(Has    , v +: vs              )
-  def has   (vs   : Seq[t]                          ): Ns1[A, t] = _exprMapV(Has    , vs                   )
-  def hasNo (v    : t, vs: t*                       ): Ns1[A, t] = _exprMapV(HasNo  , v +: vs              )
-  def hasNo (vs   : Seq[t]                          ): Ns1[A, t] = _exprMapV(HasNo  , vs                   )
+  def apply (key  : String                          ): Ns1[t, t] = _exprMapK(Has    , Seq(key)             )
+//  def not   (key  : String, keys  : String*         ): Ns1[A, t] = _exprMap (Neq    , mapK[t](key +: keys) )
+//  def not   (keys : Seq[String]                     ): Ns1[A, t] = _exprMap (Neq    , mapK[t](keys)        )
+//  def has   (v    : t, vs: t*                       ): Ns1[A, t] = _exprMapV(Has    , v +: vs              )
+//  def has   (vs   : Seq[t]                          ): Ns1[A, t] = _exprMapV(Has    , vs                   )
+//  def hasNo (v    : t, vs: t*                       ): Ns1[A, t] = _exprMapV(HasNo  , v +: vs              )
+//  def hasNo (vs   : Seq[t]                          ): Ns1[A, t] = _exprMapV(HasNo  , vs                   )
   def add   (pair : (String, t), pairs: (String, t)*): Ns1[A, t] = _exprMap (Add    , (pair +: pairs).toMap)
   def add   (pairs: Iterable[(String, t)]           ): Ns1[A, t] = _exprMap (Add    , pairs.toMap          )
   def remove(key  : String, keys: String*           ): Ns1[t, t] = _exprMapK(Remove , key +: keys          )
@@ -25,17 +23,17 @@ trait ExprMapMan_1[A, t, Ns1[_, _], Ns2[_, _, _]]
 
 
 trait ExprMapMan_2[A, B, t, Ns1[_, _, _], Ns2[_, _, _, _]]
-  extends ExprMapTacOps_2[A, B, t, Ns1, Ns2]
-    with Aggregates_2[A, B, t, Ns1] {
+  extends ExprMapTacOps_2[A, B, t, Ns1, Ns2] {
   def apply (                                       ): Ns1[A, B, t] = _exprMap (NoValue, Map.empty[String, t] )
   def apply (map  : Map[String, t]                  ): Ns1[A, B, t] = _exprMap (Eq     , map                  )
   def apply (key  : String                          ): Ns1[A, t, t] = _exprMapK(Eq     , Seq(key)             )
-  def not   (key  : String, keys  : String*         ): Ns1[A, B, t] = _exprMap (Neq    , mapK[t](key +: keys) )
-  def not   (keys : Seq[String]                     ): Ns1[A, B, t] = _exprMap (Neq    , mapK[t](keys)        )
-  def has   (v    : t, vs: t*                       ): Ns1[A, B, t] = _exprMapV(Has    , v +: vs              )
-  def has   (vs   : Seq[t]                          ): Ns1[A, B, t] = _exprMapV(Has    , vs                   )
-  def hasNo (v    : t, vs: t*                       ): Ns1[A, B, t] = _exprMapV(HasNo  , v +: vs              )
-  def hasNo (vs   : Seq[t]                          ): Ns1[A, B, t] = _exprMapV(HasNo  , vs                   )
+//  def not   (key  : String                          ): Ns1[A, B, t] = _exprMap (Neq    , mapK[t](Seq(key))    )
+//  def not   (key  : String, keys  : String*         ): Ns1[A, B, t] = _exprMap (Neq    , mapK[t](key +: keys) )
+//  def not   (keys : Seq[String]                     ): Ns1[A, B, t] = _exprMap (Neq    , mapK[t](keys)        )
+//  def has   (v    : t, vs: t*                       ): Ns1[A, B, t] = _exprMapV(Has    , v +: vs              )
+//  def has   (vs   : Seq[t]                          ): Ns1[A, B, t] = _exprMapV(Has    , vs                   )
+//  def hasNo (v    : t, vs: t*                       ): Ns1[A, B, t] = _exprMapV(HasNo  , v +: vs              )
+//  def hasNo (vs   : Seq[t]                          ): Ns1[A, B, t] = _exprMapV(HasNo  , vs                   )
   def add   (pair : (String, t), pairs: (String, t)*): Ns1[A, B, t] = _exprMap (Add    , (pair +: pairs).toMap)
   def add   (pairs: Iterable[(String, t)]           ): Ns1[A, B, t] = _exprMap (Add    , pairs.toMap          )
   def remove(key  : String, keys: String*           ): Ns1[A, t, t] = _exprMapK(Remove , key +: keys          )
@@ -44,17 +42,16 @@ trait ExprMapMan_2[A, B, t, Ns1[_, _, _], Ns2[_, _, _, _]]
 
 
 trait ExprMapMan_3[A, B, C, t, Ns1[_, _, _, _], Ns2[_, _, _, _, _]]
-  extends ExprMapTacOps_3[A, B, C, t, Ns1, Ns2]
-    with Aggregates_3[A, B, C, t, Ns1] {
+  extends ExprMapTacOps_3[A, B, C, t, Ns1, Ns2] {
   def apply (                                       ): Ns1[A, B, C, t] = _exprMap (NoValue, Map.empty[String, t] )
   def apply (map  : Map[String, t]                  ): Ns1[A, B, C, t] = _exprMap (Eq     , map                  )
   def apply (key  : String                          ): Ns1[A, B, t, t] = _exprMapK(Eq     , Seq(key)             )
-  def not   (key  : String, keys  : String*         ): Ns1[A, B, C, t] = _exprMap (Neq    , mapK[t](key +: keys) )
-  def not   (keys : Seq[String]                     ): Ns1[A, B, C, t] = _exprMap (Neq    , mapK[t](keys)        )
-  def has   (v    : t, vs: t*                       ): Ns1[A, B, C, t] = _exprMapV(Has    , v +: vs              )
-  def has   (vs   : Seq[t]                          ): Ns1[A, B, C, t] = _exprMapV(Has    , vs                   )
-  def hasNo (v    : t, vs: t*                       ): Ns1[A, B, C, t] = _exprMapV(HasNo  , v +: vs              )
-  def hasNo (vs   : Seq[t]                          ): Ns1[A, B, C, t] = _exprMapV(HasNo  , vs                   )
+//  def not   (key  : String, keys  : String*         ): Ns1[A, B, C, t] = _exprMap (Neq    , mapK[t](key +: keys) )
+//  def not   (keys : Seq[String]                     ): Ns1[A, B, C, t] = _exprMap (Neq    , mapK[t](keys)        )
+//  def has   (v    : t, vs: t*                       ): Ns1[A, B, C, t] = _exprMapV(Has    , v +: vs              )
+//  def has   (vs   : Seq[t]                          ): Ns1[A, B, C, t] = _exprMapV(Has    , vs                   )
+//  def hasNo (v    : t, vs: t*                       ): Ns1[A, B, C, t] = _exprMapV(HasNo  , v +: vs              )
+//  def hasNo (vs   : Seq[t]                          ): Ns1[A, B, C, t] = _exprMapV(HasNo  , vs                   )
   def add   (pair : (String, t), pairs: (String, t)*): Ns1[A, B, C, t] = _exprMap (Add    , (pair +: pairs).toMap)
   def add   (pairs: Iterable[(String, t)]           ): Ns1[A, B, C, t] = _exprMap (Add    , pairs.toMap          )
   def remove(key  : String, keys: String*           ): Ns1[A, B, t, t] = _exprMapK(Remove , key +: keys          )
@@ -63,8 +60,7 @@ trait ExprMapMan_3[A, B, C, t, Ns1[_, _, _, _], Ns2[_, _, _, _, _]]
 
 
 trait ExprMapMan_4[A, B, C, D, t, Ns1[_, _, _, _, _], Ns2[_, _, _, _, _, _]]
-  extends ExprMapTacOps_4[A, B, C, D, t, Ns1, Ns2]
-    with Aggregates_4[A, B, C, D, t, Ns1] {
+  extends ExprMapTacOps_4[A, B, C, D, t, Ns1, Ns2] {
   def apply (                                       ): Ns1[A, B, C, D, t] = _exprMap (NoValue, Map.empty[String, t] )
   def apply (map  : Map[String, t]                  ): Ns1[A, B, C, D, t] = _exprMap (Eq     , map                  )
   def apply (key  : String                          ): Ns1[A, B, C, t, t] = _exprMapK(Eq     , Seq(key)             )
@@ -82,8 +78,7 @@ trait ExprMapMan_4[A, B, C, D, t, Ns1[_, _, _, _, _], Ns2[_, _, _, _, _, _]]
 
 
 trait ExprMapMan_5[A, B, C, D, E, t, Ns1[_, _, _, _, _, _], Ns2[_, _, _, _, _, _, _]]
-  extends ExprMapTacOps_5[A, B, C, D, E, t, Ns1, Ns2]
-    with Aggregates_5[A, B, C, D, E, t, Ns1] {
+  extends ExprMapTacOps_5[A, B, C, D, E, t, Ns1, Ns2] {
   def apply (                                       ): Ns1[A, B, C, D, E, t] = _exprMap (NoValue, Map.empty[String, t] )
   def apply (map  : Map[String, t]                  ): Ns1[A, B, C, D, E, t] = _exprMap (Eq     , map                  )
   def apply (key  : String                          ): Ns1[A, B, C, D, t, t] = _exprMapK(Eq     , Seq(key)             )
@@ -101,8 +96,7 @@ trait ExprMapMan_5[A, B, C, D, E, t, Ns1[_, _, _, _, _, _], Ns2[_, _, _, _, _, _
 
 
 trait ExprMapMan_6[A, B, C, D, E, F, t, Ns1[_, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _]]
-  extends ExprMapTacOps_6[A, B, C, D, E, F, t, Ns1, Ns2]
-    with Aggregates_6[A, B, C, D, E, F, t, Ns1] {
+  extends ExprMapTacOps_6[A, B, C, D, E, F, t, Ns1, Ns2] {
   def apply (                                       ): Ns1[A, B, C, D, E, F, t] = _exprMap (NoValue, Map.empty[String, t] )
   def apply (map  : Map[String, t]                  ): Ns1[A, B, C, D, E, F, t] = _exprMap (Eq     , map                  )
   def apply (key  : String                          ): Ns1[A, B, C, D, E, t, t] = _exprMapK(Eq     , Seq(key)             )
@@ -120,8 +114,7 @@ trait ExprMapMan_6[A, B, C, D, E, F, t, Ns1[_, _, _, _, _, _, _], Ns2[_, _, _, _
 
 
 trait ExprMapMan_7[A, B, C, D, E, F, G, t, Ns1[_, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _]]
-  extends ExprMapTacOps_7[A, B, C, D, E, F, G, t, Ns1, Ns2]
-    with Aggregates_7[A, B, C, D, E, F, G, t, Ns1] {
+  extends ExprMapTacOps_7[A, B, C, D, E, F, G, t, Ns1, Ns2] {
   def apply (                                       ): Ns1[A, B, C, D, E, F, G, t] = _exprMap (NoValue, Map.empty[String, t] )
   def apply (map  : Map[String, t]                  ): Ns1[A, B, C, D, E, F, G, t] = _exprMap (Eq     , map                  )
   def apply (key  : String                          ): Ns1[A, B, C, D, E, F, t, t] = _exprMapK(Eq     , Seq(key)             )
@@ -139,8 +132,7 @@ trait ExprMapMan_7[A, B, C, D, E, F, G, t, Ns1[_, _, _, _, _, _, _, _], Ns2[_, _
 
 
 trait ExprMapMan_8[A, B, C, D, E, F, G, H, t, Ns1[_, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _]]
-  extends ExprMapTacOps_8[A, B, C, D, E, F, G, H, t, Ns1, Ns2]
-    with Aggregates_8[A, B, C, D, E, F, G, H, t, Ns1] {
+  extends ExprMapTacOps_8[A, B, C, D, E, F, G, H, t, Ns1, Ns2] {
   def apply (                                       ): Ns1[A, B, C, D, E, F, G, H, t] = _exprMap (NoValue, Map.empty[String, t] )
   def apply (map  : Map[String, t]                  ): Ns1[A, B, C, D, E, F, G, H, t] = _exprMap (Eq     , map                  )
   def apply (key  : String                          ): Ns1[A, B, C, D, E, F, G, t, t] = _exprMapK(Eq     , Seq(key)             )
@@ -158,8 +150,7 @@ trait ExprMapMan_8[A, B, C, D, E, F, G, H, t, Ns1[_, _, _, _, _, _, _, _, _], Ns
 
 
 trait ExprMapMan_9[A, B, C, D, E, F, G, H, I, t, Ns1[_, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprMapTacOps_9[A, B, C, D, E, F, G, H, I, t, Ns1, Ns2]
-    with Aggregates_9[A, B, C, D, E, F, G, H, I, t, Ns1] {
+  extends ExprMapTacOps_9[A, B, C, D, E, F, G, H, I, t, Ns1, Ns2] {
   def apply (                                       ): Ns1[A, B, C, D, E, F, G, H, I, t] = _exprMap (NoValue, Map.empty[String, t] )
   def apply (map  : Map[String, t]                  ): Ns1[A, B, C, D, E, F, G, H, I, t] = _exprMap (Eq     , map                  )
   def apply (key  : String                          ): Ns1[A, B, C, D, E, F, G, H, t, t] = _exprMapK(Eq     , Seq(key)             )
@@ -177,8 +168,7 @@ trait ExprMapMan_9[A, B, C, D, E, F, G, H, I, t, Ns1[_, _, _, _, _, _, _, _, _, 
 
 
 trait ExprMapMan_10[A, B, C, D, E, F, G, H, I, J, t, Ns1[_, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprMapTacOps_10[A, B, C, D, E, F, G, H, I, J, t, Ns1, Ns2]
-    with Aggregates_10[A, B, C, D, E, F, G, H, I, J, t, Ns1] {
+  extends ExprMapTacOps_10[A, B, C, D, E, F, G, H, I, J, t, Ns1, Ns2] {
   def apply (                                       ): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprMap (NoValue, Map.empty[String, t] )
   def apply (map  : Map[String, t]                  ): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprMap (Eq     , map                  )
   def apply (key  : String                          ): Ns1[A, B, C, D, E, F, G, H, I, t, t] = _exprMapK(Eq     , Seq(key)             )
@@ -196,8 +186,7 @@ trait ExprMapMan_10[A, B, C, D, E, F, G, H, I, J, t, Ns1[_, _, _, _, _, _, _, _,
 
 
 trait ExprMapMan_11[A, B, C, D, E, F, G, H, I, J, K, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprMapTacOps_11[A, B, C, D, E, F, G, H, I, J, K, t, Ns1, Ns2]
-    with Aggregates_11[A, B, C, D, E, F, G, H, I, J, K, t, Ns1] {
+  extends ExprMapTacOps_11[A, B, C, D, E, F, G, H, I, J, K, t, Ns1, Ns2] {
   def apply (                                       ): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprMap (NoValue, Map.empty[String, t] )
   def apply (map  : Map[String, t]                  ): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprMap (Eq     , map                  )
   def apply (key  : String                          ): Ns1[A, B, C, D, E, F, G, H, I, J, t, t] = _exprMapK(Eq     , Seq(key)             )
@@ -215,8 +204,7 @@ trait ExprMapMan_11[A, B, C, D, E, F, G, H, I, J, K, t, Ns1[_, _, _, _, _, _, _,
 
 
 trait ExprMapMan_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprMapTacOps_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns1, Ns2]
-    with Aggregates_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns1] {
+  extends ExprMapTacOps_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns1, Ns2] {
   def apply (                                       ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprMap (NoValue, Map.empty[String, t] )
   def apply (map  : Map[String, t]                  ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprMap (Eq     , map                  )
   def apply (key  : String                          ): Ns1[A, B, C, D, E, F, G, H, I, J, K, t, t] = _exprMapK(Eq     , Seq(key)             )
@@ -234,8 +222,7 @@ trait ExprMapMan_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns1[_, _, _, _, _, _,
 
 
 trait ExprMapMan_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprMapTacOps_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns1, Ns2]
-    with Aggregates_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns1] {
+  extends ExprMapTacOps_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns1, Ns2] {
   def apply (                                       ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprMap (NoValue, Map.empty[String, t] )
   def apply (map  : Map[String, t]                  ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprMap (Eq     , map                  )
   def apply (key  : String                          ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t, t] = _exprMapK(Eq     , Seq(key)             )
@@ -253,8 +240,7 @@ trait ExprMapMan_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns1[_, _, _, _, _,
 
 
 trait ExprMapMan_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprMapTacOps_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns1, Ns2]
-    with Aggregates_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns1] {
+  extends ExprMapTacOps_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns1, Ns2] {
   def apply (                                       ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprMap (NoValue, Map.empty[String, t] )
   def apply (map  : Map[String, t]                  ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprMap (Eq     , map                  )
   def apply (key  : String                          ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t, t] = _exprMapK(Eq     , Seq(key)             )
@@ -272,8 +258,7 @@ trait ExprMapMan_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns1[_, _, _, _,
 
 
 trait ExprMapMan_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprMapTacOps_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns1, Ns2]
-    with Aggregates_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns1] {
+  extends ExprMapTacOps_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns1, Ns2] {
   def apply (                                       ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprMap (NoValue, Map.empty[String, t] )
   def apply (map  : Map[String, t]                  ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprMap (Eq     , map                  )
   def apply (key  : String                          ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, t] = _exprMapK(Eq     , Seq(key)             )
@@ -291,8 +276,7 @@ trait ExprMapMan_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns1[_, _, _,
 
 
 trait ExprMapMan_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprMapTacOps_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns1, Ns2]
-    with Aggregates_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns1] {
+  extends ExprMapTacOps_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns1, Ns2] {
   def apply (                                       ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprMap (NoValue, Map.empty[String, t] )
   def apply (map  : Map[String, t]                  ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprMap (Eq     , map                  )
   def apply (key  : String                          ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, t] = _exprMapK(Eq     , Seq(key)             )
@@ -310,8 +294,7 @@ trait ExprMapMan_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns1[_, _,
 
 
 trait ExprMapMan_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprMapTacOps_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns1, Ns2]
-    with Aggregates_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns1] {
+  extends ExprMapTacOps_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns1, Ns2] {
   def apply (                                       ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprMap (NoValue, Map.empty[String, t] )
   def apply (map  : Map[String, t]                  ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprMap (Eq     , map                  )
   def apply (key  : String                          ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, t] = _exprMapK(Eq     , Seq(key)             )
@@ -329,8 +312,7 @@ trait ExprMapMan_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns1[_,
 
 
 trait ExprMapMan_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprMapTacOps_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Ns1, Ns2]
-    with Aggregates_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Ns1] {
+  extends ExprMapTacOps_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Ns1, Ns2] {
   def apply (                                       ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprMap (NoValue, Map.empty[String, t] )
   def apply (map  : Map[String, t]                  ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprMap (Eq     , map                  )
   def apply (key  : String                          ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, t] = _exprMapK(Eq     , Seq(key)             )
@@ -348,8 +330,7 @@ trait ExprMapMan_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Ns1
 
 
 trait ExprMapMan_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprMapTacOps_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Ns1, Ns2]
-    with Aggregates_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Ns1] {
+  extends ExprMapTacOps_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Ns1, Ns2] {
   def apply (                                       ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprMap (NoValue, Map.empty[String, t] )
   def apply (map  : Map[String, t]                  ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprMap (Eq     , map                  )
   def apply (key  : String                          ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, t] = _exprMapK(Eq     , Seq(key)             )
@@ -367,8 +348,7 @@ trait ExprMapMan_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, 
 
 
 trait ExprMapMan_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprMapTacOps_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Ns1, Ns2]
-    with Aggregates_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Ns1] {
+  extends ExprMapTacOps_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Ns1, Ns2] {
   def apply (                                       ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprMap (NoValue, Map.empty[String, t] )
   def apply (map  : Map[String, t]                  ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprMap (Eq     , map                  )
   def apply (key  : String                          ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, t] = _exprMapK(Eq     , Seq(key)             )
@@ -386,8 +366,7 @@ trait ExprMapMan_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, 
 
 
 trait ExprMapMan_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprMapTacOps_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Ns1, Ns2]
-    with Aggregates_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Ns1] {
+  extends ExprMapTacOps_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Ns1, Ns2] {
   def apply (                                       ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprMap (NoValue, Map.empty[String, t] )
   def apply (map  : Map[String, t]                  ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprMap (Eq     , map                  )
   def apply (key  : String                          ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, t] = _exprMapK(Eq     , Seq(key)             )
@@ -405,8 +384,7 @@ trait ExprMapMan_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, 
 
 
 trait ExprMapMan_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprMapTacOps_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Ns1, Ns2]
-    with Aggregates_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Ns1] {
+  extends ExprMapTacOps_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Ns1, Ns2] {
   def apply (                                       ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprMap (NoValue, Map.empty[String, t] )
   def apply (map  : Map[String, t]                  ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprMap (Eq     , map                  )
   def apply (key  : String                          ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, t] = _exprMapK(Eq     , Seq(key)             )

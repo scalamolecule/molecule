@@ -46,20 +46,20 @@ lazy val root = project
     datalogCore.jvm,
     datalogDatomic.js,
     datalogDatomic.jvm,
-    documentMongodb.js,
-    documentMongodb.jvm,
-    graphql.js,
-    graphql.jvm,
-    sqlCore.js,
-    sqlCore.jvm,
-    sqlH2.js,
-    sqlH2.jvm,
-    sqlMariadb.js,
-    sqlMariadb.jvm,
-    sqlMysql.js,
-    sqlMysql.jvm,
-    sqlPostgres.js,
-    sqlPostgres.jvm,
+//    documentMongodb.js,
+//    documentMongodb.jvm,
+//    graphql.js,
+//    graphql.jvm,
+//    sqlCore.js,
+//    sqlCore.jvm,
+//    sqlH2.js,
+//    sqlH2.jvm,
+//    sqlMariadb.js,
+//    sqlMariadb.jvm,
+//    sqlMysql.js,
+//    sqlMysql.jvm,
+//    sqlPostgres.js,
+//    sqlPostgres.jvm,
   )
 
 lazy val base = crossProject(JSPlatform, JVMPlatform)
@@ -188,158 +188,158 @@ lazy val datalogDatomic = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(datalogCore % "compile->compile;test->test")
 
 
-lazy val documentMongodb = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Full)
-  .in(file("document/mongodb"))
-  .settings(name := "molecule-document-mongodb")
-  .settings(doPublish)
-  .settings(compilerArgs)
-  .settings(testFrameworks := testingFrameworks)
-  .jsSettings(jsEnvironment)
-  .jvmSettings(
-    libraryDependencies ++= Seq(
-      "org.testcontainers" % "mongodb" % "1.19.6",
-      "org.mongodb" % "mongodb-driver-sync" % "4.11.1",
-      "ch.qos.logback" % "logback-classic" % logbackVersion % Test
-    ),
-  )
-  .dependsOn(core)
-  .dependsOn(coreTests % "compile->compile;test->test")
-
-
-
-lazy val graphql = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Full)
-  .in(file("graphql/client"))
-  .settings(name := "molecule-graphql-client")
-  .settings(doPublish)
-  .settings(compilerArgs)
-  .enablePlugins(MoleculePlugin)
-  .settings(
-    // Generate Molecule boilerplate code for tests with `sbt clean compile -Dmolecule=true`
-    moleculePluginActive := sys.props.get("molecule").contains("true"),
-    //    moleculeMakeJars := !sys.props.get("moleculeJars").contains("false"), // default: true
-    moleculeMakeJars := false, // default: true
-
-    // Multiple directories with data models
-    moleculeDataModelPaths := Seq(
-      "molecule/graphql/client"
-    ),
-
-    // Suppress "un-used" keys warning
-    Global / excludeLintKeys ++= Set(
-      moleculePluginActive,
-      moleculeDataModelPaths,
-      moleculeMakeJars
-    ),
-
-    // Let IntelliJ detect sbt-molecule-created jars in unmanaged lib directories
-    exportJars := true,
-
-    // Find scala version specific jars in respective libs
-    unmanagedBase := {
-      CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, 13)) => file(unmanagedBase.value.getPath ++ "/2.13")
-        case Some((2, 12)) => file(unmanagedBase.value.getPath ++ "/2.12")
-        case _             => file(unmanagedBase.value.getPath ++ "/3.3")
-      }
-    },
-    //    testFrameworks += new TestFramework("utest.runner.Framework"),
-  )
-  .settings(testFrameworks := testingFrameworks)
-  .settings(
-    libraryDependencies ++= Seq(
-      "com.github.ghostdogpr" %% "caliban-tools" % "2.5.2",
-      "com.github.ghostdogpr" %% "caliban-client" % "2.5.2",
-    ),
-  )
-  .jsSettings(jsEnvironment)
-  .dependsOn(coreTests % "compile->compile;test->test")
-
-lazy val sqlCore = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Full)
-  .in(file("sql/core"))
-  .settings(name := "molecule-sql-core")
-  .settings(doPublish)
-  .settings(compilerArgs)
-  .settings(testFrameworks := testingFrameworks)
-  .jsSettings(jsEnvironment)
-  .dependsOn(core)
-  .dependsOn(coreTests % "compile->compile;test->test")
-
-
-lazy val sqlH2 = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Full)
-  .in(file("sql/h2"))
-  .settings(name := "molecule-sql-h2")
-  .settings(testFrameworks := testingFrameworks)
-  .settings(doPublish)
-  .settings(compilerArgs)
-  .jsSettings(jsEnvironment)
-  .jvmSettings(
-    libraryDependencies ++= Seq(
-      "com.h2database" % "h2" % "2.2.224"
-    )
-  )
-  .dependsOn(sqlCore)
-  .dependsOn(coreTests % "compile->compile;test->test")
-
-
-lazy val sqlMariadb = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Full)
-  .in(file("sql/mariadb"))
-  .settings(name := "molecule-sql-mariadb")
-  .settings(doPublish)
-  .settings(compilerArgs)
-  .settings(testFrameworks := testingFrameworks)
-  .jsSettings(jsEnvironment)
-  .jvmSettings(
-    libraryDependencies ++= Seq(
-      "com.dimafeng" %% "testcontainers-scala-mariadb" % testContainerVersion,
-      "org.mariadb.jdbc" % "mariadb-java-client" % "3.3.3",
-      "ch.qos.logback" % "logback-classic" % logbackVersion % Test
-    ),
-    Test / fork := true
-  )
-  .dependsOn(sqlCore)
-  .dependsOn(coreTests % "compile->compile;test->test")
-
-
-lazy val sqlMysql = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Full)
-  .in(file("sql/mysql"))
-  .settings(name := "molecule-sql-mysql")
-  .settings(doPublish)
-  .settings(compilerArgs)
-  .settings(testFrameworks := testingFrameworks)
-  .jsSettings(jsEnvironment)
-  .jvmSettings(
-    libraryDependencies ++= Seq(
-      "com.dimafeng" %% "testcontainers-scala-mysql" % testContainerVersion,
-      "mysql" % "mysql-connector-java" % "8.0.33",
-    ),
-  )
-  .dependsOn(sqlCore)
-  .dependsOn(coreTests % "compile->compile;test->test")
-
-
-lazy val sqlPostgres = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Full)
-  .in(file("sql/postgres"))
-  .settings(name := "molecule-sql-postgres")
-  .settings(doPublish)
-  .settings(compilerArgs)
-  .settings(testFrameworks := testingFrameworks)
-  .jsSettings(jsEnvironment)
-  .jvmSettings(
-    libraryDependencies ++= Seq(
-      "com.dimafeng" %% "testcontainers-scala-postgresql" % testContainerVersion,
-      "org.postgresql" % "postgresql" % "42.7.2",
-      "ch.qos.logback" % "logback-classic" % logbackVersion % Test
-    ),
-  )
-  .dependsOn(sqlCore)
-  .dependsOn(coreTests % "compile->compile;test->test")
+//lazy val documentMongodb = crossProject(JSPlatform, JVMPlatform)
+//  .crossType(CrossType.Full)
+//  .in(file("document/mongodb"))
+//  .settings(name := "molecule-document-mongodb")
+//  .settings(doPublish)
+//  .settings(compilerArgs)
+//  .settings(testFrameworks := testingFrameworks)
+//  .jsSettings(jsEnvironment)
+//  .jvmSettings(
+//    libraryDependencies ++= Seq(
+//      "org.testcontainers" % "mongodb" % "1.19.6",
+//      "org.mongodb" % "mongodb-driver-sync" % "4.11.1",
+//      "ch.qos.logback" % "logback-classic" % logbackVersion % Test
+//    ),
+//  )
+//  .dependsOn(core)
+//  .dependsOn(coreTests % "compile->compile;test->test")
+//
+//
+//
+//lazy val graphql = crossProject(JSPlatform, JVMPlatform)
+//  .crossType(CrossType.Full)
+//  .in(file("graphql/client"))
+//  .settings(name := "molecule-graphql-client")
+//  .settings(doPublish)
+//  .settings(compilerArgs)
+//  .enablePlugins(MoleculePlugin)
+//  .settings(
+//    // Generate Molecule boilerplate code for tests with `sbt clean compile -Dmolecule=true`
+//    moleculePluginActive := sys.props.get("molecule").contains("true"),
+//    //    moleculeMakeJars := !sys.props.get("moleculeJars").contains("false"), // default: true
+//    moleculeMakeJars := false, // default: true
+//
+//    // Multiple directories with data models
+//    moleculeDataModelPaths := Seq(
+//      "molecule/graphql/client"
+//    ),
+//
+//    // Suppress "un-used" keys warning
+//    Global / excludeLintKeys ++= Set(
+//      moleculePluginActive,
+//      moleculeDataModelPaths,
+//      moleculeMakeJars
+//    ),
+//
+//    // Let IntelliJ detect sbt-molecule-created jars in unmanaged lib directories
+//    exportJars := true,
+//
+//    // Find scala version specific jars in respective libs
+//    unmanagedBase := {
+//      CrossVersion.partialVersion(scalaVersion.value) match {
+//        case Some((2, 13)) => file(unmanagedBase.value.getPath ++ "/2.13")
+//        case Some((2, 12)) => file(unmanagedBase.value.getPath ++ "/2.12")
+//        case _             => file(unmanagedBase.value.getPath ++ "/3.3")
+//      }
+//    },
+//    //    testFrameworks += new TestFramework("utest.runner.Framework"),
+//  )
+//  .settings(testFrameworks := testingFrameworks)
+//  .settings(
+//    libraryDependencies ++= Seq(
+//      "com.github.ghostdogpr" %% "caliban-tools" % "2.5.2",
+//      "com.github.ghostdogpr" %% "caliban-client" % "2.5.2",
+//    ),
+//  )
+//  .jsSettings(jsEnvironment)
+//  .dependsOn(coreTests % "compile->compile;test->test")
+//
+//lazy val sqlCore = crossProject(JSPlatform, JVMPlatform)
+//  .crossType(CrossType.Full)
+//  .in(file("sql/core"))
+//  .settings(name := "molecule-sql-core")
+//  .settings(doPublish)
+//  .settings(compilerArgs)
+//  .settings(testFrameworks := testingFrameworks)
+//  .jsSettings(jsEnvironment)
+//  .dependsOn(core)
+//  .dependsOn(coreTests % "compile->compile;test->test")
+//
+//
+//lazy val sqlH2 = crossProject(JSPlatform, JVMPlatform)
+//  .crossType(CrossType.Full)
+//  .in(file("sql/h2"))
+//  .settings(name := "molecule-sql-h2")
+//  .settings(testFrameworks := testingFrameworks)
+//  .settings(doPublish)
+//  .settings(compilerArgs)
+//  .jsSettings(jsEnvironment)
+//  .jvmSettings(
+//    libraryDependencies ++= Seq(
+//      "com.h2database" % "h2" % "2.2.224"
+//    )
+//  )
+//  .dependsOn(sqlCore)
+//  .dependsOn(coreTests % "compile->compile;test->test")
+//
+//
+//lazy val sqlMariadb = crossProject(JSPlatform, JVMPlatform)
+//  .crossType(CrossType.Full)
+//  .in(file("sql/mariadb"))
+//  .settings(name := "molecule-sql-mariadb")
+//  .settings(doPublish)
+//  .settings(compilerArgs)
+//  .settings(testFrameworks := testingFrameworks)
+//  .jsSettings(jsEnvironment)
+//  .jvmSettings(
+//    libraryDependencies ++= Seq(
+//      "com.dimafeng" %% "testcontainers-scala-mariadb" % testContainerVersion,
+//      "org.mariadb.jdbc" % "mariadb-java-client" % "3.3.3",
+//      "ch.qos.logback" % "logback-classic" % logbackVersion % Test
+//    ),
+//    Test / fork := true
+//  )
+//  .dependsOn(sqlCore)
+//  .dependsOn(coreTests % "compile->compile;test->test")
+//
+//
+//lazy val sqlMysql = crossProject(JSPlatform, JVMPlatform)
+//  .crossType(CrossType.Full)
+//  .in(file("sql/mysql"))
+//  .settings(name := "molecule-sql-mysql")
+//  .settings(doPublish)
+//  .settings(compilerArgs)
+//  .settings(testFrameworks := testingFrameworks)
+//  .jsSettings(jsEnvironment)
+//  .jvmSettings(
+//    libraryDependencies ++= Seq(
+//      "com.dimafeng" %% "testcontainers-scala-mysql" % testContainerVersion,
+//      "mysql" % "mysql-connector-java" % "8.0.33",
+//    ),
+//  )
+//  .dependsOn(sqlCore)
+//  .dependsOn(coreTests % "compile->compile;test->test")
+//
+//
+//lazy val sqlPostgres = crossProject(JSPlatform, JVMPlatform)
+//  .crossType(CrossType.Full)
+//  .in(file("sql/postgres"))
+//  .settings(name := "molecule-sql-postgres")
+//  .settings(doPublish)
+//  .settings(compilerArgs)
+//  .settings(testFrameworks := testingFrameworks)
+//  .jsSettings(jsEnvironment)
+//  .jvmSettings(
+//    libraryDependencies ++= Seq(
+//      "com.dimafeng" %% "testcontainers-scala-postgresql" % testContainerVersion,
+//      "org.postgresql" % "postgresql" % "42.7.2",
+//      "ch.qos.logback" % "logback-classic" % logbackVersion % Test
+//    ),
+//  )
+//  .dependsOn(sqlCore)
+//  .dependsOn(coreTests % "compile->compile;test->test")
 
 
 lazy val testingFrameworks = Seq(
