@@ -96,6 +96,9 @@ object Validation extends DataModel(5) {
     val uriSeq            = seqURI.validate(_.toString.length > 3)
     val shortSeq          = seqShort.validate(_ > 3)
     val charSeq           = seqChar.validate(_ > 'c')
+
+    // Validation not supported for map attributes
+    // val intMap = mapInt.validate(_ > 3)
   }
 
   trait Constants {

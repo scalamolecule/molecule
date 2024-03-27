@@ -1,6 +1,5 @@
 package molecule.coreTests.spi.crud.update.map
 
-import molecule.base.error.ModelError
 import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
@@ -8,6 +7,7 @@ import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
+import scala.concurrent.Future
 
 trait UpdateMap_filter extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
@@ -73,11 +73,8 @@ trait UpdateMap_filter extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Update filter value itself" - types { implicit conn =>
       for {
-        _ <- Ns.intMap_(Map(pint1)).intMap(Map(pint1)).update.transact
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can only lookup entity with card-one attribute value. Found:\n" +
-              s"""AttrMapTacInt("Ns", "intMap", Eq, Map($pint1), None, None, Nil, Nil, None, None, Seq(0, 76))"""
-          }
+        // Can't use map attributes as filter attributes
+        _ <- Future(compileError("Ns.intMap_(Map(pint1)).intMap(Map(pint1)).update.transact"))
       } yield ()
     }
 

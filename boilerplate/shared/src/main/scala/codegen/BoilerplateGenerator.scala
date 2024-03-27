@@ -20,7 +20,7 @@ object BoilerplateGenerator extends App {
   //  boilerplate.api.expression._ExprSeqOpt.generate()
   //  boilerplate.api.expression._ExprSeqTac.generate()
   //
-    boilerplate.api.expression._ExprMapMan.generate()
+  //  boilerplate.api.expression._ExprMapMan.generate()
   //  boilerplate.api.expression._ExprMapOpt.generate()
   //  boilerplate.api.expression._ExprMapTac.generate()
   //

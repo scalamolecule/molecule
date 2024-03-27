@@ -20,144 +20,66 @@ import scala.language.implicitConversions
 object AdhocJVM_datomic extends TestSuite_datomic {
 
 
-
-val x = new java.util.Vector[Any]
-x.add("a")
-x.add(1)
-
-val y = new java.util.Vector[Any]
-y.add("b")
-y.add(2)
-//  val z: util.List[Int] = Vector(1, 2).asJava
-
+  val (a1, b2) = ("a" -> int1, "b" -> int2)
+  val (b3, c4) = ("b" -> int3, "c" -> int4)
 
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
-
-      //      // Get map
-      //      val a1: Future[List[Map[String, Int]]] = Ns.intMap.query.get
-      //
-      //      // Delete map
-      //      val a2: Future[List[Map[String, Int]]] = Ns.intMap.apply().query.get
-      //      val a3: Future[List[Int]]              = Ns.intMap_.apply().i.query.get
-      //
-      //
-      //      // value of "en" (as calling apply with a key on a Scala Map)
-      //      val b0: Future[List[Int]] = Ns.intMap.apply("en").query.get
-      //
-      //      // Optional value of "en" (as calling get with a key on a Scala Map)
-      //      val b3: Future[List[Option[Int]]] = Ns.intMap_?.apply("en").query.get
-      //
-      //      // maps having certain key(s)
-      //      val b4: Future[List[String]] = Ns.intMap_.apply("en", "fr", "da").s.query.get
-      //      val b5: Future[List[String]] = Ns.intMap_.apply(Seq("en", "fr", "da")).s.query.get
-      //
-      //
-      //      // maps without certain key(s)
-      //      val d1: Future[List[Map[String, Int]]] = Ns.intMap.not("en", "da").query.get
-      //      val d2: Future[List[Map[String, Int]]] = Ns.intMap.not(Seq("en", "da")).query.get
-      //
-      //      val d3: Future[List[Int]] = Ns.intMap_.not("en", "da").i.query.get
-      //      val d4: Future[List[Int]] = Ns.intMap_.not(Seq("en", "da")).i.query.get
-      //
-      //      //      val d5: Future[List[Option[Map[String, Int]]]] = Ns.intMap_?.not("en", "da").query.get
-      //      //      val d6: Future[List[Option[Map[String, Int]]]] = Ns.intMap_?.not(Seq("en", "da")).query.get
-      //
-      //
-      //      // Has certain value(s)
-      //      val e1: Future[List[Map[String, Int]]] = Ns.intMap.has(42, 43).query.get
-      //      val e2: Future[List[Map[String, Int]]] = Ns.intMap.has(Seq(1, 2)).query.get
-      //
-      //      val e3: Future[List[Int]] = Ns.intMap_.has(42, 43).i.query.get
-      //      val e4: Future[List[Int]] = Ns.intMap_.has(Seq(1, 2)).i.query.get
-      //
-      //
-      //      // Has no such value(s)
-      //      val f1: Future[List[Map[String, Int]]] = Ns.intMap.hasNo(42, 43).query.get
-      //      val f2: Future[List[Map[String, Int]]] = Ns.intMap.hasNo(Seq(1, 2)).query.get
-      //
-      //      val f3: Future[List[Int]] = Ns.intMap_.hasNo(42, 43).i.query.get
-      //      val f4: Future[List[Int]] = Ns.intMap_.hasNo(Seq(1, 2)).i.query.get
-      //
-      //
-      //      // overwrites existing key(s)
-      //      val h1: Future[List[Map[String, Int]]] = Ns.intMap.add("en" -> 1, "da" -> 2).query.get
-      //      val h2: Future[List[Map[String, Int]]] = Ns.intMap.add(Seq("en" -> 1, "da" -> 2)).query.get
-      //
-      //      val i1: Future[List[Int]] = Ns.intMap.remove("en", "da").query.get
-      //      val i2: Future[List[Int]] = Ns.intMap.remove(Seq("en", "da")).query.get
-      //
-      //      // Match map ? (primarily used for crud
-      //      val j2: Future[List[Map[String, Int]]] = Ns.intMap(Map("en" -> 1, "da" -> 2)).query.get
-      //      //      val j2: Future[List[Map[String, Int]]] = Ns.intMap(Map("en" -> 1, "da" -> 2)).query.get
-      //
-      //      // Replace map
-      //      val j3: Future[TxReport] = Ns(42).intMap.apply(Map("en" -> 1, "da" -> 2)).update.transact
-      //      val j4: Future[TxReport] = Ns(42).i(1).intMap_.apply(Map("en" -> 1, "da" -> 2)).update.transact
-
-
-      //      val k2 = Ns.intMap.apply(min).query.get
-
-      //      val j1: Future[List[Map[String, Int]]] = Ns.intMap.apply(Ns.intMap).int.query.get
-
-
-      //      val k1: Future[List[Set[Int]]] = Ns.intSet.add(1).query.get
-
-      val a = (1, Map("a" -> int1, "b" -> int2))
-      val b = (2, Map("a" -> int2, "b" -> int3, "c" -> int4))
+      val aFalse = "a" -> boolean1
+      val bFalse = "b" -> boolean1
+      val cTrue  = "c" -> boolean2
       for {
-        _ <- Ns.i.intMap.insert(List(a, b)).transact
+        _ <- Ns.i.booleanMap.insert(List(
+          (1, Map(aFalse)),
+          (2, Map(bFalse, cTrue)),
+        )).transact
 
+        // OBS: Not that since only 2 Boolean values exist, the value tests are layed out differently to test
+
+        // "Map contains this OR that value"
+        _ <- Ns.i.a1.booleanMap_.hasNo(boolean1).query.get.map(_ ==> List())
+        _ <- Ns.i.a1.booleanMap_.hasNo(boolean2).query.get.map(_ ==> List(1))
+        _ <- Ns.i.a1.booleanMap_.hasNo(boolean1, boolean2).query.get.map(_ ==> List())
+        // Same as
+        _ <- Ns.i.a1.booleanMap_.hasNo(List(boolean1)).query.get.map(_ ==> List())
+        _ <- Ns.i.a1.booleanMap_.hasNo(List(boolean2)).query.get.map(_ ==> List(1))
+        _ <- Ns.i.a1.booleanMap_.hasNo(List(boolean1, boolean2)).query.get.map(_ ==> List())
+
+        // Empty Seq of values matches nothing
+        _ <- Ns.i.a1.booleanMap_.hasNo(List.empty[Boolean]).query.get.map(_ ==> List(1, 2))
+
+        // Combine with retrieval
+        _ <- Ns.i.a1.booleanMap.booleanMap_.hasNo(boolean1).query.get.map(_ ==> List())
+        _ <- Ns.i.a1.booleanMap.booleanMap_.hasNo(boolean2).query.get.map(_ ==> List((1, Map(aFalse))))
+        _ <- Ns.i.a1.booleanMap.booleanMap_.hasNo(boolean1, boolean2).query.get.map(_ ==> List())
 
 
         _ = {
           println("----------- 1")
           val res = datomic.Peer.q(
-            """[:find  ?b ?c2 ?c
-              | :in    $ ?c2
+            """[:find  ?b
+              | :in    $ ?c1
               | :where [?a :Ns/i ?b]
-              |        [?a :Ns/intMap _]
+              |        [?a :Ns/booleanMap _]
               |        [(datomic.api/q
-              |          "[:find (distinct ?c-pair)
-              |            :in $ ?a
-              |            :where [?a :Ns/intMap ?c]
-              |                   [?c :Ns.intMap/k_ ?c-k]
-              |                   [?c :Ns.intMap/v_ ?c-v]
-              |                   [(vector ?c-k ?c-v) ?c-pair]
-              |
-              |
-              |                   ]" $ ?a) [[?c]]]
-              |        ;;[(= (set ?c) (set ?c2)) ?x]
-              |        ;;[(clojure.set/intersection ?c ?c2) ?y]
-              |        ;;[(map vector ?c2) ?y]
-              |        ;;[(.contains ?c2 ?c) ?x]
-              |        ]
+              |          "[:find (distinct ?c)
+              |            :in $ ?a [?c1 ...]
+              |            :where [?a :Ns/booleanMap ?c]
+              |                   [?c :Ns.booleanMap/v_ ?c1]]" $ ?a ?c1) [[?c2]]]]
               |""".stripMargin, conn.db,
             //            Seq(true, false).asJava
-//            Seq(Set(List("a", 1).asJava, List("b", 2).asJava).asJava).asJava
-//            Set(List("a", 1).asJava, List("b", 2).asJava).asJava
-//            Set(x, y).asJava
-            Set(y, x).asJava
-//            """#{["b" 2] ["a" 1]}"""
+            //            Seq(Set(List("a", 1).asJava, List("b", 2).asJava).asJava).asJava
+            //            Set(List("a", 1).asJava, List("b", 2).asJava).asJava
+            //            Set(x, y).asJava
+            //            Set("c").asJava
+            Seq(true).asJava
+            //            "a"
           )
           res.forEach(r => println(r))
         }
-
-
-
-
-
-        _ <- Ns.i.a1.intMap(Map(pint1)).query.i.get.map(_ ==> List())
-        _ <- Ns.i.a1.intMap(Map(pint1, pint2)).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.intMap(Map(pint1, pint2, pint3)).query.get.map(_ ==> List())
-
-        _ <- Ns.i.a1.intMap(Map.empty[String, Int]).query.get.map(_ ==> List())
-
-        // Applying nothing matches nothing
-        _ <- Ns.i.a1.intMap().query.get.map(_ ==> List())
 
 
       } yield ()
@@ -167,41 +89,16 @@ y.add(2)
     "types2" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
-      val a = (1, Some(List(int1, int2)))
-      val b = (2, Some(List(int2, int3, int3)))
-      val c = (3, None)
+      val a = (1, List(int1, int2))
+      val b = (2, List(int2, int3, int3))
       for {
-        _ <- Ns.i.intSeq_?.insert(a, b, c).transact
-
-        //        // Non-exact Seq matches
-        //
-        //        // AND semantics
-        //        // "Not (exactly this AND that)"
-        //        _ <- Ns.i.a1.intSeq_?.not(Some(List(int1))).query.get.map(_ ==> List(a, b))
-        //        _ <- Ns.i.a1.intSeq_?.not(Some(List(int1, int2))).query.get.map(_ ==> List(b)) // exclude exact match
-        //        _ <- Ns.i.a1.intSeq_?.not(Some(List(int1, int2, int3))).query.get.map(_ ==> List(a, b))
-        //        // Same as
-        //        _ <- Ns.i.a1.intSeq_?.not(Some(List(List(int1)))).query.get.map(_ ==> List(a, b))
-        //        _ <- Ns.i.a1.intSeq_?.not(Some(List(List(int1, int2)))).query.get.map(_ ==> List(b))
-        //        _ <- Ns.i.a1.intSeq_?.not(Some(List(List(int1, int2, int3)))).query.get.map(_ ==> List(a, b))
-        //
-        //
-        //        // AND/OR semantics with multiple Seqs
-        //
-        //        // "NEITHER (exactly this AND that) NOR (exactly this AND that)"
-        //        _ <- Ns.i.a1.intSeq_?.not(Some(List(List(int1), List(int2, int3)))).query.get.map(_ ==> List(a, b))
-        //        _ <- Ns.i.a1.intSeq_?.not(Some(List(List(int1, int2), List(int2, int3)))).query.get.map(_ ==> List(b))
-        //        _ <- Ns.i.a1.intSeq_?.not(Some(List(List(int1, int2), List(int2, int3, int3)))).query.get.map(_ ==> List())
-        //
-        //        // Empty Seqs are ignored
-        //        _ <- Ns.i.a1.intSeq_?.not(Some(List(List(int1, int2), List.empty[Int]))).query.get.map(_ ==> List(b))
-        _ <- Ns.i.a1.intSeq_?.not(Some(List.empty[Int])).query.i.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.intSeq_?.not(Some(List.empty[List[Int]])).query.get.map(_ ==> List(a, b))
+        _ <- Ns.i.intSeq.insert(List(a, b)).transact
 
 
-        // Negation of None matches all asserted
-        _ <- Ns.i.a1.intSeq_?.not(Option.empty[List[Int]]).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.intSeq_?.not(Option.empty[List[List[Int]]]).query.get.map(_ ==> List(a, b))
+        // Applying nothing matches nothing
+        _ <- Ns.i.a1.intSeq().query.i.get.map(_ ==> List())
+
+
 
         //        _ = {
         //          println("----------- 2")
@@ -243,7 +140,7 @@ y.add(2)
         //          ).forEach(r => println(r))
         //        }
 
-        //        _ <- Ns.i.a1.intSeq_.has(List.empty[Int]).query.i.get.map(_ ==> List())
+        //        _ <- Ns.i.a1.intSeq_.hasNo(List.empty[Int]).query.i.get.map(_ ==> List())
 
 
       } yield ()

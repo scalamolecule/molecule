@@ -25,8 +25,8 @@ object _ExprMapOpt extends BoilerplateGenBase( "ExprMapOpt", "/api/expression") 
          |
          |trait $fileName_$arity[${`A..V`}, t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]]
          |  extends ${fileName}Ops_$arity[${`A..V`}, t, Ns1, Ns2]{
-         |  def apply(map: Option[Map[String, t]]): Ns1[${`A..V, `}        t] = _exprMapOpt(Eq, map)
-         |  def apply(key: String                ): Ns1[${`A..U, `}Option[t], t] = _exprMapOpK(Eq, key)
+         |  def apply(map: Option[Map[String, t]]): Ns1[${`A..V, `}        t] = _exprMapOpt(Eq , map)
+         |  def apply(key: String                ): Ns1[${`A..U, `}Option[t], t] = _exprMapOpK(Has, key)
          |}""".stripMargin
   }
 }

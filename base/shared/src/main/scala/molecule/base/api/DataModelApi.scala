@@ -99,28 +99,28 @@ trait DataModelApi {
   object oneShort extends oneShort
   object oneChar extends oneChar
 
-  trait oneString extends stringOptions[oneString, String]
-  trait oneInt extends Options[oneInt, Int, Int]
-  trait oneLong extends Options[oneLong, Long, Long]
-  trait oneFloat extends Options[oneFloat, Float, Float]
-  trait oneDouble extends Options[oneDouble, Double, Double]
-  trait oneBoolean extends Options[oneBoolean, Boolean, Boolean]
-  trait oneBigInt extends Options[oneBigInt, BigInt, BigInt]
-  trait oneBigDecimal extends Options[oneBigDecimal, BigDecimal, BigDecimal]
-  trait oneDate extends Options[oneDate, Date, Date]
-  trait oneDuration extends Options[oneDuration, Duration, Duration]
-  trait oneInstant extends Options[oneInstant, Instant, Instant]
-  trait oneLocalDate extends Options[oneLocalDate, LocalDate, LocalDate]
-  trait oneLocalTime extends Options[oneLocalTime, LocalTime, LocalTime]
-  trait oneLocalDateTime extends Options[oneLocalDateTime, LocalDateTime, LocalDateTime]
-  trait oneOffsetTime extends Options[oneOffsetTime, OffsetTime, OffsetTime]
-  trait oneOffsetDateTime extends Options[oneOffsetDateTime, OffsetDateTime, OffsetDateTime]
-  trait oneZonedDateTime extends Options[oneZonedDateTime, ZonedDateTime, ZonedDateTime]
-  trait oneUUID extends Options[oneUUID, UUID, UUID]
-  trait oneURI extends Options[oneURI, URI, URI]
-  trait oneByte extends Options[oneByte, Byte, Byte]
-  trait oneShort extends Options[oneShort, Short, Short]
-  trait oneChar extends Options[oneChar, Char, Char]
+  trait oneString extends stringOptions[oneString, String] with Validations[oneString, String]
+  trait oneInt extends Options[oneInt, Int, Int] with Validations[oneInt, Int]
+  trait oneLong extends Options[oneLong, Long, Long] with Validations[oneLong, Long]
+  trait oneFloat extends Options[oneFloat, Float, Float] with Validations[oneFloat, Float]
+  trait oneDouble extends Options[oneDouble, Double, Double] with Validations[oneDouble, Double]
+  trait oneBoolean extends Options[oneBoolean, Boolean, Boolean] with Validations[oneBoolean, Boolean]
+  trait oneBigInt extends Options[oneBigInt, BigInt, BigInt] with Validations[oneBigInt, BigInt]
+  trait oneBigDecimal extends Options[oneBigDecimal, BigDecimal, BigDecimal] with Validations[oneBigDecimal, BigDecimal]
+  trait oneDate extends Options[oneDate, Date, Date] with Validations[oneDate, Date]
+  trait oneDuration extends Options[oneDuration, Duration, Duration] with Validations[oneDuration, Duration]
+  trait oneInstant extends Options[oneInstant, Instant, Instant] with Validations[oneInstant, Instant]
+  trait oneLocalDate extends Options[oneLocalDate, LocalDate, LocalDate] with Validations[oneLocalDate, LocalDate]
+  trait oneLocalTime extends Options[oneLocalTime, LocalTime, LocalTime] with Validations[oneLocalTime, LocalTime]
+  trait oneLocalDateTime extends Options[oneLocalDateTime, LocalDateTime, LocalDateTime] with Validations[oneLocalDateTime, LocalDateTime]
+  trait oneOffsetTime extends Options[oneOffsetTime, OffsetTime, OffsetTime] with Validations[oneOffsetTime, OffsetTime]
+  trait oneOffsetDateTime extends Options[oneOffsetDateTime, OffsetDateTime, OffsetDateTime] with Validations[oneOffsetDateTime, OffsetDateTime]
+  trait oneZonedDateTime extends Options[oneZonedDateTime, ZonedDateTime, ZonedDateTime] with Validations[oneZonedDateTime, ZonedDateTime]
+  trait oneUUID extends Options[oneUUID, UUID, UUID] with Validations[oneUUID, UUID]
+  trait oneURI extends Options[oneURI, URI, URI] with Validations[oneURI, URI]
+  trait oneByte extends Options[oneByte, Byte, Byte] with Validations[oneByte, Byte]
+  trait oneShort extends Options[oneShort, Short, Short] with Validations[oneShort, Short]
+  trait oneChar extends Options[oneChar, Char, Char] with Validations[oneChar, Char]
 
 
   object setString extends setString
@@ -148,28 +148,28 @@ trait DataModelApi {
   object setShort extends setShort
   object setChar extends setChar
 
-  trait setString extends stringOptions[setString, Set[String]]
-  trait setInt extends Options[setInt, Set[Int], Int]
-  trait setLong extends Options[setLong, Set[Long], Long]
-  trait setFloat extends Options[setFloat, Set[Float], Float]
-  trait setDouble extends Options[setDouble, Set[Double], Double]
-  trait setBoolean extends Options[setBoolean, Set[Boolean], Boolean]
-  trait setBigInt extends Options[setBigInt, Set[BigInt], BigInt]
-  trait setBigDecimal extends Options[setBigDecimal, Set[BigDecimal], BigDecimal]
-  trait setDate extends Options[setDate, Set[Date], Date]
-  trait setDuration extends Options[setDuration, Set[Duration], Duration]
-  trait setInstant extends Options[setInstant, Set[Instant], Instant]
-  trait setLocalDate extends Options[setLocalDate, Set[LocalDate], LocalDate]
-  trait setLocalTime extends Options[setLocalTime, Set[LocalTime], LocalTime]
-  trait setLocalDateTime extends Options[setLocalDateTime, Set[LocalDateTime], LocalDateTime]
-  trait setOffsetTime extends Options[setOffsetTime, Set[OffsetTime], OffsetTime]
-  trait setOffsetDateTime extends Options[setOffsetDateTime, Set[OffsetDateTime], OffsetDateTime]
-  trait setZonedDateTime extends Options[setZonedDateTime, Set[ZonedDateTime], ZonedDateTime]
-  trait setUUID extends Options[setUUID, Set[UUID], UUID]
-  trait setURI extends Options[setURI, Set[URI], URI]
-  trait setByte extends Options[setByte, Set[Byte], Byte]
-  trait setShort extends Options[setShort, Set[Short], Short]
-  trait setChar extends Options[setChar, Set[Char], Char]
+  trait setString extends stringOptions[setString, Set[String]]  with Validations[oneString, String]
+  trait setInt extends Options[setInt, Set[Int], Int] with Validations[oneInt, Int]
+  trait setLong extends Options[setLong, Set[Long], Long] with Validations[oneLong, Long]
+  trait setFloat extends Options[setFloat, Set[Float], Float] with Validations[oneFloat, Float]
+  trait setDouble extends Options[setDouble, Set[Double], Double] with Validations[oneDouble, Double]
+  trait setBoolean extends Options[setBoolean, Set[Boolean], Boolean] with Validations[oneBoolean, Boolean]
+  trait setBigInt extends Options[setBigInt, Set[BigInt], BigInt] with Validations[oneBigInt, BigInt]
+  trait setBigDecimal extends Options[setBigDecimal, Set[BigDecimal], BigDecimal] with Validations[oneBigDecimal, BigDecimal]
+  trait setDate extends Options[setDate, Set[Date], Date] with Validations[oneDate, Date]
+  trait setDuration extends Options[setDuration, Set[Duration], Duration] with Validations[oneDuration, Duration]
+  trait setInstant extends Options[setInstant, Set[Instant], Instant] with Validations[oneInstant, Instant]
+  trait setLocalDate extends Options[setLocalDate, Set[LocalDate], LocalDate] with Validations[oneLocalDate, LocalDate]
+  trait setLocalTime extends Options[setLocalTime, Set[LocalTime], LocalTime] with Validations[oneLocalTime, LocalTime]
+  trait setLocalDateTime extends Options[setLocalDateTime, Set[LocalDateTime], LocalDateTime] with Validations[oneLocalDateTime, LocalDateTime]
+  trait setOffsetTime extends Options[setOffsetTime, Set[OffsetTime], OffsetTime] with Validations[oneOffsetTime, OffsetTime]
+  trait setOffsetDateTime extends Options[setOffsetDateTime, Set[OffsetDateTime], OffsetDateTime] with Validations[oneOffsetDateTime, OffsetDateTime]
+  trait setZonedDateTime extends Options[setZonedDateTime, Set[ZonedDateTime], ZonedDateTime] with Validations[oneZonedDateTime, ZonedDateTime]
+  trait setUUID extends Options[setUUID, Set[UUID], UUID] with Validations[oneUUID, UUID]
+  trait setURI extends Options[setURI, Set[URI], URI] with Validations[oneURI, URI]
+  trait setByte extends Options[setByte, Set[Byte], Byte] with Validations[oneByte, Byte]
+  trait setShort extends Options[setShort, Set[Short], Short] with Validations[oneShort, Short]
+  trait setChar extends Options[setChar, Set[Char], Char] with Validations[oneChar, Char]
 
 
   object seqString extends seqString
@@ -197,28 +197,28 @@ trait DataModelApi {
   object seqShort extends seqShort
   object seqChar extends seqChar
 
-  trait seqString extends stringOptions[seqString, Seq[String]]
-  trait seqInt extends Options[seqInt, Seq[Int], Int]
-  trait seqLong extends Options[seqLong, Seq[Long], Long]
-  trait seqFloat extends Options[seqFloat, Seq[Float], Float]
-  trait seqDouble extends Options[seqDouble, Seq[Double], Double]
-  trait seqBoolean extends Options[seqBoolean, Seq[Boolean], Boolean]
-  trait seqBigInt extends Options[seqBigInt, Seq[BigInt], BigInt]
-  trait seqBigDecimal extends Options[seqBigDecimal, Seq[BigDecimal], BigDecimal]
-  trait seqDate extends Options[seqDate, Seq[Date], Date]
-  trait seqDuration extends Options[seqDuration, Seq[Duration], Duration]
-  trait seqInstant extends Options[seqInstant, Seq[Instant], Instant]
-  trait seqLocalDate extends Options[seqLocalDate, Seq[LocalDate], LocalDate]
-  trait seqLocalTime extends Options[seqLocalTime, Seq[LocalTime], LocalTime]
-  trait seqLocalDateTime extends Options[seqLocalDateTime, Seq[LocalDateTime], LocalDateTime]
-  trait seqOffsetTime extends Options[seqOffsetTime, Seq[OffsetTime], OffsetTime]
-  trait seqOffsetDateTime extends Options[seqOffsetDateTime, Seq[OffsetDateTime], OffsetDateTime]
-  trait seqZonedDateTime extends Options[seqZonedDateTime, Seq[ZonedDateTime], ZonedDateTime]
-  trait seqUUID extends Options[seqUUID, Seq[UUID], UUID]
-  trait seqURI extends Options[seqURI, Seq[URI], URI]
-  trait arrayByte extends Options[arrayByte, Seq[Byte], Byte]
-  trait seqShort extends Options[seqShort, Seq[Short], Short]
-  trait seqChar extends Options[seqChar, Seq[Char], Char]
+  trait seqString extends stringOptions[seqString, Seq[String]] with Validations[oneString, String]
+  trait seqInt extends Options[seqInt, Seq[Int], Int] with Validations[oneInt, Int]
+  trait seqLong extends Options[seqLong, Seq[Long], Long] with Validations[oneLong, Long]
+  trait seqFloat extends Options[seqFloat, Seq[Float], Float] with Validations[oneFloat, Float]
+  trait seqDouble extends Options[seqDouble, Seq[Double], Double] with Validations[oneDouble, Double]
+  trait seqBoolean extends Options[seqBoolean, Seq[Boolean], Boolean] with Validations[oneBoolean, Boolean]
+  trait seqBigInt extends Options[seqBigInt, Seq[BigInt], BigInt] with Validations[oneBigInt, BigInt]
+  trait seqBigDecimal extends Options[seqBigDecimal, Seq[BigDecimal], BigDecimal] with Validations[oneBigDecimal, BigDecimal]
+  trait seqDate extends Options[seqDate, Seq[Date], Date] with Validations[oneDate, Date]
+  trait seqDuration extends Options[seqDuration, Seq[Duration], Duration] with Validations[oneDuration, Duration]
+  trait seqInstant extends Options[seqInstant, Seq[Instant], Instant] with Validations[oneInstant, Instant]
+  trait seqLocalDate extends Options[seqLocalDate, Seq[LocalDate], LocalDate] with Validations[oneLocalDate, LocalDate]
+  trait seqLocalTime extends Options[seqLocalTime, Seq[LocalTime], LocalTime] with Validations[oneLocalTime, LocalTime]
+  trait seqLocalDateTime extends Options[seqLocalDateTime, Seq[LocalDateTime], LocalDateTime] with Validations[oneLocalDateTime, LocalDateTime]
+  trait seqOffsetTime extends Options[seqOffsetTime, Seq[OffsetTime], OffsetTime] with Validations[oneOffsetTime, OffsetTime]
+  trait seqOffsetDateTime extends Options[seqOffsetDateTime, Seq[OffsetDateTime], OffsetDateTime] with Validations[oneOffsetDateTime, OffsetDateTime]
+  trait seqZonedDateTime extends Options[seqZonedDateTime, Seq[ZonedDateTime], ZonedDateTime] with Validations[oneZonedDateTime, ZonedDateTime]
+  trait seqUUID extends Options[seqUUID, Seq[UUID], UUID] with Validations[oneUUID, UUID]
+  trait seqURI extends Options[seqURI, Seq[URI], URI] with Validations[oneURI, URI]
+  trait arrayByte extends Options[arrayByte, Seq[Byte], Byte] with Validations[oneByte, Byte]
+  trait seqShort extends Options[seqShort, Seq[Short], Short] with Validations[oneShort, Short]
+  trait seqChar extends Options[seqChar, Seq[Char], Char] with Validations[oneChar, Char]
 
 
   object mapString extends mapString
@@ -335,13 +335,6 @@ trait DataModelApi {
     def descr(description: String): Self = ???
     def apply(description: String): Self = ???
 
-
-    // Validation .................
-
-    def validate(ok: BaseTpe => Boolean, errorMsg: String = ""): Self = ???
-    def validate(err2msg: PartialFunction[BaseTpe, String]): Self = ???
-
-
     // Allowed values (like enumerations)
     def enums(vs: BaseTpe*): Self = ???
     def enums(vs: Seq[BaseTpe], failureMsg: String): Self = ???
@@ -354,8 +347,14 @@ trait DataModelApi {
   }
 
 
+  trait Validations[Self, BaseTpe] {
+    def validate(ok: BaseTpe => Boolean, errorMsg: String = ""): Self = ???
+    def validate(err2msg: PartialFunction[BaseTpe, String]): Self = ???
+  }
+
+
   trait stringOptions[Self, Tpe] extends Options[Self, Tpe, String] {
-    // Enable fulltext search
+    // Enable fulltext search (for those data sources that supports it)
     val fulltext: Self = ???
 
     // Validation .................
@@ -404,7 +403,6 @@ trait DataModelApi {
 
     // Tupled attributes
     def require(attrs: Requierable*): Self = ???
-
   }
 }
 

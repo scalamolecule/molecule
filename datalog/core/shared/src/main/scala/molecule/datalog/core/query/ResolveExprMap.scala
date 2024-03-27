@@ -1,13 +1,11 @@
 package molecule.datalog.core.query
 
-import java.lang
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.core.util.JavaConversions
 import scala.reflect.ClassTag
 
 trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl] with LambdasMap =>
-
 
   protected def resolveAttrMapMan(es: List[Var], attr: AttrMapMan): List[Var] = {
     aritiesAttr()
@@ -78,28 +76,28 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     val e = es.last
     attr match {
       case at: AttrMapOptID             => noId
-      case at: AttrMapOptString         => opt(attr, e, at.op, at.vs, resOptMapString, resMapString)
-      case at: AttrMapOptInt            => opt(attr, e, at.op, at.vs, resOptMapInt, resMapInt)
-      case at: AttrMapOptLong           => opt(attr, e, at.op, at.vs, resOptMapLong, resMapLong)
-      case at: AttrMapOptFloat          => opt(attr, e, at.op, at.vs, resOptMapFloat, resMapFloat)
-      case at: AttrMapOptDouble         => opt(attr, e, at.op, at.vs, resOptMapDouble, resMapDouble)
-      case at: AttrMapOptBoolean        => opt(attr, e, at.op, at.vs, resOptMapBoolean, resMapBoolean)
-      case at: AttrMapOptBigInt         => opt(attr, e, at.op, at.vs, resOptMapBigInt, resMapBigInt)
-      case at: AttrMapOptBigDecimal     => opt(attr, e, at.op, at.vs, resOptMapBigDecimal, resMapBigDecimal)
-      case at: AttrMapOptDate           => opt(attr, e, at.op, at.vs, resOptMapDate, resMapDate)
-      case at: AttrMapOptDuration       => opt(attr, e, at.op, at.vs, resOptMapDuration, resMapDuration)
-      case at: AttrMapOptInstant        => opt(attr, e, at.op, at.vs, resOptMapInstant, resMapInstant)
-      case at: AttrMapOptLocalDate      => opt(attr, e, at.op, at.vs, resOptMapLocalDate, resMapLocalDate)
-      case at: AttrMapOptLocalTime      => opt(attr, e, at.op, at.vs, resOptMapLocalTime, resMapLocalTime)
-      case at: AttrMapOptLocalDateTime  => opt(attr, e, at.op, at.vs, resOptMapLocalDateTime, resMapLocalDateTime)
-      case at: AttrMapOptOffsetTime     => opt(attr, e, at.op, at.vs, resOptMapOffsetTime, resMapOffsetTime)
-      case at: AttrMapOptOffsetDateTime => opt(attr, e, at.op, at.vs, resOptMapOffsetDateTime, resMapOffsetDateTime)
-      case at: AttrMapOptZonedDateTime  => opt(attr, e, at.op, at.vs, resOptMapZonedDateTime, resMapZonedDateTime)
-      case at: AttrMapOptUUID           => opt(attr, e, at.op, at.vs, resOptMapUUID, resMapUUID)
-      case at: AttrMapOptURI            => opt(attr, e, at.op, at.vs, resOptMapURI, resMapURI)
-      case at: AttrMapOptByte           => opt(attr, e, at.op, at.vs, resOptMapByte, resMapByte)
-      case at: AttrMapOptShort          => opt(attr, e, at.op, at.vs, resOptMapShort, resMapShort)
-      case at: AttrMapOptChar           => opt(attr, e, at.op, at.vs, resOptMapChar, resMapChar)
+      case at: AttrMapOptString         => opt(attr, e, at.op, at.vs, resOptMapString)
+      case at: AttrMapOptInt            => opt(attr, e, at.op, at.vs, resOptMapInt)
+      case at: AttrMapOptLong           => opt(attr, e, at.op, at.vs, resOptMapLong)
+      case at: AttrMapOptFloat          => opt(attr, e, at.op, at.vs, resOptMapFloat)
+      case at: AttrMapOptDouble         => opt(attr, e, at.op, at.vs, resOptMapDouble)
+      case at: AttrMapOptBoolean        => opt(attr, e, at.op, at.vs, resOptMapBoolean)
+      case at: AttrMapOptBigInt         => opt(attr, e, at.op, at.vs, resOptMapBigInt)
+      case at: AttrMapOptBigDecimal     => opt(attr, e, at.op, at.vs, resOptMapBigDecimal)
+      case at: AttrMapOptDate           => opt(attr, e, at.op, at.vs, resOptMapDate)
+      case at: AttrMapOptDuration       => opt(attr, e, at.op, at.vs, resOptMapDuration)
+      case at: AttrMapOptInstant        => opt(attr, e, at.op, at.vs, resOptMapInstant)
+      case at: AttrMapOptLocalDate      => opt(attr, e, at.op, at.vs, resOptMapLocalDate)
+      case at: AttrMapOptLocalTime      => opt(attr, e, at.op, at.vs, resOptMapLocalTime)
+      case at: AttrMapOptLocalDateTime  => opt(attr, e, at.op, at.vs, resOptMapLocalDateTime)
+      case at: AttrMapOptOffsetTime     => opt(attr, e, at.op, at.vs, resOptMapOffsetTime)
+      case at: AttrMapOptOffsetDateTime => opt(attr, e, at.op, at.vs, resOptMapOffsetDateTime)
+      case at: AttrMapOptZonedDateTime  => opt(attr, e, at.op, at.vs, resOptMapZonedDateTime)
+      case at: AttrMapOptUUID           => opt(attr, e, at.op, at.vs, resOptMapUUID)
+      case at: AttrMapOptURI            => opt(attr, e, at.op, at.vs, resOptMapURI)
+      case at: AttrMapOptByte           => opt(attr, e, at.op, at.vs, resOptMapByte)
+      case at: AttrMapOptShort          => opt(attr, e, at.op, at.vs, resOptMapShort)
+      case at: AttrMapOptChar           => opt(attr, e, at.op, at.vs, resOptMapChar)
     }
     es
   }
@@ -116,87 +114,61 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
   }
   private def nsAttr(attr: Attr): String = s":${attr.ns}/${attr.attr}"
 
-  private def man[T: ClassTag](
+  private def man[T](
     attr: Attr, e: Var,
     map: Map[String, T],
     resMap: ResMap[T],
   ): Unit = {
     val v = vv
     find += v
-    addCast(resMap.j2sMap)
-    //    expr(false, attr, e, v, attr.op, map, resMap)
-
     attr.op match {
-      case V       => attrV(false, attr, e, v)
-      case Has     => has(false, attr, e, v, map, resMap)
+      case V       => attrV(attr, e, v, resMap)
+      case Has     => key2value(attr, e, v, map.head._1, resMap)
+      case NoValue => noMatch(attr, e, v, resMap)
       case Eq      => throw ModelError(
         s"Matching/applying a map for map attribute `${attr.cleanName}` is not supported in queries."
       )
-//      case Neq     => throw ModelError("Matching the whole Map is not supported for map attributes.")
-//      case HasNo   => throw ModelError("Matching the whole Map is not supported for map attributes.")
-//      case NoValue => throw ModelError("Matching the whole Map is not supported for map attributes.")
       case other   => unexpectedOp(other)
     }
   }
 
-  private def tac[T: ClassTag](
-    attr: Attr, e: Var,
-    map: Map[String, T],
-    resMap: ResMap[T],
-  ): Unit = {
-    val v = vv
-    //    expr(true, attr, e, v, attr.op, map, resMap)
-    attr.op match {
-      case V       => attrV(true, attr, e, v)
-      case Eq      => equal(attr, e, v, map, resMap)
-      case Neq     => neq(true, attr, e, v, map, resMap.s2j)
-      case Has     => has(true, attr, e, v, map, resMap)
-      case HasNo   => hasNo(attr, e, v, map, resMap)
-      case NoValue => noValue(attr, e)
-      case other   => unexpectedOp(other)
-    }
-  }
-
-  //  private def expr[T: ClassTag](
-  //    tacit: Boolean,
-  //    attr: Attr, e: Var, v: Var, op: Op,
-  //    map: Map[String, T],
-  //    resMap: ResMap[T],
-  //  ): Unit = {
-  //    op match {
-  //      case V         => attrV(tacit, attr, e, v)
-  //      case Eq        => equal(attr, e, v, map, resMap)
-  //      case Neq       => neq(tacit, attr, e, v, map, resMap.s2j)
-  //      case Has       => has(tacit, attr, e, v, map, resMap)
-  //      case HasNo     => hasNo(attr, e, v, map, resMap)
-  //      case NoValue   => noValue(attr, e)
-  //      case other     => unexpectedOp(other)
-  //    }
-  //  }
-
-  private def opt[T: ClassTag](
+  private def opt[T](
     attr: Attr, e: Var, op: Op,
     optMap: Option[Map[String, T]],
     resMapOpt: ResMapOpt[T],
-    resMap: ResMap[T],
   ): Unit = {
     val v = vv
-    addCast(resMapOpt.j2optMap)
+    find += v
     op match {
-      case V     => optAttr(attr, e, v)
-      case Has   => optHas(attr, e, v, optMap, resMap)
-//      case Eq    => optEqual(attr, e, v, optMap, resMapOpt, resMap)
-//      case Neq   => optNeq(attr, e, v, optMap, resMapOpt, resMap)
-//      case HasNo => optHasNo(attr, e, v, optMap, resMap, resMapOpt)
+      case V     => optAttr(attr, e, v, resMapOpt)
+      case Has   => key2optValue(attr, e, v, optMap.get.head._1, resMapOpt)
+      case Eq    => throw ModelError(
+        s"Matching/applying a map for map attribute `${attr.cleanName}` is not supported in queries."
+      )
       case other => unexpectedOp(other)
+    }
+  }
+
+  private def tac[T](
+    attr: Attr, e: Var, map: Map[String, T], resMap: ResMap[T],
+  ): Unit = {
+    val v = vv
+    attr.op match {
+      case V       => attrV(attr, e, v, resMap)
+      case Eq      => containsKeys(attr, e, v, map)
+      case Neq     => containsNoKeys(attr, e, v, map)
+      case Has     => hasValues(attr, e, v, map, resMap)
+      case HasNo   => hasNoValues(attr, e, v, map, resMap)
+      case NoValue => nonAsserted(attr, e)
+      case other   => unexpectedOp(other)
     }
   }
 
 
   // attr ----------------------------------------------------------------------
 
-  private def attrV(
-    tacit: Boolean, attr: Attr, e: Var, v: Var
+  private def attrV[T](
+    attr: Attr, e: Var, v: Var, resMap: ResMap[T]
   ): Unit = {
     val (a, ak, av, k_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
     where += s"[$e $a _]" -> wClause
@@ -208,294 +180,147 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
          |                   [$v $ak $k_]
          |                   [$v $av $v_]
          |                   [(vector $k_ $v_) $pair]]" $$ $e) [[$v]]]""".stripMargin -> wClause
-    if (tacit) {
-      widh += v // Don't coalesce List to Set
-    }
+    addCast(resMap.j2sMap)
   }
 
-  private def optAttr(
-    attr: Attr, e: Var, v: Var
+  private def optAttr[T](
+    attr: Attr, e: Var, v: Var, resMapOpt: ResMapOpt[T]
   ): Unit = {
     val (a, ak, av, k_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
-    find += v3
+    where +=
+      s"""[(datomic.api/q
+         |          "[:find (pull $e [{($a :limit nil) [$ak $av]}])
+         |            :in $$ $e]" $$ $e) [[$v1]]]""".stripMargin -> wClause
+    where += s"[(if (nil? $v1) {$a []} $v1) $v2]" -> wClause
+    where += s"[($a $v2) $v]" -> wClause
+    addCast(resMapOpt.j2optMap)
+  }
+
+
+  // value lookup by key ------------------------------------------------------------------------
+
+  private def key2value[T](
+    attr: Attr, e: Var, v: Var, key: String, resMap: ResMap[T]
+  ): Unit = {
+    val (a, ak, av, k_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
+    where += s"[$e $a $v1]" -> wClause
+    where += s"[$v1 $ak \"$key\"]" -> wClause
+    where += s"[$v1 $av $v]" -> wClause
+    addCast(resMap.j2s)
+  }
+
+
+  private def key2optValue[T](
+    attr: Attr, e: Var, v: Var, key: String, resMapOpt: ResMapOpt[T]
+  ): Unit = {
+    val (a, ak, av, k_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
     where +=
       s"""[(datomic.api/q
          |          "[:find (pull $e [{($a :limit nil) [$ak $av]}])
          |            :in $$ $e]" $$ $e) [[$v1]]]""".stripMargin -> wClause
     where += s"[(if (nil? $v1) {$a []} $v1) $v2]" -> wClause
     where += s"[($a $v2) $v3]" -> wClause
+    where += s"[(map vals $v3) $v4]" -> wClause
+    where += s"[(filter (fn [pair] (= (first pair) \"$key\")) $v4) $v5]" -> wClause
+    where += s"[(map second $v5) $v]" -> wClause
+    addCast(resMapOpt.j2optValue)
   }
 
 
-  // eq ------------------------------------------------------------------------
+  // tacit ------------------------------------------------------------------------
 
-  private def equal[T](
-    attr: Attr, e: Var, v: Var,
-    map: Map[String, T],
-    resMap: ResMap[T],
+  private def containsKeys[T](
+    attr: Attr, e: Var, v: Var, map: Map[String, T]
   ): Unit = {
     val (a, ak, av, k_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
-    //    val xx: lang.Iterable[Any]                            =  map.map(resMap.s2j).asJava
-    args += map.toList.map(pair => resMap.sPair2jVector(pair)).asJava
-    in += s"[$v2 ...]"
-    //    in += s"[[$v1]]"
+    args += map.keys.asJava
+    in += v1
     where += s"[$e $a _]" -> wClause
     where +=
       s"""[(datomic.api/q
-         |          "[:find (distinct $pair)
+         |          "[:find (distinct $v)
+         |            :in $$ $e [$v1 ...]
+         |            :where [$e $a $v]
+         |                   [$v $ak $v1]]" $$ $e $v1) [[$v2]]]""".stripMargin -> wClause
+  }
+
+
+  private def containsNoKeys[T](
+    attr: Attr, e: Var, v: Var, map: Map[String, T]
+  ): Unit = {
+    val (a, ak, av, k_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
+    args += map.keys.asJava
+    in += v1
+    where += s"[$e $a _]" -> wClause
+    where +=
+      s"""[(datomic.api/q
+         |          "[:find (distinct $k_)
          |            :in $$ $e
          |            :where [$e $a $v]
-         |                   [$v $ak $k_]
-         |                   [$v $av $v_]
-         |                   [(vector $k_ $v_) $pair]]" $$ $e) [[$v]]]""".stripMargin -> wClause
-    //    where += s"[(sort-by first $v1) $v2]" -> wClause
-    //    where += s"[(map second $v2) $v3]" -> wClause
-    where += s"[(= $v $v2)]" -> wClause
-  }
-
-  private def optEqual[T](
-    attr: Attr, e: Var, v: Var,
-    optMap: Option[Map[String, T]],
-    resMapOpt: ResMapOpt[T],
-    resMap: ResMap[T],
-  ): Unit = {
-    optMap.fold[Unit] {
-      none(attr, e, v)
-    } { maps =>
-      find += v + 3
-      equal(attr, e, v, maps, resMap)
-      replaceCast(resMapOpt.j2optMap)
-    }
+         |                   [$v $ak $k_]]" $$ $e) [[$v2]]]""".stripMargin -> wClause
+    where += s"[(set $v1) $v3]" -> wClause
+    where += s"[(clojure.set/intersection $v2 $v3) $v4]" -> wClause
+    where += s"[(empty? $v4)]" -> wClause
   }
 
 
-  // neq -----------------------------------------------------------------------
-
-  private def neq[T](
-    tacit: Boolean,
-    attr: Attr, e: Var, v: Var,
-    map: Map[String, T],
-    s2j: Any => Any,
+  private def hasValues[T](
+    attr: Attr, e: Var, v: Var, map: Map[String, T], resMap: ResMap[T]
   ): Unit = {
     val (a, ak, av, k_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
     if (map.nonEmpty) {
-      val blacklist   = v + "-blacklist"
-      val blacklisted = v + "-blacklisted"
-
-      // In both pre- and main query
+      args += map.values.map(resMap.s2j).asJava
+      in += v1
       where += s"[$e $a _]" -> wClause
-
-      // Pre-query
-      preArgs += map.map(s2j).asJava
-      preIn += s"[$v4 ...]"
-      // Find blacklisted entities that match input Maps
-      preWhere +=
-        s"""[(datomic.api/q
-           |          "[:find (distinct $pair)
-           |            :in $$ $e
-           |            :where [$e $a $v]
-           |                   [$v $ak $k_]
-           |                   [$v $av $v_]
-           |                   [(vector $k_ $v_) $pair]]" $$ $e) [[$v1]]]""".stripMargin -> wClause
-      preWhere += s"[(sort-by first $v1) $v2]" -> wClause
-      preWhere += s"[(map second $v2) $v3]" -> wClause
-      preWhere += s"[(= $v3 $v4)]" -> wClause
-
-      // Main query
-      inPost += blacklist
-      // filter out blacklisted entities
-      wherePost += s"[(contains? $blacklist $firstId) $blacklisted]" -> wClause
-      wherePost += s"[(not $blacklisted)]" -> wClause
-      // now get whitelisted list
-      wherePost +=
-        s"""[(datomic.api/q
-           |          "[:find (distinct $pair)
-           |            :in $$ $e
-           |            :where [$e $a $v]
-           |                   [$v $ak $k_]
-           |                   [$v $av $v_]
-           |                   [(vector $k_ $v_) $pair]]" $$ $e) [[$v1]]]""".stripMargin -> wClause
-      wherePost += s"[(sort-by first $v1) $v2]" -> wClause
-      wherePost += s"[(map second $v2) $v3]" -> wClause
-    } else {
-      // Get all
-      attrV(false, attr, e, v)
-    }
-    if (tacit) {
-      widh += v3 // Don't coalesce List to Set
-    }
-  }
-
-  private def optNeq[T](
-    attr: Attr, e: Var, v: Var,
-    optMap: Option[Map[String, T]],
-    resMapOpt: ResMapOpt[T],
-    resMap: ResMap[T],
-  ): Unit = {
-    optMap match {
-      case Some(maps) if maps.nonEmpty =>
-        find += v + 3
-        neq(false, attr, e, v, maps, resMap.s2j)
-        replaceCast(resMapOpt.j2optMap)
-
-      case _ =>
-        // Ignore empty maps
-        optWithoutNone(attr, e, v)
-    }
-  }
-
-
-  // has -----------------------------------------------------------------------
-
-  private def has[T: ClassTag](
-    tacit: Boolean,
-    attr: Attr, e: Var, v: Var,
-    map: Map[String, T],
-    resMap: ResMap[T],
-  ): Unit = {
-    val (a, ak, av, k_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
-    if (map.nonEmpty) {
-      args += map.map(resMap.s2j).asJava
-      in += v5
       where +=
         s"""[(datomic.api/q
-           |          "[:find (distinct $pair)
-           |            :in $$ $e
+           |          "[:find (distinct $v)
+           |            :in $$ $e [$v1 ...]
            |            :where [$e $a $v]
-           |                   [$v $ak $k_]
-           |                   [$v $av $v_]
-           |                   [(vector $k_ $v_) $pair]]" $$ $e) [[$v1]]]""".stripMargin -> wClause
-      where += s"[(sort-by first $v1) $v2]" -> wClause
-      where += s"[(map second $v2) $v3]" -> wClause
-      resMap.tpe match {
-        case "Boolean" =>
-          // Need to convert to sets of Strings for `some` to work on boolean false (maybe a bug?)
-          where += s"[(map str $v3) $v3-list]" -> wClause
-          where += s"[(set $v3-list) $v3-set]" -> wClause
-          where += s"[(map str $v5) $v5-list]" -> wClause
-          where += s"[(set $v5-list) $v5-set]" -> wClause
-          where += s"[(some $v3-set $v5-set)]" -> wClause
-
-        case _ =>
-          where += s"[(set $v3) $v4]" -> wClause
-          where += s"[(some $v4 $v5)]" -> wClause
-      }
-
+           |                   [$v $av $v1]]" $$ $e $v1) [[$v2]]]""".stripMargin -> wClause
     } else {
       // Match nothing
       where += s"[$e $a $v3]" -> wClause
       where += s"[(ground nil) $v3]" -> wGround
     }
-    if (tacit) {
-      widh += v3 // Don't coalesce List to Set
-    }
-  }
-
-  private def optHas[T: ClassTag](
-    attr: Attr, e: Var, v: Var,
-    optMap: Option[Map[String, T]],
-    resMap: ResMap[T],
-  ): Unit = {
-    optMap.fold[Unit] {
-      none(attr, e, v)
-    } { maps =>
-      find += v + 3
-      has(false, attr, e, v, maps, resMap)
-    }
   }
 
 
-  // hasNo ---------------------------------------------------------------------
-
-  private def hasNo[T](
-    attr: Attr, e: Var, v: Var,
-    map: Map[String, T],
-    resMap: ResMap[T],
+  private def hasNoValues[T](
+    attr: Attr, e: Var, v: Var, map: Map[String, T], resMap: ResMap[T]
   ): Unit = {
     val (a, ak, av, k_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
     if (map.nonEmpty) {
-      find += v3
-      args += map.map(resMap.s2j).asJava
-      in += v5
+      args += map.values.map(resMap.s2j).asJava
+      in += v1
+      where += s"[$e $a _]" -> wClause
       where +=
         s"""[(datomic.api/q
-           |          "[:find (distinct $pair)
+           |          "[:find (distinct $v_)
            |            :in $$ $e
            |            :where [$e $a $v]
-           |                   [$v $ak $k_]
-           |                   [$v $av $v_]
-           |                   [(vector $k_ $v_) $pair]]" $$ $e) [[$v1]]]""".stripMargin -> wClause
-      where += s"[(sort-by first $v1) $v2]" -> wClause
-      where += s"[(map second $v2) $v3]" -> wClause
-      resMap.tpe match {
-        case "Boolean" =>
-          // Need to convert to sets of Strings for `some` to work on boolean false (maybe a bug?)
-          where += s"[(map str $v3) $v3-list]" -> wClause
-          where += s"[(set $v3-list) $v3-set]" -> wClause
-          where += s"[(map str $v5) $v5-list]" -> wClause
-          where += s"[(set $v5-list) $v5-set]" -> wClause
-          where += s"[(not-any? $v3-set $v5-set)]" -> wClause
-
-        case _ =>
-          where += s"[(set $v3) $v4]" -> wClause
-          where += s"[(not-any? $v4 $v5)]" -> wClause
-      }
-
+           |                   [$v $av $v_]]" $$ $e) [[$v2]]]""".stripMargin -> wClause
+      where += s"[(set $v1) $v3]" -> wClause
+      where += s"[(clojure.set/intersection $v2 $v3) $v4]" -> wClause
+      where += s"[(empty? $v4)]" -> wClause
     } else {
       // Get all
-      attrV(false, attr, e, v)
-    }
-  }
-
-  private def optHasNo[T](
-    attr: Attr, e: Var, v: Var,
-    optMap: Option[Map[String, T]],
-    resMap: ResMap[T],
-    resMapOpt: ResMapOpt[T],
-  ): Unit = {
-    optMap match {
-      case Some(maps) if maps.nonEmpty =>
-        hasNo(attr, e, v, optMap.get, resMap)
-        replaceCast(resMapOpt.j2optMap)
-
-      case _ => optWithoutNone(attr, e, v)
+      attrV(attr, e, v, resMap)
     }
   }
 
 
   // no value -----------------------------------------------------------------
 
-  private def noValue(attr: Attr, e: Var): Unit = {
+  private def noMatch[T](attr: Attr, e: Var, v: Var, resMap: ResMap[T]): Unit = {
+    val a = nsAttr(attr)
+    where += s"[$e $a $v]" -> wNeqOne
+    where += s"(not [$e $a])" -> wNeqOne
+    addCast(resMap.j2sMap)
+  }
+
+  private def nonAsserted(attr: Attr, e: Var): Unit = {
     val a = nsAttr(attr)
     where += s"(not [$e $a])" -> wNeqOne
-  }
-
-
-
-  // helpers -------------------------------------------------------------------
-
-  private def none(attr: Attr, e: Var, v: Var): Unit = {
-    val (a, ak, av, k_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
-    find += s"(pull $e-$v [[$a :limit nil]])"
-    where += s"[(identity $e) $e-$v]" -> wGround
-    where += s"(not [$e $a])" -> wNeqOne
-  }
-
-  private def optWithoutNone(
-    attr: Attr, e: Var, v: Var
-  ): Unit = {
-    // Ignore empty maps
-    where += s"[(nil? ${v}1) ${v}1-empty]" -> wClause
-    where += s"[(not ${v}1-empty)]" -> wClause
-    optAttr(attr, e, v) // Get all available
-  }
-
-  private def noBooleanSetAggr[T](resMap: ResMap[T]): Unit = {
-    if (resMap.tpe == "Boolean")
-      throw ModelError("Aggregate functions not implemented for Sets of boolean values.")
-  }
-  private def noBooleanSetCounts(n: Int): Unit = {
-    if (n == -1)
-      throw ModelError("Aggregate functions not implemented for Sets of boolean values.")
   }
 }

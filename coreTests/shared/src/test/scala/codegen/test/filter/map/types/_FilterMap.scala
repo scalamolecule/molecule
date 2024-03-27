@@ -6,9 +6,12 @@ import molecule.base.util.{BaseHelpers, CodeGenBase}
 
 object _FilterMap extends CodeGenBase with BaseHelpers {
 
-  def generate(): Unit = tpeVarImp.filterNot(_._1 == "ref").foreach { case (name, tpe, v, imp) =>
-    TransformFile(name, tpe, v, imp).generate()
-  }
+  //  def generate(): Unit = (("Boolean", "Boolean", "boolean", "") +: tpeVarImp)
+  def generate(): Unit = tpeVarImp
+    .filterNot(_._1 == "ref")
+    .foreach { case (name, tpe, v, imp) =>
+      TransformFile(name, tpe, v, imp).generate()
+    }
 
   case class TransformFile(name: String, tpe: String, v: String, imp: String = "")
     extends SpiTestGenBase(s"FilterMap_$name", "/filter/map/types") {
