@@ -64,7 +64,6 @@ trait Insert_datomic
     attr: String,
     tplIndex: Int,
     transformValue: T => Any,
-    handleValue: T => Any,
     exts: List[String] = Nil
   ): Product => Unit = {
     val a = kw(ns, attr)
@@ -82,7 +81,6 @@ trait Insert_datomic
     attr: String,
     tplIndex: Int,
     transformValue: T => Any,
-    handleValue: T => Any,
     exts: List[String] = Nil
   ): Product => Unit = {
     val a = kw(ns, attr)
@@ -104,7 +102,7 @@ trait Insert_datomic
   override protected def addSet[T](
     ns: String,
     attr: String,
-    set2array: Set[Any] => Array[AnyRef],
+    set2array: Set[T] => Array[AnyRef],
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
@@ -128,7 +126,7 @@ trait Insert_datomic
   override protected def addSetOpt[T](
     ns: String,
     attr: String,
-    set2array: Set[Any] => Array[AnyRef],
+    set2array: Set[T] => Array[AnyRef],
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
@@ -159,9 +157,9 @@ trait Insert_datomic
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
-    //    set2array: Set[Any] => Array[AnyRef],
-    //    exts: List[String] = Nil,
-    //    value2json: (StringBuffer, T) => StringBuffer
+    set2array: Seq[T] => Array[AnyRef],
+    exts: List[String] = Nil,
+    value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
     val a   = kw(ns, attr)
     val a_i = kw(s"$ns.$attr", "i_")
@@ -208,9 +206,9 @@ trait Insert_datomic
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
-    //    set2array: Set[Any] => Array[AnyRef],
-    //    exts: List[String] = Nil,
-    //    value2json: (StringBuffer, T) => StringBuffer
+    seq2array: Seq[T] => Array[AnyRef],
+    exts: List[String] = Nil,
+    value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
     val a   = kw(ns, attr)
     val a_i = kw(s"$ns.$attr", "i_")

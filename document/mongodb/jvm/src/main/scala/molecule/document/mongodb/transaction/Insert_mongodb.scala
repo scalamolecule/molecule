@@ -79,13 +79,12 @@ trait Insert_mongodb
     attr: String,
     tplIndex: Int,
     transformValue: T => Any,
-    handleValue: T => Any,
     exts: List[String] = Nil
   ): Product => Unit = {
     (tpl: Product) => {
       doc.append(
         attr,
-        handleValue(tpl.productElement(tplIndex).asInstanceOf[T]).asInstanceOf[BsonValue]
+        transformValue(tpl.productElement(tplIndex).asInstanceOf[T]).asInstanceOf[BsonValue]
       )
       debug(doc, "add")
     }
@@ -96,14 +95,13 @@ trait Insert_mongodb
     attr: String,
     tplIndex: Int,
     transformValue: T => Any,
-    handleValue: T => Any,
     exts: List[String] = Nil
   ): Product => Unit = {
     (tpl: Product) => {
       tpl.productElement(tplIndex) match {
         case Some(scalaValue) => doc.append(
           attr,
-          handleValue(scalaValue.asInstanceOf[T]).asInstanceOf[BsonValue]
+          transformValue(scalaValue.asInstanceOf[T]).asInstanceOf[BsonValue]
         )
         case None             => ()
       }
@@ -113,7 +111,7 @@ trait Insert_mongodb
   override protected def addSet[T](
     ns: String,
     attr: String,
-    set2array: Set[Any] => Array[AnyRef],
+    set2array: Set[T] => Array[AnyRef],
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
@@ -135,7 +133,7 @@ trait Insert_mongodb
   override protected def addSetOpt[T](
     ns: String,
     attr: String,
-    set2array: Set[Any] => Array[AnyRef],
+    set2array: Set[T] => Array[AnyRef],
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,

@@ -34,6 +34,7 @@ trait LambdasSet extends LambdasBase with JavaConversions { self: SqlQueryBase =
   private lazy val sql2setShort         : (RS, Int) => Set[Short]          = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueShort)
   private lazy val sql2setChar          : (RS, Int) => Set[Char]           = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueChar)
 
+  // Big because it supports all sql databases. Might want to break it up and have one per sql db
   case class ResSet[T](
     tpe: String,
     tpeDb: String,
@@ -636,7 +637,7 @@ trait LambdasSet extends LambdasBase with JavaConversions { self: SqlQueryBase =
   lazy val resOptSetChar          : ResSetOpt[Char]           = ResSetOpt("Char", sql2setOptChar, set2sqlArrayChar, set2sqlsChar, one2sqlChar, one2jsonChar)
 
 
-  protected def sql2setOpt[T](row: RS, paramIndex: Int, getValue: RS => T): Option[Set[T]] = {
+  private def sql2setOpt[T](row: RS, paramIndex: Int, getValue: RS => T): Option[Set[T]] = {
     val array = row.getArray(paramIndex)
     if (row.wasNull()) {
       Option.empty[Set[T]]

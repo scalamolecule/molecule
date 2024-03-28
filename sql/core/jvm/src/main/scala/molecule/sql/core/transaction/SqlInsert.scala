@@ -1,8 +1,6 @@
 package molecule.sql.core.transaction
 
 import java.sql.{Statement, PreparedStatement => PS}
-import java.time._
-import java.util.Date
 import molecule.base.ast._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
@@ -12,7 +10,7 @@ import molecule.core.util.ModelUtils
 
 trait SqlInsert
   extends SqlBase_JVM
-    with InsertOps
+    with InsertOps with SqlBaseOps
     with SqlDataType_JVM
     with ModelUtils
     with MoleculeLogging { self: ResolveInsert with InsertResolvers_ =>
@@ -213,13 +211,12 @@ trait SqlInsert
     attr: String,
     tplIndex: Int,
     transformValue: T => Any,
-    handleValue: T => Any,
     exts: List[String] = Nil
   ): Product => Unit = {
     val (curPath, paramIndex) = getParamIndex(attr, castExt = exts.head)
     (tpl: Product) => {
       val scalaValue  = tpl.productElement(tplIndex).asInstanceOf[T]
-      val valueSetter = handleValue(scalaValue).asInstanceOf[(PS, Int) => Unit]
+      val valueSetter = transformValue(scalaValue).asInstanceOf[(PS, Int) => Unit]
       val colSetter   = (ps: PS, _: IdsMap, _: RowIndex) => {
         valueSetter(ps, paramIndex)
       }
@@ -232,14 +229,13 @@ trait SqlInsert
     attr: String,
     tplIndex: Int,
     transformValue: T => Any,
-    handleValue: T => Any,
     exts: List[String] = Nil
   ): Product => Unit = {
     val (curPath, paramIndex) = getParamIndex(attr, castExt = exts.head)
     (tpl: Product) => {
       val colSetter = tpl.productElement(tplIndex) match {
         case Some(scalaValue) =>
-          val valueSetter = handleValue(scalaValue.asInstanceOf[T]).asInstanceOf[(PS, Int) => Unit]
+          val valueSetter = transformValue(scalaValue.asInstanceOf[T]).asInstanceOf[(PS, Int) => Unit]
           (ps: PS, _: IdsMap, _: RowIndex) =>
             valueSetter(ps, paramIndex)
 
@@ -254,7 +250,7 @@ trait SqlInsert
   override protected def addSet[T](
     ns: String,
     attr: String,
-    set2array: Set[Any] => Array[AnyRef],
+    set2array: Set[T] => Array[AnyRef],
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
@@ -264,7 +260,7 @@ trait SqlInsert
     refNs.fold {
       val (curPath, paramIndex) = getParamIndex(attr)
       (tpl: Product) =>
-        val array     = set2array(tpl.productElement(tplIndex).asInstanceOf[Set[Any]])
+        val array     = set2array(tpl.productElement(tplIndex).asInstanceOf[Set[T]])
         val colSetter = if (array.nonEmpty) {
           (ps: PS, _: IdsMap, _: RowIndex) => {
             val conn = ps.getConnection
@@ -326,7 +322,7 @@ trait SqlInsert
   override protected def addSetOpt[T](
     ns: String,
     attr: String,
-    set2array: Set[Any] => Array[AnyRef],
+    set2array: Set[T] => Array[AnyRef],
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
@@ -338,7 +334,7 @@ trait SqlInsert
       (tpl: Product) => {
         val colSetter = tpl.productElement(tplIndex) match {
           case Some(set: Set[_]) =>
-            val array = set2array(set.asInstanceOf[Set[Any]])
+            val array = set2array(set.asInstanceOf[Set[T]])
             (ps: PS, _: IdsMap, _: RowIndex) => {
               val conn = ps.getConnection
               val arr  = conn.createArrayOf(exts(1), array)
@@ -412,29 +408,4 @@ trait SqlInsert
     curRefPath = curRefPath.dropRight(2) // drop refAttr, refNs
     (_: Product) => ()
   }
-
-
-  override protected lazy val handleID             = (v: Any) => (ps: PS, n: Int) => ps.setLong(n, v.asInstanceOf[String].toLong)
-  override protected lazy val handleString         = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.asInstanceOf[String])
-  override protected lazy val handleInt            = (v: Any) => (ps: PS, n: Int) => ps.setInt(n, v.asInstanceOf[Int])
-  override protected lazy val handleLong           = (v: Any) => (ps: PS, n: Int) => ps.setLong(n, v.asInstanceOf[Long])
-  override protected lazy val handleFloat          = (v: Any) => (ps: PS, n: Int) => ps.setFloat(n, v.asInstanceOf[Float])
-  override protected lazy val handleDouble         = (v: Any) => (ps: PS, n: Int) => ps.setDouble(n, v.asInstanceOf[Double])
-  override protected lazy val handleBoolean        = (v: Any) => (ps: PS, n: Int) => ps.setBoolean(n, v.asInstanceOf[Boolean])
-  override protected lazy val handleBigInt         = (v: Any) => (ps: PS, n: Int) => ps.setBigDecimal(n, BigDecimal(v.asInstanceOf[BigInt]).bigDecimal)
-  override protected lazy val handleBigDecimal     = (v: Any) => (ps: PS, n: Int) => ps.setBigDecimal(n, v.asInstanceOf[BigDecimal].bigDecimal)
-  override protected lazy val handleDate           = (v: Any) => (ps: PS, n: Int) => ps.setLong(n, v.asInstanceOf[Date].getTime)
-  override protected lazy val handleDuration       = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.asInstanceOf[Duration].toString)
-  override protected lazy val handleInstant        = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.asInstanceOf[Instant].toString)
-  override protected lazy val handleLocalDate      = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.asInstanceOf[LocalDate].toString)
-  override protected lazy val handleLocalTime      = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.asInstanceOf[LocalTime].toString)
-  override protected lazy val handleLocalDateTime  = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.asInstanceOf[LocalDateTime].toString)
-  override protected lazy val handleOffsetTime     = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.asInstanceOf[OffsetTime].toString)
-  override protected lazy val handleOffsetDateTime = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.asInstanceOf[OffsetDateTime].toString)
-  override protected lazy val handleZonedDateTime  = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.asInstanceOf[ZonedDateTime].toString)
-  override protected lazy val handleUUID           = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.toString)
-  override protected lazy val handleURI            = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.toString)
-  override protected lazy val handleByte           = (v: Any) => (ps: PS, n: Int) => ps.setByte(n, v.asInstanceOf[Byte])
-  override protected lazy val handleShort          = (v: Any) => (ps: PS, n: Int) => ps.setShort(n, v.asInstanceOf[Short])
-  override protected lazy val handleChar           = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.toString)
 }

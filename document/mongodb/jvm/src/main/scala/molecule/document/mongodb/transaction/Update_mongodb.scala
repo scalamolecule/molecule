@@ -164,7 +164,6 @@ trait Update_mongodb
     vs: Seq[T],
     owner: Boolean,
     transformValue: T => Any,
-    handleValue: T => Any,
   ): Unit = {
     if (isUpdate) {
       if (owner) {
@@ -190,8 +189,8 @@ trait Update_mongodb
     sets: Seq[Set[T]],
     refNs: Option[String],
     owner: Boolean,
-    transform: T => Any,
-    set2array: Set[Any] => Array[AnyRef],
+    transformValue: T => Any,
+    set2array: Set[T] => Array[AnyRef],
     exts: List[String],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
@@ -205,7 +204,7 @@ trait Update_mongodb
     lazy val array    = new BsonArray()
     sets match {
       case Seq(vs) =>
-        vs.map(v => array.add(transform(v).asInstanceOf[BsonValue]))
+        vs.map(v => array.add(transformValue(v).asInstanceOf[BsonValue]))
         d.setDoc.append(pathAttr, array)
       case Nil     =>
         d.setDoc.append(pathAttr, new BsonNull())
@@ -223,8 +222,8 @@ trait Update_mongodb
     sets: Seq[Set[T]],
     refNs: Option[String],
     owner: Boolean,
-    transform: T => Any,
-    set2array: Set[Any] => Array[AnyRef],
+    transformValue: T => Any,
+    set2array: Set[T] => Array[AnyRef],
     exts: List[String],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
@@ -234,10 +233,10 @@ trait Update_mongodb
         vs.size match {
           case 0 => ()
           case 1 =>
-            d.pushDoc.append(pathAttr, transform(vs.head).asInstanceOf[BsonValue])
+            d.pushDoc.append(pathAttr, transformValue(vs.head).asInstanceOf[BsonValue])
           case _ =>
             lazy val array = new BsonArray()
-            vs.map(v => array.add(transform(v).asInstanceOf[BsonValue]))
+            vs.map(v => array.add(transformValue(v).asInstanceOf[BsonValue]))
             d.pushDoc.append(pathAttr, new BsonDocument("$each", array))
         }
       case Nil     => ()
@@ -255,15 +254,14 @@ trait Update_mongodb
     set: Set[T],
     refNs: Option[String],
     owner: Boolean,
-    transform: T => Any,
-    handleValue: T => Any,
+    transformValue: T => Any,
     exts: List[String],
     one2json: T => String
   ): Unit = {
     lazy val pathAttr = if (path.isEmpty) attr else path.mkString("", ".", "." + attr)
     val vs = new BsonArray()
     if (set.nonEmpty) {
-      set.map(v => vs.add(transform(v).asInstanceOf[BsonValue]))
+      set.map(v => vs.add(transformValue(v).asInstanceOf[BsonValue]))
     }
     d.pullAll.append(pathAttr, vs)
   }

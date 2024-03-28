@@ -41,22 +41,22 @@ trait Save_mongodb
     ns: String,
     attr: String,
     optBsonValue: Option[T],
-    handleValue: T => Any,
+    transformValue: T => Any,
     exts: List[String] = Nil
   ): Unit = {
     optBsonValue.fold {
       doc.append(attr, new BsonNull())
     } { bsonValue =>
-      doc.append(attr, bsonValue.asInstanceOf[BsonValue])
+      doc.append(attr, transformValue(bsonValue).asInstanceOf[BsonValue])
     }
   }
 
   override protected def addSet[T](
     ns: String,
     attr: String,
-    optSet: Option[Set[Any]],
+    optSet: Option[Set[T]],
     transformValue: T => Any,
-    set2array: Set[Any] => Array[AnyRef],
+    set2array: Set[T] => Array[AnyRef],
     refNs: Option[String],
     exts: List[String] = Nil,
     value2json: (StringBuffer, T) => StringBuffer
@@ -66,8 +66,7 @@ trait Save_mongodb
     } {
       case set if set.nonEmpty =>
         val array: util.ArrayList[BsonValue] = new util.ArrayList[BsonValue]()
-        // Values have already been transformed in ResolveSave
-        set.map(bsonValue => array.add(bsonValue.asInstanceOf[BsonValue]))
+        set.map(bsonValue => array.add(transformValue(bsonValue).asInstanceOf[BsonValue]))
         doc.append(attr, new BsonArray(array))
 
       case _ => doc.append(attr, new BsonNull())

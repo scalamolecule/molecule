@@ -28,58 +28,82 @@ object AdhocJVM_datomic extends TestSuite_datomic {
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
-      val aFalse = "a" -> boolean1
-      val bFalse = "b" -> boolean1
-      val cTrue  = "c" -> boolean2
       for {
-        _ <- Ns.i.booleanMap.insert(List(
-          (1, Map(aFalse)),
-          (2, Map(bFalse, cTrue)),
-        )).transact
-
-        // OBS: Not that since only 2 Boolean values exist, the value tests are layed out differently to test
-
-        // "Map contains this OR that value"
-        _ <- Ns.i.a1.booleanMap_.hasNo(boolean1).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.booleanMap_.hasNo(boolean2).query.get.map(_ ==> List(1))
-        _ <- Ns.i.a1.booleanMap_.hasNo(boolean1, boolean2).query.get.map(_ ==> List())
-        // Same as
-        _ <- Ns.i.a1.booleanMap_.hasNo(List(boolean1)).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.booleanMap_.hasNo(List(boolean2)).query.get.map(_ ==> List(1))
-        _ <- Ns.i.a1.booleanMap_.hasNo(List(boolean1, boolean2)).query.get.map(_ ==> List())
-
-        // Empty Seq of values matches nothing
-        _ <- Ns.i.a1.booleanMap_.hasNo(List.empty[Boolean]).query.get.map(_ ==> List(1, 2))
-
-        // Combine with retrieval
-        _ <- Ns.i.a1.booleanMap.booleanMap_.hasNo(boolean1).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.booleanMap.booleanMap_.hasNo(boolean2).query.get.map(_ ==> List((1, Map(aFalse))))
-        _ <- Ns.i.a1.booleanMap.booleanMap_.hasNo(boolean1, boolean2).query.get.map(_ ==> List())
 
 
-        _ = {
-          println("----------- 1")
-          val res = datomic.Peer.q(
-            """[:find  ?b
-              | :in    $ ?c1
-              | :where [?a :Ns/i ?b]
-              |        [?a :Ns/booleanMap _]
-              |        [(datomic.api/q
-              |          "[:find (distinct ?c)
-              |            :in $ ?a [?c1 ...]
-              |            :where [?a :Ns/booleanMap ?c]
-              |                   [?c :Ns.booleanMap/v_ ?c1]]" $ ?a ?c1) [[?c2]]]]
-              |""".stripMargin, conn.db,
-            //            Seq(true, false).asJava
-            //            Seq(Set(List("a", 1).asJava, List("b", 2).asJava).asJava).asJava
-            //            Set(List("a", 1).asJava, List("b", 2).asJava).asJava
-            //            Set(x, y).asJava
-            //            Set("c").asJava
-            Seq(true).asJava
-            //            "a"
-          )
-          res.forEach(r => println(r))
-        }
+//        _ <- Ns.i(1).stringSet(Set(string1, string2)).save.transact
+        _ <- Ns.i(1).intSet(Set(int1, int2)).save.transact
+//        _ <- Ns.i(1).longSet(Set(long1, long2)).save.transact
+//        _ <- Ns.i(1).floatSet(Set(float1, float2)).save.transact
+//        _ <- Ns.i(1).doubleSet(Set(double1, double2)).save.transact
+//        _ <- Ns.i(1).booleanSet(Set(boolean0)).save.transact
+//        _ <- Ns.i(1).bigIntSet(Set(bigInt1, bigInt2)).save.transact
+//        _ <- Ns.i(1).bigDecimalSet(Set(bigDecimal1, bigDecimal2)).save.transact
+//        _ <- Ns.i(1).dateSet(Set(date1, date2)).save.transact
+//        _ <- Ns.i(1).durationSet(Set(duration1, duration2)).save.transact
+//        _ <- Ns.i(1).instantSet(Set(instant1, instant2)).save.transact
+//        _ <- Ns.i(1).localDateSet(Set(localDate1, localDate2)).save.transact
+//        _ <- Ns.i(1).localTimeSet(Set(localTime1, localTime2)).save.transact
+//        _ <- Ns.i(1).localDateTimeSet(Set(localDateTime1, localDateTime2)).save.transact
+//        _ <- Ns.i(1).offsetTimeSet(Set(offsetTime1, offsetTime2)).save.transact
+//        _ <- Ns.i(1).offsetDateTimeSet(Set(offsetDateTime1, offsetDateTime2)).save.transact
+//        _ <- Ns.i(1).zonedDateTimeSet(Set(zonedDateTime1, zonedDateTime2)).save.transact
+//        _ <- Ns.i(1).uuidSet(Set(uuid1, uuid2)).save.transact
+//        _ <- Ns.i(1).uriSet(Set(uri1, uri2)).save.transact
+//        _ <- Ns.i(1).byteSet(Set(byte1, byte2)).save.transact
+//        _ <- Ns.i(1).shortSet(Set(short1, short2)).save.transact
+//        _ <- Ns.i(1).charSet(Set(char1, char2)).save.transact
+
+//        _ <- Ns.i.stringSet.query.get.map(_ ==> List((1, Set(string1, string2))))
+        _ <- Ns.i.intSet.query.get.map(_ ==> List((1, Set(int1, int2))))
+//        _ <- Ns.i.longSet.query.get.map(_ ==> List((1, Set(long1, long2))))
+//        _ <- Ns.i.floatSet.query.get.map(_ ==> List((1, Set(float1, float2))))
+//        _ <- Ns.i.doubleSet.query.get.map(_ ==> List((1, Set(double1, double2))))
+//        _ <- Ns.i.booleanSet.query.get.map(_ ==> List((1, Set(boolean0))))
+//        _ <- Ns.i.bigIntSet.query.get.map(_ ==> List((1, Set(bigInt1, bigInt2))))
+//        _ <- Ns.i.bigDecimalSet.query.get.map(_ ==> List((1, Set(bigDecimal1, bigDecimal2))))
+//        _ <- Ns.i.dateSet.query.get.map(_ ==> List((1, Set(date1, date2))))
+//        _ <- Ns.i.durationSet.query.get.map(_ ==> List((1, Set(duration1, duration2))))
+//        _ <- Ns.i.instantSet.query.get.map(_ ==> List((1, Set(instant1, instant2))))
+//        _ <- Ns.i.localDateSet.query.get.map(_ ==> List((1, Set(localDate1, localDate2))))
+//        _ <- Ns.i.localTimeSet.query.get.map(_ ==> List((1, Set(localTime1, localTime2))))
+//        _ <- Ns.i.localDateTimeSet.query.get.map(_ ==> List((1, Set(localDateTime1, localDateTime2))))
+//        _ <- Ns.i.offsetTimeSet.query.get.map(_ ==> List((1, Set(offsetTime1, offsetTime2))))
+//        _ <- Ns.i.offsetDateTimeSet.query.get.map(_ ==> List((1, Set(offsetDateTime1, offsetDateTime2))))
+//        _ <- Ns.i.zonedDateTimeSet.query.get.map(_ ==> List((1, Set(zonedDateTime1, zonedDateTime2))))
+//        _ <- Ns.i.uuidSet.query.get.map(_ ==> List((1, Set(uuid1, uuid2))))
+//        _ <- Ns.i.uriSet.query.get.map(_ ==> List((1, Set(uri1, uri2))))
+//        _ <- Ns.i.byteSet.query.get.map(_ ==> List((1, Set(byte1, byte2))))
+//        _ <- Ns.i.shortSet.query.get.map(_ ==> List((1, Set(short1, short2))))
+//        _ <- Ns.i.charSet.query.get.map(_ ==> List((1, Set(char1, char2))))
+//
+//        List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
+//        _ <- Ns.i(1).refs(Set(r1, r2)).save.transact
+//        _ <- Ns.i.refs.query.get.map(_ ==> List((1, Set(r1, r2))))
+
+//        _ = {
+//          println("----------- 1")
+//          val res = datomic.Peer.q(
+//            """[:find  ?b
+//              | :in    $ ?c1
+//              | :where [?a :Ns/i ?b]
+//              |        [?a :Ns/booleanMap _]
+//              |        [(datomic.api/q
+//              |          "[:find (distinct ?c)
+//              |            :in $ ?a [?c1 ...]
+//              |            :where [?a :Ns/booleanMap ?c]
+//              |                   [?c :Ns.booleanMap/v_ ?c1]]" $ ?a ?c1) [[?c2]]]]
+//              |""".stripMargin, conn.db,
+//            //            Seq(true, false).asJava
+//            //            Seq(Set(List("a", 1).asJava, List("b", 2).asJava).asJava).asJava
+//            //            Set(List("a", 1).asJava, List("b", 2).asJava).asJava
+//            //            Set(x, y).asJava
+//            //            Set("c").asJava
+//            Seq(true).asJava
+//            //            "a"
+//          )
+//          res.forEach(r => println(r))
+//        }
 
 
       } yield ()

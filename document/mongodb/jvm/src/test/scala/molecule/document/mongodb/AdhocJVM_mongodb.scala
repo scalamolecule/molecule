@@ -22,17 +22,32 @@ object AdhocJVM_mongodb extends TestSuite_mongodb with AggrUtils {
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
-      val a = (1, Some(Set(int1, int2)))
-      val b = (2, Some(Set(int2, int3, int4)))
-      val c = (3, None)
+
       for {
-        _ <- Ns.i.intSet_?.insert(a, b, c).transact
 
-        _ <- Ns.i.a1.intSet_?.query.get.map(_ ==> List(a, b, c))
+        _ <- Ns.i.intSet.insert(List(
+          (1, Set(int1, int2)),
+          (2, Set(int2)),
+          (2, Set(int3, int4)),
+          (2, Set(int3, int4)),
+        )).transact
 
+        // Sum of all values
+        _ <- Ns.intSet.apply(sum).query.get.map(_.head ==~ (
+          int1 + int2 +
+            int2 +
+            int3 + int4 +
+            int3 + int4))
 
-        //        _ <- Ns.i(1).save.transact
-        //        _ <- Ns.i.i.query.get.map(_ ==> List(int1))
+        // Sort by sum
+        _ <- Ns.i.intSet(sum).a1.query.get.map(_ ==~ List(
+          (1, int1 + int2),
+          (2, int2 + int3 + int4 + int3 + int4),
+        ))
+        _ <- Ns.i.intSet(sum).d1.query.get.map(_ ==~ List(
+          (2, int2 + int3 + int4 + int3 + int4),
+          (1, int1 + int2),
+        ))
 
       } yield ()
     }

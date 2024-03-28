@@ -16,18 +16,14 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
       for {
-//        _ <- Ns.i(1).save.transact
-//        _ <- Ns.i.query.i.get.map(_ ==> List(1))
 
-        id <- Ns.intSet(Set(int1, int2)).save.transact.map(_.id)
-        _ <- Ns.intSet.query.get.map(_.head ==> Set(int1, int2))
+        _ <- Ns.i(1).intSeq(List(int1, int2)).save.transact
+        _ <- Ns.i.intSeq.query.get.map(_ ==> List((1, List(int1, int2))))
 
-        // Applying empty Set of values deletes previous Set
-        _ <- Ns(id).intSet(Set.empty[Int]).update.i.transact
-        _ <- Ns.intSet.query.get.map(_ ==> Nil)
 
       } yield ()
     }
+
 
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._

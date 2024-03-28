@@ -11,9 +11,9 @@ trait Save_mariadb extends SqlSave with BaseHelpers { self: ResolveSave =>
   override protected def addSet[T](
     ns: String,
     attr: String,
-    optSet: Option[Set[Any]],
+    optSet: Option[Set[T]],
     transformValue: T => Any,
-    set2array: Set[Any] => Array[AnyRef],
+    set2array: Set[T] => Array[AnyRef],
     refNs: Option[String],
     exts: List[String] = Nil,
     value2json: (StringBuffer, T) => StringBuffer
@@ -78,7 +78,6 @@ trait Save_mariadb extends SqlSave with BaseHelpers { self: ResolveSave =>
     }
   }
 
-  override protected lazy val handleDate =
-    (v: Any) => (ps: PS, n: Int) =>
-      ps.setLong(n, v.asInstanceOf[Date].getTime)
+  override protected lazy val transformDate =
+    (v: Date) => (ps: PS, n: Int) => ps.setLong(n, v.getTime)
 }

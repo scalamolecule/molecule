@@ -443,7 +443,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
           new BsonDocument("$sum", new BsonString(pathField2))
         )
         topBranch.addFields += pathField -> new BsonString(aliasField2)
-        replaceCast(uniqueField, res.v2set(uniqueField))
+        replaceCast(uniqueField, res.j2s(uniqueField))
 
       case "median" =>
         topBranch.aggregate = true

@@ -49,20 +49,20 @@ trait Save_datomic
     ns: String,
     attr: String,
     optValue: Option[T],
-    handleValue: T => Any,
+    transformValue: T => Any,
     exts: List[String] = Nil
   ): Unit = {
     optValue.foreach { v =>
-      appendStmt(add, e, kw(ns, attr), v.asInstanceOf[AnyRef])
+      appendStmt(add, e, kw(ns, attr), transformValue(v).asInstanceOf[AnyRef])
     }
   }
 
   override protected def addSet[T](
     ns: String,
     attr: String,
-    optSet: Option[Set[Any]],
+    optSet: Option[Set[T]],
     transformValue: T => Any,
-    set2array: Set[Any] => Array[AnyRef],
+    set2array: Set[T] => Array[AnyRef],
     refNs: Option[String],
     exts: List[String] = Nil,
     value2json: (StringBuffer, T) => StringBuffer
@@ -70,8 +70,7 @@ trait Save_datomic
     optSet.foreach { set =>
       val a = kw(ns, attr)
       set.foreach { v =>
-        // Values have already been transformed in core.transaction.ResolveSave
-        appendStmt(add, e, a, v.asInstanceOf[AnyRef])
+        appendStmt(add, e, a, transformValue(v).asInstanceOf[AnyRef])
       }
     }
   }
@@ -80,11 +79,11 @@ trait Save_datomic
     ns: String,
     attr: String,
     refNs: Option[String],
-    optSeq: Option[Seq[Any]],
+    optSeq: Option[Seq[T]],
     transformValue: T => Any,
-    //    set2array: Set[Any] => Array[AnyRef],
-    //    exts: List[String] = Nil,
-    //    value2json: (StringBuffer, T) => StringBuffer
+    seq2array: Seq[T] => Array[AnyRef],
+    exts: List[String] = Nil,
+    value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     optSeq.foreach { seq =>
       val a   = kw(ns, attr)
@@ -97,8 +96,7 @@ trait Save_datomic
         val ref = newId
         appendStmt(add, e, a, ref)
         appendStmt(add, ref, a_i, i.asInstanceOf[AnyRef])
-        // Values have already been transformed in core.transaction.ResolveSave
-        appendStmt(add, ref, a_v, v.asInstanceOf[AnyRef])
+        appendStmt(add, ref, a_v, transformValue(v).asInstanceOf[AnyRef])
         i += 1
       }
     }
@@ -117,7 +115,7 @@ trait Save_datomic
   override protected def addMap[T](
     ns: String,
     attr: String,
-    optMap: Option[Map[String, Any]],
+    optMap: Option[Map[String, T]],
     transformValue: T => Any,
     //    set2map: Set[Any] => Map[String, AnyRef],
     //    refNs: Option[String],
@@ -130,13 +128,12 @@ trait Save_datomic
       val a_v = kw(s"$ns.$attr", "v_")
       unusedRefIds -= e
       usedRefIds += e
-      var i    = 0
+      var i = 0
       map.foreach { case (k, v) =>
         val ref = newId
         appendStmt(add, e, a, ref)
         appendStmt(add, ref, a_k, k.asInstanceOf[AnyRef])
-        // Values have already been transformed in core.transaction.ResolveSave
-        appendStmt(add, ref, a_v, v.asInstanceOf[AnyRef])
+        appendStmt(add, ref, a_v, transformValue(v).asInstanceOf[AnyRef])
         i += 1
       }
     }

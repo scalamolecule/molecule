@@ -21,8 +21,7 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
     set: Set[T],
     refNs: Option[String],
     owner: Boolean,
-    transform: T => Any,
-    handleValue: T => Any,
+    transformValue: T => Any,
     exts: List[String],
     one2json: T => String
   ): Unit = {
@@ -43,7 +42,7 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
         placeHolders = placeHolders :+ (s"$attr = " + remove(set.size))
         addColSetter(curRefPath, (ps: PS, _: IdsMap, _: RowIndex) => {
           set.foreach { v =>
-            handleValue(v).asInstanceOf[(PS, Int) => Unit](ps, curParamIndex)
+            transformValue(v).asInstanceOf[(PS, Int) => Unit](ps, curParamIndex)
             curParamIndex += 1
           }
         })

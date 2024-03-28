@@ -62,32 +62,6 @@ trait Base_JVM_mongodb extends DataType_JVM_mongodb with ModelUtils with BaseHel
     Future(MongoHandler_JVM.recreateDb(proxy.asInstanceOf[MongoProxy]))
   }
 
-
-  override protected lazy val handleID             = (v: Any) => new BsonObjectId(new ObjectId(v.asInstanceOf[String]))
-  override protected lazy val handleString         = (v: Any) => new BsonString(v.asInstanceOf[String])
-  override protected lazy val handleInt            = (v: Any) => new BsonInt32(v.asInstanceOf[Int])
-  override protected lazy val handleLong           = (v: Any) => new BsonInt64(v.asInstanceOf[Long])
-  override protected lazy val handleFloat          = (v: Any) => new BsonDouble(v.asInstanceOf[Float])
-  override protected lazy val handleDouble         = (v: Any) => new BsonDouble(v.asInstanceOf[Double])
-  override protected lazy val handleBoolean        = (v: Any) => new BsonBoolean(v.asInstanceOf[Boolean])
-  override protected lazy val handleBigInt         = (v: Any) => new BsonDecimal128(new Decimal128(BigDecimal(v.asInstanceOf[BigInt]).bigDecimal))
-  override protected lazy val handleBigDecimal     = (v: Any) => new BsonDecimal128(new Decimal128(v.asInstanceOf[BigDecimal].bigDecimal))
-  override protected lazy val handleDate           = (v: Any) => new BsonDateTime(v.asInstanceOf[Date].getTime)
-  override protected lazy val handleDuration       = (v: Any) => new BsonString(v.asInstanceOf[Duration].toString)
-  override protected lazy val handleInstant        = (v: Any) => new BsonString(v.asInstanceOf[Instant].toString)
-  override protected lazy val handleLocalDate      = (v: Any) => new BsonString(v.asInstanceOf[LocalDate].toString)
-  override protected lazy val handleLocalTime      = (v: Any) => new BsonString(v.asInstanceOf[LocalTime].toString)
-  override protected lazy val handleLocalDateTime  = (v: Any) => new BsonString(v.asInstanceOf[LocalDateTime].toString)
-  override protected lazy val handleOffsetTime     = (v: Any) => new BsonString(v.asInstanceOf[OffsetTime].toString)
-  override protected lazy val handleOffsetDateTime = (v: Any) => new BsonString(v.asInstanceOf[OffsetDateTime].toString)
-  override protected lazy val handleZonedDateTime  = (v: Any) => new BsonString(v.asInstanceOf[ZonedDateTime].toString)
-  override protected lazy val handleUUID           = (v: Any) => new BsonString(v.asInstanceOf[UUID].toString)
-  override protected lazy val handleURI            = (v: Any) => new BsonString(v.asInstanceOf[URI].toString)
-  override protected lazy val handleByte           = (v: Any) => new BsonInt32(v.asInstanceOf[Byte])
-  override protected lazy val handleShort          = (v: Any) => new BsonInt32(v.asInstanceOf[Short])
-  override protected lazy val handleChar           = (v: Any) => new BsonString(v.asInstanceOf[Char].toString)
-
-
   override protected lazy val transformID            : String => Any         = (v: String) => new BsonObjectId(new ObjectId(v))
   override protected lazy val transformString        : String => Any         = (v: String) => new BsonString(v)
   override protected lazy val transformInt           : Int => Any            = (v: Int) => new BsonInt32(v)

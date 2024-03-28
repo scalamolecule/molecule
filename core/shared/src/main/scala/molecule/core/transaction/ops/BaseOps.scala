@@ -33,53 +33,53 @@ trait BaseOps extends JsonBase with BaseHelpers {
   protected lazy val transformShort         : Short => Any          = identity
   protected lazy val transformChar          : Char => Any           = identity
 
-  protected lazy val handleID            : Any => Any = identity
-  protected lazy val handleString        : Any => Any = identity
-  protected lazy val handleInt           : Any => Any = identity
-  protected lazy val handleLong          : Any => Any = identity
-  protected lazy val handleFloat         : Any => Any = identity
-  protected lazy val handleDouble        : Any => Any = identity
-  protected lazy val handleBoolean       : Any => Any = identity
-  protected lazy val handleBigInt        : Any => Any = identity
-  protected lazy val handleBigDecimal    : Any => Any = identity
-  protected lazy val handleDate          : Any => Any = identity
-  protected lazy val handleDuration      : Any => Any = identity
-  protected lazy val handleInstant       : Any => Any = identity
-  protected lazy val handleLocalDate     : Any => Any = identity
-  protected lazy val handleLocalTime     : Any => Any = identity
-  protected lazy val handleLocalDateTime : Any => Any = identity
-  protected lazy val handleOffsetTime    : Any => Any = identity
-  protected lazy val handleOffsetDateTime: Any => Any = identity
-  protected lazy val handleZonedDateTime : Any => Any = identity
-  protected lazy val handleUUID          : Any => Any = identity
-  protected lazy val handleURI           : Any => Any = identity
-  protected lazy val handleByte          : Any => Any = identity
-  protected lazy val handleShort         : Any => Any = identity
-  protected lazy val handleChar          : Any => Any = identity
+  protected lazy val set2arrayID            : Set[String] => Array[AnyRef]         = (set: Set[String]) => set.toArray
+  protected lazy val set2arrayString        : Set[String] => Array[AnyRef]         = (set: Set[String]) => set.toArray
+  protected lazy val set2arrayInt           : Set[Int] => Array[AnyRef]            = (set: Set[Int]) => set.toArray.asInstanceOf[Array[AnyRef]]
+  protected lazy val set2arrayLong          : Set[Long] => Array[AnyRef]           = (set: Set[Long]) => set.toArray.asInstanceOf[Array[AnyRef]]
+  protected lazy val set2arrayFloat         : Set[Float] => Array[AnyRef]          = (set: Set[Float]) => set.toArray.asInstanceOf[Array[AnyRef]]
+  protected lazy val set2arrayDouble        : Set[Double] => Array[AnyRef]         = (set: Set[Double]) => set.toArray.asInstanceOf[Array[AnyRef]]
+  protected lazy val set2arrayBoolean       : Set[Boolean] => Array[AnyRef]        = (set: Set[Boolean]) => set.toArray.asInstanceOf[Array[AnyRef]]
+  protected lazy val set2arrayBigInt        : Set[BigInt] => Array[AnyRef]         = (set: Set[BigInt]) => set.map(v => BigDecimal(v).bigDecimal.asInstanceOf[AnyRef]).toArray
+  protected lazy val set2arrayBigDecimal    : Set[BigDecimal] => Array[AnyRef]     = (set: Set[BigDecimal]) => set.map(v => v.bigDecimal.asInstanceOf[AnyRef]).toArray
+  protected lazy val set2arrayDate          : Set[Date] => Array[AnyRef]           = (set: Set[Date]) => set.map(_.getTime.asInstanceOf[AnyRef]).toArray
+  protected lazy val set2arrayDuration      : Set[Duration] => Array[AnyRef]       = (set: Set[Duration]) => set.map(_.toString.asInstanceOf[AnyRef]).toArray
+  protected lazy val set2arrayInstant       : Set[Instant] => Array[AnyRef]        = (set: Set[Instant]) => set.map(_.toString.asInstanceOf[AnyRef]).toArray
+  protected lazy val set2arrayLocalDate     : Set[LocalDate] => Array[AnyRef]      = (set: Set[LocalDate]) => set.map(_.toString.asInstanceOf[AnyRef]).toArray
+  protected lazy val set2arrayLocalTime     : Set[LocalTime] => Array[AnyRef]      = (set: Set[LocalTime]) => set.map(_.toString.asInstanceOf[AnyRef]).toArray
+  protected lazy val set2arrayLocalDateTime : Set[LocalDateTime] => Array[AnyRef]  = (set: Set[LocalDateTime]) => set.map(_.toString.asInstanceOf[AnyRef]).toArray
+  protected lazy val set2arrayOffsetTime    : Set[OffsetTime] => Array[AnyRef]     = (set: Set[OffsetTime]) => set.map(_.toString.asInstanceOf[AnyRef]).toArray
+  protected lazy val set2arrayOffsetDateTime: Set[OffsetDateTime] => Array[AnyRef] = (set: Set[OffsetDateTime]) => set.map(_.toString.asInstanceOf[AnyRef]).toArray
+  protected lazy val set2arrayZonedDateTime : Set[ZonedDateTime] => Array[AnyRef]  = (set: Set[ZonedDateTime]) => set.map(_.toString.asInstanceOf[AnyRef]).toArray
+  protected lazy val set2arrayUUID          : Set[UUID] => Array[AnyRef]           = (set: Set[UUID]) => set.toArray
+  protected lazy val set2arrayURI           : Set[URI] => Array[AnyRef]            = (set: Set[URI]) => set.map(_.toString.asInstanceOf[AnyRef]).toArray
+  protected lazy val set2arrayByte          : Set[Byte] => Array[AnyRef]           = (set: Set[Byte]) => set.toArray.asInstanceOf[Array[AnyRef]]
+  protected lazy val set2arrayShort         : Set[Short] => Array[AnyRef]          = (set: Set[Short]) => set.toArray.asInstanceOf[Array[AnyRef]]
+  protected lazy val set2arrayChar          : Set[Char] => Array[AnyRef]           = (set: Set[Char]) => set.toArray.asInstanceOf[Array[AnyRef]]
 
-  protected lazy val set2arrayID            : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
-  protected lazy val set2arrayString        : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
-  protected lazy val set2arrayInt           : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
-  protected lazy val set2arrayLong          : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
-  protected lazy val set2arrayFloat         : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
-  protected lazy val set2arrayDouble        : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
-  protected lazy val set2arrayBoolean       : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
-  protected lazy val set2arrayBigInt        : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[BigInt]].map(v => BigDecimal(v).bigDecimal.asInstanceOf[AnyRef]).toArray
-  protected lazy val set2arrayBigDecimal    : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[BigDecimal]].map(v => v.bigDecimal.asInstanceOf[AnyRef]).toArray
-  protected lazy val set2arrayDate          : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[Date]].map(_.getTime.asInstanceOf[AnyRef]).toArray
-  protected lazy val set2arrayDuration      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[Duration]].map(_.toString.asInstanceOf[AnyRef]).toArray
-  protected lazy val set2arrayInstant       : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[Instant]].map(_.toString.asInstanceOf[AnyRef]).toArray
-  protected lazy val set2arrayLocalDate     : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[LocalDate]].map(_.toString.asInstanceOf[AnyRef]).toArray
-  protected lazy val set2arrayLocalTime     : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[LocalTime]].map(_.toString.asInstanceOf[AnyRef]).toArray
-  protected lazy val set2arrayLocalDateTime : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[LocalDateTime]].map(_.toString.asInstanceOf[AnyRef]).toArray
-  protected lazy val set2arrayOffsetTime    : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[OffsetTime]].map(_.toString.asInstanceOf[AnyRef]).toArray
-  protected lazy val set2arrayOffsetDateTime: Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[OffsetDateTime]].map(_.toString.asInstanceOf[AnyRef]).toArray
-  protected lazy val set2arrayZonedDateTime : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[ZonedDateTime]].map(_.toString.asInstanceOf[AnyRef]).toArray
-  protected lazy val set2arrayUUID          : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
-  protected lazy val set2arrayURI           : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.map(_.toString.asInstanceOf[AnyRef]).toArray
-  protected lazy val set2arrayByte          : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
-  protected lazy val set2arrayShort         : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
-  protected lazy val set2arrayChar          : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  protected lazy val seq2arrayID            : Seq[String] => Array[AnyRef]         = (seq: Seq[String]) => seq.toArray
+  protected lazy val seq2arrayString        : Seq[String] => Array[AnyRef]         = (seq: Seq[String]) => seq.toArray
+  protected lazy val seq2arrayInt           : Seq[Int] => Array[AnyRef]            = (seq: Seq[Int]) => seq.asInstanceOf[Seq[AnyRef]].toArray
+  protected lazy val seq2arrayLong          : Seq[Long] => Array[AnyRef]           = (seq: Seq[Long]) => seq.toArray.asInstanceOf[Array[AnyRef]]
+  protected lazy val seq2arrayFloat         : Seq[Float] => Array[AnyRef]          = (seq: Seq[Float]) => seq.toArray.asInstanceOf[Array[AnyRef]]
+  protected lazy val seq2arrayDouble        : Seq[Double] => Array[AnyRef]         = (seq: Seq[Double]) => seq.toArray.asInstanceOf[Array[AnyRef]]
+  protected lazy val seq2arrayBoolean       : Seq[Boolean] => Array[AnyRef]        = (seq: Seq[Boolean]) => seq.toArray.asInstanceOf[Array[AnyRef]]
+  protected lazy val seq2arrayBigInt        : Seq[BigInt] => Array[AnyRef]         = (seq: Seq[BigInt]) => seq.map(v => BigDecimal(v).bigDecimal.asInstanceOf[AnyRef]).toArray
+  protected lazy val seq2arrayBigDecimal    : Seq[BigDecimal] => Array[AnyRef]     = (seq: Seq[BigDecimal]) => seq.map(v => v.bigDecimal.asInstanceOf[AnyRef]).toArray
+  protected lazy val seq2arrayDate          : Seq[Date] => Array[AnyRef]           = (seq: Seq[Date]) => seq.map(_.getTime.asInstanceOf[AnyRef]).toArray
+  protected lazy val seq2arrayDuration      : Seq[Duration] => Array[AnyRef]       = (seq: Seq[Duration]) => seq.map(_.toString.asInstanceOf[AnyRef]).toArray
+  protected lazy val seq2arrayInstant       : Seq[Instant] => Array[AnyRef]        = (seq: Seq[Instant]) => seq.map(_.toString.asInstanceOf[AnyRef]).toArray
+  protected lazy val seq2arrayLocalDate     : Seq[LocalDate] => Array[AnyRef]      = (seq: Seq[LocalDate]) => seq.map(_.toString.asInstanceOf[AnyRef]).toArray
+  protected lazy val seq2arrayLocalTime     : Seq[LocalTime] => Array[AnyRef]      = (seq: Seq[LocalTime]) => seq.map(_.toString.asInstanceOf[AnyRef]).toArray
+  protected lazy val seq2arrayLocalDateTime : Seq[LocalDateTime] => Array[AnyRef]  = (seq: Seq[LocalDateTime]) => seq.map(_.toString.asInstanceOf[AnyRef]).toArray
+  protected lazy val seq2arrayOffsetTime    : Seq[OffsetTime] => Array[AnyRef]     = (seq: Seq[OffsetTime]) => seq.map(_.toString.asInstanceOf[AnyRef]).toArray
+  protected lazy val seq2arrayOffsetDateTime: Seq[OffsetDateTime] => Array[AnyRef] = (seq: Seq[OffsetDateTime]) => seq.map(_.toString.asInstanceOf[AnyRef]).toArray
+  protected lazy val seq2arrayZonedDateTime : Seq[ZonedDateTime] => Array[AnyRef]  = (seq: Seq[ZonedDateTime]) => seq.map(_.toString.asInstanceOf[AnyRef]).toArray
+  protected lazy val seq2arrayUUID          : Seq[UUID] => Array[AnyRef]           = (seq: Seq[UUID]) => seq.toArray
+  protected lazy val seq2arrayURI           : Seq[URI] => Array[AnyRef]            = (seq: Seq[URI]) => seq.map(_.toString.asInstanceOf[AnyRef]).toArray
+  protected lazy val seq2arrayByte          : Seq[Byte] => Array[AnyRef]           = (seq: Seq[Byte]) => seq.toArray.asInstanceOf[Array[AnyRef]]
+  protected lazy val seq2arrayShort         : Seq[Short] => Array[AnyRef]          = (seq: Seq[Short]) => seq.toArray.asInstanceOf[Array[AnyRef]]
+  protected lazy val seq2arrayChar          : Seq[Char] => Array[AnyRef]           = (seq: Seq[Char]) => seq.toArray.asInstanceOf[Array[AnyRef]]
 
   protected lazy val extsID             = List("", "AnyRef")
   protected lazy val extsString         = List("", "AnyRef")

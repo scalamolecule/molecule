@@ -11,7 +11,6 @@ trait UpdateOps extends Action2Data with BaseOps {
     vs: Seq[T],
     owner: Boolean,
     transformValue: T => Any,
-    handleValue: T => Any
   ): Unit
 
   def updateSetEq[T](
@@ -20,8 +19,8 @@ trait UpdateOps extends Action2Data with BaseOps {
     sets: Seq[Set[T]],
     refNs: Option[String],
     owner: Boolean,
-    transform: T => Any,
-    set2array: Set[Any] => Array[AnyRef],
+    transformValue: T => Any,
+    set2array: Set[T] => Array[AnyRef],
     exts: List[String],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit
@@ -32,8 +31,8 @@ trait UpdateOps extends Action2Data with BaseOps {
     sets: Seq[Set[T]],
     refNs: Option[String],
     owner: Boolean,
-    transform: T => Any,
-    set2array: Set[Any] => Array[AnyRef],
+    transformValue: T => Any,
+    set2array: Set[T] => Array[AnyRef],
     exts: List[String],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit
@@ -44,8 +43,7 @@ trait UpdateOps extends Action2Data with BaseOps {
     set: Set[T],
     refNs: Option[String],
     owner: Boolean,
-    transform: T => Any,
-    handleValue: T => Any,
+    transformValue: T => Any,
     exts: List[String],
     one2json: T => String
   ): Unit
@@ -56,10 +54,10 @@ trait UpdateOps extends Action2Data with BaseOps {
     seqs: Seq[Seq[T]],
     refNs: Option[String],
     owner: Boolean,
-    transform: T => Any,
-    //    set2array: Set[Any] => Array[AnyRef],
-    //    exts: List[String],
-    //    value2json: (StringBuffer, T) => StringBuffer
+    transformValue: T => Any,
+    seq2array: Seq[T] => Array[AnyRef],
+    exts: List[String],
+    value2json: (StringBuffer, T) => StringBuffer
   ): Unit = ???
 
   def updateByteArray(
@@ -74,10 +72,10 @@ trait UpdateOps extends Action2Data with BaseOps {
     seqs: Seq[Seq[T]],
     refNs: Option[String],
     owner: Boolean,
-    transform: T => Any,
-    //    set2array: Set[Any] => Array[AnyRef],
-    //    exts: List[String],
-    //    value2json: (StringBuffer, T) => StringBuffer
+    transformValue: T => Any,
+    seq2array: Seq[T] => Array[AnyRef],
+    exts: List[String],
+    value2json: (StringBuffer, T) => StringBuffer
   ): Unit = ???
 
   def updateSeqRemove[T](
@@ -86,10 +84,9 @@ trait UpdateOps extends Action2Data with BaseOps {
     seq: Seq[T],
     refNs: Option[String],
     owner: Boolean,
-    transform: T => Any,
-    //    handleValue: T => Any,
-    //    exts: List[String],
-    //    one2json: T => String
+    transformValue: T => Any,
+    exts: List[String],
+    one2json: T => String
   ): Unit = ???
 
   def updateMapEq[T](
@@ -99,7 +96,7 @@ trait UpdateOps extends Action2Data with BaseOps {
     noValue: Boolean,
     refNs: Option[String],
     owner: Boolean,
-    transform: T => Any,
+    transformValue: T => Any,
     //    set2array: Set[Any] => Array[AnyRef],
     //    exts: List[String],
     //    value2json: (StringBuffer, T) => StringBuffer
@@ -111,7 +108,7 @@ trait UpdateOps extends Action2Data with BaseOps {
     map: Map[String, T],
     refNs: Option[String],
     owner: Boolean,
-    transform: T => Any,
+    transformValue: T => Any,
     //    set2array: Set[Any] => Array[AnyRef],
     //    exts: List[String],
     //    value2json: (StringBuffer, T) => StringBuffer
@@ -123,8 +120,7 @@ trait UpdateOps extends Action2Data with BaseOps {
     map: Map[String, T],
     refNs: Option[String],
     owner: Boolean,
-    transform: T => Any,
-    //    handleValue: T => Any,
+    transformValue: T => Any,
     //    exts: List[String],
     //    one2json: T => String
   ): Unit = ???

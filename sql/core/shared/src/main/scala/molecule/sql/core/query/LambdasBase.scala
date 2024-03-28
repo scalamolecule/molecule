@@ -5,6 +5,7 @@ import java.time._
 import java.util.{Date, UUID}
 import molecule.base.util.BaseHelpers
 import molecule.core.util.AggrUtils
+import scala.collection.mutable.ListBuffer
 import scala.reflect.ClassTag
 
 
@@ -51,6 +52,22 @@ trait LambdasBase extends BaseHelpers with AggrUtils { self: SqlQueryBase =>
         }
       }
       set
+    }
+  }
+  protected def sqlArray2list[T](row: RS, paramIndex: Int, getValue: RS => T): List[T] = {
+    val array = row.getArray(paramIndex)
+    if (row.wasNull()) {
+      List.empty[T]
+    } else {
+      val arrayResultSet = array.getResultSet
+      var buf            = ListBuffer.empty[T]
+      while (arrayResultSet.next()) {
+        val value = getValue(arrayResultSet)
+        if (!arrayResultSet.wasNull()) {
+          buf += value
+        }
+      }
+      buf.toList
     }
   }
 
@@ -102,6 +119,30 @@ trait LambdasBase extends BaseHelpers with AggrUtils { self: SqlQueryBase =>
   protected lazy val array2setByte          : (RS, Int) => Set[Byte]           = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueByte)
   protected lazy val array2setShort         : (RS, Int) => Set[Short]          = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueShort)
   protected lazy val array2setChar          : (RS, Int) => Set[Char]           = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueChar)
+
+  protected lazy val array2listId            : (RS, Int) => List[String]         = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueId)
+  protected lazy val array2listString        : (RS, Int) => List[String]         = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueString)
+  protected lazy val array2listInt           : (RS, Int) => List[Int]            = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueInt)
+  protected lazy val array2listLong          : (RS, Int) => List[Long]           = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueLong)
+  protected lazy val array2listFloat         : (RS, Int) => List[Float]          = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueFloat)
+  protected lazy val array2listDouble        : (RS, Int) => List[Double]         = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueDouble)
+  protected lazy val array2listBoolean       : (RS, Int) => List[Boolean]        = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueBoolean)
+  protected lazy val array2listBigInt        : (RS, Int) => List[BigInt]         = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueBigInt)
+  protected lazy val array2listBigDecimal    : (RS, Int) => List[BigDecimal]     = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueBigDecimal)
+  protected lazy val array2listDate          : (RS, Int) => List[Date]           = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueDate)
+  protected lazy val array2listDuration      : (RS, Int) => List[Duration]       = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueDuration)
+  protected lazy val array2listInstant       : (RS, Int) => List[Instant]        = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueInstant)
+  protected lazy val array2listLocalDate     : (RS, Int) => List[LocalDate]      = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueLocalDate)
+  protected lazy val array2listLocalTime     : (RS, Int) => List[LocalTime]      = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueLocalTime)
+  protected lazy val array2listLocalDateTime : (RS, Int) => List[LocalDateTime]  = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueLocalDateTime)
+  protected lazy val array2listOffsetTime    : (RS, Int) => List[OffsetTime]     = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueOffsetTime)
+  protected lazy val array2listOffsetDateTime: (RS, Int) => List[OffsetDateTime] = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueOffsetDateTime)
+  protected lazy val array2listZonedDateTime : (RS, Int) => List[ZonedDateTime]  = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueZonedDateTime)
+  protected lazy val array2listUUID          : (RS, Int) => List[UUID]           = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueUUID)
+  protected lazy val array2listURI           : (RS, Int) => List[URI]            = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueURI)
+  protected lazy val array2listByte          : (RS, Int) => List[Byte]           = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueByte)
+  protected lazy val array2listShort         : (RS, Int) => List[Short]          = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueShort)
+  protected lazy val array2listChar          : (RS, Int) => List[Char]           = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueChar)
 
 
   protected lazy val json2oneId            : String => String         = (v: String) => v

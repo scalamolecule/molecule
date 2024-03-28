@@ -12,7 +12,7 @@ trait Insert_mysql extends SqlInsert { self: ResolveInsert with InsertResolvers_
   override protected def addSet[T](
     ns: String,
     attr: String,
-    set2array: Set[Any] => Array[AnyRef],
+    set2array: Set[T] => Array[AnyRef],
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
@@ -82,7 +82,7 @@ trait Insert_mysql extends SqlInsert { self: ResolveInsert with InsertResolvers_
   override protected def addSetOpt[T](
     ns: String,
     attr: String,
-    set2array: Set[Any] => Array[AnyRef],
+    set2array: Set[T] => Array[AnyRef],
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
@@ -156,6 +156,6 @@ trait Insert_mysql extends SqlInsert { self: ResolveInsert with InsertResolvers_
   }
 
 
-  override protected lazy val handleDate =
-    (v: Any) => (ps: PS, n: Int) => ps.setLong(n, v.asInstanceOf[Date].getTime)
+  override protected lazy val transformDate =
+    (v: Date) => (ps: PS, n: Int) => ps.setLong(n, v.getTime)
 }

@@ -108,7 +108,6 @@ trait Update_datomic
     vs: Seq[T],
     owner: Boolean,
     transformValue: T => Any,
-    handleValue: T => Any
   ): Unit = {
     if (isUpdate) {
       val dummyFilterAttr = AttrOneTacInt(ns, attr)
@@ -130,8 +129,8 @@ trait Update_datomic
     sets: Seq[Set[T]],
     refNs: Option[String],
     owner: Boolean,
-    transform: T => Any,
-    set2array: Set[Any] => Array[AnyRef],
+    transformValue: T => Any,
+    set2array: Set[T] => Array[AnyRef],
     exts: List[String],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
@@ -141,7 +140,7 @@ trait Update_datomic
     }
     sets match {
       case Seq(set) =>
-        data += (("add", ns, attr, set.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, true, ""))
+        data += (("add", ns, attr, set.map(v => transformValue(v).asInstanceOf[AnyRef]).toSeq, true, ""))
 
       case Nil =>
         data += (("retract", ns, attr, Nil, true, ""))
@@ -158,14 +157,14 @@ trait Update_datomic
     sets: Seq[Set[T]],
     refNs: Option[String],
     owner: Boolean,
-    transform: T => Any,
-    set2array: Set[Any] => Array[AnyRef],
+    transformValue: T => Any,
+    set2array: Set[T] => Array[AnyRef],
     exts: List[String],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     sets match {
       case Seq(set) =>
-        data += (("add", ns, attr, set.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, false, ""))
+        data += (("add", ns, attr, set.map(v => transformValue(v).asInstanceOf[AnyRef]).toSeq, false, ""))
 
       case Nil =>
         data += (("retract", ns, attr, Nil, false, ""))
@@ -182,13 +181,12 @@ trait Update_datomic
     set: Set[T],
     refNs: Option[String],
     owner: Boolean,
-    transform: T => Any,
-    handleValue: T => Any,
+    transformValue: T => Any,
     exts: List[String],
     one2json: T => String
   ): Unit = {
     if (set.nonEmpty) {
-      data += (("retract", ns, attr, set.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, false, ""))
+      data += (("retract", ns, attr, set.map(v => transformValue(v).asInstanceOf[AnyRef]).toSeq, false, ""))
     }
   }
 
@@ -199,10 +197,10 @@ trait Update_datomic
     seqs: Seq[Seq[T]],
     refNs: Option[String],
     owner: Boolean,
-    transform: T => Any,
-    //    set2array: Set[Any] => Array[AnyRef],
-    //    exts: List[String],
-    //    value2json: (StringBuffer, T) => StringBuffer
+    transformValue: T => Any,
+    seq2array: Seq[T] => Array[AnyRef],
+    exts: List[String],
+    value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     if (isUpdate) {
       val dummyFilterAttr = AttrOneTacInt(ns, attr)
@@ -210,7 +208,7 @@ trait Update_datomic
     }
     seqs match {
       case Seq(seq) =>
-        data += (("add", ns, attr, seq.map(v => transform(v).asInstanceOf[AnyRef]), true, "seq"))
+        data += (("add", ns, attr, seq.map(v => transformValue(v).asInstanceOf[AnyRef]), true, "seq"))
 
       case Nil =>
         data += (("retract", ns, attr, Nil, true, "seq"))
@@ -234,14 +232,14 @@ trait Update_datomic
     seqs: Seq[Seq[T]],
     refNs: Option[String],
     owner: Boolean,
-    transform: T => Any,
-    //    set2array: Set[Any] => Array[AnyRef],
-    //    exts: List[String],
-    //    value2json: (StringBuffer, T) => StringBuffer
+    transformValue: T => Any,
+    seq2array: Seq[T] => Array[AnyRef],
+    exts: List[String],
+    value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     seqs match {
       case Seq(seq) =>
-        data += (("add", ns, attr, seq.map(v => transform(v).asInstanceOf[AnyRef]), false, "seq"))
+        data += (("add", ns, attr, seq.map(v => transformValue(v).asInstanceOf[AnyRef]), false, "seq"))
 
       case Nil =>
         data += (("retract", ns, attr, Nil, false, "seq"))
@@ -258,13 +256,12 @@ trait Update_datomic
     seq: Seq[T],
     refNs: Option[String],
     owner: Boolean,
-    transform: T => Any,
-    //    handleValue: T => Any,
-    //    exts: List[String],
-    //    one2json: T => String
+    transformValue: T => Any,
+    exts: List[String],
+    one2json: T => String
   ): Unit = {
     if (seq.nonEmpty) {
-      data += (("retract", ns, attr, seq.map(v => transform(v).asInstanceOf[AnyRef]), false, "seq"))
+      data += (("retract", ns, attr, seq.map(v => transformValue(v).asInstanceOf[AnyRef]), false, "seq"))
     }
   }
 
@@ -276,7 +273,7 @@ trait Update_datomic
     noValue: Boolean,
     refNs: Option[String],
     owner: Boolean,
-    transform: T => Any,
+    transformValue: T => Any,
     //    set2array: Set[Any] => Array[AnyRef],
     //    exts: List[String],
     //    value2json: (StringBuffer, T) => StringBuffer
@@ -289,7 +286,7 @@ trait Update_datomic
       data += (("retract", ns, attr, Nil, true, "map"))
     } else {
       val pairs = map.map { case (k, v) =>
-        (k, transform(v).asInstanceOf[AnyRef])
+        (k, transformValue(v).asInstanceOf[AnyRef])
       }.toSeq
       data += (("add", ns, attr, pairs, true, "map"))
     }
@@ -301,14 +298,14 @@ trait Update_datomic
     map: Map[String, T],
     refNs: Option[String],
     owner: Boolean,
-    transform: T => Any,
+    transformValue: T => Any,
     //    set2array: Set[Any] => Array[AnyRef],
     //    exts: List[String],
     //    value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     if (map.nonEmpty) {
       val pairs = map.map { case (k, v) =>
-        (k, transform(v).asInstanceOf[AnyRef])
+        (k, transformValue(v).asInstanceOf[AnyRef])
       }.toSeq
       data += (("add", ns, attr, pairs, false, "map"))
     }
@@ -320,8 +317,7 @@ trait Update_datomic
     map: Map[String, T],
     refNs: Option[String],
     owner: Boolean,
-    transform: T => Any,
-    //    handleValue: T => Any,
+    transformValue: T => Any,
     //    exts: List[String],
     //    one2json: T => String
   ): Unit = {

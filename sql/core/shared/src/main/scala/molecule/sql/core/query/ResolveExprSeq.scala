@@ -104,7 +104,7 @@ trait ResolveExprSeq extends ResolveExpr { self: SqlQueryBase with LambdasSeq =>
     if (!isNestedOpt) {
       notNull += col
     }
-//    addCast(res.sql2set)
+    addCast(res.sql2list)
     attr.filterAttr.fold {
       val pathAttr = path :+ attr.cleanAttr
       if (filterAttrVars.contains(pathAttr) && attr.op != V) {

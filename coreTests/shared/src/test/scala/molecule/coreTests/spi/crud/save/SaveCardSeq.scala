@@ -18,20 +18,22 @@ trait SaveCardSeq extends CoreTestSuiteBase with Array2List with ApiAsync { spi:
   override lazy val tests = Tests {
 
     "mandatory" - types { implicit conn =>
-      val multipleArrays =
-        """Can only save one Seq of values for Seq attribute `Ns.intSeq`. Found multiple seqs:
-          |List(1)
-          |List(2)""".stripMargin
       for {
         // Can't save multiple Seqs of values (use insert for that)
         _ <- Ns.intSeq(Seq(1), Seq(2)).save.transact
           .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> multipleArrays
+            err ==>
+              """Can only save one Seq of values for Seq attribute `Ns.intSeq`. Found multiple seqs:
+                |List(1)
+                |List(2)""".stripMargin
           }
         // Same as
         _ <- Ns.intSeq(Seq(Seq(1), Seq(2))).save.transact
           .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> multipleArrays
+            err ==>
+              """Can only save one Seq of values for Seq attribute `Ns.intSeq`. Found multiple seqs:
+                |List(1)
+                |List(2)""".stripMargin
           }
 
         // Empty values are ignored
@@ -62,8 +64,6 @@ trait SaveCardSeq extends CoreTestSuiteBase with Array2List with ApiAsync { spi:
         _ <- Ns.i(1).byteArray(Array(byte1, byte2)).save.i.transact // Note that Bytes are saved in Arrays
         _ <- Ns.i(1).shortSeq(List(short1, short2)).save.transact
         _ <- Ns.i(1).charSeq(List(char1, char2)).save.transact
-
-        // Array of Bytes transparently mapped to any available optimized database byte array storage format
 
         _ <- Ns.i.stringSeq.query.get.map(_ ==> List((1, List(string1, string2))))
         _ <- Ns.i.intSeq.query.get.map(_ ==> List((1, List(int1, int2))))

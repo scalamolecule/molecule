@@ -9,16 +9,16 @@ trait SaveOps extends Action2Data with BaseOps {
     ns: String,
     attr: String,
     optValue: Option[T],
-    handleValue: T => Any,
+    transformValue: T => Any,
     exts: List[String]
   ): Unit
 
   protected def addSet[T](
     ns: String,
     attr: String,
-    optSet: Option[Set[Any]],
+    optSet: Option[Set[T]],
     transformValue: T => Any,
-    set2array: Set[Any] => Array[AnyRef],
+    set2array: Set[T] => Array[AnyRef],
     refNs: Option[String],
     exts: List[String],
     value2json: (StringBuffer, T) => StringBuffer
@@ -28,11 +28,11 @@ trait SaveOps extends Action2Data with BaseOps {
     ns: String,
     attr: String,
     refNs: Option[String],
-    optSeq: Option[Seq[Any]],
+    optSeq: Option[Seq[T]],
     transformValue: T => Any,
-    //    set2array: Array[Any] => Array[AnyRef],
-    //    exts: List[String],
-    //    value2json: (StringBuffer, T) => StringBuffer
+    seq2array: Seq[T] => Array[AnyRef],
+    exts: List[String],
+    value2json: (StringBuffer, T) => StringBuffer
   ): Unit = ???
 
   protected def addByteArray(
@@ -44,7 +44,7 @@ trait SaveOps extends Action2Data with BaseOps {
   protected def addMap[T](
     ns: String,
     attr: String,
-    optMap: Option[Map[String, Any]],
+    optMap: Option[Map[String, T]],
     transformValue: T => Any,
     //    set2map: Set[Any] => Map[String, AnyRef],
     //    refNs: Option[String],
