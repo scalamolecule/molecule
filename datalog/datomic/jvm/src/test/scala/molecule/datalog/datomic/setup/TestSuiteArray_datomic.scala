@@ -12,11 +12,11 @@ import scala.concurrent.duration._
 
 trait TestSuiteArray_datomic extends CoreTestSuiteBase {
 
-  override val platform = "jvm"
-  override val database = "Datomic"
+  override val platform              = "jvm"
+  override val database              = "Datomic"
+  override val isJsPlatform: Boolean = false
 
   override def delay[T](ms: Int)(body: => T): Future[T] = ???
-  override val isJsPlatform: Boolean = false
 
   override def inMem[T](test: Conn => T, schema: Schema): T = {
     val proxy = DatomicProxy(

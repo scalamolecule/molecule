@@ -77,8 +77,17 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
         case a: AttrSetTac => resolveAttrSetTac(a); resolve(tail)
       }
 
-      case a: AttrSeq => ???
-      case a: AttrMap => ???
+      case a: AttrSeq => a match {
+        case a: AttrSeqMan => resolveAttrSeqMan(a); resolve(tail)
+        case a: AttrSeqOpt => resolveAttrSeqOpt(a); resolve(tail)
+        case a: AttrSeqTac => resolveAttrSeqTac(a); resolve(tail)
+      }
+
+      case a: AttrMap => a match {
+        case a: AttrMapMan => resolveAttrMapMan(a); resolve(tail)
+        case a: AttrMapOpt => resolveAttrMapOpt(a); resolve(tail)
+        case a: AttrMapTac => resolveAttrMapTac(a); resolve(tail)
+      }
 
       case ref: Ref                        => resolveRef0(ref, tail)
       case backRef: BackRef                => resolveBackRef(backRef, tail)

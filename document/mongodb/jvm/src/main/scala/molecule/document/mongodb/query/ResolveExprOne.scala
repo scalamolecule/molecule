@@ -8,7 +8,12 @@ import molecule.document.mongodb.query.mongoModel.{Branch, NestedRef}
 import org.bson._
 import org.bson.conversions.Bson
 
-trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self: MongoQueryBase =>
+trait ResolveExprOne extends ResolveExpr
+  with LambdasOne
+  with LambdasSet
+  with LambdasSeq
+  with LambdasMap
+  { self: MongoQueryBase =>
 
   override protected def resolveAttrOneMan(attr: AttrOneMan): Unit = {
     attr match {

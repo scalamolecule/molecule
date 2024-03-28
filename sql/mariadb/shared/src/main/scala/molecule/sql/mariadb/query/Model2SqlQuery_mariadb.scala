@@ -8,6 +8,8 @@ class Model2SqlQuery_mariadb[Tpl](elements0: List[Element])
   extends Model2SqlQuery[Tpl](elements0)
     with ResolveExprOne_mariadb
     with ResolveExprSet_mariadb
+    with ResolveExprSeq_mariadb
+    with ResolveExprMap_mariadb
     with ResolveExprSetRefAttr_mariadb
     with SqlQueryBase {
 

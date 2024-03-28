@@ -17,4 +17,12 @@ trait ResolveExpr {
   protected def resolveRefAttrSetMan(attr: AttrSetMan): Unit
   protected def resolveRefAttrSetTac(attr: AttrSetTac): Unit
   protected def resolveRefAttrSetOpt(attr: AttrSetOpt): Unit
+
+  protected def resolveAttrSeqMan(attr: AttrSeqMan): Unit
+  protected def resolveAttrSeqTac(attr: AttrSeqTac): Unit
+  protected def resolveAttrSeqOpt(attr: AttrSeqOpt): Unit
+
+  protected def resolveAttrMapMan(attr: AttrMapMan): Unit
+  protected def resolveAttrMapTac(attr: AttrMapTac): Unit
+  protected def resolveAttrMapOpt(attr: AttrMapOpt): Unit
 }

@@ -25,7 +25,7 @@ trait CoreTestSuiteBase
   def validation[T](test: Conn => T): T = inMem(test, ValidationSchema)
   def partition[T](test: Conn => T): T = inMem(test, PartitionsSchema)
 
-  def delay[T](ms: Int)(body: => T): Future[T]
+  def delay[T](ms: Int)(body: => T): Future[T] = ???
 
   override def utestFormatter: Formatter = new Formatter {
     override def formatIcon(success: Boolean): ufansi.Str = {

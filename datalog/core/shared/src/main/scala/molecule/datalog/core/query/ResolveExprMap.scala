@@ -39,6 +39,39 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     es
   }
 
+  protected def resolveAttrMapOpt(es: List[Var], attr: AttrMapOpt): List[Var] = {
+    aritiesAttr()
+    attrIndex += 1
+    hasOptAttr = true // to avoid redundant None's
+    val e = es.last
+    attr match {
+      case at: AttrMapOptID             => noId
+      case at: AttrMapOptString         => opt(attr, e, at.vs, resOptMapString)
+      case at: AttrMapOptInt            => opt(attr, e, at.vs, resOptMapInt)
+      case at: AttrMapOptLong           => opt(attr, e, at.vs, resOptMapLong)
+      case at: AttrMapOptFloat          => opt(attr, e, at.vs, resOptMapFloat)
+      case at: AttrMapOptDouble         => opt(attr, e, at.vs, resOptMapDouble)
+      case at: AttrMapOptBoolean        => opt(attr, e, at.vs, resOptMapBoolean)
+      case at: AttrMapOptBigInt         => opt(attr, e, at.vs, resOptMapBigInt)
+      case at: AttrMapOptBigDecimal     => opt(attr, e, at.vs, resOptMapBigDecimal)
+      case at: AttrMapOptDate           => opt(attr, e, at.vs, resOptMapDate)
+      case at: AttrMapOptDuration       => opt(attr, e, at.vs, resOptMapDuration)
+      case at: AttrMapOptInstant        => opt(attr, e, at.vs, resOptMapInstant)
+      case at: AttrMapOptLocalDate      => opt(attr, e, at.vs, resOptMapLocalDate)
+      case at: AttrMapOptLocalTime      => opt(attr, e, at.vs, resOptMapLocalTime)
+      case at: AttrMapOptLocalDateTime  => opt(attr, e, at.vs, resOptMapLocalDateTime)
+      case at: AttrMapOptOffsetTime     => opt(attr, e, at.vs, resOptMapOffsetTime)
+      case at: AttrMapOptOffsetDateTime => opt(attr, e, at.vs, resOptMapOffsetDateTime)
+      case at: AttrMapOptZonedDateTime  => opt(attr, e, at.vs, resOptMapZonedDateTime)
+      case at: AttrMapOptUUID           => opt(attr, e, at.vs, resOptMapUUID)
+      case at: AttrMapOptURI            => opt(attr, e, at.vs, resOptMapURI)
+      case at: AttrMapOptByte           => opt(attr, e, at.vs, resOptMapByte)
+      case at: AttrMapOptShort          => opt(attr, e, at.vs, resOptMapShort)
+      case at: AttrMapOptChar           => opt(attr, e, at.vs, resOptMapChar)
+    }
+    es
+  }
+
   protected def resolveAttrMapTac(es: List[Var], attr: AttrMapTac): List[Var] = {
     val e = es.last
     attr match {
@@ -65,39 +98,6 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
       case at: AttrMapTacByte           => tac(attr, e, at.vs, resMapByte)
       case at: AttrMapTacShort          => tac(attr, e, at.vs, resMapShort)
       case at: AttrMapTacChar           => tac(attr, e, at.vs, resMapChar)
-    }
-    es
-  }
-
-  protected def resolveAttrMapOpt(es: List[Var], attr: AttrMapOpt): List[Var] = {
-    aritiesAttr()
-    attrIndex += 1
-    hasOptAttr = true // to avoid redundant None's
-    val e = es.last
-    attr match {
-      case at: AttrMapOptID             => noId
-      case at: AttrMapOptString         => opt(attr, e, at.op, at.vs, resOptMapString)
-      case at: AttrMapOptInt            => opt(attr, e, at.op, at.vs, resOptMapInt)
-      case at: AttrMapOptLong           => opt(attr, e, at.op, at.vs, resOptMapLong)
-      case at: AttrMapOptFloat          => opt(attr, e, at.op, at.vs, resOptMapFloat)
-      case at: AttrMapOptDouble         => opt(attr, e, at.op, at.vs, resOptMapDouble)
-      case at: AttrMapOptBoolean        => opt(attr, e, at.op, at.vs, resOptMapBoolean)
-      case at: AttrMapOptBigInt         => opt(attr, e, at.op, at.vs, resOptMapBigInt)
-      case at: AttrMapOptBigDecimal     => opt(attr, e, at.op, at.vs, resOptMapBigDecimal)
-      case at: AttrMapOptDate           => opt(attr, e, at.op, at.vs, resOptMapDate)
-      case at: AttrMapOptDuration       => opt(attr, e, at.op, at.vs, resOptMapDuration)
-      case at: AttrMapOptInstant        => opt(attr, e, at.op, at.vs, resOptMapInstant)
-      case at: AttrMapOptLocalDate      => opt(attr, e, at.op, at.vs, resOptMapLocalDate)
-      case at: AttrMapOptLocalTime      => opt(attr, e, at.op, at.vs, resOptMapLocalTime)
-      case at: AttrMapOptLocalDateTime  => opt(attr, e, at.op, at.vs, resOptMapLocalDateTime)
-      case at: AttrMapOptOffsetTime     => opt(attr, e, at.op, at.vs, resOptMapOffsetTime)
-      case at: AttrMapOptOffsetDateTime => opt(attr, e, at.op, at.vs, resOptMapOffsetDateTime)
-      case at: AttrMapOptZonedDateTime  => opt(attr, e, at.op, at.vs, resOptMapZonedDateTime)
-      case at: AttrMapOptUUID           => opt(attr, e, at.op, at.vs, resOptMapUUID)
-      case at: AttrMapOptURI            => opt(attr, e, at.op, at.vs, resOptMapURI)
-      case at: AttrMapOptByte           => opt(attr, e, at.op, at.vs, resOptMapByte)
-      case at: AttrMapOptShort          => opt(attr, e, at.op, at.vs, resOptMapShort)
-      case at: AttrMapOptChar           => opt(attr, e, at.op, at.vs, resOptMapChar)
     }
     es
   }
@@ -133,13 +133,13 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
   }
 
   private def opt[T](
-    attr: Attr, e: Var, op: Op,
+    attr: Attr, e: Var,
     optMap: Option[Map[String, T]],
     resMapOpt: ResMapOpt[T],
   ): Unit = {
     val v = vv
     find += v
-    op match {
+    attr.op match {
       case V     => optAttr(attr, e, v, resMapOpt)
       case Has   => key2optValue(attr, e, v, optMap.get.head._1, resMapOpt)
       case Eq    => throw ModelError(
@@ -197,7 +197,7 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
   }
 
 
-  // value lookup by key ------------------------------------------------------------------------
+  // value lookup by key -------------------------------------------------------
 
   private def key2value[T](
     attr: Attr, e: Var, v: Var, key: String, resMap: ResMap[T]
@@ -227,7 +227,7 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
   }
 
 
-  // tacit ------------------------------------------------------------------------
+  // tacit ---------------------------------------------------------------------
 
   private def containsKeys[T](
     attr: Attr, e: Var, v: Var, map: Map[String, T]
@@ -310,7 +310,7 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
   }
 
 
-  // no value -----------------------------------------------------------------
+  // no value ------------------------------------------------------------------
 
   private def noMatch[T](attr: Attr, e: Var, v: Var, resMap: ResMap[T]): Unit = {
     val a = nsAttr(attr)

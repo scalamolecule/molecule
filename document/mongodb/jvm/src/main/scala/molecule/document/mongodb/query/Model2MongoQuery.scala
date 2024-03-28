@@ -20,6 +20,8 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     with ResolveExprOne
     with ResolveExprOneID
     with ResolveExprSet
+    with ResolveExprSeq
+    with ResolveExprMap
     with ResolveExprSetRefAttr
     with ResolveRef
     with MongoQueryBase

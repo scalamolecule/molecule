@@ -8,6 +8,8 @@ class Model2SqlQuery_mysql[Tpl](elements0: List[Element])
   extends Model2SqlQuery[Tpl](elements0)
     with ResolveExprOne_mysql
     with ResolveExprSet_mysql
+    with ResolveExprSeq_mysql
+    with ResolveExprMap_mysql
     with ResolveExprSetRefAttr_mysql
     with SqlQueryBase {
 

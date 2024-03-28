@@ -75,29 +75,29 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     hasOptAttr = true // to avoid redundant None's
     val e = es.last
     attr match {
-      case at: AttrSeqOptID             => opt(attr, e, at.op, at.vs, resOptSeqId, resSeqId)
-      case at: AttrSeqOptString         => opt(attr, e, at.op, at.vs, resOptSeqString, resSeqString)
-      case at: AttrSeqOptInt            => opt(attr, e, at.op, at.vs, resOptSeqInt, resSeqInt)
-      case at: AttrSeqOptLong           => opt(attr, e, at.op, at.vs, resOptSeqLong, resSeqLong)
-      case at: AttrSeqOptFloat          => opt(attr, e, at.op, at.vs, resOptSeqFloat, resSeqFloat)
-      case at: AttrSeqOptDouble         => opt(attr, e, at.op, at.vs, resOptSeqDouble, resSeqDouble)
-      case at: AttrSeqOptBoolean        => opt(attr, e, at.op, at.vs, resOptSeqBoolean, resSeqBoolean)
-      case at: AttrSeqOptBigInt         => opt(attr, e, at.op, at.vs, resOptSeqBigInt, resSeqBigInt)
-      case at: AttrSeqOptBigDecimal     => opt(attr, e, at.op, at.vs, resOptSeqBigDecimal, resSeqBigDecimal)
-      case at: AttrSeqOptDate           => opt(attr, e, at.op, at.vs, resOptSeqDate, resSeqDate)
-      case at: AttrSeqOptDuration       => opt(attr, e, at.op, at.vs, resOptSeqDuration, resSeqDuration)
-      case at: AttrSeqOptInstant        => opt(attr, e, at.op, at.vs, resOptSeqInstant, resSeqInstant)
-      case at: AttrSeqOptLocalDate      => opt(attr, e, at.op, at.vs, resOptSeqLocalDate, resSeqLocalDate)
-      case at: AttrSeqOptLocalTime      => opt(attr, e, at.op, at.vs, resOptSeqLocalTime, resSeqLocalTime)
-      case at: AttrSeqOptLocalDateTime  => opt(attr, e, at.op, at.vs, resOptSeqLocalDateTime, resSeqLocalDateTime)
-      case at: AttrSeqOptOffsetTime     => opt(attr, e, at.op, at.vs, resOptSeqOffsetTime, resSeqOffsetTime)
-      case at: AttrSeqOptOffsetDateTime => opt(attr, e, at.op, at.vs, resOptSeqOffsetDateTime, resSeqOffsetDateTime)
-      case at: AttrSeqOptZonedDateTime  => opt(attr, e, at.op, at.vs, resOptSeqZonedDateTime, resSeqZonedDateTime)
-      case at: AttrSeqOptUUID           => opt(attr, e, at.op, at.vs, resOptSeqUUID, resSeqUUID)
-      case at: AttrSeqOptURI            => opt(attr, e, at.op, at.vs, resOptSeqURI, resSeqURI)
+      case at: AttrSeqOptID             => opt(attr, e, at.vs, resOptSeqId, resSeqId)
+      case at: AttrSeqOptString         => opt(attr, e, at.vs, resOptSeqString, resSeqString)
+      case at: AttrSeqOptInt            => opt(attr, e, at.vs, resOptSeqInt, resSeqInt)
+      case at: AttrSeqOptLong           => opt(attr, e, at.vs, resOptSeqLong, resSeqLong)
+      case at: AttrSeqOptFloat          => opt(attr, e, at.vs, resOptSeqFloat, resSeqFloat)
+      case at: AttrSeqOptDouble         => opt(attr, e, at.vs, resOptSeqDouble, resSeqDouble)
+      case at: AttrSeqOptBoolean        => opt(attr, e, at.vs, resOptSeqBoolean, resSeqBoolean)
+      case at: AttrSeqOptBigInt         => opt(attr, e, at.vs, resOptSeqBigInt, resSeqBigInt)
+      case at: AttrSeqOptBigDecimal     => opt(attr, e, at.vs, resOptSeqBigDecimal, resSeqBigDecimal)
+      case at: AttrSeqOptDate           => opt(attr, e, at.vs, resOptSeqDate, resSeqDate)
+      case at: AttrSeqOptDuration       => opt(attr, e, at.vs, resOptSeqDuration, resSeqDuration)
+      case at: AttrSeqOptInstant        => opt(attr, e, at.vs, resOptSeqInstant, resSeqInstant)
+      case at: AttrSeqOptLocalDate      => opt(attr, e, at.vs, resOptSeqLocalDate, resSeqLocalDate)
+      case at: AttrSeqOptLocalTime      => opt(attr, e, at.vs, resOptSeqLocalTime, resSeqLocalTime)
+      case at: AttrSeqOptLocalDateTime  => opt(attr, e, at.vs, resOptSeqLocalDateTime, resSeqLocalDateTime)
+      case at: AttrSeqOptOffsetTime     => opt(attr, e, at.vs, resOptSeqOffsetTime, resSeqOffsetTime)
+      case at: AttrSeqOptOffsetDateTime => opt(attr, e, at.vs, resOptSeqOffsetDateTime, resSeqOffsetDateTime)
+      case at: AttrSeqOptZonedDateTime  => opt(attr, e, at.vs, resOptSeqZonedDateTime, resSeqZonedDateTime)
+      case at: AttrSeqOptUUID           => opt(attr, e, at.vs, resOptSeqUUID, resSeqUUID)
+      case at: AttrSeqOptURI            => opt(attr, e, at.vs, resOptSeqURI, resSeqURI)
       case at: AttrSeqOptByte           => optByteArray(attr, e, at.vs, resOptSeqByte) // Byte Array only semantics
-      case at: AttrSeqOptShort          => opt(attr, e, at.op, at.vs, resOptSeqShort, resSeqShort)
-      case at: AttrSeqOptChar           => opt(attr, e, at.op, at.vs, resOptSeqChar, resSeqChar)
+      case at: AttrSeqOptShort          => opt(attr, e, at.vs, resOptSeqShort, resSeqShort)
+      case at: AttrSeqOptChar           => opt(attr, e, at.vs, resOptSeqChar, resSeqChar)
     }
     es
   }
@@ -191,14 +191,14 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
   }
 
   private def opt[T: ClassTag](
-    attr: Attr, e: Var, op: Op,
+    attr: Attr, e: Var,
     optSeqs: Option[Seq[Seq[T]]],
     resSeqOpt: ResSeqOpt[T],
     resSeq: ResSeq[T],
   ): Unit = {
     val v = vv
     addCast(resSeqOpt.j2sOptList)
-    op match {
+    attr.op match {
       case V     => optAttr(attr, e, v)
       case Eq    => optEqual(attr, e, v, optSeqs, resSeqOpt, resSeq)
       case Neq   => optNeq(attr, e, v, optSeqs, resSeqOpt, resSeq)

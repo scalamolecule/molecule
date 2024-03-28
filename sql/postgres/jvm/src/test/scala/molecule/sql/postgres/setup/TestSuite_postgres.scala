@@ -11,8 +11,9 @@ import molecule.sql.postgres.setup.{Connection_postgres => c}
 
 trait TestSuite_postgres extends CoreTestSuite with BaseHelpers {
 
-  override val platform = "jvm"
-  override val database = "Postgres"
+  override val platform              = "jvm"
+  override val database              = "Postgres"
+  override val isJsPlatform: Boolean = false
 
   override def inMem[T](test: Conn => T, schema: Schema): T = {
     val conn = schema match {

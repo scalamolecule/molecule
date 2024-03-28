@@ -244,6 +244,7 @@ trait ModelUtils {
             case a: AttrOneTacChar           => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
           }
       }
+
       case a: AttrSet => a match {
         case a: AttrSetMan =>
           val (ns1, attr1) = nonReservedAttr(a, proxy)
@@ -328,9 +329,173 @@ trait ModelUtils {
           }
       }
 
+      case a: AttrSeq => a match {
+        case a: AttrSeqMan =>
+          val (ns1, attr1) = nonReservedAttr(a, proxy)
+          a match {
+            case a: AttrSeqManID             => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqManString         => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqManInt            => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqManLong           => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqManFloat          => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqManDouble         => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqManBoolean        => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqManBigInt         => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqManBigDecimal     => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqManDate           => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqManDuration       => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqManInstant        => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqManLocalDate      => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqManLocalTime      => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqManLocalDateTime  => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqManOffsetTime     => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqManOffsetDateTime => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqManZonedDateTime  => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqManUUID           => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqManURI            => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqManByte           => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqManShort          => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqManChar           => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+          }
+        case a: AttrSeqOpt =>
+          val (ns1, attr1) = nonReservedAttr(a, proxy)
+          a match {
+            case a: AttrSeqOptID             => a.copy(ns = ns1, attr = attr1)
+            case a: AttrSeqOptString         => a.copy(ns = ns1, attr = attr1)
+            case a: AttrSeqOptInt            => a.copy(ns = ns1, attr = attr1)
+            case a: AttrSeqOptLong           => a.copy(ns = ns1, attr = attr1)
+            case a: AttrSeqOptFloat          => a.copy(ns = ns1, attr = attr1)
+            case a: AttrSeqOptDouble         => a.copy(ns = ns1, attr = attr1)
+            case a: AttrSeqOptBoolean        => a.copy(ns = ns1, attr = attr1)
+            case a: AttrSeqOptBigInt         => a.copy(ns = ns1, attr = attr1)
+            case a: AttrSeqOptBigDecimal     => a.copy(ns = ns1, attr = attr1)
+            case a: AttrSeqOptDate           => a.copy(ns = ns1, attr = attr1)
+            case a: AttrSeqOptDuration       => a.copy(ns = ns1, attr = attr1)
+            case a: AttrSeqOptInstant        => a.copy(ns = ns1, attr = attr1)
+            case a: AttrSeqOptLocalDate      => a.copy(ns = ns1, attr = attr1)
+            case a: AttrSeqOptLocalTime      => a.copy(ns = ns1, attr = attr1)
+            case a: AttrSeqOptLocalDateTime  => a.copy(ns = ns1, attr = attr1)
+            case a: AttrSeqOptOffsetTime     => a.copy(ns = ns1, attr = attr1)
+            case a: AttrSeqOptOffsetDateTime => a.copy(ns = ns1, attr = attr1)
+            case a: AttrSeqOptZonedDateTime  => a.copy(ns = ns1, attr = attr1)
+            case a: AttrSeqOptUUID           => a.copy(ns = ns1, attr = attr1)
+            case a: AttrSeqOptURI            => a.copy(ns = ns1, attr = attr1)
+            case a: AttrSeqOptByte           => a.copy(ns = ns1, attr = attr1)
+            case a: AttrSeqOptShort          => a.copy(ns = ns1, attr = attr1)
+            case a: AttrSeqOptChar           => a.copy(ns = ns1, attr = attr1)
+          }
+        case a: AttrSeqTac =>
+          val (ns1, attr1) = nonReservedAttr(a, proxy)
+          a match {
+            case a: AttrSeqTacID             => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqTacString         => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqTacInt            => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqTacLong           => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqTacFloat          => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqTacDouble         => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqTacBoolean        => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqTacBigInt         => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqTacBigDecimal     => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqTacDate           => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqTacDuration       => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqTacInstant        => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqTacLocalDate      => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqTacLocalTime      => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqTacLocalDateTime  => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqTacOffsetTime     => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqTacOffsetDateTime => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqTacZonedDateTime  => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqTacUUID           => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqTacURI            => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqTacByte           => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqTacShort          => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrSeqTacChar           => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+          }
+      }
 
-      case a: AttrSeq => ???
-      case a: AttrMap => ???
+      case a: AttrMap => a match {
+        case a: AttrMapMan =>
+          val (ns1, attr1) = nonReservedAttr(a, proxy)
+          a match {
+            case a: AttrMapManID             => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapManString         => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapManInt            => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapManLong           => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapManFloat          => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapManDouble         => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapManBoolean        => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapManBigInt         => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapManBigDecimal     => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapManDate           => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapManDuration       => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapManInstant        => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapManLocalDate      => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapManLocalTime      => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapManLocalDateTime  => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapManOffsetTime     => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapManOffsetDateTime => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapManZonedDateTime  => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapManUUID           => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapManURI            => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapManByte           => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapManShort          => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapManChar           => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+          }
+        case a: AttrMapOpt =>
+          val (ns1, attr1) = nonReservedAttr(a, proxy)
+          a match {
+            case a: AttrMapOptID             => a.copy(ns = ns1, attr = attr1)
+            case a: AttrMapOptString         => a.copy(ns = ns1, attr = attr1)
+            case a: AttrMapOptInt            => a.copy(ns = ns1, attr = attr1)
+            case a: AttrMapOptLong           => a.copy(ns = ns1, attr = attr1)
+            case a: AttrMapOptFloat          => a.copy(ns = ns1, attr = attr1)
+            case a: AttrMapOptDouble         => a.copy(ns = ns1, attr = attr1)
+            case a: AttrMapOptBoolean        => a.copy(ns = ns1, attr = attr1)
+            case a: AttrMapOptBigInt         => a.copy(ns = ns1, attr = attr1)
+            case a: AttrMapOptBigDecimal     => a.copy(ns = ns1, attr = attr1)
+            case a: AttrMapOptDate           => a.copy(ns = ns1, attr = attr1)
+            case a: AttrMapOptDuration       => a.copy(ns = ns1, attr = attr1)
+            case a: AttrMapOptInstant        => a.copy(ns = ns1, attr = attr1)
+            case a: AttrMapOptLocalDate      => a.copy(ns = ns1, attr = attr1)
+            case a: AttrMapOptLocalTime      => a.copy(ns = ns1, attr = attr1)
+            case a: AttrMapOptLocalDateTime  => a.copy(ns = ns1, attr = attr1)
+            case a: AttrMapOptOffsetTime     => a.copy(ns = ns1, attr = attr1)
+            case a: AttrMapOptOffsetDateTime => a.copy(ns = ns1, attr = attr1)
+            case a: AttrMapOptZonedDateTime  => a.copy(ns = ns1, attr = attr1)
+            case a: AttrMapOptUUID           => a.copy(ns = ns1, attr = attr1)
+            case a: AttrMapOptURI            => a.copy(ns = ns1, attr = attr1)
+            case a: AttrMapOptByte           => a.copy(ns = ns1, attr = attr1)
+            case a: AttrMapOptShort          => a.copy(ns = ns1, attr = attr1)
+            case a: AttrMapOptChar           => a.copy(ns = ns1, attr = attr1)
+          }
+        case a: AttrMapTac =>
+          val (ns1, attr1) = nonReservedAttr(a, proxy)
+          a match {
+            case a: AttrMapTacID             => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapTacString         => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapTacInt            => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapTacLong           => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapTacFloat          => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapTacDouble         => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapTacBoolean        => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapTacBigInt         => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapTacBigDecimal     => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapTacDate           => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapTacDuration       => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapTacInstant        => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapTacLocalDate      => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapTacLocalTime      => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapTacLocalDateTime  => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapTacOffsetTime     => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapTacOffsetDateTime => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapTacZonedDateTime  => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapTacUUID           => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapTacURI            => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapTacByte           => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapTacShort          => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrMapTacChar           => a.copy(ns = ns1, attr = attr1, filterAttr = optFilterAttr)
+          }
+      }
     }
   }
 }

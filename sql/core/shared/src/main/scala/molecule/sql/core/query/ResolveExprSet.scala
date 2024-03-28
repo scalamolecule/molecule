@@ -176,7 +176,6 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     groupByCols += col // if we later need to group by non-aggregated columns
     addCast(resOpt.sql2setOpt)
     attr.op match {
-      //      case V     => ()
       case V     => setOptAttr(col, res)
       case Eq    => setOptEqual(col, optSets, res)
       case Neq   => setOptNeq(col, optSets, res)
