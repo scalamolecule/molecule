@@ -26,8 +26,6 @@ object _ExprSeqOpt extends BoilerplateGenBase( "ExprSeqOpt", "/api/expression") 
          |  extends ${fileName}Ops_$arity[${`A..V`}, t, Ns1, Ns2]{
          |  def apply(seq : Option[Seq[t]]     )               : Ns1[${`A..V`}, t] = _exprSeqOpt(Eq   , seq.map(seq => Seq(seq))  )
          |  def apply(seqs: Option[Seq[Seq[t]]])(implicit x: X): Ns1[${`A..V`}, t] = _exprSeqOpt(Eq   , seqs                      )
-         |  def not  (seq : Option[Seq[t]]     )               : Ns1[${`A..V`}, t] = _exprSeqOpt(Neq  , seq.map(seq => Seq(seq))  )
-         |  def not  (seqs: Option[Seq[Seq[t]]])(implicit x: X): Ns1[${`A..V`}, t] = _exprSeqOpt(Neq  , seqs                      )
          |  def has  (v   : Option[t]          )               : Ns1[${`A..V`}, t] = _exprSeqOpt(Has  , v.map(v => Seq(Seq(v)))   )
          |  def has  (vs  : Option[Seq[t]]     )(implicit x: X): Ns1[${`A..V`}, t] = _exprSeqOpt(Has  , vs.map(_.map(v => Seq(v))))
          |  def hasNo(v   : Option[t]          )               : Ns1[${`A..V`}, t] = _exprSeqOpt(HasNo, v.map(v => Seq(Seq(v)))   )

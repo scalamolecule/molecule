@@ -41,10 +41,6 @@ trait FilterMap_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.dateMap("a").query.get.map(_ ==> List((1, date1), (2, date2)))
           _ <- Ns.i.a1.dateMap("b").query.get.map(_ ==> List((1, date2), (2, date3)))
           _ <- Ns.i.a1.dateMap("c").query.get.map(_ ==> List((2, date4)))
-
-          // Applying nothing to mandatory map attribute matches nothing,
-          // not even entities without map attributes
-          _ <- Ns.i.a1.dateMap().query.get.map(_ ==> Nil)
         } yield ()
       }
     }

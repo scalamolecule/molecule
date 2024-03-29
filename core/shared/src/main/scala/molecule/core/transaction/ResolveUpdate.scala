@@ -30,10 +30,10 @@ class ResolveUpdate(
 
             case a: AttrSet => a match {
               case a: AttrSetMan => a.op match {
-                case Eq     => resolveAttrSetMan(a); resolve(tail)
-                case Add    => resolveAttrSetAdd(a); resolve(tail)
-                case Remove => resolveAttrSetRemove(a); resolve(tail)
-                case _      => throw ModelError(s"Unexpected $update operation for card-many attribute. Found:\n" + a)
+                case Eq | NoValue => resolveAttrSetMan(a); resolve(tail)
+                case Add          => resolveAttrSetAdd(a); resolve(tail)
+                case Remove       => resolveAttrSetRemove(a); resolve(tail)
+                case _            => throw ModelError(s"Unexpected $update operation for card-many attribute. Found:\n" + a)
               }
               case _: AttrSetTac => throw ModelError("Can only lookup entity with card-one attribute value. Found:\n" + a)
               case _: AttrSetOpt => throw ModelError(s"Can't $update optional values. Found:\n" + a)
@@ -41,10 +41,10 @@ class ResolveUpdate(
 
             case a: AttrSeq => a match {
               case a: AttrSeqMan => a.op match {
-                case Eq     => resolveAttrSeqMan(a); resolve(tail)
-                case Add    => resolveAttrSeqAdd(a); resolve(tail)
-                case Remove => resolveAttrSeqRemove(a); resolve(tail)
-                case _      => throw ModelError(s"Unexpected $update operation for card-many attribute. Found:\n" + a)
+                case Eq | NoValue => resolveAttrSeqMan(a); resolve(tail)
+                case Add          => resolveAttrSeqAdd(a); resolve(tail)
+                case Remove       => resolveAttrSeqRemove(a); resolve(tail)
+                case _            => throw ModelError(s"Unexpected $update operation for card-many attribute. Found:\n" + a)
               }
               case _: AttrSeqTac => throw ModelError("Can only lookup entity with card-one attribute value. Found:\n" + a)
               case _: AttrSeqOpt => throw ModelError(s"Can't $update optional values. Found:\n" + a)
@@ -52,11 +52,10 @@ class ResolveUpdate(
 
             case a: AttrMap => a match {
               case a: AttrMapMan => a.op match {
-                case Eq      => resolveAttrMapMan(a); resolve(tail)
-                case NoValue => resolveAttrMapMan(a); resolve(tail)
-                case Add     => resolveAttrMapAdd(a); resolve(tail)
-                case Remove  => resolveAttrMapRemove(a); resolve(tail)
-                case _       => throw ModelError(s"Unexpected $update operation for card-many attribute. Found:\n" + a)
+                case Eq | NoValue => resolveAttrMapMan(a); resolve(tail)
+                case Add          => resolveAttrMapAdd(a); resolve(tail)
+                case Remove       => resolveAttrMapRemove(a); resolve(tail)
+                case _            => throw ModelError(s"Unexpected $update operation for card-many attribute. Found:\n" + a)
               }
               case _: AttrMapTac => throw ModelError("Can only lookup entity with card-one attribute value. Found:\n" + a)
               case a: AttrMapOpt => throw ModelError(s"Can't $update optional values. Found:\n" + a.toString)

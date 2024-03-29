@@ -40,10 +40,6 @@ trait FilterMap_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.byteMap("a").query.get.map(_ ==> List((1, byte1), (2, byte2)))
           _ <- Ns.i.a1.byteMap("b").query.get.map(_ ==> List((1, byte2), (2, byte3)))
           _ <- Ns.i.a1.byteMap("c").query.get.map(_ ==> List((2, byte4)))
-
-          // Applying nothing to mandatory map attribute matches nothing,
-          // not even entities without map attributes
-          _ <- Ns.i.a1.byteMap().query.get.map(_ ==> Nil)
         } yield ()
       }
     }

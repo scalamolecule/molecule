@@ -22,57 +22,6 @@ trait FilterRefSeq_Card2RefOwned extends CoreTestSuite with ApiAsync { spi: SpiA
           (4, List())
         ).transact
 
-        // All
-        _ <- A.i.a1.OwnBb.iSeq.query.get.map(_ ==> List(
-          (1, List(1, 2, 2)),
-          (2, List(2)),
-          (2, List(7)),
-          (3, List(3)),
-        ))
-
-
-        // equal/apply
-
-        _ <- A.i.a1.OwnBb.iSeq(List(1)).query.get.map(_ ==> Nil)
-        _ <- A.i.a1.OwnBb.iSeq(List(1, 2)).query.get.map(_ ==> Nil)
-        _ <- A.i.a1.OwnBb.iSeq(List(1, 2, 2)).query.get.map(_ ==> List(
-          (1, List(1, 2, 2)),
-        ))
-        _ <- A.i.a1.OwnBb.iSeq(List.empty[Int]).query.get.map(_ ==> Nil)
-
-
-        // not
-
-        _ <- A.i.a1.OwnBb.iSeq.not(List(1)).query.get.map(_ ==> List(
-          (1, List(1, 2, 2)),
-          (2, List(2)),
-          (2, List(7)),
-          (3, List(3)),
-        ))
-        _ <- A.i.a1.OwnBb.iSeq.not(List(2)).query.get.map(_ ==> List(
-          (1, List(1, 2, 2)),
-          (2, List(7)),
-          (3, List(3)),
-        ))
-        _ <- A.i.a1.OwnBb.iSeq.not(List(1, 2)).query.get.map(_ ==> List(
-          (1, List(1, 2, 2)),
-          (2, List(2)),
-          (2, List(7)),
-          (3, List(3)),
-        ))
-        _ <- A.i.a1.OwnBb.iSeq.not(List(1, 2, 2)).query.get.map(_ ==> List(
-          (2, List(2)),
-          (2, List(7)),
-          (3, List(3)),
-        ))
-        _ <- A.i.a1.OwnBb.iSeq.not(List.empty[Int]).query.get.map(_ ==> List(
-          (1, List(1, 2, 2)),
-          (2, List(2)),
-          (2, List(7)),
-          (3, List(3)),
-        ))
-
-
         // has
 
         _ <- A.i.a1.OwnBb.iSeq.has(1).query.get.map(_ ==> List(
@@ -129,21 +78,6 @@ trait FilterRefSeq_Card2RefOwned extends CoreTestSuite with ApiAsync { spi: SpiA
           (4, List())
         ).transact
 
-        // all
-        _ <- A.i.a1.OwnBb.iSeq_.query.get.map(_ ==> List(1, 2, 2, 3))
-
-        // equal/apply
-        _ <- A.i.a1.OwnBb.iSeq_(List(1)).query.get.map(_ ==> Nil)
-        _ <- A.i.a1.OwnBb.iSeq_(List(1, 2)).query.get.map(_ ==> Nil)
-        _ <- A.i.a1.OwnBb.iSeq_(List(1, 2, 2)).query.get.map(_ ==> List(1))
-        _ <- A.i.a1.OwnBb.iSeq_(List.empty[Int]).query.get.map(_ ==> Nil)
-
-        // not
-        _ <- A.i.a1.OwnBb.iSeq_.not(List(1)).query.get.map(_ ==> List(1, 2, 2, 3))
-        _ <- A.i.a1.OwnBb.iSeq_.not(List(1, 2)).query.get.map(_ ==> List(1, 2, 2, 3))
-        _ <- A.i.a1.OwnBb.iSeq_.not(List(1, 2, 2)).query.get.map(_ ==> List(2, 2, 3))
-        _ <- A.i.a1.OwnBb.iSeq_.not(List.empty[Int]).query.get.map(_ ==> List(1, 2, 2, 3))
-
         // has
         _ <- A.i.a1.OwnBb.iSeq_.has(1).query.get.map(_ ==> List(1))
         _ <- A.i.a1.OwnBb.iSeq_.has(2).query.get.map(_ ==> List(1, 2))
@@ -178,64 +112,6 @@ trait FilterRefSeq_Card2RefOwned extends CoreTestSuite with ApiAsync { spi: SpiA
           (4, Some(1), List()), // relationship created since 1 is saved in B namespace
           (5, None, List()) //     relationship not created
         ).transact
-
-        // All
-        _ <- A.i.a1.OwnBb.iSeq_?.query.get.map(_ ==> List(
-          (1, Some(List(1, 2, 2))),
-          (2, Some(List(2))),
-          (2, Some(List(7))),
-          (3, Some(List(3))),
-          (4, None), // retrieved since there's a relationship to B (but no iSeq value)
-          // (5, None) // not retrieved since there's no relationship to B
-        ))
-
-
-        // equal/apply
-
-        _ <- A.i.a1.OwnBb.iSeq_?(Some(List(1))).query.get.map(_ ==> Nil)
-        _ <- A.i.a1.OwnBb.iSeq_?(Some(List(1, 2))).query.get.map(_ ==> Nil)
-        _ <- A.i.a1.OwnBb.iSeq_?(Some(List(1, 2, 2))).query.get.map(_ ==> List(
-          (1, Some(List(1, 2, 2))),
-        ))
-
-        // None matches non-asserted values
-        _ <- A.i.a1.OwnBb.iSeq_?(Option.empty[List[Int]]).query.get.map(_ ==> List((4, None)))
-        _ <- A.i.a1.OwnBb.iSeq_?(Option.empty[List[List[Int]]]).query.get.map(_ ==> List((4, None)))
-
-        // Empty Lists are ignored (use None to match non-asserted card-set attributes)
-        _ <- A.i.a1.OwnBb.iSeq_?(Some(List.empty[Int])).query.get.map(_ ==> Nil)
-        _ <- A.i.a1.OwnBb.iSeq_?(Some(List.empty[List[Int]])).query.get.map(_ ==> Nil)
-        _ <- A.i.a1.OwnBb.iSeq_?(Some(List(List.empty[Int]))).query.get.map(_ ==> Nil)
-
-
-        // not
-
-        _ <- A.i.a1.OwnBb.iSeq_?.not(Some(List(1))).query.get.map(_ ==> List(
-          (1, Some(List(1, 2, 2))),
-          (2, Some(List(2))),
-          (2, Some(List(7))),
-          (3, Some(List(3))),
-        ))
-        _ <- A.i.a1.OwnBb.iSeq_?.not(Some(List(2))).query.get.map(_ ==> List(
-          (1, Some(List(1, 2, 2))),
-          (2, Some(List(7))),
-          (3, Some(List(3))),
-        ))
-        _ <- A.i.a1.OwnBb.iSeq_?.not(Some(List(1, 2, 2))).query.get.map(_ ==> List(
-          (2, Some(List(2))),
-          (2, Some(List(7))),
-          (3, Some(List(3))),
-        ))
-
-        // Negating None matches all asserted values
-        _ <- A.i.a1.OwnBb.iSeq_?.not(Option.empty[List[Int]]).query.get.map(_ ==> allAssertedOptional)
-        _ <- A.i.a1.OwnBb.iSeq_?.not(Option.empty[List[List[Int]]]).query.get.map(_ ==> allAssertedOptional)
-
-        // Negating empty Lists match nothing
-        _ <- A.i.a1.OwnBb.iSeq_?.not(Some(List.empty[Int])).query.get.map(_ ==> allAssertedOptional)
-        _ <- A.i.a1.OwnBb.iSeq_?.not(Some(List.empty[List[Int]])).query.get.map(_ ==> allAssertedOptional)
-        _ <- A.i.a1.OwnBb.iSeq_?.not(Some(List(List.empty[Int]))).query.get.map(_ ==> allAssertedOptional)
-
 
         // has
 

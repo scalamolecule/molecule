@@ -41,10 +41,6 @@ trait FilterMap_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.durationMap("a").query.get.map(_ ==> List((1, duration1), (2, duration2)))
           _ <- Ns.i.a1.durationMap("b").query.get.map(_ ==> List((1, duration2), (2, duration3)))
           _ <- Ns.i.a1.durationMap("c").query.get.map(_ ==> List((2, duration4)))
-
-          // Applying nothing to mandatory map attribute matches nothing,
-          // not even entities without map attributes
-          _ <- Ns.i.a1.durationMap().query.get.map(_ ==> Nil)
         } yield ()
       }
     }

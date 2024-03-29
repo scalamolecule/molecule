@@ -31,7 +31,6 @@ object FilterSeq_Short_ extends FilterSeq_Short_ with TestAsync_datomic
 object FilterSeq_Char_ extends FilterSeq_Char_ with TestAsync_datomic
 
 
-object FilterRefSeq_base extends FilterRefSeq_base with TestAsync_datomic
 object FilterRefSeq_Card1Ref extends FilterRefSeq_Card1Ref with TestAsync_datomic
 object FilterRefSeq_Card1RefOwned extends FilterRefSeq_Card1RefOwned with TestAsync_datomic
 object FilterRefSeq_Card2Ref extends FilterRefSeq_Card2Ref with TestAsync_datomic

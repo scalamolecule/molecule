@@ -3,7 +3,6 @@ package molecule.sql.core.query
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.core.query.ResolveExpr
-import scala.collection.mutable.ListBuffer
 import scala.reflect.ClassTag
 
 trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
@@ -112,7 +111,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
         throw ModelError(s"Cardinality-set filter attributes not allowed to " +
           s"do additional filtering. Found:\n  " + attr)
       }
-      setExpr(col, attr.op, args, res, true)
+      setExpr(attr, col, attr.op, args, res, true)
     } {
       case (dir, filterPath, filterAttr) => filterAttr match {
         case filterAttr: AttrOne => setExpr2(col, attr.op, filterAttr.name, true, tpe, res, true)
@@ -127,7 +126,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     val col = getCol(attr: Attr)
     notNull += col
     attr.filterAttr.fold {
-      setExpr(col, attr.op, args, res, false)
+      setExpr(attr, col, attr.op, args, res, false)
     } { case (dir, filterPath, filterAttr) =>
       filterAttr match {
         case filterAttr: AttrOne => setExpr2(col, attr.op, filterAttr.name, true, tpe, res, false)
@@ -137,17 +136,15 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
   }
 
   protected def setExpr[T: ClassTag](
-    col: String, op: Op, sets: Seq[Set[T]], res: ResSet[T], mandatory: Boolean
+    attr: Attr, col: String, op: Op, sets: Seq[Set[T]], res: ResSet[T], mandatory: Boolean
   ): Unit = {
     op match {
-      case V         => setAttr(col, res, mandatory)
-      case Eq        => setEqual(col, sets, res)
-      case Neq       => setNeq(col, sets, res, mandatory)
-      case Has       => has(col, sets, res, res.one2sql, mandatory)
-      case HasNo     => hasNo(col, sets, res, res.one2sql, mandatory)
-      case NoValue   => setNoValue(col)
-      case Fn(kw, n) => setAggr(col, kw, n, res)
-      case other     => unexpectedOp(other)
+      case V       => setAttr(col, res, mandatory)
+      case Eq      => noCollectionMatching(attr)
+      case Has     => has(col, sets, res, res.one2sql, mandatory)
+      case HasNo   => hasNo(col, sets, res, res.one2sql, mandatory)
+      case NoValue => if (mandatory) noApplyNothing(attr) else setNoValue(col)
+      case other   => unexpectedOp(other)
     }
   }
 
@@ -157,8 +154,6 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     res: ResSet[T], mandatory: Boolean
   ): Unit = {
     op match {
-      case Eq    => setEqual2(col, filterAttr, res, mandatory)
-      case Neq   => setNeq2(col, filterAttr)
       case Has   => has2(col, filterAttr, cardOne, tpe, res, mandatory)
       case HasNo => hasNo2(col, filterAttr, cardOne, tpe, res, mandatory)
       case other => unexpectedOp(other)
@@ -177,8 +172,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     addCast(resOpt.sql2setOpt)
     attr.op match {
       case V     => setOptAttr(col, res)
-      case Eq    => setOptEqual(col, optSets, res)
-      case Neq   => setOptNeq(col, optSets, res)
+      case Eq    => noCollectionMatching(attr)
       case Has   => optHas(col, optSets, res, resOpt.one2sql)
       case HasNo => optHasNo(col, optSets, res, resOpt.one2sql)
       case other => unexpectedOp(other)
@@ -204,63 +198,6 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     select += s"ARRAY_AGG($col)"
     aggregate = true
     replaceCast(res.nestedArray2optCoalescedSet)
-  }
-
-
-  // eq ------------------------------------------------------------------------
-
-  protected def setEqual[T](col: String, sets: Seq[Set[T]], res: ResSet[T]): Unit = {
-    val setsNonEmpty = sets.filterNot(_.isEmpty)
-    setsNonEmpty.length match {
-      case 0 => where += (("FALSE", ""))
-      case 1 => where += (("", matchSet(col, res.set2sqls(setsNonEmpty.head))))
-      case _ => where += (("", matchSets(col, setsNonEmpty, res.set2sqls)))
-    }
-  }
-
-  protected def setOptEqual[T](
-    col: String, optSets: Option[Seq[Set[T]]], res: ResSet[T]
-  ): Unit = {
-    optSets.fold[Unit] {
-      where += ((col, s"IS NULL"))
-    } { sets =>
-      setEqual(col, sets, res)
-      replaceCast(res.nestedArray2optCoalescedSet)
-    }
-  }
-
-
-  // neq -----------------------------------------------------------------------
-
-  protected def setNeq[T](
-    col: String, sets: Seq[Set[T]], res: ResSet[T], mandatory: Boolean
-  ): Unit = {
-    if (mandatory) {
-      select -= col
-      groupByCols -= col
-      select += s"ARRAY_AGG($col)"
-      aggregate = true
-      replaceCast(res.nestedArray2coalescedSet)
-    }
-    val setsNonEmpty = sets.filterNot(_.isEmpty)
-    setsNonEmpty.length match {
-      case 0 => ()
-      case 1 => where += (("", "NOT " + matchSet(col, res.set2sqls(setsNonEmpty.head))))
-      case _ => where += (("", "NOT " + matchSets(col, setsNonEmpty, res.set2sqls)))
-    }
-  }
-
-  protected def setOptNeq[T](
-    col: String, optSets: Option[Seq[Set[T]]], res: ResSet[T]
-  ): Unit = {
-    optSets match {
-      case None | Some(Nil) => setOptAttr(col, res)
-      case Some(sets)       =>
-        setNeq(col, sets, res, true)
-        replaceCast(res.nestedArray2optCoalescedSet)
-    }
-    // Only asserted values
-    notNull += col
   }
 
 
@@ -371,208 +308,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
   }
 
 
-  // aggregation ---------------------------------------------------------------
-
-  protected def setAggr[T: ClassTag](
-    col: String, fn: String, optN: Option[Int], res: ResSet[T]
-  ): Unit = {
-    checkAggrSet()
-    select -= col
-    lazy val n = optN.getOrElse(0)
-    fn match {
-      case "distinct" =>
-        noBooleanSetAggr(res)
-        select += s"ARRAY_AGG(DISTINCT $col)"
-        groupByCols -= col
-        aggregate = true
-        replaceCast(res.nestedArray2nestedSet)
-
-      case "min" =>
-        noBooleanSetAggr(res)
-        select += s"MIN($col)"
-        groupByCols -= col
-        aggregate = true
-        replaceCast(res.array2setFirst)
-
-      case "mins" =>
-        noBooleanSetAggr(res)
-        select += s"ARRAY_AGG(DISTINCT $col)"
-        groupByCols -= col
-        aggregate = true
-        replaceCast(res.nestedArray2setAsc(n))
-
-      case "max" =>
-        noBooleanSetAggr(res)
-        select += s"MAX($col)"
-        groupByCols -= col
-        aggregate = true
-        replaceCast(res.array2setLast)
-
-      case "maxs" =>
-        noBooleanSetAggr(res)
-        select += s"ARRAY_AGG(DISTINCT $col)"
-        groupByCols -= col
-        aggregate = true
-        replaceCast(res.nestedArray2setDesc(n))
-
-      case "sample" =>
-        noBooleanSetAggr(res)
-        distinct = false
-        select += col
-        orderBy += ((level, -1, "RAND()", ""))
-        hardLimit = 1
-        replaceCast(res.nestedArray2coalescedSet)
-
-      case "samples" =>
-        noBooleanSetAggr(res)
-        select +=
-          s"""ARRAY_SLICE(
-             |    ARRAY_AGG(DISTINCT $col order by RAND()),
-             |    1,
-             |    LEAST(
-             |      $n,
-             |      ARRAY_LENGTH(ARRAY_AGG(DISTINCT $col))
-             |    )
-             |  )""".stripMargin
-        groupByCols -= col
-        aggregate = true
-        replaceCast(res.nestedArray2coalescedSet)
-
-
-      // Using brute force in the following aggregate functions to be able to
-      // aggregate _unique_ values (Set semantics instead of Array semantics)
-
-      case "count" =>
-        noBooleanSetCounts(n)
-        // Count of all (non-unique) values
-        select += s"ARRAY_AGG($col)"
-        groupByCols -= col
-        aggregate = true
-        replaceCast(
-          (row: RS, paramIndex: Int) => {
-            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
-            var count               = 0
-            while (outerArrayResultSet.next()) {
-              count += outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]].length
-            }
-            count
-          }
-        )
-
-      case "countDistinct" =>
-        noBooleanSetCounts(n)
-        // Count of unique values (Set semantics)
-        select += s"ARRAY_AGG($col)"
-        groupByCols -= col
-        aggregate = true
-        replaceCast(
-          (row: RS, paramIndex: Int) => {
-            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
-            var set                 = Set.empty[Any]
-            while (outerArrayResultSet.next()) {
-              outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]].foreach { value =>
-                set += value
-              }
-            }
-            set.size
-          }
-        )
-
-      case "sum" =>
-        select += s"ARRAY_AGG($col)"
-        groupByCols -= col
-        aggregate = true
-        replaceCast(res.nestedArray2sum)
-
-      case "median" =>
-        // Using brute force and collecting all unique values to calculate the median value
-        // Median of unique values (Set semantics)
-        select += s"ARRAY_AGG($col)"
-        groupByCols -= col
-        aggregate = true
-        replaceCast(
-          (row: RS, paramIndex: Int) => {
-            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
-            val list                = ListBuffer.empty[Double]
-            while (outerArrayResultSet.next()) {
-              val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
-              array.foreach(v => list += v.toString.toDouble) // not the most efficient...
-            }
-            getMedian(list.toList)
-          }
-        )
-
-      case "avg" =>
-        select += s"ARRAY_AGG($col)"
-        groupByCols -= col
-        aggregate = true
-        replaceCast(
-          (row: RS, paramIndex: Int) => {
-            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
-            val list                = ListBuffer.empty[Double]
-            while (outerArrayResultSet.next()) {
-              val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
-              array.foreach(v => list += v.toString.toDouble) // not the most efficient...
-            }
-            list.sum / list.size
-          }
-        )
-
-      case "variance" =>
-        select += s"ARRAY_AGG($col)"
-        groupByCols -= col
-        aggregate = true
-        replaceCast(
-          (row: RS, paramIndex: Int) => {
-            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
-            val list                = ListBuffer.empty[Double]
-            while (outerArrayResultSet.next()) {
-              val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
-              array.foreach(v => list += v.toString.toDouble) // not the most efficient...
-            }
-            varianceOf(list.toList: _*)
-          }
-        )
-
-      case "stddev" =>
-        select += s"ARRAY_AGG($col)"
-        groupByCols -= col
-        aggregate = true
-        replaceCast(
-          (row: RS, paramIndex: Int) => {
-            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
-            val list                = ListBuffer.empty[Double]
-            while (outerArrayResultSet.next()) {
-              val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
-              array.foreach(v => list += v.toString.toDouble) // not the most efficient...
-            }
-            stdDevOf(list.toList: _*)
-          }
-        )
-
-      case other => unexpectedKw(other)
-    }
-  }
-
-
   // Filter attribute filters --------------------------------------------------
-
-  protected def setEqual2[T](
-    col: String, filterAttr: String, res: ResSet[T], mandatory: Boolean
-  ): Unit = {
-    if (mandatory) {
-      select -= col
-      select += s"ARRAY_AGG($col)"
-      having += "COUNT(*) > 0"
-      aggregate = true
-      replaceCast(res.nestedArray2coalescedSet)
-    }
-    where += ((col, "= " + filterAttr))
-  }
-
-  protected def setNeq2(col: String, filterAttr: String): Unit = {
-    where += ((col, "<> " + filterAttr))
-  }
 
   protected def has2[T](
     col: String, filterAttr: String, filterCardOne: Boolean, tpe: String,
@@ -612,22 +348,6 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
 
 
   // helpers -------------------------------------------------------------------
-
-  protected def matchSet(col: String, set: Set[String]): String = {
-    set
-      .map(v => s"ARRAY_CONTAINS($col, $v)")
-      .mkString("(\n    ", " AND\n    ", s" AND\n    CARDINALITY($col) = ${set.size}\n  )")
-  }
-
-  protected def matchSets[T](
-    col: String, sets: Seq[Set[T]], set2sqls: Set[T] => Set[String]
-  ): String = {
-    sets.map { set =>
-      set2sqls(set)
-        .map(v => s"ARRAY_CONTAINS($col, $v)")
-        .mkString("", " AND\n      ", s" AND\n      CARDINALITY($col) = " + set.size)
-    }.mkString("(\n    (\n      ", "\n    ) OR (\n      ", "\n    )\n  )")
-  }
 
   protected def noBooleanSetAggr[T](res: ResSet[T]): Unit = {
     if (res.tpe == "Boolean")

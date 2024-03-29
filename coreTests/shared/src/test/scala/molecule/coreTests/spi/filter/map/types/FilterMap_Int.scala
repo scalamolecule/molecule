@@ -39,10 +39,6 @@ trait FilterMap_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.intMap("a").query.get.map(_ ==> List((1, int1), (2, int2)))
           _ <- Ns.i.a1.intMap("b").query.get.map(_ ==> List((1, int2), (2, int3)))
           _ <- Ns.i.a1.intMap("c").query.get.map(_ ==> List((2, int4)))
-
-          // Applying nothing to mandatory map attribute matches nothing,
-          // not even entities without map attributes
-          _ <- Ns.i.a1.intMap().query.get.map(_ ==> Nil)
         } yield ()
       }
     }

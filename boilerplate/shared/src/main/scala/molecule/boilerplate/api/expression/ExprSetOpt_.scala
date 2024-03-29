@@ -10,14 +10,12 @@ trait ExprSetOptOps_1[A, t, Ns1[_, _], Ns2[_, _, _]] extends ExprAttr_1[A, t, Ns
 
 trait ExprSetOpt_1[A, t, Ns1[_, _], Ns2[_, _, _]]
   extends ExprSetOptOps_1[A, t, Ns1, Ns2]{
-  def apply(set  : Option[Set[t]]     )               : Ns1[A, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
-  def apply(sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, t] = _exprSetOpt(Eq   , sets                       )
-  def not  (set  : Option[Set[t]]     )               : Ns1[A, t] = _exprSetOpt(Neq  , set.map(set => Seq(set))   )
-  def not  (sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, t] = _exprSetOpt(Neq  , sets                       )
-  def has  (v    : Option[t]          )               : Ns1[A, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
-  def has  (vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
-  def hasNo(v    : Option[t]          )               : Ns1[A, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
-  def hasNo(vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
+  def apply(set : Option[Set[t]]     )               : Ns1[A, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
+  def apply(sets: Option[Seq[Set[t]]])(implicit x: X): Ns1[A, t] = _exprSetOpt(Eq   , sets                       )
+  def has  (v   : Option[t]          )               : Ns1[A, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
+  def has  (vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
+  def hasNo(v   : Option[t]          )               : Ns1[A, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
+  def hasNo(vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
 }
 
 
@@ -27,14 +25,12 @@ trait ExprSetOptOps_2[A, B, t, Ns1[_, _, _], Ns2[_, _, _, _]] extends ExprAttr_2
 
 trait ExprSetOpt_2[A, B, t, Ns1[_, _, _], Ns2[_, _, _, _]]
   extends ExprSetOptOps_2[A, B, t, Ns1, Ns2]{
-  def apply(set  : Option[Set[t]]     )               : Ns1[A, B, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
-  def apply(sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, t] = _exprSetOpt(Eq   , sets                       )
-  def not  (set  : Option[Set[t]]     )               : Ns1[A, B, t] = _exprSetOpt(Neq  , set.map(set => Seq(set))   )
-  def not  (sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, t] = _exprSetOpt(Neq  , sets                       )
-  def has  (v    : Option[t]          )               : Ns1[A, B, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
-  def has  (vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
-  def hasNo(v    : Option[t]          )               : Ns1[A, B, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
-  def hasNo(vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
+  def apply(set : Option[Set[t]]     )               : Ns1[A, B, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
+  def apply(sets: Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, t] = _exprSetOpt(Eq   , sets                       )
+  def has  (v   : Option[t]          )               : Ns1[A, B, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
+  def has  (vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
+  def hasNo(v   : Option[t]          )               : Ns1[A, B, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
+  def hasNo(vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
 }
 
 
@@ -44,14 +40,12 @@ trait ExprSetOptOps_3[A, B, C, t, Ns1[_, _, _, _], Ns2[_, _, _, _, _]] extends E
 
 trait ExprSetOpt_3[A, B, C, t, Ns1[_, _, _, _], Ns2[_, _, _, _, _]]
   extends ExprSetOptOps_3[A, B, C, t, Ns1, Ns2]{
-  def apply(set  : Option[Set[t]]     )               : Ns1[A, B, C, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
-  def apply(sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, t] = _exprSetOpt(Eq   , sets                       )
-  def not  (set  : Option[Set[t]]     )               : Ns1[A, B, C, t] = _exprSetOpt(Neq  , set.map(set => Seq(set))   )
-  def not  (sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, t] = _exprSetOpt(Neq  , sets                       )
-  def has  (v    : Option[t]          )               : Ns1[A, B, C, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
-  def has  (vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
-  def hasNo(v    : Option[t]          )               : Ns1[A, B, C, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
-  def hasNo(vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
+  def apply(set : Option[Set[t]]     )               : Ns1[A, B, C, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
+  def apply(sets: Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, t] = _exprSetOpt(Eq   , sets                       )
+  def has  (v   : Option[t]          )               : Ns1[A, B, C, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
+  def has  (vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
+  def hasNo(v   : Option[t]          )               : Ns1[A, B, C, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
+  def hasNo(vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
 }
 
 
@@ -61,14 +55,12 @@ trait ExprSetOptOps_4[A, B, C, D, t, Ns1[_, _, _, _, _], Ns2[_, _, _, _, _, _]] 
 
 trait ExprSetOpt_4[A, B, C, D, t, Ns1[_, _, _, _, _], Ns2[_, _, _, _, _, _]]
   extends ExprSetOptOps_4[A, B, C, D, t, Ns1, Ns2]{
-  def apply(set  : Option[Set[t]]     )               : Ns1[A, B, C, D, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
-  def apply(sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, t] = _exprSetOpt(Eq   , sets                       )
-  def not  (set  : Option[Set[t]]     )               : Ns1[A, B, C, D, t] = _exprSetOpt(Neq  , set.map(set => Seq(set))   )
-  def not  (sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, t] = _exprSetOpt(Neq  , sets                       )
-  def has  (v    : Option[t]          )               : Ns1[A, B, C, D, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
-  def has  (vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
-  def hasNo(v    : Option[t]          )               : Ns1[A, B, C, D, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
-  def hasNo(vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
+  def apply(set : Option[Set[t]]     )               : Ns1[A, B, C, D, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
+  def apply(sets: Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, t] = _exprSetOpt(Eq   , sets                       )
+  def has  (v   : Option[t]          )               : Ns1[A, B, C, D, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
+  def has  (vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
+  def hasNo(v   : Option[t]          )               : Ns1[A, B, C, D, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
+  def hasNo(vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
 }
 
 
@@ -78,14 +70,12 @@ trait ExprSetOptOps_5[A, B, C, D, E, t, Ns1[_, _, _, _, _, _], Ns2[_, _, _, _, _
 
 trait ExprSetOpt_5[A, B, C, D, E, t, Ns1[_, _, _, _, _, _], Ns2[_, _, _, _, _, _, _]]
   extends ExprSetOptOps_5[A, B, C, D, E, t, Ns1, Ns2]{
-  def apply(set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
-  def apply(sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, t] = _exprSetOpt(Eq   , sets                       )
-  def not  (set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, t] = _exprSetOpt(Neq  , set.map(set => Seq(set))   )
-  def not  (sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, t] = _exprSetOpt(Neq  , sets                       )
-  def has  (v    : Option[t]          )               : Ns1[A, B, C, D, E, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
-  def has  (vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
-  def hasNo(v    : Option[t]          )               : Ns1[A, B, C, D, E, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
-  def hasNo(vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
+  def apply(set : Option[Set[t]]     )               : Ns1[A, B, C, D, E, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
+  def apply(sets: Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, t] = _exprSetOpt(Eq   , sets                       )
+  def has  (v   : Option[t]          )               : Ns1[A, B, C, D, E, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
+  def has  (vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
+  def hasNo(v   : Option[t]          )               : Ns1[A, B, C, D, E, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
+  def hasNo(vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
 }
 
 
@@ -95,14 +85,12 @@ trait ExprSetOptOps_6[A, B, C, D, E, F, t, Ns1[_, _, _, _, _, _, _], Ns2[_, _, _
 
 trait ExprSetOpt_6[A, B, C, D, E, F, t, Ns1[_, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _]]
   extends ExprSetOptOps_6[A, B, C, D, E, F, t, Ns1, Ns2]{
-  def apply(set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
-  def apply(sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, t] = _exprSetOpt(Eq   , sets                       )
-  def not  (set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, t] = _exprSetOpt(Neq  , set.map(set => Seq(set))   )
-  def not  (sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, t] = _exprSetOpt(Neq  , sets                       )
-  def has  (v    : Option[t]          )               : Ns1[A, B, C, D, E, F, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
-  def has  (vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
-  def hasNo(v    : Option[t]          )               : Ns1[A, B, C, D, E, F, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
-  def hasNo(vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
+  def apply(set : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
+  def apply(sets: Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, t] = _exprSetOpt(Eq   , sets                       )
+  def has  (v   : Option[t]          )               : Ns1[A, B, C, D, E, F, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
+  def has  (vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
+  def hasNo(v   : Option[t]          )               : Ns1[A, B, C, D, E, F, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
+  def hasNo(vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
 }
 
 
@@ -112,14 +100,12 @@ trait ExprSetOptOps_7[A, B, C, D, E, F, G, t, Ns1[_, _, _, _, _, _, _, _], Ns2[_
 
 trait ExprSetOpt_7[A, B, C, D, E, F, G, t, Ns1[_, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _]]
   extends ExprSetOptOps_7[A, B, C, D, E, F, G, t, Ns1, Ns2]{
-  def apply(set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
-  def apply(sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, t] = _exprSetOpt(Eq   , sets                       )
-  def not  (set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetOpt(Neq  , set.map(set => Seq(set))   )
-  def not  (sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, t] = _exprSetOpt(Neq  , sets                       )
-  def has  (v    : Option[t]          )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
-  def has  (vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
-  def hasNo(v    : Option[t]          )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
-  def hasNo(vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
+  def apply(set : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
+  def apply(sets: Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, t] = _exprSetOpt(Eq   , sets                       )
+  def has  (v   : Option[t]          )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
+  def has  (vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
+  def hasNo(v   : Option[t]          )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
+  def hasNo(vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
 }
 
 
@@ -129,14 +115,12 @@ trait ExprSetOptOps_8[A, B, C, D, E, F, G, H, t, Ns1[_, _, _, _, _, _, _, _, _],
 
 trait ExprSetOpt_8[A, B, C, D, E, F, G, H, t, Ns1[_, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _]]
   extends ExprSetOptOps_8[A, B, C, D, E, F, G, H, t, Ns1, Ns2]{
-  def apply(set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
-  def apply(sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, t] = _exprSetOpt(Eq   , sets                       )
-  def not  (set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetOpt(Neq  , set.map(set => Seq(set))   )
-  def not  (sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, t] = _exprSetOpt(Neq  , sets                       )
-  def has  (v    : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
-  def has  (vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
-  def hasNo(v    : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
-  def hasNo(vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
+  def apply(set : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
+  def apply(sets: Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, t] = _exprSetOpt(Eq   , sets                       )
+  def has  (v   : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
+  def has  (vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
+  def hasNo(v   : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
+  def hasNo(vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
 }
 
 
@@ -146,14 +130,12 @@ trait ExprSetOptOps_9[A, B, C, D, E, F, G, H, I, t, Ns1[_, _, _, _, _, _, _, _, 
 
 trait ExprSetOpt_9[A, B, C, D, E, F, G, H, I, t, Ns1[_, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _]]
   extends ExprSetOptOps_9[A, B, C, D, E, F, G, H, I, t, Ns1, Ns2]{
-  def apply(set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
-  def apply(sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetOpt(Eq   , sets                       )
-  def not  (set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetOpt(Neq  , set.map(set => Seq(set))   )
-  def not  (sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetOpt(Neq  , sets                       )
-  def has  (v    : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
-  def has  (vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
-  def hasNo(v    : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
-  def hasNo(vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
+  def apply(set : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
+  def apply(sets: Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetOpt(Eq   , sets                       )
+  def has  (v   : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
+  def has  (vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
+  def hasNo(v   : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
+  def hasNo(vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
 }
 
 
@@ -163,14 +145,12 @@ trait ExprSetOptOps_10[A, B, C, D, E, F, G, H, I, J, t, Ns1[_, _, _, _, _, _, _,
 
 trait ExprSetOpt_10[A, B, C, D, E, F, G, H, I, J, t, Ns1[_, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _]]
   extends ExprSetOptOps_10[A, B, C, D, E, F, G, H, I, J, t, Ns1, Ns2]{
-  def apply(set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
-  def apply(sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetOpt(Eq   , sets                       )
-  def not  (set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetOpt(Neq  , set.map(set => Seq(set))   )
-  def not  (sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetOpt(Neq  , sets                       )
-  def has  (v    : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
-  def has  (vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
-  def hasNo(v    : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
-  def hasNo(vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
+  def apply(set : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
+  def apply(sets: Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetOpt(Eq   , sets                       )
+  def has  (v   : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
+  def has  (vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
+  def hasNo(v   : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
+  def hasNo(vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
 }
 
 
@@ -180,14 +160,12 @@ trait ExprSetOptOps_11[A, B, C, D, E, F, G, H, I, J, K, t, Ns1[_, _, _, _, _, _,
 
 trait ExprSetOpt_11[A, B, C, D, E, F, G, H, I, J, K, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _]]
   extends ExprSetOptOps_11[A, B, C, D, E, F, G, H, I, J, K, t, Ns1, Ns2]{
-  def apply(set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
-  def apply(sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetOpt(Eq   , sets                       )
-  def not  (set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetOpt(Neq  , set.map(set => Seq(set))   )
-  def not  (sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetOpt(Neq  , sets                       )
-  def has  (v    : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
-  def has  (vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
-  def hasNo(v    : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
-  def hasNo(vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
+  def apply(set : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
+  def apply(sets: Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetOpt(Eq   , sets                       )
+  def has  (v   : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
+  def has  (vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
+  def hasNo(v   : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
+  def hasNo(vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
 }
 
 
@@ -197,14 +175,12 @@ trait ExprSetOptOps_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns1[_, _, _, _, _,
 
 trait ExprSetOpt_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _]]
   extends ExprSetOptOps_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns1, Ns2]{
-  def apply(set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
-  def apply(sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetOpt(Eq   , sets                       )
-  def not  (set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetOpt(Neq  , set.map(set => Seq(set))   )
-  def not  (sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetOpt(Neq  , sets                       )
-  def has  (v    : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
-  def has  (vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
-  def hasNo(v    : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
-  def hasNo(vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
+  def apply(set : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
+  def apply(sets: Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetOpt(Eq   , sets                       )
+  def has  (v   : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
+  def has  (vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
+  def hasNo(v   : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
+  def hasNo(vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
 }
 
 
@@ -214,14 +190,12 @@ trait ExprSetOptOps_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns1[_, _, _, _,
 
 trait ExprSetOpt_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
   extends ExprSetOptOps_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns1, Ns2]{
-  def apply(set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
-  def apply(sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetOpt(Eq   , sets                       )
-  def not  (set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetOpt(Neq  , set.map(set => Seq(set))   )
-  def not  (sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetOpt(Neq  , sets                       )
-  def has  (v    : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
-  def has  (vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
-  def hasNo(v    : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
-  def hasNo(vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
+  def apply(set : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
+  def apply(sets: Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetOpt(Eq   , sets                       )
+  def has  (v   : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
+  def has  (vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
+  def hasNo(v   : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
+  def hasNo(vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
 }
 
 
@@ -231,14 +205,12 @@ trait ExprSetOptOps_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns1[_, _, _,
 
 trait ExprSetOpt_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
   extends ExprSetOptOps_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns1, Ns2]{
-  def apply(set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
-  def apply(sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetOpt(Eq   , sets                       )
-  def not  (set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetOpt(Neq  , set.map(set => Seq(set))   )
-  def not  (sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetOpt(Neq  , sets                       )
-  def has  (v    : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
-  def has  (vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
-  def hasNo(v    : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
-  def hasNo(vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
+  def apply(set : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
+  def apply(sets: Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetOpt(Eq   , sets                       )
+  def has  (v   : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
+  def has  (vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
+  def hasNo(v   : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
+  def hasNo(vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
 }
 
 
@@ -248,14 +220,12 @@ trait ExprSetOptOps_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns1[_, _,
 
 trait ExprSetOpt_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
   extends ExprSetOptOps_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns1, Ns2]{
-  def apply(set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
-  def apply(sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetOpt(Eq   , sets                       )
-  def not  (set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetOpt(Neq  , set.map(set => Seq(set))   )
-  def not  (sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetOpt(Neq  , sets                       )
-  def has  (v    : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
-  def has  (vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
-  def hasNo(v    : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
-  def hasNo(vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
+  def apply(set : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
+  def apply(sets: Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetOpt(Eq   , sets                       )
+  def has  (v   : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
+  def has  (vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
+  def hasNo(v   : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
+  def hasNo(vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
 }
 
 
@@ -265,14 +235,12 @@ trait ExprSetOptOps_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns1[_,
 
 trait ExprSetOpt_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
   extends ExprSetOptOps_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns1, Ns2]{
-  def apply(set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
-  def apply(sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetOpt(Eq   , sets                       )
-  def not  (set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetOpt(Neq  , set.map(set => Seq(set))   )
-  def not  (sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetOpt(Neq  , sets                       )
-  def has  (v    : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
-  def has  (vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
-  def hasNo(v    : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
-  def hasNo(vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
+  def apply(set : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
+  def apply(sets: Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetOpt(Eq   , sets                       )
+  def has  (v   : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
+  def has  (vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
+  def hasNo(v   : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
+  def hasNo(vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
 }
 
 
@@ -282,14 +250,12 @@ trait ExprSetOptOps_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns1
 
 trait ExprSetOpt_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
   extends ExprSetOptOps_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns1, Ns2]{
-  def apply(set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
-  def apply(sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetOpt(Eq   , sets                       )
-  def not  (set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetOpt(Neq  , set.map(set => Seq(set))   )
-  def not  (sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetOpt(Neq  , sets                       )
-  def has  (v    : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
-  def has  (vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
-  def hasNo(v    : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
-  def hasNo(vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
+  def apply(set : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
+  def apply(sets: Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetOpt(Eq   , sets                       )
+  def has  (v   : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
+  def has  (vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
+  def hasNo(v   : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
+  def hasNo(vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
 }
 
 
@@ -299,14 +265,12 @@ trait ExprSetOptOps_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, 
 
 trait ExprSetOpt_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
   extends ExprSetOptOps_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Ns1, Ns2]{
-  def apply(set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
-  def apply(sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetOpt(Eq   , sets                       )
-  def not  (set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetOpt(Neq  , set.map(set => Seq(set))   )
-  def not  (sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetOpt(Neq  , sets                       )
-  def has  (v    : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
-  def has  (vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
-  def hasNo(v    : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
-  def hasNo(vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
+  def apply(set : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
+  def apply(sets: Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetOpt(Eq   , sets                       )
+  def has  (v   : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
+  def has  (vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
+  def hasNo(v   : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
+  def hasNo(vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
 }
 
 
@@ -316,14 +280,12 @@ trait ExprSetOptOps_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, 
 
 trait ExprSetOpt_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
   extends ExprSetOptOps_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Ns1, Ns2]{
-  def apply(set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
-  def apply(sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetOpt(Eq   , sets                       )
-  def not  (set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetOpt(Neq  , set.map(set => Seq(set))   )
-  def not  (sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetOpt(Neq  , sets                       )
-  def has  (v    : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
-  def has  (vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
-  def hasNo(v    : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
-  def hasNo(vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
+  def apply(set : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
+  def apply(sets: Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetOpt(Eq   , sets                       )
+  def has  (v   : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
+  def has  (vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
+  def hasNo(v   : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
+  def hasNo(vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
 }
 
 
@@ -333,14 +295,12 @@ trait ExprSetOptOps_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, 
 
 trait ExprSetOpt_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
   extends ExprSetOptOps_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Ns1, Ns2]{
-  def apply(set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
-  def apply(sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetOpt(Eq   , sets                       )
-  def not  (set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetOpt(Neq  , set.map(set => Seq(set))   )
-  def not  (sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetOpt(Neq  , sets                       )
-  def has  (v    : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
-  def has  (vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
-  def hasNo(v    : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
-  def hasNo(vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
+  def apply(set : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
+  def apply(sets: Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetOpt(Eq   , sets                       )
+  def has  (v   : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
+  def has  (vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
+  def hasNo(v   : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
+  def hasNo(vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
 }
 
 
@@ -350,14 +310,12 @@ trait ExprSetOptOps_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, 
 
 trait ExprSetOpt_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
   extends ExprSetOptOps_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Ns1, Ns2]{
-  def apply(set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
-  def apply(sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetOpt(Eq   , sets                       )
-  def not  (set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetOpt(Neq  , set.map(set => Seq(set))   )
-  def not  (sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetOpt(Neq  , sets                       )
-  def has  (v    : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
-  def has  (vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
-  def hasNo(v    : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
-  def hasNo(vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
+  def apply(set : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
+  def apply(sets: Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetOpt(Eq   , sets                       )
+  def has  (v   : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
+  def has  (vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
+  def hasNo(v   : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
+  def hasNo(vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
 }
 
 
@@ -367,12 +325,10 @@ trait ExprSetOptOps_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, 
 
 trait ExprSetOpt_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
   extends ExprSetOptOps_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Ns1, Ns2]{
-  def apply(set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
-  def apply(sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetOpt(Eq   , sets                       )
-  def not  (set  : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetOpt(Neq  , set.map(set => Seq(set))   )
-  def not  (sets : Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetOpt(Neq  , sets                       )
-  def has  (v    : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
-  def has  (vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
-  def hasNo(v    : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
-  def hasNo(vs   : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
+  def apply(set : Option[Set[t]]     )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetOpt(Eq   , set.map(set => Seq(set))   )
+  def apply(sets: Option[Seq[Set[t]]])(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetOpt(Eq   , sets                       )
+  def has  (v   : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetOpt(Has  , v.map(v => Seq(Set(v)))    )
+  def has  (vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetOpt(Has  , vs.map(_.map(v => Set(v))) )
+  def hasNo(v   : Option[t]          )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetOpt(HasNo, v.map(v => Seq(Set(v)))    )
+  def hasNo(vs  : Option[Seq[t]]     )(implicit x: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
 }

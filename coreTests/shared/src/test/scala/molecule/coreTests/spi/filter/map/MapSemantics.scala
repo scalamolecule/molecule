@@ -18,15 +18,34 @@ trait MapSemantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.intMap(Map(pint1)).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Matching/applying a map for map attribute `Ns.intMap` is not supported in queries."
+            err ==> "Matching collections (Ns.intMap) not supported in queries."
           }
 
         _ <- Ns.intMap_?(Some(Map(pint1))).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Matching/applying a map for map attribute `Ns.intMap` is not supported in queries."
+            err ==> "Matching collections (Ns.intMap) not supported in queries."
           }
 
         _ <- Future(compileError("Ns.intMap_(Map(pint1)).query.get"))
+      } yield ()
+    }
+
+
+    "equal nothing" - types { implicit conn =>
+      for {
+        _ <- Ns.i.intMap_?.insert(List(
+          (0, None),
+          (1, Some(Map("a" -> int1))),
+        )).transact
+
+        // Match non-asserted attribute (null) with tacit attribute
+        _ <- Ns.i.intMap_().query.get.map(_ ==> List(0))
+
+        // Can't query for empty attribute
+        _ <- Ns.i.intMap().query.get
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Applying nothing to mandatory attribute (Ns.intMap) is reserved for updates to retract."
+          }
       } yield ()
     }
   }

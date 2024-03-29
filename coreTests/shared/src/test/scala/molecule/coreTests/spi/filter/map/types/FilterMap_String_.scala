@@ -40,10 +40,6 @@ trait FilterMap_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.stringMap("a").query.get.map(_ ==> List((1, string1), (2, string2)))
           _ <- Ns.i.a1.stringMap("b").query.get.map(_ ==> List((1, string2), (2, string3)))
           _ <- Ns.i.a1.stringMap("c").query.get.map(_ ==> List((2, string4)))
-
-          // Applying nothing to mandatory map attribute matches nothing,
-          // not even entities without map attributes
-          _ <- Ns.i.a1.stringMap().query.get.map(_ ==> Nil)
         } yield ()
       }
     }

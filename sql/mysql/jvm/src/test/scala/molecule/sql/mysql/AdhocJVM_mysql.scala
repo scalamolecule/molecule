@@ -47,7 +47,6 @@ object AdhocJVM_mysql extends TestSuite_mysql {
 
 
 //        _ <- Ns.i.iSet(Ns.intSet).query.i.get.map(_ ==> List(b))
-        _ <- Ns.i.iSet.has(Ns.intSet).query.get.map(_ ==> List(b)) // Ns.iSet and Ref.intSet
 
       } yield ()
     }
@@ -82,24 +81,6 @@ object AdhocJVM_mysql extends TestSuite_mysql {
         //            |GROUP BY A.id, A.i
         //            |/*HAVING COUNT(*) > 0;*/
         //            |""".stripMargin, true)
-
-
-        _ <- A.i.iSet_(B.iSet_).B.iSet.query.get.map(_ ==> List(
-          (2, Set(2, 3, 4)) // Set(2, 3) and Set(4) are coalesced to one Set
-        ))
-        _ <- A.i.iSet_.B.iSet(A.iSet_).query.get.map(_ ==> List(
-          (2, Set(2, 3, 4))
-        ))
-
-        // To get un-coalesced Sets, separate by ids
-        _ <- A.id.a1.i.iSet_(B.iSet_).B.iSet.query.get.map(_ ==> List(
-          (a2, 2, Set(2, 3)),
-          (a3, 2, Set(4))
-        ))
-        _ <- A.id.a1.i.iSet_.B.iSet(A.iSet_).query.get.map(_ ==> List(
-          (a2, 2, Set(2, 3)),
-          (a3, 2, Set(4))
-        ))
 
       } yield ()
     }

@@ -40,10 +40,6 @@ trait FilterMap_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           _ <- Ns.i.a1.bigDecimalMap("a").query.get.map(_ ==> List((1, bigDecimal1), (2, bigDecimal2)))
           _ <- Ns.i.a1.bigDecimalMap("b").query.get.map(_ ==> List((1, bigDecimal2), (2, bigDecimal3)))
           _ <- Ns.i.a1.bigDecimalMap("c").query.get.map(_ ==> List((2, bigDecimal4)))
-
-          // Applying nothing to mandatory map attribute matches nothing,
-          // not even entities without map attributes
-          _ <- Ns.i.a1.bigDecimalMap().query.get.map(_ ==> Nil)
         } yield ()
       }
     }

@@ -5,6 +5,7 @@ import molecule.sql.core.query.{LambdasSet, SqlQueryBase}
 
 trait LambdasSet_mysql extends LambdasSet { self: SqlQueryBase =>
 
+
   override protected lazy val tpeDbString        : String = "LONGTEXT"
   override protected lazy val tpeDbInt           : String = "INT"
   override protected lazy val tpeDbLong          : String = "BIGINT"
@@ -27,7 +28,6 @@ trait LambdasSet_mysql extends LambdasSet { self: SqlQueryBase =>
   override protected lazy val tpeDbByte          : String = "TINYINT"
   override protected lazy val tpeDbShort         : String = "SMALLINT"
   override protected lazy val tpeDbChar          : String = "CHAR"
-
 
   override protected lazy val valueDate     : RS => Date            = (rs: RS) => new Date(rs.getLong(2))
   override protected lazy val json2oneDate  : String => Date        = (v: String) => new Date(v.toLong)

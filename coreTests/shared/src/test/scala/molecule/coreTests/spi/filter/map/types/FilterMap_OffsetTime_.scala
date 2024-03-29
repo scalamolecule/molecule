@@ -41,10 +41,6 @@ trait FilterMap_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           _ <- Ns.i.a1.offsetTimeMap("a").query.get.map(_ ==> List((1, offsetTime1), (2, offsetTime2)))
           _ <- Ns.i.a1.offsetTimeMap("b").query.get.map(_ ==> List((1, offsetTime2), (2, offsetTime3)))
           _ <- Ns.i.a1.offsetTimeMap("c").query.get.map(_ ==> List((2, offsetTime4)))
-
-          // Applying nothing to mandatory map attribute matches nothing,
-          // not even entities without map attributes
-          _ <- Ns.i.a1.offsetTimeMap().query.get.map(_ ==> Nil)
         } yield ()
       }
     }

@@ -306,7 +306,7 @@ case class TxModelValidation(
   private def registerMandatoryAttr(a: Attr, attr: String) = {
     if (isUpdate) {
       if (
-        (a.op == V || a.op == Eq) && deletingAttr(a)
+        (a.op == V || a.op == Eq || a.op == NoValue) && deletingAttr(a)
           || a.op == Remove && getCurSetValues.nonEmpty && removingLastValue(a, getCurSetValues.get(a))
       ) {
         // Wrongfully trying to delete mandatory attr - add to watchlist

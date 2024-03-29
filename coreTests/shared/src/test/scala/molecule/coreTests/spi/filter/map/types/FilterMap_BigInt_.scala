@@ -40,10 +40,6 @@ trait FilterMap_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.bigIntMap("a").query.get.map(_ ==> List((1, bigInt1), (2, bigInt2)))
           _ <- Ns.i.a1.bigIntMap("b").query.get.map(_ ==> List((1, bigInt2), (2, bigInt3)))
           _ <- Ns.i.a1.bigIntMap("c").query.get.map(_ ==> List((2, bigInt4)))
-
-          // Applying nothing to mandatory map attribute matches nothing,
-          // not even entities without map attributes
-          _ <- Ns.i.a1.bigIntMap().query.get.map(_ ==> Nil)
         } yield ()
       }
     }

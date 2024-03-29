@@ -128,4 +128,16 @@ trait SqlQueryBase extends Model2QueryBase with BaseHelpers with JavaConversions
   final protected def noMixedNestedModes = throw ModelError(
     "Can't mix mandatory/optional nested queries."
   )
+
+  def noCollectionMatching(attr: Attr) = {
+    val a = attr.cleanName
+    throw ModelError(s"Matching collections ($a) not supported in queries.")
+  }
+
+  def noApplyNothing(attr: Attr): Unit = {
+    val a = attr.cleanName
+    throw ModelError(
+      s"Applying nothing to mandatory attribute ($a) is reserved for updates to retract."
+    )
+  }
 }

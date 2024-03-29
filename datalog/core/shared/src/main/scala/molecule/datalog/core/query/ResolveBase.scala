@@ -5,8 +5,10 @@ import java.math.{BigDecimal => jBigDecimal, BigInteger => jBigInt}
 import java.net.URI
 import java.time._
 import java.util.{Date, UUID, List => jList}
+import molecule.base.error.ModelError
 import molecule.base.util.BaseHelpers
 import molecule.datalog.core.query.casting.NullValueException
+import molecule.boilerplate.ast.Model._
 
 trait ResolveBase extends BaseHelpers {
 
@@ -23,6 +25,11 @@ trait ResolveBase extends BaseHelpers {
            |  $other
            |  ${other.getClass}""".stripMargin
       )
+  }
+
+  def noCollectionMatching(attr: Attr) = {
+    val a = attr.cleanName
+    throw ModelError(s"Matching collections ($a) not supported in queries.")
   }
 
   // Datomic Java to Scala

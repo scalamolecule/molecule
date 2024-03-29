@@ -40,10 +40,6 @@ trait FilterMap_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.doubleMap("a").query.get.map(_ ==> List((1, double1), (2, double2)))
           _ <- Ns.i.a1.doubleMap("b").query.get.map(_ ==> List((1, double2), (2, double3)))
           _ <- Ns.i.a1.doubleMap("c").query.get.map(_ ==> List((2, double4)))
-
-          // Applying nothing to mandatory map attribute matches nothing,
-          // not even entities without map attributes
-          _ <- Ns.i.a1.doubleMap().query.get.map(_ ==> Nil)
         } yield ()
       }
     }

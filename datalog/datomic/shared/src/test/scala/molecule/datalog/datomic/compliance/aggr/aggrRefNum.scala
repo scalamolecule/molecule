@@ -1,0 +1,10 @@
+package molecule.datalog.datomic.compliance.aggr
+
+import molecule.coreTests.spi.aggr.refNum._
+import molecule.datalog.datomic.setup.TestAsync_datomic
+
+object AggrRefNum_sum extends AggrRefNum_sum with TestAsync_datomic
+object AggrRefNum_median extends AggrRefNum_median with TestAsync_datomic
+object AggrRefNum_avg extends AggrRefNum_avg with TestAsync_datomic
+object AggrRefNum_variance extends AggrRefNum_variance with TestAsync_datomic
+object AggrRefNum_stddev extends AggrRefNum_stddev with TestAsync_datomic

@@ -32,22 +32,7 @@ object AdhocJVM_mongodb extends TestSuite_mongodb with AggrUtils {
           (2, Set(int3, int4)),
         )).transact
 
-        // Sum of all values
-        _ <- Ns.intSet.apply(sum).query.get.map(_.head ==~ (
-          int1 + int2 +
-            int2 +
-            int3 + int4 +
-            int3 + int4))
 
-        // Sort by sum
-        _ <- Ns.i.intSet(sum).a1.query.get.map(_ ==~ List(
-          (1, int1 + int2),
-          (2, int2 + int3 + int4 + int3 + int4),
-        ))
-        _ <- Ns.i.intSet(sum).d1.query.get.map(_ ==~ List(
-          (2, int2 + int3 + int4 + int3 + int4),
-          (1, int1 + int2),
-        ))
 
       } yield ()
     }

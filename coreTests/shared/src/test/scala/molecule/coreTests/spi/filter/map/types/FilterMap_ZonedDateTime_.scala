@@ -41,10 +41,6 @@ trait FilterMap_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
           _ <- Ns.i.a1.zonedDateTimeMap("a").query.get.map(_ ==> List((1, zonedDateTime1), (2, zonedDateTime2)))
           _ <- Ns.i.a1.zonedDateTimeMap("b").query.get.map(_ ==> List((1, zonedDateTime2), (2, zonedDateTime3)))
           _ <- Ns.i.a1.zonedDateTimeMap("c").query.get.map(_ ==> List((2, zonedDateTime4)))
-
-          // Applying nothing to mandatory map attribute matches nothing,
-          // not even entities without map attributes
-          _ <- Ns.i.a1.zonedDateTimeMap().query.get.map(_ ==> Nil)
         } yield ()
       }
     }

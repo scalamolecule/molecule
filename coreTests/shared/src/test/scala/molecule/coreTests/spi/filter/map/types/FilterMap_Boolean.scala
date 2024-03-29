@@ -40,10 +40,6 @@ trait FilterMap_Boolean extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.booleanMap("a").query.get.map(_ ==> List((1, boolean1), (2, boolean2)))
           _ <- Ns.i.a1.booleanMap("b").query.get.map(_ ==> List((1, boolean2), (2, boolean3)))
           _ <- Ns.i.a1.booleanMap("c").query.get.map(_ ==> List((2, boolean4)))
-
-          // Applying nothing to mandatory map attribute matches nothing,
-          // not even entities without map attributes
-          _ <- Ns.i.a1.booleanMap().query.get.map(_ ==> Nil)
         } yield ()
       }
     }

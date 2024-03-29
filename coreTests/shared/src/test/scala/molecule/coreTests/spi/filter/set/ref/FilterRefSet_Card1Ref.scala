@@ -22,48 +22,6 @@ trait FilterRefSet_Card1Ref extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           (4, Set())
         ).transact
 
-        // All
-        _ <- A.i.a1.B.iSet.query.get.map(_ ==> List(
-          (1, Set(1, 2)),
-          (2, Set(2, 7)), // 2 rows coalesced
-          (3, Set(3)),
-        ))
-
-
-        // equal/apply
-
-        _ <- A.i.a1.B.iSet(Set(1)).query.get.map(_ ==> List(
-          // Set(1, 2) != Set(1)
-        ))
-        _ <- A.i.a1.B.iSet(Set(1, 2)).query.get.map(_ ==> List(
-          (1, Set(1, 2)),
-        ))
-        _ <- A.i.a1.B.iSet(Set.empty[Int]).query.get.map(_ ==> Nil)
-
-
-        // not
-
-        _ <- A.i.a1.B.iSet.not(Set(1)).query.get.map(_ ==> List(
-          (1, Set(1, 2)),
-          (2, Set(2, 7)),
-          (3, Set(3)),
-        ))
-        _ <- A.i.a1.B.iSet.not(Set(2)).query.get.map(_ ==> List(
-          (1, Set(1, 2)),
-          (2, Set(7)),
-          (3, Set(3)),
-        ))
-        _ <- A.i.a1.B.iSet.not(Set(1, 2)).query.get.map(_ ==> List(
-          (2, Set(2, 7)),
-          (3, Set(3)),
-        ))
-        _ <- A.i.a1.B.iSet.not(Set.empty[Int]).query.get.map(_ ==> List(
-          (1, Set(1, 2)),
-          (2, Set(2, 7)),
-          (3, Set(3)),
-        ))
-
-
         // has
 
         _ <- A.i.a1.B.iSet.has(1).query.get.map(_ ==> List(
@@ -117,19 +75,6 @@ trait FilterRefSet_Card1Ref extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           (4, Set())
         ).transact
 
-        // all
-        _ <- A.i.a1.B.iSet_.query.get.map(_ ==> List(1, 2, 3))
-
-        // equal/apply
-        _ <- A.i.a1.B.iSet_(Set(1)).query.get.map(_ ==> Nil)
-        _ <- A.i.a1.B.iSet_(Set(1, 2)).query.get.map(_ ==> List(1))
-        _ <- A.i.a1.B.iSet_(Set.empty[Int]).query.get.map(_ ==> Nil)
-
-        // not
-        _ <- A.i.a1.B.iSet_.not(Set(1)).query.get.map(_ ==> List(1, 2, 3))
-        _ <- A.i.a1.B.iSet_.not(Set(1, 2)).query.get.map(_ ==> List(2, 3))
-        _ <- A.i.a1.B.iSet_.not(Set.empty[Int]).query.get.map(_ ==> List(1, 2, 3))
-
         // has
         _ <- A.i.a1.B.iSet_.has(1).query.get.map(_ ==> List(1))
         _ <- A.i.a1.B.iSet_.has(2).query.get.map(_ ==> List(1, 2))
@@ -143,7 +88,7 @@ trait FilterRefSet_Card1Ref extends CoreTestSuite with ApiAsync { spi: SpiAsync 
 
         // no value - match non-asserted attribute (null)
         // Nothing returned since there's no relationship to B
-        _ <- A.i.a1.B.iSet_().query.get.map(_ ==> Nil)
+        _ <- A.i.a1.B.iSet_().query.i.get.map(_ ==> Nil)
       } yield ()
     }
 
@@ -163,57 +108,6 @@ trait FilterRefSet_Card1Ref extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           (4, Some(1), Set()), // relationship created since 1 is saved in B namespace
           (5, None, Set()) //     relationship not created
         ).transact
-
-        // All
-        _ <- A.i.a1.B.iSet_?.query.get.map(_ ==> List(
-          (1, Some(Set(1, 2))),
-          (2, Some(Set(2, 7))),
-          (3, Some(Set(3))),
-          (4, None), // retrieved since there's a relationship to B (but no iSet value)
-          // (5, None) // not retrieved since there's no relationship to B
-        ))
-
-
-        // equal/apply
-
-        _ <- A.i.a1.B.iSet_?(Some(Set(1))).query.get.map(_ ==> List(
-          // Set(1, 2) != Set(1)
-        ))
-        _ <- A.i.a1.B.iSet_?(Some(Set(1, 2))).query.get.map(_ ==> List(
-          (1, Some(Set(1, 2))),
-        ))
-
-        // None matches non-asserted values
-        _ <- A.i.a1.B.iSet_?(Option.empty[Set[Int]]).query.get.map(_ ==> List((4, None)))
-        _ <- A.i.a1.B.iSet_?(Option.empty[Seq[Set[Int]]]).query.get.map(_ ==> List((4, None)))
-
-        // Empty Sets are ignored (use None to match non-asserted card-set attributes)
-        _ <- A.i.a1.B.iSet_?(Some(Set.empty[Int])).query.get.map(_ ==> Nil)
-        _ <- A.i.a1.B.iSet_?(Some(Seq.empty[Set[Int]])).query.get.map(_ ==> Nil)
-        _ <- A.i.a1.B.iSet_?(Some(Seq(Set.empty[Int]))).query.get.map(_ ==> Nil)
-
-
-        // not
-
-        _ <- A.i.a1.B.iSet_?.not(Some(Set(1))).query.get.map(_ ==> List(
-          (1, Some(Set(1, 2))),
-          (2, Some(Set(2, 7))),
-          (3, Some(Set(3))),
-        ))
-        _ <- A.i.a1.B.iSet_?.not(Some(Set(1, 2))).query.get.map(_ ==> List(
-          (2, Some(Set(2, 7))),
-          (3, Some(Set(3))),
-        ))
-
-        // Negating None matches all asserted values
-        _ <- A.i.a1.B.iSet_?.not(Option.empty[Set[Int]]).query.get.map(_ ==> allAssertedOptional)
-        _ <- A.i.a1.B.iSet_?.not(Option.empty[Seq[Set[Int]]]).query.get.map(_ ==> allAssertedOptional)
-
-        // Negating empty Sets match nothing
-        _ <- A.i.a1.B.iSet_?.not(Some(Set.empty[Int])).query.get.map(_ ==> allAssertedOptional)
-        _ <- A.i.a1.B.iSet_?.not(Some(Seq.empty[Set[Int]])).query.get.map(_ ==> allAssertedOptional)
-        _ <- A.i.a1.B.iSet_?.not(Some(Seq(Set.empty[Int]))).query.get.map(_ ==> allAssertedOptional)
-
 
         // has
 

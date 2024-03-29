@@ -1,0 +1,10 @@
+package molecule.document.mongodb.compliance.aggr
+
+import molecule.coreTests.spi.aggr.refNum._
+import molecule.document.mongodb.setup.TestAsync_mongodb
+
+object AggrRefNum_sum extends AggrRefNum_sum with TestAsync_mongodb
+object AggrRefNum_median extends AggrRefNum_median with TestAsync_mongodb
+object AggrRefNum_avg extends AggrRefNum_avg with TestAsync_mongodb
+object AggrRefNum_variance extends AggrRefNum_variance with TestAsync_mongodb
+object AggrRefNum_stddev extends AggrRefNum_stddev with TestAsync_mongodb

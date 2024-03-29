@@ -41,10 +41,6 @@ trait FilterMap_URI_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.uriMap("a").query.get.map(_ ==> List((1, uri1), (2, uri2)))
           _ <- Ns.i.a1.uriMap("b").query.get.map(_ ==> List((1, uri2), (2, uri3)))
           _ <- Ns.i.a1.uriMap("c").query.get.map(_ ==> List((2, uri4)))
-
-          // Applying nothing to mandatory map attribute matches nothing,
-          // not even entities without map attributes
-          _ <- Ns.i.a1.uriMap().query.get.map(_ ==> Nil)
         } yield ()
       }
     }

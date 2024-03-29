@@ -41,10 +41,6 @@ trait FilterMap_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.instantMap("a").query.get.map(_ ==> List((1, instant1), (2, instant2)))
           _ <- Ns.i.a1.instantMap("b").query.get.map(_ ==> List((1, instant2), (2, instant3)))
           _ <- Ns.i.a1.instantMap("c").query.get.map(_ ==> List((2, instant4)))
-
-          // Applying nothing to mandatory map attribute matches nothing,
-          // not even entities without map attributes
-          _ <- Ns.i.a1.instantMap().query.get.map(_ ==> Nil)
         } yield ()
       }
     }

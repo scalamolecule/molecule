@@ -29,8 +29,6 @@ object FilterSet_Char_ extends FilterSet_Char_ with TestAsync_mysql
 
 object FilterSet_ref_ extends FilterSet_ref with TestAsync_mysql
 
-
-object FilterRefSet_base extends FilterRefSet_base with TestAsync_mysql
 object FilterRefSet_Card1Ref extends FilterRefSet_Card1Ref with TestAsync_mysql
 object FilterRefSet_Card1RefOwned extends FilterRefSet_Card1RefOwned with TestAsync_mysql
 object FilterRefSet_Card2Ref extends FilterRefSet_Card2Ref with TestAsync_mysql

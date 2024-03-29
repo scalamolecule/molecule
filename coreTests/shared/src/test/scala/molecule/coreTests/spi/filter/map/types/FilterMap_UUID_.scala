@@ -41,10 +41,6 @@ trait FilterMap_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.uuidMap("a").query.get.map(_ ==> List((1, uuid1), (2, uuid2)))
           _ <- Ns.i.a1.uuidMap("b").query.get.map(_ ==> List((1, uuid2), (2, uuid3)))
           _ <- Ns.i.a1.uuidMap("c").query.get.map(_ ==> List((2, uuid4)))
-
-          // Applying nothing to mandatory map attribute matches nothing,
-          // not even entities without map attributes
-          _ <- Ns.i.a1.uuidMap().query.get.map(_ ==> Nil)
         } yield ()
       }
     }

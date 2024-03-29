@@ -40,10 +40,6 @@ trait FilterMap_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.shortMap("a").query.get.map(_ ==> List((1, short1), (2, short2)))
           _ <- Ns.i.a1.shortMap("b").query.get.map(_ ==> List((1, short2), (2, short3)))
           _ <- Ns.i.a1.shortMap("c").query.get.map(_ ==> List((2, short4)))
-
-          // Applying nothing to mandatory map attribute matches nothing,
-          // not even entities without map attributes
-          _ <- Ns.i.a1.shortMap().query.get.map(_ ==> Nil)
         } yield ()
       }
     }

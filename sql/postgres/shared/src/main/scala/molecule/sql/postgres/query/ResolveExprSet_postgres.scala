@@ -3,9 +3,7 @@ package molecule.sql.postgres.query
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.sql.core.query.{ResolveExprSet, SqlQueryBase}
-import scala.collection.mutable.ListBuffer
 import scala.reflect.ClassTag
-import scala.util.Random
 
 
 trait ResolveExprSet_postgres
@@ -34,7 +32,7 @@ trait ResolveExprSet_postgres
         throw ModelError(s"Cardinality-set filter attributes not allowed to " +
           s"do additional filtering. Found:\n  " + attr)
       }
-      setExpr(col, attr.op, args, res, true)
+      setExpr(attr, col, attr.op, args, res, true)
     } {
       case (dir, filterPath, filterAttr) => filterAttr match {
         case filterAttr: AttrOne => setExpr2(col, attr.op, filterAttr.name, true, tpe, res, true)
@@ -55,61 +53,6 @@ trait ResolveExprSet_postgres
 
   override protected def setOptAttr[T](col: String, res: ResSet[T]): Unit = {
     coalesce(col, res, "opt")
-  }
-
-
-  // eq ------------------------------------------------------------------------
-
-  override protected def setEqual[T](col: String, sets: Seq[Set[T]], res: ResSet[T]): Unit = {
-    val setsNonEmpty = sets.filterNot(_.isEmpty)
-    setsNonEmpty.length match {
-      case 0 => where += (("FALSE", ""))
-      case 1 => where += (("", matchArray((res.set2sqlArray(setsNonEmpty.head), setsNonEmpty.head.size), col)))
-      case _ => where += (("", matchArrays(setsNonEmpty, col, res.set2sqlArray)))
-    }
-  }
-
-  override protected def setOptEqual[T](
-    col: String, optSets: Option[Seq[Set[T]]], res: ResSet[T]
-  ): Unit = {
-    optSets.fold[Unit] {
-      where += ((col, s"IS NULL"))
-    } { sets =>
-      setEqual(col, sets, res)
-      coalesce(col, res, "opt")
-    }
-  }
-
-
-  // neq -----------------------------------------------------------------------
-
-  override protected def setNeq[T](
-    col: String, sets: Seq[Set[T]], res: ResSet[T], mandatory: Boolean
-  ): Unit = {
-    coalesce(col, res, if (mandatory) "man" else "tac")
-    val setsNonEmpty = sets.filterNot(_.isEmpty)
-    setsNonEmpty.length match {
-      case 0 => notNull += col
-      case 1 => where += (("", "NOT " +
-        matchArray((res.set2sqlArray(setsNonEmpty.head), setsNonEmpty.head.size), col)))
-      case _ => where += (("", "NOT " +
-        matchArrays(setsNonEmpty, col, res.set2sqlArray)))
-    }
-  }
-
-
-  override protected def setOptNeq[T](
-    col: String, optSets: Option[Seq[Set[T]]], res: ResSet[T]
-  ): Unit = {
-    optSets match {
-      case None | Some(Nil) =>
-        setOptAttr(col, res)
-      case Some(sets) =>
-        setNeq(col, sets, res, true)
-        replaceCast(res.array2optSet)
-    }
-    // Only asserted values
-    notNull += col
   }
 
 
@@ -206,219 +149,7 @@ trait ResolveExprSet_postgres
   }
 
 
-  // aggregation ---------------------------------------------------------------
-
-  override protected def setAggr[T: ClassTag](
-    col: String, fn: String, optN: Option[Int], res: ResSet[T]
-  ): Unit = {
-    checkAggrSet()
-    select -= col
-    lazy val colAlias           = col.replace('.', '_')
-    lazy val n                  = optN.getOrElse(0)
-    lazy val invisibleSeparator = 29.toChar
-
-    fn match {
-      case "distinct" =>
-        noBooleanSetAggr(res)
-        select += s"ARRAY_AGG(DISTINCT ARRAY_TO_STRING($col, CHR(29)))"
-        groupByCols -= col
-        aggregate = true
-        replaceCast(
-          (row: RS, paramIndex: Int) => {
-            row.getArray(paramIndex).getArray.asInstanceOf[Array[String]]
-              .map(jsonArray =>
-                jsonArray.split(invisibleSeparator).toSet // separate values in each array/set
-                  .map(res.json2tpe) // cast each value
-              ).toSet
-          }
-        )
-
-      case "min" =>
-        noBooleanSetAggr(res)
-        select += s"MIN($col)"
-        groupByCols -= col
-        aggregate = true
-        replaceCast(res.array2setFirst)
-
-      case "mins" =>
-        noBooleanSetAggr(res)
-        select += s"ARRAY_AGG($colAlias)"
-        tempTables += s"UNNEST($col) AS $colAlias"
-        groupByCols -= col
-        aggregate = true
-        replaceCast(res.sqlArray2minN(n))
-
-      case "max" =>
-        noBooleanSetAggr(res)
-        select += s"MAX($col)"
-        groupByCols -= col
-        aggregate = true
-        replaceCast(res.array2setLast)
-
-      case "maxs" =>
-        noBooleanSetAggr(res)
-        select += s"ARRAY_AGG($colAlias)"
-        tempTables += s"UNNEST($col) AS $colAlias"
-        groupByCols -= col
-        aggregate = true
-        replaceCast(res.sqlArray2maxN(n))
-
-      case "sample" =>
-        noBooleanSetAggr(res)
-        distinct = false
-        select += col
-        orderBy += ((level, -1, "RANDOM()", ""))
-        hardLimit = 1
-        replaceCast(res.sql2set)
-
-      case "samples" =>
-        noBooleanSetAggr(res)
-        select += s"ARRAY_AGG(DISTINCT ARRAY_TO_STRING($col, CHR(29)))"
-        groupByCols -= col
-        aggregate = true
-        replaceCast(
-          (row: RS, paramIndex: Int) => {
-            val sets = row.getArray(paramIndex).getArray.asInstanceOf[Array[String]]
-              .flatMap(jsonArray =>
-                jsonArray.split(invisibleSeparator).toSet // separate values in each array/set
-                  .map(res.json2tpe) // cast each value
-              ).toSet
-            Random.shuffle(sets).take(n)
-          }
-        )
-
-      case "count" =>
-        noBooleanSetCounts(n)
-        // Count of all (non-unique) values
-        select += s"ARRAY_AGG($colAlias)"
-        tempTables += s"UNNEST($col) AS $colAlias"
-        groupByCols -= col
-        aggregate = true
-        replaceCast(
-          (row: RS, paramIndex: Int) => {
-            val resultSet = row.getArray(paramIndex).getResultSet
-            var count     = 0
-            while (resultSet.next()) {
-              count += 1
-            }
-            count
-          }
-        )
-
-      case "countDistinct" =>
-        noBooleanSetCounts(n)
-        select += s"ARRAY_AGG(DISTINCT $colAlias)"
-        tempTables += s"UNNEST($col) AS $colAlias"
-        groupByCols -= col
-        aggregate = true
-        replaceCast(
-          (row: RS, paramIndex: Int) => {
-            val resultSet = row.getArray(paramIndex).getResultSet
-            var count     = 0
-            while (resultSet.next()) {
-              count += 1
-            }
-            count
-          }
-        )
-
-      case "sum" =>
-        select += s"ARRAY_AGG($colAlias)"
-        tempTables += s"UNNEST($col) AS $colAlias"
-        groupByCols -= col
-        aggregate = true
-        replaceCast((row: RS, paramIndex: Int) => {
-          val json = row.getString(paramIndex)
-          if (row.wasNull()) {
-            Set.empty[T]
-          } else {
-            Set(
-              res.stringArray2sum(
-                json.substring(1, json.length - 1).split("\\]?, ?\\[?")
-              )
-            )
-          }
-        })
-
-      case "median" =>
-        select += s"ARRAY_AGG($colAlias)"
-        tempTables += s"UNNEST($col) AS $colAlias"
-        groupByCols -= col
-        aggregate = true
-        replaceCast((row: RS, paramIndex: Int) =>
-          getMedian(res.json2array(row.getString(paramIndex))
-            .map(_.toString.toDouble).toList)
-        )
-
-      case "avg" =>
-        select += s"ARRAY_AGG($colAlias)"
-        tempTables += s"UNNEST($col) AS $colAlias"
-        groupByCols -= col
-        aggregate = true
-        replaceCast(
-          (row: RS, paramIndex: Int) => {
-            val resultSet = row.getArray(paramIndex).getResultSet
-            val list      = ListBuffer.empty[Double]
-            while (resultSet.next()) {
-              list ++= res.json2array(row.getString(paramIndex)).map(_.toString.toDouble).toList
-            }
-            list.sum / list.size
-          }
-        )
-
-      case "variance" =>
-        select += s"ARRAY_AGG($colAlias)"
-        tempTables += s"UNNEST($col) AS $colAlias"
-        groupByCols -= col
-        aggregate = true
-        replaceCast(
-          (row: RS, paramIndex: Int) => {
-            val resultSet = row.getArray(paramIndex).getResultSet
-            val list      = ListBuffer.empty[Double]
-            while (resultSet.next()) {
-              list ++= res.json2array(row.getString(paramIndex)).map(_.toString.toDouble).toList
-            }
-            varianceOf(list.toList: _*)
-          }
-        )
-
-      case "stddev" =>
-        select += s"ARRAY_AGG($colAlias)"
-        tempTables += s"UNNEST($col) AS $colAlias"
-        groupByCols -= col
-        aggregate = true
-        replaceCast(
-          (row: RS, paramIndex: Int) => {
-            val resultSet = row.getArray(paramIndex).getResultSet
-            val list      = ListBuffer.empty[Double]
-            while (resultSet.next()) {
-              list ++= res.json2array(row.getString(paramIndex)).map(_.toString.toDouble).toList
-            }
-            stdDevOf(list.toList: _*)
-          }
-        )
-
-      case other => unexpectedKw(other)
-    }
-  }
-
-
   // Filter attribute filters --------------------------------------------------
-
-  override protected def setEqual2[T](
-    col: String, filterAttr: String, res: ResSet[T], mandatory: Boolean
-  ): Unit = {
-    if (mandatory) {
-      val colAlias = col.replace(".", "_")
-      select -= col
-      groupByCols -= col
-      select += s"ARRAY_AGG($colAlias)"
-      tempTables += s"UNNEST($col) AS $colAlias"
-      having += "COUNT(*) > 0"
-      aggregate = true
-    }
-    where += ((col, "= " + filterAttr))
-  }
 
   override protected def has2[T](
     col: String, filterAttr: String, cardOne: Boolean, tpe: String,
@@ -483,15 +214,5 @@ trait ResolveExprSet_postgres
         where += (("", s"$col <> '{}'"))
     }
     aggregate = true
-  }
-
-  private def matchArray(sqlArray: (String, Int), col: String): String = {
-    s"(${sqlArray._1} <@ $col AND CARDINALITY($col) = ${sqlArray._2})"
-  }
-
-  private def matchArrays[T](sets: Seq[Set[T]], col: String, set2sqlArray: Set[T] => String): String = {
-    sets.map(set =>
-      matchArray((set2sqlArray(set), set.size), col)
-    ).mkString("(\n    ", " OR\n    ", "\n  )")
   }
 }

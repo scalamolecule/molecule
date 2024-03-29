@@ -3,7 +3,6 @@ package molecule.datalog.core.query
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.core.util.JavaConversions
-import scala.reflect.ClassTag
 
 trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl] with LambdasMap =>
 
@@ -124,10 +123,8 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     attr.op match {
       case V       => attrV(attr, e, v, resMap)
       case Has     => key2value(attr, e, v, map.head._1, resMap)
-      case NoValue => noMatch(attr, e, v, resMap)
-      case Eq      => throw ModelError(
-        s"Matching/applying a map for map attribute `${attr.cleanName}` is not supported in queries."
-      )
+      case Eq      => noCollectionMatching(attr)
+      case NoValue => noApplyNothing(attr)
       case other   => unexpectedOp(other)
     }
   }
@@ -142,9 +139,7 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     attr.op match {
       case V     => optAttr(attr, e, v, resMapOpt)
       case Has   => key2optValue(attr, e, v, optMap.get.head._1, resMapOpt)
-      case Eq    => throw ModelError(
-        s"Matching/applying a map for map attribute `${attr.cleanName}` is not supported in queries."
-      )
+      case Eq    => noCollectionMatching(attr)
       case other => unexpectedOp(other)
     }
   }
@@ -312,15 +307,15 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
 
   // no value ------------------------------------------------------------------
 
-  private def noMatch[T](attr: Attr, e: Var, v: Var, resMap: ResMap[T]): Unit = {
-    val a = nsAttr(attr)
-    where += s"[$e $a $v]" -> wNeqOne
-    where += s"(not [$e $a])" -> wNeqOne
-    addCast(resMap.j2sMap)
-  }
-
   private def nonAsserted(attr: Attr, e: Var): Unit = {
     val a = nsAttr(attr)
     where += s"(not [$e $a])" -> wNeqOne
+  }
+
+  def noApplyNothing(attr: Attr): Unit = {
+    val a = attr.cleanName
+    throw ModelError(
+      s"Applying nothing to mandatory attribute ($a) is reserved for updates to retract."
+    )
   }
 }

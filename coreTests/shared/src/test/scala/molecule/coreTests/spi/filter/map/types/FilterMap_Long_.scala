@@ -40,10 +40,6 @@ trait FilterMap_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.longMap("a").query.get.map(_ ==> List((1, long1), (2, long2)))
           _ <- Ns.i.a1.longMap("b").query.get.map(_ ==> List((1, long2), (2, long3)))
           _ <- Ns.i.a1.longMap("c").query.get.map(_ ==> List((2, long4)))
-
-          // Applying nothing to mandatory map attribute matches nothing,
-          // not even entities without map attributes
-          _ <- Ns.i.a1.longMap().query.get.map(_ ==> Nil)
         } yield ()
       }
     }

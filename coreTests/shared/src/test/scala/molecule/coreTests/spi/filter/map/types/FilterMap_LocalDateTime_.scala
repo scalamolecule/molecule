@@ -41,10 +41,6 @@ trait FilterMap_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
           _ <- Ns.i.a1.localDateTimeMap("a").query.get.map(_ ==> List((1, localDateTime1), (2, localDateTime2)))
           _ <- Ns.i.a1.localDateTimeMap("b").query.get.map(_ ==> List((1, localDateTime2), (2, localDateTime3)))
           _ <- Ns.i.a1.localDateTimeMap("c").query.get.map(_ ==> List((2, localDateTime4)))
-
-          // Applying nothing to mandatory map attribute matches nothing,
-          // not even entities without map attributes
-          _ <- Ns.i.a1.localDateTimeMap().query.get.map(_ ==> Nil)
         } yield ()
       }
     }
