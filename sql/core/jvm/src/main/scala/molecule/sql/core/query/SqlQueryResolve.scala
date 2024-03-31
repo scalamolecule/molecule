@@ -1,14 +1,11 @@
 package molecule.sql.core.query
 
-import java.sql.ResultSet
-import molecule.base.error.ModelError
+import java.sql.{PreparedStatement, ResultSet}
 import molecule.boilerplate.ast.Model._
-import molecule.core.marshalling.ConnProxy
 import molecule.core.query.Pagination
 import molecule.core.util.ModelUtils
 import molecule.sql.core.facade.JdbcConn_JVM
-import molecule.sql.core.javaSql.ResultSetImpl
-import scala.annotation.tailrec
+import molecule.sql.core.javaSql.{PrepStmt, PrepStmtImpl, ResultSetImpl}
 import scala.collection.mutable.ListBuffer
 
 abstract class SqlQueryResolve[Tpl](
@@ -19,9 +16,11 @@ abstract class SqlQueryResolve[Tpl](
   protected def getData(
     conn: JdbcConn_JVM,
     optLimit: Option[Int],
-    optOffset: Option[Int]
+    optOffset: Option[Int],
   ): ResultSet = {
-    getResultSet(conn, m2q.getSqlQuery(Nil, optLimit, optOffset, Some(conn.proxy)))
+    val query  = m2q.getSqlQuery(Nil, optLimit, optOffset, Some(conn.proxy))
+    val inputs = m2q.inputs.toList
+    getResultSet(conn, query, inputs)
   }
 
   protected def getTotalCount(conn: JdbcConn_JVM): Int = {
@@ -30,16 +29,23 @@ abstract class SqlQueryResolve[Tpl](
     rs.getInt(1)
   }
 
-  private def getResultSet(conn: JdbcConn_JVM, query: String): ResultSet = {
+  private def getResultSet(
+    conn: JdbcConn_JVM,
+    query: String,
+    inputs: List[PrepStmt => Unit] = Nil
+  ): ResultSet = {
     //    println("--- 1 ------------------")
     //    elements.foreach(println)
     //    println("---")
     //    println(query)
-    conn.sqlConn.prepareStatement(
+    val ps = conn.sqlConn.prepareStatement(
       query,
       ResultSet.TYPE_SCROLL_INSENSITIVE,
       ResultSet.CONCUR_READ_ONLY
-    ).executeQuery()
+    )
+    // set input values corresponding to '?' in queries
+    inputs.foreach(_(new PrepStmtImpl(ps)))
+    ps.executeQuery()
   }
 
 

@@ -26,10 +26,10 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQuery
     setCoords(attr)
     aritiesAttr()
     attr match {
-      case at: AttrSetManID     => refMan(attr, at.vs, resSetId)
-      case at: AttrSetManInt    => refMan(attr, at.vs, resSetInt)
-      case at: AttrSetManLong   => refMan(attr, at.vs, resSetLong)
-      case at: AttrSetManDouble => refMan(attr, at.vs, resSetDouble)
+      case at: AttrSetManID     => setRefMan(attr, at.vs, resSetId)
+      case at: AttrSetManInt    => setRefMan(attr, at.vs, resSetInt)
+      case at: AttrSetManLong   => setRefMan(attr, at.vs, resSetLong)
+      case at: AttrSetManDouble => setRefMan(attr, at.vs, resSetDouble)
       case _                    => ()
     }
   }
@@ -37,10 +37,10 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQuery
   override protected def resolveRefAttrSetTac(attr: AttrSetTac): Unit = {
     setCoords(attr)
     attr match {
-      case at: AttrSetTacID     => refTac(attr, at.vs, resSetId)
-      case at: AttrSetTacInt    => refTac(attr, at.vs, resSetInt)
-      case at: AttrSetTacLong   => refTac(attr, at.vs, resSetLong)
-      case at: AttrSetTacDouble => refTac(attr, at.vs, resSetDouble)
+      case at: AttrSetTacID     => setRefTac(attr, at.vs, resSetId)
+      case at: AttrSetTacInt    => setRefTac(attr, at.vs, resSetInt)
+      case at: AttrSetTacLong   => setRefTac(attr, at.vs, resSetLong)
+      case at: AttrSetTacDouble => setRefTac(attr, at.vs, resSetDouble)
       case _                    => ()
     }
   }
@@ -49,16 +49,16 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQuery
     setCoords(attr)
     aritiesAttr()
     attr match {
-      case at: AttrSetOptID     => refOpt(at, at.vs, resOptSetId, resSetId)
-      case at: AttrSetOptInt    => refOpt(at, at.vs, resOptSetInt, resSetInt)
-      case at: AttrSetOptLong   => refOpt(at, at.vs, resOptSetLong, resSetLong)
-      case at: AttrSetOptDouble => refOpt(at, at.vs, resOptSetDouble, resSetDouble)
+      case at: AttrSetOptID     => setRefOpt(at, at.vs, resOptSetId, resSetId)
+      case at: AttrSetOptInt    => setRefOpt(at, at.vs, resOptSetInt, resSetInt)
+      case at: AttrSetOptLong   => setRefOpt(at, at.vs, resOptSetLong, resSetLong)
+      case at: AttrSetOptDouble => setRefOpt(at, at.vs, resOptSetDouble, resSetDouble)
       case other                => throw ModelError("Unexpected optional Set type: " + other)
     }
   }
 
 
-  protected def refMan[T: ClassTag](attr: Attr, args: Set[T], res: ResSet[T]): Unit = {
+  protected def setRefMan[T: ClassTag](attr: Attr, args: Set[T], res: ResSet[T]): Unit = {
     select += s"ARRAY_AGG($joinTable.$ref_id) $refIds"
     joins += (("INNER JOIN", joinTable, "", s"$nsId", s"= $joinTable.$ns_id"))
     groupBy += nsId
@@ -70,29 +70,26 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQuery
         // Runtime check needed since we can't type infer it
         throw ModelError(s"Cardinality-set filter attributes not allowed to do additional filtering. Found:\n  " + attr)
       }
-      refExpr(refIds, attr.op, args, res)
+      setRefExpr(attr, refIds, attr.op, args)
     } { case (dir, filterPath, filterAttr) =>
-      refExpr2(refIds, attr.op, filterAttr.name)
+      setFilterRefExpr(refIds, attr.op, filterAttr.name)
     }
   }
 
-  protected def refTac[T: ClassTag](attr: Attr, args: Set[T], res: ResSet[T]): Unit = {
+  protected def setRefTac[T: ClassTag](attr: Attr, args: Set[T], res: ResSet[T]): Unit = {
     val col = getCol(attr: Attr)
     joins += (("INNER JOIN", joinTable, "", s"$nsId", s"= $joinTable.$ns_id"))
     groupBy += nsId
     attr.filterAttr.fold {
-      refExpr(col, attr.op, args, res)
+      setRefExpr(attr, col, attr.op, args)
     } { case (dir, filterPath, filterAttr) =>
-      refExpr2(col, attr.op, filterAttr.name)
+      setFilterRefExpr(col, attr.op, filterAttr.name)
     }
   }
 
 
-  protected def refOpt[T: ClassTag](
-    attr: Attr,
-    optSet: Option[Set[T]],
-    resOpt: ResSetOpt[T],
-    res: ResSet[T]
+  protected def setRefOpt[T: ClassTag](
+    attr: Attr, optSet: Option[Set[T]], resOpt: ResSetOpt[T], res: ResSet[T]
   ): Unit = {
     val col = getCol(attr: Attr)
     select += s"ARRAY_AGG($joinTable.$ref_id) $refIds"
@@ -100,32 +97,35 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQuery
     groupBy += nsId
     addCast(resOpt.sql2setOpt)
     attr.op match {
-      case V     => ()
-      case Eq    => refOptEqual(optSet, res)
-      case Neq   => refOptNeq(optSet, res)
-      case Has   => refOptHas(col, optSet)
-      case HasNo => refOptHasNo(optSet)
+      case V  => ()
+      case Eq => noCollectionMatching(attr)
+      //      case Eq    => setRefOptEqual(optSet, res)
+      //      case Neq   => setRefOptNeq(optSet, res)
+      //      case Has   => refOptHas(col, optSet)
+      //      case HasNo => refOptHasNo(optSet)
       case other => unexpectedOp(other)
     }
   }
 
-  protected def refExpr[T: ClassTag](col: String, op: Op, set: Set[T], res: ResSet[T]): Unit = {
+  protected def setRefExpr[T: ClassTag](
+    attr: Attr, col: String, op: Op, set: Set[T] //, res: ResSet[T]
+  ): Unit = {
     op match {
-      case V        => ()
-      case Eq       => refEqual(set, res)
-      case Neq      => refNeq(set, res)
-      case Has      => refHas(set)
-      case HasNo    => refHasNo(set)
-      case NoValue  => refNoValue(col)
-      case Fn(_, _) => throw ModelError("Aggregating Sets of ref ids not supported.")
-      case other    => unexpectedOp(other)
+      case V  => ()
+      case Eq => noCollectionMatching(attr)
+      //      case Eq       => setRefEqual(set, res)
+      //      case Neq      => refNeq(set, res)
+      case Has     => refHas(set)
+      case HasNo   => refHasNo(set)
+      case NoValue => refNoValue(col)
+      case other   => unexpectedOp(other)
     }
   }
 
-  protected def refExpr2(col: String, op: Op, filterAttr: String): Unit = {
+  protected def setFilterRefExpr(col: String, op: Op, filterAttr: String): Unit = {
     op match {
-      case Eq    => refEqual2(col, filterAttr)
-      case Neq   => refNeq2(col, filterAttr)
+      //      case Eq    => setFilterRefEqual(col, filterAttr)
+      //      case Neq   => refNeq2(col, filterAttr)
       case Has   => refHas2(col, filterAttr)
       case HasNo => refHasNo2(col, filterAttr)
       case other => unexpectedOp(other)
@@ -140,21 +140,21 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQuery
     s"(SELECT CARDINALITY(ARRAY_AGG($joinTable.$ref_id)) = $size FROM $joinTable WHERE $joinTable.$ns_id = $nsId)"
   }
 
-  protected def refMatchSet(set: Set[String]): String = {
+  protected def setRefMatchSet(set: Set[String]): String = {
     set
       .map(contains)
       .mkString("(\n    ", " AND\n    ", s" AND\n    ${sizeCheck(set.size)}\n  )")
   }
 
-  protected def refEqual[T](set: Set[T], res: ResSet[T]): Unit = {
-    where += (("", refMatchSet(res.set2sqls(set))))
+  protected def setRefEqual[T](set: Set[T], res: ResSet[T]): Unit = {
+    where += (("", setRefMatchSet(res.set2sqls(set))))
   }
 
-  protected def refEqual2(col: String, filterAttr: String): Unit = {
-    where += ((col, "= " + filterAttr))
-  }
+  //  protected def setFilterRefEqual(col: String, filterAttr: String): Unit = {
+  //    where += ((col, "= " + filterAttr))
+  //  }
 
-  protected def refOptEqual[T](optSets: Option[Set[T]], res: ResSet[T]): Unit = {
+  protected def setRefOptEqual[T](optSets: Option[Set[T]], res: ResSet[T]): Unit = {
     optSets.fold[Unit] {
       where += (("",
         s"""(
@@ -164,20 +164,20 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQuery
            |  )""".stripMargin
       ))
     } { sets =>
-      refEqual(sets, res)
+      setRefEqual(sets, res)
     }
   }
 
-  protected def refNeq[T](set: Set[T], res: ResSet[T]): Unit = {
-    where += (("", "NOT " + refMatchSet(res.set2sqls(set))))
+  protected def setRefNeq[T](set: Set[T], res: ResSet[T]): Unit = {
+    where += (("", "NOT " + setRefMatchSet(res.set2sqls(set))))
   }
 
-  protected def refNeq2(col: String, filterAttr: String): Unit = {
-    where += ((col, "<> " + filterAttr))
-  }
+  //  protected def refNeq2(col: String, filterAttr: String): Unit = {
+  //    where += ((col, "<> " + filterAttr))
+  //  }
 
-  protected def refOptNeq[T](optSet: Option[Set[T]], res: ResSet[T]): Unit = {
-    optSet.foreach(set => refNeq(set, res))
+  protected def setRefOptNeq[T](optSet: Option[Set[T]], res: ResSet[T]): Unit = {
+    optSet.foreach(set => setRefNeq(set, res))
     notNull += s"$joinTable.$ns_id"
   }
 
@@ -222,7 +222,7 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQuery
       case _ =>
         val arrayContains = set
           .map(v => s"NOT ARRAY_CONTAINS(ARRAY_AGG($joinTable.$ref_id), $v)")
-            .mkString(" AND\n        ")
+          .mkString(" AND\n        ")
         where += (("", arrayMatches(arrayContains)))
     }
   }

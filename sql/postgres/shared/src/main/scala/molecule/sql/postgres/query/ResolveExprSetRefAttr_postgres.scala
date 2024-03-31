@@ -18,11 +18,11 @@ trait ResolveExprSetRefAttr_postgres
   }
 
 
-  override protected def refEqual[T](set: Set[T], res: ResSet[T]): Unit = {
+  override protected def setRefEqual[T](set: Set[T], res: ResSet[T]): Unit = {
     where += (("", refMatchArray((res.set2sqlArray(set), set.size))))
   }
 
-  override protected def refNeq[T](set: Set[T], res: ResSet[T]): Unit = {
+  override protected def setRefNeq[T](set: Set[T], res: ResSet[T]): Unit = {
     where += (("", "NOT (" + refMatchArray((res.set2sqlArray(set), set.size)) + ")"))
   }
 

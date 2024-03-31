@@ -165,7 +165,8 @@ object _CastNestedOptLeaf extends DatomicGenBase("CastNestedOptLeaf", "/query/ca
        |              val rowIt = rowsIt.next.asInstanceOf[jMap[_, _]].values().iterator()
        |              while (search && rowIt.hasNext) {
        |                rowIt.next match {
-       |                  case "__none__" => ()
+       |                  case "__none__" =>
+       |                    ()
        |
        |                  case value: jMap[_, _] if value.values().iterator().next.isInstanceOf[jList[_]] =>
        |                    isSet = true
@@ -199,7 +200,7 @@ object _CastNestedOptLeaf extends DatomicGenBase("CastNestedOptLeaf", "/query/ca
        |              case set: Set[_] =>
        |                coalescedSet = coalescedSet ++ set
        |            }
-       |            List(coalescedSet)
+       |            if (coalescedSet.isEmpty) Nil else List(coalescedSet)
        |
        |          } else {
        |            rows.asScala.toList.foreach {

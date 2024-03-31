@@ -81,17 +81,16 @@ trait FilterRefSeq_Card1Ref extends CoreTestSuite with ApiAsync { spi: SpiAsync 
         // has
         _ <- A.i.a1.B.iSeq_.has(1).query.get.map(_ ==> List(1))
         _ <- A.i.a1.B.iSeq_.has(2).query.get.map(_ ==> List(1, 2))
-        _ <- A.i.a1.B.iSeq_.has(2, 7).query.get.map(_ ==> List(1, 2, 2))
+        _ <- A.i.a1.B.iSeq_.has(2, 7).query.get.map(_ ==> List(1, 2))
         _ <- A.i.a1.B.iSeq_.has(2, 3).query.get.map(_ ==> List(1, 2, 3))
 
         // hasNo
-        _ <- A.i.a1.B.iSeq_.hasNo(1).query.get.map(_ ==> List(2, 2, 3))
+        _ <- A.i.a1.B.iSeq_.hasNo(1).query.get.map(_ ==> List(2, 3))
         _ <- A.i.a1.B.iSeq_.hasNo(2).query.get.map(_ ==> List(2, 3))
-        _ <- A.i.a1.B.iSeq_.hasNo(3).query.get.map(_ ==> List(1, 2, 2))
+        _ <- A.i.a1.B.iSeq_.hasNo(3).query.get.map(_ ==> List(1, 2))
 
         // no value - match non-asserted attribute (null)
-        // Nothing returned since there's no relationship to B
-        _ <- A.i.a1.B.iSeq_().query.i.get.map(_ ==> Nil)
+        _ <- A.i.a1.B.iSeq_().query.get.map(_ ==> List(4))
       } yield ()
     }
 

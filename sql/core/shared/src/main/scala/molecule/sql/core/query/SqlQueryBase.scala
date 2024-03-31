@@ -6,7 +6,7 @@ import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
 import molecule.core.query.Model2QueryBase
 import molecule.core.util.JavaConversions
-import molecule.sql.core.javaSql.ResultSetInterface
+import molecule.sql.core.javaSql.{PrepStmt, ResultSetInterface}
 import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
@@ -46,8 +46,8 @@ trait SqlQueryBase extends Model2QueryBase with BaseHelpers with JavaConversions
   final protected var orderBy     = new ListBuffer[(Int, Int, String, String)]
   final protected var aggregate   = false
   final protected val groupByCols = new mutable.LinkedHashSet[String]
-  final protected val in          = new ArrayBuffer[String]
   final protected var hardLimit   = 0
+  final           val inputs      = new ListBuffer[PrepStmt => Unit]
 
   // Input args and cast lambdas
   final           var castss      = List(List.empty[(RS, Int) => Any])

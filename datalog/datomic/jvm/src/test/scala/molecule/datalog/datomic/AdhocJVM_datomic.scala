@@ -140,35 +140,96 @@ object AdhocJVM_datomic extends TestSuiteArray_datomic {
 
       for {
 
-        _ <- A.i.B.iSet.insert(
-          (1, Set.empty[Int]),
-          (3, Set(5, 6)),
+        _ <- A.i.a1.Bb.*(B.i.C.iSet).insert(
+          (0, Nil),
+          (1, List(
+            (1, Set.empty[Int])
+          )),
+          (2, List(
+            (1, Set.empty[Int]),
+            (2, Set(0)),
+            (3, Set(1, 2)),
+          )),
         ).transact
 
-        //        _ <- rawTransact(
-        //          """[
-        //            |  [:db/add #db/id[db.part/user -1] :A/i 1]
-        //            |  [:db/add #db/id[db.part/user -1] :A/b #db/id[db.part/user -2]]
-        //            |  [:db/add #db/id[db.part/user -2] :B/iSet nil]
-        //            |  [:db/add #db/id[db.part/user -3] :A/i 3]
-        //            |  [:db/add #db/id[db.part/user -3] :A/b #db/id[db.part/user -4]]
-        //            |  [:db/add #db/id[db.part/user -4] :B/iSet 5]
-        //            |  [:db/add #db/id[db.part/user -4] :B/iSet 6]
-        //            |]
-        //            |""".stripMargin)
 
-        // Two A.i values were inserted
-        _ <- A.i.a1.query.get.map(_ ==> List(1, 3))
+        //        _ = {
+        //          println("----------- 2")
+        //          datomic.Peer.q(
+        //            """[:find  ?b
+        //              | :with  ?d3
+        //              | :in    $ ?d5
+        //              | :where [?a :A/i ?b]
+        //              |        [?a :A/b ?c]
+        //              |        [(datomic.api/q
+        //              |          "[:find (distinct ?d-pair)
+        //              |            :in $ ?c
+        //              |            :where [?c :B/iSeq ?d]
+        //              |                   [?d :B.iSeq/i_ ?d-i]
+        //              |                   [?d :B.iSeq/v_ ?d-v]
+        //              |                   [(vector ?d-i ?d-v) ?d-pair]]" $ ?c) [[?d1]]]
+        //              |        [(sort-by first ?d1) ?d2]
+        //              |        [(map second ?d2) ?d3]
+        //              |        [(set ?d3) ?d4]
+        //              |        [(some ?d4 ?d5)]]
+        //              |""".stripMargin, conn.db,
+        //            Seq(2, 7).asJava
+        //          ).forEach(r => println(r))
+        //        }
 
-        _ <- A.i.a1.B.iSet_?.query.get.map(_ ==> List(
-          (1, None), // Not returned since there's no relationship to B
-          (3, Some(Set(5, 6)))
+        _ = {
+          println("----------- 2")
+          datomic.Peer.q(
+            """[:find  (pull ?id0 [
+              |          {(:A/bb :limit nil :default "__none__") [
+              |            {(:B/c :limit nil :default "__none__") [
+              |              (:C/iSet :limit nil :default "__none__")]}]}])
+              | :where [?a :A/bb ?b]
+              |        [(identity ?a) ?id0]]
+              |""".stripMargin, conn.db,
+//            Seq(1).asJava
+          ).forEach(r => println(r))
+        }
+
+
+//        _ <- A.i.a1.Bb.*?(B.i.C.iSet).query.get.map(_ ==> List(
+//          (0, Nil),
+//          (1, Nil),
+//          (2, List(
+//            (2, Set(0)),
+//            (3, Set(1, 2)),
+//          )),
+//        ))
+//        _ <- A.i.Bb.*(B.i.a1.C.iSet).query.get.map(_ ==> List(
+//          (2, List(
+//            (2, Set(0)),
+//            (3, Set(1, 2)),
+//          )),
+//        ))
+//
+//        _ <- A.i.a1.Bb.*?(B.C.iSet).query.get.map(_ ==> List(
+//          (0, Nil),
+//          (1, Nil),
+//          (2, List(
+//            Set(0, 1, 2), // Set(0) and Set(1, 2) coalesced to one Set
+//          )),
+//        ))
+//        _ <- A.i.Bb.*(B.C.iSet).query.get.map(_ ==> List(
+//          (2, List(
+//            Set(0, 1, 2), // Set(0) and Set(1, 2) coalesced to one Set
+//          )),
+//        ))
+
+        _ <- A.Bb.*?(B.C.iSet).query.i.get.map(_ ==> List(
+          List(
+            Set(0, 1, 2), // Set(0) and Set(1, 2) coalesced to one Set
+          ),
         ))
-
-        _ <- A.i.B.iSet.query.get.map(_ ==> List(
-          (3, Set(5, 6))
-        ))
-
+//        _ <- A.Bb.*(B.C.iSet).query.get.map(_ ==> List(
+//          List(
+//            Set(0, 1, 2), // Set(0) and Set(1, 2) coalesced to one Set
+//          ),
+//        ))
 
         //        _ = {
         //          println("----------- 1")

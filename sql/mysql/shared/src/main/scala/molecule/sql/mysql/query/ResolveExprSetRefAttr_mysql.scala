@@ -10,7 +10,7 @@ trait ResolveExprSetRefAttr_mysql
     with LambdasSet_mysql { self: SqlQueryBase =>
 
 
-  override protected def refMan[T: ClassTag](attr: Attr, args: Set[T], res: ResSet[T]): Unit = {
+  override protected def setRefMan[T: ClassTag](attr: Attr, args: Set[T], res: ResSet[T]): Unit = {
     select += s"JSON_ARRAYAGG($joinTable.$ref_id) $refIds"
     joins += (("INNER JOIN", joinTable, "", s"$nsId", s"= $joinTable.$ns_id"))
     groupBy += nsId
@@ -25,13 +25,13 @@ trait ResolveExprSetRefAttr_mysql
         // Runtime check needed since we can't type infer it
         throw ModelError(s"Cardinality-set filter attributes not allowed to do additional filtering. Found:\n  " + attr)
       }
-      refExpr(refIds, attr.op, args, res)
+      setRefExpr(attr, refIds, attr.op, args)
     } { case (dir, filterPath, filterAttr) =>
-      refExpr2(refIds, attr.op, filterAttr.name)
+      setFilterRefExpr(refIds, attr.op, filterAttr.name)
     }
   }
 
-  override protected def refOpt[T: ClassTag](
+  override protected def setRefOpt[T: ClassTag](
     attr: Attr,
     optSet: Option[Set[T]],
     resOpt: ResSetOpt[T],
@@ -50,8 +50,8 @@ trait ResolveExprSetRefAttr_mysql
 
     attr.op match {
       case V     => ()
-      case Eq    => refOptEqual(optSet, res)
-      case Neq   => refOptNeq(optSet, res)
+      case Eq    => setRefOptEqual(optSet, res)
+      case Neq   => setRefOptNeq(optSet, res)
       case Has   => refOptHas(col, optSet)
       case HasNo => refOptHasNo(optSet)
       case other => unexpectedOp(other)
@@ -70,11 +70,11 @@ trait ResolveExprSetRefAttr_mysql
        |  )""".stripMargin
   }
 
-  override protected def refEqual[T](set: Set[T], res: ResSet[T]): Unit = {
+  override protected def setRefEqual[T](set: Set[T], res: ResSet[T]): Unit = {
     where += (("", refMatchArray(set, res.one2json)))
   }
 
-  override protected def refOptEqual[T](optSet: Option[Set[T]], res: ResSet[T]): Unit = {
+  override protected def setRefOptEqual[T](optSet: Option[Set[T]], res: ResSet[T]): Unit = {
     optSet.fold[Unit] {
       where += (("",
         s"""(
@@ -84,17 +84,17 @@ trait ResolveExprSetRefAttr_mysql
            |  )""".stripMargin
       ))
     } { set =>
-      refEqual(set, res)
+      setRefEqual(set, res)
     }
   }
 
-  override protected def refNeq[T](set: Set[T], res: ResSet[T]): Unit = {
+  override protected def setRefNeq[T](set: Set[T], res: ResSet[T]): Unit = {
     where += (("", "NOT (" + refMatchArray(set, res.one2json) + ")"))
   }
 
-  override protected def refOptNeq[T](optSets: Option[Set[T]], res: ResSet[T]): Unit = {
+  override protected def setRefOptNeq[T](optSets: Option[Set[T]], res: ResSet[T]): Unit = {
     if (optSets.isDefined && optSets.get.nonEmpty) {
-      refNeq(optSets.get, res)
+      setRefNeq(optSets.get, res)
     }
     notNull += s"$joinTable.$ns_id"
   }

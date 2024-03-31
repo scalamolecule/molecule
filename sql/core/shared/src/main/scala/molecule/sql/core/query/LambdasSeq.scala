@@ -45,13 +45,13 @@ trait LambdasSeq extends LambdasBase with JavaConversions { self: SqlQueryBase =
     one2sql: T => String,
     array2list: (RS, ParamIndex) => List[T],
 
-    nestedArray2coalescedSet: (RS, ParamIndex) => Set[T],
+    nestedArray2coalescedList: (RS, ParamIndex) => List[T],
     nestedArray2optCoalescedSet: (RS, ParamIndex) => Option[Set[T]],
     nestedArray2nestedSet: (RS, ParamIndex) => Set[Set[T]],
     array2setFirst: (RS, ParamIndex) => Set[T],
     array2setLast: (RS, ParamIndex) => Set[T],
-    nestedArray2setAsc: Int => (RS, ParamIndex) => Set[T],
-    nestedArray2setDesc: Int => (RS, ParamIndex) => Set[T],
+    nestedArray2setAsc: Int => (RS, ParamIndex) => List[T],
+    nestedArray2setDesc: Int => (RS, ParamIndex) => List[T],
     nestedArray2sum: (RS, ParamIndex) => Set[T],
     json2tpe: String => T,
     json2array: String => Array[T],
@@ -220,98 +220,98 @@ trait LambdasSeq extends LambdasBase with JavaConversions { self: SqlQueryBase =
   private lazy val array2optSetShort         : (RS, Int) => Option[Set[Short]]          = (row: RS, paramIndex: Int) => array2optSet(row, paramIndex, j2Short)
   private lazy val array2optSetChar          : (RS, Int) => Option[Set[Char]]           = (row: RS, paramIndex: Int) => array2optSet(row, paramIndex, j2Char)
 
-  private def sqlNestedArrays2set[T](row: RS, paramIndex: Int, j2s: Any => T): Set[T] = {
+  private def sqlNestedArrays2list[T](row: RS, paramIndex: Int, j2s: Any => T): List[T] = {
     val array = row.getArray(paramIndex)
     if (row.wasNull()) {
-      Set.empty[T]
+      List.empty[T]
     } else {
       val outerArrayResultSet = array.getResultSet
-      var set                 = Set.empty[T]
+      val buf                 = ListBuffer.empty[T]
       while (outerArrayResultSet.next()) {
         val array0 = outerArrayResultSet.getArray(2)
         // Account for empty Sets
         if (array0.getUnderlyingArray != null) {
           array0.getArray.asInstanceOf[Array[_]].foreach { value =>
-            set += j2s(value)
+            buf += j2s(value)
           }
         }
       }
-      set
+      buf.toList
     }
   }
 
-  private lazy val nestedArray2coalescedSetId            : (RS, Int) => Set[String]         = (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Id)
-  private lazy val nestedArray2coalescedSetString        : (RS, Int) => Set[String]         = (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2String)
-  private lazy val nestedArray2coalescedSetInt           : (RS, Int) => Set[Int]            = (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Int)
-  private lazy val nestedArray2coalescedSetLong          : (RS, Int) => Set[Long]           = (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Long)
-  private lazy val nestedArray2coalescedSetFloat         : (RS, Int) => Set[Float]          = (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Float)
-  private lazy val nestedArray2coalescedSetDouble        : (RS, Int) => Set[Double]         = (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Double)
-  private lazy val nestedArray2coalescedSetBoolean       : (RS, Int) => Set[Boolean]        = (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Boolean)
-  private lazy val nestedArray2coalescedSetBigInt        : (RS, Int) => Set[BigInt]         = (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2BigInt)
-  private lazy val nestedArray2coalescedSetBigDecimal    : (RS, Int) => Set[BigDecimal]     = (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2BigDecimal)
-  private lazy val nestedArray2coalescedSetDate          : (RS, Int) => Set[Date]           = (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Date)
-  private lazy val nestedArray2coalescedSetDuration      : (RS, Int) => Set[Duration]       = (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Duration)
-  private lazy val nestedArray2coalescedSetInstant       : (RS, Int) => Set[Instant]        = (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Instant)
-  private lazy val nestedArray2coalescedSetLocalDate     : (RS, Int) => Set[LocalDate]      = (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2LocalDate)
-  private lazy val nestedArray2coalescedSetLocalTime     : (RS, Int) => Set[LocalTime]      = (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2LocalTime)
-  private lazy val nestedArray2coalescedSetLocalDateTime : (RS, Int) => Set[LocalDateTime]  = (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2LocalDateTime)
-  private lazy val nestedArray2coalescedSetOffsetTime    : (RS, Int) => Set[OffsetTime]     = (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2OffsetTime)
-  private lazy val nestedArray2coalescedSetOffsetDateTime: (RS, Int) => Set[OffsetDateTime] = (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2OffsetDateTime)
-  private lazy val nestedArray2coalescedSetZonedDateTime : (RS, Int) => Set[ZonedDateTime]  = (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2ZonedDateTime)
-  private lazy val nestedArray2coalescedSetUUID          : (RS, Int) => Set[UUID]           = (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2UUID)
-  private lazy val nestedArray2coalescedSetURI           : (RS, Int) => Set[URI]            = (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2String).map(v => new URI(v))
-  private lazy val nestedArray2coalescedSetByte          : (RS, Int) => Set[Byte]           = (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Byte)
-  private lazy val nestedArray2coalescedSetShort         : (RS, Int) => Set[Short]          = (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Short)
-  private lazy val nestedArray2coalescedSetChar          : (RS, Int) => Set[Char]           = (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Char)
+  private lazy val nestedArray2coalescedSetId            : (RS, Int) => List[String]         = (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Id)
+  private lazy val nestedArray2coalescedSetString        : (RS, Int) => List[String]         = (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2String)
+  private lazy val nestedArray2coalescedSetInt           : (RS, Int) => List[Int]            = (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Int)
+  private lazy val nestedArray2coalescedSetLong          : (RS, Int) => List[Long]           = (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Long)
+  private lazy val nestedArray2coalescedSetFloat         : (RS, Int) => List[Float]          = (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Float)
+  private lazy val nestedArray2coalescedSetDouble        : (RS, Int) => List[Double]         = (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Double)
+  private lazy val nestedArray2coalescedSetBoolean       : (RS, Int) => List[Boolean]        = (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Boolean)
+  private lazy val nestedArray2coalescedSetBigInt        : (RS, Int) => List[BigInt]         = (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2BigInt)
+  private lazy val nestedArray2coalescedSetBigDecimal    : (RS, Int) => List[BigDecimal]     = (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2BigDecimal)
+  private lazy val nestedArray2coalescedSetDate          : (RS, Int) => List[Date]           = (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Date)
+  private lazy val nestedArray2coalescedSetDuration      : (RS, Int) => List[Duration]       = (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Duration)
+  private lazy val nestedArray2coalescedSetInstant       : (RS, Int) => List[Instant]        = (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Instant)
+  private lazy val nestedArray2coalescedSetLocalDate     : (RS, Int) => List[LocalDate]      = (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2LocalDate)
+  private lazy val nestedArray2coalescedSetLocalTime     : (RS, Int) => List[LocalTime]      = (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2LocalTime)
+  private lazy val nestedArray2coalescedSetLocalDateTime : (RS, Int) => List[LocalDateTime]  = (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2LocalDateTime)
+  private lazy val nestedArray2coalescedSetOffsetTime    : (RS, Int) => List[OffsetTime]     = (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2OffsetTime)
+  private lazy val nestedArray2coalescedSetOffsetDateTime: (RS, Int) => List[OffsetDateTime] = (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2OffsetDateTime)
+  private lazy val nestedArray2coalescedSetZonedDateTime : (RS, Int) => List[ZonedDateTime]  = (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2ZonedDateTime)
+  private lazy val nestedArray2coalescedSetUUID          : (RS, Int) => List[UUID]           = (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2UUID)
+  private lazy val nestedArray2coalescedSetURI           : (RS, Int) => List[URI]            = (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2String).map(v => new URI(v))
+  private lazy val nestedArray2coalescedSetByte          : (RS, Int) => List[Byte]           = (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Byte)
+  private lazy val nestedArray2coalescedSetShort         : (RS, Int) => List[Short]          = (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Short)
+  private lazy val nestedArray2coalescedSetChar          : (RS, Int) => List[Char]           = (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Char)
 
 
-  private lazy val nestedArray2setAscId            : Int => (RS, Int) => Set[String]         = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Id).toList.sorted.take(size).toSet
-  private lazy val nestedArray2setAscString        : Int => (RS, Int) => Set[String]         = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2String).toList.sorted.take(size).toSet
-  private lazy val nestedArray2setAscInt           : Int => (RS, Int) => Set[Int]            = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Int).toList.sorted.take(size).toSet
-  private lazy val nestedArray2setAscLong          : Int => (RS, Int) => Set[Long]           = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Long).toList.sorted.take(size).toSet
-  private lazy val nestedArray2setAscFloat         : Int => (RS, Int) => Set[Float]          = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Float).toList.sorted.take(size).toSet
-  private lazy val nestedArray2setAscDouble        : Int => (RS, Int) => Set[Double]         = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Double).toList.sorted.take(size).toSet
-  private lazy val nestedArray2setAscBoolean       : Int => (RS, Int) => Set[Boolean]        = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Boolean).toList.sorted.take(size).toSet
-  private lazy val nestedArray2setAscBigInt        : Int => (RS, Int) => Set[BigInt]         = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2BigInt).toList.sorted.take(size).toSet
-  private lazy val nestedArray2setAscBigDecimal    : Int => (RS, Int) => Set[BigDecimal]     = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2BigDecimal).toList.sorted.take(size).toSet
-  private lazy val nestedArray2setAscDate          : Int => (RS, Int) => Set[Date]           = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Date).toList.sorted.take(size).toSet
-  private lazy val nestedArray2setAscDuration      : Int => (RS, Int) => Set[Duration]       = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Duration).toList.sorted.take(size).toSet
-  private lazy val nestedArray2setAscInstant       : Int => (RS, Int) => Set[Instant]        = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Instant).toList.sorted.take(size).toSet
-  private lazy val nestedArray2setAscLocalDate     : Int => (RS, Int) => Set[LocalDate]      = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2LocalDate).toList.sorted.take(size).toSet
-  private lazy val nestedArray2setAscLocalTime     : Int => (RS, Int) => Set[LocalTime]      = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2LocalTime).toList.sorted.take(size).toSet
-  private lazy val nestedArray2setAscLocalDateTime : Int => (RS, Int) => Set[LocalDateTime]  = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2LocalDateTime).toList.sorted.take(size).toSet
-  private lazy val nestedArray2setAscOffsetTime    : Int => (RS, Int) => Set[OffsetTime]     = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2OffsetTime).toList.sorted.take(size).toSet
-  private lazy val nestedArray2setAscOffsetDateTime: Int => (RS, Int) => Set[OffsetDateTime] = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2OffsetDateTime).toList.sorted.take(size).toSet
-  private lazy val nestedArray2setAscZonedDateTime : Int => (RS, Int) => Set[ZonedDateTime]  = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2ZonedDateTime).toList.sorted.take(size).toSet
-  private lazy val nestedArray2setAscUUID          : Int => (RS, Int) => Set[UUID]           = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2UUID).toList.sorted.take(size).toSet
-  private lazy val nestedArray2setAscURI           : Int => (RS, Int) => Set[URI]            = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2String).toList.sorted.take(size).map(s => new URI(s)).toSet
-  private lazy val nestedArray2setAscByte          : Int => (RS, Int) => Set[Byte]           = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Byte).toList.sorted.take(size).toSet
-  private lazy val nestedArray2setAscShort         : Int => (RS, Int) => Set[Short]          = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Short).toList.sorted.take(size).toSet
-  private lazy val nestedArray2setAscChar          : Int => (RS, Int) => Set[Char]           = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Char).toList.sorted.take(size).toSet
+  private lazy val nestedArray2setAscId            : Int => (RS, Int) => List[String]         = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Id).sorted.take(size)
+  private lazy val nestedArray2setAscString        : Int => (RS, Int) => List[String]         = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2String).sorted.take(size)
+  private lazy val nestedArray2setAscInt           : Int => (RS, Int) => List[Int]            = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Int).sorted.take(size)
+  private lazy val nestedArray2setAscLong          : Int => (RS, Int) => List[Long]           = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Long).sorted.take(size)
+  private lazy val nestedArray2setAscFloat         : Int => (RS, Int) => List[Float]          = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Float).sorted.take(size)
+  private lazy val nestedArray2setAscDouble        : Int => (RS, Int) => List[Double]         = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Double).sorted.take(size)
+  private lazy val nestedArray2setAscBoolean       : Int => (RS, Int) => List[Boolean]        = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Boolean).sorted.take(size)
+  private lazy val nestedArray2setAscBigInt        : Int => (RS, Int) => List[BigInt]         = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2BigInt).sorted.take(size)
+  private lazy val nestedArray2setAscBigDecimal    : Int => (RS, Int) => List[BigDecimal]     = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2BigDecimal).sorted.take(size)
+  private lazy val nestedArray2setAscDate          : Int => (RS, Int) => List[Date]           = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Date).sorted.take(size)
+  private lazy val nestedArray2setAscDuration      : Int => (RS, Int) => List[Duration]       = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Duration).sorted.take(size)
+  private lazy val nestedArray2setAscInstant       : Int => (RS, Int) => List[Instant]        = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Instant).sorted.take(size)
+  private lazy val nestedArray2setAscLocalDate     : Int => (RS, Int) => List[LocalDate]      = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2LocalDate).sorted.take(size)
+  private lazy val nestedArray2setAscLocalTime     : Int => (RS, Int) => List[LocalTime]      = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2LocalTime).sorted.take(size)
+  private lazy val nestedArray2setAscLocalDateTime : Int => (RS, Int) => List[LocalDateTime]  = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2LocalDateTime).sorted.take(size)
+  private lazy val nestedArray2setAscOffsetTime    : Int => (RS, Int) => List[OffsetTime]     = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2OffsetTime).sorted.take(size)
+  private lazy val nestedArray2setAscOffsetDateTime: Int => (RS, Int) => List[OffsetDateTime] = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2OffsetDateTime).sorted.take(size)
+  private lazy val nestedArray2setAscZonedDateTime : Int => (RS, Int) => List[ZonedDateTime]  = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2ZonedDateTime).sorted.take(size)
+  private lazy val nestedArray2setAscUUID          : Int => (RS, Int) => List[UUID]           = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2UUID).sorted.take(size)
+  private lazy val nestedArray2setAscURI           : Int => (RS, Int) => List[URI]            = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2String).sorted.take(size).map(s => new URI(s))
+  private lazy val nestedArray2setAscByte          : Int => (RS, Int) => List[Byte]           = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Byte).sorted.take(size)
+  private lazy val nestedArray2setAscShort         : Int => (RS, Int) => List[Short]          = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Short).sorted.take(size)
+  private lazy val nestedArray2setAscChar          : Int => (RS, Int) => List[Char]           = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Char).sorted.take(size)
 
-  private lazy val nestedArray2setDescId            : Int => (RS, Int) => Set[String]         = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Id).toList.sorted.takeRight(size).toSet
-  private lazy val nestedArray2setDescString        : Int => (RS, Int) => Set[String]         = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2String).toList.sorted.takeRight(size).toSet
-  private lazy val nestedArray2setDescInt           : Int => (RS, Int) => Set[Int]            = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Int).toList.sorted.takeRight(size).toSet
-  private lazy val nestedArray2setDescLong          : Int => (RS, Int) => Set[Long]           = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Long).toList.sorted.takeRight(size).toSet
-  private lazy val nestedArray2setDescFloat         : Int => (RS, Int) => Set[Float]          = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Float).toList.sorted.takeRight(size).toSet
-  private lazy val nestedArray2setDescDouble        : Int => (RS, Int) => Set[Double]         = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Double).toList.sorted.takeRight(size).toSet
-  private lazy val nestedArray2setDescBoolean       : Int => (RS, Int) => Set[Boolean]        = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Boolean).toList.sorted.takeRight(size).toSet
-  private lazy val nestedArray2setDescBigInt        : Int => (RS, Int) => Set[BigInt]         = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2BigInt).toList.sorted.takeRight(size).toSet
-  private lazy val nestedArray2setDescBigDecimal    : Int => (RS, Int) => Set[BigDecimal]     = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2BigDecimal).toList.sorted.takeRight(size).toSet
-  private lazy val nestedArray2setDescDate          : Int => (RS, Int) => Set[Date]           = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Date).toList.sorted.takeRight(size).toSet
-  private lazy val nestedArray2setDescDuration      : Int => (RS, Int) => Set[Duration]       = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Duration).toList.sorted.takeRight(size).toSet
-  private lazy val nestedArray2setDescInstant       : Int => (RS, Int) => Set[Instant]        = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Instant).toList.sorted.takeRight(size).toSet
-  private lazy val nestedArray2setDescLocalDate     : Int => (RS, Int) => Set[LocalDate]      = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2LocalDate).toList.sorted.takeRight(size).toSet
-  private lazy val nestedArray2setDescLocalTime     : Int => (RS, Int) => Set[LocalTime]      = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2LocalTime).toList.sorted.takeRight(size).toSet
-  private lazy val nestedArray2setDescLocalDateTime : Int => (RS, Int) => Set[LocalDateTime]  = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2LocalDateTime).toList.sorted.takeRight(size).toSet
-  private lazy val nestedArray2setDescOffsetTime    : Int => (RS, Int) => Set[OffsetTime]     = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2OffsetTime).toList.sorted.takeRight(size).toSet
-  private lazy val nestedArray2setDescOffsetDateTime: Int => (RS, Int) => Set[OffsetDateTime] = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2OffsetDateTime).toList.sorted.takeRight(size).toSet
-  private lazy val nestedArray2setDescZonedDateTime : Int => (RS, Int) => Set[ZonedDateTime]  = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2ZonedDateTime).toList.sorted.takeRight(size).toSet
-  private lazy val nestedArray2setDescUUID          : Int => (RS, Int) => Set[UUID]           = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2UUID).toList.sorted.takeRight(size).toSet
-  private lazy val nestedArray2setDescURI           : Int => (RS, Int) => Set[URI]            = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2String).toList.sorted.takeRight(size).map(s => new URI(s)).toSet
-  private lazy val nestedArray2setDescByte          : Int => (RS, Int) => Set[Byte]           = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Byte).toList.sorted.takeRight(size).toSet
-  private lazy val nestedArray2setDescShort         : Int => (RS, Int) => Set[Short]          = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Short).toList.sorted.takeRight(size).toSet
-  private lazy val nestedArray2setDescChar          : Int => (RS, Int) => Set[Char]           = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2set(row, paramIndex, j2Char).toList.sorted.takeRight(size).toSet
+  private lazy val nestedArray2setDescId            : Int => (RS, Int) => List[String]         = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Id).sorted.takeRight(size)
+  private lazy val nestedArray2setDescString        : Int => (RS, Int) => List[String]         = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2String).sorted.takeRight(size)
+  private lazy val nestedArray2setDescInt           : Int => (RS, Int) => List[Int]            = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Int).sorted.takeRight(size)
+  private lazy val nestedArray2setDescLong          : Int => (RS, Int) => List[Long]           = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Long).sorted.takeRight(size)
+  private lazy val nestedArray2setDescFloat         : Int => (RS, Int) => List[Float]          = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Float).sorted.takeRight(size)
+  private lazy val nestedArray2setDescDouble        : Int => (RS, Int) => List[Double]         = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Double).sorted.takeRight(size)
+  private lazy val nestedArray2setDescBoolean       : Int => (RS, Int) => List[Boolean]        = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Boolean).sorted.takeRight(size)
+  private lazy val nestedArray2setDescBigInt        : Int => (RS, Int) => List[BigInt]         = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2BigInt).sorted.takeRight(size)
+  private lazy val nestedArray2setDescBigDecimal    : Int => (RS, Int) => List[BigDecimal]     = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2BigDecimal).sorted.takeRight(size)
+  private lazy val nestedArray2setDescDate          : Int => (RS, Int) => List[Date]           = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Date).sorted.takeRight(size)
+  private lazy val nestedArray2setDescDuration      : Int => (RS, Int) => List[Duration]       = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Duration).sorted.takeRight(size)
+  private lazy val nestedArray2setDescInstant       : Int => (RS, Int) => List[Instant]        = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Instant).sorted.takeRight(size)
+  private lazy val nestedArray2setDescLocalDate     : Int => (RS, Int) => List[LocalDate]      = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2LocalDate).sorted.takeRight(size)
+  private lazy val nestedArray2setDescLocalTime     : Int => (RS, Int) => List[LocalTime]      = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2LocalTime).sorted.takeRight(size)
+  private lazy val nestedArray2setDescLocalDateTime : Int => (RS, Int) => List[LocalDateTime]  = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2LocalDateTime).sorted.takeRight(size)
+  private lazy val nestedArray2setDescOffsetTime    : Int => (RS, Int) => List[OffsetTime]     = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2OffsetTime).sorted.takeRight(size)
+  private lazy val nestedArray2setDescOffsetDateTime: Int => (RS, Int) => List[OffsetDateTime] = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2OffsetDateTime).sorted.takeRight(size)
+  private lazy val nestedArray2setDescZonedDateTime : Int => (RS, Int) => List[ZonedDateTime]  = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2ZonedDateTime).sorted.takeRight(size)
+  private lazy val nestedArray2setDescUUID          : Int => (RS, Int) => List[UUID]           = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2UUID).sorted.takeRight(size)
+  private lazy val nestedArray2setDescURI           : Int => (RS, Int) => List[URI]            = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2String).sorted.takeRight(size).map(s => new URI(s))
+  private lazy val nestedArray2setDescByte          : Int => (RS, Int) => List[Byte]           = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Byte).sorted.takeRight(size)
+  private lazy val nestedArray2setDescShort         : Int => (RS, Int) => List[Short]          = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Short).sorted.takeRight(size)
+  private lazy val nestedArray2setDescChar          : Int => (RS, Int) => List[Char]           = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Char).sorted.takeRight(size)
 
 
   private def sqlArrays2set[T](row: RS, paramIndex: Int, j2s: Any => T): Set[T] = {

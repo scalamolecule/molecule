@@ -12,10 +12,7 @@ trait ResolveExprSet_postgres
 
 
   override protected def setMan[T: ClassTag](
-    attr: Attr,
-    args: Set[T],
-    tpe: String,
-    res: ResSet[T]
+    attr: Attr, args: Set[T], res: ResSet[T]
   ): Unit = {
     val col = getCol(attr: Attr)
     select += col
@@ -38,8 +35,8 @@ trait ResolveExprSet_postgres
       setExpr(attr, col, attr.op, args, res, true)
     } {
       case (dir, filterPath, filterAttr) => filterAttr match {
-        case filterAttr: AttrOne => setExpr2(col, attr.op, filterAttr.name, true, tpe, res, true)
-        case filterAttr          => setExpr2(col, attr.op, filterAttr.name, false, tpe, res, true)
+        case filterAttr: AttrOne => setFilterExpr(col, attr.op, filterAttr.name, res, true)
+        case filterAttr          => setFilterExpr(col, attr.op, filterAttr.name, res, true)
       }
     }
   }
@@ -58,7 +55,7 @@ trait ResolveExprSet_postgres
     coalesce(col, res, "opt")
   }
 
-  override protected def has[T: ClassTag](
+  override protected def setHas[T: ClassTag](
     col: String, set: Set[T], res: ResSet[T], one2sql: T => String, mandatory: Boolean
   ): Unit = {
     def contains(v: T): String = s"${one2sql(v)} = ANY($col)"
@@ -71,7 +68,7 @@ trait ResolveExprSet_postgres
     }
   }
 
-  override protected def hasNo[T](
+  override protected def setHasNo[T](
     col: String, set: Set[T], res: ResSet[T], one2sql: T => String, mandatory: Boolean
   ): Unit = {
     def notContains(v: T): String = s"${one2sql(v)} != ALL($col)"
@@ -84,46 +81,22 @@ trait ResolveExprSet_postgres
     }
   }
 
-  override protected def has2[T](
-    col: String, filterAttr: String, cardOne: Boolean, tpe: String,
-    res: ResSet[T], mandatory: Boolean
-  ): Unit = {
-    if (cardOne) {
-      where += (("", s"$col @> ARRAY(SELECT $filterAttr)"))
-    } else {
-      if (mandatory) {
-        val colAlias = col.replace(".", "_")
-        select -= col
-        select += s"ARRAY_AGG($colAlias)"
-        tempTables += s"UNNEST($col) AS $colAlias"
-        groupByCols -= col
-        having += "COUNT(*) > 0"
-        aggregate = true
-        replaceCast(res.array2set)
-      }
-      where += (("", s"$col @> $filterAttr"))
-    }
+  override protected def setFilterHas(col: String, filterAttr: String): Unit = {
+    where += (("", s"$col @> ARRAY(SELECT $filterAttr)"))
   }
 
-  override protected def hasNo2[T](
-    col: String, filterAttr: String, cardOne: Boolean, tpe: String,
-    res: ResSet[T], mandatory: Boolean
-  ): Unit = {
-    if (cardOne) {
-      if (mandatory) {
-        val colAlias = col.replace(".", "_")
-        select -= col
-        select += s"ARRAY_AGG($colAlias)"
-        tempTables += s"UNNEST($col) AS $colAlias"
-        groupByCols -= col
-        having += "COUNT(*) > 0"
-        aggregate = true
-        replaceCast(res.array2set)
-      }
-      where += (("", s"ARRAY(SELECT UNNEST($col) INTERSECT SELECT $filterAttr) = '{}'"))
-    } else {
-      where += (("", s"ARRAY(SELECT UNNEST($col) INTERSECT SELECT UNNEST($filterAttr)) = '{}'"))
+  override protected def setFilterHasNo[T](col: String, filterAttr: String, res: ResSet[T], mandatory: Boolean): Unit = {
+    if (mandatory) {
+      val colAlias = col.replace(".", "_")
+      select -= col
+      select += s"ARRAY_AGG($colAlias)"
+      tempTables += s"UNNEST($col) AS $colAlias"
+      groupByCols -= col
+      having += "COUNT(*) > 0"
+      aggregate = true
+      replaceCast(res.array2set)
     }
+    where += (("", s"ARRAY(SELECT UNNEST($col) INTERSECT SELECT $filterAttr) = '{}'"))
   }
 
   // helpers -------------------------------------------------------------------

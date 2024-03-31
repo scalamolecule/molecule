@@ -177,7 +177,8 @@ trait CastNestedOptLeaf_
               val rowIt = rowsIt.next.asInstanceOf[jMap[_, _]].values().iterator()
               while (search && rowIt.hasNext) {
                 rowIt.next match {
-                  case "__none__" => ()
+                  case "__none__" =>
+                    ()
 
                   case value: jMap[_, _] if value.values().iterator().next.isInstanceOf[jList[_]] =>
                     isSet = true
@@ -211,7 +212,7 @@ trait CastNestedOptLeaf_
               case set: Set[_] =>
                 coalescedSet = coalescedSet ++ set
             }
-            List(coalescedSet)
+            if (coalescedSet.isEmpty) Nil else List(coalescedSet)
 
           } else {
             rows.asScala.toList.foreach {
@@ -246,7 +247,7 @@ trait CastNestedOptLeaf_
     optComparator: Option[Comparator[Row]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2) = pullCasts
-    val cast = (it: java.util.Iterator[_]) =>
+    val cast         = (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it)
@@ -259,7 +260,7 @@ trait CastNestedOptLeaf_
     optComparator: Option[Comparator[Row]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3) = pullCasts
-    val cast = (it: java.util.Iterator[_]) =>
+    val cast             = (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -273,7 +274,7 @@ trait CastNestedOptLeaf_
     optComparator: Option[Comparator[Row]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4) = pullCasts
-    val cast = (it: java.util.Iterator[_]) =>
+    val cast                 = (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -288,7 +289,7 @@ trait CastNestedOptLeaf_
     optComparator: Option[Comparator[Row]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5) = pullCasts
-    val cast = (it: java.util.Iterator[_]) =>
+    val cast                     = (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -304,7 +305,7 @@ trait CastNestedOptLeaf_
     optComparator: Option[Comparator[Row]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6) = pullCasts
-    val cast = (it: java.util.Iterator[_]) =>
+    val cast                         = (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -321,7 +322,7 @@ trait CastNestedOptLeaf_
     optComparator: Option[Comparator[Row]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7) = pullCasts
-    val cast = (it: java.util.Iterator[_]) =>
+    val cast                             = (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -339,7 +340,7 @@ trait CastNestedOptLeaf_
     optComparator: Option[Comparator[Row]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8) = pullCasts
-    val cast = (it: java.util.Iterator[_]) =>
+    val cast                                 = (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -358,7 +359,7 @@ trait CastNestedOptLeaf_
     optComparator: Option[Comparator[Row]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9) = pullCasts
-    val cast = (it: java.util.Iterator[_]) =>
+    val cast                                     = (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -378,7 +379,7 @@ trait CastNestedOptLeaf_
     optComparator: Option[Comparator[Row]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10) = pullCasts
-    val cast = (it: java.util.Iterator[_]) =>
+    val cast                                          = (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -399,7 +400,7 @@ trait CastNestedOptLeaf_
     optComparator: Option[Comparator[Row]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) = pullCasts
-    val cast = (it: java.util.Iterator[_]) =>
+    val cast                                               = (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -421,7 +422,7 @@ trait CastNestedOptLeaf_
     optComparator: Option[Comparator[Row]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12) = pullCasts
-    val cast = (it: java.util.Iterator[_]) =>
+    val cast                                                    = (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -444,7 +445,7 @@ trait CastNestedOptLeaf_
     optComparator: Option[Comparator[Row]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13) = pullCasts
-    val cast = (it: java.util.Iterator[_]) =>
+    val cast                                                         = (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -468,7 +469,7 @@ trait CastNestedOptLeaf_
     optComparator: Option[Comparator[Row]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14) = pullCasts
-    val cast = (it: java.util.Iterator[_]) =>
+    val cast                                                              = (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -493,7 +494,7 @@ trait CastNestedOptLeaf_
     optComparator: Option[Comparator[Row]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15) = pullCasts
-    val cast = (it: java.util.Iterator[_]) =>
+    val cast                                                                   = (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -519,7 +520,7 @@ trait CastNestedOptLeaf_
     optComparator: Option[Comparator[Row]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16) = pullCasts
-    val cast = (it: java.util.Iterator[_]) =>
+    val cast                                                                        = (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -546,7 +547,7 @@ trait CastNestedOptLeaf_
     optComparator: Option[Comparator[Row]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17) = pullCasts
-    val cast = (it: java.util.Iterator[_]) =>
+    val cast                                                                             = (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -574,7 +575,7 @@ trait CastNestedOptLeaf_
     optComparator: Option[Comparator[Row]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18) = pullCasts
-    val cast = (it: java.util.Iterator[_]) =>
+    val cast                                                                                  = (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -603,7 +604,7 @@ trait CastNestedOptLeaf_
     optComparator: Option[Comparator[Row]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19) = pullCasts
-    val cast = (it: java.util.Iterator[_]) =>
+    val cast                                                                                       = (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -633,7 +634,7 @@ trait CastNestedOptLeaf_
     optComparator: Option[Comparator[Row]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20) = pullCasts
-    val cast = (it: java.util.Iterator[_]) =>
+    val cast                                                                                            = (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -664,7 +665,7 @@ trait CastNestedOptLeaf_
     optComparator: Option[Comparator[Row]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21) = pullCasts
-    val cast = (it: java.util.Iterator[_]) =>
+    val cast                                                                                                 = (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -696,7 +697,7 @@ trait CastNestedOptLeaf_
     optComparator: Option[Comparator[Row]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21, c22) = pullCasts
-    val cast = (it: java.util.Iterator[_]) =>
+    val cast                                                                                                      = (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),

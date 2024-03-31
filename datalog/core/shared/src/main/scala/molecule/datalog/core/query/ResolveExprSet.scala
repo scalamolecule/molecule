@@ -11,29 +11,29 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
     attrIndex += 1
     val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
     attr match {
-      case at: AttrSetManID             => man(attr, e, a, at.vs, resSetId)
-      case at: AttrSetManString         => man(attr, e, a, at.vs, resSetString)
-      case at: AttrSetManInt            => man(attr, e, a, at.vs, resSetInt)
-      case at: AttrSetManLong           => man(attr, e, a, at.vs, resSetLong)
-      case at: AttrSetManFloat          => man(attr, e, a, at.vs, resSetFloat)
-      case at: AttrSetManDouble         => man(attr, e, a, at.vs, resSetDouble)
-      case at: AttrSetManBoolean        => man(attr, e, a, at.vs, resSetBoolean)
-      case at: AttrSetManBigInt         => man(attr, e, a, at.vs, resSetBigInt)
-      case at: AttrSetManBigDecimal     => man(attr, e, a, at.vs, resSetBigDecimal)
-      case at: AttrSetManDate           => man(attr, e, a, at.vs, resSetDate)
-      case at: AttrSetManDuration       => man(attr, e, a, at.vs, resSetDuration)
-      case at: AttrSetManInstant        => man(attr, e, a, at.vs, resSetInstant)
-      case at: AttrSetManLocalDate      => man(attr, e, a, at.vs, resSetLocalDate)
-      case at: AttrSetManLocalTime      => man(attr, e, a, at.vs, resSetLocalTime)
-      case at: AttrSetManLocalDateTime  => man(attr, e, a, at.vs, resSetLocalDateTime)
-      case at: AttrSetManOffsetTime     => man(attr, e, a, at.vs, resSetOffsetTime)
-      case at: AttrSetManOffsetDateTime => man(attr, e, a, at.vs, resSetOffsetDateTime)
-      case at: AttrSetManZonedDateTime  => man(attr, e, a, at.vs, resSetZonedDateTime)
-      case at: AttrSetManUUID           => man(attr, e, a, at.vs, resSetUUID)
-      case at: AttrSetManURI            => man(attr, e, a, at.vs, resSetURI)
-      case at: AttrSetManByte           => man(attr, e, a, at.vs, resSetByte)
-      case at: AttrSetManShort          => man(attr, e, a, at.vs, resSetShort)
-      case at: AttrSetManChar           => man(attr, e, a, at.vs, resSetChar)
+      case at: AttrSetManID             => setMan(attr, e, a, at.vs, resSetId)
+      case at: AttrSetManString         => setMan(attr, e, a, at.vs, resSetString)
+      case at: AttrSetManInt            => setMan(attr, e, a, at.vs, resSetInt)
+      case at: AttrSetManLong           => setMan(attr, e, a, at.vs, resSetLong)
+      case at: AttrSetManFloat          => setMan(attr, e, a, at.vs, resSetFloat)
+      case at: AttrSetManDouble         => setMan(attr, e, a, at.vs, resSetDouble)
+      case at: AttrSetManBoolean        => setMan(attr, e, a, at.vs, resSetBoolean)
+      case at: AttrSetManBigInt         => setMan(attr, e, a, at.vs, resSetBigInt)
+      case at: AttrSetManBigDecimal     => setMan(attr, e, a, at.vs, resSetBigDecimal)
+      case at: AttrSetManDate           => setMan(attr, e, a, at.vs, resSetDate)
+      case at: AttrSetManDuration       => setMan(attr, e, a, at.vs, resSetDuration)
+      case at: AttrSetManInstant        => setMan(attr, e, a, at.vs, resSetInstant)
+      case at: AttrSetManLocalDate      => setMan(attr, e, a, at.vs, resSetLocalDate)
+      case at: AttrSetManLocalTime      => setMan(attr, e, a, at.vs, resSetLocalTime)
+      case at: AttrSetManLocalDateTime  => setMan(attr, e, a, at.vs, resSetLocalDateTime)
+      case at: AttrSetManOffsetTime     => setMan(attr, e, a, at.vs, resSetOffsetTime)
+      case at: AttrSetManOffsetDateTime => setMan(attr, e, a, at.vs, resSetOffsetDateTime)
+      case at: AttrSetManZonedDateTime  => setMan(attr, e, a, at.vs, resSetZonedDateTime)
+      case at: AttrSetManUUID           => setMan(attr, e, a, at.vs, resSetUUID)
+      case at: AttrSetManURI            => setMan(attr, e, a, at.vs, resSetURI)
+      case at: AttrSetManByte           => setMan(attr, e, a, at.vs, resSetByte)
+      case at: AttrSetManShort          => setMan(attr, e, a, at.vs, resSetShort)
+      case at: AttrSetManChar           => setMan(attr, e, a, at.vs, resSetChar)
     }
     es
   }
@@ -41,29 +41,29 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
   protected def resolveAttrSetTac(es: List[Var], attr: AttrSetTac): List[Var] = {
     val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
     attr match {
-      case at: AttrSetTacID             => tac(attr, e, a, at.vs, resSetId)
-      case at: AttrSetTacString         => tac(attr, e, a, at.vs, resSetString)
-      case at: AttrSetTacInt            => tac(attr, e, a, at.vs, resSetInt)
-      case at: AttrSetTacLong           => tac(attr, e, a, at.vs, resSetLong)
-      case at: AttrSetTacFloat          => tac(attr, e, a, at.vs, resSetFloat)
-      case at: AttrSetTacDouble         => tac(attr, e, a, at.vs, resSetDouble)
-      case at: AttrSetTacBoolean        => tac(attr, e, a, at.vs, resSetBoolean)
-      case at: AttrSetTacBigInt         => tac(attr, e, a, at.vs, resSetBigInt)
-      case at: AttrSetTacBigDecimal     => tac(attr, e, a, at.vs, resSetBigDecimal)
-      case at: AttrSetTacDate           => tac(attr, e, a, at.vs, resSetDate)
-      case at: AttrSetTacDuration       => tac(attr, e, a, at.vs, resSetDuration)
-      case at: AttrSetTacInstant        => tac(attr, e, a, at.vs, resSetInstant)
-      case at: AttrSetTacLocalDate      => tac(attr, e, a, at.vs, resSetLocalDate)
-      case at: AttrSetTacLocalTime      => tac(attr, e, a, at.vs, resSetLocalTime)
-      case at: AttrSetTacLocalDateTime  => tac(attr, e, a, at.vs, resSetLocalDateTime)
-      case at: AttrSetTacOffsetTime     => tac(attr, e, a, at.vs, resSetOffsetTime)
-      case at: AttrSetTacOffsetDateTime => tac(attr, e, a, at.vs, resSetOffsetDateTime)
-      case at: AttrSetTacZonedDateTime  => tac(attr, e, a, at.vs, resSetZonedDateTime)
-      case at: AttrSetTacUUID           => tac(attr, e, a, at.vs, resSetUUID)
-      case at: AttrSetTacURI            => tac(attr, e, a, at.vs, resSetURI)
-      case at: AttrSetTacByte           => tac(attr, e, a, at.vs, resSetByte)
-      case at: AttrSetTacShort          => tac(attr, e, a, at.vs, resSetShort)
-      case at: AttrSetTacChar           => tac(attr, e, a, at.vs, resSetChar)
+      case at: AttrSetTacID             => setTac(attr, e, a, at.vs, resSetId)
+      case at: AttrSetTacString         => setTac(attr, e, a, at.vs, resSetString)
+      case at: AttrSetTacInt            => setTac(attr, e, a, at.vs, resSetInt)
+      case at: AttrSetTacLong           => setTac(attr, e, a, at.vs, resSetLong)
+      case at: AttrSetTacFloat          => setTac(attr, e, a, at.vs, resSetFloat)
+      case at: AttrSetTacDouble         => setTac(attr, e, a, at.vs, resSetDouble)
+      case at: AttrSetTacBoolean        => setTac(attr, e, a, at.vs, resSetBoolean)
+      case at: AttrSetTacBigInt         => setTac(attr, e, a, at.vs, resSetBigInt)
+      case at: AttrSetTacBigDecimal     => setTac(attr, e, a, at.vs, resSetBigDecimal)
+      case at: AttrSetTacDate           => setTac(attr, e, a, at.vs, resSetDate)
+      case at: AttrSetTacDuration       => setTac(attr, e, a, at.vs, resSetDuration)
+      case at: AttrSetTacInstant        => setTac(attr, e, a, at.vs, resSetInstant)
+      case at: AttrSetTacLocalDate      => setTac(attr, e, a, at.vs, resSetLocalDate)
+      case at: AttrSetTacLocalTime      => setTac(attr, e, a, at.vs, resSetLocalTime)
+      case at: AttrSetTacLocalDateTime  => setTac(attr, e, a, at.vs, resSetLocalDateTime)
+      case at: AttrSetTacOffsetTime     => setTac(attr, e, a, at.vs, resSetOffsetTime)
+      case at: AttrSetTacOffsetDateTime => setTac(attr, e, a, at.vs, resSetOffsetDateTime)
+      case at: AttrSetTacZonedDateTime  => setTac(attr, e, a, at.vs, resSetZonedDateTime)
+      case at: AttrSetTacUUID           => setTac(attr, e, a, at.vs, resSetUUID)
+      case at: AttrSetTacURI            => setTac(attr, e, a, at.vs, resSetURI)
+      case at: AttrSetTacByte           => setTac(attr, e, a, at.vs, resSetByte)
+      case at: AttrSetTacShort          => setTac(attr, e, a, at.vs, resSetShort)
+      case at: AttrSetTacChar           => setTac(attr, e, a, at.vs, resSetChar)
     }
     es
   }
@@ -71,37 +71,36 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
   protected def resolveAttrSetOpt(es: List[Var], attr: AttrSetOpt): List[Var] = {
     aritiesAttr()
     attrIndex += 1
-    hasOptAttr = true
     val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
     attr match {
-      case _: AttrSetOptID             => opt(attr, e, a, resOptSetId)
-      case _: AttrSetOptString         => opt(attr, e, a, resOptSetString)
-      case _: AttrSetOptInt            => opt(attr, e, a, resOptSetInt)
-      case _: AttrSetOptLong           => opt(attr, e, a, resOptSetLong)
-      case _: AttrSetOptFloat          => opt(attr, e, a, resOptSetFloat)
-      case _: AttrSetOptDouble         => opt(attr, e, a, resOptSetDouble)
-      case _: AttrSetOptBoolean        => opt(attr, e, a, resOptSetBoolean)
-      case _: AttrSetOptBigInt         => opt(attr, e, a, resOptSetBigInt)
-      case _: AttrSetOptBigDecimal     => opt(attr, e, a, resOptSetBigDecimal)
-      case _: AttrSetOptDate           => opt(attr, e, a, resOptSetDate)
-      case _: AttrSetOptDuration       => opt(attr, e, a, resOptSetDuration)
-      case _: AttrSetOptInstant        => opt(attr, e, a, resOptSetInstant)
-      case _: AttrSetOptLocalDate      => opt(attr, e, a, resOptSetLocalDate)
-      case _: AttrSetOptLocalTime      => opt(attr, e, a, resOptSetLocalTime)
-      case _: AttrSetOptLocalDateTime  => opt(attr, e, a, resOptSetLocalDateTime)
-      case _: AttrSetOptOffsetTime     => opt(attr, e, a, resOptSetOffsetTime)
-      case _: AttrSetOptOffsetDateTime => opt(attr, e, a, resOptSetOffsetDateTime)
-      case _: AttrSetOptZonedDateTime  => opt(attr, e, a, resOptSetZonedDateTime)
-      case _: AttrSetOptUUID           => opt(attr, e, a, resOptSetUUID)
-      case _: AttrSetOptURI            => opt(attr, e, a, resOptSetURI)
-      case _: AttrSetOptByte           => opt(attr, e, a, resOptSetByte)
-      case _: AttrSetOptShort          => opt(attr, e, a, resOptSetShort)
-      case _: AttrSetOptChar           => opt(attr, e, a, resOptSetChar)
+      case _: AttrSetOptID             => setOpt(attr, e, a, resOptSetId)
+      case _: AttrSetOptString         => setOpt(attr, e, a, resOptSetString)
+      case _: AttrSetOptInt            => setOpt(attr, e, a, resOptSetInt)
+      case _: AttrSetOptLong           => setOpt(attr, e, a, resOptSetLong)
+      case _: AttrSetOptFloat          => setOpt(attr, e, a, resOptSetFloat)
+      case _: AttrSetOptDouble         => setOpt(attr, e, a, resOptSetDouble)
+      case _: AttrSetOptBoolean        => setOpt(attr, e, a, resOptSetBoolean)
+      case _: AttrSetOptBigInt         => setOpt(attr, e, a, resOptSetBigInt)
+      case _: AttrSetOptBigDecimal     => setOpt(attr, e, a, resOptSetBigDecimal)
+      case _: AttrSetOptDate           => setOpt(attr, e, a, resOptSetDate)
+      case _: AttrSetOptDuration       => setOpt(attr, e, a, resOptSetDuration)
+      case _: AttrSetOptInstant        => setOpt(attr, e, a, resOptSetInstant)
+      case _: AttrSetOptLocalDate      => setOpt(attr, e, a, resOptSetLocalDate)
+      case _: AttrSetOptLocalTime      => setOpt(attr, e, a, resOptSetLocalTime)
+      case _: AttrSetOptLocalDateTime  => setOpt(attr, e, a, resOptSetLocalDateTime)
+      case _: AttrSetOptOffsetTime     => setOpt(attr, e, a, resOptSetOffsetTime)
+      case _: AttrSetOptOffsetDateTime => setOpt(attr, e, a, resOptSetOffsetDateTime)
+      case _: AttrSetOptZonedDateTime  => setOpt(attr, e, a, resOptSetZonedDateTime)
+      case _: AttrSetOptUUID           => setOpt(attr, e, a, resOptSetUUID)
+      case _: AttrSetOptURI            => setOpt(attr, e, a, resOptSetURI)
+      case _: AttrSetOptByte           => setOpt(attr, e, a, resOptSetByte)
+      case _: AttrSetOptShort          => setOpt(attr, e, a, resOptSetShort)
+      case _: AttrSetOptChar           => setOpt(attr, e, a, resOptSetChar)
     }
     es
   }
 
-  private def man[T: ClassTag](
+  private def setMan[T: ClassTag](
     attr: Attr, e: Var, a: Att, args: Set[T], resSet: ResSet[T],
   ): Unit = {
     val v = vv
@@ -114,62 +113,62 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
         throw ModelError(s"Cardinality-set filter attributes not allowed to " +
           s"do additional filtering. Found:\n  " + attr)
       }
-      expr(false, attr, e, a, v, attr.op, args, resSet)
+      setExpr(false, attr, e, a, v, attr.op, args, resSet)
       filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
       filterAttrVars2.get(a).foreach(_(e, v))
     } { case (dir, filterPath, filterAttr) =>
-      expr2(e, a, v, attr.op, s":${filterAttr.ns}/${filterAttr.attr}")
+      setFilterExpr(e, a, v, attr.op, s":${filterAttr.ns}/${filterAttr.attr}")
     }
     refConfirmed = true
   }
 
-  private def tac[T: ClassTag](
+  private def setTac[T: ClassTag](
     attr: Attr, e: Var, a: Att, args: Set[T], resSet: ResSet[T],
   ): Unit = {
     val v = vv
     attr.filterAttr.fold {
-      expr(true, attr, e, a, v, attr.op, args, resSet)
+      setExpr(true, attr, e, a, v, attr.op, args, resSet)
       filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
       filterAttrVars2.get(a).foreach(_(e, v))
     } { case (dir, filterPath, filterAttr) =>
-      expr2(e, a, v, attr.op, s":${filterAttr.ns}/${filterAttr.attr}")
+      setFilterExpr(e, a, v, attr.op, s":${filterAttr.ns}/${filterAttr.attr}")
     }
     refConfirmed = true
   }
 
-  private def expr[T: ClassTag](
+  private def setExpr[T: ClassTag](
     tacit: Boolean,
     attr: Attr, e: Var, a: Att, v: Var, op: Op,
     sets: Set[T],
     resSet: ResSet[T],
   ): Unit = {
     op match {
-      case V       => attrV(e, a, v)
+      case V       => setAttr(e, a, v)
       case Eq      => noCollectionMatching(attr)
-      case Has     => has(e, a, v, sets, resSet.tpe, resSet.toDatalog)
-      case HasNo   => hasNo(e, a, v, sets, resSet.tpe, resSet.toDatalog)
-      case NoValue => if (tacit) noValue(e, a) else noApplyNothing(attr)
+      case Has     => setHas(e, a, v, sets, resSet.tpe, resSet.toDatalog)
+      case HasNo   => setHasNo(e, a, v, sets, resSet.tpe, resSet.toDatalog)
+      case NoValue => if (tacit) setNoValue(e, a) else noApplyNothing(attr)
       case other   => unexpectedOp(other)
     }
   }
 
-  private def expr2(
+  private def setFilterExpr(
     e: Var, a: Att, v: Var, op: Op, filterAttr: String
   ): Unit = {
     op match {
-      case Has   => has2(e, a, v, filterAttr)
-      case HasNo => hasNo2(e, a, v, filterAttr)
+      case Has   => setFilterHas(e, a, v, filterAttr)
+      case HasNo => setFilterHasNo(e, a, v, filterAttr)
       case other => unexpectedOp(other)
     }
   }
 
-  private def opt[T: ClassTag](
+  private def setOpt[T: ClassTag](
     attr: Attr, e: Var, a: Att, resSetOpt: ResSetOpt[T],
   ): Unit = {
     val v = vv
     addCast(resSetOpt.j2sOptSet)
     attr.op match {
-      case V     => optAttr(e, a, v, resSetOpt)
+      case V     => setOptAttr(e, a, v, resSetOpt)
       case Eq    => noCollectionMatching(attr)
       case other => unexpectedOp(other)
     }
@@ -178,11 +177,11 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
 
   // attr ----------------------------------------------------------------------
 
-  private def attrV(e: Var, a: Att, v: Var): Unit = {
+  private def setAttr(e: Var, a: Att, v: Var): Unit = {
     where += s"[$e $a $v]" -> wClause
   }
 
-  private def optAttr[T](e: Var, a: Att, v: Var, resOpt: ResSetOpt[T]): Unit = {
+  private def setOptAttr[T](e: Var, a: Att, v: Var, resOpt: ResSetOpt[T]): Unit = {
     if (refConfirmed) {
       val (e1, v1, v2, v3) = (e + 1, v + 1, v + 2, v + 3)
       find += s"(distinct $v3)"
@@ -229,7 +228,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
     replaceCast(resOpt.optAttr2s)
   }
 
-  private def has[T: ClassTag](
+  private def setHas[T: ClassTag](
     e: Var, a: Att, v: Var, set: Set[T], tpe: String, toDatalog: T => String
   ): Unit = {
     where += s"[$e $a $v]" -> wClause
@@ -241,7 +240,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
     }
   }
 
-  private def hasNo[T](
+  private def setHasNo[T](
     e: Var, a: Att, v: Var, set: Set[T], tpe: String, toDatalog: T => String
   ): Unit = {
     // Common for pre-query and main query
@@ -260,7 +259,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
     }
   }
 
-  private def noValue(e: Var, a: Att): Unit = {
+  private def setNoValue(e: Var, a: Att): Unit = {
     if (refConfirmed) {
       where += s"(not [$e $a])" -> wNeqOne
     } else {
@@ -278,7 +277,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
 
   // filter attribute  ---------------------------------------------------------
 
-  private def has2(e: Var, a: Att, v: Var, filterAttr: String): Unit = {
+  private def setFilterHas(e: Var, a: Att, v: Var, filterAttr: String): Unit = {
     where += s"[$e $a $v]" -> wClause
     val process: (Var, Var) => Unit = (f: Var, w: Var) => {
       where +=
@@ -302,7 +301,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
   }
 
 
-  private def hasNo2(e: Var, a: Att, v: Var, filterAttr: String): Unit = {
+  private def setFilterHasNo(e: Var, a: Att, v: Var, filterAttr: String): Unit = {
     where += s"[$e $a $v]" -> wClause
     val process: (Var, Var) => Unit = (f: Var, w: Var) => {
       where +=

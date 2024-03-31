@@ -58,10 +58,8 @@ abstract class DatomicQueryResolve[Tpl](
 
 
   private def distinct(rows: jCollection[jList[AnyRef]]): jCollection[jList[AnyRef]] = {
-    if (m2q.hasOptAttr)
-      new util.HashSet[jList[AnyRef]](rows)
-    else
-      rows
+    // Always return distinct rows
+    new util.HashSet[jList[AnyRef]](rows)
   }
 
 

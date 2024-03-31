@@ -405,6 +405,42 @@ trait SqlUpdate
     addColSetter(curRefPath, colSetter)
   }
 
+  override def updateMapEq[T](
+    ns: String,
+    attr: String,
+    refNs: Option[String],
+    noValue: Boolean,
+    owner: Boolean,
+    map: Map[String, T],
+    transformValue: T => Any,
+    //    exts: List[String],
+    //    set2array: Set[Any] => Array[AnyRef],
+    //    value2json: (StringBuffer, T) => StringBuffer
+  ): Unit = ???
+
+  override def updateMapAdd[T](
+    ns: String,
+    attr: String,
+    refNs: Option[String],
+    owner: Boolean,
+    map: Map[String, T],
+    transformValue: T => Any,
+    //    exts: List[String],
+    //    set2array: Set[Any] => Array[AnyRef],
+    //    value2json: (StringBuffer, T) => StringBuffer
+  ): Unit = ???
+
+  override def updateMapRemove[T](
+    ns: String,
+    attr: String,
+    refNs: Option[String],
+    owner: Boolean,
+    map: Map[String, T],
+    transformValue: T => Any,
+    //    exts: List[String],
+    //    one2json: T => String
+  ): Unit = ???
+
 
   override def handleIds(ns: String, ids1: Seq[String]): Unit = {
     if (ids.nonEmpty) {

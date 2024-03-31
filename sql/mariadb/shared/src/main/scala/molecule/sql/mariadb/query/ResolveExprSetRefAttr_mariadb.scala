@@ -10,7 +10,7 @@ trait ResolveExprSetRefAttr_mariadb
     with LambdasSet_mariadb { self: SqlQueryBase =>
 
 
-  override protected def refMan[T: ClassTag](
+  override protected def setRefMan[T: ClassTag](
     attr: Attr, args: Set[T], res: ResSet[T]
   ): Unit = {
     select += s"JSON_ARRAYAGG($joinTable.$ref_id) $refIds"
@@ -28,17 +28,14 @@ trait ResolveExprSetRefAttr_mariadb
         throw ModelError(s"Cardinality-set filter attributes not allowed to " +
           s"do additional filtering. Found:\n  " + attr)
       }
-      refExpr(refIds, attr.op, args, res)
+      setRefExpr(attr, refIds, attr.op, args)
     } { case (dir, filterPath, filterAttr) =>
-      refExpr2(refIds, attr.op, filterAttr.name)
+      setFilterRefExpr(refIds, attr.op, filterAttr.name)
     }
   }
 
-  override protected def refOpt[T: ClassTag](
-    attr: Attr,
-    optSet: Option[Set[T]],
-    resOpt: ResSetOpt[T],
-    res: ResSet[T]
+  override protected def setRefOpt[T: ClassTag](
+    attr: Attr, optSet: Option[Set[T]], resOpt: ResSetOpt[T], res: ResSet[T]
   ): Unit = {
     val col = getCol(attr: Attr)
     select += s"JSON_ARRAYAGG($joinTable.$ref_id) $refIds"
@@ -53,8 +50,8 @@ trait ResolveExprSetRefAttr_mariadb
 
     attr.op match {
       case V     => ()
-      case Eq    => refOptEqual(optSet, res)
-      case Neq   => refOptNeq(optSet, res)
+      case Eq    => setRefOptEqual(optSet, res)
+      case Neq   => setRefOptNeq(optSet, res)
       case Has   => refOptHas(col, optSet)
       case HasNo => refOptHasNo(optSet)
       case other => unexpectedOp(other)
@@ -73,11 +70,11 @@ trait ResolveExprSetRefAttr_mariadb
        |  )""".stripMargin
   }
 
-  override protected def refEqual[T](set: Set[T], res: ResSet[T]): Unit = {
+  override protected def setRefEqual[T](set: Set[T], res: ResSet[T]): Unit = {
     where += (("", refMatchArray(set, res.one2json)))
   }
 
-  override protected def refOptEqual[T](optSet: Option[Set[T]], res: ResSet[T]): Unit = {
+  override protected def setRefOptEqual[T](optSet: Option[Set[T]], res: ResSet[T]): Unit = {
     optSet.fold[Unit] {
       where += (("",
         s"""(
@@ -87,16 +84,16 @@ trait ResolveExprSetRefAttr_mariadb
            |  )""".stripMargin
       ))
     } { set =>
-      refEqual(set, res)
+      setRefEqual(set, res)
     }
   }
 
-  override protected def refNeq[T](set: Set[T], res: ResSet[T]): Unit = {
+  override protected def setRefNeq[T](set: Set[T], res: ResSet[T]): Unit = {
     where += (("", "NOT (" + refMatchArray(set, res.one2json) + ")"))
   }
 
-  override protected def refOptNeq[T](optSet: Option[Set[T]], res: ResSet[T]): Unit = {
-    optSet.foreach(set => refNeq(set, res))
+  override protected def setRefOptNeq[T](optSet: Option[Set[T]], res: ResSet[T]): Unit = {
+    optSet.foreach(set => setRefNeq(set, res))
     notNull += s"$joinTable.$ns_id"
   }
 

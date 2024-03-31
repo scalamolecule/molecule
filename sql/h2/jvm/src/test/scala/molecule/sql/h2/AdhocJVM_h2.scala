@@ -16,77 +16,53 @@ object AdhocJVM_h2 extends TestSuiteArray_h2 {
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+      val a = (1, Some(int1))
+      val b = (2, Some(int2))
+      val c = (3, Some(int3))
+      val x = (4, Option.empty[Int])
       for {
+        _ <- Ns.i.int_?.insert(List(a, b, c, x)).transact
 
-        _ <- Ns.i(0).save.transact
-        _ <- Ns.i.refs.insert(List(
-          (1, Set(ref1, ref2)),
-          (2, Set(ref2, ref3, ref4))
-        )).transact
+        // Find all optional attribute values
+        _ <- Ns.i.a1.int_?.query.i.get.map(_ ==> List(a, b, c, x))
 
-        // Sets without one or more values matching
-
-//        // "Doesn't have this value"
-//        _ <- Ns.i.a1.refs_.hasNo(ref0).query.get.map(_ ==> List(1, 2))
-//        _ <- Ns.i.a1.refs_.hasNo(ref1).query.get.map(_ ==> List(2))
-//        _ <- Ns.i.a1.refs_.hasNo(ref2).query.get.map(_ ==> List())
-//        _ <- Ns.i.a1.refs_.hasNo(ref3).query.get.map(_ ==> List(1))
-//        _ <- Ns.i.a1.refs_.hasNo(ref4).query.get.map(_ ==> List(1))
-//        _ <- Ns.i.a1.refs_.hasNo(ref5).query.get.map(_ ==> List(1, 2))
-//        // Same as
-//        _ <- Ns.i.a1.refs_.hasNo(Seq(ref0)).query.get.map(_ ==> List(1, 2))
-//        _ <- Ns.i.a1.refs_.hasNo(Seq(ref1)).query.get.map(_ ==> List(2))
-//        _ <- Ns.i.a1.refs_.hasNo(Seq(ref2)).query.get.map(_ ==> List())
-//        _ <- Ns.i.a1.refs_.hasNo(Seq(ref3)).query.get.map(_ ==> List(1))
-//        _ <- Ns.i.a1.refs_.hasNo(Seq(ref4)).query.get.map(_ ==> List(1))
-//        _ <- Ns.i.a1.refs_.hasNo(Seq(ref5)).query.get.map(_ ==> List(1, 2))
-
-
-        // OR semantics when multiple values
-
-        _ <- Ns.i.a1.refs_.has(ref1, ref2).query.get.map(_ ==> List(1, 2))
-
-
-        // "Has neither this OR that"
-        _ <- Ns.i.a1.refs_.hasNo(ref1, ref2).query.i.get.map(_ ==> List())
-//        _ <- Ns.i.a1.refs_.hasNo(ref1, ref3).query.get.map(_ ==> List())
-//        _ <- Ns.i.a1.refs_.hasNo(ref1, ref4).query.get.map(_ ==> List())
-//        _ <- Ns.i.a1.refs_.hasNo(ref1, ref5).query.get.map(_ ==> List(2))
-//        // Same as
-//        _ <- Ns.i.a1.refs_.hasNo(Seq(ref1, ref2)).query.get.map(_ ==> List())
-//        _ <- Ns.i.a1.refs_.hasNo(Seq(ref1, ref3)).query.get.map(_ ==> List())
-//        _ <- Ns.i.a1.refs_.hasNo(Seq(ref1, ref4)).query.get.map(_ ==> List())
-//        _ <- Ns.i.a1.refs_.hasNo(Seq(ref1, ref5)).query.get.map(_ ==> List(2))
+//        // Find optional values matching
+//        _ <- Ns.i.a1.int_?(Some(int0)).query.get.map(_ ==> List())
+//        _ <- Ns.i.a1.int_?(Some(int1)).query.get.map(_ ==> List(a))
 //
-//
-//        // Negating empty Seqs/Sets has no effect
-//        _ <- Ns.i.a1.refs_.hasNo(Seq.empty[String]).query.get.map(_ ==> List(1, 2))
+//        // None matches non-asserted/null values
+//        _ <- Ns.i.a1.int_?(Option.empty[Int]).query.get.map(_ ==> List(x))
+//        // Easier to apply nothing to tacit attribute
+//        _ <- Ns.i.a1.int_().query.get.map(_ ==> List(4))
 
 
-//        _ <- rawTransact(
-//          """INSERT INTO Ns (
-//            |  intSet
-//            |) VALUES (array[1, 2, 2])
-//            |""".stripMargin)
-//
-//        _ <- rawQuery(
-//          """SELECT DISTINCT
-//            |  ARRAY_AGG(Ns.intSet)
-//            |FROM Ns
-//            |WHERE
-//            |  Ns.intSet IS NOT NULL
-//            |HAVING COUNT(*) > 0;
-//            |""".stripMargin, true)
-//          .map(println)
-//
-//        _ <- rawQuery(
-//          """SELECT DISTINCT
-//            |  Ns.intSeq
-//            |FROM Ns
-//            |WHERE
-//            |  Ns.intSeq IS NOT NULL;
-//            |""".stripMargin, true)
-//          .map(println)
+
+
+
+        //        _ <- rawTransact(
+        //          """INSERT INTO Ns (
+        //            |  intSet
+        //            |) VALUES (array[1, 2, 2])
+        //            |""".stripMargin)
+        //
+        //        _ <- rawQuery(
+        //          """SELECT DISTINCT
+        //            |  ARRAY_AGG(Ns.intSet)
+        //            |FROM Ns
+        //            |WHERE
+        //            |  Ns.intSet IS NOT NULL
+        //            |HAVING COUNT(*) > 0;
+        //            |""".stripMargin, true)
+        //          .map(println)
+        //
+        //        _ <- rawQuery(
+        //          """SELECT DISTINCT
+        //            |  Ns.intSeq
+        //            |FROM Ns
+        //            |WHERE
+        //            |  Ns.intSeq IS NOT NULL;
+        //            |""".stripMargin, true)
+        //          .map(println)
 
       } yield ()
     }
@@ -96,8 +72,82 @@ object AdhocJVM_h2 extends TestSuiteArray_h2 {
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
 
-        _ <- A.s.Bb.s.Cc.*(C.s)
-          .insert("book", "Jan", List("Musician")).transact
+        _ <- A.i.B.iSeq.insert(
+          (1, List(1, 2, 2)),
+          (2, List(2)),
+          (2, List(7)),
+          (3, List(3)),
+          (4, List())
+        ).transact
+
+        // has
+
+        //        _ <- A.i.a1.B.iSeq.has(1).query.get.map(_ ==> List(
+        //          (1, List(1, 2, 2)),
+        //        ))
+        //        _ <- A.i.a1.B.iSeq.has(2).query.get.map(_ ==> List(
+        //          (1, List(1, 2, 2)),
+        //          (2, List(2)),
+        //        ))
+        //
+        //        _ <- A.i.a1.B.iSeq.has(2, 1).query.get.map(_ ==> List(
+        //          (1, List(1, 2, 2)),
+        //          (2, List(2)),
+        //        ))
+
+
+
+        _ <- rawQuery(
+          """SELECT DISTINCT
+            |  A.i,
+            |  ARRAY_AGG(B.iSeq)
+            |FROM A
+            |  INNER JOIN B ON A.b = B.id
+            |WHERE
+            |  ((ARRAY_CONTAINS(B.iSeq, 2)) OR
+            |   (ARRAY_CONTAINS(B.iSeq, 7))) AND
+            |  A.i    IS NOT NULL AND
+            |  B.iSeq IS NOT NULL
+            |GROUP BY A.i
+            |ORDER BY A.i;
+            |""".stripMargin, true).map(println)
+
+        _ <- rawQuery(
+          """SELECT DISTINCT
+            |  A.i,
+            |  B.iSeq
+            |FROM A
+            |  INNER JOIN B ON A.b = B.id
+            |WHERE
+            |  ((ARRAY_CONTAINS(B.iSeq, 2)) OR
+            |   (ARRAY_CONTAINS(B.iSeq, 7))) AND
+            |  A.i    IS NOT NULL AND
+            |  B.iSeq IS NOT NULL
+            |//GROUP BY A.i
+            |ORDER BY A.i;
+            |""".stripMargin, true).map(println)
+
+
+
+        _ <- A.i.a1.B.iSeq.has(2, 7).query.i.get.map(_ ==> List(
+          (1, List(1, 2, 2)),
+          (2, List(2)),
+          (2, List(7)),
+        ))
+
+        _ <- A.i.a1.B.iSeq_.has(1).query.get.map(_ ==> List(1))
+        _ <- A.i.a1.B.iSeq_.has(2).query.get.map(_ ==> List(1, 2))
+        _ <- A.i.a1.B.iSeq_.has(2, 7).query.get.map(_ ==> List(1, 2, 2))
+        _ <- A.i.a1.B.iSeq_.has(2, 3).query.get.map(_ ==> List(1, 2, 3))
+
+        // hasNo
+        _ <- A.i.a1.B.iSeq_.hasNo(1).query.get.map(_ ==> List(2, 2, 3))
+        _ <- A.i.a1.B.iSeq_.hasNo(2).query.get.map(_ ==> List(2, 3))
+        _ <- A.i.a1.B.iSeq_.hasNo(3).query.get.map(_ ==> List(1, 2, 2))
+
+        // no value - match non-asserted attribute (null)
+        // Nothing returned since there's no relationship to B
+        _ <- A.i.a1.B.iSeq_().query.i.get.map(_ ==> Nil)
 
       } yield ()
     }

@@ -12,29 +12,29 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
 
   override protected def resolveAttrSetMan(attr: AttrSetMan): Unit = {
     attr match {
-      case at: AttrSetManID             => man(attr, at.vs, resSetID)
-      case at: AttrSetManString         => man(attr, at.vs, resSetString)
-      case at: AttrSetManInt            => man(attr, at.vs, resSetInt)
-      case at: AttrSetManLong           => man(attr, at.vs, resSetLong)
-      case at: AttrSetManFloat          => man(attr, at.vs, resSetFloat)
-      case at: AttrSetManDouble         => man(attr, at.vs, resSetDouble)
-      case at: AttrSetManBoolean        => man(attr, at.vs, resSetBoolean)
-      case at: AttrSetManBigInt         => man(attr, at.vs, resSetBigInt)
-      case at: AttrSetManBigDecimal     => man(attr, at.vs, resSetBigDecimal)
-      case at: AttrSetManDate           => man(attr, at.vs, resSetDate)
-      case at: AttrSetManDuration       => man(attr, at.vs, resSetDuration)
-      case at: AttrSetManInstant        => man(attr, at.vs, resSetInstant)
-      case at: AttrSetManLocalDate      => man(attr, at.vs, resSetLocalDate)
-      case at: AttrSetManLocalTime      => man(attr, at.vs, resSetLocalTime)
-      case at: AttrSetManLocalDateTime  => man(attr, at.vs, resSetLocalDateTime)
-      case at: AttrSetManOffsetTime     => man(attr, at.vs, resSetOffsetTime)
-      case at: AttrSetManOffsetDateTime => man(attr, at.vs, resSetOffsetDateTime)
-      case at: AttrSetManZonedDateTime  => man(attr, at.vs, resSetZonedDateTime)
-      case at: AttrSetManUUID           => man(attr, at.vs, resSetUUID)
-      case at: AttrSetManURI            => man(attr, at.vs, resSetURI)
-      case at: AttrSetManByte           => man(attr, at.vs, resSetByte)
-      case at: AttrSetManShort          => man(attr, at.vs, resSetShort)
-      case at: AttrSetManChar           => man(attr, at.vs, resSetChar)
+      case at: AttrSetManID             => setMan(attr, at.vs, resSetID)
+      case at: AttrSetManString         => setMan(attr, at.vs, resSetString)
+      case at: AttrSetManInt            => setMan(attr, at.vs, resSetInt)
+      case at: AttrSetManLong           => setMan(attr, at.vs, resSetLong)
+      case at: AttrSetManFloat          => setMan(attr, at.vs, resSetFloat)
+      case at: AttrSetManDouble         => setMan(attr, at.vs, resSetDouble)
+      case at: AttrSetManBoolean        => setMan(attr, at.vs, resSetBoolean)
+      case at: AttrSetManBigInt         => setMan(attr, at.vs, resSetBigInt)
+      case at: AttrSetManBigDecimal     => setMan(attr, at.vs, resSetBigDecimal)
+      case at: AttrSetManDate           => setMan(attr, at.vs, resSetDate)
+      case at: AttrSetManDuration       => setMan(attr, at.vs, resSetDuration)
+      case at: AttrSetManInstant        => setMan(attr, at.vs, resSetInstant)
+      case at: AttrSetManLocalDate      => setMan(attr, at.vs, resSetLocalDate)
+      case at: AttrSetManLocalTime      => setMan(attr, at.vs, resSetLocalTime)
+      case at: AttrSetManLocalDateTime  => setMan(attr, at.vs, resSetLocalDateTime)
+      case at: AttrSetManOffsetTime     => setMan(attr, at.vs, resSetOffsetTime)
+      case at: AttrSetManOffsetDateTime => setMan(attr, at.vs, resSetOffsetDateTime)
+      case at: AttrSetManZonedDateTime  => setMan(attr, at.vs, resSetZonedDateTime)
+      case at: AttrSetManUUID           => setMan(attr, at.vs, resSetUUID)
+      case at: AttrSetManURI            => setMan(attr, at.vs, resSetURI)
+      case at: AttrSetManByte           => setMan(attr, at.vs, resSetByte)
+      case at: AttrSetManShort          => setMan(attr, at.vs, resSetShort)
+      case at: AttrSetManChar           => setMan(attr, at.vs, resSetChar)
     }
   }
 
@@ -68,34 +68,34 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
 
   override protected def resolveAttrSetOpt(attr: AttrSetOpt): Unit = {
     attr match {
-      case _: AttrSetOptID             => opt(attr, resSetID)
-      case _: AttrSetOptString         => opt(attr, resSetString)
-      case _: AttrSetOptInt            => opt(attr, resSetInt)
-      case _: AttrSetOptLong           => opt(attr, resSetLong)
-      case _: AttrSetOptFloat          => opt(attr, resSetFloat)
-      case _: AttrSetOptDouble         => opt(attr, resSetDouble)
-      case _: AttrSetOptBoolean        => opt(attr, resSetBoolean)
-      case _: AttrSetOptBigInt         => opt(attr, resSetBigInt)
-      case _: AttrSetOptBigDecimal     => opt(attr, resSetBigDecimal)
-      case _: AttrSetOptDate           => opt(attr, resSetDate)
-      case _: AttrSetOptDuration       => opt(attr, resSetDuration)
-      case _: AttrSetOptInstant        => opt(attr, resSetInstant)
-      case _: AttrSetOptLocalDate      => opt(attr, resSetLocalDate)
-      case _: AttrSetOptLocalTime      => opt(attr, resSetLocalTime)
-      case _: AttrSetOptLocalDateTime  => opt(attr, resSetLocalDateTime)
-      case _: AttrSetOptOffsetTime     => opt(attr, resSetOffsetTime)
-      case _: AttrSetOptOffsetDateTime => opt(attr, resSetOffsetDateTime)
-      case _: AttrSetOptZonedDateTime  => opt(attr, resSetZonedDateTime)
-      case _: AttrSetOptUUID           => opt(attr, resSetUUID)
-      case _: AttrSetOptURI            => opt(attr, resSetURI)
-      case _: AttrSetOptByte           => opt(attr, resSetByte)
-      case _: AttrSetOptShort          => opt(attr, resSetShort)
-      case _: AttrSetOptChar           => opt(attr, resSetChar)
+      case _: AttrSetOptID             => setOpt(attr, resSetID)
+      case _: AttrSetOptString         => setOpt(attr, resSetString)
+      case _: AttrSetOptInt            => setOpt(attr, resSetInt)
+      case _: AttrSetOptLong           => setOpt(attr, resSetLong)
+      case _: AttrSetOptFloat          => setOpt(attr, resSetFloat)
+      case _: AttrSetOptDouble         => setOpt(attr, resSetDouble)
+      case _: AttrSetOptBoolean        => setOpt(attr, resSetBoolean)
+      case _: AttrSetOptBigInt         => setOpt(attr, resSetBigInt)
+      case _: AttrSetOptBigDecimal     => setOpt(attr, resSetBigDecimal)
+      case _: AttrSetOptDate           => setOpt(attr, resSetDate)
+      case _: AttrSetOptDuration       => setOpt(attr, resSetDuration)
+      case _: AttrSetOptInstant        => setOpt(attr, resSetInstant)
+      case _: AttrSetOptLocalDate      => setOpt(attr, resSetLocalDate)
+      case _: AttrSetOptLocalTime      => setOpt(attr, resSetLocalTime)
+      case _: AttrSetOptLocalDateTime  => setOpt(attr, resSetLocalDateTime)
+      case _: AttrSetOptOffsetTime     => setOpt(attr, resSetOffsetTime)
+      case _: AttrSetOptOffsetDateTime => setOpt(attr, resSetOffsetDateTime)
+      case _: AttrSetOptZonedDateTime  => setOpt(attr, resSetZonedDateTime)
+      case _: AttrSetOptUUID           => setOpt(attr, resSetUUID)
+      case _: AttrSetOptURI            => setOpt(attr, resSetURI)
+      case _: AttrSetOptByte           => setOpt(attr, resSetByte)
+      case _: AttrSetOptShort          => setOpt(attr, resSetShort)
+      case _: AttrSetOptChar           => setOpt(attr, resSetChar)
     }
   }
 
 
-  private def man[T](attr: Attr, args: Set[T], resSet: ResSet[T]): Unit = {
+  private def setMan[T](attr: Attr, args: Set[T], resSet: ResSet[T]): Unit = {
     val field       = attr.attr
     val uniqueField = b.unique(field)
     projectField(field)
@@ -134,23 +134,23 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
         postFilters.get(path :+ attr.cleanAttr).foreach(_(b))
       }
       attr.op match {
-        case V       => attrV(uniqueField, field, mandatory)
+        case V       => setAttr(uniqueField, field, mandatory)
         case Eq      => noCollectionMatching(attr)
-        case Has     => has(uniqueField, field, sets, resSet, mandatory)
-        case HasNo   => hasNo(uniqueField, field, sets, resSet, mandatory)
+        case Has     => setHas(uniqueField, field, sets, resSet, mandatory)
+        case HasNo   => setHasNo(uniqueField, field, sets, resSet, mandatory)
         case NoValue => if (mandatory) noApplyNothing(attr) else noValue(field)
         case other   => unexpectedOp(other)
       }
     } { filterAttr =>
       attr.op match {
-        case Has   => has2(field, filterAttr, mandatory)
-        case HasNo => hasNo2(field, filterAttr, mandatory)
+        case Has   => setFilterHas(field, filterAttr, mandatory)
+        case HasNo => setFilterHasNo(field, filterAttr, mandatory)
         case other => unexpectedOp(other)
       }
     }
   }
 
-  private def opt[T](attr: Attr, res: ResSet[T]): Unit = {
+  private def setOpt[T](attr: Attr, res: ResSet[T]): Unit = {
     val field       = attr.attr
     val uniqueField = b.unique(field)
     projectField(field)
@@ -163,7 +163,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     topBranch.groupIdFields += prefixedFieldPair
 
     attr.op match {
-      case V     => optAttr(uniqueField, field)
+      case V     => setOptAttr(uniqueField, field)
       case Eq    => noCollectionMatching(attr)
       case other => unexpectedOp(other)
     }
@@ -172,7 +172,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
 
   // attr ----------------------------------------------------------------------
 
-  private def attrV(uniqueField: String, field: String, mandatory: Boolean): Unit = {
+  private def setAttr(uniqueField: String, field: String, mandatory: Boolean): Unit = {
     //    println(s"\n======== $uniqueField ============================================")
 
     // Skipping this for all set attributes solves the own-ref rest in UpdateSet_id.
@@ -184,7 +184,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     coalesce(uniqueField, field, mandatory)
   }
 
-  private def optAttr(uniqueField: String, field: String): Unit = {
+  private def setOptAttr(uniqueField: String, field: String): Unit = {
     topBranch.groupIdFields -= prefixedFieldPair
     if (!(b.parent.isDefined && b.parent.get.isInstanceOf[NestedRef]
       || b.isInstanceOf[NestedRef])
@@ -223,7 +223,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     }
   }
 
-  private def has[T](
+  private def setHas[T](
     uniqueField: String, field: String, set: Set[T], res: ResSet[T], mandatory: Boolean
   ): Unit = {
     set.size match {
@@ -236,7 +236,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     coalesce(uniqueField, field, mandatory)
   }
 
-  private def hasNo[T](
+  private def setHasNo[T](
     uniqueField: String, field: String, set: Set[T], res: ResSet[T], mandatory: Boolean
   ): Unit = {
     b.base.matches.add(Filters.ne(b.dot + field, new BsonNull))
@@ -265,7 +265,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
 
   // filter attribute ----------------------------------------------------------
 
-  private def has2(
+  private def setFilterHas(
     field: String, filterAttr0: (Int, List[String], Attr), mandatory: Boolean
   ): Unit = {
     val (dir, filterPath, filterAttr1) = filterAttr0
@@ -322,7 +322,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     if (mandatory) coalesceSets(field)
   }
 
-  private def hasNo2(
+  private def setFilterHasNo(
     field: String, filterAttr0: (Int, List[String], Attr), mandatory: Boolean
   ): Unit = {
     val (dir, filterPath, filterAttr1) = filterAttr0

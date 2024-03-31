@@ -75,7 +75,6 @@ trait ResolveExprOne[Tpl]
   protected def resolveAttrOneOpt(es: List[Var], attr: AttrOneOpt): List[Var] = {
     aritiesAttr()
     attrIndex += 1
-    hasOptAttr = true
     val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
     attr match {
       case at: AttrOneOptID             => opt(attr, e, a, at.vs, resOptId, sortOneOptId(at, attrIndex), sortOneID(at, attrIndex))

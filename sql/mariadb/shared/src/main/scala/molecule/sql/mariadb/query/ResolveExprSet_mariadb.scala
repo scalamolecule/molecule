@@ -12,10 +12,7 @@ trait ResolveExprSet_mariadb
 
 
   override protected def setMan[T: ClassTag](
-    attr: Attr,
-    args: Set[T],
-    tpe: String,
-    res: ResSet[T]
+    attr: Attr, args: Set[T], res: ResSet[T]
   ): Unit = {
     val col = getCol(attr: Attr)
     select += col
@@ -36,9 +33,8 @@ trait ResolveExprSet_mariadb
       setExpr(attr, col, attr.op, args, res, true)
     } {
       case (dir, filterPath, filterAttr) => filterAttr match {
-        case filterAttr: AttrOne => setExpr2(col, attr.op, filterAttr.name, true, tpe, res, true)
-        case filterAttr          =>
-          setExpr2(col, attr.op, filterAttr.name, false, tpe, res, true)
+        case filterAttr: AttrOne => setFilterExpr(col, attr.op, filterAttr.name, res, true)
+        case filterAttr          => setFilterExpr(col, attr.op, filterAttr.name, res, true)
       }
     }
   }
@@ -49,18 +45,15 @@ trait ResolveExprSet_mariadb
     op match {
       case V       => setAttr(col, res, mandatory)
       case Eq      => noCollectionMatching(attr)
-      case Has     => has(col, set, res, res.one2sql, mandatory)
-      case HasNo   => hasNo(col, set, res, res.one2sql, mandatory)
+      case Has     => setHas(col, set, res, res.one2sql, mandatory)
+      case HasNo   => setHasNo(col, set, res, res.one2sql, mandatory)
       case NoValue => if (mandatory) noApplyNothing(attr) else setNoValue(col)
       case other   => unexpectedOp(other)
     }
   }
 
   override protected def setOpt[T: ClassTag](
-    attr: Attr,
-//    optSet: Option[Set[T]],
-    resOpt: ResSetOpt[T],
-    res: ResSet[T]
+    attr: Attr, resOpt: ResSetOpt[T], res: ResSet[T]
   ): Unit = {
     val col = getCol(attr: Attr)
     select += col
@@ -104,7 +97,7 @@ trait ResolveExprSet_mariadb
     )
   }
 
-  override protected def has[T: ClassTag](
+  override protected def setHas[T: ClassTag](
     col: String, set: Set[T], res: ResSet[T], one2json: T => String, mandatory: Boolean
   ): Unit = {
     def containsSet(set: Set[T]): String = {
@@ -124,7 +117,7 @@ trait ResolveExprSet_mariadb
     }
   }
 
-  override protected def hasNo[T](
+  override protected def setHasNo[T](
     col: String, set: Set[T], res: ResSet[T], one2json: T => String, mandatory: Boolean
   ): Unit = {
     def notContains(v: T): String = s"NOT JSON_CONTAINS($col, JSON_ARRAY(${one2json(v)}))"
@@ -148,47 +141,22 @@ trait ResolveExprSet_mariadb
 
   // filter attribute ----------------------------------------------------------
 
-  override protected def has2[T](
-    col: String, filterAttr: String, cardOne: Boolean, tpe: String,
-    res: ResSet[T], mandatory: Boolean
-  ): Unit = {
-    if (cardOne) {
-      where += (("", s"JSON_CONTAINS($col, JSON_ARRAY($filterAttr))"))
-    } else {
-      if (mandatory) {
-        val i = getIndex
-        select -= col
-        select += s"JSON_ARRAYAGG(t_$i.vs)"
-        having += "COUNT(*) > 0"
-        aggregate = true
-        groupByCols -= col
-        val tpeDb = res.tpeDb
-        tempTables += s"JSON_TABLE($col, '$$[*]' COLUMNS (vs $tpeDb PATH '$$')) t_$i"
-
-      }
-      where += (("", s"JSON_CONTAINS($col, $filterAttr)"))
-    }
+  override protected def setFilterHas(col: String, filterAttr: String): Unit = {
+    where += (("", s"JSON_CONTAINS($col, JSON_ARRAY($filterAttr))"))
   }
 
-  override protected def hasNo2[T](
-    col: String, filterAttr: String, cardOne: Boolean, tpe: String,
-    res: ResSet[T], mandatory: Boolean
-  ): Unit = {
-    if (cardOne) {
-      if (mandatory) {
-        val i = getIndex
-        select -= col
-        select += s"JSON_ARRAYAGG(t_$i.vs)"
-        having += "COUNT(*) > 0"
-        aggregate = true
-        groupByCols -= col
-        val tpeDb = res.tpeDb
-        tempTables += s"JSON_TABLE($col, '$$[*]' COLUMNS (vs $tpeDb PATH '$$')) t_$i"
-      }
-      where += (("", s"NOT JSON_CONTAINS($col, JSON_ARRAY($filterAttr))"))
-    } else {
-      where += (("", s"NOT JSON_OVERLAPS($col, $filterAttr)"))
+  override protected def setFilterHasNo[T](col: String, filterAttr: String, res: ResSet[T], mandatory: Boolean): Unit = {
+    if (mandatory) {
+      val i = getIndex
+      select -= col
+      select += s"JSON_ARRAYAGG(t_$i.vs)"
+      having += "COUNT(*) > 0"
+      aggregate = true
+      groupByCols -= col
+      val tpeDb = res.tpeDb
+      tempTables += s"JSON_TABLE($col, '$$[*]' COLUMNS (vs $tpeDb PATH '$$')) t_$i"
     }
+    where += (("", s"NOT JSON_CONTAINS($col, JSON_ARRAY($filterAttr))"))
   }
 
 
