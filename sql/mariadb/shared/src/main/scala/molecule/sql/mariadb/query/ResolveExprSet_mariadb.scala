@@ -58,7 +58,7 @@ trait ResolveExprSet_mariadb
 
   override protected def setOpt[T: ClassTag](
     attr: Attr,
-    optSet: Option[Set[T]],
+//    optSet: Option[Set[T]],
     resOpt: ResSetOpt[T],
     res: ResSet[T]
   ): Unit = {
@@ -72,8 +72,6 @@ trait ResolveExprSet_mariadb
     attr.op match {
       case V     => setOptAttr(col, res)
       case Eq    => noCollectionMatching(attr)
-      case Has   => optHas(col, optSet, res, resOpt.one2sql)
-      case HasNo => optHasNo(col, optSet, res, resOpt.one2sql)
       case other => unexpectedOp(other)
     }
   }
@@ -106,9 +104,6 @@ trait ResolveExprSet_mariadb
     )
   }
 
-
-  // has -----------------------------------------------------------------------
-
   override protected def has[T: ClassTag](
     col: String, set: Set[T], res: ResSet[T], one2json: T => String, mandatory: Boolean
   ): Unit = {
@@ -128,25 +123,6 @@ trait ResolveExprSet_mariadb
       case _ => where += (("", set.map(v => containsSet(Set(v))).mkString("(", " OR\n   ", ")")))
     }
   }
-
-  override protected def optHas[T: ClassTag](
-    col: String,
-    optSets: Option[Set[T]],
-    res: ResSet[T],
-    one2sql: T => String,
-  ): Unit = {
-    optSets.fold[Unit] {
-      where += ((col, s"IS NULL"))
-    } { sets =>
-      has(col, sets, res, one2sql, true)
-      replaceCast((row: RS, paramIndex: Int) =>
-        res.json2optArray(row.getString(paramIndex)).map(_.toSet)
-      )
-    }
-  }
-
-
-  // hasNo ---------------------------------------------------------------------
 
   override protected def hasNo[T](
     col: String, set: Set[T], res: ResSet[T], one2json: T => String, mandatory: Boolean
@@ -169,26 +145,8 @@ trait ResolveExprSet_mariadb
     }
   }
 
-  override protected def optHasNo[T: ClassTag](
-    col: String,
-    optSet: Option[Set[T]],
-    res: ResSet[T],
-    one2sql: T => String
-  ): Unit = {
-    optSet.fold[Unit] {
-      setOptAttr(col, res)
-    } { set =>
-      hasNo(col, set, res, one2sql, true)
-      replaceCast((row: RS, paramIndex: Int) =>
-        res.json2optArray(row.getString(paramIndex)).map(_.toSet)
-      )
-    }
-    // Only asserted values
-    notNull += col
-  }
 
-
-  // Filter attribute filters --------------------------------------------------
+  // filter attribute ----------------------------------------------------------
 
   override protected def has2[T](
     col: String, filterAttr: String, cardOne: Boolean, tpe: String,

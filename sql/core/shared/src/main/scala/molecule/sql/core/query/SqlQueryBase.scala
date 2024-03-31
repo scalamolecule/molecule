@@ -66,9 +66,6 @@ trait SqlQueryBase extends Model2QueryBase with BaseHelpers with JavaConversions
   // Current path: List(Ns, refAttrNs2, Ns2, refAttrNs3, Ns3 ...)
   final protected var path = List.empty[String]
 
-  // Ensure distinct result set when possible redundant optional values can occur
-  final protected var hasOptAttr = false
-
   // Query variables
   final protected var filterAttrVars = Map.empty[List[String], String]
 

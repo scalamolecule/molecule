@@ -93,9 +93,6 @@ trait MongoQueryBase extends Model2QueryBase with BaseHelpers with JavaConversio
   final var isNestedMan = false
   final var isNestedOpt = false
 
-  // Ensure distinct result set when possible redundant optional values can occur
-  final protected var hasOptAttr = false
-
 
   final protected def unexpectedElement(element: Element) = throw ModelError("Unexpected element: " + element)
   final protected def unexpectedOp(op: Op) = throw ModelError("Unexpected operation: " + op)

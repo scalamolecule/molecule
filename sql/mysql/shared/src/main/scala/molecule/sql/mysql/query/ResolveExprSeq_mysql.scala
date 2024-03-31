@@ -447,7 +447,7 @@ trait ResolveExprSeq_mysql
 //  }
 //
 //
-//  // Filter attribute filters --------------------------------------------------
+//  // filter attribute ----------------------------------------------------------
 //
 //  override protected def setEqual2[T](
 //    col: String, filterAttr: String, res: ResSet[T], mandatory: Boolean

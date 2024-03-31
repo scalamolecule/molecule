@@ -68,7 +68,6 @@ trait ResolveExprOne extends ResolveExpr { self: SqlQueryBase with LambdasOne =>
 
   override protected def resolveAttrOneOpt(attr: AttrOneOpt): Unit = {
     aritiesAttr()
-    hasOptAttr = true // to avoid redundant None's
     attr match {
       case at: AttrOneOptID             => opt(attr, at.vs, resOptId)
       case at: AttrOneOptString         => opt(attr, at.vs, resOptString)

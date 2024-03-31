@@ -58,9 +58,6 @@ trait ResolveExprSet_postgres
     coalesce(col, res, "opt")
   }
 
-
-  // has -----------------------------------------------------------------------
-
   override protected def has[T: ClassTag](
     col: String, set: Set[T], res: ResSet[T], one2sql: T => String, mandatory: Boolean
   ): Unit = {
@@ -74,27 +71,6 @@ trait ResolveExprSet_postgres
     }
   }
 
-  override protected def optHas[T: ClassTag](
-    col: String,
-    optSet: Option[Set[T]],
-    res: ResSet[T],
-    one2sql: T => String,
-  ): Unit = {
-    optSet.fold[Unit] {
-      where += ((col, s"IS NULL"))
-    } { set =>
-      if (set.nonEmpty) {
-        has(col, set, res, one2sql, true)
-        replaceCast(res.array2optSet)
-      } else {
-        where += (("FALSE", ""))
-      }
-    }
-  }
-
-
-  // hasNo ---------------------------------------------------------------------
-
   override protected def hasNo[T](
     col: String, set: Set[T], res: ResSet[T], one2sql: T => String, mandatory: Boolean
   ): Unit = {
@@ -107,27 +83,6 @@ trait ResolveExprSet_postgres
       case _ => where += (("", set.map(v => notContainsSet(Set(v))).mkString("(", " AND\n   ", ")")))
     }
   }
-
-  override protected def optHasNo[T: ClassTag](
-    col: String,
-    optSet: Option[Set[T]],
-    res: ResSet[T],
-    one2sql: T => String
-  ): Unit = {
-    optSet.fold[Unit] {
-      setOptAttr(col, res)
-    } { set =>
-      hasNo(col, set, res, one2sql, true)
-      coalesce(col, res, "opt")
-      replaceCast(res.array2optSet)
-
-    }
-    // Only asserted values
-    notNull += col
-  }
-
-
-  // Filter attribute filters --------------------------------------------------
 
   override protected def has2[T](
     col: String, filterAttr: String, cardOne: Boolean, tpe: String,

@@ -67,7 +67,6 @@ trait ResolveExprMap extends ResolveExpr { self: MongoQueryBase with LambdasMap 
   }
 
   override protected def resolveAttrMapOpt(attr: AttrMapOpt): Unit = {
-    hasOptAttr = true // to avoid redundant None's
     //    attr match {
     //      case at: AttrMapOptID             => opt(at, at.vs, resSetID)
     //      case at: AttrMapOptString         => opt(at, at.vs, resSetString)
@@ -483,7 +482,7 @@ trait ResolveExprMap extends ResolveExpr { self: MongoQueryBase with LambdasMap 
   //  }
   //
   //
-  //  // Filter attribute filters --------------------------------------------------
+  //  // filter attribute ----------------------------------------------------------
   //
   //  private def equal2(
   //    field: String,

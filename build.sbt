@@ -162,7 +162,6 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(core)
 
 
-
 lazy val datalogCore = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("datalog/core"))
@@ -205,7 +204,6 @@ lazy val documentMongodb = crossProject(JSPlatform, JVMPlatform)
   )
   .dependsOn(core)
   .dependsOn(coreTests % "compile->compile;test->test")
-
 
 
 lazy val graphql = crossProject(JSPlatform, JVMPlatform)

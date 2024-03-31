@@ -67,7 +67,6 @@ trait ResolveExprSeq extends ResolveExpr { self: MongoQueryBase with LambdasSet 
   }
 
   override protected def resolveAttrSeqOpt(attr: AttrSeqOpt): Unit = {
-    hasOptAttr = true // to avoid redundant None's
 //    attr match {
 //      case at: AttrSeqOptID             => opt(at, at.vs, resSetID)
 //      case at: AttrSeqOptString         => opt(at, at.vs, resSetString)
@@ -483,7 +482,7 @@ trait ResolveExprSeq extends ResolveExpr { self: MongoQueryBase with LambdasSet 
 //  }
 //
 //
-//  // Filter attribute filters --------------------------------------------------
+//  // filter attribute ----------------------------------------------------------
 //
 //  private def equal2(
 //    field: String,

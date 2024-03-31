@@ -67,7 +67,6 @@ trait ResolveExprSeq extends ResolveExpr { self: SqlQueryBase with LambdasSeq =>
 
   override protected def resolveAttrSeqOpt(attr: AttrSeqOpt): Unit = {
     aritiesAttr()
-    hasOptAttr = true // to avoid redundant None's
     attr match {
       case at: AttrSeqOptID             => seqOpt(at, at.vs, resOptSeqId, resSeqId)
       case at: AttrSeqOptString         => seqOpt(at, at.vs, resOptSeqString, resSeqString)
@@ -327,7 +326,7 @@ trait ResolveExprSeq extends ResolveExpr { self: SqlQueryBase with LambdasSeq =>
   }
 
 
-  // Filter attribute filters --------------------------------------------------
+  // filter attribute ----------------------------------------------------------
 
   protected def has2[T](
     col: String, filterAttr: String, filterCardOne: Boolean, tpe: String,

@@ -30,7 +30,7 @@ object RawTransact extends TestSuite_postgres {
         // Insert 2 rows
         _ <- rawTransact("insert into Ns (i, boolean) values (1, true), (2, false)")
         // Rows saved
-        _ <- Ns.i.boolean.query.get.map(_ ==> List((1, true), (2, false)))
+        _ <- Ns.i.a1.boolean.query.get.map(_ ==> List((1, true), (2, false)))
       } yield ()
     }
 

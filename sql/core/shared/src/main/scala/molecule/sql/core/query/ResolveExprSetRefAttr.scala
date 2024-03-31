@@ -48,7 +48,6 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQuery
   override protected def resolveRefAttrSetOpt(attr: AttrSetOpt): Unit = {
     setCoords(attr)
     aritiesAttr()
-    hasOptAttr = true // to avoid redundant None's
     attr match {
       case at: AttrSetOptID     => refOpt(at, at.vs, resOptSetId, resSetId)
       case at: AttrSetOptInt    => refOpt(at, at.vs, resOptSetInt, resSetInt)

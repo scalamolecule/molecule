@@ -66,31 +66,30 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
 
   override protected def resolveAttrSetOpt(attr: AttrSetOpt): Unit = {
     aritiesAttr()
-    hasOptAttr = true // to avoid redundant None's
     attr match {
-      case at: AttrSetOptID             => setOpt(at, at.vs, resOptSetId, resSetId)
-      case at: AttrSetOptString         => setOpt(at, at.vs, resOptSetString, resSetString)
-      case at: AttrSetOptInt            => setOpt(at, at.vs, resOptSetInt, resSetInt)
-      case at: AttrSetOptLong           => setOpt(at, at.vs, resOptSetLong, resSetLong)
-      case at: AttrSetOptFloat          => setOpt(at, at.vs, resOptSetFloat, resSetFloat)
-      case at: AttrSetOptDouble         => setOpt(at, at.vs, resOptSetDouble, resSetDouble)
-      case at: AttrSetOptBoolean        => setOpt(at, at.vs, resOptSetBoolean, resSetBoolean)
-      case at: AttrSetOptBigInt         => setOpt(at, at.vs, resOptSetBigInt, resSetBigInt)
-      case at: AttrSetOptBigDecimal     => setOpt(at, at.vs, resOptSetBigDecimal, resSetBigDecimal)
-      case at: AttrSetOptDate           => setOpt(at, at.vs, resOptSetDate, resSetDate)
-      case at: AttrSetOptDuration       => setOpt(at, at.vs, resOptSetDuration, resSetDuration)
-      case at: AttrSetOptInstant        => setOpt(at, at.vs, resOptSetInstant, resSetInstant)
-      case at: AttrSetOptLocalDate      => setOpt(at, at.vs, resOptSetLocalDate, resSetLocalDate)
-      case at: AttrSetOptLocalTime      => setOpt(at, at.vs, resOptSetLocalTime, resSetLocalTime)
-      case at: AttrSetOptLocalDateTime  => setOpt(at, at.vs, resOptSetLocalDateTime, resSetLocalDateTime)
-      case at: AttrSetOptOffsetTime     => setOpt(at, at.vs, resOptSetOffsetTime, resSetOffsetTime)
-      case at: AttrSetOptOffsetDateTime => setOpt(at, at.vs, resOptSetOffsetDateTime, resSetOffsetDateTime)
-      case at: AttrSetOptZonedDateTime  => setOpt(at, at.vs, resOptSetZonedDateTime, resSetZonedDateTime)
-      case at: AttrSetOptUUID           => setOpt(at, at.vs, resOptSetUUID, resSetUUID)
-      case at: AttrSetOptURI            => setOpt(at, at.vs, resOptSetURI, resSetURI)
-      case at: AttrSetOptByte           => setOpt(at, at.vs, resOptSetByte, resSetByte)
-      case at: AttrSetOptShort          => setOpt(at, at.vs, resOptSetShort, resSetShort)
-      case at: AttrSetOptChar           => setOpt(at, at.vs, resOptSetChar, resSetChar)
+      case _: AttrSetOptID             => setOpt(attr, resOptSetId, resSetId)
+      case _: AttrSetOptString         => setOpt(attr, resOptSetString, resSetString)
+      case _: AttrSetOptInt            => setOpt(attr, resOptSetInt, resSetInt)
+      case _: AttrSetOptLong           => setOpt(attr, resOptSetLong, resSetLong)
+      case _: AttrSetOptFloat          => setOpt(attr, resOptSetFloat, resSetFloat)
+      case _: AttrSetOptDouble         => setOpt(attr, resOptSetDouble, resSetDouble)
+      case _: AttrSetOptBoolean        => setOpt(attr, resOptSetBoolean, resSetBoolean)
+      case _: AttrSetOptBigInt         => setOpt(attr, resOptSetBigInt, resSetBigInt)
+      case _: AttrSetOptBigDecimal     => setOpt(attr, resOptSetBigDecimal, resSetBigDecimal)
+      case _: AttrSetOptDate           => setOpt(attr, resOptSetDate, resSetDate)
+      case _: AttrSetOptDuration       => setOpt(attr, resOptSetDuration, resSetDuration)
+      case _: AttrSetOptInstant        => setOpt(attr, resOptSetInstant, resSetInstant)
+      case _: AttrSetOptLocalDate      => setOpt(attr, resOptSetLocalDate, resSetLocalDate)
+      case _: AttrSetOptLocalTime      => setOpt(attr, resOptSetLocalTime, resSetLocalTime)
+      case _: AttrSetOptLocalDateTime  => setOpt(attr, resOptSetLocalDateTime, resSetLocalDateTime)
+      case _: AttrSetOptOffsetTime     => setOpt(attr, resOptSetOffsetTime, resSetOffsetTime)
+      case _: AttrSetOptOffsetDateTime => setOpt(attr, resOptSetOffsetDateTime, resSetOffsetDateTime)
+      case _: AttrSetOptZonedDateTime  => setOpt(attr, resOptSetZonedDateTime, resSetZonedDateTime)
+      case _: AttrSetOptUUID           => setOpt(attr, resOptSetUUID, resSetUUID)
+      case _: AttrSetOptURI            => setOpt(attr, resOptSetURI, resSetURI)
+      case _: AttrSetOptByte           => setOpt(attr, resOptSetByte, resSetByte)
+      case _: AttrSetOptShort          => setOpt(attr, resOptSetShort, resSetShort)
+      case _: AttrSetOptChar           => setOpt(attr, resOptSetChar, resSetChar)
     }
   }
 
@@ -168,7 +167,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
 
   protected def setOpt[T: ClassTag](
     attr: Attr,
-    optSet: Option[Set[T]],
+//    optSet: Option[Set[T]],
     resOpt: ResSetOpt[T],
     res: ResSet[T]
   ): Unit = {
@@ -179,8 +178,6 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     attr.op match {
       case V     => setOptAttr(col, res)
       case Eq    => noCollectionMatching(attr)
-      case Has   => optHas(col, optSet, res, resOpt.one2sql)
-      case HasNo => optHasNo(col, optSet, res, resOpt.one2sql)
       case other => unexpectedOp(other)
     }
   }
@@ -206,9 +203,6 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     replaceCast(res.nestedArray2optCoalescedSet)
   }
 
-
-  // has -----------------------------------------------------------------------
-
   protected def has[T: ClassTag](
     col: String, set: Set[T], res: ResSet[T], one2sql: T => String, mandatory: Boolean
   ): Unit = {
@@ -227,27 +221,6 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
       case _ => where += (("", set.map(v => containsSet(Set(v))).mkString("(", " OR\n   ", ")")))
     }
   }
-
-  protected def optHas[T: ClassTag](
-    col: String,
-    optSet: Option[Set[T]],
-    res: ResSet[T],
-    one2sql: T => String,
-  ): Unit = {
-    optSet.fold[Unit] {
-      where += ((col, s"IS NULL"))
-    } { set =>
-      if (set.nonEmpty) {
-        has(col, set, res, one2sql, true)
-        replaceCast(res.nestedArray2optCoalescedSet)
-      } else {
-        where += (("FALSE", ""))
-      }
-    }
-  }
-
-
-  // hasNo ---------------------------------------------------------------------
 
   protected def hasNo[T](
     col: String, set: Set[T], res: ResSet[T], one2sql: T => String, mandatory: Boolean
@@ -268,32 +241,13 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     }
   }
 
-  protected def optHasNo[T: ClassTag](
-    col: String,
-    optSet: Option[Set[T]],
-    res: ResSet[T],
-    one2sql: T => String
-  ): Unit = {
-    optSet.fold[Unit] {
-      setOptAttr(col, res)
-    } { set =>
-      hasNo(col, set, res, one2sql, true)
-      replaceCast(res.nestedArray2optCoalescedSet)
-    }
-    // Only asserted values
-    notNull += col
-  }
-
-
-  // no value -----------------------------------------------------------------
-
   protected def setNoValue(col: String): Unit = {
     notNull -= col
     where += ((col, s"IS NULL"))
   }
 
 
-  // Filter attribute filters --------------------------------------------------
+  // filter attribute ----------------------------------------------------------
 
   protected def has2[T](
     col: String, filterAttr: String, filterCardOne: Boolean, tpe: String,

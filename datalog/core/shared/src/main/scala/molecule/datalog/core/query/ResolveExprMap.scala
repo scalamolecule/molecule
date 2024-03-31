@@ -41,7 +41,7 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
   protected def resolveAttrMapOpt(es: List[Var], attr: AttrMapOpt): List[Var] = {
     aritiesAttr()
     attrIndex += 1
-    hasOptAttr = true // to avoid redundant None's
+    hasOptAttr = true
     val e = es.last
     attr match {
       case at: AttrMapOptID             => noId

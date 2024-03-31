@@ -71,32 +71,32 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
   protected def resolveAttrSetOpt(es: List[Var], attr: AttrSetOpt): List[Var] = {
     aritiesAttr()
     attrIndex += 1
-    hasOptAttr = true // to avoid redundant None's
+    hasOptAttr = true
     val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
     attr match {
-      case at: AttrSetOptID             => opt(attr, e, a, at.vs, resOptSetId)
-      case at: AttrSetOptString         => opt(attr, e, a, at.vs, resOptSetString)
-      case at: AttrSetOptInt            => opt(attr, e, a, at.vs, resOptSetInt)
-      case at: AttrSetOptLong           => opt(attr, e, a, at.vs, resOptSetLong)
-      case at: AttrSetOptFloat          => opt(attr, e, a, at.vs, resOptSetFloat)
-      case at: AttrSetOptDouble         => opt(attr, e, a, at.vs, resOptSetDouble)
-      case at: AttrSetOptBoolean        => opt(attr, e, a, at.vs, resOptSetBoolean)
-      case at: AttrSetOptBigInt         => opt(attr, e, a, at.vs, resOptSetBigInt)
-      case at: AttrSetOptBigDecimal     => opt(attr, e, a, at.vs, resOptSetBigDecimal)
-      case at: AttrSetOptDate           => opt(attr, e, a, at.vs, resOptSetDate)
-      case at: AttrSetOptDuration       => opt(attr, e, a, at.vs, resOptSetDuration)
-      case at: AttrSetOptInstant        => opt(attr, e, a, at.vs, resOptSetInstant)
-      case at: AttrSetOptLocalDate      => opt(attr, e, a, at.vs, resOptSetLocalDate)
-      case at: AttrSetOptLocalTime      => opt(attr, e, a, at.vs, resOptSetLocalTime)
-      case at: AttrSetOptLocalDateTime  => opt(attr, e, a, at.vs, resOptSetLocalDateTime)
-      case at: AttrSetOptOffsetTime     => opt(attr, e, a, at.vs, resOptSetOffsetTime)
-      case at: AttrSetOptOffsetDateTime => opt(attr, e, a, at.vs, resOptSetOffsetDateTime)
-      case at: AttrSetOptZonedDateTime  => opt(attr, e, a, at.vs, resOptSetZonedDateTime)
-      case at: AttrSetOptUUID           => opt(attr, e, a, at.vs, resOptSetUUID)
-      case at: AttrSetOptURI            => opt(attr, e, a, at.vs, resOptSetURI)
-      case at: AttrSetOptByte           => opt(attr, e, a, at.vs, resOptSetByte)
-      case at: AttrSetOptShort          => opt(attr, e, a, at.vs, resOptSetShort)
-      case at: AttrSetOptChar           => opt(attr, e, a, at.vs, resOptSetChar)
+      case _: AttrSetOptID             => opt(attr, e, a, resOptSetId)
+      case _: AttrSetOptString         => opt(attr, e, a, resOptSetString)
+      case _: AttrSetOptInt            => opt(attr, e, a, resOptSetInt)
+      case _: AttrSetOptLong           => opt(attr, e, a, resOptSetLong)
+      case _: AttrSetOptFloat          => opt(attr, e, a, resOptSetFloat)
+      case _: AttrSetOptDouble         => opt(attr, e, a, resOptSetDouble)
+      case _: AttrSetOptBoolean        => opt(attr, e, a, resOptSetBoolean)
+      case _: AttrSetOptBigInt         => opt(attr, e, a, resOptSetBigInt)
+      case _: AttrSetOptBigDecimal     => opt(attr, e, a, resOptSetBigDecimal)
+      case _: AttrSetOptDate           => opt(attr, e, a, resOptSetDate)
+      case _: AttrSetOptDuration       => opt(attr, e, a, resOptSetDuration)
+      case _: AttrSetOptInstant        => opt(attr, e, a, resOptSetInstant)
+      case _: AttrSetOptLocalDate      => opt(attr, e, a, resOptSetLocalDate)
+      case _: AttrSetOptLocalTime      => opt(attr, e, a, resOptSetLocalTime)
+      case _: AttrSetOptLocalDateTime  => opt(attr, e, a, resOptSetLocalDateTime)
+      case _: AttrSetOptOffsetTime     => opt(attr, e, a, resOptSetOffsetTime)
+      case _: AttrSetOptOffsetDateTime => opt(attr, e, a, resOptSetOffsetDateTime)
+      case _: AttrSetOptZonedDateTime  => opt(attr, e, a, resOptSetZonedDateTime)
+      case _: AttrSetOptUUID           => opt(attr, e, a, resOptSetUUID)
+      case _: AttrSetOptURI            => opt(attr, e, a, resOptSetURI)
+      case _: AttrSetOptByte           => opt(attr, e, a, resOptSetByte)
+      case _: AttrSetOptShort          => opt(attr, e, a, resOptSetShort)
+      case _: AttrSetOptChar           => opt(attr, e, a, resOptSetChar)
     }
     es
   }
@@ -164,19 +164,13 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
   }
 
   private def opt[T: ClassTag](
-    attr: Attr,
-    e: Var,
-    a: Att,
-    optSets: Option[Set[T]],
-    resSetOpt: ResSetOpt[T],
+    attr: Attr, e: Var, a: Att, resSetOpt: ResSetOpt[T],
   ): Unit = {
     val v = vv
     addCast(resSetOpt.j2sOptSet)
     attr.op match {
       case V     => optAttr(e, a, v, resSetOpt)
       case Eq    => noCollectionMatching(attr)
-      case Has   => optHas(e, a, v, optSets, resSetOpt.tpe, resSetOpt.toDatalog, resSetOpt)
-      case HasNo => optHasNo(e, a, v, optSets, resSetOpt.tpe, resSetOpt.toDatalog)
       case other => unexpectedOp(other)
     }
   }
@@ -235,8 +229,6 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
     replaceCast(resOpt.optAttr2s)
   }
 
-  // has -----------------------------------------------------------------------
-
   private def has[T: ClassTag](
     e: Var, a: Att, v: Var, set: Set[T], tpe: String, toDatalog: T => String
   ): Unit = {
@@ -248,40 +240,6 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
       where += s"[(ground nil) $v]" -> wGround
     }
   }
-
-  private def optHas[T: ClassTag](
-    e: Var, a: Att, v: Var,
-    optSet: Option[Set[T]],
-    tpe: String,
-    toDatalog: T => String,
-    resSetOpt: ResSetOpt[T]
-  ): Unit = {
-    optSet.fold[Unit] {
-      if (refConfirmed) {
-        find += s"(pull $e-$v [[$a :limit nil]])"
-        where += s"[(identity $e) $e-$v]" -> wGround
-        where += s"(not [$e $a])" -> wNeqOne
-
-      } else {
-        val List(e0, _, refAttr, refId) = varPath.takeRight(4)
-        val refDatom                    = s"[$e0 $refAttr $refId]"
-        if (where.last == refDatom -> wClause) {
-          // cancel previous ref Datom since we will pull it instead
-          where.remove(where.size - 1)
-          varPath = varPath.dropRight(3)
-        }
-        find += s"$v"
-        where += s"(not [$e0 $refAttr])" -> wNeqOne
-        where += s"[(ground #{[]}) $v]" -> wNeqOne
-        replaceCast(resSetOpt.optAttr2s)
-      }
-    } { set =>
-      find += s"(distinct $v)"
-      has(e, a, v, set, tpe, toDatalog)
-    }
-  }
-
-  // hasNo ---------------------------------------------------------------------
 
   private def hasNo[T](
     e: Var, a: Att, v: Var, set: Set[T], tpe: String, toDatalog: T => String
@@ -302,23 +260,6 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
     }
   }
 
-  private def optHasNo[T](
-    e: Var, a: Att, v: Var,
-    optSet: Option[Set[T]],
-    tpe: String,
-    toDatalog: T => String
-  ): Unit = {
-    find += s"(distinct $v)"
-    if (optSet.isDefined) {
-      hasNo(e, a, v, optSet.get, tpe, toDatalog)
-    } else {
-      where += s"[$e $a $v]" -> wClause
-    }
-  }
-
-
-  // no value -----------------------------------------------------------------
-
   private def noValue(e: Var, a: Att): Unit = {
     if (refConfirmed) {
       where += s"(not [$e $a])" -> wNeqOne
@@ -335,7 +276,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
   }
 
 
-  // Filter attribute filters --------------------------------------------------
+  // filter attribute  ---------------------------------------------------------
 
   private def has2(e: Var, a: Att, v: Var, filterAttr: String): Unit = {
     where += s"[$e $a $v]" -> wClause
@@ -391,26 +332,22 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
     e: Var, a: Att, v: Var, set: Set[T], tpe: String, toDatalog: T => String
   ): Seq[String] = {
     tpe match {
-      case "Float" =>
-        set.toSeq.zipWithIndex.map { case (arg, i) =>
-          // Coerce Datomic float values for correct comparison (don't know why this is necessary)
-          // See example: https://clojurians-log.clojureverse.org/datomic/2019-10-29
-          s"""[(rule$v $e)
-             |    [$e $a $v$i] [(float $v$i) $v$i-float] [(= $v$i-float (float $arg))]]""".stripMargin
-        }
+      case "Float" => set.toSeq.zipWithIndex.map { case (arg, i) =>
+        // Coerce Datomic float values for correct comparison (don't know why this is necessary)
+        // See example: https://clojurians-log.clojureverse.org/datomic/2019-10-29
+        s"""[(rule$v $e)
+           |    [$e $a $v$i] [(float $v$i) $v$i-float] [(= $v$i-float (float $arg))]]""".stripMargin
+      }
 
-      case "URI" =>
-        set.toSeq.zipWithIndex.map { case (arg, i) =>
-          s"""[(rule$v $e)
-             |    [(ground (new java.net.URI "$arg")) $v$i-uri] [$e $a $v$i-uri]]""".stripMargin
+      case "URI" => set.toSeq.zipWithIndex.map { case (arg, i) =>
+        s"""[(rule$v $e)
+           |    [(ground (new java.net.URI "$arg")) $v$i-uri] [$e $a $v$i-uri]]""".stripMargin
+      }
 
-        }
-
-      case _ =>
-        set.toSeq.map { arg =>
-          s"""[(rule$v $e)
-             |    [$e $a ${toDatalog(arg)}]]""".stripMargin
-        }
+      case _ => set.toSeq.map { arg =>
+        s"""[(rule$v $e)
+           |    [$e $a ${toDatalog(arg)}]]""".stripMargin
+      }
     }
   }
 }

@@ -74,7 +74,6 @@ trait ResolveExprOne extends ResolveExpr
   }
 
   override protected def resolveAttrOneOpt(attr: AttrOneOpt): Unit = {
-    hasOptAttr = true // to avoid redundant None's
     attr match {
       case at: AttrOneOptID             => opt(attr, at.vs, resID)
       case at: AttrOneOptString         => opt(attr, at.vs, resString)

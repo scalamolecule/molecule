@@ -67,7 +67,6 @@ trait ResolveExprMap extends ResolveExpr { self: SqlQueryBase with LambdasMap =>
 
   override protected def resolveAttrMapOpt(attr: AttrMapOpt): Unit = {
     aritiesAttr()
-    hasOptAttr = true // to avoid redundant None's
     attr match {
       case at: AttrMapOptID             => mapOpt(at, at.vs, resOptMapId, resMapId)
       case at: AttrMapOptString         => mapOpt(at, at.vs, resOptMapString, resMapString)

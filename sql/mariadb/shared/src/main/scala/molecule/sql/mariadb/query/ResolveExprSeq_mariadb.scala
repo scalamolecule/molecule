@@ -443,7 +443,7 @@ trait ResolveExprSeq_mariadb
 //  }
 //
 //
-//  // Filter attribute filters --------------------------------------------------
+//  // filter attribute ----------------------------------------------------------
 //
 //
 //  override protected def setEqual2[T](

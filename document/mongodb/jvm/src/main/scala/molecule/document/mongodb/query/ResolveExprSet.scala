@@ -67,31 +67,30 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
   }
 
   override protected def resolveAttrSetOpt(attr: AttrSetOpt): Unit = {
-    hasOptAttr = true // to avoid redundant None's
     attr match {
-      case at: AttrSetOptID             => opt(at, at.vs, resSetID)
-      case at: AttrSetOptString         => opt(at, at.vs, resSetString)
-      case at: AttrSetOptInt            => opt(at, at.vs, resSetInt)
-      case at: AttrSetOptLong           => opt(at, at.vs, resSetLong)
-      case at: AttrSetOptFloat          => opt(at, at.vs, resSetFloat)
-      case at: AttrSetOptDouble         => opt(at, at.vs, resSetDouble)
-      case at: AttrSetOptBoolean        => opt(at, at.vs, resSetBoolean)
-      case at: AttrSetOptBigInt         => opt(at, at.vs, resSetBigInt)
-      case at: AttrSetOptBigDecimal     => opt(at, at.vs, resSetBigDecimal)
-      case at: AttrSetOptDate           => opt(at, at.vs, resSetDate)
-      case at: AttrSetOptDuration       => opt(at, at.vs, resSetDuration)
-      case at: AttrSetOptInstant        => opt(at, at.vs, resSetInstant)
-      case at: AttrSetOptLocalDate      => opt(at, at.vs, resSetLocalDate)
-      case at: AttrSetOptLocalTime      => opt(at, at.vs, resSetLocalTime)
-      case at: AttrSetOptLocalDateTime  => opt(at, at.vs, resSetLocalDateTime)
-      case at: AttrSetOptOffsetTime     => opt(at, at.vs, resSetOffsetTime)
-      case at: AttrSetOptOffsetDateTime => opt(at, at.vs, resSetOffsetDateTime)
-      case at: AttrSetOptZonedDateTime  => opt(at, at.vs, resSetZonedDateTime)
-      case at: AttrSetOptUUID           => opt(at, at.vs, resSetUUID)
-      case at: AttrSetOptURI            => opt(at, at.vs, resSetURI)
-      case at: AttrSetOptByte           => opt(at, at.vs, resSetByte)
-      case at: AttrSetOptShort          => opt(at, at.vs, resSetShort)
-      case at: AttrSetOptChar           => opt(at, at.vs, resSetChar)
+      case _: AttrSetOptID             => opt(attr, resSetID)
+      case _: AttrSetOptString         => opt(attr, resSetString)
+      case _: AttrSetOptInt            => opt(attr, resSetInt)
+      case _: AttrSetOptLong           => opt(attr, resSetLong)
+      case _: AttrSetOptFloat          => opt(attr, resSetFloat)
+      case _: AttrSetOptDouble         => opt(attr, resSetDouble)
+      case _: AttrSetOptBoolean        => opt(attr, resSetBoolean)
+      case _: AttrSetOptBigInt         => opt(attr, resSetBigInt)
+      case _: AttrSetOptBigDecimal     => opt(attr, resSetBigDecimal)
+      case _: AttrSetOptDate           => opt(attr, resSetDate)
+      case _: AttrSetOptDuration       => opt(attr, resSetDuration)
+      case _: AttrSetOptInstant        => opt(attr, resSetInstant)
+      case _: AttrSetOptLocalDate      => opt(attr, resSetLocalDate)
+      case _: AttrSetOptLocalTime      => opt(attr, resSetLocalTime)
+      case _: AttrSetOptLocalDateTime  => opt(attr, resSetLocalDateTime)
+      case _: AttrSetOptOffsetTime     => opt(attr, resSetOffsetTime)
+      case _: AttrSetOptOffsetDateTime => opt(attr, resSetOffsetDateTime)
+      case _: AttrSetOptZonedDateTime  => opt(attr, resSetZonedDateTime)
+      case _: AttrSetOptUUID           => opt(attr, resSetUUID)
+      case _: AttrSetOptURI            => opt(attr, resSetURI)
+      case _: AttrSetOptByte           => opt(attr, resSetByte)
+      case _: AttrSetOptShort          => opt(attr, resSetShort)
+      case _: AttrSetOptChar           => opt(attr, resSetChar)
     }
   }
 
@@ -151,7 +150,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     }
   }
 
-  private def opt[T](attr: Attr, optSets: Option[Set[T]], res: ResSet[T]): Unit = {
+  private def opt[T](attr: Attr, res: ResSet[T]): Unit = {
     val field       = attr.attr
     val uniqueField = b.unique(field)
     projectField(field)
@@ -166,8 +165,6 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     attr.op match {
       case V     => optAttr(uniqueField, field)
       case Eq    => noCollectionMatching(attr)
-      case Has   => optHas(uniqueField, field, optSets, res)
-      case HasNo => optHasNo(uniqueField, field, optSets, res)
       case other => unexpectedOp(other)
     }
   }
@@ -226,9 +223,6 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     }
   }
 
-
-  // has -----------------------------------------------------------------------
-
   private def has[T](
     uniqueField: String, field: String, set: Set[T], res: ResSet[T], mandatory: Boolean
   ): Unit = {
@@ -241,19 +235,6 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     }
     coalesce(uniqueField, field, mandatory)
   }
-
-  private def optHas[T](
-    uniqueField: String, field: String, optSets: Option[Set[T]], res: ResSet[T] //, mandatory: Boolean
-  ): Unit = {
-    optSets.fold[Unit] {
-      b.base.matches.add(Filters.eq(b.dot + field, new BsonNull))
-    } { sets =>
-      has(uniqueField, field, sets, res, false)
-    }
-  }
-
-
-  // hasNo ---------------------------------------------------------------------
 
   private def hasNo[T](
     uniqueField: String, field: String, set: Set[T], res: ResSet[T], mandatory: Boolean
@@ -271,21 +252,6 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     coalesce(uniqueField, field, mandatory)
   }
 
-  private def optHasNo[T](
-    uniqueField: String, field: String, optSet: Option[Set[T]], res: ResSet[T]
-  ): Unit = {
-    optSet.foreach { set =>
-      if (set.nonEmpty) {
-        hasNo(uniqueField, field, set, res, false)
-      }
-    }
-    b.base.matches.add(Filters.ne(b.dot + field, new BsonNull))
-    coalesce(uniqueField, field, true)
-  }
-
-
-  // no value -----------------------------------------------------------------
-
   private def noValue(field: String): Unit = {
     b.base.matches.remove(b.base.matches.size() - 1)
     b.base.matches.add(
@@ -297,7 +263,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
   }
 
 
-  // Filter attribute filters --------------------------------------------------
+  // filter attribute ----------------------------------------------------------
 
   private def has2(
     field: String, filterAttr0: (Int, List[String], Attr), mandatory: Boolean
