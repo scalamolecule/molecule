@@ -134,46 +134,11 @@ trait FilterOne_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Find optional values matching
         _ <- Ns.i.a1.int_?(Some(int0)).query.get.map(_ ==> List())
         _ <- Ns.i.a1.int_?(Some(int1)).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.int_?(Some(Seq(int0))).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.int_?(Some(Seq(int1))).query.get.map(_ ==> List(a))
-        // OR semantics for Seq of multiple args ("is this or that")
-        _ <- Ns.i.a1.int_?(Some(Seq(int1, int2))).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.int_?(Some(Seq(int1, int0))).query.get.map(_ ==> List(a))
-        // Empty Seq of args matches no values
-        _ <- Ns.i.a1.int_?(Some(Seq.empty[Int])).query.get.map(_ ==> List())
+
         // None matches non-asserted/null values
         _ <- Ns.i.a1.int_?(Option.empty[Int]).query.get.map(_ ==> List(x))
-        _ <- Ns.i.a1.int_?(Option.empty[Seq[Int]]).query.get.map(_ ==> List(x))
-
-        // Find optional values not matching
-        _ <- Ns.i.a1.int_?.not(Some(int0)).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.int_?.not(Some(int1)).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.int_?.not(Some(int2)).query.get.map(_ ==> List(a, c))
-        _ <- Ns.i.a1.int_?.not(Some(int3)).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.int_?.not(Some(Seq(int0))).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.int_?.not(Some(Seq(int1))).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.int_?.not(Some(Seq(int2))).query.get.map(_ ==> List(a, c))
-        _ <- Ns.i.a1.int_?.not(Some(Seq(int3))).query.get.map(_ ==> List(a, b))
-        // OR semantics for multiple negation args ("is not this and not that")
-        _ <- Ns.i.a1.int_?.not(Some(Seq(int0, int1))).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.int_?.not(Some(Seq(int1, int2))).query.get.map(_ ==> List(c))
-        _ <- Ns.i.a1.int_?.not(Some(Seq(int2, int3))).query.get.map(_ ==> List(a))
-        // Empty Seq of negation args matches all asserted values (non-null)
-        _ <- Ns.i.a1.int_?.not(Some(Seq.empty[Int])).query.get.map(_ ==> List(a, b, c))
-        // Negating None matches all asserted values (non-null)
-        _ <- Ns.i.a1.int_?.not(Option.empty[Int]).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.int_?.not(Option.empty[Seq[Int]]).query.get.map(_ ==> List(a, b, c))
-
-        // Find optional values in range
-        _ <- Ns.i.a1.int_?.<(Some(int2)).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.int_?.>(Some(int2)).query.get.map(_ ==> List(c))
-        _ <- Ns.i.a1.int_?.<=(Some(int2)).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.int_?.>=(Some(int2)).query.get.map(_ ==> List(b, c))
-        // None can't be compared and returns empty result
-        _ <- Ns.i.a1.int_?.<(None).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.int_?.<=(None).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.int_?.>(None).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.int_?.>=(None).query.get.map(_ ==> List())
+        // Easier to apply nothing to tacit attribute
+        _ <- Ns.i.a1.int_().query.get.map(_ ==> List(4))
       } yield ()
     }
   }

@@ -288,13 +288,13 @@ trait Delete_filter extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- A.iSet(Set(int1)).delete.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
               err ==> "Can only filter delete by values applied to tacit card-one attributes. Found:\n" +
-                s"""AttrSetManInt("A", "iSet", Eq, Seq(Set($int1)), None, None, Nil, Nil, None, None, Seq(0, 2))"""
+                s"""AttrSetManInt("A", "iSet", Eq, Set($int1), None, None, Nil, Nil, None, None, Seq(0, 2))"""
             }
 
           _ <- A.iSeq(List(int1)).delete.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
               err ==> "Can only filter delete by values applied to tacit card-one attributes. Found:\n" +
-                s"""AttrSeqManInt("A", "iSeq", Eq, Seq(Seq($int1)), None, None, Nil, Nil, None, None, Seq(0, 3))"""
+                s"""AttrSeqManInt("A", "iSeq", Eq, Seq($int1), None, None, Nil, Nil, None, None, Seq(0, 3))"""
             }
 
           _ <- A.iMap(Map(pint1)).delete.transact

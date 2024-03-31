@@ -10,57 +10,57 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
   override protected def resolveAttrSetMan(attr: AttrSetMan): Unit = {
     aritiesAttr()
     attr match {
-      case at: AttrSetManID             => setMan(attr, "String", at.vs, resSetId)
-      case at: AttrSetManString         => setMan(attr, "String", at.vs, resSetString)
-      case at: AttrSetManInt            => setMan(attr, "Int", at.vs, resSetInt)
-      case at: AttrSetManLong           => setMan(attr, "Long", at.vs, resSetLong)
-      case at: AttrSetManFloat          => setMan(attr, "Float", at.vs, resSetFloat)
-      case at: AttrSetManDouble         => setMan(attr, "Double", at.vs, resSetDouble)
-      case at: AttrSetManBoolean        => setMan(attr, "Boolean", at.vs, resSetBoolean)
-      case at: AttrSetManBigInt         => setMan(attr, "BigInt", at.vs, resSetBigInt)
-      case at: AttrSetManBigDecimal     => setMan(attr, "BigDecimal", at.vs, resSetBigDecimal)
-      case at: AttrSetManDate           => setMan(attr, "Date", at.vs, resSetDate)
-      case at: AttrSetManDuration       => setMan(attr, "Duration", at.vs, resSetDuration)
-      case at: AttrSetManInstant        => setMan(attr, "Instant", at.vs, resSetInstant)
-      case at: AttrSetManLocalDate      => setMan(attr, "LocalDate", at.vs, resSetLocalDate)
-      case at: AttrSetManLocalTime      => setMan(attr, "LocalTime", at.vs, resSetLocalTime)
-      case at: AttrSetManLocalDateTime  => setMan(attr, "LocalDateTime", at.vs, resSetLocalDateTime)
-      case at: AttrSetManOffsetTime     => setMan(attr, "OffsetTime", at.vs, resSetOffsetTime)
-      case at: AttrSetManOffsetDateTime => setMan(attr, "OffsetDateTime", at.vs, resSetOffsetDateTime)
-      case at: AttrSetManZonedDateTime  => setMan(attr, "ZonedDateTime", at.vs, resSetZonedDateTime)
-      case at: AttrSetManUUID           => setMan(attr, "UUID", at.vs, resSetUUID)
-      case at: AttrSetManURI            => setMan(attr, "URI", at.vs, resSetURI)
-      case at: AttrSetManByte           => setMan(attr, "Byte", at.vs, resSetByte)
-      case at: AttrSetManShort          => setMan(attr, "Short", at.vs, resSetShort)
-      case at: AttrSetManChar           => setMan(attr, "Char", at.vs, resSetChar)
+      case at: AttrSetManID             => setMan(attr, at.vs, "String", resSetId)
+      case at: AttrSetManString         => setMan(attr, at.vs, "String", resSetString)
+      case at: AttrSetManInt            => setMan(attr, at.vs, "Int", resSetInt)
+      case at: AttrSetManLong           => setMan(attr, at.vs, "Long", resSetLong)
+      case at: AttrSetManFloat          => setMan(attr, at.vs, "Float", resSetFloat)
+      case at: AttrSetManDouble         => setMan(attr, at.vs, "Double", resSetDouble)
+      case at: AttrSetManBoolean        => setMan(attr, at.vs, "Boolean", resSetBoolean)
+      case at: AttrSetManBigInt         => setMan(attr, at.vs, "BigInt", resSetBigInt)
+      case at: AttrSetManBigDecimal     => setMan(attr, at.vs, "BigDecimal", resSetBigDecimal)
+      case at: AttrSetManDate           => setMan(attr, at.vs, "Date", resSetDate)
+      case at: AttrSetManDuration       => setMan(attr, at.vs, "Duration", resSetDuration)
+      case at: AttrSetManInstant        => setMan(attr, at.vs, "Instant", resSetInstant)
+      case at: AttrSetManLocalDate      => setMan(attr, at.vs, "LocalDate", resSetLocalDate)
+      case at: AttrSetManLocalTime      => setMan(attr, at.vs, "LocalTime", resSetLocalTime)
+      case at: AttrSetManLocalDateTime  => setMan(attr, at.vs, "LocalDateTime", resSetLocalDateTime)
+      case at: AttrSetManOffsetTime     => setMan(attr, at.vs, "OffsetTime", resSetOffsetTime)
+      case at: AttrSetManOffsetDateTime => setMan(attr, at.vs, "OffsetDateTime", resSetOffsetDateTime)
+      case at: AttrSetManZonedDateTime  => setMan(attr, at.vs, "ZonedDateTime", resSetZonedDateTime)
+      case at: AttrSetManUUID           => setMan(attr, at.vs, "UUID", resSetUUID)
+      case at: AttrSetManURI            => setMan(attr, at.vs, "URI", resSetURI)
+      case at: AttrSetManByte           => setMan(attr, at.vs, "Byte", resSetByte)
+      case at: AttrSetManShort          => setMan(attr, at.vs, "Short", resSetShort)
+      case at: AttrSetManChar           => setMan(attr, at.vs, "Char", resSetChar)
     }
   }
 
   override protected def resolveAttrSetTac(attr: AttrSetTac): Unit = {
     attr match {
-      case at: AttrSetTacID             => setTac(attr, "String", at.vs, resSetId)
-      case at: AttrSetTacString         => setTac(attr, "String", at.vs, resSetString)
-      case at: AttrSetTacInt            => setTac(attr, "Int", at.vs, resSetInt)
-      case at: AttrSetTacLong           => setTac(attr, "Long", at.vs, resSetLong)
-      case at: AttrSetTacFloat          => setTac(attr, "Float", at.vs, resSetFloat)
-      case at: AttrSetTacDouble         => setTac(attr, "Double", at.vs, resSetDouble)
-      case at: AttrSetTacBoolean        => setTac(attr, "Boolean", at.vs, resSetBoolean)
-      case at: AttrSetTacBigInt         => setTac(attr, "BigInt", at.vs, resSetBigInt)
-      case at: AttrSetTacBigDecimal     => setTac(attr, "BigDecimal", at.vs, resSetBigDecimal)
-      case at: AttrSetTacDate           => setTac(attr, "Date", at.vs, resSetDate)
-      case at: AttrSetTacDuration       => setTac(attr, "Duration", at.vs, resSetDuration)
-      case at: AttrSetTacInstant        => setTac(attr, "Instant", at.vs, resSetInstant)
-      case at: AttrSetTacLocalDate      => setTac(attr, "LocalDate", at.vs, resSetLocalDate)
-      case at: AttrSetTacLocalTime      => setTac(attr, "LocalTime", at.vs, resSetLocalTime)
-      case at: AttrSetTacLocalDateTime  => setTac(attr, "LocalDateTime", at.vs, resSetLocalDateTime)
-      case at: AttrSetTacOffsetTime     => setTac(attr, "OffsetTime", at.vs, resSetOffsetTime)
-      case at: AttrSetTacOffsetDateTime => setTac(attr, "OffsetDateTime", at.vs, resSetOffsetDateTime)
-      case at: AttrSetTacZonedDateTime  => setTac(attr, "ZonedDateTime", at.vs, resSetZonedDateTime)
-      case at: AttrSetTacUUID           => setTac(attr, "UUID", at.vs, resSetUUID)
-      case at: AttrSetTacURI            => setTac(attr, "URI", at.vs, resSetURI)
-      case at: AttrSetTacByte           => setTac(attr, "Byte", at.vs, resSetByte)
-      case at: AttrSetTacShort          => setTac(attr, "Short", at.vs, resSetShort)
-      case at: AttrSetTacChar           => setTac(attr, "Char", at.vs, resSetChar)
+      case at: AttrSetTacID             => setTac(attr, at.vs, "String", resSetId)
+      case at: AttrSetTacString         => setTac(attr, at.vs, "String", resSetString)
+      case at: AttrSetTacInt            => setTac(attr, at.vs, "Int", resSetInt)
+      case at: AttrSetTacLong           => setTac(attr, at.vs, "Long", resSetLong)
+      case at: AttrSetTacFloat          => setTac(attr, at.vs, "Float", resSetFloat)
+      case at: AttrSetTacDouble         => setTac(attr, at.vs, "Double", resSetDouble)
+      case at: AttrSetTacBoolean        => setTac(attr, at.vs, "Boolean", resSetBoolean)
+      case at: AttrSetTacBigInt         => setTac(attr, at.vs, "BigInt", resSetBigInt)
+      case at: AttrSetTacBigDecimal     => setTac(attr, at.vs, "BigDecimal", resSetBigDecimal)
+      case at: AttrSetTacDate           => setTac(attr, at.vs, "Date", resSetDate)
+      case at: AttrSetTacDuration       => setTac(attr, at.vs, "Duration", resSetDuration)
+      case at: AttrSetTacInstant        => setTac(attr, at.vs, "Instant", resSetInstant)
+      case at: AttrSetTacLocalDate      => setTac(attr, at.vs, "LocalDate", resSetLocalDate)
+      case at: AttrSetTacLocalTime      => setTac(attr, at.vs, "LocalTime", resSetLocalTime)
+      case at: AttrSetTacLocalDateTime  => setTac(attr, at.vs, "LocalDateTime", resSetLocalDateTime)
+      case at: AttrSetTacOffsetTime     => setTac(attr, at.vs, "OffsetTime", resSetOffsetTime)
+      case at: AttrSetTacOffsetDateTime => setTac(attr, at.vs, "OffsetDateTime", resSetOffsetDateTime)
+      case at: AttrSetTacZonedDateTime  => setTac(attr, at.vs, "ZonedDateTime", resSetZonedDateTime)
+      case at: AttrSetTacUUID           => setTac(attr, at.vs, "UUID", resSetUUID)
+      case at: AttrSetTacURI            => setTac(attr, at.vs, "URI", resSetURI)
+      case at: AttrSetTacByte           => setTac(attr, at.vs, "Byte", resSetByte)
+      case at: AttrSetTacShort          => setTac(attr, at.vs, "Short", resSetShort)
+      case at: AttrSetTacChar           => setTac(attr, at.vs, "Char", resSetChar)
     }
   }
 
@@ -96,7 +96,10 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
 
 
   protected def setMan[T: ClassTag](
-    attr: Attr, tpe: String, args: Seq[Set[T]], res: ResSet[T]
+    attr: Attr,
+    args: Set[T],
+    tpe: String,
+    res: ResSet[T]
   ): Unit = {
     val col = getCol(attr: Attr)
     select += col
@@ -121,7 +124,10 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
   }
 
   protected def setTac[T: ClassTag](
-    attr: Attr, tpe: String, args: Seq[Set[T]], res: ResSet[T]
+    attr: Attr,
+    args: Set[T],
+    tpe: String,
+    res: ResSet[T]
   ): Unit = {
     val col = getCol(attr: Attr)
     notNull += col
@@ -136,13 +142,13 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
   }
 
   protected def setExpr[T: ClassTag](
-    attr: Attr, col: String, op: Op, sets: Seq[Set[T]], res: ResSet[T], mandatory: Boolean
+    attr: Attr, col: String, op: Op, set: Set[T], res: ResSet[T], mandatory: Boolean
   ): Unit = {
     op match {
       case V       => setAttr(col, res, mandatory)
       case Eq      => noCollectionMatching(attr)
-      case Has     => has(col, sets, res, res.one2sql, mandatory)
-      case HasNo   => hasNo(col, sets, res, res.one2sql, mandatory)
+      case Has     => has(col, set, res, res.one2sql, mandatory)
+      case HasNo   => hasNo(col, set, res, res.one2sql, mandatory)
       case NoValue => if (mandatory) noApplyNothing(attr) else setNoValue(col)
       case other   => unexpectedOp(other)
     }
@@ -162,7 +168,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
 
   protected def setOpt[T: ClassTag](
     attr: Attr,
-    optSets: Option[Seq[Set[T]]],
+    optSet: Option[Set[T]],
     resOpt: ResSetOpt[T],
     res: ResSet[T]
   ): Unit = {
@@ -173,8 +179,8 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     attr.op match {
       case V     => setOptAttr(col, res)
       case Eq    => noCollectionMatching(attr)
-      case Has   => optHas(col, optSets, res, resOpt.one2sql)
-      case HasNo => optHasNo(col, optSets, res, resOpt.one2sql)
+      case Has   => optHas(col, optSet, res, resOpt.one2sql)
+      case HasNo => optHasNo(col, optSet, res, resOpt.one2sql)
       case other => unexpectedOp(other)
     }
   }
@@ -204,7 +210,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
   // has -----------------------------------------------------------------------
 
   protected def has[T: ClassTag](
-    col: String, sets: Seq[Set[T]], res: ResSet[T], one2sql: T => String, mandatory: Boolean
+    col: String, set: Set[T], res: ResSet[T], one2sql: T => String, mandatory: Boolean
   ): Unit = {
     def contains(v: T): String = s"ARRAY_CONTAINS($col, ${one2sql(v)})"
     def containsSet(set: Set[T]): String = set.map(contains).mkString("(", " AND\n   ", ")")
@@ -215,35 +221,24 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
       aggregate = true
       replaceCast(res.nestedArray2coalescedSet)
     }
-    sets.length match {
+    set.size match {
       case 0 => where += (("FALSE", ""))
-      case 1 =>
-        val set = sets.head
-        set.size match {
-          case 0 => where += (("FALSE", ""))
-          case 1 => where += (("", contains(set.head)))
-          case _ => where += (("", containsSet(set)))
-        }
-      case _ =>
-        val expr = sets
-          .filterNot(_.isEmpty)
-          .map(containsSet).mkString("(", " OR\n   ", ")")
-        where += (("", expr))
+      case 1 => where += (("", contains(set.head)))
+      case _ => where += (("", set.map(v => containsSet(Set(v))).mkString("(", " OR\n   ", ")")))
     }
   }
 
   protected def optHas[T: ClassTag](
     col: String,
-    optSets: Option[Seq[Set[T]]],
+    optSet: Option[Set[T]],
     res: ResSet[T],
     one2sql: T => String,
   ): Unit = {
-    optSets.fold[Unit] {
+    optSet.fold[Unit] {
       where += ((col, s"IS NULL"))
-    } { sets =>
-      val setsWithValues = sets.filterNot(_.isEmpty)
-      if (setsWithValues.nonEmpty) {
-        has(col, sets, res, one2sql, true)
+    } { set =>
+      if (set.nonEmpty) {
+        has(col, set, res, one2sql, true)
         replaceCast(res.nestedArray2optCoalescedSet)
       } else {
         where += (("FALSE", ""))
@@ -255,7 +250,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
   // hasNo ---------------------------------------------------------------------
 
   protected def hasNo[T](
-    col: String, sets: Seq[Set[T]], res: ResSet[T], one2sql: T => String, mandatory: Boolean
+    col: String, set: Set[T], res: ResSet[T], one2sql: T => String, mandatory: Boolean
   ): Unit = {
     def notContains(v: T): String = s"NOT ARRAY_CONTAINS($col, ${one2sql(v)})"
     def notContainsSet(set: Set[T]): String = set.map(notContains).mkString("(", " OR\n   ", ")")
@@ -266,33 +261,23 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
       aggregate = true
       replaceCast(res.nestedArray2coalescedSet)
     }
-    sets.length match {
+    set.size match {
       case 0 => ()
-      case 1 =>
-        val set = sets.head
-        set.size match {
-          case 0 => ()
-          case 1 => where += (("", notContains(set.head)))
-          case _ => where += (("", notContainsSet(set)))
-        }
-      case _ =>
-        val expr = sets
-          .filterNot(_.isEmpty)
-          .map(notContainsSet).mkString("(", " AND\n   ", ")")
-        where += (("", expr))
+      case 1 => where += (("", notContains(set.head)))
+      case _ => where += (("", set.map(v => notContainsSet(Set(v))).mkString("(", " AND\n   ", ")")))
     }
   }
 
   protected def optHasNo[T: ClassTag](
     col: String,
-    optSets: Option[Seq[Set[T]]],
+    optSet: Option[Set[T]],
     res: ResSet[T],
     one2sql: T => String
   ): Unit = {
-    optSets.fold[Unit] {
+    optSet.fold[Unit] {
       setOptAttr(col, res)
-    } { sets =>
-      hasNo(col, sets, res, one2sql, true)
+    } { set =>
+      hasNo(col, set, res, one2sql, true)
       replaceCast(res.nestedArray2optCoalescedSet)
     }
     // Only asserted values
@@ -344,17 +329,5 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     } else {
       where += (("", s"hasNo_$tpe($col, $filterAttr)"))
     }
-  }
-
-
-  // helpers -------------------------------------------------------------------
-
-  protected def noBooleanSetAggr[T](res: ResSet[T]): Unit = {
-    if (res.tpe == "Boolean")
-      throw ModelError("Aggregate functions not implemented for Sets of boolean values.")
-  }
-  protected def noBooleanSetCounts(n: Int): Unit = {
-    if (n == -1)
-      throw ModelError("Aggregate functions not implemented for Sets of boolean values.")
   }
 }

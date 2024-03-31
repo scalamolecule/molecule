@@ -18,11 +18,45 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
+      val a = (1, Set(ref1, ref2))
+      val b = (2, Set(ref2, ref3, ref4))
       for {
+        _ <- Ns.i.refs.insert(List(a, b)).transact
 
-        List(a, b) <- Ns.int.insert(1, 2).i.transact.map(_.ids)
+        // Sets without one or more values matching
+
+//        // "Doesn't have this value"
+//        _ <- Ns.i.a1.refs.hasNo(ref0).query.get.map(_ ==> List(a, b))
+//        _ <- Ns.i.a1.refs.hasNo(ref1).query.get.map(_ ==> List(b))
+//        _ <- Ns.i.a1.refs.hasNo(ref2).query.get.map(_ ==> List())
+//        _ <- Ns.i.a1.refs.hasNo(ref3).query.get.map(_ ==> List(a))
+//        _ <- Ns.i.a1.refs.hasNo(ref4).query.get.map(_ ==> List(a))
+//        _ <- Ns.i.a1.refs.hasNo(ref5).query.get.map(_ ==> List(a, b))
+//        // Same as
+//        _ <- Ns.i.a1.refs.hasNo(Seq(ref0)).query.get.map(_ ==> List(a, b))
+//        _ <- Ns.i.a1.refs.hasNo(Seq(ref1)).query.get.map(_ ==> List(b))
+//        _ <- Ns.i.a1.refs.hasNo(Seq(ref2)).query.get.map(_ ==> List())
+//        _ <- Ns.i.a1.refs.hasNo(Seq(ref3)).query.get.map(_ ==> List(a))
+//        _ <- Ns.i.a1.refs.hasNo(Seq(ref4)).query.get.map(_ ==> List(a))
+//        _ <- Ns.i.a1.refs.hasNo(Seq(ref5)).query.get.map(_ ==> List(a, b))
 
 
+        // OR semantics when multiple values
+
+        // "Has neither this OR that"
+        _ <- Ns.i.a1.refs.hasNo(ref1, ref2).query.i.get.map(_ ==> List())
+//        _ <- Ns.i.a1.refs.hasNo(ref1, ref3).query.get.map(_ ==> List())
+//        _ <- Ns.i.a1.refs.hasNo(ref1, ref4).query.get.map(_ ==> List())
+//        _ <- Ns.i.a1.refs.hasNo(ref1, ref5).query.get.map(_ ==> List(b))
+//        // Same as
+//        _ <- Ns.i.a1.refs.hasNo(Seq(ref1, ref2)).query.get.map(_ ==> List())
+//        _ <- Ns.i.a1.refs.hasNo(Seq(ref1, ref3)).query.get.map(_ ==> List())
+//        _ <- Ns.i.a1.refs.hasNo(Seq(ref1, ref4)).query.get.map(_ ==> List())
+//        _ <- Ns.i.a1.refs.hasNo(Seq(ref1, ref5)).query.get.map(_ ==> List(b))
+//
+//
+//        // Negating empty Seqs/Sets has no effect
+//        _ <- Ns.i.a1.refs.hasNo(Seq.empty[String]).query.get.map(_ ==> List(a, b))
 
       } yield ()
     }

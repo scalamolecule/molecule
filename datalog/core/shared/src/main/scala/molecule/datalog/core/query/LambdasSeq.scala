@@ -80,7 +80,7 @@ trait LambdasSeq extends ResolveBase with JavaConversions {
           _.asInstanceOf[jList[_]].asScala.map(
             _.asInstanceOf[jMap[_, _]].values.iterator.next.toString
           )
-        ).toArray
+        )
       )
   }
 

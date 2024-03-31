@@ -38,11 +38,6 @@ trait FilterRefOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         _ <- A.i_.B.i_?.a1.query.get.map(_ ==> List(Some(1), Some(2), Some(3)))
         _ <- A.i_.B.i_?(Some(2)).query.get.map(_ ==> List(Some(2)))
-        _ <- A.i_.B.i_?.not(Some(2)).a1.query.get.map(_ ==> List(Some(1), Some(3)))
-        _ <- A.i_.B.i_?.<(Some(2)).query.get.map(_ ==> List(Some(1)))
-        _ <- A.i_.B.i_?.>(Some(2)).query.get.map(_ ==> List(Some(3)))
-        _ <- A.i_.B.i_?.<=(Some(2)).a1.query.get.map(_ ==> List(Some(1), Some(2)))
-        _ <- A.i_.B.i_?.>=(Some(2)).a1.query.get.map(_ ==> List(Some(2), Some(3)))
       } yield ()
     }
 
@@ -73,11 +68,6 @@ trait FilterRefOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         _ <- A.i_.OwnB.i_?.a1.query.get.map(_ ==> List(Some(1), Some(2), Some(3)))
         _ <- A.i_.OwnB.i_?(Some(2)).query.get.map(_ ==> List(Some(2)))
-        _ <- A.i_.OwnB.i_?.not(Some(2)).a1.query.get.map(_ ==> List(Some(1), Some(3)))
-        _ <- A.i_.OwnB.i_?.<(Some(2)).query.get.map(_ ==> List(Some(1)))
-        _ <- A.i_.OwnB.i_?.>(Some(2)).query.get.map(_ ==> List(Some(3)))
-        _ <- A.i_.OwnB.i_?.<=(Some(2)).a1.query.get.map(_ ==> List(Some(1), Some(2)))
-        _ <- A.i_.OwnB.i_?.>=(Some(2)).a1.query.get.map(_ ==> List(Some(2), Some(3)))
       } yield ()
     }
 
@@ -108,11 +98,6 @@ trait FilterRefOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         _ <- A.i_.Bb.i_?.a1.query.get.map(_ ==> List(Some(1), Some(2), Some(3)))
         _ <- A.i_.Bb.i_?(Some(2)).query.get.map(_ ==> List(Some(2)))
-        _ <- A.i_.Bb.i_?.not(Some(2)).a1.query.get.map(_ ==> List(Some(1), Some(3)))
-        _ <- A.i_.Bb.i_?.<(Some(2)).query.get.map(_ ==> List(Some(1)))
-        _ <- A.i_.Bb.i_?.>(Some(2)).query.get.map(_ ==> List(Some(3)))
-        _ <- A.i_.Bb.i_?.<=(Some(2)).a1.query.get.map(_ ==> List(Some(1), Some(2)))
-        _ <- A.i_.Bb.i_?.>=(Some(2)).a1.query.get.map(_ ==> List(Some(2), Some(3)))
       } yield ()
     }
 
@@ -143,11 +128,6 @@ trait FilterRefOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         _ <- A.i_.OwnBb.i_?.a1.query.get.map(_ ==> List(Some(1), Some(2), Some(3)))
         _ <- A.i_.OwnBb.i_?(Some(2)).query.get.map(_ ==> List(Some(2)))
-        _ <- A.i_.OwnBb.i_?.not(Some(2)).a1.query.get.map(_ ==> List(Some(1), Some(3)))
-        _ <- A.i_.OwnBb.i_?.<(Some(2)).query.get.map(_ ==> List(Some(1)))
-        _ <- A.i_.OwnBb.i_?.>(Some(2)).query.get.map(_ ==> List(Some(3)))
-        _ <- A.i_.OwnBb.i_?.<=(Some(2)).a1.query.get.map(_ ==> List(Some(1), Some(2)))
-        _ <- A.i_.OwnBb.i_?.>=(Some(2)).a1.query.get.map(_ ==> List(Some(2), Some(3)))
       } yield ()
     }
   }

@@ -19,14 +19,14 @@ object _ExprBArTac extends BoilerplateGenBase("ExprBArTac", "/api/expression") {
       s"""
          |
          |trait ${fileName}Ops_$arity[${`A..V, `}t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]] {
-         |  protected def _exprBAr(op: Op, ba: Seq[Array[t]]): Ns1[${`A..V, `}t] = ???
+         |  protected def _exprBAr(op: Op, byteArray: Array[t]): Ns1[${`A..V, `}t] = ???
          |}
          |
          |trait $fileName_$arity[${`A..V, `}t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]]
          |  extends ${fileName}Ops_$arity[${`A..V, `}t, Ns1, Ns2] {
-         |  def apply(            ): Ns1[${`A..V, `}t] = _exprBAr(Eq , Nil    )
-         |  def apply(ba: Array[t]): Ns1[${`A..V, `}t] = _exprBAr(Eq , Seq(ba))
-         |  def not  (ba: Array[t]): Ns1[${`A..V, `}t] = _exprBAr(Neq, Seq(ba))
+         |  def apply(                   ): Ns1[${`A..V, `}t] = _exprBAr(NoValue, Array.empty[Byte].asInstanceOf[Array[t]])
+         |  def apply(byteArray: Array[t]): Ns1[${`A..V, `}t] = _exprBAr(Eq     , byteArray                               )
+         |  def not  (byteArray: Array[t]): Ns1[${`A..V, `}t] = _exprBAr(Neq    , byteArray                               )
          |}""".stripMargin
   }
 }

@@ -16,7 +16,7 @@ trait UpdateOps extends Action2Data with BaseOps {
   def updateSetEq[T](
     ns: String,
     attr: String,
-    sets: Seq[Set[T]],
+    set: Set[T],
     refNs: Option[String],
     owner: Boolean,
     transformValue: T => Any,
@@ -28,7 +28,7 @@ trait UpdateOps extends Action2Data with BaseOps {
   def updateSetAdd[T](
     ns: String,
     attr: String,
-    sets: Seq[Set[T]],
+    set: Set[T],
     refNs: Option[String],
     owner: Boolean,
     transformValue: T => Any,
@@ -51,7 +51,7 @@ trait UpdateOps extends Action2Data with BaseOps {
   def updateSeqEq[T](
     ns: String,
     attr: String,
-    seqs: Seq[Seq[T]],
+    seq: Seq[T],
     refNs: Option[String],
     owner: Boolean,
     transformValue: T => Any,
@@ -63,13 +63,13 @@ trait UpdateOps extends Action2Data with BaseOps {
   def updateByteArray(
     ns: String,
     attr: String,
-    byteArrays: Seq[Array[Byte]],
+    byteArrays: Array[Byte],
   ): Unit = ???
 
   def updateSeqAdd[T](
     ns: String,
     attr: String,
-    seqs: Seq[Seq[T]],
+    seq: Seq[T],
     refNs: Option[String],
     owner: Boolean,
     transformValue: T => Any,

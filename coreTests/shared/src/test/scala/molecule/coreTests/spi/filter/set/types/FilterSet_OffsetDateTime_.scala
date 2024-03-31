@@ -127,10 +127,11 @@ trait FilterSet_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAs
           // OR semantics when multiple values
 
           // "Has this OR that"
+          _ <- Ns.i.a1.offsetDateTimeSet_.has(offsetDateTime0, offsetDateTime1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.offsetDateTimeSet_.has(offsetDateTime1, offsetDateTime2).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.offsetDateTimeSet_.has(offsetDateTime1, offsetDateTime3).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.offsetDateTimeSet_.has(offsetDateTime2, offsetDateTime3).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.offsetDateTimeSet_.has(offsetDateTime1, offsetDateTime2, offsetDateTime3).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.offsetDateTimeSet_.has(offsetDateTime3, offsetDateTime4).query.get.map(_ ==> List(2))
           // Same as
           _ <- Ns.i.a1.offsetDateTimeSet_.has(Seq(offsetDateTime1, offsetDateTime2)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.offsetDateTimeSet_.has(Seq(offsetDateTime1, offsetDateTime3)).query.get.map(_ ==> List(1, 2))
@@ -190,90 +191,6 @@ trait FilterSet_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAs
       }
     }
 
-
-    "Optional" - {
-
-      "has" - types { implicit conn =>
-        val a = (1, Some(Set(offsetDateTime1, offsetDateTime2)))
-        val b = (2, Some(Set(offsetDateTime2, offsetDateTime3, offsetDateTime4)))
-        val c = (3, None)
-        for {
-          _ <- Ns.i.offsetDateTimeSet_?.insert(a, b, c).transact
-
-          // Sets with one or more values matching
-
-          // "Has this"
-          _ <- Ns.i.a1.offsetDateTimeSet_?.has(Some(offsetDateTime0)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetDateTimeSet_?.has(Some(offsetDateTime1)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetDateTimeSet_?.has(Some(offsetDateTime2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetDateTimeSet_?.has(Some(offsetDateTime3)).query.get.map(_ ==> List(b))
-          // Same as
-          _ <- Ns.i.a1.offsetDateTimeSet_?.has(Some(Seq(offsetDateTime0))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetDateTimeSet_?.has(Some(Seq(offsetDateTime1))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetDateTimeSet_?.has(Some(Seq(offsetDateTime2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetDateTimeSet_?.has(Some(Seq(offsetDateTime3))).query.get.map(_ ==> List(b))
-
-
-          // OR semantics when multiple values
-
-          // "Has this OR that"
-          _ <- Ns.i.a1.offsetDateTimeSet_?.has(Some(Seq(offsetDateTime1, offsetDateTime2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetDateTimeSet_?.has(Some(Seq(offsetDateTime1, offsetDateTime3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetDateTimeSet_?.has(Some(Seq(offsetDateTime2, offsetDateTime3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetDateTimeSet_?.has(Some(Seq(offsetDateTime1, offsetDateTime2, offsetDateTime3))).query.get.map(_ ==> List(a, b))
-
-          // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.offsetDateTimeSet_?.has(Some(Seq.empty[OffsetDateTime])).query.get.map(_ ==> List())
-
-          // None matches non-asserted values
-          _ <- Ns.i.a1.offsetDateTimeSet_?.has(Option.empty[OffsetDateTime]).query.get.map(_ ==> List(c))
-          _ <- Ns.i.a1.offsetDateTimeSet_?.has(Option.empty[Seq[OffsetDateTime]]).query.get.map(_ ==> List(c))
-        } yield ()
-      }
-
-
-      "hasNo" - types { implicit conn =>
-        val a = (1, Some(Set(offsetDateTime1, offsetDateTime2)))
-        val b = (2, Some(Set(offsetDateTime2, offsetDateTime3, offsetDateTime4)))
-        val c = (3, None)
-        for {
-          _ <- Ns.i.offsetDateTimeSet_?.insert(a, b, c).transact
-
-          // Sets without one or more values matching
-
-          // "Doesn't have this"
-          _ <- Ns.i.a1.offsetDateTimeSet_?.hasNo(Some(offsetDateTime0)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetDateTimeSet_?.hasNo(Some(offsetDateTime1)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.offsetDateTimeSet_?.hasNo(Some(offsetDateTime2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetDateTimeSet_?.hasNo(Some(offsetDateTime3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetDateTimeSet_?.hasNo(Some(offsetDateTime4)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetDateTimeSet_?.hasNo(Some(offsetDateTime5)).query.get.map(_ ==> List(a, b))
-          // Same as
-          _ <- Ns.i.a1.offsetDateTimeSet_?.hasNo(Some(Seq(offsetDateTime0))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetDateTimeSet_?.hasNo(Some(Seq(offsetDateTime1))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.offsetDateTimeSet_?.hasNo(Some(Seq(offsetDateTime2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetDateTimeSet_?.hasNo(Some(Seq(offsetDateTime3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetDateTimeSet_?.hasNo(Some(Seq(offsetDateTime4))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetDateTimeSet_?.hasNo(Some(Seq(offsetDateTime5))).query.get.map(_ ==> List(a, b))
-
-
-          // OR semantics when multiple values
-
-          // "Has neither this OR that"
-          _ <- Ns.i.a1.offsetDateTimeSet_?.hasNo(Some(Seq(offsetDateTime1, offsetDateTime2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetDateTimeSet_?.hasNo(Some(Seq(offsetDateTime1, offsetDateTime3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetDateTimeSet_?.hasNo(Some(Seq(offsetDateTime1, offsetDateTime4))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetDateTimeSet_?.hasNo(Some(Seq(offsetDateTime1, offsetDateTime5))).query.get.map(_ ==> List(b))
-
-
-          // Negating empty Seqs/Sets has no effect
-          _ <- Ns.i.a1.offsetDateTimeSet_?.hasNo(Some(Seq.empty[OffsetDateTime])).query.get.map(_ ==> List(a, b))
-
-          // Negating None returns all asserted
-          _ <- Ns.i.a1.offsetDateTimeSet_?.hasNo(Option.empty[OffsetDateTime]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetDateTimeSet_?.hasNo(Option.empty[Seq[OffsetDateTime]]).query.get.map(_ ==> List(a, b))
-        } yield ()
-      }
-    }
+    // No filtering on optional Set attributes
   }
 }

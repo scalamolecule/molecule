@@ -33,29 +33,29 @@ trait LambdasOne extends ResolveBase {
   private lazy val firstShort         : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[Integer].toShort.asInstanceOf[AnyRef]
   private lazy val firstChar          : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[String].charAt(0).asInstanceOf[AnyRef]
 
-  protected lazy val set2setId            : AnyRef => AnyRef = set2set((v: AnyRef) => v.toString)
-  protected lazy val set2setString        : AnyRef => AnyRef = set2set
-  protected lazy val set2setInt           : AnyRef => AnyRef = set2set((v: AnyRef) => v.toString.toInt)
-  protected lazy val set2setLong          : AnyRef => AnyRef = set2set
-  protected lazy val set2setFloat         : AnyRef => AnyRef = set2set
-  protected lazy val set2setDouble        : AnyRef => AnyRef = set2set
-  protected lazy val set2setBoolean       : AnyRef => AnyRef = set2set
-  protected lazy val set2setBigInt        : AnyRef => AnyRef = set2set((v: AnyRef) => BigInt(v.toString))
-  protected lazy val set2setBigDecimal    : AnyRef => AnyRef = set2set((v: AnyRef) => BigDecimal(v.toString))
-  protected lazy val set2setDate          : AnyRef => AnyRef = set2set
-  protected lazy val set2setDuration      : AnyRef => AnyRef = set2set((v: AnyRef) => Duration.parse(v.asInstanceOf[String]))
-  protected lazy val set2setInstant       : AnyRef => AnyRef = set2set((v: AnyRef) => Instant.parse(v.asInstanceOf[String]))
-  protected lazy val set2setLocalDate     : AnyRef => AnyRef = set2set((v: AnyRef) => LocalDate.parse(v.asInstanceOf[String]))
-  protected lazy val set2setLocalTime     : AnyRef => AnyRef = set2set((v: AnyRef) => LocalTime.parse(v.asInstanceOf[String]))
-  protected lazy val set2setLocalDateTime : AnyRef => AnyRef = set2set((v: AnyRef) => LocalDateTime.parse(v.asInstanceOf[String]))
-  protected lazy val set2setOffsetTime    : AnyRef => AnyRef = set2set((v: AnyRef) => OffsetTime.parse(v.asInstanceOf[String]))
-  protected lazy val set2setOffsetDateTime: AnyRef => AnyRef = set2set((v: AnyRef) => OffsetDateTime.parse(v.asInstanceOf[String]))
-  protected lazy val set2setZonedDateTime : AnyRef => AnyRef = set2set((v: AnyRef) => ZonedDateTime.parse(v.asInstanceOf[String]))
-  protected lazy val set2setUUID          : AnyRef => AnyRef = set2set
-  protected lazy val set2setURI           : AnyRef => AnyRef = set2set
-  protected lazy val set2setByte          : AnyRef => AnyRef = set2set((v: AnyRef) => v.asInstanceOf[Integer].toByte)
-  protected lazy val set2setShort         : AnyRef => AnyRef = set2set((v: AnyRef) => v.asInstanceOf[Integer].toShort)
-  protected lazy val set2setChar          : AnyRef => AnyRef = set2set((v: AnyRef) => v.asInstanceOf[String].charAt(0))
+  private lazy val set2setId            : AnyRef => AnyRef = set2set((v: AnyRef) => v.toString)
+  private lazy val set2setString        : AnyRef => AnyRef = set2set
+  private lazy val set2setInt           : AnyRef => AnyRef = set2set((v: AnyRef) => v.toString.toInt)
+  private lazy val set2setLong          : AnyRef => AnyRef = set2set
+  private lazy val set2setFloat         : AnyRef => AnyRef = set2set
+  private lazy val set2setDouble        : AnyRef => AnyRef = set2set
+  private lazy val set2setBoolean       : AnyRef => AnyRef = set2set
+  private lazy val set2setBigInt        : AnyRef => AnyRef = set2set((v: AnyRef) => BigInt(v.toString))
+  private lazy val set2setBigDecimal    : AnyRef => AnyRef = set2set((v: AnyRef) => BigDecimal(v.toString))
+  private lazy val set2setDate          : AnyRef => AnyRef = set2set
+  private lazy val set2setDuration      : AnyRef => AnyRef = set2set((v: AnyRef) => Duration.parse(v.asInstanceOf[String]))
+  private lazy val set2setInstant       : AnyRef => AnyRef = set2set((v: AnyRef) => Instant.parse(v.asInstanceOf[String]))
+  private lazy val set2setLocalDate     : AnyRef => AnyRef = set2set((v: AnyRef) => LocalDate.parse(v.asInstanceOf[String]))
+  private lazy val set2setLocalTime     : AnyRef => AnyRef = set2set((v: AnyRef) => LocalTime.parse(v.asInstanceOf[String]))
+  private lazy val set2setLocalDateTime : AnyRef => AnyRef = set2set((v: AnyRef) => LocalDateTime.parse(v.asInstanceOf[String]))
+  private lazy val set2setOffsetTime    : AnyRef => AnyRef = set2set((v: AnyRef) => OffsetTime.parse(v.asInstanceOf[String]))
+  private lazy val set2setOffsetDateTime: AnyRef => AnyRef = set2set((v: AnyRef) => OffsetDateTime.parse(v.asInstanceOf[String]))
+  private lazy val set2setZonedDateTime : AnyRef => AnyRef = set2set((v: AnyRef) => ZonedDateTime.parse(v.asInstanceOf[String]))
+  private lazy val set2setUUID          : AnyRef => AnyRef = set2set
+  private lazy val set2setURI           : AnyRef => AnyRef = set2set
+  private lazy val set2setByte          : AnyRef => AnyRef = set2set((v: AnyRef) => v.asInstanceOf[Integer].toByte)
+  private lazy val set2setShort         : AnyRef => AnyRef = set2set((v: AnyRef) => v.asInstanceOf[Integer].toShort)
+  private lazy val set2setChar          : AnyRef => AnyRef = set2set((v: AnyRef) => v.asInstanceOf[String].charAt(0))
 
   private def set2set: AnyRef => AnyRef =
     (v: AnyRef) => v.asInstanceOf[jSet[_]].toArray.toSet
@@ -63,29 +63,29 @@ trait LambdasOne extends ResolveBase {
   private def set2set(value: AnyRef => Any): AnyRef => AnyRef =
     (v: AnyRef) => v.asInstanceOf[jSet[_]].toArray.map(value).toSet
 
-  protected lazy val vector2setId            : AnyRef => AnyRef = jvector2set((v: AnyRef) => v.toString)
-  protected lazy val vector2setString        : AnyRef => AnyRef = jvector2set
-  protected lazy val vector2setInt           : AnyRef => AnyRef = jvector2set((v: AnyRef) => v.toString.toInt)
-  protected lazy val vector2setLong          : AnyRef => AnyRef = jvector2set
-  protected lazy val vector2setFloat         : AnyRef => AnyRef = jvector2set
-  protected lazy val vector2setDouble        : AnyRef => AnyRef = jvector2set
-  protected lazy val vector2setBoolean       : AnyRef => AnyRef = jvector2set
-  protected lazy val vector2setBigInt        : AnyRef => AnyRef = jvector2set((v: AnyRef) => BigInt(v.toString))
-  protected lazy val vector2setBigDecimal    : AnyRef => AnyRef = jvector2set((v: AnyRef) => BigDecimal(v.toString))
-  protected lazy val vector2setDate          : AnyRef => AnyRef = jvector2set
-  protected lazy val vector2setDuration      : AnyRef => AnyRef = jvector2set((v: Any) => Duration.parse(v.asInstanceOf[String]))
-  protected lazy val vector2setInstant       : AnyRef => AnyRef = jvector2set((v: Any) => Instant.parse(v.asInstanceOf[String]))
-  protected lazy val vector2setLocalDate     : AnyRef => AnyRef = jvector2set((v: Any) => LocalDate.parse(v.asInstanceOf[String]))
-  protected lazy val vector2setLocalTime     : AnyRef => AnyRef = jvector2set((v: Any) => LocalTime.parse(v.asInstanceOf[String]))
-  protected lazy val vector2setLocalDateTime : AnyRef => AnyRef = jvector2set((v: Any) => LocalDateTime.parse(v.asInstanceOf[String]))
-  protected lazy val vector2setOffsetTime    : AnyRef => AnyRef = jvector2set((v: Any) => OffsetTime.parse(v.asInstanceOf[String]))
-  protected lazy val vector2setOffsetDateTime: AnyRef => AnyRef = jvector2set((v: Any) => OffsetDateTime.parse(v.asInstanceOf[String]))
-  protected lazy val vector2setZonedDateTime : AnyRef => AnyRef = jvector2set((v: Any) => ZonedDateTime.parse(v.asInstanceOf[String]))
-  protected lazy val vector2setUUID          : AnyRef => AnyRef = jvector2set
-  protected lazy val vector2setURI           : AnyRef => AnyRef = jvector2set
-  protected lazy val vector2setByte          : AnyRef => AnyRef = jvector2set((v: AnyRef) => v.asInstanceOf[Integer].toByte)
-  protected lazy val vector2setShort         : AnyRef => AnyRef = jvector2set((v: AnyRef) => v.asInstanceOf[Integer].toShort)
-  protected lazy val vector2setChar          : AnyRef => AnyRef = jvector2set((v: AnyRef) => v.asInstanceOf[String].charAt(0))
+  private lazy val vector2setId            : AnyRef => AnyRef = jvector2set((v: AnyRef) => v.toString)
+  private lazy val vector2setString        : AnyRef => AnyRef = jvector2set
+  private lazy val vector2setInt           : AnyRef => AnyRef = jvector2set((v: AnyRef) => v.toString.toInt)
+  private lazy val vector2setLong          : AnyRef => AnyRef = jvector2set
+  private lazy val vector2setFloat         : AnyRef => AnyRef = jvector2set
+  private lazy val vector2setDouble        : AnyRef => AnyRef = jvector2set
+  private lazy val vector2setBoolean       : AnyRef => AnyRef = jvector2set
+  private lazy val vector2setBigInt        : AnyRef => AnyRef = jvector2set((v: AnyRef) => BigInt(v.toString))
+  private lazy val vector2setBigDecimal    : AnyRef => AnyRef = jvector2set((v: AnyRef) => BigDecimal(v.toString))
+  private lazy val vector2setDate          : AnyRef => AnyRef = jvector2set
+  private lazy val vector2setDuration      : AnyRef => AnyRef = jvector2set((v: Any) => Duration.parse(v.asInstanceOf[String]))
+  private lazy val vector2setInstant       : AnyRef => AnyRef = jvector2set((v: Any) => Instant.parse(v.asInstanceOf[String]))
+  private lazy val vector2setLocalDate     : AnyRef => AnyRef = jvector2set((v: Any) => LocalDate.parse(v.asInstanceOf[String]))
+  private lazy val vector2setLocalTime     : AnyRef => AnyRef = jvector2set((v: Any) => LocalTime.parse(v.asInstanceOf[String]))
+  private lazy val vector2setLocalDateTime : AnyRef => AnyRef = jvector2set((v: Any) => LocalDateTime.parse(v.asInstanceOf[String]))
+  private lazy val vector2setOffsetTime    : AnyRef => AnyRef = jvector2set((v: Any) => OffsetTime.parse(v.asInstanceOf[String]))
+  private lazy val vector2setOffsetDateTime: AnyRef => AnyRef = jvector2set((v: Any) => OffsetDateTime.parse(v.asInstanceOf[String]))
+  private lazy val vector2setZonedDateTime : AnyRef => AnyRef = jvector2set((v: Any) => ZonedDateTime.parse(v.asInstanceOf[String]))
+  private lazy val vector2setUUID          : AnyRef => AnyRef = jvector2set
+  private lazy val vector2setURI           : AnyRef => AnyRef = jvector2set
+  private lazy val vector2setByte          : AnyRef => AnyRef = jvector2set((v: AnyRef) => v.asInstanceOf[Integer].toByte)
+  private lazy val vector2setShort         : AnyRef => AnyRef = jvector2set((v: AnyRef) => v.asInstanceOf[Integer].toShort)
+  private lazy val vector2setChar          : AnyRef => AnyRef = jvector2set((v: AnyRef) => v.asInstanceOf[String].charAt(0))
 
   case class ResOne[T](
     tpe: String,

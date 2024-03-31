@@ -127,10 +127,11 @@ trait FilterSet_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           // OR semantics when multiple values
 
           // "Has this OR that"
+          _ <- Ns.i.a1.durationSet_.has(duration0, duration1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.durationSet_.has(duration1, duration2).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.durationSet_.has(duration1, duration3).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.durationSet_.has(duration2, duration3).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.durationSet_.has(duration1, duration2, duration3).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.durationSet_.has(duration3, duration4).query.get.map(_ ==> List(2))
           // Same as
           _ <- Ns.i.a1.durationSet_.has(Seq(duration1, duration2)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.durationSet_.has(Seq(duration1, duration3)).query.get.map(_ ==> List(1, 2))
@@ -190,90 +191,6 @@ trait FilterSet_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       }
     }
 
-
-    "Optional" - {
-
-      "has" - types { implicit conn =>
-        val a = (1, Some(Set(duration1, duration2)))
-        val b = (2, Some(Set(duration2, duration3, duration4)))
-        val c = (3, None)
-        for {
-          _ <- Ns.i.durationSet_?.insert(a, b, c).transact
-
-          // Sets with one or more values matching
-
-          // "Has this"
-          _ <- Ns.i.a1.durationSet_?.has(Some(duration0)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.durationSet_?.has(Some(duration1)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.durationSet_?.has(Some(duration2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.durationSet_?.has(Some(duration3)).query.get.map(_ ==> List(b))
-          // Same as
-          _ <- Ns.i.a1.durationSet_?.has(Some(Seq(duration0))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.durationSet_?.has(Some(Seq(duration1))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.durationSet_?.has(Some(Seq(duration2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.durationSet_?.has(Some(Seq(duration3))).query.get.map(_ ==> List(b))
-
-
-          // OR semantics when multiple values
-
-          // "Has this OR that"
-          _ <- Ns.i.a1.durationSet_?.has(Some(Seq(duration1, duration2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.durationSet_?.has(Some(Seq(duration1, duration3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.durationSet_?.has(Some(Seq(duration2, duration3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.durationSet_?.has(Some(Seq(duration1, duration2, duration3))).query.get.map(_ ==> List(a, b))
-
-          // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.durationSet_?.has(Some(Seq.empty[Duration])).query.get.map(_ ==> List())
-
-          // None matches non-asserted values
-          _ <- Ns.i.a1.durationSet_?.has(Option.empty[Duration]).query.get.map(_ ==> List(c))
-          _ <- Ns.i.a1.durationSet_?.has(Option.empty[Seq[Duration]]).query.get.map(_ ==> List(c))
-        } yield ()
-      }
-
-
-      "hasNo" - types { implicit conn =>
-        val a = (1, Some(Set(duration1, duration2)))
-        val b = (2, Some(Set(duration2, duration3, duration4)))
-        val c = (3, None)
-        for {
-          _ <- Ns.i.durationSet_?.insert(a, b, c).transact
-
-          // Sets without one or more values matching
-
-          // "Doesn't have this"
-          _ <- Ns.i.a1.durationSet_?.hasNo(Some(duration0)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.durationSet_?.hasNo(Some(duration1)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.durationSet_?.hasNo(Some(duration2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.durationSet_?.hasNo(Some(duration3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.durationSet_?.hasNo(Some(duration4)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.durationSet_?.hasNo(Some(duration5)).query.get.map(_ ==> List(a, b))
-          // Same as
-          _ <- Ns.i.a1.durationSet_?.hasNo(Some(Seq(duration0))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.durationSet_?.hasNo(Some(Seq(duration1))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.durationSet_?.hasNo(Some(Seq(duration2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.durationSet_?.hasNo(Some(Seq(duration3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.durationSet_?.hasNo(Some(Seq(duration4))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.durationSet_?.hasNo(Some(Seq(duration5))).query.get.map(_ ==> List(a, b))
-
-
-          // OR semantics when multiple values
-
-          // "Has neither this OR that"
-          _ <- Ns.i.a1.durationSet_?.hasNo(Some(Seq(duration1, duration2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.durationSet_?.hasNo(Some(Seq(duration1, duration3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.durationSet_?.hasNo(Some(Seq(duration1, duration4))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.durationSet_?.hasNo(Some(Seq(duration1, duration5))).query.get.map(_ ==> List(b))
-
-
-          // Negating empty Seqs/Sets has no effect
-          _ <- Ns.i.a1.durationSet_?.hasNo(Some(Seq.empty[Duration])).query.get.map(_ ==> List(a, b))
-
-          // Negating None returns all asserted
-          _ <- Ns.i.a1.durationSet_?.hasNo(Option.empty[Duration]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.durationSet_?.hasNo(Option.empty[Seq[Duration]]).query.get.map(_ ==> List(a, b))
-        } yield ()
-      }
-    }
+    // No filtering on optional Set attributes
   }
 }

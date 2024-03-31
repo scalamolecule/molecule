@@ -12,7 +12,10 @@ trait ResolveExprSet_postgres
 
 
   override protected def setMan[T: ClassTag](
-    attr: Attr, tpe: String, args: Seq[Set[T]], res: ResSet[T]
+    attr: Attr,
+    args: Set[T],
+    tpe: String,
+    res: ResSet[T]
   ): Unit = {
     val col = getCol(attr: Attr)
     select += col
@@ -59,43 +62,29 @@ trait ResolveExprSet_postgres
   // has -----------------------------------------------------------------------
 
   override protected def has[T: ClassTag](
-    col: String, sets: Seq[Set[T]], res: ResSet[T], one2sql: T => String, mandatory: Boolean
+    col: String, set: Set[T], res: ResSet[T], one2sql: T => String, mandatory: Boolean
   ): Unit = {
     def contains(v: T): String = s"${one2sql(v)} = ANY($col)"
     def containsSet(set: Set[T]): String = set.map(contains).mkString(" AND ")
     coalesce(col, res, if (mandatory) "man" else "tac")
-    sets.length match {
-      case 0 =>
-        where += (("FALSE", ""))
-      case 1 =>
-        val set = sets.head
-        set.size match {
-          case 0 => where += (("FALSE", ""))
-          case 1 => where += (("", contains(set.head)))
-          case _ => where += (("", containsSet(set)))
-        }
-
-      case _ =>
-        val expr = sets
-          .filterNot(_.isEmpty)
-          .map(containsSet).mkString("(\n    ", " OR\n    ", "\n  )")
-        where += (("", expr))
+    set.size match {
+      case 0 => where += (("FALSE", ""))
+      case 1 => where += (("", contains(set.head)))
+      case _ => where += (("", set.map(v => containsSet(Set(v))).mkString("(", " OR\n   ", ")")))
     }
-
   }
 
   override protected def optHas[T: ClassTag](
     col: String,
-    optSets: Option[Seq[Set[T]]],
+    optSet: Option[Set[T]],
     res: ResSet[T],
     one2sql: T => String,
   ): Unit = {
-    optSets.fold[Unit] {
+    optSet.fold[Unit] {
       where += ((col, s"IS NULL"))
-    } { sets =>
-      val setsWithValues = sets.filterNot(_.isEmpty)
-      if (setsWithValues.nonEmpty) {
-        has(col, sets, res, one2sql, true)
+    } { set =>
+      if (set.nonEmpty) {
+        has(col, set, res, one2sql, true)
         replaceCast(res.array2optSet)
       } else {
         where += (("FALSE", ""))
@@ -107,39 +96,28 @@ trait ResolveExprSet_postgres
   // hasNo ---------------------------------------------------------------------
 
   override protected def hasNo[T](
-    col: String, sets: Seq[Set[T]], res: ResSet[T], one2sql: T => String, mandatory: Boolean
+    col: String, set: Set[T], res: ResSet[T], one2sql: T => String, mandatory: Boolean
   ): Unit = {
     def notContains(v: T): String = s"${one2sql(v)} != ALL($col)"
     def notContainsSet(set: Set[T]): String = set.map(notContains).mkString("(", " OR ", ")")
     coalesce(col, res, if (mandatory) "man" else "tac")
-    sets.length match {
+    set.size match {
       case 0 => ()
-      case 1 =>
-        val set = sets.head
-        set.size match {
-          case 0 => ()
-          case 1 => where += (("", notContains(set.head)))
-          case _ => where += (("", notContainsSet(set)))
-        }
-      case _ =>
-        val expr = sets
-          .filterNot(_.isEmpty)
-          .map(notContainsSet)
-          .mkString("(\n    ", " AND\n    ", "\n  )")
-        where += (("", expr))
+      case 1 => where += (("", notContains(set.head)))
+      case _ => where += (("", set.map(v => notContainsSet(Set(v))).mkString("(", " AND\n   ", ")")))
     }
   }
 
   override protected def optHasNo[T: ClassTag](
     col: String,
-    optSets: Option[Seq[Set[T]]],
+    optSet: Option[Set[T]],
     res: ResSet[T],
     one2sql: T => String
   ): Unit = {
-    optSets.fold[Unit] {
+    optSet.fold[Unit] {
       setOptAttr(col, res)
-    } { sets =>
-      hasNo(col, sets, res, one2sql, true)
+    } { set =>
+      hasNo(col, set, res, one2sql, true)
       coalesce(col, res, "opt")
       replaceCast(res.array2optSet)
 

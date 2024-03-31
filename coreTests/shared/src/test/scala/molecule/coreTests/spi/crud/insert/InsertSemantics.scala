@@ -73,9 +73,9 @@ trait InsertSemantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           // A.i was inserted
           _ <- A.i.query.get.map(_ ==> List(1))
 
-          // B.iSet was not inserted
-          _ <- A.i.B.iSet_?.query.get.map(_ ==> Nil)
-          _ <- A.i.B.iSet.query.get.map(_ ==> Nil)
+          // B.ii was not inserted
+          _ <- A.i.B.iSet_?.query.get.map(_ ==> List((1, None)))
+          _ <- A.i.B.iSet_.query.get.map(_ ==> Nil)
         } yield ()
       }
 
@@ -102,8 +102,8 @@ trait InsertSemantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- A.i.Bb.*?(B.iSet).query.get.map(_ ==> List((1, Nil)))
           _ <- A.i.Bb.*(B.iSet).query.get.map(_ ==> Nil)
 
-          // No optional B.iSet value since no relationship was created
-          _ <- A.i.Bb.iSet_?.query.get.map(_ ==> Nil)
+          // B.iSet was not inserted
+          _ <- A.i.Bb.iSet_?.query.get.map(_ ==> List((1, None)))
           _ <- A.i.Bb.iSet.query.get.map(_ ==> Nil)
         } yield ()
       }
@@ -118,7 +118,7 @@ trait InsertSemantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- A.i.Bb.*?(B.i.iSet).query.get.map(_ ==> List((1, Nil)))
           _ <- A.i.Bb.*(B.i.iSet).query.get.map(_ ==> Nil)
 
-          // No optional B.iSet value (but relationship was created)
+          // No optional B.iSet value
           _ <- A.i.Bb.i.iSet_?.query.get.map(_ ==> List((1, 2, None)))
           _ <- A.i.Bb.i.iSet.query.get.map(_ ==> Nil)
         } yield ()

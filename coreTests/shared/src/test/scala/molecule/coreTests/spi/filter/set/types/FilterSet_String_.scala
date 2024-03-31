@@ -126,10 +126,11 @@ trait FilterSet_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           // OR semantics when multiple values
 
           // "Has this OR that"
+          _ <- Ns.i.a1.stringSet_.has(string0, string1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.stringSet_.has(string1, string2).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.stringSet_.has(string1, string3).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.stringSet_.has(string2, string3).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.stringSet_.has(string1, string2, string3).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.stringSet_.has(string3, string4).query.get.map(_ ==> List(2))
           // Same as
           _ <- Ns.i.a1.stringSet_.has(Seq(string1, string2)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.stringSet_.has(Seq(string1, string3)).query.get.map(_ ==> List(1, 2))
@@ -189,90 +190,6 @@ trait FilterSet_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       }
     }
 
-
-    "Optional" - {
-
-      "has" - types { implicit conn =>
-        val a = (1, Some(Set(string1, string2)))
-        val b = (2, Some(Set(string2, string3, string4)))
-        val c = (3, None)
-        for {
-          _ <- Ns.i.stringSet_?.insert(a, b, c).transact
-
-          // Sets with one or more values matching
-
-          // "Has this"
-          _ <- Ns.i.a1.stringSet_?.has(Some(string0)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.stringSet_?.has(Some(string1)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.stringSet_?.has(Some(string2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.stringSet_?.has(Some(string3)).query.get.map(_ ==> List(b))
-          // Same as
-          _ <- Ns.i.a1.stringSet_?.has(Some(Seq(string0))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.stringSet_?.has(Some(Seq(string1))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.stringSet_?.has(Some(Seq(string2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.stringSet_?.has(Some(Seq(string3))).query.get.map(_ ==> List(b))
-
-
-          // OR semantics when multiple values
-
-          // "Has this OR that"
-          _ <- Ns.i.a1.stringSet_?.has(Some(Seq(string1, string2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.stringSet_?.has(Some(Seq(string1, string3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.stringSet_?.has(Some(Seq(string2, string3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.stringSet_?.has(Some(Seq(string1, string2, string3))).query.get.map(_ ==> List(a, b))
-
-          // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.stringSet_?.has(Some(Seq.empty[String])).query.get.map(_ ==> List())
-
-          // None matches non-asserted values
-          _ <- Ns.i.a1.stringSet_?.has(Option.empty[String]).query.get.map(_ ==> List(c))
-          _ <- Ns.i.a1.stringSet_?.has(Option.empty[Seq[String]]).query.get.map(_ ==> List(c))
-        } yield ()
-      }
-
-
-      "hasNo" - types { implicit conn =>
-        val a = (1, Some(Set(string1, string2)))
-        val b = (2, Some(Set(string2, string3, string4)))
-        val c = (3, None)
-        for {
-          _ <- Ns.i.stringSet_?.insert(a, b, c).transact
-
-          // Sets without one or more values matching
-
-          // "Doesn't have this"
-          _ <- Ns.i.a1.stringSet_?.hasNo(Some(string0)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.stringSet_?.hasNo(Some(string1)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.stringSet_?.hasNo(Some(string2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.stringSet_?.hasNo(Some(string3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.stringSet_?.hasNo(Some(string4)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.stringSet_?.hasNo(Some(string5)).query.get.map(_ ==> List(a, b))
-          // Same as
-          _ <- Ns.i.a1.stringSet_?.hasNo(Some(Seq(string0))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.stringSet_?.hasNo(Some(Seq(string1))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.stringSet_?.hasNo(Some(Seq(string2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.stringSet_?.hasNo(Some(Seq(string3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.stringSet_?.hasNo(Some(Seq(string4))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.stringSet_?.hasNo(Some(Seq(string5))).query.get.map(_ ==> List(a, b))
-
-
-          // OR semantics when multiple values
-
-          // "Has neither this OR that"
-          _ <- Ns.i.a1.stringSet_?.hasNo(Some(Seq(string1, string2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.stringSet_?.hasNo(Some(Seq(string1, string3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.stringSet_?.hasNo(Some(Seq(string1, string4))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.stringSet_?.hasNo(Some(Seq(string1, string5))).query.get.map(_ ==> List(b))
-
-
-          // Negating empty Seqs/Sets has no effect
-          _ <- Ns.i.a1.stringSet_?.hasNo(Some(Seq.empty[String])).query.get.map(_ ==> List(a, b))
-
-          // Negating None returns all asserted
-          _ <- Ns.i.a1.stringSet_?.hasNo(Option.empty[String]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.stringSet_?.hasNo(Option.empty[Seq[String]]).query.get.map(_ ==> List(a, b))
-        } yield ()
-      }
-    }
+    // No filtering on optional Set attributes
   }
 }

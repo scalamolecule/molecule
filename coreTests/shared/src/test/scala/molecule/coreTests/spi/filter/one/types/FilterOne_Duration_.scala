@@ -29,7 +29,7 @@ trait FilterOne_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.duration(duration1).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.duration(Seq(duration0)).query.get.map(_ ==> List())
         _ <- Ns.i.a1.duration(Seq(duration1)).query.get.map(_ ==> List(a))
-        // OR semantics for multiple args
+        // OR semantics for multiple args ("is this or that")
         _ <- Ns.i.a1.duration(duration1, duration2).query.get.map(_ ==> List(a, b))
         _ <- Ns.i.a1.duration(duration1, duration0).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.duration(Seq(duration1, duration2)).query.get.map(_ ==> List(a, b))
@@ -86,7 +86,7 @@ trait FilterOne_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.duration_(duration1).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.duration_(Seq(duration0)).query.get.map(_ ==> List())
         _ <- Ns.i.a1.duration_(Seq(duration1)).query.get.map(_ ==> List(a))
-        // OR semantics for multiple args
+        // OR semantics for multiple args ("is this or that")
         _ <- Ns.i.a1.duration_(duration1, duration2).query.get.map(_ ==> List(a, b))
         _ <- Ns.i.a1.duration_(duration1, duration0).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.duration_(Seq(duration1, duration2)).query.get.map(_ ==> List(a, b))
@@ -136,46 +136,11 @@ trait FilterOne_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Find optional values matching
         _ <- Ns.i.a1.duration_?(Some(duration0)).query.get.map(_ ==> List())
         _ <- Ns.i.a1.duration_?(Some(duration1)).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.duration_?(Some(Seq(duration0))).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.duration_?(Some(Seq(duration1))).query.get.map(_ ==> List(a))
-        // OR semantics for Ses of multiple args
-        _ <- Ns.i.a1.duration_?(Some(Seq(duration1, duration2))).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.duration_?(Some(Seq(duration1, duration0))).query.get.map(_ ==> List(a))
-        // Empty Seq of args matches no values
-        _ <- Ns.i.a1.duration_?(Some(Seq.empty[Duration])).query.get.map(_ ==> List())
+
         // None matches non-asserted/null values
         _ <- Ns.i.a1.duration_?(Option.empty[Duration]).query.get.map(_ ==> List(x))
-        _ <- Ns.i.a1.duration_?(Option.empty[Seq[Duration]]).query.get.map(_ ==> List(x))
-
-        // Find optional values not matching
-        _ <- Ns.i.a1.duration_?.not(Some(duration0)).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.duration_?.not(Some(duration1)).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.duration_?.not(Some(duration2)).query.get.map(_ ==> List(a, c))
-        _ <- Ns.i.a1.duration_?.not(Some(duration3)).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.duration_?.not(Some(Seq(duration0))).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.duration_?.not(Some(Seq(duration1))).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.duration_?.not(Some(Seq(duration2))).query.get.map(_ ==> List(a, c))
-        _ <- Ns.i.a1.duration_?.not(Some(Seq(duration3))).query.get.map(_ ==> List(a, b))
-        // OR semantics for multiple negation args
-        _ <- Ns.i.a1.duration_?.not(Some(Seq(duration0, duration1))).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.duration_?.not(Some(Seq(duration1, duration2))).query.get.map(_ ==> List(c))
-        _ <- Ns.i.a1.duration_?.not(Some(Seq(duration2, duration3))).query.get.map(_ ==> List(a))
-        // Empty Seq of negation args matches all asserted values (non-null)
-        _ <- Ns.i.a1.duration_?.not(Some(Seq.empty[Duration])).query.get.map(_ ==> List(a, b, c))
-        // Negating None matches all asserted values (non-null)
-        _ <- Ns.i.a1.duration_?.not(Option.empty[Duration]).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.duration_?.not(Option.empty[Seq[Duration]]).query.get.map(_ ==> List(a, b, c))
-
-        // Find optional values in range
-        _ <- Ns.i.a1.duration_?.<(Some(duration2)).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.duration_?.>(Some(duration2)).query.get.map(_ ==> List(c))
-        _ <- Ns.i.a1.duration_?.<=(Some(duration2)).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.duration_?.>=(Some(duration2)).query.get.map(_ ==> List(b, c))
-        // None can't be compared and returns empty result
-        _ <- Ns.i.a1.duration_?.<(None).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.duration_?.<=(None).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.duration_?.>(None).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.duration_?.>=(None).query.get.map(_ ==> List())
+        // Easier to apply nothing to tacit attribute
+        _ <- Ns.i.a1.duration_().query.get.map(_ ==> List(4))
       } yield ()
     }
   }

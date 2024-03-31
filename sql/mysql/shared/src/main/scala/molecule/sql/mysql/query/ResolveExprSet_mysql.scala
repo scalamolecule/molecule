@@ -12,7 +12,10 @@ trait ResolveExprSet_mysql
 
 
   override protected def setMan[T: ClassTag](
-    attr: Attr, tpe: String, args: Seq[Set[T]], res: ResSet[T]
+    attr: Attr,
+    args: Set[T],
+    tpe: String,
+    res: ResSet[T]
   ): Unit = {
     val col = getCol(attr: Attr)
     select += col
@@ -41,13 +44,13 @@ trait ResolveExprSet_mysql
   }
 
   override protected def setExpr[T: ClassTag](
-    attr: Attr, col: String, op: Op, sets: Seq[Set[T]], res: ResSet[T], mandatory: Boolean
+    attr: Attr, col: String, op: Op, set: Set[T], res: ResSet[T], mandatory: Boolean
   ): Unit = {
     op match {
       case V       => setAttr(col, res, mandatory)
       case Eq      => noCollectionMatching(attr)
-      case Has     => has(col, sets, res, res.one2sql, mandatory)
-      case HasNo   => hasNo(col, sets, res, res.one2sql, mandatory)
+      case Has     => has(col, set, res, res.one2sql, mandatory)
+      case HasNo   => hasNo(col, set, res, res.one2sql, mandatory)
       case NoValue => if (mandatory) noApplyNothing(attr) else setNoValue(col)
       case other   => unexpectedOp(other)
     }
@@ -55,7 +58,7 @@ trait ResolveExprSet_mysql
 
   override protected def setOpt[T: ClassTag](
     attr: Attr,
-    optSets: Option[Seq[Set[T]]],
+    optSet: Option[Set[T]],
     resOpt: ResSetOpt[T],
     res: ResSet[T]
   ): Unit = {
@@ -69,8 +72,8 @@ trait ResolveExprSet_mysql
     attr.op match {
       case V     => setOptAttr(col, res)
       case Eq    => noCollectionMatching(attr)
-      case Has   => optHas(col, optSets, res, resOpt.one2json)
-      case HasNo => optHasNo(col, optSets, res, resOpt.one2json)
+      case Has   => optHas(col, optSet, res, resOpt.one2json)
+      case HasNo => optHasNo(col, optSet, res, resOpt.one2json)
       case other => unexpectedOp(other)
     }
   }
@@ -107,7 +110,7 @@ trait ResolveExprSet_mysql
   // has -----------------------------------------------------------------------
 
   override protected def has[T: ClassTag](
-    col: String, sets: Seq[Set[T]], res: ResSet[T], one2json: T => String, mandatory: Boolean
+    col: String, set: Set[T], res: ResSet[T], one2json: T => String, mandatory: Boolean
   ): Unit = {
     def containsSet(set: Set[T]): String = {
       val jsonValues = set.map(one2json).mkString(", ")
@@ -119,33 +122,23 @@ trait ResolveExprSet_mysql
       groupByCols -= col
       aggregate = true
     }
-    sets.length match {
+    set.size match {
       case 0 => where += (("FALSE", ""))
-      case 1 =>
-        val set = sets.head
-        set.size match {
-          case 0 => where += (("FALSE", ""))
-          case 1 => where += (("", s"JSON_CONTAINS($col, JSON_ARRAY(${one2json(set.head)}))"))
-          case _ => where += (("", containsSet(set)))
-        }
-      case _ =>
-        val expr = sets
-          .filterNot(_.isEmpty)
-          .map(containsSet).mkString("(\n    ", " OR\n    ", "\n  )")
-        where += (("", expr))
+      case 1 => where += (("", s"JSON_CONTAINS($col, JSON_ARRAY(${one2json(set.head)}))"))
+      case _ => where += (("", set.map(v => containsSet(Set(v))).mkString("(", " OR\n   ", ")")))
     }
   }
 
   override protected def optHas[T: ClassTag](
     col: String,
-    optSets: Option[Seq[Set[T]]],
+    optSets: Option[Set[T]],
     res: ResSet[T],
     one2sql: T => String,
   ): Unit = {
     optSets.fold[Unit] {
       where += ((col, s"IS NULL"))
-    } { sets =>
-      has(col, sets, res, one2sql, true)
+    } { set =>
+      has(col, set, res, one2sql, true)
       replaceCast((row: RS, paramIndex: Int) =>
         res.json2optArray(row.getString(paramIndex)).map(_.toSet)
       )
@@ -156,7 +149,7 @@ trait ResolveExprSet_mysql
   // hasNo ---------------------------------------------------------------------
 
   override protected def hasNo[T](
-    col: String, sets: Seq[Set[T]], res: ResSet[T], one2json: T => String, mandatory: Boolean
+    col: String, set: Set[T], res: ResSet[T], one2json: T => String, mandatory: Boolean
   ): Unit = {
     def notContains(v: T): String = s"NOT JSON_CONTAINS($col, JSON_ARRAY(${one2json(v)}))"
     def notContainsSet(set: Set[T]): String = {
@@ -169,34 +162,23 @@ trait ResolveExprSet_mysql
       groupByCols -= col
       aggregate = true
     }
-    sets.length match {
+    set.size match {
       case 0 => ()
-      case 1 =>
-        val set = sets.head
-        set.size match {
-          case 0 => ()
-          case 1 => where += (("", notContains(set.head)))
-          case _ => where += (("", notContainsSet(set)))
-        }
-      case _ =>
-        val expr = sets
-          .filterNot(_.isEmpty)
-          .map(notContainsSet)
-          .mkString("(\n    ", " AND\n    ", "\n  )")
-        where += (("", expr))
+      case 1 => where += (("", notContains(set.head)))
+      case _ => where += (("", set.map(v => notContainsSet(Set(v))).mkString("(", " AND\n   ", ")")))
     }
   }
 
   override protected def optHasNo[T: ClassTag](
     col: String,
-    optSets: Option[Seq[Set[T]]],
+    optSet: Option[Set[T]],
     res: ResSet[T],
     one2sql: T => String
   ): Unit = {
-    optSets.fold[Unit] {
+    optSet.fold[Unit] {
       setOptAttr(col, res)
-    } { sets =>
-      hasNo(col, sets, res, one2sql, true)
+    } { set =>
+      hasNo(col, set, res, one2sql, true)
       replaceCast((row: RS, paramIndex: Int) =>
         res.json2optArray(row.getString(paramIndex)).map(_.toSet)
       )

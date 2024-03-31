@@ -11,7 +11,7 @@ trait ResolveExprSetRefAttr_mariadb
 
 
   override protected def refMan[T: ClassTag](
-    attr: Attr, args: Seq[Set[T]], res: ResSet[T]
+    attr: Attr, args: Set[T], res: ResSet[T]
   ): Unit = {
     select += s"JSON_ARRAYAGG($joinTable.$ref_id) $refIds"
     joins += (("INNER JOIN", joinTable, "", s"$nsId", s"= $joinTable.$ns_id"))
@@ -36,7 +36,7 @@ trait ResolveExprSetRefAttr_mariadb
 
   override protected def refOpt[T: ClassTag](
     attr: Attr,
-    optSets: Option[Seq[Set[T]]],
+    optSet: Option[Set[T]],
     resOpt: ResSetOpt[T],
     res: ResSet[T]
   ): Unit = {
@@ -53,10 +53,10 @@ trait ResolveExprSetRefAttr_mariadb
 
     attr.op match {
       case V     => ()
-      case Eq    => refOptEqual(optSets, res)
-      case Neq   => refOptNeq(optSets, res)
-      case Has   => refOptHas(col, optSets)
-      case HasNo => refOptHasNo(optSets)
+      case Eq    => refOptEqual(optSet, res)
+      case Neq   => refOptNeq(optSet, res)
+      case Has   => refOptHas(col, optSet)
+      case HasNo => refOptHasNo(optSet)
       case other => unexpectedOp(other)
     }
   }
@@ -73,23 +73,12 @@ trait ResolveExprSetRefAttr_mariadb
        |  )""".stripMargin
   }
 
-  private def refMatchArrays[T](sets: Seq[Set[T]], one2json: T => String): String = {
-    sets.map(set =>
-      refMatchArray(set, one2json)
-    ).mkString("(\n    ", " OR\n    ", "\n  )")
+  override protected def refEqual[T](set: Set[T], res: ResSet[T]): Unit = {
+    where += (("", refMatchArray(set, res.one2json)))
   }
 
-  override protected def refEqual[T](sets: Seq[Set[T]], res: ResSet[T]): Unit = {
-    val setsNonEmpty = sets.filterNot(_.isEmpty)
-    setsNonEmpty.length match {
-      case 0 => where += (("FALSE", ""))
-      case 1 => where += (("", refMatchArray(setsNonEmpty.head, res.one2json)))
-      case _ => where += (("", refMatchArrays(setsNonEmpty, res.one2json)))
-    }
-  }
-
-  override protected def refOptEqual[T](optSets: Option[Seq[Set[T]]], res: ResSet[T]): Unit = {
-    optSets.fold[Unit] {
+  override protected def refOptEqual[T](optSet: Option[Set[T]], res: ResSet[T]): Unit = {
+    optSet.fold[Unit] {
       where += (("",
         s"""(
            |    SELECT count($joinTable.$ref_id) = 0
@@ -97,28 +86,17 @@ trait ResolveExprSetRefAttr_mariadb
            |    WHERE $joinTable.$ns_id = $nsId
            |  )""".stripMargin
       ))
-    } { sets =>
-      refEqual(sets, res)
+    } { set =>
+      refEqual(set, res)
     }
   }
 
-  override protected def refNeq[T](sets: Seq[Set[T]], res: ResSet[T]): Unit = {
-    val setsNonEmpty = sets.filterNot(_.isEmpty)
-    setsNonEmpty.length match {
-      case 0 => ()
-      case 1 => where += (("", "NOT (" +
-        refMatchArray(setsNonEmpty.head, res.one2json) +
-        ")"))
-      case _ => where += (("", "NOT (" +
-        refMatchArrays(setsNonEmpty, res.one2json) +
-        ")"))
-    }
+  override protected def refNeq[T](set: Set[T], res: ResSet[T]): Unit = {
+    where += (("", "NOT (" + refMatchArray(set, res.one2json) + ")"))
   }
 
-  override protected def refOptNeq[T](optSets: Option[Seq[Set[T]]], res: ResSet[T]): Unit = {
-    if (optSets.isDefined && optSets.get.nonEmpty) {
-      refNeq(optSets.get, res)
-    }
+  override protected def refOptNeq[T](optSet: Option[Set[T]], res: ResSet[T]): Unit = {
+    optSet.foreach(set => refNeq(set, res))
     notNull += s"$joinTable.$ns_id"
   }
 
@@ -139,36 +117,19 @@ trait ResolveExprSetRefAttr_mariadb
        |      )""".stripMargin
   }
 
-  override protected def refHas[T: ClassTag](sets: Seq[Set[T]]): Unit = {
-    sets.length match {
+  override protected def refHas[T: ClassTag](set: Set[T]): Unit = {
+    set.size match {
       case 0 => where += (("FALSE", ""))
-      case 1 =>
-        val set = sets.head
-        if (set.isEmpty)
-          where += (("FALSE", ""))
-        else
-          where += (("", arrayMatches(Seq(arrayMatch(set)), "OR")))
-      case _ =>
-        sets.filterNot(_.isEmpty) match {
-          case Nil  => where += (("FALSE", ""))
-          case sets => where += (("", arrayMatches(sets.map(arrayMatch(_)), "OR")))
-        }
-
+      case 1 => where += (("", arrayMatches(Seq(arrayMatch(set)), "OR")))
+      case _ => where += (("", arrayMatches(set.toSeq.map(v => arrayMatch(Set(v))), "OR")))
     }
   }
 
-  override protected def refHasNo[T](sets: Seq[Set[T]]): Unit = {
-    sets.length match {
+  override protected def refHasNo[T](set: Set[T]): Unit = {
+    set.size match {
       case 0 => ()
-      case 1 =>
-        val set = sets.head
-        if (set.nonEmpty) {
-          where += (("", arrayMatches(Seq(arrayMatch(set, "NOT ")), "AND")))
-        }
-      case _ => sets.filterNot(_.isEmpty) match {
-        case Nil  => () // all
-        case sets => where += (("", arrayMatches(sets.map(arrayMatch(_, "NOT ")), "AND")))
-      }
+      case 1 => where += (("", arrayMatches(Seq(arrayMatch(set, "NOT ")), "AND")))
+      case _ => where += (("", arrayMatches(set.toSeq.map(v => arrayMatch(Set(v), "NOT ")), "AND")))
     }
   }
 }

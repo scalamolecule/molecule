@@ -102,7 +102,7 @@ trait FilterOne_Boolean extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "Optional" - types { implicit conn =>
       val a = (1, Some(true))
       val b = (2, Some(false))
-      val x = (4, Option.empty[Boolean])
+      val x = (3, Option.empty[Boolean])
       for {
         _ <- Ns.i.boolean_?.insert(List(a, b, x)).transact
 
@@ -112,40 +112,11 @@ trait FilterOne_Boolean extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Find optional values matching
         _ <- Ns.i.a1.boolean_?(Some(true)).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.boolean_?(Some(false)).query.get.map(_ ==> List(b))
-        _ <- Ns.i.a1.boolean_?(Some(Seq(true))).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.boolean_?(Some(Seq(false))).query.get.map(_ ==> List(b))
-        // OR semantics for Ses of multiple args
-        _ <- Ns.i.a1.boolean_?(Some(Seq(true, false))).query.get.map(_ ==> List(a, b))
-        // Empty Seq of args matches no values
-        _ <- Ns.i.a1.boolean_?(Some(Seq.empty[Boolean])).query.get.map(_ ==> List())
+
         // None matches non-asserted/null values
         _ <- Ns.i.a1.boolean_?(Option.empty[Boolean]).query.get.map(_ ==> List(x))
-        _ <- Ns.i.a1.boolean_?(Option.empty[Seq[Boolean]]).query.get.map(_ ==> List(x))
-
-
-        // Find optional values not matching
-        _ <- Ns.i.a1.boolean_?.not(Some(true)).query.get.map(_ ==> List(b))
-        _ <- Ns.i.a1.boolean_?.not(Some(false)).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.boolean_?.not(Some(Seq(true))).query.get.map(_ ==> List(b))
-        _ <- Ns.i.a1.boolean_?.not(Some(Seq(false))).query.get.map(_ ==> List(a))
-        // OR semantics for multiple args (for Boolean meaning all)
-        _ <- Ns.i.a1.boolean_?.not(Some(Seq(true, false))).query.get.map(_ ==> List())
-        // Empty Seq of negation args matches all asserted values (non-null)
-        _ <- Ns.i.a1.boolean_?.not(Some(Seq.empty[Boolean])).query.get.map(_ ==> List(a, b))
-        // None matches all asserted values (non-null)
-        _ <- Ns.i.a1.boolean_?.not(Option.empty[Boolean]).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.boolean_?.not(Option.empty[Seq[Boolean]]).query.get.map(_ ==> List(a, b))
-
-        // Find optional values in range
-        _ <- Ns.i.a1.boolean_?.<(Some(true)).query.get.map(_ ==> List(b))
-        _ <- Ns.i.a1.boolean_?.<=(Some(true)).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.boolean_?.>(Some(true)).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.boolean_?.>=(Some(true)).query.get.map(_ ==> List(a))
-        // None can't be compared and returns empty result
-        _ <- Ns.i.a1.boolean_?.<(None).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.boolean_?.>(None).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.boolean_?.<=(None).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.boolean_?.>=(None).query.get.map(_ ==> List())
+        // Easier to apply nothing to tacit attribute
+        _ <- Ns.i.a1.boolean_().query.get.map(_ ==> List(3))
       } yield ()
     }
   }

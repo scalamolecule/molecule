@@ -29,7 +29,7 @@ trait FilterOne_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
         _ <- Ns.i.a1.offsetTime(offsetTime1).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.offsetTime(Seq(offsetTime0)).query.get.map(_ ==> List())
         _ <- Ns.i.a1.offsetTime(Seq(offsetTime1)).query.get.map(_ ==> List(a))
-        // OR semantics for multiple args
+        // OR semantics for multiple args ("is this or that")
         _ <- Ns.i.a1.offsetTime(offsetTime1, offsetTime2).query.get.map(_ ==> List(a, b))
         _ <- Ns.i.a1.offsetTime(offsetTime1, offsetTime0).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.offsetTime(Seq(offsetTime1, offsetTime2)).query.get.map(_ ==> List(a, b))
@@ -86,7 +86,7 @@ trait FilterOne_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
         _ <- Ns.i.a1.offsetTime_(offsetTime1).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.offsetTime_(Seq(offsetTime0)).query.get.map(_ ==> List())
         _ <- Ns.i.a1.offsetTime_(Seq(offsetTime1)).query.get.map(_ ==> List(a))
-        // OR semantics for multiple args
+        // OR semantics for multiple args ("is this or that")
         _ <- Ns.i.a1.offsetTime_(offsetTime1, offsetTime2).query.get.map(_ ==> List(a, b))
         _ <- Ns.i.a1.offsetTime_(offsetTime1, offsetTime0).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.offsetTime_(Seq(offsetTime1, offsetTime2)).query.get.map(_ ==> List(a, b))
@@ -136,46 +136,11 @@ trait FilterOne_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
         // Find optional values matching
         _ <- Ns.i.a1.offsetTime_?(Some(offsetTime0)).query.get.map(_ ==> List())
         _ <- Ns.i.a1.offsetTime_?(Some(offsetTime1)).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.offsetTime_?(Some(Seq(offsetTime0))).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.offsetTime_?(Some(Seq(offsetTime1))).query.get.map(_ ==> List(a))
-        // OR semantics for Ses of multiple args
-        _ <- Ns.i.a1.offsetTime_?(Some(Seq(offsetTime1, offsetTime2))).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.offsetTime_?(Some(Seq(offsetTime1, offsetTime0))).query.get.map(_ ==> List(a))
-        // Empty Seq of args matches no values
-        _ <- Ns.i.a1.offsetTime_?(Some(Seq.empty[OffsetTime])).query.get.map(_ ==> List())
+
         // None matches non-asserted/null values
         _ <- Ns.i.a1.offsetTime_?(Option.empty[OffsetTime]).query.get.map(_ ==> List(x))
-        _ <- Ns.i.a1.offsetTime_?(Option.empty[Seq[OffsetTime]]).query.get.map(_ ==> List(x))
-
-        // Find optional values not matching
-        _ <- Ns.i.a1.offsetTime_?.not(Some(offsetTime0)).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.offsetTime_?.not(Some(offsetTime1)).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.offsetTime_?.not(Some(offsetTime2)).query.get.map(_ ==> List(a, c))
-        _ <- Ns.i.a1.offsetTime_?.not(Some(offsetTime3)).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.offsetTime_?.not(Some(Seq(offsetTime0))).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.offsetTime_?.not(Some(Seq(offsetTime1))).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.offsetTime_?.not(Some(Seq(offsetTime2))).query.get.map(_ ==> List(a, c))
-        _ <- Ns.i.a1.offsetTime_?.not(Some(Seq(offsetTime3))).query.get.map(_ ==> List(a, b))
-        // OR semantics for multiple negation args
-        _ <- Ns.i.a1.offsetTime_?.not(Some(Seq(offsetTime0, offsetTime1))).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.offsetTime_?.not(Some(Seq(offsetTime1, offsetTime2))).query.get.map(_ ==> List(c))
-        _ <- Ns.i.a1.offsetTime_?.not(Some(Seq(offsetTime2, offsetTime3))).query.get.map(_ ==> List(a))
-        // Empty Seq of negation args matches all asserted values (non-null)
-        _ <- Ns.i.a1.offsetTime_?.not(Some(Seq.empty[OffsetTime])).query.get.map(_ ==> List(a, b, c))
-        // Negating None matches all asserted values (non-null)
-        _ <- Ns.i.a1.offsetTime_?.not(Option.empty[OffsetTime]).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.offsetTime_?.not(Option.empty[Seq[OffsetTime]]).query.get.map(_ ==> List(a, b, c))
-
-        // Find optional values in range
-        _ <- Ns.i.a1.offsetTime_?.<(Some(offsetTime2)).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.offsetTime_?.>(Some(offsetTime2)).query.get.map(_ ==> List(c))
-        _ <- Ns.i.a1.offsetTime_?.<=(Some(offsetTime2)).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.offsetTime_?.>=(Some(offsetTime2)).query.get.map(_ ==> List(b, c))
-        // None can't be compared and returns empty result
-        _ <- Ns.i.a1.offsetTime_?.<(None).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.offsetTime_?.<=(None).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.offsetTime_?.>(None).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.offsetTime_?.>=(None).query.get.map(_ ==> List())
+        // Easier to apply nothing to tacit attribute
+        _ <- Ns.i.a1.offsetTime_().query.get.map(_ ==> List(4))
       } yield ()
     }
   }

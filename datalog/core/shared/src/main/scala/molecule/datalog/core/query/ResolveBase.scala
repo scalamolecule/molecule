@@ -73,30 +73,6 @@ trait ResolveBase extends BaseHelpers {
     (v: AnyRef) => v.asInstanceOf[String].charAt(0).asInstanceOf[AnyRef]
 
 
-  protected lazy val jSet2sId            : AnyRef => AnyRef = (v: AnyRef) => j2sId(v.asInstanceOf[jList[AnyRef]].iterator.next())
-  protected lazy val jSet2sString        : AnyRef => AnyRef = (v: AnyRef) => j2sString(v.asInstanceOf[jList[AnyRef]].iterator.next())
-  protected lazy val jSet2sInt           : AnyRef => AnyRef = (v: AnyRef) => j2sInt(v.asInstanceOf[jList[AnyRef]].iterator.next())
-  protected lazy val jSet2sLong          : AnyRef => AnyRef = (v: AnyRef) => j2sLong(v.asInstanceOf[jList[AnyRef]].iterator.next())
-  protected lazy val jSet2sFloat         : AnyRef => AnyRef = (v: AnyRef) => j2sFloat(v.asInstanceOf[jList[AnyRef]].iterator.next())
-  protected lazy val jSet2sDouble        : AnyRef => AnyRef = (v: AnyRef) => j2sDouble(v.asInstanceOf[jList[AnyRef]].iterator.next())
-  protected lazy val jSet2sBoolean       : AnyRef => AnyRef = (v: AnyRef) => j2sBoolean(v.asInstanceOf[jList[AnyRef]].iterator.next())
-  protected lazy val jSet2sBigInt        : AnyRef => AnyRef = (v: AnyRef) => j2sBigInt(v.asInstanceOf[jList[AnyRef]].iterator.next())
-  protected lazy val jSet2sBigDecimal    : AnyRef => AnyRef = (v: AnyRef) => j2sBigDecimal(v.asInstanceOf[jList[AnyRef]].iterator.next())
-  protected lazy val jSet2sDate          : AnyRef => AnyRef = (v: AnyRef) => j2sDate(v.asInstanceOf[jList[AnyRef]].iterator.next())
-  protected lazy val jSet2sDuration      : AnyRef => AnyRef = (v: AnyRef) => j2sDuration(v.asInstanceOf[jList[AnyRef]].iterator.next())
-  protected lazy val jSet2sInstant       : AnyRef => AnyRef = (v: AnyRef) => j2sInstant(v.asInstanceOf[jList[AnyRef]].iterator.next())
-  protected lazy val jSet2sLocalDate     : AnyRef => AnyRef = (v: AnyRef) => j2sLocalDate(v.asInstanceOf[jList[AnyRef]].iterator.next())
-  protected lazy val jSet2sLocalTime     : AnyRef => AnyRef = (v: AnyRef) => j2sLocalTime(v.asInstanceOf[jList[AnyRef]].iterator.next())
-  protected lazy val jSet2sLocalDateTime : AnyRef => AnyRef = (v: AnyRef) => j2sLocalDateTime(v.asInstanceOf[jList[AnyRef]].iterator.next())
-  protected lazy val jSet2sOffsetTime    : AnyRef => AnyRef = (v: AnyRef) => j2sOffsetTime(v.asInstanceOf[jList[AnyRef]].iterator.next())
-  protected lazy val jSet2sOffsetDateTime: AnyRef => AnyRef = (v: AnyRef) => j2sOffsetDateTime(v.asInstanceOf[jList[AnyRef]].iterator.next())
-  protected lazy val jSet2sZonedDateTime : AnyRef => AnyRef = (v: AnyRef) => j2sZonedDateTime(v.asInstanceOf[jList[AnyRef]].iterator.next())
-  protected lazy val jSet2sUUID          : AnyRef => AnyRef = (v: AnyRef) => j2sUUID(v.asInstanceOf[jList[AnyRef]].iterator.next())
-  protected lazy val jSet2sURI           : AnyRef => AnyRef = (v: AnyRef) => j2sURI(v.asInstanceOf[jList[AnyRef]].iterator.next())
-  protected lazy val jSet2sByte          : AnyRef => AnyRef = (v: AnyRef) => j2sByte(v.asInstanceOf[jList[AnyRef]].iterator.next())
-  protected lazy val jSet2sShort         : AnyRef => AnyRef = (v: AnyRef) => j2sShort(v.asInstanceOf[jList[AnyRef]].iterator.next())
-  protected lazy val jSet2sChar          : AnyRef => AnyRef = (v: AnyRef) => j2sChar(v.asInstanceOf[jList[AnyRef]].iterator.next())
-
   // Scala to Java
   protected lazy val s2jId            : Any => Any = (v: Any) => v.asInstanceOf[String].toLong.asInstanceOf[Any]
   protected lazy val s2jString        : Any => Any = identity

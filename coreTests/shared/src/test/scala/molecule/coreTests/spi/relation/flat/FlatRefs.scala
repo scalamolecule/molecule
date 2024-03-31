@@ -57,13 +57,14 @@ trait FlatRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (3, Set(5, 6)),
         ).transact
 
-        // Two A.i values were inserted
+        // A.i was inserted
         _ <- A.i.a1.query.get.map(_ ==> List(1, 3))
 
         _ <- A.i.a1.B.iSet_?.query.get.map(_ ==> List(
-          // (1, None), // Not returned since there's no relationship to B
+          (1, None),
           (3, Some(Set(5, 6)))
         ))
+
         _ <- A.i.B.iSet.query.get.map(_ ==> List(
           (3, Set(5, 6))
         ))
@@ -123,18 +124,6 @@ trait FlatRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // Reference Set of entities
           _ <- A.i(0).bb(Set(b1, b2)).save.transact
-
-          // Saving individual ref ids (not in a Set) is not allowed
-          _ <- A.i(0).bb(Seq(Set(b1), Set(b2))).save.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-              err ==> "Can only save one Set of values for Set attribute `A.bb`. " +
-                s"Found: Set($b1), Set($b2)"
-            }
-          _ <- A.i(0).bb(Set(b1), Set(b2)).save.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-              err ==> "Can only save one Set of values for Set attribute `A.bb`. " +
-                s"Found: Set($b1), Set($b2)"
-            }
 
           // Referencing namespace attributes repeat for each referenced entity
           _ <- A.i.Bb.i.a1.query.get.map(_ ==> List(

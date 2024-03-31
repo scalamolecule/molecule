@@ -9,7 +9,6 @@ import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
-import scala.collection.immutable.Set
 
 trait Aggr_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 

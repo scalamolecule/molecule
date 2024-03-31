@@ -242,33 +242,12 @@ trait UpdateSeq_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Semantics" - {
 
-      "Can't update multiple values for one card-one attribute" - types { implicit conn =>
-        for {
-          _ <- Ns("42").intSeq(Seq(Seq(1), Seq(2))).update.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-              err ==> "Can only update one Seq of values for Seq attribute `Ns.intSeq`."
-            }
-
-          // Same as
-          _ <- Ns("42").intSeq(Seq(1), Seq(2)).update.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-              err ==> "Can only update one Seq of values for Seq attribute `Ns.intSeq`."
-            }
-
-          // Same as
-          _ <- Ns("42").intSeq(Seq(1), Seq(2)).update.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-              err ==> "Can only update one Seq of values for Seq attribute `Ns.intSeq`."
-            }
-        } yield ()
-      }
-
       "Can't update optional values" - types { implicit conn =>
         for {
           _ <- Ns("42").intSeq_?(Some(List(1))).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
               err ==> "Can't update optional values. Found:\n" +
-                """AttrSeqOptInt("Ns", "intSeq", Eq, Some(Seq(Seq(1))), None, None, Nil, Nil, None, None, Seq(0, 54))"""
+                """AttrSeqOptInt("Ns", "intSeq", Eq, Some(Seq(1)), None, None, Nil, Nil, None, None, Seq(0, 54))"""
             }
         } yield ()
       }

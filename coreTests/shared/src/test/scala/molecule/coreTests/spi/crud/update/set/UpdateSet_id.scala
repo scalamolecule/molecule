@@ -98,13 +98,13 @@ trait UpdateSet_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.intSet.stringSet.query.get.map(_ ==> List((Set(1), Set("a"))))
 
         // Apply new value(s) to replace old value(s)
-        _ <- Ns(id).intSet.apply(Set(2)).stringSet.apply(Set("b", "c")).update.transact
+        _ <- Ns(id).intSet(Set(2)).stringSet(Set("b", "c")).update.transact
         _ <- Ns.intSet.stringSet.query.get.map(_ ==> List((Set(2), Set("b", "c"))))
       } yield ()
     }
 
 
-    "Ref" - refs { implicit conn =>
+    "ref ref" - refs { implicit conn =>
       for {
         id <- A.iSet(Set(1)).B.iSet(Set(2)).C.iSet(Set(3)).save.transact.map(_.id)
         _ <- A.iSet.B.iSet.C.iSet.query.get.map(_ ==> List((Set(1), Set(2), Set(3))))
@@ -139,7 +139,7 @@ trait UpdateSet_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       } yield ()
     }
 
-    "OwnB" - refs { implicit conn =>
+    "own ref" - refs { implicit conn =>
       for {
         id <- A.iSet(Set(1)).OwnB.iSet(Set(2)).C.iSet(Set(3)).save.transact.map(_.id)
         _ <- A.iSet.OwnB.iSet.C.iSet.query.get.map(_ ==> List((Set(1), Set(2), Set(3))))
@@ -174,7 +174,7 @@ trait UpdateSet_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       } yield ()
     }
 
-    "OwnC" - refs { implicit conn =>
+    "ref own" - refs { implicit conn =>
       for {
         id <- A.iSet(Set(1)).B.iSet(Set(2)).OwnC.iSet(Set(3)).save.transact.map(_.id)
         _ <- A.iSet.B.iSet.OwnC.iSet.query.get.map(_ ==> List((Set(1), Set(2), Set(3))))
@@ -209,7 +209,7 @@ trait UpdateSet_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       } yield ()
     }
 
-    "OwnB OwnC" - refs { implicit conn =>
+    "own own" - refs { implicit conn =>
       for {
         id <- A.iSet(Set(1)).OwnB.iSet(Set(2)).OwnC.iSet(Set(3)).save.transact.map(_.id)
         _ <- A.iSet.OwnB.iSet.OwnC.iSet.query.get.map(_ ==> List((Set(1), Set(2), Set(3))))
@@ -259,27 +259,12 @@ trait UpdateSet_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Semantics" - {
 
-      "Can't update multiple values for one card-one attribute" - types { implicit conn =>
-        for {
-          _ <- Ns("42").intSet(Seq(Set(1), Set(2))).update.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-              err ==> "Can only update one Set of values for Set attribute `Ns.intSet`. Found: Set(1), Set(2)"
-            }
-
-          // Same as
-          _ <- Ns("42").intSet(Set(1), Set(2)).update.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-              err ==> "Can only update one Set of values for Set attribute `Ns.intSet`. Found: Set(1), Set(2)"
-            }
-        } yield ()
-      }
-
       "Can't update optional values" - types { implicit conn =>
         for {
           _ <- Ns("42").intSet_?(Some(Set(1))).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
               err ==> "Can't update optional values. Found:\n" +
-                """AttrSetOptInt("Ns", "intSet", Eq, Some(Seq(Set(1))), None, None, Nil, Nil, None, None, Seq(0, 31))"""
+                """AttrSetOptInt("Ns", "intSet", Eq, Some(Set(1)), None, None, Nil, Nil, None, None, Seq(0, 31))"""
             }
         } yield ()
       }

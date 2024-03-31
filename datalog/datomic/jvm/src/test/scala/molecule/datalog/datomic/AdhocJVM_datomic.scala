@@ -16,26 +16,32 @@ import utest._
 import scala.concurrent.Future
 import scala.language.implicitConversions
 
-//object AdhocJVM_datomic extends TestSuiteArray_datomic with Array2List {
-object AdhocJVM_datomic extends TestSuite_datomic {
+object AdhocJVM_datomic extends TestSuiteArray_datomic {
+  //object AdhocJVM_datomic extends TestSuite_datomic {
 
-
-  val (a1, b2) = ("a" -> int1, "b" -> int2)
-  val (b3, c4) = ("b" -> int3, "c" -> int4)
 
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+      val a = (1, Array(byte1, byte2))
+      val b = (2, Array(byte2, byte3, byte3))
       for {
+        _ <- Ns.i.byteArray.insert(List(a, b)).transact
 
+        // Exact matches
+        _ <- Ns.i.byteArray(Array(byte1)).query.get.map(_ ==> Nil)
+        _ <- Ns.i.byteArray(Array(byte1, byte2)).query.get.map(_ ==> List(a))
+        _ <- Ns.i.byteArray(Array(byte1, byte2, byte3)).query.get.map(_ ==> Nil)
 
-        _ <- Ns.i.intMap().query.get
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Applying nothing to mandatory attribute (Ns.intMap) is reserved for updates to retract."
-          }
+        // Empty Byte array matches nothing
+        _ <- Ns.i.byteArray(Array.empty[Byte]).query.get.map(_ ==> Nil)
+        _ <- Ns.i.byteArray_(Array.empty[Byte]).query.get.map(_ ==> Nil)
 
+        // Applying nothing matches nothing
+        _ <- Ns.i.byteArray().query.get.map(_ ==> Nil)
+        _ <- Ns.i.byteArray_().query.get.map(_ ==> Nil)
 
         //        _ = {
         //          println("----------- 1")
@@ -132,72 +138,93 @@ object AdhocJVM_datomic extends TestSuite_datomic {
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
 
-      val a = (1, List(1, 2), List(1, 2, 3), 3)
-      val b = (2, List(2, 3), List(2, 3), 3)
-      val c = (2, List(4), List(4), 4)
-
-      val d = (2, List(4), List(3), 4)
-
       for {
 
+        _ <- A.i.B.iSet.insert(
+          (1, Set.empty[Int]),
+          (3, Set(5, 6)),
+        ).transact
 
-        List(_, a2, a3) <- A.i.iSeq.B.iSeq.i.insert(a, b, c).transact.map(_.ids)
+        //        _ <- rawTransact(
+        //          """[
+        //            |  [:db/add #db/id[db.part/user -1] :A/i 1]
+        //            |  [:db/add #db/id[db.part/user -1] :A/b #db/id[db.part/user -2]]
+        //            |  [:db/add #db/id[db.part/user -2] :B/iSet nil]
+        //            |  [:db/add #db/id[db.part/user -3] :A/i 3]
+        //            |  [:db/add #db/id[db.part/user -3] :A/b #db/id[db.part/user -4]]
+        //            |  [:db/add #db/id[db.part/user -4] :B/iSet 5]
+        //            |  [:db/add #db/id[db.part/user -4] :B/iSet 6]
+        //            |]
+        //            |""".stripMargin)
 
-        _ = {
-          println("----------- 1")
-          val res = datomic.Peer.q(
-            """[:find  ?c ?f3
-              | :where [?b :A/i ?c]
-              |        [?b :A/iSeq _]
-              |        [(datomic.api/q
-              |          "[:find (distinct ?d-pair)
-              |            :in $ ?b
-              |            :where [?b :A/iSeq ?d]
-              |                   [?d :A.iSeq/i_ ?d-i]
-              |                   [?d :A.iSeq/v_ ?d-v]
-              |                   [(vector ?d-i ?d-v) ?d-pair]]" $ ?b) [[?d1]]]
-              |        [(sort-by first ?d1) ?d2]
-              |        [(map second ?d2) ?d3]
-              |        [?b :A/b ?e]
-              |        [?e :B/iSeq _]
-              |        [(datomic.api/q
-              |          "[:find (distinct ?f-pair)
-              |            :in $ ?e
-              |            :where [?e :B/iSeq ?f]
-              |                   [?f :B.iSeq/i_ ?f-i]
-              |                   [?f :B.iSeq/v_ ?f-v]
-              |                   [(vector ?f-i ?f-v) ?f-pair]]" $ ?e) [[?f1]]]
-              |        [(sort-by first ?f1) ?f2]
-              |        [(map second ?f2) ?f3]
-              |        [(= ?d3 ?f3)]]
-              |""".stripMargin, conn.db,
-            //            Seq(Seq(1, 2, 2).asJava).asJava
-            //            Seq(1, 2, 2).asJava
-          )
-          res.forEach(r => println(r))
+        // Two A.i values were inserted
+        _ <- A.i.a1.query.get.map(_ ==> List(1, 3))
 
-          //          println("----------- 2")
-          //          datomic.Peer.q(
-          //            """[:find  ?b ?c3
-          //              | :in    $ ?c-blacklist
-          //              | :where [?a :A/i ?b]
-          //              |        [?a :A/iSeq ?c]
-          //              |        [(contains? ?c-blacklist ?a) ?c-blacklisted]
-          //              |        [(not ?c-blacklisted)]
-          //              |        [(datomic.api/q
-          //              |          "[:find (distinct ?c-pair)
-          //              |            :in $ ?a
-          //              |            :where [?a :A/iSeq ?c]
-          //              |                   [?c :A.iSeq/i_ ?c-i]
-          //              |                   [?c :A.iSeq/v_ ?c-v]
-          //              |                   [(vector ?c-i ?c-v) ?c-pair]]" $ ?a) [[?c1]]]
-          //              |        [(sort-by first ?c1) ?c2]
-          //              |        [(map second ?c2) ?c3]]
-          //              |""".stripMargin, conn.db,
-          //            res
-          //            //            Seq(false).asJava
-          //          ).forEach(r => println(r))
-        }
+        _ <- A.i.a1.B.iSet_?.query.get.map(_ ==> List(
+          (1, None), // Not returned since there's no relationship to B
+          (3, Some(Set(5, 6)))
+        ))
+
+        _ <- A.i.B.iSet.query.get.map(_ ==> List(
+          (3, Set(5, 6))
+        ))
+
+
+        //        _ = {
+        //          println("----------- 1")
+        //          val res = datomic.Peer.q(
+        //            """[:find  ?c ?f3
+        //              | :where [?b :A/i ?c]
+        //              |        [?b :A/iSeq _]
+        //              |        [(datomic.api/q
+        //              |          "[:find (distinct ?d-pair)
+        //              |            :in $ ?b
+        //              |            :where [?b :A/iSeq ?d]
+        //              |                   [?d :A.iSeq/i_ ?d-i]
+        //              |                   [?d :A.iSeq/v_ ?d-v]
+        //              |                   [(vector ?d-i ?d-v) ?d-pair]]" $ ?b) [[?d1]]]
+        //              |        [(sort-by first ?d1) ?d2]
+        //              |        [(map second ?d2) ?d3]
+        //              |        [?b :A/b ?e]
+        //              |        [?e :B/iSeq _]
+        //              |        [(datomic.api/q
+        //              |          "[:find (distinct ?f-pair)
+        //              |            :in $ ?e
+        //              |            :where [?e :B/iSeq ?f]
+        //              |                   [?f :B.iSeq/i_ ?f-i]
+        //              |                   [?f :B.iSeq/v_ ?f-v]
+        //              |                   [(vector ?f-i ?f-v) ?f-pair]]" $ ?e) [[?f1]]]
+        //              |        [(sort-by first ?f1) ?f2]
+        //              |        [(map second ?f2) ?f3]
+        //              |        [(= ?d3 ?f3)]]
+        //              |""".stripMargin, conn.db,
+        //            //            Seq(Seq(1, 2, 2).asJava).asJava
+        //            //            Seq(1, 2, 2).asJava
+        //          )
+        //          res.forEach(r => println(r))
+        //
+        //          //          println("----------- 2")
+        //          //          datomic.Peer.q(
+        //          //            """[:find  ?b ?c3
+        //          //              | :in    $ ?c-blacklist
+        //          //              | :where [?a :A/i ?b]
+        //          //              |        [?a :A/iSeq ?c]
+        //          //              |        [(contains? ?c-blacklist ?a) ?c-blacklisted]
+        //          //              |        [(not ?c-blacklisted)]
+        //          //              |        [(datomic.api/q
+        //          //              |          "[:find (distinct ?c-pair)
+        //          //              |            :in $ ?a
+        //          //              |            :where [?a :A/iSeq ?c]
+        //          //              |                   [?c :A.iSeq/i_ ?c-i]
+        //          //              |                   [?c :A.iSeq/v_ ?c-v]
+        //          //              |                   [(vector ?c-i ?c-v) ?c-pair]]" $ ?a) [[?c1]]]
+        //          //              |        [(sort-by first ?c1) ?c2]
+        //          //              |        [(map second ?c2) ?c3]]
+        //          //              |""".stripMargin, conn.db,
+        //          //            res
+        //          //            //            Seq(false).asJava
+        //          //          ).forEach(r => println(r))
+        //        }
 
 
       } yield ()
@@ -213,32 +240,23 @@ object AdhocJVM_datomic extends TestSuite_datomic {
     //    }
     //
     //
-    //    "validation" - validation { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Validation._
-    //      for {
+    //        "validation" - validation { implicit conn =>
+    //          import molecule.coreTests.dataModels.core.dsl.Validation._
+    //          for {
     //
-    //        id <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf", "stamps")).save.transact.map(_.id)
+    //            id <- MandatoryRefB.i(1).RefB.i(2).save.transact.map(_.id)
     //
-    //        //            _ <- MandatoryAttr(id).name().update.transact
-    //        //              .map(_ ==> "Unexpected success").recover {
-    //        //                case ModelError(error) =>
-    //        //                  error ==>
-    //        //                    """Can't delete mandatory attributes (or remove last values of card-many attributes):
-    //        //                      |  MandatoryAttr.name
-    //        //                      |""".stripMargin
-    //        //              }
+    //            _ <- MandatoryRefB(id).refB().update.i.transact
+    //              .map(_ ==> "Unexpected success").recover {
+    //                case ModelError(error) =>
+    //                  error ==>
+    //                    """Can't delete mandatory attributes (or remove last values of card-many attributes):
+    //                      |  MandatoryRefB.refB
+    //                      |""".stripMargin
+    //              }
     //
-    //        _ <- MandatoryAttr(id).hobbies().update.i.transact
-    //          .map(_ ==> "Unexpected success").recover {
-    //            case ModelError(error) =>
-    //              error ==>
-    //                """Can't delete mandatory attributes (or remove last values of card-many attributes):
-    //                  |  MandatoryAttr.hobbies
-    //                  |""".stripMargin
-    //          }
-    //
-    //      } yield ()
-    //    }
+    //          } yield ()
+    //        }
     //
     //
     //    "refs" - refs { implicit conn =>

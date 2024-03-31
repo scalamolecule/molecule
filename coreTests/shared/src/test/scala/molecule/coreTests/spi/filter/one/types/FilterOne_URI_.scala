@@ -29,7 +29,7 @@ trait FilterOne_URI_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.uri(uri1).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.uri(Seq(uri0)).query.get.map(_ ==> List())
         _ <- Ns.i.a1.uri(Seq(uri1)).query.get.map(_ ==> List(a))
-        // OR semantics for multiple args
+        // OR semantics for multiple args ("is this or that")
         _ <- Ns.i.a1.uri(uri1, uri2).query.get.map(_ ==> List(a, b))
         _ <- Ns.i.a1.uri(uri1, uri0).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.uri(Seq(uri1, uri2)).query.get.map(_ ==> List(a, b))
@@ -86,7 +86,7 @@ trait FilterOne_URI_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.uri_(uri1).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.uri_(Seq(uri0)).query.get.map(_ ==> List())
         _ <- Ns.i.a1.uri_(Seq(uri1)).query.get.map(_ ==> List(a))
-        // OR semantics for multiple args
+        // OR semantics for multiple args ("is this or that")
         _ <- Ns.i.a1.uri_(uri1, uri2).query.get.map(_ ==> List(a, b))
         _ <- Ns.i.a1.uri_(uri1, uri0).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.uri_(Seq(uri1, uri2)).query.get.map(_ ==> List(a, b))
@@ -136,46 +136,11 @@ trait FilterOne_URI_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Find optional values matching
         _ <- Ns.i.a1.uri_?(Some(uri0)).query.get.map(_ ==> List())
         _ <- Ns.i.a1.uri_?(Some(uri1)).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.uri_?(Some(Seq(uri0))).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.uri_?(Some(Seq(uri1))).query.get.map(_ ==> List(a))
-        // OR semantics for Ses of multiple args
-        _ <- Ns.i.a1.uri_?(Some(Seq(uri1, uri2))).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.uri_?(Some(Seq(uri1, uri0))).query.get.map(_ ==> List(a))
-        // Empty Seq of args matches no values
-        _ <- Ns.i.a1.uri_?(Some(Seq.empty[URI])).query.get.map(_ ==> List())
+
         // None matches non-asserted/null values
         _ <- Ns.i.a1.uri_?(Option.empty[URI]).query.get.map(_ ==> List(x))
-        _ <- Ns.i.a1.uri_?(Option.empty[Seq[URI]]).query.get.map(_ ==> List(x))
-
-        // Find optional values not matching
-        _ <- Ns.i.a1.uri_?.not(Some(uri0)).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.uri_?.not(Some(uri1)).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.uri_?.not(Some(uri2)).query.get.map(_ ==> List(a, c))
-        _ <- Ns.i.a1.uri_?.not(Some(uri3)).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.uri_?.not(Some(Seq(uri0))).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.uri_?.not(Some(Seq(uri1))).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.uri_?.not(Some(Seq(uri2))).query.get.map(_ ==> List(a, c))
-        _ <- Ns.i.a1.uri_?.not(Some(Seq(uri3))).query.get.map(_ ==> List(a, b))
-        // OR semantics for multiple negation args
-        _ <- Ns.i.a1.uri_?.not(Some(Seq(uri0, uri1))).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.uri_?.not(Some(Seq(uri1, uri2))).query.get.map(_ ==> List(c))
-        _ <- Ns.i.a1.uri_?.not(Some(Seq(uri2, uri3))).query.get.map(_ ==> List(a))
-        // Empty Seq of negation args matches all asserted values (non-null)
-        _ <- Ns.i.a1.uri_?.not(Some(Seq.empty[URI])).query.get.map(_ ==> List(a, b, c))
-        // Negating None matches all asserted values (non-null)
-        _ <- Ns.i.a1.uri_?.not(Option.empty[URI]).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.uri_?.not(Option.empty[Seq[URI]]).query.get.map(_ ==> List(a, b, c))
-
-        // Find optional values in range
-        _ <- Ns.i.a1.uri_?.<(Some(uri2)).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.uri_?.>(Some(uri2)).query.get.map(_ ==> List(c))
-        _ <- Ns.i.a1.uri_?.<=(Some(uri2)).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.uri_?.>=(Some(uri2)).query.get.map(_ ==> List(b, c))
-        // None can't be compared and returns empty result
-        _ <- Ns.i.a1.uri_?.<(None).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.uri_?.<=(None).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.uri_?.>(None).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.uri_?.>=(None).query.get.map(_ ==> List())
+        // Easier to apply nothing to tacit attribute
+        _ <- Ns.i.a1.uri_().query.get.map(_ ==> List(4))
       } yield ()
     }
   }

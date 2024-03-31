@@ -39,6 +39,7 @@ trait SaveOps extends Action2Data with BaseOps {
     ns: String,
     attr: String,
     optArray: Option[Array[Byte]],
+    exts: List[String],
   ): Unit = ???
 
   protected def addMap[T](

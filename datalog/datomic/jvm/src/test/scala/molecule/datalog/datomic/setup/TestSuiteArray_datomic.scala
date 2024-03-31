@@ -6,11 +6,12 @@ import molecule.core.marshalling.DatomicProxy
 import molecule.core.spi.Conn
 import molecule.core.util.Executor._
 import molecule.coreTests.setup.{CoreTestSuite, CoreTestSuiteBase}
+import molecule.coreTests.util.Array2List
 import molecule.datalog.datomic.facade.DatomicPeer
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
 
-trait TestSuiteArray_datomic extends CoreTestSuiteBase {
+trait TestSuiteArray_datomic extends CoreTestSuiteBase with Array2List {
 
   override val platform              = "jvm"
   override val database              = "Datomic"

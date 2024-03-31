@@ -28,7 +28,7 @@ trait FilterOne_Char_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.char(char1).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.char(Seq(char0)).query.get.map(_ ==> List())
         _ <- Ns.i.a1.char(Seq(char1)).query.get.map(_ ==> List(a))
-        // OR semantics for multiple args
+        // OR semantics for multiple args ("is this or that")
         _ <- Ns.i.a1.char(char1, char2).query.get.map(_ ==> List(a, b))
         _ <- Ns.i.a1.char(char1, char0).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.char(Seq(char1, char2)).query.get.map(_ ==> List(a, b))
@@ -85,7 +85,7 @@ trait FilterOne_Char_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.char_(char1).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.char_(Seq(char0)).query.get.map(_ ==> List())
         _ <- Ns.i.a1.char_(Seq(char1)).query.get.map(_ ==> List(a))
-        // OR semantics for multiple args
+        // OR semantics for multiple args ("is this or that")
         _ <- Ns.i.a1.char_(char1, char2).query.get.map(_ ==> List(a, b))
         _ <- Ns.i.a1.char_(char1, char0).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.char_(Seq(char1, char2)).query.get.map(_ ==> List(a, b))
@@ -135,46 +135,11 @@ trait FilterOne_Char_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Find optional values matching
         _ <- Ns.i.a1.char_?(Some(char0)).query.get.map(_ ==> List())
         _ <- Ns.i.a1.char_?(Some(char1)).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.char_?(Some(Seq(char0))).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.char_?(Some(Seq(char1))).query.get.map(_ ==> List(a))
-        // OR semantics for Ses of multiple args
-        _ <- Ns.i.a1.char_?(Some(Seq(char1, char2))).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.char_?(Some(Seq(char1, char0))).query.get.map(_ ==> List(a))
-        // Empty Seq of args matches no values
-        _ <- Ns.i.a1.char_?(Some(Seq.empty[Char])).query.get.map(_ ==> List())
+
         // None matches non-asserted/null values
         _ <- Ns.i.a1.char_?(Option.empty[Char]).query.get.map(_ ==> List(x))
-        _ <- Ns.i.a1.char_?(Option.empty[Seq[Char]]).query.get.map(_ ==> List(x))
-
-        // Find optional values not matching
-        _ <- Ns.i.a1.char_?.not(Some(char0)).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.char_?.not(Some(char1)).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.char_?.not(Some(char2)).query.get.map(_ ==> List(a, c))
-        _ <- Ns.i.a1.char_?.not(Some(char3)).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.char_?.not(Some(Seq(char0))).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.char_?.not(Some(Seq(char1))).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.char_?.not(Some(Seq(char2))).query.get.map(_ ==> List(a, c))
-        _ <- Ns.i.a1.char_?.not(Some(Seq(char3))).query.get.map(_ ==> List(a, b))
-        // OR semantics for multiple negation args
-        _ <- Ns.i.a1.char_?.not(Some(Seq(char0, char1))).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.char_?.not(Some(Seq(char1, char2))).query.get.map(_ ==> List(c))
-        _ <- Ns.i.a1.char_?.not(Some(Seq(char2, char3))).query.get.map(_ ==> List(a))
-        // Empty Seq of negation args matches all asserted values (non-null)
-        _ <- Ns.i.a1.char_?.not(Some(Seq.empty[Char])).query.get.map(_ ==> List(a, b, c))
-        // Negating None matches all asserted values (non-null)
-        _ <- Ns.i.a1.char_?.not(Option.empty[Char]).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.char_?.not(Option.empty[Seq[Char]]).query.get.map(_ ==> List(a, b, c))
-
-        // Find optional values in range
-        _ <- Ns.i.a1.char_?.<(Some(char2)).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.char_?.>(Some(char2)).query.get.map(_ ==> List(c))
-        _ <- Ns.i.a1.char_?.<=(Some(char2)).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.char_?.>=(Some(char2)).query.get.map(_ ==> List(b, c))
-        // None can't be compared and returns empty result
-        _ <- Ns.i.a1.char_?.<(None).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.char_?.<=(None).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.char_?.>(None).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.char_?.>=(None).query.get.map(_ ==> List())
+        // Easier to apply nothing to tacit attribute
+        _ <- Ns.i.a1.char_().query.get.map(_ ==> List(4))
       } yield ()
     }
   }

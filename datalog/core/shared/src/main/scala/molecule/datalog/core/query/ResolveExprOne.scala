@@ -133,6 +133,7 @@ trait ResolveExprOne[Tpl]
     } { case (_, filterPath, filterAttr) =>
       expr2(e, a, v, getVar(filterAttr, filterPath), attr.op)
     }
+    refConfirmed = true
   }
 
   private def tac[T: ClassTag](
@@ -150,6 +151,7 @@ trait ResolveExprOne[Tpl]
     } { case (_, filterPath, filterAttr) =>
       expr2(e, a, v, getVar(filterAttr, filterPath), attr.op)
     }
+    refConfirmed = true
   }
 
   private def expr[T: ClassTag](

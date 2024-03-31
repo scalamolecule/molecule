@@ -82,6 +82,8 @@ trait DatomicQueryBase extends BaseHelpers with JavaConversions { self: Model2Qu
   final protected var filterAttrVars  = Map.empty[List[String], Var]
   final protected var filterAttrVars1 = Map.empty[String, (Var, Var)]
   final protected var filterAttrVars2 = Map.empty[String, (Var, Var) => Unit]
+  final protected var refConfirmed    = true
+
 
   final protected var firstId: String       = ""
   final protected var varPath: List[String] = List.empty[String]

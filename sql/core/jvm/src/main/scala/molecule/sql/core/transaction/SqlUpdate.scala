@@ -149,7 +149,8 @@ trait SqlUpdate
   override def updateSetEq[T](
     ns: String,
     attr: String,
-    sets: Seq[Set[T]],
+    //    sets: Seq[Set[T]],
+    set: Set[T],
     refNs: Option[String],
     owner: Boolean,
     transformValue: T => Any,
@@ -160,32 +161,21 @@ trait SqlUpdate
     refNs.fold {
       updateCurRefPath(attr)
       placeHolders = placeHolders :+ s"$attr = ?"
-      val colSetter = sets match {
-        case Seq(set) =>
-          if (set.nonEmpty) {
-            if (!isUpsert) {
-              addToUpdateCols(ns, attr)
-            }
-            val array = set2array(set)
-            (ps: PS, _: IdsMap, _: RowIndex) => {
-              val conn = ps.getConnection
-              ps.setArray(curParamIndex, conn.createArrayOf(exts(1), array))
-              curParamIndex += 1
-            }
-          } else {
-            (ps: PS, _: IdsMap, _: RowIndex) => {
-              ps.setNull(curParamIndex, 0)
-              curParamIndex += 1
-            }
-          }
-        case Nil      =>
-          (ps: PS, _: IdsMap, _: RowIndex) => {
-            ps.setNull(curParamIndex, 0)
-            curParamIndex += 1
-          }
-        case vs       => throw ExecutionError(
-          s"Can only $update one Set of values for Set attribute `$ns.$attr`. Found: " + vs.mkString(", ")
-        )
+      val colSetter = if (set.nonEmpty) {
+        if (!isUpsert) {
+          addToUpdateCols(ns, attr)
+        }
+        val array = set2array(set)
+        (ps: PS, _: IdsMap, _: RowIndex) => {
+          val conn = ps.getConnection
+          ps.setArray(curParamIndex, conn.createArrayOf(exts(1), array))
+          curParamIndex += 1
+        }
+      } else {
+        (ps: PS, _: IdsMap, _: RowIndex) => {
+          ps.setNull(curParamIndex, 0)
+          curParamIndex += 1
+        }
       }
       addColSetter(curRefPath, colSetter)
 
@@ -196,26 +186,15 @@ trait SqlUpdate
       val ns_id     = ss(ns, "id")
       val refNs_id  = ss(refNs, "id")
       val id        = getUpdateId
-      sets match {
-        case Seq(set) =>
-          if (set.nonEmpty) {
-            // Tables are reversed in JdbcConn_JVM and we want to delete first
-            manualTableDatas = List(
-              addJoins(joinTable, ns_id, refNs_id, id, set.map(_.asInstanceOf[String].toLong)),
-              deleteJoins(joinTable, ns_id, id)
-            )
-          } else {
-            // Delete all joins when no ref ids are applied
-            manualTableDatas = List(deleteJoins(joinTable, ns_id, id))
-          }
-
-        case Nil =>
-          // Delete all joins when no ref ids are applied
-          manualTableDatas = List(deleteJoins(joinTable, ns_id, id))
-
-        case vs => throw ExecutionError(
-          s"Can only $update one Set of values for Set attribute `$ns.$attr`. Found: " + vs.mkString(", ")
+      if (set.nonEmpty) {
+        // Tables are reversed in JdbcConn_JVM and we want to delete first
+        manualTableDatas = List(
+          addJoins(joinTable, ns_id, refNs_id, id, set.map(_.asInstanceOf[String].toLong)),
+          deleteJoins(joinTable, ns_id, id)
         )
+      } else {
+        // Delete all joins when no ref ids are applied
+        manualTableDatas = List(deleteJoins(joinTable, ns_id, id))
       }
     }
   }
@@ -223,7 +202,7 @@ trait SqlUpdate
   override def updateSetAdd[T](
     ns: String,
     attr: String,
-    sets: Seq[Set[T]],
+    set: Set[T],
     refNs: Option[String],
     owner: Boolean,
     transformValue: T => Any,
@@ -232,18 +211,20 @@ trait SqlUpdate
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     refNs.fold {
-      if (sets.nonEmpty && sets.head.nonEmpty) {
+      if (set.nonEmpty) {
         updateCurRefPath(attr)
         if (!isUpsert) {
           addToUpdateCols(ns, attr)
         }
         placeHolders = placeHolders :+ s"$attr = $attr || ?"
-        val array = set2array(sets.head)
+        val array = set2array(set)
         addColSetter(curRefPath, (ps: PS, _: IdsMap, _: RowIndex) => {
           val conn = ps.getConnection
           ps.setArray(curParamIndex, conn.createArrayOf(exts(1), array))
           curParamIndex += 1
         })
+      } else {
+
       }
     } { refNs =>
       // Separate update of ref ids in join table -----------------------------
@@ -251,13 +232,9 @@ trait SqlUpdate
       val joinTable = ss(ns, refAttr, refNs)
       val ns_id     = ss(ns, "id")
       val refNs_id  = ss(refNs, "id")
-      sets match {
-        case Seq(set) => manualTableDatas = List(
+      if (set.nonEmpty) {
+        manualTableDatas = List(
           addJoins(joinTable, ns_id, refNs_id, getUpdateId, set.map(_.asInstanceOf[String].toLong))
-        )
-        case Nil      => () // Add no ref ids
-        case vs       => throw ExecutionError(
-          s"Can only $update one Set of values for Set attribute `$ns.$attr`. Found: " + vs.mkString(", ")
         )
       }
     }

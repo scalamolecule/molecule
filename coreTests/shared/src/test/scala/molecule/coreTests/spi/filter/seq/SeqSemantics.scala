@@ -19,25 +19,13 @@ trait SeqSemantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Matching collections (Ns.intSeq) not supported in queries."
           }
-        _ <- Ns.i.intSeq(Seq(Seq(int1))).query.get
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Matching collections (Ns.intSeq) not supported in queries."
-          }
 
         _ <- Ns.i.intSeq_(Seq(int1)).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Matching collections (Ns.intSeq) not supported in queries."
           }
-        _ <- Ns.i.intSeq_(Seq(Seq(int1))).query.get
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Matching collections (Ns.intSeq) not supported in queries."
-          }
 
         _ <- Ns.i.intSeq_?(Some(Seq(int1))).query.get
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Matching collections (Ns.intSeq) not supported in queries."
-          }
-        _ <- Ns.i.intSeq_?(Some(Seq(Seq(int1)))).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Matching collections (Ns.intSeq) not supported in queries."
           }

@@ -36,7 +36,6 @@ trait Update_datomic
 
     val db = conn.peerConn.db()
 
-
     if (isRpcCall) {
       // Check against db on jvm if rpc from client
 
@@ -126,7 +125,7 @@ trait Update_datomic
   override def updateSetEq[T](
     ns: String,
     attr: String,
-    sets: Seq[Set[T]],
+    set: Set[T],
     refNs: Option[String],
     owner: Boolean,
     transformValue: T => Any,
@@ -138,23 +137,17 @@ trait Update_datomic
       val dummyFilterAttr = AttrOneTacInt(ns, attr)
       filterElements = filterElements :+ dummyFilterAttr
     }
-    sets match {
-      case Seq(set) =>
-        data += (("add", ns, attr, set.map(v => transformValue(v).asInstanceOf[AnyRef]).toSeq, true, ""))
-
-      case Nil =>
-        data += (("retract", ns, attr, Nil, true, ""))
-
-      case vs => throw ExecutionError(
-        s"Can only $update one Set of values for Set attribute `$ns.$attr`. Found: " + vs.mkString(", ")
-      )
+    if (set.nonEmpty) {
+      data += (("add", ns, attr, set.map(v => transformValue(v).asInstanceOf[AnyRef]).toSeq, true, ""))
+    } else {
+      data += (("retract", ns, attr, Nil, true, ""))
     }
   }
 
   override def updateSetAdd[T](
     ns: String,
     attr: String,
-    sets: Seq[Set[T]],
+    set: Set[T],
     refNs: Option[String],
     owner: Boolean,
     transformValue: T => Any,
@@ -162,16 +155,8 @@ trait Update_datomic
     exts: List[String],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    sets match {
-      case Seq(set) =>
-        data += (("add", ns, attr, set.map(v => transformValue(v).asInstanceOf[AnyRef]).toSeq, false, ""))
-
-      case Nil =>
-        data += (("retract", ns, attr, Nil, false, ""))
-
-      case vs => throw ExecutionError(
-        s"Can only $update one Set of values for Set attribute `$ns.$attr`. Found: " + vs.mkString(", ")
-      )
+    if(set.nonEmpty){
+      data += (("add", ns, attr, set.map(v => transformValue(v).asInstanceOf[AnyRef]).toSeq, false, ""))
     }
   }
 
@@ -194,7 +179,7 @@ trait Update_datomic
   override def updateSeqEq[T](
     ns: String,
     attr: String,
-    seqs: Seq[Seq[T]],
+    seq: Seq[T],
     refNs: Option[String],
     owner: Boolean,
     transformValue: T => Any,
@@ -206,30 +191,25 @@ trait Update_datomic
       val dummyFilterAttr = AttrOneTacInt(ns, attr)
       filterElements = filterElements :+ dummyFilterAttr
     }
-    seqs match {
-      case Seq(seq) =>
-        data += (("add", ns, attr, seq.map(v => transformValue(v).asInstanceOf[AnyRef]), true, "seq"))
-
-      case Nil =>
-        data += (("retract", ns, attr, Nil, true, "seq"))
-
-      case vs => throw ExecutionError(
-        s"Can only $update one Seq of values for Seq attribute `$ns.$attr`."
-      )
+    if(seq.nonEmpty){
+      data += (("add", ns, attr, seq.map(v => transformValue(v).asInstanceOf[AnyRef]), true, "seq"))
+    } else {
+      data += (("retract", ns, attr, Nil, true, "seq"))
     }
   }
 
-  override def updateByteArray(ns: String, attr: String, byteArrays: Seq[Array[Byte]]): Unit = {
-    byteArrays match {
-      case Seq(byteArray) if byteArray.nonEmpty => data += (("add", ns, attr, Seq(byteArray), true, ""))
-      case _                                    => data += (("retract", ns, attr, Nil, true, "seq"))
+  override def updateByteArray(ns: String, attr: String, byteArray: Array[Byte]): Unit = {
+    if(byteArray.nonEmpty){
+      data += (("add", ns, attr, Seq(byteArray), true, ""))
+    } else {
+      data += (("retract", ns, attr, Nil, true, "seq"))
     }
   }
 
   override def updateSeqAdd[T](
     ns: String,
     attr: String,
-    seqs: Seq[Seq[T]],
+    seq: Seq[T],
     refNs: Option[String],
     owner: Boolean,
     transformValue: T => Any,
@@ -237,16 +217,8 @@ trait Update_datomic
     exts: List[String],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    seqs match {
-      case Seq(seq) =>
-        data += (("add", ns, attr, seq.map(v => transformValue(v).asInstanceOf[AnyRef]), false, "seq"))
-
-      case Nil =>
-        data += (("retract", ns, attr, Nil, false, "seq"))
-
-      case vs => throw ExecutionError(
-        s"Can only $update one Seq of values for Seq attribute `$ns.$attr`."
-      )
+    if(seq.nonEmpty){
+      data += (("add", ns, attr, seq.map(v => transformValue(v).asInstanceOf[AnyRef]), false, "seq"))
     }
   }
 
@@ -274,9 +246,6 @@ trait Update_datomic
     refNs: Option[String],
     owner: Boolean,
     transformValue: T => Any,
-    //    set2array: Set[Any] => Array[AnyRef],
-    //    exts: List[String],
-    //    value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     if (isUpdate) {
       val dummyFilterAttr = AttrOneTacInt(ns, attr)
@@ -299,9 +268,6 @@ trait Update_datomic
     refNs: Option[String],
     owner: Boolean,
     transformValue: T => Any,
-    //    set2array: Set[Any] => Array[AnyRef],
-    //    exts: List[String],
-    //    value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     if (map.nonEmpty) {
       val pairs = map.map { case (k, v) =>
@@ -318,8 +284,6 @@ trait Update_datomic
     refNs: Option[String],
     owner: Boolean,
     transformValue: T => Any,
-    //    exts: List[String],
-    //    one2json: T => String
   ): Unit = {
     if (map.nonEmpty) {
       data += (("retract", ns, attr, map.keys.toSeq, false, "map"))

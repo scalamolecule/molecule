@@ -28,7 +28,7 @@ trait FilterOne_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
         _ <- Ns.i.a1.bigDecimal(bigDecimal1).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.bigDecimal(Seq(bigDecimal0)).query.get.map(_ ==> List())
         _ <- Ns.i.a1.bigDecimal(Seq(bigDecimal1)).query.get.map(_ ==> List(a))
-        // OR semantics for multiple args
+        // OR semantics for multiple args ("is this or that")
         _ <- Ns.i.a1.bigDecimal(bigDecimal1, bigDecimal2).query.get.map(_ ==> List(a, b))
         _ <- Ns.i.a1.bigDecimal(bigDecimal1, bigDecimal0).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.bigDecimal(Seq(bigDecimal1, bigDecimal2)).query.get.map(_ ==> List(a, b))
@@ -85,7 +85,7 @@ trait FilterOne_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
         _ <- Ns.i.a1.bigDecimal_(bigDecimal1).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.bigDecimal_(Seq(bigDecimal0)).query.get.map(_ ==> List())
         _ <- Ns.i.a1.bigDecimal_(Seq(bigDecimal1)).query.get.map(_ ==> List(a))
-        // OR semantics for multiple args
+        // OR semantics for multiple args ("is this or that")
         _ <- Ns.i.a1.bigDecimal_(bigDecimal1, bigDecimal2).query.get.map(_ ==> List(a, b))
         _ <- Ns.i.a1.bigDecimal_(bigDecimal1, bigDecimal0).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.bigDecimal_(Seq(bigDecimal1, bigDecimal2)).query.get.map(_ ==> List(a, b))
@@ -135,46 +135,11 @@ trait FilterOne_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
         // Find optional values matching
         _ <- Ns.i.a1.bigDecimal_?(Some(bigDecimal0)).query.get.map(_ ==> List())
         _ <- Ns.i.a1.bigDecimal_?(Some(bigDecimal1)).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.bigDecimal_?(Some(Seq(bigDecimal0))).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.bigDecimal_?(Some(Seq(bigDecimal1))).query.get.map(_ ==> List(a))
-        // OR semantics for Ses of multiple args
-        _ <- Ns.i.a1.bigDecimal_?(Some(Seq(bigDecimal1, bigDecimal2))).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.bigDecimal_?(Some(Seq(bigDecimal1, bigDecimal0))).query.get.map(_ ==> List(a))
-        // Empty Seq of args matches no values
-        _ <- Ns.i.a1.bigDecimal_?(Some(Seq.empty[BigDecimal])).query.get.map(_ ==> List())
+
         // None matches non-asserted/null values
         _ <- Ns.i.a1.bigDecimal_?(Option.empty[BigDecimal]).query.get.map(_ ==> List(x))
-        _ <- Ns.i.a1.bigDecimal_?(Option.empty[Seq[BigDecimal]]).query.get.map(_ ==> List(x))
-
-        // Find optional values not matching
-        _ <- Ns.i.a1.bigDecimal_?.not(Some(bigDecimal0)).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.bigDecimal_?.not(Some(bigDecimal1)).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.bigDecimal_?.not(Some(bigDecimal2)).query.get.map(_ ==> List(a, c))
-        _ <- Ns.i.a1.bigDecimal_?.not(Some(bigDecimal3)).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.bigDecimal_?.not(Some(Seq(bigDecimal0))).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.bigDecimal_?.not(Some(Seq(bigDecimal1))).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.bigDecimal_?.not(Some(Seq(bigDecimal2))).query.get.map(_ ==> List(a, c))
-        _ <- Ns.i.a1.bigDecimal_?.not(Some(Seq(bigDecimal3))).query.get.map(_ ==> List(a, b))
-        // OR semantics for multiple negation args
-        _ <- Ns.i.a1.bigDecimal_?.not(Some(Seq(bigDecimal0, bigDecimal1))).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.bigDecimal_?.not(Some(Seq(bigDecimal1, bigDecimal2))).query.get.map(_ ==> List(c))
-        _ <- Ns.i.a1.bigDecimal_?.not(Some(Seq(bigDecimal2, bigDecimal3))).query.get.map(_ ==> List(a))
-        // Empty Seq of negation args matches all asserted values (non-null)
-        _ <- Ns.i.a1.bigDecimal_?.not(Some(Seq.empty[BigDecimal])).query.get.map(_ ==> List(a, b, c))
-        // Negating None matches all asserted values (non-null)
-        _ <- Ns.i.a1.bigDecimal_?.not(Option.empty[BigDecimal]).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.bigDecimal_?.not(Option.empty[Seq[BigDecimal]]).query.get.map(_ ==> List(a, b, c))
-
-        // Find optional values in range
-        _ <- Ns.i.a1.bigDecimal_?.<(Some(bigDecimal2)).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.bigDecimal_?.>(Some(bigDecimal2)).query.get.map(_ ==> List(c))
-        _ <- Ns.i.a1.bigDecimal_?.<=(Some(bigDecimal2)).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.bigDecimal_?.>=(Some(bigDecimal2)).query.get.map(_ ==> List(b, c))
-        // None can't be compared and returns empty result
-        _ <- Ns.i.a1.bigDecimal_?.<(None).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.bigDecimal_?.<=(None).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.bigDecimal_?.>(None).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.bigDecimal_?.>=(None).query.get.map(_ ==> List())
+        // Easier to apply nothing to tacit attribute
+        _ <- Ns.i.a1.bigDecimal_().query.get.map(_ ==> List(4))
       } yield ()
     }
   }

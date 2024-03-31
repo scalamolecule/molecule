@@ -21,7 +21,7 @@ trait UpdateSeq_uniqueAttr extends CoreTestSuite with ApiAsync { spi: SpiAsync =
         _ <- Uniques.intSeq_(Seq(1)).s("b").update.transact
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Can only lookup entity with card-one attribute value. Found:\n" +
-              """AttrSeqTacInt("Uniques", "intSeq", Eq, Seq(Seq(1)), None, None, Nil, Nil, None, None, Seq(0, 26))"""
+              """AttrSeqTacInt("Uniques", "intSeq", Eq, Seq(1), None, None, Nil, Nil, None, None, Seq(0, 26))"""
           }
       } yield ()
     }

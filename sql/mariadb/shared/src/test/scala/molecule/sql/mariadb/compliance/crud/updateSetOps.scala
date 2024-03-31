@@ -25,4 +25,4 @@ object UpdateSetOps_Byte_ extends UpdateSetOps_Byte_ with TestAsync_mariadb
 object UpdateSetOps_Short_ extends UpdateSetOps_Short_ with TestAsync_mariadb
 object UpdateSetOps_Char_ extends UpdateSetOps_Char_ with TestAsync_mariadb
 
-object UpdateSetOps_ref_ extends UpdateSetOps_ref_ with TestAsync_mariadb
+object UpdateSetOps_ref_ extends UpdateSetOps_ref with TestAsync_mariadb

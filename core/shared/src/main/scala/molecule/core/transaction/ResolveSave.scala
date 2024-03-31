@@ -179,232 +179,180 @@ class ResolveSave
   }
 
 
-  private def oneSet[T](
-    ns: String,
-    attr: String,
-    sets: Seq[Set[T]],
-  ): Option[Set[T]] = {
-    sets match {
-      case Seq(set)     => Some(set)
-      case Nil          => None
-      case multipleSets => throw ExecutionError(
-        s"Can only save one Set of values for Set attribute `$ns.$attr`. Found: " + multipleSets.mkString(", ")
-      )
-    }
-  }
+  private def optSet[T](set: Set[T]): Option[Set[T]] = if (set.nonEmpty) Some(set) else None
+
   private def resolveAttrSetMan(a: AttrSetMan): Unit = {
     val (ns, attr, refNs) = (a.ns, a.attr, a.refNs)
     a match {
-      case a: AttrSetManID             => addSet(ns, attr, oneSet(ns, attr, a.vs), transformID, set2arrayID, refNs, extsID, value2jsonID)
-      case a: AttrSetManString         => addSet(ns, attr, oneSet(ns, attr, a.vs), transformString, set2arrayString, refNs, extsString, value2jsonString)
-      case a: AttrSetManInt            => addSet(ns, attr, oneSet(ns, attr, a.vs), transformInt, set2arrayInt, refNs, extsInt, value2jsonInt)
-      case a: AttrSetManLong           => addSet(ns, attr, oneSet(ns, attr, a.vs), transformLong, set2arrayLong, refNs, extsLong, value2jsonLong)
-      case a: AttrSetManFloat          => addSet(ns, attr, oneSet(ns, attr, a.vs), transformFloat, set2arrayFloat, refNs, extsFloat, value2jsonFloat)
-      case a: AttrSetManDouble         => addSet(ns, attr, oneSet(ns, attr, a.vs), transformDouble, set2arrayDouble, refNs, extsDouble, value2jsonDouble)
-      case a: AttrSetManBoolean        => addSet(ns, attr, oneSet(ns, attr, a.vs), transformBoolean, set2arrayBoolean, refNs, extsBoolean, value2jsonBoolean)
-      case a: AttrSetManBigInt         => addSet(ns, attr, oneSet(ns, attr, a.vs), transformBigInt, set2arrayBigInt, refNs, extsBigInt, value2jsonBigInt)
-      case a: AttrSetManBigDecimal     => addSet(ns, attr, oneSet(ns, attr, a.vs), transformBigDecimal, set2arrayBigDecimal, refNs, extsBigDecimal, value2jsonBigDecimal)
-      case a: AttrSetManDate           => addSet(ns, attr, oneSet(ns, attr, a.vs), transformDate, set2arrayDate, refNs, extsDate, value2jsonDate)
-      case a: AttrSetManDuration       => addSet(ns, attr, oneSet(ns, attr, a.vs), transformDuration, set2arrayDuration, refNs, extsDuration, value2jsonDuration)
-      case a: AttrSetManInstant        => addSet(ns, attr, oneSet(ns, attr, a.vs), transformInstant, set2arrayInstant, refNs, extsInstant, value2jsonInstant)
-      case a: AttrSetManLocalDate      => addSet(ns, attr, oneSet(ns, attr, a.vs), transformLocalDate, set2arrayLocalDate, refNs, extsLocalDate, value2jsonLocalDate)
-      case a: AttrSetManLocalTime      => addSet(ns, attr, oneSet(ns, attr, a.vs), transformLocalTime, set2arrayLocalTime, refNs, extsLocalTime, value2jsonLocalTime)
-      case a: AttrSetManLocalDateTime  => addSet(ns, attr, oneSet(ns, attr, a.vs), transformLocalDateTime, set2arrayLocalDateTime, refNs, extsLocalDateTime, value2jsonLocalDateTime)
-      case a: AttrSetManOffsetTime     => addSet(ns, attr, oneSet(ns, attr, a.vs), transformOffsetTime, set2arrayOffsetTime, refNs, extsOffsetTime, value2jsonOffsetTime)
-      case a: AttrSetManOffsetDateTime => addSet(ns, attr, oneSet(ns, attr, a.vs), transformOffsetDateTime, set2arrayOffsetDateTime, refNs, extsOffsetDateTime, value2jsonOffsetDateTime)
-      case a: AttrSetManZonedDateTime  => addSet(ns, attr, oneSet(ns, attr, a.vs), transformZonedDateTime, set2arrayZonedDateTime, refNs, extsZonedDateTime, value2jsonZonedDateTime)
-      case a: AttrSetManUUID           => addSet(ns, attr, oneSet(ns, attr, a.vs), transformUUID, set2arrayUUID, refNs, extsUUID, value2jsonUUID)
-      case a: AttrSetManURI            => addSet(ns, attr, oneSet(ns, attr, a.vs), transformURI, set2arrayURI, refNs, extsURI, value2jsonURI)
-      case a: AttrSetManByte           => addSet(ns, attr, oneSet(ns, attr, a.vs), transformByte, set2arrayByte, refNs, extsByte, value2jsonByte)
-      case a: AttrSetManShort          => addSet(ns, attr, oneSet(ns, attr, a.vs), transformShort, set2arrayShort, refNs, extsShort, value2jsonShort)
-      case a: AttrSetManChar           => addSet(ns, attr, oneSet(ns, attr, a.vs), transformChar, set2arrayChar, refNs, extsChar, value2jsonChar)
-    }
-  }
-  private def resolveAttrSetTac(a: AttrSetTac): Unit = {
-    val (ns, attr, refNs) = (a.ns, a.attr, a.refNs)
-    a match {
-      case a: AttrSetTacID             => addSet(ns, attr, oneSet(ns, attr, a.vs), transformID, set2arrayID, refNs, extsID, value2jsonID)
-      case a: AttrSetTacString         => addSet(ns, attr, oneSet(ns, attr, a.vs), transformString, set2arrayString, refNs, extsString, value2jsonString)
-      case a: AttrSetTacInt            => addSet(ns, attr, oneSet(ns, attr, a.vs), transformInt, set2arrayInt, refNs, extsInt, value2jsonInt)
-      case a: AttrSetTacLong           => addSet(ns, attr, oneSet(ns, attr, a.vs), transformLong, set2arrayLong, refNs, extsLong, value2jsonLong)
-      case a: AttrSetTacFloat          => addSet(ns, attr, oneSet(ns, attr, a.vs), transformFloat, set2arrayFloat, refNs, extsFloat, value2jsonFloat)
-      case a: AttrSetTacDouble         => addSet(ns, attr, oneSet(ns, attr, a.vs), transformDouble, set2arrayDouble, refNs, extsDouble, value2jsonDouble)
-      case a: AttrSetTacBoolean        => addSet(ns, attr, oneSet(ns, attr, a.vs), transformBoolean, set2arrayBoolean, refNs, extsBoolean, value2jsonBoolean)
-      case a: AttrSetTacBigInt         => addSet(ns, attr, oneSet(ns, attr, a.vs), transformBigInt, set2arrayBigInt, refNs, extsBigInt, value2jsonBigInt)
-      case a: AttrSetTacBigDecimal     => addSet(ns, attr, oneSet(ns, attr, a.vs), transformBigDecimal, set2arrayBigDecimal, refNs, extsBigDecimal, value2jsonBigDecimal)
-      case a: AttrSetTacDate           => addSet(ns, attr, oneSet(ns, attr, a.vs), transformDate, set2arrayDate, refNs, extsDate, value2jsonDate)
-      case a: AttrSetTacDuration       => addSet(ns, attr, oneSet(ns, attr, a.vs), transformDuration, set2arrayDuration, refNs, extsDuration, value2jsonDuration)
-      case a: AttrSetTacInstant        => addSet(ns, attr, oneSet(ns, attr, a.vs), transformInstant, set2arrayInstant, refNs, extsInstant, value2jsonInstant)
-      case a: AttrSetTacLocalDate      => addSet(ns, attr, oneSet(ns, attr, a.vs), transformLocalDate, set2arrayLocalDate, refNs, extsLocalDate, value2jsonLocalDate)
-      case a: AttrSetTacLocalTime      => addSet(ns, attr, oneSet(ns, attr, a.vs), transformLocalTime, set2arrayLocalTime, refNs, extsLocalTime, value2jsonLocalTime)
-      case a: AttrSetTacLocalDateTime  => addSet(ns, attr, oneSet(ns, attr, a.vs), transformLocalDateTime, set2arrayLocalDateTime, refNs, extsLocalDateTime, value2jsonLocalDateTime)
-      case a: AttrSetTacOffsetTime     => addSet(ns, attr, oneSet(ns, attr, a.vs), transformOffsetTime, set2arrayOffsetTime, refNs, extsOffsetTime, value2jsonOffsetTime)
-      case a: AttrSetTacOffsetDateTime => addSet(ns, attr, oneSet(ns, attr, a.vs), transformOffsetDateTime, set2arrayOffsetDateTime, refNs, extsOffsetDateTime, value2jsonOffsetDateTime)
-      case a: AttrSetTacZonedDateTime  => addSet(ns, attr, oneSet(ns, attr, a.vs), transformZonedDateTime, set2arrayZonedDateTime, refNs, extsZonedDateTime, value2jsonZonedDateTime)
-      case a: AttrSetTacUUID           => addSet(ns, attr, oneSet(ns, attr, a.vs), transformUUID, set2arrayUUID, refNs, extsUUID, value2jsonUUID)
-      case a: AttrSetTacURI            => addSet(ns, attr, oneSet(ns, attr, a.vs), transformURI, set2arrayURI, refNs, extsURI, value2jsonURI)
-      case a: AttrSetTacByte           => addSet(ns, attr, oneSet(ns, attr, a.vs), transformByte, set2arrayByte, refNs, extsByte, value2jsonByte)
-      case a: AttrSetTacShort          => addSet(ns, attr, oneSet(ns, attr, a.vs), transformShort, set2arrayShort, refNs, extsShort, value2jsonShort)
-      case a: AttrSetTacChar           => addSet(ns, attr, oneSet(ns, attr, a.vs), transformChar, set2arrayChar, refNs, extsChar, value2jsonChar)
+      case a: AttrSetManID             => addSet(ns, attr, optSet(a.vs), transformID, set2arrayID, refNs, extsID, value2jsonID)
+      case a: AttrSetManString         => addSet(ns, attr, optSet(a.vs), transformString, set2arrayString, refNs, extsString, value2jsonString)
+      case a: AttrSetManInt            => addSet(ns, attr, optSet(a.vs), transformInt, set2arrayInt, refNs, extsInt, value2jsonInt)
+      case a: AttrSetManLong           => addSet(ns, attr, optSet(a.vs), transformLong, set2arrayLong, refNs, extsLong, value2jsonLong)
+      case a: AttrSetManFloat          => addSet(ns, attr, optSet(a.vs), transformFloat, set2arrayFloat, refNs, extsFloat, value2jsonFloat)
+      case a: AttrSetManDouble         => addSet(ns, attr, optSet(a.vs), transformDouble, set2arrayDouble, refNs, extsDouble, value2jsonDouble)
+      case a: AttrSetManBoolean        => addSet(ns, attr, optSet(a.vs), transformBoolean, set2arrayBoolean, refNs, extsBoolean, value2jsonBoolean)
+      case a: AttrSetManBigInt         => addSet(ns, attr, optSet(a.vs), transformBigInt, set2arrayBigInt, refNs, extsBigInt, value2jsonBigInt)
+      case a: AttrSetManBigDecimal     => addSet(ns, attr, optSet(a.vs), transformBigDecimal, set2arrayBigDecimal, refNs, extsBigDecimal, value2jsonBigDecimal)
+      case a: AttrSetManDate           => addSet(ns, attr, optSet(a.vs), transformDate, set2arrayDate, refNs, extsDate, value2jsonDate)
+      case a: AttrSetManDuration       => addSet(ns, attr, optSet(a.vs), transformDuration, set2arrayDuration, refNs, extsDuration, value2jsonDuration)
+      case a: AttrSetManInstant        => addSet(ns, attr, optSet(a.vs), transformInstant, set2arrayInstant, refNs, extsInstant, value2jsonInstant)
+      case a: AttrSetManLocalDate      => addSet(ns, attr, optSet(a.vs), transformLocalDate, set2arrayLocalDate, refNs, extsLocalDate, value2jsonLocalDate)
+      case a: AttrSetManLocalTime      => addSet(ns, attr, optSet(a.vs), transformLocalTime, set2arrayLocalTime, refNs, extsLocalTime, value2jsonLocalTime)
+      case a: AttrSetManLocalDateTime  => addSet(ns, attr, optSet(a.vs), transformLocalDateTime, set2arrayLocalDateTime, refNs, extsLocalDateTime, value2jsonLocalDateTime)
+      case a: AttrSetManOffsetTime     => addSet(ns, attr, optSet(a.vs), transformOffsetTime, set2arrayOffsetTime, refNs, extsOffsetTime, value2jsonOffsetTime)
+      case a: AttrSetManOffsetDateTime => addSet(ns, attr, optSet(a.vs), transformOffsetDateTime, set2arrayOffsetDateTime, refNs, extsOffsetDateTime, value2jsonOffsetDateTime)
+      case a: AttrSetManZonedDateTime  => addSet(ns, attr, optSet(a.vs), transformZonedDateTime, set2arrayZonedDateTime, refNs, extsZonedDateTime, value2jsonZonedDateTime)
+      case a: AttrSetManUUID           => addSet(ns, attr, optSet(a.vs), transformUUID, set2arrayUUID, refNs, extsUUID, value2jsonUUID)
+      case a: AttrSetManURI            => addSet(ns, attr, optSet(a.vs), transformURI, set2arrayURI, refNs, extsURI, value2jsonURI)
+      case a: AttrSetManByte           => addSet(ns, attr, optSet(a.vs), transformByte, set2arrayByte, refNs, extsByte, value2jsonByte)
+      case a: AttrSetManShort          => addSet(ns, attr, optSet(a.vs), transformShort, set2arrayShort, refNs, extsShort, value2jsonShort)
+      case a: AttrSetManChar           => addSet(ns, attr, optSet(a.vs), transformChar, set2arrayChar, refNs, extsChar, value2jsonChar)
     }
   }
 
-  private def oneOptSet[T](
-    ns: String,
-    attr: String,
-    optSets: Option[Seq[Set[T]]],
-  ): Option[Set[T]] = {
-    optSets.flatMap {
-      case Seq(set) => Some(set)
-      case Nil      => None
-      case vs       => throw ExecutionError(
-        s"Can only save one Set of values for optional Set attribute `$ns.$attr`. Found: " + vs.mkString(", ")
-      )
+  private def resolveAttrSetTac(a: AttrSetTac): Unit = {
+    val (ns, attr, refNs) = (a.ns, a.attr, a.refNs)
+    a match {
+      case a: AttrSetTacID             => addSet(ns, attr, optSet(a.vs), transformID, set2arrayID, refNs, extsID, value2jsonID)
+      case a: AttrSetTacString         => addSet(ns, attr, optSet(a.vs), transformString, set2arrayString, refNs, extsString, value2jsonString)
+      case a: AttrSetTacInt            => addSet(ns, attr, optSet(a.vs), transformInt, set2arrayInt, refNs, extsInt, value2jsonInt)
+      case a: AttrSetTacLong           => addSet(ns, attr, optSet(a.vs), transformLong, set2arrayLong, refNs, extsLong, value2jsonLong)
+      case a: AttrSetTacFloat          => addSet(ns, attr, optSet(a.vs), transformFloat, set2arrayFloat, refNs, extsFloat, value2jsonFloat)
+      case a: AttrSetTacDouble         => addSet(ns, attr, optSet(a.vs), transformDouble, set2arrayDouble, refNs, extsDouble, value2jsonDouble)
+      case a: AttrSetTacBoolean        => addSet(ns, attr, optSet(a.vs), transformBoolean, set2arrayBoolean, refNs, extsBoolean, value2jsonBoolean)
+      case a: AttrSetTacBigInt         => addSet(ns, attr, optSet(a.vs), transformBigInt, set2arrayBigInt, refNs, extsBigInt, value2jsonBigInt)
+      case a: AttrSetTacBigDecimal     => addSet(ns, attr, optSet(a.vs), transformBigDecimal, set2arrayBigDecimal, refNs, extsBigDecimal, value2jsonBigDecimal)
+      case a: AttrSetTacDate           => addSet(ns, attr, optSet(a.vs), transformDate, set2arrayDate, refNs, extsDate, value2jsonDate)
+      case a: AttrSetTacDuration       => addSet(ns, attr, optSet(a.vs), transformDuration, set2arrayDuration, refNs, extsDuration, value2jsonDuration)
+      case a: AttrSetTacInstant        => addSet(ns, attr, optSet(a.vs), transformInstant, set2arrayInstant, refNs, extsInstant, value2jsonInstant)
+      case a: AttrSetTacLocalDate      => addSet(ns, attr, optSet(a.vs), transformLocalDate, set2arrayLocalDate, refNs, extsLocalDate, value2jsonLocalDate)
+      case a: AttrSetTacLocalTime      => addSet(ns, attr, optSet(a.vs), transformLocalTime, set2arrayLocalTime, refNs, extsLocalTime, value2jsonLocalTime)
+      case a: AttrSetTacLocalDateTime  => addSet(ns, attr, optSet(a.vs), transformLocalDateTime, set2arrayLocalDateTime, refNs, extsLocalDateTime, value2jsonLocalDateTime)
+      case a: AttrSetTacOffsetTime     => addSet(ns, attr, optSet(a.vs), transformOffsetTime, set2arrayOffsetTime, refNs, extsOffsetTime, value2jsonOffsetTime)
+      case a: AttrSetTacOffsetDateTime => addSet(ns, attr, optSet(a.vs), transformOffsetDateTime, set2arrayOffsetDateTime, refNs, extsOffsetDateTime, value2jsonOffsetDateTime)
+      case a: AttrSetTacZonedDateTime  => addSet(ns, attr, optSet(a.vs), transformZonedDateTime, set2arrayZonedDateTime, refNs, extsZonedDateTime, value2jsonZonedDateTime)
+      case a: AttrSetTacUUID           => addSet(ns, attr, optSet(a.vs), transformUUID, set2arrayUUID, refNs, extsUUID, value2jsonUUID)
+      case a: AttrSetTacURI            => addSet(ns, attr, optSet(a.vs), transformURI, set2arrayURI, refNs, extsURI, value2jsonURI)
+      case a: AttrSetTacByte           => addSet(ns, attr, optSet(a.vs), transformByte, set2arrayByte, refNs, extsByte, value2jsonByte)
+      case a: AttrSetTacShort          => addSet(ns, attr, optSet(a.vs), transformShort, set2arrayShort, refNs, extsShort, value2jsonShort)
+      case a: AttrSetTacChar           => addSet(ns, attr, optSet(a.vs), transformChar, set2arrayChar, refNs, extsChar, value2jsonChar)
     }
   }
 
   private def resolveAttrSetOpt(a: AttrSetOpt): Unit = {
     val (ns, attr, refNs) = (a.ns, a.attr, a.refNs)
     a match {
-      case a: AttrSetOptID             => addSet(ns, attr, oneOptSet(ns, attr, a.vs), transformID, set2arrayID, refNs, extsID, value2jsonID)
-      case a: AttrSetOptString         => addSet(ns, attr, oneOptSet(ns, attr, a.vs), transformString, set2arrayString, refNs, extsString, value2jsonString)
-      case a: AttrSetOptInt            => addSet(ns, attr, oneOptSet(ns, attr, a.vs), transformInt, set2arrayInt, refNs, extsInt, value2jsonInt)
-      case a: AttrSetOptLong           => addSet(ns, attr, oneOptSet(ns, attr, a.vs), transformLong, set2arrayLong, refNs, extsLong, value2jsonLong)
-      case a: AttrSetOptFloat          => addSet(ns, attr, oneOptSet(ns, attr, a.vs), transformFloat, set2arrayFloat, refNs, extsFloat, value2jsonFloat)
-      case a: AttrSetOptDouble         => addSet(ns, attr, oneOptSet(ns, attr, a.vs), transformDouble, set2arrayDouble, refNs, extsDouble, value2jsonDouble)
-      case a: AttrSetOptBoolean        => addSet(ns, attr, oneOptSet(ns, attr, a.vs), transformBoolean, set2arrayBoolean, refNs, extsBoolean, value2jsonBoolean)
-      case a: AttrSetOptBigInt         => addSet(ns, attr, oneOptSet(ns, attr, a.vs), transformBigInt, set2arrayBigInt, refNs, extsBigInt, value2jsonBigInt)
-      case a: AttrSetOptBigDecimal     => addSet(ns, attr, oneOptSet(ns, attr, a.vs), transformBigDecimal, set2arrayBigDecimal, refNs, extsBigDecimal, value2jsonBigDecimal)
-      case a: AttrSetOptDate           => addSet(ns, attr, oneOptSet(ns, attr, a.vs), transformDate, set2arrayDate, refNs, extsDate, value2jsonDate)
-      case a: AttrSetOptDuration       => addSet(ns, attr, oneOptSet(ns, attr, a.vs), transformDuration, set2arrayDuration, refNs, extsDuration, value2jsonDuration)
-      case a: AttrSetOptInstant        => addSet(ns, attr, oneOptSet(ns, attr, a.vs), transformInstant, set2arrayInstant, refNs, extsInstant, value2jsonInstant)
-      case a: AttrSetOptLocalDate      => addSet(ns, attr, oneOptSet(ns, attr, a.vs), transformLocalDate, set2arrayLocalDate, refNs, extsLocalDate, value2jsonLocalDate)
-      case a: AttrSetOptLocalTime      => addSet(ns, attr, oneOptSet(ns, attr, a.vs), transformLocalTime, set2arrayLocalTime, refNs, extsLocalTime, value2jsonLocalTime)
-      case a: AttrSetOptLocalDateTime  => addSet(ns, attr, oneOptSet(ns, attr, a.vs), transformLocalDateTime, set2arrayLocalDateTime, refNs, extsLocalDateTime, value2jsonLocalDateTime)
-      case a: AttrSetOptOffsetTime     => addSet(ns, attr, oneOptSet(ns, attr, a.vs), transformOffsetTime, set2arrayOffsetTime, refNs, extsOffsetTime, value2jsonOffsetTime)
-      case a: AttrSetOptOffsetDateTime => addSet(ns, attr, oneOptSet(ns, attr, a.vs), transformOffsetDateTime, set2arrayOffsetDateTime, refNs, extsOffsetDateTime, value2jsonOffsetDateTime)
-      case a: AttrSetOptZonedDateTime  => addSet(ns, attr, oneOptSet(ns, attr, a.vs), transformZonedDateTime, set2arrayZonedDateTime, refNs, extsZonedDateTime, value2jsonZonedDateTime)
-      case a: AttrSetOptUUID           => addSet(ns, attr, oneOptSet(ns, attr, a.vs), transformUUID, set2arrayUUID, refNs, extsUUID, value2jsonUUID)
-      case a: AttrSetOptURI            => addSet(ns, attr, oneOptSet(ns, attr, a.vs), transformURI, set2arrayURI, refNs, extsURI, value2jsonURI)
-      case a: AttrSetOptByte           => addSet(ns, attr, oneOptSet(ns, attr, a.vs), transformByte, set2arrayByte, refNs, extsByte, value2jsonByte)
-      case a: AttrSetOptShort          => addSet(ns, attr, oneOptSet(ns, attr, a.vs), transformShort, set2arrayShort, refNs, extsShort, value2jsonShort)
-      case a: AttrSetOptChar           => addSet(ns, attr, oneOptSet(ns, attr, a.vs), transformChar, set2arrayChar, refNs, extsChar, value2jsonChar)
+      case a: AttrSetOptID             => addSet(ns, attr, a.vs, transformID, set2arrayID, refNs, extsID, value2jsonID)
+      case a: AttrSetOptString         => addSet(ns, attr, a.vs, transformString, set2arrayString, refNs, extsString, value2jsonString)
+      case a: AttrSetOptInt            => addSet(ns, attr, a.vs, transformInt, set2arrayInt, refNs, extsInt, value2jsonInt)
+      case a: AttrSetOptLong           => addSet(ns, attr, a.vs, transformLong, set2arrayLong, refNs, extsLong, value2jsonLong)
+      case a: AttrSetOptFloat          => addSet(ns, attr, a.vs, transformFloat, set2arrayFloat, refNs, extsFloat, value2jsonFloat)
+      case a: AttrSetOptDouble         => addSet(ns, attr, a.vs, transformDouble, set2arrayDouble, refNs, extsDouble, value2jsonDouble)
+      case a: AttrSetOptBoolean        => addSet(ns, attr, a.vs, transformBoolean, set2arrayBoolean, refNs, extsBoolean, value2jsonBoolean)
+      case a: AttrSetOptBigInt         => addSet(ns, attr, a.vs, transformBigInt, set2arrayBigInt, refNs, extsBigInt, value2jsonBigInt)
+      case a: AttrSetOptBigDecimal     => addSet(ns, attr, a.vs, transformBigDecimal, set2arrayBigDecimal, refNs, extsBigDecimal, value2jsonBigDecimal)
+      case a: AttrSetOptDate           => addSet(ns, attr, a.vs, transformDate, set2arrayDate, refNs, extsDate, value2jsonDate)
+      case a: AttrSetOptDuration       => addSet(ns, attr, a.vs, transformDuration, set2arrayDuration, refNs, extsDuration, value2jsonDuration)
+      case a: AttrSetOptInstant        => addSet(ns, attr, a.vs, transformInstant, set2arrayInstant, refNs, extsInstant, value2jsonInstant)
+      case a: AttrSetOptLocalDate      => addSet(ns, attr, a.vs, transformLocalDate, set2arrayLocalDate, refNs, extsLocalDate, value2jsonLocalDate)
+      case a: AttrSetOptLocalTime      => addSet(ns, attr, a.vs, transformLocalTime, set2arrayLocalTime, refNs, extsLocalTime, value2jsonLocalTime)
+      case a: AttrSetOptLocalDateTime  => addSet(ns, attr, a.vs, transformLocalDateTime, set2arrayLocalDateTime, refNs, extsLocalDateTime, value2jsonLocalDateTime)
+      case a: AttrSetOptOffsetTime     => addSet(ns, attr, a.vs, transformOffsetTime, set2arrayOffsetTime, refNs, extsOffsetTime, value2jsonOffsetTime)
+      case a: AttrSetOptOffsetDateTime => addSet(ns, attr, a.vs, transformOffsetDateTime, set2arrayOffsetDateTime, refNs, extsOffsetDateTime, value2jsonOffsetDateTime)
+      case a: AttrSetOptZonedDateTime  => addSet(ns, attr, a.vs, transformZonedDateTime, set2arrayZonedDateTime, refNs, extsZonedDateTime, value2jsonZonedDateTime)
+      case a: AttrSetOptUUID           => addSet(ns, attr, a.vs, transformUUID, set2arrayUUID, refNs, extsUUID, value2jsonUUID)
+      case a: AttrSetOptURI            => addSet(ns, attr, a.vs, transformURI, set2arrayURI, refNs, extsURI, value2jsonURI)
+      case a: AttrSetOptByte           => addSet(ns, attr, a.vs, transformByte, set2arrayByte, refNs, extsByte, value2jsonByte)
+      case a: AttrSetOptShort          => addSet(ns, attr, a.vs, transformShort, set2arrayShort, refNs, extsShort, value2jsonShort)
+      case a: AttrSetOptChar           => addSet(ns, attr, a.vs, transformChar, set2arrayChar, refNs, extsChar, value2jsonChar)
     }
   }
 
-  private def noMultipleSeqs[T](ns: String, attr: String, seqs: Seq[Seq[T]]) = {
-    throw ExecutionError(
-      s"Can only save one Seq of values for Seq attribute `$ns.$attr`. Found multiple seqs:\n" +
-        seqs.mkString("\n")
-    )
-  }
-  private def oneSeq[T](
-    ns: String,
-    attr: String,
-    seqs: Seq[Seq[T]],
-  ): Option[Seq[T]] = {
-    seqs match {
-      case Seq(seq)     => Some(seq)
-      case Nil          => None
-      case multipleSeqs => noMultipleSeqs(ns, attr, multipleSeqs)
-    }
-  }
+  private def optSeq[T](seq: Seq[T]): Option[Seq[T]] = if (seq.nonEmpty) Some(seq) else None
 
   private def resolveAttrSeqMan(a: AttrSeqMan): Unit = {
     val (ns, attr, refNs) = (a.ns, a.attr, a.refNs)
     a match {
-      case a: AttrSeqManID             => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformID, seq2arrayID, extsID, value2jsonID)
-      case a: AttrSeqManString         => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformString, seq2arrayString, extsString, value2jsonString)
-      case a: AttrSeqManInt            => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformInt, seq2arrayInt, extsInt, value2jsonInt)
-      case a: AttrSeqManLong           => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformLong, seq2arrayLong, extsLong, value2jsonLong)
-      case a: AttrSeqManFloat          => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformFloat, seq2arrayFloat, extsFloat, value2jsonFloat)
-      case a: AttrSeqManDouble         => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformDouble, seq2arrayDouble, extsDouble, value2jsonDouble)
-      case a: AttrSeqManBoolean        => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformBoolean, seq2arrayBoolean, extsBoolean, value2jsonBoolean)
-      case a: AttrSeqManBigInt         => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformBigInt, seq2arrayBigInt, extsBigInt, value2jsonBigInt)
-      case a: AttrSeqManBigDecimal     => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformBigDecimal, seq2arrayBigDecimal, extsBigDecimal, value2jsonBigDecimal)
-      case a: AttrSeqManDate           => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformDate, seq2arrayDate, extsDate, value2jsonDate)
-      case a: AttrSeqManDuration       => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformDuration, seq2arrayDuration, extsDuration, value2jsonDuration)
-      case a: AttrSeqManInstant        => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformInstant, seq2arrayInstant, extsInstant, value2jsonInstant)
-      case a: AttrSeqManLocalDate      => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformLocalDate, seq2arrayLocalDate, extsLocalDate, value2jsonLocalDate)
-      case a: AttrSeqManLocalTime      => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformLocalTime, seq2arrayLocalTime, extsLocalTime, value2jsonLocalTime)
-      case a: AttrSeqManLocalDateTime  => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformLocalDateTime, seq2arrayLocalDateTime, extsLocalDateTime, value2jsonLocalDateTime)
-      case a: AttrSeqManOffsetTime     => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformOffsetTime, seq2arrayOffsetTime, extsOffsetTime, value2jsonOffsetTime)
-      case a: AttrSeqManOffsetDateTime => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformOffsetDateTime, seq2arrayOffsetDateTime, extsOffsetDateTime, value2jsonOffsetDateTime)
-      case a: AttrSeqManZonedDateTime  => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformZonedDateTime, seq2arrayZonedDateTime, extsZonedDateTime, value2jsonZonedDateTime)
-      case a: AttrSeqManUUID           => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformUUID, seq2arrayUUID, extsUUID, value2jsonUUID)
-      case a: AttrSeqManURI            => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformURI, seq2arrayURI, extsURI, value2jsonURI)
-      case a: AttrSeqManByte           => addByteArray(ns, attr, optByteArray(ns, attr, a.vs))
-      case a: AttrSeqManShort          => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformShort, seq2arrayShort, extsShort, value2jsonShort)
-      case a: AttrSeqManChar           => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformChar, seq2arrayChar, extsChar, value2jsonChar)
+      case a: AttrSeqManID             => addSeq(ns, attr, refNs, optSeq(a.vs), transformID, seq2arrayID, extsID, value2jsonID)
+      case a: AttrSeqManString         => addSeq(ns, attr, refNs, optSeq(a.vs), transformString, seq2arrayString, extsString, value2jsonString)
+      case a: AttrSeqManInt            => addSeq(ns, attr, refNs, optSeq(a.vs), transformInt, seq2arrayInt, extsInt, value2jsonInt)
+      case a: AttrSeqManLong           => addSeq(ns, attr, refNs, optSeq(a.vs), transformLong, seq2arrayLong, extsLong, value2jsonLong)
+      case a: AttrSeqManFloat          => addSeq(ns, attr, refNs, optSeq(a.vs), transformFloat, seq2arrayFloat, extsFloat, value2jsonFloat)
+      case a: AttrSeqManDouble         => addSeq(ns, attr, refNs, optSeq(a.vs), transformDouble, seq2arrayDouble, extsDouble, value2jsonDouble)
+      case a: AttrSeqManBoolean        => addSeq(ns, attr, refNs, optSeq(a.vs), transformBoolean, seq2arrayBoolean, extsBoolean, value2jsonBoolean)
+      case a: AttrSeqManBigInt         => addSeq(ns, attr, refNs, optSeq(a.vs), transformBigInt, seq2arrayBigInt, extsBigInt, value2jsonBigInt)
+      case a: AttrSeqManBigDecimal     => addSeq(ns, attr, refNs, optSeq(a.vs), transformBigDecimal, seq2arrayBigDecimal, extsBigDecimal, value2jsonBigDecimal)
+      case a: AttrSeqManDate           => addSeq(ns, attr, refNs, optSeq(a.vs), transformDate, seq2arrayDate, extsDate, value2jsonDate)
+      case a: AttrSeqManDuration       => addSeq(ns, attr, refNs, optSeq(a.vs), transformDuration, seq2arrayDuration, extsDuration, value2jsonDuration)
+      case a: AttrSeqManInstant        => addSeq(ns, attr, refNs, optSeq(a.vs), transformInstant, seq2arrayInstant, extsInstant, value2jsonInstant)
+      case a: AttrSeqManLocalDate      => addSeq(ns, attr, refNs, optSeq(a.vs), transformLocalDate, seq2arrayLocalDate, extsLocalDate, value2jsonLocalDate)
+      case a: AttrSeqManLocalTime      => addSeq(ns, attr, refNs, optSeq(a.vs), transformLocalTime, seq2arrayLocalTime, extsLocalTime, value2jsonLocalTime)
+      case a: AttrSeqManLocalDateTime  => addSeq(ns, attr, refNs, optSeq(a.vs), transformLocalDateTime, seq2arrayLocalDateTime, extsLocalDateTime, value2jsonLocalDateTime)
+      case a: AttrSeqManOffsetTime     => addSeq(ns, attr, refNs, optSeq(a.vs), transformOffsetTime, seq2arrayOffsetTime, extsOffsetTime, value2jsonOffsetTime)
+      case a: AttrSeqManOffsetDateTime => addSeq(ns, attr, refNs, optSeq(a.vs), transformOffsetDateTime, seq2arrayOffsetDateTime, extsOffsetDateTime, value2jsonOffsetDateTime)
+      case a: AttrSeqManZonedDateTime  => addSeq(ns, attr, refNs, optSeq(a.vs), transformZonedDateTime, seq2arrayZonedDateTime, extsZonedDateTime, value2jsonZonedDateTime)
+      case a: AttrSeqManUUID           => addSeq(ns, attr, refNs, optSeq(a.vs), transformUUID, seq2arrayUUID, extsUUID, value2jsonUUID)
+      case a: AttrSeqManURI            => addSeq(ns, attr, refNs, optSeq(a.vs), transformURI, seq2arrayURI, extsURI, value2jsonURI)
+      case a: AttrSeqManByte           => addByteArray(ns, attr, optArray(a.vs), extsByte)
+      case a: AttrSeqManShort          => addSeq(ns, attr, refNs, optSeq(a.vs), transformShort, seq2arrayShort, extsShort, value2jsonShort)
+      case a: AttrSeqManChar           => addSeq(ns, attr, refNs, optSeq(a.vs), transformChar, seq2arrayChar, extsChar, value2jsonChar)
     }
   }
   private def resolveAttrSeqTac(a: AttrSeqTac): Unit = {
     val (ns, attr, refNs) = (a.ns, a.attr, a.refNs)
     a match {
-      case a: AttrSeqTacID             => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformID, seq2arrayID, extsID, value2jsonID)
-      case a: AttrSeqTacString         => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformString, seq2arrayString, extsString, value2jsonString)
-      case a: AttrSeqTacInt            => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformInt, seq2arrayInt, extsInt, value2jsonInt)
-      case a: AttrSeqTacLong           => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformLong, seq2arrayLong, extsLong, value2jsonLong)
-      case a: AttrSeqTacFloat          => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformFloat, seq2arrayFloat, extsFloat, value2jsonFloat)
-      case a: AttrSeqTacDouble         => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformDouble, seq2arrayDouble, extsDouble, value2jsonDouble)
-      case a: AttrSeqTacBoolean        => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformBoolean, seq2arrayBoolean, extsBoolean, value2jsonBoolean)
-      case a: AttrSeqTacBigInt         => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformBigInt, seq2arrayBigInt, extsBigInt, value2jsonBigInt)
-      case a: AttrSeqTacBigDecimal     => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformBigDecimal, seq2arrayBigDecimal, extsBigDecimal, value2jsonBigDecimal)
-      case a: AttrSeqTacDate           => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformDate, seq2arrayDate, extsDate, value2jsonDate)
-      case a: AttrSeqTacDuration       => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformDuration, seq2arrayDuration, extsDuration, value2jsonDuration)
-      case a: AttrSeqTacInstant        => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformInstant, seq2arrayInstant, extsInstant, value2jsonInstant)
-      case a: AttrSeqTacLocalDate      => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformLocalDate, seq2arrayLocalDate, extsLocalDate, value2jsonLocalDate)
-      case a: AttrSeqTacLocalTime      => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformLocalTime, seq2arrayLocalTime, extsLocalTime, value2jsonLocalTime)
-      case a: AttrSeqTacLocalDateTime  => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformLocalDateTime, seq2arrayLocalDateTime, extsLocalDateTime, value2jsonLocalDateTime)
-      case a: AttrSeqTacOffsetTime     => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformOffsetTime, seq2arrayOffsetTime, extsOffsetTime, value2jsonOffsetTime)
-      case a: AttrSeqTacOffsetDateTime => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformOffsetDateTime, seq2arrayOffsetDateTime, extsOffsetDateTime, value2jsonOffsetDateTime)
-      case a: AttrSeqTacZonedDateTime  => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformZonedDateTime, seq2arrayZonedDateTime, extsZonedDateTime, value2jsonZonedDateTime)
-      case a: AttrSeqTacUUID           => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformUUID, seq2arrayUUID, extsUUID, value2jsonUUID)
-      case a: AttrSeqTacURI            => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformURI, seq2arrayURI, extsURI, value2jsonURI)
-      case a: AttrSeqTacByte           => addByteArray(ns, attr, optByteArray(ns, attr, a.vs))
-      case a: AttrSeqTacShort          => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformShort, seq2arrayShort, extsShort, value2jsonShort)
-      case a: AttrSeqTacChar           => addSeq(ns, attr, refNs, oneSeq(ns, attr, a.vs), transformChar, seq2arrayChar, extsChar, value2jsonChar)
-    }
-  }
-
-  private def oneOptSeq[T](
-    ns: String,
-    attr: String,
-    optSeqs: Option[Seq[Seq[T]]],
-  ): Option[Seq[T]] = {
-    optSeqs.flatMap {
-      case Seq(seq)     => Some(seq)
-      case Nil          => None
-      case multipleSeqs => noMultipleSeqs(ns, attr, multipleSeqs)
+      case a: AttrSeqTacID             => addSeq(ns, attr, refNs, optSeq(a.vs), transformID, seq2arrayID, extsID, value2jsonID)
+      case a: AttrSeqTacString         => addSeq(ns, attr, refNs, optSeq(a.vs), transformString, seq2arrayString, extsString, value2jsonString)
+      case a: AttrSeqTacInt            => addSeq(ns, attr, refNs, optSeq(a.vs), transformInt, seq2arrayInt, extsInt, value2jsonInt)
+      case a: AttrSeqTacLong           => addSeq(ns, attr, refNs, optSeq(a.vs), transformLong, seq2arrayLong, extsLong, value2jsonLong)
+      case a: AttrSeqTacFloat          => addSeq(ns, attr, refNs, optSeq(a.vs), transformFloat, seq2arrayFloat, extsFloat, value2jsonFloat)
+      case a: AttrSeqTacDouble         => addSeq(ns, attr, refNs, optSeq(a.vs), transformDouble, seq2arrayDouble, extsDouble, value2jsonDouble)
+      case a: AttrSeqTacBoolean        => addSeq(ns, attr, refNs, optSeq(a.vs), transformBoolean, seq2arrayBoolean, extsBoolean, value2jsonBoolean)
+      case a: AttrSeqTacBigInt         => addSeq(ns, attr, refNs, optSeq(a.vs), transformBigInt, seq2arrayBigInt, extsBigInt, value2jsonBigInt)
+      case a: AttrSeqTacBigDecimal     => addSeq(ns, attr, refNs, optSeq(a.vs), transformBigDecimal, seq2arrayBigDecimal, extsBigDecimal, value2jsonBigDecimal)
+      case a: AttrSeqTacDate           => addSeq(ns, attr, refNs, optSeq(a.vs), transformDate, seq2arrayDate, extsDate, value2jsonDate)
+      case a: AttrSeqTacDuration       => addSeq(ns, attr, refNs, optSeq(a.vs), transformDuration, seq2arrayDuration, extsDuration, value2jsonDuration)
+      case a: AttrSeqTacInstant        => addSeq(ns, attr, refNs, optSeq(a.vs), transformInstant, seq2arrayInstant, extsInstant, value2jsonInstant)
+      case a: AttrSeqTacLocalDate      => addSeq(ns, attr, refNs, optSeq(a.vs), transformLocalDate, seq2arrayLocalDate, extsLocalDate, value2jsonLocalDate)
+      case a: AttrSeqTacLocalTime      => addSeq(ns, attr, refNs, optSeq(a.vs), transformLocalTime, seq2arrayLocalTime, extsLocalTime, value2jsonLocalTime)
+      case a: AttrSeqTacLocalDateTime  => addSeq(ns, attr, refNs, optSeq(a.vs), transformLocalDateTime, seq2arrayLocalDateTime, extsLocalDateTime, value2jsonLocalDateTime)
+      case a: AttrSeqTacOffsetTime     => addSeq(ns, attr, refNs, optSeq(a.vs), transformOffsetTime, seq2arrayOffsetTime, extsOffsetTime, value2jsonOffsetTime)
+      case a: AttrSeqTacOffsetDateTime => addSeq(ns, attr, refNs, optSeq(a.vs), transformOffsetDateTime, seq2arrayOffsetDateTime, extsOffsetDateTime, value2jsonOffsetDateTime)
+      case a: AttrSeqTacZonedDateTime  => addSeq(ns, attr, refNs, optSeq(a.vs), transformZonedDateTime, seq2arrayZonedDateTime, extsZonedDateTime, value2jsonZonedDateTime)
+      case a: AttrSeqTacUUID           => addSeq(ns, attr, refNs, optSeq(a.vs), transformUUID, seq2arrayUUID, extsUUID, value2jsonUUID)
+      case a: AttrSeqTacURI            => addSeq(ns, attr, refNs, optSeq(a.vs), transformURI, seq2arrayURI, extsURI, value2jsonURI)
+      case a: AttrSeqTacByte           => addByteArray(ns, attr, optArray(a.vs), extsByte)
+      case a: AttrSeqTacShort          => addSeq(ns, attr, refNs, optSeq(a.vs), transformShort, seq2arrayShort, extsShort, value2jsonShort)
+      case a: AttrSeqTacChar           => addSeq(ns, attr, refNs, optSeq(a.vs), transformChar, seq2arrayChar, extsChar, value2jsonChar)
     }
   }
 
   private def resolveAttrSeqOpt(a: AttrSeqOpt): Unit = {
     val (ns, attr, refNs) = (a.ns, a.attr, a.refNs)
     a match {
-      case a: AttrSeqOptID             => addSeq(ns, attr, refNs, oneOptSeq(ns, attr, a.vs), transformID, seq2arrayID, extsID, value2jsonID)
-      case a: AttrSeqOptString         => addSeq(ns, attr, refNs, oneOptSeq(ns, attr, a.vs), transformString, seq2arrayString, extsString, value2jsonString)
-      case a: AttrSeqOptInt            => addSeq(ns, attr, refNs, oneOptSeq(ns, attr, a.vs), transformInt, seq2arrayInt, extsInt, value2jsonInt)
-      case a: AttrSeqOptLong           => addSeq(ns, attr, refNs, oneOptSeq(ns, attr, a.vs), transformLong, seq2arrayLong, extsLong, value2jsonLong)
-      case a: AttrSeqOptFloat          => addSeq(ns, attr, refNs, oneOptSeq(ns, attr, a.vs), transformFloat, seq2arrayFloat, extsFloat, value2jsonFloat)
-      case a: AttrSeqOptDouble         => addSeq(ns, attr, refNs, oneOptSeq(ns, attr, a.vs), transformDouble, seq2arrayDouble, extsDouble, value2jsonDouble)
-      case a: AttrSeqOptBoolean        => addSeq(ns, attr, refNs, oneOptSeq(ns, attr, a.vs), transformBoolean, seq2arrayBoolean, extsBoolean, value2jsonBoolean)
-      case a: AttrSeqOptBigInt         => addSeq(ns, attr, refNs, oneOptSeq(ns, attr, a.vs), transformBigInt, seq2arrayBigInt, extsBigInt, value2jsonBigInt)
-      case a: AttrSeqOptBigDecimal     => addSeq(ns, attr, refNs, oneOptSeq(ns, attr, a.vs), transformBigDecimal, seq2arrayBigDecimal, extsBigDecimal, value2jsonBigDecimal)
-      case a: AttrSeqOptDate           => addSeq(ns, attr, refNs, oneOptSeq(ns, attr, a.vs), transformDate, seq2arrayDate, extsDate, value2jsonDate)
-      case a: AttrSeqOptDuration       => addSeq(ns, attr, refNs, oneOptSeq(ns, attr, a.vs), transformDuration, seq2arrayDuration, extsDuration, value2jsonDuration)
-      case a: AttrSeqOptInstant        => addSeq(ns, attr, refNs, oneOptSeq(ns, attr, a.vs), transformInstant, seq2arrayInstant, extsInstant, value2jsonInstant)
-      case a: AttrSeqOptLocalDate      => addSeq(ns, attr, refNs, oneOptSeq(ns, attr, a.vs), transformLocalDate, seq2arrayLocalDate, extsLocalDate, value2jsonLocalDate)
-      case a: AttrSeqOptLocalTime      => addSeq(ns, attr, refNs, oneOptSeq(ns, attr, a.vs), transformLocalTime, seq2arrayLocalTime, extsLocalTime, value2jsonLocalTime)
-      case a: AttrSeqOptLocalDateTime  => addSeq(ns, attr, refNs, oneOptSeq(ns, attr, a.vs), transformLocalDateTime, seq2arrayLocalDateTime, extsLocalDateTime, value2jsonLocalDateTime)
-      case a: AttrSeqOptOffsetTime     => addSeq(ns, attr, refNs, oneOptSeq(ns, attr, a.vs), transformOffsetTime, seq2arrayOffsetTime, extsOffsetTime, value2jsonOffsetTime)
-      case a: AttrSeqOptOffsetDateTime => addSeq(ns, attr, refNs, oneOptSeq(ns, attr, a.vs), transformOffsetDateTime, seq2arrayOffsetDateTime, extsOffsetDateTime, value2jsonOffsetDateTime)
-      case a: AttrSeqOptZonedDateTime  => addSeq(ns, attr, refNs, oneOptSeq(ns, attr, a.vs), transformZonedDateTime, seq2arrayZonedDateTime, extsZonedDateTime, value2jsonZonedDateTime)
-      case a: AttrSeqOptUUID           => addSeq(ns, attr, refNs, oneOptSeq(ns, attr, a.vs), transformUUID, seq2arrayUUID, extsUUID, value2jsonUUID)
-      case a: AttrSeqOptURI            => addSeq(ns, attr, refNs, oneOptSeq(ns, attr, a.vs), transformURI, seq2arrayURI, extsURI, value2jsonURI)
-      case a: AttrSeqOptByte           => addByteArray(ns, attr, a.vs.flatMap(vs => optByteArray(ns, attr, vs)))
-      case a: AttrSeqOptShort          => addSeq(ns, attr, refNs, oneOptSeq(ns, attr, a.vs), transformShort, seq2arrayShort, extsShort, value2jsonShort)
-      case a: AttrSeqOptChar           => addSeq(ns, attr, refNs, oneOptSeq(ns, attr, a.vs), transformChar, seq2arrayChar, extsChar, value2jsonChar)
+      case a: AttrSeqOptID             => addSeq(ns, attr, refNs, a.vs, transformID, seq2arrayID, extsID, value2jsonID)
+      case a: AttrSeqOptString         => addSeq(ns, attr, refNs, a.vs, transformString, seq2arrayString, extsString, value2jsonString)
+      case a: AttrSeqOptInt            => addSeq(ns, attr, refNs, a.vs, transformInt, seq2arrayInt, extsInt, value2jsonInt)
+      case a: AttrSeqOptLong           => addSeq(ns, attr, refNs, a.vs, transformLong, seq2arrayLong, extsLong, value2jsonLong)
+      case a: AttrSeqOptFloat          => addSeq(ns, attr, refNs, a.vs, transformFloat, seq2arrayFloat, extsFloat, value2jsonFloat)
+      case a: AttrSeqOptDouble         => addSeq(ns, attr, refNs, a.vs, transformDouble, seq2arrayDouble, extsDouble, value2jsonDouble)
+      case a: AttrSeqOptBoolean        => addSeq(ns, attr, refNs, a.vs, transformBoolean, seq2arrayBoolean, extsBoolean, value2jsonBoolean)
+      case a: AttrSeqOptBigInt         => addSeq(ns, attr, refNs, a.vs, transformBigInt, seq2arrayBigInt, extsBigInt, value2jsonBigInt)
+      case a: AttrSeqOptBigDecimal     => addSeq(ns, attr, refNs, a.vs, transformBigDecimal, seq2arrayBigDecimal, extsBigDecimal, value2jsonBigDecimal)
+      case a: AttrSeqOptDate           => addSeq(ns, attr, refNs, a.vs, transformDate, seq2arrayDate, extsDate, value2jsonDate)
+      case a: AttrSeqOptDuration       => addSeq(ns, attr, refNs, a.vs, transformDuration, seq2arrayDuration, extsDuration, value2jsonDuration)
+      case a: AttrSeqOptInstant        => addSeq(ns, attr, refNs, a.vs, transformInstant, seq2arrayInstant, extsInstant, value2jsonInstant)
+      case a: AttrSeqOptLocalDate      => addSeq(ns, attr, refNs, a.vs, transformLocalDate, seq2arrayLocalDate, extsLocalDate, value2jsonLocalDate)
+      case a: AttrSeqOptLocalTime      => addSeq(ns, attr, refNs, a.vs, transformLocalTime, seq2arrayLocalTime, extsLocalTime, value2jsonLocalTime)
+      case a: AttrSeqOptLocalDateTime  => addSeq(ns, attr, refNs, a.vs, transformLocalDateTime, seq2arrayLocalDateTime, extsLocalDateTime, value2jsonLocalDateTime)
+      case a: AttrSeqOptOffsetTime     => addSeq(ns, attr, refNs, a.vs, transformOffsetTime, seq2arrayOffsetTime, extsOffsetTime, value2jsonOffsetTime)
+      case a: AttrSeqOptOffsetDateTime => addSeq(ns, attr, refNs, a.vs, transformOffsetDateTime, seq2arrayOffsetDateTime, extsOffsetDateTime, value2jsonOffsetDateTime)
+      case a: AttrSeqOptZonedDateTime  => addSeq(ns, attr, refNs, a.vs, transformZonedDateTime, seq2arrayZonedDateTime, extsZonedDateTime, value2jsonZonedDateTime)
+      case a: AttrSeqOptUUID           => addSeq(ns, attr, refNs, a.vs, transformUUID, seq2arrayUUID, extsUUID, value2jsonUUID)
+      case a: AttrSeqOptURI            => addSeq(ns, attr, refNs, a.vs, transformURI, seq2arrayURI, extsURI, value2jsonURI)
+      case a: AttrSeqOptByte           => addByteArray(ns, attr, a.vs, extsByte)
+      case a: AttrSeqOptShort          => addSeq(ns, attr, refNs, a.vs, transformShort, seq2arrayShort, extsShort, value2jsonShort)
+      case a: AttrSeqOptChar           => addSeq(ns, attr, refNs, a.vs, transformChar, seq2arrayChar, extsChar, value2jsonChar)
     }
   }
 

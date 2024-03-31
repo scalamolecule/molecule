@@ -18,25 +18,12 @@ trait SaveCardSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "mandatory" - types { implicit conn =>
       for {
-        // Can't save multiple Sets of values (use insert for that)
-        _ <- Ns.intSet(Seq(Set(1), Set(2))).save.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can only save one Set of values for Set attribute `Ns.intSet`. Found: Set(1), Set(2)"
-          }
-
-        // Same as
-        _ <- Ns.intSet(Set(1), Set(2)).save.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can only save one Set of values for Set attribute `Ns.intSet`. Found: Set(1), Set(2)"
-          }
-
-        // Empty values are ignored
+        // Empty Set of values is ignored
         _ <- Ns.iSet.query.get.map(_ ==> List())
-        _ <- Ns.iSet(Seq.empty[Set[Int]]).save.transact
-        _ <- Ns.iSet(Seq(Set.empty[Int])).save.transact
+        _ <- Ns.iSet(Set.empty[Int]).save.transact
         _ <- Ns.iSet.query.get.map(_ ==> List())
 
-        _ <- Ns.i(1).stringSet(Set(string1, string2)).save.transact
+        _ <- Ns.i(1).stringSet.apply(Set(string1, string2)).save.transact
         _ <- Ns.i(1).intSet(Set(int1, int2)).save.transact
         _ <- Ns.i(1).longSet(Set(long1, long2)).save.transact
         _ <- Ns.i(1).floatSet(Set(float1, float2)).save.transact
@@ -91,14 +78,8 @@ trait SaveCardSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "optional" - types { implicit conn =>
       for {
-        // Can't save multiple Sets of values (use insert for that)
-        _ <- Ns.intSet_?(Some(Seq(Set(1), Set(2)))).save.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can only save one Set of values for optional Set attribute `Ns.intSet`. Found: Set(1), Set(2)"
-          }
-
-        // Empty option of Set of values saves nothing
-        _ <- Ns.intSet_?(Option.empty[Seq[Set[Int]]]).save.transact
+        // Empty option of Set of values is ignored
+        _ <- Ns.intSet_?(Option.empty[Set[Int]]).save.transact
         _ <- Ns.intSet.query.get.map(_ ==> List())
 
         _ <- Ns.int(1).i(1).stringSet_?(Option.empty[Set[String]]).save.transact

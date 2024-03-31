@@ -19,27 +19,8 @@ trait SaveCardSeq extends CoreTestSuiteBase with Array2List with ApiAsync { spi:
 
     "mandatory" - types { implicit conn =>
       for {
-        // Can't save multiple Seqs of values (use insert for that)
-        _ <- Ns.intSeq(Seq(1), Seq(2)).save.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==>
-              """Can only save one Seq of values for Seq attribute `Ns.intSeq`. Found multiple seqs:
-                |List(1)
-                |List(2)""".stripMargin
-          }
-        // Same as
-        _ <- Ns.intSeq(Seq(Seq(1), Seq(2))).save.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==>
-              """Can only save one Seq of values for Seq attribute `Ns.intSeq`. Found multiple seqs:
-                |List(1)
-                |List(2)""".stripMargin
-          }
-
-        // Empty values are ignored
-        _ <- Ns.intSeq.query.get.map(_ ==> List())
-        _ <- Ns.intSeq(List.empty[List[Int]]).save.transact
-        _ <- Ns.intSeq(List(List.empty[Int])).save.transact
+        // Empty Seq of values is ignored
+        _ <- Ns.intSeq(List.empty[Int]).save.transact
         _ <- Ns.intSeq.query.get.map(_ ==> List())
 
         _ <- Ns.i(1).stringSeq(List(string1, string2)).save.transact
@@ -60,8 +41,8 @@ trait SaveCardSeq extends CoreTestSuiteBase with Array2List with ApiAsync { spi:
         _ <- Ns.i(1).offsetDateTimeSeq(List(offsetDateTime1, offsetDateTime2)).save.transact
         _ <- Ns.i(1).zonedDateTimeSeq(List(zonedDateTime1, zonedDateTime2)).save.transact
         _ <- Ns.i(1).uuidSeq(List(uuid1, uuid2)).save.transact
-        _ <- Ns.i(1).uriSeq(List(uri1, uri2)).save.i.transact
-        _ <- Ns.i(1).byteArray(Array(byte1, byte2)).save.i.transact // Note that Bytes are saved in Arrays
+        _ <- Ns.i(1).uriSeq(List(uri1, uri2)).save.transact
+        _ <- Ns.i(1).byteArray(Array(byte1, byte2)).save.transact // Note that Bytes are saved in Arrays
         _ <- Ns.i(1).shortSeq(List(short1, short2)).save.transact
         _ <- Ns.i(1).charSeq(List(char1, char2)).save.transact
 
@@ -84,7 +65,7 @@ trait SaveCardSeq extends CoreTestSuiteBase with Array2List with ApiAsync { spi:
         _ <- Ns.i.zonedDateTimeSeq.query.get.map(_ ==> List((1, List(zonedDateTime1, zonedDateTime2))))
         _ <- Ns.i.uuidSeq.query.get.map(_ ==> List((1, List(uuid1, uuid2))))
         _ <- Ns.i.uriSeq.query.get.map(_ ==> List((1, List(uri1, uri2))))
-        _ <- Ns.i.byteArray.query.get.map(_ ==> List((1, Array(byte1, byte2)))) // Note that Bytes are saved in Arrays
+        _ <- Ns.i.byteArray.query.i.get.map(_ ==> List((1, Array(byte1, byte2)))) // Note that Bytes are saved in Arrays
         _ <- Ns.i.shortSeq.query.get.map(_ ==> List((1, List(short1, short2))))
         _ <- Ns.i.charSeq.query.get.map(_ ==> List((1, List(char1, char2))))
 
@@ -95,17 +76,8 @@ trait SaveCardSeq extends CoreTestSuiteBase with Array2List with ApiAsync { spi:
 
     "optional" - types { implicit conn =>
       for {
-        // Can't save multiple Seqs of values (use insert for that)
-        _ <- Ns.intSeq_?(Some(List(List(1), List(2)))).save.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==>
-              """Can only save one Seq of values for Seq attribute `Ns.intSeq`. Found multiple seqs:
-                |List(1)
-                |List(2)""".stripMargin
-          }
-
-        // Empty option of Seq of values saves nothing
-        _ <- Ns.intSeq_?(Option.empty[List[List[Int]]]).save.transact
+        // Empty option of Seq of values is ignored
+        _ <- Ns.intSeq_?(Option.empty[List[Int]]).save.transact
         _ <- Ns.intSeq.query.get.map(_ ==> List())
 
         _ <- Ns.int(1).i(1).stringSeq_?(Option.empty[List[String]]).save.transact

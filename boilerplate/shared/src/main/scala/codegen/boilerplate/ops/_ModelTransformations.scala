@@ -85,7 +85,7 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |    es.init :+ last
        |  }
        |
-       |  protected def addOneOpt[T](es: List[Element], op: Op, vs: Option[Seq[T]]): List[Element] = {
+       |  protected def addOneOpt[T](es: List[Element], op: Op, v: Option[T]): List[Element] = {
        |    val last = es.last match {
        |      case a: AttrOneOpt => a match {
        |        $addOptOne
@@ -95,7 +95,7 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |    es.init :+ last
        |  }
        |
-       |  protected def addSet[T](es: List[Element], op: Op, vs: Seq[Set[T]]): List[Element] = {
+       |  protected def addSet[T](es: List[Element], op: Op, vs: Set[T]): List[Element] = {
        |    val last = es.last match {
        |      case a: AttrSetMan => a match {
        |        ${addSet("Man")}
@@ -108,7 +108,7 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |    es.init :+ last
        |  }
        |
-       |  protected def addSetOpt[T](es: List[Element], op: Op, vs: Option[Seq[Set[T]]]): List[Element] = {
+       |  protected def addSetOpt[T](es: List[Element], op: Op, vs: Option[Set[T]]): List[Element] = {
        |    val last = es.last match {
        |      case a: AttrSetOpt => a match {
        |        $addOptSet
@@ -118,7 +118,7 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |    es.init :+ last
        |  }
        |
-       |  protected def addSeq[T](es: List[Element], op: Op, vs: Seq[Seq[T]]): List[Element] = {
+       |  protected def addSeq[T](es: List[Element], op: Op, vs: Seq[T]): List[Element] = {
        |    val last = es.last match {
        |      case a: AttrSeqMan => a match {
        |        ${addSeq("Man")}
@@ -135,7 +135,7 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |    es.init :+ last
        |  }
        |
-       |  protected def addSeqOpt[T](es: List[Element], op: Op, vs: Option[Seq[Seq[T]]]): List[Element] = {
+       |  protected def addSeqOpt[T](es: List[Element], op: Op, vs: Option[Seq[T]]): List[Element] = {
        |    val last = es.last match {
        |      case a: AttrSeqOpt => a match {
        |        $addOptSeq
@@ -147,18 +147,17 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |    es.init :+ last
        |  }
        |
-       |  protected def addBAr[T](es: List[Element], op: Op, ba: Seq[Array[T]]): List[Element] = {
+       |  protected def addBAr[T](es: List[Element], op: Op, ba: Array[T]): List[Element] = {
        |    es.init :+ (es.last match {
-       |      case a: AttrSeqManByte => a.copy(op = op, vs = ba.asInstanceOf[Seq[Array[Byte]]])
-       |      case a: AttrSeqTacByte => a.copy(op = op, vs = ba.asInstanceOf[Seq[Array[Byte]]])
+       |      case a: AttrSeqManByte => a.copy(op = op, vs = ba.asInstanceOf[Array[Byte]])
+       |      case a: AttrSeqTacByte => a.copy(op = op, vs = ba.asInstanceOf[Array[Byte]])
        |      case e                 => throw ModelError("Unexpected Element for adding byte array: " + e)
        |    })
        |  }
        |
        |  protected def addBArOpt[T](es: List[Element], op: Op, optBA: Option[Array[T]]): List[Element] = {
        |    es.init :+ (es.last match {
-       |      case a: AttrSeqOptByte =>
-       |        a.copy(op = op, vs = optBA.asInstanceOf[Option[Array[Byte]]].map(array => Seq(array)))
+       |      case a: AttrSeqOptByte => a.copy(op = op, vs = optBA.asInstanceOf[Option[Array[Byte]]])
        |      case e                 => throw ModelError("Unexpected Element for adding byte array: " + e)
        |    })
        |  }
@@ -460,12 +459,11 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
     baseTypes.map { baseTpe =>
       val tpe = if (baseTpe == "ID") "String" else baseTpe
       s"""case a: AttrOneOpt$baseTpe =>
-         |          val vs1     = vs.asInstanceOf[Option[Seq[$tpe]]]
-         |          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-         |            val validator = a.validator.get
-         |            vs1.get.flatMap(v => validator.validate(v))
+         |          val v1      = v.asInstanceOf[Option[$tpe]]
+         |          val errors1 = if (v1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+         |            a.validator.get.validate(v1.get)
          |          }
-         |          a.copy(op = op, vs = vs1, errors = errors1)""".stripMargin
+         |          a.copy(op = op, vs = v1.map(Seq(_)), errors = errors1)""".stripMargin
     }.mkString("\n\n        ")
   }
 
@@ -473,12 +471,12 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
     baseTypes.map { baseTpe =>
       val tpe = if (baseTpe == "ID") "String" else baseTpe
       s"""case a: AttrSet$mode$baseTpe =>
-         |          val sets    = vs.asInstanceOf[Seq[Set[$tpe]]]
-         |          val errors1 = if (sets.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+         |          val set     = vs.asInstanceOf[Set[$tpe]]
+         |          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
          |            val validator = a.validator.get
-         |            sets.flatMap(set => set.flatMap(v => validator.validate(v)))
+         |            set.toSeq.flatMap(v => validator.validate(v))
          |          }
-         |          a.copy(op = op, vs = sets, errors = errors1)""".stripMargin
+         |          a.copy(op = op, vs = set, errors = errors1)""".stripMargin
     }.mkString("\n\n        ")
   }
 
@@ -486,12 +484,12 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
     baseTypes.map { baseTpe =>
       val tpe = if (baseTpe == "ID") "String" else baseTpe
       s"""case a: AttrSetOpt$baseTpe =>
-         |          val sets    = vs.asInstanceOf[Option[Seq[Set[$tpe]]]]
-         |          val errors1 = if (sets.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+         |          val set     = vs.asInstanceOf[Option[Set[$tpe]]]
+         |          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
          |            val validator = a.validator.get
-         |            sets.get.flatMap(set => set.flatMap(v => validator.validate(v)))
+         |            set.get.toSeq.flatMap(v => validator.validate(v))
          |          }
-         |          a.copy(op = op, vs = sets, errors = errors1)""".stripMargin
+         |          a.copy(op = op, vs = set, errors = errors1)""".stripMargin
     }.mkString("\n\n        ")
   }
 
@@ -499,12 +497,12 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
     baseTypes.filterNot(_ == "Byte").map { baseTpe =>
       val tpe = if (baseTpe == "ID") "String" else baseTpe
       s"""case a: AttrSeq$mode$baseTpe =>
-         |          val seqs    = vs.asInstanceOf[Seq[Seq[$tpe]]]
-         |          val errors1 = if (seqs.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+         |          val seq     = vs.asInstanceOf[Seq[$tpe]]
+         |          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
          |            val validator = a.validator.get
-         |            seqs.flatMap(seq => seq.flatMap(v => validator.validate(v)))
+         |            seq.flatMap(v => validator.validate(v))
          |          }
-         |          a.copy(op = op, vs = seqs, errors = errors1)""".stripMargin
+         |          a.copy(op = op, vs = seq, errors = errors1)""".stripMargin
     }.mkString("\n\n        ")
   }
 
@@ -512,12 +510,12 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
     baseTypes.filterNot(_ == "Byte").map { baseTpe =>
       val tpe = if (baseTpe == "ID") "String" else baseTpe
       s"""case a: AttrSeqOpt$baseTpe =>
-         |          val seqs    = vs.asInstanceOf[Option[Seq[Seq[$tpe]]]]
-         |          val errors1 = if (seqs.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+         |          val seq     = vs.asInstanceOf[Option[Seq[$tpe]]]
+         |          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
          |            val validator = a.validator.get
-         |            seqs.get.flatMap(seq => seq.flatMap(v => validator.validate(v)))
+         |            seq.get.flatMap(v => validator.validate(v))
          |          }
-         |          a.copy(op = op, vs = seqs, errors = errors1)""".stripMargin
+         |          a.copy(op = op, vs = seq, errors = errors1)""".stripMargin
     }.mkString("\n\n        ")
   }
 

@@ -1,4 +1,3 @@
-// GENERATED CODE ********************************
 package molecule.coreTests.spi.crud.update.set.ops
 
 import molecule.core.api.ApiAsync
@@ -9,7 +8,7 @@ import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
-trait UpdateSetOps_ref_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
+trait UpdateSetOps_ref extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 

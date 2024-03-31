@@ -127,10 +127,11 @@ trait FilterSet_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
           // OR semantics when multiple values
 
           // "Has this OR that"
+          _ <- Ns.i.a1.localDateTimeSet_.has(localDateTime0, localDateTime1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.localDateTimeSet_.has(localDateTime1, localDateTime2).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.localDateTimeSet_.has(localDateTime1, localDateTime3).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.localDateTimeSet_.has(localDateTime2, localDateTime3).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.localDateTimeSet_.has(localDateTime1, localDateTime2, localDateTime3).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.localDateTimeSet_.has(localDateTime3, localDateTime4).query.get.map(_ ==> List(2))
           // Same as
           _ <- Ns.i.a1.localDateTimeSet_.has(Seq(localDateTime1, localDateTime2)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.localDateTimeSet_.has(Seq(localDateTime1, localDateTime3)).query.get.map(_ ==> List(1, 2))
@@ -190,90 +191,6 @@ trait FilterSet_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
       }
     }
 
-
-    "Optional" - {
-
-      "has" - types { implicit conn =>
-        val a = (1, Some(Set(localDateTime1, localDateTime2)))
-        val b = (2, Some(Set(localDateTime2, localDateTime3, localDateTime4)))
-        val c = (3, None)
-        for {
-          _ <- Ns.i.localDateTimeSet_?.insert(a, b, c).transact
-
-          // Sets with one or more values matching
-
-          // "Has this"
-          _ <- Ns.i.a1.localDateTimeSet_?.has(Some(localDateTime0)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.localDateTimeSet_?.has(Some(localDateTime1)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.localDateTimeSet_?.has(Some(localDateTime2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.localDateTimeSet_?.has(Some(localDateTime3)).query.get.map(_ ==> List(b))
-          // Same as
-          _ <- Ns.i.a1.localDateTimeSet_?.has(Some(Seq(localDateTime0))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.localDateTimeSet_?.has(Some(Seq(localDateTime1))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.localDateTimeSet_?.has(Some(Seq(localDateTime2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.localDateTimeSet_?.has(Some(Seq(localDateTime3))).query.get.map(_ ==> List(b))
-
-
-          // OR semantics when multiple values
-
-          // "Has this OR that"
-          _ <- Ns.i.a1.localDateTimeSet_?.has(Some(Seq(localDateTime1, localDateTime2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.localDateTimeSet_?.has(Some(Seq(localDateTime1, localDateTime3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.localDateTimeSet_?.has(Some(Seq(localDateTime2, localDateTime3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.localDateTimeSet_?.has(Some(Seq(localDateTime1, localDateTime2, localDateTime3))).query.get.map(_ ==> List(a, b))
-
-          // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.localDateTimeSet_?.has(Some(Seq.empty[LocalDateTime])).query.get.map(_ ==> List())
-
-          // None matches non-asserted values
-          _ <- Ns.i.a1.localDateTimeSet_?.has(Option.empty[LocalDateTime]).query.get.map(_ ==> List(c))
-          _ <- Ns.i.a1.localDateTimeSet_?.has(Option.empty[Seq[LocalDateTime]]).query.get.map(_ ==> List(c))
-        } yield ()
-      }
-
-
-      "hasNo" - types { implicit conn =>
-        val a = (1, Some(Set(localDateTime1, localDateTime2)))
-        val b = (2, Some(Set(localDateTime2, localDateTime3, localDateTime4)))
-        val c = (3, None)
-        for {
-          _ <- Ns.i.localDateTimeSet_?.insert(a, b, c).transact
-
-          // Sets without one or more values matching
-
-          // "Doesn't have this"
-          _ <- Ns.i.a1.localDateTimeSet_?.hasNo(Some(localDateTime0)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.localDateTimeSet_?.hasNo(Some(localDateTime1)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.localDateTimeSet_?.hasNo(Some(localDateTime2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.localDateTimeSet_?.hasNo(Some(localDateTime3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.localDateTimeSet_?.hasNo(Some(localDateTime4)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.localDateTimeSet_?.hasNo(Some(localDateTime5)).query.get.map(_ ==> List(a, b))
-          // Same as
-          _ <- Ns.i.a1.localDateTimeSet_?.hasNo(Some(Seq(localDateTime0))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.localDateTimeSet_?.hasNo(Some(Seq(localDateTime1))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.localDateTimeSet_?.hasNo(Some(Seq(localDateTime2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.localDateTimeSet_?.hasNo(Some(Seq(localDateTime3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.localDateTimeSet_?.hasNo(Some(Seq(localDateTime4))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.localDateTimeSet_?.hasNo(Some(Seq(localDateTime5))).query.get.map(_ ==> List(a, b))
-
-
-          // OR semantics when multiple values
-
-          // "Has neither this OR that"
-          _ <- Ns.i.a1.localDateTimeSet_?.hasNo(Some(Seq(localDateTime1, localDateTime2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.localDateTimeSet_?.hasNo(Some(Seq(localDateTime1, localDateTime3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.localDateTimeSet_?.hasNo(Some(Seq(localDateTime1, localDateTime4))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.localDateTimeSet_?.hasNo(Some(Seq(localDateTime1, localDateTime5))).query.get.map(_ ==> List(b))
-
-
-          // Negating empty Seqs/Sets has no effect
-          _ <- Ns.i.a1.localDateTimeSet_?.hasNo(Some(Seq.empty[LocalDateTime])).query.get.map(_ ==> List(a, b))
-
-          // Negating None returns all asserted
-          _ <- Ns.i.a1.localDateTimeSet_?.hasNo(Option.empty[LocalDateTime]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.localDateTimeSet_?.hasNo(Option.empty[Seq[LocalDateTime]]).query.get.map(_ ==> List(a, b))
-        } yield ()
-      }
-    }
+    // No filtering on optional Set attributes
   }
 }

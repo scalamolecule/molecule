@@ -25,7 +25,7 @@ trait Save_mysql extends SqlSave with BaseHelpers { self: ResolveSave =>
           ps.setNull(paramIndex, 0)
       } { set =>
         if (set.nonEmpty) {
-          val json = set2json(set.asInstanceOf[Set[T]], value2json)
+          val json = set2json(set, value2json)
           (ps: PS, _: IdsMap, _: RowIndex) =>
             ps.setString(paramIndex, json)
         } else {

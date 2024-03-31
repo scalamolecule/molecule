@@ -127,10 +127,11 @@ trait FilterSet_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           // OR semantics when multiple values
 
           // "Has this OR that"
+          _ <- Ns.i.a1.instantSet_.has(instant0, instant1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.instantSet_.has(instant1, instant2).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.instantSet_.has(instant1, instant3).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.instantSet_.has(instant2, instant3).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.instantSet_.has(instant1, instant2, instant3).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.instantSet_.has(instant3, instant4).query.get.map(_ ==> List(2))
           // Same as
           _ <- Ns.i.a1.instantSet_.has(Seq(instant1, instant2)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.instantSet_.has(Seq(instant1, instant3)).query.get.map(_ ==> List(1, 2))
@@ -190,90 +191,6 @@ trait FilterSet_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       }
     }
 
-
-    "Optional" - {
-
-      "has" - types { implicit conn =>
-        val a = (1, Some(Set(instant1, instant2)))
-        val b = (2, Some(Set(instant2, instant3, instant4)))
-        val c = (3, None)
-        for {
-          _ <- Ns.i.instantSet_?.insert(a, b, c).transact
-
-          // Sets with one or more values matching
-
-          // "Has this"
-          _ <- Ns.i.a1.instantSet_?.has(Some(instant0)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.instantSet_?.has(Some(instant1)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.instantSet_?.has(Some(instant2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.instantSet_?.has(Some(instant3)).query.get.map(_ ==> List(b))
-          // Same as
-          _ <- Ns.i.a1.instantSet_?.has(Some(Seq(instant0))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.instantSet_?.has(Some(Seq(instant1))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.instantSet_?.has(Some(Seq(instant2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.instantSet_?.has(Some(Seq(instant3))).query.get.map(_ ==> List(b))
-
-
-          // OR semantics when multiple values
-
-          // "Has this OR that"
-          _ <- Ns.i.a1.instantSet_?.has(Some(Seq(instant1, instant2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.instantSet_?.has(Some(Seq(instant1, instant3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.instantSet_?.has(Some(Seq(instant2, instant3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.instantSet_?.has(Some(Seq(instant1, instant2, instant3))).query.get.map(_ ==> List(a, b))
-
-          // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.instantSet_?.has(Some(Seq.empty[Instant])).query.get.map(_ ==> List())
-
-          // None matches non-asserted values
-          _ <- Ns.i.a1.instantSet_?.has(Option.empty[Instant]).query.get.map(_ ==> List(c))
-          _ <- Ns.i.a1.instantSet_?.has(Option.empty[Seq[Instant]]).query.get.map(_ ==> List(c))
-        } yield ()
-      }
-
-
-      "hasNo" - types { implicit conn =>
-        val a = (1, Some(Set(instant1, instant2)))
-        val b = (2, Some(Set(instant2, instant3, instant4)))
-        val c = (3, None)
-        for {
-          _ <- Ns.i.instantSet_?.insert(a, b, c).transact
-
-          // Sets without one or more values matching
-
-          // "Doesn't have this"
-          _ <- Ns.i.a1.instantSet_?.hasNo(Some(instant0)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.instantSet_?.hasNo(Some(instant1)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.instantSet_?.hasNo(Some(instant2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.instantSet_?.hasNo(Some(instant3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.instantSet_?.hasNo(Some(instant4)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.instantSet_?.hasNo(Some(instant5)).query.get.map(_ ==> List(a, b))
-          // Same as
-          _ <- Ns.i.a1.instantSet_?.hasNo(Some(Seq(instant0))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.instantSet_?.hasNo(Some(Seq(instant1))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.instantSet_?.hasNo(Some(Seq(instant2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.instantSet_?.hasNo(Some(Seq(instant3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.instantSet_?.hasNo(Some(Seq(instant4))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.instantSet_?.hasNo(Some(Seq(instant5))).query.get.map(_ ==> List(a, b))
-
-
-          // OR semantics when multiple values
-
-          // "Has neither this OR that"
-          _ <- Ns.i.a1.instantSet_?.hasNo(Some(Seq(instant1, instant2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.instantSet_?.hasNo(Some(Seq(instant1, instant3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.instantSet_?.hasNo(Some(Seq(instant1, instant4))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.instantSet_?.hasNo(Some(Seq(instant1, instant5))).query.get.map(_ ==> List(b))
-
-
-          // Negating empty Seqs/Sets has no effect
-          _ <- Ns.i.a1.instantSet_?.hasNo(Some(Seq.empty[Instant])).query.get.map(_ ==> List(a, b))
-
-          // Negating None returns all asserted
-          _ <- Ns.i.a1.instantSet_?.hasNo(Option.empty[Instant]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.instantSet_?.hasNo(Option.empty[Seq[Instant]]).query.get.map(_ ==> List(a, b))
-        } yield ()
-      }
-    }
+    // No filtering on optional Set attributes
   }
 }

@@ -10,6 +10,7 @@ import utest._
 import scala.language.implicitConversions
 import molecule.boilerplate.ast.Model._
 import molecule.coreTests.dataModels.core.dsl.Refs.A
+import molecule.document.mongodb.AdhocJVM_mongodb.{int2, int3, int4}
 import scala.collection.immutable.Set
 import scala.concurrent.Future
 import scala.util.Random
@@ -23,15 +24,15 @@ object AdhocJVM_mongodb extends TestSuite_mongodb with AggrUtils {
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
+      val a = (1, Set(int1, int2))
+      val b = (2, Set(int2, int3, int4))
       for {
+        _ <- Ns.i.intSet.insert(List(a, b)).transact
 
-        _ <- Ns.i.intSet.insert(List(
-          (1, Set(int1, int2)),
-          (2, Set(int2)),
-          (2, Set(int3, int4)),
-          (2, Set(int3, int4)),
-        )).transact
+        // Sets without one or more values matching
 
+        // "Doesn't have this"
+        _ <- Ns.i.a1.intSet.hasNo(int0).query.get.map(_ ==> List(a, b))
 
 
       } yield ()
@@ -43,25 +44,40 @@ object AdhocJVM_mongodb extends TestSuite_mongodb with AggrUtils {
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
 
+        _ <- A.i.B.iSet.insert((1, Set.empty[Int])).transact
+        id <- A.iSet(Set(1)).OwnB.iSet(Set(2)).C.iSet(Set(3)).save.transact.map(_.id)
+
+        // todo: Why do these two require/not require not-equal null?
+        _ <- A.i.B.iSet_.query.get.map(_ ==> Nil)
+        _ <- A.iSet.OwnB.iSet.C.iSet.query.get.map(_ ==> List((Set(1), Set(2), Set(3))))
 /*
-testOnly molecule.document.mongodb.compliance.relation.NestedBasic
-testOnly molecule.document.mongodb.compliance.relation.NestedRef
-testOnly molecule.document.mongodb.compliance.crud.InsertRefs
-testOnly molecule.document.mongodb.compliance.crud.InsertRefsOwned
-testOnly molecule.document.mongodb.compliance.relation.NestedTypes
-testOnly molecule.document.mongodb.compliance.crud.Delete_id
-
-
-testOnly molecule.document.mongodb.compliance.crud.InsertRefs
-testOnly molecule.document.mongodb.compliance.crud.InsertRefsOwned
-testOnly molecule.document.mongodb.compliance.crud.Delete_id
+    {
+      "$lookup": {
+        "from": "C",
+        "localField": "ownB.c",
+        "foreignField": "_id",
+        "as": "ownB.c",
+        "pipeline": [
+          {
+            "$match": {
+              "$and": [
+//                {        // specific example above solved without this
+//                  "ownB.iSet": {
+//                    "$ne": null
+//                  }
+//                },
+                {
+                  "ownB.iSet": {
+                    "$ne": []
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
  */
-
-        List(a1, a2) <- A.i.B.i.Cc.*(C.i.D.i).insert(
-          (1, 10, List((1, 2), (3, 4))),
-          (2, 20, Nil),
-        ).i.transact.map(_.ids)
-
 
 //        _ <- rawTransact(
 //          s"""{

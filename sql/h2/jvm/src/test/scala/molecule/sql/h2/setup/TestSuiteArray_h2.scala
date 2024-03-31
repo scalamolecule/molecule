@@ -5,12 +5,13 @@ import molecule.base.util.BaseHelpers
 import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.Conn
 import molecule.coreTests.setup.{CoreTestSuite, CoreTestSuiteBase}
+import molecule.coreTests.util.Array2List
 import molecule.sql.core.facade.{JdbcConn_JVM, JdbcHandler_JVM}
 import scala.util.Random
 import scala.util.control.NonFatal
 
 
-trait TestSuiteArray_h2 extends CoreTestSuiteBase with BaseHelpers {
+trait TestSuiteArray_h2 extends CoreTestSuiteBase with Array2List with BaseHelpers {
 
   override val platform              = "jvm"
   override val database              = "H2"

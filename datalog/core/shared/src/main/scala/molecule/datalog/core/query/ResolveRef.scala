@@ -11,6 +11,7 @@ trait ResolveRef[Tpl] { self: DatomicQueryBase with NestOpt_[Tpl] =>
 
   protected def resolveRef(es: List[Var], ref: Ref): List[Var] = {
     val (e, refAttr, refId) = (es.last, s":${ref.ns}/${ref.refAttr}", vv)
+    refConfirmed = false
     val card = if (ref.card.isInstanceOf[CardOne]) "one" else "set"
     varPath = varPath ++ List(card, refAttr, refId)
     path = path ++ List(ref.refAttr, ref.refNs)

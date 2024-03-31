@@ -28,7 +28,7 @@ trait FilterOne_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.short(short1).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.short(Seq(short0)).query.get.map(_ ==> List())
         _ <- Ns.i.a1.short(Seq(short1)).query.get.map(_ ==> List(a))
-        // OR semantics for multiple args
+        // OR semantics for multiple args ("is this or that")
         _ <- Ns.i.a1.short(short1, short2).query.get.map(_ ==> List(a, b))
         _ <- Ns.i.a1.short(short1, short0).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.short(Seq(short1, short2)).query.get.map(_ ==> List(a, b))
@@ -85,7 +85,7 @@ trait FilterOne_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.short_(short1).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.short_(Seq(short0)).query.get.map(_ ==> List())
         _ <- Ns.i.a1.short_(Seq(short1)).query.get.map(_ ==> List(a))
-        // OR semantics for multiple args
+        // OR semantics for multiple args ("is this or that")
         _ <- Ns.i.a1.short_(short1, short2).query.get.map(_ ==> List(a, b))
         _ <- Ns.i.a1.short_(short1, short0).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.short_(Seq(short1, short2)).query.get.map(_ ==> List(a, b))
@@ -135,46 +135,11 @@ trait FilterOne_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Find optional values matching
         _ <- Ns.i.a1.short_?(Some(short0)).query.get.map(_ ==> List())
         _ <- Ns.i.a1.short_?(Some(short1)).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.short_?(Some(Seq(short0))).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.short_?(Some(Seq(short1))).query.get.map(_ ==> List(a))
-        // OR semantics for Ses of multiple args
-        _ <- Ns.i.a1.short_?(Some(Seq(short1, short2))).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.short_?(Some(Seq(short1, short0))).query.get.map(_ ==> List(a))
-        // Empty Seq of args matches no values
-        _ <- Ns.i.a1.short_?(Some(Seq.empty[Short])).query.get.map(_ ==> List())
+
         // None matches non-asserted/null values
         _ <- Ns.i.a1.short_?(Option.empty[Short]).query.get.map(_ ==> List(x))
-        _ <- Ns.i.a1.short_?(Option.empty[Seq[Short]]).query.get.map(_ ==> List(x))
-
-        // Find optional values not matching
-        _ <- Ns.i.a1.short_?.not(Some(short0)).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.short_?.not(Some(short1)).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.short_?.not(Some(short2)).query.get.map(_ ==> List(a, c))
-        _ <- Ns.i.a1.short_?.not(Some(short3)).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.short_?.not(Some(Seq(short0))).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.short_?.not(Some(Seq(short1))).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.short_?.not(Some(Seq(short2))).query.get.map(_ ==> List(a, c))
-        _ <- Ns.i.a1.short_?.not(Some(Seq(short3))).query.get.map(_ ==> List(a, b))
-        // OR semantics for multiple negation args
-        _ <- Ns.i.a1.short_?.not(Some(Seq(short0, short1))).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.short_?.not(Some(Seq(short1, short2))).query.get.map(_ ==> List(c))
-        _ <- Ns.i.a1.short_?.not(Some(Seq(short2, short3))).query.get.map(_ ==> List(a))
-        // Empty Seq of negation args matches all asserted values (non-null)
-        _ <- Ns.i.a1.short_?.not(Some(Seq.empty[Short])).query.get.map(_ ==> List(a, b, c))
-        // Negating None matches all asserted values (non-null)
-        _ <- Ns.i.a1.short_?.not(Option.empty[Short]).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.short_?.not(Option.empty[Seq[Short]]).query.get.map(_ ==> List(a, b, c))
-
-        // Find optional values in range
-        _ <- Ns.i.a1.short_?.<(Some(short2)).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.short_?.>(Some(short2)).query.get.map(_ ==> List(c))
-        _ <- Ns.i.a1.short_?.<=(Some(short2)).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.short_?.>=(Some(short2)).query.get.map(_ ==> List(b, c))
-        // None can't be compared and returns empty result
-        _ <- Ns.i.a1.short_?.<(None).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.short_?.<=(None).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.short_?.>(None).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.short_?.>=(None).query.get.map(_ ==> List())
+        // Easier to apply nothing to tacit attribute
+        _ <- Ns.i.a1.short_().query.get.map(_ ==> List(4))
       } yield ()
     }
   }

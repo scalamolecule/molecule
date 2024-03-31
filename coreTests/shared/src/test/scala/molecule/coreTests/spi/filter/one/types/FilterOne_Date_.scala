@@ -29,7 +29,7 @@ trait FilterOne_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.date(date1).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.date(Seq(date0)).query.get.map(_ ==> List())
         _ <- Ns.i.a1.date(Seq(date1)).query.get.map(_ ==> List(a))
-        // OR semantics for multiple args
+        // OR semantics for multiple args ("is this or that")
         _ <- Ns.i.a1.date(date1, date2).query.get.map(_ ==> List(a, b))
         _ <- Ns.i.a1.date(date1, date0).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.date(Seq(date1, date2)).query.get.map(_ ==> List(a, b))
@@ -86,7 +86,7 @@ trait FilterOne_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.date_(date1).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.date_(Seq(date0)).query.get.map(_ ==> List())
         _ <- Ns.i.a1.date_(Seq(date1)).query.get.map(_ ==> List(a))
-        // OR semantics for multiple args
+        // OR semantics for multiple args ("is this or that")
         _ <- Ns.i.a1.date_(date1, date2).query.get.map(_ ==> List(a, b))
         _ <- Ns.i.a1.date_(date1, date0).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.date_(Seq(date1, date2)).query.get.map(_ ==> List(a, b))
@@ -136,46 +136,11 @@ trait FilterOne_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Find optional values matching
         _ <- Ns.i.a1.date_?(Some(date0)).query.get.map(_ ==> List())
         _ <- Ns.i.a1.date_?(Some(date1)).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.date_?(Some(Seq(date0))).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.date_?(Some(Seq(date1))).query.get.map(_ ==> List(a))
-        // OR semantics for Ses of multiple args
-        _ <- Ns.i.a1.date_?(Some(Seq(date1, date2))).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.date_?(Some(Seq(date1, date0))).query.get.map(_ ==> List(a))
-        // Empty Seq of args matches no values
-        _ <- Ns.i.a1.date_?(Some(Seq.empty[Date])).query.get.map(_ ==> List())
+
         // None matches non-asserted/null values
         _ <- Ns.i.a1.date_?(Option.empty[Date]).query.get.map(_ ==> List(x))
-        _ <- Ns.i.a1.date_?(Option.empty[Seq[Date]]).query.get.map(_ ==> List(x))
-
-        // Find optional values not matching
-        _ <- Ns.i.a1.date_?.not(Some(date0)).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.date_?.not(Some(date1)).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.date_?.not(Some(date2)).query.get.map(_ ==> List(a, c))
-        _ <- Ns.i.a1.date_?.not(Some(date3)).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.date_?.not(Some(Seq(date0))).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.date_?.not(Some(Seq(date1))).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.date_?.not(Some(Seq(date2))).query.get.map(_ ==> List(a, c))
-        _ <- Ns.i.a1.date_?.not(Some(Seq(date3))).query.get.map(_ ==> List(a, b))
-        // OR semantics for multiple negation args
-        _ <- Ns.i.a1.date_?.not(Some(Seq(date0, date1))).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.date_?.not(Some(Seq(date1, date2))).query.get.map(_ ==> List(c))
-        _ <- Ns.i.a1.date_?.not(Some(Seq(date2, date3))).query.get.map(_ ==> List(a))
-        // Empty Seq of negation args matches all asserted values (non-null)
-        _ <- Ns.i.a1.date_?.not(Some(Seq.empty[Date])).query.get.map(_ ==> List(a, b, c))
-        // Negating None matches all asserted values (non-null)
-        _ <- Ns.i.a1.date_?.not(Option.empty[Date]).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.date_?.not(Option.empty[Seq[Date]]).query.get.map(_ ==> List(a, b, c))
-
-        // Find optional values in range
-        _ <- Ns.i.a1.date_?.<(Some(date2)).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.date_?.>(Some(date2)).query.get.map(_ ==> List(c))
-        _ <- Ns.i.a1.date_?.<=(Some(date2)).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.date_?.>=(Some(date2)).query.get.map(_ ==> List(b, c))
-        // None can't be compared and returns empty result
-        _ <- Ns.i.a1.date_?.<(None).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.date_?.<=(None).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.date_?.>(None).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.date_?.>=(None).query.get.map(_ ==> List())
+        // Easier to apply nothing to tacit attribute
+        _ <- Ns.i.a1.date_().query.get.map(_ ==> List(4))
       } yield ()
     }
   }

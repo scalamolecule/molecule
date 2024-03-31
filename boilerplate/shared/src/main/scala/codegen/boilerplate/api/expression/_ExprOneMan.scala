@@ -53,15 +53,15 @@ object _ExprOneMan extends BoilerplateGenBase("ExprOneMan", "/api/expression") {
          |  extends ${fileName}Ops_$arity[${`A..V`}, t, Ns1, Ns2]
          |    with Aggregates_$arity[${`A..V`}, t, Ns1]
          |    with SortAttrs_$arity[${`A..V`}, t, Ns1] {
-         |  def apply(                ): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Eq , Nil       )
-         |  def apply(v    : t, vs: t*): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Eq , v +: vs   )
-         |  def apply(vs   : Seq[t]   ): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Eq , vs        )
-         |  def not  (v    : t, vs: t*): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Neq, v +: vs   )
-         |  def not  (vs   : Seq[t]   ): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Neq, vs        )
-         |  def <    (upper: t        ): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Lt , Seq(upper))
-         |  def <=   (upper: t        ): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Le , Seq(upper))
-         |  def >    (lower: t        ): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Gt , Seq(lower))
-         |  def >=   (lower: t        ): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Ge , Seq(lower))
+         |  def apply(                ): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(NoValue, Nil       )
+         |  def apply(v    : t, vs: t*): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Eq     , v +: vs   )
+         |  def apply(vs   : Seq[t]   ): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Eq     , vs        )
+         |  def not  (v    : t, vs: t*): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Neq    , v +: vs   )
+         |  def not  (vs   : Seq[t]   ): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Neq    , vs        )
+         |  def <    (upper: t        ): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Lt     , Seq(upper))
+         |  def <=   (upper: t        ): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Le     , Seq(upper))
+         |  def >    (lower: t        ): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Gt     , Seq(lower))
+         |  def >=   (lower: t        ): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Ge     , Seq(lower))
          |  $attrExprs
          |}
          |trait $fileName_${arity}_String[${`A..V`}, t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]] extends $fileName_$arity[${`A..V, `}t, Ns1, Ns2] {

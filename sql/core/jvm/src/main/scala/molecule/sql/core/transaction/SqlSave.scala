@@ -248,6 +248,29 @@ trait SqlSave
     }
   }
 
+  override protected def addByteArray(
+    ns: String,
+    attr: String,
+    optArray: Option[Array[Byte]],
+    exts: List[String],
+  ): Unit = {
+    val (curPath, paramIndex) = getParamIndex(attr)
+    val colSetter: Setter = optArray.fold {
+      (ps: PS, _: IdsMap, _: RowIndex) => {
+        ps.setNull(paramIndex, 0)
+      }
+    } { byteArray =>
+      (ps: PS, _: IdsMap, _: RowIndex) => {
+        if (byteArray.isEmpty) {
+          ps.setNull(paramIndex, 0)
+        } else {
+          ps.setBytes(paramIndex, byteArray)
+        }
+      }
+    }
+    addColSetter(curPath, colSetter)
+  }
+
   override protected def addRef(
     ns: String, refAttr: String, refNs: String, card: Card, owner: Boolean
   ): Unit = {

@@ -29,7 +29,7 @@ trait FilterOne_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.instant(instant1).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.instant(Seq(instant0)).query.get.map(_ ==> List())
         _ <- Ns.i.a1.instant(Seq(instant1)).query.get.map(_ ==> List(a))
-        // OR semantics for multiple args
+        // OR semantics for multiple args ("is this or that")
         _ <- Ns.i.a1.instant(instant1, instant2).query.get.map(_ ==> List(a, b))
         _ <- Ns.i.a1.instant(instant1, instant0).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.instant(Seq(instant1, instant2)).query.get.map(_ ==> List(a, b))
@@ -86,7 +86,7 @@ trait FilterOne_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.instant_(instant1).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.instant_(Seq(instant0)).query.get.map(_ ==> List())
         _ <- Ns.i.a1.instant_(Seq(instant1)).query.get.map(_ ==> List(a))
-        // OR semantics for multiple args
+        // OR semantics for multiple args ("is this or that")
         _ <- Ns.i.a1.instant_(instant1, instant2).query.get.map(_ ==> List(a, b))
         _ <- Ns.i.a1.instant_(instant1, instant0).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.instant_(Seq(instant1, instant2)).query.get.map(_ ==> List(a, b))
@@ -136,46 +136,11 @@ trait FilterOne_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Find optional values matching
         _ <- Ns.i.a1.instant_?(Some(instant0)).query.get.map(_ ==> List())
         _ <- Ns.i.a1.instant_?(Some(instant1)).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.instant_?(Some(Seq(instant0))).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.instant_?(Some(Seq(instant1))).query.get.map(_ ==> List(a))
-        // OR semantics for Ses of multiple args
-        _ <- Ns.i.a1.instant_?(Some(Seq(instant1, instant2))).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.instant_?(Some(Seq(instant1, instant0))).query.get.map(_ ==> List(a))
-        // Empty Seq of args matches no values
-        _ <- Ns.i.a1.instant_?(Some(Seq.empty[Instant])).query.get.map(_ ==> List())
+
         // None matches non-asserted/null values
         _ <- Ns.i.a1.instant_?(Option.empty[Instant]).query.get.map(_ ==> List(x))
-        _ <- Ns.i.a1.instant_?(Option.empty[Seq[Instant]]).query.get.map(_ ==> List(x))
-
-        // Find optional values not matching
-        _ <- Ns.i.a1.instant_?.not(Some(instant0)).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.instant_?.not(Some(instant1)).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.instant_?.not(Some(instant2)).query.get.map(_ ==> List(a, c))
-        _ <- Ns.i.a1.instant_?.not(Some(instant3)).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.instant_?.not(Some(Seq(instant0))).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.instant_?.not(Some(Seq(instant1))).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.instant_?.not(Some(Seq(instant2))).query.get.map(_ ==> List(a, c))
-        _ <- Ns.i.a1.instant_?.not(Some(Seq(instant3))).query.get.map(_ ==> List(a, b))
-        // OR semantics for multiple negation args
-        _ <- Ns.i.a1.instant_?.not(Some(Seq(instant0, instant1))).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.instant_?.not(Some(Seq(instant1, instant2))).query.get.map(_ ==> List(c))
-        _ <- Ns.i.a1.instant_?.not(Some(Seq(instant2, instant3))).query.get.map(_ ==> List(a))
-        // Empty Seq of negation args matches all asserted values (non-null)
-        _ <- Ns.i.a1.instant_?.not(Some(Seq.empty[Instant])).query.get.map(_ ==> List(a, b, c))
-        // Negating None matches all asserted values (non-null)
-        _ <- Ns.i.a1.instant_?.not(Option.empty[Instant]).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.instant_?.not(Option.empty[Seq[Instant]]).query.get.map(_ ==> List(a, b, c))
-
-        // Find optional values in range
-        _ <- Ns.i.a1.instant_?.<(Some(instant2)).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.instant_?.>(Some(instant2)).query.get.map(_ ==> List(c))
-        _ <- Ns.i.a1.instant_?.<=(Some(instant2)).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.instant_?.>=(Some(instant2)).query.get.map(_ ==> List(b, c))
-        // None can't be compared and returns empty result
-        _ <- Ns.i.a1.instant_?.<(None).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.instant_?.<=(None).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.instant_?.>(None).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.instant_?.>=(None).query.get.map(_ ==> List())
+        // Easier to apply nothing to tacit attribute
+        _ <- Ns.i.a1.instant_().query.get.map(_ ==> List(4))
       } yield ()
     }
   }

@@ -52,12 +52,12 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
       val vs       = (card, mode, baseTpe) match {
         case ("One", "Opt", _)      => s"Option[Seq[$baseTpe]] = None"
         case ("One", _, _)          => s"Seq[$baseTpe] = Nil"
-        case ("Set", "Opt", _)      => s"Option[Seq[Set[$baseTpe]]] = None"
-        case ("Set", _, _)          => s"Seq[Set[$baseTpe]] = Nil"
-        case ("Seq", "Opt", "Byte") => s"Option[Seq[Array[Byte]]] = None"
-        case ("Seq", _, "Byte")     => s"Seq[Array[Byte]] = Nil"
-        case ("Seq", "Opt", _)      => s"Option[Seq[Seq[$baseTpe]]] = None"
-        case ("Seq", _, _)          => s"Seq[Seq[$baseTpe]] = Nil"
+        case ("Set", "Opt", _)      => s"Option[Set[$baseTpe]] = None"
+        case ("Set", _, _)          => s"Set[$baseTpe] = Set.empty[$baseTpe]"
+        case ("Seq", "Opt", "Byte") => s"Option[Array[Byte]] = None"
+        case ("Seq", _, "Byte")     => s"Array[Byte] = Array.empty[Byte]"
+        case ("Seq", "Opt", _)      => s"Option[Seq[$baseTpe]] = None"
+        case ("Seq", _, _)          => s"Seq[$baseTpe] = Nil"
         case ("Map", "Opt", _)      => s"Option[Map[String, $baseTpe]] = None"
         case ("Map", _, _)          => s"Map[String, $baseTpe] = Map.empty[String, $baseTpe]"
       }
@@ -111,46 +111,46 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
           case "Opt" =>
             if (format_?)
               s"""def format(v: $baseTpe): String = $format
-                 |      def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+                 |      def vss: String = vs.fold("None")(_.map(format).mkString("Some(Set(", ", ", "))"))
                  |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords$ownerStr)\"\"\"""".stripMargin
             else
-              s"""def vss: String = vs.fold("None")(_.map(_.mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+              s"""def vss: String = vs.fold("None")(_.mkString("Some(Set(", ", ", "))"))
                  |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
           case _     =>
             if (format_?)
               s"""def format(v: $baseTpe): String = $format
-                 |      def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
+                 |      def vss: String = vs.map(format).mkString("Set(", ", ", ")")
                  |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords$ownerStr)\"\"\"""".stripMargin
             else
-              s"""def vss: String = vs.map(set => set.mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
+              s"""def vss: String = vs.mkString("Set(", ", ", ")")
                  |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
         }
         case "Seq" if baseTpe == "Byte" => mode match {
           case "Opt" =>
               s"""def format(v: $baseTpe): String = $format
-                 |      def vss: String = vs.fold("None")(_.map(seq => seq.map(format).mkString("Array(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+                 |      def vss: String = vs.fold("None")(_.map(format).mkString("Some(Array(", ", ", "))"))
                  |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords$ownerStr)\"\"\"""".stripMargin
           case _     =>
               s"""def format(v: $baseTpe): String = $format
-                 |      def vss: String = vs.map(seq => seq.map(format).mkString("Array(", ", ", ")")).mkString("Seq(", ", ", ")")
+                 |      def vss: String = vs.map(format).mkString("Some(Array(", ", ", "))")
                  |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords$ownerStr)\"\"\"""".stripMargin
         }
         case "Seq" => mode match {
           case "Opt" =>
             if (format_?)
               s"""def format(v: $baseTpe): String = $format
-                 |      def vss: String = vs.fold("None")(_.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+                 |      def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
                  |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords$ownerStr)\"\"\"""".stripMargin
             else
-              s"""def vss: String = vs.fold("None")(_.map(_.mkString("Seq(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+              s"""def vss: String = vs.fold("None")(_.mkString("Some(Seq(", ", ", "))"))
                  |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
           case _     =>
             if (format_?)
               s"""def format(v: $baseTpe): String = $format
-                 |      def vss: String = vs.map(seq => seq.map(format).mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+                 |      def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
                  |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords$ownerStr)\"\"\"""".stripMargin
             else
-              s"""def vss: String = vs.map(seq => seq.mkString("Seq(", ", ", ")")).mkString("Seq(", ", ", ")")
+              s"""def vss: String = vs.mkString("Seq(", ", ", ")")
                  |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
         }
         case "Map" => mode match {

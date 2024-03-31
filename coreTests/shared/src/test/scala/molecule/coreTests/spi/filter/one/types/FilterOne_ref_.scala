@@ -28,7 +28,7 @@ trait FilterOne_ref_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.ref(ref1).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.ref(Seq(ref0)).query.get.map(_ ==> List())
         _ <- Ns.i.a1.ref(Seq(ref1)).query.get.map(_ ==> List(a))
-        // OR semantics for multiple args
+        // OR semantics for multiple args ("is this or that")
         _ <- Ns.i.a1.ref(ref1, ref2).query.get.map(_ ==> List(a, b))
         _ <- Ns.i.a1.ref(ref1, ref0).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.ref(Seq(ref1, ref2)).query.get.map(_ ==> List(a, b))
@@ -85,7 +85,7 @@ trait FilterOne_ref_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.ref_(ref1).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.ref_(Seq(ref0)).query.get.map(_ ==> List())
         _ <- Ns.i.a1.ref_(Seq(ref1)).query.get.map(_ ==> List(a))
-        // OR semantics for multiple args
+        // OR semantics for multiple args ("is this or that")
         _ <- Ns.i.a1.ref_(ref1, ref2).query.get.map(_ ==> List(a, b))
         _ <- Ns.i.a1.ref_(ref1, ref0).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.ref_(Seq(ref1, ref2)).query.get.map(_ ==> List(a, b))
@@ -135,46 +135,11 @@ trait FilterOne_ref_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Find optional values matching
         _ <- Ns.i.a1.ref_?(Some(ref0)).query.get.map(_ ==> List())
         _ <- Ns.i.a1.ref_?(Some(ref1)).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.ref_?(Some(Seq(ref0))).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.ref_?(Some(Seq(ref1))).query.get.map(_ ==> List(a))
-        // OR semantics for Ses of multiple args
-        _ <- Ns.i.a1.ref_?(Some(Seq(ref1, ref2))).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.ref_?(Some(Seq(ref1, ref0))).query.get.map(_ ==> List(a))
-        // Empty Seq of args matches no values
-        _ <- Ns.i.a1.ref_?(Some(Seq.empty[String])).query.get.map(_ ==> List())
+
         // None matches non-asserted/null values
         _ <- Ns.i.a1.ref_?(Option.empty[String]).query.get.map(_ ==> List(x))
-        _ <- Ns.i.a1.ref_?(Option.empty[Seq[String]]).query.get.map(_ ==> List(x))
-
-        // Find optional values not matching
-        _ <- Ns.i.a1.ref_?.not(Some(ref0)).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.ref_?.not(Some(ref1)).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.ref_?.not(Some(ref2)).query.get.map(_ ==> List(a, c))
-        _ <- Ns.i.a1.ref_?.not(Some(ref3)).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.ref_?.not(Some(Seq(ref0))).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.ref_?.not(Some(Seq(ref1))).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.ref_?.not(Some(Seq(ref2))).query.get.map(_ ==> List(a, c))
-        _ <- Ns.i.a1.ref_?.not(Some(Seq(ref3))).query.get.map(_ ==> List(a, b))
-        // OR semantics for multiple negation args
-        _ <- Ns.i.a1.ref_?.not(Some(Seq(ref0, ref1))).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.ref_?.not(Some(Seq(ref1, ref2))).query.get.map(_ ==> List(c))
-        _ <- Ns.i.a1.ref_?.not(Some(Seq(ref2, ref3))).query.get.map(_ ==> List(a))
-        // Empty Seq of negation args matches all asserted values (non-null)
-        _ <- Ns.i.a1.ref_?.not(Some(Seq.empty[String])).query.get.map(_ ==> List(a, b, c))
-        // Negating None matches all asserted values (non-null)
-        _ <- Ns.i.a1.ref_?.not(Option.empty[String]).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.ref_?.not(Option.empty[Seq[String]]).query.get.map(_ ==> List(a, b, c))
-
-        // Find optional values in range
-        _ <- Ns.i.a1.ref_?.<(Some(ref2)).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.ref_?.>(Some(ref2)).query.get.map(_ ==> List(c))
-        _ <- Ns.i.a1.ref_?.<=(Some(ref2)).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.ref_?.>=(Some(ref2)).query.get.map(_ ==> List(b, c))
-        // None can't be compared and returns empty result
-        _ <- Ns.i.a1.ref_?.<(None).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.ref_?.<=(None).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.ref_?.>(None).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.ref_?.>=(None).query.get.map(_ ==> List())
+        // Easier to apply nothing to tacit attribute
+        _ <- Ns.i.a1.ref_().query.get.map(_ ==> List(4))
       } yield ()
     }
   }

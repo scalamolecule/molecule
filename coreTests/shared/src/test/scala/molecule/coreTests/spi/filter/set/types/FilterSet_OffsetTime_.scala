@@ -127,10 +127,11 @@ trait FilterSet_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           // OR semantics when multiple values
 
           // "Has this OR that"
+          _ <- Ns.i.a1.offsetTimeSet_.has(offsetTime0, offsetTime1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.offsetTimeSet_.has(offsetTime1, offsetTime2).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.offsetTimeSet_.has(offsetTime1, offsetTime3).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.offsetTimeSet_.has(offsetTime2, offsetTime3).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.offsetTimeSet_.has(offsetTime1, offsetTime2, offsetTime3).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.offsetTimeSet_.has(offsetTime3, offsetTime4).query.get.map(_ ==> List(2))
           // Same as
           _ <- Ns.i.a1.offsetTimeSet_.has(Seq(offsetTime1, offsetTime2)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.offsetTimeSet_.has(Seq(offsetTime1, offsetTime3)).query.get.map(_ ==> List(1, 2))
@@ -190,90 +191,6 @@ trait FilterSet_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
       }
     }
 
-
-    "Optional" - {
-
-      "has" - types { implicit conn =>
-        val a = (1, Some(Set(offsetTime1, offsetTime2)))
-        val b = (2, Some(Set(offsetTime2, offsetTime3, offsetTime4)))
-        val c = (3, None)
-        for {
-          _ <- Ns.i.offsetTimeSet_?.insert(a, b, c).transact
-
-          // Sets with one or more values matching
-
-          // "Has this"
-          _ <- Ns.i.a1.offsetTimeSet_?.has(Some(offsetTime0)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetTimeSet_?.has(Some(offsetTime1)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetTimeSet_?.has(Some(offsetTime2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetTimeSet_?.has(Some(offsetTime3)).query.get.map(_ ==> List(b))
-          // Same as
-          _ <- Ns.i.a1.offsetTimeSet_?.has(Some(Seq(offsetTime0))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetTimeSet_?.has(Some(Seq(offsetTime1))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetTimeSet_?.has(Some(Seq(offsetTime2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetTimeSet_?.has(Some(Seq(offsetTime3))).query.get.map(_ ==> List(b))
-
-
-          // OR semantics when multiple values
-
-          // "Has this OR that"
-          _ <- Ns.i.a1.offsetTimeSet_?.has(Some(Seq(offsetTime1, offsetTime2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetTimeSet_?.has(Some(Seq(offsetTime1, offsetTime3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetTimeSet_?.has(Some(Seq(offsetTime2, offsetTime3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetTimeSet_?.has(Some(Seq(offsetTime1, offsetTime2, offsetTime3))).query.get.map(_ ==> List(a, b))
-
-          // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.offsetTimeSet_?.has(Some(Seq.empty[OffsetTime])).query.get.map(_ ==> List())
-
-          // None matches non-asserted values
-          _ <- Ns.i.a1.offsetTimeSet_?.has(Option.empty[OffsetTime]).query.get.map(_ ==> List(c))
-          _ <- Ns.i.a1.offsetTimeSet_?.has(Option.empty[Seq[OffsetTime]]).query.get.map(_ ==> List(c))
-        } yield ()
-      }
-
-
-      "hasNo" - types { implicit conn =>
-        val a = (1, Some(Set(offsetTime1, offsetTime2)))
-        val b = (2, Some(Set(offsetTime2, offsetTime3, offsetTime4)))
-        val c = (3, None)
-        for {
-          _ <- Ns.i.offsetTimeSet_?.insert(a, b, c).transact
-
-          // Sets without one or more values matching
-
-          // "Doesn't have this"
-          _ <- Ns.i.a1.offsetTimeSet_?.hasNo(Some(offsetTime0)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetTimeSet_?.hasNo(Some(offsetTime1)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.offsetTimeSet_?.hasNo(Some(offsetTime2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetTimeSet_?.hasNo(Some(offsetTime3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetTimeSet_?.hasNo(Some(offsetTime4)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetTimeSet_?.hasNo(Some(offsetTime5)).query.get.map(_ ==> List(a, b))
-          // Same as
-          _ <- Ns.i.a1.offsetTimeSet_?.hasNo(Some(Seq(offsetTime0))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetTimeSet_?.hasNo(Some(Seq(offsetTime1))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.offsetTimeSet_?.hasNo(Some(Seq(offsetTime2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetTimeSet_?.hasNo(Some(Seq(offsetTime3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetTimeSet_?.hasNo(Some(Seq(offsetTime4))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.offsetTimeSet_?.hasNo(Some(Seq(offsetTime5))).query.get.map(_ ==> List(a, b))
-
-
-          // OR semantics when multiple values
-
-          // "Has neither this OR that"
-          _ <- Ns.i.a1.offsetTimeSet_?.hasNo(Some(Seq(offsetTime1, offsetTime2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetTimeSet_?.hasNo(Some(Seq(offsetTime1, offsetTime3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetTimeSet_?.hasNo(Some(Seq(offsetTime1, offsetTime4))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.offsetTimeSet_?.hasNo(Some(Seq(offsetTime1, offsetTime5))).query.get.map(_ ==> List(b))
-
-
-          // Negating empty Seqs/Sets has no effect
-          _ <- Ns.i.a1.offsetTimeSet_?.hasNo(Some(Seq.empty[OffsetTime])).query.get.map(_ ==> List(a, b))
-
-          // Negating None returns all asserted
-          _ <- Ns.i.a1.offsetTimeSet_?.hasNo(Option.empty[OffsetTime]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.offsetTimeSet_?.hasNo(Option.empty[Seq[OffsetTime]]).query.get.map(_ ==> List(a, b))
-        } yield ()
-      }
-    }
+    // No filtering on optional Set attributes
   }
 }

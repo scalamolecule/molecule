@@ -126,10 +126,11 @@ trait FilterSet_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           // OR semantics when multiple values
 
           // "Has this OR that"
+          _ <- Ns.i.a1.byteSet_.has(byte0, byte1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.byteSet_.has(byte1, byte2).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.byteSet_.has(byte1, byte3).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.byteSet_.has(byte2, byte3).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.byteSet_.has(byte1, byte2, byte3).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.byteSet_.has(byte3, byte4).query.get.map(_ ==> List(2))
           // Same as
           _ <- Ns.i.a1.byteSet_.has(Seq(byte1, byte2)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.byteSet_.has(Seq(byte1, byte3)).query.get.map(_ ==> List(1, 2))
@@ -189,90 +190,6 @@ trait FilterSet_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       }
     }
 
-
-    "Optional" - {
-
-      "has" - types { implicit conn =>
-        val a = (1, Some(Set(byte1, byte2)))
-        val b = (2, Some(Set(byte2, byte3, byte4)))
-        val c = (3, None)
-        for {
-          _ <- Ns.i.byteSet_?.insert(a, b, c).transact
-
-          // Sets with one or more values matching
-
-          // "Has this"
-          _ <- Ns.i.a1.byteSet_?.has(Some(byte0)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.byteSet_?.has(Some(byte1)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.byteSet_?.has(Some(byte2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.byteSet_?.has(Some(byte3)).query.get.map(_ ==> List(b))
-          // Same as
-          _ <- Ns.i.a1.byteSet_?.has(Some(Seq(byte0))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.byteSet_?.has(Some(Seq(byte1))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.byteSet_?.has(Some(Seq(byte2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.byteSet_?.has(Some(Seq(byte3))).query.get.map(_ ==> List(b))
-
-
-          // OR semantics when multiple values
-
-          // "Has this OR that"
-          _ <- Ns.i.a1.byteSet_?.has(Some(Seq(byte1, byte2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.byteSet_?.has(Some(Seq(byte1, byte3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.byteSet_?.has(Some(Seq(byte2, byte3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.byteSet_?.has(Some(Seq(byte1, byte2, byte3))).query.get.map(_ ==> List(a, b))
-
-          // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.byteSet_?.has(Some(Seq.empty[Byte])).query.get.map(_ ==> List())
-
-          // None matches non-asserted values
-          _ <- Ns.i.a1.byteSet_?.has(Option.empty[Byte]).query.get.map(_ ==> List(c))
-          _ <- Ns.i.a1.byteSet_?.has(Option.empty[Seq[Byte]]).query.get.map(_ ==> List(c))
-        } yield ()
-      }
-
-
-      "hasNo" - types { implicit conn =>
-        val a = (1, Some(Set(byte1, byte2)))
-        val b = (2, Some(Set(byte2, byte3, byte4)))
-        val c = (3, None)
-        for {
-          _ <- Ns.i.byteSet_?.insert(a, b, c).transact
-
-          // Sets without one or more values matching
-
-          // "Doesn't have this"
-          _ <- Ns.i.a1.byteSet_?.hasNo(Some(byte0)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.byteSet_?.hasNo(Some(byte1)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.byteSet_?.hasNo(Some(byte2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.byteSet_?.hasNo(Some(byte3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.byteSet_?.hasNo(Some(byte4)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.byteSet_?.hasNo(Some(byte5)).query.get.map(_ ==> List(a, b))
-          // Same as
-          _ <- Ns.i.a1.byteSet_?.hasNo(Some(Seq(byte0))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.byteSet_?.hasNo(Some(Seq(byte1))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.byteSet_?.hasNo(Some(Seq(byte2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.byteSet_?.hasNo(Some(Seq(byte3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.byteSet_?.hasNo(Some(Seq(byte4))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.byteSet_?.hasNo(Some(Seq(byte5))).query.get.map(_ ==> List(a, b))
-
-
-          // OR semantics when multiple values
-
-          // "Has neither this OR that"
-          _ <- Ns.i.a1.byteSet_?.hasNo(Some(Seq(byte1, byte2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.byteSet_?.hasNo(Some(Seq(byte1, byte3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.byteSet_?.hasNo(Some(Seq(byte1, byte4))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.byteSet_?.hasNo(Some(Seq(byte1, byte5))).query.get.map(_ ==> List(b))
-
-
-          // Negating empty Seqs/Sets has no effect
-          _ <- Ns.i.a1.byteSet_?.hasNo(Some(Seq.empty[Byte])).query.get.map(_ ==> List(a, b))
-
-          // Negating None returns all asserted
-          _ <- Ns.i.a1.byteSet_?.hasNo(Option.empty[Byte]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.byteSet_?.hasNo(Option.empty[Seq[Byte]]).query.get.map(_ ==> List(a, b))
-        } yield ()
-      }
-    }
+    // No filtering on optional Set attributes
   }
 }

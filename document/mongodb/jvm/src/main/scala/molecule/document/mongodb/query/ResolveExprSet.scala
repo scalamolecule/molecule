@@ -96,7 +96,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
   }
 
 
-  private def man[T](attr: Attr, args: Seq[Set[T]], resSet: ResSet[T]): Unit = {
+  private def man[T](attr: Attr, args: Set[T], resSet: ResSet[T]): Unit = {
     val field       = attr.attr
     val uniqueField = b.unique(field)
     projectField(field)
@@ -109,7 +109,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     handleExpr(uniqueField, field, attr, args, resSet, true)
   }
 
-  private def tac[T](attr: Attr, args: Seq[Set[T]], resSet: ResSet[T]): Unit = {
+  private def tac[T](attr: Attr, args: Set[T], resSet: ResSet[T]): Unit = {
     val field       = attr.attr
     val uniqueField = b.unique(field)
     b.base.matches.add(Filters.exists(b.dot + field))
@@ -120,7 +120,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     uniqueField: String,
     field: String,
     attr: Attr,
-    sets: Seq[Set[T]],
+    sets: Set[T],
     resSet: ResSet[T],
     mandatory: Boolean
   ): Unit = {
@@ -151,7 +151,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     }
   }
 
-  private def opt[T](attr: Attr, optSets: Option[Seq[Set[T]]], res: ResSet[T]): Unit = {
+  private def opt[T](attr: Attr, optSets: Option[Set[T]], res: ResSet[T]): Unit = {
     val field       = attr.attr
     val uniqueField = b.unique(field)
     projectField(field)
@@ -176,13 +176,18 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
   // attr ----------------------------------------------------------------------
 
   private def attrV(uniqueField: String, field: String, mandatory: Boolean): Unit = {
+    //    println(s"\n======== $uniqueField ============================================")
+
+    // Skipping this for all set attributes solves the own-ref rest in UpdateSet_id.
+    // But what distinguishes it?
     b.base.matches.add(Filters.ne(b.dot + field, new BsonNull))
+
     // Exclude orphaned arrays too
     b.base.matches.add(Filters.ne(b.dot + field, new BsonArray()))
     coalesce(uniqueField, field, mandatory)
   }
 
-  private def optAttr[T](uniqueField: String, field: String): Unit = {
+  private def optAttr(uniqueField: String, field: String): Unit = {
     topBranch.groupIdFields -= prefixedFieldPair
     if (!(b.parent.isDefined && b.parent.get.isInstanceOf[NestedRef]
       || b.isInstanceOf[NestedRef])
@@ -225,28 +230,20 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
   // has -----------------------------------------------------------------------
 
   private def has[T](
-    uniqueField: String, field: String, sets0: Seq[Set[T]], res: ResSet[T], mandatory: Boolean
+    uniqueField: String, field: String, set: Set[T], res: ResSet[T], mandatory: Boolean
   ): Unit = {
-    def containsSet(set: Set[T]): Bson = {
-      Filters.all(b.dot + field, set.map(v => res.v2bson(v)).asJava)
-    }
-    val sets = sets0.filterNot(_.isEmpty)
-    sets.length match {
+    set.size match {
+      case 1 => b.base.matches.add(Filters.all(b.dot + field, res.v2bson(set.head)))
       case 0 => b.base.matches.add(Filters.eq("_id", -1))
-      case 1 =>
-        val set = sets.head
-        if (set.nonEmpty)
-          b.base.matches.add(containsSet(set))
-        else
-          b.base.matches.add(Filters.eq("_id", -1))
-
-      case _ => b.base.matches.add(Filters.or(sets.map(set => containsSet(set)).asJava))
+      case _ => b.base.matches.add(Filters.or(
+        set.map(v => Filters.all(b.dot + field, res.v2bson(v))).asJava
+      ))
     }
     coalesce(uniqueField, field, mandatory)
   }
 
   private def optHas[T](
-    uniqueField: String, field: String, optSets: Option[Seq[Set[T]]], res: ResSet[T] //, mandatory: Boolean
+    uniqueField: String, field: String, optSets: Option[Set[T]], res: ResSet[T] //, mandatory: Boolean
   ): Unit = {
     optSets.fold[Unit] {
       b.base.matches.add(Filters.eq(b.dot + field, new BsonNull))
@@ -259,33 +256,27 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
   // hasNo ---------------------------------------------------------------------
 
   private def hasNo[T](
-    uniqueField: String, field: String, sets: Seq[Set[T]], res: ResSet[T], mandatory: Boolean
+    uniqueField: String, field: String, set: Set[T], res: ResSet[T], mandatory: Boolean
   ): Unit = {
     b.base.matches.add(Filters.ne(b.dot + field, new BsonNull))
     // Exclude orphaned arrays too
     b.base.matches.add(Filters.ne(b.dot + field, new BsonArray()))
-    def notContainsSet(set: Set[T]): Bson = Filters.nor(
-      Filters.all(b.dot + field, set.map(v => res.v2bson(v)).asJava)
-    )
-    sets.length match {
-      case 0 => ()
-      case 1 =>
-        val set = sets.head
-        if (set.nonEmpty)
-          b.base.matches.add(notContainsSet(set))
-
-      case _ => b.base.matches.add(Filters.and(sets.map(set => notContainsSet(set)).asJava))
+    set.size match {
+      case 1 => b.base.matches.add(Filters.ne(b.dot + field, res.v2bson(set.head)))
+      case 0 => b.base.matches.add(Filters.ne("_id", -1))
+      case _ => b.base.matches.add(Filters.nor(
+        set.map(v => Filters.all(b.dot + field, res.v2bson(v))).asJava
+      ))
     }
     coalesce(uniqueField, field, mandatory)
   }
 
   private def optHasNo[T](
-    uniqueField: String, field: String, optSets: Option[Seq[Set[T]]], res: ResSet[T]
+    uniqueField: String, field: String, optSet: Option[Set[T]], res: ResSet[T]
   ): Unit = {
-    optSets.foreach { sets0 =>
-      val sets = sets0.filterNot(_.isEmpty)
-      if (sets.nonEmpty) {
-        hasNo(uniqueField, field, sets, res, false)
+    optSet.foreach { set =>
+      if (set.nonEmpty) {
+        hasNo(uniqueField, field, set, res, false)
       }
     }
     b.base.matches.add(Filters.ne(b.dot + field, new BsonNull))

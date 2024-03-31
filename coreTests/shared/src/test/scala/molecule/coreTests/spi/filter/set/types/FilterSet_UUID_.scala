@@ -127,10 +127,11 @@ trait FilterSet_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           // OR semantics when multiple values
 
           // "Has this OR that"
+          _ <- Ns.i.a1.uuidSet_.has(uuid0, uuid1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.uuidSet_.has(uuid1, uuid2).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.uuidSet_.has(uuid1, uuid3).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.uuidSet_.has(uuid2, uuid3).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.uuidSet_.has(uuid1, uuid2, uuid3).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.uuidSet_.has(uuid3, uuid4).query.get.map(_ ==> List(2))
           // Same as
           _ <- Ns.i.a1.uuidSet_.has(Seq(uuid1, uuid2)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.uuidSet_.has(Seq(uuid1, uuid3)).query.get.map(_ ==> List(1, 2))
@@ -190,90 +191,6 @@ trait FilterSet_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       }
     }
 
-
-    "Optional" - {
-
-      "has" - types { implicit conn =>
-        val a = (1, Some(Set(uuid1, uuid2)))
-        val b = (2, Some(Set(uuid2, uuid3, uuid4)))
-        val c = (3, None)
-        for {
-          _ <- Ns.i.uuidSet_?.insert(a, b, c).transact
-
-          // Sets with one or more values matching
-
-          // "Has this"
-          _ <- Ns.i.a1.uuidSet_?.has(Some(uuid0)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uuidSet_?.has(Some(uuid1)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uuidSet_?.has(Some(uuid2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uuidSet_?.has(Some(uuid3)).query.get.map(_ ==> List(b))
-          // Same as
-          _ <- Ns.i.a1.uuidSet_?.has(Some(Seq(uuid0))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uuidSet_?.has(Some(Seq(uuid1))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uuidSet_?.has(Some(Seq(uuid2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uuidSet_?.has(Some(Seq(uuid3))).query.get.map(_ ==> List(b))
-
-
-          // OR semantics when multiple values
-
-          // "Has this OR that"
-          _ <- Ns.i.a1.uuidSet_?.has(Some(Seq(uuid1, uuid2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uuidSet_?.has(Some(Seq(uuid1, uuid3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uuidSet_?.has(Some(Seq(uuid2, uuid3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uuidSet_?.has(Some(Seq(uuid1, uuid2, uuid3))).query.get.map(_ ==> List(a, b))
-
-          // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.uuidSet_?.has(Some(Seq.empty[UUID])).query.get.map(_ ==> List())
-
-          // None matches non-asserted values
-          _ <- Ns.i.a1.uuidSet_?.has(Option.empty[UUID]).query.get.map(_ ==> List(c))
-          _ <- Ns.i.a1.uuidSet_?.has(Option.empty[Seq[UUID]]).query.get.map(_ ==> List(c))
-        } yield ()
-      }
-
-
-      "hasNo" - types { implicit conn =>
-        val a = (1, Some(Set(uuid1, uuid2)))
-        val b = (2, Some(Set(uuid2, uuid3, uuid4)))
-        val c = (3, None)
-        for {
-          _ <- Ns.i.uuidSet_?.insert(a, b, c).transact
-
-          // Sets without one or more values matching
-
-          // "Doesn't have this"
-          _ <- Ns.i.a1.uuidSet_?.hasNo(Some(uuid0)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uuidSet_?.hasNo(Some(uuid1)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uuidSet_?.hasNo(Some(uuid2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uuidSet_?.hasNo(Some(uuid3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uuidSet_?.hasNo(Some(uuid4)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uuidSet_?.hasNo(Some(uuid5)).query.get.map(_ ==> List(a, b))
-          // Same as
-          _ <- Ns.i.a1.uuidSet_?.hasNo(Some(Seq(uuid0))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uuidSet_?.hasNo(Some(Seq(uuid1))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uuidSet_?.hasNo(Some(Seq(uuid2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uuidSet_?.hasNo(Some(Seq(uuid3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uuidSet_?.hasNo(Some(Seq(uuid4))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uuidSet_?.hasNo(Some(Seq(uuid5))).query.get.map(_ ==> List(a, b))
-
-
-          // OR semantics when multiple values
-
-          // "Has neither this OR that"
-          _ <- Ns.i.a1.uuidSet_?.hasNo(Some(Seq(uuid1, uuid2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uuidSet_?.hasNo(Some(Seq(uuid1, uuid3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uuidSet_?.hasNo(Some(Seq(uuid1, uuid4))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uuidSet_?.hasNo(Some(Seq(uuid1, uuid5))).query.get.map(_ ==> List(b))
-
-
-          // Negating empty Seqs/Sets has no effect
-          _ <- Ns.i.a1.uuidSet_?.hasNo(Some(Seq.empty[UUID])).query.get.map(_ ==> List(a, b))
-
-          // Negating None returns all asserted
-          _ <- Ns.i.a1.uuidSet_?.hasNo(Option.empty[UUID]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uuidSet_?.hasNo(Option.empty[Seq[UUID]]).query.get.map(_ ==> List(a, b))
-        } yield ()
-      }
-    }
+    // No filtering on optional Set attributes
   }
 }

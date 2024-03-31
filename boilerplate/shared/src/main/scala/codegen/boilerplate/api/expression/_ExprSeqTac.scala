@@ -34,18 +34,17 @@ object _ExprSeqTac extends BoilerplateGenBase("ExprSeqTac", "/api/expression") {
       s"""
          |
          |trait ${fileName}Ops_$arity[${`A..V, `}t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]] extends ExprAttr_$arity[${`A..V, `}t, Ns1, Ns2] {
-         |  protected def _exprSeq(op: Op, seqs: Seq[Seq[t]]): Ns1[${`A..V, `}t] = ???
+         |  protected def _exprSeq(op: Op, seq: Seq[t]): Ns1[${`A..V, `}t] = ???
          |}
          |
          |trait $fileName_$arity[${`A..V, `}t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]]
          |  extends ${fileName}Ops_$arity[${`A..V, `}t, Ns1, Ns2] {
-         |  def apply(                           ): Ns1[${`A..V, `}t] = _exprSeq(NoValue, Nil                       )
-         |  def apply(seq : Seq[t], seqs: Seq[t]*): Ns1[${`A..V, `}t] = _exprSeq(Eq     , seq +: seqs               )
-         |  def apply(seqs: Seq[Seq[t]]          ): Ns1[${`A..V, `}t] = _exprSeq(Eq     , seqs                      )
-         |  def has  (v   : t, vs: t*            ): Ns1[${`A..V, `}t] = _exprSeq(Has    , (v +: vs).map(v => Seq(v)))
-         |  def has  (vs  : Seq[t]               ): Ns1[${`A..V, `}t] = _exprSeq(Has    , Seq(vs)                   )
-         |  def hasNo(v   : t, vs: t*            ): Ns1[${`A..V, `}t] = _exprSeq(HasNo  , (v +: vs).map(v => Seq(v)))
-         |  def hasNo(vs  : Seq[t]               ): Ns1[${`A..V, `}t] = _exprSeq(HasNo  , Seq(vs)                   )
+         |  def apply(                ): Ns1[${`A..V, `}t] = _exprSeq(NoValue, Seq.empty[t])
+         |  def apply(seq: Seq[t]     ): Ns1[${`A..V, `}t] = _exprSeq(Eq     , seq         )
+         |  def has  (v  : t, vs: t*  ): Ns1[${`A..V, `}t] = _exprSeq(Has    , v +: vs     )
+         |  def has  (vs : Iterable[t]): Ns1[${`A..V, `}t] = _exprSeq(Has    , vs.toSeq    )
+         |  def hasNo(v  : t, vs: t*  ): Ns1[${`A..V, `}t] = _exprSeq(HasNo  , v +: vs     )
+         |  def hasNo(vs : Iterable[t]): Ns1[${`A..V, `}t] = _exprSeq(HasNo  , vs.toSeq    )
          |  $attrExprs
          |}""".stripMargin
   }

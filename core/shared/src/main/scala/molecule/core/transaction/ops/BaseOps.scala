@@ -154,19 +154,6 @@ trait BaseOps extends JsonBase with BaseHelpers {
   protected lazy val one2jsonShort         : Short => String          = (v: Short) => s"$v"
   protected lazy val one2jsonChar          : Char => String           = (v: Char) => "\"" + v.toString + "\""
 
-  protected def optByteArray(
-    ns: String,
-    attr: String,
-    arrays: Seq[Array[Byte]],
-  ): Option[Array[Byte]] = {
-    arrays match {
-      case Seq(array)     => Some(array)
-      case Nil            => None
-      case multipleArrays =>
-        throw ExecutionError(
-          s"Can only save one Seq of values for Seq attribute `$ns.$attr`. Found multiple seqs:\n" +
-            multipleArrays.map(_.mkString("Array(", ", ", ")")).mkString("\n")
-        )
-    }
-  }
+  protected def optArray(array: Array[Byte]): Option[Array[Byte]] = if (array.nonEmpty) Some(array) else None
+
 }

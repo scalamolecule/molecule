@@ -116,7 +116,7 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
 
   private def man[T: ClassTag](
     attr: Attr, e: Var,
-    seqs: Seq[Seq[T]],
+    seq: Seq[T],
     resSeq: ResSeq[T],
   ): Unit = {
     val v = vv
@@ -130,7 +130,7 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
         throw ModelError(s"Cardinality-seq filter attributes not allowed to " +
           s"do additional filtering. Found:\n  " + attr)
       }
-      expr(false, attr, e, v, attr.op, seqs, resSeq)
+      expr(false, attr, e, v, attr.op, seq, resSeq)
       filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
       filterAttrVars2.get(a).foreach(_(e, v))
     } { case (dir, filterPath, filterAttr) =>
@@ -140,13 +140,13 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
 
   private def tac[T: ClassTag](
     attr: Attr, e: Var,
-    seqs: Seq[Seq[T]],
+    seq: Seq[T],
     resSeq: ResSeq[T],
   ): Unit = {
     val v = vv
     val a = nsAttr(attr)
     attr.filterAttr.fold {
-      expr(true, attr, e, v, attr.op, seqs, resSeq)
+      expr(true, attr, e, v, attr.op, seq, resSeq)
       filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
       filterAttrVars2.get(a).foreach(_(e, v))
     } { case (dir, filterPath, filterAttr) =>
@@ -157,14 +157,14 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
   private def expr[T: ClassTag](
     tacit: Boolean,
     attr: Attr, e: Var, v: Var, op: Op,
-    seqs: Seq[Seq[T]],
+    seq: Seq[T],
     resSeq: ResSeq[T],
   ): Unit = {
     op match {
       case V       => attrV(tacit, attr, e, v)
       case Eq      => noCollectionMatching(attr)
-      case Has     => has(tacit, attr, e, v, seqs, resSeq)
-      case HasNo   => hasNo(attr, e, v, seqs, resSeq)
+      case Has     => has(tacit, attr, e, v, seq, resSeq)
+      case HasNo   => hasNo(attr, e, v, seq, resSeq)
       case NoValue => if (tacit) noValue(e, nsAttr(attr)) else noApplyNothing(attr)
       case other   => unexpectedOp(other)
     }
@@ -182,7 +182,7 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
 
   private def opt[T: ClassTag](
     attr: Attr, e: Var,
-    optSeqs: Option[Seq[Seq[T]]],
+    optSeq: Option[Seq[T]],
     resSeqOpt: ResSeqOpt[T],
     resSeq: ResSeq[T],
   ): Unit = {
@@ -191,8 +191,8 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     attr.op match {
       case V     => optAttr(attr, e, v)
       case Eq    => noCollectionMatching(attr)
-      case Has   => optHas(attr, e, v, optSeqs, resSeq)
-      case HasNo => optHasNo(attr, e, v, optSeqs, resSeq, resSeqOpt)
+      case Has   => optHas(attr, e, v, optSeq, resSeq)
+      case HasNo => optHasNo(attr, e, v, optSeq, resSeq, resSeqOpt)
       case other => unexpectedOp(other)
     }
   }
@@ -242,12 +242,12 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
   private def has[T: ClassTag](
     tacit: Boolean,
     attr: Attr, e: Var, v: Var,
-    seqs: Seq[Seq[T]],
+    seq: Seq[T],
     resSeq: ResSeq[T],
   ): Unit = {
     val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
-    if (seqs.nonEmpty && seqs.flatten.nonEmpty) {
-      args += seqs.flatten.map(resSeq.s2j).asJava
+    if (seq.nonEmpty) {
+      args += seq.map(resSeq.s2j).asJava
       in += v5
       where +=
         s"""[(datomic.api/q
@@ -285,14 +285,14 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
 
   private def optHas[T: ClassTag](
     attr: Attr, e: Var, v: Var,
-    optSeqs: Option[Seq[Seq[T]]],
+    optSeq: Option[Seq[T]],
     resSeq: ResSeq[T],
   ): Unit = {
-    optSeqs.fold[Unit] {
+    optSeq.fold[Unit] {
       none(attr, e, v)
-    } { seqs =>
+    } { seq =>
       find += v + 3
-      has(false, attr, e, v, seqs, resSeq)
+      has(false, attr, e, v, seq, resSeq)
     }
   }
 
@@ -301,13 +301,13 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
 
   private def hasNo[T](
     attr: Attr, e: Var, v: Var,
-    seqs: Seq[Seq[T]],
+    seq: Seq[T],
     resSeq: ResSeq[T],
   ): Unit = {
     val (a, ai, av, i_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
-    if (seqs.nonEmpty && seqs.flatten.nonEmpty) {
+    if (seq.nonEmpty) {
       find += v3
-      args += seqs.flatten.map(resSeq.s2j).asJava
+      args += seq.map(resSeq.s2j).asJava
       in += v5
       where +=
         s"""[(datomic.api/q
@@ -341,13 +341,14 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
 
   private def optHasNo[T](
     attr: Attr, e: Var, v: Var,
-    optSeqs: Option[Seq[Seq[T]]],
+    optSeq: Option[Seq[T]],
     resSeq: ResSeq[T],
     resSeqOpt: ResSeqOpt[T],
   ): Unit = {
-    optSeqs match {
-      case Some(seqs) if seqs.nonEmpty && seqs.flatten.nonEmpty =>
-        hasNo(attr, e, v, optSeqs.get, resSeq)
+    optSeq match {
+      case Some(seq) if seq.nonEmpty =>
+        //        hasNo(attr, e, v, optSeq.get, resSeq)
+        hasNo(attr, e, v, seq, resSeq)
         replaceCast(resSeqOpt.j2sOptList)
 
       case _ => optWithoutNone(attr, e, v)
@@ -461,13 +462,13 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
 
   // byte array ----------------------------------------------------------------
 
-  private def manByteArray(attr: Attr, e: Var, vs: Seq[Array[Byte]]): Unit = {
+  private def manByteArray(attr: Attr, e: Var, byteArray: Array[Byte]): Unit = {
     val v = vv
     val a = nsAttr(attr)
     find += v
     attr.filterAttr.fold {
       where += s"[$e $a $v]" -> wClause
-      byteArrayOps(attr, v, vs)
+      byteArrayOps(attr, v, byteArray)
 
     } { _ =>
       throw ModelError(s"Filter attributes not allowed with byte arrays.")
@@ -475,20 +476,50 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     addCast(identity) // return Byte array as-is
   }
 
-  private def tacByteArray(attr: Attr, e: Var, vs: Seq[Array[Byte]]): Unit = {
+  private def tacByteArray(attr: Attr, e: Var, byteArray: Array[Byte]): Unit = {
     val v = vv
     val a = nsAttr(attr)
     attr.filterAttr.fold {
       where += s"[$e $a $v]" -> wClause
-      byteArrayOps(attr, v, vs)
+      byteArrayOps(attr, v, byteArray)
     } { _ =>
       throw ModelError(s"Filter attributes not allowed with byte arrays.")
     }
   }
 
+  private def byteArrayOps(attr: Attr, v: Var, byteArray: Array[Byte]): Unit = {
+    attr.op match {
+      case V   => ()
+      case Eq  =>
+        if (byteArray.length != 0) {
+          args += byteArray
+          in += s"$v-input"
+          where += s"[(java.util.Arrays/equals ^bytes $v ^bytes $v-input)]" -> wClause
+        } else {
+          // Get none
+          where += s"[(ground nil) $v]" -> wGround
+        }
+      case Neq =>
+        if (byteArray.length != 0) {
+          args += byteArray
+          in += s"$v-input"
+          where += s"[(java.util.Arrays/equals ^bytes $v ^bytes $v-input) $v-equal]" -> wClause
+          where += s"[(not $v-equal)]" -> wClause
+        } else {
+          // get all
+        }
+
+      case NoValue  =>
+        // Get none
+        where += s"[(ground nil) $v]" -> wGround
+
+      case _ => throw ModelError(
+        s"Byte arrays can only be retrieved as-is. Filters not allowed.")
+    }
+  }
 
   private def optByteArray(
-    attr: Attr, e: Var, optVs: Option[Seq[Array[Byte]]], resSeqOpt: ResSeqOpt[Byte]
+    attr: Attr, e: Var, optByteArray: Option[Array[Byte]], resSeqOpt: ResSeqOpt[Byte]
   ): Unit = {
     val v = vv
     val a = nsAttr(attr)
@@ -498,15 +529,15 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
         where += s"[(identity $e) $e-$v]" -> wGround
 
       case Eq =>
-        optVs match {
-          case Some(arrays) if arrays.nonEmpty && arrays.flatten.nonEmpty =>
-            args += arrays.head
+        optByteArray match {
+          case Some(byteArray) if byteArray.length != 0 =>
+            args += byteArray
             find += v
             in += s"$v-input"
             where += s"[$e $a $v]" -> wClause
             where += s"[(java.util.Arrays/equals ^bytes $v ^bytes $v-input)]" -> wClause
 
-          case Some(emptyArrays) =>
+          case Some(emptyByteArray) =>
             find += v
             where += s"[(ground nil) $v]" -> wGround
 
@@ -517,46 +548,18 @@ trait ResolveExprSeq[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
       case Neq =>
         find += v
         where += s"[$e $a $v]" -> wClause
-        optVs.collect {
-          case arrays if arrays.nonEmpty && arrays.flatten.nonEmpty =>
-            args += arrays.head
-            in += s"$v-input"
-            where += s"[(java.util.Arrays/equals ^bytes $v ^bytes $v-input) $v-equal]" -> wClause
-            where += s"[(not $v-equal)]" -> wClause
+        optByteArray.map { byteArray =>
+          args += byteArray
+          in += s"$v-input"
+          where += s"[(java.util.Arrays/equals ^bytes $v ^bytes $v-input) $v-equal]" -> wClause
+          where += s"[(not $v-equal)]" -> wClause
         }
+
 
       case _ => throw ModelError(
         s"Byte arrays can only be retrieved as-is. Filters not allowed.")
     }
     addCast(resSeqOpt.j2sOptList) // delegates to specialized cast for byte arrays
-  }
-
-
-  private def byteArrayOps(attr: Attr, v: Var, vs: Seq[Array[Byte]]) = {
-    attr.op match {
-      case V   => ()
-      case Eq  =>
-        if (vs.nonEmpty && vs.flatten.nonEmpty) {
-          args += vs.head
-          in += s"$v-input"
-          where += s"[(java.util.Arrays/equals ^bytes $v ^bytes $v-input)]" -> wClause
-        } else {
-          // Get none
-          where += s"[(ground nil) $v]" -> wGround
-        }
-      case Neq =>
-        if (vs.nonEmpty && vs.flatten.nonEmpty) {
-          args += vs.head
-          in += s"$v-input"
-          where += s"[(java.util.Arrays/equals ^bytes $v ^bytes $v-input) $v-equal]" -> wClause
-          where += s"[(not $v-equal)]" -> wClause
-        } else {
-          // get all
-        }
-
-      case _ => throw ModelError(
-        s"Byte arrays can only be retrieved as-is. Filters not allowed.")
-    }
   }
 
 

@@ -60,7 +60,7 @@ trait LambdasBase extends BaseHelpers with AggrUtils { self: SqlQueryBase =>
       List.empty[T]
     } else {
       val arrayResultSet = array.getResultSet
-      var buf            = ListBuffer.empty[T]
+      val buf            = ListBuffer.empty[T]
       while (arrayResultSet.next()) {
         val value = getValue(arrayResultSet)
         if (!arrayResultSet.wasNull()) {

@@ -186,7 +186,8 @@ trait Update_mongodb
   override def updateSetEq[T](
     ns: String,
     attr: String,
-    sets: Seq[Set[T]],
+    //    sets: Seq[Set[T]],
+    set: Set[T],
     refNs: Option[String],
     owner: Boolean,
     transformValue: T => Any,
@@ -202,24 +203,18 @@ trait Update_mongodb
     }
     lazy val pathAttr = if (path.isEmpty) attr else path.mkString("", ".", "." + attr)
     lazy val array    = new BsonArray()
-    sets match {
-      case Seq(vs) =>
-        vs.map(v => array.add(transformValue(v).asInstanceOf[BsonValue]))
-        d.setDoc.append(pathAttr, array)
-      case Nil     =>
-        d.setDoc.append(pathAttr, new BsonNull())
-      case vs      =>
-        val cleanAttr = attr.replace("_", "")
-        throw ExecutionError(
-          s"Can only $update one Set of values for Set attribute `$ns.$cleanAttr`. Found: " + vs.mkString(", ")
-        )
+    if (set.nonEmpty) {
+      set.map(v => array.add(transformValue(v).asInstanceOf[BsonValue]))
+      d.setDoc.append(pathAttr, array)
+    } else {
+      d.setDoc.append(pathAttr, new BsonNull())
     }
   }
 
   override def updateSetAdd[T](
     ns: String,
     attr: String,
-    sets: Seq[Set[T]],
+    set: Set[T],
     refNs: Option[String],
     owner: Boolean,
     transformValue: T => Any,
@@ -228,23 +223,14 @@ trait Update_mongodb
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     lazy val pathAttr = if (path.isEmpty) attr else path.mkString("", ".", "." + attr)
-    sets match {
-      case Seq(vs) =>
-        vs.size match {
-          case 0 => ()
-          case 1 =>
-            d.pushDoc.append(pathAttr, transformValue(vs.head).asInstanceOf[BsonValue])
-          case _ =>
-            lazy val array = new BsonArray()
-            vs.map(v => array.add(transformValue(v).asInstanceOf[BsonValue]))
-            d.pushDoc.append(pathAttr, new BsonDocument("$each", array))
-        }
-      case Nil     => ()
-      case vs      =>
-        val cleanAttr = attr.replace("_", "")
-        throw ExecutionError(
-          s"Can only $update one Set of values for Set attribute `$ns.$cleanAttr`. Found: " + vs.mkString(", ")
-        )
+    set.size match {
+      case 0 => ()
+      case 1 =>
+        d.pushDoc.append(pathAttr, transformValue(set.head).asInstanceOf[BsonValue])
+      case _ =>
+        lazy val array = new BsonArray()
+        set.map(v => array.add(transformValue(v).asInstanceOf[BsonValue]))
+        d.pushDoc.append(pathAttr, new BsonDocument("$each", array))
     }
   }
 

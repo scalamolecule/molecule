@@ -127,10 +127,11 @@ trait FilterSet_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           // OR semantics when multiple values
 
           // "Has this OR that"
+          _ <- Ns.i.a1.dateSet_.has(date0, date1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.dateSet_.has(date1, date2).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.dateSet_.has(date1, date3).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.dateSet_.has(date2, date3).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.dateSet_.has(date1, date2, date3).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.dateSet_.has(date3, date4).query.get.map(_ ==> List(2))
           // Same as
           _ <- Ns.i.a1.dateSet_.has(Seq(date1, date2)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.dateSet_.has(Seq(date1, date3)).query.get.map(_ ==> List(1, 2))
@@ -190,90 +191,6 @@ trait FilterSet_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       }
     }
 
-
-    "Optional" - {
-
-      "has" - types { implicit conn =>
-        val a = (1, Some(Set(date1, date2)))
-        val b = (2, Some(Set(date2, date3, date4)))
-        val c = (3, None)
-        for {
-          _ <- Ns.i.dateSet_?.insert(a, b, c).transact
-
-          // Sets with one or more values matching
-
-          // "Has this"
-          _ <- Ns.i.a1.dateSet_?.has(Some(date0)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.dateSet_?.has(Some(date1)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.dateSet_?.has(Some(date2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.dateSet_?.has(Some(date3)).query.get.map(_ ==> List(b))
-          // Same as
-          _ <- Ns.i.a1.dateSet_?.has(Some(Seq(date0))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.dateSet_?.has(Some(Seq(date1))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.dateSet_?.has(Some(Seq(date2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.dateSet_?.has(Some(Seq(date3))).query.get.map(_ ==> List(b))
-
-
-          // OR semantics when multiple values
-
-          // "Has this OR that"
-          _ <- Ns.i.a1.dateSet_?.has(Some(Seq(date1, date2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.dateSet_?.has(Some(Seq(date1, date3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.dateSet_?.has(Some(Seq(date2, date3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.dateSet_?.has(Some(Seq(date1, date2, date3))).query.get.map(_ ==> List(a, b))
-
-          // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.dateSet_?.has(Some(Seq.empty[Date])).query.get.map(_ ==> List())
-
-          // None matches non-asserted values
-          _ <- Ns.i.a1.dateSet_?.has(Option.empty[Date]).query.get.map(_ ==> List(c))
-          _ <- Ns.i.a1.dateSet_?.has(Option.empty[Seq[Date]]).query.get.map(_ ==> List(c))
-        } yield ()
-      }
-
-
-      "hasNo" - types { implicit conn =>
-        val a = (1, Some(Set(date1, date2)))
-        val b = (2, Some(Set(date2, date3, date4)))
-        val c = (3, None)
-        for {
-          _ <- Ns.i.dateSet_?.insert(a, b, c).transact
-
-          // Sets without one or more values matching
-
-          // "Doesn't have this"
-          _ <- Ns.i.a1.dateSet_?.hasNo(Some(date0)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.dateSet_?.hasNo(Some(date1)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.dateSet_?.hasNo(Some(date2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.dateSet_?.hasNo(Some(date3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.dateSet_?.hasNo(Some(date4)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.dateSet_?.hasNo(Some(date5)).query.get.map(_ ==> List(a, b))
-          // Same as
-          _ <- Ns.i.a1.dateSet_?.hasNo(Some(Seq(date0))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.dateSet_?.hasNo(Some(Seq(date1))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.dateSet_?.hasNo(Some(Seq(date2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.dateSet_?.hasNo(Some(Seq(date3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.dateSet_?.hasNo(Some(Seq(date4))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.dateSet_?.hasNo(Some(Seq(date5))).query.get.map(_ ==> List(a, b))
-
-
-          // OR semantics when multiple values
-
-          // "Has neither this OR that"
-          _ <- Ns.i.a1.dateSet_?.hasNo(Some(Seq(date1, date2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.dateSet_?.hasNo(Some(Seq(date1, date3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.dateSet_?.hasNo(Some(Seq(date1, date4))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.dateSet_?.hasNo(Some(Seq(date1, date5))).query.get.map(_ ==> List(b))
-
-
-          // Negating empty Seqs/Sets has no effect
-          _ <- Ns.i.a1.dateSet_?.hasNo(Some(Seq.empty[Date])).query.get.map(_ ==> List(a, b))
-
-          // Negating None returns all asserted
-          _ <- Ns.i.a1.dateSet_?.hasNo(Option.empty[Date]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.dateSet_?.hasNo(Option.empty[Seq[Date]]).query.get.map(_ ==> List(a, b))
-        } yield ()
-      }
-    }
+    // No filtering on optional Set attributes
   }
 }

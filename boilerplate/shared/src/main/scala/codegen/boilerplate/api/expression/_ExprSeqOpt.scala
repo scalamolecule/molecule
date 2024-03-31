@@ -19,17 +19,12 @@ object _ExprSeqOpt extends BoilerplateGenBase( "ExprSeqOpt", "/api/expression") 
       s"""
          |
          |trait ${fileName}Ops_$arity[${`A..V`}, t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]] extends ExprAttr_$arity[${`A..V, `}t, Ns1, Ns2] {
-         |  protected def _exprSeqOpt(op: Op, optSeqs: Option[Seq[Seq[t]]]): Ns1[${`A..V`}, t] = ???
+         |  protected def _exprSeqOpt(op: Op, optSeq: Option[Seq[t]]): Ns1[${`A..V`}, t] = ???
          |}
          |
          |trait $fileName_$arity[${`A..V`}, t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]]
          |  extends ${fileName}Ops_$arity[${`A..V`}, t, Ns1, Ns2]{
-         |  def apply(seq : Option[Seq[t]]     )               : Ns1[${`A..V`}, t] = _exprSeqOpt(Eq   , seq.map(seq => Seq(seq))  )
-         |  def apply(seqs: Option[Seq[Seq[t]]])(implicit x: X): Ns1[${`A..V`}, t] = _exprSeqOpt(Eq   , seqs                      )
-         |  def has  (v   : Option[t]          )               : Ns1[${`A..V`}, t] = _exprSeqOpt(Has  , v.map(v => Seq(Seq(v)))   )
-         |  def has  (vs  : Option[Seq[t]]     )(implicit x: X): Ns1[${`A..V`}, t] = _exprSeqOpt(Has  , vs.map(_.map(v => Seq(v))))
-         |  def hasNo(v   : Option[t]          )               : Ns1[${`A..V`}, t] = _exprSeqOpt(HasNo, v.map(v => Seq(Seq(v)))   )
-         |  def hasNo(vs  : Option[Seq[t]]     )(implicit x: X): Ns1[${`A..V`}, t] = _exprSeqOpt(HasNo, vs.map(seq => Seq(seq))   )
+         |  def apply(optSeq: Option[Seq[t]]): Ns1[${`A..V`}, t] = _exprSeqOpt(Eq, optSeq)
          |}""".stripMargin
   }
 }

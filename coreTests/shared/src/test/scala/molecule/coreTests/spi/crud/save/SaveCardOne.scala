@@ -89,14 +89,8 @@ trait SaveCardOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Optional" - types { implicit conn =>
       for {
-        // Can't save multiple values (use insert for that)
-        _ <- Ns.i_?(Some(Seq(1, 2))).save.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can only save one value for optional attribute `Ns.i`. Found: 1, 2"
-          }
-
-        // Empty option of values saves nothing
-        _ <- Ns.i_?(Option.empty[Seq[Int]]).save.transact
+        // Empty option of value is ignored
+        _ <- Ns.i_?(Option.empty[Int]).save.transact
         _ <- Ns.i.query.get.map(_ ==> List())
 
         _ <- Ns.i(1).string_?(Some(string1)).save.transact
@@ -171,8 +165,7 @@ trait SaveCardOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
         _ <- Ns.i(1).ref_?(Option.empty[String]).save.transact
         _ <- Ns.i(1).ref_?(Some(r1)).save.transact
-        _ <- Ns.i(1).ref_?(Some(Seq(r2))).save.transact
-        _ <- Ns.i_.ref_?.a1.query.get.map(_ ==> List(None, Some(r1), Some(r2)))
+        _ <- Ns.i_.ref_?.a1.query.get.map(_ ==> List(None, Some(r1)))
       } yield ()
     }
 
