@@ -12,11 +12,11 @@ trait Insert_mariadb extends SqlInsert { self: ResolveInsert with InsertResolver
   override protected def addSet[T](
     ns: String,
     attr: String,
-    set2array: Set[T] => Array[AnyRef],
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String] = Nil,
+    set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
     refNs.fold {
@@ -81,11 +81,11 @@ trait Insert_mariadb extends SqlInsert { self: ResolveInsert with InsertResolver
   override protected def addSetOpt[T](
     ns: String,
     attr: String,
-    set2array: Set[T] => Array[AnyRef],
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String] = Nil,
+    set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
     refNs.fold {

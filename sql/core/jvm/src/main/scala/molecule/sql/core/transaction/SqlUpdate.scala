@@ -116,8 +116,8 @@ trait SqlUpdate
   override def updateOne[T](
     ns: String,
     attr: String,
-    vs: Seq[T],
     owner: Boolean,
+    vs: Seq[T],
     transformValue: T => Any,
   ): Unit = {
     updateCurRefPath(attr)
@@ -149,23 +149,33 @@ trait SqlUpdate
   override def updateSetEq[T](
     ns: String,
     attr: String,
-    //    sets: Seq[Set[T]],
-    set: Set[T],
     refNs: Option[String],
     owner: Boolean,
+    set: Set[T],
     transformValue: T => Any,
-    set2array: Set[T] => Array[AnyRef],
     exts: List[String],
+    set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
+  ): Unit = {
+    updateVsEq(ns, attr, refNs, set, exts, set2array)
+  }
+
+  private def updateVsEq[T, M[_] <: Iterable[_]](
+    ns: String,
+    attr: String,
+    refNs: Option[String],
+    vs: M[T],
+    exts: List[String],
+    vs2array: M[T] => Array[AnyRef],
   ): Unit = {
     refNs.fold {
       updateCurRefPath(attr)
       placeHolders = placeHolders :+ s"$attr = ?"
-      val colSetter = if (set.nonEmpty) {
+      val colSetter = if (vs.nonEmpty) {
         if (!isUpsert) {
           addToUpdateCols(ns, attr)
         }
-        val array = set2array(set)
+        val array = vs2array(vs)
         (ps: PS, _: IdsMap, _: RowIndex) => {
           val conn = ps.getConnection
           ps.setArray(curParamIndex, conn.createArrayOf(exts(1), array))
@@ -186,10 +196,12 @@ trait SqlUpdate
       val ns_id     = ss(ns, "id")
       val refNs_id  = ss(refNs, "id")
       val id        = getUpdateId
-      if (set.nonEmpty) {
+      if (vs.nonEmpty) {
         // Tables are reversed in JdbcConn_JVM and we want to delete first
         manualTableDatas = List(
-          addJoins(joinTable, ns_id, refNs_id, id, set.map(_.asInstanceOf[String].toLong)),
+          addJoins(joinTable, ns_id, refNs_id, id, vs.asInstanceOf[Iterable[T]].map {
+            _.asInstanceOf[String].toLong
+          }),
           deleteJoins(joinTable, ns_id, id)
         )
       } else {
@@ -202,22 +214,33 @@ trait SqlUpdate
   override def updateSetAdd[T](
     ns: String,
     attr: String,
-    set: Set[T],
     refNs: Option[String],
     owner: Boolean,
+    set: Set[T],
     transformValue: T => Any,
-    set2array: Set[T] => Array[AnyRef],
     exts: List[String],
+    set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
+    updateVsAdd(ns, attr, refNs, set, exts, set2array)
+  }
+
+  private def updateVsAdd[T, M[_] <: Iterable[_]](
+    ns: String,
+    attr: String,
+    refNs: Option[String],
+    vs: M[T],
+    exts: List[String],
+    set2array: M[T] => Array[AnyRef],
+  ): Unit = {
     refNs.fold {
-      if (set.nonEmpty) {
+      if (vs.nonEmpty) {
         updateCurRefPath(attr)
         if (!isUpsert) {
           addToUpdateCols(ns, attr)
         }
         placeHolders = placeHolders :+ s"$attr = $attr || ?"
-        val array = set2array(set)
+        val array = set2array(vs)
         addColSetter(curRefPath, (ps: PS, _: IdsMap, _: RowIndex) => {
           val conn = ps.getConnection
           ps.setArray(curParamIndex, conn.createArrayOf(exts(1), array))
@@ -232,9 +255,10 @@ trait SqlUpdate
       val joinTable = ss(ns, refAttr, refNs)
       val ns_id     = ss(ns, "id")
       val refNs_id  = ss(refNs, "id")
-      if (set.nonEmpty) {
+      if (vs.nonEmpty) {
         manualTableDatas = List(
-          addJoins(joinTable, ns_id, refNs_id, getUpdateId, set.map(_.asInstanceOf[String].toLong))
+          addJoins(joinTable, ns_id, refNs_id, getUpdateId,
+            vs.asInstanceOf[Iterable[T]].map(_.asInstanceOf[String].toLong))
         )
       }
     }
@@ -244,24 +268,35 @@ trait SqlUpdate
   override def updateSetRemove[T](
     ns: String,
     attr: String,
-    set: Set[T],
     refNs: Option[String],
     owner: Boolean,
+    set: Set[T],
     transformValue: T => Any,
     exts: List[String],
     one2json: T => String
+  ): Unit = {
+    updateVsRemove(ns, attr, refNs, set, transformValue, exts)
+  }
+
+  private def updateVsRemove[T, M[_] <: Iterable[_]](
+    ns: String,
+    attr: String,
+    refNs: Option[String],
+    vs: M[T],
+    transformValue: T => Any,
+    exts: List[String],
   ): Unit = {
     val table  = ns
     val nsAttr = s"$ns.$attr"
     val dbType = exts(1)
     refNs.fold {
-      if (set.nonEmpty) {
+      if (vs.nonEmpty) {
         updateCurRefPath(nsAttr)
         val idClause = s"$table.id IN (${ids.mkString(", ")})"
         if (!isUpsert) {
           addToUpdateCols(ns, attr)
         }
-        val removeValuePlaceHolders = set.toList.map(_ => "?").mkString(", ")
+        val removeValuePlaceHolders = vs.toList.map(_ => "?").mkString(", ")
         placeHolders = placeHolders :+
           s"""$nsAttr =
              |  CASE
@@ -282,29 +317,92 @@ trait SqlUpdate
              |  END""".stripMargin
 
         addColSetter(curRefPath, (ps: PS, _: IdsMap, _: RowIndex) => {
-          set.foreach { v =>
+          vs.asInstanceOf[Iterable[T]].foreach { v =>
             transformValue(v).asInstanceOf[(PS, Int) => Unit](ps, curParamIndex)
             curParamIndex += 1
           }
-          set.foreach { v =>
+          vs.asInstanceOf[Iterable[T]].foreach { v =>
             transformValue(v).asInstanceOf[(PS, Int) => Unit](ps, curParamIndex)
             curParamIndex += 1
           }
         })
       }
     } { refNs =>
-      if (set.nonEmpty) {
+      if (vs.nonEmpty) {
         // Separate update of ref ids in join table -----------------------------
         val refAttr    = attr
         val joinTable  = ss(ns, refAttr, refNs)
         val ns_id      = ss(ns, "id")
         val refNs_id   = ss(refNs, "id")
-        val retractIds = set.mkString(s" AND $refNs_id IN (", ", ", ")")
+        val retractIds = vs.mkString(s" AND $refNs_id IN (", ", ", ")")
         manualTableDatas = List(
           deleteJoins(joinTable, ns_id, getUpdateId, retractIds)
         )
       }
     }
+  }
+
+
+  override def updateSeqEq[T](
+    ns: String,
+    attr: String,
+    refNs: Option[String],
+    owner: Boolean,
+    seq: Seq[T],
+    transformValue: T => Any,
+    exts: List[String],
+    seq2array: Seq[T] => Array[AnyRef],
+    value2json: (StringBuffer, T) => StringBuffer
+  ): Unit = {
+    updateVsEq(ns, attr, refNs, seq, exts, seq2array)
+  }
+
+  override def updateSeqAdd[T](
+    ns: String,
+    attr: String,
+    refNs: Option[String],
+    owner: Boolean,
+    seq: Seq[T],
+    transformValue: T => Any,
+    exts: List[String],
+    seq2array: Seq[T] => Array[AnyRef],
+    value2json: (StringBuffer, T) => StringBuffer
+  ): Unit = {
+    updateVsAdd(ns, attr, refNs, seq, exts, seq2array)
+  }
+
+  override def updateSeqRemove[T](
+    ns: String,
+    attr: String,
+    refNs: Option[String],
+    owner: Boolean,
+    seq: Seq[T],
+    transformValue: T => Any,
+    exts: List[String],
+    one2json: T => String
+  ): Unit = {
+    updateVsRemove(ns, attr, refNs, seq, transformValue, exts)
+  }
+
+  override def updateByteArray(
+    ns: String,
+    attr: String,
+    byteArray: Array[Byte],
+  ): Unit = {
+    updateCurRefPath(attr)
+    placeHolders = placeHolders :+ s"$attr = ?"
+    val colSetter: Setter = if (byteArray.isEmpty) {
+      (ps: PS, _: IdsMap, _: RowIndex) => {
+        ps.setNull(curParamIndex, 0)
+        curParamIndex += 1
+      }
+    } else {
+      (ps: PS, _: IdsMap, _: RowIndex) => {
+        ps.setBytes(curParamIndex, byteArray)
+        curParamIndex += 1
+      }
+    }
+    addColSetter(curRefPath, colSetter)
   }
 
 

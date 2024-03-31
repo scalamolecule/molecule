@@ -3320,7 +3320,7 @@ trait Model extends Validations with Values with BaseHelpers {
   ) extends AttrSeqMan {
     override def toString: String = {
       def format(v: Byte): String = s"$v.toByte"
-      def vss: String = vs.map(format).mkString("Some(Array(", ", ", "))")
+      def vss: String = vs.map(format).mkString("Array(", ", ", ")")
       s"""AttrSeqManByte("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
@@ -4242,7 +4242,7 @@ trait Model extends Validations with Values with BaseHelpers {
   ) extends AttrSeqTac {
     override def toString: String = {
       def format(v: Byte): String = s"$v.toByte"
-      def vss: String = vs.map(format).mkString("Some(Array(", ", ", "))")
+      def vss: String = vs.map(format).mkString("Array(", ", ", ")")
       s"""AttrSeqTacByte("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }

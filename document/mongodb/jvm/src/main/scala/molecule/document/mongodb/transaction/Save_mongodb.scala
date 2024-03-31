@@ -54,11 +54,11 @@ trait Save_mongodb
   override protected def addSet[T](
     ns: String,
     attr: String,
+    refNs: Option[String],
     optSet: Option[Set[T]],
     transformValue: T => Any,
-    set2array: Set[T] => Array[AnyRef],
-    refNs: Option[String],
     exts: List[String] = Nil,
+    set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     optSet.fold {

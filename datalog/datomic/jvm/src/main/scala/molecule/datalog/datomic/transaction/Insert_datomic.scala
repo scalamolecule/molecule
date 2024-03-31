@@ -102,11 +102,11 @@ trait Insert_datomic
   override protected def addSet[T](
     ns: String,
     attr: String,
-    set2array: Set[T] => Array[AnyRef],
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String] = Nil,
+    set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
     val a = kw(ns, attr)
@@ -126,11 +126,11 @@ trait Insert_datomic
   override protected def addSetOpt[T](
     ns: String,
     attr: String,
-    set2array: Set[T] => Array[AnyRef],
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String] = Nil,
+    set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
     val a = kw(ns, attr)
@@ -157,8 +157,8 @@ trait Insert_datomic
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
-    set2array: Seq[T] => Array[AnyRef],
     exts: List[String] = Nil,
+    set2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
     val a   = kw(ns, attr)
@@ -183,31 +183,14 @@ trait Insert_datomic
       }
   }
 
-
-  override protected def addByteArray(
-    ns: String,
-    attr: String,
-    tplIndex: Int,
-    optArray: Option[Array[Byte]],
-  ): Product => Unit = {
-    val a = kw(ns, attr)
-    backRefs = backRefs + (ns -> e)
-    (tpl: Product) =>
-      tpl.productElement(tplIndex) match {
-        case array: Array[_] if array.nonEmpty => appendStmt(add, e, a, array.asInstanceOf[AnyRef])
-        case Some(array: Array[_])             => appendStmt(add, e, a, array.asInstanceOf[AnyRef])
-        case _                                 => () // no statement to insert
-      }
-  }
-
   override protected def addSeqOpt[T](
     ns: String,
     attr: String,
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
-    seq2array: Seq[T] => Array[AnyRef],
     exts: List[String] = Nil,
+    seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
     val a   = kw(ns, attr)
@@ -229,6 +212,21 @@ trait Insert_datomic
           }
 
         case _ => () // no statement to insert
+      }
+  }
+
+  override protected def addByteArray(
+    ns: String,
+    attr: String,
+    tplIndex: Int,
+  ): Product => Unit = {
+    val a = kw(ns, attr)
+    backRefs = backRefs + (ns -> e)
+    (tpl: Product) =>
+      tpl.productElement(tplIndex) match {
+        case array: Array[_] if array.nonEmpty => appendStmt(add, e, a, array.asInstanceOf[AnyRef])
+        case Some(array: Array[_])             => appendStmt(add, e, a, array.asInstanceOf[AnyRef])
+        case _                                 => () // no statement to insert
       }
   }
 

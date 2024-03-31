@@ -17,12 +17,12 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
   override def updateSetEq[T](
     ns: String,
     attr: String,
-    set: Set[T],
     refNs: Option[String],
     owner: Boolean,
+    set: Set[T],
     transformValue: T => Any,
-    set2array: Set[T] => Array[AnyRef],
     exts: List[String],
+    set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     refNs.fold {
@@ -70,12 +70,12 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
   override def updateSetAdd[T](
     ns: String,
     attr: String,
-    set: Set[T],
     refNs: Option[String],
     owner: Boolean,
+    set: Set[T],
     transformValue: T => Any,
-    set2array: Set[T] => Array[AnyRef],
     exts: List[String],
+    set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     refNs.fold {
@@ -109,9 +109,9 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
   override def updateSetRemove[T](
     ns: String,
     attr: String,
-    set: Set[T],
     refNs: Option[String],
     owner: Boolean,
+    set: Set[T],
     transformValue: T => Any,
     exts: List[String],
     one2json: T => String

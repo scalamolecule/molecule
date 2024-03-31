@@ -109,11 +109,11 @@ trait SqlSave
   override protected def addSet[T](
     ns: String,
     attr: String,
+    refNs: Option[String],
     optSet: Option[Set[T]],
     transformValue: T => Any,
-    set2array: Set[T] => Array[AnyRef],
-    refNs: Option[String],
     exts: List[String] = Nil,
+    set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     refNs.fold {
@@ -183,8 +183,8 @@ trait SqlSave
     refNs: Option[String],
     optSeq: Option[Seq[T]],
     transformValue: T => Any,
-    seq2array: Seq[T] => Array[AnyRef],
     exts: List[String],
+    seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     refNs.fold {
@@ -255,18 +255,11 @@ trait SqlSave
     exts: List[String],
   ): Unit = {
     val (curPath, paramIndex) = getParamIndex(attr)
-    val colSetter: Setter = optArray.fold {
-      (ps: PS, _: IdsMap, _: RowIndex) => {
-        ps.setNull(paramIndex, 0)
-      }
-    } { byteArray =>
-      (ps: PS, _: IdsMap, _: RowIndex) => {
-        if (byteArray.isEmpty) {
-          ps.setNull(paramIndex, 0)
-        } else {
-          ps.setBytes(paramIndex, byteArray)
-        }
-      }
+    val colSetter: Setter     = optArray match {
+      case Some(byteArray) if !byteArray.isEmpty =>
+        (ps: PS, _: IdsMap, _: RowIndex) => ps.setBytes(paramIndex, byteArray)
+      case _                                     =>
+        (ps: PS, _: IdsMap, _: RowIndex) => ps.setNull(paramIndex, 0)
     }
     addColSetter(curPath, colSetter)
   }

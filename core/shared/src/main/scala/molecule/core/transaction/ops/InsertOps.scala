@@ -24,22 +24,22 @@ trait InsertOps extends BaseOps {
   protected def addSet[T](
     ns: String,
     attr: String,
-    set2array: Set[T] => Array[AnyRef],
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String],
+    set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit
 
   protected def addSetOpt[T](
     ns: String,
     attr: String,
-    set2array: Set[T] => Array[AnyRef],
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String],
+    set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit
 
@@ -49,16 +49,9 @@ trait InsertOps extends BaseOps {
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
-    seq2array: Seq[T] => Array[AnyRef],
     exts: List[String],
+    seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
-  ): Product => Unit = ???
-
-  protected def addByteArray(
-    ns: String,
-    attr: String,
-    tplIndex: Int,
-    optArray: Option[Array[Byte]],
   ): Product => Unit = ???
 
   protected def addSeqOpt[T](
@@ -67,9 +60,15 @@ trait InsertOps extends BaseOps {
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
-    seq2array: Seq[T] => Array[AnyRef],
     exts: List[String],
+    seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
+  ): Product => Unit = ???
+
+  protected def addByteArray(
+    ns: String,
+    attr: String,
+    tplIndex: Int,
   ): Product => Unit = ???
 
   protected def addMap[T](

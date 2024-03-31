@@ -607,73 +607,74 @@ trait LambdasSeq extends LambdasBase with JavaConversions { self: SqlQueryBase =
   case class ResSeqOpt[T](
     tpe: String,
 
-    sql2setOpt: (RS, ParamIndex) => Option[Set[T]],
+    sql2listOpt: (RS, ParamIndex) => Option[List[T]],
     seq2sqlArray: Seq[T] => String,
     seq2sqls: Seq[T] => Seq[String],
     one2sql: T => String,
     one2json: T => String
   )
 
-  lazy val resOptSeqId            : ResSeqOpt[String]         = ResSeqOpt("String", sql2setOptId, seq2sqlArrayId, seq2sqlsId, one2sqlId, one2jsonId)
-  lazy val resOptSeqString        : ResSeqOpt[String]         = ResSeqOpt("String", sql2setOptString, seq2sqlArrayString, seq2sqlsString, one2sqlString, one2jsonString)
-  lazy val resOptSeqInt           : ResSeqOpt[Int]            = ResSeqOpt("Int", sql2setOptInt, seq2sqlArrayInt, seq2sqlsInt, one2sqlInt, one2jsonInt)
-  lazy val resOptSeqLong          : ResSeqOpt[Long]           = ResSeqOpt("Long", sql2setOptLong, seq2sqlArrayLong, seq2sqlsLong, one2sqlLong, one2jsonLong)
-  lazy val resOptSeqFloat         : ResSeqOpt[Float]          = ResSeqOpt("Float", sql2setOptFloat, seq2sqlArrayFloat, seq2sqlsFloat, one2sqlFloat, one2jsonFloat)
-  lazy val resOptSeqDouble        : ResSeqOpt[Double]         = ResSeqOpt("Double", sql2setOptDouble, seq2sqlArrayDouble, seq2sqlsDouble, one2sqlDouble, one2jsonDouble)
-  lazy val resOptSeqBoolean       : ResSeqOpt[Boolean]        = ResSeqOpt("Boolean", sql2setOptBoolean, seq2sqlArrayBoolean, seq2sqlsBoolean, one2sqlBoolean, one2jsonBoolean)
-  lazy val resOptSeqBigInt        : ResSeqOpt[BigInt]         = ResSeqOpt("BigInt", sql2setOptBigInt, seq2sqlArrayBigInt, seq2sqlsBigInt, one2sqlBigInt, one2jsonBigInt)
-  lazy val resOptSeqBigDecimal    : ResSeqOpt[BigDecimal]     = ResSeqOpt("BigDecimal", sql2setOptBigDecimal, seq2sqlArrayBigDecimal, seq2sqlsBigDecimal, one2sqlBigDecimal, one2jsonBigDecimal)
-  lazy val resOptSeqDate          : ResSeqOpt[Date]           = ResSeqOpt("Date", sql2setOptDate, seq2sqlArrayDate, seq2sqlsDate, one2sqlDate, one2jsonDate)
-  lazy val resOptSeqDuration      : ResSeqOpt[Duration]       = ResSeqOpt("Duration", sql2setOptDuration, seq2sqlArrayDuration, seq2sqlsDuration, one2sqlDuration, one2jsonDuration)
-  lazy val resOptSeqInstant       : ResSeqOpt[Instant]        = ResSeqOpt("Instant", sql2setOptInstant, seq2sqlArrayInstant, seq2sqlsInstant, one2sqlInstant, one2jsonInstant)
-  lazy val resOptSeqLocalDate     : ResSeqOpt[LocalDate]      = ResSeqOpt("LocalDate", sql2setOptLocalDate, seq2sqlArrayLocalDate, seq2sqlsLocalDate, one2sqlLocalDate, one2jsonLocalDate)
-  lazy val resOptSeqLocalTime     : ResSeqOpt[LocalTime]      = ResSeqOpt("LocalTime", sql2setOptLocalTime, seq2sqlArrayLocalTime, seq2sqlsLocalTime, one2sqlLocalTime, one2jsonLocalTime)
-  lazy val resOptSeqLocalDateTime : ResSeqOpt[LocalDateTime]  = ResSeqOpt("LocalDateTime", sql2setOptLocalDateTime, seq2sqlArrayLocalDateTime, seq2sqlsLocalDateTime, one2sqlLocalDateTime, one2jsonLocalDateTime)
-  lazy val resOptSeqOffsetTime    : ResSeqOpt[OffsetTime]     = ResSeqOpt("OffsetTime", sql2setOptOffsetTime, seq2sqlArrayOffsetTime, seq2sqlsOffsetTime, one2sqlOffsetTime, one2jsonOffsetTime)
-  lazy val resOptSeqOffsetDateTime: ResSeqOpt[OffsetDateTime] = ResSeqOpt("OffsetDateTime", sql2setOptOffsetDateTime, seq2sqlArrayOffsetDateTime, seq2sqlsOffsetDateTime, one2sqlOffsetDateTime, one2jsonOffsetDateTime)
-  lazy val resOptSeqZonedDateTime : ResSeqOpt[ZonedDateTime]  = ResSeqOpt("ZonedDateTime", sql2setOptZonedDateTime, seq2sqlArrayZonedDateTime, seq2sqlsZonedDateTime, one2sqlZonedDateTime, one2jsonZonedDateTime)
-  lazy val resOptSeqUUID          : ResSeqOpt[UUID]           = ResSeqOpt("UUID", sql2setOptUUID, seq2sqlArrayUUID, seq2sqlsUUID, one2sqlUUID, one2jsonUUID)
-  lazy val resOptSeqURI           : ResSeqOpt[URI]            = ResSeqOpt("URI", sql2setOptURI, seq2sqlArrayURI, seq2sqlsURI, one2sqlURI, one2jsonURI)
-  lazy val resOptSeqByte          : ResSeqOpt[Byte]           = ResSeqOpt("Byte", sql2setOptByte, seq2sqlArrayByte, seq2sqlsByte, one2sqlByte, one2jsonByte)
-  lazy val resOptSeqShort         : ResSeqOpt[Short]          = ResSeqOpt("Short", sql2setOptShort, seq2sqlArrayShort, seq2sqlsShort, one2sqlShort, one2jsonShort)
-  lazy val resOptSeqChar          : ResSeqOpt[Char]           = ResSeqOpt("Char", sql2setOptChar, seq2sqlArrayChar, seq2sqlsChar, one2sqlChar, one2jsonChar)
+  lazy val resOptSeqId            : ResSeqOpt[String]         = ResSeqOpt("String", sql2listOptId, seq2sqlArrayId, seq2sqlsId, one2sqlId, one2jsonId)
+  lazy val resOptSeqString        : ResSeqOpt[String]         = ResSeqOpt("String", sql2listOptString, seq2sqlArrayString, seq2sqlsString, one2sqlString, one2jsonString)
+  lazy val resOptSeqInt           : ResSeqOpt[Int]            = ResSeqOpt("Int", sql2listOptInt, seq2sqlArrayInt, seq2sqlsInt, one2sqlInt, one2jsonInt)
+  lazy val resOptSeqLong          : ResSeqOpt[Long]           = ResSeqOpt("Long", sql2listOptLong, seq2sqlArrayLong, seq2sqlsLong, one2sqlLong, one2jsonLong)
+  lazy val resOptSeqFloat         : ResSeqOpt[Float]          = ResSeqOpt("Float", sql2listOptFloat, seq2sqlArrayFloat, seq2sqlsFloat, one2sqlFloat, one2jsonFloat)
+  lazy val resOptSeqDouble        : ResSeqOpt[Double]         = ResSeqOpt("Double", sql2listOptDouble, seq2sqlArrayDouble, seq2sqlsDouble, one2sqlDouble, one2jsonDouble)
+  lazy val resOptSeqBoolean       : ResSeqOpt[Boolean]        = ResSeqOpt("Boolean", sql2listOptBoolean, seq2sqlArrayBoolean, seq2sqlsBoolean, one2sqlBoolean, one2jsonBoolean)
+  lazy val resOptSeqBigInt        : ResSeqOpt[BigInt]         = ResSeqOpt("BigInt", sql2listOptBigInt, seq2sqlArrayBigInt, seq2sqlsBigInt, one2sqlBigInt, one2jsonBigInt)
+  lazy val resOptSeqBigDecimal    : ResSeqOpt[BigDecimal]     = ResSeqOpt("BigDecimal", sql2listOptBigDecimal, seq2sqlArrayBigDecimal, seq2sqlsBigDecimal, one2sqlBigDecimal, one2jsonBigDecimal)
+  lazy val resOptSeqDate          : ResSeqOpt[Date]           = ResSeqOpt("Date", sql2listOptDate, seq2sqlArrayDate, seq2sqlsDate, one2sqlDate, one2jsonDate)
+  lazy val resOptSeqDuration      : ResSeqOpt[Duration]       = ResSeqOpt("Duration", sql2listOptDuration, seq2sqlArrayDuration, seq2sqlsDuration, one2sqlDuration, one2jsonDuration)
+  lazy val resOptSeqInstant       : ResSeqOpt[Instant]        = ResSeqOpt("Instant", sql2listOptInstant, seq2sqlArrayInstant, seq2sqlsInstant, one2sqlInstant, one2jsonInstant)
+  lazy val resOptSeqLocalDate     : ResSeqOpt[LocalDate]      = ResSeqOpt("LocalDate", sql2listOptLocalDate, seq2sqlArrayLocalDate, seq2sqlsLocalDate, one2sqlLocalDate, one2jsonLocalDate)
+  lazy val resOptSeqLocalTime     : ResSeqOpt[LocalTime]      = ResSeqOpt("LocalTime", sql2listOptLocalTime, seq2sqlArrayLocalTime, seq2sqlsLocalTime, one2sqlLocalTime, one2jsonLocalTime)
+  lazy val resOptSeqLocalDateTime : ResSeqOpt[LocalDateTime]  = ResSeqOpt("LocalDateTime", sql2listOptLocalDateTime, seq2sqlArrayLocalDateTime, seq2sqlsLocalDateTime, one2sqlLocalDateTime, one2jsonLocalDateTime)
+  lazy val resOptSeqOffsetTime    : ResSeqOpt[OffsetTime]     = ResSeqOpt("OffsetTime", sql2listOptOffsetTime, seq2sqlArrayOffsetTime, seq2sqlsOffsetTime, one2sqlOffsetTime, one2jsonOffsetTime)
+  lazy val resOptSeqOffsetDateTime: ResSeqOpt[OffsetDateTime] = ResSeqOpt("OffsetDateTime", sql2listOptOffsetDateTime, seq2sqlArrayOffsetDateTime, seq2sqlsOffsetDateTime, one2sqlOffsetDateTime, one2jsonOffsetDateTime)
+  lazy val resOptSeqZonedDateTime : ResSeqOpt[ZonedDateTime]  = ResSeqOpt("ZonedDateTime", sql2listOptZonedDateTime, seq2sqlArrayZonedDateTime, seq2sqlsZonedDateTime, one2sqlZonedDateTime, one2jsonZonedDateTime)
+  lazy val resOptSeqUUID          : ResSeqOpt[UUID]           = ResSeqOpt("UUID", sql2listOptUUID, seq2sqlArrayUUID, seq2sqlsUUID, one2sqlUUID, one2jsonUUID)
+  lazy val resOptSeqURI           : ResSeqOpt[URI]            = ResSeqOpt("URI", sql2listOptURI, seq2sqlArrayURI, seq2sqlsURI, one2sqlURI, one2jsonURI)
+  lazy val resOptSeqByte          : ResSeqOpt[Byte]           = ResSeqOpt("Byte", sql2listOptByte, seq2sqlArrayByte, seq2sqlsByte, one2sqlByte, one2jsonByte)
+  lazy val resOptSeqShort         : ResSeqOpt[Short]          = ResSeqOpt("Short", sql2listOptShort, seq2sqlArrayShort, seq2sqlsShort, one2sqlShort, one2jsonShort)
+  lazy val resOptSeqChar          : ResSeqOpt[Char]           = ResSeqOpt("Char", sql2listOptChar, seq2sqlArrayChar, seq2sqlsChar, one2sqlChar, one2jsonChar)
 
 
-  private def sql2seqOpt[T](row: RS, paramIndex: Int, getValue: RS => T): Option[Set[T]] = {
+  private def sql2listOpt[T](row: RS, paramIndex: Int, getValue: RS => T): Option[List[T]] = {
     val array = row.getArray(paramIndex)
     if (row.wasNull()) {
-      Option.empty[Set[T]]
+      Option.empty[List[T]]
     } else {
       val arrayResultSet = array.getResultSet
-      var set            = Set.empty[T]
+      val buf            = ListBuffer.empty[T]
       while (arrayResultSet.next()) {
-        set += getValue(arrayResultSet)
+        buf += getValue(arrayResultSet)
       }
-      if (set.isEmpty || set == Set("0")) Option.empty[Set[T]] else Some(set)
+//      if (buf.isEmpty || buf == Set("0")) Option.empty[Set[T]] else Some(buf)
+      if (buf.isEmpty) Option.empty[List[T]] else Some(buf.toList)
     }
   }
 
-  private lazy val sql2setOptId            : (RS, Int) => Option[Set[String]]         = (row: RS, paramIndex: Int) => sql2seqOpt(row, paramIndex, valueId)
-  private lazy val sql2setOptString        : (RS, Int) => Option[Set[String]]         = (row: RS, paramIndex: Int) => sql2seqOpt(row, paramIndex, valueString)
-  private lazy val sql2setOptInt           : (RS, Int) => Option[Set[Int]]            = (row: RS, paramIndex: Int) => sql2seqOpt(row, paramIndex, valueInt)
-  private lazy val sql2setOptLong          : (RS, Int) => Option[Set[Long]]           = (row: RS, paramIndex: Int) => sql2seqOpt(row, paramIndex, valueLong)
-  private lazy val sql2setOptFloat         : (RS, Int) => Option[Set[Float]]          = (row: RS, paramIndex: Int) => sql2seqOpt(row, paramIndex, valueFloat)
-  private lazy val sql2setOptDouble        : (RS, Int) => Option[Set[Double]]         = (row: RS, paramIndex: Int) => sql2seqOpt(row, paramIndex, valueDouble)
-  private lazy val sql2setOptBoolean       : (RS, Int) => Option[Set[Boolean]]        = (row: RS, paramIndex: Int) => sql2seqOpt(row, paramIndex, valueBoolean)
-  private lazy val sql2setOptBigInt        : (RS, Int) => Option[Set[BigInt]]         = (row: RS, paramIndex: Int) => sql2seqOpt(row, paramIndex, valueBigInt)
-  private lazy val sql2setOptBigDecimal    : (RS, Int) => Option[Set[BigDecimal]]     = (row: RS, paramIndex: Int) => sql2seqOpt(row, paramIndex, valueBigDecimal)
-  private lazy val sql2setOptDate          : (RS, Int) => Option[Set[Date]]           = (row: RS, paramIndex: Int) => sql2seqOpt(row, paramIndex, valueDate)
-  private lazy val sql2setOptDuration      : (RS, Int) => Option[Set[Duration]]       = (row: RS, paramIndex: Int) => sql2seqOpt(row, paramIndex, valueDuration)
-  private lazy val sql2setOptInstant       : (RS, Int) => Option[Set[Instant]]        = (row: RS, paramIndex: Int) => sql2seqOpt(row, paramIndex, valueInstant)
-  private lazy val sql2setOptLocalDate     : (RS, Int) => Option[Set[LocalDate]]      = (row: RS, paramIndex: Int) => sql2seqOpt(row, paramIndex, valueLocalDate)
-  private lazy val sql2setOptLocalTime     : (RS, Int) => Option[Set[LocalTime]]      = (row: RS, paramIndex: Int) => sql2seqOpt(row, paramIndex, valueLocalTime)
-  private lazy val sql2setOptLocalDateTime : (RS, Int) => Option[Set[LocalDateTime]]  = (row: RS, paramIndex: Int) => sql2seqOpt(row, paramIndex, valueLocalDateTime)
-  private lazy val sql2setOptOffsetTime    : (RS, Int) => Option[Set[OffsetTime]]     = (row: RS, paramIndex: Int) => sql2seqOpt(row, paramIndex, valueOffsetTime)
-  private lazy val sql2setOptOffsetDateTime: (RS, Int) => Option[Set[OffsetDateTime]] = (row: RS, paramIndex: Int) => sql2seqOpt(row, paramIndex, valueOffsetDateTime)
-  private lazy val sql2setOptZonedDateTime : (RS, Int) => Option[Set[ZonedDateTime]]  = (row: RS, paramIndex: Int) => sql2seqOpt(row, paramIndex, valueZonedDateTime)
-  private lazy val sql2setOptUUID          : (RS, Int) => Option[Set[UUID]]           = (row: RS, paramIndex: Int) => sql2seqOpt(row, paramIndex, valueUUID)
-  private lazy val sql2setOptURI           : (RS, Int) => Option[Set[URI]]            = (row: RS, paramIndex: Int) => sql2seqOpt(row, paramIndex, valueURI)
-  private lazy val sql2setOptByte          : (RS, Int) => Option[Set[Byte]]           = (row: RS, paramIndex: Int) => sql2seqOpt(row, paramIndex, valueByte)
-  private lazy val sql2setOptShort         : (RS, Int) => Option[Set[Short]]          = (row: RS, paramIndex: Int) => sql2seqOpt(row, paramIndex, valueShort)
-  private lazy val sql2setOptChar          : (RS, Int) => Option[Set[Char]]           = (row: RS, paramIndex: Int) => sql2seqOpt(row, paramIndex, valueChar)
+  private lazy val sql2listOptId            : (RS, Int) => Option[List[String]]         = (row: RS, paramIndex: Int) => sql2listOpt(row, paramIndex, valueId)
+  private lazy val sql2listOptString        : (RS, Int) => Option[List[String]]         = (row: RS, paramIndex: Int) => sql2listOpt(row, paramIndex, valueString)
+  private lazy val sql2listOptInt           : (RS, Int) => Option[List[Int]]            = (row: RS, paramIndex: Int) => sql2listOpt(row, paramIndex, valueInt)
+  private lazy val sql2listOptLong          : (RS, Int) => Option[List[Long]]           = (row: RS, paramIndex: Int) => sql2listOpt(row, paramIndex, valueLong)
+  private lazy val sql2listOptFloat         : (RS, Int) => Option[List[Float]]          = (row: RS, paramIndex: Int) => sql2listOpt(row, paramIndex, valueFloat)
+  private lazy val sql2listOptDouble        : (RS, Int) => Option[List[Double]]         = (row: RS, paramIndex: Int) => sql2listOpt(row, paramIndex, valueDouble)
+  private lazy val sql2listOptBoolean       : (RS, Int) => Option[List[Boolean]]        = (row: RS, paramIndex: Int) => sql2listOpt(row, paramIndex, valueBoolean)
+  private lazy val sql2listOptBigInt        : (RS, Int) => Option[List[BigInt]]         = (row: RS, paramIndex: Int) => sql2listOpt(row, paramIndex, valueBigInt)
+  private lazy val sql2listOptBigDecimal    : (RS, Int) => Option[List[BigDecimal]]     = (row: RS, paramIndex: Int) => sql2listOpt(row, paramIndex, valueBigDecimal)
+  private lazy val sql2listOptDate          : (RS, Int) => Option[List[Date]]           = (row: RS, paramIndex: Int) => sql2listOpt(row, paramIndex, valueDate)
+  private lazy val sql2listOptDuration      : (RS, Int) => Option[List[Duration]]       = (row: RS, paramIndex: Int) => sql2listOpt(row, paramIndex, valueDuration)
+  private lazy val sql2listOptInstant       : (RS, Int) => Option[List[Instant]]        = (row: RS, paramIndex: Int) => sql2listOpt(row, paramIndex, valueInstant)
+  private lazy val sql2listOptLocalDate     : (RS, Int) => Option[List[LocalDate]]      = (row: RS, paramIndex: Int) => sql2listOpt(row, paramIndex, valueLocalDate)
+  private lazy val sql2listOptLocalTime     : (RS, Int) => Option[List[LocalTime]]      = (row: RS, paramIndex: Int) => sql2listOpt(row, paramIndex, valueLocalTime)
+  private lazy val sql2listOptLocalDateTime : (RS, Int) => Option[List[LocalDateTime]]  = (row: RS, paramIndex: Int) => sql2listOpt(row, paramIndex, valueLocalDateTime)
+  private lazy val sql2listOptOffsetTime    : (RS, Int) => Option[List[OffsetTime]]     = (row: RS, paramIndex: Int) => sql2listOpt(row, paramIndex, valueOffsetTime)
+  private lazy val sql2listOptOffsetDateTime: (RS, Int) => Option[List[OffsetDateTime]] = (row: RS, paramIndex: Int) => sql2listOpt(row, paramIndex, valueOffsetDateTime)
+  private lazy val sql2listOptZonedDateTime : (RS, Int) => Option[List[ZonedDateTime]]  = (row: RS, paramIndex: Int) => sql2listOpt(row, paramIndex, valueZonedDateTime)
+  private lazy val sql2listOptUUID          : (RS, Int) => Option[List[UUID]]           = (row: RS, paramIndex: Int) => sql2listOpt(row, paramIndex, valueUUID)
+  private lazy val sql2listOptURI           : (RS, Int) => Option[List[URI]]            = (row: RS, paramIndex: Int) => sql2listOpt(row, paramIndex, valueURI)
+  private lazy val sql2listOptByte          : (RS, Int) => Option[List[Byte]]           = (row: RS, paramIndex: Int) => sql2listOpt(row, paramIndex, valueByte)
+  private lazy val sql2listOptShort         : (RS, Int) => Option[List[Short]]          = (row: RS, paramIndex: Int) => sql2listOpt(row, paramIndex, valueShort)
+  private lazy val sql2listOptChar          : (RS, Int) => Option[List[Char]]           = (row: RS, paramIndex: Int) => sql2listOpt(row, paramIndex, valueChar)
 }

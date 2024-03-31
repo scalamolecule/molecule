@@ -60,11 +60,11 @@ trait Save_datomic
   override protected def addSet[T](
     ns: String,
     attr: String,
+    refNs: Option[String],
     optSet: Option[Set[T]],
     transformValue: T => Any,
-    set2array: Set[T] => Array[AnyRef],
-    refNs: Option[String],
     exts: List[String] = Nil,
+    set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     optSet.foreach { set =>
@@ -81,8 +81,8 @@ trait Save_datomic
     refNs: Option[String],
     optSeq: Option[Seq[T]],
     transformValue: T => Any,
-    seq2array: Seq[T] => Array[AnyRef],
     exts: List[String] = Nil,
+    seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     optSeq.foreach { seq =>

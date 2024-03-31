@@ -87,18 +87,82 @@ trait SpiHelpers extends ModelUtils {
                 case a: AttrSetManShort          => idsModel += AttrSetTacShort(a.ns, a.attr, coord = a.coord)
                 case a: AttrSetManChar           => idsModel += AttrSetTacChar(a.ns, a.attr, coord = a.coord)
               }
+            } else {
+              throw ModelError(s"Unexpected $update operation for card-many attribute. Found:\n" + a)
+            }
 
+          case a: AttrSeqMan =>
+            if (a.op == Eq || a.op == Add || a.op == Remove) {
+              prevNs = a.ns
+              a match {
+                case a: AttrSeqManID             => idsModel += AttrSeqTacID(a.ns, a.attr, coord = a.coord)
+                case a: AttrSeqManString         => idsModel += AttrSeqTacString(a.ns, a.attr, coord = a.coord)
+                case a: AttrSeqManInt            => idsModel += AttrSeqTacInt(a.ns, a.attr, coord = a.coord)
+                case a: AttrSeqManLong           => idsModel += AttrSeqTacLong(a.ns, a.attr, coord = a.coord)
+                case a: AttrSeqManFloat          => idsModel += AttrSeqTacFloat(a.ns, a.attr, coord = a.coord)
+                case a: AttrSeqManDouble         => idsModel += AttrSeqTacDouble(a.ns, a.attr, coord = a.coord)
+                case a: AttrSeqManBoolean        => idsModel += AttrSeqTacBoolean(a.ns, a.attr, coord = a.coord)
+                case a: AttrSeqManBigInt         => idsModel += AttrSeqTacBigInt(a.ns, a.attr, coord = a.coord)
+                case a: AttrSeqManBigDecimal     => idsModel += AttrSeqTacBigDecimal(a.ns, a.attr, coord = a.coord)
+                case a: AttrSeqManDate           => idsModel += AttrSeqTacDate(a.ns, a.attr, coord = a.coord)
+                case a: AttrSeqManDuration       => idsModel += AttrSeqTacDuration(a.ns, a.attr, coord = a.coord)
+                case a: AttrSeqManInstant        => idsModel += AttrSeqTacInstant(a.ns, a.attr, coord = a.coord)
+                case a: AttrSeqManLocalDate      => idsModel += AttrSeqTacLocalDate(a.ns, a.attr, coord = a.coord)
+                case a: AttrSeqManLocalTime      => idsModel += AttrSeqTacLocalTime(a.ns, a.attr, coord = a.coord)
+                case a: AttrSeqManLocalDateTime  => idsModel += AttrSeqTacLocalDateTime(a.ns, a.attr, coord = a.coord)
+                case a: AttrSeqManOffsetTime     => idsModel += AttrSeqTacOffsetTime(a.ns, a.attr, coord = a.coord)
+                case a: AttrSeqManOffsetDateTime => idsModel += AttrSeqTacOffsetDateTime(a.ns, a.attr, coord = a.coord)
+                case a: AttrSeqManZonedDateTime  => idsModel += AttrSeqTacZonedDateTime(a.ns, a.attr, coord = a.coord)
+                case a: AttrSeqManUUID           => idsModel += AttrSeqTacUUID(a.ns, a.attr, coord = a.coord)
+                case a: AttrSeqManURI            => idsModel += AttrSeqTacURI(a.ns, a.attr, coord = a.coord)
+                case a: AttrSeqManByte           => idsModel += AttrSeqTacByte(a.ns, a.attr, coord = a.coord)
+                case a: AttrSeqManShort          => idsModel += AttrSeqTacShort(a.ns, a.attr, coord = a.coord)
+                case a: AttrSeqManChar           => idsModel += AttrSeqTacChar(a.ns, a.attr, coord = a.coord)
+              }
+            } else {
+              throw ModelError(s"Unexpected $update operation for card-many attribute. Found:\n" + a)
+            }
+
+          case a: AttrMapMan =>
+            if (a.op == Eq || a.op == Add || a.op == Remove) {
+              prevNs = a.ns
+              a match {
+                case a: AttrMapManID             => idsModel += AttrMapTacID(a.ns, a.attr, coord = a.coord)
+                case a: AttrMapManString         => idsModel += AttrMapTacString(a.ns, a.attr, coord = a.coord)
+                case a: AttrMapManInt            => idsModel += AttrMapTacInt(a.ns, a.attr, coord = a.coord)
+                case a: AttrMapManLong           => idsModel += AttrMapTacLong(a.ns, a.attr, coord = a.coord)
+                case a: AttrMapManFloat          => idsModel += AttrMapTacFloat(a.ns, a.attr, coord = a.coord)
+                case a: AttrMapManDouble         => idsModel += AttrMapTacDouble(a.ns, a.attr, coord = a.coord)
+                case a: AttrMapManBoolean        => idsModel += AttrMapTacBoolean(a.ns, a.attr, coord = a.coord)
+                case a: AttrMapManBigInt         => idsModel += AttrMapTacBigInt(a.ns, a.attr, coord = a.coord)
+                case a: AttrMapManBigDecimal     => idsModel += AttrMapTacBigDecimal(a.ns, a.attr, coord = a.coord)
+                case a: AttrMapManDate           => idsModel += AttrMapTacDate(a.ns, a.attr, coord = a.coord)
+                case a: AttrMapManDuration       => idsModel += AttrMapTacDuration(a.ns, a.attr, coord = a.coord)
+                case a: AttrMapManInstant        => idsModel += AttrMapTacInstant(a.ns, a.attr, coord = a.coord)
+                case a: AttrMapManLocalDate      => idsModel += AttrMapTacLocalDate(a.ns, a.attr, coord = a.coord)
+                case a: AttrMapManLocalTime      => idsModel += AttrMapTacLocalTime(a.ns, a.attr, coord = a.coord)
+                case a: AttrMapManLocalDateTime  => idsModel += AttrMapTacLocalDateTime(a.ns, a.attr, coord = a.coord)
+                case a: AttrMapManOffsetTime     => idsModel += AttrMapTacOffsetTime(a.ns, a.attr, coord = a.coord)
+                case a: AttrMapManOffsetDateTime => idsModel += AttrMapTacOffsetDateTime(a.ns, a.attr, coord = a.coord)
+                case a: AttrMapManZonedDateTime  => idsModel += AttrMapTacZonedDateTime(a.ns, a.attr, coord = a.coord)
+                case a: AttrMapManUUID           => idsModel += AttrMapTacUUID(a.ns, a.attr, coord = a.coord)
+                case a: AttrMapManURI            => idsModel += AttrMapTacURI(a.ns, a.attr, coord = a.coord)
+                case a: AttrMapManByte           => idsModel += AttrMapTacByte(a.ns, a.attr, coord = a.coord)
+                case a: AttrMapManShort          => idsModel += AttrMapTacShort(a.ns, a.attr, coord = a.coord)
+                case a: AttrMapManChar           => idsModel += AttrMapTacChar(a.ns, a.attr, coord = a.coord)
+              }
             } else {
               throw ModelError(s"Unexpected $update operation for card-many attribute. Found:\n" + a)
             }
 
 
           case _: AttrOneOpt => throw ModelError(s"Can't $update optional values. Found:\n" + a)
-          case _: AttrSetTac => throw ModelError("Can only lookup entity with card-one attribute value. Found:\n" + a)
-          case _: AttrSetOpt => throw ModelError(s"Can't $update optional values. Found:\n" + a)
 
-          case a: AttrSeq => ???
-          case a: AttrMap => ???
+          case _: AttrSetTac | _: AttrSeqTac | _: AttrMapTac =>
+            throw ModelError("Can only lookup entity with card-one attribute value. Found:\n" + a)
+
+          case _: AttrSetOpt | _: AttrSeqOpt | _: AttrMapOpt =>
+            throw ModelError(s"Can't $update optional values. Found:\n" + a)
         }
 
       case ref@Ref(_, _, _, CardOne, _, coord) =>

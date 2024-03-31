@@ -250,11 +250,11 @@ trait SqlInsert
   override protected def addSet[T](
     ns: String,
     attr: String,
-    set2array: Set[T] => Array[AnyRef],
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String] = Nil,
+    set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
     refNs.fold {
@@ -322,11 +322,11 @@ trait SqlInsert
   override protected def addSetOpt[T](
     ns: String,
     attr: String,
-    set2array: Set[T] => Array[AnyRef],
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String] = Nil,
+    set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
     refNs.fold {
@@ -391,6 +391,174 @@ trait SqlInsert
         }
         addColSetter(joinPath, colSetter)
       }
+    }
+  }
+
+
+  override protected def addSeq[T](
+    ns: String,
+    attr: String,
+    refNs: Option[String],
+    tplIndex: Int,
+    transformValue: T => Any,
+    exts: List[String] = Nil,
+    seq2array: Seq[T] => Array[AnyRef],
+    value2json: (StringBuffer, T) => StringBuffer
+  ): Product => Unit = {
+    refNs.fold {
+      val (curPath, paramIndex) = getParamIndex(attr)
+      (tpl: Product) =>
+        val array     = seq2array(tpl.productElement(tplIndex).asInstanceOf[Seq[T]])
+        val colSetter = if (array.nonEmpty) {
+          (ps: PS, _: IdsMap, _: RowIndex) => {
+            val conn = ps.getConnection
+            val arr  = conn.createArrayOf(exts(1), array)
+            ps.setArray(paramIndex, arr)
+          }
+        } else {
+          (ps: PS, _: IdsMap, _: RowIndex) =>
+            ps.setNull(paramIndex, java.sql.Types.NULL)
+        }
+        addColSetter(curPath, colSetter)
+
+    } { refNs =>
+      val refAttr   = attr
+      val joinTable = ss(ns, refAttr, refNs)
+      val curPath   = if (paramIndexes.nonEmpty) curRefPath else List("0", ns)
+      val joinPath  = curPath :+ joinTable
+
+      // join table with single row (treated as normal insert since there's only 1 join per row)
+      val (id1, id2) = if (ns == refNs)
+        (ss(ns, "1_id"), ss(refNs, "2_id"))
+      else
+        (ss(ns, "id"), ss(refNs, "id"))
+      // When insertion order is reversed, this join table will be set after left and right has been inserted
+      inserts = (joinPath, List((id1, ""), (id2, ""))) +: inserts
+
+      if (paramIndexes.isEmpty) {
+        // If current namespace has no attributes, then add an empty row with
+        // default null values (only to be referenced as the left side of the join table)
+        val emptyRowSetter: Setter = (ps: PS, _: IdsMap, _: RowIndex) => ps.addBatch()
+        addColSetter(curPath, emptyRowSetter)
+        inserts = inserts :+ (curRefPath, List())
+      }
+
+      (tpl: Product) => {
+        // Empty row if no attributes in namespace in order to have an id for join table left side
+        if (!paramIndexes.exists { case ((path, _), _) => path == curPath }) {
+          // If current namespace has no attributes, then add an empty row with
+          // default null values (only to be referenced as the left side of the join table)
+          val emptyRowSetter: Setter = (ps: PS, _: IdsMap, _: RowIndex) => ps.addBatch()
+          addColSetter(curPath, emptyRowSetter)
+        }
+
+        // Join table setter
+        val refIds             = tpl.productElement(tplIndex).asInstanceOf[Seq[String]]
+        val joinSetter: Setter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
+          val id = idsMap(curPath)(rowIndex)
+          refIds.foreach { refId =>
+            ps.setLong(1, id)
+            ps.setLong(2, refId.toLong)
+            ps.addBatch()
+          }
+        }
+        addColSetter(joinPath, joinSetter)
+      }
+    }
+  }
+
+  override protected def addSeqOpt[T](
+    ns: String,
+    attr: String,
+    refNs: Option[String],
+    tplIndex: Int,
+    transformValue: T => Any,
+    exts: List[String] = Nil,
+    seq2array: Seq[T] => Array[AnyRef],
+    value2json: (StringBuffer, T) => StringBuffer
+  ): Product => Unit = {
+    refNs.fold {
+      val (curPath, paramIndex) = getParamIndex(attr)
+      (tpl: Product) => {
+        val colSetter = tpl.productElement(tplIndex) match {
+          case Some(seq: Seq[_]) =>
+            val array = seq2array(seq.asInstanceOf[Seq[T]])
+            (ps: PS, _: IdsMap, _: RowIndex) => {
+              val conn = ps.getConnection
+              val arr  = conn.createArrayOf(exts(1), array)
+              ps.setArray(paramIndex, arr)
+            }
+
+          case None =>
+            (ps: PS, _: IdsMap, _: RowIndex) =>
+              ps.setNull(paramIndex, java.sql.Types.NULL)
+        }
+        addColSetter(curPath, colSetter)
+      }
+    } { refNs =>
+      val refAttr   = attr
+      val joinTable = ss(ns, refAttr, refNs)
+      val curPath   = curRefPath
+      val joinPath  = curPath :+ joinTable
+
+      // join table with single row (treated as normal insert since there's only 1 join per row)
+      val (id1, id2) = if (ns == refNs)
+        (ss(ns, "1_id"), ss(refNs, "2_id"))
+      else
+        (ss(ns, "id"), ss(refNs, "id"))
+      // When insertion order is reversed, this join table will be set after left and right has been inserted
+      inserts = (joinPath, List((id1, ""), (id2, ""))) +: inserts
+
+      (tpl: Product) => {
+        val colSetter = tpl.productElement(tplIndex) match {
+          case Some(seq: Seq[_]) =>
+            if (seq.nonEmpty) {
+              // Empty row if no attributes in namespace in order to have an id for join table
+              if (!paramIndexes.exists { case ((path, _), _) => path == curPath }) {
+                // If current namespace has no attributes, then add an empty row with
+                // default null values (only to be referenced as the left side of the join table)
+                val emptyRowSetter: Setter = (ps: PS, _: IdsMap, _: RowIndex) => ps.addBatch()
+                addColSetter(curPath, emptyRowSetter)
+              }
+
+              // Join table setter
+              val refIds = seq.asInstanceOf[Seq[String]]
+              (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
+                val id = idsMap(curPath)(rowIndex)
+                refIds.foreach { refId =>
+                  ps.setLong(1, id)
+                  ps.setLong(2, refId.toLong)
+                  ps.addBatch()
+                }
+              }
+            } else {
+              (_: PS, _: IdsMap, _: RowIndex) => ()
+            }
+
+          case None => (_: PS, _: IdsMap, _: RowIndex) => ()
+        }
+        addColSetter(joinPath, colSetter)
+      }
+    }
+  }
+
+  override protected def addByteArray(
+    ns: String,
+    attr: String,
+    tplIndex: Int,
+  ): Product => Unit = {
+    val (curPath, paramIndex) = getParamIndex(attr)
+    (tpl: Product) => {
+      val colSetter = tpl.productElement(tplIndex) match {
+        case byteArray: Array[_] if byteArray.nonEmpty =>
+          (ps: PS, _: IdsMap, _: RowIndex) => ps.setBytes(paramIndex, byteArray.asInstanceOf[Array[Byte]])
+
+        case Some(byteArray: Array[_]) if !byteArray.isEmpty =>
+          (ps: PS, _: IdsMap, _: RowIndex) => ps.setBytes(paramIndex, byteArray.asInstanceOf[Array[Byte]])
+
+        case _ => (ps: PS, _: IdsMap, _: RowIndex) => ps.setNull(paramIndex, 0)
+      }
+      addColSetter(curPath, colSetter)
     }
   }
 

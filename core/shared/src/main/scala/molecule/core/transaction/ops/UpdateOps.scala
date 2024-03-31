@@ -8,41 +8,53 @@ trait UpdateOps extends Action2Data with BaseOps {
   def updateOne[T](
     ns: String,
     attr: String,
-    vs: Seq[T],
     owner: Boolean,
+    vs: Seq[T],
     transformValue: T => Any,
   ): Unit
 
   def updateSetEq[T](
     ns: String,
     attr: String,
-    set: Set[T],
     refNs: Option[String],
     owner: Boolean,
+    set: Set[T],
     transformValue: T => Any,
-    set2array: Set[T] => Array[AnyRef],
     exts: List[String],
+    set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit
+
+  def updateSetEq2[T](
+    ns: String,
+    attr: String,
+    refNs: Option[String],
+    owner: Boolean,
+    set: Set[T],
+    transformValue: T => Any,
+    exts: List[String],
+    set2array: Set[T] => Array[AnyRef],
+    value2json: (StringBuffer, T) => StringBuffer
+  ): Unit = ???
 
   def updateSetAdd[T](
     ns: String,
     attr: String,
-    set: Set[T],
     refNs: Option[String],
     owner: Boolean,
+    set: Set[T],
     transformValue: T => Any,
-    set2array: Set[T] => Array[AnyRef],
     exts: List[String],
+    set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit
 
   def updateSetRemove[T](
     ns: String,
     attr: String,
-    set: Set[T],
     refNs: Option[String],
     owner: Boolean,
+    set: Set[T],
     transformValue: T => Any,
     exts: List[String],
     one2json: T => String
@@ -51,75 +63,75 @@ trait UpdateOps extends Action2Data with BaseOps {
   def updateSeqEq[T](
     ns: String,
     attr: String,
-    seq: Seq[T],
     refNs: Option[String],
     owner: Boolean,
+    seq: Seq[T],
     transformValue: T => Any,
-    seq2array: Seq[T] => Array[AnyRef],
     exts: List[String],
+    seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
-  ): Unit = ???
-
-  def updateByteArray(
-    ns: String,
-    attr: String,
-    byteArrays: Array[Byte],
   ): Unit = ???
 
   def updateSeqAdd[T](
     ns: String,
     attr: String,
-    seq: Seq[T],
     refNs: Option[String],
     owner: Boolean,
+    seq: Seq[T],
     transformValue: T => Any,
-    seq2array: Seq[T] => Array[AnyRef],
     exts: List[String],
+    seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = ???
 
   def updateSeqRemove[T](
     ns: String,
     attr: String,
-    seq: Seq[T],
     refNs: Option[String],
     owner: Boolean,
+    seq: Seq[T],
     transformValue: T => Any,
     exts: List[String],
     one2json: T => String
   ): Unit = ???
 
+  def updateByteArray(
+    ns: String,
+    attr: String,
+    byteArray: Array[Byte],
+  ): Unit = ???
+
   def updateMapEq[T](
     ns: String,
     attr: String,
-    map: Map[String, T],
-    noValue: Boolean,
     refNs: Option[String],
+    noValue: Boolean,
     owner: Boolean,
+    map: Map[String, T],
     transformValue: T => Any,
-    //    set2array: Set[Any] => Array[AnyRef],
     //    exts: List[String],
+    //    set2array: Set[Any] => Array[AnyRef],
     //    value2json: (StringBuffer, T) => StringBuffer
   ): Unit = ???
 
   def updateMapAdd[T](
     ns: String,
     attr: String,
-    map: Map[String, T],
     refNs: Option[String],
     owner: Boolean,
+    map: Map[String, T],
     transformValue: T => Any,
-    //    set2array: Set[Any] => Array[AnyRef],
     //    exts: List[String],
+    //    set2array: Set[Any] => Array[AnyRef],
     //    value2json: (StringBuffer, T) => StringBuffer
   ): Unit = ???
 
   def updateMapRemove[T](
     ns: String,
     attr: String,
-    map: Map[String, T],
     refNs: Option[String],
     owner: Boolean,
+    map: Map[String, T],
     transformValue: T => Any,
     //    exts: List[String],
     //    one2json: T => String

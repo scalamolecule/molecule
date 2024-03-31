@@ -104,8 +104,8 @@ trait Update_datomic
   override def updateOne[T](
     ns: String,
     attr: String,
-    vs: Seq[T],
     owner: Boolean,
+    vs: Seq[T],
     transformValue: T => Any,
   ): Unit = {
     if (isUpdate) {
@@ -125,12 +125,12 @@ trait Update_datomic
   override def updateSetEq[T](
     ns: String,
     attr: String,
-    set: Set[T],
     refNs: Option[String],
     owner: Boolean,
+    set: Set[T],
     transformValue: T => Any,
-    set2array: Set[T] => Array[AnyRef],
     exts: List[String],
+    set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     if (isUpdate) {
@@ -147,12 +147,12 @@ trait Update_datomic
   override def updateSetAdd[T](
     ns: String,
     attr: String,
-    set: Set[T],
     refNs: Option[String],
     owner: Boolean,
+    set: Set[T],
     transformValue: T => Any,
-    set2array: Set[T] => Array[AnyRef],
     exts: List[String],
+    set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     if(set.nonEmpty){
@@ -163,9 +163,9 @@ trait Update_datomic
   override def updateSetRemove[T](
     ns: String,
     attr: String,
-    set: Set[T],
     refNs: Option[String],
     owner: Boolean,
+    set: Set[T],
     transformValue: T => Any,
     exts: List[String],
     one2json: T => String
@@ -179,12 +179,12 @@ trait Update_datomic
   override def updateSeqEq[T](
     ns: String,
     attr: String,
-    seq: Seq[T],
     refNs: Option[String],
     owner: Boolean,
+    seq: Seq[T],
     transformValue: T => Any,
-    seq2array: Seq[T] => Array[AnyRef],
     exts: List[String],
+    seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     if (isUpdate) {
@@ -198,23 +198,15 @@ trait Update_datomic
     }
   }
 
-  override def updateByteArray(ns: String, attr: String, byteArray: Array[Byte]): Unit = {
-    if(byteArray.nonEmpty){
-      data += (("add", ns, attr, Seq(byteArray), true, ""))
-    } else {
-      data += (("retract", ns, attr, Nil, true, "seq"))
-    }
-  }
-
   override def updateSeqAdd[T](
     ns: String,
     attr: String,
-    seq: Seq[T],
     refNs: Option[String],
     owner: Boolean,
+    seq: Seq[T],
     transformValue: T => Any,
-    seq2array: Seq[T] => Array[AnyRef],
     exts: List[String],
+    seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     if(seq.nonEmpty){
@@ -225,9 +217,9 @@ trait Update_datomic
   override def updateSeqRemove[T](
     ns: String,
     attr: String,
-    seq: Seq[T],
     refNs: Option[String],
     owner: Boolean,
+    seq: Seq[T],
     transformValue: T => Any,
     exts: List[String],
     one2json: T => String
@@ -237,14 +229,22 @@ trait Update_datomic
     }
   }
 
+  override def updateByteArray(ns: String, attr: String, byteArray: Array[Byte]): Unit = {
+    if(byteArray.nonEmpty){
+      data += (("add", ns, attr, Seq(byteArray), true, ""))
+    } else {
+      data += (("retract", ns, attr, Nil, true, "seq"))
+    }
+  }
+
 
   override def updateMapEq[T](
     ns: String,
     attr: String,
-    map: Map[String, T],
-    noValue: Boolean,
     refNs: Option[String],
+    noValue: Boolean,
     owner: Boolean,
+    map: Map[String, T],
     transformValue: T => Any,
   ): Unit = {
     if (isUpdate) {
@@ -264,9 +264,9 @@ trait Update_datomic
   override def updateMapAdd[T](
     ns: String,
     attr: String,
-    map: Map[String, T],
     refNs: Option[String],
     owner: Boolean,
+    map: Map[String, T],
     transformValue: T => Any,
   ): Unit = {
     if (map.nonEmpty) {
@@ -280,9 +280,9 @@ trait Update_datomic
   override def updateMapRemove[T](
     ns: String,
     attr: String,
-    map: Map[String, T],
     refNs: Option[String],
     owner: Boolean,
+    map: Map[String, T],
     transformValue: T => Any,
   ): Unit = {
     if (map.nonEmpty) {

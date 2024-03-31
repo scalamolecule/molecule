@@ -132,7 +132,7 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
                  |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords$ownerStr)\"\"\"""".stripMargin
           case _     =>
               s"""def format(v: $baseTpe): String = $format
-                 |      def vss: String = vs.map(format).mkString("Some(Array(", ", ", "))")
+                 |      def vss: String = vs.map(format).mkString("Array(", ", ", ")")
                  |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords$ownerStr)\"\"\"""".stripMargin
         }
         case "Seq" => mode match {

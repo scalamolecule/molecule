@@ -167,7 +167,6 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
 
   protected def setOpt[T: ClassTag](
     attr: Attr,
-//    optSet: Option[Set[T]],
     resOpt: ResSetOpt[T],
     res: ResSet[T]
   ): Unit = {

@@ -18,9 +18,9 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
   override def updateSetRemove[T](
     ns: String,
     attr: String,
-    set: Set[T],
     refNs: Option[String],
     owner: Boolean,
+    set: Set[T],
     transformValue: T => Any,
     exts: List[String],
     one2json: T => String
