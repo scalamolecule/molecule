@@ -37,7 +37,7 @@ trait FilterMap_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.insert(0).transact // Entity without map attribute
           _ <- Ns.i.instantMap.insert(List(a, b)).transact
 
-          _ <- Ns.i.a1.instantMap("-").query.get.map(_ ==> Nil) // When no map is saved
+          _ <- Ns.i.a1.instantMap("_").query.get.map(_ ==> Nil) // When no map is saved
           _ <- Ns.i.a1.instantMap("a").query.get.map(_ ==> List((1, instant1), (2, instant2)))
           _ <- Ns.i.a1.instantMap("b").query.get.map(_ ==> List((1, instant2), (2, instant3)))
           _ <- Ns.i.a1.instantMap("c").query.get.map(_ ==> List((2, instant4)))
@@ -70,7 +70,7 @@ trait FilterMap_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         for {
           _ <- Ns.i.instantMap_?.insert(a, b, c).transact
 
-          _ <- Ns.i.a1.instantMap_?("-").query.get.map(_ ==> List((1, None), (2, None), (3, None)))
+          _ <- Ns.i.a1.instantMap_?("_").query.get.map(_ ==> List((1, None), (2, None), (3, None)))
           _ <- Ns.i.a1.instantMap_?("a").query.get.map(_ ==> List((1, Some(instant1)), (2, Some(instant2)), (3, None)))
           _ <- Ns.i.a1.instantMap_?("b").query.get.map(_ ==> List((1, Some(instant2)), (2, Some(instant3)), (3, None)))
           _ <- Ns.i.a1.instantMap_?("c").query.get.map(_ ==> List((1, None), (2, Some(instant4)), (3, None)))
@@ -131,7 +131,7 @@ trait FilterMap_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.instantMap_(List("b")).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.instantMap_(List("c")).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.instantMap_(List("a", "c")).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.instantMap_(List("a", "-")).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.instantMap_(List("a", "_")).query.get.map(_ ==> List(1))
 
           // Empty Seq of keys matches nothing
           _ <- Ns.i.a1.instantMap_(List.empty[String]).query.get.map(_ ==> Nil)
@@ -140,12 +140,12 @@ trait FilterMap_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.instantMap_().query.get.map(_ ==> List(0))
 
           // Combine with retrieval
-          _ <- Ns.i.a1.instantMap.instantMap_("-").query.get.map(_ ==> Nil)
+          _ <- Ns.i.a1.instantMap.instantMap_("_").query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.instantMap.instantMap_("a").query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.instantMap.instantMap_("b").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.instantMap.instantMap_("c").query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.instantMap.instantMap_("a", "c").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
-          _ <- Ns.i.a1.instantMap.instantMap_("a", "-").query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.instantMap.instantMap_("a", "_").query.get.map(_ ==> List((1, Map(a1, b2))))
         } yield ()
       }
 
@@ -172,18 +172,18 @@ trait FilterMap_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.instantMap_.not(List("b")).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.instantMap_.not(List("c")).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.instantMap_.not(List("a", "c")).query.get.map(_ ==> Nil)
-          _ <- Ns.i.a1.instantMap_.not(List("a", "-")).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.instantMap_.not(List("a", "_")).query.get.map(_ ==> List(2))
 
           // Negating empty Seq of keys matches all
           _ <- Ns.i.a1.instantMap_.not(List.empty[String]).query.get.map(_ ==> List(1, 2))
 
           // Combine with retrieval
-          _ <- Ns.i.a1.instantMap.instantMap_.not("-").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
+          _ <- Ns.i.a1.instantMap.instantMap_.not("_").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.instantMap.instantMap_.not("a").query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.instantMap.instantMap_.not("b").query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.instantMap.instantMap_.not("c").query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.instantMap.instantMap_.not("a", "c").query.get.map(_ ==> Nil)
-          _ <- Ns.i.a1.instantMap.instantMap_.not("a", "-").query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.instantMap.instantMap_.not("a", "_").query.get.map(_ ==> List((2, Map(b3, c4))))
         } yield ()
       }
 
@@ -201,18 +201,24 @@ trait FilterMap_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.instantMap_.has(instant2).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.instantMap_.has(instant3).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.instantMap_.has(instant4).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.instantMap_.has(instant0, instant1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.instantMap_.has(instant1, instant2).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.instantMap_.has(instant2, instant3).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.instantMap_.has(instant3, instant4).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.instantMap_.has(instant4, instant5).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.instantMap_.has(instant5, instant6).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.instantMap_.has(List(instant0)).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.instantMap_.has(List(instant1)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.instantMap_.has(List(instant2)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.instantMap_.has(List(instant3)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.instantMap_.has(List(instant4)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.instantMap_.has(List(instant0, instant1)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.instantMap_.has(List(instant1, instant2)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.instantMap_.has(List(instant2, instant3)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.instantMap_.has(List(instant3, instant4)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.instantMap_.has(List(instant4, instant5)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.instantMap_.has(List(instant5, instant6)).query.get.map(_ ==> List())
 
           // Empty Seq of values matches nothing
           _ <- Ns.i.a1.instantMap_.has(List.empty[Instant]).query.get.map(_ ==> Nil)
@@ -223,9 +229,12 @@ trait FilterMap_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.instantMap.instantMap_.has(instant2).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.instantMap.instantMap_.has(instant3).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.instantMap.instantMap_.has(instant4).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.instantMap.instantMap_.has(instant0, instant1).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.instantMap.instantMap_.has(instant1, instant2).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.instantMap.instantMap_.has(instant2, instant3).query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.instantMap.instantMap_.has(instant3, instant4).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.instantMap.instantMap_.has(instant4, instant5).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.instantMap.instantMap_.has(instant5, instant6).query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -243,18 +252,24 @@ trait FilterMap_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.instantMap_.hasNo(instant2).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.instantMap_.hasNo(instant3).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.instantMap_.hasNo(instant4).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.instantMap_.hasNo(instant0, instant1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.instantMap_.hasNo(instant1, instant2).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.instantMap_.hasNo(instant2, instant3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.instantMap_.hasNo(instant3, instant4).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.instantMap_.hasNo(instant4, instant5).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.instantMap_.hasNo(instant5, instant6).query.get.map(_ ==> List(1, 2))
           // Same as
           _ <- Ns.i.a1.instantMap_.hasNo(List(instant0)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.instantMap_.hasNo(List(instant1)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.instantMap_.hasNo(List(instant2)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.instantMap_.hasNo(List(instant3)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.instantMap_.hasNo(List(instant4)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.instantMap_.hasNo(List(instant0, instant1)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.instantMap_.hasNo(List(instant1, instant2)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.instantMap_.hasNo(List(instant2, instant3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.instantMap_.hasNo(List(instant3, instant4)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.instantMap_.hasNo(List(instant4, instant5)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.instantMap_.hasNo(List(instant5, instant6)).query.get.map(_ ==> List(1, 2))
 
           // Negating empty Seq of values matches all
           _ <- Ns.i.a1.instantMap_.hasNo(List.empty[Instant]).query.get.map(_ ==> List(1, 2))
@@ -265,9 +280,12 @@ trait FilterMap_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.instantMap.instantMap_.hasNo(instant2).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.instantMap.instantMap_.hasNo(instant3).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.instantMap.instantMap_.hasNo(instant4).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.instantMap.instantMap_.hasNo(instant0, instant1).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.instantMap.instantMap_.hasNo(instant1, instant2).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.instantMap.instantMap_.hasNo(instant2, instant3).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.instantMap.instantMap_.hasNo(instant3, instant4).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.instantMap.instantMap_.hasNo(instant4, instant5).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.instantMap.instantMap_.hasNo(instant5, instant6).query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
         } yield ()
       }
     }

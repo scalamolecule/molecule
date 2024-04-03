@@ -129,7 +129,7 @@ trait Save_datomic
       map.foreach { case (k, v) =>
         val ref = newId
         appendStmt(add, e, a, ref)
-        appendStmt(add, ref, a_k, k.asInstanceOf[AnyRef])
+        appendStmt(add, ref, a_k, validKey(k).asInstanceOf[AnyRef])
         appendStmt(add, ref, a_v, transformValue(v).asInstanceOf[AnyRef])
         i += 1
       }

@@ -15,6 +15,7 @@ import molecule.core.transaction.ops.UpdateOps
 import molecule.core.validation.TxModelValidation
 import molecule.datalog.core.query.Model2DatomicQuery
 import molecule.datalog.datomic.facade.DatomicConn_JVM
+import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 trait Update_datomic
@@ -155,7 +156,7 @@ trait Update_datomic
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    if(set.nonEmpty){
+    if (set.nonEmpty) {
       data += (("add", ns, attr, set.map(v => transformValue(v).asInstanceOf[AnyRef]).toSeq, false, ""))
     }
   }
@@ -191,7 +192,7 @@ trait Update_datomic
       val dummyFilterAttr = AttrOneTacInt(ns, attr)
       filterElements = filterElements :+ dummyFilterAttr
     }
-    if(seq.nonEmpty){
+    if (seq.nonEmpty) {
       data += (("add", ns, attr, seq.map(v => transformValue(v).asInstanceOf[AnyRef]), true, "seq"))
     } else {
       data += (("retract", ns, attr, Nil, true, "seq"))
@@ -209,7 +210,7 @@ trait Update_datomic
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    if(seq.nonEmpty){
+    if (seq.nonEmpty) {
       data += (("add", ns, attr, seq.map(v => transformValue(v).asInstanceOf[AnyRef]), false, "seq"))
     }
   }
@@ -230,7 +231,7 @@ trait Update_datomic
   }
 
   override def updateByteArray(ns: String, attr: String, byteArray: Array[Byte]): Unit = {
-    if(byteArray.nonEmpty){
+    if (byteArray.nonEmpty) {
       data += (("add", ns, attr, Seq(byteArray), true, ""))
     } else {
       data += (("retract", ns, attr, Nil, true, "seq"))
@@ -256,7 +257,7 @@ trait Update_datomic
       data += (("retract", ns, attr, Nil, true, "map"))
     } else {
       val pairs = map.map { case (k, v) =>
-        (k, transformValue(v).asInstanceOf[AnyRef])
+        (validKey(k), transformValue(v).asInstanceOf[AnyRef])
       }.toSeq
       data += (("add", ns, attr, pairs, true, "map"))
     }
@@ -274,7 +275,7 @@ trait Update_datomic
   ): Unit = {
     if (map.nonEmpty) {
       val pairs = map.map { case (k, v) =>
-        (k, transformValue(v).asInstanceOf[AnyRef])
+        (validKey(k), transformValue(v).asInstanceOf[AnyRef])
       }.toSeq
       data += (("add", ns, attr, pairs, false, "map"))
     }
@@ -402,24 +403,36 @@ trait Update_datomic
       }
 
       def addToMap(ns: String, attr: String, newValues: Seq[AnyRef], retractCur: Boolean) = {
-        val a         = kw(ns, attr)
-        val id1       = id
-        var nextIndex = 0
-        Peer.q("[:find ?ref :in $ ?e ?a :where [?e ?a ?ref]]", db, id1, a).forEach { row =>
+        val a      = kw(ns, attr)
+        val a_k    = kw(s"$ns.$attr", "k_")
+        val a_v    = kw(s"$ns.$attr", "v_")
+        val id1    = id
+        val curMap = mutable.Map.empty[AnyRef, AnyRef] // key -> ref
+        Peer.q(
+          s"""[:find ?ref ?k
+             | :in $$ ?e ?a
+             | :where [?e ?a ?ref]
+             |        [?ref $a_k ?k]
+             | ]""".stripMargin, db, id1, a).forEach { row =>
+
           if (retractCur) {
             addRetractEntityStmt(row.get(0))
           } else {
-            nextIndex += 1
+            val (ref, key) = (row.get(0), row.get(1))
+            curMap(key) = ref
           }
         }
         if (addNewValues || entity.get(a) != null) {
-          val a_i = kw(s"$ns.$attr", "k_")
-          val a_v = kw(s"$ns.$attr", "v_")
           newValues.asInstanceOf[Seq[(AnyRef, AnyRef)]].foreach { case (k, v) =>
-            val ref = newId
-            appendStmt(add, id, a, ref)
-            appendStmt(add, ref, a_i, k)
-            appendStmt(add, ref, a_v, v)
+            curMap.get(k).fold {
+              val ref = newId
+              appendStmt(add, id, a, ref)
+              appendStmt(add, ref, a_k, k)
+              appendStmt(add, ref, a_v, v)
+            } { ref =>
+              // Only update value if key is already saved
+              appendStmt(add, ref, a_v, v)
+            }
           }
         }
       }
@@ -497,7 +510,6 @@ trait Update_datomic
       }
     }
   }
-
 
   private def uniqueIds(
     filterAttr: AttrOneTac,

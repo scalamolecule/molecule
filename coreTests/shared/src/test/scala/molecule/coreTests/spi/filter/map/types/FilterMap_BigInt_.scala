@@ -36,7 +36,7 @@ trait FilterMap_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.insert(0).transact // Entity without map attribute
           _ <- Ns.i.bigIntMap.insert(List(a, b)).transact
 
-          _ <- Ns.i.a1.bigIntMap("-").query.get.map(_ ==> Nil) // When no map is saved
+          _ <- Ns.i.a1.bigIntMap("_").query.get.map(_ ==> Nil) // When no map is saved
           _ <- Ns.i.a1.bigIntMap("a").query.get.map(_ ==> List((1, bigInt1), (2, bigInt2)))
           _ <- Ns.i.a1.bigIntMap("b").query.get.map(_ ==> List((1, bigInt2), (2, bigInt3)))
           _ <- Ns.i.a1.bigIntMap("c").query.get.map(_ ==> List((2, bigInt4)))
@@ -69,7 +69,7 @@ trait FilterMap_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         for {
           _ <- Ns.i.bigIntMap_?.insert(a, b, c).transact
 
-          _ <- Ns.i.a1.bigIntMap_?("-").query.get.map(_ ==> List((1, None), (2, None), (3, None)))
+          _ <- Ns.i.a1.bigIntMap_?("_").query.get.map(_ ==> List((1, None), (2, None), (3, None)))
           _ <- Ns.i.a1.bigIntMap_?("a").query.get.map(_ ==> List((1, Some(bigInt1)), (2, Some(bigInt2)), (3, None)))
           _ <- Ns.i.a1.bigIntMap_?("b").query.get.map(_ ==> List((1, Some(bigInt2)), (2, Some(bigInt3)), (3, None)))
           _ <- Ns.i.a1.bigIntMap_?("c").query.get.map(_ ==> List((1, None), (2, Some(bigInt4)), (3, None)))
@@ -130,7 +130,7 @@ trait FilterMap_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.bigIntMap_(List("b")).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.bigIntMap_(List("c")).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.bigIntMap_(List("a", "c")).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.bigIntMap_(List("a", "-")).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.bigIntMap_(List("a", "_")).query.get.map(_ ==> List(1))
 
           // Empty Seq of keys matches nothing
           _ <- Ns.i.a1.bigIntMap_(List.empty[String]).query.get.map(_ ==> Nil)
@@ -139,12 +139,12 @@ trait FilterMap_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.bigIntMap_().query.get.map(_ ==> List(0))
 
           // Combine with retrieval
-          _ <- Ns.i.a1.bigIntMap.bigIntMap_("-").query.get.map(_ ==> Nil)
+          _ <- Ns.i.a1.bigIntMap.bigIntMap_("_").query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.bigIntMap.bigIntMap_("a").query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.bigIntMap.bigIntMap_("b").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.bigIntMap.bigIntMap_("c").query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.bigIntMap.bigIntMap_("a", "c").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
-          _ <- Ns.i.a1.bigIntMap.bigIntMap_("a", "-").query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.bigIntMap.bigIntMap_("a", "_").query.get.map(_ ==> List((1, Map(a1, b2))))
         } yield ()
       }
 
@@ -171,18 +171,18 @@ trait FilterMap_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.bigIntMap_.not(List("b")).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.bigIntMap_.not(List("c")).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.bigIntMap_.not(List("a", "c")).query.get.map(_ ==> Nil)
-          _ <- Ns.i.a1.bigIntMap_.not(List("a", "-")).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.bigIntMap_.not(List("a", "_")).query.get.map(_ ==> List(2))
 
           // Negating empty Seq of keys matches all
           _ <- Ns.i.a1.bigIntMap_.not(List.empty[String]).query.get.map(_ ==> List(1, 2))
 
           // Combine with retrieval
-          _ <- Ns.i.a1.bigIntMap.bigIntMap_.not("-").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
+          _ <- Ns.i.a1.bigIntMap.bigIntMap_.not("_").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.bigIntMap.bigIntMap_.not("a").query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.bigIntMap.bigIntMap_.not("b").query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.bigIntMap.bigIntMap_.not("c").query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.bigIntMap.bigIntMap_.not("a", "c").query.get.map(_ ==> Nil)
-          _ <- Ns.i.a1.bigIntMap.bigIntMap_.not("a", "-").query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.bigIntMap.bigIntMap_.not("a", "_").query.get.map(_ ==> List((2, Map(b3, c4))))
         } yield ()
       }
 
@@ -200,18 +200,24 @@ trait FilterMap_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.bigIntMap_.has(bigInt2).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.bigIntMap_.has(bigInt3).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.bigIntMap_.has(bigInt4).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.bigIntMap_.has(bigInt0, bigInt1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.bigIntMap_.has(bigInt1, bigInt2).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.bigIntMap_.has(bigInt2, bigInt3).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.bigIntMap_.has(bigInt3, bigInt4).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.bigIntMap_.has(bigInt4, bigInt5).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.bigIntMap_.has(bigInt5, bigInt6).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.bigIntMap_.has(List(bigInt0)).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.bigIntMap_.has(List(bigInt1)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.bigIntMap_.has(List(bigInt2)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.bigIntMap_.has(List(bigInt3)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.bigIntMap_.has(List(bigInt4)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.bigIntMap_.has(List(bigInt0, bigInt1)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.bigIntMap_.has(List(bigInt1, bigInt2)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.bigIntMap_.has(List(bigInt2, bigInt3)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.bigIntMap_.has(List(bigInt3, bigInt4)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.bigIntMap_.has(List(bigInt4, bigInt5)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.bigIntMap_.has(List(bigInt5, bigInt6)).query.get.map(_ ==> List())
 
           // Empty Seq of values matches nothing
           _ <- Ns.i.a1.bigIntMap_.has(List.empty[BigInt]).query.get.map(_ ==> Nil)
@@ -222,9 +228,12 @@ trait FilterMap_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.bigIntMap.bigIntMap_.has(bigInt2).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.bigIntMap.bigIntMap_.has(bigInt3).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.bigIntMap.bigIntMap_.has(bigInt4).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.bigIntMap.bigIntMap_.has(bigInt0, bigInt1).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.bigIntMap.bigIntMap_.has(bigInt1, bigInt2).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.bigIntMap.bigIntMap_.has(bigInt2, bigInt3).query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.bigIntMap.bigIntMap_.has(bigInt3, bigInt4).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.bigIntMap.bigIntMap_.has(bigInt4, bigInt5).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.bigIntMap.bigIntMap_.has(bigInt5, bigInt6).query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -242,18 +251,24 @@ trait FilterMap_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.bigIntMap_.hasNo(bigInt2).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.bigIntMap_.hasNo(bigInt3).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.bigIntMap_.hasNo(bigInt4).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.bigIntMap_.hasNo(bigInt0, bigInt1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.bigIntMap_.hasNo(bigInt1, bigInt2).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.bigIntMap_.hasNo(bigInt2, bigInt3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigIntMap_.hasNo(bigInt3, bigInt4).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.bigIntMap_.hasNo(bigInt4, bigInt5).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.bigIntMap_.hasNo(bigInt5, bigInt6).query.get.map(_ ==> List(1, 2))
           // Same as
           _ <- Ns.i.a1.bigIntMap_.hasNo(List(bigInt0)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.bigIntMap_.hasNo(List(bigInt1)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.bigIntMap_.hasNo(List(bigInt2)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.bigIntMap_.hasNo(List(bigInt3)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.bigIntMap_.hasNo(List(bigInt4)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.bigIntMap_.hasNo(List(bigInt0, bigInt1)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.bigIntMap_.hasNo(List(bigInt1, bigInt2)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.bigIntMap_.hasNo(List(bigInt2, bigInt3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigIntMap_.hasNo(List(bigInt3, bigInt4)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.bigIntMap_.hasNo(List(bigInt4, bigInt5)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.bigIntMap_.hasNo(List(bigInt5, bigInt6)).query.get.map(_ ==> List(1, 2))
 
           // Negating empty Seq of values matches all
           _ <- Ns.i.a1.bigIntMap_.hasNo(List.empty[BigInt]).query.get.map(_ ==> List(1, 2))
@@ -264,9 +279,12 @@ trait FilterMap_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.bigIntMap.bigIntMap_.hasNo(bigInt2).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.bigIntMap.bigIntMap_.hasNo(bigInt3).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.bigIntMap.bigIntMap_.hasNo(bigInt4).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.bigIntMap.bigIntMap_.hasNo(bigInt0, bigInt1).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.bigIntMap.bigIntMap_.hasNo(bigInt1, bigInt2).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.bigIntMap.bigIntMap_.hasNo(bigInt2, bigInt3).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.bigIntMap.bigIntMap_.hasNo(bigInt3, bigInt4).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.bigIntMap.bigIntMap_.hasNo(bigInt4, bigInt5).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.bigIntMap.bigIntMap_.hasNo(bigInt5, bigInt6).query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
         } yield ()
       }
     }

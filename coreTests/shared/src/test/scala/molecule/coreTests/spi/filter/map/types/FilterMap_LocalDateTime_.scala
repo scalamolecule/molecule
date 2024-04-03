@@ -37,7 +37,7 @@ trait FilterMap_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
           _ <- Ns.i.insert(0).transact // Entity without map attribute
           _ <- Ns.i.localDateTimeMap.insert(List(a, b)).transact
 
-          _ <- Ns.i.a1.localDateTimeMap("-").query.get.map(_ ==> Nil) // When no map is saved
+          _ <- Ns.i.a1.localDateTimeMap("_").query.get.map(_ ==> Nil) // When no map is saved
           _ <- Ns.i.a1.localDateTimeMap("a").query.get.map(_ ==> List((1, localDateTime1), (2, localDateTime2)))
           _ <- Ns.i.a1.localDateTimeMap("b").query.get.map(_ ==> List((1, localDateTime2), (2, localDateTime3)))
           _ <- Ns.i.a1.localDateTimeMap("c").query.get.map(_ ==> List((2, localDateTime4)))
@@ -70,7 +70,7 @@ trait FilterMap_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
         for {
           _ <- Ns.i.localDateTimeMap_?.insert(a, b, c).transact
 
-          _ <- Ns.i.a1.localDateTimeMap_?("-").query.get.map(_ ==> List((1, None), (2, None), (3, None)))
+          _ <- Ns.i.a1.localDateTimeMap_?("_").query.get.map(_ ==> List((1, None), (2, None), (3, None)))
           _ <- Ns.i.a1.localDateTimeMap_?("a").query.get.map(_ ==> List((1, Some(localDateTime1)), (2, Some(localDateTime2)), (3, None)))
           _ <- Ns.i.a1.localDateTimeMap_?("b").query.get.map(_ ==> List((1, Some(localDateTime2)), (2, Some(localDateTime3)), (3, None)))
           _ <- Ns.i.a1.localDateTimeMap_?("c").query.get.map(_ ==> List((1, None), (2, Some(localDateTime4)), (3, None)))
@@ -131,7 +131,7 @@ trait FilterMap_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
           _ <- Ns.i.a1.localDateTimeMap_(List("b")).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.localDateTimeMap_(List("c")).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.localDateTimeMap_(List("a", "c")).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.localDateTimeMap_(List("a", "-")).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.localDateTimeMap_(List("a", "_")).query.get.map(_ ==> List(1))
 
           // Empty Seq of keys matches nothing
           _ <- Ns.i.a1.localDateTimeMap_(List.empty[String]).query.get.map(_ ==> Nil)
@@ -140,12 +140,12 @@ trait FilterMap_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
           _ <- Ns.i.a1.localDateTimeMap_().query.get.map(_ ==> List(0))
 
           // Combine with retrieval
-          _ <- Ns.i.a1.localDateTimeMap.localDateTimeMap_("-").query.get.map(_ ==> Nil)
+          _ <- Ns.i.a1.localDateTimeMap.localDateTimeMap_("_").query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.localDateTimeMap.localDateTimeMap_("a").query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.localDateTimeMap.localDateTimeMap_("b").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.localDateTimeMap.localDateTimeMap_("c").query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.localDateTimeMap.localDateTimeMap_("a", "c").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
-          _ <- Ns.i.a1.localDateTimeMap.localDateTimeMap_("a", "-").query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.localDateTimeMap.localDateTimeMap_("a", "_").query.get.map(_ ==> List((1, Map(a1, b2))))
         } yield ()
       }
 
@@ -172,18 +172,18 @@ trait FilterMap_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
           _ <- Ns.i.a1.localDateTimeMap_.not(List("b")).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.localDateTimeMap_.not(List("c")).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.localDateTimeMap_.not(List("a", "c")).query.get.map(_ ==> Nil)
-          _ <- Ns.i.a1.localDateTimeMap_.not(List("a", "-")).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.localDateTimeMap_.not(List("a", "_")).query.get.map(_ ==> List(2))
 
           // Negating empty Seq of keys matches all
           _ <- Ns.i.a1.localDateTimeMap_.not(List.empty[String]).query.get.map(_ ==> List(1, 2))
 
           // Combine with retrieval
-          _ <- Ns.i.a1.localDateTimeMap.localDateTimeMap_.not("-").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
+          _ <- Ns.i.a1.localDateTimeMap.localDateTimeMap_.not("_").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.localDateTimeMap.localDateTimeMap_.not("a").query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.localDateTimeMap.localDateTimeMap_.not("b").query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.localDateTimeMap.localDateTimeMap_.not("c").query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.localDateTimeMap.localDateTimeMap_.not("a", "c").query.get.map(_ ==> Nil)
-          _ <- Ns.i.a1.localDateTimeMap.localDateTimeMap_.not("a", "-").query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.localDateTimeMap.localDateTimeMap_.not("a", "_").query.get.map(_ ==> List((2, Map(b3, c4))))
         } yield ()
       }
 
@@ -201,18 +201,24 @@ trait FilterMap_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
           _ <- Ns.i.a1.localDateTimeMap_.has(localDateTime2).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.localDateTimeMap_.has(localDateTime3).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.localDateTimeMap_.has(localDateTime4).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.localDateTimeMap_.has(localDateTime0, localDateTime1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.localDateTimeMap_.has(localDateTime1, localDateTime2).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.localDateTimeMap_.has(localDateTime2, localDateTime3).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.localDateTimeMap_.has(localDateTime3, localDateTime4).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.localDateTimeMap_.has(localDateTime4, localDateTime5).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.localDateTimeMap_.has(localDateTime5, localDateTime6).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.localDateTimeMap_.has(List(localDateTime0)).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.localDateTimeMap_.has(List(localDateTime1)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.localDateTimeMap_.has(List(localDateTime2)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.localDateTimeMap_.has(List(localDateTime3)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.localDateTimeMap_.has(List(localDateTime4)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.localDateTimeMap_.has(List(localDateTime0, localDateTime1)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.localDateTimeMap_.has(List(localDateTime1, localDateTime2)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.localDateTimeMap_.has(List(localDateTime2, localDateTime3)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.localDateTimeMap_.has(List(localDateTime3, localDateTime4)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.localDateTimeMap_.has(List(localDateTime4, localDateTime5)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.localDateTimeMap_.has(List(localDateTime5, localDateTime6)).query.get.map(_ ==> List())
 
           // Empty Seq of values matches nothing
           _ <- Ns.i.a1.localDateTimeMap_.has(List.empty[LocalDateTime]).query.get.map(_ ==> Nil)
@@ -223,9 +229,12 @@ trait FilterMap_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
           _ <- Ns.i.a1.localDateTimeMap.localDateTimeMap_.has(localDateTime2).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.localDateTimeMap.localDateTimeMap_.has(localDateTime3).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.localDateTimeMap.localDateTimeMap_.has(localDateTime4).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.localDateTimeMap.localDateTimeMap_.has(localDateTime0, localDateTime1).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.localDateTimeMap.localDateTimeMap_.has(localDateTime1, localDateTime2).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.localDateTimeMap.localDateTimeMap_.has(localDateTime2, localDateTime3).query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.localDateTimeMap.localDateTimeMap_.has(localDateTime3, localDateTime4).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.localDateTimeMap.localDateTimeMap_.has(localDateTime4, localDateTime5).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.localDateTimeMap.localDateTimeMap_.has(localDateTime5, localDateTime6).query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -243,18 +252,24 @@ trait FilterMap_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
           _ <- Ns.i.a1.localDateTimeMap_.hasNo(localDateTime2).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.localDateTimeMap_.hasNo(localDateTime3).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.localDateTimeMap_.hasNo(localDateTime4).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.localDateTimeMap_.hasNo(localDateTime0, localDateTime1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.localDateTimeMap_.hasNo(localDateTime1, localDateTime2).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.localDateTimeMap_.hasNo(localDateTime2, localDateTime3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localDateTimeMap_.hasNo(localDateTime3, localDateTime4).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.localDateTimeMap_.hasNo(localDateTime4, localDateTime5).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.localDateTimeMap_.hasNo(localDateTime5, localDateTime6).query.get.map(_ ==> List(1, 2))
           // Same as
           _ <- Ns.i.a1.localDateTimeMap_.hasNo(List(localDateTime0)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.localDateTimeMap_.hasNo(List(localDateTime1)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.localDateTimeMap_.hasNo(List(localDateTime2)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.localDateTimeMap_.hasNo(List(localDateTime3)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.localDateTimeMap_.hasNo(List(localDateTime4)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.localDateTimeMap_.hasNo(List(localDateTime0, localDateTime1)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.localDateTimeMap_.hasNo(List(localDateTime1, localDateTime2)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.localDateTimeMap_.hasNo(List(localDateTime2, localDateTime3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localDateTimeMap_.hasNo(List(localDateTime3, localDateTime4)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.localDateTimeMap_.hasNo(List(localDateTime4, localDateTime5)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.localDateTimeMap_.hasNo(List(localDateTime5, localDateTime6)).query.get.map(_ ==> List(1, 2))
 
           // Negating empty Seq of values matches all
           _ <- Ns.i.a1.localDateTimeMap_.hasNo(List.empty[LocalDateTime]).query.get.map(_ ==> List(1, 2))
@@ -265,9 +280,12 @@ trait FilterMap_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
           _ <- Ns.i.a1.localDateTimeMap.localDateTimeMap_.hasNo(localDateTime2).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.localDateTimeMap.localDateTimeMap_.hasNo(localDateTime3).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.localDateTimeMap.localDateTimeMap_.hasNo(localDateTime4).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.localDateTimeMap.localDateTimeMap_.hasNo(localDateTime0, localDateTime1).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.localDateTimeMap.localDateTimeMap_.hasNo(localDateTime1, localDateTime2).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.localDateTimeMap.localDateTimeMap_.hasNo(localDateTime2, localDateTime3).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.localDateTimeMap.localDateTimeMap_.hasNo(localDateTime3, localDateTime4).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.localDateTimeMap.localDateTimeMap_.hasNo(localDateTime4, localDateTime5).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.localDateTimeMap.localDateTimeMap_.hasNo(localDateTime5, localDateTime6).query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
         } yield ()
       }
     }

@@ -36,7 +36,7 @@ trait FilterMap_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           _ <- Ns.i.insert(0).transact // Entity without map attribute
           _ <- Ns.i.bigDecimalMap.insert(List(a, b)).transact
 
-          _ <- Ns.i.a1.bigDecimalMap("-").query.get.map(_ ==> Nil) // When no map is saved
+          _ <- Ns.i.a1.bigDecimalMap("_").query.get.map(_ ==> Nil) // When no map is saved
           _ <- Ns.i.a1.bigDecimalMap("a").query.get.map(_ ==> List((1, bigDecimal1), (2, bigDecimal2)))
           _ <- Ns.i.a1.bigDecimalMap("b").query.get.map(_ ==> List((1, bigDecimal2), (2, bigDecimal3)))
           _ <- Ns.i.a1.bigDecimalMap("c").query.get.map(_ ==> List((2, bigDecimal4)))
@@ -69,7 +69,7 @@ trait FilterMap_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
         for {
           _ <- Ns.i.bigDecimalMap_?.insert(a, b, c).transact
 
-          _ <- Ns.i.a1.bigDecimalMap_?("-").query.get.map(_ ==> List((1, None), (2, None), (3, None)))
+          _ <- Ns.i.a1.bigDecimalMap_?("_").query.get.map(_ ==> List((1, None), (2, None), (3, None)))
           _ <- Ns.i.a1.bigDecimalMap_?("a").query.get.map(_ ==> List((1, Some(bigDecimal1)), (2, Some(bigDecimal2)), (3, None)))
           _ <- Ns.i.a1.bigDecimalMap_?("b").query.get.map(_ ==> List((1, Some(bigDecimal2)), (2, Some(bigDecimal3)), (3, None)))
           _ <- Ns.i.a1.bigDecimalMap_?("c").query.get.map(_ ==> List((1, None), (2, Some(bigDecimal4)), (3, None)))
@@ -130,7 +130,7 @@ trait FilterMap_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           _ <- Ns.i.a1.bigDecimalMap_(List("b")).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.bigDecimalMap_(List("c")).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.bigDecimalMap_(List("a", "c")).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.bigDecimalMap_(List("a", "-")).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.bigDecimalMap_(List("a", "_")).query.get.map(_ ==> List(1))
 
           // Empty Seq of keys matches nothing
           _ <- Ns.i.a1.bigDecimalMap_(List.empty[String]).query.get.map(_ ==> Nil)
@@ -139,12 +139,12 @@ trait FilterMap_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           _ <- Ns.i.a1.bigDecimalMap_().query.get.map(_ ==> List(0))
 
           // Combine with retrieval
-          _ <- Ns.i.a1.bigDecimalMap.bigDecimalMap_("-").query.get.map(_ ==> Nil)
+          _ <- Ns.i.a1.bigDecimalMap.bigDecimalMap_("_").query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.bigDecimalMap.bigDecimalMap_("a").query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.bigDecimalMap.bigDecimalMap_("b").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.bigDecimalMap.bigDecimalMap_("c").query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.bigDecimalMap.bigDecimalMap_("a", "c").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
-          _ <- Ns.i.a1.bigDecimalMap.bigDecimalMap_("a", "-").query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.bigDecimalMap.bigDecimalMap_("a", "_").query.get.map(_ ==> List((1, Map(a1, b2))))
         } yield ()
       }
 
@@ -171,18 +171,18 @@ trait FilterMap_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           _ <- Ns.i.a1.bigDecimalMap_.not(List("b")).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.bigDecimalMap_.not(List("c")).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.bigDecimalMap_.not(List("a", "c")).query.get.map(_ ==> Nil)
-          _ <- Ns.i.a1.bigDecimalMap_.not(List("a", "-")).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.bigDecimalMap_.not(List("a", "_")).query.get.map(_ ==> List(2))
 
           // Negating empty Seq of keys matches all
           _ <- Ns.i.a1.bigDecimalMap_.not(List.empty[String]).query.get.map(_ ==> List(1, 2))
 
           // Combine with retrieval
-          _ <- Ns.i.a1.bigDecimalMap.bigDecimalMap_.not("-").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
+          _ <- Ns.i.a1.bigDecimalMap.bigDecimalMap_.not("_").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.bigDecimalMap.bigDecimalMap_.not("a").query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.bigDecimalMap.bigDecimalMap_.not("b").query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.bigDecimalMap.bigDecimalMap_.not("c").query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.bigDecimalMap.bigDecimalMap_.not("a", "c").query.get.map(_ ==> Nil)
-          _ <- Ns.i.a1.bigDecimalMap.bigDecimalMap_.not("a", "-").query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.bigDecimalMap.bigDecimalMap_.not("a", "_").query.get.map(_ ==> List((2, Map(b3, c4))))
         } yield ()
       }
 
@@ -200,18 +200,24 @@ trait FilterMap_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           _ <- Ns.i.a1.bigDecimalMap_.has(bigDecimal2).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.bigDecimalMap_.has(bigDecimal3).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.bigDecimalMap_.has(bigDecimal4).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.bigDecimalMap_.has(bigDecimal0, bigDecimal1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.bigDecimalMap_.has(bigDecimal1, bigDecimal2).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.bigDecimalMap_.has(bigDecimal2, bigDecimal3).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.bigDecimalMap_.has(bigDecimal3, bigDecimal4).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.bigDecimalMap_.has(bigDecimal4, bigDecimal5).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.bigDecimalMap_.has(bigDecimal5, bigDecimal6).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.bigDecimalMap_.has(List(bigDecimal0)).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.bigDecimalMap_.has(List(bigDecimal1)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.bigDecimalMap_.has(List(bigDecimal2)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.bigDecimalMap_.has(List(bigDecimal3)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.bigDecimalMap_.has(List(bigDecimal4)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.bigDecimalMap_.has(List(bigDecimal0, bigDecimal1)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.bigDecimalMap_.has(List(bigDecimal1, bigDecimal2)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.bigDecimalMap_.has(List(bigDecimal2, bigDecimal3)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.bigDecimalMap_.has(List(bigDecimal3, bigDecimal4)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.bigDecimalMap_.has(List(bigDecimal4, bigDecimal5)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.bigDecimalMap_.has(List(bigDecimal5, bigDecimal6)).query.get.map(_ ==> List())
 
           // Empty Seq of values matches nothing
           _ <- Ns.i.a1.bigDecimalMap_.has(List.empty[BigDecimal]).query.get.map(_ ==> Nil)
@@ -222,9 +228,12 @@ trait FilterMap_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           _ <- Ns.i.a1.bigDecimalMap.bigDecimalMap_.has(bigDecimal2).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.bigDecimalMap.bigDecimalMap_.has(bigDecimal3).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.bigDecimalMap.bigDecimalMap_.has(bigDecimal4).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.bigDecimalMap.bigDecimalMap_.has(bigDecimal0, bigDecimal1).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.bigDecimalMap.bigDecimalMap_.has(bigDecimal1, bigDecimal2).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.bigDecimalMap.bigDecimalMap_.has(bigDecimal2, bigDecimal3).query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.bigDecimalMap.bigDecimalMap_.has(bigDecimal3, bigDecimal4).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.bigDecimalMap.bigDecimalMap_.has(bigDecimal4, bigDecimal5).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.bigDecimalMap.bigDecimalMap_.has(bigDecimal5, bigDecimal6).query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -242,18 +251,24 @@ trait FilterMap_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           _ <- Ns.i.a1.bigDecimalMap_.hasNo(bigDecimal2).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.bigDecimalMap_.hasNo(bigDecimal3).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.bigDecimalMap_.hasNo(bigDecimal4).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.bigDecimalMap_.hasNo(bigDecimal0, bigDecimal1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.bigDecimalMap_.hasNo(bigDecimal1, bigDecimal2).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.bigDecimalMap_.hasNo(bigDecimal2, bigDecimal3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigDecimalMap_.hasNo(bigDecimal3, bigDecimal4).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.bigDecimalMap_.hasNo(bigDecimal4, bigDecimal5).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.bigDecimalMap_.hasNo(bigDecimal5, bigDecimal6).query.get.map(_ ==> List(1, 2))
           // Same as
           _ <- Ns.i.a1.bigDecimalMap_.hasNo(List(bigDecimal0)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.bigDecimalMap_.hasNo(List(bigDecimal1)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.bigDecimalMap_.hasNo(List(bigDecimal2)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.bigDecimalMap_.hasNo(List(bigDecimal3)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.bigDecimalMap_.hasNo(List(bigDecimal4)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.bigDecimalMap_.hasNo(List(bigDecimal0, bigDecimal1)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.bigDecimalMap_.hasNo(List(bigDecimal1, bigDecimal2)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.bigDecimalMap_.hasNo(List(bigDecimal2, bigDecimal3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigDecimalMap_.hasNo(List(bigDecimal3, bigDecimal4)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.bigDecimalMap_.hasNo(List(bigDecimal4, bigDecimal5)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.bigDecimalMap_.hasNo(List(bigDecimal5, bigDecimal6)).query.get.map(_ ==> List(1, 2))
 
           // Negating empty Seq of values matches all
           _ <- Ns.i.a1.bigDecimalMap_.hasNo(List.empty[BigDecimal]).query.get.map(_ ==> List(1, 2))
@@ -264,9 +279,12 @@ trait FilterMap_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           _ <- Ns.i.a1.bigDecimalMap.bigDecimalMap_.hasNo(bigDecimal2).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.bigDecimalMap.bigDecimalMap_.hasNo(bigDecimal3).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.bigDecimalMap.bigDecimalMap_.hasNo(bigDecimal4).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.bigDecimalMap.bigDecimalMap_.hasNo(bigDecimal0, bigDecimal1).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.bigDecimalMap.bigDecimalMap_.hasNo(bigDecimal1, bigDecimal2).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.bigDecimalMap.bigDecimalMap_.hasNo(bigDecimal2, bigDecimal3).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.bigDecimalMap.bigDecimalMap_.hasNo(bigDecimal3, bigDecimal4).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.bigDecimalMap.bigDecimalMap_.hasNo(bigDecimal4, bigDecimal5).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.bigDecimalMap.bigDecimalMap_.hasNo(bigDecimal5, bigDecimal6).query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
         } yield ()
       }
     }

@@ -259,6 +259,31 @@ trait UpdateMap_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             }
         } yield ()
       }
+
+      "Valid keys" - types { implicit conn =>
+        for {
+          id <- Ns.intMap(Map("a" -> int0)).save.transact.map(_.id)
+
+          // Allowed characters in a key name
+          _ <- Ns(id).intMap(Map("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789" -> 1)).update.transact
+
+          // No spaces
+          _ <- Ns(id).intMap(Map("foo bar" -> 1)).update.transact
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+              err ==> "Keys of map attributes can only contain [a-zA-Z_0-9] (no spaces or special characters)."
+            }
+
+          // No special characters
+          _ <- Ns(id).intMap(Map("foo:" -> 1)).update.transact
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+              err ==> "Keys of map attributes can only contain [a-zA-Z_0-9] (no spaces or special characters)."
+            }
+          _ <- Ns(id).intMap.add("bar?" -> 2).update.transact
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+              err ==> "Keys of map attributes can only contain [a-zA-Z_0-9] (no spaces or special characters)."
+            }
+        } yield ()
+      }
     }
   }
 }

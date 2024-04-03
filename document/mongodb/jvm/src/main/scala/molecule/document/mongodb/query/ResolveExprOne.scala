@@ -3,17 +3,12 @@ package molecule.document.mongodb.query
 import com.mongodb.client.model.{Filters, Sorts}
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
-import molecule.core.query.ResolveExpr
+import molecule.core.query.{ResolveExpr, ResolveExprExceptions}
 import molecule.document.mongodb.query.mongoModel.{Branch, NestedRef}
 import org.bson._
 import org.bson.conversions.Bson
 
-trait ResolveExprOne extends ResolveExpr
-  with LambdasOne
-  with LambdasSet
-  with LambdasSeq
-  with LambdasMap
-  { self: MongoQueryBase =>
+trait ResolveExprOne extends ResolveExpr with LambdasOne { self: MongoQueryBase =>
 
   override protected def resolveAttrOneMan(attr: AttrOneMan): Unit = {
     attr match {

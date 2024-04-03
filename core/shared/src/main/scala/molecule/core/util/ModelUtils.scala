@@ -120,6 +120,14 @@ trait ModelUtils {
     prepare(elements, Nil)
   }
 
+  protected def validKey(key: String) = {
+    if (key.matches("[a-zA-Z_0-9]+")) key else {
+      throw ModelError(
+        "Keys of map attributes can only contain [a-zA-Z_0-9] (no spaces or special characters)."
+      )
+    }
+  }
+
   private def indexes(coord: Seq[Int]): (Int, Int, Option[Int]) = {
     coord match {
       case Seq(nsIndex, refAttrIndex, refNsIndex) => (nsIndex, refAttrIndex, Some(refNsIndex))

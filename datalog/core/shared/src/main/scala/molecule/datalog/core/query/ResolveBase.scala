@@ -27,11 +27,6 @@ trait ResolveBase extends BaseHelpers {
       )
   }
 
-  def noCollectionMatching(attr: Attr) = {
-    val a = attr.cleanName
-    throw ModelError(s"Matching collections ($a) not supported in queries.")
-  }
-
   // Datomic Java to Scala
   protected lazy val j2sId            : AnyRef => AnyRef =  (v: AnyRef) => v.toString
   protected lazy val j2sString        : AnyRef => AnyRef = identity

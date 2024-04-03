@@ -3,7 +3,7 @@ package molecule.datalog.datomic.transaction
 import java.lang.{Boolean => jBoolean}
 import java.util.{UUID, ArrayList => jArrayList, List => jList}
 import clojure.lang.Keyword
-import molecule.base.error.ExecutionError
+import molecule.base.error.{ExecutionError, ModelError}
 import molecule.boilerplate.ast.Model._
 import molecule.core.marshalling.{ConnProxy, DatomicProxy}
 import molecule.core.util.Executor._
@@ -79,7 +79,6 @@ trait DatomicBase_JVM extends DatomicDataType_JVM with ModelUtils {
     stmt.add(id)
     stmts.add(stmt)
   }
-
 
   // Connection pool ---------------------------------------------
 

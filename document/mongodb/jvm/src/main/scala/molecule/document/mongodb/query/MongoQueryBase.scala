@@ -2,10 +2,8 @@ package molecule.document.mongodb.query
 
 import java.util
 import molecule.base.ast.Card
-import molecule.base.error._
 import molecule.base.util.BaseHelpers
-import molecule.boilerplate.ast.Model._
-import molecule.core.query.Model2QueryBase
+import molecule.core.query.{Model2QueryBase, ResolveExprExceptions}
 import molecule.core.util.JavaConversions
 import molecule.document.mongodb.query.mongoModel.{Branch, FlatEmbed}
 import org.bson.conversions.Bson
@@ -13,7 +11,7 @@ import org.bson.{BsonDocument, BsonInt32, BsonString, BsonValue}
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
-trait MongoQueryBase extends Model2QueryBase with BaseHelpers with JavaConversions {
+trait MongoQueryBase extends Model2QueryBase with ResolveExprExceptions with BaseHelpers with JavaConversions {
 
   // Top branch holds aggregation and projection of all attributes
   final protected var topBranch: FlatEmbed = new FlatEmbed()
@@ -92,25 +90,4 @@ trait MongoQueryBase extends Model2QueryBase with BaseHelpers with JavaConversio
   final var isNested    = false
   final var isNestedMan = false
   final var isNestedOpt = false
-
-
-  final protected def unexpectedElement(element: Element) = throw ModelError("Unexpected element: " + element)
-  final protected def unexpectedOp(op: Op) = throw ModelError("Unexpected operation: " + op)
-  final protected def unexpectedKw(kw: String) = throw ModelError("Unexpected keyword: " + kw)
-
-  final protected def noMixedNestedModes = throw ModelError(
-    "Can't mix mandatory/optional nested queries."
-  )
-
-  def noCollectionMatching(attr: Attr) = {
-    val a = attr.cleanName
-    throw ModelError(s"Matching collections ($a) not supported in queries.")
-  }
-
-  def noApplyNothing(attr: Attr): Unit = {
-    val a = attr.cleanName
-    throw ModelError(
-      s"Applying nothing to mandatory attribute ($a) is reserved for updates to retract."
-    )
-  }
 }

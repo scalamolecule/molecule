@@ -3,6 +3,7 @@ package molecule.coreTests.spi.crud.insert
 import java.net.URI
 import java.time._
 import java.util.{Date, UUID}
+import molecule.base.error.ModelError
 import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
@@ -176,6 +177,26 @@ trait InsertCardMap extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         // Can't insert tacit attributes
         _ <- Future(compileError("Ns.i.stringMap_.insert(1, Map(pstring1))"))
+      } yield ()
+    }
+
+
+    "Valid keys" - types { implicit conn =>
+      for {
+        // Allowed characters in a key name
+        _ <- Ns.intMap.insert(Map("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789" -> 1)).transact
+
+        // No spaces
+        _ <- Ns.intMap.insert(Map("foo bar" -> 1)).transact
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Keys of map attributes can only contain [a-zA-Z_0-9] (no spaces or special characters)."
+          }
+
+        // No special characters
+        _ <- Ns.intMap.insert(Map("foo:" -> 1)).transact
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Keys of map attributes can only contain [a-zA-Z_0-9] (no spaces or special characters)."
+          }
       } yield ()
     }
   }

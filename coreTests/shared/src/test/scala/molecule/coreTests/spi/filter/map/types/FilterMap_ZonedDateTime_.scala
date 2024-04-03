@@ -37,7 +37,7 @@ trait FilterMap_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
           _ <- Ns.i.insert(0).transact // Entity without map attribute
           _ <- Ns.i.zonedDateTimeMap.insert(List(a, b)).transact
 
-          _ <- Ns.i.a1.zonedDateTimeMap("-").query.get.map(_ ==> Nil) // When no map is saved
+          _ <- Ns.i.a1.zonedDateTimeMap("_").query.get.map(_ ==> Nil) // When no map is saved
           _ <- Ns.i.a1.zonedDateTimeMap("a").query.get.map(_ ==> List((1, zonedDateTime1), (2, zonedDateTime2)))
           _ <- Ns.i.a1.zonedDateTimeMap("b").query.get.map(_ ==> List((1, zonedDateTime2), (2, zonedDateTime3)))
           _ <- Ns.i.a1.zonedDateTimeMap("c").query.get.map(_ ==> List((2, zonedDateTime4)))
@@ -70,7 +70,7 @@ trait FilterMap_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
         for {
           _ <- Ns.i.zonedDateTimeMap_?.insert(a, b, c).transact
 
-          _ <- Ns.i.a1.zonedDateTimeMap_?("-").query.get.map(_ ==> List((1, None), (2, None), (3, None)))
+          _ <- Ns.i.a1.zonedDateTimeMap_?("_").query.get.map(_ ==> List((1, None), (2, None), (3, None)))
           _ <- Ns.i.a1.zonedDateTimeMap_?("a").query.get.map(_ ==> List((1, Some(zonedDateTime1)), (2, Some(zonedDateTime2)), (3, None)))
           _ <- Ns.i.a1.zonedDateTimeMap_?("b").query.get.map(_ ==> List((1, Some(zonedDateTime2)), (2, Some(zonedDateTime3)), (3, None)))
           _ <- Ns.i.a1.zonedDateTimeMap_?("c").query.get.map(_ ==> List((1, None), (2, Some(zonedDateTime4)), (3, None)))
@@ -131,7 +131,7 @@ trait FilterMap_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
           _ <- Ns.i.a1.zonedDateTimeMap_(List("b")).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.zonedDateTimeMap_(List("c")).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.zonedDateTimeMap_(List("a", "c")).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.zonedDateTimeMap_(List("a", "-")).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.zonedDateTimeMap_(List("a", "_")).query.get.map(_ ==> List(1))
 
           // Empty Seq of keys matches nothing
           _ <- Ns.i.a1.zonedDateTimeMap_(List.empty[String]).query.get.map(_ ==> Nil)
@@ -140,12 +140,12 @@ trait FilterMap_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
           _ <- Ns.i.a1.zonedDateTimeMap_().query.get.map(_ ==> List(0))
 
           // Combine with retrieval
-          _ <- Ns.i.a1.zonedDateTimeMap.zonedDateTimeMap_("-").query.get.map(_ ==> Nil)
+          _ <- Ns.i.a1.zonedDateTimeMap.zonedDateTimeMap_("_").query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.zonedDateTimeMap.zonedDateTimeMap_("a").query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.zonedDateTimeMap.zonedDateTimeMap_("b").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.zonedDateTimeMap.zonedDateTimeMap_("c").query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.zonedDateTimeMap.zonedDateTimeMap_("a", "c").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
-          _ <- Ns.i.a1.zonedDateTimeMap.zonedDateTimeMap_("a", "-").query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.zonedDateTimeMap.zonedDateTimeMap_("a", "_").query.get.map(_ ==> List((1, Map(a1, b2))))
         } yield ()
       }
 
@@ -172,18 +172,18 @@ trait FilterMap_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
           _ <- Ns.i.a1.zonedDateTimeMap_.not(List("b")).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.zonedDateTimeMap_.not(List("c")).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.zonedDateTimeMap_.not(List("a", "c")).query.get.map(_ ==> Nil)
-          _ <- Ns.i.a1.zonedDateTimeMap_.not(List("a", "-")).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.zonedDateTimeMap_.not(List("a", "_")).query.get.map(_ ==> List(2))
 
           // Negating empty Seq of keys matches all
           _ <- Ns.i.a1.zonedDateTimeMap_.not(List.empty[String]).query.get.map(_ ==> List(1, 2))
 
           // Combine with retrieval
-          _ <- Ns.i.a1.zonedDateTimeMap.zonedDateTimeMap_.not("-").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
+          _ <- Ns.i.a1.zonedDateTimeMap.zonedDateTimeMap_.not("_").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.zonedDateTimeMap.zonedDateTimeMap_.not("a").query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.zonedDateTimeMap.zonedDateTimeMap_.not("b").query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.zonedDateTimeMap.zonedDateTimeMap_.not("c").query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.zonedDateTimeMap.zonedDateTimeMap_.not("a", "c").query.get.map(_ ==> Nil)
-          _ <- Ns.i.a1.zonedDateTimeMap.zonedDateTimeMap_.not("a", "-").query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.zonedDateTimeMap.zonedDateTimeMap_.not("a", "_").query.get.map(_ ==> List((2, Map(b3, c4))))
         } yield ()
       }
 
@@ -201,18 +201,24 @@ trait FilterMap_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
           _ <- Ns.i.a1.zonedDateTimeMap_.has(zonedDateTime2).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.zonedDateTimeMap_.has(zonedDateTime3).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.zonedDateTimeMap_.has(zonedDateTime4).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.zonedDateTimeMap_.has(zonedDateTime0, zonedDateTime1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.zonedDateTimeMap_.has(zonedDateTime1, zonedDateTime2).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.zonedDateTimeMap_.has(zonedDateTime2, zonedDateTime3).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.zonedDateTimeMap_.has(zonedDateTime3, zonedDateTime4).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.zonedDateTimeMap_.has(zonedDateTime4, zonedDateTime5).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.zonedDateTimeMap_.has(zonedDateTime5, zonedDateTime6).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.zonedDateTimeMap_.has(List(zonedDateTime0)).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.zonedDateTimeMap_.has(List(zonedDateTime1)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.zonedDateTimeMap_.has(List(zonedDateTime2)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.zonedDateTimeMap_.has(List(zonedDateTime3)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.zonedDateTimeMap_.has(List(zonedDateTime4)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.zonedDateTimeMap_.has(List(zonedDateTime0, zonedDateTime1)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.zonedDateTimeMap_.has(List(zonedDateTime1, zonedDateTime2)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.zonedDateTimeMap_.has(List(zonedDateTime2, zonedDateTime3)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.zonedDateTimeMap_.has(List(zonedDateTime3, zonedDateTime4)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.zonedDateTimeMap_.has(List(zonedDateTime4, zonedDateTime5)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.zonedDateTimeMap_.has(List(zonedDateTime5, zonedDateTime6)).query.get.map(_ ==> List())
 
           // Empty Seq of values matches nothing
           _ <- Ns.i.a1.zonedDateTimeMap_.has(List.empty[ZonedDateTime]).query.get.map(_ ==> Nil)
@@ -223,9 +229,12 @@ trait FilterMap_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
           _ <- Ns.i.a1.zonedDateTimeMap.zonedDateTimeMap_.has(zonedDateTime2).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.zonedDateTimeMap.zonedDateTimeMap_.has(zonedDateTime3).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.zonedDateTimeMap.zonedDateTimeMap_.has(zonedDateTime4).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.zonedDateTimeMap.zonedDateTimeMap_.has(zonedDateTime0, zonedDateTime1).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.zonedDateTimeMap.zonedDateTimeMap_.has(zonedDateTime1, zonedDateTime2).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.zonedDateTimeMap.zonedDateTimeMap_.has(zonedDateTime2, zonedDateTime3).query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.zonedDateTimeMap.zonedDateTimeMap_.has(zonedDateTime3, zonedDateTime4).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.zonedDateTimeMap.zonedDateTimeMap_.has(zonedDateTime4, zonedDateTime5).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.zonedDateTimeMap.zonedDateTimeMap_.has(zonedDateTime5, zonedDateTime6).query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -243,18 +252,24 @@ trait FilterMap_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
           _ <- Ns.i.a1.zonedDateTimeMap_.hasNo(zonedDateTime2).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.zonedDateTimeMap_.hasNo(zonedDateTime3).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.zonedDateTimeMap_.hasNo(zonedDateTime4).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.zonedDateTimeMap_.hasNo(zonedDateTime0, zonedDateTime1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.zonedDateTimeMap_.hasNo(zonedDateTime1, zonedDateTime2).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.zonedDateTimeMap_.hasNo(zonedDateTime2, zonedDateTime3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.zonedDateTimeMap_.hasNo(zonedDateTime3, zonedDateTime4).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.zonedDateTimeMap_.hasNo(zonedDateTime4, zonedDateTime5).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.zonedDateTimeMap_.hasNo(zonedDateTime5, zonedDateTime6).query.get.map(_ ==> List(1, 2))
           // Same as
           _ <- Ns.i.a1.zonedDateTimeMap_.hasNo(List(zonedDateTime0)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.zonedDateTimeMap_.hasNo(List(zonedDateTime1)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.zonedDateTimeMap_.hasNo(List(zonedDateTime2)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.zonedDateTimeMap_.hasNo(List(zonedDateTime3)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.zonedDateTimeMap_.hasNo(List(zonedDateTime4)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.zonedDateTimeMap_.hasNo(List(zonedDateTime0, zonedDateTime1)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.zonedDateTimeMap_.hasNo(List(zonedDateTime1, zonedDateTime2)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.zonedDateTimeMap_.hasNo(List(zonedDateTime2, zonedDateTime3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.zonedDateTimeMap_.hasNo(List(zonedDateTime3, zonedDateTime4)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.zonedDateTimeMap_.hasNo(List(zonedDateTime4, zonedDateTime5)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.zonedDateTimeMap_.hasNo(List(zonedDateTime5, zonedDateTime6)).query.get.map(_ ==> List(1, 2))
 
           // Negating empty Seq of values matches all
           _ <- Ns.i.a1.zonedDateTimeMap_.hasNo(List.empty[ZonedDateTime]).query.get.map(_ ==> List(1, 2))
@@ -265,9 +280,12 @@ trait FilterMap_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
           _ <- Ns.i.a1.zonedDateTimeMap.zonedDateTimeMap_.hasNo(zonedDateTime2).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.zonedDateTimeMap.zonedDateTimeMap_.hasNo(zonedDateTime3).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.zonedDateTimeMap.zonedDateTimeMap_.hasNo(zonedDateTime4).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.zonedDateTimeMap.zonedDateTimeMap_.hasNo(zonedDateTime0, zonedDateTime1).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.zonedDateTimeMap.zonedDateTimeMap_.hasNo(zonedDateTime1, zonedDateTime2).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.zonedDateTimeMap.zonedDateTimeMap_.hasNo(zonedDateTime2, zonedDateTime3).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.zonedDateTimeMap.zonedDateTimeMap_.hasNo(zonedDateTime3, zonedDateTime4).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.zonedDateTimeMap.zonedDateTimeMap_.hasNo(zonedDateTime4, zonedDateTime5).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.zonedDateTimeMap.zonedDateTimeMap_.hasNo(zonedDateTime5, zonedDateTime6).query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
         } yield ()
       }
     }

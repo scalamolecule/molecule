@@ -37,7 +37,7 @@ trait FilterMap_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAs
           _ <- Ns.i.insert(0).transact // Entity without map attribute
           _ <- Ns.i.offsetDateTimeMap.insert(List(a, b)).transact
 
-          _ <- Ns.i.a1.offsetDateTimeMap("-").query.get.map(_ ==> Nil) // When no map is saved
+          _ <- Ns.i.a1.offsetDateTimeMap("_").query.get.map(_ ==> Nil) // When no map is saved
           _ <- Ns.i.a1.offsetDateTimeMap("a").query.get.map(_ ==> List((1, offsetDateTime1), (2, offsetDateTime2)))
           _ <- Ns.i.a1.offsetDateTimeMap("b").query.get.map(_ ==> List((1, offsetDateTime2), (2, offsetDateTime3)))
           _ <- Ns.i.a1.offsetDateTimeMap("c").query.get.map(_ ==> List((2, offsetDateTime4)))
@@ -70,7 +70,7 @@ trait FilterMap_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAs
         for {
           _ <- Ns.i.offsetDateTimeMap_?.insert(a, b, c).transact
 
-          _ <- Ns.i.a1.offsetDateTimeMap_?("-").query.get.map(_ ==> List((1, None), (2, None), (3, None)))
+          _ <- Ns.i.a1.offsetDateTimeMap_?("_").query.get.map(_ ==> List((1, None), (2, None), (3, None)))
           _ <- Ns.i.a1.offsetDateTimeMap_?("a").query.get.map(_ ==> List((1, Some(offsetDateTime1)), (2, Some(offsetDateTime2)), (3, None)))
           _ <- Ns.i.a1.offsetDateTimeMap_?("b").query.get.map(_ ==> List((1, Some(offsetDateTime2)), (2, Some(offsetDateTime3)), (3, None)))
           _ <- Ns.i.a1.offsetDateTimeMap_?("c").query.get.map(_ ==> List((1, None), (2, Some(offsetDateTime4)), (3, None)))
@@ -131,7 +131,7 @@ trait FilterMap_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAs
           _ <- Ns.i.a1.offsetDateTimeMap_(List("b")).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.offsetDateTimeMap_(List("c")).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.offsetDateTimeMap_(List("a", "c")).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.offsetDateTimeMap_(List("a", "-")).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.offsetDateTimeMap_(List("a", "_")).query.get.map(_ ==> List(1))
 
           // Empty Seq of keys matches nothing
           _ <- Ns.i.a1.offsetDateTimeMap_(List.empty[String]).query.get.map(_ ==> Nil)
@@ -140,12 +140,12 @@ trait FilterMap_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAs
           _ <- Ns.i.a1.offsetDateTimeMap_().query.get.map(_ ==> List(0))
 
           // Combine with retrieval
-          _ <- Ns.i.a1.offsetDateTimeMap.offsetDateTimeMap_("-").query.get.map(_ ==> Nil)
+          _ <- Ns.i.a1.offsetDateTimeMap.offsetDateTimeMap_("_").query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.offsetDateTimeMap.offsetDateTimeMap_("a").query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.offsetDateTimeMap.offsetDateTimeMap_("b").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.offsetDateTimeMap.offsetDateTimeMap_("c").query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.offsetDateTimeMap.offsetDateTimeMap_("a", "c").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
-          _ <- Ns.i.a1.offsetDateTimeMap.offsetDateTimeMap_("a", "-").query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.offsetDateTimeMap.offsetDateTimeMap_("a", "_").query.get.map(_ ==> List((1, Map(a1, b2))))
         } yield ()
       }
 
@@ -172,18 +172,18 @@ trait FilterMap_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAs
           _ <- Ns.i.a1.offsetDateTimeMap_.not(List("b")).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.offsetDateTimeMap_.not(List("c")).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.offsetDateTimeMap_.not(List("a", "c")).query.get.map(_ ==> Nil)
-          _ <- Ns.i.a1.offsetDateTimeMap_.not(List("a", "-")).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.offsetDateTimeMap_.not(List("a", "_")).query.get.map(_ ==> List(2))
 
           // Negating empty Seq of keys matches all
           _ <- Ns.i.a1.offsetDateTimeMap_.not(List.empty[String]).query.get.map(_ ==> List(1, 2))
 
           // Combine with retrieval
-          _ <- Ns.i.a1.offsetDateTimeMap.offsetDateTimeMap_.not("-").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
+          _ <- Ns.i.a1.offsetDateTimeMap.offsetDateTimeMap_.not("_").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.offsetDateTimeMap.offsetDateTimeMap_.not("a").query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.offsetDateTimeMap.offsetDateTimeMap_.not("b").query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.offsetDateTimeMap.offsetDateTimeMap_.not("c").query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.offsetDateTimeMap.offsetDateTimeMap_.not("a", "c").query.get.map(_ ==> Nil)
-          _ <- Ns.i.a1.offsetDateTimeMap.offsetDateTimeMap_.not("a", "-").query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.offsetDateTimeMap.offsetDateTimeMap_.not("a", "_").query.get.map(_ ==> List((2, Map(b3, c4))))
         } yield ()
       }
 
@@ -201,18 +201,24 @@ trait FilterMap_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAs
           _ <- Ns.i.a1.offsetDateTimeMap_.has(offsetDateTime2).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.offsetDateTimeMap_.has(offsetDateTime3).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.offsetDateTimeMap_.has(offsetDateTime4).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.offsetDateTimeMap_.has(offsetDateTime0, offsetDateTime1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.offsetDateTimeMap_.has(offsetDateTime1, offsetDateTime2).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.offsetDateTimeMap_.has(offsetDateTime2, offsetDateTime3).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.offsetDateTimeMap_.has(offsetDateTime3, offsetDateTime4).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.offsetDateTimeMap_.has(offsetDateTime4, offsetDateTime5).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.offsetDateTimeMap_.has(offsetDateTime5, offsetDateTime6).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.offsetDateTimeMap_.has(List(offsetDateTime0)).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.offsetDateTimeMap_.has(List(offsetDateTime1)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.offsetDateTimeMap_.has(List(offsetDateTime2)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.offsetDateTimeMap_.has(List(offsetDateTime3)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.offsetDateTimeMap_.has(List(offsetDateTime4)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.offsetDateTimeMap_.has(List(offsetDateTime0, offsetDateTime1)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.offsetDateTimeMap_.has(List(offsetDateTime1, offsetDateTime2)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.offsetDateTimeMap_.has(List(offsetDateTime2, offsetDateTime3)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.offsetDateTimeMap_.has(List(offsetDateTime3, offsetDateTime4)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.offsetDateTimeMap_.has(List(offsetDateTime4, offsetDateTime5)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.offsetDateTimeMap_.has(List(offsetDateTime5, offsetDateTime6)).query.get.map(_ ==> List())
 
           // Empty Seq of values matches nothing
           _ <- Ns.i.a1.offsetDateTimeMap_.has(List.empty[OffsetDateTime]).query.get.map(_ ==> Nil)
@@ -223,9 +229,12 @@ trait FilterMap_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAs
           _ <- Ns.i.a1.offsetDateTimeMap.offsetDateTimeMap_.has(offsetDateTime2).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.offsetDateTimeMap.offsetDateTimeMap_.has(offsetDateTime3).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.offsetDateTimeMap.offsetDateTimeMap_.has(offsetDateTime4).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.offsetDateTimeMap.offsetDateTimeMap_.has(offsetDateTime0, offsetDateTime1).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.offsetDateTimeMap.offsetDateTimeMap_.has(offsetDateTime1, offsetDateTime2).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.offsetDateTimeMap.offsetDateTimeMap_.has(offsetDateTime2, offsetDateTime3).query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.offsetDateTimeMap.offsetDateTimeMap_.has(offsetDateTime3, offsetDateTime4).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.offsetDateTimeMap.offsetDateTimeMap_.has(offsetDateTime4, offsetDateTime5).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.offsetDateTimeMap.offsetDateTimeMap_.has(offsetDateTime5, offsetDateTime6).query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -243,18 +252,24 @@ trait FilterMap_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAs
           _ <- Ns.i.a1.offsetDateTimeMap_.hasNo(offsetDateTime2).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.offsetDateTimeMap_.hasNo(offsetDateTime3).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.offsetDateTimeMap_.hasNo(offsetDateTime4).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.offsetDateTimeMap_.hasNo(offsetDateTime0, offsetDateTime1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.offsetDateTimeMap_.hasNo(offsetDateTime1, offsetDateTime2).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.offsetDateTimeMap_.hasNo(offsetDateTime2, offsetDateTime3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetDateTimeMap_.hasNo(offsetDateTime3, offsetDateTime4).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.offsetDateTimeMap_.hasNo(offsetDateTime4, offsetDateTime5).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.offsetDateTimeMap_.hasNo(offsetDateTime5, offsetDateTime6).query.get.map(_ ==> List(1, 2))
           // Same as
           _ <- Ns.i.a1.offsetDateTimeMap_.hasNo(List(offsetDateTime0)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.offsetDateTimeMap_.hasNo(List(offsetDateTime1)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.offsetDateTimeMap_.hasNo(List(offsetDateTime2)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.offsetDateTimeMap_.hasNo(List(offsetDateTime3)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.offsetDateTimeMap_.hasNo(List(offsetDateTime4)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.offsetDateTimeMap_.hasNo(List(offsetDateTime0, offsetDateTime1)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.offsetDateTimeMap_.hasNo(List(offsetDateTime1, offsetDateTime2)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.offsetDateTimeMap_.hasNo(List(offsetDateTime2, offsetDateTime3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetDateTimeMap_.hasNo(List(offsetDateTime3, offsetDateTime4)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.offsetDateTimeMap_.hasNo(List(offsetDateTime4, offsetDateTime5)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.offsetDateTimeMap_.hasNo(List(offsetDateTime5, offsetDateTime6)).query.get.map(_ ==> List(1, 2))
 
           // Negating empty Seq of values matches all
           _ <- Ns.i.a1.offsetDateTimeMap_.hasNo(List.empty[OffsetDateTime]).query.get.map(_ ==> List(1, 2))
@@ -265,9 +280,12 @@ trait FilterMap_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAs
           _ <- Ns.i.a1.offsetDateTimeMap.offsetDateTimeMap_.hasNo(offsetDateTime2).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.offsetDateTimeMap.offsetDateTimeMap_.hasNo(offsetDateTime3).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.offsetDateTimeMap.offsetDateTimeMap_.hasNo(offsetDateTime4).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.offsetDateTimeMap.offsetDateTimeMap_.hasNo(offsetDateTime0, offsetDateTime1).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.offsetDateTimeMap.offsetDateTimeMap_.hasNo(offsetDateTime1, offsetDateTime2).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.offsetDateTimeMap.offsetDateTimeMap_.hasNo(offsetDateTime2, offsetDateTime3).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.offsetDateTimeMap.offsetDateTimeMap_.hasNo(offsetDateTime3, offsetDateTime4).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.offsetDateTimeMap.offsetDateTimeMap_.hasNo(offsetDateTime4, offsetDateTime5).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.offsetDateTimeMap.offsetDateTimeMap_.hasNo(offsetDateTime5, offsetDateTime6).query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
         } yield ()
       }
     }

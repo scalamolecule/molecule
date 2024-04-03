@@ -4,7 +4,7 @@ import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
-import molecule.core.query.Model2QueryBase
+import molecule.core.query.{Model2QueryBase, ResolveExprExceptions}
 import molecule.datalog.core.query.casting._
 import scala.annotation.tailrec
 import scala.collection.mutable.ArrayBuffer
@@ -26,6 +26,7 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
     with CastNestedOptLeaf_
     with Nest[Tpl]
     with NestOpt_[Tpl]
+    with ResolveExprExceptions
     with MoleculeLogging {
 
   final lazy val preInputs: Seq[AnyRef] = renderRules(rules ++ preRules) ++ preArgs
@@ -122,7 +123,7 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
     elements: List[Element]
   ): List[Var] = elements match {
     case element :: tail => element match {
-      case a: AttrOne                           =>
+      case a: AttrOne =>
         a.attr match {
           case "id" =>
             if (a.filterAttr.nonEmpty) throw ModelError(noIdFiltering)
@@ -141,7 +142,8 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
               case a: AttrOneTac => resolve(resolveAttrOneTac(es, a), tail)
             }
         }
-      case a: AttrSet                           =>
+
+      case a: AttrSet =>
         isRefAttr = a.refNs.isDefined
         a match {
           case a: AttrSetMan => resolve(resolveAttrSetMan(es, a), tail)
@@ -164,6 +166,7 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
           case a: AttrMapOpt => resolve(resolveAttrMapOpt(es, a), tail)
           case a: AttrMapTac => resolve(resolveAttrMapTac(es, a), tail)
         }
+
       case ref: Ref                             => resolve(resolveRef(es, ref), tail)
       case _: BackRef                           => resolve(resolveBackRef(es), tail)
       case Nested(ref, nestedElements)          => resolve(resolveNested(es, ref, nestedElements), tail)

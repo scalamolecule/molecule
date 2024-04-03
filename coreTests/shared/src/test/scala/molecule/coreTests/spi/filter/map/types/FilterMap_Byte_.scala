@@ -36,7 +36,7 @@ trait FilterMap_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.insert(0).transact // Entity without map attribute
           _ <- Ns.i.byteMap.insert(List(a, b)).transact
 
-          _ <- Ns.i.a1.byteMap("-").query.get.map(_ ==> Nil) // When no map is saved
+          _ <- Ns.i.a1.byteMap("_").query.get.map(_ ==> Nil) // When no map is saved
           _ <- Ns.i.a1.byteMap("a").query.get.map(_ ==> List((1, byte1), (2, byte2)))
           _ <- Ns.i.a1.byteMap("b").query.get.map(_ ==> List((1, byte2), (2, byte3)))
           _ <- Ns.i.a1.byteMap("c").query.get.map(_ ==> List((2, byte4)))
@@ -69,7 +69,7 @@ trait FilterMap_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         for {
           _ <- Ns.i.byteMap_?.insert(a, b, c).transact
 
-          _ <- Ns.i.a1.byteMap_?("-").query.get.map(_ ==> List((1, None), (2, None), (3, None)))
+          _ <- Ns.i.a1.byteMap_?("_").query.get.map(_ ==> List((1, None), (2, None), (3, None)))
           _ <- Ns.i.a1.byteMap_?("a").query.get.map(_ ==> List((1, Some(byte1)), (2, Some(byte2)), (3, None)))
           _ <- Ns.i.a1.byteMap_?("b").query.get.map(_ ==> List((1, Some(byte2)), (2, Some(byte3)), (3, None)))
           _ <- Ns.i.a1.byteMap_?("c").query.get.map(_ ==> List((1, None), (2, Some(byte4)), (3, None)))
@@ -130,7 +130,7 @@ trait FilterMap_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.byteMap_(List("b")).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.byteMap_(List("c")).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.byteMap_(List("a", "c")).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.byteMap_(List("a", "-")).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.byteMap_(List("a", "_")).query.get.map(_ ==> List(1))
 
           // Empty Seq of keys matches nothing
           _ <- Ns.i.a1.byteMap_(List.empty[String]).query.get.map(_ ==> Nil)
@@ -139,12 +139,12 @@ trait FilterMap_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.byteMap_().query.get.map(_ ==> List(0))
 
           // Combine with retrieval
-          _ <- Ns.i.a1.byteMap.byteMap_("-").query.get.map(_ ==> Nil)
+          _ <- Ns.i.a1.byteMap.byteMap_("_").query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.byteMap.byteMap_("a").query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.byteMap.byteMap_("b").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.byteMap.byteMap_("c").query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.byteMap.byteMap_("a", "c").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
-          _ <- Ns.i.a1.byteMap.byteMap_("a", "-").query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.byteMap.byteMap_("a", "_").query.get.map(_ ==> List((1, Map(a1, b2))))
         } yield ()
       }
 
@@ -171,18 +171,18 @@ trait FilterMap_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.byteMap_.not(List("b")).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.byteMap_.not(List("c")).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.byteMap_.not(List("a", "c")).query.get.map(_ ==> Nil)
-          _ <- Ns.i.a1.byteMap_.not(List("a", "-")).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.byteMap_.not(List("a", "_")).query.get.map(_ ==> List(2))
 
           // Negating empty Seq of keys matches all
           _ <- Ns.i.a1.byteMap_.not(List.empty[String]).query.get.map(_ ==> List(1, 2))
 
           // Combine with retrieval
-          _ <- Ns.i.a1.byteMap.byteMap_.not("-").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
+          _ <- Ns.i.a1.byteMap.byteMap_.not("_").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.byteMap.byteMap_.not("a").query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.byteMap.byteMap_.not("b").query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.byteMap.byteMap_.not("c").query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.byteMap.byteMap_.not("a", "c").query.get.map(_ ==> Nil)
-          _ <- Ns.i.a1.byteMap.byteMap_.not("a", "-").query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.byteMap.byteMap_.not("a", "_").query.get.map(_ ==> List((2, Map(b3, c4))))
         } yield ()
       }
 
@@ -200,18 +200,24 @@ trait FilterMap_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.byteMap_.has(byte2).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.byteMap_.has(byte3).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.byteMap_.has(byte4).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.byteMap_.has(byte0, byte1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.byteMap_.has(byte1, byte2).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.byteMap_.has(byte2, byte3).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.byteMap_.has(byte3, byte4).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.byteMap_.has(byte4, byte5).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.byteMap_.has(byte5, byte6).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.byteMap_.has(List(byte0)).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.byteMap_.has(List(byte1)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.byteMap_.has(List(byte2)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.byteMap_.has(List(byte3)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.byteMap_.has(List(byte4)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.byteMap_.has(List(byte0, byte1)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.byteMap_.has(List(byte1, byte2)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.byteMap_.has(List(byte2, byte3)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.byteMap_.has(List(byte3, byte4)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.byteMap_.has(List(byte4, byte5)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.byteMap_.has(List(byte5, byte6)).query.get.map(_ ==> List())
 
           // Empty Seq of values matches nothing
           _ <- Ns.i.a1.byteMap_.has(List.empty[Byte]).query.get.map(_ ==> Nil)
@@ -222,9 +228,12 @@ trait FilterMap_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.byteMap.byteMap_.has(byte2).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.byteMap.byteMap_.has(byte3).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.byteMap.byteMap_.has(byte4).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.byteMap.byteMap_.has(byte0, byte1).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.byteMap.byteMap_.has(byte1, byte2).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.byteMap.byteMap_.has(byte2, byte3).query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.byteMap.byteMap_.has(byte3, byte4).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.byteMap.byteMap_.has(byte4, byte5).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.byteMap.byteMap_.has(byte5, byte6).query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -242,18 +251,24 @@ trait FilterMap_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.byteMap_.hasNo(byte2).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.byteMap_.hasNo(byte3).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.byteMap_.hasNo(byte4).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.byteMap_.hasNo(byte0, byte1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.byteMap_.hasNo(byte1, byte2).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.byteMap_.hasNo(byte2, byte3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.byteMap_.hasNo(byte3, byte4).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.byteMap_.hasNo(byte4, byte5).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.byteMap_.hasNo(byte5, byte6).query.get.map(_ ==> List(1, 2))
           // Same as
           _ <- Ns.i.a1.byteMap_.hasNo(List(byte0)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.byteMap_.hasNo(List(byte1)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.byteMap_.hasNo(List(byte2)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.byteMap_.hasNo(List(byte3)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.byteMap_.hasNo(List(byte4)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.byteMap_.hasNo(List(byte0, byte1)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.byteMap_.hasNo(List(byte1, byte2)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.byteMap_.hasNo(List(byte2, byte3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.byteMap_.hasNo(List(byte3, byte4)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.byteMap_.hasNo(List(byte4, byte5)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.byteMap_.hasNo(List(byte5, byte6)).query.get.map(_ ==> List(1, 2))
 
           // Negating empty Seq of values matches all
           _ <- Ns.i.a1.byteMap_.hasNo(List.empty[Byte]).query.get.map(_ ==> List(1, 2))
@@ -264,9 +279,12 @@ trait FilterMap_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.byteMap.byteMap_.hasNo(byte2).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.byteMap.byteMap_.hasNo(byte3).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.byteMap.byteMap_.hasNo(byte4).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.byteMap.byteMap_.hasNo(byte0, byte1).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.byteMap.byteMap_.hasNo(byte1, byte2).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.byteMap.byteMap_.hasNo(byte2, byte3).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.byteMap.byteMap_.hasNo(byte3, byte4).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.byteMap.byteMap_.hasNo(byte4, byte5).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.byteMap.byteMap_.hasNo(byte5, byte6).query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
         } yield ()
       }
     }

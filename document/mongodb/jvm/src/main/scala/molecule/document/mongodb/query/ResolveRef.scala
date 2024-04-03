@@ -4,9 +4,8 @@ import com.mongodb.client.model.Filters
 import molecule.base.ast._
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
-import molecule.document.mongodb.query.mongoModel.{FlatEmbed, FlatRef, FlatRefNested, NestedEmbed, NestedRef}
-import molecule.document.mongodb.sync.pretty
-import org.bson.{BsonArray, BsonDocument, BsonInt32, BsonNull}
+import molecule.document.mongodb.query.mongoModel._
+import org.bson.{BsonArray, BsonDocument, BsonInt32}
 import scala.collection.mutable.ListBuffer
 
 

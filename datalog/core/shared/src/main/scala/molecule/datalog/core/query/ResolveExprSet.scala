@@ -2,6 +2,7 @@ package molecule.datalog.core.query
 
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
+import molecule.core.query.ResolveExpr
 import scala.reflect.ClassTag
 
 trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>

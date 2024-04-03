@@ -3,6 +3,7 @@ package molecule.coreTests.spi.crud.save
 import java.net.URI
 import java.time._
 import java.util.{Date, UUID}
+import molecule.base.error.ModelError
 import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
@@ -177,6 +178,26 @@ trait SaveCardMap extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         // Can't save map with tacit map attribute
         _ <- Future(compileError("Ns.i(1).stringMap_(Map(pstring1, pstring2)).save"))
+      } yield ()
+    }
+
+
+    "Valid keys" - types { implicit conn =>
+      for {
+        // Allowed characters in a key name
+        _ <- Ns.intMap(Map("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789" -> 1)).save.transact
+
+        // No spaces
+        _ <- Ns.intMap(Map("foo bar" -> 1)).save.transact
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Keys of map attributes can only contain [a-zA-Z_0-9] (no spaces or special characters)."
+          }
+
+        // No special characters
+        _ <- Ns.intMap(Map("foo:" -> 1)).save.transact
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Keys of map attributes can only contain [a-zA-Z_0-9] (no spaces or special characters)."
+          }
       } yield ()
     }
   }

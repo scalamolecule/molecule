@@ -124,14 +124,6 @@ trait DatomicQueryBase extends BaseHelpers with JavaConversions { self: Model2Qu
     sortss.flatMap(_.sortBy(_._1).map(_._2))
   }
 
-  final protected def unexpectedElement(element: Element) = throw ModelError("Unexpected element: " + element)
-  final protected def unexpectedOp(op: Op) = throw ModelError("Unexpected operation: " + op)
-  final protected def unexpectedKw(kw: String) = throw ModelError("Unexpected keyword: " + kw)
-
-  final protected def noMixedNestedModes = throw ModelError(
-    "Can't mix mandatory/optional nested queries."
-  )
-
   final protected def vv: Var = {
     varIndex += 1
     vars(varIndex)

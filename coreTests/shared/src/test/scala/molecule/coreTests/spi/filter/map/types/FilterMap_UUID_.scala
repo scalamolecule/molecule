@@ -37,7 +37,7 @@ trait FilterMap_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.insert(0).transact // Entity without map attribute
           _ <- Ns.i.uuidMap.insert(List(a, b)).transact
 
-          _ <- Ns.i.a1.uuidMap("-").query.get.map(_ ==> Nil) // When no map is saved
+          _ <- Ns.i.a1.uuidMap("_").query.get.map(_ ==> Nil) // When no map is saved
           _ <- Ns.i.a1.uuidMap("a").query.get.map(_ ==> List((1, uuid1), (2, uuid2)))
           _ <- Ns.i.a1.uuidMap("b").query.get.map(_ ==> List((1, uuid2), (2, uuid3)))
           _ <- Ns.i.a1.uuidMap("c").query.get.map(_ ==> List((2, uuid4)))
@@ -70,7 +70,7 @@ trait FilterMap_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         for {
           _ <- Ns.i.uuidMap_?.insert(a, b, c).transact
 
-          _ <- Ns.i.a1.uuidMap_?("-").query.get.map(_ ==> List((1, None), (2, None), (3, None)))
+          _ <- Ns.i.a1.uuidMap_?("_").query.get.map(_ ==> List((1, None), (2, None), (3, None)))
           _ <- Ns.i.a1.uuidMap_?("a").query.get.map(_ ==> List((1, Some(uuid1)), (2, Some(uuid2)), (3, None)))
           _ <- Ns.i.a1.uuidMap_?("b").query.get.map(_ ==> List((1, Some(uuid2)), (2, Some(uuid3)), (3, None)))
           _ <- Ns.i.a1.uuidMap_?("c").query.get.map(_ ==> List((1, None), (2, Some(uuid4)), (3, None)))
@@ -131,7 +131,7 @@ trait FilterMap_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.uuidMap_(List("b")).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.uuidMap_(List("c")).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.uuidMap_(List("a", "c")).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.uuidMap_(List("a", "-")).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.uuidMap_(List("a", "_")).query.get.map(_ ==> List(1))
 
           // Empty Seq of keys matches nothing
           _ <- Ns.i.a1.uuidMap_(List.empty[String]).query.get.map(_ ==> Nil)
@@ -140,12 +140,12 @@ trait FilterMap_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.uuidMap_().query.get.map(_ ==> List(0))
 
           // Combine with retrieval
-          _ <- Ns.i.a1.uuidMap.uuidMap_("-").query.get.map(_ ==> Nil)
+          _ <- Ns.i.a1.uuidMap.uuidMap_("_").query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.uuidMap.uuidMap_("a").query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.uuidMap.uuidMap_("b").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.uuidMap.uuidMap_("c").query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.uuidMap.uuidMap_("a", "c").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
-          _ <- Ns.i.a1.uuidMap.uuidMap_("a", "-").query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.uuidMap.uuidMap_("a", "_").query.get.map(_ ==> List((1, Map(a1, b2))))
         } yield ()
       }
 
@@ -172,18 +172,18 @@ trait FilterMap_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.uuidMap_.not(List("b")).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.uuidMap_.not(List("c")).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.uuidMap_.not(List("a", "c")).query.get.map(_ ==> Nil)
-          _ <- Ns.i.a1.uuidMap_.not(List("a", "-")).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.uuidMap_.not(List("a", "_")).query.get.map(_ ==> List(2))
 
           // Negating empty Seq of keys matches all
           _ <- Ns.i.a1.uuidMap_.not(List.empty[String]).query.get.map(_ ==> List(1, 2))
 
           // Combine with retrieval
-          _ <- Ns.i.a1.uuidMap.uuidMap_.not("-").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
+          _ <- Ns.i.a1.uuidMap.uuidMap_.not("_").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.uuidMap.uuidMap_.not("a").query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.uuidMap.uuidMap_.not("b").query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.uuidMap.uuidMap_.not("c").query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.uuidMap.uuidMap_.not("a", "c").query.get.map(_ ==> Nil)
-          _ <- Ns.i.a1.uuidMap.uuidMap_.not("a", "-").query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.uuidMap.uuidMap_.not("a", "_").query.get.map(_ ==> List((2, Map(b3, c4))))
         } yield ()
       }
 
@@ -201,18 +201,24 @@ trait FilterMap_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.uuidMap_.has(uuid2).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.uuidMap_.has(uuid3).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.uuidMap_.has(uuid4).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.uuidMap_.has(uuid0, uuid1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.uuidMap_.has(uuid1, uuid2).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.uuidMap_.has(uuid2, uuid3).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.uuidMap_.has(uuid3, uuid4).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.uuidMap_.has(uuid4, uuid5).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.uuidMap_.has(uuid5, uuid6).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.uuidMap_.has(List(uuid0)).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.uuidMap_.has(List(uuid1)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.uuidMap_.has(List(uuid2)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.uuidMap_.has(List(uuid3)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.uuidMap_.has(List(uuid4)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.uuidMap_.has(List(uuid0, uuid1)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.uuidMap_.has(List(uuid1, uuid2)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.uuidMap_.has(List(uuid2, uuid3)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.uuidMap_.has(List(uuid3, uuid4)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.uuidMap_.has(List(uuid4, uuid5)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.uuidMap_.has(List(uuid5, uuid6)).query.get.map(_ ==> List())
 
           // Empty Seq of values matches nothing
           _ <- Ns.i.a1.uuidMap_.has(List.empty[UUID]).query.get.map(_ ==> Nil)
@@ -223,9 +229,12 @@ trait FilterMap_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.uuidMap.uuidMap_.has(uuid2).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.uuidMap.uuidMap_.has(uuid3).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.uuidMap.uuidMap_.has(uuid4).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.uuidMap.uuidMap_.has(uuid0, uuid1).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.uuidMap.uuidMap_.has(uuid1, uuid2).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.uuidMap.uuidMap_.has(uuid2, uuid3).query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.uuidMap.uuidMap_.has(uuid3, uuid4).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.uuidMap.uuidMap_.has(uuid4, uuid5).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.uuidMap.uuidMap_.has(uuid5, uuid6).query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -243,18 +252,24 @@ trait FilterMap_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.uuidMap_.hasNo(uuid2).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.uuidMap_.hasNo(uuid3).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.uuidMap_.hasNo(uuid4).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.uuidMap_.hasNo(uuid0, uuid1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.uuidMap_.hasNo(uuid1, uuid2).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.uuidMap_.hasNo(uuid2, uuid3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uuidMap_.hasNo(uuid3, uuid4).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.uuidMap_.hasNo(uuid4, uuid5).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.uuidMap_.hasNo(uuid5, uuid6).query.get.map(_ ==> List(1, 2))
           // Same as
           _ <- Ns.i.a1.uuidMap_.hasNo(List(uuid0)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.uuidMap_.hasNo(List(uuid1)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.uuidMap_.hasNo(List(uuid2)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.uuidMap_.hasNo(List(uuid3)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.uuidMap_.hasNo(List(uuid4)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.uuidMap_.hasNo(List(uuid0, uuid1)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.uuidMap_.hasNo(List(uuid1, uuid2)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.uuidMap_.hasNo(List(uuid2, uuid3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uuidMap_.hasNo(List(uuid3, uuid4)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.uuidMap_.hasNo(List(uuid4, uuid5)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.uuidMap_.hasNo(List(uuid5, uuid6)).query.get.map(_ ==> List(1, 2))
 
           // Negating empty Seq of values matches all
           _ <- Ns.i.a1.uuidMap_.hasNo(List.empty[UUID]).query.get.map(_ ==> List(1, 2))
@@ -265,9 +280,12 @@ trait FilterMap_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.uuidMap.uuidMap_.hasNo(uuid2).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.uuidMap.uuidMap_.hasNo(uuid3).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.uuidMap.uuidMap_.hasNo(uuid4).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.uuidMap.uuidMap_.hasNo(uuid0, uuid1).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.uuidMap.uuidMap_.hasNo(uuid1, uuid2).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.uuidMap.uuidMap_.hasNo(uuid2, uuid3).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.uuidMap.uuidMap_.hasNo(uuid3, uuid4).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.uuidMap.uuidMap_.hasNo(uuid4, uuid5).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.uuidMap.uuidMap_.hasNo(uuid5, uuid6).query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
         } yield ()
       }
     }

@@ -36,35 +36,35 @@ trait ResolveNestedPull[Tpl]
               "Expressions not allowed in optional nested queries. Found:\n  " + a
             )
             case a: AttrOneMan =>
-              resolveAttrOneMan(a, attrIndex)
+              resAttrOneMan(a, attrIndex)
               addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(i, a))
 
             case a: AttrOneOpt =>
-              resolveAttrOneOpt(a, attrIndex)
+              resAttrOneOpt(a, attrIndex)
               addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(i, a))
 
             case a: AttrSetMan =>
-              resolveAttrSetMan(a)
+              resAttrSetMan(a)
               addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(i, a))
 
             case a: AttrSetOpt =>
-              resolveAttrSetOpt(a)
+              resttrSetOpt(a)
               addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(i, a))
 
             case a: AttrSeqMan =>
-              resolveAttrSeqMan(a)
+              resAttrSeqMan(a)
               addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(i, a))
 
             case a: AttrSeqOpt =>
-              resolveAttrSeqOpt(a)
+              resAttrSeqOpt(a)
               addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(i, a))
 
             case a: AttrMapMan =>
-              resolveAttrMapMan(a)
+              resAttrMapMan(a)
               addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(i, a))
 
             case a: AttrMapOpt =>
-              resolveAttrMapOpt(a)
+              resAttrMapOpt(a)
               addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(i, a))
 
             case ref: Ref             => (acc, Some(ref), tail, attrIndex)
@@ -184,7 +184,7 @@ trait ResolveNestedPull[Tpl]
   }
 
 
-  private def resolveAttrOneMan(a: AttrOneMan, attrIndex: Int): Unit = {
+  private def resAttrOneMan(a: AttrOneMan, attrIndex: Int): Unit = {
     aritiesAttr()
     a match {
       case a: AttrOneManID             => add(sortOneID(a, attrIndex), it2Id, it2Id2)
@@ -213,7 +213,7 @@ trait ResolveNestedPull[Tpl]
     }
   }
 
-  private def resolveAttrOneOpt(a: AttrOneOpt, attrIndex: Int): Unit = {
+  private def resAttrOneOpt(a: AttrOneOpt, attrIndex: Int): Unit = {
     aritiesAttr()
     a match {
       case _: AttrOneOptID             => add(sortOneOptFlatId(a, attrIndex), it2OptId)
@@ -242,7 +242,7 @@ trait ResolveNestedPull[Tpl]
     }
   }
 
-  private def resolveAttrSetMan(a: AttrSetMan): Unit = {
+  private def resAttrSetMan(a: AttrSetMan): Unit = {
     aritiesAttr()
     pullCasts += (a match {
       case _: AttrSetManID             => it2SetId
@@ -271,7 +271,7 @@ trait ResolveNestedPull[Tpl]
     })
   }
 
-  private def resolveAttrSetOpt(a: AttrSetOpt): Unit = {
+  private def resttrSetOpt(a: AttrSetOpt): Unit = {
     aritiesAttr()
     pullCasts += (a match {
       case _: AttrSetOptID             => it2OptSetId
@@ -300,7 +300,7 @@ trait ResolveNestedPull[Tpl]
     })
   }
 
-  private def resolveAttrSeqMan(a: AttrSeqMan): Unit = {
+  private def resAttrSeqMan(a: AttrSeqMan): Unit = {
     aritiesAttr()
     pullCasts += (a match {
       case _: AttrSeqManID             => it2ListId
@@ -329,7 +329,7 @@ trait ResolveNestedPull[Tpl]
     })
   }
 
-  private def resolveAttrSeqOpt(a: AttrSeqOpt): Unit = {
+  private def resAttrSeqOpt(a: AttrSeqOpt): Unit = {
     aritiesAttr()
     pullCasts += (a match {
       case _: AttrSeqOptID             => it2OptListId
@@ -358,7 +358,7 @@ trait ResolveNestedPull[Tpl]
     })
   }
 
-  private def resolveAttrMapMan(a: AttrMapMan): Unit = {
+  private def resAttrMapMan(a: AttrMapMan): Unit = {
     aritiesAttr()
     pullCasts += (a match {
       case _: AttrMapManID             => noId
@@ -387,7 +387,7 @@ trait ResolveNestedPull[Tpl]
     })
   }
 
-  private def resolveAttrMapOpt(a: AttrMapOpt): Unit = {
+  private def resAttrMapOpt(a: AttrMapOpt): Unit = {
     aritiesAttr()
     pullCasts += (a match {
       case _: AttrMapOptID             => noId

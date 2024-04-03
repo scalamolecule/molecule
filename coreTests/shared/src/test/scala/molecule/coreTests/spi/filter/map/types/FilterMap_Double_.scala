@@ -36,7 +36,7 @@ trait FilterMap_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.insert(0).transact // Entity without map attribute
           _ <- Ns.i.doubleMap.insert(List(a, b)).transact
 
-          _ <- Ns.i.a1.doubleMap("-").query.get.map(_ ==> Nil) // When no map is saved
+          _ <- Ns.i.a1.doubleMap("_").query.get.map(_ ==> Nil) // When no map is saved
           _ <- Ns.i.a1.doubleMap("a").query.get.map(_ ==> List((1, double1), (2, double2)))
           _ <- Ns.i.a1.doubleMap("b").query.get.map(_ ==> List((1, double2), (2, double3)))
           _ <- Ns.i.a1.doubleMap("c").query.get.map(_ ==> List((2, double4)))
@@ -69,7 +69,7 @@ trait FilterMap_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         for {
           _ <- Ns.i.doubleMap_?.insert(a, b, c).transact
 
-          _ <- Ns.i.a1.doubleMap_?("-").query.get.map(_ ==> List((1, None), (2, None), (3, None)))
+          _ <- Ns.i.a1.doubleMap_?("_").query.get.map(_ ==> List((1, None), (2, None), (3, None)))
           _ <- Ns.i.a1.doubleMap_?("a").query.get.map(_ ==> List((1, Some(double1)), (2, Some(double2)), (3, None)))
           _ <- Ns.i.a1.doubleMap_?("b").query.get.map(_ ==> List((1, Some(double2)), (2, Some(double3)), (3, None)))
           _ <- Ns.i.a1.doubleMap_?("c").query.get.map(_ ==> List((1, None), (2, Some(double4)), (3, None)))
@@ -130,7 +130,7 @@ trait FilterMap_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.doubleMap_(List("b")).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.doubleMap_(List("c")).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.doubleMap_(List("a", "c")).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.doubleMap_(List("a", "-")).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.doubleMap_(List("a", "_")).query.get.map(_ ==> List(1))
 
           // Empty Seq of keys matches nothing
           _ <- Ns.i.a1.doubleMap_(List.empty[String]).query.get.map(_ ==> Nil)
@@ -139,12 +139,12 @@ trait FilterMap_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.doubleMap_().query.get.map(_ ==> List(0))
 
           // Combine with retrieval
-          _ <- Ns.i.a1.doubleMap.doubleMap_("-").query.get.map(_ ==> Nil)
+          _ <- Ns.i.a1.doubleMap.doubleMap_("_").query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.doubleMap.doubleMap_("a").query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.doubleMap.doubleMap_("b").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.doubleMap.doubleMap_("c").query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.doubleMap.doubleMap_("a", "c").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
-          _ <- Ns.i.a1.doubleMap.doubleMap_("a", "-").query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.doubleMap.doubleMap_("a", "_").query.get.map(_ ==> List((1, Map(a1, b2))))
         } yield ()
       }
 
@@ -171,18 +171,18 @@ trait FilterMap_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.doubleMap_.not(List("b")).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.doubleMap_.not(List("c")).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.doubleMap_.not(List("a", "c")).query.get.map(_ ==> Nil)
-          _ <- Ns.i.a1.doubleMap_.not(List("a", "-")).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.doubleMap_.not(List("a", "_")).query.get.map(_ ==> List(2))
 
           // Negating empty Seq of keys matches all
           _ <- Ns.i.a1.doubleMap_.not(List.empty[String]).query.get.map(_ ==> List(1, 2))
 
           // Combine with retrieval
-          _ <- Ns.i.a1.doubleMap.doubleMap_.not("-").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
+          _ <- Ns.i.a1.doubleMap.doubleMap_.not("_").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.doubleMap.doubleMap_.not("a").query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.doubleMap.doubleMap_.not("b").query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.doubleMap.doubleMap_.not("c").query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.doubleMap.doubleMap_.not("a", "c").query.get.map(_ ==> Nil)
-          _ <- Ns.i.a1.doubleMap.doubleMap_.not("a", "-").query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.doubleMap.doubleMap_.not("a", "_").query.get.map(_ ==> List((2, Map(b3, c4))))
         } yield ()
       }
 
@@ -200,18 +200,24 @@ trait FilterMap_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.doubleMap_.has(double2).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.doubleMap_.has(double3).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.doubleMap_.has(double4).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.doubleMap_.has(double0, double1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.doubleMap_.has(double1, double2).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.doubleMap_.has(double2, double3).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.doubleMap_.has(double3, double4).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.doubleMap_.has(double4, double5).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.doubleMap_.has(double5, double6).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.doubleMap_.has(List(double0)).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.doubleMap_.has(List(double1)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.doubleMap_.has(List(double2)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.doubleMap_.has(List(double3)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.doubleMap_.has(List(double4)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.doubleMap_.has(List(double0, double1)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.doubleMap_.has(List(double1, double2)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.doubleMap_.has(List(double2, double3)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.doubleMap_.has(List(double3, double4)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.doubleMap_.has(List(double4, double5)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.doubleMap_.has(List(double5, double6)).query.get.map(_ ==> List())
 
           // Empty Seq of values matches nothing
           _ <- Ns.i.a1.doubleMap_.has(List.empty[Double]).query.get.map(_ ==> Nil)
@@ -222,9 +228,12 @@ trait FilterMap_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.doubleMap.doubleMap_.has(double2).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.doubleMap.doubleMap_.has(double3).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.doubleMap.doubleMap_.has(double4).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.doubleMap.doubleMap_.has(double0, double1).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.doubleMap.doubleMap_.has(double1, double2).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.doubleMap.doubleMap_.has(double2, double3).query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.doubleMap.doubleMap_.has(double3, double4).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.doubleMap.doubleMap_.has(double4, double5).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.doubleMap.doubleMap_.has(double5, double6).query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -242,18 +251,24 @@ trait FilterMap_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.doubleMap_.hasNo(double2).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.doubleMap_.hasNo(double3).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.doubleMap_.hasNo(double4).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.doubleMap_.hasNo(double0, double1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.doubleMap_.hasNo(double1, double2).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.doubleMap_.hasNo(double2, double3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.doubleMap_.hasNo(double3, double4).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.doubleMap_.hasNo(double4, double5).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.doubleMap_.hasNo(double5, double6).query.get.map(_ ==> List(1, 2))
           // Same as
           _ <- Ns.i.a1.doubleMap_.hasNo(List(double0)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.doubleMap_.hasNo(List(double1)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.doubleMap_.hasNo(List(double2)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.doubleMap_.hasNo(List(double3)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.doubleMap_.hasNo(List(double4)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.doubleMap_.hasNo(List(double0, double1)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.doubleMap_.hasNo(List(double1, double2)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.doubleMap_.hasNo(List(double2, double3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.doubleMap_.hasNo(List(double3, double4)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.doubleMap_.hasNo(List(double4, double5)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.doubleMap_.hasNo(List(double5, double6)).query.get.map(_ ==> List(1, 2))
 
           // Negating empty Seq of values matches all
           _ <- Ns.i.a1.doubleMap_.hasNo(List.empty[Double]).query.get.map(_ ==> List(1, 2))
@@ -264,9 +279,12 @@ trait FilterMap_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.doubleMap.doubleMap_.hasNo(double2).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.doubleMap.doubleMap_.hasNo(double3).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.doubleMap.doubleMap_.hasNo(double4).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.doubleMap.doubleMap_.hasNo(double0, double1).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.doubleMap.doubleMap_.hasNo(double1, double2).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.doubleMap.doubleMap_.hasNo(double2, double3).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.doubleMap.doubleMap_.hasNo(double3, double4).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.doubleMap.doubleMap_.hasNo(double4, double5).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.doubleMap.doubleMap_.hasNo(double5, double6).query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
         } yield ()
       }
     }

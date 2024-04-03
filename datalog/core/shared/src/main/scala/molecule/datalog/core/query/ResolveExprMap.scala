@@ -1,6 +1,5 @@
 package molecule.datalog.core.query
 
-import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.core.util.JavaConversions
 
@@ -149,7 +148,7 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
       case Neq     => containsNoKeys(attr, e, v, map)
       case Has     => hasValues(attr, e, v, map, resMap)
       case HasNo   => hasNoValues(attr, e, v, map, resMap)
-      case NoValue => nonAsserted(attr, e)
+      case NoValue => noValue(attr, e)
       case other   => unexpectedOp(other)
     }
   }
@@ -300,17 +299,8 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
   }
 
 
-  // no value ------------------------------------------------------------------
-
-  private def nonAsserted(attr: Attr, e: Var): Unit = {
+  private def noValue(attr: Attr, e: Var): Unit = {
     val a = nsAttr(attr)
     where += s"(not [$e $a])" -> wNeqOne
-  }
-
-  def noApplyNothing(attr: Attr): Unit = {
-    val a = attr.cleanName
-    throw ModelError(
-      s"Applying nothing to mandatory attribute ($a) is reserved for updates to retract."
-    )
   }
 }

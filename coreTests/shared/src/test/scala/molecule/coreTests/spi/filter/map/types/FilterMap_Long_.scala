@@ -36,7 +36,7 @@ trait FilterMap_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.insert(0).transact // Entity without map attribute
           _ <- Ns.i.longMap.insert(List(a, b)).transact
 
-          _ <- Ns.i.a1.longMap("-").query.get.map(_ ==> Nil) // When no map is saved
+          _ <- Ns.i.a1.longMap("_").query.get.map(_ ==> Nil) // When no map is saved
           _ <- Ns.i.a1.longMap("a").query.get.map(_ ==> List((1, long1), (2, long2)))
           _ <- Ns.i.a1.longMap("b").query.get.map(_ ==> List((1, long2), (2, long3)))
           _ <- Ns.i.a1.longMap("c").query.get.map(_ ==> List((2, long4)))
@@ -69,7 +69,7 @@ trait FilterMap_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         for {
           _ <- Ns.i.longMap_?.insert(a, b, c).transact
 
-          _ <- Ns.i.a1.longMap_?("-").query.get.map(_ ==> List((1, None), (2, None), (3, None)))
+          _ <- Ns.i.a1.longMap_?("_").query.get.map(_ ==> List((1, None), (2, None), (3, None)))
           _ <- Ns.i.a1.longMap_?("a").query.get.map(_ ==> List((1, Some(long1)), (2, Some(long2)), (3, None)))
           _ <- Ns.i.a1.longMap_?("b").query.get.map(_ ==> List((1, Some(long2)), (2, Some(long3)), (3, None)))
           _ <- Ns.i.a1.longMap_?("c").query.get.map(_ ==> List((1, None), (2, Some(long4)), (3, None)))
@@ -130,7 +130,7 @@ trait FilterMap_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.longMap_(List("b")).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.longMap_(List("c")).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.longMap_(List("a", "c")).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.longMap_(List("a", "-")).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.longMap_(List("a", "_")).query.get.map(_ ==> List(1))
 
           // Empty Seq of keys matches nothing
           _ <- Ns.i.a1.longMap_(List.empty[String]).query.get.map(_ ==> Nil)
@@ -139,12 +139,12 @@ trait FilterMap_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.longMap_().query.get.map(_ ==> List(0))
 
           // Combine with retrieval
-          _ <- Ns.i.a1.longMap.longMap_("-").query.get.map(_ ==> Nil)
+          _ <- Ns.i.a1.longMap.longMap_("_").query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.longMap.longMap_("a").query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.longMap.longMap_("b").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.longMap.longMap_("c").query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.longMap.longMap_("a", "c").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
-          _ <- Ns.i.a1.longMap.longMap_("a", "-").query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.longMap.longMap_("a", "_").query.get.map(_ ==> List((1, Map(a1, b2))))
         } yield ()
       }
 
@@ -171,18 +171,18 @@ trait FilterMap_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.longMap_.not(List("b")).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.longMap_.not(List("c")).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.longMap_.not(List("a", "c")).query.get.map(_ ==> Nil)
-          _ <- Ns.i.a1.longMap_.not(List("a", "-")).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.longMap_.not(List("a", "_")).query.get.map(_ ==> List(2))
 
           // Negating empty Seq of keys matches all
           _ <- Ns.i.a1.longMap_.not(List.empty[String]).query.get.map(_ ==> List(1, 2))
 
           // Combine with retrieval
-          _ <- Ns.i.a1.longMap.longMap_.not("-").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
+          _ <- Ns.i.a1.longMap.longMap_.not("_").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.longMap.longMap_.not("a").query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.longMap.longMap_.not("b").query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.longMap.longMap_.not("c").query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.longMap.longMap_.not("a", "c").query.get.map(_ ==> Nil)
-          _ <- Ns.i.a1.longMap.longMap_.not("a", "-").query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.longMap.longMap_.not("a", "_").query.get.map(_ ==> List((2, Map(b3, c4))))
         } yield ()
       }
 
@@ -200,18 +200,24 @@ trait FilterMap_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.longMap_.has(long2).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.longMap_.has(long3).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.longMap_.has(long4).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.longMap_.has(long0, long1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.longMap_.has(long1, long2).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.longMap_.has(long2, long3).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.longMap_.has(long3, long4).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.longMap_.has(long4, long5).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.longMap_.has(long5, long6).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.longMap_.has(List(long0)).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.longMap_.has(List(long1)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.longMap_.has(List(long2)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.longMap_.has(List(long3)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.longMap_.has(List(long4)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.longMap_.has(List(long0, long1)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.longMap_.has(List(long1, long2)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.longMap_.has(List(long2, long3)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.longMap_.has(List(long3, long4)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.longMap_.has(List(long4, long5)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.longMap_.has(List(long5, long6)).query.get.map(_ ==> List())
 
           // Empty Seq of values matches nothing
           _ <- Ns.i.a1.longMap_.has(List.empty[Long]).query.get.map(_ ==> Nil)
@@ -222,9 +228,12 @@ trait FilterMap_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.longMap.longMap_.has(long2).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.longMap.longMap_.has(long3).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.longMap.longMap_.has(long4).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.longMap.longMap_.has(long0, long1).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.longMap.longMap_.has(long1, long2).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.longMap.longMap_.has(long2, long3).query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.longMap.longMap_.has(long3, long4).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.longMap.longMap_.has(long4, long5).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.longMap.longMap_.has(long5, long6).query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -242,18 +251,24 @@ trait FilterMap_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.longMap_.hasNo(long2).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.longMap_.hasNo(long3).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.longMap_.hasNo(long4).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.longMap_.hasNo(long0, long1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.longMap_.hasNo(long1, long2).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.longMap_.hasNo(long2, long3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.longMap_.hasNo(long3, long4).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.longMap_.hasNo(long4, long5).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.longMap_.hasNo(long5, long6).query.get.map(_ ==> List(1, 2))
           // Same as
           _ <- Ns.i.a1.longMap_.hasNo(List(long0)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.longMap_.hasNo(List(long1)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.longMap_.hasNo(List(long2)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.longMap_.hasNo(List(long3)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.longMap_.hasNo(List(long4)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.longMap_.hasNo(List(long0, long1)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.longMap_.hasNo(List(long1, long2)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.longMap_.hasNo(List(long2, long3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.longMap_.hasNo(List(long3, long4)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.longMap_.hasNo(List(long4, long5)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.longMap_.hasNo(List(long5, long6)).query.get.map(_ ==> List(1, 2))
 
           // Negating empty Seq of values matches all
           _ <- Ns.i.a1.longMap_.hasNo(List.empty[Long]).query.get.map(_ ==> List(1, 2))
@@ -264,9 +279,12 @@ trait FilterMap_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.longMap.longMap_.hasNo(long2).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.longMap.longMap_.hasNo(long3).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.longMap.longMap_.hasNo(long4).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.longMap.longMap_.hasNo(long0, long1).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.longMap.longMap_.hasNo(long1, long2).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.longMap.longMap_.hasNo(long2, long3).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.longMap.longMap_.hasNo(long3, long4).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.longMap.longMap_.hasNo(long4, long5).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.longMap.longMap_.hasNo(long5, long6).query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
         } yield ()
       }
     }

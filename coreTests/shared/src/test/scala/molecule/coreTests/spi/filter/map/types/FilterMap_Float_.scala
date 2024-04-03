@@ -36,7 +36,7 @@ trait FilterMap_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.insert(0).transact // Entity without map attribute
           _ <- Ns.i.floatMap.insert(List(a, b)).transact
 
-          _ <- Ns.i.a1.floatMap("-").query.get.map(_ ==> Nil) // When no map is saved
+          _ <- Ns.i.a1.floatMap("_").query.get.map(_ ==> Nil) // When no map is saved
           _ <- Ns.i.a1.floatMap("a").query.get.map(_ ==> List((1, float1), (2, float2)))
           _ <- Ns.i.a1.floatMap("b").query.get.map(_ ==> List((1, float2), (2, float3)))
           _ <- Ns.i.a1.floatMap("c").query.get.map(_ ==> List((2, float4)))
@@ -69,7 +69,7 @@ trait FilterMap_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         for {
           _ <- Ns.i.floatMap_?.insert(a, b, c).transact
 
-          _ <- Ns.i.a1.floatMap_?("-").query.get.map(_ ==> List((1, None), (2, None), (3, None)))
+          _ <- Ns.i.a1.floatMap_?("_").query.get.map(_ ==> List((1, None), (2, None), (3, None)))
           _ <- Ns.i.a1.floatMap_?("a").query.get.map(_ ==> List((1, Some(float1)), (2, Some(float2)), (3, None)))
           _ <- Ns.i.a1.floatMap_?("b").query.get.map(_ ==> List((1, Some(float2)), (2, Some(float3)), (3, None)))
           _ <- Ns.i.a1.floatMap_?("c").query.get.map(_ ==> List((1, None), (2, Some(float4)), (3, None)))
@@ -130,7 +130,7 @@ trait FilterMap_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.floatMap_(List("b")).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.floatMap_(List("c")).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.floatMap_(List("a", "c")).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.floatMap_(List("a", "-")).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.floatMap_(List("a", "_")).query.get.map(_ ==> List(1))
 
           // Empty Seq of keys matches nothing
           _ <- Ns.i.a1.floatMap_(List.empty[String]).query.get.map(_ ==> Nil)
@@ -139,12 +139,12 @@ trait FilterMap_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.floatMap_().query.get.map(_ ==> List(0))
 
           // Combine with retrieval
-          _ <- Ns.i.a1.floatMap.floatMap_("-").query.get.map(_ ==> Nil)
+          _ <- Ns.i.a1.floatMap.floatMap_("_").query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.floatMap.floatMap_("a").query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.floatMap.floatMap_("b").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.floatMap.floatMap_("c").query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.floatMap.floatMap_("a", "c").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
-          _ <- Ns.i.a1.floatMap.floatMap_("a", "-").query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.floatMap.floatMap_("a", "_").query.get.map(_ ==> List((1, Map(a1, b2))))
         } yield ()
       }
 
@@ -171,18 +171,18 @@ trait FilterMap_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.floatMap_.not(List("b")).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.floatMap_.not(List("c")).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.floatMap_.not(List("a", "c")).query.get.map(_ ==> Nil)
-          _ <- Ns.i.a1.floatMap_.not(List("a", "-")).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.floatMap_.not(List("a", "_")).query.get.map(_ ==> List(2))
 
           // Negating empty Seq of keys matches all
           _ <- Ns.i.a1.floatMap_.not(List.empty[String]).query.get.map(_ ==> List(1, 2))
 
           // Combine with retrieval
-          _ <- Ns.i.a1.floatMap.floatMap_.not("-").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
+          _ <- Ns.i.a1.floatMap.floatMap_.not("_").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.floatMap.floatMap_.not("a").query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.floatMap.floatMap_.not("b").query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.floatMap.floatMap_.not("c").query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.floatMap.floatMap_.not("a", "c").query.get.map(_ ==> Nil)
-          _ <- Ns.i.a1.floatMap.floatMap_.not("a", "-").query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.floatMap.floatMap_.not("a", "_").query.get.map(_ ==> List((2, Map(b3, c4))))
         } yield ()
       }
 
@@ -200,18 +200,24 @@ trait FilterMap_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.floatMap_.has(float2).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.floatMap_.has(float3).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.floatMap_.has(float4).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.floatMap_.has(float0, float1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.floatMap_.has(float1, float2).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.floatMap_.has(float2, float3).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.floatMap_.has(float3, float4).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.floatMap_.has(float4, float5).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.floatMap_.has(float5, float6).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.floatMap_.has(List(float0)).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.floatMap_.has(List(float1)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.floatMap_.has(List(float2)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.floatMap_.has(List(float3)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.floatMap_.has(List(float4)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.floatMap_.has(List(float0, float1)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.floatMap_.has(List(float1, float2)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.floatMap_.has(List(float2, float3)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.floatMap_.has(List(float3, float4)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.floatMap_.has(List(float4, float5)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.floatMap_.has(List(float5, float6)).query.get.map(_ ==> List())
 
           // Empty Seq of values matches nothing
           _ <- Ns.i.a1.floatMap_.has(List.empty[Float]).query.get.map(_ ==> Nil)
@@ -222,9 +228,12 @@ trait FilterMap_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.floatMap.floatMap_.has(float2).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.floatMap.floatMap_.has(float3).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.floatMap.floatMap_.has(float4).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.floatMap.floatMap_.has(float0, float1).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.floatMap.floatMap_.has(float1, float2).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.floatMap.floatMap_.has(float2, float3).query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.floatMap.floatMap_.has(float3, float4).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.floatMap.floatMap_.has(float4, float5).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.floatMap.floatMap_.has(float5, float6).query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -242,18 +251,24 @@ trait FilterMap_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.floatMap_.hasNo(float2).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.floatMap_.hasNo(float3).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.floatMap_.hasNo(float4).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.floatMap_.hasNo(float0, float1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.floatMap_.hasNo(float1, float2).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.floatMap_.hasNo(float2, float3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.floatMap_.hasNo(float3, float4).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.floatMap_.hasNo(float4, float5).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.floatMap_.hasNo(float5, float6).query.get.map(_ ==> List(1, 2))
           // Same as
           _ <- Ns.i.a1.floatMap_.hasNo(List(float0)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.floatMap_.hasNo(List(float1)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.floatMap_.hasNo(List(float2)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.floatMap_.hasNo(List(float3)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.floatMap_.hasNo(List(float4)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.floatMap_.hasNo(List(float0, float1)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.floatMap_.hasNo(List(float1, float2)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.floatMap_.hasNo(List(float2, float3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.floatMap_.hasNo(List(float3, float4)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.floatMap_.hasNo(List(float4, float5)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.floatMap_.hasNo(List(float5, float6)).query.get.map(_ ==> List(1, 2))
 
           // Negating empty Seq of values matches all
           _ <- Ns.i.a1.floatMap_.hasNo(List.empty[Float]).query.get.map(_ ==> List(1, 2))
@@ -264,9 +279,12 @@ trait FilterMap_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.floatMap.floatMap_.hasNo(float2).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.floatMap.floatMap_.hasNo(float3).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.floatMap.floatMap_.hasNo(float4).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.floatMap.floatMap_.hasNo(float0, float1).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.floatMap.floatMap_.hasNo(float1, float2).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.floatMap.floatMap_.hasNo(float2, float3).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.floatMap.floatMap_.hasNo(float3, float4).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.floatMap.floatMap_.hasNo(float4, float5).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.floatMap.floatMap_.hasNo(float5, float6).query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
         } yield ()
       }
     }

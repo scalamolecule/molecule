@@ -25,23 +25,37 @@ object AdhocJVM_datomic extends TestSuiteArray_datomic {
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
-      val a = (1, Array(byte1, byte2))
-      val b = (2, Array(byte2, byte3, byte3))
       for {
-        _ <- Ns.i.byteArray.insert(List(a, b)).transact
 
-        // Exact matches
-        _ <- Ns.i.byteArray(Array(byte1)).query.get.map(_ ==> Nil)
-        _ <- Ns.i.byteArray(Array(byte1, byte2)).query.get.map(_ ==> List(a))
-        _ <- Ns.i.byteArray(Array(byte1, byte2, byte3)).query.get.map(_ ==> Nil)
 
-        // Empty Byte array matches nothing
-        _ <- Ns.i.byteArray(Array.empty[Byte]).query.get.map(_ ==> Nil)
-        _ <- Ns.i.byteArray_(Array.empty[Byte]).query.get.map(_ ==> Nil)
+        id <- Ns.doubleMap(Map("a" -> double0)).save.i.transact.map(_.id)
 
-        // Applying nothing matches nothing
-        _ <- Ns.i.byteArray().query.get.map(_ ==> Nil)
-        _ <- Ns.i.byteArray_().query.get.map(_ ==> Nil)
+        _ = {
+          println(id)
+        }
+
+//        _ <- rawTransact(
+//          """[
+//            |  [:db/add 17592186045418 :Ns/doubleMap #db/id[ -1]]
+//            |  [:db/add #db/id[ -1] :Ns.doubleMap/k_ a]
+//            |  [:db/add #db/id[ -1] :Ns.doubleMap/v_ 1.1]
+//            |]
+//            |""".stripMargin)
+//
+//
+//        _ <- rawTransact(
+//          """[
+//            |  [:db/add 17592186045418 :Ns/doubleMap #db/id[ -1]]
+//            |  [:db/add #db/id[ -1] :Ns.doubleMap/k_ a]
+//            |  [:db/add #db/id[ -1] :Ns.doubleMap/v_ 1.1]
+//            |]
+//            |""".stripMargin)
+
+        // Adding pair with existing key replaces the value
+        _ <- Ns(id).doubleMap.add("a" -> double1).update.i.transact
+
+        _ <- Ns.doubleMap.query.get.map(_ ==> List(Map(pdouble1)))
+//        _ <- Ns.doubleMap.query.get.map(_.head ==> Map(pdouble1))
 
         //        _ = {
         //          println("----------- 1")

@@ -294,7 +294,7 @@ trait LambdasBase extends BaseHelpers with AggrUtils with JsonBase { self: SqlQu
   protected lazy val one2jsonBoolean       : Boolean => String        = (v: Boolean) => if (v) "1" else "0"
   protected lazy val one2jsonBigInt        : BigInt => String         = (v: BigInt) => s"$v"
   protected lazy val one2jsonBigDecimal    : BigDecimal => String     = (v: BigDecimal) => s"$v"
-  protected lazy val one2jsonDate          : Date => String           = (v: Date) => s"$v"
+  protected lazy val one2jsonDate          : Date => String           = (v: Date) => v.getTime.toString
   protected lazy val one2jsonDuration      : Duration => String       = (v: Duration) => "\"" + v.toString + "\""
   protected lazy val one2jsonInstant       : Instant => String        = (v: Instant) => "\"" + v.toString + "\""
   protected lazy val one2jsonLocalDate     : LocalDate => String      = (v: LocalDate) => "\"" + v.toString + "\""

@@ -36,7 +36,7 @@ trait FilterMap_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.insert(0).transact // Entity without map attribute
           _ <- Ns.i.stringMap.insert(List(a, b)).transact
 
-          _ <- Ns.i.a1.stringMap("-").query.get.map(_ ==> Nil) // When no map is saved
+          _ <- Ns.i.a1.stringMap("_").query.get.map(_ ==> Nil) // When no map is saved
           _ <- Ns.i.a1.stringMap("a").query.get.map(_ ==> List((1, string1), (2, string2)))
           _ <- Ns.i.a1.stringMap("b").query.get.map(_ ==> List((1, string2), (2, string3)))
           _ <- Ns.i.a1.stringMap("c").query.get.map(_ ==> List((2, string4)))
@@ -69,7 +69,7 @@ trait FilterMap_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         for {
           _ <- Ns.i.stringMap_?.insert(a, b, c).transact
 
-          _ <- Ns.i.a1.stringMap_?("-").query.get.map(_ ==> List((1, None), (2, None), (3, None)))
+          _ <- Ns.i.a1.stringMap_?("_").query.get.map(_ ==> List((1, None), (2, None), (3, None)))
           _ <- Ns.i.a1.stringMap_?("a").query.get.map(_ ==> List((1, Some(string1)), (2, Some(string2)), (3, None)))
           _ <- Ns.i.a1.stringMap_?("b").query.get.map(_ ==> List((1, Some(string2)), (2, Some(string3)), (3, None)))
           _ <- Ns.i.a1.stringMap_?("c").query.get.map(_ ==> List((1, None), (2, Some(string4)), (3, None)))
@@ -130,7 +130,7 @@ trait FilterMap_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.stringMap_(List("b")).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.stringMap_(List("c")).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.stringMap_(List("a", "c")).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.stringMap_(List("a", "-")).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.stringMap_(List("a", "_")).query.get.map(_ ==> List(1))
 
           // Empty Seq of keys matches nothing
           _ <- Ns.i.a1.stringMap_(List.empty[String]).query.get.map(_ ==> Nil)
@@ -139,12 +139,12 @@ trait FilterMap_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.stringMap_().query.get.map(_ ==> List(0))
 
           // Combine with retrieval
-          _ <- Ns.i.a1.stringMap.stringMap_("-").query.get.map(_ ==> Nil)
+          _ <- Ns.i.a1.stringMap.stringMap_("_").query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.stringMap.stringMap_("a").query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.stringMap.stringMap_("b").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.stringMap.stringMap_("c").query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.stringMap.stringMap_("a", "c").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
-          _ <- Ns.i.a1.stringMap.stringMap_("a", "-").query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.stringMap.stringMap_("a", "_").query.get.map(_ ==> List((1, Map(a1, b2))))
         } yield ()
       }
 
@@ -171,18 +171,18 @@ trait FilterMap_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.stringMap_.not(List("b")).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.stringMap_.not(List("c")).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.stringMap_.not(List("a", "c")).query.get.map(_ ==> Nil)
-          _ <- Ns.i.a1.stringMap_.not(List("a", "-")).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.stringMap_.not(List("a", "_")).query.get.map(_ ==> List(2))
 
           // Negating empty Seq of keys matches all
           _ <- Ns.i.a1.stringMap_.not(List.empty[String]).query.get.map(_ ==> List(1, 2))
 
           // Combine with retrieval
-          _ <- Ns.i.a1.stringMap.stringMap_.not("-").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
+          _ <- Ns.i.a1.stringMap.stringMap_.not("_").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.stringMap.stringMap_.not("a").query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.stringMap.stringMap_.not("b").query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.stringMap.stringMap_.not("c").query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.stringMap.stringMap_.not("a", "c").query.get.map(_ ==> Nil)
-          _ <- Ns.i.a1.stringMap.stringMap_.not("a", "-").query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.stringMap.stringMap_.not("a", "_").query.get.map(_ ==> List((2, Map(b3, c4))))
         } yield ()
       }
 
@@ -200,18 +200,24 @@ trait FilterMap_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.stringMap_.has(string2).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.stringMap_.has(string3).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.stringMap_.has(string4).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.stringMap_.has(string0, string1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.stringMap_.has(string1, string2).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.stringMap_.has(string2, string3).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.stringMap_.has(string3, string4).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.stringMap_.has(string4, string5).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.stringMap_.has(string5, string6).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.stringMap_.has(List(string0)).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.stringMap_.has(List(string1)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.stringMap_.has(List(string2)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.stringMap_.has(List(string3)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.stringMap_.has(List(string4)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.stringMap_.has(List(string0, string1)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.stringMap_.has(List(string1, string2)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.stringMap_.has(List(string2, string3)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.stringMap_.has(List(string3, string4)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.stringMap_.has(List(string4, string5)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.stringMap_.has(List(string5, string6)).query.get.map(_ ==> List())
 
           // Empty Seq of values matches nothing
           _ <- Ns.i.a1.stringMap_.has(List.empty[String]).query.get.map(_ ==> Nil)
@@ -222,9 +228,12 @@ trait FilterMap_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.stringMap.stringMap_.has(string2).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.stringMap.stringMap_.has(string3).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.stringMap.stringMap_.has(string4).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.stringMap.stringMap_.has(string0, string1).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.stringMap.stringMap_.has(string1, string2).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.stringMap.stringMap_.has(string2, string3).query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.stringMap.stringMap_.has(string3, string4).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.stringMap.stringMap_.has(string4, string5).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.stringMap.stringMap_.has(string5, string6).query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -242,18 +251,24 @@ trait FilterMap_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.stringMap_.hasNo(string2).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.stringMap_.hasNo(string3).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.stringMap_.hasNo(string4).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.stringMap_.hasNo(string0, string1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.stringMap_.hasNo(string1, string2).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.stringMap_.hasNo(string2, string3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.stringMap_.hasNo(string3, string4).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.stringMap_.hasNo(string4, string5).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.stringMap_.hasNo(string5, string6).query.get.map(_ ==> List(1, 2))
           // Same as
           _ <- Ns.i.a1.stringMap_.hasNo(List(string0)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.stringMap_.hasNo(List(string1)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.stringMap_.hasNo(List(string2)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.stringMap_.hasNo(List(string3)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.stringMap_.hasNo(List(string4)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.stringMap_.hasNo(List(string0, string1)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.stringMap_.hasNo(List(string1, string2)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.stringMap_.hasNo(List(string2, string3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.stringMap_.hasNo(List(string3, string4)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.stringMap_.hasNo(List(string4, string5)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.stringMap_.hasNo(List(string5, string6)).query.get.map(_ ==> List(1, 2))
 
           // Negating empty Seq of values matches all
           _ <- Ns.i.a1.stringMap_.hasNo(List.empty[String]).query.get.map(_ ==> List(1, 2))
@@ -264,9 +279,12 @@ trait FilterMap_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.stringMap.stringMap_.hasNo(string2).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.stringMap.stringMap_.hasNo(string3).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.stringMap.stringMap_.hasNo(string4).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.stringMap.stringMap_.hasNo(string0, string1).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.stringMap.stringMap_.hasNo(string1, string2).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.stringMap.stringMap_.hasNo(string2, string3).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.stringMap.stringMap_.hasNo(string3, string4).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.stringMap.stringMap_.hasNo(string4, string5).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.stringMap.stringMap_.hasNo(string5, string6).query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
         } yield ()
       }
     }

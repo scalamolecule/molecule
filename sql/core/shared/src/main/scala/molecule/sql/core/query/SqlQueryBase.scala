@@ -1,17 +1,16 @@
 package molecule.sql.core.query
 
 import molecule.base.ast.Card
-import molecule.base.error._
 import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
-import molecule.core.query.Model2QueryBase
+import molecule.core.query.{Model2QueryBase, ResolveExprExceptions}
 import molecule.core.util.JavaConversions
 import molecule.sql.core.javaSql.{PrepStmt, ResultSetInterface}
 import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
 
-trait SqlQueryBase extends Model2QueryBase with BaseHelpers with JavaConversions {
+trait SqlQueryBase extends Model2QueryBase with ResolveExprExceptions with  BaseHelpers with JavaConversions {
 
   type RS = ResultSetInterface
   type ParamIndex = Int
@@ -116,25 +115,5 @@ trait SqlQueryBase extends Model2QueryBase with BaseHelpers with JavaConversions
   final protected def aritiesAttr(): Unit = {
     // Add new arity of 1
     aritiess = aritiess.init :+ (aritiess.last :+ List(1))
-  }
-
-  final protected def unexpectedElement(element: Element) = throw ModelError("Unexpected element: " + element)
-  final protected def unexpectedOp(op: Op) = throw ModelError("Unexpected operation: " + op)
-  final protected def unexpectedKw(kw: String) = throw ModelError("Unexpected keyword: " + kw)
-
-  final protected def noMixedNestedModes = throw ModelError(
-    "Can't mix mandatory/optional nested queries."
-  )
-
-  def noCollectionMatching(attr: Attr) = {
-    val a = attr.cleanName
-    throw ModelError(s"Matching collections ($a) not supported in queries.")
-  }
-
-  def noApplyNothing(attr: Attr): Unit = {
-    val a = attr.cleanName
-    throw ModelError(
-      s"Applying nothing to mandatory attribute ($a) is reserved for updates to retract."
-    )
   }
 }

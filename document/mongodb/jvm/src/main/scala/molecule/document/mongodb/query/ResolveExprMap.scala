@@ -8,7 +8,7 @@ import molecule.document.mongodb.query.mongoModel.{Branch, NestedEmbed, NestedRe
 import org.bson._
 import org.bson.conversions.Bson
 
-trait ResolveExprMap extends ResolveExpr { self: MongoQueryBase with LambdasMap =>
+trait ResolveExprMap extends ResolveExpr with LambdasMap { self: MongoQueryBase =>
 
   override protected def resolveAttrMapMan(attr: AttrMapMan): Unit = {
     //    attr match {

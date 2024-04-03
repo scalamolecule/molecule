@@ -37,7 +37,7 @@ trait FilterMap_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
           _ <- Ns.i.insert(0).transact // Entity without map attribute
           _ <- Ns.i.localDateMap.insert(List(a, b)).transact
 
-          _ <- Ns.i.a1.localDateMap("-").query.get.map(_ ==> Nil) // When no map is saved
+          _ <- Ns.i.a1.localDateMap("_").query.get.map(_ ==> Nil) // When no map is saved
           _ <- Ns.i.a1.localDateMap("a").query.get.map(_ ==> List((1, localDate1), (2, localDate2)))
           _ <- Ns.i.a1.localDateMap("b").query.get.map(_ ==> List((1, localDate2), (2, localDate3)))
           _ <- Ns.i.a1.localDateMap("c").query.get.map(_ ==> List((2, localDate4)))
@@ -70,7 +70,7 @@ trait FilterMap_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
         for {
           _ <- Ns.i.localDateMap_?.insert(a, b, c).transact
 
-          _ <- Ns.i.a1.localDateMap_?("-").query.get.map(_ ==> List((1, None), (2, None), (3, None)))
+          _ <- Ns.i.a1.localDateMap_?("_").query.get.map(_ ==> List((1, None), (2, None), (3, None)))
           _ <- Ns.i.a1.localDateMap_?("a").query.get.map(_ ==> List((1, Some(localDate1)), (2, Some(localDate2)), (3, None)))
           _ <- Ns.i.a1.localDateMap_?("b").query.get.map(_ ==> List((1, Some(localDate2)), (2, Some(localDate3)), (3, None)))
           _ <- Ns.i.a1.localDateMap_?("c").query.get.map(_ ==> List((1, None), (2, Some(localDate4)), (3, None)))
@@ -131,7 +131,7 @@ trait FilterMap_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
           _ <- Ns.i.a1.localDateMap_(List("b")).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.localDateMap_(List("c")).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.localDateMap_(List("a", "c")).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.localDateMap_(List("a", "-")).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.localDateMap_(List("a", "_")).query.get.map(_ ==> List(1))
 
           // Empty Seq of keys matches nothing
           _ <- Ns.i.a1.localDateMap_(List.empty[String]).query.get.map(_ ==> Nil)
@@ -140,12 +140,12 @@ trait FilterMap_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
           _ <- Ns.i.a1.localDateMap_().query.get.map(_ ==> List(0))
 
           // Combine with retrieval
-          _ <- Ns.i.a1.localDateMap.localDateMap_("-").query.get.map(_ ==> Nil)
+          _ <- Ns.i.a1.localDateMap.localDateMap_("_").query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.localDateMap.localDateMap_("a").query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.localDateMap.localDateMap_("b").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.localDateMap.localDateMap_("c").query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.localDateMap.localDateMap_("a", "c").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
-          _ <- Ns.i.a1.localDateMap.localDateMap_("a", "-").query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.localDateMap.localDateMap_("a", "_").query.get.map(_ ==> List((1, Map(a1, b2))))
         } yield ()
       }
 
@@ -172,18 +172,18 @@ trait FilterMap_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
           _ <- Ns.i.a1.localDateMap_.not(List("b")).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.localDateMap_.not(List("c")).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.localDateMap_.not(List("a", "c")).query.get.map(_ ==> Nil)
-          _ <- Ns.i.a1.localDateMap_.not(List("a", "-")).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.localDateMap_.not(List("a", "_")).query.get.map(_ ==> List(2))
 
           // Negating empty Seq of keys matches all
           _ <- Ns.i.a1.localDateMap_.not(List.empty[String]).query.get.map(_ ==> List(1, 2))
 
           // Combine with retrieval
-          _ <- Ns.i.a1.localDateMap.localDateMap_.not("-").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
+          _ <- Ns.i.a1.localDateMap.localDateMap_.not("_").query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.localDateMap.localDateMap_.not("a").query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.localDateMap.localDateMap_.not("b").query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.localDateMap.localDateMap_.not("c").query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.localDateMap.localDateMap_.not("a", "c").query.get.map(_ ==> Nil)
-          _ <- Ns.i.a1.localDateMap.localDateMap_.not("a", "-").query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.localDateMap.localDateMap_.not("a", "_").query.get.map(_ ==> List((2, Map(b3, c4))))
         } yield ()
       }
 
@@ -201,18 +201,24 @@ trait FilterMap_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
           _ <- Ns.i.a1.localDateMap_.has(localDate2).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.localDateMap_.has(localDate3).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.localDateMap_.has(localDate4).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.localDateMap_.has(localDate0, localDate1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.localDateMap_.has(localDate1, localDate2).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.localDateMap_.has(localDate2, localDate3).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.localDateMap_.has(localDate3, localDate4).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.localDateMap_.has(localDate4, localDate5).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.localDateMap_.has(localDate5, localDate6).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.localDateMap_.has(List(localDate0)).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.localDateMap_.has(List(localDate1)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.localDateMap_.has(List(localDate2)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.localDateMap_.has(List(localDate3)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.localDateMap_.has(List(localDate4)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.localDateMap_.has(List(localDate0, localDate1)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.localDateMap_.has(List(localDate1, localDate2)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.localDateMap_.has(List(localDate2, localDate3)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.localDateMap_.has(List(localDate3, localDate4)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.localDateMap_.has(List(localDate4, localDate5)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.localDateMap_.has(List(localDate5, localDate6)).query.get.map(_ ==> List())
 
           // Empty Seq of values matches nothing
           _ <- Ns.i.a1.localDateMap_.has(List.empty[LocalDate]).query.get.map(_ ==> Nil)
@@ -223,9 +229,12 @@ trait FilterMap_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
           _ <- Ns.i.a1.localDateMap.localDateMap_.has(localDate2).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.localDateMap.localDateMap_.has(localDate3).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.localDateMap.localDateMap_.has(localDate4).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.localDateMap.localDateMap_.has(localDate0, localDate1).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.localDateMap.localDateMap_.has(localDate1, localDate2).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.localDateMap.localDateMap_.has(localDate2, localDate3).query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
           _ <- Ns.i.a1.localDateMap.localDateMap_.has(localDate3, localDate4).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.localDateMap.localDateMap_.has(localDate4, localDate5).query.get.map(_ ==> List((2, Map(b3, c4))))
+          _ <- Ns.i.a1.localDateMap.localDateMap_.has(localDate5, localDate6).query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -243,18 +252,24 @@ trait FilterMap_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
           _ <- Ns.i.a1.localDateMap_.hasNo(localDate2).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.localDateMap_.hasNo(localDate3).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.localDateMap_.hasNo(localDate4).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.localDateMap_.hasNo(localDate0, localDate1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.localDateMap_.hasNo(localDate1, localDate2).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.localDateMap_.hasNo(localDate2, localDate3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localDateMap_.hasNo(localDate3, localDate4).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.localDateMap_.hasNo(localDate4, localDate5).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.localDateMap_.hasNo(localDate5, localDate6).query.get.map(_ ==> List(1, 2))
           // Same as
           _ <- Ns.i.a1.localDateMap_.hasNo(List(localDate0)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.localDateMap_.hasNo(List(localDate1)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.localDateMap_.hasNo(List(localDate2)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.localDateMap_.hasNo(List(localDate3)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.localDateMap_.hasNo(List(localDate4)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.localDateMap_.hasNo(List(localDate0, localDate1)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.localDateMap_.hasNo(List(localDate1, localDate2)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.localDateMap_.hasNo(List(localDate2, localDate3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localDateMap_.hasNo(List(localDate3, localDate4)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.localDateMap_.hasNo(List(localDate4, localDate5)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.localDateMap_.hasNo(List(localDate5, localDate6)).query.get.map(_ ==> List(1, 2))
 
           // Negating empty Seq of values matches all
           _ <- Ns.i.a1.localDateMap_.hasNo(List.empty[LocalDate]).query.get.map(_ ==> List(1, 2))
@@ -265,9 +280,12 @@ trait FilterMap_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
           _ <- Ns.i.a1.localDateMap.localDateMap_.hasNo(localDate2).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.localDateMap.localDateMap_.hasNo(localDate3).query.get.map(_ ==> List((1, Map(a1, b2))))
           _ <- Ns.i.a1.localDateMap.localDateMap_.hasNo(localDate4).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.localDateMap.localDateMap_.hasNo(localDate0, localDate1).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.localDateMap.localDateMap_.hasNo(localDate1, localDate2).query.get.map(_ ==> List((2, Map(b3, c4))))
           _ <- Ns.i.a1.localDateMap.localDateMap_.hasNo(localDate2, localDate3).query.get.map(_ ==> Nil)
           _ <- Ns.i.a1.localDateMap.localDateMap_.hasNo(localDate3, localDate4).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.localDateMap.localDateMap_.hasNo(localDate4, localDate5).query.get.map(_ ==> List((1, Map(a1, b2))))
+          _ <- Ns.i.a1.localDateMap.localDateMap_.hasNo(localDate5, localDate6).query.get.map(_ ==> List((1, Map(a1, b2)), (2, Map(b3, c4))))
         } yield ()
       }
     }
