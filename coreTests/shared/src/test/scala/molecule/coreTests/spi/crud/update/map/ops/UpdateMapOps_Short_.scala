@@ -36,13 +36,21 @@ trait UpdateMapOps_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "add" - types { implicit conn =>
       for {
-        id <- Ns.shortMap(Map(pshort1)).save.transact.map(_.id)
+        id <- Ns.shortMap(Map("a" -> short0)).save.transact.map(_.id)
+
+        // Adding pair with existing key replaces the value
+        _ <- Ns(id).shortMap.add("a" -> short1).update.transact
+        _ <- Ns.shortMap.query.get.map(_.head ==> Map(pshort1))
+
+        // Update doesn't add pair if no map attribute already exists
+        _ <- Ns(id).iMap.add("a" -> 1).update.transact
+        _ <- Ns.shortMap.iMap_?.query.get.map(_ ==> List((Map(pshort1), None)))
+
+        // Upsert adds pair to new map attribute if it wasn't already saved
+        _ <- Ns(id).iMap.add("a" -> 1).upsert.transact
+        _ <- Ns.shortMap.iMap_?.query.get.map(_ ==> List((Map(pshort1), Some(Map("a" -> 1)))))
 
         // Add pair
-        _ <- Ns(id).shortMap.add(pshort2).update.transact
-        _ <- Ns.shortMap.query.get.map(_.head ==> Map(pshort1, pshort2))
-
-        // Adding existing pair has no effect (Map semantics of only unique pairs)
         _ <- Ns(id).shortMap.add(pshort2).update.transact
         _ <- Ns.shortMap.query.get.map(_.head ==> Map(pshort1, pshort2))
 
@@ -63,17 +71,24 @@ trait UpdateMapOps_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "remove" - types { implicit conn =>
       for {
-        id <- Ns.shortMap(Map(pshort1, pshort2, pshort3, pshort4, pshort5, pshort6, pshort7)).save.transact.map(_.id)
+        id <- Ns.shortMap(Map(pshort1, pshort2, pshort3, pshort4, pshort5, pshort6, pshort7, pshort8)).save.transact.map(_.id)
 
-        // Remove pair by String key
-        _ <- Ns(id).shortMap.remove(string7).update.transact
+        // Remove pair by String key with update and upsert has same semantics
+        _ <- Ns(id).shortMap.remove(string8).update.transact
+        _ <- Ns(id).shortMap.remove(string7).upsert.transact
         _ <- Ns.shortMap.query.get.map(_.head ==> Map(pshort1, pshort2, pshort3, pshort4, pshort5, pshort6))
+
+        // Removing a pair in a non-asserted map attribute has no effect
+        _ <- Ns.shortMap.iMap_?.query.get.map(_.head._2 ==> None)
+        _ <- Ns(id).iMap.remove("a").update.transact
+        _ <- Ns(id).iMap.remove("a").upsert.transact
+        _ <- Ns.shortMap.iMap_?.query.get.map(_.head._2 ==> None)
 
         // Removing non-existing key has no effect
         _ <- Ns(id).shortMap.remove(string9).update.transact
         _ <- Ns.shortMap.query.get.map(_.head ==> Map(pshort1, pshort2, pshort3, pshort4, pshort5, pshort6))
 
-        // Removing duplicate keys removes the distinct pair
+        // Removing duplicate keys removes the distinct key only
         _ <- Ns(id).shortMap.remove(string6, string6).update.transact
         _ <- Ns.shortMap.query.get.map(_.head ==> Map(pshort1, pshort2, pshort3, pshort4, pshort5))
 

@@ -37,13 +37,21 @@ trait UpdateMapOps_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "add" - types { implicit conn =>
       for {
-        id <- Ns.dateMap(Map(pdate1)).save.transact.map(_.id)
+        id <- Ns.dateMap(Map("a" -> date0)).save.transact.map(_.id)
+
+        // Adding pair with existing key replaces the value
+        _ <- Ns(id).dateMap.add("a" -> date1).update.transact
+        _ <- Ns.dateMap.query.get.map(_.head ==> Map(pdate1))
+
+        // Update doesn't add pair if no map attribute already exists
+        _ <- Ns(id).iMap.add("a" -> 1).update.transact
+        _ <- Ns.dateMap.iMap_?.query.get.map(_ ==> List((Map(pdate1), None)))
+
+        // Upsert adds pair to new map attribute if it wasn't already saved
+        _ <- Ns(id).iMap.add("a" -> 1).upsert.transact
+        _ <- Ns.dateMap.iMap_?.query.get.map(_ ==> List((Map(pdate1), Some(Map("a" -> 1)))))
 
         // Add pair
-        _ <- Ns(id).dateMap.add(pdate2).update.transact
-        _ <- Ns.dateMap.query.get.map(_.head ==> Map(pdate1, pdate2))
-
-        // Adding existing pair has no effect (Map semantics of only unique pairs)
         _ <- Ns(id).dateMap.add(pdate2).update.transact
         _ <- Ns.dateMap.query.get.map(_.head ==> Map(pdate1, pdate2))
 
@@ -64,17 +72,24 @@ trait UpdateMapOps_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "remove" - types { implicit conn =>
       for {
-        id <- Ns.dateMap(Map(pdate1, pdate2, pdate3, pdate4, pdate5, pdate6, pdate7)).save.transact.map(_.id)
+        id <- Ns.dateMap(Map(pdate1, pdate2, pdate3, pdate4, pdate5, pdate6, pdate7, pdate8)).save.transact.map(_.id)
 
-        // Remove pair by String key
-        _ <- Ns(id).dateMap.remove(string7).update.transact
+        // Remove pair by String key with update and upsert has same semantics
+        _ <- Ns(id).dateMap.remove(string8).update.transact
+        _ <- Ns(id).dateMap.remove(string7).upsert.transact
         _ <- Ns.dateMap.query.get.map(_.head ==> Map(pdate1, pdate2, pdate3, pdate4, pdate5, pdate6))
+
+        // Removing a pair in a non-asserted map attribute has no effect
+        _ <- Ns.dateMap.iMap_?.query.get.map(_.head._2 ==> None)
+        _ <- Ns(id).iMap.remove("a").update.transact
+        _ <- Ns(id).iMap.remove("a").upsert.transact
+        _ <- Ns.dateMap.iMap_?.query.get.map(_.head._2 ==> None)
 
         // Removing non-existing key has no effect
         _ <- Ns(id).dateMap.remove(string9).update.transact
         _ <- Ns.dateMap.query.get.map(_.head ==> Map(pdate1, pdate2, pdate3, pdate4, pdate5, pdate6))
 
-        // Removing duplicate keys removes the distinct pair
+        // Removing duplicate keys removes the distinct key only
         _ <- Ns(id).dateMap.remove(string6, string6).update.transact
         _ <- Ns.dateMap.query.get.map(_.head ==> Map(pdate1, pdate2, pdate3, pdate4, pdate5))
 

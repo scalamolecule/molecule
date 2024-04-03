@@ -31,7 +31,7 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
       val colSetter = {
         if (set.nonEmpty) {
           if (!isUpsert) {
-            addToUpdateCols(ns, attr)
+            addToUpdateColsNotNull(ns, attr)
           }
           val json = set2json(set, value2json)
           (ps: PS, _: IdsMap, _: RowIndex) => {
@@ -82,7 +82,7 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
       if(set.nonEmpty){
         updateCurRefPath(attr)
         if (!isUpsert) {
-          addToUpdateCols(ns, attr)
+          addToUpdateColsNotNull(ns, attr)
         }
         placeHolders = placeHolders :+ s"$attr = JSON_MERGE($attr, ?)"
         val json = set2json(set, value2json)
@@ -120,7 +120,7 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
       if (set.nonEmpty) {
         updateCurRefPath(attr)
         if (!isUpsert) {
-          addToUpdateCols(ns, attr)
+          addToUpdateColsNotNull(ns, attr)
         }
         val valueTable    = "table_" + (placeHolders.size + 1)
         val cast          = exts.head

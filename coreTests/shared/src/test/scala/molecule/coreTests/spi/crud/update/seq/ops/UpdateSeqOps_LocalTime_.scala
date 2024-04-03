@@ -28,7 +28,7 @@ trait UpdateSeqOps_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
         _ <- Ns.localTimeSeq.query.get.map(_ ==> Nil)
 
         id <- Ns.localTimeSeq(List(localTime1, localTime2, localTime2)).save.transact.map(_.id)
-        // Applying empty value deletes previous Seq
+        // Applying nothing deletes previous Seq
         _ <- Ns(id).localTimeSeq().update.transact
         _ <- Ns.localTimeSeq.query.get.map(_ ==> Nil)
       } yield ()

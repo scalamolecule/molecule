@@ -27,7 +27,7 @@ trait UpdateSeqOps_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
         _ <- Ns.stringSeq.query.get.map(_ ==> Nil)
 
         id <- Ns.stringSeq(List(string1, string2, string2)).save.transact.map(_.id)
-        // Applying empty value deletes previous Seq
+        // Applying nothing deletes previous Seq
         _ <- Ns(id).stringSeq().update.transact
         _ <- Ns.stringSeq.query.get.map(_ ==> Nil)
       } yield ()

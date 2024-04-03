@@ -27,7 +27,7 @@ trait UpdateSeqOps_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.shortSeq.query.get.map(_ ==> Nil)
 
         id <- Ns.shortSeq(List(short1, short2, short2)).save.transact.map(_.id)
-        // Applying empty value deletes previous Seq
+        // Applying nothing deletes previous Seq
         _ <- Ns(id).shortSeq().update.transact
         _ <- Ns.shortSeq.query.get.map(_ ==> Nil)
       } yield ()

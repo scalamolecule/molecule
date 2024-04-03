@@ -8,6 +8,7 @@ object Types extends DataModel(5) {
     val i    = oneInt
     val iSet = setInt
     val iSeq = seqInt
+    val iMap = mapInt
     val s    = oneString
     val u    = oneInt.unique
 

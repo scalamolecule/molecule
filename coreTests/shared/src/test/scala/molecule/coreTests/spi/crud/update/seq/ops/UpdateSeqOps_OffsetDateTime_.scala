@@ -28,7 +28,7 @@ trait UpdateSeqOps_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: Sp
         _ <- Ns.offsetDateTimeSeq.query.get.map(_ ==> Nil)
 
         id <- Ns.offsetDateTimeSeq(List(offsetDateTime1, offsetDateTime2, offsetDateTime2)).save.transact.map(_.id)
-        // Applying empty value deletes previous Seq
+        // Applying nothing deletes previous Seq
         _ <- Ns(id).offsetDateTimeSeq().update.transact
         _ <- Ns.offsetDateTimeSeq.query.get.map(_ ==> Nil)
       } yield ()

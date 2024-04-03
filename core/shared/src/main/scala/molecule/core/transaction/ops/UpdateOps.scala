@@ -109,9 +109,9 @@ trait UpdateOps extends Action2Data with BaseOps {
     owner: Boolean,
     map: Map[String, T],
     transformValue: T => Any,
+    value2json: (StringBuffer, T) => StringBuffer
     //    exts: List[String],
     //    set2array: Set[Any] => Array[AnyRef],
-    //    value2json: (StringBuffer, T) => StringBuffer
   ): Unit = ???
 
   def updateMapAdd[T](
@@ -121,9 +121,9 @@ trait UpdateOps extends Action2Data with BaseOps {
     owner: Boolean,
     map: Map[String, T],
     transformValue: T => Any,
-    //    exts: List[String],
+    exts: List[String],
+    value2json: (StringBuffer, T) => StringBuffer,
     //    set2array: Set[Any] => Array[AnyRef],
-    //    value2json: (StringBuffer, T) => StringBuffer
   ): Unit = ???
 
   def updateMapRemove[T](
@@ -133,7 +133,8 @@ trait UpdateOps extends Action2Data with BaseOps {
     owner: Boolean,
     map: Map[String, T],
     transformValue: T => Any,
-    //    exts: List[String],
+    exts: List[String],
+    value2json: (StringBuffer, T) => StringBuffer,
     //    one2json: T => String
   ): Unit = ???
 

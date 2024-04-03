@@ -28,7 +28,7 @@ trait UpdateSeqOps_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
         _ <- Ns.instantSeq.query.get.map(_ ==> Nil)
 
         id <- Ns.instantSeq(List(instant1, instant2, instant2)).save.transact.map(_.id)
-        // Applying empty value deletes previous Seq
+        // Applying nothing deletes previous Seq
         _ <- Ns(id).instantSeq().update.transact
         _ <- Ns.instantSeq.query.get.map(_ ==> Nil)
       } yield ()

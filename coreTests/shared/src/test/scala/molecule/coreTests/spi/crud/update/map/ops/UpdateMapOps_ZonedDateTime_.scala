@@ -37,13 +37,21 @@ trait UpdateMapOps_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: Spi
 
     "add" - types { implicit conn =>
       for {
-        id <- Ns.zonedDateTimeMap(Map(pzonedDateTime1)).save.transact.map(_.id)
+        id <- Ns.zonedDateTimeMap(Map("a" -> zonedDateTime0)).save.transact.map(_.id)
+
+        // Adding pair with existing key replaces the value
+        _ <- Ns(id).zonedDateTimeMap.add("a" -> zonedDateTime1).update.transact
+        _ <- Ns.zonedDateTimeMap.query.get.map(_.head ==> Map(pzonedDateTime1))
+
+        // Update doesn't add pair if no map attribute already exists
+        _ <- Ns(id).iMap.add("a" -> 1).update.transact
+        _ <- Ns.zonedDateTimeMap.iMap_?.query.get.map(_ ==> List((Map(pzonedDateTime1), None)))
+
+        // Upsert adds pair to new map attribute if it wasn't already saved
+        _ <- Ns(id).iMap.add("a" -> 1).upsert.transact
+        _ <- Ns.zonedDateTimeMap.iMap_?.query.get.map(_ ==> List((Map(pzonedDateTime1), Some(Map("a" -> 1)))))
 
         // Add pair
-        _ <- Ns(id).zonedDateTimeMap.add(pzonedDateTime2).update.transact
-        _ <- Ns.zonedDateTimeMap.query.get.map(_.head ==> Map(pzonedDateTime1, pzonedDateTime2))
-
-        // Adding existing pair has no effect (Map semantics of only unique pairs)
         _ <- Ns(id).zonedDateTimeMap.add(pzonedDateTime2).update.transact
         _ <- Ns.zonedDateTimeMap.query.get.map(_.head ==> Map(pzonedDateTime1, pzonedDateTime2))
 
@@ -64,17 +72,24 @@ trait UpdateMapOps_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: Spi
 
     "remove" - types { implicit conn =>
       for {
-        id <- Ns.zonedDateTimeMap(Map(pzonedDateTime1, pzonedDateTime2, pzonedDateTime3, pzonedDateTime4, pzonedDateTime5, pzonedDateTime6, pzonedDateTime7)).save.transact.map(_.id)
+        id <- Ns.zonedDateTimeMap(Map(pzonedDateTime1, pzonedDateTime2, pzonedDateTime3, pzonedDateTime4, pzonedDateTime5, pzonedDateTime6, pzonedDateTime7, pzonedDateTime8)).save.transact.map(_.id)
 
-        // Remove pair by String key
-        _ <- Ns(id).zonedDateTimeMap.remove(string7).update.transact
+        // Remove pair by String key with update and upsert has same semantics
+        _ <- Ns(id).zonedDateTimeMap.remove(string8).update.transact
+        _ <- Ns(id).zonedDateTimeMap.remove(string7).upsert.transact
         _ <- Ns.zonedDateTimeMap.query.get.map(_.head ==> Map(pzonedDateTime1, pzonedDateTime2, pzonedDateTime3, pzonedDateTime4, pzonedDateTime5, pzonedDateTime6))
+
+        // Removing a pair in a non-asserted map attribute has no effect
+        _ <- Ns.zonedDateTimeMap.iMap_?.query.get.map(_.head._2 ==> None)
+        _ <- Ns(id).iMap.remove("a").update.transact
+        _ <- Ns(id).iMap.remove("a").upsert.transact
+        _ <- Ns.zonedDateTimeMap.iMap_?.query.get.map(_.head._2 ==> None)
 
         // Removing non-existing key has no effect
         _ <- Ns(id).zonedDateTimeMap.remove(string9).update.transact
         _ <- Ns.zonedDateTimeMap.query.get.map(_.head ==> Map(pzonedDateTime1, pzonedDateTime2, pzonedDateTime3, pzonedDateTime4, pzonedDateTime5, pzonedDateTime6))
 
-        // Removing duplicate keys removes the distinct pair
+        // Removing duplicate keys removes the distinct key only
         _ <- Ns(id).zonedDateTimeMap.remove(string6, string6).update.transact
         _ <- Ns.zonedDateTimeMap.query.get.map(_.head ==> Map(pzonedDateTime1, pzonedDateTime2, pzonedDateTime3, pzonedDateTime4, pzonedDateTime5))
 

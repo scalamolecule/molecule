@@ -28,7 +28,7 @@ trait UpdateSeqOps_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.uuidSeq.query.get.map(_ ==> Nil)
 
         id <- Ns.uuidSeq(List(uuid1, uuid2, uuid2)).save.transact.map(_.id)
-        // Applying empty value deletes previous Seq
+        // Applying nothing deletes previous Seq
         _ <- Ns(id).uuidSeq().update.transact
         _ <- Ns.uuidSeq.query.get.map(_ ==> Nil)
       } yield ()

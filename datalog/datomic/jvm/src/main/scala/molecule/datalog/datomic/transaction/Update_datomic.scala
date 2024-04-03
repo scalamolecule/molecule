@@ -246,6 +246,7 @@ trait Update_datomic
     owner: Boolean,
     map: Map[String, T],
     transformValue: T => Any,
+    value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     if (isUpdate) {
       val dummyFilterAttr = AttrOneTacInt(ns, attr)
@@ -268,6 +269,8 @@ trait Update_datomic
     owner: Boolean,
     map: Map[String, T],
     transformValue: T => Any,
+    exts: List[String],
+    value2json: (StringBuffer, T) => StringBuffer,
   ): Unit = {
     if (map.nonEmpty) {
       val pairs = map.map { case (k, v) =>
@@ -284,6 +287,8 @@ trait Update_datomic
     owner: Boolean,
     map: Map[String, T],
     transformValue: T => Any,
+    exts: List[String],
+    value2json: (StringBuffer, T) => StringBuffer,
   ): Unit = {
     if (map.nonEmpty) {
       data += (("retract", ns, attr, map.keys.toSeq, false, "map"))

@@ -27,7 +27,7 @@ trait UpdateSeqOps_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
         _ <- Ns.bigIntSeq.query.get.map(_ ==> Nil)
 
         id <- Ns.bigIntSeq(List(bigInt1, bigInt2, bigInt2)).save.transact.map(_.id)
-        // Applying empty value deletes previous Seq
+        // Applying nothing deletes previous Seq
         _ <- Ns(id).bigIntSeq().update.transact
         _ <- Ns.bigIntSeq.query.get.map(_ ==> Nil)
       } yield ()

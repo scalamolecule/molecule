@@ -1,16 +1,19 @@
 package molecule.sql.core.transaction
 
 import java.sql.{Statement, PreparedStatement => PS}
+import boopickle.Default._
 import molecule.base.ast._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ResolveSave
 import molecule.core.transaction.ops.SaveOps
+import molecule.core.util.SerializationUtils
 
 trait SqlSave
   extends SqlBase_JVM
     with SaveOps with SqlBaseOps
-    with MoleculeLogging { self: ResolveSave =>
+    with MoleculeLogging
+    with SerializationUtils { self: ResolveSave =>
 
   // Resolve after all back refs have been resolved and namespaces grouped
   protected var postResolvers = List.empty[Unit => Unit]
@@ -252,7 +255,6 @@ trait SqlSave
     ns: String,
     attr: String,
     optArray: Option[Array[Byte]],
-    exts: List[String],
   ): Unit = {
     val (curPath, paramIndex) = getParamIndex(attr)
     val colSetter: Setter     = optArray match {
@@ -260,6 +262,26 @@ trait SqlSave
         (ps: PS, _: IdsMap, _: RowIndex) => ps.setBytes(paramIndex, byteArray)
       case _                                     =>
         (ps: PS, _: IdsMap, _: RowIndex) => ps.setNull(paramIndex, 0)
+    }
+    addColSetter(curPath, colSetter)
+  }
+
+
+  override protected def addMap[T](
+    ns: String,
+    attr: String,
+    optMap: Option[Map[String, T]],
+    transformValue: T => Any,
+    value2json: (StringBuffer, T) => StringBuffer
+  ): Unit = {
+    val (curPath, paramIndex) = getParamIndex(attr)
+    val colSetter: Setter     = optMap match {
+      case Some(map: Map[_, _]) if map.nonEmpty =>
+        (ps: PS, _: IdsMap, _: RowIndex) =>
+          ps.setBytes(paramIndex, map2jsonByteArray(map, value2json))
+      case _                                    =>
+        (ps: PS, _: IdsMap, _: RowIndex) =>
+          ps.setNull(paramIndex, 0)
     }
     addColSetter(curPath, colSetter)
   }

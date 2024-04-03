@@ -106,7 +106,6 @@ trait Save_datomic
     ns: String,
     attr: String,
     optArray: Option[Array[Byte]],
-    exts: List[String],
   ): Unit = {
     optArray.foreach { array =>
       appendStmt(add, e, kw(ns, attr), array.asInstanceOf[AnyRef])
@@ -118,6 +117,7 @@ trait Save_datomic
     attr: String,
     optMap: Option[Map[String, T]],
     transformValue: T => Any,
+    value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     optMap.foreach { map =>
       val a   = kw(ns, attr)

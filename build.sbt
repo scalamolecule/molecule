@@ -1,5 +1,7 @@
 import org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv
 import org.scalajs.linker.interface.ESVersion
+import sbt.Keys.libraryDependencies
+import scala.collection.Seq
 
 val scala212 = "2.12.19"
 val scala213 = "2.13.13"
@@ -93,6 +95,7 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
   .settings(
     libraryDependencies ++= Seq(
       "io.suzaku" %%% "boopickle" % "1.4.0",
+      //      "com.lihaoyi" %%% "upickle" % "3.2.0", // for json de-serialisation in JsonBase
       "dev.zio" %%% "zio" % zioVersion,
       "dev.zio" %%% "zio-streams" % zioVersion,
       "dev.zio" %%% "zio-test" % zioVersion % Test,
@@ -260,7 +263,12 @@ lazy val sqlCore = crossProject(JSPlatform, JVMPlatform)
   .settings(name := "molecule-sql-core")
   .settings(doPublish)
   .settings(compilerArgs)
-  .settings(testFrameworks := testingFrameworks)
+  .settings(
+    testFrameworks := testingFrameworks,
+
+    // For json de-serialisation in LambdasMap
+    libraryDependencies += "com.lihaoyi" %% "upickle" % "3.2.0"
+  )
   .jsSettings(jsEnvironment)
   .dependsOn(core)
   .dependsOn(coreTests % "compile->compile;test->test")

@@ -6,7 +6,9 @@ import molecule.base.util.{BaseHelpers, CodeGenBase}
 
 object _UpdateSetOps extends CodeGenBase with BaseHelpers {
 
-  def generate(): Unit = tpeVarImp.foreach { case (name, tpe, v, imp) =>
+  def generate(): Unit = tpeVarImp.filterNot(
+    coord => coord._3 == "ref"
+  ).foreach { case (name, tpe, v, imp) =>
     TransformFile(name, tpe, v, imp).generate()
   }
 

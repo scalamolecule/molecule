@@ -27,7 +27,7 @@ trait UpdateSeqOps_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
         _ <- Ns.doubleSeq.query.get.map(_ ==> Nil)
 
         id <- Ns.doubleSeq(List(double1, double2, double2)).save.transact.map(_.id)
-        // Applying empty value deletes previous Seq
+        // Applying nothing deletes previous Seq
         _ <- Ns(id).doubleSeq().update.transact
         _ <- Ns.doubleSeq.query.get.map(_ ==> Nil)
       } yield ()

@@ -649,7 +649,6 @@ trait LambdasSeq extends LambdasBase with JavaConversions { self: SqlQueryBase =
       while (arrayResultSet.next()) {
         buf += getValue(arrayResultSet)
       }
-//      if (buf.isEmpty || buf == Set("0")) Option.empty[Set[T]] else Some(buf)
       if (buf.isEmpty) Option.empty[List[T]] else Some(buf.toList)
     }
   }

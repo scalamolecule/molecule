@@ -28,7 +28,7 @@ trait UpdateSeqOps_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.dateSeq.query.get.map(_ ==> Nil)
 
         id <- Ns.dateSeq(List(date1, date2, date2)).save.transact.map(_.id)
-        // Applying empty value deletes previous Seq
+        // Applying nothing deletes previous Seq
         _ <- Ns(id).dateSeq().update.transact
         _ <- Ns.dateSeq.query.get.map(_ ==> Nil)
       } yield ()

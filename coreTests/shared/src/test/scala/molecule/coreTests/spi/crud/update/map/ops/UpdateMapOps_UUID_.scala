@@ -37,13 +37,21 @@ trait UpdateMapOps_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "add" - types { implicit conn =>
       for {
-        id <- Ns.uuidMap(Map(puuid1)).save.transact.map(_.id)
+        id <- Ns.uuidMap(Map("a" -> uuid0)).save.transact.map(_.id)
+
+        // Adding pair with existing key replaces the value
+        _ <- Ns(id).uuidMap.add("a" -> uuid1).update.transact
+        _ <- Ns.uuidMap.query.get.map(_.head ==> Map(puuid1))
+
+        // Update doesn't add pair if no map attribute already exists
+        _ <- Ns(id).iMap.add("a" -> 1).update.transact
+        _ <- Ns.uuidMap.iMap_?.query.get.map(_ ==> List((Map(puuid1), None)))
+
+        // Upsert adds pair to new map attribute if it wasn't already saved
+        _ <- Ns(id).iMap.add("a" -> 1).upsert.transact
+        _ <- Ns.uuidMap.iMap_?.query.get.map(_ ==> List((Map(puuid1), Some(Map("a" -> 1)))))
 
         // Add pair
-        _ <- Ns(id).uuidMap.add(puuid2).update.transact
-        _ <- Ns.uuidMap.query.get.map(_.head ==> Map(puuid1, puuid2))
-
-        // Adding existing pair has no effect (Map semantics of only unique pairs)
         _ <- Ns(id).uuidMap.add(puuid2).update.transact
         _ <- Ns.uuidMap.query.get.map(_.head ==> Map(puuid1, puuid2))
 
@@ -64,17 +72,24 @@ trait UpdateMapOps_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "remove" - types { implicit conn =>
       for {
-        id <- Ns.uuidMap(Map(puuid1, puuid2, puuid3, puuid4, puuid5, puuid6, puuid7)).save.transact.map(_.id)
+        id <- Ns.uuidMap(Map(puuid1, puuid2, puuid3, puuid4, puuid5, puuid6, puuid7, puuid8)).save.transact.map(_.id)
 
-        // Remove pair by String key
-        _ <- Ns(id).uuidMap.remove(string7).update.transact
+        // Remove pair by String key with update and upsert has same semantics
+        _ <- Ns(id).uuidMap.remove(string8).update.transact
+        _ <- Ns(id).uuidMap.remove(string7).upsert.transact
         _ <- Ns.uuidMap.query.get.map(_.head ==> Map(puuid1, puuid2, puuid3, puuid4, puuid5, puuid6))
+
+        // Removing a pair in a non-asserted map attribute has no effect
+        _ <- Ns.uuidMap.iMap_?.query.get.map(_.head._2 ==> None)
+        _ <- Ns(id).iMap.remove("a").update.transact
+        _ <- Ns(id).iMap.remove("a").upsert.transact
+        _ <- Ns.uuidMap.iMap_?.query.get.map(_.head._2 ==> None)
 
         // Removing non-existing key has no effect
         _ <- Ns(id).uuidMap.remove(string9).update.transact
         _ <- Ns.uuidMap.query.get.map(_.head ==> Map(puuid1, puuid2, puuid3, puuid4, puuid5, puuid6))
 
-        // Removing duplicate keys removes the distinct pair
+        // Removing duplicate keys removes the distinct key only
         _ <- Ns(id).uuidMap.remove(string6, string6).update.transact
         _ <- Ns.uuidMap.query.get.map(_.head ==> Map(puuid1, puuid2, puuid3, puuid4, puuid5))
 

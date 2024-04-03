@@ -1,5 +1,6 @@
 package molecule.sql.h2
 
+import java.time.Instant
 import molecule.core.util.Executor._
 import molecule.coreTests.util.Array2List
 import molecule.sql.h2.async._
@@ -8,53 +9,55 @@ import utest._
 import scala.language.implicitConversions
 
 
-object AdhocJVM_h2 extends TestSuiteArray_h2 {
-  //object AdhocJVM_h2 extends TestSuite_h2 {
+//object AdhocJVM_h2 extends TestSuiteArray_h2 {
+object AdhocJVM_h2 extends TestSuite_h2 {
 
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
-      val a = (1, Some(int1))
-      val b = (2, Some(int2))
-      val c = (3, Some(int3))
-      val x = (4, Option.empty[Int])
+
+
       for {
-        _ <- Ns.i.int_?.insert(List(a, b, c, x)).transact
 
-        // Find all optional attribute values
-        _ <- Ns.i.a1.int_?.query.i.get.map(_ ==> List(a, b, c, x))
+        id <- Ns.instantMap(Map("a" -> instant0)).save.transact.map(_.id)
 
-//        // Find optional values matching
-//        _ <- Ns.i.a1.int_?(Some(int0)).query.get.map(_ ==> List())
-//        _ <- Ns.i.a1.int_?(Some(int1)).query.get.map(_ ==> List(a))
-//
-//        // None matches non-asserted/null values
-//        _ <- Ns.i.a1.int_?(Option.empty[Int]).query.get.map(_ ==> List(x))
-//        // Easier to apply nothing to tacit attribute
-//        _ <- Ns.i.a1.int_().query.get.map(_ ==> List(4))
+        // Adding pair with existing key replaces the value
+        _ <- Ns(id).instantMap.add("a" -> instant1).update.transact
+        _ <- Ns.instantMap.query.get.map(_.head ==> Map(pinstant1))
 
+        // Adding a non-asserted map attribute has no effect with update
+        _ <- Ns(id).stringMap.add(pstring1).update.transact
+        _ <- Ns.instantMap.stringMap_?.query.get.map(_ ==> List((Map(pinstant1), None)))
 
+        // Adding a non-asserted map attribute adds the value with upsert
+        _ <- Ns(id).stringMap.add(pstring1).upsert.transact
+        _ <- Ns.instantMap.stringMap_?.query.get.map(_ ==> List((Map(pinstant1), Some(Map(pstring1)))))
 
+        // Add pair
+        _ <- Ns(id).instantMap.add(pinstant2).update.transact
+        _ <- Ns.instantMap.query.get.map(_.head ==> Map(pinstant1, pinstant2))
 
+        // Add multiple pairs (vararg)
+        _ <- Ns(id).instantMap.add(pinstant3, pinstant4).update.transact
+        _ <- Ns.instantMap.query.get.map(_.head ==> Map(pinstant1, pinstant2, pinstant3, pinstant4))
+
+        // Add multiple pairs (Seq)
+        _ <- Ns(id).instantMap.add(Seq(pinstant5, pinstant6)).update.transact
+        _ <- Ns.instantMap.query.get.map(_.head ==> Map(pinstant1, pinstant2, pinstant3, pinstant4, pinstant5, pinstant6))
+
+        // Adding empty Seq of pairs has no effect
+        _ <- Ns(id).instantMap.add(Seq.empty[(String, Instant)]).update.transact
+        _ <- Ns.instantMap.query.get.map(_.head ==> Map(pinstant1, pinstant2, pinstant3, pinstant4, pinstant5, pinstant6))
 
         //        _ <- rawTransact(
         //          """INSERT INTO Ns (
-        //            |  intSet
-        //            |) VALUES (array[1, 2, 2])
+        //            |  intMap
+        //            |) VALUES (JSON '{ "a": 1 }')
         //            |""".stripMargin)
-        //
-        //        _ <- rawQuery(
-        //          """SELECT DISTINCT
-        //            |  ARRAY_AGG(Ns.intSet)
-        //            |FROM Ns
-        //            |WHERE
-        //            |  Ns.intSet IS NOT NULL
-        //            |HAVING COUNT(*) > 0;
-        //            |""".stripMargin, true)
-        //          .map(println)
-        //
+
+
         //        _ <- rawQuery(
         //          """SELECT DISTINCT
         //            |  Ns.intSeq
@@ -63,6 +66,7 @@ object AdhocJVM_h2 extends TestSuiteArray_h2 {
         //            |  Ns.intSeq IS NOT NULL;
         //            |""".stripMargin, true)
         //          .map(println)
+
 
       } yield ()
     }

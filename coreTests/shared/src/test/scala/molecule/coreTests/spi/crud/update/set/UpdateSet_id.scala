@@ -264,7 +264,7 @@ trait UpdateSet_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns("42").intSet_?(Some(Set(1))).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
               err ==> "Can't update optional values. Found:\n" +
-                """AttrSetOptInt("Ns", "intSet", Eq, Some(Set(1)), None, None, Nil, Nil, None, None, Seq(0, 31))"""
+                """AttrSetOptInt("Ns", "intSet", Eq, Some(Set(1)), None, None, Nil, Nil, None, None, Seq(0, 32))"""
             }
         } yield ()
       }

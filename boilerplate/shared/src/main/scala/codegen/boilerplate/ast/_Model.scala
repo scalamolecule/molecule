@@ -157,18 +157,18 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
           case "Opt" =>
             if (format_?)
               s"""def format(v: $baseTpe): String = $format
-                 |      def vss: String = vs.fold("None")(_.map { case (k, v) => s"($$k,$${format(v)})" }.mkString("Some(Map(", ", ", "))"))
+                 |      def vss: String = vs.fold("None")(_.map { case (k, v) => s\"\"\"("$$k", $${format(v)})\"\"\" }.mkString("Some(Map(", ", ", "))"))
                  |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords$ownerStr)\"\"\"""".stripMargin
             else
-              s"""def vss: String = vs.fold("None")(_.map { case (k, v) => s"($$k,$$v)" }.mkString("Some(Map(", ", ", "))"))
+              s"""def vss: String = vs.fold("None")(_.map { case (k, v) => s\"\"\"("$$k", $$v)\"\"\" }.mkString("Some(Map(", ", ", "))"))
                  |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
           case _     =>
             if (format_?)
               s"""def format(v: $baseTpe): String = $format
-                 |      def vss: String = vs.map { case (k, v) => s"($$k,$${format(v)})" }.mkString("Map(", ", ", ")")
+                 |      def vss: String = vs.map { case (k, v) => s\"\"\"("$$k", $${format(v)})\"\"\" }.mkString("Map(", ", ", ")")
                  |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords$ownerStr)\"\"\"""".stripMargin
             else
-              s"""def vss: String = vs.map { case (k, v) => s"($$k,$$v)" }.mkString("Map(", ", ", ")")
+              s"""def vss: String = vs.map { case (k, v) => s\"\"\"("$$k", $$v)\"\"\" }.mkString("Map(", ", ", ")")
                  |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
         }
       }

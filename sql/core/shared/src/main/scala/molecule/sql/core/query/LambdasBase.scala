@@ -3,13 +3,15 @@ package molecule.sql.core.query
 import java.net.URI
 import java.time._
 import java.util.{Date, UUID}
+import boopickle.Default._
 import molecule.base.util.BaseHelpers
+import molecule.core.transformation.JsonBase
 import molecule.core.util.AggrUtils
 import scala.collection.mutable.ListBuffer
 import scala.reflect.ClassTag
 
 
-trait LambdasBase extends BaseHelpers with AggrUtils { self: SqlQueryBase =>
+trait LambdasBase extends BaseHelpers with AggrUtils with JsonBase { self: SqlQueryBase =>
 
   protected lazy val one2sqlId            : String => String         = (v: String) => s"'${v.replace("'", "''")}'"
   protected lazy val one2sqlString        : String => String         = (v: String) => s"'${v.replace("'", "''")}'"
@@ -54,6 +56,7 @@ trait LambdasBase extends BaseHelpers with AggrUtils { self: SqlQueryBase =>
       set
     }
   }
+
   protected def sqlArray2list[T](row: RS, paramIndex: Int, getValue: RS => T): List[T] = {
     val array = row.getArray(paramIndex)
     if (row.wasNull()) {
@@ -68,6 +71,17 @@ trait LambdasBase extends BaseHelpers with AggrUtils { self: SqlQueryBase =>
         }
       }
       buf.toList
+    }
+  }
+
+  protected def sqlJson2map[T](row: RS, paramIndex: Int, json2map: String => Map[String, T]): Map[String, T] = {
+    val byteArray = row.getBytes(paramIndex)
+    if (row.wasNull()) {
+      Map.empty[String, T]
+    } else {
+      val json = new String(byteArray)
+      //      println("json: " + json)
+      json2map(json)
     }
   }
 

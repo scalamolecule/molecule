@@ -37,13 +37,21 @@ trait UpdateMapOps_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
 
     "add" - types { implicit conn =>
       for {
-        id <- Ns.instantMap(Map(pinstant1)).save.transact.map(_.id)
+        id <- Ns.instantMap(Map("a" -> instant0)).save.transact.map(_.id)
+
+        // Adding pair with existing key replaces the value
+        _ <- Ns(id).instantMap.add("a" -> instant1).update.transact
+        _ <- Ns.instantMap.query.get.map(_.head ==> Map(pinstant1))
+
+        // Update doesn't add pair if no map attribute already exists
+        _ <- Ns(id).iMap.add("a" -> 1).update.transact
+        _ <- Ns.instantMap.iMap_?.query.get.map(_ ==> List((Map(pinstant1), None)))
+
+        // Upsert adds pair to new map attribute if it wasn't already saved
+        _ <- Ns(id).iMap.add("a" -> 1).upsert.transact
+        _ <- Ns.instantMap.iMap_?.query.get.map(_ ==> List((Map(pinstant1), Some(Map("a" -> 1)))))
 
         // Add pair
-        _ <- Ns(id).instantMap.add(pinstant2).update.transact
-        _ <- Ns.instantMap.query.get.map(_.head ==> Map(pinstant1, pinstant2))
-
-        // Adding existing pair has no effect (Map semantics of only unique pairs)
         _ <- Ns(id).instantMap.add(pinstant2).update.transact
         _ <- Ns.instantMap.query.get.map(_.head ==> Map(pinstant1, pinstant2))
 
@@ -64,17 +72,24 @@ trait UpdateMapOps_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
 
     "remove" - types { implicit conn =>
       for {
-        id <- Ns.instantMap(Map(pinstant1, pinstant2, pinstant3, pinstant4, pinstant5, pinstant6, pinstant7)).save.transact.map(_.id)
+        id <- Ns.instantMap(Map(pinstant1, pinstant2, pinstant3, pinstant4, pinstant5, pinstant6, pinstant7, pinstant8)).save.transact.map(_.id)
 
-        // Remove pair by String key
-        _ <- Ns(id).instantMap.remove(string7).update.transact
+        // Remove pair by String key with update and upsert has same semantics
+        _ <- Ns(id).instantMap.remove(string8).update.transact
+        _ <- Ns(id).instantMap.remove(string7).upsert.transact
         _ <- Ns.instantMap.query.get.map(_.head ==> Map(pinstant1, pinstant2, pinstant3, pinstant4, pinstant5, pinstant6))
+
+        // Removing a pair in a non-asserted map attribute has no effect
+        _ <- Ns.instantMap.iMap_?.query.get.map(_.head._2 ==> None)
+        _ <- Ns(id).iMap.remove("a").update.transact
+        _ <- Ns(id).iMap.remove("a").upsert.transact
+        _ <- Ns.instantMap.iMap_?.query.get.map(_.head._2 ==> None)
 
         // Removing non-existing key has no effect
         _ <- Ns(id).instantMap.remove(string9).update.transact
         _ <- Ns.instantMap.query.get.map(_.head ==> Map(pinstant1, pinstant2, pinstant3, pinstant4, pinstant5, pinstant6))
 
-        // Removing duplicate keys removes the distinct pair
+        // Removing duplicate keys removes the distinct key only
         _ <- Ns(id).instantMap.remove(string6, string6).update.transact
         _ <- Ns.instantMap.query.get.map(_.head ==> Map(pinstant1, pinstant2, pinstant3, pinstant4, pinstant5))
 

@@ -27,7 +27,7 @@ trait UpdateSeqOps_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
         _ <- Ns.bigDecimalSeq.query.get.map(_ ==> Nil)
 
         id <- Ns.bigDecimalSeq(List(bigDecimal1, bigDecimal2, bigDecimal2)).save.transact.map(_.id)
-        // Applying empty value deletes previous Seq
+        // Applying nothing deletes previous Seq
         _ <- Ns(id).bigDecimalSeq().update.transact
         _ <- Ns.bigDecimalSeq.query.get.map(_ ==> Nil)
       } yield ()

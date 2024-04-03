@@ -237,6 +237,7 @@ trait Insert_datomic
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
+    value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
     val a   = kw(ns, attr)
     val a_k = kw(s"$ns.$attr", "k_")
@@ -264,6 +265,7 @@ trait Insert_datomic
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
+    value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
     val a   = kw(ns, attr)
     val a_k = kw(s"$ns.$attr", "k_")

@@ -170,6 +170,8 @@ trait SpiSync_h2 extends SpiSyncBase {
           case "SMALLINT ARRAY ARRAY"           => nestedArray(n, "Short")
           case "CHARACTER ARRAY ARRAY"          => nestedArray(n, "Char")
 
+          case "JSON" => value(n, "String")
+
           case other => throw new Exception(
             s"Unexpected sql result type from raw query: " + other
           )

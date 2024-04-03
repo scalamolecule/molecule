@@ -37,13 +37,21 @@ trait UpdateMapOps_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
 
     "add" - types { implicit conn =>
       for {
-        id <- Ns.durationMap(Map(pduration1)).save.transact.map(_.id)
+        id <- Ns.durationMap(Map("a" -> duration0)).save.transact.map(_.id)
+
+        // Adding pair with existing key replaces the value
+        _ <- Ns(id).durationMap.add("a" -> duration1).update.transact
+        _ <- Ns.durationMap.query.get.map(_.head ==> Map(pduration1))
+
+        // Update doesn't add pair if no map attribute already exists
+        _ <- Ns(id).iMap.add("a" -> 1).update.transact
+        _ <- Ns.durationMap.iMap_?.query.get.map(_ ==> List((Map(pduration1), None)))
+
+        // Upsert adds pair to new map attribute if it wasn't already saved
+        _ <- Ns(id).iMap.add("a" -> 1).upsert.transact
+        _ <- Ns.durationMap.iMap_?.query.get.map(_ ==> List((Map(pduration1), Some(Map("a" -> 1)))))
 
         // Add pair
-        _ <- Ns(id).durationMap.add(pduration2).update.transact
-        _ <- Ns.durationMap.query.get.map(_.head ==> Map(pduration1, pduration2))
-
-        // Adding existing pair has no effect (Map semantics of only unique pairs)
         _ <- Ns(id).durationMap.add(pduration2).update.transact
         _ <- Ns.durationMap.query.get.map(_.head ==> Map(pduration1, pduration2))
 
@@ -64,17 +72,24 @@ trait UpdateMapOps_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
 
     "remove" - types { implicit conn =>
       for {
-        id <- Ns.durationMap(Map(pduration1, pduration2, pduration3, pduration4, pduration5, pduration6, pduration7)).save.transact.map(_.id)
+        id <- Ns.durationMap(Map(pduration1, pduration2, pduration3, pduration4, pduration5, pduration6, pduration7, pduration8)).save.transact.map(_.id)
 
-        // Remove pair by String key
-        _ <- Ns(id).durationMap.remove(string7).update.transact
+        // Remove pair by String key with update and upsert has same semantics
+        _ <- Ns(id).durationMap.remove(string8).update.transact
+        _ <- Ns(id).durationMap.remove(string7).upsert.transact
         _ <- Ns.durationMap.query.get.map(_.head ==> Map(pduration1, pduration2, pduration3, pduration4, pduration5, pduration6))
+
+        // Removing a pair in a non-asserted map attribute has no effect
+        _ <- Ns.durationMap.iMap_?.query.get.map(_.head._2 ==> None)
+        _ <- Ns(id).iMap.remove("a").update.transact
+        _ <- Ns(id).iMap.remove("a").upsert.transact
+        _ <- Ns.durationMap.iMap_?.query.get.map(_.head._2 ==> None)
 
         // Removing non-existing key has no effect
         _ <- Ns(id).durationMap.remove(string9).update.transact
         _ <- Ns.durationMap.query.get.map(_.head ==> Map(pduration1, pduration2, pduration3, pduration4, pduration5, pduration6))
 
-        // Removing duplicate keys removes the distinct pair
+        // Removing duplicate keys removes the distinct key only
         _ <- Ns(id).durationMap.remove(string6, string6).update.transact
         _ <- Ns.durationMap.query.get.map(_.head ==> Map(pduration1, pduration2, pduration3, pduration4, pduration5))
 

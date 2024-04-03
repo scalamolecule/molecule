@@ -29,7 +29,7 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
       if (set.nonEmpty) {
         updateCurRefPath(attr)
         if (!isUpsert) {
-          addToUpdateCols(ns, attr)
+          addToUpdateColsNotNull(ns, attr)
         }
         val cast = exts.head
         @tailrec

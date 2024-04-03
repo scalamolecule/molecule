@@ -23,15 +23,15 @@ trait UpdateMap_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).intMap(Map(pint2)).update.transact
         _ <- Ns.intMap.query.get.map(_ ==> List(Map(pint2)))
 
-        // Updating a non-asserted attribute has no effect
+        // Updating a non-asserted map attribute has no effect
         _ <- Ns(id).stringMap(Map(pstring1)).update.transact
         _ <- Ns.intMap.stringMap_?.query.get.map(_ ==> List((Map(pint2), None)))
 
-        // Upserting a non-asserted attribute adds the value
+        // Upserting a non-asserted map attribute adds the value
         _ <- Ns(id).stringMap(Map(pstring1)).upsert.transact
         _ <- Ns.intMap.stringMap_?.query.get.map(_ ==> List((Map(pint2), Some(Map(pstring1)))))
 
-        // All attributes have to be previously asserted to be updated.
+        // All map attributes have to be previously asserted to be updated.
         // `int` is previously asserted, `boolean` is not. So this entity is not updated
         _ <- Ns(id).intMap(Map(pint3)).booleanMap(Map(pboolean1)).update.transact
         _ <- Ns.intMap.booleanMap_?.query.get.map(_ ==> List((Map(pint2), None)))
@@ -62,24 +62,24 @@ trait UpdateMap_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "Delete individual attribute value(s) with update" - types { implicit conn =>
+    "Delete individual map attribute value(s) with update" - types { implicit conn =>
       for {
         id <- Ns.intMap.stringMap.insert(Map(pint1), Map(pstring1)).transact.map(_.id)
         _ <- Ns.intMap.stringMap.query.get.map(_ ==> List((Map(pint1), Map(pstring1))))
 
-        // Apply empty value to delete attribute of entity (entity remains)
+        // Apply empty value to delete map attribute of entity (entity remains)
         _ <- Ns(id).stringMap().update.transact
         _ <- Ns.intMap.stringMap_?.query.get.map(_ ==> List((Map(pint1), None)))
       } yield ()
     }
 
 
-    "Update multiple attributes" - types { implicit conn =>
+    "Update multiple map attributes" - types { implicit conn =>
       for {
         id <- Ns.intMap.stringMap.insert(Map(pint1), Map(pstring1)).transact.map(_.id)
         _ <- Ns.intMap.stringMap.query.get.map(_ ==> List((Map(pint1), Map(pstring1))))
 
-        // Apply empty value to delete attribute of entity (entity remains)
+        // Apply empty value to delete map attribute of entity (entity remains)
         _ <- Ns(id).intMap(Map(pint2)).stringMap(Map(pstring2, pstring3)).update.transact
         _ <- Ns.intMap.stringMap.query.get.map(_ ==> List((Map(pint2), Map(pstring2, pstring3))))
       } yield ()
@@ -227,7 +227,7 @@ trait UpdateMap_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "Referenced attributes with backref" - refs { implicit conn =>
+    "Referenced map attributes with backref" - refs { implicit conn =>
       for {
         id <- A.iMap(Map(pint1)).B.iMap(Map(pint2))._A.C.iMap(Map(pint3)).save.transact.map(_.id)
         _ <- A.iMap.B.iMap._A.C.iMap.query.get.map(_ ==> List((Map(pint1), Map(pint2), Map(pint3))))
@@ -243,17 +243,17 @@ trait UpdateMap_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
       "Can't update optional values" - types { implicit conn =>
         for {
-          _ <- Ns("42").intMap_?(Some(Map(pint1))).update.transact
+          _ <- Ns("42").intMap_?(Some(Map(("a", 1)))).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
               err ==> "Can't update optional values. Found:\n" +
-                s"""AttrMapOptInt("Ns", "intMap", Eq, Some(Map($pint1)), None, None, Nil, Nil, None, None, Seq(0, 76))"""
+                s"""AttrMapOptInt("Ns", "intMap", Eq, Some(Map(("a", 1))), None, None, Nil, Nil, None, None, Seq(0, 77))"""
             }
         } yield ()
       }
 
-      "Can't update card-many referenced attributes" - types { implicit conn =>
+      "Can't update card-many referenced map attributes" - types { implicit conn =>
         for {
-          _ <- Ref("42").i(1).Nss.intMap(Map(pint2)).update.transact
+          _ <- Ref("42").i(1).Nss.intMap(Map(("a", 1))).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
               err ==> "Can't update attributes in card-many referenced namespace `Nss`"
             }

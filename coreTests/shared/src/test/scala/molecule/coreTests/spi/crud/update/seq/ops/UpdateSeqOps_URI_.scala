@@ -28,7 +28,7 @@ trait UpdateSeqOps_URI_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.uriSeq.query.get.map(_ ==> Nil)
 
         id <- Ns.uriSeq(List(uri1, uri2, uri2)).save.transact.map(_.id)
-        // Applying empty value deletes previous Seq
+        // Applying nothing deletes previous Seq
         _ <- Ns(id).uriSeq().update.transact
         _ <- Ns.uriSeq.query.get.map(_ ==> Nil)
       } yield ()

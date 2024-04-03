@@ -1,7 +1,10 @@
-package molecule.core.transformation;
+package molecule.core.transformation
 
+import boopickle.Default._
+import molecule.core.util.SerializationUtils
+import scala.collection.mutable.ArrayBuffer
 
-trait JsonBase {
+trait JsonBase extends SerializationUtils {
 
   // Shamelessly adopted from lift-json:
   // https://github.com/lift/framework/blob/db05d863c290c5fd1081a7632263433153fc9fe3/core/json/src/main/scala/net/liftweb/json/JsonAST.scala#L813-L883
@@ -69,5 +72,29 @@ trait JsonBase {
     }
     buf.append("]") // close array
     buf.toString
+  }
+
+  protected def map2jsonByteArray[T](map: Map[String, T], value2json: (StringBuffer, T) => StringBuffer): Array[Byte] = {
+    if (map.isEmpty) {
+      throw new Exception("map2jsonByteArray unexpectedly received empty map.")
+    }
+    val buf = new StringBuffer
+    buf.append("{") // start json
+    val it     = map.iterator
+    val (k, v) = it.next()
+    quote(buf, k)
+    buf.append(": ")
+    value2json(buf, v)
+    while (it.hasNext) {
+      buf.append(", ")
+      val (k, v) = it.next()
+      quote(buf, k)
+      buf.append(": ")
+      value2json(buf, v)
+    }
+    buf.append("}") // end json
+    val json = buf.toString
+    // println(json)
+    json.map(_.toByte).toArray
   }
 }

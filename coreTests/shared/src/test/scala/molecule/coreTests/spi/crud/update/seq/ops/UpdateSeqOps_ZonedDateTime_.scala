@@ -28,7 +28,7 @@ trait UpdateSeqOps_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: Spi
         _ <- Ns.zonedDateTimeSeq.query.get.map(_ ==> Nil)
 
         id <- Ns.zonedDateTimeSeq(List(zonedDateTime1, zonedDateTime2, zonedDateTime2)).save.transact.map(_.id)
-        // Applying empty value deletes previous Seq
+        // Applying nothing deletes previous Seq
         _ <- Ns(id).zonedDateTimeSeq().update.transact
         _ <- Ns.zonedDateTimeSeq.query.get.map(_ ==> Nil)
       } yield ()

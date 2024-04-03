@@ -96,38 +96,23 @@ trait ResolveExprMap extends ResolveExpr { self: SqlQueryBase with LambdasMap =>
 
 
   protected def mapMan[T: ClassTag](
-    attr: Attr, tpe: String, args: Map[String, T], res: ResMap[T]
+    attr: Attr, tpe: String, args: Map[String, T], resMap: ResMap[T]
   ): Unit = {
     val col = getCol(attr: Attr)
     select += col
     if (!isNestedOpt) {
       notNull += col
     }
-//    addCast(res.sql2set)
-//    attr.filterAttr.fold {
-//      val pathAttr = path :+ attr.cleanAttr
-//      if (filterAttrVars.contains(pathAttr) && attr.op != V) {
-//        // Runtime check needed since we can't type infer it
-//        throw ModelError(s"Cardinality-set filter attributes not allowed to " +
-//          s"do additional filtering. Found:\n  " + attr)
-//      }
-//      setExpr(col, attr.op, args, res, true)
-//    } {
-//      case (dir, filterPath, filterAttr) => filterAttr match {
-//        case filterAttr: AttrOne => setExpr2(col, attr.op, filterAttr.name, true, tpe, res, true)
-//        case filterAttr          => setExpr2(col, attr.op, filterAttr.name, false, tpe, res, true)
-//      }
-//    }
-
-//    attr.op match {
-//      case V       => mapAttr(attr, e, v, resMap)
+    addCast(resMap.sqlJson2map)
+    attr.op match {
+      case V       => ()
 //      case Has     => key2value(attr, e, v, map.head._1, resMap)
 //      case NoValue => noMatch(attr, e, v, resMap)
-//      case Eq      => throw ModelError(
-//        s"Matching/applying a map for map attribute `${attr.cleanName}` is not supported in queries."
-//      )
-//      case other   => unexpectedOp(other)
-//    }
+      case Eq      => throw ModelError(
+        s"Matching/applying a map for map attribute `${attr.cleanName}` is not supported in queries."
+      )
+      case other   => unexpectedOp(other)
+    }
   }
 
   protected def mapOpt[T: ClassTag](
@@ -139,7 +124,7 @@ trait ResolveExprMap extends ResolveExpr { self: SqlQueryBase with LambdasMap =>
     val col = getCol(attr: Attr)
     select += col
     groupByCols += col // if we later need to group by non-aggregated columns
-//    addCast(resOpt.sql2setOpt)
+    addCast(resOpt.sql2mapOpt)
 //    attr.op match {
 //      //      case V     => ()
 //      case V     => setOptAttr(col, res)
@@ -188,14 +173,9 @@ trait ResolveExprMap extends ResolveExpr { self: SqlQueryBase with LambdasMap =>
 
   // attr ----------------------------------------------------------------------
 
-  protected def mapAttr[T: ClassTag](col: String, res: ResMap[T], mandatory: Boolean): Unit = {
-    if (mandatory) {
-      select -= col
-      select += s"ARRAY_AGG($col)"
-      having += "COUNT(*) > 0"
-      aggregate = true
-//      replaceCast(res.nestedArray2coalescedSet)
-    }
+  protected def mapAttr[T: ClassTag](col: String, res: ResMap[T]): Unit = {
+
+
   }
 
   protected def mapOptAttr[T](col: String, res: ResMap[T]): Unit = {

@@ -1,12 +1,20 @@
 package molecule.sql.core.transaction
 
-import java.sql.{Statement, PreparedStatement => PS}
+import java.nio.ByteBuffer
+import java.sql.{ResultSet, Statement, PreparedStatement => PS}
+import java.util.{Date, UUID}
+import boopickle.Default._
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ResolveUpdate
 import molecule.core.transaction.ops.UpdateOps
 import molecule.sql.core.query.Model2SqlQuery
+import java.net.URI
+import java.nio.ByteBuffer
+import java.nio.charset.StandardCharsets
+import java.time._
+import java.util.{Date, UUID}
 
 trait SqlUpdate
   extends SqlBase_JVM
@@ -105,7 +113,7 @@ trait SqlUpdate
     (curRefPath, paramIndexes(curRefPath, attr))
   }
 
-  protected def addToUpdateCols(ns: String, attr: String) = {
+  protected def addToUpdateColsNotNull(ns: String, attr: String) = {
     if (!updateCols.contains(curRefPath)) {
       updateCols += curRefPath -> Nil
     }
@@ -125,7 +133,7 @@ trait SqlUpdate
     val colSetter: Setter = vs match {
       case Seq(v) =>
         if (!isUpsert) {
-          addToUpdateCols(ns, attr)
+          addToUpdateColsNotNull(ns, attr)
         }
         (ps: PS, _: IdsMap, _: RowIndex) => {
           transformValue(v).asInstanceOf[(PS, Int) => Unit](ps, curParamIndex)
@@ -173,7 +181,7 @@ trait SqlUpdate
       placeHolders = placeHolders :+ s"$attr = ?"
       val colSetter = if (vs.nonEmpty) {
         if (!isUpsert) {
-          addToUpdateCols(ns, attr)
+          addToUpdateColsNotNull(ns, attr)
         }
         val array = vs2array(vs)
         (ps: PS, _: IdsMap, _: RowIndex) => {
@@ -237,7 +245,7 @@ trait SqlUpdate
       if (vs.nonEmpty) {
         updateCurRefPath(attr)
         if (!isUpsert) {
-          addToUpdateCols(ns, attr)
+          addToUpdateColsNotNull(ns, attr)
         }
         placeHolders = placeHolders :+ s"$attr = $attr || ?"
         val array = set2array(vs)
@@ -246,8 +254,6 @@ trait SqlUpdate
           ps.setArray(curParamIndex, conn.createArrayOf(exts(1), array))
           curParamIndex += 1
         })
-      } else {
-
       }
     } { refNs =>
       // Separate update of ref ids in join table -----------------------------
@@ -292,10 +298,10 @@ trait SqlUpdate
     refNs.fold {
       if (vs.nonEmpty) {
         updateCurRefPath(nsAttr)
-        val idClause = s"$table.id IN (${ids.mkString(", ")})"
         if (!isUpsert) {
-          addToUpdateCols(ns, attr)
+          addToUpdateColsNotNull(ns, attr)
         }
+        val idClause                = s"$table.id IN (${ids.mkString(", ")})"
         val removeValuePlaceHolders = vs.toList.map(_ => "?").mkString(", ")
         placeHolders = placeHolders :+
           s"""$nsAttr =
@@ -413,10 +419,25 @@ trait SqlUpdate
     owner: Boolean,
     map: Map[String, T],
     transformValue: T => Any,
-    //    exts: List[String],
-    //    set2array: Set[Any] => Array[AnyRef],
-    //    value2json: (StringBuffer, T) => StringBuffer
-  ): Unit = ???
+    value2json: (StringBuffer, T) => StringBuffer
+  ): Unit = {
+    updateCurRefPath(attr)
+    placeHolders = placeHolders :+ s"$attr = ?"
+    if (!isUpsert) {
+      addToUpdateColsNotNull(ns, attr)
+    }
+    val colSetter: Setter = if (map.nonEmpty) {
+      (ps: PS, _: IdsMap, _: RowIndex) =>
+        ps.setBytes(curParamIndex, map2jsonByteArray(map, value2json))
+        curParamIndex += 1
+    } else {
+      (ps: PS, _: IdsMap, _: RowIndex) => {
+        ps.setNull(curParamIndex, 0)
+        curParamIndex += 1
+      }
+    }
+    addColSetter(curRefPath, colSetter)
+  }
 
   override def updateMapAdd[T](
     ns: String,
@@ -425,10 +446,58 @@ trait SqlUpdate
     owner: Boolean,
     map: Map[String, T],
     transformValue: T => Any,
-    //    exts: List[String],
+    exts: List[String],
+    value2json: (StringBuffer, T) => StringBuffer,
     //    set2array: Set[Any] => Array[AnyRef],
-    //    value2json: (StringBuffer, T) => StringBuffer
-  ): Unit = ???
+  ): Unit = {
+    if (map.nonEmpty) {
+      updateCurRefPath(attr)
+      if (!isUpsert) {
+        addToUpdateColsNotNull(ns, attr)
+      }
+      placeHolders = placeHolders :+ s"$attr = ?"
+      val colSetter = (ps: PS, _: IdsMap, _: RowIndex) => {
+        val updatedMap = {
+          val query = s"select $attr from $ns where id IN(${ids.mkString(", ")})"
+          val rs    = ps.getConnection.prepareStatement(query).executeQuery()
+          rs.next()
+          val byteArray = rs.getBytes(1)
+          if (rs.wasNull()) map else {
+            val json = new String(byteArray)
+            // Add/replace pairs in current map
+            exts.head match {
+              case "ID"             => upickle.default.read[Map[String, String]](json) ++ map.asInstanceOf[Map[String, String]]
+              case "String"         => upickle.default.read[Map[String, String]](json) ++ map.asInstanceOf[Map[String, String]]
+              case "Int"            => upickle.default.read[Map[String, Int]](json) ++ map.asInstanceOf[Map[String, Int]]
+              case "Long"           => upickle.default.read[Map[String, Long]](json) ++ map.asInstanceOf[Map[String, Long]]
+              case "Float"          => upickle.default.read[Map[String, Float]](json) ++ map.asInstanceOf[Map[String, Float]]
+              case "Double"         => upickle.default.read[Map[String, Double]](json) ++ map.asInstanceOf[Map[String, Double]]
+              case "Boolean"        => upickle.default.read[Map[String, Int]](json).map { case (k, v) => k -> (if (v == 1) true else false) } ++ map.asInstanceOf[Map[String, Boolean]]
+              case "BigInt"         => upickle.default.read[Map[String, String]](json).map { case (k, v) => k -> BigInt(v) } ++ map.asInstanceOf[Map[String, BigInt]]
+              case "BigDecimal"     => upickle.default.read[Map[String, String]](json).map { case (k, v) => k -> BigDecimal(v) } ++ map.asInstanceOf[Map[String, BigDecimal]]
+              case "Date"           => upickle.default.read[Map[String, Long]](json).map { case (k, v) => k -> new Date(v) } ++ map.asInstanceOf[Map[String, Date]]
+              case "Duration"       => upickle.default.read[Map[String, String]](json).map { case (k, v) => k -> Duration.parse(v) } ++ map.asInstanceOf[Map[String, Duration]]
+              case "Instant"        => upickle.default.read[Map[String, String]](json).map { case (k, v) => k -> Instant.parse(v) } ++ map.asInstanceOf[Map[String, Instant]]
+              case "LocalDate"      => upickle.default.read[Map[String, String]](json).map { case (k, v) => k -> LocalDate.parse(v) } ++ map.asInstanceOf[Map[String, LocalDate]]
+              case "LocalTime"      => upickle.default.read[Map[String, String]](json).map { case (k, v) => k -> LocalTime.parse(v) } ++ map.asInstanceOf[Map[String, LocalTime]]
+              case "LocalDateTime"  => upickle.default.read[Map[String, String]](json).map { case (k, v) => k -> LocalDateTime.parse(v) } ++ map.asInstanceOf[Map[String, LocalDateTime]]
+              case "OffsetTime"     => upickle.default.read[Map[String, String]](json).map { case (k, v) => k -> OffsetTime.parse(v) } ++ map.asInstanceOf[Map[String, OffsetTime]]
+              case "OffsetDateTime" => upickle.default.read[Map[String, String]](json).map { case (k, v) => k -> OffsetDateTime.parse(v) } ++ map.asInstanceOf[Map[String, OffsetDateTime]]
+              case "ZonedDateTime"  => upickle.default.read[Map[String, String]](json).map { case (k, v) => k -> ZonedDateTime.parse(v) } ++ map.asInstanceOf[Map[String, ZonedDateTime]]
+              case "UUID"           => upickle.default.read[Map[String, UUID]](json) ++ map.asInstanceOf[Map[String, UUID]]
+              case "URI"            => upickle.default.read[Map[String, String]](json).map { case (k, v) => k -> new URI(v) } ++ map.asInstanceOf[Map[String, URI]]
+              case "Byte"           => upickle.default.read[Map[String, Byte]](json) ++ map.asInstanceOf[Map[String, Byte]]
+              case "Short"          => upickle.default.read[Map[String, Short]](json) ++ map.asInstanceOf[Map[String, Short]]
+              case "Char"           => upickle.default.read[Map[String, Char]](json) ++ map.asInstanceOf[Map[String, Char]]
+            }
+          }
+        }
+        ps.setBytes(curParamIndex, map2jsonByteArray(updatedMap.asInstanceOf[Map[String, T]], value2json))
+        curParamIndex += 1
+      }
+      addColSetter(curRefPath, colSetter)
+    }
+  }
 
   override def updateMapRemove[T](
     ns: String,
@@ -437,9 +506,64 @@ trait SqlUpdate
     owner: Boolean,
     map: Map[String, T],
     transformValue: T => Any,
-    //    exts: List[String],
-    //    one2json: T => String
-  ): Unit = ???
+    exts: List[String],
+    value2json: (StringBuffer, T) => StringBuffer,
+  ): Unit = {
+    if (map.nonEmpty) {
+      updateCurRefPath(attr)
+      if (!isUpsert) {
+        addToUpdateColsNotNull(ns, attr)
+      }
+      placeHolders = placeHolders :+ s"$attr = ?"
+      val colSetter = (ps: PS, _: IdsMap, _: RowIndex) => {
+        val query = s"select $attr from $ns where id IN(${ids.mkString(", ")})"
+        val rs    = ps.getConnection.prepareStatement(query).executeQuery()
+        rs.next()
+        val byteArray = rs.getBytes(1)
+        if (rs.wasNull()) {
+          // No current map attribute asserted - do nothing
+          ps.setNull(curParamIndex, 0)
+        } else {
+          val json = new String(byteArray)
+          // Remove pairs from current map
+          val removeKeys = map.keys.toSet // avoid duplicates
+          val updatedMap       = exts.head match {
+            case "ID"             => upickle.default.read[Map[String, String]](json) -- removeKeys
+            case "String"         => upickle.default.read[Map[String, String]](json) -- removeKeys
+            case "Int"            => upickle.default.read[Map[String, Int]](json) -- removeKeys
+            case "Long"           => upickle.default.read[Map[String, Long]](json) -- removeKeys
+            case "Float"          => upickle.default.read[Map[String, Float]](json) -- removeKeys
+            case "Double"         => upickle.default.read[Map[String, Double]](json) -- removeKeys
+            case "Boolean"        => upickle.default.read[Map[String, Int]](json).map { case (k, v) => k -> (if (v == 1) true else false) } -- removeKeys
+            case "BigInt"         => upickle.default.read[Map[String, String]](json).map { case (k, v) => k -> BigInt(v) } -- removeKeys
+            case "BigDecimal"     => upickle.default.read[Map[String, String]](json).map { case (k, v) => k -> BigDecimal(v) } -- removeKeys
+            case "Date"           => upickle.default.read[Map[String, Long]](json).map { case (k, v) => k -> new Date(v.toLong) } -- removeKeys
+            case "Duration"       => upickle.default.read[Map[String, String]](json).map { case (k, v) => k -> Duration.parse(v) } -- removeKeys
+            case "Instant"        => upickle.default.read[Map[String, String]](json).map { case (k, v) => k -> Instant.parse(v) } -- removeKeys
+            case "LocalDate"      => upickle.default.read[Map[String, String]](json).map { case (k, v) => k -> LocalDate.parse(v) } -- removeKeys
+            case "LocalTime"      => upickle.default.read[Map[String, String]](json).map { case (k, v) => k -> LocalTime.parse(v) } -- removeKeys
+            case "LocalDateTime"  => upickle.default.read[Map[String, String]](json).map { case (k, v) => k -> LocalDateTime.parse(v) } -- removeKeys
+            case "OffsetTime"     => upickle.default.read[Map[String, String]](json).map { case (k, v) => k -> OffsetTime.parse(v) } -- removeKeys
+            case "OffsetDateTime" => upickle.default.read[Map[String, String]](json).map { case (k, v) => k -> OffsetDateTime.parse(v) } -- removeKeys
+            case "ZonedDateTime"  => upickle.default.read[Map[String, String]](json).map { case (k, v) => k -> ZonedDateTime.parse(v) } -- removeKeys
+            case "UUID"           => upickle.default.read[Map[String, UUID]](json) -- removeKeys
+            case "URI"            => upickle.default.read[Map[String, String]](json).map { case (k, v) => k -> new URI(v) } -- removeKeys
+            case "Byte"           => upickle.default.read[Map[String, Byte]](json) -- removeKeys
+            case "Short"          => upickle.default.read[Map[String, Short]](json) -- removeKeys
+            case "Char"           => upickle.default.read[Map[String, Char]](json) -- removeKeys
+          }
+          if (updatedMap.nonEmpty) {
+            ps.setBytes(curParamIndex, map2jsonByteArray(updatedMap.asInstanceOf[Map[String, T]], value2json))
+          } else {
+            // No pairs left - delete map attribute
+            ps.setNull(curParamIndex, 0)
+          }
+        }
+        curParamIndex += 1
+      }
+      addColSetter(curRefPath, colSetter)
+    }
+  }
 
 
   override def handleIds(ns: String, ids1: Seq[String]): Unit = {
@@ -497,27 +621,28 @@ trait SqlUpdate
     }
   }
 
-  override protected lazy val extsID             = List("", "BIGINT")
-  override protected lazy val extsString         = List("", "LONGVARCHAR")
-  override protected lazy val extsInt            = List("", "INT")
-  override protected lazy val extsLong           = List("", "BIGINT")
-  override protected lazy val extsFloat          = List("", "REAL")
-  override protected lazy val extsDouble         = List("", "DOUBLE")
-  override protected lazy val extsBoolean        = List("", "BOOLEAN")
-  override protected lazy val extsBigInt         = List("", "DECIMAL(100, 0)")
-  override protected lazy val extsBigDecimal     = List("", "DECIMAL(65535, 25)")
-  override protected lazy val extsDate           = List("", "BIGINT")
-  override protected lazy val extsDuration       = List("", "VARCHAR")
-  override protected lazy val extsInstant        = List("", "VARCHAR")
-  override protected lazy val extsLocalDate      = List("", "VARCHAR")
-  override protected lazy val extsLocalTime      = List("", "VARCHAR")
-  override protected lazy val extsLocalDateTime  = List("", "VARCHAR")
-  override protected lazy val extsOffsetTime     = List("", "VARCHAR")
-  override protected lazy val extsOffsetDateTime = List("", "VARCHAR")
-  override protected lazy val extsZonedDateTime  = List("", "VARCHAR")
-  override protected lazy val extsUUID           = List("", "UUID")
-  override protected lazy val extsURI            = List("", "VARCHAR")
-  override protected lazy val extsByte           = List("", "TINYINT")
-  override protected lazy val extsShort          = List("", "SMALLINT")
-  override protected lazy val extsChar           = List("", "CHAR")
+
+  override protected lazy val extsID             = List("ID", "BIGINT")
+  override protected lazy val extsString         = List("String", "LONGVARCHAR")
+  override protected lazy val extsInt            = List("Int", "INT")
+  override protected lazy val extsLong           = List("Long", "BIGINT")
+  override protected lazy val extsFloat          = List("Float", "REAL")
+  override protected lazy val extsDouble         = List("Double", "DOUBLE")
+  override protected lazy val extsBoolean        = List("Boolean", "BOOLEAN")
+  override protected lazy val extsBigInt         = List("BigInt", "DECIMAL(100, 0)")
+  override protected lazy val extsBigDecimal     = List("BigDecimal", "DECIMAL(65535, 25)")
+  override protected lazy val extsDate           = List("Date", "BIGINT")
+  override protected lazy val extsDuration       = List("Duration", "VARCHAR")
+  override protected lazy val extsInstant        = List("Instant", "VARCHAR")
+  override protected lazy val extsLocalDate      = List("LocalDate", "VARCHAR")
+  override protected lazy val extsLocalTime      = List("LocalTime", "VARCHAR")
+  override protected lazy val extsLocalDateTime  = List("LocalDateTime", "VARCHAR")
+  override protected lazy val extsOffsetTime     = List("OffsetTime", "VARCHAR")
+  override protected lazy val extsOffsetDateTime = List("OffsetDateTime", "VARCHAR")
+  override protected lazy val extsZonedDateTime  = List("ZonedDateTime", "VARCHAR")
+  override protected lazy val extsUUID           = List("UUID", "UUID")
+  override protected lazy val extsURI            = List("URI", "VARCHAR")
+  override protected lazy val extsByte           = List("Byte", "TINYINT")
+  override protected lazy val extsShort          = List("Short", "SMALLINT")
+  override protected lazy val extsChar           = List("Char", "CHAR")
 }

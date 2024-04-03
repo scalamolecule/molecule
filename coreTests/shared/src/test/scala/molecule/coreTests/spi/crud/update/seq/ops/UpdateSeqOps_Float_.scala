@@ -27,7 +27,7 @@ trait UpdateSeqOps_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.floatSeq.query.get.map(_ ==> Nil)
 
         id <- Ns.floatSeq(List(float1, float2, float2)).save.transact.map(_.id)
-        // Applying empty value deletes previous Seq
+        // Applying nothing deletes previous Seq
         _ <- Ns(id).floatSeq().update.transact
         _ <- Ns.floatSeq.query.get.map(_ ==> Nil)
       } yield ()

@@ -37,13 +37,21 @@ trait UpdateMapOps_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: Spi
 
     "add" - types { implicit conn =>
       for {
-        id <- Ns.localDateTimeMap(Map(plocalDateTime1)).save.transact.map(_.id)
+        id <- Ns.localDateTimeMap(Map("a" -> localDateTime0)).save.transact.map(_.id)
+
+        // Adding pair with existing key replaces the value
+        _ <- Ns(id).localDateTimeMap.add("a" -> localDateTime1).update.transact
+        _ <- Ns.localDateTimeMap.query.get.map(_.head ==> Map(plocalDateTime1))
+
+        // Update doesn't add pair if no map attribute already exists
+        _ <- Ns(id).iMap.add("a" -> 1).update.transact
+        _ <- Ns.localDateTimeMap.iMap_?.query.get.map(_ ==> List((Map(plocalDateTime1), None)))
+
+        // Upsert adds pair to new map attribute if it wasn't already saved
+        _ <- Ns(id).iMap.add("a" -> 1).upsert.transact
+        _ <- Ns.localDateTimeMap.iMap_?.query.get.map(_ ==> List((Map(plocalDateTime1), Some(Map("a" -> 1)))))
 
         // Add pair
-        _ <- Ns(id).localDateTimeMap.add(plocalDateTime2).update.transact
-        _ <- Ns.localDateTimeMap.query.get.map(_.head ==> Map(plocalDateTime1, plocalDateTime2))
-
-        // Adding existing pair has no effect (Map semantics of only unique pairs)
         _ <- Ns(id).localDateTimeMap.add(plocalDateTime2).update.transact
         _ <- Ns.localDateTimeMap.query.get.map(_.head ==> Map(plocalDateTime1, plocalDateTime2))
 
@@ -64,17 +72,24 @@ trait UpdateMapOps_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: Spi
 
     "remove" - types { implicit conn =>
       for {
-        id <- Ns.localDateTimeMap(Map(plocalDateTime1, plocalDateTime2, plocalDateTime3, plocalDateTime4, plocalDateTime5, plocalDateTime6, plocalDateTime7)).save.transact.map(_.id)
+        id <- Ns.localDateTimeMap(Map(plocalDateTime1, plocalDateTime2, plocalDateTime3, plocalDateTime4, plocalDateTime5, plocalDateTime6, plocalDateTime7, plocalDateTime8)).save.transact.map(_.id)
 
-        // Remove pair by String key
-        _ <- Ns(id).localDateTimeMap.remove(string7).update.transact
+        // Remove pair by String key with update and upsert has same semantics
+        _ <- Ns(id).localDateTimeMap.remove(string8).update.transact
+        _ <- Ns(id).localDateTimeMap.remove(string7).upsert.transact
         _ <- Ns.localDateTimeMap.query.get.map(_.head ==> Map(plocalDateTime1, plocalDateTime2, plocalDateTime3, plocalDateTime4, plocalDateTime5, plocalDateTime6))
+
+        // Removing a pair in a non-asserted map attribute has no effect
+        _ <- Ns.localDateTimeMap.iMap_?.query.get.map(_.head._2 ==> None)
+        _ <- Ns(id).iMap.remove("a").update.transact
+        _ <- Ns(id).iMap.remove("a").upsert.transact
+        _ <- Ns.localDateTimeMap.iMap_?.query.get.map(_.head._2 ==> None)
 
         // Removing non-existing key has no effect
         _ <- Ns(id).localDateTimeMap.remove(string9).update.transact
         _ <- Ns.localDateTimeMap.query.get.map(_.head ==> Map(plocalDateTime1, plocalDateTime2, plocalDateTime3, plocalDateTime4, plocalDateTime5, plocalDateTime6))
 
-        // Removing duplicate keys removes the distinct pair
+        // Removing duplicate keys removes the distinct key only
         _ <- Ns(id).localDateTimeMap.remove(string6, string6).update.transact
         _ <- Ns.localDateTimeMap.query.get.map(_.head ==> Map(plocalDateTime1, plocalDateTime2, plocalDateTime3, plocalDateTime4, plocalDateTime5))
 

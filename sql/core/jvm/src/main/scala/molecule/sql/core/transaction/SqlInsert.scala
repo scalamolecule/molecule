@@ -562,6 +562,51 @@ trait SqlInsert
     }
   }
 
+
+  override protected def addMap[T](
+    ns: String,
+    attr: String,
+    refNs: Option[String],
+    tplIndex: Int,
+    transformValue: T => Any,
+    value2json: (StringBuffer, T) => StringBuffer
+  ): Product => Unit = {
+    val (curPath, paramIndex) = getParamIndex(attr)
+    (tpl: Product) =>
+      val colSetter = tpl.productElement(tplIndex).asInstanceOf[Map[String, _]] match {
+        case map if map.nonEmpty =>
+          (ps: PS, _: IdsMap, _: RowIndex) =>
+            ps.setBytes(paramIndex, map2jsonByteArray(map.asInstanceOf[Map[String, T]], value2json))
+
+        case _ =>
+          (ps: PS, _: IdsMap, _: RowIndex) =>
+            ps.setNull(paramIndex, java.sql.Types.NULL)
+      }
+      addColSetter(curPath, colSetter)
+  }
+
+  override protected def addMapOpt[T](
+    ns: String,
+    attr: String,
+    refNs: Option[String],
+    tplIndex: Int,
+    transformValue: T => Any,
+    value2json: (StringBuffer, T) => StringBuffer
+  ): Product => Unit = {
+    val (curPath, paramIndex) = getParamIndex(attr)
+    (tpl: Product) =>
+      val colSetter = tpl.productElement(tplIndex) match {
+        case Some(map: Map[_, _]) if map.nonEmpty =>
+          (ps: PS, _: IdsMap, _: RowIndex) =>
+            ps.setBytes(paramIndex, map2jsonByteArray(map.asInstanceOf[Map[String, T]], value2json))
+
+        case _ =>
+          (ps: PS, _: IdsMap, _: RowIndex) =>
+            ps.setNull(paramIndex, java.sql.Types.NULL)
+      }
+      addColSetter(curPath, colSetter)
+  }
+
   override protected def addRef(
     ns: String,
     refAttr: String,

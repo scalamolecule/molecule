@@ -37,13 +37,21 @@ trait UpdateMapOps_URI_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "add" - types { implicit conn =>
       for {
-        id <- Ns.uriMap(Map(puri1)).save.transact.map(_.id)
+        id <- Ns.uriMap(Map("a" -> uri0)).save.transact.map(_.id)
+
+        // Adding pair with existing key replaces the value
+        _ <- Ns(id).uriMap.add("a" -> uri1).update.transact
+        _ <- Ns.uriMap.query.get.map(_.head ==> Map(puri1))
+
+        // Update doesn't add pair if no map attribute already exists
+        _ <- Ns(id).iMap.add("a" -> 1).update.transact
+        _ <- Ns.uriMap.iMap_?.query.get.map(_ ==> List((Map(puri1), None)))
+
+        // Upsert adds pair to new map attribute if it wasn't already saved
+        _ <- Ns(id).iMap.add("a" -> 1).upsert.transact
+        _ <- Ns.uriMap.iMap_?.query.get.map(_ ==> List((Map(puri1), Some(Map("a" -> 1)))))
 
         // Add pair
-        _ <- Ns(id).uriMap.add(puri2).update.transact
-        _ <- Ns.uriMap.query.get.map(_.head ==> Map(puri1, puri2))
-
-        // Adding existing pair has no effect (Map semantics of only unique pairs)
         _ <- Ns(id).uriMap.add(puri2).update.transact
         _ <- Ns.uriMap.query.get.map(_.head ==> Map(puri1, puri2))
 
@@ -64,17 +72,24 @@ trait UpdateMapOps_URI_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "remove" - types { implicit conn =>
       for {
-        id <- Ns.uriMap(Map(puri1, puri2, puri3, puri4, puri5, puri6, puri7)).save.transact.map(_.id)
+        id <- Ns.uriMap(Map(puri1, puri2, puri3, puri4, puri5, puri6, puri7, puri8)).save.transact.map(_.id)
 
-        // Remove pair by String key
-        _ <- Ns(id).uriMap.remove(string7).update.transact
+        // Remove pair by String key with update and upsert has same semantics
+        _ <- Ns(id).uriMap.remove(string8).update.transact
+        _ <- Ns(id).uriMap.remove(string7).upsert.transact
         _ <- Ns.uriMap.query.get.map(_.head ==> Map(puri1, puri2, puri3, puri4, puri5, puri6))
+
+        // Removing a pair in a non-asserted map attribute has no effect
+        _ <- Ns.uriMap.iMap_?.query.get.map(_.head._2 ==> None)
+        _ <- Ns(id).iMap.remove("a").update.transact
+        _ <- Ns(id).iMap.remove("a").upsert.transact
+        _ <- Ns.uriMap.iMap_?.query.get.map(_.head._2 ==> None)
 
         // Removing non-existing key has no effect
         _ <- Ns(id).uriMap.remove(string9).update.transact
         _ <- Ns.uriMap.query.get.map(_.head ==> Map(puri1, puri2, puri3, puri4, puri5, puri6))
 
-        // Removing duplicate keys removes the distinct pair
+        // Removing duplicate keys removes the distinct key only
         _ <- Ns(id).uriMap.remove(string6, string6).update.transact
         _ <- Ns.uriMap.query.get.map(_.head ==> Map(puri1, puri2, puri3, puri4, puri5))
 

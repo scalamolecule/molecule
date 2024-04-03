@@ -36,13 +36,21 @@ trait UpdateMapOps_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
 
     "add" - types { implicit conn =>
       for {
-        id <- Ns.doubleMap(Map(pdouble1)).save.transact.map(_.id)
+        id <- Ns.doubleMap(Map("a" -> double0)).save.transact.map(_.id)
+
+        // Adding pair with existing key replaces the value
+        _ <- Ns(id).doubleMap.add("a" -> double1).update.transact
+        _ <- Ns.doubleMap.query.get.map(_.head ==> Map(pdouble1))
+
+        // Update doesn't add pair if no map attribute already exists
+        _ <- Ns(id).iMap.add("a" -> 1).update.transact
+        _ <- Ns.doubleMap.iMap_?.query.get.map(_ ==> List((Map(pdouble1), None)))
+
+        // Upsert adds pair to new map attribute if it wasn't already saved
+        _ <- Ns(id).iMap.add("a" -> 1).upsert.transact
+        _ <- Ns.doubleMap.iMap_?.query.get.map(_ ==> List((Map(pdouble1), Some(Map("a" -> 1)))))
 
         // Add pair
-        _ <- Ns(id).doubleMap.add(pdouble2).update.transact
-        _ <- Ns.doubleMap.query.get.map(_.head ==> Map(pdouble1, pdouble2))
-
-        // Adding existing pair has no effect (Map semantics of only unique pairs)
         _ <- Ns(id).doubleMap.add(pdouble2).update.transact
         _ <- Ns.doubleMap.query.get.map(_.head ==> Map(pdouble1, pdouble2))
 
@@ -63,17 +71,24 @@ trait UpdateMapOps_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
 
     "remove" - types { implicit conn =>
       for {
-        id <- Ns.doubleMap(Map(pdouble1, pdouble2, pdouble3, pdouble4, pdouble5, pdouble6, pdouble7)).save.transact.map(_.id)
+        id <- Ns.doubleMap(Map(pdouble1, pdouble2, pdouble3, pdouble4, pdouble5, pdouble6, pdouble7, pdouble8)).save.transact.map(_.id)
 
-        // Remove pair by String key
-        _ <- Ns(id).doubleMap.remove(string7).update.transact
+        // Remove pair by String key with update and upsert has same semantics
+        _ <- Ns(id).doubleMap.remove(string8).update.transact
+        _ <- Ns(id).doubleMap.remove(string7).upsert.transact
         _ <- Ns.doubleMap.query.get.map(_.head ==> Map(pdouble1, pdouble2, pdouble3, pdouble4, pdouble5, pdouble6))
+
+        // Removing a pair in a non-asserted map attribute has no effect
+        _ <- Ns.doubleMap.iMap_?.query.get.map(_.head._2 ==> None)
+        _ <- Ns(id).iMap.remove("a").update.transact
+        _ <- Ns(id).iMap.remove("a").upsert.transact
+        _ <- Ns.doubleMap.iMap_?.query.get.map(_.head._2 ==> None)
 
         // Removing non-existing key has no effect
         _ <- Ns(id).doubleMap.remove(string9).update.transact
         _ <- Ns.doubleMap.query.get.map(_.head ==> Map(pdouble1, pdouble2, pdouble3, pdouble4, pdouble5, pdouble6))
 
-        // Removing duplicate keys removes the distinct pair
+        // Removing duplicate keys removes the distinct key only
         _ <- Ns(id).doubleMap.remove(string6, string6).update.transact
         _ <- Ns.doubleMap.query.get.map(_.head ==> Map(pdouble1, pdouble2, pdouble3, pdouble4, pdouble5))
 

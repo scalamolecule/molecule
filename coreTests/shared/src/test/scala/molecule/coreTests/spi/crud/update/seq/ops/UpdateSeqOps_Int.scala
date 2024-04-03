@@ -26,7 +26,7 @@ trait UpdateSeqOps_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.intSeq.query.get.map(_ ==> Nil)
 
         id <- Ns.intSeq(List(int1, int2, int2)).save.transact.map(_.id)
-        // Applying empty value deletes previous Seq
+        // Applying nothing deletes previous Seq
         _ <- Ns(id).intSeq().update.transact
         _ <- Ns.intSeq.query.get.map(_ ==> Nil)
       } yield ()
