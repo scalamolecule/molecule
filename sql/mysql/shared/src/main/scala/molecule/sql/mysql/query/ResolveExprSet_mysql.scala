@@ -75,8 +75,8 @@ trait ResolveExprSet_mysql
     col: String, res: ResSet[T], mandatory: Boolean
   ): Unit = {
     if (mandatory) {
-      selectWithOrder(col, res.tpeDb, "JSON_ARRAYAGG")
       select -= col
+      selectWithOrder(col, res.tpeDb, "JSON_ARRAYAGG")
       groupByCols -= col
       having += "COUNT(*) > 0"
       aggregate = true
@@ -87,8 +87,8 @@ trait ResolveExprSet_mysql
   }
 
   override protected def setOptAttr[T](col: String, res: ResSet[T]): Unit = {
-    selectWithOrder(col, res.tpeDb, "JSON_ARRAYAGG", optional = true)
     select -= col
+    selectWithOrder(col, res.tpeDb, "JSON_ARRAYAGG", optional = true)
     groupByCols -= col
     aggregate = true
     replaceCast((row: RS, paramIndex: Int) =>
@@ -104,8 +104,8 @@ trait ResolveExprSet_mysql
       s"JSON_CONTAINS($col, JSON_ARRAY($jsonValues))"
     }
     if (mandatory) {
-      selectWithOrder(col, res.tpeDb, "JSON_ARRAYAGG", optional = true)
       select -= col
+      selectWithOrder(col, res.tpeDb, "JSON_ARRAYAGG", optional = true)
       groupByCols -= col
       aggregate = true
     }
@@ -125,8 +125,8 @@ trait ResolveExprSet_mysql
       s"NOT JSON_CONTAINS($col, JSON_ARRAY($jsonValues))"
     }
     if (mandatory) {
-      selectWithOrder(col, res.tpeDb, "JSON_ARRAYAGG", optional = true)
       select -= col
+      selectWithOrder(col, res.tpeDb, "JSON_ARRAYAGG", optional = true)
       groupByCols -= col
       aggregate = true
     }
@@ -144,7 +144,9 @@ trait ResolveExprSet_mysql
     where += (("", s"JSON_CONTAINS($col, JSON_ARRAY($filterAttr))"))
   }
 
-  override protected def setFilterHasNo[T](col: String, filterAttr: String, res: ResSet[T], mandatory: Boolean): Unit = {
+  override protected def setFilterHasNo[T](
+    col: String, filterAttr: String, res: ResSet[T], mandatory: Boolean
+  ): Unit = {
     if (mandatory) {
       val i = getIndex
       select -= col

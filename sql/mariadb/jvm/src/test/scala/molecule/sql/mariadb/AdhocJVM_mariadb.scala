@@ -23,30 +23,28 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
       for {
 
 
-        List(a, b, c, d) <- A.i.iSet_?.insert(
-          (1, None),
-          (1, Some(Set(2))),
-          (1, Some(Set(3))),
-          (2, Some(Set(4, 5))),
-        ).transact.map(_.ids)
 
-        _ <- A.i.a1.iSet_?.query.get.map(_ ==> List(
-          // (1, None), // coalesced with Set(2) and Set(3)
-          (1, Some(Set(2, 3))), // coalesced Set(2) and Set(3)
-          (2, Some(Set(4, 5))),
-        ))
+        //        _ <- Ref.i.Nss.*(Ns.stringSeq).insert(1, List(List(string1, string2))).transact
+        _ <- Ref.i.Nss.*(Ns.intSeq).insert(2, List(List(int1, int2))).transact
 
-        //        _ <- rawQuery(
-        //          """SELECT DISTINCT
-        //            |  Ns.i,
-        //            |  Ns.offsetDateTimeMap
-        //            |FROM Ns
-        //            |WHERE
-        //            |  Ns.i IS NOT NULL
-        //            |ORDER BY Ns.i;
-        //            |""".stripMargin, true).map(println)
+        _ <- rawQuery(
+          """SELECT DISTINCT
+            |  Ref.id,
+            |  Ns.intSeq
+            |FROM Ref
+            |  INNER JOIN Ref_nss_Ns ON Ref.id           = Ref_nss_Ns.Ref_id
+            |  INNER JOIN Ns         ON Ref_nss_Ns.Ns_id = Ns.id
+            |WHERE
+            |  Ref.i     IS NOT NULL AND
+            |  Ns.intSeq IS NOT NULL
+            |GROUP BY Ref.id, Ns.intSeq
+            |;
+            |""".stripMargin, true)
+//            |GROUP BY Ref.id
 
 
+        //        _ <- Ref.i_.Nss.*(Ns.stringSeq).query.i.get.map(_ ==> List(List(List(string1, string2))))
+        _ <- Ref.i_.Nss.*(Ns.intSeq).query.i.get.map(_ ==> List(List(List(int1, int2))))
       } yield ()
     }
 

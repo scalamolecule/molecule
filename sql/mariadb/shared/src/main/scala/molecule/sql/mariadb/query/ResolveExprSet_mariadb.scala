@@ -82,8 +82,8 @@ trait ResolveExprSet_mariadb
     col: String, res: ResSet[T], mandatory: Boolean
   ): Unit = {
     if (mandatory) {
-      selectWithOrder(col, res.tpeDb, "JSON_ARRAYAGG")
       select -= col
+      selectWithOrder(col, res.tpeDb, "JSON_ARRAYAGG")
       groupByCols -= col
       having += "COUNT(*) > 0"
       aggregate = true
@@ -134,8 +134,8 @@ trait ResolveExprSet_mariadb
     }
     if (mandatory) {
       // We need this to coalesce Sets
-      selectWithOrder(col, res.tpeDb, "JSON_ARRAYAGG", optional = true)
       select -= col
+      selectWithOrder(col, res.tpeDb, "JSON_ARRAYAGG", optional = true)
       groupByCols -= col
       aggregate = true
     }

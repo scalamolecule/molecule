@@ -18,35 +18,37 @@ object AdhocJVM_mysql extends TestSuite_mysql {
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
-      val a = (1, Set(0, 1, 2), Set(1, 2, 3))
-      val b = (2, Set(2, 3), Set(2, 3))
-      val c = (3, Set(4), Set(3))
+
+
       for {
 
+        //        _ <- Ref.i.Nss.*(Ns.stringSeq).insert(1, List(List(string1, string2))).transact
+        _ <- Ref.i.Nss.*(Ns.intSeq).insert(2, List(List(int1, int2))).transact
 
-        _ <- Ns.i.iSet.intSet.insert(a, b, c).transact
-
-//        _ <- rawQuery(
-//          """SELECT DISTINCT
-//            |  Ns.i,
-//            |  Ns.iSet,
-//            |  JSON_ARRAYAGG(t_3.vs)
-//            |FROM Ns,
-//            |  JSON_TABLE(
-//            |    IF(Ns.intSet IS NULL, '[null]', Ns.intSet),
-//            |    '$[*]' COLUMNS (vs INT PATH '$')
-//            |  ) t_3
-//            |WHERE
-//            |  Ns.iSet   = Ns.intSet AND
-//            |  Ns.i    IS NOT NULL AND
-//            |  Ns.iSet   IS NOT NULL AND
-//            |  Ns.intSet IS NOT NULL
-//            |GROUP BY Ns.i, Ns.iSet
-//            |HAVING COUNT(*) > 0;
-//            |""".stripMargin, true)
+        _ <- rawQuery(
+          """SELECT DISTINCT
+            |  Ref.id,
+            |  Ns.intSeq
+            |FROM Ref
+            |  INNER JOIN Ref_nss_Ns ON Ref.id           = Ref_nss_Ns.Ref_id
+            |  INNER JOIN Ns         ON Ref_nss_Ns.Ns_id = Ns.id
+            |WHERE
+            |  Ref.i     IS NOT NULL AND
+            |  Ns.intSeq IS NOT NULL
+            |GROUP BY Ref.id, Ns.intSeq
+            |;
+            |""".stripMargin, true)
 
 
-//        _ <- Ns.i.iSet(Ns.intSet).query.i.get.map(_ ==> List(b))
+        //        _ <- Ref.i_.Nss.*(Ns.stringSeq).query.i.get.map(_ ==> List(List(List(string1, string2))))
+        _ <- Ref.i_.Nss.*(Ns.intSeq).query.i.get.map(_ ==> List(List(List(int1, int2))))
+
+
+
+
+
+
+        //        _ <- Ns.i.iSet(Ns.intSet).query.i.get.map(_ ==> List(b))
 
       } yield ()
     }

@@ -163,7 +163,8 @@ trait SqlSave
       case Some(map: Map[_, _]) if map.nonEmpty =>
         (ps: PS, _: IdsMap, _: RowIndex) =>
           ps.setBytes(paramIndex, map2jsonByteArray(map, value2json))
-      case _                                    =>
+
+      case _ =>
         (ps: PS, _: IdsMap, _: RowIndex) =>
           ps.setNull(paramIndex, 0)
     }

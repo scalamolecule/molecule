@@ -14,6 +14,7 @@ trait ResolveExprSeq_mariadb
   ): Unit = {
     val col = getCol(attr: Attr)
     select += col
+    groupByCols += col // if we later need to group by non-aggregated columns
     if (!isNestedOpt) {
       notNull += col
     }

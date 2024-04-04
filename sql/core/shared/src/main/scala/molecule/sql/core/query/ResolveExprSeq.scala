@@ -101,6 +101,7 @@ trait ResolveExprSeq extends ResolveExpr { self: SqlQueryBase with LambdasSeq =>
   ): Unit = {
     val col = getCol(attr: Attr)
     select += col
+    groupByCols += col // if we later need to group by non-aggregated columns
     if (!isNestedOpt) {
       notNull += col
     }
@@ -220,6 +221,7 @@ trait ResolveExprSeq extends ResolveExpr { self: SqlQueryBase with LambdasSeq =>
   private def manByteArray(attr: Attr, byteArray: Array[Byte]): Unit = {
     val col = getCol(attr: Attr)
     select += col
+    groupByCols += col // if we later need to group by non-aggregated columns
     if (!isNestedOpt) {
       notNull += col
     }
