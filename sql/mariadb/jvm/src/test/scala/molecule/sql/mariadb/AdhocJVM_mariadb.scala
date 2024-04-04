@@ -5,6 +5,7 @@ import java.time.{Duration, Instant, LocalDate, LocalDateTime, LocalTime, Offset
 import java.util.{Date, UUID}
 import molecule.base.error.ModelError
 import molecule.core.util.Executor._
+import molecule.coreTests.dataModels.core.dsl.Refs.A
 import molecule.sql.mariadb.async._
 import molecule.sql.mariadb.setup.TestSuite_mariadb
 import utest._
@@ -18,41 +19,33 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
+
       for {
 
 
-        id <- Ns.intSeq.stringSeq.insert(List(1), List("a")).transact.map(_.id)
-        _ <- Ns.intSeq.stringSeq.query.get.map(_ ==> List((List(1), List("a"))))
+        List(a, b, c, d) <- A.i.iSet_?.insert(
+          (1, None),
+          (1, Some(Set(2))),
+          (1, Some(Set(3))),
+          (2, Some(Set(4, 5))),
+        ).transact.map(_.ids)
 
-        _ <- Ns(id).intSeq(Seq(2)).stringSeq(Seq("b", "c")).update.transact
-//        _ <- Ns.intSeq.query.i.get.map(_ ==> List(List(2)))
+        _ <- A.i.a1.iSet_?.query.get.map(_ ==> List(
+          // (1, None), // coalesced with Set(2) and Set(3)
+          (1, Some(Set(2, 3))), // coalesced Set(2) and Set(3)
+          (2, Some(Set(4, 5))),
+        ))
 
+        //        _ <- rawQuery(
+        //          """SELECT DISTINCT
+        //            |  Ns.i,
+        //            |  Ns.offsetDateTimeMap
+        //            |FROM Ns
+        //            |WHERE
+        //            |  Ns.i IS NOT NULL
+        //            |ORDER BY Ns.i;
+        //            |""".stripMargin, true).map(println)
 
-        _ <- rawQuery(
-          """SELECT DISTINCT
-            |  Ns.intSeq,
-            |  JSON_ARRAYAGG(t_1.vs),
-            |  JSON_ARRAYAGG(t_2.vs)
-            |FROM Ns,
-            |  JSON_TABLE(
-            |    IF(Ns.intSeq IS NULL, '[null]', Ns.intSeq),
-            |    '$[*]' COLUMNS (vs INT PATH '$')
-            |  ) t_1,
-            |  JSON_TABLE(
-            |    IF(Ns.stringSeq IS NULL, '[null]', Ns.stringSeq),
-            |    '$[*]' COLUMNS (vs LONGTEXT PATH '$')
-            |  ) t_2
-            |WHERE
-            |  Ns.intSeq    IS NOT NULL AND
-            |  Ns.stringSeq IS NOT NULL
-            |HAVING COUNT(*) > 0;
-            |""".stripMargin, true).map(println)
-
-
-
-
-
-        _ <- Ns.intSeq.stringSeq.query.i.get.map(_ ==> List((List(2), List("b", "c"))))
 
       } yield ()
     }

@@ -113,8 +113,8 @@ trait ResolveExprSeq extends ResolveExpr { self: SqlQueryBase with LambdasSeq =>
       seqExpr(attr, col, args, res, true)
     } {
       case (dir, filterPath, filterAttr) => filterAttr match {
-        case filterAttr: AttrOne => seqExpr2(col, attr.op, filterAttr.name)
-        case filterAttr          => seqExpr2(col, attr.op, filterAttr.name)
+        case filterAttr: AttrOne => seqFilterExpr(col, attr.op, filterAttr.name)
+        case filterAttr          => seqFilterExpr(col, attr.op, filterAttr.name)
       }
     }
   }
@@ -128,8 +128,8 @@ trait ResolveExprSeq extends ResolveExpr { self: SqlQueryBase with LambdasSeq =>
       seqExpr(attr, col, args, res, false)
     } { case (dir, filterPath, filterAttr) =>
       filterAttr match {
-        case filterAttr: AttrOne => seqExpr2(col, attr.op, filterAttr.name)
-        case filterAttr          => seqExpr2(col, attr.op, filterAttr.name)
+        case filterAttr: AttrOne => seqFilterExpr(col, attr.op, filterAttr.name)
+        case filterAttr          => seqFilterExpr(col, attr.op, filterAttr.name)
       }
     }
   }
@@ -147,12 +147,12 @@ trait ResolveExprSeq extends ResolveExpr { self: SqlQueryBase with LambdasSeq =>
     }
   }
 
-  protected def seqExpr2(
+  protected def seqFilterExpr(
     col: String, op: Op, filterAttr: String
   ): Unit = {
     op match {
-      case Has   => seqHas(col, filterAttr)
-      case HasNo => seqHasNo(col, filterAttr)
+      case Has   => seqFilterHas(col, filterAttr)
+      case HasNo => seqFilterHasNo(col, filterAttr)
       case other => unexpectedOp(other)
     }
   }
@@ -206,11 +206,11 @@ trait ResolveExprSeq extends ResolveExpr { self: SqlQueryBase with LambdasSeq =>
 
   // filter attribute ----------------------------------------------------------
 
-  protected def seqHas(col: String, filterAttr: String): Unit = {
+  protected def seqFilterHas(col: String, filterAttr: String): Unit = {
     where += (("", s"ARRAY_CONTAINS($col, $filterAttr)"))
   }
 
-  protected def seqHasNo(col: String, filterAttr: String): Unit = {
+  protected def seqFilterHasNo(col: String, filterAttr: String): Unit = {
     where += (("", s"NOT ARRAY_CONTAINS($col, $filterAttr)"))
   }
 

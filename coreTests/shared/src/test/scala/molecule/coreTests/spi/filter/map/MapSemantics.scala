@@ -33,6 +33,11 @@ trait MapSemantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (10, 1),
           (20, 3),
         ))
+        _ <- Ns.i.a1.intMap_.apply("a").query.i.get.map(_ ==> List(
+          10,
+          20,
+        ))
+
         // Lookup optional value by key
         _ <- Ns.i.a1.intMap_?("c").query.get.map(_ ==> List(
           (10, None),
@@ -41,7 +46,6 @@ trait MapSemantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         // Avoid values by key
         _ <- Ns.i.a1.intMap_.not("c").query.get.map(_ ==> List(10))
-
 
         // Match by value (only on tacit map attributes)
         _ <- Ns.i.a1.intMap_.has(4).query.get.map(_ ==> List(20))

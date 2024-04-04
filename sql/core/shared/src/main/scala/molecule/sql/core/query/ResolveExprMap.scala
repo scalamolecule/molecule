@@ -135,11 +135,11 @@ trait ResolveExprMap extends ResolveExpr { self: SqlQueryBase with LambdasMap =>
     val col = getCol(attr: Attr)
     attr.op match {
       case V       => where += ((col, s"IS NOT NULL"))
-      case Eq      => containsKeys(col, map)
-      case Neq     => containsNoKeys(col, map)
-      case Has     => hasValues(col, map, resMap)
-      case HasNo   => hasNoValues(col, map, resMap)
-      case NoValue => noValue(col)
+      case Eq      => mapContainsKeys(col, map)
+      case Neq     => mapContainsNoKeys(col, map)
+      case Has     => mapHasValues(col, map, resMap)
+      case HasNo   => mapHasNoValues(col, map, resMap)
+      case NoValue => mapNoValue(col)
       case other   => unexpectedOp(other)
     }
   }
@@ -169,42 +169,43 @@ trait ResolveExprMap extends ResolveExpr { self: SqlQueryBase with LambdasMap =>
 
   // tacit ---------------------------------------------------------------------
 
-  private def containsKeys[T](col: String, map: Map[String, T]): Unit = {
+  protected def mapContainsKeys[T](col: String, map: Map[String, T]): Unit = {
     val keys = map.keys
     keys.size match {
       case 0 => where += (("FALSE", ""))
-      case 1 => where += ((s"""($col)."${keys.head}"""", s"IS NOT NULL"))
+      case 1 => where += (("", s"""($col)."${keys.head}" IS NOT NULL"""))
       case _ => where += (("", keys.map(key =>
         s"""($col)."$key" IS NOT NULL"""
       ).mkString("(", " OR\n   ", ")")))
     }
   }
 
-  private def containsNoKeys[T](
+  protected def mapContainsNoKeys[T](
     col: String, map: Map[String, T]
   ): Unit = {
     val keys = map.keys
     keys.size match {
       case 0 => () // get all
-      case 1 => where += ((s"""($col)."${keys.head}"""", s"IS NULL"))
+      case 1 => where += (("", s"""($col)."${keys.head}" IS NULL"""))
       case _ => where += (("", keys.map(key =>
         s"""($col)."$key" IS NULL"""
       ).mkString("(", " AND\n   ", ")")))
     }
   }
 
-  private def hasValues[T](
+  protected def mapHasValues[T](
     col: String, map: Map[String, T], resMap: ResMap[T]
   ): Unit = {
     if (map.nonEmpty) {
       val values = map.values.map(resMap.one2json)
       where += (("", s"""REGEXP_LIKE($col, '(${regex(resMap.tpe, values)})')"""))
     } else {
+      // Get none
       where += (("FALSE", ""))
     }
   }
 
-  private def hasNoValues[T](
+  protected def mapHasNoValues[T](
     col: String, map: Map[String, T], resMap: ResMap[T]
   ): Unit = {
     if (map.nonEmpty) {
@@ -216,7 +217,7 @@ trait ResolveExprMap extends ResolveExpr { self: SqlQueryBase with LambdasMap =>
     }
   }
 
-  private def noValue(col: String): Unit = {
+  protected def mapNoValue(col: String): Unit = {
     where += ((col, s"IS NULL"))
   }
 

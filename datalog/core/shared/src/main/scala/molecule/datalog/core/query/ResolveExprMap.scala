@@ -144,11 +144,11 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     val v = vv
     attr.op match {
       case V       => mapAttr(attr, e, v, resMap)
-      case Eq      => containsKeys(attr, e, v, map)
-      case Neq     => containsNoKeys(attr, e, v, map)
-      case Has     => hasValues(attr, e, v, map, resMap)
-      case HasNo   => hasNoValues(attr, e, v, map, resMap)
-      case NoValue => noValue(attr, e)
+      case Eq      => mapContainsKeys(attr, e, v, map)
+      case Neq     => mapContainsNoKeys(attr, e, v, map)
+      case Has     => mapHasValues(attr, e, v, map, resMap)
+      case HasNo   => mapHasNoValues(attr, e, v, map, resMap)
+      case NoValue => mapNoValue(attr, e)
       case other   => unexpectedOp(other)
     }
   }
@@ -218,7 +218,7 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
 
   // tacit ---------------------------------------------------------------------
 
-  private def containsKeys[T](
+  private def mapContainsKeys[T](
     attr: Attr, e: Var, v: Var, map: Map[String, T]
   ): Unit = {
     val (a, ak, av, k_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
@@ -234,7 +234,7 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
   }
 
 
-  private def containsNoKeys[T](
+  private def mapContainsNoKeys[T](
     attr: Attr, e: Var, v: Var, map: Map[String, T]
   ): Unit = {
     val (a, ak, av, k_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
@@ -253,7 +253,7 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
   }
 
 
-  private def hasValues[T](
+  private def mapHasValues[T](
     attr: Attr, e: Var, v: Var, map: Map[String, T], resMap: ResMap[T]
   ): Unit = {
     val (a, ak, av, k_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
@@ -275,7 +275,7 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
   }
 
 
-  private def hasNoValues[T](
+  private def mapHasNoValues[T](
     attr: Attr, e: Var, v: Var, map: Map[String, T], resMap: ResMap[T]
   ): Unit = {
     val (a, ak, av, k_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
@@ -299,7 +299,7 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
   }
 
 
-  private def noValue(attr: Attr, e: Var): Unit = {
+  private def mapNoValue(attr: Attr, e: Var): Unit = {
     val a = nsAttr(attr)
     where += s"(not [$e $a])" -> wNeqOne
   }

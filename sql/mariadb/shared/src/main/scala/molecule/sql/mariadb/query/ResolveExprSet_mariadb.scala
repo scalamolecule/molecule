@@ -1,9 +1,7 @@
 package molecule.sql.mariadb.query
 
-import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.sql.core.query.{ResolveExprSet, SqlQueryBase}
-import scala.reflect.ClassTag
 
 
 trait ResolveExprSet_mariadb
@@ -47,6 +45,16 @@ trait ResolveExprSet_mariadb
       case HasNo   => setHasNo(col, set, res, res.one2sql, mandatory)
       case NoValue => if (mandatory) noApplyNothing(attr) else setNoValue(col)
       case other   => unexpectedOp(other)
+    }
+  }
+
+  override protected def setFilterExpr[T](
+    col: String, op: Op, filterAttr: String, res: ResSet[T], mandatory: Boolean
+  ): Unit = {
+    op match {
+      case Has   => setFilterHas(col, filterAttr)
+      case HasNo => setFilterHasNo(col, filterAttr, res, mandatory)
+      case other => unexpectedOp(other)
     }
   }
 
@@ -103,6 +111,7 @@ trait ResolveExprSet_mariadb
       s"JSON_CONTAINS($col, JSON_ARRAY($jsonValues))"
     }
     if (mandatory) {
+      // We need this to coalesce Sets
       select -= col
       selectWithOrder(col, res.tpeDb, "JSON_ARRAYAGG", optional = true)
       groupByCols -= col
@@ -124,6 +133,7 @@ trait ResolveExprSet_mariadb
       s"NOT JSON_CONTAINS($col, JSON_ARRAY($jsonValues))"
     }
     if (mandatory) {
+      // We need this to coalesce Sets
       selectWithOrder(col, res.tpeDb, "JSON_ARRAYAGG", optional = true)
       select -= col
       groupByCols -= col
@@ -143,7 +153,9 @@ trait ResolveExprSet_mariadb
     where += (("", s"JSON_CONTAINS($col, JSON_ARRAY($filterAttr))"))
   }
 
-  override protected def setFilterHasNo[T](col: String, filterAttr: String, res: ResSet[T], mandatory: Boolean): Unit = {
+  override protected def setFilterHasNo[T](
+    col: String, filterAttr: String, res: ResSet[T], mandatory: Boolean
+  ): Unit = {
     if (mandatory) {
       val i = getIndex
       select -= col

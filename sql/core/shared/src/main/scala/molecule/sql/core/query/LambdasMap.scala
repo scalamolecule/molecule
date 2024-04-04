@@ -1,7 +1,6 @@
 package molecule.sql.core.query
 
 import java.net.URI
-import java.nio.ByteBuffer
 import java.time._
 import java.util.{Date, UUID}
 import boopickle.Default._
@@ -667,7 +666,7 @@ trait LambdasMap extends LambdasBase with JavaConversions { self: SqlQueryBase =
     val byteArray = row.getBytes(paramIndex)
     if (!row.wasNull() && byteArray.nonEmpty)
       Some(json2map(new String(byteArray)))
-    else 
+    else
       None
   }
 
