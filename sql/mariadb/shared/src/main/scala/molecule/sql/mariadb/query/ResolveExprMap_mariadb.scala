@@ -12,7 +12,7 @@ trait ResolveExprMap_mariadb
     with LambdasMap_mariadb { self: SqlQueryBase =>
 
 
-//  override protected def setMan[T: ClassTag](
+//  override protected def setMan[T](
 //    attr: Attr, tpe: String, args: Seq[Set[T]], res: ResSet[T]
 //  ): Unit = {
 //    val col = getCol(attr: Attr)
@@ -27,9 +27,7 @@ trait ResolveExprMap_mariadb
 //    attr.filterAttr.fold {
 //      val pathAttr = path :+ attr.cleanAttr
 //      if (filterAttrVars.contains(pathAttr) && attr.op != V) {
-//        // Runtime check needed since we can't type infer it
-//        throw ModelError(s"Cardinality-set filter attributes not allowed to " +
-//          s"do additional filtering. Found:\n  " + attr)
+//        noCardManyFilterAttrExpr(attr)
 //      }
 //      setExpr(col, attr.op, args, res, true)
 //    } {
@@ -41,7 +39,7 @@ trait ResolveExprMap_mariadb
 //    }
 //  }
 //
-//  override protected def setExpr[T: ClassTag](
+//  override protected def setExpr[T](
 //    col: String, op: Op, sets: Seq[Set[T]], res: ResSet[T], mandatory: Boolean
 //  ): Unit = {
 //    op match {
@@ -56,7 +54,7 @@ trait ResolveExprMap_mariadb
 //    }
 //  }
 //
-//  override protected def setOpt[T: ClassTag](
+//  override protected def setOpt[T](
 //    attr: Attr,
 //    optSets: Option[Seq[Set[T]]],
 //    resOpt: ResSetOpt[T],
@@ -82,7 +80,7 @@ trait ResolveExprMap_mariadb
 //
 //  // attr ----------------------------------------------------------------------
 //
-//  override protected def setAttr[T: ClassTag](
+//  override protected def setAttr[T](
 //    col: String, res: ResSet[T], mandatory: Boolean
 //  ): Unit = {
 //    if (mandatory) {
@@ -171,7 +169,7 @@ trait ResolveExprMap_mariadb
 //
 //  // has -----------------------------------------------------------------------
 //
-//  override protected def has[T: ClassTag](
+//  override protected def has[T](
 //    col: String, sets: Seq[Set[T]], res: ResSet[T], one2json: T => String, mandatory: Boolean
 //  ): Unit = {
 //    def containsSet(set: Set[T]): String = {
@@ -201,7 +199,7 @@ trait ResolveExprMap_mariadb
 //    }
 //  }
 //
-//  override protected def optHas[T: ClassTag](
+//  override protected def optHas[T](
 //    col: String,
 //    optSets: Option[Seq[Set[T]]],
 //    res: ResSet[T],
@@ -252,7 +250,7 @@ trait ResolveExprMap_mariadb
 //    }
 //  }
 //
-//  override protected def optHasNo[T: ClassTag](
+//  override protected def optHasNo[T](
 //    col: String,
 //    optSets: Option[Seq[Set[T]]],
 //    res: ResSet[T],
@@ -273,7 +271,7 @@ trait ResolveExprMap_mariadb
 //
 //  // aggregation ---------------------------------------------------------------
 //
-//  override protected def setAggr[T: ClassTag](
+//  override protected def setAggr[T](
 //    col: String, fn: String, optN: Option[Int], res: ResSet[T]
 //  ): Unit = {
 //    checkAggrSet()

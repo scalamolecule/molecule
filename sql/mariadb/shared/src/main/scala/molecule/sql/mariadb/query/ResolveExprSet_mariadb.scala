@@ -11,7 +11,7 @@ trait ResolveExprSet_mariadb
     with LambdasSet_mariadb { self: SqlQueryBase =>
 
 
-  override protected def setMan[T: ClassTag](
+  override protected def setMan[T](
     attr: Attr, args: Set[T], res: ResSet[T]
   ): Unit = {
     val col = getCol(attr: Attr)
@@ -26,9 +26,7 @@ trait ResolveExprSet_mariadb
     attr.filterAttr.fold {
       val pathAttr = path :+ attr.cleanAttr
       if (filterAttrVars.contains(pathAttr) && attr.op != V) {
-        // Runtime check needed since we can't type infer it
-        throw ModelError(s"Cardinality-set filter attributes not allowed to " +
-          s"do additional filtering. Found:\n  " + attr)
+        noCardManyFilterAttrExpr(attr)
       }
       setExpr(attr, col, attr.op, args, res, true)
     } {
@@ -39,7 +37,7 @@ trait ResolveExprSet_mariadb
     }
   }
 
-  override protected def setExpr[T: ClassTag](
+  override protected def setExpr[T](
     attr: Attr, col: String, op: Op, set: Set[T], res: ResSet[T], mandatory: Boolean
   ): Unit = {
     op match {
@@ -52,7 +50,7 @@ trait ResolveExprSet_mariadb
     }
   }
 
-  override protected def setOpt[T: ClassTag](
+  override protected def setOpt[T](
     attr: Attr, resOpt: ResSetOpt[T], res: ResSet[T]
   ): Unit = {
     val col = getCol(attr: Attr)
@@ -72,7 +70,7 @@ trait ResolveExprSet_mariadb
 
   // attr ----------------------------------------------------------------------
 
-  override protected def setAttr[T: ClassTag](
+  override protected def setAttr[T](
     col: String, res: ResSet[T], mandatory: Boolean
   ): Unit = {
     if (mandatory) {
@@ -97,7 +95,7 @@ trait ResolveExprSet_mariadb
     )
   }
 
-  override protected def setHas[T: ClassTag](
+  override protected def setHas[T](
     col: String, set: Set[T], res: ResSet[T], one2json: T => String, mandatory: Boolean
   ): Unit = {
     def containsSet(set: Set[T]): String = {

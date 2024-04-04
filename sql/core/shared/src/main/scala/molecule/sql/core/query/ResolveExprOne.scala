@@ -176,7 +176,7 @@ trait ResolveExprOne extends ResolveExpr { self: SqlQueryBase with LambdasOne =>
     case other => unexpectedOp(other)
   }
 
-  protected def opt[T: ClassTag](
+  protected def opt[T](
     attr: Attr,
     optArgs: Option[Seq[T]],
     resOpt: ResOneOpt[T],
@@ -201,7 +201,7 @@ trait ResolveExprOne extends ResolveExpr { self: SqlQueryBase with LambdasOne =>
 
   // eq ------------------------------------------------------------------------
 
-  protected def equal[T: ClassTag](col: String, args: Seq[T], one2sql: T => String): Unit = {
+  protected def equal[T](col: String, args: Seq[T], one2sql: T => String): Unit = {
     where += (args.length match {
       case 1 => (col, "= " + one2sql(args.head))
       case 0 => (col, "IS NULL ")
@@ -209,7 +209,7 @@ trait ResolveExprOne extends ResolveExpr { self: SqlQueryBase with LambdasOne =>
     })
   }
 
-  protected def optEqual[T: ClassTag](
+  protected def optEqual[T](
     col: String,
     optArgs: Option[Seq[T]],
     one2sql: T => String,

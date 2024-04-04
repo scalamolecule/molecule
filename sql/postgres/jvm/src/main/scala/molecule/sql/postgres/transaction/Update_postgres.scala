@@ -18,14 +18,14 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
   override def updateSetRemove[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     owner: Boolean,
     set: Set[T],
     transformValue: T => Any,
     exts: List[String],
     one2json: T => String
   ): Unit = {
-    refNs.fold {
+    optRefNs.fold {
       if (set.nonEmpty) {
         updateCurRefPath(attr)
         if (!isUpsert) {

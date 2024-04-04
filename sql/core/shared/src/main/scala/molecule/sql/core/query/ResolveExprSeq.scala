@@ -69,34 +69,34 @@ trait ResolveExprSeq extends ResolveExpr { self: SqlQueryBase with LambdasSeq =>
   override protected def resolveAttrSeqOpt(attr: AttrSeqOpt): Unit = {
     aritiesAttr()
     attr match {
-      case _: AttrSeqOptID             => seqOpt(attr, resOptSeqId)
-      case _: AttrSeqOptString         => seqOpt(attr, resOptSeqString)
-      case _: AttrSeqOptInt            => seqOpt(attr, resOptSeqInt)
-      case _: AttrSeqOptLong           => seqOpt(attr, resOptSeqLong)
-      case _: AttrSeqOptFloat          => seqOpt(attr, resOptSeqFloat)
-      case _: AttrSeqOptDouble         => seqOpt(attr, resOptSeqDouble)
-      case _: AttrSeqOptBoolean        => seqOpt(attr, resOptSeqBoolean)
-      case _: AttrSeqOptBigInt         => seqOpt(attr, resOptSeqBigInt)
-      case _: AttrSeqOptBigDecimal     => seqOpt(attr, resOptSeqBigDecimal)
-      case _: AttrSeqOptDate           => seqOpt(attr, resOptSeqDate)
-      case _: AttrSeqOptDuration       => seqOpt(attr, resOptSeqDuration)
-      case _: AttrSeqOptInstant        => seqOpt(attr, resOptSeqInstant)
-      case _: AttrSeqOptLocalDate      => seqOpt(attr, resOptSeqLocalDate)
-      case _: AttrSeqOptLocalTime      => seqOpt(attr, resOptSeqLocalTime)
-      case _: AttrSeqOptLocalDateTime  => seqOpt(attr, resOptSeqLocalDateTime)
-      case _: AttrSeqOptOffsetTime     => seqOpt(attr, resOptSeqOffsetTime)
-      case _: AttrSeqOptOffsetDateTime => seqOpt(attr, resOptSeqOffsetDateTime)
-      case _: AttrSeqOptZonedDateTime  => seqOpt(attr, resOptSeqZonedDateTime)
-      case _: AttrSeqOptUUID           => seqOpt(attr, resOptSeqUUID)
-      case _: AttrSeqOptURI            => seqOpt(attr, resOptSeqURI)
+      case _: AttrSeqOptID             => seqOpt(attr, resOptSeqId, resSeqId)
+      case _: AttrSeqOptString         => seqOpt(attr, resOptSeqString, resSeqString)
+      case _: AttrSeqOptInt            => seqOpt(attr, resOptSeqInt, resSeqInt)
+      case _: AttrSeqOptLong           => seqOpt(attr, resOptSeqLong, resSeqLong)
+      case _: AttrSeqOptFloat          => seqOpt(attr, resOptSeqFloat, resSeqFloat)
+      case _: AttrSeqOptDouble         => seqOpt(attr, resOptSeqDouble, resSeqDouble)
+      case _: AttrSeqOptBoolean        => seqOpt(attr, resOptSeqBoolean, resSeqBoolean)
+      case _: AttrSeqOptBigInt         => seqOpt(attr, resOptSeqBigInt, resSeqBigInt)
+      case _: AttrSeqOptBigDecimal     => seqOpt(attr, resOptSeqBigDecimal, resSeqBigDecimal)
+      case _: AttrSeqOptDate           => seqOpt(attr, resOptSeqDate, resSeqDate)
+      case _: AttrSeqOptDuration       => seqOpt(attr, resOptSeqDuration, resSeqDuration)
+      case _: AttrSeqOptInstant        => seqOpt(attr, resOptSeqInstant, resSeqInstant)
+      case _: AttrSeqOptLocalDate      => seqOpt(attr, resOptSeqLocalDate, resSeqLocalDate)
+      case _: AttrSeqOptLocalTime      => seqOpt(attr, resOptSeqLocalTime, resSeqLocalTime)
+      case _: AttrSeqOptLocalDateTime  => seqOpt(attr, resOptSeqLocalDateTime, resSeqLocalDateTime)
+      case _: AttrSeqOptOffsetTime     => seqOpt(attr, resOptSeqOffsetTime, resSeqOffsetTime)
+      case _: AttrSeqOptOffsetDateTime => seqOpt(attr, resOptSeqOffsetDateTime, resSeqOffsetDateTime)
+      case _: AttrSeqOptZonedDateTime  => seqOpt(attr, resOptSeqZonedDateTime, resSeqZonedDateTime)
+      case _: AttrSeqOptUUID           => seqOpt(attr, resOptSeqUUID, resSeqUUID)
+      case _: AttrSeqOptURI            => seqOpt(attr, resOptSeqURI, resSeqURI)
       case a: AttrSeqOptByte           => optByteArray(attr) // Byte Array only semantics
-      case _: AttrSeqOptShort          => seqOpt(attr, resOptSeqShort)
-      case _: AttrSeqOptChar           => seqOpt(attr, resOptSeqChar)
+      case _: AttrSeqOptShort          => seqOpt(attr, resOptSeqShort, resSeqShort)
+      case _: AttrSeqOptChar           => seqOpt(attr, resOptSeqChar, resSeqChar)
     }
   }
 
 
-  protected def seqMan[T: ClassTag](
+  protected def seqMan[T](
     attr: Attr, args: Seq[T], res: ResSeq[T]
   ): Unit = {
     val col = getCol(attr: Attr)
@@ -108,9 +108,7 @@ trait ResolveExprSeq extends ResolveExpr { self: SqlQueryBase with LambdasSeq =>
     attr.filterAttr.fold {
       val pathAttr = path :+ attr.cleanAttr
       if (filterAttrVars.contains(pathAttr) && attr.op != V) {
-        // Runtime check needed since we can't type infer it
-        throw ModelError(s"Cardinality-seq filter attributes not allowed to " +
-          s"do additional filtering. Found:\n  " + attr)
+        noCardManyFilterAttrExpr(attr)
       }
       seqExpr(attr, col, args, res, true)
     } {
@@ -121,7 +119,7 @@ trait ResolveExprSeq extends ResolveExpr { self: SqlQueryBase with LambdasSeq =>
     }
   }
 
-  protected def seqTac[T: ClassTag](
+  protected def seqTac[T](
     attr: Attr, args: Seq[T], res: ResSeq[T]
   ): Unit = {
     val col = getCol(attr: Attr)
@@ -136,14 +134,14 @@ trait ResolveExprSeq extends ResolveExpr { self: SqlQueryBase with LambdasSeq =>
     }
   }
 
-  protected def seqExpr[T: ClassTag](
-    attr: Attr, col: String, seqs: Seq[T], res: ResSeq[T], mandatory: Boolean
+  protected def seqExpr[T](
+    attr: Attr, col: String, seq: Seq[T], res: ResSeq[T], mandatory: Boolean
   ): Unit = {
     attr.op match {
       case V       => () // get array as-is
       case Eq      => noCollectionMatching(attr)
-      case Has     => seqHas(col, seqs, res.one2sql)
-      case HasNo   => seqHasNo(col, seqs, res.one2sql)
+      case Has     => seqHas(col, seq, res.one2sql)
+      case HasNo   => seqHasNo(col, seq, res.one2sql)
       case NoValue => if (mandatory) noApplyNothing(attr) else seqNoValue(col)
       case other   => unexpectedOp(other)
     }
@@ -159,8 +157,8 @@ trait ResolveExprSeq extends ResolveExpr { self: SqlQueryBase with LambdasSeq =>
     }
   }
 
-  protected def seqOpt[T: ClassTag](
-    attr: Attr, resOpt: ResSeqOpt[T]
+  protected def seqOpt[T](
+    attr: Attr, resOpt: ResSeqOpt[T], res: ResSeq[T]
   ): Unit = {
     val col = getCol(attr: Attr)
     select += col
@@ -176,7 +174,7 @@ trait ResolveExprSeq extends ResolveExpr { self: SqlQueryBase with LambdasSeq =>
 
   // attr ----------------------------------------------------------------------
 
-  protected def seqHas[T: ClassTag](
+  protected def seqHas[T](
     col: String, seq: Seq[T], one2sql: T => String
   ): Unit = {
     def contains(v: T): String = s"ARRAY_CONTAINS($col, ${one2sql(v)})"

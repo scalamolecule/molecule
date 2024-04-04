@@ -198,7 +198,7 @@ trait ResolveExprOne[Tpl]
     case other => unexpectedOp(other)
   }
 
-  private def opt[T: ClassTag](
+  private def opt[T](
     attr: Attr,
     e: Var,
     a: Att,
@@ -236,13 +236,13 @@ trait ResolveExprOne[Tpl]
 
   // eq ------------------------------------------------------------------------
 
-  private def equal[T: ClassTag](e: Var, a: Att, v: Var, argValues: Seq[T], fromScala: Any => Any): Unit = {
+  private def equal[T](e: Var, a: Att, v: Var, argValues: Seq[T], fromScala: Any => Any): Unit = {
     args += argValues.map(fromScala).toArray
     in += s"[$v ...]"
     where += s"[$e $a $v]" -> wClause
   }
 
-  private def optEqual[T: ClassTag](
+  private def optEqual[T](
     attr: Attr,
     e: Var,
     a: Att,
@@ -360,7 +360,7 @@ trait ResolveExprOne[Tpl]
 
   // aggregation ---------------------------------------------------------------
 
-  private def aggr[T](
+  private def aggr[T: ClassTag](
     attr: Attr, e: Var, a: Att, v: Var, fn: String, optN: Option[Int], resOne: ResOne[T]
   ): Unit = {
     checkAggrOne()

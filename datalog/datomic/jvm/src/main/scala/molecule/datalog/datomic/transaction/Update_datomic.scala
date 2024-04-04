@@ -126,7 +126,7 @@ trait Update_datomic
   override def updateSetEq[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     owner: Boolean,
     set: Set[T],
     transformValue: T => Any,
@@ -148,7 +148,7 @@ trait Update_datomic
   override def updateSetAdd[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     owner: Boolean,
     set: Set[T],
     transformValue: T => Any,
@@ -164,7 +164,7 @@ trait Update_datomic
   override def updateSetRemove[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     owner: Boolean,
     set: Set[T],
     transformValue: T => Any,
@@ -180,7 +180,7 @@ trait Update_datomic
   override def updateSeqEq[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     owner: Boolean,
     seq: Seq[T],
     transformValue: T => Any,
@@ -202,7 +202,7 @@ trait Update_datomic
   override def updateSeqAdd[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     owner: Boolean,
     seq: Seq[T],
     transformValue: T => Any,
@@ -218,7 +218,7 @@ trait Update_datomic
   override def updateSeqRemove[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     owner: Boolean,
     seq: Seq[T],
     transformValue: T => Any,
@@ -242,7 +242,7 @@ trait Update_datomic
   override def updateMapEq[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     noValue: Boolean,
     owner: Boolean,
     map: Map[String, T],
@@ -266,7 +266,7 @@ trait Update_datomic
   override def updateMapAdd[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     owner: Boolean,
     map: Map[String, T],
     transformValue: T => Any,
@@ -284,7 +284,7 @@ trait Update_datomic
   override def updateMapRemove[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     owner: Boolean,
     map: Map[String, T],
     transformValue: T => Any,

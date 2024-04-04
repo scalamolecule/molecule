@@ -113,7 +113,7 @@ trait ResolveExprSeq[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSeq =>
   }
   private def nsAttr(attr: Attr): String = s":${attr.ns}/${attr.attr}"
 
-  private def seqMan[T: ClassTag](
+  private def seqMan[T](
     attr: Attr, e: Var, seq: Seq[T], resSeq: ResSeq[T]
   ): Unit = {
     val v = vv
@@ -123,9 +123,7 @@ trait ResolveExprSeq[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSeq =>
     attr.filterAttr.fold {
       val pathAttr = varPath :+ attr.cleanAttr
       if (filterAttrVars.contains(pathAttr) && attr.op != V) {
-        // Runtime check needed since we can't type infer it
-        throw ModelError(s"Cardinality-seq filter attributes not allowed to " +
-          s"do additional filtering. Found:\n  " + attr)
+        noCardManyFilterAttrExpr(attr)
       }
       seqExpr(false, attr, e, v, attr.op, seq, resSeq)
       filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
@@ -135,7 +133,7 @@ trait ResolveExprSeq[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSeq =>
     }
   }
 
-  private def seqTac[T: ClassTag](
+  private def seqTac[T](
     attr: Attr, e: Var, seq: Seq[T], resSeq: ResSeq[T]
   ): Unit = {
     val v = vv
@@ -149,7 +147,7 @@ trait ResolveExprSeq[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSeq =>
     }
   }
 
-  private def seqExpr[T: ClassTag](
+  private def seqExpr[T](
     tacit: Boolean, attr: Attr, e: Var, v: Var, op: Op, seq: Seq[T], resSeq: ResSeq[T]
   ): Unit = {
     op match {
@@ -172,7 +170,7 @@ trait ResolveExprSeq[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSeq =>
     }
   }
 
-  private def seqOpt[T: ClassTag](
+  private def seqOpt[T](
     attr: Attr, e: Var,
     resSeqOpt: ResSeqOpt[T],
   ): Unit = {
@@ -224,7 +222,7 @@ trait ResolveExprSeq[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSeq =>
     where += s"[(map second $v5) $v6]" -> wClause
   }
 
-  private def seqHas[T: ClassTag](
+  private def seqHas[T](
     tacit: Boolean,
     attr: Attr, e: Var, v: Var,
     seq: Seq[T],

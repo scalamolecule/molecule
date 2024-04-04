@@ -10,7 +10,7 @@ trait ResolveExprSetRefAttr_mariadb
     with LambdasSet_mariadb { self: SqlQueryBase =>
 
 
-  override protected def setRefMan[T: ClassTag](
+  override protected def setRefMan[T](
     attr: Attr, args: Set[T], res: ResSet[T]
   ): Unit = {
     select += s"JSON_ARRAYAGG($joinTable.$ref_id) $refIds"
@@ -24,9 +24,7 @@ trait ResolveExprSetRefAttr_mariadb
     attr.filterAttr.fold {
       val pathAttr = path :+ attr.cleanAttr
       if (filterAttrVars.contains(pathAttr) && attr.op != V) {
-        // Runtime check needed since we can't type infer it
-        throw ModelError(s"Cardinality-set filter attributes not allowed to " +
-          s"do additional filtering. Found:\n  " + attr)
+        noCardManyFilterAttrExpr(attr)
       }
       setRefExpr(attr, refIds, attr.op, args)
     } { case (dir, filterPath, filterAttr) =>
@@ -34,7 +32,7 @@ trait ResolveExprSetRefAttr_mariadb
     }
   }
 
-  override protected def setRefOpt[T: ClassTag](
+  override protected def setRefOpt[T](
     attr: Attr, optSet: Option[Set[T]], resOpt: ResSetOpt[T], res: ResSet[T]
   ): Unit = {
     val col = getCol(attr: Attr)
@@ -114,7 +112,7 @@ trait ResolveExprSetRefAttr_mariadb
        |      )""".stripMargin
   }
 
-  override protected def refHas[T: ClassTag](set: Set[T]): Unit = {
+  override protected def refHas[T](set: Set[T]): Unit = {
     set.size match {
       case 0 => where += (("FALSE", ""))
       case 1 => where += (("", arrayMatches(Seq(arrayMatch(set)), "OR")))

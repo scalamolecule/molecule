@@ -16,7 +16,7 @@ trait UpdateOps extends Action2Data with BaseOps {
   def updateSetEq[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     owner: Boolean,
     set: Set[T],
     transformValue: T => Any,
@@ -25,22 +25,10 @@ trait UpdateOps extends Action2Data with BaseOps {
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit
 
-  def updateSetEq2[T](
-    ns: String,
-    attr: String,
-    refNs: Option[String],
-    owner: Boolean,
-    set: Set[T],
-    transformValue: T => Any,
-    exts: List[String],
-    set2array: Set[T] => Array[AnyRef],
-    value2json: (StringBuffer, T) => StringBuffer
-  ): Unit = ???
-
   def updateSetAdd[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     owner: Boolean,
     set: Set[T],
     transformValue: T => Any,
@@ -52,7 +40,7 @@ trait UpdateOps extends Action2Data with BaseOps {
   def updateSetRemove[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     owner: Boolean,
     set: Set[T],
     transformValue: T => Any,
@@ -63,7 +51,7 @@ trait UpdateOps extends Action2Data with BaseOps {
   def updateSeqEq[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     owner: Boolean,
     seq: Seq[T],
     transformValue: T => Any,
@@ -75,7 +63,7 @@ trait UpdateOps extends Action2Data with BaseOps {
   def updateSeqAdd[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     owner: Boolean,
     seq: Seq[T],
     transformValue: T => Any,
@@ -87,7 +75,7 @@ trait UpdateOps extends Action2Data with BaseOps {
   def updateSeqRemove[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     owner: Boolean,
     seq: Seq[T],
     transformValue: T => Any,
@@ -104,7 +92,7 @@ trait UpdateOps extends Action2Data with BaseOps {
   def updateMapEq[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     noValue: Boolean,
     owner: Boolean,
     map: Map[String, T],
@@ -117,7 +105,7 @@ trait UpdateOps extends Action2Data with BaseOps {
   def updateMapAdd[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     owner: Boolean,
     map: Map[String, T],
     transformValue: T => Any,
@@ -129,7 +117,7 @@ trait UpdateOps extends Action2Data with BaseOps {
   def updateMapRemove[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     owner: Boolean,
     map: Map[String, T],
     transformValue: T => Any,

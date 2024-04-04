@@ -54,7 +54,7 @@ trait Save_mongodb
   override protected def addSet[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     optSet: Option[Set[T]],
     transformValue: T => Any,
     exts: List[String] = Nil,

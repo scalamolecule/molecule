@@ -60,7 +60,7 @@ trait Save_datomic
   override protected def addSet[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     optSet: Option[Set[T]],
     transformValue: T => Any,
     exts: List[String] = Nil,
@@ -78,7 +78,7 @@ trait Save_datomic
   override protected def addSeq[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     optSeq: Option[Seq[T]],
     transformValue: T => Any,
     exts: List[String] = Nil,

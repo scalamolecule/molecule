@@ -186,7 +186,7 @@ trait Update_mongodb
   override def updateSetEq[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     owner: Boolean,
     set: Set[T],
     transformValue: T => Any,
@@ -213,7 +213,7 @@ trait Update_mongodb
   override def updateSetAdd[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     owner: Boolean,
     set: Set[T],
     transformValue: T => Any,
@@ -236,7 +236,7 @@ trait Update_mongodb
   override def updateSetRemove[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     owner: Boolean,
     set: Set[T],
     transformValue: T => Any,

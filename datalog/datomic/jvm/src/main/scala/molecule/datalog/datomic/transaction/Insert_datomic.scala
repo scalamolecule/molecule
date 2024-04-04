@@ -102,7 +102,7 @@ trait Insert_datomic
   override protected def addSet[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String] = Nil,
@@ -126,7 +126,7 @@ trait Insert_datomic
   override protected def addSetOpt[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String] = Nil,
@@ -154,7 +154,7 @@ trait Insert_datomic
   override protected def addSeq[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String] = Nil,
@@ -186,7 +186,7 @@ trait Insert_datomic
   override protected def addSeqOpt[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String] = Nil,
@@ -234,7 +234,7 @@ trait Insert_datomic
   override protected def addMap[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
@@ -262,7 +262,7 @@ trait Insert_datomic
   override protected def addMapOpt[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer

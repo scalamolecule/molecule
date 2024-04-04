@@ -61,10 +61,10 @@ trait JsonBase extends SerializationUtils with ModelUtils {
     buf.append('"') //close quote
   }
 
-  protected def set2json[T](set: Set[T], value2json: (StringBuffer, T) => StringBuffer): String = {
+  protected def iterable2json[T](iterable: Iterable[T], value2json: (StringBuffer, T) => StringBuffer): String = {
     val buf = new StringBuffer
     buf.append("[") // start array
-    val it = set.iterator
+    val it = iterable.iterator
     value2json(buf, it.next())
     while (it.hasNext) {
       buf.append(", ")
@@ -75,6 +75,10 @@ trait JsonBase extends SerializationUtils with ModelUtils {
   }
 
   protected def map2jsonByteArray[T](map: Map[String, T], value2json: (StringBuffer, T) => StringBuffer): Array[Byte] = {
+    map2json(map, value2json).map(_.toByte).toArray
+  }
+
+  protected def map2json[T](map: Map[String, T], value2json: (StringBuffer, T) => StringBuffer): String = {
     if (map.isEmpty) {
       throw ModelError("map2jsonByteArray unexpectedly received empty map.")
     }
@@ -95,6 +99,6 @@ trait JsonBase extends SerializationUtils with ModelUtils {
     buf.append("}") // end json
     val json = buf.toString
     // println(json)
-    json.map(_.toByte).toArray
+    json
   }
 }

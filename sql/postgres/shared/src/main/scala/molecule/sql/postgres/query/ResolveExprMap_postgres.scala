@@ -13,7 +13,7 @@ trait ResolveExprMap_postgres
     with LambdasMap_postgres { self: SqlQueryBase =>
 
 
-//  override protected def setMan[T: ClassTag](
+//  override protected def setMan[T](
 //    attr: Attr, tpe: String, args: Seq[Set[T]], res: ResSet[T]
 //  ): Unit = {
 //    val col = getCol(attr: Attr)
@@ -30,9 +30,7 @@ trait ResolveExprMap_postgres
 //    attr.filterAttr.fold {
 //      val pathAttr = path :+ attr.cleanAttr
 //      if (filterAttrVars.contains(pathAttr) && attr.op != V) {
-//        // Runtime check needed since we can't type infer it
-//        throw ModelError(s"Cardinality-set filter attributes not allowed to " +
-//          s"do additional filtering. Found:\n  " + attr)
+//        noCardManyFilterAttrExpr(attr)
 //      }
 //      setExpr(col, attr.op, args, res, true)
 //    } {
@@ -46,7 +44,7 @@ trait ResolveExprMap_postgres
 //
 //  // attr ----------------------------------------------------------------------
 //
-//  override protected def setAttr[T: ClassTag](
+//  override protected def setAttr[T](
 //    col: String, res: ResSet[T], mandatory: Boolean
 //  ): Unit = {
 //    coalesce(col, res, if (mandatory) "man" else "tac")
@@ -115,7 +113,7 @@ trait ResolveExprMap_postgres
 //
 //  // has -----------------------------------------------------------------------
 //
-//  override protected def has[T: ClassTag](
+//  override protected def has[T](
 //    col: String, sets: Seq[Set[T]], res: ResSet[T], one2sql: T => String, mandatory: Boolean
 //  ): Unit = {
 //    def contains(v: T): String = s"${one2sql(v)} = ANY($col)"
@@ -141,7 +139,7 @@ trait ResolveExprMap_postgres
 //
 //  }
 //
-//  override protected def optHas[T: ClassTag](
+//  override protected def optHas[T](
 //    col: String,
 //    optSets: Option[Seq[Set[T]]],
 //    res: ResSet[T],
@@ -187,7 +185,7 @@ trait ResolveExprMap_postgres
 //    }
 //  }
 //
-//  override protected def optHasNo[T: ClassTag](
+//  override protected def optHasNo[T](
 //    col: String,
 //    optSets: Option[Seq[Set[T]]],
 //    res: ResSet[T],
@@ -208,7 +206,7 @@ trait ResolveExprMap_postgres
 //
 //  // aggregation ---------------------------------------------------------------
 //
-//  override protected def setAggr[T: ClassTag](
+//  override protected def setAggr[T](
 //    col: String, fn: String, optN: Option[Int], res: ResSet[T]
 //  ): Unit = {
 //    checkAggrSet()

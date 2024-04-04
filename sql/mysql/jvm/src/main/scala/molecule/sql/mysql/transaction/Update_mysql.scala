@@ -17,7 +17,7 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
   override def updateSetEq[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     owner: Boolean,
     set: Set[T],
     transformValue: T => Any,
@@ -25,7 +25,7 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    refNs.fold {
+    optRefNs.fold {
       updateCurRefPath(attr)
       placeHolders = placeHolders :+ s"$attr = ?"
       val colSetter = {
@@ -33,7 +33,7 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
           if (!isUpsert) {
             addToUpdateColsNotNull(ns, attr)
           }
-          val json = set2json(set, value2json)
+          val json = iterable2json(set, value2json)
           (ps: PS, _: IdsMap, _: RowIndex) => {
             ps.setString(curParamIndex, json)
             curParamIndex += 1
@@ -70,7 +70,7 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
   override def updateSetAdd[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     owner: Boolean,
     set: Set[T],
     transformValue: T => Any,
@@ -78,14 +78,14 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    refNs.fold {
+    optRefNs.fold {
       if(set.nonEmpty){
         updateCurRefPath(attr)
         if (!isUpsert) {
           addToUpdateColsNotNull(ns, attr)
         }
         placeHolders = placeHolders :+ s"$attr = JSON_MERGE($attr, ?)"
-        val json = set2json(set, value2json)
+        val json = iterable2json(set, value2json)
         addColSetter(curRefPath, (ps: PS, _: IdsMap, _: RowIndex) => {
           ps.setString(curParamIndex, json)
           curParamIndex += 1
@@ -109,14 +109,14 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
   override def updateSetRemove[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     owner: Boolean,
     set: Set[T],
     transformValue: T => Any,
     exts: List[String],
     one2json: T => String
   ): Unit = {
-    refNs.fold {
+    optRefNs.fold {
       if (set.nonEmpty) {
         updateCurRefPath(attr)
         if (!isUpsert) {

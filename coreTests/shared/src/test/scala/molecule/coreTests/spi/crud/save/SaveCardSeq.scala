@@ -42,7 +42,7 @@ trait SaveCardSeq extends CoreTestSuiteBase with Array2List with ApiAsync { spi:
         _ <- Ns.i(1).zonedDateTimeSeq(List(zonedDateTime1, zonedDateTime2)).save.transact
         _ <- Ns.i(1).uuidSeq(List(uuid1, uuid2)).save.transact
         _ <- Ns.i(1).uriSeq(List(uri1, uri2)).save.transact
-        _ <- Ns.i(1).byteArray(Array(byte1, byte2)).save.transact // Note that Bytes are saved in Arrays
+        _ <- Ns.i(1).byteArray(Array(byte1, byte2)).save.transact // Note Byte Array semantics
         _ <- Ns.i(1).shortSeq(List(short1, short2)).save.transact
         _ <- Ns.i(1).charSeq(List(char1, char2)).save.transact
 
@@ -65,7 +65,7 @@ trait SaveCardSeq extends CoreTestSuiteBase with Array2List with ApiAsync { spi:
         _ <- Ns.i.zonedDateTimeSeq.query.get.map(_ ==> List((1, List(zonedDateTime1, zonedDateTime2))))
         _ <- Ns.i.uuidSeq.query.get.map(_ ==> List((1, List(uuid1, uuid2))))
         _ <- Ns.i.uriSeq.query.get.map(_ ==> List((1, List(uri1, uri2))))
-        _ <- Ns.i.byteArray.query.i.get.map(_ ==> List((1, Array(byte1, byte2)))) // Note that Bytes are saved in Arrays
+        _ <- Ns.i.byteArray.query.get.map(_ ==> List((1, Array(byte1, byte2)))) // Note that Bytes are saved in Arrays
         _ <- Ns.i.shortSeq.query.get.map(_ ==> List((1, List(short1, short2))))
         _ <- Ns.i.charSeq.query.get.map(_ ==> List((1, List(char1, char2))))
 

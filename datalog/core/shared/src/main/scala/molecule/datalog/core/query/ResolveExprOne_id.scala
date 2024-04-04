@@ -37,7 +37,7 @@ trait ResolveExprOne_id[Tpl]
     es
   }
 
-  private def man[T: ClassTag](
+  private def man[T](
     attr: Attr,
     e: Var,
     args: Seq[T],
@@ -51,7 +51,7 @@ trait ResolveExprOne_id[Tpl]
     expr(e, v, attr.op, args, res)
   }
 
-  private def tac[T: ClassTag](
+  private def tac[T](
     attr: Attr,
     e: Var,
     args: Seq[T],
@@ -61,7 +61,7 @@ trait ResolveExprOne_id[Tpl]
     expr(e, v, attr.op, args, res)
   }
 
-  private def expr[T: ClassTag](
+  private def expr[T](
     e: Var,
     v: Var,
     op: Op,
@@ -155,7 +155,7 @@ trait ResolveExprOne_id[Tpl]
     }
   }
 
-  private def equal[T: ClassTag](e: Var, argValues: Seq[T], fromScala: Any => Any): Unit = {
+  private def equal[T](e: Var, argValues: Seq[T], fromScala: Any => Any): Unit = {
     in += s"[$e ...]"
     args += argValues.map(fromScala).toArray
   }

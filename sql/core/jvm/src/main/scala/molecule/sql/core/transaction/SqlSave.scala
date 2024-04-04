@@ -112,143 +112,27 @@ trait SqlSave
   override protected def addSet[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     optSet: Option[Set[T]],
     transformValue: T => Any,
     exts: List[String] = Nil,
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    refNs.fold {
-      val (curPath, paramIndex) = getParamIndex(attr)
-      val colSetter: Setter     = optSet.fold {
-        (ps: PS, _: IdsMap, _: RowIndex) => {
-          ps.setNull(paramIndex, 0)
-        }
-      } { set =>
-        (ps: PS, _: IdsMap, _: RowIndex) => {
-          if (set.isEmpty) {
-            ps.setNull(paramIndex, 0)
-          } else {
-            val conn  = ps.getConnection
-            val array = conn.createArrayOf(exts(1), set2array(set))
-            ps.setArray(paramIndex, array)
-          }
-        }
-      }
-      addColSetter(curPath, colSetter)
-    } { refNs =>
-      val curPath = if (paramIndexes.nonEmpty) curRefPath else List(ns)
-      if (optSet.isEmpty || optSet.get.isEmpty) {
-        addColSetter(curPath, (_: PS, _: IdsMap, _: RowIndex) => ())
-      } else {
-        val set       = optSet.get
-        val refAttr   = attr
-        val joinTable = ss(ns, refAttr, refNs)
-        val joinPath  = curPath :+ joinTable
-
-        // join table with single row (treated as normal insert since there's only 1 join per row)
-        val (id1, id2) = if (ns == refNs)
-          (ss(ns, "1_id"), ss(refNs, "2_id"))
-        else
-          (ss(ns, "id"), ss(refNs, "id"))
-        // When insertion order is reversed, this join table will be set after left and right has been inserted
-        inserts = (joinPath, List((id1, ""), (id2, ""))) +: inserts
-
-        if (paramIndexes.isEmpty) {
-          // If current namespace has no attributes, then add an empty row with
-          // default null values (only to be referenced as the left side of the join table)
-          val emptyRowSetter: Setter = (ps: PS, _: IdsMap, _: RowIndex) => ps.addBatch()
-          addColSetter(curPath, emptyRowSetter)
-          inserts = inserts :+ (curRefPath, List())
-        }
-
-        // Join table setter
-        val refIds2            = set.iterator.asInstanceOf[Iterator[String]]
-        val joinSetter: Setter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
-          val refId1 = idsMap(curPath)(rowIndex)
-          while (refIds2.hasNext) {
-            val refId2 = refIds2.next()
-            ps.setLong(1, refId1)
-            ps.setLong(2, refId2.toLong)
-            if (refIds2.hasNext)
-              ps.addBatch()
-          }
-        }
-        addColSetter(joinPath, joinSetter)
-      }
-    }
+    addIterable(ns, attr, optRefNs, optSet, exts(1), set2array)
   }
 
   override protected def addSeq[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     optSeq: Option[Seq[T]],
     transformValue: T => Any,
     exts: List[String],
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    refNs.fold {
-      val (curPath, paramIndex) = getParamIndex(attr)
-      val colSetter: Setter     = optSeq.fold {
-        (ps: PS, _: IdsMap, _: RowIndex) => {
-          ps.setNull(paramIndex, 0)
-        }
-      } { seq =>
-        (ps: PS, _: IdsMap, _: RowIndex) => {
-          if (seq.isEmpty) {
-            ps.setNull(paramIndex, 0)
-          } else {
-            val conn  = ps.getConnection
-            val array = conn.createArrayOf(exts(1), seq2array(seq))
-            ps.setArray(paramIndex, array)
-          }
-        }
-      }
-      addColSetter(curPath, colSetter)
-    } { refNs =>
-      val curPath = if (paramIndexes.nonEmpty) curRefPath else List(ns)
-      if (optSeq.isEmpty || optSeq.get.isEmpty) {
-        addColSetter(curPath, (_: PS, _: IdsMap, _: RowIndex) => ())
-      } else {
-        val set       = optSeq.get
-        val refAttr   = attr
-        val joinTable = ss(ns, refAttr, refNs)
-        val joinPath  = curPath :+ joinTable
-
-        // join table with single row (treated as normal insert since there's only 1 join per row)
-        val (id1, id2) = if (ns == refNs)
-          (ss(ns, "1_id"), ss(refNs, "2_id"))
-        else
-          (ss(ns, "id"), ss(refNs, "id"))
-        // When insertion order is reversed, this join table will be set after left and right has been inserted
-        inserts = (joinPath, List((id1, ""), (id2, ""))) +: inserts
-
-        if (paramIndexes.isEmpty) {
-          // If current namespace has no attributes, then add an empty row with
-          // default null values (only to be referenced as the left side of the join table)
-          val emptyRowSetter: Setter = (ps: PS, _: IdsMap, _: RowIndex) => ps.addBatch()
-          addColSetter(curPath, emptyRowSetter)
-          inserts = inserts :+ (curRefPath, List())
-        }
-
-        // Join table setter
-        val refIds2            = set.iterator.asInstanceOf[Iterator[String]]
-        val joinSetter: Setter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
-          val refId1 = idsMap(curPath)(rowIndex)
-          while (refIds2.hasNext) {
-            val refId2 = refIds2.next()
-            ps.setLong(1, refId1)
-            ps.setLong(2, refId2.toLong)
-            if (refIds2.hasNext)
-              ps.addBatch()
-          }
-        }
-        addColSetter(joinPath, joinSetter)
-      }
-    }
+    addIterable(ns, attr, optRefNs, optSeq, exts(1), seq2array)
   }
 
   override protected def addByteArray(
@@ -297,4 +181,78 @@ trait SqlSave
   }
 
   override protected def handleRefNs(refNs: String): Unit = ()
+
+
+  // Helpers -------------------------------------------------------------------
+
+  private def addIterable[T, M[_] <: Iterable[_]](
+    ns: String,
+    attr: String,
+    optRefNs: Option[String],
+    optIterable: Option[M[T]],
+    sqlTpe: String,
+    iterable2array: M[T] => Array[AnyRef],
+  ): Unit = {
+    optRefNs.fold {
+      val (curPath, paramIndex) = getParamIndex(attr)
+      val colSetter: Setter     = if (optIterable.nonEmpty && optIterable.get.nonEmpty) {
+        val iterable = optIterable.get
+        (ps: PS, _: IdsMap, _: RowIndex) => {
+          val conn  = ps.getConnection
+          val array = conn.createArrayOf(sqlTpe, iterable2array(iterable))
+          ps.setArray(paramIndex, array)
+        }
+      } else {
+        (ps: PS, _: IdsMap, _: RowIndex) => ps.setNull(paramIndex, 0)
+      }
+      addColSetter(curPath, colSetter)
+    } { refNs =>
+      join(ns, attr, refNs, optIterable)
+    }
+  }
+
+  protected def join[T](
+    ns: String,
+    refAttr: String,
+    refNs: String,
+    optIterable: Option[Iterable[T]]
+  ): Unit = {
+    val curPath = if (paramIndexes.nonEmpty) curRefPath else List(ns)
+    if (optIterable.isEmpty || optIterable.get.isEmpty) {
+      addColSetter(curPath, (_: PS, _: IdsMap, _: RowIndex) => ())
+    } else {
+      val joinTable = ss(ns, refAttr, refNs)
+      val joinPath  = curPath :+ joinTable
+
+      // join table with single row (treated as normal insert since there's only 1 join per row)
+      val (id1, id2) = if (ns == refNs)
+        (ss(ns, "1_id"), ss(refNs, "2_id"))
+      else
+        (ss(ns, "id"), ss(refNs, "id"))
+      // When insertion order is reversed, this join table will be set after left and right has been inserted
+      inserts = (joinPath, List((id1, ""), (id2, ""))) +: inserts
+
+      if (paramIndexes.isEmpty) {
+        // If current namespace has no attributes, then add an empty row with
+        // default null values (only to be referenced as the left side of the join table)
+        val emptyRowSetter: Setter = (ps: PS, _: IdsMap, _: RowIndex) => ps.addBatch()
+        addColSetter(curPath, emptyRowSetter)
+        inserts = inserts :+ (curRefPath, List())
+      }
+
+      // Join table setter
+      val refIds2            = optIterable.get.iterator.asInstanceOf[Iterator[String]]
+      val joinSetter: Setter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
+        val refId1 = idsMap(curPath)(rowIndex)
+        while (refIds2.hasNext) {
+          val refId2 = refIds2.next()
+          ps.setLong(1, refId1)
+          ps.setLong(2, refId2.toLong)
+          if (refIds2.hasNext)
+            ps.addBatch()
+        }
+      }
+      addColSetter(joinPath, joinSetter)
+    }
+  }
 }

@@ -58,7 +58,7 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQuery
   }
 
 
-  protected def setRefMan[T: ClassTag](attr: Attr, args: Set[T], res: ResSet[T]): Unit = {
+  protected def setRefMan[T](attr: Attr, args: Set[T], res: ResSet[T]): Unit = {
     select += s"ARRAY_AGG($joinTable.$ref_id) $refIds"
     joins += (("INNER JOIN", joinTable, "", s"$nsId", s"= $joinTable.$ns_id"))
     groupBy += nsId
@@ -67,8 +67,7 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQuery
     attr.filterAttr.fold {
       val pathAttr = path :+ attr.cleanAttr
       if (filterAttrVars.contains(pathAttr) && attr.op != V) {
-        // Runtime check needed since we can't type infer it
-        throw ModelError(s"Cardinality-set filter attributes not allowed to do additional filtering. Found:\n  " + attr)
+        noCardManyFilterAttrExpr(attr)
       }
       setRefExpr(attr, refIds, attr.op, args)
     } { case (dir, filterPath, filterAttr) =>
@@ -76,7 +75,7 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQuery
     }
   }
 
-  protected def setRefTac[T: ClassTag](attr: Attr, args: Set[T], res: ResSet[T]): Unit = {
+  protected def setRefTac[T](attr: Attr, args: Set[T], res: ResSet[T]): Unit = {
     val col = getCol(attr: Attr)
     joins += (("INNER JOIN", joinTable, "", s"$nsId", s"= $joinTable.$ns_id"))
     groupBy += nsId
@@ -88,7 +87,7 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQuery
   }
 
 
-  protected def setRefOpt[T: ClassTag](
+  protected def setRefOpt[T](
     attr: Attr, optSet: Option[Set[T]], resOpt: ResSetOpt[T], res: ResSet[T]
   ): Unit = {
     val col = getCol(attr: Attr)
@@ -107,7 +106,7 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQuery
     }
   }
 
-  protected def setRefExpr[T: ClassTag](
+  protected def setRefExpr[T](
     attr: Attr, col: String, op: Op, set: Set[T] //, res: ResSet[T]
   ): Unit = {
     op match {
@@ -191,7 +190,7 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQuery
        |  )""".stripMargin
   }
 
-  protected def refHas[T: ClassTag](set: Set[T]): Unit = {
+  protected def refHas[T](set: Set[T]): Unit = {
     set.size match {
       case 0 => where += (("FALSE", ""))
       case 1 => where += (("", arrayMatches(s"  ARRAY_CONTAINS(ARRAY_AGG($joinTable.$ref_id), ${set.head})")))
@@ -207,7 +206,7 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQuery
     where += (("", s"ARRAY_CONTAINS($col, $filterAttr)"))
   }
 
-  protected def refOptHas[T: ClassTag](col: String, optSets: Option[Set[T]]): Unit = {
+  protected def refOptHas[T](col: String, optSets: Option[Set[T]]): Unit = {
     optSets.fold[Unit] {
       where += ((s"$joinTable.$ref_id", s"IS NULL"))
     } { sets =>

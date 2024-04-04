@@ -2,6 +2,7 @@ package molecule.sql.mariadb.query
 
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
+import molecule.sql.core.javaSql.PrepStmt
 import molecule.sql.core.query.{ResolveExprSeq, ResolveExprSet, SqlQueryBase}
 import scala.reflect.ClassTag
 import scala.util.Random
@@ -12,7 +13,7 @@ trait ResolveExprSeq_mariadb
     with LambdasSeq_mariadb { self: SqlQueryBase =>
 
 
-//  override protected def setMan[T: ClassTag](
+//  override protected def setMan[T](
 //    attr: Attr, tpe: String, args: Seq[Set[T]], res: ResSet[T]
 //  ): Unit = {
 //    val col = getCol(attr: Attr)
@@ -27,9 +28,7 @@ trait ResolveExprSeq_mariadb
 //    attr.filterAttr.fold {
 //      val pathAttr = path :+ attr.cleanAttr
 //      if (filterAttrVars.contains(pathAttr) && attr.op != V) {
-//        // Runtime check needed since we can't type infer it
-//        throw ModelError(s"Cardinality-set filter attributes not allowed to " +
-//          s"do additional filtering. Found:\n  " + attr)
+//        noCardManyFilterAttrExpr(attr)
 //      }
 //      setExpr(col, attr.op, args, res, true)
 //    } {
@@ -40,74 +39,103 @@ trait ResolveExprSeq_mariadb
 //      }
 //    }
 //  }
-//
-//  override protected def setExpr[T: ClassTag](
-//    col: String, op: Op, sets: Seq[Set[T]], res: ResSet[T], mandatory: Boolean
+
+//  override protected def seqMan[T](
+//    attr: Attr, args: Seq[T], res: ResSeq[T]
 //  ): Unit = {
-//    op match {
-//      case V         => setAttr(col, res, mandatory)
-//      case Eq        => setEqual(col, sets, res)
+//    val col = getCol(attr: Attr)
+//    select += col
+//    if (!isNestedOpt) {
+//      notNull += col
+//    }
+//    addCast(res.sql2list)
+//    attr.filterAttr.fold {
+//      val pathAttr = path :+ attr.cleanAttr
+//      if (filterAttrVars.contains(pathAttr) && attr.op != V) {
+//        noCardManyFilterAttrExpr(attr)
+//      }
+//      seqExpr(attr, col, args, res, true)
+//    } {
+//      case (dir, filterPath, filterAttr) => filterAttr match {
+//        case filterAttr: AttrOne => seqExpr2(col, attr.op, filterAttr.name)
+//        case filterAttr          => seqExpr2(col, attr.op, filterAttr.name)
+//      }
+//    }
+//  }
+
+
+  override protected def seqExpr[T](
+    attr: Attr, col: String, seq: Seq[T], res: ResSeq[T], mandatory: Boolean
+  ): Unit = {
+    attr.op match {
+      case V         => seqAttr(col, res, mandatory)
+//      case Eq        => noCollectionMatching(attr)
 //      case Neq       => setNeq(col, sets, res, mandatory)
 //      case Has       => has(col, sets, res, res.one2sql, mandatory)
 //      case HasNo     => hasNo(col, sets, res, res.one2sql, mandatory)
 //      case NoValue   => setNoValue(col)
 //      case Fn(kw, n) => setAggr(col, kw, n, res)
-//      case other     => unexpectedOp(other)
-//    }
-//  }
-//
-//  override protected def setOpt[T: ClassTag](
-//    attr: Attr,
-//    optSets: Option[Seq[Set[T]]],
-//    resOpt: ResSetOpt[T],
-//    res: ResSet[T]
-//  ): Unit = {
-//    val col = getCol(attr: Attr)
-//    select += col
-//    groupByCols += col // if we later need to group by non-aggregated columns
-//    addCast((row: RS, paramIndex: Int) => row.getString(paramIndex) match {
-//      case null | "[]" => Option.empty[Set[T]]
-//      case json        => Some(res.json2array(json).toSet)
-//    })
-//    attr.op match {
-//      case V     => setOptAttr(col, res)
-//      case Eq    => setOptEqual(col, optSets, res)
-//      case Neq   => setOptNeq(col, optSets, res)
-//      case Has   => optHas(col, optSets, res, resOpt.one2sql)
-//      case HasNo => optHasNo(col, optSets, res, resOpt.one2sql)
-//      case other => unexpectedOp(other)
-//    }
-//  }
-//
-//
-//  // attr ----------------------------------------------------------------------
-//
-//  override protected def setAttr[T: ClassTag](
-//    col: String, res: ResSet[T], mandatory: Boolean
-//  ): Unit = {
-//    if (mandatory) {
+      case other     => unexpectedOp(other)
+    }
+  }
+
+
+  override protected def seqOpt[T](
+    attr: Attr, resOpt: ResSeqOpt[T], res: ResSeq[T]
+  ): Unit = {
+    val col = getCol(attr: Attr)
+    select += col
+    groupByCols += col // if we later need to group by non-aggregated columns
+//    addCast(resOpt.sql2listOpt)
+
+    addCast((row: RS, paramIndex: Int) => row.getString(paramIndex) match {
+      case null | "[]" => Option.empty[Set[T]]
+      case json        =>
+
+        Some(res.json2array(json).toList)
+    })
+
+    attr.op match {
+      case V     => () // get array as-is
+      case Eq    => noCollectionMatching(attr)
+      case other => unexpectedOp(other)
+    }
+  }
+
+
+  // attr ----------------------------------------------------------------------
+
+  private def seqAttr[T](
+    col: String, res: ResSeq[T], mandatory: Boolean
+  ): Unit = {
+    if (mandatory) {
 //      selectWithOrder(col, res.tpeDb, "JSON_ARRAYAGG")
 //      select -= col
 //      groupByCols -= col
 //      having += "COUNT(*) > 0"
 //      aggregate = true
-//      replaceCast((row: RS, paramIndex: Int) =>
-//        res.json2array(row.getString(paramIndex)).toSet
-//      )
-//    }
-//  }
-//
-//  override protected def setOptAttr[T](col: String, res: ResSet[T]): Unit = {
+      replaceCast((row: RS, paramIndex: Int) =>{
+//        val json = row.getString(paramIndex)
+//        println("json: " + json)
+//        res.json2array(json).toList
+
+        res.json2array(row.getString(paramIndex)).toList
+      }
+      )
+    }
+  }
+
+//  private def seqOptAttr[T](col: String, res: ResSeq[T]): Unit = {
 //    select -= col
 //    selectWithOrder(col, res.tpeDb, "JSON_ARRAYAGG", "DISTINCT ", true)
 //    groupByCols -= col
 //    aggregate = true
 //    replaceCast((row: RS, paramIndex: Int) =>
-//      res.json2optArray(row.getString(paramIndex)).map(_.toSet)
+//      res.json2optArray(row.getString(paramIndex)).map(_.toList)
 //    )
 //  }
-//
-//
+
+
 //  // eq ------------------------------------------------------------------------
 //
 //  override protected def setEqual[T](col: String, sets: Seq[Set[T]], res: ResSet[T]): Unit = {
@@ -171,7 +199,7 @@ trait ResolveExprSeq_mariadb
 //
 //  // has -----------------------------------------------------------------------
 //
-//  override protected def has[T: ClassTag](
+//  override protected def has[T](
 //    col: String, sets: Seq[Set[T]], res: ResSet[T], one2json: T => String, mandatory: Boolean
 //  ): Unit = {
 //    def containsSet(set: Set[T]): String = {
@@ -201,7 +229,7 @@ trait ResolveExprSeq_mariadb
 //    }
 //  }
 //
-//  override protected def optHas[T: ClassTag](
+//  override protected def optHas[T](
 //    col: String,
 //    optSets: Option[Seq[Set[T]]],
 //    res: ResSet[T],
@@ -252,7 +280,7 @@ trait ResolveExprSeq_mariadb
 //    }
 //  }
 //
-//  override protected def optHasNo[T: ClassTag](
+//  override protected def optHasNo[T](
 //    col: String,
 //    optSets: Option[Seq[Set[T]]],
 //    res: ResSet[T],
@@ -273,7 +301,7 @@ trait ResolveExprSeq_mariadb
 //
 //  // aggregation ---------------------------------------------------------------
 //
-//  override protected def setAggr[T: ClassTag](
+//  override protected def setAggr[T](
 //    col: String, fn: String, optN: Option[Int], res: ResSet[T]
 //  ): Unit = {
 //    checkAggrSet()
@@ -509,46 +537,131 @@ trait ResolveExprSeq_mariadb
 //    }
 //  }
 //
+
+
+
+//  // byte array ----------------------------------------------------------------
 //
-//  // helpers -------------------------------------------------------------------
-//
-//  private def selectWithOrder(
-//    col: String,
-//    tpeDb: String,
-//    fn: String,
-//    distinct: String = "",
-//    optional: Boolean = false
-//  ): Unit = {
-//    val i  = getIndex
-//    val vs = s"t_$i.vs"
-//    if (orderBy.nonEmpty && orderBy.last._3 == col) {
-//      // order by aggregate alias instead
-//      val alias = col.replace('.', '_') + "_" + fn.toLowerCase
-//      select += s"$fn($distinct$vs) $alias"
-//      val (level, _, _, dir) = orderBy.last
-//      orderBy.remove(orderBy.size - 1)
-//      orderBy += ((level, 1, alias, dir))
-//    } else {
-//      select += s"$fn($distinct$vs)"
+//  private def manByteArray(attr: Attr, byteArray: Array[Byte]): Unit = {
+//    val col = getCol(attr: Attr)
+//    select += col
+//    if (!isNestedOpt) {
+//      notNull += col
 //    }
-//    if (optional) {
-//      joins += ((
-//        "LEFT OUTER JOIN",
-//        s"JSON_TABLE($col, '$$[*]' COLUMNS (vs $tpeDb PATH '$$')) t_$i",
-//        "",
-//        "true",
-//        ""
-//      ))
+//    attr.filterAttr.fold {
+//      byteArrayOps(attr, col, byteArray)
+//    } { _ =>
+//      throw ModelError(s"Filter attributes not allowed with byte arrays.")
+//    }
+//    // return Byte array as-is
+//    addCast((row: RS, paramIndex: Int) => row.getBytes(paramIndex))
+//  }
 //
-//    } else {
-//      tempTables +=
-//        s"""JSON_TABLE(
-//           |    IF($col IS NULL, '[null]', $col),
-//           |    '$$[*]' COLUMNS (vs $tpeDb PATH '$$')
-//           |  ) t_$i""".stripMargin
+//  private def tacByteArray(attr: Attr, vs: Array[Byte]): Unit = {
+//    val col = getCol(attr: Attr)
+//    if (!isNestedOpt) {
+//      notNull += col
+//    }
+//    attr.filterAttr.fold {
+//      byteArrayOps(attr, col, vs)
+//    } { _ =>
+//      throw ModelError(s"Filter attributes not allowed with byte arrays.")
 //    }
 //  }
 //
+//  private def byteArrayOps(attr: Attr, col: String, byteArray: Array[Byte]): Unit = {
+//    attr.op match {
+//      case V  => ()
+//      case Eq =>
+//        if (byteArray.length != 0) {
+//          where += ((col, s"= ?"))
+//          val paramIndex = inputs.size + 1
+//          inputs += ((ps: PrepStmt) => ps.setBytes(paramIndex, byteArray))
+//
+//        } else {
+//          // Get none
+//          where += (("FALSE", ""))
+//        }
+//
+//      case NoValue =>
+//        // Get none
+//        where += (("FALSE", ""))
+//
+//      case Neq =>
+//        if (byteArray.length != 0) {
+//          where += ((col, s"!= ?"))
+//          val paramIndex = inputs.size + 1
+//          inputs += ((ps: PrepStmt) => ps.setBytes(paramIndex, byteArray))
+//
+//        } else {
+//          // get all
+//        }
+//
+//      case _ => throw ModelError(
+//        s"Byte arrays (${attr.cleanName}) can only be retrieved as-is. Filters not allowed.")
+//    }
+//  }
+//
+//  private def optByteArray(attr: Attr): Unit = {
+//    attr.op match {
+//      case V =>
+//        val col = getCol(attr: Attr)
+//        select += col
+//        groupByCols += col // if we later need to group by non-aggregated columns
+//
+//        // return optional Byte array as-is
+//        addCast((row: RS, paramIndex: Int) =>
+//          row.getBytes(paramIndex) match {
+//            case null      => Option.empty[Array[Byte]]
+//            case byteArray => Some(byteArray)
+//          }
+//        )
+//
+//      case _ => throw ModelError(
+//        s"Byte arrays (${attr.cleanName}) can only be retrieved as-is. Filters not allowed."
+//      )
+//    }
+//  }
+
+  // helpers -------------------------------------------------------------------
+
+  private def selectWithOrder(
+    col: String,
+    tpeDb: String,
+    fn: String,
+    distinct: String = "",
+    optional: Boolean = false
+  ): Unit = {
+    val i  = getIndex
+    val vs = s"t_$i.vs"
+    if (orderBy.nonEmpty && orderBy.last._3 == col) {
+      // order by aggregate alias instead
+      val alias = col.replace('.', '_') + "_" + fn.toLowerCase
+      select += s"$fn($distinct$vs) $alias"
+      val (level, _, _, dir) = orderBy.last
+      orderBy.remove(orderBy.size - 1)
+      orderBy += ((level, 1, alias, dir))
+    } else {
+      select += s"$fn($distinct$vs)"
+    }
+    if (optional) {
+      joins += ((
+        "LEFT OUTER JOIN",
+        s"JSON_TABLE($col, '$$[*]' COLUMNS (vs $tpeDb PATH '$$')) t_$i",
+        "",
+        "true",
+        ""
+      ))
+
+    } else {
+      tempTables +=
+        s"""JSON_TABLE(
+           |    IF($col IS NULL, '[null]', $col),
+           |    '$$[*]' COLUMNS (vs $tpeDb PATH '$$')
+           |  ) t_$i""".stripMargin
+    }
+  }
+
 //  private def dbType(col: String): String = {
 //    attrMap(col)._2 match {
 //      case "String"         => "LONGTEXT"

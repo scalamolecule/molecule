@@ -93,7 +93,7 @@ trait ResolveExprMap extends ResolveExpr { self: SqlQueryBase with LambdasMap =>
   }
 
 
-  protected def mapMan[T: ClassTag](
+  protected def mapMan[T](
     attr: Attr, map: Map[String, T], resMap: ResMap[T]
   ): Unit = {
     val col = getCol(attr: Attr)
@@ -111,7 +111,7 @@ trait ResolveExprMap extends ResolveExpr { self: SqlQueryBase with LambdasMap =>
     }
   }
 
-  protected def mapOpt[T: ClassTag](
+  protected def mapOpt[T](
     attr: Attr,
     optMap: Option[Map[String, T]],
     resMapOpt: ResMapOpt[T],
@@ -129,7 +129,7 @@ trait ResolveExprMap extends ResolveExpr { self: SqlQueryBase with LambdasMap =>
     }
   }
 
-  protected def mapTac[T: ClassTag](
+  protected def mapTac[T](
     attr: Attr, map: Map[String, T], resMap: ResMap[T]
   ): Unit = {
     val col = getCol(attr: Attr)

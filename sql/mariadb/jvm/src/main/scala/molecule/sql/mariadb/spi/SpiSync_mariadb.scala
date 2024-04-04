@@ -101,9 +101,9 @@ trait SpiSync_mariadb extends SpiSyncBase {
         ("null", baseTpe)
       } else {
         val value = if (value0(1) == '"') {
-          value0.substring(2, value0.length - 2).split("\", ?\"").toSet
+          value0.substring(2, value0.length - 2).split("\", ?\"").toList
         } else {
-          value0.substring(1, value0.length - 1).split(", ?").toSet
+          value0.substring(1, value0.length - 1).split(", ?").toList
         }
         row += value
         (value, baseTpe)

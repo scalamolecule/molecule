@@ -149,7 +149,7 @@ trait SaveCardMap extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.int(22).i(3).charMap_?(Some(Map(pchar1, pchar2))).save.transact
 
         _ <- Ns.int_(1).i.a1.stringMap_?.query.get.map(_ ==> List((1, None), (2, None), (3, Some(Map(pstring1, pstring2)))))
-        _ <- Ns.int_(2).i.a1.intMap_?.query.i.get.map(_ ==> List((1, None), (2, None), (3, Some(Map(pint1, pint2)))))
+        _ <- Ns.int_(2).i.a1.intMap_?.query.get.map(_ ==> List((1, None), (2, None), (3, Some(Map(pint1, pint2)))))
         _ <- Ns.int_(3).i.a1.longMap_?.query.get.map(_ ==> List((1, None), (2, None), (3, Some(Map(plong1, plong2)))))
         _ <- Ns.int_(4).i.a1.floatMap_?.query.get.map(_ ==> List((1, None), (2, None), (3, Some(Map(pfloat1, pfloat2)))))
         _ <- Ns.int_(5).i.a1.doubleMap_?.query.get.map(_ ==> List((1, None), (2, None), (3, Some(Map(pdouble1, pdouble2)))))

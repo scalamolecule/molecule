@@ -30,4 +30,10 @@ trait ResolveExprExceptions {
       s"Applying nothing to mandatory attribute ($a) is reserved for updates to retract."
     )
   }
+
+  def noCardManyFilterAttrExpr(attr: Attr): Nothing = {
+    throw ModelError(
+      s"Cardinality-many filter attributes not allowed to " +
+      s"do additional filtering. Found:\n  " + attr)
+  }
 }

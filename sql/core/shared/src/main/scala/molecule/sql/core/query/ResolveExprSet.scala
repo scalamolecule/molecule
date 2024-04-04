@@ -94,7 +94,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
   }
 
 
-  protected def setMan[T: ClassTag](
+  protected def setMan[T](
     attr: Attr, args: Set[T], res: ResSet[T]
   ): Unit = {
     val col = getCol(attr: Attr)
@@ -106,9 +106,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     attr.filterAttr.fold {
       val pathAttr = path :+ attr.cleanAttr
       if (filterAttrVars.contains(pathAttr) && attr.op != V) {
-        // Runtime check needed since we can't type infer it
-        throw ModelError(s"Cardinality-set filter attributes not allowed to " +
-          s"do additional filtering. Found:\n  " + attr)
+        noCardManyFilterAttrExpr(attr)
       }
       setExpr(attr, col, attr.op, args, res, true)
     } {
@@ -119,7 +117,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     }
   }
 
-  protected def setTac[T: ClassTag](
+  protected def setTac[T](
     attr: Attr, args: Set[T], res: ResSet[T]
   ): Unit = {
     val col = getCol(attr: Attr)
@@ -134,7 +132,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     }
   }
 
-  protected def setExpr[T: ClassTag](
+  protected def setExpr[T](
     attr: Attr, col: String, op: Op, set: Set[T], res: ResSet[T], mandatory: Boolean
   ): Unit = {
     op match {
@@ -157,7 +155,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     }
   }
 
-  protected def setOpt[T: ClassTag](
+  protected def setOpt[T](
     attr: Attr, resOpt: ResSetOpt[T], res: ResSet[T]
   ): Unit = {
     val col = getCol(attr: Attr)
@@ -174,7 +172,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
 
   // attr ----------------------------------------------------------------------
 
-  protected def setAttr[T: ClassTag](col: String, res: ResSet[T], mandatory: Boolean): Unit = {
+  protected def setAttr[T](col: String, res: ResSet[T], mandatory: Boolean): Unit = {
     if (mandatory) {
       select -= col
       select += s"ARRAY_AGG($col)"
@@ -192,7 +190,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     replaceCast(res.nestedArray2optCoalescedSet)
   }
 
-  protected def setHas[T: ClassTag](
+  protected def setHas[T](
     col: String, set: Set[T], res: ResSet[T], one2sql: T => String, mandatory: Boolean
   ): Unit = {
     def contains(v: T): String = s"ARRAY_CONTAINS($col, ${one2sql(v)})"

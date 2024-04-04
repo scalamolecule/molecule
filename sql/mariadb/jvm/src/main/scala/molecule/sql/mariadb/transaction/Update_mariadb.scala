@@ -17,7 +17,7 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
   override def updateSetEq[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     owner: Boolean,
     set: Set[T],
     transformValue: T => Any,
@@ -25,15 +25,96 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
+    updateIterableEq(ns, attr, optRefNs, set, value2json)
+  }
+
+  override def updateSetAdd[T](
+    ns: String,
+    attr: String,
+    optRefNs: Option[String],
+    owner: Boolean,
+    set: Set[T],
+    transformValue: T => Any,
+    exts: List[String],
+    set2array: Set[T] => Array[AnyRef],
+    value2json: (StringBuffer, T) => StringBuffer
+  ): Unit = {
+    updateIterableAdd(ns, attr, optRefNs, set, value2json)
+  }
+
+  override def updateSetRemove[T](
+    ns: String,
+    attr: String,
+    optRefNs: Option[String],
+    owner: Boolean,
+    set: Set[T],
+    transformValue: T => Any,
+    exts: List[String],
+    one2json: T => String
+  ): Unit = {
+    updateIterableRemove(ns, attr, optRefNs, set, exts, one2json)
+  }
+
+  override def updateSeqEq[T](
+    ns: String,
+    attr: String,
+    optRefNs: Option[String],
+    owner: Boolean,
+    seq: Seq[T],
+    transformValue: T => Any,
+    exts: List[String],
+    seq2array: Seq[T] => Array[AnyRef],
+    value2json: (StringBuffer, T) => StringBuffer
+  ): Unit = {
+    updateIterableEq(ns, attr, optRefNs, seq, value2json)
+  }
+
+  override def updateSeqAdd[T](
+    ns: String,
+    attr: String,
+    optRefNs: Option[String],
+    owner: Boolean,
+    seq: Seq[T],
+    transformValue: T => Any,
+    exts: List[String],
+    seq2array: Seq[T] => Array[AnyRef],
+    value2json: (StringBuffer, T) => StringBuffer
+  ): Unit = {
+    updateIterableAdd(ns, attr, optRefNs, seq, value2json)
+  }
+
+  override def updateSeqRemove[T](
+    ns: String,
+    attr: String,
+    optRefNs: Option[String],
+    owner: Boolean,
+    seq: Seq[T],
+    transformValue: T => Any,
+    exts: List[String],
+    one2json: T => String
+  ): Unit = {
+    updateIterableRemove(ns, attr, optRefNs, seq, exts, one2json)
+  }
+
+
+  // Helpers -------------------------------------------------------------------
+
+  private def updateIterableEq[T, M[_] <: Iterable[_]](
+    ns: String,
+    attr: String,
+    refNs: Option[String],
+    iterable: M[T],
+    value2json: (StringBuffer, T) => StringBuffer
+  ): Unit = {
     refNs.fold {
       updateCurRefPath(attr)
       placeHolders = placeHolders :+ s"$attr = ?"
-      val colSetter = if(set.nonEmpty){
+      val colSetter = if (iterable.nonEmpty) {
         if (!isUpsert) {
           addToUpdateColsNotNull(ns, attr)
         }
-        val json = set2json(set, value2json)
         (ps: PS, _: IdsMap, _: RowIndex) => {
+          val json = iterable2json(iterable.asInstanceOf[Iterable[T]], value2json)
           ps.setString(curParamIndex, json)
           curParamIndex += 1
         }
@@ -44,85 +125,53 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
         }
       }
       addColSetter(curRefPath, colSetter)
-
     } { refNs =>
-      // Separate update of ref ids in join table -----------------------------
-      val refAttr   = attr
-      val joinTable = ss(ns, refAttr, refNs)
-      val ns_id     = ss(ns, "id")
-      val refNs_id  = ss(refNs, "id")
-      val id        = getUpdateId
-      if(set.nonEmpty){
-        // Tables are reversed in JdbcConn_JVM and we want to delete first
-        manualTableDatas = List(
-          addJoins(joinTable, ns_id, refNs_id, id, set.map(_.asInstanceOf[String].toLong)),
-          deleteJoins(joinTable, ns_id, id)
-        )
-      } else {
-        // Delete all joins when no ref ids are applied
-        manualTableDatas = List(deleteJoins(joinTable, ns_id, id))
-      }
+      joinEq(ns, attr, refNs, iterable)
     }
   }
 
-  override def updateSetAdd[T](
+  private def updateIterableAdd[T, M[_] <: Iterable[_]](
     ns: String,
     attr: String,
     refNs: Option[String],
-    owner: Boolean,
-    set: Set[T],
-    transformValue: T => Any,
-    exts: List[String],
-    set2array: Set[T] => Array[AnyRef],
+    iterable: M[T],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     refNs.fold {
-      if(set.nonEmpty){
+      if (iterable.nonEmpty) {
         updateCurRefPath(attr)
         if (!isUpsert) {
           addToUpdateColsNotNull(ns, attr)
         }
         placeHolders = placeHolders :+ s"$attr = JSON_MERGE($attr, ?)"
-        val json = set2json(set, value2json)
+        val json = iterable2json(iterable.asInstanceOf[Iterable[T]], value2json)
         addColSetter(curRefPath, (ps: PS, _: IdsMap, _: RowIndex) => {
           ps.setString(curParamIndex, json)
           curParamIndex += 1
         })
       }
     } { refNs =>
-      // Separate update of ref ids in join table -----------------------------
-      val refAttr   = attr
-      val joinTable = ss(ns, refAttr, refNs)
-      val ns_id     = ss(ns, "id")
-      val refNs_id  = ss(refNs, "id")
-      if(set.nonEmpty){
-        manualTableDatas = List(
-          addJoins(joinTable, ns_id, refNs_id, getUpdateId, set.map(_.asInstanceOf[String].toLong))
-        )
-      }
+      joinAdd(ns, attr, refNs, iterable)
     }
   }
 
-
-  override def updateSetRemove[T](
+  private def updateIterableRemove[T, M[_] <: Iterable[_]](
     ns: String,
     attr: String,
     refNs: Option[String],
-    owner: Boolean,
-    set: Set[T],
-    transformValue: T => Any,
+    iterable: M[T],
     exts: List[String],
     one2json: T => String
   ): Unit = {
     refNs.fold {
-      if (set.nonEmpty) {
+      if (iterable.nonEmpty) {
         updateCurRefPath(attr)
         if (!isUpsert) {
           addToUpdateColsNotNull(ns, attr)
         }
         val valueTable    = "table_" + (placeHolders.size + 1)
-        val cast          = exts.head
-        val retractValues = set.map(one2json).mkString(", ")
+        val cast          = exts(1)
+        val retractValues = iterable.asInstanceOf[Iterable[T]].map(one2json).mkString(", ")
         placeHolders = placeHolders :+
           s"""$attr = (
              |    SELECT JSON_ARRAYAGG($valueTable.v)
@@ -132,40 +181,32 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
         addColSetter(curRefPath, (_: PS, _: IdsMap, _: RowIndex) => ())
       }
     } { refNs =>
-      if (set.nonEmpty) {
-        // Separate update of ref ids in join table -----------------------------
-        val refAttr    = attr
-        val joinTable  = ss(ns, refAttr, refNs)
-        val ns_id      = ss(ns, "id")
-        val refNs_id   = ss(refNs, "id")
-        val retractIds = set.mkString(s" AND $refNs_id IN (", ", ", ")")
-        manualTableDatas = List(
-          deleteJoins(joinTable, ns_id, getUpdateId, retractIds)
-        )
-      }
+      joinRemove(ns, attr, refNs, iterable)
     }
   }
 
-  override protected lazy val extsString         = List("LONGTEXT", "")
-  override protected lazy val extsInt            = List("INT", "")
-  override protected lazy val extsLong           = List("BIGINT", "")
-  override protected lazy val extsFloat          = List("REAL", "")
-  override protected lazy val extsDouble         = List("DOUBLE", "")
-  override protected lazy val extsBoolean        = List("TINYINT(1)", "")
-  override protected lazy val extsBigInt         = List("DECIMAL(65, 0)", "")
-  override protected lazy val extsBigDecimal     = List("DECIMAL(65, 30)", "")
-  override protected lazy val extsDate           = List("BIGINT", "")
-  override protected lazy val extsDuration       = List("TINYTEXT", "")
-  override protected lazy val extsInstant        = List("TINYTEXT", "")
-  override protected lazy val extsLocalDate      = List("TINYTEXT", "")
-  override protected lazy val extsLocalTime      = List("TINYTEXT", "")
-  override protected lazy val extsLocalDateTime  = List("TINYTEXT", "")
-  override protected lazy val extsOffsetTime     = List("TINYTEXT", "")
-  override protected lazy val extsOffsetDateTime = List("TINYTEXT", "")
-  override protected lazy val extsZonedDateTime  = List("TINYTEXT", "")
-  override protected lazy val extsUUID           = List("TINYTEXT", "")
-  override protected lazy val extsURI            = List("TEXT", "")
-  override protected lazy val extsByte           = List("TINYINT", "")
-  override protected lazy val extsShort          = List("SMALLINT", "")
-  override protected lazy val extsChar           = List("CHAR", "")
+
+  override protected lazy val extsID             = List("ID", "BIGINT")
+  override protected lazy val extsString         = List("String", "LONGTEXT")
+  override protected lazy val extsInt            = List("Int", "INT")
+  override protected lazy val extsLong           = List("Long", "BIGINT")
+  override protected lazy val extsFloat          = List("Float", "REAL")
+  override protected lazy val extsDouble         = List("Double", "DOUBLE")
+  override protected lazy val extsBoolean        = List("Boolean", "TINYINT(1)")
+  override protected lazy val extsBigInt         = List("BigInt", "DECIMAL(65, 0)")
+  override protected lazy val extsBigDecimal     = List("BigDecimal", "DECIMAL(65, 30)")
+  override protected lazy val extsDate           = List("Date", "BIGINT")
+  override protected lazy val extsDuration       = List("Duration", "TINYTEXT")
+  override protected lazy val extsInstant        = List("Instant", "TINYTEXT")
+  override protected lazy val extsLocalDate      = List("LocalDate", "TINYTEXT")
+  override protected lazy val extsLocalTime      = List("LocalTime", "TINYTEXT")
+  override protected lazy val extsLocalDateTime  = List("LocalDateTime", "TINYTEXT")
+  override protected lazy val extsOffsetTime     = List("OffsetTime", "TINYTEXT")
+  override protected lazy val extsOffsetDateTime = List("OffsetDateTime", "TINYTEXT")
+  override protected lazy val extsZonedDateTime  = List("ZonedDateTime", "TINYTEXT")
+  override protected lazy val extsUUID           = List("UUID", "TINYTEXT")
+  override protected lazy val extsURI            = List("URI", "TEXT")
+  override protected lazy val extsByte           = List("Byte", "TINYINT")
+  override protected lazy val extsShort          = List("Short", "SMALLINT")
+  override protected lazy val extsChar           = List("Char", "CHAR")
 }

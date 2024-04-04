@@ -24,7 +24,7 @@ trait InsertOps extends BaseOps {
   protected def addSet[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String],
@@ -35,7 +35,7 @@ trait InsertOps extends BaseOps {
   protected def addSetOpt[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String],
@@ -46,7 +46,7 @@ trait InsertOps extends BaseOps {
   protected def addSeq[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String],
@@ -57,7 +57,7 @@ trait InsertOps extends BaseOps {
   protected def addSeqOpt[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String],
@@ -74,7 +74,7 @@ trait InsertOps extends BaseOps {
   protected def addMap[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
@@ -85,7 +85,7 @@ trait InsertOps extends BaseOps {
   protected def addMapOpt[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer

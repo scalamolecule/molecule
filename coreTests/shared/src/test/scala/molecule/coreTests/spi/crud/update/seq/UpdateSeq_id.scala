@@ -80,7 +80,6 @@ trait UpdateSeq_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         id <- Ns.intSeq.stringSeq.insert(List(1), List("a")).transact.map(_.id)
         _ <- Ns.intSeq.stringSeq.query.get.map(_ ==> List((List(1), List("a"))))
 
-        // Apply empty value to delete attribute of entity (entity remains)
         _ <- Ns(id).intSeq(Seq(2)).stringSeq(Seq("b", "c")).update.transact
         _ <- Ns.intSeq.stringSeq.query.get.map(_ ==> List((List(2), List("b", "c"))))
       } yield ()

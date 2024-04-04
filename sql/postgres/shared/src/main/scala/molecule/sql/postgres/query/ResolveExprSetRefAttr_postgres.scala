@@ -26,7 +26,7 @@ trait ResolveExprSetRefAttr_postgres
     where += (("", "NOT (" + refMatchArray((res.set2sqlArray(set), set.size)) + ")"))
   }
 
-  override protected def refHas[T: ClassTag](set: Set[T]): Unit = {
+  override protected def refHas[T](set: Set[T]): Unit = {
     set.size match {
       case 0 => where += (("FALSE", ""))
       case 1 => where += (("", arrayMatches(s"  ${set.head} = ANY(ARRAY_AGG($joinTable.$ref_id))")))

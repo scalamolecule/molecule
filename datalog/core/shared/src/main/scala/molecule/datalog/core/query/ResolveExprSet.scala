@@ -101,7 +101,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
     es
   }
 
-  private def setMan[T: ClassTag](
+  private def setMan[T](
     attr: Attr, e: Var, a: Att, args: Set[T], resSet: ResSet[T],
   ): Unit = {
     val v = vv
@@ -110,9 +110,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
     attr.filterAttr.fold {
       val pathAttr = varPath :+ attr.cleanAttr
       if (filterAttrVars.contains(pathAttr) && attr.op != V) {
-        // Runtime check needed since we can't type infer it
-        throw ModelError(s"Cardinality-set filter attributes not allowed to " +
-          s"do additional filtering. Found:\n  " + attr)
+        noCardManyFilterAttrExpr(attr)
       }
       setExpr(false, attr, e, a, v, attr.op, args, resSet)
       filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
@@ -123,7 +121,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
     refConfirmed = true
   }
 
-  private def setTac[T: ClassTag](
+  private def setTac[T](
     attr: Attr, e: Var, a: Att, args: Set[T], resSet: ResSet[T],
   ): Unit = {
     val v = vv
@@ -137,7 +135,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
     refConfirmed = true
   }
 
-  private def setExpr[T: ClassTag](
+  private def setExpr[T](
     tacit: Boolean,
     attr: Attr, e: Var, a: Att, v: Var, op: Op,
     sets: Set[T],
@@ -163,7 +161,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
     }
   }
 
-  private def setOpt[T: ClassTag](
+  private def setOpt[T](
     attr: Attr, e: Var, a: Att, resSetOpt: ResSetOpt[T],
   ): Unit = {
     val v = vv
@@ -229,7 +227,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
     replaceCast(resOpt.optAttr2s)
   }
 
-  private def setHas[T: ClassTag](
+  private def setHas[T](
     e: Var, a: Att, v: Var, set: Set[T], tpe: String, toDatalog: T => String
   ): Unit = {
     where += s"[$e $a $v]" -> wClause

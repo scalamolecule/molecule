@@ -12,19 +12,96 @@ trait Insert_mariadb extends SqlInsert { self: ResolveInsert with InsertResolver
   override protected def addSet[T](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String] = Nil,
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    refNs.fold {
+    addIterable(ns, attr, optRefNs, tplIndex, value2json)
+  }
+
+  override protected def addSetOpt[T](
+    ns: String,
+    attr: String,
+    optRefNs: Option[String],
+    tplIndex: Int,
+    transformValue: T => Any,
+    exts: List[String] = Nil,
+    set2array: Set[T] => Array[AnyRef],
+    value2json: (StringBuffer, T) => StringBuffer
+  ): Product => Unit = {
+    addOptIterable(ns, attr, optRefNs, tplIndex, value2json)
+  }
+
+  override protected def addSeq[T](
+    ns: String,
+    attr: String,
+    optRefNs: Option[String],
+    tplIndex: Int,
+    transformValue: T => Any,
+    exts: List[String],
+    seq2array: Seq[T] => Array[AnyRef],
+    value2json: (StringBuffer, T) => StringBuffer
+  ): Product => Unit = {
+    addIterable(ns, attr, optRefNs, tplIndex, value2json)
+  }
+
+  override protected def addSeqOpt[T](
+    ns: String,
+    attr: String,
+    optRefNs: Option[String],
+    tplIndex: Int,
+    transformValue: T => Any,
+    exts: List[String] = Nil,
+    seq2array: Seq[T] => Array[AnyRef],
+    value2json: (StringBuffer, T) => StringBuffer
+  ): Product => Unit = {
+    addOptIterable(ns, attr, optRefNs, tplIndex, value2json)
+  }
+
+  override protected def addMap[T](
+    ns: String,
+    attr: String,
+    optRefNs: Option[String],
+    tplIndex: Int,
+    transformValue: T => Any,
+    value2json: (StringBuffer, T) => StringBuffer
+  ): Product => Unit = {
+    val (curPath, paramIndex) = getParamIndex(attr)
+    (tpl: Product) =>
+      val colSetter = tpl.productElement(tplIndex).asInstanceOf[Map[String, _]] match {
+        case map if map.nonEmpty =>
+          (ps: PS, _: IdsMap, _: RowIndex) =>
+            ps.setString(paramIndex, map2json(map.asInstanceOf[Map[String, T]], value2json))
+
+        case _ =>
+          (ps: PS, _: IdsMap, _: RowIndex) =>
+            ps.setNull(paramIndex, java.sql.Types.NULL)
+      }
+      addColSetter(curPath, colSetter)
+  }
+
+  override protected lazy val transformDate =
+    (v: Date) => (ps: PS, n: Int) => ps.setLong(n, v.getTime)
+
+
+  // Helpers -------------------------------------------------------------------
+
+  private def addIterable[T, M[_] <: Iterable[_]](
+    ns: String,
+    attr: String,
+    optRefNs: Option[String],
+    tplIndex: Int,
+    value2json: (StringBuffer, T) => StringBuffer
+  ): Product => Unit = {
+    optRefNs.fold {
       val (curPath, paramIndex) = getParamIndex(attr)
-      (tpl: Product) =>
-        val set       = tpl.productElement(tplIndex).asInstanceOf[Set[T]]
-        val colSetter = if (set.nonEmpty) {
-          val json = set2json(set, value2json)
+      (tpl: Product) => {
+        val iterable  = tpl.productElement(tplIndex).asInstanceOf[Iterable[T]]
+        val colSetter = if (iterable.nonEmpty) {
+          val json = iterable2json(iterable, value2json)
           (ps: PS, _: IdsMap, _: RowIndex) =>
             ps.setString(paramIndex, json)
         } else {
@@ -32,130 +109,40 @@ trait Insert_mariadb extends SqlInsert { self: ResolveInsert with InsertResolver
             ps.setNull(paramIndex, java.sql.Types.NULL)
         }
         addColSetter(curPath, colSetter)
+      }
     } { refNs =>
-      val refAttr   = attr
-      val joinTable = ss(ns, refAttr, refNs)
-      val curPath   = if (paramIndexes.nonEmpty) curRefPath else List("0", ns)
-      val joinPath  = curPath :+ joinTable
-
-      // join table with single row (treated as normal insert since there's only 1 join per row)
-      val (id1, id2) = if (ns == refNs)
-        (ss(ns, "1_id"), ss(refNs, "2_id"))
-      else
-        (ss(ns, "id"), ss(refNs, "id"))
-      // When insertion order is reversed, this join table will be set after left and right has been inserted
-      inserts = (joinPath, List((id1, ""), (id2, ""))) +: inserts
-
-      if (paramIndexes.isEmpty) {
-        // If current namespace has no attributes, then add an empty row with
-        // default null values (only to be referenced as the left side of the join table)
-        val emptyRowSetter: Setter = (ps: PS, _: IdsMap, _: RowIndex) => ps.addBatch()
-        addColSetter(curPath, emptyRowSetter)
-        inserts = inserts :+ (curRefPath, List())
-      }
-
-      (tpl: Product) => {
-        // Empty row if no attributes in namespace in order to have an id for join table left side
-        if (!paramIndexes.exists { case ((path, _), _) => path == curPath }) {
-          // If current namespace has no attributes, then add an empty row with
-          // default null values (only to be referenced as the left side of the join table)
-          val emptyRowSetter: Setter = (ps: PS, _: IdsMap, _: RowIndex) => ps.addBatch()
-          addColSetter(curPath, emptyRowSetter)
-        }
-
-        // Join table setter
-        val refIds             = tpl.productElement(tplIndex).asInstanceOf[Set[String]]
-        val joinSetter: Setter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
-          val id = idsMap(curPath)(rowIndex)
-          refIds.foreach { refId =>
-            ps.setLong(1, id)
-            ps.setLong(2, refId.toLong)
-            ps.addBatch()
-          }
-        }
-        addColSetter(joinPath, joinSetter)
-      }
+      join(ns, attr, refNs, tplIndex)
     }
   }
 
-  override protected def addSetOpt[T](
+  private def addOptIterable[T, M[_] <: Iterable[_]](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     tplIndex: Int,
-    transformValue: T => Any,
-    exts: List[String] = Nil,
-    set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    refNs.fold {
-      val (curPath, paramIndex) = getParamIndex(attr)
-      (tpl: Product) => {
-        val colSetter = tpl.productElement(tplIndex) match {
-          case Some(set: Set[_]) =>
-            if (set.nonEmpty) {
-              val json = set2json(set.asInstanceOf[Set[T]], value2json)
-              (ps: PS, _: IdsMap, _: RowIndex) =>
-                ps.setString(paramIndex, json)
-            } else {
+      optRefNs.fold {
+        val (curPath, paramIndex) = getParamIndex(attr)
+        (tpl: Product) => {
+          val colSetter = tpl.productElement(tplIndex) match {
+            case Some(iterable: Iterable[_]) =>
+              if (iterable.nonEmpty) {
+                val json = iterable2json(iterable.asInstanceOf[Iterable[T]], value2json)
+                (ps: PS, _: IdsMap, _: RowIndex) =>
+                  ps.setString(paramIndex, json)
+              } else {
+                (ps: PS, _: IdsMap, _: RowIndex) =>
+                  ps.setNull(paramIndex, java.sql.Types.NULL)
+              }
+            case None                        =>
               (ps: PS, _: IdsMap, _: RowIndex) =>
                 ps.setNull(paramIndex, java.sql.Types.NULL)
-            }
-          case None              =>
-            (ps: PS, _: IdsMap, _: RowIndex) =>
-              ps.setNull(paramIndex, java.sql.Types.NULL)
+          }
+          addColSetter(curPath, colSetter)
         }
-        addColSetter(curPath, colSetter)
+      } { refNs =>
+        optJoin(ns, attr, refNs, tplIndex)
       }
-    } { refNs =>
-      val refAttr   = attr
-      val joinTable = ss(ns, refAttr, refNs)
-      val curPath   = curRefPath
-      val joinPath  = curPath :+ joinTable
-
-      // join table with single row (treated as normal insert since there's only 1 join per row)
-      val (id1, id2) = if (ns == refNs)
-        (ss(ns, "1_id"), ss(refNs, "2_id"))
-      else
-        (ss(ns, "id"), ss(refNs, "id"))
-      // When insertion order is reversed, this join table will be set after left and right has been inserted
-      inserts = (joinPath, List((id1, ""), (id2, ""))) +: inserts
-
-      (tpl: Product) => {
-        val colSetter = tpl.productElement(tplIndex) match {
-          case Some(set: Set[_]) =>
-            if (set.nonEmpty) {
-              // Empty row if no attributes in namespace in order to have an id for join table
-              if (!paramIndexes.exists { case ((path, _), _) => path == curPath }) {
-                // If current namespace has no attributes, then add an empty row with
-                // default null values (only to be referenced as the left side of the join table)
-                val emptyRowSetter: Setter = (ps: PS, _: IdsMap, _: RowIndex) => ps.addBatch()
-                addColSetter(curPath, emptyRowSetter)
-              }
-
-              // Join table setter
-              val refIds = set.asInstanceOf[Set[String]]
-              (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
-                val id = idsMap(curPath)(rowIndex)
-                refIds.foreach { refId =>
-                  ps.setLong(1, id)
-                  ps.setLong(2, refId.toLong)
-                  ps.addBatch()
-                }
-              }
-            } else {
-              (_: PS, _: IdsMap, _: RowIndex) => ()
-            }
-
-          case None =>
-            (_: PS, _: IdsMap, _: RowIndex) => ()
-        }
-        addColSetter(joinPath, colSetter)
-      }
-    }
   }
-
-
-  override protected lazy val transformDate =
-    (v: Date) => (ps: PS, n: Int) => ps.setLong(n, v.getTime)
 }

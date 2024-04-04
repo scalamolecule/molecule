@@ -11,7 +11,7 @@ trait ResolveExprSet_postgres
     with LambdasSet_postgres { self: SqlQueryBase =>
 
 
-  override protected def setMan[T: ClassTag](
+  override protected def setMan[T](
     attr: Attr, args: Set[T], res: ResSet[T]
   ): Unit = {
     val col = getCol(attr: Attr)
@@ -28,9 +28,7 @@ trait ResolveExprSet_postgres
     attr.filterAttr.fold {
       val pathAttr = path :+ attr.cleanAttr
       if (filterAttrVars.contains(pathAttr) && attr.op != V) {
-        // Runtime check needed since we can't type infer it
-        throw ModelError(s"Cardinality-set filter attributes not allowed to " +
-          s"do additional filtering. Found:\n  " + attr)
+        noCardManyFilterAttrExpr(attr)
       }
       setExpr(attr, col, attr.op, args, res, true)
     } {
@@ -44,7 +42,7 @@ trait ResolveExprSet_postgres
 
   // attr ----------------------------------------------------------------------
 
-  override protected def setAttr[T: ClassTag](
+  override protected def setAttr[T](
     col: String, res: ResSet[T], mandatory: Boolean
   ): Unit = {
     coalesce(col, res, if (mandatory) "man" else "tac")
@@ -55,7 +53,7 @@ trait ResolveExprSet_postgres
     coalesce(col, res, "opt")
   }
 
-  override protected def setHas[T: ClassTag](
+  override protected def setHas[T](
     col: String, set: Set[T], res: ResSet[T], one2sql: T => String, mandatory: Boolean
   ): Unit = {
     def contains(v: T): String = s"${one2sql(v)} = ANY($col)"
