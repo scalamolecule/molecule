@@ -108,7 +108,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
       if (filterAttrVars.contains(pathAttr) && attr.op != V) {
         noCardManyFilterAttrExpr(attr)
       }
-      setExpr(attr, col, attr.op, args, res, true)
+      setExpr(attr, col, args, res, true)
     } {
       case (dir, filterPath, filterAttr) => filterAttr match {
         case filterAttr: AttrOne => setFilterExpr(col, attr.op, filterAttr.name, res, true)
@@ -123,7 +123,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     val col = getCol(attr: Attr)
     notNull += col
     attr.filterAttr.fold {
-      setExpr(attr, col, attr.op, args, res, false)
+      setExpr(attr, col, args, res, false)
     } { case (dir, filterPath, filterAttr) =>
       filterAttr match {
         case filterAttr: AttrOne => setFilterExpr(col, attr.op, filterAttr.name, res, false)
@@ -133,9 +133,9 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
   }
 
   protected def setExpr[T](
-    attr: Attr, col: String, op: Op, set: Set[T], res: ResSet[T], mandatory: Boolean
+    attr: Attr, col: String, set: Set[T], res: ResSet[T], mandatory: Boolean
   ): Unit = {
-    op match {
+    attr.op match {
       case V       => setAttr(col, res, mandatory)
       case Eq      => noCollectionMatching(attr)
       case Has     => setHas(col, set, res, res.one2sql, mandatory)
@@ -149,7 +149,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     col: String, op: Op, filterAttr: String, res: ResSet[T], mandatory: Boolean
   ): Unit = {
     op match {
-      case Has   => setFilterHas(col, filterAttr)
+      case Has   => setFilterHas(col, filterAttr, res, mandatory)
       case HasNo => setFilterHasNo(col, filterAttr, res, mandatory)
       case other => unexpectedOp(other)
     }
@@ -236,11 +236,15 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
 
   // filter attribute ----------------------------------------------------------
 
-  protected def setFilterHas(col: String, filterAttr: String): Unit = {
+  protected def setFilterHas[T](
+    col: String, filterAttr: String, res: ResSet[T], mandatory: Boolean
+  ): Unit = {
     where += (("", s"ARRAY_CONTAINS($col, $filterAttr)"))
   }
 
-  protected def setFilterHasNo[T](col: String, filterAttr: String, res: ResSet[T], mandatory: Boolean): Unit = {
+  protected def setFilterHasNo[T](
+    col: String, filterAttr: String, res: ResSet[T], mandatory: Boolean
+  ): Unit = {
     if (mandatory) {
       select -= col
       select += s"ARRAY_AGG($col)"

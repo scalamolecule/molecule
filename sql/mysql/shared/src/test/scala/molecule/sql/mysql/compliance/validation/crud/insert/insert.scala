@@ -9,7 +9,7 @@ object Nested extends Nested with TestAsync_mysql
 object Semantics extends Semantics with TestAsync_mysql
 object TypesOne extends TypesOne with TestAsync_mysql
 object TypesOneOpt extends TypesOneOpt with TestAsync_mysql
+object TypesSeq extends TypesSeq with TestAsync_mysql
+object TypesSeqOpt extends TypesSeqOpt with TestAsync_mysql
 object TypesSet extends TypesSet with TestAsync_mysql
 object TypesSetOpt extends TypesSetOpt with TestAsync_mysql
-object TypesSeq extends TypesSeq with TestAsync_mysql
-object TypesSetOpq extends TypesSeqOpt with TestAsync_mysql

@@ -1,80 +1,11 @@
 package molecule.sql.mariadb.query
 
-import molecule.boilerplate.ast.Model._
 import molecule.sql.core.query.{ResolveExprSet, SqlQueryBase}
 
 
 trait ResolveExprSet_mariadb
   extends ResolveExprSet
     with LambdasSet_mariadb { self: SqlQueryBase =>
-
-
-  override protected def setMan[T](
-    attr: Attr, args: Set[T], res: ResSet[T]
-  ): Unit = {
-    val col = getCol(attr: Attr)
-    select += col
-    groupByCols += col // if we later need to group by non-aggregated columns
-    if (!isNestedOpt) {
-      notNull += col
-    }
-    addCast((row: RS, paramIndex: Int) =>
-      res.json2array(row.getString(paramIndex)).toSet
-    )
-    attr.filterAttr.fold {
-      val pathAttr = path :+ attr.cleanAttr
-      if (filterAttrVars.contains(pathAttr) && attr.op != V) {
-        noCardManyFilterAttrExpr(attr)
-      }
-      setExpr(attr, col, attr.op, args, res, true)
-    } {
-      case (dir, filterPath, filterAttr) => filterAttr match {
-        case filterAttr: AttrOne => setFilterExpr(col, attr.op, filterAttr.name, res, true)
-        case filterAttr          => setFilterExpr(col, attr.op, filterAttr.name, res, true)
-      }
-    }
-  }
-
-  override protected def setExpr[T](
-    attr: Attr, col: String, op: Op, set: Set[T], res: ResSet[T], mandatory: Boolean
-  ): Unit = {
-    op match {
-      case V       => setAttr(col, res, mandatory)
-      case Eq      => noCollectionMatching(attr)
-      case Has     => setHas(col, set, res, res.one2sql, mandatory)
-      case HasNo   => setHasNo(col, set, res, res.one2sql, mandatory)
-      case NoValue => if (mandatory) noApplyNothing(attr) else setNoValue(col)
-      case other   => unexpectedOp(other)
-    }
-  }
-
-  override protected def setFilterExpr[T](
-    col: String, op: Op, filterAttr: String, res: ResSet[T], mandatory: Boolean
-  ): Unit = {
-    op match {
-      case Has   => setFilterHas(col, filterAttr)
-      case HasNo => setFilterHasNo(col, filterAttr, res, mandatory)
-      case other => unexpectedOp(other)
-    }
-  }
-
-  override protected def setOpt[T](
-    attr: Attr, resOpt: ResSetOpt[T], res: ResSet[T]
-  ): Unit = {
-    val col = getCol(attr: Attr)
-    select += col
-    groupByCols += col // if we later need to group by non-aggregated columns
-    addCast((row: RS, paramIndex: Int) => row.getString(paramIndex) match {
-      case null | "[]" => Option.empty[Set[T]]
-      case json        => Some(res.json2array(json).toSet)
-    })
-    attr.op match {
-      case V     => setOptAttr(col, res)
-      case Eq    => noCollectionMatching(attr)
-      case other => unexpectedOp(other)
-    }
-  }
-
 
   // attr ----------------------------------------------------------------------
 
@@ -87,9 +18,7 @@ trait ResolveExprSet_mariadb
       groupByCols -= col
       having += "COUNT(*) > 0"
       aggregate = true
-      replaceCast((row: RS, paramIndex: Int) =>
-        res.json2array(row.getString(paramIndex)).toSet
-      )
+      mandatoryCast(res, mandatory)
     }
   }
 
@@ -111,11 +40,12 @@ trait ResolveExprSet_mariadb
       s"JSON_CONTAINS($col, JSON_ARRAY($jsonValues))"
     }
     if (mandatory) {
-      // We need this to coalesce Sets
       select -= col
+      // We need this to coalesce Sets
       selectWithOrder(col, res.tpeDb, "JSON_ARRAYAGG", optional = true)
       groupByCols -= col
       aggregate = true
+      mandatoryCast(res, mandatory)
     }
     set.size match {
       case 0 => where += (("FALSE", ""))
@@ -138,6 +68,7 @@ trait ResolveExprSet_mariadb
       selectWithOrder(col, res.tpeDb, "JSON_ARRAYAGG", optional = true)
       groupByCols -= col
       aggregate = true
+      mandatoryCast(res, mandatory)
     }
     set.size match {
       case 0 => ()
@@ -149,8 +80,11 @@ trait ResolveExprSet_mariadb
 
   // filter attribute ----------------------------------------------------------
 
-  override protected def setFilterHas(col: String, filterAttr: String): Unit = {
+  override protected def setFilterHas[T](
+    col: String, filterAttr: String, res: ResSet[T], mandatory: Boolean
+  ): Unit = {
     where += (("", s"JSON_CONTAINS($col, JSON_ARRAY($filterAttr))"))
+    mandatoryCast(res, mandatory)
   }
 
   override protected def setFilterHasNo[T](
@@ -165,6 +99,7 @@ trait ResolveExprSet_mariadb
       groupByCols -= col
       val tpeDb = res.tpeDb
       tempTables += s"JSON_TABLE($col, '$$[*]' COLUMNS (vs $tpeDb PATH '$$')) t_$i"
+      mandatoryCast(res, true)
     }
     where += (("", s"NOT JSON_CONTAINS($col, JSON_ARRAY($filterAttr))"))
   }
@@ -206,6 +141,14 @@ trait ResolveExprSet_mariadb
            |    IF($col IS NULL, '[null]', $col),
            |    '$$[*]' COLUMNS (vs $tpeDb PATH '$$')
            |  ) t_$i""".stripMargin
+    }
+  }
+
+  private def mandatoryCast[T](res: ResSet[T], mandatory: Boolean): Unit = {
+    if (mandatory) {
+      replaceCast((row: RS, paramIndex: Int) =>
+        res.json2array(row.getString(paramIndex)).toSet
+      )
     }
   }
 }

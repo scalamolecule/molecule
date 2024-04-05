@@ -1,9 +1,7 @@
 package molecule.sql.postgres.query
 
-import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.sql.core.query.{ResolveExprSet, SqlQueryBase}
-import scala.reflect.ClassTag
 
 
 trait ResolveExprSet_postgres
@@ -30,7 +28,7 @@ trait ResolveExprSet_postgres
       if (filterAttrVars.contains(pathAttr) && attr.op != V) {
         noCardManyFilterAttrExpr(attr)
       }
-      setExpr(attr, col, attr.op, args, res, true)
+      setExpr(attr, col, args, res, true)
     } {
       case (dir, filterPath, filterAttr) => filterAttr match {
         case filterAttr: AttrOne => setFilterExpr(col, attr.op, filterAttr.name, res, true)
@@ -79,11 +77,18 @@ trait ResolveExprSet_postgres
     }
   }
 
-  override protected def setFilterHas(col: String, filterAttr: String): Unit = {
+
+  // filter attribute ----------------------------------------------------------
+
+  override protected def setFilterHas[T](
+    col: String, filterAttr: String, res: ResSet[T], mandatory: Boolean
+  ): Unit = {
     where += (("", s"$col @> ARRAY(SELECT $filterAttr)"))
   }
 
-  override protected def setFilterHasNo[T](col: String, filterAttr: String, res: ResSet[T], mandatory: Boolean): Unit = {
+  override protected def setFilterHasNo[T](
+    col: String, filterAttr: String, res: ResSet[T], mandatory: Boolean
+  ): Unit = {
     if (mandatory) {
       val colAlias = col.replace(".", "_")
       select -= col
@@ -96,6 +101,7 @@ trait ResolveExprSet_postgres
     }
     where += (("", s"ARRAY(SELECT UNNEST($col) INTERSECT SELECT $filterAttr) = '{}'"))
   }
+
 
   // helpers -------------------------------------------------------------------
 

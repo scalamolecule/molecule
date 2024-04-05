@@ -9,16 +9,6 @@ import scala.util.Random
 trait ResolveExprOne_mysql extends ResolveExprOne with LambdasOne_mysql { self: SqlQueryBase =>
 
 
-  override protected def addSort(attr: Attr, col: String): Unit = {
-    attr.sort.foreach { sort =>
-      val (dir, arity) = (sort.head, sort.substring(1, 2).toInt)
-      dir match {
-        case 'a' => orderBy += ((level, arity, col, ""))
-        case 'd' => orderBy += ((level, arity, col, " DESC"))
-      }
-    }
-  }
-
   override protected def matches(col: String, regex: String): Unit = {
     if (regex.nonEmpty)
       where += ((col, s"REGEXP '$regex'"))

@@ -10,8 +10,7 @@ import molecule.sql.core.facade.JdbcConn_JVM
 
 object Connection_postgres {
 
-  val url = "jdbc:tc:postgresql:15://localhost:5432/test?preparedStatementCacheQueries=0"
-
+  val url       = "jdbc:tc:postgresql:15://localhost:5432/test?preparedStatementCacheQueries=0"
   val container = PostgreSQLContainer()
   // For fast reuse, set testcontainers.reuse.enable=true in ~/.testcontainers.properties
   // See https://callistaenterprise.se/blogg/teknik/2020/10/09/speed-up-your-testcontainers-tests/
@@ -19,10 +18,9 @@ object Connection_postgres {
   //  // These don't seem to make any difference:
   //  container.container.withReuse(true)
   //  container.container.withDatabaseName("test")
-  ////  container.container.withUsername("sa")
-  ////  container.container.withPassword("sa")
+  //  container.container.withUsername("sa")
+  //  container.container.withPassword("sa")
   //  container.container.withLabel("reuse.UUID", "e06d7a87-7d7d-472e-a047-e6c81f61d2a4");
-
 
   Class.forName(container.driverClassName)
   val sqlConn = DriverManager.getConnection(url)

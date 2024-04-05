@@ -9,7 +9,7 @@ object Nested extends Nested with TestAsync_datomic
 object Semantics extends Semantics with TestAsync_datomic
 object TypesOne extends TypesOne with TestAsync_datomic
 object TypesOneOpt extends TypesOneOpt with TestAsync_datomic
-object TypesSet extends TypesSet with TestAsync_datomic
-object TypesSetOpt extends TypesSetOpt with TestAsync_datomic
 object TypesSeq extends TypesSeq with TestAsync_datomic
 object TypesSeqOpt extends TypesSeqOpt with TestAsync_datomic
+object TypesSet extends TypesSet with TestAsync_datomic
+object TypesSetOpt extends TypesSetOpt with TestAsync_datomic

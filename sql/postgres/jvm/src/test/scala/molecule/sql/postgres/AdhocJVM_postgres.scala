@@ -1,5 +1,6 @@
 package molecule.sql.postgres
 
+import java.time.Duration
 import molecule.core.util.Executor._
 import molecule.sql.postgres.async._
 import molecule.sql.postgres.setup.{TestSuiteArray_postgres, TestSuite_postgres}
@@ -14,34 +15,48 @@ object AdhocJVM_postgres extends TestSuite_postgres {
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+
+
+      val a = (1, Map("a" -> boolean1, "b" -> boolean2))
+      val b = (2, Map("a" -> boolean2, "b" -> boolean3, "c" -> boolean4))
       for {
+        _ <- Ns.i.insert(0).transact // Entity without map attribute
+        _ <- Ns.i.booleanMap.insert(List(a, b)).transact
 
-        //        _ <- Ns.iSeq(List(1)).save.transact
-        //        _ <- Ns.iSeq.query.get.map(_ ==> List(List(1)))
+
+        //        _ <- rawTransact(
+        //          """UPDATE Ns
+        //            |SET
+        //            |  intMap = ('{"b": 2}'::jsonb)
+        //            |WHERE Ns.id IN(1) AND
+        //            |  Ns.intMap IS NOT NULL
+        //            |""".stripMargin)
 
 
-        id <- Ns.intMap.insert(Map(pint1)).transact.map(_.id)
+        _ <- rawQuery(
+          """SHOW max_connections
+            |""".stripMargin, true)
+
+        _ <- rawQuery(
+          """SHOW max_locks_per_transaction
+            |""".stripMargin, true)
+
 
 
 //        _ <- rawQuery(
 //          """SELECT DISTINCT
-//            |  Ns.intSeq
+//            |  Ns.i,
+//            |  Ns.booleanMap ->> 'a'
 //            |FROM Ns
 //            |WHERE
-//            |  Ns.intSeq IS NOT NULL AND
-//            |  Ns.intSeq != '{}'
-//            |""".stripMargin, true).map(println)
+//            |  Ns.booleanMap ?? 'a' AND
+//            |  Ns.i          IS NOT NULL AND
+//            |  Ns.booleanMap IS NOT NULL
+//            |ORDER BY Ns.i NULLS FIRST;
+//            |""".stripMargin, true)
 
-//        _ <- rawTransact(
-//          """UPDATE Ns
-//            |SET
-//            |  intMap = ('{"b": 2}'::jsonb)
-//            |WHERE Ns.id IN(1) AND
-//            |  Ns.intMap IS NOT NULL
-//            |""".stripMargin)
 
-        _ <- Ns(id).intMap(Map(pint2)).update.i.transact
-        _ <- Ns.intMap.query.get.map(_ ==> List(Map(pint2)))
+
 
       } yield ()
     }

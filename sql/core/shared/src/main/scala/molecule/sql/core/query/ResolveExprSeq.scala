@@ -4,8 +4,6 @@ import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.core.query.ResolveExpr
 import molecule.sql.core.javaSql.PrepStmt
-import scala.collection.mutable.ListBuffer
-import scala.reflect.ClassTag
 
 trait ResolveExprSeq extends ResolveExpr { self: SqlQueryBase with LambdasSeq =>
 
@@ -114,8 +112,8 @@ trait ResolveExprSeq extends ResolveExpr { self: SqlQueryBase with LambdasSeq =>
       seqExpr(attr, col, args, res, true)
     } {
       case (dir, filterPath, filterAttr) => filterAttr match {
-        case filterAttr: AttrOne => seqFilterExpr(col, attr.op, filterAttr.name)
-        case filterAttr          => seqFilterExpr(col, attr.op, filterAttr.name)
+        case filterAttr: AttrOne => seqFilterExpr(col, attr.op, filterAttr.name, res, true)
+        case filterAttr          => seqFilterExpr(col, attr.op, filterAttr.name, res, true)
       }
     }
   }
@@ -129,8 +127,8 @@ trait ResolveExprSeq extends ResolveExpr { self: SqlQueryBase with LambdasSeq =>
       seqExpr(attr, col, args, res, false)
     } { case (dir, filterPath, filterAttr) =>
       filterAttr match {
-        case filterAttr: AttrOne => seqFilterExpr(col, attr.op, filterAttr.name)
-        case filterAttr          => seqFilterExpr(col, attr.op, filterAttr.name)
+        case filterAttr: AttrOne => seqFilterExpr(col, attr.op, filterAttr.name, res, false)
+        case filterAttr          => seqFilterExpr(col, attr.op, filterAttr.name, res, false)
       }
     }
   }
@@ -139,21 +137,21 @@ trait ResolveExprSeq extends ResolveExpr { self: SqlQueryBase with LambdasSeq =>
     attr: Attr, col: String, seq: Seq[T], res: ResSeq[T], mandatory: Boolean
   ): Unit = {
     attr.op match {
-      case V       => setAttr(col)
+      case V       => seqAttr(col, res, mandatory)
       case Eq      => noCollectionMatching(attr)
-      case Has     => seqHas(col, seq, res.one2sql)
-      case HasNo   => seqHasNo(col, seq, res.one2sql)
+      case Has     => seqHas(col, seq, res.one2sql, res, mandatory)
+      case HasNo   => seqHasNo(col, seq, res.one2sql, res, mandatory)
       case NoValue => if (mandatory) noApplyNothing(attr) else seqNoValue(col)
       case other   => unexpectedOp(other)
     }
   }
 
-  protected def seqFilterExpr(
-    col: String, op: Op, filterAttr: String
+  protected def seqFilterExpr[T](
+    col: String, op: Op, filterAttr: String, res: ResSeq[T], mandatory: Boolean
   ): Unit = {
     op match {
-      case Has   => seqFilterHas(col, filterAttr)
-      case HasNo => seqFilterHasNo(col, filterAttr)
+      case Has   => seqFilterHas(col, filterAttr, res, mandatory)
+      case HasNo => seqFilterHasNo(col, filterAttr, res, mandatory)
       case other => unexpectedOp(other)
     }
   }
@@ -166,7 +164,7 @@ trait ResolveExprSeq extends ResolveExpr { self: SqlQueryBase with LambdasSeq =>
     groupByCols += col // if we later need to group by non-aggregated columns
     addCast(resOpt.sql2listOpt)
     attr.op match {
-      case V     => () // get array as-is
+      case V     => seqOptAttr(res)
       case Eq    => noCollectionMatching(attr)
       case other => unexpectedOp(other)
     }
@@ -175,12 +173,20 @@ trait ResolveExprSeq extends ResolveExpr { self: SqlQueryBase with LambdasSeq =>
 
   // attr ----------------------------------------------------------------------
 
-  protected def setAttr(col: String): Unit = {
+  protected def seqAttr[T](
+    col: String, res: ResSeq[T], mandatory: Boolean
+  ): Unit = {
+    // override in db implementation if needed
+  }
+
+  protected def seqOptAttr[T](
+    res: ResSeq[T]
+  ): Unit = {
     // override in db implementation if needed
   }
 
   protected def seqHas[T](
-    col: String, seq: Seq[T], one2sql: T => String
+    col: String, seq: Seq[T], one2sql: T => String, res: ResSeq[T], mandatory: Boolean
   ): Unit = {
     def contains(v: T): String = s"ARRAY_CONTAINS($col, ${one2sql(v)})"
     def containsSeq(seq: Seq[T]): String = seq.map(contains).mkString("(", " AND\n   ", ")")
@@ -192,7 +198,7 @@ trait ResolveExprSeq extends ResolveExpr { self: SqlQueryBase with LambdasSeq =>
   }
 
   protected def seqHasNo[T](
-    col: String, seq: Seq[T], one2sql: T => String
+    col: String, seq: Seq[T], one2sql: T => String, res: ResSeq[T], mandatory: Boolean
   ): Unit = {
     def notContains(v: T): String = s"NOT ARRAY_CONTAINS($col, ${one2sql(v)})"
     def notContainsSeq(seq: Seq[T]): String = seq.map(notContains).mkString("(", " OR\n   ", ")")
@@ -211,11 +217,15 @@ trait ResolveExprSeq extends ResolveExpr { self: SqlQueryBase with LambdasSeq =>
 
   // filter attribute ----------------------------------------------------------
 
-  protected def seqFilterHas(col: String, filterAttr: String): Unit = {
+  protected def seqFilterHas[T](
+    col: String, filterAttr: String, res: ResSeq[T], mandatory: Boolean
+  ): Unit = {
     where += (("", s"ARRAY_CONTAINS($col, $filterAttr)"))
   }
 
-  protected def seqFilterHasNo(col: String, filterAttr: String): Unit = {
+  protected def seqFilterHasNo[T](
+    col: String, filterAttr: String, res: ResSeq[T], mandatory: Boolean
+  ): Unit = {
     where += (("", s"NOT ARRAY_CONTAINS($col, $filterAttr)"))
   }
 

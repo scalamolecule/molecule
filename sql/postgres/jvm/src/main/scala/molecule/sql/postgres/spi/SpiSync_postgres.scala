@@ -154,7 +154,7 @@ trait SpiSync_postgres extends SpiSyncBase {
     }
 
     while (rowsResultSet.next) {
-      //      debug("-----------------------------------------------")
+      debug("--------------------------------------------------------------------------------------")
       var n = 1
       row.clear()
       while (n <= columnsNumber) {
@@ -208,9 +208,9 @@ trait SpiSync_postgres extends SpiSyncBase {
         }
         val columnStringValue = rowsResultSet.getString(n)
         if (rowsResultSet.wasNull()) {
-          debug(tpe + "   " + padS(20, tpe) + col + padS(20, col) + "  null")
+          debug(tpe + "   " + padS(20, tpe) + col + padS(30, col) + "  null")
         } else {
-          debug(tpe + "   " + padS(20, tpe) + col + padS(20, col) + "  " + columnStringValue)
+          debug(tpe + "   " + padS(20, tpe) + col + padS(30, col) + "  " + columnStringValue)
         }
         n += 1
       }

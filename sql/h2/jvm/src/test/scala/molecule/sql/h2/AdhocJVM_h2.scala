@@ -22,9 +22,21 @@ object AdhocJVM_h2 extends TestSuite_h2 {
 
       for {
 
-        id <- Ns.intMap(Map("a" -> int0)).save.transact.map(_.id)
+        id <- Ns.intMap.apply(Map(pint1, pint2)).save.transact.map(_.id)
+//        _ <- Ns.intMap.query.get.map(_.head ==> Map(pint1, pint2))
 
+        // Applying Map of pairs replaces map
+//        _ <- Ns(id).intMap(Map(pint3, pint4)).update.transact
+//        _ <- Ns.intMap.query.get.map(_.head ==> Map(pint3, pint4))
 
+//        // Applying empty Map of pairs deletes map
+//        _ <- Ns(id).intMap(Map.empty[String, Int]).update.transact
+//        _ <- Ns.intMap.query.get.map(_ ==> Nil)
+//
+//        id <- Ns.intMap(Map(pint1, pint2)).save.transact.map(_.id)
+//        // Applying empty value deletes map
+//        _ <- Ns(id).intMap().update.transact
+//        _ <- Ns.intMap.query.get.map(_ ==> Nil)
 
         //        _ <- rawQuery(
         //          """SELECT DISTINCT

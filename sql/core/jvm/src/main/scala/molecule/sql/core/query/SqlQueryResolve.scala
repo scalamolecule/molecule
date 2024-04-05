@@ -1,6 +1,6 @@
 package molecule.sql.core.query
 
-import java.sql.{PreparedStatement, ResultSet}
+import java.sql.ResultSet
 import molecule.boilerplate.ast.Model._
 import molecule.core.query.Pagination
 import molecule.core.util.ModelUtils

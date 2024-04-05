@@ -2,7 +2,6 @@ package molecule.sql.core.query
 
 import molecule.boilerplate.ast.Model._
 import molecule.core.query.ResolveExpr
-import scala.reflect.ClassTag
 
 trait ResolveExprMap extends ResolveExpr { self: SqlQueryBase with LambdasMap =>
 
@@ -97,6 +96,7 @@ trait ResolveExprMap extends ResolveExpr { self: SqlQueryBase with LambdasMap =>
     attr: Attr, map: Map[String, T], resMap: ResMap[T]
   ): Unit = {
     val col = getCol(attr: Attr)
+    groupByCols += col // if we later need to group by non-aggregated columns
     select += col
     if (!isNestedOpt) {
       notNull += col
@@ -147,15 +147,18 @@ trait ResolveExprMap extends ResolveExpr { self: SqlQueryBase with LambdasMap =>
 
   // value lookup by key -------------------------------------------------------
 
-  private def key2value[T](col: String, key: String, resMap: ResMap[T]): Unit = {
+  protected def key2value[T](
+    col: String, key: String, resMap: ResMap[T]
+  ): Unit = {
     val value = s"""($col)."$key""""
     select -= col
     select += value
     where += ((value, s"IS NOT NULL"))
-    replaceCast((row: RS, paramIndex: Int) => resMap.json2tpe(row.getString(paramIndex)))
+    replaceCast((row: RS, paramIndex: Int) =>
+      resMap.json2tpe(row.getString(paramIndex)))
   }
 
-  private def key2optValue[T](
+  protected def key2optValue[T](
     col: String, key: String, resMap: ResMap[T]
   ): Unit = {
     select -= col
@@ -169,7 +172,9 @@ trait ResolveExprMap extends ResolveExpr { self: SqlQueryBase with LambdasMap =>
 
   // tacit ---------------------------------------------------------------------
 
-  protected def mapContainsKeys[T](col: String, map: Map[String, T]): Unit = {
+  protected def mapContainsKeys[T](
+    col: String, map: Map[String, T]
+  ): Unit = {
     val keys = map.keys
     keys.size match {
       case 0 => where += (("FALSE", ""))
