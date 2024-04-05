@@ -2,10 +2,11 @@ package molecule.sql.postgres
 
 import molecule.core.util.Executor._
 import molecule.sql.postgres.async._
-import molecule.sql.postgres.setup.TestSuite_postgres
+import molecule.sql.postgres.setup.{TestSuiteArray_postgres, TestSuite_postgres}
 import utest._
 import scala.language.implicitConversions
 
+//object AdhocJVM_postgres extends TestSuiteArray_postgres {
 object AdhocJVM_postgres extends TestSuite_postgres {
 
   override lazy val tests = Tests {
@@ -15,13 +16,32 @@ object AdhocJVM_postgres extends TestSuite_postgres {
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
 
-        _ <- Ns.i.int.insert(
-          (1, int1),
-          (1, int2),
-          (1, int3),
-          (2, int4),
-        ).transact
+        //        _ <- Ns.iSeq(List(1)).save.transact
+        //        _ <- Ns.iSeq.query.get.map(_ ==> List(List(1)))
 
+
+        id <- Ns.intMap.insert(Map(pint1)).transact.map(_.id)
+
+
+//        _ <- rawQuery(
+//          """SELECT DISTINCT
+//            |  Ns.intSeq
+//            |FROM Ns
+//            |WHERE
+//            |  Ns.intSeq IS NOT NULL AND
+//            |  Ns.intSeq != '{}'
+//            |""".stripMargin, true).map(println)
+
+//        _ <- rawTransact(
+//          """UPDATE Ns
+//            |SET
+//            |  intMap = ('{"b": 2}'::jsonb)
+//            |WHERE Ns.id IN(1) AND
+//            |  Ns.intMap IS NOT NULL
+//            |""".stripMargin)
+
+        _ <- Ns(id).intMap(Map(pint2)).update.i.transact
+        _ <- Ns.intMap.query.get.map(_ ==> List(Map(pint2)))
 
       } yield ()
     }

@@ -213,7 +213,7 @@ trait SqlInsert
     transformValue: T => Any,
     exts: List[String] = Nil
   ): Product => Unit = {
-    val (curPath, paramIndex) = getParamIndex(attr, castExt = exts.head)
+    val (curPath, paramIndex) = getParamIndex(attr, castExt = exts(2))
     (tpl: Product) => {
       val scalaValue  = tpl.productElement(tplIndex).asInstanceOf[T]
       val valueSetter = transformValue(scalaValue).asInstanceOf[(PS, Int) => Unit]
@@ -231,7 +231,7 @@ trait SqlInsert
     transformValue: T => Any,
     exts: List[String] = Nil
   ): Product => Unit = {
-    val (curPath, paramIndex) = getParamIndex(attr, castExt = exts.head)
+    val (curPath, paramIndex) = getParamIndex(attr, castExt = exts(2))
     (tpl: Product) => {
       val colSetter = tpl.productElement(tplIndex) match {
         case Some(scalaValue) =>

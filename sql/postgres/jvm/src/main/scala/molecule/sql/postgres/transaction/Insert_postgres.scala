@@ -3,6 +3,7 @@ package molecule.sql.postgres.transaction
 import java.sql.Statement
 import molecule.core.transaction.{InsertResolvers_, ResolveInsert}
 import molecule.sql.core.transaction.{JoinTable, SqlInsert, Table}
+import java.sql.{PreparedStatement => PS}
 
 trait Insert_postgres extends SqlInsert { self: ResolveInsert with InsertResolvers_ =>
 
@@ -38,27 +39,71 @@ trait Insert_postgres extends SqlInsert { self: ResolveInsert with InsertResolve
     }
   }
 
-  override protected lazy val extsID             = List("", "BIGINT")
-  override protected lazy val extsString         = List("", "VARCHAR")
-  override protected lazy val extsInt            = List("", "INTEGER")
-  override protected lazy val extsLong           = List("", "BIGINT")
-  override protected lazy val extsFloat          = List("", "DECIMAL")
-  override protected lazy val extsDouble         = List("", "DOUBLE")
-  override protected lazy val extsBoolean        = List("", "BOOLEAN")
-  override protected lazy val extsBigInt         = List("", "DECIMAL")
-  override protected lazy val extsBigDecimal     = List("", "DECIMAL")
-  override protected lazy val extsDate           = List("", "BIGINT")
-  override protected lazy val extsDuration       = List("", "VARCHAR")
-  override protected lazy val extsInstant        = List("", "VARCHAR")
-  override protected lazy val extsLocalDate      = List("", "VARCHAR")
-  override protected lazy val extsLocalTime      = List("", "VARCHAR")
-  override protected lazy val extsLocalDateTime  = List("", "VARCHAR")
-  override protected lazy val extsOffsetTime     = List("", "VARCHAR")
-  override protected lazy val extsOffsetDateTime = List("", "VARCHAR")
-  override protected lazy val extsZonedDateTime  = List("", "VARCHAR")
-  override protected lazy val extsUUID           = List("::uuid", "UUID")
-  override protected lazy val extsURI            = List("", "VARCHAR")
-  override protected lazy val extsByte           = List("", "SMALLINT")
-  override protected lazy val extsShort          = List("", "SMALLINT")
-  override protected lazy val extsChar           = List("", "CHAR")
+  override protected def addMap[T](
+    ns: String,
+    attr: String,
+    optRefNs: Option[String],
+    tplIndex: Int,
+    transformValue: T => Any,
+    value2json: (StringBuffer, T) => StringBuffer
+  ): Product => Unit = {
+    val (curPath, paramIndex) = getParamIndex(attr, castExt = "::jsonb")
+    (tpl: Product) =>
+      val colSetter = tpl.productElement(tplIndex).asInstanceOf[Map[String, _]] match {
+        case map if map.nonEmpty =>
+          (ps: PS, _: IdsMap, _: RowIndex) =>
+            ps.setString(paramIndex, map2json(map.asInstanceOf[Map[String, T]], value2json))
+
+        case _ =>
+          (ps: PS, _: IdsMap, _: RowIndex) =>
+            ps.setNull(paramIndex, java.sql.Types.NULL)
+      }
+      addColSetter(curPath, colSetter)
+  }
+
+  override protected def addMapOpt[T](
+    ns: String,
+    attr: String,
+    optRefNs: Option[String],
+    tplIndex: Int,
+    transformValue: T => Any,
+    value2json: (StringBuffer, T) => StringBuffer
+  ): Product => Unit = {
+    val (curPath, paramIndex) = getParamIndex(attr, castExt = "::jsonb")
+    (tpl: Product) =>
+      val colSetter = tpl.productElement(tplIndex) match {
+        case Some(map: Map[_, _]) if map.nonEmpty =>
+          (ps: PS, _: IdsMap, _: RowIndex) =>
+            ps.setString(paramIndex, map2json(map.asInstanceOf[Map[String, T]], value2json))
+
+        case _ =>
+          (ps: PS, _: IdsMap, _: RowIndex) =>
+            ps.setNull(paramIndex, java.sql.Types.NULL)
+      }
+      addColSetter(curPath, colSetter)
+  }
+
+  override protected lazy val extsID             = List("ID", "VARCHAR", "")
+  override protected lazy val extsString         = List("String", "VARCHAR", "")
+  override protected lazy val extsInt            = List("Int", "INTEGER", "")
+  override protected lazy val extsLong           = List("Long", "BIGINT", "")
+  override protected lazy val extsFloat          = List("Float", "DECIMAL", "")
+  override protected lazy val extsDouble         = List("Double", "DECIMAL", "")
+  override protected lazy val extsBoolean        = List("Boolean", "BOOLEAN", "")
+  override protected lazy val extsBigInt         = List("BigInt", "DECIMAL", "")
+  override protected lazy val extsBigDecimal     = List("BigDecimal", "DECIMAL", "")
+  override protected lazy val extsDate           = List("Date", "BIGINT", "")
+  override protected lazy val extsDuration       = List("Duration", "VARCHAR", "")
+  override protected lazy val extsInstant        = List("Instant", "VARCHAR", "")
+  override protected lazy val extsLocalDate      = List("LocalDate", "VARCHAR", "")
+  override protected lazy val extsLocalTime      = List("LocalTime", "VARCHAR", "")
+  override protected lazy val extsLocalDateTime  = List("LocalDateTime", "VARCHAR", "")
+  override protected lazy val extsOffsetTime     = List("OffsetTime", "VARCHAR", "")
+  override protected lazy val extsOffsetDateTime = List("OffsetDateTime", "VARCHAR", "")
+  override protected lazy val extsZonedDateTime  = List("ZonedDateTime", "VARCHAR", "")
+  override protected lazy val extsUUID           = List("UUID", "UUID", "::uuid")
+  override protected lazy val extsURI            = List("URI", "VARCHAR", "")
+  override protected lazy val extsByte           = List("Byte", "SMALLINT", "")
+  override protected lazy val extsShort          = List("Short", "SMALLINT", "")
+  override protected lazy val extsChar           = List("Char", "TEXT", "")
 }

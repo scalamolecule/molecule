@@ -106,7 +106,7 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    updateMapEqJdbc(ns, attr, map,
+    updateMapEqJdbc(ns, attr, "", map,
       (ps: PS, paramIndex: Int) =>
         ps.setString(paramIndex, map2json(map, value2json))
     )
@@ -123,7 +123,7 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
     value2json: (StringBuffer, T) => StringBuffer,
     //    set2array: Set[Any] => Array[AnyRef],
   ): Unit = {
-    updateMapAddJdbc[T](ns, attr, map, exts,
+    updateMapAddJdbc[T](ns, attr, "", map, exts,
       (ps: PS, paramIndex: Int, updatedMap: Map[String, T]) =>
         ps.setString(paramIndex, map2json(updatedMap, value2json))
     )
@@ -139,7 +139,7 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
     exts: List[String],
     value2json: (StringBuffer, T) => StringBuffer,
   ): Unit = {
-    updateMapRemoveJdbc[T](ns, attr, map, exts,
+    updateMapRemoveJdbc[T](ns, attr, "", map, exts,
       (ps: PS, paramIndex: Int, updatedMap: Map[String, T]) =>
         ps.setString(paramIndex, map2json(updatedMap, value2json))
     )
@@ -233,27 +233,27 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
     }
   }
 
-  override protected lazy val extsID             = List("ID", "LONGTEXT")
-  override protected lazy val extsString         = List("String", "LONGTEXT")
-  override protected lazy val extsInt            = List("Int", "INT")
-  override protected lazy val extsLong           = List("Long", "BIGINT")
-  override protected lazy val extsFloat          = List("Float", "REAL")
-  override protected lazy val extsDouble         = List("Double", "DOUBLE")
-  override protected lazy val extsBoolean        = List("Boolean", "TINYINT(1)")
-  override protected lazy val extsBigInt         = List("BigInt", "DECIMAL(65, 0)")
-  override protected lazy val extsBigDecimal     = List("BigDecimal", "DECIMAL(65, 30)")
-  override protected lazy val extsDate           = List("Date", "BIGINT")
-  override protected lazy val extsDuration       = List("Duration", "TINYTEXT")
-  override protected lazy val extsInstant        = List("Instant", "TINYTEXT")
-  override protected lazy val extsLocalDate      = List("LocalDate", "TINYTEXT")
-  override protected lazy val extsLocalTime      = List("LocalTime", "TINYTEXT")
-  override protected lazy val extsLocalDateTime  = List("LocalDateTime", "TINYTEXT")
-  override protected lazy val extsOffsetTime     = List("OffsetTime", "TINYTEXT")
-  override protected lazy val extsOffsetDateTime = List("OffsetDateTime", "TINYTEXT")
-  override protected lazy val extsZonedDateTime  = List("ZonedDateTime", "TINYTEXT")
-  override protected lazy val extsUUID           = List("UUID", "TINYTEXT")
-  override protected lazy val extsURI            = List("URI", "TEXT")
-  override protected lazy val extsByte           = List("Byte", "TINYINT")
-  override protected lazy val extsShort          = List("Short", "SMALLINT")
-  override protected lazy val extsChar           = List("Char", "CHAR")
+  override protected lazy val extsID             = List("ID", "LONGTEXT", "")
+  override protected lazy val extsString         = List("String", "LONGTEXT", "")
+  override protected lazy val extsInt            = List("Int", "INT", "")
+  override protected lazy val extsLong           = List("Long", "BIGINT", "")
+  override protected lazy val extsFloat          = List("Float", "REAL", "")
+  override protected lazy val extsDouble         = List("Double", "DOUBLE", "")
+  override protected lazy val extsBoolean        = List("Boolean", "TINYINT(1)", "")
+  override protected lazy val extsBigInt         = List("BigInt", "DECIMAL(65, 0)", "")
+  override protected lazy val extsBigDecimal     = List("BigDecimal", "DECIMAL(65, 30)", "")
+  override protected lazy val extsDate           = List("Date", "BIGINT", "")
+  override protected lazy val extsDuration       = List("Duration", "TINYTEXT", "")
+  override protected lazy val extsInstant        = List("Instant", "TINYTEXT", "")
+  override protected lazy val extsLocalDate      = List("LocalDate", "TINYTEXT", "")
+  override protected lazy val extsLocalTime      = List("LocalTime", "TINYTEXT", "")
+  override protected lazy val extsLocalDateTime  = List("LocalDateTime", "TINYTEXT", "")
+  override protected lazy val extsOffsetTime     = List("OffsetTime", "TINYTEXT", "")
+  override protected lazy val extsOffsetDateTime = List("OffsetDateTime", "TINYTEXT", "")
+  override protected lazy val extsZonedDateTime  = List("ZonedDateTime", "TINYTEXT", "")
+  override protected lazy val extsUUID           = List("UUID", "TINYTEXT", "")
+  override protected lazy val extsURI            = List("URI", "TEXT", "")
+  override protected lazy val extsByte           = List("Byte", "TINYINT", "")
+  override protected lazy val extsShort          = List("Short", "SMALLINT", "")
+  override protected lazy val extsChar           = List("Char", "CHAR", "")
 }

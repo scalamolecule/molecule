@@ -266,7 +266,7 @@ trait SqlUpdate
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    updateMapEqJdbc(ns, attr, map,
+    updateMapEqJdbc(ns, attr, "", map,
       (ps: PS, paramIndex: Int) =>
         ps.setBytes(paramIndex, map2jsonByteArray(map, value2json))
     )
@@ -283,7 +283,7 @@ trait SqlUpdate
     value2json: (StringBuffer, T) => StringBuffer,
     //    set2array: Set[Any] => Array[AnyRef],
   ): Unit = {
-    updateMapAddJdbc[T](ns, attr, map, exts,
+    updateMapAddJdbc[T](ns, attr, "", map, exts,
       (ps: PS, paramIndex: Int, updatedMap: Map[String, T]) =>
         ps.setBytes(paramIndex, map2jsonByteArray(updatedMap, value2json))
     )
@@ -299,7 +299,7 @@ trait SqlUpdate
     exts: List[String],
     value2json: (StringBuffer, T) => StringBuffer,
   ): Unit = {
-    updateMapRemoveJdbc[T](ns, attr, map, exts,
+    updateMapRemoveJdbc[T](ns, attr, "", map, exts,
       (ps: PS, paramIndex: Int, updatedMap: Map[String, T]) =>
         ps.setBytes(paramIndex, map2jsonByteArray(updatedMap, value2json))
     )
@@ -535,11 +535,12 @@ trait SqlUpdate
   protected def updateMapEqJdbc[T](
     ns: String,
     attr: String,
+    cast: String,
     map: Map[String, T],
     map2jdbc: (PS, Int) => Unit
   ): Unit = {
     updateCurRefPath(attr)
-    placeHolders = placeHolders :+ s"$attr = ?"
+    placeHolders = placeHolders :+ s"$attr = ?$cast"
     if (!isUpsert) {
       addToUpdateColsNotNull(ns, attr)
     }
@@ -559,6 +560,7 @@ trait SqlUpdate
   protected def updateMapAddJdbc[T](
     ns: String,
     attr: String,
+    cast: String,
     map: Map[String, T],
     exts: List[String],
     map2jdbc: (PS, Int, Map[String, T]) => Unit
@@ -568,7 +570,7 @@ trait SqlUpdate
       if (!isUpsert) {
         addToUpdateColsNotNull(ns, attr)
       }
-      placeHolders = placeHolders :+ s"$attr = ?"
+      placeHolders = placeHolders :+ s"$attr = ?$cast"
       val colSetter = (ps: PS, _: IdsMap, _: RowIndex) => {
         val updatedMap = {
           val query = s"select $attr from $ns where id IN(${ids.mkString(", ")})"
@@ -615,6 +617,7 @@ trait SqlUpdate
   protected def updateMapRemoveJdbc[T](
     ns: String,
     attr: String,
+    cast: String,
     map: Map[String, T],
     exts: List[String],
     map2jdbc: (PS, Int, Map[String, T]) => Unit
@@ -624,7 +627,7 @@ trait SqlUpdate
       if (!isUpsert) {
         addToUpdateColsNotNull(ns, attr)
       }
-      placeHolders = placeHolders :+ s"$attr = ?"
+      placeHolders = placeHolders :+ s"$attr = ?$cast"
       val colSetter = (ps: PS, _: IdsMap, _: RowIndex) => {
         val query = s"select $attr from $ns where id IN(${ids.mkString(", ")})"
         val rs    = ps.getConnection.prepareStatement(query).executeQuery()
@@ -683,27 +686,27 @@ trait SqlUpdate
   }
 
 
-  override protected lazy val extsID             = List("ID", "BIGINT")
-  override protected lazy val extsString         = List("String", "LONGVARCHAR")
-  override protected lazy val extsInt            = List("Int", "INT")
-  override protected lazy val extsLong           = List("Long", "BIGINT")
-  override protected lazy val extsFloat          = List("Float", "REAL")
-  override protected lazy val extsDouble         = List("Double", "DOUBLE")
-  override protected lazy val extsBoolean        = List("Boolean", "BOOLEAN")
-  override protected lazy val extsBigInt         = List("BigInt", "DECIMAL(100, 0)")
-  override protected lazy val extsBigDecimal     = List("BigDecimal", "DECIMAL(65535, 25)")
-  override protected lazy val extsDate           = List("Date", "BIGINT")
-  override protected lazy val extsDuration       = List("Duration", "VARCHAR")
-  override protected lazy val extsInstant        = List("Instant", "VARCHAR")
-  override protected lazy val extsLocalDate      = List("LocalDate", "VARCHAR")
-  override protected lazy val extsLocalTime      = List("LocalTime", "VARCHAR")
-  override protected lazy val extsLocalDateTime  = List("LocalDateTime", "VARCHAR")
-  override protected lazy val extsOffsetTime     = List("OffsetTime", "VARCHAR")
-  override protected lazy val extsOffsetDateTime = List("OffsetDateTime", "VARCHAR")
-  override protected lazy val extsZonedDateTime  = List("ZonedDateTime", "VARCHAR")
-  override protected lazy val extsUUID           = List("UUID", "UUID")
-  override protected lazy val extsURI            = List("URI", "VARCHAR")
-  override protected lazy val extsByte           = List("Byte", "TINYINT")
-  override protected lazy val extsShort          = List("Short", "SMALLINT")
-  override protected lazy val extsChar           = List("Char", "CHAR")
+  override protected lazy val extsID             = List("ID", "BIGINT", "")
+  override protected lazy val extsString         = List("String", "LONGVARCHAR", "")
+  override protected lazy val extsInt            = List("Int", "INT", "")
+  override protected lazy val extsLong           = List("Long", "BIGINT", "")
+  override protected lazy val extsFloat          = List("Float", "REAL", "")
+  override protected lazy val extsDouble         = List("Double", "DOUBLE", "")
+  override protected lazy val extsBoolean        = List("Boolean", "BOOLEAN", "")
+  override protected lazy val extsBigInt         = List("BigInt", "DECIMAL(100, 0)", "")
+  override protected lazy val extsBigDecimal     = List("BigDecimal", "DECIMAL(65535, 25)", "")
+  override protected lazy val extsDate           = List("Date", "BIGINT", "")
+  override protected lazy val extsDuration       = List("Duration", "VARCHAR", "")
+  override protected lazy val extsInstant        = List("Instant", "VARCHAR", "")
+  override protected lazy val extsLocalDate      = List("LocalDate", "VARCHAR", "")
+  override protected lazy val extsLocalTime      = List("LocalTime", "VARCHAR", "")
+  override protected lazy val extsLocalDateTime  = List("LocalDateTime", "VARCHAR", "")
+  override protected lazy val extsOffsetTime     = List("OffsetTime", "VARCHAR", "")
+  override protected lazy val extsOffsetDateTime = List("OffsetDateTime", "VARCHAR", "")
+  override protected lazy val extsZonedDateTime  = List("ZonedDateTime", "VARCHAR", "")
+  override protected lazy val extsUUID           = List("UUID", "UUID", "")
+  override protected lazy val extsURI            = List("URI", "VARCHAR", "")
+  override protected lazy val extsByte           = List("Byte", "TINYINT", "")
+  override protected lazy val extsShort          = List("Short", "SMALLINT", "")
+  override protected lazy val extsChar           = List("Char", "CHAR", "")
 }

@@ -139,7 +139,7 @@ trait ResolveExprSeq extends ResolveExpr { self: SqlQueryBase with LambdasSeq =>
     attr: Attr, col: String, seq: Seq[T], res: ResSeq[T], mandatory: Boolean
   ): Unit = {
     attr.op match {
-      case V       => () // get array as-is
+      case V       => setAttr(col)
       case Eq      => noCollectionMatching(attr)
       case Has     => seqHas(col, seq, res.one2sql)
       case HasNo   => seqHasNo(col, seq, res.one2sql)
@@ -174,6 +174,10 @@ trait ResolveExprSeq extends ResolveExpr { self: SqlQueryBase with LambdasSeq =>
 
 
   // attr ----------------------------------------------------------------------
+
+  protected def setAttr(col: String): Unit = {
+    // override in db implementation if needed
+  }
 
   protected def seqHas[T](
     col: String, seq: Seq[T], one2sql: T => String

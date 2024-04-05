@@ -96,7 +96,7 @@ trait SqlSave
     transformValue: T => Any,
     exts: List[String] = Nil
   ): Unit = {
-    val (curPath, paramIndex) = getParamIndex(attr, castExt = exts.head)
+    val (curPath, paramIndex) = getParamIndex(attr, castExt = exts(2))
     val colSetter: Setter     = optValue.fold {
       (ps: PS, _: IdsMap, _: RowIndex) => {
         ps.setNull(paramIndex, 0)
