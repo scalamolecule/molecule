@@ -174,13 +174,7 @@ trait ResolveExprSet extends ResolveExpr with LambdasSet { self: MongoQueryBase 
   // attr ----------------------------------------------------------------------
 
   private def setAttr(uniqueField: String, field: String, mandatory: Boolean): Unit = {
-    //    println(s"\n======== $uniqueField ============================================")
-
-    // Skipping this for all set attributes solves the own-ref rest in UpdateSet_id.
-    // But what distinguishes it?
     b.base.matches.add(Filters.ne(b.dot + field, new BsonNull))
-
-    // Exclude orphaned arrays too
     b.base.matches.add(Filters.ne(b.dot + field, new BsonArray()))
     coalesce(uniqueField, field, mandatory)
   }

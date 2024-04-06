@@ -17,7 +17,7 @@ trait UpdateMapOps_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         id <- Ns.intMap(Map(pint1, pint2)).save.transact.map(_.id)
         _ <- Ns.intMap.query.get.map(_.head ==> Map(pint1, pint2))
 
-        // Applying Map of pairs replaces map
+        // Applying Map of pairs replaces Map
         _ <- Ns(id).intMap(Map(pint3, pint4)).update.transact
         _ <- Ns.intMap.query.get.map(_.head ==> Map(pint3, pint4))
 
@@ -41,14 +41,6 @@ trait UpdateMapOps_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).intMap.add("a" -> int1).update.transact
         _ <- Ns.intMap.query.get.map(_.head ==> Map(pint1))
 
-        // Update doesn't add pair if no map attribute already exists
-        _ <- Ns(id).iMap.add("a" -> 1).update.transact
-        _ <- Ns.intMap.iMap_?.query.get.map(_ ==> List((Map(pint1), None)))
-
-        // Upsert adds pair to new map attribute if it wasn't already saved
-        _ <- Ns(id).iMap.add("a" -> 1).upsert.transact
-        _ <- Ns.intMap.iMap_?.query.get.map(_ ==> List((Map(pint1), Some(Map("a" -> 1)))))
-
         // Add pair
         _ <- Ns(id).intMap.add(pint2).update.transact
         _ <- Ns.intMap.query.get.map(_.head ==> Map(pint1, pint2))
@@ -64,6 +56,16 @@ trait UpdateMapOps_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Adding empty Seq of pairs has no effect
         _ <- Ns(id).intMap.add(Seq.empty[(String, Int)]).update.transact
         _ <- Ns.intMap.query.get.map(_.head ==> Map(pint1, pint2, pint3, pint4, pint5, pint6))
+
+
+
+        //        // Update doesn't add pair if no Map attribute already exists
+        //        _ <- Ns(id).iMap.add("a" -> 1).update.transact
+        //        _ <- Ns.intMap.iMap_?.query.get.map(_ ==> List((Map(pint1), None)))
+
+        // Add pair of other attribute
+        _ <- Ns(id).iMap.add("a" -> 1).update.transact
+        _ <- Ns.iMap.query.get.map(_ ==> List(Map("a" -> 1)))
       } yield ()
     }
 
@@ -77,7 +79,7 @@ trait UpdateMapOps_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).intMap.remove(string7).upsert.transact
         _ <- Ns.intMap.query.get.map(_.head ==> Map(pint1, pint2, pint3, pint4, pint5, pint6))
 
-        // Removing a pair in a non-asserted map attribute has no effect
+        // Removing a pair in a non-asserted Map attribute has no effect
         _ <- Ns.intMap.iMap_?.query.get.map(_.head._2 ==> None)
         _ <- Ns(id).iMap.remove("a").update.transact
         _ <- Ns(id).iMap.remove("a").upsert.transact

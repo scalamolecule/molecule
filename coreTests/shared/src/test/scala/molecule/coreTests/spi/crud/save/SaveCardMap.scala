@@ -24,51 +24,51 @@ trait SaveCardMap extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.intMap(Map.empty[String, Int]).save.transact
         _ <- Ns.intMap.query.get.map(_ ==> List())
 
-        _ <- Ns.i(1).stringMap(Map(pstring1, pstring2)).save.transact
-        _ <- Ns.i(1).intMap(Map(pint1, pint2)).save.transact
-        _ <- Ns.i(1).longMap(Map(plong1, plong2)).save.transact
-        _ <- Ns.i(1).floatMap(Map(pfloat1, pfloat2)).save.transact
-        _ <- Ns.i(1).doubleMap(Map(pdouble1, pdouble2)).save.transact
-        _ <- Ns.i(1).booleanMap(Map(pboolean1, pboolean2)).save.transact
-        _ <- Ns.i(1).bigIntMap(Map(pbigInt1, pbigInt2)).save.transact
-        _ <- Ns.i(1).bigDecimalMap(Map(pbigDecimal1, pbigDecimal2)).save.transact
-        _ <- Ns.i(1).dateMap(Map(pdate1, pdate2)).save.transact
-        _ <- Ns.i(1).durationMap(Map(pduration1, pduration2)).save.transact
-        _ <- Ns.i(1).instantMap(Map(pinstant1, pinstant2)).save.transact
-        _ <- Ns.i(1).localDateMap(Map(plocalDate1, plocalDate2)).save.transact
-        _ <- Ns.i(1).localTimeMap(Map(plocalTime1, plocalTime2)).save.transact
-        _ <- Ns.i(1).localDateTimeMap(Map(plocalDateTime1, plocalDateTime2)).save.transact
-        _ <- Ns.i(1).offsetTimeMap(Map(poffsetTime1, poffsetTime2)).save.transact
-        _ <- Ns.i(1).offsetDateTimeMap(Map(poffsetDateTime1, poffsetDateTime2)).save.transact
-        _ <- Ns.i(1).zonedDateTimeMap(Map(pzonedDateTime1, pzonedDateTime2)).save.transact
-        _ <- Ns.i(1).uuidMap(Map(puuid1, puuid2)).save.transact
-        _ <- Ns.i(1).uriMap(Map(puri1, puri2)).save.transact
-        _ <- Ns.i(1).byteMap(Map(pbyte1, pbyte2)).save.transact
-        _ <- Ns.i(1).shortMap(Map(pshort1, pshort2)).save.transact
-        _ <- Ns.i(1).charMap(Map(pchar1, pchar2)).save.transact
+        _ <- Ns.stringMap(Map(pstring1, pstring2)).save.transact
+        _ <- Ns.intMap(Map(pint1, pint2)).save.transact
+        _ <- Ns.longMap(Map(plong1, plong2)).save.transact
+        _ <- Ns.floatMap(Map(pfloat1, pfloat2)).save.transact
+        _ <- Ns.doubleMap(Map(pdouble1, pdouble2)).save.transact
+        _ <- Ns.booleanMap(Map(pboolean1, pboolean2)).save.transact
+        _ <- Ns.bigIntMap(Map(pbigInt1, pbigInt2)).save.transact
+        _ <- Ns.bigDecimalMap(Map(pbigDecimal1, pbigDecimal2)).save.transact
+        _ <- Ns.dateMap(Map(pdate1, pdate2)).save.transact
+        _ <- Ns.durationMap(Map(pduration1, pduration2)).save.transact
+        _ <- Ns.instantMap(Map(pinstant1, pinstant2)).save.transact
+        _ <- Ns.localDateMap(Map(plocalDate1, plocalDate2)).save.transact
+        _ <- Ns.localTimeMap(Map(plocalTime1, plocalTime2)).save.transact
+        _ <- Ns.localDateTimeMap(Map(plocalDateTime1, plocalDateTime2)).save.transact
+        _ <- Ns.offsetTimeMap(Map(poffsetTime1, poffsetTime2)).save.transact
+        _ <- Ns.offsetDateTimeMap(Map(poffsetDateTime1, poffsetDateTime2)).save.transact
+        _ <- Ns.zonedDateTimeMap(Map(pzonedDateTime1, pzonedDateTime2)).save.transact
+        _ <- Ns.uuidMap(Map(puuid1, puuid2)).save.transact
+        _ <- Ns.uriMap(Map(puri1, puri2)).save.transact
+        _ <- Ns.byteMap(Map(pbyte1, pbyte2)).save.transact
+        _ <- Ns.shortMap(Map(pshort1, pshort2)).save.transact
+        _ <- Ns.charMap(Map(pchar1, pchar2)).save.transact
 
-        _ <- Ns.i.stringMap.query.get.map(_ ==> List((1, Map(pstring1, pstring2))))
-        _ <- Ns.i.intMap.query.get.map(_ ==> List((1, Map(pint1, pint2))))
-        _ <- Ns.i.longMap.query.get.map(_ ==> List((1, Map(plong1, plong2))))
-        _ <- Ns.i.floatMap.query.get.map(_ ==> List((1, Map(pfloat1, pfloat2))))
-        _ <- Ns.i.doubleMap.query.get.map(_ ==> List((1, Map(pdouble1, pdouble2))))
-        _ <- Ns.i.booleanMap.query.get.map(_ ==> List((1, Map(pboolean1, pboolean2))))
-        _ <- Ns.i.bigIntMap.query.get.map(_ ==> List((1, Map(pbigInt1, pbigInt2))))
-        _ <- Ns.i.bigDecimalMap.query.get.map(_ ==> List((1, Map(pbigDecimal1, pbigDecimal2))))
-        _ <- Ns.i.dateMap.query.get.map(_ ==> List((1, Map(pdate1, pdate2))))
-        _ <- Ns.i.durationMap.query.get.map(_ ==> List((1, Map(pduration1, pduration2))))
-        _ <- Ns.i.instantMap.query.get.map(_ ==> List((1, Map(pinstant1, pinstant2))))
-        _ <- Ns.i.localDateMap.query.get.map(_ ==> List((1, Map(plocalDate1, plocalDate2))))
-        _ <- Ns.i.localTimeMap.query.get.map(_ ==> List((1, Map(plocalTime1, plocalTime2))))
-        _ <- Ns.i.localDateTimeMap.query.get.map(_ ==> List((1, Map(plocalDateTime1, plocalDateTime2))))
-        _ <- Ns.i.offsetTimeMap.query.get.map(_ ==> List((1, Map(poffsetTime1, poffsetTime2))))
-        _ <- Ns.i.offsetDateTimeMap.query.get.map(_ ==> List((1, Map(poffsetDateTime1, poffsetDateTime2))))
-        _ <- Ns.i.zonedDateTimeMap.query.get.map(_ ==> List((1, Map(pzonedDateTime1, pzonedDateTime2))))
-        _ <- Ns.i.uuidMap.query.get.map(_ ==> List((1, Map(puuid1, puuid2))))
-        _ <- Ns.i.uriMap.query.get.map(_ ==> List((1, Map(puri1, puri2))))
-        _ <- Ns.i.byteMap.query.get.map(_ ==> List((1, Map(pbyte1, pbyte2))))
-        _ <- Ns.i.shortMap.query.get.map(_ ==> List((1, Map(pshort1, pshort2))))
-        _ <- Ns.i.charMap.query.get.map(_ ==> List((1, Map(pchar1, pchar2))))
+        _ <- Ns.stringMap.query.get.map(_.head ==> Map(pstring1, pstring2))
+        _ <- Ns.intMap.query.get.map(_.head ==> Map(pint1, pint2))
+        _ <- Ns.longMap.query.get.map(_.head ==> Map(plong1, plong2))
+        _ <- Ns.floatMap.query.get.map(_.head ==> Map(pfloat1, pfloat2))
+        _ <- Ns.doubleMap.query.get.map(_.head ==> Map(pdouble1, pdouble2))
+        _ <- Ns.booleanMap.query.get.map(_.head ==> Map(pboolean1, pboolean2))
+        _ <- Ns.bigIntMap.query.get.map(_.head ==> Map(pbigInt1, pbigInt2))
+        _ <- Ns.bigDecimalMap.query.get.map(_.head ==> Map(pbigDecimal1, pbigDecimal2))
+        _ <- Ns.dateMap.query.get.map(_.head ==> Map(pdate1, pdate2))
+        _ <- Ns.durationMap.query.get.map(_.head ==> Map(pduration1, pduration2))
+        _ <- Ns.instantMap.query.get.map(_.head ==> Map(pinstant1, pinstant2))
+        _ <- Ns.localDateMap.query.get.map(_.head ==> Map(plocalDate1, plocalDate2))
+        _ <- Ns.localTimeMap.query.get.map(_.head ==> Map(plocalTime1, plocalTime2))
+        _ <- Ns.localDateTimeMap.query.get.map(_.head ==> Map(plocalDateTime1, plocalDateTime2))
+        _ <- Ns.offsetTimeMap.query.get.map(_.head ==> Map(poffsetTime1, poffsetTime2))
+        _ <- Ns.offsetDateTimeMap.query.get.map(_.head ==> Map(poffsetDateTime1, poffsetDateTime2))
+        _ <- Ns.zonedDateTimeMap.query.get.map(_.head ==> Map(pzonedDateTime1, pzonedDateTime2))
+        _ <- Ns.uuidMap.query.get.map(_.head ==> Map(puuid1, puuid2))
+        _ <- Ns.uriMap.query.get.map(_.head ==> Map(puri1, puri2))
+        _ <- Ns.byteMap.query.get.map(_.head ==> Map(pbyte1, pbyte2))
+        _ <- Ns.shortMap.query.get.map(_.head ==> Map(pshort1, pshort2))
+        _ <- Ns.charMap.query.get.map(_.head ==> Map(pchar1, pchar2))
       } yield ()
     }
 

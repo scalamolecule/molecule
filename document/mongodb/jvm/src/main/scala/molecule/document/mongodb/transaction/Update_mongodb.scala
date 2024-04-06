@@ -24,6 +24,7 @@ trait Update_mongodb
     var referee: Option[RefData] = None,
     var ns: String = "",
     setDoc: BsonDocument = new BsonDocument(),
+    unsetDoc: BsonDocument = new BsonDocument(),
     pushDoc: BsonDocument = new BsonDocument(),
     addToSet: BsonDocument = new BsonDocument(),
     pullAll: BsonDocument = new BsonDocument(),
@@ -62,7 +63,7 @@ trait Update_mongodb
     resolve(elements)
     val updateData = new BsonDocument("_action", new BsonString("update"))
     dd.foreach {
-      case RefData(_, ns, setDoc, pushDoc, addToSet, pullAll, arrayFilters,
+      case RefData(_, ns, setDoc, unsetDoc, pushDoc, addToSet, pullAll, arrayFilters,
       ids, filterElements, uniqueFilterElements) =>
         val ids1 = if (isUpdate) {
           if (ids.nonEmpty && filterElements.nonEmpty) {
@@ -99,6 +100,9 @@ trait Update_mongodb
           val update = new BsonDocument()
           if (!setDoc.isEmpty)
             update.append("$set", setDoc)
+
+          if (!unsetDoc.isEmpty)
+            update.append("$unset", unsetDoc)
 
           if (!pushDoc.isEmpty)
             update.append("$push", pushDoc)
@@ -293,7 +297,25 @@ trait Update_mongodb
     value2json: (StringBuffer, T) => StringBuffer
     //    exts: List[String],
     //    set2array: Set[Any] => Array[AnyRef],
-  ): Unit = ???
+  ): Unit = {
+    if (isUpdate) {
+      if (owner) {
+        throw ModelError("Can't update non-existing ids of embedded documents in MongoDB.")
+      }
+      d.filterElements = d.filterElements :+ AttrOneTacInt(ns, attr) // dummy filter
+    }
+    lazy val pathAttr = if (path.isEmpty) attr else path.mkString("", ".", "." + attr)
+    if (map.nonEmpty) {
+      val mapDoc = new BsonDocument()
+      map.map { case (k, v) =>
+        mapDoc.append(validKey(k), transformValue(v).asInstanceOf[BsonValue])
+      }
+      d.setDoc.append(pathAttr, mapDoc)
+
+    } else {
+      d.setDoc.append(pathAttr, new BsonNull())
+    }
+  }
 
   override protected def updateMapAdd[T](
     ns: String,
@@ -305,7 +327,42 @@ trait Update_mongodb
     exts: List[String],
     value2json: (StringBuffer, T) => StringBuffer,
     //    set2array: Set[Any] => Array[AnyRef],
-  ): Unit = ???
+  ): Unit = {
+    lazy val pathAttr = if (path.isEmpty) attr else path.mkString("", ".", "." + attr)
+    //    val iterable = iterable0.asInstanceOf[Iterable[T]]
+    //    map.size match {
+    //      case 0 => ()
+    //      case 1 =>
+    //        d.pushDoc.append(pathAttr, transformValue(map.head).asInstanceOf[BsonValue])
+    //      case _ =>
+    //        lazy val array = new BsonArray()
+    //        map.map(v => array.add(transformValue(v).asInstanceOf[BsonValue]))
+    //        d.pushDoc.append(pathAttr, new BsonDocument("$each", array))
+    //    }
+
+    if (map.nonEmpty) {
+      //      lazy val array = new BsonArray()
+      //      map.map(v => array.add(transformValue(v).asInstanceOf[BsonValue]))
+
+
+      //      val pairs = new BsonDocument()
+      //      map.map { case (k, v) =>
+      //        pairs.append(validKey(k), transformValue(v).asInstanceOf[BsonValue])
+      //      }
+      //
+      //      d.pushDoc.append(pathAttr, new BsonDocument("$each", pairs))
+
+
+      val mapDoc = new BsonDocument()
+      map.map { case (k, v) =>
+        //        mapDoc.append(ns + "." + validKey(k), transformValue(v).asInstanceOf[BsonValue])
+        d.setDoc.append(attr + "." + validKey(k), transformValue(v).asInstanceOf[BsonValue])
+      }
+
+
+    }
+
+  }
 
   override protected def updateMapRemove[T](
     ns: String,
@@ -317,7 +374,24 @@ trait Update_mongodb
     exts: List[String],
     value2json: (StringBuffer, T) => StringBuffer,
     //    one2json: T => String
-  ): Unit = ???
+  ): Unit = {
+    lazy val pathAttr = if (path.isEmpty) attr else path.mkString("", ".", "." + attr)
+
+
+    //    val vs = new BsonArray()
+    //    val iterable = iterable0.asInstanceOf[Iterable[T]]
+    //    if (iterable.nonEmpty) {
+    //      iterable.map(v => vs.add(transformValue(v).asInstanceOf[BsonValue]))
+    //    }
+
+    //    val mapDoc = new BsonDocument()
+    map.map { case (k, v) =>
+//            mapDoc.append(ns + "." + validKey(k), transformValue(v).asInstanceOf[BsonValue])
+      d.unsetDoc.append(attr + "." + validKey(k), transformValue(v).asInstanceOf[BsonValue])
+    }
+
+
+  }
 
 
   override protected def handleIds(ns: String, ids0: Seq[String]): Unit = {
@@ -401,7 +475,7 @@ trait Update_mongodb
     transformValue: T => Any,
   ): Unit = {
     lazy val pathAttr = if (path.isEmpty) attr else path.mkString("", ".", "." + attr)
-    val vs = new BsonArray()
+    val vs       = new BsonArray()
     val iterable = iterable0.asInstanceOf[Iterable[T]]
     if (iterable.nonEmpty) {
       iterable.map(v => vs.add(transformValue(v).asInstanceOf[BsonValue]))

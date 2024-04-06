@@ -195,7 +195,20 @@ trait Insert_mongodb
     value2json: (StringBuffer, T) => StringBuffer
     //    set2array: Set[Any] => Array[AnyRef],
     //    exts: List[String],
-  ): Product => Unit = ???
+  ): Product => Unit = {
+    (tpl: Product) => {
+      tpl.productElement(tplIndex).asInstanceOf[Map[String, T]] match {
+        case map if map.nonEmpty =>
+          val mapDoc = new BsonDocument()
+          map.map { case (k, v) =>
+            mapDoc.append(validKey(k), transformValue(v).asInstanceOf[BsonValue])
+          }
+          doc.append(attr, mapDoc)
+
+        case _ => doc.append(attr, new BsonNull())
+      }
+    }
+  }
 
   override protected def addMapOpt[T](
     ns: String,
@@ -206,7 +219,20 @@ trait Insert_mongodb
     value2json: (StringBuffer, T) => StringBuffer
     //    set2array: Set[Any] => Array[AnyRef],
     //    exts: List[String],
-  ): Product => Unit = ???
+  ): Product => Unit = {
+    (tpl: Product) => {
+      tpl.productElement(tplIndex) match {
+        case Some(map: Map[_, _]) if map.nonEmpty =>
+          val mapDoc = new BsonDocument()
+          map.asInstanceOf[Map[String, T]].map { case (k, v) =>
+            mapDoc.append(validKey(k), transformValue(v).asInstanceOf[BsonValue])
+          }
+          doc.append(attr, mapDoc)
+
+        case _ => ()
+      }
+    }
+  }
 
   override protected def addRef(
     ns: String,

@@ -11,702 +11,255 @@ import org.bson.conversions.Bson
 trait ResolveExprMap extends ResolveExpr with LambdasMap { self: MongoQueryBase =>
 
   override protected def resolveAttrMapMan(attr: AttrMapMan): Unit = {
-    //    attr match {
-    //      case at: AttrMapManID             => man(attr, at.vs, resSetID)
-    //      case at: AttrMapManString         => man(attr, at.vs, resSetString)
-    //      case at: AttrMapManInt            => man(attr, at.vs, resSetInt)
-    //      case at: AttrMapManLong           => man(attr, at.vs, resSetLong)
-    //      case at: AttrMapManFloat          => man(attr, at.vs, resSetFloat)
-    //      case at: AttrMapManDouble         => man(attr, at.vs, resSetDouble)
-    //      case at: AttrMapManBoolean        => man(attr, at.vs, resSetBoolean)
-    //      case at: AttrMapManBigInt         => man(attr, at.vs, resSetBigInt)
-    //      case at: AttrMapManBigDecimal     => man(attr, at.vs, resSetBigDecimal)
-    //      case at: AttrMapManDate           => man(attr, at.vs, resSetDate)
-    //      case at: AttrMapManDuration       => man(attr, at.vs, resSetDuration)
-    //      case at: AttrMapManInstant        => man(attr, at.vs, resSetInstant)
-    //      case at: AttrMapManLocalDate      => man(attr, at.vs, resSetLocalDate)
-    //      case at: AttrMapManLocalTime      => man(attr, at.vs, resSetLocalTime)
-    //      case at: AttrMapManLocalDateTime  => man(attr, at.vs, resSetLocalDateTime)
-    //      case at: AttrMapManOffsetTime     => man(attr, at.vs, resSetOffsetTime)
-    //      case at: AttrMapManOffsetDateTime => man(attr, at.vs, resSetOffsetDateTime)
-    //      case at: AttrMapManZonedDateTime  => man(attr, at.vs, resSetZonedDateTime)
-    //      case at: AttrMapManUUID           => man(attr, at.vs, resSetUUID)
-    //      case at: AttrMapManURI            => man(attr, at.vs, resSetURI)
-    //      case at: AttrMapManByte           => man(attr, at.vs, resSetByte)
-    //      case at: AttrMapManShort          => man(attr, at.vs, resSetShort)
-    //      case at: AttrMapManChar           => man(attr, at.vs, resSetChar)
-    //    }
+    attr match {
+      case at: AttrMapManID             => mapMan(attr, at.vs, resMapID)
+      case at: AttrMapManString         => mapMan(attr, at.vs, resMapString)
+      case at: AttrMapManInt            => mapMan(attr, at.vs, resMapInt)
+      case at: AttrMapManLong           => mapMan(attr, at.vs, resMapLong)
+      case at: AttrMapManFloat          => mapMan(attr, at.vs, resMapFloat)
+      case at: AttrMapManDouble         => mapMan(attr, at.vs, resMapDouble)
+      case at: AttrMapManBoolean        => mapMan(attr, at.vs, resMapBoolean)
+      case at: AttrMapManBigInt         => mapMan(attr, at.vs, resMapBigInt)
+      case at: AttrMapManBigDecimal     => mapMan(attr, at.vs, resMapBigDecimal)
+      case at: AttrMapManDate           => mapMan(attr, at.vs, resMapDate)
+      case at: AttrMapManDuration       => mapMan(attr, at.vs, resMapDuration)
+      case at: AttrMapManInstant        => mapMan(attr, at.vs, resMapInstant)
+      case at: AttrMapManLocalDate      => mapMan(attr, at.vs, resMapLocalDate)
+      case at: AttrMapManLocalTime      => mapMan(attr, at.vs, resMapLocalTime)
+      case at: AttrMapManLocalDateTime  => mapMan(attr, at.vs, resMapLocalDateTime)
+      case at: AttrMapManOffsetTime     => mapMan(attr, at.vs, resMapOffsetTime)
+      case at: AttrMapManOffsetDateTime => mapMan(attr, at.vs, resMapOffsetDateTime)
+      case at: AttrMapManZonedDateTime  => mapMan(attr, at.vs, resMapZonedDateTime)
+      case at: AttrMapManUUID           => mapMan(attr, at.vs, resMapUUID)
+      case at: AttrMapManURI            => mapMan(attr, at.vs, resMapURI)
+      case at: AttrMapManByte           => mapMan(attr, at.vs, resMapByte)
+      case at: AttrMapManShort          => mapMan(attr, at.vs, resMapShort)
+      case at: AttrMapManChar           => mapMan(attr, at.vs, resMapChar)
+    }
   }
 
   override protected def resolveAttrMapTac(attr: AttrMapTac): Unit = {
-    //    attr match {
-    //      case at: AttrMapTacID             => tac(attr, at.vs, resSetID)
-    //      case at: AttrMapTacString         => tac(attr, at.vs, resSetString)
-    //      case at: AttrMapTacInt            => tac(attr, at.vs, resSetInt)
-    //      case at: AttrMapTacLong           => tac(attr, at.vs, resSetLong)
-    //      case at: AttrMapTacFloat          => tac(attr, at.vs, resSetFloat)
-    //      case at: AttrMapTacDouble         => tac(attr, at.vs, resSetDouble)
-    //      case at: AttrMapTacBoolean        => tac(attr, at.vs, resSetBoolean)
-    //      case at: AttrMapTacBigInt         => tac(attr, at.vs, resSetBigInt)
-    //      case at: AttrMapTacBigDecimal     => tac(attr, at.vs, resSetBigDecimal)
-    //      case at: AttrMapTacDate           => tac(attr, at.vs, resSetDate)
-    //      case at: AttrMapTacDuration       => tac(attr, at.vs, resSetDuration)
-    //      case at: AttrMapTacInstant        => tac(attr, at.vs, resSetInstant)
-    //      case at: AttrMapTacLocalDate      => tac(attr, at.vs, resSetLocalDate)
-    //      case at: AttrMapTacLocalTime      => tac(attr, at.vs, resSetLocalTime)
-    //      case at: AttrMapTacLocalDateTime  => tac(attr, at.vs, resSetLocalDateTime)
-    //      case at: AttrMapTacOffsetTime     => tac(attr, at.vs, resSetOffsetTime)
-    //      case at: AttrMapTacOffsetDateTime => tac(attr, at.vs, resSetOffsetDateTime)
-    //      case at: AttrMapTacZonedDateTime  => tac(attr, at.vs, resSetZonedDateTime)
-    //      case at: AttrMapTacUUID           => tac(attr, at.vs, resSetUUID)
-    //      case at: AttrMapTacURI            => tac(attr, at.vs, resSetURI)
-    //      case at: AttrMapTacByte           => tac(attr, at.vs, resSetByte)
-    //      case at: AttrMapTacShort          => tac(attr, at.vs, resSetShort)
-    //      case at: AttrMapTacChar           => tac(attr, at.vs, resSetChar)
-    //    }
+    attr match {
+      case at: AttrMapTacID             => mapTac(attr, at.vs, resMapID)
+      case at: AttrMapTacString         => mapTac(attr, at.vs, resMapString)
+      case at: AttrMapTacInt            => mapTac(attr, at.vs, resMapInt)
+      case at: AttrMapTacLong           => mapTac(attr, at.vs, resMapLong)
+      case at: AttrMapTacFloat          => mapTac(attr, at.vs, resMapFloat)
+      case at: AttrMapTacDouble         => mapTac(attr, at.vs, resMapDouble)
+      case at: AttrMapTacBoolean        => mapTac(attr, at.vs, resMapBoolean)
+      case at: AttrMapTacBigInt         => mapTac(attr, at.vs, resMapBigInt)
+      case at: AttrMapTacBigDecimal     => mapTac(attr, at.vs, resMapBigDecimal)
+      case at: AttrMapTacDate           => mapTac(attr, at.vs, resMapDate)
+      case at: AttrMapTacDuration       => mapTac(attr, at.vs, resMapDuration)
+      case at: AttrMapTacInstant        => mapTac(attr, at.vs, resMapInstant)
+      case at: AttrMapTacLocalDate      => mapTac(attr, at.vs, resMapLocalDate)
+      case at: AttrMapTacLocalTime      => mapTac(attr, at.vs, resMapLocalTime)
+      case at: AttrMapTacLocalDateTime  => mapTac(attr, at.vs, resMapLocalDateTime)
+      case at: AttrMapTacOffsetTime     => mapTac(attr, at.vs, resMapOffsetTime)
+      case at: AttrMapTacOffsetDateTime => mapTac(attr, at.vs, resMapOffsetDateTime)
+      case at: AttrMapTacZonedDateTime  => mapTac(attr, at.vs, resMapZonedDateTime)
+      case at: AttrMapTacUUID           => mapTac(attr, at.vs, resMapUUID)
+      case at: AttrMapTacURI            => mapTac(attr, at.vs, resMapURI)
+      case at: AttrMapTacByte           => mapTac(attr, at.vs, resMapByte)
+      case at: AttrMapTacShort          => mapTac(attr, at.vs, resMapShort)
+      case at: AttrMapTacChar           => mapTac(attr, at.vs, resMapChar)
+    }
   }
 
   override protected def resolveAttrMapOpt(attr: AttrMapOpt): Unit = {
-    //    attr match {
-    //      case at: AttrMapOptID             => opt(at, at.vs, resSetID)
-    //      case at: AttrMapOptString         => opt(at, at.vs, resSetString)
-    //      case at: AttrMapOptInt            => opt(at, at.vs, resSetInt)
-    //      case at: AttrMapOptLong           => opt(at, at.vs, resSetLong)
-    //      case at: AttrMapOptFloat          => opt(at, at.vs, resSetFloat)
-    //      case at: AttrMapOptDouble         => opt(at, at.vs, resSetDouble)
-    //      case at: AttrMapOptBoolean        => opt(at, at.vs, resSetBoolean)
-    //      case at: AttrMapOptBigInt         => opt(at, at.vs, resSetBigInt)
-    //      case at: AttrMapOptBigDecimal     => opt(at, at.vs, resSetBigDecimal)
-    //      case at: AttrMapOptDate           => opt(at, at.vs, resSetDate)
-    //      case at: AttrMapOptDuration       => opt(at, at.vs, resSetDuration)
-    //      case at: AttrMapOptInstant        => opt(at, at.vs, resSetInstant)
-    //      case at: AttrMapOptLocalDate      => opt(at, at.vs, resSetLocalDate)
-    //      case at: AttrMapOptLocalTime      => opt(at, at.vs, resSetLocalTime)
-    //      case at: AttrMapOptLocalDateTime  => opt(at, at.vs, resSetLocalDateTime)
-    //      case at: AttrMapOptOffsetTime     => opt(at, at.vs, resSetOffsetTime)
-    //      case at: AttrMapOptOffsetDateTime => opt(at, at.vs, resSetOffsetDateTime)
-    //      case at: AttrMapOptZonedDateTime  => opt(at, at.vs, resSetZonedDateTime)
-    //      case at: AttrMapOptUUID           => opt(at, at.vs, resSetUUID)
-    //      case at: AttrMapOptURI            => opt(at, at.vs, resSetURI)
-    //      case at: AttrMapOptByte           => opt(at, at.vs, resSetByte)
-    //      case at: AttrMapOptShort          => opt(at, at.vs, resSetShort)
-    //      case at: AttrMapOptChar           => opt(at, at.vs, resSetChar)
-    //    }
+    attr match {
+      case at: AttrMapOptID             => mapOpt(at, at.vs, resOptMapID, resMapID)
+      case at: AttrMapOptString         => mapOpt(at, at.vs, resOptMapString, resMapString)
+      case at: AttrMapOptInt            => mapOpt(at, at.vs, resOptMapInt, resMapInt)
+      case at: AttrMapOptLong           => mapOpt(at, at.vs, resOptMapLong, resMapLong)
+      case at: AttrMapOptFloat          => mapOpt(at, at.vs, resOptMapFloat, resMapFloat)
+      case at: AttrMapOptDouble         => mapOpt(at, at.vs, resOptMapDouble, resMapDouble)
+      case at: AttrMapOptBoolean        => mapOpt(at, at.vs, resOptMapBoolean, resMapBoolean)
+      case at: AttrMapOptBigInt         => mapOpt(at, at.vs, resOptMapBigInt, resMapBigInt)
+      case at: AttrMapOptBigDecimal     => mapOpt(at, at.vs, resOptMapBigDecimal, resMapBigDecimal)
+      case at: AttrMapOptDate           => mapOpt(at, at.vs, resOptMapDate, resMapDate)
+      case at: AttrMapOptDuration       => mapOpt(at, at.vs, resOptMapDuration, resMapDuration)
+      case at: AttrMapOptInstant        => mapOpt(at, at.vs, resOptMapInstant, resMapInstant)
+      case at: AttrMapOptLocalDate      => mapOpt(at, at.vs, resOptMapLocalDate, resMapLocalDate)
+      case at: AttrMapOptLocalTime      => mapOpt(at, at.vs, resOptMapLocalTime, resMapLocalTime)
+      case at: AttrMapOptLocalDateTime  => mapOpt(at, at.vs, resOptMapLocalDateTime, resMapLocalDateTime)
+      case at: AttrMapOptOffsetTime     => mapOpt(at, at.vs, resOptMapOffsetTime, resMapOffsetTime)
+      case at: AttrMapOptOffsetDateTime => mapOpt(at, at.vs, resOptMapOffsetDateTime, resMapOffsetDateTime)
+      case at: AttrMapOptZonedDateTime  => mapOpt(at, at.vs, resOptMapZonedDateTime, resMapZonedDateTime)
+      case at: AttrMapOptUUID           => mapOpt(at, at.vs, resOptMapUUID, resMapUUID)
+      case at: AttrMapOptURI            => mapOpt(at, at.vs, resOptMapURI, resMapURI)
+      case at: AttrMapOptByte           => mapOpt(at, at.vs, resOptMapByte, resMapByte)
+      case at: AttrMapOptShort          => mapOpt(at, at.vs, resOptMapShort, resMapShort)
+      case at: AttrMapOptChar           => mapOpt(at, at.vs, resOptMapChar, resMapChar)
+    }
   }
-  //
-  //
-  //  private def man[T](attr: Attr, args: Seq[Set[T]], resSet: ResSet[T]): Unit = {
-  //    val field       = attr.attr
-  //    val uniqueField = b.unique(field)
-  //    projectField(field)
-  //    addCast(field, resSet.castSet(field))
-  //    prefixedFieldPair = if (b.parent.isEmpty)
-  //      (nestedLevel, field, field)
-  //    else
-  //      (nestedLevel, b.path + field, b.alias + field)
-  //    topBranch.groupIdFields += prefixedFieldPair
-  //    handleExpr(uniqueField, field, attr, args, resSet, true)
-  //  }
-  //
-  //  private def tac[T](attr: Attr, args: Seq[Set[T]], resSet: ResSet[T]): Unit = {
-  //    val field       = attr.attr
-  //    val uniqueField = b.unique(field)
-  //    b.base.matches.add(Filters.exists(b.dot + field))
-  //    handleExpr(uniqueField, field, attr, args, resSet, false)
-  //  }
-  //
-  //  private def handleExpr[T](
-  //    uniqueField: String,
-  //    field: String,
-  //    attr: Attr,
-  //    args: Seq[Set[T]],
-  //    resSet: ResSet[T],
-  //    mandatory: Boolean
-  //  ): Unit = {
-  //    if (branchesByPath.isEmpty) {
-  //      path = List(attr.ns)
-  //      pathLevels(path) = 0
-  //    }
-  //    branchesByPath(path) = b
-  //    attr.filterAttr.fold {
-  //      if (hasFilterAttr) {
-  //        // Add filter if this attribute is a filter attribute pointed to
-  //        postFilters.get(path :+ attr.cleanAttr).foreach(_(b))
-  //      }
-  //      expr(uniqueField, field, attr.op, args, resSet, mandatory)
-  //    } { filterAttr =>
-  //      attr.op match {
-  //        case Eq    => equal2(field, filterAttr, mandatory)
-  //        case Neq   => neq2(field, filterAttr, mandatory)
-  //        case Has   => has2(field, filterAttr, mandatory)
-  //        case HasNo => hasNo2(field, filterAttr, mandatory)
-  //        case other => unexpectedOp(other)
-  //      }
-  //    }
-  //  }
-  //
-  //  private def expr[T](
-  //    uniqueField: String,
-  //    field: String,
-  //    op: Op,
-  //    sets: Seq[Set[T]],
-  //    res: ResSet[T],
-  //    mandatory: Boolean
-  //  ): Unit = {
-  //    op match {
-  //      case V         => attr(uniqueField, field, mandatory)
-  //      case Eq        => equal(field, sets, res)
-  //      case Neq       => neq(uniqueField, field, sets, res, mandatory)
-  //      case Has       => has(uniqueField, field, sets, res, mandatory)
-  //      case HasNo     => hasNo(uniqueField, field, sets, res, mandatory)
-  //      case NoValue   => noValue(field)
-  //      case Fn(kw, n) => aggr(uniqueField, field, kw, n, res)
-  //      case other     => unexpectedOp(other)
-  //    }
-  //  }
-  //
-  //  private def opt[T](attr: Attr, optSets: Option[Seq[Set[T]]], res: ResSet[T]): Unit = {
-  //    val field       = attr.attr
-  //    val uniqueField = b.unique(field)
-  //    projectField(field)
-  //    addCast(field, res.castOptSet(field))
-  //
-  //    prefixedFieldPair = if (b.parent.isEmpty)
-  //      (nestedLevel, field, field)
-  //    else
-  //      (nestedLevel, b.path + field, b.alias + field)
-  //    topBranch.groupIdFields += prefixedFieldPair
-  //
-  //    attr.op match {
-  //      case V     => optAttr(uniqueField, field)
-  //      case Eq    => optEqual(field, optSets, res)
-  //      case Neq   => optNeq(uniqueField, field, optSets, res)
-  //      case Has   => optHas(uniqueField, field, optSets, res)
-  //      case HasNo => optHasNo(uniqueField, field, optSets, res)
-  //      case other => unexpectedOp(other)
-  //    }
-  //  }
-  //
-  //
-  //  // attr ----------------------------------------------------------------------
-  //
-  //  private def attr(uniqueField: String, field: String, mandatory: Boolean): Unit = {
-  //    b.base.matches.add(Filters.ne(b.dot + field, new BsonNull))
-  //    // Exclude orphaned arrays too
-  //    b.base.matches.add(Filters.ne(b.dot + field, new BsonArray()))
-  //    coalesce(uniqueField, field, mandatory)
-  //  }
-  //
-  //  private def optAttr[T](uniqueField: String, field: String): Unit = {
-  //    topBranch.groupIdFields -= prefixedFieldPair
-  //    if (!(b.parent.isDefined && b.parent.get.isInstanceOf[NestedRef]
-  //      || b.isInstanceOf[NestedRef])
-  //    ) {
-  //      // Separate nulls from arrays/sets of values when grouping
-  //      topBranch.optSetSeparators += (field + "_") -> new BsonDocument("$cond", {
-  //        val condArgs = new BsonArray()
-  //        condArgs.add(new BsonDocument("$or", {
-  //          val orArgs = new BsonArray()
-  //          orArgs.add(
-  //            new BsonDocument("$ifNull", {
-  //              val ifNullArgs = new BsonArray()
-  //              ifNullArgs.add(new BsonString("$" + b.path + field))
-  //              ifNullArgs.add(new BsonBoolean(false))
-  //              ifNullArgs
-  //            })
-  //          )
-  //          orArgs.add(
-  //            new BsonDocument("$ne", {
-  //              val neArgs = new BsonArray()
-  //              neArgs.add(new BsonString("$" + b.path + field))
-  //              neArgs.add(new BsonArray())
-  //              neArgs
-  //            })
-  //          )
-  //          orArgs
-  //        }))
-  //        condArgs.add(new BsonBoolean(true))
-  //        condArgs.add(new BsonBoolean(false))
-  //        condArgs
-  //      })
-  //
-  //      topBranch.groupExprs += (b.alias + uniqueField) ->
-  //        new BsonDocument("$addToSet", new BsonString("$" + b.path + field))
-  //      topBranch.addFields += (b.path + field) -> reduce("$" + b.alias + field)
-  //    }
-  //  }
-  //
-  //
-  //  // eq ------------------------------------------------------------------------
-  //
-  //  private def equal[T](field: String, sets0: Seq[Set[T]], res: ResSet[T]): Unit = {
-  //    def filter(set: Set[T]): Bson = filterSet(field, set, res)
-  //    val sets = sets0.filterNot(_.isEmpty)
-  //    sets.length match {
-  //      case 0 => b.base.matches.add(Filters.eq("_id", -1))
-  //      case 1 => b.base.matches.add(filter(sets.head))
-  //      case _ => b.base.matches.add(Filters.or(sets.map(filter).asJava))
-  //    }
-  //  }
-  //
-  //  private def optEqual[T](
-  //    field: String, optSets: Option[Seq[Set[T]]], res: ResSet[T]
-  //  ): Unit = {
-  //    optSets.fold[Unit] {
-  //      b.base.matches.add(Filters.eq(b.dot + field, new BsonNull))
-  //    } { sets =>
-  //      equal(field, sets, res)
-  //    }
-  //  }
-  //
-  //
-  //  // neq -----------------------------------------------------------------------
-  //
-  //  private def neq[T](
-  //    uniqueField: String, field: String, sets0: Seq[Set[T]], res: ResSet[T], mandatory: Boolean
-  //  ): Unit = {
-  //    b.base.matches.add(Filters.ne(b.dot + field, new BsonNull))
-  //    // Exclude orphaned arrays too
-  //    b.base.matches.add(Filters.ne(b.dot + field, new BsonArray()))
-  //
-  //    def filter(set: Set[T]): Bson = filterSet(field, set, res)
-  //    val sets = sets0.filterNot(_.isEmpty)
-  //    sets.length match {
-  //      case 0 => ()
-  //      case 1 => b.base.matches.add(Filters.nor(filter(sets.head)))
-  //      case _ => b.base.matches.add(Filters.nor(Filters.or(sets.map(filter).asJava)))
-  //    }
-  //    coalesce(uniqueField, field, mandatory)
-  //  }
-  //
-  //  private def optNeq[T](
-  //    uniqueField: String, field: String, optSets: Option[Seq[Set[T]]], res: ResSet[T]
-  //  ): Unit = {
-  //    if (optSets.isDefined && optSets.get.nonEmpty) {
-  //      neq(uniqueField, field, optSets.get, res, true)
-  //    }
-  //    b.base.matches.add(Filters.ne(b.dot + field, new BsonNull))
-  //    coalesce(uniqueField, field, true)
-  //  }
-  //
-  //
-  //  // has -----------------------------------------------------------------------
-  //
-  //  private def has[T](
-  //    uniqueField: String, field: String, sets0: Seq[Set[T]], res: ResSet[T], mandatory: Boolean
-  //  ): Unit = {
-  //    def containsSet(set: Set[T]): Bson = {
-  //      Filters.all(b.dot + field, set.map(v => res.v2bson(v)).asJava)
-  //    }
-  //    val sets = sets0.filterNot(_.isEmpty)
-  //    sets.length match {
-  //      case 0 => b.base.matches.add(Filters.eq("_id", -1))
-  //      case 1 =>
-  //        val set = sets.head
-  //        if (set.nonEmpty)
-  //          b.base.matches.add(containsSet(set))
-  //        else
-  //          b.base.matches.add(Filters.eq("_id", -1))
-  //
-  //      case _ => b.base.matches.add(Filters.or(sets.map(set => containsSet(set)).asJava))
-  //    }
-  //    coalesce(uniqueField, field, mandatory)
-  //  }
-  //
-  //  private def optHas[T](
-  //    uniqueField: String, field: String, optSets: Option[Seq[Set[T]]], res: ResSet[T] //, mandatory: Boolean
-  //  ): Unit = {
-  //    optSets.fold[Unit] {
-  //      b.base.matches.add(Filters.eq(b.dot + field, new BsonNull))
-  //    } { sets =>
-  //      has(uniqueField, field, sets, res, false)
-  //    }
-  //  }
-  //
-  //
-  //  // hasNo ---------------------------------------------------------------------
-  //
-  //  private def hasNo[T](
-  //    uniqueField: String, field: String, sets: Seq[Set[T]], res: ResSet[T], mandatory: Boolean
-  //  ): Unit = {
-  //    b.base.matches.add(Filters.ne(b.dot + field, new BsonNull))
-  //    // Exclude orphaned arrays too
-  //    b.base.matches.add(Filters.ne(b.dot + field, new BsonArray()))
-  //    def notContainsSet(set: Set[T]): Bson = Filters.nor(
-  //      Filters.all(b.dot + field, set.map(v => res.v2bson(v)).asJava)
-  //    )
-  //    sets.length match {
-  //      case 0 => ()
-  //      case 1 =>
-  //        val set = sets.head
-  //        if (set.nonEmpty)
-  //          b.base.matches.add(notContainsSet(set))
-  //
-  //      case _ => b.base.matches.add(Filters.and(sets.map(set => notContainsSet(set)).asJava))
-  //    }
-  //    coalesce(uniqueField, field, mandatory)
-  //  }
-  //
-  //  private def optHasNo[T](
-  //    uniqueField: String, field: String, optSets: Option[Seq[Set[T]]], res: ResSet[T]
-  //  ): Unit = {
-  //    optSets.foreach { sets0 =>
-  //      val sets = sets0.filterNot(_.isEmpty)
-  //      if (sets.nonEmpty) {
-  //        hasNo(uniqueField, field, sets, res, false)
-  //      }
-  //    }
-  //    b.base.matches.add(Filters.ne(b.dot + field, new BsonNull))
-  //    coalesce(uniqueField, field, true)
-  //  }
-  //
-  //
-  //  // no value -----------------------------------------------------------------
-  //
-  //  private def noValue(field: String): Unit = {
-  //    b.base.matches.remove(b.base.matches.size() - 1)
-  //    b.base.matches.add(
-  //      Filters.or(
-  //        Filters.eq(b.dot + field, new BsonNull),
-  //        Filters.eq(b.dot + field, new BsonArray)
-  //      )
-  //    )
-  //  }
-  //
-  //
-  //  // aggregation ---------------------------------------------------------------
-  //
-  //  private def aggr[T](
-  //    uniqueField: String, field: String, fn: String, optN: Option[Int], res: ResSet[T]
-  //  ): Unit = {
-  //    checkAggrSet()
-  //    lazy val n           = optN.getOrElse(0)
-  //    lazy val aliasField  = b.alias + uniqueField
-  //    lazy val pathField   = b.path + field
-  //    lazy val aliasField2 = "$" + aliasField
-  //    lazy val pathField2  = "$" + pathField
-  //    topBranch.groupIdFields -= prefixedFieldPair
-  //    fn match {
-  //      case "distinct" =>
-  //        noBooleanSetAggr(res)
-  //        b.base.matches.add(Filters.ne(b.dot + field, new BsonNull))
-  //        topBranch.groupExprs += aliasField ->
-  //          new BsonDocument("$addToSet", new BsonString(pathField2))
-  //        addField(uniqueField)
-  //        replaceCast(uniqueField, res.castSetSet(uniqueField))
-  //
-  //      case "min" =>
-  //        noBooleanSetAggr(res)
-  //        topBranch.groupAddToSet(aliasField, pathField2)
-  //        topBranch.addFields += pathField -> aggrFn("$minN", reduce(aliasField2), 1)
-  //
-  //      case "max" =>
-  //        noBooleanSetAggr(res)
-  //        topBranch.groupAddToSet(aliasField, pathField2)
-  //        topBranch.addFields += pathField -> aggrFn("$maxN", reduce(aliasField2), 1)
-  //
-  //      case "mins" =>
-  //        noBooleanSetAggr(res)
-  //        topBranch.groupAddToSet(aliasField, pathField2)
-  //        topBranch.addFields += pathField -> aggrFn("$minN", reduce(aliasField2), n)
-  //
-  //      case "maxs" =>
-  //        noBooleanSetAggr(res)
-  //        topBranch.groupAddToSet(aliasField, pathField2)
-  //        topBranch.addFields += pathField -> aggrFn("$maxN", reduce(aliasField2), n)
-  //
-  //      case "sample" =>
-  //        noBooleanSetAggr(res)
-  //        sampleSize = 1
-  //
-  //      case "samples" =>
-  //        noBooleanSetAggr(res)
-  //        sampleSize = n
-  //
-  //      case "count" =>
-  //        noBooleanSetCounts(n)
-  //        topBranch.groupExpr(aliasField,
-  //          new BsonDocument("$sum", new BsonDocument("$size", new BsonString(pathField2)))
-  //        )
-  //        addField(uniqueField)
-  //        replaceCast(uniqueField, castInt(uniqueField))
-  //
-  //      case "countDistinct" =>
-  //        noBooleanSetCounts(n)
-  //        topBranch.groupAddToSet(aliasField, pathField2)
-  //        topBranch.addFields += pathField -> new BsonDocument("$size", reduce(aliasField2))
-  //        replaceCast(uniqueField, castInt(uniqueField))
-  //
-  //      case "sum" =>
-  //        topBranch.groupExprs += aliasField -> new BsonDocument("$sum",
-  //          new BsonDocument("$sum", new BsonString(pathField2))
-  //        )
-  //        topBranch.addFields += pathField -> new BsonString(aliasField2)
-  //        replaceCast(uniqueField, res.v2set(uniqueField))
-  //
-  //      case "median" =>
-  //        topBranch.aggregate = true
-  //        topBranch.groupAddToSet(aliasField, pathField2)
-  //        topBranch.addFields += pathField -> new BsonDocument("$median",
-  //          new BsonDocument()
-  //            .append("input", reduce(aliasField2))
-  //            .append("method", new BsonString("approximate"))
-  //        )
-  //        replaceCast(uniqueField, hardCastDouble(uniqueField))
-  //
-  //      case "avg" =>
-  //        topBranch.unwinds += pathField2
-  //        topBranch.groupExprs += aliasField -> new BsonDocument("$avg", new BsonString(pathField2))
-  //        topBranch.addFields += pathField -> new BsonString(aliasField2)
-  //        replaceCast(uniqueField, hardCastDouble(uniqueField))
-  //
-  //      case "variance" =>
-  //        topBranch.unwinds += pathField2
-  //        topBranch.groupExprs += aliasField -> new BsonDocument("$stdDevPop", new BsonString(pathField2))
-  //        topBranch.addFields += pathField -> new BsonString(aliasField2)
-  //        b.projection.remove(b.dot + uniqueField)
-  //        val pow = new BsonArray()
-  //        pow.add(new BsonString(pathField2))
-  //        pow.add(new BsonInt32(2))
-  //        b.projection.append(b.dot + field, new BsonDocument("$pow", pow))
-  //        replaceCast(uniqueField, hardCastDouble(uniqueField))
-  //
-  //      case "stddev" =>
-  //        topBranch.unwinds += pathField2
-  //        topBranch.groupExprs += aliasField -> new BsonDocument("$stdDevPop", new BsonString(pathField2))
-  //        topBranch.addFields += pathField -> new BsonString(aliasField2)
-  //        replaceCast(uniqueField, hardCastDouble(uniqueField))
-  //
-  //      case other => unexpectedKw(other)
-  //    }
-  //  }
-  //
-  //
-  //  // filter attribute ----------------------------------------------------------
-  //
-  //  private def equal2(
-  //    field: String,
-  //    filterAttr0: (Int, List[String], Attr),
-  //    mandatory: Boolean
-  //  ): Unit = {
-  //    handleFilterExpr(field, "$eq", filterAttr0, mandatory)
-  //  }
-  //
-  //  private def neq2(
-  //    field: String, filterAttr0: (Int, List[String], Attr), mandatory: Boolean
-  //  ): Unit = {
-  //    handleFilterExpr(field, "$ne", filterAttr0, mandatory)
-  //  }
-  //
-  //  private def has2(
-  //    field: String, filterAttr0: (Int, List[String], Attr), mandatory: Boolean
-  //  ): Unit = {
-  //    val (dir, filterPath, filterAttr1) = filterAttr0
-  //    val filterAttr                     = filterAttr1.cleanAttr
-  //    val args                           = new BsonArray()
-  //    val cardOne                        = filterAttr1.isInstanceOf[AttrOne]
-  //    dir match {
-  //      case 0 =>
-  //        val b1 = b
-  //        val b2 = branchesByPath(filterPath)
-  //        val op = if (cardOne) {
-  //          args.add(new BsonString("$" + b2.path + filterAttr))
-  //          args.add(new BsonString("$" + b1.path + field))
-  //          "$in"
-  //        } else {
-  //          args.add(new BsonString("$" + b1.path + field))
-  //          args.add(new BsonString("$" + b2.path + filterAttr))
-  //          "$setIsSubset"
-  //        }
-  //        b.matches.add(Filters.eq("$expr", new BsonDocument(op, args)))
-  //
-  //      case -1 =>
-  //        val b1 = b
-  //        val b2 = branchesByPath(filterPath)
-  //        args.add(new BsonString("$" + b2.path + filterAttr))
-  //        args.add(new BsonString("$" + b1.path + field))
-  //        val op = if (cardOne) "$in" else "$setIsSubset"
-  //        // Exclude grouping of calling set attribute
-  //        topBranch.groupIdFields -= prefixedFieldPair
-  //        // Filter before coalescing (running addAggregationStages in FlatEmbed)
-  //        topBranch.preMatches.add(Filters.eq("$expr", new BsonDocument(op, args)))
-  //
-  //      case 1 =>
-  //        val b1        = b
-  //        val addFilter = (b2: Branch) => {
-  //          args.add(new BsonString("$" + b2.path + filterAttr))
-  //          args.add(new BsonString("$" + b1.path + field))
-  //          if (cardOne) {
-  //            topBranch.preMatches.add(
-  //              Filters.eq("$expr", new BsonDocument("$in", args))
-  //            )
-  //          } else {
-  //            if (mandatory) {
-  //              topBranch.groupIdFields -= prefixedFieldPair
-  //            }
-  //            topBranch.preMatches.add(
-  //              Filters.eq("$expr", new BsonDocument("$setIsSubset", args))
-  //            )
-  //          }
-  //        }
-  //        postFilters(filterPath :+ filterAttr) = addFilter
-  //    }
-  //
-  //    if (mandatory) coalesceSets(field)
-  //  }
-  //
-  //  private def hasNo2(
-  //    field: String, filterAttr0: (Int, List[String], Attr), mandatory: Boolean
-  //  ): Unit = {
-  //    val (dir, filterPath, filterAttr1) = filterAttr0
-  //    val filterAttr                     = filterAttr1.cleanAttr
-  //    val fields                         = new BsonArray()
-  //    val cardOne                        = filterAttr1.isInstanceOf[AttrOne]
-  //    dir match {
-  //      case 0 =>
-  //        val b1 = b
-  //        val b2 = branchesByPath(filterPath)
-  //        if (cardOne) {
-  //          fields.add(new BsonString("$" + b2.path + filterAttr))
-  //          fields.add(new BsonString("$" + b1.path + field))
-  //          b.matches.add(Filters.eq("$expr",
-  //            new BsonDocument("$not", new BsonDocument("$in", fields))))
-  //        } else {
-  //          fields.add(new BsonString("$" + b1.path + field))
-  //          fields.add(new BsonString("$" + filterAttr))
-  //          val emptyArgs = new BsonArray()
-  //          emptyArgs.add(new BsonDocument("$setIntersection", fields))
-  //          emptyArgs.add(new BsonArray)
-  //          b.matches.add(Filters.eq("$expr", new BsonDocument("$eq", emptyArgs)))
-  //        }
-  //
-  //      case -1 =>
-  //        val b1 = b
-  //        val b2 = branchesByPath(filterPath)
-  //        if (cardOne) {
-  //          fields.add(new BsonString("$" + b2.path + filterAttr))
-  //          fields.add(new BsonString("$" + b1.path + field))
-  //          // Exclude grouping of calling set attribute
-  //          topBranch.groupIdFields -= prefixedFieldPair
-  //          topBranch.preMatches.add(Filters.eq("$expr",
-  //            new BsonDocument("$not", new BsonDocument("$in", fields))))
-  //        } else {
-  //          fields.add(new BsonString("$" + b1.path + field))
-  //          fields.add(new BsonString("$" + b2.path + filterAttr))
-  //          val emptyArgs = new BsonArray()
-  //          emptyArgs.add(new BsonDocument("$setIntersection", fields))
-  //          emptyArgs.add(new BsonArray)
-  //          topBranch.preMatches.add(Filters.eq("$expr", new BsonDocument("$eq", emptyArgs)))
-  //        }
-  //
-  //      case 1 =>
-  //        val b1        = b
-  //        val addFilter = (b2: Branch) => {
-  //          if (cardOne) {
-  //            fields.add(new BsonString("$" + b2.path + filterAttr))
-  //            fields.add(new BsonString("$" + b1.path + field))
-  //            topBranch.preMatches.add(Filters.eq("$expr",
-  //              new BsonDocument("$not", new BsonDocument("$in", fields))))
-  //          } else {
-  //            fields.add(new BsonString("$" + b1.path + field))
-  //            fields.add(new BsonString("$" + b2.path + filterAttr))
-  //            val emptyArgs = new BsonArray()
-  //            emptyArgs.add(new BsonDocument("$setIntersection", fields))
-  //            emptyArgs.add(new BsonArray)
-  //            topBranch.preMatches.add(Filters.eq("$expr", new BsonDocument("$eq", emptyArgs)))
-  //          }
-  //        }
-  //        postFilters(filterPath :+ filterAttr) = addFilter
-  //    }
-  //
-  //    if (mandatory) coalesceSets(field)
-  //  }
-  //
-  //
-  //  // helpers -------------------------------------------------------------------
-  //
-  //  private def handleFilterExpr(
-  //    field: String, op: String, filterAttr0: (Int, List[String], Attr), mandatory: Boolean
-  //  ): Unit = {
-  //    //        println(topBranch)
-  //    val (dir, filterPath, filterAttr1) = filterAttr0
-  //    val filterAttr                     = filterAttr1.cleanAttr
-  //    val args                           = new BsonArray()
-  //    dir match {
-  //      case 0 => // Same namespace
-  //        args.add(new BsonString("$" + field))
-  //        args.add(new BsonString("$" + filterAttr))
-  //        // Base and filter attributes can be compared directly
-  //        b.matches.add(Filters.eq("$expr", new BsonDocument(op, args)))
-  //
-  //      case -1 => // Backwards
-  //        val b1 = b
-  //        val b2 = branchesByPath(filterPath)
-  //        args.add(new BsonString("$" + b1.path + field))
-  //        args.add(new BsonString("$" + b2.path + filterAttr))
-  //        // Exclude grouping of calling set attribute
-  //        topBranch.groupIdFields -= prefixedFieldPair
-  //        // Filter before coalescing (running addAggregationStages in FlatEmbed)
-  //        topBranch.preMatches.add(Filters.eq("$expr", new BsonDocument(op, args)))
-  //
-  //      case 1 => // Forward
-  //        val b1        = b
-  //        val addFilter = (b2: Branch) => {
-  //          args.add(new BsonString("$" + b1.path + field))
-  //          args.add(new BsonString("$" + b2.path + filterAttr))
-  //          topBranch.preMatches.add(Filters.eq("$expr", new BsonDocument(op, args)))
-  //        }
-  //        postFilters(filterPath :+ filterAttr) = addFilter
-  //    }
-  //    if (mandatory) coalesceSets(field)
-  //  }
-  //
-  //  private def reduce(field: String): BsonDocument = {
-  //    new BsonDocument("$reduce",
-  //      new BsonDocument()
-  //        .append("input", new BsonString(field))
-  //        .append("initialValue", new BsonArray())
-  //        .append("in", new BsonDocument("$setUnion", {
-  //          val params = new BsonArray()
-  //          params.add(new BsonString("$$value"))
-  //          params.add(new BsonString("$$this"))
-  //          params
-  //        })))
-  //  }
-  //
-  //  private def filterSet[T](field: String, set: Set[T], res: ResSet[T]): Bson = {
-  //    Filters.and(
-  //      Filters.size(b.dot + field, set.size),
-  //      Filters.all(b.dot + field, set.map(res.v2bson).asJava)
-  //    )
-  //  }
-  //
-  //  private def coalesce(uniqueField: String, field: String, mandatory: Boolean): Unit = {
-  //    // (there's probably a simpler way here...)
-  //    if (mandatory
-  //      && !b.isInstanceOf[NestedEmbed]
-  //      && !(b.parent.isDefined && b.parent.get.isInstanceOf[NestedRef] || b.isInstanceOf[NestedRef])
-  //    ) {
-  //      topBranch.groupIdFields -= prefixedFieldPair
-  //      topBranch.groupExprs += (b.alias + uniqueField) ->
-  //        new BsonDocument("$addToSet", new BsonString("$" + b.path + field))
-  //      topBranch.addFields += (b.path + field) -> reduce("$" + b.alias + field)
-  //    }
-  //  }
-  //
-  //  private def coalesceSets(field: String) = {
-  //    // Coalesce Sets of values to single Set
-  //    topBranch.groupExprs += (b.alias + field) ->
-  //      new BsonDocument("$addToSet", new BsonString("$" + b.path + field))
-  //    topBranch.addFields += (b.path + field) -> reduce("$" + b.alias + field)
-  //  }
-  //
-  //  private def noBooleanSetAggr[T](res: ResSet[T]): Unit = {
-  //    if (res.tpe == "Boolean")
-  //      throw ModelError("Aggregate functions not implemented for Sets of boolean values.")
-  //  }
-  //  private def noBooleanSetCounts(n: Int): Unit = {
-  //    if (n == -1)
-  //      throw ModelError("Aggregate functions not implemented for Sets of boolean values.")
-  //  }
-}
+
+  protected def mapMan[T](
+    attr: Attr, map: Map[String, T], resMap: ResMap[T]
+  ): Unit = {
+    val field       = attr.attr
+    val uniqueField = b.unique(field)
+    projectField(field)
+    addCast(field, resMap.castMap(field))
+
+    prefixedFieldPair = if (b.parent.isEmpty)
+      (nestedLevel, field, field)
+    else
+      (nestedLevel, b.path + field, b.alias + field)
+    topBranch.groupIdFields += prefixedFieldPair
+    attr.op match {
+      case V       => setAttr(field)
+      case Has     => key2value(uniqueField, map.head._1, resMap)
+      case NoValue => noApplyNothing(attr)
+      case Eq      => noCollectionMatching(attr)
+      case other   => unexpectedOp(other)
+    }
+  }
+
+  protected def mapOpt[T](
+    attr: Attr,
+    optMap: Option[Map[String, T]],
+    resMapOpt: ResMapOpt[T],
+    resMap: ResMap[T]
+  ): Unit = {
+    val field       = attr.attr
+    val uniqueField = b.unique(field)
+    projectField(field)
+    addCast(field, resMapOpt.castOptMap(field))
+    attr.op match {
+      case V     => ()
+      case Has   => key2optValue(uniqueField, optMap.get.head._1, resMap)
+      case Eq    => noCollectionMatching(attr)
+      case other => unexpectedOp(other)
+    }
+  }
+
+  protected def mapTac[T](
+    attr: Attr, map: Map[String, T], resMap: ResMap[T]
+  ): Unit = {
+    val field       = attr.attr
+    val uniqueField = b.unique(field)
+    attr.op match {
+      case V       => () // where += ((col, s"IS NOT NULL"))
+      case Eq      => mapContainsKeys(uniqueField, map)
+      case Neq     => mapContainsNoKeys(uniqueField, map)
+      case Has     => mapHasValues(uniqueField, map, resMap)
+      case HasNo   => mapHasNoValues(uniqueField, map, resMap)
+      case NoValue => mapNoValue(uniqueField)
+      case other   => unexpectedOp(other)
+    }
+  }
+
+
+
+  // attr ----------------------------------------------------------------------
+
+  private def setAttr(field: String): Unit = {
+    b.base.matches.add(Filters.ne(b.dot + field, new BsonNull))
+    b.base.matches.add(Filters.gt(b.dot + field, new BsonDocument()))
+  }
+
+
+  // value lookup by key -------------------------------------------------------
+
+  protected def key2value[T](
+    col: String, key: String, resMap: ResMap[T]
+  ): Unit = {
+//    val value = s"""($col)."$key""""
+//    select -= col
+//    select += value
+//    where += ((value, s"IS NOT NULL"))
+//    replaceCast((row: RS, paramIndex: Int) =>
+//      resMap.json2tpe(row.getString(paramIndex)))
+    ???
+  }
+
+  protected def key2optValue[T](
+    col: String, key: String, resMap: ResMap[T]
+  ): Unit = {
+//    select -= col
+//    select += s"""($col)."$key""""
+//    replaceCast((row: RS, paramIndex: Int) => {
+//      val value = row.getString(paramIndex)
+//      if (row.wasNull()) Option.empty[T] else Some(resMap.json2tpe(value))
+//    })
+    ???
+  }
+
+
+  // tacit ---------------------------------------------------------------------
+
+  protected def mapContainsKeys[T](
+    col: String, map: Map[String, T]
+  ): Unit = {
+//    val keys = map.keys
+//    keys.size match {
+//      case 0 => where += (("FALSE", ""))
+//      case 1 => where += (("", s"""($col)."${keys.head}" IS NOT NULL"""))
+//      case _ => where += (("", keys.map(key =>
+//        s"""($col)."$key" IS NOT NULL"""
+//      ).mkString("(", " OR\n   ", ")")))
+//    }
+    ???
+  }
+
+  protected def mapContainsNoKeys[T](
+    col: String, map: Map[String, T]
+  ): Unit = {
+//    val keys = map.keys
+//    keys.size match {
+//      case 0 => () // get all
+//      case 1 => where += (("", s"""($col)."${keys.head}" IS NULL"""))
+//      case _ => where += (("", keys.map(key =>
+//        s"""($col)."$key" IS NULL"""
+//      ).mkString("(", " AND\n   ", ")")))
+//    }
+    ???
+  }
+
+  protected def mapHasValues[T](
+    col: String, map: Map[String, T], resMap: ResMap[T]
+  ): Unit = {
+//    if (map.nonEmpty) {
+//      val values = map.values.map(resMap.one2json)
+//      where += (("", s"""REGEXP_LIKE($col, '(${regex(resMap.tpe, values)})')"""))
+//    } else {
+//      // Get none
+//      where += (("FALSE", ""))
+//    }
+    ???
+  }
+
+  protected def mapHasNoValues[T](
+    col: String, map: Map[String, T], resMap: ResMap[T]
+  ): Unit = {
+//    if (map.nonEmpty) {
+//      val values = map.values.map(resMap.one2json)
+//      where += (("", s"""NOT(REGEXP_LIKE($col, '(${regex(resMap.tpe, values)})'))"""))
+//    } else {
+//      // Get all
+//      ()
+//    }
+    ???
+  }
+
+  protected def mapNoValue(col: String): Unit = {
+//    where += ((col, s"IS NULL"))
+    ???
+  }
+
+
+  // helpers -------------------------------------------------------------------
+
+  private def regex[T](tpe: String, values: Iterable[T]): String = {
+//    lazy val field = """"[^"]+""""
+//    tpe match {
+//      case "String" => values.mkString(s"$field:", s"|$field:", "")
+//
+//      case "OffsetTime" | "OffsetDateTime" | "ZonedDateTime" =>
+//        values.asInstanceOf[Iterable[String]].map(_.replace("+", "\\+")).mkString("|:")
+//
+//      case _ => values.mkString(":", "|:", "")
+//    }
+    ???
+  }}

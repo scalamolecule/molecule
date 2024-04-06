@@ -105,7 +105,18 @@ trait Save_mongodb
     //    set2map: Set[Any] => Map[String, AnyRef],
     //    optRefNs: Option[String],
   ): Unit = {
-    ???
+    optMap.fold {
+      doc.append(attr, new BsonNull())
+    } {
+      case map if map.nonEmpty =>
+        val mapDoc = new BsonDocument()
+        map.map { case (k, v) =>
+          mapDoc.append(validKey(k), transformValue(v).asInstanceOf[BsonValue])
+        }
+        doc.append(attr, mapDoc)
+
+      case _ => doc.append(attr, new BsonNull())
+    }
   }
 
   override protected def addRef(

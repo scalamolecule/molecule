@@ -27,8 +27,20 @@ object AdhocJVM_mongodb extends TestSuiteArray_mongodb with AggrUtils {
 
       for {
 
-        id <- Ns.intSeq(List(int1, int2, int2)).save.i.transact.map(_.id)
-        _ <- Ns.intSeq.query.i.get.map(_.head ==> List(int1, int2, int2))
+//        id <- Ns.intSeq(List(int1)).save.i.transact.map(_.id)
+//
+//        // Add value to end of Seq
+//        _ <- Ns(id).intSeq.add(int2, int3).update.i.transact
+//        _ <- Ns.intSeq.query.get.map(_.head ==> List(int1, int2))
+
+
+        id <- Ns.intMap(Map("a" -> int0)).save.i.transact.map(_.id)
+
+        // Adding pair with existing key replaces the value
+        _ <- Ns(id).intMap.add("a" -> int1).update.i.transact
+        _ <- Ns.intMap.query.get.map(_.head ==> Map(pint1))
+
+
       } yield ()
     }
 
