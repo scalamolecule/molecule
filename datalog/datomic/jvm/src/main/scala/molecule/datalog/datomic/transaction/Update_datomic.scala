@@ -102,7 +102,7 @@ trait Update_datomic
     stmts
   }
 
-  override def updateOne[T](
+  override protected def updateOne[T](
     ns: String,
     attr: String,
     owner: Boolean,
@@ -123,7 +123,7 @@ trait Update_datomic
   }
 
 
-  override def updateSetEq[T](
+  override protected def updateSetEq[T](
     ns: String,
     attr: String,
     optRefNs: Option[String],
@@ -145,7 +145,7 @@ trait Update_datomic
     }
   }
 
-  override def updateSetAdd[T](
+  override protected def updateSetAdd[T](
     ns: String,
     attr: String,
     optRefNs: Option[String],
@@ -161,7 +161,7 @@ trait Update_datomic
     }
   }
 
-  override def updateSetRemove[T](
+  override protected def updateSetRemove[T](
     ns: String,
     attr: String,
     optRefNs: Option[String],
@@ -177,7 +177,7 @@ trait Update_datomic
   }
 
 
-  override def updateSeqEq[T](
+  override protected def updateSeqEq[T](
     ns: String,
     attr: String,
     optRefNs: Option[String],
@@ -199,7 +199,7 @@ trait Update_datomic
     }
   }
 
-  override def updateSeqAdd[T](
+  override protected def updateSeqAdd[T](
     ns: String,
     attr: String,
     optRefNs: Option[String],
@@ -215,7 +215,7 @@ trait Update_datomic
     }
   }
 
-  override def updateSeqRemove[T](
+  override protected def updateSeqRemove[T](
     ns: String,
     attr: String,
     optRefNs: Option[String],
@@ -239,7 +239,7 @@ trait Update_datomic
   }
 
 
-  override def updateMapEq[T](
+  override protected def updateMapEq[T](
     ns: String,
     attr: String,
     optRefNs: Option[String],
@@ -263,7 +263,7 @@ trait Update_datomic
     }
   }
 
-  override def updateMapAdd[T](
+  override protected def updateMapAdd[T](
     ns: String,
     attr: String,
     optRefNs: Option[String],
@@ -281,7 +281,7 @@ trait Update_datomic
     }
   }
 
-  override def updateMapRemove[T](
+  override protected def updateMapRemove[T](
     ns: String,
     attr: String,
     optRefNs: Option[String],
@@ -325,6 +325,8 @@ trait Update_datomic
     data += (("backref", backRef.prevNs, "", Nil, false, ""))
   }
 
+
+  // Helpers -------------------------------------------------------------------
 
   private def id2stmts(db: Database, addNewValues: Boolean = true): AnyRef => Unit = {
     (id0: AnyRef) => {

@@ -96,7 +96,7 @@ trait ResolveExprSet extends ResolveExpr with LambdasSet { self: MongoQueryBase 
   }
 
 
-  private def setMan[T](attr: Attr, args: Set[T], resSet: ResSet[T]): Unit = {
+  private def setMan[T](attr: Attr, set: Set[T], resSet: ResSet[T]): Unit = {
     val field       = attr.attr
     val uniqueField = b.unique(field)
     projectField(field)
@@ -106,7 +106,7 @@ trait ResolveExprSet extends ResolveExpr with LambdasSet { self: MongoQueryBase 
     else
       (nestedLevel, b.path + field, b.alias + field)
     topBranch.groupIdFields += prefixedFieldPair
-    handleExpr(uniqueField, field, attr, args, resSet, true)
+    handleExpr(uniqueField, field, attr, set, resSet, true)
   }
 
   private def tac[T](attr: Attr, args: Set[T], resSet: ResSet[T]): Unit = {
@@ -120,7 +120,7 @@ trait ResolveExprSet extends ResolveExpr with LambdasSet { self: MongoQueryBase 
     uniqueField: String,
     field: String,
     attr: Attr,
-    sets: Set[T],
+    set: Set[T],
     resSet: ResSet[T],
     mandatory: Boolean
   ): Unit = {
@@ -137,8 +137,8 @@ trait ResolveExprSet extends ResolveExpr with LambdasSet { self: MongoQueryBase 
       attr.op match {
         case V       => setAttr(uniqueField, field, mandatory)
         case Eq      => noCollectionMatching(attr)
-        case Has     => setHas(uniqueField, field, sets, resSet, mandatory)
-        case HasNo   => setHasNo(uniqueField, field, sets, resSet, mandatory)
+        case Has     => setHas(uniqueField, field, set, resSet, mandatory)
+        case HasNo   => setHasNo(uniqueField, field, set, resSet, mandatory)
         case NoValue => if (mandatory) noApplyNothing(attr) else noValue(field)
         case other   => unexpectedOp(other)
       }

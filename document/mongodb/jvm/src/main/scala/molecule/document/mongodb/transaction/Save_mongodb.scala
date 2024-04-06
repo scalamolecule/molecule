@@ -2,13 +2,11 @@ package molecule.document.mongodb.transaction
 
 import java.util
 import molecule.base.ast.{Card, CardOne}
-import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ResolveSave
 import molecule.core.transaction.ops.SaveOps
 import org.bson._
-import org.bson.types.ObjectId
 
 trait Save_mongodb
   extends Base_JVM_mongodb
@@ -61,16 +59,53 @@ trait Save_mongodb
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    optSet.fold {
+    addIterable(attr, optSet, transformValue)
+  }
+
+  override protected def addSeq[T](
+    ns: String,
+    attr: String,
+    optRefNs: Option[String],
+    optSeq: Option[Seq[T]],
+    transformValue: T => Any,
+    exts: List[String],
+    seq2array: Seq[T] => Array[AnyRef],
+    value2json: (StringBuffer, T) => StringBuffer
+  ): Unit = {
+    addIterable(attr, optSeq, transformValue)
+  }
+
+  override protected def addByteArray(
+    ns: String,
+    attr: String,
+    optArray: Option[Array[Byte]],
+  ): Unit = {
+    optArray.fold {
       doc.append(attr, new BsonNull())
     } {
-      case set if set.nonEmpty =>
+      case byteArray if byteArray.nonEmpty =>
+        // Can't get BsonBinary working - todo
+        // doc.append(attr, new BsonBinary(byteArray))
+
         val array: util.ArrayList[BsonValue] = new util.ArrayList[BsonValue]()
-        set.map(bsonValue => array.add(transformValue(bsonValue).asInstanceOf[BsonValue]))
+        byteArray.map(byte => array.add(new BsonInt32(byte)))
         doc.append(attr, new BsonArray(array))
 
       case _ => doc.append(attr, new BsonNull())
     }
+  }
+
+  override protected def addMap[T](
+    ns: String,
+    attr: String,
+    optMap: Option[Map[String, T]],
+    transformValue: T => Any,
+    //    exts: List[String],
+    value2json: (StringBuffer, T) => StringBuffer
+    //    set2map: Set[Any] => Map[String, AnyRef],
+    //    optRefNs: Option[String],
+  ): Unit = {
+    ???
   }
 
   override protected def addRef(
@@ -130,4 +165,26 @@ trait Save_mongodb
   }
 
   override protected def handleRefNs(refNs: String): Unit = ()
+
+
+  // Helpers -------------------------------------------------------------------
+
+  private def addIterable[T, M[_] <: Iterable[_]](
+    attr: String,
+    optIterable: Option[M[T]],
+    transformValue: T => Any,
+  ): Unit = {
+    optIterable.fold {
+      doc.append(attr, new BsonNull())
+    } {
+      case iterable if iterable.nonEmpty =>
+        val array: util.ArrayList[BsonValue] = new util.ArrayList[BsonValue]()
+        iterable.asInstanceOf[Iterable[T]].map(bsonValue =>
+          array.add(transformValue(bsonValue).asInstanceOf[BsonValue])
+        )
+        doc.append(attr, new BsonArray(array))
+
+      case _ => doc.append(attr, new BsonNull())
+    }
+  }
 }

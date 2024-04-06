@@ -23,51 +23,51 @@ trait SaveCardSeq extends CoreTestSuiteBase with Array2List with ApiAsync { spi:
         _ <- Ns.intSeq(List.empty[Int]).save.transact
         _ <- Ns.intSeq.query.get.map(_ ==> List())
 
-        _ <- Ns.i(1).stringSeq(List(string1, string2)).save.transact
-        _ <- Ns.i(1).intSeq(List(int1, int2)).save.transact
-        _ <- Ns.i(1).longSeq(List(long1, long2)).save.transact
-        _ <- Ns.i(1).floatSeq(List(float1, float2)).save.transact
-        _ <- Ns.i(1).doubleSeq(List(double1, double2)).save.transact
-        _ <- Ns.i(1).booleanSeq(List(boolean0)).save.transact
-        _ <- Ns.i(1).bigIntSeq(List(bigInt1, bigInt2)).save.transact
-        _ <- Ns.i(1).bigDecimalSeq(List(bigDecimal1, bigDecimal2)).save.transact
-        _ <- Ns.i(1).dateSeq(List(date1, date2)).save.transact
-        _ <- Ns.i(1).durationSeq(List(duration1, duration2)).save.transact
-        _ <- Ns.i(1).instantSeq(List(instant1, instant2)).save.transact
-        _ <- Ns.i(1).localDateSeq(List(localDate1, localDate2)).save.transact
-        _ <- Ns.i(1).localTimeSeq(List(localTime1, localTime2)).save.transact
-        _ <- Ns.i(1).localDateTimeSeq(List(localDateTime1, localDateTime2)).save.transact
-        _ <- Ns.i(1).offsetTimeSeq(List(offsetTime1, offsetTime2)).save.transact
-        _ <- Ns.i(1).offsetDateTimeSeq(List(offsetDateTime1, offsetDateTime2)).save.transact
-        _ <- Ns.i(1).zonedDateTimeSeq(List(zonedDateTime1, zonedDateTime2)).save.transact
-        _ <- Ns.i(1).uuidSeq(List(uuid1, uuid2)).save.transact
-        _ <- Ns.i(1).uriSeq(List(uri1, uri2)).save.transact
-        _ <- Ns.i(1).byteArray(Array(byte1, byte2)).save.transact // Note Byte Array semantics
-        _ <- Ns.i(1).shortSeq(List(short1, short2)).save.transact
-        _ <- Ns.i(1).charSeq(List(char1, char2)).save.transact
+        _ <- Ns.stringSeq(List(string1, string2)).save.transact
+        _ <- Ns.intSeq(List(int1, int2)).save.transact
+        _ <- Ns.longSeq(List(long1, long2)).save.transact
+        _ <- Ns.floatSeq(List(float1, float2)).save.transact
+        _ <- Ns.doubleSeq(List(double1, double2)).save.transact
+        _ <- Ns.booleanSeq(List(boolean0)).save.transact
+        _ <- Ns.bigIntSeq(List(bigInt1, bigInt2)).save.transact
+        _ <- Ns.bigDecimalSeq(List(bigDecimal1, bigDecimal2)).save.transact
+        _ <- Ns.dateSeq(List(date1, date2)).save.transact
+        _ <- Ns.durationSeq(List(duration1, duration2)).save.transact
+        _ <- Ns.instantSeq(List(instant1, instant2)).save.transact
+        _ <- Ns.localDateSeq(List(localDate1, localDate2)).save.transact
+        _ <- Ns.localTimeSeq(List(localTime1, localTime2)).save.transact
+        _ <- Ns.localDateTimeSeq(List(localDateTime1, localDateTime2)).save.transact
+        _ <- Ns.offsetTimeSeq(List(offsetTime1, offsetTime2)).save.transact
+        _ <- Ns.offsetDateTimeSeq(List(offsetDateTime1, offsetDateTime2)).save.transact
+        _ <- Ns.zonedDateTimeSeq(List(zonedDateTime1, zonedDateTime2)).save.transact
+        _ <- Ns.uuidSeq(List(uuid1, uuid2)).save.transact
+        _ <- Ns.uriSeq(List(uri1, uri2)).save.transact
+        _ <- Ns.byteArray(Array(byte1, byte2)).save.transact // Note Byte Array semantics
+        _ <- Ns.shortSeq(List(short1, short2)).save.transact
+        _ <- Ns.charSeq(List(char1, char2)).save.transact
 
-        _ <- Ns.i.stringSeq.query.get.map(_ ==> List((1, List(string1, string2))))
-        _ <- Ns.i.intSeq.query.get.map(_ ==> List((1, List(int1, int2))))
-        _ <- Ns.i.longSeq.query.get.map(_ ==> List((1, List(long1, long2))))
-        _ <- Ns.i.floatSeq.query.get.map(_ ==> List((1, List(float1, float2))))
-        _ <- Ns.i.doubleSeq.query.get.map(_ ==> List((1, List(double1, double2))))
-        _ <- Ns.i.booleanSeq.query.get.map(_ ==> List((1, List(boolean0))))
-        _ <- Ns.i.bigIntSeq.query.get.map(_ ==> List((1, List(bigInt1, bigInt2))))
-        _ <- Ns.i.bigDecimalSeq.query.get.map(_ ==> List((1, List(bigDecimal1, bigDecimal2))))
-        _ <- Ns.i.dateSeq.query.get.map(_ ==> List((1, List(date1, date2))))
-        _ <- Ns.i.durationSeq.query.get.map(_ ==> List((1, List(duration1, duration2))))
-        _ <- Ns.i.instantSeq.query.get.map(_ ==> List((1, List(instant1, instant2))))
-        _ <- Ns.i.localDateSeq.query.get.map(_ ==> List((1, List(localDate1, localDate2))))
-        _ <- Ns.i.localTimeSeq.query.get.map(_ ==> List((1, List(localTime1, localTime2))))
-        _ <- Ns.i.localDateTimeSeq.query.get.map(_ ==> List((1, List(localDateTime1, localDateTime2))))
-        _ <- Ns.i.offsetTimeSeq.query.get.map(_ ==> List((1, List(offsetTime1, offsetTime2))))
-        _ <- Ns.i.offsetDateTimeSeq.query.get.map(_ ==> List((1, List(offsetDateTime1, offsetDateTime2))))
-        _ <- Ns.i.zonedDateTimeSeq.query.get.map(_ ==> List((1, List(zonedDateTime1, zonedDateTime2))))
-        _ <- Ns.i.uuidSeq.query.get.map(_ ==> List((1, List(uuid1, uuid2))))
-        _ <- Ns.i.uriSeq.query.get.map(_ ==> List((1, List(uri1, uri2))))
-        _ <- Ns.i.byteArray.query.get.map(_ ==> List((1, Array(byte1, byte2)))) // Note that Bytes are saved in Arrays
-        _ <- Ns.i.shortSeq.query.get.map(_ ==> List((1, List(short1, short2))))
-        _ <- Ns.i.charSeq.query.get.map(_ ==> List((1, List(char1, char2))))
+        _ <- Ns.stringSeq.query.get.map(_.head ==> List(string1, string2))
+        _ <- Ns.intSeq.query.get.map(_.head ==> List(int1, int2))
+        _ <- Ns.longSeq.query.get.map(_.head ==> List(long1, long2))
+        _ <- Ns.floatSeq.query.get.map(_.head ==> List(float1, float2))
+        _ <- Ns.doubleSeq.query.get.map(_.head ==> List(double1, double2))
+        _ <- Ns.booleanSeq.query.get.map(_.head ==> List(boolean0))
+        _ <- Ns.bigIntSeq.query.get.map(_.head ==> List(bigInt1, bigInt2))
+        _ <- Ns.bigDecimalSeq.query.get.map(_.head ==> List(bigDecimal1, bigDecimal2))
+        _ <- Ns.dateSeq.query.get.map(_.head ==> List(date1, date2))
+        _ <- Ns.durationSeq.query.get.map(_.head ==> List(duration1, duration2))
+        _ <- Ns.instantSeq.query.get.map(_.head ==> List(instant1, instant2))
+        _ <- Ns.localDateSeq.query.get.map(_.head ==> List(localDate1, localDate2))
+        _ <- Ns.localTimeSeq.query.get.map(_.head ==> List(localTime1, localTime2))
+        _ <- Ns.localDateTimeSeq.query.get.map(_.head ==> List(localDateTime1, localDateTime2))
+        _ <- Ns.offsetTimeSeq.query.get.map(_.head ==> List(offsetTime1, offsetTime2))
+        _ <- Ns.offsetDateTimeSeq.query.get.map(_.head ==> List(offsetDateTime1, offsetDateTime2))
+        _ <- Ns.zonedDateTimeSeq.query.get.map(_.head ==> List(zonedDateTime1, zonedDateTime2))
+        _ <- Ns.uuidSeq.query.get.map(_.head ==> List(uuid1, uuid2))
+        _ <- Ns.uriSeq.query.get.map(_.head ==> List(uri1, uri2))
+        _ <- Ns.byteArray.query.get.map(_.head ==> Array(byte1, byte2)) // Note that Bytes are saved in Arrays
+        _ <- Ns.shortSeq.query.get.map(_.head ==> List(short1, short2))
+        _ <- Ns.charSeq.query.get.map(_.head ==> List(char1, char2))
 
         // (Refs have Set semantics only)
       } yield ()
@@ -179,50 +179,50 @@ trait SaveCardSeq extends CoreTestSuiteBase with Array2List with ApiAsync { spi:
       // Applying value to tacit or mandatory attribute has same effect
       for {
         _ <- Ns.i(1).stringSeq_(List(string1, string2)).save.transact
-        _ <- Ns.i(1).intSeq_(List(int1, int2)).save.transact
-        _ <- Ns.i(1).longSeq_(List(long1, long2)).save.transact
-        _ <- Ns.i(1).floatSeq_(List(float1, float2)).save.transact
-        _ <- Ns.i(1).doubleSeq_(List(double1, double2)).save.transact
-        _ <- Ns.i(1).booleanSeq_(List(boolean1, boolean2)).save.transact
-        _ <- Ns.i(1).bigIntSeq_(List(bigInt1, bigInt2)).save.transact
-        _ <- Ns.i(1).bigDecimalSeq_(List(bigDecimal1, bigDecimal2)).save.transact
-        _ <- Ns.i(1).dateSeq_(List(date1, date2)).save.transact
-        _ <- Ns.i(1).durationSeq_(List(duration1, duration2)).save.transact
-        _ <- Ns.i(1).instantSeq_(List(instant1, instant2)).save.transact
-        _ <- Ns.i(1).localDateSeq_(List(localDate1, localDate2)).save.transact
-        _ <- Ns.i(1).localTimeSeq_(List(localTime1, localTime2)).save.transact
-        _ <- Ns.i(1).localDateTimeSeq_(List(localDateTime1, localDateTime2)).save.transact
-        _ <- Ns.i(1).offsetTimeSeq_(List(offsetTime1, offsetTime2)).save.transact
-        _ <- Ns.i(1).offsetDateTimeSeq_(List(offsetDateTime1, offsetDateTime2)).save.transact
-        _ <- Ns.i(1).zonedDateTimeSeq_(List(zonedDateTime1, zonedDateTime2)).save.transact
-        _ <- Ns.i(1).uuidSeq_(List(uuid1, uuid2)).save.transact
-        _ <- Ns.i(1).uriSeq_(List(uri1, uri2)).save.transact
-        _ <- Ns.i(1).byteArray_(Array(byte1, byte2)).save.transact
-        _ <- Ns.i(1).shortSeq_(List(short1, short2)).save.transact
-        _ <- Ns.i(1).charSeq_(List(char1, char2)).save.transact
+        _ <- Ns.i(2).intSeq_(List(int1, int2)).save.transact
+        _ <- Ns.i(3).longSeq_(List(long1, long2)).save.transact
+        _ <- Ns.i(4).floatSeq_(List(float1, float2)).save.transact
+        _ <- Ns.i(5).doubleSeq_(List(double1, double2)).save.transact
+        _ <- Ns.i(6).booleanSeq_(List(boolean1, boolean2)).save.transact
+        _ <- Ns.i(7).bigIntSeq_(List(bigInt1, bigInt2)).save.transact
+        _ <- Ns.i(8).bigDecimalSeq_(List(bigDecimal1, bigDecimal2)).save.transact
+        _ <- Ns.i(9).dateSeq_(List(date1, date2)).save.transact
+        _ <- Ns.i(10).durationSeq_(List(duration1, duration2)).save.transact
+        _ <- Ns.i(11).instantSeq_(List(instant1, instant2)).save.transact
+        _ <- Ns.i(12).localDateSeq_(List(localDate1, localDate2)).save.transact
+        _ <- Ns.i(13).localTimeSeq_(List(localTime1, localTime2)).save.transact
+        _ <- Ns.i(14).localDateTimeSeq_(List(localDateTime1, localDateTime2)).save.transact
+        _ <- Ns.i(15).offsetTimeSeq_(List(offsetTime1, offsetTime2)).save.transact
+        _ <- Ns.i(16).offsetDateTimeSeq_(List(offsetDateTime1, offsetDateTime2)).save.transact
+        _ <- Ns.i(17).zonedDateTimeSeq_(List(zonedDateTime1, zonedDateTime2)).save.transact
+        _ <- Ns.i(18).uuidSeq_(List(uuid1, uuid2)).save.transact
+        _ <- Ns.i(19).uriSeq_(List(uri1, uri2)).save.transact
+        _ <- Ns.i(20).byteArray_(Array(byte1, byte2)).save.transact
+        _ <- Ns.i(21).shortSeq_(List(short1, short2)).save.transact
+        _ <- Ns.i(22).charSeq_(List(char1, char2)).save.transact
 
-        _ <- Ns.i.stringSeq.query.get.map(_.head ==> (1, List(string1, string2)))
-        _ <- Ns.i.intSeq.query.get.map(_.head ==> (1, List(int1, int2)))
-        _ <- Ns.i.longSeq.query.get.map(_.head ==> (1, List(long1, long2)))
-        _ <- Ns.i.floatSeq.query.get.map(_.head ==> (1, List(float1, float2)))
-        _ <- Ns.i.doubleSeq.query.get.map(_.head ==> (1, List(double1, double2)))
-        _ <- Ns.i.booleanSeq.query.get.map(_.head ==> (1, List(boolean1, boolean2)))
-        _ <- Ns.i.bigIntSeq.query.get.map(_.head ==> (1, List(bigInt1, bigInt2)))
-        _ <- Ns.i.bigDecimalSeq.query.get.map(_.head ==> (1, List(bigDecimal1, bigDecimal2)))
-        _ <- Ns.i.dateSeq.query.get.map(_.head ==> (1, List(date1, date2)))
-        _ <- Ns.i.durationSeq.query.get.map(_.head ==> (1, List(duration1, duration2)))
-        _ <- Ns.i.instantSeq.query.get.map(_.head ==> (1, List(instant1, instant2)))
-        _ <- Ns.i.localDateSeq.query.get.map(_.head ==> (1, List(localDate1, localDate2)))
-        _ <- Ns.i.localTimeSeq.query.get.map(_.head ==> (1, List(localTime1, localTime2)))
-        _ <- Ns.i.localDateTimeSeq.query.get.map(_.head ==> (1, List(localDateTime1, localDateTime2)))
-        _ <- Ns.i.offsetTimeSeq.query.get.map(_.head ==> (1, List(offsetTime1, offsetTime2)))
-        _ <- Ns.i.offsetDateTimeSeq.query.get.map(_.head ==> (1, List(offsetDateTime1, offsetDateTime2)))
-        _ <- Ns.i.zonedDateTimeSeq.query.get.map(_.head ==> (1, List(zonedDateTime1, zonedDateTime2)))
-        _ <- Ns.i.uuidSeq.query.get.map(_.head ==> (1, List(uuid1, uuid2)))
-        _ <- Ns.i.uriSeq.query.get.map(_.head ==> (1, List(uri1, uri2)))
-        _ <- Ns.i.byteArray.query.get.map(_.head ==> (1, Array(byte1, byte2)))
-        _ <- Ns.i.shortSeq.query.get.map(_.head ==> (1, List(short1, short2)))
-        _ <- Ns.i.charSeq.query.get.map(_.head ==> (1, List(char1, char2)))
+        _ <- Ns.i.stringSeq_.query.get.map(_.head ==> 1)
+        _ <- Ns.i.intSeq_.query.get.map(_.head ==> 2)
+        _ <- Ns.i.longSeq_.query.get.map(_.head ==> 3)
+        _ <- Ns.i.floatSeq_.query.get.map(_.head ==> 4)
+        _ <- Ns.i.doubleSeq_.query.get.map(_.head ==> 5)
+        _ <- Ns.i.booleanSeq_.query.get.map(_.head ==> 6)
+        _ <- Ns.i.bigIntSeq_.query.get.map(_.head ==> 7)
+        _ <- Ns.i.bigDecimalSeq_.query.get.map(_.head ==> 8)
+        _ <- Ns.i.dateSeq_.query.get.map(_.head ==> 9)
+        _ <- Ns.i.durationSeq_.query.get.map(_.head ==> 10)
+        _ <- Ns.i.instantSeq_.query.get.map(_.head ==> 11)
+        _ <- Ns.i.localDateSeq_.query.get.map(_.head ==> 12)
+        _ <- Ns.i.localTimeSeq_.query.get.map(_.head ==> 13)
+        _ <- Ns.i.localDateTimeSeq_.query.get.map(_.head ==> 14)
+        _ <- Ns.i.offsetTimeSeq_.query.get.map(_.head ==> 15)
+        _ <- Ns.i.offsetDateTimeSeq_.query.get.map(_.head ==> 16)
+        _ <- Ns.i.zonedDateTimeSeq_.query.get.map(_.head ==> 17)
+        _ <- Ns.i.uuidSeq_.query.get.map(_.head ==> 18)
+        _ <- Ns.i.uriSeq_.query.get.map(_.head ==> 19)
+        _ <- Ns.i.byteArray_.query.get.map(_.head ==> 20)
+        _ <- Ns.i.shortSeq_.query.get.map(_.head ==> 21)
+        _ <- Ns.i.charSeq_.query.get.map(_.head ==> 22)
       } yield ()
     }
   }

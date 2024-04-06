@@ -163,7 +163,6 @@ case class TxModelValidation(
       curElements.collectFirst {
         case a1: Attr if a1.attr == attr =>
           a1 match {
-            //            case _: AttrOneMan | _: AttrSetMan =>
             case _: AttrOneMan | _: AttrSetMan | _: AttrSeqMan | _: AttrMapMan =>
               requiredAttrs -= attr
               attr -> a1

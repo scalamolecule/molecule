@@ -116,6 +116,7 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
             case a: AttrOneTac => resolveAttrOneTac(a); resolve(tail)
           }
         }
+
       case a: AttrSet                     =>
         if (a.owner)
           throw ModelError("Can't query for non-existing set of ids of embedded documents in MongoDB.")
@@ -125,8 +126,24 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
           case a: AttrSetTac => resolveAttrSetTac(a); resolve(tail)
         }
 
-      case a: AttrSeq => ???
-      case a: AttrMap => ???
+
+      case a: AttrSeq =>
+        if (a.owner)
+          throw ModelError("Can't query for non-existing set of ids of embedded documents in MongoDB.")
+        a match {
+          case a: AttrSeqMan => resolveAttrSeqMan(a); resolve(tail)
+          case a: AttrSeqOpt => resolveAttrSeqOpt(a); resolve(tail)
+          case a: AttrSeqTac => resolveAttrSeqTac(a); resolve(tail)
+        }
+
+      case a: AttrMap =>
+        if (a.owner)
+          throw ModelError("Can't query for non-existing set of ids of embedded documents in MongoDB.")
+        a match {
+          case a: AttrMapMan => resolveAttrMapMan(a); resolve(tail)
+          case a: AttrMapOpt => resolveAttrMapOpt(a); resolve(tail)
+          case a: AttrMapTac => resolveAttrMapTac(a); resolve(tail)
+        }
 
       case ref: Ref                       =>
         resolveRef(ref);

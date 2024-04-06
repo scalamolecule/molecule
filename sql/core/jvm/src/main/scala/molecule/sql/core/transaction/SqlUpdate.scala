@@ -121,7 +121,7 @@ trait SqlUpdate
   }
 
 
-  override def updateOne[T](
+  override protected def updateOne[T](
     ns: String,
     attr: String,
     owner: Boolean,
@@ -153,7 +153,7 @@ trait SqlUpdate
     addColSetter(curRefPath, colSetter)
   }
 
-  override def updateSetEq[T](
+  override protected def updateSetEq[T](
     ns: String,
     attr: String,
     optRefNs: Option[String],
@@ -167,7 +167,7 @@ trait SqlUpdate
     updateIterableEq(ns, attr, optRefNs, set, exts, set2array)
   }
 
-  override def updateSetAdd[T](
+  override protected def updateSetAdd[T](
     ns: String,
     attr: String,
     optRefNs: Option[String],
@@ -181,7 +181,7 @@ trait SqlUpdate
     updateIterableAdd(ns, attr, optRefNs, set, exts, set2array)
   }
 
-  override def updateSetRemove[T](
+  override protected def updateSetRemove[T](
     ns: String,
     attr: String,
     optRefNs: Option[String],
@@ -194,7 +194,7 @@ trait SqlUpdate
     updateIterableRemove(ns, attr, optRefNs, set, transformValue, exts)
   }
 
-  override def updateSeqEq[T](
+  override protected def updateSeqEq[T](
     ns: String,
     attr: String,
     optRefNs: Option[String],
@@ -208,7 +208,7 @@ trait SqlUpdate
     updateIterableEq(ns, attr, optRefNs, seq, exts, seq2array)
   }
 
-  override def updateSeqAdd[T](
+  override protected def updateSeqAdd[T](
     ns: String,
     attr: String,
     optRefNs: Option[String],
@@ -222,7 +222,7 @@ trait SqlUpdate
     updateIterableAdd(ns, attr, optRefNs, seq, exts, seq2array)
   }
 
-  override def updateSeqRemove[T](
+  override protected def updateSeqRemove[T](
     ns: String,
     attr: String,
     optRefNs: Option[String],
@@ -235,7 +235,7 @@ trait SqlUpdate
     updateIterableRemove(ns, attr, optRefNs, seq, transformValue, exts)
   }
 
-  override def updateByteArray(
+  override protected def updateByteArray(
     ns: String,
     attr: String,
     byteArray: Array[Byte],
@@ -256,7 +256,7 @@ trait SqlUpdate
     addColSetter(curRefPath, colSetter)
   }
 
-  override def updateMapEq[T](
+  override protected def updateMapEq[T](
     ns: String,
     attr: String,
     optRefNs: Option[String],
@@ -272,7 +272,7 @@ trait SqlUpdate
     )
   }
 
-  override def updateMapAdd[T](
+  override protected def updateMapAdd[T](
     ns: String,
     attr: String,
     optRefNs: Option[String],
@@ -289,7 +289,7 @@ trait SqlUpdate
     )
   }
 
-  override def updateMapRemove[T](
+  override protected def updateMapRemove[T](
     ns: String,
     attr: String,
     optRefNs: Option[String],
@@ -684,7 +684,6 @@ trait SqlUpdate
       case other   => throw ModelError("Expected to update one entity. Found multiple ids: " + other)
     }
   }
-
 
   override protected lazy val extsID             = List("ID", "BIGINT", "")
   override protected lazy val extsString         = List("String", "LONGVARCHAR", "")

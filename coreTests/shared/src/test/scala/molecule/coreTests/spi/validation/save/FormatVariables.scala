@@ -24,7 +24,6 @@ trait FormatVariables extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             case ValidationErrors(errorMap) =>
               errorMap ==>
                 Map(
-
                   "Variables.noErrorMsg" -> Seq(
                     // Default error message is used when no custom error message is defined
                     """Variables.noErrorMsg with value `1` doesn't satisfy validation:

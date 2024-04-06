@@ -35,7 +35,7 @@ trait Insert_mongodb
 
     // Prepare adding ns Data to namespaces
     val nssDocs = mutable.Map.empty[String, (Int, BsonArray)]
-    nss.zipWithIndex.foreach{ case (ns, i) => nssDocs(ns) = (i, new BsonArray()) }
+    nss.zipWithIndex.foreach { case (ns, i) => nssDocs(ns) = (i, new BsonArray()) }
 
     var first  = true
     var nsData = new BsonArray()
@@ -118,16 +118,7 @@ trait Insert_mongodb
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    (tpl: Product) => {
-      tpl.productElement(tplIndex).asInstanceOf[Set[T]] match {
-        case set if set.nonEmpty =>
-          val array: util.ArrayList[BsonValue] = new util.ArrayList[BsonValue](set.size)
-          set.map(scalaValue => array.add(transformValue(scalaValue).asInstanceOf[BsonValue]))
-          doc.append(attr, new BsonArray(array))
-
-        case _ => doc.append(attr, new BsonNull())
-      }
-    }
+    addIterable(attr, tplIndex, transformValue)
   }
 
   override protected def addSetOpt[T](
@@ -140,19 +131,82 @@ trait Insert_mongodb
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
+    addOptIterable(attr, tplIndex, transformValue)
+  }
+
+
+  override protected def addSeq[T](
+    ns: String,
+    attr: String,
+    optRefNs: Option[String],
+    tplIndex: Int,
+    transformValue: T => Any,
+    exts: List[String],
+    seq2array: Seq[T] => Array[AnyRef],
+    value2json: (StringBuffer, T) => StringBuffer
+  ): Product => Unit = {
+    addIterable(attr, tplIndex, transformValue)
+  }
+
+  override protected def addSeqOpt[T](
+    ns: String,
+    attr: String,
+    optRefNs: Option[String],
+    tplIndex: Int,
+    transformValue: T => Any,
+    exts: List[String],
+    seq2array: Seq[T] => Array[AnyRef],
+    value2json: (StringBuffer, T) => StringBuffer
+  ): Product => Unit = {
+    addOptIterable(attr, tplIndex, transformValue)
+  }
+
+  override protected def addByteArray(
+    ns: String,
+    attr: String,
+    tplIndex: Int,
+  ): Product => Unit = {
     (tpl: Product) => {
       tpl.productElement(tplIndex) match {
-        case Some(set: Set[_]) if set.nonEmpty =>
-          val array: util.ArrayList[BsonValue] = new util.ArrayList[BsonValue](set.size)
-          set.asInstanceOf[Set[T]].map(scalaValue =>
-            array.add(transformValue(scalaValue).asInstanceOf[BsonValue])
-          )
+        case byteArray: Array[_] if byteArray.nonEmpty =>
+          // Can't get BsonBinary working - todo
+          // doc.append(attr, new BsonBinary(byteArray))
+
+          val array: util.ArrayList[BsonValue] = new util.ArrayList[BsonValue]()
+          byteArray.asInstanceOf[Array[Byte]].map(byte => array.add(new BsonInt32(byte)))
           doc.append(attr, new BsonArray(array))
 
-        case _ => ()
+        case Some(byteArray: Array[_]) if !byteArray.isEmpty =>
+          val array: util.ArrayList[BsonValue] = new util.ArrayList[BsonValue]()
+          byteArray.asInstanceOf[Array[Byte]].map(byte => array.add(new BsonInt32(byte)))
+          doc.append(attr, new BsonArray(array))
+
+        case _ => doc.append(attr, new BsonNull())
       }
     }
   }
+
+  override protected def addMap[T](
+    ns: String,
+    attr: String,
+    optRefNs: Option[String],
+    tplIndex: Int,
+    transformValue: T => Any,
+    value2json: (StringBuffer, T) => StringBuffer
+    //    set2array: Set[Any] => Array[AnyRef],
+    //    exts: List[String],
+  ): Product => Unit = ???
+
+  override protected def addMapOpt[T](
+    ns: String,
+    attr: String,
+    optRefNs: Option[String],
+    tplIndex: Int,
+    transformValue: T => Any,
+    value2json: (StringBuffer, T) => StringBuffer
+    //    set2array: Set[Any] => Array[AnyRef],
+    //    exts: List[String],
+  ): Product => Unit = ???
 
   override protected def addRef(
     ns: String,
@@ -304,6 +358,47 @@ trait Insert_mongodb
           }
         }
         nsDocs(refNs) = (i, referencedDocs)
+      }
+    }
+  }
+
+
+  // Helpers -------------------------------------------------------------------
+
+  private def addIterable[T, M[_] <: Iterable[_]](
+    attr: String,
+    tplIndex: Int,
+    transformValue: T => Any,
+  ): Product => Unit = {
+    (tpl: Product) => {
+      tpl.productElement(tplIndex).asInstanceOf[M[T]] match {
+        case iterable if iterable.nonEmpty =>
+          val array: util.ArrayList[BsonValue] = new util.ArrayList[BsonValue](iterable.size)
+          iterable.asInstanceOf[Iterable[T]].foreach(scalaValue =>
+            array.add(transformValue(scalaValue).asInstanceOf[BsonValue])
+          )
+          doc.append(attr, new BsonArray(array))
+
+        case _ => doc.append(attr, new BsonNull())
+      }
+    }
+  }
+
+  private def addOptIterable[T, M[_] <: Iterable[_]](
+    attr: String,
+    tplIndex: Int,
+    transformValue: T => Any,
+  ): Product => Unit = {
+    (tpl: Product) => {
+      tpl.productElement(tplIndex) match {
+        case Some(iterable: Iterable[_]) if iterable.nonEmpty =>
+          val array: util.ArrayList[BsonValue] = new util.ArrayList[BsonValue](iterable.size)
+          iterable.asInstanceOf[Iterable[T]].map(scalaValue =>
+            array.add(transformValue(scalaValue).asInstanceOf[BsonValue])
+          )
+          doc.append(attr, new BsonArray(array))
+
+        case _ => ()
       }
     }
   }

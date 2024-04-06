@@ -308,10 +308,12 @@ trait SqlInsert
     (tpl: Product) => {
       val colSetter = tpl.productElement(tplIndex) match {
         case byteArray: Array[_] if byteArray.nonEmpty =>
-          (ps: PS, _: IdsMap, _: RowIndex) => ps.setBytes(paramIndex, byteArray.asInstanceOf[Array[Byte]])
+          (ps: PS, _: IdsMap, _: RowIndex) =>
+            ps.setBytes(paramIndex, byteArray.asInstanceOf[Array[Byte]])
 
         case Some(byteArray: Array[_]) if !byteArray.isEmpty =>
-          (ps: PS, _: IdsMap, _: RowIndex) => ps.setBytes(paramIndex, byteArray.asInstanceOf[Array[Byte]])
+          (ps: PS, _: IdsMap, _: RowIndex) =>
+            ps.setBytes(paramIndex, byteArray.asInstanceOf[Array[Byte]])
 
         case _ => (ps: PS, _: IdsMap, _: RowIndex) => ps.setNull(paramIndex, 0)
       }

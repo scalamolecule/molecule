@@ -4,12 +4,13 @@ import molecule.base.api.Schema
 import molecule.base.util.BaseHelpers
 import molecule.core.spi.Conn
 import molecule.coreTests.dataModels.core.schema._
-import molecule.coreTests.setup.{CoreTestSuite, CoreTestSuiteBase}
+import molecule.coreTests.setup.CoreTestSuiteBase
+import molecule.coreTests.util.Array2List
 import molecule.document.mongodb.facade.MongoHandler_JVM
 import molecule.document.mongodb.setup.{Connection_mongodb => c}
 
 
-trait TestSuiteArray_mongodb extends CoreTestSuiteBase with BaseHelpers {
+trait TestSuiteArray_mongodb extends CoreTestSuiteBase with Array2List with BaseHelpers {
 
   override val platform              = "jvm"
   override val database              = "MongoDB"
