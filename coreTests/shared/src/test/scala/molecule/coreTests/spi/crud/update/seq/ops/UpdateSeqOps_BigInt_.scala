@@ -13,60 +13,88 @@ trait UpdateSeqOps_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
 
   override lazy val tests = Tests {
 
-    "apply (replace/add all)" - types { implicit conn =>
+
+    "apply new values" - types { implicit conn =>
       for {
-        id <- Ns.bigIntSeq(List(bigInt1, bigInt2, bigInt2)).save.transact.map(_.id)
+        id <- Ns.i(42).save.transact.map(_.id)
+        // Seq attribute not yet asserted
+        _ <- Ns.bigIntSeq.query.get.map(_ ==> Nil)
+
+        // Applying Seq of values to non-asserted Seq attribute adds the attribute with the update
+        _ <- Ns(id).bigIntSeq(List(bigInt1, bigInt2, bigInt2)).update.transact
         _ <- Ns.bigIntSeq.query.get.map(_.head ==> List(bigInt1, bigInt2, bigInt2))
 
-        // Applying Seq of values replaces previous Seq
-        _ <- Ns(id).bigIntSeq(List(bigInt3, bigInt4, bigInt4)).update.transact
-        _ <- Ns.bigIntSeq.query.get.map(_.head ==> List(bigInt3, bigInt4, bigInt4))
+        // Applying Seq of values replaces previous values
+        _ <- Ns(id).bigIntSeq(List(bigInt2, bigInt3, bigInt3)).update.transact
+        _ <- Ns.bigIntSeq.query.get.map(_.head ==> List(bigInt2, bigInt3, bigInt3))
 
-        // Applying empty Seq of values deletes previous Seq
+        // Add other attribute and update Seq attribute in one go
+        _ <- Ns(id).s("foo").bigIntSeq(List(bigInt3, bigInt4, bigInt4)).update.transact
+        _ <- Ns.i.s.bigIntSeq.query.get.map(_.head ==> (42, "foo", List(bigInt3, bigInt4, bigInt4)))
+
+        // Applying empty Seq of values deletes attribute
         _ <- Ns(id).bigIntSeq(List.empty[BigInt]).update.transact
         _ <- Ns.bigIntSeq.query.get.map(_ ==> Nil)
 
-        id <- Ns.bigIntSeq(List(bigInt1, bigInt2, bigInt2)).save.transact.map(_.id)
-        // Applying nothing deletes previous Seq
+        _ <- Ns(id).bigIntSeq(List(bigInt1, bigInt2, bigInt2)).update.transact
+        // Apply nothing to delete attribute
         _ <- Ns(id).bigIntSeq().update.transact
         _ <- Ns.bigIntSeq.query.get.map(_ ==> Nil)
+
+        // Entity still has other attributes
+        _ <- Ns.i.s.query.get.map(_.head ==> (42, "foo"))
       } yield ()
     }
 
 
     "add" - types { implicit conn =>
       for {
-        id <- Ns.bigIntSeq(List(bigInt1)).save.transact.map(_.id)
+        id <- Ns.i(42).save.transact.map(_.id)
+        // Seq attribute not yet asserted
+        _ <- Ns.bigIntSeq.query.get.map(_ ==> Nil)
 
-        // Add value to end of Seq
-        _ <- Ns(id).bigIntSeq.add(bigInt2).update.transact
-        _ <- Ns.bigIntSeq.query.get.map(_.head ==> List(bigInt1, bigInt2))
-
-        // Add existing value
+        // Adding value to non-asserted Seq attribute adds the attribute with the update
         _ <- Ns(id).bigIntSeq.add(bigInt1).update.transact
-        _ <- Ns.bigIntSeq.query.get.map(_.head ==> List(bigInt1, bigInt2, bigInt1))
+        _ <- Ns.bigIntSeq.query.get.map(_.head ==> List(bigInt1))
 
-        // Add multiple values (vararg)
+        // Adding existing value to Seq adds it to the end
+        _ <- Ns(id).bigIntSeq.add(bigInt1).update.transact
+        _ <- Ns.bigIntSeq.query.get.map(_.head ==> List(bigInt1, bigInt1))
+
+        // Add new value to end of Seq
+        _ <- Ns(id).bigIntSeq.add(bigInt2).update.transact
+        _ <- Ns.bigIntSeq.query.get.map(_.head ==> List(bigInt1, bigInt1, bigInt2))
+
+        // Add multiple values with varargs
         _ <- Ns(id).bigIntSeq.add(bigInt3, bigInt4).update.transact
-        _ <- Ns.bigIntSeq.query.get.map(_.head ==> List(bigInt1, bigInt2, bigInt1, bigInt3, bigInt4))
+        _ <- Ns.bigIntSeq.query.get.map(_.head ==> List(bigInt1, bigInt1, bigInt2, bigInt3, bigInt4))
 
-        // Add multiple values (Seq)
+        // Add multiple values with Iterable
         _ <- Ns(id).bigIntSeq.add(List(bigInt4, bigInt5)).update.transact
-        _ <- Ns.bigIntSeq.query.get.map(_.head ==> List(bigInt1, bigInt2, bigInt1, bigInt3, bigInt4, bigInt4, bigInt5))
+        _ <- Ns.bigIntSeq.query.get.map(_.head ==> List(bigInt1, bigInt1, bigInt2, bigInt3, bigInt4, bigInt4, bigInt5))
 
-        // Adding empty Seq of values has no effect
-        _ <- Ns(id).bigIntSeq.add(List.empty[BigInt]).update.transact
-        _ <- Ns.bigIntSeq.query.get.map(_.head ==> List(bigInt1, bigInt2, bigInt1, bigInt3, bigInt4, bigInt4, bigInt5))
+        // Adding empty Iterable of values has no effect
+        _ <- Ns(id).bigIntSeq.add(Set.empty[BigInt]).update.transact
+        _ <- Ns.bigIntSeq.query.get.map(_.head ==> List(bigInt1, bigInt1, bigInt2, bigInt3, bigInt4, bigInt4, bigInt5))
       } yield ()
     }
 
 
     "remove" - types { implicit conn =>
       for {
-        id <- Ns.bigIntSeq(List(
+        id <- Ns.i(42).save.transact.map(_.id)
+        // Seq attribute not yet asserted
+        _ <- Ns.bigIntSeq.query.get.map(_ ==> Nil)
+
+        // Removing value from non-asserted Seq has no effect
+        _ <- Ns(id).bigIntSeq.remove(bigInt1).update.transact
+        _ <- Ns.bigIntSeq.query.get.map(_ ==> Nil)
+
+        // Start with some values
+        _ <- Ns(id).bigIntSeq.add(
           bigInt1, bigInt2, bigInt3, bigInt4, bigInt5, bigInt6, bigInt7,
           bigInt1, bigInt2, bigInt3, bigInt4, bigInt5, bigInt6, bigInt7,
-        )).save.transact.map(_.id)
+        ).update.transact
 
         // Remove all instances of a value
         _ <- Ns(id).bigIntSeq.remove(bigInt7).update.transact
@@ -89,26 +117,26 @@ trait UpdateSeqOps_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
           bigInt1, bigInt2, bigInt3, bigInt4, bigInt5,
         ))
 
-        // Remove multiple values (vararg)
+        // Remove multiple values with vararg
         _ <- Ns(id).bigIntSeq.remove(bigInt4, bigInt5).update.transact
         _ <- Ns.bigIntSeq.query.get.map(_.head ==> List(
           bigInt1, bigInt2, bigInt3,
           bigInt1, bigInt2, bigInt3,
         ))
 
-        // Remove multiple values (Seq)
+        // Remove multiple values with Iterable
         _ <- Ns(id).bigIntSeq.remove(List(bigInt2, bigInt3)).update.transact
         _ <- Ns.bigIntSeq.query.get.map(_.head ==> List(
           bigInt1,
           bigInt1
         ))
 
-        // Removing empty Seq of values has no effect
-        _ <- Ns(id).bigIntSeq.remove(List.empty[BigInt]).update.transact
+        // Removing empty Iterable of values has no effect
+        _ <- Ns(id).bigIntSeq.remove(Vector.empty[BigInt]).update.transact
         _ <- Ns.bigIntSeq.query.get.map(_.head ==> List(bigInt1, bigInt1))
 
-        // Removing all remaining elements deletes the attribute
-        _ <- Ns(id).bigIntSeq.remove(Seq(bigInt1)).update.transact
+        // Removing all remaining values deletes the attribute
+        _ <- Ns(id).bigIntSeq.remove(Set(bigInt1)).update.transact
         _ <- Ns.bigIntSeq.query.get.map(_ ==> Nil)
       } yield ()
     }

@@ -2,6 +2,7 @@ package molecule.document.mongodb
 
 import molecule.base.ast._
 import molecule.base.error.{ExecutionError, ModelError, ValidationErrors}
+import molecule.boilerplate.api.expression.{ExprSeqMan_2, ExprSeqTac_1}
 import molecule.core.util.AggrUtils
 import molecule.core.util.Executor._
 import molecule.document.mongodb.async._
@@ -27,19 +28,35 @@ object AdhocJVM_mongodb extends TestSuiteArray_mongodb with AggrUtils {
 
       for {
 
-//        id <- Ns.intSeq(List(int1)).save.i.transact.map(_.id)
+        id <- Ns.i(42).save.transact.map(_.id)
+//        // Map attribute not yet asserted
+//        _ <- Ns.intMap.query.get.map(_ ==> Nil)
 //
-//        // Add value to end of Seq
-//        _ <- Ns(id).intSeq.add(int2, int3).update.i.transact
-//        _ <- Ns.intSeq.query.get.map(_.head ==> List(int1, int2))
+//        // Applying Map of pairs to non-asserted Map attribute adds the attribute with the update
+//        _ <- Ns(id).intMap(Map(pint1, pint2)).update.transact
+//        _ <- Ns.intMap.query.get.map(_.head ==> Map(pint1, pint2))
+//
+//        // Applying Map of pairs replaces previous Map
+//        _ <- Ns(id).intMap(Map(pint2, pint3)).update.i.transact
+//        _ <- Ns.intMap.query.get.map(_.head ==> Map(pint2, pint3))
 
+        // Add other attribute and update Map attribute in one go
+//        _ <- Ns(id).s("foo").intMap(Map(pint3, pint4)).update.i.transact
+//        _ <- Ns(id).s("foo").intMap(Map(pint3, pint4)).update.i.transact
+        _ <- Ns(id).iSeq(List(3)).intMap(Map(pint3, pint4)).update.i.transact
+        _ <- Ns.i.s.intMap.query.get.map(_.head ==> (42, "foo", Map(pint3, pint4)))
 
-        id <- Ns.intMap(Map("a" -> int0)).save.i.transact.map(_.id)
-
-        // Adding pair with existing key replaces the value
-        _ <- Ns(id).intMap.add("a" -> int1).update.i.transact
-        _ <- Ns.intMap.query.get.map(_.head ==> Map(pint1))
-
+//        // Applying empty Map of pairs deletes map
+//        _ <- Ns(id).intMap(Map.empty[String, Int]).update.transact
+//        _ <- Ns.intMap.query.get.map(_ ==> Nil)
+//
+//        _ <- Ns(id).intMap(Map(pint1, pint2)).update.transact
+//        // Apply nothing to delete attribute
+//        _ <- Ns(id).intMap().update.transact
+//        _ <- Ns.intMap.query.get.map(_ ==> Nil)
+//
+//        // Entity still has other attributes
+//        _ <- Ns.i.s.query.get.map(_.head ==> (42, "foo"))
 
       } yield ()
     }
@@ -554,20 +571,19 @@ object AdhocJVM_mongodb extends TestSuiteArray_mongodb with AggrUtils {
 
      */
 
-    //    "unique" - unique { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Uniques._
-    //      for {
-    //
-    //        _ <- Uniques.int.insert(1, 2, 3).transact
-    //
-    //        c1 <- Uniques.int.a1.query.from("").limit(2).get.map { case (List(1, 2), c, true) => c }
-    //
-    //        // Turning around with first cursor leads nowhere
-    //        _ <- Uniques.int.a1.query.from(c1).limit(-2).get.map { case (Nil, _, false) => () }
-    //
-    //      } yield ()
-    //    }
-    //
+    "unique" - unique { implicit conn =>
+      import molecule.coreTests.dataModels.core.dsl.Uniques._
+      for {
+
+        _ <- Uniques.int(0).i(1).Ref.i(2).save.transact
+//        _ <- Uniques.i.Ref.i.query.get.map(_ ==> List((1, 2)))
+
+        _ <- Uniques.int_(0).i(3).Ref.i(4).update.transact
+        _ <- Uniques.i.Ref.i.query.get.map(_ ==> List((3, 4)))
+
+      } yield ()
+    }
+
     //
     //    "validation" - validation { implicit conn =>
     //      import molecule.coreTests.dataModels.core.dsl.Validation._

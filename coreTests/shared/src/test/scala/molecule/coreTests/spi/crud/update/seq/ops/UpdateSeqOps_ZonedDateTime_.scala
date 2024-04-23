@@ -14,60 +14,88 @@ trait UpdateSeqOps_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: Spi
 
   override lazy val tests = Tests {
 
-    "apply (replace/add all)" - types { implicit conn =>
+
+    "apply new values" - types { implicit conn =>
       for {
-        id <- Ns.zonedDateTimeSeq(List(zonedDateTime1, zonedDateTime2, zonedDateTime2)).save.transact.map(_.id)
+        id <- Ns.i(42).save.transact.map(_.id)
+        // Seq attribute not yet asserted
+        _ <- Ns.zonedDateTimeSeq.query.get.map(_ ==> Nil)
+
+        // Applying Seq of values to non-asserted Seq attribute adds the attribute with the update
+        _ <- Ns(id).zonedDateTimeSeq(List(zonedDateTime1, zonedDateTime2, zonedDateTime2)).update.transact
         _ <- Ns.zonedDateTimeSeq.query.get.map(_.head ==> List(zonedDateTime1, zonedDateTime2, zonedDateTime2))
 
-        // Applying Seq of values replaces previous Seq
-        _ <- Ns(id).zonedDateTimeSeq(List(zonedDateTime3, zonedDateTime4, zonedDateTime4)).update.transact
-        _ <- Ns.zonedDateTimeSeq.query.get.map(_.head ==> List(zonedDateTime3, zonedDateTime4, zonedDateTime4))
+        // Applying Seq of values replaces previous values
+        _ <- Ns(id).zonedDateTimeSeq(List(zonedDateTime2, zonedDateTime3, zonedDateTime3)).update.transact
+        _ <- Ns.zonedDateTimeSeq.query.get.map(_.head ==> List(zonedDateTime2, zonedDateTime3, zonedDateTime3))
 
-        // Applying empty Seq of values deletes previous Seq
+        // Add other attribute and update Seq attribute in one go
+        _ <- Ns(id).s("foo").zonedDateTimeSeq(List(zonedDateTime3, zonedDateTime4, zonedDateTime4)).update.transact
+        _ <- Ns.i.s.zonedDateTimeSeq.query.get.map(_.head ==> (42, "foo", List(zonedDateTime3, zonedDateTime4, zonedDateTime4)))
+
+        // Applying empty Seq of values deletes attribute
         _ <- Ns(id).zonedDateTimeSeq(List.empty[ZonedDateTime]).update.transact
         _ <- Ns.zonedDateTimeSeq.query.get.map(_ ==> Nil)
 
-        id <- Ns.zonedDateTimeSeq(List(zonedDateTime1, zonedDateTime2, zonedDateTime2)).save.transact.map(_.id)
-        // Applying nothing deletes previous Seq
+        _ <- Ns(id).zonedDateTimeSeq(List(zonedDateTime1, zonedDateTime2, zonedDateTime2)).update.transact
+        // Apply nothing to delete attribute
         _ <- Ns(id).zonedDateTimeSeq().update.transact
         _ <- Ns.zonedDateTimeSeq.query.get.map(_ ==> Nil)
+
+        // Entity still has other attributes
+        _ <- Ns.i.s.query.get.map(_.head ==> (42, "foo"))
       } yield ()
     }
 
 
     "add" - types { implicit conn =>
       for {
-        id <- Ns.zonedDateTimeSeq(List(zonedDateTime1)).save.transact.map(_.id)
+        id <- Ns.i(42).save.transact.map(_.id)
+        // Seq attribute not yet asserted
+        _ <- Ns.zonedDateTimeSeq.query.get.map(_ ==> Nil)
 
-        // Add value to end of Seq
-        _ <- Ns(id).zonedDateTimeSeq.add(zonedDateTime2).update.transact
-        _ <- Ns.zonedDateTimeSeq.query.get.map(_.head ==> List(zonedDateTime1, zonedDateTime2))
-
-        // Add existing value
+        // Adding value to non-asserted Seq attribute adds the attribute with the update
         _ <- Ns(id).zonedDateTimeSeq.add(zonedDateTime1).update.transact
-        _ <- Ns.zonedDateTimeSeq.query.get.map(_.head ==> List(zonedDateTime1, zonedDateTime2, zonedDateTime1))
+        _ <- Ns.zonedDateTimeSeq.query.get.map(_.head ==> List(zonedDateTime1))
 
-        // Add multiple values (vararg)
+        // Adding existing value to Seq adds it to the end
+        _ <- Ns(id).zonedDateTimeSeq.add(zonedDateTime1).update.transact
+        _ <- Ns.zonedDateTimeSeq.query.get.map(_.head ==> List(zonedDateTime1, zonedDateTime1))
+
+        // Add new value to end of Seq
+        _ <- Ns(id).zonedDateTimeSeq.add(zonedDateTime2).update.transact
+        _ <- Ns.zonedDateTimeSeq.query.get.map(_.head ==> List(zonedDateTime1, zonedDateTime1, zonedDateTime2))
+
+        // Add multiple values with varargs
         _ <- Ns(id).zonedDateTimeSeq.add(zonedDateTime3, zonedDateTime4).update.transact
-        _ <- Ns.zonedDateTimeSeq.query.get.map(_.head ==> List(zonedDateTime1, zonedDateTime2, zonedDateTime1, zonedDateTime3, zonedDateTime4))
+        _ <- Ns.zonedDateTimeSeq.query.get.map(_.head ==> List(zonedDateTime1, zonedDateTime1, zonedDateTime2, zonedDateTime3, zonedDateTime4))
 
-        // Add multiple values (Seq)
+        // Add multiple values with Iterable
         _ <- Ns(id).zonedDateTimeSeq.add(List(zonedDateTime4, zonedDateTime5)).update.transact
-        _ <- Ns.zonedDateTimeSeq.query.get.map(_.head ==> List(zonedDateTime1, zonedDateTime2, zonedDateTime1, zonedDateTime3, zonedDateTime4, zonedDateTime4, zonedDateTime5))
+        _ <- Ns.zonedDateTimeSeq.query.get.map(_.head ==> List(zonedDateTime1, zonedDateTime1, zonedDateTime2, zonedDateTime3, zonedDateTime4, zonedDateTime4, zonedDateTime5))
 
-        // Adding empty Seq of values has no effect
-        _ <- Ns(id).zonedDateTimeSeq.add(List.empty[ZonedDateTime]).update.transact
-        _ <- Ns.zonedDateTimeSeq.query.get.map(_.head ==> List(zonedDateTime1, zonedDateTime2, zonedDateTime1, zonedDateTime3, zonedDateTime4, zonedDateTime4, zonedDateTime5))
+        // Adding empty Iterable of values has no effect
+        _ <- Ns(id).zonedDateTimeSeq.add(Set.empty[ZonedDateTime]).update.transact
+        _ <- Ns.zonedDateTimeSeq.query.get.map(_.head ==> List(zonedDateTime1, zonedDateTime1, zonedDateTime2, zonedDateTime3, zonedDateTime4, zonedDateTime4, zonedDateTime5))
       } yield ()
     }
 
 
     "remove" - types { implicit conn =>
       for {
-        id <- Ns.zonedDateTimeSeq(List(
+        id <- Ns.i(42).save.transact.map(_.id)
+        // Seq attribute not yet asserted
+        _ <- Ns.zonedDateTimeSeq.query.get.map(_ ==> Nil)
+
+        // Removing value from non-asserted Seq has no effect
+        _ <- Ns(id).zonedDateTimeSeq.remove(zonedDateTime1).update.transact
+        _ <- Ns.zonedDateTimeSeq.query.get.map(_ ==> Nil)
+
+        // Start with some values
+        _ <- Ns(id).zonedDateTimeSeq.add(
           zonedDateTime1, zonedDateTime2, zonedDateTime3, zonedDateTime4, zonedDateTime5, zonedDateTime6, zonedDateTime7,
           zonedDateTime1, zonedDateTime2, zonedDateTime3, zonedDateTime4, zonedDateTime5, zonedDateTime6, zonedDateTime7,
-        )).save.transact.map(_.id)
+        ).update.transact
 
         // Remove all instances of a value
         _ <- Ns(id).zonedDateTimeSeq.remove(zonedDateTime7).update.transact
@@ -90,26 +118,26 @@ trait UpdateSeqOps_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: Spi
           zonedDateTime1, zonedDateTime2, zonedDateTime3, zonedDateTime4, zonedDateTime5,
         ))
 
-        // Remove multiple values (vararg)
+        // Remove multiple values with vararg
         _ <- Ns(id).zonedDateTimeSeq.remove(zonedDateTime4, zonedDateTime5).update.transact
         _ <- Ns.zonedDateTimeSeq.query.get.map(_.head ==> List(
           zonedDateTime1, zonedDateTime2, zonedDateTime3,
           zonedDateTime1, zonedDateTime2, zonedDateTime3,
         ))
 
-        // Remove multiple values (Seq)
+        // Remove multiple values with Iterable
         _ <- Ns(id).zonedDateTimeSeq.remove(List(zonedDateTime2, zonedDateTime3)).update.transact
         _ <- Ns.zonedDateTimeSeq.query.get.map(_.head ==> List(
           zonedDateTime1,
           zonedDateTime1
         ))
 
-        // Removing empty Seq of values has no effect
-        _ <- Ns(id).zonedDateTimeSeq.remove(List.empty[ZonedDateTime]).update.transact
+        // Removing empty Iterable of values has no effect
+        _ <- Ns(id).zonedDateTimeSeq.remove(Vector.empty[ZonedDateTime]).update.transact
         _ <- Ns.zonedDateTimeSeq.query.get.map(_.head ==> List(zonedDateTime1, zonedDateTime1))
 
-        // Removing all remaining elements deletes the attribute
-        _ <- Ns(id).zonedDateTimeSeq.remove(Seq(zonedDateTime1)).update.transact
+        // Removing all remaining values deletes the attribute
+        _ <- Ns(id).zonedDateTimeSeq.remove(Set(zonedDateTime1)).update.transact
         _ <- Ns.zonedDateTimeSeq.query.get.map(_ ==> Nil)
       } yield ()
     }

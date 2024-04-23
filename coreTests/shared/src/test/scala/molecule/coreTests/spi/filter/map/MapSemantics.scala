@@ -53,7 +53,7 @@ trait MapSemantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       } yield ()
     }
 
-    "Custom Map attribute" - types { implicit conn =>
+    "Custom alternative to Map attribute" - types { implicit conn =>
       for {
         // one-to-many relationship could be created to save Map data.
         _ <- Ns.i.Refs.*(Ref.s.i).insert(
@@ -76,7 +76,7 @@ trait MapSemantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             err ==> "Matching collections (Ns.intMap) not supported in queries."
           }
 
-        _ <- Ns.intMap_?(Some(Map(pint1))).query.get
+        _ <- Ns.i.intMap_?(Some(Map(pint1))).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Matching collections (Ns.intMap) not supported in queries."
           }

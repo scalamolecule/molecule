@@ -13,60 +13,88 @@ trait UpdateSeqOps_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 
-    "apply (replace/add all)" - types { implicit conn =>
+
+    "apply new values" - types { implicit conn =>
       for {
-        id <- Ns.floatSeq(List(float1, float2, float2)).save.transact.map(_.id)
+        id <- Ns.i(42).save.transact.map(_.id)
+        // Seq attribute not yet asserted
+        _ <- Ns.floatSeq.query.get.map(_ ==> Nil)
+
+        // Applying Seq of values to non-asserted Seq attribute adds the attribute with the update
+        _ <- Ns(id).floatSeq(List(float1, float2, float2)).update.transact
         _ <- Ns.floatSeq.query.get.map(_.head ==> List(float1, float2, float2))
 
-        // Applying Seq of values replaces previous Seq
-        _ <- Ns(id).floatSeq(List(float3, float4, float4)).update.transact
-        _ <- Ns.floatSeq.query.get.map(_.head ==> List(float3, float4, float4))
+        // Applying Seq of values replaces previous values
+        _ <- Ns(id).floatSeq(List(float2, float3, float3)).update.transact
+        _ <- Ns.floatSeq.query.get.map(_.head ==> List(float2, float3, float3))
 
-        // Applying empty Seq of values deletes previous Seq
+        // Add other attribute and update Seq attribute in one go
+        _ <- Ns(id).s("foo").floatSeq(List(float3, float4, float4)).update.transact
+        _ <- Ns.i.s.floatSeq.query.get.map(_.head ==> (42, "foo", List(float3, float4, float4)))
+
+        // Applying empty Seq of values deletes attribute
         _ <- Ns(id).floatSeq(List.empty[Float]).update.transact
         _ <- Ns.floatSeq.query.get.map(_ ==> Nil)
 
-        id <- Ns.floatSeq(List(float1, float2, float2)).save.transact.map(_.id)
-        // Applying nothing deletes previous Seq
+        _ <- Ns(id).floatSeq(List(float1, float2, float2)).update.transact
+        // Apply nothing to delete attribute
         _ <- Ns(id).floatSeq().update.transact
         _ <- Ns.floatSeq.query.get.map(_ ==> Nil)
+
+        // Entity still has other attributes
+        _ <- Ns.i.s.query.get.map(_.head ==> (42, "foo"))
       } yield ()
     }
 
 
     "add" - types { implicit conn =>
       for {
-        id <- Ns.floatSeq(List(float1)).save.transact.map(_.id)
+        id <- Ns.i(42).save.transact.map(_.id)
+        // Seq attribute not yet asserted
+        _ <- Ns.floatSeq.query.get.map(_ ==> Nil)
 
-        // Add value to end of Seq
-        _ <- Ns(id).floatSeq.add(float2).update.transact
-        _ <- Ns.floatSeq.query.get.map(_.head ==> List(float1, float2))
-
-        // Add existing value
+        // Adding value to non-asserted Seq attribute adds the attribute with the update
         _ <- Ns(id).floatSeq.add(float1).update.transact
-        _ <- Ns.floatSeq.query.get.map(_.head ==> List(float1, float2, float1))
+        _ <- Ns.floatSeq.query.get.map(_.head ==> List(float1))
 
-        // Add multiple values (vararg)
+        // Adding existing value to Seq adds it to the end
+        _ <- Ns(id).floatSeq.add(float1).update.transact
+        _ <- Ns.floatSeq.query.get.map(_.head ==> List(float1, float1))
+
+        // Add new value to end of Seq
+        _ <- Ns(id).floatSeq.add(float2).update.transact
+        _ <- Ns.floatSeq.query.get.map(_.head ==> List(float1, float1, float2))
+
+        // Add multiple values with varargs
         _ <- Ns(id).floatSeq.add(float3, float4).update.transact
-        _ <- Ns.floatSeq.query.get.map(_.head ==> List(float1, float2, float1, float3, float4))
+        _ <- Ns.floatSeq.query.get.map(_.head ==> List(float1, float1, float2, float3, float4))
 
-        // Add multiple values (Seq)
+        // Add multiple values with Iterable
         _ <- Ns(id).floatSeq.add(List(float4, float5)).update.transact
-        _ <- Ns.floatSeq.query.get.map(_.head ==> List(float1, float2, float1, float3, float4, float4, float5))
+        _ <- Ns.floatSeq.query.get.map(_.head ==> List(float1, float1, float2, float3, float4, float4, float5))
 
-        // Adding empty Seq of values has no effect
-        _ <- Ns(id).floatSeq.add(List.empty[Float]).update.transact
-        _ <- Ns.floatSeq.query.get.map(_.head ==> List(float1, float2, float1, float3, float4, float4, float5))
+        // Adding empty Iterable of values has no effect
+        _ <- Ns(id).floatSeq.add(Set.empty[Float]).update.transact
+        _ <- Ns.floatSeq.query.get.map(_.head ==> List(float1, float1, float2, float3, float4, float4, float5))
       } yield ()
     }
 
 
     "remove" - types { implicit conn =>
       for {
-        id <- Ns.floatSeq(List(
+        id <- Ns.i(42).save.transact.map(_.id)
+        // Seq attribute not yet asserted
+        _ <- Ns.floatSeq.query.get.map(_ ==> Nil)
+
+        // Removing value from non-asserted Seq has no effect
+        _ <- Ns(id).floatSeq.remove(float1).update.transact
+        _ <- Ns.floatSeq.query.get.map(_ ==> Nil)
+
+        // Start with some values
+        _ <- Ns(id).floatSeq.add(
           float1, float2, float3, float4, float5, float6, float7,
           float1, float2, float3, float4, float5, float6, float7,
-        )).save.transact.map(_.id)
+        ).update.transact
 
         // Remove all instances of a value
         _ <- Ns(id).floatSeq.remove(float7).update.transact
@@ -89,26 +117,26 @@ trait UpdateSeqOps_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           float1, float2, float3, float4, float5,
         ))
 
-        // Remove multiple values (vararg)
+        // Remove multiple values with vararg
         _ <- Ns(id).floatSeq.remove(float4, float5).update.transact
         _ <- Ns.floatSeq.query.get.map(_.head ==> List(
           float1, float2, float3,
           float1, float2, float3,
         ))
 
-        // Remove multiple values (Seq)
+        // Remove multiple values with Iterable
         _ <- Ns(id).floatSeq.remove(List(float2, float3)).update.transact
         _ <- Ns.floatSeq.query.get.map(_.head ==> List(
           float1,
           float1
         ))
 
-        // Removing empty Seq of values has no effect
-        _ <- Ns(id).floatSeq.remove(List.empty[Float]).update.transact
+        // Removing empty Iterable of values has no effect
+        _ <- Ns(id).floatSeq.remove(Vector.empty[Float]).update.transact
         _ <- Ns.floatSeq.query.get.map(_.head ==> List(float1, float1))
 
-        // Removing all remaining elements deletes the attribute
-        _ <- Ns(id).floatSeq.remove(Seq(float1)).update.transact
+        // Removing all remaining values deletes the attribute
+        _ <- Ns(id).floatSeq.remove(Set(float1)).update.transact
         _ <- Ns.floatSeq.query.get.map(_ ==> Nil)
       } yield ()
     }

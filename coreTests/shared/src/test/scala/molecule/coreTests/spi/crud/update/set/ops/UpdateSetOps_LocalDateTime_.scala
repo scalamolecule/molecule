@@ -9,6 +9,7 @@ import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
+import scala.collection.immutable.Set
 
 trait UpdateSetOps_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
@@ -16,47 +17,65 @@ trait UpdateSetOps_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: Spi
 
     "apply (replace/add all)" - types { implicit conn =>
       for {
-        id <- Ns.localDateTimeSet(Set(localDateTime1, localDateTime2)).save.transact.map(_.id)
+        id <- Ns.i(42).save.transact.map(_.id)
+        // Set attribute not yet asserted
+        _ <- Ns.localDateTimeSet.query.get.map(_ ==> Nil)
+
+        // Applying Set of values to non-asserted Set attribute adds the attribute with the update
+        _ <- Ns(id).localDateTimeSet(Set(localDateTime1, localDateTime2)).update.transact
         _ <- Ns.localDateTimeSet.query.get.map(_.head ==> Set(localDateTime1, localDateTime2))
 
         // Applying Set of values replaces previous Set
-        _ <- Ns(id).localDateTimeSet(Set(localDateTime3, localDateTime4)).update.transact
-        _ <- Ns.localDateTimeSet.query.get.map(_.head ==> Set(localDateTime3, localDateTime4))
+        _ <- Ns(id).localDateTimeSet(Set(localDateTime2, localDateTime3)).update.transact
+        _ <- Ns.localDateTimeSet.query.get.map(_.head ==> Set(localDateTime2, localDateTime3))
 
-        // Applying empty Set of values deletes previous Set
+        // Add other attribute and update Set attribute in one go
+        _ <- Ns(id).s("foo").localDateTimeSet(Set(localDateTime3, localDateTime4)).update.transact
+        _ <- Ns.i.s.localDateTimeSet.query.get.map(_.head ==> (42, "foo", Set(localDateTime3, localDateTime4)))
+
+        // Applying empty Set of values deletes attribute
         _ <- Ns(id).localDateTimeSet(Set.empty[LocalDateTime]).update.transact
         _ <- Ns.localDateTimeSet.query.get.map(_ ==> Nil)
 
-        id <- Ns.localDateTimeSet(Set(localDateTime1, localDateTime2)).save.transact.map(_.id)
-        // Applying empty value deletes previous Set
+        _ <- Ns(id).localDateTimeSet(Set(localDateTime1, localDateTime2)).update.transact
+        // Apply nothing delete attribute
         _ <- Ns(id).localDateTimeSet().update.transact
         _ <- Ns.localDateTimeSet.query.get.map(_ ==> Nil)
+
+        // Entity still has other attributes
+        _ <- Ns.i.s.query.get.map(_.head ==> (42, "foo"))
       } yield ()
     }
 
 
     "add" - types { implicit conn =>
       for {
-        id <- Ns.localDateTimeSet(Set(localDateTime1)).save.transact.map(_.id)
+        id <- Ns.i(42).save.transact.map(_.id)
+        // Seq attribute not yet asserted
+        _ <- Ns.localDateTimeSet.query.get.map(_ ==> Nil)
 
-        // Add value
+        // Adding value to non-asserted Set attribute adds the attribute with the update
+        _ <- Ns(id).localDateTimeSet.add(localDateTime1).update.transact
+        _ <- Ns.localDateTimeSet.query.get.map(_.head ==> Set(localDateTime1))
+
+        // Adding existing value to Set changes nothing
+        _ <- Ns(id).localDateTimeSet.add(localDateTime1).update.transact
+        _ <- Ns.localDateTimeSet.query.get.map(_.head ==> Set(localDateTime1))
+
+        // Add new value
         _ <- Ns(id).localDateTimeSet.add(localDateTime2).update.transact
         _ <- Ns.localDateTimeSet.query.get.map(_.head ==> Set(localDateTime1, localDateTime2))
 
-        // Adding existing value has no effect (Set semantics of only unique values)
-        _ <- Ns(id).localDateTimeSet.add(localDateTime2).update.transact
-        _ <- Ns.localDateTimeSet.query.get.map(_.head ==> Set(localDateTime1, localDateTime2))
-
-        // Add multiple values (vararg)
+        // Add multiple values with vararg
         _ <- Ns(id).localDateTimeSet.add(localDateTime3, localDateTime4).update.transact
         _ <- Ns.localDateTimeSet.query.get.map(_.head ==> Set(localDateTime1, localDateTime2, localDateTime3, localDateTime4))
 
-        // Add multiple values (Seq)
-        _ <- Ns(id).localDateTimeSet.add(Seq(localDateTime5, localDateTime6)).update.transact
+        // Add multiple values with Iterable
+        _ <- Ns(id).localDateTimeSet.add(List(localDateTime5, localDateTime6)).update.transact
         _ <- Ns.localDateTimeSet.query.get.map(_.head ==> Set(localDateTime1, localDateTime2, localDateTime3, localDateTime4, localDateTime5, localDateTime6))
 
-        // Adding empty Seq of values has no effect
-        _ <- Ns(id).localDateTimeSet.add(Seq.empty[LocalDateTime]).update.transact
+        // Adding empty Iterable of values has no effect
+        _ <- Ns(id).localDateTimeSet.add(Set.empty[LocalDateTime]).update.transact
         _ <- Ns.localDateTimeSet.query.get.map(_.head ==> Set(localDateTime1, localDateTime2, localDateTime3, localDateTime4, localDateTime5, localDateTime6))
       } yield ()
     }
@@ -64,7 +83,16 @@ trait UpdateSetOps_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: Spi
 
     "remove" - types { implicit conn =>
       for {
-        id <- Ns.localDateTimeSet(Set(localDateTime1, localDateTime2, localDateTime3, localDateTime4, localDateTime5, localDateTime6, localDateTime7)).save.transact.map(_.id)
+        id <- Ns.i(42).save.transact.map(_.id)
+        // Seq attribute not yet asserted
+        _ <- Ns.localDateTimeSet.query.get.map(_ ==> Nil)
+
+        // Removing value from non-asserted Set has no effect
+        _ <- Ns(id).localDateTimeSet.remove(localDateTime1).update.transact
+        _ <- Ns.localDateTimeSet.query.get.map(_ ==> Nil)
+
+        // Start with some values
+        _ <- Ns(id).localDateTimeSet.add(localDateTime1, localDateTime2, localDateTime3, localDateTime4, localDateTime5, localDateTime6, localDateTime7).update.transact
 
         // Remove value
         _ <- Ns(id).localDateTimeSet.remove(localDateTime7).update.transact
@@ -74,24 +102,24 @@ trait UpdateSetOps_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: Spi
         _ <- Ns(id).localDateTimeSet.remove(localDateTime9).update.transact
         _ <- Ns.localDateTimeSet.query.get.map(_.head ==> Set(localDateTime1, localDateTime2, localDateTime3, localDateTime4, localDateTime5, localDateTime6))
 
-        // Removing duplicate values removes the distinct value
+        // Removing duplicate values removes the distinct value (Set semantics)
         _ <- Ns(id).localDateTimeSet.remove(localDateTime6, localDateTime6).update.transact
         _ <- Ns.localDateTimeSet.query.get.map(_.head ==> Set(localDateTime1, localDateTime2, localDateTime3, localDateTime4, localDateTime5))
 
-        // Remove multiple values (vararg)
+        // Remove multiple values with varargs
         _ <- Ns(id).localDateTimeSet.remove(localDateTime4, localDateTime5).update.transact
         _ <- Ns.localDateTimeSet.query.get.map(_.head ==> Set(localDateTime1, localDateTime2, localDateTime3))
 
-        // Remove multiple values (Seq)
-        _ <- Ns(id).localDateTimeSet.remove(Seq(localDateTime2, localDateTime3)).update.transact
+        // Remove multiple values with Iterable
+        _ <- Ns(id).localDateTimeSet.remove(List(localDateTime2, localDateTime3)).update.transact
         _ <- Ns.localDateTimeSet.query.get.map(_.head ==> Set(localDateTime1))
 
-        // Removing empty Seq of values has no effect
-        _ <- Ns(id).localDateTimeSet.remove(Seq.empty[LocalDateTime]).update.transact
+        // Removing empty Iterable of values has no effect
+        _ <- Ns(id).localDateTimeSet.remove(Vector.empty[LocalDateTime]).update.transact
         _ <- Ns.localDateTimeSet.query.get.map(_.head ==> Set(localDateTime1))
 
         // Removing all remaining elements deletes the attribute
-        _ <- Ns(id).localDateTimeSet.remove(Seq(localDateTime1)).update.transact
+        _ <- Ns(id).localDateTimeSet.remove(Set(localDateTime1)).update.transact
         _ <- Ns.localDateTimeSet.query.get.map(_ ==> Nil)
       } yield ()
     }

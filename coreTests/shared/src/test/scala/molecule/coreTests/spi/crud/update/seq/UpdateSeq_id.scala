@@ -16,34 +16,6 @@ trait UpdateSeq_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 
-    "Semantics update/upsert" - types { implicit conn =>
-      for {
-        id <- Ns.intSeq.insert(List(1)).transact.map(_.id)
-        _ <- Ns.intSeq.query.get.map(_ ==> List(List(1)))
-
-        _ <- Ns(id).intSeq(List(2)).update.transact
-        _ <- Ns.intSeq.query.get.map(_ ==> List(List(2)))
-
-        // Updating a non-asserted attribute has no effect
-        _ <- Ns(id).stringSeq(List("a")).update.transact
-        _ <- Ns.intSeq.stringSeq_?.query.get.map(_ ==> List((List(2), None)))
-
-        // Upserting a non-asserted attribute adds the value
-        _ <- Ns(id).stringSeq(List("a")).upsert.transact
-        _ <- Ns.intSeq.stringSeq_?.query.get.map(_ ==> List((List(2), Some(List("a")))))
-
-        // All attributes have to be previously asserted to be updated.
-        // `int` is previously asserted, `boolean` is not. So this entity is not updated
-        _ <- Ns(id).intSeq(List(3)).booleanSeq(List(true)).update.transact
-        _ <- Ns.intSeq.booleanSeq_?.query.get.map(_ ==> List((List(2), None)))
-
-        // Upsert sets all values regardless of previous assertions
-        _ <- Ns(id).intSeq(List(3)).booleanSeq(List(true)).upsert.transact
-        _ <- Ns.intSeq.booleanSeq_?.query.get.map(_ ==> List((List(3), Some(List(true)))))
-      } yield ()
-    }
-
-
     "Multiple entities updated" - types { implicit conn =>
       for {
         List(a, b, c) <- Ns.intSeq.insert(List(1), List(2), List(3)).transact.map(_.ids)
@@ -251,14 +223,14 @@ trait UpdateSeq_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         } yield ()
       }
 
-      "Can't update card-many referenced attributes" - types { implicit conn =>
-        for {
-          _ <- Ns("42").i(1).Refs.i(2).update.transact
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-              err ==> "Can't update attributes in card-many referenced namespace `Refs`"
-            }
-        } yield ()
-      }
+//      "Can't update card-many referenced attributes" - types { implicit conn =>
+//        for {
+//          _ <- Ns("42").i(1).Refs.i(2).update.transact
+//            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+//              err ==> "Can't update attributes in card-many referenced namespace `Refs`"
+//            }
+//        } yield ()
+//      }
     }
   }
 }

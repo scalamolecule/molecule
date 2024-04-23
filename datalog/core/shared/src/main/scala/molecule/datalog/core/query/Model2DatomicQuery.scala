@@ -36,10 +36,12 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
   // Returns (preQuery, mainQuery, query string for inspection)
   final def getDatomicQueries(
     optimized: Boolean,
-    altElements: List[Element] = Nil
+    altElements: List[Element] = Nil,
+    validate: Boolean = true
   ): (String, String, String) = {
-    val elements          = if (altElements.isEmpty) elements0 else altElements
-    val (elements1, _, _) = validateQueryModel(elements, Some(addFilterAttrCallback))
+    val elements  = if (altElements.isEmpty) elements0 else altElements
+    val elements1 = if (validate)
+      validateQueryModel(elements, Some(addFilterAttrCallback))._1 else elements
 
     // Remember first entity id variable
     firstId = vv
@@ -88,7 +90,7 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
   }
 
   final def getIdQueryWithInputs: (Att, Seq[AnyRef]) = {
-    (getDatomicQueries(false)._2, inputs)
+    (getDatomicQueries(false, validate = false)._2, inputs)
   }
 
   final private def renderQuery(

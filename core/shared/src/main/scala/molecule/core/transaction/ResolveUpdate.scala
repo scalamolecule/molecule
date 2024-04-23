@@ -1,6 +1,5 @@
 package molecule.core.transaction
 
-import molecule.base.ast._
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.core.marshalling.ConnProxy
@@ -13,8 +12,242 @@ class ResolveUpdate(
   val isUpsert: Boolean,
 ) extends ModelUtils { self: UpdateOps =>
 
-  val isUpdate = !isUpsert
-  val update   = if (isUpsert) "upsert" else "update"
+  def noOptional(a: Attr): Nothing = throw ModelError(s"Can't update optional values. Found:\n" + a)
+  def noNested: Nothing = throw ModelError(s"Nested data structure not allowed in update molecule.")
+
+
+  @tailrec
+  final def getFilters(
+    reversedElements: List[Element],
+    filterElements: List[Element] = Nil,
+    hasFilter: Boolean = false,
+    requireNs: Boolean = false,
+    requiredNsPaths: List[List[String]] = List(List())
+  ): (List[Element], List[List[String]]) = {
+    reversedElements match {
+      case element :: tail => element match {
+        case a: Attr => a match {
+          case a: AttrOne => a match {
+            case a: AttrOneMan =>
+              val optValueAttr = a match {
+                case a: AttrOneManID             => AttrOneOptID(a.ns, a.attr)
+                case a: AttrOneManString         => AttrOneOptString(a.ns, a.attr)
+                case a: AttrOneManInt            => AttrOneOptInt(a.ns, a.attr)
+                case a: AttrOneManLong           => AttrOneOptLong(a.ns, a.attr)
+                case a: AttrOneManFloat          => AttrOneOptFloat(a.ns, a.attr)
+                case a: AttrOneManDouble         => AttrOneOptDouble(a.ns, a.attr)
+                case a: AttrOneManBoolean        => AttrOneOptBoolean(a.ns, a.attr)
+                case a: AttrOneManBigInt         => AttrOneOptBigInt(a.ns, a.attr)
+                case a: AttrOneManBigDecimal     => AttrOneOptBigDecimal(a.ns, a.attr)
+                case a: AttrOneManDate           => AttrOneOptDate(a.ns, a.attr)
+                case a: AttrOneManDuration       => AttrOneOptDuration(a.ns, a.attr)
+                case a: AttrOneManInstant        => AttrOneOptInstant(a.ns, a.attr)
+                case a: AttrOneManLocalDate      => AttrOneOptLocalDate(a.ns, a.attr)
+                case a: AttrOneManLocalTime      => AttrOneOptLocalTime(a.ns, a.attr)
+                case a: AttrOneManLocalDateTime  => AttrOneOptLocalDateTime(a.ns, a.attr)
+                case a: AttrOneManOffsetTime     => AttrOneOptOffsetTime(a.ns, a.attr)
+                case a: AttrOneManOffsetDateTime => AttrOneOptOffsetDateTime(a.ns, a.attr)
+                case a: AttrOneManZonedDateTime  => AttrOneOptZonedDateTime(a.ns, a.attr)
+                case a: AttrOneManUUID           => AttrOneOptUUID(a.ns, a.attr)
+                case a: AttrOneManURI            => AttrOneOptURI(a.ns, a.attr)
+                case a: AttrOneManByte           => AttrOneOptByte(a.ns, a.attr)
+                case a: AttrOneManShort          => AttrOneOptShort(a.ns, a.attr)
+                case a: AttrOneManChar           => AttrOneOptChar(a.ns, a.attr)
+              }
+              getFilters(tail, optValueAttr :: filterElements, hasFilter, true, requiredNsPaths)
+
+            case a: AttrOneTac => getFilters(tail, a :: filterElements,
+              hasFilter || a.op != NoValue, true, requiredNsPaths)
+
+            case a: AttrOneOpt => noOptional(a)
+          }
+
+          case a: AttrSet => a match {
+            case a: AttrSetMan => a.op match {
+              case _ =>
+                // Retrieve current Set values for retraction
+                val optSet = a match {
+                  case a: AttrSetManID             => AttrSetOptID(a.ns, a.attr)
+                  case a: AttrSetManString         => AttrSetOptString(a.ns, a.attr)
+                  case a: AttrSetManInt            => AttrSetOptInt(a.ns, a.attr)
+                  case a: AttrSetManLong           => AttrSetOptLong(a.ns, a.attr)
+                  case a: AttrSetManFloat          => AttrSetOptFloat(a.ns, a.attr)
+                  case a: AttrSetManDouble         => AttrSetOptDouble(a.ns, a.attr)
+                  case a: AttrSetManBoolean        => AttrSetOptBoolean(a.ns, a.attr)
+                  case a: AttrSetManBigInt         => AttrSetOptBigInt(a.ns, a.attr)
+                  case a: AttrSetManBigDecimal     => AttrSetOptBigDecimal(a.ns, a.attr)
+                  case a: AttrSetManDate           => AttrSetOptDate(a.ns, a.attr)
+                  case a: AttrSetManDuration       => AttrSetOptDuration(a.ns, a.attr)
+                  case a: AttrSetManInstant        => AttrSetOptInstant(a.ns, a.attr)
+                  case a: AttrSetManLocalDate      => AttrSetOptLocalDate(a.ns, a.attr)
+                  case a: AttrSetManLocalTime      => AttrSetOptLocalTime(a.ns, a.attr)
+                  case a: AttrSetManLocalDateTime  => AttrSetOptLocalDateTime(a.ns, a.attr)
+                  case a: AttrSetManOffsetTime     => AttrSetOptOffsetTime(a.ns, a.attr)
+                  case a: AttrSetManOffsetDateTime => AttrSetOptOffsetDateTime(a.ns, a.attr)
+                  case a: AttrSetManZonedDateTime  => AttrSetOptZonedDateTime(a.ns, a.attr)
+                  case a: AttrSetManUUID           => AttrSetOptUUID(a.ns, a.attr)
+                  case a: AttrSetManURI            => AttrSetOptURI(a.ns, a.attr)
+                  case a: AttrSetManByte           => AttrSetOptByte(a.ns, a.attr)
+                  case a: AttrSetManShort          => AttrSetOptShort(a.ns, a.attr)
+                  case a: AttrSetManChar           => AttrSetOptChar(a.ns, a.attr)
+                }
+                getFilters(tail, optSet :: filterElements,
+                  hasFilter, requireNs || a.op != Remove, requiredNsPaths)
+            }
+
+            case a: AttrSetTac =>
+              if (a.op == Eq) {
+                throw ModelError(s"Filtering by Set match (${a.name}) not supported in updates.")
+              }
+              getFilters(tail, a :: filterElements, hasFilter || a.op != NoValue, requireNs, requiredNsPaths)
+
+            case _: AttrSetOpt => noOptional(a)
+          }
+
+          case a: AttrSeq => a match {
+            case a: AttrSeqMan =>
+              // Retrieve current Seq values for retraction
+              val optSet = a match {
+                case a: AttrSeqManID             => AttrSeqOptID(a.ns, a.attr)
+                case a: AttrSeqManString         => AttrSeqOptString(a.ns, a.attr)
+                case a: AttrSeqManInt            => AttrSeqOptInt(a.ns, a.attr)
+                case a: AttrSeqManLong           => AttrSeqOptLong(a.ns, a.attr)
+                case a: AttrSeqManFloat          => AttrSeqOptFloat(a.ns, a.attr)
+                case a: AttrSeqManDouble         => AttrSeqOptDouble(a.ns, a.attr)
+                case a: AttrSeqManBoolean        => AttrSeqOptBoolean(a.ns, a.attr)
+                case a: AttrSeqManBigInt         => AttrSeqOptBigInt(a.ns, a.attr)
+                case a: AttrSeqManBigDecimal     => AttrSeqOptBigDecimal(a.ns, a.attr)
+                case a: AttrSeqManDate           => AttrSeqOptDate(a.ns, a.attr)
+                case a: AttrSeqManDuration       => AttrSeqOptDuration(a.ns, a.attr)
+                case a: AttrSeqManInstant        => AttrSeqOptInstant(a.ns, a.attr)
+                case a: AttrSeqManLocalDate      => AttrSeqOptLocalDate(a.ns, a.attr)
+                case a: AttrSeqManLocalTime      => AttrSeqOptLocalTime(a.ns, a.attr)
+                case a: AttrSeqManLocalDateTime  => AttrSeqOptLocalDateTime(a.ns, a.attr)
+                case a: AttrSeqManOffsetTime     => AttrSeqOptOffsetTime(a.ns, a.attr)
+                case a: AttrSeqManOffsetDateTime => AttrSeqOptOffsetDateTime(a.ns, a.attr)
+                case a: AttrSeqManZonedDateTime  => AttrSeqOptZonedDateTime(a.ns, a.attr)
+                case a: AttrSeqManUUID           => AttrSeqOptUUID(a.ns, a.attr)
+                case a: AttrSeqManURI            => AttrSeqOptURI(a.ns, a.attr)
+                case a: AttrSeqManByte           => AttrSeqOptByte(a.ns, a.attr)
+                case a: AttrSeqManShort          => AttrSeqOptShort(a.ns, a.attr)
+                case a: AttrSeqManChar           => AttrSeqOptChar(a.ns, a.attr)
+              }
+              getFilters(tail, optSet :: filterElements,
+                hasFilter, requireNs || a.op != Remove, requiredNsPaths)
+
+
+            case a: AttrSeqTac =>
+              if (a.op == Eq) {
+                throw ModelError(s"Filtering by Seq match (${a.name}) not supported in updates.")
+              }
+              val filterAttributes = a.op match {
+                case Has | HasNo =>
+                  // Add same tacit attribute to avoid missing Datomic binding
+                  val cleanTacitAttr = a match {
+                    case a: AttrSeqTacID             => a.copy(op = V, vs = Nil)
+                    case a: AttrSeqTacString         => a.copy(op = V, vs = Nil)
+                    case a: AttrSeqTacInt            => a.copy(op = V, vs = Nil)
+                    case a: AttrSeqTacLong           => a.copy(op = V, vs = Nil)
+                    case a: AttrSeqTacFloat          => a.copy(op = V, vs = Nil)
+                    case a: AttrSeqTacDouble         => a.copy(op = V, vs = Nil)
+                    case a: AttrSeqTacBoolean        => a.copy(op = V, vs = Nil)
+                    case a: AttrSeqTacBigInt         => a.copy(op = V, vs = Nil)
+                    case a: AttrSeqTacBigDecimal     => a.copy(op = V, vs = Nil)
+                    case a: AttrSeqTacDate           => a.copy(op = V, vs = Nil)
+                    case a: AttrSeqTacDuration       => a.copy(op = V, vs = Nil)
+                    case a: AttrSeqTacInstant        => a.copy(op = V, vs = Nil)
+                    case a: AttrSeqTacLocalDate      => a.copy(op = V, vs = Nil)
+                    case a: AttrSeqTacLocalTime      => a.copy(op = V, vs = Nil)
+                    case a: AttrSeqTacLocalDateTime  => a.copy(op = V, vs = Nil)
+                    case a: AttrSeqTacOffsetTime     => a.copy(op = V, vs = Nil)
+                    case a: AttrSeqTacOffsetDateTime => a.copy(op = V, vs = Nil)
+                    case a: AttrSeqTacZonedDateTime  => a.copy(op = V, vs = Nil)
+                    case a: AttrSeqTacUUID           => a.copy(op = V, vs = Nil)
+                    case a: AttrSeqTacURI            => a.copy(op = V, vs = Nil)
+                    case a: AttrSeqTacByte           => a.copy(op = V, vs = Array.empty[Byte])
+                    case a: AttrSeqTacShort          => a.copy(op = V, vs = Nil)
+                    case a: AttrSeqTacChar           => a.copy(op = V, vs = Nil)
+                  }
+                  List(cleanTacitAttr, a)
+
+                case _ => List(a)
+              }
+              getFilters(tail, filterAttributes ::: filterElements,
+                hasFilter || a.op != NoValue, requireNs, requiredNsPaths)
+
+            case _: AttrSeqOpt => noOptional(a)
+          }
+
+          case a: AttrMap => a match {
+            case a: AttrMapMan =>
+              // Retrieve current Map for retraction
+              val optSet = a match {
+                case a: AttrMapManID             => AttrMapOptID(a.ns, a.attr)
+                case a: AttrMapManString         => AttrMapOptString(a.ns, a.attr)
+                case a: AttrMapManInt            => AttrMapOptInt(a.ns, a.attr)
+                case a: AttrMapManLong           => AttrMapOptLong(a.ns, a.attr)
+                case a: AttrMapManFloat          => AttrMapOptFloat(a.ns, a.attr)
+                case a: AttrMapManDouble         => AttrMapOptDouble(a.ns, a.attr)
+                case a: AttrMapManBoolean        => AttrMapOptBoolean(a.ns, a.attr)
+                case a: AttrMapManBigInt         => AttrMapOptBigInt(a.ns, a.attr)
+                case a: AttrMapManBigDecimal     => AttrMapOptBigDecimal(a.ns, a.attr)
+                case a: AttrMapManDate           => AttrMapOptDate(a.ns, a.attr)
+                case a: AttrMapManDuration       => AttrMapOptDuration(a.ns, a.attr)
+                case a: AttrMapManInstant        => AttrMapOptInstant(a.ns, a.attr)
+                case a: AttrMapManLocalDate      => AttrMapOptLocalDate(a.ns, a.attr)
+                case a: AttrMapManLocalTime      => AttrMapOptLocalTime(a.ns, a.attr)
+                case a: AttrMapManLocalDateTime  => AttrMapOptLocalDateTime(a.ns, a.attr)
+                case a: AttrMapManOffsetTime     => AttrMapOptOffsetTime(a.ns, a.attr)
+                case a: AttrMapManOffsetDateTime => AttrMapOptOffsetDateTime(a.ns, a.attr)
+                case a: AttrMapManZonedDateTime  => AttrMapOptZonedDateTime(a.ns, a.attr)
+                case a: AttrMapManUUID           => AttrMapOptUUID(a.ns, a.attr)
+                case a: AttrMapManURI            => AttrMapOptURI(a.ns, a.attr)
+                case a: AttrMapManByte           => AttrMapOptByte(a.ns, a.attr)
+                case a: AttrMapManShort          => AttrMapOptShort(a.ns, a.attr)
+                case a: AttrMapManChar           => AttrMapOptChar(a.ns, a.attr)
+              }
+              getFilters(tail, optSet :: filterElements,
+                hasFilter, requireNs || a.op != Remove, requiredNsPaths)
+
+            case a: AttrMapTac => getFilters(tail, a :: filterElements,
+              hasFilter || a.op != NoValue, requireNs, requiredNsPaths)
+
+            case _: AttrMapOpt => noOptional(a)
+          }
+        }
+
+        case r: Ref => if (hasFilter) {
+          // There are filters after this ref, so we know that the reference will exist
+          getFilters(tail, r :: AttrOneManID(r.refNs, "id") :: filterElements, true)
+
+        } else {
+          // Skip tail and start over since we can't know if this ref is asserted without any filter values after it.
+          // From here on and backwards we only might have a reference
+
+          val requiredNsPaths1 = if (requireNs) {
+            requiredNsPaths match {
+              case Nil :: tail => List(r.ns, r.refAttr, r.refNs) :: tail
+              case cur :: tail => (List(r.ns, r.refAttr) ::: cur) :: tail
+              case Nil         => Nil
+            }
+          } else requiredNsPaths
+
+          // ref has no filters after it, so we don't know if theres a relationship. Look for optional ref id then.
+          getFilters(tail, AttrOneOptID(r.ns, r.refAttr) :: Nil, false, requiredNsPaths = requiredNsPaths1)
+        }
+
+        case br: BackRef => getFilters(tail, br :: filterElements, hasFilter)
+
+        case _ => noNested
+      }
+
+      case Nil =>
+        if (!hasFilter) {
+          throw ModelError("Please add at least one tacit filter attribute (applying empty value not counting).")
+        }
+        (filterElements, requiredNsPaths)
+    }
+  }
 
   @tailrec
   final def resolve(elements: List[Element]): Unit = {
@@ -23,9 +256,10 @@ class ResolveUpdate(
         case a: Attr =>
           a match {
             case a: AttrOne => a match {
-              case a: AttrOneTac => resolveAttrOneTac(a); resolve(tail)
               case a: AttrOneMan => resolveAttrOneMan(a); resolve(tail)
-              case _: AttrOneOpt => throw ModelError(s"Can't $update optional values. Found:\n" + a)
+              //              case a: AttrOneTac => resolveAttrOneTac(a); resolve(tail)
+              case a: AttrOneTac => resolve(tail)
+              case _: AttrOneOpt => noOptional(a)
             }
 
             case a: AttrSet => a match {
@@ -33,10 +267,11 @@ class ResolveUpdate(
                 case Eq | NoValue => resolveAttrSetMan(a); resolve(tail)
                 case Add          => resolveAttrSetAdd(a); resolve(tail)
                 case Remove       => resolveAttrSetRemove(a); resolve(tail)
-                case _            => throw ModelError(s"Unexpected $update operation for card-many attribute. Found:\n" + a)
+                case _            => throw ModelError(s"Unexpected update operation for card-many attribute. Found:\n" + a)
               }
-              case _: AttrSetTac => throw ModelError("Can only lookup entity with card-one attribute value. Found:\n" + a)
-              case _: AttrSetOpt => throw ModelError(s"Can't $update optional values. Found:\n" + a)
+              //              case _: AttrSetTac => throw ModelError("Can only lookup entity with card-one attribute value. Found:\n" + a)
+              case _: AttrSetTac => resolve(tail)
+              case _: AttrSetOpt => noOptional(a)
             }
 
             case a: AttrSeq => a match {
@@ -44,10 +279,11 @@ class ResolveUpdate(
                 case Eq | NoValue => resolveAttrSeqMan(a); resolve(tail)
                 case Add          => resolveAttrSeqAdd(a); resolve(tail)
                 case Remove       => resolveAttrSeqRemove(a); resolve(tail)
-                case _            => throw ModelError(s"Unexpected $update operation for card-many attribute. Found:\n" + a)
+                case _            => throw ModelError(s"Unexpected update operation for card-many attribute. Found:\n" + a)
               }
-              case _: AttrSeqTac => throw ModelError("Can only lookup entity with card-one attribute value. Found:\n" + a)
-              case _: AttrSeqOpt => throw ModelError(s"Can't $update optional values. Found:\n" + a)
+              //              case _: AttrSeqTac => throw ModelError("Can only lookup entity with card-one attribute value. Found:\n" + a)
+              case _: AttrSeqTac => resolve(tail)
+              case _: AttrSeqOpt => noOptional(a)
             }
 
             case a: AttrMap => a match {
@@ -55,21 +291,23 @@ class ResolveUpdate(
                 case Eq | NoValue => resolveAttrMapMan(a); resolve(tail)
                 case Add          => resolveAttrMapAdd(a); resolve(tail)
                 case Remove       => resolveAttrMapRemove(a); resolve(tail)
-                case _            => throw ModelError(s"Unexpected $update operation for card-many attribute. Found:\n" + a)
+                case _            => throw ModelError(s"Unexpected update operation for card-many attribute. Found:\n" + a)
               }
-              case _: AttrMapTac => throw ModelError("Can only lookup entity with card-one attribute value. Found:\n" + a)
-              case a: AttrMapOpt => throw ModelError(s"Can't $update optional values. Found:\n" + a.toString)
+              //              case _: AttrMapTac => throw ModelError("Can only lookup entity with card-one attribute value. Found:\n" + a)
+              case _: AttrMapTac => resolve(tail)
+              case a: AttrMapOpt => noOptional(a)
             }
           }
 
-        case r@Ref(_, _, _, CardOne, _, _) => handleRefNs(r); resolve(tail)
-        case br: BackRef                   => handleBackRef(br); resolve(tail)
+        //        case r@Ref(_, _, _, CardOne, _, _) => handleRefNs(r); resolve(tail)
+        case r: Ref      => handleRefNs(r); resolve(tail)
+        case br: BackRef => handleBackRef(br); resolve(tail)
 
-        case ref: Ref     => throw ModelError(
-          s"Can't $update attributes in card-many referenced namespace `${ref.refAttr.capitalize}`"
-        )
-        case _: Nested    => throw ModelError(s"Nested data structure not allowed in $update molecule.")
-        case _: NestedOpt => throw ModelError(s"Optional nested data structure not allowed in $update molecule.")
+        //        case ref: Ref => throw ModelError(
+        //          s"Can't update attributes in card-many referenced namespace `${ref.refAttr.capitalize}`"
+        //        )
+
+        case _ => noNested
       }
       case Nil             => ()
     }
@@ -83,7 +321,7 @@ class ResolveUpdate(
         s"Generic id attribute not allowed in update molecule. Found:\n" + a)
 
       case a if a.op != Eq && a.op != NoValue => throw ModelError(
-        s"Can't $update attributes without an applied value. Found:\n" + a)
+        s"Can't update attributes without an applied value. Found:\n" + a)
 
       case a: AttrOneManID             => updateOne(ns, attr, owner, a.vs, transformID)
       case a: AttrOneManString         => updateOne(ns, attr, owner, a.vs, transformString)
@@ -111,17 +349,17 @@ class ResolveUpdate(
     }
   }
 
-  private def resolveAttrOneTac(a: AttrOneTac): Unit = {
-    a match {
-      case AttrOneTacID(ns, "id", Eq, ids1, _, _, _, _, _, _, _, _) => handleIds(ns, ids1)
-
-      case a if a.attr == "id" => throw ModelError(
-        s"Generic id attribute not allowed in update molecule. Found:\n" + a)
-
-      case a if proxy.uniqueAttrs.contains(a.cleanName) => handleUniqueFilterAttr(a)
-      case a                                            => handleFilterAttr(a)
-    }
-  }
+  //  private def resolveAttrOneTac(a: AttrOneTac): Unit = {
+  //    //    a match {
+  //    //      case AttrOneTacID(ns, "id", Eq, ids1, _, _, _, _, _, _, _, _) => handleIds(ns, ids1)
+  //    //
+  //    //      case a if a.attr == "id" => throw ModelError(
+  //    //        s"Generic id attribute not allowed in update molecule. Found:\n" + a)
+  //    //
+  //    //      case a if proxy.uniqueAttrs.contains(a.cleanName) => handleUniqueFilterAttr(a)
+  //    //      case a                                            => handleFilterAttr(a)
+  //    //    }
+  //  }
 
   private def resolveAttrSetMan(a: AttrSetMan): Unit = {
     val (ns, attr, refNs, owner) = (a.ns, a.attr, a.refNs, a.owner)

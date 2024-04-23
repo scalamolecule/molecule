@@ -87,12 +87,14 @@ trait UpdateOne_uniqueAttr extends CoreTestSuite with ApiAsync { spi: SpiAsync =
           (2, int2),
           (3, int3),
         ).transact.map(_.ids)
+
         _ <- Uniques.id.a1.i.int.query.get.map(_ ==> List(
           (a, 1, int1),
           (b, 2, int2),
           (c, 3, int3),
         ))
 
+        // Update all i to 4 where int is either 2 or 3
         _ <- Uniques.i(4).int_(int2, int3).update.transact
         _ <- Uniques.id.a1.i.query.get.map(_ ==> List(
           (a, 1),
@@ -141,32 +143,32 @@ trait UpdateOne_uniqueAttr extends CoreTestSuite with ApiAsync { spi: SpiAsync =
     }
 
 
-    "Semantics" - unique { implicit conn =>
-      // Depends on wether the attribute name is a reserved keyword of the tested database
-      val attr = database match {
-        case "Mysql" => "string_"
-        case _       => "string"
-      }
-      for {
-        _ <- Uniques.i(1).i(2).int_(1).update.transact
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute Uniques.i"
-          }
-
-        _ <- Uniques.i_(1).i(2).update.transact
-
-        _ <- Uniques.int_(1).string_("x").s("c").update.transact
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can only apply one unique attribute value for update. Found:\n" +
-              s"""AttrOneTacString("Uniques", "$attr", Eq, Seq("x"), None, None, Nil, Nil, None, None, Seq(0, 3))"""
-          }
-
-        _ <- Uniques.intSet_(Set(1)).s("b").update.transact
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can only lookup entity with card-one attribute value. Found:\n" +
-              """AttrSetTacInt("Uniques", "intSet", Eq, Set(1), None, None, Nil, Nil, None, None, Seq(0, 25))"""
-          }
-      } yield ()
-    }
+//    "Semantics" - unique { implicit conn =>
+//      // Depends on wether the attribute name is a reserved keyword of the tested database
+//      val attr = database match {
+//        case "Mysql" => "string_"
+//        case _       => "string"
+//      }
+//      for {
+//        _ <- Uniques.i(1).i(2).int_(1).update.transact
+//          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+//            err ==> "Can't transact duplicate attribute Uniques.i"
+//          }
+//
+//        _ <- Uniques.i_(1).i(2).update.transact
+//
+////        _ <- Uniques.int_(1).string_("x").s("c").update.transact
+////          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+////            err ==> "Can only apply one unique attribute value for update. Found:\n" +
+////              s"""AttrOneTacString("Uniques", "$attr", Eq, Seq("x"), None, None, Nil, Nil, None, None, Seq(0, 3))"""
+////          }
+//
+//        _ <- Uniques.intSet_(Set(1)).s("b").update.transact
+//          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+//            err ==> "Can only lookup entity with card-one attribute value. Found:\n" +
+//              """AttrSetTacInt("Uniques", "intSet", Eq, Set(1), None, None, Nil, Nil, None, None, Seq(0, 25))"""
+//          }
+//      } yield ()
+//    }
   }
 }

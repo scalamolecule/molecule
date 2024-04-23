@@ -11,6 +11,7 @@ trait Model2QueryBase extends ModelUtils {
 
   private var level         = 1
   private val sortsPerLevel = mutable.Map[Int, List[Int]](1 -> Nil)
+  private var hasBinding    = false
   private var hasAggr       = false
   private var hasAggrSet    = false
 
@@ -86,6 +87,53 @@ trait Model2QueryBase extends ModelUtils {
         validate(elements)
     }
 
+    checkSorting()
+    checkBinding()
+
+    val initialNs = getInitialNonGenericNs(elements)
+
+    val elements1 = if (hasFilterAttr) {
+      checkFilterAttrs(elements, initialNs, addFilterAttr)
+    } else elements
+
+    (elements1, initialNs, hasFilterAttr)
+  }
+
+  private def validateAttr(a: Attr): Unit = {
+    if (a.sort.nonEmpty) {
+      sortsPerLevel(level) = sortsPerLevel(level) :+ a.sort.get.substring(1, 2).toInt
+    }
+    a.filterAttr.foreach(_ => hasFilterAttr = true)
+    if ((a.isInstanceOf[Mandatory] || a.isInstanceOf[Tacit]) && a.attr != "id") {
+      hasBinding = true
+    }
+  }
+
+  private def validateNested(): Unit = {
+    level += 1
+    sortsPerLevel += level -> Nil
+  }
+
+  private def validateNestedOpt(prevElements: List[Element]): Unit = {
+    level += 1
+    sortsPerLevel += level -> Nil
+    val prevElementsWithoutId = prevElements.filterNot {
+      case a: Attr if a.attr == "id" => true
+      case _                         => false
+    }
+    if (prevElementsWithoutId.length == 1) {
+      prevElementsWithoutId.head match {
+        case _: AttrOneOpt | _: AttrSetOpt | _: AttrSeqOpt | _: AttrMapOpt =>
+          throw ModelError(
+            s"Single optional attribute before optional nested data structure " +
+              s"is not allowed (id attribute doesn't count)."
+          )
+        case _                                                             => ()
+      }
+    }
+  }
+
+  private def checkSorting(): Unit = {
     sortsPerLevel.foreach {
       case (_, Nil)         => ()
       case (level, indexes) => indexes.sorted match {
@@ -109,38 +157,13 @@ trait Model2QueryBase extends ModelUtils {
           )
       }
     }
-
-    val initialNs = getInitialNonGenericNs(elements)
-
-    val elements1 = if (hasFilterAttr) {
-      checkFilterAttrs(elements, initialNs, addFilterAttr)
-    } else elements
-
-    (elements1, initialNs, hasFilterAttr)
   }
 
-  private def validateAttr(a: Attr): Unit = {
-    if (a.sort.nonEmpty) {
-      sortsPerLevel(level) = sortsPerLevel(level) :+ a.sort.get.substring(1, 2).toInt
-    }
-    a.filterAttr.foreach(_ => hasFilterAttr = true)
-  }
-
-  private def validateNested(): Unit = {
-    level += 1
-    sortsPerLevel += level -> Nil
-  }
-
-  private def validateNestedOpt(prevElements: List[Element]): Unit = {
-    level += 1
-    sortsPerLevel += level -> Nil
-    if (prevElements.length == 1) {
-      prevElements.head match {
-        case _: AttrOneOpt => throw ModelError(
-          s"Single optional attribute before optional nested data structure is not allowed."
-        )
-        case _             => ()
-      }
+  private def checkBinding(): Unit = {
+    if (!hasBinding) {
+      throw ModelError(
+        "Query needs at least 1 mandatory/tacit attribute (id not counting)."
+      )
     }
   }
 

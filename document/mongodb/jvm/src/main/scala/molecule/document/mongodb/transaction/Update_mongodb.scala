@@ -42,7 +42,11 @@ trait Update_mongodb
       s"""RefData(
          |  referee             : $referee1
          |  ns                  : $ns
-         |  update              : $update
+         |  setDoc              : $setDoc
+         |  unsetDoc            : $unsetDoc
+         |  pushDoc             : $pushDoc
+         |  addToSet            : $addToSet
+         |  pullAll             : $pullAll
          |  arrayFilters        : $arrayFilters
          |  ids                 : $ids
          |  filterElements      : $filterElements1
@@ -65,15 +69,41 @@ trait Update_mongodb
     dd.foreach {
       case RefData(_, ns, setDoc, unsetDoc, pushDoc, addToSet, pullAll, arrayFilters,
       ids, filterElements, uniqueFilterElements) =>
-        val ids1 = if (isUpdate) {
+        //        val ids1x = if (isUpdate) {
+        //          if (ids.nonEmpty && filterElements.nonEmpty) {
+        //            val filterIds = query(AttrOneManID(ns, "id", Eq, ids) +: filterElements)
+        //            val validIds  = ids.intersect(filterIds)
+        //            validIds
+        //
+        //          } else if (ids.nonEmpty && uniqueFilterElements.nonEmpty) {
+        //            val filterIds = query(AttrOneManID(ns, "id", Eq, ids) +: uniqueFilterElements.toList)
+        //            val validIds  = ids.intersect(filterIds)
+        //            validIds
+        //
+        //          } else if (uniqueFilterElements.nonEmpty) {
+        //            val filterIds = query(AttrOneManID(ns, "id", V) +: uniqueFilterElements.toList)
+        //            filterIds
+        //
+        //          } else if (filterElements.nonEmpty) {
+        //            val filterIds = query(AttrOneManID(ns, "id", V) +: filterElements)
+        //            filterIds
+        //          } else {
+        //            ids
+        //          }
+        //        } else if (ids.nonEmpty) {
+        //          ids
+        //        } else {
+        //          query(AttrOneManID(ns, "id", V) +: filterElements)
+        //        }
+        val ids1 = {
           if (ids.nonEmpty && filterElements.nonEmpty) {
             val filterIds = query(AttrOneManID(ns, "id", Eq, ids) +: filterElements)
             val validIds  = ids.intersect(filterIds)
             validIds
 
           } else if (ids.nonEmpty && uniqueFilterElements.nonEmpty) {
-            val filterIds = query(AttrOneManID(ns, "id", Eq, ids) +: uniqueFilterElements.toList)
-            val validIds  = ids.intersect(filterIds)
+            val uniqueIds = query(AttrOneManID(ns, "id", Eq, ids) +: uniqueFilterElements.toList)
+            val validIds  = ids.intersect(uniqueIds)
             validIds
 
           } else if (uniqueFilterElements.nonEmpty) {
@@ -86,12 +116,36 @@ trait Update_mongodb
           } else {
             ids
           }
-        } else if (ids.nonEmpty) {
-          ids
-        } else {
-          query(AttrOneManID(ns, "id", V) +: filterElements)
         }
-
+        //        val ids1 = {
+        //          if (ids.nonEmpty && filterElements.nonEmpty) {
+        //            val filterIds = query(AttrOneManID(ns, "id", Eq, ids) +: filterElements)
+        //            val validIds  = ids.intersect(filterIds)
+        //            validIds
+        //
+        //          } else if (ids.nonEmpty && uniqueFilterElements.nonEmpty) {
+        //            val filterIds = query(AttrOneManID(ns, "id", Eq, ids) +: uniqueFilterElements.toList)
+        //            val validIds  = ids.intersect(filterIds)
+        //            validIds
+        //
+        //          } else if (uniqueFilterElements.nonEmpty) {
+        ////          } else if (ids.isEmpty && uniqueFilterElements.nonEmpty) {
+        //            val filterIds = query(AttrOneManID(ns, "id", V) +: uniqueFilterElements.toList)
+        //            filterIds
+        //
+        //          } else if (filterElements.nonEmpty) {
+        ////          } else if (ids.isEmpty && filterElements.nonEmpty) {
+        //            val filterIds = query(AttrOneManID(ns, "id", V) +: filterElements)
+        //            filterIds
+        //          } else if (ids.nonEmpty) {
+        ////          } else {
+        //            ids
+        //          }
+        //          else {
+        //            println("++++++++ " + filterElements)
+        //            query(AttrOneManID(ns, "id", V) +: filterElements)
+        //          }
+        //        }
         if (ids1.nonEmpty) {
           val idArray = new BsonArray()
           ids1.foreach(id => idArray.add(new BsonObjectId(new ObjectId(id))))
@@ -162,6 +216,16 @@ trait Update_mongodb
     }
   }
 
+  override protected def handleBackRef(backRef: BackRef): Unit = {
+    d.referee.fold[Unit] {
+      path = path.init
+      d.filterElements = d.filterElements :+ backRef
+    } { referee =>
+      path = Nil
+      d = referee
+    }
+  }
+
   override protected def updateOne[T](
     ns: String,
     attr: String,
@@ -169,12 +233,11 @@ trait Update_mongodb
     vs: Seq[T],
     transformValue: T => Any,
   ): Unit = {
-    if (isUpdate) {
-      if (owner) {
-        throw ModelError("Can't update non-existing ids of embedded documents in MongoDB.")
-      }
-      d.filterElements = d.filterElements :+ AttrOneTacInt(ns, attr) // dummy filter
+    if (owner) {
+      throw ModelError("Can't update non-existing ids of embedded documents in MongoDB.")
     }
+    d.filterElements = d.filterElements :+ AttrOneTacInt(ns, attr) // dummy filter
+
     lazy val pathAttr = if (path.isEmpty) attr else path.mkString("", ".", "." + attr)
     vs match {
       case Seq(v) => d.setDoc.append(pathAttr, transformValue(v).asInstanceOf[BsonValue])
@@ -182,7 +245,7 @@ trait Update_mongodb
       case vs     =>
         val cleanAttr = attr.replace("_", "")
         throw ExecutionError(
-          s"Can only $update one value for attribute `$ns.$cleanAttr`. Found: " + vs.mkString(", ")
+          s"Can only update one value for attribute `$ns.$cleanAttr`. Found: " + vs.mkString(", ")
         )
     }
   }
@@ -298,12 +361,12 @@ trait Update_mongodb
     //    exts: List[String],
     //    set2array: Set[Any] => Array[AnyRef],
   ): Unit = {
-    if (isUpdate) {
-      if (owner) {
-        throw ModelError("Can't update non-existing ids of embedded documents in MongoDB.")
-      }
-      d.filterElements = d.filterElements :+ AttrOneTacInt(ns, attr) // dummy filter
-    }
+    //    if (isUpdate) {
+    //      if (owner) {
+    //        throw ModelError("Can't update non-existing ids of embedded documents in MongoDB.")
+    //      }
+    //          d.filterElements = d.filterElements :+ AttrOneTacInt(ns, attr) // dummy filter
+    //    }
     lazy val pathAttr = if (path.isEmpty) attr else path.mkString("", ".", "." + attr)
     if (map.nonEmpty) {
       val mapDoc = new BsonDocument()
@@ -326,42 +389,12 @@ trait Update_mongodb
     transformValue: T => Any,
     exts: List[String],
     value2json: (StringBuffer, T) => StringBuffer,
-    //    set2array: Set[Any] => Array[AnyRef],
   ): Unit = {
-    lazy val pathAttr = if (path.isEmpty) attr else path.mkString("", ".", "." + attr)
-    //    val iterable = iterable0.asInstanceOf[Iterable[T]]
-    //    map.size match {
-    //      case 0 => ()
-    //      case 1 =>
-    //        d.pushDoc.append(pathAttr, transformValue(map.head).asInstanceOf[BsonValue])
-    //      case _ =>
-    //        lazy val array = new BsonArray()
-    //        map.map(v => array.add(transformValue(v).asInstanceOf[BsonValue]))
-    //        d.pushDoc.append(pathAttr, new BsonDocument("$each", array))
-    //    }
-
     if (map.nonEmpty) {
-      //      lazy val array = new BsonArray()
-      //      map.map(v => array.add(transformValue(v).asInstanceOf[BsonValue]))
-
-
-      //      val pairs = new BsonDocument()
-      //      map.map { case (k, v) =>
-      //        pairs.append(validKey(k), transformValue(v).asInstanceOf[BsonValue])
-      //      }
-      //
-      //      d.pushDoc.append(pathAttr, new BsonDocument("$each", pairs))
-
-
-      val mapDoc = new BsonDocument()
       map.map { case (k, v) =>
-        //        mapDoc.append(ns + "." + validKey(k), transformValue(v).asInstanceOf[BsonValue])
         d.setDoc.append(attr + "." + validKey(k), transformValue(v).asInstanceOf[BsonValue])
       }
-
-
     }
-
   }
 
   override protected def updateMapRemove[T](
@@ -373,30 +406,16 @@ trait Update_mongodb
     transformValue: T => Any,
     exts: List[String],
     value2json: (StringBuffer, T) => StringBuffer,
-    //    one2json: T => String
   ): Unit = {
-    lazy val pathAttr = if (path.isEmpty) attr else path.mkString("", ".", "." + attr)
-
-
-    //    val vs = new BsonArray()
-    //    val iterable = iterable0.asInstanceOf[Iterable[T]]
-    //    if (iterable.nonEmpty) {
-    //      iterable.map(v => vs.add(transformValue(v).asInstanceOf[BsonValue]))
-    //    }
-
-    //    val mapDoc = new BsonDocument()
-    map.map { case (k, v) =>
-//            mapDoc.append(ns + "." + validKey(k), transformValue(v).asInstanceOf[BsonValue])
-      d.unsetDoc.append(attr + "." + validKey(k), transformValue(v).asInstanceOf[BsonValue])
+    map.map { case (k, _) =>
+      d.unsetDoc.append(attr + "." + validKey(k), new BsonNull())
     }
-
-
   }
 
 
   override protected def handleIds(ns: String, ids0: Seq[String]): Unit = {
     if (d.ids.nonEmpty) {
-      throw ModelError(s"Can't apply entity ids twice in $update.")
+      throw ModelError(s"Can't apply entity ids twice in update.")
     }
     d.ids = ids0
   }
@@ -404,7 +423,7 @@ trait Update_mongodb
   override protected def handleUniqueFilterAttr(uniqueFilterAttr: AttrOneTac): Unit = {
     if (d.uniqueFilterElements.nonEmpty) {
       throw ModelError(
-        s"Can only apply one unique attribute value for $update. Found:\n" + uniqueFilterAttr
+        s"Can only apply one unique attribute value for update. Found:\n" + uniqueFilterAttr
       )
     }
     d.uniqueFilterElements += uniqueFilterAttr
@@ -415,15 +434,6 @@ trait Update_mongodb
   }
 
 
-  override protected def handleBackRef(backRef: BackRef): Unit = {
-    d.referee.fold[Unit] {
-      path = path.init
-      d.filterElements = d.filterElements :+ backRef
-    } { referee =>
-      path = Nil
-      d = referee
-    }
-  }
 
 
   // Helpers -------------------------------------------------------------------
@@ -435,12 +445,11 @@ trait Update_mongodb
     iterable: M[T],
     transformValue: T => Any,
   ): Unit = {
-    if (isUpdate) {
-      if (owner) {
-        throw ModelError("Can't update non-existing ids of embedded documents in MongoDB.")
-      }
-      d.filterElements = d.filterElements :+ AttrOneTacInt(ns, attr) // dummy filter
+    if (owner) {
+      throw ModelError("Can't update non-existing ids of embedded documents in MongoDB.")
     }
+    //    d.filterElements = d.filterElements :+ AttrOneTacInt(ns, attr) // dummy filter
+
     lazy val pathAttr = if (path.isEmpty) attr else path.mkString("", ".", "." + attr)
     lazy val array    = new BsonArray()
     if (iterable.nonEmpty) {

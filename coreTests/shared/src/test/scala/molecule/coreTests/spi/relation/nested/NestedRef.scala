@@ -324,7 +324,8 @@ trait NestedRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         _ <- A.s_?.Bb.*?(B.i.C.i.s_?).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Single optional attribute before optional nested data structure is not allowed."
+            err ==> "Single optional attribute before optional nested data structure " +
+              "is not allowed (id attribute doesn't count)."
           }
         // Ok:
         _ <- A.s.Bb.*?(B.i.C.i.s_?).query.get

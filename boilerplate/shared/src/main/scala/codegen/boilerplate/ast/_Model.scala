@@ -47,9 +47,9 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
   private def makeAttrGroup(card: String, mode: String, modeFull: String): String = {
     // Render attribute toString method so that a printout can be directly used as valid Scala code
     def body(baseTpe0: String): String = {
-      val baseTpe  = if (baseTpe0 == "ID") "String" else baseTpe0
-      val attrType = s"Attr$card$mode$baseTpe0"
-      val vs       = (card, mode, baseTpe) match {
+      val baseTpe   = if (baseTpe0 == "ID") "String" else baseTpe0
+      val attrType  = s"Attr$card$mode$baseTpe0"
+      val vs        = (card, mode, baseTpe) match {
         case ("One", "Opt", _)      => s"Option[Seq[$baseTpe]] = None"
         case ("One", _, _)          => s"Seq[$baseTpe] = Nil"
         case ("Set", "Opt", _)      => s"Option[Set[$baseTpe]] = None"
@@ -61,8 +61,8 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
         case ("Map", "Opt", _)      => s"Option[Map[String, $baseTpe]] = None"
         case ("Map", _, _)          => s"Map[String, $baseTpe] = Map.empty[String, $baseTpe]"
       }
-      val format_? = !List("Int", "Double", "Boolean").contains(baseTpe)
-      val format   = baseTpe match {
+      val format_?  = !List("Int", "Double", "Boolean").contains(baseTpe)
+      val format    = baseTpe match {
         case "String"         => """"\"" + escStr(v) + "\"""""
         case "Int"            => "v"
         case "Long"           => """v.toString + "L""""
@@ -86,10 +86,14 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
         case "Short"          => """s"$v.toShort""""
         case "Char"           => """s"'$v'""""
       }
-      val ownerStr = if (baseTpe0 == "ID") ", $owner" else ""
+      val nullCheck = baseTpe match {
+        case "Long" | "Float" | "Byte" | "Short" | "Char" => """v.toString == "0""""
+        case _                                            => "v == null"
+      }
+      val ownerStr  = if (baseTpe0 == "ID") ", $owner" else ""
 
       val attrStr = card match {
-        case "One" => mode match {
+        case "One"                      => mode match {
           case "Opt" =>
             if (format_?)
               s"""def format(v: $baseTpe): String = $format
@@ -107,7 +111,7 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
               s"""def vss: String = vs.mkString("Seq(", ", ", ")")
                  |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
         }
-        case "Set" => mode match {
+        case "Set"                      => mode match {
           case "Opt" =>
             if (format_?)
               s"""def format(v: $baseTpe): String = $format
@@ -127,15 +131,15 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
         }
         case "Seq" if baseTpe == "Byte" => mode match {
           case "Opt" =>
-              s"""def format(v: $baseTpe): String = $format
-                 |      def vss: String = vs.fold("None")(_.map(format).mkString("Some(Array(", ", ", "))"))
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords$ownerStr)\"\"\"""".stripMargin
+            s"""def format(v: $baseTpe): String = $format
+               |      def vss: String = vs.fold("None")(_.map(format).mkString("Some(Array(", ", ", "))"))
+               |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords$ownerStr)\"\"\"""".stripMargin
           case _     =>
-              s"""def format(v: $baseTpe): String = $format
-                 |      def vss: String = vs.map(format).mkString("Array(", ", ", ")")
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords$ownerStr)\"\"\"""".stripMargin
+            s"""def format(v: $baseTpe): String = $format
+               |      def vss: String = vs.map(format).mkString("Array(", ", ", ")")
+               |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords$ownerStr)\"\"\"""".stripMargin
         }
-        case "Seq" => mode match {
+        case "Seq"                      => mode match {
           case "Opt" =>
             if (format_?)
               s"""def format(v: $baseTpe): String = $format
@@ -153,10 +157,10 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
               s"""def vss: String = vs.mkString("Seq(", ", ", ")")
                  |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
         }
-        case "Map" => mode match {
+        case "Map"                      => mode match {
           case "Opt" =>
             if (format_?)
-              s"""def format(v: $baseTpe): String = $format
+              s"""def format(v: $baseTpe): String = if ($nullCheck) "null" else $format
                  |      def vss: String = vs.fold("None")(_.map { case (k, v) => s\"\"\"("$$k", $${format(v)})\"\"\" }.mkString("Some(Map(", ", ", "))"))
                  |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords$ownerStr)\"\"\"""".stripMargin
             else
@@ -164,7 +168,7 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
                  |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
           case _     =>
             if (format_?)
-              s"""def format(v: $baseTpe): String = $format
+              s"""def format(v: $baseTpe): String = if ($nullCheck) "null" else $format
                  |      def vss: String = vs.map { case (k, v) => s\"\"\"("$$k", $${format(v)})\"\"\" }.mkString("Map(", ", ", ")")
                  |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords$ownerStr)\"\"\"""".stripMargin
             else

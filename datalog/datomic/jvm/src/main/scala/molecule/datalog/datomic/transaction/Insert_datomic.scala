@@ -353,6 +353,7 @@ trait Insert_datomic
             def process(): Unit = {
               e = nestedBaseId
               addRef(ns, refAttr, refNs, CardOne, owner)(nestedTpl)
+              unusedRefIds -= e
               e0 = e
               nested2stmts(nestedTpl)
             }

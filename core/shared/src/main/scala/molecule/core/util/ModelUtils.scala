@@ -121,9 +121,9 @@ trait ModelUtils {
   }
 
   protected def validKey(key: String) = {
-    if (key.matches("[a-zA-Z_0-9]+")) key else {
+    if (key.matches("[a-zA-Z_\\-0-9]+")) key else {
       throw ModelError(
-        "Keys of map attributes can only contain [a-zA-Z_0-9] (no spaces or special characters)."
+        "Keys of map attributes can only contain [a-zA-Z_\\-0-9] (no spaces or special characters)."
       )
     }
   }

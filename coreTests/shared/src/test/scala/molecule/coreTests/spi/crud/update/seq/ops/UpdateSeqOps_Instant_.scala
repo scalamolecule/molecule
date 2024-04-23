@@ -14,60 +14,88 @@ trait UpdateSeqOps_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
 
   override lazy val tests = Tests {
 
-    "apply (replace/add all)" - types { implicit conn =>
+
+    "apply new values" - types { implicit conn =>
       for {
-        id <- Ns.instantSeq(List(instant1, instant2, instant2)).save.transact.map(_.id)
+        id <- Ns.i(42).save.transact.map(_.id)
+        // Seq attribute not yet asserted
+        _ <- Ns.instantSeq.query.get.map(_ ==> Nil)
+
+        // Applying Seq of values to non-asserted Seq attribute adds the attribute with the update
+        _ <- Ns(id).instantSeq(List(instant1, instant2, instant2)).update.transact
         _ <- Ns.instantSeq.query.get.map(_.head ==> List(instant1, instant2, instant2))
 
-        // Applying Seq of values replaces previous Seq
-        _ <- Ns(id).instantSeq(List(instant3, instant4, instant4)).update.transact
-        _ <- Ns.instantSeq.query.get.map(_.head ==> List(instant3, instant4, instant4))
+        // Applying Seq of values replaces previous values
+        _ <- Ns(id).instantSeq(List(instant2, instant3, instant3)).update.transact
+        _ <- Ns.instantSeq.query.get.map(_.head ==> List(instant2, instant3, instant3))
 
-        // Applying empty Seq of values deletes previous Seq
+        // Add other attribute and update Seq attribute in one go
+        _ <- Ns(id).s("foo").instantSeq(List(instant3, instant4, instant4)).update.transact
+        _ <- Ns.i.s.instantSeq.query.get.map(_.head ==> (42, "foo", List(instant3, instant4, instant4)))
+
+        // Applying empty Seq of values deletes attribute
         _ <- Ns(id).instantSeq(List.empty[Instant]).update.transact
         _ <- Ns.instantSeq.query.get.map(_ ==> Nil)
 
-        id <- Ns.instantSeq(List(instant1, instant2, instant2)).save.transact.map(_.id)
-        // Applying nothing deletes previous Seq
+        _ <- Ns(id).instantSeq(List(instant1, instant2, instant2)).update.transact
+        // Apply nothing to delete attribute
         _ <- Ns(id).instantSeq().update.transact
         _ <- Ns.instantSeq.query.get.map(_ ==> Nil)
+
+        // Entity still has other attributes
+        _ <- Ns.i.s.query.get.map(_.head ==> (42, "foo"))
       } yield ()
     }
 
 
     "add" - types { implicit conn =>
       for {
-        id <- Ns.instantSeq(List(instant1)).save.transact.map(_.id)
+        id <- Ns.i(42).save.transact.map(_.id)
+        // Seq attribute not yet asserted
+        _ <- Ns.instantSeq.query.get.map(_ ==> Nil)
 
-        // Add value to end of Seq
-        _ <- Ns(id).instantSeq.add(instant2).update.transact
-        _ <- Ns.instantSeq.query.get.map(_.head ==> List(instant1, instant2))
-
-        // Add existing value
+        // Adding value to non-asserted Seq attribute adds the attribute with the update
         _ <- Ns(id).instantSeq.add(instant1).update.transact
-        _ <- Ns.instantSeq.query.get.map(_.head ==> List(instant1, instant2, instant1))
+        _ <- Ns.instantSeq.query.get.map(_.head ==> List(instant1))
 
-        // Add multiple values (vararg)
+        // Adding existing value to Seq adds it to the end
+        _ <- Ns(id).instantSeq.add(instant1).update.transact
+        _ <- Ns.instantSeq.query.get.map(_.head ==> List(instant1, instant1))
+
+        // Add new value to end of Seq
+        _ <- Ns(id).instantSeq.add(instant2).update.transact
+        _ <- Ns.instantSeq.query.get.map(_.head ==> List(instant1, instant1, instant2))
+
+        // Add multiple values with varargs
         _ <- Ns(id).instantSeq.add(instant3, instant4).update.transact
-        _ <- Ns.instantSeq.query.get.map(_.head ==> List(instant1, instant2, instant1, instant3, instant4))
+        _ <- Ns.instantSeq.query.get.map(_.head ==> List(instant1, instant1, instant2, instant3, instant4))
 
-        // Add multiple values (Seq)
+        // Add multiple values with Iterable
         _ <- Ns(id).instantSeq.add(List(instant4, instant5)).update.transact
-        _ <- Ns.instantSeq.query.get.map(_.head ==> List(instant1, instant2, instant1, instant3, instant4, instant4, instant5))
+        _ <- Ns.instantSeq.query.get.map(_.head ==> List(instant1, instant1, instant2, instant3, instant4, instant4, instant5))
 
-        // Adding empty Seq of values has no effect
-        _ <- Ns(id).instantSeq.add(List.empty[Instant]).update.transact
-        _ <- Ns.instantSeq.query.get.map(_.head ==> List(instant1, instant2, instant1, instant3, instant4, instant4, instant5))
+        // Adding empty Iterable of values has no effect
+        _ <- Ns(id).instantSeq.add(Set.empty[Instant]).update.transact
+        _ <- Ns.instantSeq.query.get.map(_.head ==> List(instant1, instant1, instant2, instant3, instant4, instant4, instant5))
       } yield ()
     }
 
 
     "remove" - types { implicit conn =>
       for {
-        id <- Ns.instantSeq(List(
+        id <- Ns.i(42).save.transact.map(_.id)
+        // Seq attribute not yet asserted
+        _ <- Ns.instantSeq.query.get.map(_ ==> Nil)
+
+        // Removing value from non-asserted Seq has no effect
+        _ <- Ns(id).instantSeq.remove(instant1).update.transact
+        _ <- Ns.instantSeq.query.get.map(_ ==> Nil)
+
+        // Start with some values
+        _ <- Ns(id).instantSeq.add(
           instant1, instant2, instant3, instant4, instant5, instant6, instant7,
           instant1, instant2, instant3, instant4, instant5, instant6, instant7,
-        )).save.transact.map(_.id)
+        ).update.transact
 
         // Remove all instances of a value
         _ <- Ns(id).instantSeq.remove(instant7).update.transact
@@ -90,26 +118,26 @@ trait UpdateSeqOps_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
           instant1, instant2, instant3, instant4, instant5,
         ))
 
-        // Remove multiple values (vararg)
+        // Remove multiple values with vararg
         _ <- Ns(id).instantSeq.remove(instant4, instant5).update.transact
         _ <- Ns.instantSeq.query.get.map(_.head ==> List(
           instant1, instant2, instant3,
           instant1, instant2, instant3,
         ))
 
-        // Remove multiple values (Seq)
+        // Remove multiple values with Iterable
         _ <- Ns(id).instantSeq.remove(List(instant2, instant3)).update.transact
         _ <- Ns.instantSeq.query.get.map(_.head ==> List(
           instant1,
           instant1
         ))
 
-        // Removing empty Seq of values has no effect
-        _ <- Ns(id).instantSeq.remove(List.empty[Instant]).update.transact
+        // Removing empty Iterable of values has no effect
+        _ <- Ns(id).instantSeq.remove(Vector.empty[Instant]).update.transact
         _ <- Ns.instantSeq.query.get.map(_.head ==> List(instant1, instant1))
 
-        // Removing all remaining elements deletes the attribute
-        _ <- Ns(id).instantSeq.remove(Seq(instant1)).update.transact
+        // Removing all remaining values deletes the attribute
+        _ <- Ns(id).instantSeq.remove(Set(instant1)).update.transact
         _ <- Ns.instantSeq.query.get.map(_ ==> Nil)
       } yield ()
     }

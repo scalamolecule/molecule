@@ -14,60 +14,88 @@ trait UpdateSeqOps_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
 
   override lazy val tests = Tests {
 
-    "apply (replace/add all)" - types { implicit conn =>
+
+    "apply new values" - types { implicit conn =>
       for {
-        id <- Ns.localTimeSeq(List(localTime1, localTime2, localTime2)).save.transact.map(_.id)
+        id <- Ns.i(42).save.transact.map(_.id)
+        // Seq attribute not yet asserted
+        _ <- Ns.localTimeSeq.query.get.map(_ ==> Nil)
+
+        // Applying Seq of values to non-asserted Seq attribute adds the attribute with the update
+        _ <- Ns(id).localTimeSeq(List(localTime1, localTime2, localTime2)).update.transact
         _ <- Ns.localTimeSeq.query.get.map(_.head ==> List(localTime1, localTime2, localTime2))
 
-        // Applying Seq of values replaces previous Seq
-        _ <- Ns(id).localTimeSeq(List(localTime3, localTime4, localTime4)).update.transact
-        _ <- Ns.localTimeSeq.query.get.map(_.head ==> List(localTime3, localTime4, localTime4))
+        // Applying Seq of values replaces previous values
+        _ <- Ns(id).localTimeSeq(List(localTime2, localTime3, localTime3)).update.transact
+        _ <- Ns.localTimeSeq.query.get.map(_.head ==> List(localTime2, localTime3, localTime3))
 
-        // Applying empty Seq of values deletes previous Seq
+        // Add other attribute and update Seq attribute in one go
+        _ <- Ns(id).s("foo").localTimeSeq(List(localTime3, localTime4, localTime4)).update.transact
+        _ <- Ns.i.s.localTimeSeq.query.get.map(_.head ==> (42, "foo", List(localTime3, localTime4, localTime4)))
+
+        // Applying empty Seq of values deletes attribute
         _ <- Ns(id).localTimeSeq(List.empty[LocalTime]).update.transact
         _ <- Ns.localTimeSeq.query.get.map(_ ==> Nil)
 
-        id <- Ns.localTimeSeq(List(localTime1, localTime2, localTime2)).save.transact.map(_.id)
-        // Applying nothing deletes previous Seq
+        _ <- Ns(id).localTimeSeq(List(localTime1, localTime2, localTime2)).update.transact
+        // Apply nothing to delete attribute
         _ <- Ns(id).localTimeSeq().update.transact
         _ <- Ns.localTimeSeq.query.get.map(_ ==> Nil)
+
+        // Entity still has other attributes
+        _ <- Ns.i.s.query.get.map(_.head ==> (42, "foo"))
       } yield ()
     }
 
 
     "add" - types { implicit conn =>
       for {
-        id <- Ns.localTimeSeq(List(localTime1)).save.transact.map(_.id)
+        id <- Ns.i(42).save.transact.map(_.id)
+        // Seq attribute not yet asserted
+        _ <- Ns.localTimeSeq.query.get.map(_ ==> Nil)
 
-        // Add value to end of Seq
-        _ <- Ns(id).localTimeSeq.add(localTime2).update.transact
-        _ <- Ns.localTimeSeq.query.get.map(_.head ==> List(localTime1, localTime2))
-
-        // Add existing value
+        // Adding value to non-asserted Seq attribute adds the attribute with the update
         _ <- Ns(id).localTimeSeq.add(localTime1).update.transact
-        _ <- Ns.localTimeSeq.query.get.map(_.head ==> List(localTime1, localTime2, localTime1))
+        _ <- Ns.localTimeSeq.query.get.map(_.head ==> List(localTime1))
 
-        // Add multiple values (vararg)
+        // Adding existing value to Seq adds it to the end
+        _ <- Ns(id).localTimeSeq.add(localTime1).update.transact
+        _ <- Ns.localTimeSeq.query.get.map(_.head ==> List(localTime1, localTime1))
+
+        // Add new value to end of Seq
+        _ <- Ns(id).localTimeSeq.add(localTime2).update.transact
+        _ <- Ns.localTimeSeq.query.get.map(_.head ==> List(localTime1, localTime1, localTime2))
+
+        // Add multiple values with varargs
         _ <- Ns(id).localTimeSeq.add(localTime3, localTime4).update.transact
-        _ <- Ns.localTimeSeq.query.get.map(_.head ==> List(localTime1, localTime2, localTime1, localTime3, localTime4))
+        _ <- Ns.localTimeSeq.query.get.map(_.head ==> List(localTime1, localTime1, localTime2, localTime3, localTime4))
 
-        // Add multiple values (Seq)
+        // Add multiple values with Iterable
         _ <- Ns(id).localTimeSeq.add(List(localTime4, localTime5)).update.transact
-        _ <- Ns.localTimeSeq.query.get.map(_.head ==> List(localTime1, localTime2, localTime1, localTime3, localTime4, localTime4, localTime5))
+        _ <- Ns.localTimeSeq.query.get.map(_.head ==> List(localTime1, localTime1, localTime2, localTime3, localTime4, localTime4, localTime5))
 
-        // Adding empty Seq of values has no effect
-        _ <- Ns(id).localTimeSeq.add(List.empty[LocalTime]).update.transact
-        _ <- Ns.localTimeSeq.query.get.map(_.head ==> List(localTime1, localTime2, localTime1, localTime3, localTime4, localTime4, localTime5))
+        // Adding empty Iterable of values has no effect
+        _ <- Ns(id).localTimeSeq.add(Set.empty[LocalTime]).update.transact
+        _ <- Ns.localTimeSeq.query.get.map(_.head ==> List(localTime1, localTime1, localTime2, localTime3, localTime4, localTime4, localTime5))
       } yield ()
     }
 
 
     "remove" - types { implicit conn =>
       for {
-        id <- Ns.localTimeSeq(List(
+        id <- Ns.i(42).save.transact.map(_.id)
+        // Seq attribute not yet asserted
+        _ <- Ns.localTimeSeq.query.get.map(_ ==> Nil)
+
+        // Removing value from non-asserted Seq has no effect
+        _ <- Ns(id).localTimeSeq.remove(localTime1).update.transact
+        _ <- Ns.localTimeSeq.query.get.map(_ ==> Nil)
+
+        // Start with some values
+        _ <- Ns(id).localTimeSeq.add(
           localTime1, localTime2, localTime3, localTime4, localTime5, localTime6, localTime7,
           localTime1, localTime2, localTime3, localTime4, localTime5, localTime6, localTime7,
-        )).save.transact.map(_.id)
+        ).update.transact
 
         // Remove all instances of a value
         _ <- Ns(id).localTimeSeq.remove(localTime7).update.transact
@@ -90,26 +118,26 @@ trait UpdateSeqOps_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
           localTime1, localTime2, localTime3, localTime4, localTime5,
         ))
 
-        // Remove multiple values (vararg)
+        // Remove multiple values with vararg
         _ <- Ns(id).localTimeSeq.remove(localTime4, localTime5).update.transact
         _ <- Ns.localTimeSeq.query.get.map(_.head ==> List(
           localTime1, localTime2, localTime3,
           localTime1, localTime2, localTime3,
         ))
 
-        // Remove multiple values (Seq)
+        // Remove multiple values with Iterable
         _ <- Ns(id).localTimeSeq.remove(List(localTime2, localTime3)).update.transact
         _ <- Ns.localTimeSeq.query.get.map(_.head ==> List(
           localTime1,
           localTime1
         ))
 
-        // Removing empty Seq of values has no effect
-        _ <- Ns(id).localTimeSeq.remove(List.empty[LocalTime]).update.transact
+        // Removing empty Iterable of values has no effect
+        _ <- Ns(id).localTimeSeq.remove(Vector.empty[LocalTime]).update.transact
         _ <- Ns.localTimeSeq.query.get.map(_.head ==> List(localTime1, localTime1))
 
-        // Removing all remaining elements deletes the attribute
-        _ <- Ns(id).localTimeSeq.remove(Seq(localTime1)).update.transact
+        // Removing all remaining values deletes the attribute
+        _ <- Ns(id).localTimeSeq.remove(Set(localTime1)).update.transact
         _ <- Ns.localTimeSeq.query.get.map(_ ==> Nil)
       } yield ()
     }

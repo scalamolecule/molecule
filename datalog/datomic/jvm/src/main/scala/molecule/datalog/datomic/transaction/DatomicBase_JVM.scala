@@ -34,6 +34,7 @@ trait DatomicBase_JVM extends DatomicDataType_JVM with ModelUtils {
   protected var ids            = Seq.empty[AnyRef]
   protected var filterElements = List.empty[Element]
 
+
   protected var stmt        : jList[AnyRef]       = null
   protected var backRefs    : Map[String, AnyRef] = Map.empty[String, AnyRef]
   protected val usedRefIds  : ListBuffer[AnyRef]  = new ListBuffer[AnyRef]
@@ -55,7 +56,10 @@ trait DatomicBase_JVM extends DatomicDataType_JVM with ModelUtils {
   protected def newId: String = {
     tempId = lowest - 1
     lowest = tempId
-    "#db/id[" + part + " " + tempId + "]"
+    if (part.isBlank)
+      "#db/id[" + tempId + "]"
+    else
+      "#db/id[" + part + " " + tempId + "]"
   }
   protected def kw(ns: String, attr: String) = Keyword.intern(ns, attr)
 

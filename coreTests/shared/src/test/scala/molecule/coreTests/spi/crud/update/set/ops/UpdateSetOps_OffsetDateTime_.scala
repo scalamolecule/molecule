@@ -9,6 +9,7 @@ import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
+import scala.collection.immutable.Set
 
 trait UpdateSetOps_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
@@ -16,47 +17,65 @@ trait UpdateSetOps_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: Sp
 
     "apply (replace/add all)" - types { implicit conn =>
       for {
-        id <- Ns.offsetDateTimeSet(Set(offsetDateTime1, offsetDateTime2)).save.transact.map(_.id)
+        id <- Ns.i(42).save.transact.map(_.id)
+        // Set attribute not yet asserted
+        _ <- Ns.offsetDateTimeSet.query.get.map(_ ==> Nil)
+
+        // Applying Set of values to non-asserted Set attribute adds the attribute with the update
+        _ <- Ns(id).offsetDateTimeSet(Set(offsetDateTime1, offsetDateTime2)).update.transact
         _ <- Ns.offsetDateTimeSet.query.get.map(_.head ==> Set(offsetDateTime1, offsetDateTime2))
 
         // Applying Set of values replaces previous Set
-        _ <- Ns(id).offsetDateTimeSet(Set(offsetDateTime3, offsetDateTime4)).update.transact
-        _ <- Ns.offsetDateTimeSet.query.get.map(_.head ==> Set(offsetDateTime3, offsetDateTime4))
+        _ <- Ns(id).offsetDateTimeSet(Set(offsetDateTime2, offsetDateTime3)).update.transact
+        _ <- Ns.offsetDateTimeSet.query.get.map(_.head ==> Set(offsetDateTime2, offsetDateTime3))
 
-        // Applying empty Set of values deletes previous Set
+        // Add other attribute and update Set attribute in one go
+        _ <- Ns(id).s("foo").offsetDateTimeSet(Set(offsetDateTime3, offsetDateTime4)).update.transact
+        _ <- Ns.i.s.offsetDateTimeSet.query.get.map(_.head ==> (42, "foo", Set(offsetDateTime3, offsetDateTime4)))
+
+        // Applying empty Set of values deletes attribute
         _ <- Ns(id).offsetDateTimeSet(Set.empty[OffsetDateTime]).update.transact
         _ <- Ns.offsetDateTimeSet.query.get.map(_ ==> Nil)
 
-        id <- Ns.offsetDateTimeSet(Set(offsetDateTime1, offsetDateTime2)).save.transact.map(_.id)
-        // Applying empty value deletes previous Set
+        _ <- Ns(id).offsetDateTimeSet(Set(offsetDateTime1, offsetDateTime2)).update.transact
+        // Apply nothing delete attribute
         _ <- Ns(id).offsetDateTimeSet().update.transact
         _ <- Ns.offsetDateTimeSet.query.get.map(_ ==> Nil)
+
+        // Entity still has other attributes
+        _ <- Ns.i.s.query.get.map(_.head ==> (42, "foo"))
       } yield ()
     }
 
 
     "add" - types { implicit conn =>
       for {
-        id <- Ns.offsetDateTimeSet(Set(offsetDateTime1)).save.transact.map(_.id)
+        id <- Ns.i(42).save.transact.map(_.id)
+        // Seq attribute not yet asserted
+        _ <- Ns.offsetDateTimeSet.query.get.map(_ ==> Nil)
 
-        // Add value
+        // Adding value to non-asserted Set attribute adds the attribute with the update
+        _ <- Ns(id).offsetDateTimeSet.add(offsetDateTime1).update.transact
+        _ <- Ns.offsetDateTimeSet.query.get.map(_.head ==> Set(offsetDateTime1))
+
+        // Adding existing value to Set changes nothing
+        _ <- Ns(id).offsetDateTimeSet.add(offsetDateTime1).update.transact
+        _ <- Ns.offsetDateTimeSet.query.get.map(_.head ==> Set(offsetDateTime1))
+
+        // Add new value
         _ <- Ns(id).offsetDateTimeSet.add(offsetDateTime2).update.transact
         _ <- Ns.offsetDateTimeSet.query.get.map(_.head ==> Set(offsetDateTime1, offsetDateTime2))
 
-        // Adding existing value has no effect (Set semantics of only unique values)
-        _ <- Ns(id).offsetDateTimeSet.add(offsetDateTime2).update.transact
-        _ <- Ns.offsetDateTimeSet.query.get.map(_.head ==> Set(offsetDateTime1, offsetDateTime2))
-
-        // Add multiple values (vararg)
+        // Add multiple values with vararg
         _ <- Ns(id).offsetDateTimeSet.add(offsetDateTime3, offsetDateTime4).update.transact
         _ <- Ns.offsetDateTimeSet.query.get.map(_.head ==> Set(offsetDateTime1, offsetDateTime2, offsetDateTime3, offsetDateTime4))
 
-        // Add multiple values (Seq)
-        _ <- Ns(id).offsetDateTimeSet.add(Seq(offsetDateTime5, offsetDateTime6)).update.transact
+        // Add multiple values with Iterable
+        _ <- Ns(id).offsetDateTimeSet.add(List(offsetDateTime5, offsetDateTime6)).update.transact
         _ <- Ns.offsetDateTimeSet.query.get.map(_.head ==> Set(offsetDateTime1, offsetDateTime2, offsetDateTime3, offsetDateTime4, offsetDateTime5, offsetDateTime6))
 
-        // Adding empty Seq of values has no effect
-        _ <- Ns(id).offsetDateTimeSet.add(Seq.empty[OffsetDateTime]).update.transact
+        // Adding empty Iterable of values has no effect
+        _ <- Ns(id).offsetDateTimeSet.add(Set.empty[OffsetDateTime]).update.transact
         _ <- Ns.offsetDateTimeSet.query.get.map(_.head ==> Set(offsetDateTime1, offsetDateTime2, offsetDateTime3, offsetDateTime4, offsetDateTime5, offsetDateTime6))
       } yield ()
     }
@@ -64,7 +83,16 @@ trait UpdateSetOps_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: Sp
 
     "remove" - types { implicit conn =>
       for {
-        id <- Ns.offsetDateTimeSet(Set(offsetDateTime1, offsetDateTime2, offsetDateTime3, offsetDateTime4, offsetDateTime5, offsetDateTime6, offsetDateTime7)).save.transact.map(_.id)
+        id <- Ns.i(42).save.transact.map(_.id)
+        // Seq attribute not yet asserted
+        _ <- Ns.offsetDateTimeSet.query.get.map(_ ==> Nil)
+
+        // Removing value from non-asserted Set has no effect
+        _ <- Ns(id).offsetDateTimeSet.remove(offsetDateTime1).update.transact
+        _ <- Ns.offsetDateTimeSet.query.get.map(_ ==> Nil)
+
+        // Start with some values
+        _ <- Ns(id).offsetDateTimeSet.add(offsetDateTime1, offsetDateTime2, offsetDateTime3, offsetDateTime4, offsetDateTime5, offsetDateTime6, offsetDateTime7).update.transact
 
         // Remove value
         _ <- Ns(id).offsetDateTimeSet.remove(offsetDateTime7).update.transact
@@ -74,24 +102,24 @@ trait UpdateSetOps_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: Sp
         _ <- Ns(id).offsetDateTimeSet.remove(offsetDateTime9).update.transact
         _ <- Ns.offsetDateTimeSet.query.get.map(_.head ==> Set(offsetDateTime1, offsetDateTime2, offsetDateTime3, offsetDateTime4, offsetDateTime5, offsetDateTime6))
 
-        // Removing duplicate values removes the distinct value
+        // Removing duplicate values removes the distinct value (Set semantics)
         _ <- Ns(id).offsetDateTimeSet.remove(offsetDateTime6, offsetDateTime6).update.transact
         _ <- Ns.offsetDateTimeSet.query.get.map(_.head ==> Set(offsetDateTime1, offsetDateTime2, offsetDateTime3, offsetDateTime4, offsetDateTime5))
 
-        // Remove multiple values (vararg)
+        // Remove multiple values with varargs
         _ <- Ns(id).offsetDateTimeSet.remove(offsetDateTime4, offsetDateTime5).update.transact
         _ <- Ns.offsetDateTimeSet.query.get.map(_.head ==> Set(offsetDateTime1, offsetDateTime2, offsetDateTime3))
 
-        // Remove multiple values (Seq)
-        _ <- Ns(id).offsetDateTimeSet.remove(Seq(offsetDateTime2, offsetDateTime3)).update.transact
+        // Remove multiple values with Iterable
+        _ <- Ns(id).offsetDateTimeSet.remove(List(offsetDateTime2, offsetDateTime3)).update.transact
         _ <- Ns.offsetDateTimeSet.query.get.map(_.head ==> Set(offsetDateTime1))
 
-        // Removing empty Seq of values has no effect
-        _ <- Ns(id).offsetDateTimeSet.remove(Seq.empty[OffsetDateTime]).update.transact
+        // Removing empty Iterable of values has no effect
+        _ <- Ns(id).offsetDateTimeSet.remove(Vector.empty[OffsetDateTime]).update.transact
         _ <- Ns.offsetDateTimeSet.query.get.map(_.head ==> Set(offsetDateTime1))
 
         // Removing all remaining elements deletes the attribute
-        _ <- Ns(id).offsetDateTimeSet.remove(Seq(offsetDateTime1)).update.transact
+        _ <- Ns(id).offsetDateTimeSet.remove(Set(offsetDateTime1)).update.transact
         _ <- Ns.offsetDateTimeSet.query.get.map(_ ==> Nil)
       } yield ()
     }

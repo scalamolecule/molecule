@@ -14,60 +14,88 @@ trait UpdateSeqOps_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 
-    "apply (replace/add all)" - types { implicit conn =>
+
+    "apply new values" - types { implicit conn =>
       for {
-        id <- Ns.dateSeq(List(date1, date2, date2)).save.transact.map(_.id)
+        id <- Ns.i(42).save.transact.map(_.id)
+        // Seq attribute not yet asserted
+        _ <- Ns.dateSeq.query.get.map(_ ==> Nil)
+
+        // Applying Seq of values to non-asserted Seq attribute adds the attribute with the update
+        _ <- Ns(id).dateSeq(List(date1, date2, date2)).update.transact
         _ <- Ns.dateSeq.query.get.map(_.head ==> List(date1, date2, date2))
 
-        // Applying Seq of values replaces previous Seq
-        _ <- Ns(id).dateSeq(List(date3, date4, date4)).update.transact
-        _ <- Ns.dateSeq.query.get.map(_.head ==> List(date3, date4, date4))
+        // Applying Seq of values replaces previous values
+        _ <- Ns(id).dateSeq(List(date2, date3, date3)).update.transact
+        _ <- Ns.dateSeq.query.get.map(_.head ==> List(date2, date3, date3))
 
-        // Applying empty Seq of values deletes previous Seq
+        // Add other attribute and update Seq attribute in one go
+        _ <- Ns(id).s("foo").dateSeq(List(date3, date4, date4)).update.transact
+        _ <- Ns.i.s.dateSeq.query.get.map(_.head ==> (42, "foo", List(date3, date4, date4)))
+
+        // Applying empty Seq of values deletes attribute
         _ <- Ns(id).dateSeq(List.empty[Date]).update.transact
         _ <- Ns.dateSeq.query.get.map(_ ==> Nil)
 
-        id <- Ns.dateSeq(List(date1, date2, date2)).save.transact.map(_.id)
-        // Applying nothing deletes previous Seq
+        _ <- Ns(id).dateSeq(List(date1, date2, date2)).update.transact
+        // Apply nothing to delete attribute
         _ <- Ns(id).dateSeq().update.transact
         _ <- Ns.dateSeq.query.get.map(_ ==> Nil)
+
+        // Entity still has other attributes
+        _ <- Ns.i.s.query.get.map(_.head ==> (42, "foo"))
       } yield ()
     }
 
 
     "add" - types { implicit conn =>
       for {
-        id <- Ns.dateSeq(List(date1)).save.transact.map(_.id)
+        id <- Ns.i(42).save.transact.map(_.id)
+        // Seq attribute not yet asserted
+        _ <- Ns.dateSeq.query.get.map(_ ==> Nil)
 
-        // Add value to end of Seq
-        _ <- Ns(id).dateSeq.add(date2).update.transact
-        _ <- Ns.dateSeq.query.get.map(_.head ==> List(date1, date2))
-
-        // Add existing value
+        // Adding value to non-asserted Seq attribute adds the attribute with the update
         _ <- Ns(id).dateSeq.add(date1).update.transact
-        _ <- Ns.dateSeq.query.get.map(_.head ==> List(date1, date2, date1))
+        _ <- Ns.dateSeq.query.get.map(_.head ==> List(date1))
 
-        // Add multiple values (vararg)
+        // Adding existing value to Seq adds it to the end
+        _ <- Ns(id).dateSeq.add(date1).update.transact
+        _ <- Ns.dateSeq.query.get.map(_.head ==> List(date1, date1))
+
+        // Add new value to end of Seq
+        _ <- Ns(id).dateSeq.add(date2).update.transact
+        _ <- Ns.dateSeq.query.get.map(_.head ==> List(date1, date1, date2))
+
+        // Add multiple values with varargs
         _ <- Ns(id).dateSeq.add(date3, date4).update.transact
-        _ <- Ns.dateSeq.query.get.map(_.head ==> List(date1, date2, date1, date3, date4))
+        _ <- Ns.dateSeq.query.get.map(_.head ==> List(date1, date1, date2, date3, date4))
 
-        // Add multiple values (Seq)
+        // Add multiple values with Iterable
         _ <- Ns(id).dateSeq.add(List(date4, date5)).update.transact
-        _ <- Ns.dateSeq.query.get.map(_.head ==> List(date1, date2, date1, date3, date4, date4, date5))
+        _ <- Ns.dateSeq.query.get.map(_.head ==> List(date1, date1, date2, date3, date4, date4, date5))
 
-        // Adding empty Seq of values has no effect
-        _ <- Ns(id).dateSeq.add(List.empty[Date]).update.transact
-        _ <- Ns.dateSeq.query.get.map(_.head ==> List(date1, date2, date1, date3, date4, date4, date5))
+        // Adding empty Iterable of values has no effect
+        _ <- Ns(id).dateSeq.add(Set.empty[Date]).update.transact
+        _ <- Ns.dateSeq.query.get.map(_.head ==> List(date1, date1, date2, date3, date4, date4, date5))
       } yield ()
     }
 
 
     "remove" - types { implicit conn =>
       for {
-        id <- Ns.dateSeq(List(
+        id <- Ns.i(42).save.transact.map(_.id)
+        // Seq attribute not yet asserted
+        _ <- Ns.dateSeq.query.get.map(_ ==> Nil)
+
+        // Removing value from non-asserted Seq has no effect
+        _ <- Ns(id).dateSeq.remove(date1).update.transact
+        _ <- Ns.dateSeq.query.get.map(_ ==> Nil)
+
+        // Start with some values
+        _ <- Ns(id).dateSeq.add(
           date1, date2, date3, date4, date5, date6, date7,
           date1, date2, date3, date4, date5, date6, date7,
-        )).save.transact.map(_.id)
+        ).update.transact
 
         // Remove all instances of a value
         _ <- Ns(id).dateSeq.remove(date7).update.transact
@@ -90,26 +118,26 @@ trait UpdateSeqOps_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           date1, date2, date3, date4, date5,
         ))
 
-        // Remove multiple values (vararg)
+        // Remove multiple values with vararg
         _ <- Ns(id).dateSeq.remove(date4, date5).update.transact
         _ <- Ns.dateSeq.query.get.map(_.head ==> List(
           date1, date2, date3,
           date1, date2, date3,
         ))
 
-        // Remove multiple values (Seq)
+        // Remove multiple values with Iterable
         _ <- Ns(id).dateSeq.remove(List(date2, date3)).update.transact
         _ <- Ns.dateSeq.query.get.map(_.head ==> List(
           date1,
           date1
         ))
 
-        // Removing empty Seq of values has no effect
-        _ <- Ns(id).dateSeq.remove(List.empty[Date]).update.transact
+        // Removing empty Iterable of values has no effect
+        _ <- Ns(id).dateSeq.remove(Vector.empty[Date]).update.transact
         _ <- Ns.dateSeq.query.get.map(_.head ==> List(date1, date1))
 
-        // Removing all remaining elements deletes the attribute
-        _ <- Ns(id).dateSeq.remove(Seq(date1)).update.transact
+        // Removing all remaining values deletes the attribute
+        _ <- Ns(id).dateSeq.remove(Set(date1)).update.transact
         _ <- Ns.dateSeq.query.get.map(_ ==> Nil)
       } yield ()
     }

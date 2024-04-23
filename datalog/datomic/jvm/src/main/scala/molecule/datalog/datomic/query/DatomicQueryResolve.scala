@@ -26,15 +26,17 @@ abstract class DatomicQueryResolve[Tpl](
     m2q.pullSortss = m2q.pullSortss :+ m2q.pullSorts.sortBy(_._1).map(_._2).toList
   }
 
-  protected def getRawData(
+  def getRawData(
     conn: DatomicConn_JVM,
     altElements: List[Element] = Nil,
-    altDb: Option[datomic.Database] = None
+    altDb: Option[datomic.Database] = None,
+    validate: Boolean = true
   ): jCollection[jList[AnyRef]] = {
     val db = altDb.getOrElse(getDb(conn))
-    m2q.getDatomicQueries(conn.optimizeQuery, altElements) match {
+    m2q.getDatomicQueries(conn.optimizeQuery, altElements, validate) match {
       case ("", query, _)       =>
         distinct(Peer.q(query, db +: m2q.inputs: _*))
+
       case (preQuery, query, _) =>
         // Pre-query
         val preRows = Peer.q(preQuery, db +: m2q.preInputs: _*)

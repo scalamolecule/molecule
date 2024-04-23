@@ -15,55 +15,69 @@ trait UpdateMapOps_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
 
     "apply (replace/add all)" - types { implicit conn =>
       for {
-        id <- Ns.bigDecimalMap(Map(pbigDecimal1, pbigDecimal2)).save.transact.map(_.id)
+        id <- Ns.i(42).save.transact.map(_.id)
+        // Map attribute not yet asserted
+        _ <- Ns.bigDecimalMap.query.get.map(_ ==> Nil)
+
+        // Applying Map of pairs to non-asserted Map attribute adds the attribute with the update
+        _ <- Ns(id).bigDecimalMap(Map(pbigDecimal1, pbigDecimal2)).update.transact
         _ <- Ns.bigDecimalMap.query.get.map(_.head ==> Map(pbigDecimal1, pbigDecimal2))
 
-        // Applying Map of pairs replaces map
-        _ <- Ns(id).bigDecimalMap(Map(pbigDecimal3, pbigDecimal4)).update.transact
-        _ <- Ns.bigDecimalMap.query.get.map(_.head ==> Map(pbigDecimal3, pbigDecimal4))
+        // Applying Map of pairs replaces previous Map
+        _ <- Ns(id).bigDecimalMap(Map(pbigDecimal2, pbigDecimal3)).update.transact
+        _ <- Ns.bigDecimalMap.query.get.map(_.head ==> Map(pbigDecimal2, pbigDecimal3))
+
+        // Add other attribute and update Map attribute in one go
+        _ <- Ns(id).s("foo").bigDecimalMap(Map(pbigDecimal3, pbigDecimal4)).update.transact
+        _ <- Ns.i.s.bigDecimalMap.query.get.map(_.head ==> (42, "foo", Map(pbigDecimal3, pbigDecimal4)))
 
         // Applying empty Map of pairs deletes map
         _ <- Ns(id).bigDecimalMap(Map.empty[String, BigDecimal]).update.transact
         _ <- Ns.bigDecimalMap.query.get.map(_ ==> Nil)
 
-        id <- Ns.bigDecimalMap(Map(pbigDecimal1, pbigDecimal2)).save.transact.map(_.id)
-        // Applying empty value deletes map
+        _ <- Ns(id).bigDecimalMap(Map(pbigDecimal1, pbigDecimal2)).update.transact
+        // Apply nothing to delete attribute
         _ <- Ns(id).bigDecimalMap().update.transact
         _ <- Ns.bigDecimalMap.query.get.map(_ ==> Nil)
+
+        // Entity still has other attributes
+        _ <- Ns.i.s.query.get.map(_.head ==> (42, "foo"))
       } yield ()
     }
 
 
     "add" - types { implicit conn =>
       for {
-        id <- Ns.bigDecimalMap(Map("a" -> bigDecimal0)).save.transact.map(_.id)
+        id <- Ns.i(42).save.transact.map(_.id)
+        // Map attribute not yet asserted
+        _ <- Ns.bigDecimalMap.query.get.map(_ ==> Nil)
 
-        // Adding pair with existing key replaces the value
+        // Adding value to non-asserted Map attribute adds the attribute with the update
+        _ <- Ns(id).bigDecimalMap.add("a" -> bigDecimal0).update.transact
+        _ <- Ns.bigDecimalMap.query.get.map(_.head ==> Map("a" -> bigDecimal0))
+
+        // Adding existing pair to Map changes nothing
+        _ <- Ns(id).bigDecimalMap.add("a" -> bigDecimal0).update.transact
+        _ <- Ns.bigDecimalMap.query.get.map(_.head ==> Map("a" -> bigDecimal0))
+
+        // Adding pair with existing key replaces the value of the pair
         _ <- Ns(id).bigDecimalMap.add("a" -> bigDecimal1).update.transact
-        _ <- Ns.bigDecimalMap.query.get.map(_.head ==> Map(pbigDecimal1))
+        _ <- Ns.bigDecimalMap.query.get.map(_.head ==> Map(pbigDecimal1)) // "a" -> bigDecimal1
 
-        // Update doesn't add pair if no map attribute already exists
-        _ <- Ns(id).iMap.add("a" -> 1).update.transact
-        _ <- Ns.bigDecimalMap.iMap_?.query.get.map(_ ==> List((Map(pbigDecimal1), None)))
-
-        // Upsert adds pair to new map attribute if it wasn't already saved
-        _ <- Ns(id).iMap.add("a" -> 1).upsert.transact
-        _ <- Ns.bigDecimalMap.iMap_?.query.get.map(_ ==> List((Map(pbigDecimal1), Some(Map("a" -> 1)))))
-
-        // Add pair
+        // Add new pair
         _ <- Ns(id).bigDecimalMap.add(pbigDecimal2).update.transact
         _ <- Ns.bigDecimalMap.query.get.map(_.head ==> Map(pbigDecimal1, pbigDecimal2))
 
-        // Add multiple pairs (vararg)
+        // Add multiple pairs with varargs
         _ <- Ns(id).bigDecimalMap.add(pbigDecimal3, pbigDecimal4).update.transact
         _ <- Ns.bigDecimalMap.query.get.map(_.head ==> Map(pbigDecimal1, pbigDecimal2, pbigDecimal3, pbigDecimal4))
 
-        // Add multiple pairs (Seq)
-        _ <- Ns(id).bigDecimalMap.add(Seq(pbigDecimal5, pbigDecimal6)).update.transact
+        // Add multiple pairs with Iterable
+        _ <- Ns(id).bigDecimalMap.add(List(pbigDecimal5, pbigDecimal6)).update.transact
         _ <- Ns.bigDecimalMap.query.get.map(_.head ==> Map(pbigDecimal1, pbigDecimal2, pbigDecimal3, pbigDecimal4, pbigDecimal5, pbigDecimal6))
 
-        // Adding empty Seq of pairs has no effect
-        _ <- Ns(id).bigDecimalMap.add(Seq.empty[(String, BigDecimal)]).update.transact
+        // Adding empty Iterable of pairs has no effect
+        _ <- Ns(id).bigDecimalMap.add(Vector.empty[(String, BigDecimal)]).update.transact
         _ <- Ns.bigDecimalMap.query.get.map(_.head ==> Map(pbigDecimal1, pbigDecimal2, pbigDecimal3, pbigDecimal4, pbigDecimal5, pbigDecimal6))
       } yield ()
     }
@@ -71,40 +85,42 @@ trait UpdateMapOps_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
 
     "remove" - types { implicit conn =>
       for {
-        id <- Ns.bigDecimalMap(Map(pbigDecimal1, pbigDecimal2, pbigDecimal3, pbigDecimal4, pbigDecimal5, pbigDecimal6, pbigDecimal7, pbigDecimal8)).save.transact.map(_.id)
+        id <- Ns.i(42).save.transact.map(_.id)
+        // Map attribute not yet asserted
+        _ <- Ns.bigDecimalMap.query.get.map(_ ==> Nil)
 
-        // Remove pair by String key with update and upsert has same semantics
-        _ <- Ns(id).bigDecimalMap.remove(string8).update.transact
-        _ <- Ns(id).bigDecimalMap.remove(string7).upsert.transact
+        // Removing pair by key from non-asserted Map has no effect
+        _ <- Ns(id).bigDecimalMap.remove(string1).update.transact
+        _ <- Ns.bigDecimalMap.query.get.map(_ ==> Nil)
+
+        // Start with some pairs
+        _ <- Ns(id).bigDecimalMap.add(pbigDecimal1, pbigDecimal2, pbigDecimal3, pbigDecimal4, pbigDecimal5, pbigDecimal6, pbigDecimal7).update.transact
+
+        // Remove pair by String key
+        _ <- Ns(id).bigDecimalMap.remove(string7).update.transact
         _ <- Ns.bigDecimalMap.query.get.map(_.head ==> Map(pbigDecimal1, pbigDecimal2, pbigDecimal3, pbigDecimal4, pbigDecimal5, pbigDecimal6))
-
-        // Removing a pair in a non-asserted map attribute has no effect
-        _ <- Ns.bigDecimalMap.iMap_?.query.get.map(_.head._2 ==> None)
-        _ <- Ns(id).iMap.remove("a").update.transact
-        _ <- Ns(id).iMap.remove("a").upsert.transact
-        _ <- Ns.bigDecimalMap.iMap_?.query.get.map(_.head._2 ==> None)
 
         // Removing non-existing key has no effect
         _ <- Ns(id).bigDecimalMap.remove(string9).update.transact
         _ <- Ns.bigDecimalMap.query.get.map(_.head ==> Map(pbigDecimal1, pbigDecimal2, pbigDecimal3, pbigDecimal4, pbigDecimal5, pbigDecimal6))
 
-        // Removing duplicate keys removes the distinct key only
+        // Removing duplicate keys removes only pairs with the distinct key (distinct key value semantics of Map)
         _ <- Ns(id).bigDecimalMap.remove(string6, string6).update.transact
         _ <- Ns.bigDecimalMap.query.get.map(_.head ==> Map(pbigDecimal1, pbigDecimal2, pbigDecimal3, pbigDecimal4, pbigDecimal5))
 
-        // Remove multiple keys (vararg)
+        // Remove multiple pairs by varargs of keys
         _ <- Ns(id).bigDecimalMap.remove(string4, string5).update.transact
         _ <- Ns.bigDecimalMap.query.get.map(_.head ==> Map(pbigDecimal1, pbigDecimal2, pbigDecimal3))
 
-        // Remove multiple keys (Seq)
-        _ <- Ns(id).bigDecimalMap.remove(Seq(string2, string3)).update.transact
+        // Remove multiple pairs by Seq of keys (not Iterable)
+        _ <- Ns(id).bigDecimalMap.remove(List(string2, string3)).update.transact
         _ <- Ns.bigDecimalMap.query.get.map(_.head ==> Map(pbigDecimal1))
 
-        // Removing empty Seq of keys has no effect
+        // Removing pairs with empty Seq of keys has no effect
         _ <- Ns(id).bigDecimalMap.remove(Seq.empty[String]).update.transact
         _ <- Ns.bigDecimalMap.query.get.map(_.head ==> Map(pbigDecimal1))
 
-        // Removing all remaining keys deletes the attribute
+        // Removing all remaining pairs deletes the attribute
         _ <- Ns(id).bigDecimalMap.remove(Seq(string1)).update.transact
         _ <- Ns.bigDecimalMap.query.get.map(_ ==> Nil)
       } yield ()

@@ -147,7 +147,7 @@ trait SqlUpdate
       case vs     =>
         val cleanAttr = attr.replace("_", "")
         throw ExecutionError(
-          s"Can only $update one value for attribute `$ns.$cleanAttr`. Found: " + vs.mkString(", ")
+          s"Can only update one value for attribute `$ns.$cleanAttr`. Found: " + vs.mkString(", ")
         )
     }
     addColSetter(curRefPath, colSetter)
@@ -308,7 +308,7 @@ trait SqlUpdate
 
   override def handleIds(ns: String, ids1: Seq[String]): Unit = {
     if (ids.nonEmpty) {
-      throw ModelError(s"Can't apply entity ids twice in $update.")
+      throw ModelError(s"Can't apply entity ids twice in update.")
     }
     ids = ids1.map(_.toLong)
   }
@@ -316,7 +316,7 @@ trait SqlUpdate
   override def handleUniqueFilterAttr(uniqueFilterAttr: AttrOneTac): Unit = {
     if (uniqueFilterElements.nonEmpty) {
       throw ModelError(
-        s"Can only apply one unique attribute value for $update. Found:\n" + uniqueFilterAttr
+        s"Can only apply one unique attribute value for update. Found:\n" + uniqueFilterAttr
       )
     }
     uniqueFilterElements = uniqueFilterElements :+ uniqueFilterAttr

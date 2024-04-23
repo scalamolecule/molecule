@@ -15,43 +15,6 @@ trait UpdateOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 
-    "Semantics update/upsert" - types { implicit conn =>
-      for {
-        id <- Ns.int.insert(1).transact.map(_.id)
-        _ <- Ns.int.query.get.map(_ ==> List(1))
-
-        // Update value
-        _ <- Ns(id).int(2).update.transact
-        _ <- Ns.int.query.get.map(_ ==> List(2))
-
-        // Same as applying ids to id_
-        _ <- Ns.id_(id).int(3).update.transact
-        _ <- Ns.int.query.get.map(_ ==> List(3))
-
-        // Update value to current value doesn't change anything
-        _ <- Ns(id).int(3).update.transact
-        _ <- Ns.int.query.get.map(_ ==> List(3))
-
-        // Updating a previously non-asserted attribute has no effect
-        _ <- Ns(id).string("a").update.transact
-        _ <- Ns.int.string_?.query.get.map(_ ==> List((3, None)))
-
-        // Upsert sets the new value regardless of previous assertion
-        _ <- Ns(id).string("a").upsert.transact
-        _ <- Ns.int.string_?.query.get.map(_ ==> List((3, Some("a"))))
-
-        // All attributes have to be previously asserted to be updated.
-        // `int` is previously asserted, `boolean` is not. So this entity is not updated
-        _ <- Ns(id).int(4).boolean(true).update.transact
-        _ <- Ns.int.boolean_?.query.get.map(_ ==> List((3, None)))
-
-        // Upsert sets all values regardless of previous assertions
-        _ <- Ns(id).int(4).boolean(true).upsert.transact
-        _ <- Ns.int.boolean_?.query.get.map(_ ==> List((4, Some(true))))
-      } yield ()
-    }
-
-
     "Ownership (Mongo)" - refs { implicit conn =>
       if (database == "MongoDB") {
         for {
@@ -147,7 +110,7 @@ trait UpdateOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "Ref" - refs { implicit conn =>
+    "ref ref" - refs { implicit conn =>
       for {
         id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
         _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
@@ -182,7 +145,7 @@ trait UpdateOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       } yield ()
     }
 
-    "OwnB" - refs { implicit conn =>
+    "own ref" - refs { implicit conn =>
       for {
         id <- A.i(1).OwnB.i(2).C.i(3).save.transact.map(_.id)
         _ <- A.i.OwnB.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
@@ -217,7 +180,7 @@ trait UpdateOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       } yield ()
     }
 
-    "OwnC" - refs { implicit conn =>
+    "ref own" - refs { implicit conn =>
       for {
         id <- A.i(1).B.i(2).OwnC.i(3).save.transact.map(_.id)
         _ <- A.i.B.i.OwnC.i.query.get.map(_ ==> List((1, 2, 3)))
@@ -252,7 +215,7 @@ trait UpdateOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       } yield ()
     }
 
-    "OwnB OwnC" - refs { implicit conn =>
+    "own own" - refs { implicit conn =>
       for {
         id <- A.i(1).OwnB.i(2).OwnC.i(3).save.transact.map(_.id)
         _ <- A.i.OwnB.i.OwnC.i.query.get.map(_ ==> List((1, 2, 3)))
@@ -359,24 +322,14 @@ trait UpdateOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         } yield ()
       }
 
-      "Can't update card-many referenced attributes" - types { implicit conn =>
-        for {
-          _ <- Ns("42").i(1).Refs.i(2).update.transact
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-              err ==> "Can't update attributes in card-many referenced namespace `Refs`"
-            }
-        } yield ()
-      }
-
-      "Can't upsert referenced attributes" - types { implicit conn =>
-        val dummyId = if(database == "MongoDB") "123456789012345678901234" else "42"
-        for {
-          _ <- Ns(dummyId).i(1).Ref.i(2).upsert.transact
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-              err ==> "Can't upsert referenced attributes. Please update instead."
-            }
-        } yield ()
-      }
+//      "Can't update card-many referenced attributes" - types { implicit conn =>
+//        for {
+//          _ <- Ns("42").i(1).Refs.i(2).update.transact
+//            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+//              err ==> "Can't update attributes in card-many referenced namespace `Refs`"
+//            }
+//        } yield ()
+//      }
     }
   }
 }

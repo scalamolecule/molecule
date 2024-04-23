@@ -13,60 +13,88 @@ trait UpdateSeqOps_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
 
   override lazy val tests = Tests {
 
-    "apply (replace/add all)" - types { implicit conn =>
+
+    "apply new values" - types { implicit conn =>
       for {
-        id <- Ns.bigDecimalSeq(List(bigDecimal1, bigDecimal2, bigDecimal2)).save.transact.map(_.id)
+        id <- Ns.i(42).save.transact.map(_.id)
+        // Seq attribute not yet asserted
+        _ <- Ns.bigDecimalSeq.query.get.map(_ ==> Nil)
+
+        // Applying Seq of values to non-asserted Seq attribute adds the attribute with the update
+        _ <- Ns(id).bigDecimalSeq(List(bigDecimal1, bigDecimal2, bigDecimal2)).update.transact
         _ <- Ns.bigDecimalSeq.query.get.map(_.head ==> List(bigDecimal1, bigDecimal2, bigDecimal2))
 
-        // Applying Seq of values replaces previous Seq
-        _ <- Ns(id).bigDecimalSeq(List(bigDecimal3, bigDecimal4, bigDecimal4)).update.transact
-        _ <- Ns.bigDecimalSeq.query.get.map(_.head ==> List(bigDecimal3, bigDecimal4, bigDecimal4))
+        // Applying Seq of values replaces previous values
+        _ <- Ns(id).bigDecimalSeq(List(bigDecimal2, bigDecimal3, bigDecimal3)).update.transact
+        _ <- Ns.bigDecimalSeq.query.get.map(_.head ==> List(bigDecimal2, bigDecimal3, bigDecimal3))
 
-        // Applying empty Seq of values deletes previous Seq
+        // Add other attribute and update Seq attribute in one go
+        _ <- Ns(id).s("foo").bigDecimalSeq(List(bigDecimal3, bigDecimal4, bigDecimal4)).update.transact
+        _ <- Ns.i.s.bigDecimalSeq.query.get.map(_.head ==> (42, "foo", List(bigDecimal3, bigDecimal4, bigDecimal4)))
+
+        // Applying empty Seq of values deletes attribute
         _ <- Ns(id).bigDecimalSeq(List.empty[BigDecimal]).update.transact
         _ <- Ns.bigDecimalSeq.query.get.map(_ ==> Nil)
 
-        id <- Ns.bigDecimalSeq(List(bigDecimal1, bigDecimal2, bigDecimal2)).save.transact.map(_.id)
-        // Applying nothing deletes previous Seq
+        _ <- Ns(id).bigDecimalSeq(List(bigDecimal1, bigDecimal2, bigDecimal2)).update.transact
+        // Apply nothing to delete attribute
         _ <- Ns(id).bigDecimalSeq().update.transact
         _ <- Ns.bigDecimalSeq.query.get.map(_ ==> Nil)
+
+        // Entity still has other attributes
+        _ <- Ns.i.s.query.get.map(_.head ==> (42, "foo"))
       } yield ()
     }
 
 
     "add" - types { implicit conn =>
       for {
-        id <- Ns.bigDecimalSeq(List(bigDecimal1)).save.transact.map(_.id)
+        id <- Ns.i(42).save.transact.map(_.id)
+        // Seq attribute not yet asserted
+        _ <- Ns.bigDecimalSeq.query.get.map(_ ==> Nil)
 
-        // Add value to end of Seq
-        _ <- Ns(id).bigDecimalSeq.add(bigDecimal2).update.transact
-        _ <- Ns.bigDecimalSeq.query.get.map(_.head ==> List(bigDecimal1, bigDecimal2))
-
-        // Add existing value
+        // Adding value to non-asserted Seq attribute adds the attribute with the update
         _ <- Ns(id).bigDecimalSeq.add(bigDecimal1).update.transact
-        _ <- Ns.bigDecimalSeq.query.get.map(_.head ==> List(bigDecimal1, bigDecimal2, bigDecimal1))
+        _ <- Ns.bigDecimalSeq.query.get.map(_.head ==> List(bigDecimal1))
 
-        // Add multiple values (vararg)
+        // Adding existing value to Seq adds it to the end
+        _ <- Ns(id).bigDecimalSeq.add(bigDecimal1).update.transact
+        _ <- Ns.bigDecimalSeq.query.get.map(_.head ==> List(bigDecimal1, bigDecimal1))
+
+        // Add new value to end of Seq
+        _ <- Ns(id).bigDecimalSeq.add(bigDecimal2).update.transact
+        _ <- Ns.bigDecimalSeq.query.get.map(_.head ==> List(bigDecimal1, bigDecimal1, bigDecimal2))
+
+        // Add multiple values with varargs
         _ <- Ns(id).bigDecimalSeq.add(bigDecimal3, bigDecimal4).update.transact
-        _ <- Ns.bigDecimalSeq.query.get.map(_.head ==> List(bigDecimal1, bigDecimal2, bigDecimal1, bigDecimal3, bigDecimal4))
+        _ <- Ns.bigDecimalSeq.query.get.map(_.head ==> List(bigDecimal1, bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4))
 
-        // Add multiple values (Seq)
+        // Add multiple values with Iterable
         _ <- Ns(id).bigDecimalSeq.add(List(bigDecimal4, bigDecimal5)).update.transact
-        _ <- Ns.bigDecimalSeq.query.get.map(_.head ==> List(bigDecimal1, bigDecimal2, bigDecimal1, bigDecimal3, bigDecimal4, bigDecimal4, bigDecimal5))
+        _ <- Ns.bigDecimalSeq.query.get.map(_.head ==> List(bigDecimal1, bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal4, bigDecimal5))
 
-        // Adding empty Seq of values has no effect
-        _ <- Ns(id).bigDecimalSeq.add(List.empty[BigDecimal]).update.transact
-        _ <- Ns.bigDecimalSeq.query.get.map(_.head ==> List(bigDecimal1, bigDecimal2, bigDecimal1, bigDecimal3, bigDecimal4, bigDecimal4, bigDecimal5))
+        // Adding empty Iterable of values has no effect
+        _ <- Ns(id).bigDecimalSeq.add(Set.empty[BigDecimal]).update.transact
+        _ <- Ns.bigDecimalSeq.query.get.map(_.head ==> List(bigDecimal1, bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal4, bigDecimal5))
       } yield ()
     }
 
 
     "remove" - types { implicit conn =>
       for {
-        id <- Ns.bigDecimalSeq(List(
+        id <- Ns.i(42).save.transact.map(_.id)
+        // Seq attribute not yet asserted
+        _ <- Ns.bigDecimalSeq.query.get.map(_ ==> Nil)
+
+        // Removing value from non-asserted Seq has no effect
+        _ <- Ns(id).bigDecimalSeq.remove(bigDecimal1).update.transact
+        _ <- Ns.bigDecimalSeq.query.get.map(_ ==> Nil)
+
+        // Start with some values
+        _ <- Ns(id).bigDecimalSeq.add(
           bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal5, bigDecimal6, bigDecimal7,
           bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal5, bigDecimal6, bigDecimal7,
-        )).save.transact.map(_.id)
+        ).update.transact
 
         // Remove all instances of a value
         _ <- Ns(id).bigDecimalSeq.remove(bigDecimal7).update.transact
@@ -89,26 +117,26 @@ trait UpdateSeqOps_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
           bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal5,
         ))
 
-        // Remove multiple values (vararg)
+        // Remove multiple values with vararg
         _ <- Ns(id).bigDecimalSeq.remove(bigDecimal4, bigDecimal5).update.transact
         _ <- Ns.bigDecimalSeq.query.get.map(_.head ==> List(
           bigDecimal1, bigDecimal2, bigDecimal3,
           bigDecimal1, bigDecimal2, bigDecimal3,
         ))
 
-        // Remove multiple values (Seq)
+        // Remove multiple values with Iterable
         _ <- Ns(id).bigDecimalSeq.remove(List(bigDecimal2, bigDecimal3)).update.transact
         _ <- Ns.bigDecimalSeq.query.get.map(_.head ==> List(
           bigDecimal1,
           bigDecimal1
         ))
 
-        // Removing empty Seq of values has no effect
-        _ <- Ns(id).bigDecimalSeq.remove(List.empty[BigDecimal]).update.transact
+        // Removing empty Iterable of values has no effect
+        _ <- Ns(id).bigDecimalSeq.remove(Vector.empty[BigDecimal]).update.transact
         _ <- Ns.bigDecimalSeq.query.get.map(_.head ==> List(bigDecimal1, bigDecimal1))
 
-        // Removing all remaining elements deletes the attribute
-        _ <- Ns(id).bigDecimalSeq.remove(Seq(bigDecimal1)).update.transact
+        // Removing all remaining values deletes the attribute
+        _ <- Ns(id).bigDecimalSeq.remove(Set(bigDecimal1)).update.transact
         _ <- Ns.bigDecimalSeq.query.get.map(_ ==> Nil)
       } yield ()
     }

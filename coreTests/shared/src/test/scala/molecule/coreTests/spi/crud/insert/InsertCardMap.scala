@@ -189,13 +189,13 @@ trait InsertCardMap extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // No spaces
         _ <- Ns.intMap.insert(Map("foo bar" -> 1)).transact
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Keys of map attributes can only contain [a-zA-Z_0-9] (no spaces or special characters)."
+            err ==> "Keys of map attributes can only contain [a-zA-Z_\\-0-9] (no spaces or special characters)."
           }
 
         // No special characters
         _ <- Ns.intMap.insert(Map("foo:" -> 1)).transact
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Keys of map attributes can only contain [a-zA-Z_0-9] (no spaces or special characters)."
+            err ==> "Keys of map attributes can only contain [a-zA-Z_\\-0-9] (no spaces or special characters)."
           }
       } yield ()
     }

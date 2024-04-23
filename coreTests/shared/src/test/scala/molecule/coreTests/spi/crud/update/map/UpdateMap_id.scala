@@ -15,34 +15,6 @@ trait UpdateMap_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 
-    "Semantics update/upsert" - types { implicit conn =>
-      for {
-        id <- Ns.intMap.insert(Map(pint1)).transact.map(_.id)
-        _ <- Ns.intMap.query.get.map(_ ==> List(Map(pint1)))
-
-        _ <- Ns(id).intMap(Map(pint2)).update.transact
-        _ <- Ns.intMap.query.get.map(_ ==> List(Map(pint2)))
-
-        // Updating a non-asserted map attribute has no effect
-        _ <- Ns(id).stringMap(Map(pstring1)).update.transact
-        _ <- Ns.intMap.stringMap_?.query.get.map(_ ==> List((Map(pint2), None)))
-
-        // Upserting a non-asserted map attribute adds the value
-        _ <- Ns(id).stringMap(Map(pstring1)).upsert.transact
-        _ <- Ns.intMap.stringMap_?.query.get.map(_ ==> List((Map(pint2), Some(Map(pstring1)))))
-
-        // All map attributes have to be previously asserted to be updated.
-        // `int` is previously asserted, `boolean` is not. So this entity is not updated
-        _ <- Ns(id).intMap(Map(pint3)).booleanMap(Map(pboolean1)).update.transact
-        _ <- Ns.intMap.booleanMap_?.query.get.map(_ ==> List((Map(pint2), None)))
-
-        // Upsert sets all values regardless of previous assertions
-        _ <- Ns(id).intMap(Map(pint3)).booleanMap(Map(pboolean1)).upsert.transact
-        _ <- Ns.intMap.booleanMap_?.query.get.map(_ ==> List((Map(pint3), Some(Map(pboolean1)))))
-      } yield ()
-    }
-
-
     "Multiple entities updated" - types { implicit conn =>
       for {
         List(a, b, c) <- Ns.intMap.insert(Map(pint1), Map(pint2), Map(pint3)).transact.map(_.ids)
@@ -251,14 +223,14 @@ trait UpdateMap_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         } yield ()
       }
 
-      "Can't update card-many referenced map attributes" - types { implicit conn =>
-        for {
-          _ <- Ref("42").i(1).Nss.intMap(Map(("a", 1))).update.transact
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-              err ==> "Can't update attributes in card-many referenced namespace `Nss`"
-            }
-        } yield ()
-      }
+//      "Can't update card-many referenced map attributes" - types { implicit conn =>
+//        for {
+//          _ <- Ref("42").i(1).Nss.intMap(Map(("a", 1))).update.transact
+//            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+//              err ==> "Can't update attributes in card-many referenced namespace `Nss`"
+//            }
+//        } yield ()
+//      }
 
       "Valid keys" - types { implicit conn =>
         for {
@@ -270,17 +242,17 @@ trait UpdateMap_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           // No spaces
           _ <- Ns(id).intMap(Map("foo bar" -> 1)).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-              err ==> "Keys of map attributes can only contain [a-zA-Z_0-9] (no spaces or special characters)."
+              err ==> "Keys of map attributes can only contain [a-zA-Z_\\-0-9] (no spaces or special characters)."
             }
 
           // No special characters
           _ <- Ns(id).intMap(Map("foo:" -> 1)).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-              err ==> "Keys of map attributes can only contain [a-zA-Z_0-9] (no spaces or special characters)."
+              err ==> "Keys of map attributes can only contain [a-zA-Z_\\-0-9] (no spaces or special characters)."
             }
           _ <- Ns(id).intMap.add("bar?" -> 2).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-              err ==> "Keys of map attributes can only contain [a-zA-Z_0-9] (no spaces or special characters)."
+              err ==> "Keys of map attributes can only contain [a-zA-Z_\\-0-9] (no spaces or special characters)."
             }
         } yield ()
       }

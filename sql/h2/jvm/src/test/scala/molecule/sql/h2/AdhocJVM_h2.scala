@@ -23,20 +23,7 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       for {
 
         id <- Ns.intMap.apply(Map(pint1, pint2)).save.transact.map(_.id)
-//        _ <- Ns.intMap.query.get.map(_.head ==> Map(pint1, pint2))
 
-        // Applying Map of pairs replaces map
-//        _ <- Ns(id).intMap(Map(pint3, pint4)).update.transact
-//        _ <- Ns.intMap.query.get.map(_.head ==> Map(pint3, pint4))
-
-//        // Applying empty Map of pairs deletes map
-//        _ <- Ns(id).intMap(Map.empty[String, Int]).update.transact
-//        _ <- Ns.intMap.query.get.map(_ ==> Nil)
-//
-//        id <- Ns.intMap(Map(pint1, pint2)).save.transact.map(_.id)
-//        // Applying empty value deletes map
-//        _ <- Ns(id).intMap().update.transact
-//        _ <- Ns.intMap.query.get.map(_ ==> Nil)
 
         //        _ <- rawQuery(
         //          """SELECT DISTINCT
@@ -64,82 +51,57 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
 
-        _ <- A.i.B.iSeq.insert(
-          (1, List(1, 2, 2)),
-          (2, List(2)),
-          (2, List(7)),
-          (3, List(3)),
-          (4, List())
-        ).transact
+        id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
 
-        // has
+        // A
+        _ <- A(id).i(10).update.transact
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((10, 2, 3)))
 
-        //        _ <- A.i.a1.B.iSeq.has(1).query.get.map(_ ==> List(
-        //          (1, List(1, 2, 2)),
-        //        ))
-        //        _ <- A.i.a1.B.iSeq.has(2).query.get.map(_ ==> List(
-        //          (1, List(1, 2, 2)),
-        //          (2, List(2)),
-        //        ))
+        // A + B
+        _ <- A(id).i(11).B.i(20).update.transact
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((11, 20, 3)))
+
+        // B
+        _ <- A(id).B.i(21).update.transact
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((11, 21, 3)))
+
+        // A + B + C
+        _ <- A(id).i(12).B.i(22).C.i(30).update.i.transact
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((12, 22, 30)))
+
+
+
+        //        _ <- rawQuery(
+        //          """SELECT DISTINCT
+        //            |  A.i,
+        //            |  ARRAY_AGG(B.iSeq)
+        //            |FROM A
+        //            |  INNER JOIN B ON A.b = B.id
+        //            |WHERE
+        //            |  ((ARRAY_CONTAINS(B.iSeq, 2)) OR
+        //            |   (ARRAY_CONTAINS(B.iSeq, 7))) AND
+        //            |  A.i    IS NOT NULL AND
+        //            |  B.iSeq IS NOT NULL
+        //            |GROUP BY A.i
+        //            |ORDER BY A.i;
+        //            |""".stripMargin, true).map(println)
         //
-        //        _ <- A.i.a1.B.iSeq.has(2, 1).query.get.map(_ ==> List(
-        //          (1, List(1, 2, 2)),
-        //          (2, List(2)),
-        //        ))
+        //        _ <- rawQuery(
+        //          """SELECT DISTINCT
+        //            |  A.i,
+        //            |  B.iSeq
+        //            |FROM A
+        //            |  INNER JOIN B ON A.b = B.id
+        //            |WHERE
+        //            |  ((ARRAY_CONTAINS(B.iSeq, 2)) OR
+        //            |   (ARRAY_CONTAINS(B.iSeq, 7))) AND
+        //            |  A.i    IS NOT NULL AND
+        //            |  B.iSeq IS NOT NULL
+        //            |//GROUP BY A.i
+        //            |ORDER BY A.i;
+        //            |""".stripMargin, true).map(println)
 
-
-
-        _ <- rawQuery(
-          """SELECT DISTINCT
-            |  A.i,
-            |  ARRAY_AGG(B.iSeq)
-            |FROM A
-            |  INNER JOIN B ON A.b = B.id
-            |WHERE
-            |  ((ARRAY_CONTAINS(B.iSeq, 2)) OR
-            |   (ARRAY_CONTAINS(B.iSeq, 7))) AND
-            |  A.i    IS NOT NULL AND
-            |  B.iSeq IS NOT NULL
-            |GROUP BY A.i
-            |ORDER BY A.i;
-            |""".stripMargin, true).map(println)
-
-        _ <- rawQuery(
-          """SELECT DISTINCT
-            |  A.i,
-            |  B.iSeq
-            |FROM A
-            |  INNER JOIN B ON A.b = B.id
-            |WHERE
-            |  ((ARRAY_CONTAINS(B.iSeq, 2)) OR
-            |   (ARRAY_CONTAINS(B.iSeq, 7))) AND
-            |  A.i    IS NOT NULL AND
-            |  B.iSeq IS NOT NULL
-            |//GROUP BY A.i
-            |ORDER BY A.i;
-            |""".stripMargin, true).map(println)
-
-
-
-        _ <- A.i.a1.B.iSeq.has(2, 7).query.i.get.map(_ ==> List(
-          (1, List(1, 2, 2)),
-          (2, List(2)),
-          (2, List(7)),
-        ))
-
-        _ <- A.i.a1.B.iSeq_.has(1).query.get.map(_ ==> List(1))
-        _ <- A.i.a1.B.iSeq_.has(2).query.get.map(_ ==> List(1, 2))
-        _ <- A.i.a1.B.iSeq_.has(2, 7).query.get.map(_ ==> List(1, 2, 2))
-        _ <- A.i.a1.B.iSeq_.has(2, 3).query.get.map(_ ==> List(1, 2, 3))
-
-        // hasNo
-        _ <- A.i.a1.B.iSeq_.hasNo(1).query.get.map(_ ==> List(2, 2, 3))
-        _ <- A.i.a1.B.iSeq_.hasNo(2).query.get.map(_ ==> List(2, 3))
-        _ <- A.i.a1.B.iSeq_.hasNo(3).query.get.map(_ ==> List(1, 2, 2))
-
-        // no value - match non-asserted attribute (null)
-        // Nothing returned since there's no relationship to B
-        _ <- A.i.a1.B.iSeq_().query.i.get.map(_ ==> Nil)
 
       } yield ()
     }

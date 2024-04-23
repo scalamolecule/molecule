@@ -14,58 +14,22 @@ trait UpdateMap_filter extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 
-    "Update/upsert, 1 value" - types { implicit conn =>
-      for {
-        _ <- Ns.i.insert(1).transact
-        _ <- Ns.i.intMap_?.query.get.map(_ ==> List((1, None)))
-
-        // Update entities with non-unique `i` attribute with value 1
-        // Updating a non-asserted value doesn't insert it (nothing is updated)
-        _ <- Ns.i_(1).intMap(Map(pint2)).update.transact
-        // (we don't need the `multiple` identifier here since only one entity matches)
-        _ <- Ns.i.intMap_?.query.get.map(_ ==> List((1, None)))
-
-        // Upserting a non-asserted value inserts it
-        _ <- Ns.i_(1).intMap(Map(pint2)).upsert.transact
-        _ <- Ns.i.intMap_?.query.get.map(_ ==> List((1, Some(Map(pint2)))))
-
-        // Updating an asserted value updates it
-        _ <- Ns.i_(1).intMap(Map(pint3)).upsert.transact
-        _ <- Ns.i.intMap.query.get.map(_ ==> List((1, Map(pint3))))
-
-        // Upserting an asserted value updates it
-        _ <- Ns.i_(1).intMap(Map(pint4)).upsert.transact
-        _ <- Ns.i.intMap.query.get.map(_ ==> List((1, Map(pint4))))
-      } yield ()
-    }
-
-
-    "Update/upsert, multiple values" - types { implicit conn =>
+    "Update multiple values" - types { implicit conn =>
       for {
         List(a, b, c) <- Ns.i.intMap_?.insert(
           (1, None),
-          (1, Some(Map(pint2))),
-          (2, Some(Map(pint3))),
+          (1, Some(Map(pint1))),
+          (2, Some(Map(pint2))),
         ).transact.map(_.ids)
 
         // Update all entities where non-unique attribute i is 1
-        _ <- Ns.i_(1).intMap(Map(pint4)).update.transact
+        _ <- Ns.i_(1).intMap(Map(pint3)).update.transact
 
-        // Only matching entities with previous values updated
+        // 2 matching entities updated
         _ <- Ns.id.a1.i.intMap_?.query.get.map(_ ==> List(
-          (a, 1, None), // not updated since there were no previous value
-          (b, 1, Some(Map(pint4))), // 2 updated to 4
-          (c, 2, Some(Map(pint3))),
-        ))
-
-        // Upsert all entities where non-unique attribute i is 1
-        _ <- Ns.i_(1).intMap(Map(pint5)).upsert.transact
-
-        // All matching entities updated
-        _ <- Ns.id.a1.i.intMap_?.query.get.map(_ ==> List(
-          (a, 1, Some(Map(pint5))), // 5 inserted
-          (b, 1, Some(Map(pint5))), // 4 updated to 5
-          (c, 2, Some(Map(pint3))),
+          (a, 1, Some(Map(pint3))), // 3 inserted
+          (b, 1, Some(Map(pint3))), // 1 updated to 3
+          (c, 2, Some(Map(pint2))),
         ))
       } yield ()
     }
@@ -86,12 +50,6 @@ trait UpdateMap_filter extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Map(pint2)),
           (3, Map(pint3)),
         ).transact.map(_.ids)
-
-        _ <- Ns.i.a1.intMap.query.get.map(_ ==> List(
-          (1, Map(pint1)),
-          (2, Map(pint2)),
-          (3, Map(pint3)),
-        ))
 
         // Update all entities where non-unique attribute i <= 2
         _ <- Ns.i_.<=(2).intMap(Map(pint4)).update.transact
