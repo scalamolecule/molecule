@@ -97,7 +97,7 @@ class ResolveUpdate(
 
             case a: AttrSetTac =>
               if (a.op == Eq) {
-                throw ModelError(s"Filtering by Set match (${a.name}) not supported in updates.")
+                throw ModelError(s"Filtering by collection equality (${a.name}) not supported in updates.")
               }
               getFilters(tail, a :: filterElements, hasFilter || a.op != NoValue, requireNs, requiredNsPaths)
 
@@ -138,7 +138,7 @@ class ResolveUpdate(
 
             case a: AttrSeqTac =>
               if (a.op == Eq) {
-                throw ModelError(s"Filtering by Seq match (${a.name}) not supported in updates.")
+                throw ModelError(s"Filtering by collection equality (${a.name}) not supported in updates.")
               }
               val filterAttributes = a.op match {
                 case Has | HasNo =>
@@ -257,8 +257,7 @@ class ResolveUpdate(
           a match {
             case a: AttrOne => a match {
               case a: AttrOneMan => resolveAttrOneMan(a); resolve(tail)
-              //              case a: AttrOneTac => resolveAttrOneTac(a); resolve(tail)
-              case a: AttrOneTac => resolve(tail)
+              case a: AttrOneTac => resolveAttrOneTac(a); resolve(tail)
               case _: AttrOneOpt => noOptional(a)
             }
 
@@ -269,8 +268,7 @@ class ResolveUpdate(
                 case Remove       => resolveAttrSetRemove(a); resolve(tail)
                 case _            => throw ModelError(s"Unexpected update operation for card-many attribute. Found:\n" + a)
               }
-              //              case _: AttrSetTac => throw ModelError("Can only lookup entity with card-one attribute value. Found:\n" + a)
-              case _: AttrSetTac => resolve(tail)
+              case a: AttrSetTac => handleFilterAttr(a); resolve(tail)
               case _: AttrSetOpt => noOptional(a)
             }
 
@@ -281,8 +279,7 @@ class ResolveUpdate(
                 case Remove       => resolveAttrSeqRemove(a); resolve(tail)
                 case _            => throw ModelError(s"Unexpected update operation for card-many attribute. Found:\n" + a)
               }
-              //              case _: AttrSeqTac => throw ModelError("Can only lookup entity with card-one attribute value. Found:\n" + a)
-              case _: AttrSeqTac => resolve(tail)
+              case a: AttrSeqTac => handleFilterAttr(a); resolve(tail)
               case _: AttrSeqOpt => noOptional(a)
             }
 
@@ -293,21 +290,14 @@ class ResolveUpdate(
                 case Remove       => resolveAttrMapRemove(a); resolve(tail)
                 case _            => throw ModelError(s"Unexpected update operation for card-many attribute. Found:\n" + a)
               }
-              //              case _: AttrMapTac => throw ModelError("Can only lookup entity with card-one attribute value. Found:\n" + a)
-              case _: AttrMapTac => resolve(tail)
+              case a: AttrMapTac => handleFilterAttr(a); resolve(tail)
               case a: AttrMapOpt => noOptional(a)
             }
           }
 
-        //        case r@Ref(_, _, _, CardOne, _, _) => handleRefNs(r); resolve(tail)
         case r: Ref      => handleRefNs(r); resolve(tail)
         case br: BackRef => handleBackRef(br); resolve(tail)
-
-        //        case ref: Ref => throw ModelError(
-        //          s"Can't update attributes in card-many referenced namespace `${ref.refAttr.capitalize}`"
-        //        )
-
-        case _ => noNested
+        case _           => noNested
       }
       case Nil             => ()
     }
@@ -349,17 +339,17 @@ class ResolveUpdate(
     }
   }
 
-  //  private def resolveAttrOneTac(a: AttrOneTac): Unit = {
-  //    //    a match {
-  //    //      case AttrOneTacID(ns, "id", Eq, ids1, _, _, _, _, _, _, _, _) => handleIds(ns, ids1)
-  //    //
-  //    //      case a if a.attr == "id" => throw ModelError(
-  //    //        s"Generic id attribute not allowed in update molecule. Found:\n" + a)
-  //    //
-  //    //      case a if proxy.uniqueAttrs.contains(a.cleanName) => handleUniqueFilterAttr(a)
-  //    //      case a                                            => handleFilterAttr(a)
-  //    //    }
-  //  }
+  private def resolveAttrOneTac(a: AttrOneTac): Unit = {
+    a match {
+      case AttrOneTacID(ns, "id", Eq, ids1, _, _, _, _, _, _, _, _) => handleIds(ns, ids1)
+
+      case a if a.attr == "id" => throw ModelError(
+        s"Generic id attribute not allowed in update molecule. Found:\n" + a)
+
+      //      case a if proxy.uniqueAttrs.contains(a.cleanName) => handleUniqueFilterAttr(a)
+      case a => handleFilterAttr(a)
+    }
+  }
 
   private def resolveAttrSetMan(a: AttrSetMan): Unit = {
     val (ns, attr, refNs, owner) = (a.ns, a.attr, a.refNs, a.owner)

@@ -6,6 +6,7 @@ import molecule.boilerplate.ast.Model._
 import molecule.core.query.ResolveExpr
 import molecule.document.mongodb.query.mongoModel.{Branch, NestedEmbed, NestedRef}
 import org.bson._
+import org.bson.types.Binary
 import scala.collection.mutable.ArrayBuffer
 
 trait ResolveExprSeq extends ResolveExpr with LambdasSeq { self: MongoQueryBase =>
@@ -429,7 +430,6 @@ trait ResolveExprSeq extends ResolveExpr with LambdasSeq { self: MongoQueryBase 
     } { _ =>
       throw ModelError(s"Filter attributes not allowed with byte arrays.")
     }
-    seqAttr(uniqueField, field, true)
   }
 
   private def tacByteArray(attr: Attr, byteArray: Array[Byte]): Unit = {
@@ -440,6 +440,7 @@ trait ResolveExprSeq extends ResolveExpr with LambdasSeq { self: MongoQueryBase 
     }
   }
 
+
   private def byteArrayOps(attr: Attr, field: String, byteArray: Array[Byte]): Unit = {
     attr.op match {
       case V =>
@@ -447,37 +448,37 @@ trait ResolveExprSeq extends ResolveExpr with LambdasSeq { self: MongoQueryBase 
         b.base.matches.add(Filters.ne(path + field, null.asInstanceOf[Array[Byte]]))
 
       case Eq =>
-        //        if (byteArray.length != 0) {
-        //          where += ((col, s"= ?"))
-        //          val paramIndex = inputs.size + 1
-        //          inputs += ((ps: PrepStmt) => ps.setBytes(paramIndex, byteArray))
-        //
-        //        } else {
-        //          // Get none
-        //          where += (("FALSE", ""))
-        //        }
-        ???
-
+        if (byteArray.length != 0) {
+          b.base.matches.add(Filters.eq(b.dot + field, byteArray2intArray(byteArray)))
+        } else {
+          // Get none
+          b.base.matches.add(Filters.eq("_id", -1))
+        }
 
       case NoValue =>
         // Get none
-        //        where += (("FALSE", ""))
-        ???
+        b.base.matches.add(Filters.eq("_id", -1))
 
       case Neq =>
-        //        if (byteArray.length != 0) {
-        //          where += ((col, s"!= ?"))
-        //          val paramIndex = inputs.size + 1
-        //          inputs += ((ps: PrepStmt) => ps.setBytes(paramIndex, byteArray))
-        //
-        //        } else {
-        //          // get all
-        //        }
-        ???
+        if (byteArray.length != 0) {
+          b.base.matches.add(Filters.ne(b.dot + field, byteArray2intArray(byteArray)))
+        } else {
+          // get all
+        }
 
       case _ => throw ModelError(
         s"Byte arrays (${attr.cleanName}) can only be retrieved as-is. Filters not allowed.")
     }
+  }
+
+  private def byteArray2intArray(byteArray: Array[Byte]): BsonArray = {
+    val intArray = new BsonArray()
+    var i        = 0
+    while (i < byteArray.length) {
+      intArray.add(new BsonInt32(byteArray(i)))
+      i += 1
+    }
+    intArray
   }
 
   private def optByteArray(attr: Attr): Unit = {
@@ -508,6 +509,7 @@ trait ResolveExprSeq extends ResolveExpr with LambdasSeq { self: MongoQueryBase 
       )
     }
   }
+
 
   // helpers -------------------------------------------------------------------
 

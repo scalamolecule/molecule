@@ -322,7 +322,7 @@ trait SqlUpdate
     uniqueFilterElements = uniqueFilterElements :+ uniqueFilterAttr
   }
 
-  override def handleFilterAttr(filterAttr: AttrOneTac): Unit = {
+  override def handleFilterAttr[T <: Attr with Tacit](filterAttr: T): Unit = {
     filterElements = filterElements :+ filterAttr
   }
 

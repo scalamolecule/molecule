@@ -627,7 +627,7 @@ trait Update_datomic
   }
 
   override def handleUniqueFilterAttr(uniqueFilterAttr: AttrOneTac): Unit = ()
-  override def handleFilterAttr(filterAttr: AttrOneTac): Unit = ()
+  override def handleFilterAttr[T <: Attr with Tacit](filterAttr: T): Unit = ()
 
 
   override def handleRefNs(ref: Ref): Unit = {

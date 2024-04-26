@@ -68,29 +68,29 @@ trait ResolveExprMap extends ResolveExpr with LambdasMap { self: MongoQueryBase 
 
   override protected def resolveAttrMapOpt(attr: AttrMapOpt): Unit = {
     attr match {
-      case at: AttrMapOptID             => mapOpt(at, at.vs, resOptMapID, resMapID)
-      case at: AttrMapOptString         => mapOpt(at, at.vs, resOptMapString, resMapString)
-      case at: AttrMapOptInt            => mapOpt(at, at.vs, resOptMapInt, resMapInt)
-      case at: AttrMapOptLong           => mapOpt(at, at.vs, resOptMapLong, resMapLong)
-      case at: AttrMapOptFloat          => mapOpt(at, at.vs, resOptMapFloat, resMapFloat)
-      case at: AttrMapOptDouble         => mapOpt(at, at.vs, resOptMapDouble, resMapDouble)
-      case at: AttrMapOptBoolean        => mapOpt(at, at.vs, resOptMapBoolean, resMapBoolean)
-      case at: AttrMapOptBigInt         => mapOpt(at, at.vs, resOptMapBigInt, resMapBigInt)
-      case at: AttrMapOptBigDecimal     => mapOpt(at, at.vs, resOptMapBigDecimal, resMapBigDecimal)
-      case at: AttrMapOptDate           => mapOpt(at, at.vs, resOptMapDate, resMapDate)
-      case at: AttrMapOptDuration       => mapOpt(at, at.vs, resOptMapDuration, resMapDuration)
-      case at: AttrMapOptInstant        => mapOpt(at, at.vs, resOptMapInstant, resMapInstant)
-      case at: AttrMapOptLocalDate      => mapOpt(at, at.vs, resOptMapLocalDate, resMapLocalDate)
-      case at: AttrMapOptLocalTime      => mapOpt(at, at.vs, resOptMapLocalTime, resMapLocalTime)
-      case at: AttrMapOptLocalDateTime  => mapOpt(at, at.vs, resOptMapLocalDateTime, resMapLocalDateTime)
-      case at: AttrMapOptOffsetTime     => mapOpt(at, at.vs, resOptMapOffsetTime, resMapOffsetTime)
-      case at: AttrMapOptOffsetDateTime => mapOpt(at, at.vs, resOptMapOffsetDateTime, resMapOffsetDateTime)
-      case at: AttrMapOptZonedDateTime  => mapOpt(at, at.vs, resOptMapZonedDateTime, resMapZonedDateTime)
-      case at: AttrMapOptUUID           => mapOpt(at, at.vs, resOptMapUUID, resMapUUID)
-      case at: AttrMapOptURI            => mapOpt(at, at.vs, resOptMapURI, resMapURI)
-      case at: AttrMapOptByte           => mapOpt(at, at.vs, resOptMapByte, resMapByte)
-      case at: AttrMapOptShort          => mapOpt(at, at.vs, resOptMapShort, resMapShort)
-      case at: AttrMapOptChar           => mapOpt(at, at.vs, resOptMapChar, resMapChar)
+      case at: AttrMapOptID             => mapOpt(at, at.vs, resOptMapID)
+      case at: AttrMapOptString         => mapOpt(at, at.vs, resOptMapString)
+      case at: AttrMapOptInt            => mapOpt(at, at.vs, resOptMapInt)
+      case at: AttrMapOptLong           => mapOpt(at, at.vs, resOptMapLong)
+      case at: AttrMapOptFloat          => mapOpt(at, at.vs, resOptMapFloat)
+      case at: AttrMapOptDouble         => mapOpt(at, at.vs, resOptMapDouble)
+      case at: AttrMapOptBoolean        => mapOpt(at, at.vs, resOptMapBoolean)
+      case at: AttrMapOptBigInt         => mapOpt(at, at.vs, resOptMapBigInt)
+      case at: AttrMapOptBigDecimal     => mapOpt(at, at.vs, resOptMapBigDecimal)
+      case at: AttrMapOptDate           => mapOpt(at, at.vs, resOptMapDate)
+      case at: AttrMapOptDuration       => mapOpt(at, at.vs, resOptMapDuration)
+      case at: AttrMapOptInstant        => mapOpt(at, at.vs, resOptMapInstant)
+      case at: AttrMapOptLocalDate      => mapOpt(at, at.vs, resOptMapLocalDate)
+      case at: AttrMapOptLocalTime      => mapOpt(at, at.vs, resOptMapLocalTime)
+      case at: AttrMapOptLocalDateTime  => mapOpt(at, at.vs, resOptMapLocalDateTime)
+      case at: AttrMapOptOffsetTime     => mapOpt(at, at.vs, resOptMapOffsetTime)
+      case at: AttrMapOptOffsetDateTime => mapOpt(at, at.vs, resOptMapOffsetDateTime)
+      case at: AttrMapOptZonedDateTime  => mapOpt(at, at.vs, resOptMapZonedDateTime)
+      case at: AttrMapOptUUID           => mapOpt(at, at.vs, resOptMapUUID)
+      case at: AttrMapOptURI            => mapOpt(at, at.vs, resOptMapURI)
+      case at: AttrMapOptByte           => mapOpt(at, at.vs, resOptMapByte)
+      case at: AttrMapOptShort          => mapOpt(at, at.vs, resOptMapShort)
+      case at: AttrMapOptChar           => mapOpt(at, at.vs, resOptMapChar)
     }
   }
 
@@ -99,8 +99,6 @@ trait ResolveExprMap extends ResolveExpr with LambdasMap { self: MongoQueryBase 
   ): Unit = {
     val field       = attr.attr
     val uniqueField = b.unique(field)
-    projectField(field)
-    addCast(field, resMap.castMap(field))
 
     prefixedFieldPair = if (b.parent.isEmpty)
       (nestedLevel, field, field)
@@ -108,7 +106,7 @@ trait ResolveExprMap extends ResolveExpr with LambdasMap { self: MongoQueryBase 
       (nestedLevel, b.path + field, b.alias + field)
     topBranch.groupIdFields += prefixedFieldPair
     attr.op match {
-      case V       => setAttr(field)
+      case V       => mapAttr(field, resMap, true)
       case Has     => key2value(uniqueField, map.head._1, resMap)
       case NoValue => noApplyNothing(attr)
       case Eq      => noCollectionMatching(attr)
@@ -120,15 +118,12 @@ trait ResolveExprMap extends ResolveExpr with LambdasMap { self: MongoQueryBase 
     attr: Attr,
     optMap: Option[Map[String, T]],
     resMapOpt: ResMapOpt[T],
-    resMap: ResMap[T]
   ): Unit = {
     val field       = attr.attr
     val uniqueField = b.unique(field)
-    projectField(field)
-    addCast(field, resMapOpt.castOptMap(field))
     attr.op match {
-      case V     => ()
-      case Has   => key2optValue(uniqueField, optMap.get.head._1, resMap)
+      case V     => mapAttrOpt(field, resMapOpt)
+      case Has   => key2optValue(uniqueField, optMap.get.head._1, resMapOpt)
       case Eq    => noCollectionMatching(attr)
       case other => unexpectedOp(other)
     }
@@ -139,13 +134,15 @@ trait ResolveExprMap extends ResolveExpr with LambdasMap { self: MongoQueryBase 
   ): Unit = {
     val field       = attr.attr
     val uniqueField = b.unique(field)
+    val pathField   = b.dot + field
+
     attr.op match {
-      case V       => () // where += ((col, s"IS NOT NULL"))
-      case Eq      => mapContainsKeys(uniqueField, map)
-      case Neq     => mapContainsNoKeys(uniqueField, map)
-      case Has     => mapHasValues(uniqueField, map, resMap)
-      case HasNo   => mapHasNoValues(uniqueField, map, resMap)
-      case NoValue => mapNoValue(uniqueField)
+      case V       => mapAttr(field, resMap, false)
+      case Eq      => mapContainsKeys(pathField, map)
+      case Neq     => mapContainsNoKeys(pathField, map)
+      case Has     => mapHasValues(pathField, map, resMap)
+      case HasNo   => mapHasNoValues(pathField, map, resMap)
+      case NoValue => mapNoValue(pathField)
       case other   => unexpectedOp(other)
     }
   }
@@ -154,112 +151,161 @@ trait ResolveExprMap extends ResolveExpr with LambdasMap { self: MongoQueryBase 
 
   // attr ----------------------------------------------------------------------
 
-  private def setAttr(field: String): Unit = {
+  private def mapAttr[T](field: String, resMap: ResMap[T], retrieve: Boolean): Unit = {
     b.base.matches.add(Filters.ne(b.dot + field, new BsonNull))
     b.base.matches.add(Filters.gt(b.dot + field, new BsonDocument()))
+    if (retrieve) {
+      projectField(field)
+      addCast(field, resMap.castMap(field))
+    }
+  }
+
+  private def mapAttrOpt[T](field: String, resMapOpt: ResMapOpt[T]): Unit = {
+    projectField(field)
+    addCast(field, resMapOpt.castOptMap(field))
   }
 
 
   // value lookup by key -------------------------------------------------------
 
   protected def key2value[T](
-    col: String, key: String, resMap: ResMap[T]
+    field: String, key: String, resMap: ResMap[T]
   ): Unit = {
-//    val value = s"""($col)."$key""""
-//    select -= col
-//    select += value
-//    where += ((value, s"IS NOT NULL"))
-//    replaceCast((row: RS, paramIndex: Int) =>
-//      resMap.json2tpe(row.getString(paramIndex)))
-    ???
+    val fieldKey = field + "." + key
+    b.base.matches.add(Filters.ne(b.dot + field, new BsonNull))
+    b.base.matches.add(Filters.ne(b.dot + fieldKey, new BsonNull))
+    projectField(fieldKey)
+    addCast(field, resMap.castValue(field, key))
   }
 
   protected def key2optValue[T](
-    col: String, key: String, resMap: ResMap[T]
+    field: String, key: String, resMapOpt: ResMapOpt[T]
   ): Unit = {
-//    select -= col
-//    select += s"""($col)."$key""""
-//    replaceCast((row: RS, paramIndex: Int) => {
-//      val value = row.getString(paramIndex)
-//      if (row.wasNull()) Option.empty[T] else Some(resMap.json2tpe(value))
-//    })
-    ???
+    projectField(field + "." + key)
+    addCast(field, resMapOpt.castOptValue(field, key))
   }
 
 
   // tacit ---------------------------------------------------------------------
 
   protected def mapContainsKeys[T](
-    col: String, map: Map[String, T]
+    field: String, map: Map[String, T]
   ): Unit = {
-//    val keys = map.keys
-//    keys.size match {
-//      case 0 => where += (("FALSE", ""))
-//      case 1 => where += (("", s"""($col)."${keys.head}" IS NOT NULL"""))
-//      case _ => where += (("", keys.map(key =>
-//        s"""($col)."$key" IS NOT NULL"""
-//      ).mkString("(", " OR\n   ", ")")))
-//    }
-    ???
+    val prefix = field + "."
+    map.size match {
+      case 0 => b.base.matches.add(Filters.eq("_id", -1))
+      case 1 => b.base.matches.add(Filters.ne(prefix + map.head._1, new BsonNull))
+      case _ => b.base.matches.add(Filters.or(
+        map.map {
+          case (k, v) => Filters.ne(prefix + k, new BsonNull)
+        }.asJava
+      ))
+    }
   }
 
   protected def mapContainsNoKeys[T](
-    col: String, map: Map[String, T]
+    field: String, map: Map[String, T]
   ): Unit = {
-//    val keys = map.keys
-//    keys.size match {
-//      case 0 => () // get all
-//      case 1 => where += (("", s"""($col)."${keys.head}" IS NULL"""))
-//      case _ => where += (("", keys.map(key =>
-//        s"""($col)."$key" IS NULL"""
-//      ).mkString("(", " AND\n   ", ")")))
-//    }
-    ???
+    val prefix = field + "."
+    map.size match {
+      case 0 => () // all
+      case 1 => b.base.matches.add(Filters.eq(prefix + map.head._1, new BsonNull))
+      case _ => b.base.matches.add(Filters.and(
+        map.map {
+          case (k, v) => Filters.eq(prefix + k, new BsonNull)
+        }.asJava
+      ))
+    }
   }
 
   protected def mapHasValues[T](
-    col: String, map: Map[String, T], resMap: ResMap[T]
+    field: String, map: Map[String, T], resMap: ResMap[T]
   ): Unit = {
-//    if (map.nonEmpty) {
-//      val values = map.values.map(resMap.one2json)
-//      where += (("", s"""REGEXP_LIKE($col, '(${regex(resMap.tpe, values)})')"""))
-//    } else {
-//      // Get none
-//      where += (("FALSE", ""))
-//    }
-    ???
+    if (map.isEmpty) {
+      b.base.matches.add(Filters.eq("_id", -1))
+    } else {
+      val value = resMap.v2bson
+      b.base.matches.add(
+        new BsonDocument("$expr",
+          new BsonDocument("$reduce", {
+            val reduce = new BsonDocument()
+            reduce.put("input", new BsonDocument("$map", {
+              val input = new BsonDocument()
+              input.put("input", new BsonDocument("$objectToArray", new BsonString("$" + b.path + field)))
+              input.put("as", new BsonString("pair"))
+              input.put("in", new BsonDocument("$in", {
+                val inArray = new BsonArray()
+                inArray.add(new BsonString("$$pair.v"))
+                inArray.add {
+                  val args = new BsonArray()
+                  map.foreach {
+                    case (k, v) => args.add(value(v))
+                  }
+                  args
+                }
+                inArray
+              }))
+              input
+            }))
+            reduce.put("initialValue", new BsonBoolean(false))
+            reduce.put("in", new BsonDocument("$or", {
+              val arr = new BsonArray()
+              arr.add(new BsonString("$$value"))
+              arr.add(new BsonString("$$this"))
+              arr
+            }))
+            reduce
+          })
+        )
+      )
+    }
   }
 
   protected def mapHasNoValues[T](
-    col: String, map: Map[String, T], resMap: ResMap[T]
+    field: String, map: Map[String, T], resMap: ResMap[T]
   ): Unit = {
-//    if (map.nonEmpty) {
-//      val values = map.values.map(resMap.one2json)
-//      where += (("", s"""NOT(REGEXP_LIKE($col, '(${regex(resMap.tpe, values)})'))"""))
-//    } else {
-//      // Get all
-//      ()
-//    }
-    ???
+    if (map.isEmpty) {
+      () // get all
+    } else {
+      val value = resMap.v2bson
+      b.base.matches.add(
+        new BsonDocument("$expr",
+          new BsonDocument("$reduce", {
+            val reduce = new BsonDocument()
+            reduce.put("input", new BsonDocument("$map", {
+              val input = new BsonDocument()
+              input.put("input", new BsonDocument("$objectToArray", new BsonString("$" + b.path + field)))
+              input.put("as", new BsonString("pair"))
+              input.put("in", new BsonDocument("$not",
+                new BsonDocument("$in", {
+                  val inArray = new BsonArray()
+                  inArray.add(new BsonString("$$pair.v"))
+                  inArray.add {
+                    val args = new BsonArray()
+                    map.foreach {
+                      case (k, v) => args.add(value(v))
+                    }
+                    args
+                  }
+                  inArray
+                })))
+              input
+            }))
+            reduce.put("initialValue", new BsonBoolean(true))
+            reduce.put("in", new BsonDocument("$and", {
+              val arr = new BsonArray()
+              arr.add(new BsonString("$$value"))
+              arr.add(new BsonString("$$this"))
+              arr
+            }))
+            reduce
+          })
+        )
+      )
+    }
   }
 
-  protected def mapNoValue(col: String): Unit = {
-//    where += ((col, s"IS NULL"))
-    ???
+  protected def mapNoValue(field: String): Unit = {
+    b.base.matches.add(Filters.eq(b.dot + field, new BsonNull))
   }
-
-
-  // helpers -------------------------------------------------------------------
-
-  private def regex[T](tpe: String, values: Iterable[T]): String = {
-//    lazy val field = """"[^"]+""""
-//    tpe match {
-//      case "String" => values.mkString(s"$field:", s"|$field:", "")
-//
-//      case "OffsetTime" | "OffsetDateTime" | "ZonedDateTime" =>
-//        values.asInstanceOf[Iterable[String]].map(_.replace("+", "\\+")).mkString("|:")
-//
-//      case _ => values.mkString(":", "|:", "")
-//    }
-    ???
-  }}
+}

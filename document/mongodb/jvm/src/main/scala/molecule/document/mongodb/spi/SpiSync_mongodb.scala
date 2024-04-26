@@ -110,7 +110,8 @@ trait SpiSync_mongodb
   ): Unit = {
     tryInspect("query", elements) {
       val (ns, pipeline) = new Model2MongoQuery[Any](elements).getBsonQuery(Nil, optLimit, optOffset)
-      printRaw(label, Nil, pipeline2json(pipeline, Some(ns)))
+//      printRaw(label, Nil, pipeline2json(pipeline, Some(ns)))
+      printRaw(label, elements, pipeline2json(pipeline, Some(ns)))
     }
   }
 

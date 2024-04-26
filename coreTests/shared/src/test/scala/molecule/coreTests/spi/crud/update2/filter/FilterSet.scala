@@ -81,9 +81,9 @@ trait FilterSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       // Filtering updates by equality of collections is not supported by molecule.
       // Instead use has/hasNo.
       for {
-        _ <- Ns("42").iSet_(Set(1)).int(3).update.transact
+        _ <- Ns("123456789012345678901234").iSet_(Set(1)).int(3).update.transact
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Filtering by Set match (Ns.iSet) not supported in updates."
+            err ==> "Filtering by collection equality (Ns.iSet) not supported in updates."
           }
       } yield ()
     }

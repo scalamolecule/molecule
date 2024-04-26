@@ -12,6 +12,7 @@ import scala.language.implicitConversions
 import molecule.boilerplate.ast.Model._
 import molecule.coreTests.dataModels.core.dsl.Refs.A
 import molecule.document.mongodb.AdhocJVM_mongodb.{int2, int3, int4}
+import org.bson.BsonBinarySubType
 import scala.collection.immutable.Set
 import scala.concurrent.Future
 import scala.util.Random
@@ -19,6 +20,9 @@ import scala.util.Random
 //object AdhocJVM_mongodb extends TestSuite_mongodb with AggrUtils {
 object AdhocJVM_mongodb extends TestSuiteArray_mongodb with AggrUtils {
 
+//  org.bson.types.Binary
+//  org.bson.types.Binary(BsonBinarySubType.BINARY, Array.empty[Byte])
+//  org.bson.types.Binary(Array.empty[Byte])
 
   override lazy val tests = Tests {
 
@@ -26,37 +30,27 @@ object AdhocJVM_mongodb extends TestSuiteArray_mongodb with AggrUtils {
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
+
+
+      val (a1, b2) = ("a" -> int1, "b" -> int2)
+      val (b3, c4) = ("b" -> int3, "c" -> int4)
+
       for {
 
-        id <- Ns.i(42).save.transact.map(_.id)
-//        // Map attribute not yet asserted
-//        _ <- Ns.intMap.query.get.map(_ ==> Nil)
-//
-//        // Applying Map of pairs to non-asserted Map attribute adds the attribute with the update
-//        _ <- Ns(id).intMap(Map(pint1, pint2)).update.transact
-//        _ <- Ns.intMap.query.get.map(_.head ==> Map(pint1, pint2))
-//
-//        // Applying Map of pairs replaces previous Map
-//        _ <- Ns(id).intMap(Map(pint2, pint3)).update.i.transact
-//        _ <- Ns.intMap.query.get.map(_.head ==> Map(pint2, pint3))
+        _ <- Ns.i.intMap.insert(List(
+          (1, Map(a1, b2)),
+          (2, Map(b3, c4)),
+        )).transact
 
-        // Add other attribute and update Map attribute in one go
-//        _ <- Ns(id).s("foo").intMap(Map(pint3, pint4)).update.i.transact
-//        _ <- Ns(id).s("foo").intMap(Map(pint3, pint4)).update.i.transact
-        _ <- Ns(id).iSeq(List(3)).intMap(Map(pint3, pint4)).update.i.transact
-        _ <- Ns.i.s.intMap.query.get.map(_.head ==> (42, "foo", Map(pint3, pint4)))
+        _ <- Ns.i.a1.intSet_.has(int1, int2).query.i.get
+        _ <- Ns.i.a1.intSeq_.has(int1, int2).query.i.get
 
-//        // Applying empty Map of pairs deletes map
-//        _ <- Ns(id).intMap(Map.empty[String, Int]).update.transact
-//        _ <- Ns.intMap.query.get.map(_ ==> Nil)
-//
-//        _ <- Ns(id).intMap(Map(pint1, pint2)).update.transact
-//        // Apply nothing to delete attribute
-//        _ <- Ns(id).intMap().update.transact
-//        _ <- Ns.intMap.query.get.map(_ ==> Nil)
-//
-//        // Entity still has other attributes
-//        _ <- Ns.i.s.query.get.map(_.head ==> (42, "foo"))
+
+        _ <- Ns.i.a1.intMap_.has(int0).query.get.map(_ ==> Nil)
+        _ <- Ns.i.a1.intMap_.has(int1).query.i.get.map(_ ==> List(1))
+
+        _ <- Ns.i.a1.intMap.intMap_.has(int1).query.i.get.map(_ ==> List((1, Map(a1, b2))))
+
 
       } yield ()
     }
@@ -70,37 +64,6 @@ object AdhocJVM_mongodb extends TestSuiteArray_mongodb with AggrUtils {
         _ <- A.i.B.iSet.insert((1, Set.empty[Int])).transact
         id <- A.iSet(Set(1)).OwnB.iSet(Set(2)).C.iSet(Set(3)).save.transact.map(_.id)
 
-        // todo: Why do these two require/not require not-equal null?
-        _ <- A.i.B.iSet_.query.get.map(_ ==> Nil)
-        _ <- A.iSet.OwnB.iSet.C.iSet.query.get.map(_ ==> List((Set(1), Set(2), Set(3))))
-        /*
-            {
-              "$lookup": {
-                "from": "C",
-                "localField": "ownB.c",
-                "foreignField": "_id",
-                "as": "ownB.c",
-                "pipeline": [
-                  {
-                    "$match": {
-                      "$and": [
-        //                {        // specific example above solved without this
-        //                  "ownB.iSet": {
-        //                    "$ne": null
-        //                  }
-        //                },
-                        {
-                          "ownB.iSet": {
-                            "$ne": []
-                          }
-                        }
-                      ]
-                    }
-                  }
-                ]
-              }
-            },
-         */
 
         //        _ <- rawTransact(
         //          s"""{

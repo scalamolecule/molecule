@@ -117,7 +117,7 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     val v = vv
     find += v
     attr.op match {
-      case V       => mapAttr(attr, e, v, resMap)
+      case V       => mapAttr(attr, e, v, resMap, true)
       case Has     => key2value(attr, e, v, map.head._1, resMap)
       case Eq      => noCollectionMatching(attr)
       case NoValue => noApplyNothing(attr)
@@ -143,7 +143,7 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
   ): Unit = {
     val v = vv
     attr.op match {
-      case V       => mapAttr(attr, e, v, resMap)
+      case V       => mapAttr(attr, e, v, resMap, false)
       case Eq      => mapContainsKeys(attr, e, v, map)
       case Neq     => mapContainsNoKeys(attr, e, v, map)
       case Has     => mapHasValues(attr, e, v, map, resMap)
@@ -157,7 +157,7 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
   // attr ----------------------------------------------------------------------
 
   private def mapAttr[T](
-    attr: Attr, e: Var, v: Var, resMap: ResMap[T]
+    attr: Attr, e: Var, v: Var, resMap: ResMap[T], mandatory: Boolean
   ): Unit = {
     val (a, ak, av, k_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
     where += s"[$e $a _]" -> wClause
@@ -169,7 +169,8 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
          |                   [$v $ak $k_]
          |                   [$v $av $v_]
          |                   [(vector $k_ $v_) $pair]]" $$ $e) [[$v]]]""".stripMargin -> wClause
-    addCast(resMap.j2sMap)
+    if (mandatory)
+      addCast(resMap.j2sMap)
   }
 
   private def mapOptAttr[T](

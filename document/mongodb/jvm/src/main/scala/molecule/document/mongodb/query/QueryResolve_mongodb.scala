@@ -20,11 +20,11 @@ abstract class QueryResolve_mongodb[Tpl](
   with ModelUtils
   with BsonUtils {
 
-  protected def getData(
+  def getData(
     conn: MongoConn_JVM,
-    altElements: List[Element],
-    optLimit: Option[Int],
-    optOffset: Option[Int]
+    altElements: List[Element] = Nil,
+    optLimit: Option[Int] = None,
+    optOffset: Option[Int] = None
   ): AggregateIterable[BsonDocument] = {
     val (collectionName, pipeline) = m2q.getBsonQuery(altElements, optLimit, optOffset)
     val collection                 = conn.mongoDb.getCollection(collectionName, classOf[BsonDocument])
