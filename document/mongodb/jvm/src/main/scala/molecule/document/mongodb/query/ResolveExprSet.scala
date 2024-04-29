@@ -1,12 +1,10 @@
 package molecule.document.mongodb.query
 
-import com.mongodb.client.model.{Filters, Projections}
-import molecule.base.error.ModelError
+import com.mongodb.client.model.Filters
 import molecule.boilerplate.ast.Model._
-import molecule.core.query.{ResolveExpr, ResolveExprExceptions}
+import molecule.core.query.ResolveExpr
 import molecule.document.mongodb.query.mongoModel.{Branch, NestedEmbed, NestedRef}
 import org.bson._
-import org.bson.conversions.Bson
 
 //trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet =>
 trait ResolveExprSet extends ResolveExpr with LambdasSet { self: MongoQueryBase =>
@@ -174,8 +172,9 @@ trait ResolveExprSet extends ResolveExpr with LambdasSet { self: MongoQueryBase 
   // attr ----------------------------------------------------------------------
 
   private def setAttr(uniqueField: String, field: String, mandatory: Boolean): Unit = {
-    b.base.matches.add(Filters.ne(b.dot + field, new BsonNull))
-    b.base.matches.add(Filters.ne(b.dot + field, new BsonArray()))
+    val prefix = if (b.isEmbedded) b.dot else ""
+    b.matches.add(Filters.ne(prefix + field, new BsonNull))
+    b.matches.add(Filters.ne(prefix + field, new BsonArray()))
     coalesce(uniqueField, field, mandatory)
   }
 

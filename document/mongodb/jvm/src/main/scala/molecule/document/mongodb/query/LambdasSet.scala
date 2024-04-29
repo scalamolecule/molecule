@@ -93,7 +93,10 @@ trait LambdasSet extends LambdasBase with JavaConversions {
     }
   }
 
-  private lazy val castOptSetID             = (field: String) => (doc: BsonDocument) => castOptSet[String](doc, field, (bv: BsonValue) => bv.asObjectId().getValue.toString)
+  private lazy val castOptSetID             = (field: String) => (doc: BsonDocument) => castOptSet[String](doc, field, {
+    case v: BsonObjectId => v.getValue.toString
+    case v: BsonString   => v.getValue
+  })
   private lazy val castOptSetString         = (field: String) => (doc: BsonDocument) => castOptSet[String](doc, field, (bv: BsonValue) => bv.asString.getValue)
   private lazy val castOptSetInt            = (field: String) => (doc: BsonDocument) => castOptSet[Int](doc, field, (bv: BsonValue) => bv.asInt32.getValue)
   private lazy val castOptSetLong           = (field: String) => (doc: BsonDocument) => castOptSet[Long](doc, field, (bv: BsonValue) => bv.asInt64.getValue)

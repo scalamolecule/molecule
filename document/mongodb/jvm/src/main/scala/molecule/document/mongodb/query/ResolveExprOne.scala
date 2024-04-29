@@ -12,7 +12,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne { self: MongoQueryBase 
 
   override protected def resolveAttrOneMan(attr: AttrOneMan): Unit = {
     attr match {
-      case at: AttrOneManID             => man(attr, at.vs, resID)
+      case at: AttrOneManID             => if (at.owner) noEmbeddedIds else man(attr, at.vs, resID)
       case at: AttrOneManString         => man(attr, at.vs, resString)
       case at: AttrOneManInt            => man(attr, at.vs, resInt)
       case at: AttrOneManLong           => man(attr, at.vs, resLong)
@@ -42,7 +42,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne { self: MongoQueryBase 
     if (isNestedOpt)
       throw ModelError("Tacit attributes not allowed in optional nested queries. Found: " + attr.name + "_")
     attr match {
-      case at: AttrOneTacID             => tac(attr, at.vs, resID)
+      case at: AttrOneTacID             => if (at.owner) noEmbeddedIds else tac(attr, at.vs, resID)
       case at: AttrOneTacString         => tac(attr, at.vs, resString)
       case at: AttrOneTacInt            => tac(attr, at.vs, resInt)
       case at: AttrOneTacLong           => tac(attr, at.vs, resLong)
@@ -70,7 +70,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne { self: MongoQueryBase 
 
   override protected def resolveAttrOneOpt(attr: AttrOneOpt): Unit = {
     attr match {
-      case at: AttrOneOptID             => opt(attr, at.vs, resID)
+      case at: AttrOneOptID             => if (at.owner) noEmbeddedIds else opt(attr, at.vs, resID)
       case at: AttrOneOptString         => opt(attr, at.vs, resString)
       case at: AttrOneOptInt            => opt(attr, at.vs, resInt)
       case at: AttrOneOptLong           => opt(attr, at.vs, resLong)

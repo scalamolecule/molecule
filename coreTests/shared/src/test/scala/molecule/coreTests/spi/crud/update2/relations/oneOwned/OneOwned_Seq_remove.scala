@@ -7,6 +7,7 @@ import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Refs._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
+import scala.concurrent.Future
 
 trait OneOwned_Seq_remove extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
@@ -71,7 +72,10 @@ trait OneOwned_Seq_remove extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         ))
 
         // Initial entity without ref was not updated (3 not removed)
-        _ <- A.iSeq.ownB_().query.get.map(_ ==> List(Seq(3, 7)))
+        _ <- if (database != "MongoDB") {
+          // Entity A without ref was not updated
+          A.iSeq.ownB_().query.get.map(_ ==> List(Seq(3, 7)))
+        } else Future.unit
       } yield ()
     }
 
@@ -97,11 +101,18 @@ trait OneOwned_Seq_remove extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (4, Seq(2, 2)),
         ))
 
-        _ <- B.s.a1.iSeq.query.get.map(_ ==> List(
-          ("b", Seq(1, 2, 1)),
-          ("c", Seq(2, 2)),
-          ("x", Seq(3, 7)), // not updated since it isn't referenced from A
-        ))
+        _ <- if (database == "MongoDB") {
+          // Embedded data in Mongo have no separate entity ids
+          B.s.a1.iSeq.query.get.map(_ ==> List(
+            ("x", Seq(3, 7)), // not updated since it isn't referenced from A
+          ))
+        } else {
+          B.s.a1.iSeq.query.get.map(_ ==> List(
+            ("b", Seq(1, 2, 1)),
+            ("c", Seq(2, 2)),
+            ("x", Seq(3, 7)), // not updated since it isn't referenced from A
+          ))
+        }
       } yield ()
     }
   }

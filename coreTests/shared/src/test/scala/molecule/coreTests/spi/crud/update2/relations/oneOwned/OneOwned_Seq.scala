@@ -7,6 +7,7 @@ import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Refs._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
+import scala.concurrent.Future
 
 trait OneOwned_Seq extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
@@ -65,8 +66,10 @@ trait OneOwned_Seq extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (Seq(4, 5), 3), // A attribute updated
         ))
 
-        // Entity A without ref was not updated
-        _ <- A.iSeq.ownB_().query.get.map(_ ==> List(Seq(0, 1)))
+        _ <- if (database != "MongoDB") {
+          // Entity A without ref was not updated
+          A.iSeq.ownB_().query.get.map(_ ==> List(Seq(0, 1)))
+        } else Future.unit
       } yield ()
     }
 
@@ -89,11 +92,18 @@ trait OneOwned_Seq extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Seq(2, 3)), // B attribute updated
         ))
 
-        _ <- B.s.a1.iSeq.query.get.map(_ ==> List(
-          ("a", Seq(2, 3)),
-          ("b", Seq(2, 3)),
-          ("x", Seq(0, 1)), // not updated since it isn't referenced from A
-        ))
+        _ <- if (database == "MongoDB") {
+          // Embedded data in Mongo have no separate entity ids
+          B.s.a1.iSeq.query.get.map(_ ==> List(
+            ("x", Seq(0, 1)), // not updated since it isn't referenced from A
+          ))
+        } else {
+          B.s.a1.iSeq.query.get.map(_ ==> List(
+            ("a", Seq(2, 3)),
+            ("b", Seq(2, 3)),
+            ("x", Seq(0, 1)), // not updated since it isn't referenced from A
+          ))
+        }
       } yield ()
     }
 
@@ -231,6 +241,10 @@ trait OneOwned_Seq extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                 _ <- rawQuery(s"[:find (count ?e) :where [?e :A.iSeq/i_ ?i]]").map(_.head ==> List(2))
                 _ <- rawQuery(s"[:find (count ?e) :where [?e :A.iSeq/v_ ?v]]").map(_.head ==> List(2))
               } yield ()
+
+            case "MongoDB" =>
+              // Mongo implementation doesn't need synthetic entities
+              Future.unit
 
             case other => throw new Exception(s"Missing $other test implementation.")
           }

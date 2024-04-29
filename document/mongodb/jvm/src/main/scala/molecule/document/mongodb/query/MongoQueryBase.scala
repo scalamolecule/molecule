@@ -2,6 +2,7 @@ package molecule.document.mongodb.query
 
 import java.util
 import molecule.base.ast.Card
+import molecule.base.error.ModelError
 import molecule.base.util.BaseHelpers
 import molecule.core.query.{Model2QueryBase, ResolveExprExceptions}
 import molecule.core.util.JavaConversions
@@ -90,4 +91,8 @@ trait MongoQueryBase extends Model2QueryBase with ResolveExprExceptions with Bas
   final var isNested    = false
   final var isNestedMan = false
   final var isNestedOpt = false
+
+  protected def noEmbeddedIds: Nothing = throw ModelError(
+    "Can't query for non-existing ids of embedded documents in MongoDB."
+  )
 }

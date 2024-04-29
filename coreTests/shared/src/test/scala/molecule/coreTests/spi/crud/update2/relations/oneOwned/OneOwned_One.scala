@@ -90,11 +90,18 @@ trait OneOwned_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (3, 4), // B attribute updated
         ))
 
-        _ <- B.s.a1.i.query.get.map(_ ==> List(
-          ("b", 4),
-          ("c", 4),
-          ("x", 0), // not updated since it isn't referenced from A
-        ))
+        _ <- if (database == "MongoDB") {
+          // Embedded data in Mongo have no separate entity ids
+          B.s.a1.i.query.get.map(_ ==> List(
+            ("x", 0), // not updated since it isn't referenced from A
+          ))
+        } else {
+          B.s.a1.i.query.get.map(_ ==> List(
+            ("b", 4),
+            ("c", 4),
+            ("x", 0), // not updated since it isn't referenced from A
+          ))
+        }
       } yield ()
     }
 

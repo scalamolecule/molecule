@@ -206,8 +206,8 @@ trait LambdasOne extends LambdasSet {
     (field: String) => (doc: BsonDocument) => doc.get(field) match {
       case _: BsonNull | null => Option.empty[String]
       case v: BsonObjectId    => Some(v.getValue.toString)
-      case _                  => throw ModelError(
-        "Can't query for non-existing ids of embedded documents in MongoDB."
+      case other              => throw ModelError(
+        "Can't query for non-existing ids of embedded documents in MongoDB. Found: " + other
       )
     }
 

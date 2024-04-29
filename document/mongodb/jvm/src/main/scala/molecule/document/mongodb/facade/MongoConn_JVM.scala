@@ -1,7 +1,7 @@
 package molecule.document.mongodb.facade
 
 import java.util
-import com.mongodb.client.model.UpdateOptions
+import com.mongodb.client.model.{InsertManyOptions, UpdateOptions}
 import com.mongodb.client.{MongoClient, MongoDatabase, TransactionBody}
 import com.mongodb.{ReadConcern, ReadPreference, TransactionOptions, WriteConcern}
 import molecule.base.error.ModelError
@@ -149,30 +149,46 @@ case class MongoConn_JVM(
           var updatedIds = List.empty[String]
           var firstNs    = true
           data.forEach {
-            case ("_action", _) => ()
-            case (ns, nsData0)  =>
+            case ("_action", _)       => ()
+            case ("_refIds", refData) =>
+              val nss = refData.asDocument()
+              nss.forEach { case (refNs, refIds0) =>
+                val refIds = refIds0.asArray()
+                if (!refIds.isEmpty) {
+                  val collection = mongoDb.getCollection(refNs, classOf[BsonDocument])
+                  collection.insertMany(clientSession, refIds.asInstanceOf[util.List[BsonDocument]])
+                }
+              }
+
+            case ("_refAttrs", refData) =>
+              val nss = refData.asDocument()
+              nss.forEach { case (ns, updateData) =>
+                val collection = mongoDb.getCollection(ns, classOf[BsonDocument])
+                updateData.asArray().forEach { bson =>
+                  val doc    = bson.asDocument()
+                  val filter = doc.getDocument("filter")
+                  val update = doc.getDocument("update")
+                  collection.updateOne(clientSession, filter, update)
+                }
+              }
+
+            case (ns, nsData0) =>
               val nsData = nsData0.asDocument()
-              val filter = nsData.get("filter").asDocument()
+              val filter = nsData.getDocument("filter")
               if (firstNs) {
                 updatedIds = filter
-                  .get("_id").asDocument()
-                  .get("$in").asArray().getValues.asScala.toList
+                  .getDocument("_id")
+                  .getArray("$in").getValues.asScala.toList
                   .map(_.asInstanceOf[BsonObjectId].getValue.toString)
                 firstNs = false
               }
-              val update     = nsData.get("update").asDocument()
+              val update     = nsData.getDocument("update")
               val collection = mongoDb.getCollection(ns, classOf[BsonDocument])
-              if (nsData.containsKey("arrayFilters")) {
-                val arrayFilters = new util.ArrayList[Bson]
-                nsData.get("arrayFilters").asArray().forEach(filter =>
-                  arrayFilters.add(filter.asDocument())
-                )
-                val updateOptions = new UpdateOptions().arrayFilters(arrayFilters)
-                collection.updateMany(clientSession, filter, update, updateOptions)
-              } else {
-                collection.updateMany(clientSession, filter, update)
-              }
+//                            collection.updateMany(clientSession, filter, update, new UpdateOptions().upsert(true))
+              collection.updateMany(clientSession, filter, update)
           }
+
+
           TxReport(updatedIds)
         }
       }
@@ -189,7 +205,7 @@ case class MongoConn_JVM(
 
 
   private def delete(data: Data): TxReport = {
-    val deletedIds = data.get("_ids").asArray().getValues.asScala.toList
+    val deletedIds = data.getArray("_ids").getValues.asScala.toList
       .map(_.asInstanceOf[BsonObjectId].getValue.toString)
     if (deletedIds.nonEmpty) {
       data.forEach {

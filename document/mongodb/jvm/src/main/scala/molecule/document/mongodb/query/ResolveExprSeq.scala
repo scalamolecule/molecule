@@ -174,14 +174,9 @@ trait ResolveExprSeq extends ResolveExpr with LambdasSeq { self: MongoQueryBase 
   // attr ----------------------------------------------------------------------
 
   private def seqAttr(uniqueField: String, field: String, mandatory: Boolean): Unit = {
-    //    println(s"\n======== $uniqueField ============================================")
-
-    // Skipping this for all set attributes solves the own-ref rest in UpdateSet_id.
-    // But what distinguishes it?
-    b.base.matches.add(Filters.ne(b.dot + field, new BsonNull))
-
-    // Exclude orphaned arrays too
-    b.base.matches.add(Filters.ne(b.dot + field, new BsonArray()))
+    val prefix = if (b.isEmbedded) b.dot else ""
+    b.matches.add(Filters.ne(prefix + field, new BsonNull))
+    b.matches.add(Filters.ne(prefix + field, new BsonArray()))
   }
 
   private def setOptAttr(uniqueField: String, field: String): Unit = {

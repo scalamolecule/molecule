@@ -108,8 +108,8 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
             case _             => throw new Exception("Unexpected optional id")
           }
         } else {
-          if (a.owner)
-            throw ModelError("Can't query for non-existing ids of embedded documents in MongoDB.")
+//          if (a.owner)
+//            throw ModelError("Can't query for non-existing ids of embedded documents in MongoDB.")
           a match {
             case a: AttrOneMan => resolveAttrOneMan(a); resolve(tail)
             case a: AttrOneOpt => resolveAttrOneOpt(a); resolve(tail)
@@ -118,8 +118,8 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
         }
 
       case a: AttrSet                     =>
-        if (a.owner)
-          throw ModelError("Can't query for non-existing set of ids of embedded documents in MongoDB.")
+//        if (a.owner)
+//          throw ModelError("Can't query for non-existing set of ids of embedded documents in MongoDB.")
         a match {
           case a: AttrSetMan => resolveAttrSetMan(a); resolve(tail)
           case a: AttrSetOpt => resolveAttrSetOpt(a); resolve(tail)
@@ -128,8 +128,8 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
 
 
       case a: AttrSeq =>
-        if (a.owner)
-          throw ModelError("Can't query for non-existing set of ids of embedded documents in MongoDB.")
+//        if (a.owner)
+//          throw ModelError("Can't query for non-existing set of ids of embedded documents in MongoDB.")
         a match {
           case a: AttrSeqMan => resolveAttrSeqMan(a); resolve(tail)
           case a: AttrSeqOpt => resolveAttrSeqOpt(a); resolve(tail)
@@ -137,17 +137,15 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
         }
 
       case a: AttrMap =>
-        if (a.owner)
-          throw ModelError("Can't query for non-existing set of ids of embedded documents in MongoDB.")
+//        if (a.owner)
+//          throw ModelError("Can't query for non-existing set of ids of embedded documents in MongoDB.")
         a match {
           case a: AttrMapMan => resolveAttrMapMan(a); resolve(tail)
           case a: AttrMapOpt => resolveAttrMapOpt(a); resolve(tail)
           case a: AttrMapTac => resolveAttrMapTac(a); resolve(tail)
         }
 
-      case ref: Ref                       =>
-        resolveRef(ref);
-        resolve(tail)
+      case ref: Ref                       => resolveRef(ref); resolve(tail)
       case backRef: BackRef               => resolveBackRef(backRef, tail.head); resolve(tail)
       case Nested(ref, nestedElements)    => resolveNested(ref, nestedElements, tail)
       case NestedOpt(ref, nestedElements) => resolveNestedOpt(ref, nestedElements, tail)

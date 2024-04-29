@@ -63,8 +63,8 @@ case class QueryResolveOffset_mongodb[Tpl](
         (Nil, 0, false)
       } else {
         val facet    = it.next()
-        val rows     = facet.get("rows").asArray()
-        val metaData = facet.get("metaData").asArray()
+        val rows     = facet.getArray("rows")
+        val metaData = facet.getArray("metaData")
         if (rows.isEmpty) {
           val totalCount = if (metaData.isEmpty) 0 else
             metaData.get(0).asDocument().get("totalCount").asInt32().intValue()

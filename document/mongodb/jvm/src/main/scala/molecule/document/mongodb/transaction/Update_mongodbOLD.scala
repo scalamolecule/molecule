@@ -87,7 +87,7 @@ trait Update_mongodbOLD
 
     val (collectionName, pipeline) = new Model2MongoQuery[Any](filters).getBsonQuery(Nil, None, None)
 
-    val filter = pipeline.get(0).toBsonDocument().get("$match").asDocument()
+    val filter = pipeline.get(0).toBsonDocument().getDocument("$match")
 
     println("--------- currentDataRows")
     currentDataRows.forEach(row => println(row.toJson(pretty)))
@@ -216,7 +216,6 @@ trait Update_mongodbOLD
             update.append("$pullAll", pullAll)
 
           val nsData = new BsonDocument()
-//            .append("filter", filter)
             .append("filter", filter)
             .append("update", update)
 

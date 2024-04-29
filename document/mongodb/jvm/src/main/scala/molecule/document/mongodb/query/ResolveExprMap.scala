@@ -152,8 +152,9 @@ trait ResolveExprMap extends ResolveExpr with LambdasMap { self: MongoQueryBase 
   // attr ----------------------------------------------------------------------
 
   private def mapAttr[T](field: String, resMap: ResMap[T], retrieve: Boolean): Unit = {
-    b.base.matches.add(Filters.ne(b.dot + field, new BsonNull))
-    b.base.matches.add(Filters.gt(b.dot + field, new BsonDocument()))
+    val prefix = if (b.isEmbedded) b.dot else ""
+    b.matches.add(Filters.ne(prefix + field, new BsonNull))
+    b.matches.add(Filters.ne(prefix + field, new BsonDocument()))
     if (retrieve) {
       projectField(field)
       addCast(field, resMap.castMap(field))

@@ -7,6 +7,7 @@ import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Refs._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
+import scala.concurrent.Future
 
 trait OneOwned_Map extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
@@ -66,7 +67,10 @@ trait OneOwned_Map extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         ))
 
         // Entity A without ref was not updated
-        _ <- A.iMap.ownB_().query.get.map(_ ==> List(Map(pint0, pint1)))
+        _ <- if (database != "MongoDB") {
+          // Entity A without ref was not updated
+          A.iMap.ownB_().query.get.map(_ ==> List(Map(pint0, pint1)))
+        } else Future.unit
       } yield ()
     }
 
@@ -89,11 +93,18 @@ trait OneOwned_Map extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Map(pint2, pint3)), // B attribute updated
         ))
 
-        _ <- B.s.a1.iMap.query.get.map(_ ==> List(
-          ("a", Map(pint2, pint3)),
-          ("b", Map(pint2, pint3)),
-          ("x", Map(pint0, pint1)), // not updated since it isn't referenced from A
-        ))
+        _ <- if (database == "MongoDB") {
+          // Embedded data in Mongo have no separate entity ids
+          B.s.a1.iMap.query.get.map(_ ==> List(
+            ("x", Map(pint0, pint1)), // not updated since it isn't referenced from A
+          ))
+        } else {
+          B.s.a1.iMap.query.get.map(_ ==> List(
+            ("a", Map(pint2, pint3)),
+            ("b", Map(pint2, pint3)),
+            ("x", Map(pint0, pint1)), // not updated since it isn't referenced from A
+          ))
+        }
       } yield ()
     }
 

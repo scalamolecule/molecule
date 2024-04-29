@@ -73,8 +73,8 @@ abstract class QueryResolve_mongodb[Tpl](
       (Nil, "", false)
     } else {
       val facet    = it.next()
-      val rows     = facet.get("rows").asArray()
-      val metaData = facet.get("metaData").asArray()
+      val rows     = facet.getArray("rows")
+      val metaData = facet.getArray("metaData")
       if (rows.isEmpty) {
         (Nil, "", false)
       } else {

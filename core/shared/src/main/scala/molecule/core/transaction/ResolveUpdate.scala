@@ -22,7 +22,8 @@ class ResolveUpdate(
     filterElements: List[Element] = Nil,
     hasFilter: Boolean = false,
     requireNs: Boolean = false,
-    requiredNsPaths: List[List[String]] = List(List())
+    requiredNsPaths: List[List[String]] = List(List()),
+    differentiateOwned: Boolean = false
   ): (List[Element], List[List[String]]) = {
     reversedElements match {
       case element :: tail => element match {
@@ -54,10 +55,10 @@ class ResolveUpdate(
                 case a: AttrOneManShort          => AttrOneOptShort(a.ns, a.attr)
                 case a: AttrOneManChar           => AttrOneOptChar(a.ns, a.attr)
               }
-              getFilters(tail, optValueAttr :: filterElements, hasFilter, true, requiredNsPaths)
+              getFilters(tail, optValueAttr :: filterElements, hasFilter, true, requiredNsPaths, differentiateOwned)
 
             case a: AttrOneTac => getFilters(tail, a :: filterElements,
-              hasFilter || a.op != NoValue, true, requiredNsPaths)
+              hasFilter || a.op != NoValue, true, requiredNsPaths, differentiateOwned)
 
             case a: AttrOneOpt => noOptional(a)
           }
@@ -92,14 +93,15 @@ class ResolveUpdate(
                   case a: AttrSetManChar           => AttrSetOptChar(a.ns, a.attr)
                 }
                 getFilters(tail, optSet :: filterElements,
-                  hasFilter, requireNs || a.op != Remove, requiredNsPaths)
+                  hasFilter, requireNs || a.op != Remove, requiredNsPaths, differentiateOwned)
             }
 
             case a: AttrSetTac =>
               if (a.op == Eq) {
                 throw ModelError(s"Filtering by collection equality (${a.name}) not supported in updates.")
               }
-              getFilters(tail, a :: filterElements, hasFilter || a.op != NoValue, requireNs, requiredNsPaths)
+              getFilters(tail, a :: filterElements,
+                hasFilter || a.op != NoValue, requireNs, requiredNsPaths, differentiateOwned)
 
             case _: AttrSetOpt => noOptional(a)
           }
@@ -133,7 +135,7 @@ class ResolveUpdate(
                 case a: AttrSeqManChar           => AttrSeqOptChar(a.ns, a.attr)
               }
               getFilters(tail, optSet :: filterElements,
-                hasFilter, requireNs || a.op != Remove, requiredNsPaths)
+                hasFilter, requireNs || a.op != Remove, requiredNsPaths, differentiateOwned)
 
 
             case a: AttrSeqTac =>
@@ -173,7 +175,7 @@ class ResolveUpdate(
                 case _ => List(a)
               }
               getFilters(tail, filterAttributes ::: filterElements,
-                hasFilter || a.op != NoValue, requireNs, requiredNsPaths)
+                hasFilter || a.op != NoValue, requireNs, requiredNsPaths, differentiateOwned)
 
             case _: AttrSeqOpt => noOptional(a)
           }
@@ -207,10 +209,10 @@ class ResolveUpdate(
                 case a: AttrMapManChar           => AttrMapOptChar(a.ns, a.attr)
               }
               getFilters(tail, optSet :: filterElements,
-                hasFilter, requireNs || a.op != Remove, requiredNsPaths)
+                hasFilter, requireNs || a.op != Remove, requiredNsPaths, differentiateOwned)
 
             case a: AttrMapTac => getFilters(tail, a :: filterElements,
-              hasFilter || a.op != NoValue, requireNs, requiredNsPaths)
+              hasFilter || a.op != NoValue, requireNs, requiredNsPaths, differentiateOwned)
 
             case _: AttrMapOpt => noOptional(a)
           }
@@ -218,7 +220,14 @@ class ResolveUpdate(
 
         case r: Ref => if (hasFilter) {
           // There are filters after this ref, so we know that the reference will exist
-          getFilters(tail, r :: AttrOneManID(r.refNs, "id") :: filterElements, true)
+          if (r.owner && differentiateOwned) {
+            // Mongo having a separate data model with no ids for embedded documents
+            getFilters(tail, r :: filterElements,
+              true, differentiateOwned = differentiateOwned)
+          } else {
+            getFilters(tail, r :: AttrOneManID(r.refNs, "id") :: filterElements,
+              true, differentiateOwned = differentiateOwned)
+          }
 
         } else {
           // Skip tail and start over since we can't know if this ref is asserted without any filter values after it.
@@ -233,10 +242,12 @@ class ResolveUpdate(
           } else requiredNsPaths
 
           // ref has no filters after it, so we don't know if theres a relationship. Look for optional ref id then.
-          getFilters(tail, AttrOneOptID(r.ns, r.refAttr) :: Nil, false, requiredNsPaths = requiredNsPaths1)
+          getFilters(tail, AttrOneOptID(r.ns, r.refAttr) :: Nil,
+            false, requiredNsPaths = requiredNsPaths1, differentiateOwned = differentiateOwned)
         }
 
-        case br: BackRef => getFilters(tail, br :: filterElements, hasFilter)
+        case br: BackRef => getFilters(tail, br :: filterElements,
+          hasFilter, differentiateOwned = differentiateOwned)
 
         case _ => noNested
       }

@@ -7,6 +7,7 @@ import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Refs._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
+import scala.concurrent.Future
 
 trait One_Seq extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
@@ -159,6 +160,10 @@ trait One_Seq extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                 _ <- rawQuery(s"[:find (count ?e) :where [?e :A.iSeq/i_ ?i]]").map(_.head ==> List(2))
                 _ <- rawQuery(s"[:find (count ?e) :where [?e :A.iSeq/v_ ?v]]").map(_.head ==> List(2))
               } yield ()
+
+            case "MongoDB" =>
+              // Mongo implementation doesn't need synthetic entities
+              Future.unit
 
             case other => throw new Exception(s"Missing $other test implementation.")
           }
