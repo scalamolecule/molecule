@@ -3,6 +3,7 @@ package molecule.document.mongodb.transaction
 import java.net.URI
 import java.time._
 import java.util.{Date, UUID}
+import molecule.base.error.ModelError
 import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
 import molecule.core.marshalling.{ConnProxy, MongoProxy}
@@ -24,15 +25,15 @@ trait Base_JVM_mongodb extends DataType_JVM_mongodb with ModelUtils with BaseHel
   protected def debug(s: Any) = if (doPrint) println(s) else ()
 
   protected var nsIndex              = 0
-  protected val nsDocs = mutable.Map.empty[String, (Int, BsonArray)]
-  protected var path                 = List.empty[String]
+  protected val nsDocs               = mutable.Map.empty[String, (Int, BsonArray)]
+  protected var embeddedPath         = List.empty[String]
   protected var doc                  = new BsonDocument()
   protected var docs                 = List(List(doc))
   protected var uniqueFilterElements = List.empty[Element]
   protected var filterElements       = List.empty[Element]
   protected var nss                  = Set.empty[String]
   protected var optIds               = Option.empty[Seq[String]]
-  protected val ids                  = ListBuffer.empty
+  //  protected val ids                  = ListBuffer.empty
 
   protected var level     = 0
   protected var selfJoins = 0
@@ -85,4 +86,12 @@ trait Base_JVM_mongodb extends DataType_JVM_mongodb with ModelUtils with BaseHel
   override protected lazy val transformByte          : Byte => Any           = (v: Byte) => new BsonInt32(v)
   override protected lazy val transformShort         : Short => Any          = (v: Short) => new BsonInt32(v)
   override protected lazy val transformChar          : Char => Any           = (v: Char) => new BsonString(v.toString)
+
+  override protected lazy val extsID = List("ID", "AnyRef", "")
+
+  protected def noEmbeddedIds(exts: List[String]) = {
+    if (exts.head == "ID") {
+      throw ModelError("Using ids for embedded documents not allowed with MongoDB.")
+    }
+  }
 }

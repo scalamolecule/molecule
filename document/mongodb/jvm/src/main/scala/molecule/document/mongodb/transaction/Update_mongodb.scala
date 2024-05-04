@@ -14,6 +14,8 @@ import molecule.document.mongodb.spi.SpiSync_mongodb
 import molecule.document.mongodb.util.BsonUtils
 import org.bson._
 import org.bson.types.ObjectId
+import scala.annotation.tailrec
+import scala.collection.immutable.List
 import scala.collection.mutable.ListBuffer
 
 trait Update_mongodb
@@ -25,234 +27,302 @@ trait Update_mongodb
 
   doPrint = false
 
-  private var requiredNsPaths = List(List.empty[String])
-  private var currentNsPath   = List.empty[String]
-
-  private var topLevelIds = List.empty[String]
-  private val refIds      = new BsonDocument()
-  private val refAttrs    = new BsonDocument()
-
   case class NsData(
-    var referee: Option[NsData] = None,
+    var parent: Option[NsData] = None,
     var ns: String = "",
+    var nsPath: List[String] = List.empty[String],
+    var refAttrPath: List[String] = List.empty[String],
     setDoc: BsonDocument = new BsonDocument(),
     unsetDoc: BsonDocument = new BsonDocument(),
     pushDoc: BsonDocument = new BsonDocument(),
     addToSet: BsonDocument = new BsonDocument(),
     pullAll: BsonDocument = new BsonDocument(),
-    arrayFilters: BsonArray = new BsonArray(),
-    var ids: Seq[String] = Seq.empty[String],
-    var filterElements: List[Element] = List.empty[Element],
-    //    uniqueFilterElements: ListBuffer[Element] = ListBuffer.empty[Element],
+    newRefIds: BsonArray = new BsonArray(), // array of BsonObjectId
+    refAttrs: BsonArray = new BsonArray(), // array of BsonObjectId
+    filterIds: BsonArray = new BsonArray(), // array of BsonObjectId
   ) {
     override def toString: String = {
-      val referee1              = if (referee.isEmpty) "None" else s"Some(${referee.get.ns})"
-      val filterElements1       = if (filterElements.isEmpty) "Nil" else
-        filterElements.mkString("\n    ", ",\n    ", "")
-      val uniqueFilterElements1 = if (uniqueFilterElements.isEmpty) "Nil" else
-        uniqueFilterElements.mkString("\n    ", ",\n    ", "")
-      s"""RefData(
-         |  referee             : $referee1
-         |  ns                  : $ns
-         |  setDoc              : $setDoc
-         |  unsetDoc            : $unsetDoc
-         |  pushDoc             : $pushDoc
-         |  addToSet            : $addToSet
-         |  pullAll             : $pullAll
-         |  arrayFilters        : $arrayFilters
-         |  ids                 : $ids
-         |  filterElements      : $filterElements1
-         |  uniqueFilterElements: $uniqueFilterElements1
-         |)""".stripMargin
+      val parent1    = if (parent.isEmpty) "None" else s"Some(${parent.get.ns})"
+      val newRefIds1 = if (newRefIds.isEmpty) "[]" else {
+        newRefIds.iterator().asScala.map(_.asDocument().toJson(pretty)).mkString("[\n", ",\n", "]")
+      }
+      val refAttrs1  = if (refAttrs.isEmpty) "[]" else {
+        refAttrs.iterator().asScala.map(_.asDocument().toJson(pretty)).mkString("[\n", ",\n", "]")
+      }
+      val filterIds1 = if (filterIds.isEmpty) "[]" else {
+        filterIds.iterator().asScala.map(_.asObjectId().getValue.toString).mkString("\n    ", "\n    ", "")
+      }
+      s"""######################################################################
+         |RefData(
+         |  parent     : $parent1
+         |  ns         : $ns
+         |  nsPath     : $nsPath
+         |  refAttrPath: $refAttrPath
+         |  setDoc     : $setDoc
+         |  unsetDoc   : $unsetDoc
+         |  pushDoc    : $pushDoc
+         |  addToSet   : $addToSet
+         |  pullAll    : $pullAll
+         |  newRefIds  : $newRefIds1
+         |  refAttrs   : $refAttrs1
+         |  filterIds  : $filterIds1
+         |)
+         |----------------------------------------------------------------------""".stripMargin
     }
   }
 
-  // Initial namespace data container
-  var nsData  = NsData()
-  val nssData = ListBuffer.empty[NsData] += nsData
+  private var conn: MongoConn_JVM = null
 
-  var conn: MongoConn_JVM = null
+  private var requiredNsPaths = List(List.empty[String])
+
+  // Initial namespace data container
+  private var nsData  = NsData()
+  private var nssData = List(nsData)
+
+  private var filterMatchRows = List.empty[BsonDocument]
+  private var refsCount       = 0
+  private var refIndex        = 0
+
+
+  protected def noUpdateOwned(owner: Boolean): Unit = if (owner) {
+    throw ModelError("Can't update non-existing ids of embedded documents in MongoDB.")
+  } else
+    ()
+
 
   def getData(elements: List[Element], conn0: MongoConn_JVM): Data = {
     conn = conn0
-    nsData.ns = getInitialNs(elements)
+    val ns = getInitialNs(elements)
+    nsData.nsPath = List(ns)
+    nsData.ns = ns
+    nsData.nsPath = List(ns)
 
     val (filterElements1, requiredNsPaths1) = getFilters(elements.reverse, differentiateOwned = true)
     requiredNsPaths = requiredNsPaths1
 
-    val filters = AttrOneManID(getInitialNs(elements), "id", V) :: filterElements1
+    val filters = AttrOneManID(ns, "id", V) :: filterElements1
 
     println("------ filters --------")
     filters.foreach(println)
-    //    println("------ requiredNsPaths: " + requiredNsPaths)
 
-    val filters1 = filters.dropRight(2) :+ filters.last
-
-    //    println("------ filters1 --------")
-    //    filters1.foreach(println)
-
-    val currentDataRows = new QueryResolveOffset_mongodb[Any](
+    refsCount = filterElements1.count {
+      case a: AttrOneOptID => noUpdateOwned(a.owner); true
+      case a: AttrSetOptID => noUpdateOwned(a.owner); true
+      case _: AttrOneManID => true
+      case _: AttrSetManID => true
+      case _               => false
+    }
+    filterMatchRows = new QueryResolveOffset_mongodb[Any](
       filters, None, None, new Model2MongoQuery[Any](filters)
-    ).getData(conn)
+    ).getData(conn).asScala.toList
 
-    var ids = List.empty[String]
-    currentDataRows.forEach(row => ids = ids :+ row.getObjectId("_id").getValue.toString)
-    nsData.ids = ids
+    // Add top level ids
+    filterMatchRows.foreach { row =>
+      nsData.filterIds.add(row.getObjectId("_id"))
+    }
 
-    println("--------- currentDataRows")
-    currentDataRows.forEach(row => println(row.toJson(pretty)))
-    println(ids)
-    println("----------")
-
-    //    println("--------- filter")
-    //    val (collectionName, pipeline) = new Model2MongoQuery[Any](filters).getBsonQuery(Nil, None, None)
-    //    val filter = pipeline.get(0).toBsonDocument().getDocument("$match")
-    //    println(filter.toJson(pretty))
-    //    println("----------")
-
+    println(s"--------- currentDataRows " + filterMatchRows.length)
+    filterMatchRows.foreach(row => println(row.toJson(pretty)))
 
     resolve(elements)
+
+    val newRefIds_ = new BsonDocument()
+    val refAttrs_  = new BsonDocument()
     val updateData = new BsonDocument()
       .append("_action", new BsonString("update"))
+      .append("_newRefIds", newRefIds_)
+      .append("_refAttrs", refAttrs_)
 
-    if (!refIds.isEmpty)
-      updateData.append("_refIds", refIds)
-
-    if (!refAttrs.isEmpty)
-      updateData.append("_refAttrs", refAttrs)
-
+    var adding = false
     nssData.foreach {
-      case NsData(_, ns, setDoc, unsetDoc, pushDoc, addToSet, pullAll, arrayFilters, ids, filterElements) =>
-        val ids1 = if (ids.nonEmpty) {
-          println(s"1 --- $ns: " + ids.toList)
-          ids
-        } else {
-          val filterElements1 = AttrOneManID(ns, "id", V) +: filterElements
-          println(s"2 --- filter elements: ")
-          filterElements1.foreach(println)
+      case w@NsData(_, ns, _, _, setDoc, unsetDoc, pushDoc, addToSet, pullAll, newRefIds, refAttrs, filterIds) =>
 
-          val ids = query(filterElements1)
-          println(s"2 --- $ns: " + ids)
-          ids
-        }
-        if (ids1.nonEmpty) {
-          val idArray = new BsonArray()
-          ids1.foreach(id => idArray.add(new BsonObjectId(new ObjectId(id))))
-          val filter = new BsonDocument("_id", new BsonDocument("$in", idArray))
+        println(w)
+        //
+        //        if (!newRefIds.isEmpty)
+        //          newRefIds_.put(ns, newRefIds)
+        //
+        //        if (!refAttrs.isEmpty)
+        //          refAttrs_.put(ns, refAttrs)
 
+        if (!filterIds.isEmpty) {
           val update = new BsonDocument()
-          if (!setDoc.isEmpty)
+          if (!setDoc.isEmpty) {
             update.append("$set", setDoc)
+            adding = true
+          }
 
-          if (!unsetDoc.isEmpty)
+          if (!unsetDoc.isEmpty) {
             update.append("$unset", unsetDoc)
+          }
 
-          if (!pushDoc.isEmpty)
+          if (!pushDoc.isEmpty) {
             update.append("$push", pushDoc)
+            adding = true
+          }
 
-          if (!addToSet.isEmpty)
+          if (!addToSet.isEmpty) {
             update.append("$addToSet", addToSet)
+            adding = true
+          }
 
-          if (!pullAll.isEmpty)
+          if (!pullAll.isEmpty) {
             update.append("$pullAll", pullAll)
+          }
 
-          lazy val nsData = new BsonDocument()
-            .append("filter", filter)
-            .append("update", update)
+          println("%%%%%%%%%  adding: " + adding)
 
-          if (!arrayFilters.isEmpty)
-            nsData.append("arrayFilters", arrayFilters)
+
+          if (adding && !newRefIds.isEmpty)
+            newRefIds_.put(ns, newRefIds)
+
+          if (!refAttrs.isEmpty)
+            refAttrs_.put(ns, refAttrs)
 
           // Only add update data for namespace if there is ids and data to update
+          //          if (adding && !update.isEmpty) {
           if (!update.isEmpty) {
-            //            println(nsData.toJson(pretty))
-            updateData.append(ns, nsData)
+            //            println("AAAAA  " + update.toJson(pretty))
+            //            println("AAAAA  " + update.keySet())
+            //            println("AAAAA  " + (update.keySet().toString == "[$pullAll]"))
+
+            //            if (!refIds.isEmpty)
+            //              refIds_.put(ns, refIds)
+            //
+            //            if (!refAttrs.isEmpty)
+            //              refAttrs_.put(ns, refAttrs)
+
+            updateData.append(ns, new BsonDocument()
+              .append("filter", new BsonDocument("_id", new BsonDocument("$in", filterIds)))
+              .append("update", update)
+            )
           }
         }
     }
+
+    //    println("XXXX  " + adding)
+
+    // Cleanup un-used pairs from update data
+    //    if (!adding || refIds_.isEmpty) updateData.remove("_newRefIds")
+    //    if (!adding || refAttrs_.isEmpty) updateData.remove("_refAttrs")
+    if (newRefIds_.isEmpty) updateData.remove("_newRefIds")
+    if (refAttrs_.isEmpty) updateData.remove("_refAttrs")
+
+
+    println("XXXX  " + updateData.toJson(pretty))
+
     updateData
+  }
+
+  @tailrec
+  private final def getBaseIds(ns: String, nsData: NsData): List[String] = {
+    if (ns == nsData.nsPath.last) {
+      nsData.filterIds.iterator().asScala.toList.map(_.asObjectId.getValue.toString)
+    } else {
+      // Get ids from backref namespace
+      getBaseIds(ns, nsData.parent.get)
+    }
   }
 
   override def handleRefNs(ref: Ref): Unit = {
     val Ref(ns, refAttr, refNs, card, owner, _) = ref
+    //    nsPath = nsPath ++ List(refAttr, refNs)
+    //    refAttrPath = refAttrPath :+ refAttr
+    //    println("------------")
+    //    println(requiredNsPaths)
+    //    println(currentNsPath)
+
+    //    println(s"refIndex $refIndex < knownRefsCount $refsCount")
+
     if (owner) {
       // Embedded document
-      nsData.filterElements = nsData.filterElements :+ ref
-      path = path :+ refAttr
+      embeddedPath = embeddedPath :+ refAttr
+      nsData.nsPath = nsData.nsPath ++ List(refAttr, refNs)
+      nsData.refAttrPath = nsData.refAttrPath :+ refAttr
 
     } else {
       // Referenced document
+      val refNsData = NsData(Some(nsData), refNs,
+        nsData.nsPath ++ List(refAttr, refNs),
+        nsData.refAttrPath :+ refAttr)
 
-      if (nsData.filterElements.nonEmpty && nsData.filterElements.last.isInstanceOf[BackRef]) {
-        // Remove BackRef orphan
-        nsData.filterElements = nsData.filterElements.init
-      }
-
-      val currentRefIds0 = SpiSync_mongodb.query_get[Option[String]](Query(
-        List(
-          AttrOneTacID(ns, "id", Eq, nsData.ids),
-          if (card.isInstanceOf[CardOne])
-            AttrOneOptID(ns, refAttr, V)
-          else
-            AttrSetOptID(ns, refAttr, V)
+      def addNewRefId(id: BsonObjectId): Boolean = {
+        // Add single new ref id (regardless of card-one/many)
+        val newRefId = new BsonObjectId()
+        //        println(s"$id  $ns  $refAttr  NEW ref: " + newRefId.getValue.toString)
+        nsData.refAttrs.add(new BsonDocument()
+          .append("filter", new BsonDocument("_id", id))
+          .append("update", new BsonDocument("$set", new BsonDocument(refAttr, newRefId)))
         )
-      ))(conn)
-
-      println("nsData.filterElements: " + nsData.filterElements)
-      println("nsData.ids           : " + nsData.ids)
-      println("currentRefIds0       : " + currentRefIds0)
-
-      val curRefIds   = new BsonArray()
-      val curRefAttrs = new BsonArray()
-      var i           = -1
-      val allRefIds   = currentRefIds0.map {
-        case Some(id) =>
-          println("---------  " + id)
-
-          id
-        case None     =>
-          i += 1
-          val refId = new BsonObjectId()
-
-          println("... " + refId)
-          // Add id of referenced document to be created
-          curRefIds.add(new BsonDocument("_id", refId))
-
-          // Add reference from current document to reference document
-          curRefAttrs.add(new BsonDocument()
-            .append("filter", new BsonDocument("_id", new BsonObjectId(new ObjectId(nsData.ids(i)))))
-            .append("update", new BsonDocument("$set", new BsonDocument(refAttr, refId)))
-          )
-
-          // Add soon to be inserted ref id
-          refId.asObjectId.getValue.toString
+        refNsData.newRefIds.add(new BsonDocument("_id", newRefId))
+        refNsData.filterIds.add(newRefId)
       }
 
-      if (!curRefIds.isEmpty) {
-        // refs
-        if (refIds.containsKey(refNs)) {
-          val allRefIds = refIds.getArray(refNs)
-          allRefIds.addAll(curRefIds)
-          refIds.put(refNs, allRefIds)
-        } else {
-          refIds.append(refNs, curRefIds)
+
+      if (refIndex < refsCount) {
+        // Maybe we have a ref
+
+        @tailrec
+        def getRef(doc: BsonDocument, embeddedPath: List[String]): BsonValue = {
+          embeddedPath match {
+            case Nil                 => doc.get(refAttr)
+            case prevRefAttr :: tail => getRef(doc.getDocument(prevRefAttr), tail)
+          }
         }
 
-        // ref attributes
-        if (refAttrs.containsKey(ns)) {
-          val allRefAttrs = refAttrs.getArray(ns)
-          allRefAttrs.addAll(curRefAttrs)
-          refAttrs.put(ns, allRefAttrs)
+
+        val prefix = if (nsData.refAttrPath.isEmpty) "" else nsData.refAttrPath.mkString("", ".", ".")
+        filterMatchRows.foreach { row =>
+          val r = getRef(row, embeddedPath)
+          //          println("+++++++  " + (prefix + refAttr))
+          //          println("+++++++  " + r)
+          r match {
+            case refId: BsonObjectId  => refNsData.filterIds.add(refId)
+            case refDoc: BsonDocument => refNsData.filterIds.add(refDoc.getObjectId("_id"))
+            case refIds: BsonArray    =>
+              if (refIds.isEmpty)
+                addNewRefId(row.getObjectId("_id"))
+              else
+                refIds.forEach(refId => refNsData.filterIds.add(refId))
+            case null                 => addNewRefId(row.getObjectId("_id"))
+          }
+        }
+      } else {
+        val ids = getBaseIds(ns, nsData)
+        //        println("???????  " + ids)
+        val x   = if (card.isInstanceOf[CardOne]) {
+          // Optional Set with single card-one ref id
+          SpiSync_mongodb.query_get[(String, Option[String])](Query(
+            List(
+              AttrOneManID(ns, "id", Eq, ids),
+              AttrOneOptID(ns, refAttr, V)
+            )
+          ))(conn).map { case (id, optRefId) => (id, optRefId.map(Set(_))) }
         } else {
-          refAttrs.append(ns, curRefAttrs)
+          // Optional Set of card-many ref ids
+          SpiSync_mongodb.query_get[(String, Option[Set[String]])](Query(
+            List(
+              AttrOneManID(ns, "id", Eq, ids),
+              AttrSetOptID(ns, refAttr, V)
+            )
+          ))(conn)
+        }
+        //        println("x  " + x)
+
+        x foreach {
+          case (id, None)         => addNewRefId(new BsonObjectId(new ObjectId(id)))
+          case (id, Some(refIds)) =>
+            // Add current ref ids
+            //            println(s"$id  CUR refs: " + refIds)
+            refNsData.filterIds.addAll(refIds.map(refId => new BsonObjectId(new ObjectId(refId))).asJava)
         }
       }
 
-      // Continue from ref namespace
-      val referee = Some(nsData)
-      path = Nil
-      nsData = NsData(referee, refNs, ids = allRefIds)
-      nssData += nsData
+      // Continue from updated ref namespace
+      nsData = refNsData
+      nssData = nssData :+ nsData
+      refIndex += 1
+      embeddedPath = Nil
     }
   }
 
@@ -261,12 +331,12 @@ trait Update_mongodb
   }
 
   override protected def handleBackRef(backRef: BackRef): Unit = {
-    nsData.referee.fold[Unit] {
-      path = path.init
-      nsData.filterElements = nsData.filterElements :+ backRef
-    } { referee =>
-      path = Nil
-      nsData = referee
+    nsData.parent.fold[Unit] {
+      embeddedPath = embeddedPath.init
+    } { parent =>
+      embeddedPath = Nil
+      nsData = parent
+      refIndex -= 1
     }
   }
 
@@ -277,12 +347,11 @@ trait Update_mongodb
     vs: Seq[T],
     transformValue: T => Any,
   ): Unit = {
-    if (owner) {
-      throw ModelError("Can't update non-existing ids of embedded documents in MongoDB.")
-    }
-    nsData.filterElements = nsData.filterElements :+ AttrOneTacInt(ns, attr) // dummy filter
-
-    lazy val pathAttr = if (path.isEmpty) attr else path.mkString("", ".", "." + attr)
+    //    if (owner) {
+    //      throw ModelError("Can't update non-existing ids of embedded documents in MongoDB.")
+    //    }
+    noUpdateOwned(owner)
+    lazy val pathAttr = if (embeddedPath.isEmpty) attr else embeddedPath.mkString("", ".", "." + attr)
     vs match {
       case Seq(v) => nsData.setDoc.append(pathAttr, transformValue(v).asInstanceOf[BsonValue])
       case Nil    => nsData.setDoc.append(pathAttr, new BsonNull())
@@ -305,7 +374,7 @@ trait Update_mongodb
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    updateIterableEq(ns, attr, owner, set, transformValue)
+    updateIterableEq(attr, owner, set, transformValue)
   }
 
   override protected def updateSetAdd[T](
@@ -346,7 +415,7 @@ trait Update_mongodb
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    updateIterableEq(ns, attr, owner, seq, transformValue)
+    updateIterableEq(attr, owner, seq, transformValue)
   }
 
   override protected def updateSeqAdd[T](
@@ -381,7 +450,7 @@ trait Update_mongodb
     attr: String,
     byteArray: Array[Byte],
   ): Unit = {
-    lazy val pathAttr = if (path.isEmpty) attr else path.mkString("", ".", "." + attr)
+    lazy val pathAttr = if (embeddedPath.isEmpty) attr else embeddedPath.mkString("", ".", "." + attr)
     if (byteArray.isEmpty) {
       () // no update
     } else {
@@ -401,17 +470,13 @@ trait Update_mongodb
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    // Add dummy filter to ensure presence of attr data
-    nsData.filterElements = nsData.filterElements :+ AttrOneTacInt(ns, attr)
-
-    lazy val pathAttr = if (path.isEmpty) attr else path.mkString("", ".", "." + attr)
+    lazy val pathAttr = if (embeddedPath.isEmpty) attr else embeddedPath.mkString("", ".", "." + attr)
     if (map.nonEmpty) {
       val mapDoc = new BsonDocument()
       map.map { case (k, v) =>
         mapDoc.append(validKey(k), transformValue(v).asInstanceOf[BsonValue])
       }
       nsData.setDoc.append(pathAttr, mapDoc)
-
     } else {
       nsData.setDoc.append(pathAttr, new BsonNull())
     }
@@ -428,7 +493,7 @@ trait Update_mongodb
     value2json: (StringBuffer, T) => StringBuffer,
   ): Unit = {
     if (map.nonEmpty) {
-      val prefix = if (path.isEmpty) "" else path.mkString("", ".", ".")
+      val prefix = if (embeddedPath.isEmpty) "" else embeddedPath.mkString("", ".", ".")
       map.map { case (k, v) =>
         nsData.setDoc.append(prefix + attr + "." + validKey(k), transformValue(v).asInstanceOf[BsonValue])
       }
@@ -445,55 +510,27 @@ trait Update_mongodb
     exts: List[String],
     value2json: (StringBuffer, T) => StringBuffer,
   ): Unit = {
-    val prefix = if (path.isEmpty) "" else path.mkString("", ".", ".")
+    val prefix = if (embeddedPath.isEmpty) "" else embeddedPath.mkString("", ".", ".")
     map.map { case (k, _) =>
       nsData.unsetDoc.append(prefix + attr + "." + validKey(k), new BsonNull())
-      //      nsData.unsetDoc.append(attr + "." + validKey(k), new BsonNull())
     }
   }
 
-
-  override protected def handleIds(ns: String, ids0: Seq[String]): Unit = {
-    //    if (nsData.ids.nonEmpty) {
-    //      throw ModelError(s"Can't apply entity ids twice in update.")
-    //    }
-    nsData.ids = ids0
-  }
-
-  override protected def handleUniqueFilterAttr(uniqueFilterAttr: AttrOneTac): Unit = {
-    //    if (nsData.uniqueFilterElements.nonEmpty) {
-    //      throw ModelError(
-    //        s"Can only apply one unique attribute value for update. Found:\n" + uniqueFilterAttr
-    //      )
-    //    }
-    //    nsData.uniqueFilterElements += uniqueFilterAttr
-    ()
-  }
-
-  override protected def handleFilterAttr[T <: Attr with Tacit](filterAttr: T): Unit = {
-    nsData.filterElements = nsData.filterElements :+ filterAttr
-  }
-
-
+  override protected def handleIds(ns: String, ids: Seq[String]): Unit = ()
+  override protected def handleUniqueFilterAttr(uniqueFilterAttr: AttrOneTac): Unit = ()
+  override protected def handleFilterAttr[T <: Attr with Tacit](filterAttr: T): Unit = ()
 
 
   // Helpers -------------------------------------------------------------------
 
   private def updateIterableEq[T, M[_] <: Iterable[_]](
-    ns: String,
     attr: String,
     owner: Boolean,
     iterable: M[T],
     transformValue: T => Any,
   ): Unit = {
-    if (owner) {
-      throw ModelError("Can't update non-existing ids of embedded documents in MongoDB.")
-    }
-
-    // Add dummy filter to ensure presence of attr data
-    nsData.filterElements = nsData.filterElements :+ AttrOneTacInt(ns, attr)
-
-    lazy val pathAttr = if (path.isEmpty) attr else path.mkString("", ".", "." + attr)
+    noUpdateOwned(owner)
+    lazy val pathAttr = if (embeddedPath.isEmpty) attr else embeddedPath.mkString("", ".", "." + attr)
     lazy val array    = new BsonArray()
     if (iterable.nonEmpty) {
       iterable.asInstanceOf[Iterable[T]].map(v => array.add(transformValue(v).asInstanceOf[BsonValue]))
@@ -508,7 +545,7 @@ trait Update_mongodb
     iterable0: M[T],
     transformValue: T => Any,
   ): Unit = {
-    lazy val pathAttr = if (path.isEmpty) attr else path.mkString("", ".", "." + attr)
+    lazy val pathAttr = if (embeddedPath.isEmpty) attr else embeddedPath.mkString("", ".", "." + attr)
     val iterable = iterable0.asInstanceOf[Iterable[T]]
     iterable.size match {
       case 0 => ()
@@ -526,7 +563,7 @@ trait Update_mongodb
     iterable0: M[T],
     transformValue: T => Any,
   ): Unit = {
-    lazy val pathAttr = if (path.isEmpty) attr else path.mkString("", ".", "." + attr)
+    lazy val pathAttr = if (embeddedPath.isEmpty) attr else embeddedPath.mkString("", ".", "." + attr)
     val vs       = new BsonArray()
     val iterable = iterable0.asInstanceOf[Iterable[T]]
     if (iterable.nonEmpty) {

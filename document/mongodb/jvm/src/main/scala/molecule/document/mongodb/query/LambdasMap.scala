@@ -83,34 +83,34 @@ trait LambdasMap extends LambdasBase with JavaConversions {
 
 
   protected lazy val valueID             = (field: String, key: String) => (doc: BsonDocument) => {
-    doc.get(field).asDocument().get(key) match {
+    doc.getDocument(field).get(key) match {
       case v: BsonObjectId => v.getValue.toString
       case v: BsonString   => v.getValue
       case v               => throw ModelError("Unexpected Bson value for id: " + v)
     }
   }
-  protected lazy val valueString         = (field: String, key: String) => (doc: BsonDocument) => doc.get(field).asDocument().get(key).asString.getValue
-  protected lazy val valueInt            = (field: String, key: String) => (doc: BsonDocument) => doc.get(field).asDocument().get(key).asInt32.getValue
-  protected lazy val valueLong           = (field: String, key: String) => (doc: BsonDocument) => doc.get(field).asDocument().get(key).asInt64.getValue
-  protected lazy val valueFloat          = (field: String, key: String) => (doc: BsonDocument) => doc.get(field).asDocument().get(key).asDouble.getValue.toFloat
-  protected lazy val valueDouble         = (field: String, key: String) => (doc: BsonDocument) => doc.get(field).asDocument().get(key).asDouble.getValue
-  protected lazy val valueBoolean        = (field: String, key: String) => (doc: BsonDocument) => doc.get(field).asDocument().get(key).asBoolean.getValue
-  protected lazy val valueBigInt         = (field: String, key: String) => (doc: BsonDocument) => BigInt(doc.get(field).asDocument().get(key).asDecimal128.getValue.bigDecimalValue.toBigInteger)
-  protected lazy val valueBigDecimal     = (field: String, key: String) => (doc: BsonDocument) => BigDecimal(doc.get(field).asDocument().get(key).asDecimal128.getValue.bigDecimalValue)
-  protected lazy val valueDate           = (field: String, key: String) => (doc: BsonDocument) => new Date(doc.get(field).asDocument().get(key).asDateTime.getValue)
-  protected lazy val valueDuration       = (field: String, key: String) => (doc: BsonDocument) => Duration.parse(doc.get(field).asDocument().get(key).asString.getValue)
-  protected lazy val valueInstant        = (field: String, key: String) => (doc: BsonDocument) => Instant.parse(doc.get(field).asDocument().get(key).asString.getValue)
-  protected lazy val valueLocalDate      = (field: String, key: String) => (doc: BsonDocument) => LocalDate.parse(doc.get(field).asDocument().get(key).asString.getValue)
-  protected lazy val valueLocalTime      = (field: String, key: String) => (doc: BsonDocument) => LocalTime.parse(doc.get(field).asDocument().get(key).asString.getValue)
-  protected lazy val valueLocalDateTime  = (field: String, key: String) => (doc: BsonDocument) => LocalDateTime.parse(doc.get(field).asDocument().get(key).asString.getValue)
-  protected lazy val valueOffsetTime     = (field: String, key: String) => (doc: BsonDocument) => OffsetTime.parse(doc.get(field).asDocument().get(key).asString.getValue)
-  protected lazy val valueOffsetDateTime = (field: String, key: String) => (doc: BsonDocument) => OffsetDateTime.parse(doc.get(field).asDocument().get(key).asString.getValue)
-  protected lazy val valueZonedDateTime  = (field: String, key: String) => (doc: BsonDocument) => ZonedDateTime.parse(doc.get(field).asDocument().get(key).asString.getValue)
-  protected lazy val valueUUID           = (field: String, key: String) => (doc: BsonDocument) => UUID.fromString(doc.get(field).asDocument().get(key).asString.getValue)
-  protected lazy val valueURI            = (field: String, key: String) => (doc: BsonDocument) => new URI(doc.get(field).asDocument().get(key).asString.getValue)
-  protected lazy val valueByte           = (field: String, key: String) => (doc: BsonDocument) => doc.get(field).asDocument().get(key).asInt32.getValue.toByte
-  protected lazy val valueShort          = (field: String, key: String) => (doc: BsonDocument) => doc.get(field).asDocument().get(key).asInt32.getValue.toShort
-  protected lazy val valueChar           = (field: String, key: String) => (doc: BsonDocument) => doc.get(field).asDocument().get(key).asString.getValue.charAt(0)
+  protected lazy val valueString         = (field: String, key: String) => (doc: BsonDocument) => doc.getDocument(field).get(key).asString.getValue
+  protected lazy val valueInt            = (field: String, key: String) => (doc: BsonDocument) => doc.getDocument(field).get(key).asInt32.getValue
+  protected lazy val valueLong           = (field: String, key: String) => (doc: BsonDocument) => doc.getDocument(field).get(key).asInt64.getValue
+  protected lazy val valueFloat          = (field: String, key: String) => (doc: BsonDocument) => doc.getDocument(field).get(key).asDouble.getValue.toFloat
+  protected lazy val valueDouble         = (field: String, key: String) => (doc: BsonDocument) => doc.getDocument(field).get(key).asDouble.getValue
+  protected lazy val valueBoolean        = (field: String, key: String) => (doc: BsonDocument) => doc.getDocument(field).get(key).asBoolean.getValue
+  protected lazy val valueBigInt         = (field: String, key: String) => (doc: BsonDocument) => BigInt(doc.getDocument(field).get(key).asDecimal128.getValue.bigDecimalValue.toBigInteger)
+  protected lazy val valueBigDecimal     = (field: String, key: String) => (doc: BsonDocument) => BigDecimal(doc.getDocument(field).get(key).asDecimal128.getValue.bigDecimalValue)
+  protected lazy val valueDate           = (field: String, key: String) => (doc: BsonDocument) => new Date(doc.getDocument(field).get(key).asDateTime.getValue)
+  protected lazy val valueDuration       = (field: String, key: String) => (doc: BsonDocument) => Duration.parse(doc.getDocument(field).get(key).asString.getValue)
+  protected lazy val valueInstant        = (field: String, key: String) => (doc: BsonDocument) => Instant.parse(doc.getDocument(field).get(key).asString.getValue)
+  protected lazy val valueLocalDate      = (field: String, key: String) => (doc: BsonDocument) => LocalDate.parse(doc.getDocument(field).get(key).asString.getValue)
+  protected lazy val valueLocalTime      = (field: String, key: String) => (doc: BsonDocument) => LocalTime.parse(doc.getDocument(field).get(key).asString.getValue)
+  protected lazy val valueLocalDateTime  = (field: String, key: String) => (doc: BsonDocument) => LocalDateTime.parse(doc.getDocument(field).get(key).asString.getValue)
+  protected lazy val valueOffsetTime     = (field: String, key: String) => (doc: BsonDocument) => OffsetTime.parse(doc.getDocument(field).get(key).asString.getValue)
+  protected lazy val valueOffsetDateTime = (field: String, key: String) => (doc: BsonDocument) => OffsetDateTime.parse(doc.getDocument(field).get(key).asString.getValue)
+  protected lazy val valueZonedDateTime  = (field: String, key: String) => (doc: BsonDocument) => ZonedDateTime.parse(doc.getDocument(field).get(key).asString.getValue)
+  protected lazy val valueUUID           = (field: String, key: String) => (doc: BsonDocument) => UUID.fromString(doc.getDocument(field).get(key).asString.getValue)
+  protected lazy val valueURI            = (field: String, key: String) => (doc: BsonDocument) => new URI(doc.getDocument(field).get(key).asString.getValue)
+  protected lazy val valueByte           = (field: String, key: String) => (doc: BsonDocument) => doc.getDocument(field).get(key).asInt32.getValue.toByte
+  protected lazy val valueShort          = (field: String, key: String) => (doc: BsonDocument) => doc.getDocument(field).get(key).asInt32.getValue.toShort
+  protected lazy val valueChar           = (field: String, key: String) => (doc: BsonDocument) => doc.getDocument(field).get(key).asString.getValue.charAt(0)
 
   //
   //  private lazy val v2setID             = (field: String) => (doc: BsonDocument) => Set(bson2ID(doc.get(field)))

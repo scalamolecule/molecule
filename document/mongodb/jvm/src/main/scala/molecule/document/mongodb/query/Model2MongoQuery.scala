@@ -35,11 +35,13 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     optLimit: Option[Int],
     optOffset: Option[Int],
   ): (String, util.ArrayList[Bson]) = {
-    val elements1                              = if (altElements.isEmpty) elements0 else altElements
+    val elements1 = if (altElements.isEmpty) elements0 else altElements
+
     val (elements2, initialNs, hasFilterAttr0) = validateQueryModel(elements1)
     hasFilterAttr = hasFilterAttr0
 
-    topBranch = new FlatEmbed(ns = initialNs, cardMany = true)
+//    topBranch = new FlatEmbed(ns = initialNs, cardMany = true)
+    topBranch = new FlatEmbed(ns = initialNs)
     b = topBranch
 
     // Recursively resolve molecule elements
@@ -49,7 +51,8 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     val topStages = new util.ArrayList[Bson]()
 
     if (sampleSize > 0) {
-      topStages.add(new BsonDocument("$sample", new BsonDocument("size", new BsonInt32(sampleSize))))
+      topStages.add(new BsonDocument("$sample",
+        new BsonDocument("size", new BsonInt32(sampleSize))))
     }
 
     // Recursively add aggregation pipeline stages for all branches
@@ -97,7 +100,7 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
   @tailrec
   final private def resolve(elements: List[Element]): Unit = elements match {
     case element :: tail => element match {
-      case a: AttrOne                     =>
+      case a: AttrOne =>
         if (a.attr == "id" && a.filterAttr.nonEmpty) {
           throw ModelError(noIdFiltering)
         }
@@ -108,8 +111,8 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
             case _             => throw new Exception("Unexpected optional id")
           }
         } else {
-//          if (a.owner)
-//            throw ModelError("Can't query for non-existing ids of embedded documents in MongoDB.")
+          //          if (a.owner)
+          //            throw ModelError("Can't query for non-existing ids of embedded documents in MongoDB.")
           a match {
             case a: AttrOneMan => resolveAttrOneMan(a); resolve(tail)
             case a: AttrOneOpt => resolveAttrOneOpt(a); resolve(tail)
@@ -117,9 +120,9 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
           }
         }
 
-      case a: AttrSet                     =>
-//        if (a.owner)
-//          throw ModelError("Can't query for non-existing set of ids of embedded documents in MongoDB.")
+      case a: AttrSet =>
+        //        if (a.owner)
+        //          throw ModelError("Can't query for non-existing set of ids of embedded documents in MongoDB.")
         a match {
           case a: AttrSetMan => resolveAttrSetMan(a); resolve(tail)
           case a: AttrSetOpt => resolveAttrSetOpt(a); resolve(tail)
@@ -128,8 +131,8 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
 
 
       case a: AttrSeq =>
-//        if (a.owner)
-//          throw ModelError("Can't query for non-existing set of ids of embedded documents in MongoDB.")
+        //        if (a.owner)
+        //          throw ModelError("Can't query for non-existing set of ids of embedded documents in MongoDB.")
         a match {
           case a: AttrSeqMan => resolveAttrSeqMan(a); resolve(tail)
           case a: AttrSeqOpt => resolveAttrSeqOpt(a); resolve(tail)
@@ -137,8 +140,8 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
         }
 
       case a: AttrMap =>
-//        if (a.owner)
-//          throw ModelError("Can't query for non-existing set of ids of embedded documents in MongoDB.")
+        //        if (a.owner)
+        //          throw ModelError("Can't query for non-existing set of ids of embedded documents in MongoDB.")
         a match {
           case a: AttrMapMan => resolveAttrMapMan(a); resolve(tail)
           case a: AttrMapOpt => resolveAttrMapOpt(a); resolve(tail)

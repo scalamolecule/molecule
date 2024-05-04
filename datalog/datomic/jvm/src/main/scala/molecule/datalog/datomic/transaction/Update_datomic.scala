@@ -29,15 +29,13 @@ trait Update_datomic
 
   // Use current data rows for comparison
   private val rowResolvers = ListBuffer.empty[jList[AnyRef] => Unit]
+  private var rowSize      = 0
   private var attrIndex    = 0
 
   private var db: Database = null
 
-  // Entity ids for current namespace (can be multiple for card-many ref)
-  private var ee = List.empty[AnyRef] // Long or String (#db/id[db.part/user -1])
-
   // Cache entities for each namespace to be able to go back with BackRef and use previous namespace entities
-  private var eee = List.empty[List[AnyRef]] // Long or String (#db/id[db.part/user -1])
+  private var idLists = List.empty[List[AnyRef]] // Long or String (#db/id[db.part/user -1])
 
   private var requiredNsPaths = List(List.empty[String])
   private var currentNsPath   = List.empty[String]
@@ -91,26 +89,30 @@ trait Update_datomic
     //    filters.foreach(println)
     //    println("------ requiredNsPaths: " + requiredNsPaths)
 
-    val currentDataRows = new DatomicQueryResolveOffset[Any](
+    val filterMatchRows = new DatomicQueryResolveOffset[Any](
       filters, None, None, None, new Model2DatomicQuery[Any](filters)
     ).getRawData(conn, validate = false)
 
     //    println("--------- currentDataRows")
     //    currentDataRows.forEach(row => println(row))
 
-    if (!currentDataRows.isEmpty) {
-      val it = currentDataRows.iterator()
+    if (!filterMatchRows.isEmpty) {
+      val it = filterMatchRows.iterator()
       if (it.hasNext) {
+        val row = it.next()
         // First entity id
-        ee = List(it.next().get(0))
-        eee = List(ee)
+        ids = List(row.get(0))
+        idLists = List(ids)
+        rowSize = row.size
       }
     }
-    // Resolve the update model
+
+    // Resolve update model
     resolve(elements)
 
-    currentDataRows.forEach { row =>
-      ee = List(row.get(0))
+    // Resolve row updates
+    filterMatchRows.forEach { row =>
+      ids = List(row.get(0))
       attrIndex = 1
       // Apply actions for each current row
       rowResolvers.foreach(_(row))
@@ -133,7 +135,7 @@ trait Update_datomic
     val a = kw(ns, attr)
     vs match {
       case Seq(v) => rowResolvers += { _ =>
-        ee.foreach(e => appendStmt(add, e, a, transformValue(v).asInstanceOf[AnyRef]))
+        ids.foreach(e => appendStmt(add, e, a, transformValue(v).asInstanceOf[AnyRef]))
         attrIndex += 1
       }
       case Nil    => rowResolvers += { (row: jList[AnyRef]) =>
@@ -141,7 +143,7 @@ trait Update_datomic
           case map: jMap[_, _] => map.get(dbId)
           case v               => v
         }
-        ee.foreach(e => appendStmt(retract, e, a, currentValue.asInstanceOf[AnyRef]))
+        ids.foreach(e => appendStmt(retract, e, a, currentValue.asInstanceOf[AnyRef]))
         attrIndex += 1
       }
       case vs     => throw ExecutionError(
@@ -166,11 +168,11 @@ trait Update_datomic
     if (set.nonEmpty) {
       val newSet = set.map(transformValue(_).asInstanceOf[AnyRef])
       rowResolvers += { (row: jList[AnyRef]) =>
-        ee.foreach {
+        ids.foreach {
           case tempId: String => newSet.foreach(newValues => appendStmt(add, tempId, a, newValues))
           case e              =>
             // Resolved entity id
-            if (attrIndex < row.size()) {
+            if (attrIndex < rowSize) {
               // Cached values with known ref
               val oldSet = cachedValues(row, optRefNs).toSet
               oldSet.diff(newSet).foreach(oldValues => appendStmt(retract, e, a, oldValues))
@@ -193,7 +195,7 @@ trait Update_datomic
       // Retract current Set
       rowResolvers += { (row: jList[AnyRef]) =>
         cachedValues(row, optRefNs).foreach(oldValue =>
-          ee.foreach(e => appendStmt(retract, e, a, oldValue))
+          ids.foreach(e => appendStmt(retract, e, a, oldValue))
         )
         attrIndex += 1
       }
@@ -215,7 +217,7 @@ trait Update_datomic
       val a         = kw(ns, attr)
       val addValues = set.map(transformValue(_).asInstanceOf[AnyRef])
       rowResolvers += { _ =>
-        addValues.foreach(addValue => ee.foreach(e => appendStmt(add, e, a, addValue)))
+        addValues.foreach(addValue => ids.foreach(e => appendStmt(add, e, a, addValue)))
         attrIndex += 1
       }
     }
@@ -235,7 +237,7 @@ trait Update_datomic
       val a            = kw(ns, attr)
       val removeValues = set.map(transformValue(_).asInstanceOf[AnyRef])
       rowResolvers += { _ =>
-        removeValues.foreach(removeValue => ee.foreach(e => appendStmt(retract, e, a, removeValue)))
+        removeValues.foreach(removeValue => ids.foreach(e => appendStmt(retract, e, a, removeValue)))
         attrIndex += 1
       }
     }
@@ -262,7 +264,7 @@ trait Update_datomic
 
         // Assert new values
         var i = 0
-        ee.foreach { e =>
+        ids.foreach { e =>
           newSeq.foreach { newValue =>
             val ref = newId
             appendStmt(add, e, a, ref)
@@ -282,11 +284,11 @@ trait Update_datomic
   }
 
   private def retractCurrentSeqValues(row: jList[AnyRef], a: Keyword, optRefNs: Option[String]): Unit = {
-    if (attrIndex < row.size()) {
+    if (attrIndex < rowSize) {
       // Cached values with known ref
       Peer.q(
         "[:find ?ref :in $ [?e ...] ?a [?v ...] :where [?e ?a ?ref][?ref ?v_ ?v]]",
-        db, ee.asJava, a, cachedValues(row, optRefNs).asJava
+        db, ids.asJava, a, cachedValues(row, optRefNs).asJava
       ).forEach(row =>
         addRetractEntityStmt(row.get(0))
       )
@@ -314,7 +316,7 @@ trait Update_datomic
       val a_v       = kw(s"$ns.$attr", "v_")
       val addValues = seq.map(transformValue(_).asInstanceOf[AnyRef])
       rowResolvers += { _ =>
-        ee.foreach { e =>
+        ids.foreach { e =>
           val count = e match {
             case tempId: String => 0
             case e              =>
@@ -373,10 +375,10 @@ trait Update_datomic
       remaining.clear()
     }
 
-    if (attrIndex < row.size()) {
+    if (attrIndex < rowSize) {
       Peer.q(
         "[:find ?ref ?i ?v :in $ [?e ...] ?a ?i_ ?v_ :where [?e ?a ?ref][?ref ?i_ ?i][?ref ?v_ ?v]]",
-        db, ee.asJava, a, i_, v_
+        db, ids.asJava, a, i_, v_
       ).forEach { row =>
         val (ref, i, v) = (row.get(0), row.get(1), row.get(2))
         if (removeValues.contains(v)) {
@@ -388,7 +390,7 @@ trait Update_datomic
       reIndex()
     } else {
       // Unknown ref, traverse to synthetic entity with Datomic entity api
-      ee.foreach {
+      ids.foreach {
         case tempId: String => ()
         case e              =>
           // Unknown ref, traverse to value with Datomic entity api
@@ -419,7 +421,7 @@ trait Update_datomic
       val newValues = newByteArray
       rowResolvers += { (row: jList[AnyRef]) =>
         val oldByteArray = row.get(attrIndex).asInstanceOf[jMap[_, _]].values.iterator().next()
-        ee.foreach { e =>
+        ids.foreach { e =>
           appendStmt(retract, e, a, oldByteArray.asInstanceOf[AnyRef])
           appendStmt(add, e, a, newValues.asInstanceOf[AnyRef])
         }
@@ -428,7 +430,7 @@ trait Update_datomic
     } else {
       rowResolvers += { (row: jList[AnyRef]) =>
         val oldByteArray = row.get(attrIndex).asInstanceOf[jMap[_, _]].values.iterator().next()
-        ee.foreach(e => appendStmt(retract, e, a, oldByteArray.asInstanceOf[AnyRef]))
+        ids.foreach(e => appendStmt(retract, e, a, oldByteArray.asInstanceOf[AnyRef]))
         attrIndex += 1
       }
     }
@@ -462,7 +464,7 @@ trait Update_datomic
 
         // Assert new pairs
         var i = 0
-        ee.foreach { e =>
+        ids.foreach { e =>
           newPairs.foreach { case (key, newValue) =>
             val ref = newId
             appendStmt(add, e, a, ref)
@@ -477,12 +479,12 @@ trait Update_datomic
   }
 
   private def retractCurrentMapPairs(row: jList[AnyRef], a: Keyword, a_k: Keyword, optRefNs: Option[String]): Unit = {
-    if (attrIndex < row.size()) {
+    if (attrIndex < rowSize) {
       // Cached values with known ref
       val keys = cachedValues(row, optRefNs).map(_.asInstanceOf[jMap[_, _]].get(a_k)).asJava
       Peer.q(
         "[:find ?ref :in $ [?e ...] ?a ?a_k [?k ...] :where [?e ?a ?ref][?ref ?a_k ?k]]",
-        db, ee.asJava, a, a_k, keys
+        db, ids.asJava, a, a_k, keys
       ).forEach(pairEntity =>
         addRetractEntityStmt(pairEntity.get(0))
       )
@@ -494,7 +496,7 @@ trait Update_datomic
 
 
   private def retractSyntheticEntitiesByLookup(a: Keyword): Unit = {
-    ee.foreach {
+    ids.foreach {
       case tempId: String => ()
       case e              =>
         // Unknown ref, traverse to value with Datomic entity api
@@ -551,7 +553,7 @@ trait Update_datomic
         retractPairs(map, row, a, k_)
 
         // Add new pairs
-        ee.foreach { e =>
+        ids.foreach { e =>
           var i = 0
           newPairs.foreach { case (key, newValue) =>
             val ref = newId
@@ -568,16 +570,16 @@ trait Update_datomic
 
   private def retractPairs[T](map: Map[String, T], row: jList[AnyRef], a: Keyword, a_k: Keyword): Unit = {
     val keys = map.keys.toList
-    if (attrIndex < row.size()) {
+    if (attrIndex < rowSize) {
       // Retract synthetic entities where key match new keys
       Peer.q(
         "[:find ?ref :in $ [?e ...] ?a ?a_k [?k ...] :where [?e ?a ?ref][?ref ?a_k ?k]]",
-        db, ee.asJava, a, a_k, keys.asJava
+        db, ids.asJava, a, a_k, keys.asJava
       ).forEach(pairEntity =>
         addRetractEntityStmt(pairEntity.get(0))
       )
     } else {
-      ee.foreach {
+      ids.foreach {
         case tempId: String => ()
         case e              =>
           // Unknown ref, traverse to matching pairs with Datomic entity api
@@ -619,42 +621,37 @@ trait Update_datomic
   }
 
 
-  override def handleIds(ns: String, ids1: Seq[String]): Unit = {
-    if (ids.nonEmpty) {
-      throw ModelError(s"Can't apply entity ids twice in update.")
-    }
-    ids = ids ++ ids1.map(_.toLong).asInstanceOf[Seq[AnyRef]]
-  }
-
+  override def handleIds(ns: String, ids1: Seq[String]): Unit = ()
   override def handleUniqueFilterAttr(uniqueFilterAttr: AttrOneTac): Unit = ()
   override def handleFilterAttr[T <: Attr with Tacit](filterAttr: T): Unit = ()
 
-
   override def handleRefNs(ref: Ref): Unit = {
+    val Ref(ns, refAttr0, refNs, card, _, _) = ref
+
     currentNsPath = currentNsPath match {
-      case Nil => List(ref.ns, ref.refAttr, ref.refNs)
-      case cur => cur ++ List(ref.refAttr, ref.refNs)
+      case Nil => List(ns, refAttr0, refNs)
+      case cur => cur ++ List(refAttr0, refNs)
     }
     //    println("------------")
     //    println(requiredNsPaths)
     //    println(currentNsPath)
-    val refAttr = kw(ref.ns, ref.refAttr)
+    val refAttr = kw(ns, refAttr0)
     rowResolvers += { (row: jList[AnyRef]) =>
-      ee = if (attrIndex < row.size) {
+      ids = if (attrIndex < rowSize) {
         row.get(attrIndex) match {
           case null =>
             // Don't add ref if it's not required (when removing only)
             if (requiredNsPaths.contains(currentNsPath)) {
               // Add ref to next namespace
               val ref = newId
-              appendStmt(add, ee.head, refAttr, ref)
+              appendStmt(add, ids.head, refAttr, ref)
               List(ref)
             } else Nil
 
           case e: jLong => List(e)
 
           case map: jMap[_, _] =>
-            if (ref.card == CardOne) {
+            if (card == CardOne) {
               // Current ref
               List(map.get(refAttr).asInstanceOf[jMap[_, _]].get(dbId).asInstanceOf[AnyRef])
             } else {
@@ -666,7 +663,7 @@ trait Update_datomic
         }
       } else {
         // Get currently unknown ref from Datomic database entity lookup
-        eee.last.map { e =>
+        idLists.last.map { e =>
           db.entity(e).asInstanceOf[EntityMap].get(refAttr) match {
             case set: jSet[_]  => set.iterator.next.asInstanceOf[EntityMap].get(dbId)
             case em: EntityMap => em.get(dbId)
@@ -674,15 +671,15 @@ trait Update_datomic
         }
       }
       attrIndex += 1
-      eee = eee :+ ee
+      idLists = idLists :+ ids
     }
   }
 
   override def handleBackRef(backRef: BackRef): Unit = {
     currentNsPath = currentNsPath.init
     rowResolvers += { _ =>
-      eee = eee.init
-      ee = eee.last
+      idLists = idLists.init
+      ids = idLists.last
     }
   }
 

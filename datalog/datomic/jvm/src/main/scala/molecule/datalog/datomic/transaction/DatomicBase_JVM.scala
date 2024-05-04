@@ -31,7 +31,7 @@ trait DatomicBase_JVM extends DatomicDataType_JVM with ModelUtils {
   protected var e     : AnyRef = "" // Long or String (#db/id[db.part/user -1])
   protected var e0    : AnyRef = ""
 
-  protected var ids            = Seq.empty[AnyRef]
+  protected var ids            = List.empty[AnyRef]
   protected var filterElements = List.empty[Element]
 
 

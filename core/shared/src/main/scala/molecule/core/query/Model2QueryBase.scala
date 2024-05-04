@@ -104,7 +104,8 @@ trait Model2QueryBase extends ModelUtils {
       sortsPerLevel(level) = sortsPerLevel(level) :+ a.sort.get.substring(1, 2).toInt
     }
     a.filterAttr.foreach(_ => hasFilterAttr = true)
-    if ((a.isInstanceOf[Mandatory] || a.isInstanceOf[Tacit]) && a.attr != "id") {
+//    if ((a.isInstanceOf[Mandatory] || a.isInstanceOf[Tacit]) && a.attr != "id") {
+    if ((a.isInstanceOf[Mandatory] || a.isInstanceOf[Tacit])) {
       hasBinding = true
     }
   }

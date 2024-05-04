@@ -39,11 +39,11 @@ class FlatRef(
 ) {
 
   override def getStages: util.ArrayList[BsonDocument] = {
-    //    println(s"----- 2 -----  $dot  $refAttr  ${parent.map(_.isEmbedded)}")
+    println(s"----- 2 -----  $dot  $refAttr  ${parent.map(_.isEmbedded)}")
     //    matches.forEach(m => println(m))
 
     // Recursively resolve embedded/looked-up documents
-    subBranches.foreach(ref => stages.addAll(ref.getStages))
+    subBranches.foreach(branch => stages.addAll(branch.getStages))
 
     if (sorts.nonEmpty) {
       addStage("$sort", Sorts.orderBy(getSorts))
@@ -77,14 +77,23 @@ class FlatRef(
     }
     postStages.add(new BsonDocument("$match", outerMatches))
 
-    // Get head document of ref array
-    postStages.add(
-      new BsonDocument("$addFields",
-        new BsonDocument(dot1 + refAttr,
-          new BsonDocument("$first", new BsonString("$" + dot1 + refAttr))
+    if (cardMany) {
+      // Flatten card-many docs
+      postStages.add(
+        new BsonDocument("$unwind",
+          new BsonDocument("path", new BsonString("$" + dot1 + refAttr))
         )
       )
-    )
+    } else {
+      // Get head document of ref array
+      postStages.add(
+        new BsonDocument("$addFields",
+          new BsonDocument(dot1 + refAttr,
+            new BsonDocument("$first", new BsonString("$" + dot1 + refAttr))
+          )
+        )
+      )
+    }
 
     // Match filter attribute with flattened ref fields
     addStage("$match", postMatches)

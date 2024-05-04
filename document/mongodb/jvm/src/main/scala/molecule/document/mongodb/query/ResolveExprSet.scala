@@ -6,68 +6,67 @@ import molecule.core.query.ResolveExpr
 import molecule.document.mongodb.query.mongoModel.{Branch, NestedEmbed, NestedRef}
 import org.bson._
 
-//trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet =>
 trait ResolveExprSet extends ResolveExpr with LambdasSet { self: MongoQueryBase =>
 
   override protected def resolveAttrSetMan(attr: AttrSetMan): Unit = {
     attr match {
-      case at: AttrSetManID             => setMan(attr, at.vs, resSetID)
-      case at: AttrSetManString         => setMan(attr, at.vs, resSetString)
-      case at: AttrSetManInt            => setMan(attr, at.vs, resSetInt)
-      case at: AttrSetManLong           => setMan(attr, at.vs, resSetLong)
-      case at: AttrSetManFloat          => setMan(attr, at.vs, resSetFloat)
-      case at: AttrSetManDouble         => setMan(attr, at.vs, resSetDouble)
-      case at: AttrSetManBoolean        => setMan(attr, at.vs, resSetBoolean)
-      case at: AttrSetManBigInt         => setMan(attr, at.vs, resSetBigInt)
-      case at: AttrSetManBigDecimal     => setMan(attr, at.vs, resSetBigDecimal)
-      case at: AttrSetManDate           => setMan(attr, at.vs, resSetDate)
-      case at: AttrSetManDuration       => setMan(attr, at.vs, resSetDuration)
-      case at: AttrSetManInstant        => setMan(attr, at.vs, resSetInstant)
-      case at: AttrSetManLocalDate      => setMan(attr, at.vs, resSetLocalDate)
-      case at: AttrSetManLocalTime      => setMan(attr, at.vs, resSetLocalTime)
-      case at: AttrSetManLocalDateTime  => setMan(attr, at.vs, resSetLocalDateTime)
-      case at: AttrSetManOffsetTime     => setMan(attr, at.vs, resSetOffsetTime)
-      case at: AttrSetManOffsetDateTime => setMan(attr, at.vs, resSetOffsetDateTime)
-      case at: AttrSetManZonedDateTime  => setMan(attr, at.vs, resSetZonedDateTime)
-      case at: AttrSetManUUID           => setMan(attr, at.vs, resSetUUID)
-      case at: AttrSetManURI            => setMan(attr, at.vs, resSetURI)
-      case at: AttrSetManByte           => setMan(attr, at.vs, resSetByte)
-      case at: AttrSetManShort          => setMan(attr, at.vs, resSetShort)
-      case at: AttrSetManChar           => setMan(attr, at.vs, resSetChar)
+      case a: AttrSetManID             => if (a.owner) noEmbeddedIds else setMan(attr, a.vs, resSetID)
+      case a: AttrSetManString         => setMan(attr, a.vs, resSetString)
+      case a: AttrSetManInt            => setMan(attr, a.vs, resSetInt)
+      case a: AttrSetManLong           => setMan(attr, a.vs, resSetLong)
+      case a: AttrSetManFloat          => setMan(attr, a.vs, resSetFloat)
+      case a: AttrSetManDouble         => setMan(attr, a.vs, resSetDouble)
+      case a: AttrSetManBoolean        => setMan(attr, a.vs, resSetBoolean)
+      case a: AttrSetManBigInt         => setMan(attr, a.vs, resSetBigInt)
+      case a: AttrSetManBigDecimal     => setMan(attr, a.vs, resSetBigDecimal)
+      case a: AttrSetManDate           => setMan(attr, a.vs, resSetDate)
+      case a: AttrSetManDuration       => setMan(attr, a.vs, resSetDuration)
+      case a: AttrSetManInstant        => setMan(attr, a.vs, resSetInstant)
+      case a: AttrSetManLocalDate      => setMan(attr, a.vs, resSetLocalDate)
+      case a: AttrSetManLocalTime      => setMan(attr, a.vs, resSetLocalTime)
+      case a: AttrSetManLocalDateTime  => setMan(attr, a.vs, resSetLocalDateTime)
+      case a: AttrSetManOffsetTime     => setMan(attr, a.vs, resSetOffsetTime)
+      case a: AttrSetManOffsetDateTime => setMan(attr, a.vs, resSetOffsetDateTime)
+      case a: AttrSetManZonedDateTime  => setMan(attr, a.vs, resSetZonedDateTime)
+      case a: AttrSetManUUID           => setMan(attr, a.vs, resSetUUID)
+      case a: AttrSetManURI            => setMan(attr, a.vs, resSetURI)
+      case a: AttrSetManByte           => setMan(attr, a.vs, resSetByte)
+      case a: AttrSetManShort          => setMan(attr, a.vs, resSetShort)
+      case a: AttrSetManChar           => setMan(attr, a.vs, resSetChar)
     }
   }
 
   override protected def resolveAttrSetTac(attr: AttrSetTac): Unit = {
     attr match {
-      case at: AttrSetTacID             => tac(attr, at.vs, resSetID)
-      case at: AttrSetTacString         => tac(attr, at.vs, resSetString)
-      case at: AttrSetTacInt            => tac(attr, at.vs, resSetInt)
-      case at: AttrSetTacLong           => tac(attr, at.vs, resSetLong)
-      case at: AttrSetTacFloat          => tac(attr, at.vs, resSetFloat)
-      case at: AttrSetTacDouble         => tac(attr, at.vs, resSetDouble)
-      case at: AttrSetTacBoolean        => tac(attr, at.vs, resSetBoolean)
-      case at: AttrSetTacBigInt         => tac(attr, at.vs, resSetBigInt)
-      case at: AttrSetTacBigDecimal     => tac(attr, at.vs, resSetBigDecimal)
-      case at: AttrSetTacDate           => tac(attr, at.vs, resSetDate)
-      case at: AttrSetTacDuration       => tac(attr, at.vs, resSetDuration)
-      case at: AttrSetTacInstant        => tac(attr, at.vs, resSetInstant)
-      case at: AttrSetTacLocalDate      => tac(attr, at.vs, resSetLocalDate)
-      case at: AttrSetTacLocalTime      => tac(attr, at.vs, resSetLocalTime)
-      case at: AttrSetTacLocalDateTime  => tac(attr, at.vs, resSetLocalDateTime)
-      case at: AttrSetTacOffsetTime     => tac(attr, at.vs, resSetOffsetTime)
-      case at: AttrSetTacOffsetDateTime => tac(attr, at.vs, resSetOffsetDateTime)
-      case at: AttrSetTacZonedDateTime  => tac(attr, at.vs, resSetZonedDateTime)
-      case at: AttrSetTacUUID           => tac(attr, at.vs, resSetUUID)
-      case at: AttrSetTacURI            => tac(attr, at.vs, resSetURI)
-      case at: AttrSetTacByte           => tac(attr, at.vs, resSetByte)
-      case at: AttrSetTacShort          => tac(attr, at.vs, resSetShort)
-      case at: AttrSetTacChar           => tac(attr, at.vs, resSetChar)
+      case a: AttrSetTacID             => if (a.owner) noEmbeddedIds else tac(attr, a.vs, resSetID)
+      case a: AttrSetTacString         => tac(attr, a.vs, resSetString)
+      case a: AttrSetTacInt            => tac(attr, a.vs, resSetInt)
+      case a: AttrSetTacLong           => tac(attr, a.vs, resSetLong)
+      case a: AttrSetTacFloat          => tac(attr, a.vs, resSetFloat)
+      case a: AttrSetTacDouble         => tac(attr, a.vs, resSetDouble)
+      case a: AttrSetTacBoolean        => tac(attr, a.vs, resSetBoolean)
+      case a: AttrSetTacBigInt         => tac(attr, a.vs, resSetBigInt)
+      case a: AttrSetTacBigDecimal     => tac(attr, a.vs, resSetBigDecimal)
+      case a: AttrSetTacDate           => tac(attr, a.vs, resSetDate)
+      case a: AttrSetTacDuration       => tac(attr, a.vs, resSetDuration)
+      case a: AttrSetTacInstant        => tac(attr, a.vs, resSetInstant)
+      case a: AttrSetTacLocalDate      => tac(attr, a.vs, resSetLocalDate)
+      case a: AttrSetTacLocalTime      => tac(attr, a.vs, resSetLocalTime)
+      case a: AttrSetTacLocalDateTime  => tac(attr, a.vs, resSetLocalDateTime)
+      case a: AttrSetTacOffsetTime     => tac(attr, a.vs, resSetOffsetTime)
+      case a: AttrSetTacOffsetDateTime => tac(attr, a.vs, resSetOffsetDateTime)
+      case a: AttrSetTacZonedDateTime  => tac(attr, a.vs, resSetZonedDateTime)
+      case a: AttrSetTacUUID           => tac(attr, a.vs, resSetUUID)
+      case a: AttrSetTacURI            => tac(attr, a.vs, resSetURI)
+      case a: AttrSetTacByte           => tac(attr, a.vs, resSetByte)
+      case a: AttrSetTacShort          => tac(attr, a.vs, resSetShort)
+      case a: AttrSetTacChar           => tac(attr, a.vs, resSetChar)
     }
   }
 
   override protected def resolveAttrSetOpt(attr: AttrSetOpt): Unit = {
     attr match {
-      case _: AttrSetOptID             => setOpt(attr, resSetID)
+      case _: AttrSetOptID             => if (attr.owner) noEmbeddedIds else setOpt(attr, resSetID)
       case _: AttrSetOptString         => setOpt(attr, resSetString)
       case _: AttrSetOptInt            => setOpt(attr, resSetInt)
       case _: AttrSetOptLong           => setOpt(attr, resSetLong)
@@ -99,11 +98,7 @@ trait ResolveExprSet extends ResolveExpr with LambdasSet { self: MongoQueryBase 
     val uniqueField = b.unique(field)
     projectField(field)
     addCast(field, resSet.castSet(field))
-    prefixedFieldPair = if (b.parent.isEmpty)
-      (nestedLevel, field, field)
-    else
-      (nestedLevel, b.path + field, b.alias + field)
-    topBranch.groupIdFields += prefixedFieldPair
+    addGrouping(field)
     handleExpr(uniqueField, field, attr, set, resSet, true)
   }
 
@@ -154,13 +149,7 @@ trait ResolveExprSet extends ResolveExpr with LambdasSet { self: MongoQueryBase 
     val uniqueField = b.unique(field)
     projectField(field)
     addCast(field, res.castOptSet(field))
-
-    prefixedFieldPair = if (b.parent.isEmpty)
-      (nestedLevel, field, field)
-    else
-      (nestedLevel, b.path + field, b.alias + field)
-    topBranch.groupIdFields += prefixedFieldPair
-
+    addGrouping(field)
     attr.op match {
       case V     => setOptAttr(uniqueField, field)
       case Eq    => noCollectionMatching(attr)
@@ -175,46 +164,46 @@ trait ResolveExprSet extends ResolveExpr with LambdasSet { self: MongoQueryBase 
     val prefix = if (b.isEmbedded) b.dot else ""
     b.matches.add(Filters.ne(prefix + field, new BsonNull))
     b.matches.add(Filters.ne(prefix + field, new BsonArray()))
-    coalesce(uniqueField, field, mandatory)
+//    coalesce(uniqueField, field, mandatory)
   }
 
   private def setOptAttr(uniqueField: String, field: String): Unit = {
-    topBranch.groupIdFields -= prefixedFieldPair
-    if (!(b.parent.isDefined && b.parent.get.isInstanceOf[NestedRef]
-      || b.isInstanceOf[NestedRef])
-    ) {
-      // Separate nulls from arrays/sets of values when grouping
-      topBranch.optSetSeparators += (field + "_") -> new BsonDocument("$cond", {
-        val condArgs = new BsonArray()
-        condArgs.add(new BsonDocument("$or", {
-          val orArgs = new BsonArray()
-          orArgs.add(
-            new BsonDocument("$ifNull", {
-              val ifNullArgs = new BsonArray()
-              ifNullArgs.add(new BsonString("$" + b.path + field))
-              ifNullArgs.add(new BsonBoolean(false))
-              ifNullArgs
-            })
-          )
-          orArgs.add(
-            new BsonDocument("$ne", {
-              val neArgs = new BsonArray()
-              neArgs.add(new BsonString("$" + b.path + field))
-              neArgs.add(new BsonArray())
-              neArgs
-            })
-          )
-          orArgs
-        }))
-        condArgs.add(new BsonBoolean(true))
-        condArgs.add(new BsonBoolean(false))
-        condArgs
-      })
-
-      topBranch.groupExprs += (b.alias + uniqueField) ->
-        new BsonDocument("$addToSet", new BsonString("$" + b.path + field))
-      topBranch.addFields += (b.path + field) -> reduce("$" + b.alias + field)
-    }
+//    topBranch.groupIdFields -= prefixedFieldPair
+//    if (!(b.parent.isDefined && b.parent.get.isInstanceOf[NestedRef]
+//      || b.isInstanceOf[NestedRef])
+//    ) {
+//      // Separate nulls from arrays/sets of values when grouping
+//      topBranch.optSetSeparators += (field + "_") -> new BsonDocument("$cond", {
+//        val condArgs = new BsonArray()
+//        condArgs.add(new BsonDocument("$or", {
+//          val orArgs = new BsonArray()
+//          orArgs.add(
+//            new BsonDocument("$ifNull", {
+//              val ifNullArgs = new BsonArray()
+//              ifNullArgs.add(new BsonString("$" + b.path + field))
+//              ifNullArgs.add(new BsonBoolean(false))
+//              ifNullArgs
+//            })
+//          )
+//          orArgs.add(
+//            new BsonDocument("$ne", {
+//              val neArgs = new BsonArray()
+//              neArgs.add(new BsonString("$" + b.path + field))
+//              neArgs.add(new BsonArray())
+//              neArgs
+//            })
+//          )
+//          orArgs
+//        }))
+//        condArgs.add(new BsonBoolean(true))
+//        condArgs.add(new BsonBoolean(false))
+//        condArgs
+//      })
+//
+////      topBranch.groupExprs += (b.alias + uniqueField) ->
+////        new BsonDocument("$addToSet", new BsonString("$" + b.path + field))
+////      topBranch.addFields += (b.path + field) -> reduce("$" + b.alias + field)
+//    }
   }
 
   private def setHas[T](

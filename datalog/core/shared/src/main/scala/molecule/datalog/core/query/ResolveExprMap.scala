@@ -295,7 +295,7 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
       where += s"[(empty? $v4)]" -> wClause
     } else {
       // Get all
-      mapAttr(attr, e, v, resMap)
+      mapAttr(attr, e, v, resMap, true)
     }
   }
 

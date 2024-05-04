@@ -199,7 +199,7 @@ object Inspect extends TestSuite_mongodb {
           {
             "_action": "insert",
             "_selfJoins": 0,
-            "_refIdss": [],
+            "_newRefIds": [],
             "Ns": [
               {
                 "string": "a",
@@ -228,7 +228,7 @@ object Inspect extends TestSuite_mongodb {
           {
             "_action": "insert",
             "_selfJoins": 0,
-            "_refIdss": [],
+            "_newRefIds": [],
             "Ns": [
               {
                 "string": "a",
@@ -261,7 +261,7 @@ object Inspect extends TestSuite_mongodb {
           {
             "_action": "insert",
             "_selfJoins": 0,
-            "_refIdss": [],
+            "_newRefIds": [],
             "Ns": [
               {
                 "string": "a",
@@ -296,7 +296,7 @@ object Inspect extends TestSuite_mongodb {
           {
             "_action": "insert",
             "_selfJoins": 0,
-            "_refIdss": [],
+            "_newRefIds": [],
             "Ns": [
               {
                 "string": "a",

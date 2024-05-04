@@ -14,7 +14,8 @@ trait Many_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "id-filter - ref - value" - refs { implicit conn =>
       for {
-        List(a, b, c, d, e, f) <- A.i.a1.Bb.*?(B.s_?.i_?).insert(
+        x <- A.i(0).save.transact.map(_.id)
+        List(a, b, c, d, e, f) <- A.i.Bb.*?(B.s_?.i_?).insert(
           (1, List()),
           (2, List((Some("a"), None))),
           (3, List((Some("b"), None), (Some("c"), None))),
@@ -24,9 +25,10 @@ trait Many_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         ).transact.map(_.ids)
 
         // Filter by A ids, update B values
-        _ <- A(a, b, c, d, e, f).Bb.i(4).update.transact
+        _ <- A(x, a, b, c, d, e, f).Bb.i(4).update.transact
 
         _ <- A.i.a1.Bb.*?(B.s_?.i).query.get.map(_ ==> List(
+          (0, List((None, 4))), //                       ref + addition
           (1, List((None, 4))), //                       ref + addition
           (2, List((Some("a"), 4))), //                  addition in 1 ref entity
           (3, List((Some("b"), 4), (Some("c"), 4))), //  addition in 2 ref entities
@@ -40,7 +42,8 @@ trait Many_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "filter - ref - value" - refs { implicit conn =>
       for {
-        _ <- A.i.a1.Bb.*?(B.s_?.i_?).insert(
+        x <- A.i(0).save.transact.map(_.id)
+        _ <- A.i.Bb.*?(B.s_?.i_?).insert(
           (1, List()),
           (2, List((Some("a"), None))),
           (3, List((Some("b"), None), (Some("c"), None))),
@@ -53,6 +56,7 @@ trait Many_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- A.i_.Bb.i(4).update.transact
 
         _ <- A.i.a1.Bb.*?(B.s_?.i).query.get.map(_ ==> List(
+          (0, List((None, 4))), //                       ref + addition
           (1, List((None, 4))), //                       ref + addition
           (2, List((Some("a"), 4))), //                  addition in 1 ref entity
           (3, List((Some("b"), 4), (Some("c"), 4))), //  addition in 2 ref entities

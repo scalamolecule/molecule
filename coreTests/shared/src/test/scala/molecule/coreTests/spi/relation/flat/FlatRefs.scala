@@ -114,34 +114,71 @@ trait FlatRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "multiple card-many refs" - refs { implicit conn =>
-      // Can't query for non-existing ids of embedded documents in MongoDB
-      if (database != "MongoDB") {
+    "Flattened nested data" - refs { implicit conn =>
+      for {
+        _ <- A.i.Bb.*(B.i).insert(
+          (1, List(1, 2)),
+          (2, List(3, 4)),
+        ).transact
 
-        for {
-          // Two entities to be referenced
-          List(b1, b2) <- B.i.insert(1, 2).transact.map(_.ids)
+        // Nested
+        _ <- A.i.Bb.*(B.i).query.get.map(_ ==> List(
+          (1, List(1, 2)),
+          (2, List(3, 4)),
+        ))
 
-          // Reference Set of entities
-          _ <- A.i(0).bb(Set(b1, b2)).save.transact
+        // Flat (A.i values repeated)
+        _ <- A.i.Bb.i.query.get.map(_ ==> List(
+          (1, 1),
+          (1, 2),
+          (2, 3),
+          (2, 4),
+        ))
+      } yield ()
+    }
 
-          // Referencing namespace attributes repeat for each referenced entity
-          _ <- A.i.Bb.i.a1.query.get.map(_ ==> List(
-            (0, 1),
-            (0, 2), // 0 is repeated
-          ))
+    "Flattened nested data, 2 levels" - refs { implicit conn =>
+      for {
+        _ <- A.i.Bb.*(B.i.Cc.*(C.i)).insert(
+          (1, List(
+            (1, List(1, 2)),
+            (2, List(2, 3)))),
+          (2, List(
+            (3, List(3, 4)),
+            (4, List(4, 5)))),
+        ).transact
 
-          // Card many ref attributes return Set of ref ids
-          _ <- A.i.bb.query.get.map(_ ==> List((0, Set(b1, b2))))
-        } yield ()
-      }
+        // Nested
+        _ <- A.i.Bb.*(B.i.Cc.*(C.i)).query.get.map(_ ==> List(
+          (1, List(
+            (1, List(1, 2)),
+            (2, List(2, 3)))),
+          (2, List(
+            (3, List(3, 4)),
+            (4, List(4, 5)))),
+        ))
+
+        // Flat
+        _ <- A.i.Bb.i.Cc.i.query.get.map(_ ==> List(
+          (1, 1, 1),
+          (1, 1, 2),
+          (1, 2, 2),
+          (1, 2, 3),
+
+          (2, 3, 3),
+          (2, 3, 4),
+          (2, 4, 4),
+          (2, 4, 5),
+        ))
+      } yield ()
     }
 
 
-    // Owned relationships are relevant to database with different
-    // computational model for owned relationships (like MongoDB).
 
-    "Flat owned" - {
+    // Owned relationships are relevant to database with different
+    // computational model for owned relationships (like MongoDB embedded documents).
+
+    "Owned" - {
 
       "one-one" - refs { implicit conn =>
         import molecule.coreTests.dataModels.core.dsl.Refs._
@@ -232,6 +269,66 @@ trait FlatRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         for {
           _ <- A.i(1).OwnB.i(2)._A.OwnC.i(3).save.transact
           _ <- A.i.OwnB.i._A.OwnC.i.query.get.map(_ ==> List((1, 2, 3)))
+        } yield ()
+      }
+
+
+      "Flattened nested data" - refs { implicit conn =>
+        for {
+          _ <- A.i.OwnBb.*(B.i).insert(
+            (1, List(1, 2)),
+            (2, List(3, 4)),
+          ).transact
+
+          // Nested
+          _ <- A.i.OwnBb.*(B.i).query.get.map(_ ==> List(
+            (1, List(1, 2)),
+            (2, List(3, 4)),
+          ))
+
+          // Flat (A.i values repeated)
+          _ <- A.i.OwnBb.i.query.get.map(_ ==> List(
+            (1, 1),
+            (1, 2),
+            (2, 3),
+            (2, 4),
+          ))
+        } yield ()
+      }
+
+      "Flattened nested data, 2 levels" - refs { implicit conn =>
+        for {
+          _ <- A.i.OwnBb.*(B.i.OwnCc.*(C.i)).insert(
+            (1, List(
+              (1, List(1, 2)),
+              (2, List(2, 3)))),
+            (2, List(
+              (3, List(3, 4)),
+              (4, List(4, 5)))),
+          ).transact
+
+          // Nested
+          _ <- A.i.OwnBb.*(B.i.OwnCc.*(C.i)).query.get.map(_ ==> List(
+            (1, List(
+              (1, List(1, 2)),
+              (2, List(2, 3)))),
+            (2, List(
+              (3, List(3, 4)),
+              (4, List(4, 5)))),
+          ))
+
+          // Flat
+          _ <- A.i.OwnBb.i.OwnCc.i.query.get.map(_ ==> List(
+            (1, 1, 1),
+            (1, 1, 2),
+            (1, 2, 2),
+            (1, 2, 3),
+
+            (2, 3, 3),
+            (2, 3, 4),
+            (2, 4, 4),
+            (2, 4, 5),
+          ))
         } yield ()
       }
     }

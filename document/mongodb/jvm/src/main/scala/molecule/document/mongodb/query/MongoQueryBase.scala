@@ -73,6 +73,13 @@ trait MongoQueryBase extends Model2QueryBase with ResolveExprExceptions with Bas
   final protected def addCast(field: String, cast: BsonDocument => Any): Unit = {
     allCasts.last.last._3 += ((field, cast))
   }
+  final protected def addGrouping(field: String): Unit = {
+    prefixedFieldPair = if (b.parent.isEmpty)
+      (nestedLevel, field, field)
+    else
+      (nestedLevel, b.path + field, b.alias + field)
+    topBranch.groupIdFields += prefixedFieldPair
+  }
 
   final protected def removeLastCast(): Unit = {
     val last = allCasts.last.last._3

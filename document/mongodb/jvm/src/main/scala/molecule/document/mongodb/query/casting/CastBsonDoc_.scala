@@ -27,7 +27,7 @@ trait CastBsonDoc_ extends BaseHelpers {
         (outerDoc: BsonDocument) => {
           // Traverse to sub document
           val subDoc = refAttrPath.foldLeft(outerDoc) {
-            case (curDoc, refAttr) => curDoc.get(refAttr).asDocument()
+            case (curDoc, refAttr) => curDoc.getDocument(refAttr)
           }
           fieldCast(subDoc)
         }
@@ -54,11 +54,11 @@ trait CastBsonDoc_ extends BaseHelpers {
       val doc        = lastAttrPath match {
         case Nil => outerDoc
         case _   => lastAttrPath.foldLeft(outerDoc) {
-          case (curDoc, refAttr) => curDoc.get(refAttr).asDocument()
+          case (curDoc, refAttr) => curDoc.getDocument(refAttr)
         }
       }
       curLevelDocs.clear()
-      doc.get(nestedRefAttr).asArray().forEach { nestedRow =>
+      doc.getArray(nestedRefAttr).forEach { nestedRow =>
         nestedRows += castNestedDocument(nestedRow.asDocument())
       }
       if (singleNestedOpt && nestedRows.nonEmpty && nestedRows.head.isInstanceOf[Set[_]]) {

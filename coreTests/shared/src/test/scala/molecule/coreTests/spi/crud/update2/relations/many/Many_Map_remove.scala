@@ -14,7 +14,7 @@ trait Many_Map_remove extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "id-filter - ref - value" - refs { implicit conn =>
       for {
-        List(a, b, c, d, e, f) <- A.i.a1.Bb.*?(B.s_?.iMap_?).insert(
+        List(a, b, c, d, e, f) <- A.i.Bb.*?(B.s_?.iMap_?).insert(
           (1, List()),
           (2, List((Some("a"), None))),
           (3, List((Some("b"), None), (Some("c"), None))),
@@ -41,7 +41,7 @@ trait Many_Map_remove extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "filter - ref - value" - refs { implicit conn =>
       for {
-        _ <- A.i.a1.Bb.*?(B.s_?.iMap_?).insert(
+        _ <- A.i.Bb.*?(B.s_?.iMap_?).insert(
           (1, List()),
           (2, List((Some("a"), None))),
           (3, List((Some("b"), None), (Some("c"), None))),

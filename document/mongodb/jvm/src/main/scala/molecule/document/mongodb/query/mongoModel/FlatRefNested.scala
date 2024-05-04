@@ -36,11 +36,11 @@ class FlatRefNested(
 ) {
 
   override def getStages: util.ArrayList[BsonDocument] = {
-    //    println(s"----- 2a -----  $dot  $refAttr  ${parent0.map(_.isEmbedded)}")
+    println(s"----- 2a -----  $dot  $refAttr  ${parent0.map(_.isEmbedded)}")
     //    matches.forEach(m => println(m))
 
     // Recursively resolve embedded/looked-up documents
-    subBranches.foreach(ref => stages.addAll(ref.getStages))
+    subBranches.foreach(branch => stages.addAll(branch.getStages))
 
     if (sorts.nonEmpty) {
       addStage("$sort", Sorts.orderBy(getSorts))

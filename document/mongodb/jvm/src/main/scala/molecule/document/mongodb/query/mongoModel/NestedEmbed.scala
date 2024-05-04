@@ -37,10 +37,10 @@ class NestedEmbed(
 ) {
 
   override def getStages: util.ArrayList[BsonDocument] = {
-    //    println(s"----- 4 -----  $refAttr  $sorts")
+    println(s"----- 4 -----  $refAttr  $sorts")
 
     addMatches()
-    subBranches.foreach(ref => stages.addAll(ref.getStages))
+    subBranches.foreach(branch => stages.addAll(branch.getStages))
 
     if (parent.isEmpty) {
       addStage("$project", projection)

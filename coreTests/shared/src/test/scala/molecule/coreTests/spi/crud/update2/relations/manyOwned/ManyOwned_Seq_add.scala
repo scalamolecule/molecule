@@ -40,7 +40,7 @@ trait ManyOwned_Seq_add extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "filter - ref - value" - refs { implicit conn =>
       for {
-        _ <- A.i.a1.OwnBb.*?(B.s_?.iSeq_?).insert(
+        _ <- A.i.OwnBb.*?(B.s_?.iSeq_?).insert(
           (1, List()),
           (2, List((Some("a"), None))),
           (3, List((Some("b"), None), (Some("c"), None))),

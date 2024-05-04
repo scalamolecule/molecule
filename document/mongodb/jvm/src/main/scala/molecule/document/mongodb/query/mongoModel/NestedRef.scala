@@ -42,7 +42,7 @@ class NestedRef(
 
     // Nested -------------------
     addMatches()
-    subBranches.foreach(ref => stages.addAll(ref.getStages))
+    subBranches.foreach(branch => stages.addAll(branch.getStages))
     addStage("$project", projection)
 
     if (sorts.nonEmpty) {

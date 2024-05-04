@@ -275,12 +275,12 @@ trait Insert_mongodb
         // Step into referenced document
         docs = docs.init :+ (docs.last :+ doc)
 
-        val (i, nsData2) = nsDocs.getOrElse(refNs, {
+        val (i, nsData) = nsDocs.getOrElse(refNs, {
           nsIndex += 1
           (nsIndex, new BsonArray())
         })
-        nsData2.add(doc)
-        nsDocs(refNs) = (i, nsData2)
+        nsData.add(doc)
+        nsDocs(refNs) = (i, nsData)
       }
     }
   }
@@ -371,7 +371,7 @@ trait Insert_mongodb
 
           if (beforeDoc != outerDoc) {
             // Reference document
-            val refId = new BsonString(new ObjectId().toHexString)
+            val refId = new BsonObjectId()
             refIds.add(refId)
 
             // Set id in referenced document

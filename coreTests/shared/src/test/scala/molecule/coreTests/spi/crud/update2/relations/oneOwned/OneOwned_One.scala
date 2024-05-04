@@ -248,6 +248,21 @@ trait OneOwned_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
+    "Delete individual owned ref value(s) with update" - refs { implicit conn =>
+      // Not relevant for embedded documents without entity in Mongo
+      if (database != "MongoDB") {
+        for {
+          id <- A.i(1).OwnB.i(7).save.transact.map(_.id)
+          _ <- A.i.OwnB.i.query.get.map(_ ==> List((1, 7)))
+
+          // Apply empty value to delete ref id of entity (entity remains)
+          _ <- A(id).ownB().update.transact
+          _ <- A.i.ownB_?.query.get.map(_ ==> List((1, None)))
+        } yield ()
+      }
+    }
+
+
     "Ownership (Mongo)" - refs { implicit conn =>
       if (database == "MongoDB") {
         for {
@@ -257,6 +272,7 @@ trait OneOwned_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
               err ==> "Can't update non-existing ids of embedded documents in MongoDB."
             }
+
           _ <- A.i.ownB.query.get
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
               err ==> "Can't query for non-existing ids of embedded documents in MongoDB."
@@ -269,21 +285,6 @@ trait OneOwned_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
               err ==> "Can't query for non-existing ids of embedded documents in MongoDB."
             }
-        } yield ()
-      }
-    }
-
-
-    "Delete individual owned ref value(s) with update" - refs { implicit conn =>
-      // Not relevant for embedded documents without entity in Mongo
-      if (database != "MongoDB") {
-        for {
-          id <- A.i(1).OwnB.i(7).save.transact.map(_.id)
-          _ <- A.i.OwnB.i.query.get.map(_ ==> List((1, 7)))
-
-          // Apply empty value to delete ref id of entity (entity remains)
-          _ <- A(id).ownB().update.transact
-          _ <- A.i.ownB_?.query.get.map(_ ==> List((1, None)))
         } yield ()
       }
     }

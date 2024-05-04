@@ -1,7 +1,6 @@
 package molecule.document.mongodb.query
 
-import com.mongodb.client.model.mql.MqlValues._
-import com.mongodb.client.model.{Filters, Projections, Sorts}
+import com.mongodb.client.model.{Filters, Sorts}
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.core.query.ResolveExpr

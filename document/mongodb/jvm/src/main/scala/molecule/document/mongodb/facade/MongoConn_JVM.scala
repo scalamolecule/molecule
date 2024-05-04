@@ -149,8 +149,12 @@ case class MongoConn_JVM(
           var updatedIds = List.empty[String]
           var firstNs    = true
           data.forEach {
-            case ("_action", _)       => ()
-            case ("_refIds", refData) =>
+            case ("_action", _) => ()
+
+            case ("_newRefIds", refData) =>
+//              println("++++ _newRefIds: " + refData)
+
+              // Insert missing refs
               val nss = refData.asDocument()
               nss.forEach { case (refNs, refIds0) =>
                 val refIds = refIds0.asArray()
@@ -161,6 +165,9 @@ case class MongoConn_JVM(
               }
 
             case ("_refAttrs", refData) =>
+//              println("++++ _refAttrs: " + refData)
+
+              // Add ref attributes to referring doc
               val nss = refData.asDocument()
               nss.forEach { case (ns, updateData) =>
                 val collection = mongoDb.getCollection(ns, classOf[BsonDocument])
@@ -182,9 +189,16 @@ case class MongoConn_JVM(
                   .map(_.asInstanceOf[BsonObjectId].getValue.toString)
                 firstNs = false
               }
-              val update     = nsData.getDocument("update")
+              val update = nsData.getDocument("update")
+
+//              println(s"$ns ######## filter")
+//              println(filter.toJson(pretty))
+//              println("######## update")
+//              println(update.toJson(pretty))
+
+
               val collection = mongoDb.getCollection(ns, classOf[BsonDocument])
-//                            collection.updateMany(clientSession, filter, update, new UpdateOptions().upsert(true))
+              //              collection.updateMany(clientSession, filter, update, new UpdateOptions().upsert(true))
               collection.updateMany(clientSession, filter, update)
           }
 

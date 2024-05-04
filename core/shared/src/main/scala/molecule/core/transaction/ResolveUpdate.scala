@@ -1,5 +1,6 @@
 package molecule.core.transaction
 
+import molecule.base.ast.CardOne
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.core.marshalling.ConnProxy
@@ -31,7 +32,7 @@ class ResolveUpdate(
           case a: AttrOne => a match {
             case a: AttrOneMan =>
               val optValueAttr = a match {
-                case a: AttrOneManID             => AttrOneOptID(a.ns, a.attr)
+                case a: AttrOneManID             => AttrOneOptID(a.ns, a.attr, owner = a.owner)
                 case a: AttrOneManString         => AttrOneOptString(a.ns, a.attr)
                 case a: AttrOneManInt            => AttrOneOptInt(a.ns, a.attr)
                 case a: AttrOneManLong           => AttrOneOptLong(a.ns, a.attr)
@@ -68,7 +69,7 @@ class ResolveUpdate(
               case _ =>
                 // Retrieve current Set values for retraction
                 val optSet = a match {
-                  case a: AttrSetManID             => AttrSetOptID(a.ns, a.attr)
+                  case a: AttrSetManID             => AttrSetOptID(a.ns, a.attr, owner = a.owner)
                   case a: AttrSetManString         => AttrSetOptString(a.ns, a.attr)
                   case a: AttrSetManInt            => AttrSetOptInt(a.ns, a.attr)
                   case a: AttrSetManLong           => AttrSetOptLong(a.ns, a.attr)
@@ -225,8 +226,11 @@ class ResolveUpdate(
             getFilters(tail, r :: filterElements,
               true, differentiateOwned = differentiateOwned)
           } else {
-            getFilters(tail, r :: AttrOneManID(r.refNs, "id") :: filterElements,
-              true, differentiateOwned = differentiateOwned)
+            //            getFilters(tail, r :: AttrOneManID(r.refNs, "id") :: filterElements,
+            //              true, differentiateOwned = differentiateOwned)
+//            val idAttr = if (r.card == CardOne) AttrOneManID(r.refNs, "id") else AttrSetManID(r.refNs, "id")
+            val idAttr = AttrOneManID(r.refNs, "id")
+            getFilters(tail, r :: idAttr :: filterElements, true, differentiateOwned = differentiateOwned)
           }
 
         } else {
@@ -242,12 +246,18 @@ class ResolveUpdate(
           } else requiredNsPaths
 
           // ref has no filters after it, so we don't know if theres a relationship. Look for optional ref id then.
-          getFilters(tail, AttrOneOptID(r.ns, r.refAttr) :: Nil,
+          //          getFilters(tail, AttrOneOptID(r.ns, r.refAttr) :: Nil,
+          //            false, requiredNsPaths = requiredNsPaths1, differentiateOwned = differentiateOwned)
+
+//          val ref = if (r.card == CardOne) AttrOneOptID(r.ns, r.refAttr) else AttrSetOptID(r.ns, r.refAttr)
+          val idAttr = AttrOneOptID(r.ns, r.refAttr)
+//          val idAttr = if (r.card == CardOne) AttrOneManID(r.ns, r.refAttr) else AttrSetManID(r.ns, r.refAttr)
+          getFilters(tail, idAttr :: Nil,
             false, requiredNsPaths = requiredNsPaths1, differentiateOwned = differentiateOwned)
         }
 
-        case br: BackRef => getFilters(tail, br :: filterElements,
-          hasFilter, differentiateOwned = differentiateOwned)
+        case br: BackRef =>
+          getFilters(tail, br :: filterElements, hasFilter, differentiateOwned = differentiateOwned)
 
         case _ => noNested
       }
@@ -259,6 +269,7 @@ class ResolveUpdate(
         (filterElements, requiredNsPaths)
     }
   }
+
 
   @tailrec
   final def resolve(elements: List[Element]): Unit = {

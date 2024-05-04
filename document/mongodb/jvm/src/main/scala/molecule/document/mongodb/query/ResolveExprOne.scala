@@ -70,7 +70,9 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne { self: MongoQueryBase 
 
   override protected def resolveAttrOneOpt(attr: AttrOneOpt): Unit = {
     attr match {
-      case at: AttrOneOptID             => if (at.owner) noEmbeddedIds else opt(attr, at.vs, resID)
+      case at: AttrOneOptID             => if (at.owner) noEmbeddedIds else {
+        opt(attr, at.vs, resID)
+      }
       case at: AttrOneOptString         => opt(attr, at.vs, resString)
       case at: AttrOneOptInt            => opt(attr, at.vs, resInt)
       case at: AttrOneOptLong           => opt(attr, at.vs, resLong)
@@ -121,13 +123,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne { self: MongoQueryBase 
     projectField(uniqueField)
     addSort(attr, uniqueField)
     addCast(uniqueField, res.cast(uniqueField))
-
-    prefixedFieldPair = if (b.parent.isEmpty)
-      (nestedLevel, field, field)
-    else
-      (nestedLevel, b.path + field, b.alias + field)
-    topBranch.groupIdFields += prefixedFieldPair
-
+    addGrouping(field)
     handleExpr(uniqueField, field, attr, args, res)
   }
 
@@ -199,6 +195,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne { self: MongoQueryBase 
     projectField(uniqueField)
     addCast(uniqueField, res.castOpt(uniqueField))
     addSort(attr, uniqueField)
+    addGrouping(field)
     attr.op match {
       case V     => () // selected field can already be a value or null
       case Eq    => optEqual(field, optArgs, res)
@@ -210,6 +207,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne { self: MongoQueryBase 
       case other => unexpectedOp(other)
     }
   }
+
 
   // attr ----------------------------------------------------------------------
 

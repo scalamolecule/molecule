@@ -13,7 +13,8 @@ trait ResolveRef { self: MongoQueryBase =>
 
   protected def resolveRef(ref: Ref): Unit = {
     val Ref(ns, refAttr, refNs, card, owner, _) = ref
-    if (isNestedOpt && card == CardSet) {
+    val cardMany                                = card == CardSet
+    if (isNestedOpt && cardMany) {
       throw ModelError(
         "Only cardinality-one refs allowed in optional nested queries. Found: " + ref
       )
@@ -34,7 +35,7 @@ trait ResolveRef { self: MongoQueryBase =>
       val embeddedBranch = new FlatEmbed(
         nestedLevel,
         Some(b),
-        card.isInstanceOf[CardSet],
+        cardMany,
         ns,
         refAttr,
         refNs,
@@ -45,6 +46,9 @@ trait ResolveRef { self: MongoQueryBase =>
         b.alias + refAttr + "_",
         refProjections
       )
+      if (cardMany) {
+        b.base.unwinds += b.dot + refAttr
+      }
       embeddedBranch.base = b.base
       embeddedBranch
 
@@ -52,7 +56,7 @@ trait ResolveRef { self: MongoQueryBase =>
       val refBranch = new FlatRefNested(
         nestedLevel,
         Some(b),
-        card.isInstanceOf[CardSet],
+        cardMany,
         ns,
         refAttr,
         refNs,
@@ -69,7 +73,7 @@ trait ResolveRef { self: MongoQueryBase =>
       val refBranch = new FlatRef(
         nestedLevel,
         Some(b),
-        card.isInstanceOf[CardSet],
+        cardMany,
         ns,
         refAttr,
         refNs,

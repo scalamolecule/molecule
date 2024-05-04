@@ -2,6 +2,7 @@ package molecule.document.mongodb.transaction
 
 import java.util
 import molecule.base.ast.{Card, CardOne}
+import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ResolveSave
@@ -42,6 +43,7 @@ trait Save_mongodb
     transformValue: T => Any,
     exts: List[String] = Nil
   ): Unit = {
+    noEmbeddedIds(exts)
     optBsonValue.fold {
       doc.append(attr, new BsonNull())
     } { bsonValue =>
@@ -59,6 +61,7 @@ trait Save_mongodb
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
+    noEmbeddedIds(exts)
     addIterable(attr, optSet, transformValue)
   }
 

@@ -1,5 +1,6 @@
 package molecule.coreTests.spi.crud.update2.relations.oneOwned
 
+import molecule.base.error.ModelError
 import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
@@ -225,6 +226,41 @@ trait OneOwned_Set extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- A(id).iSet(Set(10)).OwnB.iSet(Set(20))._A.C.iSet(Set(30)).update.transact
         _ <- A.iSet.OwnB.iSet._A.C.iSet.query.get.map(_ ==> List((Set(10), Set(20), Set(30))))
       } yield ()
+    }
+
+
+    "Ownership (Mongo)" - refs { implicit conn =>
+      if (database == "MongoDB") {
+        for {
+          id <- A.i(1).OwnBb.i(2).save.transact.map(_.id)
+
+          _ <- A(id).ownBb(Set("123456789012345678901234")).update.i.transact
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+              err ==> "Can't update non-existing ids of embedded documents in MongoDB."
+            }
+          _ <- A(id).ownBb.add("123456789012345678901234").update.i.transact
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+              err ==> "Can't update non-existing ids of embedded documents in MongoDB."
+            }
+          _ <- A(id).ownBb.remove("123456789012345678901234").update.i.transact
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+              err ==> "Can't update non-existing ids of embedded documents in MongoDB."
+            }
+
+          _ <- A.i.ownBb.query.get
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+              err ==> "Can't query for non-existing ids of embedded documents in MongoDB."
+            }
+          _ <- A.i.ownBb_.query.get
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+              err ==> "Can't query for non-existing ids of embedded documents in MongoDB."
+            }
+          _ <- A.i.ownBb_?.query.get
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+              err ==> "Can't query for non-existing ids of embedded documents in MongoDB."
+            }
+        } yield ()
+      }
     }
   }
 }

@@ -58,46 +58,46 @@ object AdhocJVM_mongodb extends TestSuiteArray_mongodb with AggrUtils with BsonU
 
       for {
 
-        List(a, b, c, d, e, f) <- A.i.a1.Bb.*?(B.s_?.i_?).insert(
-          (1, List()),
-          (2, List((Some("a"), None))),
-          (3, List((Some("b"), None), (Some("c"), None))),
-          (4, List((Some("d"), Some(1)))),
-          (5, List((Some("e"), Some(2)), (Some("f"), Some(3)))),
-          (6, List((Some("g"), Some(4)), (Some("h"), None))),
-        ).transact.map(_.ids)
 
-        // Filter by A ids, update B values
-        _ <- A(a, b, c, d, e, f).Bb.i(4).update.i.transact
 
-        _ <- A.i.a1.Bb.*?(B.s_?.i).query.get.map(_ ==> List(
-          (1, List((None, 4))), //                       ref + addition
-          (2, List((Some("a"), 4))), //                  addition in 1 ref entity
-          (3, List((Some("b"), 4), (Some("c"), 4))), //  addition in 2 ref entities
-          (4, List((Some("d"), 4))), //                  update in 1 ref entity
-          (5, List((Some("e"), 4), (Some("f"), 4))), //  update in 2 ref entities
-          (6, List((Some("g"), 4), (Some("h"), 4))), //  update in one ref entity and addition in another
+        _ <- A.iSet.Bb.*?(B.s).insert(
+//          (Set(1, 3), List()),
+//          (Set(1, 2), List("a")),
+          (Set(2, 3), List("b")),
+//          (Set(3, 4), List("d", "e")),
+        ).i.transact.map(_.ids)
+
+        // Filter by B attribute, update A values
+//        _ <- A.iSet.remove(3, 4).Bb.s_.update.i.transact
+
+        // 2 A entities updated
+        _ <- A.iSet_?.Bb.*(B.s.a1).query.i.get.map(_ ==> List(
+//          (Some(Set(1, 2)), List("a")),
+//          (Some(Set(2)), List("b", "c")), // 1 value removed
+          (Some(Set(2, 3)), List("b")), // 1 value removed
+//          (None, List("d", "e")), //         both values removed (refs to B still exist)
         ))
 
-
-      } yield ()
-
-
-    }
-
-    "unique" - unique { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Uniques._
-      for {
-
-        _ <- Uniques.int(0).i(1).Ref.i(2).save.transact
-        //        _ <- Uniques.i.Ref.i.query.get.map(_ ==> List((1, 2)))
-
-        _ <- Uniques.int_(0).i(3).Ref.i(4).update.transact
-        _ <- Uniques.i.Ref.i.query.get.map(_ ==> List((3, 4)))
-
       } yield ()
     }
 
+
+
+
+
+    //    "unique" - unique { implicit conn =>
+    //      import molecule.coreTests.dataModels.core.dsl.Uniques._
+    //      for {
+    //
+    //        _ <- Uniques.int(0).i(1).Ref.i(2).save.transact
+    //        //        _ <- Uniques.i.Ref.i.query.get.map(_ ==> List((1, 2)))
+    //
+    //        _ <- Uniques.int_(0).i(3).Ref.i(4).update.transact
+    //        _ <- Uniques.i.Ref.i.query.get.map(_ ==> List((3, 4)))
+    //
+    //      } yield ()
+    //    }
+    //
     //
     //    "validation" - validation { implicit conn =>
     //      import molecule.coreTests.dataModels.core.dsl.Validation._

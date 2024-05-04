@@ -3,6 +3,7 @@ package molecule.document.mongodb.query.mongoModel
 import java.util
 import com.mongodb.MongoClientSettings
 import com.mongodb.client.model.{Filters, Sorts}
+import molecule.core.util.JavaConversions
 import org.bson._
 import org.bson.conversions.Bson
 import scala.collection.mutable
@@ -35,20 +36,16 @@ class FlatEmbed(
   path,
   alias,
   projection,
-) {
+) with JavaConversions {
 
   override def getStages: util.ArrayList[BsonDocument] = {
-    //    println(s"----- 1 -----  $dot  $refAttr  ${parent.map(_.isEmbedded)}")
+    println(s"----- 1 -----  $dot  $refAttr  ${parent.map(_.isEmbedded)}")
     //    matches.forEach(m => println(m))
 
     addMatches()
 
     // Recursively resolve embedded/looked-up documents
-    subBranches.foreach(ref => stages.addAll(ref.getStages))
-
-    unwinds.foreach(field =>
-      stages.add(new BsonDocument("$unwind", new BsonString(field)))
-    )
+    subBranches.foreach(branch => stages.addAll(branch.getStages))
 
     addStage("$match", preMatches)
 
@@ -66,6 +63,16 @@ class FlatEmbed(
     addStage("$match", postMatches)
 
     stages.addAll(postStages)
+
+
+    // Flatten embedded card-many data (if any)
+    unwinds.foreach { field =>
+      stages.add(
+        new BsonDocument("$unwind",
+          new BsonDocument("path", new BsonString("$" + field))
+        )
+      )
+    }
 
     if (parent.isEmpty) {
       addStage("$project", projection)

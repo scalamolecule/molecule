@@ -41,7 +41,7 @@ trait ManyOwned_Map_remove extends CoreTestSuite with ApiAsync { spi: SpiAsync =
 
     "filter - ref - value" - refs { implicit conn =>
       for {
-        _ <- A.i.a1.OwnBb.*?(B.s_?.iMap_?).insert(
+        _ <- A.i.OwnBb.*?(B.s_?.iMap_?).insert(
           (1, List()),
           (2, List((Some("a"), None))),
           (3, List((Some("b"), None), (Some("c"), None))),

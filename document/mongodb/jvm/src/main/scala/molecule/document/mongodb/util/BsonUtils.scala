@@ -43,7 +43,7 @@ trait BsonUtils extends DataType_JVM_mongodb {
           case "insert" =>
             bson.forEach {
               case ("_action", value)             => data.append("_action", value) // leave as-is
-              case ("_selfJoins" | "_refIdss", _) => () // ignore here
+              case ("_selfJoins" | "_newRefIds", _) => () // ignore here
               case (ns, rawRows)                  =>
                 val metaAttrs = nsMap.get(ns).fold(throw ModelError(s"Couldn't find namespace ´$ns´"))(_.attrs)
                 data.append(ns, castInsert(rawRows.asArray, metaAttrs))
@@ -52,7 +52,7 @@ trait BsonUtils extends DataType_JVM_mongodb {
           case "update" =>
             bson.forEach {
               case ("_action", value)             => data.append("_action", value) // leave as-is
-              case ("_selfJoins" | "_refIdss", _) => () // ignore here
+              case ("_selfJoins" | "_newRefIds", _) => () // ignore here
               case (ns, rawRows)                  =>
                 // (re-use castInsert)
                 val rows = new BsonArray()

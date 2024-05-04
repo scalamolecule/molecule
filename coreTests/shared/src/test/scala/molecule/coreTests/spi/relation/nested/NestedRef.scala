@@ -117,7 +117,7 @@ trait NestedRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Nested ref with card-set attr" - refs { implicit conn =>
       for {
-        _ <- A.i.a1.Bb.*(B.i.C.iSet).insert(
+        _ <- A.i.Bb.*(B.i.C.iSet).insert(
           (0, Nil),
           (1, List(
             (1, Set.empty[Int])

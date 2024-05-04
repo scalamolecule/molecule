@@ -180,42 +180,42 @@ trait ResolveExprSeq extends ResolveExpr with LambdasSeq { self: MongoQueryBase 
   }
 
   private def setOptAttr(uniqueField: String, field: String): Unit = {
-    topBranch.groupIdFields -= prefixedFieldPair
-    if (!(b.parent.isDefined && b.parent.get.isInstanceOf[NestedRef]
-      || b.isInstanceOf[NestedRef])
-    ) {
-      // Separate nulls from arrays/sets of values when grouping
-      topBranch.optSetSeparators += (field + "_") -> new BsonDocument("$cond", {
-        val condArgs = new BsonArray()
-        condArgs.add(new BsonDocument("$or", {
-          val orArgs = new BsonArray()
-          orArgs.add(
-            new BsonDocument("$ifNull", {
-              val ifNullArgs = new BsonArray()
-              ifNullArgs.add(new BsonString("$" + b.path + field))
-              ifNullArgs.add(new BsonBoolean(false))
-              ifNullArgs
-            })
-          )
-          orArgs.add(
-            new BsonDocument("$ne", {
-              val neArgs = new BsonArray()
-              neArgs.add(new BsonString("$" + b.path + field))
-              neArgs.add(new BsonArray())
-              neArgs
-            })
-          )
-          orArgs
-        }))
-        condArgs.add(new BsonBoolean(true))
-        condArgs.add(new BsonBoolean(false))
-        condArgs
-      })
-
-      topBranch.groupExprs += (b.alias + uniqueField) ->
-        new BsonDocument("$addToSet", new BsonString("$" + b.path + field))
-      topBranch.addFields += (b.path + field) -> reduce("$" + b.alias + field)
-    }
+//    topBranch.groupIdFields -= prefixedFieldPair
+//    if (!(b.parent.isDefined && b.parent.get.isInstanceOf[NestedRef]
+//      || b.isInstanceOf[NestedRef])
+//    ) {
+//      // Separate nulls from arrays/sets of values when grouping
+//      topBranch.optSetSeparators += (field + "_") -> new BsonDocument("$cond", {
+//        val condArgs = new BsonArray()
+//        condArgs.add(new BsonDocument("$or", {
+//          val orArgs = new BsonArray()
+//          orArgs.add(
+//            new BsonDocument("$ifNull", {
+//              val ifNullArgs = new BsonArray()
+//              ifNullArgs.add(new BsonString("$" + b.path + field))
+//              ifNullArgs.add(new BsonBoolean(false))
+//              ifNullArgs
+//            })
+//          )
+//          orArgs.add(
+//            new BsonDocument("$ne", {
+//              val neArgs = new BsonArray()
+//              neArgs.add(new BsonString("$" + b.path + field))
+//              neArgs.add(new BsonArray())
+//              neArgs
+//            })
+//          )
+//          orArgs
+//        }))
+//        condArgs.add(new BsonBoolean(true))
+//        condArgs.add(new BsonBoolean(false))
+//        condArgs
+//      })
+//
+////      topBranch.groupExprs += (b.alias + uniqueField) ->
+////        new BsonDocument("$addToSet", new BsonString("$" + b.path + field))
+////      topBranch.addFields += (b.path + field) -> reduce("$" + b.alias + field)
+//    }
   }
 
   private def seqHas[T](

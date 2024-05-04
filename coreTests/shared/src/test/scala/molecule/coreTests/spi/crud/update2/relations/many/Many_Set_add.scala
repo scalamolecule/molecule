@@ -40,7 +40,7 @@ trait Many_Set_add extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "filter - ref - value" - refs { implicit conn =>
       for {
-        _ <- A.i.a1.Bb.*?(B.s_?.iSet_?).insert(
+        _ <- A.i.Bb.*?(B.s_?.iSet_?).insert(
           (1, List()),
           (2, List((Some("a"), None))),
           (3, List((Some("b"), None), (Some("c"), None))),
