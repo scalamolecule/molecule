@@ -115,49 +115,143 @@ trait ManyOwned_Map extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           ))
         ))
 
-        _ <- B.s_?.a1.iMap.query.get.map(_ ==> List(
-          (None, Map(pint1, pint2)),
-          (Some("a"), Map(pint3, pint4)),
-          (Some("b"), Map(pint3, pint4)),
-          (Some("x"), Map(pint0, pint1)), // no change to entity without relationship from A
-        ))
+        _ <- if (database == "MongoDB") {
+          // Embedded documents in Mongo have no separate entity ids
+          B.s_?.a1.iMap.query.get.map(_ ==> List(
+            (Some("x"), Map(pint0, pint1)), // no change to entity without relationship from A
+          ))
+        } else {
+          B.s_?.a1.iMap.query.get.map(_ ==> List(
+            (None, Map(pint1, pint2)),
+            (Some("a"), Map(pint3, pint4)),
+            (Some("b"), Map(pint3, pint4)),
+            (Some("x"), Map(pint0, pint1)), // no change to entity without relationship from A
+          ))
+        }
       } yield ()
     }
 
 
-    "ref ref" - refs { implicit conn =>
-      for {
-        id <- A.iMap(Map(pint1)).OwnBb.iMap(Map(pint2)).Cc.iMap(Map(pint3)).save.transact.map(_.id)
-        _ <- A.iMap.OwnBb.iMap.Cc.iMap.query.get.map(_ ==> List((Map(pint1), Map(pint2), Map(pint3))))
+    "own ref" - refs { implicit conn =>
+      if (database != "MongoDB") {
+        //
+        // Mixing cardinality-many updates with further nested
+        // related/embedded documents not implemented for Mongodb.
+        for {
+          id <- A.iMap(Map(pint1)).OwnBb.iMap(Map(pint2)).Cc.iMap(Map(pint3)).save.transact.map(_.id)
+          _ <- A.iMap.OwnBb.iMap.Cc.iMap.query.get.map(_ ==> List((Map(pint1), Map(pint2), Map(pint3))))
 
-        // A
-        _ <- A(id).iMap(Map(pint1)).update.transact
-        _ <- A.iMap.OwnBb.iMap.Cc.iMap.query.get.map(_ ==> List((Map(pint1), Map(pint2), Map(pint3))))
+          // A
+          _ <- A(id).iMap(Map(pint1)).update.transact
+          _ <- A.iMap.OwnBb.iMap.Cc.iMap.query.get.map(_ ==> List((Map(pint1), Map(pint2), Map(pint3))))
 
-        // A + B
-        _ <- A(id).iMap(Map(pint2)).OwnBb.iMap(Map(pint1)).update.transact
-        _ <- A.iMap.OwnBb.iMap.Cc.iMap.query.get.map(_ ==> List((Map(pint2), Map(pint1), Map(pint3))))
+          // A + B
+          _ <- A(id).iMap(Map(pint2)).OwnBb.iMap(Map(pint1)).update.transact
+          _ <- A.iMap.OwnBb.iMap.Cc.iMap.query.get.map(_ ==> List((Map(pint2), Map(pint1), Map(pint3))))
 
-        // B
-        _ <- A(id).OwnBb.iMap(Map(pint2)).update.transact
-        _ <- A.iMap.OwnBb.iMap.Cc.iMap.query.get.map(_ ==> List((Map(pint2), Map(pint2), Map(pint3))))
+          // B
+          _ <- A(id).OwnBb.iMap(Map(pint2)).update.transact
+          _ <- A.iMap.OwnBb.iMap.Cc.iMap.query.get.map(_ ==> List((Map(pint2), Map(pint2), Map(pint3))))
 
-        // A + B + C
-        _ <- A(id).iMap(Map(pint3)).OwnBb.iMap(Map(pint3)).Cc.iMap(Map(pint1)).update.transact
-        _ <- A.iMap.OwnBb.iMap.Cc.iMap.query.get.map(_ ==> List((Map(pint3), Map(pint3), Map(pint1))))
+          // A + B + C
+          _ <- A(id).iMap(Map(pint3)).OwnBb.iMap(Map(pint3)).Cc.iMap(Map(pint1)).update.transact
+          _ <- A.iMap.OwnBb.iMap.Cc.iMap.query.get.map(_ ==> List((Map(pint3), Map(pint3), Map(pint1))))
 
-        // A + C
-        _ <- A(id).iMap(Map(pint4)).OwnBb.Cc.iMap(Map(pint2)).update.transact
-        _ <- A.iMap.OwnBb.iMap.Cc.iMap.query.get.map(_ ==> List((Map(pint4), Map(pint3), Map(pint2))))
+          // A + C
+          _ <- A(id).iMap(Map(pint4)).OwnBb.Cc.iMap(Map(pint2)).update.transact
+          _ <- A.iMap.OwnBb.iMap.Cc.iMap.query.get.map(_ ==> List((Map(pint4), Map(pint3), Map(pint2))))
 
-        // B + C
-        _ <- A(id).OwnBb.iMap(Map(pint4)).Cc.iMap(Map(pint3)).update.transact
-        _ <- A.iMap.OwnBb.iMap.Cc.iMap.query.get.map(_ ==> List((Map(pint4), Map(pint4), Map(pint3))))
+          // B + C
+          _ <- A(id).OwnBb.iMap(Map(pint4)).Cc.iMap(Map(pint3)).update.transact
+          _ <- A.iMap.OwnBb.iMap.Cc.iMap.query.get.map(_ ==> List((Map(pint4), Map(pint4), Map(pint3))))
 
-        // C
-        _ <- A(id).OwnBb.Cc.iMap(Map(pint4)).update.transact
-        _ <- A.iMap.OwnBb.iMap.Cc.iMap.query.get.map(_ ==> List((Map(pint4), Map(pint4), Map(pint4))))
-      } yield ()
+          // C
+          _ <- A(id).OwnBb.Cc.iMap(Map(pint4)).update.transact
+          _ <- A.iMap.OwnBb.iMap.Cc.iMap.query.get.map(_ ==> List((Map(pint4), Map(pint4), Map(pint4))))
+        } yield ()
+      }
+    }
+
+
+    "ref own" - refs { implicit conn =>
+      if (database != "MongoDB") {
+        //
+        // Mixing cardinality-many updates with further nested
+        // related/embedded documents not implemented for Mongodb.
+        for {
+          id <- A.iMap(Map(pint1)).Bb.iMap(Map(pint2)).OwnCc.iMap(Map(pint3)).save.transact.map(_.id)
+          _ <- A.iMap.Bb.iMap.OwnCc.iMap.query.get.map(_ ==> List((Map(pint1), Map(pint2), Map(pint3))))
+
+          // A
+          _ <- A(id).iMap(Map(pint1)).update.transact
+          _ <- A.iMap.Bb.iMap.OwnCc.iMap.query.get.map(_ ==> List((Map(pint1), Map(pint2), Map(pint3))))
+
+          // A + B
+          _ <- A(id).iMap(Map(pint2)).Bb.iMap(Map(pint1)).update.transact
+          _ <- A.iMap.Bb.iMap.OwnCc.iMap.query.get.map(_ ==> List((Map(pint2), Map(pint1), Map(pint3))))
+
+          // B
+          _ <- A(id).Bb.iMap(Map(pint2)).update.transact
+          _ <- A.iMap.Bb.iMap.OwnCc.iMap.query.get.map(_ ==> List((Map(pint2), Map(pint2), Map(pint3))))
+
+          // A + B + C
+          _ <- A(id).iMap(Map(pint3)).Bb.iMap(Map(pint3)).OwnCc.iMap(Map(pint1)).update.transact
+          _ <- A.iMap.Bb.iMap.OwnCc.iMap.query.get.map(_ ==> List((Map(pint3), Map(pint3), Map(pint1))))
+
+          // A + C
+          _ <- A(id).iMap(Map(pint4)).Bb.OwnCc.iMap(Map(pint2)).update.transact
+          _ <- A.iMap.Bb.iMap.OwnCc.iMap.query.get.map(_ ==> List((Map(pint4), Map(pint3), Map(pint2))))
+
+          // B + C
+          _ <- A(id).Bb.iMap(Map(pint4)).OwnCc.iMap(Map(pint3)).update.transact
+          _ <- A.iMap.Bb.iMap.OwnCc.iMap.query.get.map(_ ==> List((Map(pint4), Map(pint4), Map(pint3))))
+
+          // C
+          _ <- A(id).Bb.OwnCc.iMap(Map(pint4)).update.transact
+          _ <- A.iMap.Bb.iMap.OwnCc.iMap.query.get.map(_ ==> List((Map(pint4), Map(pint4), Map(pint4))))
+        } yield ()
+      }
+    }
+
+
+    "own own" - refs { implicit conn =>
+      if (database != "MongoDB") {
+        //
+        // Mixing cardinality-many updates with further nested
+        // related/embedded documents not implemented for Mongodb.
+        for {
+          id <- A.iMap(Map(pint1)).OwnBb.iMap(Map(pint2)).OwnCc.iMap(Map(pint3)).save.transact.map(_.id)
+          _ <- A.iMap.OwnBb.iMap.OwnCc.iMap.query.get.map(_ ==> List((Map(pint1), Map(pint2), Map(pint3))))
+
+          // A
+          _ <- A(id).iMap(Map(pint1)).update.transact
+          _ <- A.iMap.OwnBb.iMap.OwnCc.iMap.query.get.map(_ ==> List((Map(pint1), Map(pint2), Map(pint3))))
+
+          // A + B
+          _ <- A(id).iMap(Map(pint2)).OwnBb.iMap(Map(pint1)).update.transact
+          _ <- A.iMap.OwnBb.iMap.OwnCc.iMap.query.get.map(_ ==> List((Map(pint2), Map(pint1), Map(pint3))))
+
+          // B
+          _ <- A(id).OwnBb.iMap(Map(pint2)).update.transact
+          _ <- A.iMap.OwnBb.iMap.OwnCc.iMap.query.get.map(_ ==> List((Map(pint2), Map(pint2), Map(pint3))))
+
+          // A + B + C
+          _ <- A(id).iMap(Map(pint3)).OwnBb.iMap(Map(pint3)).OwnCc.iMap(Map(pint1)).update.transact
+          _ <- A.iMap.OwnBb.iMap.OwnCc.iMap.query.get.map(_ ==> List((Map(pint3), Map(pint3), Map(pint1))))
+
+          // A + C
+          _ <- A(id).iMap(Map(pint4)).OwnBb.OwnCc.iMap(Map(pint2)).update.transact
+          _ <- A.iMap.OwnBb.iMap.OwnCc.iMap.query.get.map(_ ==> List((Map(pint4), Map(pint3), Map(pint2))))
+
+          // B + C
+          _ <- A(id).OwnBb.iMap(Map(pint4)).OwnCc.iMap(Map(pint3)).update.transact
+          _ <- A.iMap.OwnBb.iMap.OwnCc.iMap.query.get.map(_ ==> List((Map(pint4), Map(pint4), Map(pint3))))
+
+          // C
+          _ <- A(id).OwnBb.OwnCc.iMap(Map(pint4)).update.transact
+          _ <- A.iMap.OwnBb.iMap.OwnCc.iMap.query.get.map(_ ==> List((Map(pint4), Map(pint4), Map(pint4))))
+        } yield ()
+      }
     }
 
 

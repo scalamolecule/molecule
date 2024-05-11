@@ -49,6 +49,9 @@ abstract class Branch(
 
   val unwinds = ListBuffer.empty[String]
 
+  var isOwnedFlatCardManyRef = false
+
+
   def addMatches(): Unit = {
     matches.size match {
       case 0 => () // do nothing

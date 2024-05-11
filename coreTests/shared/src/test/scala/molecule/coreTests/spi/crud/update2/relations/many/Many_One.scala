@@ -122,5 +122,54 @@ trait Many_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         ))
       } yield ()
     }
+
+
+
+    "ref ref" - refs { implicit conn =>
+      for {
+        id <- A.i(1).Bb.i(2).Cc.i(3).save.transact.map(_.id)
+        _ <- A.i.Bb.i.Cc.i.query.get.map(_ ==> List((1, 2, 3)))
+
+        // A
+        _ <- A(id).i(10).update.transact
+        _ <- A.i.Bb.i.Cc.i.query.get.map(_ ==> List((10, 2, 3)))
+
+        // A + B
+        _ <- A(id).i(11).Bb.i(20).update.transact
+        _ <- A.i.Bb.i.Cc.i.query.get.map(_ ==> List((11, 20, 3)))
+
+        // B
+        _ <- A(id).Bb.i(21).update.transact
+        _ <- A.i.Bb.i.Cc.i.query.get.map(_ ==> List((11, 21, 3)))
+
+        // A + B + C
+        _ <- A(id).i(12).Bb.i(22).Cc.i(30).update.transact
+        _ <- A.i.Bb.i.Cc.i.query.get.map(_ ==> List((12, 22, 30)))
+
+        // A + C
+        _ <- A(id).i(13).Bb.Cc.i(31).update.transact
+        _ <- A.i.Bb.i.Cc.i.query.get.map(_ ==> List((13, 22, 31)))
+
+        // B + C
+        _ <- A(id).Bb.i(23).Cc.i(32).update.transact
+        _ <- A.i.Bb.i.Cc.i.query.get.map(_ ==> List((13, 23, 32)))
+
+        // C
+        _ <- A(id).Bb.Cc.i(33).update.transact
+        _ <- A.i.Bb.i.Cc.i.query.get.map(_ ==> List((13, 23, 33)))
+      } yield ()
+    }
+
+
+    "backref" - refs { implicit conn =>
+      for {
+        id <- A.i(1).Bb.i(2)._A.Cc.i(3).save.transact.map(_.id)
+        _ <- A.i.Bb.i._A.Cc.i.query.get.map(_ ==> List((1, 2, 3)))
+
+        // Updating A.Bb.i and A.Cc.i
+        _ <- A(id).i(10).Bb.i(20)._A.Cc.i(30).update.transact
+        _ <- A.i.Bb.i._A.Cc.i.query.get.map(_ ==> List((10, 20, 30)))
+      } yield ()
+    }
   }
 }

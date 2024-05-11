@@ -4,7 +4,7 @@ import com.mongodb.client.model.{Filters, Sorts}
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.core.query.{ResolveExpr, ResolveExprExceptions}
-import molecule.document.mongodb.query.mongoModel.{Branch, NestedRef}
+import molecule.document.mongodb.query.mongoModel.{Branch, NestedEmbed, NestedRef}
 import org.bson._
 import org.bson.conversions.Bson
 
@@ -119,7 +119,6 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne { self: MongoQueryBase 
   private def man[T](attr: Attr, args: Seq[T], res: ResOne[T]): Unit = {
     val field       = attr.attr
     val uniqueField = b.unique(field)
-
     projectField(uniqueField)
     addSort(attr, uniqueField)
     addCast(uniqueField, res.cast(uniqueField))
@@ -211,9 +210,23 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne { self: MongoQueryBase 
 
   // attr ----------------------------------------------------------------------
 
-  protected def attr[T](field: String): Unit = {
-    val path = if (b.isEmbedded) b.dot else ""
-    b.base.matches.add(Filters.ne(path + field, null.asInstanceOf[T]))
+  protected def attr(field: String): Unit = {
+    if (!isNestedOpt) {
+      val path = if (b.isEmbedded) b.dot else ""
+
+      //      println(b)
+      //      println(b.base)
+      //
+      //      println(b.isOwnedCardManyRef)
+      //      println(b.base.isOwnedCardManyRef)
+
+      if (b.base.isOwnedFlatCardManyRef) {
+        // Match after unwinding card-many values
+        b.base.postMatches.add(Filters.ne(path + field, new BsonNull()))
+      } else {
+        b.base.matches.add(Filters.ne(path + field, new BsonNull()))
+      }
+    }
   }
 
 

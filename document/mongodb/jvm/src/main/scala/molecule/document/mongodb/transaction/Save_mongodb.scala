@@ -129,10 +129,14 @@ trait Save_mongodb
     card: Card,
     owner: Boolean
   ): Unit = {
+    val cardOne = card.isInstanceOf[CardOne]
     if (owner) {
       // Embed document
       val embeddedDoc = new BsonDocument()
-      doc.append(refAttr, embeddedDoc)
+
+      //      doc.append(refAttr, embeddedDoc)
+      doc.append(refAttr, if (cardOne) embeddedDoc else bsonArray(embeddedDoc))
+
       // Step into embedded document
       doc = embeddedDoc
       docs = docs.init :+ (docs.last :+ doc)
@@ -146,14 +150,13 @@ trait Save_mongodb
         selfJoins += 1
       }
 
-      val ref = card match {
-        case CardOne => refId
-        case _       =>
-          val array = new BsonArray
-          array.add(refId)
-          array
-      }
-      doc.append(refAttr, ref)
+      //      val ref = card match {
+      //        case CardOne => refId
+      //        case _       => bsonArray(refId)
+      //      }
+      //      doc.append(refAttr, ref)
+      doc.append(refAttr, if (cardOne) refId else bsonArray(refId))
+
 
       // Set id in new referenced document
       doc = new BsonDocument()

@@ -8,6 +8,7 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ops.InsertOps
 import molecule.core.transaction.{InsertResolvers_, ResolveInsert}
 import molecule.core.util.ModelUtils
+import molecule.document.mongodb.sync.pretty
 import org.bson._
 import org.bson.types.ObjectId
 import scala.collection.mutable
@@ -242,11 +243,14 @@ trait Insert_mongodb
     owner: Boolean
   ): Product => Unit = {
     nss += refNs
+    val cardOne = card.isInstanceOf[CardOne]
     if (owner) {
       (_: Product) => {
         // Embed document
         val embeddedDoc = new BsonDocument()
-        doc.append(refAttr, embeddedDoc)
+        //        doc.append(refAttr, embeddedDoc)
+        doc.append(refAttr, if (cardOne) embeddedDoc else bsonArray(embeddedDoc))
+
         // Step into embedded document
         docs = docs.init :+ (docs.last :+ embeddedDoc)
         doc = embeddedDoc
@@ -259,14 +263,16 @@ trait Insert_mongodb
       (_: Product) => {
         // Reference document
         val refId = new BsonObjectId()
-        val ref   = card match {
-          case CardOne => refId
-          case _       =>
-            val array = new BsonArray
-            array.add(refId)
-            array
-        }
-        doc.append(refAttr, ref)
+        //        val ref   = card match {
+        //          case CardOne => refId
+        //          case _       =>
+        //            val array = new BsonArray
+        //            array.add(refId)
+        //            array
+        //        }
+        //        doc.append(refAttr, ref)
+        doc.append(refAttr, if (cardOne) refId else bsonArray(refId))
+
 
         // Set id in referenced document
         doc = new BsonDocument()
@@ -326,11 +332,19 @@ trait Insert_mongodb
           // Save outer doc
           val outerDoc = doc
 
+
+
+
           // Process nested data
           resolveNested(nestedTpl)
 
-          // Add doc to embedded array
-          nestedArray.add(outerDoc)
+
+          //          println("QQQ  " + outerDoc.toJson(pretty))
+
+          if (!outerDoc.isEmpty) {
+            // Add doc to embedded array
+            nestedArray.add(outerDoc)
+          }
         }
       }
 

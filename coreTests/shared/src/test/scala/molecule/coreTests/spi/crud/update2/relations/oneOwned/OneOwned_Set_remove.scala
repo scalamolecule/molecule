@@ -102,7 +102,7 @@ trait OneOwned_Set_remove extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         ))
 
         _ <- if (database == "MongoDB") {
-          // Embedded data in Mongo have no separate entity ids
+          // Embedded documents in Mongo have no separate entity ids
           B.s.a1.iSet.query.get.map(_ ==> List(
             ("x", Set(3, 7)), // not updated since it isn't referenced from A
           ))

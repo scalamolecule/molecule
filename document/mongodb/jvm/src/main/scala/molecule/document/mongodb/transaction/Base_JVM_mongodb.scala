@@ -63,6 +63,18 @@ trait Base_JVM_mongodb extends DataType_JVM_mongodb with ModelUtils with BaseHel
     Future(MongoHandler_JVM.recreateDb(proxy.asInstanceOf[MongoProxy]))
   }
 
+  protected def bsonArray(args: BsonValue*): BsonArray = {
+    val array = new BsonArray()
+    args.foreach(arg => array.add(arg))
+    array
+  }
+
+  protected def bsonDoc(pairs: (String, BsonValue)*): BsonDocument = {
+    val doc = new BsonDocument()
+    pairs.foreach { case (k, v) => doc.append(k, v) }
+    doc
+  }
+
   override protected lazy val transformID            : String => Any         = (v: String) => new BsonObjectId(new ObjectId(v))
   override protected lazy val transformString        : String => Any         = (v: String) => new BsonString(v)
   override protected lazy val transformInt           : Int => Any            = (v: Int) => new BsonInt32(v)

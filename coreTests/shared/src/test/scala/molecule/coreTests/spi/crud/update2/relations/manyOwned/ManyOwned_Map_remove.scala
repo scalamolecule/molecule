@@ -72,7 +72,7 @@ trait ManyOwned_Map_remove extends CoreTestSuite with ApiAsync { spi: SpiAsync =
           (Map(pint1, pint2), List("a")),
           (Map(pint2, pint3), List("b", "c")),
           (Map(pint3, pint4), List("d", "e")),
-        ).transact.map(_.ids)
+        ).transact
 
         // Filter by B attribute, update A values
         _ <- A.iMap.remove(string3, string4).OwnBb.s_.update.transact
@@ -122,12 +122,19 @@ trait ManyOwned_Map_remove extends CoreTestSuite with ApiAsync { spi: SpiAsync =
           ))
         ))
 
-        _ <- B.s_?.a1.iMap.query.get.map(_ ==> List(
-          (None, Map(pint0, pint1)),
-          (Some("b"), Map(pint1, pint2)),
-          (Some("c"), Map(pint2)),
-          (Some("x"), Map(pint1, pint3)), // not update without relationship from A
-        ))
+        _ <- if (database == "MongoDB") {
+          // Embedded documents in Mongo have no separate entity ids
+          B.s_?.a1.iMap.query.get.map(_ ==> List(
+            (Some("x"), Map(pint1, pint3)), // not update without relationship from A
+          ))
+        } else {
+          B.s_?.a1.iMap.query.get.map(_ ==> List(
+            (None, Map(pint0, pint1)),
+            (Some("b"), Map(pint1, pint2)),
+            (Some("c"), Map(pint2)),
+            (Some("x"), Map(pint1, pint3)), // not update without relationship from A
+          ))
+        }
       } yield ()
     }
   }

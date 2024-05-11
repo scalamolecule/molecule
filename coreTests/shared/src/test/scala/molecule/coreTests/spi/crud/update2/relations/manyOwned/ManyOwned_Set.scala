@@ -115,49 +115,143 @@ trait ManyOwned_Set extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           ))
         ))
 
-        _ <- B.s_?.a1.iSet.query.get.map(_ ==> List(
-          (None, Set(1, 2)),
-          (Some("a"), Set(3, 4)),
-          (Some("b"), Set(3, 4)),
-          (Some("x"), Set(0, 1)), // no change to entity without relationship from A
-        ))
+        _ <- if (database == "MongoDB") {
+          // Embedded documents in Mongo have no separate entity ids
+          B.s_?.a1.iSet.query.get.map(_ ==> List(
+            (Some("x"), Set(0, 1)), // no change to entity without relationship from A
+          ))
+        } else {
+          B.s_?.a1.iSet.query.get.map(_ ==> List(
+            (None, Set(1, 2)),
+            (Some("a"), Set(3, 4)),
+            (Some("b"), Set(3, 4)),
+            (Some("x"), Set(0, 1)), // no change to entity without relationship from A
+          ))
+        }
       } yield ()
     }
 
-    
-    "ref ref" - refs { implicit conn =>
-      for {
-        id <- A.iSet(Set(1)).OwnBb.iSet(Set(2)).Cc.iSet(Set(3)).save.transact.map(_.id)
-        _ <- A.iSet.OwnBb.iSet.Cc.iSet.query.get.map(_ ==> List((Set(1), Set(2), Set(3))))
 
-        // A
-        _ <- A(id).iSet(Set(10)).update.transact
-        _ <- A.iSet.OwnBb.iSet.Cc.iSet.query.get.map(_ ==> List((Set(10), Set(2), Set(3))))
+    "own ref" - refs { implicit conn =>
+      if (database != "MongoDB") {
+        //
+        // Mixing cardinality-many updates with further nested
+        // related/embedded documents not implemented for Mongodb.
+        for {
+          id <- A.iSet(Set(1)).OwnBb.iSet(Set(2)).Cc.iSet(Set(3)).save.transact.map(_.id)
+          _ <- A.iSet.OwnBb.iSet.Cc.iSet.query.get.map(_ ==> List((Set(1), Set(2), Set(3))))
 
-        // A + B
-        _ <- A(id).iSet(Set(11)).OwnBb.iSet(Set(20)).update.transact
-        _ <- A.iSet.OwnBb.iSet.Cc.iSet.query.get.map(_ ==> List((Set(11), Set(20), Set(3))))
+          // A
+          _ <- A(id).iSet(Set(10)).update.transact
+          _ <- A.iSet.OwnBb.iSet.Cc.iSet.query.get.map(_ ==> List((Set(10), Set(2), Set(3))))
 
-        // B
-        _ <- A(id).OwnBb.iSet(Set(21)).update.transact
-        _ <- A.iSet.OwnBb.iSet.Cc.iSet.query.get.map(_ ==> List((Set(11), Set(21), Set(3))))
+          // A + B
+          _ <- A(id).iSet(Set(11)).OwnBb.iSet(Set(20)).update.transact
+          _ <- A.iSet.OwnBb.iSet.Cc.iSet.query.get.map(_ ==> List((Set(11), Set(20), Set(3))))
 
-        // A + B + C
-        _ <- A(id).iSet(Set(12)).OwnBb.iSet(Set(22)).Cc.iSet(Set(30)).update.transact
-        _ <- A.iSet.OwnBb.iSet.Cc.iSet.query.get.map(_ ==> List((Set(12), Set(22), Set(30))))
+          // B
+          _ <- A(id).OwnBb.iSet(Set(21)).update.transact
+          _ <- A.iSet.OwnBb.iSet.Cc.iSet.query.get.map(_ ==> List((Set(11), Set(21), Set(3))))
 
-        // A + C
-        _ <- A(id).iSet(Set(13)).OwnBb.Cc.iSet(Set(31)).update.transact
-        _ <- A.iSet.OwnBb.iSet.Cc.iSet.query.get.map(_ ==> List((Set(13), Set(22), Set(31))))
+          // A + B + C
+          _ <- A(id).iSet(Set(12)).OwnBb.iSet(Set(22)).Cc.iSet(Set(30)).update.transact
+          _ <- A.iSet.OwnBb.iSet.Cc.iSet.query.get.map(_ ==> List((Set(12), Set(22), Set(30))))
 
-        // B + C
-        _ <- A(id).OwnBb.iSet(Set(23)).Cc.iSet(Set(32)).update.transact
-        _ <- A.iSet.OwnBb.iSet.Cc.iSet.query.get.map(_ ==> List((Set(13), Set(23), Set(32))))
+          // A + C
+          _ <- A(id).iSet(Set(13)).OwnBb.Cc.iSet(Set(31)).update.transact
+          _ <- A.iSet.OwnBb.iSet.Cc.iSet.query.get.map(_ ==> List((Set(13), Set(22), Set(31))))
 
-        // C
-        _ <- A(id).OwnBb.Cc.iSet(Set(33)).update.transact
-        _ <- A.iSet.OwnBb.iSet.Cc.iSet.query.get.map(_ ==> List((Set(13), Set(23), Set(33))))
-      } yield ()
+          // B + C
+          _ <- A(id).OwnBb.iSet(Set(23)).Cc.iSet(Set(32)).update.transact
+          _ <- A.iSet.OwnBb.iSet.Cc.iSet.query.get.map(_ ==> List((Set(13), Set(23), Set(32))))
+
+          // C
+          _ <- A(id).OwnBb.Cc.iSet(Set(33)).update.transact
+          _ <- A.iSet.OwnBb.iSet.Cc.iSet.query.get.map(_ ==> List((Set(13), Set(23), Set(33))))
+        } yield ()
+      }
+    }
+
+
+    "ref own" - refs { implicit conn =>
+      if (database != "MongoDB") {
+        //
+        // Mixing cardinality-many updates with further nested
+        // related/embedded documents not implemented for Mongodb.
+        for {
+          id <- A.iSet(Set(1)).Bb.iSet(Set(2)).OwnCc.iSet(Set(3)).save.transact.map(_.id)
+          _ <- A.iSet.Bb.iSet.OwnCc.iSet.query.get.map(_ ==> List((Set(1), Set(2), Set(3))))
+
+          // A
+          _ <- A(id).iSet(Set(10)).update.transact
+          _ <- A.iSet.Bb.iSet.OwnCc.iSet.query.get.map(_ ==> List((Set(10), Set(2), Set(3))))
+
+          // A + B
+          _ <- A(id).iSet(Set(11)).Bb.iSet(Set(20)).update.transact
+          _ <- A.iSet.Bb.iSet.OwnCc.iSet.query.get.map(_ ==> List((Set(11), Set(20), Set(3))))
+
+          // B
+          _ <- A(id).Bb.iSet(Set(21)).update.transact
+          _ <- A.iSet.Bb.iSet.OwnCc.iSet.query.get.map(_ ==> List((Set(11), Set(21), Set(3))))
+
+          // A + B + C
+          _ <- A(id).iSet(Set(12)).Bb.iSet(Set(22)).OwnCc.iSet(Set(30)).update.transact
+          _ <- A.iSet.Bb.iSet.OwnCc.iSet.query.get.map(_ ==> List((Set(12), Set(22), Set(30))))
+
+          // A + C
+          _ <- A(id).iSet(Set(13)).Bb.OwnCc.iSet(Set(31)).update.transact
+          _ <- A.iSet.Bb.iSet.OwnCc.iSet.query.get.map(_ ==> List((Set(13), Set(22), Set(31))))
+
+          // B + C
+          _ <- A(id).Bb.iSet(Set(23)).OwnCc.iSet(Set(32)).update.transact
+          _ <- A.iSet.Bb.iSet.OwnCc.iSet.query.get.map(_ ==> List((Set(13), Set(23), Set(32))))
+
+          // C
+          _ <- A(id).Bb.OwnCc.iSet(Set(33)).update.transact
+          _ <- A.iSet.Bb.iSet.OwnCc.iSet.query.get.map(_ ==> List((Set(13), Set(23), Set(33))))
+        } yield ()
+      }
+    }
+
+
+    "own own" - refs { implicit conn =>
+      if (database != "MongoDB") {
+        //
+        // Mixing cardinality-many updates with further nested
+        // related/embedded documents not implemented for Mongodb.
+        for {
+          id <- A.iSet(Set(1)).OwnBb.iSet(Set(2)).OwnCc.iSet(Set(3)).save.transact.map(_.id)
+          _ <- A.iSet.OwnBb.iSet.OwnCc.iSet.query.get.map(_ ==> List((Set(1), Set(2), Set(3))))
+
+          // A
+          _ <- A(id).iSet(Set(10)).update.transact
+          _ <- A.iSet.OwnBb.iSet.OwnCc.iSet.query.get.map(_ ==> List((Set(10), Set(2), Set(3))))
+
+          // A + B
+          _ <- A(id).iSet(Set(11)).OwnBb.iSet(Set(20)).update.transact
+          _ <- A.iSet.OwnBb.iSet.OwnCc.iSet.query.get.map(_ ==> List((Set(11), Set(20), Set(3))))
+
+          // B
+          _ <- A(id).OwnBb.iSet(Set(21)).update.transact
+          _ <- A.iSet.OwnBb.iSet.OwnCc.iSet.query.get.map(_ ==> List((Set(11), Set(21), Set(3))))
+
+          // A + B + C
+          _ <- A(id).iSet(Set(12)).OwnBb.iSet(Set(22)).OwnCc.iSet(Set(30)).update.transact
+          _ <- A.iSet.OwnBb.iSet.OwnCc.iSet.query.get.map(_ ==> List((Set(12), Set(22), Set(30))))
+
+          // A + C
+          _ <- A(id).iSet(Set(13)).OwnBb.OwnCc.iSet(Set(31)).update.transact
+          _ <- A.iSet.OwnBb.iSet.OwnCc.iSet.query.get.map(_ ==> List((Set(13), Set(22), Set(31))))
+
+          // B + C
+          _ <- A(id).OwnBb.iSet(Set(23)).OwnCc.iSet(Set(32)).update.transact
+          _ <- A.iSet.OwnBb.iSet.OwnCc.iSet.query.get.map(_ ==> List((Set(13), Set(23), Set(32))))
+
+          // C
+          _ <- A(id).OwnBb.OwnCc.iSet(Set(33)).update.transact
+          _ <- A.iSet.OwnBb.iSet.OwnCc.iSet.query.get.map(_ ==> List((Set(13), Set(23), Set(33))))
+        } yield ()
+      }
     }
 
 

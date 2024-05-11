@@ -49,6 +49,17 @@ class NestedEmbed(
       addStage("$sort", Sorts.orderBy(getSorts))
     }
 
+    if (addFields.nonEmpty) {
+      // Ensure at least an embedded empty document dummy
+      val addFieldsDoc = new BsonDocument()
+      addFields.foreach { case (fieldPath, bson) =>
+        addFieldsDoc.put(fieldPath, bson)
+      }
+      if (!addFieldsDoc.isEmpty) {
+        stages.add(new BsonDocument("$addFields", addFieldsDoc))
+      }
+    }
+
     stages
   }
 

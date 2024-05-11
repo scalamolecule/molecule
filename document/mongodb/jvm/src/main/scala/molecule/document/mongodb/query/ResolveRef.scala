@@ -5,7 +5,7 @@ import molecule.base.ast._
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.document.mongodb.query.mongoModel._
-import org.bson.{BsonArray, BsonDocument, BsonInt32}
+import org.bson.{BsonArray, BsonDocument, BsonInt32, BsonNull}
 import scala.collection.mutable.ListBuffer
 
 
@@ -47,12 +47,14 @@ trait ResolveRef { self: MongoQueryBase =>
         refProjections
       )
       if (cardMany) {
+        b.base.isOwnedFlatCardManyRef = true
         b.base.unwinds += b.dot + refAttr
       }
       embeddedBranch.base = b.base
       embeddedBranch
 
     } else if (b.isInstanceOf[NestedEmbed]) {
+      b.base.isOwnedFlatCardManyRef = false
       val refBranch = new FlatRefNested(
         nestedLevel,
         Some(b),
@@ -70,6 +72,7 @@ trait ResolveRef { self: MongoQueryBase =>
       refBranch
 
     } else {
+      b.base.isOwnedFlatCardManyRef = false
       val refBranch = new FlatRef(
         nestedLevel,
         Some(b),
@@ -155,6 +158,7 @@ trait ResolveRef { self: MongoQueryBase =>
   private def resolveNested(ref: Ref, nestedElements: List[Element], mandatory: Boolean): Unit = {
     validateRefNs(ref, nestedElements)
     isNested = true
+    b.base.isOwnedFlatCardManyRef = false
     val Ref(ns, refAttr, refNs, _, owner, _) = ref
     nestedLevel += 1
     path ++= List(refAttr, refNs)
@@ -164,6 +168,9 @@ trait ResolveRef { self: MongoQueryBase =>
     val refProjections = new BsonDocument()
 
     if (owner) {
+      // Ensure at least an embedded empty document dummy
+      b.addFields += b.refAttr -> new BsonDocument("_", new BsonNull())
+
       b.projection.append(refAttr, refProjections)
       val embeddedBranch = new NestedEmbed(
         nestedLevel,

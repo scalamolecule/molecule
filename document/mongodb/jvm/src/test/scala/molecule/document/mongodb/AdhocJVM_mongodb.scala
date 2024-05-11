@@ -58,25 +58,44 @@ object AdhocJVM_mongodb extends TestSuiteArray_mongodb with AggrUtils with BsonU
 
       for {
 
+        _ <- A.i(1).save.transact
+//        _ <- A.i(2).B.s("b").save.transact
+//        _ <- A.i(3).B.s("c").iSet(Set(1, 2)).save.transact
 
+        // Filter by A attribute, update B values
+        _ <- A.i_.B.iSet.add(2, 3).update.transact
 
-        _ <- A.iSet.Bb.*?(B.s).insert(
-//          (Set(1, 3), List()),
-//          (Set(1, 2), List("a")),
-          (Set(2, 3), List("b")),
-//          (Set(3, 4), List("d", "e")),
-        ).i.transact.map(_.ids)
-
-        // Filter by B attribute, update A values
-//        _ <- A.iSet.remove(3, 4).Bb.s_.update.i.transact
-
-        // 2 A entities updated
-        _ <- A.iSet_?.Bb.*(B.s.a1).query.i.get.map(_ ==> List(
-//          (Some(Set(1, 2)), List("a")),
-//          (Some(Set(2)), List("b", "c")), // 1 value removed
-          (Some(Set(2, 3)), List("b")), // 1 value removed
-//          (None, List("d", "e")), //         both values removed (refs to B still exist)
+        _ <- A.i.a1.B.iSet.query.get.map(_ ==> List(
+          (1, Set(2, 3)), //    relationship to B created, B attribute added
+//          (2, Set(2, 3)), //    B attribute added
+//          (3, Set(1, 2, 3)), // B attribute updated (2 not added - already exists in Set)
         ))
+
+
+
+
+//        _ <- A.i.OwnBb.*?(B.s_?.iSet_?).insert(
+//          (1, List()),
+////          (2, List((Some("a"), None))),
+////          (3, List((Some("b"), None), (Some("c"), None))),
+////          (4, List((Some("d"), Some(Set(1, 2))))),
+////          (5, List((Some("e"), Some(Set(2, 3))), (Some("f"), Some(Set(3, 4))))),
+////          (6, List((Some("g"), Some(Set(4, 5))), (Some("h"), None))),
+//        ).i.transact
+//
+//        // Filter by A ids, update B values
+//        _ <- A.i_.OwnBb.iSet.add(4, 5).update.transact
+//
+//        _ <- A.i.a1.OwnBb.*?(B.s_?.iSet).query.get.map(_ ==> List(
+//          (1, List((None, Set(4, 5)))), //                                       ref + addition
+////          (2, List((Some("a"), Set(4, 5)))), //                                  addition in 1 ref entity
+////          (3, List((Some("b"), Set(4, 5)), (Some("c"), Set(4, 5)))), //          addition in 2 ref entities
+////          (4, List((Some("d"), Set(1, 2, 4, 5)))), //                            update in 1 ref entity
+////          (5, List((Some("e"), Set(2, 3, 4, 5)), (Some("f"), Set(3, 4, 5)))), // update in 2 ref entities
+////          (6, List((Some("g"), Set(4, 5)), (Some("h"), Set(4, 5)))), //          update in one ref entity and addition in another
+//        ))
+
+
 
       } yield ()
     }

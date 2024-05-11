@@ -58,9 +58,15 @@ trait CastBsonDoc_ extends BaseHelpers {
         }
       }
       curLevelDocs.clear()
-      doc.getArray(nestedRefAttr).forEach { nestedRow =>
-        nestedRows += castNestedDocument(nestedRow.asDocument())
+      doc.get(nestedRefAttr) match {
+        case a: BsonArray => a.forEach { nestedRow =>
+          nestedRows += castNestedDocument(nestedRow.asDocument())
+        }
+        case _            => () // Dummy document for empty optional nested data
       }
+      //      doc.getArray(nestedRefAttr).forEach { nestedRow =>
+      //        nestedRows += castNestedDocument(nestedRow.asDocument())
+      //      }
       if (singleNestedOpt && nestedRows.nonEmpty && nestedRows.head.isInstanceOf[Set[_]]) {
         // (can't flatten like this with Scala 2.12.18)
         //        List(nestedRows.asInstanceOf[ListBuffer[Set[_]]].flatten.toSet)

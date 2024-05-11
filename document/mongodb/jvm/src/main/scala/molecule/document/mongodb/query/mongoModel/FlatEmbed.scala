@@ -60,10 +60,6 @@ class FlatEmbed(
       parent.get.projection.remove(refAttr)
     }
 
-    addStage("$match", postMatches)
-
-    stages.addAll(postStages)
-
 
     // Flatten embedded card-many data (if any)
     unwinds.foreach { field =>
@@ -73,6 +69,10 @@ class FlatEmbed(
         )
       )
     }
+
+    addStage("$match", postMatches)
+
+    stages.addAll(postStages)
 
     if (parent.isEmpty) {
       addStage("$project", projection)

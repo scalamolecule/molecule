@@ -226,17 +226,14 @@ class ResolveUpdate(
             getFilters(tail, r :: filterElements,
               true, differentiateOwned = differentiateOwned)
           } else {
-            //            getFilters(tail, r :: AttrOneManID(r.refNs, "id") :: filterElements,
-            //              true, differentiateOwned = differentiateOwned)
-//            val idAttr = if (r.card == CardOne) AttrOneManID(r.refNs, "id") else AttrSetManID(r.refNs, "id")
             val idAttr = AttrOneManID(r.refNs, "id")
-            getFilters(tail, r :: idAttr :: filterElements, true, differentiateOwned = differentiateOwned)
+            getFilters(tail, r :: AttrOneManID(r.refNs, "id") :: filterElements,
+              true, differentiateOwned = differentiateOwned)
           }
 
         } else {
           // Skip tail and start over since we can't know if this ref is asserted without any filter values after it.
           // From here on and backwards we only might have a reference
-
           val requiredNsPaths1 = if (requireNs) {
             requiredNsPaths match {
               case Nil :: tail => List(r.ns, r.refAttr, r.refNs) :: tail
@@ -246,13 +243,7 @@ class ResolveUpdate(
           } else requiredNsPaths
 
           // ref has no filters after it, so we don't know if theres a relationship. Look for optional ref id then.
-          //          getFilters(tail, AttrOneOptID(r.ns, r.refAttr) :: Nil,
-          //            false, requiredNsPaths = requiredNsPaths1, differentiateOwned = differentiateOwned)
-
-//          val ref = if (r.card == CardOne) AttrOneOptID(r.ns, r.refAttr) else AttrSetOptID(r.ns, r.refAttr)
-          val idAttr = AttrOneOptID(r.ns, r.refAttr)
-//          val idAttr = if (r.card == CardOne) AttrOneManID(r.ns, r.refAttr) else AttrSetManID(r.ns, r.refAttr)
-          getFilters(tail, idAttr :: Nil,
+          getFilters(tail, AttrOneOptID(r.ns, r.refAttr) :: Nil,
             false, requiredNsPaths = requiredNsPaths1, differentiateOwned = differentiateOwned)
         }
 

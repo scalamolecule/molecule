@@ -152,7 +152,7 @@ case class MongoConn_JVM(
             case ("_action", _) => ()
 
             case ("_newRefIds", refData) =>
-//              println("++++ _newRefIds: " + refData)
+              //              println("++++ _newRefIds: " + refData)
 
               // Insert missing refs
               val nss = refData.asDocument()
@@ -165,7 +165,7 @@ case class MongoConn_JVM(
               }
 
             case ("_refAttrs", refData) =>
-//              println("++++ _refAttrs: " + refData)
+              //              println("++++ _refAttrs: " + refData)
 
               // Add ref attributes to referring doc
               val nss = refData.asDocument()
@@ -189,17 +189,31 @@ case class MongoConn_JVM(
                   .map(_.asInstanceOf[BsonObjectId].getValue.toString)
                 firstNs = false
               }
-              val update = nsData.getDocument("update")
 
-//              println(s"$ns ######## filter")
-//              println(filter.toJson(pretty))
-//              println("######## update")
-//              println(update.toJson(pretty))
+
+
+
+              //              val update: Bson = nsData.get("update").asInstanceOf[Bson]
+
+              //              println(s"$ns ######## filter")
+              //              println(filter.toJson(pretty))
+              //              println("######## update")
+              //              println(update.toJson(pretty))
 
 
               val collection = mongoDb.getCollection(ns, classOf[BsonDocument])
               //              collection.updateMany(clientSession, filter, update, new UpdateOptions().upsert(true))
-              collection.updateMany(clientSession, filter, update)
+//              collection.updateMany(clientSession, filter, update)
+              //              collection.updateMany(clientSession, filter, arrayList)
+
+              nsData.get("update") match {
+                case doc: BsonDocument => collection.updateMany(clientSession, filter, doc)
+                case arr: BsonArray    =>
+                  val stages = new util.ArrayList[Bson]()
+                  arr.forEach(stage => stages.add(stage.asDocument()))
+                  collection.updateMany(clientSession, filter, stages)
+              }
+
           }
 
 

@@ -91,7 +91,7 @@ trait OneOwned_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         ))
 
         _ <- if (database == "MongoDB") {
-          // Embedded data in Mongo have no separate entity ids
+          // Embedded documents in Mongo have no separate entity ids
           B.s.a1.i.query.get.map(_ ==> List(
             ("x", 0), // not updated since it isn't referenced from A
           ))
@@ -106,7 +106,7 @@ trait OneOwned_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "ref ref" - refs { implicit conn =>
+    "own ref" - refs { implicit conn =>
       for {
         id <- A.i(1).OwnB.i(2).C.i(3).save.transact.map(_.id)
         _ <- A.i.OwnB.i.C.i.query.get.map(_ ==> List((1, 2, 3)))

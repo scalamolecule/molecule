@@ -115,12 +115,19 @@ trait ManyOwned_Seq_add extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           ))
         ))
 
-        _ <- B.s_?.a1.iSeq.query.get.map(_ ==> List(
-          (None, Seq(1, 2)),
-          (Some("a"), Seq(3, 4)),
-          (Some("b"), Seq(2, 3, 3, 4)),
-          (Some("x"), Seq(0, 1)), // no change to entity without relationship from A
-        ))
+        _ <- if (database == "MongoDB") {
+          // Embedded documents in Mongo have no separate entity ids
+          B.s_?.a1.iSeq.query.get.map(_ ==> List(
+            (Some("x"), Seq(0, 1)), // no change to entity without relationship from A
+          ))
+        } else {
+          B.s_?.a1.iSeq.query.get.map(_ ==> List(
+            (None, Seq(1, 2)),
+            (Some("a"), Seq(3, 4)),
+            (Some("b"), Seq(2, 3, 3, 4)),
+            (Some("x"), Seq(0, 1)), // no change to entity without relationship from A
+          ))
+        }
       } yield ()
     }
   }

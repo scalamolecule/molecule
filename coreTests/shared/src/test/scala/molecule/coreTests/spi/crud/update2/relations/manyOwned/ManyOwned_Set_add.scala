@@ -115,12 +115,19 @@ trait ManyOwned_Set_add extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           ))
         ))
 
-        _ <- B.s_?.a1.iSet.query.get.map(_ ==> List(
-          (None, Set(1, 2)),
-          (Some("a"), Set(3, 4)),
-          (Some("b"), Set(2, 3, 4)),
-          (Some("x"), Set(0, 1)), // no change to entity without relationship from A
-        ))
+        _ <- if (database == "MongoDB") {
+          // Embedded documents in Mongo have no separate entity ids
+          B.s_?.a1.iSet.query.get.map(_ ==> List(
+            (Some("x"), Set(0, 1)), // no change to entity without relationship from A
+          ))
+        } else {
+          B.s_?.a1.iSet.query.get.map(_ ==> List(
+            (None, Set(1, 2)),
+            (Some("a"), Set(3, 4)),
+            (Some("b"), Set(2, 3, 4)),
+            (Some("x"), Set(0, 1)), // no change to entity without relationship from A
+          ))
+        }
       } yield ()
     }
   }

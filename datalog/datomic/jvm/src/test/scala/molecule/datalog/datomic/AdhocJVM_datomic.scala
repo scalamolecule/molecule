@@ -102,13 +102,13 @@ object AdhocJVM_datomic extends TestSuiteArray_datomic {
       for {
 
 
+        id <- A.iSet(Set(1)).OwnBb.iSet(Set(2)).Cc.iSet(Set(3)).save.i.transact.map(_.id)
+        //        _ <- A.iSet.OwnBb.iSet.query.i.get.map(_ ==> List((Set(1), Set(2))))
 
-        id <- A.iMap(Map(pint1)).Bb.iMap(Map(pint2))._A.Cc.iMap(Map(pint3)).save.transact.map(_.id)
-        _ <- A.iMap.Bb.iMap._A.Cc.iMap.query.get.map(_ ==> List((Map(pint1), Map(pint2), Map(pint3))))
 
-        // Updating A.Bb.iMap and A.Cc.iMap
-        _ <- A(id).iMap(Map(pint1)).Bb.iMap(Map(pint1))._A.Cc.iMap(Map(pint1)).update.transact
-        _ <- A.iMap.Bb.iMap._A.Cc.iMap.query.get.map(_ ==> List((Map(pint1), Map(pint1), Map(pint1))))
+        _ <- A.iSet.OwnBb.iSet.Cc.iSet.query.i.get
+
+
 
         //        _ = {
         //          println("----------- 2")

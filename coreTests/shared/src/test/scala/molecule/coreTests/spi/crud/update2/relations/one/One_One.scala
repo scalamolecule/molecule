@@ -98,7 +98,6 @@ trait One_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-
     "ref ref" - refs { implicit conn =>
       for {
         id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)

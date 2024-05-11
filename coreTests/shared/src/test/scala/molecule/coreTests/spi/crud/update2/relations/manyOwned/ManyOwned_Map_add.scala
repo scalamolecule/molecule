@@ -115,12 +115,19 @@ trait ManyOwned_Map_add extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           ))
         ))
 
-        _ <- B.s_?.a1.iMap.query.get.map(_ ==> List(
-          (None, Map(pint1, pint2)),
-          (Some("a"), Map(pint3, pint4)),
-          (Some("b"), Map(pint2, pint3, pint4)),
-          (Some("x"), Map(pint0, pint1)), // no change to entity without relationship from A
-        ))
+        _ <- if (database == "MongoDB") {
+          // Embedded documents in Mongo have no separate entity ids
+          B.s_?.a1.iMap.query.get.map(_ ==> List(
+            (Some("x"), Map(pint0, pint1)), // no change to entity without relationship from A
+          ))
+        } else {
+          B.s_?.a1.iMap.query.get.map(_ ==> List(
+            (None, Map(pint1, pint2)),
+            (Some("a"), Map(pint3, pint4)),
+            (Some("b"), Map(pint2, pint3, pint4)),
+            (Some("x"), Map(pint0, pint1)), // no change to entity without relationship from A
+          ))
+        }
       } yield ()
     }
   }
