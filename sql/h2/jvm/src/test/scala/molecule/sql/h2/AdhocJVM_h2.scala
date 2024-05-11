@@ -51,26 +51,20 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
 
-        id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
-        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
-
-        // A
-        _ <- A(id).i(10).update.transact
-        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((10, 2, 3)))
-
-        // A + B
-        _ <- A(id).i(11).B.i(20).update.transact
-        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((11, 20, 3)))
-
-        // B
-        _ <- A(id).B.i(21).update.transact
-        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((11, 21, 3)))
-
-        // A + B + C
-        _ <- A(id).i(12).B.i(22).C.i(30).update.i.transact
-        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((12, 22, 30)))
 
 
+        _ <- A.i(1).save.transact
+        _ <- A.i(2).B.s("b").save.transact
+        _ <- A.i(3).B.s("c").i(3).save.transact
+
+        // Filter by A attribute, update B values
+        _ <- A.i_.B.i(4).update.transact
+
+        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
+          (1, 4), // relationship to B created + B attribute added
+          (2, 4), // B attribute added
+          (3, 4), // B attribute updated
+        ))
 
         //        _ <- rawQuery(
         //          """SELECT DISTINCT

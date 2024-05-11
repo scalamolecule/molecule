@@ -33,7 +33,7 @@ trait MapSemantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (10, 1),
           (20, 3),
         ))
-        _ <- Ns.i.a1.intMap_.apply("a").query.i.get.map(_ ==> List(
+        _ <- Ns.i.a1.intMap_("a").query.i.get.map(_ ==> List(
           10,
           20,
         ))

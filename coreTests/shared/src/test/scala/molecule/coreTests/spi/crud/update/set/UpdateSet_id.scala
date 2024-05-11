@@ -58,7 +58,7 @@ trait UpdateSet_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.intSet.stringSet.query.get.map(_ ==> List((Set(1), Set("a"))))
 
         // Apply empty value to delete attribute of entity (entity remains)
-        _ <- Ns(id).stringSet.apply().update.transact
+        _ <- Ns(id).stringSet().update.transact
         _ <- Ns.intSet.stringSet_?.query.get.map(_ ==> List((Set(1), None)))
       } yield ()
     }

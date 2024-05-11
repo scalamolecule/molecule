@@ -41,7 +41,7 @@ trait FilterSeq_ByteArray extends CoreTestSuiteBase with Array2List with ApiAsyn
           _ <- Ns.i.byteArray(Array.empty[Byte]).query.get.map(_ ==> Nil)
 
           // Applying nothing matches nothing
-          _ <- Ns.i.byteArray.apply().query.get.map(_ ==> Nil)
+          _ <- Ns.i.byteArray().query.get.map(_ ==> Nil)
         } yield ()
       }
 

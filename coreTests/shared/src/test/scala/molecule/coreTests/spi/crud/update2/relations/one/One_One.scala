@@ -74,7 +74,7 @@ trait One_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "ref - filter/value" - refs { implicit conn =>
       for {
         // will not be updated (no update filter match)
-        _ <- B.s("x").i.apply(0).save.transact
+        _ <- B.s("x").i(0).save.transact
         _ <- A.i(1).save.transact
 
         // will be updated

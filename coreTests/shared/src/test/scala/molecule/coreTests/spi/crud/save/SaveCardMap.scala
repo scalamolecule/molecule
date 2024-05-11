@@ -76,7 +76,7 @@ trait SaveCardMap extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "optional" - types { implicit conn =>
       for {
         // Empty option of Array of values saves nothing
-        _ <- Ns.intMap_?.apply(Option.empty[Map[String, Int]]).save.transact
+        _ <- Ns.intMap_?(Option.empty[Map[String, Int]]).save.transact
         _ <- Ns.intMap.query.get.map(_ ==> List())
 
         _ <- Ns.int(1).i(1).stringMap_?(Option.empty[Map[String, String]]).save.transact
