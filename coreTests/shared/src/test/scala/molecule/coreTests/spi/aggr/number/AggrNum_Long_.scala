@@ -64,24 +64,6 @@ trait AggrNum_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             })
           } yield ()
 
-        case "MongoDB" =>
-          for {
-            _ <- Ns.i.long.insert(List(
-              (1, long1),
-              (1, long2),
-              (2, long2),
-              (2, long5),
-              (2, long9),
-            )).transact
-
-            _ <- Ns.long(median).query.get.map(_.head ==~ long2.toString.toDouble) // whole middle number
-
-            _ <- Ns.i.long(median).query.get.map(_.map {
-              case (1, median) => median ==~ long1.toDouble // lower number
-              case (2, median) => median ==~ long5.toString.toDouble // middle number
-            })
-          } yield ()
-
         case _ =>
           for {
             _ <- Ns.i.long.insert(List(

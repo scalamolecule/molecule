@@ -64,24 +64,6 @@ trait AggrNum_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             })
           } yield ()
 
-        case "MongoDB" =>
-          for {
-            _ <- Ns.i.byte.insert(List(
-              (1, byte1),
-              (1, byte2),
-              (2, byte2),
-              (2, byte5),
-              (2, byte9),
-            )).transact
-
-            _ <- Ns.byte(median).query.get.map(_.head ==~ byte2.toString.toDouble) // whole middle number
-
-            _ <- Ns.i.byte(median).query.get.map(_.map {
-              case (1, median) => median ==~ byte1.toDouble // lower number
-              case (2, median) => median ==~ byte5.toString.toDouble // middle number
-            })
-          } yield ()
-
         case _ =>
           for {
             _ <- Ns.i.byte.insert(List(

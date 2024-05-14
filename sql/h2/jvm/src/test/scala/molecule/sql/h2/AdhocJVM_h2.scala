@@ -59,6 +59,7 @@ object AdhocJVM_h2 extends TestSuite_h2 {
 
         // Filter by A attribute, update B values
         _ <- A.i_.B.i(4).update.transact
+//        _ <- A.i_.B.i(4).upsert.transact
 
         _ <- A.i.a1.B.i.query.get.map(_ ==> List(
           (1, 4), // relationship to B created + B attribute added

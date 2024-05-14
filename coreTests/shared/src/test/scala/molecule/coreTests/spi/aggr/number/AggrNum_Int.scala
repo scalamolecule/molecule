@@ -63,24 +63,6 @@ trait AggrNum_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             })
           } yield ()
 
-        case "MongoDB" =>
-          for {
-            _ <- Ns.i.int.insert(List(
-              (1, int1),
-              (1, int2),
-              (2, int2),
-              (2, int5),
-              (2, int9),
-            )).transact
-
-            _ <- Ns.int(median).query.get.map(_.head ==~ int2.toString.toDouble) // whole middle number
-
-            _ <- Ns.i.int(median).query.get.map(_.map {
-              case (1, median) => median ==~ int1.toDouble // lower number
-              case (2, median) => median ==~ int5.toString.toDouble // middle number
-            })
-          } yield ()
-
         case _ =>
           for {
             _ <- Ns.i.int.insert(List(

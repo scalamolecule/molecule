@@ -15,7 +15,6 @@ trait TestData extends DateHandling { self: CoreTest =>
   private def ur(i: Int): URI = new URI("uri" + i)
   private def bi(i: Int): BigInt = BigInt(i)
   private def bd(d: Double): BigDecimal = BigDecimal(d)
-  private def r(i: Int): String = if (database == "MongoDB") "12345678901234567890123" + i else s"$i"
 
   lazy val (string0, string1, string2, string3, string4, string5, string6, string7, string8, string9) =
     ("-", "a", "b", "c", "d", "e", "f", "g", "h", "i")
@@ -166,7 +165,7 @@ trait TestData extends DateHandling { self: CoreTest =>
     (0 to 9).toList.map(_.toShort)
 
   lazy val (ref0, ref1, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9) =
-    (r(0), r(1), r(2), r(3), r(4), r(5), r(6), r(7), r(8), r(9))
+    ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9")
 
   lazy val toleranceBigDecimal: BigDecimal = BigDecimal(0.001)
   lazy val toleranceDouble    : Double     = 0.001

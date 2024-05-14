@@ -64,24 +64,6 @@ trait AggrNum_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             })
           } yield ()
 
-        case "MongoDB" =>
-          for {
-            _ <- Ns.i.float.insert(List(
-              (1, float1),
-              (1, float2),
-              (2, float2),
-              (2, float5),
-              (2, float9),
-            )).transact
-
-            _ <- Ns.float(median).query.get.map(_.head ==~ float2.toString.toDouble) // whole middle number
-
-            _ <- Ns.i.float(median).query.get.map(_.map {
-              case (1, median) => median ==~ float1.toDouble // lower number
-              case (2, median) => median ==~ float5.toString.toDouble // middle number
-            })
-          } yield ()
-
         case _ =>
           for {
             _ <- Ns.i.float.insert(List(

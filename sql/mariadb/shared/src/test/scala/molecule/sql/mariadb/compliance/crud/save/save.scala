@@ -9,5 +9,4 @@ object SaveCardSeq extends SaveCardSeq with TestSuiteArray_mariadb with SpiAsync
 object SaveCardSet extends SaveCardSet with TestAsync_mariadb
 object SaveCardMap extends SaveCardMap with TestAsync_mariadb
 object SaveRefs extends SaveRefs with TestAsync_mariadb
-object SaveRefsOwned extends SaveRefsOwned with TestAsync_mariadb
 object SaveSemantics extends SaveSemantics with TestAsync_mariadb

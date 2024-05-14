@@ -9,5 +9,4 @@ object SaveCardSeq extends SaveCardSeq with TestSuiteArray_datomic with SpiAsync
 object SaveCardSet extends SaveCardSet with TestAsync_datomic
 object SaveCardMap extends SaveCardMap with TestAsync_datomic
 object SaveRefs extends SaveRefs with TestAsync_datomic
-object SaveRefsOwned extends SaveRefsOwned with TestAsync_datomic
 object SaveSemantics extends SaveSemantics with TestAsync_datomic

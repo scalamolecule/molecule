@@ -59,17 +59,14 @@ trait OpsOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
     "Delete individual owned ref value(s) with update" - refs { implicit conn =>
-      // Not relevant for embedded documents without entity in Mongo
-      if (database != "MongoDB") {
-        for {
-          id <- A.i(1).OwnB.i(7).save.transact.map(_.id)
-          _ <- A.i.OwnB.i.query.get.map(_ ==> List((1, 7)))
+      for {
+        id <- A.i(1).OwnB.i(7).save.transact.map(_.id)
+        _ <- A.i.OwnB.i.query.get.map(_ ==> List((1, 7)))
 
-          // Apply empty value to delete ref id of entity (entity remains)
-          _ <- A(id).ownB().update.transact
-          _ <- A.i.ownB_?.query.get.map(_ ==> List((1, None)))
-        } yield ()
-      }
+        // Apply empty value to delete ref id of entity (entity remains)
+        _ <- A(id).ownB().update.transact
+        _ <- A.i.ownB_?.query.get.map(_ ==> List((1, None)))
+      } yield ()
     }
 
 

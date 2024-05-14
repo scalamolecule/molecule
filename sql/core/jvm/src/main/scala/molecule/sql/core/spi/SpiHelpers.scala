@@ -155,7 +155,6 @@ trait SpiHelpers extends ModelUtils {
               throw ModelError(s"Unexpected $update operation for card-many attribute. Found:\n" + a)
             }
 
-
           case _: AttrOneOpt => throw ModelError(s"Can't $update optional values. Found:\n" + a)
 
           case _: AttrSetTac | _: AttrSeqTac | _: AttrMapTac =>

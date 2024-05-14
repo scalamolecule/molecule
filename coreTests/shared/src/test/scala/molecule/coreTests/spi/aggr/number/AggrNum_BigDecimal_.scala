@@ -64,24 +64,6 @@ trait AggrNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             })
           } yield ()
 
-        case "MongoDB" =>
-          for {
-            _ <- Ns.i.bigDecimal.insert(List(
-              (1, bigDecimal1),
-              (1, bigDecimal2),
-              (2, bigDecimal2),
-              (2, bigDecimal5),
-              (2, bigDecimal9),
-            )).transact
-
-            _ <- Ns.bigDecimal(median).query.get.map(_.head ==~ bigDecimal2.toString.toDouble) // whole middle number
-
-            _ <- Ns.i.bigDecimal(median).query.get.map(_.map {
-              case (1, median) => median ==~ bigDecimal1.toDouble // lower number
-              case (2, median) => median ==~ bigDecimal5.toString.toDouble // middle number
-            })
-          } yield ()
-
         case _ =>
           for {
             _ <- Ns.i.bigDecimal.insert(List(

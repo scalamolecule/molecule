@@ -9,5 +9,4 @@ object InsertCardSeq extends InsertCardSeq with TestSuiteArray_mysql with SpiAsy
 object InsertCardSet extends InsertCardSet with TestAsync_mysql
 object InsertCardMap extends InsertCardMap with TestAsync_mysql
 object InsertRefs extends InsertRefs with TestAsync_mysql
-object InsertRefsOwned extends InsertRefsOwned with TestAsync_mysql
 object InsertSemantics extends InsertSemantics with TestAsync_mysql

@@ -2,8 +2,6 @@
 
 Molecule is a Scala library to build queries and transactions with the words of your domain for various databases:
 
-- Document
-    - [MongoDB](http://www.mongodb.com)
 - Datalog
     - [Datomic](http://www.datomic.com)
 - SQL
@@ -183,7 +181,6 @@ lazy val yourProject = project.in(file("app"))
   .settings(
     libraryDependencies ++= Seq(
       // One or more of:
-      "org.scalamolecule" %%% "molecule-document-mongodb" % "0.8.0",
       "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.8.0",
       "org.scalamolecule" %%% "molecule-sql-h2" % "0.8.0",
       "org.scalamolecule" %%% "molecule-sql-mariadb" % "0.8.0",
@@ -202,13 +199,12 @@ in order to offer all functionality of Molecule.
 
 ### Run jvm tests
 
-Make sure Docker is running to run tests for MongoDB, MariaDB, Mysql and Postgress (Datomic and H2 run in-memory).
+Make sure Docker is running to run tests for MariaDB, Mysql and Postgress (Datomic and H2 run in-memory).
 For instance on a mac you can start Docker Desktop.
 
 Run the same test suite on jvm targeting various databases:
 
     sbt datalogDatomicJVM/test
-    sbt documentMongodbJVM/test
     sbt sqlH2JVM/test
     sbt sqlMariadbJVM/test
     sbt sqlMysqlJVM/test

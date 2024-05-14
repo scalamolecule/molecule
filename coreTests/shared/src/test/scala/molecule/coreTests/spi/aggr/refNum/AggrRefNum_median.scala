@@ -16,7 +16,7 @@ trait AggrRefNum_median extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     // Different databases have different ways of calculating a median
     // when the count of values is even and there's no middle value
-    val wholeOrAverage = if (List("Datomic", "MongoDB").contains(database)) {
+    val wholeOrAverage = if (List("Datomic").contains(database)) {
       // lower whole number
       int1
     } else {

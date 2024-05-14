@@ -426,6 +426,5 @@ object Boopicklers extends MoleculeLogging {
   implicit val pickleConnProxy: CompositePickler[ConnProxy] =
     compositePickler[ConnProxy]
       .addConcreteType[DatomicProxy]
-      .addConcreteType[MongoProxy]
       .addConcreteType[JdbcProxy]
 }

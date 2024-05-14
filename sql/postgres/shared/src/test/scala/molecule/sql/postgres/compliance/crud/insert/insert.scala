@@ -9,5 +9,4 @@ object InsertCardSeq extends InsertCardSeq with TestSuiteArray_postgres with Spi
 object InsertCardSet extends InsertCardSet with TestAsync_postgres
 object InsertCardMap extends InsertCardMap with TestAsync_postgres
 object InsertRefs extends InsertRefs with TestAsync_postgres
-object InsertRefsOwned extends InsertRefsOwned with TestAsync_postgres
 object InsertSemantics extends InsertSemantics with TestAsync_postgres

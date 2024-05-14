@@ -53,16 +53,3 @@ case class JdbcProxy(
   useTestContainer: Boolean = false
 ) extends ConnProxy
 
-
-case class MongoProxy(
-  connectionString: String, // ex "mongodb://localhost:27017"
-  dbName: String,
-  override val metaSchema: MetaSchema,
-  override val nsMap: Map[String, MetaNs],
-  override val attrMap: Map[String, (Card, String, Seq[String])],
-  override val uniqueAttrs: List[String],
-  override val dbView: Option[DbView] = None,
-  override val uuid: UUID = UUID.randomUUID(),
-  override val reserved: Option[Reserved] = None,
-  useTestContainer: Boolean = false
-) extends ConnProxy

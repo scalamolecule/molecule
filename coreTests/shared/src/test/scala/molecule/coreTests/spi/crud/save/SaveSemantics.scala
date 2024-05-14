@@ -65,28 +65,5 @@ trait SaveSemantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- A.i.Bb.*?(B.i).insert(0, List(1)).transact
       } yield ()
     }
-
-
-    "No embedded ids with Mongo" - refs { implicit conn =>
-      if (database == "MongoDB") {
-        for {
-          _ <- A.ownB(ref1).save.transact
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-              err ==> "Using ids for embedded documents not allowed with MongoDB."
-            }
-
-          _ <- A.ownBb(Set(ref1, ref2)).save.transact
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-              err ==> "Using ids for embedded documents not allowed with MongoDB."
-            }
-        } yield ()
-      } else {
-        for {
-          // ok
-          _ <- A.ownB(ref1).save.transact
-          _ <- A.ownBb(Set(ref1, ref2)).save.transact
-        } yield ()
-      }
-    }
   }
 }

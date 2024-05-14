@@ -207,28 +207,5 @@ trait InsertSemantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- A.i.Bb.*?(B.i.C.i._B.s).insert(1, List((2, 3, "a"))).transact
       } yield ()
     }
-
-
-    "No embedded ids with Mongo" - refs { implicit conn =>
-      if (database == "MongoDB") {
-        for {
-          _ <- A.ownB.insert(ref1).transact
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-              err ==> "Using ids for embedded documents not allowed with MongoDB."
-            }
-
-          _ <- A.ownBb.insert(Set(ref1, ref2)).transact
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-              err ==> "Using ids for embedded documents not allowed with MongoDB."
-            }
-        } yield ()
-      } else {
-        for {
-          // ok
-          _ <- A.ownB.insert(ref1).transact
-          _ <- A.ownBb.insert(Set(ref1, ref2)).transact
-        } yield ()
-      }
-    }
   }
 }

@@ -15,32 +15,6 @@ trait UpdateOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 
-    "Ownership (Mongo)" - refs { implicit conn =>
-      if (database == "MongoDB") {
-        for {
-          id <- A.i(1).OwnB.i(2).save.transact.map(_.id)
-
-          _ <- A(id).ownB("123456789012345678901234").update.transact
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-              err ==> "Can't update non-existing ids of embedded documents in MongoDB."
-            }
-          _ <- A.i.ownB.query.get
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-              err ==> "Can't query for non-existing ids of embedded documents in MongoDB."
-            }
-          _ <- A.i.ownB_.query.get
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-              err ==> "Can't query for non-existing ids of embedded documents in MongoDB."
-            }
-          _ <- A.i.ownB_?.query.get
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-              err ==> "Can't query for non-existing ids of embedded documents in MongoDB."
-            }
-        } yield ()
-      }
-    }
-
-
     "Multiple entities updated" - types { implicit conn =>
       for {
         List(a, b, c) <- Ns.int.insert(1, 2, 3).transact.map(_.ids)
@@ -85,17 +59,14 @@ trait UpdateOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
     "Delete individual owned ref value(s) with update" - refs { implicit conn =>
-      // Not relevant for embedded documents without entity in Mongo
-      if (database != "MongoDB") {
-        for {
-          id <- A.i(1).OwnB.i(7).save.transact.map(_.id)
-          _ <- A.i.OwnB.i.query.get.map(_ ==> List((1, 7)))
+      for {
+        id <- A.i(1).OwnB.i(7).save.transact.map(_.id)
+        _ <- A.i.OwnB.i.query.get.map(_ ==> List((1, 7)))
 
-          // Apply empty value to delete ref id of entity (entity remains)
-          _ <- A(id).ownB().update.transact
-          _ <- A.i.ownB_?.query.get.map(_ ==> List((1, None)))
-        } yield ()
-      }
+        // Apply empty value to delete ref id of entity (entity remains)
+        _ <- A(id).ownB().update.transact
+        _ <- A.i.ownB_?.query.get.map(_ ==> List((1, None)))
+      } yield ()
     }
 
 
@@ -322,14 +293,14 @@ trait UpdateOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         } yield ()
       }
 
-//      "Can't update card-many referenced attributes" - types { implicit conn =>
-//        for {
-//          _ <- Ns("42").i(1).Refs.i(2).update.transact
-//            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-//              err ==> "Can't update attributes in card-many referenced namespace `Refs`"
-//            }
-//        } yield ()
-//      }
+      //      "Can't update card-many referenced attributes" - types { implicit conn =>
+      //        for {
+      //          _ <- Ns("42").i(1).Refs.i(2).update.transact
+      //            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+      //              err ==> "Can't update attributes in card-many referenced namespace `Refs`"
+      //            }
+      //        } yield ()
+      //      }
     }
   }
 }

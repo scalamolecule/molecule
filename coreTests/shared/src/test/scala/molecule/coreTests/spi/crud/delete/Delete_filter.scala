@@ -44,7 +44,7 @@ trait Delete_filter extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "Expression" -  {
+    "Expression" - {
       import molecule.coreTests.dataModels.core.dsl.Types._
 
       "equal 0" - types { implicit conn =>
@@ -205,14 +205,8 @@ trait Delete_filter extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- A.i.a1.query.get.map(_ ==> List(1, 3))
         _ <- A.i.OwnB.i.query.get.map(_ ==> List((3, 30)))
 
-        _ <- if (database != "MongoDB") {
-          // Owned B entity is deleted too
-          B.i.a1.query.get.map(_ ==> List(30))
-        } else {
-          // Owned entity in Mongo is embedded in the A document.
-          // So we can't query it in isolation without its parent A document.
-          Future.unit
-        }
+        // Owned B entity is deleted too
+        _ <- B.i.a1.query.get.map(_ ==> List(30))
 
         // A.i entity has no ref to OwnB.i_(42) so nothing is deleted
         _ <- A.i_.OwnB.i_(42).delete.transact
@@ -244,34 +238,20 @@ trait Delete_filter extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
     "Ref owned + expr" - refs { implicit conn =>
-      if (database == "MongoDB") {
-        // Since owned B is an embedded document in Mongo we can't query it as an independent entity
-        for {
-          _ <- A.i.OwnB.i.insert((1, 10), (2, 20)).transact
-          _ <- A.i.a1.query.get.map(_ ==> List(1, 2))
-          _ <- A.i.a1.OwnB.i.query.get.map(_ ==> List((1, 10), (2, 20)))
+      // In other dbs, owned B is a separate entity. So we can query it independently
+      for {
+        _ <- A.i.OwnB.i.insert((1, 10), (2, 20)).transact
+        _ <- A.i.a1.query.get.map(_ ==> List(1, 2))
+        _ <- B.i.a1.query.get.map(_ ==> List(10, 20))
+        _ <- A.i.a1.OwnB.i.query.get.map(_ ==> List((1, 10), (2, 20)))
 
-          _ <- A.i_.OwnB.i_.>(15).delete.transact
-          _ <- A.i.query.get.map(_ ==> List(1))
-          _ <- A.i.OwnB.i.query.get.map(_ ==> List((1, 10)))
-        } yield ()
+        _ <- A.i_.OwnB.i_.>(15).delete.transact
+        _ <- A.i.query.get.map(_ ==> List(1))
 
-      } else {
-        // In other dbs, owned B is a separate entity. So we can query it independently
-        for {
-          _ <- A.i.OwnB.i.insert((1, 10), (2, 20)).transact
-          _ <- A.i.a1.query.get.map(_ ==> List(1, 2))
-          _ <- B.i.a1.query.get.map(_ ==> List(10, 20))
-          _ <- A.i.a1.OwnB.i.query.get.map(_ ==> List((1, 10), (2, 20)))
-
-          _ <- A.i_.OwnB.i_.>(15).delete.transact
-          _ <- A.i.query.get.map(_ ==> List(1))
-
-          // Owned B entity with i == 20 is deleted too
-          _ <- B.i.a1.query.get.map(_ ==> List(10))
-          _ <- A.i.OwnB.i.query.get.map(_ ==> List((1, 10)))
-        } yield ()
-      }
+        // Owned B entity with i == 20 is deleted too
+        _ <- B.i.a1.query.get.map(_ ==> List(10))
+        _ <- A.i.OwnB.i.query.get.map(_ ==> List((1, 10)))
+      } yield ()
     }
 
 

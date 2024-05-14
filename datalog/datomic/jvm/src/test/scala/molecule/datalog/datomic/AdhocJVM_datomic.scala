@@ -27,33 +27,7 @@ object AdhocJVM_datomic extends TestSuiteArray_datomic {
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
 
-//        id <- Ns.i(42).save.transact.map(_.id)
-        // Map attribute not yet asserted
-//        _ <- Ns.dateMap.query.get.map(_ ==> Nil)
-
-        // Applying Map of pairs to non-asserted Map attribute adds the attribute with the update
         _ <- Ns("x").dateMap.apply(Map(pdate1, pdate2)).update.transact
-//        _ <- Ns.dateMap.query.get.map(_.head ==> Map(pdate1, pdate2))
-//
-//        // Applying Map of pairs replaces previous Map
-//        _ <- Ns(id).dateMap(Map(pdate2, pdate3)).update.transact
-//        _ <- Ns.dateMap.query.get.map(_.head ==> Map(pdate2, pdate3))
-//
-//        // Add other attribute and update Map attribute in one go
-//        _ <- Ns(id).s("foo").dateMap(Map(pdate3, pdate4)).update.transact
-//        _ <- Ns.i.s.dateMap.query.get.map(_.head ==> (42, "foo", Map(pdate3, pdate4)))
-//
-//        // Applying empty Map of pairs deletes map
-//        _ <- Ns(id).dateMap(Map.empty[String, Date]).update.transact
-//        _ <- Ns.dateMap.query.get.map(_ ==> Nil)
-//
-//        _ <- Ns(id).dateMap(Map(pdate1, pdate2)).update.transact
-//        // Apply nothing to delete attribute
-//        _ <- Ns(id).dateMap().update.transact
-//        _ <- Ns.dateMap.query.get.map(_ ==> Nil)
-//
-//        // Entity still has other attributes
-//        _ <- Ns.i.s.query.get.map(_.head ==> (42, "foo"))
 
 
         //        _ <- rawTransact(
@@ -102,13 +76,19 @@ object AdhocJVM_datomic extends TestSuiteArray_datomic {
       for {
 
 
-        id <- A.iSet(Set(1)).OwnBb.iSet(Set(2)).Cc.iSet(Set(3)).save.i.transact.map(_.id)
-        //        _ <- A.iSet.OwnBb.iSet.query.i.get.map(_ ==> List((Set(1), Set(2))))
+        _ <- A.i(1).save.transact
+        _ <- A.i(2).B.s("b").save.transact
+        _ <- A.i(3).B.s("c").i(3).save.transact
 
+        // Filter by A attribute, update B values
+        _ <- A.i_.B.i(4).update.transact
+        //        _ <- A.i_.B.i(4).upsert.transact
 
-        _ <- A.iSet.OwnBb.iSet.Cc.iSet.query.i.get
-
-
+        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
+          (1, 4), // relationship to B created + B attribute added
+          (2, 4), // B attribute added
+          (3, 4), // B attribute updated
+        ))
 
         //        _ = {
         //          println("----------- 2")
