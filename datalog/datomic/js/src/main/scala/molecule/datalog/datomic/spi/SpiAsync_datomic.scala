@@ -159,8 +159,8 @@ trait SpiAsync_datomic extends SpiAsync with DatomicSpiAsyncBase with FutureUtil
 
   override def update_validate(update: Update)(implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = future {
     val proxy = conn.proxy
-    if (update.isUpsert && isRefUpdate(update.elements))
-      throw ModelError("Can't upsert referenced attributes. Please update instead.")
+//    if (update.isUpsert && isRefUpdate(update.elements))
+//      throw ModelError("Can't upsert referenced attributes. Please update instead.")
     TxModelValidation(proxy.nsMap, proxy.attrMap, "update").validate(update.elements)
   }
 

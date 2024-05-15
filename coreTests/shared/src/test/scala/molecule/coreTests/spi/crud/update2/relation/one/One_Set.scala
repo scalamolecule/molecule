@@ -16,15 +16,28 @@ trait One_Set extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         a <- A.i(1).save.transact.map(_.id)
         b <- A.i(2).B.s("b").save.transact.map(_.id)
-        c <- A.i(3).B.s("c").iSet(Set(1, 2)).save.transact.map(_.id)
+        c <- A.i(3).B.s("c").iSet(Set(3, 4)).save.transact.map(_.id)
 
-        // Filter by A ids, update B values
-        _ <- A(a, b, c).B.iSet(Set(2, 3)).update.transact
+        // Current entity with A value and ref to B value
+        _ <- A.i.a1.B.iSet.query.get.map(_ ==> List(
+          (3, Set(3, 4))
+        ))
+
+        // Filter by A value, update existing B values
+        _ <- A(a, b, c).B.iSet(Set(4, 5)).update.transact
 
         _ <- A.i.a1.B.iSet.query.get.map(_ ==> List(
-          (1, Set(2, 3)), // relationship to B created, B attribute added
-          (2, Set(2, 3)), // B attribute added
-          (3, Set(2, 3)), // B attribute updated
+          (3, Set(4, 5)) // B value updated since there was a previous value
+        ))
+
+        // Filter by A ids, upsert B values (insert if not already present)
+        _ <- A(a, b, c).B.iSet(Set(5, 6)).upsert.transact
+
+        // Now three A entities with referenced B value
+        _ <- A.i.a1.B.iSet.query.get.map(_ ==> List(
+          (1, Set(5, 6)), // relationship to B created and B value inserted
+          (2, Set(5, 6)), // B value inserted
+          (3, Set(5, 6)), // B value updated
         ))
       } yield ()
     }
@@ -34,15 +47,28 @@ trait One_Set extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- A.i(1).save.transact
         _ <- A.i(2).B.s("b").save.transact
-        _ <- A.i(3).B.s("c").iSet(Set(1, 2)).save.transact
+        _ <- A.i(3).B.s("c").iSet(Set(3, 4)).save.transact
 
-        // Filter by A attribute, update B values
-        _ <- A.i_.B.iSet(Set(2, 3)).update.transact
+        // Current entity with A value and ref to B value
+        _ <- A.i.a1.B.iSet.query.get.map(_ ==> List(
+          (3, Set(3, 4))
+        ))
+
+        // Filter by A value, update existing B values
+        _ <- A.i_.B.iSet(Set(4, 5)).update.transact
 
         _ <- A.i.a1.B.iSet.query.get.map(_ ==> List(
-          (1, Set(2, 3)), // relationship to B created, B attribute added
-          (2, Set(2, 3)), // B attribute added
-          (3, Set(2, 3)), // B attribute updated
+          (3, Set(4, 5)) // B value updated since there was a previous value
+        ))
+
+        // Filter by A ids, upsert B values (insert if not already present)
+        _ <- A.i_.B.iSet(Set(5, 6)).upsert.transact
+
+        // Now three A entities with referenced B value
+        _ <- A.i.a1.B.iSet.query.get.map(_ ==> List(
+          (1, Set(5, 6)), // relationship to B created and B value inserted
+          (2, Set(5, 6)), // B value inserted
+          (3, Set(5, 6)), // B value updated
         ))
       } yield ()
     }
@@ -50,22 +76,35 @@ trait One_Set extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "value - ref - filter" - refs { implicit conn =>
       for {
-        _ <- A.iSet(Set(0, 1)).save.transact
-
+        _ <- A.iSet(Set(0, 1)).save.transact // won't be updated since there's no B value
         _ <- A.B.i(1).save.transact
         _ <- A.iSet(Set(2, 3)).B.i(2).save.transact
         _ <- A.iSet(Set(3, 4)).B.i(3).save.transact
 
-        // Filter by B attribute, update A values
+        // Current 2 entities with A value and ref to B value
+        _ <- A.iSet.B.i.a1.query.get.map(_ ==> List(
+          (Set(2, 3), 2),
+          (Set(3, 4), 3),
+        ))
+
+        // Filter by B value, update A values
         _ <- A.iSet(Set(4, 5)).B.i_.update.transact
 
         _ <- A.iSet.B.i.a1.query.get.map(_ ==> List(
-          (Set(4, 5), 1), // A attribute added
-          (Set(4, 5), 2), // A attribute updated
-          (Set(4, 5), 3), // A attribute updated
+          (Set(4, 5), 2), // A value updated
+          (Set(4, 5), 3), // A value updated
         ))
 
-        // Entity A without ref was not updated
+        // Filter by B value, upsert A values (insert if not already present)
+        _ <- A.iSet(Set(5, 6)).B.i_.upsert.transact
+
+        _ <- A.iSet.B.i.a1.query.get.map(_ ==> List(
+          (Set(5, 6), 1), // A value and relationship to B value inserted
+          (Set(5, 6), 2), // A value updated
+          (Set(5, 6), 3), // A value updated
+        ))
+
+        // Initial entity without ref to B was not updated/upserted
         _ <- A.iSet.b_().query.get.map(_ ==> List(Set(0, 1)))
       } yield ()
     }
@@ -75,23 +114,35 @@ trait One_Set extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         // will not be updated (no update filter match)
         _ <- B.s("x").iSet(Set(0, 1)).save.transact
-        _ <- A.i(0).save.transact
+        _ <- A.i(1).save.transact
 
         // will be updated
-        _ <- A.i(1).B.s("a").save.transact
-        _ <- A.i(2).B.s("b").iSet(Set(1, 2)).save.transact
+        _ <- A.i(2).B.s("b").save.transact
+        _ <- A.i(3).B.s("c").iSet(Set(3, 4)).save.transact
 
-        // Filter by B attribute, update B values
-        _ <- A.B.s_.iSet(Set(2, 3)).update.transact
+        // Current entity with A value and ref to B value
+        _ <- A.i.a1.B.iSet.query.get.map(_ ==> List(
+          (3, Set(3, 4))
+        ))
+
+        // Filter by B value, update existing B values
+        _ <- A.B.s_.iSet(Set(4, 5)).update.transact
 
         _ <- A.i.a1.B.iSet.query.get.map(_ ==> List(
-          (1, Set(2, 3)), // B attribute added
-          (2, Set(2, 3)), // B attribute updated
+          (3, Set(4, 5)), // B value updated since there was a previous value
+        ))
+
+        // Filter by B attribute, upsert B values
+        _ <- A.B.s_.iSet(Set(5, 6)).upsert.transact
+
+        _ <- A.i.a1.B.iSet.query.get.map(_ ==> List(
+          (2, Set(5, 6)), // B value inserted
+          (3, Set(5, 6)), // B value updated
         ))
 
         _ <- B.s.a1.iSet.query.get.map(_ ==> List(
-          ("a", Set(2, 3)),
-          ("b", Set(2, 3)),
+          ("b", Set(5, 6)),
+          ("c", Set(5, 6)),
           ("x", Set(0, 1)), // not updated since it isn't referenced from A
         ))
       } yield ()

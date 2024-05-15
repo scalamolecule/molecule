@@ -80,21 +80,28 @@ trait Update_datomic
       }
     }
 
-    val (filterElements1, requiredNsPaths1) = getFilters(elements.reverse)
+    println("------ elements --------")
+    elements.foreach(println)
+
+    val (filterElements1, requiredNsPaths1) = if (isUpsert)
+      getUpsertFilters(elements.reverse)
+    else
+      getUpdateFilters(elements.reverse)
+
     requiredNsPaths = requiredNsPaths1
 
     val filters = AttrOneManID(getInitialNs(elements), "id", V) :: filterElements1
 
-    //    println("------ filters --------")
-    //    filters.foreach(println)
-    //    println("------ requiredNsPaths: " + requiredNsPaths)
+    println("------ filters --------")
+    filters.foreach(println)
+    println("------ requiredNsPaths: " + requiredNsPaths)
 
     val filterMatchRows = new DatomicQueryResolveOffset[Any](
       filters, None, None, None, new Model2DatomicQuery[Any](filters)
     ).getRawData(conn, validate = false)
 
-    //    println("--------- currentDataRows")
-    //    currentDataRows.forEach(row => println(row))
+    println("--------- filterMatchRows")
+    filterMatchRows.forEach(row => println(row))
 
     if (!filterMatchRows.isEmpty) {
       val it = filterMatchRows.iterator()
@@ -134,18 +141,29 @@ trait Update_datomic
   ): Unit = {
     val a = kw(ns, attr)
     vs match {
-      case Seq(v) => rowResolvers += { _ =>
-        ids.foreach(e => appendStmt(add, e, a, transformValue(v).asInstanceOf[AnyRef]))
-        attrIndex += 1
-      }
-      case Nil    => rowResolvers += { (row: jList[AnyRef]) =>
-        val currentValue = row.get(attrIndex).asInstanceOf[jMap[_, _]].get(a) match {
-          case map: jMap[_, _] => map.get(dbId)
-          case v               => v
+      case Seq(v) =>
+        rowResolvers += { _ =>
+          ids.foreach(e => appendStmt(add, e, a, transformValue(v).asInstanceOf[AnyRef]))
+          attrIndex += 1
         }
-        ids.foreach(e => appendStmt(retract, e, a, currentValue.asInstanceOf[AnyRef]))
-        attrIndex += 1
-      }
+      case Nil    =>
+        rowResolvers += {
+          case row: jList[AnyRef] if isUpsert =>
+            val currentValue = row.get(attrIndex).asInstanceOf[jMap[_, _]].get(a) match {
+              case map: jMap[_, _] => map.get(dbId)
+              case v               => v
+            }
+            ids.foreach(e => appendStmt(retract, e, a, currentValue.asInstanceOf[AnyRef]))
+            attrIndex += 1
+
+          case row: jList[AnyRef] =>
+            val currentValue = row.get(attrIndex) match {
+              case map: jMap[_, _] => map.get(dbId)
+              case v               => v
+            }
+            ids.foreach(e => appendStmt(retract, e, a, currentValue.asInstanceOf[AnyRef]))
+            attrIndex += 1
+        }
       case vs     => throw ExecutionError(
         s"Can only update one value for attribute `$ns.$attr`. Found: " + vs.mkString(", ")
       )
@@ -481,7 +499,12 @@ trait Update_datomic
   private def retractCurrentMapPairs(row: jList[AnyRef], a: Keyword, a_k: Keyword, optRefNs: Option[String]): Unit = {
     if (attrIndex < rowSize) {
       // Cached values with known ref
-      val keys = cachedValues(row, optRefNs).map(_.asInstanceOf[jMap[_, _]].get(a_k)).asJava
+      val cached = cachedValues(row, optRefNs)
+      val keys   = if (isUpsert) {
+        cached.map(_.asInstanceOf[jMap[_, _]].get(a_k)).asJava
+      } else {
+        cached.map(_.asInstanceOf[jList[_]].get(0)).asJava
+      }
       Peer.q(
         "[:find ?ref :in $ [?e ...] ?a ?a_k [?k ...] :where [?e ?a ?ref][?ref ?a_k ?k]]",
         db, ids.asJava, a, a_k, keys
@@ -516,10 +539,18 @@ trait Update_datomic
 
   private def cachedValues(row: jList[AnyRef], optRefNs: Option[String]): List[AnyRef] = {
     (if (optRefNs.isEmpty) {
-      row.get(attrIndex) match {
-        case vs: jSet[_]  => vs.iterator().next().asInstanceOf[jList[_]].toArray()
-        case vs: jList[_] => vs.toArray()
-        case vs: Array[_] => vs.asInstanceOf[Array[AnyRef]]
+      if (isUpsert) {
+        row.get(attrIndex) match {
+          case vs: jSet[_]  => vs.iterator().next().asInstanceOf[jList[_]].toArray()
+          case vs: jList[_] => vs.toArray()
+          case vs: Array[_] => vs.asInstanceOf[Array[AnyRef]]
+        }
+      } else {
+        row.get(attrIndex) match {
+          case vs: jSet[_]  => vs.toArray()
+          case vs: jList[_] => vs.toArray()
+          case vs: Array[_] => vs.asInstanceOf[Array[AnyRef]]
+        }
       }
     } else {
       row.get(attrIndex)
@@ -636,42 +667,52 @@ trait Update_datomic
     //    println(requiredNsPaths)
     //    println(currentNsPath)
     val refAttr = kw(ns, refAttr0)
-    rowResolvers += { (row: jList[AnyRef]) =>
-      ids = if (attrIndex < rowSize) {
-        row.get(attrIndex) match {
-          case null =>
-            // Don't add ref if it's not required (when removing only)
-            if (requiredNsPaths.contains(currentNsPath)) {
-              // Add ref to next namespace
-              val ref = newId
-              appendStmt(add, ids.head, refAttr, ref)
-              List(ref)
-            } else Nil
+    rowResolvers += {
+      case row: jList[AnyRef] if isUpsert =>
+        ids = if (attrIndex < rowSize) {
+          //          println("---------")
+          //          println(row)
+          //          println(attrIndex)
+          row.get(attrIndex) match {
+            case null =>
+              // Don't add ref if it's not required (when removing only)
+              if (requiredNsPaths.contains(currentNsPath)) {
+                // Add ref to next namespace
+                val ref = newId
+                appendStmt(add, ids.head, refAttr, ref)
+                List(ref)
+              } else Nil
 
-          case e: jLong => List(e)
+            case e: jLong => List(e)
 
-          case map: jMap[_, _] =>
-            if (card == CardOne) {
-              // Current ref
-              List(map.get(refAttr).asInstanceOf[jMap[_, _]].get(dbId).asInstanceOf[AnyRef])
-            } else {
-              // Extract entity ids from vector of current card-many refs
-              map.get(refAttr).asInstanceOf[jList[_]].asScala.toList.map(entityMap =>
-                entityMap.asInstanceOf[jMap[_, _]].get(dbId).asInstanceOf[AnyRef]
-              )
+            case map: jMap[_, _] =>
+              if (card == CardOne) {
+                // Current ref
+                List(map.get(refAttr).asInstanceOf[jMap[_, _]].get(dbId).asInstanceOf[AnyRef])
+              } else {
+                // Extract entity ids from vector of current card-many refs
+                map.get(refAttr).asInstanceOf[jList[_]].asScala.toList.map(entityMap =>
+                  entityMap.asInstanceOf[jMap[_, _]].get(dbId).asInstanceOf[AnyRef]
+                )
+              }
+          }
+        } else {
+          // Get currently unknown ref from Datomic database entity lookup
+          idLists.last.map { e =>
+            db.entity(e).asInstanceOf[EntityMap].get(refAttr) match {
+              case set: jSet[_]  => set.iterator.next.asInstanceOf[EntityMap].get(dbId)
+              case em: EntityMap => em.get(dbId)
             }
-        }
-      } else {
-        // Get currently unknown ref from Datomic database entity lookup
-        idLists.last.map { e =>
-          db.entity(e).asInstanceOf[EntityMap].get(refAttr) match {
-            case set: jSet[_]  => set.iterator.next.asInstanceOf[EntityMap].get(dbId)
-            case em: EntityMap => em.get(dbId)
           }
         }
-      }
-      attrIndex += 1
-      idLists = idLists :+ ids
+        attrIndex += 1
+        idLists = idLists :+ ids
+
+      case row: jList[AnyRef] =>
+        if (attrIndex < rowSize)
+          ids = List(row.get(attrIndex).asInstanceOf[jLong])
+        attrIndex += 1
+        idLists = idLists :+ ids
     }
   }
 

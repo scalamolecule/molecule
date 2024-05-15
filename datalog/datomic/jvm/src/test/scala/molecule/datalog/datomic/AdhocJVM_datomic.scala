@@ -70,25 +70,24 @@ object AdhocJVM_datomic extends TestSuiteArray_datomic {
 
 
 
+
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
 
 
-        _ <- A.i(1).save.transact
-        _ <- A.i(2).B.s("b").save.transact
-        _ <- A.i(3).B.s("c").i(3).save.transact
+        refId <- B.i(7).save.transact.map(_.id)
+        id <- A.i.b.insert(1, refId).transact.map(_.id)
+        _ <- A.i.b.query.get.map(_ ==> List((1, refId)))
 
-        // Filter by A attribute, update B values
-        _ <- A.i_.B.i(4).update.transact
-        //        _ <- A.i_.B.i(4).upsert.transact
+        // Apply empty value to delete ref id of entity (entity remains)
+        _ <- A(id).b().update.transact
+        _ <- A.i.b_?.query.get.map(_ ==> List((1, None)))
 
-        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
-          (1, 4), // relationship to B created + B attribute added
-          (2, 4), // B attribute added
-          (3, 4), // B attribute updated
-        ))
+
+
+
 
         //        _ = {
         //          println("----------- 2")

@@ -18,13 +18,26 @@ trait One_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         b <- A.i(2).B.s("b").save.transact.map(_.id)
         c <- A.i(3).B.s("c").i(3).save.transact.map(_.id)
 
-        // Filter by A ids, update B values
+        // Current entity with A value and ref to B value
+        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
+          (3, 3)
+        ))
+
+        // Filter by A ids, update existing B values
         _ <- A(a, b, c).B.i(4).update.transact
 
         _ <- A.i.a1.B.i.query.get.map(_ ==> List(
-          (1, 4), // relationship to B created + B attribute added
-          (2, 4), // B attribute added
-          (3, 4), // B attribute updated
+          (3, 4) // B value updated since there was a previous value
+        ))
+
+        // Filter by A ids, upsert B values (insert if not already present)
+        _ <- A(a, b, c).B.i(5).upsert.transact
+
+        // Now three A entities with referenced B value
+        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
+          (1, 5), // relationship to B created + B value inserted
+          (2, 5), // B value inserted
+          (3, 5), // B value updated
         ))
       } yield ()
     }
@@ -32,17 +45,30 @@ trait One_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "filter - ref - value" - refs { implicit conn =>
       for {
-        _ <- A.i(1).save.transact
-        _ <- A.i(2).B.s("b").save.transact
-        _ <- A.i(3).B.s("c").i(3).save.transact
+        _ <- A.i(1).save.transact.map(_.id)
+        _ <- A.i(2).B.s("b").save.transact.map(_.id)
+        _ <- A.i(3).B.s("c").i(3).save.transact.map(_.id)
 
-        // Filter by A attribute, update B values
+        // Current entity with A value and ref to B value
+        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
+          (3, 3)
+        ))
+
+        // Filter by A value, update existing B values
         _ <- A.i_.B.i(4).update.transact
 
         _ <- A.i.a1.B.i.query.get.map(_ ==> List(
-          (1, 4), // relationship to B created + B attribute added
-          (2, 4), // B attribute added
-          (3, 4), // B attribute updated
+          (3, 4) // B value updated since there was a previous value
+        ))
+
+        // Filter by A ids, upsert B values (insert if not already present)
+        _ <- A.i_.B.i(5).upsert.transact
+
+        // Now three A entities with referenced B value
+        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
+          (1, 5), // relationship to B created and B value inserted
+          (2, 5), // B value inserted
+          (3, 5), // B value updated
         ))
       } yield ()
     }
@@ -50,23 +76,36 @@ trait One_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "value - ref - filter" - refs { implicit conn =>
       for {
-        _ <- A.i(0).save.transact
-
+        _ <- A.i(0).save.transact // won't be updated since there's no B value
         _ <- A.B.i(1).save.transact
         _ <- A.i(2).B.i(2).save.transact
         _ <- A.i(3).B.i(3).save.transact
 
-        // Filter by B attribute, update A values
+        // Current 2 entities with A value and ref to B value
+        _ <- A.i.B.i.a1.query.get.map(_ ==> List(
+          (2, 2),
+          (3, 3),
+        ))
+
+        // Filter by B value, update A values
         _ <- A.i(4).B.i_.update.transact
 
         _ <- A.i.B.i.a1.query.get.map(_ ==> List(
-          (4, 1), // A attribute added
-          (4, 2), // A attribute updated
-          (4, 3), // A attribute updated
+          (4, 2), // A value updated
+          (4, 3), // A value updated
         ))
 
-        // Initial entity without ref was not updated
-        _ <- A.i.a1.query.get.map(_ ==> List(0, 4))
+        // Filter by B value, upsert A values (insert if not already present)
+        _ <- A.i(5).B.i_.upsert.transact
+
+        _ <- A.i.B.i.a1.query.get.map(_ ==> List(
+          (5, 1), // A value and relationship to B value inserted
+          (5, 2), // A value updated
+          (5, 3), // A value updated
+        ))
+
+        // Initial entity without ref to B was not updated/upserted
+        _ <- A.i.a1.query.get.map(_ ==> List(0, 5))
       } yield ()
     }
 
@@ -81,17 +120,29 @@ trait One_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- A.i(2).B.s("b").save.transact
         _ <- A.i(3).B.s("c").i(3).save.transact
 
-        // Filter by B attribute, update B values
+        // Current entity with A value and ref to B value
+        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
+          (3, 3)
+        ))
+
+        // Filter by B value, update existing B values
         _ <- A.B.s_.i(4).update.transact
 
         _ <- A.i.a1.B.i.query.get.map(_ ==> List(
-          (2, 4), // B attribute added
-          (3, 4), // B attribute updated
+          (3, 4), // B value updated since there was a previous value
+        ))
+
+        // Filter by B attribute, upsert B values
+        _ <- A.B.s_.i(5).upsert.transact
+
+        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
+          (2, 5), // B value inserted
+          (3, 5), // B value updated
         ))
 
         _ <- B.s.a1.i.query.get.map(_ ==> List(
-          ("b", 4),
-          ("c", 4),
+          ("b", 5),
+          ("c", 5),
           ("x", 0), // not updated since it isn't referenced from A
         ))
       } yield ()

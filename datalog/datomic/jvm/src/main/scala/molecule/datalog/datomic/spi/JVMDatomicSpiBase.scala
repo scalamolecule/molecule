@@ -14,8 +14,8 @@ import scala.collection.mutable.ListBuffer
 trait JVMDatomicSpiBase extends ModelUtils {
 
   def validateUpdate(conn0: Conn, update: Update): Map[String, Seq[String]] = {
-    if (update.isUpsert && isRefUpdate(update.elements))
-      throw ModelError("Can't upsert referenced attributes. Please update instead.")
+//    if (update.isUpsert && isRefUpdate(update.elements))
+//      throw ModelError("Can't upsert referenced attributes. Please update instead.")
 
     val conn  = conn0.asInstanceOf[DatomicConn_JVM]
     val proxy = conn.proxy

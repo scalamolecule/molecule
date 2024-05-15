@@ -34,11 +34,11 @@ trait One_Seq_remove extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "filter - ref - value" - refs { implicit conn =>
       for {
-        _ <- A.i(1).save.transact.map(_.id)
-        _ <- A.i(2).B.s("b").save.transact.map(_.id)
-        _ <- A.i(3).B.s("c").iSeq(Seq(1, 2, 1)).save.transact.map(_.id)
-        _ <- A.i(4).B.s("c").iSeq(Seq(2, 3, 2)).save.transact.map(_.id)
-        _ <- A.i(5).B.s("c").iSeq(Seq(3, 4, 3)).save.transact.map(_.id)
+        _ <- A.i(1).save.transact
+        _ <- A.i(2).B.s("b").save.transact
+        _ <- A.i(3).B.s("c").iSeq(Seq(1, 2, 1)).save.transact
+        _ <- A.i(4).B.s("c").iSeq(Seq(2, 3, 2)).save.transact
+        _ <- A.i(5).B.s("c").iSeq(Seq(3, 4, 3)).save.transact
 
         // Filter by A ids, update B values
         _ <- A.i_.B.iSeq.remove(3, 4).update.transact

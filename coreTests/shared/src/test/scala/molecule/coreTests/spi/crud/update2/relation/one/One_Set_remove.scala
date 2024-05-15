@@ -34,14 +34,15 @@ trait One_Set_remove extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "filter - ref - value" - refs { implicit conn =>
       for {
-        _ <- A.i(1).save.transact.map(_.id)
-        _ <- A.i(2).B.s("b").save.transact.map(_.id)
-        _ <- A.i(3).B.s("c").iSet(Set(1, 2)).save.transact.map(_.id)
-        _ <- A.i(4).B.s("c").iSet(Set(2, 3)).save.transact.map(_.id)
-        _ <- A.i(5).B.s("c").iSet(Set(3, 4)).save.transact.map(_.id)
+        _ <- A.i(1).save.transact
+        _ <- A.i(2).B.s("b").save.transact
+        _ <- A.i(3).B.s("c").iSet(Set(1, 2)).save.transact
+        _ <- A.i(4).B.s("c").iSet(Set(2, 3)).save.transact
+        _ <- A.i(5).B.s("c").iSet(Set(3, 4)).save.transact
 
-        // Filter by A ids, update B values
-        _ <- A.i_.B.iSet.remove(3, 4).update.transact
+        // `upsert` has same semantics as `update` with `remove` since we don't insert data
+        // Filter by A ids, update/upsert B values
+        _ <- A.i_.B.iSet.remove(3, 4).upsert.transact
 
         // 2 entities left with remaining values
         _ <- A.i.a1.B.iSet.query.get.map(_ ==> List(
