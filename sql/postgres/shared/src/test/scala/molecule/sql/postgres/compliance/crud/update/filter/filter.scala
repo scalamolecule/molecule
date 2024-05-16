@@ -1,6 +1,6 @@
 package molecule.sql.postgres.compliance.crud.update.filter
 
-import molecule.coreTests.spi.crud.update2.filter._
+import molecule.coreTests.spi.crud.update.filter._
 import molecule.sql.postgres.setup.TestAsync_postgres
 
 object FilterOne extends FilterOne with TestAsync_postgres

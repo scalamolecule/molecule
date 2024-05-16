@@ -17,8 +17,8 @@ import utest._
 import scala.concurrent.Future
 import scala.language.implicitConversions
 
-object AdhocJVM_datomic extends TestSuiteArray_datomic {
-  //object AdhocJVM_datomic extends TestSuite_datomic {
+//object AdhocJVM_datomic extends TestSuiteArray_datomic {
+object AdhocJVM_datomic extends TestSuite_datomic {
 
   override lazy val tests = Tests {
 

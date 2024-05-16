@@ -1,6 +1,6 @@
 package molecule.sql.mysql.compliance.crud.update.ops
 
-import molecule.coreTests.spi.crud.update2.ops._
+import molecule.coreTests.spi.crud.update.ops._
 import molecule.sql.mysql.setup.TestAsync_mysql
 
 object OpsOne extends OpsOne with TestAsync_mysql

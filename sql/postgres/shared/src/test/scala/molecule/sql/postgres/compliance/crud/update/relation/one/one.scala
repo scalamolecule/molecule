@@ -1,6 +1,6 @@
 package molecule.sql.postgres.compliance.crud.update.relation.one
 
-import molecule.coreTests.spi.crud.update2.relation.one._
+import molecule.coreTests.spi.crud.update.relation.one._
 import molecule.sql.postgres.setup.TestAsync_postgres
 
 object One_Map extends One_Map with TestAsync_postgres

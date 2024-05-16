@@ -1,6 +1,6 @@
 package molecule.datalog.datomic.compliance.crud.update.filter
 
-import molecule.coreTests.spi.crud.update2.filter._
+import molecule.coreTests.spi.crud.update.filter._
 import molecule.datalog.datomic.setup.TestAsync_datomic
 
 object FilterOne extends FilterOne with TestAsync_datomic

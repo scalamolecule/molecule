@@ -1,6 +1,6 @@
 package molecule.sql.postgres.compliance.crud.update.relation.many
 
-import molecule.coreTests.spi.crud.update2.relation.many._
+import molecule.coreTests.spi.crud.update.relation.many._
 import molecule.sql.postgres.setup.TestAsync_postgres
 
 object Many_Map extends Many_Map with TestAsync_postgres

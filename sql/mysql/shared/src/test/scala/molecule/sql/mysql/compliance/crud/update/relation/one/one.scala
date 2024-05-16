@@ -1,6 +1,6 @@
 package molecule.sql.mysql.compliance.crud.update.relation.one
 
-import molecule.coreTests.spi.crud.update2.relation.one._
+import molecule.coreTests.spi.crud.update.relation.one._
 import molecule.sql.mysql.setup.TestAsync_mysql
 
 object One_Map extends One_Map with TestAsync_mysql

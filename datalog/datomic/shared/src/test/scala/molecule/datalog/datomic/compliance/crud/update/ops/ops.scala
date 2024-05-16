@@ -1,6 +1,6 @@
 package molecule.datalog.datomic.compliance.crud.update.ops
 
-import molecule.coreTests.spi.crud.update2.ops._
+import molecule.coreTests.spi.crud.update.ops._
 import molecule.datalog.datomic.setup.TestAsync_datomic
 
 object OpsOne extends OpsOne with TestAsync_datomic

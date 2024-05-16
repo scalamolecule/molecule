@@ -1,6 +1,6 @@
 package molecule.sql.postgres.compliance.crud.update.ops
 
-import molecule.coreTests.spi.crud.update2.ops._
+import molecule.coreTests.spi.crud.update.ops._
 import molecule.sql.postgres.setup.TestAsync_postgres
 
 object OpsOne extends OpsOne with TestAsync_postgres

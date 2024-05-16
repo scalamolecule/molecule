@@ -1,6 +1,6 @@
 package molecule.sql.mysql.compliance.crud.update.relation.many
 
-import molecule.coreTests.spi.crud.update2.relation.many._
+import molecule.coreTests.spi.crud.update.relation.many._
 import molecule.sql.mysql.setup.TestAsync_mysql
 
 object Many_Map extends Many_Map with TestAsync_mysql

@@ -25,24 +25,6 @@ object AdhocJVM_h2 extends TestSuite_h2 {
         id <- Ns.intMap.apply(Map(pint1, pint2)).save.transact.map(_.id)
 
 
-        //        _ <- rawQuery(
-        //          """SELECT DISTINCT
-        //            |  Ns.i,
-        //            |  Ns.offsetDateTimeMap
-        //            |FROM Ns
-        //            |WHERE
-        //            |  Ns.i                 IS NOT NULL AND
-        //            |  Ns.offsetDateTimeMap IS NOT NULL
-        //            |ORDER BY Ns.i;
-        //            |""".stripMargin, true).map(println)
-
-        //        _ <- rawTransact(
-        //          """INSERT INTO Ns (
-        //            |  intMap
-        //            |) VALUES (JSON '{ "a": 1 }')
-        //            |""".stripMargin)
-
-
       } yield ()
     }
 
@@ -66,36 +48,6 @@ object AdhocJVM_h2 extends TestSuite_h2 {
           (2, 4), // B attribute added
           (3, 4), // B attribute updated
         ))
-
-        //        _ <- rawQuery(
-        //          """SELECT DISTINCT
-        //            |  A.i,
-        //            |  ARRAY_AGG(B.iSeq)
-        //            |FROM A
-        //            |  INNER JOIN B ON A.b = B.id
-        //            |WHERE
-        //            |  ((ARRAY_CONTAINS(B.iSeq, 2)) OR
-        //            |   (ARRAY_CONTAINS(B.iSeq, 7))) AND
-        //            |  A.i    IS NOT NULL AND
-        //            |  B.iSeq IS NOT NULL
-        //            |GROUP BY A.i
-        //            |ORDER BY A.i;
-        //            |""".stripMargin, true).map(println)
-        //
-        //        _ <- rawQuery(
-        //          """SELECT DISTINCT
-        //            |  A.i,
-        //            |  B.iSeq
-        //            |FROM A
-        //            |  INNER JOIN B ON A.b = B.id
-        //            |WHERE
-        //            |  ((ARRAY_CONTAINS(B.iSeq, 2)) OR
-        //            |   (ARRAY_CONTAINS(B.iSeq, 7))) AND
-        //            |  A.i    IS NOT NULL AND
-        //            |  B.iSeq IS NOT NULL
-        //            |//GROUP BY A.i
-        //            |ORDER BY A.i;
-        //            |""".stripMargin, true).map(println)
 
 
       } yield ()

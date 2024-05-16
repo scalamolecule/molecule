@@ -1,6 +1,6 @@
 package molecule.datalog.datomic.compliance.crud.update.relation.one
 
-import molecule.coreTests.spi.crud.update2.relation.one._
+import molecule.coreTests.spi.crud.update.relation.one._
 import molecule.datalog.datomic.setup.TestAsync_datomic
 
 object One_Map extends One_Map with TestAsync_datomic

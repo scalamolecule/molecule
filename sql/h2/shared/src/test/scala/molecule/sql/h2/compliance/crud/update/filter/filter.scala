@@ -1,6 +1,6 @@
 package molecule.sql.h2.compliance.crud.update.filter
 
-import molecule.coreTests.spi.crud.update2.filter._
+import molecule.coreTests.spi.crud.update.filter._
 import molecule.sql.h2.setup.TestAsync_h2
 
 object FilterOne extends FilterOne with TestAsync_h2

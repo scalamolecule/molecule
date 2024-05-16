@@ -1,6 +1,6 @@
 package molecule.sql.mariadb.compliance.crud.update.relation.one
 
-import molecule.coreTests.spi.crud.update2.relation.one._
+import molecule.coreTests.spi.crud.update.relation.one._
 import molecule.sql.mariadb.setup.TestAsync_mariadb
 
 object One_Map extends One_Map with TestAsync_mariadb

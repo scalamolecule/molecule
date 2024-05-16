@@ -1,6 +1,6 @@
 package molecule.sql.mariadb.compliance.crud.update.ops
 
-import molecule.coreTests.spi.crud.update2.ops._
+import molecule.coreTests.spi.crud.update.ops._
 import molecule.sql.mariadb.setup.TestAsync_mariadb
 
 object OpsOne extends OpsOne with TestAsync_mariadb

@@ -1,6 +1,6 @@
 package molecule.datalog.datomic.compliance.crud.update.relation.many
 
-import molecule.coreTests.spi.crud.update2.relation.many._
+import molecule.coreTests.spi.crud.update.relation.many._
 import molecule.datalog.datomic.setup.TestAsync_datomic
 
 object Many_Map extends Many_Map with TestAsync_datomic
