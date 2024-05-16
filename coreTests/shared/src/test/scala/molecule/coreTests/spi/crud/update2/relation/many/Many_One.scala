@@ -14,7 +14,6 @@ trait Many_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "id-filter - ref - value" - refs { implicit conn =>
       for {
-        x <- A.i(0).save.transact.map(_.id)
         List(a, b, c, d, e, f) <- A.i.Bb.*?(B.s_?.i_?).insert(
           (1, List()),
           (2, List((Some("a"), None))),
@@ -25,16 +24,27 @@ trait Many_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         ).transact.map(_.ids)
 
         // Filter by A ids, update B values
-        _ <- A(x, a, b, c, d, e, f).Bb.i(4).update.transact
+        _ <- A(a, b, c, d, e, f).Bb.i(4).update.transact
 
         _ <- A.i.a1.Bb.*?(B.s_?.i).query.get.map(_ ==> List(
-          (0, List((None, 4))), //                       ref + addition
-          (1, List((None, 4))), //                       ref + addition
-          (2, List((Some("a"), 4))), //                  addition in 1 ref entity
-          (3, List((Some("b"), 4), (Some("c"), 4))), //  addition in 2 ref entities
+          (1, List()), //                                no B.i value
+          (2, List()), //                                no B.i value
+          (3, List()), //                                no B.i value
           (4, List((Some("d"), 4))), //                  update in 1 ref entity
           (5, List((Some("e"), 4), (Some("f"), 4))), //  update in 2 ref entities
-          (6, List((Some("g"), 4), (Some("h"), 4))), //  update in one ref entity and addition in another
+          (6, List((Some("g"), 4))), //                  already had same value
+        ))
+
+        // Filter by A ids, upsert B values
+        _ <- A(a, b, c, d, e, f).Bb.i(5).upsert.transact
+
+        _ <- A.i.a1.Bb.*?(B.s_?.i).query.get.map(_ ==> List(
+          (1, List((None, 5))), //                       ref + insert
+          (2, List((Some("a"), 5))), //                  addition in 1 ref entity
+          (3, List((Some("b"), 5), (Some("c"), 5))), //  addition in 2 ref entities
+          (4, List((Some("d"), 5))), //                  update in 1 ref entity
+          (5, List((Some("e"), 5), (Some("f"), 5))), //  update in 2 ref entities
+          (6, List((Some("g"), 5), (Some("h"), 5))), //  update in one ref entity and insertion in another
         ))
       } yield ()
     }
@@ -42,7 +52,6 @@ trait Many_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "filter - ref - value" - refs { implicit conn =>
       for {
-        x <- A.i(0).save.transact.map(_.id)
         _ <- A.i.Bb.*?(B.s_?.i_?).insert(
           (1, List()),
           (2, List((Some("a"), None))),
@@ -50,19 +59,30 @@ trait Many_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (4, List((Some("d"), Some(1)))),
           (5, List((Some("e"), Some(2)), (Some("f"), Some(3)))),
           (6, List((Some("g"), Some(4)), (Some("h"), None))),
-        ).transact.map(_.ids)
+        ).transact
 
         // Filter by A ids, update B values
         _ <- A.i_.Bb.i(4).update.transact
 
         _ <- A.i.a1.Bb.*?(B.s_?.i).query.get.map(_ ==> List(
-          (0, List((None, 4))), //                       ref + addition
-          (1, List((None, 4))), //                       ref + addition
-          (2, List((Some("a"), 4))), //                  addition in 1 ref entity
-          (3, List((Some("b"), 4), (Some("c"), 4))), //  addition in 2 ref entities
-          (4, List((Some("d"), 4))), //                  update in 1 ref entity
-          (5, List((Some("e"), 4), (Some("f"), 4))), //  update in 2 ref entities
-          (6, List((Some("g"), 4), (Some("h"), 4))), //  update in one ref entity and addition in another
+          (1, List()), //                               no B.i value
+          (2, List()), //                               no B.i value
+          (3, List()), //                               no B.i value
+          (4, List((Some("d"), 4))), //                 update in 1 ref entity
+          (5, List((Some("e"), 4), (Some("f"), 4))), // update in 2 ref entities
+          (6, List((Some("g"), 4))), //                 already had same value
+        ))
+
+        // Filter by A ids, upsert B values
+        _ <- A.i_.Bb.i(5).upsert.transact
+
+        _ <- A.i.a1.Bb.*?(B.s_?.i).query.get.map(_ ==> List(
+          (1, List((None, 5))), //                      ref + insert
+          (2, List((Some("a"), 5))), //                 addition in 1 ref entity
+          (3, List((Some("b"), 5), (Some("c"), 5))), // addition in 2 ref entities
+          (4, List((Some("d"), 5))), //                 update in 1 ref entity
+          (5, List((Some("e"), 5), (Some("f"), 5))), // update in 2 ref entities
+          (6, List((Some("g"), 5), (Some("h"), 5))), // update in one ref entity and insertion in another
         ))
       } yield ()
     }
@@ -79,8 +99,16 @@ trait Many_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         _ <- A.i.Bb.*?(B.s).query.get.map(_.sortBy(_._2.headOption.toString) ==> List(
           (0, List()), //         Nothing updated since this A entity has no ref to B
-          (3, List("a", "b")), // A attribute added
           (3, List("c", "d")), // A attribute updated
+        ))
+
+        // Filter by B attribute, upsert A values
+        _ <- A.i(4).Bb.s_.upsert.transact
+
+        _ <- A.i.Bb.*?(B.s).query.get.map(_.sortBy(_._2.headOption.toString) ==> List(
+          (0, List()), //         Nothing updated since this A entity has no ref to B
+          (4, List("a", "b")), // A attribute inserted
+          (4, List("c", "d")), // A attribute updated
         ))
       } yield ()
     }
@@ -110,14 +138,27 @@ trait Many_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, List(
             // (None, None),         (no relationship to B)
             (None, Some(1)), //      No change without filter match
-            (Some("a"), Some(3)), // B attribute added
+            (Some("a"), None), //    No change without filter match
             (Some("b"), Some(3)), // B attribute updated
           ))
         ))
 
+        // Filter by B attribute, upsert B values
+        _ <- A.Bb.s_.i(4).upsert.transact
+
+        _ <- A.i.a1.Bb.*?(B.s_?.a1.i_?).query.get.map(_ ==> List(
+          (1, List()), // No change to entity without relationship to B
+          (2, List(
+            // (None, None),         (no relationship to B)
+            (None, Some(1)), //      No change without filter match
+            (Some("a"), Some(4)), // B attribute inserted
+            (Some("b"), Some(4)), // B attribute updated
+          ))
+        ))
+
         _ <- B.s.a1.i.query.get.map(_ ==> List(
-          ("a", 3),
-          ("b", 3),
+          ("a", 4),
+          ("b", 4),
           ("x", 0), // No change to entity without relationship from A
         ))
       } yield ()

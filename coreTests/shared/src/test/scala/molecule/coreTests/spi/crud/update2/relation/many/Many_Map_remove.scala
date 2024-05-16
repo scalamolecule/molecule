@@ -50,8 +50,9 @@ trait Many_Map_remove extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (6, List((Some("g"), Some(Map(pint4, pint5))), (Some("h"), None))),
         ).transact
 
+        // `upsert` has same semantics as `update` with `remove` since we don't insert data
         // Filter by A ids, update B values
-        _ <- A.i_.Bb.iMap.remove(string4, string5).update.transact
+        _ <- A.i_.Bb.iMap.remove(string4, string5).upsert.transact
 
         _ <- A.i.a1.Bb.*?(B.s_?.iMap_?).query.get.map(_ ==> List(
           (1, List()),

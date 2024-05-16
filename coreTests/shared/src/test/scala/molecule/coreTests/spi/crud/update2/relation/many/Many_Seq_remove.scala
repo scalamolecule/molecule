@@ -49,8 +49,9 @@ trait Many_Seq_remove extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (6, List((Some("g"), Some(Seq(4, 5, 4))), (Some("h"), None))),
         ).transact
 
+        // `upsert` has same semantics as `update` with `remove` since we don't insert data
         // Filter by A ids, update B values
-        _ <- A.i_.Bb.iSeq.remove(4, 5).update.transact
+        _ <- A.i_.Bb.iSeq.remove(4, 5).upsert.transact
 
         _ <- A.i.a1.Bb.*?(B.s_?.iSeq_?).query.get.map(_ ==> List(
           (1, List()),

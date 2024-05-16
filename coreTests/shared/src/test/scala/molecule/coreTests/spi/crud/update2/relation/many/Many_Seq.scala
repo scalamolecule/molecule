@@ -27,12 +27,24 @@ trait Many_Seq extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- A(a, b, c, d, e, f).Bb.iSeq(Seq(4, 5)).update.transact
 
         _ <- A.i.a1.Bb.*?(B.s_?.iSeq).query.get.map(_ ==> List(
-          (1, List((None, Seq(4, 5)))), //                              ref + addition
-          (2, List((Some("a"), Seq(4, 5)))), //                         addition in 1 ref entity
-          (3, List((Some("b"), Seq(4, 5)), (Some("c"), Seq(4, 5)))), // addition in 2 ref entities
+          (1, List()), //                                               no B.i value
+          (2, List()), //                                               no B.i value
+          (3, List()), //                                               no B.i value
           (4, List((Some("d"), Seq(4, 5)))), //                         update in 1 ref entity
           (5, List((Some("e"), Seq(4, 5)), (Some("f"), Seq(4, 5)))), // update in 2 ref entities
-          (6, List((Some("g"), Seq(4, 5)), (Some("h"), Seq(4, 5)))), // update in one ref entity and addition in another
+          (6, List((Some("g"), Seq(4, 5)))), //                         already had same value
+        ))
+
+        // Filter by A ids, upsert B values
+        _ <- A(a, b, c, d, e, f).Bb.iSeq(Seq(5, 6)).upsert.transact
+
+        _ <- A.i.a1.Bb.*?(B.s_?.iSeq).query.get.map(_ ==> List(
+          (1, List((None, Seq(5, 6)))), //                              ref + addition
+          (2, List((Some("a"), Seq(5, 6)))), //                         addition in 1 ref entity
+          (3, List((Some("b"), Seq(5, 6)), (Some("c"), Seq(5, 6)))), // addition in 2 ref entities
+          (4, List((Some("d"), Seq(5, 6)))), //                         update in 1 ref entity
+          (5, List((Some("e"), Seq(5, 6)), (Some("f"), Seq(5, 6)))), // update in 2 ref entities
+          (6, List((Some("g"), Seq(5, 6)), (Some("h"), Seq(5, 6)))), // update in one ref entity and addition in another
         ))
       } yield ()
     }
@@ -40,25 +52,37 @@ trait Many_Seq extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "filter - ref - value" - refs { implicit conn =>
       for {
-        _ <- A.i.Bb.*?(B.s_?.iSeq_?).insert(
+        _ <- A.i.a1.Bb.*?(B.s_?.iSeq_?).insert(
           (1, List()),
           (2, List((Some("a"), None))),
           (3, List((Some("b"), None), (Some("c"), None))),
           (4, List((Some("d"), Some(Seq(1, 2))))),
           (5, List((Some("e"), Some(Seq(2, 3))), (Some("f"), Some(Seq(3, 4))))),
           (6, List((Some("g"), Some(Seq(4, 5))), (Some("h"), None))),
-        ).transact
+        ).transact.map(_.ids)
 
         // Filter by A ids, update B values
         _ <- A.i_.Bb.iSeq(Seq(4, 5)).update.transact
 
         _ <- A.i.a1.Bb.*?(B.s_?.iSeq).query.get.map(_ ==> List(
-          (1, List((None, Seq(4, 5)))), //                              ref + addition
-          (2, List((Some("a"), Seq(4, 5)))), //                         addition in 1 ref entity
-          (3, List((Some("b"), Seq(4, 5)), (Some("c"), Seq(4, 5)))), // addition in 2 ref entities
+          (1, List()), //                                               no B.i value
+          (2, List()), //                                               no B.i value
+          (3, List()), //                                               no B.i value
           (4, List((Some("d"), Seq(4, 5)))), //                         update in 1 ref entity
           (5, List((Some("e"), Seq(4, 5)), (Some("f"), Seq(4, 5)))), // update in 2 ref entities
-          (6, List((Some("g"), Seq(4, 5)), (Some("h"), Seq(4, 5)))), // update in one ref entity and addition in another
+          (6, List((Some("g"), Seq(4, 5)))), //                         already had same value
+        ))
+
+        // Filter by A ids, upsert B values
+        _ <- A.i_.Bb.iSeq(Seq(5, 6)).upsert.transact
+
+        _ <- A.i.a1.Bb.*?(B.s_?.iSeq).query.get.map(_ ==> List(
+          (1, List((None, Seq(5, 6)))), //                              ref + addition
+          (2, List((Some("a"), Seq(5, 6)))), //                         addition in 1 ref entity
+          (3, List((Some("b"), Seq(5, 6)), (Some("c"), Seq(5, 6)))), // addition in 2 ref entities
+          (4, List((Some("d"), Seq(5, 6)))), //                         update in 1 ref entity
+          (5, List((Some("e"), Seq(5, 6)), (Some("f"), Seq(5, 6)))), // update in 2 ref entities
+          (6, List((Some("g"), Seq(5, 6)), (Some("h"), Seq(5, 6)))), // update in one ref entity and addition in another
         ))
       } yield ()
     }
@@ -76,11 +100,22 @@ trait Many_Seq extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Filter by B attribute, update A values
         _ <- A.iSeq(Seq(3, 4)).Bb.s_.update.transact
 
+
         _ <- A.iSeq.Bb.*?(B.s).query.get.map(_.sortBy(_._2.headOption.toString) ==> List(
           (Seq(0, 1), List()), //         nothing updated since this A entity has no ref to B
-          (Seq(3, 4), List("a")), //      A attribute added
+          // (<none>, List("a")), //      no A attribute to update
           (Seq(3, 4), List("b", "c")), // A attribute updated
           (Seq(3, 4), List("d", "e")), // A attribute updated
+        ))
+
+        // Filter by B attribute, update A values
+        _ <- A.iSeq(Seq(4, 5)).Bb.s_.upsert.transact
+
+        _ <- A.iSeq.Bb.*?(B.s).query.get.map(_.sortBy(_._2.headOption.toString) ==> List(
+          (Seq(0, 1), List()), //         nothing updated since this A entity has no ref to B
+          (Seq(4, 5), List("a")), //      A attribute inserted
+          (Seq(4, 5), List("b", "c")), // A attribute updated
+          (Seq(4, 5), List("d", "e")), // A attribute updated
         ))
       } yield ()
     }
@@ -106,19 +141,32 @@ trait Many_Seq extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- A.Bb.s_.iSeq(Seq(3, 4)).update.transact
 
         _ <- A.i.a1.Bb.*?(B.s_?.a1.iSeq_?).query.get.map(_ ==> List(
-          (1, List()), // no change to entity without relationship to B
+          (1, List()), //                    no change to entity without relationship to B
           (2, List(
             // (None, None),                 no relationship to B
             (None, Some(Seq(1, 2))), //      no change without filter match
-            (Some("a"), Some(Seq(3, 4))), // B attribute added
+            (Some("a"), None), //            no value to update
             (Some("b"), Some(Seq(3, 4))), // B attribute updated
+          ))
+        ))
+
+        // Filter by B attribute, update B values
+        _ <- A.Bb.s_.iSeq(Seq(4, 5)).upsert.transact
+
+        _ <- A.i.a1.Bb.*?(B.s_?.a1.iSeq_?).query.get.map(_ ==> List(
+          (1, List()), //                    no change to entity without relationship to B
+          (2, List(
+            // (None, None),                 no relationship to B
+            (None, Some(Seq(1, 2))), //      no change without filter match
+            (Some("a"), Some(Seq(4, 5))), // B attribute inserted
+            (Some("b"), Some(Seq(4, 5))), // B attribute updated
           ))
         ))
 
         _ <- B.s_?.a1.iSeq.query.get.map(_ ==> List(
           (None, Seq(1, 2)),
-          (Some("a"), Seq(3, 4)),
-          (Some("b"), Seq(3, 4)),
+          (Some("a"), Seq(4, 5)),
+          (Some("b"), Seq(4, 5)),
           (Some("x"), Seq(0, 1)), // no change to entity without relationship from A
         ))
       } yield ()
