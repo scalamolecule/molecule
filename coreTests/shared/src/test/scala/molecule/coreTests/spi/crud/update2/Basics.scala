@@ -13,50 +13,6 @@ trait Basics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 
-    "Default upsert semantics" - types { implicit conn =>
-      for {
-        id <- Ns.i(42).save.transact.map(_.id)
-
-        // Attribute not yet asserted
-        _ <- Ns.int.query.get.map(_ ==> Nil)
-
-        // Add attribute value if no value exists already
-        _ <- Ns(id).int(1).update.transact
-        _ <- Ns.int.query.get.map(_ ==> List(1))
-
-        // Change existing attribute value
-        _ <- Ns(id).int(2).update.transact
-        _ <- Ns.int.query.get.map(_ ==> List(2))
-      } yield ()
-    }
-
-
-    "Force updating only existing value" - types { implicit conn =>
-      for {
-        ids <- Ns.i.int_?.insert(
-          (0, None),
-          (1, Some(1)),
-        ).transact.map(_.ids)
-
-        // Ensure attribute already has a value by adding tacit attribute
-        _ <- Ns(ids).int_.int(2).update.transact
-
-        // Only second entity updated
-        _ <- Ns.i.int_?.query.get.map(_ ==> List(
-          (0, None),
-          (1, Some(2))
-        ))
-
-        // Without the tacit attribute, both entities are updated
-        _ <- Ns(ids).int(3).update.transact
-        _ <- Ns.i.int_?.query.get.map(_ ==> List(
-          (0, Some(3)),
-          (1, Some(3))
-        ))
-      } yield ()
-    }
-
-
     "Can't update optional values" - types { implicit conn =>
       for {
         _ <- Ns("42").int_?(Some(1)).update.transact

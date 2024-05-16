@@ -17,24 +17,39 @@ trait OpsOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "apply" - types { implicit conn =>
       for {
         id <- Ns.i(42).save.transact.map(_.id)
+
         // Attribute not yet asserted
         _ <- Ns.int.query.get.map(_ ==> Nil)
 
-        // Applying value to non-asserted attribute adds the attribute in the update
+        // When attribute is not already asserted, an update has no effect
         _ <- Ns(id).int(int1).update.transact
+        _ <- Ns.int.query.get.map(_ ==> Nil)
+
+        // To insert the attribute value if not already asserted, use `upsert`
+        _ <- Ns(id).int(int1).upsert.transact
+        // Now the attribute value was inserted
         _ <- Ns.int.query.get.map(_.head ==> int1)
 
         // Update value to current value doesn't change anything
         _ <- Ns(id).int(int1).update.transact
         _ <- Ns.int.query.get.map(_.head ==> int1)
 
-        // Update value
+        // Update existing value
         _ <- Ns(id).int(int2).update.transact
         _ <- Ns.int.query.get.map(_.head ==> int2)
 
-        // Add new attribute and update value in one go
-        _ <- Ns(id).s("foo").int(int3).update.transact
-        _ <- Ns.i.s.int.query.get.map(_.head ==> (42, "foo", int3))
+        // Upsert existing value - same effect as update
+        _ <- Ns(id).int(int3).upsert.transact
+        _ <- Ns.int.query.get.map(_.head ==> int3)
+
+        // OBS: all attributes have to be asserted for any value to be updated!
+        _ <- Ns(id).s("foo").int(int4).update.transact
+        // Nothing is updated
+        _ <- Ns.s_?.int.query.get.map(_.head ==> (None, int3))
+
+        // Use upsert to guarantee that all values are updated/inserted
+        _ <- Ns(id).s("foo").int(int4).upsert.transact
+        _ <- Ns.s_?.int.query.get.map(_.head ==> (Some("foo"), int4))
 
         // Apply nothing to delete value
         _ <- Ns(id).int().update.transact
@@ -69,6 +84,35 @@ trait OpsOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       } yield ()
     }
 
+    "Update multiple values" - types { implicit conn =>
+      for {
+        List(a, b, c) <- Ns.i.int_?.insert(
+          (1, None),
+          (1, Some(1)),
+          (2, Some(2)),
+        ).transact.map(_.ids)
+
+        // Update all entities where i is 1
+        _ <- Ns.i_(1).int(3).update.transact
+
+        // 2 matching entities updated
+        _ <- Ns.id.a1.i.int_?.query.get.map(_ ==> List(
+          (a, 1, None), //    no value to update
+          (b, 1, Some(3)), // value updated
+          (c, 2, Some(2)),
+        ))
+
+        // Upsert all entities where non-unique attribute i is 1
+        _ <- Ns.i_(1).int(4).upsert.transact
+
+        // 2 matching entities updated
+        _ <- Ns.id.a1.i.int_?.query.get.map(_ ==> List(
+          (a, 1, Some(4)), // attribute inserted
+          (b, 1, Some(4)), // value updated
+          (c, 2, Some(2)),
+        ))
+      } yield ()
+    }
 
     "Can't update multiple values for one card-one attribute" - types { implicit conn =>
       for {

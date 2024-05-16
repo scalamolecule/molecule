@@ -438,7 +438,10 @@ trait Update_datomic
     if (newByteArray.nonEmpty) {
       val newValues = newByteArray
       rowResolvers += { (row: jList[AnyRef]) =>
-        val oldByteArray = row.get(attrIndex).asInstanceOf[jMap[_, _]].values.iterator().next()
+        val oldByteArray = if (isUpsert)
+          row.get(attrIndex).asInstanceOf[jMap[_, _]].values.iterator().next()
+        else
+          row.get(attrIndex).asInstanceOf[Array[_]]
         ids.foreach { e =>
           appendStmt(retract, e, a, oldByteArray.asInstanceOf[AnyRef])
           appendStmt(add, e, a, newValues.asInstanceOf[AnyRef])
@@ -447,7 +450,10 @@ trait Update_datomic
       }
     } else {
       rowResolvers += { (row: jList[AnyRef]) =>
-        val oldByteArray = row.get(attrIndex).asInstanceOf[jMap[_, _]].values.iterator().next()
+        val oldByteArray = if (isUpsert)
+          row.get(attrIndex).asInstanceOf[jMap[_, _]].values.iterator().next()
+        else
+          row.get(attrIndex).asInstanceOf[Array[_]]
         ids.foreach(e => appendStmt(retract, e, a, oldByteArray.asInstanceOf[AnyRef]))
         attrIndex += 1
       }
@@ -539,25 +545,23 @@ trait Update_datomic
 
   private def cachedValues(row: jList[AnyRef], optRefNs: Option[String]): List[AnyRef] = {
     (if (optRefNs.isEmpty) {
-      if (isUpsert) {
-        row.get(attrIndex) match {
-          case vs: jSet[_]  => vs.iterator().next().asInstanceOf[jList[_]].toArray()
-          case vs: jList[_] => vs.toArray()
-          case vs: Array[_] => vs.asInstanceOf[Array[AnyRef]]
-        }
-      } else {
-        row.get(attrIndex) match {
-          case vs: jSet[_]  => vs.toArray()
-          case vs: jList[_] => vs.toArray()
-          case vs: Array[_] => vs.asInstanceOf[Array[AnyRef]]
-        }
+      row.get(attrIndex) match {
+        case vs: jSet[_]  => if (isUpsert)
+          vs.iterator().next().asInstanceOf[jList[_]].toArray()
+        else
+          vs.toArray()
+        case vs: jList[_] => vs.toArray()
+        case vs: Array[_] => vs.asInstanceOf[Array[AnyRef]]
       }
     } else {
-      row.get(attrIndex)
-        .asInstanceOf[jSet[_]].iterator().next()
-        .asInstanceOf[jList[_]].toArray().map {
-          case map: jMap[_, _] => map.get(dbId).asInstanceOf[AnyRef]
-        }
+      if (isUpsert)
+        row.get(attrIndex)
+          .asInstanceOf[jSet[_]].iterator().next()
+          .asInstanceOf[jList[_]].toArray().map {
+            case map: jMap[_, _] => map.get(dbId).asInstanceOf[AnyRef]
+          }
+      else
+        row.get(attrIndex).asInstanceOf[jSet[_]].toArray
     }).toList
   }
 

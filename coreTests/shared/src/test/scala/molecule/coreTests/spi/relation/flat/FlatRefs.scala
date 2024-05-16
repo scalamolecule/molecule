@@ -1,6 +1,5 @@
 package molecule.coreTests.spi.relation.flat
 
-import molecule.base.error._
 import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
@@ -122,13 +121,13 @@ trait FlatRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         ).transact
 
         // Nested
-        _ <- A.i.Bb.*(B.i).query.get.map(_ ==> List(
+        _ <- A.i.a1.Bb.*(B.i.a1).query.get.map(_ ==> List(
           (1, List(1, 2)),
           (2, List(3, 4)),
         ))
 
         // Flat (A.i values repeated)
-        _ <- A.i.Bb.i.query.get.map(_ ==> List(
+        _ <- A.i.a1.Bb.i.a2.query.get.map(_ ==> List(
           (1, 1),
           (1, 2),
           (2, 3),
@@ -149,7 +148,7 @@ trait FlatRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         ).transact
 
         // Nested
-        _ <- A.i.Bb.*(B.i.Cc.*(C.i)).query.get.map(_ ==> List(
+        _ <- A.i.a1.Bb.*(B.i.a1.Cc.*(C.i.a1)).query.get.map(_ ==> List(
           (1, List(
             (1, List(1, 2)),
             (2, List(2, 3)))),
@@ -159,7 +158,7 @@ trait FlatRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         ))
 
         // Flat
-        _ <- A.i.Bb.i.Cc.i.query.get.map(_ ==> List(
+        _ <- A.i.a1.Bb.i.a2.Cc.i.a3.query.get.map(_ ==> List(
           (1, 1, 1),
           (1, 1, 2),
           (1, 2, 2),

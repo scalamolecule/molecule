@@ -26,230 +26,21 @@ object AdhocJVM_datomic extends TestSuiteArray_datomic {
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
-
-        _ <- Ns("x").dateMap.apply(Map(pdate1, pdate2)).update.transact
-
-
-        //        _ <- rawTransact(
-        //          """[
-        //            |  [:db/add 17592186045418 :Ns/doubleMap #db/id[ -1]]
-        //            |  [:db/add #db/id[ -1] :Ns.doubleMap/k_ a]
-        //            |  [:db/add #db/id[ -1] :Ns.doubleMap/v_ 1.1]
-        //            |]
-        //            |""".stripMargin)
+        id2 <- Ns.intSet(Set(int1)).save.transact.map(_.id)
+        _ <- Ns(id2).intSet(Set(int2)).update.transact
+        _ <- Ns.intSet.query.get.map(_.head ==> Set(int2))
 
 
-        //        _ = {
-        //          println("----------- 1")
-        //          val res = datomic.Peer.q(
-        //            """[:find  ?b
-        //              | :in    $ ?c1
-        //              | :where [?a :Ns/i ?b]
-        //              |        [?a :Ns/booleanMap _]
-        //              |        [(datomic.api/q
-        //              |          "[:find (distinct ?c)
-        //              |            :in $ ?a [?c1 ...]
-        //              |            :where [?a :Ns/booleanMap ?c]
-        //              |                   [?c :Ns.booleanMap/v_ ?c1]]" $ ?a ?c1) [[?c2]]]]
-        //              |""".stripMargin, conn.db,
-        //            //            Seq(true, false).asJava
-        //            //            Seq(Set(List("a", 1).asJava, List("b", 2).asJava).asJava).asJava
-        //            //            Set(List("a", 1).asJava, List("b", 2).asJava).asJava
-        //            //            Set(x, y).asJava
-        //            //            Set("c").asJava
-        //            Seq(true).asJava
-        //            //            "a"
-        //          )
-        //          res.forEach(r => println(r))
-        //        }
+
+        id23 <- Ns.refs(Set(ref1)).save.transact.map(_.id)
+
+        _ <- Ns(id23).refs(Set(ref2)).update.transact
+        _ <- Ns.refs.query.get.map(_.head ==> Set(ref2))
 
 
-      } yield ()
-    }
+        _ <- Ns(id23).refs(Set(ref3)).upsert.transact
+        _ <- Ns.refs.query.get.map(_.head ==> Set(ref3))
 
-    
-    "id-filter - ref - value" - refs { implicit conn =>
-      for {
-        List(a, b, c, d, e, f) <- A.i.a1.Bb.*?(B.s_?.iMap_?).insert(
-          (1, List()),
-          (2, List((Some("a"), None))),
-          (3, List((Some("b"), None), (Some("c"), None))),
-          (4, List((Some("d"), Some(Map(pint1, pint2))))),
-          (5, List((Some("e"), Some(Map(pint2, pint3))), (Some("f"), Some(Map(pint3, pint4))))),
-          (6, List((Some("g"), Some(Map(pint4, pint5))), (Some("h"), None))),
-        ).transact.map(_.ids)
-
-        // Filter by A ids, update B values
-        _ <- A(a, b, c, d, e, f).Bb.iMap.add(pint4, pint5).update.transact
-
-        _ <- A.i.a1.Bb.*?(B.s_?.iMap).query.get.map(_ ==> List(
-          (1, List()), //                                   no B value to update
-          (2, List()), //                                   no B value to update
-          (3, List()), //                                   no B value to update
-          (4, List( //                                      update in 1 ref entity
-            (Some("d"), Map(pint1, pint2, pint4, pint5)))),
-          (5, List( //                                      update in 2 ref entities
-            (Some("e"), Map(pint2, pint3, pint4, pint5)),
-            (Some("f"), Map(pint3, pint4, pint4, pint5)))),
-          (6, List( //                                      update one ref entity
-            (Some("g"), Map(pint4, pint5, pint4, pint5)))),
-        ))
-
-        // Filter by A ids, upsert B values
-        _ <- A(a, b, c, d, e, f).Bb.iMap.add(pint5, pint6).upsert.transact
-
-        _ <- A.i.a1.Bb.*?(B.s_?.iMap).query.get.map(_ ==> List(
-          (1, List( //                                                    ref + insertion
-            (None, Map(pint5, pint6)))),
-          (2, List( //                                                    insertion in 1 ref entity
-            (Some("a"), Map(pint5, pint6)))),
-          (3, List( //                                                    insertion in 2 ref entities
-            (Some("b"), Map(pint5, pint6)),
-            (Some("c"), Map(pint5, pint6)))),
-          (4, List( //                                                    update in 1 ref entity
-            (Some("d"), Map(pint1, pint2, pint4, pint5, pint5, pint6)))),
-          (5, List( //                                                    update in 2 ref entities
-            (Some("e"), Map(pint2, pint3, pint4, pint5, pint5, pint6)),
-            (Some("f"), Map(pint3, pint4, pint4, pint5, pint5, pint6)))),
-          (6, List( //                                                    update in one ref entity and insertion in another
-            (Some("g"), Map(pint4, pint5, pint4, pint5, pint5, pint6)),
-            (Some("h"), Map(pint5, pint6)))),
-        ))
-      } yield ()
-    }
-
-
-    "filter - ref - value" - refs { implicit conn =>
-      for {
-        _ <- A.i.a1.Bb.*?(B.s_?.iMap_?).insert(
-          (1, List()),
-          (2, List((Some("a"), None))),
-          (3, List((Some("b"), None), (Some("c"), None))),
-          (4, List((Some("d"), Some(Map(pint1, pint2))))),
-          (5, List((Some("e"), Some(Map(pint2, pint3))), (Some("f"), Some(Map(pint3, pint4))))),
-          (6, List((Some("g"), Some(Map(pint4, pint5))), (Some("h"), None))),
-        ).transact.map(_.ids)
-
-        // Filter by A ids, update B values
-        _ <- A.i_.Bb.iMap.add(pint4, pint5).update.transact
-
-        _ <- A.i.a1.Bb.*?(B.s_?.iMap).query.get.map(_ ==> List(
-          (1, List()), //                                   no B value to update
-          (2, List()), //                                   no B value to update
-          (3, List()), //                                   no B value to update
-          (4, List( //                                      update in 1 ref entity
-            (Some("d"), Map(pint1, pint2, pint4, pint5)))),
-          (5, List( //                                      update in 2 ref entities
-            (Some("e"), Map(pint2, pint3, pint4, pint5)),
-            (Some("f"), Map(pint3, pint4, pint4, pint5)))),
-          (6, List( //                                      update one ref entity
-            (Some("g"), Map(pint4, pint5, pint4, pint5)))),
-        ))
-
-        // Filter by A ids, upsert B values
-        _ <- A.i_.Bb.iMap.add(pint5, pint6).upsert.transact
-
-        _ <- A.i.a1.Bb.*?(B.s_?.iMap).query.get.map(_ ==> List(
-          (1, List( //                                                    ref + insertion
-            (None, Map(pint5, pint6)))),
-          (2, List( //                                                    insertion in 1 ref entity
-            (Some("a"), Map(pint5, pint6)))),
-          (3, List( //                                                    insertion in 2 ref entities
-            (Some("b"), Map(pint5, pint6)),
-            (Some("c"), Map(pint5, pint6)))),
-          (4, List( //                                                    update in 1 ref entity
-            (Some("d"), Map(pint1, pint2, pint4, pint5, pint5, pint6)))),
-          (5, List( //                                                    update in 2 ref entities
-            (Some("e"), Map(pint2, pint3, pint4, pint5, pint5, pint6)),
-            (Some("f"), Map(pint3, pint4, pint4, pint5, pint5, pint6)))),
-          (6, List( //                                                    update in one ref entity and insertion in another
-            (Some("g"), Map(pint4, pint5, pint4, pint5, pint5, pint6)),
-            (Some("h"), Map(pint5, pint6)))),
-        ))
-      } yield ()
-    }
-
-
-    "value - ref - filter" - refs { implicit conn =>
-      for {
-        _ <- A.iMap_?.Bb.*?(B.s).insert(
-          (Some(Map(pint0, pint1)), List()),
-          (None, List("a")),
-          (Some(Map(pint1, pint2)), List("b", "c")),
-          (Some(Map(pint2, pint3)), List("d", "e")),
-        ).transact
-
-        // Filter by B attribute, update A values
-        _ <- A.iMap.add(pint3, pint4).Bb.s_.update.transact
-
-        _ <- A.iMap.Bb.*?(B.s).query.get.map(_.sortBy(_._2.headOption.toString) ==> List(
-          (Map(pint0, pint1), List()), //                       nothing updated since this A entity has no ref to B
-          // (<none>, List("a")), //                            no A attribute to update
-          (Map(pint1, pint2, pint3, pint4), List("b", "c")), // A attribute updated
-          (Map(pint2, pint3, pint3, pint4), List("d", "e")), // A attribute updated
-        ))
-
-        // Filter by B attribute, update A values
-        _ <- A.iMap.add(pint4, pint5).Bb.s_.upsert.transact
-
-        _ <- A.iMap.Bb.*?(B.s).query.get.map(_.sortBy(_._2.headOption.toString) ==> List(
-          (Map(pint0, pint1), List()), //                                     nothing updated since this A entity has no ref to B
-          (Map(pint4, pint5), List("a")), //                                  A attribute inserted
-          (Map(pint1, pint2, pint3, pint4, pint4, pint5), List("b", "c")), // A attribute updated
-          (Map(pint2, pint3, pint3, pint4, pint4, pint5), List("d", "e")), // A attribute updated
-        ))
-      } yield ()
-    }
-
-
-    "ref - filter/value" - refs { implicit conn =>
-      for {
-        // will not be updated since entities have no A -> B relationship
-        _ <- B.s("x").iMap(Map(pint0, pint1)).save.transact
-        _ <- A.i(1).save.transact
-
-        // will be updated
-        _ <- A.i.Bb.*(B.s_?.iMap_?).insert(
-          (2, List(
-            (None, None), // no relationship to B created
-            (None, Some(Map(pint1, pint2))),
-            (Some("a"), None),
-            (Some("b"), Some(Map(pint2, pint3))),
-          ))
-        ).transact
-
-        // Filter by B attribute, update B values
-        _ <- A.Bb.s_.iMap.add(pint3, pint4).update.transact
-
-        _ <- A.i.a1.Bb.*?(B.s_?.a1.iMap_?).query.get.map(_ ==> List(
-          (1, List()), //                                          no change to entity without relationship to B
-          (2, List(
-            // (None, None),                                       no relationship to B
-            (None, Some(Map(pint1, pint2))), //                    no change without filter match
-            (Some("a"), None), //                                  no B attribute to update
-            (Some("b"), Some(Map(pint2, pint3, pint3, pint4))), // B attribute updated
-          ))
-        ))
-
-        // Filter by B attribute, upsert B values
-        _ <- A.Bb.s_.iMap.add(pint4, pint5).upsert.transact
-
-        _ <- A.i.a1.Bb.*?(B.s_?.a1.iMap_?).query.get.map(_ ==> List(
-          (1, List()), //                                                        no change to entity without relationship to B
-          (2, List(
-            // (None, None),                                                     no relationship to B
-            (None, Some(Map(pint1, pint2))), //                                  no change without filter match
-            (Some("a"), Some(Map(pint4, pint5))), //                             B attribute added
-            (Some("b"), Some(Map(pint2, pint3, pint3, pint4, pint4, pint5))), // B attribute updated
-          ))
-        ))
-
-        _ <- B.s_?.a1.iMap.query.get.map(_ ==> List(
-          (None, Map(pint1, pint2)),
-          (Some("a"), Map(pint4, pint5)),
-          (Some("b"), Map(pint2, pint3, pint3, pint4, pint4, pint5)),
-          (Some("x"), Map(pint0, pint1)), // no change to entity without relationship from A
-        ))
       } yield ()
     }
 
@@ -259,9 +50,31 @@ object AdhocJVM_datomic extends TestSuiteArray_datomic {
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
 
-        // will not be updated since entities have no A -> B relationship
-        _ <- B.s("x").iSet(Set(0, 1)).save.transact
+        a <- A.i(1).save.transact.map(_.id)
+        b <- A.i(2).s("b").save.transact.map(_.id)
+        c <- A.i(3).s("c").i(3).save.transact.map(_.id)
 
+        // Current entity with A value and ref to B value
+        _ <- A.i.a1.i.query.get.map(_ ==> List(
+          (3, 3)
+        ))
+
+        // Filter by A ids, update existing B values
+        _ <- A(a, b, c).i(4).update.transact
+
+        _ <- A.i.a1.i.query.get.map(_ ==> List(
+          (3, 4) // B value updated since there was a previous value
+        ))
+
+        // Filter by A ids, upsert B values (insert if not already present)
+        _ <- A(a, b, c).i(5).upsert.transact
+
+        // Now three A entities with referenced B value
+        _ <- A.i.a1.i.query.get.map(_ ==> List(
+          (1, 5), // relationship to B created + B value inserted
+          (2, 5), // B value inserted
+          (3, 5), // B value updated
+        ))
 
 
         //        _ = {

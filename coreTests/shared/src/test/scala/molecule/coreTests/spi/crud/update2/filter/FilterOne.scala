@@ -96,7 +96,7 @@ trait FilterOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         ))
 
         // Nothing updated if no match
-        _ <- Ns("123456789012345678901234").int(5).update.transact
+        _ <- Ns("42").int(5).update.transact
         _ <- Ns.id.a1.i.int.query.get.map(_ ==> List(
           (a, 1, 4),
           (b, 1, 4),
