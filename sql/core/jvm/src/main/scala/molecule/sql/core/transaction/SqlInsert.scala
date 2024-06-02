@@ -18,7 +18,7 @@ trait SqlInsert
   doPrint = false
   //  doPrint = true
 
-  def getData(nsMap: Map[String, MetaNs], elements: List[Element], tpls: Seq[Product]): Data = {
+  def getInsertData(nsMap: Map[String, MetaNs], elements: List[Element], tpls: Seq[Product]): Data = {
     //    elements.foreach(debug)
     debug("\n\n### A #############################################################################################")
     if (tpls.isEmpty) {
@@ -61,8 +61,7 @@ trait SqlInsert
 
         debug(s"B -------------------- refPath: $refPath")
         debug(stmt)
-        val ps = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
-        tableDatas(refPath) = Table(refPath, stmt, ps)
+        tableDatas(refPath) = Table(refPath, stmt)
         rowSettersMap(refPath) = Nil
     }
 
@@ -70,8 +69,7 @@ trait SqlInsert
       case (joinRefPath, id1, id2, leftPath, rightPath) =>
         val joinTable = joinRefPath.last
         val stmt      = s"INSERT INTO $joinTable ($id1, $id2) VALUES (?, ?)"
-        val ps        = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
-        joinTableDatas = joinTableDatas :+ JoinTable(stmt, ps, leftPath, rightPath)
+        joinTableDatas = joinTableDatas :+ JoinTable(stmt, preparedStmt(stmt), leftPath, rightPath)
     }
   }
 
@@ -79,16 +77,17 @@ trait SqlInsert
     inserts.foreach {
       case (refPath, cols) =>
         debug(s"C ---------------------- $refPath")
-        colSettersMap.foreach(x =>
-          debug(s"C ${x._2.size} colSetters: " + x._1)
-        )
+        if (doPrint) {
+          colSettersMap.foreach(x =>
+            println(s"C ${x._2.size} colSetters: " + x._1)
+          )
+        }
         colSettersMap.get(refPath).foreach { colSetters =>
           //        debug(s"C ---------------------- ${colSetters.length}  $refPath")
           colSettersMap(refPath) = Nil
           val rowSetter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
             var i        = 0
             val colCount = cols.length
-            ps.toString
 
             // Set all column values for this row of this insert
             colSetters.foreach { colSetter =>

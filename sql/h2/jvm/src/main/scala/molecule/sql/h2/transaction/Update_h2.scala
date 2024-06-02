@@ -9,6 +9,7 @@ import molecule.sql.h2.query.Model2SqlQuery_h2
 trait Update_h2 extends SqlUpdate { self: ResolveUpdate =>
 
   doPrint = false
+  //  doPrint = true
 
   override def model2SqlQuery(elements: List[Element]): Model2SqlQuery[Any] =
     new Model2SqlQuery_h2[Any](elements)

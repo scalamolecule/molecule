@@ -7,6 +7,7 @@ import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.{Conn, TxReport}
 import molecule.core.util.ModelUtils
 import molecule.sql.core.transaction.{JoinTable, SqlBase_JVM, SqlDataType_JVM, Table}
+import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
@@ -22,7 +23,8 @@ case class JdbcConn_JVM(
 
   override lazy val sqlConn: Connection = sqlConn0
 
-  doPrint = false
+  //  doPrint = false
+  doPrint = true
 
   override def transact_async(data: (List[Table], List[JoinTable]))
                              (implicit ec: ExecutionContext): Future[TxReport] = {
@@ -67,16 +69,24 @@ case class JdbcConn_JVM(
     val tables     = data._1
     val joinTables = data._2
     var idsMap     = Map.empty[List[String], List[Long]]
+    val idsAcc     = mutable.Map.empty[List[String], List[Long]]
     var ids        = List.empty[Long]
 
     debug("########################################################################################## " + tables.size)
 
     // Insert statements backwards to obtain auto-generated ref ids for prepending inserts
     tables.reverse.foreach {
-      case Table(refPath, stmt, ps, populatePS) =>
+      case Table(refPath, stmt, populatePS, accIds, useAccIds, curIds, upsertStmt) =>
         debug("D --- table ----------------------------------------------")
         debug("idsMap 1: " + idsMap)
-        debug(stmt)
+        debug("idsAcc 1: " + idsAcc.toMap)
+        debug("refPath : " + refPath)
+        debug("curIds  : " + curIds)
+
+        val stmt1 = if (useAccIds) upsertStmt.get(curIds ++ idsAcc.getOrElse(refPath, Nil)) else stmt
+        debug("stmt1   : " + stmt1)
+
+        val ps    = preparedStmt(stmt1)
 
         populatePS(ps, idsMap, 0)
 
@@ -99,7 +109,7 @@ case class JdbcConn_JVM(
             }
           }
         } catch {
-          case e: NullPointerException =>
+          case _: NullPointerException =>
             // MariaDB can return null instead of empty ResultSet which we simply ignore
             logger.debug("Resultset was null")
             ()
@@ -110,6 +120,14 @@ case class JdbcConn_JVM(
         ps.close()
         idsMap = idsMap + (refPath -> ids)
         debug("idsMap 2: " + idsMap)
+        if (accIds) {
+          if (idsAcc.contains(refPath)) {
+            idsAcc(refPath) = idsAcc(refPath) ++ ids
+          } else {
+            idsAcc += refPath -> ids
+          }
+          debug("idsAcc 2: " + idsAcc.toMap)
+        }
     }
 
     joinTables.foreach {

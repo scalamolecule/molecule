@@ -1,6 +1,6 @@
 package molecule.sql.core.spi
 
-import java.sql.Statement
+import java.sql.{Statement, PreparedStatement => PS}
 import molecule.base.error._
 import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
@@ -8,22 +8,23 @@ import molecule.core.action._
 import molecule.core.marshalling.ConnProxy
 import molecule.core.marshalling.dbView.{AsOf, DbView, Since}
 import molecule.core.spi._
-import molecule.core.util.ModelUtils
 import molecule.core.validation.TxModelValidation
 import molecule.core.validation.insert.InsertValidation
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.query.{Model2SqlQuery, SqlQueryBase, SqlQueryResolveCursor, SqlQueryResolveOffset}
-import molecule.sql.core.transaction.{SqlBase_JVM, SqlUpdateSetValidator}
+import molecule.sql.core.transaction.{SqlBase_JVM, SqlUpdateSetValidator, Table, UpdateFilters}
 import scala.annotation.nowarn
+import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 import scala.util.control.NonFatal
 
 
 trait SpiSyncBase
   extends SpiSync
+    with UpdateFilters
     with SqlBase_JVM
     with SpiHelpers
     with SqlUpdateSetValidator
-    with ModelUtils
     with Renderer
     with BaseHelpers {
 
@@ -42,7 +43,7 @@ trait SpiSyncBase
       .getListFromOffset_sync(conn)._1
   }
 
-  def query_getRaw[Tpl](q: Query[Tpl])(implicit conn0: Conn): List[Tpl] = {
+  private def query_getRaw[Tpl](q: Query[Tpl])(implicit conn0: Conn): List[Tpl] = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
     val m2q  = getModel2SqlQuery[Tpl](q.elements)
     SqlQueryResolveOffset[Tpl](q.elements, q.optLimit, None, m2q)
@@ -104,7 +105,7 @@ trait SpiSyncBase
     printInspectQuery("QUERY (cursor)", q.elements, q.optLimit, None, Some(conn.proxy))
   }
 
-  def printInspectQuery(
+  private def printInspectQuery(
     label: String,
     elements: List[Element],
     optLimit: Option[Int],
@@ -191,17 +192,156 @@ trait SpiSyncBase
       update_inspect(update)
     val errors = update_validate(update0) // validate original elements against meta model
     if (errors.isEmpty) {
-      val txReport = if (isRefUpdate(update.elements)) {
-        // Atomic transaction with updates for each ref namespace
-        conn.atomicTransaction(refUpdates(update)(conn))
+      val data     = if (update.elements.exists {
+        case _: Ref => true
+        case _      => false
+      }) {
+        if (update0.isUpsert) refUpserts(update)(conn) else refUpdates(update)(conn)
       } else {
-        conn.transact_sync(update_getData(conn, update))
+        update_getData(conn, update)
       }
+      val txReport = conn.transact_sync(data)
       conn.callback(update.elements)
       txReport
     } else {
       throw ValidationErrors(errors)
     }
+  }
+
+
+  @nowarn // Accept dynamic type parameter of returned Query
+  private def refUpserts(update: Update)(implicit conn: JdbcConn_JVM): Data = {
+    val elements = update.elements
+    val refIds   = new ListBuffer[Long]()
+    val refIdss  = mutable.Map.empty[List[String], List[Long]]
+
+    println("------ elements --------")
+    elements.foreach(println)
+
+    val filterElements1 = getUpsertFilters3(elements)
+
+    lazy val multiUpdates = prepareMultipleUpdates2(elements, update.isUpsert)
+
+    var i      = 0
+    val tables = filterElements1.flatMap {
+      case (1, refPath, updateModel) =>
+        println("-------- updateModel 1")
+        updateModel.foreach(println)
+
+        val ids    = query_getRaw[String](Query(updateModel)).map(_.toLong)
+        val tables = update_getData(conn, Update(elements, true))._1
+        // Add current ref ids
+        tables.map(_.copy(refPath = refPath, useAccIds = true, curIds = ids))
+
+      case (2, refPath, updateModel) =>
+        println("-------- updateModel 2")
+        updateModel.foreach(println)
+
+        refIds.clear()
+        refIdss += refPath -> Nil
+        val newRefTables = query_getRaw[(String, Option[String])](Query(updateModel)).flatMap {
+          case (id, Some(refId)) =>
+            println(s"+++++++++++++++ $id  $refId")
+            refIdss(refPath) = refIdss(refPath) :+ refId.toLong
+            Nil
+
+          case (id, None) =>
+            val List(ns, refAttr, refNs) = refPath.takeRight(3)
+
+            // Insert ref row
+            val insertRefRow = s"INSERT INTO $refNs DEFAULT VALUES"
+            val insert       = (ps: PS, _: IdsMap, _: RowIndex) => {
+              ps.addBatch()
+            }
+            val newRefTable  = Table(refPath, insertRefRow, insert, true)
+
+            // Add relationship to ref row
+            val updateCurRow = s"UPDATE $ns SET $refAttr = ? WHERE id = $id"
+            val update       = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
+              // Use ref path to retrieve created ref id from previous insert
+              val refId = idsMap(refPath).head
+              println("  refId: " + refId)
+              //                refIds += refId
+              //                              refIdss(refPath) = refIdss(refPath) :+ refId
+              ps.setLong(1, refId)
+              ps.addBatch()
+            }
+            val updateRef    = Table(refPath, updateCurRow, update)
+
+            // Tables are resolved in reverse order in populateStmts
+            List(updateRef, newRefTable)
+        }
+
+        val (_, model) = multiUpdates(i)
+        i += 1
+        val elements     = model(Nil) // we pass current ids in Table
+        val tables       = update_getData(conn, Update(elements, true))._1
+        // Add current ref ids
+        val tableUpdates = tables.map(_.copy(
+          refPath = refPath,
+          useAccIds = true,
+          curIds = refIdss(refPath)
+        ))
+
+        tableUpdates ++ newRefTables
+    }
+    (tables, Nil)
+  }
+
+
+  @nowarn // Accept dynamic type parameter of returned Query
+  private def refUpdates(update: Update)(implicit conn: JdbcConn_JVM): Data = {
+    val elements = update.elements
+    val firstNs  = getInitialNs(elements)
+
+    println("............ elements")
+    elements.foreach(println)
+
+    val (arity, updateIdsModel) = getUpdateIdsModel(elements)
+
+    println(s"------ updateIdsModel ------  $arity")
+    updateIdsModel.foreach(println)
+
+    val idRows = query_getRaw(Query[AnyRef](updateIdsModel))
+
+    println("------ rawIds --------")
+    idRows.foreach(println)
+
+    val refIdss = arity match {
+      case 1 => Array(idRows.asInstanceOf[List[String]])
+      case 2 =>
+        val (aa, bb) = idRows.asInstanceOf[List[(String, String)]].unzip
+        Array(aa, bb)
+
+      case 3 =>
+        val (aa, bb, cc) = idRows.asInstanceOf[List[(String, String, String)]].unzip3
+        Array(aa, bb, cc)
+
+      case idCount =>
+        val result = Array.fill(idCount)(List.empty[String])
+        idRows.asInstanceOf[List[Product]].foreach { tuple =>
+          (0 until idCount).foreach { i =>
+            result(i) = result(i) :+ tuple.productElement(i).asInstanceOf[String]
+          }
+        }
+        result
+    }
+
+    println(refIdss.mkString("Array(", ", ", ")"))
+
+    var i            = 0
+    val tableUpdates = prepareMultipleUpdates2(elements, update.isUpsert).flatMap {
+      case (refPath, modelResolver) =>
+        val updateModel = modelResolver(refIdss(i)) // we pass current ids in Table
+
+        val n = updateModel.length
+        println(s"------ X ------- $refPath  $n")
+        updateModel.foreach(println)
+        i += 1
+        update_getData(conn, updateModel, update.isUpsert)._1
+    }
+
+    (tableUpdates, Nil)
   }
 
   def refIdsQuery(idsModel: List[Element], proxy: ConnProxy): String
@@ -288,20 +428,6 @@ trait SpiSyncBase
 
   // Util --------------------------------------
 
-  @nowarn // Accept dynamic type parameter of returned Query
-  private def refUpdates(update: Update)(implicit conn: JdbcConn_JVM): () => List[Long] = {
-    val (idQuery, updateModels) = getIdQuery(update.elements, update.isUpsert)
-    val refIds: List[Long]      = getRefIds(query_getRaw(idQuery))
-    () => {
-      val ids = refIds.zipWithIndex.map {
-        case (refId: Long, i) =>
-          val updateModel = updateModels(i)(refId)
-          conn.populateStmts(update_getData(conn, updateModel, update.isUpsert))
-      }
-      // Return TxReport with initial update ids
-      ids.head
-    }
-  }
 
   override def fallback_rawTransact(
     txData: String,

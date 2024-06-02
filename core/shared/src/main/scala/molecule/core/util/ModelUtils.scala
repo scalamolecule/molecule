@@ -120,13 +120,17 @@ trait ModelUtils {
     prepare(elements, Nil)
   }
 
-  protected def validKey(key: String) = {
+  protected def validKey(key: String): String = {
     if (key.matches("[a-zA-Z_\\-0-9]+")) key else {
       throw ModelError(
         "Keys of map attributes can only contain [a-zA-Z_\\-0-9] (no spaces or special characters)."
       )
     }
   }
+
+  def noOptional(a: Attr): Nothing = throw ModelError(s"Can't update optional values. Found:\n" + a)
+
+  def noNested: Nothing = throw ModelError(s"Nested data structure not allowed in update molecule.")
 
   private def indexes(coord: Seq[Int]): (Int, Int, Option[Int]) = {
     coord match {
@@ -135,7 +139,7 @@ trait ModelUtils {
     }
   }
 
-  private final  def nonReservedAttr(a: Attr, proxy: ConnProxy): (String, String) = {
+  private final def nonReservedAttr(a: Attr, proxy: ConnProxy): (String, String) = {
     val (nsIndex, attrIndex, _) = indexes(a.coord)
     (
       if (proxy.reserved.get.reservedNss(nsIndex)) a.ns + "_" else a.ns,
@@ -143,7 +147,7 @@ trait ModelUtils {
     )
   }
 
-  private final  def nonReservedRef(ref: Ref, proxy: ConnProxy): (String, String, String) = {
+  private final def nonReservedRef(ref: Ref, proxy: ConnProxy): (String, String, String) = {
     val Seq(nsIndex, refAttrIndex, refNsIndex) = ref.coord
     val (reservedNss, reservedAttrs)           = (proxy.reserved.get.reservedNss, proxy.reserved.get.reservedAttrs)
     val refNs                                  = ref.refNs
@@ -154,7 +158,7 @@ trait ModelUtils {
     )
   }
 
-  private final  def nonReservedBackRef(backRef: BackRef, proxy: ConnProxy): (String, String) = {
+  private final def nonReservedBackRef(backRef: BackRef, proxy: ConnProxy): (String, String) = {
     val Seq(prevNsIndex, curNsIndex) = backRef.coord
     val reservedNss                  = proxy.reserved.get.reservedNss
     (
@@ -163,7 +167,7 @@ trait ModelUtils {
     )
   }
 
-  private final  def resolveReservedNames(
+  private final def resolveReservedNames(
     a0: Attr,
     proxy: ConnProxy,
     optFilterAttr: Option[(Int, List[String], Attr)] = None

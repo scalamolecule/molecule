@@ -23,6 +23,7 @@ import scala.collection.mutable.ListBuffer
 trait Update_datomic
   extends DatomicBase_JVM
     with UpdateOps
+    with UpdateFilters
     with ModelTransformations_
     with MoleculeLogging
     with JavaConversions { self: ResolveUpdate =>
@@ -80,8 +81,8 @@ trait Update_datomic
       }
     }
 
-    println("------ elements --------")
-    elements.foreach(println)
+    //    println("------ elements --------")
+    //    elements.foreach(println)
 
     val (filterElements1, requiredNsPaths1) = if (isUpsert)
       getUpsertFilters(elements.reverse)
@@ -92,25 +93,25 @@ trait Update_datomic
 
     val filters = AttrOneManID(getInitialNs(elements), "id", V) :: filterElements1
 
-    println("------ filters --------")
-    filters.foreach(println)
-    println("------ requiredNsPaths: " + requiredNsPaths)
+    //    println("------ filters --------")
+    //    filters.foreach(println)
+    //    println("------ requiredNsPaths: " + requiredNsPaths)
 
     val filterMatchRows = new DatomicQueryResolveOffset[Any](
       filters, None, None, None, new Model2DatomicQuery[Any](filters)
     ).getRawData(conn, validate = false)
 
-    println("--------- filterMatchRows")
-    filterMatchRows.forEach(row => println(row))
+    //    println("--------- filterMatchRows")
+    //    filterMatchRows.forEach(row => println(row))
 
     if (!filterMatchRows.isEmpty) {
       val it = filterMatchRows.iterator()
       if (it.hasNext) {
-        val row = it.next()
-        // First entity id
-        ids = List(row.get(0))
+        val firstRow = it.next()
+        // First namespace entity id of first row
+        ids = List(firstRow.get(0))
         idLists = List(ids)
-        rowSize = row.size
+        rowSize = firstRow.size
       }
     }
 
@@ -121,14 +122,17 @@ trait Update_datomic
     filterMatchRows.forEach { row =>
       ids = List(row.get(0))
       attrIndex = 1
-      // Apply actions for each current row
+      // Resolve each row
       rowResolvers.foreach(_(row))
     }
 
     if (debug) {
-      val updateStrs = "UPDATE:" +: elements :+ "" :+ stmts.toArray().mkString("\n")
+      val action     = if (isUpsert) "UPSERT" else "UPDATE"
+      val updateStrs = s"$action:" +: elements :+ "" :+ stmts.toArray().mkString("\n")
       logger.debug(updateStrs.mkString("\n").trim)
     }
+
+    // Datomic statements created from row resolutions
     stmts
   }
 
@@ -235,7 +239,8 @@ trait Update_datomic
       val a         = kw(ns, attr)
       val addValues = set.map(transformValue(_).asInstanceOf[AnyRef])
       rowResolvers += { _ =>
-        addValues.foreach(addValue => ids.foreach(e => appendStmt(add, e, a, addValue)))
+        addValues.foreach(addValue =>
+          ids.foreach(e => appendStmt(add, e, a, addValue)))
         attrIndex += 1
       }
     }
@@ -255,7 +260,8 @@ trait Update_datomic
       val a            = kw(ns, attr)
       val removeValues = set.map(transformValue(_).asInstanceOf[AnyRef])
       rowResolvers += { _ =>
-        removeValues.foreach(removeValue => ids.foreach(e => appendStmt(retract, e, a, removeValue)))
+        removeValues.foreach(removeValue =>
+          ids.foreach(e => appendStmt(retract, e, a, removeValue)))
         attrIndex += 1
       }
     }
@@ -301,7 +307,9 @@ trait Update_datomic
     }
   }
 
-  private def retractCurrentSeqValues(row: jList[AnyRef], a: Keyword, optRefNs: Option[String]): Unit = {
+  private def retractCurrentSeqValues(
+    row: jList[AnyRef], a: Keyword, optRefNs: Option[String]
+  ): Unit = {
     if (attrIndex < rowSize) {
       // Cached values with known ref
       Peer.q(
@@ -657,7 +665,6 @@ trait Update_datomic
 
 
   override def handleIds(ns: String, ids1: Seq[String]): Unit = ()
-  override def handleUniqueFilterAttr(uniqueFilterAttr: AttrOneTac): Unit = ()
   override def handleFilterAttr[T <: Attr with Tacit](filterAttr: T): Unit = ()
 
   override def handleRefNs(ref: Ref): Unit = {

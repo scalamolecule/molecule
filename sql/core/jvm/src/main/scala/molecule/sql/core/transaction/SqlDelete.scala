@@ -21,7 +21,7 @@ trait SqlDelete
 
   def model2SqlQuery(elements: List[Element]): Model2SqlQuery[Any]
 
-  def getData(elements: List[Element], nsMap: Map[String, MetaNs]): Data = {
+  def getDeleteData(elements: List[Element], nsMap: Map[String, MetaNs]): Data = {
     val refPath = List(getInitialNs(elements))
     resolve(elements, true)
     if (ids.nonEmpty) {
@@ -81,9 +81,8 @@ trait SqlDelete
   protected def prepareTable(refPath: List[String], table: String, idColumn: String, ids: Seq[Long]): Table = {
     val ids_       = ids.mkString(", ")
     val stmt       = s"DELETE FROM $table WHERE $idColumn IN ($ids_)"
-    val ps         = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
     val populatePS = (ps: PS, _: IdsMap, _: RowIndex) => ps.addBatch()
-    Table(refPath, stmt, ps, populatePS)
+    Table(refPath, stmt, populatePS)
   }
 
 

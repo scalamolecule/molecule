@@ -25,8 +25,7 @@ trait Insert_postgres extends SqlInsert { self: ResolveInsert with InsertResolve
 
         debug(s"B -------------------- refPath: $refPath")
         debug(stmt)
-        val ps = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
-        tableDatas(refPath) = Table(refPath, stmt, ps)
+        tableDatas(refPath) = Table(refPath, stmt)
         rowSettersMap(refPath) = Nil
     }
 
@@ -34,8 +33,7 @@ trait Insert_postgres extends SqlInsert { self: ResolveInsert with InsertResolve
       case (joinRefPath, id1, id2, leftPath, rightPath) =>
         val joinTable = joinRefPath.last
         val stmt      = s"INSERT INTO $joinTable ($id1, $id2) VALUES (?, ?)"
-        val ps        = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
-        joinTableDatas = joinTableDatas :+ JoinTable(stmt, ps, leftPath, rightPath)
+        joinTableDatas = joinTableDatas :+ JoinTable(stmt, preparedStmt(stmt), leftPath, rightPath)
     }
   }
 

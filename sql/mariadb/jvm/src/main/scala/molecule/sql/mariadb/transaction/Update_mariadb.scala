@@ -1,11 +1,10 @@
 package molecule.sql.mariadb.transaction
 
-import java.sql.{Statement, PreparedStatement => PS}
-import molecule.base.error._
+import java.sql.{PreparedStatement => PS}
 import molecule.boilerplate.ast.Model._
 import molecule.core.transaction.ResolveUpdate
 import molecule.sql.core.query.Model2SqlQuery
-import molecule.sql.core.transaction.{SqlUpdate, Table}
+import molecule.sql.core.transaction.SqlUpdate
 import molecule.sql.mariadb.query.Model2SqlQuery_mariadb
 
 trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>

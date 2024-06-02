@@ -21,7 +21,7 @@ trait FilterOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "Value asserted" - types { implicit conn =>
       for {
         _ <- Ns.i_?.int.insert(
-          (None, 0),
+          (None, 0), // entity with missing i
           (Some(1), 1),
           (Some(2), 2),
         ).transact
@@ -53,19 +53,13 @@ trait FilterOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "Value not asserted" - types { implicit conn =>
       for {
         _ <- Ns.i_?.int.insert(
-          (None, 0),
+          (None, 0), // entity with missing i
           (Some(1), 1),
           (Some(2), 2),
         ).transact
 
         // Update all entities where `i` is not asserted (null)
         _ <- Ns.i_().int(3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Please add at least one tacit filter attribute (applying empty value not counting)."
-          }
-
-        // Add at leas one tacit filter attribute apart from filter applying nothing
-        _ <- Ns.i_().int_.int(3).update.transact
 
         // 1 entity updated
         _ <- Ns.i_?.int.query.get.map(_ ==> List(

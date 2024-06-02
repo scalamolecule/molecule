@@ -100,6 +100,7 @@ abstract class DatomicQueryResolve[Tpl](
     }
   }
 
+
   def paginateFromIdentifiers(
     conn: DatomicConn_JVM,
     limit: Int,
@@ -169,7 +170,7 @@ abstract class DatomicQueryResolve[Tpl](
     }
   }
 
-  def paginateRows(
+  private def paginateRows(
     count: Int,
     sortedRows: jList[jList[AnyRef]],
     identifiers: List[Any],

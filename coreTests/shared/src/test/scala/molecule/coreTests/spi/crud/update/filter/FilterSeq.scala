@@ -60,12 +60,6 @@ trait FilterSeq extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         // Update all entities where `iSeq` is not asserted (null)
         _ <- Ns.iSeq_().int(3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Please add at least one tacit filter attribute (applying empty value not counting)."
-          }
-
-        // Add at leas one tacit filter attribute apart from filter applying nothing
-        _ <- Ns.iSeq_().int_.int(3).update.transact
 
         // 1 entity updated
         _ <- Ns.id.a1.iSeq_?.int.query.get.map(_ ==> List(

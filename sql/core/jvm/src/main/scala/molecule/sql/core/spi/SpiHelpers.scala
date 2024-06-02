@@ -15,6 +15,73 @@ import scala.collection.mutable.ListBuffer
 
 trait SpiHelpers extends ModelUtils {
 
+  def prepareMultipleUpdates2(
+    elements: List[Element],
+    isUpsert: Boolean
+  ): List[ // List of resolvers for each table involved in update/upsert
+    (
+      List[String], // ref path
+        List[String] => List[Element] // ref ids => update model
+      )
+  ] = {
+    val dummyCoord = Seq(0, 0) // irrelevant for id columns that will never collide with keywords
+    var hasId      = false
+    var hasData    = false
+    val firstNs    = getInitialNs(elements)
+    var curNs      = firstNs
+    var refPath    = List(firstNs)
+
+
+    val updateModel  = ListBuffer.empty[Element]
+    val updateModels = ListBuffer.empty[(List[String], List[String] => List[Element])]
+
+    elements.foreach {
+      case a@AttrOneTacID(_, "id", _, _, _, _, _, _, _, _, _, _) =>
+        updateModel += a
+        hasId = true
+
+      case a: Attr if a.isInstanceOf[Mandatory] =>
+        updateModel += a
+        hasData = true
+
+      case Ref(_, refAttr, refNs, CardOne, _, _) =>
+        if (hasData) {
+          val updateElements = updateModel.toList
+          if (hasId) {
+            updateModels += refPath -> (_ => updateElements)
+          } else {
+            val ns = curNs // immutable value for later lambda resolution
+            updateModels += refPath -> ((ids: List[String]) =>
+              AttrOneTacID(ns, "id", Eq, ids, coord = dummyCoord) +: updateElements)
+          }
+        }
+
+        refPath ++= List(refAttr, refNs)
+        curNs = refNs
+        hasId = false
+        hasData = false
+        updateModel.clear()
+
+      case ref: Ref =>
+        //        throw ModelError(s"Can't $update attributes in card-many referenced namespace `${ref.refAttr.capitalize}`")
+        ???
+
+      case BackRef(x, ns, _) =>
+        refPath = refPath.dropRight(2)
+        curNs = ns
+
+      case other => ()
+    }
+
+    if (hasData) {
+      val updateElements = updateModel.toList
+      updateModels += refPath -> ((ids: List[String]) =>
+        AttrOneTacID(refPath.last, "id", Eq, ids, coord = dummyCoord) +: updateElements)
+    }
+    updateModels.toList
+  }
+
+
   def prepareMultipleUpdates(
     elements: List[Element],
     isUpsert: Boolean
@@ -209,6 +276,7 @@ trait SpiHelpers extends ModelUtils {
   private type S = String
 
   def getRefIds(refIdsAnyCardinality: List[Any]): List[Long] = {
+    // Start with dummy id (not used) to mark first namespace
     refIdsAnyCardinality.headOption.fold(List(0L)) {
       case a: S                                                                                                                                 => 0L +: List(a).map(_.toLong)
       case (a: S, b: S)                                                                                                                         => 0L +: List(a, b).map(_.toLong)
@@ -240,8 +308,9 @@ trait SpiHelpers extends ModelUtils {
     elements: List[Element],
     isUpsert: Boolean = false
   ) = {
-    if (isUpsert)
-      throw ModelError("Can't upsert referenced attributes. Please update instead.")
+    //    if (isUpsert)
+    //      throw ModelError("Can't upsert referenced attributes. Please update instead.")
+
     val (refIdsModel, updateModels) = prepareMultipleUpdates(elements, isUpsert)
     val idQuery                     = updateModels.size match {
       case 1  => Query[L](refIdsModel)

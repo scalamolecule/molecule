@@ -82,7 +82,7 @@ object Rpc_postgres
       conn <- getConn(proxy)
       data = new ResolveSave with Save_postgres {
         override lazy val sqlConn: Connection = conn.sqlConn
-      }.getData(elements)
+      }.getSaveData(elements)
       txReport <- conn.transact_async(data)
     } yield txReport
   }
@@ -104,7 +104,7 @@ object Rpc_postgres
       }
       data = new ResolveInsert with Insert_postgres {
         override lazy val sqlConn: Connection = conn.sqlConn
-      }.getData(proxy.nsMap, elements, tpls)
+      }.getInsertData(proxy.nsMap, elements, tpls)
       txReport <- conn.transact_async(data)
     } yield txReport
   }
@@ -137,7 +137,7 @@ object Rpc_postgres
       } else {
         val data = new ResolveUpdate(conn.proxy, isUpsert) with Update_postgres {
           override lazy val sqlConn: Connection = conn.sqlConn
-        }.getData(elements)
+        }.getUpdateData(elements)
         Future(conn.transact_sync(data))
       }
     } yield txReport
@@ -157,7 +157,7 @@ object Rpc_postgres
             val updateModel = updateModels(i)(refId)
             val data        = new ResolveUpdate(conn.proxy, isUpsert) with Update_postgres {
               override lazy val sqlConn = conn.sqlConn
-            }.getData(updateModel)
+            }.getUpdateData(updateModel)
             conn.populateStmts(data)
         }
         // Return TxReport with initial update ids
@@ -174,7 +174,7 @@ object Rpc_postgres
       conn <- getConn(proxy)
       data = new ResolveDelete with Delete_postgres {
         override lazy val sqlConn: Connection = conn.sqlConn
-      }.getData(elements, proxy.nsMap)
+      }.getDeleteData(elements, proxy.nsMap)
       txReport <- conn.transact_async(data)
     } yield txReport
   }

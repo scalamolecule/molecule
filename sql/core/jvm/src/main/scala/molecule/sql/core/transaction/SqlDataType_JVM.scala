@@ -5,7 +5,7 @@ import molecule.core.spi.DataType
 
 trait SqlDataType_JVM extends DataType {
 
-  // refPath -> Array(ids)
+  // refPath -> List(ids)
   type IdsMap = Map[List[String], List[Long]]
 
   type RowIndex = Int

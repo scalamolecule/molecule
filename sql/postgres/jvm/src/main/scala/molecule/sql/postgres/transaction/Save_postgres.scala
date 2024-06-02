@@ -1,6 +1,6 @@
 package molecule.sql.postgres.transaction
 
-import java.sql.{Statement, PreparedStatement => PS}
+import java.sql.{PreparedStatement => PS}
 import molecule.core.transaction.ResolveSave
 import molecule.sql.core.transaction.{SqlSave, Table}
 
@@ -26,8 +26,7 @@ trait Save_postgres extends SqlSave { self: ResolveSave =>
         debug(s"--- save -------------------  ${colSetters.length}  $refPath")
         debug(stmt)
 
-        val ps = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
-        tableDatas(refPath) = Table(refPath, stmt, ps)
+        tableDatas(refPath) = Table(refPath, stmt)
 
 
         colSettersMap(refPath) = Nil

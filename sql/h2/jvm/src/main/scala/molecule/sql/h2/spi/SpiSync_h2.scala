@@ -24,13 +24,13 @@ trait SpiSync_h2 extends SpiSyncBase {
   override def save_getData(save: Save, conn: JdbcConn_JVM): Data = {
     new ResolveSave with Save_h2 {
       override lazy val sqlConn = conn.sqlConn
-    }.getData(save.elements)
+    }.getSaveData(save.elements)
   }
 
   override def insert_getData(insert: Insert, conn: JdbcConn_JVM): Data = {
     new ResolveInsert with Insert_h2 {
       override lazy val sqlConn: sql.Connection = conn.sqlConn
-    }.getData(conn.proxy.nsMap, insert.elements, insert.tpls)
+    }.getInsertData(conn.proxy.nsMap, insert.elements, insert.tpls)
   }
 
   override def refIdsQuery(idsModel: List[Element], proxy: ConnProxy): String = {
@@ -40,13 +40,13 @@ trait SpiSync_h2 extends SpiSyncBase {
   override def update_getData(conn: JdbcConn_JVM, update: Update): Data = {
     new ResolveUpdate(conn.proxy, update.isUpsert) with Update_h2 {
       override lazy val sqlConn = conn.sqlConn
-    }.getData(update.elements)
+    }.getUpdateData(update.elements)
   }
 
   override def update_getData(conn: JdbcConn_JVM, elements: List[Element], isUpsert: Boolean): Data = {
     new ResolveUpdate(conn.proxy, isUpsert) with Update_h2 {
       override lazy val sqlConn = conn.sqlConn
-    }.getData(elements)
+    }.getUpdateData(elements)
   }
 
   override def update_validate(update: Update)(implicit conn0: Conn): Map[String, Seq[String]] = {
@@ -64,7 +64,7 @@ trait SpiSync_h2 extends SpiSyncBase {
   override def delete_getData(conn: JdbcConn_JVM, delete: Delete): Data = {
     new ResolveDelete with Delete_h2 {
       override lazy val sqlConn = conn.sqlConn
-    }.getData(delete.elements, conn.proxy.nsMap)
+    }.getDeleteData(delete.elements, conn.proxy.nsMap)
   }
 
   override def fallback_rawQuery(

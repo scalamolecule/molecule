@@ -1,6 +1,6 @@
 package molecule.sql.core.transaction
 
-import java.sql.{PreparedStatement => PS}
+import java.sql.{Statement, PreparedStatement => PS}
 import java.util.UUID
 import molecule.base.ast._
 import molecule.base.util.BaseHelpers
@@ -10,6 +10,7 @@ import molecule.core.util.Executor._
 import molecule.core.util.ModelUtils
 import molecule.sql.core.facade.{JdbcConn_JVM, JdbcHandler_JVM}
 import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 
 trait SqlBase_JVM extends SqlDataType_JVM with ModelUtils with BaseHelpers {
@@ -17,28 +18,32 @@ trait SqlBase_JVM extends SqlDataType_JVM with ModelUtils with BaseHelpers {
   // Override on instantiation
   lazy val sqlConn: java.sql.Connection = ???
 
+  protected def preparedStmt(stmt: String) =
+    sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
+
   var level = 0
   override def indent(level: Int) = "  " * level
   protected def debug(s: Any) = if (doPrint) println(s) else ()
 
-  protected var doPrint              = true
-  protected var initialNs            = ""
-  protected var curRefPath           = List("0")
-  protected var inserts              = List.empty[(List[String], List[(String, String)])]
-  protected var updates              = List.empty[(List[String], List[String])]
-  protected var placeHolders         = List.empty[String]
-  protected var joins                = List.empty[(List[String], String, String, List[String], List[String])]
-  protected var ids                  = Seq.empty[Long]
-  protected val updateCols           = mutable.Map.empty[List[String], List[String]]
-  protected var uniqueFilterElements = List.empty[Element]
-  protected var filterElements       = List.empty[Element]
-  protected val paramIndexes         = mutable.Map.empty[(List[String], String), Int]
-  protected val colSettersMap        = mutable.Map.empty[List[String], List[Setter]]
-  protected val rowSettersMap        = mutable.Map.empty[List[String], List[Setter]]
-  protected val tableDatas           = mutable.Map.empty[List[String], Table]
-  protected var manualTableDatas     = List.empty[Table]
-  protected var joinTableDatas       = List.empty[JoinTable]
-  protected val rightCountsMap       = mutable.Map.empty[List[String], List[Int]]
+  protected var doPrint          = true
+  protected var initialNs        = ""
+  protected var curRefPath       = List("0")
+  protected var inserts          = List.empty[(List[String], List[(String, String)])]
+  protected var updates          = List.empty[(List[String], List[String])] // refPath -> cols
+  protected var placeHolders     = List.empty[String]
+  protected var placeHolders2    = ListBuffer.empty[(String, String)]
+  protected var joins            = List.empty[(List[String], String, String, List[String], List[String])]
+  protected var ids              = Seq.empty[Long]
+  protected val updateCols       = mutable.Map.empty[List[String], List[String]]
+  protected var filterElements   = List.empty[Element]
+  protected val paramIndexes     = mutable.Map.empty[(List[String], String), Int]
+  protected val colSettersMap    = mutable.Map.empty[List[String], List[Setter]]
+  protected val rowSettersMap    = mutable.Map.empty[List[String], List[Setter]]
+  protected val tableDatas       = mutable.Map.empty[List[String], Table]
+  protected var manualTableDatas = List.empty[Table]
+  protected var joinTableDatas   = List.empty[JoinTable]
+  protected val rightCountsMap   = mutable.Map.empty[List[String], List[Int]]
+  //  protected var uniqueFilterElements = List.empty[Element]
 
 
   protected def addColSetter(refPath: List[String], colSetter: Setter) = {
@@ -78,8 +83,8 @@ trait SqlBase_JVM extends SqlDataType_JVM with ModelUtils with BaseHelpers {
   protected def getRefResolver[T](
     ns: String, refAttr: String, refNs: String, card: Card
   ): T => Unit = {
-    val joinTable = ss(ns, refAttr, refNs)
-    val curPath   = curRefPath
+    val joinTablePath = ss(ns, refAttr, refNs)
+    val curPath       = curRefPath
 
     if (inserts.exists(_._1 == curPath)) {
       // Add ref attribute to current namespace
@@ -102,7 +107,7 @@ trait SqlBase_JVM extends SqlDataType_JVM with ModelUtils with BaseHelpers {
       inserts = inserts :+ (curPath, Nil)
     }
 
-    lazy val joinPath = curPath :+ joinTable
+    lazy val joinPath = curPath :+ joinTablePath
 
     if (card == CardSet) {
       // join table with single row (treated as normal insert

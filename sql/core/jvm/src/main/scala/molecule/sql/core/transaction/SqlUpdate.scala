@@ -1,7 +1,8 @@
 package molecule.sql.core.transaction
 
-import java.nio.ByteBuffer
-import java.sql.{ResultSet, Statement, PreparedStatement => PS}
+import java.net.URI
+import java.sql.{PreparedStatement => PS}
+import java.time._
 import java.util.{Date, UUID}
 import boopickle.Default._
 import molecule.base.error._
@@ -10,78 +11,93 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ResolveUpdate
 import molecule.core.transaction.ops.UpdateOps
 import molecule.sql.core.query.Model2SqlQuery
-import java.net.URI
-import java.nio.ByteBuffer
-import java.nio.charset.StandardCharsets
-import java.time._
-import java.util.{Date, UUID}
 
 trait SqlUpdate
   extends SqlBase_JVM
-    with UpdateOps with SqlBaseOps
+    with UpdateOps
+    with SqlBaseOps
+    with UpdateFilters
     with MoleculeLogging { self: ResolveUpdate =>
 
-  doPrint = false
+  //  doPrint = false
+  doPrint = true
   protected var curParamIndex = 1
 
   def model2SqlQuery(elements: List[Element]): Model2SqlQuery[Any]
 
-  def getData(elements: List[Element]): Data = {
+  def getUpdateData(elements: List[Element]): Data = {
     curRefPath = List(getInitialNs(elements))
+    // Resolve update model
     resolve(elements)
     addRowSetterToTables()
     (manualTableDatas ++ getTables, Nil)
   }
 
+
   protected def addRowSetterToTables(): Unit = {
     updates.foreach {
       case (refPath, _) =>
-        val table         = refPath.last
-        val columnSetters = placeHolders.mkString(",\n  ")
+        val table              = refPath.last
+        val (stmt, upsertStmt) = if (isUpsert) {
+          val columnSetters = placeHolders2.map(_._2).mkString(",\n  ")
+          val cols          = placeHolders2.map(_._1)
+          val colList       = cols.mkString(", ")
+          val colEquals     = cols.map(col => s"$col = _v.$col").mkString(", ")
+          val colsPrefixed  = cols.map(col => s"_v.$col").mkString(", ")
+          val upsertStmt    = (ids: List[Long]) =>
+            s"""MERGE INTO $table
+               |USING VALUES ($columnSetters) _v($colList)
+               | ON $table.id IN(${ids.mkString(", ")})
+               |    WHEN MATCHED THEN
+               |      UPDATE SET $colEquals
+               |    WHEN NOT MATCHED THEN
+               |      INSERT ($colList) VALUES ($colsPrefixed)""".stripMargin
+          ("", Some(upsertStmt))
 
-        val clauses_ = if (ids.nonEmpty) {
-          s"$table.id IN(${ids.mkString(", ")})"
         } else {
-          if (uniqueFilterElements.nonEmpty) {
-            // todo: if unique filter attributes exists, query to get ids...
-            model2SqlQuery(uniqueFilterElements).getWhereClauses.map {
-              case (attr, expr) => s"$attr $expr"
-            }.mkString(" AND\n  ")
+          val updateCols2_ = if (updateCols.isEmpty) Nil else
+            updateCols(refPath).map(c => s"$c IS NOT NULL")
+
+          val clauses_ = if (ids.nonEmpty) {
+            List(s"$table.id IN(${ids.mkString(", ")})")
           } else {
-            model2SqlQuery(filterElements).getWhereClauses.map {
-              case (attr, expr) => s"$attr $expr"
-            }.mkString(" AND\n  ")
+            model2SqlQuery(filterElements).getWhereClauses
           }
-        }
+          val clauses  = (updateCols2_ ++ clauses_).mkString(" AND\n  ")
 
-        val updateCols2_ = if (updateCols.isEmpty) "" else {
-          updateCols(refPath).map(c => s"$c IS NOT NULL").mkString(" AND\n  ", " AND\n  ", "")
+          val columnSetters = placeHolders.mkString(",\n  ")
+          val stmt          =
+            s"""UPDATE $table
+               |SET
+               |  $columnSetters
+               |WHERE
+               |  $clauses""".stripMargin
+          (stmt, None)
         }
-
-        val stmt =
-          s"""UPDATE $table
-             |SET
-             |  $columnSetters
-             |WHERE $clauses_$updateCols2_""".stripMargin
+        //        println("------ stmt --------")
+        //        println(stmt)
 
         debug(stmt)
         val colSetters = colSettersMap(refPath)
         debug(s"--- update -------------------  ${colSetters.length}  $refPath")
 
-        val ps = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
-        tableDatas(refPath) = Table(refPath, stmt, ps)
+        tableDatas(refPath) = Table(refPath, stmt, upsertStmt = upsertStmt)
         colSettersMap(refPath) = Nil
         val rowSetter = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
           // Set all column values for this row in this insert/batch
-          colSetters.foreach(colSetter =>
+          colSetters.foreach { colSetter =>
+            //            debug("\nps  Z   : " + ps)
+            //            debug("idsMap    : " + idsMap)
+
             colSetter(ps, idsMap, 0)
-          )
+          }
           // Complete row
           ps.addBatch()
         }
         rowSettersMap(refPath) = List(rowSetter)
     }
   }
+
 
   protected def getTables: List[Table] = {
     // Add insert resolver to each table insert
@@ -130,6 +146,7 @@ trait SqlUpdate
   ): Unit = {
     updateCurRefPath(attr)
     placeHolders = placeHolders :+ s"$attr = ?"
+    placeHolders2 += attr -> "?"
     val colSetter: Setter = vs match {
       case Seq(v) =>
         if (!isUpsert) {
@@ -151,6 +168,7 @@ trait SqlUpdate
         )
     }
     addColSetter(curRefPath, colSetter)
+    //    addColSetter(List("A", "b", "B"), colSetter)
   }
 
   override protected def updateSetEq[T](
@@ -313,22 +331,17 @@ trait SqlUpdate
     ids = ids1.map(_.toLong)
   }
 
-  override def handleUniqueFilterAttr(uniqueFilterAttr: AttrOneTac): Unit = {
-    if (uniqueFilterElements.nonEmpty) {
-      throw ModelError(
-        s"Can only apply one unique attribute value for update. Found:\n" + uniqueFilterAttr
-      )
-    }
-    uniqueFilterElements = uniqueFilterElements :+ uniqueFilterAttr
-  }
-
   override def handleFilterAttr[T <: Attr with Tacit](filterAttr: T): Unit = {
     filterElements = filterElements :+ filterAttr
   }
 
-  override def handleRefNs(ref: Ref): Unit = ()
+  override def handleRefNs(ref: Ref): Unit = {
+    curRefPath ++= List(ref.refAttr, ref.refNs)
+  }
 
-  override def handleBackRef(backRef: BackRef): Unit = ()
+  override def handleBackRef(backRef: BackRef): Unit = {
+    curRefPath = curRefPath.dropRight(2)
+  }
 
 
   // Helpers -------------------------------------------------------------------
@@ -380,7 +393,11 @@ trait SqlUpdate
         if (!isUpsert) {
           addToUpdateColsNotNull(ns, attr)
         }
-        placeHolders = placeHolders :+ s"$attr = $attr || ?"
+        val expr = if (isUpsert)
+          s"$attr = CASE WHEN $attr IS NULL THEN ARRAY[] ELSE $attr END || ?"
+        else
+          s"$attr = $attr || ?"
+        placeHolders = placeHolders :+ expr
         val array = set2array(iterable)
         addColSetter(curRefPath, (ps: PS, _: IdsMap, _: RowIndex) => {
           val conn = ps.getConnection
@@ -510,25 +527,23 @@ trait SqlUpdate
     }
   }
 
-  protected def deleteJoins(joinTable: String, ns_id: String, id: Long, refIds: String = ""): Table = {
+  private def deleteJoins(joinTable: String, ns_id: String, id: Long, refIds: String = ""): Table = {
     val deletePath  = List("deleteJoins")
     val deleteJoins = s"DELETE FROM $joinTable WHERE $ns_id = $id" + refIds
-    val deletePS    = sqlConn.prepareStatement(deleteJoins, Statement.RETURN_GENERATED_KEYS)
     val delete      = (ps: PS, _: IdsMap, _: RowIndex) => ps.addBatch()
-    Table(deletePath, deleteJoins, deletePS, delete)
+    Table(deletePath, deleteJoins, delete)
   }
 
-  protected def addJoins(joinTable: String, ns_id: String, refNs_id: String, id: Long, refIds: Iterable[Long]): Table = {
+  private def addJoins(joinTable: String, ns_id: String, refNs_id: String, id: Long, refIds: Iterable[Long]): Table = {
     val addPath  = List("addJoins")
     val addJoins = s"INSERT INTO $joinTable($ns_id, $refNs_id) VALUES (?, ?)"
-    val addPS    = sqlConn.prepareStatement(addJoins, Statement.RETURN_GENERATED_KEYS)
     val add      = (ps: PS, _: IdsMap, _: RowIndex) =>
       refIds.foreach { refId =>
         ps.setLong(1, id)
         ps.setLong(2, refId)
         ps.addBatch()
       }
-    Table(addPath, addJoins, addPS, add)
+    Table(addPath, addJoins, add)
   }
 
 

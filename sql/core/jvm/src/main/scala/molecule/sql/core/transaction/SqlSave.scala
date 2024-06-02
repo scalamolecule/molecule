@@ -20,7 +20,7 @@ trait SqlSave
 
   doPrint = false
 
-  def getData(elements: List[Element]): Data = {
+  def getSaveData(elements: List[Element]): Data = {
     initialNs = getInitialNs(elements)
     curRefPath = List(initialNs)
     resolve(elements)
@@ -44,8 +44,7 @@ trait SqlSave
         debug(s"--- save -------------------  ${colSetters.length}  $refPath")
         debug(stmt)
 
-        val ps = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
-        tableDatas(refPath) = Table(refPath, stmt, ps)
+        tableDatas(refPath) = Table(refPath, stmt)
         colSettersMap(refPath) = Nil
         val rowSetter = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
           // Set all column values for this row in this insert/batch

@@ -26,20 +26,61 @@ object AdhocJVM_datomic extends TestSuite_datomic {
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
-        id2 <- Ns.intSet(Set(int1)).save.transact.map(_.id)
-        _ <- Ns(id2).intSet(Set(int2)).update.transact
-        _ <- Ns.intSet.query.get.map(_.head ==> Set(int2))
 
 
+        _ <- Ns.i_?.int.insert(
+          (None, 0), // entity with missing i
+          (Some(1), 1),
+          (Some(2), 2),
+        ).transact
 
-        id23 <- Ns.refs(Set(ref1)).save.transact.map(_.id)
+        //        // Update all entities where `i` is not asserted (null)
+        //        _ <- Ns.i_().int(3).update.transact
+        //          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+        //            err ==> "Please add at least one tacit filter attribute (applying empty value not counting)."
+        //          }
 
-        _ <- Ns(id23).refs(Set(ref2)).update.transact
-        _ <- Ns.refs.query.get.map(_.head ==> Set(ref2))
+        // Add at least one tacit filter attribute apart from filter applying nothing
+//        _ <- Ns.i_().int_.int(3).update.transact
+        _ <- Ns.i_().int(3).update.transact
 
+        // 1 entity updated
+        _ <- Ns.i_?.int.query.get.map(_ ==> List(
+          (None, 3), // updated
+          (Some(1), 1),
+          (Some(2), 2),
+        ))
 
-        _ <- Ns(id23).refs(Set(ref3)).upsert.transact
-        _ <- Ns.refs.query.get.map(_.head ==> Set(ref3))
+        //        List(a, b) <- Ns.i.int.insert(
+        //          (1, 1),
+        //          (2, 2),
+        //        ).transact.map(_.ids)
+        //
+        //        // Update entities with id a or b
+        //        _ <- Ns(x, a, b).int(3).update.transact
+        //
+        //        // 2 entities updated
+        //        _ <- Ns.i.a1.int_?.query.get.map(_ ==> List(
+        //          (0, None), // updated
+        //          (1, Some(3)), // updated
+        //          (2, Some(3)),
+        //        ))
+        //
+        //        // Nothing updated if no match
+        //        _ <- Ns("42").int(5).update.transact
+        //        _ <- Ns.id.a1.i.int.query.get.map(_ ==> List(
+        //          (a, 1, 4),
+        //          (b, 1, 4),
+        //          (c, 2, 3),
+        //        ))
+        //
+        //        // Nothing updated if no match
+        //        _ <- Ns("42").int(5).update.transact
+        //        _ <- Ns.id.a1.i.int.query.get.map(_ ==> List(
+        //          (a, 1, 4),
+        //          (b, 1, 4),
+        //          (c, 2, 3),
+        //        ))
 
       } yield ()
     }
@@ -51,29 +92,29 @@ object AdhocJVM_datomic extends TestSuite_datomic {
       for {
 
         a <- A.i(1).save.transact.map(_.id)
-        b <- A.i(2).s("b").save.transact.map(_.id)
-        c <- A.i(3).s("c").i(3).save.transact.map(_.id)
+        b <- A.i(2).B.s("b").save.transact.map(_.id)
+        c <- A.i(3).B.s("c").i(3).save.transact.map(_.id)
 
         // Current entity with A value and ref to B value
-        _ <- A.i.a1.i.query.get.map(_ ==> List(
+        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
           (3, 3)
         ))
 
         // Filter by A ids, update existing B values
-        _ <- A(a, b, c).i(4).update.transact
+        _ <- A(a, b, c).B.i(4).update.transact
 
-        _ <- A.i.a1.i.query.get.map(_ ==> List(
+        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
           (3, 4) // B value updated since there was a previous value
         ))
 
         // Filter by A ids, upsert B values (insert if not already present)
-        _ <- A(a, b, c).i(5).upsert.transact
+        _ <- A(a, b, c).bool(true).B.i(5).upsert.transact
 
         // Now three A entities with referenced B value
-        _ <- A.i.a1.i.query.get.map(_ ==> List(
-          (1, 5), // relationship to B created + B value inserted
-          (2, 5), // B value inserted
-          (3, 5), // B value updated
+        _ <- A.i.a1.bool.B.i.query.get.map(_ ==> List(
+          (1, true, 5), // relationship to B created + B value inserted
+          (2, true, 5), // B value inserted
+          (3, true, 5), // B value updated
         ))
 
 

@@ -48,9 +48,21 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
   }
 
 
-  private[molecule] def getWhereClauses: ListBuffer[(String, String)] = {
+  private[molecule] def getWhereClauses: ListBuffer[String] = {
     resolveElements(elements0)
-    where
+    val clauses = notNull.map(col => s"$col IS NOT NULL") ++ where.map { case (col, expr) => s"$col $expr" }
+
+//    println("------ joins --------")
+//    println(formattedJoins)
+
+    val joinsExist = if (joins.isEmpty) Nil else
+      List(
+        s"""EXISTS (
+           |  SELECT * FROM Ns
+           |    ${formattedJoins.trim}
+           |)""".stripMargin)
+
+    clauses ++ joinsExist
   }
 
 
@@ -89,10 +101,10 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
         case a: AttrMapTac => resolveAttrMapTac(a); resolve(tail)
       }
 
-      case ref: Ref                        => resolveRef0(ref, tail)
-      case backRef: BackRef                => resolveBackRef(backRef, tail)
-      case Nested(ref, nestedElements)     => resolveNested(ref, nestedElements, tail)
-      case NestedOpt(ref, nestedElements)  => resolveNestedOpt(ref, nestedElements, tail)
+      case ref: Ref                       => resolveRef0(ref, tail)
+      case backRef: BackRef               => resolveBackRef(backRef, tail)
+      case Nested(ref, nestedElements)    => resolveNested(ref, nestedElements, tail)
+      case NestedOpt(ref, nestedElements) => resolveNestedOpt(ref, nestedElements, tail)
     }
     case Nil             => ()
   }
@@ -270,9 +282,8 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     s"$limit_$offset_"
   }
 
-  final def getTotalCountQuery: String = {
-    val table  = from
-    val joins_ = if (joins.isEmpty) "" else {
+  private def formattedJoins: String = {
+    if (joins.isEmpty) "" else {
       val max1  = joins.map(_._1.length).max
       val max2  = joins.map(_._2.length).max
       val max3  = joins.map(_._3.length).max
@@ -288,7 +299,11 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
         s"$join_ $table_$as_ ON $predicate"
       }.mkString("\n", "\n", "")
     }
+  }
 
+  final def getTotalCountQuery: String = {
+    val table    = from
+    val joins_   = formattedJoins
     val notNulls = notNull.map(col => (col, "IS NOT NULL"))
     val allWhere = where ++ notNulls
     val where_   = if (allWhere.isEmpty) "" else {
