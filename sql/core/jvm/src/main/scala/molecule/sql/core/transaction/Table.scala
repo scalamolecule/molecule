@@ -11,4 +11,5 @@ case class Table(
   useAccIds: Boolean = false,
   curIds: List[Long] = Nil,
   upsertStmt: Option[List[Long] => String] = None,
+  updateIdsMap: Boolean = true,
 )

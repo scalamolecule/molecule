@@ -15,7 +15,7 @@ import scala.collection.mutable.ListBuffer
 
 trait SpiHelpers extends ModelUtils {
 
-  def prepareMultipleUpdates2(
+  def getUpdateResolvers(
     elements: List[Element],
     isUpsert: Boolean
   ): List[ // List of resolvers for each table involved in update/upsert
@@ -24,14 +24,12 @@ trait SpiHelpers extends ModelUtils {
         List[String] => List[Element] // ref ids => update model
       )
   ] = {
-    val dummyCoord = Seq(0, 0) // irrelevant for id columns that will never collide with keywords
-    var hasId      = false
-    var hasData    = false
-    val firstNs    = getInitialNs(elements)
-    var curNs      = firstNs
-    var refPath    = List(firstNs)
-
-
+    val dummyCoord   = Seq(0, 0) // irrelevant for id columns that will never collide with keywords
+    var hasId        = false
+    var hasData      = false
+    val firstNs      = getInitialNs(elements)
+    var curNs        = firstNs
+    var refPath      = List(firstNs)
     val updateModel  = ListBuffer.empty[Element]
     val updateModels = ListBuffer.empty[(List[String], List[String] => List[Element])]
 

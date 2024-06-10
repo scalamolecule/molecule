@@ -152,6 +152,7 @@ trait SpiSyncBase
   }
 
 
+
   // Insert --------------------------------------------------------
 
   override def insert_transact(insert0: Insert)(implicit conn0: Conn): TxReport = {
@@ -209,139 +210,340 @@ trait SpiSyncBase
   }
 
 
-  @nowarn // Accept dynamic type parameter of returned Query
   private def refUpserts(update: Update)(implicit conn: JdbcConn_JVM): Data = {
-    val elements = update.elements
-    val refIds   = new ListBuffer[Long]()
-    val refIdss  = mutable.Map.empty[List[String], List[Long]]
+    val elements     = update.elements
+    val refIdss      = mutable.Map.empty[List[String], List[Long]]
+    var tableUpdates = List.empty[Table]
 
+    println("\n=== UPSERT =========================================================================================")
     println("------ elements --------")
     elements.foreach(println)
 
-    val filterElements1 = getUpsertFilters3(elements)
+    val stages = getUpsertStages(elements)
+    println("\n------ stages ---------")
+    stages.foreach(println)
+    println("")
 
-    lazy val multiUpdates = prepareMultipleUpdates2(elements, update.isUpsert)
-
-    var i      = 0
-    val tables = filterElements1.flatMap {
-      case (1, refPath, updateModel) =>
-        println("-------- updateModel 1")
-        updateModel.foreach(println)
-
-        val ids    = query_getRaw[String](Query(updateModel)).map(_.toLong)
-        val tables = update_getData(conn, Update(elements, true))._1
-        // Add current ref ids
-        tables.map(_.copy(refPath = refPath, useAccIds = true, curIds = ids))
-
-      case (2, refPath, updateModel) =>
-        println("-------- updateModel 2")
-        updateModel.foreach(println)
-
-        refIds.clear()
-        refIdss += refPath -> Nil
-        val newRefTables = query_getRaw[(String, Option[String])](Query(updateModel)).flatMap {
-          case (id, Some(refId)) =>
-            println(s"+++++++++++++++ $id  $refId")
-            refIdss(refPath) = refIdss(refPath) :+ refId.toLong
-            Nil
-
-          case (id, None) =>
-            val List(ns, refAttr, refNs) = refPath.takeRight(3)
-
-            // Insert ref row
-            val insertRefRow = s"INSERT INTO $refNs DEFAULT VALUES"
-            val insert       = (ps: PS, _: IdsMap, _: RowIndex) => {
-              ps.addBatch()
+    stages.foreach {
+      case FindAllIds(refPath, elements) =>
+        // Get and cache current ids for each table
+        val arity = refPath.sliding(1, 2).flatten.toList.length
+        getIdLists(arity, elements) match {
+          case Array() => return (Nil, Nil) // Abort if no filter matches no ids
+          case idLists =>
+            var i = 1
+            idLists.foreach { idsList =>
+              refIdss(refPath.take(i)) = idsList
+              i += 2 // next table ref path
             }
-            val newRefTable  = Table(refPath, insertRefRow, insert, true)
-
-            // Add relationship to ref row
-            val updateCurRow = s"UPDATE $ns SET $refAttr = ? WHERE id = $id"
-            val update       = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
-              // Use ref path to retrieve created ref id from previous insert
-              val refId = idsMap(refPath).head
-              println("  refId: " + refId)
-              //                refIds += refId
-              //                              refIdss(refPath) = refIdss(refPath) :+ refId
-              ps.setLong(1, refId)
-              ps.addBatch()
-            }
-            val updateRef    = Table(refPath, updateCurRow, update)
-
-            // Tables are resolved in reverse order in populateStmts
-            List(updateRef, newRefTable)
+            println("\n-- 1 ---- refIdss -------- " + refPath)
+            refIdss.toList.sortBy(_._1.length).foreach(println)
         }
 
-        val (_, model) = multiUpdates(i)
-        i += 1
-        val elements     = model(Nil) // we pass current ids in Table
-        val tables       = update_getData(conn, Update(elements, true))._1
-        // Add current ref ids
-        val tableUpdates = tables.map(_.copy(
-          refPath = refPath,
-          useAccIds = true,
-          curIds = refIdss(refPath)
-        ))
 
-        tableUpdates ++ newRefTables
+      case FindKnownIds(refPath, elements) =>
+        val List(ns, refAttr, refNs) = refPath.takeRight(3)
+
+        val refPathLength = refPath.length
+        val refPaths      = (1 to(refPathLength, 2)).map(refPath.take).zipWithIndex
+        val last          = (refPathLength - 1) / 2
+        println("-- 2 ---- ref paths ------")
+        refPaths.foreach(println)
+
+        // Get current ids and optional ref ids
+        val tuples = query_getRaw[AnyRef](Query(elements)).asInstanceOf[List[Product]]
+        println("\n-- 2 ---- tuples --------- " + refPath)
+        tuples.foreach(println)
+
+        tuples.foreach { tuple =>
+          refPaths.foreach {
+            case (refPath, `last`) =>
+              tuple.productElement(last).asInstanceOf[Option[String]] match {
+                case Some(refId) =>
+                  refIdss(refPath) = refIdss.getOrElse(refPath, List.empty[Long]) :+ refId.toLong
+                case None        =>
+                  // Insert ref row
+                  val insertRefRow = s"INSERT INTO $refNs DEFAULT VALUES"
+                  val insert       = (ps: PS, _: IdsMap, _: RowIndex) => {
+                    ps.addBatch()
+                  }
+                  val newRefTable  = Table(refPath, insertRefRow, insert, true)
+
+                  // Add relationship to new ref row
+                  val curId        = tuple.productElement(last - 1).asInstanceOf[String]
+                  val updateCurRow = s"UPDATE $ns SET $refAttr = ? WHERE id = $curId"
+                  val update       = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
+                    // Use ref path to retrieve created ref id from previous insert
+                    val refId = idsMap(refPath).head
+                    //                    val refId = idsMap(refPath).last
+                    println("  refId: " + refId)
+                    ps.setLong(1, refId)
+                    ps.addBatch()
+                  }
+                  val updateRef    = Table(refPath.dropRight(2), updateCurRow, update)
+
+                  // Tables are resolved in reverse order in JdbcConn_JVM.populateStmts
+                  tableUpdates = List(updateRef, newRefTable) ++ tableUpdates
+              }
+
+              if (!refIdss.contains(refPath))
+                refIdss(refPath) = Nil
+
+            case (refPath, i) =>
+              refIdss(refPath) = refIdss.getOrElse(refPath, List.empty[Long]) :+
+                tuple.productElement(i).asInstanceOf[String].toLong
+          }
+        }
+        println("-- 2 ---- refIdss -------- ")
+        refIdss.toList.sortBy(_._1.length).foreach(println)
+
+
+      case CompleteCurRef(refPath, idsResolver) =>
+        val List(ns, refAttr, refNs) = refPath.takeRight(3)
+        val insert                   = (_: PS, idsMap: IdsMap, _: RowIndex) => {
+          val nsIds    = idsMap(refPath.dropRight(2))
+          //          println("-- 3 ---- nsIds: " + nsIds)
+          val elements = idsResolver(nsIds.map(_.toString))
+          //          println("-- 3 ---- elements --------")
+          //          elements.foreach(println)
+          //          println("-- 3 ---- tuples --------")
+          //          query_getRaw(Query[(String, Option[String])](elements)).foreach(println)
+          val refIds   = ListBuffer.empty[Long]
+          query_getRaw(Query[(String, Option[String])](elements)).flatMap {
+            case (nsId, None)        =>
+              val refId = getId(s"INSERT INTO $refNs DEFAULT VALUES")
+              refIds += refId
+              Some((nsId, refId))
+            case (nsId, Some(refId)) =>
+              refIds += refId.toLong
+              None
+          }.foreach {
+            case (nsId, refId) => getId(s"UPDATE $ns SET $refAttr = $refId WHERE id = $nsId")
+          }
+          idsMap(refPath) = refIds.toList
+
+          println("-- 3 ---- idsMap -------- " + refPath)
+          println(idsMap)
+
+          println("-- 3 ---- refIdss -------- ")
+          refIdss.toList.sortBy(_._1.length).foreach(println)
+        }
+        // Update internally in this case since we complete the ref structure
+        // needing queries during transaction buildup
+        tableUpdates = Table(refPath, "select 42", insert, updateIdsMap = false) :: tableUpdates
+
+      //        println("\n-- 3 ---- refIdss -------- " + refPath)
+      //        val refIdLists = refIdss.toList.sortBy(_._1.length)
+      //        refIdLists.foreach(println)
+      //
+      //        val nsIds    = refIdss(refPath.dropRight(2))
+      //        val elements = idsResolver(nsIds.map(_.toString))
+      //
+      //        println("-- 3 ---- tuples --------")
+      //        query_getRaw(Query[Option[String]](elements)).foreach(println)
+      //
+      //
+      //        // Handle ids maybe pointing to ref
+      //        query_getRaw(Query[Option[String]](elements)).foreach {
+      //          case Some(refId) =>
+      //            refIdss(refPath) = refIdss.getOrElse(refPath, List.empty[Long]) :+ refId.toLong
+      //          case None        =>
+      //            println("+++++++++")
+      //            makeRef(refPath, ns, refAttr, refNs, false, true, "  ", elements)
+      //        }
+      //
+      //        // Handle missing ids of previous namespace
+      //        val numberOfMissingIds = refIdLists.head._2.length - refIdLists.last._2.length
+      //
+      //        println(s"numberOfMissingIds: " + numberOfMissingIds)
+      //        (0 until numberOfMissingIds).foreach { _ =>
+      //          println(".........")
+      //          makeRef(refPath, ns, refAttr, refNs, false, true, "            ", elements)
+      //        }
+      //          makeRef(refPath, ns, refAttr, refNs, false, true, "            ")
+
+
+      //      case NewRef(refPath, idsResolver) =>
+      //        val List(ns, refAttr, refNs) = refPath.takeRight(3)
+      //
+      //        println("\n-- 3 ---- refIdss -------- " + refPath)
+      //        val refIdLists = refIdss.toList.sortBy(_._1.length)
+      //        refIdLists.foreach(println)
+      //
+      //        val nsIds    = refIdss(refPath.dropRight(2))
+      //        val elements = idsResolver(nsIds.map(_.toString))
+      //
+      //        println("-- 3 ---- tuples --------")
+      //        query_getRaw(Query[Option[String]](elements)).foreach(println)
+      //
+      //
+      //        // Handle ids maybe pointing to ref
+      //        query_getRaw(Query[Option[String]](elements)).foreach {
+      //          case Some(refId) =>
+      //            refIdss(refPath) = refIdss.getOrElse(refPath, List.empty[Long]) :+ refId.toLong
+      //          case None        =>
+      //            makeRef(refPath, ns, refAttr, refNs, false, true, "  ")
+      //        }
+      //
+      //        // Handle missing ids of previous namespace
+      //        val numberOfMissingIds = refIdLists.head._2.length - refIdLists.last._2.length
+      //
+      //        println(s"numberOfMissingIds: " + numberOfMissingIds)
+      //        (0 until numberOfMissingIds).foreach { _ =>
+      //          println(".........")
+      //          makeRef(refPath, ns, refAttr, refNs, false, true, "            ")
+      //        }
+      ////          makeRef(refPath, ns, refAttr, refNs, false, true, "            ")
+
+      case UpdateNsData(refPath, elements) =>
+        println("\n-- 4 ---- refIdss -------- " + refPath)
+        refIdss.toList.sortBy(_._1.length).foreach(println)
+
+        val table = update_getData(conn, Update(elements, true))._1.head
+        println("\n-- 4 ---- table -------- ")
+        println(table)
+
+        val tableUpdate = refIdss.get(refPath).fold {
+          table.copy(
+            refPath = refPath,
+            accIds = true,
+            useAccIds = true,
+            updateIdsMap = false
+          )
+
+        }(ids =>
+          table.copy(
+            refPath = refPath,
+            useAccIds = true,
+            curIds = ids // add current ref ids
+          )
+        )
+        tableUpdates = tableUpdate +: tableUpdates
     }
-    (tables, Nil)
+
+    //    def makeRef(refPath: List[String], ns: String, refAttr: String, refNs: String,
+    //                addIds: Boolean, useAccIds: Boolean, x: String, es: List[Element] = Nil) = {
+    //      // Insert ref row
+    //      val insertRefRow = s"INSERT $x INTO $refNs DEFAULT VALUES"
+    //      val insert       = (ps: PS, _: IdsMap, _: RowIndex) => {
+    //        ps.addBatch()
+    //      }
+    //      val newRefTable  = Table(refPath, insertRefRow, insert, true)
+    //      //      val newRefTable  = Table(refPath, insertRefRow, insert)
+    //
+    //      // Add relationship to new ref row
+    //      //      val updateStmt = (ids: List[Long]) => s"UPDATE     $ns SET $refAttr = ? WHERE id = ${ids.head}"
+    //      val updateStmt = (ids: List[Long]) => s"UPDATE $x $ns SET $refAttr = ? WHERE id = ${ids.last}"
+    //      //      val updateStmt = (ids: List[Long]) => s"UPDATE $x $ns SET $refAttr = ? WHERE id = 4"
+    //      //      val updateStmt = (ids: List[Long]) => s"UPDATE $x $ns SET $refAttr = ? WHERE id = 6"
+    //      //      val updateStmt = (ids: List[Long]) => s"UPDATE $ns SET $refAttr = ? WHERE id IN(${ids.mkString(", ")})"
+    //
+    //
+    //      val update    = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
+    //        // Use ref path to retrieve created ref id from previous insert
+    //        //        val refId = idsMap(refPath).head
+    //
+    //        //        println("-- 3 ---- tuples -------- 222")
+    //        //        query_getRaw(Query[Option[String]](es)).foreach(println)
+    //
+    //        val refId = idsMap(refPath).last
+    //        println("  refId   : " + refId)
+    //        ps.setLong(1, refId)
+    //        ps.addBatch()
+    //      }
+    //      val curIds    = refIdss.getOrElse(refPath, Nil)
+    //      val updateRef = Table(refPath, "", update, addIds, useAccIds, curIds, Some(updateStmt))
+    //
+    //      // Tables are resolved in reverse order in JdbcConn_JVM.populateStmts
+    //      tableUpdates = List(updateRef, newRefTable) ++ tableUpdates
+    //    }
+
+    (tableUpdates, Nil)
   }
 
+  private def prepStmt(stmt: String)(implicit conn: JdbcConn_JVM) = {
+    conn.sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
+  }
+  private def getId(stmt: String)(implicit conn: JdbcConn_JVM): Long = {
+    val ps = conn.sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
 
-  @nowarn // Accept dynamic type parameter of returned Query
+    ps.addBatch()
+    ps.executeBatch()
+    val resultSet = ps.getGeneratedKeys
+    resultSet.next()
+    val id = resultSet.getLong(1)
+    println(stmt + "  -->  id " + id)
+    id
+  }
+
   private def refUpdates(update: Update)(implicit conn: JdbcConn_JVM): Data = {
     val elements = update.elements
-    val firstNs  = getInitialNs(elements)
 
     println("............ elements")
     elements.foreach(println)
 
-    val (arity, updateIdsModel) = getUpdateIdsModel(elements)
+    val (arity, idsModel) = getUpdateIdsModel(elements)
 
     println(s"------ updateIdsModel ------  $arity")
-    updateIdsModel.foreach(println)
+    idsModel.foreach(println)
 
-    val idRows = query_getRaw(Query[AnyRef](updateIdsModel))
+    val idLists = getIdLists(arity, idsModel)
 
-    println("------ rawIds --------")
+    println(s"------ idLists ------  $arity")
+    idLists.foreach(println)
+
+    if (idLists.isEmpty) {
+      (Nil, Nil)
+    } else {
+      var i            = 0
+      val tableUpdates = getUpdateResolvers(elements, update.isUpsert).flatMap {
+        case (refPath, modelResolver) =>
+          val updateModel = modelResolver(idLists(i).map(_.toString)) // we pass current ids in Table
+
+          val n = updateModel.length
+          println(s"------ X ------- $refPath  $n")
+          updateModel.foreach(println)
+          i += 1
+          update_getData(conn, updateModel, update.isUpsert)._1
+      }
+      (tableUpdates, Nil)
+    }
+  }
+
+
+  private def getIdLists(arity: Int, idsModel: List[Element])
+                        (implicit conn: JdbcConn_JVM): Array[List[Long]] = {
+    val idRows = query_getRaw(Query[AnyRef](idsModel))
+    println("------ idRows --------")
     idRows.foreach(println)
+    println("--------")
 
-    val refIdss = arity match {
-      case 1 => Array(idRows.asInstanceOf[List[String]])
-      case 2 =>
-        val (aa, bb) = idRows.asInstanceOf[List[(String, String)]].unzip
-        Array(aa, bb)
+    if (idRows.isEmpty) {
+      Array.empty[List[Long]]
+    } else {
 
-      case 3 =>
-        val (aa, bb, cc) = idRows.asInstanceOf[List[(String, String, String)]].unzip3
-        Array(aa, bb, cc)
+      val idLists = arity match {
+        case 1 => Array(idRows.asInstanceOf[List[String]])
+        case 2 =>
+          val (aa, bb) = idRows.asInstanceOf[List[(String, String)]].unzip
+          Array(aa, bb)
 
-      case idCount =>
-        val result = Array.fill(idCount)(List.empty[String])
-        idRows.asInstanceOf[List[Product]].foreach { tuple =>
-          (0 until idCount).foreach { i =>
-            result(i) = result(i) :+ tuple.productElement(i).asInstanceOf[String]
+        case 3 =>
+          val (aa, bb, cc) = idRows.asInstanceOf[List[(String, String, String)]].unzip3
+          Array(aa, bb, cc)
+
+        case idCount =>
+          val result = Array.fill(idCount)(List.empty[String])
+          idRows.asInstanceOf[List[Product]].foreach { tuple =>
+            (0 until idCount).foreach { i =>
+              result(i) = result(i) :+ tuple.productElement(i).asInstanceOf[String]
+            }
           }
-        }
-        result
+          result
+      }
+      println(idLists.mkString("Array(", ", ", ")"))
+      idLists.map(_.map(_.toLong))
     }
-
-    println(refIdss.mkString("Array(", ", ", ")"))
-
-    var i            = 0
-    val tableUpdates = prepareMultipleUpdates2(elements, update.isUpsert).flatMap {
-      case (refPath, modelResolver) =>
-        val updateModel = modelResolver(refIdss(i)) // we pass current ids in Table
-
-        val n = updateModel.length
-        println(s"------ X ------- $refPath  $n")
-        updateModel.foreach(println)
-        i += 1
-        update_getData(conn, updateModel, update.isUpsert)._1
-    }
-
-    (tableUpdates, Nil)
   }
 
   def refIdsQuery(idsModel: List[Element], proxy: ConnProxy): String

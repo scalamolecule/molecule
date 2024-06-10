@@ -1,6 +1,5 @@
 package molecule.sql.core.query
 
-import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.util.{FutureUtils, ModelUtils}

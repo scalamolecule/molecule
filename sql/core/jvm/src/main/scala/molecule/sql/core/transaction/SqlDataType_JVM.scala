@@ -2,11 +2,12 @@ package molecule.sql.core.transaction
 
 import java.sql.{PreparedStatement => PS}
 import molecule.core.spi.DataType
+import scala.collection.mutable
 
 trait SqlDataType_JVM extends DataType {
 
   // refPath -> List(ids)
-  type IdsMap = Map[List[String], List[Long]]
+  type IdsMap = mutable.Map[List[String], List[Long]]
 
   type RowIndex = Int
 

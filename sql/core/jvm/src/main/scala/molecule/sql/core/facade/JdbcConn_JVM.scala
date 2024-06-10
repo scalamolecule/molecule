@@ -43,7 +43,7 @@ case class JdbcConn_JVM(
       // Execute batches
       val ids = executions()
 
-      // transact all
+      // commit or fail all
       sqlConn.commit()
 
       TxReport(ids.map(_.toString))
@@ -68,7 +68,7 @@ case class JdbcConn_JVM(
   def populateStmts(data: Data): List[Long] = {
     val tables     = data._1
     val joinTables = data._2
-    var idsMap     = Map.empty[List[String], List[Long]]
+    val idsMap     = mutable.Map.empty[List[String], List[Long]]
     val idsAcc     = mutable.Map.empty[List[String], List[Long]]
     var ids        = List.empty[Long]
 
@@ -76,17 +76,23 @@ case class JdbcConn_JVM(
 
     // Insert statements backwards to obtain auto-generated ref ids for prepending inserts
     tables.reverse.foreach {
-      case Table(refPath, stmt, populatePS, accIds, useAccIds, curIds, upsertStmt) =>
-        debug("D --- table ----------------------------------------------")
-        debug("idsMap 1: " + idsMap)
-        debug("idsAcc 1: " + idsAcc.toMap)
-        debug("refPath : " + refPath)
-        debug("curIds  : " + curIds)
+      case Table(refPath, stmt, populatePS, accIds, useAccIds, curIds, upsertStmt, updateIdsMap) =>
+        debug("D --- table ---------------------------------------------------------------------------------------------")
+        debug("refPath  : " + refPath)
+        debug("idsMap 1 : " + idsMap)
+        debug("accIds   : " + accIds)
+        debug("useAccIds: " + useAccIds)
+        debug("curIds   : " + curIds)
+        debug("idsAcc 1 : " + idsAcc.toMap)
 
-        val stmt1 = if (useAccIds) upsertStmt.get(curIds ++ idsAcc.getOrElse(refPath, Nil)) else stmt
-        debug("stmt1   : " + stmt1)
+        val stmt1 = if (useAccIds) {
+          val ids = if (updateIdsMap) curIds ++ idsAcc.getOrElse(refPath, Nil) else idsMap.getOrElse(refPath, Nil)
+          debug("ids      : " + ids)
+          upsertStmt.get(ids)
+        } else stmt
+        debug("stmt1    : " + stmt1)
 
-        val ps    = preparedStmt(stmt1)
+        val ps = preparedStmt(stmt1)
 
         populatePS(ps, idsMap, 0)
 
@@ -118,7 +124,9 @@ case class JdbcConn_JVM(
             throw e
         }
         ps.close()
-        idsMap = idsMap + (refPath -> ids)
+        debug("idsMap 2: " + idsMap)
+        if (updateIdsMap)
+          idsMap(refPath) = ids
         debug("idsMap 2: " + idsMap)
         if (accIds) {
           if (idsAcc.contains(refPath)) {

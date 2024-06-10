@@ -8,305 +8,203 @@ import scala.collection.mutable.ListBuffer
 
 trait UpdateFilters extends ModelUtils {
 
-  @tailrec
-  final def getUpsertFilters(
-    reversedElements: List[Element],
-    filterElements: List[Element] = Nil,
-    hasFilter: Boolean = false,
-    requireNs: Boolean = false,
-    requiredNsPaths: List[List[String]] = List(List())
-  ): (List[Element], List[List[String]]) = {
-    reversedElements match {
-      case element :: tail => element match {
-        case a: Attr => a match {
-          case a: AttrOne => a match {
-            case a: AttrOneMan =>
-              val optValueAttr = a match {
-                case a: AttrOneManID             => AttrOneOptID(a.ns, a.attr, owner = a.owner)
-                case a: AttrOneManString         => AttrOneOptString(a.ns, a.attr)
-                case a: AttrOneManInt            => AttrOneTacInt(a.ns, a.attr)
-                case a: AttrOneManLong           => AttrOneOptLong(a.ns, a.attr)
-                case a: AttrOneManFloat          => AttrOneOptFloat(a.ns, a.attr)
-                case a: AttrOneManDouble         => AttrOneOptDouble(a.ns, a.attr)
-                case a: AttrOneManBoolean        => AttrOneOptBoolean(a.ns, a.attr)
-                case a: AttrOneManBigInt         => AttrOneOptBigInt(a.ns, a.attr)
-                case a: AttrOneManBigDecimal     => AttrOneOptBigDecimal(a.ns, a.attr)
-                case a: AttrOneManDate           => AttrOneOptDate(a.ns, a.attr)
-                case a: AttrOneManDuration       => AttrOneOptDuration(a.ns, a.attr)
-                case a: AttrOneManInstant        => AttrOneOptInstant(a.ns, a.attr)
-                case a: AttrOneManLocalDate      => AttrOneOptLocalDate(a.ns, a.attr)
-                case a: AttrOneManLocalTime      => AttrOneOptLocalTime(a.ns, a.attr)
-                case a: AttrOneManLocalDateTime  => AttrOneOptLocalDateTime(a.ns, a.attr)
-                case a: AttrOneManOffsetTime     => AttrOneOptOffsetTime(a.ns, a.attr)
-                case a: AttrOneManOffsetDateTime => AttrOneOptOffsetDateTime(a.ns, a.attr)
-                case a: AttrOneManZonedDateTime  => AttrOneOptZonedDateTime(a.ns, a.attr)
-                case a: AttrOneManUUID           => AttrOneOptUUID(a.ns, a.attr)
-                case a: AttrOneManURI            => AttrOneOptURI(a.ns, a.attr)
-                case a: AttrOneManByte           => AttrOneOptByte(a.ns, a.attr)
-                case a: AttrOneManShort          => AttrOneOptShort(a.ns, a.attr)
-                case a: AttrOneManChar           => AttrOneOptChar(a.ns, a.attr)
-              }
-              getUpsertFilters(tail, optValueAttr :: filterElements, hasFilter, true, requiredNsPaths)
+  sealed trait UpdateStage
 
-            case a: AttrOneTac => getUpsertFilters(
-              tail, a :: filterElements, hasFilter || a.op != NoValue, true, requiredNsPaths
-            )
-            case a: AttrOneOpt => noOptional(a)
-          }
-
-          case a: AttrSet => a match {
-            case a: AttrSetMan => a.op match {
-              case _ =>
-                // Retrieve current Set values for retraction
-                val optSet = a match {
-                  case a: AttrSetManID             => AttrSetOptID(a.ns, a.attr, owner = a.owner)
-                  case a: AttrSetManString         => AttrSetOptString(a.ns, a.attr)
-                  case a: AttrSetManInt            => AttrSetOptInt(a.ns, a.attr)
-                  case a: AttrSetManLong           => AttrSetOptLong(a.ns, a.attr)
-                  case a: AttrSetManFloat          => AttrSetOptFloat(a.ns, a.attr)
-                  case a: AttrSetManDouble         => AttrSetOptDouble(a.ns, a.attr)
-                  case a: AttrSetManBoolean        => AttrSetOptBoolean(a.ns, a.attr)
-                  case a: AttrSetManBigInt         => AttrSetOptBigInt(a.ns, a.attr)
-                  case a: AttrSetManBigDecimal     => AttrSetOptBigDecimal(a.ns, a.attr)
-                  case a: AttrSetManDate           => AttrSetOptDate(a.ns, a.attr)
-                  case a: AttrSetManDuration       => AttrSetOptDuration(a.ns, a.attr)
-                  case a: AttrSetManInstant        => AttrSetOptInstant(a.ns, a.attr)
-                  case a: AttrSetManLocalDate      => AttrSetOptLocalDate(a.ns, a.attr)
-                  case a: AttrSetManLocalTime      => AttrSetOptLocalTime(a.ns, a.attr)
-                  case a: AttrSetManLocalDateTime  => AttrSetOptLocalDateTime(a.ns, a.attr)
-                  case a: AttrSetManOffsetTime     => AttrSetOptOffsetTime(a.ns, a.attr)
-                  case a: AttrSetManOffsetDateTime => AttrSetOptOffsetDateTime(a.ns, a.attr)
-                  case a: AttrSetManZonedDateTime  => AttrSetOptZonedDateTime(a.ns, a.attr)
-                  case a: AttrSetManUUID           => AttrSetOptUUID(a.ns, a.attr)
-                  case a: AttrSetManURI            => AttrSetOptURI(a.ns, a.attr)
-                  case a: AttrSetManByte           => AttrSetOptByte(a.ns, a.attr)
-                  case a: AttrSetManShort          => AttrSetOptShort(a.ns, a.attr)
-                  case a: AttrSetManChar           => AttrSetOptChar(a.ns, a.attr)
-                }
-                getUpsertFilters(
-                  tail, optSet :: filterElements, hasFilter, requireNs || a.op != Remove, requiredNsPaths
-                )
-            }
-
-            case a: AttrSetTac =>
-              if (a.op == Eq) {
-                throw ModelError(s"Filtering by collection equality (${a.name}) not supported in updates.")
-              }
-              getUpsertFilters(tail, a :: filterElements,
-                hasFilter || a.op != NoValue, requireNs, requiredNsPaths)
-
-            case _: AttrSetOpt => noOptional(a)
-          }
-
-          case a: AttrSeq => a match {
-            case a: AttrSeqMan =>
-              // Retrieve current Seq values for retraction
-              val optSet = a match {
-                case a: AttrSeqManID             => AttrSeqOptID(a.ns, a.attr)
-                case a: AttrSeqManString         => AttrSeqOptString(a.ns, a.attr)
-                case a: AttrSeqManInt            => AttrSeqOptInt(a.ns, a.attr)
-                case a: AttrSeqManLong           => AttrSeqOptLong(a.ns, a.attr)
-                case a: AttrSeqManFloat          => AttrSeqOptFloat(a.ns, a.attr)
-                case a: AttrSeqManDouble         => AttrSeqOptDouble(a.ns, a.attr)
-                case a: AttrSeqManBoolean        => AttrSeqOptBoolean(a.ns, a.attr)
-                case a: AttrSeqManBigInt         => AttrSeqOptBigInt(a.ns, a.attr)
-                case a: AttrSeqManBigDecimal     => AttrSeqOptBigDecimal(a.ns, a.attr)
-                case a: AttrSeqManDate           => AttrSeqOptDate(a.ns, a.attr)
-                case a: AttrSeqManDuration       => AttrSeqOptDuration(a.ns, a.attr)
-                case a: AttrSeqManInstant        => AttrSeqOptInstant(a.ns, a.attr)
-                case a: AttrSeqManLocalDate      => AttrSeqOptLocalDate(a.ns, a.attr)
-                case a: AttrSeqManLocalTime      => AttrSeqOptLocalTime(a.ns, a.attr)
-                case a: AttrSeqManLocalDateTime  => AttrSeqOptLocalDateTime(a.ns, a.attr)
-                case a: AttrSeqManOffsetTime     => AttrSeqOptOffsetTime(a.ns, a.attr)
-                case a: AttrSeqManOffsetDateTime => AttrSeqOptOffsetDateTime(a.ns, a.attr)
-                case a: AttrSeqManZonedDateTime  => AttrSeqOptZonedDateTime(a.ns, a.attr)
-                case a: AttrSeqManUUID           => AttrSeqOptUUID(a.ns, a.attr)
-                case a: AttrSeqManURI            => AttrSeqOptURI(a.ns, a.attr)
-                case a: AttrSeqManByte           => AttrSeqOptByte(a.ns, a.attr)
-                case a: AttrSeqManShort          => AttrSeqOptShort(a.ns, a.attr)
-                case a: AttrSeqManChar           => AttrSeqOptChar(a.ns, a.attr)
-              }
-              getUpsertFilters(
-                tail, optSet :: filterElements, hasFilter, requireNs || a.op != Remove, requiredNsPaths
-              )
-
-
-            case a: AttrSeqTac =>
-              if (a.op == Eq) {
-                throw ModelError(s"Filtering by collection equality (${a.name}) not supported in updates.")
-              }
-              val filterAttributes = a.op match {
-                case Has | HasNo =>
-                  // Add same tacit attribute to avoid missing Datomic binding
-                  val cleanTacitAttr = a match {
-                    case a: AttrSeqTacID             => a.copy(op = V, vs = Nil)
-                    case a: AttrSeqTacString         => a.copy(op = V, vs = Nil)
-                    case a: AttrSeqTacInt            => a.copy(op = V, vs = Nil)
-                    case a: AttrSeqTacLong           => a.copy(op = V, vs = Nil)
-                    case a: AttrSeqTacFloat          => a.copy(op = V, vs = Nil)
-                    case a: AttrSeqTacDouble         => a.copy(op = V, vs = Nil)
-                    case a: AttrSeqTacBoolean        => a.copy(op = V, vs = Nil)
-                    case a: AttrSeqTacBigInt         => a.copy(op = V, vs = Nil)
-                    case a: AttrSeqTacBigDecimal     => a.copy(op = V, vs = Nil)
-                    case a: AttrSeqTacDate           => a.copy(op = V, vs = Nil)
-                    case a: AttrSeqTacDuration       => a.copy(op = V, vs = Nil)
-                    case a: AttrSeqTacInstant        => a.copy(op = V, vs = Nil)
-                    case a: AttrSeqTacLocalDate      => a.copy(op = V, vs = Nil)
-                    case a: AttrSeqTacLocalTime      => a.copy(op = V, vs = Nil)
-                    case a: AttrSeqTacLocalDateTime  => a.copy(op = V, vs = Nil)
-                    case a: AttrSeqTacOffsetTime     => a.copy(op = V, vs = Nil)
-                    case a: AttrSeqTacOffsetDateTime => a.copy(op = V, vs = Nil)
-                    case a: AttrSeqTacZonedDateTime  => a.copy(op = V, vs = Nil)
-                    case a: AttrSeqTacUUID           => a.copy(op = V, vs = Nil)
-                    case a: AttrSeqTacURI            => a.copy(op = V, vs = Nil)
-                    case a: AttrSeqTacByte           => a.copy(op = V, vs = Array.empty[Byte])
-                    case a: AttrSeqTacShort          => a.copy(op = V, vs = Nil)
-                    case a: AttrSeqTacChar           => a.copy(op = V, vs = Nil)
-                  }
-                  List(cleanTacitAttr, a)
-
-                case _ => List(a)
-              }
-              getUpsertFilters(
-                tail, filterAttributes ::: filterElements, hasFilter || a.op != NoValue, requireNs, requiredNsPaths
-              )
-
-            case _: AttrSeqOpt => noOptional(a)
-          }
-
-          case a: AttrMap => a match {
-            case a: AttrMapMan =>
-              // Retrieve current Map for retraction
-              val optSet = a match {
-                case a: AttrMapManID             => AttrMapOptID(a.ns, a.attr)
-                case a: AttrMapManString         => AttrMapOptString(a.ns, a.attr)
-                case a: AttrMapManInt            => AttrMapOptInt(a.ns, a.attr)
-                case a: AttrMapManLong           => AttrMapOptLong(a.ns, a.attr)
-                case a: AttrMapManFloat          => AttrMapOptFloat(a.ns, a.attr)
-                case a: AttrMapManDouble         => AttrMapOptDouble(a.ns, a.attr)
-                case a: AttrMapManBoolean        => AttrMapOptBoolean(a.ns, a.attr)
-                case a: AttrMapManBigInt         => AttrMapOptBigInt(a.ns, a.attr)
-                case a: AttrMapManBigDecimal     => AttrMapOptBigDecimal(a.ns, a.attr)
-                case a: AttrMapManDate           => AttrMapOptDate(a.ns, a.attr)
-                case a: AttrMapManDuration       => AttrMapOptDuration(a.ns, a.attr)
-                case a: AttrMapManInstant        => AttrMapOptInstant(a.ns, a.attr)
-                case a: AttrMapManLocalDate      => AttrMapOptLocalDate(a.ns, a.attr)
-                case a: AttrMapManLocalTime      => AttrMapOptLocalTime(a.ns, a.attr)
-                case a: AttrMapManLocalDateTime  => AttrMapOptLocalDateTime(a.ns, a.attr)
-                case a: AttrMapManOffsetTime     => AttrMapOptOffsetTime(a.ns, a.attr)
-                case a: AttrMapManOffsetDateTime => AttrMapOptOffsetDateTime(a.ns, a.attr)
-                case a: AttrMapManZonedDateTime  => AttrMapOptZonedDateTime(a.ns, a.attr)
-                case a: AttrMapManUUID           => AttrMapOptUUID(a.ns, a.attr)
-                case a: AttrMapManURI            => AttrMapOptURI(a.ns, a.attr)
-                case a: AttrMapManByte           => AttrMapOptByte(a.ns, a.attr)
-                case a: AttrMapManShort          => AttrMapOptShort(a.ns, a.attr)
-                case a: AttrMapManChar           => AttrMapOptChar(a.ns, a.attr)
-              }
-              getUpsertFilters(
-                tail, optSet :: filterElements, hasFilter, requireNs || a.op != Remove, requiredNsPaths
-              )
-
-            case a: AttrMapTac => getUpsertFilters(tail, a :: filterElements,
-              hasFilter || a.op != NoValue, requireNs, requiredNsPaths)
-
-            case _: AttrMapOpt => noOptional(a)
-          }
-        }
-
-        case r: Ref => if (hasFilter) {
-          getUpsertFilters(tail, r :: AttrOneManID(r.refNs, "id") :: filterElements, true)
-        } else {
-          // Skip tail and start over since we can't know if this ref is asserted without any filter values after it.
-          // From here on and backwards we only might have a reference
-          val requiredNsPaths1 = if (requireNs) {
-            requiredNsPaths match {
-              case Nil :: tail => List(r.ns, r.refAttr, r.refNs) :: tail
-              case cur :: tail => (List(r.ns, r.refAttr) ::: cur) :: tail
-              case Nil         => Nil
-            }
-          } else requiredNsPaths
-
-          // ref has no filters after it, so we don't know if there's a relationship. Look for optional ref id then.
-          getUpsertFilters(tail, AttrOneOptID(r.ns, r.refAttr, refNs = Some(r.refNs)) :: Nil, false, requiredNsPaths = requiredNsPaths1)
-        }
-
-        case br: BackRef => getUpsertFilters(tail, br :: filterElements, hasFilter)
-        case _           => noNested
-      }
-
-      case Nil => (filterElements, requiredNsPaths)
+  case class FindAllIds(refPath: List[String], elements: List[Element]) extends UpdateStage {
+    override def toString: String = {
+      s"""FindAllIds(
+         |  refPath : $refPath
+         |  elements: ${elements.mkString("\n    ", "\n    ", "")}
+         |)""".stripMargin
     }
   }
 
+  case class FindKnownIds(refPath: List[String], elements: List[Element]) extends UpdateStage {
+    override def toString: String = {
+      s"""FindKnownIds(
+         |  refPath : $refPath
+         |  elements: ${elements.mkString("\n    ", "\n    ", "")}
+         |)""".stripMargin
+    }
+  }
 
-  final def getUpsertFilters3(elements: List[Element]): List[(Int, List[String], List[Element])] = {
-    var hasData      = false
-    var hasFilter    = false
-    val filterModel  = ListBuffer.empty[Element]
-    val filterModels = ListBuffer.empty[(Int, List[String], List[Element])]
-    val firstNs      = getInitialNs(elements)
-    var refPath      = List(firstNs)
+  case class CompleteCurRef(refPath: List[String], idsResolver: List[String] => List[Element]) extends UpdateStage {
+    override def toString: String = {
+      s"""CompleteCurRef(
+         |  refPath    : $refPath
+         |  idsResolver: List(<ids>) => List(
+         |    ${idsResolver(List("<ids>")).mkString("\n    ")}
+         |  )
+         |)""".stripMargin
+    }
+  }
 
-    var prevNs      = ""
-    var prevRefAttr = ""
-    var curNs       = ""
+  case class UpdateNsData(refPath: List[String], elements: List[Element]) extends UpdateStage {
+    override def toString: String = {
+      s"""UpdateNsData(
+         |  refPath : $refPath
+         |  elements: ${elements.mkString("\n    ", "\n    ", "")}
+         |)""".stripMargin
+    }
+  }
 
-    elements.foreach {
-      case a: Attr => a match {
-        case a: AttrOne => a match {
-          case a: AttrOneMan =>
-            hasData = true
+  def getUpsertStages(elements: List[Element]): List[UpdateStage] = {
+    // Resolve model backwards to locate edge of known ids in ref structure
+    @tailrec
+    def rec(
+      reversedElements: List[Element],
+      stages: List[UpdateStage],
+      refPath: List[String],
+      idsModel: List[Element],
+      updateModel: List[Element],
+      nsHasFilter: Boolean,
+      nextNsHasFilter: Boolean,
+      makeIdsOptRef: Boolean,
+    ): List[UpdateStage] = {
+      reversedElements match {
+        case lastElement :: es => lastElement match {
+          case a: Attr =>
+            a match {
+              case a: AttrOne => a match {
+                case a: AttrOneMan =>
+                  rec(es, stages, refPath, idsModel, a :: updateModel, nsHasFilter, nextNsHasFilter, makeIdsOptRef)
+                case a: AttrOneTac =>
+                  rec(es, stages, refPath, a :: idsModel, updateModel, true, nextNsHasFilter, makeIdsOptRef)
+                case a: AttrOneOpt => noOptional(a)
+              }
+              //              case a: AttrSet => a match {
+              //                case a: AttrSetMan => ???
+              //                case a: AttrSetTac =>
+              //                  if (a.op == Eq) {
+              //                    throw ModelError(s"Filtering by collection equality (${a.name}) not supported in updates.")
+              //                  }
+              //                  ???
+              //                case _: AttrSetOpt => noOptional(a)
+              //              }
+              //
+              //              case a: AttrSeq => a match {
+              //                case a: AttrSeqMan => ???
+              //                case a: AttrSeqTac =>
+              //                  if (a.op == Eq) {
+              //                    throw ModelError(s"Filtering by collection equality (${a.name}) not supported in updates.")
+              //                  }
+              //                  ???
+              //                case _: AttrSeqOpt => noOptional(a)
+              //              }
+              //
+              //              case a: AttrMap => a match {
+              //                case a: AttrMapMan => ???
+              //                case a: AttrMapTac => ???
+              //                case _: AttrMapOpt => noOptional(a)
+              //              }
+              case _ => ???
+            }
 
-          case a: AttrOneTac =>
-            hasFilter = true
-            filterModel += a
+          case ref@Ref(ns, refAttr, refNs, _, _, _) if nsHasFilter || nextNsHasFilter =>
+            val curRefPath   = if (refPath.isEmpty) {
+              // Start ref path
+              List(ns, refAttr, refNs)
+            } else {
+              // Extend ref path from following namespaces
+              List(ns, refAttr) ++ refPath
+            }
+            val updateNsData = if (updateModel.isEmpty)
+              Nil
+            else if (refPath.isEmpty)
+              List(UpdateNsData(curRefPath, updateModel))
+            else
+              List(UpdateNsData(List(ns, refAttr, refNs), updateModel))
 
-          case a: AttrOneOpt => noOptional(a)
+            if (stages.nonEmpty && stages.head.isInstanceOf[CompleteCurRef]) {
+              val idsResolver    = stages.head.asInstanceOf[CompleteCurRef].idsResolver
+              val refAttrElement = idsResolver(Nil).last
+              val idsModel1      = ref :: AttrOneManID(refNs, "id") :: (idsModel :+ refAttrElement)
+
+              // Exclude CompleteCurRef stage since we'll find an optional ref id
+              // Set current ref path
+              val stagesWithoutCompleteCurRef = stages.tail.map {
+                case UpdateNsData(_, elements)   => UpdateNsData(curRefPath, elements)
+                case CompleteCurRef(_, elements) => CompleteCurRef(curRefPath, elements)
+                case other                       => other
+              }
+              val stages1                     = updateNsData ::: stagesWithoutCompleteCurRef
+              rec(es, stages1, curRefPath, idsModel1, Nil, false, true, true)
+            } else {
+              val idsModel1 = ref :: AttrOneManID(refNs, "id") :: idsModel
+              val stages1   = updateNsData ::: stages
+              rec(es, stages1, curRefPath, idsModel1, Nil, false, true, makeIdsOptRef)
+            }
+
+          case Ref(ns, refAttr, refNs, _, _, _) =>
+            // use ref path for this namespace only
+            val refPath1 = List(ns, refAttr, refNs)
+            val newRef   = CompleteCurRef(
+              refPath1,
+              (ids: List[String]) => List(
+                AttrOneManID(ns, "id", Eq, ids),
+                AttrOneOptID(ns, refAttr, refNs = Some(refNs))
+              )
+            )
+
+            val updatedStages = if (stages.isEmpty)
+              Nil
+            else {
+              // Prepend current ref path
+              val curRefPath = List(ns, refAttr) ++ refPath
+              stages.map {
+                case UpdateNsData(_, elements)   => UpdateNsData(curRefPath, elements)
+                case CompleteCurRef(_, elements) => CompleteCurRef(curRefPath, elements)
+                case other                       => other
+              }
+            }
+
+            val stages1 = if (updateModel.isEmpty)
+              newRef :: updatedStages
+            else
+              newRef :: UpdateNsData(refPath1, updateModel) :: updatedStages
+            rec(es, stages1, refPath1, Nil, Nil, false, nextNsHasFilter, makeIdsOptRef)
+
+          case _: BackRef => throw ModelError("Back refs not allowed in upserts")
+          case _          => noNested
         }
-        case _          => ()
+
+        case Nil if makeIdsOptRef =>
+          println(s"\n... 1 ......  $nsHasFilter  $nextNsHasFilter  $refPath  ${stages.length}")
+          val refPath1     = refPath
+          val ns           = refPath1.head
+          val findKnownIds = FindKnownIds(refPath, AttrOneManID(ns, "id") +: idsModel)
+          if (updateModel.isEmpty) {
+            findKnownIds :: stages
+          } else {
+            findKnownIds :: UpdateNsData(List(ns), updateModel) :: stages
+          }
+
+        case Nil if nextNsHasFilter =>
+          println(s"\n... 2 ......  $nsHasFilter  $nextNsHasFilter  $refPath  ${stages.length}")
+          val ns         = refPath.head
+          val findAllIds = FindAllIds(refPath, AttrOneManID(ns, "id") +: idsModel)
+          if (updateModel.isEmpty) {
+            findAllIds :: stages
+          } else {
+            findAllIds :: UpdateNsData(List(ns), updateModel) :: stages
+          }
+
+        case Nil =>
+          println(s"\n... 3 ......  $nsHasFilter  $nextNsHasFilter  $refPath")
+          val List(ns, refAttr, refNs) = refPath.take(3)
+          val idsModel1                = AttrOneManID(ns, "id") +: idsModel :+ AttrOneOptID(ns, refAttr, refNs = Some(refNs))
+          val findKnownIds             = FindKnownIds(refPath, idsModel1)
+          val stages1                  = if (stages.isEmpty) Nil else stages.tail
+          if (updateModel.isEmpty) {
+            findKnownIds :: stages1
+          } else {
+            findKnownIds :: UpdateNsData(refPath, updateModel) :: stages1
+            //            idsOptRef :: UpdateNsData(refPath.dropRight(2), updateModel) :: stages1
+          }
       }
-
-      case r: Ref =>
-        refPath ++= List(r.refAttr, r.refNs)
-        if (hasData) {
-          filterModel += AttrOneManID(r.ns, "id")
-        } else if (hasFilter) {
-          filterModels += ((1, refPath, filterModel.toList))
-          filterModel.clear()
-        }
-        filterModel += r
-        hasData = false
-        hasFilter = false
-        prevNs = r.ns
-        prevRefAttr = r.refAttr
-        curNs = r.refNs
-
-      case br: BackRef => ???
-      case _           => noNested
     }
 
-
-    if (hasFilter) {
-      if (hasData) {
-        filterModel += AttrOneManID(curNs, "id")
-        //        filterModel ++= List(
-        //
-        //          AttrOneManID(ns, "id"),
-        //          AttrOneManID(refNs, "id")
-        //        )
-      }
-      filterModels += ((1, refPath, filterModel.toList))
-    } else {
-      val prevModel = filterModels.last
-      // Add id of current namespace and optional ref id
-      val newModel  = prevModel._3 ++ List(
-        AttrOneManID(prevNs, "id"),
-        AttrOneOptID(prevNs, prevRefAttr, refNs = Some(curNs))
-      )
-      filterModels.update(filterModels.length - 1, (2, refPath, newModel))
-    }
-
-    filterModels.toList
+    rec(elements.reverse, Nil, Nil, Nil, Nil, false, false, false)
   }
 
 
@@ -317,12 +215,12 @@ trait UpdateFilters extends ModelUtils {
     var curNs       = firstNs
     val filterModel = ListBuffer.empty[Element]
 
+    // Since updates work on fully present ref structures we can accumulate forward
     elements.foreach {
       case a: Attr => a match {
-
         case a if a.isInstanceOf[Mandatory] => hasData = true
         case a if a.isInstanceOf[Tacit]     => filterModel += a
-        case _                              => noOptional(a)
+        case a                              => noOptional(a)
 
         //        case a: AttrOne => a match {
         //          case a: AttrOneMan => hasData = true
@@ -505,11 +403,11 @@ trait UpdateFilters extends ModelUtils {
       case _                 => noNested
     }
 
+    // Handle last namespace
     if (hasData) {
       filterModel += AttrOneManID(curNs, "id")
       arity += 1
     }
-
     (arity, filterModel.toList)
   }
 }

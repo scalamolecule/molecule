@@ -41,7 +41,7 @@ object AdhocJVM_datomic extends TestSuite_datomic {
         //          }
 
         // Add at least one tacit filter attribute apart from filter applying nothing
-//        _ <- Ns.i_().int_.int(3).update.transact
+        //        _ <- Ns.i_().int_.int(3).update.transact
         _ <- Ns.i_().int(3).update.transact
 
         // 1 entity updated
@@ -91,30 +91,35 @@ object AdhocJVM_datomic extends TestSuite_datomic {
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
 
-        a <- A.i(1).save.transact.map(_.id)
-        b <- A.i(2).B.s("b").save.transact.map(_.id)
-        c <- A.i(3).B.s("c").i(3).save.transact.map(_.id)
+        _ <- A.i(1).s("a").save.transact.map(_.id)
+        _ <- A.i(2).B.s("b").save.transact
+        _ <- A.i(3).B.i(2).save.transact
+        _ <- A.i(4).s("d").save.transact.map(_.id)
+        _ <- A.i(5).s("e").B.i(5).save.transact.map(_.id)
+        _ <- A.i(6).s("f").B.i(6).save.transact.map(_.id)
 
-        // Current entity with A value and ref to B value
-        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
-          (3, 3)
+        _ <- A.i.s.a1.B.i.query.get.map(_ ==> List(
+          (5, "e", 5),
+          (6, "f", 6),
         ))
 
-        // Filter by A ids, update existing B values
-        _ <- A(a, b, c).B.i(4).update.transact
+        _ <- A.i_.s("x").B.i(7).update.transact
 
-        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
-          (3, 4) // B value updated since there was a previous value
+        _ <- A.i.a1.s.B.i.query.get.map(_ ==> List(
+          (5, "x", 7), // A and B values updated
+          (6, "x", 7), // A and B values updated
         ))
 
-        // Filter by A ids, upsert B values (insert if not already present)
-        _ <- A(a, b, c).bool(true).B.i(5).upsert.transact
+        //        _ <- A.i_.B.i(8).upsert.transact
+        _ <- A.i_.s("y").B.i(8).upsert.transact
 
-        // Now three A entities with referenced B value
-        _ <- A.i.a1.bool.B.i.query.get.map(_ ==> List(
-          (1, true, 5), // relationship to B created + B value inserted
-          (2, true, 5), // B value inserted
-          (3, true, 5), // B value updated
+        _ <- A.i.a1.s.B.i.query.get.map(_ ==> List(
+          (1, "y", 8), // A value updated and ref to B and B value inserted
+          (2, "y", 8), // A value inserted and B value inserted
+          (3, "y", 8), // A value inserted and B value updated
+          (4, "y", 8), // A and B values updated
+          (5, "y", 8), // A and B values updated
+          (6, "y", 8), // A and B values updated
         ))
 
 

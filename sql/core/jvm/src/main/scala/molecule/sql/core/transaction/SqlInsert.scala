@@ -110,7 +110,7 @@ trait SqlInsert
     // Add insert resolver to each table insert
     inserts.map { case (refPath, _) =>
       val rowSetters = rowSettersMap(refPath)
-      val populatePS = (ps: PS, idsMap: Map[List[String], List[Long]], _: Int) => {
+      val populatePS = (ps: PS, idsMap: IdsMap, _: Int) => {
         // Set all column values for this row in this insert/batch
         var rowIndex = 0
         rowSetters.foreach { rowSetter =>
