@@ -45,7 +45,8 @@ trait UpdateOps extends Action2Data with BaseOps {
     set: Set[T],
     transformValue: T => Any,
     exts: List[String],
-    one2json: T => String
+    one2json: T => String,
+    set2array: Set[T] => Array[AnyRef]
   ): Unit
 
   protected def updateSeqEq[T](
@@ -80,7 +81,8 @@ trait UpdateOps extends Action2Data with BaseOps {
     seq: Seq[T],
     transformValue: T => Any,
     exts: List[String],
-    one2json: T => String
+    one2json: T => String,
+    seq2array: Seq[T] => Array[AnyRef]
   ): Unit = ???
 
   protected def updateByteArray(

@@ -254,7 +254,8 @@ trait Update_datomic
     set: Set[T],
     transformValue: T => Any,
     exts: List[String],
-    one2json: T => String
+    one2json: T => String,
+    set2array: Set[T] => Array[AnyRef]
   ): Unit = {
     if (set.nonEmpty) {
       val a            = kw(ns, attr)
@@ -371,12 +372,11 @@ trait Update_datomic
     seq: Seq[T],
     transformValue: T => Any,
     exts: List[String],
-    one2json: T => String
+    one2json: T => String,
+    seq2array: Seq[T] => Array[AnyRef]
   ): Unit = {
     if (seq.nonEmpty) {
       rowResolvers += { (row: jList[AnyRef]) =>
-        //        println("ROW: " + row)
-
         retractSeqValues(row, ns, attr, seq, transformValue)
         attrIndex += 1
       }

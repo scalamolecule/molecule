@@ -6,7 +6,7 @@ import molecule.core.util.ModelUtils
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
-trait UpdateFilters extends ModelUtils {
+trait UpdateUtils extends ModelUtils {
 
   sealed trait UpdateStage
 
@@ -72,32 +72,36 @@ trait UpdateFilters extends ModelUtils {
                   rec(es, stages, refPath, a :: idsModel, updateModel, true, nextNsHasFilter, makeIdsOptRef)
                 case a: AttrOneOpt => noOptional(a)
               }
-              //              case a: AttrSet => a match {
-              //                case a: AttrSetMan => ???
-              //                case a: AttrSetTac =>
-              //                  if (a.op == Eq) {
-              //                    throw ModelError(s"Filtering by collection equality (${a.name}) not supported in updates.")
-              //                  }
-              //                  ???
-              //                case _: AttrSetOpt => noOptional(a)
-              //              }
-              //
-              //              case a: AttrSeq => a match {
-              //                case a: AttrSeqMan => ???
-              //                case a: AttrSeqTac =>
-              //                  if (a.op == Eq) {
-              //                    throw ModelError(s"Filtering by collection equality (${a.name}) not supported in updates.")
-              //                  }
-              //                  ???
-              //                case _: AttrSeqOpt => noOptional(a)
-              //              }
-              //
-              //              case a: AttrMap => a match {
-              //                case a: AttrMapMan => ???
-              //                case a: AttrMapTac => ???
-              //                case _: AttrMapOpt => noOptional(a)
-              //              }
-              case _ => ???
+
+              case a: AttrSet => a match {
+                case a: AttrSetMan =>
+                  rec(es, stages, refPath, idsModel, a :: updateModel, nsHasFilter, nextNsHasFilter, makeIdsOptRef)
+                case a: AttrSetTac =>
+                  if (a.op == Eq) {
+                    throw ModelError(s"Filtering by collection equality (${a.name}) not supported in updates.")
+                  }
+                  rec(es, stages, refPath, a :: idsModel, updateModel, true, nextNsHasFilter, makeIdsOptRef)
+                case _: AttrSetOpt => noOptional(a)
+              }
+
+              case a: AttrSeq => a match {
+                case a: AttrSeqMan =>
+                  rec(es, stages, refPath, idsModel, a :: updateModel, nsHasFilter, nextNsHasFilter, makeIdsOptRef)
+                case a: AttrSeqTac =>
+                  if (a.op == Eq) {
+                    throw ModelError(s"Filtering by collection equality (${a.name}) not supported in updates.")
+                  }
+                  rec(es, stages, refPath, a :: idsModel, updateModel, true, nextNsHasFilter, makeIdsOptRef)
+                case _: AttrSeqOpt => noOptional(a)
+              }
+
+              case a: AttrMap => a match {
+                case a: AttrMapMan =>
+                  rec(es, stages, refPath, idsModel, a :: updateModel, nsHasFilter, nextNsHasFilter, makeIdsOptRef)
+                case a: AttrMapTac =>
+                  rec(es, stages, refPath, a :: idsModel, updateModel, true, nextNsHasFilter, makeIdsOptRef)
+                case _: AttrMapOpt => noOptional(a)
+              }
             }
 
           case ref@Ref(ns, refAttr, refNs, _, _, _) if nsHasFilter || nextNsHasFilter =>
@@ -199,7 +203,6 @@ trait UpdateFilters extends ModelUtils {
             findKnownIds :: stages1
           } else {
             findKnownIds :: UpdateNsData(refPath, updateModel) :: stages1
-            //            idsOptRef :: UpdateNsData(refPath.dropRight(2), updateModel) :: stages1
           }
       }
     }

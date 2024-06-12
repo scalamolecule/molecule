@@ -61,7 +61,7 @@ trait One_Map extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (3, Map(pint4, pint5)) // B value updated since there was a previous value
         ))
 
-        // Filter by A ids, upsert B values (insert if not already present)
+        // Filter by A.i values, upsert B values (insert if not already present)
         _ <- A.i_.B.iMap(Map(pint5, pint6)).upsert.transact
 
         // Now three A entities with referenced B value

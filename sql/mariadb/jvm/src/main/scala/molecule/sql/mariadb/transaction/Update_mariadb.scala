@@ -49,7 +49,8 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
     set: Set[T],
     transformValue: T => Any,
     exts: List[String],
-    one2json: T => String
+    one2json: T => String,
+    set2array: Set[T] => Array[AnyRef]
   ): Unit = {
     updateIterableRemove(ns, attr, optRefNs, set, exts, one2json)
   }
@@ -90,7 +91,8 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
     seq: Seq[T],
     transformValue: T => Any,
     exts: List[String],
-    one2json: T => String
+    one2json: T => String,
+    seq2array: Seq[T] => Array[AnyRef]
   ): Unit = {
     updateIterableRemove(ns, attr, optRefNs, seq, exts, one2json)
   }

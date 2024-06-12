@@ -12,7 +12,7 @@ import molecule.core.validation.TxModelValidation
 import molecule.core.validation.insert.InsertValidation
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.query.{Model2SqlQuery, SqlQueryBase, SqlQueryResolveCursor, SqlQueryResolveOffset}
-import molecule.sql.core.transaction.{SqlBase_JVM, SqlUpdateSetValidator, Table, UpdateFilters}
+import molecule.sql.core.transaction.{SqlBase_JVM, SqlUpdateSetValidator, Table, UpdateUtils}
 import scala.annotation.nowarn
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
@@ -21,7 +21,7 @@ import scala.util.control.NonFatal
 
 trait SpiSyncBase
   extends SpiSync
-    with UpdateFilters
+    with UpdateUtils
     with SqlBase_JVM
     with SpiHelpers
     with SqlUpdateSetValidator
@@ -399,6 +399,9 @@ trait SpiSyncBase
         println("\n-- 4 ---- refIdss -------- " + refPath)
         refIdss.toList.sortBy(_._1.length).foreach(println)
 
+        println("-- 4 ---- elements --------")
+        elements.foreach(println)
+
         val table = update_getData(conn, Update(elements, true))._1.head
         println("\n-- 4 ---- table -------- ")
         println(table)
@@ -420,43 +423,6 @@ trait SpiSyncBase
         )
         tableUpdates = tableUpdate +: tableUpdates
     }
-
-    //    def makeRef(refPath: List[String], ns: String, refAttr: String, refNs: String,
-    //                addIds: Boolean, useAccIds: Boolean, x: String, es: List[Element] = Nil) = {
-    //      // Insert ref row
-    //      val insertRefRow = s"INSERT $x INTO $refNs DEFAULT VALUES"
-    //      val insert       = (ps: PS, _: IdsMap, _: RowIndex) => {
-    //        ps.addBatch()
-    //      }
-    //      val newRefTable  = Table(refPath, insertRefRow, insert, true)
-    //      //      val newRefTable  = Table(refPath, insertRefRow, insert)
-    //
-    //      // Add relationship to new ref row
-    //      //      val updateStmt = (ids: List[Long]) => s"UPDATE     $ns SET $refAttr = ? WHERE id = ${ids.head}"
-    //      val updateStmt = (ids: List[Long]) => s"UPDATE $x $ns SET $refAttr = ? WHERE id = ${ids.last}"
-    //      //      val updateStmt = (ids: List[Long]) => s"UPDATE $x $ns SET $refAttr = ? WHERE id = 4"
-    //      //      val updateStmt = (ids: List[Long]) => s"UPDATE $x $ns SET $refAttr = ? WHERE id = 6"
-    //      //      val updateStmt = (ids: List[Long]) => s"UPDATE $ns SET $refAttr = ? WHERE id IN(${ids.mkString(", ")})"
-    //
-    //
-    //      val update    = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
-    //        // Use ref path to retrieve created ref id from previous insert
-    //        //        val refId = idsMap(refPath).head
-    //
-    //        //        println("-- 3 ---- tuples -------- 222")
-    //        //        query_getRaw(Query[Option[String]](es)).foreach(println)
-    //
-    //        val refId = idsMap(refPath).last
-    //        println("  refId   : " + refId)
-    //        ps.setLong(1, refId)
-    //        ps.addBatch()
-    //      }
-    //      val curIds    = refIdss.getOrElse(refPath, Nil)
-    //      val updateRef = Table(refPath, "", update, addIds, useAccIds, curIds, Some(updateStmt))
-    //
-    //      // Tables are resolved in reverse order in JdbcConn_JVM.populateStmts
-    //      tableUpdates = List(updateRef, newRefTable) ++ tableUpdates
-    //    }
 
     (tableUpdates, Nil)
   }

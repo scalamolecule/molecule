@@ -66,7 +66,7 @@ trait One_Set_add extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- A.i.a1.B.iSet.query.get.map(_ ==> List(
           (1, Set(5, 6)), //       relationship to B created, B values added
           (2, Set(5, 6)), //       B attribute added
-          (3, Set(3, 4, 5, 6)), // B attribute updated (2 not added - already exists in Set)
+          (3, Set(3, 4, 5, 6)), // B attribute updated (5 not added - already exists in Set)
         ))
       } yield ()
     }

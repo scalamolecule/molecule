@@ -22,7 +22,8 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
     set: Set[T],
     transformValue: T => Any,
     exts: List[String],
-    one2json: T => String
+    one2json: T => String,
+    set2array: Set[T] => Array[AnyRef]
   ): Unit = {
     updateIterableRemove(ns, attr, optRefNs, set, transformValue, exts)
   }
@@ -35,7 +36,8 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
     seq: Seq[T],
     transformValue: T => Any,
     exts: List[String],
-    one2json: T => String
+    one2json: T => String,
+    seq2array: Seq[T] => Array[AnyRef]
   ): Unit = {
     updateIterableRemove(ns, attr, optRefNs, seq, transformValue, exts)
   }

@@ -3,6 +3,7 @@ package molecule.sql.h2
 import java.time.Instant
 import molecule.base.error.ModelError
 import molecule.core.util.Executor._
+import molecule.coreTests.dataModels.core.dsl.Types.Ns
 import molecule.coreTests.util.Array2List
 import molecule.sql.h2.async._
 import molecule.sql.h2.setup.{TestSuiteArray_h2, TestSuite_h2}
@@ -21,7 +22,18 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
 
-        _ <- Ns.i(1).refs(Set(ref1)).save.transact
+        //        _ <- Ns.i(1).refs(Set(ref1)).save.transact
+
+        id <- Ns.byteArray(Array(byte1, byte2, byte2)).save.transact.map(_.id)
+        _ <- Ns.byteArray.query.get.map(_.head ==> Array(byte1, byte2, byte2))
+
+        // Applying Byte Array replaces previous Array
+        _ <- Ns(id).byteArray(Array(byte3, byte4, byte4)).update.transact
+        //        _ <- Ns(id).byteArray(Array(byte3, byte4, byte4)).upsert.transact
+        _ <- Ns.byteArray.query.get.map(_.head ==> Array(byte3, byte4, byte4))
+
+
+
 
         //        _ <- rawQuery(
         //          """select count(*) from Ns
@@ -45,10 +57,49 @@ object AdhocJVM_h2 extends TestSuite_h2 {
 
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
+      val pint20 = "b" -> 20
+      val pint30 = "c" -> 30
+
       for {
 
+        //        _ <- rawTransact(
+        //          """UPDATE B
+        //            |SET
+        //            |  B.iMap = JSON_OBJECT('iMap': 100 format json)
+        //            |WHERE
+        //            |  B.iMap IS NOT NULL AND
+        //            |  B.id IN(42)
+        //            |""".stripMargin)
 
-        _ <- A.i(1).s("a").save.transact.map(_.id)
+        //        _ <- rawTransact(
+        //          """MERGE INTO B
+        //            |USING VALUES (
+        //            |  JSON_OBJECT('a': 6)
+        //            |) _v(iMap)
+        //            |ON B.id IN(1)
+        //            |WHEN MATCHED THEN
+        //            |  UPDATE SET
+        //            |    B.iMap = JSON_OBJECT('a': 7)
+        //            |WHEN NOT MATCHED THEN
+        //            |  INSERT (iMap) VALUES (
+        //            |    JSON_OBJECT('a': 8)
+        //            |  )
+        //            |""".stripMargin)
+
+        _ <- A.i(1).save.transact
+        _ <- A.i(2).B.s("b").save.transact
+        _ <- A.i(3).B.s("c").iMap(Map(pint1, pint2)).save.transact
+        _ <- A.i(4).B.s("c").iMap(Map(pint2, pint3)).save.transact
+        _ <- A.i(5).B.s("c").iMap(Map(pint3, pint4)).save.transact
+
+        // Filter by A ids, update B values
+        _ <- A.i_.B.iMap.remove(string3, string4).update.transact
+
+        // 2 entities left with remaining values
+        _ <- A.i.a1.B.iMap.query.get.map(_ ==> List(
+          (3, Map(pint1, pint2)),
+          (4, Map(pint2)),
+        ))
 
 
       } yield ()

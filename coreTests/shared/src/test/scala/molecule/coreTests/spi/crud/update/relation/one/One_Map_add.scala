@@ -10,33 +10,48 @@ import utest._
 
 trait One_Map_add extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
+  // Pairs with existing key and new value
+  val pint20 = "b" -> 20
+  val pint30 = "c" -> 30
+
   override lazy val tests = Tests {
 
     "id-filter - ref - value" - refs { implicit conn =>
       for {
         a <- A.i(1).save.transact.map(_.id)
         b <- A.i(2).B.s("b").save.transact.map(_.id)
-        c <- A.i(3).B.s("c").iMap(Map(pint3, pint4)).save.transact.map(_.id)
+        c <- A.i(3).B.s("c").iMap(Map(pint1, pint2, pint3)).save.transact.map(_.id)
 
         // Current entity with A value and ref to B value
         _ <- A.i.a1.B.iMap.query.get.map(_ ==> List(
-          (3, Map(pint3, pint4))
+          (3, Map(pint1, pint2, pint3))
         ))
 
-        // Filter by A attribute, update B values
-        _ <- A(a, b, c).B.iMap.add(pint4, pint5).update.transact
+        // Filter by ids, add B pairs with update
+        _ <- A(a, b, c).B.iMap.add(pint20, pint3, pint4).update.transact
 
         _ <- A.i.a1.B.iMap.query.get.map(_ ==> List(
-          (3, Map(pint3, pint4, pint4, pint5)) // B attribute updated, all values appended (List semantics)
+          (3, Map(
+            pint1,
+            pint20, // key unchanged, value updated
+            pint3, //  pair already existed, so no change
+            pint4 //   new pair added
+          ))
         ))
 
-        // Filter by A attribute, upsert B values
-        _ <- A(a, b, c).B.iMap.add(pint5, pint6).upsert.transact
+        // Filter by ids, add B pairs with upsert
+        _ <- A(a, b, c).B.iMap.add(pint30, pint4, pint5).upsert.transact
 
         _ <- A.i.a1.B.iMap.query.get.map(_ ==> List(
-          (1, Map(pint5, pint6)), //                             relationship to B created, B values added
-          (2, Map(pint5, pint6)), //                             B attribute added
-          (3, Map(pint3, pint4, pint4, pint5, pint5, pint6)), // B attribute updated
+          (1, Map(pint30, pint4, pint5)), // relationship to B created, pairs added
+          (2, Map(pint30, pint4, pint5)), // pairs added
+          (3, Map(
+            pint1,
+            pint20,
+            pint30, // key unchanged, value updated
+            pint4, //  pair already existed, so no change
+            pint5 //   new pair added
+          )),
         ))
       } yield ()
     }
@@ -46,27 +61,38 @@ trait One_Map_add extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- A.i(1).save.transact
         _ <- A.i(2).B.s("b").save.transact
-        _ <- A.i(3).B.s("c").iMap(Map(pint3, pint4)).save.transact
+        _ <- A.i(3).B.s("c").iMap(Map(pint1, pint2, pint3)).save.transact
 
         // Current entity with A value and ref to B value
         _ <- A.i.a1.B.iMap.query.get.map(_ ==> List(
-          (3, Map(pint3, pint4))
+          (3, Map(pint1, pint2, pint3))
         ))
 
-        // Filter by A attribute, update B values
-        _ <- A.i_.B.iMap.add(pint4, pint5).update.transact
+        // Filter by A attribute, add B pairs with update
+        _ <- A.i_.B.iMap.add(pint20, pint3, pint4).update.transact
 
         _ <- A.i.a1.B.iMap.query.get.map(_ ==> List(
-          (3, Map(pint3, pint4, pint4, pint5)) // B attribute updated, all values appended (List semantics)
+          (3, Map(
+            pint1,
+            pint20, // key unchanged, value updated
+            pint3, //  pair already existed, so no change
+            pint4 //   new pair added
+          ))
         ))
 
-        // Filter by A attribute, upsert B values
-        _ <- A.i_.B.iMap.add(pint5, pint6).upsert.transact
+        // Filter by A attribute, add B pairs with upsert
+        _ <- A.i_.B.iMap.add(pint30, pint4, pint5).upsert.transact
 
         _ <- A.i.a1.B.iMap.query.get.map(_ ==> List(
-          (1, Map(pint5, pint6)), //                             relationship to B created, B values added
-          (2, Map(pint5, pint6)), //                             B attribute added
-          (3, Map(pint3, pint4, pint4, pint5, pint5, pint6)), // B attribute updated
+          (1, Map(pint30, pint4, pint5)), // relationship to B created, pairs added
+          (2, Map(pint30, pint4, pint5)), // pairs added
+          (3, Map(
+            pint1,
+            pint20,
+            pint30, // key unchanged, value updated
+            pint4, //  pair already existed, so no change
+            pint5 //   new pair added
+          )),
         ))
       } yield ()
     }

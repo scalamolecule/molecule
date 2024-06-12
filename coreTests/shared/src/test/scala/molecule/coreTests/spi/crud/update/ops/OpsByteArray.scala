@@ -37,6 +37,26 @@ trait OpsByteArray extends CoreTestSuiteBase with Array2List with ApiAsync { spi
       } yield ()
     }
 
+    "apply (replace/add all), upsert" - types { implicit conn =>
+      for {
+        id <- Ns.byteArray(Array(byte1, byte2, byte2)).save.transact.map(_.id)
+        _ <- Ns.byteArray.query.get.map(_.head ==> Array(byte1, byte2, byte2))
+
+        // Applying Byte Array replaces previous Array
+        _ <- Ns(id).byteArray(Array(byte3, byte4, byte4)).upsert.transact
+        _ <- Ns.byteArray.query.get.map(_.head ==> Array(byte3, byte4, byte4))
+
+        // Applying empty Byte Array deletes previous Array
+        _ <- Ns(id).byteArray(Array.empty[Byte]).upsert.transact
+        _ <- Ns.byteArray.query.get.map(_ ==> Nil)
+
+        id <- Ns.byteArray(Array(byte1, byte2, byte2)).save.transact.map(_.id)
+        // Applying empty value deletes previous Byte Array
+        _ <- Ns(id).byteArray().upsert.transact
+        _ <- Ns.byteArray.query.get.map(_ ==> Nil)
+      } yield ()
+    }
+
 
     "add" - types { implicit conn =>
       for {

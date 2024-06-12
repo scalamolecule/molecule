@@ -31,7 +31,7 @@ trait SqlBase_JVM extends SqlDataType_JVM with ModelUtils with BaseHelpers {
   protected var inserts          = List.empty[(List[String], List[(String, String)])]
   protected var updates          = List.empty[(List[String], List[String])] // refPath -> cols
   protected var placeHolders     = List.empty[String]
-  protected var placeHolders2    = ListBuffer.empty[(String, String)]
+  protected var placeHolders2    = ListBuffer.empty[(String, String, String)]
   protected var joins            = List.empty[(List[String], String, String, List[String], List[String])]
   protected var ids              = Seq.empty[Long]
   protected val updateCols       = mutable.Map.empty[List[String], List[String]]

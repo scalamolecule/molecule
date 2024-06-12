@@ -1,7 +1,7 @@
 package molecule.sql.core.facade
 
 import java.sql
-import java.sql.{Connection, SQLException}
+import java.sql.{Connection, SQLException, Statement}
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.{Conn, TxReport}
@@ -161,6 +161,13 @@ case class JdbcConn_JVM(
         }
         ps.executeBatch()
     }
+
+    val query = s"SELECT iMap FROM B"
+    val ps    = sqlConn.prepareStatement(query)
+    //    val ps    = ps.getConnection.prepareStatement(query) //.executeQuery()
+    val rs    = ps.executeQuery()
+    rs.next()
+    //    val byteArray = rs.getBytes(1)
 
     // Return ids of first namespace entities
     idsMap.collectFirst {

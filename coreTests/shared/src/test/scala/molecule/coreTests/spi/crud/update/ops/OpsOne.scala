@@ -197,6 +197,54 @@ trait OpsOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.short.query.get.map(_.head ==> short2)
         _ <- Ns.char.query.get.map(_.head ==> char2)
         _ <- Ns.ref.query.get.map(_.head ==> ref2)
+
+        _ <- Ns(id1).string(string3).upsert.transact
+        _ <- Ns(id2).int(int3).upsert.transact
+        _ <- Ns(id3).long(long3).upsert.transact
+        _ <- Ns(id4).float(float3).upsert.transact
+        _ <- Ns(id5).double(double3).upsert.transact
+        _ <- Ns(id6).boolean(boolean3).upsert.transact
+        _ <- Ns(id7).bigInt(bigInt3).upsert.transact
+        _ <- Ns(id8).bigDecimal(bigDecimal3).upsert.transact
+        _ <- Ns(id9).date(date3).upsert.transact
+        _ <- Ns(id10).duration(duration3).upsert.transact
+        _ <- Ns(id11).instant(instant3).upsert.transact
+        _ <- Ns(id12).localDate(localDate3).upsert.transact
+        _ <- Ns(id13).localTime(localTime3).upsert.transact
+        _ <- Ns(id14).localDateTime(localDateTime3).upsert.transact
+        _ <- Ns(id15).offsetTime(offsetTime3).upsert.transact
+        _ <- Ns(id16).offsetDateTime(offsetDateTime3).upsert.transact
+        _ <- Ns(id17).zonedDateTime(zonedDateTime3).upsert.transact
+        _ <- Ns(id18).uuid(uuid3).upsert.transact
+        _ <- Ns(id19).uri(uri3).upsert.transact
+        _ <- Ns(id20).byte(byte3).upsert.transact
+        _ <- Ns(id21).short(short3).upsert.transact
+        _ <- Ns(id22).char(char3).upsert.transact
+        _ <- Ns(id23).ref(ref3).upsert.transact
+
+        _ <- Ns.string.query.get.map(_.head ==> string3)
+        _ <- Ns.int.query.get.map(_.head ==> int3)
+        _ <- Ns.long.query.get.map(_.head ==> long3)
+        _ <- Ns.float.query.get.map(_.head ==> float3)
+        _ <- Ns.double.query.get.map(_.head ==> double3)
+        _ <- Ns.boolean.query.get.map(_.head ==> boolean3)
+        _ <- Ns.bigInt.query.get.map(_.head ==> bigInt3)
+        _ <- Ns.bigDecimal.query.get.map(_.head ==> bigDecimal3)
+        _ <- Ns.date.query.get.map(_.head ==> date3)
+        _ <- Ns.duration.query.get.map(_.head ==> duration3)
+        _ <- Ns.instant.query.get.map(_.head ==> instant3)
+        _ <- Ns.localDate.query.get.map(_.head ==> localDate3)
+        _ <- Ns.localTime.query.get.map(_.head ==> localTime3)
+        _ <- Ns.localDateTime.query.get.map(_.head ==> localDateTime3)
+        _ <- Ns.offsetTime.query.get.map(_.head ==> offsetTime3)
+        _ <- Ns.offsetDateTime.query.get.map(_.head ==> offsetDateTime3)
+        _ <- Ns.zonedDateTime.query.get.map(_.head ==> zonedDateTime3)
+        _ <- Ns.uuid.query.get.map(_.head ==> uuid3)
+        _ <- Ns.uri.query.get.map(_.head ==> uri3)
+        _ <- Ns.byte.query.get.map(_.head ==> byte3)
+        _ <- Ns.short.query.get.map(_.head ==> short3)
+        _ <- Ns.char.query.get.map(_.head ==> char3)
+        _ <- Ns.ref.query.get.map(_.head ==> ref3)
       } yield ()
     }
   }
