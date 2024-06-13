@@ -13,7 +13,6 @@ import molecule.core.validation.insert.InsertValidation
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.query.{Model2SqlQuery, SqlQueryBase, SqlQueryResolveCursor, SqlQueryResolveOffset}
 import molecule.sql.core.transaction.{SqlBase_JVM, SqlUpdateSetValidator, Table, UpdateUtils}
-import scala.annotation.nowarn
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.util.control.NonFatal
@@ -250,48 +249,77 @@ trait SpiSyncBase
         println("-- 2 ---- ref paths ------")
         refPaths.foreach(println)
 
-        // Get current ids and optional ref ids
-        val tuples = query_getRaw[AnyRef](Query(elements)).asInstanceOf[List[Product]]
-        println("\n-- 2 ---- tuples --------- " + refPath)
-        tuples.foreach(println)
+        println("-- 2 ---- elements --------")
+        elements.foreach(println)
 
-        tuples.foreach { tuple =>
+
+        // Get current ids and optional ref ids
+        val rowTuples = query_getRaw[AnyRef](Query(elements)).asInstanceOf[List[Product]]
+        println("\n-- 2 ---- tuples --------- " + refPath)
+        rowTuples.foreach(println)
+
+        rowTuples.foreach { rowTuple =>
+          // Loop through namespaces of each row to complete ref structure
           refPaths.foreach {
             case (refPath, `last`) =>
-              tuple.productElement(last).asInstanceOf[Option[String]] match {
-                case Some(refId) =>
-                  refIdss(refPath) = refIdss.getOrElse(refPath, List.empty[Long]) :+ refId.toLong
-                case None        =>
-                  // Insert ref row
-                  val insertRefRow = s"INSERT INTO $refNs DEFAULT VALUES"
-                  val insert       = (ps: PS, _: IdsMap, _: RowIndex) => {
+              rowTuple.productElement(last) match {
+                case nested: List[_] if nested.isEmpty =>
+                  val insertRefRowStmt   = s"INSERT INTO $refNs DEFAULT VALUES"
+                  val insertRefRowAction = (ps: PS, _: IdsMap, _: RowIndex) => {
                     ps.addBatch()
                   }
-                  val newRefTable  = Table(refPath, insertRefRow, insert, true)
+                  val insertRefRow       = Table(refPath, insertRefRowStmt, insertRefRowAction, true)
 
-                  // Add relationship to new ref row
-                  val curId        = tuple.productElement(last - 1).asInstanceOf[String]
-                  val updateCurRow = s"UPDATE $ns SET $refAttr = ? WHERE id = $curId"
-                  val update       = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
+                  // Insert join row
+                  val curId               = rowTuple.productElement(last - 1).asInstanceOf[String]
+                  val insertJoinRowStmt   =
+                    s"INSERT INTO ${ns}_${refAttr}_$refNs (${ns}_id, ${refNs}_id) VALUES ($curId, ?)"
+                  val insertJoinRowAction = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
                     // Use ref path to retrieve created ref id from previous insert
                     val refId = idsMap(refPath).head
-                    //                    val refId = idsMap(refPath).last
+                    ps.setLong(1, refId)
+                    ps.addBatch()
+                  }
+                  val insertJoinRow       = Table(refPath, insertJoinRowStmt, insertJoinRowAction)
+
+                  // Tables are resolved in reverse order in JdbcConn_JVM.populateStmts
+                  tableUpdates = List(insertJoinRow, insertRefRow) ++ tableUpdates
+
+                case nested: List[_] =>
+                  val refIds = nested.asInstanceOf[List[String]].map(_.toLong)
+                  refIdss(refPath) = refIdss.getOrElse(refPath, List.empty[Long]) ++ refIds
+
+                case Some(refId: String) =>
+                  refIdss(refPath) = refIdss.getOrElse(refPath, List.empty[Long]) :+ refId.toLong
+
+                case None =>
+                  val insertRefRowStmt   = s"INSERT INTO $refNs DEFAULT VALUES"
+                  val insertRefRowAction = (ps: PS, _: IdsMap, _: RowIndex) => {
+                    ps.addBatch()
+                  }
+                  val insertRefRow       = Table(refPath, insertRefRowStmt, insertRefRowAction, true)
+
+                  // Add relationship to new ref row
+                  val curId              = rowTuple.productElement(last - 1).asInstanceOf[String]
+                  val updateCurRowStmt   = s"UPDATE $ns SET $refAttr = ? WHERE id = $curId"
+                  val updateCurRowAction = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
+                    // Use ref path to retrieve created ref id from previous insert
+                    val refId = idsMap(refPath).head
                     println("  refId: " + refId)
                     ps.setLong(1, refId)
                     ps.addBatch()
                   }
-                  val updateRef    = Table(refPath.dropRight(2), updateCurRow, update)
+                  val updateCurRow       = Table(refPath.dropRight(2), updateCurRowStmt, updateCurRowAction)
 
                   // Tables are resolved in reverse order in JdbcConn_JVM.populateStmts
-                  tableUpdates = List(updateRef, newRefTable) ++ tableUpdates
+                  tableUpdates = List(updateCurRow, insertRefRow) ++ tableUpdates
               }
-
               if (!refIdss.contains(refPath))
                 refIdss(refPath) = Nil
 
             case (refPath, i) =>
               refIdss(refPath) = refIdss.getOrElse(refPath, List.empty[Long]) :+
-                tuple.productElement(i).asInstanceOf[String].toLong
+                rowTuple.productElement(i).asInstanceOf[String].toLong
           }
         }
         println("-- 2 ---- refIdss -------- ")
@@ -301,14 +329,16 @@ trait SpiSyncBase
       case CompleteCurRef(refPath, idsResolver) =>
         val List(ns, refAttr, refNs) = refPath.takeRight(3)
         val insert                   = (_: PS, idsMap: IdsMap, _: RowIndex) => {
-          val nsIds    = idsMap(refPath.dropRight(2))
-          //          println("-- 3 ---- nsIds: " + nsIds)
+          val nsIds = idsMap(refPath.dropRight(2))
+          println("-- 3 ---- nsIds: " + nsIds)
+
           val elements = idsResolver(nsIds.map(_.toString))
-          //          println("-- 3 ---- elements --------")
-          //          elements.foreach(println)
-          //          println("-- 3 ---- tuples --------")
-          //          query_getRaw(Query[(String, Option[String])](elements)).foreach(println)
-          val refIds   = ListBuffer.empty[Long]
+          println("-- 3 ---- elements --------")
+          elements.foreach(println)
+          println("-- 3 ---- tuples --------")
+          query_getRaw(Query[(String, Option[String])](elements)).foreach(println)
+
+          val refIds = ListBuffer.empty[Long]
           query_getRaw(Query[(String, Option[String])](elements)).flatMap {
             case (nsId, None)        =>
               val refId = getId(s"INSERT INTO $refNs DEFAULT VALUES")

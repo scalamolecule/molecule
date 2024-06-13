@@ -43,15 +43,15 @@ trait NestOpt[Tpl] { self: Model2QueryBase
   private lazy val i6 = i5 + aritiess(5).flatten.takeWhile(_ != -1).sum
   private lazy val i7 = i6 + aritiess(6).flatten.takeWhile(_ != -1).sum
 
-  private var rowCount                                  = -1
-  private lazy val rowIndexTx                           = 1 + rowCount - txAttrs // 1-based indexes for jdbc ResultSet
+  private var rowCount                                 = -1
+  private lazy val rowIndexTx                          = 1 + rowCount - txAttrs // 1-based indexes for jdbc ResultSet
   private lazy val tplBranch0: (RS, NestedTpls) => Tpl = castBranch[Tpl](aritiess(0), castss(0), i0, rowIndexTx)
-  private lazy val tplBranch1: (RS, NestedTpls) => Any        = castBranch[Any](aritiess(1), castss(1), i1, 0)
-  private lazy val tplBranch2: (RS, NestedTpls) => Any        = castBranch[Any](aritiess(2), castss(2), i2, 0)
-  private lazy val tplBranch3: (RS, NestedTpls) => Any        = castBranch[Any](aritiess(3), castss(3), i3, 0)
-  private lazy val tplBranch4: (RS, NestedTpls) => Any        = castBranch[Any](aritiess(4), castss(4), i4, 0)
-  private lazy val tplBranch5: (RS, NestedTpls) => Any        = castBranch[Any](aritiess(5), castss(5), i5, 0)
-  private lazy val tplBranch6: (RS, NestedTpls) => Any        = castBranch[Any](aritiess(6), castss(6), i6, 0)
+  private lazy val tplBranch1: (RS, NestedTpls) => Any = castBranch[Any](aritiess(1), castss(1), i1, 0)
+  private lazy val tplBranch2: (RS, NestedTpls) => Any = castBranch[Any](aritiess(2), castss(2), i2, 0)
+  private lazy val tplBranch3: (RS, NestedTpls) => Any = castBranch[Any](aritiess(3), castss(3), i3, 0)
+  private lazy val tplBranch4: (RS, NestedTpls) => Any = castBranch[Any](aritiess(4), castss(4), i4, 0)
+  private lazy val tplBranch5: (RS, NestedTpls) => Any = castBranch[Any](aritiess(5), castss(5), i5, 0)
+  private lazy val tplBranch6: (RS, NestedTpls) => Any = castBranch[Any](aritiess(6), castss(6), i6, 0)
 
   private lazy val tplLeaf1: RS => Any = castRow2AnyTpl(aritiess(1), castss(1), i1, None)
   private lazy val tplLeaf2: RS => Any = castRow2AnyTpl(aritiess(2), castss(2), i2, None)
@@ -85,31 +85,40 @@ trait NestOpt[Tpl] { self: Model2QueryBase
     result.filterNot(_ == Nil)
   }
 
-  final private def flatten(list: List[Any]): List[Any] = {
-    val buf = new ListBuffer[Any]
-    val it  = list.iterator
-    while (it.hasNext) {
-      it.next() match {
-        case null                       => ()
-        case set: Set[_] if set.isEmpty => ()
-        case Some(v)                    => buf += Some(v)
-        case None                       => ()
-        case tpl: Product               =>
-          var hasEmptySet = false
-          val allEmpty    = (0 until tpl.productArity).foldLeft(0) {
-            case (acc, i) =>
-              val el = tpl.productElement(i)
-              el match {
-                case set: Set[_] if set.isEmpty => hasEmptySet = true; acc
-                case None                       => acc
-                case Nil                        => acc
-                case null                       => acc
-                case _                          => acc + 1
-              }
-          } == 0
-          if (!allEmpty && !hasEmptySet)
-            buf += tpl
+  final private def flatten(list: List[Any], hasNested: Boolean = true): List[Any] = {
+    val buf  = new ListBuffer[Any]
+    val rows = list.iterator
+    while (rows.hasNext) {
+      rows.next() match {
+        // Nested empty single value not to be added
+        case set: Set[_] if set.isEmpty    => ()
+        case seq: Seq[_] if seq.isEmpty    => ()
+        case map: Map[_, _] if map.isEmpty => ()
+        case None                          => ()
+        case null                          => ()
 
+        // Nested tuple
+        case nestedTuple: Product =>
+          var hasEmpty = false
+          val last     = nestedTuple.productArity - 1
+          val allEmpty = (0 until nestedTuple.productArity).foldLeft(0) {
+
+            // When last value is an optional list of further optional nested tuples then it can be empty
+            case (acc, `last`) if hasNested => acc
+
+            case (acc, i) => nestedTuple.productElement(i) match {
+              case None                          => acc // ok with empty optional
+              case set: Set[_] if set.isEmpty    => hasEmpty = true; acc
+              case seq: Seq[_] if seq.isEmpty    => hasEmpty = true; acc
+              case map: Map[_, _] if map.isEmpty => hasEmpty = true; acc
+              case null                          => hasEmpty = true; acc
+              case _                             => acc + 1
+            }
+          } == 0
+          if (!allEmpty && !hasEmpty)
+            buf += nestedTuple
+
+        // Add existing nested single value
         case v => buf += v
       }
     }
@@ -122,7 +131,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
     if (rowCount == 1) {
       rows.first()
       acc1 = List(tplLeaf1(rows))
-      acc0 = List(tplBranch0(rows, flatten(acc1)))
+      acc0 = List(tplBranch0(rows, flatten(acc1, false)))
 
     } else {
       rows.afterLast()
@@ -133,21 +142,25 @@ trait NestOpt[Tpl] { self: Model2QueryBase
             if (e0 != p0) {
               // Use previous row (going backwards)
               rows.next()
-              acc0 = tplBranch0(rows, flatten(acc1)) :: acc0
+              println("+++++++++++++++++  2a")
+              acc0 = tplBranch0(rows, flatten(acc1, false)) :: acc0
               rows.previous()
 
               acc1 = List(tplLeaf1(rows))
-              acc0 = tplBranch0(rows, flatten(acc1)) :: acc0
+              println("+++++++++++++++++  2b")
+              acc0 = tplBranch0(rows, flatten(acc1, false)) :: acc0
 
             } else /* e1 != p1 */ {
               acc1 = tplLeaf1(rows) :: acc1
-              acc0 = tplBranch0(rows, flatten(acc1)) :: acc0
+              println("+++++++++++++++++  2c")
+              acc0 = tplBranch0(rows, flatten(acc1, false)) :: acc0
             }
 
           } else if (e0 != p0) {
             // Use previous row (going backwards)
             rows.next()
-            acc0 = tplBranch0(rows, flatten(acc1)) :: acc0
+            println("+++++++++++++++++  2d")
+            acc0 = tplBranch0(rows, flatten(acc1, false)) :: acc0
             rows.previous()
 
             acc1 = List(tplLeaf1(rows))
@@ -172,7 +185,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
     if (rowCount == 1) {
       rows.first()
       acc2 = List(tplLeaf2(rows))
-      acc1 = List(tplBranch1(rows, flatten(acc2)))
+      acc1 = List(tplBranch1(rows, flatten(acc2, false)))
       acc0 = List(tplBranch0(rows, flatten(acc1)))
 
     } else {
@@ -185,32 +198,32 @@ trait NestOpt[Tpl] { self: Model2QueryBase
           if (rows.isFirst) {
             if (e0 != p0) {
               rows.next()
-              acc1 = tplBranch1(rows, flatten(acc2)) :: acc1
+              acc1 = tplBranch1(rows, flatten(acc2, false)) :: acc1
               acc0 = tplBranch0(rows, flatten(acc1)) :: acc0
               rows.previous()
 
               acc2 = List(tplLeaf2(rows))
-              acc1 = List(tplBranch1(rows, flatten(acc2)))
+              acc1 = List(tplBranch1(rows, flatten(acc2, false)))
               acc0 = tplBranch0(rows, flatten(acc1)) :: acc0
 
             } else if (e1 != p1) {
               rows.next()
-              acc1 = tplBranch1(rows, flatten(acc2)) :: acc1
+              acc1 = tplBranch1(rows, flatten(acc2, false)) :: acc1
               rows.previous()
 
               acc2 = List(tplLeaf2(rows))
-              acc1 = tplBranch1(rows, flatten(acc2)) :: acc1
+              acc1 = tplBranch1(rows, flatten(acc2, false)) :: acc1
               acc0 = tplBranch0(rows, flatten(acc1)) :: acc0
 
             } else /* e2 != p2 */ {
               acc2 = tplLeaf2(rows) :: acc2
-              acc1 = tplBranch1(rows, flatten(acc2)) :: acc1
+              acc1 = tplBranch1(rows, flatten(acc2, false)) :: acc1
               acc0 = tplBranch0(rows, flatten(acc1)) :: acc0
             }
 
           } else if (e0 != p0) {
             rows.next()
-            acc1 = tplBranch1(rows, flatten(acc2)) :: acc1
+            acc1 = tplBranch1(rows, flatten(acc2, false)) :: acc1
             acc0 = tplBranch0(rows, flatten(acc1)) :: acc0
             rows.previous()
 
@@ -219,7 +232,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
           } else if (e1 != p1) {
             rows.next()
-            acc1 = tplBranch1(rows, flatten(acc2)) :: acc1
+            acc1 = tplBranch1(rows, flatten(acc2, false)) :: acc1
             rows.previous()
 
             acc2 = List(tplLeaf2(rows))
@@ -246,7 +259,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
     if (rowCount == 1) {
       rows.first()
       acc3 = List(tplLeaf3(rows))
-      acc2 = List(tplBranch2(rows, flatten(acc3)))
+      acc2 = List(tplBranch2(rows, flatten(acc3, false)))
       acc1 = List(tplBranch1(rows, flatten(acc2)))
       acc0 = List(tplBranch0(rows, flatten(acc1)))
 
@@ -261,47 +274,47 @@ trait NestOpt[Tpl] { self: Model2QueryBase
           if (rows.isFirst) {
             if (e0 != p0) {
               rows.next()
-              acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
+              acc2 = tplBranch2(rows, flatten(acc3, false)) :: acc2
               acc1 = tplBranch1(rows, flatten(acc2)) :: acc1
               acc0 = tplBranch0(rows, flatten(acc1)) :: acc0
               rows.previous()
 
               acc3 = List(tplLeaf3(rows))
-              acc2 = List(tplBranch2(rows, flatten(acc3)))
+              acc2 = List(tplBranch2(rows, flatten(acc3, false)))
               acc1 = List(tplBranch1(rows, flatten(acc2)))
               acc0 = tplBranch0(rows, flatten(acc1)) :: acc0
 
             } else if (e1 != p1) {
               rows.next()
-              acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
+              acc2 = tplBranch2(rows, flatten(acc3, false)) :: acc2
               acc1 = tplBranch1(rows, flatten(acc2)) :: acc1
               rows.previous()
 
               acc3 = List(tplLeaf3(rows))
-              acc2 = List(tplBranch2(rows, flatten(acc3)))
+              acc2 = List(tplBranch2(rows, flatten(acc3, false)))
               acc1 = tplBranch1(rows, flatten(acc2)) :: acc1
               acc0 = tplBranch0(rows, flatten(acc1)) :: acc0
 
             } else if (e2 != p2) {
               rows.next()
-              acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
+              acc2 = tplBranch2(rows, flatten(acc3, false)) :: acc2
               rows.previous()
 
               acc3 = List(tplLeaf3(rows))
-              acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
+              acc2 = tplBranch2(rows, flatten(acc3, false)) :: acc2
               acc1 = tplBranch1(rows, flatten(acc2)) :: acc1
               acc0 = tplBranch0(rows, flatten(acc1)) :: acc0
 
             } else /* e3 != p3 */ {
               acc3 = tplLeaf3(rows) :: acc3
-              acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
+              acc2 = tplBranch2(rows, flatten(acc3, false)) :: acc2
               acc1 = tplBranch1(rows, flatten(acc2)) :: acc1
               acc0 = tplBranch0(rows, flatten(acc1)) :: acc0
             }
 
           } else if (e0 != p0) {
             rows.next()
-            acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
+            acc2 = tplBranch2(rows, flatten(acc3, false)) :: acc2
             acc1 = tplBranch1(rows, flatten(acc2)) :: acc1
             acc0 = tplBranch0(rows, flatten(acc1)) :: acc0
             rows.previous()
@@ -312,7 +325,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
           } else if (e1 != p1) {
             rows.next()
-            acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
+            acc2 = tplBranch2(rows, flatten(acc3, false)) :: acc2
             acc1 = tplBranch1(rows, flatten(acc2)) :: acc1
             rows.previous()
 
@@ -321,7 +334,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
           } else if (e2 != p2) {
             rows.next()
-            acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
+            acc2 = tplBranch2(rows, flatten(acc3, false)) :: acc2
             rows.previous()
 
             acc3 = List(tplLeaf3(rows))
@@ -349,7 +362,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
     if (rowCount == 1) {
       rows.first()
       acc4 = List(tplLeaf4(rows))
-      acc3 = List(tplBranch3(rows, flatten(acc4)))
+      acc3 = List(tplBranch3(rows, flatten(acc4, false)))
       acc2 = List(tplBranch2(rows, flatten(acc3)))
       acc1 = List(tplBranch1(rows, flatten(acc2)))
       acc0 = List(tplBranch0(rows, flatten(acc1)))
@@ -366,57 +379,57 @@ trait NestOpt[Tpl] { self: Model2QueryBase
           if (rows.isFirst) {
             if (e0 != p0) {
               rows.next()
-              acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
+              acc3 = tplBranch3(rows, flatten(acc4, false)) :: acc3
               acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
               acc1 = tplBranch1(rows, flatten(acc2)) :: acc1
               acc0 = tplBranch0(rows, flatten(acc1)) :: acc0
               rows.previous()
 
               acc4 = List(tplLeaf4(rows))
-              acc3 = List(tplBranch3(rows, flatten(acc4)))
+              acc3 = List(tplBranch3(rows, flatten(acc4, false)))
               acc2 = List(tplBranch2(rows, flatten(acc3)))
               acc1 = List(tplBranch1(rows, flatten(acc2)))
               acc0 = tplBranch0(rows, flatten(acc1)) :: acc0
 
             } else if (e1 != p1) {
               rows.next()
-              acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
+              acc3 = tplBranch3(rows, flatten(acc4, false)) :: acc3
               acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
               acc1 = tplBranch1(rows, flatten(acc2)) :: acc1
               rows.previous()
 
               acc4 = List(tplLeaf4(rows))
-              acc3 = List(tplBranch3(rows, flatten(acc4)))
+              acc3 = List(tplBranch3(rows, flatten(acc4, false)))
               acc2 = List(tplBranch2(rows, flatten(acc3)))
               acc1 = tplBranch1(rows, flatten(acc2)) :: acc1
               acc0 = tplBranch0(rows, flatten(acc1)) :: acc0
 
             } else if (e2 != p2) {
               rows.next()
-              acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
+              acc3 = tplBranch3(rows, flatten(acc4, false)) :: acc3
               acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
               rows.previous()
 
               acc4 = List(tplLeaf4(rows))
-              acc3 = List(tplBranch3(rows, flatten(acc4)))
+              acc3 = List(tplBranch3(rows, flatten(acc4, false)))
               acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
               acc1 = tplBranch1(rows, flatten(acc2)) :: acc1
               acc0 = tplBranch0(rows, flatten(acc1)) :: acc0
 
             } else if (e3 != p3) {
               rows.next()
-              acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
+              acc3 = tplBranch3(rows, flatten(acc4, false)) :: acc3
               rows.previous()
 
               acc4 = List(tplLeaf4(rows))
-              acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
+              acc3 = tplBranch3(rows, flatten(acc4, false)) :: acc3
               acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
               acc1 = tplBranch1(rows, flatten(acc2)) :: acc1
               acc0 = tplBranch0(rows, flatten(acc1)) :: acc0
 
             } else /* e4 != p4 */ {
               acc4 = tplLeaf4(rows) :: acc4
-              acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
+              acc3 = tplBranch3(rows, flatten(acc4, false)) :: acc3
               acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
               acc1 = tplBranch1(rows, flatten(acc2)) :: acc1
               acc0 = tplBranch0(rows, flatten(acc1)) :: acc0
@@ -424,7 +437,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
           } else if (e0 != p0) {
             rows.next()
-            acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
+            acc3 = tplBranch3(rows, flatten(acc4, false)) :: acc3
             acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
             acc1 = tplBranch1(rows, flatten(acc2)) :: acc1
             acc0 = tplBranch0(rows, flatten(acc1)) :: acc0
@@ -437,7 +450,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
           } else if (e1 != p1) {
             rows.next()
-            acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
+            acc3 = tplBranch3(rows, flatten(acc4, false)) :: acc3
             acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
             acc1 = tplBranch1(rows, flatten(acc2)) :: acc1
             rows.previous()
@@ -448,7 +461,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
           } else if (e2 != p2) {
             rows.next()
-            acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
+            acc3 = tplBranch3(rows, flatten(acc4, false)) :: acc3
             acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
             rows.previous()
 
@@ -457,7 +470,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
           } else if (e3 != p3) {
             rows.next()
-            acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
+            acc3 = tplBranch3(rows, flatten(acc4, false)) :: acc3
             rows.previous()
 
             acc4 = List(tplLeaf4(rows))
@@ -486,7 +499,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
     if (rowCount == 1) {
       rows.first()
       acc5 = List(tplLeaf5(rows))
-      acc4 = List(tplBranch4(rows, flatten(acc5)))
+      acc4 = List(tplBranch4(rows, flatten(acc5, false)))
       acc3 = List(tplBranch3(rows, flatten(acc4)))
       acc2 = List(tplBranch2(rows, flatten(acc3)))
       acc1 = List(tplBranch1(rows, flatten(acc2)))
@@ -505,7 +518,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
           if (rows.isFirst) {
             if (e0 != p0) {
               rows.next()
-              acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
+              acc4 = tplBranch4(rows, flatten(acc5, false)) :: acc4
               acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
               acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
               acc1 = tplBranch1(rows, flatten(acc2)) :: acc1
@@ -513,7 +526,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
               rows.previous()
 
               acc5 = List(tplLeaf5(rows))
-              acc4 = List(tplBranch4(rows, flatten(acc5)))
+              acc4 = List(tplBranch4(rows, flatten(acc5, false)))
               acc3 = List(tplBranch3(rows, flatten(acc4)))
               acc2 = List(tplBranch2(rows, flatten(acc3)))
               acc1 = List(tplBranch1(rows, flatten(acc2)))
@@ -521,14 +534,14 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
             } else if (e1 != p1) {
               rows.next()
-              acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
+              acc4 = tplBranch4(rows, flatten(acc5, false)) :: acc4
               acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
               acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
               acc1 = tplBranch1(rows, flatten(acc2)) :: acc1
               rows.previous()
 
               acc5 = List(tplLeaf5(rows))
-              acc4 = List(tplBranch4(rows, flatten(acc5)))
+              acc4 = List(tplBranch4(rows, flatten(acc5, false)))
               acc3 = List(tplBranch3(rows, flatten(acc4)))
               acc2 = List(tplBranch2(rows, flatten(acc3)))
               acc1 = tplBranch1(rows, flatten(acc2)) :: acc1
@@ -536,13 +549,13 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
             } else if (e2 != p2) {
               rows.next()
-              acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
+              acc4 = tplBranch4(rows, flatten(acc5, false)) :: acc4
               acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
               acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
               rows.previous()
 
               acc5 = List(tplLeaf5(rows))
-              acc4 = List(tplBranch4(rows, flatten(acc5)))
+              acc4 = List(tplBranch4(rows, flatten(acc5, false)))
               acc3 = List(tplBranch3(rows, flatten(acc4)))
               acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
               acc1 = tplBranch1(rows, flatten(acc2)) :: acc1
@@ -550,12 +563,12 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
             } else if (e3 != p3) {
               rows.next()
-              acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
+              acc4 = tplBranch4(rows, flatten(acc5, false)) :: acc4
               acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
               rows.previous()
 
               acc5 = List(tplLeaf5(rows))
-              acc4 = List(tplBranch4(rows, flatten(acc5)))
+              acc4 = List(tplBranch4(rows, flatten(acc5, false)))
               acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
               acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
               acc1 = tplBranch1(rows, flatten(acc2)) :: acc1
@@ -563,11 +576,11 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
             } else if (e4 != p4) {
               rows.next()
-              acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
+              acc4 = tplBranch4(rows, flatten(acc5, false)) :: acc4
               rows.previous()
 
               acc5 = List(tplLeaf5(rows))
-              acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
+              acc4 = tplBranch4(rows, flatten(acc5, false)) :: acc4
               acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
               acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
               acc1 = tplBranch1(rows, flatten(acc2)) :: acc1
@@ -575,7 +588,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
             } else /* e5 != p5 */ {
               acc5 = tplLeaf5(rows) :: acc5
-              acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
+              acc4 = tplBranch4(rows, flatten(acc5, false)) :: acc4
               acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
               acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
               acc1 = tplBranch1(rows, flatten(acc2)) :: acc1
@@ -584,7 +597,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
           } else if (e0 != p0) {
             rows.next()
-            acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
+            acc4 = tplBranch4(rows, flatten(acc5, false)) :: acc4
             acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
             acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
             acc1 = tplBranch1(rows, flatten(acc2)) :: acc1
@@ -599,7 +612,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
           } else if (e1 != p1) {
             rows.next()
-            acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
+            acc4 = tplBranch4(rows, flatten(acc5, false)) :: acc4
             acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
             acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
             acc1 = tplBranch1(rows, flatten(acc2)) :: acc1
@@ -612,7 +625,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
           } else if (e2 != p2) {
             rows.next()
-            acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
+            acc4 = tplBranch4(rows, flatten(acc5, false)) :: acc4
             acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
             acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
             rows.previous()
@@ -623,7 +636,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
           } else if (e3 != p3) {
             rows.next()
-            acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
+            acc4 = tplBranch4(rows, flatten(acc5, false)) :: acc4
             acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
             rows.previous()
 
@@ -632,7 +645,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
           } else if (e4 != p4) {
             rows.next()
-            acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
+            acc4 = tplBranch4(rows, flatten(acc5, false)) :: acc4
             rows.previous()
 
             acc5 = List(tplLeaf5(rows))
@@ -662,7 +675,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
     if (rowCount == 1) {
       rows.first()
       acc6 = List(tplLeaf6(rows))
-      acc5 = List(tplBranch5(rows, flatten(acc6)))
+      acc5 = List(tplBranch5(rows, flatten(acc6, false)))
       acc4 = List(tplBranch4(rows, flatten(acc5)))
       acc3 = List(tplBranch3(rows, flatten(acc4)))
       acc2 = List(tplBranch2(rows, flatten(acc3)))
@@ -683,7 +696,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
           if (rows.isFirst) {
             if (e0 != p0) {
               rows.next()
-              acc5 = tplBranch5(rows, flatten(acc6)) :: acc5
+              acc5 = tplBranch5(rows, flatten(acc6, false)) :: acc5
               acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
               acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
               acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
@@ -692,7 +705,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
               rows.previous()
 
               acc6 = List(tplLeaf6(rows))
-              acc5 = List(tplBranch5(rows, flatten(acc6)))
+              acc5 = List(tplBranch5(rows, flatten(acc6, false)))
               acc4 = List(tplBranch4(rows, flatten(acc5)))
               acc3 = List(tplBranch3(rows, flatten(acc4)))
               acc2 = List(tplBranch2(rows, flatten(acc3)))
@@ -701,7 +714,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
             } else if (e1 != p1) {
               rows.next()
-              acc5 = tplBranch5(rows, flatten(acc6)) :: acc5
+              acc5 = tplBranch5(rows, flatten(acc6, false)) :: acc5
               acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
               acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
               acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
@@ -709,7 +722,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
               rows.previous()
 
               acc6 = List(tplLeaf6(rows))
-              acc5 = List(tplBranch5(rows, flatten(acc6)))
+              acc5 = List(tplBranch5(rows, flatten(acc6, false)))
               acc4 = List(tplBranch4(rows, flatten(acc5)))
               acc3 = List(tplBranch3(rows, flatten(acc4)))
               acc2 = List(tplBranch2(rows, flatten(acc3)))
@@ -718,14 +731,14 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
             } else if (e2 != p2) {
               rows.next()
-              acc5 = tplBranch5(rows, flatten(acc6)) :: acc5
+              acc5 = tplBranch5(rows, flatten(acc6, false)) :: acc5
               acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
               acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
               acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
               rows.previous()
 
               acc6 = List(tplLeaf6(rows))
-              acc5 = List(tplBranch5(rows, flatten(acc6)))
+              acc5 = List(tplBranch5(rows, flatten(acc6, false)))
               acc4 = List(tplBranch4(rows, flatten(acc5)))
               acc3 = List(tplBranch3(rows, flatten(acc4)))
               acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
@@ -734,13 +747,13 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
             } else if (e3 != p3) {
               rows.next()
-              acc5 = tplBranch5(rows, flatten(acc6)) :: acc5
+              acc5 = tplBranch5(rows, flatten(acc6, false)) :: acc5
               acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
               acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
               rows.previous()
 
               acc6 = List(tplLeaf6(rows))
-              acc5 = List(tplBranch5(rows, flatten(acc6)))
+              acc5 = List(tplBranch5(rows, flatten(acc6, false)))
               acc4 = List(tplBranch4(rows, flatten(acc5)))
               acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
               acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
@@ -749,12 +762,12 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
             } else if (e4 != p4) {
               rows.next()
-              acc5 = tplBranch5(rows, flatten(acc6)) :: acc5
+              acc5 = tplBranch5(rows, flatten(acc6, false)) :: acc5
               acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
               rows.previous()
 
               acc6 = List(tplLeaf6(rows))
-              acc5 = List(tplBranch5(rows, flatten(acc6)))
+              acc5 = List(tplBranch5(rows, flatten(acc6, false)))
               acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
               acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
               acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
@@ -763,11 +776,11 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
             } else if (e5 != p5) {
               rows.next()
-              acc5 = tplBranch5(rows, flatten(acc6)) :: acc5
+              acc5 = tplBranch5(rows, flatten(acc6, false)) :: acc5
               rows.previous()
 
               acc6 = List(tplLeaf6(rows))
-              acc5 = tplBranch5(rows, flatten(acc6)) :: acc5
+              acc5 = tplBranch5(rows, flatten(acc6, false)) :: acc5
               acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
               acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
               acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
@@ -776,7 +789,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
             } else /* e6 != p6 */ {
               acc6 = tplLeaf6(rows) :: acc6
-              acc5 = tplBranch5(rows, flatten(acc6)) :: acc5
+              acc5 = tplBranch5(rows, flatten(acc6, false)) :: acc5
               acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
               acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
               acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
@@ -786,7 +799,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
           } else if (e0 != p0) {
             rows.next()
-            acc5 = tplBranch5(rows, flatten(acc6)) :: acc5
+            acc5 = tplBranch5(rows, flatten(acc6, false)) :: acc5
             acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
             acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
             acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
@@ -803,7 +816,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
           } else if (e1 != p1) {
             rows.next()
-            acc5 = tplBranch5(rows, flatten(acc6)) :: acc5
+            acc5 = tplBranch5(rows, flatten(acc6, false)) :: acc5
             acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
             acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
             acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
@@ -818,7 +831,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
           } else if (e2 != p2) {
             rows.next()
-            acc5 = tplBranch5(rows, flatten(acc6)) :: acc5
+            acc5 = tplBranch5(rows, flatten(acc6, false)) :: acc5
             acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
             acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
             acc2 = tplBranch2(rows, flatten(acc3)) :: acc2
@@ -831,7 +844,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
           } else if (e3 != p3) {
             rows.next()
-            acc5 = tplBranch5(rows, flatten(acc6)) :: acc5
+            acc5 = tplBranch5(rows, flatten(acc6, false)) :: acc5
             acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
             acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
             rows.previous()
@@ -842,7 +855,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
           } else if (e4 != p4) {
             rows.next()
-            acc5 = tplBranch5(rows, flatten(acc6)) :: acc5
+            acc5 = tplBranch5(rows, flatten(acc6, false)) :: acc5
             acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
             rows.previous()
 
@@ -851,7 +864,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
           } else if (e5 != p5) {
             rows.next()
-            acc5 = tplBranch5(rows, flatten(acc6)) :: acc5
+            acc5 = tplBranch5(rows, flatten(acc6, false)) :: acc5
             rows.previous()
 
             acc6 = List(tplLeaf6(rows))
@@ -881,7 +894,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
     if (rowCount == 1) {
       rows.first()
       acc7 = List(tplLeaf7(rows))
-      acc6 = List(tplBranch6(rows, flatten(acc7)))
+      acc6 = List(tplBranch6(rows, flatten(acc7, false)))
       acc5 = List(tplBranch5(rows, flatten(acc6)))
       acc4 = List(tplBranch4(rows, flatten(acc5)))
       acc3 = List(tplBranch3(rows, flatten(acc4)))
@@ -904,7 +917,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
           if (rows.isFirst) {
             if (e0 != p0) {
               rows.next()
-              acc6 = tplBranch6(rows, flatten(acc7)) :: acc6
+              acc6 = tplBranch6(rows, flatten(acc7, false)) :: acc6
               acc5 = tplBranch5(rows, flatten(acc6)) :: acc5
               acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
               acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
@@ -914,7 +927,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
               rows.previous()
 
               acc7 = List(tplLeaf7(rows))
-              acc6 = List(tplBranch6(rows, flatten(acc7)))
+              acc6 = List(tplBranch6(rows, flatten(acc7, false)))
               acc5 = List(tplBranch5(rows, flatten(acc6)))
               acc4 = List(tplBranch4(rows, flatten(acc5)))
               acc3 = List(tplBranch3(rows, flatten(acc4)))
@@ -924,7 +937,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
             } else if (e1 != p1) {
               rows.next()
-              acc6 = tplBranch6(rows, flatten(acc7)) :: acc6
+              acc6 = tplBranch6(rows, flatten(acc7, false)) :: acc6
               acc5 = tplBranch5(rows, flatten(acc6)) :: acc5
               acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
               acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
@@ -933,7 +946,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
               rows.previous()
 
               acc7 = List(tplLeaf7(rows))
-              acc6 = List(tplBranch6(rows, flatten(acc7)))
+              acc6 = List(tplBranch6(rows, flatten(acc7, false)))
               acc5 = List(tplBranch5(rows, flatten(acc6)))
               acc4 = List(tplBranch4(rows, flatten(acc5)))
               acc3 = List(tplBranch3(rows, flatten(acc4)))
@@ -943,7 +956,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
             } else if (e2 != p2) {
               rows.next()
-              acc6 = tplBranch6(rows, flatten(acc7)) :: acc6
+              acc6 = tplBranch6(rows, flatten(acc7, false)) :: acc6
               acc5 = tplBranch5(rows, flatten(acc6)) :: acc5
               acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
               acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
@@ -951,7 +964,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
               rows.previous()
 
               acc7 = List(tplLeaf7(rows))
-              acc6 = List(tplBranch6(rows, flatten(acc7)))
+              acc6 = List(tplBranch6(rows, flatten(acc7, false)))
               acc5 = List(tplBranch5(rows, flatten(acc6)))
               acc4 = List(tplBranch4(rows, flatten(acc5)))
               acc3 = List(tplBranch3(rows, flatten(acc4)))
@@ -961,14 +974,14 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
             } else if (e3 != p3) {
               rows.next()
-              acc6 = tplBranch6(rows, flatten(acc7)) :: acc6
+              acc6 = tplBranch6(rows, flatten(acc7, false)) :: acc6
               acc5 = tplBranch5(rows, flatten(acc6)) :: acc5
               acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
               acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
               rows.previous()
 
               acc7 = List(tplLeaf7(rows))
-              acc6 = List(tplBranch6(rows, flatten(acc7)))
+              acc6 = List(tplBranch6(rows, flatten(acc7, false)))
               acc5 = List(tplBranch5(rows, flatten(acc6)))
               acc4 = List(tplBranch4(rows, flatten(acc5)))
               acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
@@ -978,13 +991,13 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
             } else if (e4 != p4) {
               rows.next()
-              acc6 = tplBranch6(rows, flatten(acc7)) :: acc6
+              acc6 = tplBranch6(rows, flatten(acc7, false)) :: acc6
               acc5 = tplBranch5(rows, flatten(acc6)) :: acc5
               acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
               rows.previous()
 
               acc7 = List(tplLeaf7(rows))
-              acc6 = List(tplBranch6(rows, flatten(acc7)))
+              acc6 = List(tplBranch6(rows, flatten(acc7, false)))
               acc5 = List(tplBranch5(rows, flatten(acc6)))
               acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
               acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
@@ -994,12 +1007,12 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
             } else if (e5 != p5) {
               rows.next()
-              acc6 = tplBranch6(rows, flatten(acc7)) :: acc6
+              acc6 = tplBranch6(rows, flatten(acc7, false)) :: acc6
               acc5 = tplBranch5(rows, flatten(acc6)) :: acc5
               rows.previous()
 
               acc7 = List(tplLeaf7(rows))
-              acc6 = List(tplBranch6(rows, flatten(acc7)))
+              acc6 = List(tplBranch6(rows, flatten(acc7, false)))
               acc5 = tplBranch5(rows, flatten(acc6)) :: acc5
               acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
               acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
@@ -1009,11 +1022,11 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
             } else if (e6 != p6) {
               rows.next()
-              acc6 = tplBranch6(rows, flatten(acc7)) :: acc6
+              acc6 = tplBranch6(rows, flatten(acc7, false)) :: acc6
               rows.previous()
 
               acc7 = List(tplLeaf7(rows))
-              acc6 = tplBranch6(rows, flatten(acc7)) :: acc6
+              acc6 = tplBranch6(rows, flatten(acc7, false)) :: acc6
               acc5 = tplBranch5(rows, flatten(acc6)) :: acc5
               acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
               acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
@@ -1023,7 +1036,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
             } else /* e7 != p7 */ {
               acc7 = tplLeaf7(rows) :: acc7
-              acc6 = tplBranch6(rows, flatten(acc7)) :: acc6
+              acc6 = tplBranch6(rows, flatten(acc7, false)) :: acc6
               acc5 = tplBranch5(rows, flatten(acc6)) :: acc5
               acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
               acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
@@ -1034,7 +1047,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
           } else if (e0 != p0) {
             rows.next()
-            acc6 = tplBranch6(rows, flatten(acc7)) :: acc6
+            acc6 = tplBranch6(rows, flatten(acc7, false)) :: acc6
             acc5 = tplBranch5(rows, flatten(acc6)) :: acc5
             acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
             acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
@@ -1053,7 +1066,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
           } else if (e1 != p1) {
             rows.next()
-            acc6 = tplBranch6(rows, flatten(acc7)) :: acc6
+            acc6 = tplBranch6(rows, flatten(acc7, false)) :: acc6
             acc5 = tplBranch5(rows, flatten(acc6)) :: acc5
             acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
             acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
@@ -1070,7 +1083,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
           } else if (e2 != p2) {
             rows.next()
-            acc6 = tplBranch6(rows, flatten(acc7)) :: acc6
+            acc6 = tplBranch6(rows, flatten(acc7, false)) :: acc6
             acc5 = tplBranch5(rows, flatten(acc6)) :: acc5
             acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
             acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
@@ -1085,7 +1098,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
           } else if (e3 != p3) {
             rows.next()
-            acc6 = tplBranch6(rows, flatten(acc7)) :: acc6
+            acc6 = tplBranch6(rows, flatten(acc7, false)) :: acc6
             acc5 = tplBranch5(rows, flatten(acc6)) :: acc5
             acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
             acc3 = tplBranch3(rows, flatten(acc4)) :: acc3
@@ -1098,7 +1111,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
           } else if (e4 != p4) {
             rows.next()
-            acc6 = tplBranch6(rows, flatten(acc7)) :: acc6
+            acc6 = tplBranch6(rows, flatten(acc7, false)) :: acc6
             acc5 = tplBranch5(rows, flatten(acc6)) :: acc5
             acc4 = tplBranch4(rows, flatten(acc5)) :: acc4
             rows.previous()
@@ -1109,7 +1122,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
           } else if (e5 != p5) {
             rows.next()
-            acc6 = tplBranch6(rows, flatten(acc7)) :: acc6
+            acc6 = tplBranch6(rows, flatten(acc7, false)) :: acc6
             acc5 = tplBranch5(rows, flatten(acc6)) :: acc5
             rows.previous()
 
@@ -1118,7 +1131,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
           } else if (e6 != p6) {
             rows.next()
-            acc6 = tplBranch6(rows, flatten(acc7)) :: acc6
+            acc6 = tplBranch6(rows, flatten(acc7, false)) :: acc6
             rows.previous()
 
             acc7 = List(tplLeaf7(rows))

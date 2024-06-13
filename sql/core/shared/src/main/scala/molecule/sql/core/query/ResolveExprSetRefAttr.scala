@@ -78,6 +78,7 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQuery
   protected def setRefTac[T](attr: Attr, args: Set[T], res: ResSet[T]): Unit = {
     val col = getCol(attr: Attr)
     joins += (("INNER JOIN", joinTable, "", s"$nsId", s"= $joinTable.$ns_id"))
+    //    joins += (("LEFT JOIN", joinTable, "", s"$nsId", s"= $joinTable.$ns_id"))
     groupBy += nsId
     attr.filterAttr.fold {
       setRefExpr(attr, col, attr.op, args)
@@ -114,9 +115,10 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQuery
       case Eq => noCollectionMatching(attr)
       //      case Eq       => setRefEqual(set, res)
       //      case Neq      => refNeq(set, res)
-      case Has     => refHas(set)
-      case HasNo   => refHasNo(set)
-      case NoValue => refNoValue(col)
+      case Has   => refHas(set)
+      case HasNo => refHasNo(set)
+      //      case NoValue => refNoValue(col)
+      case NoValue => refNoValue(s"$joinTable.$ns_id")
       case other   => unexpectedOp(other)
     }
   }
@@ -240,6 +242,9 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQuery
 
   protected def refNoValue(col: String): Unit = {
     notNull -= col
+    // Make join optional
+    joins.remove(joins.length - 1)
+    joins += (("LEFT JOIN", joinTable, "", s"$nsId", s"= $col"))
     where += ((col, s"IS NULL"))
   }
 }

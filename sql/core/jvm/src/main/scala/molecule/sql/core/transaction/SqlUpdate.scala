@@ -1,9 +1,6 @@
 package molecule.sql.core.transaction
 
-import java.net.URI
 import java.sql.{PreparedStatement => PS}
-import java.time._
-import java.util.{Date, UUID}
 import boopickle.Default._
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
@@ -58,18 +55,19 @@ trait SqlUpdate
               colValus = s"$colValus,\n    _v.$col"
           }
           val upsertStmt = (ids1: List[Long]) => {
-            val ids2 = if (ids1.nonEmpty)
+            val ids2 = if (ids1.nonEmpty) {
               ids1 // ids of existing and new entities (when ref structure establishment)
-            else if (ids.nonEmpty)
+            } else {
               ids // ids of existing entities (collected in handleIds)
-            else
-              List(-1) // no existing entities
-
+            }
+            val clauses = if (ids2.nonEmpty) {
+              s"$table.id IN(${ids2.mkString(", ")})"
+            } else {
+              model2SqlQuery(filterElements).getWhereClauses.mkString(" AND\n  ")
+            }
             s"""MERGE INTO $table
-               |USING VALUES (
-               |  $inputs
-               |) _v($colList)
-               |ON $table.id IN(${ids2.mkString(", ")})
+               |USING VALUES ($inputs) _v($colList)
+               |ON $clauses
                |WHEN MATCHED THEN
                |  UPDATE SET
                |    $setCols
@@ -81,9 +79,9 @@ trait SqlUpdate
           ("", Some(upsertStmt))
 
         } else {
-          val updateCols2_ = if (updateCols.isEmpty) Nil else
+          val updateCols2_ = if (updateCols.isEmpty) Nil else {
             updateCols(refPath).map(c => s"$c IS NOT NULL")
-
+          }
           val clauses_ = if (ids.nonEmpty) {
             List(s"$table.id IN(${ids.mkString(", ")})")
           } else {
@@ -105,7 +103,7 @@ trait SqlUpdate
         println("------ stmt --------")
         println(stmt)
         println("------ upsertStmt --------")
-        println(upsertStmt.map(_(List(1))))
+        println(upsertStmt.map(_(List(42))))
 
         debug(stmt)
         val colSetters = colSettersMap(refPath)
@@ -381,12 +379,12 @@ trait SqlUpdate
       placeHolders = placeHolders :+ s"$nsAttr = removePairs_$scalaBaseType($ns.$attr, ?)"
       placeHolders2 += ((
         attr,
-        s"CAST(? AS JSON)",
+        s"CAST(? AS VARCHAR ARRAY)",
         s"removePairs_$scalaBaseType($ns.$attr, _v.$attr)"
       ))
-
       val colSetter = (ps: PS, _: IdsMap, _: RowIndex) => {
-        ps.setBytes(curParamIndex, map2jsonByteArray(map, value2json))
+        val conn = ps.getConnection
+        ps.setArray(curParamIndex, conn.createArrayOf("String", map.keys.toArray))
         curParamIndex += 1
       }
       addColSetter(curRefPath, colSetter)
@@ -402,6 +400,11 @@ trait SqlUpdate
   }
 
   override def handleFilterAttr[T <: Attr with Tacit](filterAttr: T): Unit = {
+    filterAttr match {
+      case a: AttrSeqTac if a.op == Eq => noCollectionFilterEq(a.name)
+      case a: AttrSetTac if a.op == Eq => noCollectionFilterEq(a.name)
+      case _                           => ()
+    }
     filterElements = filterElements :+ filterAttr
   }
 

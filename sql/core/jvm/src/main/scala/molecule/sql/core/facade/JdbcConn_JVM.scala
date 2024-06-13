@@ -103,10 +103,10 @@ case class JdbcConn_JVM(
           ids = List.empty[Long]
 
           // No join tables (also without collision prevention "_"-suffix of table names)
-          // ns_join_ref             2 glues
-          // part_ns_join_part_ref   4 glues
-          val glues = refPath.last.init.count(_ == '_')
-          if (glues != 2 && glues != 4) {
+          // ns_join_ref             2 underscores
+          // part_ns_join_part_ref   4 underscores
+          val underscores = refPath.last.init.count(_ == '_')
+          if (underscores != 2 && underscores != 4) {
             while (resultSet.next()) {
               //              val id = resultSet.getLong(1)
               //              debug("  ################# " + id)
@@ -139,8 +139,13 @@ case class JdbcConn_JVM(
     }
 
     joinTables.foreach {
-      case JoinTable(stmt, ps, leftPath, rightPath, rightCounts) =>
+      case JoinTable(stmt, leftPath, rightPath, rightCounts) =>
         debug("D --- joinTable -------------------------------------------------\n" + stmt)
+        debug("leftPath : " + leftPath)
+        debug("rightPath: " + rightPath)
+        debug("idsMap 1 : " + idsMap)
+
+        val ps         = preparedStmt(stmt)
         val idsLeft    = idsMap(leftPath)
         var idLeft     = 0L
         var leftIndex  = 0
@@ -161,13 +166,6 @@ case class JdbcConn_JVM(
         }
         ps.executeBatch()
     }
-
-    val query = s"SELECT iMap FROM B"
-    val ps    = sqlConn.prepareStatement(query)
-    //    val ps    = ps.getConnection.prepareStatement(query) //.executeQuery()
-    val rs    = ps.executeQuery()
-    rs.next()
-    //    val byteArray = rs.getBytes(1)
 
     // Return ids of first namespace entities
     idsMap.collectFirst {

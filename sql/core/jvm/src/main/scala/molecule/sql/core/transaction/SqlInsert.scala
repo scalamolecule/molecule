@@ -15,11 +15,10 @@ trait SqlInsert
     with ModelUtils
     with MoleculeLogging { self: ResolveInsert with InsertResolvers_ =>
 
-  doPrint = false
-  //  doPrint = true
+  // (set doPrint in db implementations to print debug data)
 
   def getInsertData(nsMap: Map[String, MetaNs], elements: List[Element], tpls: Seq[Product]): Data = {
-    //    elements.foreach(debug)
+    elements.foreach(debug)
     debug("\n\n### A #############################################################################################")
     if (tpls.isEmpty) {
       debug("Tpls data empty, so no insert...")
@@ -50,6 +49,19 @@ trait SqlInsert
 
   protected def initInserts(): Unit = {
     inserts.foreach {
+      case (refPath, Nil) =>
+        // Add entity without attributes having only ref to next namespace
+        val table = refPath.last
+        val stmt  = s"INSERT INTO $table DEFAULT VALUES"
+        debug(s"B -------------------- refPath: $refPath")
+        debug(stmt)
+        tableDatas(refPath) = Table(refPath, stmt)
+        val rowSetter = (ps: PS, _: IdsMap, _: RowIndex) => {
+          ps.addBatch()
+        }
+        colSettersMap(refPath) = Nil
+        rowSettersMap(refPath) = List(rowSetter)
+
       case (refPath, cols) =>
         val table             = refPath.last
         val columns           = cols.map(_._1).mkString(",\n  ")
@@ -58,7 +70,6 @@ trait SqlInsert
           s"""INSERT INTO $table (
              |  $columns
              |) VALUES ($inputPlaceholders)""".stripMargin
-
         debug(s"B -------------------- refPath: $refPath")
         debug(stmt)
         tableDatas(refPath) = Table(refPath, stmt)
@@ -69,7 +80,7 @@ trait SqlInsert
       case (joinRefPath, id1, id2, leftPath, rightPath) =>
         val joinTable = joinRefPath.last
         val stmt      = s"INSERT INTO $joinTable ($id1, $id2) VALUES (?, ?)"
-        joinTableDatas = joinTableDatas :+ JoinTable(stmt, preparedStmt(stmt), leftPath, rightPath)
+        joinTableDatas = joinTableDatas :+ JoinTable(stmt, leftPath, rightPath)
     }
   }
 
@@ -119,63 +130,6 @@ trait SqlInsert
         }
       }
       tableDatas(refPath).copy(populatePS = populatePS)
-    }
-  }
-
-  override protected def addNested(
-    nsMap: Map[String, MetaNs],
-    tplIndex: Int,
-    ns: String,
-    refAttr: String,
-    refNs: String,
-    owner: Boolean,
-    nestedElements: List[Element]
-  ): Product => Unit = {
-    val joinTable  = ss(ns, refAttr, refNs)
-    val (id1, id2) = if (ns == refNs)
-      (ss(ns, "1_id"), ss(refNs, "2_id"))
-    else
-      (ss(ns, "id"), ss(refNs, "id"))
-    val nextLevel  = level + 1
-    val joinPath   = curRefPath :+ joinTable
-    val leftPath   = curRefPath
-    val rightPath  = List(s"$nextLevel", refNs)
-    joins = joins :+ (joinPath, id1, id2, leftPath, rightPath)
-    rightCountsMap(joinPath) = List.empty[Int]
-
-    // Initiate new level
-    level = nextLevel
-    curRefPath = List(s"$level", refNs)
-    colSettersMap += curRefPath -> Nil
-
-    // Recursively resolve nested data
-    val resolveNested = getResolver(nsMap, nestedElements)
-
-    countValueAttrs(nestedElements) match {
-      case 1 =>
-        (tpl: Product) => {
-          val nestedSingleValues = tpl.productElement(tplIndex).asInstanceOf[Seq[Any]].filter {
-            case set: Set[_] if set.isEmpty => false
-            case _                          => true
-          }
-          val length             = nestedSingleValues.length
-          rightCountsMap(joinPath) = rightCountsMap(joinPath) :+ length
-          nestedSingleValues.foreach { nestedSingleValue =>
-            resolveNested(Tuple1(nestedSingleValue))
-          }
-        }
-      case _ =>
-        (tpl: Product) => {
-          val nestedTpls = tpl.productElement(tplIndex).asInstanceOf[Seq[Product]]
-          val length     = nestedTpls.length
-          rightCountsMap(joinPath) = rightCountsMap(joinPath) :+ length
-          var rowIndex = 0
-          nestedTpls.foreach { nestedTpl =>
-            debug(s"------ $rowIndex ##################################### " + nestedTpl)
-            rowIndex += 1
-            resolveNested(nestedTpl)
-          }
-        }
     }
   }
 
@@ -377,6 +331,69 @@ trait SqlInsert
   override protected def addBackRef(backRefNs: String): Product => Unit = {
     curRefPath = curRefPath.dropRight(2) // drop refAttr, refNs
     (_: Product) => ()
+  }
+
+  override protected def addNested(
+    nsMap: Map[String, MetaNs],
+    tplIndex: Int,
+    ns: String,
+    refAttr: String,
+    refNs: String,
+    owner: Boolean,
+    nestedElements: List[Element]
+  ): Product => Unit = {
+    println("%%%%%%%%%%%%%%%%%%%%%%% " + inserts)
+
+    if (inserts.isEmpty) {
+      inserts = inserts :+ (curRefPath, Nil)
+    }
+
+    val joinTable  = ss(ns, refAttr, refNs)
+    val (id1, id2) = if (ns == refNs)
+      (ss(ns, "1_id"), ss(refNs, "2_id"))
+    else
+      (ss(ns, "id"), ss(refNs, "id"))
+    val nextLevel  = level + 1
+    val joinPath   = curRefPath :+ joinTable
+    val leftPath   = curRefPath
+    val rightPath  = List(s"$nextLevel", refNs)
+    joins = joins :+ (joinPath, id1, id2, leftPath, rightPath)
+    rightCountsMap(joinPath) = List.empty[Int]
+
+    // Initiate new level
+    level = nextLevel
+    curRefPath = List(s"$level", refNs)
+    colSettersMap += curRefPath -> Nil
+
+    // Recursively resolve nested data
+    val resolveNested = getResolver(nsMap, nestedElements)
+
+    countValueAttrs(nestedElements) match {
+      case 1 =>
+        (tpl: Product) => {
+          val nestedSingleValues = tpl.productElement(tplIndex).asInstanceOf[Seq[Any]].filter {
+            case set: Set[_] if set.isEmpty => false
+            case _                          => true
+          }
+          val length             = nestedSingleValues.length
+          rightCountsMap(joinPath) = rightCountsMap(joinPath) :+ length
+          nestedSingleValues.foreach { nestedSingleValue =>
+            resolveNested(Tuple1(nestedSingleValue))
+          }
+        }
+      case _ =>
+        (tpl: Product) => {
+          val nestedTpls = tpl.productElement(tplIndex).asInstanceOf[Seq[Product]]
+          val length     = nestedTpls.length
+          rightCountsMap(joinPath) = rightCountsMap(joinPath) :+ length
+          var rowIndex = 0
+          nestedTpls.foreach { nestedTpl =>
+            debug(s"------ $rowIndex ##################################### " + nestedTpl)
+            rowIndex += 1
+            resolveNested(nestedTpl)
+          }
+        }
+    }
   }
 
 

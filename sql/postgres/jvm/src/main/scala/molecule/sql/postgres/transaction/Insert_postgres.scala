@@ -33,7 +33,7 @@ trait Insert_postgres extends SqlInsert { self: ResolveInsert with InsertResolve
       case (joinRefPath, id1, id2, leftPath, rightPath) =>
         val joinTable = joinRefPath.last
         val stmt      = s"INSERT INTO $joinTable ($id1, $id2) VALUES (?, ?)"
-        joinTableDatas = joinTableDatas :+ JoinTable(stmt, preparedStmt(stmt), leftPath, rightPath)
+        joinTableDatas = joinTableDatas :+ JoinTable(stmt, leftPath, rightPath)
     }
   }
 

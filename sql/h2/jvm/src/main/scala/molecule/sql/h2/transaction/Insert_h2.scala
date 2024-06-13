@@ -6,4 +6,6 @@ import molecule.sql.core.transaction.SqlInsert
 trait Insert_h2 extends SqlInsert { self: ResolveInsert with InsertResolvers_ =>
 
   doPrint = false
+  //    doPrint = true
+
 }

@@ -22,16 +22,7 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
 
-        //        _ <- Ns.i(1).refs(Set(ref1)).save.transact
-
-        id <- Ns.byteArray(Array(byte1, byte2, byte2)).save.transact.map(_.id)
-        _ <- Ns.byteArray.query.get.map(_.head ==> Array(byte1, byte2, byte2))
-
-        // Applying Byte Array replaces previous Array
-        _ <- Ns(id).byteArray(Array(byte3, byte4, byte4)).update.transact
-        //        _ <- Ns(id).byteArray(Array(byte3, byte4, byte4)).upsert.transact
-        _ <- Ns.byteArray.query.get.map(_.head ==> Array(byte3, byte4, byte4))
-
+        id1 <- Ns.stringSeq(List(string1, string2, string3)).save.transact.map(_.id)
 
 
 
@@ -57,50 +48,43 @@ object AdhocJVM_h2 extends TestSuite_h2 {
 
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
-      val pint20 = "b" -> 20
-      val pint30 = "c" -> 30
-
       for {
 
-        //        _ <- rawTransact(
-        //          """UPDATE B
-        //            |SET
-        //            |  B.iMap = JSON_OBJECT('iMap': 100 format json)
-        //            |WHERE
-        //            |  B.iMap IS NOT NULL AND
-        //            |  B.id IN(42)
-        //            |""".stripMargin)
+
+        _ <- A.i.Bb.*?(B.s_?.iMap_?).insert(
+          (1, List()),
+          (2, List((Some("a"), None))),
+          (3, List((Some("b"), None), (Some("c"), None))),
+          (4, List((Some("d"), Some(Map(pint1, pint2))))),
+          (5, List((Some("e"), Some(Map(pint2, pint3))), (Some("f"), Some(Map(pint3, pint4))))),
+          (6, List((Some("g"), Some(Map(pint4, pint5))), (Some("h"), None))),
+        ).transact
+
 
         //        _ <- rawTransact(
-        //          """MERGE INTO B
-        //            |USING VALUES (
-        //            |  JSON_OBJECT('a': 6)
-        //            |) _v(iMap)
-        //            |ON B.id IN(1)
-        //            |WHEN MATCHED THEN
-        //            |  UPDATE SET
-        //            |    B.iMap = JSON_OBJECT('a': 7)
-        //            |WHEN NOT MATCHED THEN
-        //            |  INSERT (iMap) VALUES (
-        //            |    JSON_OBJECT('a': 8)
+        //          """UPDATE Ns
+        //            |SET
+        //            |  i = 7
+        //            |WHERE
+        //            |  Ns.i IS NOT NULL AND
+        //            |  exists (
+        //            |    select * from Ns
+        //            |      INNER JOIN Ns_refs_Ref ON Ns.id = Ns_refs_Ref.Ns_id
         //            |  )
         //            |""".stripMargin)
 
-        _ <- A.i(1).save.transact
-        _ <- A.i(2).B.s("b").save.transact
-        _ <- A.i(3).B.s("c").iMap(Map(pint1, pint2)).save.transact
-        _ <- A.i(4).B.s("c").iMap(Map(pint2, pint3)).save.transact
-        _ <- A.i(5).B.s("c").iMap(Map(pint3, pint4)).save.transact
-
+        // `upsert` has same semantics as `update` with `remove` since we don't insert data
         // Filter by A ids, update B values
-        _ <- A.i_.B.iMap.remove(string3, string4).update.transact
+        _ <- A.i_.Bb.iMap.remove(string4, string5).upsert.transact
 
-        // 2 entities left with remaining values
-        _ <- A.i.a1.B.iMap.query.get.map(_ ==> List(
-          (3, Map(pint1, pint2)),
-          (4, Map(pint2)),
+        _ <- A.i.a1.Bb.*?(B.s_?.iMap_?).query.get.map(_ ==> List(
+          (1, List()),
+          (2, List((Some("a"), None))),
+          (3, List((Some("b"), None), (Some("c"), None))),
+          (4, List((Some("d"), Some(Map(pint1, pint2))))),
+          (5, List((Some("e"), Some(Map(pint2, pint3))), (Some("f"), Some(Map(pint3))))), // update of last nested entity
+          (6, List((Some("g"), None), (Some("h"), None))), //                                update of first nested entity
         ))
-
 
       } yield ()
     }

@@ -60,9 +60,23 @@ trait SpiHelpers extends ModelUtils {
         hasData = false
         updateModel.clear()
 
-      case ref: Ref =>
-        //        throw ModelError(s"Can't $update attributes in card-many referenced namespace `${ref.refAttr.capitalize}`")
-        ???
+      case Ref(_, refAttr, refNs, _, _, _) =>
+        if (hasData) {
+          val updateElements = updateModel.toList
+          if (hasId) {
+            updateModels += refPath -> (_ => updateElements)
+          } else {
+            val ns = curNs // immutable value for later lambda resolution
+            updateModels += refPath -> ((ids: List[String]) =>
+              AttrOneTacID(ns, "id", Eq, ids, coord = dummyCoord) +: updateElements)
+          }
+        }
+
+        refPath ++= List(refAttr, refNs)
+        curNs = refNs
+        hasId = false
+        hasData = false
+        updateModel.clear()
 
       case BackRef(x, ns, _) =>
         refPath = refPath.dropRight(2)

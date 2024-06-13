@@ -12,6 +12,10 @@ class ResolveUpdate(
   val isUpsert: Boolean,
 ) extends ModelUtils { self: UpdateOps =>
 
+  private def unexpectedOp(a: Attr) =     throw ModelError(
+    s"Unexpected update operation for card-many attribute. Found:\n" + a
+  )
+
   @tailrec
   final def resolve(elements: List[Element]): Unit = {
     elements match {
@@ -29,7 +33,7 @@ class ResolveUpdate(
                 case Eq | NoValue => resolveAttrSetMan(a); resolve(tail)
                 case Add          => resolveAttrSetAdd(a); resolve(tail)
                 case Remove       => resolveAttrSetRemove(a); resolve(tail)
-                case _            => throw ModelError(s"Unexpected update operation for card-many attribute. Found:\n" + a)
+                case _            => unexpectedOp(a)
               }
               case a: AttrSetTac => handleFilterAttr(a); resolve(tail)
               case _: AttrSetOpt => noOptional(a)
@@ -40,7 +44,7 @@ class ResolveUpdate(
                 case Eq | NoValue => resolveAttrSeqMan(a); resolve(tail)
                 case Add          => resolveAttrSeqAdd(a); resolve(tail)
                 case Remove       => resolveAttrSeqRemove(a); resolve(tail)
-                case _            => throw ModelError(s"Unexpected update operation for card-many attribute. Found:\n" + a)
+                case _            => unexpectedOp(a)
               }
               case a: AttrSeqTac => handleFilterAttr(a); resolve(tail)
               case _: AttrSeqOpt => noOptional(a)
@@ -51,7 +55,7 @@ class ResolveUpdate(
                 case Eq | NoValue => resolveAttrMapMan(a); resolve(tail)
                 case Add          => resolveAttrMapAdd(a); resolve(tail)
                 case Remove       => resolveAttrMapRemove(a); resolve(tail)
-                case _            => throw ModelError(s"Unexpected update operation for card-many attribute. Found:\n" + a)
+                case _            => unexpectedOp(a)
               }
               case a: AttrMapTac => handleFilterAttr(a); resolve(tail)
               case a: AttrMapOpt => noOptional(a)
