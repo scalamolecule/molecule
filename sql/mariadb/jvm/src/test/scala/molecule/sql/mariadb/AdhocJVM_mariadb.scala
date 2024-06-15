@@ -22,29 +22,57 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
 
       for {
 
+        _ <- Ns.s.int.insert(
+          ("bar", 1),
+          ("baz", 2),
+          ("foo", 3),
+        ).transact
+
+        // Update all entities where `s` starts with "ba"
+        _ <- Ns.s_.startsWith("ba").int(4).update.transact
+
+        // 2 entities updated
+        _ <- Ns.s.a1.int.query.get.map(_ ==> List(
+          ("bar", 4), // updated
+          ("baz", 4), // updated
+          ("foo", 3),
+        ))
+
+        _ <- Ns.s_.endsWith("oo").int(5).update.transact
+        _ <- Ns.s.a1.int.query.get.map(_ ==> List(
+          ("bar", 4),
+          ("baz", 4),
+          ("foo", 5), // updated
+        ))
+
+        _ <- Ns.s_.contains("a").int(6).update.transact
+        _ <- Ns.s.a1.int.query.get.map(_ ==> List(
+          ("bar", 6), // updated
+          ("baz", 6), // updated
+          ("foo", 5),
+        ))
+
+        _ <- Ns.s_.matches("[a-z]{3}").int(7).update.transact
+        _ <- Ns.s.a1.int.query.get.map(_ ==> List(
+          ("bar", 7), // updated
+          ("baz", 7), // updated
+          ("foo", 7), // updated
+        ))
+
+        // No-match updates that won't change data
+        _ <- Ns.s_.startsWith("bo").int(8).update.transact
+        _ <- Ns.s_.endsWith("aa").int(8).update.transact
+        _ <- Ns.s_.contains("x").int(8).update.transact
+        _ <- Ns.s_.matches("[A_Z]+").int(8).update.transact
+
+        // Nothing updated if no match
+        _ <- Ns.s.a1.int.query.get.map(_ ==> List(
+          ("bar", 7),
+          ("baz", 7),
+          ("foo", 7),
+        ))
 
 
-        //        _ <- Ref.i.Nss.*(Ns.stringSeq).insert(1, List(List(string1, string2))).transact
-        _ <- Ref.i.Nss.*(Ns.intSeq).insert(2, List(List(int1, int2))).transact
-
-        _ <- rawQuery(
-          """SELECT DISTINCT
-            |  Ref.id,
-            |  Ns.intSeq
-            |FROM Ref
-            |  INNER JOIN Ref_nss_Ns ON Ref.id           = Ref_nss_Ns.Ref_id
-            |  INNER JOIN Ns         ON Ref_nss_Ns.Ns_id = Ns.id
-            |WHERE
-            |  Ref.i     IS NOT NULL AND
-            |  Ns.intSeq IS NOT NULL
-            |GROUP BY Ref.id, Ns.intSeq
-            |;
-            |""".stripMargin, true)
-//            |GROUP BY Ref.id
-
-
-        //        _ <- Ref.i_.Nss.*(Ns.stringSeq).query.i.get.map(_ ==> List(List(List(string1, string2))))
-        _ <- Ref.i_.Nss.*(Ns.intSeq).query.i.get.map(_ ==> List(List(List(int1, int2))))
       } yield ()
     }
 
@@ -54,77 +82,80 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
 
       for {
 
-        _ <- A.i.Bb.*(B.i.C.i.Dd.*(D.i.E.i)).insert(
-          (0, Nil),
-          (1, List(
-            (1, 1, Nil),
-          )),
-          (2, List(
-            (1, 1, Nil),
-            (2, 2, List((1, 2))),
-            (3, 3, List((1, 2), (3, 4))),
-          )),
-        ).transact
-
-        _ <- A.i.a1.Bb.*?(B.i.a1.C.i.Dd.*?(D.i.a1.E.i)).query.get.map(_ ==> List(
-          (0, Nil),
-          (1, List(
-            (1, 1, Nil),
-          )),
-          (2, List(
-            (1, 1, Nil),
-            (2, 2, List((1, 2))),
-            (3, 3, List((1, 2), (3, 4))),
-          )),
-        ))
-
-        _ <- A.i.Bb.*(B.i.a1.C.i.Dd.*(D.i.a1.E.i)).query.get.map(_ ==> List(
-          (2, List(
-            (2, 2, List((1, 2))),
-            (3, 3, List((1, 2), (3, 4))),
-          )),
-        ))
 
 
-        //        _ <- A.i.Bb.*(B.i.C.iSet).insert(
-        //          (0, Nil),
-        //          (1, List(
-        //            (1, Set.empty[Int])
-        //          )),
-        //          (2, List(
-        //            (1, Set.empty[Int]),
-        //            (2, Set(0)),
-        //            (3, Set(1, 2)),
-        //          )),
-        //        ).transact
-        //
-        //        _ <- rawQuery(
-        //          """SELECT DISTINCT
-        //            |  A.id,
-        //            |  A.i,
-        //            |  JSON_ARRAYAGG(t_1.vs)
-        //            |FROM A
-        //            |  LEFT JOIN A_bb_B ON A.id        = A_bb_B.A_id
-        //            |  LEFT JOIN B      ON A_bb_B.B_id = B.id
-        //            |  LEFT JOIN C      ON B.c         = C.id,
-        //            |  JSON_TABLE(
-        //            |    IF(C.iSet IS NULL, '[null]', C.iSet),
-        //            |    '$[*]' COLUMNS (vs INT PATH '$')
-        //            |  ) t_1
+        //        _ <- rawTransact(
+        //          """UPDATE B
+        //            |SET
+        //            |  iMap = json_merge_patch(iMap, json_object("b", 20, "c", 3, "d", 4))
         //            |WHERE
-        //            |  A.i IS NOT NULL
-        //            |GROUP BY A.id, A.i
-        //            |HAVING COUNT(*) > 0
-        //            |ORDER BY A.i;
-        //            |""".stripMargin, true)
+        //            |  B.iMap is not null and
+        //            |  B.id IN(1, 2, 3)
+        //            |""".stripMargin)
+
+        _ <- A.i.a1.Bb.*?(B.s_?.iSeq_?).insert(
+          //          (1, List()),
+          //          (2, List((Some("a"), None))),
+          //          (3, List((Some("b"), None), (Some("c"), None))),
+          //                    (4, List((Some("d"), Some(Seq(1, 2))))),
+          //          (5, List((Some("e"), Some(Seq(2, 3))), (Some("f"), Some(Seq(3, 4))))),
+          (6, List((Some("g"), Some(Seq(4, 5))), (Some("h"), None))),
+        ).transact.map(_.ids)
+
+        // Filter by A ids, update B values
+        //        _ <- A.i_.Bb.iSeq(Seq(4, 5)).update.transact
+
+        //        _ <- A.i.a1.Bb.*?(B.s_?.iSet).query.i.get
+
+
+        _ <- rawQuery(
+          """SELECT DISTINCT
+            |  A.id,
+            |  A.i,
+            |  B.s,
+            |  B.iSeq
+            |FROM A
+            |  LEFT JOIN A_bb_B ON A.id        = A_bb_B.A_id
+            |  LEFT JOIN B      ON A_bb_B.B_id = B.id
+            |WHERE
+            |  A.i IS NOT NULL
+            |GROUP BY A.id, A.i, B.s, B.iSeq
+            |ORDER BY A.i;
+            |""".stripMargin, true)
+
+        _ <- A.i.a1.Bb.*?(B.s_?.iSeq).query.i.get.map(_ ==> List(
+          //          (1, List()), //                                               no B.i value
+          //          (2, List()), //                                               no B.i value
+          //          (3, List()), //                                               no B.i value
+          //          (4, List((Some("d"), Seq(4, 5)))), //                         update in 1 ref entity
+          //          (5, List((Some("e"), Seq(4, 5)), (Some("f"), Seq(4, 5)))), // update in 2 ref entities
+          (6, List((Some("g"), Seq(4, 5)))), //                         already had same value
+        ))
+
+        //        // Filter by A ids, upsert B values
+        //        _ <- A.i_.Bb.iSeq(Seq(5, 6)).upsert.transact
         //
-        //        _ <- A.i.a1.Bb.*?(B.C.iSet).query.i.get.map(_ ==> List(
-        //          (0, Nil),
-        //          (1, Nil),
-        //          (2, List(
-        //            Set(0, 1, 2), // Set(0) and Set(1, 2) coalesced to one Set
-        //          )),
+        //        _ <- A.i.a1.Bb.*?(B.s_?.iSeq).query.get.map(_ ==> List(
+        //          (1, List((None, Seq(5, 6)))), //                              ref + addition
+        //          (2, List((Some("a"), Seq(5, 6)))), //                         addition in 1 ref entity
+        //          (3, List((Some("b"), Seq(5, 6)), (Some("c"), Seq(5, 6)))), // addition in 2 ref entities
+        //          (4, List((Some("d"), Seq(5, 6)))), //                         update in 1 ref entity
+        //          (5, List((Some("e"), Seq(5, 6)), (Some("f"), Seq(5, 6)))), // update in 2 ref entities
+        //          (6, List((Some("g"), Seq(5, 6)), (Some("h"), Seq(5, 6)))), // update in one ref entity and addition in another
         //        ))
+
+        //        _ <- rawTransact(
+        //          """UPDATE B
+        //            |SET
+        //            |  iSeq = (
+        //            |      SELECT JSON_ARRAYAGG(list.v)
+        //            |      FROM   JSON_TABLE(B.iSeq, '$[*]' COLUMNS (v INT PATH '$')) as list
+        //            |      WHERE  list.v NOT IN (3, 4) and B.id is not null
+        //            |    )
+        //            |WHERE
+        //            |  B.iSeq is not null and
+        //            |  B.id IN(1, 2, 3)
+        //            |""".stripMargin)
 
       } yield ()
     }

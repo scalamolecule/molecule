@@ -157,7 +157,7 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     refNs.fold {
-      updateCurRefPath(attr)
+      cols += attr
       placeHolders = placeHolders :+ s"$attr = ?"
       val colSetter = if (iterable.nonEmpty) {
         if (!isUpsert) {
@@ -189,11 +189,11 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
   ): Unit = {
     refNs.fold {
       if (iterable.nonEmpty) {
-        updateCurRefPath(attr)
+        cols += attr
         if (!isUpsert) {
           addToUpdateColsNotNull(ns, attr)
         }
-        placeHolders = placeHolders :+ s"$attr = JSON_MERGE($attr, ?)"
+        placeHolders = placeHolders :+ s"$attr = JSON_MERGE(IFNULL($attr, '[]'), ?)"
         val json = iterable2json(iterable.asInstanceOf[Iterable[T]], value2json)
         addColSetter(curRefPath, (ps: PS, _: IdsMap, _: RowIndex) => {
           ps.setString(curParamIndex, json)
@@ -215,7 +215,7 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
   ): Unit = {
     refNs.fold {
       if (iterable.nonEmpty) {
-        updateCurRefPath(attr)
+        cols += attr
         if (!isUpsert) {
           addToUpdateColsNotNull(ns, attr)
         }

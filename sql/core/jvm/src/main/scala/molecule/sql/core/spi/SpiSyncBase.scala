@@ -196,7 +196,10 @@ trait SpiSyncBase
         case _: Ref => true
         case _      => false
       }) {
-        if (update0.isUpsert) refUpserts(update)(conn) else refUpdates(update)(conn)
+        if (update0.isUpsert)
+          refUpserts(update)(conn)
+        else
+          refUpdates(update)(conn)
       } else {
         update_getData(conn, update)
       }
@@ -264,7 +267,7 @@ trait SpiSyncBase
             case (refPath, `last`) =>
               rowTuple.productElement(last) match {
                 case nested: List[_] if nested.isEmpty =>
-                  val insertRefRowStmt   = s"INSERT INTO $refNs DEFAULT VALUES"
+                  val insertRefRowStmt   = s"INSERT INTO $refNs (id) VALUES (DEFAULT)"
                   val insertRefRowAction = (ps: PS, _: IdsMap, _: RowIndex) => {
                     ps.addBatch()
                   }
@@ -293,7 +296,7 @@ trait SpiSyncBase
                   refIdss(refPath) = refIdss.getOrElse(refPath, List.empty[Long]) :+ refId.toLong
 
                 case None =>
-                  val insertRefRowStmt   = s"INSERT INTO $refNs DEFAULT VALUES"
+                  val insertRefRowStmt   = s"INSERT INTO $refNs (id) VALUES (DEFAULT)"
                   val insertRefRowAction = (ps: PS, _: IdsMap, _: RowIndex) => {
                     ps.addBatch()
                   }
@@ -309,7 +312,12 @@ trait SpiSyncBase
                     ps.setLong(1, refId)
                     ps.addBatch()
                   }
-                  val updateCurRow       = Table(refPath.dropRight(2), updateCurRowStmt, updateCurRowAction)
+                  val updateCurRow       = Table(
+                    refPath.dropRight(2),
+                    updateCurRowStmt,
+                    updateCurRowAction,
+                    curIds = List(curId.toLong),
+                  )
 
                   // Tables are resolved in reverse order in JdbcConn_JVM.populateStmts
                   tableUpdates = List(updateCurRow, insertRefRow) ++ tableUpdates
@@ -336,19 +344,19 @@ trait SpiSyncBase
           println("-- 3 ---- elements --------")
           elements.foreach(println)
           println("-- 3 ---- tuples --------")
-          query_getRaw(Query[(String, Option[String])](elements)).foreach(println)
+          //          query_getRaw(Query[(String, Option[String])](elements)).foreach(println)
 
           val refIds = ListBuffer.empty[Long]
           query_getRaw(Query[(String, Option[String])](elements)).flatMap {
             case (nsId, None)        =>
-              val refId = getId(s"INSERT INTO $refNs DEFAULT VALUES")
+              val refId = getId(s"INSERT INTO $refNs (id) VALUES (DEFAULT)")
               refIds += refId
               Some((nsId, refId))
             case (nsId, Some(refId)) =>
               refIds += refId.toLong
               None
           }.foreach {
-            case (nsId, refId) => getId(s"UPDATE $ns SET $refAttr = $refId WHERE id = $nsId")
+            case (nsId, refId) => getId(s"UPDATE $ns SET $refAttr = $refId WHERE id = $nsId", Some(nsId))
           }
           idsMap(refPath) = refIds.toList
 
@@ -362,68 +370,6 @@ trait SpiSyncBase
         // needing queries during transaction buildup
         tableUpdates = Table(refPath, "select 42", insert, updateIdsMap = false) :: tableUpdates
 
-      //        println("\n-- 3 ---- refIdss -------- " + refPath)
-      //        val refIdLists = refIdss.toList.sortBy(_._1.length)
-      //        refIdLists.foreach(println)
-      //
-      //        val nsIds    = refIdss(refPath.dropRight(2))
-      //        val elements = idsResolver(nsIds.map(_.toString))
-      //
-      //        println("-- 3 ---- tuples --------")
-      //        query_getRaw(Query[Option[String]](elements)).foreach(println)
-      //
-      //
-      //        // Handle ids maybe pointing to ref
-      //        query_getRaw(Query[Option[String]](elements)).foreach {
-      //          case Some(refId) =>
-      //            refIdss(refPath) = refIdss.getOrElse(refPath, List.empty[Long]) :+ refId.toLong
-      //          case None        =>
-      //            println("+++++++++")
-      //            makeRef(refPath, ns, refAttr, refNs, false, true, "  ", elements)
-      //        }
-      //
-      //        // Handle missing ids of previous namespace
-      //        val numberOfMissingIds = refIdLists.head._2.length - refIdLists.last._2.length
-      //
-      //        println(s"numberOfMissingIds: " + numberOfMissingIds)
-      //        (0 until numberOfMissingIds).foreach { _ =>
-      //          println(".........")
-      //          makeRef(refPath, ns, refAttr, refNs, false, true, "            ", elements)
-      //        }
-      //          makeRef(refPath, ns, refAttr, refNs, false, true, "            ")
-
-
-      //      case NewRef(refPath, idsResolver) =>
-      //        val List(ns, refAttr, refNs) = refPath.takeRight(3)
-      //
-      //        println("\n-- 3 ---- refIdss -------- " + refPath)
-      //        val refIdLists = refIdss.toList.sortBy(_._1.length)
-      //        refIdLists.foreach(println)
-      //
-      //        val nsIds    = refIdss(refPath.dropRight(2))
-      //        val elements = idsResolver(nsIds.map(_.toString))
-      //
-      //        println("-- 3 ---- tuples --------")
-      //        query_getRaw(Query[Option[String]](elements)).foreach(println)
-      //
-      //
-      //        // Handle ids maybe pointing to ref
-      //        query_getRaw(Query[Option[String]](elements)).foreach {
-      //          case Some(refId) =>
-      //            refIdss(refPath) = refIdss.getOrElse(refPath, List.empty[Long]) :+ refId.toLong
-      //          case None        =>
-      //            makeRef(refPath, ns, refAttr, refNs, false, true, "  ")
-      //        }
-      //
-      //        // Handle missing ids of previous namespace
-      //        val numberOfMissingIds = refIdLists.head._2.length - refIdLists.last._2.length
-      //
-      //        println(s"numberOfMissingIds: " + numberOfMissingIds)
-      //        (0 until numberOfMissingIds).foreach { _ =>
-      //          println(".........")
-      //          makeRef(refPath, ns, refAttr, refNs, false, true, "            ")
-      //        }
-      ////          makeRef(refPath, ns, refAttr, refNs, false, true, "            ")
 
       case UpdateNsData(refPath, elements) =>
         println("\n-- 4 ---- refIdss -------- " + refPath)
@@ -453,21 +399,20 @@ trait SpiSyncBase
         )
         tableUpdates = tableUpdate +: tableUpdates
     }
-
     (tableUpdates, Nil)
   }
 
-  private def prepStmt(stmt: String)(implicit conn: JdbcConn_JVM) = {
-    conn.sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
-  }
-  private def getId(stmt: String)(implicit conn: JdbcConn_JVM): Long = {
+  private def getId(stmt: String, updateId: Option[String] = None)(implicit conn: JdbcConn_JVM): Long = {
     val ps = conn.sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
-
     ps.addBatch()
     ps.executeBatch()
     val resultSet = ps.getGeneratedKeys
-    resultSet.next()
-    val id = resultSet.getLong(1)
+    val id        = if (resultSet.next()) {
+      resultSet.getLong(1)
+    } else {
+      // MariaDb doesn't return id from updates, so we use supplied id in update stmt
+      updateId.get.toLong
+    }
     println(stmt + "  -->  id " + id)
     id
   }

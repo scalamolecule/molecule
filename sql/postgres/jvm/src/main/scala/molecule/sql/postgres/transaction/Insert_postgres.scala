@@ -20,7 +20,7 @@ trait Insert_postgres extends SqlInsert { self: ResolveInsert with InsertResolve
              |  $columns
              |) VALUES ($inputPlaceholders)""".stripMargin
         } else {
-          s"INSERT INTO $table DEFAULT VALUES"
+          s"INSERT INTO $table (id) VALUES (DEFAULT)"
         }
 
         debug(s"B -------------------- refPath: $refPath")

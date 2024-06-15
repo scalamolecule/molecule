@@ -62,15 +62,15 @@ trait SpiSync_postgres extends SpiSyncBase {
   }
 
   override def update_validate(update: Update)(implicit conn0: Conn): Map[String, Seq[String]] = {
-    val conn     = conn0.asInstanceOf[JdbcConn_JVM]
-    val resolver = (query: String) => {
+    val conn            = conn0.asInstanceOf[JdbcConn_JVM]
+    val query2resultSet = (query: String) => {
       val ps        = conn.sqlConn.prepareStatement(
         query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY
       )
       val resultSet = ps.executeQuery()
       new ResultSetImpl(resultSet)
     }
-    validateUpdateSet(conn.proxy, update.elements, update.isUpsert, resolver)
+    validateUpdateSet(conn.proxy, update.elements, query2resultSet)
   }
 
   override def delete_getData(conn: JdbcConn_JVM, delete: Delete): Data = {

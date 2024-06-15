@@ -103,7 +103,7 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
   ): Unit = {
     optRefNs.fold {
       if (iterable.nonEmpty) {
-        updateCurRefPath(attr)
+        cols += attr
         if (!isUpsert) {
           addToUpdateColsNotNull(ns, attr)
         }

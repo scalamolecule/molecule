@@ -23,7 +23,7 @@ case class JdbcConn_JVM(
 
   override lazy val sqlConn: Connection = sqlConn0
 
-  //  doPrint = false
+  //    doPrint = false
   doPrint = true
 
   override def transact_async(data: (List[Table], List[JoinTable]))
@@ -78,19 +78,20 @@ case class JdbcConn_JVM(
     tables.reverse.foreach {
       case Table(refPath, stmt, populatePS, accIds, useAccIds, curIds, upsertStmt, updateIdsMap) =>
         debug("D --- table ---------------------------------------------------------------------------------------------")
-        debug("refPath  : " + refPath)
-        debug("idsMap 1 : " + idsMap)
-        debug("accIds   : " + accIds)
-        debug("useAccIds: " + useAccIds)
-        debug("curIds   : " + curIds)
-        debug("idsAcc 1 : " + idsAcc.toMap)
+        debug("refPath     : " + refPath)
+        debug("idsMap 1    : " + idsMap)
+        debug("accIds      : " + accIds)
+        debug("useAccIds   : " + useAccIds)
+        debug("updateIdsMap: " + updateIdsMap)
+        debug("curIds      : " + curIds)
+        debug("idsAcc 1    : " + idsAcc.toMap)
 
         val stmt1 = if (useAccIds) {
           val ids = if (updateIdsMap) curIds ++ idsAcc.getOrElse(refPath, Nil) else idsMap.getOrElse(refPath, Nil)
-          debug("ids      : " + ids)
+          debug("ids         : " + ids)
           upsertStmt.get(ids)
         } else stmt
-        debug("stmt1    : " + stmt1)
+        debug("stmt1       : " + stmt1)
 
         val ps = preparedStmt(stmt1)
 
@@ -107,11 +108,18 @@ case class JdbcConn_JVM(
           // part_ns_join_part_ref   4 underscores
           val underscores = refPath.last.init.count(_ == '_')
           if (underscores != 2 && underscores != 4) {
+            var idSet  = false
             while (resultSet.next()) {
-              //              val id = resultSet.getLong(1)
               //              debug("  ################# " + id)
+              //              genIds = genIds :+ id
               //              ids = ids :+ id
               ids = ids :+ resultSet.getLong(1)
+              idSet = true
+            }
+            if (!idSet) {
+              // Not getting ids from updates with MariaDb.
+              // So we simply pick previous ids and the id supplied to the update
+              ids = idsMap.getOrElse(refPath, Nil) ++ curIds
             }
           }
         } catch {
@@ -124,17 +132,17 @@ case class JdbcConn_JVM(
             throw e
         }
         ps.close()
-        debug("idsMap 2: " + idsMap)
+        debug("idsMap 2    : " + idsMap)
         if (updateIdsMap)
           idsMap(refPath) = ids
-        debug("idsMap 2: " + idsMap)
+        debug("idsMap 2    : " + idsMap)
         if (accIds) {
           if (idsAcc.contains(refPath)) {
             idsAcc(refPath) = idsAcc(refPath) ++ ids
           } else {
             idsAcc += refPath -> ids
           }
-          debug("idsAcc 2: " + idsAcc.toMap)
+          debug("idsAcc 2    : " + idsAcc.toMap)
         }
     }
 

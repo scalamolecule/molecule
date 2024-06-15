@@ -77,9 +77,20 @@ trait ResolveExprSeq_mariadb
 
   private def mandatoryCast[T](res: ResSeq[T], mandatory: Boolean): Unit = {
     if (mandatory) {
-      replaceCast((row: RS, paramIndex: Int) =>
-        res.json2array(row.getString(paramIndex)).toList
-      )
+      if (isNestedOpt) {
+        // Allow empty optional nested rows.
+        // So let non-asserted Seq values (null) be checked in NestedOpt
+        replaceCast((row: RS, paramIndex: Int) => {
+          row.getString(paramIndex) match {
+            case null => null
+            case s    => res.json2array(s).toList
+          }
+        })
+      } else {
+        replaceCast((row: RS, paramIndex: Int) =>
+          res.json2array(row.getString(paramIndex)).toList
+        )
+      }
     }
   }
 }

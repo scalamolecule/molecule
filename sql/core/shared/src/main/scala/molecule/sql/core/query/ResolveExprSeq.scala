@@ -100,6 +100,9 @@ trait ResolveExprSeq extends ResolveExpr { self: SqlQueryBase with LambdasSeq =>
     val col = getCol(attr: Attr)
     select += col
     groupByCols += col // if we later need to group by non-aggregated columns
+
+    // Allow empty optional nested rows.
+    // So let non-asserted Seq values be checked in NestedOpt
     if (!isNestedOpt) {
       notNull += col
     }

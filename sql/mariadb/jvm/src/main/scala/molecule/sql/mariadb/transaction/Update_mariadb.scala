@@ -97,6 +97,56 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
     updateIterableRemove(ns, attr, optRefNs, seq, exts, one2json)
   }
 
+  override protected def updateMapAdd[T](
+    ns: String,
+    attr: String,
+    optRefNs: Option[String],
+    owner: Boolean,
+    map: Map[String, T],
+    transformValue: T => Any,
+    exts: List[String],
+    value2json: (StringBuffer, T) => StringBuffer,
+  ): Unit = {
+    if (map.nonEmpty) {
+      cols += attr
+      if (!isUpsert) {
+        addToUpdateColsNotNull(ns, attr)
+      }
+      placeHolders = placeHolders :+ s"$ns.$attr = JSON_MERGE_PATCH(IFNULL($ns.$attr, JSON_OBJECT()), ?)"
+      val jsonBytes  = map2jsonByteArray(map, value2json)
+      val colSetter = (ps: PS, _: IdsMap, _: RowIndex) => {
+        ps.setBytes(curParamIndex, jsonBytes)
+        curParamIndex += 1
+      }
+      addColSetter(curRefPath, colSetter)
+    }
+  }
+
+  override protected def updateMapRemove[T](
+    ns: String,
+    attr: String,
+    optRefNs: Option[String],
+    owner: Boolean,
+    map: Map[String, T],
+    transformValue: T => Any,
+    exts: List[String],
+    value2json: (StringBuffer, T) => StringBuffer,
+  ): Unit = {
+    if (map.nonEmpty) {
+      cols += attr
+      if (!isUpsert) {
+        addToUpdateColsNotNull(ns, attr)
+      }
+      val keys = map.keySet.map(k => s"'$$.$k'").mkString(", ")
+      placeHolders = placeHolders :+
+        s"""$ns.$attr = CASE JSON_REMOVE(IFNULL($ns.$attr, NULL), $keys)
+           |    WHEN JSON_OBJECT() THEN NULL
+           |    ELSE JSON_REMOVE($ns.$attr, $keys)
+           |  END""".stripMargin
+      addColSetter(curRefPath, (ps: PS, _: IdsMap, _: RowIndex) => ())
+    }
+  }
+
 
   // Helpers -------------------------------------------------------------------
 
@@ -108,7 +158,7 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     refNs.fold {
-      updateCurRefPath(attr)
+      cols += attr
       placeHolders = placeHolders :+ s"$attr = ?"
       val colSetter = if (iterable.nonEmpty) {
         if (!isUpsert) {
@@ -140,11 +190,11 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
   ): Unit = {
     refNs.fold {
       if (iterable.nonEmpty) {
-        updateCurRefPath(attr)
+        cols += attr
         if (!isUpsert) {
           addToUpdateColsNotNull(ns, attr)
         }
-        placeHolders = placeHolders :+ s"$attr = JSON_MERGE($attr, ?)"
+        placeHolders = placeHolders :+ s"""$attr = JSON_MERGE(IFNULL($attr, '[]'), ?)"""
         val json = iterable2json(iterable.asInstanceOf[Iterable[T]], value2json)
         addColSetter(curRefPath, (ps: PS, _: IdsMap, _: RowIndex) => {
           ps.setString(curParamIndex, json)
@@ -166,7 +216,7 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
   ): Unit = {
     refNs.fold {
       if (iterable.nonEmpty) {
-        updateCurRefPath(attr)
+        cols += attr
         if (!isUpsert) {
           addToUpdateColsNotNull(ns, attr)
         }
@@ -177,7 +227,7 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
           s"""$attr = (
              |    SELECT JSON_ARRAYAGG($valueTable.v)
              |    FROM   JSON_TABLE($ns.$attr, '$$[*]' COLUMNS (v $dbType PATH '$$')) $valueTable
-             |    WHERE  $valueTable.v NOT IN ($retractValues)
+             |    WHERE  $valueTable.v NOT IN ($retractValues) AND $ns.id IS NOT NULL
              |  )""".stripMargin
         addColSetter(curRefPath, (_: PS, _: IdsMap, _: RowIndex) => ())
       }

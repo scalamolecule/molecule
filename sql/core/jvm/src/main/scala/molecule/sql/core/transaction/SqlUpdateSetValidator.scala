@@ -12,12 +12,8 @@ trait SqlUpdateSetValidator extends SpiHelpers {
   protected def validateUpdateSet(
     proxy: ConnProxy,
     elements: List[Element],
-    isUpsert: Boolean,
     query2resultSet: String => Row
   ): Map[String, Seq[String]] = {
-//    if (isUpsert && isRefUpdate(elements))
-//      throw ModelError("Can't upsert referenced attributes. Please update instead.")
-
     val curSetValues: Attr => Set[Any] = (a: Attr) => try {
       val ns    = a.ns
       val attr  = a.attr
@@ -54,12 +50,8 @@ trait SqlUpdateSetValidator extends SpiHelpers {
   protected def validateUpdateSet2(
     proxy: ConnProxy,
     elements: List[Element],
-    isUpsert: Boolean,
     query2resultSet: String => Row
   ): Map[String, Seq[String]] = {
-    if (isUpsert && isRefUpdate(elements))
-      throw ModelError("Can't upsert referenced attributes. Please update instead.")
-
     val curSetValues: Attr => Set[Any] = (a: Attr) => try {
       val ns    = a.ns
       val attr  = a.attr

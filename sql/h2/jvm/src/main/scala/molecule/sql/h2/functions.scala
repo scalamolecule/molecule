@@ -8,8 +8,13 @@ import java.{lang => ja}
 import upickle.default.{read, write}
 import scala.reflect.ClassTag
 
+// H2 helper functions for updates that are likely not possible to implement with H2 SQL.
+// Create aliases in database to use functions.
+// @see molecule.coreTests.dataModels.core.schema.RefsSchema_H2
 object functions {
 
+  // Remove values from Set or Seq
+  // Example: Ns(id).iSeq.remove(1, 2)
   def removeFromArray_ID /*             */ (base: Array[String], remove: Array[String]): Array[String] = removeFromArray(base, remove)
   def removeFromArray_String /*         */ (base: Array[String], remove: Array[String]): Array[String] = removeFromArray(base, remove)
   def removeFromArray_Int /*            */ (base: Array[Integer], remove: Array[Integer]): Array[Integer] = removeFromArray(base, remove)
@@ -59,8 +64,10 @@ object functions {
   }
 
 
-  type bb = Array[Byte]
+  // Adding pairs to Map attributes
+  // Example: Ns(id).iMap.add("foo" -> 42)
 
+  type bb = Array[Byte]
   def addPairs_ID /*             */ (a: bb, b: bb): bb = addPairs(a, b, encodeMap_ID, decodeMap_ID)
   def addPairs_String /*         */ (a: bb, b: bb): bb = addPairs(a, b, encodeMap_String, decodeMap_String)
   def addPairs_Int /*            */ (a: bb, b: bb): bb = addPairs(a, b, encodeMap_Int, decodeMap_Int)
@@ -91,13 +98,14 @@ object functions {
     decode: String => Map[String, T],
     encode: Map[String, T] => String
   ): bb = {
-    if (base == null)
-      return add
+    val baseMap = if (base == null)
+      Map.empty[String, T] // if attribute is not already set (in upserts)
+    else
+      decode(new String(base))
 
     if (add == null)
       return base
 
-    val baseMap     = decode(new String(base))
     val newPairs    = decode(new String(add))
     val expandedMap = baseMap ++ newPairs
 
@@ -107,6 +115,8 @@ object functions {
       encode(expandedMap).map(_.toByte).toArray
   }
 
+  // Removing pairs from Map attributes (by String key)
+  // Example: Ns(id).iMap.remove("foo")
 
   def removePairs_ID /*             */ (a: bb, b: Array[String]): bb = removePairs(a, b, encodeMap_ID, decodeMap_ID)
   def removePairs_String /*         */ (a: bb, b: Array[String]): bb = removePairs(a, b, encodeMap_String, decodeMap_String)
@@ -141,10 +151,11 @@ object functions {
     if (base == null)
       return null
 
+    val baseMap      = decode(new String(base))
+
     if (removeKeys == null || removeKeys.isEmpty)
       return base
 
-    val baseMap      = decode(new String(base))
     val remainingMap = baseMap.removedAll(removeKeys)
 
     if (remainingMap.isEmpty)

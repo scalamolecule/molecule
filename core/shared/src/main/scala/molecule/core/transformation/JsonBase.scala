@@ -31,7 +31,6 @@ trait JsonBase extends SerializationUtils with ModelUtils {
       }
 
     s.foreach { c =>
-      println("--- c: " + c)
       val strReplacement = c match {
         case '"'  => "\\\""
         case '\\' => "\\\\"
@@ -77,12 +76,7 @@ trait JsonBase extends SerializationUtils with ModelUtils {
   }
 
   protected def map2jsonByteArray[T](map: Map[String, T], value2json: (StringBuffer, T) => StringBuffer): Array[Byte] = {
-    //    map2json(map, value2json).map(_.toByte).toArray
-    val json = map2json(map, value2json)
-
-    println("===== " + json)
-
-    json.map(_.toByte).toArray
+    map2json(map, value2json).map(_.toByte).toArray
   }
 
   protected def map2json[T](map: Map[String, T], value2json: (StringBuffer, T) => StringBuffer): String = {

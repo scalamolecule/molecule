@@ -89,7 +89,9 @@ trait NestOpt[Tpl] { self: Model2QueryBase
     val buf  = new ListBuffer[Any]
     val rows = list.iterator
     while (rows.hasNext) {
-      rows.next() match {
+      val row = rows.next()
+      //      println("---------- " + row)
+      row match {
         // Nested empty single value not to be added
         case set: Set[_] if set.isEmpty    => ()
         case seq: Seq[_] if seq.isEmpty    => ()
@@ -142,24 +144,20 @@ trait NestOpt[Tpl] { self: Model2QueryBase
             if (e0 != p0) {
               // Use previous row (going backwards)
               rows.next()
-              println("+++++++++++++++++  2a")
               acc0 = tplBranch0(rows, flatten(acc1, false)) :: acc0
               rows.previous()
 
               acc1 = List(tplLeaf1(rows))
-              println("+++++++++++++++++  2b")
               acc0 = tplBranch0(rows, flatten(acc1, false)) :: acc0
 
             } else /* e1 != p1 */ {
               acc1 = tplLeaf1(rows) :: acc1
-              println("+++++++++++++++++  2c")
               acc0 = tplBranch0(rows, flatten(acc1, false)) :: acc0
             }
 
           } else if (e0 != p0) {
             // Use previous row (going backwards)
             rows.next()
-            println("+++++++++++++++++  2d")
             acc0 = tplBranch0(rows, flatten(acc1, false)) :: acc0
             rows.previous()
 

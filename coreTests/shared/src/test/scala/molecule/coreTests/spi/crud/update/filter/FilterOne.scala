@@ -247,12 +247,15 @@ trait FilterOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           ("foo", 7), // updated
         ))
 
-        // Nothing updated if no match
+        // No-match updates that won't change data
         _ <- Ns.s_.startsWith("bo").int(8).update.transact
         _ <- Ns.s_.endsWith("aa").int(8).update.transact
         _ <- Ns.s_.contains("x").int(8).update.transact
+
+        // case-sensitive reg-ex won't match lower-case strings foo/bar/baz
         _ <- Ns.s_.matches("[A_Z]+").int(8).update.transact
 
+        // Nothing updated if no match
         _ <- Ns.s.a1.int.query.get.map(_ ==> List(
           ("bar", 7),
           ("baz", 7),

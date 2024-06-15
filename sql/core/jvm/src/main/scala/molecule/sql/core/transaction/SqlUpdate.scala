@@ -16,7 +16,7 @@ trait SqlUpdate
     with UpdateUtils
     with MoleculeLogging { self: ResolveUpdate =>
 
-  //  doPrint = false
+  //    doPrint = false
   doPrint = true
   protected var curParamIndex = 1
 
@@ -26,141 +26,102 @@ trait SqlUpdate
     curRefPath = List(getInitialNs(elements))
     // Resolve update model
     resolve(elements)
-    addRowSetterToTables()
-    (manualTableDatas ++ getTables, Nil)
+    (manualTableDatas ++ getTableData, Nil)
   }
 
 
-  protected def addRowSetterToTables(): Unit = {
-    updates.foreach {
-      case (refPath, _) =>
-        val table              = refPath.last
-        val (stmt, upsertStmt) = if (isUpsert) {
-          var inputs   = ""
-          var colList  = ""
-          var setCols  = ""
-          var colValus = ""
-          var first    = true
-          placeHolders2.foreach {
-            case (col, placeHolder, expr) if first =>
-              inputs = placeHolder
-              colList = col
-              setCols = s"$table.$col = $expr"
-              colValus = s"_v.$col"
-              first = false
-            case (col, placeHolder, expr)          =>
-              inputs = s"$inputs, $placeHolder"
-              colList = s"$colList,\n    $col"
-              setCols = s"$setCols,\n    $table.$col = $expr"
-              colValus = s"$colValus,\n    _v.$col"
-          }
-          val upsertStmt = (ids1: List[Long]) => {
-            val ids2 = if (ids1.nonEmpty) {
-              ids1 // ids of existing and new entities (when ref structure establishment)
-            } else {
-              ids // ids of existing entities (collected in handleIds)
-            }
-            val clauses = if (ids2.nonEmpty) {
-              s"$table.id IN(${ids2.mkString(", ")})"
-            } else {
-              model2SqlQuery(filterElements).getWhereClauses.mkString(" AND\n  ")
-            }
-            s"""MERGE INTO $table
-               |USING VALUES ($inputs) _v($colList)
-               |ON $clauses
-               |WHEN MATCHED THEN
-               |  UPDATE SET
-               |    $setCols
-               |WHEN NOT MATCHED THEN
-               |  INSERT ($colList) VALUES (
-               |    $colValus
-               |  )""".stripMargin
-          }
-          ("", Some(upsertStmt))
-
-        } else {
-          val updateCols2_ = if (updateCols.isEmpty) Nil else {
-            updateCols(refPath).map(c => s"$c IS NOT NULL")
-          }
-          val clauses_ = if (ids.nonEmpty) {
-            List(s"$table.id IN(${ids.mkString(", ")})")
-          } else {
-            model2SqlQuery(filterElements).getWhereClauses
-          }
-          val clauses  = (updateCols2_ ++ clauses_).mkString(" AND\n  ")
-
-          val columnSetters = placeHolders.mkString(",\n  ")
-          val stmt          =
-            s"""UPDATE $table
-               |SET
-               |  $columnSetters
-               |WHERE
-               |  $clauses""".stripMargin
-          (stmt, None)
-        }
-
-        println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-        println("------ stmt --------")
-        println(stmt)
-        println("------ upsertStmt --------")
-        println(upsertStmt.map(_(List(42))))
-
-        debug(stmt)
-        val colSetters = colSettersMap(refPath)
-        debug(s"--- update -------------------  ${colSetters.length}  $refPath")
-
-        tableDatas(refPath) = Table(refPath, stmt,
-          useAccIds = isUpsert,
-          upsertStmt = upsertStmt,
-          updateIdsMap = isUpsert
-        )
-
-        colSettersMap(refPath) = Nil
-        val rowSetter = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
-          // Set all column values for this row in this insert/batch
-          colSetters.foreach { colSetter =>
-            //            debug("\nps  Z   : " + ps)
-            //            debug("idsMap    : " + idsMap)
-
-            colSetter(ps, idsMap, 0)
-          }
-          // Complete row
-          ps.addBatch()
-        }
-        rowSettersMap(refPath) = List(rowSetter)
-    }
-  }
-
-
-  protected def getTables: List[Table] = {
-    // Add insert resolver to each table insert
-    updates.map { case (refPath, _) =>
-      val rowSetters = rowSettersMap(refPath)
+  private def getTableData: List[Table] = {
+    if (cols.isEmpty) {
+      Nil
+    } else {
+      addRowSetterToTable()
+      val rowSetters = rowSettersMap(curRefPath)
       val populatePS = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
         // Set all column values for this row in this insert/batch
         rowSetters.foreach(rowSetter =>
           rowSetter(ps, idsMap, rowIndex)
         )
       }
-      tableDatas(refPath).copy(populatePS = populatePS)
+      // Add update resolver
+      List(tableDatas(curRefPath).copy(populatePS = populatePS))
     }
   }
 
-  protected def updateCurRefPath(attr: String): (List[String], Int) = {
-    if (updates.exists(_._1 == curRefPath)) {
-      updates = updates.map {
-        case (path, cols) if path == curRefPath =>
-          paramIndexes += (curRefPath, attr) -> (cols.length + 1)
-          (path, cols :+ attr)
-
-        case other => other
+  private def addRowSetterToTable(): Unit = {
+    val columnSetters      = placeHolders.mkString(",\n  ")
+    val refPath            = curRefPath
+    val table              = refPath.last
+    val (stmt, upsertStmt) = if (isUpsert) {
+      val upsertStmt = (ids1: List[Long]) => {
+        val ids2    = if (ids1.nonEmpty) {
+          ids1 // ids of existing and new entities (when ref structure establishment)
+        } else {
+          ids // ids of existing entities (collected in handleIds)
+        }
+        println(ids2)
+        val clauses = if (ids2.nonEmpty) {
+          s"$table.id IN(${ids2.mkString(", ")})"
+        } else {
+          model2SqlQuery(filterElements).getWhereClauses.mkString(" AND\n  ")
+        }
+        s"""UPDATE $table
+           |SET
+           |  $columnSetters
+           |WHERE
+           |  $clauses""".stripMargin
       }
+      ("", Some(upsertStmt))
+
     } else {
-      paramIndexes += (curRefPath, attr) -> 1
-      updates = updates :+ (curRefPath, List(attr))
+      val updateCols2_ = if (updateCols.isEmpty) Nil else {
+        updateCols(refPath).map(c => s"$c IS NOT NULL")
+      }
+      val clauses_     = if (ids.nonEmpty) {
+        List(s"$table.id IN(${ids.mkString(", ")})")
+      } else {
+        model2SqlQuery(filterElements).getWhereClauses
+      }
+      val clauses      = (updateCols2_ ++ clauses_).mkString(" AND\n  ")
+
+      val stmt =
+        s"""UPDATE $table
+           |SET
+           |  $columnSetters
+           |WHERE
+           |  $clauses""".stripMargin
+      (stmt, None)
     }
-    (curRefPath, paramIndexes(curRefPath, attr))
+
+    println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    println("------ stmt --------")
+    println(stmt)
+    println("------ upsertStmt --------")
+    println(upsertStmt.map(_(List(42))))
+
+    debug(stmt)
+    val colSetters = colSettersMap(refPath)
+    debug(s"--- update -------------------  ${colSetters.length}  $refPath")
+
+    tableDatas(refPath) = Table(refPath, stmt,
+      useAccIds = isUpsert,
+      upsertStmt = upsertStmt,
+      updateIdsMap = isUpsert
+    )
+
+    colSettersMap(refPath) = Nil
+    val rowSetter = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
+      // Set all column values for this row in this insert/batch
+      colSetters.foreach { colSetter =>
+        //            debug("\nps  Z   : " + ps)
+        //            debug("idsMap    : " + idsMap)
+        colSetter(ps, idsMap, 0)
+      }
+      // Complete row
+      ps.addBatch()
+    }
+    rowSettersMap(refPath) = List(rowSetter)
   }
+
 
   protected def addToUpdateColsNotNull(ns: String, attr: String) = {
     if (!updateCols.contains(curRefPath)) {
@@ -177,9 +138,8 @@ trait SqlUpdate
     vs: Seq[T],
     transformValue: T => Any,
   ): Unit = {
-    updateCurRefPath(attr)
+    cols += attr
     placeHolders = placeHolders :+ s"$attr = ?"
-    placeHolders2 += ((attr, "?", s"_v.$attr"))
     val colSetter: Setter = vs match {
       case Seq(v) =>
         if (!isUpsert) {
@@ -292,9 +252,8 @@ trait SqlUpdate
     attr: String,
     byteArray: Array[Byte],
   ): Unit = {
-    updateCurRefPath(attr)
+    cols += attr
     placeHolders = placeHolders :+ s"$attr = ?"
-    placeHolders2 += ((attr, "?", s"_v.$attr"))
     val colSetter: Setter = if (byteArray.isEmpty) {
       (ps: PS, _: IdsMap, _: RowIndex) => {
         ps.setNull(curParamIndex, 0)
@@ -337,19 +296,13 @@ trait SqlUpdate
     value2json: (StringBuffer, T) => StringBuffer,
   ): Unit = {
     if (map.nonEmpty) {
-      updateCurRefPath(attr)
+      cols += attr
       if (!isUpsert) {
         addToUpdateColsNotNull(ns, attr)
       }
       val nsAttr        = s"$ns.$attr"
       val scalaBaseType = exts.head
       placeHolders = placeHolders :+ s"$nsAttr = addPairs_$scalaBaseType($ns.$attr, ?)"
-      placeHolders2 += ((
-        attr,
-        s"CAST(? AS JSON)",
-        s"addPairs_$scalaBaseType($ns.$attr, _v.$attr)"
-      ))
-
       val colSetter = (ps: PS, _: IdsMap, _: RowIndex) => {
         ps.setBytes(curParamIndex, map2jsonByteArray(map, value2json))
         curParamIndex += 1
@@ -370,18 +323,13 @@ trait SqlUpdate
     value2json: (StringBuffer, T) => StringBuffer,
   ): Unit = {
     if (map.nonEmpty) {
-      updateCurRefPath(attr)
+      cols += attr
       if (!isUpsert) {
         addToUpdateColsNotNull(ns, attr)
       }
       val nsAttr        = s"$ns.$attr"
       val scalaBaseType = exts.head
       placeHolders = placeHolders :+ s"$nsAttr = removePairs_$scalaBaseType($ns.$attr, ?)"
-      placeHolders2 += ((
-        attr,
-        s"CAST(? AS VARCHAR ARRAY)",
-        s"removePairs_$scalaBaseType($ns.$attr, _v.$attr)"
-      ))
       val colSetter = (ps: PS, _: IdsMap, _: RowIndex) => {
         val conn = ps.getConnection
         ps.setArray(curParamIndex, conn.createArrayOf("String", map.keys.toArray))
@@ -409,11 +357,13 @@ trait SqlUpdate
   }
 
   override def handleRefNs(ref: Ref): Unit = {
-    curRefPath ++= List(ref.refAttr, ref.refNs)
+    //    curRefPath ++= List(ref.refAttr, ref.refNs)
+    throw ModelError(s"Can't apply entity ids twice in update.")
   }
 
   override def handleBackRef(backRef: BackRef): Unit = {
-    curRefPath = curRefPath.dropRight(2)
+    //    curRefPath = curRefPath.dropRight(2)
+    throw ModelError(s"Can't apply entity ids twice in update.")
   }
 
 
@@ -429,9 +379,8 @@ trait SqlUpdate
   ): Unit = {
     val baseType = exts(1)
     refNs.fold {
-      updateCurRefPath(attr)
+      cols += attr
       placeHolders = placeHolders :+ s"$attr = ?"
-      placeHolders2 += ((attr, s"CAST(? AS $baseType ARRAY)", s"_v.$attr"))
       val colSetter = if (iterable.nonEmpty) {
         if (!isUpsert) {
           addToUpdateColsNotNull(ns, attr)
@@ -465,16 +414,11 @@ trait SqlUpdate
     val dbBaseType = exts(1)
     refNs.fold {
       if (iterable.nonEmpty) {
-        updateCurRefPath(attr)
+        cols += attr
         if (!isUpsert) {
           addToUpdateColsNotNull(ns, attr)
         }
-        placeHolders = placeHolders :+ s"$attr = $attr || ?"
-        placeHolders2 += ((
-          attr,
-          s"CAST(? AS $dbBaseType ARRAY)",
-          s"IFNULL($ns.$attr, ARRAY[]) || _v.$attr"
-        ))
+        placeHolders = placeHolders :+ s"$attr = IFNULL($ns.$attr, ARRAY[]) || ?"
         val array = iterable2array(iterable)
         addColSetter(curRefPath, (ps: PS, _: IdsMap, _: RowIndex) => {
           val conn = ps.getConnection
@@ -500,17 +444,11 @@ trait SqlUpdate
     val dbBaseType    = exts(1)
     refNs.fold {
       if (iterable.nonEmpty) {
-        updateCurRefPath(nsAttr)
+        cols += nsAttr
         if (!isUpsert) {
           addToUpdateColsNotNull(ns, attr)
         }
         placeHolders = placeHolders :+ s"$nsAttr = removeFromArray_$scalaBaseType($ns.$attr, ?)"
-        placeHolders2 += ((
-          attr,
-          s"CAST(? AS $dbBaseType ARRAY)",
-          s"removeFromArray_$scalaBaseType($ns.$attr, _v.$attr)"
-        ))
-
         val array = iterable2array(iterable)
         addColSetter(curRefPath, (ps: PS, _: IdsMap, _: RowIndex) => {
           val conn = ps.getConnection
@@ -612,10 +550,8 @@ trait SqlUpdate
     map: Map[String, T],
     map2jdbc: (PS, Int) => Unit
   ): Unit = {
-    updateCurRefPath(attr)
+    cols += attr
     placeHolders = placeHolders :+ s"$attr = ?$cast"
-    placeHolders2 += ((attr, s"cast(? as JSON)", s"_v.$attr"))
-
     if (!isUpsert) {
       addToUpdateColsNotNull(ns, attr)
     }
@@ -642,7 +578,7 @@ trait SqlUpdate
     map2jdbc: (PS, Int, Map[String, T]) => Unit
   ): Unit = {
     //    if (map.nonEmpty) {
-    //      updateCurRefPath(attr)
+    //      cols += attr
     //      if (!isUpsert) {
     //        addToUpdateColsNotNull(ns, attr)
     //      }
@@ -731,7 +667,7 @@ trait SqlUpdate
     map2jdbc: (PS, Int, Map[String, T]) => Unit
   ): Unit = {
     //    if (map.nonEmpty) {
-    //      updateCurRefPath(attr)
+    //      cols += attr
     //      if (!isUpsert) {
     //        addToUpdateColsNotNull(ns, attr)
     //      }

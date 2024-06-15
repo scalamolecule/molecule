@@ -19,7 +19,7 @@ trait Save_postgres extends SqlSave { self: ResolveSave =>
              |  $columns
              |) VALUES ($inputPlaceholders)""".stripMargin
         } else {
-          s"INSERT INTO $table DEFAULT VALUES"
+          s"INSERT INTO $table (id) VALUES (DEFAULT)"
         }
 
         val colSetters = colSettersMap(refPath)

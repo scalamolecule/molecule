@@ -29,11 +29,10 @@ trait SqlBase_JVM extends SqlDataType_JVM with ModelUtils with BaseHelpers {
   protected var initialNs        = ""
   protected var curRefPath       = List("0")
   protected var inserts          = List.empty[(List[String], List[(String, String)])]
-  protected var updates          = List.empty[(List[String], List[String])] // refPath -> cols
   protected var placeHolders     = List.empty[String]
-  protected var placeHolders2    = ListBuffer.empty[(String, String, String)]
   protected var joins            = List.empty[(List[String], String, String, List[String], List[String])]
   protected var ids              = Seq.empty[Long]
+  protected var cols             = ListBuffer.empty[String]
   protected val updateCols       = mutable.Map.empty[List[String], List[String]]
   protected var filterElements   = List.empty[Element]
   protected val paramIndexes     = mutable.Map.empty[(List[String], String), Int]
@@ -43,7 +42,6 @@ trait SqlBase_JVM extends SqlDataType_JVM with ModelUtils with BaseHelpers {
   protected var manualTableDatas = List.empty[Table]
   protected var joinTableDatas   = List.empty[JoinTable]
   protected val rightCountsMap   = mutable.Map.empty[List[String], List[Int]]
-  //  protected var uniqueFilterElements = List.empty[Element]
 
 
   protected def addColSetter(refPath: List[String], colSetter: Setter) = {

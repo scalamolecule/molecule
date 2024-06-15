@@ -56,15 +56,154 @@ object AdhocJVM_mysql extends TestSuite_mysql {
 
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
-      val a = (1, Set(1, 2), Set(1, 2, 3), 3)
-      val b = (2, Set(2, 3), Set(2, 3), 3)
-      val c = (2, Set(4), Set(4), 4)
-
-      val d = (2, Set(4), Set(3), 4)
-
       for {
-        List(_, a2, a3) <- A.i.iSet.B.iSet.i.insert(a, b, c).transact.map(_.ids)
 
+
+
+        //        _ <- A.i(1).save.transact
+        //        _ <- A.i(2).B.s("b").save.transact
+        _ <- A.i(3).B.s("c").iSeq(Seq(1, 2)).save.transact
+        _ <- A.i(4).B.s("c").iSeq(Seq(2, 3)).save.transact
+        _ <- A.i(5).B.s("c").iSeq(Seq(3, 4, 4, 4)).save.transact
+
+        //        _ <- rawTransact(
+        //          """UPDATE B
+        //            |SET
+        //            |  iSet = (
+        //            |    SELECT JSON_ARRAYAGG(table_1.v)
+        //            |    FROM   JSON_TABLE(B.iSet, '$[*]' COLUMNS (v INT PATH '$')) table_1
+        //            |    WHERE  table_1.v NOT IN (3, 4)
+        //            |  )
+        //            |WHERE
+        //            |  B.iSet IS NOT NULL AND
+        //            |  B.id IN(1, 2, 3, 4)
+        //            |""".stripMargin)
+
+        //        _ <- rawTransact(
+        //          """UPDATE B
+        //            |SET
+        //            |  iSet = case (
+        //            |    SELECT JSON_ARRAYAGG(table_1.v)
+        //            |    FROM   JSON_TABLE(B.iSet, '$[*]' COLUMNS (v INT PATH '$')) table_1
+        //            |    WHERE  table_1.v NOT IN (3, 4)
+        //            |  )
+        //            |  when '' then '[42]'
+        //            |  else '[43]'
+        //            |  end
+        //            |WHERE
+        //            |  B.id IN(1, 2, 3, 4, 5)
+        //            |""".stripMargin)
+
+        //        _ <- rawTransact(
+        //          """UPDATE B
+        //            |SET
+        //            |  iSet =
+        //            |    (
+        //            |      SELECT JSON_ARRAYAGG(list.v)
+        //            |      FROM   JSON_TABLE(B.iSet, '$[*]' COLUMNS (v INT PATH '$')) list
+        //            |      WHERE  list.v NOT IN (3, 4)
+        //            |    )
+        //            |WHERE
+        //            |  B.id IN(1, 2, 3, 4, 5)
+        //            |""".stripMargin)
+        //
+        //        _ <- rawQuery(
+        //          """select iSet, isnull(iSet),
+        //            |(
+        //            |      SELECT JSON_ARRAYAGG(list.v)
+        //            |      FROM   JSON_TABLE(B.iSet, '$[*]' COLUMNS (v INT PATH '$')) list
+        //            |    ) as x1
+        //            |from B
+        //            |WHERE
+        //            |  B.iSet is not null and
+        //            |  B.id IN(1, 2, 3, 4, 5)
+        //            |""".stripMargin, true)
+        ////            |      WHERE  list.v NOT IN (3, 4)
+
+//                _ <- rawTransact(
+//                  """UPDATE B
+//                    |SET
+//                    |  iSet = case B.iSet when '[3, 4]' then null else (
+//                    |      SELECT JSON_ARRAYAGG(list.v)
+//                    |      FROM   JSON_TABLE(B.iSet, '$[*]' COLUMNS (v INT PATH '$')) list
+//                    |      WHERE  list.v NOT IN (3, 4)
+//                    |    ) end
+//                    |WHERE
+//                    |  B.iSet is not null and
+//                    |  B.id IN(2, 3)
+//                    |""".stripMargin)
+
+        //        _ <- rawTransact(
+        //          """UPDATE B
+        //            |SET
+        //            |  iSet = (
+        //            |      SELECT JSON_ARRAYAGG(list.v)
+        //            |      FROM   JSON_TABLE(B.iSet, '$[*]' COLUMNS (v INT PATH '$')) list
+        //            |      WHERE  list.v NOT IN (3, 4)
+        //            |    )
+        //            |WHERE
+        //            |  B.iSet is not null and
+        //            |  B.id IN(2, 3)
+        //            |""".stripMargin)
+
+        //        _ <- rawTransact(
+        //          """UPDATE B
+        //            |SET
+        //            |  iSet = JSON_REMOVE(iSet, JSON_UNQUOTE(JSON_SEARCH(iSet, 'one', '3')))
+        //            |WHERE
+        //            |  B.iSet is not null and
+        //            |  B.id IN(1, 2, 3)
+        //            |""".stripMargin)
+
+//        _ <- rawQuery(
+//          """SELECT iSeq,
+//            |  (
+//            |      SELECT JSON_ARRAYAGG(list.v)
+//            |      FROM   JSON_TABLE('[1,2,3]', '$[*]' COLUMNS (v INT PATH '$')) as list
+//            |    ) as x
+//            |FROM B
+//            |""".stripMargin, true)
+
+        _ <- rawQuery(
+          """SELECT iSeq,
+            |  (
+            |      SELECT JSON_ARRAYAGG(list.v)
+            |      FROM   JSON_TABLE(B.iSeq, '$[*]' COLUMNS (v INT PATH '$')) as list
+            |      WHERE  list.v NOT IN (3, 4)
+            |    ) as x
+            |FROM B
+            |""".stripMargin, true)
+//
+        _ <- rawTransact(
+          """UPDATE B
+            |SET
+            |  iSeq = (
+            |      SELECT JSON_ARRAYAGG(list.v)
+            |      FROM   JSON_TABLE(B.iSeq, '$[*]' COLUMNS (v INT PATH '$')) as list
+            |      WHERE  list.v NOT IN (3, 4)
+            |    )
+            |WHERE
+            |  B.iSeq is not null and
+            |  B.id IN(1, 2, 3)
+            |""".stripMargin)
+
+        //            |  B.id IN(1, 2, 3, 4, 5)
+        //            |  iSet = case B.iSet when isnull(B.iSet) then '[0]' else '[1]' end
+        //            |  iSet = case B.iSet when '[1, 2]' then '[0]' else '[1]' end
+        //            |  iSet = ifnull(B.iSet, '[0]')
+
+        //            |      FROM   JSON_TABLE(ifnull(B.iSet, '[]'), '$[*]' COLUMNS (v INT PATH '$')) table_1
+
+        // `upsert` has same semantics as `update` with `remove` since we don't insert data
+        // Filter by A ids, update/upsert B values
+        //        _ <- A.i_.B.iSet.remove(3, 4).update.transact
+        //        _ <- A.i_.B.iSet.remove(3, 4).upsert.transact
+
+        // 2 entities left with remaining values
+        _ <- A.i.a1.B.iSeq.query.i.get.map(_ ==> List(
+          (3, Seq(1, 2)),
+          (4, Seq(2)),
+        ))
 
         //        _ <- rawQuery(
         //          """SELECT DISTINCT
@@ -95,14 +234,14 @@ object AdhocJVM_mysql extends TestSuite_mysql {
     //
     //      } yield ()
     //    }
-
-
-    "validation" - validation { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Validation._
-      for {
-        List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)
-
-      } yield ()
-    }
+    //
+    //
+    //    "validation" - validation { implicit conn =>
+    //      import molecule.coreTests.dataModels.core.dsl.Validation._
+    //      for {
+    //        List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)
+    //
+    //      } yield ()
+    //    }
   }
 }

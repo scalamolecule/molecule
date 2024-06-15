@@ -11,7 +11,7 @@ trait ResolveExprOne_mariadb extends ResolveExprOne with LambdasOne_mariadb { se
 
   override protected def matches(col: String, regex: String): Unit = {
     if (regex.nonEmpty)
-      where += ((col, s"REGEXP '$regex'"))
+      where += ((col, s"REGEXP BINARY '$regex'")) // "BINARY" makes it case-sensitive
   }
 
 
