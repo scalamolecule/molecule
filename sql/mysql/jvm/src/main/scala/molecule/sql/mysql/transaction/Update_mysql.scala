@@ -12,7 +12,6 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
   override def model2SqlQuery(elements: List[Element]): Model2SqlQuery[Any] =
     new Model2SqlQuery_mysql[Any](elements)
 
-
   override def updateSetEq[T](
     ns: String,
     attr: String,
@@ -123,12 +122,21 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
     transformValue: T => Any,
     exts: List[String],
     value2json: (StringBuffer, T) => StringBuffer,
-    //    set2array: Set[Any] => Array[AnyRef],
   ): Unit = {
-    updateMapAddJdbc[T](ns, attr, "", map, exts,
-      (ps: PS, paramIndex: Int, updatedMap: Map[String, T]) =>
-        ps.setString(paramIndex, map2json(updatedMap, value2json))
-    )
+    if (map.nonEmpty) {
+      cols += attr
+      if (!isUpsert) {
+        addToUpdateColsNotNull(ns, attr)
+      }
+      placeHolders = placeHolders :+
+        s"$ns.$attr = JSON_MERGE_PATCH(IFNULL($ns.$attr, JSON_OBJECT()), ?)"
+      val json = map2json(map, value2json)
+      val colSetter = (ps: PS, _: IdsMap, _: RowIndex) => {
+        ps.setString(curParamIndex, json)
+        curParamIndex += 1
+      }
+      addColSetter(curRefPath, colSetter)
+    }
   }
 
   override def updateMapRemove[T](
@@ -141,10 +149,19 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
     exts: List[String],
     value2json: (StringBuffer, T) => StringBuffer,
   ): Unit = {
-    updateMapRemoveJdbc[T](ns, attr, "", map, exts,
-      (ps: PS, paramIndex: Int, updatedMap: Map[String, T]) =>
-        ps.setString(paramIndex, map2json(updatedMap, value2json))
-    )
+    if (map.nonEmpty) {
+      cols += attr
+      if (!isUpsert) {
+        addToUpdateColsNotNull(ns, attr)
+      }
+      val keys = map.keySet.map(k => s"'$$.$k'").mkString(", ")
+      placeHolders = placeHolders :+
+        s"""$ns.$attr = CASE JSON_REMOVE(IFNULL($ns.$attr, NULL), $keys)
+           |    WHEN JSON_OBJECT() THEN NULL
+           |    ELSE JSON_REMOVE($ns.$attr, $keys)
+           |  END""".stripMargin
+      addColSetter(curRefPath, (ps: PS, _: IdsMap, _: RowIndex) => ())
+    }
   }
 
   // Helpers -------------------------------------------------------------------

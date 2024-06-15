@@ -34,7 +34,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     renderSqlQuery(optLimit, optOffset)
   }
 
-  final private def resolveElements(elements1: List[Element]): Unit = {
+  final protected def resolveElements(elements1: List[Element]): Unit = {
     from = getInitialNs(elements1)
     prevRefNss = Set(from)
     path = List(from)
@@ -48,20 +48,17 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
   }
 
 
-  private[molecule] def getWhereClauses: ListBuffer[String] = {
+  def getWhereClauses: ListBuffer[String] = {
     resolveElements(elements0)
-    val clauses = notNull.map(col => s"$col IS NOT NULL") ++ where.map { case (col, expr) => s"$col $expr" }
-
-//    println("------ joins --------")
-//    println(formattedJoins)
-
+    val clauses    = notNull.map(col => s"$col IS NOT NULL") ++ where.map { case (col, expr) => s"$col $expr" }
+    //    println("------ joins --------")
+    //    println(formattedJoins)
     val joinsExist = if (joins.isEmpty) Nil else
       List(
         s"""EXISTS (
            |  SELECT * FROM Ns
            |    ${formattedJoins.trim}
            |)""".stripMargin)
-
     clauses ++ joinsExist
   }
 
@@ -282,7 +279,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     s"$limit_$offset_"
   }
 
-  private def formattedJoins: String = {
+  protected def formattedJoins: String = {
     if (joins.isEmpty) "" else {
       val max1  = joins.map(_._1.length).max
       val max2  = joins.map(_._2.length).max

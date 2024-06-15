@@ -26,7 +26,7 @@ trait Many_Seq_add extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Filter by A ids, update B values
         _ <- A(a, b, c, d, e, f).Bb.iSeq.add(4, 5).update.transact
 
-        _ <- A.i.a1.Bb.*?(B.s_?.iSeq).query.get.map(_ ==> List(
+        _ <- A.i.a1.Bb.*?(B.s_?.a1.iSeq).query.get.map(_ ==> List(
           (1, List()), //                                                           no B value to update
           (2, List()), //                                                           no B value to update
           (3, List()), //                                                           no B value to update
@@ -38,7 +38,7 @@ trait Many_Seq_add extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Filter by A ids, upsert B values
         _ <- A(a, b, c, d, e, f).Bb.iSeq.add(5, 6).upsert.transact
 
-        _ <- A.i.a1.Bb.*?(B.s_?.iSeq).query.get.map(_ ==> List(
+        _ <- A.i.a1.Bb.*?(B.s_?.a1.iSeq).query.get.map(_ ==> List(
           (1, List((None, Seq(5, 6)))), //                                                      ref + insertion
           (2, List((Some("a"), Seq(5, 6)))), //                                                 insertion in 1 ref entity
           (3, List((Some("b"), Seq(5, 6)), (Some("c"), Seq(5, 6)))), //                         insertion in 2 ref entities
@@ -64,7 +64,7 @@ trait Many_Seq_add extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Filter by A ids, update B values
         _ <- A.i_.Bb.iSeq.add(4, 5).update.transact
 
-        _ <- A.i.a1.Bb.*?(B.s_?.iSeq).query.get.map(_ ==> List(
+        _ <- A.i.a1.Bb.*?(B.s_?.a1.iSeq).query.get.map(_ ==> List(
           (1, List()), //                                                           no B value to update
           (2, List()), //                                                           no B value to update
           (3, List()), //                                                           no B value to update
@@ -76,7 +76,7 @@ trait Many_Seq_add extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Filter by A ids, upsert B values
         _ <- A.i_.Bb.iSeq.add(5, 6).upsert.transact
 
-        _ <- A.i.a1.Bb.*?(B.s_?.iSeq).query.get.map(_ ==> List(
+        _ <- A.i.a1.Bb.*?(B.s_?.a1.iSeq).query.get.map(_ ==> List(
           (1, List((None, Seq(5, 6)))), //                                                      ref + insertion
           (2, List((Some("a"), Seq(5, 6)))), //                                                 insertion in 1 ref entity
           (3, List((Some("b"), Seq(5, 6)), (Some("c"), Seq(5, 6)))), //                         insertion in 2 ref entities
@@ -100,7 +100,7 @@ trait Many_Seq_add extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Filter by B attribute, update A values
         _ <- A.iSeq.add(3, 4).Bb.s_.update.transact
 
-        _ <- A.iSeq.Bb.*?(B.s).query.get.map(_.sortBy(_._2.headOption.toString) ==> List(
+        _ <- A.iSeq.Bb.*?(B.s.a1).query.get.map(_.sortBy(_._2.headOption.toString) ==> List(
           (Seq(0, 1), List()), //               nothing updated since this A entity has no ref to B
           // (<none>, List("a")), //            no A attribute to update
           (Seq(1, 2, 3, 4), List("b", "c")), // A attribute updated
@@ -110,7 +110,7 @@ trait Many_Seq_add extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Filter by B attribute, update A values
         _ <- A.iSeq.add(4, 5).Bb.s_.upsert.transact
 
-        _ <- A.iSeq.Bb.*?(B.s).query.get.map(_.sortBy(_._2.headOption.toString) ==> List(
+        _ <- A.iSeq.Bb.*?(B.s.a1).query.get.map(_.sortBy(_._2.headOption.toString) ==> List(
           (Seq(0, 1), List()), //                     nothing updated since this A entity has no ref to B
           (Seq(4, 5), List("a")), //                  A attribute inserted
           (Seq(1, 2, 3, 4, 4, 5), List("b", "c")), // A attribute updated

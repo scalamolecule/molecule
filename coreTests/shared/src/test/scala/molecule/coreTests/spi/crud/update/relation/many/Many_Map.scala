@@ -26,7 +26,7 @@ trait Many_Map extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Filter by A ids, update B values
         _ <- A(a, b, c, d, e, f).Bb.iMap(Map(pint4, pint5)).update.transact
 
-        _ <- A.i.a1.Bb.*?(B.s_?.iMap).query.get.map(_ ==> List(
+        _ <- A.i.a1.Bb.*?(B.s_?.a1.iMap).query.get.map(_ ==> List(
           (1, List()), //                                                               no B.i value
           (2, List()), //                                                               no B.i value
           (3, List()), //                                                               no B.i value
@@ -38,7 +38,7 @@ trait Many_Map extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Filter by A ids, upsert B values
         _ <- A(a, b, c, d, e, f).Bb.iMap(Map(pint5, pint6)).upsert.transact
 
-        _ <- A.i.a1.Bb.*?(B.s_?.iMap).query.get.map(_ ==> List(
+        _ <- A.i.a1.Bb.*?(B.s_?.a1.iMap).query.get.map(_ ==> List(
           (1, List((None, Map(pint5, pint6)))), //                                      ref + addition
           (2, List((Some("a"), Map(pint5, pint6)))), //                                 addition in 1 ref entity
           (3, List((Some("b"), Map(pint5, pint6)), (Some("c"), Map(pint5, pint6)))), // addition in 2 ref entities
@@ -64,7 +64,7 @@ trait Many_Map extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Filter by A ids, update B values
         _ <- A.i_.Bb.iMap(Map(pint4, pint5)).update.transact
 
-        _ <- A.i.a1.Bb.*?(B.s_?.iMap).query.get.map(_ ==> List(
+        _ <- A.i.a1.Bb.*?(B.s_?.a1.iMap).query.get.map(_ ==> List(
           (1, List()), //                                                               no B.i value
           (2, List()), //                                                               no B.i value
           (3, List()), //                                                               no B.i value
@@ -76,7 +76,7 @@ trait Many_Map extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Filter by A ids, upsert B values
         _ <- A.i_.Bb.iMap(Map(pint5, pint6)).upsert.transact
 
-        _ <- A.i.a1.Bb.*?(B.s_?.iMap).query.get.map(_ ==> List(
+        _ <- A.i.a1.Bb.*?(B.s_?.a1.iMap).query.get.map(_ ==> List(
           (1, List((None, Map(pint5, pint6)))), //                                      ref + addition
           (2, List((Some("a"), Map(pint5, pint6)))), //                                 addition in 1 ref entity
           (3, List((Some("b"), Map(pint5, pint6)), (Some("c"), Map(pint5, pint6)))), // addition in 2 ref entities
@@ -101,7 +101,7 @@ trait Many_Map extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- A.iMap(Map(pint3, pint4)).Bb.s_.update.transact
 
 
-        _ <- A.iMap.Bb.*?(B.s).query.get.map(_.sortBy(_._2.headOption.toString) ==> List(
+        _ <- A.iMap.Bb.*?(B.s.a1).query.get.map(_.sortBy(_._2.headOption.toString) ==> List(
           (Map(pint0, pint1), List()), //         nothing updated since this A entity has no ref to B
           // (<none>, List("a")), //              no A attribute to update
           (Map(pint3, pint4), List("b", "c")), // A attribute updated
@@ -111,7 +111,7 @@ trait Many_Map extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Filter by B attribute, update A values
         _ <- A.iMap(Map(pint4, pint5)).Bb.s_.upsert.transact
 
-        _ <- A.iMap.Bb.*?(B.s).query.get.map(_.sortBy(_._2.headOption.toString) ==> List(
+        _ <- A.iMap.Bb.*?(B.s.a1).query.get.map(_.sortBy(_._2.headOption.toString) ==> List(
           (Map(pint0, pint1), List()), //         nothing updated since this A entity has no ref to B
           (Map(pint4, pint5), List("a")), //      A attribute inserted
           (Map(pint4, pint5), List("b", "c")), // A attribute updated

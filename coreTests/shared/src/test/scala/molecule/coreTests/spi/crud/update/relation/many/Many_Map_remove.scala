@@ -27,7 +27,7 @@ trait Many_Map_remove extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- A(a, b, c, d, e, f).Bb.iMap.remove(string4, string5).update.transact
 
         // 3 nested entities updated
-        _ <- A.i.a1.Bb.*?(B.s_?.iMap_?).query.get.map(_ ==> List(
+        _ <- A.i.a1.Bb.*?(B.s_?.a1.iMap_?).query.get.map(_ ==> List(
           (1, List()),
           (2, List((Some("a"), None))),
           (3, List((Some("b"), None), (Some("c"), None))),
@@ -54,7 +54,7 @@ trait Many_Map_remove extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Filter by A ids, update B values
         _ <- A.i_.Bb.iMap.remove(string4, string5).upsert.transact
 
-        _ <- A.i.a1.Bb.*?(B.s_?.iMap_?).query.get.map(_ ==> List(
+        _ <- A.i.a1.Bb.*?(B.s_?.a1.iMap_?).query.get.map(_ ==> List(
           (1, List()),
           (2, List((Some("a"), None))),
           (3, List((Some("b"), None), (Some("c"), None))),

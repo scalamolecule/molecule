@@ -80,57 +80,46 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
 
+      val pint20 = "b" -> 20
+      val pint30 = "c" -> 30
       for {
 
 
+        _ <- A.i(1).save.transact
+        _ <- A.i(2).B.s("b").save.transact
+        _ <- A.i(3).B.s("c").iMap(Map(pint1, pint2, pint3)).save.transact
 
-        //        _ <- rawTransact(
-        //          """UPDATE B
-        //            |SET
-        //            |  iMap = json_merge_patch(iMap, json_object("b", 20, "c", 3, "d", 4))
-        //            |WHERE
-        //            |  B.iMap is not null and
-        //            |  B.id IN(1, 2, 3)
-        //            |""".stripMargin)
+        //        // Current entity with A value and ref to B value
+        //        _ <- A.i.a1.B.iMap.query.get.map(_ ==> List(
+        //          (3, Map(pint1, pint2, pint3))
+        //        ))
+        //
+        // Filter by A attribute, add B pairs with update
+        _ <- A.i_.B.iMap.add(pint20, pint3, pint4).update.i.transact
 
-        _ <- A.i.a1.Bb.*?(B.s_?.iSeq_?).insert(
-          //          (1, List()),
-          //          (2, List((Some("a"), None))),
-          //          (3, List((Some("b"), None), (Some("c"), None))),
-          //                    (4, List((Some("d"), Some(Seq(1, 2))))),
-          //          (5, List((Some("e"), Some(Seq(2, 3))), (Some("f"), Some(Seq(3, 4))))),
-          (6, List((Some("g"), Some(Seq(4, 5))), (Some("h"), None))),
-        ).transact.map(_.ids)
-
-        // Filter by A ids, update B values
-        //        _ <- A.i_.Bb.iSeq(Seq(4, 5)).update.transact
-
-        //        _ <- A.i.a1.Bb.*?(B.s_?.iSet).query.i.get
-
-
-        _ <- rawQuery(
-          """SELECT DISTINCT
-            |  A.id,
-            |  A.i,
-            |  B.s,
-            |  B.iSeq
-            |FROM A
-            |  LEFT JOIN A_bb_B ON A.id        = A_bb_B.A_id
-            |  LEFT JOIN B      ON A_bb_B.B_id = B.id
-            |WHERE
-            |  A.i IS NOT NULL
-            |GROUP BY A.id, A.i, B.s, B.iSeq
-            |ORDER BY A.i;
-            |""".stripMargin, true)
-
-        _ <- A.i.a1.Bb.*?(B.s_?.iSeq).query.i.get.map(_ ==> List(
-          //          (1, List()), //                                               no B.i value
-          //          (2, List()), //                                               no B.i value
-          //          (3, List()), //                                               no B.i value
-          //          (4, List((Some("d"), Seq(4, 5)))), //                         update in 1 ref entity
-          //          (5, List((Some("e"), Seq(4, 5)), (Some("f"), Seq(4, 5)))), // update in 2 ref entities
-          (6, List((Some("g"), Seq(4, 5)))), //                         already had same value
+        _ <- A.i.a1.B.iMap.query.get.map(_ ==> List(
+          (3, Map(
+            pint1,
+            pint20, // key unchanged, value updated
+            pint3, //  pair already existed, so no change
+            pint4 //   new pair added
+          ))
         ))
+
+        //        // Filter by A attribute, add B pairs with upsert
+        //        _ <- A.i_.B.iMap.add(pint30, pint4, pint5).upsert.transact
+        //
+        //        _ <- A.i.a1.B.iMap.query.get.map(_ ==> List(
+        //          (1, Map(pint30, pint4, pint5)), // relationship to B created, pairs added
+        //          (2, Map(pint30, pint4, pint5)), // pairs added
+        //          (3, Map(
+        //            pint1,
+        //            pint20,
+        //            pint30, // key unchanged, value updated
+        //            pint4, //  pair already existed, so no change
+        //            pint5 //   new pair added
+        //          )),
+        //        ))
 
         //        // Filter by A ids, upsert B values
         //        _ <- A.i_.Bb.iSeq(Seq(5, 6)).upsert.transact

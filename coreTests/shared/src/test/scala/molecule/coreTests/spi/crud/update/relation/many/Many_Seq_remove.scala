@@ -26,7 +26,7 @@ trait Many_Seq_remove extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Filter by A ids, update B values
         _ <- A(a, b, c, d, e, f).Bb.iSeq.remove(4, 5).update.transact
 
-        _ <- A.i.a1.Bb.*?(B.s_?.iSeq_?).query.get.map(_ ==> List(
+        _ <- A.i.a1.Bb.*?(B.s_?.a1.iSeq_?).query.get.map(_ ==> List(
           (1, List()),
           (2, List((Some("a"), None))),
           (3, List((Some("b"), None), (Some("c"), None))),
@@ -53,7 +53,7 @@ trait Many_Seq_remove extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Filter by A ids, update B values
         _ <- A.i_.Bb.iSeq.remove(4, 5).upsert.transact
 
-        _ <- A.i.a1.Bb.*?(B.s_?.iSeq_?).query.get.map(_ ==> List(
+        _ <- A.i.a1.Bb.*?(B.s_?.a1.iSeq_?).query.get.map(_ ==> List(
           (1, List()),
           (2, List((Some("a"), None))),
           (3, List((Some("b"), None), (Some("c"), None))),

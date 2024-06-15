@@ -112,7 +112,8 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
       if (!isUpsert) {
         addToUpdateColsNotNull(ns, attr)
       }
-      placeHolders = placeHolders :+ s"$ns.$attr = JSON_MERGE_PATCH(IFNULL($ns.$attr, JSON_OBJECT()), ?)"
+      placeHolders = placeHolders :+
+        s"$ns.$attr = JSON_MERGE_PATCH(IFNULL($ns.$attr, JSON_OBJECT()), ?)"
       val jsonBytes  = map2jsonByteArray(map, value2json)
       val colSetter = (ps: PS, _: IdsMap, _: RowIndex) => {
         ps.setBytes(curParamIndex, jsonBytes)

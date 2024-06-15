@@ -26,7 +26,7 @@ trait Many_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Filter by A ids, update B values
         _ <- A(a, b, c, d, e, f).Bb.i(4).update.transact
 
-        _ <- A.i.a1.Bb.*?(B.s_?.i).query.get.map(_ ==> List(
+        _ <- A.i.a1.Bb.*?(B.s_?.a1.i).query.get.map(_ ==> List(
           (1, List()), //                                no B.i value
           (2, List()), //                                no B.i value
           (3, List()), //                                no B.i value
@@ -38,7 +38,7 @@ trait Many_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Filter by A ids, upsert B values
         _ <- A(a, b, c, d, e, f).Bb.i(5).upsert.transact
 
-        _ <- A.i.a1.Bb.*?(B.s_?.i).query.get.map(_ ==> List(
+        _ <- A.i.a1.Bb.*?(B.s_?.a1.i).query.get.map(_ ==> List(
           (1, List((None, 5))), //                       ref + insert
           (2, List((Some("a"), 5))), //                  addition in 1 ref entity
           (3, List((Some("b"), 5), (Some("c"), 5))), //  addition in 2 ref entities
@@ -64,7 +64,7 @@ trait Many_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Filter by A ids, update B values
         _ <- A.i_.Bb.i(4).update.transact
 
-        _ <- A.i.a1.Bb.*?(B.s_?.i).query.get.map(_ ==> List(
+        _ <- A.i.a1.Bb.*?(B.s_?.a1.i).query.get.map(_ ==> List(
           (1, List()), //                               no B.i value
           (2, List()), //                               no B.i value
           (3, List()), //                               no B.i value
@@ -76,7 +76,7 @@ trait Many_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Filter by A ids, upsert B values
         _ <- A.i_.Bb.i(5).upsert.transact
 
-        _ <- A.i.a1.Bb.*?(B.s_?.i).query.get.map(_ ==> List(
+        _ <- A.i.a1.Bb.*?(B.s_?.a1.i).query.get.map(_ ==> List(
           (1, List((None, 5))), //                      ref + insert
           (2, List((Some("a"), 5))), //                 addition in 1 ref entity
           (3, List((Some("b"), 5), (Some("c"), 5))), // addition in 2 ref entities
@@ -97,7 +97,7 @@ trait Many_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Filter by B attribute, update A values
         _ <- A.i(3).Bb.s_.update.transact
 
-        _ <- A.i.Bb.*?(B.s).query.get.map(_.sortBy(_._2.headOption.toString) ==> List(
+        _ <- A.i.Bb.*?(B.s.a1).query.get.map(_.sortBy(_._2.headOption.toString) ==> List(
           (0, List()), //         Nothing updated since this A entity has no ref to B
           (3, List("c", "d")), // A attribute updated
         ))
@@ -105,7 +105,7 @@ trait Many_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Filter by B attribute, upsert A values
         _ <- A.i(4).Bb.s_.upsert.transact
 
-        _ <- A.i.Bb.*?(B.s).query.get.map(_.sortBy(_._2.headOption.toString) ==> List(
+        _ <- A.i.Bb.*?(B.s.a1).query.get.map(_.sortBy(_._2.headOption.toString) ==> List(
           (0, List()), //         Nothing updated since this A entity has no ref to B
           (4, List("a", "b")), // A attribute inserted
           (4, List("c", "d")), // A attribute updated

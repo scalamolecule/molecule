@@ -101,9 +101,9 @@ trait SpiSync_mysql extends SpiSyncBase {
         ("null", baseTpe)
       } else {
         val value = if (value0(1) == '"') {
-          value0.substring(2, value0.length - 2).split("\", ?\"").toList
+          value0.substring(2, value0.length - 2).split("\", ?\"").toSet
         } else {
-          value0.substring(1, value0.length - 1).split(", ?").toList
+          value0.substring(1, value0.length - 1).split(", ?").toSet
         }
         row += value
         (value, baseTpe)

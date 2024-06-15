@@ -2,6 +2,7 @@ package molecule.sql.mysql.query
 
 import molecule.boilerplate.ast.Model._
 import molecule.sql.core.query._
+import scala.collection.mutable.ListBuffer
 
 
 class Model2SqlQuery_mysql[Tpl](elements0: List[Element])
@@ -13,6 +14,23 @@ class Model2SqlQuery_mysql[Tpl](elements0: List[Element])
     with ResolveExprSetRefAttr_mysql
     with SqlQueryBase {
 
+
+  override def getWhereClauses: ListBuffer[String] = {
+    resolveElements(elements0)
+    val clauses = notNull.map(col => s"$col IS NOT NULL") ++ where.map { case (col, expr) => s"$col $expr" }
+    //    println("------ joins --------")
+    //    println(formattedJoins)
+    val joinsExist = if (joins.isEmpty) Nil else
+      List(
+        s"""Ns.id IN (
+           |  SELECT Ns.id FROM (
+           |    SELECT Ns.id FROM Ns
+           |      ${formattedJoins.trim}
+           |  ) AS t
+           |)""".stripMargin)
+
+    clauses ++ joinsExist
+  }
 
   override def pagination(optLimit: Option[Int], optOffset: Option[Int], isBackwards: Boolean): String = {
     if (isNestedMan || isNestedOpt) {

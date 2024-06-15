@@ -128,7 +128,8 @@ trait ModelUtils {
     }
   }
 
-  def noOptional(a: Attr): Nothing = throw ModelError(s"Can't update optional values (${a.cleanName}_?)")
+  def noOptional(a: Attr): Nothing =
+    throw ModelError(s"Can't update optional values (${a.cleanName}_?)")
 
   def noNested: Nothing = throw ModelError(s"Nested data structure not allowed in update molecule.")
 
