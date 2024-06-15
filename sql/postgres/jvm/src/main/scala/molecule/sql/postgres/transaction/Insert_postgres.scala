@@ -9,34 +9,6 @@ trait Insert_postgres extends SqlInsert { self: ResolveInsert with InsertResolve
 
   doPrint = false
 
-  override protected def initInserts(): Unit = {
-    inserts.foreach {
-      case (refPath, cols) =>
-        val table             = refPath.last
-        val columns           = cols.map(_._1).mkString(",\n  ")
-        val inputPlaceholders = cols.map { case (_, castExt) => s"?$castExt" }.mkString(", ")
-        val stmt              = if (cols.nonEmpty) {
-          s"""INSERT INTO $table (
-             |  $columns
-             |) VALUES ($inputPlaceholders)""".stripMargin
-        } else {
-          s"INSERT INTO $table (id) VALUES (DEFAULT)"
-        }
-
-        debug(s"B -------------------- refPath: $refPath")
-        debug(stmt)
-        tableDatas(refPath) = Table(refPath, stmt)
-        rowSettersMap(refPath) = Nil
-    }
-
-    joins.foreach {
-      case (joinRefPath, id1, id2, leftPath, rightPath) =>
-        val joinTable = joinRefPath.last
-        val stmt      = s"INSERT INTO $joinTable ($id1, $id2) VALUES (?, ?)"
-        joinTableDatas = joinTableDatas :+ JoinTable(stmt, leftPath, rightPath)
-    }
-  }
-
   override protected def addMap[T](
     ns: String,
     attr: String,

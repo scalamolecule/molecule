@@ -10,21 +10,40 @@ import molecule.sql.core.facade.JdbcConn_JVM
 
 object Connection_postgres {
 
-  val url       = "jdbc:tc:postgresql:15://localhost:5432/test?preparedStatementCacheQueries=0"
-  val container = PostgreSQLContainer()
+
+
+  val url = "jdbc:tc:postgresql:16://localhost:5432/test?preparedStatementCacheQueries=0"
+//  val url = "jdbc:tc:postgresql:16://localhost:5432/test?preparedStatementCacheQueries=0&max_locks_per_transaction=256"
+
+  val container = new PostgreSQLContainer(
+    //    urlParams = Map("max_locks_per_transaction" -> "1")
+  )
+
+
   // For fast reuse, set testcontainers.reuse.enable=true in ~/.testcontainers.properties
   // See https://callistaenterprise.se/blogg/teknik/2020/10/09/speed-up-your-testcontainers-tests/
 
   //  // These don't seem to make any difference:
   //  container.container.withReuse(true)
+
+  //  val params = new java.util.HashMap[String, String]()
+  //  params.put("max_locks_per_transaction", "256")
+  //  container
+  //    .withDatabaseProperty("max_locks_per_transaction", "256");
+
   //  container.container.withDatabaseName("test")
   //  container.container.withUsername("sa")
   //  container.container.withPassword("sa")
   //  container.container.withLabel("reuse.UUID", "e06d7a87-7d7d-472e-a047-e6c81f61d2a4");
 
+
+  // Doesn't seem to make a difference
+  //  container.container.withCommand("postgres -c max_locks_per_transaction=256")
+
+  //  container.start()
+
   Class.forName(container.driverClassName)
   val sqlConn = DriverManager.getConnection(url)
-
 
   val recreateSchema =
     s"""DROP SCHEMA IF EXISTS public CASCADE;

@@ -13,8 +13,6 @@ trait ResolveExprSeq_postgres
   override protected def seqAttr[T](
     col: String, res: ResSeq[T], mandatory: Boolean
   ): Unit = {
-    // avoid empty arrays
-    where += (("", s"ARRAY_LENGTH($col, 1) IS NOT NULL"))
     mandatoryCast(res, mandatory)
   }
 
@@ -73,12 +71,13 @@ trait ResolveExprSeq_postgres
         })
       } else {
         replaceCast((row: RS, paramIndex: Int) =>
-          res.json2array(row.getString(paramIndex)).toList
+          res.array2list(row, paramIndex)
         )
       }
     }
   }
 
-  override protected lazy val json2oneBoolean: String => Boolean =
+  override protected lazy val json2oneBoolean: String => Boolean = {
     (v: String) => v == "t" || v == "1"
+  }
 }

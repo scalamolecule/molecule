@@ -65,7 +65,8 @@ trait SqlInsert
       case (refPath, cols) =>
         val table             = refPath.last
         val columns           = cols.map(_._1).mkString(",\n  ")
-        val inputPlaceholders = cols.map(_ => "?").mkString(", ")
+        val inputPlaceholders = cols.map { case (_, castExt) => s"?$castExt" }.mkString(", ")
+
         val stmt              =
           s"""INSERT INTO $table (
              |  $columns
@@ -342,8 +343,6 @@ trait SqlInsert
     owner: Boolean,
     nestedElements: List[Element]
   ): Product => Unit = {
-    println("%%%%%%%%%%%%%%%%%%%%%%% " + inserts)
-
     if (inserts.isEmpty) {
       inserts = inserts :+ (curRefPath, Nil)
     }

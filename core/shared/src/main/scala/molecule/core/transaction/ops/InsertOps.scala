@@ -78,8 +78,6 @@ trait InsertOps extends BaseOps {
     tplIndex: Int,
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
-    //    set2array: Set[Any] => Array[AnyRef],
-    //    exts: List[String],
   ): Product => Unit = ???
 
   protected def addMapOpt[T](
@@ -89,8 +87,6 @@ trait InsertOps extends BaseOps {
     tplIndex: Int,
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
-    //    set2array: Set[Any] => Array[AnyRef],
-    //    exts: List[String],
   ): Product => Unit = ???
 
   protected def addRef(

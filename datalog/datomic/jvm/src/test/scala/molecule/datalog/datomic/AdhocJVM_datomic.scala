@@ -4,6 +4,7 @@ import java.net.URI
 import java.time._
 import java.util
 import java.util.{Date, UUID}
+import datomic.Peer
 import molecule.base.error.{ExecutionError, ModelError}
 import molecule.core.action.Query
 import molecule.core.spi.TxReport
@@ -44,48 +45,55 @@ object AdhocJVM_datomic extends TestSuite_datomic {
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
 
-        _ <- A.s("a").save.transact // no A.i filter match
-        _ <- A.i(1).save.transact
+        _ <- A.i.Bb.*?(B.s_?.i_?).insert(
+          (1, List()),
+          (2, List((Some("a"), None))),
+          (3, List((Some("b"), None), (Some("c"), None))),
+          (4, List((Some("d"), Some(1)))),
+          (5, List((Some("e"), Some(2)), (Some("f"), Some(3)))),
+          (6, List((Some("g"), Some(4)), (Some("h"), None))),
+        ).i.transact
+
+        // Filter by A ids, update B values
+        _ <- A.i_.Bb.i(4).update.i.transact
+
+        _ = {
+          println("-------")
+          Peer.q(
+            """[:find  ?b
+              |        (pull ?id0 [
+              |          {(:A/bb :limit nil :default "__none__") [
+              |            (:B/s :limit nil :default "__none__")
+              |            (:B/i :limit nil :default "__none__")]}])
+              | :where [?a :A/i ?b]
+              |        [(identity ?a) ?id0]]
+              |        """.stripMargin,
+            conn.db
+          ).forEach { r => println(r) }
+        }
 
 
 
-        //        _ = {
-        //          println("----------- 2")
-        //          datomic.Peer.q(
-        //            """[:find  ?b
-        //              | :with  ?d3
-        //              | :in    $ ?d5
-        //              | :where [?a :A/i ?b]
-        //              |        [?a :A/b ?c]
-        //              |        [(datomic.api/q
-        //              |          "[:find (distinct ?d-pair)
-        //              |            :in $ ?c
-        //              |            :where [?c :B/iSeq ?d]
-        //              |                   [?d :B.iSeq/i_ ?d-i]
-        //              |                   [?d :B.iSeq/v_ ?d-v]
-        //              |                   [(vector ?d-i ?d-v) ?d-pair]]" $ ?c) [[?d1]]]
-        //              |        [(sort-by first ?d1) ?d2]
-        //              |        [(map second ?d2) ?d3]
-        //              |        [(set ?d3) ?d4]
-        //              |        [(some ?d4 ?d5)]]
-        //              |""".stripMargin, conn.db,
-        //            Seq(2, 7).asJava
-        //          ).forEach(r => println(r))
-        //        }
+        _ <- A.i.a1.Bb.*?(B.s_?.a1.i).query.i.get.map(_ ==> List(
+          (1, List()), //                               no B.i value
+          (2, List()), //                               no B.i value
+          (3, List()), //                               no B.i value
+          (4, List((Some("d"), 4))), //                 update in 1 ref entity
+          (5, List((Some("e"), 4), (Some("f"), 4))), // update in 2 ref entities
+          (6, List((Some("g"), 4))), //                 already had same value
+        ))
 
-        //        _ = {
-        //          println("----------- 2")
-        //          datomic.Peer.q(
-        //            """[:find  (pull ?id0 [
-        //              |          {(:A/bb :limit nil :default "__none__") [
-        //              |            {(:B/c :limit nil :default "__none__") [
-        //              |              (:C/iSet :limit nil :default "__none__")]}]}])
-        //              | :where [?a :A/bb ?b]
-        //              |        [(identity ?a) ?id0]]
-        //              |""".stripMargin, conn.db,
-        ////            Seq(1).asJava
-        //          ).forEach(r => println(r))
-        //        }
+        // Filter by A ids, upsert B values
+        _ <- A.i_.Bb.i(5).upsert.transact
+
+        _ <- A.i.a1.Bb.*?(B.s_?.a1.i).query.get.map(_ ==> List(
+          (1, List((None, 5))), //                      ref + insert
+          (2, List((Some("a"), 5))), //                 addition in 1 ref entity
+          (3, List((Some("b"), 5), (Some("c"), 5))), // addition in 2 ref entities
+          (4, List((Some("d"), 5))), //                 update in 1 ref entity
+          (5, List((Some("e"), 5), (Some("f"), 5))), // update in 2 ref entities
+          (6, List((Some("g"), 5), (Some("h"), 5))), // update in one ref entity and insertion in another
+        ))
 
 
       } yield ()

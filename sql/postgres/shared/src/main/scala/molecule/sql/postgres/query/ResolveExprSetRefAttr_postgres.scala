@@ -1,7 +1,6 @@
 package molecule.sql.postgres.query
 
 import molecule.sql.core.query.{ResolveExprSetRefAttr, SqlQueryBase}
-import scala.reflect.ClassTag
 
 trait ResolveExprSetRefAttr_postgres
   extends ResolveExprSetRefAttr

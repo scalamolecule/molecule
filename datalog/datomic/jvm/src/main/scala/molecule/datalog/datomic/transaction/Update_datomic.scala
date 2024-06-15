@@ -146,9 +146,9 @@ trait Update_datomic
   override protected def updateOne[T](
     ns: String,
     attr: String,
-    owner: Boolean,
     vs: Seq[T],
     transformValue: T => Any,
+    exts: List[String],
   ): Unit = {
     val a = kw(ns, attr)
     vs match {
@@ -186,7 +186,6 @@ trait Update_datomic
     ns: String,
     attr: String,
     optRefNs: Option[String],
-    owner: Boolean,
     set: Set[T],
     transformValue: T => Any,
     exts: List[String],
@@ -235,7 +234,6 @@ trait Update_datomic
     ns: String,
     attr: String,
     optRefNs: Option[String],
-    owner: Boolean,
     set: Set[T],
     transformValue: T => Any,
     exts: List[String],
@@ -257,7 +255,6 @@ trait Update_datomic
     ns: String,
     attr: String,
     optRefNs: Option[String],
-    owner: Boolean,
     set: Set[T],
     transformValue: T => Any,
     exts: List[String],
@@ -279,7 +276,6 @@ trait Update_datomic
     ns: String,
     attr: String,
     optRefNs: Option[String],
-    owner: Boolean,
     seq: Seq[T],
     transformValue: T => Any,
     exts: List[String],
@@ -337,7 +333,6 @@ trait Update_datomic
     ns: String,
     attr: String,
     optRefNs: Option[String],
-    owner: Boolean,
     seq: Seq[T],
     transformValue: T => Any,
     exts: List[String],
@@ -375,7 +370,6 @@ trait Update_datomic
     ns: String,
     attr: String,
     optRefNs: Option[String],
-    owner: Boolean,
     seq: Seq[T],
     transformValue: T => Any,
     exts: List[String],
@@ -448,7 +442,9 @@ trait Update_datomic
     }
   }
 
-  override def updateByteArray(ns: String, attr: String, newByteArray: Array[Byte]): Unit = {
+  override def updateByteArray(
+    ns: String, attr: String, newByteArray: Array[Byte]
+  ): Unit = {
     val a = kw(ns, attr)
     if (newByteArray.nonEmpty) {
       val newValues = newByteArray
@@ -481,7 +477,6 @@ trait Update_datomic
     attr: String,
     optRefNs: Option[String],
     noValue: Boolean,
-    owner: Boolean,
     map: Map[String, T],
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
@@ -585,7 +580,6 @@ trait Update_datomic
     ns: String,
     attr: String,
     optRefNs: Option[String],
-    owner: Boolean,
     map: Map[String, T],
     transformValue: T => Any,
     exts: List[String],
@@ -653,11 +647,8 @@ trait Update_datomic
     ns: String,
     attr: String,
     optRefNs: Option[String],
-    owner: Boolean,
     map: Map[String, T],
-    transformValue: T => Any,
     exts: List[String],
-    value2json: (StringBuffer, T) => StringBuffer,
   ): Unit = {
     if (map.nonEmpty) {
       val a  = kw(ns, attr)

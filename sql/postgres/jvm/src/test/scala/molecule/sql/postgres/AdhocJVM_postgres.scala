@@ -15,47 +15,9 @@ object AdhocJVM_postgres extends TestSuite_postgres {
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
-
-
-      val a = (1, Map("a" -> boolean1, "b" -> boolean2))
-      val b = (2, Map("a" -> boolean2, "b" -> boolean3, "c" -> boolean4))
       for {
-        _ <- Ns.i.insert(0).transact // Entity without map attribute
-        _ <- Ns.i.booleanMap.insert(List(a, b)).transact
 
-
-        //        _ <- rawTransact(
-        //          """UPDATE Ns
-        //            |SET
-        //            |  intMap = ('{"b": 2}'::jsonb)
-        //            |WHERE Ns.id IN(1) AND
-        //            |  Ns.intMap IS NOT NULL
-        //            |""".stripMargin)
-
-
-        _ <- rawQuery(
-          """SHOW max_connections
-            |""".stripMargin, true)
-
-        _ <- rawQuery(
-          """SHOW max_locks_per_transaction
-            |""".stripMargin, true)
-
-
-
-//        _ <- rawQuery(
-//          """SELECT DISTINCT
-//            |  Ns.i,
-//            |  Ns.booleanMap ->> 'a'
-//            |FROM Ns
-//            |WHERE
-//            |  Ns.booleanMap ?? 'a' AND
-//            |  Ns.i          IS NOT NULL AND
-//            |  Ns.booleanMap IS NOT NULL
-//            |ORDER BY Ns.i NULLS FIRST;
-//            |""".stripMargin, true)
-
-
+        id1 <- Ns.stringSeq(List(string1, string2, string3)).save.transact.map(_.id)
 
 
       } yield ()
@@ -63,30 +25,41 @@ object AdhocJVM_postgres extends TestSuite_postgres {
 
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
-
+      val pint20 = "b" -> 20
+      val pint30 = "c" -> 30
       for {
 
-        _ <- A.i.Bb.*(B.i.C.iSet).insert(
-          (0, Nil),
-          (1, List(
-            (1, Set.empty[Int])
-          )),
-          (2, List(
-            (1, Set.empty[Int]),
-            (2, Set(0)),
-            (3, Set(1, 2)),
-          )),
-        ).transact
+        // Will not be updated since entity has no A -> B relationship
+        _ <- B.s("x").iSeq(Seq(1, 2, 3)).save.transact
 
 
-        _ <- A.i.a1.Bb.*?(B.i.C.iSet).query.get.map(_ ==> List(
-          (0, Nil),
-          (1, Nil),
-          (2, List(
-            (2, Set(0)),
-            (3, Set(1, 2)),
-          )),
-        ))
+        //        _ <- rawTransact(
+        //          """UPDATE B
+        //            |SET
+        //            |  iSeq = ARRAY_REMOVE(ARRAY_REMOVE(iSeq, ?::integer), ?::integer)
+        //            |WHERE
+        //            |  iSeq IS NOT NULL AND
+        //            |  B.id IN(2, 3)
+        //            |""".stripMargin)
+
+
+        //        _ <- rawQuery(
+        //          """SELECT ARRAY_AGG(elem) AS unique_array
+        //            |FROM UNNEST('{1, 2, 3, 2, 4, 1}'::int[]) AS elem
+        //            |WHERE elem NOT IN(3, 4)
+        //            |""".stripMargin, true)
+        //
+        //        _ <- rawQuery(
+        //          """SELECT ARRAY_AGG(elem) AS unique_array
+        //            |FROM UNNEST('{1, 2, 3, 2, 4, 1}'::int[]) AS elem
+        //            |WHERE elem NOT IN(1, 2, 3, 4)
+        //            |""".stripMargin, true)
+        //
+        //        _ <- rawQuery(
+        //          """SELECT ARRAY_AGG(elem) AS unique_array
+        //            |FROM UNNEST('{1, 2, 3, 2, 4, 1}'::int[]) AS elem
+        //            |WHERE not elem = ANY ('{3, 4}'::int[])
+        //            |""".stripMargin, true)
 
       } yield ()
     }

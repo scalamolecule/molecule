@@ -6,6 +6,7 @@ import molecule.core.query.Model2QueryBase
 import molecule.datalog.core.query.DatomicQueryBase
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
+import scala.util.control.NonFatal
 
 
 trait CastNestedOptLeaf_
@@ -119,9 +120,11 @@ trait CastNestedOptLeaf_
         case row: jMap[_, _] =>
           list.clear()
           try {
-            rowList += cast(flatten(list, row).iterator)
+            rowList +=
+              cast(flatten(list, row).iterator)
           } catch {
-            case _: NullValueException => ()
+            case _: NullValueException =>
+              ()
           }
       }
       rowList.toList
@@ -140,7 +143,18 @@ trait CastNestedOptLeaf_
           sortedRows.add(flatten(list, row).asInstanceOf[Row])
       }
       Collections.sort(sortedRows, comparator)
-      sortedRows.asScala.map(row => cast(row.iterator)).toList
+      //      println("sortedRows: " + sortedRows)
+      val tupleList = sortedRows.asScala.flatMap { row =>
+        //        println("row: " + row)
+        try {
+          Some(cast(row.iterator))
+        } catch {
+          case _: NullValueException => None
+          case NonFatal(e)           => throw e
+        }
+      }.toList
+      //      println("tupleList: " + tupleList)
+      tupleList
   }
 
   final private def resolveNested(

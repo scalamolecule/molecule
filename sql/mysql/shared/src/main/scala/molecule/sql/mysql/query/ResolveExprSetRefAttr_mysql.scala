@@ -1,9 +1,7 @@
 package molecule.sql.mysql.query
 
-import molecule.sql.core.query.{ResolveExprSetRefAttr, SqlQueryBase}
-import scala.reflect.ClassTag
 import molecule.boilerplate.ast.Model._
-import molecule.base.error.ModelError
+import molecule.sql.core.query.{ResolveExprSetRefAttr, SqlQueryBase}
 
 trait ResolveExprSetRefAttr_mysql
   extends ResolveExprSetRefAttr

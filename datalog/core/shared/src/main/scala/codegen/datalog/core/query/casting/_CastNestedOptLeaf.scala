@@ -128,7 +128,18 @@ object _CastNestedOptLeaf extends DatomicGenBase("CastNestedOptLeaf", "/query/ca
        |          sortedRows.add(flatten(list, row).asInstanceOf[Row])
        |      }
        |      Collections.sort(sortedRows, comparator)
-       |      sortedRows.asScala.map(row => cast(row.iterator)).toList
+       |      //      println("sortedRows: " + sortedRows)
+       |      val tupleList = sortedRows.asScala.flatMap { row =>
+       |        //        println("row: " + row)
+       |        try {
+       |          Some(cast(row.iterator))
+       |        } catch {
+       |          case _: NullValueException => None
+       |          case NonFatal(e)           => throw e
+       |        }
+       |      }.toList
+       |      //      println("tupleList: " + tupleList)
+       |      tupleList
        |  }
        |
        |  final private def resolveNested(

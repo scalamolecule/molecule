@@ -108,10 +108,10 @@ case class JdbcConn_JVM(
           // part_ns_join_part_ref   4 underscores
           val underscores = refPath.last.init.count(_ == '_')
           if (underscores != 2 && underscores != 4) {
-            var idSet  = false
+            var idSet = false
             while (resultSet.next()) {
+              //              val id = resultSet.getLong(1)
               //              debug("  ################# " + id)
-              //              genIds = genIds :+ id
               //              ids = ids :+ id
               ids = ids :+ resultSet.getLong(1)
               idSet = true

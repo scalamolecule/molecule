@@ -62,7 +62,7 @@ trait FilterOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i_().int(3).update.transact
 
         // 1 entity updated
-        _ <- Ns.i_?.int.query.get.map(_ ==> List(
+        _ <- Ns.i_?.a1.int.query.get.map(_ ==> List(
           (None, 3), // updated
           (Some(1), 1),
           (Some(2), 2),

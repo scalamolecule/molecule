@@ -101,7 +101,7 @@ trait Many_Set extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- A.iSet(Set(3, 4)).Bb.s_.update.transact
 
 
-        _ <- A.iSet.Bb.*?(B.s).query.get.map(_.sortBy(_._2.headOption.toString) ==> List(
+        _ <- A.iSet.Bb.*?(B.s.a1).query.get.map(_.sortBy(_._2.headOption.toString) ==> List(
           (Set(0, 1), List()), //         nothing updated since this A entity has no ref to B
           // (<none>, List("a")), //      no A attribute to update
           (Set(3, 4), List("b", "c")), // A attribute updated
@@ -111,7 +111,7 @@ trait Many_Set extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Filter by B attribute, update A values
         _ <- A.iSet(Set(4, 5)).Bb.s_.upsert.transact
 
-        _ <- A.iSet.Bb.*?(B.s).query.get.map(_.sortBy(_._2.headOption.toString) ==> List(
+        _ <- A.iSet.Bb.*?(B.s.a1).query.get.map(_.sortBy(_._2.headOption.toString) ==> List(
           (Set(0, 1), List()), //         nothing updated since this A entity has no ref to B
           (Set(4, 5), List("a")), //      A attribute inserted
           (Set(4, 5), List("b", "c")), // A attribute updated

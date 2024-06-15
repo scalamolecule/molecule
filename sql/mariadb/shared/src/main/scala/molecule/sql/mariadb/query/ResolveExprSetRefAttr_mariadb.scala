@@ -1,9 +1,7 @@
 package molecule.sql.mariadb.query
 
-import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.sql.core.query.{ResolveExprSetRefAttr, SqlQueryBase}
-import scala.reflect.ClassTag
 
 trait ResolveExprSetRefAttr_mariadb
   extends ResolveExprSetRefAttr

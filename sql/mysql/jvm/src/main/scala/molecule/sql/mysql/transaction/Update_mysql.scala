@@ -16,7 +16,6 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
     ns: String,
     attr: String,
     optRefNs: Option[String],
-    owner: Boolean,
     set: Set[T],
     transformValue: T => Any,
     exts: List[String],
@@ -30,7 +29,6 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
     ns: String,
     attr: String,
     optRefNs: Option[String],
-    owner: Boolean,
     set: Set[T],
     transformValue: T => Any,
     exts: List[String],
@@ -44,7 +42,6 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
     ns: String,
     attr: String,
     optRefNs: Option[String],
-    owner: Boolean,
     set: Set[T],
     transformValue: T => Any,
     exts: List[String],
@@ -58,7 +55,6 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
     ns: String,
     attr: String,
     optRefNs: Option[String],
-    owner: Boolean,
     seq: Seq[T],
     transformValue: T => Any,
     exts: List[String],
@@ -72,7 +68,6 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
     ns: String,
     attr: String,
     optRefNs: Option[String],
-    owner: Boolean,
     seq: Seq[T],
     transformValue: T => Any,
     exts: List[String],
@@ -86,7 +81,6 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
     ns: String,
     attr: String,
     optRefNs: Option[String],
-    owner: Boolean,
     seq: Seq[T],
     transformValue: T => Any,
     exts: List[String],
@@ -102,7 +96,6 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
     attr: String,
     optRefNs: Option[String],
     noValue: Boolean,
-    owner: Boolean,
     map: Map[String, T],
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
@@ -117,7 +110,6 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
     ns: String,
     attr: String,
     optRefNs: Option[String],
-    owner: Boolean,
     map: Map[String, T],
     transformValue: T => Any,
     exts: List[String],
@@ -126,7 +118,7 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
     if (map.nonEmpty) {
       cols += attr
       if (!isUpsert) {
-        addToUpdateColsNotNull(ns, attr)
+        addToUpdateColsNotNull(attr)
       }
       placeHolders = placeHolders :+
         s"$ns.$attr = JSON_MERGE_PATCH(IFNULL($ns.$attr, JSON_OBJECT()), ?)"
@@ -143,16 +135,13 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
     ns: String,
     attr: String,
     optRefNs: Option[String],
-    owner: Boolean,
     map: Map[String, T],
-    transformValue: T => Any,
     exts: List[String],
-    value2json: (StringBuffer, T) => StringBuffer,
   ): Unit = {
     if (map.nonEmpty) {
       cols += attr
       if (!isUpsert) {
-        addToUpdateColsNotNull(ns, attr)
+        addToUpdateColsNotNull(attr)
       }
       val keys = map.keySet.map(k => s"'$$.$k'").mkString(", ")
       placeHolders = placeHolders :+
@@ -178,7 +167,7 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
       placeHolders = placeHolders :+ s"$attr = ?"
       val colSetter = if (iterable.nonEmpty) {
         if (!isUpsert) {
-          addToUpdateColsNotNull(ns, attr)
+          addToUpdateColsNotNull(attr)
         }
         (ps: PS, _: IdsMap, _: RowIndex) => {
           val json = iterable2json(iterable.asInstanceOf[Iterable[T]], value2json)
@@ -208,7 +197,7 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
       if (iterable.nonEmpty) {
         cols += attr
         if (!isUpsert) {
-          addToUpdateColsNotNull(ns, attr)
+          addToUpdateColsNotNull(attr)
         }
         placeHolders = placeHolders :+ s"$attr = JSON_MERGE(IFNULL($attr, '[]'), ?)"
         val json = iterable2json(iterable.asInstanceOf[Iterable[T]], value2json)
@@ -234,7 +223,7 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
       if (iterable.nonEmpty) {
         cols += attr
         if (!isUpsert) {
-          addToUpdateColsNotNull(ns, attr)
+          addToUpdateColsNotNull(attr)
         }
         val valueTable    = "table_" + (placeHolders.size + 1)
         val cast          = exts(1)

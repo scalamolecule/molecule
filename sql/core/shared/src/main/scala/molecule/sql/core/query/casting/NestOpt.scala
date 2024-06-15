@@ -90,7 +90,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
     val rows = list.iterator
     while (rows.hasNext) {
       val row = rows.next()
-      //      println("---------- " + row)
+      //      println("---------- row:  " + row)
       row match {
         // Nested empty single value not to be added
         case set: Set[_] if set.isEmpty    => ()
