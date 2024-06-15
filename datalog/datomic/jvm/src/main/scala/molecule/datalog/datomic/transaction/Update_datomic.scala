@@ -90,12 +90,13 @@ trait Update_datomic
       getUpdateFilters(elements.reverse)
 
     requiredNsPaths = requiredNsPaths1
+    //    println("------ requiredNsPaths ------")
+    //    requiredNsPaths.foreach(println)
 
     val filters = AttrOneManID(getInitialNs(elements), "id", V) :: filterElements1
 
     //    println("------ filters --------")
     //    filters.foreach(println)
-    //    println("------ requiredNsPaths: " + requiredNsPaths)
 
     val filterMatchRows = new DatomicQueryResolveOffset[Any](
       filters, None, None, None, new Model2DatomicQuery[Any](filters)
@@ -115,6 +116,8 @@ trait Update_datomic
       }
     }
 
+    //    println("\n=================== RESOLVE =================================================")
+
     // Resolve update model
     resolve(elements)
 
@@ -132,9 +135,13 @@ trait Update_datomic
       logger.debug(updateStrs.mkString("\n").trim)
     }
 
+    //    println("\n------ stmts --------")
+    //    stmts.forEach(stmt => println(stmt))
+
     // Datomic statements created from row resolutions
     stmts
   }
+
 
   override protected def updateOne[T](
     ns: String,
@@ -674,9 +681,7 @@ trait Update_datomic
       case Nil => List(ns, refAttr0, refNs)
       case cur => cur ++ List(refAttr0, refNs)
     }
-    //    println("------------")
-    //    println(requiredNsPaths)
-    //    println(currentNsPath)
+    println("  currentNsPath" + currentNsPath)
     val refAttr = kw(ns, refAttr0)
     rowResolvers += {
       case row: jList[AnyRef] if isUpsert =>
@@ -687,6 +692,7 @@ trait Update_datomic
           row.get(attrIndex) match {
             case null =>
               // Don't add ref if it's not required (when removing only)
+              // Add required ref
               if (requiredNsPaths.contains(currentNsPath)) {
                 // Add ref to next namespace
                 val ref = newId
@@ -708,12 +714,23 @@ trait Update_datomic
               }
           }
         } else {
-          // Get currently unknown ref from Datomic database entity lookup
-          idLists.last.map { e =>
-            db.entity(e).asInstanceOf[EntityMap].get(refAttr) match {
-              case set: jSet[_]  => set.iterator.next.asInstanceOf[EntityMap].get(dbId)
-              case em: EntityMap => em.get(dbId)
-            }
+          idLists.last.map {
+            case tempRefId: String =>
+              // Add existing temporary ref id to next namespace
+              appendStmt(add, ids.head, refAttr, tempRefId)
+              tempRefId
+
+            case e =>
+              // Get currently unknown ref from Datomic database entity lookup
+              db.entity(e).asInstanceOf[EntityMap].get(refAttr) match {
+                case set: jSet[_]  => set.iterator.next.asInstanceOf[EntityMap].get(dbId)
+                case em: EntityMap => em.get(dbId)
+                case null          =>
+                  // Add ref to next namespace
+                  val tempRefId = newId
+                  appendStmt(add, ids.head, refAttr, tempRefId)
+                  tempRefId
+              }
           }
         }
         attrIndex += 1

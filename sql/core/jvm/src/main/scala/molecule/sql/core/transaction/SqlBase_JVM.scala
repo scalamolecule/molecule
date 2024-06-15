@@ -56,7 +56,7 @@ trait SqlBase_JVM extends SqlDataType_JVM with ModelUtils with BaseHelpers {
 
   // "Connection pool" ---------------------------------------------
 
-  // todo: offer real solution
+  // todo: use Hikari or other real connection pool solution
   private val connectionPool = mutable.HashMap.empty[UUID, Future[JdbcConn_JVM]]
 
   //  override def clearConnPool: Future[Unit] = Future {

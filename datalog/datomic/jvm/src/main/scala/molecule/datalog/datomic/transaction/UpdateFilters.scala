@@ -13,7 +13,7 @@ trait UpdateFilters extends ModelUtils {
     filterElements: List[Element] = Nil,
     hasFilter: Boolean = false,
     requireNs: Boolean = false,
-    requiredNsPaths: List[List[String]] = List(List())
+    requiredNsPaths: List[List[String]] = List.empty[List[String]]
   ): (List[Element], List[List[String]]) = {
     reversedElements match {
       case element :: tail => element match {
@@ -213,24 +213,28 @@ trait UpdateFilters extends ModelUtils {
         }
 
         case r: Ref => if (hasFilter) {
-          getUpsertFilters(tail, r :: AttrOneManID(r.refNs, "id") :: filterElements, true)
+          // Pad current paths. We can safely do this since backrefs are not
+          // allowed in upserts, so we'll have a straight ns path.
+          val requiredNsPaths1 = requiredNsPaths.map(cur => List(r.ns, r.refAttr) ::: cur)
+          getUpsertFilters(
+            tail,
+            r :: AttrOneManID(r.refNs, "id") :: filterElements,
+            true,
+            requiredNsPaths = requiredNsPaths1
+          )
         } else {
           // Skip tail and start over since we can't know if this ref is asserted without any filter values after it.
           // From here on and backwards we only might have a reference
           val requiredNsPaths1 = if (requireNs) {
-            requiredNsPaths match {
-              case Nil :: tail => List(r.ns, r.refAttr, r.refNs) :: tail
-              case cur :: tail => (List(r.ns, r.refAttr) ::: cur) :: tail
-              case Nil         => Nil
-            }
+            List(r.ns, r.refAttr, r.refNs) :: requiredNsPaths.map(cur => List(r.ns, r.refAttr) ::: cur)
           } else requiredNsPaths
 
           // ref has no filters after it, so we don't know if theres a relationship. Look for optional ref id then.
-          getUpsertFilters(tail, AttrOneOptID(r.ns, r.refAttr) :: Nil, false, requiredNsPaths = requiredNsPaths1)
+          getUpsertFilters(tail, AttrOneOptID(r.ns, r.refAttr) :: Nil, requiredNsPaths = requiredNsPaths1)
         }
 
-        case br: BackRef => getUpsertFilters(tail, br :: filterElements, hasFilter)
-        case _           => noNested
+        case _: BackRef => throw ModelError("Back refs not allowed in upserts")
+        case _          => noNested
       }
 
       case Nil => (filterElements, requiredNsPaths)
@@ -452,5 +456,4 @@ trait UpdateFilters extends ModelUtils {
       case Nil => (filterElements, requiredNsPaths)
     }
   }
-
 }

@@ -8,12 +8,13 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ResolveUpdate
 import molecule.core.transaction.ops.UpdateOps
 import molecule.sql.core.query.Model2SqlQuery
+import molecule.sql.core.spi.SpiHelpers
 
 trait SqlUpdate
   extends SqlBase_JVM
     with UpdateOps
     with SqlBaseOps
-    with UpdateUtils
+    with SpiHelpers
     with MoleculeLogging { self: ResolveUpdate =>
 
   //    doPrint = false

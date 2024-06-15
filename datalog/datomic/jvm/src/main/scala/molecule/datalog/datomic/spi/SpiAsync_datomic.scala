@@ -19,58 +19,69 @@ trait SpiAsync_datomic
 
   // Query --------------------------------------------------------
 
-  override def query_get[Tpl](q: Query[Tpl])
-                             (implicit conn: Conn, ec: EC): Future[List[Tpl]] = {
+  override def query_get[Tpl](
+    q: Query[Tpl]
+  )(implicit conn: Conn, ec: EC): Future[List[Tpl]] = {
     future(SpiSync_datomic.query_get(q))
   }
 
-  override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)
-                                   (implicit conn: Conn, ec: EC): Future[Unit] = {
+  override def query_subscribe[Tpl](
+    q: Query[Tpl], callback: List[Tpl] => Unit
+  )(implicit conn: Conn, ec: EC): Future[Unit] = {
     future(SpiSync_datomic.query_subscribe(q, callback))
   }
 
-  override def query_unsubscribe[Tpl](q: Query[Tpl])
-                                     (implicit conn: Conn, ec: EC): Future[Unit] = {
+  override def query_unsubscribe[Tpl](
+    q: Query[Tpl]
+  )(implicit conn: Conn, ec: EC): Future[Unit] = {
     future(SpiSync_datomic.query_unsubscribe(q))
   }
 
-  override def query_inspect[Tpl](q: Query[Tpl])
-                                 (implicit conn: Conn, ec: EC): Future[Unit] = {
+  override def query_inspect[Tpl](
+    q: Query[Tpl]
+  )(implicit conn: Conn, ec: EC): Future[Unit] = {
     future(SpiSync_datomic.query_inspect(q))
   }
 
 
-  override def queryOffset_get[Tpl](q: QueryOffset[Tpl])
-                                   (implicit conn: Conn, ec: EC): Future[(List[Tpl], Int, Boolean)] = {
+  override def queryOffset_get[Tpl](
+    q: QueryOffset[Tpl]
+  )(implicit conn: Conn, ec: EC): Future[(List[Tpl], Int, Boolean)] = {
     future(SpiSync_datomic.queryOffset_get(q))
   }
 
-  override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])
-                                       (implicit conn: Conn, ec: EC): Future[Unit] = {
+  override def queryOffset_inspect[Tpl](
+    q: QueryOffset[Tpl]
+  )(implicit conn: Conn, ec: EC): Future[Unit] = {
     future(SpiSync_datomic.queryOffset_inspect(q))
   }
 
 
-  override def queryCursor_get[Tpl](q: QueryCursor[Tpl])
-                                   (implicit conn: Conn, ec: EC): Future[(List[Tpl], String, Boolean)] = {
+  override def queryCursor_get[Tpl](
+    q: QueryCursor[Tpl]
+  )(implicit conn: Conn, ec: EC): Future[(List[Tpl], String, Boolean)] = {
     future(SpiSync_datomic.queryCursor_get(q))
   }
 
-  override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])
-                                       (implicit conn: Conn, ec: EC): Future[Unit] = {
+  override def queryCursor_inspect[Tpl](
+    q: QueryCursor[Tpl]
+  )(implicit conn: Conn, ec: EC): Future[Unit] = {
     future(SpiSync_datomic.queryCursor_inspect(q))
   }
 
 
   // Save --------------------------------------------------------
 
-  override def save_transact(save: Save)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
+  override def save_transact(
+    save: Save
+  )(implicit conn0: Conn, ec: EC): Future[TxReport] = {
     val conn = conn0.asInstanceOf[DatomicConn_JVM]
     for {
       _ <- if (save.doInspect) save_inspect(save) else Future.unit
       errors <- save_validate(save)
       txReport <- errors match {
-        case errors if errors.isEmpty => conn.transact_async(save_getStmts(save))
+        case errors if errors.isEmpty =>
+          conn.transact_async(save_getStmts(save))
         case errors                   => throw ValidationErrors(errors)
       }
     } yield {
@@ -79,7 +90,9 @@ trait SpiAsync_datomic
     }
   }
 
-  override def save_inspect(save: Save)(implicit conn: Conn, ec: EC): Future[Unit] = future {
+  override def save_inspect(
+    save: Save
+  )(implicit conn: Conn, ec: EC): Future[Unit] = future {
     SpiSync_datomic.save_inspect(save)
   }
 
@@ -87,20 +100,25 @@ trait SpiAsync_datomic
     SpiSync_datomic.save_getStmts(save)
   }
 
-  override def save_validate(save: Save)(implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = future {
+  override def save_validate(
+    save: Save
+  )(implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = future {
     SpiSync_datomic.save_validate(save)
   }
 
 
   // Insert --------------------------------------------------------
 
-  override def insert_transact(insert: Insert)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
+  override def insert_transact(
+    insert: Insert
+  )(implicit conn0: Conn, ec: EC): Future[TxReport] = {
     val conn = conn0.asInstanceOf[DatomicConn_JVM]
     for {
       _ <- if (insert.doInspect) insert_inspect(insert) else Future.unit
       errors <- insert_validate(insert)
       txReport <- errors match {
-        case errors if errors.isEmpty => conn.transact_async(insert_getStmts(insert, conn.proxy))
+        case errors if errors.isEmpty =>
+          conn.transact_async(insert_getStmts(insert, conn.proxy))
         case errors                   => throw InsertErrors(errors)
       }
     } yield {
@@ -109,7 +127,9 @@ trait SpiAsync_datomic
     }
   }
 
-  override def insert_inspect(insert: Insert)(implicit conn: Conn, ec: EC): Future[Unit] = future {
+  override def insert_inspect(
+    insert: Insert
+  )(implicit conn: Conn, ec: EC): Future[Unit] = future {
     SpiSync_datomic.insert_inspect(insert)
   }
 
@@ -117,21 +137,25 @@ trait SpiAsync_datomic
     SpiSync_datomic.insert_getStmts(insert, proxy)
   }
 
-  override def insert_validate(insert: Insert)
-                              (implicit conn: Conn, ec: EC): Future[Seq[(Int, Seq[InsertError])]] = future {
+  override def insert_validate(
+    insert: Insert
+  )(implicit conn: Conn, ec: EC): Future[Seq[(Int, Seq[InsertError])]] = future {
     SpiSync_datomic.insert_validate(insert)
   }
 
 
   // Update --------------------------------------------------------
 
-  override def update_transact(update: Update)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
+  override def update_transact(
+    update: Update
+  )(implicit conn0: Conn, ec: EC): Future[TxReport] = {
     val conn = conn0.asInstanceOf[DatomicConn_JVM]
     for {
       _ <- if (update.doInspect) update_inspect(update) else Future.unit
       errors <- update_validate(update)
       txReport <- errors match {
-        case errors if errors.isEmpty => conn.transact_async(update_getStmts(update, conn))
+        case errors if errors.isEmpty =>
+          conn.transact_async(update_getStmts(update, conn))
         case errors                   => throw ValidationErrors(errors)
       }
     } yield {
@@ -140,7 +164,9 @@ trait SpiAsync_datomic
     }
   }
 
-  override def update_inspect(update: Update)(implicit conn: Conn, ec: EC): Future[Unit] = future {
+  override def update_inspect(
+    update: Update
+  )(implicit conn: Conn, ec: EC): Future[Unit] = future {
     SpiSync_datomic.update_inspect(update)
   }
 
@@ -148,14 +174,18 @@ trait SpiAsync_datomic
     SpiSync_datomic.update_getStmts(update, conn)
   }
 
-  override def update_validate(update: Update)(implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = future {
+  override def update_validate(
+    update: Update
+  )(implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = future {
     SpiSync_datomic.update_validate(update)
   }
 
 
   // Delete --------------------------------------------------------
 
-  override def delete_transact(delete: Delete)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
+  override def delete_transact(
+    delete: Delete
+  )(implicit conn0: Conn, ec: EC): Future[TxReport] = {
     val conn = conn0.asInstanceOf[DatomicConn_JVM]
     for {
       _ <- if (delete.doInspect) delete_inspect(delete) else Future.unit
@@ -166,7 +196,9 @@ trait SpiAsync_datomic
     }
   }
 
-  override def delete_inspect(delete: Delete)(implicit conn: Conn, ec: EC): Future[Unit] = future {
+  override def delete_inspect(
+    delete: Delete
+  )(implicit conn: Conn, ec: EC): Future[Unit] = future {
     SpiSync_datomic.delete_inspect(delete)
   }
 
@@ -178,15 +210,13 @@ trait SpiAsync_datomic
   // Fallbacks --------------------------------------------------------
 
   override def fallback_rawQuery(
-    query: String,
-    debug: Boolean = false,
+    query: String, debug: Boolean = false,
   )(implicit conn: Conn, ec: EC): Future[List[List[Any]]] = future {
     SpiSync_datomic.fallback_rawQuery(query, debug)
   }
 
   override def fallback_rawTransact(
-    txData: String,
-    debugFlag: Boolean = false
+    txData: String, debugFlag: Boolean = false
   )(implicit conn: Conn, ec: EC): Future[TxReport] = {
     val debug = if (debugFlag) (s: String) => println(s) else (_: String) => ()
     debug("\n=============================================================================")

@@ -158,21 +158,21 @@ trait One_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- A.i(4).B.s("b").i(4).save.transact
         _ <- A.i(5).B.s("c").i(5).save.transact
 
-        _ <- A.i.a1.B.s.i.query.get.map(_ ==> List(
+        _ <- A.i.B.s.i.a1.query.get.map(_ ==> List(
           (4, "b", 4),
           (5, "c", 5),
         ))
 
         _ <- A.i(6).B.s("x").i_.update.transact
 
-        _ <- A.i.a1.B.s.i.query.get.map(_ ==> List(
+        _ <- A.i.B.s.i.a1.query.get.map(_ ==> List(
           (6, "x", 4), // A and B values updated
           (6, "x", 5), // A and B values updated
         ))
 
         _ <- A.i(7).B.s("y").i_.upsert.transact
 
-        _ <- A.i.a1.B.s.i.query.get.map(_ ==> List(
+        _ <- A.i.B.s.i.a1.query.get.map(_ ==> List(
           (7, "y", 2), // A value inserted, B value updated
           (7, "y", 4), // A and B values updated
           (7, "y", 5), // A and B values updated
@@ -275,7 +275,7 @@ trait One_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         // Insert refs to C and set A.i and C.i values for all entities that have B.i value
         _ <- A.i(10).B.i_.C.i(10).upsert.transact
-        _ <- A.i.B.i.C.i.query.get.map(_ ==> List(
+        _ <- A.i.B.i.a1.C.i.query.get.map(_ ==> List(
           (10, 2, 10), // A.i inserted, ref to C and C.i inserted
           (10, 3, 10), // A.i updated, ref to C and C.i inserted
           (10, 5, 10), // A.i inserted, C.i inserted
@@ -309,7 +309,7 @@ trait One_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         // Insert refs to C and set C.i values for all entities that have A.i and B.i value
         _ <- A.i_.B.i_.C.i(9).upsert.transact
-        _ <- A.i.B.i.C.i.query.get.map(_ ==> List(
+        _ <- A.i.a1.B.i.C.i.query.get.map(_ ==> List(
           (3, 3, 9), // ref to C and C.i inserted
           (6, 6, 9), // C.i inserted
           (7, 7, 9), // C.i updated
@@ -345,7 +345,7 @@ trait One_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         // Insert refs to B + C or C and set C.i values for all entities that have A.i value
         _ <- A.i_.B.i(12).C.i(12).upsert.transact
-        _ <- A.i.B.i.C.i.query.get.map(_ ==> List(
+        _ <- A.i.a1.B.i.C.i.query.get.map(_ ==> List(
           (1, 12, 12), // ref to B inserted, B.i inserted, ref to C inserted, C.i inserted
           (3, 12, 12), // B.i inserted, ref to C inserted, C.i inserted
           (4, 12, 12), // B.i updated, ref to C inserted, C.i inserted

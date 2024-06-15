@@ -34,53 +34,6 @@ object AdhocJVM_datomic extends TestSuite_datomic {
           (Some(2), 2),
         ).transact
 
-        //        // Update all entities where `i` is not asserted (null)
-        //        _ <- Ns.i_().int(3).update.transact
-        //          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-        //            err ==> "Please add at least one tacit filter attribute (applying empty value not counting)."
-        //          }
-
-        // Add at least one tacit filter attribute apart from filter applying nothing
-        //        _ <- Ns.i_().int_.int(3).update.transact
-        _ <- Ns.i_().int(3).update.transact
-
-        // 1 entity updated
-        _ <- Ns.i_?.int.query.get.map(_ ==> List(
-          (None, 3), // updated
-          (Some(1), 1),
-          (Some(2), 2),
-        ))
-
-        //        List(a, b) <- Ns.i.int.insert(
-        //          (1, 1),
-        //          (2, 2),
-        //        ).transact.map(_.ids)
-        //
-        //        // Update entities with id a or b
-        //        _ <- Ns(x, a, b).int(3).update.transact
-        //
-        //        // 2 entities updated
-        //        _ <- Ns.i.a1.int_?.query.get.map(_ ==> List(
-        //          (0, None), // updated
-        //          (1, Some(3)), // updated
-        //          (2, Some(3)),
-        //        ))
-        //
-        //        // Nothing updated if no match
-        //        _ <- Ns("42").int(5).update.transact
-        //        _ <- Ns.id.a1.i.int.query.get.map(_ ==> List(
-        //          (a, 1, 4),
-        //          (b, 1, 4),
-        //          (c, 2, 3),
-        //        ))
-        //
-        //        // Nothing updated if no match
-        //        _ <- Ns("42").int(5).update.transact
-        //        _ <- Ns.id.a1.i.int.query.get.map(_ ==> List(
-        //          (a, 1, 4),
-        //          (b, 1, 4),
-        //          (c, 2, 3),
-        //        ))
 
       } yield ()
     }
@@ -91,36 +44,9 @@ object AdhocJVM_datomic extends TestSuite_datomic {
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
 
-        _ <- A.i(1).s("a").save.transact.map(_.id)
-        _ <- A.i(2).B.s("b").save.transact
-        _ <- A.i(3).B.i(2).save.transact
-        _ <- A.i(4).s("d").save.transact.map(_.id)
-        _ <- A.i(5).s("e").B.i(5).save.transact.map(_.id)
-        _ <- A.i(6).s("f").B.i(6).save.transact.map(_.id)
+        _ <- A.s("a").save.transact // no A.i filter match
+        _ <- A.i(1).save.transact
 
-        _ <- A.i.s.a1.B.i.query.get.map(_ ==> List(
-          (5, "e", 5),
-          (6, "f", 6),
-        ))
-
-        _ <- A.i_.s("x").B.i(7).update.transact
-
-        _ <- A.i.a1.s.B.i.query.get.map(_ ==> List(
-          (5, "x", 7), // A and B values updated
-          (6, "x", 7), // A and B values updated
-        ))
-
-        //        _ <- A.i_.B.i(8).upsert.transact
-        _ <- A.i_.s("y").B.i(8).upsert.transact
-
-        _ <- A.i.a1.s.B.i.query.get.map(_ ==> List(
-          (1, "y", 8), // A value updated and ref to B and B value inserted
-          (2, "y", 8), // A value inserted and B value inserted
-          (3, "y", 8), // A value inserted and B value updated
-          (4, "y", 8), // A and B values updated
-          (5, "y", 8), // A and B values updated
-          (6, "y", 8), // A and B values updated
-        ))
 
 
         //        _ = {

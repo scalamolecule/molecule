@@ -12,13 +12,83 @@ import molecule.sql.core.javaSql.{ResultSetInterface => Row}
 import scala.annotation.nowarn
 import scala.collection.mutable.ListBuffer
 
-
 trait SpiHelpers extends ModelUtils {
 
-  def getUpdateResolvers(
-    elements: List[Element],
-    isUpsert: Boolean
-  ): List[ // List of resolvers for each table involved in update/upsert
+  def noCollectionFilterEq(attr: String) = throw ModelError(
+    s"Filtering by collection equality ($attr) not supported in updates."
+  )
+
+  final def getUpdateIdsModel(elements: List[Element]): (Int, List[Element]) = {
+    var hasData     = false
+    var arity       = 0
+    val firstNs     = getInitialNs(elements)
+    var curNs       = firstNs
+    val filterModel = ListBuffer.empty[Element]
+
+    // Since updates work on fully present ref structures we can accumulate forward
+    elements.foreach {
+      case a: Attr =>
+        a match {
+          case a: AttrOne => a match {
+            case a: AttrOneMan => hasData = true
+            case a: AttrOneTac => filterModel += a
+            case a: AttrOneOpt => noOptional(a)
+          }
+
+          case a: AttrSet => a match {
+            case a: AttrSetMan => hasData = true
+            case a: AttrSetTac =>
+              if (a.op == Eq) {
+                noCollectionFilterEq(a.name)
+              }
+              filterModel += a
+            case _: AttrSetOpt => noOptional(a)
+          }
+
+          case a: AttrSeq => a match {
+            case a: AttrSeqMan => hasData = true
+            case a: AttrSeqTac =>
+              if (a.op == Eq) {
+                noCollectionFilterEq(a.name)
+              }
+              filterModel += a
+            case _: AttrSeqOpt => noOptional(a)
+          }
+
+          case a: AttrMap => a match {
+            case a: AttrMapMan => hasData = true
+            case a: AttrMapTac =>
+              if (a.op == Eq) {
+                noCollectionFilterEq(a.name)
+              }
+              filterModel += a
+            case _: AttrMapOpt => noOptional(a)
+          }
+        }
+
+      case r: Ref =>
+        if (hasData) {
+          filterModel += AttrOneManID(curNs, "id")
+          arity += 1
+        }
+        filterModel += r
+        curNs = r.refNs
+        hasData = false
+
+      case BackRef(_, ns, _) => curNs = ns
+      case _                 => noNested
+    }
+
+    // Handle last namespace
+    if (hasData) {
+      filterModel += AttrOneManID(curNs, "id")
+      arity += 1
+    }
+    (arity, filterModel.toList)
+  }
+
+  def getUpdateResolvers(elements: List[Element]): List[
+    // List of resolvers for each table involved in update/upsert
     (
       List[String], // ref path
         List[String] => List[Element] // ref ids => update model
@@ -350,6 +420,15 @@ trait SpiHelpers extends ModelUtils {
     }
     (idQuery, updateModels)
   }
+
+
+
+
+
+
+
+
+
 
 
   protected def nestedArray2coalescedSet(a: Attr, rs: Row, isAttr: Boolean = true): Set[Any] = {
