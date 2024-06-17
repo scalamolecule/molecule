@@ -2,11 +2,10 @@ package molecule.sql.core.query
 
 import molecule.base.ast._
 import molecule.base.error.ModelError
-import molecule.boilerplate.ast.Model
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.ConnProxy
-import molecule.core.query.{Model2QueryBase, ResolveExpr}
+import molecule.core.query.ResolveExpr
 import molecule.core.util.ModelUtils
 import molecule.sql.core.query.casting._
 import scala.annotation.tailrec
@@ -21,6 +20,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     with NestOpt[Tpl]
     with ModelUtils
     with MoleculeLogging { self: ResolveExpr with SqlQueryBase =>
+
 
   final def getSqlQuery(
     altElements: List[Element],

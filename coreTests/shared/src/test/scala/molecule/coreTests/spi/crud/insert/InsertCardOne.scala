@@ -19,13 +19,13 @@ trait InsertCardOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "mandatory" - types { implicit conn =>
       for {
         _ <- Ns.string.insert(string1).transact
-        _ <- Ns.int.insert(int1).transact
-        _ <- Ns.long.insert(long1).transact
-        _ <- Ns.float.insert(float1).transact
-        _ <- Ns.double.insert(double1).transact
+        _ <- Ns.int.insert(intMin, int1, intMax).transact
+        _ <- Ns.long.insert(longMin, long1, longMax).transact
+        _ <- Ns.float.insert(floatMin, float1, floatMax).transact
+        _ <- Ns.double.insert(doubleMin, double1, doubleMax).transact
         _ <- Ns.boolean.insert(boolean1).transact
-        _ <- Ns.bigInt.insert(bigInt1).transact
-        _ <- Ns.bigDecimal.insert(bigDecimal1).transact
+        _ <- Ns.bigInt.insert(bigIntNeg, bigInt1, bigIntPos).transact
+        _ <- Ns.bigDecimal.insert(bigDecimalNeg, bigDecimal1, bigDecimalPos).transact
         _ <- Ns.date.insert(date1).transact
         _ <- Ns.duration.insert(duration1).transact
         _ <- Ns.instant.insert(instant1).transact
@@ -37,18 +37,18 @@ trait InsertCardOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.zonedDateTime.insert(zonedDateTime1).transact
         _ <- Ns.uuid.insert(uuid1).transact
         _ <- Ns.uri.insert(uri1).transact
-        _ <- Ns.byte.insert(byte1).transact
-        _ <- Ns.short.insert(short1).transact
+        _ <- Ns.byte.insert(byteMin, byte1, byteMax).transact
+        _ <- Ns.short.insert(shortMin, short1, shortMax).transact
         _ <- Ns.char.insert(char1).transact
 
         _ <- Ns.string.a1.query.get.map(_ ==> List(string1))
-        _ <- Ns.int.a1.query.get.map(_ ==> List(int1))
-        _ <- Ns.long.a1.query.get.map(_ ==> List(long1))
-        _ <- Ns.float.a1.query.get.map(_ ==> List(float1))
-        _ <- Ns.double.a1.query.get.map(_ ==> List(double1))
+        _ <- Ns.int.a1.query.get.map(_ ==> List(intMin, int1, intMax))
+        _ <- Ns.long.a1.query.get.map(_ ==> List(longMin, long1, longMax))
+        _ <- Ns.float.a1.query.get.map(_ ==> List(floatMin, float1, floatMax))
+        _ <- Ns.double.a1.query.get.map(_ ==> List(doubleMin, double1, doubleMax))
         _ <- Ns.boolean.a1.query.get.map(_ ==> List(boolean1))
-        _ <- Ns.bigInt.a1.query.get.map(_ ==> List(bigInt1))
-        _ <- Ns.bigDecimal.a1.query.get.map(_ ==> List(bigDecimal1))
+        _ <- Ns.bigInt.a1.query.get.map(_ ==> List(bigIntNeg, bigInt1, bigIntPos))
+        _ <- Ns.bigDecimal.a1.query.get.map(_ ==> List(bigDecimalNeg, bigDecimal1, bigDecimalPos))
         _ <- Ns.date.a1.query.get.map(_ ==> List(date1))
         _ <- Ns.duration.a1.query.get.map(_ ==> List(duration1))
         _ <- Ns.instant.a1.query.get.map(_ ==> List(instant1))
@@ -60,8 +60,8 @@ trait InsertCardOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.zonedDateTime.a1.query.get.map(_ ==> List(zonedDateTime1))
         _ <- Ns.uuid.a1.query.get.map(_ ==> List(uuid1))
         _ <- Ns.uri.a1.query.get.map(_ ==> List(uri1))
-        _ <- Ns.byte.a1.query.get.map(_ ==> List(byte1))
-        _ <- Ns.short.a1.query.get.map(_ ==> List(short1))
+        _ <- Ns.byte.a1.query.get.map(_ ==> List(byteMin, byte1, byteMax))
+        _ <- Ns.short.a1.query.get.map(_ ==> List(shortMin, short1, shortMax))
         _ <- Ns.char.a1.query.get.map(_ ==> List(char1))
 
         List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)

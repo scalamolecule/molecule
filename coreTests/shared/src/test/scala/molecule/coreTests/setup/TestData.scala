@@ -4,6 +4,7 @@ import java.net.URI
 import java.time._
 import java.util.{Date, UUID}
 import molecule.base.util.DateHandling
+import scala.math.BigInt
 
 trait TestData extends DateHandling { self: CoreTest =>
 
@@ -15,30 +16,35 @@ trait TestData extends DateHandling { self: CoreTest =>
   private def ur(i: Int): URI = new URI("uri" + i)
   private def bi(i: Int): BigInt = BigInt(i)
   private def bd(d: Double): BigDecimal = BigDecimal(d)
+  private val n = "1234567890123456789012345678901234567890"
 
   lazy val (string0, string1, string2, string3, string4, string5, string6, string7, string8, string9) =
     ("-", "a", "b", "c", "d", "e", "f", "g", "h", "i")
 
-  lazy val (int0, int1, int2, int3, int4, int5, int6, int7, int8, int9) =
-    (0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+  lazy val (int0, int1, int2, int3, int4, int5, int6, int7, int8, int9, intMin, intMax) =
+    (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, Int.MinValue, Int.MaxValue)
 
-  lazy val (long0, long1, long2, long3, long4, long5, long6, long7, long8, long9) =
-    (0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L)
+  lazy val (long0, long1, long2, long3, long4, long5, long6, long7, long8, long9, longMin, longMax) =
+    (0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, Long.MinValue, Long.MaxValue)
 
-  lazy val (float0, float1, float2, float3, float4, float5, float6, float7, float8, float9) =
-    (0.0f, 1.1f, 2.2f, 3.3f, 4.4f, 5.5f, 6.6f, 7.7f, 8.8f, 9.9f)
+  lazy val (float0, float1, float2, float3, float4, float5, float6, float7, float8, float9, floatMin, floatMax) =
+    (0.0f, 1.1f, 2.2f, 3.3f, 4.4f, 5.5f, 6.6f, 7.7f, 8.8f, 9.9f, Float.MinValue, Float.MaxValue)
 
-  lazy val (double0, double1, double2, double3, double4, double5, double6, double7, double8, double9) =
-    (0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9)
+  lazy val (double0, double1, double2, double3, double4, double5, double6, double7, double8, double9, doubleMin, doubleMax) =
+    (0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, Double.MinValue, Double.MaxValue)
 
   lazy val (boolean0, boolean1, boolean2, boolean3, boolean4, boolean5, boolean6, boolean7, boolean8, boolean9) =
     (false, false, true, false, true, false, true, false, true, false) // make boolean1 sort before boolean2 (false before true)
 
-  lazy val (bigInt0, bigInt1, bigInt2, bigInt3, bigInt4, bigInt5, bigInt6, bigInt7, bigInt8, bigInt9) =
-    (bi(0), bi(1), bi(2), bi(3), bi(4), bi(5), bi(6), bi(7), bi(8), bi(9))
+  lazy val (bigInt0, bigInt1, bigInt2, bigInt3, bigInt4, bigInt5,
+  bigInt6, bigInt7, bigInt8, bigInt9, bigIntNeg, bigIntPos) =
+    (bi(0), bi(1), bi(2), bi(3), bi(4), bi(5), bi(6), bi(7), bi(8), bi(9),
+      BigInt(s"-" + n), BigInt(n))
 
-  lazy val (bigDecimal0, bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal5, bigDecimal6, bigDecimal7, bigDecimal8, bigDecimal9) =
-    (bd(0.0), bd(1.1), bd(2.2), bd(3.3), bd(4.4), bd(5.5), bd(6.6), bd(7.7), bd(8.8), bd(9.9))
+  lazy val (bigDecimal0, bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4,
+  bigDecimal5, bigDecimal6, bigDecimal7, bigDecimal8, bigDecimal9, bigDecimalNeg, bigDecimalPos) =
+    (bd(0.0), bd(1.1), bd(2.2), bd(3.3), bd(4.4), bd(5.5), bd(6.6), bd(7.7), bd(8.8), bd(9.9),
+      BigDecimal(s"-$n.$n"), BigDecimal(s"$n.$n"))
 
   lazy val (date0, date1, date2, date3, date4, date5, date6, date7, date8, date9) =
     (da(0), da(1), da(2), da(3), da(4), da(5), da(6), da(7), da(8), da(9))
@@ -158,11 +164,11 @@ trait TestData extends DateHandling { self: CoreTest =>
   : (Char, Char, Char, Char, Char, Char, Char, Char, Char, Char) =
     ('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j')
 
-  lazy val List(byte0, byte1, byte2, byte3, byte4, byte5, byte6, byte7, byte8, byte9) =
-    (0 to 9).toList.map(_.toByte)
+  lazy val List(byte0, byte1, byte2, byte3, byte4, byte5, byte6, byte7, byte8, byte9, byteMin, byteMax) =
+    (0 to 9).toList.map(_.toByte) ++ List(Byte.MinValue, Byte.MaxValue)
 
-  lazy val List(short0, short1, short2, short3, short4, short5, short6, short7, short8, short9) =
-    (0 to 9).toList.map(_.toShort)
+  lazy val List(short0, short1, short2, short3, short4, short5, short6, short7, short8, short9, shortMin, shortMax) =
+    (0 to 9).toList.map(_.toShort) ++ List(Short.MinValue, Short.MaxValue)
 
   lazy val (ref0, ref1, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9) =
     ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9")

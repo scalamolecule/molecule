@@ -294,15 +294,15 @@ trait SpiSyncBase
   // Util --------------------------------------
 
   override def fallback_rawTransact(
-    txData: String,
+    stmt: String,
     doPrint: Boolean = false
   )(implicit conn0: Conn): TxReport = {
     val conn  = conn0.asInstanceOf[JdbcConn_JVM]
     val debug = if (doPrint) (s: String) => println(s) else (_: String) => ()
     debug("\n=============================================================================")
-    debug(txData)
+    debug(stmt)
 
-    val ps = conn.sqlConn.prepareStatement(txData, Statement.RETURN_GENERATED_KEYS)
+    val ps = conn.sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
     ps.execute()
 
     val resultSet = ps.getGeneratedKeys // is empty if no nested data

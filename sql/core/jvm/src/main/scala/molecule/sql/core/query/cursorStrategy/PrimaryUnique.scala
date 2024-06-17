@@ -6,7 +6,6 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.query.Pagination
 import molecule.core.util.FutureUtils
 import molecule.sql.core.facade.JdbcConn_JVM
-import molecule.sql.core.javaSql.ResultSetImpl
 import molecule.sql.core.query.{Model2SqlQuery, SqlQueryBase, SqlQueryResolve}
 import scala.collection.mutable.ListBuffer
 
@@ -38,14 +37,13 @@ case class PrimaryUnique[Tpl](
     val filterAttr   = getFilterAttr(tpe, ns, attr, fn, v)
     val altElements  = filterAttr +: (if (forward) elements else reverseTopLevelSorting(elements))
     val sortedRows   = getRawData(conn, altElements, Some(limit.abs), None)
-    val sortedRows1  = new ResultSetImpl(sortedRows)
-    val flatRowCount = m2q.getRowCount(sortedRows1)
+    val flatRowCount = m2q.getRowCount(sortedRows)
 
     if (flatRowCount == 0) {
       (Nil, "", false)
     } else {
       if (m2q.isNestedMan || m2q.isNestedOpt) {
-        val nestedRows    = if (m2q.isNestedMan) m2q.rows2nested(sortedRows1) else m2q.rows2nestedOpt(sortedRows1)
+        val nestedRows    = if (m2q.isNestedMan) m2q.rows2nested(sortedRows) else m2q.rows2nestedOpt(sortedRows)
         val topLevelCount = nestedRows.length
         val limitAbs      = limit.abs.min(topLevelCount)
         val hasMore       = limitAbs < topLevelCount
@@ -61,7 +59,7 @@ case class PrimaryUnique[Tpl](
         val tuples     = ListBuffer.empty[Tpl]
         val row2tpl    = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 1, None)
         while (sortedRows.next()) {
-          tuples += row2tpl(sortedRows1).asInstanceOf[Tpl]
+          tuples += row2tpl(sortedRows).asInstanceOf[Tpl]
         }
         val result = if (forward) tuples.toList else tuples.toList.reverse
         val cursor = nextCursorUniques(result, tokens)

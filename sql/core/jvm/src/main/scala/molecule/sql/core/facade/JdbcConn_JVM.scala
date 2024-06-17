@@ -1,13 +1,15 @@
 package molecule.sql.core.facade
 
 import java.sql
-import java.sql.{Connection, SQLException, Statement}
+import java.sql.{Connection, PreparedStatement, ResultSet, SQLException}
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.{Conn, TxReport}
 import molecule.core.util.ModelUtils
+import molecule.sql.core.javaSql.{ResultSetImpl, ResultSetInterface}
 import molecule.sql.core.transaction.{JoinTable, SqlBase_JVM, SqlDataType_JVM, Table}
 import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
@@ -20,11 +22,24 @@ case class JdbcConn_JVM(
   with ModelUtils
   with MoleculeLogging {
 
+  // debugging
+  //    doPrint = false
+  doPrint = true
+
 
   override lazy val sqlConn: Connection = sqlConn0
 
-  //    doPrint = false
-  doPrint = true
+  def queryStmt(query: String): PreparedStatement = {
+    sqlConn.prepareStatement(
+      query,
+      ResultSet.TYPE_SCROLL_INSENSITIVE,
+      ResultSet.CONCUR_READ_ONLY
+    )
+  }
+
+  def resultSet(underlying: ResultSet): ResultSetInterface = {
+    new ResultSetImpl(underlying)
+  }
 
   override def transact_async(data: (List[Table], List[JoinTable]))
                              (implicit ec: ExecutionContext): Future[TxReport] = {
@@ -70,7 +85,7 @@ case class JdbcConn_JVM(
     val joinTables = data._2
     val idsMap     = mutable.Map.empty[List[String], List[Long]]
     val idsAcc     = mutable.Map.empty[List[String], List[Long]]
-    var ids        = List.empty[Long]
+    val ids        = ListBuffer.empty[Long]
 
     debug("########################################################################################## " + tables.size)
 
@@ -87,63 +102,21 @@ case class JdbcConn_JVM(
         debug("idsAcc 1    : " + idsAcc.toMap)
 
         val stmt1 = if (useAccIds) {
-          val ids = if (updateIdsMap) curIds ++ idsAcc.getOrElse(refPath, Nil) else idsMap.getOrElse(refPath, Nil)
+          val ids = if (updateIdsMap)
+            curIds ++ idsAcc.getOrElse(refPath, Nil)
+          else
+            idsMap.getOrElse(refPath, Nil)
           debug("ids         : " + ids)
           upsertStmt.get(ids)
         } else stmt
         debug("stmt1       : " + stmt1)
 
-        val ps = preparedStmt(stmt1)
-
-        populatePS(ps, idsMap, 0)
+        val ps = transactionStmt(stmt1)
 
         // Populate prepared statement
-        ps.executeBatch()
-        try {
-          val resultSet = ps.getGeneratedKeys
-          ids = List.empty[Long]
+        populatePS(ps, idsMap, 0)
 
-          // No join tables (also without collision prevention "_"-suffix of table names)
-          // ns_join_ref             2 underscores
-          // part_ns_join_part_ref   4 underscores
-          val underscores = refPath.last.init.count(_ == '_')
-          if (underscores != 2 && underscores != 4) {
-            var idSet = false
-            while (resultSet.next()) {
-              //              val id = resultSet.getLong(1)
-              //              debug("  ################# " + id)
-              //              ids = ids :+ id
-              ids = ids :+ resultSet.getLong(1)
-              idSet = true
-            }
-            if (!idSet) {
-              // Not getting ids from updates with MariaDb.
-              // So we simply pick previous ids and the id supplied to the update
-              ids = idsMap.getOrElse(refPath, Nil) ++ curIds
-            }
-          }
-        } catch {
-          case _: NullPointerException =>
-            // MariaDB can return null instead of empty ResultSet which we simply ignore
-            logger.debug("Resultset was null")
-            ()
-          case NonFatal(e)             =>
-            e.printStackTrace()
-            throw e
-        }
-        ps.close()
-        debug("idsMap 2    : " + idsMap)
-        if (updateIdsMap)
-          idsMap(refPath) = ids
-        debug("idsMap 2    : " + idsMap)
-        if (accIds) {
-          if (idsAcc.contains(refPath)) {
-            idsAcc(refPath) = idsAcc(refPath) ++ ids
-          } else {
-            idsAcc += refPath -> ids
-          }
-          debug("idsAcc 2    : " + idsAcc.toMap)
-        }
+        extractAffectedIds(refPath, ps, ids, idsMap, idsAcc, curIds, updateIdsMap, accIds)
     }
 
     joinTables.foreach {
@@ -153,7 +126,7 @@ case class JdbcConn_JVM(
         debug("rightPath: " + rightPath)
         debug("idsMap 1 : " + idsMap)
 
-        val ps         = preparedStmt(stmt)
+        val ps         = transactionStmt(stmt)
         val idsLeft    = idsMap(leftPath)
         var idLeft     = 0L
         var leftIndex  = 0
@@ -180,5 +153,57 @@ case class JdbcConn_JVM(
       case (List(ns), ids)      => ids
       case (List("0", ns), ids) => ids // nested
     }.getOrElse(Nil)
+  }
+
+
+  def extractAffectedIds(
+    refPath: List[String],
+    ps: PreparedStatement,
+    ids: ListBuffer[Long],
+    idsMap: mutable.Map[List[String], List[Long]],
+    idsAcc: mutable.Map[List[String], List[Long]],
+    curIds: List[Long],
+    updateIdsMap: Boolean,
+    accIds: Boolean,
+  ): Unit = {
+    // Execute batch of prepared statements
+    ps.executeBatch()
+    val resultSet = ps.getGeneratedKeys
+    ids.clear()
+
+    // No join tables (also without collision prevention "_"-suffix of table names)
+    // ns_join_ref             2 underscores
+    // part_ns_join_part_ref   4 underscores
+    val underscores = refPath.last.init.count(_ == '_')
+    if (underscores != 2 && underscores != 4) {
+      var idSet = false
+      while (resultSet.next()) {
+        val id = resultSet.getLong(1)
+        debug("  ################# " + id)
+        ids += id
+        //              ids = ids :+ resultSet.getLong(1)
+        idSet = true
+      }
+      if (!idSet) {
+        // Not getting ids from updates with MariaDb.
+        // So we simply pick previous ids and the id supplied to the update
+        ids.clear()
+        ids.addAll(idsMap.getOrElse(refPath, Nil) ++ curIds)
+      }
+    }
+    ps.close()
+
+    debug("idsMap 2    : " + idsMap)
+    if (updateIdsMap)
+      idsMap(refPath) = ids.toList
+    debug("idsMap 2    : " + idsMap)
+    if (accIds) {
+      if (idsAcc.contains(refPath)) {
+        idsAcc(refPath) = idsAcc(refPath) ++ ids.toList
+      } else {
+        idsAcc += refPath -> ids.toList
+      }
+      debug("idsAcc 2    : " + idsAcc.toMap)
+    }
   }
 }

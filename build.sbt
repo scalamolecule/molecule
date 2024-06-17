@@ -4,8 +4,8 @@ import sbt.Keys.libraryDependencies
 import scala.collection.Seq
 
 val scala212 = "2.12.19"
-val scala213 = "2.13.13"
-val scala3   = "3.3.3"
+val scala213 = "2.13.14"
+val scala3   = "3.4.2"
 val allScala = Seq(scala212, scala213, scala3)
 
 val akkaVersion          = "2.8.3"
@@ -54,12 +54,14 @@ lazy val root = project
     sqlCore.jvm,
     sqlH2.js,
     sqlH2.jvm,
-    sqlMariadb.js,
-    sqlMariadb.jvm,
-    sqlMysql.js,
-    sqlMysql.jvm,
-    sqlPostgres.js,
-    sqlPostgres.jvm,
+    sqlMariaDB.js,
+    sqlMariaDB.jvm,
+    sqlMySQL.js,
+    sqlMySQL.jvm,
+    sqlPostgreSQL.js,
+    sqlPostgreSQL.jvm,
+    sqlSQLite.js,
+    sqlSQLite.jvm,
   )
 
 lazy val base = crossProject(JSPlatform, JVMPlatform)
@@ -270,7 +272,7 @@ lazy val sqlH2 = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(coreTests % "compile->compile;test->test")
 
 
-lazy val sqlMariadb = crossProject(JSPlatform, JVMPlatform)
+lazy val sqlMariaDB = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("sql/mariadb"))
   .settings(name := "molecule-sql-mariadb")
@@ -290,7 +292,7 @@ lazy val sqlMariadb = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(coreTests % "compile->compile;test->test")
 
 
-lazy val sqlMysql = crossProject(JSPlatform, JVMPlatform)
+lazy val sqlMySQL = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("sql/mysql"))
   .settings(name := "molecule-sql-mysql")
@@ -308,7 +310,7 @@ lazy val sqlMysql = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(coreTests % "compile->compile;test->test")
 
 
-lazy val sqlPostgres = crossProject(JSPlatform, JVMPlatform)
+lazy val sqlPostgreSQL = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("sql/postgres"))
   .settings(name := "molecule-sql-postgres")
@@ -326,6 +328,23 @@ lazy val sqlPostgres = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(sqlCore)
   .dependsOn(coreTests % "compile->compile;test->test")
 
+
+
+lazy val sqlSQLite = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
+  .in(file("sql/sqlite"))
+  .settings(name := "molecule-sql-sqlite")
+  .settings(testFrameworks := testingFrameworks)
+  .settings(doPublish)
+  .settings(compilerArgs)
+  .jsSettings(jsEnvironment)
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      "org.xerial" % "sqlite-jdbc" % "3.41.2.2"
+    )
+  )
+  .dependsOn(sqlCore)
+  .dependsOn(coreTests % "compile->compile;test->test")
 
 lazy val testingFrameworks = Seq(
   new TestFramework("utest.runner.Framework"),

@@ -2,27 +2,16 @@ package molecule.sql.postgres.spi
 
 import java.sql
 import java.sql.ResultSet
-import molecule.sql.core.javaSql.{ResultSetInterface => Row}
-import molecule.base.error._
-import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
 import molecule.core.action._
 import molecule.core.marshalling.ConnProxy
-import molecule.core.marshalling.dbView.{AsOf, DbView, Since}
 import molecule.core.spi._
 import molecule.core.transaction._
-import molecule.core.util.ModelUtils
-import molecule.core.validation.TxModelValidation
-import molecule.core.validation.insert.InsertValidation
 import molecule.sql.core.facade.JdbcConn_JVM
-import molecule.sql.core.javaSql.ResultSetImpl
-import molecule.sql.core.query.{SqlQueryResolveCursor, SqlQueryResolveOffset}
-import molecule.sql.core.spi.{SpiHelpers, SpiSyncBase}
-import molecule.sql.core.transaction.{SqlBase_JVM, SqlUpdateSetValidator}
+import molecule.sql.core.spi.SpiSyncBase
 import molecule.sql.postgres.query._
 import molecule.sql.postgres.transaction._
 import org.postgresql.util.PSQLException
-import scala.annotation.nowarn
 import scala.collection.mutable.ListBuffer
 import scala.util.control.NonFatal
 
@@ -67,8 +56,7 @@ trait SpiSync_postgres extends SpiSyncBase {
       val ps        = conn.sqlConn.prepareStatement(
         query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY
       )
-      val resultSet = ps.executeQuery()
-      new ResultSetImpl(resultSet)
+      conn.resultSet(ps.executeQuery())
     }
     validateUpdateSet(conn.proxy, update.elements, query2resultSet)
   }

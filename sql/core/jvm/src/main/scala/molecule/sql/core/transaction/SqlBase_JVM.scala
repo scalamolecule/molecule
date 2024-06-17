@@ -18,8 +18,12 @@ trait SqlBase_JVM extends SqlDataType_JVM with ModelUtils with BaseHelpers {
   // Override on instantiation
   lazy val sqlConn: java.sql.Connection = ???
 
-  protected def preparedStmt(stmt: String) =
-    sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
+  def transactionStmt(stmt: String) = {
+    sqlConn.prepareStatement(
+      stmt,
+      Statement.RETURN_GENERATED_KEYS
+    )
+  }
 
   var level = 0
   override def indent(level: Int) = "  " * level

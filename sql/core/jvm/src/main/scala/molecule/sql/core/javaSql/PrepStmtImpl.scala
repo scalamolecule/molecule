@@ -1,6 +1,8 @@
 package molecule.sql.core.javaSql
 
 import java.sql.{Date, PreparedStatement, Time, Timestamp}
+import java.math.{BigDecimal => jBigDecimal}
+
 
 class PrepStmtImpl(val underlying: PreparedStatement) extends PrepStmt {
 
@@ -12,7 +14,7 @@ class PrepStmtImpl(val underlying: PreparedStatement) extends PrepStmt {
   override def setLong(parameterIndex: Int, x: Long): Unit = underlying.setLong(parameterIndex, x)
   override def setFloat(parameterIndex: Int, x: Float): Unit = underlying.setFloat(parameterIndex, x)
   override def setDouble(parameterIndex: Int, x: Double): Unit = underlying.setDouble(parameterIndex, x)
-  override def setBigDecimal(parameterIndex: Int, x: java.math.BigDecimal): Unit = underlying.setBigDecimal(parameterIndex, x)
+  override def setBigDecimal(parameterIndex: Int, x: jBigDecimal): Unit = underlying.setBigDecimal(parameterIndex, x)
   override def setString(parameterIndex: Int, x: String): Unit = underlying.setString(parameterIndex, x)
   override def setBytes(parameterIndex: Int, x: Array[Byte]): Unit = underlying.setBytes(parameterIndex, x)
   override def setDate(parameterIndex: Int, x: Date): Unit = underlying.setDate(parameterIndex, x)

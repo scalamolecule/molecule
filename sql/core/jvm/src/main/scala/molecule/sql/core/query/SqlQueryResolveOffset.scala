@@ -4,7 +4,6 @@ import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.util.{FutureUtils, ModelUtils}
 import molecule.sql.core.facade.JdbcConn_JVM
-import molecule.sql.core.javaSql.ResultSetImpl
 import scala.collection.mutable.ListBuffer
 
 case class SqlQueryResolveOffset[Tpl](
@@ -22,18 +21,17 @@ case class SqlQueryResolveOffset[Tpl](
   def getListFromOffset_sync(implicit conn: JdbcConn_JVM)
   : (List[Tpl], Int, Boolean) = {
     offsetLimitCheck(optLimit, optOffset)
-    val sortedRows  = getData(conn, optLimit, optOffset)
-    val sortedRows1 = new ResultSetImpl(sortedRows)
+    val sortedRows = getData(conn, optLimit, optOffset)
     if (m2q.isNestedMan || m2q.isNestedOpt) {
       val totalCount = if (m2q.isNestedMan)
-        m2q.getRowCount(sortedRows1)
+        m2q.getRowCount(sortedRows)
       else
-        optOffset.fold(m2q.getRowCount(sortedRows1))(_ => getTotalCount(conn))
+        optOffset.fold(m2q.getRowCount(sortedRows))(_ => getTotalCount(conn))
 
       val nestedRows0 = if (m2q.isNestedMan)
-        m2q.rows2nested(sortedRows1)
+        m2q.rows2nested(sortedRows)
       else
-        m2q.rows2nestedOpt(sortedRows1)
+        m2q.rows2nestedOpt(sortedRows)
 
       val nestedRows    = if (forward) nestedRows0 else nestedRows0.reverse
       val topLevelCount = nestedRows.length
@@ -42,12 +40,12 @@ case class SqlQueryResolveOffset[Tpl](
       (offsetList(nestedRows, fromUntil), topLevelCount, hasMore)
 
     } else {
-      val totalCount = optOffset.fold(m2q.getRowCount(sortedRows1))(_ => getTotalCount(conn))
+      val totalCount = optOffset.fold(m2q.getRowCount(sortedRows))(_ => getTotalCount(conn))
       val casts      = m2q.castss.head
       val row2tpl    = m2q.castRow2AnyTpl(m2q.aritiess.head, casts, 1, None)
       val tuples     = ListBuffer.empty[Tpl]
       while (sortedRows.next()) {
-        tuples += row2tpl(sortedRows1).asInstanceOf[Tpl]
+        tuples += row2tpl(sortedRows).asInstanceOf[Tpl]
       }
       val fromUntil = getFromUntil(totalCount, optLimit, optOffset)
       val hasMore   = fromUntil.fold(totalCount > 0)(_._3)

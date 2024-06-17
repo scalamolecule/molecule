@@ -1,5 +1,6 @@
 package molecule.sql.core.javaSql
 
+import java.math.{BigDecimal => jBigDecimal}
 import java.net.URL
 import java.sql.ResultSet
 
@@ -18,10 +19,11 @@ class ResultSetImpl(val underlying: ResultSet) extends ResultSetInterface {
   override def getFloat(columnIndex: Int): Float = underlying.getFloat(columnIndex)
   override def getDouble(columnIndex: Int): Double = underlying.getDouble(columnIndex)
   override def getBytes(columnIndex: Int): Array[Byte] = underlying.getBytes(columnIndex)
-  override def getBigDecimal(columnIndex: Int): java.math.BigDecimal = underlying.getBigDecimal(columnIndex)
+  override def getBigDecimal(columnIndex: Int): jBigDecimal = underlying.getBigDecimal(columnIndex)
   override def getURL(columnIndex: Int): URL = underlying.getURL(columnIndex)
 
-  override def getArray(columnIndex: Int): ArrayInterface = new ArrayImpl(underlying.getArray(columnIndex))
+  override def getArray(columnIndex: Int): ArrayInterface =
+    new ArrayImpl(underlying.getArray(columnIndex))
 
   override def isBeforeFirst: Boolean = underlying.isBeforeFirst
   override def isAfterLast: Boolean = underlying.isAfterLast

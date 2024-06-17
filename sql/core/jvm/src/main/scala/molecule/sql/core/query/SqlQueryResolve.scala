@@ -1,11 +1,10 @@
 package molecule.sql.core.query
 
-import java.sql.ResultSet
 import molecule.boilerplate.ast.Model._
 import molecule.core.query.Pagination
 import molecule.core.util.ModelUtils
 import molecule.sql.core.facade.JdbcConn_JVM
-import molecule.sql.core.javaSql.{PrepStmt, PrepStmtImpl, ResultSetImpl}
+import molecule.sql.core.javaSql.{PrepStmt, PrepStmtImpl, ResultSetInterface}
 import scala.collection.mutable.ListBuffer
 
 abstract class SqlQueryResolve[Tpl](
@@ -13,11 +12,12 @@ abstract class SqlQueryResolve[Tpl](
   m2q: Model2SqlQuery[Tpl] with SqlQueryBase
 ) extends Pagination[Tpl] with ModelUtils {
 
+
   protected def getData(
     conn: JdbcConn_JVM,
     optLimit: Option[Int],
     optOffset: Option[Int],
-  ): ResultSet = {
+  ): ResultSetInterface = {
     val query  = m2q.getSqlQuery(Nil, optLimit, optOffset, Some(conn.proxy))
     val inputs = m2q.inputs.toList
     getResultSet(conn, query, inputs)
@@ -33,19 +33,12 @@ abstract class SqlQueryResolve[Tpl](
     conn: JdbcConn_JVM,
     query: String,
     inputs: List[PrepStmt => Unit] = Nil
-  ): ResultSet = {
-    //    println("--- 1 ------------------")
-    //    elements.foreach(println)
-    //    println("---")
-    //    println(query)
-    val ps = conn.sqlConn.prepareStatement(
-      query,
-      ResultSet.TYPE_SCROLL_INSENSITIVE,
-      ResultSet.CONCUR_READ_ONLY
-    )
+  ): ResultSetInterface = {
+    val ps  = conn.queryStmt(query)
+    val ps1 = new PrepStmtImpl(ps)
     // set input values corresponding to '?' in queries
-    inputs.foreach(_(new PrepStmtImpl(ps)))
-    ps.executeQuery()
+    inputs.foreach(_(ps1))
+    conn.resultSet(ps.executeQuery())
   }
 
 
@@ -54,7 +47,7 @@ abstract class SqlQueryResolve[Tpl](
     altElements: List[Element],
     optLimit: Option[Int],
     optOffset: Option[Int]
-  ): ResultSet = {
+  ): ResultSetInterface = {
     val query = m2q.getSqlQuery(altElements, optLimit, optOffset, Some(conn.proxy))
     getResultSet(conn, query)
   }
@@ -86,14 +79,13 @@ abstract class SqlQueryResolve[Tpl](
     }
     val altElements  = filterAttr +: elements
     val sortedRows   = getRawData(conn, altElements, None, None)
-    val sortedRows1  = new ResultSetImpl(sortedRows)
-    val flatRowCount = m2q.getRowCount(sortedRows1)
+    val flatRowCount = m2q.getRowCount(sortedRows)
 
     if (flatRowCount == 0) {
       (Nil, "", false)
     } else {
       if (m2q.isNestedMan || m2q.isNestedOpt) {
-        val nestedTpls     = if (m2q.isNestedMan) m2q.rows2nested(sortedRows1) else m2q.rows2nestedOpt(sortedRows1)
+        val nestedTpls     = if (m2q.isNestedMan) m2q.rows2nested(sortedRows) else m2q.rows2nestedOpt(sortedRows)
         val totalCount     = nestedTpls.length
         val count          = getCount(limit, forward, totalCount)
         val nestedTpls1    = if (forward) nestedTpls else nestedTpls.reverse
@@ -108,7 +100,7 @@ abstract class SqlQueryResolve[Tpl](
         val allTuples  = ListBuffer.empty[Tpl]
         val row2tpl    = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 1, None)
         while (sortedRows.next()) {
-          allTuples += row2tpl(sortedRows1).asInstanceOf[Tpl]
+          allTuples += row2tpl(sortedRows).asInstanceOf[Tpl]
         }
         val allTuples1     = if (forward) allTuples else allTuples.reverse
         val (tuples, more) = paginateTpls(count, allTuples1.result(), identifiers, identifyTpl)

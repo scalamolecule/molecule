@@ -16,7 +16,8 @@ object StarwarsSchema extends Schema
   with StarwarsSchema_H2
   with StarwarsSchema_MariaDB
   with StarwarsSchema_Mysql
-  with StarwarsSchema_PostgreSQL {
+  with StarwarsSchema_PostgreSQL
+  with StarwarsSchema_SQlite {
 
   val metaSchema: MetaSchema =
     MetaSchema("molecule.graphql.client", "Starwars", 6, Seq(

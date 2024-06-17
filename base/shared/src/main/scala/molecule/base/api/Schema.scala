@@ -23,14 +23,16 @@ trait Schema {
   val datomicAliases   : String
 
   /** sql schemas */
-  val sqlSchema_h2         : String
-  val sqlSchema_mariadb    : String
-  val sqlSchema_mysql      : String
-  val sqlSchema_postgres   : String
+  val sqlSchema_h2      : String
+  val sqlSchema_mariadb : String
+  val sqlSchema_mysql   : String
+  val sqlSchema_postgres: String
+  val sqlSchema_sqlite  : String
 
   /** sql reserved keyword detection */
-  val sqlReserved_h2         : Option[Reserved]
-  val sqlReserved_mariadb    : Option[Reserved]
-  val sqlReserved_mysql      : Option[Reserved]
-  val sqlReserved_postgres   : Option[Reserved]
+  val sqlReserved_h2      : Option[Reserved]
+  val sqlReserved_mariadb : Option[Reserved]
+  val sqlReserved_mysql   : Option[Reserved]
+  val sqlReserved_postgres: Option[Reserved]
+  val sqlReserved_sqlite  : Option[Reserved]
 }

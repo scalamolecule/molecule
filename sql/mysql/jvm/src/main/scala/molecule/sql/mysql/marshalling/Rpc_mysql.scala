@@ -14,7 +14,6 @@ import molecule.core.transaction._
 import molecule.core.util.Executor._
 import molecule.core.util.FutureUtils
 import molecule.sql.core.facade.JdbcConn_JVM
-import molecule.sql.core.javaSql.ResultSetImpl
 import molecule.sql.core.spi.SpiHelpers
 import molecule.sql.core.transaction.{SqlBase_JVM, SqlUpdateSetValidator}
 import molecule.sql.mysql.async._
@@ -121,9 +120,9 @@ object Rpc_mysql
           val ps        = conn.sqlConn.prepareStatement(
             query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY
           )
-          val resultSet = ps.executeQuery()
+          val resultSet = conn.resultSet(ps.executeQuery())
           resultSet.next()
-          new ResultSetImpl(resultSet)
+          resultSet
         }
       )
       _ = if (errors.nonEmpty) {

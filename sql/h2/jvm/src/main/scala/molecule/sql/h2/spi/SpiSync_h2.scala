@@ -8,7 +8,6 @@ import molecule.core.marshalling.ConnProxy
 import molecule.core.spi._
 import molecule.core.transaction._
 import molecule.sql.core.facade.JdbcConn_JVM
-import molecule.sql.core.javaSql.ResultSetImpl
 import molecule.sql.core.spi.SpiSyncBase
 import molecule.sql.h2.query.Model2SqlQuery_h2
 import molecule.sql.h2.transaction._
@@ -52,11 +51,10 @@ trait SpiSync_h2 extends SpiSyncBase {
   override def update_validate(update: Update)(implicit conn0: Conn): Map[String, Seq[String]] = {
     val conn            = conn0.asInstanceOf[JdbcConn_JVM]
     val query2resultSet = (query: String) => {
-      val ps        = conn.sqlConn.prepareStatement(
+      val ps = conn.sqlConn.prepareStatement(
         query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY
       )
-      val resultSet = ps.executeQuery()
-      new ResultSetImpl(resultSet)
+      conn.resultSet(ps.executeQuery())
     }
     validateUpdateSet(conn.proxy, update.elements, query2resultSet)
   }

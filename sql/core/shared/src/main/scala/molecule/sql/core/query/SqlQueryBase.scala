@@ -10,7 +10,11 @@ import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
 
-trait SqlQueryBase extends Model2QueryBase with ResolveExprExceptions with  BaseHelpers with JavaConversions {
+trait SqlQueryBase
+  extends Model2QueryBase
+    with ResolveExprExceptions
+    with BaseHelpers
+    with JavaConversions {
 
   type RS = ResultSetInterface
   type ParamIndex = Int
