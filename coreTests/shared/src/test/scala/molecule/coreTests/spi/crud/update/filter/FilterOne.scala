@@ -345,6 +345,8 @@ trait FilterOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i(1).byte(byte1).save.transact
         _ <- Ns.i(1).short(short1).save.transact
         _ <- Ns.i(1).char(char1).save.transact
+
+        ref1 <- Ref.i(1).save.transact.map(_.id)
         _ <- Ns.i(1).ref(ref1).save.transact
 
         // Update i using equal filter

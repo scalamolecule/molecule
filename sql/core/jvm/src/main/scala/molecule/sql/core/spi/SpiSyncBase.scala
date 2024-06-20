@@ -248,11 +248,15 @@ trait SpiSyncBase
   override def delete_transact(delete0: Delete)(implicit conn0: Conn): TxReport = {
     val conn   = conn0.asInstanceOf[JdbcConn_JVM]
     val delete = delete0.copy(elements = noKeywords(delete0.elements, Some(conn.proxy)))
-    if (delete.doInspect)
+    if (delete.doInspect) {
       delete_inspect(delete)
-    val txReport = conn.transact_sync(delete_getData(conn, delete))
-    conn.callback(delete.elements, true)
-    txReport
+    }
+    //    val txReport = conn.transact_sync(delete_getData(conn, delete))
+    delete_getData2(conn, delete).fold(TxReport(Nil)) { executions =>
+      val txReport = conn.atomicTransaction(executions)
+      conn.callback(delete.elements, true)
+      txReport
+    }
   }
 
   override def delete_inspect(delete: Delete)(implicit conn0: Conn): Unit = {
@@ -264,6 +268,7 @@ trait SpiSyncBase
 
   // Implement for each sql database
   def delete_getData(conn: JdbcConn_JVM, delete: Delete): Data
+  def delete_getData2(conn: JdbcConn_JVM, delete: Delete): Option[() => List[Long]] = ???
 
 
   // Inspect --------------------------------------------------------

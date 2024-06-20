@@ -2,9 +2,7 @@ package molecule.core.util
 
 trait AggrUtils {
 
-//  def getMedian(set: Set[Double]): Double = {
-  def getMedian(list: List[Double]): Double = {
-//    val values = list.toList.sorted
+  def getMedian(list: Seq[Double]): Double = {
     val values = list.sorted
     val count  = values.length
     if (count % 2 == 1) {
@@ -32,7 +30,8 @@ trait AggrUtils {
     implicit val byte      : Avg[Byte]       = (vs: Seq[Byte]) => vs.sum / vs.size.toDouble
     implicit val short     : Avg[Short]      = (vs: Seq[Short]) => vs.sum / vs.size.toDouble
   }
-  def averageOf[A](vs: A*)(implicit avg: Avg[A]): Double = avg.calc(vs)
+  def averageOf[A](v: A, vs: A*)(implicit avg: Avg[A]): Double = avg.calc(v +: vs)
+  def averageOf[A](vs: Seq[A])(implicit avg: Avg[A]): Double = avg.calc(vs)
 
 
   trait Variance[A] {
@@ -40,53 +39,47 @@ trait AggrUtils {
   }
   object Variance {
     implicit val int       : Variance[Int]        = (vs: Seq[Int]) => {
-      val m = averageOf(vs: _*)
-      averageOf(vs.map(x => Math.pow(x - m, 2)): _*)
+      averageOf(vs.map(x => Math.pow(x - averageOf(vs), 2)))
     }
     implicit val long      : Variance[Long]       = (vs: Seq[Long]) => {
-      val m = averageOf(vs: _*)
-      averageOf(vs.map(x => Math.pow(x - m, 2)): _*)
+      averageOf(vs.map(x => Math.pow(x - averageOf(vs), 2)))
     }
     implicit val float     : Variance[Float]      = (vs: Seq[Float]) => {
-      val m = averageOf(vs: _*)
-      averageOf(vs.map(x => Math.pow(x - m, 2)): _*)
+      averageOf(vs.map(x => Math.pow(x - averageOf(vs), 2)))
     }
     implicit val double    : Variance[Double]     = (vs: Seq[Double]) => {
-      val m = averageOf(vs: _*)
-      averageOf(vs.map(x => Math.pow(x - m, 2)): _*)
+      averageOf(vs.map(x => Math.pow(x - averageOf(vs), 2)))
     }
     implicit val bigInt    : Variance[BigInt]     = (vs: Seq[BigInt]) => {
-      val m = averageOf(vs: _*)
-      averageOf(vs.map(x => Math.pow(x.toDouble - m, 2)): _*)
+      averageOf(vs.map(x => Math.pow(x.toDouble - averageOf(vs), 2)))
     }
     implicit val bigDecimal: Variance[BigDecimal] = (vs: Seq[BigDecimal]) => {
-      val m = averageOf(vs: _*)
-      averageOf(vs.map(x => Math.pow(x.toDouble - m, 2)): _*)
+      averageOf(vs.map(x => Math.pow(x.toDouble - averageOf(vs), 2)))
     }
     implicit val byte      : Variance[Byte]       = (vs: Seq[Byte]) => {
-      val m = averageOf(vs: _*)
-      averageOf(vs.map(x => Math.pow(x - m, 2)): _*)
+      averageOf(vs.map(x => Math.pow(x - averageOf(vs), 2)))
     }
     implicit val short     : Variance[Short]      = (vs: Seq[Short]) => {
-      val m = averageOf(vs: _*)
-      averageOf(vs.map(x => Math.pow(x - m, 2)): _*)
+      averageOf(vs.map(x => Math.pow(x - averageOf(vs), 2)))
     }
   }
-  def varianceOf[A](vs: A*)(implicit variance: Variance[A]): Double = variance.calc(vs)
+  def varianceOf[A](v: A, vs: A*)(implicit variance: Variance[A]): Double = variance.calc(v +: vs)
+  def varianceOf[A](vs: Seq[A])(implicit variance: Variance[A]): Double = variance.calc(vs)
 
 
   trait StdDev[A] {
     def calc(vs: Seq[A]): Double
   }
   object StdDev {
-    implicit val int       : StdDev[Int]        = (vs: Seq[Int]) => math.sqrt(varianceOf(vs: _*))
-    implicit val long      : StdDev[Long]       = (vs: Seq[Long]) => math.sqrt(varianceOf(vs: _*))
-    implicit val float     : StdDev[Float]      = (vs: Seq[Float]) => math.sqrt(varianceOf(vs: _*))
-    implicit val double    : StdDev[Double]     = (vs: Seq[Double]) => math.sqrt(varianceOf(vs: _*))
-    implicit val bigInt    : StdDev[BigInt]     = (vs: Seq[BigInt]) => math.sqrt(varianceOf(vs: _*))
-    implicit val bigDecimal: StdDev[BigDecimal] = (vs: Seq[BigDecimal]) => math.sqrt(varianceOf(vs: _*))
-    implicit val byte      : StdDev[Byte]       = (vs: Seq[Byte]) => math.sqrt(varianceOf(vs: _*))
-    implicit val short     : StdDev[Short]      = (vs: Seq[Short]) => math.sqrt(varianceOf(vs: _*))
+    implicit val int       : StdDev[Int]        = (vs: Seq[Int]) => math.sqrt(varianceOf(vs))
+    implicit val long      : StdDev[Long]       = (vs: Seq[Long]) => math.sqrt(varianceOf(vs))
+    implicit val float     : StdDev[Float]      = (vs: Seq[Float]) => math.sqrt(varianceOf(vs))
+    implicit val double    : StdDev[Double]     = (vs: Seq[Double]) => math.sqrt(varianceOf(vs))
+    implicit val bigInt    : StdDev[BigInt]     = (vs: Seq[BigInt]) => math.sqrt(varianceOf(vs))
+    implicit val bigDecimal: StdDev[BigDecimal] = (vs: Seq[BigDecimal]) => math.sqrt(varianceOf(vs))
+    implicit val byte      : StdDev[Byte]       = (vs: Seq[Byte]) => math.sqrt(varianceOf(vs))
+    implicit val short     : StdDev[Short]      = (vs: Seq[Short]) => math.sqrt(varianceOf(vs))
   }
-  def stdDevOf[A](vs: A*)(implicit stdDev: StdDev[A]): Double = stdDev.calc(vs)
+  def stdDevOf[A](v: A, vs: A*)(implicit stdDev: StdDev[A]): Double = stdDev.calc(v +: vs)
+  def stdDevOf[A](vs: Seq[A])(implicit stdDev: StdDev[A]): Double = stdDev.calc(vs)
 }

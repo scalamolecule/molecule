@@ -29,7 +29,7 @@ trait SqlBase_JVM extends SqlDataType_JVM with ModelUtils with BaseHelpers {
   override def indent(level: Int) = "  " * level
   protected def debug(s: Any) = if (doPrint) println(s) else ()
 
-  protected var doPrint          = true
+  protected var doPrint          = false
   protected var initialNs        = ""
   protected var curRefPath       = List("0")
   protected var inserts          = List.empty[(List[String], List[(String, String)])]

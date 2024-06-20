@@ -65,6 +65,12 @@ trait SpiSync_h2 extends SpiSyncBase {
     }.getDeleteData(delete.elements, conn.proxy.nsMap)
   }
 
+  override def delete_getData2(conn: JdbcConn_JVM, delete: Delete): Option[() => List[Long]] = {
+    new ResolveDelete with Delete_h2 {
+      override lazy val sqlConn = conn.sqlConn
+    }.getDeleteData2(delete.elements, conn.proxy.nsMap)
+  }
+
   override def fallback_rawQuery(
     query: String,
     debugFlag: Boolean = false,

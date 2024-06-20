@@ -176,6 +176,8 @@ trait OpsSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     
     "Types apply" - types { implicit conn =>
       for {
+        List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
+
         id1 <- Ns.stringSet(Set(string1)).save.transact.map(_.id)
         id2 <- Ns.intSet(Set(int1)).save.transact.map(_.id)
         id3 <- Ns.longSet(Set(long1)).save.transact.map(_.id)
@@ -305,6 +307,8 @@ trait OpsSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     
     "Types add" - types { implicit conn =>
       for {
+        List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
+
         id1 <- Ns.stringSet(Set(string1)).save.transact.map(_.id)
         id2 <- Ns.intSet(Set(int1)).save.transact.map(_.id)
         id3 <- Ns.longSet(Set(long1)).save.transact.map(_.id)
@@ -432,6 +436,8 @@ trait OpsSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     
     "Types remove" - types { implicit conn =>
       for {
+        List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
+
         id1 <- Ns.stringSet(Set(string1, string2, string3)).save.transact.map(_.id)
         id2 <- Ns.intSet(Set(int1, int2, int3)).save.transact.map(_.id)
         id3 <- Ns.longSet(Set(long1, long2, long3)).save.transact.map(_.id)

@@ -1,13 +1,11 @@
 package molecule.sql.mariadb.query
 
 import molecule.base.error.ModelError
-import molecule.boilerplate.ast.Model._
 import molecule.sql.core.query.{ResolveExprOne, SqlQueryBase}
 import scala.reflect.ClassTag
 import scala.util.Random
 
 trait ResolveExprOne_mariadb extends ResolveExprOne with LambdasOne_mariadb { self: SqlQueryBase =>
-
 
   override protected def matches(col: String, regex: String): Unit = {
     if (regex.nonEmpty)
@@ -129,8 +127,7 @@ trait ResolveExprOne_mariadb extends ResolveExprOne with LambdasOne_mariadb { se
         replaceCast(
           (row: RS, paramIndex: Int) => {
             val json    = row.getString(paramIndex)
-            val doubleSet = json.substring(1, json.length - 1).split(",").map(_.toDouble).toSeq
-            varianceOf(doubleSet: _*)
+            varianceOf(json.substring(1, json.length - 1).split(",").map(_.toDouble).toSeq)
           }
         )
 
@@ -143,9 +140,8 @@ trait ResolveExprOne_mariadb extends ResolveExprOne with LambdasOne_mariadb { se
         select += s"JSON_ARRAYAGG($col)"
         replaceCast(
           (row: RS, paramIndex: Int) => {
-            val json    = row.getString(paramIndex)
-            val doubleSet = json.substring(1, json.length - 1).split(",").map(_.toDouble).toSeq
-            stdDevOf(doubleSet: _*)
+            val json      = row.getString(paramIndex)
+            stdDevOf(json.substring(1, json.length - 1).split(",").map(_.toDouble).toSeq)
           }
         )
 

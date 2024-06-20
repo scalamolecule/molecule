@@ -64,7 +64,11 @@ class ResultSetImpl_sqlite(val underlying: ResultSet) extends ResultSetInterface
 
   // Data ---------------------------------------------
 
-  override def getString(columnIndex: Int): String = value(columnIndex).asInstanceOf[String]
+  override def getString(columnIndex: Int): String = value(columnIndex) match {
+    case s: String            => s
+    case i: java.lang.Integer => i.toString
+    case d: java.lang.Double  => d.toString
+  }
   override def getBoolean(columnIndex: Int): Boolean = value(columnIndex).asInstanceOf[Boolean]
   override def getByte(columnIndex: Int): Byte = value(columnIndex).asInstanceOf[Byte]
   override def getShort(columnIndex: Int): Short = value(columnIndex).asInstanceOf[Short]

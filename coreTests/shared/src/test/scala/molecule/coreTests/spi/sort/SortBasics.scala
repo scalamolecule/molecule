@@ -16,6 +16,8 @@ trait SortBasics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Types" - types { implicit conn =>
       for {
+        List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
+
         _ <- Ns.string.insert(string3, string1, string2).transact
         _ <- Ns.int.insert(int3, int1, int2).transact
         _ <- Ns.long.insert(long3, long1, long2).transact
@@ -95,6 +97,8 @@ trait SortBasics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Optional" - types { implicit conn =>
       for {
+        List(ref1, ref2) <- Ref.i.insert(1, 2).transact.map(_.ids)
+
         _ <- Ns.i.string_?.insert((1, Some(string2)), (1, None), (1, Some(string1))).transact
         _ <- Ns.i.int_?.insert((2, Some(int2)), (2, None), (2, Some(int1))).transact
         _ <- Ns.i.long_?.insert((3, Some(long2)), (3, None), (3, Some(long1))).transact

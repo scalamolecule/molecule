@@ -126,6 +126,8 @@ trait OpsOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Types apply" - types { implicit conn =>
       for {
+        List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
+
         id1 <- Ns.string(string1).save.transact.map(_.id)
         id2 <- Ns.int(int1).save.transact.map(_.id)
         id3 <- Ns.long(long1).save.transact.map(_.id)

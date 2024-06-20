@@ -22,6 +22,8 @@ trait SortAggr extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "count" - types { implicit conn =>
       for {
+        List(ref1, ref2) <- Ref.i.insert(1, 2).transact.map(_.ids)
+
         _ <- Ns.i.string.insert(
           (1, string1),
           (1, string2),
@@ -103,6 +105,8 @@ trait SortAggr extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "countDistinct" - types { implicit conn =>
       for {
+        List(ref1, ref2) <- Ref.i.insert(1, 2).transact.map(_.ids)
+
         _ <- Ns.i.string.insert(
           (1, string1),
           (1, string2),

@@ -23,8 +23,8 @@ case class JdbcConn_JVM(
   with MoleculeLogging {
 
   // debugging
-  //    doPrint = false
-  doPrint = true
+  doPrint = false
+  //  doPrint = true
 
 
   override lazy val sqlConn: Connection = sqlConn0
@@ -116,7 +116,9 @@ case class JdbcConn_JVM(
         // Populate prepared statement
         populatePS(ps, idsMap, 0)
 
-        extractAffectedIds(refPath, ps, ids, idsMap, idsAcc, curIds, updateIdsMap, accIds)
+        val x = extractAffectedIds(refPath, ps, ids, idsMap, idsAcc, curIds, updateIdsMap, accIds)
+
+        x
     }
 
     joinTables.foreach {

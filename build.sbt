@@ -340,7 +340,7 @@ lazy val sqlSQLite = crossProject(JSPlatform, JVMPlatform)
   .jsSettings(jsEnvironment)
   .jvmSettings(
     libraryDependencies ++= Seq(
-      "org.xerial" % "sqlite-jdbc" % "3.41.2.2"
+      "org.xerial" % "sqlite-jdbc" % "3.46.0.0"
     )
   )
   .dependsOn(sqlCore)

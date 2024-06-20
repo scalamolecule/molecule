@@ -5,6 +5,7 @@ import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
 import molecule.coreTests.async._
+import molecule.coreTests.dataModels.core.dsl.Types.Ref
 import molecule.coreTests.dataModels.core.dsl.Validation._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
@@ -77,6 +78,8 @@ trait RequiredAttrs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Attr/ref" - validation { implicit conn =>
       for {
+        List(ref1) <- RefB.i.insert(1).transact.map(_.ids)
+
         _ <- Require.int(1).save.transact
           .map(_ ==> "Unexpected success").recover {
             case ModelError(error) =>
@@ -99,6 +102,9 @@ trait RequiredAttrs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Ref/ref" - validation { implicit conn =>
       for {
+        ref1 <- RefB.i.insert(1).transact.map(_.id)
+        ref2 <- Enum.luckyNumber.insert(7).transact.map(_.id)
+
         _ <- Require.ref1(ref1).save.transact
           .map(_ ==> "Unexpected success").recover {
             case ModelError(error) =>

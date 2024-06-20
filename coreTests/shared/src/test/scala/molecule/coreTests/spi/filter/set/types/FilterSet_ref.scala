@@ -16,9 +16,11 @@ trait FilterSet_ref extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "Mandatory" - {
 
       "has" - types { implicit conn =>
-        val a = (1, Set(ref1, ref2))
-        val b = (2, Set(ref2, ref3, ref4))
         for {
+          List(ref1, ref2, ref3, ref4) <- Ref.i.insert(1, 2, 3, 4).transact.map(_.ids)
+          a = (1, Set(ref1, ref2))
+          b = (2, Set(ref2, ref3, ref4))
+
           _ <- Ns.i.refs.insert(List(a, b)).transact
 
           // Sets with one or more values matching
@@ -56,9 +58,11 @@ trait FilterSet_ref extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
       "hasNo" - types { implicit conn =>
-        val a = (1, Set(ref1, ref2))
-        val b = (2, Set(ref2, ref3, ref4))
         for {
+          List(ref0, ref1, ref2, ref3, ref4, ref5) <- Ref.i.insert(0, 1, 2, 3, 4, 5).transact.map(_.ids)
+          a = (1, Set(ref1, ref2))
+          b = (2, Set(ref2, ref3, ref4))
+
           _ <- Ns.i.refs.insert(List(a, b)).transact
 
           // Sets without one or more values matching
@@ -104,6 +108,8 @@ trait FilterSet_ref extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
       "has" - types { implicit conn =>
         for {
+          List(ref0, ref1, ref2, ref3, ref4) <- Ref.i.insert(0, 1, 2, 3, 4).transact.map(_.ids)
+
           _ <- Ns.i(0).save.transact
           _ <- Ns.i.refs.insert(List(
             (1, Set(ref1, ref2)),
@@ -146,6 +152,8 @@ trait FilterSet_ref extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
       "hasNo" - types { implicit conn =>
         for {
+          List(ref0, ref1, ref2, ref3, ref4, ref5) <- Ref.i.insert(0, 1, 2, 3, 4, 5).transact.map(_.ids)
+
           _ <- Ns.i(0).save.transact
           _ <- Ns.i.refs.insert(List(
             (1, Set(ref1, ref2)),

@@ -17,7 +17,9 @@ class Model2SqlQuery_mysql[Tpl](elements0: List[Element])
 
   override def getWhereClauses: ListBuffer[String] = {
     resolveElements(elements0)
-    val clauses = notNull.map(col => s"$col IS NOT NULL") ++ where.map { case (col, expr) => s"$col $expr" }
+    val clauses = notNull.map(col => s"$col IS NOT NULL") ++ where.map {
+      case (col, expr) => s"$col $expr"
+    }
     //    println("------ joins --------")
     //    println(formattedJoins)
     val joinsExist = if (joins.isEmpty) Nil else
@@ -32,7 +34,11 @@ class Model2SqlQuery_mysql[Tpl](elements0: List[Element])
     clauses ++ joinsExist
   }
 
-  override def pagination(optLimit: Option[Int], optOffset: Option[Int], isBackwards: Boolean): String = {
+  override def pagination(
+    optLimit: Option[Int],
+    optOffset: Option[Int],
+    isBackwards: Boolean
+  ): String = {
     if (isNestedMan || isNestedOpt) {
       ""
     } else if (hardLimit == 0) {

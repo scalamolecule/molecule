@@ -14,10 +14,13 @@ trait FilterOne_ref_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
   override lazy val tests = Tests {
 
     "Mandatory" - types { implicit conn =>
-      val a = (1, ref1)
-      val b = (2, ref2)
-      val c = (3, ref3)
       for {
+        List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
+        a = (1, ref1)
+        b = (2, ref2)
+        c = (3, ref3)
+
+
         _ <- Ns.i.ref.insert(List(a, b, c)).transact
 
         // Find all attribute values
@@ -67,6 +70,8 @@ trait FilterOne_ref_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "Tacit" - types { implicit conn =>
       val (a, b, c, x) = (1, 2, 3, 4)
       for {
+        List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
+
         _ <- Ns.i.ref_?.insert(List(
           (a, Some(ref1)),
           (b, Some(ref2)),
@@ -122,11 +127,13 @@ trait FilterOne_ref_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
     "Optional" - types { implicit conn =>
-      val a = (1, Some(ref1))
-      val b = (2, Some(ref2))
-      val c = (3, Some(ref3))
-      val x = (4, Option.empty[String])
       for {
+        List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
+        a = (1, Some(ref1))
+        b = (2, Some(ref2))
+        c = (3, Some(ref3))
+        x = (4, Option.empty[String])
+
         _ <- Ns.i.ref_?.insert(List(a, b, c, x)).transact
 
         // Find all optional attribute values

@@ -8,7 +8,6 @@ import scala.util.Random
 
 trait ResolveExprOne_mysql extends ResolveExprOne with LambdasOne_mysql { self: SqlQueryBase =>
 
-
   override protected def matches(col: String, regex: String): Unit = {
     if (regex.nonEmpty)
       where += ((col, s"REGEXP '$regex'"))
@@ -16,7 +15,7 @@ trait ResolveExprOne_mysql extends ResolveExprOne with LambdasOne_mysql { self: 
 
 
   override protected def aggr[T: ClassTag](
-  col: String, fn: String, optN: Option[Int], res: ResOne[T]
+    col: String, fn: String, optN: Option[Int], res: ResOne[T]
   ): Unit = {
     checkAggrOne()
     lazy val sep     = "0x1D" // Use invisible ascii Group Selector to separate concatenated values
@@ -128,9 +127,8 @@ trait ResolveExprOne_mysql extends ResolveExprOne with LambdasOne_mysql { self: 
         select += s"JSON_ARRAYAGG($col)"
         replaceCast(
           (row: RS, paramIndex: Int) => {
-            val json    = row.getString(paramIndex)
-            val doubleSet = json.substring(1, json.length - 1).split(", ").map(_.toDouble).toSeq
-            varianceOf(doubleSet: _*)
+            val json = row.getString(paramIndex)
+            varianceOf(json.substring(1, json.length - 1).split(", ").map(_.toDouble).toSeq)
           }
         )
 
@@ -143,9 +141,8 @@ trait ResolveExprOne_mysql extends ResolveExprOne with LambdasOne_mysql { self: 
         select += s"JSON_ARRAYAGG($col)"
         replaceCast(
           (row: RS, paramIndex: Int) => {
-            val json    = row.getString(paramIndex)
-            val doubleSet = json.substring(1, json.length - 1).split(", ").map(_.toDouble).toSeq
-            stdDevOf(doubleSet: _*)
+            val json = row.getString(paramIndex)
+            stdDevOf(json.substring(1, json.length - 1).split(", ").map(_.toDouble).toSeq)
           }
         )
 

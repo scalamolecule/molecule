@@ -50,7 +50,9 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
 
   def getWhereClauses: ListBuffer[String] = {
     resolveElements(elements0)
-    val clauses    = notNull.map(col => s"$col IS NOT NULL") ++ where.map { case (col, expr) => s"$col $expr" }
+    val clauses    = notNull.map(col => s"$col IS NOT NULL") ++ where.map {
+      case (col, expr) => s"$col $expr"
+    }
     //    println("------ joins --------")
     //    println(formattedJoins)
     val joinsExist = if (joins.isEmpty) Nil else
@@ -67,7 +69,8 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
   final private def resolve(elements: List[Element]): Unit = elements match {
     case element :: tail => element match {
       case a: AttrOne                      =>
-        if (a.attr == "id" && a.filterAttr.nonEmpty || a.attr != "id" && a.filterAttr.exists(_._3.attr == "id")) {
+        if (a.attr == "id" && a.filterAttr.nonEmpty
+          || a.attr != "id" && a.filterAttr.exists(_._3.attr == "id")) {
           throw ModelError(noIdFiltering)
         }
         a match {
@@ -138,7 +141,9 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     resolve(tail)
   }
 
-  final private def resolveNested(ref: Ref, nestedElements: List[Element], tail: List[Element]): Unit = {
+  final private def resolveNested(
+    ref: Ref, nestedElements: List[Element], tail: List[Element]
+  ): Unit = {
     level += 1
     isNestedMan = true
     if (isNestedOpt) {
@@ -155,7 +160,9 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     resolve(tail)
   }
 
-  final private def resolveNestedOpt(ref: Ref, nestedElements: List[Element], tail: List[Element]): Unit = {
+  final private def resolveNestedOpt(
+    ref: Ref, nestedElements: List[Element], tail: List[Element]
+  ): Unit = {
     level += 1
     isNestedOpt = true
     if (isNestedMan) {
@@ -193,7 +200,9 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     optOffset: Option[Int]
   ): String = {
     val distinct_ = if (distinct) " DISTINCT" else ""
-    val select_   = (nestedIds ++ select).mkString(s",\n  ")
+
+
+    val select_ = (nestedIds ++ select).mkString(s",\n  ")
 
     val joins_      = if (joins.isEmpty) "" else {
       val max1  = joins.map(_._1.length).max
@@ -201,14 +210,23 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
       val max3  = joins.map(_._3.length).max
       val max4  = joins.map(_._4.length).max + 1
       val hasAs = joins.exists(_._3.nonEmpty)
-      joins.map { case (join, table, as, lft, rgt) =>
-        val join_     = join + padS(max1, join)
-        val table_    = table + padS(max2, table)
-        val as_       = if (hasAs) {
-          if (as.isEmpty) padS(max3 + 4, "") else " AS " + as + padS(max3, as)
-        } else ""
-        val predicate = lft + padS(max4, lft) + rgt
-        s"$join_ $table_$as_ ON $predicate"
+      joins.map {
+        //        case (join, table, as, "", "") =>
+        //          val join_     = join + padS(max1, join)
+        //          val table_    = table + padS(max2, table)
+        //          val as_       = if (hasAs) {
+        //            if (as.isEmpty) padS(max3 + 4, "") else " AS " + as + padS(max3, as)
+        //          } else ""
+        //          s"$join_ $table_$as_"
+
+        case (join, table, as, lft, rgt) =>
+          val join_     = join + padS(max1, join)
+          val table_    = table + padS(max2, table)
+          val as_       = if (hasAs) {
+            if (as.isEmpty) padS(max3 + 4, "") else " AS " + as + padS(max3, as)
+          } else ""
+          val predicate = lft + padS(max4, lft) + rgt
+          s"$join_ $table_$as_ ON $predicate"
       }.mkString("\n  ", "\n  ", "")
     }
     val tempTables_ = if (tempTables.isEmpty) "" else tempTables.mkString(",\n  ", ",\n  ", "")
@@ -230,7 +248,8 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
 
     val having_ = if (having.isEmpty) "" else having.mkString("\nHAVING ", ", ", "")
 
-    val isBackwards = optLimit.isDefined && optLimit.get < 0 || optOffset.isDefined && optOffset.get < 0
+    val isBackwards = optLimit.fold(false)(_ < 0) || optOffset.fold(false)(_ < 0)
+//    val isBackwards = optLimit.isDefined && optLimit.get < 0 || optOffset.isDefined && optOffset.get < 0
 
     val orderBy_ = if (orderBy.isEmpty) {
       ""

@@ -53,7 +53,7 @@ trait SpiSync_sqlite extends SpiSyncBase {
   override def update_validate(update: Update)(implicit conn0: Conn): Map[String, Seq[String]] = {
     val conn            = conn0.asInstanceOf[JdbcConn_JVM]
     val query2resultSet = (query: String) => {
-      val ps        = conn.sqlConn.prepareStatement(
+      val ps = conn.sqlConn.prepareStatement(
         query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY
       )
       conn.resultSet(ps.executeQuery())
@@ -65,6 +65,11 @@ trait SpiSync_sqlite extends SpiSyncBase {
     new ResolveDelete with Delete_sqlite {
       override lazy val sqlConn = conn.sqlConn
     }.getDeleteData(delete.elements, conn.proxy.nsMap)
+  }
+  override def delete_getData2(conn: JdbcConn_JVM, delete: Delete): Option[() => List[Long]] = {
+    new ResolveDelete with Delete_sqlite {
+      override lazy val sqlConn = conn.sqlConn
+    }.getDeleteData2(delete.elements, conn.proxy.nsMap)
   }
 
 
@@ -79,16 +84,16 @@ trait SpiSync_sqlite extends SpiSyncBase {
     debug("\n=============================================================================")
     debug(stmt)
 
-    val stmtReturningIds = if(stmt.trim.toLowerCase.endsWith("returning id")) stmt else stmt + " RETURNING id"
-    val ps = conn.transactionStmt(stmtReturningIds)
+    val stmtReturningIds = if (stmt.trim.toLowerCase.endsWith("returning id")) stmt else stmt + " RETURNING id"
+    val ps               = conn.transactionStmt(stmtReturningIds)
     ps.addBatch()
     ps.execute()
-//    ps.executeBatch()
-//    ps.executeUpdate()
+    //    ps.executeBatch()
+    //    ps.executeUpdate()
 
     var ids       = List.empty[String]
     val resultSet = ps.getResultSet
-//    val resultSet = ps.getGeneratedKeys
+    //    val resultSet = ps.getGeneratedKeys
     while (resultSet.next()) {
       ids = ids :+ resultSet.getLong(1).toString
     }
@@ -152,14 +157,13 @@ trait SpiSync_sqlite extends SpiSyncBase {
       var n = 1
       row.clear()
       while (n <= columnsNumber) {
-        val col     = rsmd.getColumnName(n)
-        val sqlType = rsmd.getColumnTypeName(n)
-
+        val col         = rsmd.getColumnName(n)
+        val sqlType     = rsmd.getColumnTypeName(n)
         val tpe         = sqlType match {
           case "CHARACTER VARYING" => value(resultSet.getString(n), "String/URI")
           case "INTEGER"           => value(resultSet.getInt(n), "Int")
           case "BIGINT"            => value(resultSet.getLong(n), "Long")
-          case "REAL"              => value(resultSet.getFloat(n), "Float")
+          case "FLOAT"             => value(resultSet.getFloat(n), "Float")
           case "DOUBLE PRECISION"  => value(resultSet.getDouble(n), "Double")
           case "BOOLEAN"           => value(resultSet.getBoolean(n), "Boolean")
           case "DECIMAL"           => value(resultSet.getDouble(n), "BigInt/Decimal")
@@ -201,7 +205,11 @@ trait SpiSync_sqlite extends SpiSyncBase {
           case "SMALLINT ARRAY ARRAY"           => nestedArray(n, "Short")
           case "CHARACTER ARRAY ARRAY"          => nestedArray(n, "Char")
 
-          case "JSON" => value(n, "String")
+          case "VARBINARY" => value(n, "String")
+          case "VARCHAR"   => value(n, "String")
+          case "NVARCHAR"  => value(n, "String")
+          case "TEXT"      => value(n, "String")
+          case "JSON"      => value(n, "String")
 
           case other => throw new Exception(
             s"Unexpected sql result type from raw query: " + other

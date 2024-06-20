@@ -37,8 +37,40 @@ trait SqlDelete
     }
   }
 
+  def getDeleteData2(elements: List[Element], nsMap: Map[String, MetaNs]): Option[() => List[Long]] = {
+    val refPath = List(getInitialNs(elements))
+    resolve(elements, true)
+    if (ids.nonEmpty) {
+      deleteTableData2(refPath, nsMap, ids)
+    } else if (filterElements.nonEmpty) {
+      deleteTableData2(refPath, nsMap, getIds)
+    } else {
+      None
+    }
+  }
 
-  protected def deleteTableData(refPath: List[String], nsMap: Map[String, MetaNs], ids: Seq[Long]): Data = {
+
+  private def deleteTableData(refPath: List[String], nsMap: Map[String, MetaNs], ids: Seq[Long]): Data = {
+    val ns = refPath.head
+
+    // Delete join rows matching deleted entities
+    val joinTables: List[Table] = nsMap(ns).attrs
+      .filter(attr => attr.refNs.nonEmpty && attr.card == CardSet && !attr.options.contains("owner"))
+      .map { metaAttr =>
+        val refNs     = metaAttr.refNs.get
+        val joinTable = ss(ns, metaAttr.attr, refNs)
+        val idCol     = ss(ns, if (ns == refNs) "1_id" else "id")
+        prepareTable(refPath, joinTable, idCol, ids)
+      }.toList
+
+    // Recursively delete owned entities
+    val ownedTables  = deleteOwned(refPath, nsMap, Seq(nsMap(ns)), Set.empty[String], Nil, ids)
+    val table: Table = prepareTable(refPath, ns, s"$ns.id", ids)
+    ((table +: joinTables) ++ ownedTables, Nil)
+  }
+
+
+  def deleteTableData2(refPath: List[String], nsMap: Map[String, MetaNs], ids: Seq[Long]): Option[() => List[Long]] = {
     val ns = refPath.head
 
     // Delete join rows matching deleted entities
@@ -54,12 +86,26 @@ trait SqlDelete
     // Recursively delete owned entities
     val ownedTables = deleteOwned(refPath, nsMap, Seq(nsMap(ns)), Set.empty[String], Nil, ids)
 
-    val table: Table = prepareTable(refPath, ns, s"$ns.id", ids)
-    ((table +: joinTables) ++ ownedTables, Nil)
+    val table  = prepareTable(refPath, ns, s"$ns.id", ids)
+    val tables = ownedTables.toList ++ joinTables ++ List(table)
+    Some(
+      () => {
+        val s = sqlConn.createStatement()
+        s.addBatch("SET REFERENTIAL_INTEGRITY = 0")
+        tables.foreach { t =>
+          //          println("  €€€€€€€€€  " + t.stmt)
+          s.addBatch(t.stmt)
+        }
+        s.addBatch("SET REFERENTIAL_INTEGRITY = 1")
+        s.executeBatch
+        s.close()
+        ids.toList
+      }
+    )
   }
 
 
-  protected def getIds: List[Long] = {
+  private def getIds: List[Long] = {
     val ns                    = getInitialNs(filterElements)
     val filterElementsWithIds = AttrOneManID(ns, "id", V) +: filterElements
     val query                 = model2SqlQuery(filterElementsWithIds).getSqlQuery(Nil, None, None, None)
@@ -78,10 +124,21 @@ trait SqlDelete
   }
 
 
-  protected def prepareTable(refPath: List[String], table: String, idColumn: String, ids: Seq[Long]): Table = {
+  private def prepareTable(refPath: List[String], table: String, idColumn: String, ids: Seq[Long]): Table = {
     val ids_       = ids.mkString(", ")
     val stmt       = s"DELETE FROM $table WHERE $idColumn IN ($ids_)"
-    val populatePS = (ps: PS, _: IdsMap, _: RowIndex) => ps.addBatch()
+    //    val populatePS = (ps: PS, _: IdsMap, _: RowIndex) => ps.addBatch()
+    val populatePS = (ps: PS, _: IdsMap, _: RowIndex) => {
+
+      //      ps.addBatch("SET FOREIGN_KEY_CHECKS = 0")
+      //      ps.addBatch("SET REFERENTIAL_INTEGRITY = 0")
+      //  ps.addBatch("DELETE FROM reservations")
+      //  ps.addBatch("DELETE FROM flights")
+      ps.addBatch()
+      //  ps.addBatch("DELETE FROM A WHERE A.id IN (1)")
+      //      ps.addBatch("SET FOREIGN_KEY_CHECKS = 1")
+      //      ps.addBatch("SET REFERENTIAL_INTEGRITY = 1")
+    }
     Table(refPath, stmt, populatePS)
   }
 

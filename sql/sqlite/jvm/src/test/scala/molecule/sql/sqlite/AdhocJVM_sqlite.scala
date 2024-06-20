@@ -25,73 +25,86 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
       for {
 
 
-        _ <- Ns.string.insert(string1).transact
-        _ <- Ns.int.insert(intMin, int1, intMax).transact
-        _ <- Ns.long.insert(longMin, long1, longMax).transact
-        _ <- Ns.float.insert(floatMin, float1, floatMax).transact
-        _ <- Ns.double.insert(doubleMin, double1, doubleMax).transact
-        _ <- Ns.boolean.insert(boolean1).transact
-        _ <- Ns.bigInt.insert(bigIntNeg, bigInt1, bigIntPos).transact
-        _ <- Ns.bigDecimal.insert(bigDecimalNeg, bigDecimal1, bigDecimalPos).transact
-        _ <- Ns.date.insert(date1).transact
-        _ <- Ns.duration.insert(duration1).transact
-        _ <- Ns.instant.insert(instant1).transact
-        _ <- Ns.localDate.insert(localDate1).transact
-        _ <- Ns.localTime.insert(localTime1).transact
-        _ <- Ns.localDateTime.insert(localDateTime1).transact
-        _ <- Ns.offsetTime.insert(offsetTime1).transact
-        _ <- Ns.offsetDateTime.insert(offsetDateTime1).transact
-        _ <- Ns.zonedDateTime.insert(zonedDateTime1).transact
-        _ <- Ns.uuid.insert(uuid1).transact
-        _ <- Ns.uri.insert(uri1).transact
-        _ <- Ns.byte.insert(byteMin, byte1, byteMax).transact
-        _ <- Ns.short.insert(shortMin, short1, shortMax).transact
-        _ <- Ns.char.insert(char1).transact
+        ref1 <- Ref.i(1).save.transact.map(_.id)
+        _ <- Ns.i(1).ref(ref1).save.transact
+//        _ <- Ns.i(1).ref("42").save.transact
 
-        _ <- Ns.string.a1.query.get.map(_ ==> List(string1))
-        _ <- Ns.int.a1.query.get.map(_ ==> List(intMin, int1, intMax))
-        _ <- Ns.long.a1.query.get.map(_ ==> List(longMin, long1, longMax))
-        _ <- Ns.float.a1.query.get.map(_ ==> List(floatMin, float1, floatMax))
-        _ <- Ns.double.a1.query.get.map(_ ==> List(doubleMin, double1, doubleMax))
-        _ <- Ns.boolean.a1.query.get.map(_ ==> List(boolean1))
-        _ <- Ns.bigInt.a1.query.get.map(_ ==> List(bigIntNeg, bigInt1, bigIntPos))
-        _ <- Ns.bigDecimal.a1.query.get.map(_ ==> List(bigDecimalNeg, bigDecimal1, bigDecimalPos))
-        _ <- Ns.date.a1.query.get.map(_ ==> List(date1))
-        _ <- Ns.duration.a1.query.get.map(_ ==> List(duration1))
-        _ <- Ns.instant.a1.query.get.map(_ ==> List(instant1))
-        _ <- Ns.localDate.a1.query.get.map(_ ==> List(localDate1))
-        _ <- Ns.localTime.a1.query.get.map(_ ==> List(localTime1))
-        _ <- Ns.localDateTime.a1.query.get.map(_ ==> List(localDateTime1))
-        _ <- Ns.offsetTime.a1.query.get.map(_ ==> List(offsetTime1))
-        _ <- Ns.offsetDateTime.a1.query.get.map(_ ==> List(offsetDateTime1))
-        _ <- Ns.zonedDateTime.a1.query.get.map(_ ==> List(zonedDateTime1))
-        _ <- Ns.uuid.a1.query.get.map(_ ==> List(uuid1))
-        _ <- Ns.uri.a1.query.get.map(_ ==> List(uri1))
-        _ <- Ns.byte.a1.query.get.map(_ ==> List(byteMin, byte1, byteMax))
-        _ <- Ns.short.a1.query.get.map(_ ==> List(shortMin, short1, shortMax))
-        _ <- Ns.char.a1.query.get.map(_ ==> List(char1))
-
-        List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
-        _ <- Ns.ref.insert(r1).transact
-        _ <- Ns.ref.insert(Seq(r2)).transact
-        _ <- Ns.ref.a1.query.get.map(_ ==> List(r1, r2))
-
+        //        _ <- Ns.i.int.insert(
+        //          (1, int1),
+        //          (1, int2),
+        //          (1, int3),
+        //          (2, int4),
+        //          (2, int5),
+        //          (2, int6),
+        //          (2, int6), // (make sure grouped values coalesce)
+        //        ).transact
+        //
+        //
         //        _ <- rawQuery(
-        //          """select count(*) from Ns
-        //            |    INNER JOIN Ns_refs_Ref ON Ns.id = Ns_refs_Ref.Ns_id
+        //          """SELECT i, JSON_GROUP_ARRAY(distinct int order by int desc) as x
+        //            |FROM Ns
+        //            |group by i
         //            |""".stripMargin, true)
         //
-        //        _ <- rawTransact(
-        //          """UPDATE Ns
-        //            |SET
-        //            |  i = 7
-        //            |WHERE
-        //            |  Ns.i IS NOT NULL AND
-        //            |  exists (
-        //            |    select * from Ns
-        //            |      INNER JOIN Ns_refs_Ref ON Ns.id = Ns_refs_Ref.Ns_id
-        //            |  )
-        //            |""".stripMargin)
+        //        _ <- rawQuery(
+        //          """SELECT i ,(
+        //            |    SELECT JSON_GROUP_ARRAY(int)
+        //            |    FROM (
+        //            |        SELECT distinct int
+        //            |        FROM Ns AS _t
+        //            |        WHERE _t.i = Ns.i
+        //            |        ORDER BY _t.int DESC
+        //            |        LIMIT 2
+        //            |    )
+        //            |) as sum_int
+        //            |FROM Ns as Ns
+        //            |GROUP BY i
+        //            |""".stripMargin, true)
+
+
+        //        _ <- rawQuery(
+        //          """SELECT Ns.i, json_group_array(distinct x.value order by x.value desc)
+        //            |FROM Ns, json_each(int) as x
+        //            |group by i
+        //            |""".stripMargin, true)
+
+        //        _ <- rawQuery(
+        //          """SELECT json_group_array(json_extract(int, '$[' || id || ']'))
+        //            |FROM Ns, json_each(int)
+        //            |WHERE id < 3;
+        //            |""".stripMargin, true)
+
+
+        //        _ <- rawQuery(
+        //          """SELECT json_group_array(json_extract(myarray, '$[' || idx || ']'))
+        //            |FROM mytable, json_each(myarray)
+        //            |WHERE idx < 3;
+        //            |""".stripMargin, true)
+
+
+        //
+        //        _ <- Ns.int(min(1)).query.get.map(_ ==> List(Set(int1)))
+        //        _ <- Ns.int(min(2)).query.get.map(_ ==> List(Set(int1, int2)))
+        //
+        //        _ <- Ns.int(max(1)).query.get.map(_ ==> List(Set(int6)))
+        //        _ <- Ns.int(max(2)).query.get.map(_ ==> List(Set(int5, int6)))
+        //
+        //        _ <- Ns.i.a1.int(min(2)).query.get.map(_ ==> List(
+        //          (1, Set(int1, int2)),
+        //          (2, Set(int4, int5))
+        //        ))
+        //
+        //        _ <- Ns.i.a1.int(max(2)).query.get.map(_ ==> List(
+        //          (1, Set(int2, int3)),
+        //          (2, Set(int5, int6))
+        //        ))
+        //
+        //        _ <- Ns.i.a1.int(min(2)).int(max(2)).query.get.map(_ ==> List(
+        //          (1, Set(int1, int2), Set(int2, int3)),
+        //          (2, Set(int4, int5), Set(int5, int6))
+        //        ))
+
+
       } yield ()
     }
 

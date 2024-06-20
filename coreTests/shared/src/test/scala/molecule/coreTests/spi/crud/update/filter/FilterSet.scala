@@ -151,6 +151,8 @@ trait FilterSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Types, filter asserted" - types { implicit conn =>
       for {
+        ref1 <- Ref.i(1).save.transact.map(_.id)
+
         // Initial values
         _ <- Ns.i(1).stringSet(Set(string1)).save.transact
         _ <- Ns.i(1).intSet(Set(int1)).save.transact
@@ -231,6 +233,8 @@ trait FilterSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Types, filter has" - types { implicit conn =>
       for {
+        ref1 <- Ref.i(1).save.transact.map(_.id)
+
         // Initial values
         _ <- Ns.i(1).stringSet(Set(string1)).save.transact
         _ <- Ns.i(1).intSet(Set(int1)).save.transact
@@ -311,6 +315,8 @@ trait FilterSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Types, filter hasNo" - types { implicit conn =>
       for {
+        List(ref1, ref2) <- Ref.i.insert(1, 2).transact.map(_.ids)
+
         // Initial values
         _ <- Ns.i(1).stringSet(Set(string1)).save.transact
         _ <- Ns.i(1).intSet(Set(int1)).save.transact

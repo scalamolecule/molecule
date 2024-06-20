@@ -6,7 +6,6 @@ import scala.reflect.ClassTag
 
 trait ResolveExprOne_postgres extends ResolveExprOne with LambdasOne_postgres { self: SqlQueryBase =>
 
-
   override protected def addSort(attr: Attr, col: String): Unit = {
     attr.sort.foreach { sort =>
       val (dir, arity) = (sort.head, sort.substring(1, 2).toInt)
@@ -29,8 +28,6 @@ trait ResolveExprOne_postgres extends ResolveExprOne with LambdasOne_postgres { 
     lazy val n = optN.getOrElse(0)
     // Replace find/casting with aggregate function/cast
     select -= col
-    lazy val colAlias           = col.replace('.', '_')
-
     fn match {
       case "distinct" =>
         select += s"ARRAY_AGG(DISTINCT $col)"
