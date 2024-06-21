@@ -20,15 +20,19 @@ object AdhocJVM_mysql extends TestSuite_mysql {
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
 
+//      println(floatMin)
+//      println(floatMin.toInt)
+//      println(Int.íntValue)
+//      println("------")
+//      println(floatMax)
+//      println(floatMax.toInt)
+//      println(Int.MaxValue)
+
       for {
 
-        //        _ <- Ns.i(1).intSet(Set(int1)).save.transact
-        _ <- Ns.i(1).refs(Set(ref1)).save.transact
+        _ <- Ns.float.insert(floatMin, float1, floatMax).transact
 
-        // Update i using asserted filter
-        //        _ <- Ns.i(2).intSet_.update.i.transact
-
-
+        _ <- Ns.float.a1.query.get.map(_ ==> List(floatMin, float1, floatMax))
 
 //        _ <- rawTransact(
 //          """UPDATE Ns as x
@@ -41,11 +45,6 @@ object AdhocJVM_mysql extends TestSuite_mysql {
 //            |    INNER JOIN Ns_refs_Ref ON Ns.id = Ns_refs_Ref.Ns_id
 //            |)
 //            |""".stripMargin)
-
-
-        _ <- Ns.i(2).refs_.update.i.transact
-
-        _ <- Ns.i.refs_.query.get.map(_.head ==> 2)
 
 
       } yield ()

@@ -22,68 +22,14 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
+        //        _ <- Ns.bigDecimal.insert(bigDecimalNeg, bigDecimal1, bigDecimalPos).transact
+        //        _ <- Ns.bigDecimal.a1.query.get.map(_ ==> List(bigDecimalNeg, bigDecimal1, bigDecimalPos))
 
-        List(
-        ref1,
-        ref2,
-        ref3,
-        ) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
+        _ <- Ns.bigInt.insert(bigIntPos).i.transact
+        _ <- Ns.bigInt.a1.query.i.get.map(_ ==> List(bigIntPos))
 
-        _ <- Ns.i.ref.insert(List(
-          (1, ref1),
-          (2, ref2),
-          (2, ref2),
-          (2, ref3),
-        )).transact
-
-        _ <- Ns.i.ref.a1.query.get.map(_ ==> List(
-          (1, ref1),
-          (2, ref2), // 2 rows coalesced
-          (2, ref3),
-        ))
-
-        // Distinct values are returned in a Set
-        _ <- Ns.i.a1.ref(distinct).query.get.map(_ ==> List(
-          (1, Set(ref1)),
-          (2, Set(ref2, ref3)),
-        ))
-
-        _ <- Ns.ref(distinct).query.get.map(_.head ==> Set(
-          ref1, ref2, ref3
-        ))
-
-        //        ref1 <- Ref.i(1).save.transact.map(_.id)
-        //        _ <- Ns.i(1).ref(ref1).save.transact
-
-        //        List(
-        //        ref1,
-        //        ref2,
-        //        ref3,
-        //        ) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
-        //
-        //        _ <- Ns.i.ref.insert(List(
-        //          (1, ref1),
-        //          (2, ref2),
-        //          (2, ref2),
-        //          (2, ref3),
-        //        )).transact
-        //
-        //        _ <- Ns.i.ref.a1.query.get.map(_ ==> List(
-        //          (1, ref1),
-        //          (2, ref2), // 2 rows coalesced
-        //          (2, ref3),
-        //        ))
-        //
-        //        // Distinct values are returned in a Set
-        //        _ <- Ns.i.a1.ref(distinct).query.get.map(_ ==> List(
-        //          (1, Set(ref1)),
-        //          (2, Set(ref2, ref3)),
-        //        ))
-        //
-        //        _ <- Ns.ref(distinct).query.get.map(_.head ==> Set(
-        //          ref1, ref2, ref3
-        //        ))
-
+        _ <- Ns.bigDecimal.insert(bigDecimalPos).i.transact
+        _ <- Ns.bigDecimal.a1.query.i.get.map(_ ==> List(bigDecimalPos))
 
         //        _ <- rawQuery(
         //          """select count(*) from Ns
@@ -107,15 +53,29 @@ object AdhocJVM_h2 extends TestSuite_h2 {
 
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
-      val pint20 = "b" -> 20
-      val pint30 = "c" -> 30
       for {
 
-
-        e1 <- A.i.Bb.*(B.i).insert(
-          (1, Seq(10, 11)),
-          (2, Seq(20, 21))
+        e1 <- A.i.OwnB.i.insert(
+          (1, 10),
+          (2, 20)
         ).transact.map(_.id)
+
+        // 2 entities, each with an owned sub-entity
+        _ <- A.i.a1.OwnB.i.query.get.map(_ ==> List(
+          (1, 10),
+          (2, 20)
+        ))
+
+        // 2 sub-entities
+        _ <- B.i.a1.query.get.map(_ ==> List(10, 20))
+
+        _ <- A(e1).delete.transact
+
+        // 1 entity with 1 owned sub-entity left
+        _ <- A.i.OwnB.i.query.get.map(_ ==> List((2, 20)))
+
+        // 2 sub-entities
+        _ <- B.i.query.get.map(_ ==> List(20))
 
         //        // 2 entities, each with 2 owned sub-entities
         //        _ <- A.i.a1.Bb.*(B.i.a1).query.get.map(_ ==> List(
@@ -145,13 +105,7 @@ object AdhocJVM_h2 extends TestSuite_h2 {
         //          """DELETE FROM A WHERE A.id IN (1)
         //            |""".stripMargin)
 
-        // Delete first A entity and implicitly its joins to B
-        _ <- A(e1).delete.transact
 
-        // 1 entity with 2 referenced entities left
-        _ <- A.i.Bb.*(B.i.a1).query.get.map(_ ==> List(
-          (2, Seq(20, 21))
-        ))
         //
         //        // Referenced entities are not deleted
         //        _ <- B.i.a1.query.get.map(_ ==> List(10, 11, 20, 21))

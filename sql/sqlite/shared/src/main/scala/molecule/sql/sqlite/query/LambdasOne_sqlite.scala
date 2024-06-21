@@ -4,7 +4,6 @@ import molecule.sql.core.query.{LambdasOne, SqlQueryBase}
 
 trait LambdasOne_sqlite extends LambdasOne { self: SqlQueryBase =>
 
-
   // SQlite data conversions
   override lazy val sql2oneId        : (RS, Int) => String     = (row: RS, paramIndex: Int) => row.getInt(paramIndex).toString
   override lazy val sql2oneBoolean   : (RS, Int) => Boolean    = (row: RS, paramIndex: Int) => row.getInt(paramIndex) == 1

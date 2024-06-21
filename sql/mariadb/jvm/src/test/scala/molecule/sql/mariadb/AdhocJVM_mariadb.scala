@@ -3,7 +3,7 @@ package molecule.sql.mariadb
 import java.net.URI
 import java.time.{Duration, Instant, LocalDate, LocalDateTime, LocalTime, OffsetDateTime, OffsetTime, ZonedDateTime}
 import java.util.{Date, UUID}
-import molecule.base.error.ModelError
+import molecule.base.error.{InsertErrors, ModelError, ValidationErrors}
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Refs.A
 import molecule.sql.mariadb.async._
@@ -22,55 +22,9 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
 
       for {
 
-        _ <- Ns.s.int.insert(
-          ("bar", 1),
-          ("baz", 2),
-          ("foo", 3),
-        ).transact
-
-        // Update all entities where `s` starts with "ba"
-        _ <- Ns.s_.startsWith("ba").int(4).update.transact
-
-        // 2 entities updated
-        _ <- Ns.s.a1.int.query.get.map(_ ==> List(
-          ("bar", 4), // updated
-          ("baz", 4), // updated
-          ("foo", 3),
-        ))
-
-        _ <- Ns.s_.endsWith("oo").int(5).update.transact
-        _ <- Ns.s.a1.int.query.get.map(_ ==> List(
-          ("bar", 4),
-          ("baz", 4),
-          ("foo", 5), // updated
-        ))
-
-        _ <- Ns.s_.contains("a").int(6).update.transact
-        _ <- Ns.s.a1.int.query.get.map(_ ==> List(
-          ("bar", 6), // updated
-          ("baz", 6), // updated
-          ("foo", 5),
-        ))
-
-        _ <- Ns.s_.matches("[a-z]{3}").int(7).update.transact
-        _ <- Ns.s.a1.int.query.get.map(_ ==> List(
-          ("bar", 7), // updated
-          ("baz", 7), // updated
-          ("foo", 7), // updated
-        ))
-
-        // No-match updates that won't change data
-        _ <- Ns.s_.startsWith("bo").int(8).update.transact
-        _ <- Ns.s_.endsWith("aa").int(8).update.transact
-        _ <- Ns.s_.contains("x").int(8).update.transact
-        _ <- Ns.s_.matches("[A_Z]+").int(8).update.transact
-
-        // Nothing updated if no match
-        _ <- Ns.s.a1.int.query.get.map(_ ==> List(
-          ("bar", 7),
-          ("baz", 7),
-          ("foo", 7),
-        ))
+        _ <- Ns.int.insert(int1, int2, int3).transact
+        _ <- Ns.int_(int0).delete.i.transact
+        _ <- Ns.int.a1.query.get.map(_ ==> List(int1, int2, int3))
 
 
       } yield ()
@@ -198,12 +152,38 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
     }
 
 
-    //    "validation" - validation { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Validation._
-    //      for {
-    //        List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)
-    //
-    //      } yield ()
-    //    }
+    "validation" - validation { implicit conn =>
+      import molecule.coreTests.dataModels.core.dsl.Validation._
+      for {
+        _ <- Type.string("a").save.transact
+          .map(_ ==> "Unexpected success").recover {
+            case ValidationErrors(errorMap) =>
+              errorMap.head._2.head ==>
+                s"""Type.string with value `a` doesn't satisfy validation:
+                   |_ > "b"
+                   |""".stripMargin
+          }
+
+        _ <- Type.string.insert("a").transact
+          .map(_ ==> "Unexpected success").recover {
+            case InsertErrors(errors, _) =>
+              errors.head._2.head.errors.head ==
+                s"""Type.string with value `a` doesn't satisfy validation:
+                   |_ > "b"
+                   |""".stripMargin
+          }
+
+        id <- Type.string("c").save.transact.map(_.id)
+        _ <- Type(id).string("a").update.transact
+          .map(_ ==> "Unexpected success").recover {
+            case ValidationErrors(errorMap) =>
+              errorMap.head._2.head ==
+                s"""Type.string with value `a` doesn't satisfy validation:
+                   |_ > "b"
+                   |""".stripMargin
+          }
+
+      } yield ()
+    }
   }
 }

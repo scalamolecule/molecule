@@ -16,6 +16,7 @@ trait Aggr_ref_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "distinct" - types { implicit conn =>
       for {
         List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
+
         _ <- Ns.i.ref.insert(List(
           (1, ref1),
           (2, ref2),
@@ -120,6 +121,7 @@ trait Aggr_ref_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         List(ref1, ref2, ref3, ref4) <- Ref.i.insert(1, 2, 3, 4).transact.map(_.ids)
         all = Set(ref1, ref2, ref3, ref4)
+
         _ <- Ns.ref.insert(List(ref1, ref2, ref3)).transact
         _ <- Ns.ref(sample).query.get.map(res => all.contains(res.head) ==> true)
         _ <- Ns.ref(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
@@ -131,6 +133,7 @@ trait Aggr_ref_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "count" - types { implicit conn =>
       for {
         List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
+
         _ <- Ns.i.ref.insert(List(
           (1, ref1),
           (2, ref2),

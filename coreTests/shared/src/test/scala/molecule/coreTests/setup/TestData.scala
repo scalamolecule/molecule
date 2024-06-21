@@ -16,7 +16,9 @@ trait TestData extends DateHandling { self: CoreTest =>
   private def ur(i: Int): URI = new URI("uri" + i)
   private def bi(i: Int): BigInt = BigInt(i)
   private def bd(d: Double): BigDecimal = BigDecimal(d)
-  private val n = "1234567890123456789012345678901234567890"
+
+  // Long.Max:     9223372036854775807
+  private val n = "12345678901234567890" // for BigInt/Decimal
 
   lazy val (string0, string1, string2, string3, string4, string5, string6, string7, string8, string9) =
     ("-", "a", "b", "c", "d", "e", "f", "g", "h", "i")
@@ -27,8 +29,12 @@ trait TestData extends DateHandling { self: CoreTest =>
   lazy val (long0, long1, long2, long3, long4, long5, long6, long7, long8, long9, longMin, longMax) =
     (0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, Long.MinValue, Long.MaxValue)
 
-  lazy val (float0, float1, float2, float3, float4, float5, float6, float7, float8, float9, floatMin, floatMax) =
-    (0.0f, 1.1f, 2.2f, 3.3f, 4.4f, 5.5f, 6.6f, 7.7f, 8.8f, 9.9f, Float.MinValue, Float.MaxValue)
+  lazy val (float0, float1, float2, float3, float4, float5, float6, float7, float8, float9, floatMin, floatMax) = {
+    (0.0f, 1.1f, 2.2f, 3.3f, 4.4f, 5.5f, 6.6f, 7.7f, 8.8f, 9.9f, -1234.56f, 1234.56f)
+  }
+  // Float sucks. Use Double instead
+  //    (0.0f, 1.1f, 2.2f, 3.3f, 4.4f, 5.5f, 6.6f, 7.7f, 8.8f, 9.9f, Float.MinValue, Float.MaxValue)
+  //                                                                       ^^ gives weird exponential value
 
   lazy val (double0, double1, double2, double3, double4, double5, double6, double7, double8, double9, doubleMin, doubleMax) =
     (0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, Double.MinValue, Double.MaxValue)

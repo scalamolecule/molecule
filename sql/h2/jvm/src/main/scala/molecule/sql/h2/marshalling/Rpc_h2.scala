@@ -169,7 +169,7 @@ object Rpc_h2
       conn <- getConn(proxy)
       data = new ResolveDelete with Delete_h2 {
         override lazy val sqlConn: Connection = conn.sqlConn
-      }.getDeleteData(elements, proxy.nsMap)
+      }.getDeleteDataForInspection(elements, proxy.nsMap)
       txReport <- conn.transact_async(data)
     } yield txReport
   }

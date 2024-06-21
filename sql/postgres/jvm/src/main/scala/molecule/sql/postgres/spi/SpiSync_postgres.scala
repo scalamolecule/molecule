@@ -61,10 +61,16 @@ trait SpiSync_postgres extends SpiSyncBase {
     validateUpdateSet(conn.proxy, update.elements, query2resultSet)
   }
 
-  override def delete_getData(conn: JdbcConn_JVM, delete: Delete): Data = {
+  override def delete_getInspectionData(conn: JdbcConn_JVM, delete: Delete): Data = {
     new ResolveDelete with Delete_postgres {
       override lazy val sqlConn = conn.sqlConn
-    }.getDeleteData(delete.elements, conn.proxy.nsMap)
+    }.getDeleteDataForInspection(delete.elements, conn.proxy.nsMap)
+  }
+
+  override def delete_getExecutioner(conn: JdbcConn_JVM, delete: Delete): Option[() => List[Long]] = {
+    new ResolveDelete with Delete_postgres {
+      override lazy val sqlConn = conn.sqlConn
+    }.getDeleteExecutioner(delete.elements, conn.proxy.nsMap, "session_replication_role", "replica", "default")
   }
 
   override def fallback_rawQuery(

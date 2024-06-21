@@ -222,6 +222,8 @@ object RawQuery extends TestSuite_mariadb {
 
     "Optional Set of refs" - types { implicit conn =>
       for {
+        List(ref1, ref2) <- Ref.i.insert(1, 2).transact.map(_.ids)
+
         _ <- Ns.i.refs_?.insert(
           (1, Option.empty[Set[String]]),
           (2, Some(Set.empty[String])),

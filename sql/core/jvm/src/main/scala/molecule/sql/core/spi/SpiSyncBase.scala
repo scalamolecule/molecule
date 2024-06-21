@@ -1,6 +1,7 @@
 package molecule.sql.core.spi
 
 import java.sql.Statement
+import molecule.base.ast.MetaNs
 import molecule.base.error._
 import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
@@ -13,7 +14,7 @@ import molecule.core.validation.insert.InsertValidation
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.query.{Model2SqlQuery, SqlQueryBase, SqlQueryResolveCursor, SqlQueryResolveOffset}
 import molecule.sql.core.transaction.update.UpdateHelper
-import molecule.sql.core.transaction.{SqlBase_JVM, SqlUpdateSetValidator}
+import molecule.sql.core.transaction.{SqlBase_JVM, SqlUpdateSetValidator, Table}
 import scala.util.control.NonFatal
 
 
@@ -252,23 +253,26 @@ trait SpiSyncBase
       delete_inspect(delete)
     }
     //    val txReport = conn.transact_sync(delete_getData(conn, delete))
-    delete_getData2(conn, delete).fold(TxReport(Nil)) { executions =>
+    delete_getExecutioner(conn, delete).fold(TxReport(Nil)) { executions =>
       val txReport = conn.atomicTransaction(executions)
       conn.callback(delete.elements, true)
       txReport
     }
   }
 
+  // Implement for each database
+  def delete_getExecutioner(conn: JdbcConn_JVM, delete: Delete): Option[() => List[Long]]
+
   override def delete_inspect(delete: Delete)(implicit conn0: Conn): Unit = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
     tryInspect("delete", delete.elements) {
-      printInspectTx("DELETE", delete.elements, delete_getData(conn, delete))
+      printInspectTx("DELETE", delete.elements, delete_getInspectionData(conn, delete))
     }
   }
 
-  // Implement for each sql database
-  def delete_getData(conn: JdbcConn_JVM, delete: Delete): Data
-  def delete_getData2(conn: JdbcConn_JVM, delete: Delete): Option[() => List[Long]] = ???
+  // Only used for inspection
+  def delete_getInspectionData(conn: JdbcConn_JVM, delete: Delete): Data
+
 
 
   // Inspect --------------------------------------------------------

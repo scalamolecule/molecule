@@ -173,7 +173,7 @@ object Rpc_postgres
       conn <- getConn(proxy)
       data = new ResolveDelete with Delete_postgres {
         override lazy val sqlConn: Connection = conn.sqlConn
-      }.getDeleteData(elements, proxy.nsMap)
+      }.getDeleteDataForInspection(elements, proxy.nsMap)
       txReport <- conn.transact_async(data)
     } yield txReport
   }
