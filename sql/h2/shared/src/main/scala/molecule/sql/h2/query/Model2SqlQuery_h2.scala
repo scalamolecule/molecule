@@ -11,5 +11,4 @@ class Model2SqlQuery_h2[Tpl](elements0: List[Element])
     with ResolveExprSeq_h2
     with ResolveExprMap_h2
     with ResolveExprSetRefAttr_h2
-    with SqlQueryBase {
-}
+    with SqlQueryBase

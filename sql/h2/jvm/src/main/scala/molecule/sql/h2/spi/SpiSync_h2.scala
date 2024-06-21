@@ -68,7 +68,7 @@ trait SpiSync_h2 extends SpiSyncBase {
   override def delete_getExecutioner(conn: JdbcConn_JVM, delete: Delete): Option[() => List[Long]] = {
     new ResolveDelete with Delete_h2 {
       override lazy val sqlConn = conn.sqlConn
-    }.getDeleteExecutioner(delete.elements, conn.proxy.nsMap, "REFERENTIAL_INTEGRITY", "TRUE", "FALSE")
+    }.getDeleteExecutioner(delete.elements, conn.proxy.nsMap, "SET REFERENTIAL_INTEGRITY", "TRUE", "FALSE")
   }
 
   override def fallback_rawQuery(

@@ -62,7 +62,7 @@ trait SpiSync_mariadb extends SpiSyncBase {
   override def delete_getExecutioner(conn: JdbcConn_JVM, delete: Delete): Option[() => List[Long]] = {
     new ResolveDelete with Delete_mariadb {
       override lazy val sqlConn = conn.sqlConn
-    }.getDeleteExecutioner(delete.elements, conn.proxy.nsMap, "FOREIGN_KEY_CHECKS")
+    }.getDeleteExecutioner(delete.elements, conn.proxy.nsMap, "SET FOREIGN_KEY_CHECKS")
   }
 
   override def delete_getInspectionData(conn: JdbcConn_JVM, delete: Delete): Data = {

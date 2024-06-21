@@ -57,12 +57,14 @@ trait SqlDelete
       () => {
         val s = sqlConn.createStatement()
         //          println("--------------------")
-        s.addBatch(s"SET $fkConstraintParam = $fkOff")
+        s.addBatch(s"$fkConstraintParam = $fkOff")
+//        s.addBatch(s"PRAGMA foreign_keys = 0")
         tables.foreach { t =>
           //          println("  €€€€€€€€€  " + t.stmt)
           s.addBatch(t.stmt)
         }
-        s.addBatch(s"SET $fkConstraintParam = $fkOn")
+//        s.addBatch(s"PRAGMA foreign_keys = 1")
+        s.addBatch(s"$fkConstraintParam = $fkOn")
         s.executeBatch
         s.close()
         ids.toList

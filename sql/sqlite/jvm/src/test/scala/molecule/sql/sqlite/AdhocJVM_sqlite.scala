@@ -1,8 +1,11 @@
 package molecule.sql.sqlite
 
-import java.time.Instant
+import java.net.URI
+import java.time.{Duration, Instant, LocalDate, LocalDateTime, LocalTime, OffsetDateTime, OffsetTime, ZonedDateTime}
+import java.util.{Date, UUID}
 import molecule.base.error.{ExecutionError, ModelError}
 import molecule.core.util.Executor._
+import molecule.coreTests.dataModels.core.dsl.Refs.A
 import molecule.coreTests.dataModels.core.dsl.Types.Ns
 import molecule.coreTests.util.Array2List
 import molecule.sql.sqlite.async._
@@ -21,88 +24,24 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
-
       for {
 
+        _ <- Ns.i(1).string_?(Some(string1)).save.transact
 
-        ref1 <- Ref.i(1).save.transact.map(_.id)
-        _ <- Ns.i(1).ref(ref1).save.transact
-//        _ <- Ns.i(1).ref("42").save.transact
-
-        //        _ <- Ns.i.int.insert(
-        //          (1, int1),
-        //          (1, int2),
-        //          (1, int3),
-        //          (2, int4),
-        //          (2, int5),
-        //          (2, int6),
-        //          (2, int6), // (make sure grouped values coalesce)
-        //        ).transact
-        //
-        //
-        //        _ <- rawQuery(
-        //          """SELECT i, JSON_GROUP_ARRAY(distinct int order by int desc) as x
-        //            |FROM Ns
-        //            |group by i
-        //            |""".stripMargin, true)
-        //
-        //        _ <- rawQuery(
-        //          """SELECT i ,(
-        //            |    SELECT JSON_GROUP_ARRAY(int)
-        //            |    FROM (
-        //            |        SELECT distinct int
-        //            |        FROM Ns AS _t
-        //            |        WHERE _t.i = Ns.i
-        //            |        ORDER BY _t.int DESC
-        //            |        LIMIT 2
-        //            |    )
-        //            |) as sum_int
-        //            |FROM Ns as Ns
-        //            |GROUP BY i
-        //            |""".stripMargin, true)
+        _ <- Ns.i(1).string_?(Option.empty[String]).save.transact
 
 
-        //        _ <- rawQuery(
-        //          """SELECT Ns.i, json_group_array(distinct x.value order by x.value desc)
-        //            |FROM Ns, json_each(int) as x
-        //            |group by i
-        //            |""".stripMargin, true)
+//        _ <- rawQuery(
+//          """SELECT DISTINCT
+//            |  Ns.i,
+//            |  Ns.string
+//            |FROM Ns
+//            |WHERE
+//            |  Ns.i IS NOT NULL
+//            |ORDER BY Ns.string;
+//            |""".stripMargin, true)
 
-        //        _ <- rawQuery(
-        //          """SELECT json_group_array(json_extract(int, '$[' || id || ']'))
-        //            |FROM Ns, json_each(int)
-        //            |WHERE id < 3;
-        //            |""".stripMargin, true)
-
-
-        //        _ <- rawQuery(
-        //          """SELECT json_group_array(json_extract(myarray, '$[' || idx || ']'))
-        //            |FROM mytable, json_each(myarray)
-        //            |WHERE idx < 3;
-        //            |""".stripMargin, true)
-
-
-        //
-        //        _ <- Ns.int(min(1)).query.get.map(_ ==> List(Set(int1)))
-        //        _ <- Ns.int(min(2)).query.get.map(_ ==> List(Set(int1, int2)))
-        //
-        //        _ <- Ns.int(max(1)).query.get.map(_ ==> List(Set(int6)))
-        //        _ <- Ns.int(max(2)).query.get.map(_ ==> List(Set(int5, int6)))
-        //
-        //        _ <- Ns.i.a1.int(min(2)).query.get.map(_ ==> List(
-        //          (1, Set(int1, int2)),
-        //          (2, Set(int4, int5))
-        //        ))
-        //
-        //        _ <- Ns.i.a1.int(max(2)).query.get.map(_ ==> List(
-        //          (1, Set(int2, int3)),
-        //          (2, Set(int5, int6))
-        //        ))
-        //
-        //        _ <- Ns.i.a1.int(min(2)).int(max(2)).query.get.map(_ ==> List(
-        //          (1, Set(int1, int2), Set(int2, int3)),
-        //          (2, Set(int4, int5), Set(int5, int6))
-        //        ))
+        _ <- Ns.i_.string_?.a1.query.i.get.map(_ ==> List(None, Some(string1)))
 
 
       } yield ()
@@ -111,15 +50,76 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
 
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
-      val pint20 = "b" -> 20
-      val pint30 = "c" -> 30
       for {
 
 
-        // Will not be updated since entity has no A -> B relationship
-        _ <- B.s("x").iSeq(Seq(1, 2, 3)).save.transact
+        _ <- A.i.B.i.insert(
+          (1, 1),
+          (1, 2),
+          (1, 3),
+          (2, 4),
+          (2, 5),
+          (2, 6),
+          (2, 6), // (make sure grouped values coalesce)
+        ).transact
+
+        _ <- A.B.i(min(2)).query.get.map(_ ==> List(Set(1, 2)))
+        _ <- A.B.i(max(2)).query.get.map(_ ==> List(Set(5, 6)))
+        _ <- A.B.i(min(2)).i(max(2)).query.get.map(_ ==> List((Set(1, 2), Set(5, 6))))
+
+        _ <- rawQuery(
+          """SELECT DISTINCT
+            |  A.i,
+            |  (
+            |    SELECT JSON_GROUP_ARRAY(i)
+            |    FROM (
+            |      SELECT distinct _B.i
+            |      FROM A as _A
+            |      INNER JOIN B as _B ON _A.b = _B.id
+            |      WHERE _A.i = A.i
+            |      ORDER BY _B.i ASC
+            |      LIMIT 2
+            |    )
+            |  ) as i_min
+            |FROM A
+            |  INNER JOIN B ON A.b = B.id
+            |WHERE
+            |  A.i IS NOT NULL AND
+            |  B.i IS NOT NULL
+            |GROUP BY A.i
+            |ORDER BY A.i;
+            |""".stripMargin, true)
+
+        _ <- A.i.a1.B.i(min(2)).query.i.get.map(_ ==> List(
+          (1, Set(1, 2)),
+          (2, Set(4, 5))
+        ))
+
+        _ <- A.i.a1.B.i(max(2)).query.get.map(_ ==> List(
+          (1, Set(2, 3)),
+          (2, Set(5, 6))
+        ))
+
+        _ <- A.i.a1.B.i(min(2)).i(max(2)).query.get.map(_ ==> List(
+          (1, Set(1, 2), Set(2, 3)),
+          (2, Set(4, 5), Set(5, 6))
+        ))
 
 
+        //        _ <- A.i.a1.B.i(min(2)).query.i.get.map(_ ==> List(
+        //          (1, Set(1, 2)),
+        //          (2, Set(4, 5))
+        //        ))
+        //
+        ////        _ <- A.i.a1.B.i(max(2)).query.get.map(_ ==> List(
+        ////          (1, Set(2, 3)),
+        ////          (2, Set(5, 6))
+        ////        ))
+        ////
+        ////        _ <- A.i.a1.B.i(min(2)).i(max(2)).query.get.map(_ ==> List(
+        ////          (1, Set(1, 2), Set(2, 3)),
+        ////          (2, Set(4, 5), Set(5, 6))
+        ////        ))
         //        _ <- rawTransact(
         //          """UPDATE Ns
         //            |SET

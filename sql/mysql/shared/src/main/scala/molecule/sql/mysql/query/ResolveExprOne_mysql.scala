@@ -15,7 +15,12 @@ trait ResolveExprOne_mysql extends ResolveExprOne with LambdasOne_mysql { self: 
 
 
   override protected def aggr[T: ClassTag](
-    col: String, fn: String, optN: Option[Int], res: ResOne[T]
+    ns: String,
+    attr: String,
+    col: String,
+    fn: String,
+    optN: Option[Int],
+    res: ResOne[T]
   ): Unit = {
     checkAggrOne()
     lazy val sep     = "0x1D" // Use invisible ascii Group Selector to separate concatenated values

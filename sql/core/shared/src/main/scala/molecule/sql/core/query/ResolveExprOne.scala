@@ -117,7 +117,7 @@ trait ResolveExprOne extends ResolveExpr { self: SqlQueryBase with LambdasOne =>
     }
     addSort(attr, col)
     attr.filterAttr.fold {
-      expr(col, attr.op, args, res)
+      expr(attr.ns, attr.attr, col, attr.op, args, res)
     } { case (dir, filterPath, filterAttr) =>
       expr2(col, attr.op, filterAttr.name)
     }
@@ -129,13 +129,15 @@ trait ResolveExprOne extends ResolveExpr { self: SqlQueryBase with LambdasOne =>
       notNull += col
     }
     attr.filterAttr.fold {
-      expr(col, attr.op, args, res)
+      expr(attr.ns, attr.attr, col, attr.op, args, res)
     } { case (dir, filterPath, filterAttr) =>
       expr2(col, attr.op, getCol(filterAttr, filterPath))
     }
   }
 
   protected def expr[T: ClassTag](
+    ns: String,
+    attr: String,
     col: String,
     op: Op,
     args: Seq[T],
@@ -150,7 +152,7 @@ trait ResolveExprOne extends ResolveExpr { self: SqlQueryBase with LambdasOne =>
       case Le         => compare(col, args.head, "<=", res.one2sql)
       case Ge         => compare(col, args.head, ">=", res.one2sql)
       case NoValue    => noValue(col)
-      case Fn(kw, n)  => aggr(col, kw, n, res)
+      case Fn(kw, n)  => aggr(ns, attr, col, kw, n, res)
       case StartsWith => startsWith(col, args.head)
       case EndsWith   => endsWith(col, args.head)
       case Contains   => contains(col, args.head)
@@ -303,7 +305,12 @@ trait ResolveExprOne extends ResolveExpr { self: SqlQueryBase with LambdasOne =>
   // aggregation ---------------------------------------------------------------
 
   protected def aggr[T: ClassTag](
-    col: String, fn: String, optN: Option[Int], res: ResOne[T]
+    ns: String,
+    attr: String,
+    col: String,
+    fn: String,
+    optN: Option[Int],
+    res: ResOne[T]
   ): Unit = {
     checkAggrOne()
     lazy val n = optN.getOrElse(0)

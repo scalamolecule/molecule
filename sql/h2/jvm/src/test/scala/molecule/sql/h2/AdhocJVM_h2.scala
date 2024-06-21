@@ -22,15 +22,24 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
-        //        _ <- Ns.bigDecimal.insert(bigDecimalNeg, bigDecimal1, bigDecimalPos).transact
-        //        _ <- Ns.bigDecimal.a1.query.get.map(_ ==> List(bigDecimalNeg, bigDecimal1, bigDecimalPos))
 
-        _ <- Ns.bigInt.insert(bigIntPos).i.transact
-        _ <- Ns.bigInt.a1.query.i.get.map(_ ==> List(bigIntPos))
 
-        _ <- Ns.bigDecimal.insert(bigDecimalPos).i.transact
-        _ <- Ns.bigDecimal.a1.query.i.get.map(_ ==> List(bigDecimalPos))
+        _ <- Ns.i(1).string_?(Some(string1)).save.transact
 
+        _ <- Ns.i(1).string_?(Option.empty[String]).save.transact
+
+
+        //        _ <- rawQuery(
+        //          """SELECT DISTINCT
+        //            |  Ns.i,
+        //            |  Ns.string
+        //            |FROM Ns
+        //            |WHERE
+        //            |  Ns.i IS NOT NULL
+        //            |ORDER BY Ns.string;
+        //            |""".stripMargin, true)
+
+        _ <- Ns.i_.string_?.a1.query.i.get.map(_ ==> List(None, Some(string1)))
         //        _ <- rawQuery(
         //          """select count(*) from Ns
         //            |    INNER JOIN Ns_refs_Ref ON Ns.id = Ns_refs_Ref.Ns_id

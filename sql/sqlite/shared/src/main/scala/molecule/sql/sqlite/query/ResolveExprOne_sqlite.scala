@@ -6,14 +6,19 @@ import scala.reflect.ClassTag
 
 trait ResolveExprOne_sqlite extends ResolveExprOne with LambdasOne_sqlite { self: SqlQueryBase =>
 
+
   override protected def aggr[T: ClassTag](
-    col: String, fn: String, optN: Option[Int], res: ResOne[T]
+    ns: String,
+    attr: String,
+    col: String,
+    fn: String,
+    optN: Option[Int],
+    res: ResOne[T]
   ): Unit = {
     checkAggrOne()
     lazy val n = optN.getOrElse(0)
     // Replace find/casting with aggregate function/cast
     select -= col
-    //    lazy val colAlias = col.replace('.', '_')
 
     def jsonArray2doubles(json: String): Seq[Double] = {
       if (json.startsWith("[\""))
@@ -37,14 +42,8 @@ trait ResolveExprOne_sqlite extends ResolveExprOne with LambdasOne_sqlite { self
         aggregate = true
 
       case "mins" =>
-        select +=
-          s"""TRIM_ARRAY(
-             |    ARRAY_AGG(DISTINCT $col order by $col ASC),
-             |    GREATEST(
-             |      0,
-             |      ARRAY_LENGTH(ARRAY_AGG(DISTINCT $col), 1) - $n
-             |    )
-             |  )""".stripMargin
+        select2 = select2 + (select.length -> minMaxSelect(ns, attr, n, "ASC"))
+        select += "<replace>" // add to maintain correct indexing
         groupByCols -= col
         aggregate = true
         replaceCast((row: RS, paramIndex: Int) =>
@@ -57,14 +56,8 @@ trait ResolveExprOne_sqlite extends ResolveExprOne with LambdasOne_sqlite { self
         aggregate = true
 
       case "maxs" =>
-        select +=
-          s"""TRIM_ARRAY(
-             |    ARRAY_AGG(DISTINCT $col order by $col DESC),
-             |    GREATEST(
-             |      0,
-             |      ARRAY_LENGTH(ARRAY_AGG(DISTINCT $col), 1) - $n
-             |    )
-             |  )""".stripMargin
+        select2 = select2 + (select.length -> minMaxSelect(ns, attr, n, "DESC"))
+        select += "<replace>" // add to maintain correct indexing
         groupByCols -= col
         aggregate = true
         replaceCast((row: RS, paramIndex: Int) =>
@@ -72,20 +65,12 @@ trait ResolveExprOne_sqlite extends ResolveExprOne with LambdasOne_sqlite { self
         )
 
       case "sample" =>
-        distinct = false
-        select += col
-        orderBy += ((level, -1, "RANDOM()", ""))
-        hardLimit = 1
+        select2 = select2 + (select.length -> sampleSelect(ns, attr))
+        select += "<replace>" // add to maintain correct indexing
 
       case "samples" =>
-        select +=
-          s"""TRIM_ARRAY(
-             |    ARRAY_AGG($col order by random()),
-             |    GREATEST(
-             |      0,
-             |      ARRAY_LENGTH(ARRAY_AGG(DISTINCT $col), 1) - $n
-             |    )
-             |  )""".stripMargin
+        select2 = select2 + (select.length -> samplesSelect(ns, attr, n))
+        select += "<replace>" // add to maintain correct indexing
         groupByCols -= col
         aggregate = true
         replaceCast((row: RS, paramIndex: Int) =>
@@ -129,7 +114,6 @@ trait ResolveExprOne_sqlite extends ResolveExprOne with LambdasOne_sqlite { self
         // There should be a solution using percent_rank ...
         //        selectWithOrder(col, "percent_rank", "0.5) WITHIN GROUP (ORDER BY ")
         //        select += s"percentile_cont(0.5) within group (order by salary) over (partition by a.company_name) as median"
-
         if (orderBy.nonEmpty && orderBy.last._3 == col) {
           throw ModelError("Sorting by median not implemented for this database.")
         }
@@ -173,6 +157,90 @@ trait ResolveExprOne_sqlite extends ResolveExprOne with LambdasOne_sqlite { self
         )
 
       case other => unexpectedKw(other)
+    }
+  }
+
+
+  def sampleSelect(
+    ns: String, attr: String
+  ): (String, List[(String, String, String, String, String)], Set[String]) => String = {
+    (baseNs: String, joins: List[(String, String, String, String, String)], groupCols: Set[String]) => {
+      s"""(
+         |    SELECT $attr
+         |    FROM (
+         |      SELECT distinct _$ns.$attr
+         |      ${mkFrom(baseNs, joins, groupCols)}
+         |      ORDER BY RANDOM()
+         |      LIMIT 1
+         |    )
+         |  ) as ${ns}_${attr}_samples""".stripMargin
+    }
+  }
+
+  def samplesSelect(
+    ns: String, attr: String, n: Int
+  ): (String, List[(String, String, String, String, String)], Set[String]) => String = {
+    (baseNs: String, joins: List[(String, String, String, String, String)], groupCols: Set[String]) => {
+      s"""(
+         |    SELECT JSON_GROUP_ARRAY($attr)
+         |    FROM (
+         |      SELECT distinct _$ns.$attr
+         |      ${mkFrom(baseNs, joins, groupCols)}
+         |      ORDER BY RANDOM()
+         |      LIMIT $n
+         |    )
+         |  ) as ${ns}_${attr}_samples""".stripMargin
+    }
+  }
+
+  def minMaxSelect(
+    ns: String, attr: String, n: Int, dir: String
+  ): (String, List[(String, String, String, String, String)], Set[String]) => String = {
+    val fn = if (dir == "ASC") "_min" else "_max"
+    (baseNs: String, joins: List[(String, String, String, String, String)], groupCols: Set[String]) => {
+      s"""(
+         |    SELECT JSON_GROUP_ARRAY($attr)
+         |    FROM (
+         |      SELECT distinct _$ns.$attr
+         |      ${mkFrom(baseNs, joins, groupCols)}
+         |      ORDER BY _$ns.$attr $dir
+         |      LIMIT $n
+         |    )
+         |  ) as ${ns}_$attr$fn""".stripMargin
+    }
+  }
+
+  def mkFrom(
+    baseNs: String,
+    joins: List[(String, String, String, String, String)],
+    groupCols: Set[String]
+  ): String = {
+    val where = if (groupCols.isEmpty) "" else
+      groupCols
+        .map(ns_attr => s"_$baseNs.${ns_attr.split('.')(1)} = $ns_attr")
+        .mkString("\n      WHERE ", " AND\n        ", "")
+
+    if(joins.isEmpty) {
+      s"FROM $baseNs AS _$baseNs $where"
+    } else{
+      val max1  = joins.map(_._1.length).max
+      val max2  = joins.map(_._2.length).max
+      val max3  = joins.map(_._3.length).max
+      val max4  = joins.map(_._4.length).max + 1
+      val hasAs = joins.exists(_._3.nonEmpty)
+      val joinTables = joins.map {
+        case (join, table, as, lft, rgt) =>
+          val join_     = join + padS(max1, join)
+          val table_    = table + padS(max2, table) + " AS _" + table
+          val as_       = if (hasAs) {
+            if (as.isEmpty) padS(max3 + 4, "") else " AS " + as + padS(max3, as)
+          } else ""
+          val predicate = "_" + lft + padS(max4, lft) + "= _" + rgt.drop(2) // really hackish
+          s"$join_ $table_$as_ ON $predicate"
+      }.mkString("\n      ")
+
+      s"""FROM $baseNs AS _$baseNs
+         |      $joinTables $where"""
     }
   }
 }

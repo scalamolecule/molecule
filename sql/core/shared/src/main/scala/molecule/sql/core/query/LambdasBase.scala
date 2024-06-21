@@ -229,34 +229,36 @@ trait LambdasBase extends BaseHelpers with AggrUtils with JsonBase { self: SqlQu
     }
   }
 
-  private lazy val jsonArrayId            : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
-  private lazy val jsonArrayString        : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
-  private lazy val jsonArrayInt           : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
-  private lazy val jsonArrayLong          : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
-  private lazy val jsonArrayFloat         : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
-  private lazy val jsonArrayDouble        : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
-  private lazy val jsonArrayBoolean       : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
-  private lazy val jsonArrayBigInt        : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
-  private lazy val jsonArrayBigDecimal    : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
-  private lazy val jsonArrayDate          : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
-  private lazy val jsonArrayDuration      : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
-  private lazy val jsonArrayInstant       : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
-  private lazy val jsonArrayLocalDate     : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
-  private lazy val jsonArrayLocalTime     : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
-  private lazy val jsonArrayLocalDateTime : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
-  private lazy val jsonArrayOffsetTime    : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
-  private lazy val jsonArrayOffsetDateTime: String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
-  private lazy val jsonArrayZonedDateTime : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
-  private lazy val jsonArrayUUID          : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
-  private lazy val jsonArrayURI           : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
-  private lazy val jsonArrayByte          : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
-  private lazy val jsonArrayShort         : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
-  private lazy val jsonArrayChar          : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
+  protected lazy val jsonArrayId            : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
+  protected lazy val jsonArrayString        : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
+  protected lazy val jsonArrayInt           : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
+  protected lazy val jsonArrayLong          : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
+  protected lazy val jsonArrayFloat         : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
+  protected lazy val jsonArrayDouble        : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
+  protected lazy val jsonArrayBoolean       : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
+  protected lazy val jsonArrayBigInt        : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
+  protected lazy val jsonArrayBigDecimal    : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
+  protected lazy val jsonArrayDate          : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
+  protected lazy val jsonArrayDuration      : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
+  protected lazy val jsonArrayInstant       : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
+  protected lazy val jsonArrayLocalDate     : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
+  protected lazy val jsonArrayLocalTime     : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
+  protected lazy val jsonArrayLocalDateTime : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
+  protected lazy val jsonArrayOffsetTime    : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
+  protected lazy val jsonArrayOffsetDateTime: String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
+  protected lazy val jsonArrayZonedDateTime : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
+  protected lazy val jsonArrayUUID          : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
+  protected lazy val jsonArrayURI           : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
+  protected lazy val jsonArrayByte          : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
+  protected lazy val jsonArrayShort         : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
+  protected lazy val jsonArrayChar          : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
 
   private def jsonArray2array[T: ClassTag](array: Array[String], decode: String => T): Array[T] = {
     array.flatMap {
-      case "null" => None
-      case v      => Some(decode(v))
+      case "null" =>
+        None
+      case v      =>
+        Some(decode(v))
     }
   }
 
@@ -283,7 +285,6 @@ trait LambdasBase extends BaseHelpers with AggrUtils with JsonBase { self: SqlQu
   protected lazy val json2arrayByte          : String => Array[Byte]           = (json: String) => if (json == "[null]") Array.empty[Byte] else jsonArray2array(jsonArrayByte(json), json2oneByte)
   protected lazy val json2arrayShort         : String => Array[Short]          = (json: String) => if (json == "[null]") Array.empty[Short] else jsonArray2array(jsonArrayShort(json), json2oneShort)
   protected lazy val json2arrayChar          : String => Array[Char]           = (json: String) => if (json == "[null]") Array.empty[Char] else jsonArray2array(jsonArrayChar(json), json2oneChar)
-
 
   protected lazy val one2jsonId            : String => String         = (v: String) => v
   protected lazy val one2jsonString        : String => String         = (v: String) => "\"" + escStr(v) + "\""

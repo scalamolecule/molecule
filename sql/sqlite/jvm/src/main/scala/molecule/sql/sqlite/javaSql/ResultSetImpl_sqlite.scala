@@ -65,23 +65,41 @@ class ResultSetImpl_sqlite(val underlying: ResultSet) extends ResultSetInterface
   // Data ---------------------------------------------
 
   override def getString(columnIndex: Int): String = value(columnIndex) match {
+    case null                 => null
     case s: String            => s
     case i: java.lang.Integer => i.toString
     case d: java.lang.Double  => d.toString
   }
-  override def getBoolean(columnIndex: Int): Boolean = value(columnIndex).asInstanceOf[Boolean]
-  override def getByte(columnIndex: Int): Byte = value(columnIndex).asInstanceOf[Byte]
-  override def getShort(columnIndex: Int): Short = value(columnIndex).asInstanceOf[Short]
+  override def getBoolean(columnIndex: Int): Boolean = value(columnIndex) match {
+    case i: java.lang.Integer => i.longValue() match {
+      case 1 => true
+      case 0 => false
+    }
+    case b                    => b.asInstanceOf[Boolean]
+  }
+  override def getByte(columnIndex: Int): Byte = value(columnIndex) match {
+    case null                 => null.asInstanceOf[Byte]
+    case i: java.lang.Integer => i.byteValue()
+  }
+  override def getShort(columnIndex: Int): Short = value(columnIndex) match {
+    case null                 => null.asInstanceOf[Byte]
+    case i: java.lang.Integer => i.shortValue()
+  }
   override def getInt(columnIndex: Int): Int = value(columnIndex).asInstanceOf[Int]
   override def getLong(columnIndex: Int): Long =
     value(columnIndex) match {
+      case null                 => null.asInstanceOf[Int]
       case l: java.lang.Long    => l.longValue()
       case i: java.lang.Integer => i.longValue()
     }
   override def getFloat(columnIndex: Int): Float = value(columnIndex).asInstanceOf[Double].toFloat
   override def getDouble(columnIndex: Int): Double = value(columnIndex).asInstanceOf[Double]
   override def getBytes(columnIndex: Int): Array[Byte] = value(columnIndex).asInstanceOf[Array[Byte]]
-  override def getBigDecimal(columnIndex: Int): jBigDecimal = value(columnIndex).asInstanceOf[jBigDecimal]
+  override def getBigDecimal(columnIndex: Int): jBigDecimal = value(columnIndex) match {
+    case null            => null.asInstanceOf[jBigDecimal]
+    case s: String       => new jBigDecimal(s)
+    case bd: jBigDecimal => bd
+  }
   override def getURL(columnIndex: Int): URL = value(columnIndex).asInstanceOf[URL]
 
   override def getArray(columnIndex: Int): ArrayInterface =
@@ -95,7 +113,8 @@ class ResultSetImpl_sqlite(val underlying: ResultSet) extends ResultSetInterface
     rowIndex != totalRowCount
   }
   override def close(): Unit = underlying.close()
-  override def wasNull(): Boolean = value(prevColIndex) == null
+  override def wasNull(): Boolean =
+    value(prevColIndex) == null
   override def isBeforeFirst: Boolean = rowIndex == -1
   override def isAfterLast: Boolean = rowIndex == totalRowCount
   override def isFirst: Boolean = rowIndex == 0
