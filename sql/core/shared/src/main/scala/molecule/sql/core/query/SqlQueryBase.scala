@@ -38,7 +38,7 @@ trait SqlQueryBase
 
   // Main query
   final protected val select      = new ListBuffer[String]
-  final protected var select2     = Map.empty[Int, (String, List[(String, String, String, String, String)], Set[String]) => String]
+  final protected var select2     = Map.empty[Int, (List[(String, String, String, String, String)], Set[String]) => String]
   final protected var distinct    = true
   final protected var from        = ""
   final protected val joins       = new ListBuffer[(String, String, String, String, String)]

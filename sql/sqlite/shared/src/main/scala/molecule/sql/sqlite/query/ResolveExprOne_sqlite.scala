@@ -163,13 +163,13 @@ trait ResolveExprOne_sqlite extends ResolveExprOne with LambdasOne_sqlite { self
 
   def sampleSelect(
     ns: String, attr: String
-  ): (String, List[(String, String, String, String, String)], Set[String]) => String = {
-    (baseNs: String, joins: List[(String, String, String, String, String)], groupCols: Set[String]) => {
+  ): (List[(String, String, String, String, String)], Set[String]) => String = {
+    (joins: List[(String, String, String, String, String)], groupCols: Set[String]) => {
       s"""(
          |    SELECT $attr
          |    FROM (
          |      SELECT distinct _$ns.$attr
-         |      ${mkFrom(baseNs, joins, groupCols)}
+         |      ${mkFrom(joins, groupCols)}
          |      ORDER BY RANDOM()
          |      LIMIT 1
          |    )
@@ -179,13 +179,13 @@ trait ResolveExprOne_sqlite extends ResolveExprOne with LambdasOne_sqlite { self
 
   def samplesSelect(
     ns: String, attr: String, n: Int
-  ): (String, List[(String, String, String, String, String)], Set[String]) => String = {
-    (baseNs: String, joins: List[(String, String, String, String, String)], groupCols: Set[String]) => {
+  ): (List[(String, String, String, String, String)], Set[String]) => String = {
+    (joins: List[(String, String, String, String, String)], groupCols: Set[String]) => {
       s"""(
          |    SELECT JSON_GROUP_ARRAY($attr)
          |    FROM (
          |      SELECT distinct _$ns.$attr
-         |      ${mkFrom(baseNs, joins, groupCols)}
+         |      ${mkFrom(joins, groupCols)}
          |      ORDER BY RANDOM()
          |      LIMIT $n
          |    )
@@ -195,14 +195,14 @@ trait ResolveExprOne_sqlite extends ResolveExprOne with LambdasOne_sqlite { self
 
   def minMaxSelect(
     ns: String, attr: String, n: Int, dir: String
-  ): (String, List[(String, String, String, String, String)], Set[String]) => String = {
+  ): (List[(String, String, String, String, String)], Set[String]) => String = {
     val fn = if (dir == "ASC") "_min" else "_max"
-    (baseNs: String, joins: List[(String, String, String, String, String)], groupCols: Set[String]) => {
+    (joins: List[(String, String, String, String, String)], groupCols: Set[String]) => {
       s"""(
          |    SELECT JSON_GROUP_ARRAY($attr)
          |    FROM (
          |      SELECT distinct _$ns.$attr
-         |      ${mkFrom(baseNs, joins, groupCols)}
+         |      ${mkFrom(joins, groupCols)}
          |      ORDER BY _$ns.$attr $dir
          |      LIMIT $n
          |    )
@@ -211,17 +211,16 @@ trait ResolveExprOne_sqlite extends ResolveExprOne with LambdasOne_sqlite { self
   }
 
   def mkFrom(
-    baseNs: String,
     joins: List[(String, String, String, String, String)],
     groupCols: Set[String]
   ): String = {
     val where = if (groupCols.isEmpty) "" else
       groupCols
-        .map(ns_attr => s"_$baseNs.${ns_attr.split('.')(1)} = $ns_attr")
+        .map(ns_attr => s"_$from.${ns_attr.split('.')(1)} = $ns_attr")
         .mkString("\n      WHERE ", " AND\n        ", "")
 
     if(joins.isEmpty) {
-      s"FROM $baseNs AS _$baseNs $where"
+      s"FROM $from AS _$from $where"
     } else{
       val max1  = joins.map(_._1.length).max
       val max2  = joins.map(_._2.length).max
@@ -239,7 +238,7 @@ trait ResolveExprOne_sqlite extends ResolveExprOne with LambdasOne_sqlite { self
           s"$join_ $table_$as_ ON $predicate"
       }.mkString("\n      ")
 
-      s"""FROM $baseNs AS _$baseNs
+      s"""FROM $from AS _$from
          |      $joinTables $where"""
     }
   }

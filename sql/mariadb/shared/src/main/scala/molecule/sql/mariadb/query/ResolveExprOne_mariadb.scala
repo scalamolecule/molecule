@@ -5,7 +5,9 @@ import molecule.sql.core.query.{ResolveExprOne, SqlQueryBase}
 import scala.reflect.ClassTag
 import scala.util.Random
 
-trait ResolveExprOne_mariadb extends ResolveExprOne with LambdasOne_mariadb { self: SqlQueryBase =>
+trait ResolveExprOne_mariadb
+  extends ResolveExprOne
+    with LambdasOne_mariadb { self: SqlQueryBase =>
 
   override protected def matches(col: String, regex: String): Unit = {
     if (regex.nonEmpty)

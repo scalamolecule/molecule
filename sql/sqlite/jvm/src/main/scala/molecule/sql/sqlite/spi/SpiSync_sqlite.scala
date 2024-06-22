@@ -71,7 +71,7 @@ trait SpiSync_sqlite extends SpiSyncBase {
   override def delete_getExecutioner(conn: JdbcConn_JVM, delete: Delete): Option[() => List[Long]] = {
     new ResolveDelete with Delete_sqlite {
       override lazy val sqlConn = conn.sqlConn
-    }.getDeleteExecutioner(delete.elements, conn.proxy.nsMap, "PRAGMA foreign_keys")
+    }.getDeleteExecutioner(delete.elements, conn.proxy.nsMap, "PRAGMA foreign_keys", "0", "1")
   }
 
 
@@ -130,29 +130,6 @@ trait SpiSync_sqlite extends SpiSyncBase {
       }
       baseTpe
     }
-    def array(n: Int, baseTpe: String): String = {
-      val arr = resultSet.getArray(n)
-      if (resultSet.wasNull()) {
-        row += null
-      } else {
-        row += arr.getArray.asInstanceOf[Array[_]].toSet
-      }
-      s"Set[$baseTpe]"
-    }
-
-    def nestedArray(n: Int, baseTpe: String): String = {
-      val arr = resultSet.getArray(n).getResultSet
-      if (arr.wasNull()) {
-        row += null
-      } else {
-        arr.next()
-        val arr2 = arr.getArray(2)
-        if (arr2 != null) {
-          row += arr2.getArray.asInstanceOf[Array[_]].toSet
-        }
-      }
-      s"Set[$baseTpe]"
-    }
 
     while (resultSet.next) {
       debug("-----------------------------------------------")
@@ -162,56 +139,27 @@ trait SpiSync_sqlite extends SpiSyncBase {
         val col         = rsmd.getColumnName(n)
         val sqlType     = rsmd.getColumnTypeName(n)
         val tpe         = sqlType match {
-          case "CHARACTER VARYING" => value(resultSet.getString(n), "String/URI")
-          case "INTEGER"           => value(resultSet.getInt(n), "Int")
-          case "BIGINT"            => value(resultSet.getLong(n), "Long")
-          case "FLOAT"             => value(resultSet.getFloat(n), "Float")
-          case "DOUBLE PRECISION"  => value(resultSet.getDouble(n), "Double")
-          case "BOOLEAN"           => value(resultSet.getBoolean(n), "Boolean")
-          case "DECIMAL"           => value(resultSet.getDouble(n), "BigInt/Decimal")
-          case "DATE"              => value(resultSet.getLong(n), "Long")
-          case "UUID"              => value(resultSet.getString(n), "UUID")
-          case "TINYINT"           => value(resultSet.getShort(n), "Byte")
-          case "SMALLINT"          => value(resultSet.getShort(n), "Short")
-          case "CHARACTER"         => value(resultSet.getString(n), "Char")
+          //          case "CHARACTER VARYING" => value(resultSet.getString(n), "String/URI")
+          //          case "FLOAT"             => value(resultSet.getFloat(n), "Float")
+          //          case "DECIMAL"           => value(resultSet.getDouble(n), "BigInt/Decimal")
+          //          case "UUID"              => value(resultSet.getString(n), "UUID")
+          //          case "DECFLOAT"         => value(resultSet.getString(n), "DECFLOAT")
+          case "VARCHAR"          => value(resultSet.getString(n), "String")
+          case "NVARCHAR"         => value(resultSet.getString(n), "String")
+          case "INTEGER"          => value(resultSet.getInt(n), "Int")
+          case "BIGINT"           => value(resultSet.getLong(n), "Long")
+          case "DOUBLE PRECISION" => value(resultSet.getDouble(n), "Double")
+          case "BOOLEAN"          => value(resultSet.getBoolean(n), "Boolean")
+          case "DATE"             => value(resultSet.getLong(n), "Long")
+          case "TINYINT"          => value(resultSet.getShort(n), "Byte")
+          case "SMALLINT"         => value(resultSet.getShort(n), "Short")
+          case "CHARACTER"        => value(resultSet.getString(n), "Char")
+          case "TEXT"             => value(resultSet.getString(n), "String")
+          case "NUMERIC"          => value(resultSet.getString(n), "NUMERIC")
+          case "VARBINARY"        => value(resultSet.getBytes(n), "String")
 
-          case "NUMERIC"  => value(resultSet.getString(n), "NUMERIC")
-          case "DECFLOAT" => value(resultSet.getString(n), "DECFLOAT")
-
-          case "CHARACTER VARYING ARRAY"  => array(n, "String/URI")
-          case "INTEGER ARRAY"            => array(n, "Int")
-          case "BIGINT ARRAY"             => array(n, "Long")
-          case "REAL ARRAY"               => array(n, "Float")
-          case "DOUBLE PRECISION ARRAY"   => array(n, "Double")
-          case "BOOLEAN ARRAY"            => array(n, "Boolean")
-          case "DECIMAL(100, 0) ARRAY"    => array(n, "BigInt")
-          case "DECIMAL(65535, 25) ARRAY" => array(n, "BigDecimal")
-          case "DATE ARRAY"               => array(n, "Long")
-          case "UUID ARRAY"               => array(n, "UUID")
-          case "TINYINT ARRAY"            => array(n, "Byte")
-          case "SMALLINT ARRAY"           => array(n, "Short")
-          case "CHARACTER ARRAY"          => array(n, "Char")
-
-          case "NULL"                           => nestedArray(n, "null")
-          case "CHARACTER VARYING ARRAY ARRAY"  => nestedArray(n, "String/URI")
-          case "INTEGER ARRAY ARRAY"            => nestedArray(n, "Int")
-          case "BIGINT ARRAY ARRAY"             => nestedArray(n, "Long")
-          case "REAL ARRAY ARRAY"               => nestedArray(n, "Float")
-          case "DOUBLE PRECISION ARRAY ARRAY"   => nestedArray(n, "Double")
-          case "BOOLEAN ARRAY ARRAY"            => nestedArray(n, "Boolean")
-          case "DECIMAL(100, 0) ARRAY ARRAY"    => nestedArray(n, "BigInt")
-          case "DECIMAL(65535, 25) ARRAY ARRAY" => nestedArray(n, "BigDecimal")
-          case "DATE ARRAY ARRAY"               => nestedArray(n, "Long")
-          case "UUID ARRAY ARRAY"               => nestedArray(n, "UUID")
-          case "TINYINT ARRAY ARRAY"            => nestedArray(n, "Byte")
-          case "SMALLINT ARRAY ARRAY"           => nestedArray(n, "Short")
-          case "CHARACTER ARRAY ARRAY"          => nestedArray(n, "Char")
-
-          case "VARBINARY" => value(n, "String")
-          case "VARCHAR"   => value(n, "String")
-          case "NVARCHAR"  => value(n, "String")
-          case "TEXT"      => value(n, "String")
-          case "JSON"      => value(n, "String")
+          // Set/Seq/Map
+          case "JSON" => value(resultSet.getString(n), "String")
 
           case other => throw new Exception(
             s"Unexpected sql result type from raw query: " + other

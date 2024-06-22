@@ -96,7 +96,6 @@ trait ResolveExprMap extends ResolveExpr { self: SqlQueryBase with LambdasMap =>
     attr: Attr, map: Map[String, T], resMap: ResMap[T]
   ): Unit = {
     val col = getCol(attr: Attr)
-    groupByCols += col // if we later need to group by non-aggregated columns
     select += col
     if (!isNestedOpt) {
       notNull += col
@@ -119,7 +118,6 @@ trait ResolveExprMap extends ResolveExpr { self: SqlQueryBase with LambdasMap =>
   ): Unit = {
     val col = getCol(attr: Attr)
     select += col
-    groupByCols += col // if we later need to group by non-aggregated columns
     addCast(resMapOpt.sql2optMap)
     attr.op match {
       case V     => ()

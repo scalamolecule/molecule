@@ -91,6 +91,7 @@ case class JdbcConn_JVM(
 
     // Insert statements backwards to obtain auto-generated ref ids for prepending inserts
     tables.reverse.foreach {
+//    tables.foreach {
       case Table(refPath, stmt, populatePS, accIds, useAccIds, curIds, upsertStmt, updateIdsMap) =>
         debug("D --- table ---------------------------------------------------------------------------------------------")
         debug("refPath     : " + refPath)
@@ -116,9 +117,7 @@ case class JdbcConn_JVM(
         // Populate prepared statement
         populatePS(ps, idsMap, 0)
 
-        val x = extractAffectedIds(refPath, ps, ids, idsMap, idsAcc, curIds, updateIdsMap, accIds)
-
-        x
+        extractAffectedIds(refPath, ps, ids, idsMap, idsAcc, curIds, updateIdsMap, accIds)
     }
 
     joinTables.foreach {
@@ -157,6 +156,13 @@ case class JdbcConn_JVM(
     }.getOrElse(Nil)
   }
 
+  def notJoinTable(refPath: List[String]): Boolean = {
+    // No join tables (also without collision prevention "_"-suffix of table names)
+    // ns_join_ref             2 underscores
+    // part_ns_join_part_ref   4 underscores
+    val underscores = refPath.last.init.count(_ == '_')
+    underscores != 2 && underscores != 4
+  }
 
   def extractAffectedIds(
     refPath: List[String],
@@ -173,11 +179,7 @@ case class JdbcConn_JVM(
     val resultSet = ps.getGeneratedKeys
     ids.clear()
 
-    // No join tables (also without collision prevention "_"-suffix of table names)
-    // ns_join_ref             2 underscores
-    // part_ns_join_part_ref   4 underscores
-    val underscores = refPath.last.init.count(_ == '_')
-    if (underscores != 2 && underscores != 4) {
+    if (notJoinTable(refPath)) {
       var idSet = false
       while (resultSet.next()) {
         val id = resultSet.getLong(1)

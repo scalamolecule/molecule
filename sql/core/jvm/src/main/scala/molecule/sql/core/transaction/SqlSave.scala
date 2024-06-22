@@ -16,7 +16,7 @@ trait SqlSave
     with SerializationUtils { self: ResolveSave =>
 
   // Resolve after all back refs have been resolved and namespaces grouped
-  protected var postResolvers = List.empty[Unit => Unit]
+  private var postResolvers = List.empty[Unit => Unit]
 
   doPrint = false
 
@@ -29,22 +29,16 @@ trait SqlSave
     (getTables, Nil)
   }
 
-  protected def addRowSetterToTables(): Unit = {
+  private def addRowSetterToTables(): Unit = {
     inserts.foreach {
       case (refPath, cols) =>
-        val table             = refPath.last
-        val columns           = cols.map(_._1).mkString(",\n  ")
-        val inputPlaceholders = cols.map(_ => "?").mkString(", ")
-        val stmt              = {
-          s"""INSERT INTO $table (
-             |  $columns
-             |) VALUES ($inputPlaceholders)""".stripMargin
-        }
-        val colSetters        = colSettersMap(refPath)
+        val table      = refPath.last
+        val insertStmt = insertEmptyRowStmt(table, cols)
+        val colSetters = colSettersMap(refPath)
         debug(s"--- save -------------------  ${colSetters.length}  $refPath")
-        debug(stmt)
+        debug(insertStmt)
 
-        tableDatas(refPath) = Table(refPath, stmt)
+        tableDatas(refPath) = Table(refPath, insertStmt)
         colSettersMap(refPath) = Nil
         val rowSetter = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
           // Set all column values for this row in this insert/batch
@@ -58,7 +52,17 @@ trait SqlSave
     }
   }
 
-  protected def getTables: List[Table] = {
+  protected def insertEmptyRowStmt(
+    table: String, cols: List[(String, String)]
+  ): String = {
+    val columns           = cols.map(_._1).mkString(",\n  ")
+    val inputPlaceholders = cols.map(_ => "?").mkString(", ")
+    s"""INSERT INTO $table (
+       |  $columns
+       |) VALUES ($inputPlaceholders)""".stripMargin
+  }
+
+  private def getTables: List[Table] = {
     // Add insert resolver to each table insert
     inserts.map { case (refPath, _) =>
       val rowSetters = rowSettersMap(refPath)
@@ -72,7 +76,9 @@ trait SqlSave
     }
   }
 
-  protected def getParamIndex(attr: String, add: Boolean = true, castExt: String = ""): (List[String], Int) = {
+  protected def getParamIndex(
+    attr: String, add: Boolean = true, castExt: String = ""
+  ): (List[String], Int) = {
     if (inserts.exists(_._1 == curRefPath)) {
       inserts = inserts.map {
         case (path, cols) if path == curRefPath =>
@@ -224,12 +230,14 @@ trait SqlSave
       val joinTable = ss(ns, refAttr, refNs)
       val joinPath  = curPath :+ joinTable
 
-      // join table with single row (treated as normal insert since there's only 1 join per row)
+      // join table with single row
+      // (treated as normal insert since there's only 1 join per row)
       val (id1, id2) = if (ns == refNs)
         (ss(ns, "1_id"), ss(refNs, "2_id"))
       else
         (ss(ns, "id"), ss(refNs, "id"))
-      // When insertion order is reversed, this join table will be set after left and right has been inserted
+      // When insertion order is reversed, this join table
+      // will be set after left and right has been inserted
       inserts = (joinPath, List((id1, ""), (id2, ""))) +: inserts
 
       if (paramIndexes.isEmpty) {

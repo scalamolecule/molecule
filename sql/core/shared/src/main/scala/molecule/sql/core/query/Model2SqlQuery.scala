@@ -218,11 +218,8 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     val select1 = if (select2.isEmpty) {
       select
     } else {
-
-      joins.foreach(println)
-
       select.zipWithIndex.map {
-        case (s, i) => select2.get(i).fold(s)(_(from, joins.toList, groupByCols.toSet))
+        case (s, i) => select2.get(i).fold(s)(_(joins.toList, groupByCols.toSet))
       }
     }
     (nestedIds ++ select1).mkString(s",\n  ")

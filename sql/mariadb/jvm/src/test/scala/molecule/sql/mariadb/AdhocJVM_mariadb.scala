@@ -22,9 +22,14 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
 
       for {
 
-        _ <- Ns.int.insert(int1, int2, int3).transact
-        _ <- Ns.int_(int0).delete.i.transact
-        _ <- Ns.int.a1.query.get.map(_ ==> List(int1, int2, int3))
+        List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
+        _ <- Ns.refs(Set(r1, r2)).save.i.transact
+
+
+        _ <- rawQuery(
+          """select id from Ns
+            |""".stripMargin, true)
+        _ <- Ns.refs.query.get.map(_.head ==> Set(r1, r2))
 
 
       } yield ()

@@ -80,7 +80,7 @@ trait LambdasBase extends BaseHelpers with AggrUtils with JsonBase { self: SqlQu
       Map.empty[String, T]
     } else {
       val json = new String(byteArray)
-      println("json: " + json)
+      //      println("json: " + json)
       json2map(json)
     }
   }
@@ -184,7 +184,7 @@ trait LambdasBase extends BaseHelpers with AggrUtils with JsonBase { self: SqlQu
   protected lazy val json2oneChar          : String => Char           = (v: String) => v.charAt(0)
 
 
-  private def jsonArray2optArray[T: ClassTag](array: Array[String], decode: String => T): Option[Array[T]] = {
+  protected def jsonArray2optArray[T: ClassTag](array: Array[String], decode: String => T): Option[Array[T]] = {
     if (array.isEmpty) None else {
       val vs = array.flatMap {
         case "null" => None
@@ -236,8 +236,8 @@ trait LambdasBase extends BaseHelpers with AggrUtils with JsonBase { self: SqlQu
   protected lazy val jsonArrayFloat         : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
   protected lazy val jsonArrayDouble        : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
   protected lazy val jsonArrayBoolean       : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
-  protected lazy val jsonArrayBigInt        : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
-  protected lazy val jsonArrayBigDecimal    : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
+  protected lazy val jsonArrayBigInt        : String => Array[String] = (json: String) => json.substring(2, json.length - 2).split("\", ?\"")
+  protected lazy val jsonArrayBigDecimal    : String => Array[String] = (json: String) => json.substring(2, json.length - 2).split("\", ?\"")
   protected lazy val jsonArrayDate          : String => Array[String] = (json: String) => json.substring(1, json.length - 1).split(", ?")
   protected lazy val jsonArrayDuration      : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")
   protected lazy val jsonArrayInstant       : String => Array[String] = (json: String) => str(json).split("\"?, ?\"?")

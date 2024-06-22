@@ -26,22 +26,27 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
 
       for {
 
-        _ <- Ns.i(1).string_?(Some(string1)).save.transact
+        _ <- Ns.intMap(Map(pint1, pint2)).save.transact
+        _ <- Ns.intMap.query.get.map(_.head ==> Map(pint1, pint2))
 
-        _ <- Ns.i(1).string_?(Option.empty[String]).save.transact
 
+        //        _ <- rawTransact(
+        //          """insert into Ns default values
+        //            |""".stripMargin)
 
 //        _ <- rawQuery(
-//          """SELECT DISTINCT
-//            |  Ns.i,
-//            |  Ns.string
-//            |FROM Ns
-//            |WHERE
-//            |  Ns.i IS NOT NULL
-//            |ORDER BY Ns.string;
+//          """select id from Ns
 //            |""".stripMargin, true)
 
-        _ <- Ns.i_.string_?.a1.query.i.get.map(_ ==> List(None, Some(string1)))
+        //        _ <- rawQuery(
+        //          """SELECT DISTINCT
+        //            |  Ns.i,
+        //            |  Ns.string
+        //            |FROM Ns
+        //            |WHERE
+        //            |  Ns.i IS NOT NULL
+        //            |ORDER BY Ns.string;
+        //            |""".stripMargin, true)
 
 
       } yield ()

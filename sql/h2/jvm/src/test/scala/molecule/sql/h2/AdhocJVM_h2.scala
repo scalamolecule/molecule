@@ -24,10 +24,14 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       for {
 
 
-        _ <- Ns.i(1).string_?(Some(string1)).save.transact
+        List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
+        _ <- Ns.refs(Set(r1, r2)).save.i.transact
 
-        _ <- Ns.i(1).string_?(Option.empty[String]).save.transact
+        _ <- rawQuery(
+          """select id from Ns
+            |""".stripMargin, true)
 
+        _ <- Ns.refs.query.get.map(_.head ==> Set(r1, r2))
 
         //        _ <- rawQuery(
         //          """SELECT DISTINCT
@@ -39,7 +43,6 @@ object AdhocJVM_h2 extends TestSuite_h2 {
         //            |ORDER BY Ns.string;
         //            |""".stripMargin, true)
 
-        _ <- Ns.i_.string_?.a1.query.i.get.map(_ ==> List(None, Some(string1)))
         //        _ <- rawQuery(
         //          """select count(*) from Ns
         //            |    INNER JOIN Ns_refs_Ref ON Ns.id = Ns_refs_Ref.Ns_id

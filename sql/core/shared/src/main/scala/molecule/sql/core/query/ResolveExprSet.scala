@@ -160,7 +160,6 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
   ): Unit = {
     val col = getCol(attr: Attr)
     select += col
-    groupByCols += col // if we later need to group by non-aggregated columns
     addCast(resOpt.sql2setOpt)
     attr.op match {
       case V     => setOptAttr(col, res)
@@ -184,7 +183,6 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
 
   protected def setOptAttr[T](col: String, res: ResSet[T]): Unit = {
     select -= col
-    groupByCols -= col
     select += s"ARRAY_AGG($col)"
     aggregate = true
     replaceCast(res.nestedArray2optCoalescedSet)
@@ -197,7 +195,6 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     def containsSet(set: Set[T]): String = set.map(contains).mkString("(", " AND\n   ", ")")
     if (mandatory) {
       select -= col
-      groupByCols -= col
       select += s"ARRAY_AGG($col)"
       aggregate = true
       replaceCast(res.nestedArray2coalescedSet)
@@ -216,7 +213,6 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     def notContainsSet(set: Set[T]): String = set.map(notContains).mkString("(", " OR\n   ", ")")
     if (mandatory) {
       select -= col
-      groupByCols -= col
       select += s"ARRAY_AGG($col)"
       aggregate = true
       replaceCast(res.nestedArray2coalescedSet)

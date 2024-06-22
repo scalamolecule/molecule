@@ -68,7 +68,7 @@ trait SpiSync_mysql extends SpiSyncBase {
   override def delete_getExecutioner(conn: JdbcConn_JVM, delete: Delete): Option[() => List[Long]] = {
     new ResolveDelete with Delete_mysql {
       override lazy val sqlConn = conn.sqlConn
-    }.getDeleteExecutioner(delete.elements, conn.proxy.nsMap, "SET FOREIGN_KEY_CHECKS")
+    }.getDeleteExecutioner(delete.elements, conn.proxy.nsMap, "SET FOREIGN_KEY_CHECKS", "0", "1")
   }
 
   override def fallback_rawQuery(

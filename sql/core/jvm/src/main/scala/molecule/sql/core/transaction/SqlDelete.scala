@@ -26,17 +26,17 @@ trait SqlDelete
     elements: List[Element],
     nsMap: Map[String, MetaNs],
     fkConstraintParam: String,
-    fkOn: String = "1",
-    fkOff: String = "0",
+    fkOff: String,
+    fkOn: String,
   ): Option[() => List[Long]] = {
     val refPath = List(getInitialNs(elements))
     resolve(elements, true)
     if (ids.nonEmpty) {
-      deleteExecutioner(refPath, nsMap, ids, fkConstraintParam, fkOn, fkOff)
+      deleteExecutioner(refPath, nsMap, ids, fkConstraintParam, fkOff, fkOn)
     } else if (filterElements.nonEmpty) {
       ids = getIds
       if (ids.nonEmpty)
-        deleteExecutioner(refPath, nsMap, ids, fkConstraintParam, fkOn, fkOff)
+        deleteExecutioner(refPath, nsMap, ids, fkConstraintParam, fkOff, fkOn)
       else
         None
     } else {
@@ -49,21 +49,19 @@ trait SqlDelete
     nsMap: Map[String, MetaNs],
     ids: Seq[Long],
     fkConstraintParam: String,
-    fkOn: String,
     fkOff: String,
+    fkOn: String,
   ): Option[() => List[Long]] = {
     val tables = getDeleteTables(refPath, nsMap, ids)
     Some(
       () => {
         val s = sqlConn.createStatement()
-        //          println("--------------------")
+        //        println(s"-------------------- $fkConstraintParam = $fkOff")
         s.addBatch(s"$fkConstraintParam = $fkOff")
-//        s.addBatch(s"PRAGMA foreign_keys = 0")
         tables.foreach { t =>
           //          println("  €€€€€€€€€  " + t.stmt)
           s.addBatch(t.stmt)
         }
-//        s.addBatch(s"PRAGMA foreign_keys = 1")
         s.addBatch(s"$fkConstraintParam = $fkOn")
         s.executeBatch
         s.close()
@@ -94,22 +92,24 @@ trait SqlDelete
     joinTables ++ ownedTables.toList ++ List(table)
   }
 
+
   def getDeleteDataForInspection(elements: List[Element], nsMap: Map[String, MetaNs]): Data = {
     val refPath = List(getInitialNs(elements))
     resolve(elements, true)
     if (ids.nonEmpty) {
-      tableDataForDeletion(refPath, nsMap, ids)
+      inspectionTableDataForDeletion(refPath, nsMap, ids)
     } else if (filterElements.nonEmpty) {
       ids = getIds
       if (ids.nonEmpty)
-        tableDataForDeletion(refPath, nsMap, ids)
+        inspectionTableDataForDeletion(refPath, nsMap, ids)
       else
         (Nil, Nil)
     } else {
       (Nil, Nil)
     }
   }
-  private def tableDataForDeletion(
+
+  private def inspectionTableDataForDeletion(
     refPath: List[String], nsMap: Map[String, MetaNs], ids: Seq[Long]
   ): Data = {
     val ns = refPath.head

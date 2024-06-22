@@ -70,7 +70,7 @@ trait SpiSync_postgres extends SpiSyncBase {
   override def delete_getExecutioner(conn: JdbcConn_JVM, delete: Delete): Option[() => List[Long]] = {
     new ResolveDelete with Delete_postgres {
       override lazy val sqlConn = conn.sqlConn
-    }.getDeleteExecutioner(delete.elements, conn.proxy.nsMap, "session_replication_role", "replica", "default")
+    }.getDeleteExecutioner(delete.elements, conn.proxy.nsMap, "SET session_replication_role", "replica", "default")
   }
 
   override def fallback_rawQuery(

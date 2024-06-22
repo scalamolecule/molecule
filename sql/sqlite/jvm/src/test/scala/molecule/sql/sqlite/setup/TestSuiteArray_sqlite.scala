@@ -1,24 +1,37 @@
 package molecule.sql.sqlite.setup
 
+import java.sql.DriverManager
 import molecule.base.api.Schema
 import molecule.base.util.BaseHelpers
 import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.Conn
-import molecule.coreTests.setup.{CoreTestSuite, CoreTestSuiteBase}
+import molecule.coreTests.setup.CoreTestSuiteBase
 import molecule.coreTests.util.Array2List
-import molecule.sql.core.facade.{JdbcConn_JVM, JdbcHandler_JVM}
-import scala.util.Random
+import molecule.sql.sqlite.facade.JdbcConnSQlite_JVM
+import scala.concurrent.blocking
 import scala.util.control.NonFatal
 
 
 trait TestSuiteArray_sqlite extends CoreTestSuiteBase with Array2List with BaseHelpers {
 
-  override val platform              = "jvm"
-  override val database              = "Sqlite"
+  override val platform = "jvm"
+  override val database = "SQlite"
   override val isJsPlatform: Boolean = false
 
+
+  val url = "jdbc:sqlite::memory:"
+
+  def recreateDb(proxy: JdbcProxy): JdbcConnSQlite_JVM = blocking {
+    val sqlConn = DriverManager.getConnection(url)
+    val conn    = new JdbcConnSQlite_JVM(proxy, sqlConn)
+    val stmt    = conn.sqlConn.createStatement
+    stmt.executeUpdate(proxy.createSchema)
+    stmt.close()
+    conn
+  }
+
+
   override def inMem[T](test: Conn => T, schema: Schema): T = {
-    val url   = "jdbc:sqlite:mem:test_database_" + Random.nextInt()
     val proxy = JdbcProxy(
       url,
       schema.sqlSchema_sqlite,
@@ -28,10 +41,9 @@ trait TestSuiteArray_sqlite extends CoreTestSuiteBase with Array2List with BaseH
       schema.uniqueAttrs,
       reserved = schema.sqlReserved_sqlite
     )
-    var conn  = JdbcConn_JVM(proxy, null)
+    var conn  = new JdbcConnSQlite_JVM(proxy, null)
     try {
-      Class.forName("org.sqlite.Driver")
-      conn = JdbcHandler_JVM.recreateDb(proxy)
+      conn = recreateDb(proxy)
       test(conn)
     } catch {
       case NonFatal(exc) => throw exc

@@ -9,29 +9,20 @@ trait ResolveExprSet_sqlite
 
   // attr ----------------------------------------------------------------------
 
-//  override protected def setAttr[T](
-//    col: String, res: ResSet[T], mandatory: Boolean
-//  ): Unit = {
-//    if (mandatory) {
-//      select -= col
-//      selectWithOrder(col, res.tpeDb, "JSON_ARRAYAGG")
-//      groupByCols -= col
-//      having += "COUNT(*) > 0"
-//      aggregate = true
-//      mandatoryCast(res, mandatory)
-//    }
-//  }
-//
-//  override protected def setOptAttr[T](col: String, res: ResSet[T]): Unit = {
-//    select -= col
-//    selectWithOrder(col, res.tpeDb, "JSON_ARRAYAGG", "DISTINCT ", true)
-//    groupByCols -= col
-//    aggregate = true
-//    replaceCast((row: RS, paramIndex: Int) =>
-//      res.json2optArray(row.getString(paramIndex)).map(_.toSet)
-//    )
-//  }
-//
+  override protected def setAttr[T](
+    col: String, res: ResSet[T], mandatory: Boolean
+  ): Unit = {
+    if (mandatory) {
+      mandatoryCast(res, mandatory)
+    }
+  }
+
+  override protected def setOptAttr[T](col: String, res: ResSet[T]): Unit = {
+    replaceCast((row: RS, paramIndex: Int) =>
+      res.json2optArray(row.getString(paramIndex)).map(_.toSet)
+    )
+  }
+
 //  override protected def setHas[T](
 //    col: String, set: Set[T], res: ResSet[T], one2json: T => String, mandatory: Boolean
 //  ): Unit = {
@@ -143,12 +134,12 @@ trait ResolveExprSet_sqlite
 //           |  ) t_$i""".stripMargin
 //    }
 //  }
-//
-//  private def mandatoryCast[T](res: ResSet[T], mandatory: Boolean): Unit = {
-//    if (mandatory) {
-//      replaceCast((row: RS, paramIndex: Int) =>
-//        res.json2array(row.getString(paramIndex)).toSet
-//      )
-//    }
-//  }
+
+  private def mandatoryCast[T](res: ResSet[T], mandatory: Boolean): Unit = {
+    if (mandatory) {
+      replaceCast((row: RS, paramIndex: Int) =>
+        res.json2array(row.getString(paramIndex)).toSet
+      )
+    }
+  }
 }

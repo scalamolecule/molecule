@@ -8,37 +8,19 @@ trait Save_postgres extends SqlSave { self: ResolveSave =>
 
   doPrint = false
 
-  override protected def addRowSetterToTables(): Unit = {
-    inserts.foreach {
-      case (refPath, cols) =>
-        val table             = refPath.last
-        val columns           = cols.map(_._1).mkString(",\n  ")
-        val inputPlaceholders = cols.map { case (_, castExt) => s"?$castExt" }.mkString(", ")
-        val stmt              = if (cols.nonEmpty) {
-          s"""INSERT INTO $table (
-             |  $columns
-             |) VALUES ($inputPlaceholders)""".stripMargin
-        } else {
-          s"INSERT INTO $table (id) VALUES (DEFAULT)"
-        }
-
-        val colSetters = colSettersMap(refPath)
-        debug(s"--- save -------------------  ${colSetters.length}  $refPath")
-        debug(stmt)
-
-        tableDatas(refPath) = Table(refPath, stmt)
-
-
-        colSettersMap(refPath) = Nil
-        val rowSetter = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
-          // Set all column values for this row in this insert/batch
-          colSetters.foreach(colSetter =>
-            colSetter(ps, idsMap, 0)
-          )
-          // Complete row
-          ps.addBatch()
-        }
-        rowSettersMap(refPath) = List(rowSetter)
+  override protected def insertEmptyRowStmt(
+    table: String, cols: List[(String, String)]
+  ): String = {
+    val columns           = cols.map(_._1).mkString(",\n  ")
+    val inputPlaceholders = cols.map {
+      case (_, castExt) => s"?$castExt"
+    }.mkString(", ")
+    if (cols.nonEmpty) {
+      s"""INSERT INTO $table (
+         |  $columns
+         |) VALUES ($inputPlaceholders)""".stripMargin
+    } else {
+      s"INSERT INTO $table (id) VALUES (DEFAULT)"
     }
   }
 
