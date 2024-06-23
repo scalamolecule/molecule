@@ -10,7 +10,8 @@ import scala.collection.mutable.ListBuffer
 
 trait LambdasSeq extends LambdasBase with JavaConversions { self: SqlQueryBase =>
 
-  private lazy val sql2listId            : (RS, Int) => List[String]         = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueId)
+  private lazy val sql2listId            : (RS, Int) => List[String]         = (row: RS, paramIndex: Int) =>
+    sqlArray2list(row, paramIndex, valueId)
   private lazy val sql2listString        : (RS, Int) => List[String]         = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueString)
   private lazy val sql2listInt           : (RS, Int) => List[Int]            = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueInt)
   private lazy val sql2listLong          : (RS, Int) => List[Long]           = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueLong)

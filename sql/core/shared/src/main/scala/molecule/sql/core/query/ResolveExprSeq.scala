@@ -99,7 +99,6 @@ trait ResolveExprSeq extends ResolveExpr { self: SqlQueryBase with LambdasSeq =>
   ): Unit = {
     val col = getCol(attr: Attr)
     select += col
-
     // Allow empty optional nested rows.
     // So let non-asserted Seq values be checked in NestedOpt
     if (!isNestedOpt) {
@@ -298,7 +297,6 @@ trait ResolveExprSeq extends ResolveExpr { self: SqlQueryBase with LambdasSeq =>
       case V =>
         val col = getCol(attr: Attr)
         select += col
-
         // return optional Byte array as-is
         addCast((row: RS, paramIndex: Int) =>
           row.getBytes(paramIndex) match {

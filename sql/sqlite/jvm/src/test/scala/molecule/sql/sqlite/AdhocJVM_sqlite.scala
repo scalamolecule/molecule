@@ -26,8 +26,63 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
 
       for {
 
-        _ <- Ns.intMap(Map(pint1, pint2)).save.transact
-        _ <- Ns.intMap.query.get.map(_.head ==> Map(pint1, pint2))
+        _ <- Ns.bigIntSet(Set(bigInt1, bigInt2)).save.transact
+        _ <- Ns.bigIntSet.query.get.map(_.head ==> Set(bigInt1, bigInt2))
+
+//        _ <- Ns.bigDecimalSet(Set(bigDecimal1, bigDecimal2)).save.transact
+//        _ <- Ns.bigDecimalSet.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2))
+
+        _ <- Ns.i.bigIntSet.insert(1, Set(bigInt1, bigInt2)).transact
+        _ <- Ns.i.bigIntSet.query.get.map(_ ==> List((1, Set(bigInt1, bigInt2))))
+
+
+//        _ <- Ns.i.stringSet.insert(1, Set(string1, string2)).transact
+//        _ <- Ns.i.intSet.insert(1, Set(int1, int2)).transact
+//        _ <- Ns.i.longSet.insert(1, Set(long1, long2)).transact
+//        _ <- Ns.i.floatSet.insert(1, Set(float1, float2)).transact
+//        _ <- Ns.i.doubleSet.insert(1, Set(double1, double2)).transact
+//        _ <- Ns.i.booleanSet.insert(1, Set(boolean0)).transact
+//        _ <- Ns.i.bigDecimalSet.insert(1, Set(bigDecimal1, bigDecimal2)).transact
+//        _ <- Ns.i.dateSet.insert(1, Set(date1, date2)).transact
+//        _ <- Ns.i.durationSet.insert(1, Set(duration1, duration2)).transact
+//        _ <- Ns.i.instantSet.insert(1, Set(instant1, instant2)).transact
+//        _ <- Ns.i.localDateSet.insert(1, Set(localDate1, localDate2)).transact
+//        _ <- Ns.i.localTimeSet.insert(1, Set(localTime1, localTime2)).transact
+//        _ <- Ns.i.localDateTimeSet.insert(1, Set(localDateTime1, localDateTime2)).transact
+//        _ <- Ns.i.offsetTimeSet.insert(1, Set(offsetTime1, offsetTime2)).transact
+//        _ <- Ns.i.offsetDateTimeSet.insert(1, Set(offsetDateTime1, offsetDateTime2)).transact
+//        _ <- Ns.i.zonedDateTimeSet.insert(1, Set(zonedDateTime1, zonedDateTime2)).transact
+//        _ <- Ns.i.uuidSet.insert(1, Set(uuid1, uuid2)).transact
+//        _ <- Ns.i.uriSet.insert(1, Set(uri1, uri2)).transact
+//        _ <- Ns.i.byteSet.insert(1, Set(byte1, byte2)).transact
+//        _ <- Ns.i.shortSet.insert(1, Set(short1, short2)).transact
+//        _ <- Ns.i.charSet.insert(1, Set(char1, char2)).transact
+//
+//        _ <- Ns.i.stringSet.query.get.map(_ ==> List((1, Set(string1, string2))))
+//        _ <- Ns.i.intSet.query.get.map(_ ==> List((1, Set(int1, int2))))
+//        _ <- Ns.i.longSet.query.get.map(_ ==> List((1, Set(long1, long2))))
+//        _ <- Ns.i.floatSet.query.get.map(_ ==> List((1, Set(float1, float2))))
+//        _ <- Ns.i.doubleSet.query.get.map(_ ==> List((1, Set(double1, double2))))
+//        _ <- Ns.i.booleanSet.query.get.map(_ ==> List((1, Set(boolean0))))
+//        _ <- Ns.i.bigDecimalSet.query.get.map(_ ==> List((1, Set(bigDecimal1, bigDecimal2))))
+//        _ <- Ns.i.dateSet.query.get.map(_ ==> List((1, Set(date1, date2))))
+//        _ <- Ns.i.durationSet.query.get.map(_ ==> List((1, Set(duration1, duration2))))
+//        _ <- Ns.i.instantSet.query.get.map(_ ==> List((1, Set(instant1, instant2))))
+//        _ <- Ns.i.localDateSet.query.get.map(_ ==> List((1, Set(localDate1, localDate2))))
+//        _ <- Ns.i.localTimeSet.query.get.map(_ ==> List((1, Set(localTime1, localTime2))))
+//        _ <- Ns.i.localDateTimeSet.query.get.map(_ ==> List((1, Set(localDateTime1, localDateTime2))))
+//        _ <- Ns.i.offsetTimeSet.query.get.map(_ ==> List((1, Set(offsetTime1, offsetTime2))))
+//        _ <- Ns.i.offsetDateTimeSet.query.get.map(_ ==> List((1, Set(offsetDateTime1, offsetDateTime2))))
+//        _ <- Ns.i.zonedDateTimeSet.query.get.map(_ ==> List((1, Set(zonedDateTime1, zonedDateTime2))))
+//        _ <- Ns.i.uuidSet.query.get.map(_ ==> List((1, Set(uuid1, uuid2))))
+//        _ <- Ns.i.uriSet.query.get.map(_ ==> List((1, Set(uri1, uri2))))
+//        _ <- Ns.i.byteSet.query.get.map(_ ==> List((1, Set(byte1, byte2))))
+//        _ <- Ns.i.shortSet.query.get.map(_ ==> List((1, Set(short1, short2))))
+//        _ <- Ns.i.charSet.query.get.map(_ ==> List((1, Set(char1, char2))))
+//
+//        List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
+//        _ <- Ns.i.refs.insert(1, Set(r1, r2)).transact
+//        _ <- Ns.i.refs.query.get.map(_ ==> List((1, Set(r1, r2))))
 
 
         //        _ <- rawTransact(

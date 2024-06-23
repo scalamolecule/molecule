@@ -153,7 +153,8 @@ trait ResolveExprMap extends ResolveExpr { self: SqlQueryBase with LambdasMap =>
     select += value
     where += ((value, s"IS NOT NULL"))
     replaceCast((row: RS, paramIndex: Int) =>
-      resMap.json2tpe(row.getString(paramIndex)))
+      resMap.json2tpe(row.getString(paramIndex))
+    )
   }
 
   protected def key2optValue[T](

@@ -17,8 +17,9 @@ trait TestData extends DateHandling { self: CoreTest =>
   private def bi(i: Int): BigInt = BigInt(i)
   private def bd(d: Double): BigDecimal = BigDecimal(d)
 
-  // Long.Max:     9223372036854775807
-  private val n = "12345678901234567890" // for BigInt/Decimal
+  private val n = "123456789012345678901234567" // for BigInt/Decimal
+//  private val n = "1234567890123456789012345678" // too big for MariaDb for some reason
+
 
   lazy val (string0, string1, string2, string3, string4, string5, string6, string7, string8, string9) =
     ("-", "a", "b", "c", "d", "e", "f", "g", "h", "i")

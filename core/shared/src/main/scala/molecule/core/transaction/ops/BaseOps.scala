@@ -114,8 +114,8 @@ trait BaseOps extends JsonBase with BaseHelpers {
   protected lazy val value2jsonFloat         : (StringBuffer, Float) => StringBuffer          = (buf: StringBuffer, v: Float) => buf.append(v)
   protected lazy val value2jsonDouble        : (StringBuffer, Double) => StringBuffer         = (buf: StringBuffer, v: Double) => buf.append(v)
   protected lazy val value2jsonBoolean       : (StringBuffer, Boolean) => StringBuffer        = (buf: StringBuffer, v: Boolean) => buf.append(if (v) "1" else "0")
-  protected lazy val value2jsonBigInt        : (StringBuffer, BigInt) => StringBuffer         = (buf: StringBuffer, v: BigInt) => buf.append(v)
-  protected lazy val value2jsonBigDecimal    : (StringBuffer, BigDecimal) => StringBuffer     = (buf: StringBuffer, v: BigDecimal) => buf.append(v)
+  protected lazy val value2jsonBigInt        : (StringBuffer, BigInt) => StringBuffer         = (buf: StringBuffer, v: BigInt) => quote(buf, v.toString())
+  protected lazy val value2jsonBigDecimal    : (StringBuffer, BigDecimal) => StringBuffer     = (buf: StringBuffer, v: BigDecimal) => quote(buf, v.toString())
   protected lazy val value2jsonDate          : (StringBuffer, Date) => StringBuffer           = (buf: StringBuffer, v: Date) => buf.append(v.getTime)
   protected lazy val value2jsonDuration      : (StringBuffer, Duration) => StringBuffer       = (buf: StringBuffer, v: Duration) => quote(buf, v.toString)
   protected lazy val value2jsonInstant       : (StringBuffer, Instant) => StringBuffer        = (buf: StringBuffer, v: Instant) => quote(buf, v.toString)
@@ -139,8 +139,8 @@ trait BaseOps extends JsonBase with BaseHelpers {
   protected lazy val one2jsonFloat         : Float => String          = (v: Float) => s"$v"
   protected lazy val one2jsonDouble        : Double => String         = (v: Double) => s"$v"
   protected lazy val one2jsonBoolean       : Boolean => String        = (v: Boolean) => if (v) "1" else "0"
-  protected lazy val one2jsonBigInt        : BigInt => String         = (v: BigInt) => s"$v"
-  protected lazy val one2jsonBigDecimal    : BigDecimal => String     = (v: BigDecimal) => s"$v"
+  protected lazy val one2jsonBigInt        : BigInt => String         = (v: BigInt) => "\"" + v + "\""
+  protected lazy val one2jsonBigDecimal    : BigDecimal => String     = (v: BigDecimal) => "\"" + v + "\""
   protected lazy val one2jsonDate          : Date => String           = (v: Date) => s"${v.getTime}"
   protected lazy val one2jsonDuration      : Duration => String       = (v: Duration) => "\"" + v.toString + "\""
   protected lazy val one2jsonInstant       : Instant => String        = (v: Instant) => "\"" + v.toString + "\""

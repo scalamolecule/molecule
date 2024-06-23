@@ -18,18 +18,103 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
-
-
       for {
 
-        List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
-        _ <- Ns.refs(Set(r1, r2)).save.i.transact
 
 
-        _ <- rawQuery(
-          """select id from Ns
-            |""".stripMargin, true)
-        _ <- Ns.refs.query.get.map(_.head ==> Set(r1, r2))
+        _ <- Ns.bigIntSeq.Ref.bigInt.insert(List(bigInt1), bigInt1).transact
+        _ <- Ns.bigIntSeq.has(Ref.bigInt_).Ref.bigInt.query.i.get.map(_ ==> List((List(bigInt1), bigInt1)))
+
+        _ <- Ns.bigDecimalSeq.Ref.bigDecimal.insert(List(bigDecimal1), bigDecimal1).transact
+
+        //        _ <- rawTransact(
+        //          """UPDATE Ns
+        //            |SET
+        //            |  i = 2
+        //            |WHERE
+        //            |  i IS NOT NULL AND
+        //            |  Ns.bigIntSet IS NOT NULL AND
+        //            |   JSON_CONTAINS(Ns.bigIntSet, JSON_ARRAY("1"))
+        //            |""".stripMargin)
+
+//        _ <- rawQuery(
+//          """SELECT DISTINCT
+//            |  Ns.bigIntSeq,
+//            |  Ref.bigInt_
+//            |FROM Ns
+//            |  INNER JOIN Ref ON Ns.ref = Ref.id
+//            |WHERE
+//            |  JSON_CONTAINS(Ns.bigIntSeq, JSON_ARRAY('1')) AND
+//            |  Ns.bigIntSeq IS NOT NULL AND
+//            |  Ref.bigInt_  IS NOT NULL;
+//            |""".stripMargin, true)
+
+//        _ <- rawQuery(
+//          """SELECT DISTINCT
+//            |  bigDecimal,
+//            |  CAST(bigDecimal AS char),
+//            |  convert(CAST(bigDecimal AS char), decimal(65, 38)),
+//            |  cast(bigDecimal as decimal(65, 38)),
+//            |  convert(bigDecimal, char),
+//            |  '------',
+//            |  convert('1.1', decimal(65, 38)),
+//            |  cast(convert('1.1', decimal(65, 38)) as char),
+//            |  '------',
+//            |  JSON_CONTAINS('["1.1", "2.2"]', JSON_ARRAY('1.1')),
+//            |  JSON_CONTAINS('["1.1", "2.2"]', JSON_ARRAY(bigDecimal))
+//            |FROM Ref
+//            |""".stripMargin, true)
+
+//        _ <- rawQuery(
+//          """SELECT name from
+//            |  JSON_TABLE('{"x": ["1.1", "2.2"]}',
+//            |          '$.[*]' COLUMNS (
+//            |          name  varchar(10) path '$.x'
+//            |          )
+//            |) AS alias
+//            |""".stripMargin, true)
+
+//        _ <- rawQuery(
+//          """select (
+//            |SELECT count(name) = 1 from
+//            |  JSON_TABLE('["1.1", "2.2"]',
+//            |          '$[*]' COLUMNS (
+//            |          name  varchar(10) path '$'
+//            |          )
+//            |) AS alias
+//            |          where cast(name as decimal(65, 38)) in('1.1')
+//            |          ) as x
+//            |""".stripMargin, true)
+//            |          where JSON_CONTAINS(JSON_ARRAY('1.1'), json_array(name))
+//
+//        _ <- rawQuery(
+//          """SELECT DISTINCT
+//            |  Ns.bigDecimalSeq,
+//            |  Ref.bigDecimal
+//            |FROM Ns
+//            |  INNER JOIN Ref ON Ns.ref = Ref.id
+//            |WHERE
+//            |  (
+//            |    SELECT count(_v) > 0
+//            |    FROM
+//            |      JSON_TABLE(
+//            |        Ns.bigDecimalSeq, '$[*]'
+//            |        COLUMNS(_v varchar(65) path '$')
+//            |      ) AS alias
+//            |    WHERE CONVERT(_v, DECIMAL(65, 38)) IN (Ref.bigDecimal)
+//            |  ) AND
+//            |  Ns.bigDecimalSeq IS NOT NULL AND
+//            |  Ref.bigDecimal   IS NOT NULL;
+//            |""".stripMargin, true)
+//
+//            |  JSON_CONTAINS(Ns.bigDecimalSeq, JSON_ARRAY(CAST(Ref.bigDecimal AS CHAR)))
+//        _ <- Ns.bigIntSeq.has(Ref.bigInt_).Ref.bigInt.query.i.get.map(_ ==> List((List(bigInt1), bigInt1)))
+        _ <- Ns.bigDecimalSeq.has(Ref.bigDecimal_).Ref.bigDecimal.query.i.get.map(_ ==> List((List(bigDecimal1), bigDecimal1)))
+
+
+        //        _ <- rawQuery(
+        //          """select id from Ns
+        //            |""".stripMargin, true)
 
 
       } yield ()
@@ -39,58 +124,90 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
 
-      val pint20 = "b" -> 20
+      val pint20 = "b" -> 21
       val pint30 = "c" -> 30
       for {
 
+        //        _ <- B.s("x").iMap(Map(pint0, pint1)).save.transact
+        //        _ <- A.i(1).save.transact
 
-        _ <- A.i(1).save.transact
-        _ <- A.i(2).B.s("b").save.transact
-        _ <- A.i(3).B.s("c").iMap(Map(pint1, pint2, pint3)).save.transact
+        // will be updated
+        _ <- A.i.Bb.*(B.s_?.iMap_?).insert(
+          (2, List(
+            (None, None), // no relationship to B created
+            (None, Some(Map(pint1, pint2))),
+            (Some("a"), None),
+            (Some("b"), Some(Map(pint2, pint3))),
+          ))
+        ).transact
 
-        //        // Current entity with A value and ref to B value
-        //        _ <- A.i.a1.B.iMap.query.get.map(_ ==> List(
-        //          (3, Map(pint1, pint2, pint3))
-        //        ))
-        //
-        // Filter by A attribute, add B pairs with update
-        _ <- A.i_.B.iMap.add(pint20, pint3, pint4).update.i.transact
+        // Filter by B attribute, update B values
+        _ <- A.Bb.s_.iMap(Map(pint3, pint4)).update.transact
 
-        _ <- A.i.a1.B.iMap.query.get.map(_ ==> List(
-          (3, Map(
-            pint1,
-            pint20, // key unchanged, value updated
-            pint3, //  pair already existed, so no change
-            pint4 //   new pair added
+        _ <- A.i.a1.Bb.*?(B.s_?.a1.iMap_?).query.i.get.map(_ ==> List(
+          //          (1, List()), //                            no change to entity without relationship to B
+          (2, List(
+            // (None, None),                         no relationship to B
+            (None, Some(Map(pint1, pint2))), //      no change without filter match
+            (Some("a"), None), //                    no value to update
+            (Some("b"), Some(Map(pint3, pint4))), // B attribute updated
           ))
         ))
 
-        //        // Filter by A attribute, add B pairs with upsert
-        //        _ <- A.i_.B.iMap.add(pint30, pint4, pint5).upsert.transact
-        //
-        //        _ <- A.i.a1.B.iMap.query.get.map(_ ==> List(
-        //          (1, Map(pint30, pint4, pint5)), // relationship to B created, pairs added
-        //          (2, Map(pint30, pint4, pint5)), // pairs added
-        //          (3, Map(
-        //            pint1,
-        //            pint20,
-        //            pint30, // key unchanged, value updated
-        //            pint4, //  pair already existed, so no change
-        //            pint5 //   new pair added
-        //          )),
-        //        ))
+        /*
+        ========================================
+QUERY:
+AttrOneManInt("A", "i", V, Seq(), None, None, Nil, Nil, None, Some("a1"), Seq(0, 1))
+NestedOpt(
+  Ref("A", "bb", "B", CardSet, false, Seq(0, 14, 1)),
+  List(
+    AttrOneOptString("B", "s", V, None, None, None, Nil, Nil, None, Some("a1"), Seq(1, 28)),
+    AttrMapOptInt("B", "iMap", V, None, None, None, Nil, Nil, None, None, Seq(1, 27))))
 
-        //        // Filter by A ids, upsert B values
-        //        _ <- A.i_.Bb.iSeq(Seq(5, 6)).upsert.transact
-        //
-        //        _ <- A.i.a1.Bb.*?(B.s_?.iSeq).query.get.map(_ ==> List(
-        //          (1, List((None, Seq(5, 6)))), //                              ref + addition
-        //          (2, List((Some("a"), Seq(5, 6)))), //                         addition in 1 ref entity
-        //          (3, List((Some("b"), Seq(5, 6)), (Some("c"), Seq(5, 6)))), // addition in 2 ref entities
-        //          (4, List((Some("d"), Seq(5, 6)))), //                         update in 1 ref entity
-        //          (5, List((Some("e"), Seq(5, 6)), (Some("f"), Seq(5, 6)))), // update in 2 ref entities
-        //          (6, List((Some("g"), Seq(5, 6)), (Some("h"), Seq(5, 6)))), // update in one ref entity and addition in another
-        //        ))
+SELECT DISTINCT
+  A.id,
+  A.i,
+  B.s,
+  B.iMap
+FROM A
+  LEFT JOIN A_bb_B ON A.id        = A_bb_B.A_id
+  LEFT JOIN B      ON A_bb_B.B_id = B.id
+WHERE
+  A.i IS NOT NULL
+ORDER BY A.i, B.s;
+----------------------------------------
+???????????????  aggregate    false
+???????????????  groupBy      LinkedHashSet()
+???????????????  groupByCols  LinkedHashSet(A.i, A.id, B.s)
+
+
+
+========================================
+QUERY:
+AttrOneManInt("A", "i", V, Seq(), None, None, Nil, Nil, None, Some("a1"), Seq(0, 1))
+NestedOpt(
+  Ref("A", "bb", "B", CardSet, false, Seq(0, 14, 1)),
+  List(
+    AttrOneOptString("B", "s", V, None, None, None, Nil, Nil, None, Some("a1"), Seq(1, 28)),
+    AttrMapOptInt("B", "iMap", V, None, None, None, Nil, Nil, None, None, Seq(1, 27))))
+
+SELECT DISTINCT
+  A.id,
+  A.i,
+  B.s,
+  B.iMap
+FROM A
+  LEFT JOIN A_bb_B ON A.id        = A_bb_B.A_id
+  LEFT JOIN B      ON A_bb_B.B_id = B.id
+WHERE
+  A.i IS NOT NULL
+GROUP BY A.id, A.i, B.s
+ORDER BY A.i, B.s;
+----------------------------------------
+???????????????  aggregate    true
+???????????????  groupBy      LinkedHashSet(A.id)
+???????????????  groupByCols  LinkedHashSet(A.i, B.s)
+         */
 
         //        _ <- rawTransact(
         //          """UPDATE B

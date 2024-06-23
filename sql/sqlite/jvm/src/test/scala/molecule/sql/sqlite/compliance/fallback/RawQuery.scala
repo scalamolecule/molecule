@@ -146,7 +146,7 @@ object RawQuery extends TestSuite_sqlite {
         _ <- rawQuery(q("doubleSet")).map(_.head ==> List(Set(double1, double2)))
         _ <- rawQuery(q("booleanSet")).map(_.head ==> List(Set(boolean1, boolean2)))
         _ <- rawQuery(q("bigIntSet")).map(_.head ==> List(Set(new jBigDecimal(bigInt1.bigInteger), new jBigDecimal(bigInt2.bigInteger))))
-        _ <- rawQuery(q("bigDecimalSet")).map(_.head ==> List(Set(bigDecimal1.bigDecimal.setScale(25), bigDecimal2.bigDecimal.setScale(25))))
+        _ <- rawQuery(q("bigDecimalSet")).map(_.head ==> List(Set(bigDecimal1.bigDecimal.setScale(38), bigDecimal2.bigDecimal.setScale(38))))
         _ <- rawQuery(q("dateSet")).map(_.head ==> List(Set(date1.getTime, date2.getTime)))
         _ <- rawQuery(q("durationSet")).map(_.head ==> List(Set(duration1.toString, duration2.toString)))
         _ <- rawQuery(q("instantSet")).map(_.head ==> List(Set(instant1.toString, instant2.toString)))

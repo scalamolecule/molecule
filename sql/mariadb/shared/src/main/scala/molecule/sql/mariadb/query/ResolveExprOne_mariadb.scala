@@ -1,19 +1,18 @@
 package molecule.sql.mariadb.query
 
 import molecule.base.error.ModelError
-import molecule.sql.core.query.{ResolveExprOne, SqlQueryBase}
+import molecule.sql.core.query.{LambdasOne, ResolveExprOne, SqlQueryBase}
 import scala.reflect.ClassTag
 import scala.util.Random
 
 trait ResolveExprOne_mariadb
   extends ResolveExprOne
-    with LambdasOne_mariadb { self: SqlQueryBase =>
+    with LambdasOne { self: SqlQueryBase =>
 
   override protected def matches(col: String, regex: String): Unit = {
     if (regex.nonEmpty)
       where += ((col, s"REGEXP BINARY '$regex'")) // "BINARY" makes it case-sensitive
   }
-
 
   override protected def aggr[T: ClassTag](
     ns: String,
@@ -33,7 +32,9 @@ trait ResolveExprOne_mariadb
         select += s"JSON_ARRAYAGG($col)"
         groupByCols -= col
         aggregate = true
-        replaceCast((row: RS, paramIndex: Int) => res.json2array(row.getString(paramIndex)).toSet)
+        replaceCast((row: RS, paramIndex: Int) =>
+          res.json2array(row.getString(paramIndex)).toSet
+        )
 
       case "min" =>
         select += s"MIN($col)"
@@ -113,12 +114,6 @@ trait ResolveExprOne_mariadb
           }
         )
 
-      // Implement native MariaDB median/variance/stddev methods
-
-      //        selectWithOrder(col, "MEDIAN", "")
-      //        groupByCols -= col
-      //        aggregate = true
-
       case "avg" =>
         selectWithOrder(col, "AVG", "")
         groupByCols -= col
@@ -133,7 +128,7 @@ trait ResolveExprOne_mariadb
         select += s"JSON_ARRAYAGG($col)"
         replaceCast(
           (row: RS, paramIndex: Int) => {
-            val json    = row.getString(paramIndex)
+            val json = row.getString(paramIndex)
             varianceOf(json.substring(1, json.length - 1).split(",").map(_.toDouble).toSeq)
           }
         )
@@ -147,7 +142,7 @@ trait ResolveExprOne_mariadb
         select += s"JSON_ARRAYAGG($col)"
         replaceCast(
           (row: RS, paramIndex: Int) => {
-            val json      = row.getString(paramIndex)
+            val json = row.getString(paramIndex)
             stdDevOf(json.substring(1, json.length - 1).split(",").map(_.toDouble).toSeq)
           }
         )

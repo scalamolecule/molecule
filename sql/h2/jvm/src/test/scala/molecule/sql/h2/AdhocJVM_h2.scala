@@ -21,17 +21,45 @@ object AdhocJVM_h2 extends TestSuite_h2 {
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+      val a = (1, Map("a" -> bigInt1, "b" -> bigInt2))
+      val b = (2, Map("a" -> bigInt2, "b" -> bigInt3, "c" -> bigInt4))
       for {
 
+        _ <- Ns.i.bigInt.insert(List(
+          (1, bigInt1),
+          (1, bigInt2),
+          (2, bigInt2),
+          (2, bigInt3),
+          (2, bigInt4),
+        )).transact
 
-        List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
-        _ <- Ns.refs(Set(r1, r2)).save.i.transact
+        // Sum of all values
+        _ <- Ns.bigInt(sum).query.get.map(
+          _.head ==~ bigInt1 + bigInt2 + bigInt2 + bigInt3 + bigInt4
+        )
 
-        _ <- rawQuery(
-          """select id from Ns
-            |""".stripMargin, true)
+        _ <- Ns.i.bigInt(sum).query.get.map(_.map {
+          case (1, sum) => sum ==~ bigInt1 + bigInt2
+          case (2, sum) => sum ==~ bigInt2 + bigInt3 + bigInt4
+        })
 
-        _ <- Ns.refs.query.get.map(_.head ==> Set(r1, r2))
+
+
+//
+//        _ <- Ns.i.insert(0).transact // Entity without map attribute
+//        _ <- Ns.i.bigIntMap.insert(List(a, b)).transact
+//
+//        _ <- Ns.i(0).stringMap(Map("a" -> "hej")).save.transact
+////        _ <- Ns.i(1).bigIntMap(Map("a" -> bigInt1, "b" -> bigInt2)).save.transact
+////        _ <- Ns.i(2).bigIntMap(Map("a" -> bigInt2, "b" -> bigInt3, "c" -> bigInt4)).save.transact
+//
+//
+////        _ <- Ns.i.a1.bigIntMap("_").query.get.map(_ ==> Nil) // When no map is saved
+//        _ <- Ns.i.a1.stringMap("a").query.get.map(_ ==> List((0, "hej")))
+//
+//        _ <- Ns.i.a1.bigIntMap("a").query.get.map(_ ==> List((1, bigInt1), (2, bigInt2)))
+////        _ <- Ns.i.a1.bigIntMap("b").query.get.map(_ ==> List((1, bigInt2), (2, bigInt3)))
+////        _ <- Ns.i.a1.bigIntMap("c").query.get.map(_ ==> List((2, bigInt4)))
 
         //        _ <- rawQuery(
         //          """SELECT DISTINCT
@@ -67,70 +95,31 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
 
-        e1 <- A.i.OwnB.i.insert(
-          (1, 10),
-          (2, 20)
-        ).transact.map(_.id)
+        //        _ <- B.s("x").iMap(Map(pint0, pint1)).save.transact
+        //        _ <- A.i(1).save.transact
 
-        // 2 entities, each with an owned sub-entity
-        _ <- A.i.a1.OwnB.i.query.get.map(_ ==> List(
-          (1, 10),
-          (2, 20)
+        // will be updated
+        _ <- A.i.Bb.*(B.s_?.iMap_?).insert(
+          (2, List(
+            (None, None), // no relationship to B created
+            (None, Some(Map(pint1, pint2))),
+            //            (Some("a"), None),
+            //            (Some("b"), Some(Map(pint2, pint3))),
+          ))
+        ).transact
+
+        // Filter by B attribute, update B values
+        //        _ <- A.Bb.s_.iMap(Map(pint3, pint4)).update.transact
+
+        _ <- A.i.a1.Bb.*?(B.s_?.a1.iMap_?).query.i.get.map(_ ==> List(
+          //          (1, List()), //                            no change to entity without relationship to B
+          (2, List(
+            // (None, None),                         no relationship to B
+            (None, Some(Map(pint1, pint2))), //      no change without filter match
+            //            (Some("a"), None), //                    no value to update
+            //            (Some("b"), Some(Map(pint3, pint4))), // B attribute updated
+          ))
         ))
-
-        // 2 sub-entities
-        _ <- B.i.a1.query.get.map(_ ==> List(10, 20))
-
-        _ <- A(e1).delete.transact
-
-        // 1 entity with 1 owned sub-entity left
-        _ <- A.i.OwnB.i.query.get.map(_ ==> List((2, 20)))
-
-        // 2 sub-entities
-        _ <- B.i.query.get.map(_ ==> List(20))
-
-        //        // 2 entities, each with 2 owned sub-entities
-        //        _ <- A.i.a1.Bb.*(B.i.a1).query.get.map(_ ==> List(
-        //          (1, Seq(10, 11)),
-        //          (2, Seq(20, 21))
-        //        ))
-        //
-        //        // 4 referenced entities
-        //        _ <- B.i.a1.query.get.map(_ ==> List(10, 11, 20, 21))
-        //
-        //        _ <- if (platform == "Jdbc jvm") {
-        //          // 4 join rows from A to B
-        //          rawQuery("SELECT * FROM A_bb_B").map(_ ==> List(
-        //            List(1, 1),
-        //            List(1, 2),
-        //            List(2, 3),
-        //            List(2, 4),
-        //          ))
-        //        } else Future.unit
-
-        //
-        //        _ <- rawTransact(
-        //          """DELETE FROM A_bb_B WHERE A_id IN (1)
-        //            |""".stripMargin)
-        //
-        //        _ <- rawTransact(
-        //          """DELETE FROM A WHERE A.id IN (1)
-        //            |""".stripMargin)
-
-
-        //
-        //        // Referenced entities are not deleted
-        //        _ <- B.i.a1.query.get.map(_ ==> List(10, 11, 20, 21))
-        //
-        //        _ <- if (platform == "Jdbc jvm") {
-        //          // Join rows deleted
-        //          rawQuery("SELECT * FROM A_bb_B").map(_ ==> List(
-        //            // List(1, 1),
-        //            // List(1, 2),
-        //            List(2, 3),
-        //            List(2, 4),
-        //          ))
-        //        } else Future.unit
 
         //        _ <- rawTransact(
         //          """UPDATE Ns

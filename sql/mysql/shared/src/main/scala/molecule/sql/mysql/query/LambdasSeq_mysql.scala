@@ -28,7 +28,6 @@ trait LambdasSeq_mysql extends LambdasSeq { self: SqlQueryBase =>
   override protected lazy val tpeDbShort         : String = "SMALLINT"
   override protected lazy val tpeDbChar          : String = "CHAR"
 
-
   override protected lazy val valueDate     : RS => Date            = (rs: RS) => new Date(rs.getLong(2))
   override protected lazy val json2oneDate  : String => Date        = (v: String) => new Date(v.toLong)
   override protected lazy val one2jsonDate  : Date => String        = (v: Date) => s"${v.getTime}"

@@ -11,6 +11,7 @@ class Model2SqlQuery_mariadb[Tpl](elements0: List[Element])
     with ResolveExprSeq_mariadb
     with ResolveExprMap_mariadb
     with ResolveExprSetRefAttr_mariadb
+    with Lambdas_mariadb // obs: has to be last to override resolvers above
     with SqlQueryBase {
 
 
@@ -41,39 +42,5 @@ class Model2SqlQuery_mariadb[Tpl](elements0: List[Element])
         case Some(offset)                => s"\nLIMIT $offset, $hardLimit"
       }
     }
-  }
-
-  override protected def resolveNestedRef(ref: Ref): Unit = {
-    val Ref(ns, refAttr, refNs, _, _, _) = ref
-
-    val (as, ext) = getOptExt().fold(("", ""))(ext => (refNs + ext, ext))
-    val nsExt     = getOptExt(path.dropRight(2)).getOrElse("")
-
-    nestedIds += s"$ns.id"
-    groupBy += s"$ns.id"
-    aggregate = true
-
-    val joinTable  = ss(ns, refAttr, refNs)
-    val (id1, id2) = if (ns == refNs) ("1_id", "2_id") else ("id", "id")
-    joins += (("INNER JOIN", joinTable, "", s"$ns$nsExt.id", s"= $joinTable.${ns}_$id1"))
-    joins += (("INNER JOIN", refNs, as, s"$joinTable.${refNs}_$id2", s"= $refNs$ext.id"))
-    castss = castss :+ Nil
-  }
-
-  override protected def resolveNestedOptRef(nestedRef: Ref): Unit = {
-    val Ref(ns, refAttr, refNs, _, _, _) = nestedRef
-
-    val (as, ext) = getOptExt().fold(("", ""))(ext => (refNs + ext, ext))
-    val nsExt     = getOptExt(path.dropRight(2)).getOrElse("")
-
-    nestedIds += s"$ns.id"
-    groupBy += s"$ns.id"
-    aggregate = true
-
-    val joinTable  = ss(ns, refAttr, refNs)
-    val (id1, id2) = if (ns == refNs) ("1_id", "2_id") else ("id", "id")
-    joins += (("LEFT JOIN", joinTable, "", s"$ns$nsExt.id", s"= $joinTable.${ns}_$id1"))
-    joins += (("LEFT JOIN", refNs, as, s"$joinTable.${refNs}_$id2", s"= $refNs$ext.id"))
-    castss = castss :+ Nil
   }
 }

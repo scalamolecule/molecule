@@ -73,10 +73,6 @@ trait Save_sqlite extends SqlSave { self: ResolveSave =>
          |  $columns
          |) VALUES ($inputPlaceholders)""".stripMargin
     } else {
-//      s"INSERT INTO $table (id) VALUES (DEFAULT)"
-//      s"INSERT INTO $table (id) VALUES (null)"
-//      s"""INSERT INTO $table (id) DEFAULT VALUES"""
-//      s"""INSERT INTO "$table" DEFAULT VALUES"""
       s"INSERT INTO $table DEFAULT VALUES"
     }
   }

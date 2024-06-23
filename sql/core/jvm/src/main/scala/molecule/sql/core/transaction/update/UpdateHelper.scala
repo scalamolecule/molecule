@@ -21,14 +21,14 @@ trait UpdateHelper { self: SpiSyncBase =>
     val refIdss      = mutable.Map.empty[List[String], List[Long]]
     var tableUpdates = List.empty[Table]
 
-    println("\n=== UPSERT =========================================================================================")
-    println("------ elements --------")
-    elements.foreach(println)
+    //    println("\n=== UPSERT =========================================================================================")
+    //    println("------ elements --------")
+    //    elements.foreach(println)
 
     val stages = getUpsertStages(elements)
-    println("\n------ stages ---------")
-    stages.foreach(println)
-    println("")
+    //    println("\n------ stages ---------")
+    //    stages.foreach(println)
+    //    println("")
 
     stages.foreach {
       case FindAllIds(refPath, elements) =>
@@ -42,8 +42,8 @@ trait UpdateHelper { self: SpiSyncBase =>
               refIdss(refPath.take(i)) = idsList
               i += 2 // next table ref path
             }
-            println("\n-- 1 ---- refIdss -------- " + refPath)
-            refIdss.toList.sortBy(_._1.length).foreach(println)
+          //            println("\n-- 1 ---- refIdss -------- " + refPath)
+          //            refIdss.toList.sortBy(_._1.length).foreach(println)
         }
 
 
@@ -53,17 +53,17 @@ trait UpdateHelper { self: SpiSyncBase =>
         val refPathLength = refPath.length
         val refPaths      = (1 to(refPathLength, 2)).map(refPath.take).zipWithIndex
         val last          = (refPathLength - 1) / 2
-        println("-- 2 ---- ref paths ------")
-        refPaths.foreach(println)
+        //        println("-- 2 ---- ref paths ------")
+        //        refPaths.foreach(println)
 
-        println("-- 2 ---- elements --------")
-        elements.foreach(println)
+        //        println("-- 2 ---- elements --------")
+        //        elements.foreach(println)
 
 
         // Get current ids and optional ref ids
         val rowTuples = query_getRaw[AnyRef](Query(elements)).asInstanceOf[List[Product]]
-        println("\n-- 2 ---- row tuples --------- " + refPath)
-        rowTuples.foreach(println)
+        //        println("\n-- 2 ---- row tuples --------- " + refPath)
+        //        rowTuples.foreach(println)
 
         rowTuples.foreach { rowTuple =>
           // Loop through namespaces of each row to complete ref structure
@@ -112,7 +112,7 @@ trait UpdateHelper { self: SpiSyncBase =>
                   val updateCurRowAction = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
                     // Use ref path to retrieve created ref id from previous insert
                     val refId = idsMap(refPath).head
-                    println("  refId: " + refId)
+                    //                    println("  refId: " + refId)
                     ps.setLong(1, refId)
                     ps.addBatch()
                   }
@@ -134,19 +134,19 @@ trait UpdateHelper { self: SpiSyncBase =>
                 rowTuple.productElement(i).asInstanceOf[String].toLong
           }
         }
-        println("-- 2 ---- refIdss -------- ")
-        refIdss.toList.sortBy(_._1.length).foreach(println)
+      //        println("-- 2 ---- refIdss -------- ")
+      //        refIdss.toList.sortBy(_._1.length).foreach(println)
 
 
       case CompleteCurRef(refPath, idsResolver) =>
         val List(ns, refAttr, refNs) = refPath.takeRight(3)
         val insert                   = (_: PS, idsMap: IdsMap, _: RowIndex) => {
           val nsIds = idsMap(refPath.dropRight(2))
-          println("-- 3 ---- nsIds: " + nsIds)
+          //          println("-- 3 ---- nsIds: " + nsIds)
 
           val elements = idsResolver(nsIds.map(_.toString))
-          println("-- 3 ---- elements --------")
-          elements.foreach(println)
+          //          println("-- 3 ---- elements --------")
+          //          elements.foreach(println)
           //          println("-- 3 ---- tuples --------")
           //          query_getRaw(Query[(String, Option[String])](elements)).foreach(println)
 
@@ -164,11 +164,11 @@ trait UpdateHelper { self: SpiSyncBase =>
           }
           idsMap(refPath) = refIds.toList
 
-          println("-- 3 ---- idsMap -------- " + refPath)
-          println(idsMap)
+          //          println("-- 3 ---- idsMap -------- " + refPath)
+          //          println(idsMap)
 
-          println("-- 3 ---- refIdss -------- ")
-          refIdss.toList.sortBy(_._1.length).foreach(println)
+          //          println("-- 3 ---- refIdss -------- ")
+          //          refIdss.toList.sortBy(_._1.length).foreach(println)
         }
         // Update internally in this case since we complete the ref structure
         // needing queries during transaction buildup
@@ -176,15 +176,15 @@ trait UpdateHelper { self: SpiSyncBase =>
 
 
       case UpdateNsData(refPath, elements) =>
-        println("\n-- 4 ---- refIdss -------- " + refPath)
-        refIdss.toList.sortBy(_._1.length).foreach(println)
+        //        println("\n-- 4 ---- refIdss -------- " + refPath)
+        //        refIdss.toList.sortBy(_._1.length).foreach(println)
 
-        println("-- 4 ---- elements --------")
-        elements.foreach(println)
+        //        println("-- 4 ---- elements --------")
+        //        elements.foreach(println)
 
         val table = update_getData(conn, Update(elements, true))._1.head
-        println("\n-- 4 ---- table -------- ")
-        println(table)
+        //        println("\n-- 4 ---- table -------- ")
+        //        println(table)
 
         val tableUpdate = refIdss.get(refPath).fold {
           table.copy(
@@ -361,7 +361,7 @@ trait UpdateHelper { self: SpiSyncBase =>
         }
 
         case Nil if makeIdsOptRef =>
-          println(s"\n... 1 ......  $nsHasFilter  $nextNsHasFilter  $refPath  ${stages.length}")
+          //          println(s"\n... 1 ......  $nsHasFilter  $nextNsHasFilter  $refPath  ${stages.length}")
           val refPath1     = refPath
           val ns           = refPath1.head
           val findKnownIds = FindKnownIds(refPath, AttrOneManID(ns, "id") +: idsModel)
@@ -372,7 +372,7 @@ trait UpdateHelper { self: SpiSyncBase =>
           }
 
         case Nil if nextNsHasFilter =>
-          println(s"\n... 2 ......  $nsHasFilter  $nextNsHasFilter  $refPath  ${stages.length}")
+          //          println(s"\n... 2 ......  $nsHasFilter  $nextNsHasFilter  $refPath  ${stages.length}")
           val ns         = refPath.head
           val findAllIds = FindAllIds(refPath, AttrOneManID(ns, "id") +: idsModel)
           if (updateModel.isEmpty) {
@@ -382,7 +382,7 @@ trait UpdateHelper { self: SpiSyncBase =>
           }
 
         case Nil =>
-          println(s"\n... 3 ......  $nsHasFilter  $nextNsHasFilter  $refPath")
+          //          println(s"\n... 3 ......  $nsHasFilter  $nextNsHasFilter  $refPath")
           val List(ns, refAttr, refNs) = refPath.take(3)
           val refId                    = if (isCardOne)
             AttrOneOptID(ns, refAttr, refNs = Some(refNs))
@@ -406,22 +406,21 @@ trait UpdateHelper { self: SpiSyncBase =>
   }
 
 
-
   protected def refUpdates(update: Update)(implicit conn: JdbcConn_JVM): Data = {
     val elements = update.elements
 
-    println("............ elements")
-    elements.foreach(println)
+    //    println("............ elements")
+    //    elements.foreach(println)
 
     val (arity, idsModel) = getUpdateIdsModel(elements)
 
-    println(s"------ updateIdsModel ------  $arity")
-    idsModel.foreach(println)
+    //    println(s"------ updateIdsModel ------  $arity")
+    //    idsModel.foreach(println)
 
     val idLists = getIdLists(arity, idsModel)
 
-    println(s"------ idLists ------  $arity")
-    idLists.foreach(println)
+    //    println(s"------ idLists ------  $arity")
+    //    idLists.foreach(println)
 
     if (idLists.isEmpty) {
       (Nil, Nil)
@@ -432,8 +431,8 @@ trait UpdateHelper { self: SpiSyncBase =>
           val updateModel = modelResolver(idLists(i).map(_.toString)) // we pass current ids in Table
 
           val n = updateModel.length
-          println(s"------ X ------- $refPath  $n")
-          updateModel.foreach(println)
+          //          println(s"------ X ------- $refPath  $n")
+          //          updateModel.foreach(println)
           i += 1
           update_getData(conn, updateModel, update.isUpsert)._1
       }
@@ -452,16 +451,16 @@ trait UpdateHelper { self: SpiSyncBase =>
       // MariaDb doesn't return id from updates, so we use supplied id in update stmt
       updateId.get.toLong
     }
-    println(stmt + "  -->  id " + id)
+    //    println(stmt + "  -->  id " + id)
     id
   }
 
   protected def getIdLists(arity: Int, idsModel: List[Element])
                           (implicit conn: JdbcConn_JVM): Array[List[Long]] = {
     val idRows = query_getRaw(Query[AnyRef](idsModel))
-    println("------ idRows --------")
-    idRows.foreach(println)
-    println("--------")
+    //    println("------ idRows --------")
+    //    idRows.foreach(println)
+    //    println("--------")
 
     if (idRows.isEmpty) {
       Array.empty[List[Long]]
@@ -486,7 +485,7 @@ trait UpdateHelper { self: SpiSyncBase =>
           }
           result
       }
-      println(idLists.mkString("Array(", ", ", ")"))
+      //      println(idLists.mkString("Array(", ", ", ")"))
       idLists.map(_.map(_.toLong))
     }
   }

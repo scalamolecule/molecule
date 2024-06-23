@@ -51,7 +51,7 @@ trait SpiSync_mariadb extends SpiSyncBase {
   override def update_validate(update: Update)(implicit conn0: Conn): Map[String, Seq[String]] = {
     val conn            = conn0.asInstanceOf[JdbcConn_JVM]
     val query2resultSet = (query: String) => {
-      val ps        = conn.sqlConn.prepareStatement(
+      val ps = conn.sqlConn.prepareStatement(
         query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY
       )
       conn.resultSet(ps.executeQuery())

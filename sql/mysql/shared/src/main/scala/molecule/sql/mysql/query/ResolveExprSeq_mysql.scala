@@ -61,14 +61,16 @@ trait ResolveExprSeq_mysql
   override protected def seqFilterHas[T](
     col: String, filterAttr: String, res: ResSeq[T], mandatory: Boolean
   ): Unit = {
-    where += (("", s"JSON_CONTAINS($col, JSON_ARRAY($filterAttr))"))
+//    where += (("", s"JSON_CONTAINS($col, JSON_ARRAY($filterAttr))"))
+    where += (("", hasClause(col, filterAttr, res)))
     mandatoryCast(res, mandatory)
   }
 
   override protected def seqFilterHasNo[T](
     col: String, filterAttr: String, res: ResSeq[T], mandatory: Boolean
   ): Unit = {
-    where += (("", s"NOT JSON_CONTAINS($col, JSON_ARRAY($filterAttr))"))
+//    where += (("", s"NOT JSON_CONTAINS($col, JSON_ARRAY($filterAttr))"))
+    where += (("", s"NOT ${hasClause(col, filterAttr, res)}"))
     mandatoryCast(res, mandatory)
   }
 
@@ -91,6 +93,29 @@ trait ResolveExprSeq_mysql
           res.json2array(row.getString(paramIndex)).toList
         )
       }
+    }
+  }
+
+  private def hasClause[T](col: String, filterAttr: String, res: ResSeq[T]): String = {
+    res.tpe match {
+      case "BigInt" =>
+        s"JSON_CONTAINS($col, JSON_ARRAY(CAST($filterAttr AS CHAR)))"
+
+      case "BigDecimal" =>
+        // Compare Decimals, not Strings.
+        // String representation of filterAttr pads 0's so we can't use that
+        // against the truncated String representations in the json array
+        s"""(
+           |    SELECT count(_v) > 0
+           |    FROM
+           |      JSON_TABLE(
+           |        $col, '$$[*]'
+           |        COLUMNS(_v varchar(65) path '$$')
+           |      ) AS alias
+           |    WHERE CONVERT(_v, DECIMAL(65, 30)) = $filterAttr
+           |  )"""
+
+      case _ => s"JSON_CONTAINS($col, JSON_ARRAY($filterAttr))"
     }
   }
 }

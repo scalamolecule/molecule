@@ -14,7 +14,7 @@ trait LambdasOne extends LambdasBase { self: SqlQueryBase =>
     one2sql: T => String,
     array2set: (RS, Int) => AnyRef,
     json2tpe: String => T,
-    json2array: String => Array[T]
+    json2array: String => Array[T],
   )
 
   protected lazy val sql2oneId            : (RS, Int) => String         = (row: RS, paramIndex: Int) => row.getLong(paramIndex).toString

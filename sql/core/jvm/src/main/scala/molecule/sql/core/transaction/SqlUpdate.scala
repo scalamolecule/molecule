@@ -17,8 +17,8 @@ trait SqlUpdate
     with SpiHelpers
     with MoleculeLogging { self: ResolveUpdate =>
 
-  //    doPrint = false
-  doPrint = true
+      doPrint = false
+//  doPrint = true
 
   protected var curParamIndex = 1
 
@@ -55,12 +55,12 @@ trait SqlUpdate
     val table              = refPath.last
     val (stmt, upsertStmt) = if (isUpsert) {
       val upsertStmt = (ids1: List[Long]) => {
-        val ids2 = if (ids1.nonEmpty) {
+        val ids2    = if (ids1.nonEmpty) {
           ids1 // ids of existing and new entities (when ref structure establishment)
         } else {
           ids // ids of existing entities (collected in handleIds)
         }
-        println(ids2)
+        //        println(ids2)
         val clauses = if (ids2.nonEmpty) {
           s"$table.id IN(${ids2.mkString(", ")})"
         } else {
@@ -94,11 +94,11 @@ trait SqlUpdate
       (stmt, None)
     }
 
-    println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-    println("------ stmt --------")
-    println(stmt)
-    println("------ upsertStmt --------")
-    println(upsertStmt.map(_(List(42))))
+    //    println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    //    println("------ stmt --------")
+    //    println(stmt)
+    //    println("------ upsertStmt --------")
+    //    println(upsertStmt.map(_(List(42))))
 
     debug(stmt)
     val colSetters = colSettersMap(refPath)
@@ -142,7 +142,7 @@ trait SqlUpdate
     cols += attr
     val cast = exts(2)
     placeHolders = placeHolders :+ s"$attr = ?$cast"
-//    placeHolders = placeHolders :+ s"$attr = ?"
+    //    placeHolders = placeHolders :+ s"$attr = ?"
     val colSetter: Setter = vs match {
       case Seq(v) =>
         if (!isUpsert) {
@@ -579,7 +579,7 @@ trait SqlUpdate
   override protected lazy val extsDouble         = List("Double", "DOUBLE", "")
   override protected lazy val extsBoolean        = List("Boolean", "BOOLEAN", "")
   override protected lazy val extsBigInt         = List("BigInt", "DECIMAL(100, 0)", "")
-  override protected lazy val extsBigDecimal     = List("BigDecimal", "DECIMAL(65535, 25)", "")
+  override protected lazy val extsBigDecimal     = List("BigDecimal", "DECIMAL(65535, 38)", "")
   override protected lazy val extsDate           = List("Date", "BIGINT", "")
   override protected lazy val extsDuration       = List("Duration", "VARCHAR", "")
   override protected lazy val extsInstant        = List("Instant", "VARCHAR", "")

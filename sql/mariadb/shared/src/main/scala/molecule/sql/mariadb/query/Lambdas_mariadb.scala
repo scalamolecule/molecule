@@ -1,9 +1,9 @@
 package molecule.sql.mariadb.query
 
 import java.util.Date
-import molecule.sql.core.query.{LambdasSet, SqlQueryBase}
+import molecule.sql.core.query.{LambdasBase, SqlQueryBase}
 
-trait LambdasSet_mariadb extends LambdasSet { self: SqlQueryBase =>
+trait Lambdas_mariadb extends LambdasBase { self: SqlQueryBase =>
 
   override protected lazy val tpeDbId            : String = "BIGINT"
   override protected lazy val tpeDbString        : String = "LONGTEXT"
@@ -29,6 +29,7 @@ trait LambdasSet_mariadb extends LambdasSet { self: SqlQueryBase =>
   override protected lazy val tpeDbShort         : String = "SMALLINT"
   override protected lazy val tpeDbChar          : String = "CHAR"
 
+  // Dates saved with epoch time
   override protected lazy val valueDate     : RS => Date            = (rs: RS) => new Date(rs.getLong(2))
   override protected lazy val json2oneDate  : String => Date        = (v: String) => new Date(v.toLong)
   override protected lazy val one2jsonDate  : Date => String        = (v: Date) => s"${v.getTime}"

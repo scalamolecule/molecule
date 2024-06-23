@@ -82,7 +82,7 @@ trait ResolveExprSet_mysql
   override protected def setFilterHas[T](
     col: String, filterAttr: String, res: ResSet[T], mandatory: Boolean
   ): Unit = {
-    where += (("", s"JSON_CONTAINS($col, JSON_ARRAY($filterAttr))"))
+    where += (("", hasClause(col, filterAttr, res)))
     mandatoryCast(res, mandatory)
   }
 
@@ -100,7 +100,7 @@ trait ResolveExprSet_mysql
       tempTables += s"JSON_TABLE($col, '$$[*]' COLUMNS (vs $tpeDb PATH '$$')) t_$i"
       mandatoryCast(res, true)
     }
-    where += (("", s"NOT JSON_CONTAINS($col, JSON_ARRAY($filterAttr))"))
+    where += (("", s"NOT ${hasClause(col, filterAttr, res)}"))
   }
 
 
@@ -148,6 +148,29 @@ trait ResolveExprSet_mysql
       replaceCast((row: RS, paramIndex: Int) =>
         res.json2array(row.getString(paramIndex)).toSet
       )
+    }
+  }
+
+  private def hasClause[T](col: String, filterAttr: String, res: ResSet[T]): String = {
+    res.tpe match {
+      case "BigInt" =>
+        s"JSON_CONTAINS($col, JSON_ARRAY(CAST($filterAttr AS CHAR)))"
+
+      case "BigDecimal" =>
+        // Compare Decimals, not Strings.
+        // String representation of filterAttr pads 0's so we can't use that
+        // against the truncated String representations in the json array
+        s"""(
+           |    SELECT count(_v) > 0
+           |    FROM
+           |      JSON_TABLE(
+           |        $col, '$$[*]'
+           |        COLUMNS(_v varchar(65) path '$$')
+           |      ) AS alias
+           |    WHERE CONVERT(_v, DECIMAL(65, 30)) = $filterAttr
+           |  )"""
+
+      case _ => s"JSON_CONTAINS($col, JSON_ARRAY($filterAttr))"
     }
   }
 }

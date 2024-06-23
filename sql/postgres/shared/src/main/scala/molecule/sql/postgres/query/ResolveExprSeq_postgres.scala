@@ -66,7 +66,7 @@ trait ResolveExprSeq_postgres
         replaceCast((row: RS, paramIndex: Int) => {
           row.getString(paramIndex) match {
             case null => null
-            case s    => res.json2array(s).toList
+            case _    => res.array2list(row, paramIndex)
           }
         })
       } else {

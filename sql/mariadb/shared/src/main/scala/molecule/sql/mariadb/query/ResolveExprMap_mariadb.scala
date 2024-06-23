@@ -1,11 +1,11 @@
 package molecule.sql.mariadb.query
 
-import molecule.sql.core.query.{ResolveExprMap, SqlQueryBase}
+import molecule.sql.core.query.{LambdasMap, ResolveExprMap, SqlQueryBase}
 
 
 trait ResolveExprMap_mariadb
   extends ResolveExprMap
-    with LambdasMap_mariadb { self: SqlQueryBase =>
+    with LambdasMap { self: SqlQueryBase =>
 
   // value lookup by key -------------------------------------------------------
 

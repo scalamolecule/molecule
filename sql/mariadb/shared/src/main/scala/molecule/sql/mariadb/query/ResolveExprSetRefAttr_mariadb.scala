@@ -5,7 +5,7 @@ import molecule.sql.core.query.{ResolveExprSetRefAttr, SqlQueryBase}
 
 trait ResolveExprSetRefAttr_mariadb
   extends ResolveExprSetRefAttr
-    with LambdasSet_mariadb { self: SqlQueryBase =>
+    with Lambdas_mariadb { self: SqlQueryBase =>
 
 
   override protected def setRefMan[T](
