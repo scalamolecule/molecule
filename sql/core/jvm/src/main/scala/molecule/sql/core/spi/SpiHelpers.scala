@@ -91,7 +91,7 @@ trait SpiHelpers extends ModelUtils {
     // List of resolvers for each table involved in update/upsert
     (
       List[String], // ref path
-        List[String] => List[Element] // ref ids => update model
+        List[Long] => List[Element] // ref ids => update model
       )
   ] = {
     val dummyCoord   = Seq(0, 0) // irrelevant for id columns that will never collide with keywords
@@ -101,7 +101,7 @@ trait SpiHelpers extends ModelUtils {
     var curNs        = firstNs
     var refPath      = List(firstNs)
     val updateModel  = ListBuffer.empty[Element]
-    val updateModels = ListBuffer.empty[(List[String], List[String] => List[Element])]
+    val updateModels = ListBuffer.empty[(List[String], List[Long] => List[Element])]
 
     elements.foreach {
       case a@AttrOneTacID(_, "id", _, _, _, _, _, _, _, _, _) =>
@@ -119,7 +119,7 @@ trait SpiHelpers extends ModelUtils {
             updateModels += refPath -> (_ => updateElements)
           } else {
             val ns = curNs // immutable value for later lambda resolution
-            updateModels += refPath -> ((ids: List[String]) =>
+            updateModels += refPath -> ((ids: List[Long]) =>
               AttrOneTacID(ns, "id", Eq, ids, coord = dummyCoord) +: updateElements)
           }
         }
@@ -137,7 +137,7 @@ trait SpiHelpers extends ModelUtils {
             updateModels += refPath -> (_ => updateElements)
           } else {
             val ns = curNs // immutable value for later lambda resolution
-            updateModels += refPath -> ((ids: List[String]) =>
+            updateModels += refPath -> ((ids: List[Long]) =>
               AttrOneTacID(ns, "id", Eq, ids, coord = dummyCoord) +: updateElements)
           }
         }
@@ -157,7 +157,7 @@ trait SpiHelpers extends ModelUtils {
 
     if (hasData) {
       val updateElements = updateModel.toList
-      updateModels += refPath -> ((ids: List[String]) =>
+      updateModels += refPath -> ((ids: List[Long]) =>
         AttrOneTacID(refPath.last, "id", Eq, ids, coord = dummyCoord) +: updateElements)
     }
     updateModels.toList
@@ -327,7 +327,7 @@ trait SpiHelpers extends ModelUtils {
           // Make update model once we get an id
           val ns            = prevNs
           val tacitElements = updateModel.toList
-          updateModels = updateModels :+ ((id: Long) => AttrOneTacID(ns, "id", Eq, Seq(id.toString), coord = coord) +: tacitElements)
+          updateModels = updateModels :+ ((id: Long) => AttrOneTacID(ns, "id", Eq, Seq(id), coord = coord) +: tacitElements)
         }
 
         idsModel += ref
@@ -347,7 +347,7 @@ trait SpiHelpers extends ModelUtils {
       idsModel += AttrOneManID(prevNs, "id", coord = dummyCoord)
 
       // Make update model once we get an id
-      val id2updateModel = (id: Long) => AttrOneTacID(prevNs, "id", Eq, Seq(id.toString), coord = dummyCoord) +: updateModel.toList
+      val id2updateModel = (id: Long) => AttrOneTacID(prevNs, "id", Eq, Seq(id), coord = dummyCoord) +: updateModel.toList
       updateModels = updateModels :+ id2updateModel
     }
 
@@ -355,7 +355,7 @@ trait SpiHelpers extends ModelUtils {
   }
 
   private type L = Long
-  private type S = String
+  private type S = Long
 
   def getRefIds(refIdsAnyCardinality: List[Any]): List[Long] = {
     // Start with dummy id (not used) to mark first namespace
@@ -421,19 +421,9 @@ trait SpiHelpers extends ModelUtils {
     (idQuery, updateModels)
   }
 
-
-
-
-
-
-
-
-
-
-
   protected def nestedArray2coalescedSet(a: Attr, rs: Row, isAttr: Boolean = true): Set[Any] = {
     a match {
-      case _: AttrSetManID             => sql2set(isAttr, rs, (v: Any) => v.toString)
+      case _: AttrSetManID             => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[Long])
       case _: AttrSetManString         => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[String])
       case _: AttrSetManInt            => sql2set(isAttr, rs, (v: Any) => v.toString.toInt)
       case _: AttrSetManLong           => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[Long])
@@ -502,7 +492,7 @@ trait SpiHelpers extends ModelUtils {
     rs.next()
     val json = rs.getString(1)
     a match {
-      case _: AttrSetManID             => json.substring(1, json.length - 1).split(", ?").toSet
+      case _: AttrSetManID             => json.substring(1, json.length - 1).split(", ?").map(_.toLong).toSet
       case _: AttrSetManString         => json.substring(2, json.length - 2).split("\", ?\"").toSet
       case _: AttrSetManInt            => json.substring(1, json.length - 1).split(", ?").map(_.toInt).toSet
       case _: AttrSetManLong           => json.substring(1, json.length - 1).split(", ?").map(_.toLong).toSet

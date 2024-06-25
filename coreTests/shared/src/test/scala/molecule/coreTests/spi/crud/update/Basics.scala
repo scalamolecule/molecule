@@ -15,22 +15,22 @@ trait Basics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Can't update optional values" - types { implicit conn =>
       for {
-        _ <- Ns("42").int_?(Some(1)).update.transact
+        _ <- Ns(42).int_?(Some(1)).update.transact
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Can't update optional values (Ns.int_?)"
           }
 
-        _ <- Ns("42").intSet_?(Some(Set(1))).update.transact
+        _ <- Ns(42).intSet_?(Some(Set(1))).update.transact
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Can't update optional values (Ns.intSet_?)"
           }
 
-        _ <- Ns("42").intSeq_?(Some(Seq(1))).update.transact
+        _ <- Ns(42).intSeq_?(Some(Seq(1))).update.transact
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Can't update optional values (Ns.intSeq_?)"
           }
 
-        _ <- Ns("42").intMap_?(Some(Map("a" -> 1))).update.transact
+        _ <- Ns(42).intMap_?(Some(Map("a" -> 1))).update.transact
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Can't update optional values (Ns.intMap_?)"
           }

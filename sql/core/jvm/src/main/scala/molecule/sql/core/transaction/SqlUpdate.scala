@@ -331,11 +331,11 @@ trait SqlUpdate
   }
 
 
-  override def handleIds(ns: String, ids1: Seq[String]): Unit = {
+  override def handleIds(ns: String, ids1: Seq[Long]): Unit = {
     if (ids.nonEmpty) {
       throw ModelError(s"Can't apply entity ids twice in update.")
     }
-    ids = ids1.map(_.toLong)
+    ids = ids1
   }
 
   override def handleFilterAttr[T <: Attr with Tacit](filterAttr: T): Unit = {
@@ -469,7 +469,7 @@ trait SqlUpdate
       // Tables are reversed in JdbcConn_JVM and we want to delete first
       manualTableDatas = List(
         addJoins(joinTable, ns_id, refNs_id, id,
-          vs.map(_.asInstanceOf[String].toLong)
+          vs.map(_.asInstanceOf[Long])
         ),
         deleteJoins(joinTable, ns_id, id)
       )
@@ -492,7 +492,7 @@ trait SqlUpdate
       val refNs_id  = ss(refNs, "id")
       manualTableDatas = List(
         addJoins(joinTable, ns_id, refNs_id, getUpdateId,
-          vs.map(_.asInstanceOf[String].toLong)
+          vs.map(_.asInstanceOf[Long])
         )
       )
     }

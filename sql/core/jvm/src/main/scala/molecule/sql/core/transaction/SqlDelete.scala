@@ -290,8 +290,8 @@ trait SqlDelete
   }
 
 
-  override def addIds(ids1: Seq[String]): Unit = {
-    ids = ids ++ ids1.map(_.toLong)
+  override def addIds(ids1: Seq[Long]): Unit = {
+    ids = ids ++ ids1
   }
 
   override def addFilterElement(element: Element): Unit = {

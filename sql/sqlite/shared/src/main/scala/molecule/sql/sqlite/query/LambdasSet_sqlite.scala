@@ -8,7 +8,7 @@ import molecule.sql.core.query.{LambdasSet, SqlQueryBase}
 trait LambdasSet_sqlite extends LambdasSet { self: SqlQueryBase =>
 
 
-  override protected lazy val json2optArrayId            : String => Option[Array[String]]         = (json: String) => if (json == null) Option.empty[Array[String]] else jsonArray2optArray(jsonArrayId(json), json2oneId)
+  override protected lazy val json2optArrayId            : String => Option[Array[Long]]           = (json: String) => if (json == null) Option.empty[Array[Long]] else jsonArray2optArray(jsonArrayId(json), json2oneId)
   override protected lazy val json2optArrayString        : String => Option[Array[String]]         = (json: String) => if (json == null) Option.empty[Array[String]] else jsonArray2optArray(jsonArrayString(json), json2oneString)
   override protected lazy val json2optArrayInt           : String => Option[Array[Int]]            = (json: String) => if (json == null) Option.empty[Array[Int]] else jsonArray2optArray(jsonArrayInt(json), json2oneInt)
   override protected lazy val json2optArrayLong          : String => Option[Array[Long]]           = (json: String) => if (json == null) Option.empty[Array[Long]] else jsonArray2optArray(jsonArrayLong(json), json2oneLong)

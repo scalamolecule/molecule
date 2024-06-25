@@ -144,7 +144,7 @@ trait InsertCardOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i_.char_?.a1.query.get.map(_ ==> List(None, Some(char1)))
 
         r1 <- Ref.i.insert(1, 2).transact.map(_.id)
-        _ <- Ns.i.ref_?.insert(1, Option.empty[String]).transact
+        _ <- Ns.i.ref_?.insert(1, Option.empty[Long]).transact
         _ <- Ns.i.ref_?.insert(1, Some(r1)).transact
         _ <- Ns.i_.ref_?.a1.query.get.map(_ ==> List(None, Some(r1)))
       } yield ()

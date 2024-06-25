@@ -13,18 +13,18 @@ trait InsertValidators_ extends InsertValueResolvers_ {
     optValidator: Option[ValidateID],
     a: Attr,
     curElements: List[Element]
-  ): Option[Product => String => Seq[String]] = {
+  ): Option[Product => Long => Seq[String]] = {
     optValidator.fold(
-      Option.empty[Product => String => Seq[String]]
+      Option.empty[Product => Long => Seq[String]]
     ) { validator =>
       if (a.valueAttrs.isEmpty) {
-        Some((_: Product) => (v: String) => validator.validate(v))
+        Some((_: Product) => (v: Long) => validator.validate(v))
       } else {
         val tpl2values = tpl2valueResolver(a, curElements)
         Some(
           (tpl: Product) => {
             val values = tpl2values(tpl)
-            (v: String) =>
+            (v: Long) =>
               validator.withValues(values).validate(v)
           }
         )

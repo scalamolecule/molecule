@@ -11,7 +11,7 @@ import scala.reflect.ClassTag
 
 trait LambdasSeq extends ResolveBase with JavaConversions {
 
-  private lazy val j2sListId            : AnyRef => List[String]         = (seq: AnyRef) => jList2list(_.asInstanceOf[String]).apply(seq)
+  private lazy val j2sListId            : AnyRef => List[Long]           = (seq: AnyRef) => jList2list(_.asInstanceOf[Long]).apply(seq)
   private lazy val j2sListString        : AnyRef => List[String]         = (seq: AnyRef) => jList2list(_.asInstanceOf[String]).apply(seq)
   private lazy val j2sListInt           : AnyRef => List[Int]            = (seq: AnyRef) => jList2list(_.toString.toInt).apply(seq)
   private lazy val j2sListLong          : AnyRef => List[Long]           = (seq: AnyRef) => jList2list(_.asInstanceOf[Long]).apply(seq)
@@ -45,7 +45,7 @@ trait LambdasSeq extends ResolveBase with JavaConversions {
     s2j: Any => Any,
   )
 
-  lazy val resSeqId            : ResSeq[String]         = ResSeq("String", j2sListId, s2jId)
+  lazy val resSeqId            : ResSeq[Long]           = ResSeq("Long", j2sListId, s2jId)
   lazy val resSeqString        : ResSeq[String]         = ResSeq("String", j2sListString, s2jString)
   lazy val resSeqInt           : ResSeq[Int]            = ResSeq("Int", j2sListInt, s2jInt)
   lazy val resSeqLong          : ResSeq[Long]           = ResSeq("Long", j2sListLong, s2jLong)
@@ -73,12 +73,12 @@ trait LambdasSeq extends ResolveBase with JavaConversions {
   private def optSeq2sID = (v: AnyRef) => {
     val set = v.asInstanceOf[Array[_]]
     if (set.iterator.next().asInstanceOf[jList[_]].isEmpty)
-      Option.empty[Array[String]]
+      Option.empty[Array[Long]]
     else
       Some(
         set.flatMap(
           _.asInstanceOf[jList[_]].asScala.map(
-            _.asInstanceOf[jMap[_, _]].values.iterator.next.toString
+            _.asInstanceOf[jMap[_, _]].values.iterator.next
           )
         )
       )
@@ -142,7 +142,7 @@ trait LambdasSeq extends ResolveBase with JavaConversions {
     j2sOptList: AnyRef => AnyRef,
   )
 
-  lazy val resOptSeqId            : ResSeqOpt[String]         = ResSeqOpt(j2sOptListId)
+  lazy val resOptSeqId            : ResSeqOpt[Long]           = ResSeqOpt(j2sOptListId)
   lazy val resOptSeqString        : ResSeqOpt[String]         = ResSeqOpt(j2sOptListString)
   lazy val resOptSeqInt           : ResSeqOpt[Int]            = ResSeqOpt(j2sOptListInt)
   lazy val resOptSeqLong          : ResSeqOpt[Long]           = ResSeqOpt(j2sOptListLong)

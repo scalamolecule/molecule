@@ -33,9 +33,6 @@ trait Model extends Validations with Values with BaseHelpers {
     val sort      : Option[String]
     val coord     : Seq[Int]
 
-    // Used for id/ref attributes
-    val owner: Boolean = false
-
     def name: String = ns + "." + attr
 
     // skip underscore from keyword collision prevention re-namings in schemas
@@ -145,7 +142,7 @@ trait Model extends Validations with Values with BaseHelpers {
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[String] = Nil,
+    vs: Seq[Long] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateID] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -155,7 +152,7 @@ trait Model extends Validations with Values with BaseHelpers {
     override val coord: Seq[Int] = Nil
   ) extends AttrOneMan {
     override def toString: String = {
-      def format(v: String): String = "\"" + escStr(v) + "\""
+      def format(v: Long): String = v.toString + "L"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
       s"""AttrOneManID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
@@ -605,7 +602,7 @@ trait Model extends Validations with Values with BaseHelpers {
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Option[Seq[String]] = None,
+    vs: Option[Seq[Long]] = None,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateID] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -615,7 +612,7 @@ trait Model extends Validations with Values with BaseHelpers {
     override val coord: Seq[Int] = Nil
   ) extends AttrOneOpt {
     override def toString: String = {
-      def format(v: String): String = "\"" + escStr(v) + "\""
+      def format(v: Long): String = v.toString + "L"
       def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
       s"""AttrOneOptID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
@@ -1065,7 +1062,7 @@ trait Model extends Validations with Values with BaseHelpers {
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[String] = Nil,
+    vs: Seq[Long] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateID] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -1075,7 +1072,7 @@ trait Model extends Validations with Values with BaseHelpers {
     override val coord: Seq[Int] = Nil
   ) extends AttrOneTac {
     override def toString: String = {
-      def format(v: String): String = "\"" + escStr(v) + "\""
+      def format(v: Long): String = v.toString + "L"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
       s"""AttrOneTacID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
@@ -1525,7 +1522,7 @@ trait Model extends Validations with Values with BaseHelpers {
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Set[String] = Set.empty[String],
+    vs: Set[Long] = Set.empty[Long],
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateID] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -1535,7 +1532,7 @@ trait Model extends Validations with Values with BaseHelpers {
     override val coord: Seq[Int] = Nil
   ) extends AttrSetMan {
     override def toString: String = {
-      def format(v: String): String = "\"" + escStr(v) + "\""
+      def format(v: Long): String = v.toString + "L"
       def vss: String = vs.map(format).mkString("Set(", ", ", ")")
       s"""AttrSetManID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
@@ -1985,7 +1982,7 @@ trait Model extends Validations with Values with BaseHelpers {
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Option[Set[String]] = None,
+    vs: Option[Set[Long]] = None,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateID] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -1995,7 +1992,7 @@ trait Model extends Validations with Values with BaseHelpers {
     override val coord: Seq[Int] = Nil
   ) extends AttrSetOpt {
     override def toString: String = {
-      def format(v: String): String = "\"" + escStr(v) + "\""
+      def format(v: Long): String = v.toString + "L"
       def vss: String = vs.fold("None")(_.map(format).mkString("Some(Set(", ", ", "))"))
       s"""AttrSetOptID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
@@ -2445,7 +2442,7 @@ trait Model extends Validations with Values with BaseHelpers {
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Set[String] = Set.empty[String],
+    vs: Set[Long] = Set.empty[Long],
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateID] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -2455,7 +2452,7 @@ trait Model extends Validations with Values with BaseHelpers {
     override val coord: Seq[Int] = Nil
   ) extends AttrSetTac {
     override def toString: String = {
-      def format(v: String): String = "\"" + escStr(v) + "\""
+      def format(v: Long): String = v.toString + "L"
       def vss: String = vs.map(format).mkString("Set(", ", ", ")")
       s"""AttrSetTacID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
@@ -2905,7 +2902,7 @@ trait Model extends Validations with Values with BaseHelpers {
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[String] = Nil,
+    vs: Seq[Long] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateID] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -2915,7 +2912,7 @@ trait Model extends Validations with Values with BaseHelpers {
     override val coord: Seq[Int] = Nil
   ) extends AttrSeqMan {
     override def toString: String = {
-      def format(v: String): String = "\"" + escStr(v) + "\""
+      def format(v: Long): String = v.toString + "L"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
       s"""AttrSeqManID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
@@ -3365,7 +3362,7 @@ trait Model extends Validations with Values with BaseHelpers {
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Option[Seq[String]] = None,
+    vs: Option[Seq[Long]] = None,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateID] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3375,7 +3372,7 @@ trait Model extends Validations with Values with BaseHelpers {
     override val coord: Seq[Int] = Nil
   ) extends AttrSeqOpt {
     override def toString: String = {
-      def format(v: String): String = "\"" + escStr(v) + "\""
+      def format(v: Long): String = v.toString + "L"
       def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
       s"""AttrSeqOptID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
@@ -3825,7 +3822,7 @@ trait Model extends Validations with Values with BaseHelpers {
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[String] = Nil,
+    vs: Seq[Long] = Nil,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateID] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -3835,7 +3832,7 @@ trait Model extends Validations with Values with BaseHelpers {
     override val coord: Seq[Int] = Nil
   ) extends AttrSeqTac {
     override def toString: String = {
-      def format(v: String): String = "\"" + escStr(v) + "\""
+      def format(v: Long): String = v.toString + "L"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
       s"""AttrSeqTacID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
@@ -4285,7 +4282,7 @@ trait Model extends Validations with Values with BaseHelpers {
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Map[String, String] = Map.empty[String, String],
+    vs: Map[String, Long] = Map.empty[String, Long],
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateID] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -4295,7 +4292,7 @@ trait Model extends Validations with Values with BaseHelpers {
     override val coord: Seq[Int] = Nil
   ) extends AttrMapMan {
     override def toString: String = {
-      def format(v: String): String = if (v == null) "null" else "\"" + escStr(v) + "\""
+      def format(v: Long): String = if (v.toString == "0") "null" else v.toString + "L"
       def vss: String = vs.map { case (k, v) => s"""("$k", ${format(v)})""" }.mkString("Map(", ", ", ")")
       s"""AttrMapManID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
@@ -4745,7 +4742,7 @@ trait Model extends Validations with Values with BaseHelpers {
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Option[Map[String, String]] = None,
+    vs: Option[Map[String, Long]] = None,
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateID] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -4755,7 +4752,7 @@ trait Model extends Validations with Values with BaseHelpers {
     override val coord: Seq[Int] = Nil
   ) extends AttrMapOpt {
     override def toString: String = {
-      def format(v: String): String = if (v == null) "null" else "\"" + escStr(v) + "\""
+      def format(v: Long): String = if (v.toString == "0") "null" else v.toString + "L"
       def vss: String = vs.fold("None")(_.map { case (k, v) => s"""("$k", ${format(v)})""" }.mkString("Some(Map(", ", ", "))"))
       s"""AttrMapOptID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
@@ -5205,7 +5202,7 @@ trait Model extends Validations with Values with BaseHelpers {
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Map[String, String] = Map.empty[String, String],
+    vs: Map[String, Long] = Map.empty[String, Long],
     override val filterAttr: Option[(Int, List[String], Attr)] = None,
     override val validator: Option[ValidateID] = None,
     override val valueAttrs: Seq[String] = Nil,
@@ -5215,7 +5212,7 @@ trait Model extends Validations with Values with BaseHelpers {
     override val coord: Seq[Int] = Nil
   ) extends AttrMapTac {
     override def toString: String = {
-      def format(v: String): String = if (v == null) "null" else "\"" + escStr(v) + "\""
+      def format(v: Long): String = if (v.toString == "0") "null" else v.toString + "L"
       def vss: String = vs.map { case (k, v) => s"""("$k", ${format(v)})""" }.mkString("Map(", ", ", ")")
       s"""AttrMapTacID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }

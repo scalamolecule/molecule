@@ -226,8 +226,8 @@ object RawQuery extends TestSuite_sqlite {
         List(ref1, ref2) <- Ref.i.insert(1, 2).transact.map(_.ids)
 
         _ <- Ns.i.refs_?.insert(
-          (1, Option.empty[Set[String]]),
-          (2, Some(Set.empty[String])),
+          (1, Option.empty[Set[Long]]),
+          (2, Some(Set.empty[Long])),
           (3, Some(Set(ref1, ref2))),
         ).transact
 

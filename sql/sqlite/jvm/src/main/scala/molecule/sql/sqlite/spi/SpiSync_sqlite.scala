@@ -93,11 +93,11 @@ trait SpiSync_sqlite extends SpiSyncBase {
     //    ps.executeBatch()
     //    ps.executeUpdate()
 
-    var ids       = List.empty[String]
+    var ids       = List.empty[Long]
     val resultSet = ps.getResultSet
     //    val resultSet = ps.getGeneratedKeys
     while (resultSet.next()) {
-      ids = ids :+ resultSet.getLong(1).toString
+      ids = ids :+ resultSet.getLong(1)
     }
     ps.close()
     debug("---------------")

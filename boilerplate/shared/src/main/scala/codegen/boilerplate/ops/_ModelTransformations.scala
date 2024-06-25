@@ -438,7 +438,7 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
 
   private def addOne(mode: String): String = {
     baseTypes.map { baseTpe =>
-      val tpe = if (baseTpe == "ID") "String" else baseTpe
+      val tpe = if (baseTpe == "ID") "Long" else baseTpe
       s"""case a: AttrOne$mode$baseTpe =>
          |          val vs1     = vs.asInstanceOf[Seq[$tpe]]
          |          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
@@ -451,7 +451,7 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
 
   private def addOptOne: String = {
     baseTypes.map { baseTpe =>
-      val tpe = if (baseTpe == "ID") "String" else baseTpe
+      val tpe = if (baseTpe == "ID") "Long" else baseTpe
       s"""case a: AttrOneOpt$baseTpe =>
          |          val v1      = v.asInstanceOf[Option[$tpe]]
          |          val errors1 = if (v1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
@@ -463,7 +463,7 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
 
   private def addSet(mode: String): String = {
     baseTypes.map { baseTpe =>
-      val tpe = if (baseTpe == "ID") "String" else baseTpe
+      val tpe = if (baseTpe == "ID") "Long" else baseTpe
       s"""case a: AttrSet$mode$baseTpe =>
          |          val set     = vs.asInstanceOf[Set[$tpe]]
          |          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
@@ -476,7 +476,7 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
 
   private def addOptSet: String = {
     baseTypes.map { baseTpe =>
-      val tpe = if (baseTpe == "ID") "String" else baseTpe
+      val tpe = if (baseTpe == "ID") "Long" else baseTpe
       s"""case a: AttrSetOpt$baseTpe =>
          |          val set     = vs.asInstanceOf[Option[Set[$tpe]]]
          |          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
@@ -489,7 +489,7 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
 
   private def addSeq(mode: String): String = {
     baseTypes.filterNot(_ == "Byte").map { baseTpe =>
-      val tpe = if (baseTpe == "ID") "String" else baseTpe
+      val tpe = if (baseTpe == "ID") "Long" else baseTpe
       s"""case a: AttrSeq$mode$baseTpe =>
          |          val seq     = vs.asInstanceOf[Seq[$tpe]]
          |          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
@@ -502,7 +502,7 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
 
   private def addOptSeq: String = {
     baseTypes.filterNot(_ == "Byte").map { baseTpe =>
-      val tpe = if (baseTpe == "ID") "String" else baseTpe
+      val tpe = if (baseTpe == "ID") "Long" else baseTpe
       s"""case a: AttrSeqOpt$baseTpe =>
          |          val seq     = vs.asInstanceOf[Option[Seq[$tpe]]]
          |          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
@@ -515,7 +515,7 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
 
   private def addMap(mode: String): String = {
     baseTypes.map { baseTpe =>
-      val tpe = if (baseTpe == "ID") "String" else baseTpe
+      val tpe = if (baseTpe == "ID") "Long" else baseTpe
       s"""case a: AttrMap$mode$baseTpe =>
          |          val map     = vs.asInstanceOf[Map[String, $tpe]]
          |          val errors1 = if (map.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
@@ -528,7 +528,7 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
 
   private def addOptMap: String = {
     baseTypes.map { baseTpe =>
-      val tpe = if (baseTpe == "ID") "String" else baseTpe
+      val tpe = if (baseTpe == "ID") "Long" else baseTpe
       s"""case a: AttrMapOpt$baseTpe =>
          |          val map     = vs.asInstanceOf[Option[Map[String, $tpe]]]
          |          val errors1 = if (map.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {

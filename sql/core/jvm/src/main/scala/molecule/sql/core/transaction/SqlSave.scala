@@ -249,13 +249,13 @@ trait SqlSave
       }
 
       // Join table setter
-      val refIds2            = optIterable.get.iterator.asInstanceOf[Iterator[String]]
+      val refIds2            = optIterable.get.iterator.asInstanceOf[Iterator[Long]]
       val joinSetter: Setter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
         val refId1 = idsMap(curPath)(rowIndex)
         while (refIds2.hasNext) {
           val refId2 = refIds2.next()
           ps.setLong(1, refId1)
-          ps.setLong(2, refId2.toLong)
+          ps.setLong(2, refId2)
           if (refIds2.hasNext)
             ps.addBatch()
         }

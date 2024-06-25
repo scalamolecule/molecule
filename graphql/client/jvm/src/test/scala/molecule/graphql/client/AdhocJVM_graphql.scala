@@ -25,7 +25,6 @@ object AdhocJVM_graphql extends TestSuite_graphql {
 
         _ <- hero("EMPIRE").name.query.get
 
-        _ <- character("1001").name.query.get
         _ <- character(1001L).name.query.get
         _ <- character(1001).name.query.get
 

@@ -157,7 +157,7 @@ trait ModelTransformations_ {
     val last = es.last match {
       case a: AttrOneMan => a match {
         case a: AttrOneManID =>
-          val vs1     = vs.asInstanceOf[Seq[String]]
+          val vs1     = vs.asInstanceOf[Seq[Long]]
           val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
             val validator = a.validator.get
             vs1.flatMap(v => validator.validate(v))
@@ -342,7 +342,7 @@ trait ModelTransformations_ {
       }
       case a: AttrOneTac => a match {
         case a: AttrOneTacID =>
-          val vs1     = vs.asInstanceOf[Seq[String]]
+          val vs1     = vs.asInstanceOf[Seq[Long]]
           val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
             val validator = a.validator.get
             vs1.flatMap(v => validator.validate(v))
@@ -534,7 +534,7 @@ trait ModelTransformations_ {
     val last = es.last match {
       case a: AttrOneOpt => a match {
         case a: AttrOneOptID =>
-          val v1      = v.asInstanceOf[Option[String]]
+          val v1      = v.asInstanceOf[Option[Long]]
           val errors1 = if (v1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
             a.validator.get.validate(v1.get)
           }
@@ -703,7 +703,7 @@ trait ModelTransformations_ {
     val last = es.last match {
       case a: AttrSetMan => a match {
         case a: AttrSetManID =>
-          val set     = vs.asInstanceOf[Set[String]]
+          val set     = vs.asInstanceOf[Set[Long]]
           val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
             val validator = a.validator.get
             set.toSeq.flatMap(v => validator.validate(v))
@@ -888,7 +888,7 @@ trait ModelTransformations_ {
       }
       case a: AttrSetTac => a match {
         case a: AttrSetTacID =>
-          val set     = vs.asInstanceOf[Set[String]]
+          val set     = vs.asInstanceOf[Set[Long]]
           val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
             val validator = a.validator.get
             set.toSeq.flatMap(v => validator.validate(v))
@@ -1080,7 +1080,7 @@ trait ModelTransformations_ {
     val last = es.last match {
       case a: AttrSetOpt => a match {
         case a: AttrSetOptID =>
-          val set     = vs.asInstanceOf[Option[Set[String]]]
+          val set     = vs.asInstanceOf[Option[Set[Long]]]
           val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
             val validator = a.validator.get
             set.get.toSeq.flatMap(v => validator.validate(v))
@@ -1272,7 +1272,7 @@ trait ModelTransformations_ {
     val last = es.last match {
       case a: AttrSeqMan => a match {
         case a: AttrSeqManID =>
-          val seq     = vs.asInstanceOf[Seq[String]]
+          val seq     = vs.asInstanceOf[Seq[Long]]
           val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
             val validator = a.validator.get
             seq.flatMap(v => validator.validate(v))
@@ -1451,7 +1451,7 @@ trait ModelTransformations_ {
       }
       case a: AttrSeqTac => a match {
         case a: AttrSeqTacID =>
-          val seq     = vs.asInstanceOf[Seq[String]]
+          val seq     = vs.asInstanceOf[Seq[Long]]
           val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
             val validator = a.validator.get
             seq.flatMap(v => validator.validate(v))
@@ -1637,7 +1637,7 @@ trait ModelTransformations_ {
     val last = es.last match {
       case a: AttrSeqOpt => a match {
         case a: AttrSeqOptID =>
-          val seq     = vs.asInstanceOf[Option[Seq[String]]]
+          val seq     = vs.asInstanceOf[Option[Seq[Long]]]
           val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
             val validator = a.validator.get
             seq.get.flatMap(v => validator.validate(v))
@@ -1838,7 +1838,7 @@ trait ModelTransformations_ {
     val last = es.last match {
       case a: AttrMapMan => a match {
         case a: AttrMapManID =>
-          val map     = vs.asInstanceOf[Map[String, String]]
+          val map     = vs.asInstanceOf[Map[String, Long]]
           val errors1 = if (map.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
@@ -2023,7 +2023,7 @@ trait ModelTransformations_ {
       }
       case a: AttrMapTac => a match {
         case a: AttrMapTacID =>
-          val map     = vs.asInstanceOf[Map[String, String]]
+          val map     = vs.asInstanceOf[Map[String, Long]]
           val errors1 = if (map.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
@@ -2215,7 +2215,7 @@ trait ModelTransformations_ {
     val last = es.last match {
       case a: AttrMapOpt => a match {
         case a: AttrMapOptID =>
-          val map     = vs.asInstanceOf[Option[Map[String, String]]]
+          val map     = vs.asInstanceOf[Option[Map[String, Long]]]
           val errors1 = if (map.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
             val validator = a.validator.get
             map.get.values.toSeq.flatMap(validator.validate)

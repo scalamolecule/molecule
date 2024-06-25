@@ -13,7 +13,7 @@ import scala.reflect.ClassTag
 
 trait LambdasBase extends BaseHelpers with AggrUtils with JsonBase { self: SqlQueryBase =>
 
-  protected lazy val one2sqlId            : String => String         = (v: String) => s"'${v.replace("'", "''")}'"
+  protected lazy val one2sqlId            : Long => String           = (v: Long) => s"$v"
   protected lazy val one2sqlString        : String => String         = (v: String) => s"'${v.replace("'", "''")}'"
   protected lazy val one2sqlInt           : Int => String            = (v: Int) => s"$v"
   protected lazy val one2sqlLong          : Long => String           = (v: Long) => s"$v"
@@ -85,7 +85,7 @@ trait LambdasBase extends BaseHelpers with AggrUtils with JsonBase { self: SqlQu
     }
   }
 
-  protected lazy val valueId            : RS => String         = (rs: RS) => rs.getLong(2).toString
+  protected lazy val valueId            : RS => Long           = (rs: RS) => rs.getLong(2)
   protected lazy val valueString        : RS => String         = (rs: RS) => rs.getString(2)
   protected lazy val valueInt           : RS => Int            = (rs: RS) => rs.getInt(2)
   protected lazy val valueLong          : RS => Long           = (rs: RS) => rs.getLong(2)
@@ -110,7 +110,7 @@ trait LambdasBase extends BaseHelpers with AggrUtils with JsonBase { self: SqlQu
   protected lazy val valueChar          : RS => Char           = (rs: RS) => rs.getString(2).charAt(0)
 
 
-  protected lazy val array2setId            : (RS, Int) => Set[String]         = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueId)
+  protected lazy val array2setId            : (RS, Int) => Set[Long]           = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueId)
   protected lazy val array2setString        : (RS, Int) => Set[String]         = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueString)
   protected lazy val array2setInt           : (RS, Int) => Set[Int]            = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueInt)
   protected lazy val array2setLong          : (RS, Int) => Set[Long]           = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueLong)
@@ -134,7 +134,7 @@ trait LambdasBase extends BaseHelpers with AggrUtils with JsonBase { self: SqlQu
   protected lazy val array2setShort         : (RS, Int) => Set[Short]          = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueShort)
   protected lazy val array2setChar          : (RS, Int) => Set[Char]           = (row: RS, paramIndex: Int) => sqlArray2set(row, paramIndex, valueChar)
 
-  protected lazy val array2listId            : (RS, Int) => List[String]         = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueId)
+  protected lazy val array2listId            : (RS, Int) => List[Long]           = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueId)
   protected lazy val array2listString        : (RS, Int) => List[String]         = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueString)
   protected lazy val array2listInt           : (RS, Int) => List[Int]            = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueInt)
   protected lazy val array2listLong          : (RS, Int) => List[Long]           = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueLong)
@@ -159,7 +159,7 @@ trait LambdasBase extends BaseHelpers with AggrUtils with JsonBase { self: SqlQu
   protected lazy val array2listChar          : (RS, Int) => List[Char]           = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueChar)
 
 
-  protected lazy val json2oneId            : String => String         = (v: String) => v
+  protected lazy val json2oneId            : String => Long           = (v: String) => v.toLong
   protected lazy val json2oneString        : String => String         = (v: String) => v
   protected lazy val json2oneInt           : String => Int            = (v: String) => v.toInt
   protected lazy val json2oneLong          : String => Long           = (v: String) => v.toLong
@@ -194,7 +194,7 @@ trait LambdasBase extends BaseHelpers with AggrUtils with JsonBase { self: SqlQu
     }
   }
 
-  protected lazy val json2optArrayId            : String => Option[Array[String]]         = (json: String) => jsonArray2optArray(jsonArrayId(json), json2oneId)
+  protected lazy val json2optArrayId            : String => Option[Array[Long]]           = (json: String) => jsonArray2optArray(jsonArrayId(json), json2oneId)
   protected lazy val json2optArrayString        : String => Option[Array[String]]         = (json: String) => jsonArray2optArray(jsonArrayString(json), json2oneString)
   protected lazy val json2optArrayInt           : String => Option[Array[Int]]            = (json: String) => jsonArray2optArray(jsonArrayInt(json), json2oneInt)
   protected lazy val json2optArrayLong          : String => Option[Array[Long]]           = (json: String) => jsonArray2optArray(jsonArrayLong(json), json2oneLong)
@@ -264,7 +264,7 @@ trait LambdasBase extends BaseHelpers with AggrUtils with JsonBase { self: SqlQu
     }
   }
 
-  protected lazy val json2arrayId            : String => Array[String]         = (json: String) => if (json == "[null]") Array.empty[String] else jsonArray2array(jsonArrayId(json), json2oneId)
+  protected lazy val json2arrayId            : String => Array[Long]           = (json: String) => if (json == "[null]") Array.empty[Long] else jsonArray2array(jsonArrayId(json), json2oneId)
   protected lazy val json2arrayString        : String => Array[String]         = (json: String) => if (json == "[null]") Array.empty[String] else jsonArray2array(jsonArrayString(json), json2oneString)
   protected lazy val json2arrayInt           : String => Array[Int]            = (json: String) => if (json == "[null]") Array.empty[Int] else jsonArray2array(jsonArrayInt(json), json2oneInt)
   protected lazy val json2arrayLong          : String => Array[Long]           = (json: String) => if (json == "[null]") Array.empty[Long] else jsonArray2array(jsonArrayLong(json), json2oneLong)
@@ -288,7 +288,7 @@ trait LambdasBase extends BaseHelpers with AggrUtils with JsonBase { self: SqlQu
   protected lazy val json2arrayShort         : String => Array[Short]          = (json: String) => if (json == "[null]") Array.empty[Short] else jsonArray2array(jsonArrayShort(json), json2oneShort)
   protected lazy val json2arrayChar          : String => Array[Char]           = (json: String) => if (json == "[null]") Array.empty[Char] else jsonArray2array(jsonArrayChar(json), json2oneChar)
 
-  protected lazy val one2jsonId            : String => String         = (v: String) => v
+  protected lazy val one2jsonId            : Long => String           = (v: Long) => s"$v"
   protected lazy val one2jsonString        : String => String         = (v: String) => "\"" + escStr(v) + "\""
   protected lazy val one2jsonInt           : Int => String            = (v: Int) => s"$v"
   protected lazy val one2jsonLong          : Long => String           = (v: Long) => s"$v"

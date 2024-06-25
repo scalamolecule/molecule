@@ -10,8 +10,7 @@ import scala.collection.mutable.ListBuffer
 
 trait LambdasSeq extends LambdasBase with JavaConversions { self: SqlQueryBase =>
 
-  private lazy val sql2listId            : (RS, Int) => List[String]         = (row: RS, paramIndex: Int) =>
-    sqlArray2list(row, paramIndex, valueId)
+  private lazy val sql2listId            : (RS, Int) => List[Long]           = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueId)
   private lazy val sql2listString        : (RS, Int) => List[String]         = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueString)
   private lazy val sql2listInt           : (RS, Int) => List[Int]            = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueInt)
   private lazy val sql2listLong          : (RS, Int) => List[Long]           = (row: RS, paramIndex: Int) => sqlArray2list(row, paramIndex, valueLong)
@@ -66,7 +65,7 @@ trait LambdasSeq extends LambdasBase with JavaConversions { self: SqlQueryBase =
     array2optSet: (RS, ParamIndex) => Option[Set[T]],
   )
 
-  lazy val resSeqId            : ResSeq[String]         = ResSeq("String", tpeDbId, sql2listId, null, seq2sqlArrayId, seq2sqlsId, one2sqlId, array2listId, nestedArray2coalescedSetId, nestedArray2optCoalescedSetId, nestedArray2nestedSetId, array2setFirstId, array2setLastId, nestedArray2setAscId, nestedArray2setDescId, nestedArray2sumId, json2oneId, json2arrayId, json2optArrayId, one2jsonId, stringArray2sumId, valueId, sqlArray2sumId, sqlArray2minNId, sqlArray2maxNId, array2optSetId)
+  lazy val resSeqId            : ResSeq[Long]           = ResSeq("Long", tpeDbId, sql2listId, null, seq2sqlArrayId, seq2sqlsId, one2sqlId, array2listId, nestedArray2coalescedSetId, nestedArray2optCoalescedSetId, nestedArray2nestedSetId, array2setFirstId, array2setLastId, nestedArray2setAscId, nestedArray2setDescId, nestedArray2sumId, json2oneId, json2arrayId, json2optArrayId, one2jsonId, stringArray2sumId, valueId, sqlArray2sumId, sqlArray2minNId, sqlArray2maxNId, array2optSetId)
   lazy val resSeqString        : ResSeq[String]         = ResSeq("String", tpeDbString, sql2listString, null, seq2sqlArrayString, seq2sqlsString, one2sqlString, array2listString, nestedArray2coalescedSetString, nestedArray2optCoalescedSetString, nestedArray2nestedSetString, array2setFirstString, array2setLastString, nestedArray2setAscString, nestedArray2setDescString, nestedArray2sumString, json2oneString, json2arrayString, json2optArrayString, one2jsonString, stringArray2sumString, valueString, sqlArray2sumString, sqlArray2minNString, sqlArray2maxNString, array2optSetString)
   lazy val resSeqInt           : ResSeq[Int]            = ResSeq("Int", tpeDbInt, sql2listInt, null, seq2sqlArrayInt, seq2sqlsInt, one2sqlInt, array2listInt, nestedArray2coalescedSetInt, nestedArray2optCoalescedSetInt, nestedArray2nestedSetInt, array2setFirstInt, array2setLastInt, nestedArray2setAscInt, nestedArray2setDescInt, nestedArray2sumInt, json2oneInt, json2arrayInt, json2optArrayInt, one2jsonInt, stringArray2sumInt, valueInt, sqlArray2sumInt, sqlArray2minNInt, sqlArray2maxNInt, array2optSetInt)
   lazy val resSeqLong          : ResSeq[Long]           = ResSeq("Long", tpeDbLong, sql2listLong, null, seq2sqlArrayLong, seq2sqlsLong, one2sqlLong, array2listLong, nestedArray2coalescedSetLong, nestedArray2optCoalescedSetLong, nestedArray2nestedSetLong, array2setFirstLong, array2setLastLong, nestedArray2setAscLong, nestedArray2setDescLong, nestedArray2sumLong, json2oneLong, json2arrayLong, json2optArrayLong, one2jsonLong, stringArray2sumLong, valueLong, sqlArray2sumLong, sqlArray2minNLong, sqlArray2maxNLong, array2optSetLong)
@@ -90,7 +89,7 @@ trait LambdasSeq extends LambdasBase with JavaConversions { self: SqlQueryBase =
   lazy val resSeqShort         : ResSeq[Short]          = ResSeq("Short", tpeDbShort, sql2listShort, null, seq2sqlArrayShort, seq2sqlsShort, one2sqlShort, array2listShort, nestedArray2coalescedSetShort, nestedArray2optCoalescedSetShort, nestedArray2nestedSetShort, array2setFirstShort, array2setLastShort, nestedArray2setAscShort, nestedArray2setDescShort, nestedArray2sumShort, json2oneShort, json2arrayShort, json2optArrayShort, one2jsonShort, stringArray2sumShort, valueShort, sqlArray2sumShort, sqlArray2minNShort, sqlArray2maxNShort, array2optSetShort)
   lazy val resSeqChar          : ResSeq[Char]           = ResSeq("Char", tpeDbChar, sql2listChar, null, seq2sqlArrayChar, seq2sqlsChar, one2sqlChar, array2listChar, nestedArray2coalescedSetChar, nestedArray2optCoalescedSetChar, nestedArray2nestedSetChar, array2setFirstChar, array2setLastChar, nestedArray2setAscChar, nestedArray2setDescChar, nestedArray2sumChar, json2oneChar, json2arrayChar, json2optArrayChar, one2jsonChar, stringArray2sumChar, valueChar, sqlArray2sumChar, sqlArray2minNChar, sqlArray2maxNChar, array2optSetChar)
 
-  private lazy val seq2sqlArrayId            : Seq[String] => String         = (seq: Seq[String]) => seq.mkString("ARRAY[", ", ", "]::bigint[]")
+  private lazy val seq2sqlArrayId            : Seq[Long] => String           = (seq: Seq[Long]) => seq.mkString("ARRAY[", ", ", "]::bigint[]")
   private lazy val seq2sqlArrayString        : Seq[String] => String         = (seq: Seq[String]) => seq.map(_.replace("'", "''")).mkString("ARRAY['", "', '", "']::text[]")
   private lazy val seq2sqlArrayInt           : Seq[Int] => String            = (seq: Seq[Int]) => seq.mkString("ARRAY[", ", ", "]::integer[]")
   private lazy val seq2sqlArrayLong          : Seq[Long] => String           = (seq: Seq[Long]) => seq.mkString("ARRAY[", ", ", "]::bigint[]")
@@ -114,7 +113,7 @@ trait LambdasSeq extends LambdasBase with JavaConversions { self: SqlQueryBase =
   private lazy val seq2sqlArrayShort         : Seq[Short] => String          = (seq: Seq[Short]) => seq.mkString("ARRAY[", ", ", "]::smallint[]")
   private lazy val seq2sqlArrayChar          : Seq[Char] => String           = (seq: Seq[Char]) => seq.mkString("ARRAY['", "', '", "']::char[]")
 
-  private lazy val seq2sqlsId            : Seq[String] => Seq[String]         = (seq: Seq[String]) => seq.map(_.replace("'", "''")).map(v => s"'$v'")
+  private lazy val seq2sqlsId            : Seq[Long] => Seq[String]           = (seq: Seq[Long]) => seq.map(_.toString)
   private lazy val seq2sqlsString        : Seq[String] => Seq[String]         = (seq: Seq[String]) => seq.map(_.replace("'", "''")).map(v => s"'$v'")
   private lazy val seq2sqlsInt           : Seq[Int] => Seq[String]            = (seq: Seq[Int]) => seq.map(_.toString)
   private lazy val seq2sqlsLong          : Seq[Long] => Seq[String]           = (seq: Seq[Long]) => seq.map(_.toString)
@@ -159,7 +158,7 @@ trait LambdasSeq extends LambdasBase with JavaConversions { self: SqlQueryBase =
     }
   }
 
-  private lazy val nestedArray2optCoalescedSetId            : (RS, Int) => Option[Set[String]]         = (row: RS, paramIndex: Int) => sqlNestedArrays2optCoalescedSet(row, paramIndex, j2Id)
+  private lazy val nestedArray2optCoalescedSetId            : (RS, Int) => Option[Set[Long]]           = (row: RS, paramIndex: Int) => sqlNestedArrays2optCoalescedSet(row, paramIndex, j2Id)
   private lazy val nestedArray2optCoalescedSetString        : (RS, Int) => Option[Set[String]]         = (row: RS, paramIndex: Int) => sqlNestedArrays2optCoalescedSet(row, paramIndex, j2String)
   private lazy val nestedArray2optCoalescedSetInt           : (RS, Int) => Option[Set[Int]]            = (row: RS, paramIndex: Int) => sqlNestedArrays2optCoalescedSet(row, paramIndex, j2Int)
   private lazy val nestedArray2optCoalescedSetLong          : (RS, Int) => Option[Set[Long]]           = (row: RS, paramIndex: Int) => sqlNestedArrays2optCoalescedSet(row, paramIndex, j2Long)
@@ -197,7 +196,7 @@ trait LambdasSeq extends LambdasBase with JavaConversions { self: SqlQueryBase =
     }
   }
 
-  private lazy val array2optSetId            : (RS, Int) => Option[Set[String]]         = (row: RS, paramIndex: Int) => array2optSet(row, paramIndex, j2Id)
+  private lazy val array2optSetId            : (RS, Int) => Option[Set[Long]]           = (row: RS, paramIndex: Int) => array2optSet(row, paramIndex, j2Id)
   private lazy val array2optSetString        : (RS, Int) => Option[Set[String]]         = (row: RS, paramIndex: Int) => array2optSet(row, paramIndex, j2String)
   private lazy val array2optSetInt           : (RS, Int) => Option[Set[Int]]            = (row: RS, paramIndex: Int) => array2optSet(row, paramIndex, j2Int)
   private lazy val array2optSetLong          : (RS, Int) => Option[Set[Long]]           = (row: RS, paramIndex: Int) => array2optSet(row, paramIndex, j2Long)
@@ -241,7 +240,7 @@ trait LambdasSeq extends LambdasBase with JavaConversions { self: SqlQueryBase =
     }
   }
 
-  private lazy val nestedArray2coalescedSetId            : (RS, Int) => List[String]         = (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Id)
+  private lazy val nestedArray2coalescedSetId            : (RS, Int) => List[Long]           = (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Id)
   private lazy val nestedArray2coalescedSetString        : (RS, Int) => List[String]         = (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2String)
   private lazy val nestedArray2coalescedSetInt           : (RS, Int) => List[Int]            = (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Int)
   private lazy val nestedArray2coalescedSetLong          : (RS, Int) => List[Long]           = (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Long)
@@ -266,7 +265,7 @@ trait LambdasSeq extends LambdasBase with JavaConversions { self: SqlQueryBase =
   private lazy val nestedArray2coalescedSetChar          : (RS, Int) => List[Char]           = (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Char)
 
 
-  private lazy val nestedArray2setAscId            : Int => (RS, Int) => List[String]         = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Id).sorted.take(size)
+  private lazy val nestedArray2setAscId            : Int => (RS, Int) => List[Long]           = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Id).sorted.take(size)
   private lazy val nestedArray2setAscString        : Int => (RS, Int) => List[String]         = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2String).sorted.take(size)
   private lazy val nestedArray2setAscInt           : Int => (RS, Int) => List[Int]            = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Int).sorted.take(size)
   private lazy val nestedArray2setAscLong          : Int => (RS, Int) => List[Long]           = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Long).sorted.take(size)
@@ -290,7 +289,7 @@ trait LambdasSeq extends LambdasBase with JavaConversions { self: SqlQueryBase =
   private lazy val nestedArray2setAscShort         : Int => (RS, Int) => List[Short]          = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Short).sorted.take(size)
   private lazy val nestedArray2setAscChar          : Int => (RS, Int) => List[Char]           = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Char).sorted.take(size)
 
-  private lazy val nestedArray2setDescId            : Int => (RS, Int) => List[String]         = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Id).sorted.takeRight(size)
+  private lazy val nestedArray2setDescId            : Int => (RS, Int) => List[Long]           = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Id).sorted.takeRight(size)
   private lazy val nestedArray2setDescString        : Int => (RS, Int) => List[String]         = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2String).sorted.takeRight(size)
   private lazy val nestedArray2setDescInt           : Int => (RS, Int) => List[Int]            = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Int).sorted.takeRight(size)
   private lazy val nestedArray2setDescLong          : Int => (RS, Int) => List[Long]           = (size: Int) => (row: RS, paramIndex: Int) => sqlNestedArrays2list(row, paramIndex, j2Long).sorted.takeRight(size)
@@ -328,7 +327,7 @@ trait LambdasSeq extends LambdasBase with JavaConversions { self: SqlQueryBase =
     }
   }
 
-  private lazy val sqlArray2minNId            : Int => (RS, Int) => Set[String]         = (size: Int) => (row: RS, paramIndex: Int) => sqlArrays2set(row, paramIndex, j2Id).toList.sorted.take(size).toSet
+  private lazy val sqlArray2minNId            : Int => (RS, Int) => Set[Long]           = (size: Int) => (row: RS, paramIndex: Int) => sqlArrays2set(row, paramIndex, j2Id).toList.sorted.take(size).toSet
   private lazy val sqlArray2minNString        : Int => (RS, Int) => Set[String]         = (size: Int) => (row: RS, paramIndex: Int) => sqlArrays2set(row, paramIndex, j2String).toList.sorted.take(size).toSet
   private lazy val sqlArray2minNInt           : Int => (RS, Int) => Set[Int]            = (size: Int) => (row: RS, paramIndex: Int) => sqlArrays2set(row, paramIndex, j2Int).toList.sorted.take(size).toSet
   private lazy val sqlArray2minNLong          : Int => (RS, Int) => Set[Long]           = (size: Int) => (row: RS, paramIndex: Int) => sqlArrays2set(row, paramIndex, j2Long).toList.sorted.take(size).toSet
@@ -352,7 +351,7 @@ trait LambdasSeq extends LambdasBase with JavaConversions { self: SqlQueryBase =
   private lazy val sqlArray2minNShort         : Int => (RS, Int) => Set[Short]          = (size: Int) => (row: RS, paramIndex: Int) => sqlArrays2set(row, paramIndex, j2Short).toList.sorted.take(size).toSet
   private lazy val sqlArray2minNChar          : Int => (RS, Int) => Set[Char]           = (size: Int) => (row: RS, paramIndex: Int) => sqlArrays2set(row, paramIndex, j2Char).toList.sorted.take(size).toSet
 
-  private lazy val sqlArray2maxNId            : Int => (RS, Int) => Set[String]         = (size: Int) => (row: RS, paramIndex: Int) => sqlArrays2set(row, paramIndex, j2Id).toList.sorted.takeRight(size).toSet
+  private lazy val sqlArray2maxNId            : Int => (RS, Int) => Set[Long]           = (size: Int) => (row: RS, paramIndex: Int) => sqlArrays2set(row, paramIndex, j2Id).toList.sorted.takeRight(size).toSet
   private lazy val sqlArray2maxNString        : Int => (RS, Int) => Set[String]         = (size: Int) => (row: RS, paramIndex: Int) => sqlArrays2set(row, paramIndex, j2String).toList.sorted.takeRight(size).toSet
   private lazy val sqlArray2maxNInt           : Int => (RS, Int) => Set[Int]            = (size: Int) => (row: RS, paramIndex: Int) => sqlArrays2set(row, paramIndex, j2Int).toList.sorted.takeRight(size).toSet
   private lazy val sqlArray2maxNLong          : Int => (RS, Int) => Set[Long]           = (size: Int) => (row: RS, paramIndex: Int) => sqlArrays2set(row, paramIndex, j2Long).toList.sorted.takeRight(size).toSet
@@ -393,7 +392,7 @@ trait LambdasSeq extends LambdasBase with JavaConversions { self: SqlQueryBase =
       list.toList
     }
   }
-  private lazy val nestedArray2sumId            : (RS, Int) => Set[String]         = (row: RS, paramIndex: Int) => onlyNumbers
+  private lazy val nestedArray2sumId            : (RS, Int) => Set[Long]           = (row: RS, paramIndex: Int) => onlyNumbers
   private lazy val nestedArray2sumString        : (RS, Int) => Set[String]         = (row: RS, paramIndex: Int) => onlyNumbers
   private lazy val nestedArray2sumInt           : (RS, Int) => Set[Int]            = (row: RS, paramIndex: Int) => Set(sqlNestedArrays2sum[Int](row, paramIndex, j2Int).sum)
   private lazy val nestedArray2sumLong          : (RS, Int) => Set[Long]           = (row: RS, paramIndex: Int) => Set(sqlNestedArrays2sum[Long](row, paramIndex, j2Long).sum)
@@ -430,7 +429,7 @@ trait LambdasSeq extends LambdasBase with JavaConversions { self: SqlQueryBase =
       list.toList
     }
   }
-  private lazy val sqlArray2sumId            : (RS, Int) => Set[String]         = (row: RS, paramIndex: Int) => onlyNumbers
+  private lazy val sqlArray2sumId            : (RS, Int) => Set[Long]           = (row: RS, paramIndex: Int) => onlyNumbers
   private lazy val sqlArray2sumString        : (RS, Int) => Set[String]         = (row: RS, paramIndex: Int) => onlyNumbers
   private lazy val sqlArray2sumInt           : (RS, Int) => Set[Int]            = (row: RS, paramIndex: Int) => Set(sqlArray2sum[Int](row, paramIndex, valueInt).sum)
   private lazy val sqlArray2sumLong          : (RS, Int) => Set[Long]           = (row: RS, paramIndex: Int) => Set(sqlArray2sum[Long](row, paramIndex, valueLong).sum)
@@ -454,7 +453,7 @@ trait LambdasSeq extends LambdasBase with JavaConversions { self: SqlQueryBase =
   private lazy val sqlArray2sumShort         : (RS, Int) => Set[Short]          = (row: RS, paramIndex: Int) => Set(sqlArray2sum[Short](row, paramIndex, valueShort).sum)
   private lazy val sqlArray2sumChar          : (RS, Int) => Set[Char]           = (row: RS, paramIndex: Int) => Set(sqlArray2sum[Char](row, paramIndex, valueChar).sum)
 
-  private lazy val stringArray2sumId            : Array[String] => String         = (vs: Array[String]) => onlyNumbers
+  private lazy val stringArray2sumId            : Array[String] => Long           = (vs: Array[String]) => onlyNumbers
   private lazy val stringArray2sumString        : Array[String] => String         = (vs: Array[String]) => onlyNumbers
   private lazy val stringArray2sumInt           : Array[String] => Int            = (vs: Array[String]) => vs.map(_.toInt).sum
   private lazy val stringArray2sumLong          : Array[String] => Long           = (vs: Array[String]) => vs.map(_.toLong).sum
@@ -479,7 +478,7 @@ trait LambdasSeq extends LambdasBase with JavaConversions { self: SqlQueryBase =
   private lazy val stringArray2sumChar          : Array[String] => Char           = (vs: Array[String]) => vs.map(_.charAt(0)).sum
 
 
-  private lazy val j2Id            : Any => String         = (v: Any) => v.asInstanceOf[Long].toString
+  private lazy val j2Id            : Any => Long           = (v: Any) => v.asInstanceOf[Long]
   private lazy val j2String        : Any => String         = (v: Any) => v.asInstanceOf[String]
   private lazy val j2Int           : Any => Int            = (v: Any) => v.toString.toInt
   private lazy val j2Long          : Any => Long           = (v: Any) => v.asInstanceOf[Long]
@@ -531,7 +530,7 @@ trait LambdasSeq extends LambdasBase with JavaConversions { self: SqlQueryBase =
     }
   }
 
-  private lazy val nestedArray2nestedSetId            : (RS, Int) => Set[Set[String]]         = (row: RS, paramIndex: Int) => sqlNestedArrays2nestedSeq(row, paramIndex, j2Id)
+  private lazy val nestedArray2nestedSetId            : (RS, Int) => Set[Set[Long]]           = (row: RS, paramIndex: Int) => sqlNestedArrays2nestedSeq(row, paramIndex, j2Id)
   private lazy val nestedArray2nestedSetString        : (RS, Int) => Set[Set[String]]         = (row: RS, paramIndex: Int) => sqlNestedArrays2nestedSeq(row, paramIndex, j2String)
   private lazy val nestedArray2nestedSetInt           : (RS, Int) => Set[Set[Int]]            = (row: RS, paramIndex: Int) => sqlNestedArrays2nestedSeq(row, paramIndex, j2Int)
   private lazy val nestedArray2nestedSetLong          : (RS, Int) => Set[Set[Long]]           = (row: RS, paramIndex: Int) => sqlNestedArrays2nestedSeq(row, paramIndex, j2Long)
@@ -556,7 +555,7 @@ trait LambdasSeq extends LambdasBase with JavaConversions { self: SqlQueryBase =
   private lazy val nestedArray2nestedSetChar          : (RS, Int) => Set[Set[Char]]           = (row: RS, paramIndex: Int) => sqlNestedArrays2nestedSeq(row, paramIndex, j2Char)
 
 
-  private lazy val array2setFirstId            : (RS, Int) => Set[String]         = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Id).min)
+  private lazy val array2setFirstId            : (RS, Int) => Set[Long]           = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Id).min)
   private lazy val array2setFirstString        : (RS, Int) => Set[String]         = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2String).min)
   private lazy val array2setFirstInt           : (RS, Int) => Set[Int]            = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Int).min)
   private lazy val array2setFirstLong          : (RS, Int) => Set[Long]           = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Long).min)
@@ -580,7 +579,7 @@ trait LambdasSeq extends LambdasBase with JavaConversions { self: SqlQueryBase =
   private lazy val array2setFirstShort         : (RS, Int) => Set[Short]          = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Short).min)
   private lazy val array2setFirstChar          : (RS, Int) => Set[Char]           = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Char).min)
 
-  private lazy val array2setLastId            : (RS, Int) => Set[String]         = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Id).max)
+  private lazy val array2setLastId            : (RS, Int) => Set[Long]           = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Id).max)
   private lazy val array2setLastString        : (RS, Int) => Set[String]         = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2String).max)
   private lazy val array2setLastInt           : (RS, Int) => Set[Int]            = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Int).max)
   private lazy val array2setLastLong          : (RS, Int) => Set[Long]           = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Long).max)
@@ -615,7 +614,7 @@ trait LambdasSeq extends LambdasBase with JavaConversions { self: SqlQueryBase =
     one2json: T => String
   )
 
-  lazy val resOptSeqId            : ResSeqOpt[String]         = ResSeqOpt("String", sql2listOptId, seq2sqlArrayId, seq2sqlsId, one2sqlId, one2jsonId)
+  lazy val resOptSeqId            : ResSeqOpt[Long]           = ResSeqOpt("Long", sql2listOptId, seq2sqlArrayId, seq2sqlsId, one2sqlId, one2jsonId)
   lazy val resOptSeqString        : ResSeqOpt[String]         = ResSeqOpt("String", sql2listOptString, seq2sqlArrayString, seq2sqlsString, one2sqlString, one2jsonString)
   lazy val resOptSeqInt           : ResSeqOpt[Int]            = ResSeqOpt("Int", sql2listOptInt, seq2sqlArrayInt, seq2sqlsInt, one2sqlInt, one2jsonInt)
   lazy val resOptSeqLong          : ResSeqOpt[Long]           = ResSeqOpt("Long", sql2listOptLong, seq2sqlArrayLong, seq2sqlsLong, one2sqlLong, one2jsonLong)
@@ -654,7 +653,7 @@ trait LambdasSeq extends LambdasBase with JavaConversions { self: SqlQueryBase =
     }
   }
 
-  private lazy val sql2listOptId            : (RS, Int) => Option[List[String]]         = (row: RS, paramIndex: Int) => sql2listOpt(row, paramIndex, valueId)
+  private lazy val sql2listOptId            : (RS, Int) => Option[List[Long]]           = (row: RS, paramIndex: Int) => sql2listOpt(row, paramIndex, valueId)
   private lazy val sql2listOptString        : (RS, Int) => Option[List[String]]         = (row: RS, paramIndex: Int) => sql2listOpt(row, paramIndex, valueString)
   private lazy val sql2listOptInt           : (RS, Int) => Option[List[Int]]            = (row: RS, paramIndex: Int) => sql2listOpt(row, paramIndex, valueInt)
   private lazy val sql2listOptLong          : (RS, Int) => Option[List[Long]]           = (row: RS, paramIndex: Int) => sql2listOpt(row, paramIndex, valueLong)

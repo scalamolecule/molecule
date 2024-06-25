@@ -116,7 +116,7 @@ trait OpsOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Can't update multiple values for one card-one attribute" - types { implicit conn =>
       for {
-        _ <- Ns("42").int(2, 3).update.transact
+        _ <- Ns(42).int(2, 3).update.transact
           .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Can only update one value for attribute `Ns.int`. Found: 2, 3"
           }

@@ -225,8 +225,8 @@ object RawQuery extends TestSuite_mariadb {
         List(ref1, ref2) <- Ref.i.insert(1, 2).transact.map(_.ids)
 
         _ <- Ns.i.refs_?.insert(
-          (1, Option.empty[Set[String]]),
-          (2, Some(Set.empty[String])),
+          (1, Option.empty[Set[Long]]),
+          (2, Some(Set.empty[Long])),
           (3, Some(Set(ref1, ref2))),
         ).transact
 
@@ -252,7 +252,7 @@ object RawQuery extends TestSuite_mariadb {
           // All json values are Strings, even nulls
           List(1, Set("null")),
           List(2, Set("null")),
-          List(3, Set(ref1, ref2))
+          List(3, Set(s"$ref1", s"$ref2"))
         ))
       } yield ()
     }

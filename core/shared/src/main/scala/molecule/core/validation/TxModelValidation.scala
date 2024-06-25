@@ -253,7 +253,6 @@ case class TxModelValidation(
         }
         case _: AttrSetTac | _: AttrSetOpt => onlyMandatory(a)
 
-
         case a: AttrSeq => ???
         case a: AttrMap => ???
       }
@@ -321,7 +320,7 @@ case class TxModelValidation(
     if (isUpdate) {
       if (
         (a.op == V || a.op == Eq || a.op == NoValue) && deletingAttr(a)
-          || a.op == Remove && getCurSetValues.nonEmpty && removingLastValue(a, getCurSetValues.get(a).map(_.toString))
+          || a.op == Remove && getCurSetValues.nonEmpty && removingLastValue(a, getCurSetValues.get(a))
       ) {
         // Wrongfully trying to delete mandatory attr - add to watchlist
         deletingAttrs += attr

@@ -163,7 +163,7 @@ trait SaveCardOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i_.char_?.a1.query.get.map(_ ==> List(None, Some(char1)))
 
         List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
-        _ <- Ns.i(1).ref_?(Option.empty[String]).save.transact
+        _ <- Ns.i(1).ref_?(Option.empty[Long]).save.transact
         _ <- Ns.i(1).ref_?(Some(r1)).save.transact
         _ <- Ns.i_.ref_?.a1.query.get.map(_ ==> List(None, Some(r1)))
       } yield ()

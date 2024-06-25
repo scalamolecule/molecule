@@ -25,41 +25,48 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       val b = (2, Map("a" -> bigInt2, "b" -> bigInt3, "c" -> bigInt4))
       for {
 
-        _ <- Ns.i.bigInt.insert(List(
-          (1, bigInt1),
-          (1, bigInt2),
-          (2, bigInt2),
-          (2, bigInt3),
-          (2, bigInt4),
-        )).transact
-
-        // Sum of all values
-        _ <- Ns.bigInt(sum).query.get.map(
-          _.head ==~ bigInt1 + bigInt2 + bigInt2 + bigInt3 + bigInt4
-        )
-
-        _ <- Ns.i.bigInt(sum).query.get.map(_.map {
-          case (1, sum) => sum ==~ bigInt1 + bigInt2
-          case (2, sum) => sum ==~ bigInt2 + bigInt3 + bigInt4
-        })
+        List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
+        _ <- Ns.int.i.refs_?.insert(23, 1, Option.empty[Set[Long]]).transact
+        _ <- Ns.int.i.refs_?.insert(23, 2, Some(Set.empty[Long])).transact
+        _ <- Ns.int.i.refs_?.insert(23, 3, Some(Set(r1, r2))).transact
 
 
+        _ <- rawQuery(
+          """SELECT DISTINCT
+            |  Ns.i,
+            |  ARRAY_AGG(Ns_refs_Ref.Ref_id) Ns_refs
+            |FROM Ns
+            |  LEFT JOIN Ns_refs_Ref ON Ns.id = Ns_refs_Ref.Ns_id
+            |WHERE
+            |  Ns.int = 23 AND
+            |  Ns.int IS NOT NULL AND
+            |  Ns.i   IS NOT NULL
+            |GROUP BY Ns.id
+            |ORDER BY Ns.i;
+            |""".stripMargin, true)
 
-//
-//        _ <- Ns.i.insert(0).transact // Entity without map attribute
-//        _ <- Ns.i.bigIntMap.insert(List(a, b)).transact
-//
-//        _ <- Ns.i(0).stringMap(Map("a" -> "hej")).save.transact
-////        _ <- Ns.i(1).bigIntMap(Map("a" -> bigInt1, "b" -> bigInt2)).save.transact
-////        _ <- Ns.i(2).bigIntMap(Map("a" -> bigInt2, "b" -> bigInt3, "c" -> bigInt4)).save.transact
-//
-//
-////        _ <- Ns.i.a1.bigIntMap("_").query.get.map(_ ==> Nil) // When no map is saved
-//        _ <- Ns.i.a1.stringMap("a").query.get.map(_ ==> List((0, "hej")))
-//
-//        _ <- Ns.i.a1.bigIntMap("a").query.get.map(_ ==> List((1, bigInt1), (2, bigInt2)))
-////        _ <- Ns.i.a1.bigIntMap("b").query.get.map(_ ==> List((1, bigInt2), (2, bigInt3)))
-////        _ <- Ns.i.a1.bigIntMap("c").query.get.map(_ ==> List((2, bigInt4)))
+
+
+        _ <- Ns.int_(23).i.a1.refs_?.query.i.get
+          .map(_ ==> List((1, None), (2, None), (3, Some(Set(r1, r2)))))
+
+
+
+        //
+        //        _ <- Ns.i.insert(0).transact // Entity without map attribute
+        //        _ <- Ns.i.bigIntMap.insert(List(a, b)).transact
+        //
+        //        _ <- Ns.i(0).stringMap(Map("a" -> "hej")).save.transact
+        ////        _ <- Ns.i(1).bigIntMap(Map("a" -> bigInt1, "b" -> bigInt2)).save.transact
+        ////        _ <- Ns.i(2).bigIntMap(Map("a" -> bigInt2, "b" -> bigInt3, "c" -> bigInt4)).save.transact
+        //
+        //
+        ////        _ <- Ns.i.a1.bigIntMap("_").query.get.map(_ ==> Nil) // When no map is saved
+        //        _ <- Ns.i.a1.stringMap("a").query.get.map(_ ==> List((0, "hej")))
+        //
+        //        _ <- Ns.i.a1.bigIntMap("a").query.get.map(_ ==> List((1, bigInt1), (2, bigInt2)))
+        ////        _ <- Ns.i.a1.bigIntMap("b").query.get.map(_ ==> List((1, bigInt2), (2, bigInt3)))
+        ////        _ <- Ns.i.a1.bigIntMap("c").query.get.map(_ ==> List((2, bigInt4)))
 
         //        _ <- rawQuery(
         //          """SELECT DISTINCT
@@ -149,15 +156,29 @@ object AdhocJVM_h2 extends TestSuite_h2 {
     //      } yield ()
     //    }
 
-    //
-    //    "validation" - validation { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Validation._
-    //      for {
-    //        List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)
-    //
-    //
-    //      } yield ()
-    //    }
+
+    "validation" - validation { implicit conn =>
+      import molecule.coreTests.dataModels.core.dsl.Validation._
+      for {
+        List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)
+
+        id <- MandatoryRefsB.i(1).refsB(Set(r1, r2)).save.transact.map(_.ids)
+
+        // Mandatory refs can be removed as long as some ref ids remain
+        _ <- MandatoryRefsB(id).refsB.remove(r2).update.transact
+
+        // Last mandatory ref can't be removed. This can prevent creating orphan relationships.
+        _ <- MandatoryRefsB(id).refsB.remove(r1).update.i.transact
+          .map(_ ==> "Unexpected success").recover {
+            case ModelError(error) =>
+              error ==>
+                """Can't delete mandatory attributes (or remove last values of card-many attributes):
+                  |  MandatoryRefsB.refsB
+                  |""".stripMargin
+          }
+
+      } yield ()
+    }
     //
     //    "partitions" - partition { implicit conn =>
     //      import molecule.coreTests.dataModels.core.dsl.Partitions._

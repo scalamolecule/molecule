@@ -662,7 +662,7 @@ trait Update_datomic
   }
 
 
-  override def handleIds(ns: String, ids1: Seq[String]): Unit = ()
+  override def handleIds(ns: String, ids1: Seq[Long]): Unit = ()
   override def handleFilterAttr[T <: Attr with Tacit](filterAttr: T): Unit = ()
 
   override def handleRefNs(ref: Ref): Unit = {
@@ -746,7 +746,7 @@ trait Update_datomic
 
   // Helpers -------------------------------------------------------------------
 
-  override protected lazy val transformID             = (v: String) => v.toLong
+  override protected lazy val transformID             = identity
   override protected lazy val transformString         = identity
   override protected lazy val transformInt            = identity
   override protected lazy val transformLong           = identity

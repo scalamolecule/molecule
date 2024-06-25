@@ -14,24 +14,21 @@ case class FindAllIds(refPath: List[String], elements: List[Element]) extends Up
   }
 }
 
-case class FindKnownIds(refPath: List[String],
-                        //                          isCardOne: Boolean,
-                        elements: List[Element]) extends UpsertStage {
+case class FindKnownIds(refPath: List[String], elements: List[Element]) extends UpsertStage {
   override def toString: String = {
     s"""FindKnownIds(
        |  refPath  : $refPath
        |  elements : ${elements.mkString("\n    ", "\n    ", "")}
        |)""".stripMargin
-    //         |  isCardOne: $isCardOne
   }
 }
 
-case class CompleteCurRef(refPath: List[String], idsResolver: List[String] => List[Element]) extends UpsertStage {
+case class CompleteCurRef(refPath: List[String], idsResolver: List[Long] => List[Element]) extends UpsertStage {
   override def toString: String = {
     s"""CompleteCurRef(
        |  refPath    : $refPath
        |  idsResolver: List(<ids>) => List(
-       |    ${idsResolver(List("<ids>")).mkString("\n    ")}
+       |    ${idsResolver(List(-1L)).mkString("\n    ")}
        |  )
        |)""".stripMargin
   }

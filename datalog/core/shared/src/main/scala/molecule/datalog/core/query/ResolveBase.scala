@@ -28,7 +28,7 @@ trait ResolveBase extends BaseHelpers {
   }
 
   // Datomic Java to Scala
-  protected lazy val j2sId            : AnyRef => AnyRef =  (v: AnyRef) => v.toString
+  protected lazy val j2sId            : AnyRef => AnyRef = identity
   protected lazy val j2sString        : AnyRef => AnyRef = identity
   // Datomic can return both Integer or Long
   protected lazy val j2sInt           : AnyRef => AnyRef = (v: AnyRef) => v.toString.toInt.asInstanceOf[AnyRef]
@@ -69,7 +69,7 @@ trait ResolveBase extends BaseHelpers {
 
 
   // Scala to Java
-  protected lazy val s2jId            : Any => Any = (v: Any) => v.asInstanceOf[String].toLong.asInstanceOf[Any]
+  protected lazy val s2jId            : Any => Any = identity
   protected lazy val s2jString        : Any => Any = identity
   protected lazy val s2jInt           : Any => Any = (v: Any) => v.asInstanceOf[Int].toLong.asInstanceOf[Any]
   protected lazy val s2jLong          : Any => Any = identity
@@ -94,7 +94,7 @@ trait ResolveBase extends BaseHelpers {
   protected lazy val s2jChar          : Any => Any = (v: Any) => v.asInstanceOf[Char].toString.asInstanceOf[Any]
 
   // Java to Scala
-  protected lazy val j2Id            : Any => String         = (v: Any) => v.toString
+  protected lazy val j2Id            : Any => Long           = (v: Any) => v.asInstanceOf[Long]
   protected lazy val j2String        : Any => String         = (v: Any) => v.asInstanceOf[String]
   protected lazy val j2Int           : Any => Int            = (v: Any) => v.toString.toInt
   protected lazy val j2Long          : Any => Long           = (v: Any) => v.asInstanceOf[Long]
@@ -123,7 +123,7 @@ trait ResolveBase extends BaseHelpers {
   lazy val toInt: AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[Integer].toInt.asInstanceOf[AnyRef]
 
 
-  protected lazy val dId            : String => String         = (v: String) => v
+  protected lazy val dId            : Long => String           = (v: Long) => v.toString
   protected lazy val dString        : String => String         = (v: String) => "\"" + escStr(v) + "\""
   protected lazy val dInt           : Int => String            = (v: Int) => v.toString
   protected lazy val dLong          : Long => String           = (v: Long) => v.toString

@@ -43,7 +43,7 @@ trait LambdasSet extends ResolveBase with JavaConversions {
     j2sSet: AnyRef => AnyRef,
   )
 
-  lazy val resSetId            : ResSet[String]         = ResSet("String", dId, j2sSetId)
+  lazy val resSetId            : ResSet[Long]           = ResSet("Long", dId, j2sSetId)
   lazy val resSetString        : ResSet[String]         = ResSet("String", dString, j2sSetString)
   lazy val resSetInt           : ResSet[Int]            = ResSet("Int", dInt, j2sSetInt)
   lazy val resSetLong          : ResSet[Long]           = ResSet("Long", dLong, j2sSetLong)
@@ -73,12 +73,12 @@ trait LambdasSet extends ResolveBase with JavaConversions {
   }
 
   private lazy val j2sOpSet_Id = (v: AnyRef) => v match {
-    case null            => Option.empty[Set[String]]
-    case set: jSet[_]    => Some(set.asScala.map(_.toString))
+    case null            => Option.empty[Set[Long]]
+    case set: jSet[_]    => Some(set.asScala)
     case map: jMap[_, _] =>
       val list = map.values.iterator.next.asInstanceOf[jList[_]].asScala
       list.head match {
-        case _: jLong => Some(list.map(_.toString).toSet)
+        case _: jLong => Some(list.toSet)
         // Refs
         case _: jMap[_, _] =>
           /*
@@ -90,8 +90,7 @@ trait LambdasSet extends ResolveBase with JavaConversions {
           // If the ref is not owned, Datomic only returns the id
           {:ns/ref {:db/id 17592186045422}}
            */
-          //          var ids = Set.empty[Long]
-          var ids = Set.empty[String]
+          var ids = Set.empty[Long]
           list.foreach {
             case m: jMap[_, _] =>
               var continue = true
@@ -100,7 +99,7 @@ trait LambdasSet extends ResolveBase with JavaConversions {
                 val pair = it.next()
                 if (pair.getKey.toString == ":db/id") {
                   continue = false
-                  ids = ids + pair.getValue.toString
+                  ids = ids + pair.getValue.asInstanceOf[Long]
                 }
               }
             case other         => throw new Exception(
@@ -186,12 +185,12 @@ trait LambdasSet extends ResolveBase with JavaConversions {
   private def optAttr2sOptSetID = (v: AnyRef) => {
     val set = v.asInstanceOf[jSet[_]]
     if (set.iterator.next.asInstanceOf[jList[_]].isEmpty)
-      Option.empty[Set[String]]
+      Option.empty[Set[Long]]
     else
       Some(
         set.asScala.flatMap(
           _.asInstanceOf[jList[_]].asScala.map(
-            _.asInstanceOf[jMap[_, _]].values.iterator.next.toString
+            _.asInstanceOf[jMap[_, _]].values.iterator.next
           )
         ).toSet
       )
@@ -234,7 +233,7 @@ trait LambdasSet extends ResolveBase with JavaConversions {
     optAttr2s: AnyRef => AnyRef,
   )
 
-  lazy val resOptSetId            : ResSetOpt[String]         = ResSetOpt("String", dId, j2sOptSetId, jOptSetAttr2sOptSetId)
+  lazy val resOptSetId            : ResSetOpt[Long]           = ResSetOpt("Long", dId, j2sOptSetId, jOptSetAttr2sOptSetId)
   lazy val resOptSetString        : ResSetOpt[String]         = ResSetOpt("String", dString, j2sOptSetString, jOptSetAttr2sOptSetString)
   lazy val resOptSetInt           : ResSetOpt[Int]            = ResSetOpt("Int", dInt, j2sOptSetInt, jOptSetAttr2sOptSetInt)
   lazy val resOptSetLong          : ResSetOpt[Long]           = ResSetOpt("Long", dLong, j2sOptSetLong, jOptSetAttr2sOptSetLong)

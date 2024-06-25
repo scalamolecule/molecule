@@ -9,7 +9,7 @@ import java.util.{Date, UUID, Iterator => jIterator, List => jList, Map => jMap,
 trait LambdasOne extends ResolveBase {
 
   // Single sample value extracted from clojure LazySeq
-  private lazy val firstIdx           : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).toString.asInstanceOf[AnyRef]
+  private lazy val firstIdx           : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
   private lazy val firstString        : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
   private lazy val firstInt           : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).toString.toInt.asInstanceOf[AnyRef]
   private lazy val firstLong          : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
@@ -33,7 +33,7 @@ trait LambdasOne extends ResolveBase {
   private lazy val firstShort         : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[Integer].toShort.asInstanceOf[AnyRef]
   private lazy val firstChar          : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[String].charAt(0).asInstanceOf[AnyRef]
 
-  private lazy val set2setId            : AnyRef => AnyRef = set2set((v: AnyRef) => v.toString)
+  private lazy val set2setId            : AnyRef => AnyRef = set2set
   private lazy val set2setString        : AnyRef => AnyRef = set2set
   private lazy val set2setInt           : AnyRef => AnyRef = set2set((v: AnyRef) => v.toString.toInt)
   private lazy val set2setLong          : AnyRef => AnyRef = set2set
@@ -63,7 +63,7 @@ trait LambdasOne extends ResolveBase {
   private def set2set(value: AnyRef => Any): AnyRef => AnyRef =
     (v: AnyRef) => v.asInstanceOf[jSet[_]].toArray.map(value).toSet
 
-  private lazy val vector2setId            : AnyRef => AnyRef = jvector2set((v: AnyRef) => v.toString)
+  private lazy val vector2setId            : AnyRef => AnyRef = jvector2set
   private lazy val vector2setString        : AnyRef => AnyRef = jvector2set
   private lazy val vector2setInt           : AnyRef => AnyRef = jvector2set((v: AnyRef) => v.toString.toInt)
   private lazy val vector2setLong          : AnyRef => AnyRef = jvector2set
@@ -97,7 +97,7 @@ trait LambdasOne extends ResolveBase {
     vector2set: AnyRef => AnyRef,
   )
 
-  lazy val resId            : ResOne[String]         = ResOne("String", dId, s2jId, j2sId, firstIdx, set2setId, vector2setId)
+  lazy val resId            : ResOne[Long]           = ResOne("Long", dId, s2jId, j2sId, firstIdx, set2setId, vector2setId)
   lazy val resString        : ResOne[String]         = ResOne("String", dString, s2jString, j2sString, firstString, set2setString, vector2setString)
   lazy val resInt           : ResOne[Int]            = ResOne("Int", dInt, s2jInt, j2sInt, firstInt, set2setInt, vector2setInt)
   lazy val resLong          : ResOne[Long]           = ResOne("Long", dLong, s2jLong, j2sLong, firstLong, set2setLong, vector2setLong)
@@ -123,11 +123,11 @@ trait LambdasOne extends ResolveBase {
 
 
   private lazy val j2sOptId             = (v: AnyRef) => v match {
-    case null          => Option.empty[String]
-    case v: jLong      => Some(v.toString)
+    case null          => Option.empty[Long]
+    case v: jLong      => Some(v)
     case v: jMap[_, _] =>
       v.values.iterator.next match {
-        case l: Long => Some(l.toString)
+        case l: Long => Some(l)
         // ref
         case map: jMap[_, _] =>
           /*
@@ -140,13 +140,13 @@ trait LambdasOne extends ResolveBase {
           {:ns/ref {:db/id 17592186045422}}
            */
           var continue = true
-          var id       = ""
+          var id       = 0L
           val it       = map.entrySet().iterator()
           while (it.hasNext && continue) {
             val pair = it.next()
             if (pair.getKey.toString == ":db/id") {
               continue = false
-              id = pair.getValue.toString
+              id = pair.getValue.toString.toLong
             }
           }
           Some(id)
@@ -298,7 +298,7 @@ trait LambdasOne extends ResolveBase {
     j2s: AnyRef => AnyRef
   )
 
-  lazy val resOptId            : ResOneOpt[String]         = ResOneOpt("String", dId, s2jId, j2sOptId)
+  lazy val resOptId            : ResOneOpt[Long]           = ResOneOpt("Long", dId, s2jId, j2sOptId)
   lazy val resOptString        : ResOneOpt[String]         = ResOneOpt("String", dString, s2jString, j2sOptString)
   lazy val resOptInt           : ResOneOpt[Int]            = ResOneOpt("Int", dInt, s2jInt, j2sOptInt)
   lazy val resOptLong          : ResOneOpt[Long]           = ResOneOpt("Long", dLong, s2jLong, j2sOptLong)
@@ -326,7 +326,7 @@ trait LambdasOne extends ResolveBase {
   // Nested opt ---------------------------------------------------------------------
 
   lazy val it2Id2    : AnyRef => AnyRef = {
-    case v: jLong => v.toString.asInstanceOf[AnyRef]
+    case v: jLong => v.asInstanceOf[AnyRef]
     case `none`   => nullValue
     case other    => unexpectedValue(other)
   }
@@ -346,7 +346,7 @@ trait LambdasOne extends ResolveBase {
 
   lazy val it2Id            : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
     case `none`   => nullValue
-    case v: jLong => v.toString
+    case v: jLong => v
     case other    => unexpectedValue(other)
   }
   lazy val it2String        : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
@@ -465,7 +465,7 @@ trait LambdasOne extends ResolveBase {
 
   lazy val it2OptId            : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
     case `none` => None
-    case v      => Some(v.toString)
+    case v      => Some(v)
   }
   lazy val it2OptString        : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
     case `none` => None

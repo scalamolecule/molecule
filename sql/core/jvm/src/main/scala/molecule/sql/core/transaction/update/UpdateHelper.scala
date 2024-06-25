@@ -78,7 +78,7 @@ trait UpdateHelper { self: SpiSyncBase =>
                   val insertRefRow       = Table(refPath, insertRefRowStmt, insertRefRowAction, true)
 
                   // Insert join row
-                  val curId               = rowTuple.productElement(last - 1).asInstanceOf[String]
+                  val curId               = rowTuple.productElement(last - 1).asInstanceOf[Long]
                   val insertJoinRowStmt   =
                     s"INSERT INTO ${ns}_${refAttr}_$refNs (${ns}_id, ${refNs}_id) VALUES ($curId, ?)"
                   val insertJoinRowAction = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
@@ -93,11 +93,12 @@ trait UpdateHelper { self: SpiSyncBase =>
                   tableUpdates = List(insertJoinRow, insertRefRow) ++ tableUpdates
 
                 case nested: List[_] =>
-                  val refIds = nested.asInstanceOf[List[String]].map(_.toLong)
+                  //                  val refIds = nested.asInstanceOf[List[String]].map(_.toLong)
+                  val refIds = nested.asInstanceOf[List[Long]]
                   refIdss(refPath) = refIdss.getOrElse(refPath, List.empty[Long]) ++ refIds
 
-                case Some(refId: String) =>
-                  refIdss(refPath) = refIdss.getOrElse(refPath, List.empty[Long]) :+ refId.toLong
+                case Some(refId: Long) =>
+                  refIdss(refPath) = refIdss.getOrElse(refPath, List.empty[Long]) :+ refId
 
                 case None =>
                   val insertRefRowStmt   = s"INSERT INTO $refNs (id) VALUES (DEFAULT)"
@@ -107,7 +108,7 @@ trait UpdateHelper { self: SpiSyncBase =>
                   val insertRefRow       = Table(refPath, insertRefRowStmt, insertRefRowAction, true)
 
                   // Add relationship to new ref row
-                  val curId              = rowTuple.productElement(last - 1).asInstanceOf[String]
+                  val curId              = rowTuple.productElement(last - 1).asInstanceOf[Long]
                   val updateCurRowStmt   = s"UPDATE $ns SET $refAttr = ? WHERE id = $curId"
                   val updateCurRowAction = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
                     // Use ref path to retrieve created ref id from previous insert
@@ -120,7 +121,7 @@ trait UpdateHelper { self: SpiSyncBase =>
                     refPath.dropRight(2),
                     updateCurRowStmt,
                     updateCurRowAction,
-                    curIds = List(curId.toLong),
+                    curIds = List(curId),
                   )
 
                   // Tables are resolved in reverse order in JdbcConn_JVM.populateStmts
@@ -131,7 +132,7 @@ trait UpdateHelper { self: SpiSyncBase =>
 
             case (refPath, i) =>
               refIdss(refPath) = refIdss.getOrElse(refPath, List.empty[Long]) :+
-                rowTuple.productElement(i).asInstanceOf[String].toLong
+                rowTuple.productElement(i).asInstanceOf[Long]
           }
         }
       //        println("-- 2 ---- refIdss -------- ")
@@ -144,20 +145,20 @@ trait UpdateHelper { self: SpiSyncBase =>
           val nsIds = idsMap(refPath.dropRight(2))
           //          println("-- 3 ---- nsIds: " + nsIds)
 
-          val elements = idsResolver(nsIds.map(_.toString))
+          val elements = idsResolver(nsIds)
           //          println("-- 3 ---- elements --------")
           //          elements.foreach(println)
           //          println("-- 3 ---- tuples --------")
           //          query_getRaw(Query[(String, Option[String])](elements)).foreach(println)
 
           val refIds = ListBuffer.empty[Long]
-          query_getRaw(Query[(String, Option[String])](elements)).flatMap {
+          query_getRaw(Query[(Long, Option[Long])](elements)).flatMap {
             case (nsId, None)        =>
               val refId = getId(s"INSERT INTO $refNs (id) VALUES (DEFAULT)")
               refIds += refId
               Some((nsId, refId))
             case (nsId, Some(refId)) =>
-              refIds += refId.toLong
+              refIds += refId
               None
           }.foreach {
             case (nsId, refId) => getId(s"UPDATE $ns SET $refAttr = $refId WHERE id = $nsId", Some(nsId))
@@ -324,7 +325,7 @@ trait UpdateHelper { self: SpiSyncBase =>
             val newRef        = if (isCardOne1) {
               CompleteCurRef(
                 refPath1,
-                (ids: List[String]) => List(
+                (ids: List[Long]) => List(
                   AttrOneManID(ns, "id", Eq, ids),
                   AttrOneOptID(ns, refAttr, refNs = Some(refNs))
                 )
@@ -332,7 +333,7 @@ trait UpdateHelper { self: SpiSyncBase =>
             } else {
               CompleteCurRef(
                 refPath1,
-                (ids: List[String]) => List(
+                (ids: List[Long]) => List(
                   AttrOneManID(ns, "id", Eq, ids),
                   AttrOneOptID(ns, refAttr, refNs = Some(refNs))
                 )
@@ -428,7 +429,7 @@ trait UpdateHelper { self: SpiSyncBase =>
       var i            = 0
       val tableUpdates = getUpdateResolvers(elements).flatMap {
         case (refPath, modelResolver) =>
-          val updateModel = modelResolver(idLists(i).map(_.toString)) // we pass current ids in Table
+          val updateModel = modelResolver(idLists(i)) // we pass current ids in Table
 
           val n = updateModel.length
           //          println(s"------ X ------- $refPath  $n")
@@ -440,7 +441,7 @@ trait UpdateHelper { self: SpiSyncBase =>
     }
   }
 
-  private def getId(stmt: String, updateId: Option[String] = None)(implicit conn: JdbcConn_JVM): Long = {
+  private def getId(stmt: String, updateId: Option[Long] = None)(implicit conn: JdbcConn_JVM): Long = {
     val ps = conn.sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
     ps.addBatch()
     ps.executeBatch()
@@ -449,7 +450,7 @@ trait UpdateHelper { self: SpiSyncBase =>
       resultSet.getLong(1)
     } else {
       // MariaDb doesn't return id from updates, so we use supplied id in update stmt
-      updateId.get.toLong
+      updateId.get
     }
     //    println(stmt + "  -->  id " + id)
     id
@@ -467,26 +468,26 @@ trait UpdateHelper { self: SpiSyncBase =>
     } else {
 
       val idLists = arity match {
-        case 1 => Array(idRows.asInstanceOf[List[String]])
+        case 1 => Array(idRows.asInstanceOf[List[Long]])
         case 2 =>
-          val (aa, bb) = idRows.asInstanceOf[List[(String, String)]].unzip
+          val (aa, bb) = idRows.asInstanceOf[List[(Long, Long)]].unzip
           Array(aa, bb)
 
         case 3 =>
-          val (aa, bb, cc) = idRows.asInstanceOf[List[(String, String, String)]].unzip3
+          val (aa, bb, cc) = idRows.asInstanceOf[List[(Long, Long, Long)]].unzip3
           Array(aa, bb, cc)
 
         case idCount =>
-          val result = Array.fill(idCount)(List.empty[String])
+          val result = Array.fill(idCount)(List.empty[Long])
           idRows.asInstanceOf[List[Product]].foreach { tuple =>
             (0 until idCount).foreach { i =>
-              result(i) = result(i) :+ tuple.productElement(i).asInstanceOf[String]
+              result(i) = result(i) :+ tuple.productElement(i).asInstanceOf[Long]
             }
           }
           result
       }
       //      println(idLists.mkString("Array(", ", ", ")"))
-      idLists.map(_.map(_.toLong))
+      idLists
     }
   }
 

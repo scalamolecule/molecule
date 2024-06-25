@@ -315,9 +315,9 @@ trait SpiSyncBase
     ps.execute()
 
     val resultSet = ps.getGeneratedKeys // is empty if no nested data
-    var ids       = List.empty[String]
+    var ids       = List.empty[Long]
     while (resultSet.next()) {
-      ids = ids :+ resultSet.getLong(1).toString
+      ids = ids :+ resultSet.getLong(1)
     }
     ps.close()
 

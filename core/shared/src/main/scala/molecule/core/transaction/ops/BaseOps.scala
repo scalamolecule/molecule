@@ -9,7 +9,7 @@ import molecule.core.transformation.JsonBase
 
 trait BaseOps extends JsonBase with BaseHelpers {
 
-  protected lazy val transformID            : String => Any         = identity
+  protected lazy val transformID            : Long => Any           = identity
   protected lazy val transformString        : String => Any         = identity
   protected lazy val transformInt           : Int => Any            = identity
   protected lazy val transformLong          : Long => Any           = identity
@@ -33,7 +33,7 @@ trait BaseOps extends JsonBase with BaseHelpers {
   protected lazy val transformShort         : Short => Any          = identity
   protected lazy val transformChar          : Char => Any           = identity
 
-  protected lazy val set2arrayID            : Set[String] => Array[AnyRef]         = (set: Set[String]) => set.asInstanceOf[Set[AnyRef]].toArray
+  protected lazy val set2arrayID            : Set[Long] => Array[AnyRef]           = (set: Set[Long]) => set.asInstanceOf[Set[AnyRef]].toArray
   protected lazy val set2arrayString        : Set[String] => Array[AnyRef]         = (set: Set[String]) => set.asInstanceOf[Set[AnyRef]].toArray
   protected lazy val set2arrayInt           : Set[Int] => Array[AnyRef]            = (set: Set[Int]) => set.asInstanceOf[Set[AnyRef]].toArray
   protected lazy val set2arrayLong          : Set[Long] => Array[AnyRef]           = (set: Set[Long]) => set.asInstanceOf[Set[AnyRef]].toArray
@@ -57,7 +57,7 @@ trait BaseOps extends JsonBase with BaseHelpers {
   protected lazy val set2arrayShort         : Set[Short] => Array[AnyRef]          = (set: Set[Short]) => set.asInstanceOf[Set[AnyRef]].toArray
   protected lazy val set2arrayChar          : Set[Char] => Array[AnyRef]           = (set: Set[Char]) => set.asInstanceOf[Set[AnyRef]].toArray
 
-  protected lazy val seq2arrayID            : Seq[String] => Array[AnyRef]         = (seq: Seq[String]) => seq.asInstanceOf[Seq[AnyRef]].toArray
+  protected lazy val seq2arrayID            : Seq[Long] => Array[AnyRef]           = (seq: Seq[Long]) => seq.asInstanceOf[Seq[AnyRef]].toArray
   protected lazy val seq2arrayString        : Seq[String] => Array[AnyRef]         = (seq: Seq[String]) => seq.asInstanceOf[Seq[AnyRef]].toArray
   protected lazy val seq2arrayInt           : Seq[Int] => Array[AnyRef]            = (seq: Seq[Int]) => seq.asInstanceOf[Seq[AnyRef]].toArray
   protected lazy val seq2arrayLong          : Seq[Long] => Array[AnyRef]           = (seq: Seq[Long]) => seq.asInstanceOf[Seq[AnyRef]].toArray
@@ -83,7 +83,7 @@ trait BaseOps extends JsonBase with BaseHelpers {
 
   // Various extension data for each database
   // Scala type - Db type - cast
-  protected lazy val extsID             = List("String", "AnyRef", "")
+  protected lazy val extsID             = List("Long", "AnyRef", "")
   protected lazy val extsString         = List("String", "AnyRef", "")
   protected lazy val extsInt            = List("Int", "AnyRef", "")
   protected lazy val extsLong           = List("Long", "AnyRef", "")
@@ -107,7 +107,7 @@ trait BaseOps extends JsonBase with BaseHelpers {
   protected lazy val extsShort          = List("Short", "AnyRef", "")
   protected lazy val extsChar           = List("Char", "AnyRef", "")
 
-  protected lazy val value2jsonID            : (StringBuffer, String) => StringBuffer         = (buf: StringBuffer, v: String) => quote(buf, v)
+  protected lazy val value2jsonID            : (StringBuffer, Long) => StringBuffer           = (buf: StringBuffer, v: Long) => buf.append(v)
   protected lazy val value2jsonString        : (StringBuffer, String) => StringBuffer         = (buf: StringBuffer, v: String) => quote(buf, v)
   protected lazy val value2jsonInt           : (StringBuffer, Int) => StringBuffer            = (buf: StringBuffer, v: Int) => buf.append(v)
   protected lazy val value2jsonLong          : (StringBuffer, Long) => StringBuffer           = (buf: StringBuffer, v: Long) => buf.append(v)
@@ -132,7 +132,7 @@ trait BaseOps extends JsonBase with BaseHelpers {
   protected lazy val value2jsonChar          : (StringBuffer, Char) => StringBuffer           = (buf: StringBuffer, v: Char) => quote(buf, v.toString)
 
 
-  protected lazy val one2jsonID            : String => String         = (v: String) => "\"" + escStr(v) + "\""
+  protected lazy val one2jsonID            : Long => String           = (v: Long) => s"$v"
   protected lazy val one2jsonString        : String => String         = (v: String) => "\"" + escStr(v) + "\""
   protected lazy val one2jsonInt           : Int => String            = (v: Int) => s"$v"
   protected lazy val one2jsonLong          : Long => String           = (v: Long) => s"$v"

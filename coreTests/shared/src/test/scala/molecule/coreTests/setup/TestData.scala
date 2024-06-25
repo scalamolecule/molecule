@@ -18,7 +18,7 @@ trait TestData extends DateHandling { self: CoreTest =>
   private def bd(d: Double): BigDecimal = BigDecimal(d)
 
   private val n = "123456789012345678901234567" // for BigInt/Decimal
-//  private val n = "1234567890123456789012345678" // too big for MariaDb for some reason
+  //  private val n = "1234567890123456789012345678" // too big for MariaDb for some reason
 
 
   lazy val (string0, string1, string2, string3, string4, string5, string6, string7, string8, string9) =
@@ -178,7 +178,7 @@ trait TestData extends DateHandling { self: CoreTest =>
     (0 to 9).toList.map(_.toShort) ++ List(Short.MinValue, Short.MaxValue)
 
   lazy val (ref0, ref1, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9) =
-    ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9")
+    (0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L)
 
   lazy val toleranceBigDecimal: BigDecimal = BigDecimal(0.001)
   lazy val toleranceDouble    : Double     = 0.001

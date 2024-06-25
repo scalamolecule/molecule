@@ -378,7 +378,7 @@ trait Insert_datomic
     }
   }
 
-  override protected lazy val transformID             = (v: Any) => v.asInstanceOf[String].toLong
+  override protected lazy val transformID             = identity
   override protected lazy val transformString         = identity
   override protected lazy val transformInt            = (v: Any) => v.asInstanceOf[Int].toLong
   override protected lazy val transformLong           = identity

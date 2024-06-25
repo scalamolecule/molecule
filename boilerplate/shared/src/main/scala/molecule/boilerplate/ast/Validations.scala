@@ -16,7 +16,7 @@ trait Validations {
   case class ValidateID(_attrs: Seq[Attr] = Nil, _values: Seq[Value] = Nil) extends Validator {
     override def withAttrs(_attrs: Seq[Attr]): ValidateID = ???
     override def withValues(_values: Seq[Value]): ValidateID = ???
-    def validate(v: String): Seq[String] = ???
+    def validate(v: Long): Seq[String] = ???
   }
 
   case class ValidateString(_attrs: Seq[Attr] = Nil, _values: Seq[Value] = Nil) extends Validator {

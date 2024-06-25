@@ -61,7 +61,7 @@ case class JdbcConn_JVM(
       // commit or fail all
       sqlConn.commit()
 
-      TxReport(ids.map(_.toString))
+      TxReport(ids)
     } catch {
       // re-throw errors to keep stacktrace back to original error
       case e: SQLException =>

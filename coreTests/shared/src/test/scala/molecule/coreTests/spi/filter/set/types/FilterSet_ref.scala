@@ -52,7 +52,7 @@ trait FilterSet_ref extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
           // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.refs.has(Seq.empty[String]).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.refs.has(Seq.empty[Long]).query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -98,7 +98,7 @@ trait FilterSet_ref extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
           // Negating empty Seqs/Sets has no effect
-          _ <- Ns.i.a1.refs.hasNo(Seq.empty[String]).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.refs.hasNo(Seq.empty[Long]).query.get.map(_ ==> List(a, b))
         } yield ()
       }
     }
@@ -145,7 +145,7 @@ trait FilterSet_ref extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
           // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.refs_.has(Seq.empty[String]).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.refs_.has(Seq.empty[Long]).query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -193,7 +193,7 @@ trait FilterSet_ref extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
           // Negating empty Seqs/Sets has no effect
-          _ <- Ns.i.a1.refs_.hasNo(Seq.empty[String]).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.refs_.hasNo(Seq.empty[Long]).query.get.map(_ ==> List(1, 2))
         } yield ()
       }
     }

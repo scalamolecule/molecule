@@ -48,7 +48,7 @@ trait Delete_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- A.i.insert(1, 2, 3).transact
         _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
 
-        _ <- A(Seq.empty[String]).delete.transact
+        _ <- A(Seq.empty[Long]).delete.transact
 
         // No entities deleted
         _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))

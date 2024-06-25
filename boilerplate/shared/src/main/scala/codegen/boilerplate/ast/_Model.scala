@@ -47,7 +47,7 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
   private def makeAttrGroup(card: String, mode: String, modeFull: String): String = {
     // Render attribute toString method so that a printout can be directly used as valid Scala code
     def body(baseTpe0: String): String = {
-      val baseTpe   = if (baseTpe0 == "ID") "String" else baseTpe0
+      val baseTpe   = if (baseTpe0 == "ID") "Long" else baseTpe0
       val attrType  = s"Attr$card$mode$baseTpe0"
       val vs        = (card, mode, baseTpe) match {
         case ("One", "Opt", _)      => s"Option[Seq[$baseTpe]] = None"

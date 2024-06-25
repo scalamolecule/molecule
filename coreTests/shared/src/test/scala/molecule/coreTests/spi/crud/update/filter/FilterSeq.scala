@@ -75,7 +75,7 @@ trait FilterSeq extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       // Filtering updates by equality of collections is not supported by molecule.
       // Instead use has/hasNo.
       for {
-        _ <- Ns("42").iSeq_(List(1)).int(3).update.transact
+        _ <- Ns(42).iSeq_(List(1)).int(3).update.transact
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Filtering by collection equality (Ns.iSeq) not supported in updates."
           }

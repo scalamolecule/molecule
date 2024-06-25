@@ -17,7 +17,7 @@ trait LambdasMap extends LambdasBase with JavaConversions { self: SqlQueryBase =
     json2tpe: String => T,
   )
 
-  lazy val resMapId            : ResMap[String]         = ResMap("String", tpeDbId, one2jsonId, sqlJson2mapId, json2oneId)
+  lazy val resMapId            : ResMap[Long]           = ResMap("Long", tpeDbId, one2jsonId, sqlJson2mapId, json2oneId)
   lazy val resMapString        : ResMap[String]         = ResMap("String", tpeDbString, one2jsonString, sqlJson2mapString, json2oneString)
   lazy val resMapInt           : ResMap[Int]            = ResMap("Int", tpeDbInt, one2jsonInt, sqlJson2mapInt, json2oneInt)
   lazy val resMapLong          : ResMap[Long]           = ResMap("Long", tpeDbLong, one2jsonLong, sqlJson2mapLong, json2oneLong)
@@ -42,7 +42,7 @@ trait LambdasMap extends LambdasBase with JavaConversions { self: SqlQueryBase =
   lazy val resMapChar          : ResMap[Char]           = ResMap("Char", tpeDbChar, one2jsonChar, sqlJson2mapChar, json2oneChar)
 
 
-  private lazy val json2mapID            : String => Map[String, String]         = (json: String) => upickle.default.read[Map[String, String]](json)
+  private lazy val json2mapID            : String => Map[String, Long]           = (json: String) => upickle.default.read[Map[String, Long]](json)
   private lazy val json2mapString        : String => Map[String, String]         = (json: String) => upickle.default.read[Map[String, String]](json)
   private lazy val json2mapInt           : String => Map[String, Int]            = (json: String) => upickle.default.read[Map[String, Int]](json)
   private lazy val json2mapLong          : String => Map[String, Long]           = (json: String) => upickle.default.read[Map[String, Long]](json)
@@ -66,7 +66,7 @@ trait LambdasMap extends LambdasBase with JavaConversions { self: SqlQueryBase =
   private lazy val json2mapShort         : String => Map[String, Short]          = (json: String) => upickle.default.read[Map[String, Short]](json)
   private lazy val json2mapChar          : String => Map[String, Char]           = (json: String) => upickle.default.read[Map[String, Char]](json)
 
-  private lazy val sqlJson2mapId            : (RS, Int) => Map[String, String]         = (row: RS, paramIndex: Int) => sqlJson2map(row, paramIndex, json2mapID)
+  private lazy val sqlJson2mapId            : (RS, Int) => Map[String, Long]           = (row: RS, paramIndex: Int) => sqlJson2map(row, paramIndex, json2mapID)
   private lazy val sqlJson2mapString        : (RS, Int) => Map[String, String]         = (row: RS, paramIndex: Int) => sqlJson2map(row, paramIndex, json2mapString)
   private lazy val sqlJson2mapInt           : (RS, Int) => Map[String, Int]            = (row: RS, paramIndex: Int) => sqlJson2map(row, paramIndex, json2mapInt)
   private lazy val sqlJson2mapLong          : (RS, Int) => Map[String, Long]           = (row: RS, paramIndex: Int) => sqlJson2map(row, paramIndex, json2mapLong)
@@ -91,13 +91,12 @@ trait LambdasMap extends LambdasBase with JavaConversions { self: SqlQueryBase =
   private lazy val sqlJson2mapChar          : (RS, Int) => Map[String, Char]           = (row: RS, paramIndex: Int) => sqlJson2map(row, paramIndex, json2mapChar)
 
 
-
   case class ResMapOpt[T](
     tpe: String,
     sql2optMap: (RS, ParamIndex) => Option[Map[String, T]],
   )
 
-  lazy val resOptMapId            : ResMapOpt[String]         = ResMapOpt("String", sql2optMapId)
+  lazy val resOptMapId            : ResMapOpt[Long]           = ResMapOpt("Long", sql2optMapId)
   lazy val resOptMapString        : ResMapOpt[String]         = ResMapOpt("String", sql2optMapString)
   lazy val resOptMapInt           : ResMapOpt[Int]            = ResMapOpt("Int", sql2optMapInt)
   lazy val resOptMapLong          : ResMapOpt[Long]           = ResMapOpt("Long", sql2optMapLong)
@@ -130,7 +129,7 @@ trait LambdasMap extends LambdasBase with JavaConversions { self: SqlQueryBase =
       None
   }
 
-  private lazy val sql2optMapId            : (RS, Int) => Option[Map[String, String]]         = (row: RS, paramIndex: Int) => sql2mapOpt(row, paramIndex, json2mapID)
+  private lazy val sql2optMapId            : (RS, Int) => Option[Map[String, Long]]           = (row: RS, paramIndex: Int) => sql2mapOpt(row, paramIndex, json2mapID)
   private lazy val sql2optMapString        : (RS, Int) => Option[Map[String, String]]         = (row: RS, paramIndex: Int) => sql2mapOpt(row, paramIndex, json2mapString)
   private lazy val sql2optMapInt           : (RS, Int) => Option[Map[String, Int]]            = (row: RS, paramIndex: Int) => sql2mapOpt(row, paramIndex, json2mapInt)
   private lazy val sql2optMapLong          : (RS, Int) => Option[Map[String, Long]]           = (row: RS, paramIndex: Int) => sql2mapOpt(row, paramIndex, json2mapLong)

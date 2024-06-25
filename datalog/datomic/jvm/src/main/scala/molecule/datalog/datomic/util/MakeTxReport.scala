@@ -17,8 +17,8 @@ object MakeTxReport {
     val t      : Long     = dbAfter.basisT
     val tx     : Long     = Peer.toTx(t).asInstanceOf[Long]
 
-    val ids: List[String] = {
-      val allIds           = ListBuffer.empty[String]
+    val ids: List[Long] = {
+      val allIds           = ListBuffer.empty[Long]
       val refs             = mutable.Set.empty[Long]
       val datoms           = rawTxReport.get(TX_DATA).asInstanceOf[jList[PeerDatom]].iterator
       val tempIds          = rawTxReport.get(TEMPIDS).asInstanceOf[jMap[_, _]].values().asScala.toBuffer
@@ -29,9 +29,8 @@ object MakeTxReport {
       while (datoms.hasNext) {
         datom = datoms.next
         e = datom.e().asInstanceOf[Long]
-        val eStr = e.toString
         if (datom.added() && tempIds.contains(e) && !refs.contains(e)) {
-          allIds += eStr
+          allIds += e
         }
         datom.v() match {
           case likelyRef: jLong =>

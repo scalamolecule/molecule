@@ -493,12 +493,12 @@ trait SqlInsert
       }
 
       // Join table setter
-      val refIds             = tpl.productElement(tplIndex).asInstanceOf[Iterable[String]]
+      val refIds             = tpl.productElement(tplIndex).asInstanceOf[Iterable[Long]]
       val joinSetter: Setter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
         val id = idsMap(curPath)(rowIndex)
         refIds.foreach { refId =>
           ps.setLong(1, id)
-          ps.setLong(2, refId.toLong)
+          ps.setLong(2, refId)
           ps.addBatch()
         }
       }
@@ -537,12 +537,12 @@ trait SqlInsert
             }
 
             // Join table setter
-            val refIds = set.asInstanceOf[Iterable[String]]
+            val refIds = set.asInstanceOf[Iterable[Long]]
             (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
               val id = idsMap(curPath)(rowIndex)
               refIds.foreach { refId =>
                 ps.setLong(1, id)
-                ps.setLong(2, refId.toLong)
+                ps.setLong(2, refId)
                 ps.addBatch()
               }
             }

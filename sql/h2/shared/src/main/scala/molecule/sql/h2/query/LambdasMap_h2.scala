@@ -8,7 +8,7 @@ import molecule.sql.core.query.{LambdasMap, SqlQueryBase}
 trait LambdasMap_h2 extends LambdasMap { self: SqlQueryBase =>
 
   // Unquoting json string values from H2
-  override protected lazy val json2oneId            : String => String         = (v: String) => v.substring(1, v.length - 1)
+  override protected lazy val json2oneId            : String => Long           = (v: String) => v.toLong
   override protected lazy val json2oneString        : String => String         = (v: String) => v.substring(1, v.length - 1)
   override protected lazy val json2oneInt           : String => Int            = (v: String) => v.toInt
   override protected lazy val json2oneLong          : String => Long           = (v: String) => v.toLong
