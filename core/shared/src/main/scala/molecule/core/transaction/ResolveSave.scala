@@ -46,8 +46,8 @@ class ResolveSave
             }
           }
 
-        case Ref(ns, refAttr, refNs, card, owner, _) =>
-          addRef(ns, refAttr, refNs, card, owner)
+        case Ref(ns, refAttr, refNs, card, _, _) =>
+          addRef(ns, refAttr, refNs, card)
           resolve(tail)
 
         case BackRef(backRefNs, _, _) =>

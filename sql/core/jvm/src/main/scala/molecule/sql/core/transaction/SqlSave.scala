@@ -177,7 +177,7 @@ trait SqlSave
   }
 
   override protected def addRef(
-    ns: String, refAttr: String, refNs: String, card: Card, owner: Boolean
+    ns: String, refAttr: String, refNs: String, card: Card
   ): Unit = {
     postResolvers = postResolvers :+ getRefResolver[Unit](ns, refAttr, refNs, card)
   }

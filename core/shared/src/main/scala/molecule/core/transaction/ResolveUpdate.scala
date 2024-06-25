@@ -108,7 +108,7 @@ class ResolveUpdate(
 
   private def resolveAttrOneTac(a: AttrOneTac): Unit = {
     a match {
-      case AttrOneTacID(ns, "id", Eq, ids1, _, _, _, _, _, _, _, _) => handleIds(ns, ids1)
+      case AttrOneTacID(ns, "id", Eq, ids1, _, _, _, _, _, _, _) => handleIds(ns, ids1)
 
       case a if a.attr == "id" => throw ModelError(
         s"Generic id attribute not allowed in update molecule. Found:\n" + a)

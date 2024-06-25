@@ -28,19 +28,6 @@ trait FilterAttrRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       } yield ()
     }
 
-    "Forward/backward owner" - refs { implicit conn =>
-      for {
-        _ <- A.s.i.OwnB.i.insert(
-          ("a", 1, 0),
-          ("b", 1, 1),
-        ).transact
-
-        _ <- A.s.i_(B.i_).OwnB.i_.query.get.map(_ ==> List("b"))
-
-        _ <- A.s.i_.OwnB.i_(A.i_).query.get.map(_ ==> List("b"))
-      } yield ()
-    }
-
     "Ref-Ref" - refs { implicit conn =>
       for {
         _ <- A.s.i.B.i.C.i.insert(

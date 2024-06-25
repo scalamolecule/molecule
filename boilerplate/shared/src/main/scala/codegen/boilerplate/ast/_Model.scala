@@ -90,7 +90,6 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
         case "Long" | "Float" | "Byte" | "Short" | "Char" => """v.toString == "0""""
         case _                                            => "v == null"
       }
-      val ownerStr  = if (baseTpe0 == "ID") ", $owner" else ""
 
       val attrStr = card match {
         case "One"                      => mode match {
@@ -98,7 +97,7 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
             if (format_?)
               s"""def format(v: $baseTpe): String = $format
                  |      def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords$ownerStr)\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
             else
               s"""def vss: String = vs.fold("None")(_.mkString("Some(Seq(", ", ", "))"))
                  |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
@@ -106,7 +105,7 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
             if (format_?)
               s"""def format(v: $baseTpe): String = $format
                  |      def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords$ownerStr)\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
             else
               s"""def vss: String = vs.mkString("Seq(", ", ", ")")
                  |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
@@ -116,7 +115,7 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
             if (format_?)
               s"""def format(v: $baseTpe): String = $format
                  |      def vss: String = vs.fold("None")(_.map(format).mkString("Some(Set(", ", ", "))"))
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords$ownerStr)\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
             else
               s"""def vss: String = vs.fold("None")(_.mkString("Some(Set(", ", ", "))"))
                  |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
@@ -124,7 +123,7 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
             if (format_?)
               s"""def format(v: $baseTpe): String = $format
                  |      def vss: String = vs.map(format).mkString("Set(", ", ", ")")
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords$ownerStr)\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
             else
               s"""def vss: String = vs.mkString("Set(", ", ", ")")
                  |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
@@ -133,18 +132,18 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
           case "Opt" =>
             s"""def format(v: $baseTpe): String = $format
                |      def vss: String = vs.fold("None")(_.map(format).mkString("Some(Array(", ", ", "))"))
-               |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords$ownerStr)\"\"\"""".stripMargin
+               |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
           case _     =>
             s"""def format(v: $baseTpe): String = $format
                |      def vss: String = vs.map(format).mkString("Array(", ", ", ")")
-               |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords$ownerStr)\"\"\"""".stripMargin
+               |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
         }
         case "Seq"                      => mode match {
           case "Opt" =>
             if (format_?)
               s"""def format(v: $baseTpe): String = $format
                  |      def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords$ownerStr)\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
             else
               s"""def vss: String = vs.fold("None")(_.mkString("Some(Seq(", ", ", "))"))
                  |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
@@ -152,7 +151,7 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
             if (format_?)
               s"""def format(v: $baseTpe): String = $format
                  |      def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords$ownerStr)\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
             else
               s"""def vss: String = vs.mkString("Seq(", ", ", ")")
                  |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
@@ -162,7 +161,7 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
             if (format_?)
               s"""def format(v: $baseTpe): String = if ($nullCheck) "null" else $format
                  |      def vss: String = vs.fold("None")(_.map { case (k, v) => s\"\"\"("$$k", $${format(v)})\"\"\" }.mkString("Some(Map(", ", ", "))"))
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords$ownerStr)\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
             else
               s"""def vss: String = vs.fold("None")(_.map { case (k, v) => s\"\"\"("$$k", $$v)\"\"\" }.mkString("Some(Map(", ", ", "))"))
                  |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
@@ -170,14 +169,12 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
             if (format_?)
               s"""def format(v: $baseTpe): String = if ($nullCheck) "null" else $format
                  |      def vss: String = vs.map { case (k, v) => s\"\"\"("$$k", $${format(v)})\"\"\" }.mkString("Map(", ", ", ")")
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords$ownerStr)\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
             else
               s"""def vss: String = vs.map { case (k, v) => s\"\"\"("$$k", $$v)\"\"\" }.mkString("Map(", ", ", ")")
                  |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
         }
       }
-
-      val ownerAttr = if (baseTpe0 == "ID") s",\n    override val owner: Boolean = false" else ""
 
       s"""
          |  case class Attr$card$mode$baseTpe0(
@@ -191,7 +188,7 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
          |    override val errors: Seq[String] = Nil,
          |    override val refNs: Option[String] = None,
          |    override val sort: Option[String] = None,
-         |    override val coord: Seq[Int] = Nil$ownerAttr
+         |    override val coord: Seq[Int] = Nil
          |  ) extends Attr$card$mode {
          |    override def toString: String = {
          |      $attrStr

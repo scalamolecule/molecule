@@ -104,7 +104,7 @@ trait SpiHelpers extends ModelUtils {
     val updateModels = ListBuffer.empty[(List[String], List[String] => List[Element])]
 
     elements.foreach {
-      case a@AttrOneTacID(_, "id", _, _, _, _, _, _, _, _, _, _) =>
+      case a@AttrOneTacID(_, "id", _, _, _, _, _, _, _, _, _) =>
         updateModel += a
         hasId = true
 

@@ -33,31 +33,27 @@ trait SaveOps extends Action2Data with BaseOps {
     exts: List[String],
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
-  ): Unit = ???
+  ): Unit
 
   protected def addByteArray(
     ns: String,
     attr: String,
     optArray: Option[Array[Byte]],
-  ): Unit = ???
+  ): Unit
 
   protected def addMap[T](
     ns: String,
     attr: String,
     optMap: Option[Map[String, T]],
     transformValue: T => Any,
-    //    exts: List[String],
     value2json: (StringBuffer, T) => StringBuffer
-    //    set2map: Set[Any] => Map[String, AnyRef],
-    //    optRefNs: Option[String],
-  ): Unit = ???
+  ): Unit
 
   protected def addRef(
     ns: String,
     refAttr: String,
     refNs: String,
-    card: Card,
-    owner: Boolean
+    card: Card
   ): Unit
 
   protected def addBackRef(

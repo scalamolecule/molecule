@@ -168,34 +168,19 @@ trait SpiSync_postgres extends SpiSyncBase {
           case "int2"      => value(rowsResultSet.getInt(n), "Byte")
           case "bpchar"    => value(rowsResultSet.getString(n), "Char")
           case "bigserial" => value(rowsResultSet.getLong(n), "Long id")
-          case "jsonb"     =>
-
-            //            import org.postgresql.jdbc.PgArray
-
-            //            println("1  " + rowsResultSet.)
-            //            println("1  " + rowsResultSet.getArray(n))
-            //            println("1  " + rowsResultSet.getArray(n).getArray)
-            //            println("1  " + rowsResultSet.getArray(n).getClass)
-            //            println("1  " + rowsResultSet.getString(n))
-            //            println("2  " + rowsResultSet.getArray(n).getResultSet)
-            //            println("3  " + rowsResultSet.getArray(n).getArray.asInstanceOf[Array[_]].toList)
-
-            //            array(n, "Int")
-            value(rowsResultSet.getString(n), "String/URI")
-
-          case "_int4"    => array(n, "Int")
-          case "_text"    => array(n, "String")
-          case "_int8"    => array(n, "Long")
-          case "_numeric" => array(n, "Float/BigInt/BigDecimal")
-          case "_float8"  => array(n, "Double")
-          case "_bool"    => array(n, "Boolean")
-          case "_date"    => array(n, "Date")
-          case "_varchar" => array(n, "java.time text/URI")
-          case "_uuid"    => array(n, "UUID")
-          case "_int2"    => array(n, "Byte/Short")
-          case "_bpchar"  => array(n, "Char")
-          case "_jsonb"   =>
-            array(n, "String")
+          case "jsonb"     => value(rowsResultSet.getString(n), "String/URI")
+          case "_int4"     => array(n, "Int")
+          case "_text"     => array(n, "String")
+          case "_int8"     => array(n, "Long")
+          case "_numeric"  => array(n, "Float/BigInt/BigDecimal")
+          case "_float8"   => array(n, "Double")
+          case "_bool"     => array(n, "Boolean")
+          case "_date"     => array(n, "Date")
+          case "_varchar"  => array(n, "java.time text/URI")
+          case "_uuid"     => array(n, "UUID")
+          case "_int2"     => array(n, "Byte/Short")
+          case "_bpchar"   => array(n, "Char")
+          case "_jsonb"    => array(n, "String")
 
           case other =>
             throw new Exception(s"Unexpected sql result type from raw query: " + other)

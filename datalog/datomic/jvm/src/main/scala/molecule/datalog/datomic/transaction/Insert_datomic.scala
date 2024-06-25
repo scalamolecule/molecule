@@ -292,7 +292,6 @@ trait Insert_datomic
     refAttr: String,
     refNs: String,
     card: Card,
-    owner: Boolean
   ): Product => Unit = {
     val a = kw(ns, refAttr)
     (_: Product) =>
@@ -320,7 +319,6 @@ trait Insert_datomic
     ns: String,
     refAttr: String,
     refNs: String,
-    owner: Boolean,
     nestedElements: List[Element]
   ): Product => Unit = {
     // Recursively resolve nested data
@@ -334,7 +332,7 @@ trait Insert_datomic
           values.foreach { value =>
             e = nestedBaseId
             val nestedTpl = Tuple1(value)
-            addRef(ns, refAttr, refNs, CardOne, owner)(nestedTpl)
+            addRef(ns, refAttr, refNs, CardOne)(nestedTpl)
             unusedRefIds -= e
             e0 = e
             nested2stmts(nestedTpl)
@@ -352,7 +350,7 @@ trait Insert_datomic
           nestedTpls.foreach { nestedTpl =>
             def process(): Unit = {
               e = nestedBaseId
-              addRef(ns, refAttr, refNs, CardOne, owner)(nestedTpl)
+              addRef(ns, refAttr, refNs, CardOne)(nestedTpl)
               unusedRefIds -= e
               e0 = e
               nested2stmts(nestedTpl)
@@ -371,7 +369,7 @@ trait Insert_datomic
           val nestedBaseId = e
           nestedTpls.foreach { nestedTpl =>
             e = nestedBaseId
-            addRef(ns, refAttr, refNs, CardOne, owner)(nestedTpl)
+            addRef(ns, refAttr, refNs, CardOne)(nestedTpl)
             unusedRefIds -= e
             e0 = e
             nested2stmts(nestedTpl)

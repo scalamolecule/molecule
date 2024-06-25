@@ -325,7 +325,6 @@ trait SqlInsert
     refAttr: String,
     refNs: String,
     card: Card,
-    owner: Boolean
   ): Product => Unit = {
     getRefResolver[Product](ns, refAttr, refNs, card)
   }
@@ -341,7 +340,6 @@ trait SqlInsert
     ns: String,
     refAttr: String,
     refNs: String,
-    owner: Boolean,
     nestedElements: List[Element]
   ): Product => Unit = {
     if (inserts.isEmpty) {

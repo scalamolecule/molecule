@@ -12,7 +12,7 @@ class ResolveDelete { self: DeleteOps =>
     elements match {
       case element :: tail => element match {
         case a: Attr => a match {
-          case AttrOneTacID(_, "id", Eq, ids1, _, _, _, _, _, _, _, _) =>
+          case AttrOneTacID(_, "id", Eq, ids1, _, _, _, _, _, _, _) =>
             if (!topLevel)
               throw ModelError(
                 s"Can only apply entity ids to be deleted to the initial namespace."

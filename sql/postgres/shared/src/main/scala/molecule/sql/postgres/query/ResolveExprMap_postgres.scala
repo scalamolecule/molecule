@@ -88,6 +88,7 @@ trait ResolveExprMap_postgres
     where += ((col, s"IS NULL"))
   }
 
-  override protected lazy val json2oneBoolean: String => Boolean =
+  override protected lazy val json2oneBoolean: String => Boolean = {
     (v: String) => v == "t" || v == "1"
+  }
 }

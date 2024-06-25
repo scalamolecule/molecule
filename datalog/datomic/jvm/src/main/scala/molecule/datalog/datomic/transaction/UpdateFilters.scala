@@ -21,7 +21,7 @@ trait UpdateFilters extends ModelUtils {
           case a: AttrOne => a match {
             case a: AttrOneMan =>
               val optValueAttr = a match {
-                case a: AttrOneManID             => AttrOneOptID(a.ns, a.attr, owner = a.owner)
+                case a: AttrOneManID             => AttrOneOptID(a.ns, a.attr)
                 case a: AttrOneManString         => AttrOneOptString(a.ns, a.attr)
                 case a: AttrOneManInt            => AttrOneOptInt(a.ns, a.attr)
                 case a: AttrOneManLong           => AttrOneOptLong(a.ns, a.attr)
@@ -58,7 +58,7 @@ trait UpdateFilters extends ModelUtils {
               case _ =>
                 // Retrieve current Set values for retraction
                 val optSet = a match {
-                  case a: AttrSetManID             => AttrSetOptID(a.ns, a.attr, owner = a.owner)
+                  case a: AttrSetManID             => AttrSetOptID(a.ns, a.attr)
                   case a: AttrSetManString         => AttrSetOptString(a.ns, a.attr)
                   case a: AttrSetManInt            => AttrSetOptInt(a.ns, a.attr)
                   case a: AttrSetManLong           => AttrSetOptLong(a.ns, a.attr)
@@ -256,7 +256,7 @@ trait UpdateFilters extends ModelUtils {
           case a: AttrOne => a match {
             case a: AttrOneMan =>
               val optValueAttr = a match {
-                case a: AttrOneManID             => AttrOneManID(a.ns, a.attr, owner = a.owner)
+                case a: AttrOneManID             => AttrOneManID(a.ns, a.attr)
                 case a: AttrOneManString         => AttrOneManString(a.ns, a.attr)
                 case a: AttrOneManInt            => AttrOneManInt(a.ns, a.attr)
                 case a: AttrOneManLong           => AttrOneManLong(a.ns, a.attr)
@@ -293,7 +293,7 @@ trait UpdateFilters extends ModelUtils {
               case _ =>
                 // Retrieve current Set values for retraction
                 val filterElement = a match {
-                  case a: AttrSetManID             => AttrSetManID(a.ns, a.attr, owner = a.owner)
+                  case a: AttrSetManID             => AttrSetManID(a.ns, a.attr)
                   case a: AttrSetManString         => AttrSetManString(a.ns, a.attr)
                   case a: AttrSetManInt            => AttrSetManInt(a.ns, a.attr)
                   case a: AttrSetManLong           => AttrSetManLong(a.ns, a.attr)

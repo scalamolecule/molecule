@@ -261,19 +261,15 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |          // Convert adjacent mandatory filter attribute to tacit attribute
        |          val tacitAttr = filterAttr0 match {
        |            case a: AttrOneMan => a match {
-       |              case a: AttrOneManID             => AttrOneTacID(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.refNs, a.sort, a.coord, a.owner)
        |              ${liftFilterAttr("One")}
        |            }
        |            case a: AttrSetMan => a match {
-       |              case a: AttrSetManID             => AttrSetTacID(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.refNs, a.sort, a.coord, a.owner)
        |              ${liftFilterAttr("Set")}
        |            }
        |            case a: AttrSeqMan => a match {
-       |              case a: AttrSeqManID             => AttrSeqTacID(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.refNs, a.sort, a.coord, a.owner)
        |              ${liftFilterAttr("Seq")}
        |            }
        |            case a: AttrMapMan => a match {
-       |              case a: AttrMapManID             => AttrMapTacID(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.refNs, a.sort, a.coord, a.owner)
        |              ${liftFilterAttr("Map")}
        |            }
        |            case other         => other
@@ -333,12 +329,10 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |  protected def reverseTopLevelSorting(es: List[Element]): List[Element] = {
        |    es.map {
        |      case attr: AttrOneMan => attr match {
-       |        case a@AttrOneManID(_, _, _, _, _, _, _, _, _, Some(sort), _, _)          => a.copy(sort = Some(reverseSort(sort)))
        |        ${reverseTopLevelSorting("Man")}
        |        case a                                                                    => a
        |      }
        |      case attr: AttrOneOpt => attr match {
-       |        case a@AttrOneOptID(_, _, _, _, _, _, _, _, _, Some(sort), _, _)          => a.copy(sort = Some(reverseSort(sort)))
        |        ${reverseTopLevelSorting("Opt")}
        |        case a                                                                    => a
        |      }
@@ -552,7 +546,7 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
   }
 
   private def liftFilterAttr(card: String): String = {
-    baseTypesWithSpaces.tail.map { case (baseTpe, space) =>
+    baseTypesWithSpaces.map { case (baseTpe, space) =>
       s"case a: Attr${card}Man$baseTpe $space=> Attr${card}Tac$baseTpe(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.refNs, a.sort, a.coord)"
     }.mkString("\n              ")
   }
@@ -563,7 +557,7 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
   }
 
   private def reverseTopLevelSorting(mode: String): String = {
-    baseTypesWithSpaces.tail.map { case (baseTpe, space) =>
+    baseTypesWithSpaces.map { case (baseTpe, space) =>
       s"case a@AttrOne$mode$baseTpe(_, _, _, _, _, _, _, _, _, Some(sort), _) $space=> a.copy(sort = Some(reverseSort(sort)))"
     }.mkString("\n        ")
   }

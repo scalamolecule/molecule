@@ -79,9 +79,9 @@ class ResolveInsert
             }
           }
 
-        case Ref(ns, refAttr, refNs, card, owner, _) =>
+        case Ref(ns, refAttr, refNs, card, _, _) =>
           prevRefs += refAttr
-          val refResolver = addRef(ns, refAttr, refNs, card, owner)
+          val refResolver = addRef(ns, refAttr, refNs, card)
           resolve(nsMap, tail, resolvers :+ refResolver, tplIndex)
 
         case BackRef(backRefNs, _, _) =>
@@ -94,14 +94,14 @@ class ResolveInsert
           val backRefResolver = addBackRef(backRefNs)
           resolve(nsMap, tail, resolvers :+ backRefResolver, tplIndex)
 
-        case Nested(Ref(ns, refAttr, refNs, _, owner, _), nestedElements) =>
+        case Nested(Ref(ns, refAttr, refNs, _, _, _), nestedElements) =>
           prevRefs.clear()
-          val nestedResolver = addNested(nsMap, tplIndex, ns, refAttr, refNs, owner, nestedElements)
+          val nestedResolver = addNested(nsMap, tplIndex, ns, refAttr, refNs, nestedElements)
           resolve(nsMap, tail, resolvers :+ nestedResolver, tplIndex)
 
-        case NestedOpt(Ref(ns, refAttr, refNs, _, owner, _), nestedElements) =>
+        case NestedOpt(Ref(ns, refAttr, refNs, _, _, _), nestedElements) =>
           prevRefs.clear()
-          val optNestedResolver = addNested(nsMap, tplIndex, ns, refAttr, refNs, owner, nestedElements)
+          val optNestedResolver = addNested(nsMap, tplIndex, ns, refAttr, refNs, nestedElements)
           resolve(nsMap, tail, resolvers :+ optNestedResolver, tplIndex)
       }
       case Nil             => resolvers

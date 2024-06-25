@@ -52,7 +52,7 @@ trait InsertOps extends BaseOps {
     exts: List[String],
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
-  ): Product => Unit = ???
+  ): Product => Unit
 
   protected def addSeqOpt[T](
     ns: String,
@@ -63,13 +63,13 @@ trait InsertOps extends BaseOps {
     exts: List[String],
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
-  ): Product => Unit = ???
+  ): Product => Unit
 
   protected def addByteArray(
     ns: String,
     attr: String,
     tplIndex: Int,
-  ): Product => Unit = ???
+  ): Product => Unit
 
   protected def addMap[T](
     ns: String,
@@ -78,7 +78,7 @@ trait InsertOps extends BaseOps {
     tplIndex: Int,
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
-  ): Product => Unit = ???
+  ): Product => Unit
 
   protected def addMapOpt[T](
     ns: String,
@@ -87,14 +87,13 @@ trait InsertOps extends BaseOps {
     tplIndex: Int,
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
-  ): Product => Unit = ???
+  ): Product => Unit
 
   protected def addRef(
     ns: String,
     refAttr: String,
     refNs: String,
-    card: Card,
-    owner: Boolean
+    card: Card
   ): Product => Unit
 
   protected def addBackRef(
@@ -107,7 +106,6 @@ trait InsertOps extends BaseOps {
     ns: String,
     refAttr: String,
     refNs: String,
-    owner: Boolean,
     elements: List[Element]
   ): Product => Unit
 }
