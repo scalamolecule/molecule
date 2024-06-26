@@ -27,7 +27,7 @@ class Model2SqlQuery_mysql[Tpl](elements0: List[Element])
         s"""Ns.id IN (
            |  SELECT Ns.id FROM (
            |    SELECT Ns.id FROM Ns
-           |      ${formattedJoins.trim}
+           |      ${mkJoins(2).trim}
            |  ) AS t
            |)""".stripMargin)
 

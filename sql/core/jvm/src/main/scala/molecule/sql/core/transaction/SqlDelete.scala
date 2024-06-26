@@ -26,17 +26,17 @@ trait SqlDelete
     elements: List[Element],
     nsMap: Map[String, MetaNs],
     fkConstraintParam: String,
-    fkOff: String,
-    fkOn: String,
+    fkConstraintOff: String,
+    fkConstraintOn: String,
   ): Option[() => List[Long]] = {
     val refPath = List(getInitialNs(elements))
     resolve(elements, true)
     if (ids.nonEmpty) {
-      deleteExecutioner(refPath, nsMap, ids, fkConstraintParam, fkOff, fkOn)
+      deleteExecutioner(refPath, nsMap, ids, fkConstraintParam, fkConstraintOff, fkConstraintOn)
     } else if (filterElements.nonEmpty) {
       ids = getIds
       if (ids.nonEmpty)
-        deleteExecutioner(refPath, nsMap, ids, fkConstraintParam, fkOff, fkOn)
+        deleteExecutioner(refPath, nsMap, ids, fkConstraintParam, fkConstraintOff, fkConstraintOn)
       else
         None
     } else {
@@ -49,20 +49,26 @@ trait SqlDelete
     nsMap: Map[String, MetaNs],
     ids: Seq[Long],
     fkConstraintParam: String,
-    fkOff: String,
-    fkOn: String,
+    fkConstraintOff: String,
+    fkConstraintOn: String,
   ): Option[() => List[Long]] = {
-    val tables = getDeleteTables(refPath, nsMap, ids)
+    val tables               = getDeleteTables(refPath, nsMap, ids)
+    val disableFkConstraints = fkConstraintParam.nonEmpty
     Some(
       () => {
         val s = sqlConn.createStatement()
-        //        println(s"-------------------- $fkConstraintParam = $fkOff")
-        s.addBatch(s"$fkConstraintParam = $fkOff")
+        if (disableFkConstraints) {
+          //          println(s"-------------------- $fkConstraintParam = $fkConstraintOff")
+          s.addBatch(s"$fkConstraintParam = $fkConstraintOff")
+        }
         tables.foreach { t =>
           //          println("  €€€€€€€€€  " + t.stmt)
           s.addBatch(t.stmt)
         }
-        s.addBatch(s"$fkConstraintParam = $fkOn")
+        if (disableFkConstraints) {
+          //        println(s"-------------------- $fkConstraintParam = $fkConstraintOn")
+          s.addBatch(s"$fkConstraintParam = $fkConstraintOn")
+        }
         s.executeBatch
         s.close()
         ids.toList
@@ -89,6 +95,7 @@ trait SqlDelete
     val ownedTables = deleteOwned(refPath, nsMap, Seq(nsMap(ns)), Set.empty[String], Nil, ids)
 
     val table = prepareTable(refPath, ns, s"$ns.id", ids)
+
     joinTables ++ ownedTables.toList ++ List(table)
   }
 
@@ -137,9 +144,12 @@ trait SqlDelete
     val query                 = model2SqlQuery(filterElementsWithIds).getSqlQuery(Nil, None, None, None)
     val ps                    = sqlConn.prepareStatement(
       query,
-      ResultSet.TYPE_SCROLL_INSENSITIVE,
+      //      ResultSet.TYPE_SCROLL_INSENSITIVE,
+      //      ResultSet.CONCUR_READ_ONLY,
+      //      Statement.RETURN_GENERATED_KEYS
+
+      ResultSet.TYPE_FORWARD_ONLY,
       ResultSet.CONCUR_READ_ONLY,
-      Statement.RETURN_GENERATED_KEYS
     )
     val resultSet             = ps.executeQuery()
     val ids                   = ListBuffer.empty[Long]
@@ -172,7 +182,8 @@ trait SqlDelete
     nsIds: Seq[Long],
   ): Seq[Table] = {
     metaNss match {
-      case Nil              => ownedTables
+      case Nil              =>
+        ownedTables
       case metaNs :: nsTail =>
         val ns            = metaNs.ns
         val processedNss1 = processedNss + ns

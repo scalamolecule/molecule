@@ -18,15 +18,4 @@ trait LambdasMap_sqlite extends LambdasMap { self: SqlQueryBase =>
       json2map(json)
     }
   }
-
-
-  override protected def sql2mapOpt[T](
-    row: RS, paramIndex: Int, json2map: String => Map[String, T]
-  ): Option[Map[String, T]] = {
-    val json = row.getString(paramIndex)
-    if (!row.wasNull() && json.nonEmpty)
-      Some(json2map(json))
-    else
-      None
-  }
 }

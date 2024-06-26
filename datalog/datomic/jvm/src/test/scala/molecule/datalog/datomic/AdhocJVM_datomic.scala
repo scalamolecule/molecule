@@ -58,7 +58,6 @@ object AdhocJVM_datomic extends TestSuite_datomic {
         _ <- A.i_.Bb.i(4).update.i.transact
 
         _ = {
-          println("-------")
           Peer.q(
             """[:find  ?b
               |        (pull ?id0 [

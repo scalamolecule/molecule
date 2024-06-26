@@ -53,7 +53,7 @@ trait SqlInsert
       case (refPath, Nil) =>
         // Add entity without attributes having only ref to next namespace
         val table = refPath.last
-        val stmt  = s"INSERT INTO $table (id) VALUES (DEFAULT)"
+        val stmt  = s"INSERT INTO $table DEFAULT VALUES"
         debug(s"B -------------------- refPath: $refPath")
         debug(stmt)
         tableDatas(refPath) = Table(refPath, stmt)
@@ -68,7 +68,7 @@ trait SqlInsert
         val columns           = cols.map(_._1).mkString(",\n  ")
         val inputPlaceholders = cols.map { case (_, castExt) => s"?$castExt" }.mkString(", ")
 
-        val stmt              =
+        val stmt =
           s"""INSERT INTO $table (
              |  $columns
              |) VALUES ($inputPlaceholders)""".stripMargin

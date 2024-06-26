@@ -257,10 +257,8 @@ trait LambdasBase extends BaseHelpers with AggrUtils with JsonBase { self: SqlQu
 
   protected def jsonArray2array[T: ClassTag](array: Array[String], decode: String => T): Array[T] = {
     array.flatMap {
-      case "null" =>
-        None
-      case v      =>
-        Some(decode(v))
+      case "null" => None
+      case v      => Some(decode(v))
     }
   }
 

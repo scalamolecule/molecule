@@ -147,4 +147,8 @@ trait Insert_sqlite extends SqlInsert { self: ResolveInsert with InsertResolvers
     }
   }
 
+
+  // Save Floats as Doubles (REAL PRECISION) in SQlite
+  override protected lazy val transformFloat =
+    (v: Float) => (ps: PS, n: Int) => ps.setDouble(n, v.toString.toDouble)
 }

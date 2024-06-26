@@ -42,8 +42,8 @@ trait Nest[Tpl] { self: Model2QueryBase
   private lazy val i6 = i5 + aritiess(5).flatten.takeWhile(_ != -1).sum
   private lazy val i7 = i6 + aritiess(6).flatten.takeWhile(_ != -1).sum
 
-  private var rowCount                                  = -1
-  private lazy val rowIndexTx                           = 1 + rowCount - txAttrs // 1-based indexes for jdbc ResultSet
+  private var rowCount                                 = -1
+  private lazy val rowIndexTx                          = 1 + rowCount - txAttrs // 1-based indexes for jdbc ResultSet
   private lazy val tplBranch0: (RS, NestedTpls) => Tpl = castBranch[Tpl](aritiess(0), castss(0), i0, rowIndexTx)
   private lazy val tplBranch1: (RS, NestedTpls) => Any = castBranch[Any](aritiess(1), castss(1), i1, 0)
   private lazy val tplBranch2: (RS, NestedTpls) => Any = castBranch[Any](aritiess(2), castss(2), i2, 0)
@@ -85,7 +85,7 @@ trait Nest[Tpl] { self: Model2QueryBase
 
   final private def rows2nested1(rows: RS): List[Tpl] = {
     rowCount = getRowCount(rows)
-
+    //    println("rowCount " + rowCount)
     if (rowCount == 1) {
       rows.first()
       acc1 = List(tplLeaf1(rows))
@@ -93,8 +93,10 @@ trait Nest[Tpl] { self: Model2QueryBase
 
     } else {
       rows.afterLast()
+      //      println("=====================================")
       while (rows.previous()) {
         e0 = rows.getLong(1)
+        //        println("  e0: " + e0)
         if (nextRow) {
           if (rows.isFirst) { // last going backwards
             if (e0 != p0) {
@@ -127,6 +129,7 @@ trait Nest[Tpl] { self: Model2QueryBase
           nextRow = true
         }
         p0 = e0
+        //        println("--------------------------------")
       }
     }
     acc0

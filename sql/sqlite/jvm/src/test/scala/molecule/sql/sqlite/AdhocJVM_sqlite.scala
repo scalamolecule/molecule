@@ -12,6 +12,7 @@ import molecule.sql.sqlite.async._
 import molecule.sql.sqlite.setup.{TestSuiteArray_sqlite, TestSuite_sqlite}
 import utest._
 import scala.collection.mutable
+import scala.concurrent.Future
 import scala.language.implicitConversions
 
 
@@ -26,32 +27,34 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
 
       for {
 
-        _ <- Ns.bigIntSet(Set(bigInt1, bigInt2)).save.transact
-        _ <- Ns.bigIntSet.query.get.map(_.head ==> Set(bigInt1, bigInt2))
+        _ <- Ns.int.i.intMap_?.insert(2, 1, Option.empty[Map[String, Int]]).transact
+        _ <- Ns.int.i.intMap_?.insert(2, 2, Some(Map.empty[String, Int])).transact
 
-//        _ <- Ns.bigDecimalSet(Set(bigDecimal1, bigDecimal2)).save.transact
-//        _ <- Ns.bigDecimalSet.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2))
+        _ <- Ns.int.i.intMap_?.insert(2, 3, Some(Map(pint1, pint2))).transact
 
-        _ <- Ns.i.bigIntSet.insert(1, Set(bigInt1, bigInt2)).transact
-        _ <- Ns.i.bigIntSet.query.get.map(_ ==> List((1, Set(bigInt1, bigInt2))))
 
+        //        _ <- rawQuery(
+        //          """SELECT DISTINCT
+        //            |  Ns.i,
+        //            |  Ns.intMap
+        //            |FROM Ns
+        //            |WHERE
+        //            |  Ns.int = 2 AND
+        //            |  Ns.int IS NOT NULL AND
+        //            |  Ns.i   IS NOT NULL
+        //            |ORDER BY Ns.i;
+        //            |""".stripMargin, true)
+
+
+        _ <- Ns.int_(2).i.a1.intMap_?.query.i.get.map(_ ==>
+          List((1, None), (2, None), (3, Some(Map(pint1, pint2)))))
 
         //        _ <- rawTransact(
         //          """insert into Ns default values
         //            |""".stripMargin)
 
-//        _ <- rawQuery(
-//          """select id from Ns
-//            |""".stripMargin, true)
-
         //        _ <- rawQuery(
-        //          """SELECT DISTINCT
-        //            |  Ns.i,
-        //            |  Ns.string
-        //            |FROM Ns
-        //            |WHERE
-        //            |  Ns.i IS NOT NULL
-        //            |ORDER BY Ns.string;
+        //          """select id from Ns
         //            |""".stripMargin, true)
 
 
@@ -64,73 +67,47 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
       for {
 
 
-        _ <- A.i.B.i.insert(
-          (1, 1),
-          (1, 2),
-          (1, 3),
-          (2, 4),
-          (2, 5),
-          (2, 6),
-          (2, 6), // (make sure grouped values coalesce)
-        ).transact
+        _ <- A.i.Bb.*(B.iSet).insert((1, List(Set.empty[Int]))).transact
 
-        _ <- A.B.i(min(2)).query.get.map(_ ==> List(Set(1, 2)))
-        _ <- A.B.i(max(2)).query.get.map(_ ==> List(Set(5, 6)))
-        _ <- A.B.i(min(2)).i(max(2)).query.get.map(_ ==> List((Set(1, 2), Set(5, 6))))
+//        // A.i was inserted
+//        _ <- A.i.query.get.map(_ ==> List(1))
+
 
         _ <- rawQuery(
           """SELECT DISTINCT
+            |  A.id,
             |  A.i,
-            |  (
-            |    SELECT JSON_GROUP_ARRAY(i)
-            |    FROM (
-            |      SELECT distinct _B.i
-            |      FROM A as _A
-            |      INNER JOIN B as _B ON _A.b = _B.id
-            |      WHERE _A.i = A.i
-            |      ORDER BY _B.i ASC
-            |      LIMIT 2
-            |    )
-            |  ) as i_min
+            |  JSON_GROUP_ARRAY(_B_iSet.VALUE) as B_iSet
             |FROM A
-            |  INNER JOIN B ON A.b = B.id
+            |  LEFT JOIN  A_bb_B                       ON A.id        = A_bb_B.A_id
+            |  LEFT JOIN  B                            ON A_bb_B.B_id = B.id
+            |  Left JOIN JSON_EACH(B.iSet) AS _B_iSet
             |WHERE
-            |  A.i IS NOT NULL AND
-            |  B.i IS NOT NULL
-            |GROUP BY A.i
-            |ORDER BY A.i;
+            |  A.i IS NOT NULL
+            |GROUP BY A.i, A.id
+            |HAVING COUNT(*) > 0;
             |""".stripMargin, true)
 
-        _ <- A.i.a1.B.i(min(2)).query.i.get.map(_ ==> List(
-          (1, Set(1, 2)),
-          (2, Set(4, 5))
-        ))
 
-        _ <- A.i.a1.B.i(max(2)).query.get.map(_ ==> List(
-          (1, Set(2, 3)),
-          (2, Set(5, 6))
-        ))
-
-        _ <- A.i.a1.B.i(min(2)).i(max(2)).query.get.map(_ ==> List(
-          (1, Set(1, 2), Set(2, 3)),
-          (2, Set(4, 5), Set(5, 6))
-        ))
+        _ <- A.i.Bb.*?(B.iSet).query.i.get.map(_ ==> List((1, Nil)))
+//        _ <- A.i.Bb.*(B.iSet).query.get.map(_ ==> Nil)
+//
+//        // B.iSet was not inserted
+//        _ <- A.i.Bb.iSet_?.query.get.map(_ ==> List((1, None)))
+//        _ <- A.i.Bb.iSet.query.get.map(_ ==> Nil)
 
 
-        //        _ <- A.i.a1.B.i(min(2)).query.i.get.map(_ ==> List(
-        //          (1, Set(1, 2)),
-        //          (2, Set(4, 5))
-        //        ))
-        //
-        ////        _ <- A.i.a1.B.i(max(2)).query.get.map(_ ==> List(
-        ////          (1, Set(2, 3)),
-        ////          (2, Set(5, 6))
-        ////        ))
-        ////
-        ////        _ <- A.i.a1.B.i(min(2)).i(max(2)).query.get.map(_ ==> List(
-        ////          (1, Set(1, 2), Set(2, 3)),
-        ////          (2, Set(4, 5), Set(5, 6))
-        ////        ))
+
+        //        _ <- rawQuery(
+        //          """SELECT DISTINCT
+        //            |  i,
+        //            |  json_group_array(iSet)
+        //            |FROM A
+        //            |where iSet is not null
+        //            |group by i
+        //            |""".stripMargin, true)
+
+
         //        _ <- rawTransact(
         //          """UPDATE Ns
         //            |SET
@@ -150,11 +127,21 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
 
     //    "unique" - unique { implicit conn =>
     //      import molecule.coreTests.dataModels.core.dsl.Uniques._
-    //      val triples             = getTriples.map(t => (t._3, t._1, t._2))
-    //      val List(a, b, c, d, e) = triples.sortBy(p => (p._2, p._3, p._1))
-    //      val query               = (c: String, l: Int) => Uniques.int.a3.s.a1.i.a2.query.from(c).limit(l)
+    //      //          val triples             = getTriples.map(t => (t._3, t._1, t._2))
+    //      //          val List(a, b, c, d, e) = triples.sortBy(p => (p._2, p._3, p._1))
+    //      //          val query               = (c: String, l: Int) => Uniques.int.a3.s.a1.i.a2.query.from(c).limit(l)
     //      for {
-    //        _ <- Uniques.int.s.i.insert(triples).transact
+    //
+    //
+    //        _ <- Uniques.i.float.insert((1, float1), (2, float2)).transact
+    //        //        _ <- Uniques.i.float.insert((1, float1)).transact
+    //        //        _ <- Uniques.i.double.insert((1, double1), (2, double2)).transact
+    //        //            _ <- Uniques.i.float.insert((2, float2)).transact
+    //
+    //        _ <- Uniques.i.float.query.get.map(_ ==> List(
+    //          (1, 1.1f),
+    //          (2, 2.2f),
+    //        ))
     //
     //      } yield ()
     //    }

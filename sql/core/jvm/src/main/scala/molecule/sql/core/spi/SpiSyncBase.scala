@@ -252,7 +252,6 @@ trait SpiSyncBase
     if (delete.doInspect) {
       delete_inspect(delete)
     }
-    //    val txReport = conn.transact_sync(delete_getData(conn, delete))
     delete_getExecutioner(conn, delete).fold(TxReport(Nil)) { executions =>
       val txReport = conn.atomicTransaction(executions)
       conn.callback(delete.elements, true)

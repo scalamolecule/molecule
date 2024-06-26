@@ -1,7 +1,7 @@
 package molecule.sql.sqlite.spi
 
 import java.sql
-import java.sql.{ResultSet, Statement}
+import java.sql.{Connection, ResultSet}
 import molecule.boilerplate.ast.Model._
 import molecule.core.action._
 import molecule.core.marshalling.ConnProxy
@@ -61,6 +61,35 @@ trait SpiSync_sqlite extends SpiSyncBase {
     validateUpdateSet(conn.proxy, update.elements, query2resultSet)
   }
 
+
+  override def delete_transact(delete0: Delete)(implicit conn0: Conn): TxReport = {
+    val conn   = conn0.asInstanceOf[JdbcConn_JVM]
+    val delete = delete0.copy(elements = noKeywords(delete0.elements, Some(conn.proxy)))
+    if (delete.doInspect) {
+      delete_inspect(delete)
+    }
+    delete_getExecutioner(conn, delete).fold(TxReport(Nil)) { executions =>
+      // Turn of foreign key constraints temporarily to allow multiple deletions
+      setFkConstraint(conn.sqlConn, 0)
+
+      // Commit deletions
+      val txReport = conn.atomicTransaction(executions)
+
+      // Turn on foreign key constraints again
+      setFkConstraint(conn.sqlConn, 1)
+
+      conn.callback(delete.elements, true)
+      txReport
+    }
+  }
+
+  private def setFkConstraint(sqlConn: Connection, value: Int): Unit = {
+    sqlConn.setAutoCommit(true)
+    val a = sqlConn.prepareStatement(s"PRAGMA foreign_keys = $value")
+    a.executeUpdate()
+    a.close()
+  }
+
   override def delete_getInspectionData(conn: JdbcConn_JVM, delete: Delete): Data = {
     new ResolveDelete with Delete_sqlite {
       override lazy val sqlConn = conn.sqlConn
@@ -71,7 +100,7 @@ trait SpiSync_sqlite extends SpiSyncBase {
   override def delete_getExecutioner(conn: JdbcConn_JVM, delete: Delete): Option[() => List[Long]] = {
     new ResolveDelete with Delete_sqlite {
       override lazy val sqlConn = conn.sqlConn
-    }.getDeleteExecutioner(delete.elements, conn.proxy.nsMap, "PRAGMA foreign_keys", "0", "1")
+    }.getDeleteExecutioner(delete.elements, conn.proxy.nsMap, "", "", "")
   }
 
 
@@ -95,7 +124,6 @@ trait SpiSync_sqlite extends SpiSyncBase {
 
     var ids       = List.empty[Long]
     val resultSet = ps.getResultSet
-    //    val resultSet = ps.getGeneratedKeys
     while (resultSet.next()) {
       ids = ids :+ resultSet.getLong(1)
     }
@@ -131,7 +159,7 @@ trait SpiSync_sqlite extends SpiSyncBase {
       baseTpe
     }
 
-    while (resultSet.next) {
+    while (resultSet.next()) {
       debug("-----------------------------------------------")
       var n = 1
       row.clear()

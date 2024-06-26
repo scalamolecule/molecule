@@ -48,7 +48,7 @@ class ResultSetImpl_sqlite(val underlying: ResultSet) extends ResultSetInterface
   }
 
   //  println("......")
-  //  rows.foreach(println)
+  //  rows.filterNot(_ == null).foreach(row => println(row.toList))
   //  println("......")
 
   val totalRowCount = rowIndex
@@ -69,7 +69,15 @@ class ResultSetImpl_sqlite(val underlying: ResultSet) extends ResultSetInterface
     case s: String            => s
     case i: java.lang.Integer => i.toString
     case d: java.lang.Double  => d.toString
+    case a: Array[_] =>
+      println(a.toList)
+      ???
+
+    case other =>
+//      println(s"other String type for value $other " + other.getClass)
+      throw new Exception(s"other String type for value $other " + other.getClass)
   }
+
   override def getBoolean(columnIndex: Int): Boolean = value(columnIndex) match {
     case i: java.lang.Integer => i.longValue() match {
       case 1 => true
@@ -77,29 +85,34 @@ class ResultSetImpl_sqlite(val underlying: ResultSet) extends ResultSetInterface
     }
     case b                    => b.asInstanceOf[Boolean]
   }
+
   override def getByte(columnIndex: Int): Byte = value(columnIndex) match {
     case null                 => null.asInstanceOf[Byte]
     case i: java.lang.Integer => i.byteValue()
   }
+
   override def getShort(columnIndex: Int): Short = value(columnIndex) match {
     case null                 => null.asInstanceOf[Byte]
     case i: java.lang.Integer => i.shortValue()
   }
+
   override def getInt(columnIndex: Int): Int = value(columnIndex).asInstanceOf[Int]
-  override def getLong(columnIndex: Int): Long =
-    value(columnIndex) match {
-      case null                 => null.asInstanceOf[Int]
-      case l: java.lang.Long    => l.longValue()
-      case i: java.lang.Integer => i.longValue()
-    }
+
+  override def getLong(columnIndex: Int): Long = value(columnIndex) match {
+    case null                 => null.asInstanceOf[Int]
+    case l: java.lang.Long    => l.longValue()
+    case i: java.lang.Integer => i.longValue()
+  }
   override def getFloat(columnIndex: Int): Float = value(columnIndex).asInstanceOf[Double].toFloat
   override def getDouble(columnIndex: Int): Double = value(columnIndex).asInstanceOf[Double]
   override def getBytes(columnIndex: Int): Array[Byte] = value(columnIndex).asInstanceOf[Array[Byte]]
+
   override def getBigDecimal(columnIndex: Int): jBigDecimal = value(columnIndex) match {
     case null            => null.asInstanceOf[jBigDecimal]
     case s: String       => new jBigDecimal(s)
     case bd: jBigDecimal => bd
   }
+
   override def getURL(columnIndex: Int): URL = value(columnIndex).asInstanceOf[URL]
 
   override def getArray(columnIndex: Int): ArrayInterface =
@@ -108,34 +121,46 @@ class ResultSetImpl_sqlite(val underlying: ResultSet) extends ResultSetInterface
 
   // Cursor/actions -----------------------------------
 
-  override def next(): Boolean = {
-    rowIndex += 1
-    rowIndex != totalRowCount
-  }
   override def close(): Unit = underlying.close()
-  override def wasNull(): Boolean =
-    value(prevColIndex) == null
+  override def wasNull(): Boolean = value(prevColIndex) == null
   override def isBeforeFirst: Boolean = rowIndex == -1
   override def isAfterLast: Boolean = rowIndex == totalRowCount
   override def isFirst: Boolean = rowIndex == 0
   override def isLast: Boolean = rowIndex == totalRowCount - 1
-  override def beforeFirst(): Unit = rowIndex = -1
-  override def afterLast(): Unit = rowIndex = totalRowCount
-  override def first(): Boolean = {
+
+  override def beforeFirst(): Unit = {
     rowIndex = -1
+    //    println("rowIndex, beforeFirst: " + rowIndex)
+  }
+
+  override def afterLast(): Unit = {
+    rowIndex = totalRowCount
+    //    println("rowIndex, afterLast  : " + rowIndex)
+  }
+
+  override def first(): Boolean = {
+    rowIndex = 0
+    //    println("rowIndex, first      : " + rowIndex)
     true
   }
   override def last(): Boolean = {
     rowIndex = totalRowCount - 1
+    //    println("rowIndex, last       : " + rowIndex)
     true
   }
-  override def getRow: Int = rowIndex + 1
+  override def next(): Boolean = {
+    rowIndex += 1
+    //    println("rowIndex, next       : " + rowIndex)
+    rowIndex != totalRowCount
+  }
   override def previous(): Boolean = {
     rowIndex -= 1
-    true
+    //    println("rowIndex, previous   : " + rowIndex)
+    rowIndex != -1
   }
   override def isClosed: Boolean = underlying.isClosed
 
+  override def getRow: Int = rowIndex + 1
   override def insertRow(): Unit = underlying.insertRow()
   override def updateRow(): Unit = underlying.updateRow()
   override def deleteRow(): Unit = underlying.deleteRow()
