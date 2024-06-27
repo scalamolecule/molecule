@@ -49,7 +49,7 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    updateMapEqJdbc(ns, attr, "::jsonb", map,
+    updateMapEqJdbc(attr, "::jsonb", map,
       (ps: PS, paramIndex: Int) =>
         ps.setString(paramIndex, map2json(map, value2json))
     )

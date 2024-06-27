@@ -100,7 +100,7 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    updateMapEqJdbc(ns, attr, "", map,
+    updateMapEqJdbc(attr, "", map,
       (ps: PS, paramIndex: Int) =>
         ps.setString(paramIndex, map2json(map, value2json))
     )

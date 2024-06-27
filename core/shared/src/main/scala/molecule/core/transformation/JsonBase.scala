@@ -81,7 +81,7 @@ trait JsonBase extends SerializationUtils with ModelUtils {
 
   protected def map2json[T](map: Map[String, T], value2json: (StringBuffer, T) => StringBuffer): String = {
     if (map.isEmpty) {
-      throw ModelError("map2jsonByteArray unexpectedly received empty map.")
+      throw ModelError("Can't convert empty Scala Map to json.")
     }
     val buf = new StringBuffer
     buf.append("{") // start json

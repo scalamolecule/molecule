@@ -18,9 +18,10 @@ object SpiSync_sqlite extends SpiSync_sqlite
 
 trait SpiSync_sqlite extends SpiSyncBase {
 
-
   override def getModel2SqlQuery[Tpl](elements: List[Element]) =
     new Model2SqlQuery_sqlite[Tpl](elements)
+
+  override lazy val defaultValues = "DEFAULT VALUES"
 
   override def save_getData(save: Save, conn: JdbcConn_JVM): Data = {
     new ResolveSave with Save_sqlite {
@@ -115,12 +116,13 @@ trait SpiSync_sqlite extends SpiSyncBase {
     debug("\n=============================================================================")
     debug(stmt)
 
-    val stmtReturningIds = if (stmt.trim.toLowerCase.endsWith("returning id")) stmt else stmt + " RETURNING id"
+    val stmtReturningIds = if (stmt.trim.toLowerCase.endsWith("returning id"))
+      stmt
+    else
+      stmt + " RETURNING id"
     val ps               = conn.transactionStmt(stmtReturningIds)
     ps.addBatch()
     ps.execute()
-    //    ps.executeBatch()
-    //    ps.executeUpdate()
 
     var ids       = List.empty[Long]
     val resultSet = ps.getResultSet

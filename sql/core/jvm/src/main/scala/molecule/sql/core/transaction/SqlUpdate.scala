@@ -17,8 +17,8 @@ trait SqlUpdate
     with SpiHelpers
     with MoleculeLogging { self: ResolveUpdate =>
 
-      doPrint = false
-//  doPrint = true
+  doPrint = false
+  //  doPrint = true
 
   protected var curParamIndex = 1
 
@@ -273,7 +273,7 @@ trait SqlUpdate
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    updateMapEqJdbc(ns, attr, "", map,
+    updateMapEqJdbc(attr, "", map,
       (ps: PS, paramIndex: Int) => {
         ps.setBytes(paramIndex, map2jsonByteArray(map, value2json))
       }
@@ -539,7 +539,6 @@ trait SqlUpdate
   }
 
   protected def updateMapEqJdbc[T](
-    ns: String,
     attr: String,
     cast: String,
     map: Map[String, T],

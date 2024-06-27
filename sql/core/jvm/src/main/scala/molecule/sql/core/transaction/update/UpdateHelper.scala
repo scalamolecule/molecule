@@ -71,7 +71,7 @@ trait UpdateHelper { self: SpiSyncBase =>
             case (refPath, `last`) =>
               rowTuple.productElement(last) match {
                 case nested: List[_] if nested.isEmpty =>
-                  val insertRefRowStmt   = s"INSERT INTO $refNs (id) VALUES (DEFAULT)"
+                  val insertRefRowStmt   = s"INSERT INTO $refNs $defaultValues"
                   val insertRefRowAction = (ps: PS, _: IdsMap, _: RowIndex) => {
                     ps.addBatch()
                   }
@@ -101,7 +101,7 @@ trait UpdateHelper { self: SpiSyncBase =>
                   refIdss(refPath) = refIdss.getOrElse(refPath, List.empty[Long]) :+ refId
 
                 case None =>
-                  val insertRefRowStmt   = s"INSERT INTO $refNs (id) VALUES (DEFAULT)"
+                  val insertRefRowStmt   = s"INSERT INTO $refNs $defaultValues"
                   val insertRefRowAction = (ps: PS, _: IdsMap, _: RowIndex) => {
                     ps.addBatch()
                   }
@@ -154,7 +154,7 @@ trait UpdateHelper { self: SpiSyncBase =>
           val refIds = ListBuffer.empty[Long]
           query_getRaw(Query[(Long, Option[Long])](elements)).flatMap {
             case (nsId, None)        =>
-              val refId = getId(s"INSERT INTO $refNs (id) VALUES (DEFAULT)")
+              val refId = getId(s"INSERT INTO $refNs $defaultValues")
               refIds += refId
               Some((nsId, refId))
             case (nsId, Some(refId)) =>
@@ -207,7 +207,7 @@ trait UpdateHelper { self: SpiSyncBase =>
     (tableUpdates, Nil)
   }
 
-  def getUpsertStages(elements: List[Element]): List[UpsertStage] = {
+  private def getUpsertStages(elements: List[Element]): List[UpsertStage] = {
     // Resolve model backwards to locate edge of known ids in ref structure
     @tailrec
     def rec(

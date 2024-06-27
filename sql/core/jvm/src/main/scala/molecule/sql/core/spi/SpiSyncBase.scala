@@ -31,6 +31,8 @@ trait SpiSyncBase
 
   def getModel2SqlQuery[Tpl](elements: List[Element]): Model2SqlQuery[Tpl] with SqlQueryBase
 
+  lazy val defaultValues = "(id) VALUES (DEFAULT)"
+
   override def query_get[Tpl](q0: Query[Tpl])(implicit conn0: Conn): List[Tpl] = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
     val q    = q0.copy(elements = noKeywords(q0.elements, Some(conn.proxy)))
@@ -222,15 +224,14 @@ trait SpiSyncBase
              |
              |${refIdsQuery(idsModel, conn.proxy)}
              |""".stripMargin
-        val updates                  =
-          updateModels
-            .map(_(42L)) // dummy value
-            .map { m =>
-              val elements = m.mkString("\n")
-              val tables   = update_getData(conn, m, update.isUpsert)._1
-              tables.headOption.fold(elements)(table => elements + "\n" + table.stmt)
-            }
-            .mkString(action + "S ----------------------\n", "\n------------\n", "")
+        val updates                  = updateModels
+          .map(_(42L)) // dummy value
+          .map { m =>
+            val elements = m.mkString("\n")
+            val tables   = update_getData(conn, m, update.isUpsert)._1
+            tables.headOption.fold(elements)(table => elements + "\n" + table.stmt)
+          }
+          .mkString(action + "S ----------------------\n", "\n------------\n", "")
 
         printRaw(action, update.elements, refIds + "\n" + updates)
       } else {
