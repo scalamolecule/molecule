@@ -177,7 +177,11 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQuery
   protected def refHas[T](set: Set[T]): Unit = {
     set.size match {
       case 0 => where += (("FALSE", ""))
-      case 1 => where += (("", arrayMatches(s"  ARRAY_CONTAINS(ARRAY_AGG($joinTable.$ref_id), ${set.head})")))
+      case 1 =>
+        val arrayContains = arrayMatches(
+          s"  ARRAY_CONTAINS(ARRAY_AGG($joinTable.$ref_id), ${set.head})"
+        )
+        where += (("", arrayContains))
       case _ =>
         val arrayContains = set
           .map(v => s"ARRAY_CONTAINS(ARRAY_AGG($joinTable.$ref_id), $v)")
@@ -201,7 +205,11 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQuery
   protected def refHasNo[T](set: Set[T]): Unit = {
     set.size match {
       case 0 => ()
-      case 1 => where += (("", arrayMatches(s"  NOT ARRAY_CONTAINS(ARRAY_AGG($joinTable.$ref_id), ${set.head})")))
+      case 1 => where += (("",
+        arrayMatches(
+          s"  " + s"NOT ARRAY_CONTAINS(ARRAY_AGG($joinTable.$ref_id), ${set.head})"
+        )
+      ))
       case _ =>
         val arrayContains = set
           .map(v => s"NOT ARRAY_CONTAINS(ARRAY_AGG($joinTable.$ref_id), $v)")

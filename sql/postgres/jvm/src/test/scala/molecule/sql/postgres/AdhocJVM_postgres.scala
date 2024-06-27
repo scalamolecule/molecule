@@ -18,24 +18,14 @@ object AdhocJVM_postgres extends TestSuite_postgres {
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
 
-        _ <- Ref.i.Nss.*(Ns.stringSeq).insert(1, List(List(string1, string2))).transact
+        List(ref1, ref2, ref3, ref4) <- Ref.i.insert(1, 2, 3, 4).transact.map(_.ids)
+        a = (1, Set(ref1, ref2))
+        b = (2, Set(ref2, ref3, ref4))
 
-        //        _ <- Ref.i_.Nss.*(Ns.stringSeq).query.i.get.map(_ ==> List(List(List(string1, string2))))
+        _ <- Ns.i.refs.insert(List(a, b)).transact
 
+        _ <- Ns.i.a1.refs.has(ref2).query.i.get.map(_ ==> List(a, b))
 
-        _ <- rawQuery(
-          """SELECT DISTINCT
-            |  Ref.id,
-            |  Ns.stringSeq
-            |FROM Ref
-            |  LEFT JOIN Ref_nss_Ns ON Ref.id           = Ref_nss_Ns.Ref_id
-            |  LEFT JOIN Ns         ON Ref_nss_Ns.Ns_id = Ns.id
-            |WHERE
-            |  Ref.i = 1 AND
-            |  Ref.i IS NOT NULL;
-            |""".stripMargin, true)
-
-        _ <- Ref.i_(1).Nss.*?(Ns.stringSeq).query.i.get.map(_ ==> List(List(List(string1, string2))))
 
 
       } yield ()

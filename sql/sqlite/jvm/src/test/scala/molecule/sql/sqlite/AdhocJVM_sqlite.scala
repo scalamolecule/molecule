@@ -5,7 +5,7 @@ import java.time.{Duration, Instant, LocalDate, LocalDateTime, LocalTime, Offset
 import java.util.{Date, UUID}
 import molecule.base.error.{ExecutionError, ModelError}
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.core.dsl.Refs.A
+import molecule.coreTests.dataModels.core.dsl.Refs.{A, B}
 import molecule.coreTests.dataModels.core.dsl.Types.Ns
 import molecule.coreTests.util.Array2List
 import molecule.sql.sqlite.async._
@@ -25,37 +25,42 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
+
+      val (a1, b2) = ("a" -> offsetDateTime1, "b" -> offsetDateTime2)
+      val (b3, c4) = ("b" -> offsetDateTime3, "c" -> offsetDateTime4)
       for {
-
-        _ <- Ns.int.i.intMap_?.insert(2, 1, Option.empty[Map[String, Int]]).transact
-        _ <- Ns.int.i.intMap_?.insert(2, 2, Some(Map.empty[String, Int])).transact
-
-        _ <- Ns.int.i.intMap_?.insert(2, 3, Some(Map(pint1, pint2))).transact
-
-
-        //        _ <- rawQuery(
-        //          """SELECT DISTINCT
-        //            |  Ns.i,
-        //            |  Ns.intMap
-        //            |FROM Ns
-        //            |WHERE
-        //            |  Ns.int = 2 AND
-        //            |  Ns.int IS NOT NULL AND
-        //            |  Ns.i   IS NOT NULL
-        //            |ORDER BY Ns.i;
-        //            |""".stripMargin, true)
+        _ <- Ns.i.offsetDateTimeMap.insert(List(
+          (1, Map(a1, b2)),
+          (2, Map(b3, c4)),
+        )).transact
 
 
-        _ <- Ns.int_(2).i.a1.intMap_?.query.i.get.map(_ ==>
-          List((1, None), (2, None), (3, Some(Map(pint1, pint2)))))
+        _ <- rawQuery(
+          """SELECT DISTINCT
+            |  Ns.i,
+            |  Ns.offsetDateTimeMap,
+            |  Ns.offsetDateTimeMap REGEXP '2001-01-01T01:01:01.000000001\\+01:00',
+            |  Ns.offsetDateTimeMap REGEXP '2001-01-01T01:01:01.000000001\+01:00'
+            |FROM Ns
+            |WHERE
+            |  Ns.i IS NOT NULL
+            |ORDER BY Ns.i;
+            |""".stripMargin, true)
 
-        //        _ <- rawTransact(
-        //          """insert into Ns default values
-        //            |""".stripMargin)
+        _ <- rawQuery(
+          """SELECT DISTINCT
+            |  Ns.i
+            |FROM Ns
+            |WHERE
+            |  Ns.offsetDateTimeMap REGEXP '2001-01-01T01:01:01.000000001\\+?01:00' = 1 AND
+            |  Ns.i IS NOT NULL
+            |ORDER BY Ns.i;
+            |""".stripMargin, true)
 
-        //        _ <- rawQuery(
-        //          """select id from Ns
-        //            |""".stripMargin, true)
+        // "Map contains this OR that value"
+        //        _ <- Ns.i.a1.offsetDateTimeMap_.has(offsetDateTime0).query.get.map(_ ==> Nil)
+        _ <- Ns.i.a1.offsetDateTimeMap_.has(offsetDateTime1).query.i.get.map(_ ==> List(1))
+//        _ <- Ns.i.a1.offsetDateTimeMap_.has(offsetDateTime2).query.get.map(_ ==> List(1))
 
 
       } yield ()
@@ -67,34 +72,52 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
       for {
 
 
-        _ <- A.i.Bb.*(B.iSet).insert((1, List(Set.empty[Int]))).transact
+        _ <- A.i.iSet.B.iSet.i.insert(
+          (1, Set(1, 2), Set(1, 2, 3), 3),
+          (2, Set(2, 3), Set(2, 3), 3),
+          (2, Set(4), Set(4), 4),
+          (2, Set(4), Set(3), 4),
+        ).transact
 
-//        // A.i was inserted
-//        _ <- A.i.query.get.map(_ ==> List(1))
+        _ <- A.i.iSet_.hasNo(B.i_).B.iSet.i.a1.query.get.map(_ ==> List(
+          (1, Set(1, 2, 3), 3),
+        ))
+        _ <- A.i.iSet.hasNo(B.i_).B.iSet_.i.a1.query.get.map(_ ==> List(
+          (1, Set(1, 2), 3),
+        ))
 
 
+        //            |  B.iSet
         _ <- rawQuery(
           """SELECT DISTINCT
-            |  A.id,
             |  A.i,
-            |  JSON_GROUP_ARRAY(_B_iSet.VALUE) as B_iSet
+            |  JSON_GROUP_ARRAY(_B_iSet.value) as B_iSet
             |FROM A
-            |  LEFT JOIN  A_bb_B                       ON A.id        = A_bb_B.A_id
-            |  LEFT JOIN  B                            ON A_bb_B.B_id = B.id
-            |  Left JOIN JSON_EACH(B.iSet) AS _B_iSet
+            |  INNER JOIN B ON A.b = B.id
+            |  inner join JSON_EACH(B.iSet) as _B_iSet
             |WHERE
-            |  A.i IS NOT NULL
-            |GROUP BY A.i, A.id
-            |HAVING COUNT(*) > 0;
+            |  NOT EXISTS (
+            |    SELECT *
+            |    FROM JSON_EACH(B.iSet)
+            |    WHERE JSON_EACH.VALUE = A.i
+            |  ) AND
+            |  A.i    IS NOT NULL AND
+            |  A.iSet IS NOT NULL AND
+            |  B.iSet IS NOT NULL
+            |group by A.i
+            |ORDER BY A.i
             |""".stripMargin, true)
 
+        _ <- A.i.a1.iSet_.B.iSet.hasNo(A.i_).query.i.get.map(_ ==> List(
+          (2, Set(3, 4)),
+        ))
+        _ <- A.i.a1.iSet.B.iSet_.hasNo(A.i_).query.get.map(_ ==> List(
+          (2, Set(4)),
+        ))
 
-        _ <- A.i.Bb.*?(B.iSet).query.i.get.map(_ ==> List((1, Nil)))
-//        _ <- A.i.Bb.*(B.iSet).query.get.map(_ ==> Nil)
-//
-//        // B.iSet was not inserted
-//        _ <- A.i.Bb.iSet_?.query.get.map(_ ==> List((1, None)))
-//        _ <- A.i.Bb.iSet.query.get.map(_ ==> Nil)
+
+
+
 
 
 

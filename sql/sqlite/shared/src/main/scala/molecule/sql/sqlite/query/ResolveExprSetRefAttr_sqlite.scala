@@ -112,16 +112,48 @@ trait ResolveExprSetRefAttr_sqlite
   override protected def refHas[T](set: Set[T]): Unit = {
     set.size match {
       case 0 => where += (("FALSE", ""))
-      case 1 => where += (("", arrayMatches(Seq(arrayMatch(set)), "OR")))
-      case _ => where += (("", arrayMatches(set.toSeq.map(v => arrayMatch(Set(v))), "OR")))
+      case 1 => where += (("",
+        s"""EXISTS (
+           |    SELECT *
+           |    FROM $joinTable
+           |    WHERE
+           |      $joinTable.$ns_id = $nsId AND
+           |      $joinTable.$ref_id = ${set.head}
+           |  )""".stripMargin
+        ))
+      case _ => where += (("",
+        s"""EXISTS (
+           |    SELECT *
+           |    FROM $joinTable
+           |    WHERE
+           |      $joinTable.$ns_id = $nsId AND
+           |      $joinTable.$ref_id IN (${set.mkString(", ")})
+           |  )""".stripMargin
+      ))
     }
   }
 
   override protected def refHasNo[T](set: Set[T]): Unit = {
     set.size match {
       case 0 => ()
-      case 1 => where += (("", arrayMatches(Seq(arrayMatch(set, "NOT ")), "AND")))
-      case _ => where += (("", arrayMatches(set.toSeq.map(v => arrayMatch(Set(v), "NOT ")), "AND")))
+      case 1 => where += (("",
+        s"""NOT EXISTS (
+           |    SELECT *
+           |    FROM $joinTable
+           |    WHERE
+           |      $joinTable.$ns_id = $nsId AND
+           |      $joinTable.$ref_id = ${set.head}
+           |  )""".stripMargin
+      ))
+      case _ => where += (("",
+        s"""NOT EXISTS (
+           |    SELECT *
+           |    FROM $joinTable
+           |    WHERE
+           |      $joinTable.$ns_id = $nsId AND
+           |      $joinTable.$ref_id IN (${set.mkString(", ")})
+           |  )""".stripMargin
+      ))
     }
   }
 }

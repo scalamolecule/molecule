@@ -24,53 +24,84 @@ trait ResolveExprSeq_sqlite
     })
   }
 
-//  override protected def seqHas[T](
-//    col: String, seq: Seq[T], one2json: T => String, res: ResSeq[T], mandatory: Boolean
-//  ): Unit = {
-//    def containsSeq(seq: Seq[T]): String = {
-//      val jsonValues = seq.map(one2json).mkString(", ")
-//      s"JSON_CONTAINS($col, JSON_ARRAY($jsonValues))"
-//    }
-//    mandatoryCast(res, mandatory)
-//    seq.size match {
-//      case 0 => where += (("FALSE", ""))
-//      case 1 => where += (("", s"JSON_CONTAINS($col, JSON_ARRAY(${one2json(seq.head)}))"))
-//      case _ => where += (("", seq.map(v => containsSeq(Seq(v))).mkString("(", " OR\n   ", ")")))
-//    }
-//  }
-//
-//  override protected def seqHasNo[T](
-//    col: String, seq: Seq[T], one2json: T => String, res: ResSeq[T], mandatory: Boolean
-//  ): Unit = {
-//    def notContains(v: T): String = s"NOT JSON_CONTAINS($col, JSON_ARRAY(${one2json(v)}))"
-//    def notContainsSeq(seq: Seq[T]): String = {
-//      val jsonValues = seq.map(one2json).mkString(", ")
-//      s"NOT JSON_CONTAINS($col, JSON_ARRAY($jsonValues))"
-//    }
-//    mandatoryCast(res, mandatory)
-//    seq.size match {
-//      case 0 => ()
-//      case 1 => where += (("", notContains(seq.head)))
-//      case _ => where += (("", seq.map(v => notContainsSeq(Seq(v))).mkString("(", " AND\n   ", ")")))
-//    }
-//  }
-//
-//
-//  // filter attribute ----------------------------------------------------------
-//
-//  override protected def seqFilterHas[T](
-//    col: String, filterAttr: String, res: ResSeq[T], mandatory: Boolean
-//  ): Unit = {
-//    where += (("", s"JSON_CONTAINS($col, JSON_ARRAY($filterAttr))"))
-//    mandatoryCast(res, mandatory)
-//  }
-//
-//  override protected def seqFilterHasNo[T](
-//    col: String, filterAttr: String, res: ResSeq[T], mandatory: Boolean
-//  ): Unit = {
-//    where += (("", s"NOT JSON_CONTAINS($col, JSON_ARRAY($filterAttr))"))
-//    mandatoryCast(res, mandatory)
-//  }
+  override protected def seqHas[T](
+    col: String, seq: Seq[T], one2json: T => String, res: ResSeq[T], mandatory: Boolean
+  ): Unit = {
+    seq.size match {
+      case 0 => where += (("FALSE", ""))
+      case 1 => where += (("",
+        s"""EXISTS (
+           |    SELECT *
+           |    FROM JSON_EACH($col)
+           |    WHERE JSON_EACH.VALUE = ${one2json(seq.head)}
+           |  )""".stripMargin
+      ))
+      case _ =>
+        val values = seq.map(one2json).mkString(", ")
+        where += (("",
+          s"""EXISTS (
+             |    SELECT *
+             |    FROM JSON_EACH($col)
+             |    WHERE JSON_EACH.VALUE IN ($values)
+             |  )""".stripMargin
+        ))
+    }
+    mandatoryCast(res, mandatory)
+  }
+
+  override protected def seqHasNo[T](
+    col: String, seq: Seq[T], one2json: T => String, res: ResSeq[T], mandatory: Boolean
+  ): Unit = {
+    seq.size match {
+      case 0 => ()
+      case 1 => where += (("",
+        s"""NOT EXISTS (
+           |    SELECT *
+           |    FROM JSON_EACH($col)
+           |    WHERE JSON_EACH.VALUE = ${one2json(seq.head)}
+           |  )""".stripMargin
+      ))
+      case _ =>
+        val values = seq.map(one2json).mkString(", ")
+        where += (("",
+          s"""NOT EXISTS (
+             |    SELECT *
+             |    FROM JSON_EACH($col)
+             |    WHERE JSON_EACH.VALUE IN ($values)
+             |  )""".stripMargin
+        ))
+    }
+    mandatoryCast(res, mandatory)
+  }
+
+
+  // filter attribute ----------------------------------------------------------
+
+  override protected def seqFilterHas[T](
+    col: String, filterAttr: String, res: ResSeq[T], mandatory: Boolean
+  ): Unit = {
+    where += (("",
+      s"""EXISTS (
+         |    SELECT *
+         |    FROM JSON_EACH($col)
+         |    WHERE JSON_EACH.VALUE = $filterAttr
+         |  )""".stripMargin
+    ))
+    mandatoryCast(res, mandatory)
+  }
+
+  override protected def seqFilterHasNo[T](
+    col: String, filterAttr: String, res: ResSeq[T], mandatory: Boolean
+  ): Unit = {
+    where += (("",
+      s"""NOT EXISTS (
+         |    SELECT *
+         |    FROM JSON_EACH($col)
+         |    WHERE JSON_EACH.VALUE = $filterAttr
+         |  )""".stripMargin
+    ))
+    mandatoryCast(res, mandatory)
+  }
 
 
   // helpers -------------------------------------------------------------------

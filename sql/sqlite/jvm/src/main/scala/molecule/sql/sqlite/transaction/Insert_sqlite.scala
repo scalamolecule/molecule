@@ -84,8 +84,27 @@ trait Insert_sqlite extends SqlInsert { self: ResolveInsert with InsertResolvers
       addColSetter(curPath, colSetter)
   }
 
-  override protected lazy val transformDate =
-    (v: Date) => (ps: PS, n: Int) => ps.setLong(n, v.getTime)
+  override protected def addMapOpt[T](
+    ns: String,
+    attr: String,
+    optRefNs: Option[String],
+    tplIndex: Int,
+    transformValue: T => Any,
+    value2json: (StringBuffer, T) => StringBuffer
+  ): Product => Unit = {
+    val (curPath, paramIndex) = getParamIndex(attr)
+    (tpl: Product) =>
+      val colSetter = tpl.productElement(tplIndex) match {
+        case Some(map: Map[_, _]) if map.nonEmpty =>
+          (ps: PS, _: IdsMap, _: RowIndex) =>
+            ps.setString(paramIndex, map2json(map.asInstanceOf[Map[String, T]], value2json))
+
+        case _ =>
+          (ps: PS, _: IdsMap, _: RowIndex) =>
+            ps.setNull(paramIndex, java.sql.Types.NULL)
+      }
+      addColSetter(curPath, colSetter)
+  }
 
 
   // Helpers -------------------------------------------------------------------
@@ -151,4 +170,7 @@ trait Insert_sqlite extends SqlInsert { self: ResolveInsert with InsertResolvers
   // Save Floats as Doubles (REAL PRECISION) in SQlite
   override protected lazy val transformFloat =
     (v: Float) => (ps: PS, n: Int) => ps.setDouble(n, v.toString.toDouble)
+
+  override protected lazy val transformDate =
+    (v: Date) => (ps: PS, n: Int) => ps.setLong(n, v.getTime)
 }

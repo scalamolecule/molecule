@@ -21,62 +21,18 @@ object AdhocJVM_h2 extends TestSuite_h2 {
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
-      val a = (1, Map("a" -> bigInt1, "b" -> bigInt2))
-      val b = (2, Map("a" -> bigInt2, "b" -> bigInt3, "c" -> bigInt4))
       for {
 
-        List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
-        _ <- Ns.int.i.refs_?.insert(23, 1, Option.empty[Set[Long]]).transact
-        _ <- Ns.int.i.refs_?.insert(23, 2, Some(Set.empty[Long])).transact
-        _ <- Ns.int.i.refs_?.insert(23, 3, Some(Set(r1, r2))).transact
+        List(ref1, ref2, ref3, ref4) <- Ref.i.insert(1, 2, 3, 4).transact.map(_.ids)
+        a = (1, Set(ref1, ref2))
+        b = (2, Set(ref2, ref3, ref4))
 
+        _ <- Ns.i.refs.insert(List(a, b)).transact
 
-        _ <- rawQuery(
-          """SELECT DISTINCT
-            |  Ns.i,
-            |  ARRAY_AGG(Ns_refs_Ref.Ref_id) Ns_refs
-            |FROM Ns
-            |  LEFT JOIN Ns_refs_Ref ON Ns.id = Ns_refs_Ref.Ns_id
-            |WHERE
-            |  Ns.int = 23 AND
-            |  Ns.int IS NOT NULL AND
-            |  Ns.i   IS NOT NULL
-            |GROUP BY Ns.id
-            |ORDER BY Ns.i;
-            |""".stripMargin, true)
+        _ <- Ns.i.a1.refs.has(ref2).query.i.get.map(_ ==> List(a, b))
 
 
 
-        _ <- Ns.int_(23).i.a1.refs_?.query.i.get
-          .map(_ ==> List((1, None), (2, None), (3, Some(Set(r1, r2)))))
-
-
-
-        //
-        //        _ <- Ns.i.insert(0).transact // Entity without map attribute
-        //        _ <- Ns.i.bigIntMap.insert(List(a, b)).transact
-        //
-        //        _ <- Ns.i(0).stringMap(Map("a" -> "hej")).save.transact
-        ////        _ <- Ns.i(1).bigIntMap(Map("a" -> bigInt1, "b" -> bigInt2)).save.transact
-        ////        _ <- Ns.i(2).bigIntMap(Map("a" -> bigInt2, "b" -> bigInt3, "c" -> bigInt4)).save.transact
-        //
-        //
-        ////        _ <- Ns.i.a1.bigIntMap("_").query.get.map(_ ==> Nil) // When no map is saved
-        //        _ <- Ns.i.a1.stringMap("a").query.get.map(_ ==> List((0, "hej")))
-        //
-        //        _ <- Ns.i.a1.bigIntMap("a").query.get.map(_ ==> List((1, bigInt1), (2, bigInt2)))
-        ////        _ <- Ns.i.a1.bigIntMap("b").query.get.map(_ ==> List((1, bigInt2), (2, bigInt3)))
-        ////        _ <- Ns.i.a1.bigIntMap("c").query.get.map(_ ==> List((2, bigInt4)))
-
-        //        _ <- rawQuery(
-        //          """SELECT DISTINCT
-        //            |  Ns.i,
-        //            |  Ns.string
-        //            |FROM Ns
-        //            |WHERE
-        //            |  Ns.i IS NOT NULL
-        //            |ORDER BY Ns.string;
-        //            |""".stripMargin, true)
 
         //        _ <- rawQuery(
         //          """select count(*) from Ns

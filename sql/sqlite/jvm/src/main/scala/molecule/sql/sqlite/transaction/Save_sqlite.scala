@@ -55,6 +55,10 @@ trait Save_sqlite extends SqlSave { self: ResolveSave =>
     addColSetter(curPath, colSetter)
   }
 
+  // Save Floats as Doubles (REAL PRECISION) in SQlite
+  override protected lazy val transformFloat =
+    (v: Float) => (ps: PS, n: Int) => ps.setDouble(n, v.toString.toDouble)
+
   override protected lazy val transformDate =
     (v: Date) => (ps: PS, n: Int) => ps.setLong(n, v.getTime)
 

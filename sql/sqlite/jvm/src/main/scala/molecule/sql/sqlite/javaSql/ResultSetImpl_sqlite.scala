@@ -68,14 +68,8 @@ class ResultSetImpl_sqlite(val underlying: ResultSet) extends ResultSetInterface
     case null                 => null
     case s: String            => s
     case i: java.lang.Integer => i.toString
+    case l: java.lang.Long    => l.toString
     case d: java.lang.Double  => d.toString
-    case a: Array[_] =>
-      println(a.toList)
-      ???
-
-    case other =>
-//      println(s"other String type for value $other " + other.getClass)
-      throw new Exception(s"other String type for value $other " + other.getClass)
   }
 
   override def getBoolean(columnIndex: Int): Boolean = value(columnIndex) match {

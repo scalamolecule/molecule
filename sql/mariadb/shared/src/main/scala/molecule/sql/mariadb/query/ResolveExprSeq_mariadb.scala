@@ -32,12 +32,12 @@ trait ResolveExprSeq_mariadb
       val jsonValues = seq.map(one2json).mkString(", ")
       s"JSON_CONTAINS($col, JSON_ARRAY($jsonValues))"
     }
-    mandatoryCast(res, mandatory)
     seq.size match {
       case 0 => where += (("FALSE", ""))
       case 1 => where += (("", s"JSON_CONTAINS($col, JSON_ARRAY(${one2json(seq.head)}))"))
       case _ => where += (("", seq.map(v => containsSeq(Seq(v))).mkString("(", " OR\n   ", ")")))
     }
+    mandatoryCast(res, mandatory)
   }
 
   override protected def seqHasNo[T](
@@ -48,12 +48,12 @@ trait ResolveExprSeq_mariadb
       val jsonValues = seq.map(one2json).mkString(", ")
       s"NOT JSON_CONTAINS($col, JSON_ARRAY($jsonValues))"
     }
-    mandatoryCast(res, mandatory)
     seq.size match {
       case 0 => ()
       case 1 => where += (("", notContains(seq.head)))
       case _ => where += (("", seq.map(v => notContainsSeq(Seq(v))).mkString("(", " AND\n   ", ")")))
     }
+    mandatoryCast(res, mandatory)
   }
 
 

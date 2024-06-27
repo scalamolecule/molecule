@@ -22,10 +22,15 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
 
 
 
-        _ <- Ns.bigIntSeq.Ref.bigInt.insert(List(bigInt1), bigInt1).transact
-        _ <- Ns.bigIntSeq.has(Ref.bigInt_).Ref.bigInt.query.i.get.map(_ ==> List((List(bigInt1), bigInt1)))
+        List(ref1, ref2, ref3, ref4) <- Ref.i.insert(1, 2, 3, 4).transact.map(_.ids)
+        a = (1, Set(ref1, ref2))
+        b = (2, Set(ref2, ref3, ref4))
 
-        _ <- Ns.bigDecimalSeq.Ref.bigDecimal.insert(List(bigDecimal1), bigDecimal1).transact
+        _ <- Ns.i.refs.insert(List(a, b)).transact
+
+        _ <- Ns.i.a1.refs.has(ref2).query.i.get.map(_ ==> List(a, b))
+
+
 
         //        _ <- rawTransact(
         //          """UPDATE Ns
@@ -107,9 +112,7 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
 //            |  Ref.bigDecimal   IS NOT NULL;
 //            |""".stripMargin, true)
 //
-//            |  JSON_CONTAINS(Ns.bigDecimalSeq, JSON_ARRAY(CAST(Ref.bigDecimal AS CHAR)))
-//        _ <- Ns.bigIntSeq.has(Ref.bigInt_).Ref.bigInt.query.i.get.map(_ ==> List((List(bigInt1), bigInt1)))
-        _ <- Ns.bigDecimalSeq.has(Ref.bigDecimal_).Ref.bigDecimal.query.i.get.map(_ ==> List((List(bigDecimal1), bigDecimal1)))
+
 
 
         //        _ <- rawQuery(

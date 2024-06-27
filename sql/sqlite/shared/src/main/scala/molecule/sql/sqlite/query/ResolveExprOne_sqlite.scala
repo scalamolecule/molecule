@@ -7,6 +7,11 @@ import scala.reflect.ClassTag
 trait ResolveExprOne_sqlite extends ResolveExprOne with LambdasOne_sqlite { self: SqlQueryBase =>
 
 
+  override protected def matches(col: String, regex: String): Unit = {
+    if (regex.nonEmpty)
+      where += ((col, s"REGEXP '$regex'"))
+  }
+
   override protected def aggr[T: ClassTag](
     ns: String,
     attr: String,

@@ -1,12 +1,14 @@
 package molecule.sql.sqlite.setup
 
 import java.sql.DriverManager
+import java.util.regex.Pattern
 import molecule.base.api.Schema
 import molecule.base.util.BaseHelpers
 import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.Conn
 import molecule.coreTests.setup.CoreTestSuite
 import molecule.sql.sqlite.facade.JdbcConnSQlite_JVM
+import org.sqlite._
 import scala.concurrent.blocking
 import scala.util.control.NonFatal
 
@@ -20,7 +22,21 @@ trait TestSuite_sqlite extends CoreTestSuite with BaseHelpers {
   def recreateDb(proxy: JdbcProxy): JdbcConnSQlite_JVM = blocking {
     val sqlConn = DriverManager.getConnection(url)
     val conn    = new JdbcConnSQlite_JVM(proxy, sqlConn)
-    val stmt    = conn.sqlConn.createStatement
+
+    // Add regexp function to sqlite
+    Function.create(conn.sqlConn, "REGEXP", new Function() {
+      override def xFunc(): Unit = {
+        val expression = value_text(0)
+        var value      = value_text(1)
+        if (value == null)
+          value = ""
+
+        val pattern = Pattern.compile(expression)
+        result(if (pattern.matcher(value).find()) 1 else 0)
+      }
+    })
+
+    val stmt = conn.sqlConn.createStatement
     stmt.executeUpdate(proxy.createSchema)
     stmt.close()
     conn

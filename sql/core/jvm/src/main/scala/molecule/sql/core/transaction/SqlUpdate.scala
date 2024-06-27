@@ -142,7 +142,6 @@ trait SqlUpdate
     cols += attr
     val cast = exts(2)
     placeHolders = placeHolders :+ s"$attr = ?$cast"
-    //    placeHolders = placeHolders :+ s"$attr = ?"
     val colSetter: Setter = vs match {
       case Seq(v) =>
         if (!isUpsert) {
