@@ -2,17 +2,17 @@
 
 Molecule is a Scala library to build queries and transactions with the words of your domain for various databases:
 
-- Datalog
-    - [Datomic](http://www.datomic.com)
 - SQL
     - [PostgreSQL](https://www.postgresql.org)
+    - [SQlite](https://sqlite.org)
     - [MySQL](https://www.mysql.com)
     - [MariaDB](https://mariadb.com)
     - [H2](https://h2database.com/html/main.html)
+- Datalog
+    - [Datomic](http://www.datomic.com)
 
 Molecule generates boilerplate code from your domain data model. You can then access multiple databases in a uniform way
-with
-"molecules" like this:
+with "molecules" like this:
 
 ```scala
 val persons = Person.name.age.Address.street.query.get
@@ -164,7 +164,7 @@ Add the following to your build files:
 `project/build.properties`:
 
 ```
-sbt.version = 1.9.9
+sbt.version = 1.10.0
 ```
 
 `project/plugins.sbt`:
@@ -204,11 +204,12 @@ For instance on a mac you can start Docker Desktop.
 
 Run the same test suite on jvm targeting various databases:
 
-    sbt datalogDatomicJVM/test
-    sbt sqlH2JVM/test
-    sbt sqlMariadbJVM/test
-    sbt sqlMysqlJVM/test
     sbt sqlPostgresJVM/test
+    sbt sqlSQliteJVM/test
+    sbt sqlMysqlJVM/test
+    sbt sqlMariadbJVM/test
+    sbt sqlH2JVM/test
+    sbt datalogDatomicJVM/test
 
 ### Run js tests
 

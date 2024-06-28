@@ -17,7 +17,9 @@ object RawQuery extends TestSuite_mariadb {
       for {
         _ <- Ns.string("a").int(1).save.transact
 
-        _ <- Ns.string.int.query.i.get
+        _ <- Ns.string.int.query.i.get.map(_ ==> List(
+          ("a", 1) // First row as typed tuple
+        ))
 
         // Each Row returned as a List of Any
         _ <- rawQuery(

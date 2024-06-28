@@ -5,7 +5,7 @@ import scala.collection.Seq
 
 val scala212 = "2.12.19"
 val scala213 = "2.13.14"
-val scala3   = "3.4.2"
+val scala3   = "3.3.3"
 val allScala = Seq(scala212, scala213, scala3)
 
 val akkaVersion          = "2.8.3"
@@ -60,8 +60,8 @@ lazy val root = project
     sqlMySQL.jvm,
     sqlPostgreSQL.js,
     sqlPostgreSQL.jvm,
-    sqlSQLite.js,
-    sqlSQLite.jvm,
+    sqlSQlite.js,
+    sqlSQlite.jvm,
   )
 
 lazy val base = crossProject(JSPlatform, JVMPlatform)
@@ -131,8 +131,8 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
   .settings(
     // Generate Molecule boilerplate code for tests with `sbt clean compile -Dmolecule=true`
     moleculePluginActive := sys.props.get("molecule").contains("true"),
-    moleculeMakeJars := !sys.props.get("moleculeJars").contains("false"), // default: true
-    moleculeMakeJars := false, // default: true
+    //    moleculeMakeJars := !sys.props.get("moleculeJars").contains("false"), // default: true
+    //    moleculeMakeJars := false, // default: true
 
     // Multiple directories with data models
     moleculeDataModelPaths := Seq(
@@ -329,8 +329,7 @@ lazy val sqlPostgreSQL = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(coreTests % "compile->compile;test->test")
 
 
-
-lazy val sqlSQLite = crossProject(JSPlatform, JVMPlatform)
+lazy val sqlSQlite = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("sql/sqlite"))
   .settings(name := "molecule-sql-sqlite")

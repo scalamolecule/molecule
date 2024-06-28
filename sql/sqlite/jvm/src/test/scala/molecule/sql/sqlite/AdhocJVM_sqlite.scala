@@ -27,9 +27,13 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
 
       for {
 
-        List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
-        _ <- Ns.refs(Set(r1, r2)).save.i.transact
-//        _ <- Ns.refs.query.get.map(_.head ==> Set(r1, r2))
+        _ <- Ns.string("a").int(1).save.transact
+
+        _ <- Ns.string.int.query.i.get.map(_ ==> List(
+          ("a", 1) // First row as typed tuple
+        ))
+
+
 
 //        // Values are still typed
 //        _ <- rawQuery(

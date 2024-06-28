@@ -16,7 +16,9 @@ object RawQuery extends TestSuite_mysql {
       for {
         _ <- Ns.string("a").int(1).save.transact
 
-        _ <- Ns.string.int.query.i.get
+        _ <- Ns.string.int.query.i.get.map(_ ==> List(
+          ("a", 1) // First row as typed tuple
+        ))
 
         // Each Row returned as a List of Any
         _ <- rawQuery(
@@ -30,7 +32,7 @@ object RawQuery extends TestSuite_mysql {
             |""".stripMargin,
           true // set to true to print debug info
         ).map(_ ==> List(
-            List("a", 1) // First row
+            List("a", 1) // First row as List[Any]
           ))
       } yield ()
     }
