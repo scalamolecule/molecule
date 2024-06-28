@@ -25,6 +25,8 @@ trait SqlBase_JVM extends SqlDataType_JVM with ModelUtils with BaseHelpers {
     )
   }
 
+  lazy protected val defaultValues = "(id) VALUES (DEFAULT)"
+
   var level = 0
   override def indent(level: Int) = "  " * level
   protected def debug(s: Any) = if (doPrint) println(s) else ()

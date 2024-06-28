@@ -27,80 +27,22 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
 
       for {
 
+        List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
+        _ <- Ns.refs(Set(r1, r2)).save.i.transact
+//        _ <- Ns.refs.query.get.map(_.head ==> Set(r1, r2))
 
-        //        id <- Ns.intMap(Map("a" -> 1)).save.transact.map(_.id)
-        id <- Ns.intMap(Map("a" -> 1, "b" -> 2)).save.transact.map(_.id)
-
-
-//        _ <- Ns.intSet.query.i.get.map(_.head ==> Set(int1, int2))
-
-        _ <- Ns.refs.query.i.get.map(_.head ==> Set())
-
-
-        //        _ <- rawQuery(
-        //          """SELECT
-        //            | x.key,
-        //            | x.value
-        //            |FROM Ns, JSON_tree(intMap, '$*') AS x
-        //            |""".stripMargin, true)
-        //
-        //
-        //        _ <- rawQuery(
-        //          """SELECT
-        //            |_vs.key
-        //            |_vs.value
-        //            |FROM Ns, JSON_tree(intMap, '$.a') AS _vs
-        //            |""".stripMargin, true)
+//        // Values are still typed
+//        _ <- rawQuery(
+//          """SELECT DISTINCT
+//            |  Ns.string,
+//            |  Ns.int
+//            |FROM Ns
+//            |WHERE
+//            |  Ns.string IS NOT NULL AND
+//            |  Ns.int    IS NOT NULL;
+//            |""".stripMargin).map(_.head == List("a", "1") ==> false)
 
 
-        //        _ <- rawTransact(
-        //          """UPDATE Ns
-        //            |SET
-        //            |  intMap = json_object("b", 10, "c", 30)
-        //            |WHERE
-        //            |  Ns.id IN(1)
-        //            |""".stripMargin)
-
-        //        _ <- rawTransact(
-        //          """UPDATE Ns
-        //            |SET
-        //            |  intMap = json_set(intMap, "$.b", 11, "$.c", 21)
-        //            |WHERE
-        //            |  Ns.id IN(1)
-        //            |""".stripMargin)
-
-        //        _ <- rawQuery(
-        //          """SELECT JSON_GROUP_ARRAY(VALUE)
-        //            |    FROM (
-        //            |      SELECT _vs.value FROM Ns, JSON_EACH(stringSeq) AS _vs
-        //            |      UNION all
-        //            |      SELECT _vs.value FROM JSON_EACH('["a", "b"]') AS _vs
-        //            |    )
-        //            |""".stripMargin, true)
-
-
-        //        _ <- rawQuery(
-        //          """select
-        //            |  json_remove(intMap, '$.a')
-        //            |from Ns
-        //            |""".stripMargin, true)
-
-        _ <- rawQuery(
-          """
-            |select
-            |(
-            |case json_remove(intMap, '$.x')
-            |when '{}' then null
-            |when null then intMap
-            |else json_remove(intMap, '$.x')
-            |end
-            |) as z
-            |from Ns
-            |""".stripMargin, true)
-
-        // Removing all remaining pairs deletes the attribute
-        _ <- Ns(id).intMap.remove(Seq(string1)).update.i.transact
-        _ <- Ns.intMap.query.get.map(_ ==> Nil)
         //        _ <- rawTransact(
         //          """UPDATE Ns
         //            |SET

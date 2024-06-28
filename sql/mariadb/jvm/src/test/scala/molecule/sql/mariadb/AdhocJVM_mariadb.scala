@@ -127,90 +127,29 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
 
-      val pint20 = "b" -> 21
-      val pint30 = "c" -> 30
       for {
 
-        //        _ <- B.s("x").iMap(Map(pint0, pint1)).save.transact
-        //        _ <- A.i(1).save.transact
+//        _ <- A.i(0).save.transact.map(_.id)
+        _ <- A.Bb.*(B.s).insert(List("a", "b")).i.transact.map(_.id)
+//        _ <- A.i.Bb.*(B.s).insert((2, List("c", "d"))).transact.map(_.id)
+//
+//        // Filter by B attribute, update A values
+//        _ <- A.i(3).Bb.s_.update.transact
+//
+//        _ <- A.i.Bb.*?(B.s.a1).query.get.map(_.sortBy(_._2.headOption.toString) ==> List(
+//          (0, List()), //         Nothing updated since this A entity has no ref to B
+//          (3, List("c", "d")), // A attribute updated
+//        ))
+//
+//        // Filter by B attribute, upsert A values
+//        _ <- A.i(4).Bb.s_.upsert.transact
+//
+//        _ <- A.i.Bb.*?(B.s.a1).query.get.map(_.sortBy(_._2.headOption.toString) ==> List(
+//          (0, List()), //         Nothing updated since this A entity has no ref to B
+//          (4, List("a", "b")), // A attribute inserted
+//          (4, List("c", "d")), // A attribute updated
+//        ))
 
-        // will be updated
-        _ <- A.i.Bb.*(B.s_?.iMap_?).insert(
-          (2, List(
-            (None, None), // no relationship to B created
-            (None, Some(Map(pint1, pint2))),
-            (Some("a"), None),
-            (Some("b"), Some(Map(pint2, pint3))),
-          ))
-        ).transact
-
-        // Filter by B attribute, update B values
-        _ <- A.Bb.s_.iMap(Map(pint3, pint4)).update.transact
-
-        _ <- A.i.a1.Bb.*?(B.s_?.a1.iMap_?).query.i.get.map(_ ==> List(
-          //          (1, List()), //                            no change to entity without relationship to B
-          (2, List(
-            // (None, None),                         no relationship to B
-            (None, Some(Map(pint1, pint2))), //      no change without filter match
-            (Some("a"), None), //                    no value to update
-            (Some("b"), Some(Map(pint3, pint4))), // B attribute updated
-          ))
-        ))
-
-        /*
-        ========================================
-QUERY:
-AttrOneManInt("A", "i", V, Seq(), None, None, Nil, Nil, None, Some("a1"), Seq(0, 1))
-NestedOpt(
-  Ref("A", "bb", "B", CardSet, false, Seq(0, 14, 1)),
-  List(
-    AttrOneOptString("B", "s", V, None, None, None, Nil, Nil, None, Some("a1"), Seq(1, 28)),
-    AttrMapOptInt("B", "iMap", V, None, None, None, Nil, Nil, None, None, Seq(1, 27))))
-
-SELECT DISTINCT
-  A.id,
-  A.i,
-  B.s,
-  B.iMap
-FROM A
-  LEFT JOIN A_bb_B ON A.id        = A_bb_B.A_id
-  LEFT JOIN B      ON A_bb_B.B_id = B.id
-WHERE
-  A.i IS NOT NULL
-ORDER BY A.i, B.s;
-----------------------------------------
-???????????????  aggregate    false
-???????????????  groupBy      LinkedHashSet()
-???????????????  groupByCols  LinkedHashSet(A.i, A.id, B.s)
-
-
-
-========================================
-QUERY:
-AttrOneManInt("A", "i", V, Seq(), None, None, Nil, Nil, None, Some("a1"), Seq(0, 1))
-NestedOpt(
-  Ref("A", "bb", "B", CardSet, false, Seq(0, 14, 1)),
-  List(
-    AttrOneOptString("B", "s", V, None, None, None, Nil, Nil, None, Some("a1"), Seq(1, 28)),
-    AttrMapOptInt("B", "iMap", V, None, None, None, Nil, Nil, None, None, Seq(1, 27))))
-
-SELECT DISTINCT
-  A.id,
-  A.i,
-  B.s,
-  B.iMap
-FROM A
-  LEFT JOIN A_bb_B ON A.id        = A_bb_B.A_id
-  LEFT JOIN B      ON A_bb_B.B_id = B.id
-WHERE
-  A.i IS NOT NULL
-GROUP BY A.id, A.i, B.s
-ORDER BY A.i, B.s;
-----------------------------------------
-???????????????  aggregate    true
-???????????????  groupBy      LinkedHashSet(A.id)
-???????????????  groupByCols  LinkedHashSet(A.i, B.s)
-         */
 
         //        _ <- rawTransact(
         //          """UPDATE B
@@ -229,73 +168,69 @@ ORDER BY A.i, B.s;
     }
 
 
-    "unique" - unique { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Uniques._
-      val attr = database match {
-        case "Mysql" => "string_"
-        case _       => "string"
-      }
-
-
-      for {
-
-        //            _ <- Uniques.i(1).i(2).int_(1).update.transact
-        //              .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-        //                err ==> "Can't transact duplicate attribute Uniques.i"
-        //              }
-        //
-        //            _ <- Uniques.i_(1).i(2).update.transact
-        //
-        //            _ <- Uniques.int_(1).string_("x").s("c").update.transact
-        //              .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-        //                err ==> "Can only apply one unique attribute value for update. Found:\n" +
-        //                  s"""AttrOneTacString("Uniques", "$attr", Eq, Seq("x"), None, None, Nil, Nil, None, None, Seq(0, 3))"""
-        //              }
-        //
-        //            _ <- Uniques.intSet_(1).s("b").update.transact
-        //              .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-        //                err ==> "Can only lookup entity with card-one attribute value. Found:\n" +
-        //                  """AttrSetTacInt("Uniques", "intSet", Eq, Seq(Set(1)), None, None, Nil, Nil, None, None, Seq(0, 25))"""
-        //              }
-
-
-        //
-        //            _ <- Uniques.int.insert(1, 2, 3).transact
-        //
-        //            c1 <- Uniques.int.a1.query.from("").limit(2).get.map { case (List(1, 2), c, true) => c }
-        //
-        //            // Turning around with first cursor leads nowhere
-        //            _ <- Uniques.int.a1.query.from(c1).limit(-2).get.map { case (Nil, _, false) => () }
-
-
-
-
-        _ <- Uniques.int.insert(1, 2).transact
-
-
-      } yield ()
-    }
-
-
-    "validation" - validation { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Validation._
-      for {
-        id <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf", "stamps")).save.transact.map(_.id)
-
-        // We can remove a value from a Set as long as it's not the last value
-        _ <- MandatoryAttr(id).hobbies.remove("stamps").update.i.transact
-
-        //        // Can't remove the last value of a mandatory attribute Set of values
-        //        _ <- MandatoryAttr(id).hobbies.remove("golf").update.transact
-        //          .map(_ ==> "Unexpected success").recover {
-        //            case ModelError(error) =>
-        //              error ==>
-        //                """Can't delete mandatory attributes (or remove last values of card-many attributes):
-        //                  |  MandatoryAttr.hobbies
-        //                  |""".stripMargin
-        //          }
-
-      } yield ()
-    }
+//    "unique" - unique { implicit conn =>
+//      import molecule.coreTests.dataModels.core.dsl.Uniques._
+//
+//
+//      for {
+//
+//        //            _ <- Uniques.i(1).i(2).int_(1).update.transact
+//        //              .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+//        //                err ==> "Can't transact duplicate attribute Uniques.i"
+//        //              }
+//        //
+//        //            _ <- Uniques.i_(1).i(2).update.transact
+//        //
+//        //            _ <- Uniques.int_(1).string_("x").s("c").update.transact
+//        //              .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+//        //                err ==> "Can only apply one unique attribute value for update. Found:\n" +
+//        //                  s"""AttrOneTacString("Uniques", "$attr", Eq, Seq("x"), None, None, Nil, Nil, None, None, Seq(0, 3))"""
+//        //              }
+//        //
+//        //            _ <- Uniques.intSet_(1).s("b").update.transact
+//        //              .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+//        //                err ==> "Can only lookup entity with card-one attribute value. Found:\n" +
+//        //                  """AttrSetTacInt("Uniques", "intSet", Eq, Seq(Set(1)), None, None, Nil, Nil, None, None, Seq(0, 25))"""
+//        //              }
+//
+//
+//        //
+//        //            _ <- Uniques.int.insert(1, 2, 3).transact
+//        //
+//        //            c1 <- Uniques.int.a1.query.from("").limit(2).get.map { case (List(1, 2), c, true) => c }
+//        //
+//        //            // Turning around with first cursor leads nowhere
+//        //            _ <- Uniques.int.a1.query.from(c1).limit(-2).get.map { case (Nil, _, false) => () }
+//
+//
+//
+//
+//        _ <- Uniques.int.insert(1, 2).transact
+//
+//
+//      } yield ()
+//    }
+//
+//
+//    "validation" - validation { implicit conn =>
+//      import molecule.coreTests.dataModels.core.dsl.Validation._
+//      for {
+//        id <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf", "stamps")).save.transact.map(_.id)
+//
+//        // We can remove a value from a Set as long as it's not the last value
+//        _ <- MandatoryAttr(id).hobbies.remove("stamps").update.i.transact
+//
+//        //        // Can't remove the last value of a mandatory attribute Set of values
+//        //        _ <- MandatoryAttr(id).hobbies.remove("golf").update.transact
+//        //          .map(_ ==> "Unexpected success").recover {
+//        //            case ModelError(error) =>
+//        //              error ==>
+//        //                """Can't delete mandatory attributes (or remove last values of card-many attributes):
+//        //                  |  MandatoryAttr.hobbies
+//        //                  |""".stripMargin
+//        //          }
+//
+//      } yield ()
+//    }
   }
 }

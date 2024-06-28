@@ -21,7 +21,8 @@ trait SpiSync_sqlite extends SpiSyncBase {
   override def getModel2SqlQuery[Tpl](elements: List[Element]) =
     new Model2SqlQuery_sqlite[Tpl](elements)
 
-  override lazy val defaultValues = "DEFAULT VALUES"
+  override protected lazy val defaultValues = "DEFAULT VALUES"
+
 
   override def save_getData(save: Save, conn: JdbcConn_JVM): Data = {
     new ResolveSave with Save_sqlite {
@@ -135,78 +136,5 @@ trait SpiSync_sqlite extends SpiSyncBase {
     debug("---------------")
     debug("Ids: " + ids)
     TxReport(ids)
-  }
-
-  override def fallback_rawQuery(
-    query: String,
-    debugFlag: Boolean = false,
-  )(implicit conn: Conn): List[List[Any]] = {
-    val c             = conn.asInstanceOf[JdbcConn_JVM].sqlConn
-    val statement     = c.createStatement()
-    val resultSet     = statement.executeQuery(query)
-    val rsmd          = resultSet.getMetaData
-    val columnsNumber = rsmd.getColumnCount
-
-    val debug = if (debugFlag) (s: String) => println(s) else (_: String) => ()
-    debug("\n=============================================================================")
-    debug(query)
-
-    val rows = ListBuffer.empty[List[Any]]
-    val row  = ListBuffer.empty[Any]
-
-    def value[T](rawValue: T, baseTpe: String): String = {
-      if (resultSet.wasNull()) {
-        row += null
-      } else {
-        row += rawValue
-      }
-      baseTpe
-    }
-
-    while (resultSet.next()) {
-      debug("-----------------------------------------------")
-      var n = 1
-      row.clear()
-      while (n <= columnsNumber) {
-        val col         = rsmd.getColumnName(n)
-        val sqlType     = rsmd.getColumnTypeName(n)
-        val tpe         = sqlType match {
-          //          case "CHARACTER VARYING" => value(resultSet.getString(n), "String/URI")
-          //          case "FLOAT"             => value(resultSet.getFloat(n), "Float")
-          //          case "DECIMAL"           => value(resultSet.getDouble(n), "BigInt/Decimal")
-          //          case "UUID"              => value(resultSet.getString(n), "UUID")
-          //          case "DECFLOAT"         => value(resultSet.getString(n), "DECFLOAT")
-          case "VARCHAR"          => value(resultSet.getString(n), "String")
-          case "NVARCHAR"         => value(resultSet.getString(n), "String")
-          case "INTEGER"          => value(resultSet.getInt(n), "Int")
-          case "BIGINT"           => value(resultSet.getLong(n), "Long")
-          case "DOUBLE PRECISION" => value(resultSet.getDouble(n), "Double")
-          case "BOOLEAN"          => value(resultSet.getBoolean(n), "Boolean")
-          case "DATE"             => value(resultSet.getLong(n), "Long")
-          case "TINYINT"          => value(resultSet.getShort(n), "Byte")
-          case "SMALLINT"         => value(resultSet.getShort(n), "Short")
-          case "CHARACTER"        => value(resultSet.getString(n), "Char")
-          case "TEXT"             => value(resultSet.getString(n), "String")
-          case "NUMERIC"          => value(resultSet.getString(n), "NUMERIC")
-          case "VARBINARY"        => value(resultSet.getBytes(n), "String")
-
-          // Set/Seq/Map
-          case "JSON" => value(resultSet.getString(n), "String")
-
-          case other => throw new Exception(
-            s"Unexpected sql result type from raw query: " + other
-          )
-        }
-        val columnValue = resultSet.getString(n)
-        if (resultSet.wasNull()) {
-          debug(tpe + "   " + padS(20, tpe) + col + padS(20, col) + "  null")
-        } else if (!resultSet.wasNull()) {
-          debug(tpe + "   " + padS(20, tpe) + col + padS(20, col) + "  " + columnValue)
-        }
-        n += 1
-      }
-      rows += row.toList
-    }
-    rows.toList
   }
 }

@@ -1,7 +1,6 @@
 package molecule.sql.core.spi
 
-import java.sql.Statement
-import molecule.base.ast.MetaNs
+import java.sql.{ResultSetMetaData, Statement}
 import molecule.base.error._
 import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
@@ -14,7 +13,8 @@ import molecule.core.validation.insert.InsertValidation
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.query.{Model2SqlQuery, SqlQueryBase, SqlQueryResolveCursor, SqlQueryResolveOffset}
 import molecule.sql.core.transaction.update.UpdateHelper
-import molecule.sql.core.transaction.{SqlBase_JVM, SqlUpdateSetValidator, Table}
+import molecule.sql.core.transaction.{SqlBase_JVM, SqlUpdateSetValidator}
+import scala.collection.mutable.ListBuffer
 import scala.util.control.NonFatal
 
 
@@ -30,8 +30,6 @@ trait SpiSyncBase
   // Query --------------------------------------------------------
 
   def getModel2SqlQuery[Tpl](elements: List[Element]): Model2SqlQuery[Tpl] with SqlQueryBase
-
-  lazy val defaultValues = "(id) VALUES (DEFAULT)"
 
   override def query_get[Tpl](q0: Query[Tpl])(implicit conn0: Conn): List[Tpl] = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
@@ -324,5 +322,86 @@ trait SpiSyncBase
     debug("---------------")
     debug("Ids: " + ids)
     TxReport(ids)
+  }
+
+  override def fallback_rawQuery(
+    query: String,
+    debug: Boolean = false,
+  )(implicit conn: Conn): List[List[Any]] = {
+    val c            = conn.asInstanceOf[JdbcConn_JVM].sqlConn
+    val statement    = c.createStatement()
+    val resultSet    = statement.executeQuery(query)
+    val metaData     = resultSet.getMetaData
+    val columnsCount = metaData.getColumnCount
+    val rows         = ListBuffer.empty[List[Any]]
+    val row          = ListBuffer.empty[Any]
+    val types        = new Array[String](columnsCount)
+    while (resultSet.next()) {
+      var n = 1
+      row.clear()
+      while (n <= columnsCount) {
+        resultSet.getObject(n) match {
+          case null => row += null
+          case v    =>
+            row += v
+            types(n - 1) = v.getClass.toString
+        }
+        n += 1
+      }
+      rows += row.toList
+    }
+    if (debug) {
+      renderRawQueryData(query, rows, types, metaData)
+    }
+    resultSet.close()
+    rows.toList
+  }
+
+  def renderRawQueryData(
+    query: String,
+    rows: ListBuffer[List[Any]],
+    types: Array[String],
+    metaData: ResultSetMetaData
+  ): Unit = {
+    println("\n=============================================================================")
+    println(query)
+    val max      = 10
+    val showRows = rows.length - max match {
+      case 1          => rows.take(max) :+ "1 more row..."
+      case n if n > 1 => rows.take(max) :+ s"$n more rows..."
+      case _          => rows
+    }
+
+    val (col, tpe, dbTpe) = ("Column", "Raw type", "Db type")
+    var maxCol            = col.length
+    var maxTpe            = tpe.length
+    var maxDbTpe          = dbTpe.length
+    val sep               = 4
+
+    val typeData = types.zipWithIndex.map {
+      case (null, i) =>
+        val col   = metaData.getColumnName(i + 1)
+        val dbTpe = metaData.getColumnTypeName(i + 1)
+        (col, "null", dbTpe)
+
+      case (tpe, i) =>
+        val col    = metaData.getColumnName(i + 1)
+        val dbType = metaData.getColumnTypeName(i + 1)
+        maxCol = maxCol.max(col.length)
+        maxTpe = maxTpe.max(tpe.length)
+        maxDbTpe = maxDbTpe.max(dbType.length)
+        (col, tpe, dbType)
+    }
+
+    def tpeLine(col: String, tpe: String, dbTpe: String) = {
+      println(col + padS(maxCol + sep, col) + tpe + padS(maxTpe + sep, tpe) + dbTpe)
+    }
+
+    println(showRows.mkString("List(\n  ", ",\n  ", "\n)\n"))
+    tpeLine(col, tpe, dbTpe)
+    println("-" * (maxCol + sep + maxTpe + sep + maxDbTpe))
+    typeData.foreach {
+      case (col, tpe, dbTpe) => tpeLine(col, tpe, dbTpe)
+    }
   }
 }
