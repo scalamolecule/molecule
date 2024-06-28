@@ -50,7 +50,7 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
           s"""$attr = (
              |    SELECT JSON_GROUP_ARRAY(VALUE)
              |    FROM (
-             |      SELECT _vs.value FROM $ns, JSON_EACH($attr) AS _vs
+             |      SELECT _vs.value FROM $ns AS _t, JSON_EACH($attr) AS _vs WHERE _t.id = $ns.id
              |      UNION
              |      SELECT _vs.value FROM JSON_EACH(?) AS _vs
              |    )
@@ -93,8 +93,10 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
              |    )
              |    FROM (
              |      SELECT _vs.value
-             |      FROM $ns, JSON_EACH($attr) AS _vs
-             |      WHERE _vs.VALUE NOT IN ($retractValues)
+             |      FROM $ns AS _t, JSON_EACH($attr) AS _vs
+             |      WHERE
+             |        _t.id = $ns.id AND
+             |        _vs.VALUE NOT IN ($retractValues)
              |    )
              |  )""".stripMargin
         addColSetter(curRefPath, (_: PS, _: IdsMap, _: RowIndex) => ())
@@ -138,7 +140,7 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
           s"""$attr = (
              |    SELECT JSON_GROUP_ARRAY(VALUE)
              |    FROM (
-             |      SELECT _vs.value FROM $ns, JSON_EACH($attr) AS _vs
+             |      SELECT _vs.value FROM $ns as _t, JSON_EACH($attr) AS _vs WHERE _t.id = $ns.id
              |      UNION ALL
              |      SELECT _vs.value FROM JSON_EACH(?) AS _vs
              |    )
@@ -181,8 +183,10 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
              |    )
              |    FROM (
              |      SELECT _vs.value
-             |      FROM $ns, JSON_EACH($attr) AS _vs
-             |      WHERE _vs.VALUE NOT IN ($retractValues)
+             |      FROM $ns AS _t, JSON_EACH($attr) AS _vs
+             |      WHERE
+             |        _t.id = $ns.id AND
+             |        _vs.VALUE NOT IN ($retractValues)
              |    )
              |  )""".stripMargin
         addColSetter(curRefPath, (_: PS, _: IdsMap, _: RowIndex) => ())

@@ -58,7 +58,7 @@ trait SpiSync_postgres extends SpiSyncBase {
       )
       conn.resultSet(ps.executeQuery())
     }
-    validateUpdateSet(conn.proxy, update.elements, query2resultSet)
+    validateUpdateSet_array(conn.proxy, update.elements, query2resultSet)
   }
 
   override def delete_getInspectionData(conn: JdbcConn_JVM, delete: Delete): Data = {

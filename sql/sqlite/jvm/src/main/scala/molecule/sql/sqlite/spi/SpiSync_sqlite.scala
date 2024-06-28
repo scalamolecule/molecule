@@ -55,11 +55,13 @@ trait SpiSync_sqlite extends SpiSyncBase {
     val conn            = conn0.asInstanceOf[JdbcConn_JVM]
     val query2resultSet = (query: String) => {
       val ps = conn.sqlConn.prepareStatement(
-        query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY
+        query,
+        ResultSet.TYPE_FORWARD_ONLY,
+        ResultSet.CONCUR_READ_ONLY
       )
       conn.resultSet(ps.executeQuery())
     }
-    validateUpdateSet(conn.proxy, update.elements, query2resultSet)
+    validateUpdateSet_sqlite(conn.proxy, update.elements, query2resultSet)
   }
 
 

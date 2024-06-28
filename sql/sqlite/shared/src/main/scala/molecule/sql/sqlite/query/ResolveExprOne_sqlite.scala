@@ -178,7 +178,7 @@ trait ResolveExprOne_sqlite extends ResolveExprOne with LambdasOne_sqlite { self
          |      ORDER BY RANDOM()
          |      LIMIT 1
          |    )
-         |  ) as ${ns}_${attr}_samples""".stripMargin
+         |  ) AS ${ns}_${attr}_samples""".stripMargin
     }
   }
 
@@ -194,7 +194,7 @@ trait ResolveExprOne_sqlite extends ResolveExprOne with LambdasOne_sqlite { self
          |      ORDER BY RANDOM()
          |      LIMIT $n
          |    )
-         |  ) as ${ns}_${attr}_samples""".stripMargin
+         |  ) AS ${ns}_${attr}_samples""".stripMargin
     }
   }
 
@@ -211,7 +211,7 @@ trait ResolveExprOne_sqlite extends ResolveExprOne with LambdasOne_sqlite { self
          |      ORDER BY _$ns.$attr $dir
          |      LIMIT $n
          |    )
-         |  ) as ${ns}_$attr$fn""".stripMargin
+         |  ) AS ${ns}_$attr$fn""".stripMargin
     }
   }
 

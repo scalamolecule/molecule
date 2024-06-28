@@ -60,7 +60,7 @@ trait SqlUpdate
         } else {
           ids // ids of existing entities (collected in handleIds)
         }
-        //        println(ids2)
+        //        println(s"  ............................ ids2: " + ids2)
         val clauses = if (ids2.nonEmpty) {
           s"$table.id IN(${ids2.mkString(", ")})"
         } else {

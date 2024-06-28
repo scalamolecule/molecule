@@ -280,33 +280,20 @@ ORDER BY A.i, B.s;
     "validation" - validation { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Validation._
       for {
-        _ <- Type.string("a").save.transact
-          .map(_ ==> "Unexpected success").recover {
-            case ValidationErrors(errorMap) =>
-              errorMap.head._2.head ==>
-                s"""Type.string with value `a` doesn't satisfy validation:
-                   |_ > "b"
-                   |""".stripMargin
-          }
+        id <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf", "stamps")).save.transact.map(_.id)
 
-        _ <- Type.string.insert("a").transact
-          .map(_ ==> "Unexpected success").recover {
-            case InsertErrors(errors, _) =>
-              errors.head._2.head.errors.head ==
-                s"""Type.string with value `a` doesn't satisfy validation:
-                   |_ > "b"
-                   |""".stripMargin
-          }
+        // We can remove a value from a Set as long as it's not the last value
+        _ <- MandatoryAttr(id).hobbies.remove("stamps").update.i.transact
 
-        id <- Type.string("c").save.transact.map(_.id)
-        _ <- Type(id).string("a").update.transact
-          .map(_ ==> "Unexpected success").recover {
-            case ValidationErrors(errorMap) =>
-              errorMap.head._2.head ==
-                s"""Type.string with value `a` doesn't satisfy validation:
-                   |_ > "b"
-                   |""".stripMargin
-          }
+        //        // Can't remove the last value of a mandatory attribute Set of values
+        //        _ <- MandatoryAttr(id).hobbies.remove("golf").update.transact
+        //          .map(_ ==> "Unexpected success").recover {
+        //            case ModelError(error) =>
+        //              error ==>
+        //                """Can't delete mandatory attributes (or remove last values of card-many attributes):
+        //                  |  MandatoryAttr.hobbies
+        //                  |""".stripMargin
+        //          }
 
       } yield ()
     }

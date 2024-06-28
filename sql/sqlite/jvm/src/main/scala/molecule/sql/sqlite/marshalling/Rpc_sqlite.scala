@@ -111,7 +111,7 @@ object Rpc_sqlite
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
-      errors = validateUpdateSet(conn.proxy, elements,
+      errors = validateUpdateSet_array(conn.proxy, elements,
         (query: String) => {
           val ps        = conn.sqlConn.prepareStatement(
             query, Row.TYPE_SCROLL_INSENSITIVE, Row.CONCUR_READ_ONLY

@@ -28,9 +28,13 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
       for {
 
 
-//        id <- Ns.intMap(Map("a" -> 1)).save.transact.map(_.id)
+        //        id <- Ns.intMap(Map("a" -> 1)).save.transact.map(_.id)
         id <- Ns.intMap(Map("a" -> 1, "b" -> 2)).save.transact.map(_.id)
 
+
+//        _ <- Ns.intSet.query.i.get.map(_.head ==> Set(int1, int2))
+
+        _ <- Ns.refs.query.i.get.map(_.head ==> Set())
 
 
         //        _ <- rawQuery(
@@ -49,22 +53,21 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
         //            |""".stripMargin, true)
 
 
+        //        _ <- rawTransact(
+        //          """UPDATE Ns
+        //            |SET
+        //            |  intMap = json_object("b", 10, "c", 30)
+        //            |WHERE
+        //            |  Ns.id IN(1)
+        //            |""".stripMargin)
 
-//        _ <- rawTransact(
-//          """UPDATE Ns
-//            |SET
-//            |  intMap = json_object("b", 10, "c", 30)
-//            |WHERE
-//            |  Ns.id IN(1)
-//            |""".stripMargin)
-
-//        _ <- rawTransact(
-//          """UPDATE Ns
-//            |SET
-//            |  intMap = json_set(intMap, "$.b", 11, "$.c", 21)
-//            |WHERE
-//            |  Ns.id IN(1)
-//            |""".stripMargin)
+        //        _ <- rawTransact(
+        //          """UPDATE Ns
+        //            |SET
+        //            |  intMap = json_set(intMap, "$.b", 11, "$.c", 21)
+        //            |WHERE
+        //            |  Ns.id IN(1)
+        //            |""".stripMargin)
 
         //        _ <- rawQuery(
         //          """SELECT JSON_GROUP_ARRAY(VALUE)
@@ -76,12 +79,11 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
         //            |""".stripMargin, true)
 
 
-
-//        _ <- rawQuery(
-//          """select
-//            |  json_remove(intMap, '$.a')
-//            |from Ns
-//            |""".stripMargin, true)
+        //        _ <- rawQuery(
+        //          """select
+        //            |  json_remove(intMap, '$.a')
+        //            |from Ns
+        //            |""".stripMargin, true)
 
         _ <- rawQuery(
           """
@@ -125,66 +127,89 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
       for {
 
 
-        _ <- A.s("a").save.transact // no A.i filter match
-        _ <- A.i(1).save.transact
+        _ <- A.i.a1.Bb.*?(B.s_?.iSeq_?).insert(
+          //          (1, List()),
+          //          (2, List((Some("a"), None))),
+          //          (3, List((Some("b"), None), (Some("c"), None))),
+          //          (4, List((Some("d"), Some(Seq(1, 2))))),
+          (5, List((Some("e"), Some(Seq(2, 3))), (Some("f"), Some(Seq(3, 4))))),
+          //          (6, List((Some("g"), Some(Seq(4, 5))), (Some("h"), None))),
+        ).transact.map(_.ids)
 
-        _ <- A.s("a").B.s("b").save.transact // no A.i filter match
-        _ <- A.s("a").B.i(2).save.transact // no A.i filter match
-        _ <- A.i(3).B.s("b").save.transact
-        _ <- A.i(4).B.i(4).save.transact
 
-        _ <- A.s("a").B.i(5).C.s("c").save.transact // no A.i filter match
-        _ <- A.s("a").B.i(6).C.i(6).save.transact // no A.i filter match
-        _ <- A.i(7).B.s("b").C.s("c").save.transact
-        _ <- A.i(8).B.s("b").C.i(8).save.transact
-        _ <- A.i(9).B.i(9).C.s("c").save.transact
-        _ <- A.i(10).B.i(10).C.i(10).save.transact
+        //        _ <- rawTransact(
+        //          """UPDATE B
+        //            |SET
+        //            |  iSeq = iSeq
+        //            |WHERE
+        //            |  iSeq IS NOT NULL AND
+        //            |  B.id IN(1, 2)
+        //            |""".stripMargin)
 
-        // Not filtering on C attribute makes ref to C unknown
+        //        _ <- rawTransact(
+        //          """UPDATE B
+        //            |SET
+        //            |  iSeq = '[4, 8]'
+        //            |WHERE
+        //            |  iSeq IS NOT NULL AND
+        //            |  B.id IN(1, 2)
+        //            |""".stripMargin)
 
-        // Only entities having A.i value will have existing B.i and C.i values updated
-        _ <- A.i_.B.i(11).C.i(11).update.transact
-        _ <- A.i.B.i.C.i.query.get.map(_ ==> List(
-          (10, 11, 11) // B.i and C.i updated
+        //        _ <- rawTransact(
+        //          """UPDATE B
+        //            |SET
+        //            |  iSeq = (
+        //            |    SELECT JSON_GROUP_ARRAY(VALUE)
+        //            |    FROM (
+        //            |      SELECT _vs.value FROM B as b2, JSON_EACH(iSeq) AS _vs where b2.id = B.id
+        //            |      UNION ALL
+        //            |      SELECT _vs.value FROM JSON_EACH('[4, 5]') AS _vs
+        //            |    )
+        //            |  )
+        //            |WHERE
+        //            |  iSeq IS NOT NULL AND
+        //            |  id IN(1, 2)
+        //            |""".stripMargin)
+
+        //        _ <- rawTransact(
+        //          """UPDATE B
+        //            |SET
+        //            |  iSeq = (
+        //            |    SELECT JSON_GROUP_ARRAY(VALUE)
+        //            |    FROM (
+        //            |      SELECT _vs.value FROM B, JSON_EACH(iSeq) AS _vs where B
+        //            |      UNION ALL
+        //            |      SELECT _vs.value FROM JSON_EACH('[4, 5]') AS _vs
+        //            |    )
+        //            |  )
+        //            |WHERE
+        //            |  iSeq IS NOT NULL AND
+        //            |  B.id IN(1, 2)
+        //            |""".stripMargin)
+
+        // Filter by A ids, update B values
+        _ <- A.i_.Bb.iSeq.add(4, 5).update.transact
+
+        _ <- A.i.a1.Bb.*?(B.s_?.a1.iSeq).query.get.map(_ ==> List(
+          //          (1, List()), //                                                           no B value to update
+          //          (2, List()), //                                                           no B value to update
+          //          (3, List()), //                                                           no B value to update
+          //          (4, List((Some("d"), Seq(1, 2, 4, 5)))), //                               update in 1 ref entity
+          (5, List((Some("e"), Seq(2, 3, 4, 5)), (Some("f"), Seq(3, 4, 4, 5)))), // update in 2 ref entities
+          //          (6, List((Some("g"), Seq(4, 5, 4, 5)))), //                               update, but already has same values
         ))
 
-        // Insert refs to B + C or C and set C.i values for all entities that have A.i value
-        _ <- A.i_.B.i(12).C.i(12).upsert.i.transact
-
-        _ <- A.i.a1.B.i.C.i.query.get.map(_ ==> List(
-          (1, 12, 12), // ref to B inserted, B.i inserted, ref to C inserted, C.i inserted
-          (3, 12, 12), // B.i inserted, ref to C inserted, C.i inserted
-          (4, 12, 12), // B.i updated, ref to C inserted, C.i inserted
-          (7, 12, 12), // B.i inserted, C.i inserted
-          (8, 12, 12), // B.i inserted, C.i updated
-          (9, 12, 12), // B.i updated, C.i inserted
-          (10, 12, 12), // B.i updated, C.i updated
-        ))
-
-
-//        _ <- rawQuery(
-//          """SELECT DISTINCT
-//            |  A.i,
-//            |  JSON_GROUP_ARRAY(_B_iSet.value) as B_iSet
-//            |FROM A
-//            |  INNER JOIN B ON A.b = B.id
-//            |  inner join JSON_EACH(B.iSet) as _B_iSet
-//            |WHERE
-//            |  NOT EXISTS (
-//            |    SELECT *
-//            |    FROM JSON_EACH(B.iSet)
-//            |    WHERE JSON_EACH.VALUE = A.i
-//            |  ) AND
-//            |  A.i    IS NOT NULL AND
-//            |  A.iSet IS NOT NULL AND
-//            |  B.iSet IS NOT NULL
-//            |group by A.i
-//            |ORDER BY A.i
-//            |""".stripMargin, true)
-
-
-
-
+        //        // Filter by A ids, upsert B values
+        //        _ <- A.i_.Bb.iSeq.add(5, 6).upsert.transact
+        //
+        //        _ <- A.i.a1.Bb.*?(B.s_?.a1.iSeq).query.get.map(_ ==> List(
+        //          (1, List((None, Seq(5, 6)))), //                                                      ref + insertion
+        //          (2, List((Some("a"), Seq(5, 6)))), //                                                 insertion in 1 ref entity
+        //          (3, List((Some("b"), Seq(5, 6)), (Some("c"), Seq(5, 6)))), //                         insertion in 2 ref entities
+        //          (4, List((Some("d"), Seq(1, 2, 4, 5, 5, 6)))), //                                     update in 1 ref entity
+        //          (5, List((Some("e"), Seq(2, 3, 4, 5, 5, 6)), (Some("f"), Seq(3, 4, 4, 5, 5, 6)))), // update in 2 ref entities
+        //          (6, List((Some("g"), Seq(4, 5, 4, 5, 5, 6)), (Some("h"), Seq(5, 6)))), //             update in one ref entity and insertion in another
+        //        ))
 
 
         //        _ <- rawQuery(
@@ -235,15 +260,27 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
     //      } yield ()
     //    }
 
-    //
-    //    "validation" - validation { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Validation._
-    //      for {
-    //        List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)
-    //
-    //
-    //      } yield ()
-    //    }
+
+//    "validation" - validation { implicit conn =>
+//      import molecule.coreTests.dataModels.core.dsl.Validation._
+//      for {
+//        id <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf", "stamps")).save.transact.map(_.id)
+//
+//        // We can remove a value from a Set as long as it's not the last value
+//        _ <- MandatoryAttr(id).hobbies.remove("stamps").update.i.transact
+//
+//        // Can't remove the last value of a mandatory attribute Set of values
+//        _ <- MandatoryAttr(id).hobbies.remove("golf").update.transact
+//          .map(_ ==> "Unexpected success").recover {
+//            case ModelError(error) =>
+//              error ==>
+//                """Can't delete mandatory attributes (or remove last values of card-many attributes):
+//                  |  MandatoryAttr.hobbies
+//                  |""".stripMargin
+//          }
+//
+//      } yield ()
+//    }
     //
     //    "partitions" - partition { implicit conn =>
     //      import molecule.coreTests.dataModels.core.dsl.Partitions._

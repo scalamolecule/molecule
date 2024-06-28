@@ -115,7 +115,7 @@ object Rpc_mariadb
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
-      errors = validateUpdateSet2(conn.proxy, elements,
+      errors = validateUpdateSet_json(conn.proxy, elements,
         (query: String) => {
           val ps        = conn.sqlConn.prepareStatement(
             query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY

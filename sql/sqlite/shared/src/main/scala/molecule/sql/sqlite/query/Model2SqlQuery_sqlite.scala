@@ -14,7 +14,9 @@ class Model2SqlQuery_sqlite[Tpl](elements0: List[Element])
     with SqlQueryBase{
 
 
-  override def pagination(optLimit: Option[Int], optOffset: Option[Int], isBackwards: Boolean): String = {
+  override def pagination(
+    optLimit: Option[Int], optOffset: Option[Int], isBackwards: Boolean
+  ): String = {
     val limit_ = if (isNestedMan || isNestedOpt) {
       ""
     } else if (hardLimit != 0) {

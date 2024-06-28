@@ -58,31 +58,38 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
 
-        //        _ <- B.s("x").iMap(Map(pint0, pint1)).save.transact
-        //        _ <- A.i(1).save.transact
+        _ <- A.i.a1.Bb.*?(B.s_?.iSeq_?).insert(
+          //          (1, List()),
+          //          (2, List((Some("a"), None))),
+          //          (3, List((Some("b"), None), (Some("c"), None))),
+          //          (4, List((Some("d"), Some(Seq(1, 2))))),
+          (5, List((Some("e"), Some(Seq(2, 3))), (Some("f"), Some(Seq(3, 4))))),
+          //          (6, List((Some("g"), Some(Seq(4, 5))), (Some("h"), None))),
+        ).transact.map(_.ids)
 
-        // will be updated
-        _ <- A.i.Bb.*(B.s_?.iMap_?).insert(
-          (2, List(
-            (None, None), // no relationship to B created
-            (None, Some(Map(pint1, pint2))),
-            //            (Some("a"), None),
-            //            (Some("b"), Some(Map(pint2, pint3))),
-          ))
-        ).transact
+        // Filter by A ids, update B values
+        _ <- A.i_.Bb.iSeq.add(4, 5).update.transact
 
-        // Filter by B attribute, update B values
-        //        _ <- A.Bb.s_.iMap(Map(pint3, pint4)).update.transact
-
-        _ <- A.i.a1.Bb.*?(B.s_?.a1.iMap_?).query.i.get.map(_ ==> List(
-          //          (1, List()), //                            no change to entity without relationship to B
-          (2, List(
-            // (None, None),                         no relationship to B
-            (None, Some(Map(pint1, pint2))), //      no change without filter match
-            //            (Some("a"), None), //                    no value to update
-            //            (Some("b"), Some(Map(pint3, pint4))), // B attribute updated
-          ))
+        _ <- A.i.a1.Bb.*?(B.s_?.a1.iSeq).query.get.map(_ ==> List(
+          //          (1, List()), //                                                           no B value to update
+          //          (2, List()), //                                                           no B value to update
+          //          (3, List()), //                                                           no B value to update
+          //          (4, List((Some("d"), Seq(1, 2, 4, 5)))), //                               update in 1 ref entity
+          (5, List((Some("e"), Seq(2, 3, 4, 5)), (Some("f"), Seq(3, 4, 4, 5)))), // update in 2 ref entities
+          //          (6, List((Some("g"), Seq(4, 5, 4, 5)))), //                               update, but already has same values
         ))
+
+        //        // Filter by A ids, upsert B values
+        //        _ <- A.i_.Bb.iSeq.add(5, 6).upsert.transact
+        //
+        //        _ <- A.i.a1.Bb.*?(B.s_?.a1.iSeq).query.get.map(_ ==> List(
+        //          (1, List((None, Seq(5, 6)))), //                                                      ref + insertion
+        //          (2, List((Some("a"), Seq(5, 6)))), //                                                 insertion in 1 ref entity
+        //          (3, List((Some("b"), Seq(5, 6)), (Some("c"), Seq(5, 6)))), //                         insertion in 2 ref entities
+        //          (4, List((Some("d"), Seq(1, 2, 4, 5, 5, 6)))), //                                     update in 1 ref entity
+        //          (5, List((Some("e"), Seq(2, 3, 4, 5, 5, 6)), (Some("f"), Seq(3, 4, 4, 5, 5, 6)))), // update in 2 ref entities
+        //          (6, List((Some("g"), Seq(4, 5, 4, 5, 5, 6)), (Some("h"), Seq(5, 6)))), //             update in one ref entity and insertion in another
+        //        ))
 
         //        _ <- rawTransact(
         //          """UPDATE Ns
@@ -116,22 +123,20 @@ object AdhocJVM_h2 extends TestSuite_h2 {
     "validation" - validation { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Validation._
       for {
-        List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)
+        id <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf", "stamps")).save.transact.map(_.id)
 
-        id <- MandatoryRefsB.i(1).refsB(Set(r1, r2)).save.transact.map(_.ids)
+        // We can remove a value from a Set as long as it's not the last value
+        _ <- MandatoryAttr(id).hobbies.remove("stamps").update.i.transact
 
-        // Mandatory refs can be removed as long as some ref ids remain
-        _ <- MandatoryRefsB(id).refsB.remove(r2).update.transact
-
-        // Last mandatory ref can't be removed. This can prevent creating orphan relationships.
-        _ <- MandatoryRefsB(id).refsB.remove(r1).update.i.transact
-          .map(_ ==> "Unexpected success").recover {
-            case ModelError(error) =>
-              error ==>
-                """Can't delete mandatory attributes (or remove last values of card-many attributes):
-                  |  MandatoryRefsB.refsB
-                  |""".stripMargin
-          }
+        //        // Can't remove the last value of a mandatory attribute Set of values
+        //        _ <- MandatoryAttr(id).hobbies.remove("golf").update.transact
+        //          .map(_ ==> "Unexpected success").recover {
+        //            case ModelError(error) =>
+        //              error ==>
+        //                """Can't delete mandatory attributes (or remove last values of card-many attributes):
+        //                  |  MandatoryAttr.hobbies
+        //                  |""".stripMargin
+        //          }
 
       } yield ()
     }

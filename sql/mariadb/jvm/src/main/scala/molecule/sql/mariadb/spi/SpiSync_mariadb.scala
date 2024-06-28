@@ -56,7 +56,7 @@ trait SpiSync_mariadb extends SpiSyncBase {
       )
       conn.resultSet(ps.executeQuery())
     }
-    validateUpdateSet2(conn.proxy, update.elements, query2resultSet)
+    validateUpdateSet_json(conn.proxy, update.elements, query2resultSet)
   }
 
   override def delete_getExecutioner(conn: JdbcConn_JVM, delete: Delete): Option[() => List[Long]] = {

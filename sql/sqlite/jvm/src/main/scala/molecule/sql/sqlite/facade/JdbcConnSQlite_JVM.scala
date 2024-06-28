@@ -36,31 +36,42 @@ class JdbcConnSQlite_JVM(
     updateIdsMap: Boolean,
     accIds: Boolean,
   ): Unit = {
+    debug("")
     if (notJoinTable(refPath)) {
-      // Get previous last id
-      val table     = refPath.last
-      val getPrevId = sqlConn.prepareStatement(s"select max(id) from $table").executeQuery()
-      getPrevId.next()
-      val prevId = getPrevId.getLong(1)
-      getPrevId.close()
-      //      println("")
-      //      println("  prev id: " + prevId)
+      if (curIds.nonEmpty) {
+        // We have ids already used
+        debug("  curIds: " + curIds)
+        ids ++= curIds
+        // Execute incoming batch of prepared statements
+        ps.executeBatch()
 
-      // Execute incoming batch of prepared statements
-      ps.executeBatch()
-      ids.clear()
+      } else {
+        // Get previous last id
+        val table     = refPath.last
+        val getPrevId = sqlConn.prepareStatement(
+          s"select max(id) from $table"
+        ).executeQuery()
+        getPrevId.next()
+        val prevId = getPrevId.getLong(1)
+        getPrevId.close()
+        debug("  prev id: " + prevId)
 
-      // Since SQlite doesn't allow us to get ps.getGeneratedKeys after an
-      // executeBatch(), we get the affected ids by brute force with a query instead.
-      val getNewIds = sqlConn.prepareStatement(
-        s"select id from $table where id > $prevId order by id asc"
-      ).executeQuery()
-      while (getNewIds.next()) {
-        ids += getNewIds.getLong(1)
+        // Execute incoming batch of prepared statements
+        ps.executeBatch()
+        ids.clear()
+
+        // Since SQlite doesn't allow us to get ps.getGeneratedKeys after an
+        // executeBatch(), we get the affected ids by brute force with a query instead.
+        val getNewIds = sqlConn.prepareStatement(
+          s"select id from $table where id > $prevId order by id asc"
+        ).executeQuery()
+        while (getNewIds.next()) {
+          ids += getNewIds.getLong(1)
+        }
+        getNewIds.close()
+        debug("  new ids: " + ids.mkString(", "))
+        debug("")
       }
-      getNewIds.close()
-      //    println("  new ids: " + ids.mkString(", "))
-      //    println("")
 
     } else {
       // Execute incoming batch of prepared statements
@@ -68,6 +79,8 @@ class JdbcConnSQlite_JVM(
       ps.executeBatch()
       ids.clear()
     }
+
+    debug("  +++++++++++++ ids: " + ids)
 
     // Close incoming batch of prepared statements
     ps.close()

@@ -154,14 +154,16 @@ trait UpdateHelper { self: SpiSyncBase =>
           val refIds = ListBuffer.empty[Long]
           query_getRaw(Query[(Long, Option[Long])](elements)).flatMap {
             case (nsId, None)        =>
-              val refId = getId(s"INSERT INTO $refNs $defaultValues")
+              val refId = getId(s"INSERT INTO $refNs $defaultValues", refNs)
               refIds += refId
               Some((nsId, refId))
             case (nsId, Some(refId)) =>
               refIds += refId
               None
           }.foreach {
-            case (nsId, refId) => getId(s"UPDATE $ns SET $refAttr = $refId WHERE id = $nsId", Some(nsId))
+            case (nsId, refId) => getId(
+              s"UPDATE $ns SET $refAttr = $refId WHERE id = $nsId", ns, Some(nsId)
+            )
           }
           idsMap(refPath) = refIds.toList
 
@@ -441,16 +443,27 @@ trait UpdateHelper { self: SpiSyncBase =>
     }
   }
 
-  private def getId(stmt: String, updateId: Option[Long] = None)(implicit conn: JdbcConn_JVM): Long = {
+  private def getId(
+    stmt: String,
+    table: String,
+    updateId: Option[Long] = None,
+  )(implicit conn: JdbcConn_JVM): Long = {
     val ps = conn.sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
     ps.addBatch()
     ps.executeBatch()
     val resultSet = ps.getGeneratedKeys
     val id        = if (resultSet.next()) {
       resultSet.getLong(1)
-    } else {
+    } else if (updateId.nonEmpty) {
+      //      println("getId stmt:\n" + stmt)
       // MariaDb doesn't return id from updates, so we use supplied id in update stmt
       updateId.get
+    } else {
+      val getPrevId = conn.sqlConn.prepareStatement(
+        s"select max(id) from $table"
+      ).executeQuery()
+      getPrevId.next()
+      getPrevId.getLong(1)
     }
     //    println(stmt + "  -->  id " + id)
     id

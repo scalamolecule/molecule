@@ -222,7 +222,7 @@ trait SortAggr extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
     "median" - types { implicit conn =>
-      if (Seq("MariaDB", "Mysql").contains(database)) {
+      if (Seq("MariaDB", "Mysql", "SQlite").contains(database)) {
         Ns.i.int(median).a1.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Sorting by median not implemented for this database."
@@ -302,7 +302,7 @@ trait SortAggr extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
     "variance" - types { implicit conn =>
-      if (Seq("MariaDB", "Mysql").contains(database)) {
+      if (Seq("MariaDB", "Mysql", "SQlite").contains(database)) {
         Ns.i.int(variance).a1.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Sorting by variance not implemented for this database."
@@ -345,7 +345,7 @@ trait SortAggr extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
     "stddev" - types { implicit conn =>
-      if (Seq("MariaDB", "Mysql").contains(database)) {
+      if (Seq("MariaDB", "Mysql", "SQlite").contains(database)) {
         Ns.i.int(stddev).a1.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Sorting by standard deviation not implemented for this database."

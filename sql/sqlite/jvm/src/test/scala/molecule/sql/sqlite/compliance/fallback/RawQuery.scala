@@ -82,16 +82,16 @@ object RawQuery extends TestSuite_sqlite {
         _ <- rawQuery(q("string")).map(_.head ==> List(string1))
         _ <- rawQuery(q("int")).map(_.head ==> List(int1))
         _ <- rawQuery(q("long")).map(_.head ==> List(long1))
-        _ <- rawQuery(q("float")).map(_.head ==> List(float1))
+        _ <- rawQuery(q("float")).map(_.head ==> List(double1)) // Floats returned as doubles
         _ <- rawQuery(q("double")).map(_.head ==> List(double1))
         _ <- rawQuery(q("boolean")).map(_.head ==> List(boolean1))
-        _ <- rawQuery(q("bigInt")).map(_.head ==> List(bigInt1))
-        _ <- rawQuery(q("bigDecimal")).map(_.head ==> List(bigDecimal1))
+        _ <- rawQuery(q("bigInt")).map(_.head ==> List(bigInt1.toString))
+        _ <- rawQuery(q("bigDecimal")).map(_.head ==> List(bigDecimal1.toString))
         _ <- rawQuery(q("date")).map(_.head ==> List(date1.getTime))
         _ <- rawQuery(q("duration")).map(_.head ==> List(duration1.toString))
         _ <- rawQuery(q("instant")).map(_.head ==> List(instant1.toString))
         _ <- rawQuery(q("localDate")).map(_.head ==> List(localDate1.toString))
-        _ <- rawQuery(q("localTime_")).map(_.head ==> List(localTime1.toString))
+        _ <- rawQuery(q("localTime")).map(_.head ==> List(localTime1.toString))
         _ <- rawQuery(q("localDateTime")).map(_.head ==> List(localDateTime1.toString))
         _ <- rawQuery(q("offsetTime")).map(_.head ==> List(offsetTime1.toString))
         _ <- rawQuery(q("offsetDateTime")).map(_.head ==> List(offsetDateTime1.toString))
@@ -174,13 +174,12 @@ object RawQuery extends TestSuite_sqlite {
         _ <- rawQuery(
           """SELECT DISTINCT
             |  Ns.i,
-            |  ARRAY_AGG(DISTINCT Ns.int)
+            |  json_group_array(DISTINCT Ns.int)
             |FROM Ns
             |WHERE
             |  Ns.i   IS NOT NULL AND
             |  Ns.int IS NOT NULL
-            |GROUP BY Ns.i
-            |ORDER BY Ns.i NULLS FIRST;
+            |GROUP BY Ns.i;
             |""".stripMargin,
           true // debug
         ).map(_.head ==> List(1, Set(2)))

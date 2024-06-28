@@ -9,7 +9,7 @@ import molecule.sql.core.spi.SpiHelpers
 
 trait SqlUpdateSetValidator extends SpiHelpers {
 
-  protected def validateUpdateSet(
+  protected def validateUpdateSet_array(
     proxy: ConnProxy,
     elements: List[Element],
     query2resultSet: String => Row
@@ -47,7 +47,7 @@ trait SqlUpdateSetValidator extends SpiHelpers {
     TxModelValidation(proxy.nsMap, proxy.attrMap, "update", Some(curSetValues)).validate(elements)
   }
 
-  protected def validateUpdateSet2(
+  protected def validateUpdateSet_json(
     proxy: ConnProxy,
     elements: List[Element],
     query2resultSet: String => Row
@@ -71,6 +71,45 @@ trait SqlUpdateSetValidator extends SpiHelpers {
            |FROM $ns
            |INNER JOIN $joinTable ON $ns.id = $joinTable.$ns_id
            |GROUP BY $ns.id;""".stripMargin
+      }
+      jsonArray2coalescedSet(a, query2resultSet(query))
+    } catch {
+      case e: MoleculeError => throw e
+      case t: Throwable     =>
+        t.printStackTrace()
+        throw ExecutionError(
+          s"Unexpected error trying to find current values of mandatory attribute ${a.name}")
+    }
+    TxModelValidation(proxy.nsMap, proxy.attrMap, "update", Some(curSetValues)).validate(elements)
+  }
+
+  protected def validateUpdateSet_sqlite(
+    proxy: ConnProxy,
+    elements: List[Element],
+    query2resultSet: String => Row
+  ): Map[String, Seq[String]] = {
+    val curSetValues: Attr => Set[Any] = (a: Attr) => try {
+      val ns      = a.ns
+      val attr    = a.attr
+      val ns_attr = ns + "_" + attr
+      val query   = a.refNs.fold(
+        s"""SELECT DISTINCT
+           |  JSON_GROUP_ARRAY(_$ns_attr.VALUE) AS $ns_attr
+           |FROM $ns
+           |  INNER JOIN JSON_EACH($ns.$attr) AS _$ns_attr
+           |WHERE
+           |  $ns.$attr IS NOT NULL
+           |HAVING COUNT(*) > 0
+           |""".stripMargin
+      ) { refNs =>
+        val joinTable = ss(ns, attr, refNs)
+        val refNs_id  = ss(refNs, "id")
+        val ns_id     = ss(ns, "id")
+        s"""SELECT DISTINCT
+           |  json_group_array($joinTable.$refNs_id)
+           |FROM $ns
+           |  INNER JOIN $joinTable ON $ns.id = $joinTable.$ns_id
+           |GROUP BY $ns.id""".stripMargin
       }
       jsonArray2coalescedSet(a, query2resultSet(query))
     } catch {

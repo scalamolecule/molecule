@@ -16,7 +16,7 @@ trait ResolveExprSet_sqlite
       val attr     = col.replace('.', '_')
       val colTable = "_" + col.replace('.', '_')
       select -= col
-      select += s"JSON_GROUP_ARRAY($colTable.VALUE) as $attr"
+      select += s"JSON_GROUP_ARRAY($colTable.VALUE) AS $attr"
 
       // Allow empty mandatory value in optional nested structures
       val mode = if (isNestedOpt) "LEFT" else "INNER"
@@ -31,7 +31,7 @@ trait ResolveExprSet_sqlite
     val attr     = col.replace('.', '_')
     val colTable = "_" + col.replace('.', '_')
     select -= col
-    select += s"JSON_GROUP_ARRAY($colTable.VALUE) as $attr"
+    select += s"JSON_GROUP_ARRAY($colTable.VALUE) AS $attr"
     joins += (("LEFT JOIN", s"JSON_EACH($col)", colTable, "", ""))
     aggregate = true
     replaceCast((row: RS, paramIndex: Int) =>
@@ -46,7 +46,7 @@ trait ResolveExprSet_sqlite
       val attr     = col.replace('.', '_')
       val colTable = "_" + col.replace('.', '_')
       select -= col
-      select += s"JSON_GROUP_ARRAY($colTable.VALUE) as $attr"
+      select += s"JSON_GROUP_ARRAY($colTable.VALUE) AS $attr"
 
       // Allow empty mandatory value in optional nested structures
       val mode = if (isNestedOpt) "LEFT" else "INNER"
@@ -83,7 +83,7 @@ trait ResolveExprSet_sqlite
       val attr     = col.replace('.', '_')
       val colTable = "_" + col.replace('.', '_')
       select -= col
-      select += s"JSON_GROUP_ARRAY($colTable.VALUE) as $attr"
+      select += s"JSON_GROUP_ARRAY($colTable.VALUE) AS $attr"
 
       // Allow empty mandatory value in optional nested structures
       val mode = if (isNestedOpt) "LEFT" else "INNER"
@@ -135,7 +135,7 @@ trait ResolveExprSet_sqlite
       val attr     = col.replace('.', '_')
       val colTable = "_" + col.replace('.', '_')
       select -= col
-      select += s"JSON_GROUP_ARRAY($colTable.VALUE) as $attr"
+      select += s"JSON_GROUP_ARRAY($colTable.VALUE) AS $attr"
 
       // Allow empty mandatory value in optional nested structures
       val mode = if (isNestedOpt) "LEFT" else "INNER"
