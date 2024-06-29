@@ -151,32 +151,34 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
 
   object dek {
     def readString = dec.readString
-    def readInt = dec.readInt
 
     // todo: Skip brute forcing values to Strings
+    def readInt = dec.readString.toInt
     def readLong = dec.readString.toLong
     def readFloat = dec.readString.toFloat
     def readDouble = dec.readString.toDouble
 
     // todo: how can we make these work instead?
+    //    def readInt = dec.readInt
     //    def readLong = dec.readLong
     //    def readFloat = dec.readFloat
     //    def readDouble = dec.readDouble
 
-
     def readBoolean = BooleanPickler.unpickle(state)
     def readBigInt = {
-      val len = dec.readInt
-      val ba  = Array.ofDim[Byte](len)
-      (0 until len).foreach(i => ba(i) = dec.readByte)
-      BigInt(ba)
+      //      val len = dec.readInt
+      //      val ba  = Array.ofDim[Byte](len)
+      //      (0 until len).foreach(i => ba(i) = dec.readByte)
+      //      BigInt(ba)
+      BigInt(dec.readString)
     }
     def readBigDecimal = {
-      val scale = dec.readInt
-      val len   = dec.readInt
-      val ba    = Array.ofDim[Byte](len)
-      (0 until len).foreach(i => ba(i) = dec.readByte)
-      BigDecimal(BigInt(ba), scale)
+      //      val scale = dec.readInt
+      //      val len   = dec.readInt
+      //      val ba    = Array.ofDim[Byte](len)
+      //      (0 until len).foreach(i => ba(i) = dec.readByte)
+      //      BigDecimal(BigInt(ba), scale)
+      BigDecimal(dec.readString)
     }
     def readDate = new Date(dec.readString.toLong)
     def readDuration = Duration.parse(dec.readString)
@@ -209,22 +211,6 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
       }
     }
 
-    def readSets[T](reader: => T): () => Seq[Set[T]] = {
-      () => {
-        dec.readInt match {
-          case 0         => Seq.empty[Set[T]]
-          case setsCount =>
-            var sets = Seq.empty[Set[T]]
-            var i    = 0
-            while (i < setsCount) {
-              sets = sets :+ readSet[T](reader)()
-              i += 1
-            }
-            sets
-        }
-      }
-    }
-
     def readSeq[T](reader: => T): () => Seq[T] = {
       () => {
         dec.readInt match {
@@ -241,18 +227,18 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
       }
     }
 
-    def readSeqs[T](reader: => T): () => Seq[Seq[T]] = {
+    def readByteArray: () => Array[Byte] = {
       () => {
         dec.readInt match {
-          case 0         => Seq.empty[Seq[T]]
-          case setsCount =>
-            var seqs = Seq.empty[Seq[T]]
-            var i    = 0
-            while (i < setsCount) {
-              seqs = seqs :+ readSeq[T](reader)()
+          case 0   => Array.empty[Byte]
+          case len =>
+            val array = new Array[Byte](len)
+            var i     = 0
+            while (i < len) {
+              array(i) = dec.readByte
               i += 1
             }
-            seqs
+            array
         }
       }
     }
@@ -269,22 +255,6 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
               i += 1
             }
             map
-        }
-      }
-    }
-
-    def readMaps[T](reader: => T): () => Seq[Map[String, T]] = {
-      () => {
-        dec.readInt match {
-          case 0         => Seq.empty[Map[String, T]]
-          case setsCount =>
-            var maps = Seq.empty[Map[String, T]]
-            var i    = 0
-            while (i < setsCount) {
-              maps = maps :+ readMap[T](reader)()
-              i += 1
-            }
-            maps
         }
       }
     }
@@ -316,6 +286,15 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
       }
     }
 
+    def readOptByteArray: () => Option[Array[Byte]] = {
+      () => {
+        state.dec.readInt match {
+          case 2 => Some(readByteArray())
+          case 1 => None
+        }
+      }
+    }
+
     def readOptMap[T](reader: => T): () => Option[Map[String, T]] = {
       () => {
         state.dec.readInt match {
@@ -342,7 +321,7 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
   }
   private def unpickleAttrOneManV(a: AttrOneMan): () => Any = {
     a match {
-      case _: AttrOneManID             => () => dek.readString
+      case _: AttrOneManID             => () => dek.readLong
       case _: AttrOneManString         => () => dek.readString
       case _: AttrOneManInt            => () => dek.readInt
       case _: AttrOneManLong           => () => dek.readLong
@@ -369,7 +348,7 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
   }
   private def unpickleAttrOneManSet(a: AttrOneMan): () => Any = {
     a match {
-      case _: AttrOneManID             => dek.readSet[String](dek.readString)
+      case _: AttrOneManID             => dek.readSet[Long](dek.readLong)
       case _: AttrOneManString         => dek.readSet[String](dek.readString)
       case _: AttrOneManInt            => dek.readSet[Int](dek.readInt)
       case _: AttrOneManLong           => dek.readSet[Long](dek.readLong)
@@ -397,7 +376,7 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
 
   private def unpickleAttrOneOpt(a: AttrOneOpt): () => Any = {
     a match {
-      case _: AttrOneOptID             => dek.readOpt[String](dek.readString)
+      case _: AttrOneOptID             => dek.readOpt[Long](dek.readLong)
       case _: AttrOneOptString         => dek.readOpt[String](dek.readString)
       case _: AttrOneOptInt            => dek.readOpt[Int](dek.readInt)
       case _: AttrOneOptLong           => dek.readOpt[Long](dek.readLong)
@@ -424,20 +403,8 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
   }
 
   private def unpickleAttrSetMan(a: AttrSetMan): () => Any = {
-    a.op match {
-      case Fn(kw, _) => kw match {
-        case "count" | "countDistinct"                => () => dek.readInt
-        case "distinct"                               => unpickleAttrSetManSet(a)
-        case "mins" | "maxs" | "samples"              => unpickleAttrSetManV(a)
-        case "median" | "avg" | "variance" | "stddev" => () => dek.readDouble
-        case _                                        => unpickleAttrSetManV(a)
-      }
-      case _         => unpickleAttrSetManV(a)
-    }
-  }
-  private def unpickleAttrSetManV(a: AttrSetMan): () => Any = {
     a match {
-      case _: AttrSetManID             => dek.readSet[String](dek.readString)
+      case _: AttrSetManID             => dek.readSet[Long](dek.readLong)
       case _: AttrSetManString         => dek.readSet[String](dek.readString)
       case _: AttrSetManInt            => dek.readSet[Int](dek.readInt)
       case _: AttrSetManLong           => dek.readSet[Long](dek.readLong)
@@ -462,78 +429,38 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
       case _: AttrSetManChar           => dek.readSet[Char](dek.readChar)
     }
   }
-  private def unpickleAttrSetManSet(a: AttrSetMan): () => Any = {
-    a match {
-      case _: AttrSetManID             => dek.readSets[String](dek.readString)
-      case _: AttrSetManString         => dek.readSets[String](dek.readString)
-      case _: AttrSetManInt            => dek.readSets[Int](dek.readInt)
-      case _: AttrSetManLong           => dek.readSets[Long](dek.readLong)
-      case _: AttrSetManFloat          => dek.readSets[Float](dek.readFloat)
-      case _: AttrSetManDouble         => dek.readSets[Double](dek.readDouble)
-      case _: AttrSetManBoolean        => dek.readSets[Boolean](dek.readBoolean)
-      case _: AttrSetManBigInt         => dek.readSets[BigInt](dek.readBigInt)
-      case _: AttrSetManBigDecimal     => dek.readSets[BigDecimal](dek.readBigDecimal)
-      case _: AttrSetManDate           => dek.readSets[Date](dek.readDate)
-      case _: AttrSetManDuration       => dek.readSets[Duration](dek.readDuration)
-      case _: AttrSetManInstant        => dek.readSets[Instant](dek.readInstant)
-      case _: AttrSetManLocalDate      => dek.readSets[LocalDate](dek.readLocalDate)
-      case _: AttrSetManLocalTime      => dek.readSets[LocalTime](dek.readLocalTime)
-      case _: AttrSetManLocalDateTime  => dek.readSets[LocalDateTime](dek.readLocalDateTime)
-      case _: AttrSetManOffsetTime     => dek.readSets[OffsetTime](dek.readOffsetTime)
-      case _: AttrSetManOffsetDateTime => dek.readSets[OffsetDateTime](dek.readOffsetDateTime)
-      case _: AttrSetManZonedDateTime  => dek.readSets[ZonedDateTime](dek.readZonedDateTime)
-      case _: AttrSetManUUID           => dek.readSets[UUID](dek.readUUID)
-      case _: AttrSetManURI            => dek.readSets[URI](dek.readURI)
-      case _: AttrSetManByte           => dek.readSets[Byte](dek.readByte)
-      case _: AttrSetManShort          => dek.readSets[Short](dek.readShort)
-      case _: AttrSetManChar           => dek.readSets[Char](dek.readChar)
-    }
-  }
 
   private def unpickleAttrSetOpt(a: AttrSetOpt): () => Any = {
     a match {
-      case _: AttrSetOptID             => dek.readOptSet(dek.readString)
-      case _: AttrSetOptString         => dek.readOptSet(dek.readString)
-      case _: AttrSetOptInt            => dek.readOptSet(dek.readInt)
-      case _: AttrSetOptLong           => dek.readOptSet(dek.readLong)
-      case _: AttrSetOptFloat          => dek.readOptSet(dek.readFloat)
-      case _: AttrSetOptDouble         => dek.readOptSet(dek.readDouble)
-      case _: AttrSetOptBoolean        => dek.readOptSet(dek.readBoolean)
-      case _: AttrSetOptBigInt         => dek.readOptSet(dek.readBigInt)
-      case _: AttrSetOptBigDecimal     => dek.readOptSet(dek.readBigDecimal)
-      case _: AttrSetOptDate           => dek.readOptSet(dek.readDate)
-      case _: AttrSetOptDuration       => dek.readOptSet(dek.readDuration)
-      case _: AttrSetOptInstant        => dek.readOptSet(dek.readInstant)
-      case _: AttrSetOptLocalDate      => dek.readOptSet(dek.readLocalDate)
-      case _: AttrSetOptLocalTime      => dek.readOptSet(dek.readLocalTime)
-      case _: AttrSetOptLocalDateTime  => dek.readOptSet(dek.readLocalDateTime)
-      case _: AttrSetOptOffsetTime     => dek.readOptSet(dek.readOffsetTime)
-      case _: AttrSetOptOffsetDateTime => dek.readOptSet(dek.readOffsetDateTime)
-      case _: AttrSetOptZonedDateTime  => dek.readOptSet(dek.readZonedDateTime)
-      case _: AttrSetOptUUID           => dek.readOptSet(dek.readUUID)
-      case _: AttrSetOptURI            => dek.readOptSet(dek.readURI)
-      case _: AttrSetOptByte           => dek.readOptSet(dek.readByte)
-      case _: AttrSetOptShort          => dek.readOptSet(dek.readShort)
-      case _: AttrSetOptChar           => dek.readOptSet(dek.readChar)
+      case _: AttrSetOptID             => dek.readOptSet[Long](dek.readLong)
+      case _: AttrSetOptString         => dek.readOptSet[String](dek.readString)
+      case _: AttrSetOptInt            => dek.readOptSet[Int](dek.readInt)
+      case _: AttrSetOptLong           => dek.readOptSet[Long](dek.readLong)
+      case _: AttrSetOptFloat          => dek.readOptSet[Float](dek.readFloat)
+      case _: AttrSetOptDouble         => dek.readOptSet[Double](dek.readDouble)
+      case _: AttrSetOptBoolean        => dek.readOptSet[Boolean](dek.readBoolean)
+      case _: AttrSetOptBigInt         => dek.readOptSet[BigInt](dek.readBigInt)
+      case _: AttrSetOptBigDecimal     => dek.readOptSet[BigDecimal](dek.readBigDecimal)
+      case _: AttrSetOptDate           => dek.readOptSet[Date](dek.readDate)
+      case _: AttrSetOptDuration       => dek.readOptSet[Duration](dek.readDuration)
+      case _: AttrSetOptInstant        => dek.readOptSet[Instant](dek.readInstant)
+      case _: AttrSetOptLocalDate      => dek.readOptSet[LocalDate](dek.readLocalDate)
+      case _: AttrSetOptLocalTime      => dek.readOptSet[LocalTime](dek.readLocalTime)
+      case _: AttrSetOptLocalDateTime  => dek.readOptSet[LocalDateTime](dek.readLocalDateTime)
+      case _: AttrSetOptOffsetTime     => dek.readOptSet[OffsetTime](dek.readOffsetTime)
+      case _: AttrSetOptOffsetDateTime => dek.readOptSet[OffsetDateTime](dek.readOffsetDateTime)
+      case _: AttrSetOptZonedDateTime  => dek.readOptSet[ZonedDateTime](dek.readZonedDateTime)
+      case _: AttrSetOptUUID           => dek.readOptSet[UUID](dek.readUUID)
+      case _: AttrSetOptURI            => dek.readOptSet[URI](dek.readURI)
+      case _: AttrSetOptByte           => dek.readOptSet[Byte](dek.readByte)
+      case _: AttrSetOptShort          => dek.readOptSet[Short](dek.readShort)
+      case _: AttrSetOptChar           => dek.readOptSet[Char](dek.readChar)
     }
   }
-
 
   private def unpickleAttrSeqMan(a: AttrSeqMan): () => Any = {
-    a.op match {
-      case Fn(kw, _) => kw match {
-        case "count" | "countDistinct"                => () => dek.readInt
-        case "distinct"                               => unpickleAttrSeqManArr(a)
-        case "mins" | "maxs" | "samples"              => unpickleAttrSeqManV(a)
-        case "median" | "avg" | "variance" | "stddev" => () => dek.readDouble
-        case _                                        => unpickleAttrSeqManV(a)
-      }
-      case _         => unpickleAttrSeqManV(a)
-    }
-  }
-  private def unpickleAttrSeqManV(a: AttrSeqMan): () => Any = {
     a match {
-      case _: AttrSeqManID             => dek.readSeq[String](dek.readString)
+      case _: AttrSeqManID             => dek.readSeq[Long](dek.readLong)
       case _: AttrSeqManString         => dek.readSeq[String](dek.readString)
       case _: AttrSeqManInt            => dek.readSeq[Int](dek.readInt)
       case _: AttrSeqManLong           => dek.readSeq[Long](dek.readLong)
@@ -553,82 +480,77 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
       case _: AttrSeqManZonedDateTime  => dek.readSeq[ZonedDateTime](dek.readZonedDateTime)
       case _: AttrSeqManUUID           => dek.readSeq[UUID](dek.readUUID)
       case _: AttrSeqManURI            => dek.readSeq[URI](dek.readURI)
-      case _: AttrSeqManByte           => dek.readSeq[Byte](dek.readByte)
+      case _: AttrSeqManByte           => dek.readByteArray
       case _: AttrSeqManShort          => dek.readSeq[Short](dek.readShort)
       case _: AttrSeqManChar           => dek.readSeq[Char](dek.readChar)
-    }
-  }
-  private def unpickleAttrSeqManArr(a: AttrSeqMan): () => Any = {
-    a match {
-      case _: AttrSeqManID             => dek.readSeqs[String](dek.readString)
-      case _: AttrSeqManString         => dek.readSeqs[String](dek.readString)
-      case _: AttrSeqManInt            => dek.readSeqs[Int](dek.readInt)
-      case _: AttrSeqManLong           => dek.readSeqs[Long](dek.readLong)
-      case _: AttrSeqManFloat          => dek.readSeqs[Float](dek.readFloat)
-      case _: AttrSeqManDouble         => dek.readSeqs[Double](dek.readDouble)
-      case _: AttrSeqManBoolean        => dek.readSeqs[Boolean](dek.readBoolean)
-      case _: AttrSeqManBigInt         => dek.readSeqs[BigInt](dek.readBigInt)
-      case _: AttrSeqManBigDecimal     => dek.readSeqs[BigDecimal](dek.readBigDecimal)
-      case _: AttrSeqManDate           => dek.readSeqs[Date](dek.readDate)
-      case _: AttrSeqManDuration       => dek.readSeqs[Duration](dek.readDuration)
-      case _: AttrSeqManInstant        => dek.readSeqs[Instant](dek.readInstant)
-      case _: AttrSeqManLocalDate      => dek.readSeqs[LocalDate](dek.readLocalDate)
-      case _: AttrSeqManLocalTime      => dek.readSeqs[LocalTime](dek.readLocalTime)
-      case _: AttrSeqManLocalDateTime  => dek.readSeqs[LocalDateTime](dek.readLocalDateTime)
-      case _: AttrSeqManOffsetTime     => dek.readSeqs[OffsetTime](dek.readOffsetTime)
-      case _: AttrSeqManOffsetDateTime => dek.readSeqs[OffsetDateTime](dek.readOffsetDateTime)
-      case _: AttrSeqManZonedDateTime  => dek.readSeqs[ZonedDateTime](dek.readZonedDateTime)
-      case _: AttrSeqManUUID           => dek.readSeqs[UUID](dek.readUUID)
-      case _: AttrSeqManURI            => dek.readSeqs[URI](dek.readURI)
-      case _: AttrSeqManByte           => dek.readSeqs[Byte](dek.readByte)
-      case _: AttrSeqManShort          => dek.readSeqs[Short](dek.readShort)
-      case _: AttrSeqManChar           => dek.readSeqs[Char](dek.readChar)
     }
   }
 
   private def unpickleAttrSeqOpt(a: AttrSeqOpt): () => Any = {
     a match {
-      case _: AttrSeqOptID             => dek.readOptSeq(dek.readString)
-      case _: AttrSeqOptString         => dek.readOptSeq(dek.readString)
-      case _: AttrSeqOptInt            => dek.readOptSeq(dek.readInt)
-      case _: AttrSeqOptLong           => dek.readOptSeq(dek.readLong)
-      case _: AttrSeqOptFloat          => dek.readOptSeq(dek.readFloat)
-      case _: AttrSeqOptDouble         => dek.readOptSeq(dek.readDouble)
-      case _: AttrSeqOptBoolean        => dek.readOptSeq(dek.readBoolean)
-      case _: AttrSeqOptBigInt         => dek.readOptSeq(dek.readBigInt)
-      case _: AttrSeqOptBigDecimal     => dek.readOptSeq(dek.readBigDecimal)
-      case _: AttrSeqOptDate           => dek.readOptSeq(dek.readDate)
-      case _: AttrSeqOptDuration       => dek.readOptSeq(dek.readDuration)
-      case _: AttrSeqOptInstant        => dek.readOptSeq(dek.readInstant)
-      case _: AttrSeqOptLocalDate      => dek.readOptSeq(dek.readLocalDate)
-      case _: AttrSeqOptLocalTime      => dek.readOptSeq(dek.readLocalTime)
-      case _: AttrSeqOptLocalDateTime  => dek.readOptSeq(dek.readLocalDateTime)
-      case _: AttrSeqOptOffsetTime     => dek.readOptSeq(dek.readOffsetTime)
-      case _: AttrSeqOptOffsetDateTime => dek.readOptSeq(dek.readOffsetDateTime)
-      case _: AttrSeqOptZonedDateTime  => dek.readOptSeq(dek.readZonedDateTime)
-      case _: AttrSeqOptUUID           => dek.readOptSeq(dek.readUUID)
-      case _: AttrSeqOptURI            => dek.readOptSeq(dek.readURI)
-      case _: AttrSeqOptByte           => dek.readOptSeq(dek.readByte)
-      case _: AttrSeqOptShort          => dek.readOptSeq(dek.readShort)
-      case _: AttrSeqOptChar           => dek.readOptSeq(dek.readChar)
+      case _: AttrSeqOptID             => dek.readOptSeq[Long](dek.readLong)
+      case _: AttrSeqOptString         => dek.readOptSeq[String](dek.readString)
+      case _: AttrSeqOptInt            => dek.readOptSeq[Int](dek.readInt)
+      case _: AttrSeqOptLong           => dek.readOptSeq[Long](dek.readLong)
+      case _: AttrSeqOptFloat          => dek.readOptSeq[Float](dek.readFloat)
+      case _: AttrSeqOptDouble         => dek.readOptSeq[Double](dek.readDouble)
+      case _: AttrSeqOptBoolean        => dek.readOptSeq[Boolean](dek.readBoolean)
+      case _: AttrSeqOptBigInt         => dek.readOptSeq[BigInt](dek.readBigInt)
+      case _: AttrSeqOptBigDecimal     => dek.readOptSeq[BigDecimal](dek.readBigDecimal)
+      case _: AttrSeqOptDate           => dek.readOptSeq[Date](dek.readDate)
+      case _: AttrSeqOptDuration       => dek.readOptSeq[Duration](dek.readDuration)
+      case _: AttrSeqOptInstant        => dek.readOptSeq[Instant](dek.readInstant)
+      case _: AttrSeqOptLocalDate      => dek.readOptSeq[LocalDate](dek.readLocalDate)
+      case _: AttrSeqOptLocalTime      => dek.readOptSeq[LocalTime](dek.readLocalTime)
+      case _: AttrSeqOptLocalDateTime  => dek.readOptSeq[LocalDateTime](dek.readLocalDateTime)
+      case _: AttrSeqOptOffsetTime     => dek.readOptSeq[OffsetTime](dek.readOffsetTime)
+      case _: AttrSeqOptOffsetDateTime => dek.readOptSeq[OffsetDateTime](dek.readOffsetDateTime)
+      case _: AttrSeqOptZonedDateTime  => dek.readOptSeq[ZonedDateTime](dek.readZonedDateTime)
+      case _: AttrSeqOptUUID           => dek.readOptSeq[UUID](dek.readUUID)
+      case _: AttrSeqOptURI            => dek.readOptSeq[URI](dek.readURI)
+      case _: AttrSeqOptByte           => dek.readOptByteArray
+      case _: AttrSeqOptShort          => dek.readOptSeq[Short](dek.readShort)
+      case _: AttrSeqOptChar           => dek.readOptSeq[Char](dek.readChar)
     }
   }
 
+
   private def unpickleAttrMapMan(a: AttrMapMan): () => Any = {
     a.op match {
-      case Fn(kw, _) => kw match {
-        case "count" | "countDistinct"                => () => dek.readInt
-        case "distinct"                               => unpickleAttrMapManMap(a)
-        case "mins" | "maxs" | "samples"              => unpickleAttrMapManV(a)
-        case "median" | "avg" | "variance" | "stddev" => () => dek.readDouble
-        case _                                        => unpickleAttrMapManV(a)
-      }
-      case _         => unpickleAttrMapManV(a)
+      case Has => unpickleAttrMapManHas(a)
+      case _   => unpickleAttrMapManOther(a)
     }
   }
-  private def unpickleAttrMapManV(a: AttrMapMan): () => Any = {
+  private def unpickleAttrMapManHas(a: AttrMapMan): () => Any = {
     a match {
-      case _: AttrMapManID             => dek.readMap[String](dek.readString)
+      case _: AttrMapManID             => () => dek.readLong
+      case _: AttrMapManString         => () => dek.readString
+      case _: AttrMapManInt            => () => dek.readInt
+      case _: AttrMapManLong           => () => dek.readLong
+      case _: AttrMapManFloat          => () => dek.readFloat
+      case _: AttrMapManDouble         => () => dek.readDouble
+      case _: AttrMapManBoolean        => () => dek.readBoolean
+      case _: AttrMapManBigInt         => () => dek.readBigInt
+      case _: AttrMapManBigDecimal     => () => dek.readBigDecimal
+      case _: AttrMapManDate           => () => dek.readDate
+      case _: AttrMapManDuration       => () => dek.readDuration
+      case _: AttrMapManInstant        => () => dek.readInstant
+      case _: AttrMapManLocalDate      => () => dek.readLocalDate
+      case _: AttrMapManLocalTime      => () => dek.readLocalTime
+      case _: AttrMapManLocalDateTime  => () => dek.readLocalDateTime
+      case _: AttrMapManOffsetTime     => () => dek.readOffsetTime
+      case _: AttrMapManOffsetDateTime => () => dek.readOffsetDateTime
+      case _: AttrMapManZonedDateTime  => () => dek.readZonedDateTime
+      case _: AttrMapManUUID           => () => dek.readUUID
+      case _: AttrMapManURI            => () => dek.readURI
+      case _: AttrMapManByte           => () => dek.readByte
+      case _: AttrMapManShort          => () => dek.readShort
+      case _: AttrMapManChar           => () => dek.readChar
+    }
+  }
+  private def unpickleAttrMapManOther(a: AttrMapMan): () => Any = {
+    a match {
+      case _: AttrMapManID             => dek.readMap[Long](dek.readLong)
       case _: AttrMapManString         => dek.readMap[String](dek.readString)
       case _: AttrMapManInt            => dek.readMap[Int](dek.readInt)
       case _: AttrMapManLong           => dek.readMap[Long](dek.readLong)
@@ -653,59 +575,66 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
       case _: AttrMapManChar           => dek.readMap[Char](dek.readChar)
     }
   }
-  private def unpickleAttrMapManMap(a: AttrMapMan): () => Any = {
-    a match {
-      case _: AttrMapManID             => dek.readMaps[String](dek.readString)
-      case _: AttrMapManString         => dek.readMaps[String](dek.readString)
-      case _: AttrMapManInt            => dek.readMaps[Int](dek.readInt)
-      case _: AttrMapManLong           => dek.readMaps[Long](dek.readLong)
-      case _: AttrMapManFloat          => dek.readMaps[Float](dek.readFloat)
-      case _: AttrMapManDouble         => dek.readMaps[Double](dek.readDouble)
-      case _: AttrMapManBoolean        => dek.readMaps[Boolean](dek.readBoolean)
-      case _: AttrMapManBigInt         => dek.readMaps[BigInt](dek.readBigInt)
-      case _: AttrMapManBigDecimal     => dek.readMaps[BigDecimal](dek.readBigDecimal)
-      case _: AttrMapManDate           => dek.readMaps[Date](dek.readDate)
-      case _: AttrMapManDuration       => dek.readMaps[Duration](dek.readDuration)
-      case _: AttrMapManInstant        => dek.readMaps[Instant](dek.readInstant)
-      case _: AttrMapManLocalDate      => dek.readMaps[LocalDate](dek.readLocalDate)
-      case _: AttrMapManLocalTime      => dek.readMaps[LocalTime](dek.readLocalTime)
-      case _: AttrMapManLocalDateTime  => dek.readMaps[LocalDateTime](dek.readLocalDateTime)
-      case _: AttrMapManOffsetTime     => dek.readMaps[OffsetTime](dek.readOffsetTime)
-      case _: AttrMapManOffsetDateTime => dek.readMaps[OffsetDateTime](dek.readOffsetDateTime)
-      case _: AttrMapManZonedDateTime  => dek.readMaps[ZonedDateTime](dek.readZonedDateTime)
-      case _: AttrMapManUUID           => dek.readMaps[UUID](dek.readUUID)
-      case _: AttrMapManURI            => dek.readMaps[URI](dek.readURI)
-      case _: AttrMapManByte           => dek.readMaps[Byte](dek.readByte)
-      case _: AttrMapManShort          => dek.readMaps[Short](dek.readShort)
-      case _: AttrMapManChar           => dek.readMaps[Char](dek.readChar)
-    }
-  }
+
 
   private def unpickleAttrMapOpt(a: AttrMapOpt): () => Any = {
+    a.op match {
+      case Has => unpickleAttrMapOptHas(a)
+      case _   => unpickleAttrMapOptOther(a)
+    }
+  }
+  private def unpickleAttrMapOptHas(a: AttrMapOpt): () => Any = {
     a match {
-      case _: AttrMapOptID             => dek.readOptMap(dek.readString)
-      case _: AttrMapOptString         => dek.readOptMap(dek.readString)
-      case _: AttrMapOptInt            => dek.readOptMap(dek.readInt)
-      case _: AttrMapOptLong           => dek.readOptMap(dek.readLong)
-      case _: AttrMapOptFloat          => dek.readOptMap(dek.readFloat)
-      case _: AttrMapOptDouble         => dek.readOptMap(dek.readDouble)
-      case _: AttrMapOptBoolean        => dek.readOptMap(dek.readBoolean)
-      case _: AttrMapOptBigInt         => dek.readOptMap(dek.readBigInt)
-      case _: AttrMapOptBigDecimal     => dek.readOptMap(dek.readBigDecimal)
-      case _: AttrMapOptDate           => dek.readOptMap(dek.readDate)
-      case _: AttrMapOptDuration       => dek.readOptMap(dek.readDuration)
-      case _: AttrMapOptInstant        => dek.readOptMap(dek.readInstant)
-      case _: AttrMapOptLocalDate      => dek.readOptMap(dek.readLocalDate)
-      case _: AttrMapOptLocalTime      => dek.readOptMap(dek.readLocalTime)
-      case _: AttrMapOptLocalDateTime  => dek.readOptMap(dek.readLocalDateTime)
-      case _: AttrMapOptOffsetTime     => dek.readOptMap(dek.readOffsetTime)
-      case _: AttrMapOptOffsetDateTime => dek.readOptMap(dek.readOffsetDateTime)
-      case _: AttrMapOptZonedDateTime  => dek.readOptMap(dek.readZonedDateTime)
-      case _: AttrMapOptUUID           => dek.readOptMap(dek.readUUID)
-      case _: AttrMapOptURI            => dek.readOptMap(dek.readURI)
-      case _: AttrMapOptByte           => dek.readOptMap(dek.readByte)
-      case _: AttrMapOptShort          => dek.readOptMap(dek.readShort)
-      case _: AttrMapOptChar           => dek.readOptMap(dek.readChar)
+      case _: AttrMapOptID             => dek.readOpt[Long](dek.readLong)
+      case _: AttrMapOptString         => dek.readOpt[String](dek.readString)
+      case _: AttrMapOptInt            => dek.readOpt[Int](dek.readInt)
+      case _: AttrMapOptLong           => dek.readOpt[Long](dek.readLong)
+      case _: AttrMapOptFloat          => dek.readOpt[Float](dek.readFloat)
+      case _: AttrMapOptDouble         => dek.readOpt[Double](dek.readDouble)
+      case _: AttrMapOptBoolean        => dek.readOpt[Boolean](dek.readBoolean)
+      case _: AttrMapOptBigInt         => dek.readOpt[BigInt](dek.readBigInt)
+      case _: AttrMapOptBigDecimal     => dek.readOpt[BigDecimal](dek.readBigDecimal)
+      case _: AttrMapOptDate           => dek.readOpt[Date](dek.readDate)
+      case _: AttrMapOptDuration       => dek.readOpt[Duration](dek.readDuration)
+      case _: AttrMapOptInstant        => dek.readOpt[Instant](dek.readInstant)
+      case _: AttrMapOptLocalDate      => dek.readOpt[LocalDate](dek.readLocalDate)
+      case _: AttrMapOptLocalTime      => dek.readOpt[LocalTime](dek.readLocalTime)
+      case _: AttrMapOptLocalDateTime  => dek.readOpt[LocalDateTime](dek.readLocalDateTime)
+      case _: AttrMapOptOffsetTime     => dek.readOpt[OffsetTime](dek.readOffsetTime)
+      case _: AttrMapOptOffsetDateTime => dek.readOpt[OffsetDateTime](dek.readOffsetDateTime)
+      case _: AttrMapOptZonedDateTime  => dek.readOpt[ZonedDateTime](dek.readZonedDateTime)
+      case _: AttrMapOptUUID           => dek.readOpt[UUID](dek.readUUID)
+      case _: AttrMapOptURI            => dek.readOpt[URI](dek.readURI)
+      case _: AttrMapOptByte           => dek.readOpt[Byte](dek.readByte)
+      case _: AttrMapOptShort          => dek.readOpt[Short](dek.readShort)
+      case _: AttrMapOptChar           => dek.readOpt[Char](dek.readChar)
+    }
+  }
+  private def unpickleAttrMapOptOther(a: AttrMapOpt): () => Any = {
+    a match {
+      case _: AttrMapOptID             => dek.readOptMap[Long](dek.readLong)
+      case _: AttrMapOptString         => dek.readOptMap[String](dek.readString)
+      case _: AttrMapOptInt            => dek.readOptMap[Int](dek.readInt)
+      case _: AttrMapOptLong           => dek.readOptMap[Long](dek.readLong)
+      case _: AttrMapOptFloat          => dek.readOptMap[Float](dek.readFloat)
+      case _: AttrMapOptDouble         => dek.readOptMap[Double](dek.readDouble)
+      case _: AttrMapOptBoolean        => dek.readOptMap[Boolean](dek.readBoolean)
+      case _: AttrMapOptBigInt         => dek.readOptMap[BigInt](dek.readBigInt)
+      case _: AttrMapOptBigDecimal     => dek.readOptMap[BigDecimal](dek.readBigDecimal)
+      case _: AttrMapOptDate           => dek.readOptMap[Date](dek.readDate)
+      case _: AttrMapOptDuration       => dek.readOptMap[Duration](dek.readDuration)
+      case _: AttrMapOptInstant        => dek.readOptMap[Instant](dek.readInstant)
+      case _: AttrMapOptLocalDate      => dek.readOptMap[LocalDate](dek.readLocalDate)
+      case _: AttrMapOptLocalTime      => dek.readOptMap[LocalTime](dek.readLocalTime)
+      case _: AttrMapOptLocalDateTime  => dek.readOptMap[LocalDateTime](dek.readLocalDateTime)
+      case _: AttrMapOptOffsetTime     => dek.readOptMap[OffsetTime](dek.readOffsetTime)
+      case _: AttrMapOptOffsetDateTime => dek.readOptMap[OffsetDateTime](dek.readOffsetDateTime)
+      case _: AttrMapOptZonedDateTime  => dek.readOptMap[ZonedDateTime](dek.readZonedDateTime)
+      case _: AttrMapOptUUID           => dek.readOptMap[UUID](dek.readUUID)
+      case _: AttrMapOptURI            => dek.readOptMap[URI](dek.readURI)
+      case _: AttrMapOptByte           => dek.readOptMap[Byte](dek.readByte)
+      case _: AttrMapOptShort          => dek.readOptMap[Short](dek.readShort)
+      case _: AttrMapOptChar           => dek.readOptMap[Char](dek.readChar)
     }
   }
 }

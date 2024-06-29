@@ -3,7 +3,6 @@ package molecule.sql.core.query
 import java.net.URI
 import java.time._
 import java.util.{Date, UUID}
-import boopickle.Default._
 import molecule.core.util.JavaConversions
 
 trait LambdasMap extends LambdasBase with JavaConversions { self: SqlQueryBase =>

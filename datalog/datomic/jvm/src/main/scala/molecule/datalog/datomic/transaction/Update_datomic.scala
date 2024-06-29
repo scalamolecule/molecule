@@ -672,7 +672,7 @@ trait Update_datomic
       case Nil => List(ns, refAttr0, refNs)
       case cur => cur ++ List(refAttr0, refNs)
     }
-    println("  currentNsPath" + currentNsPath)
+    //    println("  currentNsPath: " + currentNsPath)
     val refAttr = kw(ns, refAttr0)
     rowResolvers += {
       case row: jList[AnyRef] if isUpsert =>

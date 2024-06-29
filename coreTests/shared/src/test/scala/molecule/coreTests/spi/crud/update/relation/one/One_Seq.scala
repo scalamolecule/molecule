@@ -199,7 +199,7 @@ trait One_Seq extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
     "no synthetic orphans" - refs { implicit conn =>
-      if (database == "Datomic") {
+      if (database == "Datomic" && platform == "jvm") {
         // Datomic uses synthetic index/value coordinates to maintain ordered Lists
         for {
           a <- A.iSeq(Seq(1, 2)).save.transact.map(_.id)

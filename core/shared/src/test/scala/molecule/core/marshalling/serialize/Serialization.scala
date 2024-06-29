@@ -13,7 +13,7 @@ object Serialization extends TestSuite {
   override lazy val tests = Tests {
 
     "No base attrs with tx meta data" - {
-      val elements = List(
+      val elements     = List(
         AttrOneManInt("R2", "i", V, Seq(), None, None, Nil, Nil, None, None),
         AttrOneManString("R2", "s", V, Seq(), None, None, Nil, Nil, None, None)
       )
@@ -23,6 +23,18 @@ object Serialization extends TestSuite {
 
       deserialized ==> data
     }
+
+//    "Seq" - {
+//      val elements     = List(
+//        AttrOneManInt("Ns", "i", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 1)),
+//        AttrMapOptShort("Ns", "shortMap", Has, Some(Map(("a", null))), None, None, Nil, Nil, None, None, Seq(0, 96))
+//      )
+//      val data         = Right(List((2, "b")))
+//      val serialized   = PickleTpls(elements, false).pickle(data)
+//      val deserialized = Unpickle.apply[Either[MoleculeError, List[(Int, String)]]].fromBytes(ByteBuffer.wrap(serialized))
+//
+//      deserialized ==> data
+//    }
   }
 }
 

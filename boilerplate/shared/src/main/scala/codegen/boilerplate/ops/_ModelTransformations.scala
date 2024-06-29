@@ -514,15 +514,28 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
   }
 
   private def addMap(mode: String): String = {
-    baseTypes.map { baseTpe =>
+    baseTypesWithDummyValues.map { case (baseTpe, dummyValue) =>
       val tpe = if (baseTpe == "ID") "Long" else baseTpe
-      s"""case a: AttrMap$mode$baseTpe =>
-         |          val map     = vs.asInstanceOf[Map[String, $tpe]]
-         |          val errors1 = if (map.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-         |            val validator = a.validator.get
-         |            map.values.toSeq.flatMap(validator.validate)
-         |          }
-         |          a.copy(op = op, vs = map, errors = errors1)""".stripMargin
+//      if (mode == "Man") {
+//        s"""case a: AttrMap$mode$baseTpe =>
+//           |          val map     = vs.asInstanceOf[Map[String, $tpe]]
+//           |          val errors1 = if (map.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+//           |            val validator = a.validator.get
+//           |            map.values.toSeq.flatMap(validator.validate)
+//           |          }
+//           |          a.copy(op = op, vs = map, errors = errors1)""".stripMargin
+//      } else {
+//      }
+        s"""case a: AttrMap$mode$baseTpe =>
+           |          val map     = vs.asInstanceOf[Map[String, $tpe]]
+           |          val errors1 = if (map.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+           |            val validator = a.validator.get
+           |            map.values.toSeq.flatMap(validator.validate)
+           |          }
+           |          if (map.size == 1 && map.head._2 == null.asInstanceOf[$tpe])
+           |            a.copy(op = op, vs = Map(map.head._1 -> $dummyValue), errors = errors1)
+           |          else
+           |            a.copy(op = op, vs = map, errors = errors1)""".stripMargin
     }.mkString("\n\n        ")
   }
 

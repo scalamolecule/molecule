@@ -28,75 +28,87 @@ object AdhocJVM_datomic extends TestSuite_datomic {
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
 
-
-        _ <- Ns.i_?.int.insert(
-          (None, 0), // entity with missing i
-          (Some(1), 1),
-          (Some(2), 2),
-        ).transact
-
-
-      } yield ()
-    }
-
-
-    "refs" - refs { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Refs._
-      implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
-      for {
-
-        _ <- A.i.Bb.*?(B.s_?.i_?).insert(
-          (1, List()),
-          (2, List((Some("a"), None))),
-          (3, List((Some("b"), None), (Some("c"), None))),
-          (4, List((Some("d"), Some(1)))),
-          (5, List((Some("e"), Some(2)), (Some("f"), Some(3)))),
-          (6, List((Some("g"), Some(4)), (Some("h"), None))),
-        ).i.transact
-
-        // Filter by A ids, update B values
-        _ <- A.i_.Bb.i(4).update.i.transact
-
-        _ = {
-          Peer.q(
-            """[:find  ?b
-              |        (pull ?id0 [
-              |          {(:A/bb :limit nil :default "__none__") [
-              |            (:B/s :limit nil :default "__none__")
-              |            (:B/i :limit nil :default "__none__")]}])
-              | :where [?a :A/i ?b]
-              |        [(identity ?a) ?id0]]
-              |        """.stripMargin,
-            conn.db
-          ).forEach { r => println(r) }
-        }
+//        _ <- Ns.int.insert(1).transact
+//        _ <- Ns.int.query.get.map(_ ==> List(1))
+//
+//        _ <- Ns.intSet(Set(int1, int2)).save.transact
+//        _ <- Ns.intSet.query.get.map(_.head ==> Set(int1, int2))
+//
+//        _ <- Ns.intSeq(Seq(int1, int2)).save.i.transact
+//        _ <- Ns.intSeq.query.get.map(_.head ==> Seq(int1, int2))
+//
+//
+//        _ <- Ns.int(20).i(1).byteArray_?(Option.empty[Array[Byte]]).save.transact
+//        _ <- Ns.int(20).i(2).byteArray_?(Some(Array.empty[Byte])).save.transact
+//        _ <- Ns.intSeq(List(int1, int2)).save.transact
+//        _ <- Ns.intSeq.query.get.map(_.head ==> List(int1, int2))
 
 
 
-        _ <- A.i.a1.Bb.*?(B.s_?.a1.i).query.i.get.map(_ ==> List(
-          (1, List()), //                               no B.i value
-          (2, List()), //                               no B.i value
-          (3, List()), //                               no B.i value
-          (4, List((Some("d"), 4))), //                 update in 1 ref entity
-          (5, List((Some("e"), 4), (Some("f"), 4))), // update in 2 ref entities
-          (6, List((Some("g"), 4))), //                 already had same value
-        ))
-
-        // Filter by A ids, upsert B values
-        _ <- A.i_.Bb.i(5).upsert.transact
-
-        _ <- A.i.a1.Bb.*?(B.s_?.a1.i).query.get.map(_ ==> List(
-          (1, List((None, 5))), //                      ref + insert
-          (2, List((Some("a"), 5))), //                 addition in 1 ref entity
-          (3, List((Some("b"), 5), (Some("c"), 5))), // addition in 2 ref entities
-          (4, List((Some("d"), 5))), //                 update in 1 ref entity
-          (5, List((Some("e"), 5), (Some("f"), 5))), // update in 2 ref entities
-          (6, List((Some("g"), 5), (Some("h"), 5))), // update in one ref entity and insertion in another
-        ))
-
+        _ <- Ns.i.shortMap_?.insert((3, Some(Map("a" -> short5)))).transact
+        _ <- Ns.i.shortMap_?("a").query.i.get.map(_ ==> List((3, Some(short5))))
 
       } yield ()
     }
+
+
+    //    "refs" - refs { implicit conn =>
+    //      import molecule.coreTests.dataModels.core.dsl.Refs._
+    //      implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+    //      for {
+    //
+    //        _ <- A.i.Bb.*?(B.s_?.i_?).insert(
+    //          (1, List()),
+    //          (2, List((Some("a"), None))),
+    //          (3, List((Some("b"), None), (Some("c"), None))),
+    //          (4, List((Some("d"), Some(1)))),
+    //          (5, List((Some("e"), Some(2)), (Some("f"), Some(3)))),
+    //          (6, List((Some("g"), Some(4)), (Some("h"), None))),
+    //        ).i.transact
+    //
+    //        // Filter by A ids, update B values
+    //        _ <- A.i_.Bb.i(4).update.i.transact
+    //
+    //        _ = {
+    //          Peer.q(
+    //            """[:find  ?b
+    //              |        (pull ?id0 [
+    //              |          {(:A/bb :limit nil :default "__none__") [
+    //              |            (:B/s :limit nil :default "__none__")
+    //              |            (:B/i :limit nil :default "__none__")]}])
+    //              | :where [?a :A/i ?b]
+    //              |        [(identity ?a) ?id0]]
+    //              |        """.stripMargin,
+    //            conn.db
+    //          ).forEach { r => println(r) }
+    //        }
+    //
+    //
+    //
+    //        _ <- A.i.a1.Bb.*?(B.s_?.a1.i).query.i.get.map(_ ==> List(
+    //          (1, List()), //                               no B.i value
+    //          (2, List()), //                               no B.i value
+    //          (3, List()), //                               no B.i value
+    //          (4, List((Some("d"), 4))), //                 update in 1 ref entity
+    //          (5, List((Some("e"), 4), (Some("f"), 4))), // update in 2 ref entities
+    //          (6, List((Some("g"), 4))), //                 already had same value
+    //        ))
+    //
+    //        // Filter by A ids, upsert B values
+    //        _ <- A.i_.Bb.i(5).upsert.transact
+    //
+    //        _ <- A.i.a1.Bb.*?(B.s_?.a1.i).query.get.map(_ ==> List(
+    //          (1, List((None, 5))), //                      ref + insert
+    //          (2, List((Some("a"), 5))), //                 addition in 1 ref entity
+    //          (3, List((Some("b"), 5), (Some("c"), 5))), // addition in 2 ref entities
+    //          (4, List((Some("d"), 5))), //                 update in 1 ref entity
+    //          (5, List((Some("e"), 5), (Some("f"), 5))), // update in 2 ref entities
+    //          (6, List((Some("g"), 5), (Some("h"), 5))), // update in one ref entity and insertion in another
+    //        ))
+    //
+    //
+    //      } yield ()
+    //    }
 
 
     //    "unique" - unique { implicit conn =>

@@ -153,10 +153,4 @@ trait ResolveBase extends BaseHelpers {
 
   protected def jvector2set(value: AnyRef => Any): AnyRef => AnyRef =
     (v: AnyRef) => v.asInstanceOf[jList[_]].toArray.toSet.map(value)
-
-  protected def jvector2list: AnyRef => AnyRef =
-    (v: AnyRef) => v.asInstanceOf[jList[_]].toArray.toList
-
-  protected def jvector2list(value: AnyRef => Any): AnyRef => AnyRef =
-    (v: AnyRef) => v.asInstanceOf[jList[_]].toArray.toList.map(value)
 }

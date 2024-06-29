@@ -72,7 +72,7 @@ trait FilterMap_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.a1.shortMap_?("_").query.get.map(_ ==> List((1, None), (2, None), (3, None)))
           _ <- Ns.i.a1.shortMap_?("a").query.get.map(_ ==> List((1, Some(short1)), (2, Some(short2)), (3, None)))
           _ <- Ns.i.a1.shortMap_?("b").query.get.map(_ ==> List((1, Some(short2)), (2, Some(short3)), (3, None)))
-          _ <- Ns.i.a1.shortMap_?("c").query.get.map(_ ==> List((1, None), (2, Some(short4)), (3, None)))
+          _ <- Ns.i.a1.shortMap_?.apply("c").query.get.map(_ ==> List((1, None), (2, Some(short4)), (3, None)))
         } yield ()
       }
     }

@@ -73,7 +73,7 @@ trait FilterMap extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Key" - types { implicit conn =>
       // Filtering updates by equality of collections is not supported by molecule.
-      // Instead use has/hasNo.
+      // Instead, use has/hasNo.
       for {
         List(a, b) <- Ns.iMap.int.insert(
           (Map("a" -> 1, "b" -> 2), 1),
@@ -115,7 +115,7 @@ trait FilterMap extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "No key" - types { implicit conn =>
       // Filtering updates by equality of collections is not supported by molecule.
-      // Instead use has/hasNo.
+      // Instead, use has/hasNo.
       for {
         List(a, b) <- Ns.iMap.int.insert(
           (Map("a" -> 1, "b" -> 2), 1),

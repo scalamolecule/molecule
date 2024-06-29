@@ -1,9 +1,13 @@
 package molecule.base.util
 
+import java.net.URI
+import java.time._
+import java.util.{Date, UUID}
+
 
 trait CodeGenBase extends BaseHelpers {
 
-  val baseTypes = Seq(
+  val baseTypes                = Seq(
     "ID",
     "String",
     "Int",
@@ -27,6 +31,32 @@ trait CodeGenBase extends BaseHelpers {
     "Byte",
     "Short",
     "Char",
+  )
+
+  val baseTypesWithDummyValues = Seq(
+    ("ID", "-42L"),
+    ("String", """"foo""""),
+    ("Int", "-42"),
+    ("Long", "-42L"),
+    ("Float", "-42f"),
+    ("Double", "-42.0"),
+    ("Boolean", "false"),
+    ("BigInt", "BigInt(-42)"),
+    ("BigDecimal", "BigDecimal(-42.0)"),
+    ("Date", "new Date()"),
+    ("Duration", "Duration.ofDays(0)"),
+    ("Instant", "Instant.now()"),
+    ("LocalDate", "LocalDate.now()"),
+    ("LocalTime", "LocalTime.now()"),
+    ("LocalDateTime", "LocalDateTime.now()"),
+    ("OffsetTime", "OffsetTime.now()"),
+    ("OffsetDateTime", "OffsetDateTime.now()"),
+    ("ZonedDateTime", "ZonedDateTime.now()"),
+    ("UUID", "UUID.randomUUID()"),
+    ("URI", """new URI("foo")"""),
+    ("Byte", "42.toByte"),
+    ("Short", "42.toShort"),
+    ("Char", "'-'"),
   )
 
   val baseTypesWithSpaces = Seq(

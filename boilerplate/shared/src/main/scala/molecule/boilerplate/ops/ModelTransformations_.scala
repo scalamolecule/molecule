@@ -1843,7 +1843,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[Long])
+            a.copy(op = op, vs = Map(map.head._1 -> -42L), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapManString =>
           val map     = vs.asInstanceOf[Map[String, String]]
@@ -1851,7 +1854,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[String])
+            a.copy(op = op, vs = Map(map.head._1 -> "foo"), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapManInt =>
           val map     = vs.asInstanceOf[Map[String, Int]]
@@ -1859,7 +1865,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[Int])
+            a.copy(op = op, vs = Map(map.head._1 -> -42), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapManLong =>
           val map     = vs.asInstanceOf[Map[String, Long]]
@@ -1867,7 +1876,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[Long])
+            a.copy(op = op, vs = Map(map.head._1 -> -42L), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapManFloat =>
           val map     = vs.asInstanceOf[Map[String, Float]]
@@ -1875,7 +1887,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[Float])
+            a.copy(op = op, vs = Map(map.head._1 -> -42f), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapManDouble =>
           val map     = vs.asInstanceOf[Map[String, Double]]
@@ -1883,7 +1898,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[Double])
+            a.copy(op = op, vs = Map(map.head._1 -> -42.0), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapManBoolean =>
           val map     = vs.asInstanceOf[Map[String, Boolean]]
@@ -1891,7 +1909,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[Boolean])
+            a.copy(op = op, vs = Map(map.head._1 -> false), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapManBigInt =>
           val map     = vs.asInstanceOf[Map[String, BigInt]]
@@ -1899,7 +1920,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[BigInt])
+            a.copy(op = op, vs = Map(map.head._1 -> BigInt(-42)), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapManBigDecimal =>
           val map     = vs.asInstanceOf[Map[String, BigDecimal]]
@@ -1907,7 +1931,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[BigDecimal])
+            a.copy(op = op, vs = Map(map.head._1 -> BigDecimal(-42.0)), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapManDate =>
           val map     = vs.asInstanceOf[Map[String, Date]]
@@ -1915,7 +1942,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[Date])
+            a.copy(op = op, vs = Map(map.head._1 -> new Date()), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapManDuration =>
           val map     = vs.asInstanceOf[Map[String, Duration]]
@@ -1923,7 +1953,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[Duration])
+            a.copy(op = op, vs = Map(map.head._1 -> Duration.ofDays(0)), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapManInstant =>
           val map     = vs.asInstanceOf[Map[String, Instant]]
@@ -1931,7 +1964,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[Instant])
+            a.copy(op = op, vs = Map(map.head._1 -> Instant.now()), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapManLocalDate =>
           val map     = vs.asInstanceOf[Map[String, LocalDate]]
@@ -1939,7 +1975,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[LocalDate])
+            a.copy(op = op, vs = Map(map.head._1 -> LocalDate.now()), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapManLocalTime =>
           val map     = vs.asInstanceOf[Map[String, LocalTime]]
@@ -1947,7 +1986,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[LocalTime])
+            a.copy(op = op, vs = Map(map.head._1 -> LocalTime.now()), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapManLocalDateTime =>
           val map     = vs.asInstanceOf[Map[String, LocalDateTime]]
@@ -1955,7 +1997,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[LocalDateTime])
+            a.copy(op = op, vs = Map(map.head._1 -> LocalDateTime.now()), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapManOffsetTime =>
           val map     = vs.asInstanceOf[Map[String, OffsetTime]]
@@ -1963,7 +2008,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[OffsetTime])
+            a.copy(op = op, vs = Map(map.head._1 -> OffsetTime.now()), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapManOffsetDateTime =>
           val map     = vs.asInstanceOf[Map[String, OffsetDateTime]]
@@ -1971,7 +2019,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[OffsetDateTime])
+            a.copy(op = op, vs = Map(map.head._1 -> OffsetDateTime.now()), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapManZonedDateTime =>
           val map     = vs.asInstanceOf[Map[String, ZonedDateTime]]
@@ -1979,7 +2030,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[ZonedDateTime])
+            a.copy(op = op, vs = Map(map.head._1 -> ZonedDateTime.now()), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapManUUID =>
           val map     = vs.asInstanceOf[Map[String, UUID]]
@@ -1987,7 +2041,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[UUID])
+            a.copy(op = op, vs = Map(map.head._1 -> UUID.randomUUID()), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapManURI =>
           val map     = vs.asInstanceOf[Map[String, URI]]
@@ -1995,7 +2052,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[URI])
+            a.copy(op = op, vs = Map(map.head._1 -> new URI("foo")), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapManByte =>
           val map     = vs.asInstanceOf[Map[String, Byte]]
@@ -2003,7 +2063,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[Byte])
+            a.copy(op = op, vs = Map(map.head._1 -> 42.toByte), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapManShort =>
           val map     = vs.asInstanceOf[Map[String, Short]]
@@ -2011,7 +2074,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[Short])
+            a.copy(op = op, vs = Map(map.head._1 -> 42.toShort), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapManChar =>
           val map     = vs.asInstanceOf[Map[String, Char]]
@@ -2019,7 +2085,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[Char])
+            a.copy(op = op, vs = Map(map.head._1 -> '-'), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
       }
       case a: AttrMapTac => a match {
         case a: AttrMapTacID =>
@@ -2028,7 +2097,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[Long])
+            a.copy(op = op, vs = Map(map.head._1 -> -42L), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapTacString =>
           val map     = vs.asInstanceOf[Map[String, String]]
@@ -2036,7 +2108,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[String])
+            a.copy(op = op, vs = Map(map.head._1 -> "foo"), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapTacInt =>
           val map     = vs.asInstanceOf[Map[String, Int]]
@@ -2044,7 +2119,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[Int])
+            a.copy(op = op, vs = Map(map.head._1 -> -42), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapTacLong =>
           val map     = vs.asInstanceOf[Map[String, Long]]
@@ -2052,7 +2130,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[Long])
+            a.copy(op = op, vs = Map(map.head._1 -> -42L), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapTacFloat =>
           val map     = vs.asInstanceOf[Map[String, Float]]
@@ -2060,7 +2141,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[Float])
+            a.copy(op = op, vs = Map(map.head._1 -> -42f), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapTacDouble =>
           val map     = vs.asInstanceOf[Map[String, Double]]
@@ -2068,7 +2152,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[Double])
+            a.copy(op = op, vs = Map(map.head._1 -> -42.0), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapTacBoolean =>
           val map     = vs.asInstanceOf[Map[String, Boolean]]
@@ -2076,7 +2163,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[Boolean])
+            a.copy(op = op, vs = Map(map.head._1 -> false), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapTacBigInt =>
           val map     = vs.asInstanceOf[Map[String, BigInt]]
@@ -2084,7 +2174,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[BigInt])
+            a.copy(op = op, vs = Map(map.head._1 -> BigInt(-42)), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapTacBigDecimal =>
           val map     = vs.asInstanceOf[Map[String, BigDecimal]]
@@ -2092,7 +2185,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[BigDecimal])
+            a.copy(op = op, vs = Map(map.head._1 -> BigDecimal(-42.0)), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapTacDate =>
           val map     = vs.asInstanceOf[Map[String, Date]]
@@ -2100,7 +2196,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[Date])
+            a.copy(op = op, vs = Map(map.head._1 -> new Date()), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapTacDuration =>
           val map     = vs.asInstanceOf[Map[String, Duration]]
@@ -2108,7 +2207,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[Duration])
+            a.copy(op = op, vs = Map(map.head._1 -> Duration.ofDays(0)), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapTacInstant =>
           val map     = vs.asInstanceOf[Map[String, Instant]]
@@ -2116,7 +2218,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[Instant])
+            a.copy(op = op, vs = Map(map.head._1 -> Instant.now()), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapTacLocalDate =>
           val map     = vs.asInstanceOf[Map[String, LocalDate]]
@@ -2124,7 +2229,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[LocalDate])
+            a.copy(op = op, vs = Map(map.head._1 -> LocalDate.now()), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapTacLocalTime =>
           val map     = vs.asInstanceOf[Map[String, LocalTime]]
@@ -2132,7 +2240,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[LocalTime])
+            a.copy(op = op, vs = Map(map.head._1 -> LocalTime.now()), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapTacLocalDateTime =>
           val map     = vs.asInstanceOf[Map[String, LocalDateTime]]
@@ -2140,7 +2251,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[LocalDateTime])
+            a.copy(op = op, vs = Map(map.head._1 -> LocalDateTime.now()), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapTacOffsetTime =>
           val map     = vs.asInstanceOf[Map[String, OffsetTime]]
@@ -2148,7 +2262,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[OffsetTime])
+            a.copy(op = op, vs = Map(map.head._1 -> OffsetTime.now()), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapTacOffsetDateTime =>
           val map     = vs.asInstanceOf[Map[String, OffsetDateTime]]
@@ -2156,7 +2273,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[OffsetDateTime])
+            a.copy(op = op, vs = Map(map.head._1 -> OffsetDateTime.now()), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapTacZonedDateTime =>
           val map     = vs.asInstanceOf[Map[String, ZonedDateTime]]
@@ -2164,7 +2284,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[ZonedDateTime])
+            a.copy(op = op, vs = Map(map.head._1 -> ZonedDateTime.now()), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapTacUUID =>
           val map     = vs.asInstanceOf[Map[String, UUID]]
@@ -2172,7 +2295,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[UUID])
+            a.copy(op = op, vs = Map(map.head._1 -> UUID.randomUUID()), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapTacURI =>
           val map     = vs.asInstanceOf[Map[String, URI]]
@@ -2180,7 +2306,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[URI])
+            a.copy(op = op, vs = Map(map.head._1 -> new URI("foo")), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapTacByte =>
           val map     = vs.asInstanceOf[Map[String, Byte]]
@@ -2188,7 +2317,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[Byte])
+            a.copy(op = op, vs = Map(map.head._1 -> 42.toByte), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapTacShort =>
           val map     = vs.asInstanceOf[Map[String, Short]]
@@ -2196,7 +2328,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[Short])
+            a.copy(op = op, vs = Map(map.head._1 -> 42.toShort), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
 
         case a: AttrMapTacChar =>
           val map     = vs.asInstanceOf[Map[String, Char]]
@@ -2204,7 +2339,10 @@ trait ModelTransformations_ {
             val validator = a.validator.get
             map.values.toSeq.flatMap(validator.validate)
           }
-          a.copy(op = op, vs = map, errors = errors1)
+          if (map.size == 1 && map.head._2 == null.asInstanceOf[Char])
+            a.copy(op = op, vs = Map(map.head._1 -> '-'), errors = errors1)
+          else
+            a.copy(op = op, vs = map, errors = errors1)
       }
       case a             => unexpected(a)
     }

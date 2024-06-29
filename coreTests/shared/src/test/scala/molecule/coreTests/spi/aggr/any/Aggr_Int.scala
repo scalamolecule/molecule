@@ -134,7 +134,7 @@ trait Aggr_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, 3)
         ))
 
-        _ <- Ns.int(countDistinct).query.get.map(_ ==> List(3))
+        _ <- Ns.int.apply(countDistinct).query.get.map(_ ==> List(3))
         _ <- Ns.i.a1.int(countDistinct).query.get.map(_ ==> List(
           (1, 1),
           (2, 2)

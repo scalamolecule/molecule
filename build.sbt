@@ -2,6 +2,8 @@ import org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv
 import org.scalajs.linker.interface.ESVersion
 import sbt.Keys.libraryDependencies
 import scala.collection.Seq
+import org.scalajs.linker.interface.ModuleSplitStyle
+
 
 val scala212 = "2.12.19"
 val scala213 = "2.13.14"
@@ -35,6 +37,7 @@ lazy val root = project
   .in(file("."))
   .settings(name := "molecule")
   .settings(publish / skip := true)
+  .enablePlugins(ScalaJSPlugin)
   .aggregate(
     base.js,
     base.jvm,
@@ -48,8 +51,8 @@ lazy val root = project
     datalogCore.jvm,
     datalogDatomic.js,
     datalogDatomic.jvm,
-    graphql.js,
-    graphql.jvm,
+    //    graphql.js,
+    //    graphql.jvm,
     sqlCore.js,
     sqlCore.jvm,
     sqlH2.js,
@@ -176,7 +179,7 @@ lazy val datalogCore = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += "com.datomic" % "peer" % "1.0.7075"
   )
   .jsSettings(jsEnvironment)
-  .dependsOn(coreTests)
+  .dependsOn(coreTests % "compile->compile;test->test")
 
 
 lazy val datalogDatomic = crossProject(JSPlatform, JVMPlatform)
@@ -185,58 +188,100 @@ lazy val datalogDatomic = crossProject(JSPlatform, JVMPlatform)
   .settings(name := "molecule-datalog-datomic")
   .settings(doPublish)
   .settings(compilerArgs)
-  .settings(testFrameworks := testingFrameworks)
+  .settings(
+    testFrameworks := testingFrameworks,
+
+    // Temporarily limit number of tests to be compiled by sbt (comment out this whole sbt setting to test all)
+    // Note that intellij doesn't recognize this setting - there you can right-click on files and exclude
+    unmanagedSources / excludeFilter := {
+      val test = "src/test/scala/molecule/datalog/datomic"
+      def path(platform: String) = (baseDirectory.value / s"../$platform/$test").getCanonicalPath
+      val jsTests     = path("js")
+      val jvmTests    = path("jvm")
+      val sharedTests = path("shared")
+      val allowed     = Seq(
+        //        sharedTests + "/compliance/aggr",
+        //        sharedTests + "/compliance/api",
+        //        sharedTests + "/compliance/crud",
+        sharedTests + "/compliance/crud/update",
+        //        sharedTests + "/compliance/crud/update/ops",
+        //        sharedTests + "/compliance/crud/update/relation",
+        //        sharedTests + "/compliance/filter",
+        //        sharedTests + "/compliance/filterAttr",
+        //        sharedTests + "/compliance/inspect",
+        //        sharedTests + "/compliance/pagination",
+        //        sharedTests + "/compliance/partitions",
+        //        sharedTests + "/compliance/relation",
+        //        sharedTests + "/compliance/sort",
+        //        sharedTests + "/compliance/subscription",
+        //        sharedTests + "/compliance/time",
+        //        sharedTests + "/compliance/validation",
+        //        sharedTests + "/compliance",
+        sharedTests + "/setup",
+        jsTests + "/setup",
+        jsTests + "/AdhocJS_datomic.scala",
+        //        jvmTests + "/AdhocJVM_datomic.scala",
+        //        sharedTests + "/Adhoc_datomic.scala",
+      )
+      new SimpleFileFilter(f =>
+        (f.getCanonicalPath.startsWith(jsTests)
+          || f.getCanonicalPath.startsWith(jvmTests)
+          || f.getCanonicalPath.startsWith(sharedTests)) &&
+          !allowed.exists(p => f.getCanonicalPath.startsWith(p))
+      )
+    },
+  )
   .jsSettings(jsEnvironment)
   .dependsOn(datalogCore % "compile->compile;test->test")
 
 
-lazy val graphql = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Full)
-  .in(file("graphql/client"))
-  .settings(name := "molecule-graphql-client")
-  .settings(doPublish)
-  .settings(compilerArgs)
-  .enablePlugins(MoleculePlugin)
-  .settings(
-    // Generate Molecule boilerplate code for tests with `sbt clean compile -Dmolecule=true`
-    moleculePluginActive := sys.props.get("molecule").contains("true"),
-    //    moleculeMakeJars := !sys.props.get("moleculeJars").contains("false"), // default: true
-    moleculeMakeJars := false, // default: true
-
-    // Multiple directories with data models
-    moleculeDataModelPaths := Seq(
-      "molecule/graphql/client"
-    ),
-
-    // Suppress "un-used" keys warning
-    Global / excludeLintKeys ++= Set(
-      moleculePluginActive,
-      moleculeDataModelPaths,
-      moleculeMakeJars
-    ),
-
-    // Let IntelliJ detect sbt-molecule-created jars in unmanaged lib directories
-    exportJars := true,
-
-    // Find scala version specific jars in respective libs
-    unmanagedBase := {
-      CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, 13)) => file(unmanagedBase.value.getPath ++ "/2.13")
-        case Some((2, 12)) => file(unmanagedBase.value.getPath ++ "/2.12")
-        case _             => file(unmanagedBase.value.getPath ++ "/3.3")
-      }
-    },
-    //    testFrameworks += new TestFramework("utest.runner.Framework"),
-  )
-  .settings(testFrameworks := testingFrameworks)
-  .settings(
-    libraryDependencies ++= Seq(
-      "com.github.ghostdogpr" %% "caliban-tools" % "2.5.2",
-      "com.github.ghostdogpr" %% "caliban-client" % "2.5.2",
-    ),
-  )
-  .jsSettings(jsEnvironment)
-  .dependsOn(coreTests % "compile->compile;test->test")
+//lazy val graphql = crossProject(JSPlatform, JVMPlatform)
+//  .crossType(CrossType.Full)
+//  .in(file("graphql/client"))
+//  .settings(name := "molecule-graphql-client")
+//  .settings(doPublish)
+//  .settings(compilerArgs)
+//  .enablePlugins(MoleculePlugin)
+//  .settings(
+//    // Generate Molecule boilerplate code for tests with `sbt clean compile -Dmolecule=true`
+//    moleculePluginActive := sys.props.get("molecule").contains("true"),
+//    //    moleculeMakeJars := !sys.props.get("moleculeJars").contains("false"), // default: true
+//    //    moleculeMakeJars := false, // default: true
+//
+//    // Multiple directories with data models
+//    moleculeDataModelPaths := Seq(
+//      "molecule/graphql/client"
+//    ),
+//
+//    // Suppress "un-used" keys warning
+//    Global / excludeLintKeys ++= Set(
+//      moleculePluginActive,
+//      moleculeDataModelPaths,
+//      moleculeMakeJars
+//    ),
+//
+//    // Let IntelliJ detect sbt-molecule-created jars in unmanaged lib directories
+//    exportJars := true,
+//
+//    // Find scala version specific jars in respective libs
+//    unmanagedBase := {
+//      CrossVersion.partialVersion(scalaVersion.value) match {
+//        case Some((2, 13)) => file(unmanagedBase.value.getPath ++ "/2.13")
+//        case Some((2, 12)) => file(unmanagedBase.value.getPath ++ "/2.12")
+//        case _             => file(unmanagedBase.value.getPath ++ "/3.3")
+//      }
+//    },
+//    //    testFrameworks += new TestFramework("utest.runner.Framework"),
+//  )
+//  .settings(testFrameworks := testingFrameworks)
+//  .settings(
+//    libraryDependencies ++= Seq(
+//      "com.github.ghostdogpr" %% "caliban-tools" % "2.5.2",
+//      "com.github.ghostdogpr" %% "caliban-client" % "2.5.2",
+//    ),
+//  )
+//  .jsSettings(jsEnvironment)
+//  .dependsOn(coreTests % "compile->compile;test->test")
 
 lazy val sqlCore = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
@@ -352,19 +397,28 @@ lazy val testingFrameworks = Seq(
 
 lazy val jsEnvironment = {
   Seq(
-    jsEnv := new JSDOMNodeJSEnv(
-      JSDOMNodeJSEnv
-        .Config()
-        // for some reason still needed...
-        // https://github.com/scala-js/scala-js-js-envs/issues/12
-        .withArgs(List("--dns-result-order=ipv4first"))
-    ),
+
+    //        jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(),
+
+
+    //    jsEnv := new JSDOMNodeJSEnv(
+    //      JSDOMNodeJSEnv
+    //        .Config()
+    //        // for some reason still needed...
+    //        // https://github.com/scala-js/scala-js-js-envs/issues/12
+    //        .withArgs(List("--dns-result-order=ipv4first"))
+    //    ),
     // "Error: connect ECONNREFUSED ::1:8080" with this one alone... shouldn't it work?
-    //  jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv()
+    jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
 
     // Allowing unicode characters in regex expressions (used in email regex)
     // https://www.scala-js.org/doc/regular-expressions.html
-    scalaJSLinkerConfig ~= (_.withESFeatures(_.withESVersion(ESVersion.ES2018)))
+    scalaJSLinkerConfig ~= (_.withESFeatures(_.withESVersion(ESVersion.ES2018))),
+
+    //scalaJSLinkerConfig ~= (_.withModuleSplitStyle(ModuleSplitStyle.SmallestModules))
+    // causes:
+    // [error] java.util.concurrent.ExecutionException: Boxed Error
+    // [error] Caused by: java.lang.AssertionError: non-public module in NoModule mode
   )
 }
 
