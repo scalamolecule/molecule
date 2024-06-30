@@ -43,7 +43,7 @@ trait ResolveExprOne[Tpl]
   protected def resolveAttrOneTac(es: List[Var], attr: AttrOneTac): List[Var] = {
     val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
     if (isNestedOpt)
-      throw ModelError("Tacit attributes not allowed in optional nested queries. Found: " + attr.name + "_")
+      throw ModelError(s"Tacit attributes not allowed in optional nested queries (${attr.name}_).")
     attr match {
       case at: AttrOneTacID             => tac(attr, e, a, at.vs, resId)
       case at: AttrOneTacString         => tac(attr, e, a, at.vs, resString)

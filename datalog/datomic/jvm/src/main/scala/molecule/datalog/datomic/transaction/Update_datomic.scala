@@ -594,7 +594,6 @@ trait Update_datomic
       }
       rowResolvers += { (row: jList[AnyRef]) =>
         // Retract old pairs with same keys as new pairs (if any)
-//        retractPairs(map, row, a, k_)
         retractPairs(map.keySet.toSeq, row, a, k_)
 
         // Add new pairs

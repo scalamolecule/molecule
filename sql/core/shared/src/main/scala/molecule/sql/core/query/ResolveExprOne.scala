@@ -38,7 +38,7 @@ trait ResolveExprOne extends ResolveExpr { self: SqlQueryBase with LambdasOne =>
 
   override protected def resolveAttrOneTac(attr: AttrOneTac): Unit = {
     if (isNestedOpt)
-      throw ModelError("Tacit attributes not allowed in optional nested queries. Found: " + attr.name + "_")
+      throw ModelError(s"Tacit attributes not allowed in optional nested queries (${attr.name}_).")
     attr match {
       case at: AttrOneTacID             => tac(attr, at.vs, resId1)
       case at: AttrOneTacString         => tac(attr, at.vs, resString1)

@@ -10,7 +10,7 @@ import scala.annotation.tailrec
 trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { self: InsertValidationResolvers_ =>
 
   private var curElements: List[Element] = List.empty[Element]
-  private def noEmpty(a: Attr) = throw new Exception("Can't use tacit attributes in insert molecule. Found: " + a)
+  private def noEmpty(a: Attr) = throw new Exception("Can't use tacit attributes in insert molecule (${a.name}).")
 
   @tailrec
   final override def getValidators(
@@ -27,7 +27,7 @@ trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { sel
       case element :: tail => element match {
         case a: Attr =>
           if (a.op != V) {
-            throw ModelError("Can't insert attributes with an applied value. Found:\n" + a)
+            throw ModelError("Can't insert attributes with an applied value (${a.name}).")
           }
           a match {
             case a: AttrOne => a match {

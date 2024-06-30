@@ -147,6 +147,6 @@ trait SqlUpdateSetValidator extends SpiHelpers {
     case _: AttrSetManByte           => "TINYINT"
     case _: AttrSetManShort          => "SMALLINT"
     case _: AttrSetManChar           => "CHAR"
-    case a                           => throw ModelError(s"Unexpected attribute. Found:\n" + a)
+    case a                           => throw ModelError(s"Unexpected attribute (${a.name}).")
   }
 }

@@ -13,7 +13,7 @@ class ResolveUpdate(
 ) extends ModelUtils { self: UpdateOps =>
 
   private def unexpectedOp(a: Attr) =     throw ModelError(
-    s"Unexpected update operation for card-many attribute. Found:\n" + a
+    s"Unexpected update operation for card-many attribute (${a.name})." + a
   )
 
   @tailrec
@@ -75,10 +75,10 @@ class ResolveUpdate(
     val (ns, attr) = (a.ns, a.attr)
     a match {
       case a if a.attr == "id" => throw ModelError(
-        s"Generic id attribute not allowed in update molecule. Found:\n" + a)
+        s"Generic id attribute not allowed in update molecule (${a.name}).")
 
       case a if a.op != Eq && a.op != NoValue => throw ModelError(
-        s"Can't update attributes without an applied value. Found:\n" + a)
+        s"Can't update attributes without an applied value (${a.name}).")
 
       case a: AttrOneManID             => updateOne(ns, attr, a.vs, transformID, extsID)
       case a: AttrOneManString         => updateOne(ns, attr, a.vs, transformString, extsString)
@@ -111,7 +111,7 @@ class ResolveUpdate(
       case AttrOneTacID(ns, "id", Eq, ids1, _, _, _, _, _, _, _) => handleIds(ns, ids1)
 
       case a if a.attr == "id" => throw ModelError(
-        s"Generic id attribute not allowed in update molecule. Found:\n" + a)
+        s"Generic id attribute not allowed in update molecule (${a.name}).")
 
       case a => handleFilterAttr(a)
     }

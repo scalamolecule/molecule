@@ -111,10 +111,10 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
 
 
   final private def resolveRef0(ref: Ref, tail: List[Element]): Unit = {
-    val Ref(_, refAttr, refNs, card, _, _) = ref
+    val Ref(ns, refAttr, refNs, card, _, _) = ref
     if (isNestedOpt && card == CardSet) {
       throw ModelError(
-        "Only cardinality-one refs allowed in optional nested queries. Found: " + ref
+        s"Only cardinality-one refs allowed in optional nested queries ($ns.$refAttr)."
       )
     }
 

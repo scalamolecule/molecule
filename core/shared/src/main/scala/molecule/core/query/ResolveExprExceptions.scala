@@ -33,7 +33,6 @@ trait ResolveExprExceptions {
 
   def noCardManyFilterAttrExpr(attr: Attr): Nothing = {
     throw ModelError(
-      s"Cardinality-many filter attributes not allowed to " +
-      s"do additional filtering. Found:\n  " + attr)
+      s"Cardinality-many filter attributes not allowed to do additional filtering (${attr.name}).")
   }
 }

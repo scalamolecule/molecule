@@ -21,14 +21,14 @@ class ResolveDelete { self: DeleteOps =>
             resolve(tail, topLevel)
 
           case a if a.attr == "id" => throw ModelError(
-            s"Mandatory id attribute not allowed in delete molecule. Found:\n" + a)
+            s"Mandatory id attribute not allowed in delete molecule (${a.name}).")
 
           case _: AttrOneTac =>
             addFilterElement(element)
             resolve(tail, topLevel)
 
           case _ => throw ModelError(
-            s"Can only filter delete by values applied to tacit card-one attributes (${a.name})"
+            s"Can only filter delete by values applied to tacit card-one attributes (${a.name})."
           )
         }
 

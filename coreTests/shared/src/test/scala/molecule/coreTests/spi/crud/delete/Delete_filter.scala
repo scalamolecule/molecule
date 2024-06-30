@@ -261,26 +261,22 @@ trait Delete_filter extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         for {
           _ <- A.i.<=(int1).delete.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-              err ==> "Can only filter delete by values applied to tacit card-one attributes. Found:\n" +
-                s"""AttrOneManInt("A", "i", Le, Seq($int1), None, None, Nil, Nil, None, None, Seq(0, 1))"""
+              err ==> "Can only filter delete by values applied to tacit card-one attributes (A.i)."
             }
 
           _ <- A.iSet(Set(int1)).delete.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-              err ==> "Can only filter delete by values applied to tacit card-one attributes. Found:\n" +
-                s"""AttrSetManInt("A", "iSet", Eq, Set($int1), None, None, Nil, Nil, None, None, Seq(0, 2))"""
+              err ==> "Can only filter delete by values applied to tacit card-one attributes (A.iSet)."
             }
 
           _ <- A.iSeq(List(int1)).delete.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-              err ==> "Can only filter delete by values applied to tacit card-one attributes. Found:\n" +
-                s"""AttrSeqManInt("A", "iSeq", Eq, Seq($int1), None, None, Nil, Nil, None, None, Seq(0, 3))"""
+              err ==> "Can only filter delete by values applied to tacit card-one attributes (A.iSeq)."
             }
 
           _ <- A.iMap(Map(pint1)).delete.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-              err ==> "Can only filter delete by values applied to tacit card-one attributes. Found:\n" +
-                s"""AttrMapManInt("A", "iMap", Eq, Map(("a", 1)), None, None, Nil, Nil, None, None, Seq(0, 4))"""
+              err ==> "Can only filter delete by values applied to tacit card-one attributes (A.iMap)."
             }
         } yield ()
       }

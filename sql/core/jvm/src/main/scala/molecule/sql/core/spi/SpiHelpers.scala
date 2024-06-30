@@ -237,7 +237,7 @@ trait SpiHelpers extends ModelUtils {
                 case a: AttrSetManChar           => idsModel += AttrSetTacChar(a.ns, a.attr, coord = a.coord)
               }
             } else {
-              throw ModelError(s"Unexpected $update operation for card-many attribute. Found:\n" + a)
+              throw ModelError(s"Unexpected $update operation for card-many attribute (${a.name}).")
             }
 
           case a: AttrSeqMan =>
@@ -269,7 +269,7 @@ trait SpiHelpers extends ModelUtils {
                 case a: AttrSeqManChar           => idsModel += AttrSeqTacChar(a.ns, a.attr, coord = a.coord)
               }
             } else {
-              throw ModelError(s"Unexpected $update operation for card-many attribute. Found:\n" + a)
+              throw ModelError(s"Unexpected $update operation for card-many attribute (${a.name}).")
             }
 
           case a: AttrMapMan =>
@@ -301,13 +301,13 @@ trait SpiHelpers extends ModelUtils {
                 case a: AttrMapManChar           => idsModel += AttrMapTacChar(a.ns, a.attr, coord = a.coord)
               }
             } else {
-              throw ModelError(s"Unexpected $update operation for card-many attribute. Found:\n" + a)
+              throw ModelError(s"Unexpected $update operation for card-many attribute (${a.name}).")
             }
 
           case _: AttrOneOpt => throw ModelError(s"Can't $update optional values (${a.cleanName}_?)")
 
           case _: AttrSetTac | _: AttrSeqTac | _: AttrMapTac =>
-            throw ModelError("Can only lookup entity with card-one attribute value. Found:\n" + a)
+            throw ModelError("Can only lookup entity with card-one attribute value (${a.name}).")
 
           case _: AttrSetOpt | _: AttrSeqOpt | _: AttrMapOpt =>
             throw ModelError(s"Can't $update optional values (${a.cleanName}_?)")

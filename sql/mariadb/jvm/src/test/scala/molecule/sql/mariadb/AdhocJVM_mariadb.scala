@@ -174,34 +174,7 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
 //
 //      for {
 //
-//        //            _ <- Uniques.i(1).i(2).int_(1).update.transact
-//        //              .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-//        //                err ==> "Can't transact duplicate attribute Uniques.i"
-//        //              }
-//        //
-//        //            _ <- Uniques.i_(1).i(2).update.transact
-//        //
-//        //            _ <- Uniques.int_(1).string_("x").s("c").update.transact
-//        //              .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-//        //                err ==> "Can only apply one unique attribute value for update. Found:\n" +
-//        //                  s"""AttrOneTacString("Uniques", "$attr", Eq, Seq("x"), None, None, Nil, Nil, None, None, Seq(0, 3))"""
-//        //              }
-//        //
-//        //            _ <- Uniques.intSet_(1).s("b").update.transact
-//        //              .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-//        //                err ==> "Can only lookup entity with card-one attribute value. Found:\n" +
-//        //                  """AttrSetTacInt("Uniques", "intSet", Eq, Seq(Set(1)), None, None, Nil, Nil, None, None, Seq(0, 25))"""
-//        //              }
-//
-//
-//        //
-//        //            _ <- Uniques.int.insert(1, 2, 3).transact
-//        //
-//        //            c1 <- Uniques.int.a1.query.from("").limit(2).get.map { case (List(1, 2), c, true) => c }
-//        //
-//        //            // Turning around with first cursor leads nowhere
-//        //            _ <- Uniques.int.a1.query.from(c1).limit(-2).get.map { case (Nil, _, false) => () }
-//
+
 //
 //
 //

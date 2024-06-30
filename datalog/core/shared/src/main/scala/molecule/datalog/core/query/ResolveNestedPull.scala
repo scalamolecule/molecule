@@ -33,7 +33,7 @@ trait ResolveNestedPull[Tpl]
         case head :: tail =>
           head match {
             case a: Attr if a.op != V => throw ModelError(
-              "Expressions not allowed in optional nested queries. Found:\n  " + a
+              s"Expressions not allowed in optional nested queries (${a.name})."
             )
             case a: AttrOneMan =>
               resAttrOneMan(a, attrIndex)
@@ -73,7 +73,7 @@ trait ResolveNestedPull[Tpl]
             case _: Nested            => noMixedNestedModes
 
             case a: AttrOneTac => throw ModelError(
-              "Tacit attributes not allowed in optional nested queries. Found: " + a.name + "_")
+              s"Tacit attributes not allowed in optional nested queries (${a.name}_).")
 
             case other => throw ModelError(
               "Unexpected element in optional nested molecule: " + other
@@ -105,7 +105,7 @@ trait ResolveNestedPull[Tpl]
           (res, append + append1)
 
         case (_, Some(ref: Ref), _, _) => throw ModelError(
-          "Only cardinality-one refs allowed in optional nested queries. Found: " + ref
+          s"Only cardinality-one refs allowed in optional nested queries (${ref.ns}.${ref.refAttr})."
         )
 
         case (acc1, Some(BackRef(backRef, _, _)), tail, attrIndex1) =>

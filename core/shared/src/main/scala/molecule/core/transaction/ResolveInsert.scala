@@ -14,7 +14,7 @@ class ResolveInsert
   extends InsertResolvers_ with InsertValidators_ with ModelUtils { self: InsertOps =>
 
   private val prevRefs: ListBuffer[AnyRef] = ListBuffer.empty[AnyRef]
-  private def noEmpty(a: Attr) = throw new Exception("Can't use tacit attributes in insert molecule. Found: " + a)
+  private def noEmpty(a: Attr) = throw new Exception("Can't use tacit attributes in insert molecule (${a.name}).")
 
 
   @tailrec
@@ -28,7 +28,7 @@ class ResolveInsert
       case element :: tail => element match {
         case a: Attr =>
           if (a.op != V) {
-            throw ModelError("Can't insert attributes with an applied value. Found:\n" + a)
+            throw ModelError(s"Can't insert attributes with an applied value (${a.name}).")
           }
           a match {
             case a: AttrOne => a match {
