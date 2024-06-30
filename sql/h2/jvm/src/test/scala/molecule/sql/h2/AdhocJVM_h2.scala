@@ -21,16 +21,59 @@ object AdhocJVM_h2 extends TestSuite_h2 {
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+
+
+      val (a1, b2) = ("a" -> int1, "b" -> int2)
+      val (b3, c4) = ("b" -> int3, "c" -> int4)
+
       for {
+        _ <- Ns.i.insert(0).transact // Entity without map attribute
+        _ <- Ns.i.intMap.insert(List(
+          (1, Map(a1, b2)),
+          (2, Map(b3, c4)),
+        )).transact
 
-        List(ref1, ref2, ref3, ref4) <- Ref.i.insert(1, 2, 3, 4).transact.map(_.ids)
-        a = (1, Set(ref1, ref2))
-        b = (2, Set(ref2, ref3, ref4))
+        // OR semantics! (different from Set and Seq)
 
-        _ <- Ns.i.refs.insert(List(a, b)).transact
-
-        _ <- Ns.i.a1.refs.has(ref2).query.i.get.map(_ ==> List(a, b))
-
+        // "Map contains this OR that key"
+//        _ <- Ns.i.a1.intMap_("_").query.get.map(_ ==> Nil)
+        _ <- Ns.i.a1.intMap_("a").query.i.get.map(_ ==> List(1))
+        //        List(a, b) <- Ns.iMap.int.insert(
+        //          (Map("a" -> 1, "b" -> 2), 1),
+        //          (Map("b" -> 2, "c" -> 3), 2),
+        //        ).transact.map(_.ids)
+        //
+        //        _ <- Ns.iMap_.hasNo(1).int(3).update.i.transact
+        //
+        //        // Update all entities where `iMap` has a key = "a"
+        //        _ <- Ns.iMap_.apply("a").int(3).update.i.transact
+        //
+        //        // 1 entity updated
+        //        _ <- Ns.id.a1.iMap.int.query.get.map(_ ==> List(
+        //          (a, Map("a" -> 1, "b" -> 2), 3), // updated
+        //          (b, Map("b" -> 2, "c" -> 3), 2),
+        //        ))
+        //
+        //        // Update all entities where `iMap` has keys "a" or "c"
+        //        _ <- Ns.iMap_(Seq("a", "c")).int(4).update.transact
+        //        _ <- Ns.id.a1.iMap.int.query.get.map(_ ==> List(
+        //          (a, Map("a" -> 1, "b" -> 2), 4), // updated
+        //          (b, Map("b" -> 2, "c" -> 3), 4), // updated
+        //        ))
+        //
+        //        // Update all entities where `iMap` has keys "x" or "c"
+        //        _ <- Ns.iMap_("x", "c").int(5).update.transact
+        //        _ <- Ns.id.a1.iMap.int.query.get.map(_ ==> List(
+        //          (a, Map("a" -> 1, "b" -> 2), 4),
+        //          (b, Map("b" -> 2, "c" -> 3), 5), // updated
+        //        ))
+        //
+        //        // Nothing updated since no `iMap` has key "x"
+        //        _ <- Ns.iMap_("x").int(5).update.transact
+        //        _ <- Ns.id.a1.iMap.int.query.get.map(_ ==> List(
+        //          (a, Map("a" -> 1, "b" -> 2), 4),
+        //          (b, Map("b" -> 2, "c" -> 3), 5),
+        //        ))
 
 
 

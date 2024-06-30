@@ -34,10 +34,9 @@ trait ResolveExprMap_postgres
 
   // tacit ---------------------------------------------------------------------
 
-  override protected def mapContainsKeys[T](
-    col: String, map: Map[String, T]
+  override protected def mapContainsKeys(
+    col: String, keys: Seq[String]
   ): Unit = {
-    val keys = map.keys
     if (keys.nonEmpty) {
       where += (("", keys.map(k => s"$col ?? '$k'").mkString("(", " OR\n   ", ")")))
     } else {
@@ -45,10 +44,9 @@ trait ResolveExprMap_postgres
     }
   }
 
-  override protected def mapContainsNoKeys[T](
-    col: String, map: Map[String, T]
+  override protected def mapContainsNoKeys(
+    col: String, keys: Seq[String]
   ): Unit = {
-    val keys = map.keys
     if (keys.nonEmpty) {
       where += (("", keys.map(k => s"$col ?? '$k'").mkString("NOT (", " OR\n   ", ")")))
     } else {
@@ -57,13 +55,13 @@ trait ResolveExprMap_postgres
   }
 
   override protected def mapHasValues[T](
-    col: String, map: Map[String, T], resMap: ResMap[T]
+    col: String, values: Seq[T], resMap: ResMap[T]
   ): Unit = {
-    if (map.nonEmpty) {
-      val values = map.values.map(v =>
+    if (values.nonEmpty) {
+      val values1 = values.map(v =>
         s"JSONB_PATH_QUERY_ARRAY($col, '$$.*') @> '${resMap.one2json(v)}'"
       )
-      where += (("", values.mkString("(", " OR\n   ", ")")))
+      where += (("", values1.mkString("(", " OR\n   ", ")")))
     } else {
       // Get none
       where += (("FALSE", ""))
@@ -71,13 +69,13 @@ trait ResolveExprMap_postgres
   }
 
   override protected def mapHasNoValues[T](
-    col: String, map: Map[String, T], resMap: ResMap[T]
+    col: String, values: Seq[T], resMap: ResMap[T]
   ): Unit = {
-    if (map.nonEmpty) {
-      val values = map.values.map(v =>
+    if (values.nonEmpty) {
+      val values1 = values.map(v =>
         s"JSONB_PATH_QUERY_ARRAY($col, '$$.*') @> '${resMap.one2json(v)}'"
       )
-      where += (("", values.mkString("NOT (", " OR\n   ", ")")))
+      where += (("", values1.mkString("NOT (", " OR\n   ", ")")))
     } else {
       // Get all
       ()

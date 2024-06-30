@@ -8,92 +8,92 @@ trait ResolveExprMap extends ResolveExpr { self: SqlQueryBase with LambdasMap =>
   override protected def resolveAttrMapMan(attr: AttrMapMan): Unit = {
     aritiesAttr()
     attr match {
-      case at: AttrMapManID             => mapMan(attr, at.vs, resMapId)
-      case at: AttrMapManString         => mapMan(attr, at.vs, resMapString)
-      case at: AttrMapManInt            => mapMan(attr, at.vs, resMapInt)
-      case at: AttrMapManLong           => mapMan(attr, at.vs, resMapLong)
-      case at: AttrMapManFloat          => mapMan(attr, at.vs, resMapFloat)
-      case at: AttrMapManDouble         => mapMan(attr, at.vs, resMapDouble)
-      case at: AttrMapManBoolean        => mapMan(attr, at.vs, resMapBoolean)
-      case at: AttrMapManBigInt         => mapMan(attr, at.vs, resMapBigInt)
-      case at: AttrMapManBigDecimal     => mapMan(attr, at.vs, resMapBigDecimal)
-      case at: AttrMapManDate           => mapMan(attr, at.vs, resMapDate)
-      case at: AttrMapManDuration       => mapMan(attr, at.vs, resMapDuration)
-      case at: AttrMapManInstant        => mapMan(attr, at.vs, resMapInstant)
-      case at: AttrMapManLocalDate      => mapMan(attr, at.vs, resMapLocalDate)
-      case at: AttrMapManLocalTime      => mapMan(attr, at.vs, resMapLocalTime)
-      case at: AttrMapManLocalDateTime  => mapMan(attr, at.vs, resMapLocalDateTime)
-      case at: AttrMapManOffsetTime     => mapMan(attr, at.vs, resMapOffsetTime)
-      case at: AttrMapManOffsetDateTime => mapMan(attr, at.vs, resMapOffsetDateTime)
-      case at: AttrMapManZonedDateTime  => mapMan(attr, at.vs, resMapZonedDateTime)
-      case at: AttrMapManUUID           => mapMan(attr, at.vs, resMapUUID)
-      case at: AttrMapManURI            => mapMan(attr, at.vs, resMapURI)
-      case at: AttrMapManByte           => mapMan(attr, at.vs, resMapByte)
-      case at: AttrMapManShort          => mapMan(attr, at.vs, resMapShort)
-      case at: AttrMapManChar           => mapMan(attr, at.vs, resMapChar)
-    }
-  }
-
-  override protected def resolveAttrMapTac(attr: AttrMapTac): Unit = {
-    attr match {
-      case at: AttrMapTacID             => mapTac(attr, at.vs, resMapId)
-      case at: AttrMapTacString         => mapTac(attr, at.vs, resMapString)
-      case at: AttrMapTacInt            => mapTac(attr, at.vs, resMapInt)
-      case at: AttrMapTacLong           => mapTac(attr, at.vs, resMapLong)
-      case at: AttrMapTacFloat          => mapTac(attr, at.vs, resMapFloat)
-      case at: AttrMapTacDouble         => mapTac(attr, at.vs, resMapDouble)
-      case at: AttrMapTacBoolean        => mapTac(attr, at.vs, resMapBoolean)
-      case at: AttrMapTacBigInt         => mapTac(attr, at.vs, resMapBigInt)
-      case at: AttrMapTacBigDecimal     => mapTac(attr, at.vs, resMapBigDecimal)
-      case at: AttrMapTacDate           => mapTac(attr, at.vs, resMapDate)
-      case at: AttrMapTacDuration       => mapTac(attr, at.vs, resMapDuration)
-      case at: AttrMapTacInstant        => mapTac(attr, at.vs, resMapInstant)
-      case at: AttrMapTacLocalDate      => mapTac(attr, at.vs, resMapLocalDate)
-      case at: AttrMapTacLocalTime      => mapTac(attr, at.vs, resMapLocalTime)
-      case at: AttrMapTacLocalDateTime  => mapTac(attr, at.vs, resMapLocalDateTime)
-      case at: AttrMapTacOffsetTime     => mapTac(attr, at.vs, resMapOffsetTime)
-      case at: AttrMapTacOffsetDateTime => mapTac(attr, at.vs, resMapOffsetDateTime)
-      case at: AttrMapTacZonedDateTime  => mapTac(attr, at.vs, resMapZonedDateTime)
-      case at: AttrMapTacUUID           => mapTac(attr, at.vs, resMapUUID)
-      case at: AttrMapTacURI            => mapTac(attr, at.vs, resMapURI)
-      case at: AttrMapTacByte           => mapTac(attr, at.vs, resMapByte)
-      case at: AttrMapTacShort          => mapTac(attr, at.vs, resMapShort)
-      case at: AttrMapTacChar           => mapTac(attr, at.vs, resMapChar)
+      case at: AttrMapManID             => mapMan(attr, at.keys, resMapId)
+      case at: AttrMapManString         => mapMan(attr, at.keys, resMapString)
+      case at: AttrMapManInt            => mapMan(attr, at.keys, resMapInt)
+      case at: AttrMapManLong           => mapMan(attr, at.keys, resMapLong)
+      case at: AttrMapManFloat          => mapMan(attr, at.keys, resMapFloat)
+      case at: AttrMapManDouble         => mapMan(attr, at.keys, resMapDouble)
+      case at: AttrMapManBoolean        => mapMan(attr, at.keys, resMapBoolean)
+      case at: AttrMapManBigInt         => mapMan(attr, at.keys, resMapBigInt)
+      case at: AttrMapManBigDecimal     => mapMan(attr, at.keys, resMapBigDecimal)
+      case at: AttrMapManDate           => mapMan(attr, at.keys, resMapDate)
+      case at: AttrMapManDuration       => mapMan(attr, at.keys, resMapDuration)
+      case at: AttrMapManInstant        => mapMan(attr, at.keys, resMapInstant)
+      case at: AttrMapManLocalDate      => mapMan(attr, at.keys, resMapLocalDate)
+      case at: AttrMapManLocalTime      => mapMan(attr, at.keys, resMapLocalTime)
+      case at: AttrMapManLocalDateTime  => mapMan(attr, at.keys, resMapLocalDateTime)
+      case at: AttrMapManOffsetTime     => mapMan(attr, at.keys, resMapOffsetTime)
+      case at: AttrMapManOffsetDateTime => mapMan(attr, at.keys, resMapOffsetDateTime)
+      case at: AttrMapManZonedDateTime  => mapMan(attr, at.keys, resMapZonedDateTime)
+      case at: AttrMapManUUID           => mapMan(attr, at.keys, resMapUUID)
+      case at: AttrMapManURI            => mapMan(attr, at.keys, resMapURI)
+      case at: AttrMapManByte           => mapMan(attr, at.keys, resMapByte)
+      case at: AttrMapManShort          => mapMan(attr, at.keys, resMapShort)
+      case at: AttrMapManChar           => mapMan(attr, at.keys, resMapChar)
     }
   }
 
   override protected def resolveAttrMapOpt(attr: AttrMapOpt): Unit = {
     aritiesAttr()
     attr match {
-      case at: AttrMapOptID             => mapOpt(at, at.vs, resOptMapId, resMapId)
-      case at: AttrMapOptString         => mapOpt(at, at.vs, resOptMapString, resMapString)
-      case at: AttrMapOptInt            => mapOpt(at, at.vs, resOptMapInt, resMapInt)
-      case at: AttrMapOptLong           => mapOpt(at, at.vs, resOptMapLong, resMapLong)
-      case at: AttrMapOptFloat          => mapOpt(at, at.vs, resOptMapFloat, resMapFloat)
-      case at: AttrMapOptDouble         => mapOpt(at, at.vs, resOptMapDouble, resMapDouble)
-      case at: AttrMapOptBoolean        => mapOpt(at, at.vs, resOptMapBoolean, resMapBoolean)
-      case at: AttrMapOptBigInt         => mapOpt(at, at.vs, resOptMapBigInt, resMapBigInt)
-      case at: AttrMapOptBigDecimal     => mapOpt(at, at.vs, resOptMapBigDecimal, resMapBigDecimal)
-      case at: AttrMapOptDate           => mapOpt(at, at.vs, resOptMapDate, resMapDate)
-      case at: AttrMapOptDuration       => mapOpt(at, at.vs, resOptMapDuration, resMapDuration)
-      case at: AttrMapOptInstant        => mapOpt(at, at.vs, resOptMapInstant, resMapInstant)
-      case at: AttrMapOptLocalDate      => mapOpt(at, at.vs, resOptMapLocalDate, resMapLocalDate)
-      case at: AttrMapOptLocalTime      => mapOpt(at, at.vs, resOptMapLocalTime, resMapLocalTime)
-      case at: AttrMapOptLocalDateTime  => mapOpt(at, at.vs, resOptMapLocalDateTime, resMapLocalDateTime)
-      case at: AttrMapOptOffsetTime     => mapOpt(at, at.vs, resOptMapOffsetTime, resMapOffsetTime)
-      case at: AttrMapOptOffsetDateTime => mapOpt(at, at.vs, resOptMapOffsetDateTime, resMapOffsetDateTime)
-      case at: AttrMapOptZonedDateTime  => mapOpt(at, at.vs, resOptMapZonedDateTime, resMapZonedDateTime)
-      case at: AttrMapOptUUID           => mapOpt(at, at.vs, resOptMapUUID, resMapUUID)
-      case at: AttrMapOptURI            => mapOpt(at, at.vs, resOptMapURI, resMapURI)
-      case at: AttrMapOptByte           => mapOpt(at, at.vs, resOptMapByte, resMapByte)
-      case at: AttrMapOptShort          => mapOpt(at, at.vs, resOptMapShort, resMapShort)
-      case at: AttrMapOptChar           => mapOpt(at, at.vs, resOptMapChar, resMapChar)
+      case at: AttrMapOptID             => mapOpt(at, at.keys, resOptMapId, resMapId)
+      case at: AttrMapOptString         => mapOpt(at, at.keys, resOptMapString, resMapString)
+      case at: AttrMapOptInt            => mapOpt(at, at.keys, resOptMapInt, resMapInt)
+      case at: AttrMapOptLong           => mapOpt(at, at.keys, resOptMapLong, resMapLong)
+      case at: AttrMapOptFloat          => mapOpt(at, at.keys, resOptMapFloat, resMapFloat)
+      case at: AttrMapOptDouble         => mapOpt(at, at.keys, resOptMapDouble, resMapDouble)
+      case at: AttrMapOptBoolean        => mapOpt(at, at.keys, resOptMapBoolean, resMapBoolean)
+      case at: AttrMapOptBigInt         => mapOpt(at, at.keys, resOptMapBigInt, resMapBigInt)
+      case at: AttrMapOptBigDecimal     => mapOpt(at, at.keys, resOptMapBigDecimal, resMapBigDecimal)
+      case at: AttrMapOptDate           => mapOpt(at, at.keys, resOptMapDate, resMapDate)
+      case at: AttrMapOptDuration       => mapOpt(at, at.keys, resOptMapDuration, resMapDuration)
+      case at: AttrMapOptInstant        => mapOpt(at, at.keys, resOptMapInstant, resMapInstant)
+      case at: AttrMapOptLocalDate      => mapOpt(at, at.keys, resOptMapLocalDate, resMapLocalDate)
+      case at: AttrMapOptLocalTime      => mapOpt(at, at.keys, resOptMapLocalTime, resMapLocalTime)
+      case at: AttrMapOptLocalDateTime  => mapOpt(at, at.keys, resOptMapLocalDateTime, resMapLocalDateTime)
+      case at: AttrMapOptOffsetTime     => mapOpt(at, at.keys, resOptMapOffsetTime, resMapOffsetTime)
+      case at: AttrMapOptOffsetDateTime => mapOpt(at, at.keys, resOptMapOffsetDateTime, resMapOffsetDateTime)
+      case at: AttrMapOptZonedDateTime  => mapOpt(at, at.keys, resOptMapZonedDateTime, resMapZonedDateTime)
+      case at: AttrMapOptUUID           => mapOpt(at, at.keys, resOptMapUUID, resMapUUID)
+      case at: AttrMapOptURI            => mapOpt(at, at.keys, resOptMapURI, resMapURI)
+      case at: AttrMapOptByte           => mapOpt(at, at.keys, resOptMapByte, resMapByte)
+      case at: AttrMapOptShort          => mapOpt(at, at.keys, resOptMapShort, resMapShort)
+      case at: AttrMapOptChar           => mapOpt(at, at.keys, resOptMapChar, resMapChar)
+    }
+  }
+
+  override protected def resolveAttrMapTac(attr: AttrMapTac): Unit = {
+    attr match {
+      case at: AttrMapTacID             => mapTac(attr, at.keys, at.values, resMapId)
+      case at: AttrMapTacString         => mapTac(attr, at.keys, at.values, resMapString)
+      case at: AttrMapTacInt            => mapTac(attr, at.keys, at.values, resMapInt)
+      case at: AttrMapTacLong           => mapTac(attr, at.keys, at.values, resMapLong)
+      case at: AttrMapTacFloat          => mapTac(attr, at.keys, at.values, resMapFloat)
+      case at: AttrMapTacDouble         => mapTac(attr, at.keys, at.values, resMapDouble)
+      case at: AttrMapTacBoolean        => mapTac(attr, at.keys, at.values, resMapBoolean)
+      case at: AttrMapTacBigInt         => mapTac(attr, at.keys, at.values, resMapBigInt)
+      case at: AttrMapTacBigDecimal     => mapTac(attr, at.keys, at.values, resMapBigDecimal)
+      case at: AttrMapTacDate           => mapTac(attr, at.keys, at.values, resMapDate)
+      case at: AttrMapTacDuration       => mapTac(attr, at.keys, at.values, resMapDuration)
+      case at: AttrMapTacInstant        => mapTac(attr, at.keys, at.values, resMapInstant)
+      case at: AttrMapTacLocalDate      => mapTac(attr, at.keys, at.values, resMapLocalDate)
+      case at: AttrMapTacLocalTime      => mapTac(attr, at.keys, at.values, resMapLocalTime)
+      case at: AttrMapTacLocalDateTime  => mapTac(attr, at.keys, at.values, resMapLocalDateTime)
+      case at: AttrMapTacOffsetTime     => mapTac(attr, at.keys, at.values, resMapOffsetTime)
+      case at: AttrMapTacOffsetDateTime => mapTac(attr, at.keys, at.values, resMapOffsetDateTime)
+      case at: AttrMapTacZonedDateTime  => mapTac(attr, at.keys, at.values, resMapZonedDateTime)
+      case at: AttrMapTacUUID           => mapTac(attr, at.keys, at.values, resMapUUID)
+      case at: AttrMapTacURI            => mapTac(attr, at.keys, at.values, resMapURI)
+      case at: AttrMapTacByte           => mapTac(attr, at.keys, at.values, resMapByte)
+      case at: AttrMapTacShort          => mapTac(attr, at.keys, at.values, resMapShort)
+      case at: AttrMapTacChar           => mapTac(attr, at.keys, at.values, resMapChar)
     }
   }
 
 
   protected def mapMan[T](
-    attr: Attr, map: Map[String, T], resMap: ResMap[T]
+    attr: Attr, keys: Seq[String], resMap: ResMap[T]
   ): Unit = {
     val col = getCol(attr: Attr)
     select += col
@@ -103,7 +103,7 @@ trait ResolveExprMap extends ResolveExpr { self: SqlQueryBase with LambdasMap =>
     addCast(resMap.sqlJson2map)
     attr.op match {
       case V       => ()
-      case Has     => key2value(col, map.head._1, resMap)
+      case Has     => key2value(col, keys.head, resMap)
       case NoValue => noApplyNothing(attr)
       case Eq      => noCollectionMatching(attr)
       case other   => unexpectedOp(other)
@@ -111,32 +111,29 @@ trait ResolveExprMap extends ResolveExpr { self: SqlQueryBase with LambdasMap =>
   }
 
   protected def mapOpt[T](
-    attr: Attr,
-    optMap: Option[Map[String, T]],
-    resMapOpt: ResMapOpt[T],
-    resMap: ResMap[T]
+    attr: Attr, keys: Seq[String], resMapOpt: ResMapOpt[T], resMap: ResMap[T]
   ): Unit = {
     val col = getCol(attr: Attr)
     select += col
     addCast(resMapOpt.sql2optMap)
     attr.op match {
       case V     => ()
-      case Has   => key2optValue(col, optMap.get.head._1, resMap)
+      case Has   => key2optValue(col, keys.head, resMap)
       case Eq    => noCollectionMatching(attr)
       case other => unexpectedOp(other)
     }
   }
 
   protected def mapTac[T](
-    attr: Attr, map: Map[String, T], resMap: ResMap[T]
+    attr: Attr, keys: Seq[String], values: Seq[T], resMap: ResMap[T]
   ): Unit = {
     val col = getCol(attr: Attr)
     attr.op match {
       case V       => where += ((col, s"IS NOT NULL"))
-      case Eq      => mapContainsKeys(col, map)
-      case Neq     => mapContainsNoKeys(col, map)
-      case Has     => mapHasValues(col, map, resMap)
-      case HasNo   => mapHasNoValues(col, map, resMap)
+      case Eq      => mapContainsKeys(col, keys)
+      case Neq     => mapContainsNoKeys(col, keys)
+      case Has     => mapHasValues(col, values, resMap)
+      case HasNo   => mapHasNoValues(col, values, resMap)
       case NoValue => mapNoValue(col)
       case other   => unexpectedOp(other)
     }
@@ -171,10 +168,9 @@ trait ResolveExprMap extends ResolveExpr { self: SqlQueryBase with LambdasMap =>
 
   // tacit ---------------------------------------------------------------------
 
-  protected def mapContainsKeys[T](
-    col: String, map: Map[String, T]
+  protected def mapContainsKeys(
+    col: String, keys: Seq[String]
   ): Unit = {
-    val keys = map.keys
     keys.size match {
       case 0 => where += (("FALSE", ""))
       case 1 => where += (("", s"""($col)."${keys.head}" IS NOT NULL"""))
@@ -184,10 +180,9 @@ trait ResolveExprMap extends ResolveExpr { self: SqlQueryBase with LambdasMap =>
     }
   }
 
-  protected def mapContainsNoKeys[T](
-    col: String, map: Map[String, T]
+  protected def mapContainsNoKeys(
+    col: String, keys: Seq[String]
   ): Unit = {
-    val keys = map.keys
     keys.size match {
       case 0 => () // get all
       case 1 => where += (("", s"""($col)."${keys.head}" IS NULL"""))
@@ -198,11 +193,11 @@ trait ResolveExprMap extends ResolveExpr { self: SqlQueryBase with LambdasMap =>
   }
 
   protected def mapHasValues[T](
-    col: String, map: Map[String, T], resMap: ResMap[T]
+    col: String, values: Seq[T], resMap: ResMap[T]
   ): Unit = {
-    if (map.nonEmpty) {
-      val values = map.values.map(resMap.one2json)
-      where += (("", s"""REGEXP_LIKE($col, '(${regex(resMap.tpe, values)})')"""))
+    if (values.nonEmpty) {
+      val values1 = values.map(resMap.one2json)
+      where += (("", s"""REGEXP_LIKE($col, '(${regex(resMap.tpe, values1)})')"""))
     } else {
       // Get none
       where += (("FALSE", ""))
@@ -210,11 +205,11 @@ trait ResolveExprMap extends ResolveExpr { self: SqlQueryBase with LambdasMap =>
   }
 
   protected def mapHasNoValues[T](
-    col: String, map: Map[String, T], resMap: ResMap[T]
+    col: String, values: Seq[T], resMap: ResMap[T]
   ): Unit = {
-    if (map.nonEmpty) {
-      val values = map.values.map(resMap.one2json)
-      where += (("", s"""NOT(REGEXP_LIKE($col, '(${regex(resMap.tpe, values)})'))"""))
+    if (values.nonEmpty) {
+      val values1 = values.map(resMap.one2json)
+      where += (("", s"""NOT(REGEXP_LIKE($col, '(${regex(resMap.tpe, values1)})'))"""))
     } else {
       // Get all
       ()

@@ -175,10 +175,36 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |    es.init :+ last
        |  }
        |
+       |  protected def addMapKs(es: List[Element], op: Op, ks: Seq[String]): List[Element] = {
+       |    val last = es.last match {
+       |      case a: AttrMapMan => a match {
+       |        ${addMapKs("Man")}
+       |      }
+       |      case a: AttrMapOpt => a match {
+       |        ${addMapKs("Opt")}
+       |      }
+       |      case a: AttrMapTac => a match {
+       |        ${addMapKs("Tac")}
+       |      }
+       |      case a             => unexpected(a)
+       |    }
+       |    es.init :+ last
+       |  }
+       |
+       |  protected def addMapVs[T](es: List[Element], op: Op, vs: Seq[T]): List[Element] = {
+       |    val last = es.last match {
+       |      case a: AttrMapTac => a match {
+       |        $addMapVs
+       |      }
+       |      case a             => unexpected(a)
+       |    }
+       |    es.init :+ last
+       |  }
+       |
        |  protected def addMapOpt[T](es: List[Element], op: Op, vs: Option[Map[String, T]]): List[Element] = {
        |    val last = es.last match {
        |      case a: AttrMapOpt => a match {
-       |        $addOptMap
+       |        $addMapOpt
        |      }
        |      case a             => unexpected(a)
        |    }
@@ -237,7 +263,7 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |  private def resolvePath(es: List[Element], path: List[String]): List[String] = {
        |    es match {
        |      case e :: tail => e match {
-       |        case r: Ref =>
+       |        case r: Ref  =>
        |          val p = if (path.isEmpty) List(r.ns, r.refAttr, r.refNs) else List(r.refAttr, r.refNs)
        |          resolvePath(tail, path ++ p)
        |        case a: Attr => resolvePath(tail, if (path.isEmpty) List(a.ns) else path)
@@ -514,41 +540,41 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
   }
 
   private def addMap(mode: String): String = {
-    baseTypesWithDummyValues.map { case (baseTpe, dummyValue) =>
+    baseTypes.map { baseTpe =>
       val tpe = if (baseTpe == "ID") "Long" else baseTpe
-//      if (mode == "Man") {
-//        s"""case a: AttrMap$mode$baseTpe =>
-//           |          val map     = vs.asInstanceOf[Map[String, $tpe]]
-//           |          val errors1 = if (map.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-//           |            val validator = a.validator.get
-//           |            map.values.toSeq.flatMap(validator.validate)
-//           |          }
-//           |          a.copy(op = op, vs = map, errors = errors1)""".stripMargin
-//      } else {
-//      }
-        s"""case a: AttrMap$mode$baseTpe =>
-           |          val map     = vs.asInstanceOf[Map[String, $tpe]]
-           |          val errors1 = if (map.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-           |            val validator = a.validator.get
-           |            map.values.toSeq.flatMap(validator.validate)
-           |          }
-           |          if (map.size == 1 && map.head._2 == null.asInstanceOf[$tpe])
-           |            a.copy(op = op, vs = Map(map.head._1 -> $dummyValue), errors = errors1)
-           |          else
-           |            a.copy(op = op, vs = map, errors = errors1)""".stripMargin
+      s"""case a: AttrMap$mode$baseTpe =>
+         |          val newMap  = vs.asInstanceOf[Map[String, $tpe]]
+         |          val errors1 = if (newMap.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+         |            val validator = a.validator.get
+         |            newMap.values.toSeq.flatMap(validator.validate)
+         |          }
+         |          a.copy(op = op, map = newMap, errors = errors1)""".stripMargin
     }.mkString("\n\n        ")
   }
 
-  private def addOptMap: String = {
+  private def addMapKs(mode: String): String = {
+    baseTypesWithSpaces.map { case (baseTpe, space) =>
+      s"""case a: AttrMap$mode$baseTpe $space=> a.copy(op = op, keys = ks)""".stripMargin
+    }.mkString("\n        ")
+  }
+
+  private def addMapVs: String = {
+    baseTypesWithSpaces.map { case (baseTpe, space) =>
+      val tpe = if (baseTpe == "ID") "Long" else baseTpe
+      s"""case a: AttrMapTac$baseTpe $space=> a.copy(op = op, values = vs.asInstanceOf[Seq[$tpe]])""".stripMargin
+    }.mkString("\n        ")
+  }
+
+  private def addMapOpt: String = {
     baseTypes.map { baseTpe =>
       val tpe = if (baseTpe == "ID") "Long" else baseTpe
       s"""case a: AttrMapOpt$baseTpe =>
-         |          val map     = vs.asInstanceOf[Option[Map[String, $tpe]]]
-         |          val errors1 = if (map.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+         |          val newMap  = vs.asInstanceOf[Option[Map[String, $tpe]]]
+         |          val errors1 = if (newMap.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
          |            val validator = a.validator.get
-         |            map.get.values.toSeq.flatMap(validator.validate)
+         |            newMap.get.values.toSeq.flatMap(validator.validate)
          |          }
-         |          a.copy(op = op, vs = map, errors = errors1)""".stripMargin
+         |          a.copy(op = op, map = newMap, errors = errors1)""".stripMargin
     }.mkString("\n\n        ")
   }
 
@@ -559,8 +585,12 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
   }
 
   private def liftFilterAttr(card: String): String = {
-    baseTypesWithSpaces.map { case (baseTpe, space) =>
-      s"case a: Attr${card}Man$baseTpe $space=> Attr${card}Tac$baseTpe(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.refNs, a.sort, a.coord)"
+    baseTypesWithSpaces.map {
+      case (baseTpe, space) if card == "Map" =>
+        s"case a: Attr${card}Man$baseTpe $space=> Attr${card}Tac$baseTpe(a.ns, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.refNs, a.sort, a.coord)"
+
+      case (baseTpe, space) =>
+        s"case a: Attr${card}Man$baseTpe $space=> Attr${card}Tac$baseTpe(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.refNs, a.sort, a.coord)"
     }.mkString("\n              ")
   }
   private def addFilterAttr(card: String, mode: String): String = {

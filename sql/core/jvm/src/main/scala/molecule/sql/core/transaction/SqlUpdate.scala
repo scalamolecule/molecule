@@ -294,7 +294,6 @@ trait SqlUpdate
       if (!isUpsert) {
         addToUpdateColsNotNull(attr)
       }
-      val nsAttr        = s"$ns.$attr"
       val scalaBaseType = exts.head
       placeHolders = placeHolders :+ s"$attr = addPairs_$scalaBaseType($attr, ?)"
       val colSetter = (ps: PS, _: IdsMap, _: RowIndex) => {
@@ -310,10 +309,10 @@ trait SqlUpdate
     ns: String,
     attr: String,
     optRefNs: Option[String],
-    map: Map[String, T],
+    keys: Seq[String],
     exts: List[String],
   ): Unit = {
-    if (map.nonEmpty) {
+    if (keys.nonEmpty) {
       cols += attr
       if (!isUpsert) {
         addToUpdateColsNotNull(attr)
@@ -322,7 +321,7 @@ trait SqlUpdate
       placeHolders = placeHolders :+ s"$attr = removePairs_$scalaBaseType($attr, ?)"
       val colSetter = (ps: PS, _: IdsMap, _: RowIndex) => {
         val conn = ps.getConnection
-        ps.setArray(curParamIndex, conn.createArrayOf("String", map.keys.toArray))
+        ps.setArray(curParamIndex, conn.createArrayOf("String", keys.toArray))
         curParamIndex += 1
       }
       addColSetter(curRefPath, colSetter)

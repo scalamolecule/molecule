@@ -360,28 +360,28 @@ trait SpiHelpers extends ModelUtils {
   def getRefIds(refIdsAnyCardinality: List[Any]): List[Long] = {
     // Start with dummy id (not used) to mark first namespace
     refIdsAnyCardinality.headOption.fold(List(0L)) {
-      case a: S                                                                                                                                 => 0L +: List(a).map(_.toLong)
-      case (a: S, b: S)                                                                                                                         => 0L +: List(a, b).map(_.toLong)
-      case (a: S, b: S, c: S)                                                                                                                   => 0L +: List(a, b, c).map(_.toLong)
-      case (a: S, b: S, c: S, d: S)                                                                                                             => 0L +: List(a, b, c, d).map(_.toLong)
-      case (a: S, b: S, c: S, d: S, e: S)                                                                                                       => 0L +: List(a, b, c, d, e).map(_.toLong)
-      case (a: S, b: S, c: S, d: S, e: S, f: S)                                                                                                 => 0L +: List(a, b, c, d, e, f).map(_.toLong)
-      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S)                                                                                           => 0L +: List(a, b, c, d, e, f, g).map(_.toLong)
-      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S)                                                                                     => 0L +: List(a, b, c, d, e, f, g, h).map(_.toLong)
-      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S)                                                                               => 0L +: List(a, b, c, d, e, f, g, h, i).map(_.toLong)
-      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S)                                                                         => 0L +: List(a, b, c, d, e, f, g, h, i, j).map(_.toLong)
-      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S)                                                                   => 0L +: List(a, b, c, d, e, f, g, h, i, j, k).map(_.toLong)
-      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S, l: S)                                                             => 0L +: List(a, b, c, d, e, f, g, h, i, j, k, l).map(_.toLong)
-      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S, l: S, m: S)                                                       => 0L +: List(a, b, c, d, e, f, g, h, i, j, k, l, m).map(_.toLong)
-      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S, l: S, m: S, n: S)                                                 => 0L +: List(a, b, c, d, e, f, g, h, i, j, k, l, m, n).map(_.toLong)
-      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S, l: S, m: S, n: S, o: S)                                           => 0L +: List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o).map(_.toLong)
-      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S, l: S, m: S, n: S, o: S, p: S)                                     => 0L +: List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p).map(_.toLong)
-      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S, l: S, m: S, n: S, o: S, p: S, q: S)                               => 0L +: List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q).map(_.toLong)
-      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S, l: S, m: S, n: S, o: S, p: S, q: S, r: S)                         => 0L +: List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r).map(_.toLong)
-      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S, l: S, m: S, n: S, o: S, p: S, q: S, r: S, s: S)                   => 0L +: List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s).map(_.toLong)
-      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S, l: S, m: S, n: S, o: S, p: S, q: S, r: S, s: S, t: S)             => 0L +: List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t).map(_.toLong)
-      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S, l: S, m: S, n: S, o: S, p: S, q: S, r: S, s: S, t: S, u: S)       => 0L +: List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u).map(_.toLong)
-      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S, l: S, m: S, n: S, o: S, p: S, q: S, r: S, s: S, t: S, u: S, v: S) => 0L +: List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v).map(_.toLong)
+      case a: S                                                                                                                                 => 0L +: List(a)
+      case (a: S, b: S)                                                                                                                         => 0L +: List(a, b)
+      case (a: S, b: S, c: S)                                                                                                                   => 0L +: List(a, b, c)
+      case (a: S, b: S, c: S, d: S)                                                                                                             => 0L +: List(a, b, c, d)
+      case (a: S, b: S, c: S, d: S, e: S)                                                                                                       => 0L +: List(a, b, c, d, e)
+      case (a: S, b: S, c: S, d: S, e: S, f: S)                                                                                                 => 0L +: List(a, b, c, d, e, f)
+      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S)                                                                                           => 0L +: List(a, b, c, d, e, f, g)
+      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S)                                                                                     => 0L +: List(a, b, c, d, e, f, g, h)
+      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S)                                                                               => 0L +: List(a, b, c, d, e, f, g, h, i)
+      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S)                                                                         => 0L +: List(a, b, c, d, e, f, g, h, i, j)
+      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S)                                                                   => 0L +: List(a, b, c, d, e, f, g, h, i, j, k)
+      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S, l: S)                                                             => 0L +: List(a, b, c, d, e, f, g, h, i, j, k, l)
+      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S, l: S, m: S)                                                       => 0L +: List(a, b, c, d, e, f, g, h, i, j, k, l, m)
+      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S, l: S, m: S, n: S)                                                 => 0L +: List(a, b, c, d, e, f, g, h, i, j, k, l, m, n)
+      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S, l: S, m: S, n: S, o: S)                                           => 0L +: List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o)
+      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S, l: S, m: S, n: S, o: S, p: S)                                     => 0L +: List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p)
+      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S, l: S, m: S, n: S, o: S, p: S, q: S)                               => 0L +: List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q)
+      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S, l: S, m: S, n: S, o: S, p: S, q: S, r: S)                         => 0L +: List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r)
+      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S, l: S, m: S, n: S, o: S, p: S, q: S, r: S, s: S)                   => 0L +: List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s)
+      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S, l: S, m: S, n: S, o: S, p: S, q: S, r: S, s: S, t: S)             => 0L +: List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t)
+      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S, l: S, m: S, n: S, o: S, p: S, q: S, r: S, s: S, t: S, u: S)       => 0L +: List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u)
+      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S, l: S, m: S, n: S, o: S, p: S, q: S, r: S, s: S, t: S, u: S, v: S) => 0L +: List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v)
     }
   }
 
@@ -390,9 +390,6 @@ trait SpiHelpers extends ModelUtils {
     elements: List[Element],
     isUpsert: Boolean = false
   ) = {
-    //    if (isUpsert)
-    //      throw ModelError("Can't upsert referenced attributes. Please update instead.")
-
     val (refIdsModel, updateModels) = prepareMultipleUpdates(elements, isUpsert)
     val idQuery                     = updateModels.size match {
       case 1  => Query[L](refIdsModel)

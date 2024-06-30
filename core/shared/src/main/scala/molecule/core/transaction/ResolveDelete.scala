@@ -28,7 +28,7 @@ class ResolveDelete { self: DeleteOps =>
             resolve(tail, topLevel)
 
           case _ => throw ModelError(
-            "Can only filter delete by values applied to tacit card-one attributes. Found:\n" + a
+            s"Can only filter delete by values applied to tacit card-one attributes (${a.name})"
           )
         }
 

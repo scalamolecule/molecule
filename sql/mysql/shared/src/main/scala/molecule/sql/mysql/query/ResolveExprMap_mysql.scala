@@ -34,10 +34,9 @@ trait ResolveExprMap_mysql
 
   // tacit ---------------------------------------------------------------------
 
-  override protected def mapContainsKeys[T](
-    col: String, map: Map[String, T]
+  override protected def mapContainsKeys(
+    col: String, keys: Seq[String]
   ): Unit = {
-    val keys = map.keys
     keys.size match {
       case 0 => where += (("FALSE", ""))
       case 1 => where += ((s"""JSON_VALUE($col, '$$.${keys.head}')""", s"IS NOT NULL"))
@@ -47,10 +46,9 @@ trait ResolveExprMap_mysql
     }
   }
 
-  override protected def mapContainsNoKeys[T](
-    col: String, map: Map[String, T]
+  override protected def mapContainsNoKeys(
+    col: String, keys: Seq[String]
   ): Unit = {
-    val keys = map.keys
     keys.size match {
       case 0 => () // get all
       case 1 => where += (("", s"JSON_VALUE($col, '$$.${keys.head}') IS NULL"))
@@ -61,11 +59,11 @@ trait ResolveExprMap_mysql
   }
 
   override protected def mapHasValues[T](
-    col: String, map: Map[String, T], resMap: ResMap[T]
+    col: String, values: Seq[T], resMap: ResMap[T]
   ): Unit = {
-    if (map.nonEmpty) {
-      val values = map.values.map(resMap.one2json)
-      where += (("", s"""$col REGEXP '${regex(resMap.tpe, values)}' = 1"""))
+    if (values.nonEmpty) {
+      val values1 = values.map(resMap.one2json)
+      where += (("", s"""$col REGEXP '${regex(resMap.tpe, values1)}' = 1"""))
     } else {
       // Get none
       where += (("FALSE", ""))
@@ -73,11 +71,11 @@ trait ResolveExprMap_mysql
   }
 
   override protected def mapHasNoValues[T](
-    col: String, map: Map[String, T], resMap: ResMap[T]
+    col: String, values: Seq[T], resMap: ResMap[T]
   ): Unit = {
-    if (map.nonEmpty) {
-      val values = map.values.map(resMap.one2json)
-      where += (("", s"""$col REGEXP '${regex(resMap.tpe, values)}' = 0"""))
+    if (values.nonEmpty) {
+      val values1 = values.map(resMap.one2json)
+      where += (("", s"""$col REGEXP '${regex(resMap.tpe, values1)}' = 0"""))
     } else {
       // Get all
       ()

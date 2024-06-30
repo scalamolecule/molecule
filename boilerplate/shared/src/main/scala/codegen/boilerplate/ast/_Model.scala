@@ -50,16 +50,27 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
       val baseTpe   = if (baseTpe0 == "ID") "Long" else baseTpe0
       val attrType  = s"Attr$card$mode$baseTpe0"
       val vs        = (card, mode, baseTpe) match {
-        case ("One", "Opt", _)      => s"Option[Seq[$baseTpe]] = None"
-        case ("One", _, _)          => s"Seq[$baseTpe] = Nil"
-        case ("Set", "Opt", _)      => s"Option[Set[$baseTpe]] = None"
-        case ("Set", _, _)          => s"Set[$baseTpe] = Set.empty[$baseTpe]"
-        case ("Seq", "Opt", "Byte") => s"Option[Array[Byte]] = None"
-        case ("Seq", _, "Byte")     => s"Array[Byte] = Array.empty[Byte]"
-        case ("Seq", "Opt", _)      => s"Option[Seq[$baseTpe]] = None"
-        case ("Seq", _, _)          => s"Seq[$baseTpe] = Nil"
-        case ("Map", "Opt", _)      => s"Option[Map[String, $baseTpe]] = None"
-        case ("Map", _, _)          => s"Map[String, $baseTpe] = Map.empty[String, $baseTpe]"
+        case ("One", "Opt", _)      => s"vs: Option[Seq[$baseTpe]] = None"
+        case ("One", _, _)          => s"vs: Seq[$baseTpe] = Nil"
+        case ("Set", "Opt", _)      => s"vs: Option[Set[$baseTpe]] = None"
+        case ("Set", _, _)          => s"vs: Set[$baseTpe] = Set.empty[$baseTpe]"
+        case ("Seq", "Opt", "Byte") => s"vs: Option[Array[Byte]] = None"
+        case ("Seq", _, "Byte")     => s"vs: Array[Byte] = Array.empty[Byte]"
+        case ("Seq", "Opt", _)      => s"vs: Option[Seq[$baseTpe]] = None"
+        case ("Seq", _, _)          => s"vs: Seq[$baseTpe] = Nil"
+
+        case ("Map", "Man", _)      =>
+          s"""map: Map[String, $baseTpe] = Map.empty[String, $baseTpe],
+             |    override val keys: Seq[String] = Nil""".stripMargin
+
+        case ("Map", "Opt", _)          =>
+          s"""map: Option[Map[String, $baseTpe]] = None,
+             |    override val keys: Seq[String] = Nil""".stripMargin
+
+        case ("Map", "Tac", _)      =>
+          s"""map: Map[String, $baseTpe] = Map.empty[String, $baseTpe],
+             |    override val keys: Seq[String] = Nil,
+             |    values: Seq[$baseTpe] = Nil""".stripMargin
       }
       val format_?  = !List("Int", "Double", "Boolean").contains(baseTpe)
       val format    = baseTpe match {
@@ -157,22 +168,34 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
                  |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
         }
         case "Map"                      => mode match {
+          case "Man"     =>
+            if (format_?)
+              s"""def format(v: $baseTpe): String = if ($nullCheck) "null" else $format
+                 |      def pairs: String = map.map { case (k, v) => s\"\"\"("$$k", $${format(v)})\"\"\" }.mkString("Map(", ", ", ")")
+                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$pairs, $$ks, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
+            else
+              s"""def pairs: String = map.map { case (k, v) => s\"\"\"("$$k", $$v)\"\"\" }.mkString("Map(", ", ", ")")
+                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$pairs, $$ks, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
+
           case "Opt" =>
             if (format_?)
               s"""def format(v: $baseTpe): String = if ($nullCheck) "null" else $format
-                 |      def vss: String = vs.fold("None")(_.map { case (k, v) => s\"\"\"("$$k", $${format(v)})\"\"\" }.mkString("Some(Map(", ", ", "))"))
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
+                 |      def pairs: String = map.fold("None")(_.map { case (k, v) => s\"\"\"("$$k", $${format(v)})\"\"\" }.mkString("Some(Map(", ", ", "))"))
+                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$pairs, $$ks, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
             else
-              s"""def vss: String = vs.fold("None")(_.map { case (k, v) => s\"\"\"("$$k", $$v)\"\"\" }.mkString("Some(Map(", ", ", "))"))
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
-          case _     =>
+              s"""def pairs: String = map.fold("None")(_.map { case (k, v) => s\"\"\"("$$k", $$v)\"\"\" }.mkString("Some(Map(", ", ", "))"))
+                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$pairs, $$ks, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
+
+          case "Tac" =>
             if (format_?)
               s"""def format(v: $baseTpe): String = if ($nullCheck) "null" else $format
-                 |      def vss: String = vs.map { case (k, v) => s\"\"\"("$$k", $${format(v)})\"\"\" }.mkString("Map(", ", ", ")")
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
+                 |      def pairs: String = map.map { case (k, v) => s\"\"\"("$$k", $${format(v)})\"\"\" }.mkString("Map(", ", ", ")")
+                 |      def vs: String = if (values.isEmpty) "Nil" else values.mkString("Seq(", ", ", ")")
+                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$pairs, $$ks, $$vs, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
             else
-              s"""def vss: String = vs.map { case (k, v) => s\"\"\"("$$k", $$v)\"\"\" }.mkString("Map(", ", ", ")")
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
+              s"""def pairs: String = map.map { case (k, v) => s\"\"\"("$$k", $$v)\"\"\" }.mkString("Map(", ", ", ")")
+                 |      def vs: String = if (values.isEmpty) "Nil" else values.mkString("Seq(", ", ", ")")
+                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$pairs, $$ks, $$vs, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
         }
       }
 
@@ -181,7 +204,7 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
          |    override val ns: String,
          |    override val attr: String,
          |    override val op: Op = V,
-         |    vs: $vs,
+         |    $vs,
          |    override val filterAttr: Option[(Int, List[String], Attr)] = None,
          |    override val validator: Option[Validate$baseTpe0] = None,
          |    override val valueAttrs: Seq[String] = Nil,

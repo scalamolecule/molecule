@@ -135,7 +135,7 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
     // Generate Molecule boilerplate code for tests with `sbt clean compile -Dmolecule=true`
     moleculePluginActive := sys.props.get("molecule").contains("true"),
     //    moleculeMakeJars := !sys.props.get("moleculeJars").contains("false"), // default: true
-    //    moleculeMakeJars := false, // default: true
+//    moleculeMakeJars := false, // default: true
 
     // Multiple directories with data models
     moleculeDataModelPaths := Seq(
@@ -176,7 +176,7 @@ lazy val datalogCore = crossProject(JSPlatform, JVMPlatform)
   .settings(compilerArgs)
   .settings(testFrameworks := testingFrameworks)
   .jvmSettings(
-    libraryDependencies += "com.datomic" % "peer" % "1.0.7075"
+    libraryDependencies += "com.datomic" % "peer" % "1.0.7075" // Requires Java 11
   )
   .jsSettings(jsEnvironment)
   .dependsOn(coreTests % "compile->compile;test->test")

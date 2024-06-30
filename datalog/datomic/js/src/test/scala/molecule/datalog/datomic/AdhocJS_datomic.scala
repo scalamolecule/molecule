@@ -28,6 +28,7 @@ object AdhocJS_datomic extends TestSuite_datomic {
 
         // To add values to the attribute if not already asserted, use `upsert`
         _ <- Ns(id).intMap.add("a" -> int1).upsert.i.transact
+        _ <- Ns(id).intMap.remove("b").upsert.i.transact
         _ <- Ns.intMap.query.get.map(_.head ==> Map("a" -> int0))
 //
 //        // Adding existing pair to Map changes nothing

@@ -242,21 +242,21 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
     ns: String,
     attr: String,
     optRefNs: Option[String],
-    map: Map[String, T],
+    keys: Seq[String],
     exts: List[String],
   ): Unit = {
-    if (map.nonEmpty) {
+    if (keys.nonEmpty) {
       cols += attr
       if (!isUpsert) {
         addToUpdateColsNotNull(attr)
       }
-      val keys = map.keySet.map(k => s"'$$.${validKey(k)}'").mkString(", ")
+      val keys1 = keys.map(k => s"'$$.${validKey(k)}'").mkString(", ")
       placeHolders = placeHolders :+
         s"""$attr = (
-           |    CASE JSON_REMOVE($attr, $keys)
+           |    CASE JSON_REMOVE($attr, $keys1)
            |    WHEN '{}' THEN NULL
            |    WHEN NULL THEN $attr
-           |    ELSE JSON_REMOVE($attr, $keys)
+           |    ELSE JSON_REMOVE($attr, $keys1)
            |    END
            |  )""".stripMargin
       addColSetter(curRefPath, (_: PS, _: IdsMap, _: RowIndex) => ())

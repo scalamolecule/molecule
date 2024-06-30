@@ -109,7 +109,7 @@ trait UpdateOps extends Action2Data with BaseOps {
     ns: String,
     attr: String,
     optRefNs: Option[String],
-    map: Map[String, T],
+    keys: Seq[String],
     exts: List[String],
   ): Unit
 

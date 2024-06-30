@@ -594,7 +594,8 @@ trait Update_datomic
       }
       rowResolvers += { (row: jList[AnyRef]) =>
         // Retract old pairs with same keys as new pairs (if any)
-        retractPairs(map, row, a, k_)
+//        retractPairs(map, row, a, k_)
+        retractPairs(map.keySet.toSeq, row, a, k_)
 
         // Add new pairs
         ids.foreach { e =>
@@ -612,8 +613,7 @@ trait Update_datomic
     }
   }
 
-  private def retractPairs[T](map: Map[String, T], row: jList[AnyRef], a: Keyword, a_k: Keyword): Unit = {
-    val keys = map.keys.toList
+  private def retractPairs[T](keys: Seq[String], row: jList[AnyRef], a: Keyword, a_k: Keyword): Unit = {
     if (attrIndex < rowSize) {
       // Retract synthetic entities where key match new keys
       Peer.q(
@@ -647,15 +647,15 @@ trait Update_datomic
     ns: String,
     attr: String,
     optRefNs: Option[String],
-    map: Map[String, T],
+    keys: Seq[String],
     exts: List[String],
   ): Unit = {
-    if (map.nonEmpty) {
+    if (keys.nonEmpty) {
       val a  = kw(ns, attr)
       val k_ = kw(s"$ns.$attr", "k_")
       rowResolvers += { (row: jList[AnyRef]) =>
         // Retract old pairs with same keys as new pairs (if any)
-        retractPairs(map, row, a, k_)
+        retractPairs(keys, row, a, k_)
         attrIndex += 1
       }
     }

@@ -143,7 +143,7 @@ trait ModelUtils {
   private final def nonReservedAttr(a: Attr, proxy: ConnProxy): (String, String) = {
     val (nsIndex, attrIndex, _) = indexes(a.coord)
     (
-      if (proxy.reserved.get.reservedNss(nsIndex)) a.ns + "_" else a.ns,
+      if (proxy.reserved.get.reservedNss.apply(nsIndex)) a.ns + "_" else a.ns,
       if (proxy.reserved.get.reservedAttrs(attrIndex)) a.attr + "_" else a.attr
     )
   }

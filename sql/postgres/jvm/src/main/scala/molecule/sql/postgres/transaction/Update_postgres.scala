@@ -87,10 +87,10 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
     ns: String,
     attr: String,
     optRefNs: Option[String],
-    map: Map[String, T],
+    keys: Seq[String],
     exts: List[String],
   ): Unit = {
-    if (map.nonEmpty) {
+    if (keys.nonEmpty) {
       cols += attr
       if (!isUpsert) {
         addToUpdateColsNotNull(attr)
@@ -100,10 +100,9 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
            |    WHEN $attr::jsonb - ? = '{}' THEN NULL
            |    ELSE $attr::jsonb - ?
            |  END""".stripMargin
-      val keys: Array[AnyRef] = map.keys.toArray
       val colSetter           = (ps: PS, _: IdsMap, _: RowIndex) => {
         val conn  = ps.getConnection
-        val array = conn.createArrayOf("text", keys)
+        val array = conn.createArrayOf("text", keys.toArray)
         ps.setArray(curParamIndex, array)
         ps.setArray(curParamIndex + 1, array)
         curParamIndex += 2

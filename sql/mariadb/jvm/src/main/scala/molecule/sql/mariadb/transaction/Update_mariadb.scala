@@ -120,19 +120,19 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
     ns: String,
     attr: String,
     optRefNs: Option[String],
-    map: Map[String, T],
+    keys: Seq[String],
     exts: List[String],
   ): Unit = {
-    if (map.nonEmpty) {
+    if (keys.nonEmpty) {
       cols += attr
       if (!isUpsert) {
         addToUpdateColsNotNull(attr)
       }
-      val keys = map.keySet.map(k => s"'$$.$k'").mkString(", ")
+      val keys1 = keys.map(k => s"'$$.$k'").mkString(", ")
       placeHolders = placeHolders :+
-        s"""$ns.$attr = CASE JSON_REMOVE(IFNULL($ns.$attr, NULL), $keys)
+        s"""$ns.$attr = CASE JSON_REMOVE(IFNULL($ns.$attr, NULL), $keys1)
            |    WHEN JSON_OBJECT() THEN NULL
-           |    ELSE JSON_REMOVE($ns.$attr, $keys)
+           |    ELSE JSON_REMOVE($ns.$attr, $keys1)
            |  END""".stripMargin
       addColSetter(curRefPath, (ps: PS, _: IdsMap, _: RowIndex) => ())
     }
