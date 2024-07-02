@@ -20,14 +20,38 @@ object AdhocJS_sqlite extends TestSuite_sqlite {
     }
 
 
-    //    "refs" - refs { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Refs._
-    //      for {
-    //
-    //        _ <- Ns.i.Rs1.*(R1.i).insert(0, List(1)).transact
-    //
-    //      } yield ()
-    //    }
+//    "refs" - refs { implicit conn =>
+//      import molecule.coreTests.dataModels.core.dsl.Refs._
+//      for {
+//
+//        _ <- A.i(1).save.transact
+//        _ <- A.i(2).B.s("b").save.transact
+//        _ <- A.i(3).B.s("c").i(3).save.transact
+//
+//        //        // Current entity with A value and ref to B value
+//        //        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
+//        //          (3, 3)
+//        //        ))
+//        //
+//        //        // Filter by A value, update existing B values
+//        //        _ <- A.i_.B.i(4).update.transact
+//        //
+//        //        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
+//        //          (3, 4) // B value updated since there was a previous value
+//        //        ))
+//
+//        // Filter by A ids, upsert B values (insert if not already present)
+//        _ <- A.i_.B.i(5).upsert.i.transact
+//
+//        // Now three A entities with referenced B value
+//        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
+//          (1, 5), // relationship to B created and B value inserted
+//          (2, 5), // B value inserted
+//          (3, 5), // B value updated
+//        ))
+//
+//      } yield ()
+//    }
 
     //
     //    "validation" - validation { implicit conn =>
@@ -55,3 +79,10 @@ object AdhocJS_sqlite extends TestSuite_sqlite {
     //    }
   }
 }
+
+/*
+testOnly molecule.sql.sqlite.compliance.crud.delete.Delete_id
+testOnly molecule.sql.sqlite.compliance.crud.delete.Delete_filter
+testOnly molecule.sql.sqlite.compliance.crud.update.relation.one.One_Set_add
+testOnly molecule.sql.sqlite.compliance.pagination.cursor.noUnique.DirectionsOptional
+ */

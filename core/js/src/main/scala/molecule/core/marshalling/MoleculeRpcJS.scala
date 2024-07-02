@@ -76,10 +76,11 @@ case class MoleculeRpcJS(interface: String, port: Int)
 
   override def update(
     proxy: ConnProxy,
+    elementsRaw: List[Element],
     elements: List[Element],
     isUpsert: Boolean = false
   ): Future[Either[MoleculeError, TxReport]] = Future {
-    val argsSerialized = Pickle.intoBytes((proxy, elements, isUpsert)).typedArray()
+    val argsSerialized = Pickle.intoBytes((proxy, elementsRaw, elements, isUpsert)).typedArray()
     xmlHttpRequest("update", argsSerialized).map(resultSerialized =>
       Unpickle.apply[Either[MoleculeError, TxReport]].fromBytes(resultSerialized)
     )

@@ -12,10 +12,10 @@ import scala.util.Random
 trait ZioSpec_sqlite extends CoreTestZioSpecBase {
 
   override val platform = "js"
-  override val database = "Sqlite"
+  override val database = "SQlite"
 
   override def inMem[T](schema: Schema): ZLayer[T, Throwable, Conn] = {
-    val url   = s"jdbc:sqlite:mem:test_database_" + Random.nextInt()
+    val url   = "jdbc:sqlite::memory:"
     val proxy = JdbcProxy(
       url,
       schema.sqlSchema_sqlite,

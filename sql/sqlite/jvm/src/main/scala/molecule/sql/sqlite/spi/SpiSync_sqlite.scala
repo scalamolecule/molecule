@@ -46,12 +46,6 @@ trait SpiSync_sqlite extends SpiSyncBase {
     }.getUpdateData(update.elements)
   }
 
-  override def update_getData(conn: JdbcConn_JVM, elements: List[Element], isUpsert: Boolean): Data = {
-    new ResolveUpdate(conn.proxy, isUpsert) with Update_sqlite {
-      override lazy val sqlConn = conn.sqlConn
-    }.getUpdateData(elements)
-  }
-
   override def update_validate(update: Update)(implicit conn0: Conn): Map[String, Seq[String]] = {
     val conn            = conn0.asInstanceOf[JdbcConn_JVM]
     val query2resultSet = (query: String) => {
@@ -87,7 +81,7 @@ trait SpiSync_sqlite extends SpiSyncBase {
     }
   }
 
-  private def setFkConstraint(sqlConn: Connection, value: Int): Unit = {
+  protected def setFkConstraint(sqlConn: Connection, value: Int): Unit = {
     sqlConn.setAutoCommit(true)
     val a = sqlConn.prepareStatement(s"PRAGMA foreign_keys = $value")
     a.executeUpdate()
@@ -101,7 +95,9 @@ trait SpiSync_sqlite extends SpiSyncBase {
   }
 
 
-  override def delete_getExecutioner(conn: JdbcConn_JVM, delete: Delete): Option[() => List[Long]] = {
+  override def delete_getExecutioner(
+    conn: JdbcConn_JVM, delete: Delete
+  ): Option[() => List[Long]] = {
     new ResolveDelete with Delete_sqlite {
       override lazy val sqlConn = conn.sqlConn
     }.getDeleteExecutioner(delete.elements, conn.proxy.nsMap, "", "", "")

@@ -1,29 +1,40 @@
 package molecule.sql.core.transaction
 
-import java.sql.{Statement, PreparedStatement => PS}
+import java.sql.{DriverManager, Statement, PreparedStatement => PS}
 import java.util.UUID
 import molecule.base.ast._
 import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
+import molecule.core.action.{Delete, Update}
 import molecule.core.marshalling.{ConnProxy, JdbcProxy}
 import molecule.core.util.Executor._
 import molecule.core.util.ModelUtils
 import molecule.sql.core.facade.{JdbcConn_JVM, JdbcHandler_JVM}
+import molecule.sql.core.query.{Model2SqlQuery, SqlQueryBase}
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 
 trait SqlBase_JVM extends SqlDataType_JVM with ModelUtils with BaseHelpers {
 
-  // Override on instantiation
+  // Implement/set for each database ----------------------------
+
+  protected def getJdbcConn(proxy: ConnProxy): Future[JdbcConn_JVM] = ???
+
   lazy val sqlConn: java.sql.Connection = ???
 
-  def transactionStmt(stmt: String) = {
-    sqlConn.prepareStatement(
-      stmt,
-      Statement.RETURN_GENERATED_KEYS
-    )
-  }
+  def getModel2SqlQuery[Tpl](
+    elements: List[Element]
+  ): Model2SqlQuery[Tpl] with SqlQueryBase = ???
+
+  def update_getData(conn: JdbcConn_JVM, update: Update): Data = ???
+
+  def delete_getExecutioner(
+    conn: JdbcConn_JVM, delete: Delete
+  ): Option[() => List[Long]] = ???
+
+
+  // Prepared statement buildup -------------------------------
 
   lazy protected val defaultValues = "(id) VALUES (DEFAULT)"
 
@@ -49,6 +60,9 @@ trait SqlBase_JVM extends SqlDataType_JVM with ModelUtils with BaseHelpers {
   protected var joinTableDatas   = List.empty[JoinTable]
   protected val rightCountsMap   = mutable.Map.empty[List[String], List[Int]]
 
+  def transactionStmt(stmt: String) = {
+    sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
+  }
 
   protected def addColSetter(refPath: List[String], colSetter: Setter) = {
     // Cache colSetter for this table
@@ -71,7 +85,7 @@ trait SqlBase_JVM extends SqlDataType_JVM with ModelUtils with BaseHelpers {
   //  }
 
   protected def getConn(proxy: ConnProxy): Future[JdbcConn_JVM] = {
-    val futConn             = connectionPool.getOrElse(proxy.uuid, getFreshConn(proxy))
+    val futConn             = connectionPool.getOrElse(proxy.uuid, getJdbcConn(proxy))
     val futConnTimeAdjusted = futConn.map { conn =>
       conn
     }
@@ -80,8 +94,21 @@ trait SqlBase_JVM extends SqlDataType_JVM with ModelUtils with BaseHelpers {
     futConnTimeAdjusted
   }
 
-  private def getFreshConn(proxy: ConnProxy): Future[JdbcConn_JVM] = {
-    Future(JdbcHandler_JVM.recreateDb(proxy.asInstanceOf[JdbcProxy]))
+  protected def getNewJdbcConn(proxy0: ConnProxy): Future[JdbcConn_JVM] = {
+    val proxy = proxy0.asInstanceOf[JdbcProxy]
+    Future(
+      JdbcHandler_JVM.recreateDb(
+        JdbcConn_JVM(
+          proxy,
+
+          // Since RPC calls run in parallel we need a new connection for
+          // each test when using Docker containers.
+          // This makes the test suite run slower compared to sequential runs
+          // of jvm tests.
+          DriverManager.getConnection(proxy.url)
+        )
+      )
+    )
   }
 
   protected def getRefResolver[T](

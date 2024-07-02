@@ -16,7 +16,7 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 
-    "String" - validation { implicit conn =>
+    "Types" - validation { implicit conn =>
       for {
         _ <- Type.string_?.insert(Some("a")).transact
           .map(_ ==> "Unexpected success").recover {
@@ -51,11 +51,7 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |""".stripMargin
           }
 
-      } yield ()
-    }
 
-    "Int" - validation { implicit conn =>
-      for {
         _ <- Type.int_?.insert(Some(1)).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
@@ -64,11 +60,7 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |_ > 2
                    |""".stripMargin
           }
-      } yield ()
-    }
 
-    "Long" - validation { implicit conn =>
-      for {
         _ <- Type.long_?.insert(Some(1L)).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
@@ -77,11 +69,7 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |_ > 2L
                    |""".stripMargin
           }
-      } yield ()
-    }
 
-    "Float" - validation { implicit conn =>
-      for {
         _ <- Type.float_?.insert(Some(float1)).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
@@ -90,11 +78,7 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |_ > 2.2f
                    |""".stripMargin
           }
-      } yield ()
-    }
 
-    "Double" - validation { implicit conn =>
-      for {
         _ <- Type.double_?.insert(Some(double1)).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
@@ -103,11 +87,7 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |_ > 2.2
                    |""".stripMargin
           }
-      } yield ()
-    }
 
-    "Boolean" - validation { implicit conn =>
-      for {
         _ <- Type.boolean_?.insert(Some(true)).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
@@ -116,11 +96,7 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |_ == false
                    |""".stripMargin
           }
-      } yield ()
-    }
 
-    "BigInt" - validation { implicit conn =>
-      for {
         _ <- Type.bigInt_?.insert(Some(bigInt1)).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
@@ -129,11 +105,7 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |_ > BigInt(2)
                    |""".stripMargin
           }
-      } yield ()
-    }
 
-    "BigDecimal" - validation { implicit conn =>
-      for {
         _ <- Type.bigDecimal_?.insert(Some(bigDecimal1)).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
@@ -142,11 +114,7 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |_ > BigDecimal(2.2)
                    |""".stripMargin
           }
-      } yield ()
-    }
 
-    "Date" - validation { implicit conn =>
-      for {
         _ <- Type.date_?.insert(Some(date1)).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
@@ -155,11 +123,7 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |_.after(new Date(993942000000L))
                    |""".stripMargin
           }
-      } yield ()
-    }
 
-    "Duration" - validation { implicit conn =>
-      for {
         _ <- Type.duration_?.insert(Some(duration1)).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
@@ -168,11 +132,7 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |_.compareTo(Duration.ofMinutes(2)) > 0
                    |""".stripMargin
           }
-      } yield ()
-    }
 
-    "Instant" - validation { implicit conn =>
-      for {
         _ <- Type.instant_?.insert(Some(instant1)).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
@@ -181,11 +141,7 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |_.compareTo(Instant.ofEpochSecond(2)) > 0
                    |""".stripMargin
           }
-      } yield ()
-    }
 
-    "LocalDate" - validation { implicit conn =>
-      for {
         _ <- Type.localDate_?.insert(Some(localDate1)).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
@@ -194,11 +150,7 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |_.compareTo(LocalDate.of(2002, 1, 1)) > 0
                    |""".stripMargin
           }
-      } yield ()
-    }
 
-    "LocalTime" - validation { implicit conn =>
-      for {
         _ <- Type.localTime_?.insert(Some(localTime1)).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
@@ -207,11 +159,7 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |_.compareTo(LocalTime.of(2, 2)) > 0
                    |""".stripMargin
           }
-      } yield ()
-    }
 
-    "LocalDateTime" - validation { implicit conn =>
-      for {
         _ <- Type.localDateTime_?.insert(Some(localDateTime1)).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
@@ -220,11 +168,7 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |_.compareTo(LocalDateTime.of(2002, 1, 1, 1, 2)) > 0
                    |""".stripMargin
           }
-      } yield ()
-    }
 
-    "OffsetTime" - validation { implicit conn =>
-      for {
         _ <- Type.offsetTime_?.insert(Some(offsetTime1)).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
@@ -233,11 +177,7 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |_.compareTo(OffsetTime.of(2, 2, 2, 2, ZoneOffset.ofHours(2))) > 0
                    |""".stripMargin
           }
-      } yield ()
-    }
 
-    "OffsetDateTime" - validation { implicit conn =>
-      for {
         _ <- Type.offsetDateTime_?.insert(Some(offsetDateTime1)).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
@@ -246,11 +186,7 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |_.compareTo(OffsetDateTime.of(2002, 1, 1, 1, 1, 1, 1, ZoneOffset.ofHours(2))) > 0
                    |""".stripMargin
           }
-      } yield ()
-    }
 
-    "ZonedDateTime" - validation { implicit conn =>
-      for {
         _ <- Type.zonedDateTime_?.insert(Some(zonedDateTime1)).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
@@ -259,11 +195,7 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |_.compareTo(ZonedDateTime.of(2002, 1, 1, 1, 1, 1, 1, ZoneOffset.ofHours(2))) > 0
                    |""".stripMargin
           }
-      } yield ()
-    }
 
-    "UUID" - validation { implicit conn =>
-      for {
         _ <- Type.uuid_?.insert(Some(UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"))).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
@@ -272,12 +204,9 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |_.toString != "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
                    |""".stripMargin
           }
-      } yield ()
-    }
 
-    "URI" - validation { implicit conn =>
-      val uri = new URI("x")
-      for {
+
+        uri = new URI("x")
         _ <- Type.uri_?.insert(Some(uri)).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
@@ -286,11 +215,7 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |_.toString.length > 2
                    |""".stripMargin
           }
-      } yield ()
-    }
 
-    "Byte" - validation { implicit conn =>
-      for {
         _ <- Type.byte_?.insert(Some(byte1)).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
@@ -299,11 +224,7 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |_ > $byte2
                    |""".stripMargin
           }
-      } yield ()
-    }
 
-    "Short" - validation { implicit conn =>
-      for {
         _ <- Type.short_?.insert(Some(short1)).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>
@@ -312,11 +233,7 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |_ > $short2
                    |""".stripMargin
           }
-      } yield ()
-    }
 
-    "Char" - validation { implicit conn =>
-      for {
         _ <- Type.char_?.insert(Some('a')).transact
           .map(_ ==> "Unexpected success").recover {
             case InsertErrors(errors, _) =>

@@ -83,6 +83,7 @@ trait SpiAsyncBase extends SpiAsync with Renderer with FutureUtils {
     val save = save0.copy(elements = noKeywords(save0.elements, Some(conn.proxy)))
     for {
       _ <- if (save.doInspect) save_inspect(save) else Future.unit
+      // Validating on JS side since it doesn't require db lookups
       errors <- save_validate(save0) // validate original elements against meta model
       txReport <- errors match {
         case errors if errors.isEmpty => conn.rpc.save(conn.proxy, save.elements).future
@@ -111,6 +112,7 @@ trait SpiAsyncBase extends SpiAsync with Renderer with FutureUtils {
     val insert = insert0.copy(elements = noKeywords(insert0.elements, Some(conn.proxy)))
     for {
       _ <- if (insert.doInspect) insert_inspect(insert) else Future.unit
+      // Validating on JS side since it doesn't require db lookups
       errors <- insert_validate(insert0) // validate original elements against meta model
       txReport <- errors match {
         case errors if errors.isEmpty =>
@@ -141,11 +143,8 @@ trait SpiAsyncBase extends SpiAsync with Renderer with FutureUtils {
     val update = update0.copy(elements = noKeywords(update0.elements, Some(conn.proxy)))
     for {
       _ <- if (update.doInspect) update_inspect(update) else Future.unit
-      errors <- update_validate(update0) // validate original elements against meta model
-      txReport <- errors match {
-        case errors if errors.isEmpty => conn.rpc.update(conn.proxy, update.elements, update.isUpsert).future
-        case errors                   => throw ValidationErrors(errors)
-      }
+      // Validating on JVM side since it requires db lookups
+      txReport <- conn.rpc.update(conn.proxy, update0.elements, update.elements, update.isUpsert).future
     } yield {
       conn.callback(update.elements)
       txReport
@@ -159,8 +158,6 @@ trait SpiAsyncBase extends SpiAsync with Renderer with FutureUtils {
   override def update_validate(update: Update)
                               (implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = future {
     val proxy = conn.proxy
-//    if (update.isUpsert && isRefUpdate(update.elements))
-//      throw ModelError("Can't upsert referenced attributes. Please update instead.")
     TxModelValidation(proxy.nsMap, proxy.attrMap, "update").validate(update.elements)
   }
 

@@ -18,51 +18,12 @@ object AdhocJVM_mysql extends TestSuite_mysql {
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
-
-
-//      println(floatMin)
-//      println(floatMin.toInt)
-//      println(Int.íntValue)
-//      println("------")
-//      println(floatMax)
-//      println(floatMax.toInt)
-//      println(Int.MaxValue)
-
       for {
-
-        _ <- Ns.float.insert(floatMin, float1, floatMax).transact
-
-        _ <- Ns.float.a1.query.get.map(_ ==> List(floatMin, float1, floatMax))
-
-//        _ <- rawTransact(
-//          """UPDATE Ns as x
-//            |SET
-//            |  i = 1
-//            |WHERE
-//            |  x.i IS NOT NULL AND
-//            |  EXISTS (
-//            |  SELECT * FROM Ns
-//            |    INNER JOIN Ns_refs_Ref ON Ns.id = Ns_refs_Ref.Ns_id
-//            |)
-//            |""".stripMargin)
-
-
+        _ <- Ns.int.insert(1).transact
+        _ <- Ns.int.query.get.map(_ ==> List(1))
       } yield ()
     }
-/*
-UPDATE Ns as Ns
-SET
-  i = 1
-WHERE
-  Ns.i IS NOT NULL AND
-  EXISTS (
-  SELECT * FROM Ns
-    INNER JOIN Ns_refs_Ref ON Ns.id = Ns_refs_Ref.Ns_id
-)
 
-Mysql
-You can't specify target table 'Ns' for update in FROM clause
- */
 
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._

@@ -16,7 +16,7 @@ trait TestSuite_h2 extends CoreTestSuite with BaseHelpers {
   override val database = "H2"
 
   override def inMem[T](test: Conn => T, schema: Schema): T = {
-    val url   = "jdbc:h2:mem:test_database_" + Random.nextInt()
+    val url   = "jdbc:h2:mem:test_database_" + Random.nextInt().abs
     val proxy = JdbcProxy(
       url,
       schema.sqlSchema_h2,

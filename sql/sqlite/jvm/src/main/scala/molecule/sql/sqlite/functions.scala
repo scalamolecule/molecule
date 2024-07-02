@@ -8,9 +8,9 @@ import java.{lang => ja}
 import upickle.default.{read, write}
 import scala.reflect.ClassTag
 
-// Sqlite helper functions for updates that are likely not possible to implement with Sqlite SQL.
+// SQlite helper functions for updates that are likely not possible to implement with SQlite SQL.
 // Create aliases in database to use functions.
-// @see molecule.coreTests.dataModels.core.schema.RefsSchema_Sqlite
+// @see molecule.coreTests.dataModels.core.schema.RefsSchema_SQlite
 object functions {
 
   // Remove values from Set or Seq

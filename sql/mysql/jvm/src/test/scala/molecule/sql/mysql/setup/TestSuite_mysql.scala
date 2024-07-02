@@ -6,7 +6,7 @@ import molecule.core.spi.Conn
 import molecule.coreTests.dataModels.core.schema._
 import molecule.coreTests.setup.CoreTestSuite
 import molecule.sql.core.facade.JdbcHandler_JVM
-import molecule.sql.mysql.setup.{Connection_mysql => c}
+import molecule.sql.mysql.marshalling.{Connection_mysql, Connection_mysql => c}
 
 
 trait TestSuite_mysql extends CoreTestSuite with BaseHelpers {
@@ -15,13 +15,6 @@ trait TestSuite_mysql extends CoreTestSuite with BaseHelpers {
   override val database = "Mysql"
 
   override def inMem[T](test: Conn => T, schema: Schema): T = {
-    val conn = schema match {
-      case TypesSchema      => JdbcHandler_JVM.recreateDb(c.conn_Types, c.recreateStmt_Types)
-      case RefsSchema       => JdbcHandler_JVM.recreateDb(c.conn_Refs, c.recreateStmt_Refs)
-      case UniquesSchema    => JdbcHandler_JVM.recreateDb(c.conn_Uniques, c.recreateStmt_Uniques)
-      case ValidationSchema => JdbcHandler_JVM.recreateDb(c.conn_Validation, c.recreateStmt_Validation)
-      case PartitionsSchema => JdbcHandler_JVM.recreateDb(c.conn_Partitions, c.recreateStmt_Partitions)
-    }
-    test(conn)
+    test(Connection_mysql.getConnection(schema))
   }
 }

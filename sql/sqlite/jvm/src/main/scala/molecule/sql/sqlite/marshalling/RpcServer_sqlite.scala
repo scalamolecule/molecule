@@ -9,7 +9,7 @@ import scala.io.StdIn
  *
  * Run with
  *
- * sbt sqlSqliteJVM/run
+ * sbt sqlSQliteJVM/run
  */
 object RpcServer_sqlite extends MoleculeRpcServer_AkkaHttp(Rpc_sqlite) with App {
 

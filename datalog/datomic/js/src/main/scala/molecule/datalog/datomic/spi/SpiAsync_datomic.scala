@@ -144,7 +144,8 @@ trait SpiAsync_datomic extends SpiAsync with DatomicSpiAsyncBase with FutureUtil
       _ <- if (update.doInspect) update_inspect(update) else Future.unit
       errors <- update_validate(update0) // validate original elements against meta model
       txReport <- errors match {
-        case errors if errors.isEmpty => conn.rpc.update(conn.proxy, update.elements, update.isUpsert).future
+        case errors if errors.isEmpty =>
+          conn.rpc.update(conn.proxy, update0.elements, update.elements, update.isUpsert).future
         case errors                   => throw ValidationErrors(errors)
       }
     } yield {

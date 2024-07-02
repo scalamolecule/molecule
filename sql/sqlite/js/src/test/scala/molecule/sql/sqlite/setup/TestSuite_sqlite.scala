@@ -5,18 +5,16 @@ import molecule.core.marshalling.{JdbcProxy, RpcRequest}
 import molecule.core.spi.Conn
 import molecule.coreTests.setup.CoreTestSuite
 import molecule.sql.core.facade.JdbcConn_JS
-import scala.util.Random
 
 
 trait TestSuite_sqlite extends CoreTestSuite {
 
   override val platform = "js"
-  override val database = "Sqlite"
+  override val database = "SQlite"
 
   override def inMem[T](test: Conn => T, schema: Schema): T = {
-    val url   = s"jdbc:sqlite:mem:test_database_" + Random.nextInt()
     val proxy = JdbcProxy(
-      url,
+      "jdbc:sqlite::memory:",
       schema.sqlSchema_sqlite,
       schema.metaSchema,
       schema.nsMap,

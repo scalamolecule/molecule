@@ -95,6 +95,7 @@ object Rpc_datomic
 
   override def update(
     proxy: ConnProxy,
+    elementsRaw: List[Element],
     elements: List[Element],
     isUpsert: Boolean = false
   ): Future[Either[MoleculeError, TxReport]] = either {

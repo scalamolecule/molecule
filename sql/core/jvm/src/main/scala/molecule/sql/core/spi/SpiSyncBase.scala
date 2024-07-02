@@ -29,29 +29,14 @@ trait SpiSyncBase
 
   // Query --------------------------------------------------------
 
-  def getModel2SqlQuery[Tpl](elements: List[Element]): Model2SqlQuery[Tpl] with SqlQueryBase
-
   override def query_get[Tpl](q0: Query[Tpl])(implicit conn0: Conn): List[Tpl] = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
     val q    = q0.copy(elements = noKeywords(q0.elements, Some(conn.proxy)))
     if (q.doInspect)
       query_inspect(q)
-    q.dbView.foreach(noTime)
     val m2q = getModel2SqlQuery[Tpl](q.elements)
     SqlQueryResolveOffset[Tpl](q.elements, q.optLimit, None, m2q)
       .getListFromOffset_sync(conn)._1
-  }
-
-  protected def query_getRaw[Tpl](q: Query[Tpl])(implicit conn0: Conn): List[Tpl] = {
-    val conn = conn0.asInstanceOf[JdbcConn_JVM]
-    val m2q  = getModel2SqlQuery[Tpl](q.elements)
-    SqlQueryResolveOffset[Tpl](q.elements, q.optLimit, None, m2q)
-      .getListFromOffset_sync(conn)._1
-  }
-
-  private def noTime(dbView: DbView): Unit = dbView match {
-    case _: AsOf  => throw ModelError("Time function 'asOf' is only implemented for Datomic.")
-    case _: Since => throw ModelError("Time function 'since' is only implemented for Datomic.")
   }
 
   override def query_subscribe[Tpl](q0: Query[Tpl], callback: List[Tpl] => Unit)
@@ -81,7 +66,6 @@ trait SpiSyncBase
     val q    = q0.copy(elements = noKeywords(q0.elements, Some(conn.proxy)))
     if (q.doInspect)
       queryOffset_inspect(q)
-    q.dbView.foreach(noTime)
     val m2q = getModel2SqlQuery[Tpl](q.elements)
     SqlQueryResolveOffset[Tpl](q.elements, q.optLimit, Some(q.offset), m2q)
       .getListFromOffset_sync(conn)
@@ -97,7 +81,6 @@ trait SpiSyncBase
     val q    = q0.copy(elements = noKeywords(q0.elements, Some(conn.proxy)))
     if (q.doInspect)
       queryCursor_inspect(q)
-    q.dbView.foreach(noTime)
     val m2q = getModel2SqlQuery[Tpl](q.elements)
     SqlQueryResolveCursor[Tpl](q.elements, q.optLimit, Some(q.cursor), m2q)
       .getListFromCursor_sync(conn)
@@ -196,9 +179,9 @@ trait SpiSyncBase
     if (errors.isEmpty) {
       val data     = if (isRefUpdate(update.elements)) {
         if (update0.isUpsert)
-          refUpserts(update)(conn)
+          refUpserts(update.elements)(conn)
         else
-          refUpdates(update)(conn)
+          refUpdates(update.elements, update.isUpsert)(conn)
       } else {
         update_getData(conn, update)
       }
@@ -226,7 +209,8 @@ trait SpiSyncBase
           .map(_(42L)) // dummy value
           .map { m =>
             val elements = m.mkString("\n")
-            val tables   = update_getData(conn, m, update.isUpsert)._1
+            val tables   = update_getData(conn, Update(m, update.isUpsert))._1
+//            val tables   = update_getData(conn, m, update.isUpsert)._1
             tables.headOption.fold(elements)(table => elements + "\n" + table.stmt)
           }
           .mkString(action + "S ----------------------\n", "\n------------\n", "")
@@ -237,10 +221,6 @@ trait SpiSyncBase
       }
     }
   }
-
-  // Implement for each sql database
-  def update_getData(conn: JdbcConn_JVM, update: Update): Data
-  def update_getData(conn: JdbcConn_JVM, elements: List[Element], isUpsert: Boolean): Data
 
 
   // Delete --------------------------------------------------------
@@ -258,9 +238,6 @@ trait SpiSyncBase
     }
   }
 
-  // Implement for each database
-  def delete_getExecutioner(conn: JdbcConn_JVM, delete: Delete): Option[() => List[Long]]
-
   override def delete_inspect(delete: Delete)(implicit conn0: Conn): Unit = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
     tryInspect("delete", delete.elements) {
@@ -270,7 +247,6 @@ trait SpiSyncBase
 
   // Only used for inspection
   def delete_getInspectionData(conn: JdbcConn_JVM, delete: Delete): Data
-
 
 
   // Inspect --------------------------------------------------------

@@ -6,7 +6,7 @@ import molecule.core.spi.Conn
 import molecule.coreTests.dataModels.core.schema._
 import molecule.coreTests.setup.{CoreTestSuite, CoreTestSuiteBase}
 import molecule.sql.core.facade.JdbcHandler_JVM
-import molecule.sql.mariadb.setup.{Connection_mariadb => c}
+import molecule.sql.mariadb.marshalling.{Connection_mariadb, Connection_mariadb => c}
 
 
 trait TestSuiteArray_mariadb extends CoreTestSuiteBase with BaseHelpers {
@@ -16,13 +16,6 @@ trait TestSuiteArray_mariadb extends CoreTestSuiteBase with BaseHelpers {
   override val isJsPlatform: Boolean = false
 
   override def inMem[T](test: Conn => T, schema: Schema): T = {
-    val conn = schema match {
-      case TypesSchema      => JdbcHandler_JVM.recreateDb(c.conn_Types, c.recreateStmt_Types)
-      case RefsSchema       => JdbcHandler_JVM.recreateDb(c.conn_Refs, c.recreateStmt_Refs)
-      case UniquesSchema    => JdbcHandler_JVM.recreateDb(c.conn_Uniques, c.recreateStmt_Uniques)
-      case ValidationSchema => JdbcHandler_JVM.recreateDb(c.conn_Validation, c.recreateStmt_Validation)
-      case PartitionsSchema => JdbcHandler_JVM.recreateDb(c.conn_Partitions, c.recreateStmt_Partitions)
-    }
-    test(conn)
+    test(Connection_mariadb.getConnection(schema))
   }
 }

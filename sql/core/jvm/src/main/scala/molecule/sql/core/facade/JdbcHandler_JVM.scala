@@ -18,9 +18,9 @@ object JdbcHandler_JVM {
   }
 
   // For docker test containers
-  def recreateDb(conn: JdbcConn_JVM, recreationStmt: String): JdbcConn_JVM = blocking {
+  def recreateDb(conn: JdbcConn_JVM): JdbcConn_JVM = blocking {
     val stmt = conn.sqlConn.createStatement
-    stmt.executeUpdate(recreationStmt)
+    stmt.executeUpdate(conn.proxy.createSchema)
     stmt.close()
     conn
   }

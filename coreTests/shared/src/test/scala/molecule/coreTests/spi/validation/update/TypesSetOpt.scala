@@ -16,7 +16,7 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 
-    "String" - validation { implicit conn =>
+    "Types" - validation { implicit conn =>
       for {
         id <- Type.stringSet_?(Some(Set("d"))).save.transact.map(_.id)
 
@@ -51,11 +51,8 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                 // (value b is ok)
               )
           }
-      } yield ()
-    }
 
-    "Int" - validation { implicit conn =>
-      for {
+
         id <- Type.intSet_?(Some(Set(4))).save.transact.map(_.id)
         _ <- Type(id).intSet_?(Some(Set(1, 2, 4))).update.transact
           .map(_ ==> "Unexpected success").recover {
@@ -69,11 +66,8 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |""".stripMargin
               )
           }
-      } yield ()
-    }
 
-    "Long" - validation { implicit conn =>
-      for {
+
         id <- Type.longSet_?(Some(Set(4L))).save.transact.map(_.id)
         _ <- Type(id).longSet_?(Some(Set(1L, 2L, 4L))).update.transact
           .map(_ ==> "Unexpected success").recover {
@@ -87,11 +81,8 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |""".stripMargin
               )
           }
-      } yield ()
-    }
 
-    "Float" - validation { implicit conn =>
-      for {
+
         id <- Type.floatSet_?(Some(Set(float4))).save.transact.map(_.id)
         _ <- Type(id).floatSet_?(Some(Set(float1, float2, float4))).update.transact
           .map(_ ==> "Unexpected success").recover {
@@ -105,11 +96,8 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |""".stripMargin
               )
           }
-      } yield ()
-    }
 
-    "Double" - validation { implicit conn =>
-      for {
+
         id <- Type.double(double4).save.transact.map(_.id)
         _ <- Type(id).doubleSet_?(Some(Set(double1, double2, double4))).update.transact
           .map(_ ==> "Unexpected success").recover {
@@ -123,11 +111,8 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |""".stripMargin
               )
           }
-      } yield ()
-    }
 
-    "Boolean" - validation { implicit conn =>
-      for {
+
         id <- Type.boolean(false).save.transact.map(_.id)
         _ <- Type(id).booleanSet_?(Some(Set(true, false))).update.transact
           .map(_ ==> "Unexpected success").recover {
@@ -138,11 +123,8 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |""".stripMargin
               )
           }
-      } yield ()
-    }
 
-    "BigInt" - validation { implicit conn =>
-      for {
+
         id <- Type.bigIntSet_?(Some(Set(bigInt4))).save.transact.map(_.id)
         _ <- Type(id).bigIntSet_?(Some(Set(bigInt1, bigInt2, bigInt4))).update.transact
           .map(_ ==> "Unexpected success").recover {
@@ -156,11 +138,8 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |""".stripMargin
               )
           }
-      } yield ()
-    }
 
-    "BigDecimal" - validation { implicit conn =>
-      for {
+
         id <- Type.bigDecimalSet_?(Some(Set(bigDecimal4))).save.transact.map(_.id)
         _ <- Type(id).bigDecimalSet_?(Some(Set(bigDecimal1, bigDecimal2, bigDecimal4))).update.transact
           .map(_ ==> "Unexpected success").recover {
@@ -174,11 +153,8 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |""".stripMargin
               )
           }
-      } yield ()
-    }
 
-    "Date" - validation { implicit conn =>
-      for {
+
         id <- Type.dateSet_?(Some(Set(date4))).save.transact.map(_.id)
         _ <- Type(id).dateSet_?(Some(Set(date1, date2, date4))).update.transact
           .map(_ ==> "Unexpected success").recover {
@@ -192,11 +168,8 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |""".stripMargin
               )
           }
-      } yield ()
-    }
 
-    "Duration" - validation { implicit conn =>
-      for {
+
         id <- Type.durationSet_?(Some(Set(duration4))).save.transact.map(_.id)
         _ <- Type(id).durationSet_?(Some(Set(duration1, duration2, duration4))).update.transact
           .map(_ ==> "Unexpected success").recover {
@@ -210,11 +183,8 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |""".stripMargin
               )
           }
-      } yield ()
-    }
 
-    "Instant" - validation { implicit conn =>
-      for {
+
         id <- Type.instantSet_?(Some(Set(instant4))).save.transact.map(_.id)
         _ <- Type(id).instantSet_?(Some(Set(instant1, instant2, instant4))).update.transact
           .map(_ ==> "Unexpected success").recover {
@@ -228,11 +198,8 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |""".stripMargin
               )
           }
-      } yield ()
-    }
 
-    "LocalDate" - validation { implicit conn =>
-      for {
+
         id <- Type.localDateSet_?(Some(Set(localDate4))).save.transact.map(_.id)
         _ <- Type(id).localDateSet_?(Some(Set(localDate1, localDate2, localDate4))).update.transact
           .map(_ ==> "Unexpected success").recover {
@@ -246,11 +213,8 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |""".stripMargin
               )
           }
-      } yield ()
-    }
 
-    "LocalTime" - validation { implicit conn =>
-      for {
+
         id <- Type.localTimeSet_?(Some(Set(localTime4))).save.transact.map(_.id)
         _ <- Type(id).localTimeSet_?(Some(Set(localTime1, localTime2, localTime4))).update.transact
           .map(_ ==> "Unexpected success").recover {
@@ -264,11 +228,8 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |""".stripMargin
               )
           }
-      } yield ()
-    }
 
-    "LocalDateTime" - validation { implicit conn =>
-      for {
+
         id <- Type.localDateTimeSet_?(Some(Set(localDateTime4))).save.transact.map(_.id)
         _ <- Type(id).localDateTimeSet_?(Some(Set(localDateTime1, localDateTime2, localDateTime4))).update.transact
           .map(_ ==> "Unexpected success").recover {
@@ -282,11 +243,8 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |""".stripMargin
               )
           }
-      } yield ()
-    }
 
-    "OffsetTime" - validation { implicit conn =>
-      for {
+
         id <- Type.offsetTimeSet_?(Some(Set(offsetTime4))).save.transact.map(_.id)
         _ <- Type(id).offsetTimeSet_?(Some(Set(offsetTime1, offsetTime2, offsetTime4))).update.transact
           .map(_ ==> "Unexpected success").recover {
@@ -300,11 +258,8 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |""".stripMargin
               )
           }
-      } yield ()
-    }
 
-    "OffsetDateTime" - validation { implicit conn =>
-      for {
+
         id <- Type.offsetDateTimeSet_?(Some(Set(offsetDateTime4))).save.transact.map(_.id)
         _ <- Type(id).offsetDateTimeSet_?(Some(Set(offsetDateTime1, offsetDateTime2, offsetDateTime4))).update.transact
           .map(_ ==> "Unexpected success").recover {
@@ -318,11 +273,8 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |""".stripMargin
               )
           }
-      } yield ()
-    }
 
-    "ZonedDateTime" - validation { implicit conn =>
-      for {
+
         id <- Type.zonedDateTimeSet_?(Some(Set(zonedDateTime4))).save.transact.map(_.id)
         _ <- Type(id).zonedDateTimeSet_?(Some(Set(zonedDateTime1, zonedDateTime2, zonedDateTime4))).update.transact
           .map(_ ==> "Unexpected success").recover {
@@ -336,11 +288,8 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |""".stripMargin
               )
           }
-      } yield ()
-    }
 
-    "UUID" - validation { implicit conn =>
-      for {
+
         id <- Type.uuidSet_?(Some(Set(UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-dddddddddddd")))).save.transact.map(_.id)
         _ <- Type(id).uuidSet_?(Some(Set(UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")))).update.transact
           .map(_ ==> "Unexpected success").recover {
@@ -351,14 +300,11 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |""".stripMargin
               )
           }
-      } yield ()
-    }
 
-    "URI" - validation { implicit conn =>
-      val uri1 = new URI("a")
-      val uri2 = new URI("ab")
-      val uri4 = new URI("abcd")
-      for {
+
+        uri1 = new URI("a")
+        uri2 = new URI("ab")
+        uri4 = new URI("abcd")
         id <- Type.uriSet_?(Some(Set(uri4))).save.transact.map(_.id)
         _ <- Type(id).uriSet_?(Some(Set(uri1, uri2, uri4))).update.transact
           .map(_ ==> "Unexpected success").recover {
@@ -372,11 +318,8 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |""".stripMargin
               )
           }
-      } yield ()
-    }
 
-    "Byte" - validation { implicit conn =>
-      for {
+
         id <- Type.byteSet_?(Some(Set(byte4))).save.transact.map(_.id)
         _ <- Type(id).byteSet_?(Some(Set(byte1, byte2, byte4))).update.transact
           .map(_ ==> "Unexpected success").recover {
@@ -390,11 +333,8 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |""".stripMargin
               )
           }
-      } yield ()
-    }
 
-    "Short" - validation { implicit conn =>
-      for {
+
         id <- Type.shortSet_?(Some(Set(short4))).save.transact.map(_.id)
         _ <- Type(id).shortSet_?(Some(Set(short1, short2, short4))).update.transact
           .map(_ ==> "Unexpected success").recover {
@@ -408,11 +348,7 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
                    |""".stripMargin
               )
           }
-      } yield ()
-    }
 
-    "Char" - validation { implicit conn =>
-      for {
         id <- Type.charSet_?(Some(Set('d'))).save.transact.map(_.id)
         _ <- Type(id).charSet_?(Some(Set('a', 'b', 'd'))).update.transact
           .map(_ ==> "Unexpected success").recover {

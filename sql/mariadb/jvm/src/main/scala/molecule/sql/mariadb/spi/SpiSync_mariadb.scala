@@ -11,7 +11,6 @@ import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.spi.SpiSyncBase
 import molecule.sql.mariadb.query.Model2SqlQuery_mariadb
 import molecule.sql.mariadb.transaction._
-import scala.collection.mutable.ListBuffer
 
 
 object SpiSync_mariadb extends SpiSync_mariadb
@@ -20,7 +19,6 @@ trait SpiSync_mariadb extends SpiSyncBase {
 
   override def getModel2SqlQuery[Tpl](elements: List[Element]) =
     new Model2SqlQuery_mariadb[Tpl](elements)
-
 
   override def save_getData(save: Save, conn: JdbcConn_JVM): Data = {
     new ResolveSave with Save_mariadb {
@@ -44,13 +42,9 @@ trait SpiSync_mariadb extends SpiSyncBase {
     }.getUpdateData(update.elements)
   }
 
-  override def update_getData(conn: JdbcConn_JVM, elements: List[Element], isUpsert: Boolean): Data = {
-    new ResolveUpdate(conn.proxy, isUpsert) with Update_mariadb {
-      override lazy val sqlConn = conn.sqlConn
-    }.getUpdateData(elements)
-  }
-
-  override def update_validate(update: Update)(implicit conn0: Conn): Map[String, Seq[String]] = {
+  override def update_validate(
+    update: Update)
+    (implicit conn0: Conn): Map[String, Seq[String]] = {
     val conn            = conn0.asInstanceOf[JdbcConn_JVM]
     val query2resultSet = (query: String) => {
       val ps = conn.sqlConn.prepareStatement(
@@ -61,13 +55,19 @@ trait SpiSync_mariadb extends SpiSyncBase {
     validateUpdateSet_json(conn.proxy, update.elements, query2resultSet)
   }
 
-  override def delete_getExecutioner(conn: JdbcConn_JVM, delete: Delete): Option[() => List[Long]] = {
+  override def delete_getExecutioner(
+    conn: JdbcConn_JVM, delete: Delete
+  ): Option[() => List[Long]] = {
     new ResolveDelete with Delete_mariadb {
       override lazy val sqlConn = conn.sqlConn
-    }.getDeleteExecutioner(delete.elements, conn.proxy.nsMap, "SET FOREIGN_KEY_CHECKS", "0", "1")
+    }.getDeleteExecutioner(
+      delete.elements, conn.proxy.nsMap, "SET FOREIGN_KEY_CHECKS", "0", "1"
+    )
   }
 
-  override def delete_getInspectionData(conn: JdbcConn_JVM, delete: Delete): Data = {
+  override def delete_getInspectionData(
+    conn: JdbcConn_JVM, delete: Delete
+  ): Data = {
     new ResolveDelete with Delete_mariadb {
       override lazy val sqlConn = conn.sqlConn
     }.getDeleteDataForInspection(delete.elements, conn.proxy.nsMap)

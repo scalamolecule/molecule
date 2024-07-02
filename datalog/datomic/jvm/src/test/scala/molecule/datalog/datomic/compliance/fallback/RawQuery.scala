@@ -1,6 +1,5 @@
 package molecule.datalog.datomic.compliance.fallback
 
-import java.math.{BigDecimal => jBigDecimal}
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.datalog.datomic.async._

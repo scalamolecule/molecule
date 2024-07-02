@@ -6,18 +6,26 @@ import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.core.action.{Query, Update}
 import molecule.core.marshalling.ConnProxy
+import molecule.core.spi.Conn
 import molecule.sql.core.facade.JdbcConn_JVM
-import molecule.sql.core.spi.SpiSyncBase
-import molecule.sql.core.transaction.Table
+import molecule.sql.core.query.SqlQueryResolveOffset
+import molecule.sql.core.spi.{SpiHelpers, SpiSyncBase}
+import molecule.sql.core.transaction.{SqlBase_JVM, Table}
 import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 
-trait UpdateHelper { self: SpiSyncBase =>
+trait UpdateHelper extends SpiHelpers { self: SqlBase_JVM =>
 
-  protected def refUpserts(update: Update)(implicit conn: JdbcConn_JVM): Data = {
-    val elements     = update.elements
+  protected def query_getRaw[Tpl](q: Query[Tpl])(implicit conn0: Conn): List[Tpl] = {
+    val conn = conn0.asInstanceOf[JdbcConn_JVM]
+    val m2q  = getModel2SqlQuery[Tpl](q.elements)
+    SqlQueryResolveOffset[Tpl](q.elements, q.optLimit, None, m2q)
+      .getListFromOffset_sync(conn)._1
+  }
+
+  protected def refUpserts(elements: List[Element])(implicit conn: JdbcConn_JVM): Data = {
     val refIdss      = mutable.Map.empty[List[String], List[Long]]
     var tableUpdates = List.empty[Table]
 
@@ -186,6 +194,7 @@ trait UpdateHelper { self: SpiSyncBase =>
         //        elements.foreach(println)
 
         val table = update_getData(conn, Update(elements, true))._1.head
+//        val table = update_getData(conn, elements, true)._1.head
         //        println("\n-- 4 ---- table -------- ")
         //        println(table)
 
@@ -409,8 +418,8 @@ trait UpdateHelper { self: SpiSyncBase =>
   }
 
 
-  protected def refUpdates(update: Update)(implicit conn: JdbcConn_JVM): Data = {
-    val elements = update.elements
+  protected def refUpdates(elements: List[Element], isUpsert: Boolean)(implicit conn: JdbcConn_JVM): Data = {
+//    val elements = update.elements
 
     //    println("............ elements")
     //    elements.foreach(println)
@@ -437,7 +446,8 @@ trait UpdateHelper { self: SpiSyncBase =>
           //          println(s"------ X ------- $refPath  $n")
           //          updateModel.foreach(println)
           i += 1
-          update_getData(conn, updateModel, update.isUpsert)._1
+//          update_getData(conn, updateModel, isUpsert)._1
+          update_getData(conn, Update(updateModel, isUpsert))._1
       }
       (tableUpdates, Nil)
     }
@@ -456,7 +466,7 @@ trait UpdateHelper { self: SpiSyncBase =>
       resultSet.getLong(1)
     } else if (updateId.nonEmpty) {
       //      println("getId stmt:\n" + stmt)
-      // MariaDb doesn't return id from updates, so we use supplied id in update stmt
+      // MariaDB doesn't return id from updates, so we use supplied id in update stmt
       updateId.get
     } else {
       val getPrevId = conn.sqlConn.prepareStatement(

@@ -1,18 +1,9 @@
 package molecule.sql.sqlite
 
-import java.net.URI
-import java.time.{Duration, Instant, LocalDate, LocalDateTime, LocalTime, OffsetDateTime, OffsetTime, ZonedDateTime}
-import java.util.{Date, UUID}
-import molecule.base.error.{ExecutionError, ModelError}
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.core.dsl.Refs.{A, B}
-import molecule.coreTests.dataModels.core.dsl.Types.Ns
-import molecule.coreTests.util.Array2List
 import molecule.sql.sqlite.async._
-import molecule.sql.sqlite.setup.{TestSuiteArray_sqlite, TestSuite_sqlite}
+import molecule.sql.sqlite.setup.TestSuite_sqlite
 import utest._
-import scala.collection.mutable
-import scala.concurrent.Future
 import scala.language.implicitConversions
 
 
@@ -32,10 +23,8 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
           (Map("b" -> 2, "c" -> 3), 2),
         ).transact.map(_.ids)
 
-        _ <- Ns.iMap_.hasNo(1).int(3).update.i.transact
-
         // Update all entities where `iMap` has a key = "a"
-        _ <- Ns.iMap_.apply("a").int(3).update.i.transact
+        _ <- Ns.iMap_("a").int(3).update.transact
 
         // 1 entity updated
         _ <- Ns.id.a1.iMap.int.query.get.map(_ ==> List(
@@ -43,26 +32,7 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
           (b, Map("b" -> 2, "c" -> 3), 2),
         ))
 
-        // Update all entities where `iMap` has keys "a" or "c"
-        _ <- Ns.iMap_(Seq("a", "c")).int(4).update.transact
-        _ <- Ns.id.a1.iMap.int.query.get.map(_ ==> List(
-          (a, Map("a" -> 1, "b" -> 2), 4), // updated
-          (b, Map("b" -> 2, "c" -> 3), 4), // updated
-        ))
 
-        // Update all entities where `iMap` has keys "x" or "c"
-        _ <- Ns.iMap_("x", "c").int(5).update.transact
-        _ <- Ns.id.a1.iMap.int.query.get.map(_ ==> List(
-          (a, Map("a" -> 1, "b" -> 2), 4),
-          (b, Map("b" -> 2, "c" -> 3), 5), // updated
-        ))
-
-        // Nothing updated since no `iMap` has key "x"
-        _ <- Ns.iMap_("x").int(5).update.transact
-        _ <- Ns.id.a1.iMap.int.query.get.map(_ ==> List(
-          (a, Map("a" -> 1, "b" -> 2), 4),
-          (b, Map("b" -> 2, "c" -> 3), 5),
-        ))
 
 //        // Values are still typed
 //        _ <- rawQuery(
@@ -102,15 +72,31 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
       for {
 
 
-        _ <- A.i.a1.Bb.*?(B.s_?.iSeq_?).insert(
-          //          (1, List()),
-          //          (2, List((Some("a"), None))),
-          //          (3, List((Some("b"), None), (Some("c"), None))),
-          //          (4, List((Some("d"), Some(Seq(1, 2))))),
-          (5, List((Some("e"), Some(Seq(2, 3))), (Some("f"), Some(Seq(3, 4))))),
-          //          (6, List((Some("g"), Some(Seq(4, 5))), (Some("h"), None))),
-        ).transact.map(_.ids)
+        _ <- A.i(1).save.transact
+        _ <- A.i(2).B.s("b").save.transact
+        _ <- A.i(3).B.s("c").i(3).save.transact
 
+//        // Current entity with A value and ref to B value
+//        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
+//          (3, 3)
+//        ))
+//
+//        // Filter by A value, update existing B values
+//        _ <- A.i_.B.i(4).update.transact
+//
+//        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
+//          (3, 4) // B value updated since there was a previous value
+//        ))
+
+        // Filter by A ids, upsert B values (insert if not already present)
+        _ <- A.i_.B.i(5).upsert.i.transact
+
+        // Now three A entities with referenced B value
+        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
+          (1, 5), // relationship to B created and B value inserted
+          (2, 5), // B value inserted
+          (3, 5), // B value updated
+        ))
 
         //        _ <- rawTransact(
         //          """UPDATE B
@@ -161,30 +147,6 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
         //            |  iSeq IS NOT NULL AND
         //            |  B.id IN(1, 2)
         //            |""".stripMargin)
-
-        // Filter by A ids, update B values
-        _ <- A.i_.Bb.iSeq.add(4, 5).update.transact
-
-        _ <- A.i.a1.Bb.*?(B.s_?.a1.iSeq).query.get.map(_ ==> List(
-          //          (1, List()), //                                                           no B value to update
-          //          (2, List()), //                                                           no B value to update
-          //          (3, List()), //                                                           no B value to update
-          //          (4, List((Some("d"), Seq(1, 2, 4, 5)))), //                               update in 1 ref entity
-          (5, List((Some("e"), Seq(2, 3, 4, 5)), (Some("f"), Seq(3, 4, 4, 5)))), // update in 2 ref entities
-          //          (6, List((Some("g"), Seq(4, 5, 4, 5)))), //                               update, but already has same values
-        ))
-
-        //        // Filter by A ids, upsert B values
-        //        _ <- A.i_.Bb.iSeq.add(5, 6).upsert.transact
-        //
-        //        _ <- A.i.a1.Bb.*?(B.s_?.a1.iSeq).query.get.map(_ ==> List(
-        //          (1, List((None, Seq(5, 6)))), //                                                      ref + insertion
-        //          (2, List((Some("a"), Seq(5, 6)))), //                                                 insertion in 1 ref entity
-        //          (3, List((Some("b"), Seq(5, 6)), (Some("c"), Seq(5, 6)))), //                         insertion in 2 ref entities
-        //          (4, List((Some("d"), Seq(1, 2, 4, 5, 5, 6)))), //                                     update in 1 ref entity
-        //          (5, List((Some("e"), Seq(2, 3, 4, 5, 5, 6)), (Some("f"), Seq(3, 4, 4, 5, 5, 6)))), // update in 2 ref entities
-        //          (6, List((Some("g"), Seq(4, 5, 4, 5, 5, 6)), (Some("h"), Seq(5, 6)))), //             update in one ref entity and insertion in another
-        //        ))
 
 
         //        _ <- rawQuery(

@@ -11,14 +11,14 @@ import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.spi.SpiSyncBase
 import molecule.sql.mysql.query.Model2SqlQuery_mysql
 import molecule.sql.mysql.transaction._
-import scala.collection.mutable.ListBuffer
 
 
 object SpiSync_mysql extends SpiSync_mysql
 
 trait SpiSync_mysql extends SpiSyncBase {
 
-  override def getModel2SqlQuery[Tpl](elements: List[Element]) = new Model2SqlQuery_mysql[Tpl](elements)
+  override def getModel2SqlQuery[Tpl](elements: List[Element]) =
+    new Model2SqlQuery_mysql[Tpl](elements)
 
   override def save_getData(save: Save, conn: JdbcConn_JVM): Data = {
     new ResolveSave with Save_mysql {
@@ -42,16 +42,12 @@ trait SpiSync_mysql extends SpiSyncBase {
     }.getUpdateData(update.elements)
   }
 
-  override def update_getData(conn: JdbcConn_JVM, elements: List[Element], isUpsert: Boolean): Data = {
-    new ResolveUpdate(conn.proxy, isUpsert) with Update_mysql {
-      override lazy val sqlConn = conn.sqlConn
-    }.getUpdateData(elements)
-  }
-
-  override def update_validate(update: Update)(implicit conn0: Conn): Map[String, Seq[String]] = {
+  override def update_validate(
+    update: Update
+  )(implicit conn0: Conn): Map[String, Seq[String]] = {
     val conn            = conn0.asInstanceOf[JdbcConn_JVM]
     val query2resultSet = (query: String) => {
-      val ps        = conn.sqlConn.prepareStatement(
+      val ps = conn.sqlConn.prepareStatement(
         query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY
       )
       conn.resultSet(ps.executeQuery())
@@ -59,15 +55,21 @@ trait SpiSync_mysql extends SpiSyncBase {
     validateUpdateSet_json(conn.proxy, update.elements, query2resultSet)
   }
 
-  override def delete_getInspectionData(conn: JdbcConn_JVM, delete: Delete): Data = {
+  override def delete_getInspectionData(
+    conn: JdbcConn_JVM, delete: Delete
+  ): Data = {
     new ResolveDelete with Delete_mysql {
       override lazy val sqlConn = conn.sqlConn
     }.getDeleteDataForInspection(delete.elements, conn.proxy.nsMap)
   }
 
-  override def delete_getExecutioner(conn: JdbcConn_JVM, delete: Delete): Option[() => List[Long]] = {
+  override def delete_getExecutioner(
+    conn: JdbcConn_JVM, delete: Delete
+  ): Option[() => List[Long]] = {
     new ResolveDelete with Delete_mysql {
       override lazy val sqlConn = conn.sqlConn
-    }.getDeleteExecutioner(delete.elements, conn.proxy.nsMap, "SET FOREIGN_KEY_CHECKS", "0", "1")
+    }.getDeleteExecutioner(
+      delete.elements, conn.proxy.nsMap, "SET FOREIGN_KEY_CHECKS", "0", "1"
+    )
   }
 }

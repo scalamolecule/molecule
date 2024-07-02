@@ -31,15 +31,10 @@ trait CoreTestSuite extends CoreTestSuiteBase {
         // Hack to make Arrays compare sanely; at some point we may want some
         // custom, extensible, typesafe equality check but for now this will do
         case (lhs: Array[_], rhs: Array[_]) =>
-          Predef.assert(lhs.toSeq == rhs.toSeq,
-            //            s"==> assertion failed: ${lhs.toSeq} != ${rhs.toSeq}"
-            showResult(lhs.toSeq, rhs.toSeq)
-          )
-        case (lhs, rhs)                     =>
-          Predef.assert(lhs == rhs,
-            //            s"==> assertion failed: $lhs != $rhs"
-            showResult(lhs, rhs)
-          )
+          Predef.assert(lhs.toSeq == rhs.toSeq, showResult(lhs.toSeq, rhs.toSeq))
+
+        case (lhs, rhs) =>
+          Predef.assert(lhs == rhs, showResult(lhs, rhs))
       }
     }
   }
