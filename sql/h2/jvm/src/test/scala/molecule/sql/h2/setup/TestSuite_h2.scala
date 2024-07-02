@@ -35,6 +35,7 @@ trait TestSuite_h2 extends CoreTestSuite with BaseHelpers {
       case NonFatal(exc) => throw exc
     } finally {
       if (conn.sqlConn != null) {
+        // Closing connection after each test
         conn.sqlConn.close()
       }
     }

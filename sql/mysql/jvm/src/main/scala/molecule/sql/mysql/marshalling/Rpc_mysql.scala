@@ -18,33 +18,9 @@ import scala.concurrent.Future
 object Rpc_mysql extends SpiSync_mysql with Rpc_SQL {
 
   override protected def getJdbcConn(proxy: ConnProxy): Future[JdbcConn_JVM] = {
-    getNewJdbcConn(proxy)
-  }
-
-  override protected def getQuery[Any](
-    conn: JdbcConn_JVM,
-    elements: List[Element],
-    optLimit: Option[Int]
-  ): List[Any] = {
-    query_get[Any](Query(elements, optLimit))(conn)
-  }
-
-  override protected def getQueryOffset[Any](
-    conn: JdbcConn_JVM,
-    elements: List[Element],
-    optLimit: Option[Int],
-    offset: Int
-  ): (List[Any], RowIndex, Boolean) = {
-    queryOffset_get[Any](QueryOffset(elements, optLimit, offset))(conn)
-  }
-
-  override protected def getQueryCursor[Any](
-    conn: JdbcConn_JVM,
-    elements: List[Element],
-    optLimit: Option[Int],
-    cursor: String
-  ): (List[Any], String, Boolean) = {
-    queryCursor_get[Any](QueryCursor(elements, optLimit, cursor))(conn)
+    Future(
+      Connection_mysql.getNewConnection(proxy.asInstanceOf[JdbcProxy])
+    )
   }
 
   override protected def getSaveData(conn: JdbcConn_JVM): ResolveSave with SqlSave = {

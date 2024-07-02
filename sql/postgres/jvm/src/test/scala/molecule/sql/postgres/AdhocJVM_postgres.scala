@@ -3,6 +3,8 @@ package molecule.sql.postgres
 import java.time.Duration
 import molecule.base.error.InsertErrors
 import molecule.core.util.Executor._
+import molecule.coreTests.dataModels.core.dsl.Types.Ns
+import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.postgres.async._
 import molecule.sql.postgres.setup.{TestSuiteArray_postgres, TestSuite_postgres}
 import utest._
@@ -28,17 +30,11 @@ object AdhocJVM_postgres extends TestSuite_postgres {
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
 
-        List(a, b, c, d, e, f) <- A.i.a1.Bb.*?(B.s_?.iMap_?).insert(
-          (1, List()),
-          (2, List((Some("a"), None))),
-          (3, List((Some("b"), None), (Some("c"), None))),
-          (4, List((Some("d"), Some(Map(pint1, pint2))))),
-          (5, List((Some("e"), Some(Map(pint2, pint3))), (Some("f"), Some(Map(pint3, pint4))))),
-          (6, List((Some("g"), Some(Map(pint4, pint5))), (Some("h"), None))),
-        ).transact.map(_.ids)
+        _ <- A.i.insert(2).transact
+        _ <- A.i.query.get.map(_ ==> List(2))
 
-        // Filter by A ids, update B values
-        _ <- A(a, b, c, d, e, f).Bb.iMap(Map(pint4, pint5)).update.transact
+
+//        _ = conn.asInstanceOf[JdbcConn_JVM].sqlConn.close()
 
         //        _ <- rawTransact(
         //          """UPDATE B

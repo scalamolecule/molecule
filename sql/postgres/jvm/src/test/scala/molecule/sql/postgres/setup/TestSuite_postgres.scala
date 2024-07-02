@@ -13,6 +13,8 @@ trait TestSuite_postgres extends CoreTestSuite with BaseHelpers {
   override val isJsPlatform = false
 
   override def inMem[T](test: Conn => T, schema: Schema): T = {
+    // For speed, re-use the same connection for all tests
+    // by dropping the previous database before each test.
     test(Connection_postgres.getConnection(schema))
   }
 }

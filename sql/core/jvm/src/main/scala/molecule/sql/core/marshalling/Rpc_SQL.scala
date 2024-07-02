@@ -34,10 +34,9 @@ trait Rpc_SQL
     elements: List[Element],
     limit: Option[Int]
   ): Future[Either[MoleculeError, List[Any]]] = either {
-    for {
-      conn <- getConn(proxy)
-      tpls <- Future(getQuery[Any](conn, elements, limit))
-    } yield tpls
+    getConn(proxy).map(conn =>
+      query_get[Any](Query(elements, limit))(conn)
+    )
   }
 
   override def queryOffset[Any](
@@ -46,10 +45,9 @@ trait Rpc_SQL
     limit: Option[Int],
     offset: Int
   ): Future[Either[MoleculeError, (List[Any], Int, Boolean)]] = either {
-    for {
-      conn <- getConn(proxy)
-      tpls <- Future(getQueryOffset[Any](conn, elements, limit, offset))
-    } yield tpls
+    getConn(proxy).map(conn =>
+      queryOffset_get[Any](QueryOffset(elements, limit, offset))(conn)
+    )
   }
 
   override def queryCursor[Any](
@@ -58,24 +56,20 @@ trait Rpc_SQL
     limit: Option[Int],
     cursor: String
   ): Future[Either[MoleculeError, (List[Any], String, Boolean)]] = either {
-    for {
-      conn <- getConn(proxy)
-      tpls <- Future(getQueryCursor[Any](conn, elements, limit, cursor))
-    } yield tpls
+    getConn(proxy).map(conn =>
+      queryCursor_get[Any](QueryCursor(elements, limit, cursor))(conn)
+    )
   }
 
   override def save(
     proxy: ConnProxy,
     elements: List[Element]
   ): Future[Either[MoleculeError, TxReport]] = either {
-    for {
-      conn <- getConn(proxy)
-      txReport <- Future {
-        val data = getSaveData(conn).getSaveData(elements)
-        conn.transact_sync(data)
-      }
-
-    } yield txReport
+    getConn(proxy).map(conn =>
+      conn.transact_sync(
+        getSaveData(conn).getSaveData(elements)
+      )
+    )
   }
 
   override def insert(
@@ -94,7 +88,7 @@ trait Rpc_SQL
             } else tpls).asInstanceOf[Seq[Product]]
           case Left(err)   => throw err
         }
-        val data = getInsertData(conn).getInsertData(proxy.nsMap, elements, tpls)
+        val data       = getInsertData(conn).getInsertData(proxy.nsMap, elements, tpls)
         conn.transact_sync(data)
       }
     } yield txReport
@@ -143,25 +137,6 @@ trait Rpc_SQL
 
   // Implement for each db ------------------------------------
 
-  protected def getQuery[Any](
-    conn: JdbcConn_JVM,
-    elements: List[Element],
-    optLimit: Option[Int]
-  ): List[Any]
-
-  protected def getQueryOffset[Any](
-    conn: JdbcConn_JVM,
-    elements: List[Element],
-    optLimit: Option[Int],
-    offset: Int
-  ): (List[Any], RowIndex, Boolean)
-
-  protected def getQueryCursor[Any](
-    conn: JdbcConn_JVM,
-    elements: List[Element],
-    optLimit: Option[Int],
-    cursor: String
-  ): (List[Any], String, Boolean)
 
   protected def getSaveData(conn: JdbcConn_JVM): ResolveSave with SqlSave
   protected def getInsertData(conn: JdbcConn_JVM): ResolveInsert with SqlInsert

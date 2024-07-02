@@ -1,15 +1,15 @@
 package molecule.sql.core.transaction
 
-import java.sql.{DriverManager, Statement, PreparedStatement => PS}
+import java.sql.{Statement, PreparedStatement => PS}
 import java.util.UUID
 import molecule.base.ast._
 import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
 import molecule.core.action.{Delete, Update}
-import molecule.core.marshalling.{ConnProxy, JdbcProxy}
+import molecule.core.marshalling.ConnProxy
 import molecule.core.util.Executor._
 import molecule.core.util.ModelUtils
-import molecule.sql.core.facade.{JdbcConn_JVM, JdbcHandler_JVM}
+import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.query.{Model2SqlQuery, SqlQueryBase}
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
@@ -92,23 +92,6 @@ trait SqlBase_JVM extends SqlDataType_JVM with ModelUtils with BaseHelpers {
     connectionPool(proxy.uuid) = futConnTimeAdjusted
     // logger.debug("connectionPool.size: " + connectionPool.size)
     futConnTimeAdjusted
-  }
-
-  protected def getNewJdbcConn(proxy0: ConnProxy): Future[JdbcConn_JVM] = {
-    val proxy = proxy0.asInstanceOf[JdbcProxy]
-    Future(
-      JdbcHandler_JVM.recreateDb(
-        JdbcConn_JVM(
-          proxy,
-
-          // Since RPC calls run in parallel we need a new connection for
-          // each test when using Docker containers.
-          // This makes the test suite run slower compared to sequential runs
-          // of jvm tests.
-          DriverManager.getConnection(proxy.url)
-        )
-      )
-    )
   }
 
   protected def getRefResolver[T](

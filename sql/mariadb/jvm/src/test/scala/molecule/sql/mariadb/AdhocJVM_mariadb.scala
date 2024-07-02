@@ -20,136 +20,18 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
 
-
-
-        List(ref1, ref2, ref3, ref4) <- Ref.i.insert(1, 2, 3, 4).transact.map(_.ids)
-        a = (1, Set(ref1, ref2))
-        b = (2, Set(ref2, ref3, ref4))
-
-        _ <- Ns.i.refs.insert(List(a, b)).transact
-
-        _ <- Ns.i.a1.refs.has(ref2).query.i.get.map(_ ==> List(a, b))
-
-
-
-        //        _ <- rawTransact(
-        //          """UPDATE Ns
-        //            |SET
-        //            |  i = 2
-        //            |WHERE
-        //            |  i IS NOT NULL AND
-        //            |  Ns.bigIntSet IS NOT NULL AND
-        //            |   JSON_CONTAINS(Ns.bigIntSet, JSON_ARRAY("1"))
-        //            |""".stripMargin)
-
-//        _ <- rawQuery(
-//          """SELECT DISTINCT
-//            |  Ns.bigIntSeq,
-//            |  Ref.bigInt_
-//            |FROM Ns
-//            |  INNER JOIN Ref ON Ns.ref = Ref.id
-//            |WHERE
-//            |  JSON_CONTAINS(Ns.bigIntSeq, JSON_ARRAY('1')) AND
-//            |  Ns.bigIntSeq IS NOT NULL AND
-//            |  Ref.bigInt_  IS NOT NULL;
-//            |""".stripMargin, true)
-
-//        _ <- rawQuery(
-//          """SELECT DISTINCT
-//            |  bigDecimal,
-//            |  CAST(bigDecimal AS char),
-//            |  convert(CAST(bigDecimal AS char), decimal(65, 38)),
-//            |  cast(bigDecimal as decimal(65, 38)),
-//            |  convert(bigDecimal, char),
-//            |  '------',
-//            |  convert('1.1', decimal(65, 38)),
-//            |  cast(convert('1.1', decimal(65, 38)) as char),
-//            |  '------',
-//            |  JSON_CONTAINS('["1.1", "2.2"]', JSON_ARRAY('1.1')),
-//            |  JSON_CONTAINS('["1.1", "2.2"]', JSON_ARRAY(bigDecimal))
-//            |FROM Ref
-//            |""".stripMargin, true)
-
-//        _ <- rawQuery(
-//          """SELECT name from
-//            |  JSON_TABLE('{"x": ["1.1", "2.2"]}',
-//            |          '$.[*]' COLUMNS (
-//            |          name  varchar(10) path '$.x'
-//            |          )
-//            |) AS alias
-//            |""".stripMargin, true)
-
-//        _ <- rawQuery(
-//          """select (
-//            |SELECT count(name) = 1 from
-//            |  JSON_TABLE('["1.1", "2.2"]',
-//            |          '$[*]' COLUMNS (
-//            |          name  varchar(10) path '$'
-//            |          )
-//            |) AS alias
-//            |          where cast(name as decimal(65, 38)) in('1.1')
-//            |          ) as x
-//            |""".stripMargin, true)
-//            |          where JSON_CONTAINS(JSON_ARRAY('1.1'), json_array(name))
-//
-//        _ <- rawQuery(
-//          """SELECT DISTINCT
-//            |  Ns.bigDecimalSeq,
-//            |  Ref.bigDecimal
-//            |FROM Ns
-//            |  INNER JOIN Ref ON Ns.ref = Ref.id
-//            |WHERE
-//            |  (
-//            |    SELECT count(_v) > 0
-//            |    FROM
-//            |      JSON_TABLE(
-//            |        Ns.bigDecimalSeq, '$[*]'
-//            |        COLUMNS(_v varchar(65) path '$')
-//            |      ) AS alias
-//            |    WHERE CONVERT(_v, DECIMAL(65, 38)) IN (Ref.bigDecimal)
-//            |  ) AND
-//            |  Ns.bigDecimalSeq IS NOT NULL AND
-//            |  Ref.bigDecimal   IS NOT NULL;
-//            |""".stripMargin, true)
-//
-
-
-
-        //        _ <- rawQuery(
-        //          """select id from Ns
-        //            |""".stripMargin, true)
-
-
+        _ <- Ns.int.insert(1).transact
+        _ <- Ns.int.query.get.map(_ ==> List(1))
       } yield ()
     }
 
 
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
-
       for {
 
-//        _ <- A.i(0).save.transact.map(_.id)
-        _ <- A.Bb.*(B.s).insert(List("a", "b")).i.transact.map(_.id)
-//        _ <- A.i.Bb.*(B.s).insert((2, List("c", "d"))).transact.map(_.id)
-//
-//        // Filter by B attribute, update A values
-//        _ <- A.i(3).Bb.s_.update.transact
-//
-//        _ <- A.i.Bb.*?(B.s.a1).query.get.map(_.sortBy(_._2.headOption.toString) ==> List(
-//          (0, List()), //         Nothing updated since this A entity has no ref to B
-//          (3, List("c", "d")), // A attribute updated
-//        ))
-//
-//        // Filter by B attribute, upsert A values
-//        _ <- A.i(4).Bb.s_.upsert.transact
-//
-//        _ <- A.i.Bb.*?(B.s.a1).query.get.map(_.sortBy(_._2.headOption.toString) ==> List(
-//          (0, List()), //         Nothing updated since this A entity has no ref to B
-//          (4, List("a", "b")), // A attribute inserted
-//          (4, List("c", "d")), // A attribute updated
-//        ))
-
+        _ <- A.i.insert(2).transact
+        _ <- A.i.query.get.map(_ ==> List(2))
 
         //        _ <- rawTransact(
         //          """UPDATE B

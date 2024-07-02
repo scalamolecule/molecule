@@ -15,6 +15,7 @@ trait ConnectionJS_postgres {
     val n     = Random.nextInt().abs
     val url   = s"jdbc:tc:postgresql:16://localhost:5432/test$n" +
       s"?preparedStatementCacheQueries=0"
+
     val proxy = JdbcProxy(
       url,
       schema.sqlSchema_postgres,

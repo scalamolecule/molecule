@@ -26,6 +26,17 @@ object Rpc_sqlite extends SpiSync_sqlite with Rpc_SQL {
     )
   }
 
+  override protected def getSaveData(conn: JdbcConn_JVM): ResolveSave with SqlSave = {
+    new ResolveSave with Save_sqlite {
+      override lazy val sqlConn: Connection = conn.sqlConn
+    }
+  }
+
+  override protected def getInsertData(conn: JdbcConn_JVM): ResolveInsert with SqlInsert = {
+    new ResolveInsert with Insert_sqlite {
+      override lazy val sqlConn: Connection = conn.sqlConn
+    }
+  }
 
   // Disable foreign key constraints for possibly multiple deletions
   override def delete(
@@ -49,44 +60,5 @@ object Rpc_sqlite extends SpiSync_sqlite with Rpc_SQL {
         }
       )
     } yield txReport
-  }
-
-
-  override protected def getQuery[Any](
-    conn: JdbcConn_JVM,
-    elements: List[Element],
-    optLimit: Option[Int]
-  ): List[Any] = {
-    query_get[Any](Query(elements, optLimit))(conn)
-  }
-
-  override protected def getQueryOffset[Any](
-    conn: JdbcConn_JVM,
-    elements: List[Element],
-    optLimit: Option[Int],
-    offset: Int
-  ): (List[Any], RowIndex, Boolean) = {
-    queryOffset_get[Any](QueryOffset(elements, optLimit, offset))(conn)
-  }
-
-  override protected def getQueryCursor[Any](
-    conn: JdbcConn_JVM,
-    elements: List[Element],
-    optLimit: Option[Int],
-    cursor: String
-  ): (List[Any], String, Boolean) = {
-    queryCursor_get[Any](QueryCursor(elements, optLimit, cursor))(conn)
-  }
-
-  override protected def getSaveData(conn: JdbcConn_JVM): ResolveSave with SqlSave = {
-    new ResolveSave with Save_sqlite {
-      override lazy val sqlConn: Connection = conn.sqlConn
-    }
-  }
-
-  override protected def getInsertData(conn: JdbcConn_JVM): ResolveInsert with SqlInsert = {
-    new ResolveInsert with Insert_sqlite {
-      override lazy val sqlConn: Connection = conn.sqlConn
-    }
   }
 }

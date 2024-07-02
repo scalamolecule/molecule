@@ -27,42 +27,10 @@ object AdhocJVM_mysql extends TestSuite_mysql {
 
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
-
       for {
 
-
-        _ <- A.i.a1.Bb.*?(B.s_?.iSeq_?).insert(
-          (1, List()),
-          (2, List((Some("a"), None))),
-          (3, List((Some("b"), None), (Some("c"), None))),
-          (4, List((Some("d"), Some(Seq(1, 2))))),
-          (5, List((Some("e"), Some(Seq(2, 3))), (Some("f"), Some(Seq(3, 4))))),
-          (6, List((Some("g"), Some(Seq(4, 5))), (Some("h"), None))),
-        ).transact.map(_.ids)
-
-        // Filter by A ids, update B values
-        _ <- A.i_.Bb.iSeq(Seq(4, 5)).update.transact
-
-        _ <- A.i.a1.Bb.*?(B.s_?.iSeq).query.get.map(_ ==> List(
-          (1, List()), //                                               no B.i value
-          (2, List()), //                                               no B.i value
-          (3, List()), //                                               no B.i value
-          (4, List((Some("d"), Seq(4, 5)))), //                         update in 1 ref entity
-          (5, List((Some("e"), Seq(4, 5)), (Some("f"), Seq(4, 5)))), // update in 2 ref entities
-          (6, List((Some("g"), Seq(4, 5)))), //                         already had same value
-        ))
-
-        //        // Filter by A ids, upsert B values
-        //        _ <- A.i_.Bb.iSeq(Seq(5, 6)).upsert.transact
-        //
-        //        _ <- A.i.a1.Bb.*?(B.s_?.iSeq).query.get.map(_ ==> List(
-        //          (1, List((None, Seq(5, 6)))), //                              ref + addition
-        //          (2, List((Some("a"), Seq(5, 6)))), //                         addition in 1 ref entity
-        //          (3, List((Some("b"), Seq(5, 6)), (Some("c"), Seq(5, 6)))), // addition in 2 ref entities
-        //          (4, List((Some("d"), Seq(5, 6)))), //                         update in 1 ref entity
-        //          (5, List((Some("e"), Seq(5, 6)), (Some("f"), Seq(5, 6)))), // update in 2 ref entities
-        //          (6, List((Some("g"), Seq(5, 6)), (Some("h"), Seq(5, 6)))), // update in one ref entity and addition in another
-        //        ))
+        _ <- A.i.insert(2).transact
+        _ <- A.i.query.get.map(_ ==> List(2))
 
 
         //        _ <- rawTransact(

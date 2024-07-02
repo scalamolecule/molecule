@@ -31,6 +31,7 @@ trait TestSuite_sqlite extends CoreTestSuite with BaseHelpers {
       case NonFatal(exc) => throw exc
     } finally {
       if (conn.sqlConn != null) {
+        // Closing connection after each test
         conn.sqlConn.close()
       }
     }
