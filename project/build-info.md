@@ -10,13 +10,13 @@ Compile to current version only:
 
 Compile to 2.12 only:
 
-    sbt ++2.12.18 compile
-    sbt ++2.12.18 clean compile
+    sbt ++2.12.19 compile
+    sbt ++2.12.19 clean compile
 
 Compile to 3.3 only:
 
-    sbt ++3.3.1 compile
-    sbt ++3.3.1 clean compile
+    sbt ++3.3.3 compile
+    sbt ++3.3.3 clean compile
 
 Compile to all versions:
 
@@ -45,6 +45,6 @@ To maven central with docs generated (required)
 
 Publish versions separately
 
-    sbt ++2.12.18 publishLocal
-    sbt ++2.12.18 publishSigned -Ddocs=true
+    sbt ++2.12.19 publishLocal
+    sbt ++2.12.19 publishSigned -Ddocs=true
 

@@ -1,87 +1,99 @@
 ![](project/resources/Molecule-logo.png)
 
-Molecule is a Scala library to build queries and transactions with the words of your domain for various databases:
+Molecule is a Scala library to query SQL and NoSQL databases with the words of your domain.
 
-- SQL
-    - [PostgreSQL](https://www.postgresql.org)
-    - [SQlite](https://sqlite.org)
-    - [MySQL](https://www.mysql.com)
-    - [MariaDB](https://mariadb.com)
-    - [H2](https://h2database.com/html/main.html)
-- Datalog
-    - [Datomic](http://www.datomic.com)
-
-Molecule generates boilerplate code from your domain data model. You can then access multiple databases in a uniform way
-with "molecules" like this:
-
+Compose an immutable "molecule" data structure:
 ```scala
-val persons = Person.name.age.Address.street.query.get
+Person.name.age.Address.street
 ```
 
-The returned `persons` are typed as `List[(String, Int, String)]` and can also be fetched asynchronously as a `Future`
-or a `ZIO`.
-Notice how the relationship from Person to Address is intuitively created. Much more complex queries can also be created
-easily without having to know the query languages of the underlying databases.
+instead of building queries
+<table>
+<tr>
+<td> SQL </td> <td> Datalog </td>
+</tr>
+<tr>
+<td valign="top">
 
-### Features
+```sql
+SELECT
+  Person.name,
+  Person.age,
+  Address.street
+FROM Person
+  INNER JOIN Address 
+    ON Person.address = Address.id;
+```
+</td>
+<td valign="top">
 
+```clojure
+[:find ?name ?age ?street
+ :where [?a :Person/name ?name]
+        [?a :Person/age ?age]
+        [?a :Ns/address ?b]
+        [?b :Address/street ?street]]
+```
+</td>
+</tr>
+</table>
+
+and get typed data matching the molecule from the database:
+
+```scala
+val persons: List[(String, Int, String)] =
+  Person.name.age.Address.street.query.get
+```
+Data can also be fetched asynchronously in a `Future` or `ZIO`.
+
+
+### Main features of Molecule
+
+- Support for [PostgreSQL](https://www.postgresql.org), [SQlite](https://sqlite.org), [MySQL](https://www.mysql.com), [MariaDB](https://mariadb.com), [H2](https://h2database.com/html/main.html) and [Datomic](http://www.datomic.com). More can easily be added.
+- Molecules for any database behave identically (each pass the same 1400+ test suite)
 - Targets Scala 3.3, 2.13 and 2.12 on JVM and JS platforms
+- Multiple APIs: synchronous, asynchronous and ZIO
+- All Scala primitive types and collection types available as molecule attributes
+- Rich data structure elements:
+    - Nested data structures
+    - Validation
+    - Pagination
+    - Sorting
+    - Subscriptions
 - Typed database calls directly from Client with no need for Server implementation or JSON encoding/decoding
 - Fast transparent binary serialization between Client and Server with [Boopickle](https://boopickle.suzaku.io) (no
   manual setup)
-- Single SPI of +1800 tests adhered to by each database implementation
 - No macros
 - No complex type class implicits
 - Maximum type inference
-- Synchronous/Asynchronous/ZIO APIs
-- Scala/Java types transparently mapped to all databases
-    - Scala primitives/wrappers
-        - `String`
-        - `Int`
-        - `Long`
-        - `Float`
-        - `Double`
-        - `Boolean`
-        - `Byte`
-        - `Short`
-        - `Char`
-        - `BigInt`
-        - `BigDecimal`
-    - java.util/net
-        - `Date`
-        - `UUID`
-        - `URI`
-    - java.time
-        - `Duration`
-        - `Instant`
-        - `LocalDate`
-        - `LocalTime`
-        - `LocalDateTime`
-        - `OffsetTime`
-        - `OffsetDateTime`
-        - `ZonedDateTime`
-- `Set`s of all above types supported as field/column type for all databases
-- Collision of valid Scala field/column name with reserved keywords of database transparently resolved
-- Nested data structures
-- Validation
-- Pagination (offset/cursor)
-- Sorting
-- Subscriptions
 
-Documentation at [scalamolecule.org](http://scalamolecule.org) still documents the old macro-based version of molecule
-but will be updated to the new version. Most concepts overlap.
 
 ### How does it work?
 
-1) Define a domain data model.
+1) Define a domain data model with Molecule's meta DSL
+```scala
+object Refs extends DataModel(5) {
+
+  trait Person {
+    val name     = oneString
+    val age      = oneInt
+    val birthday = oneLocalDate 
+    val address  = one[Address]
+  }
+
+  trait Address {
+    val street = oneString
+    val zip    = oneString
+    val city   = oneString
+  }
+}
+```
 2) Run `sbt compile -Dmolecule=true` once to generate molecule-enabling boilerplate code from
    your [domain data model definition](https://github.com/scalamolecule/molecule/tree/main/coreTests/shared/src/main/scala/molecule/coreTests/dataModels/core/dataModel).
    The [sbt-molecule](https://github.com/scalamolecule/sbt-molecule) plugin automatically also creates database schemas
-   for
-   all database types. Now you can easily read and write data to/from a database with plain vanilla Scala code in a
-   fluent
-   style (see examples below).
-3) Write molecule transactions/queries.
+   for all database types.
+3) Now you can easily read and write from the database with plain vanilla Scala code in a fluent style (see examples below).
+
 
 ### Examples
 
@@ -193,7 +205,7 @@ lazy val yourProject = project.in(file("app"))
 
 ## Explore
 
-The `coreTests` module in this repo has several data model definitions and more than 1800 tests that show all details of
+The `coreTests` module in this repo has several data model definitions and more than 1400 tests that show all details of
 how molecule can be used. This forms the Service Provider Interface that each database implementation needs to comply to
 in order to offer all functionality of Molecule.
 

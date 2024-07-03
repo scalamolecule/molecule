@@ -77,21 +77,18 @@ trait Rpc_SQL
     elements: List[Element],
     tplsSerialized: Array[Byte],
   ): Future[Either[MoleculeError, TxReport]] = either {
-    for {
-      conn <- getConn(proxy)
-      txReport <- Future {
-        val tplsEither = UnpickleTpls[Any](elements, ByteBuffer.wrap(tplsSerialized)).unpickle
-        val tpls       = tplsEither match {
-          case Right(tpls) =>
-            (if (countValueAttrs(elements) == 1) {
-              tpls.map(Tuple1(_))
-            } else tpls).asInstanceOf[Seq[Product]]
-          case Left(err)   => throw err
-        }
-        val data       = getInsertData(conn).getInsertData(proxy.nsMap, elements, tpls)
-        conn.transact_sync(data)
+    getConn(proxy).map { conn =>
+      val tplsEither = UnpickleTpls[Any](elements, ByteBuffer.wrap(tplsSerialized)).unpickle
+      val tpls       = tplsEither match {
+        case Right(tpls) =>
+          (if (countValueAttrs(elements) == 1) {
+            tpls.map(Tuple1(_))
+          } else tpls).asInstanceOf[Seq[Product]]
+        case Left(err)   => throw err
       }
-    } yield txReport
+      val data       = getInsertData(conn).getInsertData(proxy.nsMap, elements, tpls)
+      conn.transact_sync(data)
+    }
   }
 
   override def update(
@@ -100,43 +97,36 @@ trait Rpc_SQL
     elements: List[Element],
     isUpsert: Boolean = false
   ): Future[Either[MoleculeError, TxReport]] = either {
-    for {
-      conn <- getConn(proxy)
-      txReport <- Future {
-        val errors = update_validate(Update(elementsRaw, isUpsert))(conn)
-        if (errors.nonEmpty)
-          throw ValidationErrors(errors)
+    getConn(proxy).map { conn =>
+      val errors = update_validate(Update(elementsRaw, isUpsert))(conn)
+      if (errors.nonEmpty)
+        throw ValidationErrors(errors)
 
-        val data = if (isRefUpdate(elements)) {
-          if (isUpsert)
-            refUpserts(elements)(conn)
-          else
-            refUpdates(elements, isUpsert)(conn)
-        } else {
-          update_getData(conn, Update(elements, isUpsert))
-        }
-        conn.transact_sync(data)
+      val data = if (isRefUpdate(elements)) {
+        if (isUpsert)
+          refUpserts(elements)(conn)
+        else
+          refUpdates(elements, isUpsert)(conn)
+      } else {
+        update_getData(conn, Update(elements, isUpsert))
       }
-    } yield txReport
+      conn.transact_sync(data)
+    }
   }
 
   override def delete(
     proxy: ConnProxy,
     elements: List[Element]
   ): Future[Either[MoleculeError, TxReport]] = either {
-    for {
-      conn <- getConn(proxy)
-      txReport <- Future(
-        delete_getExecutioner(conn, Delete(elements)).fold(TxReport(Nil)) { executions =>
-          conn.atomicTransaction(executions)
-        }
-      )
-    } yield txReport
+    getConn(proxy).map { conn =>
+      delete_getExecutioner(conn, Delete(elements)).fold(TxReport(Nil)) { executions =>
+        conn.atomicTransaction(executions)
+      }
+    }
   }
 
 
   // Implement for each db ------------------------------------
-
 
   protected def getSaveData(conn: JdbcConn_JVM): ResolveSave with SqlSave
   protected def getInsertData(conn: JdbcConn_JVM): ResolveInsert with SqlInsert

@@ -18,19 +18,7 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
 
       for {
 
-        List(a, b) <- Ns.iMap.int.insert(
-          (Map("a" -> 1, "b" -> 2), 1),
-          (Map("b" -> 2, "c" -> 3), 2),
-        ).transact.map(_.ids)
-
-        // Update all entities where `iMap` has a key = "a"
-        _ <- Ns.iMap_("a").int(3).update.transact
-
-        // 1 entity updated
-        _ <- Ns.id.a1.iMap.int.query.get.map(_ ==> List(
-          (a, Map("a" -> 1, "b" -> 2), 3), // updated
-          (b, Map("b" -> 2, "c" -> 3), 2),
-        ))
+        _ <- Ns.string.int.Ref.string.query.inspect
 
 
 
