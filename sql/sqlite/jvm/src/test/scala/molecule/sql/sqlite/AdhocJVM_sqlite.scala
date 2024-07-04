@@ -17,40 +17,8 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
       for {
-
-        _ <- Ns.string.int.Ref.string.query.inspect
-
-
-
-//        // Values are still typed
-//        _ <- rawQuery(
-//          """SELECT DISTINCT
-//            |  Ns.string,
-//            |  Ns.int
-//            |FROM Ns
-//            |WHERE
-//            |  Ns.string IS NOT NULL AND
-//            |  Ns.int    IS NOT NULL;
-//            |""".stripMargin).map(_.head == List("a", "1") ==> false)
-
-
-        //        _ <- rawTransact(
-        //          """UPDATE Ns
-        //            |SET
-        //            |  stringSeq = (
-        //            |    SELECT JSON_GROUP_ARRAY(VALUE)
-        //            |    FROM (
-        //            |      SELECT _vs.value FROM Ns, JSON_EACH(stringSeq) AS _vs
-        //            |      UNION ALL
-        //            |      SELECT _vs.value FROM Ns, JSON_EACH(?) AS _vs
-        //            |    )
-        //            |  )
-        //            |WHERE
-        //            |  stringSeq IS NOT NULL AND
-        //            |  Ns.id IN(1)
-        //            |""".stripMargin)
-
-
+        _ <- Ns.int.insert(1).transact
+        _ <- Ns.int.query.get.map(_ ==> List(1))
       } yield ()
     }
 
@@ -59,82 +27,8 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
 
-
-        _ <- A.i(1).save.transact
-        _ <- A.i(2).B.s("b").save.transact
-        _ <- A.i(3).B.s("c").i(3).save.transact
-
-//        // Current entity with A value and ref to B value
-//        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
-//          (3, 3)
-//        ))
-//
-//        // Filter by A value, update existing B values
-//        _ <- A.i_.B.i(4).update.transact
-//
-//        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
-//          (3, 4) // B value updated since there was a previous value
-//        ))
-
-        // Filter by A ids, upsert B values (insert if not already present)
-        _ <- A.i_.B.i(5).upsert.i.transact
-
-        // Now three A entities with referenced B value
-        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
-          (1, 5), // relationship to B created and B value inserted
-          (2, 5), // B value inserted
-          (3, 5), // B value updated
-        ))
-
-        //        _ <- rawTransact(
-        //          """UPDATE B
-        //            |SET
-        //            |  iSeq = iSeq
-        //            |WHERE
-        //            |  iSeq IS NOT NULL AND
-        //            |  B.id IN(1, 2)
-        //            |""".stripMargin)
-
-        //        _ <- rawTransact(
-        //          """UPDATE B
-        //            |SET
-        //            |  iSeq = '[4, 8]'
-        //            |WHERE
-        //            |  iSeq IS NOT NULL AND
-        //            |  B.id IN(1, 2)
-        //            |""".stripMargin)
-
-        //        _ <- rawTransact(
-        //          """UPDATE B
-        //            |SET
-        //            |  iSeq = (
-        //            |    SELECT JSON_GROUP_ARRAY(VALUE)
-        //            |    FROM (
-        //            |      SELECT _vs.value FROM B as b2, JSON_EACH(iSeq) AS _vs where b2.id = B.id
-        //            |      UNION ALL
-        //            |      SELECT _vs.value FROM JSON_EACH('[4, 5]') AS _vs
-        //            |    )
-        //            |  )
-        //            |WHERE
-        //            |  iSeq IS NOT NULL AND
-        //            |  id IN(1, 2)
-        //            |""".stripMargin)
-
-        //        _ <- rawTransact(
-        //          """UPDATE B
-        //            |SET
-        //            |  iSeq = (
-        //            |    SELECT JSON_GROUP_ARRAY(VALUE)
-        //            |    FROM (
-        //            |      SELECT _vs.value FROM B, JSON_EACH(iSeq) AS _vs where B
-        //            |      UNION ALL
-        //            |      SELECT _vs.value FROM JSON_EACH('[4, 5]') AS _vs
-        //            |    )
-        //            |  )
-        //            |WHERE
-        //            |  iSeq IS NOT NULL AND
-        //            |  B.id IN(1, 2)
-        //            |""".stripMargin)
+        _ <- A.i.insert(2).transact
+        _ <- A.i.query.get.map(_ ==> List(2))
 
 
         //        _ <- rawQuery(

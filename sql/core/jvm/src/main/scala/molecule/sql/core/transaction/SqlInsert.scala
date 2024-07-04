@@ -150,15 +150,15 @@ trait SqlInsert
       inserts = inserts.map {
         case (path, cols) if path == curRefPath =>
           paramIndexes += (curRefPath, attr) -> (cols.length + 1)
-          (path, if (add) cols :+ (attr, castExt) else cols)
+          (path, if (add) cols :+ (attr -> castExt) else cols)
 
         case other => other
       }
     } else {
       paramIndexes += (curRefPath, attr) -> 1
-      inserts = inserts :+ (curRefPath, List((attr, castExt)))
+      inserts = inserts :+ (curRefPath -> List(attr -> castExt))
     }
-    (curRefPath, paramIndexes(curRefPath, attr))
+    (curRefPath, paramIndexes(curRefPath -> attr))
   }
 
   override protected def addOne[T](
@@ -343,7 +343,7 @@ trait SqlInsert
     nestedElements: List[Element]
   ): Product => Unit = {
     if (inserts.isEmpty) {
-      inserts = inserts :+ (curRefPath, Nil)
+      inserts = inserts :+ (curRefPath -> Nil)
     }
 
     val joinTable  = ss(ns, refAttr, refNs)
@@ -355,7 +355,7 @@ trait SqlInsert
     val joinPath   = curRefPath :+ joinTable
     val leftPath   = curRefPath
     val rightPath  = List(s"$nextLevel", refNs)
-    joins = joins :+ (joinPath, id1, id2, leftPath, rightPath)
+    joins = joins :+ ((joinPath, id1, id2, leftPath, rightPath))
     rightCountsMap(joinPath) = List.empty[Int]
 
     // Initiate new level
@@ -480,7 +480,7 @@ trait SqlInsert
       // default null values (only to be referenced as the left side of the join table)
       val emptyRowSetter: Setter = (ps: PS, _: IdsMap, _: RowIndex) => ps.addBatch()
       addColSetter(curPath, emptyRowSetter)
-      inserts = inserts :+ (curRefPath, List())
+      inserts = inserts :+ (curRefPath -> List())
     }
 
     (tpl: Product) => {

@@ -113,7 +113,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
         noCardManyFilterAttrExpr(attr)
       }
       setExpr(false, attr, e, a, v, attr.op, args, resSet)
-      filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
+      filterAttrVars1 = filterAttrVars1 + (a -> (e -> v))
       filterAttrVars2.get(a).foreach(_(e, v))
     } { case (dir, filterPath, filterAttr) =>
       setFilterExpr(e, a, v, attr.op, s":${filterAttr.ns}/${filterAttr.attr}")
@@ -127,7 +127,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
     val v = vv
     attr.filterAttr.fold {
       setExpr(true, attr, e, a, v, attr.op, args, resSet)
-      filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
+      filterAttrVars1 = filterAttrVars1 + (a -> (e -> v))
       filterAttrVars2.get(a).foreach(_(e, v))
     } { case (dir, filterPath, filterAttr) =>
       setFilterExpr(e, a, v, attr.op, s":${filterAttr.ns}/${filterAttr.attr}")

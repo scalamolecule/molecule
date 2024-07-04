@@ -20,7 +20,9 @@ inThisBuild(
     organizationHomepage := Some(url("http://www.scalamolecule.org")),
     versionScheme := Some("early-semver"),
     version := "0.8.1-SNAPSHOT",
-    scalaVersion := scala213,
+    //    scalaVersion := scala212,
+    //    scalaVersion := scala213,
+    scalaVersion := scala3,
     crossScalaVersions := allScala,
 
     // Run tests for all systems sequentially to avoid data locks with db
@@ -78,7 +80,7 @@ lazy val boilerplate = crossProject(JSPlatform, JVMPlatform)
   .settings(doPublish)
   .settings(
     libraryDependencies ++= Seq(
-      "com.lihaoyi" %%% "utest" % "0.8.2",
+      "com.lihaoyi" %%% "utest" % "0.8.3",
       "com.outr" %%% "scribe" % "3.13.0", // Logging
       "org.scalactic" %%% "scalactic" % "3.2.18", // Tolerant roundings with triple equal on js platform
       "io.github.cquiroz" %%% "scala-java-time" % "2.5.0"
@@ -132,7 +134,7 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
     // Generate Molecule boilerplate code for tests with `sbt clean compile -Dmolecule=true`
     moleculePluginActive := sys.props.get("molecule").contains("true"),
     //    moleculeMakeJars := !sys.props.get("moleculeJars").contains("false"), // default: true
-    //    moleculeMakeJars := false, // default: true
+    moleculeMakeJars := false, // default: true
 
     // Multiple directories with data models
     moleculeDataModelPaths := Seq(
@@ -173,7 +175,7 @@ lazy val datalogCore = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += "com.datomic" % "peer" % "1.0.7075" // Requires Java 11
   )
   .jsSettings(jsEnvironment)
-  .dependsOn(coreTests % "compile->compile;test->test")
+  .dependsOn(core)
 
 
 lazy val datalogDatomic = crossProject(JSPlatform, JVMPlatform)
@@ -182,9 +184,53 @@ lazy val datalogDatomic = crossProject(JSPlatform, JVMPlatform)
   .settings(name := "molecule-datalog-datomic")
   .settings(doPublish)
   .settings(compilerArgs)
-  .settings(testFrameworks := testingFrameworks)
+  .settings(
+    testFrameworks := testingFrameworks,
+
+    // Temporarily limit number of tests to be compiled by sbt (comment out this whole sbt setting to test all)
+    // Note that intellij doesn't recognize this setting - there you can right-click on files and exclude
+    unmanagedSources / excludeFilter := {
+      val test = "src/test/scala/molecule/datalog/datomic"
+      def path(platform: String) = (baseDirectory.value / s"../$platform/$test").getCanonicalPath
+      val jsTests     = path("js")
+      val jvmTests    = path("jvm")
+      val sharedTests = path("shared")
+      val allowed     = Seq(
+        //        sharedTests + "/compliance/aggr",
+        //        sharedTests + "/compliance/api",
+        //        sharedTests + "/compliance/crud",
+        //        sharedTests + "/compliance/crud/update",
+        //        sharedTests + "/compliance/crud/update/ops",
+        //        sharedTests + "/compliance/crud/update/relation",
+        //        sharedTests + "/compliance/filter",
+        //        sharedTests + "/compliance/filterAttr",
+        //        sharedTests + "/compliance/inspect",
+        //        sharedTests + "/compliance/pagination",
+        //        sharedTests + "/compliance/partitions",
+        //        sharedTests + "/compliance/relation",
+        //        sharedTests + "/compliance/sort",
+        //        sharedTests + "/compliance/subscription",
+        //        sharedTests + "/compliance/time",
+        //        sharedTests + "/compliance/validation",
+        //        sharedTests + "/compliance",
+        sharedTests + "/setup",
+        jvmTests + "/setup",
+        jsTests + "/setup",
+        jsTests + "/AdhocJS_datomic.scala",
+        //        jvmTests + "/AdhocJVM_datomic.scala",
+        //        sharedTests + "/Adhoc_datomic.scala",
+      )
+      new SimpleFileFilter(f =>
+        (f.getCanonicalPath.startsWith(jsTests)
+          || f.getCanonicalPath.startsWith(jvmTests)
+          || f.getCanonicalPath.startsWith(sharedTests)) &&
+          !allowed.exists(p => f.getCanonicalPath.startsWith(p))
+      )
+    },
+  )
   .jsSettings(jsEnvironment)
-  .dependsOn(datalogCore % "compile->compile;test->test")
+  .dependsOn(datalogCore)
+  .dependsOn(coreTests % "test->test")
 
 
 //lazy val graphql = crossProject(JSPlatform, JVMPlatform)
@@ -255,7 +301,6 @@ lazy val sqlCore = crossProject(JSPlatform, JVMPlatform)
     )
   )
   .dependsOn(core)
-  .dependsOn(coreTests % "compile->compile;test->test")
 
 
 lazy val sqlH2 = crossProject(JSPlatform, JVMPlatform)
@@ -272,7 +317,7 @@ lazy val sqlH2 = crossProject(JSPlatform, JVMPlatform)
     )
   )
   .dependsOn(sqlCore)
-  .dependsOn(coreTests % "compile->compile;test->test")
+  .dependsOn(coreTests % "test->test")
 
 
 lazy val sqlMariaDB = crossProject(JSPlatform, JVMPlatform)
@@ -292,7 +337,7 @@ lazy val sqlMariaDB = crossProject(JSPlatform, JVMPlatform)
     Test / fork := true
   )
   .dependsOn(sqlCore)
-  .dependsOn(coreTests % "compile->compile;test->test")
+  .dependsOn(coreTests % "test->test")
 
 
 lazy val sqlMySQL = crossProject(JSPlatform, JVMPlatform)
@@ -310,7 +355,7 @@ lazy val sqlMySQL = crossProject(JSPlatform, JVMPlatform)
     ),
   )
   .dependsOn(sqlCore)
-  .dependsOn(coreTests % "compile->compile;test->test")
+  .dependsOn(coreTests % "test->test")
 
 
 lazy val sqlPostgreSQL = crossProject(JSPlatform, JVMPlatform)
@@ -329,7 +374,7 @@ lazy val sqlPostgreSQL = crossProject(JSPlatform, JVMPlatform)
     ),
   )
   .dependsOn(sqlCore)
-  .dependsOn(coreTests % "compile->compile;test->test")
+  .dependsOn(coreTests % "test->test")
 
 
 lazy val sqlSQlite = crossProject(JSPlatform, JVMPlatform)
@@ -346,7 +391,7 @@ lazy val sqlSQlite = crossProject(JSPlatform, JVMPlatform)
     )
   )
   .dependsOn(sqlCore)
-  .dependsOn(coreTests % "compile->compile;test->test")
+  .dependsOn(coreTests % "test->test")
 
 lazy val testingFrameworks = Seq(
   new TestFramework("utest.runner.Framework"),
@@ -371,12 +416,12 @@ lazy val compilerArgs = Def.settings(
     "-language:higherKinds",
     "-language:existentials",
     "-unchecked",
-    "-Xfatal-warnings"
+    "-Xfatal-warnings",
+    "11"
   ) ++ (CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((2, 12)) =>
       Seq(
         "-Xsource:2.13",
-        "-Yno-adapted-args",
         "-Ypartial-unification",
         "-Ywarn-extra-implicit",
         "-Ywarn-inaccessible",
@@ -384,7 +429,6 @@ lazy val compilerArgs = Def.settings(
         "-Ywarn-unused:-nowarn",
         "-Ywarn-nullary-override",
         "-Ywarn-nullary-unit",
-        "-opt-inline-from:<source>",
         "-opt-warnings",
         "-opt:l:inline",
         "-explaintypes"

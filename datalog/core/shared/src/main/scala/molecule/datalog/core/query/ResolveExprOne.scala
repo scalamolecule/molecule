@@ -127,7 +127,7 @@ trait ResolveExprOne[Tpl]
     find += v
     attr.filterAttr.fold {
       expr(attr, e, a, v, attr.op, args, resOne)
-      filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
+      filterAttrVars1 = filterAttrVars1 + (a -> (e -> v))
       filterAttrVars2.get(a).foreach(_(e, v))
     } { case (_, filterPath, filterAttr) =>
       expr2(e, a, v, getVar(filterAttr, filterPath), attr.op)
@@ -145,7 +145,7 @@ trait ResolveExprOne[Tpl]
     val v = getVar(attr, cache = attr.op == V)
     attr.filterAttr.fold {
       expr(attr, e, a, v, attr.op, args, resOne)
-      filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
+      filterAttrVars1 = filterAttrVars1 + (a -> (e -> v))
       filterAttrVars2.get(a).foreach(_(e, v))
     } { case (_, filterPath, filterAttr) =>
       expr2(e, a, v, getVar(filterAttr, filterPath), attr.op)

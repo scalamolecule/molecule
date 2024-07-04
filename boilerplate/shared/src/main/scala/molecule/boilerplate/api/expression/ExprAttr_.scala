@@ -4,6 +4,7 @@ package molecule.boilerplate.api.expression
 import molecule.base.ast._
 import molecule.boilerplate.api._
 import molecule.boilerplate.ast.Model._
+import scala.language.higherKinds
 
 
 trait ExprAttr_0[t, Ns1[_], Ns2[_, _]] extends ExprBase {

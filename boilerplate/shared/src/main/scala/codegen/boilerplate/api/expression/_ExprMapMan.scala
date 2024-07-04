@@ -10,6 +10,7 @@ object _ExprMapMan extends BoilerplateGenBase("ExprMapMan", "/api/expression") {
        |package molecule.boilerplate.api.expression
        |
        |import molecule.boilerplate.ast.Model._
+       |import scala.language.higherKinds
        |$traits
        |""".stripMargin
   }
@@ -25,7 +26,7 @@ object _ExprMapMan extends BoilerplateGenBase("ExprMapMan", "/api/expression") {
          |  def apply (key  : String                          ): Ns1[${`A..t`}, t] = _exprMapK(Has    , Seq(key)             )
          |  def add   (pair : (String, t), pairs: (String, t)*): Ns1[${`A..V`}, t] = _exprMap (Add    , (pair +: pairs).toMap)
          |  def add   (pairs: Iterable[(String, t)]           ): Ns1[${`A..V`}, t] = _exprMap (Add    , pairs.toMap          )
-         |  def remove(key  : String, keys: String*           ): Ns1[${`A..t`}, t] = _exprMapK(Remove , key +: keys          )
+         |  def remove(key  : String, keys: String*           ): Ns1[${`A..t`}, t] = _exprMapK(Remove , Seq(key) ++ keys     )
          |  def remove(keys : Seq[String]                     ): Ns1[${`A..t`}, t] = _exprMapK(Remove , keys                 )
          |}""".stripMargin
   }

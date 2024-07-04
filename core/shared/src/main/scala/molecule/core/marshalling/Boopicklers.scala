@@ -31,10 +31,10 @@ object Boopicklers extends MoleculeLogging {
   pickleCard.addConcreteType[CardSeq.type]
   pickleCard.addConcreteType[CardMap.type]
 
-  implicit val pickleMetaAttr  : CompositePickler[MetaAttr]   = compositePickler[MetaAttr]
-  implicit val pickleMetaNs    : CompositePickler[MetaNs]     = compositePickler[MetaNs]
-  implicit val pickleMetaPart  : CompositePickler[MetaPart]   = compositePickler[MetaPart]
-  implicit val pickleMetaSchema: CompositePickler[MetaSchema] = compositePickler[MetaSchema]
+  implicit val pickleMetaAttr  : Pickler[MetaAttr]   = generatePickler[MetaAttr]
+  implicit val pickleMetaNs    : Pickler[MetaNs]     = generatePickler[MetaNs]
+  implicit val pickleMetaPart  : Pickler[MetaPart]   = generatePickler[MetaPart]
+  implicit val pickleMetaSchema: Pickler[MetaSchema] = generatePickler[MetaSchema]
 
   implicit val pickleMetaModel: CompositePickler[MetaModel] = compositePickler[MetaModel]
   pickleMetaModel.addConcreteType[MetaAttr]
@@ -66,6 +66,7 @@ object Boopicklers extends MoleculeLogging {
   pickleOp.addConcreteType[Fn]
 
   implicit val pickleValidator: CompositePickler[Validator] = compositePickler[Validator]
+  pickleValidator.addConcreteType[ValidateID]
   pickleValidator.addConcreteType[ValidateString]
   pickleValidator.addConcreteType[ValidateInt]
   pickleValidator.addConcreteType[ValidateLong]
@@ -703,6 +704,7 @@ object Boopicklers extends MoleculeLogging {
   pickleElement.addConcreteType[AttrMapTacShort]
   pickleElement.addConcreteType[AttrMapTacFloat]
   pickleElement.addConcreteType[AttrMapTacChar]
+
 
   implicit val pickleInsertError: CompositePickler[InsertError] =
     compositePickler[InsertError]

@@ -194,7 +194,7 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
   ): Unit = {
     val (a, ak, av, k_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
     where += s"[$e $a $v1]" -> wClause
-    where += s"[$v1 $ak \"$key\"]" -> wClause
+    where += s"""[$v1 $ak "$key"]""" -> wClause
     where += s"[$v1 $av $v]" -> wClause
     addCast(resMap.j2s)
   }
@@ -211,7 +211,7 @@ trait ResolveExprMap[Tpl] extends JavaConversions { self: Model2DatomicQuery[Tpl
     where += s"[(if (nil? $v1) {$a []} $v1) $v2]" -> wClause
     where += s"[($a $v2) $v3]" -> wClause
     where += s"[(map vals $v3) $v4]" -> wClause
-    where += s"[(filter (fn [pair] (= (first pair) \"$key\")) $v4) $v5]" -> wClause
+    where += s"""[(filter (fn [pair] (= (first pair) "$key")) $v4) $v5]""" -> wClause
     where += s"[(map second $v5) $v]" -> wClause
     addCast(resMapOpt.j2optValue)
   }

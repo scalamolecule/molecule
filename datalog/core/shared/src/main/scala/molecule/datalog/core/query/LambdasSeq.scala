@@ -1,13 +1,11 @@
 package molecule.datalog.core.query
 
-import java.lang.{Double => jDouble, Float => jFloat, Integer => jInteger, Long => jLong}
-import java.math.{BigDecimal => jBigDecimal, BigInteger => jBigInt}
+import java.lang.{Integer => jInteger}
 import java.net.URI
 import java.time._
 import java.util.{Date, UUID, Iterator => jIterator, List => jList, Map => jMap, Set => jSet}
 import molecule.core.util.JavaConversions
-import scala.collection.mutable.{ArrayBuffer, ListBuffer}
-import scala.reflect.ClassTag
+import scala.collection.mutable.ListBuffer
 
 trait LambdasSeq extends ResolveBase with JavaConversions {
 
@@ -70,19 +68,33 @@ trait LambdasSeq extends ResolveBase with JavaConversions {
   lazy val resSeqChar          : ResSeq[Char]           = ResSeq("Char", j2sListChar, s2jChar)
 
 
-  private def optSeq2sID = (v: AnyRef) => {
-    val set = v.asInstanceOf[Array[_]]
-    if (set.iterator.next().asInstanceOf[jList[_]].isEmpty)
-      Option.empty[Array[Long]]
-    else
-      Some(
-        set.flatMap(
-          _.asInstanceOf[jList[_]].asScala.map(
-            _.asInstanceOf[jMap[_, _]].values.iterator.next
-          )
+  private def optSeq2sID: AnyRef => Option[List[Long]] = (v: AnyRef) => {
+    val set = v.asInstanceOf[jList[_]].asScala
+    if (set.iterator.next().asInstanceOf[jList[_]].isEmpty) {
+      Option.empty[List[Long]]
+    } else {
+      val ids: List[Long] = set.flatMap(
+        _.asInstanceOf[jList[_]].asScala.map(
+          _.asInstanceOf[jMap[_, _]].values.iterator.next
         )
-      )
+      ).asInstanceOf[List[Long]]
+      Some(ids)
+    }
   }
+
+  //  private def optSeq2sID = (v: AnyRef) => {
+  //    val set = v.asInstanceOf[Array[_]]
+  //    if (set.iterator.next().asInstanceOf[jList[_]].isEmpty)
+  //      Option.empty[Array[Long]]
+  //    else
+  //      Some(
+  //        set.flatMap(
+  //          _.asInstanceOf[jList[_]].asScala.map(
+  //            _.asInstanceOf[jMap[_, _]].values.iterator.next
+  //          )
+  //        )
+  //      )
+  //  }
 
 
   private def optSeq2s[T](decode: Any => T): AnyRef => Option[List[T]] = (v: AnyRef) => {
@@ -95,7 +107,7 @@ trait LambdasSeq extends ResolveBase with JavaConversions {
       }
       val list = ListBuffer.empty[T]
       while (it.hasNext) {
-        list.addOne(decode(it.next))
+        list += decode(it.next)
       }
       if (list.isEmpty) Option.empty[List[T]] else Some(list.toList)
     }
@@ -113,29 +125,29 @@ trait LambdasSeq extends ResolveBase with JavaConversions {
     }
   }
 
-  private lazy val j2sOptListId             = optSeq2sID
-  private lazy val j2sOptListString         = optSeq2s(j2String)
-  private lazy val j2sOptListInt            = optSeq2s(j2Int)
-  private lazy val j2sOptListLong           = optSeq2s(j2Long)
-  private lazy val j2sOptListFloat          = optSeq2s(j2Float)
-  private lazy val j2sOptListDouble         = optSeq2s(j2Double)
-  private lazy val j2sOptListBoolean        = optSeq2s(j2Boolean)
-  private lazy val j2sOptListBigInt         = optSeq2s(j2BigInt)
-  private lazy val j2sOptListBigDecimal     = optSeq2s(j2BigDecimal)
-  private lazy val j2sOptListDate           = optSeq2s(j2Date)
-  private lazy val j2sOptListDuration       = optSeq2s(j2Duration)
-  private lazy val j2sOptListInstant        = optSeq2s(j2Instant)
-  private lazy val j2sOptListLocalDate      = optSeq2s(j2LocalDate)
-  private lazy val j2sOptListLocalTime      = optSeq2s(j2LocalTime)
-  private lazy val j2sOptListLocalDateTime  = optSeq2s(j2LocalDateTime)
-  private lazy val j2sOptListOffsetTime     = optSeq2s(j2OffsetTime)
-  private lazy val j2sOptListOffsetDateTime = optSeq2s(j2OffsetDateTime)
-  private lazy val j2sOptListZonedDateTime  = optSeq2s(j2ZonedDateTime)
-  private lazy val j2sOptListUUID           = optSeq2s(j2UUID)
-  private lazy val j2sOptListURI            = optSeq2s(j2URI)
-  private lazy val j2sOptListByte           = optByteAttr2s
-  private lazy val j2sOptListShort          = optSeq2s(j2Short)
-  private lazy val j2sOptListChar           = optSeq2s(j2Char)
+  private lazy val j2sOptListId            : AnyRef => Option[List[Long]]           = optSeq2sID
+  private lazy val j2sOptListString        : AnyRef => Option[List[String]]         = optSeq2s(j2String)
+  private lazy val j2sOptListInt           : AnyRef => Option[List[Int]]            = optSeq2s(j2Int)
+  private lazy val j2sOptListLong          : AnyRef => Option[List[Long]]           = optSeq2s(j2Long)
+  private lazy val j2sOptListFloat         : AnyRef => Option[List[Float]]          = optSeq2s(j2Float)
+  private lazy val j2sOptListDouble        : AnyRef => Option[List[Double]]         = optSeq2s(j2Double)
+  private lazy val j2sOptListBoolean       : AnyRef => Option[List[Boolean]]        = optSeq2s(j2Boolean)
+  private lazy val j2sOptListBigInt        : AnyRef => Option[List[BigInt]]         = optSeq2s(j2BigInt)
+  private lazy val j2sOptListBigDecimal    : AnyRef => Option[List[BigDecimal]]     = optSeq2s(j2BigDecimal)
+  private lazy val j2sOptListDate          : AnyRef => Option[List[Date]]           = optSeq2s(j2Date)
+  private lazy val j2sOptListDuration      : AnyRef => Option[List[Duration]]       = optSeq2s(j2Duration)
+  private lazy val j2sOptListInstant       : AnyRef => Option[List[Instant]]        = optSeq2s(j2Instant)
+  private lazy val j2sOptListLocalDate     : AnyRef => Option[List[LocalDate]]      = optSeq2s(j2LocalDate)
+  private lazy val j2sOptListLocalTime     : AnyRef => Option[List[LocalTime]]      = optSeq2s(j2LocalTime)
+  private lazy val j2sOptListLocalDateTime : AnyRef => Option[List[LocalDateTime]]  = optSeq2s(j2LocalDateTime)
+  private lazy val j2sOptListOffsetTime    : AnyRef => Option[List[OffsetTime]]     = optSeq2s(j2OffsetTime)
+  private lazy val j2sOptListOffsetDateTime: AnyRef => Option[List[OffsetDateTime]] = optSeq2s(j2OffsetDateTime)
+  private lazy val j2sOptListZonedDateTime : AnyRef => Option[List[ZonedDateTime]]  = optSeq2s(j2ZonedDateTime)
+  private lazy val j2sOptListUUID          : AnyRef => Option[List[UUID]]           = optSeq2s(j2UUID)
+  private lazy val j2sOptListURI           : AnyRef => Option[List[URI]]            = optSeq2s(j2URI)
+  private lazy val j2sOptListByte          : AnyRef => Option[Array[Byte]]          = optByteAttr2s
+  private lazy val j2sOptListShort         : AnyRef => Option[List[Short]]          = optSeq2s(j2Short)
+  private lazy val j2sOptListChar          : AnyRef => Option[List[Char]]           = optSeq2s(j2Char)
 
 
   case class ResSeqOpt[T](

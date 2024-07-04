@@ -47,32 +47,33 @@ val persons: List[(String, Int, String)] =
 Data can also be fetched asynchronously in a `Future` or `ZIO`.
 
 
-### Main features of Molecule
+## Main features of Molecule
 
-- Support for [PostgreSQL](https://www.postgresql.org), [SQlite](https://sqlite.org), [MySQL](https://www.mysql.com), [MariaDB](https://mariadb.com), [H2](https://h2database.com/html/main.html) and [Datomic](http://www.datomic.com). More can easily be added.
-- Molecules for any database behave identically (each pass the same 1400+ test suite)
+- Support for [PostgreSQL](https://www.postgresql.org), [SQlite](https://sqlite.org), [MySQL](https://www.mysql.com), [MariaDB](https://mariadb.com), [H2](https://h2database.com/html/main.html) and [Datomic](http://www.datomic.com) databases. More can easily be added
+- Molecules for any database behave identically (each db pass the same SPI compliance 1400+ test suite)
 - Targets Scala 3.3, 2.13 and 2.12 on JVM and JS platforms
-- Multiple APIs: synchronous, asynchronous and ZIO
-- All Scala primitive types and collection types available as molecule attributes
-- Rich data structure elements:
-    - Nested data structures
+- Synchronous, Asynchronous (Future) and ZIO APIs
+- All Scala primitive types and collection types available as molecule attributes (!)
+- Typed methods to compose even complex molecules:
+    - Expression/aggregation functions
     - Validation
-    - Pagination
+    - Nested data
     - Sorting
+    - Pagination (offset/cursor)
     - Subscriptions
-- Typed database calls directly from Client with no need for Server implementation or JSON encoding/decoding
+- Molecules on ScalaJS side transparently operates server database with no JSON marshalling/wiring setup
 - Fast transparent binary serialization between Client and Server with [Boopickle](https://boopickle.suzaku.io) (no
   manual setup)
 - No macros
 - No complex type class implicits
-- Maximum type inference
+- Maximum type inference in IDE to easily choose available attributes/expressions/relationships
 
 
-### How does it work?
+## How does it work?
 
-1) Define a domain data model with Molecule's meta DSL
+1) Define a model of your domain data with Molecule's meta DSL
 ```scala
-object Refs extends DataModel(5) {
+object MyDomain extends DataModel(5) { 
 
   trait Person {
     val name     = oneString
@@ -88,16 +89,13 @@ object Refs extends DataModel(5) {
   }
 }
 ```
-2) Run `sbt compile -Dmolecule=true` once to generate molecule-enabling boilerplate code from
-   your [domain data model definition](https://github.com/scalamolecule/molecule/tree/main/coreTests/shared/src/main/scala/molecule/coreTests/dataModels/core/dataModel).
-   The [sbt-molecule](https://github.com/scalamolecule/sbt-molecule) plugin automatically also creates database schemas
-   for all database types.
-3) Now you can easily read and write from the database with plain vanilla Scala code in a fluent style (see examples below).
+2) Run `sbt compile -Dmolecule=true` once to generate molecule-enabling boilerplate code and db schemas.
+3) Compose fluent molecules with your domain terms to save and read data from your database.
 
 
-### Examples
+## Examples
 
-Same molecule query in all APIs returns the same data in different type wrappings:
+Molecules using any Database/API combination return the same data, just in different wrappings:
 
 Synchronous API, Datomic
 
@@ -135,6 +133,8 @@ val persons: ZIO[Conn, MoleculeError, List[(String, Int, String)]] =
   Person.name.age.Address.street.query.get
 ```
 
+### Transact data
+
 Save one entity
 
 ```scala
@@ -164,12 +164,12 @@ Person(bobId).delete.transact
 
 ## Get started
 
-Please clone [molecule-samples](https://github.com/scalamolecule/molecule-samples) and use one of the template projects
+Clone [molecule-samples](https://github.com/scalamolecule/molecule-samples) and use one of the template projects
 to get started.
 
     git clone https://github.com/scalamolecule/molecule-samples.git
 
-### Basic sbt setup
+## Basic sbt setup
 
 Add the following to your build files:
 
@@ -203,16 +203,19 @@ lazy val yourProject = project.in(file("app"))
   )
 ```
 
-## Explore
+## Explore code
 
 The `coreTests` module in this repo has several data model definitions and more than 1400 tests that show all details of
 how molecule can be used. This forms the Service Provider Interface that each database implementation needs to comply to
 in order to offer all functionality of Molecule.
 
-### Run jvm tests
 
-Make sure Docker is running to run tests for MariaDB, Mysql and Postgress (Datomic and H2 run in-memory).
-For instance on a mac you can start Docker Desktop.
+<details>
+
+<summary>Run JVM tests</summary>
+
+Make sure Docker is running to run tests for Postgres, SQlite, Mysql and MariaDB. Datomic and H2 can be run in memory for tests.
+On a mac you can for instance start Docker Desktop.
 
 Run the same test suite on jvm targeting various databases:
 
@@ -223,7 +226,12 @@ Run the same test suite on jvm targeting various databases:
     sbt sqlH2JVM/test
     sbt datalogDatomicJVM/test
 
-### Run js tests
+</details>
+
+
+<details>
+
+<summary>Run JS tests</summary>
 
 To run tests from the client side with Scala.js, first run a jvm server (Akka Http) in one process:
 
@@ -235,7 +243,12 @@ Then in another process/terminal window:
 
 (Scalajs tests don't work with Scala 3.x yet)
 
-### Test latest snapshot locally
+</details>
+
+
+<details>
+
+<summary>Test latest snapshot locally</summary>
 
 To be completely up-to-date, you can pull the latest snapshot from Github.
 Initially you clone the `sbt-molecule` and `molecule` repositories
@@ -262,6 +275,8 @@ To generate the boilerplate code with the latest plugin, run the following comma
 
 Now the boilerplate code for the core tests is generated and the various test suites can be run from your IDE
 (be prepared that it takes a while to compile all the tests for all SPI implementations).
+</details>
+
 
 ### Author
 

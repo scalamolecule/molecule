@@ -1,21 +1,9 @@
 package molecule.datalog.datomic
 
-import java.net.URI
-import java.time._
-import java.util
-import java.util.{Date, UUID}
-import datomic.Peer
-import molecule.base.error.{ExecutionError, ModelError}
-import molecule.core.action.Query
-import molecule.core.spi.TxReport
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.core.dsl.Refs.{A, B}
-import molecule.coreTests.dataModels.core.dsl.Types.Ns
-import molecule.coreTests.util.Array2List
 import molecule.datalog.datomic.async._
-import molecule.datalog.datomic.setup.{TestSuiteArray_datomic, TestSuite_datomic}
+import molecule.datalog.datomic.setup.TestSuite_datomic
 import utest._
-import scala.concurrent.Future
 import scala.language.implicitConversions
 
 //object AdhocJVM_datomic extends TestSuiteArray_datomic {
@@ -28,74 +16,22 @@ object AdhocJVM_datomic extends TestSuite_datomic {
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
 
-        _ <- Ns.string.int.Ref.string.query.inspect
-
-
-
+        _ <- Ns.int.insert(1).transact
+        _ <- Ns.int.query.get.map(_ ==> List(1))
       } yield ()
     }
 
 
-        "refs" - refs { implicit conn =>
-          import molecule.coreTests.dataModels.core.dsl.Refs._
-          implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+    "refs" - refs { implicit conn =>
+      import molecule.coreTests.dataModels.core.dsl.Refs._
+      for {
 
-          val x: B_1[Int, Int] = A.i_.B.iMap.remove(string3, string4)
-
-          for {
-
-            _ <- A.i.Bb.*?(B.s_?.i_?).insert(
-              (1, List()),
-              (2, List((Some("a"), None))),
-              (3, List((Some("b"), None), (Some("c"), None))),
-              (4, List((Some("d"), Some(1)))),
-              (5, List((Some("e"), Some(2)), (Some("f"), Some(3)))),
-              (6, List((Some("g"), Some(4)), (Some("h"), None))),
-            ).i.transact
-
-            // Filter by A ids, update B values
-            _ <- A.i_.Bb.i(4).update.i.transact
-
-            _ = {
-              Peer.q(
-                """[:find  ?b
-                  |        (pull ?id0 [
-                  |          {(:A/bb :limit nil :default "__none__") [
-                  |            (:B/s :limit nil :default "__none__")
-                  |            (:B/i :limit nil :default "__none__")]}])
-                  | :where [?a :A/i ?b]
-                  |        [(identity ?a) ?id0]]
-                  |        """.stripMargin,
-                conn.db
-              ).forEach { r => println(r) }
-            }
+        _ <- A.i.insert(2).transact
+        _ <- A.i.query.get.map(_ ==> List(2))
 
 
-
-            _ <- A.i.a1.Bb.*?(B.s_?.a1.i).query.i.get.map(_ ==> List(
-              (1, List()), //                               no B.i value
-              (2, List()), //                               no B.i value
-              (3, List()), //                               no B.i value
-              (4, List((Some("d"), 4))), //                 update in 1 ref entity
-              (5, List((Some("e"), 4), (Some("f"), 4))), // update in 2 ref entities
-              (6, List((Some("g"), 4))), //                 already had same value
-            ))
-
-            // Filter by A ids, upsert B values
-            _ <- A.i_.Bb.i(5).upsert.transact
-
-            _ <- A.i.a1.Bb.*?(B.s_?.a1.i).query.get.map(_ ==> List(
-              (1, List((None, 5))), //                      ref + insert
-              (2, List((Some("a"), 5))), //                 addition in 1 ref entity
-              (3, List((Some("b"), 5), (Some("c"), 5))), // addition in 2 ref entities
-              (4, List((Some("d"), 5))), //                 update in 1 ref entity
-              (5, List((Some("e"), 5), (Some("f"), 5))), // update in 2 ref entities
-              (6, List((Some("g"), 5), (Some("h"), 5))), // update in one ref entity and insertion in another
-            ))
-
-
-          } yield ()
-        }
+      } yield ()
+    }
 
 
     //    "unique" - unique { implicit conn =>

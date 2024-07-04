@@ -2,10 +2,8 @@ package molecule.sql.mysql.setup
 
 import molecule.base.api.Schema
 import molecule.core.spi.Conn
-import molecule.coreTests.dataModels.core.schema._
 import molecule.coreTests.setup.CoreTestZioSpec
-import molecule.sql.core.facade.{JdbcConn_JVM, JdbcHandler_JVM}
-import molecule.sql.mysql.marshalling.{Connection_mysql, Connection_mysql => c}
+import molecule.sql.mysql.marshalling.Connection_mysql
 import zio.{ZIO, ZLayer}
 
 trait ZioSpec_mysql extends CoreTestZioSpec {

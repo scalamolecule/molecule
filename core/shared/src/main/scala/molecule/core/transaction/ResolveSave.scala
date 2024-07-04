@@ -3,11 +3,9 @@ package molecule.core.transaction
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
-import molecule.core.marshalling.ConnProxy
 import molecule.core.transaction.ops.SaveOps
 import molecule.core.util.ModelUtils
 import scala.annotation.tailrec
-import scala.collection.immutable.ArraySeq
 
 class ResolveSave
   extends ModelUtils with MoleculeLogging { self: SaveOps =>

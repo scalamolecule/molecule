@@ -151,12 +151,13 @@ object functions {
     if (base == null)
       return null
 
-    val baseMap      = decode(new String(base))
+    val baseMap = decode(new String(base))
 
     if (removeKeys == null || removeKeys.isEmpty)
       return base
 
-    val remainingMap = baseMap.removedAll(removeKeys)
+    //    val remainingMap = baseMap.removedAll(removeKeys)
+    val remainingMap = baseMap.--(removeKeys)
 
     if (remainingMap.isEmpty)
       null // remove attribute entirely

@@ -1,6 +1,7 @@
 package codegen.boilerplate.api.expression
 
 import codegen.BoilerplateGenBase
+import scala.language.higherKinds
 
 
 object _ExprMapOpt extends BoilerplateGenBase( "ExprMapOpt", "/api/expression") {
@@ -10,6 +11,7 @@ object _ExprMapOpt extends BoilerplateGenBase( "ExprMapOpt", "/api/expression") 
        |package molecule.boilerplate.api.expression
        |
        |import molecule.boilerplate.ast.Model._
+       |import scala.language.higherKinds
        |$traits
        |""".stripMargin
   }

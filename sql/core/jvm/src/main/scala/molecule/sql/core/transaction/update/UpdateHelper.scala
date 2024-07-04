@@ -38,12 +38,18 @@ trait UpdateHelper extends SpiHelpers { self: SqlBase_JVM =>
     //    stages.foreach(println)
     //    println("")
 
+    var moveOn = false
     stages.foreach {
+      case _ if moveOn => ()
+
       case FindAllIds(refPath, elements) =>
         // Get and cache current ids for each table
         val arity = refPath.sliding(1, 2).flatten.toList.length
         getIdLists(arity, elements) match {
-          case Array() => return (Nil, Nil) // Abort if no filter matches no ids
+          case Array() =>
+            tableUpdates = Nil
+            moveOn = true // Abort if no filter matches no ids
+
           case idLists =>
             var i = 1
             idLists.foreach { idsList =>
@@ -194,7 +200,7 @@ trait UpdateHelper extends SpiHelpers { self: SqlBase_JVM =>
         //        elements.foreach(println)
 
         val table = update_getData(conn, Update(elements, true))._1.head
-//        val table = update_getData(conn, elements, true)._1.head
+        //        val table = update_getData(conn, elements, true)._1.head
         //        println("\n-- 4 ---- table -------- ")
         //        println(table)
 
@@ -419,7 +425,7 @@ trait UpdateHelper extends SpiHelpers { self: SqlBase_JVM =>
 
 
   protected def refUpdates(elements: List[Element], isUpsert: Boolean)(implicit conn: JdbcConn_JVM): Data = {
-//    val elements = update.elements
+    //    val elements = update.elements
 
     //    println("............ elements")
     //    elements.foreach(println)
@@ -446,7 +452,7 @@ trait UpdateHelper extends SpiHelpers { self: SqlBase_JVM =>
           //          println(s"------ X ------- $refPath  $n")
           //          updateModel.foreach(println)
           i += 1
-//          update_getData(conn, updateModel, isUpsert)._1
+          //          update_getData(conn, updateModel, isUpsert)._1
           update_getData(conn, Update(updateModel, isUpsert))._1
       }
       (tableUpdates, Nil)

@@ -45,7 +45,7 @@ trait ResolveRef[Tpl] { self: DatomicQueryBase with NestOpt_[Tpl] =>
     val levelIdSorter        = (_: Int) => (a: Row, b: Row) =>
       a.get(nestedIndex).asInstanceOf[jLong].compareTo(b.get(nestedIndex).asInstanceOf[jLong])
     val dummyIndexOfNestedId = 6
-    sortss = sortss.init :+ (sortss.last :+ (dummyIndexOfNestedId, levelIdSorter))
+    sortss = sortss.init :+ (sortss.last :+ (dummyIndexOfNestedId -> levelIdSorter))
     sortss = sortss :+ Nil
   }
 

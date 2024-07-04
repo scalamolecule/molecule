@@ -337,7 +337,7 @@ trait SqlUpdate
   }
 
   override def handleFilterAttr[T <: Attr with Tacit](filterAttr: T): Unit = {
-    filterAttr match {
+    filterAttr.asInstanceOf[Attr] match {
       case a: AttrSeqTac if a.op == Eq => noCollectionFilterEq(a.name)
       case a: AttrSetTac if a.op == Eq => noCollectionFilterEq(a.name)
       case _                           => ()
@@ -452,11 +452,11 @@ trait SqlUpdate
   }
 
 
-  protected def joinEq[T](
+  protected def joinEq[T, M[_] <: Iterable[_]](
     ns: String,
     refAttr: String,
     refNs: String,
-    vs: Iterable[T]
+    vs: M[T]
   ): Unit = {
     // Separate update of ref ids in join table -----------------------------
     val joinTable = ss(ns, refAttr, refNs)
@@ -467,7 +467,7 @@ trait SqlUpdate
       // Tables are reversed in JdbcConn_JVM and we want to delete first
       manualTableDatas = List(
         addJoins(joinTable, ns_id, refNs_id, id,
-          vs.map(_.asInstanceOf[Long])
+          vs.asInstanceOf[Iterable[T]].map(_.asInstanceOf[Long])
         ),
         deleteJoins(joinTable, ns_id, id)
       )
@@ -477,11 +477,11 @@ trait SqlUpdate
     }
   }
 
-  protected def joinAdd[T](
+  protected def joinAdd[T, M[_] <: Iterable[_]](
     ns: String,
     refAttr: String,
     refNs: String,
-    vs: Iterable[T]
+    vs: M[T]
   ): Unit = {
     if (vs.nonEmpty) {
       // Separate update of ref ids in join table -----------------------------
@@ -490,17 +490,17 @@ trait SqlUpdate
       val refNs_id  = ss(refNs, "id")
       manualTableDatas = List(
         addJoins(joinTable, ns_id, refNs_id, getUpdateId,
-          vs.map(_.asInstanceOf[Long])
+          vs.asInstanceOf[Iterable[T]].map(_.asInstanceOf[Long])
         )
       )
     }
   }
 
-  protected def joinRemove[T](
+  protected def joinRemove[T, M[_] <: Iterable[_]](
     ns: String,
     refAttr: String,
     refNs: String,
-    vs: Iterable[T]
+    vs: M[T]
   ): Unit = {
     if (vs.nonEmpty) {
       // Separate update of ref ids in join table -----------------------------

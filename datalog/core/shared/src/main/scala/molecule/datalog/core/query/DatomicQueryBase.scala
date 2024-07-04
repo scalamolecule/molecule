@@ -1,12 +1,10 @@
 package molecule.datalog.core.query
 
 import java.util.{Iterator => jIterator, List => jList}
-import molecule.base.error._
 import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
 import molecule.core.query.Model2QueryBase
 import molecule.core.util.JavaConversions
-import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 

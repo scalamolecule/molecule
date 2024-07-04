@@ -2,6 +2,7 @@
 package molecule.boilerplate.api.expression
 
 import molecule.boilerplate.ast.Model._
+import scala.language.higherKinds
 
 
 trait ExprBArTacOps_0[t, Ns1[_], Ns2[_, _]] {

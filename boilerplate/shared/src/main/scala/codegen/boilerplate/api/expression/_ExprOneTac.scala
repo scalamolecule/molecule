@@ -12,6 +12,7 @@ object _ExprOneTac extends BoilerplateGenBase("ExprOneTac", "/api/expression") {
        |import molecule.base.ast._
        |import molecule.boilerplate.api._
        |import molecule.boilerplate.ast.Model._
+       |import scala.language.higherKinds
        |$traits
        |""".stripMargin
   }
@@ -51,15 +52,15 @@ object _ExprOneTac extends BoilerplateGenBase("ExprOneTac", "/api/expression") {
          |
          |trait $fileName_$arity[${`A..V, `}t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]]
          |  extends ${fileName}Ops_$arity[${`A..V, `}t, Ns1, Ns2] {
-         |  def apply(                ): Ns1[${`A..V, `}t] with CardOne = _exprOneTac(NoValue, Nil       )
-         |  def apply(v    : t, vs: t*): Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Eq     , v +: vs   )
-         |  def apply(vs   : Seq[t]   ): Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Eq     , vs        )
-         |  def not  (v    : t, vs: t*): Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Neq    , v +: vs   )
-         |  def not  (vs   : Seq[t]   ): Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Neq    , vs        )
-         |  def <    (upper: t        ): Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Lt     , Seq(upper))
-         |  def <=   (upper: t        ): Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Le     , Seq(upper))
-         |  def >    (lower: t        ): Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Gt     , Seq(lower))
-         |  def >=   (lower: t        ): Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Ge     , Seq(lower))
+         |  def apply(                ): Ns1[${`A..V, `}t] with CardOne = _exprOneTac(NoValue, Nil         )
+         |  def apply(v    : t, vs: t*): Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Eq     , Seq(v) ++ vs)
+         |  def apply(vs   : Seq[t]   ): Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Eq     , vs          )
+         |  def not  (v    : t, vs: t*): Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Neq    , Seq(v) ++ vs)
+         |  def not  (vs   : Seq[t]   ): Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Neq    , vs          )
+         |  def <    (upper: t        ): Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Lt     , Seq(upper)  )
+         |  def <=   (upper: t        ): Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Le     , Seq(upper)  )
+         |  def >    (lower: t        ): Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Gt     , Seq(lower)  )
+         |  def >=   (lower: t        ): Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Ge     , Seq(lower)  )
          |  $attrExprs
          |}
          |trait $fileName_${arity}_String[${`A..V, `}t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]] extends $fileName_$arity[${`A..V, `}t, Ns1, Ns2] {

@@ -2,6 +2,7 @@
 package molecule.boilerplate.api.expression
 
 import molecule.boilerplate.ast.Model._
+import scala.language.higherKinds
 
 
 trait ExprBArMan_1[A, t, Ns1[_, _], Ns2[_, _, _]]

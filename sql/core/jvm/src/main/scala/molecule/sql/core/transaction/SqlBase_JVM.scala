@@ -105,7 +105,7 @@ trait SqlBase_JVM extends SqlDataType_JVM with ModelUtils with BaseHelpers {
       inserts = inserts.map {
         case (path, cols) if card == CardOne && path == curPath =>
           paramIndexes += (curPath, refAttr) -> (cols.length + 1)
-          (curPath, cols :+ (refAttr, ""))
+          (curPath, cols :+ (refAttr -> ""))
 
         case other => other
       }
@@ -113,12 +113,12 @@ trait SqlBase_JVM extends SqlDataType_JVM with ModelUtils with BaseHelpers {
     } else if (card == CardOne) {
       // Make card-one ref from current empty namespace
       paramIndexes += (curPath, refAttr) -> 1
-      inserts = inserts :+ (curPath, List((refAttr, "")))
+      inserts = inserts :+ (curPath -> List(refAttr -> ""))
 
     } else if (card == CardSet) {
       // ref to join table
       // Make card-many ref from current empty namespace
-      inserts = inserts :+ (curPath, Nil)
+      inserts = inserts :+ (curPath -> Nil)
     }
 
     lazy val joinPath = curPath :+ joinTablePath
@@ -138,12 +138,12 @@ trait SqlBase_JVM extends SqlDataType_JVM with ModelUtils with BaseHelpers {
     // Start new ref table
     val refPath = curPath ++ List(refAttr, refNs)
     curRefPath = refPath
-    inserts = inserts :+ (refPath, Nil)
+    inserts = inserts :+ (refPath -> Nil)
 
 
     if (card == CardOne) {
       // Card-one ref setter
-      val paramIndex = paramIndexes(curPath, refAttr)
+      val paramIndex = paramIndexes(curPath -> refAttr)
       var rowIndex   = 0
       (_: T) => {
         val colSetter: Setter = {

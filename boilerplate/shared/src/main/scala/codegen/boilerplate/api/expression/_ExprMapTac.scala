@@ -10,6 +10,7 @@ object _ExprMapTac extends BoilerplateGenBase("ExprMapTac", "/api/expression") {
        |package molecule.boilerplate.api.expression
        |
        |import molecule.boilerplate.ast.Model._
+       |import scala.language.higherKinds
        |$traits
        |""".stripMargin
   }
@@ -27,13 +28,13 @@ object _ExprMapTac extends BoilerplateGenBase("ExprMapTac", "/api/expression") {
          |trait $fileName_$arity[${`A..V, `}t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]]
          |  extends ${fileName}Ops_$arity[${`A..V, `}t, Ns1, Ns2] {
          |  def apply(                           ): Ns1[${`A..V, `}t] = _exprMap (NoValue, Map.empty[String, t])
-         |  def apply(key : String, keys: String*): Ns1[${`A..t, `}t] = _exprMapK(Eq     , key +: keys         )
+         |  def apply(key : String, keys: String*): Ns1[${`A..t, `}t] = _exprMapK(Eq     , Seq(key) ++ keys    )
          |  def apply(keys: Seq[String]          ): Ns1[${`A..t, `}t] = _exprMapK(Eq     , keys                )
-         |  def not  (key : String, keys: String*): Ns1[${`A..t, `}t] = _exprMapK(Neq    , key +: keys         )
+         |  def not  (key : String, keys: String*): Ns1[${`A..t, `}t] = _exprMapK(Neq    , Seq(key) ++ keys    )
          |  def not  (keys: Seq[String]          ): Ns1[${`A..t, `}t] = _exprMapK(Neq    , keys                )
-         |  def has  (v : t, vs: t*              ): Ns1[${`A..V, `}t] = _exprMapV(Has    , v +: vs             )
+         |  def has  (v : t, vs: t*              ): Ns1[${`A..V, `}t] = _exprMapV(Has    , Seq(v) ++ vs        )
          |  def has  (vs: Seq[t]                 ): Ns1[${`A..V, `}t] = _exprMapV(Has    , vs                  )
-         |  def hasNo(v : t, vs: t*              ): Ns1[${`A..V, `}t] = _exprMapV(HasNo  , v +: vs             )
+         |  def hasNo(v : t, vs: t*              ): Ns1[${`A..V, `}t] = _exprMapV(HasNo  , Seq(v) ++ vs        )
          |  def hasNo(vs: Seq[t]                 ): Ns1[${`A..V, `}t] = _exprMapV(HasNo  , vs                  )
          |}""".stripMargin
   }

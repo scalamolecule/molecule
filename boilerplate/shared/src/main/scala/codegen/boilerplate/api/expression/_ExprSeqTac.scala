@@ -12,6 +12,7 @@ object _ExprSeqTac extends BoilerplateGenBase("ExprSeqTac", "/api/expression") {
        |import molecule.base.ast._
        |import molecule.boilerplate.api._
        |import molecule.boilerplate.ast.Model._
+       |import scala.language.higherKinds
        |$traits
        |""".stripMargin
   }
@@ -41,10 +42,10 @@ object _ExprSeqTac extends BoilerplateGenBase("ExprSeqTac", "/api/expression") {
          |  extends ${fileName}Ops_$arity[${`A..V, `}t, Ns1, Ns2] {
          |  def apply(                ): Ns1[${`A..V, `}t] = _exprSeq(NoValue, Seq.empty[t])
          |  def apply(seq: Seq[t]     ): Ns1[${`A..V, `}t] = _exprSeq(Eq     , seq         )
-         |  def has  (v  : t, vs: t*  ): Ns1[${`A..V, `}t] = _exprSeq(Has    , v +: vs     )
-         |  def has  (vs : Iterable[t]): Ns1[${`A..V, `}t] = _exprSeq(Has    , vs.toSeq    )
-         |  def hasNo(v  : t, vs: t*  ): Ns1[${`A..V, `}t] = _exprSeq(HasNo  , v +: vs     )
-         |  def hasNo(vs : Iterable[t]): Ns1[${`A..V, `}t] = _exprSeq(HasNo  , vs.toSeq    )
+         |  def has  (v  : t, vs: t*  ): Ns1[${`A..V, `}t] = _exprSeq(Has    , Seq(v) ++ vs)
+         |  def has  (vs : Iterable[t]): Ns1[${`A..V, `}t] = _exprSeq(Has    , Seq()  ++ vs)
+         |  def hasNo(v  : t, vs: t*  ): Ns1[${`A..V, `}t] = _exprSeq(HasNo  , Seq(v) ++ vs)
+         |  def hasNo(vs : Iterable[t]): Ns1[${`A..V, `}t] = _exprSeq(HasNo  , Seq()  ++ vs)
          |  $attrExprs
          |}""".stripMargin
   }

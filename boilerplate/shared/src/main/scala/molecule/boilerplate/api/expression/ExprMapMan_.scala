@@ -2,6 +2,7 @@
 package molecule.boilerplate.api.expression
 
 import molecule.boilerplate.ast.Model._
+import scala.language.higherKinds
 
 
 trait ExprMapMan_1[A, t, Ns1[_, _], Ns2[_, _, _]]
@@ -11,7 +12,7 @@ trait ExprMapMan_1[A, t, Ns1[_, _], Ns2[_, _, _]]
   def apply (key  : String                          ): Ns1[t, t] = _exprMapK(Has    , Seq(key)             )
   def add   (pair : (String, t), pairs: (String, t)*): Ns1[A, t] = _exprMap (Add    , (pair +: pairs).toMap)
   def add   (pairs: Iterable[(String, t)]           ): Ns1[A, t] = _exprMap (Add    , pairs.toMap          )
-  def remove(key  : String, keys: String*           ): Ns1[t, t] = _exprMapK(Remove , key +: keys          )
+  def remove(key  : String, keys: String*           ): Ns1[t, t] = _exprMapK(Remove , Seq(key) ++ keys     )
   def remove(keys : Seq[String]                     ): Ns1[t, t] = _exprMapK(Remove , keys                 )
 }
 
@@ -23,7 +24,7 @@ trait ExprMapMan_2[A, B, t, Ns1[_, _, _], Ns2[_, _, _, _]]
   def apply (key  : String                          ): Ns1[A, t, t] = _exprMapK(Has    , Seq(key)             )
   def add   (pair : (String, t), pairs: (String, t)*): Ns1[A, B, t] = _exprMap (Add    , (pair +: pairs).toMap)
   def add   (pairs: Iterable[(String, t)]           ): Ns1[A, B, t] = _exprMap (Add    , pairs.toMap          )
-  def remove(key  : String, keys: String*           ): Ns1[A, t, t] = _exprMapK(Remove , key +: keys          )
+  def remove(key  : String, keys: String*           ): Ns1[A, t, t] = _exprMapK(Remove , Seq(key) ++ keys     )
   def remove(keys : Seq[String]                     ): Ns1[A, t, t] = _exprMapK(Remove , keys                 )
 }
 
@@ -35,7 +36,7 @@ trait ExprMapMan_3[A, B, C, t, Ns1[_, _, _, _], Ns2[_, _, _, _, _]]
   def apply (key  : String                          ): Ns1[A, B, t, t] = _exprMapK(Has    , Seq(key)             )
   def add   (pair : (String, t), pairs: (String, t)*): Ns1[A, B, C, t] = _exprMap (Add    , (pair +: pairs).toMap)
   def add   (pairs: Iterable[(String, t)]           ): Ns1[A, B, C, t] = _exprMap (Add    , pairs.toMap          )
-  def remove(key  : String, keys: String*           ): Ns1[A, B, t, t] = _exprMapK(Remove , key +: keys          )
+  def remove(key  : String, keys: String*           ): Ns1[A, B, t, t] = _exprMapK(Remove , Seq(key) ++ keys     )
   def remove(keys : Seq[String]                     ): Ns1[A, B, t, t] = _exprMapK(Remove , keys                 )
 }
 
@@ -47,7 +48,7 @@ trait ExprMapMan_4[A, B, C, D, t, Ns1[_, _, _, _, _], Ns2[_, _, _, _, _, _]]
   def apply (key  : String                          ): Ns1[A, B, C, t, t] = _exprMapK(Has    , Seq(key)             )
   def add   (pair : (String, t), pairs: (String, t)*): Ns1[A, B, C, D, t] = _exprMap (Add    , (pair +: pairs).toMap)
   def add   (pairs: Iterable[(String, t)]           ): Ns1[A, B, C, D, t] = _exprMap (Add    , pairs.toMap          )
-  def remove(key  : String, keys: String*           ): Ns1[A, B, C, t, t] = _exprMapK(Remove , key +: keys          )
+  def remove(key  : String, keys: String*           ): Ns1[A, B, C, t, t] = _exprMapK(Remove , Seq(key) ++ keys     )
   def remove(keys : Seq[String]                     ): Ns1[A, B, C, t, t] = _exprMapK(Remove , keys                 )
 }
 
@@ -59,7 +60,7 @@ trait ExprMapMan_5[A, B, C, D, E, t, Ns1[_, _, _, _, _, _], Ns2[_, _, _, _, _, _
   def apply (key  : String                          ): Ns1[A, B, C, D, t, t] = _exprMapK(Has    , Seq(key)             )
   def add   (pair : (String, t), pairs: (String, t)*): Ns1[A, B, C, D, E, t] = _exprMap (Add    , (pair +: pairs).toMap)
   def add   (pairs: Iterable[(String, t)]           ): Ns1[A, B, C, D, E, t] = _exprMap (Add    , pairs.toMap          )
-  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, t, t] = _exprMapK(Remove , key +: keys          )
+  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, t, t] = _exprMapK(Remove , Seq(key) ++ keys     )
   def remove(keys : Seq[String]                     ): Ns1[A, B, C, D, t, t] = _exprMapK(Remove , keys                 )
 }
 
@@ -71,7 +72,7 @@ trait ExprMapMan_6[A, B, C, D, E, F, t, Ns1[_, _, _, _, _, _, _], Ns2[_, _, _, _
   def apply (key  : String                          ): Ns1[A, B, C, D, E, t, t] = _exprMapK(Has    , Seq(key)             )
   def add   (pair : (String, t), pairs: (String, t)*): Ns1[A, B, C, D, E, F, t] = _exprMap (Add    , (pair +: pairs).toMap)
   def add   (pairs: Iterable[(String, t)]           ): Ns1[A, B, C, D, E, F, t] = _exprMap (Add    , pairs.toMap          )
-  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, E, t, t] = _exprMapK(Remove , key +: keys          )
+  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, E, t, t] = _exprMapK(Remove , Seq(key) ++ keys     )
   def remove(keys : Seq[String]                     ): Ns1[A, B, C, D, E, t, t] = _exprMapK(Remove , keys                 )
 }
 
@@ -83,7 +84,7 @@ trait ExprMapMan_7[A, B, C, D, E, F, G, t, Ns1[_, _, _, _, _, _, _, _], Ns2[_, _
   def apply (key  : String                          ): Ns1[A, B, C, D, E, F, t, t] = _exprMapK(Has    , Seq(key)             )
   def add   (pair : (String, t), pairs: (String, t)*): Ns1[A, B, C, D, E, F, G, t] = _exprMap (Add    , (pair +: pairs).toMap)
   def add   (pairs: Iterable[(String, t)]           ): Ns1[A, B, C, D, E, F, G, t] = _exprMap (Add    , pairs.toMap          )
-  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, E, F, t, t] = _exprMapK(Remove , key +: keys          )
+  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, E, F, t, t] = _exprMapK(Remove , Seq(key) ++ keys     )
   def remove(keys : Seq[String]                     ): Ns1[A, B, C, D, E, F, t, t] = _exprMapK(Remove , keys                 )
 }
 
@@ -95,7 +96,7 @@ trait ExprMapMan_8[A, B, C, D, E, F, G, H, t, Ns1[_, _, _, _, _, _, _, _, _], Ns
   def apply (key  : String                          ): Ns1[A, B, C, D, E, F, G, t, t] = _exprMapK(Has    , Seq(key)             )
   def add   (pair : (String, t), pairs: (String, t)*): Ns1[A, B, C, D, E, F, G, H, t] = _exprMap (Add    , (pair +: pairs).toMap)
   def add   (pairs: Iterable[(String, t)]           ): Ns1[A, B, C, D, E, F, G, H, t] = _exprMap (Add    , pairs.toMap          )
-  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, E, F, G, t, t] = _exprMapK(Remove , key +: keys          )
+  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, E, F, G, t, t] = _exprMapK(Remove , Seq(key) ++ keys     )
   def remove(keys : Seq[String]                     ): Ns1[A, B, C, D, E, F, G, t, t] = _exprMapK(Remove , keys                 )
 }
 
@@ -107,7 +108,7 @@ trait ExprMapMan_9[A, B, C, D, E, F, G, H, I, t, Ns1[_, _, _, _, _, _, _, _, _, 
   def apply (key  : String                          ): Ns1[A, B, C, D, E, F, G, H, t, t] = _exprMapK(Has    , Seq(key)             )
   def add   (pair : (String, t), pairs: (String, t)*): Ns1[A, B, C, D, E, F, G, H, I, t] = _exprMap (Add    , (pair +: pairs).toMap)
   def add   (pairs: Iterable[(String, t)]           ): Ns1[A, B, C, D, E, F, G, H, I, t] = _exprMap (Add    , pairs.toMap          )
-  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, E, F, G, H, t, t] = _exprMapK(Remove , key +: keys          )
+  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, E, F, G, H, t, t] = _exprMapK(Remove , Seq(key) ++ keys     )
   def remove(keys : Seq[String]                     ): Ns1[A, B, C, D, E, F, G, H, t, t] = _exprMapK(Remove , keys                 )
 }
 
@@ -119,7 +120,7 @@ trait ExprMapMan_10[A, B, C, D, E, F, G, H, I, J, t, Ns1[_, _, _, _, _, _, _, _,
   def apply (key  : String                          ): Ns1[A, B, C, D, E, F, G, H, I, t, t] = _exprMapK(Has    , Seq(key)             )
   def add   (pair : (String, t), pairs: (String, t)*): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprMap (Add    , (pair +: pairs).toMap)
   def add   (pairs: Iterable[(String, t)]           ): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprMap (Add    , pairs.toMap          )
-  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, E, F, G, H, I, t, t] = _exprMapK(Remove , key +: keys          )
+  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, E, F, G, H, I, t, t] = _exprMapK(Remove , Seq(key) ++ keys     )
   def remove(keys : Seq[String]                     ): Ns1[A, B, C, D, E, F, G, H, I, t, t] = _exprMapK(Remove , keys                 )
 }
 
@@ -131,7 +132,7 @@ trait ExprMapMan_11[A, B, C, D, E, F, G, H, I, J, K, t, Ns1[_, _, _, _, _, _, _,
   def apply (key  : String                          ): Ns1[A, B, C, D, E, F, G, H, I, J, t, t] = _exprMapK(Has    , Seq(key)             )
   def add   (pair : (String, t), pairs: (String, t)*): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprMap (Add    , (pair +: pairs).toMap)
   def add   (pairs: Iterable[(String, t)]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprMap (Add    , pairs.toMap          )
-  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, E, F, G, H, I, J, t, t] = _exprMapK(Remove , key +: keys          )
+  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, E, F, G, H, I, J, t, t] = _exprMapK(Remove , Seq(key) ++ keys     )
   def remove(keys : Seq[String]                     ): Ns1[A, B, C, D, E, F, G, H, I, J, t, t] = _exprMapK(Remove , keys                 )
 }
 
@@ -143,7 +144,7 @@ trait ExprMapMan_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns1[_, _, _, _, _, _,
   def apply (key  : String                          ): Ns1[A, B, C, D, E, F, G, H, I, J, K, t, t] = _exprMapK(Has    , Seq(key)             )
   def add   (pair : (String, t), pairs: (String, t)*): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprMap (Add    , (pair +: pairs).toMap)
   def add   (pairs: Iterable[(String, t)]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprMap (Add    , pairs.toMap          )
-  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, t, t] = _exprMapK(Remove , key +: keys          )
+  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, t, t] = _exprMapK(Remove , Seq(key) ++ keys     )
   def remove(keys : Seq[String]                     ): Ns1[A, B, C, D, E, F, G, H, I, J, K, t, t] = _exprMapK(Remove , keys                 )
 }
 
@@ -155,7 +156,7 @@ trait ExprMapMan_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns1[_, _, _, _, _,
   def apply (key  : String                          ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t, t] = _exprMapK(Has    , Seq(key)             )
   def add   (pair : (String, t), pairs: (String, t)*): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprMap (Add    , (pair +: pairs).toMap)
   def add   (pairs: Iterable[(String, t)]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprMap (Add    , pairs.toMap          )
-  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t, t] = _exprMapK(Remove , key +: keys          )
+  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t, t] = _exprMapK(Remove , Seq(key) ++ keys     )
   def remove(keys : Seq[String]                     ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t, t] = _exprMapK(Remove , keys                 )
 }
 
@@ -167,7 +168,7 @@ trait ExprMapMan_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns1[_, _, _, _,
   def apply (key  : String                          ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t, t] = _exprMapK(Has    , Seq(key)             )
   def add   (pair : (String, t), pairs: (String, t)*): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprMap (Add    , (pair +: pairs).toMap)
   def add   (pairs: Iterable[(String, t)]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprMap (Add    , pairs.toMap          )
-  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t, t] = _exprMapK(Remove , key +: keys          )
+  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t, t] = _exprMapK(Remove , Seq(key) ++ keys     )
   def remove(keys : Seq[String]                     ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t, t] = _exprMapK(Remove , keys                 )
 }
 
@@ -179,7 +180,7 @@ trait ExprMapMan_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns1[_, _, _,
   def apply (key  : String                          ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, t] = _exprMapK(Has    , Seq(key)             )
   def add   (pair : (String, t), pairs: (String, t)*): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprMap (Add    , (pair +: pairs).toMap)
   def add   (pairs: Iterable[(String, t)]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprMap (Add    , pairs.toMap          )
-  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, t] = _exprMapK(Remove , key +: keys          )
+  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, t] = _exprMapK(Remove , Seq(key) ++ keys     )
   def remove(keys : Seq[String]                     ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, t] = _exprMapK(Remove , keys                 )
 }
 
@@ -191,7 +192,7 @@ trait ExprMapMan_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns1[_, _,
   def apply (key  : String                          ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, t] = _exprMapK(Has    , Seq(key)             )
   def add   (pair : (String, t), pairs: (String, t)*): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprMap (Add    , (pair +: pairs).toMap)
   def add   (pairs: Iterable[(String, t)]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprMap (Add    , pairs.toMap          )
-  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, t] = _exprMapK(Remove , key +: keys          )
+  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, t] = _exprMapK(Remove , Seq(key) ++ keys     )
   def remove(keys : Seq[String]                     ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, t] = _exprMapK(Remove , keys                 )
 }
 
@@ -203,7 +204,7 @@ trait ExprMapMan_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns1[_,
   def apply (key  : String                          ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, t] = _exprMapK(Has    , Seq(key)             )
   def add   (pair : (String, t), pairs: (String, t)*): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprMap (Add    , (pair +: pairs).toMap)
   def add   (pairs: Iterable[(String, t)]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprMap (Add    , pairs.toMap          )
-  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, t] = _exprMapK(Remove , key +: keys          )
+  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, t] = _exprMapK(Remove , Seq(key) ++ keys     )
   def remove(keys : Seq[String]                     ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, t] = _exprMapK(Remove , keys                 )
 }
 
@@ -215,7 +216,7 @@ trait ExprMapMan_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Ns1
   def apply (key  : String                          ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, t] = _exprMapK(Has    , Seq(key)             )
   def add   (pair : (String, t), pairs: (String, t)*): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprMap (Add    , (pair +: pairs).toMap)
   def add   (pairs: Iterable[(String, t)]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprMap (Add    , pairs.toMap          )
-  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, t] = _exprMapK(Remove , key +: keys          )
+  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, t] = _exprMapK(Remove , Seq(key) ++ keys     )
   def remove(keys : Seq[String]                     ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, t] = _exprMapK(Remove , keys                 )
 }
 
@@ -227,7 +228,7 @@ trait ExprMapMan_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, 
   def apply (key  : String                          ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, t] = _exprMapK(Has    , Seq(key)             )
   def add   (pair : (String, t), pairs: (String, t)*): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprMap (Add    , (pair +: pairs).toMap)
   def add   (pairs: Iterable[(String, t)]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprMap (Add    , pairs.toMap          )
-  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, t] = _exprMapK(Remove , key +: keys          )
+  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, t] = _exprMapK(Remove , Seq(key) ++ keys     )
   def remove(keys : Seq[String]                     ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, t] = _exprMapK(Remove , keys                 )
 }
 
@@ -239,7 +240,7 @@ trait ExprMapMan_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, 
   def apply (key  : String                          ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, t] = _exprMapK(Has    , Seq(key)             )
   def add   (pair : (String, t), pairs: (String, t)*): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprMap (Add    , (pair +: pairs).toMap)
   def add   (pairs: Iterable[(String, t)]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprMap (Add    , pairs.toMap          )
-  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, t] = _exprMapK(Remove , key +: keys          )
+  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, t] = _exprMapK(Remove , Seq(key) ++ keys     )
   def remove(keys : Seq[String]                     ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, t] = _exprMapK(Remove , keys                 )
 }
 
@@ -251,7 +252,7 @@ trait ExprMapMan_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, 
   def apply (key  : String                          ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, t] = _exprMapK(Has    , Seq(key)             )
   def add   (pair : (String, t), pairs: (String, t)*): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprMap (Add    , (pair +: pairs).toMap)
   def add   (pairs: Iterable[(String, t)]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprMap (Add    , pairs.toMap          )
-  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, t] = _exprMapK(Remove , key +: keys          )
+  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, t] = _exprMapK(Remove , Seq(key) ++ keys     )
   def remove(keys : Seq[String]                     ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, t] = _exprMapK(Remove , keys                 )
 }
 
@@ -263,6 +264,6 @@ trait ExprMapMan_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, 
   def apply (key  : String                          ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, t] = _exprMapK(Has    , Seq(key)             )
   def add   (pair : (String, t), pairs: (String, t)*): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprMap (Add    , (pair +: pairs).toMap)
   def add   (pairs: Iterable[(String, t)]           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprMap (Add    , pairs.toMap          )
-  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, t] = _exprMapK(Remove , key +: keys          )
+  def remove(key  : String, keys: String*           ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, t] = _exprMapK(Remove , Seq(key) ++ keys     )
   def remove(keys : Seq[String]                     ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, t] = _exprMapK(Remove , keys                 )
 }

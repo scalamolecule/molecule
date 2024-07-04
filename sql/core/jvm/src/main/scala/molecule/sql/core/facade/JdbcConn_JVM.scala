@@ -195,7 +195,7 @@ case class JdbcConn_JVM(
         // Not getting ids from updates with MariaDB.
         // So we simply pick previous ids and the id supplied to the update
         ids.clear()
-        ids.addAll(idsMap.getOrElse(refPath, Nil) ++ curIds)
+        ids ++= (idsMap.getOrElse(refPath, Nil) ++ curIds)
       }
     }
     ps.close()

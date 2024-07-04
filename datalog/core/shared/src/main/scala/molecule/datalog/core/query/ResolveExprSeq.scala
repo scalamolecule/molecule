@@ -126,7 +126,7 @@ trait ResolveExprSeq[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSeq =>
         noCardManyFilterAttrExpr(attr)
       }
       seqExpr(false, attr, e, v, attr.op, seq, resSeq)
-      filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
+      filterAttrVars1 = filterAttrVars1 + (a -> (e -> v))
       filterAttrVars2.get(a).foreach(_(e, v))
     } { case (dir, filterPath, filterAttr) =>
       seqFilterExpr(attr, e, v, attr.op, s":${filterAttr.ns}/${filterAttr.attr}", resSeq)
@@ -140,7 +140,7 @@ trait ResolveExprSeq[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSeq =>
     val a = nsAttr(attr)
     attr.filterAttr.fold {
       seqExpr(true, attr, e, v, attr.op, seq, resSeq)
-      filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
+      filterAttrVars1 = filterAttrVars1 + (a -> (e -> v))
       filterAttrVars2.get(a).foreach(_(e, v))
     } { case (dir, filterPath, filterAttr) =>
       seqFilterExpr(attr, e, v, attr.op, s":${filterAttr.ns}/${filterAttr.attr}", resSeq)
