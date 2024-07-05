@@ -32,7 +32,7 @@ To have molecule jars generated, add `-Dmolecule=true`
 ## Compile JS
 
     sbt
-    moleculeJS/fastOptJS
+    moleculeJS/fastLinkJS
 
 
 ## Publish
@@ -48,3 +48,23 @@ Publish versions separately
     sbt ++2.12.19 publishLocal
     sbt ++2.12.19 publishSigned -Ddocs=true
 
+
+### Misc
+
+To see available paths for tests if generated code is missing on classpath
+
+    sbt
+    test:soureDirectories
+
+or inspect
+
+    sbt
+    inspect tree compile:managedSourceDirectories
+    inspect tree compile:unmanagedSourceDirectories
+    inspect tree compile
+    inspect tree test:managedSourceDirectories
+    inspect tree test:unmanagedSourceDirectories
+    inspect tree test
+                     
+etc..
+                 

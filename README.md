@@ -182,7 +182,7 @@ sbt.version = 1.10.0
 `project/plugins.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.7.0")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.8.0")
 ```
 
 `build.sbt`:
@@ -193,11 +193,12 @@ lazy val yourProject = project.in(file("app"))
   .settings(
     libraryDependencies ++= Seq(
       // One or more of:
-      "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.8.0",
-      "org.scalamolecule" %%% "molecule-sql-h2" % "0.8.0",
-      "org.scalamolecule" %%% "molecule-sql-mariadb" % "0.8.0",
-      "org.scalamolecule" %%% "molecule-sql-mysql" % "0.8.0",
-      "org.scalamolecule" %%% "molecule-sql-postgres" % "0.8.0",
+      "org.scalamolecule" %%% "molecule-sql-postgres" % "0.9.0",
+      "org.scalamolecule" %%% "molecule-sql-sqlite" % "0.9.0",
+      "org.scalamolecule" %%% "molecule-sql-mysql" % "0.9.0",
+      "org.scalamolecule" %%% "molecule-sql-mariadb" % "0.9.0",
+      "org.scalamolecule" %%% "molecule-sql-h2" % "0.9.0",
+      "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.9.0",
     ),
     moleculeSchemas := Seq("app") // paths to your data model definitions
   )
