@@ -62,7 +62,7 @@ Data can also be fetched asynchronously in a `Future` or `ZIO`.
     - Pagination (offset/cursor)
     - Subscriptions
 - Molecules on ScalaJS side transparently operates server database with no JSON marshalling/wiring setup
-- Fast transparent binary serialization between Client and Server with [Boopickle](https://boopickle.suzaku.io) (no
+- Fast transparent binary serialization between Client and Server with [Boopickle](https://github.com/suzaku-io/boopickle) (no
   manual setup)
 - No macros
 - No complex type class implicits
