@@ -1,9 +1,11 @@
 package molecule.datalog.datomic
 
+import molecule.boilerplate.api.{NestedInit_01, NestedInit_02}
 import molecule.core.util.Executor._
 import molecule.datalog.datomic.async._
 import molecule.datalog.datomic.setup.TestSuite_datomic
 import utest._
+import scala.concurrent.Future
 import scala.language.implicitConversions
 
 //object AdhocJVM_datomic extends TestSuiteArray_datomic {
@@ -28,6 +30,10 @@ object AdhocJVM_datomic extends TestSuite_datomic {
 
         _ <- A.i.insert(2).transact
         _ <- A.i.query.get.map(_ ==> List(2))
+
+        _ <- A.i.Bb.*(B.i).query.get
+
+        //        _ <- A.i.Bb.?(B.i).query.get
 
 
       } yield ()

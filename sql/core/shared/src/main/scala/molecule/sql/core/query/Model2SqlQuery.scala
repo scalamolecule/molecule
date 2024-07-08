@@ -102,6 +102,9 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
       }
 
       case ref: Ref                       => resolveRef0(ref, tail)
+      case ref: OptRef                    =>
+//        ???
+        ()
       case backRef: BackRef               => resolveBackRef(backRef, tail)
       case Nested(ref, nestedElements)    => resolveNested(ref, nestedElements, tail)
       case NestedOpt(ref, nestedElements) => resolveNestedOpt(ref, nestedElements, tail)
@@ -117,9 +120,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
         s"Only cardinality-one refs allowed in optional nested queries ($ns.$refAttr)."
       )
     }
-
     handleRef(refAttr, refNs)
-
     val singleOptSet = tail.length == 1 && tail.head.isInstanceOf[AttrSetOpt]
     resolveRef(ref, singleOptSet)
     resolve(tail)
@@ -185,9 +186,10 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
   final private def validateRefNs(ref: Ref, nestedElements: List[Element]): Unit = {
     val refName  = ref.refAttr.capitalize
     val nestedNs = nestedElements.head match {
-      case a: Attr => a.ns
-      case r: Ref  => r.ns
-      case other   => unexpectedElement(other)
+      case a: Attr   => a.ns
+      case r: Ref    => r.ns
+      case r: OptRef => r.ref.ns
+      case other     => unexpectedElement(other)
     }
     if (ref.refNs != nestedNs) {
       throw ModelError(s"`$refName` can only nest to `${ref.refNs}`. Found: `$nestedNs`")
@@ -228,11 +230,11 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
   protected def mkJoins(indents: Int): String = {
     if (joins.isEmpty) "" else {
       val indent = "  " * indents
-      val max1  = joins.map(_._1.length).max
-      val max2  = joins.map(_._2.length).max
-      val max3  = joins.map(_._3.length).max
-      val max4  = joins.map(_._4.length).max + 1
-      val hasAs = joins.exists(_._3.nonEmpty)
+      val max1   = joins.map(_._1.length).max
+      val max2   = joins.map(_._2.length).max
+      val max3   = joins.map(_._3.length).max
+      val max4   = joins.map(_._4.length).max + 1
+      val hasAs  = joins.exists(_._3.nonEmpty)
       joins.map {
         case (join, table, as, lft, rgt) =>
           val join_  = join + padS(max1, join)

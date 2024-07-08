@@ -35,7 +35,7 @@ trait ResolveNestedPull[Tpl]
             case a: Attr if a.op != V => throw ModelError(
               s"Expressions not allowed in optional nested queries (${a.name})."
             )
-            case a: AttrOneMan =>
+            case a: AttrOneMan        =>
               resAttrOneMan(a, attrIndex)
               addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(i, a))
 
@@ -68,6 +68,7 @@ trait ResolveNestedPull[Tpl]
               addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(i, a))
 
             case ref: Ref             => (acc, Some(ref), tail, attrIndex)
+            case optRef: OptRef       => ??? //(acc, Some(optRef), Nil, attrIndex)
             case backRef: BackRef     => (acc, Some(backRef), tail, attrIndex)
             case nestedOpt: NestedOpt => (acc, Some(nestedOpt), Nil, attrIndex)
             case _: Nested            => noMixedNestedModes

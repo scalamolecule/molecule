@@ -29,7 +29,8 @@ trait ModelUtils {
   final protected def getInitialNs(elements: List[Element]): String = {
     elements.head match {
       case a: Attr                              => a.ns
-      case b: Ref                               => b.ns
+      case r: Ref                               => r.ns
+      case OptRef(Ref(ns, _, _, _, _, _), _)    => ns
       case Nested(Ref(ns, _, _, _, _, _), _)    => ns
       case NestedOpt(Ref(ns, _, _, _, _, _), _) => ns
       case other                                => throw ModelError("Unexpected head element: " + other)
@@ -41,7 +42,8 @@ trait ModelUtils {
     elements.head match {
       case a: Attr if a.attr == "id"            => getInitialNonGenericNs(elements.tail)
       case a: Attr                              => a.ns
-      case b: Ref                               => b.ns
+      case r: Ref                               => r.ns
+      case OptRef(Ref(ns, _, _, _, _, _), _)    => ns
       case Nested(Ref(ns, _, _, _, _, _), _)    => ns
       case NestedOpt(Ref(ns, _, _, _, _, _), _) => ns
       case other                                => throw ModelError("Unexpected head element: " + other)
@@ -62,6 +64,7 @@ trait ModelUtils {
     elements match {
       case element :: tail => element match {
         case a: Attr          => getAttrNames(tail, attrs + a.name)
+        case OptRef(_, es)    => getAttrNames(tail ++ es, attrs)
         case Nested(_, es)    => getAttrNames(tail ++ es, attrs)
         case NestedOpt(_, es) => getAttrNames(tail ++ es, attrs)
         case _                => getAttrNames(tail, attrs)
@@ -82,7 +85,8 @@ trait ModelUtils {
           element match {
             case a: Attr      => prepare(tail, acc :+ prepareAttr(a))
             case r: Ref       => prepare(tail, acc :+ prepareRef(r))
-            case r: BackRef   => prepare(tail, acc :+ prepareBackRef(r))
+            case r: OptRef    => ???
+            case b: BackRef   => prepare(tail, acc :+ prepareBackRef(b))
             case n: Nested    => prepare(tail, acc :+ prepareNested(n))
             case n: NestedOpt => prepare(tail, acc :+ prepareNestedOpt(n))
           }

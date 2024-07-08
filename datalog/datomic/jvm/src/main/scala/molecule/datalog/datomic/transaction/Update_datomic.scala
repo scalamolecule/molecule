@@ -664,7 +664,7 @@ trait Update_datomic
   override def handleIds(ns: String, ids1: Seq[Long]): Unit = ()
   override def handleFilterAttr[T <: Attr with Tacit](filterAttr: T): Unit = ()
 
-  override def handleRefNs(ref: Ref): Unit = {
+  override def handleRef(ref: Ref): Unit = {
     val Ref(ns, refAttr0, refNs, card, _, _) = ref
 
     currentNsPath = currentNsPath match {

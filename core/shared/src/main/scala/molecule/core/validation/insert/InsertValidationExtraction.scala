@@ -80,6 +80,8 @@ trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { sel
         case Ref(_, refAttr, _, _, _, _) =>
           getValidators(nsMap, tail, validators, tplIndex, prevRefs :+ refAttr)
 
+        case OptRef(Ref(ns, refAttr, _, _, _, _), optRefElements) => ???
+
         case BackRef(backRefNs, _, _) =>
           tail.head match {
             case Ref(_, refAttr, _, _, _, _) if prevRefs.contains(refAttr) => throw ModelError(

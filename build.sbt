@@ -19,7 +19,7 @@ inThisBuild(
     organizationName := "ScalaMolecule",
     organizationHomepage := Some(url("http://www.scalamolecule.org")),
     versionScheme := Some("early-semver"),
-    version := "0.9.0",
+    version := "0.9.1-SNAPSHOT",
     scalaVersion := scala213,
     crossScalaVersions := allScala,
 
@@ -132,7 +132,7 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
     // Generate Molecule boilerplate code for tests with `sbt clean compile -Dmolecule=true`
     moleculePluginActive := sys.props.get("molecule").contains("true"),
     //    moleculeMakeJars := !sys.props.get("moleculeJars").contains("false"), // default: true
-    moleculeMakeJars := false, // default: true
+    //    moleculeMakeJars := false, // default: true
 
     // Multiple directories with data models
     moleculeDataModelPaths := Seq(
@@ -242,7 +242,7 @@ lazy val datalogDatomic = crossProject(JSPlatform, JVMPlatform)
 //    // Generate Molecule boilerplate code for tests with `sbt clean compile -Dmolecule=true`
 //    moleculePluginActive := sys.props.get("molecule").contains("true"),
 //    //    moleculeMakeJars := !sys.props.get("moleculeJars").contains("false"), // default: true
-//    //    moleculeMakeJars := false, // default: true
+//    moleculeMakeJars := false, // default: true
 //
 //    // Multiple directories with data models
 //    moleculeDataModelPaths := Seq(
@@ -277,7 +277,9 @@ lazy val datalogDatomic = crossProject(JSPlatform, JVMPlatform)
 //    ),
 //  )
 //  .jsSettings(jsEnvironment)
-//  .dependsOn(coreTests % "compile->compile;test->test")
+//  .dependsOn(core)
+//  .dependsOn(coreTests % "test->test")
+
 
 lazy val sqlCore = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)

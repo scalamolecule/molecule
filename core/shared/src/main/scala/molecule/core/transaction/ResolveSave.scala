@@ -48,6 +48,10 @@ class ResolveSave
           addRef(ns, refAttr, refNs, card)
           resolve(tail)
 
+        case _: OptRef    => throw ModelError(
+          "Optional ref not allowed in save molecule. Please use mandatory ref instead."
+        )
+
         case BackRef(backRefNs, _, _) =>
           addBackRef(backRefNs)
           resolve(tail)

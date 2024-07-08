@@ -75,6 +75,8 @@ trait SpiHelpers extends ModelUtils {
         curNs = r.refNs
         hasData = false
 
+      case r: OptRef => ???
+
       case BackRef(_, ns, _) => curNs = ns
       case _                 => noNested
     }
@@ -337,6 +339,8 @@ trait SpiHelpers extends ModelUtils {
       case ref: Ref => throw ModelError(
         s"Can't $update attributes in card-many referenced namespace `${ref.refAttr.capitalize}`"
       )
+
+      case ref: OptRef => ???
 
       case other => idsModel += other
     }

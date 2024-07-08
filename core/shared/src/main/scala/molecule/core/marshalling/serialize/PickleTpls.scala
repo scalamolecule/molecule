@@ -122,6 +122,8 @@ case class PickleTpls(
           prevRefs += refAttr
           resolvePicklers(tail, picklers, tplIndex)
 
+        case OptRef(_, optRefElements) => ???
+
         case BackRef(backRefNs, _, _) =>
           tail.head match {
             case Ref(_, refAttr, _, _, _, _) if prevRefs.contains(refAttr) => throw ModelError(

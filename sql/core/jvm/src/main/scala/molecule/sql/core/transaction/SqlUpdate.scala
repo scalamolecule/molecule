@@ -345,7 +345,7 @@ trait SqlUpdate
     filterElements = filterElements :+ filterAttr
   }
 
-  override def handleRefNs(ref: Ref): Unit = {
+  override def handleRef(ref: Ref): Unit = {
     throw ModelError(s"Can't apply entity ids twice in update.")
   }
 

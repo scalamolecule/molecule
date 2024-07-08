@@ -170,6 +170,7 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
         }
 
       case ref: Ref                             => resolve(resolveRef(es, ref), tail)
+      case OptRef(ref, nestedElements)          => ???
       case _: BackRef                           => resolve(resolveBackRef(es), tail)
       case Nested(ref, nestedElements)          => resolve(resolveNested(es, ref, nestedElements), tail)
       case NestedOpt(nestedRef, nestedElements) => resolve(resolveNestedOpt(es, nestedRef, nestedElements), tail)
@@ -217,6 +218,7 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
     val nestedNs = nestedElements.head match {
       case a: Attr => a.ns
       case r: Ref  => r.ns
+      case r: OptRef  => r.ref.ns
       case other   => unexpectedElement(other)
     }
     if (ref.refNs != nestedNs)

@@ -2704,6 +2704,8 @@ trait ModelTransformations_ {
         case r: Ref  =>
           val p = if (path.isEmpty) List(r.ns, r.refAttr, r.refNs) else List(r.refAttr, r.refNs)
           resolvePath(tail, path ++ p)
+        case r: OptRef  =>
+          ???
         case a: Attr => resolvePath(tail, if (path.isEmpty) List(a.ns) else path)
         case other   => throw ModelError("Invalid element in filter attribute path: " + other)
       }
@@ -3365,6 +3367,7 @@ trait ModelTransformations_ {
           case _             => topLevelAttrCount(tail, count)
         }
         case _: Ref           => topLevelAttrCount(tail, count)
+        case OptRef(_, es)    => ???
         case _: BackRef       => topLevelAttrCount(tail, count)
         case Nested(_, es)    => topLevelAttrCount(tail, count + countNested(es))
         case NestedOpt(_, es) => topLevelAttrCount(tail, count + countNested(es))

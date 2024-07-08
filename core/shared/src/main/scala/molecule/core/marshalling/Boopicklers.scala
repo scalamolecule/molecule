@@ -410,6 +410,7 @@ object Boopicklers extends MoleculeLogging {
   implicit val pickleElement: CompositePickler[Element] = compositePickler[Element]
   pickleElement.addConcreteType[Attr]
   pickleElement.addConcreteType[Ref]
+  pickleElement.addConcreteType[OptRef]
   pickleElement.addConcreteType[BackRef]
   pickleElement.addConcreteType[Nested]
   pickleElement.addConcreteType[NestedOpt]

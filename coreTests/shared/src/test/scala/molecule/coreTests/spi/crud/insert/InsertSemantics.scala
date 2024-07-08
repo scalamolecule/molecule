@@ -123,6 +123,28 @@ trait InsertSemantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- A.i.Bb.i.iSet.query.get.map(_ ==> Nil)
         } yield ()
       }
+
+      "Optional Nested" - refs { implicit conn =>
+        for {
+          _ <- A.i.Bb.*(B.i).insert(
+            (1, List(1, 2)),
+            (2, Nil),
+          ).transact.map(_.ids)
+
+          // Same as using optional nested notation
+          _ <- A.i.Bb.*?(B.i).insert(
+            (3, List(3, 4)),
+            (4, Nil),
+          ).transact.map(_.ids)
+
+          _ <- A.i.a1.Bb.*?(B.i.a1).query.get.map(_ ==> List(
+            (1, List(1, 2)),
+            (2, Nil),
+            (3, List(3, 4)),
+            (4, Nil),
+          ))
+        } yield ()
+      }
     }
 
 

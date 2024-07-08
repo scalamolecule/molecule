@@ -70,6 +70,17 @@ trait Model extends Validations with Values with BaseHelpers {
     def name = ns + "." + refAttr
   }
 
+  case class OptRef(ref: Ref, elements: List[Element]) extends Element {
+    override def render(i: Int): String = {
+      val indent = "  " * i
+      s"""|${indent}OptRef(
+          |${indent}  $ref,
+          |${indent}  List(
+          |${renders(elements, i + 2)}))""".stripMargin
+    }
+    override def toString: String = render(0)
+  }
+
   case class BackRef(
     prevNs: String,
     curNs: String,

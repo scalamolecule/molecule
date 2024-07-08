@@ -12,7 +12,7 @@ class ResolveUpdate(
   val isUpsert: Boolean,
 ) extends ModelUtils { self: UpdateOps =>
 
-  private def unexpectedOp(a: Attr) =     throw ModelError(
+  private def unexpectedOp(a: Attr) = throw ModelError(
     s"Unexpected update operation for card-many attribute (${a.name})." + a
   )
 
@@ -62,7 +62,8 @@ class ResolveUpdate(
             }
           }
 
-        case r: Ref      => handleRefNs(r); resolve(tail)
+        case r: Ref      => handleRef(r); resolve(tail)
+        case r: OptRef   => ???
         case br: BackRef => handleBackRef(br); resolve(tail)
         case _           => noNested
       }

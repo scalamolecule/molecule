@@ -93,6 +93,16 @@ trait SqlQueryBase
     prevRefNss += refNs
   }
 
+  protected def handleOptRef(refAttr: String, refNs: String): Unit = {
+    path = path ++ List(refAttr, refNs)
+    if (prevRefNss.contains(refNs)) {
+      preExts(path) = preExts.getOrElse(path, Some("_" + refAttr))
+    } else {
+      preExts(path) = preExts.getOrElse(path, None)
+    }
+    prevRefNss += refNs
+  }
+
   protected def handleBackRef(): Unit = {
     path = path.dropRight(2)
   }
@@ -101,7 +111,7 @@ trait SqlQueryBase
     castss = castss.init :+ (castss.last :+ cast)
   }
 
-  final protected def removeLastCast(): Unit = {
+  private final def removeLastCast(): Unit = {
     castss = castss.init :+ castss.last.init
   }
 

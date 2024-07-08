@@ -51,10 +51,13 @@ trait Model2QueryBase extends ModelUtils {
                   handleRef(r.refAttr, r.refNs)
                   validate(tail, prevElements)
 
-                case _: BackRef =>
+                case OptRef(r, es) =>
+//                  ???
+                  ()
+
+                case _: BackRef    =>
                   handleBackRef()
                   validate(tail, prevElements)
-
                 case Nested(r, es) =>
                   handleRef(r.refAttr, r.refNs)
                   validateNested()
@@ -104,8 +107,7 @@ trait Model2QueryBase extends ModelUtils {
       sortsPerLevel(level) = sortsPerLevel(level) :+ a.sort.get.substring(1, 2).toInt
     }
     a.filterAttr.foreach(_ => hasFilterAttr = true)
-//    if ((a.isInstanceOf[Mandatory] || a.isInstanceOf[Tacit]) && a.attr != "id") {
-    if ((a.isInstanceOf[Mandatory] || a.isInstanceOf[Tacit])) {
+    if (a.isInstanceOf[Mandatory] || a.isInstanceOf[Tacit]) {
       hasBinding = true
     }
   }
@@ -206,6 +208,7 @@ trait Model2QueryBase extends ModelUtils {
           element match {
             case a: Attr      => checkAttr(a); check(tail)
             case r: Ref       => handleRef(r); check(tail)
+            case n: OptRef    => ???
             case _: BackRef   => handleBackRef(); check(tail)
             case n: Nested    => handleNested(n.ref); check(n.elements ++ tail)
             case n: NestedOpt => handleNested(n.ref); check(n.elements ++ tail)
@@ -285,6 +288,7 @@ trait Model2QueryBase extends ModelUtils {
           element match {
             case a: Attr      => prepare(tail, acc ++ prepareAttr(a))
             case r: Ref       => prepare(tail, acc :+ prepareRef(r))
+            case r: OptRef    => ???
             case b: BackRef   => prepare(tail, acc :+ prepareBackRef(b))
             case n: Nested    => prepare(tail, acc :+ prepareNested(n))
             case n: NestedOpt => prepare(tail, acc :+ prepareNestedOpt(n))

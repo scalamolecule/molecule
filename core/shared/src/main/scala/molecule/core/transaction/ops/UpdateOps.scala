@@ -117,5 +117,5 @@ trait UpdateOps extends Action2Data with BaseOps {
   protected def handleFilterAttr[T <: Attr with Tacit](filterAttr: T): Unit
 
   protected def handleBackRef(backRef: BackRef): Unit
-  protected def handleRefNs(ref: Ref): Unit
+  protected def handleRef(ref: Ref): Unit
 }
