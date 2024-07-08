@@ -9,5 +9,5 @@ object DirectionsUniqueStandard extends DirectionsUniqueStandard with TestAsync_
 object MutationAdd extends MutationAdd with TestAsync_datomic
 object MutationDelete extends MutationDelete with TestAsync_datomic
 object Nested extends Nested with TestAsync_datomic
-object NestedOpt extends NestedOpt with TestAsync_datomic
+object OptNested extends OptNested with TestAsync_datomic
 object TypesUniqueValue extends TypesUniqueValue with TestAsync_datomic

@@ -3,7 +3,7 @@ package molecule.sql.core.query
 import molecule.base.ast.Card
 import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
-import molecule.core.query.{Model2QueryBase, ResolveExprExceptions}
+import molecule.core.query.Model2Query
 import molecule.core.util.JavaConversions
 import molecule.sql.core.javaSql.{PrepStmt, ResultSetInterface}
 import scala.collection.mutable
@@ -11,8 +11,7 @@ import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
 
 trait SqlQueryBase
-  extends Model2QueryBase
-    with ResolveExprExceptions
+  extends Model2Query
     with BaseHelpers
     with JavaConversions {
 
@@ -20,21 +19,9 @@ trait SqlQueryBase
   type ParamIndex = Int
   type NestedTpls = List[Any]
 
-  def getRowCount(resultSet: RS): Int = {
-    resultSet.last()
-    val size = resultSet.getRow
-    resultSet.beforeFirst()
-    size
-  }
-
   // Lookup original type of aggregate attributes
   final protected var attrMap = Map.empty[String, (Card, String, Seq[String])]
 
-  private var index = 0
-  def getIndex = {
-    index += 1
-    index
-  }
 
   // Main query
   final protected val select      = new ListBuffer[String]
@@ -56,8 +43,6 @@ trait SqlQueryBase
   // Input args and cast lambdas
   final           var castss      = List(List.empty[(RS, Int) => Any])
   final           var aritiess    = List(List.empty[List[Int]])
-  final           var isNestedMan = false
-  final           var isNestedOpt = false
   final protected val nestedIds   = new ArrayBuffer[String]
   final protected var level       = 0
   final protected val args        = new ArrayBuffer[AnyRef]
@@ -67,12 +52,22 @@ trait SqlQueryBase
   final protected val preExts    = mutable.Map.empty[List[String], Option[String]]
   final protected val exts       = mutable.Map.empty[List[String], Option[String]]
 
-  // Current path: List(Ns, refAttrNs2, Ns2, refAttrNs3, Ns3 ...)
-  final protected var path = List.empty[String]
-
   // Query variables
   final protected var filterAttrVars = Map.empty[List[String], String]
 
+
+  private var index = 0
+  def getIndex = {
+    index += 1
+    index
+  }
+
+  def getRowCount(resultSet: RS): Int = {
+    resultSet.last()
+    val size = resultSet.getRow
+    resultSet.beforeFirst()
+    size
+  }
 
   final protected def getCol(attr: Attr, path: List[String] = path): String = {
     val ext = getOptExt(path).getOrElse("")
@@ -84,16 +79,6 @@ trait SqlQueryBase
   }
 
   protected def handleRef(refAttr: String, refNs: String): Unit = {
-    path = path ++ List(refAttr, refNs)
-    if (prevRefNss.contains(refNs)) {
-      preExts(path) = preExts.getOrElse(path, Some("_" + refAttr))
-    } else {
-      preExts(path) = preExts.getOrElse(path, None)
-    }
-    prevRefNss += refNs
-  }
-
-  protected def handleOptRef(refAttr: String, refNs: String): Unit = {
     path = path ++ List(refAttr, refNs)
     if (prevRefNss.contains(refNs)) {
       preExts(path) = preExts.getOrElse(path, Some("_" + refAttr))

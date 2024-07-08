@@ -9,5 +9,5 @@ object DirectionsUniqueStandard extends DirectionsUniqueStandard with TestAsync_
 object MutationAdd extends MutationAdd with TestAsync_postgres
 object MutationDelete extends MutationDelete with TestAsync_postgres
 object Nested extends Nested with TestAsync_postgres
-object NestedOpt extends NestedOpt with TestAsync_postgres
+object OptNested extends OptNested with TestAsync_postgres
 object TypesUniqueValue extends TypesUniqueValue with TestAsync_postgres

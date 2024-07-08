@@ -48,18 +48,18 @@ class ResolveSave
           addRef(ns, refAttr, refNs, card)
           resolve(tail)
 
-        case _: OptRef    => throw ModelError(
-          "Optional ref not allowed in save molecule. Please use mandatory ref instead."
-        )
-
         case BackRef(backRefNs, _, _) =>
           addBackRef(backRefNs)
           resolve(tail)
 
+        case _: OptRef    => throw ModelError(
+          "Optional ref not allowed in save molecule. Please use mandatory ref instead."
+        )
+
         case _: Nested    => throw ModelError(
           "Nested data structure not allowed in save molecule. Please use insert instead."
         )
-        case _: NestedOpt => throw ModelError(
+        case _: OptNested => throw ModelError(
           "Optional nested data structure not allowed in save molecule. Please use insert instead."
         )
       }

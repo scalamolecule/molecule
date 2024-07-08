@@ -9,5 +9,5 @@ object DirectionsUniqueStandard extends DirectionsUniqueStandard with TestAsync_
 object MutationAdd extends MutationAdd with TestAsync_h2
 object MutationDelete extends MutationDelete with TestAsync_h2
 object Nested extends Nested with TestAsync_h2
-object NestedOpt extends NestedOpt with TestAsync_h2
+object OptNested extends OptNested with TestAsync_h2
 object TypesUniqueValue extends TypesUniqueValue with TestAsync_h2

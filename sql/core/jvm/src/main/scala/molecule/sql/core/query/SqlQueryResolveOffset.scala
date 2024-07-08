@@ -22,13 +22,13 @@ case class SqlQueryResolveOffset[Tpl](
   : (List[Tpl], Int, Boolean) = {
     offsetLimitCheck(optLimit, optOffset)
     val sortedRows = getData(conn, optLimit, optOffset)
-    if (m2q.isNestedMan || m2q.isNestedOpt) {
-      val totalCount = if (m2q.isNestedMan)
+    if (m2q.isManNested || m2q.isOptNested) {
+      val totalCount = if (m2q.isManNested)
         m2q.getRowCount(sortedRows)
       else
         optOffset.fold(m2q.getRowCount(sortedRows))(_ => getTotalCount(conn))
 
-      val nestedRows0 = if (m2q.isNestedMan)
+      val nestedRows0 = if (m2q.isManNested)
         m2q.rows2nested(sortedRows)
       else
         m2q.rows2nestedOpt(sortedRows)

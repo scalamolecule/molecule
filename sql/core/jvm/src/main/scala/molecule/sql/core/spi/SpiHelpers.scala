@@ -75,9 +75,8 @@ trait SpiHelpers extends ModelUtils {
         curNs = r.refNs
         hasData = false
 
-      case r: OptRef => ???
-
       case BackRef(_, ns, _) => curNs = ns
+      case r: OptRef => ???
       case _                 => noNested
     }
 

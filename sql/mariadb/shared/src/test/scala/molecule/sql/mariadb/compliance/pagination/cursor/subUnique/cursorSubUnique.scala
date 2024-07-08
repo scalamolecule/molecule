@@ -9,5 +9,5 @@ object DirectionsUniqueStandard extends DirectionsUniqueStandard with TestAsync_
 object MutationAdd extends MutationAdd with TestAsync_mariadb
 object MutationDelete extends MutationDelete with TestAsync_mariadb
 object Nested extends Nested with TestAsync_mariadb
-object NestedOpt extends NestedOpt with TestAsync_mariadb
+object OptNested extends OptNested with TestAsync_mariadb
 object TypesUniqueValue extends TypesUniqueValue with TestAsync_mariadb

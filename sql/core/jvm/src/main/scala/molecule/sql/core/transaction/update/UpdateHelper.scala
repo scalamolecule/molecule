@@ -405,7 +405,7 @@ trait UpdateHelper extends SpiHelpers { self: SqlBase_JVM =>
           val refId                    = if (isCardOne)
             AttrOneOptID(ns, refAttr, refNs = Some(refNs))
           else
-            NestedOpt(
+            OptNested(
               Ref(ns, refAttr, refNs, CardSet, false),
               List(
                 AttrOneManID(refNs, "id")))

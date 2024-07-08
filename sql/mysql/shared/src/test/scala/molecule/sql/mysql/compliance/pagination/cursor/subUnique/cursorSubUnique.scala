@@ -9,5 +9,5 @@ object DirectionsUniqueStandard extends DirectionsUniqueStandard with TestAsync_
 object MutationAdd extends MutationAdd with TestAsync_mysql
 object MutationDelete extends MutationDelete with TestAsync_mysql
 object Nested extends Nested with TestAsync_mysql
-object NestedOpt extends NestedOpt with TestAsync_mysql
+object OptNested extends OptNested with TestAsync_mysql
 object TypesUniqueValue extends TypesUniqueValue with TestAsync_mysql

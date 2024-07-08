@@ -10,5 +10,5 @@ object DirectionsOptional extends DirectionsOptional with TestAsync_sqlite
 object MutationAdd extends MutationAdd with TestAsync_sqlite
 object MutationDelete extends MutationDelete with TestAsync_sqlite
 object Nested extends Nested with TestAsync_sqlite
-object NestedOpt extends NestedOpt with TestAsync_sqlite
+object OptNested extends OptNested with TestAsync_sqlite
 object TypesOptional extends TypesOptional with TestAsync_sqlite

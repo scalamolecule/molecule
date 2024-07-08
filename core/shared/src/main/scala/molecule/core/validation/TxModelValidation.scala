@@ -66,19 +66,6 @@ case class TxModelValidation(
           refPath = refPath :+ refAttr
           validate(tail)
 
-        case OptRef(r, es) =>
-          val refAttr = r.ns + "." + r.refAttr
-          if (prev(level)(group).contains(refAttr))
-            dup(refAttr)
-          if (refPath.contains(refAttr))
-            dup(refAttr)
-          prev(level) = prev(level) :+ Array(refAttr)
-          group += 1
-          mandatoryRefs = mandatoryRefs.filterNot(_._1 == refAttr)
-          presentAttrs += r.refAttr
-          refPath = refPath :+ refAttr
-          validate(es ++ tail)
-
         case BackRef(prevNs1, curNs, _) =>
           if (group == 0) {
             throw ModelError(s"Can't use backref namespace _$prevNs1 from here")
@@ -92,6 +79,19 @@ case class TxModelValidation(
           refPath = refPath.init
           validate(tail)
 
+        case OptRef(r, es) =>
+          val refAttr = r.ns + "." + r.refAttr
+          if (prev(level)(group).contains(refAttr))
+            dup(refAttr)
+          if (refPath.contains(refAttr))
+            dup(refAttr)
+          prev(level) = prev(level) :+ Array(refAttr)
+          group += 1
+          mandatoryRefs = mandatoryRefs.filterNot(_._1 == refAttr)
+          presentAttrs += r.refAttr
+          refPath = refPath :+ refAttr
+          validate(es ++ tail)
+
         case Nested(r, es) =>
           curElements = es
           val ref = r.name
@@ -102,7 +102,7 @@ case class TxModelValidation(
           group = 0
           validate(es ++ tail)
 
-        case NestedOpt(r, es) =>
+        case OptNested(r, es) =>
           curElements = es
           val ref = r.name
           if (prev(level)(group).contains(ref))

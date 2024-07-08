@@ -10,5 +10,5 @@ object DirectionsOptional extends DirectionsOptional with TestAsync_postgres
 object MutationAdd extends MutationAdd with TestAsync_postgres
 object MutationDelete extends MutationDelete with TestAsync_postgres
 object Nested extends Nested with TestAsync_postgres
-object NestedOpt extends NestedOpt with TestAsync_postgres
+object OptNested extends OptNested with TestAsync_postgres
 object TypesOptional extends TypesOptional with TestAsync_postgres

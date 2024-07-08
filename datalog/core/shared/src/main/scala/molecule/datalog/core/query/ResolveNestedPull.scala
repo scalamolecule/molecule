@@ -20,7 +20,7 @@ trait ResolveNestedPull[Tpl]
     with MoleculeLogging { self: Model2DatomicQuery[Tpl] =>
 
 
-  final protected def resolveNestedOptElements(e: Var, ref: Ref, elements: List[Element]): Unit = {
+  final protected def resolveOptNestedElements(e: Var, ref: Ref, elements: List[Element]): Unit = {
     @tailrec
     def addPullAttrs(
       elements: List[Element],
@@ -68,9 +68,9 @@ trait ResolveNestedPull[Tpl]
               addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(i, a))
 
             case ref: Ref             => (acc, Some(ref), tail, attrIndex)
-            case optRef: OptRef       => ??? //(acc, Some(optRef), Nil, attrIndex)
             case backRef: BackRef     => (acc, Some(backRef), tail, attrIndex)
-            case nestedOpt: NestedOpt => (acc, Some(nestedOpt), Nil, attrIndex)
+            case optRef: OptRef       => ??? //(acc, Some(optRef), Nil, attrIndex)
+            case nestedOpt: OptNested => (acc, Some(nestedOpt), Nil, attrIndex)
             case _: Nested            => noMixedNestedModes
 
             case a: AttrOneTac => throw ModelError(
@@ -130,7 +130,7 @@ trait ResolveNestedPull[Tpl]
           val (_, acc2, append2) = rec(tail, level)
           (acc2, append2)
 
-        case (acc1, Some(NestedOpt(ref1, elements1)), _, _) =>
+        case (acc1, Some(OptNested(ref1, elements1)), _, _) =>
           // New sub level
           pullCastss = pullCastss :+ pullCasts.toList
           pullCasts.clear()

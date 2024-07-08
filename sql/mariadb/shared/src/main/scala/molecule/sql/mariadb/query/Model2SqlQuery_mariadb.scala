@@ -6,17 +6,17 @@ import molecule.sql.core.query._
 
 class Model2SqlQuery_mariadb[Tpl](elements0: List[Element])
   extends Model2SqlQuery[Tpl](elements0)
-    with ResolveExprOne_mariadb
-    with ResolveExprSet_mariadb
-    with ResolveExprSeq_mariadb
-    with ResolveExprMap_mariadb
-    with ResolveExprSetRefAttr_mariadb
+    with QueryExprOne_mariadb
+    with QueryExprSet_mariadb
+    with QueryExprSeq_mariadb
+    with QueryExprMap_mariadb
+    with QueryExprSetRefAttr_mariadb
     with Lambdas_mariadb // obs: has to be last to override resolvers above
     with SqlQueryBase {
 
 
   override def pagination(optLimit: Option[Int], optOffset: Option[Int], isBackwards: Boolean): String = {
-    if (isNestedMan || isNestedOpt) {
+    if (isManNested || isOptNested) {
       ""
     } else if (hardLimit == 0) {
       if (!isBackwards) {

@@ -51,7 +51,7 @@ case class DatomicQueryResolveOffset[Tpl](
       val hasMore   = fromUntil.fold(totalCount > 0)(_._3)
       val tuples    = ListBuffer.empty[Tpl]
 
-      if (m2q.isNestedOpt) {
+      if (m2q.isOptNested) {
         postAdjustPullCasts()
         offsetRaw(sortedRows, fromUntil).forEach { row =>
           tuples += m2q.pullRow2tpl(row)

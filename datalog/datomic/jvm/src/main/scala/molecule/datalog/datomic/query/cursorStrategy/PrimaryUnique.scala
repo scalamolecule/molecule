@@ -64,7 +64,7 @@ case class PrimaryUnique[Tpl](
         val hasMore    = limitAbs < totalCount
         val tuples     = ListBuffer.empty[Tpl]
 
-        if (m2q.isNestedOpt) {
+        if (m2q.isOptNested) {
           postAdjustPullCasts()
           sortedRows.subList(0, limitAbs).forEach(row => tuples += m2q.pullRow2tpl(row))
           val tpls   = if (forward) tuples.toList else tuples.toList.reverse

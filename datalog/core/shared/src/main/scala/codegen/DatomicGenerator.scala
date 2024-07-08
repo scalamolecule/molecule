@@ -9,8 +9,8 @@ object DatomicGenerator extends App {
   //
   //  codegen.datalog.core.query.casting._CastIt2Tpl.generate()
   //  codegen.datalog.core.query.casting._CastNestedBranch.generate()
-  //  codegen.datalog.core.query.casting._CastNestedOptBranch.generate()
-  //  codegen.datalog.core.query.casting._CastNestedOptLeaf.generate()
+  //  codegen.datalog.core.query.casting._CastOptNestedBranch.generate()
+  //  codegen.datalog.core.query.casting._CastOptNestedLeaf.generate()
   //  codegen.datalog.core.query.casting._CastRow2Tpl.generate()
   //  codegen.datalog.core.query.casting._NestOpt.generate()
 

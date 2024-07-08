@@ -448,7 +448,7 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |        case _: OptRef        => topLevelAttrCount(tail, count)
        |        case _: BackRef       => topLevelAttrCount(tail, count)
        |        case Nested(_, es)    => topLevelAttrCount(tail, count + countNested(es))
-       |        case NestedOpt(_, es) => topLevelAttrCount(tail, count + countNested(es))
+       |        case OptNested(_, es) => topLevelAttrCount(tail, count + countNested(es))
        |      }
        |    }
        |  }

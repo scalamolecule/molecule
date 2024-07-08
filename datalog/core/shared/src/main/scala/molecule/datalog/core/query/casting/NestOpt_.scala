@@ -2,17 +2,17 @@
 package molecule.datalog.core.query.casting
 
 import java.util.{Iterator => jIterator, Map => jMap}
-import molecule.core.query.Model2QueryBase
+import molecule.core.query.Model2Query
 import molecule.datalog.core.query.DatomicQueryBase
 import scala.annotation.tailrec
 
 
 trait NestOpt_[Tpl]
-  extends CastNestedOptBranch_
-    with CastNestedOptLeaf_
+  extends CastOptNestedBranch_
+    with CastOptNestedLeaf_
     with CastRow2Tpl_
     with DatomicQueryBase
-    with Model2QueryBase {
+    with Model2Query {
 
   private lazy val levels = pullCastss.length
 
@@ -95,7 +95,7 @@ trait NestOpt_[Tpl]
         val cast = (row: Row) => casts.head(row.get(rowIndex))
         resolveArities(as, casts.tail, rowIndex + 1, rowIndexTx, acc :+ cast)
 
-      // NestedOpt
+      // OptNested
       case List(-1) :: as =>
         val cast = (row: Row) => casts.head(row.get(rowIndex))
         resolveArities(as, casts.tail, rowIndexTx, rowIndexTx, acc :+ cast)

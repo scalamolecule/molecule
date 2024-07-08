@@ -2,7 +2,7 @@ package codegen.datalog.core.query.casting
 
 import codegen.DatomicGenBase
 
-object _CastNestedOptBranch extends DatomicGenBase("CastNestedOptBranch", "/query/casting") {
+object _CastOptNestedBranch extends DatomicGenBase("CastOptNestedBranch", "/query/casting") {
 
   val content = {
     val pullBranchX    = (1 to 21).map(i => s"case ${caseN(i)} => pullBranch$i(pullCasts, optComparator, refDepth)").mkString("\n      ")

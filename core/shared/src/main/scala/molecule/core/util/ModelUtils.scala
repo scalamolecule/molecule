@@ -14,9 +14,9 @@ trait ModelUtils {
       case e :: tail => e match {
         case _: Mandatory @unchecked => count(tail, acc + 1)
         case _: Optional @unchecked  => count(tail, acc + 1)
-        case _: Nested               => count(tail, acc + 1)
-        case _: NestedOpt            => count(tail, acc + 1)
-        case _                       => count(tail, acc)
+        case _: Nested    => count(tail, acc + 1)
+        case _: OptNested => count(tail, acc + 1)
+        case _            => count(tail, acc)
       }
       case Nil       => acc
     }
@@ -32,7 +32,7 @@ trait ModelUtils {
       case r: Ref                               => r.ns
       case OptRef(Ref(ns, _, _, _, _, _), _)    => ns
       case Nested(Ref(ns, _, _, _, _, _), _)    => ns
-      case NestedOpt(Ref(ns, _, _, _, _, _), _) => ns
+      case OptNested(Ref(ns, _, _, _, _, _), _) => ns
       case other                                => throw ModelError("Unexpected head element: " + other)
     }
   }
@@ -45,7 +45,7 @@ trait ModelUtils {
       case r: Ref                               => r.ns
       case OptRef(Ref(ns, _, _, _, _, _), _)    => ns
       case Nested(Ref(ns, _, _, _, _, _), _)    => ns
-      case NestedOpt(Ref(ns, _, _, _, _, _), _) => ns
+      case OptNested(Ref(ns, _, _, _, _, _), _) => ns
       case other                                => throw ModelError("Unexpected head element: " + other)
     }
   }
@@ -66,7 +66,7 @@ trait ModelUtils {
         case a: Attr          => getAttrNames(tail, attrs + a.name)
         case OptRef(_, es)    => getAttrNames(tail ++ es, attrs)
         case Nested(_, es)    => getAttrNames(tail ++ es, attrs)
-        case NestedOpt(_, es) => getAttrNames(tail ++ es, attrs)
+        case OptNested(_, es) => getAttrNames(tail ++ es, attrs)
         case _                => getAttrNames(tail, attrs)
       }
       case Nil             => attrs
@@ -85,10 +85,10 @@ trait ModelUtils {
           element match {
             case a: Attr      => prepare(tail, acc :+ prepareAttr(a))
             case r: Ref       => prepare(tail, acc :+ prepareRef(r))
-            case r: OptRef    => ???
             case b: BackRef   => prepare(tail, acc :+ prepareBackRef(b))
+            case r: OptRef    => ???
             case n: Nested    => prepare(tail, acc :+ prepareNested(n))
-            case n: NestedOpt => prepare(tail, acc :+ prepareNestedOpt(n))
+            case n: OptNested => prepare(tail, acc :+ prepareOptNested(n))
           }
         case Nil             => acc
       }
@@ -117,8 +117,8 @@ trait ModelUtils {
       Nested(nested.ref, prepare(nested.elements, Nil))
     }
 
-    def prepareNestedOpt(nested: NestedOpt): NestedOpt = {
-      NestedOpt(nested.ref, prepare(nested.elements, Nil))
+    def prepareOptNested(nested: OptNested): OptNested = {
+      OptNested(nested.ref, prepare(nested.elements, Nil))
     }
 
     prepare(elements, Nil)

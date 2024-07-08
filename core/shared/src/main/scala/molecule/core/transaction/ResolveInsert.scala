@@ -84,10 +84,6 @@ class ResolveInsert
           val refResolver = addRef(ns, refAttr, refNs, card)
           resolve(nsMap, tail, resolvers :+ refResolver, tplIndex)
 
-        case OptRef(Ref(ns, refAttr, refNs, _, _, _), optRefElements) => throw ModelError(
-          "Optional ref not allowed in insert molecule. Please use mandatory ref instead."
-        )
-
         case BackRef(backRefNs, _, _) =>
           tail.head match {
             case Ref(_, refAttr, _, _, _, _) if prevRefs.contains(refAttr) => throw ModelError(
@@ -98,12 +94,16 @@ class ResolveInsert
           val backRefResolver = addBackRef(backRefNs)
           resolve(nsMap, tail, resolvers :+ backRefResolver, tplIndex)
 
+        case OptRef(Ref(ns, refAttr, refNs, _, _, _), optRefElements) => throw ModelError(
+          "Optional ref not allowed in insert molecule. Please use mandatory ref instead."
+        )
+
         case Nested(Ref(ns, refAttr, refNs, _, _, _), nestedElements) =>
           prevRefs.clear()
           val nestedResolver = addNested(nsMap, tplIndex, ns, refAttr, refNs, nestedElements)
           resolve(nsMap, tail, resolvers :+ nestedResolver, tplIndex)
 
-        case NestedOpt(Ref(ns, refAttr, refNs, _, _, _), nestedElements) =>
+        case OptNested(Ref(ns, refAttr, refNs, _, _, _), nestedElements) =>
           // (same behaviour as mandatory nested - the list can have data or not)
           prevRefs.clear()
           val optNestedResolver = addNested(nsMap, tplIndex, ns, refAttr, refNs, nestedElements)

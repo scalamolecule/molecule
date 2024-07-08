@@ -105,9 +105,6 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
           prevRefs += refAttr
           resolveUnpicklers(tail, unpicklers)
 
-        case OptRef(_, optRefElements) =>
-          ???
-
         case BackRef(backRefNs, _, _) =>
           tail.head match {
             case Ref(_, refAttr, _, _, _, _) if prevRefs.contains(refAttr) => throw ModelError(
@@ -117,11 +114,14 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
           }
           resolveUnpicklers(tail, unpicklers)
 
+        case OptRef(_, optRefElements) =>
+          ???
+
         case Nested(_, nestedElements) =>
           prevRefs.clear()
           resolveUnpicklers(tail, unpicklers :+ unpickleNested(nestedElements))
 
-        case NestedOpt(_, nestedElements) =>
+        case OptNested(_, nestedElements) =>
           prevRefs.clear()
           resolveUnpicklers(tail, unpicklers :+ unpickleNested(nestedElements))
       }

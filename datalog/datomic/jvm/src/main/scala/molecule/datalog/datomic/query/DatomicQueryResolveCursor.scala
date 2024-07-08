@@ -86,7 +86,7 @@ case class DatomicQueryResolveCursor[Tpl](
       val hasMore    = limitAbs < totalCount
       val tuples     = ListBuffer.empty[Tpl]
 
-      if (m2q.isNestedOpt) {
+      if (m2q.isOptNested) {
         postAdjustPullCasts()
         if (totalCount == 0) {
           (Nil, "", false)

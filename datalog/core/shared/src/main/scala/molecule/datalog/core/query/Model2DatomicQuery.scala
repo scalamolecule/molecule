@@ -4,33 +4,32 @@ import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
-import molecule.core.query.{Model2QueryBase, ResolveExprExceptions}
+import molecule.core.query.QueryExpr
 import molecule.datalog.core.query.casting._
-import scala.annotation.tailrec
 import scala.collection.mutable.ArrayBuffer
 
 
 class Model2DatomicQuery[Tpl](elements0: List[Element])
-  extends Model2QueryBase
-    with ResolveExprOne[Tpl]
-    with ResolveExprOne_id[Tpl]
-    with ResolveExprSet[Tpl]
-    with ResolveExprSeq[Tpl]
-    with ResolveExprMap[Tpl]
-    with ResolveRef[Tpl]
+  extends QueryExpr
+    with QueryExprOne[Tpl]
+    with QueryExprOneId[Tpl]
+    with QueryExprSet[Tpl]
+    with QueryExprSeq[Tpl]
+    with QueryExprMap[Tpl]
+    with QueryExprRef[Tpl]
     with ResolveNestedPull[Tpl]
-    with DatomicQueryBase
     with CastNestedBranch_
     with CastRow2Tpl_
-    with CastNestedOptBranch_
-    with CastNestedOptLeaf_
+    with CastOptNestedBranch_
+    with CastOptNestedLeaf_
     with Nest[Tpl]
     with NestOpt_[Tpl]
-    with ResolveExprExceptions
+    with DatomicQueryBase
     with MoleculeLogging {
 
   final lazy val preInputs: Seq[AnyRef] = renderRules(rules ++ preRules) ++ preArgs
   final lazy val inputs   : Seq[AnyRef] = renderRules(rules) ++ args
+
 
   // Some specialized expressions require a pre-query to extract entity ids for the main query
   // Returns (preQuery, mainQuery, query string for inspection)
@@ -48,8 +47,9 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
     varPath = List(firstId)
     path = List(getInitialNs(elements1))
 
+    es = List(firstId)
     // Recursively resolve molecule elements
-    resolve(List(firstId), elements1)
+    resolve(elements1)
 
     // Build Datomic query string(s) from mutated query sections
     val mainQuery = renderQuery(
@@ -117,112 +117,6 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
 
   final private def renderRules(rules: ArrayBuffer[String]): Seq[String] = {
     if (rules.isEmpty) Nil else Seq(rules.mkString("[\n  ", "\n  ", "\n]"))
-  }
-
-  @tailrec
-  final private def resolve(
-    es: List[Var],
-    elements: List[Element]
-  ): List[Var] = elements match {
-    case element :: tail => element match {
-      case a: AttrOne =>
-        a.attr match {
-          case "id" =>
-            if (a.filterAttr.nonEmpty) throw ModelError(noIdFiltering)
-            a match {
-              case a: AttrOneMan => resolve(resolveIdMan(es, a), tail)
-              case a: AttrOneTac => resolve(resolveIdTac(es, a), tail)
-              case _             => unexpectedElement(a)
-            }
-          case _    =>
-            a.filterAttr.collect {
-              case filterAttr if filterAttr._3.attr == "id" => throw ModelError(noIdFiltering)
-            }
-            a match {
-              case a: AttrOneMan => resolve(resolveAttrOneMan(es, a), tail)
-              case a: AttrOneOpt => resolve(resolveAttrOneOpt(es, a), tail)
-              case a: AttrOneTac => resolve(resolveAttrOneTac(es, a), tail)
-            }
-        }
-
-      case a: AttrSet =>
-        isRefAttr = a.refNs.isDefined
-        a match {
-          case a: AttrSetMan => resolve(resolveAttrSetMan(es, a), tail)
-          case a: AttrSetOpt => resolve(resolveAttrSetOpt(es, a), tail)
-          case a: AttrSetTac => resolve(resolveAttrSetTac(es, a), tail)
-        }
-
-      case a: AttrSeq =>
-        isRefAttr = a.refNs.isDefined
-        a match {
-          case a: AttrSeqMan => resolve(resolveAttrSeqMan(es, a), tail)
-          case a: AttrSeqOpt => resolve(resolveAttrSeqOpt(es, a), tail)
-          case a: AttrSeqTac => resolve(resolveAttrSeqTac(es, a), tail)
-        }
-
-      case a: AttrMap =>
-        isRefAttr = a.refNs.isDefined
-        a match {
-          case a: AttrMapMan => resolve(resolveAttrMapMan(es, a), tail)
-          case a: AttrMapOpt => resolve(resolveAttrMapOpt(es, a), tail)
-          case a: AttrMapTac => resolve(resolveAttrMapTac(es, a), tail)
-        }
-
-      case ref: Ref                             => resolve(resolveRef(es, ref), tail)
-      case OptRef(ref, nestedElements)          => ???
-      case _: BackRef                           => resolve(resolveBackRef(es), tail)
-      case Nested(ref, nestedElements)          => resolve(resolveNested(es, ref, nestedElements), tail)
-      case NestedOpt(nestedRef, nestedElements) => resolve(resolveNestedOpt(es, nestedRef, nestedElements), tail)
-    }
-    case Nil             => es
-  }
-
-
-  final private def resolveNested(
-    es: List[Var], ref: Ref, nestedElements: List[Element]
-  ): List[Var] = {
-    isNested = true
-    if (isNestedOpt)
-      noMixedNestedModes
-    validateRefNs(ref, nestedElements)
-
-    aritiesNested()
-    resolve(resolveNestedRef(es, ref), nestedElements)
-  }
-
-  final private def resolveNestedOpt(
-    es: List[Var], nestedRef: Ref, nestedElements: List[Element]
-  ): List[Var] = {
-    isNestedOpt = true
-    if (isNested) {
-      noMixedNestedModes
-    }
-    if (expectedFilterAttrs.nonEmpty) {
-      throw ModelError("Filter attributes not allowed in optional nested queries.")
-    }
-    validateRefNs(nestedRef, nestedElements)
-
-    // On top level, move past nested pull date to tx meta data (if any)
-    attrIndex += 1
-
-    aritiesNested()
-    val e = es.last
-    resolveNestedOptRef(e, nestedRef)
-    resolveNestedOptElements(e, nestedRef, nestedElements)
-    es
-  }
-
-  final private def validateRefNs(ref: Ref, nestedElements: List[Element]): Unit = {
-    val refName  = ref.refAttr.capitalize
-    val nestedNs = nestedElements.head match {
-      case a: Attr => a.ns
-      case r: Ref  => r.ns
-      case r: OptRef  => r.ref.ns
-      case other   => unexpectedElement(other)
-    }
-    if (ref.refNs != nestedNs)
-      throw ModelError(s"`$refName` can only nest to `${ref.refNs}`. Found: `$nestedNs`")
   }
 
 

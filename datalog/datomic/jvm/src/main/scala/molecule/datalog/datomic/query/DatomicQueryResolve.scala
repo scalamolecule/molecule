@@ -147,7 +147,7 @@ abstract class DatomicQueryResolve[Tpl](
 
       } else {
         val totalCount = rows.size
-        if (m2q.isNestedOpt) {
+        if (m2q.isOptNested) {
           postAdjustPullCasts()
           if (!forward) Collections.reverse(sortedRows)
           val count          = getCount(limit, forward, totalCount)

@@ -63,8 +63,8 @@ class ResolveUpdate(
           }
 
         case r: Ref      => handleRef(r); resolve(tail)
-        case r: OptRef   => ???
         case br: BackRef => handleBackRef(br); resolve(tail)
+        case r: OptRef   => ???
         case _           => noNested
       }
       case Nil             => ()

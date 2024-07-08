@@ -1,12 +1,12 @@
 package molecule.sql.core.query.casting
 
 import java.lang.{Long => jLong}
-import molecule.core.query.Model2QueryBase
+import molecule.core.query.Model2Query
 import molecule.sql.core.query.SqlQueryBase
 import scala.collection.mutable.ListBuffer
 
 
-trait NestOpt[Tpl] { self: Model2QueryBase
+trait NestOpt[Tpl] { self: Model2Query
   with SqlQueryBase
   with CastNestedBranch_ =>
 

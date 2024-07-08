@@ -84,8 +84,8 @@ abstract class SqlQueryResolve[Tpl](
     if (flatRowCount == 0) {
       (Nil, "", false)
     } else {
-      if (m2q.isNestedMan || m2q.isNestedOpt) {
-        val nestedTpls     = if (m2q.isNestedMan) m2q.rows2nested(sortedRows) else m2q.rows2nestedOpt(sortedRows)
+      if (m2q.isManNested || m2q.isOptNested) {
+        val nestedTpls     = if (m2q.isManNested) m2q.rows2nested(sortedRows) else m2q.rows2nestedOpt(sortedRows)
         val totalCount     = nestedTpls.length
         val count          = getCount(limit, forward, totalCount)
         val nestedTpls1    = if (forward) nestedTpls else nestedTpls.reverse

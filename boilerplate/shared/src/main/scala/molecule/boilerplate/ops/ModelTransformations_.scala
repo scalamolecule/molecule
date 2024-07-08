@@ -3367,10 +3367,10 @@ trait ModelTransformations_ {
           case _             => topLevelAttrCount(tail, count)
         }
         case _: Ref           => topLevelAttrCount(tail, count)
-        case OptRef(_, es)    => ???
         case _: BackRef       => topLevelAttrCount(tail, count)
+        case OptRef(_, es)    => ???
         case Nested(_, es)    => topLevelAttrCount(tail, count + countNested(es))
-        case NestedOpt(_, es) => topLevelAttrCount(tail, count + countNested(es))
+        case OptNested(_, es) => topLevelAttrCount(tail, count + countNested(es))
       }
     }
   }

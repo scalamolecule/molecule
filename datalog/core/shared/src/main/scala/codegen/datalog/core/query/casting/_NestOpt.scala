@@ -17,8 +17,8 @@ object _NestOpt extends DatomicGenBase("NestOpt", "/query/casting") {
        |
        |
        |trait $fileName_[Tpl]
-       |  extends CastNestedOptBranch_
-       |    with CastNestedOptLeaf_
+       |  extends CastOptNestedBranch_
+       |    with CastOptNestedLeaf_
        |    with CastRow2Tpl_
        |    with DatomicQueryBase { self: Model2Query =>
        |
@@ -103,7 +103,7 @@ object _NestOpt extends DatomicGenBase("NestOpt", "/query/casting") {
        |        val cast = (row: Row) => casts.head(row.get(rowIndex))
        |        resolveArities(as, casts.tail, rowIndex + 1, rowIndexTx, acc :+ cast)
        |
-       |      // NestedOpt
+       |      // OptNested
        |      case List(-1) :: as =>
        |        val cast = (row: Row) => casts.head(row.get(rowIndex))
        |        resolveArities(as, casts.tail, rowIndexTx, rowIndexTx, acc :+ cast)

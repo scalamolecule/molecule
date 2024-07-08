@@ -70,17 +70,6 @@ trait Model extends Validations with Values with BaseHelpers {
     def name = ns + "." + refAttr
   }
 
-  case class OptRef(ref: Ref, elements: List[Element]) extends Element {
-    override def render(i: Int): String = {
-      val indent = "  " * i
-      s"""|${indent}OptRef(
-          |${indent}  $ref,
-          |${indent}  List(
-          |${renders(elements, i + 2)}))""".stripMargin
-    }
-    override def toString: String = render(0)
-  }
-
   case class BackRef(
     prevNs: String,
     curNs: String,
@@ -90,6 +79,17 @@ trait Model extends Validations with Values with BaseHelpers {
       val coords = if (coord.isEmpty) "Nil" else coord.mkString("Seq(", ", ", ")")
       s"""BackRef("$prevNs", "$curNs", $coords)"""
     }
+  }
+
+  case class OptRef(ref: Ref, elements: List[Element]) extends Element {
+    override def render(i: Int): String = {
+      val indent = "  " * i
+      s"""|${indent}OptRef(
+          |${indent}  $ref,
+          |${indent}  List(
+          |${renders(elements, i + 2)}))""".stripMargin
+    }
+    override def toString: String = render(0)
   }
 
   case class Nested(ref: Ref, elements: List[Element]) extends Element {
@@ -103,10 +103,10 @@ trait Model extends Validations with Values with BaseHelpers {
     override def toString: String = render(0)
   }
 
-  case class NestedOpt(ref: Ref, elements: List[Element]) extends Element {
+  case class OptNested(ref: Ref, elements: List[Element]) extends Element {
     override def render(i: Int): String = {
       val indent = "  " * i
-      s"""|${indent}NestedOpt(
+      s"""|${indent}OptNested(
           |${indent}  $ref,
           |${indent}  List(
           |${renders(elements, i + 2)}))""".stripMargin

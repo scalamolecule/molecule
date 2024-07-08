@@ -244,6 +244,10 @@ object AdhocJVM_h2 extends TestSuite_h2 {
         //          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
         //            err ==> "Only further optional refs allowed after optional ref."
         //          }
+        //        _ <- A.i.B.?(B.i.s).Cc.*(C.i).query.get
+        //          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+        //            err ==> "Only further optional refs allowed after optional ref."
+        //          }
         //
         //
         //

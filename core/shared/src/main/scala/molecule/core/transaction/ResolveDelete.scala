@@ -33,7 +33,7 @@ class ResolveDelete { self: DeleteOps =>
         }
 
         case _: Nested    => throw ModelError(s"Nested data structure not allowed in delete molecule.")
-        case _: NestedOpt => throw ModelError(s"Optional nested data structure not allowed in delete molecule.")
+        case _: OptNested => throw ModelError(s"Optional nested data structure not allowed in delete molecule.")
         case _            =>
           addFilterElement(element)
           resolve(tail, false)

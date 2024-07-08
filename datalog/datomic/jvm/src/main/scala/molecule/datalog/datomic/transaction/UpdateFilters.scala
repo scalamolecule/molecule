@@ -233,8 +233,8 @@ trait UpdateFilters extends ModelUtils {
           getUpsertFilters(tail, AttrOneOptID(r.ns, r.refAttr) :: Nil, requiredNsPaths = requiredNsPaths1)
         }
 
-        case _: OptRef  => ???
         case _: BackRef => throw ModelError("Back refs not allowed in upserts")
+        case _: OptRef  => ???
         case _          => noNested
       }
 
@@ -450,8 +450,8 @@ trait UpdateFilters extends ModelUtils {
         }
 
         case r: Ref      => getUpdateFilters(tail, r :: AttrOneManID(r.refNs, "id") :: filterElements, true)
-        case r: OptRef   => ???
         case br: BackRef => getUpdateFilters(tail, br :: filterElements, hasFilter)
+        case r: OptRef   => ???
         case _           => noNested
       }
 

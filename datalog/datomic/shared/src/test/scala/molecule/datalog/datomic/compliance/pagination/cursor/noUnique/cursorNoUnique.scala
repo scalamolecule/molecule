@@ -10,5 +10,5 @@ object DirectionsOptional extends DirectionsOptional with TestAsync_datomic
 object MutationAdd extends MutationAdd with TestAsync_datomic
 object MutationDelete extends MutationDelete with TestAsync_datomic
 object Nested extends Nested with TestAsync_datomic
-object NestedOpt extends NestedOpt with TestAsync_datomic
+object OptNested extends OptNested with TestAsync_datomic
 object TypesOptional extends TypesOptional with TestAsync_datomic

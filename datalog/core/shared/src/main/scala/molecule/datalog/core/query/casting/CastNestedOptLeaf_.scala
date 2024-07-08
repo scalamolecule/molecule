@@ -2,15 +2,15 @@
 package molecule.datalog.core.query.casting
 
 import java.util.{Collections, Comparator, ArrayList => jArrayList, Iterator => jIterator, List => jList, Map => jMap}
-import molecule.core.query.Model2QueryBase
+import molecule.core.query.Model2Query
 import molecule.datalog.core.query.DatomicQueryBase
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 import scala.util.control.NonFatal
 
 
-trait CastNestedOptLeaf_
-  extends CastRow2Tpl_ with CastIt2Tpl_ { self: Model2QueryBase with DatomicQueryBase =>
+trait CastOptNestedLeaf_
+  extends CastRow2Tpl_ with CastIt2Tpl_ { self: Model2Query with DatomicQueryBase =>
 
   val rowList = new ListBuffer[Any]
 

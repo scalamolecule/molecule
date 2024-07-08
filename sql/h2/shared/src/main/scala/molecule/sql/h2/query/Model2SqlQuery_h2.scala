@@ -6,9 +6,9 @@ import molecule.sql.core.query._
 
 class Model2SqlQuery_h2[Tpl](elements0: List[Element])
   extends Model2SqlQuery[Tpl](elements0)
-    with ResolveExprOne_h2
-    with ResolveExprSet_h2
-    with ResolveExprSeq_h2
-    with ResolveExprMap_h2
-    with ResolveExprSetRefAttr_h2
+    with QueryExprOne_h2
+    with QueryExprSet_h2
+    with QueryExprSeq_h2
+    with QueryExprMap_h2
+    with QueryExprSetRefAttr_h2
     with SqlQueryBase

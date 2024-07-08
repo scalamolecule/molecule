@@ -10,5 +10,5 @@ object DirectionsOptional extends DirectionsOptional with TestAsync_mysql
 object MutationAdd extends MutationAdd with TestAsync_mysql
 object MutationDelete extends MutationDelete with TestAsync_mysql
 object Nested extends Nested with TestAsync_mysql
-object NestedOpt extends NestedOpt with TestAsync_mysql
+object OptNested extends OptNested with TestAsync_mysql
 object TypesOptional extends TypesOptional with TestAsync_mysql

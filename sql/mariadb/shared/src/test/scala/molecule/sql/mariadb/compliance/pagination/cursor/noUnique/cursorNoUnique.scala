@@ -10,5 +10,5 @@ object DirectionsOptional extends DirectionsOptional with TestAsync_mariadb
 object MutationAdd extends MutationAdd with TestAsync_mariadb
 object MutationDelete extends MutationDelete with TestAsync_mariadb
 object Nested extends Nested with TestAsync_mariadb
-object NestedOpt extends NestedOpt with TestAsync_mariadb
+object OptNested extends OptNested with TestAsync_mariadb
 object TypesOptional extends TypesOptional with TestAsync_mariadb

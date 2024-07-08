@@ -10,5 +10,5 @@ object DirectionsOptional extends DirectionsOptional with TestAsync_h2
 object MutationAdd extends MutationAdd with TestAsync_h2
 object MutationDelete extends MutationDelete with TestAsync_h2
 object Nested extends Nested with TestAsync_h2
-object NestedOpt extends NestedOpt with TestAsync_h2
+object OptNested extends OptNested with TestAsync_h2
 object TypesOptional extends TypesOptional with TestAsync_h2

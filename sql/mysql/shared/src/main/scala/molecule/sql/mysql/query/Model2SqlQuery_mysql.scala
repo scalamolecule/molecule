@@ -7,11 +7,11 @@ import scala.collection.mutable.ListBuffer
 
 class Model2SqlQuery_mysql[Tpl](elements0: List[Element])
   extends Model2SqlQuery[Tpl](elements0)
-    with ResolveExprOne_mysql
-    with ResolveExprSet_mysql
-    with ResolveExprSeq_mysql
-    with ResolveExprMap_mysql
-    with ResolveExprSetRefAttr_mysql
+    with QueryExprOne_mysql
+    with QueryExprSet_mysql
+    with QueryExprSeq_mysql
+    with QueryExprMap_mysql
+    with QueryExprSetRefAttr_mysql
     with SqlQueryBase {
 
 
@@ -39,7 +39,7 @@ class Model2SqlQuery_mysql[Tpl](elements0: List[Element])
     optOffset: Option[Int],
     isBackwards: Boolean
   ): String = {
-    if (isNestedMan || isNestedOpt) {
+    if (isManNested || isOptNested) {
       ""
     } else if (hardLimit == 0) {
       if (!isBackwards) {
