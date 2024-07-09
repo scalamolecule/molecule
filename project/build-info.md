@@ -37,11 +37,17 @@ To have molecule jars generated, add `-Dmolecule=true`
 
 ## Publish
 
-    sbt +publishLocal
+1) Set molecule build version to new version
+2) `sbt ++2.12.19 "project baseJVM" publishLocal` (using sbt-molecule snapshot)
+3) Set sbt-molecule to new version and `sbt publishLocal`
+4) Molecule `sbt +publishLocal`
+5) Test sbt-molecule `./test-all.sh`
+6) sbt-molecule: `sbt publishSigned`
+7) molecule
+   - `sbt +compile`
+   - `sbt +publishSigned -Ddocs=true`
 
-To maven central with docs generated (required)
-    
-    sbt +publishSigned -Ddocs=true
+
 
 Publish versions separately
 

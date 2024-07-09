@@ -19,7 +19,7 @@ inThisBuild(
     organizationName := "ScalaMolecule",
     organizationHomepage := Some(url("http://www.scalamolecule.org")),
     versionScheme := Some("early-semver"),
-    version := "0.9.1-SNAPSHOT",
+    version := "0.9.1",
     scalaVersion := scala213,
     crossScalaVersions := allScala,
 
@@ -146,9 +146,6 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
       moleculeMakeJars
     ),
 
-    // Let IntelliJ detect sbt-molecule-created jars in unmanaged lib directories
-    exportJars := true,
-
     // Find scala version specific jars in respective libs
     unmanagedBase := {
       CrossVersion.partialVersion(scalaVersion.value) match {
@@ -255,9 +252,6 @@ lazy val datalogDatomic = crossProject(JSPlatform, JVMPlatform)
 //      moleculeDataModelPaths,
 //      moleculeMakeJars
 //    ),
-//
-//    // Let IntelliJ detect sbt-molecule-created jars in unmanaged lib directories
-//    exportJars := true,
 //
 //    // Find scala version specific jars in respective libs
 //    unmanagedBase := {
