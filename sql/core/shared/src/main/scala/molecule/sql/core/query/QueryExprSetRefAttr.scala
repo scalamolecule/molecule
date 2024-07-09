@@ -160,7 +160,7 @@ trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: SqlQueryBase
 
   protected def setRefOptNeq[T](optSet: Option[Set[T]], res: ResSet[T]): Unit = {
     optSet.foreach(set => setRefNeq(set, res))
-    notNull += s"$joinTable.$ns_id"
+    setNotNull(s"$joinTable.$ns_id")
   }
 
 
@@ -230,10 +230,10 @@ trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: SqlQueryBase
   }
 
   protected def refNoValue(col: String): Unit = {
-    notNull -= col
+    unsetNotNull(col)
     // Make join optional
     joins.remove(joins.length - 1)
     joins += (("LEFT JOIN", joinTable, "", List(s"$nsId = $col")))
-    where += ((col, s"IS NULL"))
+    setNull(col)
   }
 }

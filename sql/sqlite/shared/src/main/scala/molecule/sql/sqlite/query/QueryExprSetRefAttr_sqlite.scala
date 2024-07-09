@@ -89,7 +89,7 @@ trait QueryExprSetRefAttr_sqlite
 
   override protected def setRefOptNeq[T](optSet: Option[Set[T]], res: ResSet[T]): Unit = {
     optSet.foreach(set => setRefNeq(set, res))
-    notNull += s"$joinTable.$ns_id"
+    setNotNull(s"$joinTable.$ns_id")
   }
 
 

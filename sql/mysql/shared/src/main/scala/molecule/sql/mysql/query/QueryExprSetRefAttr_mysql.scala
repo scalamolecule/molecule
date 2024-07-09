@@ -93,7 +93,7 @@ trait QueryExprSetRefAttr_mysql
     if (optSets.isDefined && optSets.get.nonEmpty) {
       setRefNeq(optSets.get, res)
     }
-    notNull += s"$joinTable.$ns_id"
+    setNotNull(s"$joinTable.$ns_id")
   }
 
 

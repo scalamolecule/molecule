@@ -98,7 +98,7 @@ trait QueryExprSet extends QueryExpr { self: SqlQueryBase with LambdasSet =>
     val col = getCol(attr: Attr)
     select += col
     if (!isOptNested) {
-      notNull += col
+      setNotNull(col)
     }
     addCast(res.sql2set)
     attr.filterAttr.fold {
@@ -119,7 +119,7 @@ trait QueryExprSet extends QueryExpr { self: SqlQueryBase with LambdasSet =>
     attr: Attr, args: Set[T], res: ResSet[T]
   ): Unit = {
     val col = getCol(attr: Attr)
-    notNull += col
+      setNotNull(col)
     attr.filterAttr.fold {
       setExpr(attr, col, args, res, false)
     } { case (dir, filterPath, filterAttr) =>
@@ -223,8 +223,8 @@ trait QueryExprSet extends QueryExpr { self: SqlQueryBase with LambdasSet =>
   }
 
   protected def setNoValue(col: String): Unit = {
-    notNull -= col
-    where += ((col, s"IS NULL"))
+    unsetNotNull(col)
+    setNull(col)
   }
 
 

@@ -54,11 +54,14 @@ trait QueryExprRef extends QueryExpr { self: SqlQueryBase =>
 
 
   override protected def queryOptRef(ref: Ref, nestedElements: List[Element]): Unit = {
+    if (hasOptRef) {
+      // transfer previous predicates from where
+    }
     hasOptRef = true
     val Ref(ns, refAttr, refNs, _, _, _) = ref
     handleRef(refAttr, refNs)
 
-    val nsExt = getOptExt(path.dropRight(2)).getOrElse("")
+    val nsExt           = getOptExt(path.dropRight(2)).getOrElse("")
     val (refAs, refExt) = getOptExt().fold(("", ""))(ext => (refNs + ext, ext))
     joins += ((s"LEFT JOIN", refNs, refAs, List(s"$ns$nsExt.$refAttr = $refNs$refExt.id")))
 

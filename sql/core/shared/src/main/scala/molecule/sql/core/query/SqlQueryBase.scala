@@ -30,7 +30,6 @@ trait SqlQueryBase
   final protected var from        = ""
   final protected val joins       = new ListBuffer[(String, String, String, List[String])]
   final protected val tempTables  = ListBuffer.empty[String]
-  final protected val notNull     = new ListBuffer[String]
   final protected val where       = new ListBuffer[(String, String)]
   final protected val groupBy     = new mutable.LinkedHashSet[String]
   final protected val having      = new mutable.LinkedHashSet[String]
@@ -55,6 +54,15 @@ trait SqlQueryBase
   // Query variables
   final protected var filterAttrVars = Map.empty[List[String], String]
 
+  def setNotNull(col: String) = {
+    where += ((col, "IS NOT NULL"))
+  }
+  def setNull(col: String) = {
+    where += ((col, "IS NULL"))
+  }
+  def unsetNotNull(col: String) = {
+    where -= ((col, "IS NOT NULL"))
+  }
 
   private var index = 0
   def getIndex = {

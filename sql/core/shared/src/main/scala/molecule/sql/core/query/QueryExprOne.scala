@@ -117,7 +117,7 @@ trait QueryExprOne extends QueryExpr { self: SqlQueryBase with LambdasOne =>
       addCast(res.sql2oneOrNull)
     } else {
       addCast(res.sql2one)
-      notNull += col
+      setNotNull(col)
     }
     addSort(attr, col)
     attr.filterAttr.fold {
@@ -130,7 +130,7 @@ trait QueryExprOne extends QueryExpr { self: SqlQueryBase with LambdasOne =>
   protected def tac[T: ClassTag](attr: Attr, args: Seq[T], res: ResOne[T]): Unit = {
     val col = getCol(attr: Attr)
     if (!isOptNested) {
-      notNull += col
+      setNotNull(col)
     }
     attr.filterAttr.fold {
       expr(attr.ns, attr.attr, col, attr.op, args, res)
@@ -221,7 +221,7 @@ trait QueryExprOne extends QueryExpr { self: SqlQueryBase with LambdasOne =>
     one2sql: T => String,
   ): Unit = {
     optArgs.fold[Unit] {
-      where += ((col, s"IS NULL"))
+      setNull(col)
     } {
       case Nil => where += (("FALSE", ""))
       case vs  => equal(col, vs, one2sql)
@@ -247,7 +247,7 @@ trait QueryExprOne extends QueryExpr { self: SqlQueryBase with LambdasOne =>
     if (optArgs.isDefined && optArgs.get.nonEmpty) {
       neq(col, optArgs.get, one2sql)
     } else {
-      notNull += col
+      setNotNull(col)
     }
   }
 
@@ -276,8 +276,8 @@ trait QueryExprOne extends QueryExpr { self: SqlQueryBase with LambdasOne =>
   // no value ------------------------------------------------------------------
 
   protected def noValue(col: String): Unit = {
-    notNull -= col
-    where += ((col, s"IS NULL"))
+    unsetNotNull(col)
+    setNull(col)
   }
 
 

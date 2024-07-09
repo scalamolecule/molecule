@@ -83,7 +83,7 @@ trait QueryExprMap_postgres
   }
 
   override protected def mapNoValue(col: String): Unit = {
-    where += ((col, s"IS NULL"))
+    setNull(col)
   }
 
   override protected lazy val json2oneBoolean: String => Boolean = {

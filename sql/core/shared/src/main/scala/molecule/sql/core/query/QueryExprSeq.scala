@@ -102,7 +102,7 @@ trait QueryExprSeq extends QueryExpr { self: SqlQueryBase with LambdasSeq =>
     // Allow empty optional nested rows.
     // So let non-asserted Seq values be checked in OptNested
     if (!isOptNested) {
-      notNull += col
+      setNotNull(col)
     }
     addCast(res.sql2list)
     attr.filterAttr.fold {
@@ -123,7 +123,7 @@ trait QueryExprSeq extends QueryExpr { self: SqlQueryBase with LambdasSeq =>
     attr: Attr, args: Seq[T], res: ResSeq[T]
   ): Unit = {
     val col = getCol(attr: Attr)
-    notNull += col
+      setNotNull(col)
     attr.filterAttr.fold {
       seqExpr(attr, col, args, res, false)
     } { case (dir, filterPath, filterAttr) =>
@@ -210,8 +210,8 @@ trait QueryExprSeq extends QueryExpr { self: SqlQueryBase with LambdasSeq =>
   }
 
   protected def seqNoValue(col: String): Unit = {
-    notNull -= col
-    where += ((col, s"IS NULL"))
+    unsetNotNull(col)
+    setNull(col)
   }
 
 
@@ -236,7 +236,7 @@ trait QueryExprSeq extends QueryExpr { self: SqlQueryBase with LambdasSeq =>
     val col = getCol(attr: Attr)
     select += col
     if (!isOptNested) {
-      notNull += col
+      setNotNull(col)
     }
     attr.filterAttr.fold {
       byteArrayOps(attr, col, byteArray)
@@ -250,7 +250,7 @@ trait QueryExprSeq extends QueryExpr { self: SqlQueryBase with LambdasSeq =>
   private def tacByteArray(attr: Attr, byteArray: Array[Byte]): Unit = {
     val col = getCol(attr: Attr)
     if (!isOptNested) {
-      notNull += col
+      setNotNull(col)
     }
     attr.filterAttr.fold {
       byteArrayOps(attr, col, byteArray)

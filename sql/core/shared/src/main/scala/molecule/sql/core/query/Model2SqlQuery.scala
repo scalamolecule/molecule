@@ -49,7 +49,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
 
   def getWhereClauses: ListBuffer[String] = {
     resolveElements(elements0)
-    val clauses    = notNull.map(col => s"$col IS NOT NULL") ++ where.map {
+    val clauses    = where.map {
       case (col, expr) => s"$col $expr"
     }
     //    println("------ joins --------")
@@ -68,6 +68,11 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     optLimit: Option[Int],
     optOffset: Option[Int]
   ): String = {
+    if (hasOptRef) {
+      println(joins)
+      println(where)
+    }
+
     val isBackwards = optLimit.fold(false)(_ < 0) || optOffset.fold(false)(_ < 0)
     val distinct_   = if (distinct) " DISTINCT" else ""
     val select_     = mkSelect
@@ -99,9 +104,9 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
       val indent = "  " * indents
       joins.map {
         case (join, table, as, predicates) =>
-          val as_ = if (as.isEmpty) "" else " " + as
+          val as_         = if (as.isEmpty) "" else " " + as
           val predicates_ = if (predicates.isEmpty) "" else
-            predicates.mkString(" ON\n    ", "\n    ", "")
+            predicates.mkString(s" ON\n$indent  ", s"\n$indent  ", "")
           s"$join $table$as_$predicates_"
       }.mkString(s"\n$indent", s"\n$indent", "")
     }
@@ -112,8 +117,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
   }
 
   private def mkWhere: String = {
-    val notNulls = notNull.map(col => (col, "IS NOT NULL"))
-    val allWhere = where ++ notNulls
+    val allWhere = where
     if (allWhere.isEmpty) "" else {
       val max = allWhere.map(_._1.length).max
       allWhere.map {
@@ -177,19 +181,10 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
 
 
   final def getTotalCountQuery: String = {
-    val table    = from
-    val joins_   = mkJoins(1)
-    val notNulls = notNull.map(col => (col, "IS NOT NULL"))
-    val allWhere = where ++ notNulls
-    val where_   = if (allWhere.isEmpty) "" else {
-      val max = allWhere.map(_._1.length).max
-      allWhere.map {
-        case ("", predicate)  => predicate
-        case (col, predicate) => s"$col " + padS(max, col) + predicate
-      }.mkString("\nWHERE\n  ", s" AND\n  ", "")
-    }
-    val having_  = if (having.isEmpty) "" else having.mkString("\nHAVING ", ", ", "")
-
+    val table   = from
+    val joins_  = mkJoins(1)
+    val where_  = mkWhere
+    val having_ = if (having.isEmpty) "" else having.mkString("\nHAVING ", ", ", "")
     s"""SELECT COUNT($table.id)
        |FROM $table$joins_$where_$having_;""".stripMargin
   }

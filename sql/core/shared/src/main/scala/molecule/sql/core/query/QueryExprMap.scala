@@ -98,7 +98,7 @@ trait QueryExprMap extends QueryExpr { self: SqlQueryBase with LambdasMap =>
     val col = getCol(attr: Attr)
     select += col
     if (!isOptNested) {
-      notNull += col
+      setNotNull(col)
     }
     addCast(resMap.sqlJson2map)
     attr.op match {
@@ -217,7 +217,7 @@ trait QueryExprMap extends QueryExpr { self: SqlQueryBase with LambdasMap =>
   }
 
   protected def mapNoValue(col: String): Unit = {
-    where += ((col, s"IS NULL"))
+    setNull(col)
   }
 
 

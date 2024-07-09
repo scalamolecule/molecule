@@ -20,7 +20,7 @@ trait QueryExprSet_postgres
       addCast(res.sql2setOrNull)
     } else {
       addCast(res.sql2set)
-      notNull += col
+      setNotNull(col)
     }
 
     attr.filterAttr.fold {
