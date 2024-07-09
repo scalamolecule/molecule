@@ -176,13 +176,13 @@ Add the following to your build files:
 `project/build.properties`:
 
 ```
-sbt.version = 1.10.0
+sbt.version = 1.10.1
 ```
 
 `project/plugins.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.8.0")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.8.1")
 ```
 
 `build.sbt`:
@@ -193,12 +193,12 @@ lazy val yourProject = project.in(file("app"))
   .settings(
     libraryDependencies ++= Seq(
       // One or more of:
-      "org.scalamolecule" %%% "molecule-sql-postgres" % "0.9.0",
-      "org.scalamolecule" %%% "molecule-sql-sqlite" % "0.9.0",
-      "org.scalamolecule" %%% "molecule-sql-mysql" % "0.9.0",
-      "org.scalamolecule" %%% "molecule-sql-mariadb" % "0.9.0",
-      "org.scalamolecule" %%% "molecule-sql-h2" % "0.9.0",
-      "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.9.0",
+      "org.scalamolecule" %%% "molecule-sql-postgres" % "0.9.1",
+      "org.scalamolecule" %%% "molecule-sql-sqlite" % "0.9.1",
+      "org.scalamolecule" %%% "molecule-sql-mysql" % "0.9.1",
+      "org.scalamolecule" %%% "molecule-sql-mariadb" % "0.9.1",
+      "org.scalamolecule" %%% "molecule-sql-h2" % "0.9.1",
+      "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.9.1",
     ),
     moleculeSchemas := Seq("app") // paths to your data model definitions
   )
@@ -241,8 +241,6 @@ To run tests from the client side with Scala.js, first run a jvm server (Akka Ht
 Then in another process/terminal window:
 
     sbt sqlPostgresJS/test
-
-(Scalajs tests don't work with Scala 3.x yet)
 
 </details>
 
