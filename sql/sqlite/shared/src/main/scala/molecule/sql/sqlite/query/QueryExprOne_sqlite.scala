@@ -168,8 +168,8 @@ trait QueryExprOne_sqlite extends QueryExprOne with LambdasOne_sqlite { self: Sq
 
   def sampleSelect(
     ns: String, attr: String
-  ): (List[(String, String, String, String, String)], Set[String]) => String = {
-    (joins: List[(String, String, String, String, String)], groupCols: Set[String]) => {
+  ): (List[(String, String, String, List[String])], Set[String]) => String = {
+    (joins: List[(String, String, String, List[String])], groupCols: Set[String]) => {
       s"""(
          |    SELECT $attr
          |    FROM (
@@ -184,8 +184,8 @@ trait QueryExprOne_sqlite extends QueryExprOne with LambdasOne_sqlite { self: Sq
 
   def samplesSelect(
     ns: String, attr: String, n: Int
-  ): (List[(String, String, String, String, String)], Set[String]) => String = {
-    (joins: List[(String, String, String, String, String)], groupCols: Set[String]) => {
+  ): (List[(String, String, String, List[String])], Set[String]) => String = {
+    (joins: List[(String, String, String, List[String])], groupCols: Set[String]) => {
       s"""(
          |    SELECT JSON_GROUP_ARRAY($attr)
          |    FROM (
@@ -200,9 +200,9 @@ trait QueryExprOne_sqlite extends QueryExprOne with LambdasOne_sqlite { self: Sq
 
   def minMaxSelect(
     ns: String, attr: String, n: Int, dir: String
-  ): (List[(String, String, String, String, String)], Set[String]) => String = {
+  ): (List[(String, String, String, List[String])], Set[String]) => String = {
     val fn = if (dir == "ASC") "_min" else "_max"
-    (joins: List[(String, String, String, String, String)], groupCols: Set[String]) => {
+    (joins: List[(String, String, String, List[String])], groupCols: Set[String]) => {
       s"""(
          |    SELECT JSON_GROUP_ARRAY($attr)
          |    FROM (
@@ -216,7 +216,7 @@ trait QueryExprOne_sqlite extends QueryExprOne with LambdasOne_sqlite { self: Sq
   }
 
   def mkFrom(
-    joins: List[(String, String, String, String, String)],
+    joins: List[(String, String, String, List[String])],
     groupCols: Set[String]
   ): String = {
     val where = if (groupCols.isEmpty) "" else
@@ -227,20 +227,12 @@ trait QueryExprOne_sqlite extends QueryExprOne with LambdasOne_sqlite { self: Sq
     if(joins.isEmpty) {
       s"FROM $from AS _$from $where"
     } else{
-      val max1  = joins.map(_._1.length).max
-      val max2  = joins.map(_._2.length).max
-      val max3  = joins.map(_._3.length).max
-      val max4  = joins.map(_._4.length).max + 1
-      val hasAs = joins.exists(_._3.nonEmpty)
       val joinTables = joins.map {
-        case (join, table, as, lft, rgt) =>
-          val join_     = join + padS(max1, join)
-          val table_    = table + padS(max2, table) + " AS _" + table
-          val as_       = if (hasAs) {
-            if (as.isEmpty) padS(max3 + 4, "") else " AS " + as + padS(max3, as)
-          } else ""
-          val predicate = "_" + lft + padS(max4, lft) + "= _" + rgt.drop(2) // really hackish
-          s"$join_ $table_$as_ ON $predicate"
+        case (join, table, as, predicates) =>
+          val table_    = table + " AS _" + table
+          val as_ = if (as.isEmpty) "" else " " + as
+          val predicate_ = "_" + predicates.head.replace(" = ", " = _")
+          s"$join $table_$as_ ON $predicate_"
       }.mkString("\n      ")
 
       s"""FROM $from AS _$from

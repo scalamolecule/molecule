@@ -25,10 +25,10 @@ trait SqlQueryBase
 
   // Main query
   final protected val select      = new ListBuffer[String]
-  final protected var select2     = Map.empty[Int, (List[(String, String, String, String, String)], Set[String]) => String]
+  final protected var select2     = Map.empty[Int, (List[(String, String, String, List[String])], Set[String]) => String]
   final protected var distinct    = true
   final protected var from        = ""
-  final protected val joins       = new ListBuffer[(String, String, String, String, String)]
+  final protected val joins       = new ListBuffer[(String, String, String, List[String])]
   final protected val tempTables  = ListBuffer.empty[String]
   final protected val notNull     = new ListBuffer[String]
   final protected val where       = new ListBuffer[(String, String)]
@@ -41,11 +41,11 @@ trait SqlQueryBase
   final           val inputs      = new ListBuffer[PrepStmt => Unit]
 
   // Input args and cast lambdas
-  final           var castss      = List(List.empty[(RS, Int) => Any])
-  final           var aritiess    = List(List.empty[List[Int]])
-  final protected val nestedIds   = new ArrayBuffer[String]
-  final protected var level       = 0
-  final protected val args        = new ArrayBuffer[AnyRef]
+  final           var castss    = List(List.empty[(RS, Int) => Any])
+  final           var aritiess  = List(List.empty[List[Int]])
+  final protected val nestedIds = new ArrayBuffer[String]
+  final protected var level     = 0
+  final protected val args      = new ArrayBuffer[AnyRef]
 
 
   final protected var prevRefNss = Set.empty[String]

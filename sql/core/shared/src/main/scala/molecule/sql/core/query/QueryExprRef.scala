@@ -18,8 +18,7 @@ trait QueryExprRef extends QueryExpr { self: SqlQueryBase =>
     checkOnlyOptRef()
     handleRef(refAttr, refNs)
 
-    val singleOptSet    = tail.length == 1 && tail.head.isInstanceOf[AttrSetOpt]
-    val (refAs, refExt) = getOptExt().fold(("", ""))(ext => (refNs + ext, ext))
+    val singleOptSet = tail.length == 1 && tail.head.isInstanceOf[AttrSetOpt]
 
     val nsExt = if (ns == refNs)
       "" // self-joins
@@ -27,21 +26,18 @@ trait QueryExprRef extends QueryExpr { self: SqlQueryBase =>
       getOptExt(path.dropRight(2)).getOrElse("")
 
     if (ref.card == CardOne) {
-      val joinType = if (isOptNested) "LEFT" else "INNER"
-      joins += ((s"$joinType JOIN", refNs, refAs, s"$ns$nsExt.$refAttr", s"= $refNs$refExt.id"))
+      val (refAs, refExt) = getOptExt().fold(("", ""))(ext => (refNs + ext, ext))
+      val joinType        = if (isOptNested) "LEFT" else "INNER"
+      joins += ((s"$joinType JOIN", refNs, refAs, List(s"$ns$nsExt.$refAttr = $refNs$refExt.id")))
     } else {
-      val joinTable  = ss(ns, refAttr, refNs)
-      val (id1, id2) = if (ns == refNs) ("1_id", "2_id") else ("id", "id")
-      val ns_id1     = ss(ns, id1)
-      val refNs_id2  = ss(refNs, id2)
-      val joinType   = if (singleOptSet) "LEFT" else "INNER"
-      joins += ((s"$joinType JOIN", joinTable, "", s"$ns$nsExt.id", s"= $joinTable.$ns_id1"))
-      joins += ((s"$joinType JOIN", refNs, refAs, s"$joinTable.$refNs_id2", s"= $refNs$refExt.id"))
+      val joinType = if (singleOptSet) "LEFT" else "INNER"
+      addJoins(ns, nsExt, refAttr, refNs, joinType)
     }
   }
 
 
   override protected def queryBackRef(backRef: BackRef, tail: List[Element]): Unit = {
+    checkOnlyOptRef()
     if (isManNested || isOptNested) {
       val BackRef(bRef, _, _) = backRef
       tail.head match {
@@ -58,57 +54,28 @@ trait QueryExprRef extends QueryExpr { self: SqlQueryBase =>
 
 
   override protected def queryOptRef(ref: Ref, nestedElements: List[Element]): Unit = {
-    //    level += 1
-
     hasOptRef = true
-    //    if (expectedFilterAttrs.nonEmpty) {
-    //      throw ModelError("Filter attributes not allowed in optional nested queries.")
-    //    }
-    val Ref(_, refAttr, refNs, _, _, _) = ref
+    val Ref(ns, refAttr, refNs, _, _, _) = ref
     handleRef(refAttr, refNs)
 
-//    aritiesNested()
-//    resolveOptNestedRef(ref)
+    val nsExt = getOptExt(path.dropRight(2)).getOrElse("")
+    val (refAs, refExt) = getOptExt().fold(("", ""))(ext => (refNs + ext, ext))
+    joins += ((s"LEFT JOIN", refNs, refAs, List(s"$ns$nsExt.$refAttr = $refNs$refExt.id")))
+
     resolve(nestedElements)
   }
 
 
-  override protected def queryNested(
-    ref: Ref, nestedElements: List[Element]
-  ): Unit = {
-    level += 1
+  override protected def queryNested(ref: Ref, nestedElements: List[Element]): Unit = {
     isManNested = true
     if (isOptNested) {
       noMixedNestedModes
     }
-    validateRefNs(ref, nestedElements)
-
-    val Ref(ns, refAttr, refNs, _, _, _) = ref
-    handleRef(refAttr, refNs)
-
-    aritiesNested()
-
-    val (as, ext) = getOptExt().fold(("", ""))(ext => (refNs + ext, ext))
-    val nsExt     = getOptExt(path.dropRight(2)).getOrElse("")
-
-    val id = s"$ns.id"
-    nestedIds += id
-    groupByCols += id // if we later need to group by non-aggregated columns
-
-    val joinTable  = ss(ns, refAttr, refNs)
-    val (id1, id2) = if (ns == refNs) ("1_id", "2_id") else ("id", "id")
-    val ns_id1     = ss(ns, id1)
-    val refNs_id2  = ss(refNs, id2)
-    joins += (("INNER JOIN", joinTable, "", s"$ns$nsExt.id", s"= $joinTable.$ns_id1"))
-    joins += (("INNER JOIN", refNs, as, s"$joinTable.$refNs_id2", s"= $refNs$ext.id"))
-    castss = castss :+ Nil
-
-    resolve(nestedElements)
+    resolveNested(ref, nestedElements, "INNER")
   }
 
 
   override protected def queryOptNested(ref: Ref, nestedElements: List[Element]): Unit = {
-    level += 1
     isOptNested = true
     if (isManNested) {
       noMixedNestedModes
@@ -116,28 +83,36 @@ trait QueryExprRef extends QueryExpr { self: SqlQueryBase =>
     if (expectedFilterAttrs.nonEmpty) {
       throw ModelError("Filter attributes not allowed in optional nested queries.")
     }
+    resolveNested(ref, nestedElements, "LEFT")
+  }
+
+
+  private def resolveNested(ref: Ref, nestedElements: List[Element], joinType: String): Unit = {
+    val Ref(ns, refAttr, refNs, _, _, _) = ref
+    level += 1
+    checkOnlyOptRef()
     validateRefNs(ref, nestedElements)
 
-    val Ref(ns, refAttr, refNs, _, _, _) = ref
     handleRef(refAttr, refNs)
-
-    aritiesNested()
-
-    val (as, ext) = getOptExt().fold(("", ""))(ext => (refNs + ext, ext))
-    val nsExt     = getOptExt(path.dropRight(2)).getOrElse("")
+    val nsExt = getOptExt(path.dropRight(2)).getOrElse("")
+    addJoins(ns, nsExt, refAttr, refNs, joinType)
 
     val id = s"$ns.id"
     nestedIds += id
     groupByCols += id // if we later need to group by non-aggregated columns
-
-    val joinTable  = ss(ns, refAttr, refNs)
-    val (id1, id2) = if (ns == refNs) ("1_id", "2_id") else ("id", "id")
-    val ns_id1     = ss(ns, id1)
-    val refNs_id2  = ss(refNs, id2)
-    joins += (("LEFT JOIN", joinTable, "", s"$ns$nsExt.id", s"= $joinTable.$ns_id1"))
-    joins += (("LEFT JOIN", refNs, as, s"$joinTable.$refNs_id2", s"= $refNs$ext.id"))
+    aritiesNested()
     castss = castss :+ Nil
 
     resolve(nestedElements)
+  }
+
+  private def addJoins(ns: String, nsExt: String, refAttr: String, refNs: String, joinType: String): Unit = {
+    val (refAs, refExt) = getOptExt().fold(("", ""))(ext => (refNs + ext, ext))
+    val joinTable       = ss(ns, refAttr, refNs)
+    val (id1, id2)      = if (ns == refNs) ("1_id", "2_id") else ("id", "id")
+    val ns_id1          = ss(ns, id1)
+    val refNs_id2       = ss(refNs, id2)
+    joins += ((s"$joinType JOIN", joinTable, "", List(s"$ns$nsExt.id = $joinTable.$ns_id1")))
+    joins += ((s"$joinType JOIN", refNs, refAs, List(s"$joinTable.$refNs_id2 = $refNs$refExt.id")))
   }
 }

@@ -20,7 +20,7 @@ trait QueryExprSet_sqlite
 
       // Allow empty mandatory value in optional nested structures
       val mode = if (isOptNested) "LEFT" else "INNER"
-      joins += ((s"$mode JOIN", s"JSON_EACH($col)", colTable, "", ""))
+      joins += ((s"$mode JOIN", s"JSON_EACH($col)", colTable, Nil))
       having += "COUNT(*) > 0"
       aggregate = true
       mandatoryCast(res, mandatory)
@@ -32,7 +32,7 @@ trait QueryExprSet_sqlite
     val colTable = "_" + col.replace('.', '_')
     select -= col
     select += s"JSON_GROUP_ARRAY($colTable.VALUE) AS $attr"
-    joins += (("LEFT JOIN", s"JSON_EACH($col)", colTable, "", ""))
+    joins += (("LEFT JOIN", s"JSON_EACH($col)", colTable, Nil))
     aggregate = true
     replaceCast((row: RS, paramIndex: Int) =>
       res.json2optArray(row.getString(paramIndex)).map(_.toSet)
@@ -50,7 +50,7 @@ trait QueryExprSet_sqlite
 
       // Allow empty mandatory value in optional nested structures
       val mode = if (isOptNested) "LEFT" else "INNER"
-      joins += ((s"$mode JOIN", s"JSON_EACH($col)", colTable, "", ""))
+      joins += ((s"$mode JOIN", s"JSON_EACH($col)", colTable, Nil))
       having += "COUNT(*) > 0"
       aggregate = true
       mandatoryCast(res, mandatory)
@@ -87,7 +87,7 @@ trait QueryExprSet_sqlite
 
       // Allow empty mandatory value in optional nested structures
       val mode = if (isOptNested) "LEFT" else "INNER"
-      joins += ((s"$mode JOIN", s"JSON_EACH($col)", colTable, "", ""))
+      joins += ((s"$mode JOIN", s"JSON_EACH($col)", colTable, Nil))
       aggregate = true
       mandatoryCast(res, mandatory)
     }
@@ -139,7 +139,7 @@ trait QueryExprSet_sqlite
 
       // Allow empty mandatory value in optional nested structures
       val mode = if (isOptNested) "LEFT" else "INNER"
-      joins += ((s"$mode JOIN", s"JSON_EACH($col)", colTable, "", ""))
+      joins += ((s"$mode JOIN", s"JSON_EACH($col)", colTable, Nil))
       having += "COUNT(*) > 0"
       aggregate = true
       mandatoryCast(res, mandatory)
@@ -180,8 +180,7 @@ trait QueryExprSet_sqlite
         "LEFT OUTER JOIN",
         s"JSON_TABLE($col, '$$[*]' COLUMNS (vs $tpeDb PATH '$$')) t_$i",
         "",
-        "true",
-        ""
+        List("true")
       ))
 
     } else {

@@ -59,7 +59,7 @@ trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: SqlQueryBase
 
   protected def setRefMan[T](attr: Attr, args: Set[T], res: ResSet[T]): Unit = {
     select += s"ARRAY_AGG($joinTable.$ref_id) $refIds"
-    joins += (("INNER JOIN", joinTable, "", s"$nsId", s"= $joinTable.$ns_id"))
+    joins += (("INNER JOIN", joinTable, "", List(s"$nsId = $joinTable.$ns_id")))
     groupBy += nsId
     addCast(res.sql2set)
 
@@ -76,7 +76,7 @@ trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: SqlQueryBase
 
   protected def setRefTac[T](attr: Attr, args: Set[T], res: ResSet[T]): Unit = {
     val col = getCol(attr: Attr)
-    joins += (("INNER JOIN", joinTable, "", s"$nsId", s"= $joinTable.$ns_id"))
+    joins += (("INNER JOIN", joinTable, "", List(s"$nsId = $joinTable.$ns_id")))
     groupBy += nsId
     attr.filterAttr.fold {
       setRefExpr(attr, col, attr.op, args)
@@ -90,7 +90,7 @@ trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: SqlQueryBase
     attr: Attr, optSet: Option[Set[T]], resOpt: ResSetOpt[T], res: ResSet[T]
   ): Unit = {
     select += s"ARRAY_AGG($joinTable.$ref_id) $refIds"
-    joins += (("LEFT JOIN", joinTable, "", s"$nsId", s"= $joinTable.$ns_id"))
+    joins += (("LEFT JOIN", joinTable, "", List(s"$nsId = $joinTable.$ns_id")))
     groupBy += nsId
     addCast(resOpt.sql2setOpt)
     attr.op match {
@@ -233,7 +233,7 @@ trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: SqlQueryBase
     notNull -= col
     // Make join optional
     joins.remove(joins.length - 1)
-    joins += (("LEFT JOIN", joinTable, "", s"$nsId", s"= $col"))
+    joins += (("LEFT JOIN", joinTable, "", List(s"$nsId = $col")))
     where += ((col, s"IS NULL"))
   }
 }

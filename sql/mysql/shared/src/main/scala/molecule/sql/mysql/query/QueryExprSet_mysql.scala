@@ -130,8 +130,7 @@ trait QueryExprSet_mysql
         "LEFT OUTER JOIN",
         s"JSON_TABLE($col, '$$[*]' COLUMNS (vs $tpeDb PATH '$$')) t_$i",
         "",
-        "true",
-        ""
+        List("true")
       ))
 
     } else {

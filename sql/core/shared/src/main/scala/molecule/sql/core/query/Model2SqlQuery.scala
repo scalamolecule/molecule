@@ -97,24 +97,12 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
   protected def mkJoins(indents: Int): String = {
     if (joins.isEmpty) "" else {
       val indent = "  " * indents
-      val max1   = joins.map(_._1.length).max
-      val max2   = joins.map(_._2.length).max
-      val max3   = joins.map(_._3.length).max
-      val max4   = joins.map(_._4.length).max + 1
-      val hasAs  = joins.exists(_._3.nonEmpty)
       joins.map {
-        case (join, table, as, lft, rgt) =>
-          val join_  = join + padS(max1, join)
-          val table_ = table + padS(max2, table)
-          val as_    = if (hasAs) {
-            if (as.isEmpty) padS(max3 + 4, "") else " AS " + as + padS(max3, as)
-          } else ""
-          if (lft.nonEmpty) {
-            val predicate = lft + padS(max4, lft) + rgt
-            s"$join_ $table_$as_ ON $predicate"
-          } else {
-            s"$join_ $table_$as_"
-          }
+        case (join, table, as, predicates) =>
+          val as_ = if (as.isEmpty) "" else " " + as
+          val predicates_ = if (predicates.isEmpty) "" else
+            predicates.mkString(" ON\n    ", "\n    ", "")
+          s"$join $table$as_$predicates_"
       }.mkString(s"\n$indent", s"\n$indent", "")
     }
   }

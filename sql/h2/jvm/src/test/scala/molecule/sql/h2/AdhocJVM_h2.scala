@@ -53,8 +53,8 @@ object AdhocJVM_h2 extends TestSuite_h2 {
             |  B.i
             |FROM A
             |  LEFT JOIN B ON
-            |  A.b = B.id AND
-            |  B.i IS NOT NULL
+            |    A.b = B.id AND
+            |    B.i IS NOT NULL
             |WHERE
             |  A.i IS NOT NULL
             |""".stripMargin, true)

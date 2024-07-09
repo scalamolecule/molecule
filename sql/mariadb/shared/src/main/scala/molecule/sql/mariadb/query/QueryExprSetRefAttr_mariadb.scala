@@ -12,7 +12,7 @@ trait QueryExprSetRefAttr_mariadb
     attr: Attr, args: Set[T], res: ResSet[T]
   ): Unit = {
     select += s"JSON_ARRAYAGG($joinTable.$ref_id) $refIds"
-    joins += (("INNER JOIN", joinTable, "", s"$nsId", s"= $joinTable.$ns_id"))
+    joins += (("INNER JOIN", joinTable, "", List(s"$nsId = $joinTable.$ns_id")))
     groupBy += nsId
     addCast(
       (row: RS, paramIndex: Int) =>
@@ -35,7 +35,7 @@ trait QueryExprSetRefAttr_mariadb
   ): Unit = {
     val col = getCol(attr: Attr)
     select += s"JSON_ARRAYAGG($joinTable.$ref_id) $refIds"
-    joins += (("LEFT JOIN", joinTable, "", s"$nsId", s"= $joinTable.$ns_id"))
+    joins += (("LEFT JOIN", joinTable, "", List(s"$nsId = $joinTable.$ns_id")))
     groupBy += nsId
     addCast((row: RS, paramIndex: Int) => {
       row.getString(paramIndex) match {
