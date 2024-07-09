@@ -1,9 +1,9 @@
 package molecule.sql.core.query
 
 import molecule.boilerplate.ast.Model._
-import molecule.core.query.QueryExpr
+import molecule.core.query.{Model2Query, QueryExpr}
 
-trait QueryExprMap extends QueryExpr { self: SqlQueryBase with LambdasMap =>
+trait QueryExprMap extends QueryExpr { self: Model2Query with SqlQueryBase with LambdasMap =>
 
   override protected def queryAttrMapMan(attr: AttrMapMan): Unit = {
     aritiesAttr()
@@ -34,6 +34,34 @@ trait QueryExprMap extends QueryExpr { self: SqlQueryBase with LambdasMap =>
     }
   }
 
+  override protected def queryAttrMapTac(attr: AttrMapTac): Unit = {
+    attr match {
+      case at: AttrMapTacID             => mapTac(attr, at.keys, at.values, resMapId)
+      case at: AttrMapTacString         => mapTac(attr, at.keys, at.values, resMapString)
+      case at: AttrMapTacInt            => mapTac(attr, at.keys, at.values, resMapInt)
+      case at: AttrMapTacLong           => mapTac(attr, at.keys, at.values, resMapLong)
+      case at: AttrMapTacFloat          => mapTac(attr, at.keys, at.values, resMapFloat)
+      case at: AttrMapTacDouble         => mapTac(attr, at.keys, at.values, resMapDouble)
+      case at: AttrMapTacBoolean        => mapTac(attr, at.keys, at.values, resMapBoolean)
+      case at: AttrMapTacBigInt         => mapTac(attr, at.keys, at.values, resMapBigInt)
+      case at: AttrMapTacBigDecimal     => mapTac(attr, at.keys, at.values, resMapBigDecimal)
+      case at: AttrMapTacDate           => mapTac(attr, at.keys, at.values, resMapDate)
+      case at: AttrMapTacDuration       => mapTac(attr, at.keys, at.values, resMapDuration)
+      case at: AttrMapTacInstant        => mapTac(attr, at.keys, at.values, resMapInstant)
+      case at: AttrMapTacLocalDate      => mapTac(attr, at.keys, at.values, resMapLocalDate)
+      case at: AttrMapTacLocalTime      => mapTac(attr, at.keys, at.values, resMapLocalTime)
+      case at: AttrMapTacLocalDateTime  => mapTac(attr, at.keys, at.values, resMapLocalDateTime)
+      case at: AttrMapTacOffsetTime     => mapTac(attr, at.keys, at.values, resMapOffsetTime)
+      case at: AttrMapTacOffsetDateTime => mapTac(attr, at.keys, at.values, resMapOffsetDateTime)
+      case at: AttrMapTacZonedDateTime  => mapTac(attr, at.keys, at.values, resMapZonedDateTime)
+      case at: AttrMapTacUUID           => mapTac(attr, at.keys, at.values, resMapUUID)
+      case at: AttrMapTacURI            => mapTac(attr, at.keys, at.values, resMapURI)
+      case at: AttrMapTacByte           => mapTac(attr, at.keys, at.values, resMapByte)
+      case at: AttrMapTacShort          => mapTac(attr, at.keys, at.values, resMapShort)
+      case at: AttrMapTacChar           => mapTac(attr, at.keys, at.values, resMapChar)
+    }
+  }
+
   override protected def queryAttrMapOpt(attr: AttrMapOpt): Unit = {
     aritiesAttr()
     attr match {
@@ -60,34 +88,6 @@ trait QueryExprMap extends QueryExpr { self: SqlQueryBase with LambdasMap =>
       case at: AttrMapOptByte           => mapOpt(at, at.keys, resOptMapByte, resMapByte)
       case at: AttrMapOptShort          => mapOpt(at, at.keys, resOptMapShort, resMapShort)
       case at: AttrMapOptChar           => mapOpt(at, at.keys, resOptMapChar, resMapChar)
-    }
-  }
-
-  override protected def queryAttrMapTac(attr: AttrMapTac): Unit = {
-    attr match {
-      case at: AttrMapTacID             => mapTac(attr, at.keys, at.values, resMapId)
-      case at: AttrMapTacString         => mapTac(attr, at.keys, at.values, resMapString)
-      case at: AttrMapTacInt            => mapTac(attr, at.keys, at.values, resMapInt)
-      case at: AttrMapTacLong           => mapTac(attr, at.keys, at.values, resMapLong)
-      case at: AttrMapTacFloat          => mapTac(attr, at.keys, at.values, resMapFloat)
-      case at: AttrMapTacDouble         => mapTac(attr, at.keys, at.values, resMapDouble)
-      case at: AttrMapTacBoolean        => mapTac(attr, at.keys, at.values, resMapBoolean)
-      case at: AttrMapTacBigInt         => mapTac(attr, at.keys, at.values, resMapBigInt)
-      case at: AttrMapTacBigDecimal     => mapTac(attr, at.keys, at.values, resMapBigDecimal)
-      case at: AttrMapTacDate           => mapTac(attr, at.keys, at.values, resMapDate)
-      case at: AttrMapTacDuration       => mapTac(attr, at.keys, at.values, resMapDuration)
-      case at: AttrMapTacInstant        => mapTac(attr, at.keys, at.values, resMapInstant)
-      case at: AttrMapTacLocalDate      => mapTac(attr, at.keys, at.values, resMapLocalDate)
-      case at: AttrMapTacLocalTime      => mapTac(attr, at.keys, at.values, resMapLocalTime)
-      case at: AttrMapTacLocalDateTime  => mapTac(attr, at.keys, at.values, resMapLocalDateTime)
-      case at: AttrMapTacOffsetTime     => mapTac(attr, at.keys, at.values, resMapOffsetTime)
-      case at: AttrMapTacOffsetDateTime => mapTac(attr, at.keys, at.values, resMapOffsetDateTime)
-      case at: AttrMapTacZonedDateTime  => mapTac(attr, at.keys, at.values, resMapZonedDateTime)
-      case at: AttrMapTacUUID           => mapTac(attr, at.keys, at.values, resMapUUID)
-      case at: AttrMapTacURI            => mapTac(attr, at.keys, at.values, resMapURI)
-      case at: AttrMapTacByte           => mapTac(attr, at.keys, at.values, resMapByte)
-      case at: AttrMapTacShort          => mapTac(attr, at.keys, at.values, resMapShort)
-      case at: AttrMapTacChar           => mapTac(attr, at.keys, at.values, resMapChar)
     }
   }
 

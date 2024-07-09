@@ -1,11 +1,12 @@
 package molecule.sql.postgres.query
 
+import molecule.core.query.Model2Query
 import molecule.sql.core.query.{QueryExprSeq, SqlQueryBase}
 
 
 trait QueryExprSeq_postgres
   extends QueryExprSeq
-    with LambdasSeq_postgres { self: SqlQueryBase =>
+    with LambdasSeq_postgres { self: Model2Query with SqlQueryBase =>
 
 
   // attr ----------------------------------------------------------------------

@@ -2,10 +2,10 @@ package molecule.sql.core.query
 
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
-import molecule.core.query.QueryExpr
+import molecule.core.query.{Model2Query, QueryExpr}
 import molecule.sql.core.javaSql.PrepStmt
 
-trait QueryExprSeq extends QueryExpr { self: SqlQueryBase with LambdasSeq =>
+trait QueryExprSeq extends QueryExpr { self: Model2Query with SqlQueryBase with LambdasSeq =>
 
   override protected def queryAttrSeqMan(attr: AttrSeqMan): Unit = {
     aritiesAttr()

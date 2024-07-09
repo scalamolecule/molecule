@@ -84,6 +84,8 @@ trait DatomicQueryBase
 
   // Paths
   final var varPath: List[String] = List.empty[String]
+  final var path        = List.empty[String]
+
 
   final protected def addCast(cast: AnyRef => AnyRef): Unit = {
     castss = castss.init :+ (castss.last :+ cast)

@@ -1,11 +1,12 @@
 package molecule.sql.mariadb.query
 
+import molecule.core.query.Model2Query
 import molecule.sql.core.query.{LambdasSeq, QueryExprSeq, SqlQueryBase}
 
 
 trait QueryExprSeq_mariadb
   extends QueryExprSeq
-    with LambdasSeq { self: SqlQueryBase =>
+    with LambdasSeq { self: Model2Query with SqlQueryBase =>
 
   // attr ----------------------------------------------------------------------
 

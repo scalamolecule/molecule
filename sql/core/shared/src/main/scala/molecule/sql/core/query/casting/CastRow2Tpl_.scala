@@ -1,12 +1,11 @@
 // GENERATED CODE ********************************
 package molecule.sql.core.query.casting
 
-import molecule.core.query.Model2Query
 import molecule.sql.core.query.SqlQueryBase
 import scala.annotation.tailrec
 
 
-trait CastRow2Tpl_ { self: Model2Query with SqlQueryBase =>
+class CastRow2Tpl_[NestedTpls] extends SqlQueryBase {
 
   @tailrec
   final private def resolveArities(
@@ -26,12 +25,11 @@ trait CastRow2Tpl_ { self: Model2Query with SqlQueryBase =>
         val cast = (_: RS, _: ParamIndex) => nested.getOrElse(List.empty[Any])
         resolveArities(Nil, casts, 0, acc :+ cast, None)
 
-
       case _ => acc
     }
   }
 
-  final  def castRow2AnyTpl(
+  final def cast(
     arities: List[List[Int]],
     casts: List[(RS, ParamIndex) => Any],
     attrIndex: ParamIndex,

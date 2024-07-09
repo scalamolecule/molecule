@@ -23,7 +23,6 @@ trait Model2Query extends QueryExpr with ModelUtils {
   final var isNested    = false
   final var isManNested = false
   final var isOptNested = false
-  final var path        = List.empty[String]
 
 
   @tailrec

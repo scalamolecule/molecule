@@ -3,18 +3,17 @@ package molecule.sql.core.query
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.ConnProxy
-import molecule.core.query.QueryExpr
+import molecule.core.query.{Model2Query, QueryExpr}
 import molecule.core.util.ModelUtils
 import molecule.sql.core.query.casting._
 import scala.collection.mutable.ListBuffer
 
 
 abstract class Model2SqlQuery[Tpl](elements0: List[Element])
-  extends QueryExprRef
-    with CastNestedBranch_
-    with CastRow2Tpl_
+  extends Model2Query with QueryExprRef
     with Nest[Tpl]
     with NestOpt[Tpl]
+    with NestOptRef[Tpl]
     with ModelUtils
     with MoleculeLogging { self: QueryExpr with SqlQueryBase =>
 
@@ -69,10 +68,8 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     optOffset: Option[Int]
   ): String = {
     if (hasOptRef) {
-      println(joins)
-      println(where)
+      addPredicatesToLastLeftJoin()
     }
-
     val isBackwards = optLimit.fold(false)(_ < 0) || optOffset.fold(false)(_ < 0)
     val distinct_   = if (distinct) " DISTINCT" else ""
     val select_     = mkSelect
@@ -106,7 +103,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
         case (join, table, as, predicates) =>
           val as_         = if (as.isEmpty) "" else " " + as
           val predicates_ = if (predicates.isEmpty) "" else
-            predicates.mkString(s" ON\n$indent  ", s"\n$indent  ", "")
+            predicates.mkString(s" ON\n$indent  ", s" AND\n$indent  ", "")
           s"$join $table$as_$predicates_"
       }.mkString(s"\n$indent", s"\n$indent", "")
     }

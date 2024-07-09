@@ -1,10 +1,11 @@
 package molecule.sql.sqlite.query
 
+import molecule.core.query.Model2Query
 import molecule.sql.core.query.{QueryExprSet, SqlQueryBase}
 
 trait QueryExprSet_sqlite
   extends QueryExprSet
-    with LambdasSet_sqlite { self: SqlQueryBase =>
+    with LambdasSet_sqlite { self: Model2Query with SqlQueryBase =>
 
 
   // attr ----------------------------------------------------------------------

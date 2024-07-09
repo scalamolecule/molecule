@@ -1,11 +1,14 @@
 package molecule.sql.mysql.query
 
 import molecule.base.error.ModelError
+import molecule.core.query.Model2Query
 import molecule.sql.core.query.{QueryExprOne, SqlQueryBase}
 import scala.reflect.ClassTag
 import scala.util.Random
 
-trait QueryExprOne_mysql extends QueryExprOne with LambdasOne_mysql { self: SqlQueryBase =>
+trait QueryExprOne_mysql
+  extends QueryExprOne
+    with LambdasOne_mysql { self: Model2Query with SqlQueryBase =>
 
   override protected def matches(col: String, regex: String): Unit = {
     if (regex.nonEmpty)

@@ -1,11 +1,12 @@
 package molecule.sql.mysql.query
 
+import molecule.core.query.Model2Query
 import molecule.sql.core.query.{QueryExprMap, SqlQueryBase}
 
 
 trait QueryExprMap_mysql
   extends QueryExprMap
-    with LambdasMap_mysql { self: SqlQueryBase =>
+    with LambdasMap_mysql { self: Model2Query with SqlQueryBase =>
 
   // value lookup by key -------------------------------------------------------
 

@@ -43,27 +43,27 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       for {
 
 
-        _ <- A.i(1).save.transact
-        _ <- A.i(2).B.i(20).save.transact
-        //        _ <- A.i(3).B.s("a").save.transact
-
-        _ <- rawQuery(
-          """SELECT DISTINCT
-            |  A.i,
-            |  B.i
-            |FROM A
-            |  LEFT JOIN B ON
-            |    A.b = B.id AND
-            |    B.i IS NOT NULL
-            |WHERE
-            |  A.i IS NOT NULL
-            |""".stripMargin, true)
-
-        _ <- A.i.B.?(B.i).query.i.get.map(_ ==> List(
-          (1, None),
-          (2, Some(20)),
-          //          (3, None),
-        ))
+        //        _ <- A.i(1).save.transact
+        //        _ <- A.i(2).B.i(20).save.transact
+        //        //        _ <- A.i(3).B.s("a").save.transact
+        //
+        //        _ <- rawQuery(
+        //          """SELECT DISTINCT
+        //            |  A.i,
+        //            |  B.i
+        //            |FROM A
+        //            |  LEFT JOIN B ON
+        //            |    A.b = B.id AND
+        //            |    B.i IS NOT NULL
+        //            |WHERE
+        //            |  A.i IS NOT NULL
+        //            |""".stripMargin, true)
+        //
+        //        _ <- A.i.B.?(B.i).query.get.map(_ ==> List(
+        //          (1, None),
+        //          (2, Some(20)),
+        //          //          (3, None),
+        //        ))
         //
         //        _ <- rawQuery(
         //          """SELECT DISTINCT
@@ -81,11 +81,11 @@ object AdhocJVM_h2 extends TestSuite_h2 {
         //          (1, Some(None)), // doesn't make sense
         //        ))
 
-
-        //        _ <- A.i(1).save.transact
-        //        _ <- A.i(2).B.s("a").save.transact
-        //        _ <- A.i(3).B.i(30).save.transact
-        //        _ <- A.i(4).B.i(40).s("b").save.transact
+        //
+        //                _ <- A.i(1).save.transact
+        //                _ <- A.i(2).B.s("a").save.transact
+        //                _ <- A.i(3).B.i(30).save.transact
+        //                _ <- A.i(4).B.i(40).s("b").save.transact
         //
         //        _ <- rawQuery(
         //          """SELECT DISTINCT
@@ -179,33 +179,49 @@ object AdhocJVM_h2 extends TestSuite_h2 {
         //        ))
         //
 
-        //
-        //        _ <- A.i(5).B.i(50).s("c").C.i(500).s("cc").save.transact
-        //
-        //        _ <- rawQuery(
-        //          """SELECT DISTINCT
-        //            |  A.i,
-        //            |  B.i, B.s,
-        //            |  C.i, C.s
-        //            |FROM A
-        //            |  LEFT JOIN B ON
-        //            |    A.b = B.id AND
-        //            |    B.i IS NOT NULL AND
-        //            |    B.s IS NOT NULL
-        //            |  LEFT JOIN C ON
-        //            |    B.c = C.id AND
-        //            |    C.i IS NOT NULL AND
-        //            |    C.s IS NOT NULL
-        //            |WHERE
-        //            |  A.i IS NOT NULL
-        //            |""".stripMargin, true)
-        //        _ <- A.i.B.?(B.i.s.C.?(C.i.s)).query.get.map(_ ==> List(
-        //          (1, None),
-        //          (2, None),
-        //          (3, None),
-        //          (4, Some((40, "b", None))),
-        //          (5, Some((50, "c", Some((500, "cc"))))),
-        //        ))
+
+
+        _ <- A.i.Bb.*(B.i.s.Cc.*(C.s.i)).insert(
+          1, List((2, "a", List(("b", 3))))
+        ).transact
+
+        _ <- A.i.Bb.*(B.i.s.Cc.*(C.s.i)).query.get.map(_ ==> List(
+          (1, List((2, "a", List(("b", 3)))))
+        ))
+
+        //        _ <- A.i(1).save.transact
+        //        _ <- A.i(2).B.s("a").save.transact
+        //        _ <- A.i(3).B.i(30).save.transact
+        //        _ <- A.i(4).B.i(40).s("b").save.transact
+        _ <- A.i(5).B.i(50).s("c").C.i(500).s("cc").save.transact
+
+//        _ <- rawQuery(
+//          """SELECT DISTINCT
+//            |  A.i,
+//            |  B.i,
+//            |  B.s,
+//            |  C.s,
+//            |  C.i
+//            |FROM A
+//            |  LEFT JOIN B ON
+//            |    A.b = B.id AND
+//            |    B.i IS NOT NULL AND
+//            |    B.s IS NOT NULL
+//            |  LEFT JOIN C ON
+//            |    B.c = C.id AND
+//            |    C.s IS NOT NULL AND
+//            |    C.i IS NOT NULL
+//            |WHERE
+//            |  A.i IS NOT NULL
+//            |""".stripMargin, true)
+
+        _ <- A.i.B.?(B.i.s.C.?(C.s.i)).query.get.map(_ ==> List(
+//          (1, None),
+//          (2, None),
+//          (3, None),
+//          (4, Some((40, "b", None))),
+          (5, Some((50, "c", Some(("cc", 500))))),
+        ))
         //
         //
         //        _ <- A.i(6).B.i(60).s("d")._A.C.i(600).s("dd").save.transact

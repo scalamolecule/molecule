@@ -3,10 +3,10 @@ package molecule.sql.core.query
 import molecule.base.ast._
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
-import molecule.core.query.QueryExpr
+import molecule.core.query.{Model2Query, QueryExpr}
 
 
-trait QueryExprRef extends QueryExpr { self: SqlQueryBase =>
+trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
 
   override protected def queryRef(ref: Ref, tail: List[Element]): Unit = {
     val Ref(ns, refAttr, refNs, card, _, _) = ref
@@ -56,14 +56,22 @@ trait QueryExprRef extends QueryExpr { self: SqlQueryBase =>
   override protected def queryOptRef(ref: Ref, nestedElements: List[Element]): Unit = {
     if (hasOptRef) {
       // transfer previous predicates from where
+      addPredicatesToLastLeftJoin()
     }
     hasOptRef = true
+
+    // Know where we should steal predicates from subsequent `where` additions
+    whereSplit = where.length
+
     val Ref(ns, refAttr, refNs, _, _, _) = ref
     handleRef(refAttr, refNs)
 
     val nsExt           = getOptExt(path.dropRight(2)).getOrElse("")
     val (refAs, refExt) = getOptExt().fold(("", ""))(ext => (refNs + ext, ext))
     joins += ((s"LEFT JOIN", refNs, refAs, List(s"$ns$nsExt.$refAttr = $refNs$refExt.id")))
+
+    aritiesNextLevel()
+    castss = castss :+ Nil
 
     resolve(nestedElements)
   }
@@ -103,7 +111,7 @@ trait QueryExprRef extends QueryExpr { self: SqlQueryBase =>
     val id = s"$ns.id"
     nestedIds += id
     groupByCols += id // if we later need to group by non-aggregated columns
-    aritiesNested()
+    aritiesNextLevel()
     castss = castss :+ Nil
 
     resolve(nestedElements)

@@ -1,76 +1,79 @@
 package molecule.sql.core.query.casting
 
 import java.lang.{Long => jLong}
-import molecule.core.query.Model2Query
 import molecule.sql.core.query.SqlQueryBase
 
 
-trait Nest[Tpl] { self: Model2Query
-  with SqlQueryBase
-  with CastNestedBranch_ =>
+trait Nest[Tpl] extends SqlQueryBase {
+
+  protected val branch = new CastNestedBranch_[List[Any]]
+  protected val row    = new CastRow2Tpl_[List[Any]]
 
   // Previous entity ids on each level
-  private var p0: jLong = 0L
-  private var p1: jLong = 0L
-  private var p2: jLong = 0L
-  private var p3: jLong = 0L
-  private var p4: jLong = 0L
-  private var p5: jLong = 0L
-  private var p6: jLong = 0L
+  protected var p0: jLong = 0L
+  protected var p1: jLong = 0L
+  protected var p2: jLong = 0L
+  protected var p3: jLong = 0L
+  protected var p4: jLong = 0L
+  protected var p5: jLong = 0L
+  protected var p6: jLong = 0L
 
   // Current entity ids on each level
-  private var e0: jLong = 0L
-  private var e1: jLong = 0L
-  private var e2: jLong = 0L
-  private var e3: jLong = 0L
-  private var e4: jLong = 0L
-  private var e5: jLong = 0L
-  private var e6: jLong = 0L
+  protected var e0: jLong = 0L
+  protected var e1: jLong = 0L
+  protected var e2: jLong = 0L
+  protected var e3: jLong = 0L
+  protected var e4: jLong = 0L
+  protected var e5: jLong = 0L
+  protected var e6: jLong = 0L
 
-  private var nextRow: Boolean = false
+  protected var nextRow: Boolean = false
 
-  private lazy val nestedLevels = castss.length - 1
-  private lazy val txAttrs      = aritiess.head.flatten.dropWhile(_ != -1).tail.sum
+  protected lazy val nestedLevels = castss.length - 1
+  protected lazy val txAttrs      = aritiess.head.flatten.dropWhile(_ != -1).tail.sum
 
   // First attr index for each level
-  private lazy val i0 = 1 + nestedLevels // 1-based indexes for jdbc Row
-  private lazy val i1 = i0 + aritiess.head.flatten.takeWhile(_ != -1).sum
-  private lazy val i2 = i1 + aritiess(1).flatten.takeWhile(_ != -1).sum
-  private lazy val i3 = i2 + aritiess(2).flatten.takeWhile(_ != -1).sum
-  private lazy val i4 = i3 + aritiess(3).flatten.takeWhile(_ != -1).sum
-  private lazy val i5 = i4 + aritiess(4).flatten.takeWhile(_ != -1).sum
-  private lazy val i6 = i5 + aritiess(5).flatten.takeWhile(_ != -1).sum
-  private lazy val i7 = i6 + aritiess(6).flatten.takeWhile(_ != -1).sum
+  protected lazy val i0 = 1 + nestedLevels // 1-based indexes for jdbc ResultSet
+  protected lazy val i1 = i0 + aritiess.head.flatten.takeWhile(_ != -1).sum
+  protected lazy val i2 = i1 + aritiess(1).flatten.takeWhile(_ != -1).sum
+  protected lazy val i3 = i2 + aritiess(2).flatten.takeWhile(_ != -1).sum
+  protected lazy val i4 = i3 + aritiess(3).flatten.takeWhile(_ != -1).sum
+  protected lazy val i5 = i4 + aritiess(4).flatten.takeWhile(_ != -1).sum
+  protected lazy val i6 = i5 + aritiess(5).flatten.takeWhile(_ != -1).sum
+  protected lazy val i7 = i6 + aritiess(6).flatten.takeWhile(_ != -1).sum
 
-  private var rowCount                                 = -1
-  private lazy val rowIndexTx                          = 1 + rowCount - txAttrs // 1-based indexes for jdbc ResultSet
-  private lazy val tplBranch0: (RS, NestedTpls) => Tpl = castBranch[Tpl](aritiess(0), castss(0), i0, rowIndexTx)
-  private lazy val tplBranch1: (RS, NestedTpls) => Any = castBranch[Any](aritiess(1), castss(1), i1, 0)
-  private lazy val tplBranch2: (RS, NestedTpls) => Any = castBranch[Any](aritiess(2), castss(2), i2, 0)
-  private lazy val tplBranch3: (RS, NestedTpls) => Any = castBranch[Any](aritiess(3), castss(3), i3, 0)
-  private lazy val tplBranch4: (RS, NestedTpls) => Any = castBranch[Any](aritiess(4), castss(4), i4, 0)
-  private lazy val tplBranch5: (RS, NestedTpls) => Any = castBranch[Any](aritiess(5), castss(5), i5, 0)
-  private lazy val tplBranch6: (RS, NestedTpls) => Any = castBranch[Any](aritiess(6), castss(6), i6, 0)
+  protected var rowCount                                = -1
+  protected lazy val rowIndexTx                         = 1 + rowCount - txAttrs // 1-based indexes for jdbc ResultSet
+  protected lazy val tplBranch0: (RS, List[Any]) => Tpl = branch.cast[Tpl](aritiess(0), castss(0), i0, rowIndexTx)
+  protected lazy val tplBranch1: (RS, List[Any]) => Any = branch.cast[Any](aritiess(1), castss(1), i1, 0)
+  protected lazy val tplBranch2: (RS, List[Any]) => Any = branch.cast[Any](aritiess(2), castss(2), i2, 0)
+  protected lazy val tplBranch3: (RS, List[Any]) => Any = branch.cast[Any](aritiess(3), castss(3), i3, 0)
+  protected lazy val tplBranch4: (RS, List[Any]) => Any = branch.cast[Any](aritiess(4), castss(4), i4, 0)
+  protected lazy val tplBranch5: (RS, List[Any]) => Any = branch.cast[Any](aritiess(5), castss(5), i5, 0)
+  protected lazy val tplBranch6: (RS, List[Any]) => Any = branch.cast[Any](aritiess(6), castss(6), i6, 0)
 
-  private lazy val tplLeaf1: RS => Any = castRow2AnyTpl(aritiess(1), castss(1), i1, None)
-  private lazy val tplLeaf2: RS => Any = castRow2AnyTpl(aritiess(2), castss(2), i2, None)
-  private lazy val tplLeaf3: RS => Any = castRow2AnyTpl(aritiess(3), castss(3), i3, None)
-  private lazy val tplLeaf4: RS => Any = castRow2AnyTpl(aritiess(4), castss(4), i4, None)
-  private lazy val tplLeaf5: RS => Any = castRow2AnyTpl(aritiess(5), castss(5), i5, None)
-  private lazy val tplLeaf6: RS => Any = castRow2AnyTpl(aritiess(6), castss(6), i6, None)
-  private lazy val tplLeaf7: RS => Any = castRow2AnyTpl(aritiess(7), castss(7), i7, None)
+  protected lazy val tplLeaf1: RS => Any = row.cast(aritiess(1), castss(1), i1, None)
+  protected lazy val tplLeaf2: RS => Any = row.cast(aritiess(2), castss(2), i2, None)
+  protected lazy val tplLeaf3: RS => Any = row.cast(aritiess(3), castss(3), i3, None)
+  protected lazy val tplLeaf4: RS => Any = row.cast(aritiess(4), castss(4), i4, None)
+  protected lazy val tplLeaf5: RS => Any = row.cast(aritiess(5), castss(5), i5, None)
+  protected lazy val tplLeaf6: RS => Any = row.cast(aritiess(6), castss(6), i6, None)
+  protected lazy val tplLeaf7: RS => Any = row.cast(aritiess(7), castss(7), i7, None)
 
-  private var acc0: List[Tpl] = List.empty[Tpl]
-  private var acc1: List[Any] = List.empty[Any]
-  private var acc2: List[Any] = List.empty[Any]
-  private var acc3: List[Any] = List.empty[Any]
-  private var acc4: List[Any] = List.empty[Any]
-  private var acc5: List[Any] = List.empty[Any]
-  private var acc6: List[Any] = List.empty[Any]
-  private var acc7: List[Any] = List.empty[Any]
-
+  protected var acc0: List[Tpl] = List.empty[Tpl]
+  protected var acc1: List[Any] = List.empty[Any]
+  protected var acc2: List[Any] = List.empty[Any]
+  protected var acc3: List[Any] = List.empty[Any]
+  protected var acc4: List[Any] = List.empty[Any]
+  protected var acc5: List[Any] = List.empty[Any]
+  protected var acc6: List[Any] = List.empty[Any]
+  protected var acc7: List[Any] = List.empty[Any]
 
   final def rows2nested(rows: RS): List[Tpl] = {
+
+    //    println("aritiess: ")
+    //    aritiess.foreach(println)
+
     nestedLevels match {
       case 1 => rows2nested1(rows)
       case 2 => rows2nested2(rows)
@@ -93,10 +96,8 @@ trait Nest[Tpl] { self: Model2Query
 
     } else {
       rows.afterLast()
-      //      println("=====================================")
       while (rows.previous()) {
         e0 = rows.getLong(1)
-        //        println("  e0: " + e0)
         if (nextRow) {
           if (rows.isFirst) { // last going backwards
             if (e0 != p0) {
@@ -129,7 +130,6 @@ trait Nest[Tpl] { self: Model2Query
           nextRow = true
         }
         p0 = e0
-        //        println("--------------------------------")
       }
     }
     acc0

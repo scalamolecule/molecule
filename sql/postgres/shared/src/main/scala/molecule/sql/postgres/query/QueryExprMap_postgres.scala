@@ -1,11 +1,12 @@
 package molecule.sql.postgres.query
 
+import molecule.core.query.Model2Query
 import molecule.sql.core.query.{QueryExprMap, SqlQueryBase}
 
 
 trait QueryExprMap_postgres
   extends QueryExprMap
-    with LambdasMap_postgres { self: SqlQueryBase =>
+    with LambdasMap_postgres { self: Model2Query with SqlQueryBase =>
 
 
   // value lookup by key -------------------------------------------------------

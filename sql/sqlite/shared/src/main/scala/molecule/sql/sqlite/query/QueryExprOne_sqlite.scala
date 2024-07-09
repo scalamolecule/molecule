@@ -1,10 +1,13 @@
 package molecule.sql.sqlite.query
 
 import molecule.base.error.ModelError
+import molecule.core.query.Model2Query
 import molecule.sql.core.query.{QueryExprOne, SqlQueryBase}
 import scala.reflect.ClassTag
 
-trait QueryExprOne_sqlite extends QueryExprOne with LambdasOne_sqlite { self: SqlQueryBase =>
+trait QueryExprOne_sqlite
+  extends QueryExprOne
+    with LambdasOne_sqlite { self: Model2Query with SqlQueryBase =>
 
 
   override protected def matches(col: String, regex: String): Unit = {

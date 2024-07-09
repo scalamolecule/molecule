@@ -3,11 +3,12 @@ package molecule.sql.sqlite.query
 import java.net.URI
 import java.time.{Duration, Instant, LocalDate, LocalDateTime, LocalTime, OffsetDateTime, OffsetTime, ZonedDateTime}
 import java.util.{Date, UUID}
+import molecule.core.query.Model2Query
 import molecule.sql.core.query.{QueryExprMap, SqlQueryBase}
 
 trait QueryExprMap_sqlite
   extends QueryExprMap
-    with LambdasMap_sqlite { self: SqlQueryBase =>
+    with LambdasMap_sqlite { self: Model2Query with SqlQueryBase =>
 
 
   // value lookup by key -------------------------------------------------------

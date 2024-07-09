@@ -1,11 +1,12 @@
 package molecule.sql.sqlite.query
 
 import molecule.boilerplate.ast.Model._
+import molecule.core.query.Model2Query
 import molecule.sql.core.query.{QueryExprSetRefAttr, SqlQueryBase}
 
 trait QueryExprSetRefAttr_sqlite
   extends QueryExprSetRefAttr
-    with LambdasSet_sqlite { self: SqlQueryBase =>
+    with LambdasSet_sqlite { self: Model2Query with SqlQueryBase =>
 
   override protected def setRefMan[T](
     attr: Attr, args: Set[T], res: ResSet[T]

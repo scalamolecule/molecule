@@ -1,11 +1,12 @@
 package molecule.sql.mysql.query
 
+import molecule.core.query.Model2Query
 import molecule.sql.core.query.{QueryExprSeq, SqlQueryBase}
 
 
 trait QueryExprSeq_mysql
   extends QueryExprSeq
-    with LambdasSeq_mysql { self: SqlQueryBase =>
+    with LambdasSeq_mysql { self: Model2Query with SqlQueryBase =>
 
   // attr ----------------------------------------------------------------------
 

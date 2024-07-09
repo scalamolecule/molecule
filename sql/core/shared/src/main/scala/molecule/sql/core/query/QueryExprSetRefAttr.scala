@@ -2,9 +2,9 @@ package molecule.sql.core.query
 
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
-import molecule.core.query.QueryExpr
+import molecule.core.query.{Model2Query, QueryExpr}
 
-trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: SqlQueryBase =>
+trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: Model2Query with SqlQueryBase =>
 
   protected var joinTable: String = ""
   protected var nsId     : String = ""

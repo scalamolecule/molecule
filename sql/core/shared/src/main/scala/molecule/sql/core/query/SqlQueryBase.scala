@@ -3,21 +3,16 @@ package molecule.sql.core.query
 import molecule.base.ast.Card
 import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
-import molecule.core.query.Model2Query
 import molecule.core.util.JavaConversions
 import molecule.sql.core.javaSql.{PrepStmt, ResultSetInterface}
 import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
 
-trait SqlQueryBase
-  extends Model2Query
-    with BaseHelpers
-    with JavaConversions {
+trait SqlQueryBase extends BaseHelpers with JavaConversions {
 
   type RS = ResultSetInterface
   type ParamIndex = Int
-  type NestedTpls = List[Any]
 
   // Lookup original type of aggregate attributes
   final protected var attrMap = Map.empty[String, (Card, String, Seq[String])]
@@ -46,10 +41,15 @@ trait SqlQueryBase
   final protected var level     = 0
   final protected val args      = new ArrayBuffer[AnyRef]
 
+  final protected var whereSplit = 0
 
   final protected var prevRefNss = Set.empty[String]
   final protected val preExts    = mutable.Map.empty[List[String], Option[String]]
   final protected val exts       = mutable.Map.empty[List[String], Option[String]]
+
+  //  override final var path = List.empty[String]
+  final var path = List.empty[String]
+
 
   // Query variables
   final protected var filterAttrVars = Map.empty[List[String], String]
@@ -62,6 +62,14 @@ trait SqlQueryBase
   }
   def unsetNotNull(col: String) = {
     where -= ((col, "IS NOT NULL"))
+  }
+
+  def addPredicatesToLastLeftJoin(): Unit = {
+    val (leftJoin, table, as, colsMatch) = joins.last
+    val leftJoinPredicates               = where.drop(whereSplit).map { case (col, pred) => s"$col $pred" }
+    val updatedLeftJoin                  = (leftJoin, table, as, colsMatch ++ leftJoinPredicates)
+    joins.update(joins.length - 1, updatedLeftJoin)
+    where.takeInPlace(whereSplit)
   }
 
   private var index = 0
@@ -113,7 +121,7 @@ trait SqlQueryBase
     addCast(cast)
   }
 
-  final protected def aritiesNested(): Unit = {
+  final protected def aritiesNextLevel(): Unit = {
     val newLevel           = Nil
     val curLevel           = aritiess.last
     val curLevelWithNested = curLevel :+ List(-1)

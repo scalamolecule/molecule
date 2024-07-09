@@ -1,9 +1,9 @@
 package molecule.sql.core.query
 
 import molecule.boilerplate.ast.Model._
-import molecule.core.query.QueryExpr
+import molecule.core.query.{Model2Query, QueryExpr}
 
-trait QueryExprSet extends QueryExpr { self: SqlQueryBase with LambdasSet =>
+trait QueryExprSet extends QueryExpr { self: Model2Query with SqlQueryBase with LambdasSet =>
 
   override protected def queryAttrSetMan(attr: AttrSetMan): Unit = {
     aritiesAttr()

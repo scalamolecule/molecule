@@ -8,6 +8,7 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.query.Pagination
 import molecule.core.util.FutureUtils
 import molecule.sql.core.facade.JdbcConn_JVM
+import molecule.sql.core.query.casting.CastRow2Tpl_
 import molecule.sql.core.query.cursorStrategy.{NoUnique, PrimaryUnique, SubUnique}
 import scala.collection.mutable.ListBuffer
 
@@ -73,7 +74,7 @@ case class SqlQueryResolveCursor[Tpl](
         val limitAbs   = limit.abs.min(totalCount)
         val hasMore    = limitAbs < totalCount
         val tuples     = ListBuffer.empty[Tpl]
-        val row2tpl    = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 1, None)
+        val row2tpl    = new CastRow2Tpl_[List[Tpl]].cast(m2q.aritiess.head, m2q.castss.head, 1, None)
         while (sortedRows.next()) {
           tuples += row2tpl(sortedRows).asInstanceOf[Tpl]
         }

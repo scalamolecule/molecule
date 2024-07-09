@@ -2,17 +2,16 @@ package molecule.sql.core.query
 
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
-import molecule.core.query.QueryExpr
+import molecule.core.query.{Model2Query, QueryExpr}
 import scala.reflect.ClassTag
 
-trait QueryExprOne extends QueryExpr { self: SqlQueryBase with LambdasOne =>
+trait QueryExprOne extends QueryExpr { self: Model2Query with SqlQueryBase with LambdasOne =>
 
   override protected def queryIdMan(a: AttrOneMan): Unit = queryAttrOneMan(a)
   override protected def queryIdTac(a: AttrOneTac): Unit = queryAttrOneTac(a)
 
 
   override protected def queryAttrOneMan(attr: AttrOneMan): Unit = {
-    aritiesAttr()
     attr match {
       case at: AttrOneManID             => man(attr, at.vs, resId1)
       case at: AttrOneManString         => man(attr, at.vs, resString1)
@@ -71,7 +70,6 @@ trait QueryExprOne extends QueryExpr { self: SqlQueryBase with LambdasOne =>
   }
 
   override protected def queryAttrOneOpt(attr: AttrOneOpt): Unit = {
-    aritiesAttr()
     attr match {
       case at: AttrOneOptID             => opt(attr, at.vs, resOptId)
       case at: AttrOneOptString         => opt(attr, at.vs, resOptString)
@@ -110,6 +108,7 @@ trait QueryExprOne extends QueryExpr { self: SqlQueryBase with LambdasOne =>
   }
 
   protected def man[T: ClassTag](attr: Attr, args: Seq[T], res: ResOne[T]): Unit = {
+    aritiesAttr()
     val col = getCol(attr: Attr)
     select += col
     groupByCols += col // if we later need to group by non-aggregated columns
@@ -190,6 +189,7 @@ trait QueryExprOne extends QueryExpr { self: SqlQueryBase with LambdasOne =>
     val col = getCol(attr: Attr)
     select += col
     groupByCols += col // if we later need to group by non-aggregated columns
+    aritiesAttr()
     addCast(resOpt.sql2oneOpt)
     addSort(attr, col)
     attr.op match {

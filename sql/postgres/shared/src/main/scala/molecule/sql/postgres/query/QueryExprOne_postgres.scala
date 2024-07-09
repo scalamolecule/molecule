@@ -1,10 +1,13 @@
 package molecule.sql.postgres.query
 
 import molecule.boilerplate.ast.Model._
+import molecule.core.query.Model2Query
 import molecule.sql.core.query.{QueryExprOne, SqlQueryBase}
 import scala.reflect.ClassTag
 
-trait QueryExprOne_postgres extends QueryExprOne with LambdasOne_postgres { self: SqlQueryBase =>
+trait QueryExprOne_postgres
+  extends QueryExprOne
+    with LambdasOne_postgres { self: Model2Query with SqlQueryBase =>
 
   override protected def addSort(attr: Attr, col: String): Unit = {
     attr.sort.foreach { sort =>

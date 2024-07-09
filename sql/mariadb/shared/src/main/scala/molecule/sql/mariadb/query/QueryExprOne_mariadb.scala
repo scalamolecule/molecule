@@ -1,13 +1,14 @@
 package molecule.sql.mariadb.query
 
 import molecule.base.error.ModelError
+import molecule.core.query.Model2Query
 import molecule.sql.core.query.{LambdasOne, QueryExprOne, SqlQueryBase}
 import scala.reflect.ClassTag
 import scala.util.Random
 
 trait QueryExprOne_mariadb
   extends QueryExprOne
-    with LambdasOne { self: SqlQueryBase =>
+    with LambdasOne { self: Model2Query with SqlQueryBase =>
 
   override protected def matches(col: String, regex: String): Unit = {
     if (regex.nonEmpty)

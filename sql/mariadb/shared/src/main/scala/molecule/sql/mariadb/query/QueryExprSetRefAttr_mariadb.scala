@@ -1,11 +1,12 @@
 package molecule.sql.mariadb.query
 
 import molecule.boilerplate.ast.Model._
+import molecule.core.query.Model2Query
 import molecule.sql.core.query.{QueryExprSetRefAttr, SqlQueryBase}
 
 trait QueryExprSetRefAttr_mariadb
   extends QueryExprSetRefAttr
-    with Lambdas_mariadb { self: SqlQueryBase =>
+    with Lambdas_mariadb { self: Model2Query with SqlQueryBase =>
 
 
   override protected def setRefMan[T](
