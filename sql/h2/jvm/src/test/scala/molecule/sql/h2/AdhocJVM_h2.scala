@@ -180,47 +180,93 @@ object AdhocJVM_h2 extends TestSuite_h2 {
         //
 
 
+        //        _ <- A.i.Bb.*(B.i.s.Cc.*(C.s.i)).insert(
+        //          1, List((2, "a", List(("b", 3))))
+        //        ).transact
+        //
+        //        _ <- A.i.Bb.*(B.i.s.Cc.*(C.s.i)).query.get.map(_ ==> List(
+        //          (1, List((2, "a", List(("b", 3)))))
+        //        ))
 
-        _ <- A.i.Bb.*(B.i.s.Cc.*(C.s.i)).insert(
-          1, List((2, "a", List(("b", 3))))
-        ).transact
+        _ <- A.i(1).save.transact
+        _ <- A.i(2).B.i(20).save.transact
+        _ <- A.i(3).B.i(30).C.s("300").i(300).save.transact
+        _ <- A.i(4).B.i(40).s("40").save.transact
+        _ <- A.i(5).B.i(50).s("50").C.s("500").save.transact
+        _ <- A.i(6).B.i(60).s("60").C.s("600").i(600).save.transact
 
-        _ <- A.i.Bb.*(B.i.s.Cc.*(C.s.i)).query.get.map(_ ==> List(
-          (1, List((2, "a", List(("b", 3)))))
+        //        _ <- rawQuery(
+        //          """SELECT DISTINCT
+        //            |  A.i,
+        //            |  B.i,
+        //            |  B.s,
+        //            |  C.s,
+        //            |  C.i
+        //            |FROM A
+        //            |  LEFT JOIN B ON
+        //            |    A.b = B.id AND
+        //            |    B.i IS NOT NULL AND
+        //            |    B.s IS NOT NULL
+        //            |  LEFT JOIN C ON
+        //            |    B.c = C.id AND
+        //            |    C.s IS NOT NULL AND
+        //            |    C.i IS NOT NULL
+        //            |WHERE
+        //            |  A.i IS NOT NULL
+        //            |""".stripMargin, true)
+        //
+        //
+        //        _ <- A.i.B.i.s.C.s.i.query.get.map(_ ==> List(
+        //          (6, 60, "60", "600", 600),
+        //        ))
+        //        _ <- A.i.B.i.s.C.s.i_?.query.get.map(_ ==> List(
+        //          (5, 50, "50", "500", None),
+        //          (6, 60, "60", "600", Some(600)),
+        //        ))
+        //        _ <- A.i.B.i.s_?.C.s.i.query.get.map(_ ==> List(
+        //          (3, 30, None, "300", 300),
+        //          (6, 60, Some("60"), "600", 600),
+        //        ))
+        //        _ <- A.i.B.i.s_?.C.s.i_?.query.get.map(_ ==> List(
+        //          (3, 30, None, "300", Some(300)),
+        //          (5, 50, Some("50"), "500", None),
+        //          (6, 60, Some("60"), "600", Some(600)),
+        //        ))
+        //
+        _ <- A.i.B.?(B.i.s.C.?(C.s.i)).query.get.map(_ ==> List(
+          (1, None),
+          (2, None),
+          (3, None),
+          (4, Some((40, "40", None))),
+          (5, Some((50, "50", None))),
+          (6, Some((60, "60", Some(("600", 600))))),
         ))
 
-        //        _ <- A.i(1).save.transact
-        //        _ <- A.i(2).B.s("a").save.transact
-        //        _ <- A.i(3).B.i(30).save.transact
-        //        _ <- A.i(4).B.i(40).s("b").save.transact
-        _ <- A.i(5).B.i(50).s("c").C.i(500).s("cc").save.transact
+        _ <- A.i.B.?(B.i.s.C.?(C.s.i_?)).query.i.get.map(_ ==> List(
+          (1, None),
+          (2, None),
+          (3, None),
+          (4, Some((40, "40", None))),
+          (5, Some((50, "50", Some(("500", None))))),
+          (6, Some((60, "60", Some(("600", Some(600)))))),
+        ))
 
-//        _ <- rawQuery(
-//          """SELECT DISTINCT
-//            |  A.i,
-//            |  B.i,
-//            |  B.s,
-//            |  C.s,
-//            |  C.i
-//            |FROM A
-//            |  LEFT JOIN B ON
-//            |    A.b = B.id AND
-//            |    B.i IS NOT NULL AND
-//            |    B.s IS NOT NULL
-//            |  LEFT JOIN C ON
-//            |    B.c = C.id AND
-//            |    C.s IS NOT NULL AND
-//            |    C.i IS NOT NULL
-//            |WHERE
-//            |  A.i IS NOT NULL
-//            |""".stripMargin, true)
+        _ <- A.i.B.?(B.i.s_?.C.?(C.s.i)).query.i.get.map(_ ==> List(
+          (1, None),
+          (2, Some((20, None, None))),
+          (3, Some((30, None, Some(("300", 300))))),
+          (4, Some((40, Some("40"), None))),
+          (5, Some((50, Some("50"), None))),
+          (6, Some((60, Some("60"), Some(("600", 600))))),
+        ))
 
-        _ <- A.i.B.?(B.i.s.C.?(C.s.i)).query.get.map(_ ==> List(
-//          (1, None),
-//          (2, None),
-//          (3, None),
-//          (4, Some((40, "b", None))),
-          (5, Some((50, "c", Some(("cc", 500))))),
+        _ <- A.i.B.?(B.i.s_?.C.?(C.s.i_?)).query.i.get.map(_ ==> List(
+          (1, None),
+          (2, Some((20, None, None))),
+          (3, Some((30, None, Some(("300", Some(300)))))),
+          (4, Some((40, Some("40"), None))),
+          (5, Some((50, Some("50"), Some(("500", None))))),
+          (6, Some((60, Some("60"), Some(("600", Some(600)))))),
         ))
         //
         //
@@ -244,15 +290,7 @@ object AdhocJVM_h2 extends TestSuite_h2 {
         //            |WHERE
         //            |  A.i IS NOT NULL
         //            |""".stripMargin, true)
-        //        _ <- A.i.B.?(B.i.s).C.?(C.i.s).query.get.map(_ ==> List(
-        //          (1, None, None),
-        //          (2, None, None),
-        //          (3, None, None),
-        //          (4, Some((40, "b")), None),
-        //          (5, Some((50, "c")), None),
-        //          (6, Some((60, "c")), Some((600, "dd"))),
-        //          (7, None, Some((700, "ee"))),
-        //        ))
+
         //
         //
         //

@@ -9,7 +9,7 @@ import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
 
-trait FlatRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
+trait FlatRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
   override lazy val tests = Tests {

@@ -12,18 +12,17 @@ class CastNestedBranch_[NestedTpls] extends SqlQueryBase {
     arities: List[List[Int]],
     casts: List[(RS, ParamIndex) => Any],
     attrIndex: ParamIndex,
-    attrIndexTx: ParamIndex,
     acc: List[(RS, ParamIndex, NestedTpls) => Any]
   ): List[(RS, ParamIndex, NestedTpls) => Any] = {
     arities match {
       case List(1) :: as =>
         val cast = (row: RS, attrIndex1: ParamIndex, _: NestedTpls) => casts.head(row, attrIndex1)
-        resolveArities(as, casts.tail, attrIndex + 1, attrIndexTx, acc :+ cast)
+        resolveArities(as, casts.tail, attrIndex + 1, acc :+ cast)
 
       // Nested
       case List(-1) :: as =>
         val cast = (_: RS, _: ParamIndex, nested: NestedTpls) => nested
-        resolveArities(as, casts, attrIndexTx, attrIndexTx, acc :+ cast)
+        resolveArities(as, casts, 0, acc :+ cast)
 
       case _ => acc
     }
@@ -33,9 +32,8 @@ class CastNestedBranch_[NestedTpls] extends SqlQueryBase {
     arities: List[List[Int]],
     casts: List[(RS, ParamIndex) => Any],
     firstAttrIndex: ParamIndex,
-    firstAttrIndexTx: ParamIndex
   ): (RS, NestedTpls) => T = {
-    val casters = resolveArities(arities, casts, firstAttrIndex, firstAttrIndexTx, Nil)
+    val casters = resolveArities(arities, casts, firstAttrIndex, Nil)
     casters.length match {
       case 0  => cast0[T]
       case 1  => cast1[T](casters, firstAttrIndex)

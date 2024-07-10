@@ -21,6 +21,7 @@ class ResultSetImpl(val underlying: ResultSet) extends ResultSetInterface {
   override def getBytes(columnIndex: Int): Array[Byte] = underlying.getBytes(columnIndex)
   override def getBigDecimal(columnIndex: Int): jBigDecimal = underlying.getBigDecimal(columnIndex)
   override def getURL(columnIndex: Int): URL = underlying.getURL(columnIndex)
+  override def getObject(columnIndex: Int): AnyRef = underlying.getObject(columnIndex)
 
   override def getArray(columnIndex: Int): ArrayInterface =
     new ArrayImpl(underlying.getArray(columnIndex))

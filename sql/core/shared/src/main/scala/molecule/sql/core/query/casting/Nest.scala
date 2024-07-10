@@ -6,8 +6,8 @@ import molecule.sql.core.query.SqlQueryBase
 
 trait Nest[Tpl] extends SqlQueryBase {
 
-  protected val branch = new CastNestedBranch_[List[Any]]
-  protected val row    = new CastRow2Tpl_[List[Any]]
+  protected lazy val branch       = new CastNestedBranch_[List[Any]]
+  protected lazy val row          = new CastRow2Tpl_[List[Any]]
 
   // Previous entity ids on each level
   protected var p0: jLong = 0L
@@ -27,10 +27,8 @@ trait Nest[Tpl] extends SqlQueryBase {
   protected var e5: jLong = 0L
   protected var e6: jLong = 0L
 
-  protected var nextRow: Boolean = false
-
+  // Important that this is lazy to allow castss to be populated first (wonders of mutation :-)
   protected lazy val nestedLevels = castss.length - 1
-  protected lazy val txAttrs      = aritiess.head.flatten.dropWhile(_ != -1).tail.sum
 
   // First attr index for each level
   protected lazy val i0 = 1 + nestedLevels // 1-based indexes for jdbc ResultSet
@@ -42,23 +40,24 @@ trait Nest[Tpl] extends SqlQueryBase {
   protected lazy val i6 = i5 + aritiess(5).flatten.takeWhile(_ != -1).sum
   protected lazy val i7 = i6 + aritiess(6).flatten.takeWhile(_ != -1).sum
 
-  protected var rowCount                                = -1
-  protected lazy val rowIndexTx                         = 1 + rowCount - txAttrs // 1-based indexes for jdbc ResultSet
-  protected lazy val tplBranch0: (RS, List[Any]) => Tpl = branch.cast[Tpl](aritiess(0), castss(0), i0, rowIndexTx)
-  protected lazy val tplBranch1: (RS, List[Any]) => Any = branch.cast[Any](aritiess(1), castss(1), i1, 0)
-  protected lazy val tplBranch2: (RS, List[Any]) => Any = branch.cast[Any](aritiess(2), castss(2), i2, 0)
-  protected lazy val tplBranch3: (RS, List[Any]) => Any = branch.cast[Any](aritiess(3), castss(3), i3, 0)
-  protected lazy val tplBranch4: (RS, List[Any]) => Any = branch.cast[Any](aritiess(4), castss(4), i4, 0)
-  protected lazy val tplBranch5: (RS, List[Any]) => Any = branch.cast[Any](aritiess(5), castss(5), i5, 0)
-  protected lazy val tplBranch6: (RS, List[Any]) => Any = branch.cast[Any](aritiess(6), castss(6), i6, 0)
+  protected var rowCount = -1
+  protected var nextRow  = false
 
-  protected lazy val tplLeaf1: RS => Any = row.cast(aritiess(1), castss(1), i1, None)
-  protected lazy val tplLeaf2: RS => Any = row.cast(aritiess(2), castss(2), i2, None)
-  protected lazy val tplLeaf3: RS => Any = row.cast(aritiess(3), castss(3), i3, None)
-  protected lazy val tplLeaf4: RS => Any = row.cast(aritiess(4), castss(4), i4, None)
-  protected lazy val tplLeaf5: RS => Any = row.cast(aritiess(5), castss(5), i5, None)
-  protected lazy val tplLeaf6: RS => Any = row.cast(aritiess(6), castss(6), i6, None)
-  protected lazy val tplLeaf7: RS => Any = row.cast(aritiess(7), castss(7), i7, None)
+  protected lazy val tplBranch0: (RS, List[Any]) => Tpl = branch.cast[Tpl](aritiess(0), castss(0), i0)
+  protected lazy val tplBranch1: (RS, List[Any]) => Any = branch.cast[Any](aritiess(1), castss(1), i1)
+  protected lazy val tplBranch2: (RS, List[Any]) => Any = branch.cast[Any](aritiess(2), castss(2), i2)
+  protected lazy val tplBranch3: (RS, List[Any]) => Any = branch.cast[Any](aritiess(3), castss(3), i3)
+  protected lazy val tplBranch4: (RS, List[Any]) => Any = branch.cast[Any](aritiess(4), castss(4), i4)
+  protected lazy val tplBranch5: (RS, List[Any]) => Any = branch.cast[Any](aritiess(5), castss(5), i5)
+  protected lazy val tplBranch6: (RS, List[Any]) => Any = branch.cast[Any](aritiess(6), castss(6), i6)
+
+  protected lazy val tplLeaf1: RS => Any = row.cast(aritiess(1), castss(1), i1)
+  protected lazy val tplLeaf2: RS => Any = row.cast(aritiess(2), castss(2), i2)
+  protected lazy val tplLeaf3: RS => Any = row.cast(aritiess(3), castss(3), i3)
+  protected lazy val tplLeaf4: RS => Any = row.cast(aritiess(4), castss(4), i4)
+  protected lazy val tplLeaf5: RS => Any = row.cast(aritiess(5), castss(5), i5)
+  protected lazy val tplLeaf6: RS => Any = row.cast(aritiess(6), castss(6), i6)
+  protected lazy val tplLeaf7: RS => Any = row.cast(aritiess(7), castss(7), i7)
 
   protected var acc0: List[Tpl] = List.empty[Tpl]
   protected var acc1: List[Any] = List.empty[Any]
@@ -69,11 +68,8 @@ trait Nest[Tpl] extends SqlQueryBase {
   protected var acc6: List[Any] = List.empty[Any]
   protected var acc7: List[Any] = List.empty[Any]
 
+
   final def rows2nested(rows: RS): List[Tpl] = {
-
-    //    println("aritiess: ")
-    //    aritiess.foreach(println)
-
     nestedLevels match {
       case 1 => rows2nested1(rows)
       case 2 => rows2nested2(rows)
@@ -84,7 +80,6 @@ trait Nest[Tpl] extends SqlQueryBase {
       case 7 => rows2nested7(rows)
     }
   }
-
 
   final private def rows2nested1(rows: RS): List[Tpl] = {
     rowCount = getRowCount(rows)

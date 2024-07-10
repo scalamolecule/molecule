@@ -10,8 +10,8 @@ import scala.collection.mutable.ListBuffer
 
 
 abstract class Model2SqlQuery[Tpl](elements0: List[Element])
-  extends Model2Query with QueryExprRef
-    with Nest[Tpl]
+  extends Model2Query
+    with QueryExprRef
     with NestOpt[Tpl]
     with NestOptRef[Tpl]
     with ModelUtils

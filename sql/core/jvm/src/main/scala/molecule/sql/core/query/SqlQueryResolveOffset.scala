@@ -32,7 +32,7 @@ case class SqlQueryResolveOffset[Tpl](
       val nestedRows0 = if (m2q.isManNested)
         m2q.rows2nested(sortedRows)
       else
-        m2q.rows2nestedOpt(sortedRows)
+        m2q.rows2optNnested(sortedRows)
 
       val nestedRows    = if (forward) nestedRows0 else nestedRows0.reverse
       val topLevelCount = nestedRows.length
@@ -42,34 +42,35 @@ case class SqlQueryResolveOffset[Tpl](
 
     } else if (m2q.hasOptRef) {
 
+List(1).exists(_ == 2)
+      val totalCount = optOffset.fold(m2q.getRowCount(sortedRows))(_ => getTotalCount(conn))
+      val row2nestedOptions = m2q.row2nestedOptions
 
-//      val totalCount = optOffset.fold(m2q.getRowCount(sortedRows))(_ => getTotalCount(conn))
-//      val nestedRows = m2q.rows2optional(sortedRows)
-//
 //      val casts   = m2q.castss.head
-//      val row2tpl = m2q.castRow2AnyTpl(m2q.aritiess.head, casts, 1, None)
-//      val tuples  = ListBuffer.empty[Tpl]
-//      while (sortedRows.next()) {
-//
-//        val tpl = row2tpl(sortedRows)
-//        println(tpl)
-//        tuples += tpl.asInstanceOf[Tpl]
-//
-//        //        tuples += row2tpl(sortedRows).asInstanceOf[Tpl]
-//      }
-//
-//
-//      val fromUntil = getFromUntil(totalCount, optLimit, optOffset)
-//      val hasMore   = fromUntil.fold(totalCount > 0)(_._3)
-//      (tuples.toList, totalCount, hasMore)
+//      val row2tpl = new CastRow2Tpl_[List[Tpl]].cast(m2q.aritiess.head, casts, 1, None)
+      val tuples  = ListBuffer.empty[Tpl]
+      while (sortedRows.next()) {
 
-      ???
+        val tpl = row2nestedOptions(sortedRows)
+        println(tpl)
+        tuples += tpl.asInstanceOf[Tpl]
+
+        //        tuples += row2tpl(sortedRows).asInstanceOf[Tpl]
+      }
+
+
+      val fromUntil = getFromUntil(totalCount, optLimit, optOffset)
+      val hasMore   = fromUntil.fold(totalCount > 0)(_._3)
+      (tuples.toList, totalCount, hasMore)
+
+//      ???
 
     } else {
       val totalCount = optOffset.fold(m2q.getRowCount(sortedRows))(_ => getTotalCount(conn))
       val casts      = m2q.castss.head
 //      val row2tpl    = m2q.castRow2AnyTpl(m2q.aritiess.head, casts, 1, None)
-      val row2tpl    = new CastRow2Tpl_[List[Tpl]].cast(m2q.aritiess.head, casts, 1, None)
+//      val row2tpl    = new CastRow2Tpl_[List[Tpl]].cast(m2q.aritiess.head, casts, 1, None)
+      val row2tpl    = new CastRow2Tpl_[List[Tpl]].cast(m2q.aritiess.head, casts, 1)
       val tuples     = ListBuffer.empty[Tpl]
       while (sortedRows.next()) {
 

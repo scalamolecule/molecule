@@ -19,6 +19,8 @@ trait ResultSetInterface {
   def getBytes(columnIndex: Int): Array[Byte]
   def getBigDecimal(columnIndex: Int): java.math.BigDecimal
   def getURL(columnIndex: Int): URL
+  def getObject(columnIndex: Int): AnyRef
+
 
   def getArray(columnIndex: Int): ArrayInterface
 

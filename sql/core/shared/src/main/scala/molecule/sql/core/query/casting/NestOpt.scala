@@ -5,15 +5,15 @@ import scala.collection.mutable.ListBuffer
 
 trait NestOpt[Tpl] extends Nest[Tpl] {
 
-  final def rows2nestedOpt(rows: RS): List[Tpl] = {
+  final def rows2optNnested(rows: RS): List[Tpl] = {
     val result = nestedLevels match {
-      case 1 => rows2nested1(rows)
-      case 2 => rows2nested2(rows)
-      case 3 => rows2nested3(rows)
-      case 4 => rows2nested4(rows)
-      case 5 => rows2nested5(rows)
-      case 6 => rows2nested6(rows)
-      case 7 => rows2nested7(rows)
+      case 1 => rows2optNested1(rows)
+      case 2 => rows2optNested2(rows)
+      case 3 => rows2optNested3(rows)
+      case 4 => rows2optNested4(rows)
+      case 5 => rows2optNested5(rows)
+      case 6 => rows2optNested6(rows)
+      case 7 => rows2optNested7(rows)
     }
     // Exclude empty rows with no nested
     result.filterNot(_ == Nil)
@@ -61,7 +61,7 @@ trait NestOpt[Tpl] extends Nest[Tpl] {
     buf.toList
   }
 
-  final private def rows2nested1(rows: RS): List[Tpl] = {
+  final private def rows2optNested1(rows: RS): List[Tpl] = {
     rowCount = getRowCount(rows)
 
     if (rowCount == 1) {
@@ -111,7 +111,7 @@ trait NestOpt[Tpl] extends Nest[Tpl] {
   }
 
 
-  final private def rows2nested2(rows: RS): List[Tpl] = {
+  final private def rows2optNested2(rows: RS): List[Tpl] = {
     rowCount = getRowCount(rows)
 
     if (rowCount == 1) {
@@ -185,7 +185,7 @@ trait NestOpt[Tpl] extends Nest[Tpl] {
   }
 
 
-  final private def rows2nested3(rows: RS): List[Tpl] = {
+  final private def rows2optNested3(rows: RS): List[Tpl] = {
     rowCount = getRowCount(rows)
 
     if (rowCount == 1) {
@@ -288,7 +288,7 @@ trait NestOpt[Tpl] extends Nest[Tpl] {
   }
 
 
-  final private def rows2nested4(rows: RS): List[Tpl] = {
+  final private def rows2optNested4(rows: RS): List[Tpl] = {
     rowCount = getRowCount(rows)
 
     if (rowCount == 1) {
@@ -425,7 +425,7 @@ trait NestOpt[Tpl] extends Nest[Tpl] {
   }
 
 
-  final private def rows2nested5(rows: RS): List[Tpl] = {
+  final private def rows2optNested5(rows: RS): List[Tpl] = {
     rowCount = getRowCount(rows)
 
     if (rowCount == 1) {
@@ -601,7 +601,7 @@ trait NestOpt[Tpl] extends Nest[Tpl] {
   }
 
 
-  final private def rows2nested6(rows: RS): List[Tpl] = {
+  final private def rows2optNested6(rows: RS): List[Tpl] = {
     rowCount = getRowCount(rows)
 
     if (rowCount == 1) {
@@ -820,7 +820,7 @@ trait NestOpt[Tpl] extends Nest[Tpl] {
     acc0
   }
 
-  final private def rows2nested7(rows: RS): List[Tpl] = {
+  final private def rows2optNested7(rows: RS): List[Tpl] = {
     rowCount = getRowCount(rows)
 
     if (rowCount == 1) {

@@ -86,7 +86,7 @@ abstract class SqlQueryResolve[Tpl](
       (Nil, "", false)
     } else {
       if (m2q.isManNested || m2q.isOptNested) {
-        val nestedTpls     = if (m2q.isManNested) m2q.rows2nested(sortedRows) else m2q.rows2nestedOpt(sortedRows)
+        val nestedTpls     = if (m2q.isManNested) m2q.rows2nested(sortedRows) else m2q.rows2optNnested(sortedRows)
         val totalCount     = nestedTpls.length
         val count          = getCount(limit, forward, totalCount)
         val nestedTpls1    = if (forward) nestedTpls else nestedTpls.reverse
@@ -99,7 +99,8 @@ abstract class SqlQueryResolve[Tpl](
         val totalCount = flatRowCount
         val count      = getCount(limit, forward, totalCount)
         val allTuples  = ListBuffer.empty[Tpl]
-        val row2tpl    = new CastRow2Tpl_[List[Tpl]].cast(m2q.aritiess.head, m2q.castss.head, 1, None)
+//        val row2tpl    = new CastRow2Tpl_[List[Tpl]].cast(m2q.aritiess.head, m2q.castss.head, 1, None)
+        val row2tpl    = new CastRow2Tpl_[List[Tpl]].cast(m2q.aritiess.head, m2q.castss.head, 1)
         while (sortedRows.next()) {
           allTuples += row2tpl(sortedRows).asInstanceOf[Tpl]
         }

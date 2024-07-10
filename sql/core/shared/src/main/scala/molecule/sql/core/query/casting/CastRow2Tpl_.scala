@@ -13,17 +13,16 @@ class CastRow2Tpl_[NestedTpls] extends SqlQueryBase {
     casts: List[(RS, ParamIndex) => Any],
     attrIndex: ParamIndex,
     acc: List[(RS, ParamIndex) => Any],
-    nested: Option[NestedTpls]
   ): List[(RS, ParamIndex) => Any] = {
     arities match {
       case List(1) :: as =>
         val cast = (row: RS, _: ParamIndex) => casts.head(row, attrIndex)
-        resolveArities(as, casts.tail, attrIndex + 1, acc :+ cast, nested)
+        resolveArities(as, casts.tail, attrIndex + 1, acc :+ cast)
 
       // Nested
       case List(-1) :: Nil =>
-        val cast = (_: RS, _: ParamIndex) => nested.getOrElse(List.empty[Any])
-        resolveArities(Nil, casts, 0, acc :+ cast, None)
+        val cast = (_: RS, _: ParamIndex) => List.empty[Any]
+        resolveArities(Nil, casts, 0, acc :+ cast)
 
       case _ => acc
     }
@@ -33,9 +32,8 @@ class CastRow2Tpl_[NestedTpls] extends SqlQueryBase {
     arities: List[List[Int]],
     casts: List[(RS, ParamIndex) => Any],
     attrIndex: ParamIndex,
-    nested: Option[NestedTpls]
   ): RS => Any = {
-    val casters: List[(RS, ParamIndex) => Any] = resolveArities(arities, casts, attrIndex, Nil, nested)
+    val casters: List[(RS, ParamIndex) => Any] = resolveArities(arities, casts, attrIndex, Nil)
     arities.length match {
       case 1  => cast1(casters, attrIndex)
       case 2  => cast2(casters, attrIndex)

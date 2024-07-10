@@ -108,6 +108,8 @@ class ResultSetImpl_sqlite(val underlying: ResultSet) extends ResultSetInterface
   }
 
   override def getURL(columnIndex: Int): URL = value(columnIndex).asInstanceOf[URL]
+  override def getObject(columnIndex: Int): AnyRef = underlying.getObject(columnIndex)
+
 
   override def getArray(columnIndex: Int): ArrayInterface =
     new ArrayImpl(value(columnIndex).asInstanceOf[java.sql.Array])
