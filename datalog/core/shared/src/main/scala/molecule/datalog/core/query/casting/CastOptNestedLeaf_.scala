@@ -16,16 +16,16 @@ trait CastOptNestedLeaf_
 
   @tailrec
   final private def resolveArities(
-    arities: List[List[Int]],
+    arities: List[Int],
     casts: List[jIterator[_] => Any],
     acc: List[jIterator[_] => Any],
   ): List[jIterator[_] => Any] = {
     arities match {
-      case List(1) :: as =>
+      case 1 :: as =>
         resolveArities(as, casts.tail, acc :+ casts.head)
 
       // Nested
-      case List(-1) :: Nil =>
+      case -1 :: Nil =>
         resolveArities(Nil, casts.tail, acc :+ casts.head)
 
       case _ => acc
@@ -34,7 +34,7 @@ trait CastOptNestedLeaf_
 
 
   final protected def pullLeaf(
-    arities: List[List[Int]],
+    arities: List[Int],
     pullCasts0: List[jIterator[_] => Any],
     pullSorts: List[Int => (Row, Row) => Int]
   ): jIterator[_] => List[Any] = {

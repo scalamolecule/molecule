@@ -57,7 +57,7 @@ trait DatomicQueryBase
   final val preArgs  = new ArrayBuffer[AnyRef]
   final val args     = new ArrayBuffer[AnyRef]
   final var castss   = List(List.empty[AnyRef => AnyRef])
-  final var aritiess = List(List.empty[List[Int]])
+  final var aritiess = List(List.empty[Int])
 
   // Sorting
   final var sortss    = List(List.empty[(Int, Int => (Row, Row) => Int)])
@@ -110,13 +110,15 @@ trait DatomicQueryBase
   final protected def aritiesNested(): Unit = {
     val newLevel           = Nil
     val curLevel           = aritiess.last
-    val curLevelWithNested = curLevel :+ List(-1)
+//    val curLevelWithNested = curLevel :+ List(-1)
+    val curLevelWithNested = curLevel :+ -1
     aritiess = (aritiess.init :+ curLevelWithNested) :+ newLevel
   }
 
   final protected def aritiesAttr(): Unit = {
     // Add new arity of 1
-    aritiess = aritiess.init :+ (aritiess.last :+ List(1))
+//    aritiess = aritiess.init :+ (aritiess.last :+ List(1))
+    aritiess = aritiess.init :+ (aritiess.last :+ 1)
   }
 
   final def getFlatSorters(

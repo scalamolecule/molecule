@@ -4,7 +4,7 @@ import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.util.{FutureUtils, ModelUtils}
 import molecule.sql.core.facade.JdbcConn_JVM
-import molecule.sql.core.query.casting.CastRow2Tpl_
+import molecule.sql.core.query.casting.CastTpl_
 import scala.collection.mutable.ListBuffer
 
 case class SqlQueryResolveOffset[Tpl](
@@ -68,9 +68,7 @@ List(1).exists(_ == 2)
     } else {
       val totalCount = optOffset.fold(m2q.getRowCount(sortedRows))(_ => getTotalCount(conn))
       val casts      = m2q.castss.head
-//      val row2tpl    = m2q.castRow2AnyTpl(m2q.aritiess.head, casts, 1, None)
-//      val row2tpl    = new CastRow2Tpl_[List[Tpl]].cast(m2q.aritiess.head, casts, 1, None)
-      val row2tpl    = new CastRow2Tpl_[List[Tpl]].cast(m2q.aritiess.head, casts, 1)
+      val row2tpl    = CastTpl_ .cast(m2q.aritiess.head, casts, 1)
       val tuples     = ListBuffer.empty[Tpl]
       while (sortedRows.next()) {
 

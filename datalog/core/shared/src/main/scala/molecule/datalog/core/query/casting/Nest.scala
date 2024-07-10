@@ -34,17 +34,17 @@ trait Nest[Tpl] { self: Model2Query
   private var nextRow: Boolean = false
 
   private lazy val nestedLevels = castss.length - 1
-  private lazy val txAttrs      = aritiess.head.flatten.dropWhile(_ != -1).tail.sum
+  private lazy val txAttrs      = aritiess.head.dropWhile(_ != -1).tail.sum
 
   // First attr index for each level
   private lazy val i0 = nestedLevels
-  private lazy val i1 = i0 + aritiess.head.flatten.takeWhile(_ != -1).sum
-  private lazy val i2 = i1 + aritiess(1).flatten.takeWhile(_ != -1).sum
-  private lazy val i3 = i2 + aritiess(2).flatten.takeWhile(_ != -1).sum
-  private lazy val i4 = i3 + aritiess(3).flatten.takeWhile(_ != -1).sum
-  private lazy val i5 = i4 + aritiess(4).flatten.takeWhile(_ != -1).sum
-  private lazy val i6 = i5 + aritiess(5).flatten.takeWhile(_ != -1).sum
-  private lazy val i7 = i6 + aritiess(6).flatten.takeWhile(_ != -1).sum
+  private lazy val i1 = i0 + aritiess.head.takeWhile(_ != -1).sum
+  private lazy val i2 = i1 + aritiess(1).takeWhile(_ != -1).sum
+  private lazy val i3 = i2 + aritiess(2).takeWhile(_ != -1).sum
+  private lazy val i4 = i3 + aritiess(3).takeWhile(_ != -1).sum
+  private lazy val i5 = i4 + aritiess(4).takeWhile(_ != -1).sum
+  private lazy val i6 = i5 + aritiess(5).takeWhile(_ != -1).sum
+  private lazy val i7 = i6 + aritiess(6).takeWhile(_ != -1).sum
 
   private lazy val rowIndexTx                          = row.size() - txAttrs
   private lazy val tplBranch0: (Row, List[Any]) => Tpl = castBranch[Tpl](aritiess(0), castss(0), i0, rowIndexTx)

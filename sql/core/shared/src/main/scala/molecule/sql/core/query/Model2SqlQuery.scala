@@ -12,7 +12,7 @@ import scala.collection.mutable.ListBuffer
 abstract class Model2SqlQuery[Tpl](elements0: List[Element])
   extends Model2Query
     with QueryExprRef
-    with NestOpt[Tpl]
+    with NestOptTpls[Tpl]
     with NestOptRef[Tpl]
     with ModelUtils
     with MoleculeLogging { self: QueryExpr with SqlQueryBase =>

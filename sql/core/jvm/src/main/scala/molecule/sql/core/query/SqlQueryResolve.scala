@@ -5,7 +5,7 @@ import molecule.core.query.Pagination
 import molecule.core.util.ModelUtils
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.javaSql.{PrepStmt, PrepStmtImpl, ResultSetInterface}
-import molecule.sql.core.query.casting.CastRow2Tpl_
+import molecule.sql.core.query.casting.CastTpl_
 import scala.collection.mutable.ListBuffer
 
 abstract class SqlQueryResolve[Tpl](
@@ -99,8 +99,7 @@ abstract class SqlQueryResolve[Tpl](
         val totalCount = flatRowCount
         val count      = getCount(limit, forward, totalCount)
         val allTuples  = ListBuffer.empty[Tpl]
-//        val row2tpl    = new CastRow2Tpl_[List[Tpl]].cast(m2q.aritiess.head, m2q.castss.head, 1, None)
-        val row2tpl    = new CastRow2Tpl_[List[Tpl]].cast(m2q.aritiess.head, m2q.castss.head, 1)
+        val row2tpl    = CastTpl_.cast(m2q.aritiess.head, m2q.castss.head, 1)
         while (sortedRows.next()) {
           allTuples += row2tpl(sortedRows).asInstanceOf[Tpl]
         }

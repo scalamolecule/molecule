@@ -36,7 +36,7 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions {
 
   // Input args and cast lambdas
   final           var castss    = List(List.empty[(RS, Int) => Any])
-  final           var aritiess  = List(List.empty[List[Int]])
+  final           var aritiess  = List(List.empty[Int])
   final protected val nestedIds = new ArrayBuffer[String]
   final protected var level     = 0
   final protected val args      = new ArrayBuffer[AnyRef]
@@ -124,12 +124,14 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions {
   final protected def aritiesNextLevel(): Unit = {
     val newLevel           = Nil
     val curLevel           = aritiess.last
-    val curLevelWithNested = curLevel :+ List(-1)
+//    val curLevelWithNested = curLevel :+ List(-1)
+    val curLevelWithNested = curLevel :+ -1
     aritiess = (aritiess.init :+ curLevelWithNested) :+ newLevel
   }
 
   final protected def aritiesAttr(): Unit = {
     // Add new arity of 1
-    aritiess = aritiess.init :+ (aritiess.last :+ List(1))
+//    aritiess = aritiess.init :+ (aritiess.last :+ List(1))
+    aritiess = aritiess.init :+ (aritiess.last :+ 1)
   }
 }

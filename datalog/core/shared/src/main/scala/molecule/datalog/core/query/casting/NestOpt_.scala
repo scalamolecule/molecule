@@ -84,19 +84,19 @@ trait NestOpt_[Tpl]
 
   @tailrec
   final private def resolveArities(
-    arities: List[List[Int]],
+    arities: List[Int],
     casts: List[AnyRef => AnyRef],
     rowIndex: Int,
     rowIndexTx: Int,
     acc: List[Row => AnyRef]
   ): List[Row => AnyRef] = {
     arities match {
-      case List(1) :: as =>
+      case 1 :: as =>
         val cast = (row: Row) => casts.head(row.get(rowIndex))
         resolveArities(as, casts.tail, rowIndex + 1, rowIndexTx, acc :+ cast)
 
       // OptNested
-      case List(-1) :: as =>
+      case -1 :: as =>
         val cast = (row: Row) => casts.head(row.get(rowIndex))
         resolveArities(as, casts.tail, rowIndexTx, rowIndexTx, acc :+ cast)
 
@@ -107,7 +107,7 @@ trait NestOpt_[Tpl]
   final lazy val pullRow2tpl: Row => Tpl = {
     val arities    = aritiess.head
     val casts      = castss.head
-    val rowIndexTx = arities.flatten.takeWhile(_ != -1).sum + 1
+    val rowIndexTx = arities.takeWhile(_ != -1).sum + 1
     val casters    = resolveArities(arities, casts, 0, rowIndexTx, Nil)
     casters.length match {
       case 1  => cast1(casters)

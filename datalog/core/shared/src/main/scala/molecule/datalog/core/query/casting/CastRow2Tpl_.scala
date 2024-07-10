@@ -10,19 +10,19 @@ trait CastRow2Tpl_ { self: Model2Query with DatomicQueryBase =>
 
   @tailrec
   final private def resolveArities(
-    arities: List[List[Int]],
+    arities: List[Int],
     casts: List[AnyRef => AnyRef],
     attrIndex: AttrIndex,
     acc: List[Row => Any],
     nested: Option[NestedTpls]
   ): List[Row => Any] = {
     arities match {
-      case List(1) :: as =>
+      case 1 :: as =>
         val cast = (row: Row) => casts.head(row.get(attrIndex))
         resolveArities(as, casts.tail, attrIndex + 1, acc :+ cast, nested)
 
       // Nested
-      case List(-1) :: Nil =>
+      case -1 :: Nil =>
         val cast = (_: Row) => nested.get
         resolveArities(Nil, casts, 0, acc :+ cast, None)
 
@@ -31,7 +31,7 @@ trait CastRow2Tpl_ { self: Model2Query with DatomicQueryBase =>
   }
 
   final def castRow2AnyTpl(
-    arities: List[List[Int]],
+    arities: List[Int],
     casts: List[AnyRef => AnyRef],
     attrIndex: AttrIndex,
     nested: Option[NestedTpls]

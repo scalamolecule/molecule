@@ -11,19 +11,19 @@ trait CastNestedBranch_
 
   @tailrec
   final private def resolveArities(
-    arities: List[List[Int]],
+    arities: List[Int],
     casts: List[AnyRef => AnyRef],
     attrIndex: AttrIndex,
     attrIndexTx: AttrIndex,
     acc: List[(Row, NestedTpls) => Any]
   ): List[(Row, NestedTpls) => Any] = {
     arities match {
-      case List(1) :: as =>
+      case 1 :: as =>
         val cast = (row: Row, _: NestedTpls) => casts.head(row.get(attrIndex))
         resolveArities(as, casts.tail, attrIndex + 1, attrIndexTx, acc :+ cast)
 
       // Nested
-      case List(-1) :: as =>
+      case -1 :: as =>
         val cast = (_: Row, nested: NestedTpls) => nested
         resolveArities(as, casts, attrIndexTx, attrIndexTx, acc :+ cast)
 
@@ -32,7 +32,7 @@ trait CastNestedBranch_
   }
 
   final protected def castBranch[T](
-    arities: List[List[Int]],
+    arities: List[Int],
     casts: List[AnyRef => AnyRef],
     firstAttrIndex: AttrIndex,
     firstAttrIndexTx: AttrIndex

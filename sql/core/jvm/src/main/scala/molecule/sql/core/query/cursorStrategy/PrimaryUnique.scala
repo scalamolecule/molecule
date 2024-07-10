@@ -6,7 +6,7 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.query.Pagination
 import molecule.core.util.FutureUtils
 import molecule.sql.core.facade.JdbcConn_JVM
-import molecule.sql.core.query.casting.CastRow2Tpl_
+import molecule.sql.core.query.casting.CastTpl_
 import molecule.sql.core.query.{Model2SqlQuery, SqlQueryBase, SqlQueryResolve}
 import scala.collection.mutable.ListBuffer
 
@@ -58,8 +58,7 @@ case class PrimaryUnique[Tpl](
         val limitAbs   = limit.abs.min(totalCount)
         val hasMore    = limitAbs < totalCount
         val tuples     = ListBuffer.empty[Tpl]
-//        val row2tpl    = new CastRow2Tpl_[List[Tpl]].cast(m2q.aritiess.head, m2q.castss.head, 1, None)
-        val row2tpl    = new CastRow2Tpl_[List[Tpl]].cast(m2q.aritiess.head, m2q.castss.head, 1)
+        val row2tpl    = CastTpl_.cast(m2q.aritiess.head, m2q.castss.head, 1)
         while (sortedRows.next()) {
           tuples += row2tpl(sortedRows).asInstanceOf[Tpl]
         }
