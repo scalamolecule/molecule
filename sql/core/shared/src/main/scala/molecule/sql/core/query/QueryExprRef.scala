@@ -54,7 +54,11 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
 
 
   override protected def queryOptRef(ref: Ref, nestedElements: List[Element]): Unit = {
+
+    println(ref)
+    println(s"========================= $hasOptRef  A  " + aritiess)
     if (hasOptRef) {
+      println("-------- B  " + aritiess)
       // transfer previous predicates from where
       addPredicatesToLastLeftJoin()
     }
@@ -70,8 +74,17 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
     val (refAs, refExt) = getOptExt().fold(("", ""))(ext => (refNs + ext, ext))
     joins += ((s"LEFT JOIN", refNs, refAs, List(s"$ns$nsExt.$refAttr = $refNs$refExt.id")))
 
-    aritiesNextLevel()
+//    println("===================================")
+//    println(self.elements0)
+//    joins.foreach(println)
+//    println("----------")
+//    where.foreach(println)
+
+
+    aritiesAddNested()
     castss = castss :+ Nil
+
+
 
     resolve(nestedElements)
   }
@@ -111,7 +124,11 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
     val id = s"$ns.id"
     nestedIds += id
     groupByCols += id // if we later need to group by non-aggregated columns
-    aritiesNextLevel()
+
+    aritiesAddNested()
+    casts = casts.nest
+//    casts = CastNested(casts)
+
     castss = castss :+ Nil
 
     resolve(nestedElements)

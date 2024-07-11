@@ -32,32 +32,32 @@ trait NestTpls[Tpl] extends SqlQueryBase {
 
   // First attr index for each level
   protected lazy val i0 = 1 + nestedLevels // 1-based indexes for jdbc ResultSet
-  protected lazy val i1 = i0 + aritiess.head.takeWhile(_ != -1).sum
-  protected lazy val i2 = i1 + aritiess(1).takeWhile(_ != -1).sum
-  protected lazy val i3 = i2 + aritiess(2).takeWhile(_ != -1).sum
-  protected lazy val i4 = i3 + aritiess(3).takeWhile(_ != -1).sum
-  protected lazy val i5 = i4 + aritiess(4).takeWhile(_ != -1).sum
-  protected lazy val i6 = i5 + aritiess(5).takeWhile(_ != -1).sum
-  protected lazy val i7 = i6 + aritiess(6).takeWhile(_ != -1).sum
+  protected lazy val i1 = i0 + aritiess.head.count(_ == 0)
+  protected lazy val i2 = i1 + aritiess(1).count(_ == 0)
+  protected lazy val i3 = i2 + aritiess(2).count(_ == 0)
+  protected lazy val i4 = i3 + aritiess(3).count(_ == 0)
+  protected lazy val i5 = i4 + aritiess(4).count(_ == 0)
+  protected lazy val i6 = i5 + aritiess(5).count(_ == 0)
+  protected lazy val i7 = i6 + aritiess(6).count(_ == 0)
 
   protected var rowCount = -1
   protected var nextRow  = false
 
-  protected lazy val branch0: (RS, List[Any]) => Tpl = branch.cast[Tpl](aritiess(0), castss(0), i0)
-  protected lazy val branch1: (RS, List[Any]) => Any = branch.cast[Any](aritiess(1), castss(1), i1)
-  protected lazy val branch2: (RS, List[Any]) => Any = branch.cast[Any](aritiess(2), castss(2), i2)
-  protected lazy val branch3: (RS, List[Any]) => Any = branch.cast[Any](aritiess(3), castss(3), i3)
-  protected lazy val branch4: (RS, List[Any]) => Any = branch.cast[Any](aritiess(4), castss(4), i4)
-  protected lazy val branch5: (RS, List[Any]) => Any = branch.cast[Any](aritiess(5), castss(5), i5)
-  protected lazy val branch6: (RS, List[Any]) => Any = branch.cast[Any](aritiess(6), castss(6), i6)
+  protected lazy val branch0: (RS, List[Any]) => Tpl = branch.castNested[Tpl](aritiess(0), castss(0), i0)
+  protected lazy val branch1: (RS, List[Any]) => Any = branch.castNested[Any](aritiess(1), castss(1), i1)
+  protected lazy val branch2: (RS, List[Any]) => Any = branch.castNested[Any](aritiess(2), castss(2), i2)
+  protected lazy val branch3: (RS, List[Any]) => Any = branch.castNested[Any](aritiess(3), castss(3), i3)
+  protected lazy val branch4: (RS, List[Any]) => Any = branch.castNested[Any](aritiess(4), castss(4), i4)
+  protected lazy val branch5: (RS, List[Any]) => Any = branch.castNested[Any](aritiess(5), castss(5), i5)
+  protected lazy val branch6: (RS, List[Any]) => Any = branch.castNested[Any](aritiess(6), castss(6), i6)
 
-  protected lazy val leaf1: RS => Any = leaf.cast(aritiess(1), castss(1), i1)
-  protected lazy val leaf2: RS => Any = leaf.cast(aritiess(2), castss(2), i2)
-  protected lazy val leaf3: RS => Any = leaf.cast(aritiess(3), castss(3), i3)
-  protected lazy val leaf4: RS => Any = leaf.cast(aritiess(4), castss(4), i4)
-  protected lazy val leaf5: RS => Any = leaf.cast(aritiess(5), castss(5), i5)
-  protected lazy val leaf6: RS => Any = leaf.cast(aritiess(6), castss(6), i6)
-  protected lazy val leaf7: RS => Any = leaf.cast(aritiess(7), castss(7), i7)
+  protected lazy val leaf1: RS => Any = leaf.castTpl(aritiess(1), castss(1), i1)
+  protected lazy val leaf2: RS => Any = leaf.castTpl(aritiess(2), castss(2), i2)
+  protected lazy val leaf3: RS => Any = leaf.castTpl(aritiess(3), castss(3), i3)
+  protected lazy val leaf4: RS => Any = leaf.castTpl(aritiess(4), castss(4), i4)
+  protected lazy val leaf5: RS => Any = leaf.castTpl(aritiess(5), castss(5), i5)
+  protected lazy val leaf6: RS => Any = leaf.castTpl(aritiess(6), castss(6), i6)
+  protected lazy val leaf7: RS => Any = leaf.castTpl(aritiess(7), castss(7), i7)
 
   protected var acc0: List[Tpl] = List.empty[Tpl]
   protected var acc1: List[Any] = List.empty[Any]

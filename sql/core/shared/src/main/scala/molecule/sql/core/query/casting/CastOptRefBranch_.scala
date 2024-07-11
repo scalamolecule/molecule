@@ -15,7 +15,7 @@ object CastOptRefBranch_ extends SqlQueryBase {
     acc: List[(RS, ParamIndex, Option[Any]) => Any]
   ): List[(RS, ParamIndex, Option[Any]) => Any] = {
     arities match {
-      case 1 :: as =>
+      case 0 :: as =>
         val cast = (row: RS, attrIndex1: ParamIndex, _: Option[Any]) => casts.head(row, attrIndex1)
         resolveArities(as, casts.tail, attrIndex + 1, acc :+ cast)
 
@@ -24,11 +24,23 @@ object CastOptRefBranch_ extends SqlQueryBase {
         val cast = (_: RS, _: ParamIndex, nested: Option[Any]) => nested
         resolveArities(as, casts, 0, acc :+ cast)
 
+      // Adjacent optional refs
+      case n :: nextArities =>
+        val (tplCasts, moreCasts) = casts.splitAt(n)
+
+        println("a " + tplCasts.length)
+        println("b " + moreCasts.length)
+        val cast                  =
+          (row: RS, _: ParamIndex, nextGroup: Option[Any]) =>
+            castOptRefBranch(List(0, 0), tplCasts, attrIndex)(row, nextGroup)
+        resolveArities(nextArities, moreCasts, attrIndex + 1, acc :+ cast)
+//        resolveArities(nextArities, moreCasts, attrIndex + n, acc :+ cast)
+
       case _ => acc
     }
   }
 
-  final def cast(
+  final def castOptRefBranch(
     arities: List[Int],
     casts: List[(RS, ParamIndex) => Any],
     firstAttrIndex: ParamIndex,

@@ -18,7 +18,7 @@ trait CastNestedBranch_
     acc: List[(Row, NestedTpls) => Any]
   ): List[(Row, NestedTpls) => Any] = {
     arities match {
-      case 1 :: as =>
+      case 0 :: as =>
         val cast = (row: Row, _: NestedTpls) => casts.head(row.get(attrIndex))
         resolveArities(as, casts.tail, attrIndex + 1, attrIndexTx, acc :+ cast)
 

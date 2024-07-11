@@ -58,7 +58,7 @@ case class PrimaryUnique[Tpl](
         val limitAbs   = limit.abs.min(totalCount)
         val hasMore    = limitAbs < totalCount
         val tuples     = ListBuffer.empty[Tpl]
-        val row2tpl    = CastTpl_.cast(m2q.aritiess.head, m2q.castss.head, 1)
+        val row2tpl    = CastTpl_.castTpl(m2q.aritiess.head, m2q.castss.head, 1)
         while (sortedRows.next()) {
           tuples += row2tpl(sortedRows).asInstanceOf[Tpl]
         }

@@ -91,7 +91,7 @@ trait NestOpt_[Tpl]
     acc: List[Row => AnyRef]
   ): List[Row => AnyRef] = {
     arities match {
-      case 1 :: as =>
+      case 0 :: as =>
         val cast = (row: Row) => casts.head(row.get(rowIndex))
         resolveArities(as, casts.tail, rowIndex + 1, rowIndexTx, acc :+ cast)
 

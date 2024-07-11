@@ -15,7 +15,7 @@ object CastOptTpl_ extends SqlQueryBase {
     acc: List[(RS, ParamIndex) => Any],
   ): List[(RS, ParamIndex) => Any] = {
     arities match {
-      case 1 :: as =>
+      case 0 :: as =>
         val cast = (row: RS, _: ParamIndex) => casts.head(row, attrIndex)
         resolveArities(as, casts.tail, attrIndex + 1, acc :+ cast)
 

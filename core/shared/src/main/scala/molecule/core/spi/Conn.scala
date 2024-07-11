@@ -22,6 +22,7 @@ abstract class Conn(val proxy: ConnProxy)
   protected def jvmOnly(method: String): ExecutionError =
     ExecutionError(s"`$method` only implemented on JVM platform.")
 
+  var startTime = 0L
 
   // Subscriptions --------------------------------------------------------------
 

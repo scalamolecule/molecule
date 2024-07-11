@@ -5,14 +5,18 @@ import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
 import molecule.core.util.JavaConversions
 import molecule.sql.core.javaSql.{PrepStmt, ResultSetInterface}
+import molecule.sql.core.query.castStrategy.{CastStrategy, CastTuple}
 import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
+
+
 
 
 trait SqlQueryBase extends BaseHelpers with JavaConversions {
 
   type RS = ResultSetInterface
   type ParamIndex = Int
+  type Cast = (RS, ParamIndex) => Any
 
   // Lookup original type of aggregate attributes
   final protected var attrMap = Map.empty[String, (Card, String, Seq[String])]
@@ -35,6 +39,10 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions {
   final           val inputs      = new ListBuffer[PrepStmt => Unit]
 
   // Input args and cast lambdas
+  final var casts: CastStrategy = CastTuple()
+  //  final var casts: CastStrategy[Cast] = CastTuple[Cast]()
+  //  final var casts: List[CastStrategy[Cast]] = List(new CastTuple[Cast])
+
   final           var castss    = List(List.empty[(RS, Int) => Any])
   final           var aritiess  = List(List.empty[Int])
   final protected val nestedIds = new ArrayBuffer[String]
@@ -121,17 +129,16 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions {
     addCast(cast)
   }
 
-  final protected def aritiesNextLevel(): Unit = {
-    val newLevel           = Nil
-    val curLevel           = aritiess.last
-//    val curLevelWithNested = curLevel :+ List(-1)
-    val curLevelWithNested = curLevel :+ -1
-    aritiess = (aritiess.init :+ curLevelWithNested) :+ newLevel
+  final protected def aritiesAttr(): Unit = {
+    // Add new arity
+    aritiess = aritiess.init :+ (aritiess.last :+ 0)
   }
 
-  final protected def aritiesAttr(): Unit = {
-    // Add new arity of 1
-//    aritiess = aritiess.init :+ (aritiess.last :+ List(1))
-    aritiess = aritiess.init :+ (aritiess.last :+ 1)
+  final protected def aritiesAddGroup(): Unit = {
+    aritiess = (aritiess.init :+ (aritiess.last :+ -1)) :+ Nil
+  }
+
+  final protected def aritiesAddNested(): Unit = {
+    aritiess = (aritiess.init :+ (aritiess.last :+ -1)) :+ Nil
   }
 }

@@ -61,7 +61,7 @@ trait FlatRefOptNested extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       } yield ()
     }
 
-    "Ref" - refs { implicit conn =>
+    "Ref (for comparison)" - refs { implicit conn =>
       for {
         _ <- A.i(1).save.transact
         _ <- A.i(2).B.i(20).save.transact

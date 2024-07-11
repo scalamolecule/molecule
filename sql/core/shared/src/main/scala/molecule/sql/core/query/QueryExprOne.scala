@@ -108,13 +108,21 @@ trait QueryExprOne extends QueryExpr { self: Model2Query with SqlQueryBase with 
   }
 
   protected def man[T: ClassTag](attr: Attr, args: Seq[T], res: ResOne[T]): Unit = {
-    aritiesAttr()
     val col = getCol(attr: Attr)
     select += col
     groupByCols += col // if we later need to group by non-aggregated columns
+    aritiesAttr()
     if (isOptNested) {
+      casts.add(res.sql2oneOrNull)
       addCast(res.sql2oneOrNull)
     } else {
+
+
+//      println(attr)
+//      println(res.sql2one)
+
+
+      casts.add(res.sql2one)
       addCast(res.sql2one)
       setNotNull(col)
     }

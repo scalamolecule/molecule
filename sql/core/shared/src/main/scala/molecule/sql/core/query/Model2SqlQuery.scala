@@ -69,7 +69,17 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
   ): String = {
     if (hasOptRef) {
       addPredicatesToLastLeftJoin()
+
+      println("-------- C  " + aritiess)
     }
+
+//    aritiess = List(
+//      List(0,-1),
+//      List(2),
+//      List(2),
+//    )
+//    aritiess = List(List(0, 2, 2))
+
     val isBackwards = optLimit.fold(false)(_ < 0) || optOffset.fold(false)(_ < 0)
     val distinct_   = if (distinct) " DISTINCT" else ""
     val select_     = mkSelect
@@ -97,6 +107,9 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
   }
 
   protected def mkJoins(indents: Int): String = {
+
+    joins.mkString("\n")
+
     if (joins.isEmpty) "" else {
       val indent = "  " * indents
       joins.map {

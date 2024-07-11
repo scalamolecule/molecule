@@ -17,7 +17,7 @@ trait CastRow2Tpl_ { self: Model2Query with DatomicQueryBase =>
     nested: Option[NestedTpls]
   ): List[Row => Any] = {
     arities match {
-      case 1 :: as =>
+      case 0 :: as =>
         val cast = (row: Row) => casts.head(row.get(attrIndex))
         resolveArities(as, casts.tail, attrIndex + 1, acc :+ cast, nested)
 

@@ -21,7 +21,7 @@ trait CastOptNestedLeaf_
     acc: List[jIterator[_] => Any],
   ): List[jIterator[_] => Any] = {
     arities match {
-      case 1 :: as =>
+      case 0 :: as =>
         resolveArities(as, casts.tail, acc :+ casts.head)
 
       // Nested

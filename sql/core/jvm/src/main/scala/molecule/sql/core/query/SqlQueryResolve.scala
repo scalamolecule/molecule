@@ -99,7 +99,7 @@ abstract class SqlQueryResolve[Tpl](
         val totalCount = flatRowCount
         val count      = getCount(limit, forward, totalCount)
         val allTuples  = ListBuffer.empty[Tpl]
-        val row2tpl    = CastTpl_.cast(m2q.aritiess.head, m2q.castss.head, 1)
+        val row2tpl    = CastTpl_.castTpl(m2q.aritiess.head, m2q.castss.head, 1)
         while (sortedRows.next()) {
           allTuples += row2tpl(sortedRows).asInstanceOf[Tpl]
         }

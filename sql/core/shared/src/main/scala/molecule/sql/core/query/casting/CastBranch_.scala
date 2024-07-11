@@ -15,20 +15,32 @@ class CastBranch_[NestedTpls] extends SqlQueryBase {
     acc: List[(RS, ParamIndex, NestedTpls) => Any]
   ): List[(RS, ParamIndex, NestedTpls) => Any] = {
     arities match {
-      case 1 :: as =>
-        val cast = (row: RS, attrIndex1: ParamIndex, _: NestedTpls) => casts.head(row, attrIndex1)
-        resolveArities(as, casts.tail, attrIndex + 1, acc :+ cast)
+      case Nil => acc
+
+      case 0 :: nextArities =>
+        val cast = (row: RS, attrIndex1: ParamIndex, _: NestedTpls) =>
+          casts.head(row, attrIndex1)
+        resolveArities(nextArities, casts.tail, attrIndex + 1, acc :+ cast)
 
       // Nested
-      case -1 :: as =>
-        val cast = (_: RS, _: ParamIndex, nested: NestedTpls) => nested
-        resolveArities(as, casts, 0, acc :+ cast)
+      case -1 :: nextArities =>
+        val cast = (_: RS, _: ParamIndex, nested: NestedTpls) =>
+          nested
+        resolveArities(nextArities, casts, 0, acc :+ cast)
+
+      // Adjacent optional refs
+      case n :: nextArities =>
+        val (tplCasts, moreCasts) = casts.splitAt(n)
+        val cast                  =
+          (row: RS, _: ParamIndex, nextGroup: NestedTpls) =>
+            castNested(List(n), tplCasts, attrIndex)(row, nextGroup)
+        resolveArities(nextArities, moreCasts, attrIndex + n, acc :+ cast)
 
       case _ => acc
     }
   }
 
-  final def cast[T](
+  final def castNested[T](
     arities: List[Int],
     casts: List[(RS, ParamIndex) => Any],
     firstAttrIndex: ParamIndex,

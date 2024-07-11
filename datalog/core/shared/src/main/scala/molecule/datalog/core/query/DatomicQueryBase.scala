@@ -110,15 +110,13 @@ trait DatomicQueryBase
   final protected def aritiesNested(): Unit = {
     val newLevel           = Nil
     val curLevel           = aritiess.last
-//    val curLevelWithNested = curLevel :+ List(-1)
     val curLevelWithNested = curLevel :+ -1
     aritiess = (aritiess.init :+ curLevelWithNested) :+ newLevel
   }
 
   final protected def aritiesAttr(): Unit = {
     // Add new arity of 1
-//    aritiess = aritiess.init :+ (aritiess.last :+ List(1))
-    aritiess = aritiess.init :+ (aritiess.last :+ 1)
+    aritiess = aritiess.init :+ (aritiess.last :+ 0)
   }
 
   final def getFlatSorters(
