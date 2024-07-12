@@ -17,8 +17,8 @@ object SpiSync_postgres extends SpiSync_postgres
 
 trait SpiSync_postgres extends SpiSyncBase {
 
-  override def getModel2SqlQuery[Tpl](elements: List[Element]) =
-    new Model2SqlQuery_postgres[Tpl](elements)
+  override def getModel2SqlQuery(elements: List[Element]) =
+    new Model2SqlQuery_postgres(elements)
 
   override def save_getData(save: Save, conn: JdbcConn_JVM): Data = {
     new ResolveSave with Save_postgres {

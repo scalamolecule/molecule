@@ -20,7 +20,7 @@ trait UpdateHelper extends SpiHelpers { self: SqlBase_JVM =>
 
   protected def query_getRaw[Tpl](q: Query[Tpl])(implicit conn0: Conn): List[Tpl] = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
-    val m2q  = getModel2SqlQuery[Tpl](q.elements)
+    val m2q  = getModel2SqlQuery(q.elements)
     SqlQueryResolveOffset[Tpl](q.elements, q.optLimit, None, m2q)
       .getListFromOffset_sync(conn)._1
   }

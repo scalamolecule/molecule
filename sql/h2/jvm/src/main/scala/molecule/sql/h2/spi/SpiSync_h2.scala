@@ -18,8 +18,8 @@ object SpiSync_h2 extends SpiSync_h2
 
 trait SpiSync_h2 extends SpiSyncBase {
 
-  override def getModel2SqlQuery[Tpl](elements: List[Element]) =
-    new Model2SqlQuery_h2[Tpl](elements)
+  override def getModel2SqlQuery(elements: List[Element]) =
+    new Model2SqlQuery_h2(elements)
 
   override def save_getData(save: Save, conn: JdbcConn_JVM): Data = {
     new ResolveSave with Save_h2 {

@@ -8,6 +8,6 @@ import molecule.sql.postgres.query.Model2SqlQuery_postgres
 
 trait Delete_postgres extends SqlDelete { self: ResolveDelete =>
 
-  override def model2SqlQuery(elements: List[Element]): Model2SqlQuery[Any] =
-    new Model2SqlQuery_postgres[Any](elements)
+  override def model2SqlQuery(elements: List[Element]): Model2SqlQuery =
+    new Model2SqlQuery_postgres(elements)
 }

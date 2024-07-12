@@ -10,8 +10,8 @@ import scala.annotation.tailrec
 
 trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
 
-  override def model2SqlQuery(elements: List[Element]): Model2SqlQuery[Any] =
-    new Model2SqlQuery_postgres[Any](elements)
+  override def model2SqlQuery(elements: List[Element]): Model2SqlQuery =
+    new Model2SqlQuery_postgres(elements)
 
 
   override def updateSetRemove[T](

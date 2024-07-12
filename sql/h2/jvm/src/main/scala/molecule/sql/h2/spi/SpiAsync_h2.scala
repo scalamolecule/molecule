@@ -12,7 +12,7 @@ trait SpiAsync_h2 extends SpiAsync with ModelUtils {
                              (implicit conn: Conn, ec: EC): Future[List[Tpl]] = Future {
     //    // Check that rawQuery can handle all SPI queries
     //    val q1    = q.copy(elements = noKeywords(q.elements, Some(conn.proxy)))
-    //    val m2q = getModel2SqlQuery[Tpl](q1.elements)
+    //    val m2q = getModel2SqlQuery(q1.elements)
     //    val qu = m2q.getSqlQuery(q1.elements, None, None)
     //    SpiSync_h2.fallback_rawQuery(qu, true, true)
 

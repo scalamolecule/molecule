@@ -18,8 +18,8 @@ object SpiSync_sqlite extends SpiSync_sqlite
 
 trait SpiSync_sqlite extends SpiSyncBase {
 
-  override def getModel2SqlQuery[Tpl](elements: List[Element]) =
-    new Model2SqlQuery_sqlite[Tpl](elements)
+  override def getModel2SqlQuery(elements: List[Element]) =
+    new Model2SqlQuery_sqlite(elements)
 
   override protected lazy val defaultValues = "DEFAULT VALUES"
 

@@ -9,8 +9,8 @@ import molecule.sql.mysql.query.Model2SqlQuery_mysql
 
 trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
 
-  override def model2SqlQuery(elements: List[Element]): Model2SqlQuery[Any] =
-    new Model2SqlQuery_mysql[Any](elements)
+  override def model2SqlQuery(elements: List[Element]): Model2SqlQuery =
+    new Model2SqlQuery_mysql(elements)
 
   override def updateSetEq[T](
     ns: String,

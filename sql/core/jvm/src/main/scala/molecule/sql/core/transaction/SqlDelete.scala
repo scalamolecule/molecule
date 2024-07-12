@@ -19,7 +19,7 @@ trait SqlDelete
     with ModelUtils
     with MoleculeLogging { self: ResolveDelete =>
 
-  def model2SqlQuery(elements: List[Element]): Model2SqlQuery[Any]
+  def model2SqlQuery(elements: List[Element]): Model2SqlQuery
 
 
   def getDeleteExecutioner(

@@ -17,8 +17,8 @@ object SpiSync_mariadb extends SpiSync_mariadb
 
 trait SpiSync_mariadb extends SpiSyncBase {
 
-  override def getModel2SqlQuery[Tpl](elements: List[Element]) =
-    new Model2SqlQuery_mariadb[Tpl](elements)
+  override def getModel2SqlQuery(elements: List[Element]) =
+    new Model2SqlQuery_mariadb(elements)
 
   override def save_getData(save: Save, conn: JdbcConn_JVM): Data = {
     new ResolveSave with Save_mariadb {

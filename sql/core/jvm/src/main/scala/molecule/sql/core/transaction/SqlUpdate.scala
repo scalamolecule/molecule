@@ -22,7 +22,7 @@ trait SqlUpdate
 
   protected var curParamIndex = 1
 
-  def model2SqlQuery(elements: List[Element]): Model2SqlQuery[Any]
+  def model2SqlQuery(elements: List[Element]): Model2SqlQuery
 
   def getUpdateData(elements: List[Element]): Data = {
     curRefPath = List(getInitialNs(elements))

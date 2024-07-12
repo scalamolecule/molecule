@@ -17,8 +17,8 @@ object SpiSync_mysql extends SpiSync_mysql
 
 trait SpiSync_mysql extends SpiSyncBase {
 
-  override def getModel2SqlQuery[Tpl](elements: List[Element]) =
-    new Model2SqlQuery_mysql[Tpl](elements)
+  override def getModel2SqlQuery(elements: List[Element]) =
+    new Model2SqlQuery_mysql(elements)
 
   override def save_getData(save: Save, conn: JdbcConn_JVM): Data = {
     new ResolveSave with Save_mysql {

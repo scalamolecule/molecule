@@ -8,6 +8,6 @@ import molecule.sql.h2.query.Model2SqlQuery_h2
 
 trait Delete_h2 extends SqlDelete { self: ResolveDelete =>
 
-  override def model2SqlQuery(elements: List[Element]): Model2SqlQuery[Any] =
-    new Model2SqlQuery_h2[Any](elements)
+  override def model2SqlQuery(elements: List[Element]): Model2SqlQuery =
+    new Model2SqlQuery_h2(elements)
 }

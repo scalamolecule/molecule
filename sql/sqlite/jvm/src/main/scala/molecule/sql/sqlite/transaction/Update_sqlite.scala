@@ -12,8 +12,8 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
   doPrint = false
   //  doPrint = true
 
-  override def model2SqlQuery(elements: List[Element]): Model2SqlQuery[Any] =
-    new Model2SqlQuery_sqlite[Any](elements)
+  override def model2SqlQuery(elements: List[Element]): Model2SqlQuery =
+    new Model2SqlQuery_sqlite(elements)
 
 
   override def updateSetEq[T](

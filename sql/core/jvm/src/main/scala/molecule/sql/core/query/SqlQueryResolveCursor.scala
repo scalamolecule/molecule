@@ -15,7 +15,7 @@ case class SqlQueryResolveCursor[Tpl](
   elements: List[Element],
   optLimit: Option[Int],
   cursor: Option[String],
-  m2q: Model2SqlQuery[Tpl] with SqlQueryBase
+  m2q: Model2SqlQuery with SqlQueryBase
 ) extends SqlQueryResolve[Tpl](elements, m2q)
   with FutureUtils
   with Pagination[Tpl]

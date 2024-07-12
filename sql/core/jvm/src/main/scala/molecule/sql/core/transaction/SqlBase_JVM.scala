@@ -23,9 +23,9 @@ trait SqlBase_JVM extends SqlDataType_JVM with ModelUtils with BaseHelpers {
 
   lazy val sqlConn: java.sql.Connection = ???
 
-  def getModel2SqlQuery[Tpl](
+  def getModel2SqlQuery(
     elements: List[Element]
-  ): Model2SqlQuery[Tpl] with SqlQueryBase = ???
+  ): Model2SqlQuery with SqlQueryBase = ???
 
   def update_getData(conn: JdbcConn_JVM, update: Update): Data = ???
 

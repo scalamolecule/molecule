@@ -34,7 +34,7 @@ trait SpiSyncBase
     val q    = q0.copy(elements = noKeywords(q0.elements, Some(conn.proxy)))
     if (q.doInspect)
       query_inspect(q)
-    val m2q = getModel2SqlQuery[Tpl](q.elements)
+    val m2q = getModel2SqlQuery(q.elements)
     SqlQueryResolveOffset[Tpl](q.elements, q.optLimit, None, m2q)
       .getListFromOffset_sync(conn)._1
   }
@@ -43,14 +43,14 @@ trait SpiSyncBase
                                    (implicit conn0: Conn): Unit = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
     val q    = q0.copy(elements = noKeywords(q0.elements, Some(conn.proxy)))
-    val m2q  = getModel2SqlQuery[Tpl](q.elements)
+    val m2q  = getModel2SqlQuery(q.elements)
     SqlQueryResolveOffset[Tpl](q.elements, q.optLimit, None, m2q)
-      .subscribe(conn, callback, (elements: List[Element]) => getModel2SqlQuery[Tpl](elements))
+      .subscribe(conn, callback, (elements: List[Element]) => getModel2SqlQuery(elements))
   }
   override def query_unsubscribe[Tpl](q0: Query[Tpl])(implicit conn0: Conn): Unit = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
     val q    = q0.copy(elements = noKeywords(q0.elements, Some(conn.proxy)))
-    val m2q  = getModel2SqlQuery[Tpl](q.elements)
+    val m2q  = getModel2SqlQuery(q.elements)
     SqlQueryResolveOffset[Tpl](q.elements, q.optLimit, None, m2q)
       .unsubscribe(conn)
   }
@@ -66,7 +66,7 @@ trait SpiSyncBase
     val q    = q0.copy(elements = noKeywords(q0.elements, Some(conn.proxy)))
     if (q.doInspect)
       queryOffset_inspect(q)
-    val m2q = getModel2SqlQuery[Tpl](q.elements)
+    val m2q = getModel2SqlQuery(q.elements)
     SqlQueryResolveOffset[Tpl](q.elements, q.optLimit, Some(q.offset), m2q)
       .getListFromOffset_sync(conn)
   }
@@ -81,7 +81,7 @@ trait SpiSyncBase
     val q    = q0.copy(elements = noKeywords(q0.elements, Some(conn.proxy)))
     if (q.doInspect)
       queryCursor_inspect(q)
-    val m2q = getModel2SqlQuery[Tpl](q.elements)
+    val m2q = getModel2SqlQuery(q.elements)
     SqlQueryResolveCursor[Tpl](q.elements, q.optLimit, Some(q.cursor), m2q)
       .getListFromCursor_sync(conn)
   }
@@ -98,7 +98,7 @@ trait SpiSyncBase
     optProxy: Option[ConnProxy]
   ): Unit = {
     tryInspect("query", elements) {
-      val query = getModel2SqlQuery[Any](elements).getSqlQuery(Nil, optLimit, optOffset, optProxy)
+      val query = getModel2SqlQuery(elements).getSqlQuery(Nil, optLimit, optOffset, optProxy)
       printRaw(label, elements, query)
     }
   }

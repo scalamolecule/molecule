@@ -9,11 +9,9 @@ import molecule.sql.core.query.casting._
 import scala.collection.mutable.ListBuffer
 
 
-abstract class Model2SqlQuery[Tpl](elements0: List[Element])
+abstract class Model2SqlQuery(elements0: List[Element])
   extends Model2Query
     with QueryExprRef
-//    with NestOptTpls[Tpl]
-//    with NestOptRef[Tpl]
     with ModelUtils
     with MoleculeLogging { self: QueryExpr with SqlQueryBase =>
 

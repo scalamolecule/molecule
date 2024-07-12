@@ -4,8 +4,8 @@ import molecule.boilerplate.ast.Model._
 import molecule.sql.core.query._
 
 
-class Model2SqlQuery_postgres[Tpl](elements0: List[Element])
-  extends Model2SqlQuery[Tpl](elements0)
+class Model2SqlQuery_postgres(elements0: List[Element])
+  extends Model2SqlQuery(elements0)
     with QueryExprOne_postgres
     with QueryExprSet_postgres
     with QueryExprSeq_postgres
