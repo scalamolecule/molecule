@@ -17,7 +17,7 @@ trait QueryExprMap_mysql
     select -= col
     select += value
     where += ((value, s"IS NOT NULL"))
-    replaceCast((row: RS, paramIndex: Int) =>
+    casts.replace((row: RS, paramIndex: Int) =>
       resMap.json2tpe(row.getString(paramIndex)))
   }
 
@@ -26,7 +26,7 @@ trait QueryExprMap_mysql
   ): Unit = {
     select -= col
     select += s"JSON_VALUE($col, '$$.$key')"
-    replaceCast((row: RS, paramIndex: Int) => {
+    casts.replace((row: RS, paramIndex: Int) => {
       val value = row.getString(paramIndex)
       if (row.wasNull()) Option.empty[T] else Some(resMap.json2tpe(value))
     })

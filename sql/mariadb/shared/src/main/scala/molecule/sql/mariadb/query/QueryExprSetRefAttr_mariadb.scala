@@ -15,7 +15,7 @@ trait QueryExprSetRefAttr_mariadb
     select += s"JSON_ARRAYAGG($joinTable.$ref_id) $refIds"
     joins += (("INNER JOIN", joinTable, "", List(s"$nsId = $joinTable.$ns_id")))
     groupBy += nsId
-    addCast(
+    casts.add(
       (row: RS, paramIndex: Int) =>
         res.json2array(row.getString(paramIndex)).toSet
     )
@@ -38,7 +38,7 @@ trait QueryExprSetRefAttr_mariadb
     select += s"JSON_ARRAYAGG($joinTable.$ref_id) $refIds"
     joins += (("LEFT JOIN", joinTable, "", List(s"$nsId = $joinTable.$ns_id")))
     groupBy += nsId
-    addCast((row: RS, paramIndex: Int) => {
+    casts.add((row: RS, paramIndex: Int) => {
       row.getString(paramIndex) match {
         case "[null]" => Option.empty[Set[T]]
         case json     => Some(res.json2array(json).toSet)

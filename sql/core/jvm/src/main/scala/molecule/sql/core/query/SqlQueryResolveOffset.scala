@@ -4,8 +4,7 @@ import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.util.{FutureUtils, ModelUtils}
 import molecule.sql.core.facade.JdbcConn_JVM
-import molecule.sql.core.query.castStrategy._
-import molecule.sql.core.query.casting.CastTpl_
+import molecule.sql.core.query.casting._
 import scala.collection.mutable.ListBuffer
 
 case class SqlQueryResolveOffset[Tpl](
@@ -18,58 +17,19 @@ case class SqlQueryResolveOffset[Tpl](
   with ModelUtils
   with MoleculeLogging {
 
-  lazy val forward = optLimit.fold(true)(_ >= 0) && optOffset.fold(true)(_ >= 0)
 
   def getListFromOffset_sync(implicit conn: JdbcConn_JVM)
   : (List[Tpl], Int, Boolean) = {
     offsetLimitCheck(optLimit, optOffset)
     val sortedRows = getData(conn, optLimit, optOffset)
-
-    val castedRows = m2q.casts match {
-      case c: CastTuple =>
-        val row2tpl = c.tupleCaster
-        val tuples  = ListBuffer.empty[Tpl]
-        while (sortedRows.next()) {
-          //          val tpl = row2tpl(sortedRows)
-          //          println(tpl)
-          //          tuples += tpl.asInstanceOf[Tpl]
-          tuples += row2tpl(sortedRows).asInstanceOf[Tpl]
-        }
-        if (forward) tuples.toList else tuples.reverse.toList.reverse
-
-      case c: CastNested => NestTpls2.rows2nested(
-        sortedRows,
-        c.getCasters
-      ).asInstanceOf[List[Tpl]]
-
-      case _ => ???
+    m2q.casts match {
+      case c: CastTuple  => handleTuples(c, sortedRows, conn)
+      case c: CastNested => handleNested(c, sortedRows, conn)
+      case _             => ???
     }
-
-    println("XXX   " + castedRows)
-
-
-    if (m2q.isManNested || m2q.isOptNested) {
-      val nestedRows0 = if (m2q.isManNested)
-        m2q.rows2nested(sortedRows)
-      else
-        m2q.rows2optNnested(sortedRows)
-      val nestedRows  = if (forward) nestedRows0 else nestedRows0.reverse
-
-
-      val totalCount = if (m2q.isManNested)
-        m2q.getRowCount(sortedRows)
-      else
-        optOffset.fold(m2q.getRowCount(sortedRows))(_ => getTotalCount(conn))
-
-      val topLevelCount = nestedRows.length
-      val fromUntil     = getFromUntil(topLevelCount, optLimit, optOffset)
-      val hasMore       = fromUntil.fold(totalCount > 0)(_._3)
-      (offsetList(nestedRows, fromUntil), topLevelCount, hasMore)
-
-    } else if (m2q.hasOptRef) {
-
-      //      val row2nestedOptions = m2q.row2nestedOptions
-      val row2nestedOptions = m2q.row2nestedOptions
+  }
+  /*
+       val row2nestedOptions = m2q.row2nestedOptions
 
       //      val casts   = m2q.castss.head
       //      val row2tpl = new CastRow2Tpl_[List[Tpl]].cast(m2q.aritiess.head, casts, 1, None)
@@ -82,38 +42,51 @@ case class SqlQueryResolveOffset[Tpl](
 
         //        tuples += row2tpl(sortedRows).asInstanceOf[Tpl]
       }
+   */
+
+  private def handleTuples(
+    c: CastTuple, sortedRows: RS, conn: JdbcConn_JVM
+  ): (List[Tpl], Int, Boolean) = {
+    val row2tpl = c.tupleCaster
+    val tuples  = ListBuffer.empty[Tpl]
+    while (sortedRows.next()) {
+      tuples += row2tpl(sortedRows).asInstanceOf[Tpl]
+    }
+    val rows       = order(tuples.toList)
+    val totalCount = optOffset.fold(m2q.getRowCount(sortedRows))(_ => getTotalCount(conn))
+    val fromUntil  = getFromUntil(totalCount, optLimit, optOffset)
+    val hasMore    = fromUntil.fold(totalCount > 0)(_._3)
+    (rows, totalCount, hasMore)
+  }
 
 
-      val totalCount = optOffset.fold(m2q.getRowCount(sortedRows))(_ => getTotalCount(conn))
-      val fromUntil  = getFromUntil(totalCount, optLimit, optOffset)
-      val hasMore    = fromUntil.fold(totalCount > 0)(_._3)
-      (tuples.toList, totalCount, hasMore)
-
-      //      ???
+  private def handleNested(
+    c: CastNested, sortedRows: RS, conn: JdbcConn_JVM
+  ): (List[Tpl], Int, Boolean) = {
+    val (nestedRows, totalCount) = if (m2q.isManNested) {
+      // Nested
+      val nestedRows = order((new NestTpls).rows2nested(
+        sortedRows, c.getCasters
+      ).asInstanceOf[List[Tpl]])
+      (nestedRows, m2q.getRowCount(sortedRows))
 
     } else {
-      val casts    = m2q.castss.head
-      val row2tpl1 = CastTpl_.castTpl(m2q.aritiess.head, casts, 1)
-      //      val row2tpl    = CastTpl2_.tupleCaster(m2q)
-
-      //      val row2tpl    = m2q.casts.asInstanceOf[m2q.CastTuple].row2tpl
-      //      val tuples     = ListBuffer.empty[Tpl]
-      //      while (sortedRows.next()) {
-      //
-      //        val tpl = row2tpl(sortedRows)
-      //        println(tpl)
-      //        tuples += tpl.asInstanceOf[Tpl]
-      //        //        tuples += row2tpl(sortedRows).asInstanceOf[Tpl]
-      //      }
-      //      val result    = if (forward) tuples.toList else tuples.toList.reverse
-      val result = castedRows
-
-
-      val totalCount = optOffset.fold(m2q.getRowCount(sortedRows))(_ => getTotalCount(conn))
-      val fromUntil  = getFromUntil(totalCount, optLimit, optOffset)
-      val hasMore    = fromUntil.fold(totalCount > 0)(_._3)
-      (result, totalCount, hasMore)
+      // OptNested
+      val nestedRows = order((new NestOptTpls).rows2optNested(
+        sortedRows, c.getCasters
+      ).asInstanceOf[List[Tpl]])
+      (nestedRows, optOffset.fold(m2q.getRowCount(sortedRows))(_ => getTotalCount(conn)))
     }
+
+    val topLevelCount = nestedRows.length
+    val fromUntil     = getFromUntil(topLevelCount, optLimit, optOffset)
+    val hasMore       = fromUntil.fold(totalCount > 0)(_._3)
+    (offsetList(nestedRows, fromUntil), topLevelCount, hasMore)
+  }
+
+  private def order(rows: List[Tpl]) = {
+    if (optLimit.fold(true)(_ >= 0) && optOffset.fold(true)(_ >= 0))
+      rows else rows.reverse
   }
 
 

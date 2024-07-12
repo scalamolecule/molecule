@@ -79,9 +79,7 @@ trait LambdasBase extends BaseHelpers with AggrUtils with JsonBase { self: SqlQu
     if (row.wasNull()) {
       Map.empty[String, T]
     } else {
-      val json = new String(byteArray)
-      //      println("json: " + json)
-      json2map(json)
+      json2map(new String(byteArray))
     }
   }
 

@@ -43,167 +43,61 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       for {
 
 
-        //        _ <- A.s.Bb.*(B.i).insert(
-        //          ("a", List(2, 3)),
-        //        ).transact
-        //        _ <- A.s.Bb.*(B.i).query.get
+        _ <- A.B.Cc.i.insert(1).transact
 
+//        _ <- A.s.Bb.*(B.iSeq).insert(List(("a", List(Seq(3))))).transact
+//
+//        _ <- rawQuery(
+//          """SELECT DISTINCT
+//            |  A.id,
+//            |  A.s,
+//            |  B.iSeq
+//            |FROM A
+//            |  INNER JOIN A_bb_B ON
+//            |    A.id = A_bb_B.A_id
+//            |  INNER JOIN B ON
+//            |    A_bb_B.B_id = B.id
+//            |WHERE
+//            |  A.s    IS NOT NULL AND
+//            |  B.iSeq IS NOT NULL;
+//            |""".stripMargin, true)
+//        _ <- A.s.Bb.*(B.iSeq).query.get.map(_ ==> List(("a", List(Seq(3)))))
 
-        _ <- A.s.Bb.*(B.i.Cc.*(C.i)).insert(
-          ("a", List(
-            (2, List(20, 21)),
-            (3, List(30, 31)),
-          )),
-//          ("a", List((2, List(20)))),
-        ).transact
+//        _ <- A.s.Bb.*(B.iSet).insert(List(("a", List(Set(3))))).transact
+//        _ <- rawQuery(
+//          """SELECT DISTINCT
+//            |  A.id,
+//            |  A.s,
+//            |  ARRAY_AGG(B.iSet)
+//            |FROM A
+//            |  INNER JOIN A_bb_B ON
+//            |    A.id = A_bb_B.A_id
+//            |  INNER JOIN B ON
+//            |    A_bb_B.B_id = B.id
+//            |WHERE
+//            |  A.s    IS NOT NULL AND
+//            |  B.iSet IS NOT NULL
+//            |GROUP BY A.s, A.id
+//            |HAVING COUNT(*) > 0;
+//            |""".stripMargin, true)
+//        _ <- A.s.Bb.*(B.iSet).query.get.map(_ ==> List(("a", List(Set(3)))))
 
-        _ <- rawQuery(
-          """SELECT DISTINCT
-            |  A.id,
-            |  B.id,
-            |  A.s,
-            |  B.i,
-            |  C.i
-            |FROM A
-            |  INNER JOIN A_bb_B ON
-            |    A.id = A_bb_B.A_id
-            |  INNER JOIN B ON
-            |    A_bb_B.B_id = B.id
-            |  INNER JOIN B_cc_C ON
-            |    B.id = B_cc_C.B_id
-            |  INNER JOIN C ON
-            |    B_cc_C.C_id = C.id
-            |WHERE
-            |  A.s IS NOT NULL AND
-            |  B.i IS NOT NULL AND
-            |  C.i IS NOT NULL;
-            |""".stripMargin, true)
+        //        _ <- A.i.Bb.*(B.iSet).insert(List((2, List(Set(3, 4))))).transact
+        //        _ <- A.i.Bb.*(B.iSet).query.get.map(_ ==> List((2, List(Set(3, 4)))))
 
-
-        _ <- A.s.Bb.*(B.i.Cc.*(C.i)).query.get
-        //        _ <- A.s.Bb.*(B.s).query.get
-        //                  .map(_ ==> List(
-        //                  ("a", List(2, 3)),
-        //                ))
-
-
-        //        //        _ <- A.i(1).save.transact
-        //        //        _ <- A.i(2).B.i(20).save.transact
-        //        //        _ <- A.i(3).B.i(30)._A.C.s("300").i(300).save.transact
-        //        //        _ <- A.i(4).B.i(40).s("40").save.transact
-        //        //        _ <- A.i(5).B.i(50).s("50")._A.C.s("500").save.transact
-        //        _ <- A.i(6).B.i(60).s("60")._A.C.s("600").i(600).save.transact
+        //        // Referenced entities are not deleted
+        //        _ <- B.i.a1.query.get.map(_ ==> List(10, 11, 20, 21))
         //
-        //        //        _ <- rawQuery(
-        //        //          """SELECT DISTINCT
-        //        //            |  A.i,
-        //        //            |  B.i,
-        //        //            |  B.s,
-        //        //            |  C.s,
-        //        //            |  C.i
-        //        //            |FROM A
-        //        //            |  LEFT JOIN B ON
-        //        //            |    A.b = B.id AND
-        //        //            |    B.i IS NOT NULL AND
-        //        //            |    B.s IS NOT NULL
-        //        //            |  LEFT JOIN C ON
-        //        //            |    B.c = C.id AND
-        //        //            |    C.s IS NOT NULL AND
-        //        //            |    C.i IS NOT NULL
-        //        //            |WHERE
-        //        //            |  A.i IS NOT NULL
-        //        //            |""".stripMargin, true)
-        //        //
-        //
-        //        //        _ <- rawQuery(
-        //        //          """SELECT DISTINCT
-        //        //            |  A.i,
-        //        //            |  B.i, B.s,
-        //        //            |  C.i, C.s
-        //        //            |FROM A
-        //        //            |  LEFT JOIN B ON
-        //        //            |    A.b = B.id AND
-        //        //            |    B.i IS NOT NULL AND
-        //        //            |    B.s IS NOT NULL
-        //        //            |  LEFT JOIN C ON
-        //        //            |    A.c = C.id AND
-        //        //            |    C.i IS NOT NULL AND
-        //        //            |    C.s IS NOT NULL
-        //        //            |WHERE
-        //        //            |  A.i IS NOT NULL
-        //        //            |""".stripMargin, true)
-        //
-        ////        _ <- A.i.B.?(B.i.s.C.?(C.s.i)).query.i.get
-        //
-        //        a = List(
-        //          List(0, -1),
-        //          List(0, 0, -1),
-        //          List(0, 0),
-        //        )
-        //
-        //        b = List(
-        //          List(0, -1),
-        //          List(2),
-        //          List(2),
-        //        )
-        //
-        //        c = List(
-        //          List(0, 2, 2),
-        //        )
-        //
-        //        _ <- A.i
-        //          .B.?(B.i.s)
-        //          .C.?(C.s.i).query.i.get.map(_ ==> List(
-        //            //          (1, None),
-        //            //          (2, None),
-        //            //          (3, None),
-        //            //          (4, Some((40, "40", None))),
-        //            //          (5, Some((50, "50", None))),
-        //            (6, Some((60, "60")), Some(("600", 600))),
+        //        _ <- if (platform == "Jdbc jvm") {
+        //          // Join rows deleted
+        //          rawQuery("SELECT * FROM A_bb_B").map(_ ==> List(
+        //            // List(1, 1),
+        //            // List(1, 2),
+        //            List(2, 3),
+        //            List(2, 4),
         //          ))
+        //        } else Future.unit
 
-        //        _ <- A.i
-        //          .B.?(B.i.s)
-        //          .C.?(C.s.i_?).query.i.get.map(_ ==> List(
-        //            (1, None),
-        //            (2, None),
-        //            (3, None),
-        //            (4, Some((40, "40", None))),
-        //            (5, Some((50, "50", Some(("500", None))))),
-        //            (6, Some((60, "60", Some(("600", Some(600)))))),
-        //          ))
-        //
-        //        _ <- A.i
-        //          .B.?(B.i.s_?)
-        //          .C.?(C.s.i).query.i.get.map(_ ==> List(
-        //            (1, None),
-        //            (2, Some((20, None, None))),
-        //            (3, Some((30, None, Some(("300", 300))))),
-        //            (4, Some((40, Some("40"), None))),
-        //            (5, Some((50, Some("50"), None))),
-        //            (6, Some((60, Some("60"), Some(("600", 600))))),
-        //          ))
-        //
-        //        _ <- A.i
-        //          .B.?(B.i.s_?)
-        //          .C.?(C.s.i_?).query.i.get.map(_ ==> List(
-        //            (1, None),
-        //            (2, Some((20, None, None))),
-        //            (3, Some((30, None, Some(("300", Some(300)))))),
-        //            (4, Some((40, Some("40"), None))),
-        //            (5, Some((50, Some("50"), Some(("500", None))))),
-        //            (6, Some((60, Some("60"), Some(("600", Some(600)))))),
-        //          ))
-
-
-        //        _ <- A.i.B.?(B.i.s).C.i.query.get
-        //          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-        //            err ==> "Only further optional refs allowed after optional ref."
-        //          }
-        //        _ <- A.i.B.?(B.i.s).Cc.*(C.i).query.get
-        //          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-        //            err ==> "Only further optional refs allowed after optional ref."
-        //          }
 
         //
         //

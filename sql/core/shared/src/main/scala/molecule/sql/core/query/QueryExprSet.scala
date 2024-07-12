@@ -6,7 +6,6 @@ import molecule.core.query.{Model2Query, QueryExpr}
 trait QueryExprSet extends QueryExpr { self: Model2Query with SqlQueryBase with LambdasSet =>
 
   override protected def queryAttrSetMan(attr: AttrSetMan): Unit = {
-    aritiesAttr()
     attr match {
       case at: AttrSetManID             => setMan(attr, at.vs, resSetId)
       case at: AttrSetManString         => setMan(attr, at.vs, resSetString)
@@ -63,7 +62,6 @@ trait QueryExprSet extends QueryExpr { self: Model2Query with SqlQueryBase with 
   }
 
   override protected def queryAttrSetOpt(attr: AttrSetOpt): Unit = {
-    aritiesAttr()
     attr match {
       case _: AttrSetOptID             => setOpt(attr, resOptSetId, resSetId)
       case _: AttrSetOptString         => setOpt(attr, resOptSetString, resSetString)
@@ -100,7 +98,7 @@ trait QueryExprSet extends QueryExpr { self: Model2Query with SqlQueryBase with 
     if (!isOptNested) {
       setNotNull(col)
     }
-    addCast(res.sql2set)
+    casts.add(res.sql2set)
     attr.filterAttr.fold {
       val pathAttr = path :+ attr.cleanAttr
       if (filterAttrVars.contains(pathAttr) && attr.op != V) {
@@ -158,7 +156,7 @@ trait QueryExprSet extends QueryExpr { self: Model2Query with SqlQueryBase with 
   ): Unit = {
     val col = getCol(attr: Attr)
     select += col
-    addCast(resOpt.sql2setOpt)
+    casts.add(resOpt.sql2setOpt)
     attr.op match {
       case V     => setOptAttr(col, res)
       case Eq    => noCollectionMatching(attr)
@@ -175,7 +173,7 @@ trait QueryExprSet extends QueryExpr { self: Model2Query with SqlQueryBase with 
       select += s"ARRAY_AGG($col)"
       having += "COUNT(*) > 0"
       aggregate = true
-      replaceCast(res.nestedArray2coalescedSet)
+      casts.replace(res.nestedArray2coalescedSet)
     }
   }
 
@@ -183,7 +181,7 @@ trait QueryExprSet extends QueryExpr { self: Model2Query with SqlQueryBase with 
     select -= col
     select += s"ARRAY_AGG($col)"
     aggregate = true
-    replaceCast(res.nestedArray2optCoalescedSet)
+    casts.replace(res.nestedArray2optCoalescedSet)
   }
 
   protected def setHas[T](
@@ -195,7 +193,7 @@ trait QueryExprSet extends QueryExpr { self: Model2Query with SqlQueryBase with 
       select -= col
       select += s"ARRAY_AGG($col)"
       aggregate = true
-      replaceCast(res.nestedArray2coalescedSet)
+      casts.replace(res.nestedArray2coalescedSet)
     }
     set.size match {
       case 0 => where += (("FALSE", ""))
@@ -213,7 +211,7 @@ trait QueryExprSet extends QueryExpr { self: Model2Query with SqlQueryBase with 
       select -= col
       select += s"ARRAY_AGG($col)"
       aggregate = true
-      replaceCast(res.nestedArray2coalescedSet)
+      casts.replace(res.nestedArray2coalescedSet)
     }
     set.size match {
       case 0 => ()
@@ -244,7 +242,7 @@ trait QueryExprSet extends QueryExpr { self: Model2Query with SqlQueryBase with 
       select += s"ARRAY_AGG($col)"
       having += "COUNT(*) > 0"
       aggregate = true
-      replaceCast(res.nestedArray2coalescedSet)
+      casts.replace(res.nestedArray2coalescedSet)
     }
     where += (("", s"NOT ARRAY_CONTAINS($col, $filterAttr)"))
   }

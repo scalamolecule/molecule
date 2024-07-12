@@ -7,78 +7,56 @@ import scala.annotation.tailrec
 
 object CastTpl_ extends SqlQueryBase {
 
-  @tailrec
-  final private def resolveArities(
-    arities: List[Int],
-    casts: List[(RS, ParamIndex) => Any],
-    attrIndex: ParamIndex,
-    acc: List[(RS, ParamIndex) => Any],
-  ): List[(RS, ParamIndex) => Any] = {
-    arities match {
-      case 0 :: as =>
-        val cast = (row: RS, _: ParamIndex) => casts.head(row, attrIndex)
-        resolveArities(as, casts.tail, attrIndex + 1, acc :+ cast)
-
-      // Nested
-      case -1 :: Nil =>
-        val cast = (_: RS, _: ParamIndex) => List.empty[Any]
-        resolveArities(Nil, casts, 0, acc :+ cast)
-
-      case _ => acc
+  final def tupleCaster(casts: List[Cast], firstIndex: ParamIndex): RS => Any = {
+    casts.length match {
+      case 1  => cast1(casts, firstIndex)
+      case 2  => cast2(casts, firstIndex)
+      case 3  => cast3(casts, firstIndex)
+      case 4  => cast4(casts, firstIndex)
+      case 5  => cast5(casts, firstIndex)
+      case 6  => cast6(casts, firstIndex)
+      case 7  => cast7(casts, firstIndex)
+      case 8  => cast8(casts, firstIndex)
+      case 9  => cast9(casts, firstIndex)
+      case 10 => cast10(casts, firstIndex)
+      case 11 => cast11(casts, firstIndex)
+      case 12 => cast12(casts, firstIndex)
+      case 13 => cast13(casts, firstIndex)
+      case 14 => cast14(casts, firstIndex)
+      case 15 => cast15(casts, firstIndex)
+      case 16 => cast16(casts, firstIndex)
+      case 17 => cast17(casts, firstIndex)
+      case 18 => cast18(casts, firstIndex)
+      case 19 => cast19(casts, firstIndex)
+      case 20 => cast20(casts, firstIndex)
+      case 21 => cast21(casts, firstIndex)
+      case 22 => cast22(casts, firstIndex)
     }
   }
 
-  final def castTpl(
-    arities: List[Int],
-    casts: List[(RS, ParamIndex) => Any],
-    attrIndex: ParamIndex,
-  ): RS => Any = {
-    val casters: List[(RS, ParamIndex) => Any] = resolveArities(arities, casts, attrIndex, Nil)
-    arities.length match {
-      case 1  => cast1(casters, attrIndex)
-      case 2  => cast2(casters, attrIndex)
-      case 3  => cast3(casters, attrIndex)
-      case 4  => cast4(casters, attrIndex)
-      case 5  => cast5(casters, attrIndex)
-      case 6  => cast6(casters, attrIndex)
-      case 7  => cast7(casters, attrIndex)
-      case 8  => cast8(casters, attrIndex)
-      case 9  => cast9(casters, attrIndex)
-      case 10 => cast10(casters, attrIndex)
-      case 11 => cast11(casters, attrIndex)
-      case 12 => cast12(casters, attrIndex)
-      case 13 => cast13(casters, attrIndex)
-      case 14 => cast14(casters, attrIndex)
-      case 15 => cast15(casters, attrIndex)
-      case 16 => cast16(casters, attrIndex)
-      case 17 => cast17(casters, attrIndex)
-      case 18 => cast18(casters, attrIndex)
-      case 19 => cast19(casters, attrIndex)
-      case 20 => cast20(casters, attrIndex)
-      case 21 => cast21(casters, attrIndex)
-      case 22 => cast22(casters, attrIndex)
-    }
-  }
-
-  final private def cast1(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Any = {
+  final private def cast1(casters: List[(RS, ParamIndex) => Any], firstIndex: ParamIndex): RS => Any = {
     val List(c1) = casters
-    (row: RS) =>
-      c1(row, attrIndex)
+    (row: RS) => {
+//      println(s"  ------- B  $firstIndex")
+//      println(s"  ------- B  " + c1(row, firstIndex))
+      c1(row, firstIndex)
+    }
   }
 
-  final private def cast2(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Any = {
+  final private def cast2(casters: List[(RS, ParamIndex) => Any], firstIndex: ParamIndex): RS => Any = {
     val List(c1, c2) = casters
-    val List(i1, i2) = (attrIndex until attrIndex + 2).toList
-    (row: RS) =>
+    val List(i1, i2) = (firstIndex until firstIndex + 2).toList
+    (row: RS) => {
       (
         c1(row, i1),
         c2(row, i2)
       )
+    }
   }
 
-  final private def cast3(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Any = {
+  final private def cast3(casters: List[(RS, ParamIndex) => Any], firstIndex: ParamIndex): RS => Any = {
     val List(c1, c2, c3) = casters
-    val List(i1, i2, i3) = (attrIndex until attrIndex + 3).toList
+    val List(i1, i2, i3) = (firstIndex until firstIndex + 3).toList
     (row: RS) =>
       (
         c1(row, i1),

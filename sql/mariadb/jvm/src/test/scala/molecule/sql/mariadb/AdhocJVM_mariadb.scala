@@ -30,8 +30,9 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
 
-        _ <- A.i.insert(2).transact
-        _ <- A.i.query.get.map(_ ==> List(2))
+
+        _ <- A.B.Cc.i.insert(1).transact
+
 
         //        _ <- rawTransact(
         //          """UPDATE B

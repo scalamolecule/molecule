@@ -19,7 +19,7 @@ trait QueryExprSeq_mysql
   override protected def seqOptAttr[T](
     res: ResSeq[T]
   ): Unit = {
-    replaceCast((row: RS, paramIndex: Int) => row.getString(paramIndex) match {
+    casts.replace((row: RS, paramIndex: Int) => row.getString(paramIndex) match {
       case null | "[]" => Option.empty[Set[T]]
       case json        => Some(res.json2array(json).toList)
     })
@@ -83,14 +83,14 @@ trait QueryExprSeq_mysql
       if (isOptNested) {
         // Allow empty optional nested rows.
         // So let non-asserted Seq values (null) be checked in NestedOpt
-        replaceCast((row: RS, paramIndex: Int) => {
+        casts.replace((row: RS, paramIndex: Int) => {
           row.getString(paramIndex) match {
             case null => null
             case s    => res.json2array(s).toList
           }
         })
       } else {
-        replaceCast((row: RS, paramIndex: Int) =>
+        casts.replace((row: RS, paramIndex: Int) =>
           res.json2array(row.getString(paramIndex)).toList
         )
       }

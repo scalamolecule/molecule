@@ -5,11 +5,9 @@ import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
 import molecule.core.util.JavaConversions
 import molecule.sql.core.javaSql.{PrepStmt, ResultSetInterface}
-import molecule.sql.core.query.castStrategy.{CastStrategy, CastTuple}
+import molecule.sql.core.query.casting.{CastStrategy, CastTuple}
 import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
-
-
 
 
 trait SqlQueryBase extends BaseHelpers with JavaConversions {
@@ -20,7 +18,6 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions {
 
   // Lookup original type of aggregate attributes
   final protected var attrMap = Map.empty[String, (Card, String, Seq[String])]
-
 
   // Main query
   final protected val select      = new ListBuffer[String]
@@ -38,16 +35,10 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions {
   final protected var hardLimit   = 0
   final           val inputs      = new ListBuffer[PrepStmt => Unit]
 
-  // Input args and cast lambdas
   final var casts: CastStrategy = CastTuple()
-  //  final var casts: CastStrategy[Cast] = CastTuple[Cast]()
-  //  final var casts: List[CastStrategy[Cast]] = List(new CastTuple[Cast])
 
-  final           var castss    = List(List.empty[(RS, Int) => Any])
-  final           var aritiess  = List(List.empty[Int])
   final protected val nestedIds = new ArrayBuffer[String]
   final protected var level     = 0
-  final protected val args      = new ArrayBuffer[AnyRef]
 
   final protected var whereSplit = 0
 
@@ -114,31 +105,5 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions {
 
   protected def handleBackRef(): Unit = {
     path = path.dropRight(2)
-  }
-
-  final protected def addCast(cast: (RS, Int) => Any): Unit = {
-    castss = castss.init :+ (castss.last :+ cast)
-  }
-
-  private final def removeLastCast(): Unit = {
-    castss = castss.init :+ castss.last.init
-  }
-
-  final protected def replaceCast(cast: (RS, Int) => Any): Unit = {
-    removeLastCast()
-    addCast(cast)
-  }
-
-  final protected def aritiesAttr(): Unit = {
-    // Add new arity
-    aritiess = aritiess.init :+ (aritiess.last :+ 0)
-  }
-
-  final protected def aritiesAddGroup(): Unit = {
-    aritiess = (aritiess.init :+ (aritiess.last :+ -1)) :+ Nil
-  }
-
-  final protected def aritiesAddNested(): Unit = {
-    aritiess = (aritiess.init :+ (aritiess.last :+ -1)) :+ Nil
   }
 }

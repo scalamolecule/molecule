@@ -20,7 +20,7 @@ trait QueryExprMap_sqlite
     select -= col
     select += value
     where += ((value, s"IS NOT NULL"))
-    replaceCast((row: RS, paramIndex: Int) =>
+    casts.replace((row: RS, paramIndex: Int) =>
       resMap.json2tpe(row.getString(paramIndex)))
   }
 
@@ -29,7 +29,7 @@ trait QueryExprMap_sqlite
   ): Unit = {
     select -= col
     select += s"JSON_EXTRACT($col, '$$.$key')"
-    replaceCast((row: RS, paramIndex: Int) => {
+    casts.replace((row: RS, paramIndex: Int) => {
       val value = row.getString(paramIndex)
       if (row.wasNull()) Option.empty[T] else Some(resMap.json2tpe(value))
     })

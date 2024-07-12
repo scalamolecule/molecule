@@ -6,9 +6,8 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.query.Pagination
 import molecule.core.util.FutureUtils
 import molecule.sql.core.facade.JdbcConn_JVM
-import molecule.sql.core.query.casting.CastTpl_
+import molecule.sql.core.query.casting.{CastNested, CastTuple}
 import molecule.sql.core.query.{Model2SqlQuery, SqlQueryBase, SqlQueryResolve}
-import scala.collection.mutable.ListBuffer
 
 /**
  * Molecule has a unique attribute that is sorted first.
@@ -29,6 +28,7 @@ case class PrimaryUnique[Tpl](
 ) extends SqlQueryResolve[Tpl](elements, m2q)
   with FutureUtils with Pagination[Tpl] with ModelTransformations_ with MoleculeLogging {
 
+
   def getPage(tokens: List[String], limit: Int)
              (implicit conn: JdbcConn_JVM): (List[Tpl], String, Boolean) = {
     val List(_, _, tpe, ns, attr, _, a, z) = tokens
@@ -43,28 +43,10 @@ case class PrimaryUnique[Tpl](
     if (flatRowCount == 0) {
       (Nil, "", false)
     } else {
-      if (m2q.isManNested || m2q.isOptNested) {
-        val nestedRows    = if (m2q.isManNested) m2q.rows2nested(sortedRows) else m2q.rows2optNnested(sortedRows)
-        val topLevelCount = nestedRows.length
-        val limitAbs      = limit.abs.min(topLevelCount)
-        val hasMore       = limitAbs < topLevelCount
-        val selectedRows  = nestedRows.take(limitAbs)
-        val result        = if (forward) selectedRows else selectedRows.reverse
-        val cursor        = nextCursorUniques(result, tokens)
-        (result, cursor, hasMore)
-
-      } else {
-        val totalCount = getTotalCount(conn)
-        val limitAbs   = limit.abs.min(totalCount)
-        val hasMore    = limitAbs < totalCount
-        val tuples     = ListBuffer.empty[Tpl]
-        val row2tpl    = CastTpl_.castTpl(m2q.aritiess.head, m2q.castss.head, 1)
-        while (sortedRows.next()) {
-          tuples += row2tpl(sortedRows).asInstanceOf[Tpl]
-        }
-        val result = if (forward) tuples.toList else tuples.toList.reverse
-        val cursor = nextCursorUniques(result, tokens)
-        (result, cursor, hasMore)
+      m2q.casts match {
+        case c: CastTuple  => handleTuples(c, limit, forward, sortedRows, conn)
+        case c: CastNested => handleNested(c, limit, forward, sortedRows, conn)
+        case _             => ???
       }
     }
   }

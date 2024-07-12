@@ -8,7 +8,6 @@ import molecule.sql.core.javaSql.PrepStmt
 trait QueryExprSeq extends QueryExpr { self: Model2Query with SqlQueryBase with LambdasSeq =>
 
   override protected def queryAttrSeqMan(attr: AttrSeqMan): Unit = {
-    aritiesAttr()
     attr match {
       case a: AttrSeqManID             => seqMan(a, a.vs, resSeqId)
       case a: AttrSeqManString         => seqMan(a, a.vs, resSeqString)
@@ -65,7 +64,6 @@ trait QueryExprSeq extends QueryExpr { self: Model2Query with SqlQueryBase with 
   }
 
   override protected def queryAttrSeqOpt(attr: AttrSeqOpt): Unit = {
-    aritiesAttr()
     attr match {
       case a: AttrSeqOptID             => seqOpt(a, resOptSeqId, resSeqId)
       case a: AttrSeqOptString         => seqOpt(a, resOptSeqString, resSeqString)
@@ -104,7 +102,7 @@ trait QueryExprSeq extends QueryExpr { self: Model2Query with SqlQueryBase with 
     if (!isOptNested) {
       setNotNull(col)
     }
-    addCast(res.sql2list)
+    casts.add(res.sql2list)
     attr.filterAttr.fold {
       val pathAttr = path :+ attr.cleanAttr
       if (filterAttrVars.contains(pathAttr) && attr.op != V) {
@@ -162,7 +160,7 @@ trait QueryExprSeq extends QueryExpr { self: Model2Query with SqlQueryBase with 
   ): Unit = {
     val col = getCol(attr: Attr)
     select += col
-    addCast(resOpt.sql2listOpt)
+    casts.add(resOpt.sql2listOpt)
     attr.op match {
       case V     => seqOptAttr(res)
       case Eq    => noCollectionMatching(attr)
@@ -244,7 +242,7 @@ trait QueryExprSeq extends QueryExpr { self: Model2Query with SqlQueryBase with 
       throw ModelError(s"Filter attributes not allowed with byte arrays.")
     }
     // return Byte array as-is
-    addCast((row: RS, paramIndex: Int) => row.getBytes(paramIndex))
+    casts.add((row: RS, paramIndex: Int) => row.getBytes(paramIndex))
   }
 
   private def tacByteArray(attr: Attr, byteArray: Array[Byte]): Unit = {
@@ -298,7 +296,7 @@ trait QueryExprSeq extends QueryExpr { self: Model2Query with SqlQueryBase with 
         val col = getCol(attr: Attr)
         select += col
         // return optional Byte array as-is
-        addCast((row: RS, paramIndex: Int) =>
+        casts.add((row: RS, paramIndex: Int) =>
           row.getBytes(paramIndex) match {
             case null      => Option.empty[Array[Byte]]
             case byteArray => Some(byteArray)

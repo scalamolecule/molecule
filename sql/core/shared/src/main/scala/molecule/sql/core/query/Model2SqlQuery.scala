@@ -12,8 +12,8 @@ import scala.collection.mutable.ListBuffer
 abstract class Model2SqlQuery[Tpl](elements0: List[Element])
   extends Model2Query
     with QueryExprRef
-    with NestOptTpls[Tpl]
-    with NestOptRef[Tpl]
+//    with NestOptTpls[Tpl]
+//    with NestOptRef[Tpl]
     with ModelUtils
     with MoleculeLogging { self: QueryExpr with SqlQueryBase =>
 
@@ -69,16 +69,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
   ): String = {
     if (hasOptRef) {
       addPredicatesToLastLeftJoin()
-
-      println("-------- C  " + aritiess)
     }
-
-//    aritiess = List(
-//      List(0,-1),
-//      List(2),
-//      List(2),
-//    )
-//    aritiess = List(List(0, 2, 2))
 
     val isBackwards = optLimit.fold(false)(_ < 0) || optOffset.fold(false)(_ < 0)
     val distinct_   = if (distinct) " DISTINCT" else ""

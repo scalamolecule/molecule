@@ -23,7 +23,6 @@ trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: Model2Query 
 
   override protected def queryRefAttrSetMan(attr: AttrSetMan): Unit = {
     setCoords(attr)
-    aritiesAttr()
     attr match {
       case at: AttrSetManID     => setRefMan(attr, at.vs, resSetId)
       case at: AttrSetManInt    => setRefMan(attr, at.vs, resSetInt)
@@ -46,7 +45,6 @@ trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: Model2Query 
 
   override protected def queryRefAttrSetOpt(attr: AttrSetOpt): Unit = {
     setCoords(attr)
-    aritiesAttr()
     attr match {
       case at: AttrSetOptID     => setRefOpt(at, at.vs, resOptSetId, resSetId)
       case at: AttrSetOptInt    => setRefOpt(at, at.vs, resOptSetInt, resSetInt)
@@ -61,7 +59,7 @@ trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: Model2Query 
     select += s"ARRAY_AGG($joinTable.$ref_id) $refIds"
     joins += (("INNER JOIN", joinTable, "", List(s"$nsId = $joinTable.$ns_id")))
     groupBy += nsId
-    addCast(res.sql2set)
+    casts.add(res.sql2set)
 
     attr.filterAttr.fold {
       val pathAttr = path :+ attr.cleanAttr
@@ -92,7 +90,7 @@ trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: Model2Query 
     select += s"ARRAY_AGG($joinTable.$ref_id) $refIds"
     joins += (("LEFT JOIN", joinTable, "", List(s"$nsId = $joinTable.$ns_id")))
     groupBy += nsId
-    addCast(resOpt.sql2setOpt)
+    casts.add(resOpt.sql2setOpt)
     attr.op match {
       case V     => ()
       case Eq    => noCollectionMatching(attr)

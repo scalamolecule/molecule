@@ -41,7 +41,7 @@ trait QueryExprOne_postgres
         select += s"ARRAY_AGG(DISTINCT $col)"
         groupByCols -= col
         aggregate = true
-        replaceCast(res.array2set)
+        casts.replace(res.array2set)
 
       case "min" =>
         select += s"MIN($col${castText(res.tpe)})"
@@ -59,7 +59,7 @@ trait QueryExprOne_postgres
              |  )""".stripMargin
         groupByCols -= col
         aggregate = true
-        replaceCast(res.array2set)
+        casts.replace(res.array2set)
 
       case "max" =>
         select += s"MAX($col${castText(res.tpe)})"
@@ -77,7 +77,7 @@ trait QueryExprOne_postgres
              |  )""".stripMargin
         groupByCols -= col
         aggregate = true
-        replaceCast(res.array2set)
+        casts.replace(res.array2set)
 
       case "sample" =>
         distinct = false
@@ -96,21 +96,21 @@ trait QueryExprOne_postgres
              |  )""".stripMargin
         groupByCols -= col
         aggregate = true
-        replaceCast(res.array2set)
+        casts.replace(res.array2set)
 
       case "count" =>
         distinct = false
         groupByCols -= col
         aggregate = true
         selectWithOrder(col, "COUNT", "")
-        replaceCast(toInt)
+        casts.replace(toInt)
 
       case "countDistinct" =>
         distinct = false
         groupByCols -= col
         aggregate = true
         selectWithOrder(col, "COUNT")
-        replaceCast(toInt)
+        casts.replace(toInt)
 
       case "sum" =>
         groupByCols -= col

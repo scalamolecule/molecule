@@ -38,7 +38,7 @@ trait QueryExprOne_mysql
         select += s"JSON_ARRAYAGG($col)"
         groupByCols -= col
         aggregate = true
-        replaceCast((row: RS, paramIndex: Int) =>
+        casts.replace((row: RS, paramIndex: Int) =>
           res.json2array(row.getString(paramIndex)).toSet
         )
 
@@ -51,7 +51,7 @@ trait QueryExprOne_mysql
         select += s"GROUP_CONCAT(DISTINCT $col SEPARATOR $sep)"
         groupByCols -= col
         aggregate = true
-        replaceCast((row: RS, paramIndex: Int) =>
+        casts.replace((row: RS, paramIndex: Int) =>
           row.getString(paramIndex).split(sepChar).map(res.json2tpe).take(n).toSet
         )
 
@@ -64,7 +64,7 @@ trait QueryExprOne_mysql
         select += s"GROUP_CONCAT(DISTINCT $col ORDER BY $col DESC SEPARATOR $sep)"
         groupByCols -= col
         aggregate = true
-        replaceCast((row: RS, paramIndex: Int) =>
+        casts.replace((row: RS, paramIndex: Int) =>
           row.getString(paramIndex).split(sepChar).map(res.json2tpe).take(n).toSet
         )
 
@@ -72,7 +72,7 @@ trait QueryExprOne_mysql
         select += s"JSON_ARRAYAGG($col)"
         groupByCols -= col
         aggregate = true
-        replaceCast((row: RS, paramIndex: Int) => {
+        casts.replace((row: RS, paramIndex: Int) => {
           val array = res.json2array(row.getString(paramIndex))
           val rnd   = new Random().nextInt(array.length)
           array(rnd)
@@ -82,7 +82,7 @@ trait QueryExprOne_mysql
         select += s"JSON_ARRAYAGG($col)"
         groupByCols -= col
         aggregate = true
-        replaceCast((row: RS, paramIndex: Int) => {
+        casts.replace((row: RS, paramIndex: Int) => {
           val array = res.json2array(row.getString(paramIndex))
           Random.shuffle(array.toSet).take(n)
         })
@@ -92,14 +92,14 @@ trait QueryExprOne_mysql
         distinct = false
         groupByCols -= col
         aggregate = true
-        replaceCast(toInt)
+        casts.replace(toInt)
 
       case "countDistinct" =>
         selectWithOrder(col, "COUNT")
         distinct = false
         groupByCols -= col
         aggregate = true
-        replaceCast(toInt)
+        casts.replace(toInt)
 
       case "sum" =>
         selectWithOrder(col, "SUM", "")
@@ -113,7 +113,7 @@ trait QueryExprOne_mysql
         select += s"JSON_ARRAYAGG($col)"
         groupByCols -= col
         aggregate = true
-        replaceCast(
+        casts.replace(
           (row: RS, paramIndex: Int) => {
             val json = row.getString(paramIndex)
             getMedian(json.substring(1, json.length - 1).split(", ").map(_.toDouble).toList)
@@ -132,7 +132,7 @@ trait QueryExprOne_mysql
         groupByCols -= col
         aggregate = true
         select += s"JSON_ARRAYAGG($col)"
-        replaceCast(
+        casts.replace(
           (row: RS, paramIndex: Int) => {
             val json = row.getString(paramIndex)
             varianceOf(json.substring(1, json.length - 1).split(", ").map(_.toDouble).toSeq)
@@ -146,7 +146,7 @@ trait QueryExprOne_mysql
         groupByCols -= col
         aggregate = true
         select += s"JSON_ARRAYAGG($col)"
-        replaceCast(
+        casts.replace(
           (row: RS, paramIndex: Int) => {
             val json = row.getString(paramIndex)
             stdDevOf(json.substring(1, json.length - 1).split(", ").map(_.toDouble).toSeq)

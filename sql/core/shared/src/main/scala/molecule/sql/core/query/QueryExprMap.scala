@@ -6,7 +6,6 @@ import molecule.core.query.{Model2Query, QueryExpr}
 trait QueryExprMap extends QueryExpr { self: Model2Query with SqlQueryBase with LambdasMap =>
 
   override protected def queryAttrMapMan(attr: AttrMapMan): Unit = {
-    aritiesAttr()
     attr match {
       case at: AttrMapManID             => mapMan(attr, at.keys, resMapId)
       case at: AttrMapManString         => mapMan(attr, at.keys, resMapString)
@@ -63,7 +62,6 @@ trait QueryExprMap extends QueryExpr { self: Model2Query with SqlQueryBase with 
   }
 
   override protected def queryAttrMapOpt(attr: AttrMapOpt): Unit = {
-    aritiesAttr()
     attr match {
       case at: AttrMapOptID             => mapOpt(at, at.keys, resOptMapId, resMapId)
       case at: AttrMapOptString         => mapOpt(at, at.keys, resOptMapString, resMapString)
@@ -100,27 +98,13 @@ trait QueryExprMap extends QueryExpr { self: Model2Query with SqlQueryBase with 
     if (!isOptNested) {
       setNotNull(col)
     }
-    addCast(resMap.sqlJson2map)
+    casts.add(resMap.sqlJson2map)
     attr.op match {
       case V       => ()
       case Has     => key2value(col, keys.head, resMap)
       case NoValue => noApplyNothing(attr)
       case Eq      => noCollectionMatching(attr)
       case other   => unexpectedOp(other)
-    }
-  }
-
-  protected def mapOpt[T](
-    attr: Attr, keys: Seq[String], resMapOpt: ResMapOpt[T], resMap: ResMap[T]
-  ): Unit = {
-    val col = getCol(attr: Attr)
-    select += col
-    addCast(resMapOpt.sql2optMap)
-    attr.op match {
-      case V     => ()
-      case Has   => key2optValue(col, keys.head, resMap)
-      case Eq    => noCollectionMatching(attr)
-      case other => unexpectedOp(other)
     }
   }
 
@@ -139,6 +123,20 @@ trait QueryExprMap extends QueryExpr { self: Model2Query with SqlQueryBase with 
     }
   }
 
+  protected def mapOpt[T](
+    attr: Attr, keys: Seq[String], resMapOpt: ResMapOpt[T], resMap: ResMap[T]
+  ): Unit = {
+    val col = getCol(attr: Attr)
+    select += col
+    casts.add(resMapOpt.sql2optMap)
+    attr.op match {
+      case V     => ()
+      case Has   => key2optValue(col, keys.head, resMap)
+      case Eq    => noCollectionMatching(attr)
+      case other => unexpectedOp(other)
+    }
+  }
+
 
   // value lookup by key -------------------------------------------------------
 
@@ -149,7 +147,7 @@ trait QueryExprMap extends QueryExpr { self: Model2Query with SqlQueryBase with 
     select -= col
     select += value
     where += ((value, s"IS NOT NULL"))
-    replaceCast((row: RS, paramIndex: Int) =>
+    casts.replace((row: RS, paramIndex: Int) =>
       resMap.json2tpe(row.getString(paramIndex))
     )
   }
@@ -159,7 +157,7 @@ trait QueryExprMap extends QueryExpr { self: Model2Query with SqlQueryBase with 
   ): Unit = {
     select -= col
     select += s"""($col)."$key""""
-    replaceCast((row: RS, paramIndex: Int) => {
+    casts.replace((row: RS, paramIndex: Int) => {
       val value = row.getString(paramIndex)
       if (row.wasNull()) Option.empty[T] else Some(resMap.json2tpe(value))
     })

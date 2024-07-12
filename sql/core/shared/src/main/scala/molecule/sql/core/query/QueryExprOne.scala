@@ -111,19 +111,10 @@ trait QueryExprOne extends QueryExpr { self: Model2Query with SqlQueryBase with 
     val col = getCol(attr: Attr)
     select += col
     groupByCols += col // if we later need to group by non-aggregated columns
-    aritiesAttr()
     if (isOptNested) {
       casts.add(res.sql2oneOrNull)
-      addCast(res.sql2oneOrNull)
     } else {
-
-
-//      println(attr)
-//      println(res.sql2one)
-
-
       casts.add(res.sql2one)
-      addCast(res.sql2one)
       setNotNull(col)
     }
     addSort(attr, col)
@@ -197,8 +188,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query with SqlQueryBase with 
     val col = getCol(attr: Attr)
     select += col
     groupByCols += col // if we later need to group by non-aggregated columns
-    aritiesAttr()
-    addCast(resOpt.sql2oneOpt)
+    casts.add(resOpt.sql2oneOpt)
     addSort(attr, col)
     attr.op match {
       case V     => () // selected col can already be a value or null
@@ -333,7 +323,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query with SqlQueryBase with 
         select += s"ARRAY_AGG(DISTINCT $col)"
         groupByCols -= col
         aggregate = true
-        replaceCast(res.array2set)
+        casts.replace(res.array2set)
 
       case "min" =>
         select += s"MIN($col)"
@@ -352,7 +342,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query with SqlQueryBase with 
              |  )""".stripMargin
         groupByCols -= col
         aggregate = true
-        replaceCast(res.array2set)
+        casts.replace(res.array2set)
 
       case "max" =>
         select += s"MAX($col)"
@@ -371,7 +361,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query with SqlQueryBase with 
              |  )""".stripMargin
         groupByCols -= col
         aggregate = true
-        replaceCast(res.array2set)
+        casts.replace(res.array2set)
 
       case "sample" =>
         distinct = false
@@ -391,21 +381,21 @@ trait QueryExprOne extends QueryExpr { self: Model2Query with SqlQueryBase with 
              |  )""".stripMargin
         groupByCols -= col
         aggregate = true
-        replaceCast(res.array2set)
+        casts.replace(res.array2set)
 
       case "count" =>
         distinct = false
         groupByCols -= col
         aggregate = true
         selectWithOrder(col, "COUNT", "")
-        replaceCast(toInt)
+        casts.replace(toInt)
 
       case "countDistinct" =>
         distinct = false
         groupByCols -= col
         aggregate = true
         selectWithOrder(col, "COUNT")
-        replaceCast(toInt)
+        casts.replace(toInt)
 
       case "sum" =>
         groupByCols -= col
