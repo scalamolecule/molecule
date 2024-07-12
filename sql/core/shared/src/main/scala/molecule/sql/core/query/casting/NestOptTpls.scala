@@ -94,7 +94,7 @@ class NestOptTpls extends SqlQueryBase {
   }
 
   final private def rows2optNested1(rows: RS, casters: List[CastTuple]): List[Any] = {
-    val branch0: (RS, List[Any]) => Any = casters(0).branchCaster
+    val branch0: (RS, List[Any]) => Any = casters(0).branchListCaster
     val leaf   : RS => Any              = casters(1).tupleCaster
 
     if (getRowCount(rows) == 1) {
@@ -145,8 +145,8 @@ class NestOptTpls extends SqlQueryBase {
 
 
   final private def rows2optNested2(rows: RS, casters: List[CastTuple]): List[Any] = {
-    val branch0: (RS, List[Any]) => Any = casters(0).branchCaster
-    val branch1: (RS, List[Any]) => Any = casters(1).branchCaster
+    val branch0: (RS, List[Any]) => Any = casters(0).branchListCaster
+    val branch1: (RS, List[Any]) => Any = casters(1).branchListCaster
     val leaf   : RS => Any              = casters(2).tupleCaster
 
     if (getRowCount(rows) == 1) {
@@ -221,9 +221,9 @@ class NestOptTpls extends SqlQueryBase {
 
 
   final private def rows2optNested3(rows: RS, casters: List[CastTuple]): List[Any] = {
-    val branch0: (RS, List[Any]) => Any = casters(0).branchCaster
-    val branch1: (RS, List[Any]) => Any = casters(1).branchCaster
-    val branch2: (RS, List[Any]) => Any = casters(2).branchCaster
+    val branch0: (RS, List[Any]) => Any = casters(0).branchListCaster
+    val branch1: (RS, List[Any]) => Any = casters(1).branchListCaster
+    val branch2: (RS, List[Any]) => Any = casters(2).branchListCaster
     val leaf   : RS => Any              = casters(3).tupleCaster
 
     if (getRowCount(rows) == 1) {
@@ -327,10 +327,10 @@ class NestOptTpls extends SqlQueryBase {
 
 
   final private def rows2optNested4(rows: RS, casters: List[CastTuple]): List[Any] = {
-    val branch0: (RS, List[Any]) => Any = casters(0).branchCaster
-    val branch1: (RS, List[Any]) => Any = casters(1).branchCaster
-    val branch2: (RS, List[Any]) => Any = casters(2).branchCaster
-    val branch3: (RS, List[Any]) => Any = casters(3).branchCaster
+    val branch0: (RS, List[Any]) => Any = casters(0).branchListCaster
+    val branch1: (RS, List[Any]) => Any = casters(1).branchListCaster
+    val branch2: (RS, List[Any]) => Any = casters(2).branchListCaster
+    val branch3: (RS, List[Any]) => Any = casters(3).branchListCaster
     val leaf   : RS => Any              = casters(4).tupleCaster
 
     if (getRowCount(rows) == 1) {
@@ -468,11 +468,11 @@ class NestOptTpls extends SqlQueryBase {
 
 
   final private def rows2optNested5(rows: RS, casters: List[CastTuple]): List[Any] = {
-    val branch0: (RS, List[Any]) => Any = casters(0).branchCaster
-    val branch1: (RS, List[Any]) => Any = casters(1).branchCaster
-    val branch2: (RS, List[Any]) => Any = casters(2).branchCaster
-    val branch3: (RS, List[Any]) => Any = casters(3).branchCaster
-    val branch4: (RS, List[Any]) => Any = casters(4).branchCaster
+    val branch0: (RS, List[Any]) => Any = casters(0).branchListCaster
+    val branch1: (RS, List[Any]) => Any = casters(1).branchListCaster
+    val branch2: (RS, List[Any]) => Any = casters(2).branchListCaster
+    val branch3: (RS, List[Any]) => Any = casters(3).branchListCaster
+    val branch4: (RS, List[Any]) => Any = casters(4).branchListCaster
     val leaf   : RS => Any              = casters(5).tupleCaster
 
     if (getRowCount(rows) == 1) {
@@ -649,12 +649,12 @@ class NestOptTpls extends SqlQueryBase {
 
 
   final private def rows2optNested6(rows: RS, casters: List[CastTuple]): List[Any] = {
-    val branch0: (RS, List[Any]) => Any = casters(0).branchCaster
-    val branch1: (RS, List[Any]) => Any = casters(1).branchCaster
-    val branch2: (RS, List[Any]) => Any = casters(2).branchCaster
-    val branch3: (RS, List[Any]) => Any = casters(3).branchCaster
-    val branch4: (RS, List[Any]) => Any = casters(4).branchCaster
-    val branch5: (RS, List[Any]) => Any = casters(5).branchCaster
+    val branch0: (RS, List[Any]) => Any = casters(0).branchListCaster
+    val branch1: (RS, List[Any]) => Any = casters(1).branchListCaster
+    val branch2: (RS, List[Any]) => Any = casters(2).branchListCaster
+    val branch3: (RS, List[Any]) => Any = casters(3).branchListCaster
+    val branch4: (RS, List[Any]) => Any = casters(4).branchListCaster
+    val branch5: (RS, List[Any]) => Any = casters(5).branchListCaster
     val leaf   : RS => Any              = casters(6).tupleCaster
 
     if (getRowCount(rows) == 1) {
@@ -874,13 +874,13 @@ class NestOptTpls extends SqlQueryBase {
   }
 
   final private def rows2optNested7(rows: RS, casters: List[CastTuple]): List[Any] = {
-    val branch0: (RS, List[Any]) => Any = casters(0).branchCaster
-    val branch1: (RS, List[Any]) => Any = casters(1).branchCaster
-    val branch2: (RS, List[Any]) => Any = casters(2).branchCaster
-    val branch3: (RS, List[Any]) => Any = casters(3).branchCaster
-    val branch4: (RS, List[Any]) => Any = casters(4).branchCaster
-    val branch5: (RS, List[Any]) => Any = casters(5).branchCaster
-    val branch6: (RS, List[Any]) => Any = casters(6).branchCaster
+    val branch0: (RS, List[Any]) => Any = casters(0).branchListCaster
+    val branch1: (RS, List[Any]) => Any = casters(1).branchListCaster
+    val branch2: (RS, List[Any]) => Any = casters(2).branchListCaster
+    val branch3: (RS, List[Any]) => Any = casters(3).branchListCaster
+    val branch4: (RS, List[Any]) => Any = casters(4).branchListCaster
+    val branch5: (RS, List[Any]) => Any = casters(5).branchListCaster
+    val branch6: (RS, List[Any]) => Any = casters(6).branchListCaster
     val leaf   : RS => Any              = casters(7).tupleCaster
 
     if (getRowCount(rows) == 1) {

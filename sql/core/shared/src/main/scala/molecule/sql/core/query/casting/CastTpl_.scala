@@ -2,12 +2,11 @@
 package molecule.sql.core.query.casting
 
 import molecule.sql.core.query.SqlQueryBase
-import scala.annotation.tailrec
 
 
 object CastTpl_ extends SqlQueryBase {
 
-  final def tupleCaster(casts: List[Cast], firstIndex: ParamIndex): RS => Any = {
+  final def cast(casts: List[Cast], firstIndex: ParamIndex): RS => Any = {
     casts.length match {
       case 1  => cast1(casts, firstIndex)
       case 2  => cast2(casts, firstIndex)
@@ -34,28 +33,33 @@ object CastTpl_ extends SqlQueryBase {
     }
   }
 
-  final private def cast1(casters: List[(RS, ParamIndex) => Any], firstIndex: ParamIndex): RS => Any = {
-    val List(c1) = casters
-    (row: RS) => {
-//      println(s"  ------- B  $firstIndex")
-//      println(s"  ------- B  " + c1(row, firstIndex))
+  final private def cast1(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Any = {
+    val List(c1) = casts
+    (row: RS) =>
       c1(row, firstIndex)
-    }
   }
 
-  final private def cast2(casters: List[(RS, ParamIndex) => Any], firstIndex: ParamIndex): RS => Any = {
-    val List(c1, c2) = casters
+  final private def cast2(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Any = {
+    val List(c1, c2) = casts
     val List(i1, i2) = (firstIndex until firstIndex + 2).toList
-    (row: RS) => {
+    (row: RS) =>
       (
         c1(row, i1),
         c2(row, i2)
       )
-    }
   }
 
-  final private def cast3(casters: List[(RS, ParamIndex) => Any], firstIndex: ParamIndex): RS => Any = {
-    val List(c1, c2, c3) = casters
+  final private def cast3(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Any = {
+    val List(c1, c2, c3) = casts
     val List(i1, i2, i3) = (firstIndex until firstIndex + 3).toList
     (row: RS) =>
       (
@@ -65,9 +69,12 @@ object CastTpl_ extends SqlQueryBase {
       )
   }
 
-  final private def cast4(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Any = {
-    val List(c1, c2, c3, c4) = casters
-    val List(i1, i2, i3, i4) = (attrIndex until attrIndex + 4).toList
+  final private def cast4(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Any = {
+    val List(c1, c2, c3, c4) = casts
+    val List(i1, i2, i3, i4) = (firstIndex until firstIndex + 4).toList
     (row: RS) =>
       (
         c1(row, i1),
@@ -77,9 +84,12 @@ object CastTpl_ extends SqlQueryBase {
       )
   }
 
-  final private def cast5(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Any = {
-    val List(c1, c2, c3, c4, c5) = casters
-    val List(i1, i2, i3, i4, i5) = (attrIndex until attrIndex + 5).toList
+  final private def cast5(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Any = {
+    val List(c1, c2, c3, c4, c5) = casts
+    val List(i1, i2, i3, i4, i5) = (firstIndex until firstIndex + 5).toList
     (row: RS) =>
       (
         c1(row, i1),
@@ -90,9 +100,12 @@ object CastTpl_ extends SqlQueryBase {
       )
   }
 
-  final private def cast6(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Any = {
-    val List(c1, c2, c3, c4, c5, c6) = casters
-    val List(i1, i2, i3, i4, i5, i6) = (attrIndex until attrIndex + 6).toList
+  final private def cast6(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Any = {
+    val List(c1, c2, c3, c4, c5, c6) = casts
+    val List(i1, i2, i3, i4, i5, i6) = (firstIndex until firstIndex + 6).toList
     (row: RS) =>
       (
         c1(row, i1),
@@ -104,9 +117,12 @@ object CastTpl_ extends SqlQueryBase {
       )
   }
 
-  final private def cast7(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Any = {
-    val List(c1, c2, c3, c4, c5, c6, c7) = casters
-    val List(i1, i2, i3, i4, i5, i6, i7) = (attrIndex until attrIndex + 7).toList
+  final private def cast7(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Any = {
+    val List(c1, c2, c3, c4, c5, c6, c7) = casts
+    val List(i1, i2, i3, i4, i5, i6, i7) = (firstIndex until firstIndex + 7).toList
     (row: RS) =>
       (
         c1(row, i1),
@@ -119,9 +135,12 @@ object CastTpl_ extends SqlQueryBase {
       )
   }
 
-  final private def cast8(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Any = {
-    val List(c1, c2, c3, c4, c5, c6, c7, c8) = casters
-    val List(i1, i2, i3, i4, i5, i6, i7, i8) = (attrIndex until attrIndex + 8).toList
+  final private def cast8(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Any = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8) = casts
+    val List(i1, i2, i3, i4, i5, i6, i7, i8) = (firstIndex until firstIndex + 8).toList
     (row: RS) =>
       (
         c1(row, i1),
@@ -135,9 +154,12 @@ object CastTpl_ extends SqlQueryBase {
       )
   }
 
-  final private def cast9(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Any = {
-    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9) = casters
-    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9) = (attrIndex until attrIndex + 9).toList
+  final private def cast9(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Any = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9) = casts
+    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9) = (firstIndex until firstIndex + 9).toList
     (row: RS) =>
       (
         c1(row, i1),
@@ -152,9 +174,12 @@ object CastTpl_ extends SqlQueryBase {
       )
   }
 
-  final private def cast10(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Any = {
-    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10) = casters
-    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10) = (attrIndex until attrIndex + 10).toList
+  final private def cast10(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Any = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10) = casts
+    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10) = (firstIndex until firstIndex + 10).toList
     (row: RS) =>
       (
         c1(row, i1),
@@ -170,9 +195,12 @@ object CastTpl_ extends SqlQueryBase {
       )
   }
 
-  final private def cast11(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Any = {
-    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) = casters
-    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11) = (attrIndex until attrIndex + 11).toList
+  final private def cast11(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Any = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) = casts
+    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11) = (firstIndex until firstIndex + 11).toList
     (row: RS) =>
       (
         c1(row, i1),
@@ -189,9 +217,12 @@ object CastTpl_ extends SqlQueryBase {
       )
   }
 
-  final private def cast12(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Any = {
-    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12) = casters
-    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12) = (attrIndex until attrIndex + 12).toList
+  final private def cast12(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Any = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12) = casts
+    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12) = (firstIndex until firstIndex + 12).toList
     (row: RS) =>
       (
         c1(row, i1),
@@ -209,9 +240,12 @@ object CastTpl_ extends SqlQueryBase {
       )
   }
 
-  final private def cast13(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Any = {
-    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13) = casters
-    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13) = (attrIndex until attrIndex + 13).toList
+  final private def cast13(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Any = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13) = casts
+    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13) = (firstIndex until firstIndex + 13).toList
     (row: RS) =>
       (
         c1(row, i1),
@@ -230,9 +264,12 @@ object CastTpl_ extends SqlQueryBase {
       )
   }
 
-  final private def cast14(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Any = {
-    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14) = casters
-    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14) = (attrIndex until attrIndex + 14).toList
+  final private def cast14(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Any = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14) = casts
+    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14) = (firstIndex until firstIndex + 14).toList
     (row: RS) =>
       (
         c1(row, i1),
@@ -252,9 +289,12 @@ object CastTpl_ extends SqlQueryBase {
       )
   }
 
-  final private def cast15(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Any = {
-    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15) = casters
-    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15) = (attrIndex until attrIndex + 15).toList
+  final private def cast15(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Any = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15) = casts
+    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15) = (firstIndex until firstIndex + 15).toList
     (row: RS) =>
       (
         c1(row, i1),
@@ -275,9 +315,12 @@ object CastTpl_ extends SqlQueryBase {
       )
   }
 
-  final private def cast16(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Any = {
-    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16) = casters
-    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16) = (attrIndex until attrIndex + 16).toList
+  final private def cast16(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Any = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16) = casts
+    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16) = (firstIndex until firstIndex + 16).toList
     (row: RS) =>
       (
         c1(row, i1),
@@ -299,9 +342,12 @@ object CastTpl_ extends SqlQueryBase {
       )
   }
 
-  final private def cast17(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Any = {
-    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17) = casters
-    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17) = (attrIndex until attrIndex + 17).toList
+  final private def cast17(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Any = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17) = casts
+    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17) = (firstIndex until firstIndex + 17).toList
     (row: RS) =>
       (
         c1(row, i1),
@@ -324,9 +370,12 @@ object CastTpl_ extends SqlQueryBase {
       )
   }
 
-  final private def cast18(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Any = {
-    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18) = casters
-    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18) = (attrIndex until attrIndex + 18).toList
+  final private def cast18(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Any = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18) = casts
+    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18) = (firstIndex until firstIndex + 18).toList
     (row: RS) =>
       (
         c1(row, i1),
@@ -350,9 +399,12 @@ object CastTpl_ extends SqlQueryBase {
       )
   }
 
-  final private def cast19(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Any = {
-    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19) = casters
-    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19) = (attrIndex until attrIndex + 19).toList
+  final private def cast19(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Any = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19) = casts
+    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19) = (firstIndex until firstIndex + 19).toList
     (row: RS) =>
       (
         c1(row, i1),
@@ -377,9 +429,12 @@ object CastTpl_ extends SqlQueryBase {
       )
   }
 
-  final private def cast20(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Any = {
-    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20) = casters
-    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20) = (attrIndex until attrIndex + 20).toList
+  final private def cast20(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Any = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20) = casts
+    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20) = (firstIndex until firstIndex + 20).toList
     (row: RS) =>
       (
         c1(row, i1),
@@ -405,9 +460,12 @@ object CastTpl_ extends SqlQueryBase {
       )
   }
 
-  final private def cast21(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Any = {
-    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21) = casters
-    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21) = (attrIndex until attrIndex + 21).toList
+  final private def cast21(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Any = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21) = casts
+    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21) = (firstIndex until firstIndex + 21).toList
     (row: RS) =>
       (
         c1(row, i1),
@@ -434,9 +492,12 @@ object CastTpl_ extends SqlQueryBase {
       )
   }
 
-  final private def cast22(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Any = {
-    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21, c22) = casters
-    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22) = (attrIndex until attrIndex + 22).toList
+  final private def cast22(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Any = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21, c22) = casts
+    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22) = (firstIndex until firstIndex + 22).toList
     (row: RS) =>
       (
         c1(row, i1),

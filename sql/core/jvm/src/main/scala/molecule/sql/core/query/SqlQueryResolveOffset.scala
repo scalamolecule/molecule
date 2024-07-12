@@ -23,26 +23,29 @@ case class SqlQueryResolveOffset[Tpl](
     offsetLimitCheck(optLimit, optOffset)
     val sortedRows = getData(conn, optLimit, optOffset)
     m2q.casts match {
-      case c: CastTuple  => handleTuples(c, sortedRows, conn)
-      case c: CastNested => handleNested(c, sortedRows, conn)
-      case _             => ???
+      case c: CastTuple        => handleTuples(c, sortedRows, conn)
+      case c: CastNested       => handleNested(c, sortedRows, conn)
+      case c: CastOptRefNested => handleOptRefNested(c, sortedRows, conn)
+      case _                   => ???
     }
   }
-  /*
-       val row2nestedOptions = m2q.row2nestedOptions
 
-      //      val casts   = m2q.castss.head
-      //      val row2tpl = new CastRow2Tpl_[List[Tpl]].cast(m2q.aritiess.head, casts, 1, None)
-      val tuples = ListBuffer.empty[Tpl]
-      while (sortedRows.next()) {
 
-        val tpl = row2nestedOptions(sortedRows)
-        println(tpl)
-        tuples += tpl.asInstanceOf[Tpl]
+  private def handleOptRefNested(
+    c: CastOptRefNested, sortedRows: RS, conn: JdbcConn_JVM
+  ): (List[Tpl], Int, Boolean) = {
+    val row2nestedOptions = NestOptRef.row2nestedOptions(c.getCasters)
+    val tuples            = ListBuffer.empty[Tpl]
+    while (sortedRows.next()) {
+      tuples += row2nestedOptions(sortedRows).asInstanceOf[Tpl]
+    }
+    val rows       = order(tuples.toList)
+    val totalCount = optOffset.fold(m2q.getRowCount(sortedRows))(_ => getTotalCount(conn))
+    val fromUntil  = getFromUntil(totalCount, optLimit, optOffset)
+    val hasMore    = fromUntil.fold(totalCount > 0)(_._3)
+    (rows, totalCount, hasMore)
+  }
 
-        //        tuples += row2tpl(sortedRows).asInstanceOf[Tpl]
-      }
-   */
 
   private def handleTuples(
     c: CastTuple, sortedRows: RS, conn: JdbcConn_JVM
@@ -84,7 +87,8 @@ case class SqlQueryResolveOffset[Tpl](
     (offsetList(nestedRows, fromUntil), topLevelCount, hasMore)
   }
 
-  private def order(rows: List[Tpl]) = {
+
+  private def order(rows: List[Tpl]): List[Tpl] = {
     if (optLimit.fold(true)(_ >= 0) && optOffset.fold(true)(_ >= 0))
       rows else rows.reverse
   }

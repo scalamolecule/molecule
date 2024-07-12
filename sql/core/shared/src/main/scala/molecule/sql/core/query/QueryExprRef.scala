@@ -36,7 +36,9 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
   }
 
 
-  override protected def queryBackRef(backRef: BackRef, tail: List[Element]): Unit = {
+  override protected def queryBackRef(
+    backRef: BackRef, tail: List[Element]
+  ): Unit = {
     checkOnlyOptRef()
     if (isManNested || isOptNested) {
       val BackRef(bRef, _, _) = backRef
@@ -53,8 +55,9 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
   }
 
 
-  override protected def queryOptRef(ref: Ref, nestedElements: List[Element]): Unit = {
-
+  override protected def queryOptRef(
+    ref: Ref, nestedElements: List[Element]
+  ): Unit = {
     println(ref)
     println(s"========================= $hasOptRef  A  ")
     if (hasOptRef) {
@@ -74,23 +77,20 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
     val (refAs, refExt) = getOptExt().fold(("", ""))(ext => (refNs + ext, ext))
     joins += ((s"LEFT JOIN", refNs, refAs, List(s"$ns$nsExt.$refAttr = $refNs$refExt.id")))
 
-//    println("===================================")
-//    println(self.elements0)
-//    joins.foreach(println)
-//    println("----------")
-//    where.foreach(println)
+    //    println("===================================")
+    //    println(self.elements0)
+    //    joins.foreach(println)
+    //    println("----------")
+    //    where.foreach(println)
 
-
-//    aritiesAddNested()
-//    castss = castss :+ Nil
-
-
-
+    casts = casts.optRef
     resolve(nestedElements)
   }
 
 
-  override protected def queryNested(ref: Ref, nestedElements: List[Element]): Unit = {
+  override protected def queryNested(
+    ref: Ref, nestedElements: List[Element]
+  ): Unit = {
     isManNested = true
     if (isOptNested) {
       noMixedNestedModes
@@ -99,7 +99,9 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
   }
 
 
-  override protected def queryOptNested(ref: Ref, nestedElements: List[Element]): Unit = {
+  override protected def queryOptNested(
+    ref: Ref, nestedElements: List[Element]
+  ): Unit = {
     isOptNested = true
     if (isManNested) {
       noMixedNestedModes
@@ -111,7 +113,9 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
   }
 
 
-  private def resolveNested(ref: Ref, nestedElements: List[Element], joinType: String): Unit = {
+  private def resolveNested(
+    ref: Ref, nestedElements: List[Element], joinType: String
+  ): Unit = {
     val Ref(ns, refAttr, refNs, _, _, _) = ref
     level += 1
     checkOnlyOptRef()
@@ -126,13 +130,12 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
     groupByCols += id // if we later need to group by non-aggregated columns
 
     casts = casts.nest
-//    aritiesAddNested()
-//    castss = castss :+ Nil
-
     resolve(nestedElements)
   }
 
-  private def addJoins(ns: String, nsExt: String, refAttr: String, refNs: String, joinType: String): Unit = {
+  private def addJoins(
+    ns: String, nsExt: String, refAttr: String, refNs: String, joinType: String
+  ): Unit = {
     val (refAs, refExt) = getOptExt().fold(("", ""))(ext => (refNs + ext, ext))
     val joinTable       = ss(ns, refAttr, refNs)
     val (id1, id2)      = if (ns == refNs) ("1_id", "2_id") else ("id", "id")

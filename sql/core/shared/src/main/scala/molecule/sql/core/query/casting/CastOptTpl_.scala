@@ -2,93 +2,80 @@
 package molecule.sql.core.query.casting
 
 import molecule.sql.core.query.SqlQueryBase
-import scala.annotation.tailrec
 
 
 object CastOptTpl_ extends SqlQueryBase {
 
-  @tailrec
-  final private def resolveArities(
-    arities: List[Int],
-    casts: List[(RS, ParamIndex) => Any],
-    attrIndex: ParamIndex,
-    acc: List[(RS, ParamIndex) => Any],
-  ): List[(RS, ParamIndex) => Any] = {
-    arities match {
-      case 0 :: as =>
-        val cast = (row: RS, _: ParamIndex) => casts.head(row, attrIndex)
-        resolveArities(as, casts.tail, attrIndex + 1, acc :+ cast)
-
-      // Nested
-      case -1 :: Nil =>
-        val cast = (_: RS, _: ParamIndex) => List.empty[Any]
-        resolveArities(Nil, casts, 0, acc :+ cast)
-
-      case _ => acc
-    }
-  }
-
   final def cast(
-    arities: List[Int],
-    casts: List[(RS, ParamIndex) => Any],
-    attrIndex: ParamIndex,
+    casts: List[Cast],
+    firstIndex: ParamIndex
   ): RS => Option[Any] = {
-    val casters: List[(RS, ParamIndex) => Any] = resolveArities(arities, casts, attrIndex, Nil)
-    arities.length match {
-      case 1  => cast1(casters, attrIndex)
-      case 2  => cast2(casters, attrIndex)
-      case 3  => cast3(casters, attrIndex)
-      case 4  => cast4(casters, attrIndex)
-      case 5  => cast5(casters, attrIndex)
-      case 6  => cast6(casters, attrIndex)
-      case 7  => cast7(casters, attrIndex)
-      case 8  => cast8(casters, attrIndex)
-      case 9  => cast9(casters, attrIndex)
-      case 10 => cast10(casters, attrIndex)
-      case 11 => cast11(casters, attrIndex)
-      case 12 => cast12(casters, attrIndex)
-      case 13 => cast13(casters, attrIndex)
-      case 14 => cast14(casters, attrIndex)
-      case 15 => cast15(casters, attrIndex)
-      case 16 => cast16(casters, attrIndex)
-      case 17 => cast17(casters, attrIndex)
-      case 18 => cast18(casters, attrIndex)
-      case 19 => cast19(casters, attrIndex)
-      case 20 => cast20(casters, attrIndex)
-      case 21 => cast21(casters, attrIndex)
-      case 22 => cast22(casters, attrIndex)
+    casts.length match {
+      case 1  => cast1(casts, firstIndex)
+      case 2  => cast2(casts, firstIndex)
+      case 3  => cast3(casts, firstIndex)
+      case 4  => cast4(casts, firstIndex)
+      case 5  => cast5(casts, firstIndex)
+      case 6  => cast6(casts, firstIndex)
+      case 7  => cast7(casts, firstIndex)
+      case 8  => cast8(casts, firstIndex)
+      case 9  => cast9(casts, firstIndex)
+      case 10 => cast10(casts, firstIndex)
+      case 11 => cast11(casts, firstIndex)
+      case 12 => cast12(casts, firstIndex)
+      case 13 => cast13(casts, firstIndex)
+      case 14 => cast14(casts, firstIndex)
+      case 15 => cast15(casts, firstIndex)
+      case 16 => cast16(casts, firstIndex)
+      case 17 => cast17(casts, firstIndex)
+      case 18 => cast18(casts, firstIndex)
+      case 19 => cast19(casts, firstIndex)
+      case 20 => cast20(casts, firstIndex)
+      case 21 => cast21(casts, firstIndex)
+      case 22 => cast22(casts, firstIndex)
     }
   }
 
-  final private def cast1(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Option[Any] = {
-    val List(c1) = casters
+  final private def cast1(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Option[Any] = {
+    val List(c1) = casts
     (row: RS) =>
-      val v = c1(row, attrIndex)
-      if (row.getObject(attrIndex) == null && v != None)
+      val v = c1(row, firstIndex)
+      if (row.getObject(firstIndex) == null && v != None)
         Option.empty[Any]
       else
         Some(v)
   }
 
-  final private def cast2(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Option[Any] = {
-    val List(c1, c2) = casters
-    val List(i1, i2) = (attrIndex until attrIndex + 2).toList
+  final private def cast2(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Option[Any] = {
+    val List(c1, c2) = casts
+    val List(i1, i2) = (firstIndex until firstIndex + 2).toList
     (row: RS) => {
       val List(r1, r2) = List(i1, i2).map(row.getObject)
       val (v1, v2) = (
         c1(row, i1),
         c2(row, i2)
       )
-      if (r1 == null && v1 != None
-        || r2 == null && v2 != None
-      ) Option.empty[Any] else
+      if (
+        r1 == null && v1 != None
+          || r2 == null && v2 != None
+      ) Option.empty[Any]
+      else
         Some((v1, v2))
     }
   }
 
-  final private def cast3(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Option[Any] = {
-    val List(c1, c2, c3) = casters
-    val List(i1, i2, i3) = (attrIndex until attrIndex + 3).toList
+  final private def cast3(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Option[Any] = {
+    val List(c1, c2, c3) = casts
+    val List(i1, i2, i3) = (firstIndex until firstIndex + 3).toList
     (row: RS) => {
       val List(r1, r2, r3) = List(i1, i2, i3).map(row.getObject)
       val (v1, v2, v3) = (
@@ -96,17 +83,22 @@ object CastOptTpl_ extends SqlQueryBase {
         c2(row, i2),
         c3(row, i3)
       )
-      if (r1 == null && v1 != None
-        || r2 == null && v2 != None
-        || r3 == null && v3 != None
-      ) Option.empty[Any] else
+      if (
+        r1 == null && v1 != None
+          || r2 == null && v2 != None
+          || r3 == null && v3 != None
+      ) Option.empty[Any]
+      else
         Some((v1, v2, v3))
     }
   }
 
-  final private def cast4(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Option[Any] = {
-    val List(c1, c2, c3, c4) = casters
-    val List(i1, i2, i3, i4) = (attrIndex until attrIndex + 4).toList
+  final private def cast4(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Option[Any] = {
+    val List(c1, c2, c3, c4) = casts
+    val List(i1, i2, i3, i4) = (firstIndex until firstIndex + 4).toList
     (row: RS) => {
       val List(r1, r2, r3, r4) = List(i1, i2, i3, i4).map(row.getObject)
       val (v1, v2, v3, v4) = (
@@ -115,18 +107,23 @@ object CastOptTpl_ extends SqlQueryBase {
         c3(row, i3),
         c4(row, i4)
       )
-      if (r1 == null && v1 != None
-        || r2 == null && v2 != None
-        || r3 == null && v3 != None
-        || r4 == null && v4 != None
-      ) Option.empty[Any] else
+      if (
+        r1 == null && v1 != None
+          || r2 == null && v2 != None
+          || r3 == null && v3 != None
+          || r4 == null && v4 != None
+      ) Option.empty[Any]
+      else
         Some((v1, v2, v3, v4))
     }
   }
 
-  final private def cast5(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Option[Any] = {
-    val List(c1, c2, c3, c4, c5) = casters
-    val List(i1, i2, i3, i4, i5) = (attrIndex until attrIndex + 5).toList
+  final private def cast5(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Option[Any] = {
+    val List(c1, c2, c3, c4, c5) = casts
+    val List(i1, i2, i3, i4, i5) = (firstIndex until firstIndex + 5).toList
     (row: RS) => {
       val List(r1, r2, r3, r4, r5) = List(i1, i2, i3, i4, i5).map(row.getObject)
       val (v1, v2, v3, v4, v5) = (
@@ -136,19 +133,24 @@ object CastOptTpl_ extends SqlQueryBase {
         c4(row, i4),
         c5(row, i5)
       )
-      if (r1 == null && v1 != None
-        || r2 == null && v2 != None
-        || r3 == null && v3 != None
-        || r4 == null && v4 != None
-        || r5 == null && v5 != None
-      ) Option.empty[Any] else
+      if (
+        r1 == null && v1 != None
+          || r2 == null && v2 != None
+          || r3 == null && v3 != None
+          || r4 == null && v4 != None
+          || r5 == null && v5 != None
+      ) Option.empty[Any]
+      else
         Some((v1, v2, v3, v4, v5))
     }
   }
 
-  final private def cast6(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Option[Any] = {
-    val List(c1, c2, c3, c4, c5, c6) = casters
-    val List(i1, i2, i3, i4, i5, i6) = (attrIndex until attrIndex + 6).toList
+  final private def cast6(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Option[Any] = {
+    val List(c1, c2, c3, c4, c5, c6) = casts
+    val List(i1, i2, i3, i4, i5, i6) = (firstIndex until firstIndex + 6).toList
     (row: RS) => {
       val List(r1, r2, r3, r4, r5, r6) = List(i1, i2, i3, i4, i5, i6).map(row.getObject)
       val (v1, v2, v3, v4, v5, v6) = (
@@ -159,20 +161,25 @@ object CastOptTpl_ extends SqlQueryBase {
         c5(row, i5),
         c6(row, i6)
       )
-      if (r1 == null && v1 != None
-        || r2 == null && v2 != None
-        || r3 == null && v3 != None
-        || r4 == null && v4 != None
-        || r5 == null && v5 != None
-        || r6 == null && v6 != None
-      ) Option.empty[Any] else
+      if (
+        r1 == null && v1 != None
+          || r2 == null && v2 != None
+          || r3 == null && v3 != None
+          || r4 == null && v4 != None
+          || r5 == null && v5 != None
+          || r6 == null && v6 != None
+      ) Option.empty[Any]
+      else
         Some((v1, v2, v3, v4, v5, v6))
     }
   }
 
-  final private def cast7(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Option[Any] = {
-    val List(c1, c2, c3, c4, c5, c6, c7) = casters
-    val List(i1, i2, i3, i4, i5, i6, i7) = (attrIndex until attrIndex + 7).toList
+  final private def cast7(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Option[Any] = {
+    val List(c1, c2, c3, c4, c5, c6, c7) = casts
+    val List(i1, i2, i3, i4, i5, i6, i7) = (firstIndex until firstIndex + 7).toList
     (row: RS) => {
       val List(r1, r2, r3, r4, r5, r6, r7) = List(i1, i2, i3, i4, i5, i6, i7).map(row.getObject)
       val (v1, v2, v3, v4, v5, v6, v7) = (
@@ -184,21 +191,26 @@ object CastOptTpl_ extends SqlQueryBase {
         c6(row, i6),
         c7(row, i7)
       )
-      if (r1 == null && v1 != None
-        || r2 == null && v2 != None
-        || r3 == null && v3 != None
-        || r4 == null && v4 != None
-        || r5 == null && v5 != None
-        || r6 == null && v6 != None
-        || r7 == null && v7 != None
-      ) Option.empty[Any] else
+      if (
+        r1 == null && v1 != None
+          || r2 == null && v2 != None
+          || r3 == null && v3 != None
+          || r4 == null && v4 != None
+          || r5 == null && v5 != None
+          || r6 == null && v6 != None
+          || r7 == null && v7 != None
+      ) Option.empty[Any]
+      else
         Some((v1, v2, v3, v4, v5, v6, v7))
     }
   }
 
-  final private def cast8(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Option[Any] = {
-    val List(c1, c2, c3, c4, c5, c6, c7, c8) = casters
-    val List(i1, i2, i3, i4, i5, i6, i7, i8) = (attrIndex until attrIndex + 8).toList
+  final private def cast8(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Option[Any] = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8) = casts
+    val List(i1, i2, i3, i4, i5, i6, i7, i8) = (firstIndex until firstIndex + 8).toList
     (row: RS) => {
       val List(r1, r2, r3, r4, r5, r6, r7, r8) = List(i1, i2, i3, i4, i5, i6, i7, i8).map(row.getObject)
       val (v1, v2, v3, v4, v5, v6, v7, v8) = (
@@ -211,22 +223,27 @@ object CastOptTpl_ extends SqlQueryBase {
         c7(row, i7),
         c8(row, i8)
       )
-      if (r1 == null && v1 != None
-        || r2 == null && v2 != None
-        || r3 == null && v3 != None
-        || r4 == null && v4 != None
-        || r5 == null && v5 != None
-        || r6 == null && v6 != None
-        || r7 == null && v7 != None
-        || r8 == null && v8 != None
-      ) Option.empty[Any] else
+      if (
+        r1 == null && v1 != None
+          || r2 == null && v2 != None
+          || r3 == null && v3 != None
+          || r4 == null && v4 != None
+          || r5 == null && v5 != None
+          || r6 == null && v6 != None
+          || r7 == null && v7 != None
+          || r8 == null && v8 != None
+      ) Option.empty[Any]
+      else
         Some((v1, v2, v3, v4, v5, v6, v7, v8))
     }
   }
 
-  final private def cast9(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Option[Any] = {
-    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9) = casters
-    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9) = (attrIndex until attrIndex + 9).toList
+  final private def cast9(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Option[Any] = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9) = casts
+    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9) = (firstIndex until firstIndex + 9).toList
     (row: RS) => {
       val List(r1, r2, r3, r4, r5, r6, r7, r8, r9) = List(i1, i2, i3, i4, i5, i6, i7, i8, i9).map(row.getObject)
       val (v1, v2, v3, v4, v5, v6, v7, v8, v9) = (
@@ -240,23 +257,28 @@ object CastOptTpl_ extends SqlQueryBase {
         c8(row, i8),
         c9(row, i9)
       )
-      if (r1 == null && v1 != None
-        || r2 == null && v2 != None
-        || r3 == null && v3 != None
-        || r4 == null && v4 != None
-        || r5 == null && v5 != None
-        || r6 == null && v6 != None
-        || r7 == null && v7 != None
-        || r8 == null && v8 != None
-        || r9 == null && v9 != None
-      ) Option.empty[Any] else
+      if (
+        r1 == null && v1 != None
+          || r2 == null && v2 != None
+          || r3 == null && v3 != None
+          || r4 == null && v4 != None
+          || r5 == null && v5 != None
+          || r6 == null && v6 != None
+          || r7 == null && v7 != None
+          || r8 == null && v8 != None
+          || r9 == null && v9 != None
+      ) Option.empty[Any]
+      else
         Some((v1, v2, v3, v4, v5, v6, v7, v8, v9))
     }
   }
 
-  final private def cast10(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Option[Any] = {
-    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10) = casters
-    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10) = (attrIndex until attrIndex + 10).toList
+  final private def cast10(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Option[Any] = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10) = casts
+    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10) = (firstIndex until firstIndex + 10).toList
     (row: RS) => {
       val List(r1, r2, r3, r4, r5, r6, r7, r8, r9, r10) = List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10).map(row.getObject)
       val (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10) = (
@@ -271,24 +293,29 @@ object CastOptTpl_ extends SqlQueryBase {
         c9(row, i9),
         c10(row, i10)
       )
-      if (r1 == null && v1 != None
-        || r2 == null && v2 != None
-        || r3 == null && v3 != None
-        || r4 == null && v4 != None
-        || r5 == null && v5 != None
-        || r6 == null && v6 != None
-        || r7 == null && v7 != None
-        || r8 == null && v8 != None
-        || r9 == null && v9 != None
-        || r10 == null && v10 != None
-      ) Option.empty[Any] else
+      if (
+        r1 == null && v1 != None
+          || r2 == null && v2 != None
+          || r3 == null && v3 != None
+          || r4 == null && v4 != None
+          || r5 == null && v5 != None
+          || r6 == null && v6 != None
+          || r7 == null && v7 != None
+          || r8 == null && v8 != None
+          || r9 == null && v9 != None
+          || r10 == null && v10 != None
+      ) Option.empty[Any]
+      else
         Some((v1, v2, v3, v4, v5, v6, v7, v8, v9, v10))
     }
   }
 
-  final private def cast11(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Option[Any] = {
-    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) = casters
-    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11) = (attrIndex until attrIndex + 11).toList
+  final private def cast11(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Option[Any] = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) = casts
+    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11) = (firstIndex until firstIndex + 11).toList
     (row: RS) => {
       val List(r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11) = List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11).map(row.getObject)
       val (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11) = (
@@ -304,25 +331,30 @@ object CastOptTpl_ extends SqlQueryBase {
         c10(row, i10),
         c11(row, i11)
       )
-      if (r1 == null && v1 != None
-        || r2 == null && v2 != None
-        || r3 == null && v3 != None
-        || r4 == null && v4 != None
-        || r5 == null && v5 != None
-        || r6 == null && v6 != None
-        || r7 == null && v7 != None
-        || r8 == null && v8 != None
-        || r9 == null && v9 != None
-        || r10 == null && v10 != None
-        || r11 == null && v11 != None
-      ) Option.empty[Any] else
+      if (
+        r1 == null && v1 != None
+          || r2 == null && v2 != None
+          || r3 == null && v3 != None
+          || r4 == null && v4 != None
+          || r5 == null && v5 != None
+          || r6 == null && v6 != None
+          || r7 == null && v7 != None
+          || r8 == null && v8 != None
+          || r9 == null && v9 != None
+          || r10 == null && v10 != None
+          || r11 == null && v11 != None
+      ) Option.empty[Any]
+      else
         Some((v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11))
     }
   }
 
-  final private def cast12(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Option[Any] = {
-    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12) = casters
-    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12) = (attrIndex until attrIndex + 12).toList
+  final private def cast12(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Option[Any] = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12) = casts
+    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12) = (firstIndex until firstIndex + 12).toList
     (row: RS) => {
       val List(r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12) = List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12).map(row.getObject)
       val (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12) = (
@@ -339,26 +371,31 @@ object CastOptTpl_ extends SqlQueryBase {
         c11(row, i11),
         c12(row, i12)
       )
-      if (r1 == null && v1 != None
-        || r2 == null && v2 != None
-        || r3 == null && v3 != None
-        || r4 == null && v4 != None
-        || r5 == null && v5 != None
-        || r6 == null && v6 != None
-        || r7 == null && v7 != None
-        || r8 == null && v8 != None
-        || r9 == null && v9 != None
-        || r10 == null && v10 != None
-        || r11 == null && v11 != None
-        || r12 == null && v12 != None
-      ) Option.empty[Any] else
+      if (
+        r1 == null && v1 != None
+          || r2 == null && v2 != None
+          || r3 == null && v3 != None
+          || r4 == null && v4 != None
+          || r5 == null && v5 != None
+          || r6 == null && v6 != None
+          || r7 == null && v7 != None
+          || r8 == null && v8 != None
+          || r9 == null && v9 != None
+          || r10 == null && v10 != None
+          || r11 == null && v11 != None
+          || r12 == null && v12 != None
+      ) Option.empty[Any]
+      else
         Some((v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12))
     }
   }
 
-  final private def cast13(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Option[Any] = {
-    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13) = casters
-    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13) = (attrIndex until attrIndex + 13).toList
+  final private def cast13(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Option[Any] = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13) = casts
+    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13) = (firstIndex until firstIndex + 13).toList
     (row: RS) => {
       val List(r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13) = List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13).map(row.getObject)
       val (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13) = (
@@ -376,27 +413,32 @@ object CastOptTpl_ extends SqlQueryBase {
         c12(row, i12),
         c13(row, i13)
       )
-      if (r1 == null && v1 != None
-        || r2 == null && v2 != None
-        || r3 == null && v3 != None
-        || r4 == null && v4 != None
-        || r5 == null && v5 != None
-        || r6 == null && v6 != None
-        || r7 == null && v7 != None
-        || r8 == null && v8 != None
-        || r9 == null && v9 != None
-        || r10 == null && v10 != None
-        || r11 == null && v11 != None
-        || r12 == null && v12 != None
-        || r13 == null && v13 != None
-      ) Option.empty[Any] else
+      if (
+        r1 == null && v1 != None
+          || r2 == null && v2 != None
+          || r3 == null && v3 != None
+          || r4 == null && v4 != None
+          || r5 == null && v5 != None
+          || r6 == null && v6 != None
+          || r7 == null && v7 != None
+          || r8 == null && v8 != None
+          || r9 == null && v9 != None
+          || r10 == null && v10 != None
+          || r11 == null && v11 != None
+          || r12 == null && v12 != None
+          || r13 == null && v13 != None
+      ) Option.empty[Any]
+      else
         Some((v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13))
     }
   }
 
-  final private def cast14(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Option[Any] = {
-    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14) = casters
-    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14) = (attrIndex until attrIndex + 14).toList
+  final private def cast14(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Option[Any] = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14) = casts
+    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14) = (firstIndex until firstIndex + 14).toList
     (row: RS) => {
       val List(r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14) = List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14).map(row.getObject)
       val (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14) = (
@@ -415,28 +457,33 @@ object CastOptTpl_ extends SqlQueryBase {
         c13(row, i13),
         c14(row, i14)
       )
-      if (r1 == null && v1 != None
-        || r2 == null && v2 != None
-        || r3 == null && v3 != None
-        || r4 == null && v4 != None
-        || r5 == null && v5 != None
-        || r6 == null && v6 != None
-        || r7 == null && v7 != None
-        || r8 == null && v8 != None
-        || r9 == null && v9 != None
-        || r10 == null && v10 != None
-        || r11 == null && v11 != None
-        || r12 == null && v12 != None
-        || r13 == null && v13 != None
-        || r14 == null && v14 != None
-      ) Option.empty[Any] else
+      if (
+        r1 == null && v1 != None
+          || r2 == null && v2 != None
+          || r3 == null && v3 != None
+          || r4 == null && v4 != None
+          || r5 == null && v5 != None
+          || r6 == null && v6 != None
+          || r7 == null && v7 != None
+          || r8 == null && v8 != None
+          || r9 == null && v9 != None
+          || r10 == null && v10 != None
+          || r11 == null && v11 != None
+          || r12 == null && v12 != None
+          || r13 == null && v13 != None
+          || r14 == null && v14 != None
+      ) Option.empty[Any]
+      else
         Some((v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14))
     }
   }
 
-  final private def cast15(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Option[Any] = {
-    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15) = casters
-    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15) = (attrIndex until attrIndex + 15).toList
+  final private def cast15(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Option[Any] = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15) = casts
+    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15) = (firstIndex until firstIndex + 15).toList
     (row: RS) => {
       val List(r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15) = List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15).map(row.getObject)
       val (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15) = (
@@ -456,29 +503,34 @@ object CastOptTpl_ extends SqlQueryBase {
         c14(row, i14),
         c15(row, i15)
       )
-      if (r1 == null && v1 != None
-        || r2 == null && v2 != None
-        || r3 == null && v3 != None
-        || r4 == null && v4 != None
-        || r5 == null && v5 != None
-        || r6 == null && v6 != None
-        || r7 == null && v7 != None
-        || r8 == null && v8 != None
-        || r9 == null && v9 != None
-        || r10 == null && v10 != None
-        || r11 == null && v11 != None
-        || r12 == null && v12 != None
-        || r13 == null && v13 != None
-        || r14 == null && v14 != None
-        || r15 == null && v15 != None
-      ) Option.empty[Any] else
+      if (
+        r1 == null && v1 != None
+          || r2 == null && v2 != None
+          || r3 == null && v3 != None
+          || r4 == null && v4 != None
+          || r5 == null && v5 != None
+          || r6 == null && v6 != None
+          || r7 == null && v7 != None
+          || r8 == null && v8 != None
+          || r9 == null && v9 != None
+          || r10 == null && v10 != None
+          || r11 == null && v11 != None
+          || r12 == null && v12 != None
+          || r13 == null && v13 != None
+          || r14 == null && v14 != None
+          || r15 == null && v15 != None
+      ) Option.empty[Any]
+      else
         Some((v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15))
     }
   }
 
-  final private def cast16(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Option[Any] = {
-    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16) = casters
-    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16) = (attrIndex until attrIndex + 16).toList
+  final private def cast16(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Option[Any] = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16) = casts
+    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16) = (firstIndex until firstIndex + 16).toList
     (row: RS) => {
       val List(r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16) = List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16).map(row.getObject)
       val (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16) = (
@@ -499,30 +551,35 @@ object CastOptTpl_ extends SqlQueryBase {
         c15(row, i15),
         c16(row, i16)
       )
-      if (r1 == null && v1 != None
-        || r2 == null && v2 != None
-        || r3 == null && v3 != None
-        || r4 == null && v4 != None
-        || r5 == null && v5 != None
-        || r6 == null && v6 != None
-        || r7 == null && v7 != None
-        || r8 == null && v8 != None
-        || r9 == null && v9 != None
-        || r10 == null && v10 != None
-        || r11 == null && v11 != None
-        || r12 == null && v12 != None
-        || r13 == null && v13 != None
-        || r14 == null && v14 != None
-        || r15 == null && v15 != None
-        || r16 == null && v16 != None
-      ) Option.empty[Any] else
+      if (
+        r1 == null && v1 != None
+          || r2 == null && v2 != None
+          || r3 == null && v3 != None
+          || r4 == null && v4 != None
+          || r5 == null && v5 != None
+          || r6 == null && v6 != None
+          || r7 == null && v7 != None
+          || r8 == null && v8 != None
+          || r9 == null && v9 != None
+          || r10 == null && v10 != None
+          || r11 == null && v11 != None
+          || r12 == null && v12 != None
+          || r13 == null && v13 != None
+          || r14 == null && v14 != None
+          || r15 == null && v15 != None
+          || r16 == null && v16 != None
+      ) Option.empty[Any]
+      else
         Some((v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16))
     }
   }
 
-  final private def cast17(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Option[Any] = {
-    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17) = casters
-    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17) = (attrIndex until attrIndex + 17).toList
+  final private def cast17(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Option[Any] = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17) = casts
+    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17) = (firstIndex until firstIndex + 17).toList
     (row: RS) => {
       val List(r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16, r17) = List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17).map(row.getObject)
       val (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17) = (
@@ -544,31 +601,36 @@ object CastOptTpl_ extends SqlQueryBase {
         c16(row, i16),
         c17(row, i17)
       )
-      if (r1 == null && v1 != None
-        || r2 == null && v2 != None
-        || r3 == null && v3 != None
-        || r4 == null && v4 != None
-        || r5 == null && v5 != None
-        || r6 == null && v6 != None
-        || r7 == null && v7 != None
-        || r8 == null && v8 != None
-        || r9 == null && v9 != None
-        || r10 == null && v10 != None
-        || r11 == null && v11 != None
-        || r12 == null && v12 != None
-        || r13 == null && v13 != None
-        || r14 == null && v14 != None
-        || r15 == null && v15 != None
-        || r16 == null && v16 != None
-        || r17 == null && v17 != None
-      ) Option.empty[Any] else
+      if (
+        r1 == null && v1 != None
+          || r2 == null && v2 != None
+          || r3 == null && v3 != None
+          || r4 == null && v4 != None
+          || r5 == null && v5 != None
+          || r6 == null && v6 != None
+          || r7 == null && v7 != None
+          || r8 == null && v8 != None
+          || r9 == null && v9 != None
+          || r10 == null && v10 != None
+          || r11 == null && v11 != None
+          || r12 == null && v12 != None
+          || r13 == null && v13 != None
+          || r14 == null && v14 != None
+          || r15 == null && v15 != None
+          || r16 == null && v16 != None
+          || r17 == null && v17 != None
+      ) Option.empty[Any]
+      else
         Some((v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17))
     }
   }
 
-  final private def cast18(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Option[Any] = {
-    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18) = casters
-    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18) = (attrIndex until attrIndex + 18).toList
+  final private def cast18(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Option[Any] = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18) = casts
+    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18) = (firstIndex until firstIndex + 18).toList
     (row: RS) => {
       val List(r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16, r17, r18) = List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18).map(row.getObject)
       val (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18) = (
@@ -591,32 +653,37 @@ object CastOptTpl_ extends SqlQueryBase {
         c17(row, i17),
         c18(row, i18)
       )
-      if (r1 == null && v1 != None
-        || r2 == null && v2 != None
-        || r3 == null && v3 != None
-        || r4 == null && v4 != None
-        || r5 == null && v5 != None
-        || r6 == null && v6 != None
-        || r7 == null && v7 != None
-        || r8 == null && v8 != None
-        || r9 == null && v9 != None
-        || r10 == null && v10 != None
-        || r11 == null && v11 != None
-        || r12 == null && v12 != None
-        || r13 == null && v13 != None
-        || r14 == null && v14 != None
-        || r15 == null && v15 != None
-        || r16 == null && v16 != None
-        || r17 == null && v17 != None
-        || r18 == null && v18 != None
-      ) Option.empty[Any] else
+      if (
+        r1 == null && v1 != None
+          || r2 == null && v2 != None
+          || r3 == null && v3 != None
+          || r4 == null && v4 != None
+          || r5 == null && v5 != None
+          || r6 == null && v6 != None
+          || r7 == null && v7 != None
+          || r8 == null && v8 != None
+          || r9 == null && v9 != None
+          || r10 == null && v10 != None
+          || r11 == null && v11 != None
+          || r12 == null && v12 != None
+          || r13 == null && v13 != None
+          || r14 == null && v14 != None
+          || r15 == null && v15 != None
+          || r16 == null && v16 != None
+          || r17 == null && v17 != None
+          || r18 == null && v18 != None
+      ) Option.empty[Any]
+      else
         Some((v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18))
     }
   }
 
-  final private def cast19(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Option[Any] = {
-    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19) = casters
-    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19) = (attrIndex until attrIndex + 19).toList
+  final private def cast19(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Option[Any] = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19) = casts
+    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19) = (firstIndex until firstIndex + 19).toList
     (row: RS) => {
       val List(r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16, r17, r18, r19) = List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19).map(row.getObject)
       val (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19) = (
@@ -640,33 +707,38 @@ object CastOptTpl_ extends SqlQueryBase {
         c18(row, i18),
         c19(row, i19)
       )
-      if (r1 == null && v1 != None
-        || r2 == null && v2 != None
-        || r3 == null && v3 != None
-        || r4 == null && v4 != None
-        || r5 == null && v5 != None
-        || r6 == null && v6 != None
-        || r7 == null && v7 != None
-        || r8 == null && v8 != None
-        || r9 == null && v9 != None
-        || r10 == null && v10 != None
-        || r11 == null && v11 != None
-        || r12 == null && v12 != None
-        || r13 == null && v13 != None
-        || r14 == null && v14 != None
-        || r15 == null && v15 != None
-        || r16 == null && v16 != None
-        || r17 == null && v17 != None
-        || r18 == null && v18 != None
-        || r19 == null && v19 != None
-      ) Option.empty[Any] else
+      if (
+        r1 == null && v1 != None
+          || r2 == null && v2 != None
+          || r3 == null && v3 != None
+          || r4 == null && v4 != None
+          || r5 == null && v5 != None
+          || r6 == null && v6 != None
+          || r7 == null && v7 != None
+          || r8 == null && v8 != None
+          || r9 == null && v9 != None
+          || r10 == null && v10 != None
+          || r11 == null && v11 != None
+          || r12 == null && v12 != None
+          || r13 == null && v13 != None
+          || r14 == null && v14 != None
+          || r15 == null && v15 != None
+          || r16 == null && v16 != None
+          || r17 == null && v17 != None
+          || r18 == null && v18 != None
+          || r19 == null && v19 != None
+      ) Option.empty[Any]
+      else
         Some((v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19))
     }
   }
 
-  final private def cast20(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Option[Any] = {
-    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20) = casters
-    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20) = (attrIndex until attrIndex + 20).toList
+  final private def cast20(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Option[Any] = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20) = casts
+    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20) = (firstIndex until firstIndex + 20).toList
     (row: RS) => {
       val List(r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16, r17, r18, r19, r20) = List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20).map(row.getObject)
       val (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19, v20) = (
@@ -691,34 +763,39 @@ object CastOptTpl_ extends SqlQueryBase {
         c19(row, i19),
         c20(row, i20)
       )
-      if (r1 == null && v1 != None
-        || r2 == null && v2 != None
-        || r3 == null && v3 != None
-        || r4 == null && v4 != None
-        || r5 == null && v5 != None
-        || r6 == null && v6 != None
-        || r7 == null && v7 != None
-        || r8 == null && v8 != None
-        || r9 == null && v9 != None
-        || r10 == null && v10 != None
-        || r11 == null && v11 != None
-        || r12 == null && v12 != None
-        || r13 == null && v13 != None
-        || r14 == null && v14 != None
-        || r15 == null && v15 != None
-        || r16 == null && v16 != None
-        || r17 == null && v17 != None
-        || r18 == null && v18 != None
-        || r19 == null && v19 != None
-        || r20 == null && v20 != None
-      ) Option.empty[Any] else
+      if (
+        r1 == null && v1 != None
+          || r2 == null && v2 != None
+          || r3 == null && v3 != None
+          || r4 == null && v4 != None
+          || r5 == null && v5 != None
+          || r6 == null && v6 != None
+          || r7 == null && v7 != None
+          || r8 == null && v8 != None
+          || r9 == null && v9 != None
+          || r10 == null && v10 != None
+          || r11 == null && v11 != None
+          || r12 == null && v12 != None
+          || r13 == null && v13 != None
+          || r14 == null && v14 != None
+          || r15 == null && v15 != None
+          || r16 == null && v16 != None
+          || r17 == null && v17 != None
+          || r18 == null && v18 != None
+          || r19 == null && v19 != None
+          || r20 == null && v20 != None
+      ) Option.empty[Any]
+      else
         Some((v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19, v20))
     }
   }
 
-  final private def cast21(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Option[Any] = {
-    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21) = casters
-    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21) = (attrIndex until attrIndex + 21).toList
+  final private def cast21(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Option[Any] = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21) = casts
+    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21) = (firstIndex until firstIndex + 21).toList
     (row: RS) => {
       val List(r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16, r17, r18, r19, r20, r21) = List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21).map(row.getObject)
       val (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19, v20, v21) = (
@@ -744,35 +821,40 @@ object CastOptTpl_ extends SqlQueryBase {
         c20(row, i20),
         c21(row, i21)
       )
-      if (r1 == null && v1 != None
-        || r2 == null && v2 != None
-        || r3 == null && v3 != None
-        || r4 == null && v4 != None
-        || r5 == null && v5 != None
-        || r6 == null && v6 != None
-        || r7 == null && v7 != None
-        || r8 == null && v8 != None
-        || r9 == null && v9 != None
-        || r10 == null && v10 != None
-        || r11 == null && v11 != None
-        || r12 == null && v12 != None
-        || r13 == null && v13 != None
-        || r14 == null && v14 != None
-        || r15 == null && v15 != None
-        || r16 == null && v16 != None
-        || r17 == null && v17 != None
-        || r18 == null && v18 != None
-        || r19 == null && v19 != None
-        || r20 == null && v20 != None
-        || r21 == null && v21 != None
-      ) Option.empty[Any] else
+      if (
+        r1 == null && v1 != None
+          || r2 == null && v2 != None
+          || r3 == null && v3 != None
+          || r4 == null && v4 != None
+          || r5 == null && v5 != None
+          || r6 == null && v6 != None
+          || r7 == null && v7 != None
+          || r8 == null && v8 != None
+          || r9 == null && v9 != None
+          || r10 == null && v10 != None
+          || r11 == null && v11 != None
+          || r12 == null && v12 != None
+          || r13 == null && v13 != None
+          || r14 == null && v14 != None
+          || r15 == null && v15 != None
+          || r16 == null && v16 != None
+          || r17 == null && v17 != None
+          || r18 == null && v18 != None
+          || r19 == null && v19 != None
+          || r20 == null && v20 != None
+          || r21 == null && v21 != None
+      ) Option.empty[Any]
+      else
         Some((v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19, v20, v21))
     }
   }
 
-  final private def cast22(casters: List[(RS, ParamIndex) => Any], attrIndex: ParamIndex): RS => Option[Any] = {
-    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21, c22) = casters
-    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22) = (attrIndex until attrIndex + 22).toList
+  final private def cast22(
+    casts: List[(RS, ParamIndex) => Any],
+    firstIndex: ParamIndex
+  ): RS => Option[Any] = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21, c22) = casts
+    val List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22) = (firstIndex until firstIndex + 22).toList
     (row: RS) => {
       val List(r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16, r17, r18, r19, r20, r21, r22) = List(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22).map(row.getObject)
       val (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19, v20, v21, v22) = (
@@ -799,29 +881,31 @@ object CastOptTpl_ extends SqlQueryBase {
         c21(row, i21),
         c22(row, i22)
       )
-      if (r1 == null && v1 != None
-        || r2 == null && v2 != None
-        || r3 == null && v3 != None
-        || r4 == null && v4 != None
-        || r5 == null && v5 != None
-        || r6 == null && v6 != None
-        || r7 == null && v7 != None
-        || r8 == null && v8 != None
-        || r9 == null && v9 != None
-        || r10 == null && v10 != None
-        || r11 == null && v11 != None
-        || r12 == null && v12 != None
-        || r13 == null && v13 != None
-        || r14 == null && v14 != None
-        || r15 == null && v15 != None
-        || r16 == null && v16 != None
-        || r17 == null && v17 != None
-        || r18 == null && v18 != None
-        || r19 == null && v19 != None
-        || r20 == null && v20 != None
-        || r21 == null && v21 != None
-        || r22 == null && v22 != None
-      ) Option.empty[Any] else
+      if (
+        r1 == null && v1 != None
+          || r2 == null && v2 != None
+          || r3 == null && v3 != None
+          || r4 == null && v4 != None
+          || r5 == null && v5 != None
+          || r6 == null && v6 != None
+          || r7 == null && v7 != None
+          || r8 == null && v8 != None
+          || r9 == null && v9 != None
+          || r10 == null && v10 != None
+          || r11 == null && v11 != None
+          || r12 == null && v12 != None
+          || r13 == null && v13 != None
+          || r14 == null && v14 != None
+          || r15 == null && v15 != None
+          || r16 == null && v16 != None
+          || r17 == null && v17 != None
+          || r18 == null && v18 != None
+          || r19 == null && v19 != None
+          || r20 == null && v20 != None
+          || r21 == null && v21 != None
+          || r22 == null && v22 != None
+      ) Option.empty[Any]
+      else
         Some((v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19, v20, v21, v22))
     }
   }
