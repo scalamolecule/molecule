@@ -7,7 +7,9 @@ import molecule.core.transaction.InsertValidators_
 import molecule.core.util.ModelUtils
 import scala.annotation.tailrec
 
-trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { self: InsertValidationResolvers_ =>
+trait InsertValidationExtraction
+  extends InsertValidators_
+    with ModelUtils { self: InsertValidationResolvers_ =>
 
   private var curElements: List[Element] = List.empty[Element]
   private def noEmpty(a: Attr) = throw new Exception("Can't use tacit attributes in insert molecule (${a.name}).")
@@ -81,15 +83,13 @@ trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { sel
           getValidators(nsMap, tail, validators, tplIndex, prevRefs :+ refAttr)
 
         case BackRef(backRefNs, _, _) =>
-          tail.head match {
-            case Ref(_, refAttr, _, _, _, _) if prevRefs.contains(refAttr) => throw ModelError(
-              s"Can't re-use previous namespace ${refAttr.capitalize} after backref _$backRefNs."
-            )
-            case _                                                         => // ok
-          }
+          noNsReUseAfterBackref(tail.head, prevRefs, backRefNs)
           getValidators(nsMap, tail, validators, tplIndex, prevRefs)
 
-        case OptRef(Ref(ns, refAttr, _, _, _, _), optRefElements) => ???
+        case OptRef(Ref(ns, refAttr, _, _, _, _), optRefElements) =>
+          curElements = optRefElements
+          getValidators(nsMap, tail, validators :+
+            addOptRef(nsMap, tplIndex, ns, refAttr, optRefElements), tplIndex, Nil)
 
         case Nested(Ref(ns, refAttr, _, _, _, _), nestedElements) =>
           curElements = nestedElements
@@ -103,6 +103,53 @@ trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { sel
       }
       case Nil             => validators
     }
+  }
+
+
+  private def addOptRef(
+    nsMap: Map[String, MetaNs],
+    tplIndex: Int,
+    ns: String,
+    refAttr: String,
+    optElements: List[Element]
+  ): Product => Seq[InsertError] = {
+    // Recursively validate nested data
+    val validate    = getInsertValidator(nsMap, optElements)
+    val fullRefAttr = ns + "." + refAttr
+    countValueAttrs(optElements) match {
+      case 1 => // Nested arity-1 values
+        (tpl: Product) => {
+          val optionValue   = tpl.productElement(tplIndex).asInstanceOf[Option[Any]]
+          val indexedErrors = collectInsertErrorsSingle(validate, optionValue)
+          if (indexedErrors.isEmpty) Nil else Seq(InsertError(0, fullRefAttr, Nil, indexedErrors))
+        }
+      case _ =>
+        (tpl: Product) => {
+          val optionTpl     = tpl.productElement(tplIndex).asInstanceOf[Option[Product]]
+          val indexedErrors = collectInsertErrorsTuple(validate, optionTpl)
+          if (indexedErrors.isEmpty) Nil else Seq(InsertError(0, fullRefAttr, Nil, indexedErrors))
+        }
+    }
+  }
+
+  private def collectInsertErrorsSingle(
+    validate: Product => Seq[InsertError],
+    values: Iterable[Any],
+  ): Seq[(Int, Seq[InsertError])] = {
+    values.zipWithIndex.flatMap { case (nestedValue, rowIndex) =>
+      val rowErrors: Seq[InsertError] = validate(Tuple1(nestedValue)) // Need tuple
+      if (rowErrors.isEmpty) None else Some((rowIndex, rowErrors))
+    }.toSeq
+  }
+
+  private def collectInsertErrorsTuple(
+    validate: Product => Seq[InsertError],
+    values: Iterable[Product],
+  ): Seq[(Int, Seq[InsertError])] = {
+    values.zipWithIndex.flatMap { case (nestedValue, rowIndex) =>
+      val rowErrors: Seq[InsertError] = validate(nestedValue) // Need tuple
+      if (rowErrors.isEmpty) None else Some((rowIndex, rowErrors))
+    }.toSeq
   }
 
   private def addNested(
@@ -119,23 +166,18 @@ trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { sel
       case 1 => // Nested arity-1 values
         (tpl: Product) => {
           val nestedValues  = tpl.productElement(tplIndex).asInstanceOf[Seq[Any]]
-          val indexedErrors = nestedValues.zipWithIndex.flatMap { case (nestedValue, rowIndex) =>
-            val rowErrors: Seq[InsertError] = validate(Tuple1(nestedValue))
-            if (rowErrors.isEmpty) None else Some((rowIndex, rowErrors))
-          }
+          val indexedErrors = collectInsertErrorsSingle(validate, nestedValues)
           if (indexedErrors.isEmpty) Nil else Seq(InsertError(0, fullRefAttr, Nil, indexedErrors))
         }
       case _ =>
         (tpl: Product) => {
           val nestedTpls    = tpl.productElement(tplIndex).asInstanceOf[Seq[Product]]
-          val indexedErrors = nestedTpls.zipWithIndex.flatMap { case (nestedTpl, rowIndex) =>
-            val rowErrors: Seq[InsertError] = validate(nestedTpl)
-            if (rowErrors.isEmpty) None else Some((rowIndex, rowErrors))
-          }
+          val indexedErrors = collectInsertErrorsTuple(validate, nestedTpls)
           if (indexedErrors.isEmpty) Nil else Seq(InsertError(0, fullRefAttr, Nil, indexedErrors))
         }
     }
   }
+
 
   private def validatorV[T](
     ns: String,

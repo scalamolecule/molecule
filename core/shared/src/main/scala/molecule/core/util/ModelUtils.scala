@@ -14,9 +14,10 @@ trait ModelUtils {
       case e :: tail => e match {
         case _: Mandatory @unchecked => count(tail, acc + 1)
         case _: Optional @unchecked  => count(tail, acc + 1)
-        case _: Nested    => count(tail, acc + 1)
-        case _: OptNested => count(tail, acc + 1)
-        case _            => count(tail, acc)
+        case _: OptRef               => count(tail, acc + 1)
+        case _: Nested               => count(tail, acc + 1)
+        case _: OptNested            => count(tail, acc + 1)
+        case _                       => count(tail, acc)
       }
       case Nil       => acc
     }
@@ -86,7 +87,7 @@ trait ModelUtils {
             case a: Attr      => prepare(tail, acc :+ prepareAttr(a))
             case r: Ref       => prepare(tail, acc :+ prepareRef(r))
             case b: BackRef   => prepare(tail, acc :+ prepareBackRef(b))
-            case r: OptRef    => ???
+            case r: OptRef    => prepare(tail, acc :+ prepareOptRef(r))
             case n: Nested    => prepare(tail, acc :+ prepareNested(n))
             case n: OptNested => prepare(tail, acc :+ prepareOptNested(n))
           }
@@ -113,6 +114,10 @@ trait ModelUtils {
       backRef.copy(prevNs = prevNs, curNs = curNs)
     }
 
+    def prepareOptRef(optRef: OptRef): OptRef = {
+      OptRef(optRef.ref, prepare(optRef.elements, Nil))
+    }
+
     def prepareNested(nested: Nested): Nested = {
       Nested(nested.ref, prepare(nested.elements, Nil))
     }
@@ -135,7 +140,22 @@ trait ModelUtils {
   def noOptional(a: Attr): Nothing =
     throw ModelError(s"Can't update optional values (${a.cleanName}_?)")
 
-  def noNested: Nothing = throw ModelError(s"Nested data structure not allowed in update molecule.")
+  def noNested: Nothing =
+    throw ModelError(s"Nested data structure not allowed in update molecule.")
+
+  def noNsReUseAfterBackref(
+    nextElement: Element,
+    prevRefs: List[String],
+    backRefNs: String
+  ): Unit = {
+    nextElement match {
+      case Ref(_, refAttr, _, _, _, _) if prevRefs.contains(refAttr) => throw ModelError(
+        s"Can't re-use previous namespace ${refAttr.capitalize} after backref _$backRefNs."
+      )
+
+      case _ => () // ok
+    }
+  }
 
   private def indexes(coord: Seq[Int]): (Int, Int, Option[Int]) = {
     coord match {

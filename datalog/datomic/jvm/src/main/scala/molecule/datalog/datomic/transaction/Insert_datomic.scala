@@ -313,6 +313,15 @@ trait Insert_datomic
       e = backRefs(backRefNs)
   }
 
+  override protected def addOptRef(
+    nsMap: Map[String, MetaNs],
+    tplIndex: Int,
+    ns: String,
+    refAttr: String,
+    refNs: String,
+    elements: List[Element]
+  ): Product => Unit = ???
+
   override protected def addNested(
     nsMap: Map[String, MetaNs],
     tplIndex: Int,

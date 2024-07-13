@@ -5,7 +5,7 @@ import molecule.core.query.Pagination
 import molecule.core.util.ModelUtils
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.javaSql.{PrepStmt, PrepStmtImpl, ResultSetInterface}
-import molecule.sql.core.query.casting.{CastNested, CastTuple, NestOptTpls, NestTpls}
+import molecule.sql.core.query.casting.{CastNested, CastStrategy, CastTuple, NestOptTpls, NestTpls}
 import scala.collection.mutable.ListBuffer
 
 abstract class SqlQueryResolve[Tpl](
@@ -55,42 +55,33 @@ abstract class SqlQueryResolve[Tpl](
   }
 
   protected def handleTuples(
-    c: CastTuple, limit: Int, forward: Boolean, sortedRows: RS, conn: JdbcConn_JVM
+    c: CastStrategy, limit: Int, forward: Boolean, sortedRows: RS, conn: JdbcConn_JVM
   ): (List[Tpl], String, Boolean) = {
     val totalCount = getTotalCount(conn)
     val limitAbs   = limit.abs.min(totalCount)
     val hasMore    = limitAbs < totalCount
-    val row2tpl    = c.tupleCaster
-    val tuples     = ListBuffer.empty[Tpl]
+    val tpls       = castTuples(c.row2tpl, sortedRows, forward)
+    val cursor     = initialCursor(conn, elements, tpls)
+    (tpls, cursor, hasMore)
+  }
+
+  protected def castTuples(row2tpl: RS => Any, sortedRows: RS, forward: Boolean): List[Tpl] = {
+    val tuples = ListBuffer.empty[Tpl]
     while (sortedRows.next()) {
       tuples += row2tpl(sortedRows).asInstanceOf[Tpl]
     }
-    val result = if (forward) tuples.toList else tuples.toList.reverse
-    val cursor = initialCursor(conn, elements, result)
-    (result, cursor, hasMore)
+    if (forward) tuples.toList else tuples.toList.reverse
   }
-
 
   protected def handleNested(
     c: CastNested, limit: Int, forward: Boolean, sortedRows: RS, conn: JdbcConn_JVM
   ): (List[Tpl], String, Boolean) = {
-    val nestedRows    = if (m2q.isManNested) {
-      // Nested
-      (new NestTpls).rows2nested(
-        sortedRows, c.getCasters
-      ).asInstanceOf[List[Tpl]]
-    } else {
-      // OptNested
-      (new NestOptTpls).rows2optNested(
-        sortedRows, c.getCasters
-      ).asInstanceOf[List[Tpl]]
-    }
-    val topLevelCount = nestedRows.length
-    val limitAbs      = limit.abs.min(topLevelCount)
-    val hasMore       = limitAbs < topLevelCount
-    val selectedRows  = nestedRows.take(limitAbs)
-    val tpls          = if (forward) selectedRows else selectedRows.reverse
-    val cursor        = initialCursor(conn, elements, tpls)
+    val (nestedTpls, topLevelCount) = getNestedTpls(sortedRows, c)
+    val limitAbs                    = limit.abs.min(topLevelCount)
+    val hasMore                     = limitAbs < topLevelCount
+    val selectedRows                = nestedTpls.take(limitAbs)
+    val tpls                        = if (forward) selectedRows else selectedRows.reverse
+    val cursor                      = initialCursor(conn, elements, tpls)
     (tpls, cursor, hasMore)
   }
 
@@ -146,19 +137,10 @@ abstract class SqlQueryResolve[Tpl](
     conn: JdbcConn_JVM
   ): (List[Tpl], String, Boolean) = {
     val totalCount = getTotalCount(conn)
-    val count      = getCount(limit, forward, totalCount)
-    val row2tpl    = c.tupleCaster
-    val allTuples  = ListBuffer.empty[Tpl]
-    while (sortedRows.next()) {
-      allTuples += row2tpl(sortedRows).asInstanceOf[Tpl]
-    }
-    val allTuples1     = if (forward) allTuples else allTuples.reverse
-    val (tuples, more) = paginateTpls(count, allTuples1.result(), identifiers, identifyTpl)
-    val rows           = if (forward) tuples else tuples.reverse
-    val cursor         = nextCursor(rows, allTokens)
-    (rows, cursor, more > 0)
-  }
+    val nestedTpls = castTuples(c.row2tpl, sortedRows, forward)
+    paginatedResult(limit, forward, allTokens, identifiers, identifyTpl, nextCursor, nestedTpls, totalCount)
 
+  }
 
   protected def paginateNested(
     c: CastNested,
@@ -170,6 +152,29 @@ abstract class SqlQueryResolve[Tpl](
     nextCursor: (List[Tpl], List[String]) => String,
     sortedRows: RS,
   ): (List[Tpl], String, Boolean) = {
+    val (nestedTpls0, totalCount) = getNestedTpls(sortedRows, c)
+    val nestedTpls                = if (forward) nestedTpls0 else nestedTpls0.reverse
+    paginatedResult(limit, forward, allTokens, identifiers, identifyTpl, nextCursor, nestedTpls, totalCount)
+  }
+
+  private def paginatedResult(
+    limit: Int,
+    forward: Boolean,
+    allTokens: List[String],
+    identifiers: List[Any],
+    identifyTpl: Tpl => Any,
+    nextCursor: (List[Tpl], List[String]) => String,
+    nestedTpls1: List[Tpl],
+    totalCount: Int
+  ): (List[Tpl], String, Boolean) = {
+    val count         = getCount(limit, forward, totalCount)
+    val (tpls0, more) = paginateTpls(count, nestedTpls1, identifiers, identifyTpl)
+    val tpls          = if (forward) tpls0 else tpls0.reverse
+    val cursor        = nextCursor(tpls, allTokens)
+    (tpls, cursor, more > 0)
+  }
+
+  private def getNestedTpls(sortedRows: RS, c: CastNested): (List[Tpl], Int) = {
     val nestedTpls = if (m2q.isManNested) {
       // Nested
       (new NestTpls).rows2nested(
@@ -181,12 +186,6 @@ abstract class SqlQueryResolve[Tpl](
         sortedRows, c.getCasters
       ).asInstanceOf[List[Tpl]]
     }
-    val totalCount     = nestedTpls.length
-    val count          = getCount(limit, forward, totalCount)
-    val nestedTpls1    = if (forward) nestedTpls else nestedTpls.reverse
-    val (tuples, more) = paginateTpls(count, nestedTpls1, identifiers, identifyTpl)
-    val rows           = if (forward) tuples else tuples.reverse
-    val cursor         = nextCursor(rows, allTokens)
-    (rows, cursor, more > 0)
+    (nestedTpls, nestedTpls.length)
   }
 }

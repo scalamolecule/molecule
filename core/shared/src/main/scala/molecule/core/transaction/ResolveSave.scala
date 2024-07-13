@@ -53,7 +53,7 @@ class ResolveSave
           resolve(tail)
 
         case _: OptRef    => throw ModelError(
-          "Optional ref not allowed in save molecule. Please use mandatory ref instead."
+          "Optional ref not allowed in save molecule. Please use mandatory ref or insert instead."
         )
 
         case _: Nested    => throw ModelError(

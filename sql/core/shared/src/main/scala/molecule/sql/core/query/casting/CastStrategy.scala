@@ -28,6 +28,8 @@ sealed trait CastStrategy extends CastBase {
   def add(cast: Cast): Unit
   def replace(cast: Cast): Unit
 
+  def row2tpl: RS => Any = ???
+
   def nest: CastNested
   def optRef: CastOptRefNested
 }
@@ -41,7 +43,7 @@ case class CastTuple(
   def getCasts: List[Cast] = casts
   def lastIndex: Int = firstIndex + casts.length
 
-  def tupleCaster: RS => Any =
+  override def row2tpl: RS => Any =
     CastTpl_.cast(casts, firstIndex)
 
   def branchListCaster: (RS, List[Any]) => Any =
@@ -98,6 +100,9 @@ case class CastNested(private val casters0: List[CastTuple])
 
 case class CastOptRefNested(private val casters0: List[CastTuple])
   extends Casters(casters0) with CastStrategy {
+
+  override def row2tpl: RS => Any =
+    NestOptRef.row2nestedOptions(getCasters)
 
   override def nest: CastNested = ???
 

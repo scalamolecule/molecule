@@ -100,6 +100,15 @@ trait InsertOps extends BaseOps {
     backRefNs: String
   ): Product => Unit
 
+  protected def addOptRef(
+    nsMap: Map[String, MetaNs],
+    tplIndex: Int,
+    ns: String,
+    refAttr: String,
+    refNs: String,
+    elements: List[Element]
+  ): Product => Unit
+
   protected def addNested(
     nsMap: Map[String, MetaNs],
     tplIndex: Int,

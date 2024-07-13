@@ -138,7 +138,12 @@ val persons: ZIO[Conn, MoleculeError, List[(String, Int, String)]] =
 Save one entity
 
 ```scala
-Person.name("Bob").age(42).Address.street("Baker st").save.transact
+Person
+  .name("Bob")
+  .age(42)
+  .Address
+  .street("Baker st")
+  .save.transact
 ```
 
 Insert multiple entities

@@ -11,18 +11,17 @@ import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
 class ResolveInsert
-  extends InsertResolvers_ with InsertValidators_ with ModelUtils { self: InsertOps =>
-
-  private val prevRefs: ListBuffer[AnyRef] = ListBuffer.empty[AnyRef]
-  private def noEmpty(a: Attr) = throw new Exception("Can't use tacit attributes in insert molecule (${a.name}).")
-
+  extends InsertResolvers_
+    with InsertValidators_
+    with ModelUtils { self: InsertOps =>
 
   @tailrec
   final override def resolve(
     nsMap: Map[String, MetaNs],
     elements: List[Element],
     resolvers: List[Product => Unit],
-    tplIndex: Int
+    tplIndex: Int,
+    prevRefs: List[String]
   ): List[Product => Unit] = {
     elements match {
       case element :: tail => element match {
@@ -34,22 +33,22 @@ class ResolveInsert
             case a: AttrOne => a match {
               case a: AttrOneMan =>
                 val attrOneManResolver = resolveAttrOneMan(a, tplIndex)
-                resolve(nsMap, tail, resolvers :+ attrOneManResolver, tplIndex + 1)
+                resolve(nsMap, tail, resolvers :+ attrOneManResolver, tplIndex + 1, prevRefs)
 
               case a: AttrOneOpt =>
                 val attrOneOptResolver = resolveAttrOneOpt(a, tplIndex)
-                resolve(nsMap, tail, resolvers :+ attrOneOptResolver, tplIndex + 1)
+                resolve(nsMap, tail, resolvers :+ attrOneOptResolver, tplIndex + 1, prevRefs)
 
               case a => noEmpty(a)
             }
             case a: AttrSet => a match {
               case a: AttrSetMan =>
                 val attrsSetManResolver = resolveAttrSetMan(a, tplIndex)
-                resolve(nsMap, tail, resolvers :+ attrsSetManResolver, tplIndex + 1)
+                resolve(nsMap, tail, resolvers :+ attrsSetManResolver, tplIndex + 1, prevRefs)
 
               case a: AttrSetOpt =>
                 val attrSetOptResolver = resolveAttrSetOpt(a, tplIndex)
-                resolve(nsMap, tail, resolvers :+ attrSetOptResolver, tplIndex + 1)
+                resolve(nsMap, tail, resolvers :+ attrSetOptResolver, tplIndex + 1, prevRefs)
 
               case a => noEmpty(a)
             }
@@ -57,11 +56,11 @@ class ResolveInsert
             case a: AttrSeq => a match {
               case a: AttrSeqMan =>
                 val attrsSetManResolver = resolveAttrSeqMan(a, tplIndex)
-                resolve(nsMap, tail, resolvers :+ attrsSetManResolver, tplIndex + 1)
+                resolve(nsMap, tail, resolvers :+ attrsSetManResolver, tplIndex + 1, prevRefs)
 
               case a: AttrSeqOpt =>
                 val attrSetOptResolver = resolveAttrSeqOpt(a, tplIndex)
-                resolve(nsMap, tail, resolvers :+ attrSetOptResolver, tplIndex + 1)
+                resolve(nsMap, tail, resolvers :+ attrSetOptResolver, tplIndex + 1, prevRefs)
 
               case a => noEmpty(a)
             }
@@ -69,49 +68,45 @@ class ResolveInsert
             case a: AttrMap => a match {
               case a: AttrMapMan =>
                 val attrsSetManResolver = resolveAttrMapMan(a, tplIndex)
-                resolve(nsMap, tail, resolvers :+ attrsSetManResolver, tplIndex + 1)
+                resolve(nsMap, tail, resolvers :+ attrsSetManResolver, tplIndex + 1, prevRefs)
 
               case a: AttrMapOpt =>
                 val attrSetOptResolver = resolveAttrMapOpt(a, tplIndex)
-                resolve(nsMap, tail, resolvers :+ attrSetOptResolver, tplIndex + 1)
+                resolve(nsMap, tail, resolvers :+ attrSetOptResolver, tplIndex + 1, prevRefs)
 
               case a => noEmpty(a)
             }
           }
 
         case Ref(ns, refAttr, refNs, card, _, _) =>
-          prevRefs += refAttr
           val refResolver = addRef(ns, refAttr, refNs, card)
-          resolve(nsMap, tail, resolvers :+ refResolver, tplIndex)
+          resolve(nsMap, tail, resolvers :+ refResolver, tplIndex, prevRefs :+ refAttr)
 
         case BackRef(backRefNs, _, _) =>
-          tail.head match {
-            case Ref(_, refAttr, _, _, _, _) if prevRefs.contains(refAttr) => throw ModelError(
-              s"Can't re-use previous namespace ${refAttr.capitalize} after backref _$backRefNs."
-            )
-            case _                                                         => // ok
-          }
+          noNsReUseAfterBackref(tail.head, prevRefs, backRefNs)
           val backRefResolver = addBackRef(backRefNs)
-          resolve(nsMap, tail, resolvers :+ backRefResolver, tplIndex)
+          resolve(nsMap, tail, resolvers :+ backRefResolver, tplIndex, Nil)
 
-        case OptRef(Ref(ns, refAttr, refNs, _, _, _), optRefElements) => throw ModelError(
-          "Optional ref not allowed in insert molecule. Please use mandatory ref instead."
-        )
+        case OptRef(Ref(ns, refAttr, refNs, _, _, _), optRefElements) =>
+          val nestedResolver = addOptRef(nsMap, tplIndex, ns, refAttr, refNs, optRefElements)
+          resolve(nsMap, tail, resolvers :+ nestedResolver, tplIndex, Nil)
 
         case Nested(Ref(ns, refAttr, refNs, _, _, _), nestedElements) =>
-          prevRefs.clear()
           val nestedResolver = addNested(nsMap, tplIndex, ns, refAttr, refNs, nestedElements)
-          resolve(nsMap, tail, resolvers :+ nestedResolver, tplIndex)
+          resolve(nsMap, tail, resolvers :+ nestedResolver, tplIndex, Nil)
 
         case OptNested(Ref(ns, refAttr, refNs, _, _, _), nestedElements) =>
           // (same behaviour as mandatory nested - the list can have data or not)
-          prevRefs.clear()
           val optNestedResolver = addNested(nsMap, tplIndex, ns, refAttr, refNs, nestedElements)
-          resolve(nsMap, tail, resolvers :+ optNestedResolver, tplIndex)
+          resolve(nsMap, tail, resolvers :+ optNestedResolver, tplIndex, Nil)
       }
       case Nil             => resolvers
     }
   }
+
+  private def noEmpty(a: Attr) = throw new Exception(
+    s"Can't use tacit attributes in insert molecule (${a.name})."
+  )
 
 
   private def resolveAttrOneMan(a: AttrOneMan, tplIndex: Int): Product => Unit = {

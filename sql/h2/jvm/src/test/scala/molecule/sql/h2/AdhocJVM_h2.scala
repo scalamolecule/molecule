@@ -43,76 +43,96 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       for {
 
 
-//        _ <- A.i(1).save.transact
-//        _ <- A.i(2).B.i(20).save.transact
-//
-//        _ <- A.i.B.?(B.i).query.get.map(_ ==> List(
-//          (1, None),
-//          (2, Some(20)),
-//        ))
+        _ <- A.i.Bb.*(B.i).insert(
+          (1, Nil),
+          (2, List(20))
+        ).i.transact
 
 
-        _ <- A.i(1).save.transact
-        _ <- A.i(2).B.i(20).save.transact
-        _ <- A.i(3).B.i(30).C.s("300").i(300).save.transact
-        _ <- A.i(4).B.i(40).s("40").save.transact
-        _ <- A.i(5).B.i(50).s("50").C.s("500").save.transact
-        _ <- A.i(6).B.i(60).s("60").C.s("600").i(600).save.transact
-
-        _ <- A.i.B.?(B.i.s.C.?(C.s.i)).query.get.map(_ ==> List(
+        _ <- A.i.B.?(B.i).insert(
           (1, None),
-          (2, None),
-          (3, None),
-          (4, Some((40, "40", None))),
-          (5, Some((50, "50", None))),
-          (6, Some((60, "60", Some(("600", 600))))),
+          (2, Some(20))
+        ).i.transact
+
+        //        _ <- rawQuery(
+        //          """SELECT DISTINCT
+        //            |  A.i,
+        //            |  B.i
+        //            |FROM A
+        //            |  LEFT JOIN B ON
+        //            |    A.b = B.id
+        //            |WHERE
+        //            |  A.i IS NOT NULL;
+        //            |""".stripMargin, true)
+        //
+        //        _ <- rawQuery(
+        //          """SELECT count(*) from B
+        //            |""".stripMargin, true)
+
+
+        _ <- A.i.B.?(B.i).query.get.map(_ ==> List(
+          (1, None),
+          (2, Some(20)),
         ))
 
-        _ <- A.i.B.?(B.i.s.C.?(C.s.i_?)).query.get.map(_ ==> List(
-          (1, None),
-          (2, None),
-          (3, None),
-          (4, Some((40, "40", None))),
-          (5, Some((50, "50", Some(("500", None))))),
-          (6, Some((60, "60", Some(("600", Some(600)))))),
-        ))
 
-        _ <- A.i.B.?(B.i.s_?.C.?(C.s.i)).query.get.map(_ ==> List(
-          (1, None),
-          (2, Some((20, None, None))),
-          (3, Some((30, None, Some(("300", 300))))),
-          (4, Some((40, Some("40"), None))),
-          (5, Some((50, Some("50"), None))),
-          (6, Some((60, Some("60"), Some(("600", 600))))),
-        ))
 
-        _ <- A.i.B.?(B.i.s_?.C.?(C.s.i_?)).query.get.map(_ ==> List(
-          (1, None),
-          (2, Some((20, None, None))),
-          (3, Some((30, None, Some(("300", Some(300)))))),
-          (4, Some((40, Some("40"), None))),
-          (5, Some((50, Some("50"), Some(("500", None))))),
-          (6, Some((60, Some("60"), Some(("600", Some(600)))))),
-        ))
 
-//        _ <- A.s.Bb.*(B.iSet).insert(List(("a", List(Set(3))))).transact
-//        _ <- rawQuery(
-//          """SELECT DISTINCT
-//            |  A.id,
-//            |  A.s,
-//            |  ARRAY_AGG(B.iSet)
-//            |FROM A
-//            |  INNER JOIN A_bb_B ON
-//            |    A.id = A_bb_B.A_id
-//            |  INNER JOIN B ON
-//            |    A_bb_B.B_id = B.id
-//            |WHERE
-//            |  A.s    IS NOT NULL AND
-//            |  B.iSet IS NOT NULL
-//            |GROUP BY A.s, A.id
-//            |HAVING COUNT(*) > 0;
-//            |""".stripMargin, true)
-//        _ <- A.s.Bb.*(B.iSet).query.get.map(_ ==> List(("a", List(Set(3)))))
+
+        //        _ <- A.i.B.?(B.i.C.i).insert(
+        //          (0, Nil),
+        //          (1, List((1, 2))),
+        //          (2, List((3, 4), (5, 6))),
+        //        ).transact
+        //
+        //        _ <- A.i.a1.B.?(B.i.a1.C.i).query.get.map(_ ==> List(
+        //          (0, Nil),
+        //          (1, List((1, 2))),
+        //          (2, List((3, 4), (5, 6))),
+        //        ))
+        //        _ <- A.i.a1.B.?(B.i.a1.C.i).query.get.map(_ ==> List(
+        //          (1, List((1, 2))),
+        //          (2, List((3, 4), (5, 6))),
+        //        ))
+        //
+        //        _ <- A.i.a1.B.?(B.C.i.a1).query.get.map(_ ==> List(
+        //          (0, Nil),
+        //          (1, List(2)),
+        //          (2, List(4, 6)),
+        //        ))
+        //        _ <- A.i.a1.B.?(B.C.i.a1).query.get.map(_ ==> List(
+        //          (1, List(2)),
+        //          (2, List(4, 6)),
+        //        ))
+        //
+        //        _ <- A.B.?(B.C.i.a1).query.get.map(_ ==> List(
+        //          // List(), // empty list is not returned when no attributes are present before nesting
+        //          List(2),
+        //          List(4, 6),
+        //        ))
+        //        _ <- A.B.?(B.C.i.a1).query.get.map(_ ==> List(
+        //          List(2),
+        //          List(4, 6),
+        //        ))
+
+        //        _ <- A.s.Bb.*(B.iSet).insert(List(("a", List(Set(3))))).transact
+        //        _ <- rawQuery(
+        //          """SELECT DISTINCT
+        //            |  A.id,
+        //            |  A.s,
+        //            |  ARRAY_AGG(B.iSet)
+        //            |FROM A
+        //            |  INNER JOIN A_bb_B ON
+        //            |    A.id = A_bb_B.A_id
+        //            |  INNER JOIN B ON
+        //            |    A_bb_B.B_id = B.id
+        //            |WHERE
+        //            |  A.s    IS NOT NULL AND
+        //            |  B.iSet IS NOT NULL
+        //            |GROUP BY A.s, A.id
+        //            |HAVING COUNT(*) > 0;
+        //            |""".stripMargin, true)
+        //        _ <- A.s.Bb.*(B.iSet).query.get.map(_ ==> List(("a", List(Set(3)))))
 
         //        _ <- A.i.Bb.*(B.iSet).insert(List((2, List(Set(3, 4))))).transact
         //        _ <- A.i.Bb.*(B.iSet).query.get.map(_ ==> List((2, List(Set(3, 4)))))
@@ -129,37 +149,6 @@ object AdhocJVM_h2 extends TestSuite_h2 {
         //            List(2, 4),
         //          ))
         //        } else Future.unit
-
-
-        //
-        //
-        //        // todo: allow
-        //
-        //        _ <- A.i.B.?(B.i).insert(1, Some(2)).transact
-        //          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-        //            err ==> "Optional ref not allowed in insert molecule. Please use mandatory ref instead."
-        //          }
-        //
-        //        _ <- A.i.B.?(B.i).insert(List(
-        //            (1, Some(2)),
-        //            (2, None),
-        //          )).transact
-        //          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-        //            err ==> "Optional ref not allowed in insert molecule. Please use mandatory ref instead."
-        //          }
-        //
-        //        _ <- A.i.B.?(B.i.s).insert(1, Some((2, "foo"))).transact
-        //          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-        //            err ==> "Optional ref not allowed in insert molecule. Please use mandatory ref instead."
-        //          }
-        //
-        //        _ <- A.i.B.?(B.i.s).insert(List(
-        //            (1, Some((2, "foo"))),
-        //            (2, None),
-        //          )).transact
-        //          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-        //            err ==> "Optional ref not allowed in insert molecule. Please use mandatory ref instead."
-        //          }
 
 
         //        _ <- rawQuery(

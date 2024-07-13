@@ -49,7 +49,7 @@ class NestTpls extends SqlQueryBase {
 
   final private def rows2nested1(rows: RS, casters: List[CastTuple]): List[Any] = {
     val branch0: (RS, List[Any]) => Any = casters(0).branchListCaster
-    val leaf   : RS => Any              = casters(1).tupleCaster
+    val leaf   : RS => Any              = casters(1).row2tpl
 
     if (getRowCount(rows) == 1) {
       rows.first()
@@ -101,7 +101,7 @@ class NestTpls extends SqlQueryBase {
   final private def rows2nested2(rows: RS, casters: List[CastTuple]): List[Any] = {
     val branch0: (RS, List[Any]) => Any = casters(0).branchListCaster
     val branch1: (RS, List[Any]) => Any = casters(1).branchListCaster
-    val leaf   : RS => Any              = casters(2).tupleCaster
+    val leaf   : RS => Any              = casters(2).row2tpl
 
     if (getRowCount(rows) == 1) {
       rows.first()
@@ -178,7 +178,7 @@ class NestTpls extends SqlQueryBase {
     val branch0: (RS, List[Any]) => Any = casters(0).branchListCaster
     val branch1: (RS, List[Any]) => Any = casters(1).branchListCaster
     val branch2: (RS, List[Any]) => Any = casters(2).branchListCaster
-    val leaf   : RS => Any              = casters(3).tupleCaster
+    val leaf   : RS => Any              = casters(3).row2tpl
 
     if (getRowCount(rows) == 1) {
       rows.first()
@@ -285,7 +285,7 @@ class NestTpls extends SqlQueryBase {
     val branch1: (RS, List[Any]) => Any = casters(1).branchListCaster
     val branch2: (RS, List[Any]) => Any = casters(2).branchListCaster
     val branch3: (RS, List[Any]) => Any = casters(3).branchListCaster
-    val leaf   : RS => Any              = casters(4).tupleCaster
+    val leaf   : RS => Any              = casters(4).row2tpl
 
     if (getRowCount(rows) == 1) {
       rows.first()
@@ -427,7 +427,7 @@ class NestTpls extends SqlQueryBase {
     val branch2: (RS, List[Any]) => Any = casters(2).branchListCaster
     val branch3: (RS, List[Any]) => Any = casters(3).branchListCaster
     val branch4: (RS, List[Any]) => Any = casters(4).branchListCaster
-    val leaf   : RS => Any              = casters(5).tupleCaster
+    val leaf   : RS => Any              = casters(5).row2tpl
 
     if (getRowCount(rows) == 1) {
       rows.first()
@@ -609,7 +609,7 @@ class NestTpls extends SqlQueryBase {
     val branch3: (RS, List[Any]) => Any = casters(3).branchListCaster
     val branch4: (RS, List[Any]) => Any = casters(4).branchListCaster
     val branch5: (RS, List[Any]) => Any = casters(5).branchListCaster
-    val leaf   : RS => Any              = casters(6).tupleCaster
+    val leaf   : RS => Any              = casters(6).row2tpl
 
     if (getRowCount(rows) == 1) {
       rows.first()
@@ -835,7 +835,7 @@ class NestTpls extends SqlQueryBase {
     val branch4: (RS, List[Any]) => Any = casters(4).branchListCaster
     val branch5: (RS, List[Any]) => Any = casters(5).branchListCaster
     val branch6: (RS, List[Any]) => Any = casters(6).branchListCaster
-    val leaf   : RS => Any              = casters(7).tupleCaster
+    val leaf   : RS => Any              = casters(7).row2tpl
 
     if (getRowCount(rows) == 1) {
       rows.first()

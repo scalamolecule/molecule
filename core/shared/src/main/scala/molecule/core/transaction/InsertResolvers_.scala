@@ -10,14 +10,15 @@ trait InsertResolvers_ {
     nsMap: Map[String, MetaNs],
     elements: List[Element],
     resolvers: List[Product => Unit],
-    tplIndex: Int
+    tplIndex: Int,
+    prevRefs: List[String]
   ): List[Product => Unit]
 
   def getResolver(
     nsMap: Map[String, MetaNs],
     elements: List[Element]
   ): Product => Unit = {
-    val resolvers: List[Product => Unit] = resolve(nsMap, elements, Nil, 0)
+    val resolvers: List[Product => Unit] = resolve(nsMap, elements, Nil, 0, Nil)
     resolvers.length match {
       case 1  => resolve1(resolvers)
       case 2  => resolve2(resolvers)

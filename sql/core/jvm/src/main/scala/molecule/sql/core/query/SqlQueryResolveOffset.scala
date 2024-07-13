@@ -5,7 +5,6 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.util.{FutureUtils, ModelUtils}
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.query.casting._
-import scala.collection.mutable.ListBuffer
 
 case class SqlQueryResolveOffset[Tpl](
   elements: List[Element],
@@ -17,6 +16,7 @@ case class SqlQueryResolveOffset[Tpl](
   with ModelUtils
   with MoleculeLogging {
 
+  lazy val forward = optLimit.fold(true)(_ >= 0) && optOffset.fold(true)(_ >= 0)
 
   def getListFromOffset_sync(implicit conn: JdbcConn_JVM)
   : (List[Tpl], Int, Boolean) = {
@@ -24,42 +24,20 @@ case class SqlQueryResolveOffset[Tpl](
     val sortedRows = getData(conn, optLimit, optOffset)
     m2q.casts match {
       case c: CastTuple        => handleTuples(c, sortedRows, conn)
+      case c: CastOptRefNested => handleTuples(c, sortedRows, conn)
       case c: CastNested       => handleNested(c, sortedRows, conn)
-      case c: CastOptRefNested => handleOptRefNested(c, sortedRows, conn)
       case _                   => ???
     }
   }
 
-
-  private def handleOptRefNested(
-    c: CastOptRefNested, sortedRows: RS, conn: JdbcConn_JVM
-  ): (List[Tpl], Int, Boolean) = {
-    val row2nestedOptions = NestOptRef.row2nestedOptions(c.getCasters)
-    val tuples            = ListBuffer.empty[Tpl]
-    while (sortedRows.next()) {
-      tuples += row2nestedOptions(sortedRows).asInstanceOf[Tpl]
-    }
-    val rows       = order(tuples.toList)
-    val totalCount = optOffset.fold(m2q.getRowCount(sortedRows))(_ => getTotalCount(conn))
-    val fromUntil  = getFromUntil(totalCount, optLimit, optOffset)
-    val hasMore    = fromUntil.fold(totalCount > 0)(_._3)
-    (rows, totalCount, hasMore)
-  }
-
-
   private def handleTuples(
-    c: CastTuple, sortedRows: RS, conn: JdbcConn_JVM
+    c: CastStrategy, sortedRows: RS, conn: JdbcConn_JVM
   ): (List[Tpl], Int, Boolean) = {
-    val row2tpl = c.tupleCaster
-    val tuples  = ListBuffer.empty[Tpl]
-    while (sortedRows.next()) {
-      tuples += row2tpl(sortedRows).asInstanceOf[Tpl]
-    }
-    val rows       = order(tuples.toList)
+    val tpls       = castTuples(c.row2tpl, sortedRows, forward)
     val totalCount = optOffset.fold(m2q.getRowCount(sortedRows))(_ => getTotalCount(conn))
     val fromUntil  = getFromUntil(totalCount, optLimit, optOffset)
     val hasMore    = fromUntil.fold(totalCount > 0)(_._3)
-    (rows, totalCount, hasMore)
+    (tpls, totalCount, hasMore)
   }
 
 
@@ -89,8 +67,7 @@ case class SqlQueryResolveOffset[Tpl](
 
 
   private def order(rows: List[Tpl]): List[Tpl] = {
-    if (optLimit.fold(true)(_ >= 0) && optOffset.fold(true)(_ >= 0))
-      rows else rows.reverse
+    if (forward) rows else rows.reverse
   }
 
 

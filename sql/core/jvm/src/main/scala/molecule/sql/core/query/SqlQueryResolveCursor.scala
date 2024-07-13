@@ -8,7 +8,7 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.query.Pagination
 import molecule.core.util.FutureUtils
 import molecule.sql.core.facade.JdbcConn_JVM
-import molecule.sql.core.query.casting.{CastNested, CastTuple}
+import molecule.sql.core.query.casting.{CastNested, CastOptRefNested, CastTuple}
 import molecule.sql.core.query.cursorStrategy.{NoUnique, PrimaryUnique, SubUnique}
 
 case class SqlQueryResolveCursor[Tpl](
@@ -59,9 +59,10 @@ case class SqlQueryResolveCursor[Tpl](
       (Nil, "", false)
     } else {
       m2q.casts match {
-        case c: CastTuple  => handleTuples(c, limit, forward, sortedRows, conn)
-        case c: CastNested => handleNested(c, limit, forward, sortedRows, conn)
-        case _             => ???
+        case c: CastTuple        => handleTuples(c, limit, forward, sortedRows, conn)
+        case c: CastOptRefNested => handleTuples(c, limit, forward, sortedRows, conn)
+        case c: CastNested       => handleNested(c, limit, forward, sortedRows, conn)
+        case _                   => ???
       }
     }
   }
