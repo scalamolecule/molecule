@@ -9,18 +9,22 @@ trait CastBase {
   type Cast = (RS, ParamIndex) => Any
 }
 
-class Casters(casters0: List[CastTuple]) extends CastBase { self: CastStrategy =>
-  private var casters = casters0
+class TupleCasters(tupleCasters0: List[CastTuple]) extends CastBase { self: CastStrategy =>
+  private var _tupleCasters = tupleCasters0
 
+  // Add cast to last CastTuple
   override def add(cast: Cast): Unit = {
-    val last = casters.last
-    casters = casters.init :+ last.copy(casts0 = last.getCasts :+ cast)
+    val last = _tupleCasters.last
+    _tupleCasters = _tupleCasters.init :+ last.copy(casts0 = last.getCasts :+ cast)
   }
+
+  // Replace last cast of last CastTuple
   override def replace(cast: Cast): Unit = {
-    val last = casters.last
-    casters = casters.init :+ last.copy(casts0 = last.getCasts.init :+ cast)
+    val last = _tupleCasters.last
+    _tupleCasters = _tupleCasters.init :+ last.copy(casts0 = last.getCasts.init :+ cast)
   }
-  def getCasters: List[CastTuple] = casters
+
+  def tupleCasters: List[CastTuple] = _tupleCasters
 }
 
 
@@ -86,29 +90,29 @@ case class CastTuple(
 }
 
 
-case class CastNested(private val casters0: List[CastTuple])
-  extends Casters(casters0) with CastStrategy {
+case class CastNested(private val tupleCasters0: List[CastTuple])
+  extends TupleCasters(tupleCasters0) with CastStrategy {
 
   override def nest: CastNested = {
     // Shift all first indexes since one more initial
     // nested level entity id is added for housekeeping
-    val casters1 = getCasters.map(c => c.copy(firstIndex = c.firstIndex + 1))
+    val casters1 = tupleCasters.map(c => c.copy(firstIndex = c.firstIndex + 1))
     CastNested(casters1 :+ CastTuple(Nil, casters1.last.lastIndex))
   }
   override def optRef: CastOptRefNested = ???
 }
 
-case class CastOptRefNested(private val casters0: List[CastTuple])
-  extends Casters(casters0) with CastStrategy {
+case class CastOptRefNested(private val tupleCasters0: List[CastTuple])
+  extends TupleCasters(tupleCasters0) with CastStrategy {
 
   override def row2tpl: RS => Any =
-    NestOptRef.row2nestedOptions(getCasters)
+    NestOptRef.row2nestedOptions(tupleCasters)
 
   override def nest: CastNested = ???
 
   override def optRef: CastOptRefNested = {
     CastOptRefNested(
-      getCasters :+ CastTuple(Nil, getCasters.last.lastIndex)
+      tupleCasters :+ CastTuple(Nil, tupleCasters.last.lastIndex)
     )
   }
 }

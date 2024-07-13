@@ -18,7 +18,9 @@ trait SqlInsert
 
   // (set doPrint in db implementations to print debug data)
 
-  def getInsertData(nsMap: Map[String, MetaNs], elements: List[Element], tpls: Seq[Product]): Data = {
+  def getInsertData(
+    nsMap: Map[String, MetaNs], elements: List[Element], tpls: Seq[Product]
+  ): Data = {
     elements.foreach(debug)
     debug("\n\n### A #############################################################################################")
     if (tpls.isEmpty) {

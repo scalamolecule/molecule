@@ -178,12 +178,12 @@ abstract class SqlQueryResolve[Tpl](
     val nestedTpls = if (m2q.isManNested) {
       // Nested
       (new NestTpls).rows2nested(
-        sortedRows, c.getCasters
+        sortedRows, c.tupleCasters
       ).asInstanceOf[List[Tpl]]
     } else {
       // OptNested
       (new NestOptTpls).rows2optNested(
-        sortedRows, c.getCasters
+        sortedRows, c.tupleCasters
       ).asInstanceOf[List[Tpl]]
     }
     (nestedTpls, nestedTpls.length)

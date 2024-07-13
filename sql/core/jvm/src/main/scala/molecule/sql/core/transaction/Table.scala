@@ -13,3 +13,10 @@ case class Table(
   upsertStmt: Option[List[Long] => String] = None,
   updateIdsMap: Boolean = true,
 )
+
+case class JoinTable(
+  stmt: String,
+  leftPath: List[String],
+  rightPath: List[String],
+  rightCounts: List[Int] = List.empty[Int]
+)

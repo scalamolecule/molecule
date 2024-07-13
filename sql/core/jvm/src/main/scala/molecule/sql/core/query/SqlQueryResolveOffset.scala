@@ -47,14 +47,14 @@ case class SqlQueryResolveOffset[Tpl](
     val (nestedRows, totalCount) = if (m2q.isManNested) {
       // Nested
       val nestedRows = order((new NestTpls).rows2nested(
-        sortedRows, c.getCasters
+        sortedRows, c.tupleCasters
       ).asInstanceOf[List[Tpl]])
       (nestedRows, m2q.getRowCount(sortedRows))
 
     } else {
       // OptNested
       val nestedRows = order((new NestOptTpls).rows2optNested(
-        sortedRows, c.getCasters
+        sortedRows, c.tupleCasters
       ).asInstanceOf[List[Tpl]])
       (nestedRows, optOffset.fold(m2q.getRowCount(sortedRows))(_ => getTotalCount(conn)))
     }
