@@ -1,7 +1,9 @@
 package molecule.sql.core.transaction.strategy
 
-import java.sql.PreparedStatement
-import molecule.sql.core.javaSql.ResultSetInterface
+import java.sql.{Connection, PreparedStatement, Statement}
+import molecule.base.util.BaseHelpers
+import molecule.core.util.ModelUtils
+import molecule.sql.core.transaction.op._
 
 
 trait TxBase {
@@ -9,27 +11,21 @@ trait TxBase {
   type RowIndex = Int
   type ParamIndex = Int
   type Cast = (PS, ParamIndex) => Any
+  type Setter = PS => Unit
 }
 
 
-sealed trait TxStrategy extends TxBase {
+trait TxStrategy extends TxBase with BaseHelpers {
+  val sqlConn: Connection
 
-}
+  def paramIndex: Int
+  def add(col: String, setter: Setter, placeHolder: String = "?"): Unit
 
+  def refOne(ns: String, refAttr: String, refNs: String): TxStrategy = ???
+  def refMany(ns: String, refAttr: String, refNs: String): TxStrategy = ???
+  def optRef: TxStrategy = ???
+  def optRefNest: TxStrategy = ???
+  def nest: TxStrategy = ???
 
-
-case class SaveStrategy() extends TxStrategy {
-
-}
-
-case class InsertStrategy() extends TxStrategy {
-
-}
-
-case class UpdateStrategy() extends TxStrategy {
-
-}
-
-case class DeleteStrategy() extends TxStrategy {
-
+  def execute: List[Long]
 }

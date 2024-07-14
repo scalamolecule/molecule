@@ -42,38 +42,56 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       //      val a8: Future[List[(Int, Option[(Int, String)], Option[(Int, String)])]] = A.i.B.?(B.i.s).C.?(C.i.s).query.get
       for {
 
+        _ <- A.i(7).s("a").save.transact
+        _ <- A.i.s.query.get.map(_ ==> List((7, "a")))
 
-        _ <- A.i.Bb.*(B.i).insert(
-          (1, Nil),
-          (2, List(20))
-        ).i.transact
+        _ <- A.i(7).B.s("a").save.transact
+        _ <- A.i.B.s.query.get.map(_ ==> List((7, "a")))
 
-
-        _ <- A.i.B.?(B.i).insert(
-          (1, None),
-          (2, Some(20))
-        ).i.transact
-
-        //        _ <- rawQuery(
-        //          """SELECT DISTINCT
-        //            |  A.i,
-        //            |  B.i
-        //            |FROM A
-        //            |  LEFT JOIN B ON
-        //            |    A.b = B.id
-        //            |WHERE
-        //            |  A.i IS NOT NULL;
-        //            |""".stripMargin, true)
-        //
-        //        _ <- rawQuery(
-        //          """SELECT count(*) from B
-        //            |""".stripMargin, true)
+        _ <- A.i(7).Bb.s("a").save.transact
+        _ <- A.i.Bb.s.query.get.map(_ ==> List((7, "a")))
 
 
-        _ <- A.i.B.?(B.i).query.get.map(_ ==> List(
-          (1, None),
-          (2, Some(20)),
-        ))
+
+
+//        _ <- A.i.Bb.*(B.i).insert(
+//          (1, Nil),
+//          (2, List(20))
+//        ).i.transact
+
+
+
+//        _ <- A.i.Bb.*(B.i).insert(
+//          (1, Nil),
+//          (2, List(20))
+//        ).i.transact
+//
+//
+//        _ <- A.i.B.?(B.i).insert(
+//          (1, None),
+//          (2, Some(20))
+//        ).i.transact
+//
+//        //        _ <- rawQuery(
+//        //          """SELECT DISTINCT
+//        //            |  A.i,
+//        //            |  B.i
+//        //            |FROM A
+//        //            |  LEFT JOIN B ON
+//        //            |    A.b = B.id
+//        //            |WHERE
+//        //            |  A.i IS NOT NULL;
+//        //            |""".stripMargin, true)
+//        //
+//        //        _ <- rawQuery(
+//        //          """SELECT count(*) from B
+//        //            |""".stripMargin, true)
+//
+//
+//        _ <- A.i.B.?(B.i).query.get.map(_ ==> List(
+//          (1, None),
+//          (2, Some(20)),
+//        ))
 
 
 

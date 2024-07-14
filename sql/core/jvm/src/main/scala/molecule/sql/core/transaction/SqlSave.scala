@@ -1,6 +1,6 @@
 package molecule.sql.core.transaction
 
-import java.sql.{Statement, PreparedStatement => PS}
+import java.sql.{PreparedStatement => PS}
 import boopickle.Default._
 import molecule.base.ast._
 import molecule.boilerplate.ast.Model._
@@ -8,6 +8,8 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ResolveSave
 import molecule.core.transaction.ops.SaveOps
 import molecule.core.util.SerializationUtils
+import molecule.sql.core.transaction.op.SaveNs
+import molecule.sql.core.transaction.strategy.TxStrategy
 
 trait SqlSave
   extends SqlBase_JVM
@@ -27,6 +29,13 @@ trait SqlSave
     postResolvers.foreach(_(()))
     addRowSetterToTables()
     (getTables, Nil)
+  }
+
+  def getSaveStrategy(elements: List[Element]): TxStrategy = {
+    initialNs = getInitialNs(elements)
+    save = SaveNs(sqlConn, initialNs)
+    resolve(elements)
+    save
   }
 
   private def addRowSetterToTables(): Unit = {
@@ -101,6 +110,14 @@ trait SqlSave
     transformValue: T => Any,
     exts: List[String] = Nil
   ): Unit = {
+    val paramIndex1 = save.paramIndex
+    optValue.fold {
+      save.add(attr, (ps: PS) => ps.setNull(paramIndex1, 0))
+    } { value =>
+      val setter = transformValue(value).asInstanceOf[(PS, Int) => Unit]
+      save.add(attr, (ps: PS) => setter(ps, paramIndex1))
+    }
+
     val (curPath, paramIndex) = getParamIndex(attr, castExt = exts(2))
     val colSetter: Setter     = optValue.fold {
       (ps: PS, _: IdsMap, _: RowIndex) => {
@@ -179,6 +196,10 @@ trait SqlSave
   override protected def addRef(
     ns: String, refAttr: String, refNs: String, card: Card
   ): Unit = {
+    save = card match {
+      case CardOne => save.refOne(ns, refAttr, refNs)
+      case _       => save.refMany(ns, refAttr, refNs)
+    }
     postResolvers = postResolvers :+ getRefResolver[Unit](ns, refAttr, refNs, card)
   }
 

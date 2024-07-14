@@ -6,12 +6,12 @@ import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
 import molecule.core.action._
 import molecule.core.marshalling.ConnProxy
-import molecule.core.marshalling.dbView.{AsOf, DbView, Since}
 import molecule.core.spi._
 import molecule.core.validation.TxModelValidation
 import molecule.core.validation.insert.InsertValidation
 import molecule.sql.core.facade.JdbcConn_JVM
-import molecule.sql.core.query.{Model2SqlQuery, SqlQueryBase, SqlQueryResolveCursor, SqlQueryResolveOffset}
+import molecule.sql.core.query.{SqlQueryResolveCursor, SqlQueryResolveOffset}
+import molecule.sql.core.transaction.strategy.TxStrategy
 import molecule.sql.core.transaction.update.UpdateHelper
 import molecule.sql.core.transaction.{SqlBase_JVM, SqlUpdateSetValidator}
 import scala.collection.mutable.ListBuffer
@@ -113,7 +113,11 @@ trait SpiSyncBase
       save_inspect(save)
     val errors = save_validate(save0) // validate original elements against meta model
     if (errors.isEmpty) {
-      val txReport = conn.transact_sync(save_getData(save, conn))
+      //      val txReport = conn.transact_sync(save_getData(save, conn))
+
+      val txStrategy = save_getData2(save, conn)
+      val txReport   = conn.transact_sync(txStrategy)
+
       conn.callback(save.elements)
       txReport
     } else {
@@ -130,6 +134,8 @@ trait SpiSyncBase
 
   // Implement for each sql database
   def save_getData(save: Save, conn: JdbcConn_JVM): Data
+  def save_getData2(save: Save, conn: JdbcConn_JVM): TxStrategy = ???
+
 
   override def save_validate(save: Save)(implicit conn: Conn): Map[String, Seq[String]] = {
     val proxy = conn.proxy
@@ -210,7 +216,7 @@ trait SpiSyncBase
           .map { m =>
             val elements = m.mkString("\n")
             val tables   = update_getData(conn, Update(m, update.isUpsert))._1
-//            val tables   = update_getData(conn, m, update.isUpsert)._1
+            //            val tables   = update_getData(conn, m, update.isUpsert)._1
             tables.headOption.fold(elements)(table => elements + "\n" + table.stmt)
           }
           .mkString(action + "S ----------------------\n", "\n------------\n", "")
