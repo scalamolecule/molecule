@@ -1,14 +1,14 @@
-package molecule.sql.core.transaction.op
+package molecule.sql.core.transaction.strategy.save
 
 import java.sql.{Connection, Statement}
-import molecule.sql.core.transaction.strategy.TxStrategy
+import molecule.sql.core.transaction.strategy.{SqlOps, SqlAction}
 import scala.collection.mutable.ListBuffer
 
 abstract class SaveBase(
   sqlConn: Connection,
-  dbOps: DbOps,
+  dbOps: SqlOps,
   table: String
-) extends TxStrategy {
+) extends SqlAction {
 
   private val cols         = ListBuffer.empty[String]
   private val placeHolders = ListBuffer.empty[String]
@@ -33,8 +33,11 @@ abstract class SaveBase(
     sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
   }
 
+  // This is the heart of save operations for this node in the
+  // graph of relationships. Each ref recursively save its sub-graph.
   def insert: List[Long] = {
-    // Execute referenced namespaces first so that we can reference them subsequently
+    // Execute referenced namespaces first so that we can
+    // reference them subsequently from current namespace
     refs.foreach(_.execute)
 
     // Execute this namespace insert
@@ -98,12 +101,12 @@ abstract class SaveBase(
     }
   }
 
-  override def refOne(ns: String, refAttr: String, refNs: String): TxStrategy = {
+  override def refOne(ns: String, refAttr: String, refNs: String): SqlAction = {
     val ref = SaveRefOne(this, sqlConn, dbOps, ns, refAttr, refNs)
     refs += ref
     ref
   }
-  override def refMany(ns: String, refAttr: String, refNs: String): TxStrategy = {
+  override def refMany(ns: String, refAttr: String, refNs: String): SqlAction = {
     val ref = SaveRefMany(this, sqlConn, dbOps, ns, refAttr, refNs)
     refs += ref
     ref

@@ -1,10 +1,10 @@
 package molecule.sql.sqlite.transaction
 
 import java.sql.Connection
-import molecule.sql.core.transaction.op.DbOps
+import molecule.sql.core.transaction.strategy.SqlOps
 import scala.collection.mutable.ListBuffer
 
-class DbOps_sqlite extends DbOps {
+class SqlOps_sqlite extends SqlOps {
 
   // Since SQlite doesn't allow us to get ps.getGeneratedKeys after an
   // executeBatch(), we get the affected ids by brute force with a query instead.

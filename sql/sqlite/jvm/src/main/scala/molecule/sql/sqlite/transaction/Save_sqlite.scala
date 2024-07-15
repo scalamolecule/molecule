@@ -42,13 +42,13 @@ trait Save_sqlite extends SqlSave with TxBase_sqlite { self: ResolveSave =>
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    val paramIndex1 = save.paramIndex
+    val paramIndex1 = action.paramIndex
     optMap match {
       case Some(map: Map[_, _]) if map.nonEmpty =>
-        save.add(attr, (ps: PS) =>
+        action.add(attr, (ps: PS) =>
           ps.setString(paramIndex1, map2json(map, value2json)))
       case _                                    =>
-        save.add(attr, (ps: PS) => ps.setNull(paramIndex1, 0))
+        action.add(attr, (ps: PS) => ps.setNull(paramIndex1, 0))
     }
   }
 
@@ -70,16 +70,16 @@ trait Save_sqlite extends SqlSave with TxBase_sqlite { self: ResolveSave =>
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     optRefNs.fold {
-      val paramIndex1 = save.paramIndex
+      val paramIndex1 = action.paramIndex
       if (optIterable.nonEmpty && optIterable.get.nonEmpty) {
         val json = iterable2json(optIterable.get, value2json)
-        save.add(attr, (ps: PS) => ps.setString(paramIndex1, json))
+        action.add(attr, (ps: PS) => ps.setString(paramIndex1, json))
       } else {
-        save.add(attr, (ps: PS) => ps.setNull(paramIndex1, 0))
+        action.add(attr, (ps: PS) => ps.setNull(paramIndex1, 0))
       }
     } { refNs =>
       optIterable.foreach(refIds =>
-        save.addCardManyRefAttr(
+        action.addCardManyRefAttr(
           ns, attr, refNs, refIds.asInstanceOf[Set[Long]], defaultValues
         )
       )

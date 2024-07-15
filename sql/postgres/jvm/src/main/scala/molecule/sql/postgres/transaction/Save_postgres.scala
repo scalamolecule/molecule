@@ -15,13 +15,13 @@ trait Save_postgres extends SqlSave with TxBase_postgres { self: ResolveSave =>
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    val paramIndex1 = save.paramIndex
+    val paramIndex1 = action.paramIndex
     optMap match {
       case Some(map: Map[_, _]) if map.nonEmpty =>
-        save.add(attr, (ps: PS) =>
+        action.add(attr, (ps: PS) =>
           ps.setString(paramIndex1, map2json(map, value2json)), "?", "::jsonb")
       case _                                    =>
-        save.add(attr, (ps: PS) => ps.setNull(paramIndex1, 0))
+        action.add(attr, (ps: PS) => ps.setNull(paramIndex1, 0))
     }
   }
 

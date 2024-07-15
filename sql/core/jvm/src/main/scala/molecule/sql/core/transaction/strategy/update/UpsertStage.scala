@@ -1,4 +1,4 @@
-package molecule.sql.core.transaction.update
+package molecule.sql.core.transaction.strategy.update
 
 import molecule.boilerplate.ast.Model._
 

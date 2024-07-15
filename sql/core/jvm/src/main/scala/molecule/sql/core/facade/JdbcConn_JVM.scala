@@ -7,7 +7,7 @@ import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.{Conn, TxReport}
 import molecule.core.util.ModelUtils
 import molecule.sql.core.javaSql.{ResultSetImpl, ResultSetInterface}
-import molecule.sql.core.transaction.strategy.TxStrategy
+import molecule.sql.core.transaction.strategy.SqlAction
 import molecule.sql.core.transaction.{JoinTable, SqlBase_JVM, SqlDataType_JVM, Table}
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
@@ -51,7 +51,7 @@ case class JdbcConn_JVM(
     atomicTransaction(() => populateStmts(data))
   }
 
-  def transact_sync(tx: TxStrategy): TxReport = {
+  def transact_sync(tx: SqlAction): TxReport = {
     atomicTransaction(() => tx.execute)
   }
 

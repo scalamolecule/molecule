@@ -1,4 +1,4 @@
-package molecule.sql.core.transaction.update
+package molecule.sql.core.transaction.strategy.update
 
 import java.sql.{Statement, PreparedStatement => PS}
 import molecule.base.ast.{CardOne, CardSet}
@@ -9,7 +9,7 @@ import molecule.core.marshalling.ConnProxy
 import molecule.core.spi.Conn
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.query.SqlQueryResolveOffset
-import molecule.sql.core.spi.{SpiHelpers, SpiSyncBase}
+import molecule.sql.core.spi.SpiHelpers
 import molecule.sql.core.transaction.{SqlBase_JVM, Table}
 import scala.annotation.tailrec
 import scala.collection.mutable

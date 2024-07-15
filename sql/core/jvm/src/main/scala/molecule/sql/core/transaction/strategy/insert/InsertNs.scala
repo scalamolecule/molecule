@@ -1,15 +1,15 @@
-package molecule.sql.core.transaction.op
+package molecule.sql.core.transaction.strategy.insert
 
 import java.sql.Connection
-import molecule.sql.core.transaction.strategy.TxStrategy
+import molecule.sql.core.transaction.strategy.{SqlOps, SqlAction}
 
-case class SaveNs(
+case class InsertNs(
   sqlConn: Connection,
   ns: String,
-)(implicit dbOps: DbOps) extends SaveBase(sqlConn, dbOps, ns) {
+)(implicit dbOps: SqlOps) extends InsertBase(sqlConn, dbOps, ns) {
 
   // Initial namespace
-  def fromTop: TxStrategy = this
+  def fromTop: SqlAction = this
 
   override def execute: List[Long] = {
     insert

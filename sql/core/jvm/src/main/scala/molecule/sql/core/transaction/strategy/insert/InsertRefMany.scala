@@ -1,18 +1,18 @@
-package molecule.sql.core.transaction.op
+package molecule.sql.core.transaction.strategy.insert
 
 import java.sql.Connection
-import molecule.sql.core.transaction.strategy.TxStrategy
+import molecule.sql.core.transaction.strategy.{SqlOps, SqlAction}
 
-case class SaveRefMany(
-  parent: TxStrategy,
+case class InsertRefMany(
+  parent: SqlAction,
   sqlConn: Connection,
-  dbOps: DbOps,
+  dbOps: SqlOps,
   ns: String,
   refAttr: String,
   refNs: String,
-) extends SaveBase(sqlConn, dbOps, refNs) {
+) extends InsertBase(sqlConn, dbOps, refNs) {
 
-  def fromTop: TxStrategy = parent.fromTop
+  def fromTop: SqlAction = parent.fromTop
 
   override def execute: List[Long] = {
     val List(refId) = insert
@@ -30,7 +30,7 @@ case class SaveRefMany(
     List(refId)
   }
 
-  override def backRef: TxStrategy = parent
+  override def backRef: SqlAction = parent
 
   override def toString: String = render(0)
   override def render(indent: Int): String = render(indent, "SaveRefMany")

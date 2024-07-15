@@ -1,10 +1,10 @@
 package molecule.sql.postgres.transaction
 
 import java.sql.Connection
-import molecule.sql.core.transaction.op.DbOps
+import molecule.sql.core.transaction.strategy.SqlOps
 import scala.collection.mutable.ListBuffer
 
-class DbOps_postgres extends DbOps {
+class SqlOps_postgres extends SqlOps {
 
 
   override def insertStmt(

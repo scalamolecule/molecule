@@ -1,10 +1,9 @@
-package molecule.sql.core.transaction.op
+package molecule.sql.core.transaction.strategy
 
 import java.sql.Connection
-import molecule.sql.core.transaction.strategy.TxBase
 import scala.collection.mutable.ListBuffer
 
-class DbOps extends TxBase {
+class SqlOps extends SqlActionBase {
 
   def getIds(sqlConn: Connection, table: String, ps: PS): List[Long] = {
     // Execute incoming batch of prepared statements

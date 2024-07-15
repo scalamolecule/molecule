@@ -4,24 +4,10 @@ import java.sql.{Connection, PreparedStatement}
 import molecule.base.util.BaseHelpers
 import scala.collection.mutable.ListBuffer
 
-trait TxBase extends BaseHelpers {
-  type PS = PreparedStatement
-  type RowIndex = Int
-  type ParamIndex = Int
-  type Cast = (PS, ParamIndex) => Any
-  type Setter = PS => Unit
 
-  def joinIdNames(ns: String, refNs: String): (String, String) = {
-    if (ns == refNs)
-      (ss(ns, "1_id"), ss(refNs, "2_id"))
-    else
-      (ss(ns, "id"), ss(refNs, "id"))
-  }
-}
-
-trait TxStrategy extends TxBase {
+trait SqlAction extends SqlActionBase {
   val sqlConn: Connection
-  protected val refs        = ListBuffer.empty[TxStrategy]
+  protected val refs        = ListBuffer.empty[SqlAction]
   private   val postSetters = ListBuffer.empty[List[Long] => Unit]
 
   // For inspection
@@ -40,14 +26,14 @@ trait TxStrategy extends TxBase {
   }
   def getPostSetters: ListBuffer[List[Long] => Unit] = postSetters
 
-  def backRef: TxStrategy = ???
-  def refOne(ns: String, refAttr: String, refNs: String): TxStrategy = ???
-  def refMany(ns: String, refAttr: String, refNs: String): TxStrategy = ???
-  def optRef: TxStrategy = ???
-  def optRefNest: TxStrategy = ???
-  def nest: TxStrategy = ???
+  def backRef: SqlAction = ???
+  def refOne(ns: String, refAttr: String, refNs: String): SqlAction = ???
+  def refMany(ns: String, refAttr: String, refNs: String): SqlAction = ???
+  def optRef: SqlAction = ???
+  def optRefNest: SqlAction = ???
+  def nest: SqlAction = ???
 
-  def fromTop: TxStrategy
+  def fromTop: SqlAction
   def execute: List[Long]
 
   def addCardManyRefAttr(

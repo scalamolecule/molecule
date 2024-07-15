@@ -11,8 +11,8 @@ import molecule.core.validation.TxModelValidation
 import molecule.core.validation.insert.InsertValidation
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.query.{SqlQueryResolveCursor, SqlQueryResolveOffset}
-import molecule.sql.core.transaction.strategy.TxStrategy
-import molecule.sql.core.transaction.update.UpdateHelper
+import molecule.sql.core.transaction.strategy.SqlAction
+import molecule.sql.core.transaction.strategy.update.UpdateHelper
 import molecule.sql.core.transaction.{SqlBase_JVM, SqlUpdateSetValidator}
 import scala.collection.mutable.ListBuffer
 import scala.util.control.NonFatal
@@ -130,7 +130,7 @@ trait SpiSyncBase
   }
 
   // Implement for each sql database
-  def save_getData(save: Save, conn: JdbcConn_JVM): TxStrategy = ???
+  def save_getData(save: Save, conn: JdbcConn_JVM): SqlAction = ???
 
 
   override def save_validate(save: Save)(implicit conn: Conn): Map[String, Seq[String]] = {
@@ -163,6 +163,7 @@ trait SpiSyncBase
   }
 
   // Implement for each sql database
+  def insert_getData2(insert: Insert, conn: JdbcConn_JVM): SqlAction
   def insert_getData(insert: Insert, conn: JdbcConn_JVM): Data
 
   override def insert_validate(insert: Insert)(implicit conn: Conn): Seq[(Int, Seq[InsertError])] = {
@@ -276,7 +277,7 @@ trait SpiSyncBase
   }
 
   private def printInspectTx2(
-    label: String, elements: List[Element], tx: TxStrategy, tpls: Seq[Product] = Nil
+    label: String, elements: List[Element], tx: SqlAction, tpls: Seq[Product] = Nil
   ): Unit = {
     printRaw(label, elements, tx.toString, tpls.mkString("\n"))
   }

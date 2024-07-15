@@ -7,6 +7,9 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ops.InsertOps
 import molecule.core.transaction.{InsertResolvers_, ResolveInsert}
 import molecule.core.util.ModelUtils
+import molecule.sql.core.transaction.strategy.SqlAction
+import molecule.sql.core.transaction.strategy.insert.InsertNs
+import molecule.sql.core.transaction.strategy.save.SaveNs
 
 trait SqlInsert
   extends SqlBase_JVM
@@ -17,6 +20,14 @@ trait SqlInsert
     with MoleculeLogging { self: ResolveInsert with InsertResolvers_ =>
 
   // (set doPrint in db implementations to print debug data)
+
+  def getInsertStrategy(
+    nsMap: Map[String, MetaNs], elements: List[Element], tpls: Seq[Product]
+  ): SqlAction = {
+    action = InsertNs(sqlConn, getInitialNs(elements))
+    getResolver(nsMap, elements)
+    action.fromTop
+  }
 
   def getInsertData(
     nsMap: Map[String, MetaNs], elements: List[Element], tpls: Seq[Product]
@@ -162,6 +173,10 @@ trait SqlInsert
     }
     (curRefPath, paramIndexes(curRefPath -> attr))
   }
+
+
+
+
 
   override protected def addOne[T](
     ns: String,
