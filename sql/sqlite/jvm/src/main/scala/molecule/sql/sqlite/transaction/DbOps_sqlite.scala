@@ -2,12 +2,15 @@ package molecule.sql.sqlite.transaction
 
 import java.sql.Connection
 import molecule.sql.core.transaction.op.DbOps
-import molecule.sql.core.transaction.strategy.TxBase
 import scala.collection.mutable.ListBuffer
 
 class DbOps_sqlite extends DbOps {
 
-  override def getIds(sqlConn: Connection, table: String, ps: PS): List[Long] = {
+  // Since SQlite doesn't allow us to get ps.getGeneratedKeys after an
+  // executeBatch(), we get the affected ids by brute force with a query instead.
+  override def getIds(
+    sqlConn: Connection, table: String, ps: PS
+  ): List[Long] = {
     val getPrevId = sqlConn.prepareStatement(
       s"select max(id) from $table"
     ).executeQuery()
@@ -19,13 +22,11 @@ class DbOps_sqlite extends DbOps {
     ps.executeBatch()
     ps.close()
 
-    // Since SQlite doesn't allow us to get ps.getGeneratedKeys after an
-    // executeBatch(), we get the affected ids by brute force with a query instead.
     val getNewIds = sqlConn.prepareStatement(
       s"select id from $table where id > $prevId order by id asc"
     ).executeQuery()
 
-    val ids       = ListBuffer.empty[Long]
+    val ids = ListBuffer.empty[Long]
     while (getNewIds.next()) {
       ids += getNewIds.getLong(1)
     }
@@ -40,9 +41,6 @@ class DbOps_sqlite extends DbOps {
   ): String = {
     val columns           = cols.mkString(",\n  ")
     val inputPlaceholders = placeHolders.mkString(", ")
-//    val inputPlaceholders = cols.map {
-//      case (_, castExt) => s"?$castExt"
-//    }.mkString(", ")
     if (cols.nonEmpty) {
       s"""INSERT INTO $table (
          |  $columns

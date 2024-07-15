@@ -21,12 +21,7 @@ trait SpiSync_mysql extends SpiSyncBase {
   override def getModel2SqlQuery(elements: List[Element]) =
     new Model2SqlQuery_mysql(elements)
 
-  override def save_getData(save: Save, conn: JdbcConn_JVM): Data = {
-    new ResolveSave with Save_mysql {
-      override lazy val sqlConn = conn.sqlConn
-    }.getSaveData(save.elements)
-  }
-  override def save_getData2(save: Save, conn: JdbcConn_JVM): TxStrategy = {
+  override def save_getData(save: Save, conn: JdbcConn_JVM): TxStrategy = {
     new ResolveSave with Save_mysql {
       override lazy val sqlConn = conn.sqlConn
     }.getSaveStrategy(save.elements)

@@ -113,8 +113,7 @@ trait SpiSyncBase
       save_inspect(save)
     val errors = save_validate(save0) // validate original elements against meta model
     if (errors.isEmpty) {
-//      val txReport = conn.transact_sync(save_getData(save, conn))
-      val txReport = conn.transact_sync(save_getData2(save, conn))
+      val txReport = conn.transact_sync(save_getData(save, conn))
 
       conn.callback(save.elements)
       txReport
@@ -126,14 +125,12 @@ trait SpiSyncBase
   override def save_inspect(save: Save)(implicit conn0: Conn): Unit = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
     tryInspect("save", save.elements) {
-//      printInspectTx("SAVE", save.elements, save_getData(save, conn))
-      printInspectTx2("SAVE", save.elements, save_getData2(save, conn))
+      printInspectTx2("SAVE", save.elements, save_getData(save, conn))
     }
   }
 
   // Implement for each sql database
-  def save_getData(save: Save, conn: JdbcConn_JVM): Data
-  def save_getData2(save: Save, conn: JdbcConn_JVM): TxStrategy = ???
+  def save_getData(save: Save, conn: JdbcConn_JVM): TxStrategy = ???
 
 
   override def save_validate(save: Save)(implicit conn: Conn): Map[String, Seq[String]] = {
@@ -281,16 +278,6 @@ trait SpiSyncBase
   private def printInspectTx2(
     label: String, elements: List[Element], tx: TxStrategy, tpls: Seq[Product] = Nil
   ): Unit = {
-//    val (tables, joinTables) = stmts
-//    val tableStmts           = tables.reverse.map(_.stmt).mkString("\n--------\n")
-//    val joinTableStmts       = if (joinTables.isEmpty) {
-//      ""
-//    } else {
-//      "\n\n--------------\n\n" + joinTables.map(_.stmt).mkString("\n--------\n")
-//    }
-//    printRaw(label, elements, tableStmts + joinTableStmts, tpls.mkString("\n"))
-
-
     printRaw(label, elements, tx.toString, tpls.mkString("\n"))
   }
 

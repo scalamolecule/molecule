@@ -41,26 +41,14 @@ trait Save_mariadb extends SqlSave with BaseHelpers { self: ResolveSave =>
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    val paramIndex1 = save.paramIndex
+    val paramIndex = save.paramIndex
     optMap match {
       case Some(map: Map[_, _]) if map.nonEmpty =>
         save.add(attr, (ps: PS) =>
-          ps.setString(paramIndex1, map2json(map, value2json)))
+          ps.setString(paramIndex, map2json(map, value2json)))
       case _                                    =>
-        save.add(attr, (ps: PS) => ps.setNull(paramIndex1, 0))
+        save.add(attr, (ps: PS) => ps.setNull(paramIndex, 0))
     }
-
-
-    val (curPath, paramIndex) = getParamIndex(attr)
-    val colSetter: Setter     = optMap match {
-      case Some(map: Map[_, _]) if map.nonEmpty =>
-        (ps: PS, _: IdsMap, _: RowIndex) =>
-          ps.setString(paramIndex, map2json(map, value2json))
-      case _                                    =>
-        (ps: PS, _: IdsMap, _: RowIndex) =>
-          ps.setNull(paramIndex, 0)
-    }
-    addColSetter(curPath, colSetter)
   }
 
   override protected lazy val transformDate =
@@ -77,37 +65,19 @@ trait Save_mariadb extends SqlSave with BaseHelpers { self: ResolveSave =>
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     optRefNs.fold {
-      val paramIndex1 = save.paramIndex
+      val paramIndex = save.paramIndex
       if (optIterable.nonEmpty && optIterable.get.nonEmpty) {
         val json = iterable2json(optIterable.get, value2json)
-        save.add(attr, (ps: PS) => ps.setString(paramIndex1, json))
+        save.add(attr, (ps: PS) => ps.setString(paramIndex, json))
       } else {
-        save.add(attr, (ps: PS) => ps.setNull(paramIndex1, 0))
+        save.add(attr, (ps: PS) => ps.setNull(paramIndex, 0))
       }
-
-
-
-
-
-
-
-      val (curPath, paramIndex) = getParamIndex(attr)
-      val colSetter: Setter     = if (optIterable.nonEmpty && optIterable.get.nonEmpty) {
-        val json = iterable2json(optIterable.get, value2json)
-        (ps: PS, _: IdsMap, _: RowIndex) => ps.setString(paramIndex, json)
-      } else {
-        (ps: PS, _: IdsMap, _: RowIndex) => ps.setNull(paramIndex, 0)
-      }
-      addColSetter(curPath, colSetter)
     } { refNs =>
       optIterable.foreach(refIds =>
         save.addCardManyRefAttr(
           ns, attr, refNs, refIds.asInstanceOf[Set[Long]], defaultValues
         )
       )
-
-
-      join(ns, attr, refNs, optIterable)
     }
   }
 }

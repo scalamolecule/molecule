@@ -5,7 +5,5 @@ import molecule.sql.core.transaction.op.DbOps
 
 trait TxBase_sqlite { self: SqlBase_JVM =>
 
-
   override implicit lazy val dbOps: DbOps = new DbOps_sqlite
-
 }

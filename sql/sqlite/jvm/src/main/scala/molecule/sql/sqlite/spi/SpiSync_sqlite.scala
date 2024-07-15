@@ -24,13 +24,7 @@ trait SpiSync_sqlite extends SpiSyncBase {
 
   override protected lazy val defaultValues = "DEFAULT VALUES"
 
-
-  override def save_getData(save: Save, conn: JdbcConn_JVM): Data = {
-    new ResolveSave with Save_sqlite {
-      override lazy val sqlConn = conn.sqlConn
-    }.getSaveData(save.elements)
-  }
-  override def save_getData2(save: Save, conn: JdbcConn_JVM): TxStrategy = {
+  override def save_getData(save: Save, conn: JdbcConn_JVM): TxStrategy = {
     new ResolveSave with Save_sqlite {
       override lazy val sqlConn = conn.sqlConn
     }.getSaveStrategy(save.elements)

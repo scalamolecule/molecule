@@ -67,7 +67,7 @@ trait Rpc_SQL
   ): Future[Either[MoleculeError, TxReport]] = either {
     getConn(proxy).map(conn =>
       conn.transact_sync(
-        getSaveData(conn).getSaveData(elements)
+        getSaveData(conn).getSaveStrategy(elements)
       )
     )
   }

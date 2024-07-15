@@ -21,12 +21,7 @@ trait SpiSync_mariadb extends SpiSyncBase {
   override def getModel2SqlQuery(elements: List[Element]) =
     new Model2SqlQuery_mariadb(elements)
 
-  override def save_getData(save: Save, conn: JdbcConn_JVM): Data = {
-    new ResolveSave with Save_mariadb {
-      override lazy val sqlConn = conn.sqlConn
-    }.getSaveData(save.elements)
-  }
-  override def save_getData2(save: Save, conn: JdbcConn_JVM): TxStrategy = {
+  override def save_getData(save: Save, conn: JdbcConn_JVM): TxStrategy = {
     new ResolveSave with Save_mariadb {
       override lazy val sqlConn = conn.sqlConn
     }.getSaveStrategy(save.elements)

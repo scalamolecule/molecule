@@ -8,23 +8,6 @@ trait Save_postgres extends SqlSave with TxBase_postgres { self: ResolveSave =>
 
   doPrint = false
 
-  override protected def insertEmptyRowStmt(
-    table: String, cols: List[(String, String)]
-  ): String = {
-    val columns           = cols.map(_._1).mkString(",\n  ")
-    val inputPlaceholders = cols.map {
-      case (_, castExt) => s"?$castExt"
-    }.mkString(", ")
-    if (cols.nonEmpty) {
-      s"""INSERT INTO $table (
-         |  $columns
-         |) VALUES ($inputPlaceholders)""".stripMargin
-    } else {
-      s"INSERT INTO $table (id) VALUES (DEFAULT)"
-    }
-  }
-
-
   override protected def addMap[T](
     ns: String,
     attr: String,
@@ -40,19 +23,6 @@ trait Save_postgres extends SqlSave with TxBase_postgres { self: ResolveSave =>
       case _                                    =>
         save.add(attr, (ps: PS) => ps.setNull(paramIndex1, 0))
     }
-
-
-    val (curPath, paramIndex) = getParamIndex(attr, castExt = "::jsonb")
-    val colSetter: Setter     = optMap match {
-      case Some(map: Map[_, _]) if map.nonEmpty =>
-        (ps: PS, _: IdsMap, _: RowIndex) =>
-          ps.setString(paramIndex, map2json(map, value2json))
-
-      case _ =>
-        (ps: PS, _: IdsMap, _: RowIndex) =>
-          ps.setNull(paramIndex, 0)
-    }
-    addColSetter(curPath, colSetter)
   }
 
   override protected lazy val extsID             = List("ID", "VARCHAR", "")
