@@ -1,6 +1,6 @@
 package molecule.sql.core.transaction
 
-import java.sql.{PreparedStatement => PS}
+import java.sql.{Statement, PreparedStatement => PS}
 import boopickle.Default._
 import molecule.base.ast._
 import molecule.boilerplate.ast.Model._
@@ -23,6 +23,8 @@ trait SqlSave
   doPrint = false
 
   def getSaveData(elements: List[Element]): Data = {
+    save = SaveNs(sqlConn, getInitialNs(elements))
+
     initialNs = getInitialNs(elements)
     curRefPath = List(initialNs)
     resolve(elements)
@@ -32,10 +34,9 @@ trait SqlSave
   }
 
   def getSaveStrategy(elements: List[Element]): TxStrategy = {
-    initialNs = getInitialNs(elements)
-    save = SaveNs(sqlConn, initialNs)
+    save = SaveNs(sqlConn, getInitialNs(elements))
     resolve(elements)
-    save
+    save.fromTop
   }
 
   private def addRowSetterToTables(): Unit = {
@@ -115,7 +116,12 @@ trait SqlSave
       save.add(attr, (ps: PS) => ps.setNull(paramIndex1, 0))
     } { value =>
       val setter = transformValue(value).asInstanceOf[(PS, Int) => Unit]
-      save.add(attr, (ps: PS) => setter(ps, paramIndex1))
+      save.add(
+        attr,
+        (ps: PS) => setter(ps, paramIndex1),
+        "?",
+        exts(2) // Add type casting for postgres
+      )
     }
 
     val (curPath, paramIndex) = getParamIndex(attr, castExt = exts(2))
@@ -162,6 +168,14 @@ trait SqlSave
     attr: String,
     optArray: Option[Array[Byte]],
   ): Unit = {
+    val paramIndex1 = save.paramIndex
+    if (optArray.nonEmpty && optArray.get.nonEmpty) {
+      save.add(attr, (ps: PS) => ps.setBytes(paramIndex1, optArray.get))
+    } else {
+      save.add(attr, (ps: PS) => ps.setNull(paramIndex1, 0))
+    }
+
+
     val (curPath, paramIndex) = getParamIndex(attr)
     val colSetter: Setter     = optArray match {
       case Some(byteArray) if !byteArray.isEmpty =>
@@ -180,6 +194,15 @@ trait SqlSave
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
+    val paramIndex1 = save.paramIndex
+    optMap match {
+      case Some(map: Map[_, _]) if map.nonEmpty =>
+        save.add(attr, (ps: PS) =>
+          ps.setBytes(paramIndex1, map2jsonByteArray(map, value2json)))
+      case _                                    =>
+        save.add(attr, (ps: PS) => ps.setNull(paramIndex1, 0))
+    }
+
     val (curPath, paramIndex) = getParamIndex(attr)
     val colSetter: Setter     = optMap match {
       case Some(map: Map[_, _]) if map.nonEmpty =>
@@ -200,10 +223,12 @@ trait SqlSave
       case CardOne => save.refOne(ns, refAttr, refNs)
       case _       => save.refMany(ns, refAttr, refNs)
     }
+
     postResolvers = postResolvers :+ getRefResolver[Unit](ns, refAttr, refNs, card)
   }
 
   override protected def addBackRef(backRefNs: String): Unit = {
+    save = save.backRef
     curRefPath = curRefPath.dropRight(2)
   }
 
@@ -221,6 +246,19 @@ trait SqlSave
     iterable2array: M[T] => Array[AnyRef],
   ): Unit = {
     optRefNs.fold {
+      val paramIndex1 = save.paramIndex
+      if (optIterable.nonEmpty && optIterable.get.nonEmpty) {
+        val iterable = optIterable.get
+        save.add(attr, (ps: PS) => {
+          val conn  = ps.getConnection
+          val array = conn.createArrayOf(sqlTpe, iterable2array(iterable))
+          ps.setArray(paramIndex1, array)
+        })
+      } else {
+        save.add(attr, (ps: PS) => ps.setNull(paramIndex1, 0))
+      }
+
+
       val (curPath, paramIndex) = getParamIndex(attr)
       val colSetter: Setter     = if (optIterable.nonEmpty && optIterable.get.nonEmpty) {
         val iterable = optIterable.get
@@ -234,6 +272,13 @@ trait SqlSave
       }
       addColSetter(curPath, colSetter)
     } { refNs =>
+      optIterable.foreach(refIds =>
+        save.addCardManyRefAttr(
+          ns, attr, refNs, refIds.asInstanceOf[Set[Long]], defaultValues
+        )
+      )
+
+
       join(ns, attr, refNs, optIterable)
     }
   }
@@ -244,10 +289,24 @@ trait SqlSave
     refNs: String,
     optIterable: Option[M[T]]
   ): Unit = {
+    //    optIterable.foreach { refIds =>
+    //      val refIds1 = refIds.asInstanceOf[Set[Long]]
+    //      save.addRefAttrJoins(ns, refAttr, refNs, refIds1, defaultValues)
+    //    }
+
+
     val curPath = if (paramIndexes.nonEmpty) curRefPath else List(ns)
     if (optIterable.isEmpty || optIterable.get.isEmpty) {
+      //      save.add(refAttr, (_: PS) => ())
+
       addColSetter(curPath, (_: PS, _: IdsMap, _: RowIndex) => ())
+
     } else {
+      // Card-many ref attr ids
+      //      val refIds = optIterable.get.asInstanceOf[Set[Long]]
+      //      save.addRefAttrJoins(ns, refAttr, refNs, refIds, defaultValues)
+
+
       val joinTable = ss(ns, refAttr, refNs)
       val joinPath  = curPath :+ joinTable
 

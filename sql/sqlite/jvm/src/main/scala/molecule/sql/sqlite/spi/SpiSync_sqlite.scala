@@ -9,6 +9,7 @@ import molecule.core.spi._
 import molecule.core.transaction._
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.spi.SpiSyncBase
+import molecule.sql.core.transaction.strategy.TxStrategy
 import molecule.sql.sqlite.query.Model2SqlQuery_sqlite
 import molecule.sql.sqlite.transaction._
 import scala.collection.mutable.ListBuffer
@@ -28,6 +29,11 @@ trait SpiSync_sqlite extends SpiSyncBase {
     new ResolveSave with Save_sqlite {
       override lazy val sqlConn = conn.sqlConn
     }.getSaveData(save.elements)
+  }
+  override def save_getData2(save: Save, conn: JdbcConn_JVM): TxStrategy = {
+    new ResolveSave with Save_sqlite {
+      override lazy val sqlConn = conn.sqlConn
+    }.getSaveStrategy(save.elements)
   }
 
   override def insert_getData(insert: Insert, conn: JdbcConn_JVM): Data = {

@@ -6,28 +6,32 @@ import molecule.sql.core.transaction.strategy.TxStrategy
 case class SaveRefMany(
   parent: TxStrategy,
   sqlConn: Connection,
-  ns: String, refAttr: String, refNs: String
-) extends HandleInsert(sqlConn, refNs) {
+  dbOps: DbOps,
+  ns: String,
+  refAttr: String,
+  refNs: String,
+) extends SaveBase(sqlConn, dbOps, refNs) {
+
+  def fromTop: TxStrategy = parent.fromTop
 
   override def execute: List[Long] = {
-    val refId = insertOne
+    val List(refId) = insert
 
-    // Save parent
-    val List(parentId) = parent.execute
+    // Add many-to-many join once we have a parent id
+    val (id1, id2) = joinIdNames(ns, refNs)
+    addPostSetter((parentIds: List[Long]) => {
+      val joinStmt =
+        s"""INSERT INTO ${ns}_${refAttr}_$refNs (
+           |  $id1, $id2
+           |) VALUES (${parentIds.head}, $refId)""".stripMargin
+      sqlConn.prepareStatement(joinStmt).execute()
+    })
 
-    // Add many-to-many join from parent to ref
-    val (id1, id2) = if (ns == refNs)
-      (ss(ns, "1_id"), ss(refNs, "2_id"))
-    else
-      (ss(ns, "id"), ss(refNs, "id"))
-    val joinStmt   =
-      s"""INSERT INTO ${ns}_${refAttr}_$refNs (
-         |  $id1, $id2
-         |) VALUES ($parentId, $refId)""".stripMargin
-    val join       = sqlConn.prepareStatement(joinStmt)
-    join.execute()
-
-    // Parent id for TxReport
-    List(parentId)
+    List(refId)
   }
+
+  override def backRef: TxStrategy = parent
+
+  override def toString: String = render(0)
+  override def render(indent: Int): String = render(indent, "SaveRefMany")
 }

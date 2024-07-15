@@ -25,7 +25,7 @@ case class JdbcConn_JVM(
 
   // debugging
   doPrint = false
-  //    doPrint = true
+  //  doPrint = true
 
 
   override lazy val sqlConn: Connection = sqlConn0
@@ -92,6 +92,7 @@ case class JdbcConn_JVM(
     val idsAcc     = mutable.Map.empty[List[String], List[Long]]
     val ids        = ListBuffer.empty[Long]
 
+
     debug("########################################################################################## " + tables.size)
 
     // Insert statements backwards to obtain auto-generated ref ids for prepending inserts
@@ -124,6 +125,9 @@ case class JdbcConn_JVM(
         extractAffectedIds(refPath, ps, ids, idsMap, idsAcc, curIds, updateIdsMap, accIds)
     }
 
+//    println("a " + idsMap)
+
+
     joinTables.foreach {
       case JoinTable(stmt, leftPath, rightPath, rightCounts) =>
         debug("D --- joinTable -------------------------------------------------\n" + stmt)
@@ -154,10 +158,14 @@ case class JdbcConn_JVM(
     }
 
     // Return ids of first namespace entities
-    idsMap.collectFirst {
+    val x = idsMap.collectFirst {
       case (List(ns), ids)      => ids
       case (List("0", ns), ids) => ids // nested
     }.getOrElse(Nil)
+
+//    println("x " + idsMap)
+//    println("x " + x)
+    x
   }
 
   def notJoinTable(refPath: List[String]): Boolean = {

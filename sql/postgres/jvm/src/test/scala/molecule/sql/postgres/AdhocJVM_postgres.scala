@@ -20,8 +20,11 @@ object AdhocJVM_postgres extends TestSuite_postgres {
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
-        _ <- Ns.int.insert(1).transact
-        _ <- Ns.int.query.get.map(_ ==> List(1))
+//        _ <- Ns.int.insert(1).transact
+//        _ <- Ns.int.query.get.map(_ ==> List(1))
+
+        _ <- Ns.uuid(uuid1).save.transact
+
       } yield ()
     }
 

@@ -4,7 +4,7 @@ import java.sql.{PreparedStatement => PS}
 import molecule.core.transaction.ResolveSave
 import molecule.sql.core.transaction.{SqlSave, Table}
 
-trait Save_postgres extends SqlSave { self: ResolveSave =>
+trait Save_postgres extends SqlSave with TxBase_postgres { self: ResolveSave =>
 
   doPrint = false
 
@@ -32,6 +32,16 @@ trait Save_postgres extends SqlSave { self: ResolveSave =>
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
+    val paramIndex1 = save.paramIndex
+    optMap match {
+      case Some(map: Map[_, _]) if map.nonEmpty =>
+        save.add(attr, (ps: PS) =>
+          ps.setString(paramIndex1, map2json(map, value2json)), "?", "::jsonb")
+      case _                                    =>
+        save.add(attr, (ps: PS) => ps.setNull(paramIndex1, 0))
+    }
+
+
     val (curPath, paramIndex) = getParamIndex(attr, castExt = "::jsonb")
     val colSetter: Setter     = optMap match {
       case Some(map: Map[_, _]) if map.nonEmpty =>

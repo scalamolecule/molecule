@@ -5,17 +5,16 @@ import molecule.sql.core.transaction.strategy.TxStrategy
 
 case class SaveNs(
   sqlConn: Connection,
-  ns: String
-) extends HandleInsert(sqlConn, ns) {
+  ns: String,
+)(implicit dbOps: DbOps) extends SaveBase(sqlConn, dbOps, ns) {
+
+  // Initial namespace
+  def fromTop: TxStrategy = this
 
   override def execute: List[Long] = {
-    List(insertOne)
+    insert
   }
 
-  override def refOne(ns: String, refAttr: String, refNs: String): TxStrategy = {
-    SaveRefOne(this, sqlConn, ns, refAttr, refNs)
-  }
-  override def refMany(ns: String, refAttr: String, refNs: String): TxStrategy = {
-    SaveRefMany(this, sqlConn, ns, refAttr, refNs)
-  }
+  override def toString: String = render(0)
+  override def render(indent: Int): String = render(indent, "SaveNs")
 }

@@ -17,8 +17,13 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
       for {
-        _ <- Ns.int.insert(1).transact
-        _ <- Ns.int.query.get.map(_ ==> List(1))
+//        _ <- Ns.int.insert(1).transact
+//        _ <- Ns.int.query.get.map(_ ==> List(1))
+
+        List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
+        _ <- Ns.refs(Set(r1, r2)).save.transact
+        _ <- Ns.refs.query.get.map(_.head ==> Set(r1, r2))
+
       } yield ()
     }
 
@@ -27,8 +32,18 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
 
-        _ <- A.i.insert(2).transact
-        _ <- A.i.query.get.map(_ ==> List(2))
+        //        _ <- A.i(7).s("a").save.transact
+        //        _ <- A.i.s.query.get.map(_ ==> List((7, "a")))
+
+        ids <- A.i(7).B.s("a").save.i.transact.map(_.ids)
+        _ = println("ids: " + ids)
+        _ <- A.i.B.s.query.get.map(_ ==> List((7, "a")))
+
+        //        _ <- A.i(7).Bb.s("a").save.transact
+        //        _ <- A.i.Bb.s.query.get.map(_ ==> List((7, "a")))
+        //
+        //        _ <- A.i(1).B.i(2)._A.s("a").save.transact
+        //        _ <- A.i.B.i._A.s.query.get.map(_ ==> List((1, 2, "a")))
 
 
         //        _ <- rawQuery(

@@ -3,6 +3,7 @@ package molecule.sql.h2
 import java.time.Instant
 import molecule.base.error.{ExecutionError, ModelError}
 import molecule.core.util.Executor._
+import molecule.coreTests.dataModels.core.dsl.Refs.A
 import molecule.coreTests.dataModels.core.dsl.Types.Ns
 import molecule.coreTests.util.Array2List
 import molecule.sql.h2.async._
@@ -23,8 +24,14 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
       for {
-        _ <- Ns.int.insert(8).transact
-        _ <- Ns.int.query.get.map(_ ==> List(8))
+        //        _ <- Ns.int.insert(8).transact
+        //        _ <- Ns.refs(Set(8)).save.i.transact
+        //        _ <- Ns.refs.query.get.map(_ ==> List(8))
+
+        _ <- Ns.uuid(uuid1).save.transact
+
+
+
       } yield ()
     }
 
@@ -40,61 +47,101 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       //      val a7: Future[List[(Int, Option[(Int, String)])]]                        = A.i.B.?(B.i.s).query.get
       //      val a5: Future[List[(Int, Option[(Int, String, Option[(Int, String)])])]] = A.i.B.?(B.i.s.C.?(C.i.s)).query.get
       //      val a8: Future[List[(Int, Option[(Int, String)], Option[(Int, String)])]] = A.i.B.?(B.i.s).C.?(C.i.s).query.get
+
+      //      class Chicken (e: => Egg) {
+      //        lazy val offspring = e
+      //        val a = 1
+      //      }
+      //
+      //      class Egg (c: => Chicken) {
+      //        lazy val mother = c
+      //        val b = 2
+      //      }
+      //
+      //      lazy val chicken: Chicken = new Chicken(egg)
+      //      lazy val egg: Egg         = new Egg(chicken)
+      //
+      //      println(chicken)
+      //      println(egg.mother.a)
+      //      println(egg.mother.offspring.b)
+      //      println(egg.mother.offspring.b)
+
       for {
 
-        _ <- A.i(7).s("a").save.transact
-        _ <- A.i.s.query.get.map(_ ==> List((7, "a")))
+        _ <- A.i(1).B.i(2).C.i(3)._B.s("a").D.i(4).save.inspect
 
-        _ <- A.i(7).B.s("a").save.transact
+
+//        _ <- A.i(7).s("a").save.transact
+//        _ <- A.i.s.query.get.map(_ ==> List((7, "a")))
+
+        ids <- A.i(7).B.s("a").save.i.transact.map(_.ids)
+        _ = println("ids: " + ids)
         _ <- A.i.B.s.query.get.map(_ ==> List((7, "a")))
 
-        _ <- A.i(7).Bb.s("a").save.transact
-        _ <- A.i.Bb.s.query.get.map(_ ==> List((7, "a")))
-
-
-
-
-//        _ <- A.i.Bb.*(B.i).insert(
-//          (1, Nil),
-//          (2, List(20))
-//        ).i.transact
-
-
-
-//        _ <- A.i.Bb.*(B.i).insert(
-//          (1, Nil),
-//          (2, List(20))
-//        ).i.transact
+//        _ <- A.i(7).Bb.s("a").save.transact
+//        _ <- A.i.Bb.s.query.get.map(_ ==> List((7, "a")))
 //
-//
-//        _ <- A.i.B.?(B.i).insert(
-//          (1, None),
-//          (2, Some(20))
-//        ).i.transact
-//
-//        //        _ <- rawQuery(
-//        //          """SELECT DISTINCT
-//        //            |  A.i,
-//        //            |  B.i
-//        //            |FROM A
-//        //            |  LEFT JOIN B ON
-//        //            |    A.b = B.id
-//        //            |WHERE
-//        //            |  A.i IS NOT NULL;
-//        //            |""".stripMargin, true)
-//        //
-//        //        _ <- rawQuery(
-//        //          """SELECT count(*) from B
-//        //            |""".stripMargin, true)
-//
-//
-//        _ <- A.i.B.?(B.i).query.get.map(_ ==> List(
-//          (1, None),
-//          (2, Some(20)),
-//        ))
+//        _ <- A.i(1).B.i(2)._A.s("a").save.transact
+//        _ <- A.i.B.i._A.s.query.get.map(_ ==> List((1, 2, "a")))
+        /*
+        ========================================
+        SAVE:
+        AttrOneManInt("A", "i", Eq, Seq(1), None, None, Nil, Nil, None, None, Seq(0, 1))
+        Ref("A", "b", "B", CardOne, false, Seq(0, 8, 1))
+        AttrOneManInt("B", "i", Eq, Seq(2), None, None, Nil, Nil, None, None, Seq(1, 24))
+        BackRef("A", "B", Seq(0, 1))
+        AttrOneManString("A", "s", Eq, Seq("a"), None, None, Nil, Nil, None, None, Seq(0, 5))
+
+        INSERT INTO B (
+          i
+        ) VALUES (?)
+        --------
+        INSERT INTO A (
+          i,
+          b,
+          s
+        ) VALUES (?, ?, ?)
+        ----------------------------------------
+         */
 
 
+        //        _ <- A.i.Bb.*(B.i).insert(
+        //          (1, Nil),
+        //          (2, List(20))
+        //        ).i.transact
 
+
+        //        _ <- A.i.Bb.*(B.i).insert(
+        //          (1, Nil),
+        //          (2, List(20))
+        //        ).i.transact
+        //
+        //
+        //        _ <- A.i.B.?(B.i).insert(
+        //          (1, None),
+        //          (2, Some(20))
+        //        ).i.transact
+        //
+        //        //        _ <- rawQuery(
+        //        //          """SELECT DISTINCT
+        //        //            |  A.i,
+        //        //            |  B.i
+        //        //            |FROM A
+        //        //            |  LEFT JOIN B ON
+        //        //            |    A.b = B.id
+        //        //            |WHERE
+        //        //            |  A.i IS NOT NULL;
+        //        //            |""".stripMargin, true)
+        //        //
+        //        //        _ <- rawQuery(
+        //        //          """SELECT count(*) from B
+        //        //            |""".stripMargin, true)
+        //
+        //
+        //        _ <- A.i.B.?(B.i).query.get.map(_ ==> List(
+        //          (1, None),
+        //          (2, Some(20)),
+        //        ))
 
 
         //        _ <- A.i.B.?(B.i.C.i).insert(

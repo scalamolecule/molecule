@@ -11,6 +11,7 @@ import molecule.core.util.Executor._
 import molecule.core.util.ModelUtils
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.query.{Model2SqlQuery, SqlQueryBase}
+import molecule.sql.core.transaction.op.DbOps
 import molecule.sql.core.transaction.strategy.TxStrategy
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
@@ -26,7 +27,7 @@ trait SqlBase_JVM extends SqlDataType_JVM with ModelUtils with BaseHelpers {
 
   final var save: TxStrategy = null // set in resolvers
 
-
+  implicit lazy val dbOps: DbOps = new DbOps
 
   def getModel2SqlQuery(
     elements: List[Element]

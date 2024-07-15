@@ -78,7 +78,7 @@ trait Insert_h2 extends SqlInsert { self: ResolveInsert with InsertResolvers_ =>
     countValueAttrs(nestedElements) match {
       case 1 =>
         (tpl: Product) => {
-          println("tpl 1: " + tpl)
+//          println("tpl 1: " + tpl)
 
           tpl.productElement(tplIndex) match {
             case Some(value) =>
@@ -89,10 +89,10 @@ trait Insert_h2 extends SqlInsert { self: ResolveInsert with InsertResolvers_ =>
               //                  ps.setArray(paramIndex, arr)
               //                }
 
-              println("+++++++++++++++++++++++ " + value)
+//              println("+++++++++++++++++++++++ " + value)
 
             case None =>
-              println("+++++++++++++++++++++++ NONE" )
+//              println("+++++++++++++++++++++++ NONE" )
             //                (ps: PS, _: IdsMap, _: RowIndex) =>
             //                  ps.setNull(paramIndex, java.sql.Types.NULL)
           }
@@ -105,7 +105,7 @@ trait Insert_h2 extends SqlInsert { self: ResolveInsert with InsertResolvers_ =>
           val length              = optionalSingleValue.fold(0)(_ => 1)
           rightCountsMap(refPath) = rightCountsMap(refPath) :+ length
           optionalSingleValue.foreach { nestedSingleValue =>
-            println("   ######  " + nestedSingleValue)
+//            println("   ######  " + nestedSingleValue)
             resolveNested(Tuple1(nestedSingleValue))
           }
         }

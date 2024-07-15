@@ -397,7 +397,7 @@ trait SqlInsert
     countValueAttrs(nestedElements) match {
       case 1 =>
         (tpl: Product) => {
-          println("tpl 1: " + tpl)
+//          println("tpl 1: " + tpl)
 
           tpl.productElement(tplIndex) match {
             case Some(value) =>
@@ -408,10 +408,10 @@ trait SqlInsert
             //                  ps.setArray(paramIndex, arr)
             //                }
 
-            println("+++++++++++++++++++++++ " + value)
+//            println("+++++++++++++++++++++++ " + value)
 
             case None =>
-            println("+++++++++++++++++++++++ NONE" )
+//            println("+++++++++++++++++++++++ NONE" )
             //                (ps: PS, _: IdsMap, _: RowIndex) =>
             //                  ps.setNull(paramIndex, java.sql.Types.NULL)
           }
@@ -424,7 +424,7 @@ trait SqlInsert
           val length              = optionalSingleValue.fold(0)(_ => 1)
           rightCountsMap(refPath) = rightCountsMap(refPath) :+ length
           optionalSingleValue.foreach { nestedSingleValue =>
-            println("   ######  " + nestedSingleValue)
+//            println("   ######  " + nestedSingleValue)
             resolveNested(Tuple1(nestedSingleValue))
           }
         }
@@ -497,7 +497,7 @@ trait SqlInsert
     countValueAttrs(nestedElements) match {
       case 1 =>
         (tpl: Product) => {
-          println("tpl 1: " + tpl)
+//          println("tpl 1: " + tpl)
 
           val nestedSingleValues = tpl.productElement(tplIndex).asInstanceOf[Seq[Any]].filter {
             case set: Set[_] if set.isEmpty => false

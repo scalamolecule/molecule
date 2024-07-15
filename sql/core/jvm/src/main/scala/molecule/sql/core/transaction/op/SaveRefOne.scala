@@ -6,15 +6,26 @@ import molecule.sql.core.transaction.strategy.TxStrategy
 case class SaveRefOne(
   parent: TxStrategy,
   sqlConn: Connection,
-  ns: String, refAttr: String, refNs: String
-) extends HandleInsert(sqlConn, refNs) {
+  dbOps: DbOps,
+  ns: String,
+  refAttr: String,
+  refNs: String,
+) extends SaveBase(sqlConn, dbOps, refNs) {
+
+  def fromTop: TxStrategy = parent.fromTop
 
   override def execute: List[Long] = {
-    val refId = insertOne
+    val List(refId) = insert
 
-    // Add ref id to refAttr of parent namespace
+    // Add ref id from parent to ref
     val refAttrIndex = parent.paramIndex
     parent.add(refAttr, (ps: PS) => ps.setLong(refAttrIndex, refId))
-    parent.execute
+
+    List(refId)
   }
+
+  override def backRef: TxStrategy = parent
+
+  override def toString: String = render(0)
+  override def render(indent: Int): String = render(indent, "SaveRefOne")
 }
