@@ -51,8 +51,8 @@ case class JdbcConn_JVM(
     atomicTransaction(() => populateStmts(data))
   }
 
-  def transact_sync(tx: SqlAction): TxReport = {
-    atomicTransaction(() => tx.execute)
+  def transact_sync(action: SqlAction): TxReport = {
+    atomicTransaction(() => action.execute)
   }
 
   def atomicTransaction(executions: () => List[Long]): TxReport = {
@@ -125,7 +125,7 @@ case class JdbcConn_JVM(
         extractAffectedIds(refPath, ps, ids, idsMap, idsAcc, curIds, updateIdsMap, accIds)
     }
 
-//    println("a " + idsMap)
+    //    println("a " + idsMap)
 
 
     joinTables.foreach {
@@ -163,8 +163,8 @@ case class JdbcConn_JVM(
       case (List("0", ns), ids) => ids // nested
     }.getOrElse(Nil)
 
-//    println("x " + idsMap)
-//    println("x " + x)
+    //    println("x " + idsMap)
+    //    println("x " + x)
     x
   }
 

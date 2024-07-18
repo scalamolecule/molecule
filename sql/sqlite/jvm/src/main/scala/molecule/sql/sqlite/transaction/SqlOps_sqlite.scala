@@ -6,6 +6,8 @@ import scala.collection.mutable.ListBuffer
 
 class SqlOps_sqlite extends SqlOps {
 
+  lazy override val defaultValues = "DEFAULT VALUES"
+
   // Since SQlite doesn't allow us to get ps.getGeneratedKeys after an
   // executeBatch(), we get the affected ids by brute force with a query instead.
   override def getIds(

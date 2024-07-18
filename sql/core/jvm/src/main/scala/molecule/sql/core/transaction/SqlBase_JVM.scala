@@ -11,7 +11,7 @@ import molecule.core.util.Executor._
 import molecule.core.util.ModelUtils
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.query.{Model2SqlQuery, SqlQueryBase}
-import molecule.sql.core.transaction.strategy.{SqlOps, SqlAction}
+import molecule.sql.core.transaction.strategy.SqlOps
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
@@ -24,9 +24,7 @@ trait SqlBase_JVM extends SqlDataType_JVM with ModelUtils with BaseHelpers {
 
   lazy val sqlConn: java.sql.Connection = ???
 
-  final var action: SqlAction = null // set in resolvers
-
-  implicit lazy val dbOps: SqlOps = new SqlOps
+  implicit lazy val sqlOps: SqlOps = new SqlOps
 
   def getModel2SqlQuery(
     elements: List[Element]

@@ -77,7 +77,7 @@ trait One_Map extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "value - ref - filter" - refs { implicit conn =>
       for {
         _ <- A.iMap(Map(pint0, pint1)).save.transact // won't be updated since there's no B value
-        _ <- A.B.i(1).save.transact
+        _ <- A.s("x").B.i(1).save.transact
         _ <- A.iMap(Map(pint2, pint3)).B.i(2).save.transact
         _ <- A.iMap(Map(pint3, pint4)).B.i(3).save.transact
 

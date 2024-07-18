@@ -91,7 +91,7 @@ trait Many_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "value - ref - filter" - refs { implicit conn =>
       for {
         _ <- A.i(0).save.transact.map(_.id)
-        _ <- A.Bb.*(B.s).insert(List("a", "b")).transact.map(_.id)
+        _ <- A.s.Bb.*(B.s).insert(("x", List("a", "b"))).transact.map(_.id)
         _ <- A.i.Bb.*(B.s).insert((2, List("c", "d"))).transact.map(_.id)
 
         // Filter by B attribute, update A values

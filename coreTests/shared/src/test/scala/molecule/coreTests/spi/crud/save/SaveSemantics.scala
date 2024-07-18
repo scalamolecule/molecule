@@ -14,6 +14,21 @@ trait SaveSemantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 
+    "Attribute required in each namespace" - refs { implicit conn =>
+      for {
+        _ <- A.B.i(1).save.transact
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Please add at least 1 attribute to namespace A before relating to B"
+          }
+
+        _ <- A.Bb.i(1).save.transact
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Please add at least 1 attribute to namespace A before relating to Bb"
+          }
+      } yield ()
+    }
+
+
     "Duplicate attributes not allowed, flat" - {
 
       "Same ns" - refs { implicit conn =>

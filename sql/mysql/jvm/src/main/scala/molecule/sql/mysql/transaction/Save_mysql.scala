@@ -41,13 +41,13 @@ trait Save_mysql extends SqlSave with BaseHelpers { self: ResolveSave =>
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    val paramIndex = action.paramIndex
+    val paramIndex = save.paramIndex(attr)
     optMap match {
       case Some(map: Map[_, _]) if map.nonEmpty =>
-        action.add(attr, (ps: PS) =>
+        save.add((ps: PS) =>
           ps.setString(paramIndex, map2json(map, value2json)))
       case _                                    =>
-        action.add(attr, (ps: PS) => ps.setNull(paramIndex, 0))
+        save.add((ps: PS) => ps.setNull(paramIndex, 0))
     }
   }
 
@@ -65,17 +65,17 @@ trait Save_mysql extends SqlSave with BaseHelpers { self: ResolveSave =>
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     optRefNs.fold {
-      val paramIndex = action.paramIndex
+      val paramIndex = save.paramIndex(attr)
       if (optIterable.nonEmpty && optIterable.get.nonEmpty) {
         val json = iterable2json(optIterable.get, value2json)
-        action.add(attr, (ps: PS) => ps.setString(paramIndex, json))
+        save.add((ps: PS) => ps.setString(paramIndex, json))
       } else {
-        action.add(attr, (ps: PS) => ps.setNull(paramIndex, 0))
+        save.add((ps: PS) => ps.setNull(paramIndex, 0))
       }
     } { refNs =>
       optIterable.foreach(refIds =>
-        action.addCardManyRefAttr(
-          ns, attr, refNs, refIds.asInstanceOf[Set[Long]], defaultValues
+        save.addCardManyRefAttr(
+          ns, attr, refNs, refIds.asInstanceOf[Set[Long]]
         )
       )
     }

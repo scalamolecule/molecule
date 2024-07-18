@@ -6,6 +6,6 @@ import molecule.sql.core.transaction.strategy.SqlOps
 trait TxBase_postgres { self: SqlBase_JVM =>
 
 
-  override implicit lazy val dbOps: SqlOps = new SqlOps_postgres
+  override implicit lazy val sqlOps: SqlOps = new SqlOps_postgres
 
 }

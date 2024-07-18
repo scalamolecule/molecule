@@ -16,7 +16,6 @@ trait Insert_h2 extends SqlInsert { self: ResolveInsert with InsertResolvers_ =>
 
 
   override protected def addOptRef(
-    nsMap: Map[String, MetaNs],
     tplIndex: Int,
     ns: String,
     refAttr: String,
@@ -72,7 +71,7 @@ trait Insert_h2 extends SqlInsert { self: ResolveInsert with InsertResolvers_ =>
     inserts = inserts :+ (refPath -> Nil)
 
     // Recursively resolve nested data
-    val resolveNested = getResolver(nsMap, nestedElements)
+    val resolveNested = getResolver(nestedElements)
 
 
     countValueAttrs(nestedElements) match {

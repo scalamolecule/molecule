@@ -118,7 +118,7 @@ trait SpiAsync_datomic
       errors <- insert_validate(insert)
       txReport <- errors match {
         case errors if errors.isEmpty =>
-          conn.transact_async(insert_getStmts(insert, conn.proxy))
+          conn.transact_async(insert_getStmts(insert))
         case errors                   => throw InsertErrors(errors)
       }
     } yield {
@@ -133,8 +133,8 @@ trait SpiAsync_datomic
     SpiSync_datomic.insert_inspect(insert)
   }
 
-  private def insert_getStmts(insert: Insert, proxy: ConnProxy): Data = {
-    SpiSync_datomic.insert_getStmts(insert, proxy)
+  private def insert_getStmts(insert: Insert): Data = {
+    SpiSync_datomic.insert_getStmts(insert)
   }
 
   override def insert_validate(

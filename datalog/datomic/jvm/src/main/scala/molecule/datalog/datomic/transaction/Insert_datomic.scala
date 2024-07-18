@@ -17,14 +17,13 @@ trait Insert_datomic
     with MoleculeLogging { self: ResolveInsert with InsertResolvers_ =>
 
   def getStmts(
-    nsMap: Map[String, MetaNs],
     elements: List[Element],
     tpls: Seq[Product],
     idIndex: Int = 0,
     debug: Boolean = true
   ): Data = {
     initTxBase(elements, idIndex)
-    val row2stmts = getResolver(nsMap, elements)
+    val row2stmts = getResolver(elements)
     tpls.foreach { tpl =>
       e = newId
       e0 = e
@@ -314,7 +313,6 @@ trait Insert_datomic
   }
 
   override protected def addOptRef(
-    nsMap: Map[String, MetaNs],
     tplIndex: Int,
     ns: String,
     refAttr: String,
@@ -323,7 +321,6 @@ trait Insert_datomic
   ): Product => Unit = ???
 
   override protected def addNested(
-    nsMap: Map[String, MetaNs],
     tplIndex: Int,
     ns: String,
     refAttr: String,
@@ -331,7 +328,7 @@ trait Insert_datomic
     nestedElements: List[Element]
   ): Product => Unit = {
     // Recursively resolve nested data
-    val nested2stmts = getResolver(nsMap, nestedElements)
+    val nested2stmts = getResolver(nestedElements)
     val lastIsSet    = nestedElements.last.isInstanceOf[AttrSet]
     countValueAttrs(nestedElements) match {
       case 1 => // Nested arity-1 values

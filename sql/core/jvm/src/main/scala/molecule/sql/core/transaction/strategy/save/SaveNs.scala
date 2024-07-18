@@ -1,21 +1,20 @@
 package molecule.sql.core.transaction.strategy.save
 
 import java.sql.Connection
-import molecule.sql.core.transaction.strategy.{SqlOps, SqlAction}
+import molecule.sql.core.transaction.strategy.SqlOps
+import scala.collection.mutable.ListBuffer
 
 case class SaveNs(
   sqlConn: Connection,
   ns: String,
-)(implicit dbOps: SqlOps) extends SaveBase(sqlConn, dbOps, ns) {
+)(implicit sqlOps: SqlOps) extends SaveAction(sqlConn, sqlOps, ns) {
+
+  rowSetters += ListBuffer.empty[PS => Unit]
 
   // Initial namespace
-  def fromTop: SqlAction = this
+  override def initialAction: SaveAction = this
 
-  override def execute: List[Long] = {
-    // Initial action of top node to save its graph underneath of relationships
-    insert
-  }
+  override def execute: List[Long] = insert
 
-  override def toString: String = render(0)
-  override def render(indent: Int): String = render(indent, "SaveNs")
+  override def toString: String = recurseRender(0, "SaveNs")
 }

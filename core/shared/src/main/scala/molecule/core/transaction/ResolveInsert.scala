@@ -17,7 +17,6 @@ class ResolveInsert
 
   @tailrec
   final override def resolve(
-    nsMap: Map[String, MetaNs],
     elements: List[Element],
     resolvers: List[Product => Unit],
     tplIndex: Int,
@@ -33,22 +32,22 @@ class ResolveInsert
             case a: AttrOne => a match {
               case a: AttrOneMan =>
                 val attrOneManResolver = resolveAttrOneMan(a, tplIndex)
-                resolve(nsMap, tail, resolvers :+ attrOneManResolver, tplIndex + 1, prevRefs)
+                resolve(tail, resolvers :+ attrOneManResolver, tplIndex + 1, prevRefs)
 
               case a: AttrOneOpt =>
                 val attrOneOptResolver = resolveAttrOneOpt(a, tplIndex)
-                resolve(nsMap, tail, resolvers :+ attrOneOptResolver, tplIndex + 1, prevRefs)
+                resolve(tail, resolvers :+ attrOneOptResolver, tplIndex + 1, prevRefs)
 
               case a => noEmpty(a)
             }
             case a: AttrSet => a match {
               case a: AttrSetMan =>
                 val attrsSetManResolver = resolveAttrSetMan(a, tplIndex)
-                resolve(nsMap, tail, resolvers :+ attrsSetManResolver, tplIndex + 1, prevRefs)
+                resolve(tail, resolvers :+ attrsSetManResolver, tplIndex + 1, prevRefs)
 
               case a: AttrSetOpt =>
                 val attrSetOptResolver = resolveAttrSetOpt(a, tplIndex)
-                resolve(nsMap, tail, resolvers :+ attrSetOptResolver, tplIndex + 1, prevRefs)
+                resolve(tail, resolvers :+ attrSetOptResolver, tplIndex + 1, prevRefs)
 
               case a => noEmpty(a)
             }
@@ -56,11 +55,11 @@ class ResolveInsert
             case a: AttrSeq => a match {
               case a: AttrSeqMan =>
                 val attrsSetManResolver = resolveAttrSeqMan(a, tplIndex)
-                resolve(nsMap, tail, resolvers :+ attrsSetManResolver, tplIndex + 1, prevRefs)
+                resolve(tail, resolvers :+ attrsSetManResolver, tplIndex + 1, prevRefs)
 
               case a: AttrSeqOpt =>
                 val attrSetOptResolver = resolveAttrSeqOpt(a, tplIndex)
-                resolve(nsMap, tail, resolvers :+ attrSetOptResolver, tplIndex + 1, prevRefs)
+                resolve(tail, resolvers :+ attrSetOptResolver, tplIndex + 1, prevRefs)
 
               case a => noEmpty(a)
             }
@@ -68,11 +67,11 @@ class ResolveInsert
             case a: AttrMap => a match {
               case a: AttrMapMan =>
                 val attrsSetManResolver = resolveAttrMapMan(a, tplIndex)
-                resolve(nsMap, tail, resolvers :+ attrsSetManResolver, tplIndex + 1, prevRefs)
+                resolve(tail, resolvers :+ attrsSetManResolver, tplIndex + 1, prevRefs)
 
               case a: AttrMapOpt =>
                 val attrSetOptResolver = resolveAttrMapOpt(a, tplIndex)
-                resolve(nsMap, tail, resolvers :+ attrSetOptResolver, tplIndex + 1, prevRefs)
+                resolve(tail, resolvers :+ attrSetOptResolver, tplIndex + 1, prevRefs)
 
               case a => noEmpty(a)
             }
@@ -80,25 +79,25 @@ class ResolveInsert
 
         case Ref(ns, refAttr, refNs, card, _, _) =>
           val refResolver = addRef(ns, refAttr, refNs, card)
-          resolve(nsMap, tail, resolvers :+ refResolver, tplIndex, prevRefs :+ refAttr)
+          resolve(tail, resolvers :+ refResolver, tplIndex, prevRefs :+ refAttr)
 
         case BackRef(backRefNs, _, _) =>
           noNsReUseAfterBackref(tail.head, prevRefs, backRefNs)
           val backRefResolver = addBackRef(backRefNs)
-          resolve(nsMap, tail, resolvers :+ backRefResolver, tplIndex, Nil)
+          resolve(tail, resolvers :+ backRefResolver, tplIndex, Nil)
 
         case OptRef(Ref(ns, refAttr, refNs, _, _, _), optRefElements) =>
-          val nestedResolver = addOptRef(nsMap, tplIndex, ns, refAttr, refNs, optRefElements)
-          resolve(nsMap, tail, resolvers :+ nestedResolver, tplIndex, Nil)
+          val nestedResolver = addOptRef(tplIndex, ns, refAttr, refNs, optRefElements)
+          resolve(tail, resolvers :+ nestedResolver, tplIndex, Nil)
 
         case Nested(Ref(ns, refAttr, refNs, _, _, _), nestedElements) =>
-          val nestedResolver = addNested(nsMap, tplIndex, ns, refAttr, refNs, nestedElements)
-          resolve(nsMap, tail, resolvers :+ nestedResolver, tplIndex, Nil)
+          val nestedResolver = addNested(tplIndex, ns, refAttr, refNs, nestedElements)
+          resolve(tail, resolvers :+ nestedResolver, tplIndex, Nil)
 
         case OptNested(Ref(ns, refAttr, refNs, _, _, _), nestedElements) =>
           // (same behaviour as mandatory nested - the list can have data or not)
-          val optNestedResolver = addNested(nsMap, tplIndex, ns, refAttr, refNs, nestedElements)
-          resolve(nsMap, tail, resolvers :+ optNestedResolver, tplIndex, Nil)
+          val optNestedResolver = addNested(tplIndex, ns, refAttr, refNs, nestedElements)
+          resolve(tail, resolvers :+ optNestedResolver, tplIndex, Nil)
       }
       case Nil             => resolvers
     }

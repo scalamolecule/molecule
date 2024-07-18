@@ -75,7 +75,7 @@ trait One_Set_add extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "value - ref - filter" - refs { implicit conn =>
       for {
         _ <- A.iSet(Set(0, 1)).save.transact // won't be updated since there's no B value
-        _ <- A.B.i(1).save.transact
+        _ <- A.s("x").B.i(1).save.transact
         _ <- A.iSet(Set(2, 3)).B.i(2).save.transact
         _ <- A.iSet(Set(3, 4)).B.i(3).save.transact
 

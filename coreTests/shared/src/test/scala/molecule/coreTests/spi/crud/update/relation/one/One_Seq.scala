@@ -78,7 +78,7 @@ trait One_Seq extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "value - ref - filter" - refs { implicit conn =>
       for {
         _ <- A.iSeq(Seq(0, 1)).save.transact // won't be updated since there's no B value
-        _ <- A.B.i(1).save.transact
+        _ <- A.s("x").B.i(1).save.transact
         _ <- A.iSeq(Seq(2, 3)).B.i(2).save.transact
         _ <- A.iSeq(Seq(3, 4)).B.i(3).save.transact
 

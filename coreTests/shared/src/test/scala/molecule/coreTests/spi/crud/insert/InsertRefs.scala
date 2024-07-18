@@ -27,21 +27,8 @@ trait InsertRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, "b"),
         ))
 
-        _ <- A.B.i.insert(1).transact
-        _ <- A.B.i.query.get.map(_ ==> List(1))
-
         _ <- A.i.B.i.insert(1, 2).transact
         _ <- A.i.B.i.query.get.map(_ ==> List((1, 2)))
-
-
-        _ <- A.B.C.i.insert(1).transact
-        _ <- A.B.C.i.query.get.map(_ ==> List(1))
-
-        _ <- A.B.i.C.i.insert(1, 2).transact
-        _ <- A.B.i.C.i.query.get.map(_ ==> List((1, 2)))
-
-        _ <- A.i.B.C.i.insert(1, 2).transact
-        _ <- A.i.B.C.i.query.get.map(_ ==> List((1, 2)))
 
         _ <- A.i.B.i.C.i.insert(1, 2, 3).transact
         _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
@@ -51,21 +38,8 @@ trait InsertRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "card many" - refs { implicit conn =>
       for {
-        _ <- A.Bb.i.insert(1).transact
-        _ <- A.Bb.i.query.get.map(_ ==> List(1))
-
         _ <- A.i.Bb.i.insert(1, 2).transact
         _ <- A.i.Bb.i.query.get.map(_ ==> List((1, 2)))
-
-
-        _ <- A.Bb.Cc.i.insert(1).transact
-        _ <- A.Bb.Cc.i.query.get.map(_ ==> List(1))
-
-        _ <- A.Bb.i.Cc.i.insert(1, 2).transact
-        _ <- A.Bb.i.Cc.i.query.get.map(_ ==> List((1, 2)))
-
-        _ <- A.i.Bb.Cc.i.insert(1, 2).transact
-        _ <- A.i.Bb.Cc.i.query.get.map(_ ==> List((1, 2)))
 
         _ <- A.i.Bb.i.Cc.i.insert(1, 2, 3).transact
         _ <- A.i.Bb.i.Cc.i.query.get.map(_ ==> List((1, 2, 3)))
@@ -75,15 +49,6 @@ trait InsertRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "card one/many" - refs { implicit conn =>
       for {
-        _ <- A.B.Cc.i.insert(1).transact
-        _ <- A.B.Cc.i.query.get.map(_ ==> List(1))
-
-        _ <- A.i.B.Cc.i.insert(1, 2).transact
-        _ <- A.i.B.Cc.i.query.get.map(_ ==> List((1, 2)))
-
-        _ <- A.B.i.Cc.i.insert(1, 2).transact
-        _ <- A.B.i.Cc.i.query.get.map(_ ==> List((1, 2)))
-
         _ <- A.i.B.i.Cc.i.insert(1, 2, 3).transact
         _ <- A.i.B.i.Cc.i.query.get.map(_ ==> List((1, 2, 3)))
       } yield ()
@@ -92,15 +57,6 @@ trait InsertRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "card many/one" - refs { implicit conn =>
       for {
-        _ <- A.Bb.C.i.insert(1).transact
-        _ <- A.Bb.C.i.query.get.map(_ ==> List(1))
-
-        _ <- A.Bb.i.C.i.insert(1, 2).transact
-        _ <- A.Bb.i.C.i.query.get.map(_ ==> List((1, 2)))
-
-        _ <- A.i.Bb.C.i.insert(1, 2).transact
-        _ <- A.i.Bb.C.i.query.get.map(_ ==> List((1, 2)))
-
         _ <- A.i.Bb.i.C.i.insert(1, 2, 3).transact
         _ <- A.i.Bb.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
       } yield ()
@@ -118,45 +74,17 @@ trait InsertRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- A.i.B.i._A.s.insert(1, 2, "a").transact
         _ <- A.i.B.i._A.s.query.get.map(_ ==> List((1, 2, "a")))
 
-        _ <- A.B.i._A.s.insert(2, "a").transact
-        _ <- A.B.i._A.s.query.get.map(_ ==> List((2, "a")))
-
-
         _ <- A.i.B.i._A.s.C.i.insert(1, 2, "a", 3).transact
         _ <- A.i.B.i._A.s.C.i.query.get.map(_ ==> List((1, 2, "a", 3)))
 
         _ <- A.i.B.i._A.C.i.insert(1, 2, 3).transact
         _ <- A.i.B.i._A.C.i.query.get.map(_ ==> List((1, 2, 3)))
 
-        _ <- A.B.i._A.s.C.i.insert(2, "a", 3).transact
-        _ <- A.B.i._A.s.C.i.query.get.map(_ ==> List((2, "a", 3)))
-
-        _ <- A.B.i._A.C.i.insert(2, 3).transact
-        _ <- A.B.i._A.C.i.query.get.map(_ ==> List((2, 3)))
-
-
         _ <- A.i.B.i.C.i._B.s.insert(1, 2, 3, "a").transact
         _ <- A.i.B.i.C.i._B.s.query.get.map(_ ==> List((1, 2, 3, "a")))
 
-        _ <- A.B.i.C.i._B.s.insert(2, 3, "a").transact
-        _ <- A.B.i.C.i._B.s.query.get.map(_ ==> List((2, 3, "a")))
-
-        _ <- A.B.C.i._B.s.insert(3, "a").transact
-        _ <- A.B.C.i._B.s.query.get.map(_ ==> List((3, "a")))
-
-
         _ <- A.i.B.i.C.i._B.s.D.i.insert(1, 2, 3, "a", 4).transact
         _ <- A.i.B.i.C.i._B.s.D.i.query.get.map(_ ==> List((1, 2, 3, "a", 4)))
-
-        _ <- A.i.B.i.C.i._B.D.i.insert(1, 2, 3, 4).transact
-        _ <- A.i.B.i.C.i._B.D.i.query.get.map(_ ==> List((1, 2, 3, 4)))
-
-        _ <- A.i.B.C.i._B.D.i.insert(1, 3, 4).transact
-        _ <- A.i.B.C.i._B.D.i.query.get.map(_ ==> List((1, 3, 4)))
-
-        _ <- A.B.C.i._B.D.i.insert(3, 4).transact
-        _ <- A.B.C.i._B.D.i.query.get.map(_ ==> List((3, 4)))
-
 
         _ <- A.i.B.i.C.i._B.s._A.s.insert(1, 2, 3, "a", "b").transact
         _ <- A.i.B.i.C.i._B.s._A.s.query.get.map(_ ==> List((1, 2, 3, "a", "b")))
@@ -164,16 +92,8 @@ trait InsertRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- A.i.B.i.C.i._B._A.s.insert(1, 2, 3, "b").transact
         _ <- A.i.B.i.C.i._B._A.s.query.get.map(_ ==> List((1, 2, 3, "b")))
 
-        _ <- A.i.B.C.i._B._A.s.insert(1, 3, "b").transact
-        _ <- A.i.B.C.i._B._A.s.query.get.map(_ ==> List((1, 3, "b")))
-
-        _ <- A.B.C.i._B._A.s.insert(3, "b").transact
-        _ <- A.B.C.i._B._A.s.query.get.map(_ ==> List((3, "b")))
-
-
         _ <- A.i.B.i.C.i._B.s._A.s.D.i.insert(1, 2, 3, "a", "b", 4).transact
         _ <- A.i.B.i.C.i._B.s._A.s.D.i.query.get.map(_ ==> List((1, 2, 3, "a", "b", 4)))
-
 
         // Distinguish separate relationships to same namespace
         _ <- A.i.B.i._A.B1.i.insert(1, 2, 3).transact
@@ -190,15 +110,8 @@ trait InsertRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- A.i.Bb.i._A.s.insert(1, 2, "a").transact
         _ <- A.i.Bb.i._A.s.query.get.map(_ ==> List((1, 2, "a")))
 
-        _ <- A.B.i._A.s.insert(2, "a").transact
-        _ <- A.B.i._A.s.query.get.map(_ ==> List((2, "a")))
-
         _ <- A.i.Bb.i._A.s.insert(1, 2, "a").transact
         _ <- A.i.Bb.i._A.s.query.get.map(_ ==> List((1, 2, "a")))
-
-        _ <- A.Bb.i._A.s.insert(2, "a").transact
-        _ <- A.Bb.i._A.s.query.get.map(_ ==> List((2, "a")))
-
 
         _ <- A.i.Bb.i._A.s.C.i.insert(1, 2, "a", 3).transact
         _ <- A.i.Bb.i._A.s.C.i.query.get.map(_ ==> List((1, 2, "a", 3)))
@@ -206,48 +119,17 @@ trait InsertRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- A.i.Bb.i._A.C.i.insert(1, 2, 3).transact
         _ <- A.i.Bb.i._A.C.i.query.get.map(_ ==> List((1, 2, 3)))
 
-        _ <- A.Bb.i._A.s.C.i.insert(2, "a", 3).transact
-        _ <- A.Bb.i._A.s.C.i.query.get.map(_ ==> List((2, "a", 3)))
-
-        _ <- A.Bb.i._A.C.i.insert(2, 3).transact
-        _ <- A.Bb.i._A.C.i.query.get.map(_ ==> List((2, 3)))
-
-
         _ <- A.i.Bb.i.Cc.i._B.s.insert(1, 2, 3, "a").transact
         _ <- A.i.Bb.i.Cc.i._B.s.query.get.map(_ ==> List((1, 2, 3, "a")))
 
-        _ <- A.Bb.i.Cc.i._B.s.insert(2, 3, "a").transact
-        _ <- A.Bb.i.Cc.i._B.s.query.get.map(_ ==> List((2, 3, "a")))
-
-        _ <- A.Bb.Cc.i._B.s.insert(3, "a").transact
-        _ <- A.Bb.Cc.i._B.s.query.get.map(_ ==> List((3, "a")))
-
-
         _ <- A.i.Bb.i.Cc.i._B.s.D.i.insert(1, 2, 3, "a", 4).transact
         _ <- A.i.Bb.i.Cc.i._B.s.D.i.query.get.map(_ ==> List((1, 2, 3, "a", 4)))
-
-        _ <- A.i.Bb.i.Cc.i._B.D.i.insert(1, 2, 3, 4).transact
-        _ <- A.i.Bb.i.Cc.i._B.D.i.query.get.map(_ ==> List((1, 2, 3, 4)))
-
-        _ <- A.i.Bb.Cc.i._B.D.i.insert(1, 3, 4).transact
-        _ <- A.i.Bb.Cc.i._B.D.i.query.get.map(_ ==> List((1, 3, 4)))
-
-        _ <- A.Bb.Cc.i._B.D.i.insert(3, 4).transact
-        _ <- A.Bb.Cc.i._B.D.i.query.get.map(_ ==> List((3, 4)))
-
 
         _ <- A.i.Bb.i.Cc.i._B.s._A.s.insert(1, 2, 3, "a", "b").transact
         _ <- A.i.Bb.i.Cc.i._B.s._A.s.query.get.map(_ ==> List((1, 2, 3, "a", "b")))
 
         _ <- A.i.Bb.i.Cc.i._B._A.s.insert(1, 2, 3, "b").transact
         _ <- A.i.Bb.i.Cc.i._B._A.s.query.get.map(_ ==> List((1, 2, 3, "b")))
-
-        _ <- A.i.Bb.Cc.i._B._A.s.insert(1, 3, "b").transact
-        _ <- A.i.Bb.Cc.i._B._A.s.query.get.map(_ ==> List((1, 3, "b")))
-
-        _ <- A.Bb.Cc.i._B._A.s.insert(3, "b").transact
-        _ <- A.Bb.Cc.i._B._A.s.query.get.map(_ ==> List((3, "b")))
-
 
         _ <- A.i.Bb.i.Cc.i._B.s._A.s.D.i.insert(1, 2, 3, "a", "b", 4).transact
         _ <- A.i.Bb.i.Cc.i._B.s._A.s.D.i.query.get.map(_ ==> List((1, 2, 3, "a", "b", 4)))

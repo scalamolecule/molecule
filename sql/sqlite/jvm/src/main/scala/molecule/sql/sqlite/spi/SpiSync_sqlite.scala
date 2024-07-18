@@ -9,7 +9,8 @@ import molecule.core.spi._
 import molecule.core.transaction._
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.spi.SpiSyncBase
-import molecule.sql.core.transaction.strategy.SqlAction
+import molecule.sql.core.transaction.strategy.insert.InsertAction
+import molecule.sql.core.transaction.strategy.save.SaveAction
 import molecule.sql.sqlite.query.Model2SqlQuery_sqlite
 import molecule.sql.sqlite.transaction._
 import scala.collection.mutable.ListBuffer
@@ -24,21 +25,16 @@ trait SpiSync_sqlite extends SpiSyncBase {
 
   override protected lazy val defaultValues = "DEFAULT VALUES"
 
-  override def save_getData(save: Save, conn: JdbcConn_JVM): SqlAction = {
+  override def save_getData(save: Save, conn: JdbcConn_JVM): SaveAction = {
     new ResolveSave with Save_sqlite {
       override lazy val sqlConn = conn.sqlConn
-    }.getSaveStrategy(save.elements)
+    }.getSaveAction(save.elements)
   }
 
-  override def insert_getData2(insert: Insert, conn: JdbcConn_JVM): SqlAction = {
+  override def insert_getData(insert: Insert, conn: JdbcConn_JVM): InsertAction = {
     new ResolveInsert with Insert_sqlite {
       override lazy val sqlConn: sql.Connection = conn.sqlConn
-    }.getInsertStrategy(conn.proxy.nsMap, insert.elements, insert.tpls)
-  }
-  override def insert_getData(insert: Insert, conn: JdbcConn_JVM): Data = {
-    new ResolveInsert with Insert_sqlite {
-      override lazy val sqlConn: sql.Connection = conn.sqlConn
-    }.getInsertData(conn.proxy.nsMap, insert.elements, insert.tpls)
+    }.getInsertAction(insert.elements, insert.tpls)
   }
 
   override def refIdsQuery(idsModel: List[Element], proxy: ConnProxy): String = {

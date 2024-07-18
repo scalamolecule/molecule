@@ -56,7 +56,7 @@ trait One_Map_remove extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- A.iMap(Map(pint3, pint7)).save.transact
 
-        _ <- A.B.i(2).save.transact
+        _ <- A.s("x").B.i(2).save.transact
         _ <- A.iMap(Map(pint1, pint2)).B.i(3).save.transact
         _ <- A.iMap(Map(pint2, pint3)).B.i(4).save.transact
         _ <- A.iMap(Map(pint3, pint4)).B.i(5).save.transact

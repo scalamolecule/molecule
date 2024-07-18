@@ -1,24 +1,25 @@
 package molecule.sql.core.transaction.strategy.save
 
 import java.sql.Connection
-import molecule.sql.core.transaction.strategy.{SqlOps, SqlAction}
+import molecule.sql.core.transaction.strategy.SqlOps
 
 case class SaveRefMany(
-  parent: SqlAction,
+  parent: SaveAction,
   sqlConn: Connection,
-  dbOps: SqlOps,
+  sqlOps: SqlOps,
   ns: String,
   refAttr: String,
   refNs: String,
-) extends SaveBase(sqlConn, dbOps, refNs) {
+) extends SaveAction(sqlConn, sqlOps, refNs) {
 
-  def fromTop: SqlAction = parent.fromTop
+  override def initialAction: SaveAction = parent.initialAction
+  override def backRef: SaveAction = parent
 
   override def execute: List[Long] = {
     val List(refId) = insert
 
     // Add many-to-many join once we have a parent id
-    val (id1, id2) = joinIdNames(ns, refNs)
+    val (id1, id2) = sqlOps.joinIdNames(ns, refNs)
     addPostSetter((parentIds: List[Long]) => {
       val joinStmt =
         s"""INSERT INTO ${ns}_${refAttr}_$refNs (
@@ -30,8 +31,9 @@ case class SaveRefMany(
     List(refId)
   }
 
-  override def backRef: SqlAction = parent
-
-  override def toString: String = render(0)
-  override def render(indent: Int): String = render(indent, "SaveRefMany")
+  override def render(indent: Int): String = {
+    // show join table after parent insert
+    parent.postStmts += sqlOps.getJoinStmt(ns, refAttr, refNs)
+    recurseRender(indent, "SaveRefMany")
+  }
 }

@@ -8,8 +8,7 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ResolveSave
 import molecule.core.transaction.ops.SaveOps
 import molecule.core.util.SerializationUtils
-import molecule.sql.core.transaction.strategy.SqlAction
-import molecule.sql.core.transaction.strategy.save.SaveNs
+import molecule.sql.core.transaction.strategy.save.{SaveAction, SaveNs}
 
 trait SqlSave
   extends SqlBase_JVM
@@ -17,12 +16,91 @@ trait SqlSave
     with MoleculeLogging
     with SerializationUtils { self: ResolveSave =>
 
+  protected var save: SaveAction = null
 
-  def getSaveStrategy(elements: List[Element]): SqlAction = {
-    action = SaveNs(sqlConn, getInitialNs(elements))
+  def getSaveAction(elements: List[Element]): SaveAction = {
+    save = SaveNs(sqlConn, getInitialNs(elements))
     resolve(elements)
-    action.fromTop
+    save.initialAction
   }
+
+  // Resolve after all back refs have been resolved and namespaces grouped
+  private var postResolvers = List.empty[Unit => Unit]
+
+  def getSaveData(elements: List[Element]): Data = {
+    initialNs = getInitialNs(elements)
+    curRefPath = List(initialNs)
+    resolve(elements)
+    postResolvers.foreach(_(()))
+    addRowSetterToTables()
+    (getTables, Nil)
+  }
+
+  private def addRowSetterToTables(): Unit = {
+    inserts.foreach {
+      case (refPath, cols) =>
+        val table      = refPath.last
+        val insertStmt = insertEmptyRowStmt(table, cols)
+        val colSetters = colSettersMap(refPath)
+        debug(s"--- save -------------------  ${colSetters.length}  $refPath")
+        debug(insertStmt)
+
+        tableDatas(refPath) = Table(refPath, insertStmt)
+        colSettersMap(refPath) = Nil
+        val rowSetter = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
+          // Set all column values for this row in this insert/batch
+          colSetters.foreach { colSetter =>
+            colSetter(ps, idsMap, 0)
+          }
+          // Complete row
+          ps.addBatch()
+        }
+        rowSettersMap(refPath) = List(rowSetter)
+    }
+  }
+
+  protected def insertEmptyRowStmt(
+    table: String, cols: List[(String, String)]
+  ): String = {
+    val columns           = cols.map(_._1).mkString(",\n  ")
+    val inputPlaceholders = cols.map(_ => "?").mkString(", ")
+    s"""INSERT INTO $table (
+       |  $columns
+       |) VALUES ($inputPlaceholders)""".stripMargin
+  }
+
+  private def getTables: List[Table] = {
+    // Add insert resolver to each table insert
+    inserts.map { case (refPath, _) =>
+      val rowSetters = rowSettersMap(refPath)
+      val populatePS = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
+        // Set all column values for this row in this insert/batch
+        rowSetters.foreach(rowSetter =>
+          rowSetter(ps, idsMap, rowIndex)
+        )
+      }
+      tableDatas(refPath).copy(populatePS = populatePS)
+    }
+  }
+
+  protected def getParamIndex(
+    attr: String, add: Boolean = true, castExt: String = ""
+  ): (List[String], Int) = {
+    if (inserts.exists(_._1 == curRefPath)) {
+      inserts = inserts.map {
+        case (path, cols) if path == curRefPath =>
+          paramIndexes += (curRefPath, attr) -> (cols.length + 1)
+          (path, if (add) cols :+ (attr -> castExt) else cols)
+
+        case other => other
+      }
+    } else {
+      paramIndexes += (curRefPath, attr) -> 1
+      inserts = inserts :+ (curRefPath -> List(attr -> castExt))
+    }
+    (curRefPath, paramIndexes(curRefPath -> attr))
+  }
+
 
   override protected def addOne[T](
     ns: String,
@@ -31,17 +109,13 @@ trait SqlSave
     transformValue: T => Any,
     exts: List[String] = Nil
   ): Unit = {
-    val paramIndex = action.paramIndex
+    val paramIndex = save.paramIndex(attr, "?", exts(2))
+//    val stableSave = save
     optValue.fold {
-      action.add(attr, (ps: PS) => ps.setNull(paramIndex, 0))
+      save.add((ps: PS) => ps.setNull(paramIndex, 0))
     } { value =>
       val setter = transformValue(value).asInstanceOf[(PS, Int) => Unit]
-      action.add(
-        attr,
-        (ps: PS) => setter(ps, paramIndex),
-        "?",
-        exts(2) // Add type casting for postgres
-      )
+      save.add((ps: PS) => setter(ps, paramIndex))
     }
   }
 
@@ -76,11 +150,11 @@ trait SqlSave
     attr: String,
     optArray: Option[Array[Byte]],
   ): Unit = {
-    val paramIndex = action.paramIndex
+    val paramIndex = save.paramIndex(attr)
     if (optArray.nonEmpty && optArray.get.nonEmpty) {
-      action.add(attr, (ps: PS) => ps.setBytes(paramIndex, optArray.get))
+      save.add((ps: PS) => ps.setBytes(paramIndex, optArray.get))
     } else {
-      action.add(attr, (ps: PS) => ps.setNull(paramIndex, 0))
+      save.add((ps: PS) => ps.setNull(paramIndex, 0))
     }
   }
 
@@ -91,27 +165,27 @@ trait SqlSave
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    val paramIndex = action.paramIndex
+    val paramIndex = save.paramIndex(attr)
     optMap match {
       case Some(map: Map[_, _]) if map.nonEmpty =>
-        action.add(attr, (ps: PS) =>
+        save.add((ps: PS) =>
           ps.setBytes(paramIndex, map2jsonByteArray(map, value2json)))
       case _                                    =>
-        action.add(attr, (ps: PS) => ps.setNull(paramIndex, 0))
+        save.add((ps: PS) => ps.setNull(paramIndex, 0))
     }
   }
 
   override protected def addRef(
     ns: String, refAttr: String, refNs: String, card: Card
   ): Unit = {
-    action = card match {
-      case CardOne => action.refOne(ns, refAttr, refNs)
-      case _       => action.refMany(ns, refAttr, refNs)
+    save = card match {
+      case CardOne => save.refOne(ns, refAttr, refNs)
+      case _       => save.refMany(ns, refAttr, refNs)
     }
   }
 
   override protected def addBackRef(backRefNs: String): Unit = {
-    action = action.backRef
+    save = save.backRef
   }
 
   override protected def handleRefNs(refNs: String): Unit = ()
@@ -128,23 +202,69 @@ trait SqlSave
     iterable2array: M[T] => Array[AnyRef],
   ): Unit = {
     optRefNs.fold {
-      val paramIndex = action.paramIndex
+      val paramIndex = save.paramIndex(attr)
       if (optIterable.nonEmpty && optIterable.get.nonEmpty) {
         val iterable = optIterable.get
-        action.add(attr, (ps: PS) => {
+        save.add((ps: PS) => {
           val conn  = ps.getConnection
           val array = conn.createArrayOf(sqlTpe, iterable2array(iterable))
           ps.setArray(paramIndex, array)
         })
       } else {
-        action.add(attr, (ps: PS) => ps.setNull(paramIndex, 0))
+        save.add((ps: PS) => ps.setNull(paramIndex, 0))
       }
     } { refNs =>
       optIterable.foreach(refIds =>
-        action.addCardManyRefAttr(
-          ns, attr, refNs, refIds.asInstanceOf[Set[Long]], defaultValues
+        save.addCardManyRefAttr(
+          ns, attr, refNs, refIds.asInstanceOf[Set[Long]]
         )
       )
+    }
+  }
+  protected def join[T, M[_] <: Iterable[_]](
+    ns: String,
+    refAttr: String,
+    refNs: String,
+    optIterable: Option[M[T]]
+  ): Unit = {
+    val curPath = if (paramIndexes.nonEmpty) curRefPath else List(ns)
+    if (optIterable.isEmpty || optIterable.get.isEmpty) {
+      addColSetter(curPath, (_: PS, _: IdsMap, _: RowIndex) => ())
+    } else {
+      val joinTable = ss(ns, refAttr, refNs)
+      val joinPath  = curPath :+ joinTable
+
+      // join table with single row
+      // (treated as normal insert since there's only 1 join per row)
+      val (id1, id2) = if (ns == refNs)
+        (ss(ns, "1_id"), ss(refNs, "2_id"))
+      else
+        (ss(ns, "id"), ss(refNs, "id"))
+      // When insertion order is reversed, this join table
+      // will be set after left and right has been inserted
+      inserts = (joinPath, List((id1, ""), (id2, ""))) +: inserts
+
+      if (paramIndexes.isEmpty) {
+        // If current namespace has no attributes, then add an empty row with
+        // default null values (only to be referenced as the left side of the join table)
+        val emptyRowSetter: Setter = (ps: PS, _: IdsMap, _: RowIndex) => ps.addBatch()
+        addColSetter(curPath, emptyRowSetter)
+        inserts = inserts :+ (curRefPath -> List())
+      }
+
+      // Join table setter
+      val refIds2            = optIterable.get.iterator.asInstanceOf[Iterator[Long]]
+      val joinSetter: Setter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
+        val refId1 = idsMap(curPath)(rowIndex)
+        while (refIds2.hasNext) {
+          val refId2 = refIds2.next()
+          ps.setLong(1, refId1)
+          ps.setLong(2, refId2)
+          if (refIds2.hasNext)
+            ps.addBatch()
+        }
+      }
+      addColSetter(joinPath, joinSetter)
     }
   }
 }

@@ -12,6 +12,8 @@ import molecule.core.validation.insert.InsertValidation
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.query.{SqlQueryResolveCursor, SqlQueryResolveOffset}
 import molecule.sql.core.transaction.strategy.SqlAction
+import molecule.sql.core.transaction.strategy.insert.InsertAction
+import molecule.sql.core.transaction.strategy.save.SaveAction
 import molecule.sql.core.transaction.strategy.update.UpdateHelper
 import molecule.sql.core.transaction.{SqlBase_JVM, SqlUpdateSetValidator}
 import scala.collection.mutable.ListBuffer
@@ -130,7 +132,7 @@ trait SpiSyncBase
   }
 
   // Implement for each sql database
-  def save_getData(save: Save, conn: JdbcConn_JVM): SqlAction = ???
+  def save_getData(save: Save, conn: JdbcConn_JVM): SaveAction
 
 
   override def save_validate(save: Save)(implicit conn: Conn): Map[String, Seq[String]] = {
@@ -148,9 +150,13 @@ trait SpiSyncBase
       insert_inspect(insert)
     val errors = insert_validate(insert0) // validate original elements against meta model
     if (errors.isEmpty) {
-      val txReport = conn.transact_sync(insert_getData(insert, conn))
-      conn.callback(insert.elements)
-      txReport
+      if (insert.tpls.isEmpty) {
+        TxReport(Nil)
+      } else {
+        val txReport = conn.transact_sync(insert_getData(insert, conn))
+        conn.callback(insert.elements)
+        txReport
+      }
     } else {
       throw InsertErrors(errors)
     }
@@ -158,13 +164,12 @@ trait SpiSyncBase
   override def insert_inspect(insert: Insert)(implicit conn: Conn): Unit = {
     tryInspect("insert", insert.elements) {
       val jdbcConn = conn.asInstanceOf[JdbcConn_JVM]
-      printInspectTx("INSERT", insert.elements, insert_getData(insert, jdbcConn), insert.tpls)
+      printInspectTx2("INSERT", insert.elements, insert_getData(insert, jdbcConn), insert.tpls)
     }
   }
 
   // Implement for each sql database
-  def insert_getData2(insert: Insert, conn: JdbcConn_JVM): SqlAction
-  def insert_getData(insert: Insert, conn: JdbcConn_JVM): Data
+  def insert_getData(insert: Insert, conn: JdbcConn_JVM): InsertAction
 
   override def insert_validate(insert: Insert)(implicit conn: Conn): Seq[(Int, Seq[InsertError])] = {
     InsertValidation.validate(conn, insert.elements, insert.tpls)
@@ -213,7 +218,6 @@ trait SpiSyncBase
           .map { m =>
             val elements = m.mkString("\n")
             val tables   = update_getData(conn, Update(m, update.isUpsert))._1
-            //            val tables   = update_getData(conn, m, update.isUpsert)._1
             tables.headOption.fold(elements)(table => elements + "\n" + table.stmt)
           }
           .mkString(action + "S ----------------------\n", "\n------------\n", "")
@@ -254,7 +258,8 @@ trait SpiSyncBase
 
   // Inspect --------------------------------------------------------
 
-  private def tryInspect(action: String, elements: List[Element])(body: => Unit): Unit = try {
+  private def tryInspect(action: String, elements: List[Element])
+                        (body: => Unit): Unit = try {
     body
   } catch {
     case NonFatal(e) =>
@@ -277,9 +282,12 @@ trait SpiSyncBase
   }
 
   private def printInspectTx2(
-    label: String, elements: List[Element], tx: SqlAction, tpls: Seq[Product] = Nil
+    label: String,
+    elements: List[Element],
+    action: SqlAction,
+    tpls: Seq[Product] = Nil
   ): Unit = {
-    printRaw(label, elements, tx.toString, tpls.mkString("\n"))
+    printRaw(label, elements, action.toString, tpls.mkString("\n"))
   }
 
 

@@ -13,6 +13,26 @@ trait InsertSemantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 
+    "Attribute required in each namespace" - refs { implicit conn =>
+      for {
+        _ <- A.B.i.insert(1).transact
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Please add at least 1 attribute to namespace A before relating to B"
+          }
+
+        _ <- A.Bb.i.insert(1).transact
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Please add at least 1 attribute to namespace A before relating to Bb"
+          }
+
+        _ <- A.Bb.*(B.i).insert(List(1)).transact
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Please add at least 1 attribute to namespace A before relating to Bb"
+          }
+      } yield ()
+    }
+
+
     "Empty Sets" - {
 
       "Alone" - refs { implicit conn =>
@@ -75,7 +95,16 @@ trait InsertSemantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // B.ii was not inserted
           _ <- A.i.B.iSet_?.query.get.map(_ ==> List((1, None)))
-          _ <- A.i.B.iSet_.query.get.map(_ ==> Nil)
+
+          // Datomic/SQL differs in whether a relationship is created
+          // when inserting empty collection
+          _ <- if (database == "Datomic") {
+            // No relationship to B
+            A.i.b_.query.get.map(_ ==> Nil)
+          } else {
+            // Relationship to empty row in B
+            A.i.b_.query.get.map(_ ==> List(1))
+          }
         } yield ()
       }
 
@@ -105,6 +134,16 @@ trait InsertSemantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           // B.iSet was not inserted
           _ <- A.i.Bb.iSet_?.query.get.map(_ ==> List((1, None)))
           _ <- A.i.Bb.iSet.query.get.map(_ ==> Nil)
+
+          // Datomic/SQL differs in whether a relationship is created
+          // when inserting empty collection
+          _ <- if (database == "Datomic") {
+            // No relationship to B
+            A.i.bb_.query.get.map(_ ==> Nil)
+          } else {
+            // Relationship to empty row in B
+            A.i.bb_.query.get.map(_ ==> List(1))
+          }
         } yield ()
       }
 
@@ -123,28 +162,29 @@ trait InsertSemantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- A.i.Bb.i.iSet.query.get.map(_ ==> Nil)
         } yield ()
       }
+    }
 
-      "Optional Nested" - refs { implicit conn =>
-        for {
-          _ <- A.i.Bb.*(B.i).insert(
-            (1, List(1, 2)),
-            (2, Nil),
-          ).transact.map(_.ids)
 
-          // Same as using optional nested notation
-          _ <- A.i.Bb.*?(B.i).insert(
-            (3, List(3, 4)),
-            (4, Nil),
-          ).transact.map(_.ids)
+    "Optional Nested" - refs { implicit conn =>
+      for {
+        _ <- A.i.Bb.*(B.i).insert(
+          (1, List(1, 2)),
+          (2, Nil),
+        ).transact.map(_.ids)
 
-          _ <- A.i.a1.Bb.*?(B.i.a1).query.get.map(_ ==> List(
-            (1, List(1, 2)),
-            (2, Nil),
-            (3, List(3, 4)),
-            (4, Nil),
-          ))
-        } yield ()
-      }
+        // Same as using optional nested notation
+        _ <- A.i.Bb.*?(B.i).insert(
+          (3, List(3, 4)),
+          (4, Nil),
+        ).transact.map(_.ids)
+
+        _ <- A.i.a1.Bb.*?(B.i.a1).query.get.map(_ ==> List(
+          (1, List(1, 2)),
+          (2, Nil),
+          (3, List(3, 4)),
+          (4, Nil),
+        ))
+      } yield ()
     }
 
 

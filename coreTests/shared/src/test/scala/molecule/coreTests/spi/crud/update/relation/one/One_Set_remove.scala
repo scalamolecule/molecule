@@ -57,7 +57,7 @@ trait One_Set_remove extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- A.iSet(Set(3, 7)).save.transact
 
-        _ <- A.B.i(2).save.transact
+        _ <- A.s("x").B.i(2).save.transact
         _ <- A.iSet(Set(1, 2)).B.i(3).save.transact
         _ <- A.iSet(Set(2, 3)).B.i(4).save.transact
         _ <- A.iSet(Set(3, 4)).B.i(5).save.transact

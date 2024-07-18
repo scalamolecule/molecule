@@ -59,6 +59,7 @@ case class TxModelValidation(
             dup(refAttr)
           if (refPath.contains(refAttr))
             dup(refAttr)
+          noEmpty(r.ns, r.refAttr)
           prev(level) = prev(level) :+ Array(refAttr)
           group += 1
           mandatoryRefs = mandatoryRefs.filterNot(_._1 == refAttr)
@@ -97,6 +98,7 @@ case class TxModelValidation(
           val ref = r.name
           if (prev(level)(group).contains(ref))
             dup(ref)
+          noEmpty(r.ns, r.refAttr)
           prev = prev :+ Array(Array(ref))
           level += 1
           group = 0
@@ -169,6 +171,14 @@ case class TxModelValidation(
   private def onlyMandatory(a: Attr) = {
     val mode = if (a.isInstanceOf[Tacit]) "tacit" else "optional"
     throw ModelError(s"Required attributes have to be mandatory. Found $mode attribute ${a.ns}.${a.attr}")
+  }
+  private def noEmpty(ns: String, refAttr: String): Unit = {
+    if (presentAttrs.isEmpty && !isUpdate) {
+      throw ModelError(
+        s"Please add at least 1 attribute to namespace $ns " +
+          s"before relating to " + refAttr.capitalize
+      )
+    }
   }
 
   private def valueValidate(a: Attr): Seq[String] = {

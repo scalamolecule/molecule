@@ -1,5 +1,6 @@
 package molecule.datalog.datomic
 
+import molecule.base.error.ModelError
 import molecule.boilerplate.api.{NestedInit_01, NestedInit_02}
 import molecule.core.util.Executor._
 import molecule.datalog.datomic.async._
@@ -28,12 +29,44 @@ object AdhocJVM_datomic extends TestSuite_datomic {
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
 
-        _ <- A.i.insert(2).transact
-        _ <- A.i.query.get.map(_ ==> List(2))
+//        _ <- A.i.B.iSet.insert((1, Set.empty[Int])).transact
+//
+//        // A.i was inserted
+//        _ <- A.i.query.get.map(_ ==> List(1))
+//
+//        // B.ii was not inserted
+//        _ <- A.i.B.iSet_?.query.get.map(_ ==> List((1, None)))
+//
+//        // Ref created though (empty row in B namespace)
+//        _ <- A.i.b_.query.get.map(_ ==> List(1))
+//        _ <- A.i.b_?.query.get.map(_ ==> List((1, None)))
 
-        _ <- A.i.Bb.*(B.i).query.get
+        _ <- A.B.i(1).save.transact
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Please add at least 1 attribute to namespace A before relating to B"
+          }
 
-        //        _ <- A.i.Bb.?(B.i).query.get
+        _ <- A.Bb.i(1).save.transact
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Please add at least 1 attribute to namespace A before relating to Bb"
+          }
+
+
+        _ <- A.i.B.iSet.insert((20, Set.empty[Int])).i.transact.map(_.id)
+        _ <- A.i.B.iSet_?.query.get.map(_ ==> List((20, None)))
+        _ <- A.i.b_.query.get.map(_ ==> Nil)
+//        _ <- A.i.b_.query.get.map(_ ==> List(20))
+
+
+//
+//        refId <- A.i_.b.query.get.map(_.head)
+//
+//        _ = println("=====================================")
+//        _ <- B(refId).iSet().update.i.transact
+//
+//        _ <- A.i.B.iSet.query.get.map(_ ==> Nil)
+//        _ <- A.i.B.iSet.query.get.map(_ ==> List((20, None)))
+
 
 
       } yield ()

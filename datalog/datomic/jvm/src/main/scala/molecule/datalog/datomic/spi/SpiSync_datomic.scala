@@ -118,7 +118,7 @@ trait SpiSync_datomic
   override def insert_inspect(insert: Insert)(implicit conn: Conn): Unit = {
     printInspectTx(
       "INSERT",
-      insert.elements, insert_getStmts(insert, conn.proxy)
+      insert.elements, insert_getStmts(insert)
     )
   }
 
@@ -128,9 +128,9 @@ trait SpiSync_datomic
     InsertValidation.validate(conn, insert.elements, insert.tpls)
   }
 
-  def insert_getStmts(insert: Insert, proxy: ConnProxy): Data = {
+  def insert_getStmts(insert: Insert): Data = {
     (new ResolveInsert with Insert_datomic)
-      .getStmts(proxy.nsMap, insert.elements, insert.tpls)
+      .getStmts(insert.elements, insert.tpls)
   }
 
   override def update_transact(update: Update)(implicit conn: Conn): TxReport = {

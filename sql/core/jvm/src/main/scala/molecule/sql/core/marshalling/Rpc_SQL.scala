@@ -67,7 +67,7 @@ trait Rpc_SQL
   ): Future[Either[MoleculeError, TxReport]] = either {
     getConn(proxy).map(conn =>
       conn.transact_sync(
-        getSaveData(conn).getSaveStrategy(elements)
+        getSaveData(conn).getSaveAction(elements)
       )
     )
   }
@@ -86,7 +86,7 @@ trait Rpc_SQL
           } else tpls).asInstanceOf[Seq[Product]]
         case Left(err)   => throw err
       }
-      val data       = getInsertData(conn).getInsertData(proxy.nsMap, elements, tpls)
+      val data       = getInsertData(conn).getInsertData(elements, tpls)
       conn.transact_sync(data)
     }
   }

@@ -87,8 +87,7 @@ object Rpc_datomic
           } else tpls).asInstanceOf[Seq[Product]]
         case Left(err)   => throw err // catched in outer either wrapper
       }
-      stmts = (new ResolveInsert with Insert_datomic)
-        .getStmts(proxy.nsMap, elements, tpls)
+      stmts = (new ResolveInsert with Insert_datomic).getStmts(elements, tpls)
       txReport <- conn.transact_async(stmts)
     } yield txReport
   }

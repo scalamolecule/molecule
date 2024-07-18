@@ -56,7 +56,7 @@ trait One_Seq_remove extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- A.iSeq(Seq(3, 7)).save.transact
 
-        _ <- A.B.i(2).save.transact
+        _ <- A.s("x").B.i(2).save.transact
         _ <- A.iSeq(Seq(1, 2, 1)).B.i(3).save.transact
         _ <- A.iSeq(Seq(2, 3, 2)).B.i(4).save.transact
         _ <- A.iSeq(Seq(3, 4, 3)).B.i(5).save.transact

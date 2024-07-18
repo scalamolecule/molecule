@@ -1,31 +1,33 @@
 package molecule.sql.core.transaction.strategy.save
 
 import java.sql.Connection
-import molecule.sql.core.transaction.strategy.{SqlOps, SqlAction}
+import molecule.sql.core.transaction.strategy.SqlOps
 
 case class SaveRefOne(
-  parent: SqlAction,
+  parent: SaveAction,
   sqlConn: Connection,
-  dbOps: SqlOps,
+  sqlOps: SqlOps,
   ns: String,
   refAttr: String,
   refNs: String,
-) extends SaveBase(sqlConn, dbOps, refNs) {
+) extends SaveAction(sqlConn, sqlOps, refNs) {
 
-  def fromTop: SqlAction = parent.fromTop
+  override def initialAction: SaveAction = parent.initialAction
+  override def backRef: SaveAction = parent
 
   override def execute: List[Long] = {
     val List(refId) = insert
 
     // Add ref id from parent to ref
-    val refAttrIndex = parent.paramIndex
-    parent.add(refAttr, (ps: PS) => ps.setLong(refAttrIndex, refId))
+    val refAttrIndex = parent.paramIndex(refAttr)
+    parent.rowSetters.last += ((ps: PS) => ps.setLong(refAttrIndex, refId))
 
     List(refId)
   }
 
-  override def backRef: SqlAction = parent
-
-  override def toString: String = render(0)
-  override def render(indent: Int): String = render(indent, "SaveRefOne")
+  override def render(indent: Int): String = {
+    // Add refAttr to parent insert
+    parent.paramIndex(refAttr)
+    recurseRender(indent, "SaveRefOne")
+  }
 }

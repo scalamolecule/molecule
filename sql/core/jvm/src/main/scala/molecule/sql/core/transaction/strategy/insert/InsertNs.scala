@@ -1,20 +1,23 @@
 package molecule.sql.core.transaction.strategy.insert
 
 import java.sql.Connection
-import molecule.sql.core.transaction.strategy.{SqlOps, SqlAction}
+import molecule.sql.core.transaction.strategy.SqlOps
 
+/*
+1. Recursively build graph of Product => PS => Unit setters
+2. Create PS for each table in the graph
+3. Loop tuples and recursively populate PS's for each tuple/sub-tuple in graph
+4. Execute ps.executeBatch for each table in the graph
+ */
 case class InsertNs(
   sqlConn: Connection,
   ns: String,
-)(implicit dbOps: SqlOps) extends InsertBase(sqlConn, dbOps, ns) {
+)(implicit sqlOps: SqlOps) extends InsertAction(sqlConn, sqlOps, ns) {
 
   // Initial namespace
-  def fromTop: SqlAction = this
+  override def initialAction: InsertAction = this
 
-  override def execute: List[Long] = {
-    insert
-  }
+  override def execute: List[Long] = insert
 
-  override def toString: String = render(0)
-  override def render(indent: Int): String = render(indent, "SaveNs")
+  override def toString: String = recurseRender(0, "InsertNs")
 }

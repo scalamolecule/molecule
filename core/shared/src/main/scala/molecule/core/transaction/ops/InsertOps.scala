@@ -101,7 +101,6 @@ trait InsertOps extends BaseOps {
   ): Product => Unit
 
   protected def addOptRef(
-    nsMap: Map[String, MetaNs],
     tplIndex: Int,
     ns: String,
     refAttr: String,
@@ -110,7 +109,6 @@ trait InsertOps extends BaseOps {
   ): Product => Unit
 
   protected def addNested(
-    nsMap: Map[String, MetaNs],
     tplIndex: Int,
     ns: String,
     refAttr: String,
