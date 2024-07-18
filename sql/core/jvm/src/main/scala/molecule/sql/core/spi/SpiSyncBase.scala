@@ -14,7 +14,7 @@ import molecule.sql.core.query.{SqlQueryResolveCursor, SqlQueryResolveOffset}
 import molecule.sql.core.transaction.strategy.SqlAction
 import molecule.sql.core.transaction.strategy.insert.InsertAction
 import molecule.sql.core.transaction.strategy.save.SaveAction
-import molecule.sql.core.transaction.strategy.update.UpdateHelper
+import molecule.sql.core.transaction.strategy.updateOld.UpdateHelper
 import molecule.sql.core.transaction.{SqlBase_JVM, SqlUpdateSetValidator}
 import scala.collection.mutable.ListBuffer
 import scala.util.control.NonFatal

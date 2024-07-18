@@ -4,7 +4,7 @@ import java.sql.Connection
 import molecule.base.util.BaseHelpers
 import scala.collection.mutable.ListBuffer
 
-class SqlOps extends SqlBase with BaseHelpers{
+class SqlOps extends SqlBase with BaseHelpers {
 
   lazy val defaultValues = "(id) VALUES (DEFAULT)"
 

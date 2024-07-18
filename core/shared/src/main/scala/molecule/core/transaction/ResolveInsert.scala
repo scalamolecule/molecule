@@ -1,14 +1,10 @@
 package molecule.core.transaction
 
-import molecule.base.ast._
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
-import molecule.core.marshalling.ConnProxy
 import molecule.core.transaction.ops.InsertOps
 import molecule.core.util.ModelUtils
 import scala.annotation.tailrec
-import scala.collection.mutable
-import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
 class ResolveInsert
   extends InsertResolvers_

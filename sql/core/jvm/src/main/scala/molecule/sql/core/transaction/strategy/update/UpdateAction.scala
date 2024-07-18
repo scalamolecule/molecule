@@ -1,11 +1,11 @@
-package molecule.sql.core.transaction.strategy.save
+package molecule.sql.core.transaction.strategy.update
 
 import java.sql.Connection
+import molecule.sql.core.transaction.strategy.save.{SaveAction, SaveRefMany, SaveRefOne}
 import molecule.sql.core.transaction.strategy.{SqlAction, SqlOps}
 import scala.collection.mutable.ListBuffer
 
-
-abstract class SaveAction(
+abstract class UpdateAction(
   sqlConn: Connection,
   sqlOps: SqlOps,
   ns: String
@@ -13,7 +13,7 @@ abstract class SaveAction(
 
   // This is the heart of save operations for this node in the
   // graph of relationships. Each ref recursively save its sub-graph.
-  def insert: List[Long] = {
+  def update: List[Long] = {
     // Execute referenced namespaces first so that we can
     // reference them subsequently from current namespace
     refs.foreach(_.execute)
@@ -24,7 +24,7 @@ abstract class SaveAction(
     // Add one row
     rowSetters.foreach { rowSetter =>
       rowSetter.foreach { colSetter =>
-//        println("colSetter: " + colSetter)
+        //        println("colSetter: " + colSetter)
         colSetter(ps)
       }
       ps.addBatch()
@@ -44,49 +44,30 @@ abstract class SaveAction(
     ids
   }
 
-  def addCardManyRefAttr(
-    ns: String, refAttr: String, refNs: String, refIds: Set[Long]
-  ): Unit = {
-    if (refIds.nonEmpty) {
-      addPostSetter(
-        (parentIds: List[Long]) => {
-          val leftId = parentIds.head
-          val ps     = prepStmt(sqlOps.getJoinStmt(ns, refAttr, refNs))
-          val it     = refIds.iterator
-          while (it.hasNext) {
-            ps.setLong(1, leftId)
-            ps.setLong(2, it.next())
-            ps.addBatch()
-          }
-          ps.executeBatch()
-          ps.close()
-        }
-      )
-    }
-  }
+
 
 
   // Change strategy ----------------------------------------
 
   // Traverse back to initial InsertAction
-  def initialAction: SaveAction
+  def initialAction: UpdateAction
 
-  def refOne(ns: String, refAttr: String, refNs: String): SaveAction = {
-    val ref = SaveRefOne(this, sqlConn, sqlOps, ns, refAttr, refNs)
+  def refOne(ns: String, refAttr: String, refNs: String): UpdateAction = {
+    val ref = UpdateRefOne(this, sqlConn, sqlOps, ns, refAttr, refNs)
     ref.rowSetters += ListBuffer.empty[PS => Unit]
     refs += ref
     ref
   }
 
-  def refMany(ns: String, refAttr: String, refNs: String): SaveAction = {
-    val ref = SaveRefMany(this, sqlConn, sqlOps, ns, refAttr, refNs)
+  def refMany(ns: String, refAttr: String, refNs: String): UpdateAction = {
+    val ref = UpdateRefMany(this, sqlConn, sqlOps, ns, refAttr, refNs)
     ref.rowSetters += ListBuffer.empty[PS => Unit]
     refs += ref
     ref
   }
 
-  def backRef: SaveAction = ???
+  def backRef: UpdateAction = ???
 
-  def optRef: SaveAction = ???
-  def optRefNest: SaveAction = ???
+  def optRef: UpdateAction = ???
+  def optRefNest: UpdateAction = ???
 }

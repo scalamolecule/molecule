@@ -1,4 +1,4 @@
-package molecule.sql.core.transaction.strategy.update
+package molecule.sql.core.transaction.strategy.updateOld
 
 import java.sql.{Statement, PreparedStatement => PS}
 import molecule.base.ast.{CardOne, CardSet}

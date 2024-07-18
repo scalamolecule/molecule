@@ -25,7 +25,7 @@ trait SqlInsert
     val resolveTpl   = getResolver(elements)
     tpls.foreach { tpl =>
       stableInsert.nextRow()
-      println("------------------------------- " + tpl)
+      //      println("------------------------------- " + tpl)
       resolveTpl(tpl)
     }
     insert.initialAction
@@ -41,14 +41,14 @@ trait SqlInsert
   ): Product => Unit = {
     val paramIndex   = insert.paramIndex(attr, "?", exts(2))
     val stableInsert = insert
-    println(s"    $ns.$attr          $paramIndex ")
+    //    println(s"    $ns.$attr          $paramIndex ")
     (tpl: Product) => {
       val scalaValue  = tpl.productElement(tplIndex).asInstanceOf[T]
       val valueSetter = transformValue(scalaValue).asInstanceOf[(PS, Int) => Unit]
-      println(s"$ns.$attr($paramIndex) = $scalaValue")
+      //      println(s"$ns.$attr($paramIndex) = $scalaValue")
       stableInsert.add {
         (ps: PS) =>
-          println(s"1--  $ns.$attr($paramIndex) = $scalaValue")
+          //          println(s"1--  $ns.$attr($paramIndex) = $scalaValue")
           valueSetter(ps, paramIndex)
       }
     }
@@ -250,7 +250,7 @@ trait SqlInsert
           val nestedSingleValues = tpl.productElement(tplIndex).asInstanceOf[Seq[Any]]
           stableInsert.addNestedCount(nestedSingleValues.length)
           nestedSingleValues.foreach { nestedSingleValue =>
-            println("++++++++++++++++++++++++++  " + nestedSingleValue)
+            //            println("++++++++++++++++++++++++++  " + nestedSingleValue)
             stableInsert.nextNestedRow()
             resolveNested(Tuple1(nestedSingleValue))
           }

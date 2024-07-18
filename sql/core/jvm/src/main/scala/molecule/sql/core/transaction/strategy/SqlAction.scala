@@ -7,11 +7,15 @@ import scala.collection.mutable.ListBuffer
 abstract class SqlAction(
   sqlConn: Connection,
   sqlOps: SqlOps,
-  table: String
+  ns: String
 ) extends SqlBase {
 
-  protected val refs = ListBuffer.empty[SqlAction]
-  val cols = ListBuffer.empty[String]
+  // Strategy execution
+  def execute: List[Long]
+
+
+  protected val refs         = ListBuffer.empty[SqlAction]
+  protected val cols         = ListBuffer.empty[String]
   protected val placeHolders = ListBuffer.empty[String]
   protected val postSetters  = ListBuffer.empty[List[Long] => Unit]
 
@@ -28,26 +32,17 @@ abstract class SqlAction(
   }
   def getNestedCounts = nestedCounts
 
-  def execute: List[Long]
-
-
   def nextRow(): Unit = {
     rowSetters += ListBuffer.empty[PS => Unit]
     //    println(s"$table nextRow")
-    //    refs.foreach(_.nextRow())
     refs.foreach {
-      case _: InsertNested => () //
+      case _: InsertNested => () // use nextNestedRow in addNested
       case other           => other.nextRow()
     }
   }
   def nextNestedRow(): Unit = {
     rowSetters += ListBuffer.empty[PS => Unit]
     refs.foreach(_.nextRow())
-    //    refs.foreach {
-    //      case nested: InsertNested => nested.nextRow()
-    //      case other                => ()
-    //      //          case other           => other.nextRow()
-    //    }
   }
 
   def paramIndex = cols.length + 1
@@ -62,7 +57,6 @@ abstract class SqlAction(
 
   def add(colSetter: PS => Unit): Unit = {
     rowSetters.last += colSetter
-
     //    rowSetters.foreach { rowSetter =>
     //      println(rowSetter.mkString(s"$table add\n  ", "\n  ", "\n  --"))
     //    }
@@ -84,7 +78,7 @@ abstract class SqlAction(
     val p1             = "  " * indent
     val p2             = p1 + "  "
     val strategies     = refs.map(_.render(indent + 1)) ++
-      (sqlOps.insertStmt(table, cols, placeHolders) +: postStmts)
+      (sqlOps.insertStmt(ns, cols, placeHolders) +: postStmts)
     val executionGraph = strategies.map(stmt =>
       stmt.linesIterator.mkString("\n  " + p1)
     ).mkString(s"\n$p2---------------------------\n$p2")

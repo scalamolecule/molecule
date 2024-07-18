@@ -7,8 +7,8 @@ import molecule.sql.core.transaction.strategy.{SqlAction, SqlOps}
 abstract class InsertAction(
   sqlConn: Connection,
   sqlOps: SqlOps,
-  val table: String
-) extends SqlAction(sqlConn, sqlOps, table) {
+  ns: String
+) extends SqlAction(sqlConn, sqlOps, ns) {
 
   def insert: List[Long] = {
 
@@ -17,7 +17,7 @@ abstract class InsertAction(
 
     // Execute this namespace insert
     //    val ps = prepStmt(sqlOps.insertStmt(table, cols, placeHolders))
-    val stmt = sqlOps.insertStmt(table, cols, placeHolders)
+    val stmt = sqlOps.insertStmt(ns, cols, placeHolders)
     //    println("\n=============================================" +
     //      "============================================== " + table)
     //    println(stmt)
@@ -38,7 +38,7 @@ abstract class InsertAction(
 
     // Retrieve generated ids (various db implementations)
     // Executes and closes prepared statement
-    val ids = sqlOps.getIds(sqlConn, table, ps)
+    val ids = sqlOps.getIds(sqlConn, ns, ps)
 
     // Execute post inserts of refs given new ids of this namespace
     // (many-to-many joins using this id and ref id in pairs)

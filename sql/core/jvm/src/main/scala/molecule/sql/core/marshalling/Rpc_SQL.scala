@@ -12,7 +12,7 @@ import molecule.core.transaction._
 import molecule.core.util.Executor._
 import molecule.core.util.FutureUtils
 import molecule.sql.core.facade.JdbcConn_JVM
-import molecule.sql.core.transaction.strategy.update.UpdateHelper
+import molecule.sql.core.transaction.strategy.updateOld.UpdateHelper
 import molecule.sql.core.transaction.{SqlBase_JVM, SqlInsert, SqlSave}
 import scala.concurrent.Future
 
