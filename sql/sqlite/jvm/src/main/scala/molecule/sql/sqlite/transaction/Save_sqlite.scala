@@ -50,13 +50,6 @@ trait Save_sqlite extends SqlSave with TxBase_sqlite { self: ResolveSave =>
     }
   }
 
-  // Save Floats as Doubles (REAL PRECISION) in SQlite
-  override protected lazy val transformFloat =
-    (v: Float) => (ps: PS, n: Int) => ps.setDouble(n, v.toString.toDouble)
-
-  override protected lazy val transformDate =
-    (v: Date) => (ps: PS, n: Int) => ps.setLong(n, v.getTime)
-
 
   // Helpers -------------------------------------------------------------------
 
@@ -83,4 +76,11 @@ trait Save_sqlite extends SqlSave with TxBase_sqlite { self: ResolveSave =>
       )
     }
   }
+
+  // Save Floats as Doubles (REAL PRECISION) in SQlite
+  override protected lazy val transformFloat =
+    (v: Float) => (ps: PS, n: Int) => ps.setDouble(n, v.toString.toDouble)
+
+  override protected lazy val transformDate =
+    (v: Date) => (ps: PS, n: Int) => ps.setLong(n, v.getTime)
 }

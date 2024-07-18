@@ -5,5 +5,4 @@ import molecule.sql.core.transaction.SqlSave
 
 trait Save_h2 extends SqlSave { self: ResolveSave =>
 
-  doPrint = false
 }

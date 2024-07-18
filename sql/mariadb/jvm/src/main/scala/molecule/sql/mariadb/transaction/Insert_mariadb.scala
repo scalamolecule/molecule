@@ -7,8 +7,6 @@ import molecule.sql.core.transaction.SqlInsert
 
 trait Insert_mariadb extends SqlInsert { self: ResolveInsert with InsertResolvers_ =>
 
-  doPrint = false
-
   override protected def addSet[T](
     ns: String,
     attr: String,
@@ -69,22 +67,23 @@ trait Insert_mariadb extends SqlInsert { self: ResolveInsert with InsertResolver
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    val (curPath, paramIndex) = getParamIndex(attr)
-    (tpl: Product) =>
-      val colSetter = tpl.productElement(tplIndex).asInstanceOf[Map[String, _]] match {
+    val paramIndex   = insert.paramIndex(attr)
+    val stableInsert = insert
+    (tpl: Product) => {
+      tpl.productElement(tplIndex).asInstanceOf[Map[String, _]] match {
         case map if map.nonEmpty =>
-          (ps: PS, _: IdsMap, _: RowIndex) =>
-            ps.setString(paramIndex, map2json(map.asInstanceOf[Map[String, T]], value2json))
+          stableInsert.add((ps: PS) =>
+            ps.setString(
+              paramIndex,
+              map2json(map.asInstanceOf[Map[String, T]], value2json)
+            ))
 
         case _ =>
-          (ps: PS, _: IdsMap, _: RowIndex) =>
-            ps.setNull(paramIndex, java.sql.Types.NULL)
+          stableInsert.add((ps: PS) =>
+            ps.setNull(paramIndex, java.sql.Types.NULL))
       }
-      addColSetter(curPath, colSetter)
+    }
   }
-
-  override protected lazy val transformDate =
-    (v: Date) => (ps: PS, n: Int) => ps.setLong(n, v.getTime)
 
 
   // Helpers -------------------------------------------------------------------
@@ -96,22 +95,25 @@ trait Insert_mariadb extends SqlInsert { self: ResolveInsert with InsertResolver
     tplIndex: Int,
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
+    val stableInsert = insert
     optRefNs.fold {
-      val (curPath, paramIndex) = getParamIndex(attr)
+      val paramIndex = stableInsert.paramIndex(attr)
       (tpl: Product) => {
         val iterable  = tpl.productElement(tplIndex).asInstanceOf[Iterable[T]]
-        val colSetter = if (iterable.nonEmpty) {
+        if (iterable.nonEmpty) {
           val json = iterable2json(iterable, value2json)
-          (ps: PS, _: IdsMap, _: RowIndex) =>
-            ps.setString(paramIndex, json)
+          stableInsert.add((ps: PS) =>
+            ps.setString(paramIndex, json))
         } else {
-          (ps: PS, _: IdsMap, _: RowIndex) =>
-            ps.setNull(paramIndex, java.sql.Types.NULL)
+          stableInsert.add((ps: PS) =>
+            ps.setNull(paramIndex, java.sql.Types.NULL))
         }
-        addColSetter(curPath, colSetter)
       }
     } { refNs =>
-      join(ns, attr, refNs, tplIndex)
+      (tpl: Product) => {
+        val refIds = tpl.productElement(tplIndex).asInstanceOf[Iterable[Long]]
+        stableInsert.addCardManyRefAttr(ns, attr, refNs, refIds.asInstanceOf[Set[Long]])
+      }
     }
   }
 
@@ -122,27 +124,38 @@ trait Insert_mariadb extends SqlInsert { self: ResolveInsert with InsertResolver
     tplIndex: Int,
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-      optRefNs.fold {
-        val (curPath, paramIndex) = getParamIndex(attr)
-        (tpl: Product) => {
-          val colSetter = tpl.productElement(tplIndex) match {
-            case Some(iterable: Iterable[_]) =>
-              if (iterable.nonEmpty) {
-                val json = iterable2json(iterable.asInstanceOf[Iterable[T]], value2json)
-                (ps: PS, _: IdsMap, _: RowIndex) =>
-                  ps.setString(paramIndex, json)
-              } else {
-                (ps: PS, _: IdsMap, _: RowIndex) =>
-                  ps.setNull(paramIndex, java.sql.Types.NULL)
-              }
-            case None                        =>
-              (ps: PS, _: IdsMap, _: RowIndex) =>
-                ps.setNull(paramIndex, java.sql.Types.NULL)
-          }
-          addColSetter(curPath, colSetter)
+    val stableInsert = insert
+    optRefNs.fold {
+      val paramIndex = stableInsert.paramIndex(attr)
+      (tpl: Product) =>
+        tpl.productElement(tplIndex) match {
+          case Some(iterable: Iterable[_]) =>
+            if (iterable.nonEmpty) {
+              val json = iterable2json(iterable.asInstanceOf[Iterable[T]], value2json)
+              stableInsert.add((ps: PS) =>
+                ps.setString(paramIndex, json))
+            } else {
+              stableInsert.add((ps: PS) =>
+                ps.setNull(paramIndex, java.sql.Types.NULL))
+            }
+          case None                        =>
+            stableInsert.add((ps: PS) =>
+              ps.setNull(paramIndex, java.sql.Types.NULL))
         }
-      } { refNs =>
-        optJoin(ns, attr, refNs, tplIndex)
+    } { refNs =>
+      (tpl: Product) => {
+        tpl.productElement(tplIndex) match {
+          case Some(set: Iterable[_]) if set.nonEmpty =>
+            stableInsert.addCardManyRefAttr(
+              ns, attr, refNs, set.asInstanceOf[Set[Long]]
+            )
+          case _                                      => ()
+        }
       }
+    }
   }
+
+  override protected lazy val transformDate =
+    (v: Date) => (ps: PS, n: Int) => ps.setLong(n, v.getTime)
+
 }

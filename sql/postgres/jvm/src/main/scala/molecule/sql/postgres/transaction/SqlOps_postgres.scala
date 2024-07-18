@@ -1,11 +1,8 @@
 package molecule.sql.postgres.transaction
 
-import java.sql.Connection
 import molecule.sql.core.transaction.strategy.SqlOps
-import scala.collection.mutable.ListBuffer
 
 class SqlOps_postgres extends SqlOps {
-
 
   override def insertStmt(
     table: String, cols: Iterable[String], placeHolders: Iterable[String]

@@ -1,13 +1,11 @@
 package molecule.sql.mariadb.marshalling
 
-import java.sql.{Connection, DriverManager}
-import molecule.boilerplate.ast.Model._
-import molecule.core.action.{Query, QueryCursor, QueryOffset}
+import java.sql.Connection
 import molecule.core.marshalling.Boopicklers._
 import molecule.core.marshalling.{ConnProxy, JdbcProxy}
 import molecule.core.transaction._
 import molecule.core.util.Executor._
-import molecule.sql.core.facade.{JdbcConn_JVM, JdbcHandler_JVM}
+import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.marshalling.Rpc_SQL
 import molecule.sql.core.transaction.{SqlInsert, SqlSave}
 import molecule.sql.mariadb.spi.SpiSync_mariadb

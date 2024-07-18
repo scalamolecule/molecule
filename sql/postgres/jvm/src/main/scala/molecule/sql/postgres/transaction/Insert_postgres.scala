@@ -1,13 +1,10 @@
 package molecule.sql.postgres.transaction
 
-import java.sql.Statement
-import molecule.core.transaction.{InsertResolvers_, ResolveInsert}
-import molecule.sql.core.transaction.{JoinTable, SqlInsert, Table}
 import java.sql.{PreparedStatement => PS}
+import molecule.core.transaction.{InsertResolvers_, ResolveInsert}
+import molecule.sql.core.transaction.SqlInsert
 
 trait Insert_postgres extends SqlInsert { self: ResolveInsert with InsertResolvers_ =>
-
-  doPrint = false
 
   override protected def addMap[T](
     ns: String,
@@ -17,18 +14,22 @@ trait Insert_postgres extends SqlInsert { self: ResolveInsert with InsertResolve
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    val (curPath, paramIndex) = getParamIndex(attr, castExt = "::jsonb")
-    (tpl: Product) =>
-      val colSetter = tpl.productElement(tplIndex).asInstanceOf[Map[String, _]] match {
+    val paramIndex   = insert.paramIndex(attr, "?", "::jsonb")
+    val stableInsert = insert
+    (tpl: Product) => {
+      tpl.productElement(tplIndex).asInstanceOf[Map[String, _]] match {
         case map if map.nonEmpty =>
-          (ps: PS, _: IdsMap, _: RowIndex) =>
-            ps.setString(paramIndex, map2json(map.asInstanceOf[Map[String, T]], value2json))
+          stableInsert.add((ps: PS) =>
+            ps.setString(
+              paramIndex,
+              map2json(map.asInstanceOf[Map[String, T]], value2json)
+            ))
 
         case _ =>
-          (ps: PS, _: IdsMap, _: RowIndex) =>
-            ps.setNull(paramIndex, java.sql.Types.NULL)
+          stableInsert.add((ps: PS) =>
+            ps.setNull(paramIndex, java.sql.Types.NULL))
       }
-      addColSetter(curPath, colSetter)
+    }
   }
 
   override protected def addMapOpt[T](
@@ -39,18 +40,22 @@ trait Insert_postgres extends SqlInsert { self: ResolveInsert with InsertResolve
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    val (curPath, paramIndex) = getParamIndex(attr, castExt = "::jsonb")
-    (tpl: Product) =>
-      val colSetter = tpl.productElement(tplIndex) match {
+    val paramIndex   = insert.paramIndex(attr, "?", "::jsonb")
+    val stableInsert = insert
+    (tpl: Product) => {
+      tpl.productElement(tplIndex) match {
         case Some(map: Map[_, _]) if map.nonEmpty =>
-          (ps: PS, _: IdsMap, _: RowIndex) =>
-            ps.setString(paramIndex, map2json(map.asInstanceOf[Map[String, T]], value2json))
+          stableInsert.add((ps: PS) =>
+            ps.setString(
+              paramIndex,
+              map2json(map.asInstanceOf[Map[String, T]], value2json)
+            ))
 
         case _ =>
-          (ps: PS, _: IdsMap, _: RowIndex) =>
-            ps.setNull(paramIndex, java.sql.Types.NULL)
+          stableInsert.add((ps: PS) =>
+            ps.setNull(paramIndex, java.sql.Types.NULL))
       }
-      addColSetter(curPath, colSetter)
+    }
   }
 
   override protected lazy val extsID             = List("ID", "VARCHAR", "")

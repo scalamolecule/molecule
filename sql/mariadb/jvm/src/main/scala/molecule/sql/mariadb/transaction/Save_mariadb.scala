@@ -51,9 +51,6 @@ trait Save_mariadb extends SqlSave with BaseHelpers { self: ResolveSave =>
     }
   }
 
-  override protected lazy val transformDate =
-    (v: Date) => (ps: PS, n: Int) => ps.setLong(n, v.getTime)
-
 
   // Helpers -------------------------------------------------------------------
 
@@ -80,4 +77,7 @@ trait Save_mariadb extends SqlSave with BaseHelpers { self: ResolveSave =>
       )
     }
   }
+
+  override protected lazy val transformDate =
+    (v: Date) => (ps: PS, n: Int) => ps.setLong(n, v.getTime)
 }

@@ -24,57 +24,11 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
       for {
-        //        List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
-        //        _ <- Ns.i.refs.insert(1, Set(r1, r2)).i.transact
-        //        _ <- Ns.i.refs.query.get.map(_ ==> List((1, Set(r1, r2))))
 
-        List(ref1, ref2, ref3, ref4) <- Ref.i.insert(1, 2, 3, 4).transact.map(_.ids)
-        a = (5, Set(ref1, ref2))
-        b = (6, Set(ref2, ref3, ref4))
+        _ <- Ns.i.stringMap.insert(1, Map(pstring1, pstring2)).i.transact
 
-//        _ <- Ns.i.longSet.insert(List(a, b)).transact
-//        _ <- Ns.id.i.a1.longSet.query.i.get.map(_ ==> List(
-//          (1, 1, Set(1, 2)),
-//          (2, 2, Set(2, 3, 4)),
-//        ))
-
-
-        _ <- Ns.i.refs.insert(List(a, b)).transact
-
-        // Sets with one or more values matching
-        _ <- Ns.id.i.a1.refs.query.i.get.map(_ ==> List(
-          (1, 5, Set(1, 2)),
-          (2, 6, Set(2, 3, 4)),
-        ))
-
-        // "Has this value"
-        //        _ <- Ns.i.a1.refs.has(ref0).query.get.map(_ ==> List())
-//        _ <- Ns.i.a1.refs.has(ref1).query.i.get.map(_ ==> List(a))
-        //        _ <- Ns.i.a1.refs.has(ref2).query.get.map(_ ==> List(a, b))
-        //        _ <- Ns.i.a1.refs.has(ref3).query.get.map(_ ==> List(b))
-        //        // Same as
-        //        _ <- Ns.i.a1.refs.has(Seq(ref0)).query.get.map(_ ==> List())
-        //        _ <- Ns.i.a1.refs.has(Seq(ref1)).query.get.map(_ ==> List(a))
-        //        _ <- Ns.i.a1.refs.has(Seq(ref2)).query.get.map(_ ==> List(a, b))
-        //        _ <- Ns.i.a1.refs.has(Seq(ref3)).query.get.map(_ ==> List(b))
-        //
-        //
-        //        // OR semantics when multiple values
-        //
-        //        // "Has this OR that"
-        //        _ <- Ns.i.a1.refs.has(ref1, ref2).query.get.map(_ ==> List(a, b))
-        //        _ <- Ns.i.a1.refs.has(ref1, ref3).query.get.map(_ ==> List(a, b))
-        //        _ <- Ns.i.a1.refs.has(ref2, ref3).query.get.map(_ ==> List(a, b))
-        //        _ <- Ns.i.a1.refs.has(ref1, ref2, ref3).query.get.map(_ ==> List(a, b))
-        //        // Same as
-        //        _ <- Ns.i.a1.refs.has(Seq(ref1, ref2)).query.get.map(_ ==> List(a, b))
-        //        _ <- Ns.i.a1.refs.has(Seq(ref1, ref3)).query.get.map(_ ==> List(a, b))
-        //        _ <- Ns.i.a1.refs.has(Seq(ref2, ref3)).query.get.map(_ ==> List(a, b))
-        //        _ <- Ns.i.a1.refs.has(Seq(ref1, ref2, ref3)).query.get.map(_ ==> List(a, b))
-        //
-        //
-        //        // Empty Seq/Sets match nothing
-        //        _ <- Ns.i.a1.refs.has(Seq.empty[Long]).query.get.map(_ ==> List())
+        _ <- Ns.i.query.get.map(_ ==> List(1))
+        _ <- Ns.i.stringMap.query.i.get.map(_ ==> List((1, Map(pstring1, pstring2))))
 
 
       } yield ()

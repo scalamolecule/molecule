@@ -2,11 +2,10 @@ package molecule.sql.postgres.transaction
 
 import java.sql.{PreparedStatement => PS}
 import molecule.core.transaction.ResolveSave
+import molecule.core.transaction.ops.SaveOps
 import molecule.sql.core.transaction.{SqlSave, Table}
 
-trait Save_postgres extends SqlSave with TxBase_postgres { self: ResolveSave =>
-
-  doPrint = false
+trait Save_postgres extends SaveOps with SqlSave with TxBase_postgres { self: ResolveSave =>
 
   override protected def addMap[T](
     ns: String,
@@ -15,12 +14,12 @@ trait Save_postgres extends SqlSave with TxBase_postgres { self: ResolveSave =>
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    val paramIndex1 = save.paramIndex(attr, "?", "::jsonb")
+    val paramIndex = save.paramIndex(attr, "?", "::jsonb")
     optMap match {
       case Some(map: Map[_, _]) if map.nonEmpty =>
-        save.add((ps: PS) => ps.setString(paramIndex1, map2json(map, value2json)))
+        save.add((ps: PS) => ps.setString(paramIndex, map2json(map, value2json)))
       case _                                    =>
-        save.add((ps: PS) => ps.setNull(paramIndex1, 0))
+        save.add((ps: PS) => ps.setNull(paramIndex, 0))
     }
   }
 

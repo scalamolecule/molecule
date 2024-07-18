@@ -20,8 +20,17 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
 
-        _ <- Ns.int.insert(1).transact
-        _ <- Ns.int.query.get.map(_ ==> List(1))
+        _ <- Ns.i.stringMap.insert(1, Map(pstring1, pstring2)).i.transact
+
+        _ <- Ns.i.query.get.map(_ ==> List(1))
+        _ <- Ns.i.stringMap.query.i.get.map(_ ==> List((1, Map(pstring1, pstring2))))
+
+
+
+        _ <- Ns.int.i.stringSeq_?.insert(1, 1, Option.empty[List[String]]).transact
+
+        _ <- Ns.int.i.stringSeq_?.insert(1, 2, Some(List.empty[String])).transact
+
       } yield ()
     }
 

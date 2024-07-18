@@ -78,7 +78,9 @@ trait Rpc_SQL
     tplsSerialized: Array[Byte],
   ): Future[Either[MoleculeError, TxReport]] = either {
     getConn(proxy).map { conn =>
-      val tplsEither = UnpickleTpls[Any](elements, ByteBuffer.wrap(tplsSerialized)).unpickle
+      val tplsEither = UnpickleTpls[Any](
+        elements, ByteBuffer.wrap(tplsSerialized)
+      ).unpickle
       val tpls       = tplsEither match {
         case Right(tpls) =>
           (if (countValueAttrs(elements) == 1) {
@@ -86,8 +88,9 @@ trait Rpc_SQL
           } else tpls).asInstanceOf[Seq[Product]]
         case Left(err)   => throw err
       }
-      val data       = getInsertData(conn).getInsertData(elements, tpls)
-      conn.transact_sync(data)
+      conn.transact_sync(
+        getInsertData(conn).getInsertAction(elements, tpls)
+      )
     }
   }
 
@@ -119,7 +122,9 @@ trait Rpc_SQL
     elements: List[Element]
   ): Future[Either[MoleculeError, TxReport]] = either {
     getConn(proxy).map { conn =>
-      delete_getExecutioner(conn, Delete(elements)).fold(TxReport(Nil)) { executions =>
+      delete_getExecutioner(conn, Delete(elements)).fold(
+        TxReport(Nil)
+      ) { executions =>
         conn.atomicTransaction(executions)
       }
     }

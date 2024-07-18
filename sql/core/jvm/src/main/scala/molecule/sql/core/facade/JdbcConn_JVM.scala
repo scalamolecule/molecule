@@ -23,10 +23,6 @@ case class JdbcConn_JVM(
   with ModelUtils
   with MoleculeLogging {
 
-  // debugging
-  doPrint = false
-  //  doPrint = true
-
 
   override lazy val sqlConn: Connection = sqlConn0
 

@@ -23,7 +23,16 @@ object AdhocJVM_postgres extends TestSuite_postgres {
 //        _ <- Ns.int.insert(1).transact
 //        _ <- Ns.int.query.get.map(_ ==> List(1))
 
-        _ <- Ns.uuid(uuid1).save.transact
+//        _ <- Ns.uuid(uuid1).save.transact
+
+
+
+        _ <- Ns.i.uuid.insert(List(
+          (1, uuid1),
+          (2, uuid2),
+          (2, uuid2),
+          (2, uuid3),
+        )).i.transact
 
       } yield ()
     }
@@ -31,14 +40,33 @@ object AdhocJVM_postgres extends TestSuite_postgres {
 
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
+      implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+
       for {
 
-        _ <- A.i.insert(2).transact
-        _ <- A.i.query.get.map(_ ==> List(2))
+        _ <- A.i.B.i.insert(List(
+          //          (1, 1),
+          (1, 2),
+          //          (2, 2),
+          //          (2, 3),
+          //          (2, 4),
+        )).i.transact
+
+        // Average of all (non-coalesced) values
+        //        _ <- A.i.query.get.map(_ ==> List(1, 2))
+        _ <- A.i.b.query.get.map(_ ==> List((1, 1)))
+        //        _ <- B.i.query.get.map(_ ==> List(1, 2, 3, 4))
+        //
+        //        _ <- A.B.i.query.i.get.map(_ ==> List(7))
 
 
-//        _ = conn.asInstanceOf[JdbcConn_JVM].sqlConn.close()
-
+        //        _ <- A.B.i(avg).query.get.map(_ ==> List(7))
+        //        _ <- A.B.i(avg).query.get.map(_.head ==~ (1 + 2 + 2 + 3 + 4).toDouble / 5.0)
+        //
+        //        _ <- A.i.B.i(avg).query.get.map(_.map {
+        //          case (1, avg) => avg ==~ (1 + 2).toDouble / 2.0
+        //          case (2, avg) => avg ==~ (2 + 3 + 4).toDouble / 3.0
+        //        })
         //        _ <- rawTransact(
         //          """UPDATE B
         //            |SET

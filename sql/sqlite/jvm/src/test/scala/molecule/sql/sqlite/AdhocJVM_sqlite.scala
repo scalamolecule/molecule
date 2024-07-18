@@ -17,8 +17,8 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
       for {
-//        _ <- Ns.int.insert(1).transact
-//        _ <- Ns.int.query.get.map(_ ==> List(1))
+        //        _ <- Ns.int.insert(1).transact
+        //        _ <- Ns.int.query.get.map(_ ==> List(1))
 
         List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
         _ <- Ns.refs(Set(r1, r2)).save.transact
@@ -30,21 +30,33 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
 
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
+      implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+
       for {
 
-        //        _ <- A.i(7).s("a").save.transact
-        //        _ <- A.i.s.query.get.map(_ ==> List((7, "a")))
+        _ <- A.i.B.i.insert(List(
+//          (1, 1),
+          (1, 2),
+//          (2, 2),
+//          (2, 3),
+//          (2, 4),
+        )).i.transact
 
-        ids <- A.i(7).B.s("a").save.i.transact.map(_.ids)
-        _ = println("ids: " + ids)
-        _ <- A.i.B.s.query.get.map(_ ==> List((7, "a")))
+        // Average of all (non-coalesced) values
+//        _ <- A.i.query.get.map(_ ==> List(1, 2))
+        _ <- A.i.b.query.get.map(_ ==> List((1, 1)))
+//        _ <- B.i.query.get.map(_ ==> List(1, 2, 3, 4))
+//
+//        _ <- A.B.i.query.i.get.map(_ ==> List(7))
 
-        //        _ <- A.i(7).Bb.s("a").save.transact
-        //        _ <- A.i.Bb.s.query.get.map(_ ==> List((7, "a")))
+
+        //        _ <- A.B.i(avg).query.get.map(_ ==> List(7))
+        //        _ <- A.B.i(avg).query.get.map(_.head ==~ (1 + 2 + 2 + 3 + 4).toDouble / 5.0)
         //
-        //        _ <- A.i(1).B.i(2)._A.s("a").save.transact
-        //        _ <- A.i.B.i._A.s.query.get.map(_ ==> List((1, 2, "a")))
-
+        //        _ <- A.i.B.i(avg).query.get.map(_.map {
+        //          case (1, avg) => avg ==~ (1 + 2).toDouble / 2.0
+        //          case (2, avg) => avg ==~ (2 + 3 + 4).toDouble / 3.0
+        //        })
 
         //        _ <- rawQuery(
         //          """SELECT DISTINCT
@@ -95,26 +107,26 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
     //    }
 
 
-//    "validation" - validation { implicit conn =>
-//      import molecule.coreTests.dataModels.core.dsl.Validation._
-//      for {
-//        id <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf", "stamps")).save.transact.map(_.id)
-//
-//        // We can remove a value from a Set as long as it's not the last value
-//        _ <- MandatoryAttr(id).hobbies.remove("stamps").update.i.transact
-//
-//        // Can't remove the last value of a mandatory attribute Set of values
-//        _ <- MandatoryAttr(id).hobbies.remove("golf").update.transact
-//          .map(_ ==> "Unexpected success").recover {
-//            case ModelError(error) =>
-//              error ==>
-//                """Can't delete mandatory attributes (or remove last values of card-many attributes):
-//                  |  MandatoryAttr.hobbies
-//                  |""".stripMargin
-//          }
-//
-//      } yield ()
-//    }
+    //    "validation" - validation { implicit conn =>
+    //      import molecule.coreTests.dataModels.core.dsl.Validation._
+    //      for {
+    //        id <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf", "stamps")).save.transact.map(_.id)
+    //
+    //        // We can remove a value from a Set as long as it's not the last value
+    //        _ <- MandatoryAttr(id).hobbies.remove("stamps").update.i.transact
+    //
+    //        // Can't remove the last value of a mandatory attribute Set of values
+    //        _ <- MandatoryAttr(id).hobbies.remove("golf").update.transact
+    //          .map(_ ==> "Unexpected success").recover {
+    //            case ModelError(error) =>
+    //              error ==>
+    //                """Can't delete mandatory attributes (or remove last values of card-many attributes):
+    //                  |  MandatoryAttr.hobbies
+    //                  |""".stripMargin
+    //          }
+    //
+    //      } yield ()
+    //    }
     //
     //    "partitions" - partition { implicit conn =>
     //      import molecule.coreTests.dataModels.core.dsl.Partitions._

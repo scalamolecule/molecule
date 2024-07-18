@@ -1,6 +1,9 @@
 package molecule.sql.mysql
 
 import java.io.File
+import java.net.URI
+import java.time.{Duration, Instant, LocalDate, LocalDateTime, LocalTime, OffsetDateTime, OffsetTime, ZonedDateTime}
+import java.util.{Date, UUID}
 import molecule.base.error.{ExecutionError, ModelError, ValidationErrors}
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Uniques.Uniques
@@ -19,8 +22,16 @@ object AdhocJVM_mysql extends TestSuite_mysql {
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
-        _ <- Ns.int.insert(1).transact
-        _ <- Ns.int.query.get.map(_ ==> List(1))
+
+
+        _ <- Ns.i.uuid.insert(List(
+          (1, uuid1),
+          (2, uuid2),
+          (2, uuid2),
+          (2, uuid3),
+        )).i.transact
+
+
       } yield ()
     }
 
