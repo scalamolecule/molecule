@@ -16,13 +16,15 @@ case class UpdateRefOne(
   override def backRef: UpdateAction = parent
 
   override def execute: List[Long] = {
-    val List(refId) = update
+//    val List(refId) = update
+//
+//    // Add ref id from parent to ref
+//    val refAttrIndex = parent.paramIndex(refAttr)
+//    parent.rowSetters.last += ((ps: PS) => ps.setLong(refAttrIndex, refId))
+//
+//    List(refId)
 
-    // Add ref id from parent to ref
-    val refAttrIndex = parent.paramIndex(refAttr)
-    parent.rowSetters.last += ((ps: PS) => ps.setLong(refAttrIndex, refId))
-
-    List(refId)
+    ???
   }
 
   override def render(indent: Int): String = {

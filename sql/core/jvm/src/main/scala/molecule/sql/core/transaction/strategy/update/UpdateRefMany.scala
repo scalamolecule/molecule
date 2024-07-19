@@ -16,19 +16,21 @@ case class UpdateRefMany(
   override def backRef: UpdateAction = parent
 
   override def execute: List[Long] = {
-    val List(refId) = update
+//    val List(refId) = update
+//
+//    // Add many-to-many join once we have a parent id
+//    val (id1, id2) = sqlOps.joinIdNames(ns, refNs)
+//    addPostSetter((parentIds: List[Long]) => {
+//      val joinStmt =
+//        s"""INSERT INTO ${ns}_${refAttr}_$refNs (
+//           |  $id1, $id2
+//           |) VALUES (${parentIds.head}, $refId)""".stripMargin
+//      sqlConn.prepareStatement(joinStmt).execute()
+//    })
+//
+//    List(refId)
 
-    // Add many-to-many join once we have a parent id
-    val (id1, id2) = sqlOps.joinIdNames(ns, refNs)
-    addPostSetter((parentIds: List[Long]) => {
-      val joinStmt =
-        s"""INSERT INTO ${ns}_${refAttr}_$refNs (
-           |  $id1, $id2
-           |) VALUES (${parentIds.head}, $refId)""".stripMargin
-      sqlConn.prepareStatement(joinStmt).execute()
-    })
-
-    List(refId)
+    ???
   }
 
   override def render(indent: Int): String = {

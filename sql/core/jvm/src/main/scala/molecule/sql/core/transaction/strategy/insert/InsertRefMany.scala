@@ -17,8 +17,30 @@ case class InsertRefMany(
 
   override def execute: List[Long] = {
     val refIds = insert
+
     // Add joins once we have parent ids
-    addCardManyJoins(ns, refAttr, refNs, refIds)
+    addPostSetter(
+      (parentIds: List[Long]) => {
+        val (l1, l2) = (parentIds.length, refIds.length)
+        if (l1 != l2) {
+          throw new Exception(
+            s"Unexpected different number of left/right ids for " +
+              s"joinTable ${ns}_${refAttr}_$refNs: $l1/$l2"
+          )
+        }
+        val ps       = prepStmt(sqlOps.getJoinStmt(ns, refAttr, refNs))
+        val leftIds  = parentIds.iterator
+        val rightIds = refIds.iterator
+        while (rightIds.hasNext) {
+          ps.setLong(1, leftIds.next())
+          ps.setLong(2, rightIds.next())
+          ps.addBatch()
+        }
+        ps.executeBatch()
+        ps.close()
+      }
+    )
+
     refIds
   }
 

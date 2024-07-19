@@ -14,6 +14,7 @@ import molecule.sql.core.query.{SqlQueryResolveCursor, SqlQueryResolveOffset}
 import molecule.sql.core.transaction.strategy.SqlAction
 import molecule.sql.core.transaction.strategy.insert.InsertAction
 import molecule.sql.core.transaction.strategy.save.SaveAction
+import molecule.sql.core.transaction.strategy.update.UpdateAction
 import molecule.sql.core.transaction.strategy.updateOld.UpdateHelper
 import molecule.sql.core.transaction.{SqlBase_JVM, SqlUpdateSetValidator}
 import scala.collection.mutable.ListBuffer
@@ -115,8 +116,7 @@ trait SpiSyncBase
       save_inspect(save)
     val errors = save_validate(save0) // validate original elements against meta model
     if (errors.isEmpty) {
-      val txReport = conn.transact_sync(save_getData(save, conn))
-
+      val txReport = conn.transact_sync(save_getAction(save, conn))
       conn.callback(save.elements)
       txReport
     } else {
@@ -127,12 +127,12 @@ trait SpiSyncBase
   override def save_inspect(save: Save)(implicit conn0: Conn): Unit = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
     tryInspect("save", save.elements) {
-      printInspectTx2("SAVE", save.elements, save_getData(save, conn))
+      printInspectTx2("SAVE", save.elements, save_getAction(save, conn))
     }
   }
 
   // Implement for each sql database
-  def save_getData(save: Save, conn: JdbcConn_JVM): SaveAction
+  def save_getAction(save: Save, conn: JdbcConn_JVM): SaveAction
 
 
   override def save_validate(save: Save)(implicit conn: Conn): Map[String, Seq[String]] = {
@@ -153,7 +153,7 @@ trait SpiSyncBase
       if (insert.tpls.isEmpty) {
         TxReport(Nil)
       } else {
-        val txReport = conn.transact_sync(insert_getData(insert, conn))
+        val txReport = conn.transact_sync(insert_getAction(insert, conn))
         conn.callback(insert.elements)
         txReport
       }
@@ -164,12 +164,12 @@ trait SpiSyncBase
   override def insert_inspect(insert: Insert)(implicit conn: Conn): Unit = {
     tryInspect("insert", insert.elements) {
       val jdbcConn = conn.asInstanceOf[JdbcConn_JVM]
-      printInspectTx2("INSERT", insert.elements, insert_getData(insert, jdbcConn), insert.tpls)
+      printInspectTx2("INSERT", insert.elements, insert_getAction(insert, jdbcConn), insert.tpls)
     }
   }
 
   // Implement for each sql database
-  def insert_getData(insert: Insert, conn: JdbcConn_JVM): InsertAction
+  def insert_getAction(insert: Insert, conn: JdbcConn_JVM): InsertAction
 
   override def insert_validate(insert: Insert)(implicit conn: Conn): Seq[(Int, Seq[InsertError])] = {
     InsertValidation.validate(conn, insert.elements, insert.tpls)
@@ -185,7 +185,8 @@ trait SpiSyncBase
       update_inspect(update)
     val errors = update_validate(update0) // validate original elements against meta model
     if (errors.isEmpty) {
-      val data     = if (isRefUpdate(update.elements)) {
+
+      lazy val data = if (isRefUpdate(update.elements)) {
         if (update0.isUpsert)
           refUpserts(update.elements)(conn)
         else
@@ -193,7 +194,12 @@ trait SpiSyncBase
       } else {
         update_getData(conn, update)
       }
-      val txReport = conn.transact_sync(data)
+
+      lazy val action = update_getAction(update, conn)
+
+      //      val txReport = conn.transact_sync(data)
+      val txReport = conn.transact_sync(action)
+
       conn.callback(update.elements)
       txReport
     } else {
@@ -205,29 +211,38 @@ trait SpiSyncBase
     val conn   = conn0.asInstanceOf[JdbcConn_JVM]
     val action = if (update.isUpsert) "UPSERT" else "UPDATE"
     tryInspect(action, update.elements) {
-      if (isRefUpdate(update.elements)) {
-        val (idsModel, updateModels) = prepareMultipleUpdates(update.elements, update.isUpsert)
-        val refIds                   =
-          s"""REF IDS MODEL ----------------
-             |${idsModel.mkString("\n")}
-             |
-             |${refIdsQuery(idsModel, conn.proxy)}
-             |""".stripMargin
-        val updates                  = updateModels
-          .map(_(42L)) // dummy value
-          .map { m =>
-            val elements = m.mkString("\n")
-            val tables   = update_getData(conn, Update(m, update.isUpsert))._1
-            tables.headOption.fold(elements)(table => elements + "\n" + table.stmt)
-          }
-          .mkString(action + "S ----------------------\n", "\n------------\n", "")
+      //      if (isRefUpdate(update.elements)) {
+      //        val (idsModel, updateModels) = prepareMultipleUpdates(update.elements, update.isUpsert)
+      //        val refIds                   =
+      //          s"""REF IDS MODEL ----------------
+      //             |${idsModel.mkString("\n")}
+      //             |
+      //             |${refIdsQuery(idsModel, conn.proxy)}
+      //             |""".stripMargin
+      //        val updates                  = updateModels
+      //          .map(_(42L)) // dummy value
+      //          .map { m =>
+      //            val elements = m.mkString("\n")
+      //            val tables   = update_getData(conn, Update(m, update.isUpsert))._1
+      //            tables.headOption.fold(elements)(table => elements + "\n" + table.stmt)
+      //          }
+      //          .mkString(action + "S ----------------------\n", "\n------------\n", "")
+      //
+      //        printRaw(action, update.elements, refIds + "\n" + updates)
+      //      } else {
+      //        printInspectTx(action, update.elements, update_getData(conn, update))
+      //      }
 
-        printRaw(action, update.elements, refIds + "\n" + updates)
-      } else {
-        printInspectTx(action, update.elements, update_getData(conn, update))
-      }
+
+//      printInspectTx(action, update.elements, update_getData(conn, update))
+
+      printInspectTx2(action, update.elements, update_getAction(update, conn))
     }
   }
+
+
+  // Implement for each sql database
+  def update_getAction(update: Update, conn: JdbcConn_JVM): UpdateAction = ???
 
 
   // Delete --------------------------------------------------------

@@ -32,7 +32,7 @@ trait SqlSave
     transformValue: T => Any,
     exts: List[String] = Nil
   ): Unit = {
-    val paramIndex = save.paramIndex(attr, "?", exts(2))
+    val paramIndex = save.paramIndex(attr, exts(2))
     optValue.fold {
       save.add((ps: PS) => ps.setNull(paramIndex, 0))
     } { value =>

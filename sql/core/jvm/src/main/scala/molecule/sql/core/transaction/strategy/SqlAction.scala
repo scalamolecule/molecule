@@ -14,10 +14,12 @@ abstract class SqlAction(
   def execute: List[Long]
 
 
-  protected val refs         = ListBuffer.empty[SqlAction]
+  protected val children     = ListBuffer.empty[SqlAction]
   protected val cols         = ListBuffer.empty[String]
   protected val placeHolders = ListBuffer.empty[String]
   protected val postSetters  = ListBuffer.empty[List[Long] => Unit]
+
+  private[strategy] val clauses = ListBuffer.empty[String]
 
   private[strategy] var rowSetters: ListBuffer[ListBuffer[PS => Unit]] =
     ListBuffer.empty[ListBuffer[PS => Unit]]
@@ -35,23 +37,28 @@ abstract class SqlAction(
   def nextRow(): Unit = {
     rowSetters += ListBuffer.empty[PS => Unit]
     //    println(s"$table nextRow")
-    refs.foreach {
+    children.foreach {
       case _: InsertNested => () // use nextNestedRow in addNested
       case other           => other.nextRow()
     }
   }
   def nextNestedRow(): Unit = {
     rowSetters += ListBuffer.empty[PS => Unit]
-    refs.foreach(_.nextRow())
+    children.foreach(_.nextRow())
+  }
+
+  def addChild[T <: SqlAction](child: T, addRowSetter: Boolean = false): T = {
+    children += child
+    if (addRowSetter)
+      child.rowSetters += ListBuffer.empty[PS => Unit]
+    child
   }
 
   def paramIndex = cols.length + 1
 
-  def paramIndex(
-    attr: String, placeHolder: String = "?", typeCast: String = ""
-  ): Int = {
+  def paramIndex(attr: String, typeCast: String = ""): Int = {
     cols += attr
-    placeHolders += placeHolder + typeCast
+    placeHolders += "?" + typeCast
     cols.length
   }
 
@@ -74,16 +81,16 @@ abstract class SqlAction(
 
   def render(indent: Int): String = ???
 
+  def curStmt: String
+
   def recurseRender(indent: Int, strategy: String): String = {
-    val p1             = "  " * indent
-    val p2             = p1 + "  "
-    val strategies     = refs.map(_.render(indent + 1)) ++
-      (sqlOps.insertStmt(ns, cols, placeHolders) +: postStmts)
-    val executionGraph = strategies.map(stmt =>
-      stmt.linesIterator.mkString("\n  " + p1)
+    val p1        = "  " * indent
+    val p2        = p1 + "  "
+    val stmts     = children.map(_.render(indent + 1)) ++ (curStmt +: postStmts)
+    val stmtGraph = stmts.map(stmt => stmt.linesIterator.mkString("\n  " + p1)
     ).mkString(s"\n$p2---------------------------\n$p2")
     s"""$p1$strategy(
-       |$p1  $executionGraph
+       |$p1  $stmtGraph
        |$p1)""".stripMargin
   }
 }

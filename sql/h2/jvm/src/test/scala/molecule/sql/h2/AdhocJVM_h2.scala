@@ -25,11 +25,63 @@ object AdhocJVM_h2 extends TestSuite_h2 {
 
       for {
 
-        _ <- Ns.i.stringMap.insert(1, Map(pstring1, pstring2)).i.transact
-
+        id <- Ns.i(1).save.transact.map(_.id)
         _ <- Ns.i.query.get.map(_ ==> List(1))
-        _ <- Ns.i.stringMap.query.i.get.map(_ ==> List((1, Map(pstring1, pstring2))))
 
+
+//        _ <- rawTransact(
+//          """UPDATE Ns
+//            |  SET
+//            |    i = 2
+//            |  WHERE
+//            |    Ns.id = 1
+//            |""".stripMargin)
+
+        _ <- Ns(id).i(2).update.i.transact
+        _ <- Ns.i.query.get.map(_ ==> List(2))
+
+
+        //        // Update entities with id a or b
+        //        _ <- Ns(a, b).int(4).update.transact
+        //
+        //        // 2 entities updated
+        //        _ <- Ns.id.a1.i.int.query.get.map(_ ==> List(
+        //          (a, 1, 4), // updated
+        //          (b, 1, 4), // updated
+        //          (c, 2, 3),
+        //        ))
+        //
+        //        // Nothing updated if no match
+        //        _ <- Ns(42).int(5).update.transact
+        //        _ <- Ns.id.a1.i.int.query.get.map(_ ==> List(
+        //          (a, 1, 4),
+        //          (b, 1, 4),
+        //          (c, 2, 3),
+        //        ))
+        //
+        //        List(a, b, c) <- Ns.i.int.insert(
+        //          (1, 1),
+        //          (1, 2),
+        //          (2, 3),
+        //        ).transact.map(_.ids)
+        //
+        //        // Update entities with id a or b
+        //        _ <- Ns(a, b).int(4).update.transact
+        //
+        //        // 2 entities updated
+        //        _ <- Ns.id.a1.i.int.query.get.map(_ ==> List(
+        //          (a, 1, 4), // updated
+        //          (b, 1, 4), // updated
+        //          (c, 2, 3),
+        //        ))
+        //
+        //        // Nothing updated if no match
+        //        _ <- Ns(42).int(5).update.transact
+        //        _ <- Ns.id.a1.i.int.query.get.map(_ ==> List(
+        //          (a, 1, 4),
+        //          (b, 1, 4),
+        //          (c, 2, 3),
+        //        ))
 
       } yield ()
     }
@@ -50,35 +102,6 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       for {
 
         _ <- A.iMap(Map(pint0, pint1)).save.transact // won't be updated since there's no B value
-        _ <- A.s("x").B.i(1).save.transact
-        _ <- A.iMap(Map(pint2, pint3)).B.i(2).save.transact
-        _ <- A.iMap(Map(pint3, pint4)).B.i(3).save.transact
-
-        // Current 2 entities with A value and ref to B value
-        _ <- A.iMap.B.i.a1.query.get.map(_ ==> List(
-          (Map(pint2, pint3), 2),
-          (Map(pint3, pint4), 3),
-        ))
-
-        // Filter by B value, update A values
-        _ <- A.iMap(Map(pint4, pint5)).B.i_.update.transact
-
-        _ <- A.iMap.B.i.a1.query.get.map(_ ==> List(
-          (Map(pint4, pint5), 2), // A value updated
-          (Map(pint4, pint5), 3), // A value updated
-        ))
-
-        // Filter by B value, upsert A values (insert if not already present)
-        _ <- A.iMap(Map(pint5, pint6)).B.i_.upsert.transact
-
-        _ <- A.iMap.B.i.a1.query.get.map(_ ==> List(
-          (Map(pint5, pint6), 1), // A value and relationship to B value inserted
-          (Map(pint5, pint6), 2), // A value updated
-          (Map(pint5, pint6), 3), // A value updated
-        ))
-
-        // Initial entity without ref to B was not updated/upserted
-        _ <- A.iMap.b_().query.get.map(_ ==> List(Map(pint0, pint1)))
 
         //        List(
         //          (1,List((Some(a),None), (Some(b),None), (Some(c),None), (Some(d),Some(1)), (Some(e),Some(2)), (Some(f),Some(3)), (Some(g),Some(4)), (Some(h),None))), (2,List()), (3,List()), (4,List()), (5,List()), (6,List()))

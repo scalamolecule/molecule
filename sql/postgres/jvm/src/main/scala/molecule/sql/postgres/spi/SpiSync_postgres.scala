@@ -22,13 +22,13 @@ trait SpiSync_postgres extends SpiSyncBase {
   override def getModel2SqlQuery(elements: List[Element]) =
     new Model2SqlQuery_postgres(elements)
 
-  override def save_getData(save: Save, conn: JdbcConn_JVM): SaveAction = {
+  override def save_getAction(save: Save, conn: JdbcConn_JVM): SaveAction = {
     new ResolveSave with Save_postgres {
       override lazy val sqlConn = conn.sqlConn
     }.getSaveAction(save.elements)
   }
 
-  override def insert_getData(insert: Insert, conn: JdbcConn_JVM): InsertAction = {
+  override def insert_getAction(insert: Insert, conn: JdbcConn_JVM): InsertAction = {
     new ResolveInsert with Insert_postgres {
       override lazy val sqlConn: sql.Connection = conn.sqlConn
     }.getInsertAction(insert.elements, insert.tpls)

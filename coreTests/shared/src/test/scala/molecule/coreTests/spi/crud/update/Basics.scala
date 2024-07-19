@@ -13,6 +13,17 @@ trait Basics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 
+    "Update entity with id" - types { implicit conn =>
+      for {
+        id <- Ns.i(1).save.transact.map(_.id)
+        _ <- Ns.i.query.get.map(_ ==> List(1))
+
+        _ <- Ns(id).i(2).update.transact
+        _ <- Ns.i.query.get.map(_ ==> List(2))
+      } yield ()
+    }
+
+
     "Can't update optional values" - types { implicit conn =>
       for {
         _ <- Ns(42).int_?(Some(1)).update.transact

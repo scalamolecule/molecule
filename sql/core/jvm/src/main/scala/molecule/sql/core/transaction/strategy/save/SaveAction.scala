@@ -2,7 +2,6 @@ package molecule.sql.core.transaction.strategy.save
 
 import java.sql.Connection
 import molecule.sql.core.transaction.strategy.{SqlAction, SqlOps}
-import scala.collection.mutable.ListBuffer
 
 
 abstract class SaveAction(
@@ -16,15 +15,15 @@ abstract class SaveAction(
   def insert: List[Long] = {
     // Execute referenced namespaces first so that we can
     // reference them subsequently from current namespace
-    refs.foreach(_.execute)
+    children.foreach(_.execute)
 
     // Execute this namespace insert
-    val ps = prepStmt(sqlOps.insertStmt(ns, cols, placeHolders))
+    val ps = prepStmt(curStmt)
 
     // Add one row
     rowSetters.foreach { rowSetter =>
       rowSetter.foreach { colSetter =>
-//        println("colSetter: " + colSetter)
+        //        println("colSetter: " + colSetter)
         colSetter(ps)
       }
       ps.addBatch()
@@ -37,7 +36,7 @@ abstract class SaveAction(
 
     // Execute post inserts of refs given new ids of this namespace
     // (many-to-many joins using this id and ref id in pairs)
-    refs.foreach(_.getPostSetters.foreach(_(ids)))
+    children.foreach(_.getPostSetters.foreach(_(ids)))
 
     // Execute post inserts of this ns (card-many ref attr ids-to-join tables)
     getPostSetters.foreach(_(ids))
@@ -68,25 +67,22 @@ abstract class SaveAction(
 
   // Change strategy ----------------------------------------
 
-  // Traverse back to initial InsertAction
+  // Traverse back and up to initial SaveAction
   def initialAction: SaveAction
 
-  def refOne(ns: String, refAttr: String, refNs: String): SaveAction = {
-    val ref = SaveRefOne(this, sqlConn, sqlOps, ns, refAttr, refNs)
-    ref.rowSetters += ListBuffer.empty[PS => Unit]
-    refs += ref
-    ref
-  }
+  def refOne(ns: String, refAttr: String, refNs: String): SaveAction =
+    addChild(SaveRefOne(this, sqlConn, sqlOps, ns, refAttr, refNs), true)
 
-  def refMany(ns: String, refAttr: String, refNs: String): SaveAction = {
-    val ref = SaveRefMany(this, sqlConn, sqlOps, ns, refAttr, refNs)
-    ref.rowSetters += ListBuffer.empty[PS => Unit]
-    refs += ref
-    ref
-  }
+  def refMany(ns: String, refAttr: String, refNs: String): SaveAction =
+    addChild(SaveRefMany(this, sqlConn, sqlOps, ns, refAttr, refNs), true)
 
   def backRef: SaveAction = ???
 
   def optRef: SaveAction = ???
   def optRefNest: SaveAction = ???
+
+
+  // Render --------------------------------------
+
+  override def curStmt: String = sqlOps.insertStmt(ns, cols, placeHolders)
 }

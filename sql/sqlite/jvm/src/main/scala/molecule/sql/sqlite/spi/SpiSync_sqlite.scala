@@ -25,13 +25,13 @@ trait SpiSync_sqlite extends SpiSyncBase {
 
   override protected lazy val defaultValues = "DEFAULT VALUES"
 
-  override def save_getData(save: Save, conn: JdbcConn_JVM): SaveAction = {
+  override def save_getAction(save: Save, conn: JdbcConn_JVM): SaveAction = {
     new ResolveSave with Save_sqlite {
       override lazy val sqlConn = conn.sqlConn
     }.getSaveAction(save.elements)
   }
 
-  override def insert_getData(insert: Insert, conn: JdbcConn_JVM): InsertAction = {
+  override def insert_getAction(insert: Insert, conn: JdbcConn_JVM): InsertAction = {
     new ResolveInsert with Insert_sqlite {
       override lazy val sqlConn: sql.Connection = conn.sqlConn
     }.getInsertAction(insert.elements, insert.tpls)

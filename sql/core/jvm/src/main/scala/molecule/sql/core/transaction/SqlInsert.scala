@@ -39,7 +39,7 @@ trait SqlInsert
     transformValue: T => Any,
     exts: List[String] = Nil
   ): Product => Unit = {
-    val paramIndex   = insert.paramIndex(attr, "?", exts(2))
+    val paramIndex   = insert.paramIndex(attr, exts(2))
     val stableInsert = insert
     //    println(s"    $ns.$attr          $paramIndex ")
     (tpl: Product) => {
@@ -61,7 +61,7 @@ trait SqlInsert
     transformValue: T => Any,
     exts: List[String] = Nil
   ): Product => Unit = {
-    val paramIndex   = insert.paramIndex(attr, "?", exts(2))
+    val paramIndex   = insert.paramIndex(attr, exts(2))
     val stableInsert = insert
     (tpl: Product) => {
       tpl.productElement(tplIndex) match {

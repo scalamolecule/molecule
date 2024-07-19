@@ -46,4 +46,17 @@ class SqlOps extends SqlBase with BaseHelpers {
        |  $columns
        |) VALUES ($inputPlaceholders)""".stripMargin
   }
+
+
+  def updateStmt(
+    table: String, cols: Iterable[String], clauses: Iterable[String]
+  ): String = {
+    val columnSetters = cols.mkString(",\n  ")
+    val updateClauses = clauses.mkString(" AND\n  ")
+    s"""UPDATE $table
+       |SET
+       |  $columnSetters
+       |WHERE
+       |  $updateClauses""".stripMargin
+  }
 }

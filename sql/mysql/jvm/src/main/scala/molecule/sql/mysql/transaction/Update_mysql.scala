@@ -12,6 +12,9 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
   override def model2SqlQuery(elements: List[Element]): Model2SqlQuery =
     new Model2SqlQuery_mysql(elements)
 
+  protected var curParamIndex = 1
+
+
   override def updateSetEq[T](
     ns: String,
     attr: String,

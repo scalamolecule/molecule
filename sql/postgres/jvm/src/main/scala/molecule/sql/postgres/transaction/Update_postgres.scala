@@ -13,6 +13,8 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
   override def model2SqlQuery(elements: List[Element]): Model2SqlQuery =
     new Model2SqlQuery_postgres(elements)
 
+  protected var curParamIndex = 1
+
 
   override def updateSetRemove[T](
     ns: String,

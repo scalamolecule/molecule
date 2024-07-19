@@ -4,7 +4,7 @@ import java.sql.Connection
 import molecule.sql.core.transaction.strategy.SqlOps
 import scala.collection.mutable.ListBuffer
 
-case class UpdateNs(
+case class UpsertNs(
   sqlConn: Connection,
   ns: String,
 )(implicit sqlOps: SqlOps) extends UpdateAction(sqlConn, sqlOps, ns) {
@@ -14,7 +14,11 @@ case class UpdateNs(
   // Initial namespace
   override def initialAction: UpdateAction = this
 
-  override def execute: List[Long] = update
+  override def execute: List[Long] = {
+    //    update
 
-  override def toString: String = recurseRender(0, "UpdateNs")
+    ???
+  }
+
+  override def toString: String = recurseRender(0, "UpsertNs")
 }

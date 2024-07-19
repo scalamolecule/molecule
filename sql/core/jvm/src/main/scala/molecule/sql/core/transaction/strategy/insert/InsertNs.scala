@@ -4,9 +4,11 @@ import java.sql.Connection
 import molecule.sql.core.transaction.strategy.SqlOps
 
 /*
-1. Recursively build graph of Product => PS => Unit setters
+// Initial insert action
+
+1. Recursively build graph of Product => PS (PreparedStatement) => Unit setters
 2. Create PS for each table in the graph
-3. Loop tuples and recursively populate PS's for each tuple/sub-tuple in graph
+3. Loop row tuples and recursively populate PS's for each tuple/sub-tuple in graph
 4. Execute ps.executeBatch for each table in the graph
  */
 case class InsertNs(

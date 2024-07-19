@@ -4,6 +4,7 @@ import java.sql.Connection
 import molecule.sql.core.transaction.strategy.SqlOps
 import scala.collection.mutable.ListBuffer
 
+// Initial save action
 case class SaveNs(
   sqlConn: Connection,
   ns: String,
