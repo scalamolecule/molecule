@@ -96,9 +96,6 @@ abstract class Model2SqlQuery(elements0: List[Element])
   }
 
   protected def mkJoins(indents: Int): String = {
-
-    joins.mkString("\n")
-
     if (joins.isEmpty) "" else {
       val indent = "  " * indents
       joins.map {

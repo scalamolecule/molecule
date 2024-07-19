@@ -11,7 +11,6 @@ import molecule.core.util.ModelUtils
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.query.{Model2SqlQuery, SqlQueryBase}
 import molecule.sql.core.transaction.strategy.SqlOps
-import molecule.sql.core.transaction.strategy.update.UpdateAction
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
@@ -26,11 +25,12 @@ trait SqlBase_JVM extends SqlDataType_JVM with ModelUtils with BaseHelpers {
 
   implicit lazy val sqlOps: SqlOps = new SqlOps
 
+
   def getModel2SqlQuery(
     elements: List[Element]
   ): Model2SqlQuery with SqlQueryBase = ???
 
-//  def update_getAction(update: Update, conn: JdbcConn_JVM): UpdateAction = ???
+  //  def update_getAction(update: Update, conn: JdbcConn_JVM): UpdateAction = ???
   def update_getData(conn: JdbcConn_JVM, update: Update): Data = ???
 
   def delete_getExecutioner(
@@ -51,7 +51,7 @@ trait SqlBase_JVM extends SqlDataType_JVM with ModelUtils with BaseHelpers {
   protected var curRefPath       = List("0")
   protected var placeHolders     = List.empty[String]
   protected var joins            = List.empty[(List[String], String, String, List[String], List[String])]
-  protected var ids              = Seq.empty[Long]
+  protected var idsOLD           = Seq.empty[Long]
   protected var cols             = ListBuffer.empty[String]
   protected val updateCols       = mutable.Map.empty[List[String], List[String]]
   protected var filterElements   = List.empty[Element]

@@ -19,7 +19,7 @@ abstract class SqlAction(
   protected val placeHolders = ListBuffer.empty[String]
   protected val postSetters  = ListBuffer.empty[List[Long] => Unit]
 
-  private[strategy] val clauses = ListBuffer.empty[String]
+
 
   private[strategy] var rowSetters: ListBuffer[ListBuffer[PS => Unit]] =
     ListBuffer.empty[ListBuffer[PS => Unit]]
@@ -56,13 +56,14 @@ abstract class SqlAction(
 
   def paramIndex = cols.length + 1
 
-  def paramIndex(attr: String, typeCast: String = ""): Int = {
+  def paramIndex(attr: String): Int = paramIndex(attr, "")
+  def paramIndex(attr: String, typeCast: String): Int = {
     cols += attr
     placeHolders += "?" + typeCast
     cols.length
   }
 
-  def add(colSetter: PS => Unit): Unit = {
+  def addColSetter(colSetter: PS => Unit): Unit = {
     rowSetters.last += colSetter
     //    rowSetters.foreach { rowSetter =>
     //      println(rowSetter.mkString(s"$table add\n  ", "\n  ", "\n  --"))
@@ -75,7 +76,7 @@ abstract class SqlAction(
   def getPostSetters: ListBuffer[List[Long] => Unit] = postSetters
 
 
-  def prepStmt(stmt: String): PS = {
+  def prepare(stmt: String): PS = {
     sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
   }
 

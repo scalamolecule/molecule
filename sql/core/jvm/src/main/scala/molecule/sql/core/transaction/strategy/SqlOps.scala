@@ -58,5 +58,6 @@ class SqlOps extends SqlBase with BaseHelpers {
        |  $columnSetters
        |WHERE
        |  $updateClauses""".stripMargin
+
   }
 }

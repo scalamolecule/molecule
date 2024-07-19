@@ -1,16 +1,20 @@
 package molecule.sql.core.transaction.strategy.update
 
 import java.sql.Connection
+import molecule.boilerplate.ast.Model.Element
+import molecule.sql.core.query.Model2SqlQuery
 import molecule.sql.core.transaction.strategy.SqlOps
+import scala.collection.mutable.ListBuffer
 
 case class UpdateRefOne(
   parent: UpdateAction,
   sqlConn: Connection,
   sqlOps: SqlOps,
+  m2q: ListBuffer[Element] => Model2SqlQuery,
   ns: String,
   refAttr: String,
   refNs: String,
-) extends UpdateAction(sqlConn, sqlOps, refNs) {
+) extends UpdateAction(sqlConn, sqlOps, m2q, refNs) {
 
   override def initialAction: UpdateAction = parent.initialAction
   override def backRef: UpdateAction = parent

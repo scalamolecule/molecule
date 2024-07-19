@@ -115,7 +115,6 @@ trait QueryExprOne extends QueryExpr { self: Model2Query with SqlQueryBase with 
       casts.add(res.sql2oneOrNull)
     } else {
       casts.add(res.sql2one)
-      setNotNull(col)
     }
     addSort(attr, col)
     attr.filterAttr.fold {
@@ -127,9 +126,6 @@ trait QueryExprOne extends QueryExpr { self: Model2Query with SqlQueryBase with 
 
   protected def tac[T: ClassTag](attr: Attr, args: Seq[T], res: ResOne[T]): Unit = {
     val col = getCol(attr: Attr)
-    if (!isOptNested) {
-      setNotNull(col)
-    }
     attr.filterAttr.fold {
       expr(attr.ns, attr.attr, col, attr.op, args, res)
     } { case (dir, filterPath, filterAttr) =>
@@ -146,7 +142,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query with SqlQueryBase with 
     res: ResOne[T],
   ): Unit = {
     op match {
-      case V          => ()
+      case V          => attrV(col)
       case Eq         => equal(col, args, res.one2sql)
       case Neq        => neq(col, args, res.one2sql)
       case Lt         => compare(col, args.head, "<", res.one2sql)
@@ -203,12 +199,21 @@ trait QueryExprOne extends QueryExpr { self: Model2Query with SqlQueryBase with 
   }
 
 
+  // attr ----------------------------------------------------------------------
+
+  private def attrV(col: String): Unit = {
+    if (!isOptNested) {
+      setNotNull(col)
+    }
+  }
+
+
   // eq ------------------------------------------------------------------------
 
   protected def equal[T](col: String, args: Seq[T], one2sql: T => String): Unit = {
     where += (args.length match {
       case 1 => (col, "= " + one2sql(args.head))
-      case 0 => (col, "IS NULL ")
+      case 0 => ("FALSE", "") // Empty Seq of args matches no values
       case _ => (col, args.map(one2sql).mkString("IN (", ", ", ")"))
     })
   }

@@ -22,66 +22,42 @@ object AdhocJVM_h2 extends TestSuite_h2 {
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
-
+//      val (a, b, c, x) = (1, 2, 3, 4)
       for {
+//        _ <- Ns.i.int_?.insert(List(
+//          (a, Some(int1)),
+//          (b, Some(int2)),
+//          (c, Some(int3)),
+//          (x, None)
+//        )).transact
+//
+//        _ <- Ns.i.a1.int_(Seq.empty[Int]).query.i.get.map(_ ==> List())
 
-        id <- Ns.i(1).save.transact.map(_.id)
-        _ <- Ns.i.query.get.map(_ ==> List(1))
+        List(a, b, c) <- Ns.i.int_?.insert(
+          (1, None),
+          (1, Some(1)),
+          (2, Some(2)),
+        ).transact.map(_.ids)
 
+        // Update all entities where i is 1
+        _ <- Ns.i_(1).int(3).update.i.transact
 
-//        _ <- rawTransact(
-//          """UPDATE Ns
-//            |  SET
-//            |    i = 2
-//            |  WHERE
-//            |    Ns.id = 1
-//            |""".stripMargin)
+        // 2 matching entities updated
+        _ <- Ns.id.a1.i.int_?.query.get.map(_ ==> List(
+          (a, 1, None), //    no value to update
+          (b, 1, Some(3)), // value updated
+          (c, 2, Some(2)),
+        ))
 
-        _ <- Ns(id).i(2).update.i.transact
-        _ <- Ns.i.query.get.map(_ ==> List(2))
+        // Upsert all entities where non-unique attribute i is 1
+        _ <- Ns.i_(1).int(4).upsert.transact
 
-
-        //        // Update entities with id a or b
-        //        _ <- Ns(a, b).int(4).update.transact
-        //
-        //        // 2 entities updated
-        //        _ <- Ns.id.a1.i.int.query.get.map(_ ==> List(
-        //          (a, 1, 4), // updated
-        //          (b, 1, 4), // updated
-        //          (c, 2, 3),
-        //        ))
-        //
-        //        // Nothing updated if no match
-        //        _ <- Ns(42).int(5).update.transact
-        //        _ <- Ns.id.a1.i.int.query.get.map(_ ==> List(
-        //          (a, 1, 4),
-        //          (b, 1, 4),
-        //          (c, 2, 3),
-        //        ))
-        //
-        //        List(a, b, c) <- Ns.i.int.insert(
-        //          (1, 1),
-        //          (1, 2),
-        //          (2, 3),
-        //        ).transact.map(_.ids)
-        //
-        //        // Update entities with id a or b
-        //        _ <- Ns(a, b).int(4).update.transact
-        //
-        //        // 2 entities updated
-        //        _ <- Ns.id.a1.i.int.query.get.map(_ ==> List(
-        //          (a, 1, 4), // updated
-        //          (b, 1, 4), // updated
-        //          (c, 2, 3),
-        //        ))
-        //
-        //        // Nothing updated if no match
-        //        _ <- Ns(42).int(5).update.transact
-        //        _ <- Ns.id.a1.i.int.query.get.map(_ ==> List(
-        //          (a, 1, 4),
-        //          (b, 1, 4),
-        //          (c, 2, 3),
-        //        ))
+        // 2 matching entities updated
+        _ <- Ns.id.a1.i.int_?.query.get.map(_ ==> List(
+          (a, 1, Some(4)), // attribute inserted
+          (b, 1, Some(4)), // value updated
+          (c, 2, Some(2)),
+        ))
 
       } yield ()
     }

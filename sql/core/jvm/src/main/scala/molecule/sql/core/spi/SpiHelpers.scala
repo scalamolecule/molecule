@@ -17,6 +17,12 @@ trait SpiHelpers extends ModelUtils {
   def noCollectionFilterEq(attr: String) = throw ModelError(
     s"Filtering by collection equality ($attr) not supported in updates."
   )
+  def noIdsTwice() = throw ModelError(
+    "Can't apply entity ids twice in update."
+  )
+  def noMixIdsFilterAttrs() = throw ModelError(
+    "Can't mix using ids and filter elements"
+  )
 
   final def getUpdateIdsModel(elements: List[Element]): (Int, List[Element]) = {
     var hasData     = false

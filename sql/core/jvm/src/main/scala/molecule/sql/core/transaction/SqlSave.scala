@@ -34,10 +34,10 @@ trait SqlSave
   ): Unit = {
     val paramIndex = save.paramIndex(attr, exts(2))
     optValue.fold {
-      save.add((ps: PS) => ps.setNull(paramIndex, 0))
+      save.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
     } { value =>
       val setter = transformValue(value).asInstanceOf[(PS, Int) => Unit]
-      save.add((ps: PS) => setter(ps, paramIndex))
+      save.addColSetter((ps: PS) => setter(ps, paramIndex))
     }
   }
 
@@ -74,9 +74,9 @@ trait SqlSave
   ): Unit = {
     val paramIndex = save.paramIndex(attr)
     if (optArray.nonEmpty && optArray.get.nonEmpty) {
-      save.add((ps: PS) => ps.setBytes(paramIndex, optArray.get))
+      save.addColSetter((ps: PS) => ps.setBytes(paramIndex, optArray.get))
     } else {
-      save.add((ps: PS) => ps.setNull(paramIndex, 0))
+      save.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
     }
   }
 
@@ -90,10 +90,10 @@ trait SqlSave
     val paramIndex = save.paramIndex(attr)
     optMap match {
       case Some(map: Map[_, _]) if map.nonEmpty =>
-        save.add((ps: PS) =>
+        save.addColSetter((ps: PS) =>
           ps.setBytes(paramIndex, map2jsonByteArray(map, value2json)))
       case _                                    =>
-        save.add((ps: PS) => ps.setNull(paramIndex, 0))
+        save.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
     }
   }
 
@@ -127,13 +127,13 @@ trait SqlSave
       val paramIndex = save.paramIndex(attr)
       if (optIterable.nonEmpty && optIterable.get.nonEmpty) {
         val iterable = optIterable.get
-        save.add((ps: PS) => {
+        save.addColSetter((ps: PS) => {
           val conn  = ps.getConnection
           val array = conn.createArrayOf(sqlTpe, iterable2array(iterable))
           ps.setArray(paramIndex, array)
         })
       } else {
-        save.add((ps: PS) => ps.setNull(paramIndex, 0))
+        save.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
       }
     } { refNs =>
       optIterable.foreach(refIds =>

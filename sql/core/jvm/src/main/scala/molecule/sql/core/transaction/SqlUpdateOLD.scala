@@ -58,7 +58,7 @@ trait SqlUpdateOLD
         val ids2    = if (ids1.nonEmpty) {
           ids1 // ids of existing and new entities (when ref structure establishment)
         } else {
-          ids // ids of existing entities (collected in handleIds)
+          idsOLD // ids of existing entities (collected in handleIds)
         }
         //        println(s"  ............................ ids2: " + ids2)
         val clauses = if (ids2.nonEmpty) {
@@ -78,8 +78,8 @@ trait SqlUpdateOLD
       val updateCols2_ = if (updateCols.isEmpty) Nil else {
         updateCols(refPath).map(c => s"$c IS NOT NULL")
       }
-      val clauses_     = if (ids.nonEmpty) {
-        List(s"$table.id IN(${ids.mkString(", ")})")
+      val clauses_     = if (idsOLD.nonEmpty) {
+        List(s"$table.id IN(${idsOLD.mkString(", ")})")
       } else {
         model2SqlQuery(filterElements).getWhereClauses
       }
@@ -330,10 +330,13 @@ trait SqlUpdateOLD
 
 
   override def handleIds(ns: String, ids1: Seq[Long]): Unit = {
-    if (ids.nonEmpty) {
+    if (idsOLD.nonEmpty) {
       throw ModelError(s"Can't apply entity ids twice in update.")
     }
-    ids = ids1
+    if (filterElements.nonEmpty) {
+      throw ModelError("Can't mix using ids and filter elements")
+    }
+    idsOLD = ids1
   }
 
   override def handleFilterAttr[T <: Attr with Tacit](filterAttr: T): Unit = {
@@ -341,6 +344,9 @@ trait SqlUpdateOLD
       case a: AttrSeqTac if a.op == Eq => noCollectionFilterEq(a.name)
       case a: AttrSetTac if a.op == Eq => noCollectionFilterEq(a.name)
       case _                           => ()
+    }
+    if (idsOLD.nonEmpty) {
+      throw ModelError("Can't mix using ids and filter elements")
     }
     filterElements = filterElements :+ filterAttr
   }
@@ -562,7 +568,7 @@ trait SqlUpdateOLD
   }
 
   protected def getUpdateId: Long = {
-    ids.toList match {
+    idsOLD.toList match {
       case List(v) => v
       case other   => throw ModelError("Expected to update one entity. Found multiple ids: " + other)
     }

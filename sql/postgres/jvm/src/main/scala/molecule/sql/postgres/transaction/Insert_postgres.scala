@@ -19,14 +19,14 @@ trait Insert_postgres extends SqlInsert { self: ResolveInsert with InsertResolve
     (tpl: Product) => {
       tpl.productElement(tplIndex).asInstanceOf[Map[String, _]] match {
         case map if map.nonEmpty =>
-          stableInsert.add((ps: PS) =>
+          stableInsert.addColSetter((ps: PS) =>
             ps.setString(
               paramIndex,
               map2json(map.asInstanceOf[Map[String, T]], value2json)
             ))
 
         case _ =>
-          stableInsert.add((ps: PS) =>
+          stableInsert.addColSetter((ps: PS) =>
             ps.setNull(paramIndex, java.sql.Types.NULL))
       }
     }
@@ -45,14 +45,14 @@ trait Insert_postgres extends SqlInsert { self: ResolveInsert with InsertResolve
     (tpl: Product) => {
       tpl.productElement(tplIndex) match {
         case Some(map: Map[_, _]) if map.nonEmpty =>
-          stableInsert.add((ps: PS) =>
+          stableInsert.addColSetter((ps: PS) =>
             ps.setString(
               paramIndex,
               map2json(map.asInstanceOf[Map[String, T]], value2json)
             ))
 
         case _ =>
-          stableInsert.add((ps: PS) =>
+          stableInsert.addColSetter((ps: PS) =>
             ps.setNull(paramIndex, java.sql.Types.NULL))
       }
     }

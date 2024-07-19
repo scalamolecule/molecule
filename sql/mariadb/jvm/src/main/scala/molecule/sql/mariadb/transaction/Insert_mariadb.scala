@@ -72,14 +72,14 @@ trait Insert_mariadb extends SqlInsert { self: ResolveInsert with InsertResolver
     (tpl: Product) => {
       tpl.productElement(tplIndex).asInstanceOf[Map[String, _]] match {
         case map if map.nonEmpty =>
-          stableInsert.add((ps: PS) =>
+          stableInsert.addColSetter((ps: PS) =>
             ps.setString(
               paramIndex,
               map2json(map.asInstanceOf[Map[String, T]], value2json)
             ))
 
         case _ =>
-          stableInsert.add((ps: PS) =>
+          stableInsert.addColSetter((ps: PS) =>
             ps.setNull(paramIndex, java.sql.Types.NULL))
       }
     }
@@ -102,10 +102,10 @@ trait Insert_mariadb extends SqlInsert { self: ResolveInsert with InsertResolver
         val iterable  = tpl.productElement(tplIndex).asInstanceOf[Iterable[T]]
         if (iterable.nonEmpty) {
           val json = iterable2json(iterable, value2json)
-          stableInsert.add((ps: PS) =>
+          stableInsert.addColSetter((ps: PS) =>
             ps.setString(paramIndex, json))
         } else {
-          stableInsert.add((ps: PS) =>
+          stableInsert.addColSetter((ps: PS) =>
             ps.setNull(paramIndex, java.sql.Types.NULL))
         }
       }
@@ -132,14 +132,14 @@ trait Insert_mariadb extends SqlInsert { self: ResolveInsert with InsertResolver
           case Some(iterable: Iterable[_]) =>
             if (iterable.nonEmpty) {
               val json = iterable2json(iterable.asInstanceOf[Iterable[T]], value2json)
-              stableInsert.add((ps: PS) =>
+              stableInsert.addColSetter((ps: PS) =>
                 ps.setString(paramIndex, json))
             } else {
-              stableInsert.add((ps: PS) =>
+              stableInsert.addColSetter((ps: PS) =>
                 ps.setNull(paramIndex, java.sql.Types.NULL))
             }
           case None                        =>
-            stableInsert.add((ps: PS) =>
+            stableInsert.addColSetter((ps: PS) =>
               ps.setNull(paramIndex, java.sql.Types.NULL))
         }
     } { refNs =>

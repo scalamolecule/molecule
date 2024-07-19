@@ -9,7 +9,8 @@ import molecule.core.transaction.ResolveUpdate
 import molecule.core.transaction.ops.UpdateOps
 import molecule.sql.core.query.Model2SqlQuery
 import molecule.sql.core.spi.SpiHelpers
-import molecule.sql.core.transaction.strategy.update.{UpdateAction, UpdateInit, UpsertNs}
+import molecule.sql.core.transaction.strategy.update.{UpdateAction, UpdateNs}
+import scala.collection.mutable.ListBuffer
 
 trait SqlUpdate
   extends SqlBase_JVM
@@ -21,10 +22,11 @@ trait SqlUpdate
   protected var update: UpdateAction = null
 
   def getUpdateAction(elements: List[Element]): UpdateAction = {
-    update = if (isUpsert)
-      UpsertNs(sqlConn, getInitialNs(elements))
-    else
-      UpdateInit(sqlConn, getInitialNs(elements))
+    update = UpdateNs(
+      sqlConn,
+      (elements: ListBuffer[Element]) => model2SqlQuery(elements.toList),
+      getInitialNs(elements),
+    )
     resolve(elements)
     update.initialAction
   }
@@ -42,41 +44,35 @@ trait SqlUpdate
     transformValue: T => Any,
     exts: List[String],
   ): Unit = {
-    val paramIndex = update.paramIndex(s"$attr = ?" + exts(2))
-
+    val paramIndex = update.paramIndex(ns, attr, isUpsert, exts(2))
     vs match {
-      case Seq(v) =>
-        //        if (!isUpsert) {
-        //          addToUpdateColsNotNull(attr)
-        //        }
-        val setValue = transformValue(v).asInstanceOf[(PS, Int) => Unit]
-        update.add((ps: PS) => setValue(ps, paramIndex))
-      case Nil    =>
-        update.add((ps: PS) => ps.setNull(paramIndex, 0))
-      case vs     =>
-        val cleanAttr = attr.replace("_", "")
-        throw ExecutionError(
-          s"Can only update one value for attribute `$ns.$cleanAttr`. Found: " + vs.mkString(", ")
-        )
+      case Seq(v) => update.addColSetter((ps: PS) =>
+        transformValue(v).asInstanceOf[(PS, Int) => Unit](ps, paramIndex))
+      case Nil    => update.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
+      case vs     => throw ExecutionError(
+        s"Can only update one value for attribute `$ns.$attr`. Found: " + vs.mkString(", ")
+      )
     }
   }
 
-  override def handleIds(ns: String, ids1: Seq[Long]): Unit = {
-    if (ids.nonEmpty) {
-      throw ModelError(s"Can't apply entity ids twice in update.")
-    }
-    ids = ids1
-
-    update = update.withIds(ns, ids1)
+  override def handleIds(ns: String, ids: Seq[Long]): Unit = {
+    if (update.ids.nonEmpty) noIdsTwice()
+    if (update.filters.nonEmpty) noMixIdsFilterAttrs()
+    update.ids = ids.toList
+    update.clauses += (ids match {
+      case Seq(id) => s"$ns.id = $id"
+      case Nil     => throw ModelError("Missing ids to update")
+      case ids     => s"$ns.id IN(${ids.mkString(", ")})"
+    })
   }
 
   override def handleFilterAttr[T <: Attr with Tacit](filterAttr: T): Unit = {
+    if (update.ids.nonEmpty) noMixIdsFilterAttrs()
     filterAttr.asInstanceOf[Attr] match {
       case a: AttrSeqTac if a.op == Eq => noCollectionFilterEq(a.name)
       case a: AttrSetTac if a.op == Eq => noCollectionFilterEq(a.name)
-      case _                           => ()
+      case _                           => update.filters += filterAttr
     }
-    filterElements = filterElements :+ filterAttr
   }
 
   override protected def updateSetEq[T](
@@ -162,21 +158,12 @@ trait SqlUpdate
     attr: String,
     byteArray: Array[Byte],
   ): Unit = {
-    val paramIndex = update.paramIndex(attr)
-    //    cols += attr
-    //    placeHolders = placeHolders :+ s"$attr = ?"
-    //    if (byteArray.isEmpty) {
-    //      (ps: PS) => {
-    //        ps.setNull(paramIndex, 0)
-    //        paramIndex += 1
-    //      }
-    //    } else {
-    //      (ps: PS) => {
-    //        ps.setBytes(paramIndex, byteArray)
-    //        paramIndex += 1
-    //      }
-    //    }
-    ???
+    val paramIndex = update.paramIndex(ns, attr, isUpsert)
+    if (byteArray.isEmpty) {
+      update.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
+    } else {
+      update.addColSetter((ps: PS) => ps.setBytes(paramIndex, byteArray))
+    }
   }
 
   override protected def updateMapEq[T](
@@ -204,19 +191,13 @@ trait SqlUpdate
     exts: List[String],
     value2json: (StringBuffer, T) => StringBuffer,
   ): Unit = {
-    val paramIndex = update.paramIndex(attr)
     if (map.nonEmpty) {
-      //      cols += attr
-      //      if (!isUpsert) {
-      //        addToUpdateColsNotNull(attr)
-      //      }
-      //      val scalaBaseType = exts.head
-      //      placeHolders = placeHolders :+ s"$attr = addPairs_$scalaBaseType($attr, ?)"
-      //      val colSetter = (ps: PS) => {
-      //        ps.setBytes(paramIndex, map2jsonByteArray(map, value2json))
-      //        paramIndex += 1
-      //      }
-      ???
+      val scalaBaseType = exts.head
+      val setAttr       = s"$attr = addPairs_$scalaBaseType($attr, ?)"
+      val paramIndex    = update.paramIndex(ns, setAttr, isUpsert)
+      update.addColSetter((ps: PS) =>
+        ps.setBytes(paramIndex, map2jsonByteArray(map, value2json))
+      )
     }
   }
 
@@ -228,20 +209,14 @@ trait SqlUpdate
     keys: Seq[String],
     exts: List[String],
   ): Unit = {
-    val paramIndex = update.paramIndex(attr)
     if (keys.nonEmpty) {
-      //      cols += attr
-      //      if (!isUpsert) {
-      //        addToUpdateColsNotNull(attr)
-      //      }
-      //      val scalaBaseType = exts.head
-      //      placeHolders = placeHolders :+ s"$attr = removePairs_$scalaBaseType($attr, ?)"
-      //      val colSetter = (ps: PS) => {
-      //        val conn = ps.getConnection
-      //        ps.setArray(paramIndex, conn.createArrayOf("String", keys.toArray))
-      //        paramIndex += 1
-      //      }
-      ???
+      val scalaBaseType = exts.head
+      val setAttr       = s"$attr = removePairs_$scalaBaseType($attr, ?)"
+      val paramIndex    = update.paramIndex(ns, setAttr, isUpsert)
+      placeHolders = placeHolders :+ s"$attr = removePairs_$scalaBaseType($attr, ?)"
+      update.addColSetter((ps: PS) =>
+        ps.setArray(paramIndex, ps.getConnection.createArrayOf("String", keys.toArray))
+      )
     }
   }
 
@@ -264,28 +239,14 @@ trait SqlUpdate
     exts: List[String],
     vs2array: M[T] => Array[AnyRef],
   ): Unit = {
-    val paramIndex = update.paramIndex(attr)
     val dbBaseType = exts(1)
+    val paramIndex = update.paramIndex(ns, attr, isUpsert, dbBaseType)
     refNs.fold {
-      //      cols += attr
-      //      placeHolders = placeHolders :+ s"$attr = ?"
-      //      val colSetter = if (iterable.nonEmpty) {
-      //        if (!isUpsert) {
-      //          addToUpdateColsNotNull(attr)
-      //        }
-      //        val array = vs2array(iterable)
-      //        (ps: PS) => {
-      //          val conn = ps.getConnection
-      //          ps.setArray(paramIndex, conn.createArrayOf(dbBaseType, array))
-      //          paramIndex += 1
-      //        }
-      //      } else {
-      //        (ps: PS) => {
-      //          ps.setNull(paramIndex, 0)
-      //          paramIndex += 1
-      //        }
-      //      }
-      ???
+      if (iterable.nonEmpty) {
+        addArray(paramIndex, dbBaseType, vs2array(iterable))
+      } else {
+        update.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
+      }
     } { refNs =>
       joinEq(ns, attr, refNs, iterable)
     }
@@ -299,30 +260,29 @@ trait SqlUpdate
     exts: List[String],
     iterable2array: M[T] => Array[AnyRef],
   ): Unit = {
-    val paramIndex = update.paramIndex(attr)
-    val dbBaseType = exts(1)
     refNs.fold {
-      //      if (iterable.nonEmpty) {
-      //        cols += attr
-      //        if (!isUpsert) {
-      //          addToUpdateColsNotNull(attr)
-      //        }
-      //        val cast = exts(2) match {
-      //          case ""  => ""
-      //          case tpe => tpe + "[]"
-      //        }
-      //        placeHolders = placeHolders :+ s"$attr = COALESCE($attr, ARRAY[]$cast) || ?"
-      //        val array = iterable2array(iterable)
-      //        addColSetter(curRefPath, (ps: PS) => {
-      //          val conn = ps.getConnection
-      //          ps.setArray(paramIndex, conn.createArrayOf(dbBaseType, array))
-      //          paramIndex += 1
-      //        })
-      //      }
-      ???
+      if (iterable.nonEmpty) {
+        val dbBaseType = exts(1)
+        val cast       = exts(2) match {
+          case ""  => ""
+          case tpe => tpe + "[]"
+        }
+        val setAttr    = s"$attr = COALESCE($attr, ARRAY[]$cast) || ?"
+        val paramIndex = update.paramIndex(ns, setAttr, isUpsert, dbBaseType)
+        addArray(paramIndex, dbBaseType, iterable2array(iterable))
+      }
     } { refNs =>
       joinAdd(ns, attr, refNs, iterable)
     }
+  }
+
+  private def addArray(
+    paramIndex: Int, dbBaseType: String, array: Array[AnyRef]
+  ): Unit = {
+    update.addColSetter((ps: PS) => {
+      val conn = ps.getConnection
+      ps.setArray(paramIndex, conn.createArrayOf(dbBaseType, array))
+    })
   }
 
   private def updateIterableRemove[T, M[_] <: Iterable[_]](
@@ -333,25 +293,22 @@ trait SqlUpdate
     exts: List[String],
     iterable2array: M[T] => Array[AnyRef]
   ): Unit = {
-    val paramIndex    = update.paramIndex(attr)
-    val scalaBaseType = exts.head
-    val dbBaseType    = exts(1)
     refNs.fold {
-      //      if (iterable.nonEmpty) {
-      //        cols += attr
-      //        if (!isUpsert) {
-      //          addToUpdateColsNotNull(attr)
-      //        }
-      //        placeHolders = placeHolders :+ s"$attr = removeFromArray_$scalaBaseType($attr, ?)"
-      //        val array = iterable2array(iterable)
-      //        addColSetter(curRefPath, (ps: PS) => {
-      //          val conn = ps.getConnection
-      //          ps.setArray(paramIndex, conn.createArrayOf(dbBaseType, array))
-      //          paramIndex += 1
-      //        })
-      //      }
+      if (iterable.nonEmpty) {
+        val scalaBaseType = exts.head
+        val dbBaseType    = exts(1)
+        val setAttr       = s"$attr = removeFromArray_$scalaBaseType($attr, ?)"
+        val paramIndex    = update.paramIndex(ns, setAttr, isUpsert, dbBaseType)
+        addArray(paramIndex, dbBaseType, iterable2array(iterable))
 
-      ???
+        //        placeHolders = placeHolders :+ s"$attr = removeFromArray_$scalaBaseType($attr, ?)"
+        //        val array = iterable2array(iterable)
+        //        addColSetter(curRefPath, (ps: PS) => {
+        //          val conn = ps.getConnection
+        //          ps.setArray(paramIndex, conn.createArrayOf(dbBaseType, array))
+        //          paramIndex += 1
+        //        })
+      }
     } { refNs =>
       joinRemove(ns, attr, refNs, iterable)
     }
@@ -471,7 +428,7 @@ trait SqlUpdate
   }
 
   protected def getUpdateId: Long = {
-    ids.toList match {
+    idsOLD.toList match {
       case List(v) => v
       case other   => throw ModelError("Expected to update one entity. Found multiple ids: " + other)
     }

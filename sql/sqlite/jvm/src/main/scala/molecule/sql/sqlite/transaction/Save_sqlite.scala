@@ -43,10 +43,10 @@ trait Save_sqlite extends SqlSave with TxBase_sqlite { self: ResolveSave =>
     val paramIndex1 = save.paramIndex(attr)
     optMap match {
       case Some(map: Map[_, _]) if map.nonEmpty =>
-        save.add((ps: PS) =>
+        save.addColSetter((ps: PS) =>
           ps.setString(paramIndex1, map2json(map, value2json)))
       case _                                    =>
-        save.add((ps: PS) => ps.setNull(paramIndex1, 0))
+        save.addColSetter((ps: PS) => ps.setNull(paramIndex1, 0))
     }
   }
 
@@ -64,9 +64,9 @@ trait Save_sqlite extends SqlSave with TxBase_sqlite { self: ResolveSave =>
       val paramIndex1 = save.paramIndex(attr)
       if (optIterable.nonEmpty && optIterable.get.nonEmpty) {
         val json = iterable2json(optIterable.get, value2json)
-        save.add((ps: PS) => ps.setString(paramIndex1, json))
+        save.addColSetter((ps: PS) => ps.setString(paramIndex1, json))
       } else {
-        save.add((ps: PS) => ps.setNull(paramIndex1, 0))
+        save.addColSetter((ps: PS) => ps.setNull(paramIndex1, 0))
       }
     } { refNs =>
       optIterable.foreach(refIds =>

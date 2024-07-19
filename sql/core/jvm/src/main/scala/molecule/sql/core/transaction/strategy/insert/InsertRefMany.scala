@@ -28,7 +28,7 @@ case class InsertRefMany(
               s"joinTable ${ns}_${refAttr}_$refNs: $l1/$l2"
           )
         }
-        val ps       = prepStmt(sqlOps.getJoinStmt(ns, refAttr, refNs))
+        val ps       = prepare(sqlOps.getJoinStmt(ns, refAttr, refNs))
         val leftIds  = parentIds.iterator
         val rightIds = refIds.iterator
         while (rightIds.hasNext) {

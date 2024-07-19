@@ -44,10 +44,10 @@ trait Save_mysql extends SqlSave with BaseHelpers { self: ResolveSave =>
     val paramIndex = save.paramIndex(attr)
     optMap match {
       case Some(map: Map[_, _]) if map.nonEmpty =>
-        save.add((ps: PS) =>
+        save.addColSetter((ps: PS) =>
           ps.setString(paramIndex, map2json(map, value2json)))
       case _                                    =>
-        save.add((ps: PS) => ps.setNull(paramIndex, 0))
+        save.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
     }
   }
 
@@ -65,9 +65,9 @@ trait Save_mysql extends SqlSave with BaseHelpers { self: ResolveSave =>
       val paramIndex = save.paramIndex(attr)
       if (optIterable.nonEmpty && optIterable.get.nonEmpty) {
         val json = iterable2json(optIterable.get, value2json)
-        save.add((ps: PS) => ps.setString(paramIndex, json))
+        save.addColSetter((ps: PS) => ps.setString(paramIndex, json))
       } else {
-        save.add((ps: PS) => ps.setNull(paramIndex, 0))
+        save.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
       }
     } { refNs =>
       optIterable.foreach(refIds =>

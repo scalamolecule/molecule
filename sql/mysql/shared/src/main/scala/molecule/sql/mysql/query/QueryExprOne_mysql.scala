@@ -15,7 +15,6 @@ trait QueryExprOne_mysql
       where += ((col, s"REGEXP '$regex'"))
   }
 
-
   override protected def aggr[T: ClassTag](
     ns: String,
     attr: String,

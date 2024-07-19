@@ -234,7 +234,7 @@ trait SpiSyncBase
       //      }
 
 
-//      printInspectTx(action, update.elements, update_getData(conn, update))
+      //      printInspectTx(action, update.elements, update_getData(conn, update))
 
       printInspectTx2(action, update.elements, update_getAction(update, conn))
     }

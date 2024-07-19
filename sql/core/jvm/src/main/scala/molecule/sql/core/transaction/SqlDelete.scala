@@ -31,12 +31,12 @@ trait SqlDelete
   ): Option[() => List[Long]] = {
     val refPath = List(getInitialNs(elements))
     resolve(elements, true)
-    if (ids.nonEmpty) {
-      deleteExecutioner(refPath, nsMap, ids, fkConstraintParam, fkConstraintOff, fkConstraintOn)
+    if (idsOLD.nonEmpty) {
+      deleteExecutioner(refPath, nsMap, idsOLD, fkConstraintParam, fkConstraintOff, fkConstraintOn)
     } else if (filterElements.nonEmpty) {
-      ids = getIds
-      if (ids.nonEmpty)
-        deleteExecutioner(refPath, nsMap, ids, fkConstraintParam, fkConstraintOff, fkConstraintOn)
+      idsOLD = getIds
+      if (idsOLD.nonEmpty)
+        deleteExecutioner(refPath, nsMap, idsOLD, fkConstraintParam, fkConstraintOff, fkConstraintOn)
       else
         None
     } else {
@@ -103,12 +103,12 @@ trait SqlDelete
   def getDeleteDataForInspection(elements: List[Element], nsMap: Map[String, MetaNs]): Data = {
     val refPath = List(getInitialNs(elements))
     resolve(elements, true)
-    if (ids.nonEmpty) {
-      inspectionTableDataForDeletion(refPath, nsMap, ids)
+    if (idsOLD.nonEmpty) {
+      inspectionTableDataForDeletion(refPath, nsMap, idsOLD)
     } else if (filterElements.nonEmpty) {
-      ids = getIds
-      if (ids.nonEmpty)
-        inspectionTableDataForDeletion(refPath, nsMap, ids)
+      idsOLD = getIds
+      if (idsOLD.nonEmpty)
+        inspectionTableDataForDeletion(refPath, nsMap, idsOLD)
       else
         (Nil, Nil)
     } else {
@@ -302,7 +302,7 @@ trait SqlDelete
 
 
   override def addIds(ids1: Seq[Long]): Unit = {
-    ids = ids ++ ids1
+    idsOLD = idsOLD ++ ids1
   }
 
   override def addFilterElement(element: Element): Unit = {

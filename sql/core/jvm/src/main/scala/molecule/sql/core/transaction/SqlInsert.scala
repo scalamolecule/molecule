@@ -46,7 +46,7 @@ trait SqlInsert
       val scalaValue  = tpl.productElement(tplIndex).asInstanceOf[T]
       val valueSetter = transformValue(scalaValue).asInstanceOf[(PS, Int) => Unit]
       //      println(s"$ns.$attr($paramIndex) = $scalaValue")
-      stableInsert.add {
+      stableInsert.addColSetter {
         (ps: PS) =>
           //          println(s"1--  $ns.$attr($paramIndex) = $scalaValue")
           valueSetter(ps, paramIndex)
@@ -68,10 +68,10 @@ trait SqlInsert
         case Some(scalaValue) =>
           val valueSetter = transformValue(scalaValue.asInstanceOf[T])
             .asInstanceOf[(PS, Int) => Unit]
-          stableInsert.add((ps: PS) => valueSetter(ps, paramIndex))
+          stableInsert.addColSetter((ps: PS) => valueSetter(ps, paramIndex))
 
         case None =>
-          stableInsert.add((ps: PS) => ps.setNull(paramIndex, java.sql.Types.NULL))
+          stableInsert.addColSetter((ps: PS) => ps.setNull(paramIndex, java.sql.Types.NULL))
       }
     }
   }
@@ -138,15 +138,15 @@ trait SqlInsert
     (tpl: Product) => {
       tpl.productElement(tplIndex) match {
         case byteArray: Array[_] if byteArray.nonEmpty =>
-          stableInsert.add((ps: PS) =>
+          stableInsert.addColSetter((ps: PS) =>
             ps.setBytes(paramIndex, byteArray.asInstanceOf[Array[Byte]]))
 
         case Some(byteArray: Array[_]) if !byteArray.isEmpty =>
-          stableInsert.add((ps: PS) =>
+          stableInsert.addColSetter((ps: PS) =>
             ps.setBytes(paramIndex, byteArray.asInstanceOf[Array[Byte]]))
 
         case _ =>
-          stableInsert.add((ps: PS) => ps.setNull(paramIndex, 0))
+          stableInsert.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
       }
     }
   }
@@ -164,14 +164,14 @@ trait SqlInsert
     (tpl: Product) => {
       tpl.productElement(tplIndex).asInstanceOf[Map[String, _]] match {
         case map if map.nonEmpty =>
-          stableInsert.add((ps: PS) =>
+          stableInsert.addColSetter((ps: PS) =>
             ps.setBytes(
               paramIndex,
               map2jsonByteArray(map.asInstanceOf[Map[String, T]], value2json)
             ))
 
         case _ =>
-          stableInsert.add((ps: PS) =>
+          stableInsert.addColSetter((ps: PS) =>
             ps.setNull(paramIndex, java.sql.Types.NULL))
       }
     }
@@ -190,14 +190,14 @@ trait SqlInsert
     (tpl: Product) => {
       tpl.productElement(tplIndex) match {
         case Some(map: Map[_, _]) if map.nonEmpty =>
-          stableInsert.add((ps: PS) =>
+          stableInsert.addColSetter((ps: PS) =>
             ps.setBytes(
               paramIndex,
               map2jsonByteArray(map.asInstanceOf[Map[String, T]], value2json)
             ))
 
         case _ =>
-          stableInsert.add((ps: PS) =>
+          stableInsert.addColSetter((ps: PS) =>
             ps.setNull(paramIndex, java.sql.Types.NULL))
       }
     }
@@ -285,7 +285,7 @@ trait SqlInsert
         val array = iterable2array(tpl.productElement(tplIndex).asInstanceOf[M[T]])
         //        println(s"$ns.$attr($paramIndex) = $scalaValue")
         if (array.nonEmpty) {
-          stableInsert.add((ps: PS) => {
+          stableInsert.addColSetter((ps: PS) => {
             val conn = ps.getConnection
             val arr  = conn.createArrayOf(sqlTpe, array)
             ps.setArray(paramIndex, arr)
@@ -293,7 +293,7 @@ trait SqlInsert
         } else {
           //          println(s"$ns.$attr tpl.productArity: " + tpl.productArity)
           //          println(s"$ns.$attr                 : " + stableInsert.cols.length)
-          stableInsert.add(
+          stableInsert.addColSetter(
             (ps: PS) => {
               //              println(s"4--  $ns.$attr($paramIndex) = $scalaValue")
               ps.setNull(paramIndex, java.sql.Types.NULL)
@@ -324,14 +324,14 @@ trait SqlInsert
         tpl.productElement(tplIndex) match {
           case Some(iterable: Iterable[_]) =>
             val array = iterable2array(iterable.asInstanceOf[M[T]])
-            stableInsert.add((ps: PS) => {
+            stableInsert.addColSetter((ps: PS) => {
               val conn = ps.getConnection
               val arr  = conn.createArrayOf(sqlTpe, array)
               ps.setArray(paramIndex, arr)
             })
 
           case None =>
-            stableInsert.add((ps: PS) =>
+            stableInsert.addColSetter((ps: PS) =>
               ps.setNull(paramIndex, java.sql.Types.NULL))
         }
       }

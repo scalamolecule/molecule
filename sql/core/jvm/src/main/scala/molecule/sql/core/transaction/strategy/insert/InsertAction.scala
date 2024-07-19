@@ -21,7 +21,7 @@ abstract class InsertAction(
     //    println("\n=============================================" +
     //      "============================================== " + table)
     //    println(stmt)
-    val ps   = prepStmt(stmt)
+    val ps   = prepare(stmt)
 
     // Add rows
     rowSetters.foreach { rowSetter =>
@@ -61,7 +61,7 @@ abstract class InsertAction(
     addPostSetter(
       (parentIds: List[Long]) => {
         val leftId = parentIds.head
-        val ps     = prepStmt(sqlOps.getJoinStmt(ns, refAttr, refNs))
+        val ps     = prepare(sqlOps.getJoinStmt(ns, refAttr, refNs))
         val it     = refIds.iterator
         while (it.hasNext) {
           ps.setLong(1, leftId)

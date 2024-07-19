@@ -10,9 +10,9 @@ case class SaveNs(
   ns: String,
 )(implicit sqlOps: SqlOps) extends SaveAction(sqlConn, sqlOps, ns) {
 
+  // Start collecting rowSetters
   rowSetters += ListBuffer.empty[PS => Unit]
 
-  // Initial namespace
   override def initialAction: SaveAction = this
 
   override def execute: List[Long] = insert

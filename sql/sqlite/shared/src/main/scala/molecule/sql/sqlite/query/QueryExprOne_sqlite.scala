@@ -9,7 +9,6 @@ trait QueryExprOne_sqlite
   extends QueryExprOne
     with LambdasOne_sqlite { self: Model2Query with SqlQueryBase =>
 
-
   override protected def matches(col: String, regex: String): Unit = {
     if (regex.nonEmpty)
       where += ((col, s"REGEXP '$regex'"))
