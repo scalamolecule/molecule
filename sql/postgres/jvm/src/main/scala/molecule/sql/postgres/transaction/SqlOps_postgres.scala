@@ -4,6 +4,9 @@ import molecule.sql.core.transaction.strategy.SqlOps
 
 class SqlOps_postgres extends SqlOps {
 
+  override lazy val defaultValues = "(id) VALUES (DEFAULT)"
+
+
   override def insertStmt(
     table: String, cols: Iterable[String], placeHolders: Iterable[String]
   ): String = {

@@ -14,12 +14,12 @@ case class UpdateRefMany(
   ns: String,
   refAttr: String,
   refNs: String,
-) extends UpdateAction(sqlConn, sqlOps, m2q, refNs) {
+) extends UpdateAction(parent, sqlConn, sqlOps, m2q, refNs) {
 
-  override def initialAction: UpdateAction = parent.initialAction
+  override def rootAction: UpdateAction = parent.rootAction
   override def backRef: UpdateAction = parent
 
-  override def execute: List[Long] = {
+  override def execute(): Unit = {
 //    val List(refId) = update
 //
 //    // Add many-to-many join once we have a parent id
@@ -39,7 +39,7 @@ case class UpdateRefMany(
 
   override def render(indent: Int): String = {
     // show join table after parent insert
-    parent.postStmts += sqlOps.getJoinStmt(ns, refAttr, refNs)
+    parent.postStmts += sqlOps.insertJoinStmt(ns, refAttr, refNs)
     recurseRender(indent, "UpdateRefMany")
   }
 }

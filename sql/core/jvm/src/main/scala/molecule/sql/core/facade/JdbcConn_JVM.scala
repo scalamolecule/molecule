@@ -48,7 +48,8 @@ case class JdbcConn_JVM(
   }
 
   def transact_sync(action: SqlAction): TxReport = {
-    atomicTransaction(() => action.execute)
+    atomicTransaction(() => action.executeRoot)
+//    atomicTransaction(() => action.executeRoot)
   }
 
   def atomicTransaction(executions: () => List[Long]): TxReport = {

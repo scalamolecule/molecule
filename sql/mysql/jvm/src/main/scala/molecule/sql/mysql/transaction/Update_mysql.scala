@@ -185,7 +185,7 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
       }
       addColSetter(curRefPath, colSetter)
     } { refNs =>
-      joinEq(ns, attr, refNs, iterable)
+      setRefIds(ns, attr, refNs, iterable.asInstanceOf[Set[Long]])
     }
   }
 
@@ -210,7 +210,7 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
         })
       }
     } { refNs =>
-      joinAdd(ns, attr, refNs, iterable)
+      addRefIds(ns, attr, refNs, iterable.asInstanceOf[Set[Long]])
     }
   }
 
@@ -240,7 +240,7 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
         addColSetter(curRefPath, (_: PS, _: IdsMap, _: RowIndex) => ())
       }
     } { refNs =>
-      joinRemove(ns, attr, refNs, iterable)
+      removeRefIds(ns, attr, refNs, iterable.asInstanceOf[Set[Long]])
     }
   }
 

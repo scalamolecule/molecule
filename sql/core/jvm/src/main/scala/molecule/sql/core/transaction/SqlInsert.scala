@@ -7,7 +7,7 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ops.InsertOps
 import molecule.core.transaction.{InsertResolvers_, ResolveInsert}
 import molecule.core.util.ModelUtils
-import molecule.sql.core.transaction.strategy.insert.{InsertAction, InsertNs}
+import molecule.sql.core.transaction.strategy.insert.{InsertAction, InsertRoot}
 
 trait SqlInsert
   extends SqlBase_JVM
@@ -20,15 +20,15 @@ trait SqlInsert
   protected var insert: InsertAction = null
 
   def getInsertAction(elements: List[Element], tpls: Seq[Product]): InsertAction = {
-    insert = InsertNs(sqlConn, getInitialNs(elements))
+    insert = InsertRoot(sqlConn, getInitialNs(elements)).insertNs
     val stableInsert = insert
     val resolveTpl   = getResolver(elements)
     tpls.foreach { tpl =>
-      stableInsert.nextRow()
       //      println("------------------------------- " + tpl)
+      stableInsert.nextRow()
       resolveTpl(tpl)
     }
-    insert.initialAction
+    insert.rootAction
   }
 
 
@@ -41,16 +41,10 @@ trait SqlInsert
   ): Product => Unit = {
     val paramIndex   = insert.paramIndex(attr, exts(2))
     val stableInsert = insert
-    //    println(s"    $ns.$attr          $paramIndex ")
     (tpl: Product) => {
       val scalaValue  = tpl.productElement(tplIndex).asInstanceOf[T]
       val valueSetter = transformValue(scalaValue).asInstanceOf[(PS, Int) => Unit]
-      //      println(s"$ns.$attr($paramIndex) = $scalaValue")
-      stableInsert.addColSetter {
-        (ps: PS) =>
-          //          println(s"1--  $ns.$attr($paramIndex) = $scalaValue")
-          valueSetter(ps, paramIndex)
-      }
+      stableInsert.addColSetter((ps: PS) => valueSetter(ps, paramIndex))
     }
   }
 
@@ -71,7 +65,8 @@ trait SqlInsert
           stableInsert.addColSetter((ps: PS) => valueSetter(ps, paramIndex))
 
         case None =>
-          stableInsert.addColSetter((ps: PS) => ps.setNull(paramIndex, java.sql.Types.NULL))
+          stableInsert.addColSetter((ps: PS) =>
+            ps.setNull(paramIndex, java.sql.Types.NULL))
       }
     }
   }
@@ -238,8 +233,9 @@ trait SqlInsert
     refNs: String,
     nestedElements: List[Element]
   ): Product => Unit = {
-    insert = insert.nest(ns, refAttr, refNs)
-    val stableInsert = insert
+    val nestedJoins  = insert.nest(ns, refAttr, refNs)
+    val nestedInsert = nestedJoins.nested
+    insert = nestedInsert
 
     // Recursively resolve nested data
     val resolveNested = getResolver(nestedElements)
@@ -248,19 +244,18 @@ trait SqlInsert
       case 1 =>
         (tpl: Product) => {
           val nestedSingleValues = tpl.productElement(tplIndex).asInstanceOf[Seq[Any]]
-          stableInsert.addNestedCount(nestedSingleValues.length)
+          nestedJoins.addNestedCount(nestedSingleValues.length)
           nestedSingleValues.foreach { nestedSingleValue =>
-            //            println("++++++++++++++++++++++++++  " + nestedSingleValue)
-            stableInsert.nextNestedRow()
+            nestedInsert.nextRow()
             resolveNested(Tuple1(nestedSingleValue))
           }
         }
       case _ =>
         (tpl: Product) => {
           val nestedTpls = tpl.productElement(tplIndex).asInstanceOf[Seq[Product]]
-          stableInsert.addNestedCount(nestedTpls.length)
+          nestedJoins.addNestedCount(nestedTpls.length)
           nestedTpls.foreach { nestedTpl =>
-            stableInsert.nextNestedRow()
+            nestedInsert.nextRow()
             resolveNested(nestedTpl)
           }
         }
@@ -278,12 +273,11 @@ trait SqlInsert
     tplIndex: Int,
     iterable2array: M[T] => Array[AnyRef],
   ): Product => Unit = {
-    val stableInsert = insert
     optRefNs.fold {
-      val paramIndex = stableInsert.paramIndex(attr)
+      val stableInsert = insert
+      val paramIndex   = stableInsert.paramIndex(attr)
       (tpl: Product) => {
         val array = iterable2array(tpl.productElement(tplIndex).asInstanceOf[M[T]])
-        //        println(s"$ns.$attr($paramIndex) = $scalaValue")
         if (array.nonEmpty) {
           stableInsert.addColSetter((ps: PS) => {
             val conn = ps.getConnection
@@ -291,20 +285,18 @@ trait SqlInsert
             ps.setArray(paramIndex, arr)
           })
         } else {
-          //          println(s"$ns.$attr tpl.productArity: " + tpl.productArity)
-          //          println(s"$ns.$attr                 : " + stableInsert.cols.length)
           stableInsert.addColSetter(
             (ps: PS) => {
-              //              println(s"4--  $ns.$attr($paramIndex) = $scalaValue")
               ps.setNull(paramIndex, java.sql.Types.NULL)
             }
           )
         }
       }
     } { refNs =>
+      val insertRefIds = insert.refIds(attr, refNs)
       (tpl: Product) => {
         val refIds = tpl.productElement(tplIndex).asInstanceOf[Iterable[Long]]
-        stableInsert.addCardManyRefAttr(ns, attr, refNs, refIds.asInstanceOf[Set[Long]])
+        insertRefIds.addRefIds(refIds)
       }
     }
   }
@@ -317,9 +309,9 @@ trait SqlInsert
     tplIndex: Int,
     iterable2array: M[T] => Array[AnyRef],
   ): Product => Unit = {
-    val stableInsert = insert
     optRefNs.fold {
-      val paramIndex = stableInsert.paramIndex(attr)
+      val stableInsert = insert
+      val paramIndex   = stableInsert.paramIndex(attr)
       (tpl: Product) => {
         tpl.productElement(tplIndex) match {
           case Some(iterable: Iterable[_]) =>
@@ -336,13 +328,13 @@ trait SqlInsert
         }
       }
     } { refNs =>
+      val insertRefIds = insert.refIds(attr, refNs)
       (tpl: Product) => {
         tpl.productElement(tplIndex) match {
-          case Some(set: Iterable[_]) if set.nonEmpty =>
-            stableInsert.addCardManyRefAttr(
-              ns, attr, refNs, set.asInstanceOf[Set[Long]]
-            )
-          case _                                      => ()
+          case Some(set: Iterable[_]) =>
+            insertRefIds.addRefIds(set.asInstanceOf[Iterable[Long]])
+          case _                      =>
+            insertRefIds.addRefIds(Iterable.empty[Long])
         }
       }
     }

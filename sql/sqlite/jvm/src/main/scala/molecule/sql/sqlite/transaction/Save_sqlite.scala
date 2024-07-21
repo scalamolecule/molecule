@@ -70,7 +70,7 @@ trait Save_sqlite extends SqlSave with TxBase_sqlite { self: ResolveSave =>
       }
     } { refNs =>
       optIterable.foreach(refIds =>
-        save.addCardManyRefAttr(
+        save.insertJoins(
           ns, attr, refNs, refIds.asInstanceOf[Set[Long]]
         )
       )

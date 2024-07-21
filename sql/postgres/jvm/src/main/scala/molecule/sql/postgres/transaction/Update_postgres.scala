@@ -147,7 +147,7 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
         addColSetter(curRefPath, colSetter)
       }
     } { refNs =>
-      joinRemove(ns, attr, refNs, iterable)
+      removeRefIds(ns, attr, refNs, iterable.asInstanceOf[Set[Long]])
     }
   }
 

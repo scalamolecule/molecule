@@ -6,7 +6,7 @@ import scala.collection.mutable.ListBuffer
 
 class SqlOps_sqlite extends SqlOps {
 
-  lazy override val defaultValues = "DEFAULT VALUES"
+//  lazy override val defaultValues = "DEFAULT VALUES"
 
   // Since SQlite doesn't allow us to get ps.getGeneratedKeys after an
   // executeBatch(), we get the affected ids by brute force with a query instead.
@@ -38,18 +38,18 @@ class SqlOps_sqlite extends SqlOps {
   }
 
 
-  override def insertStmt(
-    table: String, cols: Iterable[String], placeHolders: Iterable[String]
-  ): String = {
-    val columns           = cols.mkString(",\n  ")
-    val inputPlaceholders = placeHolders.mkString(", ")
-    if (cols.nonEmpty) {
-      s"""INSERT INTO $table (
-         |  $columns
-         |) VALUES ($inputPlaceholders)""".stripMargin
-    } else {
-      s"INSERT INTO $table DEFAULT VALUES"
-    }
-  }
+//  override def insertStmt(
+//    table: String, cols: Iterable[String], placeHolders: Iterable[String]
+//  ): String = {
+//    val columns           = cols.mkString(",\n  ")
+//    val inputPlaceholders = placeHolders.mkString(", ")
+//    if (cols.nonEmpty) {
+//      s"""INSERT INTO $table (
+//         |  $columns
+//         |) VALUES ($inputPlaceholders)""".stripMargin
+//    } else {
+//      s"INSERT INTO $table DEFAULT VALUES"
+//    }
+//  }
 
 }

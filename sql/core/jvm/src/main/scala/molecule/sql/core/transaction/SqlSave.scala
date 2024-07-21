@@ -8,7 +8,7 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ResolveSave
 import molecule.core.transaction.ops.SaveOps
 import molecule.core.util.SerializationUtils
-import molecule.sql.core.transaction.strategy.save.{SaveAction, SaveNs}
+import molecule.sql.core.transaction.strategy.save.{SaveAction, SaveRoot}
 
 trait SqlSave
   extends SqlBase_JVM
@@ -19,11 +19,10 @@ trait SqlSave
   protected var save: SaveAction = null
 
   def getSaveAction(elements: List[Element]): SaveAction = {
-    save = SaveNs(sqlConn, getInitialNs(elements))
+    save = SaveRoot(sqlConn, getInitialNs(elements)).saveNs
     resolve(elements)
-    save.initialAction
+    save.rootAction
   }
-
 
   override protected def addOne[T](
     ns: String,
@@ -51,7 +50,7 @@ trait SqlSave
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    addIterable(ns, attr, optRefNs, optSet, exts(1), set2array)
+    addIterable(attr, optRefNs, optSet, exts(1), set2array)
   }
 
   override protected def addSeq[T](
@@ -64,7 +63,7 @@ trait SqlSave
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    addIterable(ns, attr, optRefNs, optSeq, exts(1), seq2array)
+    addIterable(attr, optRefNs, optSeq, exts(1), seq2array)
   }
 
   override protected def addByteArray(
@@ -116,7 +115,6 @@ trait SqlSave
   // Helpers -------------------------------------------------------------------
 
   private def addIterable[T, M[_] <: Iterable[_]](
-    ns: String,
     attr: String,
     optRefNs: Option[String],
     optIterable: Option[M[T]],
@@ -137,9 +135,7 @@ trait SqlSave
       }
     } { refNs =>
       optIterable.foreach(refIds =>
-        save.addCardManyRefAttr(
-          ns, attr, refNs, refIds.asInstanceOf[Set[Long]]
-        )
+        save.refIds(attr, refNs, refIds.asInstanceOf[Set[Long]])
       )
     }
   }

@@ -4,18 +4,28 @@ import java.sql.Connection
 import molecule.sql.core.transaction.strategy.SqlOps
 import scala.collection.mutable.ListBuffer
 
-// Initial save action
 case class SaveNs(
+  parent: SaveAction,
   sqlConn: Connection,
+  sqlOps: SqlOps,
   ns: String,
-)(implicit sqlOps: SqlOps) extends SaveAction(sqlConn, sqlOps, ns) {
+  action: String,
+) extends SaveAction(parent, sqlConn, sqlOps, ns) {
 
-  // Start collecting rowSetters
   rowSetters += ListBuffer.empty[PS => Unit]
 
-  override def initialAction: SaveAction = this
+  override def rootAction: SaveAction = parent.rootAction
 
-  override def execute: List[Long] = insert
+  override def execute(): Unit = {
+    children.foreach(_.execute())
+    executeThisNs()
+  }
 
-  override def toString: String = recurseRender(0, "SaveNs")
+  override def curStmt: String = {
+    sqlOps.insertStmt(ns, cols, placeHolders)
+  }
+
+  override def render(indent: Int): String = {
+    recurseRender(indent, action)
+  }
 }

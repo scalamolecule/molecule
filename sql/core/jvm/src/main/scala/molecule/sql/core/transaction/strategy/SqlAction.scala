@@ -1,51 +1,36 @@
 package molecule.sql.core.transaction.strategy
 
 import java.sql.{Connection, Statement}
-import molecule.sql.core.transaction.strategy.insert.InsertNested
 import scala.collection.mutable.ListBuffer
 
 abstract class SqlAction(
+  parent: SqlAction,
   sqlConn: Connection,
   sqlOps: SqlOps,
   ns: String
 ) extends SqlBase {
 
   // Strategy execution
-  def execute: List[Long]
+  def executeRoot: List[Long] = ???
+  def execute(): Unit = ???
 
 
-  protected val children     = ListBuffer.empty[SqlAction]
-  protected val cols         = ListBuffer.empty[String]
-  protected val placeHolders = ListBuffer.empty[String]
-  protected val postSetters  = ListBuffer.empty[List[Long] => Unit]
+  // todo, use ArrayBuilders instead of ListBuffer
+//    private[transaction] val children1     = mutable.ArrayBuilder.make[SqlAction]
 
+  private[transaction] val children     = ListBuffer.empty[SqlAction]
+  private[transaction] val cols         = ListBuffer.empty[String]
+  private[transaction] val placeHolders = ListBuffer.empty[String]
+  private[transaction] val postSetters  = ListBuffer.empty[List[Long] => Unit]
 
+  private[transaction] var ids = List.empty[Long]
 
-  private[strategy] var rowSetters: ListBuffer[ListBuffer[PS => Unit]] =
+  private[transaction] val rowSetters: ListBuffer[ListBuffer[PS => Unit]] =
     ListBuffer.empty[ListBuffer[PS => Unit]]
 
   // For inspection
-  private[strategy] val postStmts = ListBuffer.empty[String]
+  private[transaction] val postStmts = ListBuffer.empty[String]
 
-  // Keep track of nested counts for joins
-  private var nestedCounts = List.empty[Int]
-  def addNestedCount(n: Int): Unit = {
-    nestedCounts = nestedCounts :+ n
-  }
-  def getNestedCounts = nestedCounts
-
-  def nextRow(): Unit = {
-    rowSetters += ListBuffer.empty[PS => Unit]
-    //    println(s"$table nextRow")
-    children.foreach {
-      case _: InsertNested => () // use nextNestedRow in addNested
-      case other           => other.nextRow()
-    }
-  }
-  def nextNestedRow(): Unit = {
-    rowSetters += ListBuffer.empty[PS => Unit]
-    children.foreach(_.nextRow())
-  }
 
   def addChild[T <: SqlAction](child: T, addRowSetter: Boolean = false): T = {
     children += child
@@ -54,7 +39,13 @@ abstract class SqlAction(
     child
   }
 
-  def paramIndex = cols.length + 1
+  def addSibling[T <: SqlAction](sibling: T, addRowSetter: Boolean = false): T = {
+    parent.children += sibling
+    if (addRowSetter) {
+      sibling.rowSetters += ListBuffer.empty[PS => Unit]
+    }
+    sibling
+  }
 
   def paramIndex(attr: String): Int = paramIndex(attr, "")
   def paramIndex(attr: String, typeCast: String): Int = {
@@ -65,9 +56,6 @@ abstract class SqlAction(
 
   def addColSetter(colSetter: PS => Unit): Unit = {
     rowSetters.last += colSetter
-    //    rowSetters.foreach { rowSetter =>
-    //      println(rowSetter.mkString(s"$table add\n  ", "\n  ", "\n  --"))
-    //    }
   }
 
   def addPostSetter(postSetter: List[Long] => Unit): Unit = {
@@ -80,18 +68,89 @@ abstract class SqlAction(
     sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
   }
 
+
+  // Helpers -------------------------------------
+
+  def insertJoins(
+    ns: String, refAttr: String, refNs: String, refIds: Set[Long]
+  ): Unit = {
+    addPostSetter(
+      (parentIds: List[Long]) => {
+        val leftId = parentIds.head
+        val ps     = prepare(sqlOps.insertJoinStmt(ns, refAttr, refNs))
+        val it     = refIds.iterator
+        while (it.hasNext) {
+          ps.setLong(1, leftId)
+          ps.setLong(2, it.next())
+          ps.addBatch()
+        }
+        ps.executeBatch()
+        ps.close()
+      }
+    )
+  }
+
+  def deleteJoins(
+    ns: String, refAttr: String, refNs: String, refIds: Set[Long]
+  ): Unit = {
+    if (refIds.nonEmpty) {
+      //      val deleteStmt = sqlOps.deleteStmt(ns, )
+      //      addPostSetter(
+      //        (parentIds: List[Long]) => {
+      //          val leftId = parentIds.head
+      //          val ps     = prepare(sqlOps.deleteStmt(ns, refAttr, refNs))
+      //          val it     = refIds.iterator
+      //          while (it.hasNext) {
+      //            ps.setLong(1, leftId)
+      //            ps.setLong(2, it.next())
+      //            ps.addBatch()
+      //          }
+      //          ps.executeBatch()
+      //          ps.close()
+      //        }
+      //      )
+      ???
+    }
+  }
+
+
+  // Render --------------------------------------
+
   def render(indent: Int): String = ???
 
-  def curStmt: String
+  def curStmt: String = ???
 
-  def recurseRender(indent: Int, strategy: String): String = {
-    val p1        = "  " * indent
-    val p2        = p1 + "  "
-    val stmts     = children.map(_.render(indent + 1)) ++ (curStmt +: postStmts)
-    val stmtGraph = stmts.map(stmt => stmt.linesIterator.mkString("\n  " + p1)
-    ).mkString(s"\n$p2---------------------------\n$p2")
-    s"""$p1$strategy(
-       |$p1  $stmtGraph
-       |$p1)""".stripMargin
+  def executeThisNs(): Unit = {
+    val ps = prepare(curStmt)
+
+    //    println(s"++++++++  $ns  " + rowSetters.length + "  " + curStmt.linesIterator.next())
+    //    rowSetters.foreach(r => println(r.length))
+
+    // Populate prepared statement
+    rowSetters.foreach {
+      case rowSetter if rowSetter.nonEmpty =>
+        rowSetter.foreach { colSetter =>
+          colSetter(ps)
+        }
+        ps.addBatch()
+
+      case _ => ps.addBatch() // Add empty row (for joins)
+    }
+
+    // Cache generated ids (various db implementations)
+    // Closes prepared statement
+    ids = sqlOps.getIds(sqlConn, ns, ps)
+  }
+
+  // Render graph of action executions
+  def recurseRender(indent: Int, action: String): String = {
+    val cur   = if (indent == -1) Nil else List(curStmt)
+    val stmts = children.map(_.render(indent + 1)) ++ cur
+    val graph = stmts.map(stmt => stmt.linesIterator
+      .mkString("\n   ")
+    ).mkString(s"\n   ---------------------------\n   ")
+    s"""$action(
+       |   $graph
+       |)""".stripMargin
   }
 }

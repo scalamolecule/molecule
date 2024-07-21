@@ -2,99 +2,73 @@ package molecule.sql.core.transaction.strategy.insert
 
 import java.sql.Connection
 import molecule.sql.core.transaction.strategy.{SqlAction, SqlOps}
+import scala.collection.mutable.ListBuffer
 
 
 abstract class InsertAction(
+  parent: InsertAction,
   sqlConn: Connection,
   sqlOps: SqlOps,
   ns: String
-) extends SqlAction(sqlConn, sqlOps, ns) {
+) extends SqlAction(parent, sqlConn, sqlOps, ns) {
 
-  def insert: List[Long] = {
+  // Build execution graph ----------------------------------------
 
-    // Execute referenced namespaces first so that we can reference them subsequently
-    children.foreach(_.execute)
-
-    // Execute this namespace insert
-    //    val ps = prepStmt(sqlOps.insertStmt(table, cols, placeHolders))
-    val stmt = curStmt
-    //    println("\n=============================================" +
-    //      "============================================== " + table)
-    //    println(stmt)
-    val ps   = prepare(stmt)
-
-    // Add rows
-    rowSetters.foreach { rowSetter =>
-      //      println("••••••••••••••••••••••••")
-      if (rowSetter.nonEmpty) {
-        rowSetter.foreach { colSetter =>
-          //          println("colSetter: " + colSetter)
-          colSetter(ps)
-        }
-        ps.addBatch()
-        //        println("++++++++++++")
-      }
-    }
-
-    // Retrieve generated ids (various db implementations)
-    // Executes and closes prepared statement
-    val ids = sqlOps.getIds(sqlConn, ns, ps)
-
-    // Execute post inserts of refs given new ids of this namespace
-    // (many-to-many joins using this id and ref id in pairs)
-    children.foreach(_.getPostSetters.foreach(_(ids)))
-
-    // Ref attr ids
-    getPostSetters.zip(ids).foreach {
-      case (joinSetter, parentId) =>
-        // Join parent id with refAttr ids
-        joinSetter(List(parentId))
-    }
-
-    ids
+  def refIds(refAttr: String, refNs: String): InsertRefIds = {
+    addSibling(InsertRefIds(
+      parent, sqlConn, sqlOps, ns, refAttr, refNs
+    ))
   }
 
-
-  def addCardManyRefAttr(
-    ns: String, refAttr: String, refNs: String, refIds: Set[Long]
-  ): Unit = {
-    addPostSetter(
-      (parentIds: List[Long]) => {
-        val leftId = parentIds.head
-        val ps     = prepare(sqlOps.getJoinStmt(ns, refAttr, refNs))
-        val it     = refIds.iterator
-        while (it.hasNext) {
-          ps.setLong(1, leftId)
-          ps.setLong(2, it.next())
-          ps.addBatch()
-        }
-        ps.executeBatch()
-        ps.close()
-      }
-    )
+  def refOne(ns: String, refAttr: String, refNs: String): InsertAction = {
+    addChild(InsertRefOne(
+      this, sqlConn, sqlOps, ns, refAttr, refNs, paramIndex(refAttr)
+    ))
   }
 
-  // Change strategy ----------------------------------------
+  def refMany(ns: String, refAttr: String, refNs: String): InsertAction = {
+    val ref = addChild(InsertNs(this, sqlConn, sqlOps, refNs, "RefMany"))
 
-  // Traverse back and up to initial InsertAction
-  def initialAction: InsertAction
+    // Make joins to refs after current and refs have been inserted
+    addSibling(InsertRefJoin(this, ref, sqlConn, sqlOps, ns, refAttr, refNs))
 
-  def refOne(ns: String, refAttr: String, refNs: String): InsertAction =
-    addChild(InsertRefOne(this, sqlConn, sqlOps, ns, refAttr, refNs))
+    // Continue in ref namespace
+    ref
+  }
 
-  def refMany(ns: String, refAttr: String, refNs: String): InsertAction =
-    addChild(InsertRefMany(this, sqlConn, sqlOps, ns, refAttr, refNs))
+  def backRef: InsertAction = parent
 
-  def backRef: InsertAction = ???
+  def nest(ns: String, refAttr: String, refNs: String): InsertNestedJoins = {
+    // Nested namespace
+    val nested = addChild(InsertNs(this, sqlConn, sqlOps, refNs, "Nested"))
 
-  def nest(ns: String, refAttr: String, refNs: String): InsertAction =
-    addChild(InsertNested(this, sqlConn, sqlOps, ns, refAttr, refNs))
+    // Make joins to nested after current and nested have been inserted
+    addSibling(InsertNestedJoins(this, nested, sqlConn, sqlOps, ns, refAttr, refNs))
+  }
 
   def optRef: InsertAction = ???
   def optRefNest: InsertAction = ???
 
+  // Traverse back and up to initial InsertAction
+  def rootAction: InsertAction = ???
 
-  // Render --------------------------------------
 
-  override def curStmt: String = sqlOps.insertStmt(ns, cols, placeHolders)
+  def nextRow(): Unit = {
+    rowSetters += ListBuffer.empty[PS => Unit]
+    children.foreach {
+      case InsertNs(_, _, _, _, "Nested") => ()
+      case child: InsertAction            => child.nextRow()
+      case _                              => ()
+    }
+  }
+
+  def sameLength(l1: Int, l2: Int, refAttr: String, refNs: String) = {
+    // Make sure arities match (not needed once implementation is stabilized)
+    if (l1 != l2) {
+      throw new Exception(
+        s"Unexpected different number of left/right ids for " +
+          s"joinTable ${ns}_${refAttr}_$refNs: $l1/$l2"
+      )
+    }
+  }
 }

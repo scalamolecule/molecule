@@ -64,7 +64,7 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
         })
       }
     } { refNs =>
-      joinAdd(ns, attr, refNs, set)
+      addRefIds(ns, attr, refNs, set.asInstanceOf[Set[Long]])
     }
   }
 
@@ -104,7 +104,7 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
         addColSetter(curRefPath, (_: PS, _: IdsMap, _: RowIndex) => ())
       }
     } { refNs =>
-      joinRemove(ns, attr, refNs, set)
+      removeRefIds(ns, attr, refNs, set.asInstanceOf[Set[Long]])
     }
   }
 
@@ -154,7 +154,7 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
         })
       }
     } { refNs =>
-      joinAdd(ns, attr, refNs, seq)
+      addRefIds(ns, attr, refNs, seq.asInstanceOf[Set[Long]])
     }
   }
 
@@ -194,7 +194,7 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
         addColSetter(curRefPath, (_: PS, _: IdsMap, _: RowIndex) => ())
       }
     } { refNs =>
-      joinRemove(ns, attr, refNs, seq)
+      removeRefIds(ns, attr, refNs, seq.asInstanceOf[Set[Long]])
     }
   }
 
@@ -295,7 +295,7 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
       }
       addColSetter(curRefPath, colSetter)
     } { refNs =>
-      joinEq(ns, attr, refNs, iterable)
+      setRefIds(ns, attr, refNs, iterable.asInstanceOf[Set[Long]])
     }
   }
 

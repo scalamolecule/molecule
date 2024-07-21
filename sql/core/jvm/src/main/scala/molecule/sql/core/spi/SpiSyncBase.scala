@@ -197,8 +197,8 @@ trait SpiSyncBase
 
       lazy val action = update_getAction(update, conn)
 
-      //      val txReport = conn.transact_sync(data)
-      val txReport = conn.transact_sync(action)
+            val txReport = conn.transact_sync(data)
+//      val txReport = conn.transact_sync(action)
 
       conn.callback(update.elements)
       txReport

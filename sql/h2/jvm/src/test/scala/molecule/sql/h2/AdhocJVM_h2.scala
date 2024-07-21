@@ -22,42 +22,28 @@ object AdhocJVM_h2 extends TestSuite_h2 {
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
-//      val (a, b, c, x) = (1, 2, 3, 4)
       for {
-//        _ <- Ns.i.int_?.insert(List(
-//          (a, Some(int1)),
-//          (b, Some(int2)),
-//          (c, Some(int3)),
-//          (x, None)
-//        )).transact
-//
-//        _ <- Ns.i.a1.int_(Seq.empty[Int]).query.i.get.map(_ ==> List())
 
-        List(a, b, c) <- Ns.i.int_?.insert(
-          (1, None),
-          (1, Some(1)),
-          (2, Some(2)),
-        ).transact.map(_.ids)
+        //        _ <- rawTransact(
+        //          """UPDATE Ns
+        //            |  SET
+        //            |    intSet = ?INT
+        //            |  WHERE
+        //            |    Ns.id = 1 AND
+        //            |    Ns.intSet IS NOT NULL
+        //            |""".stripMargin)
 
-        // Update all entities where i is 1
-        _ <- Ns.i_(1).int(3).update.i.transact
+        List(r1, r2) <- Ref.i.insert(1, 2).i.transact.map(_.ids)
+        _ <- Ns.refs(Set(r1, r2)).save.i.transact
+        ////        _ <- Ns.refs(Set(1, 2)).save.i.transact
+        _ <- Ns.refs.query.get.map(_.head ==> Set(r1, r2))
 
-        // 2 matching entities updated
-        _ <- Ns.id.a1.i.int_?.query.get.map(_ ==> List(
-          (a, 1, None), //    no value to update
-          (b, 1, Some(3)), // value updated
-          (c, 2, Some(2)),
-        ))
+        //        List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
+        //        _ <- Ns.int.i.refs_?.insert(23, 1, Option.empty[Set[Long]]).transact
+        //        _ <- Ns.int.i.refs_?.insert(23, 2, Some(Set.empty[Long])).transact
+        //        _ <- Ns.int.i.refs_?.insert(23, 3, Some(Set(r1, r2))).transact
+        //        _ <- Ns.int_(23).i.a1.refs_?.query.get.map(_ ==> List((1, None), (2, None), (3, Some(Set(r1, r2)))))
 
-        // Upsert all entities where non-unique attribute i is 1
-        _ <- Ns.i_(1).int(4).upsert.transact
-
-        // 2 matching entities updated
-        _ <- Ns.id.a1.i.int_?.query.get.map(_ ==> List(
-          (a, 1, Some(4)), // attribute inserted
-          (b, 1, Some(4)), // value updated
-          (c, 2, Some(2)),
-        ))
 
       } yield ()
     }
@@ -77,37 +63,86 @@ object AdhocJVM_h2 extends TestSuite_h2 {
 
       for {
 
-        _ <- A.iMap(Map(pint0, pint1)).save.transact // won't be updated since there's no B value
-
-        //        List(
-        //          (1,List((Some(a),None), (Some(b),None), (Some(c),None), (Some(d),Some(1)), (Some(e),Some(2)), (Some(f),Some(3)), (Some(g),Some(4)), (Some(h),None))), (2,List()), (3,List()), (4,List()), (5,List()), (6,List()))
-        //          List(
-        //          (1,List()),
-        //          (2,List((Some(a),None))), (3,List((Some(b),None), (Some(c),None))), (4,List((Some(d),Some(1)))), (5,List((Some(e),Some(2)), (Some(f),Some(3)))), (6,List((Some(g),Some(4)), (Some(h),None))))
-
-        //        // Filter by A ids, update B values
-        //        _ <- A(a, b, c, d, e, f).Bb.i(4).update.transact
+        //        _ <- A.i.Bb.*(B.i).insert(
+        //          (1, List(1, 2)),
+        //          (2, List(3, 4)),
+        //        ).i.transact.map(_.ids)
         //
-        //        _ <- A.i.a1.Bb.*?(B.s_?.a1.i).query.get.map(_ ==> List(
-        //          (1, List()), //                                no B.i value
-        //          (2, List()), //                                no B.i value
-        //          (3, List()), //                                no B.i value
-        //          (4, List((Some("d"), 4))), //                  update in 1 ref entity
-        //          (5, List((Some("e"), 4), (Some("f"), 4))), //  update in 2 ref entities
-        //          (6, List((Some("g"), 4))), //                  already had same value
+        //        _ <- A.i.a1.Bb.*?(B.i.a1).query.get.map(_ ==> List(
+        //          (1, List(1, 2)),
+        //          (2, List(3, 4)),
+        //        ))
+        //
+        //
+        //        _ <- A.i.Bb.*(B.i.s).insert(
+        //          (1, List((1, "a"), (2, "b"))),
+        //          (2, List((3, "c"), (4, "d"))),
+        //        ).i.transact.map(_.ids)
+        //
+        //        _ <- A.i.a1.Bb.*?(B.i.a1.s).query.get.map(_ ==> List(
+        //          (1, List((1, "a"), (2, "b"))),
+        //          (2, List((3, "c"), (4, "d"))),
         //        ))
 
-        //        // Filter by A ids, upsert B values
-        //        _ <- A(a, b, c, d, e, f).Bb.i(5).upsert.transact
+
+        //        _ <- A.i.Bb.*(B.i.C.s).insert(
+        //          (1, List((1, "a"), (2, "b"))),
+        //          (2, List((3, "c"), (4, "d"))),
+        //        ).i.transact.map(_.ids)
         //
-        //        _ <- A.i.a1.Bb.*?(B.s_?.a1.i).query.get.map(_ ==> List(
-        //          (1, List((None, 5))), //                       ref + insert
-        //          (2, List((Some("a"), 5))), //                  addition in 1 ref entity
-        //          (3, List((Some("b"), 5), (Some("c"), 5))), //  addition in 2 ref entities
-        //          (4, List((Some("d"), 5))), //                  update in 1 ref entity
-        //          (5, List((Some("e"), 5), (Some("f"), 5))), //  update in 2 ref entities
-        //          (6, List((Some("g"), 5), (Some("h"), 5))), //  update in one ref entity and insertion in another
+        //        _ <- A.i.a1.Bb.*?(B.i.a1.C.s).query.get.map(_ ==> List(
+        //          (1, List((1, "a"), (2, "b"))),
+        //          (2, List((3, "c"), (4, "d"))),
         //        ))
+
+
+        //        _ <- A.i.Cc.*(C.i.D.i).insert(
+        //          (1, List((1, 2), (3, 4))),
+        //        ).i.transact
+
+//        _ <- A.i.Cc.*(C.i).insert(
+//          (1, List(1, 2)),
+//        ).i.transact
+//
+//
+//        _ <- A.i.B.i.Cc.*(C.i).insert(
+//          (1, 10, List(1, 2)),
+//          //          (1, 10, List((1, 2), (3, 4))),
+//          //          (2, 20, Nil),
+//        ).i.transact.map(_.ids)
+
+        //        _ <- A.i.B.i.Cc.*(C.i.D.i).insert(
+        //          (1, 10, List((1, 2))),
+        //          //          (1, 10, List((1, 2), (3, 4))),
+        //          //          (2, 20, Nil),
+        //        ).i.transact.map(_.ids)
+
+
+//                List(a1, a2) <- A.i.B.i.Cc.*(C.i.D.i).insert(
+//                  (1, 10, List((1, 2), (3, 4))),
+//                  (2, 20, Nil),
+//                ).i.transact.map(_.ids)
+//
+//                _ <- A.id(a1, a2).i.a1.B.i.Cc.*?(C.i.a1.D.i).query.get.map(_ ==> List(
+//                  (a1, 1, 10, List((1, 2), (3, 4))),
+//                  (a2, 2, 20, Nil),
+//                ))
+
+                e1 <- A.i.Bb.*(B.i).insert(
+                  (1, Seq(10, 11)),
+                  (2, Seq(20, 21))
+                ).transact.map(_.id)
+
+                // 2 entities, each with 2 owned sub-entities
+                _ <- A.i.a1.Bb.*(B.i.a1).query.get.map(_ ==> List(
+                  (1, Seq(10, 11)),
+                  (2, Seq(20, 21))
+                ))
+
+
+//        _ <- A.i.B.i.C.i.insert(1, 2, 3).i.transact
+//        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
+
 
         //        _ <- rawQuery(
         //          """select count(*) from Ns

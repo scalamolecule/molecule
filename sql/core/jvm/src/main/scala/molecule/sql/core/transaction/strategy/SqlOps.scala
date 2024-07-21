@@ -6,22 +6,8 @@ import scala.collection.mutable.ListBuffer
 
 class SqlOps extends SqlBase with BaseHelpers {
 
-  lazy val defaultValues = "(id) VALUES (DEFAULT)"
+  lazy val defaultValues = "DEFAULT VALUES"
 
-
-  def joinIdNames(ns: String, refNs: String): (String, String) = {
-    if (ns == refNs)
-      (ss(ns, "1_id"), ss(refNs, "2_id"))
-    else
-      (ss(ns, "id"), ss(refNs, "id"))
-  }
-
-  def getJoinStmt(ns: String, refAttr: String, refNs: String): String = {
-    val (id1, id2) = joinIdNames(ns, refNs)
-    s"""INSERT INTO ${ns}_${refAttr}_$refNs (
-       |  $id1, $id2
-       |) VALUES (?, ?)""".stripMargin
-  }
 
   def getIds(sqlConn: Connection, table: String, ps: PS): List[Long] = {
     // Execute incoming batch of prepared statements
@@ -37,16 +23,48 @@ class SqlOps extends SqlBase with BaseHelpers {
     ids.toList
   }
 
+
+  // Render sql statements --------------------------------------
+
+  def joinIdNames(ns: String, refNs: String): (String, String) = {
+    if (ns == refNs)
+      (ss(ns, "1_id"), ss(refNs, "2_id"))
+    else
+      (ss(ns, "id"), ss(refNs, "id"))
+  }
+
+  def insertJoinStmt(ns: String, refAttr: String, refNs: String): String = {
+    val (id1, id2) = joinIdNames(ns, refNs)
+    s"""INSERT INTO ${ns}_${refAttr}_$refNs (
+       |  $id1, $id2
+       |) VALUES (?, ?)""".stripMargin
+  }
+
+  def deleteJoinStmt(ns: String, refAttr: String, refNs: String): String = {
+    val joinTable = ss(ns, refAttr, refNs)
+    val ns_id     = ss(ns, "id")
+    val refNs_id  = ss(refNs, "id")
+    //    val deleteJoins = s"DELETE FROM $joinTable WHERE $ns_id = $id" + refIds
+
+    val (id1, id2) = joinIdNames(ns, refNs)
+    s"""INSERT INTO ${ns}_${refAttr}_$refNs (
+       |  $id1, $id2
+       |) VALUES (?, ?)""".stripMargin
+  }
+
   def insertStmt(
     table: String, cols: Iterable[String], placeHolders: Iterable[String]
   ): String = {
     val columns           = cols.mkString(",\n  ")
     val inputPlaceholders = placeHolders.mkString(", ")
-    s"""INSERT INTO $table (
-       |  $columns
-       |) VALUES ($inputPlaceholders)""".stripMargin
+    if (cols.nonEmpty) {
+      s"""INSERT INTO $table (
+         |  $columns
+         |) VALUES ($inputPlaceholders)""".stripMargin
+    } else {
+      s"INSERT INTO $table $defaultValues"
+    }
   }
-
 
   def updateStmt(
     table: String, cols: Iterable[String], clauses: Iterable[String]
@@ -58,6 +76,14 @@ class SqlOps extends SqlBase with BaseHelpers {
        |  $columnSetters
        |WHERE
        |  $updateClauses""".stripMargin
+  }
 
+  def deleteStmt(
+    table: String, clauses: Iterable[String]
+  ): String = {
+    val deleteClauses = clauses.mkString(" AND\n  ")
+    s"""DELETE FROM $table
+       |WHERE
+       |  $deleteClauses""".stripMargin
   }
 }

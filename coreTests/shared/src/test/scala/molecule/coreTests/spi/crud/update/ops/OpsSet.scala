@@ -67,7 +67,7 @@ trait OpsSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.intSet.query.get.map(_ ==> Nil)
 
         // When attribute is not already asserted, an update has no effect
-        _ <- Ns(id).intSet.add(int1).update.transact
+        _ <- Ns(id).intSet.add(int1).update.i.transact
         _ <- Ns.intSet.query.get.map(_ ==> Nil)
 
         // To add values to the attribute if not already asserted, use `upsert`

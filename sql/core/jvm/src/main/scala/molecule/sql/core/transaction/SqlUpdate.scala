@@ -23,12 +23,13 @@ trait SqlUpdate
 
   def getUpdateAction(elements: List[Element]): UpdateAction = {
     update = UpdateNs(
+      null,
       sqlConn,
       (elements: ListBuffer[Element]) => model2SqlQuery(elements.toList),
       getInitialNs(elements),
     )
     resolve(elements)
-    update.initialAction
+    update.rootAction
   }
 
   def model2SqlQuery(elements: List[Element]): Model2SqlQuery
@@ -44,7 +45,9 @@ trait SqlUpdate
     transformValue: T => Any,
     exts: List[String],
   ): Unit = {
-    val paramIndex = update.paramIndex(ns, attr, isUpsert, exts(2))
+    //    val paramIndex = update.paramIndex(ns, attr, isUpsert, exts(2))
+    val cast       = exts(2)
+    val paramIndex = update.paramIndex(s"$attr = ?$cast", isUpsert, ns, attr)
     vs match {
       case Seq(v) => update.addColSetter((ps: PS) =>
         transformValue(v).asInstanceOf[(PS, Int) => Unit](ps, paramIndex))
@@ -158,7 +161,8 @@ trait SqlUpdate
     attr: String,
     byteArray: Array[Byte],
   ): Unit = {
-    val paramIndex = update.paramIndex(ns, attr, isUpsert)
+    //    val paramIndex = update.paramIndex(ns, attr, isUpsert)
+    val paramIndex = update.paramIndex(s"$attr = ?", isUpsert, ns, attr)
     if (byteArray.isEmpty) {
       update.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
     } else {
@@ -194,7 +198,9 @@ trait SqlUpdate
     if (map.nonEmpty) {
       val scalaBaseType = exts.head
       val setAttr       = s"$attr = addPairs_$scalaBaseType($attr, ?)"
-      val paramIndex    = update.paramIndex(ns, setAttr, isUpsert)
+      //      val paramIndex    = update.paramIndex(ns, setAttr, isUpsert)
+
+      val paramIndex = update.paramIndex(setAttr, isUpsert, ns, attr)
       update.addColSetter((ps: PS) =>
         ps.setBytes(paramIndex, map2jsonByteArray(map, value2json))
       )
@@ -212,7 +218,7 @@ trait SqlUpdate
     if (keys.nonEmpty) {
       val scalaBaseType = exts.head
       val setAttr       = s"$attr = removePairs_$scalaBaseType($attr, ?)"
-      val paramIndex    = update.paramIndex(ns, setAttr, isUpsert)
+      val paramIndex    = update.paramIndex(setAttr, isUpsert, ns, attr)
       placeHolders = placeHolders :+ s"$attr = removePairs_$scalaBaseType($attr, ?)"
       update.addColSetter((ps: PS) =>
         ps.setArray(paramIndex, ps.getConnection.createArrayOf("String", keys.toArray))
@@ -239,16 +245,16 @@ trait SqlUpdate
     exts: List[String],
     vs2array: M[T] => Array[AnyRef],
   ): Unit = {
-    val dbBaseType = exts(1)
-    val paramIndex = update.paramIndex(ns, attr, isUpsert, dbBaseType)
     refNs.fold {
+      val dbBaseType = exts(1)
+      val paramIndex = update.paramIndex(s"$attr = ?", isUpsert, ns, attr)
       if (iterable.nonEmpty) {
         addArray(paramIndex, dbBaseType, vs2array(iterable))
       } else {
         update.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
       }
     } { refNs =>
-      joinEq(ns, attr, refNs, iterable)
+      setRefIds(ns, attr, refNs, iterable.asInstanceOf[Set[Long]])
     }
   }
 
@@ -268,21 +274,12 @@ trait SqlUpdate
           case tpe => tpe + "[]"
         }
         val setAttr    = s"$attr = COALESCE($attr, ARRAY[]$cast) || ?"
-        val paramIndex = update.paramIndex(ns, setAttr, isUpsert, dbBaseType)
+        val paramIndex = update.paramIndex(setAttr, isUpsert, ns, attr)
         addArray(paramIndex, dbBaseType, iterable2array(iterable))
       }
     } { refNs =>
-      joinAdd(ns, attr, refNs, iterable)
+      addRefIds(ns, attr, refNs, iterable.asInstanceOf[Set[Long]])
     }
-  }
-
-  private def addArray(
-    paramIndex: Int, dbBaseType: String, array: Array[AnyRef]
-  ): Unit = {
-    update.addColSetter((ps: PS) => {
-      val conn = ps.getConnection
-      ps.setArray(paramIndex, conn.createArrayOf(dbBaseType, array))
-    })
   }
 
   private def updateIterableRemove[T, M[_] <: Iterable[_]](
@@ -298,86 +295,94 @@ trait SqlUpdate
         val scalaBaseType = exts.head
         val dbBaseType    = exts(1)
         val setAttr       = s"$attr = removeFromArray_$scalaBaseType($attr, ?)"
-        val paramIndex    = update.paramIndex(ns, setAttr, isUpsert, dbBaseType)
+        val paramIndex    = update.paramIndex(setAttr, isUpsert, ns, attr)
         addArray(paramIndex, dbBaseType, iterable2array(iterable))
-
-        //        placeHolders = placeHolders :+ s"$attr = removeFromArray_$scalaBaseType($attr, ?)"
-        //        val array = iterable2array(iterable)
-        //        addColSetter(curRefPath, (ps: PS) => {
-        //          val conn = ps.getConnection
-        //          ps.setArray(paramIndex, conn.createArrayOf(dbBaseType, array))
-        //          paramIndex += 1
-        //        })
       }
     } { refNs =>
-      joinRemove(ns, attr, refNs, iterable)
+      removeRefIds(ns, attr, refNs, iterable.asInstanceOf[Set[Long]])
     }
   }
 
+  private def addArray(
+    paramIndex: Int, dbBaseType: String, array: Array[AnyRef]
+  ): Unit = {
+    update.addColSetter((ps: PS) => {
+      val conn = ps.getConnection
+      ps.setArray(paramIndex, conn.createArrayOf(dbBaseType, array))
+    })
+  }
 
-  protected def joinEq[T, M[_] <: Iterable[_]](
+  protected def setRefIds(
     ns: String,
     refAttr: String,
     refNs: String,
-    vs: M[T]
+    refIds: Set[Long]
   ): Unit = {
     // Separate update of ref ids in join table -----------------------------
     val joinTable = ss(ns, refAttr, refNs)
     val ns_id     = ss(ns, "id")
     val refNs_id  = ss(refNs, "id")
     val id        = getUpdateId
-    if (vs.nonEmpty) {
+    if (refIds.nonEmpty) {
+
+
+//      val updateId = update.getPostSetters.last.ids
+
+//      update.deleteJoins(ns, refAttr, refNs, vs.asInstanceOf[Iterable[Long]])
+//      update.insertRefIdSet(ns, refAttr, refNs, vs.asInstanceOf[Iterable[Long]])
+
+
       // Tables are reversed in JdbcConn_JVM and we want to delete first
-      manualTableDatas = List(
-        addJoins(joinTable, ns_id, refNs_id, id,
-          vs.asInstanceOf[Iterable[T]].map(_.asInstanceOf[Long])
-        ),
-        deleteJoins(joinTable, ns_id, id)
-      )
+//      manualTableDatas = List(
+//        addJoinsOLD(joinTable, ns_id, refNs_id, id,
+//          refIds.asInstanceOf[Iterable[T]].map(_.asInstanceOf[Long])
+//        ),
+//        deleteJoinsOLD(joinTable, ns_id, id)
+//      )
     } else {
       // Delete all joins when no ref ids are applied
-      manualTableDatas = List(deleteJoins(joinTable, ns_id, id))
+      manualTableDatas = List(deleteJoinsOLD(joinTable, ns_id, id))
     }
   }
 
-  protected def joinAdd[T, M[_] <: Iterable[_]](
+  protected def addRefIds(
     ns: String,
     refAttr: String,
     refNs: String,
-    vs: M[T]
+    refIds: Set[Long]
   ): Unit = {
-    if (vs.nonEmpty) {
+    if (refIds.nonEmpty) {
       // Separate update of ref ids in join table -----------------------------
       val joinTable = ss(ns, refAttr, refNs)
       val ns_id     = ss(ns, "id")
       val refNs_id  = ss(refNs, "id")
-      manualTableDatas = List(
-        addJoins(joinTable, ns_id, refNs_id, getUpdateId,
-          vs.asInstanceOf[Iterable[T]].map(_.asInstanceOf[Long])
-        )
-      )
+//      manualTableDatas = List(
+//        addJoinsOLD(joinTable, ns_id, refNs_id, getUpdateId,
+//          refIds.asInstanceOf[Iterable[T]].map(_.asInstanceOf[Long])
+//        )
+//      )
     }
   }
 
-  protected def joinRemove[T, M[_] <: Iterable[_]](
+  protected def removeRefIds(
     ns: String,
     refAttr: String,
     refNs: String,
-    vs: M[T]
+    refIds: Set[Long]
   ): Unit = {
-    if (vs.nonEmpty) {
+    if (refIds.nonEmpty) {
       // Separate update of ref ids in join table -----------------------------
       val joinTable  = ss(ns, refAttr, refNs)
       val ns_id      = ss(ns, "id")
       val refNs_id   = ss(refNs, "id")
-      val retractIds = vs.mkString(s" AND $refNs_id IN (", ", ", ")")
+      val retractIds = refIds.mkString(s" AND $refNs_id IN (", ", ", ")")
       manualTableDatas = List(
-        deleteJoins(joinTable, ns_id, getUpdateId, retractIds)
+        deleteJoinsOLD(joinTable, ns_id, getUpdateId, retractIds)
       )
     }
   }
 
-  private def deleteJoins(
+  private def deleteJoinsOLD(
     joinTable: String, ns_id: String, id: Long, refIds: String = ""
   ): Table = {
     val deletePath  = List("deleteJoins")
@@ -387,7 +392,7 @@ trait SqlUpdate
     ???
   }
 
-  private def addJoins(
+  private def addJoinsOLD(
     joinTable: String, ns_id: String, refNs_id: String, id: Long, refIds: Iterable[Long]
   ): Table = {
     val addPath  = List("addJoins")
@@ -428,7 +433,7 @@ trait SqlUpdate
   }
 
   protected def getUpdateId: Long = {
-    idsOLD.toList match {
+    update.ids match {
       case List(v) => v
       case other   => throw ModelError("Expected to update one entity. Found multiple ids: " + other)
     }

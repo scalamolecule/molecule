@@ -2,36 +2,31 @@ package molecule.sql.core.transaction.strategy.save
 
 import java.sql.Connection
 import molecule.sql.core.transaction.strategy.SqlOps
-import scala.collection.mutable.ListBuffer
 
-case class SaveRefOne(
+case class SaveRefJoin(
   parent: SaveAction,
+  ref: SaveAction,
   sqlConn: Connection,
   sqlOps: SqlOps,
   ns: String,
   refAttr: String,
   refNs: String,
-  refAttrIndex: Int
 ) extends SaveAction(parent, sqlConn, sqlOps, refNs) {
 
-  rowSetters += ListBuffer.empty[PS => Unit]
-
-  override def rootAction: SaveAction = parent.rootAction
-
   override def execute(): Unit = {
-    children.foreach(_.execute())
-    executeThisNs()
-
-    parent.rowSetters.last += {
-      (ps: PS) => ps.setLong(refAttrIndex, ids.head)
-    }
+    val ps = prepare(curStmt)
+    ps.setLong(1, parent.ids.last)
+    ps.setLong(2, ref.ids.last)
+    ps.addBatch()
+    ps.executeBatch()
+    ps.close()
   }
 
   override def curStmt: String = {
-    sqlOps.insertStmt(refNs, cols, placeHolders)
+    sqlOps.insertJoinStmt(ns, refAttr, refNs)
   }
 
   override def render(indent: Int): String = {
-    recurseRender(indent, "RefOne")
+    recurseRender(indent, "RefJoin")
   }
 }

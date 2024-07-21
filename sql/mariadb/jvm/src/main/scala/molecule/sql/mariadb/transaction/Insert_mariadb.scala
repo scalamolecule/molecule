@@ -112,7 +112,7 @@ trait Insert_mariadb extends SqlInsert { self: ResolveInsert with InsertResolver
     } { refNs =>
       (tpl: Product) => {
         val refIds = tpl.productElement(tplIndex).asInstanceOf[Iterable[Long]]
-        stableInsert.addCardManyRefAttr(ns, attr, refNs, refIds.asInstanceOf[Set[Long]])
+        stableInsert.insertJoins(ns, attr, refNs, refIds.asInstanceOf[Set[Long]])
       }
     }
   }
@@ -146,7 +146,7 @@ trait Insert_mariadb extends SqlInsert { self: ResolveInsert with InsertResolver
       (tpl: Product) => {
         tpl.productElement(tplIndex) match {
           case Some(set: Iterable[_]) if set.nonEmpty =>
-            stableInsert.addCardManyRefAttr(
+            stableInsert.insertJoins(
               ns, attr, refNs, set.asInstanceOf[Set[Long]]
             )
           case _                                      => ()

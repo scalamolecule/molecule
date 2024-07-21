@@ -10,31 +10,30 @@ case class InsertRefOne(
   ns: String,
   refAttr: String,
   refNs: String,
-) extends InsertAction(sqlConn, sqlOps, refNs) {
+  refAttrIndex: Int
+) extends InsertAction(parent, sqlConn, sqlOps, refNs) {
 
-  override def initialAction: InsertAction = parent.initialAction
-  override def backRef: InsertAction = parent
+  override def rootAction: InsertAction = parent.rootAction
 
-  override def execute: List[Long] = {
-    val refIds = insert
-
-    // Add ref id from parent to ref for all inserted rows
-    val refAttrIndex = parent.paramIndex(refAttr)
-    val refSetters   = parent.rowSetters.iterator
-    refIds.foreach { refId =>
-      val refSettersForRow = refSetters.next()
-      refSettersForRow += (
-        (ps: PS) => {
-//          println(s"3--  $ns.$refAttr($refAttrIndex) = $refId")
-          ps.setLong(refAttrIndex, refId)
-        })
+  override def execute(): Unit = {
+    children.foreach(_.execute())
+    executeThisNs()
+    val refSetters = parent.rowSetters.iterator
+    val refIds     = ids.iterator
+    while (refIds.hasNext) {
+      val refSetter = refSetters.next()
+      val refId     = refIds.next()
+      refSetter += ((ps: PS) => ps.setLong(refAttrIndex, refId))
     }
-    refIds
+  }
+
+  override def curStmt: String = {
+    sqlOps.insertStmt(refNs, cols, placeHolders)
   }
 
   override def render(indent: Int): String = {
     // Add refAttr to parent insert
     parent.paramIndex(refAttr)
-    recurseRender(indent, "InsertRefOne")
+    recurseRender(indent, "RefOne")
   }
 }

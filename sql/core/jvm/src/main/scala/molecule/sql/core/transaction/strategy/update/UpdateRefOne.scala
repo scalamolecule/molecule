@@ -14,12 +14,12 @@ case class UpdateRefOne(
   ns: String,
   refAttr: String,
   refNs: String,
-) extends UpdateAction(sqlConn, sqlOps, m2q, refNs) {
+) extends UpdateAction(parent, sqlConn, sqlOps, m2q, refNs) {
 
-  override def initialAction: UpdateAction = parent.initialAction
+  override def rootAction: UpdateAction = parent.rootAction
   override def backRef: UpdateAction = parent
 
-  override def execute: List[Long] = {
+  override def executeRoot: List[Long] = {
 //    val List(refId) = update
 //
 //    // Add ref id from parent to ref

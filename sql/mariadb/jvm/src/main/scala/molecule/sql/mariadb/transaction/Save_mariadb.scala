@@ -71,7 +71,7 @@ trait Save_mariadb extends SqlSave with BaseHelpers { self: ResolveSave =>
       }
     } { refNs =>
       optIterable.foreach(refIds =>
-        save.addCardManyRefAttr(
+        save.insertJoins(
           ns, attr, refNs, refIds.asInstanceOf[Set[Long]]
         )
       )
