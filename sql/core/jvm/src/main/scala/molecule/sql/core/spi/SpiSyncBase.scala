@@ -197,8 +197,8 @@ trait SpiSyncBase
 
       lazy val action = update_getAction(update, conn)
 
-            val txReport = conn.transact_sync(data)
-//      val txReport = conn.transact_sync(action)
+//            val txReport = conn.transact_sync(data)
+      val txReport = conn.transact_sync(action)
 
       conn.callback(update.elements)
       txReport
@@ -211,32 +211,35 @@ trait SpiSyncBase
     val conn   = conn0.asInstanceOf[JdbcConn_JVM]
     val action = if (update.isUpsert) "UPSERT" else "UPDATE"
     tryInspect(action, update.elements) {
-      //      if (isRefUpdate(update.elements)) {
-      //        val (idsModel, updateModels) = prepareMultipleUpdates(update.elements, update.isUpsert)
-      //        val refIds                   =
-      //          s"""REF IDS MODEL ----------------
-      //             |${idsModel.mkString("\n")}
-      //             |
-      //             |${refIdsQuery(idsModel, conn.proxy)}
-      //             |""".stripMargin
-      //        val updates                  = updateModels
-      //          .map(_(42L)) // dummy value
-      //          .map { m =>
-      //            val elements = m.mkString("\n")
-      //            val tables   = update_getData(conn, Update(m, update.isUpsert))._1
-      //            tables.headOption.fold(elements)(table => elements + "\n" + table.stmt)
-      //          }
-      //          .mkString(action + "S ----------------------\n", "\n------------\n", "")
-      //
-      //        printRaw(action, update.elements, refIds + "\n" + updates)
-      //      } else {
-      //        printInspectTx(action, update.elements, update_getData(conn, update))
-      //      }
 
+            val old = true
+//      val old = false
 
-      //      printInspectTx(action, update.elements, update_getData(conn, update))
+      if (old) {
+        if (isRefUpdate(update.elements)) {
+          val (idsModel, updateModels) = prepareMultipleUpdates(update.elements, update.isUpsert)
+          val refIds                   =
+            s"""REF IDS MODEL ----------------
+               |${idsModel.mkString("\n")}
+               |
+               |${refIdsQuery(idsModel, conn.proxy)}
+               |""".stripMargin
+          val updates                  = updateModels
+            .map(_(42L)) // dummy value
+            .map { m =>
+              val elements = m.mkString("\n")
+              val tables   = update_getData(conn, Update(m, update.isUpsert))._1
+              tables.headOption.fold(elements)(table => elements + "\n" + table.stmt)
+            }
+            .mkString(action + "S ----------------------\n", "\n------------\n", "")
 
-      printInspectTx2(action, update.elements, update_getAction(update, conn))
+          printRaw(action, update.elements, refIds + "\n" + updates)
+        } else {
+          printInspectTx(action, update.elements, update_getData(conn, update))
+        }
+      } else {
+        printInspectTx2(action, update.elements, update_getAction(update, conn))
+      }
     }
   }
 

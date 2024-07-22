@@ -16,7 +16,7 @@ import scala.language.implicitConversions
 
 //object AdhocJVM_h2 extends TestSuiteArray_h2 {
 object AdhocJVM_h2 extends TestSuite_h2 {
-
+  List(1).zip(List(2))
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
@@ -33,17 +33,14 @@ object AdhocJVM_h2 extends TestSuite_h2 {
         //            |    Ns.intSet IS NOT NULL
         //            |""".stripMargin)
 
-        List(r1, r2) <- Ref.i.insert(1, 2).i.transact.map(_.ids)
-        _ <- Ns.refs(Set(r1, r2)).save.i.transact
-        ////        _ <- Ns.refs(Set(1, 2)).save.i.transact
-        _ <- Ns.refs.query.get.map(_.head ==> Set(r1, r2))
+        id <- Ns.i(42).save.transact.map(_.id)
 
-        //        List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
-        //        _ <- Ns.int.i.refs_?.insert(23, 1, Option.empty[Set[Long]]).transact
-        //        _ <- Ns.int.i.refs_?.insert(23, 2, Some(Set.empty[Long])).transact
-        //        _ <- Ns.int.i.refs_?.insert(23, 3, Some(Set(r1, r2))).transact
-        //        _ <- Ns.int_(23).i.a1.refs_?.query.get.map(_ ==> List((1, None), (2, None), (3, Some(Set(r1, r2)))))
+        // Map attribute not yet asserted
+        _ <- Ns.intMap.query.get.map(_ ==> Nil)
 
+        // When attribute is not already asserted, an update has no effect
+        _ <- Ns(id).intMap(Map(pint1, pint2)).update.i.transact
+        _ <- Ns.intMap.query.get.map(_ ==> Nil)
 
       } yield ()
     }
@@ -63,86 +60,95 @@ object AdhocJVM_h2 extends TestSuite_h2 {
 
       for {
 
-        //        _ <- A.i.Bb.*(B.i).insert(
-        //          (1, List(1, 2)),
-        //          (2, List(3, 4)),
-        //        ).i.transact.map(_.ids)
-        //
-        //        _ <- A.i.a1.Bb.*?(B.i.a1).query.get.map(_ ==> List(
-        //          (1, List(1, 2)),
-        //          (2, List(3, 4)),
-        //        ))
-        //
-        //
-        //        _ <- A.i.Bb.*(B.i.s).insert(
-        //          (1, List((1, "a"), (2, "b"))),
-        //          (2, List((3, "c"), (4, "d"))),
-        //        ).i.transact.map(_.ids)
-        //
-        //        _ <- A.i.a1.Bb.*?(B.i.a1.s).query.get.map(_ ==> List(
-        //          (1, List((1, "a"), (2, "b"))),
-        //          (2, List((3, "c"), (4, "d"))),
-        //        ))
 
+        List(b1, b2) <- B.s.insert("b10", "b20").transact.map(_.ids)
 
-        //        _ <- A.i.Bb.*(B.i.C.s).insert(
-        //          (1, List((1, "a"), (2, "b"))),
-        //          (2, List((3, "c"), (4, "d"))),
-        //        ).i.transact.map(_.ids)
-        //
-        //        _ <- A.i.a1.Bb.*?(B.i.a1.C.s).query.get.map(_ ==> List(
-        //          (1, List((1, "a"), (2, "b"))),
-        //          (2, List((3, "c"), (4, "d"))),
-        //        ))
+        List(a1, a2) <- A.i.b.insert(
+          (10, b1),
+          (20, b2),
+        ).transact.map(_.ids)
 
+        _ <- A.i.B.s.query.get.map(_ ==> List(
+          (10, "b10"),
+          (20, "b20"),
+        ))
 
-        //        _ <- A.i.Cc.*(C.i.D.i).insert(
-        //          (1, List((1, 2), (3, 4))),
-        //        ).i.transact
+        _ <- A(a1).i(11).B.s("b11").query.inspect
 
-//        _ <- A.i.Cc.*(C.i).insert(
-//          (1, List(1, 2)),
-//        ).i.transact
+        _ <- A(a1).i(11).B.s("b11").update.i.transact
+//        _ <- A.i.B.s.query.get.map(_ ==> List(
+//          (11, "b11"),
+//          (20, "b20"),
+//        ))
 //
+//        _ <- A.i(21).B.id(b2).s("b21").update.i.transact
+//        _ <- A.i.B.s.query.get.map(_ ==> List(
+//          (11, "b11"),
+//          (21, "b21"),
+//        ))
+
+
+
+//        a <- A.i(1).save.transact.map(_.id)
+//        b <- A.i(2).B.s("b").save.transact.map(_.id)
+//        c <- A.i(3).B.s("c").i(3).save.transact.map(_.id)
 //
-//        _ <- A.i.B.i.Cc.*(C.i).insert(
-//          (1, 10, List(1, 2)),
-//          //          (1, 10, List((1, 2), (3, 4))),
-//          //          (2, 20, Nil),
-//        ).i.transact.map(_.ids)
-
-        //        _ <- A.i.B.i.Cc.*(C.i.D.i).insert(
-        //          (1, 10, List((1, 2))),
-        //          //          (1, 10, List((1, 2), (3, 4))),
-        //          //          (2, 20, Nil),
-        //        ).i.transact.map(_.ids)
-
-
-//                List(a1, a2) <- A.i.B.i.Cc.*(C.i.D.i).insert(
-//                  (1, 10, List((1, 2), (3, 4))),
-//                  (2, 20, Nil),
-//                ).i.transact.map(_.ids)
+//        // Current entity with A value and ref to B value
+//        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
+//          (3, 3)
+//        ))
 //
-//                _ <- A.id(a1, a2).i.a1.B.i.Cc.*?(C.i.a1.D.i).query.get.map(_ ==> List(
-//                  (a1, 1, 10, List((1, 2), (3, 4))),
-//                  (a2, 2, 20, Nil),
-//                ))
+//        // Filter by A ids, update existing B values
+//        _ <- A(a, b, c).B.i(4).update.i.transact
+        /*
+        ========================================
+        UPDATE:
+        AttrOneTacID("A", "id", Eq, Seq(1L, 2L, 3L), None, None, Nil, Nil, None, None, Seq(0, 0))
+        Ref("A", "b", "B", CardOne, false, Seq(0, 8, 1))
+        AttrOneManInt("B", "i", Eq, Seq(4), None, None, Nil, Nil, None, None, Seq(1, 24))
 
-                e1 <- A.i.Bb.*(B.i).insert(
-                  (1, Seq(10, 11)),
-                  (2, Seq(20, 21))
-                ).transact.map(_.id)
+        REF IDS MODEL ----------------
+        AttrOneTacID("A", "id", Eq, Seq(1L, 2L, 3L), None, None, Nil, Nil, None, None, Seq(0, 0))
+        Ref("A", "b", "B", CardOne, false, Seq(0, 8, 1))
+        AttrOneTacInt("B", "i", V, Seq(), None, None, Nil, Nil, None, None, Seq(1, 24))
+        AttrOneManID("B", "id", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 0))
 
-                // 2 entities, each with 2 owned sub-entities
-                _ <- A.i.a1.Bb.*(B.i.a1).query.get.map(_ ==> List(
-                  (1, Seq(10, 11)),
-                  (2, Seq(20, 21))
-                ))
+        SELECT DISTINCT
+          B.id
+        FROM A
+          INNER JOIN B ON
+            A.b = B.id
+        WHERE
+          A.id IN (1, 2, 3) AND
+          B.i  IS NOT NULL AND
+          B.id IS NOT NULL;
 
-
-//        _ <- A.i.B.i.C.i.insert(1, 2, 3).i.transact
-//        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
-
+        UPDATES ----------------------
+        AttrOneTacID("A", "id", Eq, Seq(1L, 2L, 3L), None, None, Nil, Nil, None, None, Seq(0, 0))
+        ------------
+        AttrOneTacID("B", "id", Eq, Seq(42L), None, None, Nil, Nil, None, None, Seq(0, 0))
+        AttrOneManInt("B", "i", Eq, Seq(4), None, None, Nil, Nil, None, None, Seq(1, 24))
+        UPDATE B
+        SET
+          i = ?
+        WHERE
+          i IS NOT NULL AND
+          B.id IN(42)
+        ----------------------------------------
+         */
+//        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
+//          (3, 4) // B value updated since there was a previous value
+//        ))
+//
+//        // Filter by A ids, upsert B values (insert if not already present)
+//        _ <- A(a, b, c).B.i(5).upsert.transact
+//
+//        // Now three A entities with referenced B value
+//        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
+//          (1, 5), // relationship to B created + B value inserted
+//          (2, 5), // B value inserted
+//          (3, 5), // B value updated
+//        ))
 
         //        _ <- rawQuery(
         //          """select count(*) from Ns

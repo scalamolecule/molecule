@@ -20,7 +20,7 @@ case class SaveRefOne(
 
   override def execute(): Unit = {
     children.foreach(_.execute())
-    executeThisNs()
+    insert()
 
     parent.rowSetters.last += {
       (ps: PS) => ps.setLong(refAttrIndex, ids.head)

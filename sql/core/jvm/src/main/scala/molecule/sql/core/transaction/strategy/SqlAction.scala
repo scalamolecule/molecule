@@ -120,12 +120,10 @@ abstract class SqlAction(
 
   def curStmt: String = ???
 
-  def executeThisNs(): Unit = {
+  def insert(): Unit = {
     val ps = prepare(curStmt)
-
     //    println(s"++++++++  $ns  " + rowSetters.length + "  " + curStmt.linesIterator.next())
     //    rowSetters.foreach(r => println(r.length))
-
     // Populate prepared statement
     rowSetters.foreach {
       case rowSetter if rowSetter.nonEmpty =>
@@ -136,7 +134,6 @@ abstract class SqlAction(
 
       case _ => ps.addBatch() // Add empty row (for joins)
     }
-
     // Cache generated ids (various db implementations)
     // Closes prepared statement
     ids = sqlOps.getIds(sqlConn, ns, ps)

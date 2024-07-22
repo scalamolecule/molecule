@@ -6,42 +6,31 @@ import molecule.sql.core.query.Model2SqlQuery
 import molecule.sql.core.transaction.strategy.SqlOps
 import scala.collection.mutable.ListBuffer
 
-case class UpdateRefOne(
+case class UpdateRefJoin(
   parent: UpdateAction,
+  ref: UpdateAction,
   sqlConn: Connection,
   sqlOps: SqlOps,
   m2q: ListBuffer[Element] => Model2SqlQuery,
   ns: String,
   refAttr: String,
   refNs: String,
-  refAttrIndex: Int
 ) extends UpdateAction(parent, sqlConn, sqlOps, m2q, refNs) {
 
-  rowSetters += ListBuffer.empty[PS => Unit]
-
-  override def rootAction: UpdateAction = parent.rootAction
-
   override def execute(): Unit = {
-    children.foreach(_.execute())
-    update()
-
-//    parent.rowSetters.last += {
-//      (ps: PS) => ps.setLong(refAttrIndex, ids.head)
-//    }
+    val ps = prepare(curStmt)
+    ps.setLong(1, parent.ids.last)
+    ps.setLong(2, ref.ids.last)
+    ps.addBatch()
+    ps.executeBatch()
+    ps.close()
   }
 
-
   override def curStmt: String = {
-    if (cols.isEmpty) "..." else {
-      val filterClauses = if (filters.isEmpty) Nil else
-        m2q(filters).getWhereClauses
-      sqlOps.updateStmt(ns, cols, clauses ++ filterClauses)
-    }
+    sqlOps.insertJoinStmt(ns, refAttr, refNs)
   }
 
   override def render(indent: Int): String = {
-    // Add refAttr to parent insert
-    parent.paramIndex(refAttr)
-    recurseRender(indent, "UpdateRefOne")
+    recurseRender(indent, "RefJoin")
   }
 }

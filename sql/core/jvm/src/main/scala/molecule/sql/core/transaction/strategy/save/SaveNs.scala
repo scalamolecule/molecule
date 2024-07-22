@@ -18,7 +18,7 @@ case class SaveNs(
 
   override def execute(): Unit = {
     children.foreach(_.execute())
-    executeThisNs()
+    insert()
   }
 
   override def curStmt: String = {

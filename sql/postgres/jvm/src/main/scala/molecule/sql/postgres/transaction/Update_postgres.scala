@@ -51,10 +51,11 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    updateMapEqJdbc(attr, "::jsonb", map,
-      (ps: PS, paramIndex: Int) =>
-        ps.setString(paramIndex, map2json(map, value2json))
-    )
+//    updateMapEqJdbc(attr, "::jsonb", map,
+//      (ps: PS, paramIndex: Int) =>
+//        ps.setString(paramIndex, map2json(map, value2json))
+//    )
+    ???
   }
 
   override def updateMapAdd[T](
@@ -85,7 +86,7 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
     }
   }
 
-  override def updateMapRemove[T](
+  override def updateMapRemove(
     ns: String,
     attr: String,
     optRefNs: Option[String],
@@ -147,7 +148,8 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
         addColSetter(curRefPath, colSetter)
       }
     } { refNs =>
-      removeRefIds(ns, attr, refNs, iterable.asInstanceOf[Set[Long]])
+//      removeRefIds(ns, attr, refNs, iterable.asInstanceOf[Set[Long]])
+      ???
     }
   }
 

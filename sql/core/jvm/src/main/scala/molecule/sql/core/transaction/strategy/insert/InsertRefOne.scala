@@ -17,7 +17,7 @@ case class InsertRefOne(
 
   override def execute(): Unit = {
     children.foreach(_.execute())
-    executeThisNs()
+    insert()
     val refSetters = parent.rowSetters.iterator
     val refIds     = ids.iterator
     while (refIds.hasNext) {

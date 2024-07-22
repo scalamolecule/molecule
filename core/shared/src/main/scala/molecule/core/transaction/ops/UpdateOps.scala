@@ -108,7 +108,7 @@ trait UpdateOps extends Action2Data with BaseOps {
     value2json: (StringBuffer, T) => StringBuffer,
   ): Unit
 
-  protected def updateMapRemove[T](
+  protected def updateMapRemove(
     ns: String,
     attr: String,
     optRefNs: Option[String],

@@ -642,7 +642,7 @@ trait Update_datomic
     }
   }
 
-  override protected def updateMapRemove[T](
+  override protected def updateMapRemove(
     ns: String,
     attr: String,
     optRefNs: Option[String],

@@ -117,7 +117,7 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
     }
   }
 
-  override protected def updateMapRemove[T](
+  override protected def updateMapRemove(
     ns: String,
     attr: String,
     optRefNs: Option[String],
@@ -169,7 +169,8 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
       }
       addColSetter(curRefPath, colSetter)
     } { refNs =>
-      setRefIds(ns, attr, refNs, iterable.asInstanceOf[Set[Long]])
+//      setRefIds(ns, attr, refNs, iterable.asInstanceOf[Set[Long]])
+      ???
     }
   }
 
@@ -194,7 +195,8 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
         })
       }
     } { refNs =>
-      addRefIds(ns, attr, refNs, iterable.asInstanceOf[Set[Long]])
+//      addRefIds(ns, attr, refNs, iterable.asInstanceOf[Set[Long]])
+      ???
     }
   }
 
@@ -224,7 +226,8 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
         addColSetter(curRefPath, (_: PS, _: IdsMap, _: RowIndex) => ())
       }
     } { refNs =>
-      removeRefIds(ns, attr, refNs, iterable.asInstanceOf[Set[Long]])
+//      removeRefIds(ns, attr, refNs, iterable.asInstanceOf[Set[Long]])
+      ???
     }
   }
 

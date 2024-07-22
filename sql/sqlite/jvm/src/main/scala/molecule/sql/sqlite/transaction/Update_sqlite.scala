@@ -64,7 +64,8 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
         })
       }
     } { refNs =>
-      addRefIds(ns, attr, refNs, set.asInstanceOf[Set[Long]])
+//      addRefIds(ns, attr, refNs, set.asInstanceOf[Set[Long]])
+      ???
     }
   }
 
@@ -104,7 +105,8 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
         addColSetter(curRefPath, (_: PS, _: IdsMap, _: RowIndex) => ())
       }
     } { refNs =>
-      removeRefIds(ns, attr, refNs, set.asInstanceOf[Set[Long]])
+//      removeRefIds(ns, attr, refNs, set.asInstanceOf[Set[Long]])
+      ???
     }
   }
 
@@ -154,7 +156,8 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
         })
       }
     } { refNs =>
-      addRefIds(ns, attr, refNs, seq.asInstanceOf[Set[Long]])
+//      addRefIds(ns, attr, refNs, seq.asInstanceOf[Set[Long]])
+      ???
     }
   }
 
@@ -194,7 +197,8 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
         addColSetter(curRefPath, (_: PS, _: IdsMap, _: RowIndex) => ())
       }
     } { refNs =>
-      removeRefIds(ns, attr, refNs, seq.asInstanceOf[Set[Long]])
+//      removeRefIds(ns, attr, refNs, seq.asInstanceOf[Set[Long]])
+      ???
     }
   }
 
@@ -207,11 +211,12 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    updateMapEqJdbc(attr, "", map,
-      (ps: PS, paramIndex: Int) => {
-        ps.setString(paramIndex, map2json(map, value2json))
-      }
-    )
+//    updateMapEqJdbc(attr, "", map,
+//      (ps: PS, paramIndex: Int) => {
+//        ps.setString(paramIndex, map2json(map, value2json))
+//      }
+//    )
+    ???
   }
 
   override protected def updateMapAdd[T](
@@ -240,7 +245,7 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
     }
   }
 
-  override protected def updateMapRemove[T](
+  override protected def updateMapRemove(
     ns: String,
     attr: String,
     optRefNs: Option[String],
@@ -295,7 +300,8 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
       }
       addColSetter(curRefPath, colSetter)
     } { refNs =>
-      setRefIds(ns, attr, refNs, iterable.asInstanceOf[Set[Long]])
+//      setRefIds(ns, attr, refNs, iterable.asInstanceOf[Set[Long]])
+      ???
     }
   }
 
