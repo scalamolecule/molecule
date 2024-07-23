@@ -68,7 +68,7 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
     value2json: (StringBuffer, T) => StringBuffer,
   ): Unit = {
     if (map.nonEmpty) {
-      cols += attr
+      colsOLD += attr
       if (!isUpsert) {
         addToUpdateColsNotNull(attr)
       }
@@ -94,7 +94,7 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
     exts: List[String],
   ): Unit = {
     if (keys.nonEmpty) {
-      cols += attr
+      colsOLD += attr
       if (!isUpsert) {
         addToUpdateColsNotNull(attr)
       }
@@ -126,7 +126,7 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
   ): Unit = {
     optRefNs.fold {
       if (iterable.nonEmpty) {
-        cols += attr
+        colsOLD += attr
         if (!isUpsert) {
           addToUpdateColsNotNull(attr)
         }

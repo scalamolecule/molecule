@@ -39,7 +39,7 @@ trait SqlInsert
     transformValue: T => Any,
     exts: List[String] = Nil
   ): Product => Unit = {
-    val paramIndex   = insert.paramIndex(attr, exts(2))
+    val paramIndex   = insert.setCol(attr, exts(2))
     val stableInsert = insert
     (tpl: Product) => {
       val scalaValue  = tpl.productElement(tplIndex).asInstanceOf[T]
@@ -55,7 +55,7 @@ trait SqlInsert
     transformValue: T => Any,
     exts: List[String] = Nil
   ): Product => Unit = {
-    val paramIndex   = insert.paramIndex(attr, exts(2))
+    val paramIndex   = insert.setCol(attr, exts(2))
     val stableInsert = insert
     (tpl: Product) => {
       tpl.productElement(tplIndex) match {
@@ -128,7 +128,7 @@ trait SqlInsert
     attr: String,
     tplIndex: Int,
   ): Product => Unit = {
-    val paramIndex   = insert.paramIndex(attr)
+    val paramIndex   = insert.setCol(attr)
     val stableInsert = insert
     (tpl: Product) => {
       tpl.productElement(tplIndex) match {
@@ -154,7 +154,7 @@ trait SqlInsert
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    val paramIndex   = insert.paramIndex(attr)
+    val paramIndex   = insert.setCol(attr)
     val stableInsert = insert
     (tpl: Product) => {
       tpl.productElement(tplIndex).asInstanceOf[Map[String, _]] match {
@@ -180,7 +180,7 @@ trait SqlInsert
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    val paramIndex   = insert.paramIndex(attr)
+    val paramIndex   = insert.setCol(attr)
     val stableInsert = insert
     (tpl: Product) => {
       tpl.productElement(tplIndex) match {
@@ -275,7 +275,7 @@ trait SqlInsert
   ): Product => Unit = {
     optRefNs.fold {
       val stableInsert = insert
-      val paramIndex   = stableInsert.paramIndex(attr)
+      val paramIndex   = stableInsert.setCol(attr)
       (tpl: Product) => {
         val array = iterable2array(tpl.productElement(tplIndex).asInstanceOf[M[T]])
         if (array.nonEmpty) {
@@ -311,7 +311,7 @@ trait SqlInsert
   ): Product => Unit = {
     optRefNs.fold {
       val stableInsert = insert
-      val paramIndex   = stableInsert.paramIndex(attr)
+      val paramIndex   = stableInsert.setCol(attr)
       (tpl: Product) => {
         tpl.productElement(tplIndex) match {
           case Some(iterable: Iterable[_]) =>

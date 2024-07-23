@@ -43,7 +43,7 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
   ): Unit = {
     optRefNs.fold {
       if (set.nonEmpty) {
-        cols += attr
+        colsOLD += attr
         if (!isUpsert) {
           addToUpdateColsNotNull(attr)
         }
@@ -81,7 +81,7 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
   ): Unit = {
     optRefNs.fold {
       if (set.nonEmpty) {
-        cols += attr
+        colsOLD += attr
         if (!isUpsert) {
           addToUpdateColsNotNull(attr)
         }
@@ -135,7 +135,7 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
   ): Unit = {
     optRefNs.fold {
       if (seq.nonEmpty) {
-        cols += attr
+        colsOLD += attr
         if (!isUpsert) {
           addToUpdateColsNotNull(attr)
         }
@@ -173,7 +173,7 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
   ): Unit = {
     optRefNs.fold {
       if (seq.nonEmpty) {
-        cols += attr
+        colsOLD += attr
         if (!isUpsert) {
           addToUpdateColsNotNull(attr)
         }
@@ -229,7 +229,7 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
     value2json: (StringBuffer, T) => StringBuffer,
   ): Unit = {
     if (map.nonEmpty) {
-      cols += attr
+      colsOLD += attr
       if (!isUpsert) {
         addToUpdateColsNotNull(attr)
       }
@@ -253,7 +253,7 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
     exts: List[String],
   ): Unit = {
     if (keys.nonEmpty) {
-      cols += attr
+      colsOLD += attr
       if (!isUpsert) {
         addToUpdateColsNotNull(attr)
       }
@@ -281,7 +281,7 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     refNs.fold {
-      cols += attr
+      colsOLD += attr
       placeHolders = placeHolders :+ s"$attr = ?"
       val colSetter = if (iterable.nonEmpty) {
         if (!isUpsert) {

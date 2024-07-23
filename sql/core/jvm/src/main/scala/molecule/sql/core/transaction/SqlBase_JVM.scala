@@ -50,15 +50,17 @@ trait SqlBase_JVM extends SqlDataType_JVM with ModelUtils with BaseHelpers {
   protected var initialNs        = ""
   protected var curRefPath       = List("0")
   protected var placeHolders     = List.empty[String]
-  protected var joins            = List.empty[(List[String], String, String, List[String], List[String])]
   protected var idsOLD           = Seq.empty[Long]
-  protected var cols             = ListBuffer.empty[String]
   protected val updateCols       = mutable.Map.empty[List[String], List[String]]
-  protected var filterElements   = List.empty[Element]
   protected val colSettersMap    = mutable.Map.empty[List[String], List[Setter]]
   protected val rowSettersMap    = mutable.Map.empty[List[String], List[Setter]]
   protected val tableDatas       = mutable.Map.empty[List[String], Table]
   protected var manualTableDatas = List.empty[Table]
+
+
+  protected var filterElementsOLD = List.empty[Element]
+  protected var joinsOLD          = List.empty[(List[String], String, String, List[String], List[String])]
+  protected var colsOLD           = ListBuffer.empty[String]
 
   def transactionStmt(stmt: String) = {
     sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)

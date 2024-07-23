@@ -21,6 +21,8 @@ trait SqlDelete
 
   def model2SqlQuery(elements: List[Element]): Model2SqlQuery
 
+//  protected var filterElementsOLD = List.empty[Element]
+
 
   def getDeleteExecutioner(
     elements: List[Element],
@@ -33,7 +35,7 @@ trait SqlDelete
     resolve(elements, true)
     if (idsOLD.nonEmpty) {
       deleteExecutioner(refPath, nsMap, idsOLD, fkConstraintParam, fkConstraintOff, fkConstraintOn)
-    } else if (filterElements.nonEmpty) {
+    } else if (filterElementsOLD.nonEmpty) {
       idsOLD = getIds
       if (idsOLD.nonEmpty)
         deleteExecutioner(refPath, nsMap, idsOLD, fkConstraintParam, fkConstraintOff, fkConstraintOn)
@@ -105,7 +107,7 @@ trait SqlDelete
     resolve(elements, true)
     if (idsOLD.nonEmpty) {
       inspectionTableDataForDeletion(refPath, nsMap, idsOLD)
-    } else if (filterElements.nonEmpty) {
+    } else if (filterElementsOLD.nonEmpty) {
       idsOLD = getIds
       if (idsOLD.nonEmpty)
         inspectionTableDataForDeletion(refPath, nsMap, idsOLD)
@@ -139,8 +141,8 @@ trait SqlDelete
 
 
   private def getIds: List[Long] = {
-    val ns                    = getInitialNs(filterElements)
-    val filterElementsWithIds = AttrOneManID(ns, "id", V) +: filterElements
+    val ns                    = getInitialNs(filterElementsOLD)
+    val filterElementsWithIds = AttrOneManID(ns, "id", V) +: filterElementsOLD
     val query                 = model2SqlQuery(filterElementsWithIds).getSqlQuery(Nil, None, None, None)
     val ps                    = sqlConn.prepareStatement(
       query,
@@ -306,6 +308,6 @@ trait SqlDelete
   }
 
   override def addFilterElement(element: Element): Unit = {
-    filterElements = filterElements :+ element
+    filterElementsOLD = filterElementsOLD :+ element
   }
 }

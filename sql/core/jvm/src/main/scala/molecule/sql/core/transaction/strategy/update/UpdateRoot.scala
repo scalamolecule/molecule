@@ -10,13 +10,16 @@ case class UpdateRoot(
   sqlConn: Connection,
   m2q: ListBuffer[Element] => Model2SqlQuery,
   ns: String,
-)(implicit sqlOps: SqlOps) extends UpdateAction(null, sqlConn, sqlOps, m2q, ns) {
+  isUpsert: Boolean,
+)(implicit sqlOps: SqlOps)
+  extends UpdateAction(null, sqlConn, sqlOps, isUpsert, ns) {
 
-  val updateNs: UpdateNs = {
-    val first = UpdateNs(this, sqlConn, sqlOps, m2q, ns, "Ns")
-    children += first
-    first
-  }
+  val firstNs = UpdateNs(this, sqlConn, sqlOps, isUpsert, ns, "Ns")
+  children += firstNs
+
+  var idsQuery = ""
+  var refIds   = Array.empty[List[Long]]
+
 
   override def rootAction: UpdateAction = this
 
@@ -25,5 +28,30 @@ case class UpdateRoot(
     children.head.ids
   }
 
-  override def toString: String = recurseRender(-1, "Update")
+  def withIds(
+    idsData: (ListBuffer[String], String, Array[List[Long]])
+  ): UpdateRoot = {
+    val (cols0, idsQuery0, refIds0) = idsData
+    cols.addAll(cols0)
+    idsQuery = idsQuery0
+    refIds = refIds0
+
+    // Add ids to each namespace
+    firstNs.distributeIds(refIds)
+    this
+  }
+
+  override def toString: String = {
+    val idQuery = if (idsQuery.isEmpty) "" else {
+      val ids = cols.zip(refIds).map {
+        case (col, ids) => s"$col: $ids"
+      }.mkString("\n")
+      s"""$idsQuery
+         |-----------------------
+         |$ids
+         |
+         |""".stripMargin
+    }
+    recurseRender(-1, idQuery + "Update")
+  }
 }

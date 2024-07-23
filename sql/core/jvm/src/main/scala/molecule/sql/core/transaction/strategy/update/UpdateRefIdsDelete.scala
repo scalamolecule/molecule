@@ -11,13 +11,13 @@ case class UpdateRefIdsDelete(
   parent: UpdateAction,
   sqlConn: Connection,
   sqlOps: SqlOps,
-  m2q: ListBuffer[Element] => Model2SqlQuery,
+  isUpsert: Boolean,
   ns: String,
   refAttr: String,
   refNs: String,
   nsId: Long,
   refIds: Set[Long]
-) extends UpdateAction(parent, sqlConn, sqlOps, m2q, refNs) with BaseHelpers {
+) extends UpdateAction(parent, sqlConn, sqlOps, isUpsert, ns)  with BaseHelpers {
 
   override def execute(): Unit = {
     val ps = prepare(curStmt)

@@ -11,11 +11,11 @@ case class UpdateRefJoin(
   ref: UpdateAction,
   sqlConn: Connection,
   sqlOps: SqlOps,
-  m2q: ListBuffer[Element] => Model2SqlQuery,
+  isUpsert: Boolean,
   ns: String,
   refAttr: String,
   refNs: String,
-) extends UpdateAction(parent, sqlConn, sqlOps, m2q, refNs) {
+) extends UpdateAction(parent, sqlConn, sqlOps, isUpsert, refNs) {
 
   override def execute(): Unit = {
     val ps = prepare(curStmt)

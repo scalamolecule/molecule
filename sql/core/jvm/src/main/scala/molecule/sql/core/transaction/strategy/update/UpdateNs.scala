@@ -1,8 +1,6 @@
 package molecule.sql.core.transaction.strategy.update
 
 import java.sql.Connection
-import molecule.boilerplate.ast.Model.Element
-import molecule.sql.core.query.Model2SqlQuery
 import molecule.sql.core.transaction.strategy.SqlOps
 import scala.collection.mutable.ListBuffer
 
@@ -10,10 +8,10 @@ case class UpdateNs(
   parent: UpdateAction,
   sqlConn: Connection,
   sqlOps: SqlOps,
-  m2q: ListBuffer[Element] => Model2SqlQuery,
+  isUpsert: Boolean,
   ns: String,
-  action: String,
-) extends UpdateAction(parent, sqlConn, sqlOps, m2q, ns) {
+  action: String
+) extends UpdateAction(parent, sqlConn, sqlOps, isUpsert, ns) {
 
   rowSetters += ListBuffer.empty[PS => Unit]
 
@@ -25,10 +23,11 @@ case class UpdateNs(
   }
 
   override def curStmt: String = {
-    if (cols.isEmpty) "..." else {
-      val filterClauses = if (filters.isEmpty) Nil else
-        m2q(filters).getWhereClauses
-      sqlOps.updateStmt(ns, cols, clauses ++ filterClauses)
+    if (cols.isEmpty) {
+      s"no update columns in $ns ..."
+    } else {
+      val idClause = s"$ns.id IN(" + ids.mkString(", ") + ")"
+      sqlOps.updateStmt(ns, cols, List(idClause))
     }
   }
 

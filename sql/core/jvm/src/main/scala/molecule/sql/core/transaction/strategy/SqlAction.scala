@@ -10,27 +10,28 @@ abstract class SqlAction(
   ns: String
 ) extends SqlBase {
 
-  // Strategy execution
+  // Strategy execution -----------------------------------------
+
   def executeRoot: List[Long] = ???
-  def execute(): Unit = ???
+
+  private[transaction] def execute(): Unit = ???
+
+  // update
+  private[transaction] def buildIdsQuery(): Unit = ???
+  private[transaction] def getIds(): Unit = ???
+  private[transaction] def distributeIds(): Unit = ???
 
 
-  // todo, use ArrayBuilders instead of ListBuffer
-//    private[transaction] val children1     = mutable.ArrayBuilder.make[SqlAction]
+  // Housekeeping ----------------------------------------------------
 
   private[transaction] val children     = ListBuffer.empty[SqlAction]
   private[transaction] val cols         = ListBuffer.empty[String]
   private[transaction] val placeHolders = ListBuffer.empty[String]
-  private[transaction] val postSetters  = ListBuffer.empty[List[Long] => Unit]
+  private[transaction] var ids          = List.empty[Long]
+  private[transaction] val rowSetters   = ListBuffer.empty[ListBuffer[PS => Unit]]
 
-  private[transaction] var ids = List.empty[Long]
 
-  private[transaction] val rowSetters: ListBuffer[ListBuffer[PS => Unit]] =
-    ListBuffer.empty[ListBuffer[PS => Unit]]
-
-  // For inspection
-  private[transaction] val postStmts = ListBuffer.empty[String]
-
+  // Resolve helpers ----------------------------------------------------
 
   def addChild[T <: SqlAction](child: T, addRowSetter: Boolean = false): T = {
     children += child
@@ -47,8 +48,8 @@ abstract class SqlAction(
     sibling
   }
 
-  def paramIndex(attr: String): Int = paramIndex(attr, "")
-  def paramIndex(attr: String, typeCast: String): Int = {
+  def setCol(attr: String): Int = setCol(attr, "")
+  def setCol(attr: String, typeCast: String): Int = {
     cols += attr
     placeHolders += "?" + typeCast
     cols.length
@@ -58,36 +59,29 @@ abstract class SqlAction(
     rowSetters.last += colSetter
   }
 
-  def addPostSetter(postSetter: List[Long] => Unit): Unit = {
-    postSetters += postSetter
-  }
-  def getPostSetters: ListBuffer[List[Long] => Unit] = postSetters
-
 
   def prepare(stmt: String): PS = {
     sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
   }
 
-
-  // Helpers -------------------------------------
-
   def insertJoins(
     ns: String, refAttr: String, refNs: String, refIds: Set[Long]
   ): Unit = {
-    addPostSetter(
-      (parentIds: List[Long]) => {
-        val leftId = parentIds.head
-        val ps     = prepare(sqlOps.insertJoinStmt(ns, refAttr, refNs))
-        val it     = refIds.iterator
-        while (it.hasNext) {
-          ps.setLong(1, leftId)
-          ps.setLong(2, it.next())
-          ps.addBatch()
-        }
-        ps.executeBatch()
-        ps.close()
-      }
-    )
+    //    addPostSetter(
+    //      (parentIds: List[Long]) => {
+    //        val leftId = parentIds.head
+    //        val ps     = prepare(sqlOps.insertJoinStmt(ns, refAttr, refNs))
+    //        val it     = refIds.iterator
+    //        while (it.hasNext) {
+    //          ps.setLong(1, leftId)
+    //          ps.setLong(2, it.next())
+    //          ps.addBatch()
+    //        }
+    //        ps.executeBatch()
+    //        ps.close()
+    //      }
+    //    )
+    ???
   }
 
   def deleteJoins(
@@ -114,17 +108,10 @@ abstract class SqlAction(
   }
 
 
-  // Render --------------------------------------
-
-  def render(indent: Int): String = ???
-
-  def curStmt: String = ???
+  // Save/Insert execution --------------------------------------
 
   def insert(): Unit = {
     val ps = prepare(curStmt)
-    //    println(s"++++++++  $ns  " + rowSetters.length + "  " + curStmt.linesIterator.next())
-    //    rowSetters.foreach(r => println(r.length))
-    // Populate prepared statement
     rowSetters.foreach {
       case rowSetter if rowSetter.nonEmpty =>
         rowSetter.foreach { colSetter =>
@@ -138,6 +125,21 @@ abstract class SqlAction(
     // Closes prepared statement
     ids = sqlOps.getIds(sqlConn, ns, ps)
   }
+
+
+//  def distributeIds(refIds: Array[List[Long]]): Unit = ???
+
+
+  def distributeIds(refIds: Array[List[Long]]): Unit = {
+    children.foreach(_.distributeIds(refIds.tail))
+    ids = refIds.head
+  }
+
+  // Render --------------------------------------
+
+  def render(indent: Int): String = ???
+
+  def curStmt: String = ???
 
   // Render graph of action executions
   def recurseRender(indent: Int, action: String): String = {

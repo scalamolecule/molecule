@@ -31,7 +31,7 @@ trait SqlSave
     transformValue: T => Any,
     exts: List[String] = Nil
   ): Unit = {
-    val paramIndex = save.paramIndex(attr, exts(2))
+    val paramIndex = save.setCol(attr, exts(2))
     optValue.fold {
       save.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
     } { value =>
@@ -71,7 +71,7 @@ trait SqlSave
     attr: String,
     optArray: Option[Array[Byte]],
   ): Unit = {
-    val paramIndex = save.paramIndex(attr)
+    val paramIndex = save.setCol(attr)
     if (optArray.nonEmpty && optArray.get.nonEmpty) {
       save.addColSetter((ps: PS) => ps.setBytes(paramIndex, optArray.get))
     } else {
@@ -86,7 +86,7 @@ trait SqlSave
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    val paramIndex = save.paramIndex(attr)
+    val paramIndex = save.setCol(attr)
     optMap match {
       case Some(map: Map[_, _]) if map.nonEmpty =>
         save.addColSetter((ps: PS) =>
@@ -122,7 +122,7 @@ trait SqlSave
     iterable2array: M[T] => Array[AnyRef],
   ): Unit = {
     optRefNs.fold {
-      val paramIndex = save.paramIndex(attr)
+      val paramIndex = save.setCol(attr)
       if (optIterable.nonEmpty && optIterable.get.nonEmpty) {
         val iterable = optIterable.get
         save.addColSetter((ps: PS) => {

@@ -21,7 +21,7 @@ abstract class SaveAction(
 
   def refOne(ns: String, refAttr: String, refNs: String): SaveAction = {
     addChild(SaveRefOne(
-      this, sqlConn, sqlOps, ns, refAttr, refNs, paramIndex(refAttr)
+      this, sqlConn, sqlOps, ns, refAttr, refNs, setCol(refAttr)
     ))
   }
 

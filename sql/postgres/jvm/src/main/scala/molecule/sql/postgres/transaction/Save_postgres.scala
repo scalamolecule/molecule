@@ -14,7 +14,7 @@ trait Save_postgres extends SaveOps with SqlSave with TxBase_postgres { self: Re
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    val paramIndex = save.paramIndex(attr, "::jsonb")
+    val paramIndex = save.setCol(attr, "::jsonb")
     optMap match {
       case Some(map: Map[_, _]) if map.nonEmpty =>
         save.addColSetter((ps: PS) => ps.setString(paramIndex, map2json(map, value2json)))

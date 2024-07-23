@@ -67,7 +67,7 @@ trait Insert_mariadb extends SqlInsert { self: ResolveInsert with InsertResolver
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    val paramIndex   = insert.paramIndex(attr)
+    val paramIndex   = insert.setCol(attr)
     val stableInsert = insert
     (tpl: Product) => {
       tpl.productElement(tplIndex).asInstanceOf[Map[String, _]] match {
@@ -97,7 +97,7 @@ trait Insert_mariadb extends SqlInsert { self: ResolveInsert with InsertResolver
   ): Product => Unit = {
     val stableInsert = insert
     optRefNs.fold {
-      val paramIndex = stableInsert.paramIndex(attr)
+      val paramIndex = stableInsert.setCol(attr)
       (tpl: Product) => {
         val iterable  = tpl.productElement(tplIndex).asInstanceOf[Iterable[T]]
         if (iterable.nonEmpty) {
@@ -126,7 +126,7 @@ trait Insert_mariadb extends SqlInsert { self: ResolveInsert with InsertResolver
   ): Product => Unit = {
     val stableInsert = insert
     optRefNs.fold {
-      val paramIndex = stableInsert.paramIndex(attr)
+      val paramIndex = stableInsert.setCol(attr)
       (tpl: Product) =>
         tpl.productElement(tplIndex) match {
           case Some(iterable: Iterable[_]) =>

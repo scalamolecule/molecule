@@ -28,7 +28,7 @@ trait QueryExprRef[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] with N
   }
 
 
-  override protected def queryOptRef(ref: Ref, nestedElements: List[Element]): Unit = {
+  override protected def queryOptRef(ref: Ref, optionalElements: List[Element]): Unit = {
 
   }
 

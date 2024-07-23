@@ -197,7 +197,7 @@ trait SpiSyncBase
 
       lazy val action = update_getAction(update, conn)
 
-//            val txReport = conn.transact_sync(data)
+      //      val txReport = conn.transact_sync(data)
       val txReport = conn.transact_sync(action)
 
       conn.callback(update.elements)
@@ -212,19 +212,21 @@ trait SpiSyncBase
     val action = if (update.isUpsert) "UPSERT" else "UPDATE"
     tryInspect(action, update.elements) {
 
-            val old = true
-//      val old = false
+      //      val old = true
+      val old = false
 
       if (old) {
         if (isRefUpdate(update.elements)) {
           val (idsModel, updateModels) = prepareMultipleUpdates(update.elements, update.isUpsert)
-          val refIds                   =
+
+          val refIds =
             s"""REF IDS MODEL ----------------
                |${idsModel.mkString("\n")}
                |
                |${refIdsQuery(idsModel, conn.proxy)}
                |""".stripMargin
-          val updates                  = updateModels
+
+          val updates = updateModels
             .map(_(42L)) // dummy value
             .map { m =>
               val elements = m.mkString("\n")

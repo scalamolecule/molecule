@@ -33,7 +33,7 @@ case class InsertRefOne(
 
   override def render(indent: Int): String = {
     // Add refAttr to parent insert
-    parent.paramIndex(refAttr)
+    parent.setCol(refAttr)
     recurseRender(indent, "RefOne")
   }
 }

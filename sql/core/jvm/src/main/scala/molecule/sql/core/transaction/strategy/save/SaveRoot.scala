@@ -9,11 +9,8 @@ case class SaveRoot(
   ns: String,
 )(implicit sqlOps: SqlOps) extends SaveAction(null, sqlConn, sqlOps, ns) {
 
-  val saveNs: SaveNs = {
-    val first = SaveNs(this, sqlConn, sqlOps, ns, "Ns")
-    children += first
-    first
-  }
+  val saveNs = SaveNs(this, sqlConn, sqlOps, ns, "Ns")
+  children += saveNs
 
   override def rootAction: SaveAction = this
 

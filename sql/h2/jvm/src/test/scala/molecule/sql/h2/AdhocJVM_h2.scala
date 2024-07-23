@@ -24,23 +24,11 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
 
-        //        _ <- rawTransact(
-        //          """UPDATE Ns
-        //            |  SET
-        //            |    intSet = ?INT
-        //            |  WHERE
-        //            |    Ns.id = 1 AND
-        //            |    Ns.intSet IS NOT NULL
-        //            |""".stripMargin)
 
-        id <- Ns.i(42).save.transact.map(_.id)
+        id <- Ns.int(42).save.transact.map(_.id)
 
-        // Map attribute not yet asserted
-        _ <- Ns.intMap.query.get.map(_ ==> Nil)
-
-        // When attribute is not already asserted, an update has no effect
-        _ <- Ns(id).intMap(Map(pint1, pint2)).update.i.transact
-        _ <- Ns.intMap.query.get.map(_ ==> Nil)
+        _ <- Ns(id).int().update.i.transact
+        _ <- Ns.int.query.get.map(_ ==> Nil)
 
       } yield ()
     }
@@ -61,94 +49,42 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       for {
 
 
-        List(b1, b2) <- B.s.insert("b10", "b20").transact.map(_.ids)
+        _ <- A.s("a").save.transact // no A.i filter match
+        _ <- A.i(1).save.transact
 
-        List(a1, a2) <- A.i.b.insert(
-          (10, b1),
-          (20, b2),
-        ).transact.map(_.ids)
+        _ <- A.s("a").B.s("b").save.transact // no A.i filter match
+        _ <- A.s("a").B.i(2).save.transact // no A.i filter match
+        _ <- A.i(3).B.s("b").save.transact
+        _ <- A.i(4).B.i(4).save.transact
 
-        _ <- A.i.B.s.query.get.map(_ ==> List(
-          (10, "b10"),
-          (20, "b20"),
+        _ <- A.s("a").B.i(5).C.s("c").save.transact // no A.i filter match
+        _ <- A.s("a").B.i(6).C.i(6).save.transact // no A.i filter match
+        _ <- A.i(7).B.s("b").C.s("c").save.transact
+        _ <- A.i(8).B.s("b").C.i(8).save.transact
+        _ <- A.i(9).B.i(9).C.s("c").save.transact
+        _ <- A.i(10).B.i(10).C.i(10).save.transact
+
+        // Not filtering on C attribute makes ref to C unknown
+
+        // Only entities having A.i value will have existing B.i and C.i values updated
+        _ <- A.i_.B.i(11).C.i(11).update.transact
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List(
+          (10, 11, 11) // B.i and C.i updated
         ))
 
-        _ <- A(a1).i(11).B.s("b11").query.inspect
-
-        _ <- A(a1).i(11).B.s("b11").update.i.transact
-//        _ <- A.i.B.s.query.get.map(_ ==> List(
-//          (11, "b11"),
-//          (20, "b20"),
-//        ))
-//
-//        _ <- A.i(21).B.id(b2).s("b21").update.i.transact
-//        _ <- A.i.B.s.query.get.map(_ ==> List(
-//          (11, "b11"),
-//          (21, "b21"),
-//        ))
+        // Insert refs to B + C or C and set C.i values for all entities that have A.i value
+        _ <- A.i_.B.i(12).C.i(12).upsert.transact
+        _ <- A.i.a1.B.i.C.i.query.get.map(_ ==> List(
+          (1, 12, 12), // ref to B inserted, B.i inserted, ref to C inserted, C.i inserted
+          (3, 12, 12), // B.i inserted, ref to C inserted, C.i inserted
+          (4, 12, 12), // B.i updated, ref to C inserted, C.i inserted
+          (7, 12, 12), // B.i inserted, C.i inserted
+          (8, 12, 12), // B.i inserted, C.i updated
+          (9, 12, 12), // B.i updated, C.i inserted
+          (10, 12, 12), // B.i updated, C.i updated
+        ))
 
 
-
-//        a <- A.i(1).save.transact.map(_.id)
-//        b <- A.i(2).B.s("b").save.transact.map(_.id)
-//        c <- A.i(3).B.s("c").i(3).save.transact.map(_.id)
-//
-//        // Current entity with A value and ref to B value
-//        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
-//          (3, 3)
-//        ))
-//
-//        // Filter by A ids, update existing B values
-//        _ <- A(a, b, c).B.i(4).update.i.transact
-        /*
-        ========================================
-        UPDATE:
-        AttrOneTacID("A", "id", Eq, Seq(1L, 2L, 3L), None, None, Nil, Nil, None, None, Seq(0, 0))
-        Ref("A", "b", "B", CardOne, false, Seq(0, 8, 1))
-        AttrOneManInt("B", "i", Eq, Seq(4), None, None, Nil, Nil, None, None, Seq(1, 24))
-
-        REF IDS MODEL ----------------
-        AttrOneTacID("A", "id", Eq, Seq(1L, 2L, 3L), None, None, Nil, Nil, None, None, Seq(0, 0))
-        Ref("A", "b", "B", CardOne, false, Seq(0, 8, 1))
-        AttrOneTacInt("B", "i", V, Seq(), None, None, Nil, Nil, None, None, Seq(1, 24))
-        AttrOneManID("B", "id", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 0))
-
-        SELECT DISTINCT
-          B.id
-        FROM A
-          INNER JOIN B ON
-            A.b = B.id
-        WHERE
-          A.id IN (1, 2, 3) AND
-          B.i  IS NOT NULL AND
-          B.id IS NOT NULL;
-
-        UPDATES ----------------------
-        AttrOneTacID("A", "id", Eq, Seq(1L, 2L, 3L), None, None, Nil, Nil, None, None, Seq(0, 0))
-        ------------
-        AttrOneTacID("B", "id", Eq, Seq(42L), None, None, Nil, Nil, None, None, Seq(0, 0))
-        AttrOneManInt("B", "i", Eq, Seq(4), None, None, Nil, Nil, None, None, Seq(1, 24))
-        UPDATE B
-        SET
-          i = ?
-        WHERE
-          i IS NOT NULL AND
-          B.id IN(42)
-        ----------------------------------------
-         */
-//        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
-//          (3, 4) // B value updated since there was a previous value
-//        ))
-//
-//        // Filter by A ids, upsert B values (insert if not already present)
-//        _ <- A(a, b, c).B.i(5).upsert.transact
-//
-//        // Now three A entities with referenced B value
-//        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
-//          (1, 5), // relationship to B created + B value inserted
-//          (2, 5), // B value inserted
-//          (3, 5), // B value updated
-//        ))
 
         //        _ <- rawQuery(
         //          """select count(*) from Ns
@@ -156,15 +92,12 @@ object AdhocJVM_h2 extends TestSuite_h2 {
         //            |""".stripMargin, true)
         //
         //        _ <- rawTransact(
-        //          """UPDATE Ns
+        //          """UPDATE B
         //            |SET
-        //            |  i = 7
+        //            |  i = ?
         //            |WHERE
-        //            |  Ns.i IS NOT NULL AND
-        //            |  exists (
-        //            |    select * from Ns
-        //            |      INNER JOIN Ns_refs_Ref ON Ns.id = Ns_refs_Ref.Ns_id
-        //            |  )
+        //            |  i IS NOT NULL AND
+        //            |  B.id IN(42)
         //            |""".stripMargin)
       } yield ()
     }

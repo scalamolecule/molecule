@@ -102,7 +102,7 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
     value2json: (StringBuffer, T) => StringBuffer,
   ): Unit = {
     if (map.nonEmpty) {
-      cols += attr
+      colsOLD += attr
       if (!isUpsert) {
         addToUpdateColsNotNull(attr)
       }
@@ -125,7 +125,7 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
     exts: List[String],
   ): Unit = {
     if (keys.nonEmpty) {
-      cols += attr
+      colsOLD += attr
       if (!isUpsert) {
         addToUpdateColsNotNull(attr)
       }
@@ -150,7 +150,7 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     refNs.fold {
-      cols += attr
+      colsOLD += attr
       placeHolders = placeHolders :+ s"$attr = ?"
       val colSetter = if (iterable.nonEmpty) {
         if (!isUpsert) {
@@ -183,7 +183,7 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
   ): Unit = {
     refNs.fold {
       if (iterable.nonEmpty) {
-        cols += attr
+        colsOLD += attr
         if (!isUpsert) {
           addToUpdateColsNotNull(attr)
         }
@@ -210,7 +210,7 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
   ): Unit = {
     refNs.fold {
       if (iterable.nonEmpty) {
-        cols += attr
+        colsOLD += attr
         if (!isUpsert) {
           addToUpdateColsNotNull(attr)
         }

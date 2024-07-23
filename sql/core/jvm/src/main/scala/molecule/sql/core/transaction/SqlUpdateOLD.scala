@@ -9,6 +9,7 @@ import molecule.core.transaction.ResolveUpdate
 import molecule.core.transaction.ops.UpdateOps
 import molecule.sql.core.query.Model2SqlQuery
 import molecule.sql.core.spi.SpiHelpers
+import scala.collection.mutable.ListBuffer
 
 trait SqlUpdateOLD
   extends SqlBase_JVM
@@ -22,6 +23,11 @@ trait SqlUpdateOLD
 
   protected var curParamIndex = 1
 
+//  protected var joins          = List.empty[(List[String], String, String, List[String], List[String])]
+//  protected var colsOLD        = ListBuffer.empty[String]
+//  protected var filterElements = List.empty[Element]
+
+
   def model2SqlQuery(elements: List[Element]): Model2SqlQuery
 
   def getUpdateData(elements: List[Element]): Data = {
@@ -33,7 +39,7 @@ trait SqlUpdateOLD
 
 
   private def getTableData: List[Table] = {
-    if (cols.isEmpty) {
+    if (colsOLD.isEmpty) {
       Nil
     } else {
       addRowSetterToTable()
@@ -64,7 +70,7 @@ trait SqlUpdateOLD
         val clauses = if (ids2.nonEmpty) {
           s"$table.id IN(${ids2.mkString(", ")})"
         } else {
-          model2SqlQuery(filterElements).getWhereClauses.mkString(" AND\n  ")
+          model2SqlQuery(filterElementsOLD).getWhereClauses.mkString(" AND\n  ")
         }
         s"""UPDATE $table
            |SET
@@ -81,7 +87,7 @@ trait SqlUpdateOLD
       val clauses_     = if (idsOLD.nonEmpty) {
         List(s"$table.id IN(${idsOLD.mkString(", ")})")
       } else {
-        model2SqlQuery(filterElements).getWhereClauses
+        model2SqlQuery(filterElementsOLD).getWhereClauses
       }
       val clauses      = (updateCols2_ ++ clauses_).mkString(" AND\n  ")
 
@@ -139,7 +145,7 @@ trait SqlUpdateOLD
     transformValue: T => Any,
     exts: List[String],
   ): Unit = {
-    cols += attr
+    colsOLD += attr
     val cast = exts(2)
     placeHolders = placeHolders :+ s"$attr = ?$cast"
     val colSetter: Setter = vs match {
@@ -248,7 +254,7 @@ trait SqlUpdateOLD
     attr: String,
     byteArray: Array[Byte],
   ): Unit = {
-    cols += attr
+    colsOLD += attr
     placeHolders = placeHolders :+ s"$attr = ?"
     val colSetter: Setter = if (byteArray.isEmpty) {
       (ps: PS, _: IdsMap, _: RowIndex) => {
@@ -290,7 +296,7 @@ trait SqlUpdateOLD
     value2json: (StringBuffer, T) => StringBuffer,
   ): Unit = {
     if (map.nonEmpty) {
-      cols += attr
+      colsOLD += attr
       if (!isUpsert) {
         addToUpdateColsNotNull(attr)
       }
@@ -313,7 +319,7 @@ trait SqlUpdateOLD
     exts: List[String],
   ): Unit = {
     if (keys.nonEmpty) {
-      cols += attr
+      colsOLD += attr
       if (!isUpsert) {
         addToUpdateColsNotNull(attr)
       }
@@ -333,7 +339,7 @@ trait SqlUpdateOLD
     if (idsOLD.nonEmpty) {
       throw ModelError(s"Can't apply entity ids twice in update.")
     }
-    if (filterElements.nonEmpty) {
+    if (filterElementsOLD.nonEmpty) {
       throw ModelError("Can't mix using ids and filter elements")
     }
     idsOLD = ids1
@@ -348,7 +354,7 @@ trait SqlUpdateOLD
     if (idsOLD.nonEmpty) {
       throw ModelError("Can't mix using ids and filter elements")
     }
-    filterElements = filterElements :+ filterAttr
+    filterElementsOLD = filterElementsOLD :+ filterAttr
   }
 
   override def handleRef(ref: Ref): Unit = {
@@ -372,7 +378,7 @@ trait SqlUpdateOLD
   ): Unit = {
     val dbBaseType = exts(1)
     refNs.fold {
-      cols += attr
+      colsOLD += attr
       placeHolders = placeHolders :+ s"$attr = ?"
       val colSetter = if (iterable.nonEmpty) {
         if (!isUpsert) {
@@ -407,7 +413,7 @@ trait SqlUpdateOLD
     val dbBaseType = exts(1)
     refNs.fold {
       if (iterable.nonEmpty) {
-        cols += attr
+        colsOLD += attr
         if (!isUpsert) {
           addToUpdateColsNotNull(attr)
         }
@@ -440,7 +446,7 @@ trait SqlUpdateOLD
     val dbBaseType    = exts(1)
     refNs.fold {
       if (iterable.nonEmpty) {
-        cols += attr
+        colsOLD += attr
         if (!isUpsert) {
           addToUpdateColsNotNull(attr)
         }
@@ -549,7 +555,7 @@ trait SqlUpdateOLD
     map: Map[String, T],
     map2jdbc: (PS, Int) => Unit
   ): Unit = {
-    cols += attr
+    colsOLD += attr
     placeHolders = placeHolders :+ s"$attr = ?$cast"
     if (!isUpsert) {
       addToUpdateColsNotNull(attr)

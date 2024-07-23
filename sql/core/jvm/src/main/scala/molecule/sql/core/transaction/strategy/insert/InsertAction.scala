@@ -22,7 +22,7 @@ abstract class InsertAction(
 
   def refOne(ns: String, refAttr: String, refNs: String): InsertAction = {
     addChild(InsertRefOne(
-      this, sqlConn, sqlOps, ns, refAttr, refNs, paramIndex(refAttr)
+      this, sqlConn, sqlOps, ns, refAttr, refNs, setCol(refAttr)
     ))
   }
 

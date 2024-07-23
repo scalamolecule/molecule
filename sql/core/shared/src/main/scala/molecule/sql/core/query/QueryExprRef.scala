@@ -56,7 +56,7 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
 
 
   override protected def queryOptRef(
-    ref: Ref, nestedElements: List[Element]
+    ref: Ref, optionalElements: List[Element]
   ): Unit = {
     println(ref)
     println(s"========================= $hasOptRef  A  ")
@@ -84,7 +84,7 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
     //    where.foreach(println)
 
     casts = casts.optRef
-    resolve(nestedElements)
+    resolve(optionalElements)
   }
 
 

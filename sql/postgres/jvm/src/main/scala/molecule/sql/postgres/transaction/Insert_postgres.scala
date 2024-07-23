@@ -14,7 +14,7 @@ trait Insert_postgres extends SqlInsert { self: ResolveInsert with InsertResolve
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    val paramIndex   = insert.paramIndex(attr, "::jsonb")
+    val paramIndex   = insert.setCol(attr, "::jsonb")
     val stableInsert = insert
     (tpl: Product) => {
       tpl.productElement(tplIndex).asInstanceOf[Map[String, _]] match {
@@ -40,7 +40,7 @@ trait Insert_postgres extends SqlInsert { self: ResolveInsert with InsertResolve
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    val paramIndex   = insert.paramIndex(attr, "::jsonb")
+    val paramIndex   = insert.setCol(attr, "::jsonb")
     val stableInsert = insert
     (tpl: Product) => {
       tpl.productElement(tplIndex) match {

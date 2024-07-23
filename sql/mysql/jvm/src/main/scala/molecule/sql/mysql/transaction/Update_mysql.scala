@@ -108,7 +108,7 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
     //        ps.setString(paramIndex, map2json(map, value2json))
     //    )
 
-    val paramIndex = update.paramIndex(s"$attr = ?", isUpsert, ns, attr)
+    val paramIndex = update.setCol(s"$attr = ?")
     if (map.isEmpty) {
       update.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
     } else {
@@ -144,7 +144,7 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
 
     if (map.nonEmpty) {
       val setAttr    = s"$ns.$attr = JSON_MERGE_PATCH(IFNULL($ns.$attr, JSON_OBJECT()), ?)"
-      val paramIndex = update.paramIndex(setAttr, isUpsert, ns, attr)
+      val paramIndex = update.setCol(setAttr)
       val json       = map2json(map, value2json)
       update.addColSetter((ps: PS) =>
         ps.setString(paramIndex, json)
@@ -160,7 +160,7 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
     exts: List[String],
   ): Unit = {
     if (keys.nonEmpty) {
-      cols += attr
+      colsOLD += attr
       if (!isUpsert) {
         addToUpdateColsNotNull(attr)
       }
@@ -180,7 +180,7 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
            |    WHEN JSON_OBJECT() THEN NULL
            |    ELSE JSON_REMOVE($ns.$attr, $keys1)
            |  END""".stripMargin
-      update.paramIndex(setAttr, isUpsert, ns, attr)
+      update.setCol(setAttr)
       update.addColSetter((_: PS) => ())
     }
   }
@@ -195,7 +195,7 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     refNs.fold {
-      cols += attr
+      colsOLD += attr
       placeHolders = placeHolders :+ s"$attr = ?"
       val colSetter = if (iterable.nonEmpty) {
         if (!isUpsert) {
@@ -228,7 +228,7 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
   ): Unit = {
     refNs.fold {
       if (iterable.nonEmpty) {
-        cols += attr
+        colsOLD += attr
         if (!isUpsert) {
           addToUpdateColsNotNull(attr)
         }
@@ -255,7 +255,7 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
   ): Unit = {
     refNs.fold {
       if (iterable.nonEmpty) {
-        cols += attr
+        colsOLD += attr
         if (!isUpsert) {
           addToUpdateColsNotNull(attr)
         }
