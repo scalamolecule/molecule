@@ -24,11 +24,12 @@ abstract class SqlAction(
 
   // Housekeeping ----------------------------------------------------
 
-  private[transaction] val children     = ListBuffer.empty[SqlAction]
-  private[transaction] val cols         = ListBuffer.empty[String]
-  private[transaction] val placeHolders = ListBuffer.empty[String]
-  private[transaction] var ids          = List.empty[Long]
-  private[transaction] val rowSetters   = ListBuffer.empty[ListBuffer[PS => Unit]]
+  private[transaction] val children      = ListBuffer.empty[SqlAction]
+  private[transaction] val cols          = ListBuffer.empty[String]
+  private[transaction] val mandatoryCols = ListBuffer.empty[String]
+  private[transaction] val placeHolders  = ListBuffer.empty[String]
+  private[transaction] var ids           = List.empty[Long]
+  private[transaction] val rowSetters    = ListBuffer.empty[ListBuffer[PS => Unit]]
 
 
   // Resolve helpers ----------------------------------------------------
@@ -127,7 +128,7 @@ abstract class SqlAction(
   }
 
 
-//  def distributeIds(refIds: Array[List[Long]]): Unit = ???
+  //  def distributeIds(refIds: Array[List[Long]]): Unit = ???
 
 
   def distributeIds(refIds: Array[List[Long]]): Unit = {

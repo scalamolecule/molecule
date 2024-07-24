@@ -27,7 +27,7 @@ case class UpdateNs(
       s"no update columns in $ns ..."
     } else {
       val idClause = s"$ns.id IN(" + ids.mkString(", ") + ")"
-      sqlOps.updateStmt(ns, cols, List(idClause))
+      sqlOps.updateStmt(ns, cols, idClause +: mandatoryCols)
     }
   }
 

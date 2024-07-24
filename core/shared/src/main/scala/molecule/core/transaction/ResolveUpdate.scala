@@ -12,8 +12,6 @@ class ResolveUpdate(
   val isUpsert: Boolean,
 ) extends ModelUtils { self: UpdateOps =>
 
-  val isUpdate = !isUpsert
-
   private def unexpectedOp(a: Attr) = throw ModelError(
     s"Unexpected update operation for card-many attribute (${a.name})." + a
   )

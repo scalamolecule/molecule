@@ -2,7 +2,7 @@ package molecule.sql.core.transaction.strategy
 
 import java.sql.Connection
 import molecule.base.util.BaseHelpers
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.{ArrayStack, ListBuffer}
 
 class SqlOps extends SqlBase with BaseHelpers {
 
@@ -25,6 +25,23 @@ class SqlOps extends SqlBase with BaseHelpers {
 
 
   // Render sql statements --------------------------------------
+
+  def selectStmt(
+    ns: String,
+    cols0: Iterable[String],
+    joins0: Iterable[String],
+    clauses0: Iterable[String],
+  ): String = {
+    val cols    = cols0.mkString(",\n  ")
+    val joins   = if (joins0.isEmpty) "" else
+      joins0.mkString(s"\n  ", s"\n  ", "")
+    val clauses = clauses0.mkString(" AND\n  ")
+    s"""SELECT DISTINCT
+       |  $cols
+       |FROM $ns$joins
+       |WHERE
+       |  $clauses""".stripMargin
+  }
 
   def joinIdNames(ns: String, refNs: String): (String, String) = {
     if (ns == refNs)

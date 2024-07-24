@@ -20,16 +20,21 @@ trait SqlUpdate
     with SpiHelpers
     with MoleculeLogging { self: ResolveUpdate =>
 
+  protected var root  : UpdateRoot   = null
   protected var update: UpdateAction = null
 
-  // Build query for ids of each namespace
-  private var isRefUpdate    = false
-  private var ids            = List.empty[Long]
-  private var ns             = ""
-  private val cols           = ListBuffer.empty[String]
-  private val joins          = ListBuffer.empty[String]
-  private val filterElements = ListBuffer.empty[Element]
-  private val join           = if (isUpsert) "LEFT JOIN" else "INNER JOIN"
+  private var isRefUpdate = false
+  private var usesFilters = false
+  private var ns          = ""
+  private val join        = if (isUpsert) "LEFT JOIN" else "INNER JOIN"
+
+  // Build query for ids of each namespace involved in update
+  private object query {
+    var ids            = List.empty[Long]
+    val idCols         = ListBuffer.empty[String]
+    val joins          = ListBuffer.empty[String]
+    val filterElements = ListBuffer.empty[Element]
+  }
 
   def model2SqlQuery(elements: List[Element]): Model2SqlQuery
 
@@ -37,34 +42,22 @@ trait SqlUpdate
   def getUpdateAction(elements: List[Element]): UpdateAction = {
     val m2q = (elements: ListBuffer[Element]) => model2SqlQuery(elements.toList)
     ns = getInitialNs(elements)
-    cols += s"$ns.id"
-    val root = UpdateRoot(sqlConn, m2q, ns, isUpsert)
+    query.idCols += s"$ns.id"
+    root = UpdateRoot(sqlConn, m2q, ns, isUpsert)
     update = root.firstNs
     resolve(elements)
-    root.withIds(getIds)
+    initRoot()
+    root
   }
 
-  def getUpdateData(elements: List[Element]): Data = ???
-  protected def addToUpdateColsNotNull(attr: String) = ???
 
-  def getIds: (ListBuffer[String], String, Array[List[Long]]) = {
-    if (ids.nonEmpty && filterElements.isEmpty && !isRefUpdate) {
-      (cols, "", Array(ids))
-
-    } else {
+  private def initRoot(): Unit = {
+    if (usesFilters || isRefUpdate) {
       // Query for ids of each namespace
-      val idCols   = cols.mkString(",\n  ")
-      val refJoins = if (joins.isEmpty) "" else joins.mkString(s"\n  ", s"\n  ", "")
-      val clauses  = model2SqlQuery(filterElements.toList)
-        .getWhereClauses2.mkString(" AND\n  ")
-      val idsQuery    =
-        s"""SELECT DISTINCT
-           |  $idCols
-           |FROM $ns$refJoins
-           |WHERE
-           |  $clauses""".stripMargin
-
-      val nsCount = cols.length
+      val idsQuery = sqlOps.selectStmt(ns, query.idCols, query.joins,
+        model2SqlQuery(query.filterElements.toList).getWhereClauses2
+      )
+      val nsCount = query.idCols.length
       val refIds  = new Array[ListBuffer[Long]](nsCount)
         .map(_ => ListBuffer.empty[Long])
 
@@ -77,8 +70,10 @@ trait SqlUpdate
           nsIndex += 1
         }
       }
-      val refIds1 = refIds.map(_.toList)
-      (cols, idsQuery, refIds1)
+      val refIdLists = refIds.map(_.toList)
+      root.idsQuery = idsQuery
+      root.refIds = refIdLists
+      root.firstNs.distributeIds(refIdLists)
     }
   }
 
@@ -93,14 +88,10 @@ trait SqlUpdate
     val paramIndex = update.setCol(s"$attr = ?$cast")
     vs match {
       case Seq(v) =>
-        if (isUpdate) {
-          // not null dummy
-          filterElements += AttrOneTacByte(ns, attr)
-        } else {
-          filterElements += AttrOneOptByte(ns, attr)
-        }
+        setAttrPresence(ns, attr)
         update.addColSetter((ps: PS) =>
-          transformValue(v).asInstanceOf[(PS, Int) => Unit](ps, paramIndex))
+          transformValue(v).asInstanceOf[(PS, Int) => Unit](ps, paramIndex)
+        )
 
       case Nil =>
         update.addColSetter((ps: PS) =>
@@ -114,16 +105,14 @@ trait SqlUpdate
   }
 
   override def handleIds(ns: String, ids0: Seq[Long]): Unit = {
-    //    if (update.nsCount == 1) {
-    //      update.ids = ids.toList
-    //    }
+    if (query.ids.nonEmpty) {
+      throw ModelError(s"Can't apply entity ids twice in update.")
+    }
+    query.filterElements += AttrOneManID(ns, "id", Eq, ids0)
+    query.ids = ids0.toList
 
-//    filterElements += AttrOneManID(ns, "id", Eq, ids0)
-
-    // Set ids already here if no need to distribute ids from ref ids query
-    ids = ids0.toList
-    //    update.ids = ids
-    //    update.filterElements += AttrOneManID(ns, "id", Eq, ids)
+    // Set here if no need for distributing ids across multiple namespaces
+    update.ids = query.ids
   }
 
   override def handleFilterAttr[T <: Attr with Tacit](filterAttr: T): Unit = {
@@ -131,25 +120,16 @@ trait SqlUpdate
       case a: AttrSeqTac if a.op == Eq => noCollectionFilterEq(a.name)
       case a: AttrSetTac if a.op == Eq => noCollectionFilterEq(a.name)
       case _                           =>
-
-        filterElements += filterAttr
-      //        update.filterElements += filterAttr
+        usesFilters = true
+        query.filterElements += filterAttr
     }
   }
 
   override def handleRef(ref: Ref): Unit = {
-    val Ref(ns, refAttr, refNs, card, _, _) = ref
     isRefUpdate = true
-    cols += s"$refNs.id"
-    joins += s"$join $refNs ON $ns.$refAttr = $refNs.id"
-    //    filterElements += ref
-
-    //    update.cols += s"$refNs.id"
-    //    update.joins += s"$refNs ON $ns.$refAttr = $refNs.id"
-    //    update.filterElements += ref
-    //    if (!isUpsert) {
-    //      update.filterElements += AttrOneManID(refNs, "id", V)
-    //    }
+    val Ref(ns, refAttr, refNs, card, _, _) = ref
+    query.idCols += s"$refNs.id"
+    query.joins += s"$join $refNs ON $ns.$refAttr = $refNs.id"
     update = card match {
       case CardOne => update.refOne(ns, refAttr, refNs)
       case _       => update.refMany(ns, refAttr, refNs)
@@ -239,7 +219,6 @@ trait SqlUpdate
     attr: String,
     byteArray: Array[Byte],
   ): Unit = {
-    //    val paramIndex = update.paramIndex(ns, attr, isUpsert)
     val paramIndex = update.setCol(s"$attr = ?")
     if (byteArray.isEmpty) {
       update.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
@@ -261,6 +240,7 @@ trait SqlUpdate
     if (map.isEmpty) {
       update.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
     } else {
+      setAttrPresence(ns, attr)
       update.addColSetter((ps: PS) =>
         ps.setBytes(paramIndex, map2jsonByteArray(map, value2json))
       )
@@ -277,6 +257,7 @@ trait SqlUpdate
     value2json: (StringBuffer, T) => StringBuffer,
   ): Unit = {
     if (map.nonEmpty) {
+      setAttrPresence(ns, attr)
       val scalaBaseType = exts.head
       val setAttr       = s"$attr = addPairs_$scalaBaseType($attr, ?)"
       val paramIndex    = update.setCol(setAttr)
@@ -295,11 +276,13 @@ trait SqlUpdate
     exts: List[String],
   ): Unit = {
     if (keys.nonEmpty) {
+      setAttrPresence(ns, attr)
       val scalaBaseType = exts.head
       val setAttr       = s"$attr = removePairs_$scalaBaseType($attr, ?)"
       val paramIndex    = update.setCol(setAttr)
       update.addColSetter((ps: PS) =>
-        ps.setArray(paramIndex, ps.getConnection.createArrayOf("String", keys.toArray))
+        ps.setArray(paramIndex,
+          ps.getConnection.createArrayOf("String", keys.toArray))
       )
     }
   }
@@ -323,6 +306,7 @@ trait SqlUpdate
       val dbBaseType = exts(1)
       val paramIndex = update.setCol(s"$attr = ?")
       if (iterable.nonEmpty) {
+        setAttrPresence(ns, attr)
         addArray(paramIndex, dbBaseType, vs2array(iterable))
       } else {
         update.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
@@ -346,6 +330,7 @@ trait SqlUpdate
   ): Unit = {
     refNs.fold {
       if (iterable.nonEmpty) {
+        setAttrPresence(ns, attr)
         val dbBaseType = exts(1)
         val cast       = exts(2) match {
           case ""  => ""
@@ -356,7 +341,6 @@ trait SqlUpdate
         addArray(paramIndex, dbBaseType, iterable2array(iterable))
       }
     } { refNs =>
-      //      addRefIds(ns, attr, refNs, iterable.asInstanceOf[Set[Long]])
       if (iterable.nonEmpty) {
         update.insertRefIds(attr, refNs, iterable.asInstanceOf[Set[Long]])
       }
@@ -373,6 +357,7 @@ trait SqlUpdate
   ): Unit = {
     refNs.fold {
       if (iterable.nonEmpty) {
+        setAttrPresence(ns, attr)
         val scalaBaseType = exts.head
         val dbBaseType    = exts(1)
         val setAttr       = s"$attr = removeFromArray_$scalaBaseType($attr, ?)"
@@ -380,11 +365,24 @@ trait SqlUpdate
         addArray(paramIndex, dbBaseType, iterable2array(iterable))
       }
     } { refNs =>
-      //      removeRefIds(ns, attr, refNs, iterable.asInstanceOf[Set[Long]])
       if (iterable.nonEmpty) {
         val refIds = iterable.asInstanceOf[Set[Long]]
         update.deleteRefIds(attr, refNs, getUpdateId, refIds)
       }
+    }
+  }
+
+
+  private def setAttrPresence(ns: String, attr: String): Unit = {
+    if (isUpsert) {
+      // Allow finding where clauses for ids query. Not used otherwise
+      query.filterElements += AttrOneOptByte(ns, attr)
+    } else {
+      // Attribute value present in updated data
+      query.filterElements += AttrOneTacByte(ns, attr)
+
+      // Used for single ns update with ids and no filters
+      update.mandatoryCols += s"$ns.$attr IS NOT NULL"
     }
   }
 
@@ -397,127 +395,6 @@ trait SqlUpdate
     })
   }
 
-  //  protected def setRefIds(
-  //    ns: String,
-  //    refAttr: String,
-  //    refNs: String,
-  //    refIds: Set[Long]
-  //  ): Unit = {
-  //    // Separate update of ref ids in join table -----------------------------
-  //    val joinTable = ss(ns, refAttr, refNs)
-  //    val ns_id     = ss(ns, "id")
-  //    val refNs_id  = ss(refNs, "id")
-  //    val nsId      = getUpdateId
-  //    if (refIds.nonEmpty) {
-  //
-  //      update.deleteRefIds(refAttr, refNs, nsId, refIds)
-  //      update.insertRefIds(refAttr, refNs, refIds)
-  //
-  //      //      val updateId = update.getPostSetters.last.ids
-  //
-  //      //      update.deleteJoins(ns, refAttr, refNs, vs.asInstanceOf[Iterable[Long]])
-  //      //      update.insertRefIdSet(ns, refAttr, refNs, vs.asInstanceOf[Iterable[Long]])
-  //
-  //      //
-  //      //      // Tables are reversed in JdbcConn_JVM and we want to delete first
-  //      //      manualTableDatas = List(
-  //      //        addJoinsOLD(joinTable, ns_id, refNs_id, nsId,
-  //      //          refIds.asInstanceOf[Iterable[T]].map(_.asInstanceOf[Long])
-  //      //        ),
-  //      //        deleteJoinsOLD(joinTable, ns_id, nsId)
-  //      //      )
-  //    } else {
-  //      // Delete all joins when no ref ids are applied
-  //      manualTableDatas = List(deleteJoinsOLD(joinTable, ns_id, nsId))
-  //    }
-  //  }
-  //
-  //  protected def addRefIds(
-  //    ns: String,
-  //    refAttr: String,
-  //    refNs: String,
-  //    refIds: Set[Long]
-  //  ): Unit = {
-  //    if (refIds.nonEmpty) {
-  //      // Separate update of ref ids in join table -----------------------------
-  //      val joinTable = ss(ns, refAttr, refNs)
-  //      val ns_id     = ss(ns, "id")
-  //      val refNs_id  = ss(refNs, "id")
-  //      //      manualTableDatas = List(
-  //      //        addJoinsOLD(joinTable, ns_id, refNs_id, getUpdateId,
-  //      //          refIds.asInstanceOf[Iterable[T]].map(_.asInstanceOf[Long])
-  //      //        )
-  //      //      )
-  //    }
-  //  }
-  //
-  //  protected def removeRefIds(
-  //    ns: String,
-  //    refAttr: String,
-  //    refNs: String,
-  //    refIds: Set[Long]
-  //  ): Unit = {
-  //    if (refIds.nonEmpty) {
-  //      // Separate update of ref ids in join table -----------------------------
-  //      val joinTable  = ss(ns, refAttr, refNs)
-  //      val ns_id      = ss(ns, "id")
-  //      val refNs_id   = ss(refNs, "id")
-  //      val retractIds = refIds.mkString(s" AND $refNs_id IN (", ", ", ")")
-  //      manualTableDatas = List(
-  //        deleteJoinsOLD(joinTable, ns_id, getUpdateId, retractIds)
-  //      )
-  //    }
-  //  }
-  //
-  //  private def deleteJoinsOLD(
-  //    joinTable: String, ns_id: String, id: Long, refIds: String = ""
-  //  ): Table = {
-  //    val deletePath  = List("deleteJoins")
-  //    val deleteJoins = s"DELETE FROM $joinTable WHERE $ns_id = $id" + refIds
-  //    val delete      = (ps: PS) => ps.addBatch()
-  //    //    Table(deletePath, deleteJoins, delete)
-  //    ???
-  //  }
-  //
-  //  private def addJoinsOLD(
-  //    joinTable: String, ns_id: String, refNs_id: String, id: Long, refIds: Iterable[Long]
-  //  ): Table = {
-  //    val addPath  = List("addJoins")
-  //    val addJoins = s"INSERT INTO $joinTable($ns_id, $refNs_id) VALUES (?, ?)"
-  //    val add      = (ps: PS) =>
-  //      refIds.foreach { refId =>
-  //        ps.setLong(1, id)
-  //        ps.setLong(2, refId)
-  //        ps.addBatch()
-  //      }
-  //    //    Table(addPath, addJoins, add)
-  //    ???
-  //  }
-  //
-  //  protected def updateMapEqJdbc[T](
-  //    attr: String,
-  //    cast: String,
-  //    map: Map[String, T],
-  //    map2jdbc: (PS, Int) => Unit
-  //  ): Unit = {
-  //    val paramIndex = update.paramIndex(attr)
-  //    cols += attr
-  //    placeHolders = placeHolders :+ s"$attr = ?$cast"
-  //    if (!isUpsert) {
-  //      addToUpdateColsNotNull(attr)
-  //    }
-  //    //    if (map.nonEmpty) {
-  //    //      (ps: PS) =>
-  //    //        map2jdbc(ps, paramIndex)
-  //    //        paramIndex += 1
-  //    //    } else {
-  //    //      (ps: PS) => {
-  //    //        ps.setNull(paramIndex, 0)
-  //    //        paramIndex += 1
-  //    //      }
-  //    //    }
-  //    ???
-  //  }
 
   protected def getUpdateId: Long = {
     update.ids match {
@@ -527,6 +404,10 @@ trait SqlUpdate
       )
     }
   }
+
+  // todo: remove
+  def getUpdateData(elements: List[Element]): Data = ???
+  protected def addToUpdateColsNotNull(attr: String) = ???
 
   override protected lazy val extsID             = List("ID", "BIGINT", "")
   override protected lazy val extsString         = List("String", "LONGVARCHAR", "")

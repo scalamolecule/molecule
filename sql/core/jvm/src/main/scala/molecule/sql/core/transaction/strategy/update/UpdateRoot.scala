@@ -17,6 +17,7 @@ case class UpdateRoot(
   val firstNs = UpdateNs(this, sqlConn, sqlOps, isUpsert, ns, "Ns")
   children += firstNs
 
+  // set by SqlUpdate.initRoot()
   var idsQuery = ""
   var refIds   = Array.empty[List[Long]]
 
@@ -26,19 +27,6 @@ case class UpdateRoot(
   override def executeRoot: List[Long] = {
     children.foreach(_.execute())
     children.head.ids
-  }
-
-  def withIds(
-    idsData: (ListBuffer[String], String, Array[List[Long]])
-  ): UpdateRoot = {
-    val (cols0, idsQuery0, refIds0) = idsData
-    cols.addAll(cols0)
-    idsQuery = idsQuery0
-    refIds = refIds0
-
-    // Add ids to each namespace
-    firstNs.distributeIds(refIds)
-    this
   }
 
   override def toString: String = {

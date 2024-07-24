@@ -42,8 +42,8 @@ case class UpdateRefOne(
     // Add ref id to parent ns where ref ids are missing
     val nsUpdate  = sqlOps.updateStmt(ns,
       List(s"$refAttr = ?"),
-      List(s"id = ?"))
-    //    println(nsUpdate)
+      List(s"id = ?")
+    )
     val addRefIds = prepare(nsUpdate)
     parent.ids.zip(ids).map {
       case (nsId, 0)  => // no ref id
