@@ -25,17 +25,20 @@ case class UpdateRefOne(
     if (cols.isEmpty) {
       s"no update columns in $refNs ..."
     } else {
-      val ids1     = if (ids.contains(0L)) getCompleteRefIds else ids
-      val idClause = s"$refNs.id IN(" + ids1.mkString(", ") + ")"
+      val idClause = s"$refNs.id IN(" + ids.mkString(", ") + ")"
       sqlOps.updateStmt(refNs, cols, List(idClause))
     }
   }
 
-  // Insert missing card-one refs in graph structure to be updated
-  private def getCompleteRefIds: List[Long] = {
+  override def completeIds(refIds: Array[List[Long]]): Unit = {
+    ids = getCompleteRefIds(refIds.head)
+    children.foreach(_.completeIds(refIds.tail))
+  }
+
+  private def getCompleteRefIds(knownIds: List[Long]): List[Long] = {
     // Insert empty ref rows for each missing id (0)
     val insertEmptyRefRows = prepare(sqlOps.insertStmt(refNs, Nil, Nil))
-    (1 to ids.count(_ == 0L)).foreach(_ => insertEmptyRefRows.addBatch())
+    (1 to knownIds.count(_ == 0L)).foreach(_ => insertEmptyRefRows.addBatch())
     val newRefIds  = sqlOps.getIds(sqlConn, refNs, insertEmptyRefRows)
     val newRefIds1 = newRefIds.iterator
 
@@ -45,7 +48,7 @@ case class UpdateRefOne(
       List(s"id = ?")
     )
     val addRefIds = prepare(nsUpdate)
-    parent.ids.zip(ids).map {
+    parent.ids.zip(knownIds).map {
       case (nsId, 0)  => // no ref id
         addRefIds.setLong(1, newRefIds1.next())
         addRefIds.setLong(2, nsId)
@@ -57,7 +60,7 @@ case class UpdateRefOne(
 
     // Return completed referenced ref ids
     val newRefIds2 = newRefIds.iterator
-    ids.map {
+    knownIds.map {
       case 0     => newRefIds2.next()
       case refId => refId
     }

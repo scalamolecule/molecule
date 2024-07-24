@@ -71,9 +71,10 @@ trait SqlUpdate
         }
       }
       val refIdLists = refIds.map(_.toList)
+      root.cols ++= query.idCols
       root.idsQuery = idsQuery
       root.refIds = refIdLists
-      root.firstNs.distributeIds(refIdLists)
+      root.firstNs.completeIds(refIdLists)
     }
   }
 

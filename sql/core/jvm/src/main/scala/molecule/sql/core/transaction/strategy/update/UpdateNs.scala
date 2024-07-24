@@ -31,6 +31,11 @@ case class UpdateNs(
     }
   }
 
+  override def completeIds(refIds: Array[List[Long]]): Unit = {
+    ids = refIds.head
+    children.foreach(_.completeIds(refIds.tail))
+  }
+
   override def render(indent: Int): String = {
     recurseRender(indent, action)
   }

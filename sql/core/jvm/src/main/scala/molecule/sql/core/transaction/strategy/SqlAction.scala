@@ -128,13 +128,10 @@ abstract class SqlAction(
   }
 
 
-  //  def distributeIds(refIds: Array[List[Long]]): Unit = ???
+  // Populate update graph -------------------------
 
+  def completeIds(refIds: Array[List[Long]]): Unit = ???
 
-  def distributeIds(refIds: Array[List[Long]]): Unit = {
-    children.foreach(_.distributeIds(refIds.tail))
-    ids = refIds.head
-  }
 
   // Render --------------------------------------
 
