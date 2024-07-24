@@ -144,10 +144,10 @@ abstract class SqlAction(
     val cur   = if (indent == -1) Nil else List(curStmt)
     val stmts = children.map(_.render(indent + 1)) ++ cur
     val graph = stmts.map(stmt => stmt.linesIterator
-      .mkString("\n   ")
-    ).mkString(s"\n   ---------------------------\n   ")
+      .mkString("\n  ")
+    ).mkString(s"\n  ---------------------------\n  ")
     s"""$action(
-       |   $graph
+       |  $graph
        |)""".stripMargin
   }
 }

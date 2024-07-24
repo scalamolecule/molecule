@@ -16,29 +16,45 @@ case class UpdateRefMany(
   refNs: String,
 ) extends UpdateAction(parent, sqlConn, sqlOps, isUpsert, refNs) {
 
-  override def rootAction: UpdateAction = parent.rootAction
+  rowSetters += ListBuffer.empty[PS => Unit]
 
   override def execute(): Unit = {
-    //    val List(refId) = update
-    //
-    //    // Add many-to-many join once we have a parent id
-    //    val (id1, id2) = sqlOps.joinIdNames(ns, refNs)
-    //    addPostSetter((parentIds: List[Long]) => {
-    //      val joinStmt =
-    //        s"""INSERT INTO ${ns}_${refAttr}_$refNs (
-    //           |  $id1, $id2
-    //           |) VALUES (${parentIds.head}, $refId)""".stripMargin
-    //      sqlConn.prepareStatement(joinStmt).execute()
-    //    })
-    //
-    //    List(refId)
+    children.foreach(_.execute())
+    update()
+  }
 
-    ???
+  override def curStmt: String = {
+    if (cols.isEmpty) {
+      s"no update columns in $refNs ..."
+    } else {
+      val idClause = s"$refNs.id IN(" + ids.mkString(", ") + ")"
+      sqlOps.updateStmt(refNs, cols, List(idClause))
+    }
+  }
+
+  override def completeIds(refIds: Array[List[Long]]): Unit = {
+    ids = getCompleteRefIds(refNs, refIds.head)
+    children.foreach(_.completeIds(refIds.tail))
+  }
+
+  override def addRefs(knownIds: List[Long], newRefIds: List[Long]): Unit = {
+    val newRefIds1 = newRefIds.iterator
+
+    // Add joins from parent to new refs
+    val joinUpdates = sqlOps.insertJoinStmt(ns, refAttr, refNs)
+    val addJoins     = prepare(joinUpdates)
+    parent.ids.zip(knownIds).foreach {
+      case (nsId, 0)  => // missing ref
+        addJoins.setLong(1, nsId) // left id of join
+        addJoins.setLong(2, newRefIds1.next()) // right id of join
+        addJoins.addBatch()
+      case (_, refId) => () // existing ref id
+    }
+    addJoins.executeBatch()
+    addJoins.close()
   }
 
   override def render(indent: Int): String = {
-    // show join table after parent insert
-    //    parent.postStmts += sqlOps.insertJoinStmt(ns, refAttr, refNs)
     recurseRender(indent, "UpdateRefMany")
   }
 }

@@ -31,42 +31,32 @@ case class UpdateRefOne(
   }
 
   override def completeIds(refIds: Array[List[Long]]): Unit = {
-    ids = getCompleteRefIds(refIds.head)
+    ids = getCompleteRefIds(refNs, refIds.head)
     children.foreach(_.completeIds(refIds.tail))
   }
 
-  private def getCompleteRefIds(knownIds: List[Long]): List[Long] = {
-    // Insert empty ref rows for each missing id (0)
-    val insertEmptyRefRows = prepare(sqlOps.insertStmt(refNs, Nil, Nil))
-    (1 to knownIds.count(_ == 0L)).foreach(_ => insertEmptyRefRows.addBatch())
-    val newRefIds  = sqlOps.getIds(sqlConn, refNs, insertEmptyRefRows)
+  override def addRefs(knownIds: List[Long], newRefIds: List[Long]): Unit = {
     val newRefIds1 = newRefIds.iterator
 
-    // Add ref id to parent ns where ref ids are missing
-    val nsUpdate  = sqlOps.updateStmt(ns,
+    // Add ref ids from parent to new refs
+    val parentUpdates  = sqlOps.updateStmt(ns,
       List(s"$refAttr = ?"),
       List(s"id = ?")
     )
-    val addRefIds = prepare(nsUpdate)
-    parent.ids.zip(knownIds).map {
-      case (nsId, 0)  => // no ref id
+    val addRefIds = prepare(parentUpdates)
+    parent.ids.zip(knownIds).foreach {
+      case (nsId, 0)  => // missing ref
         addRefIds.setLong(1, newRefIds1.next())
         addRefIds.setLong(2, nsId)
         addRefIds.addBatch()
-      case (_, refId) => refId // existing ref id
+      case (_, refId) => () // existing ref id
     }
     addRefIds.executeBatch()
     addRefIds.close()
-
-    // Return completed referenced ref ids
-    val newRefIds2 = newRefIds.iterator
-    knownIds.map {
-      case 0     => newRefIds2.next()
-      case refId => refId
-    }
   }
 
+
   override def render(indent: Int): String = {
-    recurseRender(indent, "UpdateRef")
+    recurseRender(indent, "UpdateRefOne")
   }
 }

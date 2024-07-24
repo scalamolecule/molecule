@@ -53,25 +53,40 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       for {
 
 
-        id <- A.i(1).B.i(2)._A.C.i(3).save.transact.map(_.id)
-        _ <- A.i.B.i._A.C.i.query.get.map(_ ==> List((1, 2, 3)))
+        List(a, b, c, d, e, f) <- A.i.Bb.*?(B.s_?.i_?).insert(
+//        List(f) <- A.i.Bb.*?(B.s_?.i_?).insert(
+          (1, List()),
+          (2, List((Some("a"), None))),
+          (3, List((Some("b"), None), (Some("c"), None))),
+          (4, List((Some("d"), Some(1)))),
+          (5, List((Some("e"), Some(2)), (Some("f"), Some(3)))),
+          (6, List((Some("g"), Some(4)), (Some("h"), None))),
+        ).transact.map(_.ids)
 
-//        // Updating A.B.i and A.C.i
-//        _ <- A(id).i(10).B.i(20)._A.C.i(30).update.i.transact
-//        _ <- A.i.B.i._A.C.i.query.get.map(_ ==> List((10, 20, 30)))
+        // Filter by A ids, update B values
+        _ <- A(a, b, c, d, e, f).Bb.i(4).update.i.transact
 
+        _ <- A.i.a1.Bb.*?(B.s_?.a1.i).query.i.get.map(_ ==> List(
+          (1, List()), //                                no B.i value
+          (2, List()), //                                no B.i value
+          (3, List()), //                                no B.i value
+          (4, List((Some("d"), 4))), //                  update in 1 ref entity
+          (5, List((Some("e"), 4), (Some("f"), 4))), //  update in 2 ref entities
+          (6, List((Some("g"), 4))), //                  already had same value
+        ))
 
-        _ <- A(id).i(10).B.i(20)._A.C.i(30).upsert.i.transact
-        _ <- A.i.B.i._A.C.i.query.get.map(_ ==> List((10, 20, 30)))
+        // Filter by A ids, upsert B values
+        _ <- A(a, b, c, d, e, f).Bb.i(5).upsert.i.transact
+//        _ <- A(f).Bb.i(5).upsert.i.transact
 
-        _ <- A(id).i(11).B.i(21)._A.C.s("x").upsert.i.transact
-        _ <- A.i.B.i._A.C.s.query.get.map(_ ==> List((11, 21, "x")))
-
-//        _ <- A(id).i(10).B.i(20)._A.C.i(30).upsert.transact
-//          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-//            err ==> "Back refs not allowed in upserts"
-//          }
-
+        _ <- A.i.a1.Bb.*?(B.s_?.a1.i).query.get.map(_ ==> List(
+          (1, List((None, 5))), //                       ref + insert
+          (2, List((Some("a"), 5))), //                  addition in 1 ref entity
+          (3, List((Some("b"), 5), (Some("c"), 5))), //  addition in 2 ref entities
+          (4, List((Some("d"), 5))), //                  update in 1 ref entity
+          (5, List((Some("e"), 5), (Some("f"), 5))), //  update in 2 ref entities
+          (6, List((Some("g"), 5), (Some("h"), 5))), //  update in one ref entity and insertion in another
+        ))
 
 
         //        _ <- rawQuery(

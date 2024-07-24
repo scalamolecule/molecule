@@ -57,8 +57,8 @@ trait SqlUpdate
       val idsQuery = sqlOps.selectStmt(ns, query.idCols, query.joins,
         model2SqlQuery(query.filterElements.toList).getWhereClauses2
       )
-      val nsCount = query.idCols.length
-      val refIds  = new Array[ListBuffer[Long]](nsCount)
+      val nsCount  = query.idCols.length
+      val refIds   = new Array[ListBuffer[Long]](nsCount)
         .map(_ => ListBuffer.empty[Long])
 
       val resultSet = sqlConn.prepareStatement(idsQuery).executeQuery()
@@ -129,11 +129,24 @@ trait SqlUpdate
   override def handleRef(ref: Ref): Unit = {
     isRefUpdate = true
     val Ref(ns, refAttr, refNs, card, _, _) = ref
-    query.idCols += s"$refNs.id"
-    query.joins += s"$join $refNs ON $ns.$refAttr = $refNs.id"
     update = card match {
-      case CardOne => update.refOne(ns, refAttr, refNs)
-      case _       => update.refMany(ns, refAttr, refNs)
+      case CardOne =>
+        query.idCols += s"$refNs.id"
+        query.joins += s"$join $refNs ON $ns.$refAttr = $refNs.id"
+        // Switch strategy
+        update.refOne(ns, refAttr, refNs)
+
+      case _ =>
+        val joinTable = ss(ns, refAttr, refNs)
+        val ns_id     = s"${ns}_id"
+        val ref_id    = s"${refNs}_id"
+        query.idCols += s"$refNs.id"
+        query.joins ++= List(
+          s"$join $joinTable ON $ns.id = $joinTable.$ns_id",
+          s"$join $refNs ON $joinTable.$ref_id = $refNs.id",
+        )
+        // Switch strategy
+        update.refMany(ns, refAttr, refNs)
     }
   }
 
@@ -289,6 +302,7 @@ trait SqlUpdate
   }
 
   override def handleBackRef(backRef: BackRef): Unit = {
+    // Switch strategy to previous action
     update = update.backRef
   }
 
