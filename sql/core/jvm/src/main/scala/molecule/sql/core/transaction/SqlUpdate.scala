@@ -289,7 +289,7 @@ trait SqlUpdate
   }
 
   override def handleBackRef(backRef: BackRef): Unit = {
-    throw ModelError(s"Can't apply entity ids twice in update.")
+    update = update.backRef
   }
 
 

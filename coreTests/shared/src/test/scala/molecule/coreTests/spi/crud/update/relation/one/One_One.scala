@@ -403,10 +403,9 @@ trait One_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- A(id).i(10).B.i(20)._A.C.i(30).update.transact
         _ <- A.i.B.i._A.C.i.query.get.map(_ ==> List((10, 20, 30)))
 
-        _ <- A(id).i(10).B.i(20)._A.C.i(30).upsert.transact
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Back refs not allowed in upserts"
-          }
+        // Upsert, adding C.s("x")
+        _ <- A(id).i(11).B.i(21)._A.C.s("x").upsert.i.transact
+        _ <- A.i.B.i._A.C.s.query.get.map(_ ==> List((11, 21, "x")))
       } yield ()
     }
 
