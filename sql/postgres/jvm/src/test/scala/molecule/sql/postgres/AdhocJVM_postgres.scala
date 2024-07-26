@@ -44,29 +44,22 @@ object AdhocJVM_postgres extends TestSuite_postgres {
 
       for {
 
-        _ <- A.i.B.i.insert(List(
-          //          (1, 1),
-          (1, 2),
-          //          (2, 2),
-          //          (2, 3),
-          //          (2, 4),
-        )).i.transact
+        _ <- A.i.insert(1).transact
+        _ <- A.i.B.i.insert((2, 20), (3, 30)).transact
 
-        // Average of all (non-coalesced) values
-        //        _ <- A.i.query.get.map(_ ==> List(1, 2))
-        _ <- A.i.b.query.get.map(_ ==> List((1, 1)))
-        //        _ <- B.i.query.get.map(_ ==> List(1, 2, 3, 4))
-        //
-        //        _ <- A.B.i.query.i.get.map(_ ==> List(7))
+        _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
+        _ <- A.i.a1.B.i.query.get.map(_ ==> List((2, 20), (3, 30)))
+
+        // Nothing deleted since entity 1 doesn't have a ref
+        _ <- A.i_(1).B.i_.delete.transact
+        _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
+
+        // Second entity has a ref and will be deleted
+        _ <- A.i_(2).B.i_.delete.i.transact
+        _ <- A.i.a1.query.get.map(_ ==> List(1, 3))
 
 
-        //        _ <- A.B.i(avg).query.get.map(_ ==> List(7))
-        //        _ <- A.B.i(avg).query.get.map(_.head ==~ (1 + 2 + 2 + 3 + 4).toDouble / 5.0)
-        //
-        //        _ <- A.i.B.i(avg).query.get.map(_.map {
-        //          case (1, avg) => avg ==~ (1 + 2).toDouble / 2.0
-        //          case (2, avg) => avg ==~ (2 + 3 + 4).toDouble / 3.0
-        //        })
+
         //        _ <- rawTransact(
         //          """UPDATE B
         //            |SET

@@ -1,15 +1,23 @@
 package molecule.sql.core.transaction.strategy
 
-import java.sql.Connection
+import java.sql.{PreparedStatement => PS}
 import molecule.base.util.BaseHelpers
-import scala.collection.mutable.{ArrayStack, ListBuffer}
+import molecule.boilerplate.ast.Model.Element
+import molecule.sql.core.query.Model2SqlQuery
+import scala.collection.mutable.ListBuffer
 
-class SqlOps extends SqlBase with BaseHelpers {
+trait SqlOps extends BaseHelpers {
 
-  lazy val defaultValues = "DEFAULT VALUES"
+  val sqlOps: SqlOps = this
+
+  val sqlConn: java.sql.Connection
+
+  val m2q: List[Element] => Model2SqlQuery
+
+  val defaultValues = "DEFAULT VALUES"
 
 
-  def getIds(sqlConn: Connection, table: String, ps: PS): List[Long] = {
+  def getIds(ps: PS, table: String = ""): List[Long] = {
     // Execute incoming batch of prepared statements
     ps.executeBatch()
 
@@ -51,18 +59,6 @@ class SqlOps extends SqlBase with BaseHelpers {
   }
 
   def insertJoinStmt(ns: String, refAttr: String, refNs: String): String = {
-    val (id1, id2) = joinIdNames(ns, refNs)
-    s"""INSERT INTO ${ns}_${refAttr}_$refNs (
-       |  $id1, $id2
-       |) VALUES (?, ?)""".stripMargin
-  }
-
-  def deleteJoinStmt(ns: String, refAttr: String, refNs: String): String = {
-    val joinTable = ss(ns, refAttr, refNs)
-    val ns_id     = ss(ns, "id")
-    val refNs_id  = ss(refNs, "id")
-    //    val deleteJoins = s"DELETE FROM $joinTable WHERE $ns_id = $id" + refIds
-
     val (id1, id2) = joinIdNames(ns, refNs)
     s"""INSERT INTO ${ns}_${refAttr}_$refNs (
        |  $id1, $id2

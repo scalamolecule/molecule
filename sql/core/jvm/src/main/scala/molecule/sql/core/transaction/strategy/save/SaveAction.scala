@@ -1,35 +1,32 @@
 package molecule.sql.core.transaction.strategy.save
 
-import java.sql.Connection
 import molecule.sql.core.transaction.strategy.{SqlAction, SqlOps}
-
 
 abstract class SaveAction(
   parent: SaveAction,
-  sqlConn: Connection,
   sqlOps: SqlOps,
   ns: String
-) extends SqlAction(parent, sqlConn, sqlOps, ns) {
+) extends SqlAction(parent, sqlOps, ns) {
 
   // Build execution graph ----------------------------------------
 
   def refIds(refAttr: String, refNs: String, refIds: Set[Long]): Unit = {
     addSibling(SaveRefIds(
-      parent, sqlConn, sqlOps, ns, refAttr, refNs, refIds
+      parent, sqlOps, ns, refAttr, refNs, refIds
     ))
   }
 
   def refOne(ns: String, refAttr: String, refNs: String): SaveAction = {
     addChild(SaveRefOne(
-      this, sqlConn, sqlOps, ns, refAttr, refNs, setCol(refAttr)
+      this, sqlOps, ns, refAttr, refNs, setCol(refAttr)
     ))
   }
 
   def refMany(ns: String, refAttr: String, refNs: String): SaveAction = {
-    val ref = addChild(SaveNs(this, sqlConn, sqlOps, refNs, "RefMany"))
+    val ref = addChild(SaveNs(this, sqlOps, refNs, "RefMany"))
 
     // Make join after current ns is inserted
-    addSibling(SaveRefJoin(this, ref, sqlConn, sqlOps, ns, refAttr, refNs))
+    addSibling(SaveRefJoin(this, ref, sqlOps, ns, refAttr, refNs))
 
     // Continue in ref namespace
     ref

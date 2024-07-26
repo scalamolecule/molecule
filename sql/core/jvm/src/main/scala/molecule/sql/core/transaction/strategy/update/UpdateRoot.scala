@@ -1,20 +1,13 @@
 package molecule.sql.core.transaction.strategy.update
 
-import java.sql.Connection
-import molecule.boilerplate.ast.Model.Element
-import molecule.sql.core.query.Model2SqlQuery
 import molecule.sql.core.transaction.strategy.SqlOps
-import scala.collection.mutable.ListBuffer
 
 case class UpdateRoot(
-  sqlConn: Connection,
-  m2q: ListBuffer[Element] => Model2SqlQuery,
-  ns: String,
-  isUpsert: Boolean,
-)(implicit sqlOps: SqlOps)
-  extends UpdateAction(null, sqlConn, sqlOps, isUpsert, ns) {
+  sqlOps: SqlOps,
+  ns: String
+) extends UpdateAction(null, sqlOps, ns) {
 
-  val firstNs = UpdateNs(this, sqlConn, sqlOps, isUpsert, ns, "Ns")
+  val firstNs = UpdateNs(this, sqlOps, ns, "Ns")
   children += firstNs
 
   // set by SqlUpdate.initRoot()

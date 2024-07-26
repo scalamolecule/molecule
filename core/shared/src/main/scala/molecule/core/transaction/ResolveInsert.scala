@@ -3,13 +3,11 @@ package molecule.core.transaction
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.core.transaction.ops.InsertOps
-import molecule.core.util.ModelUtils
 import scala.annotation.tailrec
 
-class ResolveInsert
+trait ResolveInsert
   extends InsertResolvers_
-    with InsertValidators_
-    with ModelUtils { self: InsertOps =>
+    with InsertValidators_ { self: InsertOps =>
 
   @tailrec
   final override def resolve(

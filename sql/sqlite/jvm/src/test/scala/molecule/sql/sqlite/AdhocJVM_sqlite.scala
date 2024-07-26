@@ -17,12 +17,13 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
       for {
-        //        _ <- Ns.int.insert(1).transact
-        //        _ <- Ns.int.query.get.map(_ ==> List(1))
 
-        List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
-        _ <- Ns.refs(Set(r1, r2)).save.transact
-        _ <- Ns.refs.query.get.map(_.head ==> Set(r1, r2))
+        List(a, b) <- Ns.int.insert(1, 2).transact.map(_.ids)
+//        _ <- Ns.int(3).save.transact
+//        _ <- Ns.int.a1.query.get.map(_ ==> List(1, 2, 3))
+//        _ <- Ns(a).int(10).update.transact
+//        _ <- Ns(b).delete.transact
+//        _ <- Ns.int.a1.query.get.map(_ ==> List(3, 10))
 
       } yield ()
     }
@@ -34,29 +35,31 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
 
       for {
 
-        _ <- A.i.B.i.insert(List(
-//          (1, 1),
-          (1, 2),
-//          (2, 2),
-//          (2, 3),
-//          (2, 4),
-        )).i.transact
+        a <- A.i(1).save.transact.map(_.id)
+        b <- A.i(2).B.s("b").save.transact.map(_.id)
+        c <- A.i(3).B.s("c").i(3).save.transact.map(_.id)
 
-        // Average of all (non-coalesced) values
-//        _ <- A.i.query.get.map(_ ==> List(1, 2))
-        _ <- A.i.b.query.get.map(_ ==> List((1, 1)))
-//        _ <- B.i.query.get.map(_ ==> List(1, 2, 3, 4))
+//        // Current entity with A value and ref to B value
+//        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
+//          (3, 3)
+//        ))
 //
-//        _ <- A.B.i.query.i.get.map(_ ==> List(7))
+//        // Filter by A ids, update existing B values
+//        _ <- A(a, b, c).B.i(4).update.transact
+//
+//        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
+//          (3, 4) // B value updated since there was a previous value
+//        ))
 
+        // Filter by A ids, upsert B values (insert if not already present)
+        _ <- A(a, b, c).B.i(5).upsert.i.transact
 
-        //        _ <- A.B.i(avg).query.get.map(_ ==> List(7))
-        //        _ <- A.B.i(avg).query.get.map(_.head ==~ (1 + 2 + 2 + 3 + 4).toDouble / 5.0)
-        //
-        //        _ <- A.i.B.i(avg).query.get.map(_.map {
-        //          case (1, avg) => avg ==~ (1 + 2).toDouble / 2.0
-        //          case (2, avg) => avg ==~ (2 + 3 + 4).toDouble / 3.0
-        //        })
+        // Now three A entities with referenced B value
+        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
+          (1, 5), // relationship to B created + B value inserted
+          (2, 5), // B value inserted
+          (3, 5), // B value updated
+        ))
 
         //        _ <- rawQuery(
         //          """SELECT DISTINCT

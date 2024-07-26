@@ -3,24 +3,22 @@ package molecule.sql.core.transaction
 import java.sql.{PreparedStatement => PS}
 import molecule.base.ast._
 import molecule.boilerplate.ast.Model._
-import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ops.InsertOps
 import molecule.core.transaction.{InsertResolvers_, ResolveInsert}
-import molecule.core.util.ModelUtils
+import molecule.sql.core.transaction.strategy.SqlOps
 import molecule.sql.core.transaction.strategy.insert.{InsertAction, InsertRoot}
 
 trait SqlInsert
-  extends SqlBase_JVM
-    with InsertOps
-    with SqlBaseOps
-    with SqlDataType_JVM
-    with ModelUtils
-    with MoleculeLogging { self: ResolveInsert with InsertResolvers_ =>
+  extends InsertOps
+    with SqlBaseOps { self: ResolveInsert with InsertResolvers_ with SqlOps =>
 
   protected var insert: InsertAction = null
 
-  def getInsertAction(elements: List[Element], tpls: Seq[Product]): InsertAction = {
-    insert = InsertRoot(sqlConn, getInitialNs(elements)).insertNs
+  def getInsertAction(
+    elements: List[Element],
+    tpls: Seq[Product]
+  ): InsertAction = {
+    insert = InsertRoot(sqlOps, getInitialNs(elements)).insertNs
     val stableInsert = insert
     val resolveTpl   = getResolver(elements)
     tpls.foreach { tpl =>
@@ -81,7 +79,7 @@ trait SqlInsert
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    addIterable(ns, attr, optRefNs, exts(1), tplIndex, set2array)
+    addIterable(attr, optRefNs, exts(1), tplIndex, set2array)
   }
 
   override protected def addSetOpt[T](
@@ -94,7 +92,7 @@ trait SqlInsert
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    addOptIterable(ns, attr, optRefNs, exts(1), tplIndex, set2array)
+    addOptIterable(attr, optRefNs, exts(1), tplIndex, set2array)
   }
 
   override protected def addSeq[T](
@@ -107,7 +105,7 @@ trait SqlInsert
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    addIterable(ns, attr, optRefNs, exts(1), tplIndex, seq2array)
+    addIterable(attr, optRefNs, exts(1), tplIndex, seq2array)
   }
 
   override protected def addSeqOpt[T](
@@ -120,7 +118,7 @@ trait SqlInsert
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    addOptIterable(ns, attr, optRefNs, exts(1), tplIndex, seq2array)
+    addOptIterable(attr, optRefNs, exts(1), tplIndex, seq2array)
   }
 
   override protected def addByteArray(
@@ -266,7 +264,6 @@ trait SqlInsert
   // Helpers -------------------------------------------------------------------
 
   private def addIterable[T, M[_] <: Iterable[_]](
-    ns: String,
     attr: String,
     optRefNs: Option[String],
     sqlTpe: String,
@@ -302,7 +299,6 @@ trait SqlInsert
   }
 
   private def addOptIterable[T, M[_] <: Iterable[_]](
-    ns: String,
     attr: String,
     optRefNs: Option[String],
     sqlTpe: String,

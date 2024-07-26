@@ -2,15 +2,14 @@ package molecule.core.transaction
 
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
-import molecule.core.marshalling.ConnProxy
 import molecule.core.transaction.ops.UpdateOps
 import molecule.core.util.ModelUtils
 import scala.annotation.tailrec
 
-class ResolveUpdate(
-  val proxy: ConnProxy,
-  val isUpsert: Boolean,
-) extends ModelUtils { self: UpdateOps =>
+trait ResolveUpdate
+  extends ModelUtils { self: UpdateOps =>
+
+  val isUpsert: Boolean
 
   private def unexpectedOp(a: Attr) = throw ModelError(
     s"Unexpected update operation for card-many attribute (${a.name})." + a

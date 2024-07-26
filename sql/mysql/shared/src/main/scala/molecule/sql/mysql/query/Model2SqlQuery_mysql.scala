@@ -20,8 +20,6 @@ class Model2SqlQuery_mysql(elements0: List[Element])
     val clauses = where.map {
       case (col, expr) => s"$col $expr"
     }
-    //    println("------ joins --------")
-    //    println(formattedJoins)
     val joinsExist = if (joins.isEmpty) Nil else
       List(
         s"""Ns.id IN (

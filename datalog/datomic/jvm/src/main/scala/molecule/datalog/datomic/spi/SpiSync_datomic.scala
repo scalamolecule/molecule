@@ -150,8 +150,9 @@ trait SpiSync_datomic
   }
 
   def update_getStmts(update: Update, conn: DatomicConn_JVM): Data = {
-    (new ResolveUpdate(conn.proxy, update.isUpsert) with Update_datomic)
-      .getStmts(conn, update.elements)
+    new ResolveUpdate with Update_datomic{
+      override val isUpsert: Boolean = update.isUpsert
+    }.getStmts(conn, update.elements)
   }
 
   override def delete_transact(delete: Delete)(implicit conn: Conn): TxReport = {

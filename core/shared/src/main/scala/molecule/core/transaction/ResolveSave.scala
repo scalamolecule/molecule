@@ -2,13 +2,10 @@ package molecule.core.transaction
 
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
-import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ops.SaveOps
-import molecule.core.util.ModelUtils
 import scala.annotation.tailrec
 
-class ResolveSave
-  extends ModelUtils with MoleculeLogging { self: SaveOps =>
+trait ResolveSave { self: SaveOps =>
 
   @tailrec
   final def resolve(elements: List[Element]): Unit = {

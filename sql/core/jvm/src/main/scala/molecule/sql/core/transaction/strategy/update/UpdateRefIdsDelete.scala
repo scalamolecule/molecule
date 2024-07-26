@@ -1,23 +1,17 @@
 package molecule.sql.core.transaction.strategy.update
 
-import java.sql.Connection
 import molecule.base.util.BaseHelpers
-import molecule.boilerplate.ast.Model.Element
-import molecule.sql.core.query.Model2SqlQuery
 import molecule.sql.core.transaction.strategy.SqlOps
-import scala.collection.mutable.ListBuffer
 
 case class UpdateRefIdsDelete(
   parent: UpdateAction,
-  sqlConn: Connection,
   sqlOps: SqlOps,
-  isUpsert: Boolean,
   ns: String,
   refAttr: String,
   refNs: String,
   nsId: Long,
   refIds: Set[Long]
-) extends UpdateAction(parent, sqlConn, sqlOps, isUpsert, ns)  with BaseHelpers {
+) extends UpdateAction(parent, sqlOps, ns) with BaseHelpers {
 
   override def execute(): Unit = {
     val ps = prepare(curStmt)

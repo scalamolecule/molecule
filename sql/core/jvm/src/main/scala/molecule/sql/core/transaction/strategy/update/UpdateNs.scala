@@ -1,17 +1,15 @@
 package molecule.sql.core.transaction.strategy.update
 
-import java.sql.Connection
+import java.sql.{PreparedStatement => PS}
 import molecule.sql.core.transaction.strategy.SqlOps
 import scala.collection.mutable.ListBuffer
 
 case class UpdateNs(
   parent: UpdateAction,
-  sqlConn: Connection,
   sqlOps: SqlOps,
-  isUpsert: Boolean,
   ns: String,
   action: String
-) extends UpdateAction(parent, sqlConn, sqlOps, isUpsert, ns) {
+) extends UpdateAction(parent, sqlOps, ns) {
 
   rowSetters += ListBuffer.empty[PS => Unit]
 
@@ -25,6 +23,8 @@ case class UpdateNs(
   override def curStmt: String = {
     if (cols.isEmpty) {
       s"no update columns in $ns ..."
+    } else if (ids.isEmpty) {
+      s"no ids found to be updated in $ns ..."
     } else {
       val idClause = s"$ns.id IN(" + ids.mkString(", ") + ")"
       sqlOps.updateStmt(ns, cols, idClause +: mandatoryCols)

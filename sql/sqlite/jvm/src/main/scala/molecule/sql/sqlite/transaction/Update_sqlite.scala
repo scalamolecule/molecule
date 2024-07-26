@@ -1,22 +1,12 @@
 package molecule.sql.sqlite.transaction
 
 import java.sql.{PreparedStatement => PS}
-import molecule.boilerplate.ast.Model._
 import molecule.core.transaction.ResolveUpdate
-import molecule.sql.core.query.Model2SqlQuery
 import molecule.sql.core.transaction.SqlUpdate
-import molecule.sql.sqlite.query.Model2SqlQuery_sqlite
+import molecule.sql.core.transaction.strategy.SqlOps
 
-trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
-
-  doPrint = false
-  //  doPrint = true
-
-  override def model2SqlQuery(elements: List[Element]): Model2SqlQuery =
-    new Model2SqlQuery_sqlite(elements)
-
-  protected var curParamIndex = 1
-
+trait Update_sqlite
+  extends SqlUpdate { self: ResolveUpdate with SqlOps =>
 
   override def updateSetEq[T](
     ns: String,
@@ -43,12 +33,8 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
   ): Unit = {
     optRefNs.fold {
       if (set.nonEmpty) {
-        colsOLD += attr
-        if (!isUpsert) {
-          addToUpdateColsNotNull(attr)
-        }
-        // Using UNION (without ALL) only adds new values to Set
-        placeHolders = placeHolders :+
+        setAttrPresence(ns, attr)
+        val setAttr    =
           s"""$attr = (
              |    SELECT JSON_GROUP_ARRAY(VALUE)
              |    FROM (
@@ -57,15 +43,14 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
              |      SELECT _vs.value FROM JSON_EACH(?) AS _vs
              |    )
              |  )""".stripMargin
-        val json = iterable2json(set, value2json)
-        addColSetter(curRefPath, (ps: PS, _: IdsMap, _: RowIndex) => {
-          ps.setString(curParamIndex, json)
-          curParamIndex += 1
-        })
+        val json       = iterable2json(set, value2json)
+        val paramIndex = update.setCol(setAttr)
+        update.addColSetter((ps: PS) => ps.setString(paramIndex, json))
       }
     } { refNs =>
-//      addRefIds(ns, attr, refNs, set.asInstanceOf[Set[Long]])
-      ???
+      if (set.nonEmpty) {
+        update.insertRefIds(attr, refNs, set.asInstanceOf[Set[Long]])
+      }
     }
   }
 
@@ -81,12 +66,9 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
   ): Unit = {
     optRefNs.fold {
       if (set.nonEmpty) {
-        colsOLD += attr
-        if (!isUpsert) {
-          addToUpdateColsNotNull(attr)
-        }
+        setAttrPresence(ns, attr)
         val retractValues = set.map(one2json).mkString(", ")
-        placeHolders = placeHolders :+
+        update.setCol(
           s"""$attr = (
              |    SELECT (
              |      CASE JSON_GROUP_ARRAY(VALUE)
@@ -102,11 +84,14 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
              |        _vs.VALUE NOT IN ($retractValues)
              |    )
              |  )""".stripMargin
-        addColSetter(curRefPath, (_: PS, _: IdsMap, _: RowIndex) => ())
+        )
+        update.addColSetter((_: PS) => ())
       }
     } { refNs =>
-//      removeRefIds(ns, attr, refNs, set.asInstanceOf[Set[Long]])
-      ???
+      if (set.nonEmpty) {
+        val refIds = set.asInstanceOf[Set[Long]]
+        update.deleteRefIds(attr, refNs, getUpdateId, refIds)
+      }
     }
   }
 
@@ -135,12 +120,8 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
   ): Unit = {
     optRefNs.fold {
       if (seq.nonEmpty) {
-        colsOLD += attr
-        if (!isUpsert) {
-          addToUpdateColsNotNull(attr)
-        }
-        // Using UNION ALL to add even duplicates
-        placeHolders = placeHolders :+
+        setAttrPresence(ns, attr)
+        val setAttr    =
           s"""$attr = (
              |    SELECT JSON_GROUP_ARRAY(VALUE)
              |    FROM (
@@ -149,15 +130,14 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
              |      SELECT _vs.value FROM JSON_EACH(?) AS _vs
              |    )
              |  )""".stripMargin
-        val json = iterable2json(seq, value2json)
-        addColSetter(curRefPath, (ps: PS, _: IdsMap, _: RowIndex) => {
-          ps.setString(curParamIndex, json)
-          curParamIndex += 1
-        })
+        val json       = iterable2json(seq, value2json)
+        val paramIndex = update.setCol(setAttr)
+        update.addColSetter((ps: PS) => ps.setString(paramIndex, json))
       }
     } { refNs =>
-//      addRefIds(ns, attr, refNs, seq.asInstanceOf[Set[Long]])
-      ???
+      if (seq.nonEmpty) {
+        update.insertRefIds(attr, refNs, seq.asInstanceOf[Set[Long]])
+      }
     }
   }
 
@@ -173,12 +153,9 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
   ): Unit = {
     optRefNs.fold {
       if (seq.nonEmpty) {
-        colsOLD += attr
-        if (!isUpsert) {
-          addToUpdateColsNotNull(attr)
-        }
+        setAttrPresence(ns, attr)
         val retractValues = seq.map(one2json).mkString(", ")
-        placeHolders = placeHolders :+
+        update.setCol(
           s"""$attr = (
              |    SELECT (
              |      CASE JSON_GROUP_ARRAY(VALUE)
@@ -194,11 +171,13 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
              |        _vs.VALUE NOT IN ($retractValues)
              |    )
              |  )""".stripMargin
-        addColSetter(curRefPath, (_: PS, _: IdsMap, _: RowIndex) => ())
+        )
+        update.addColSetter((_: PS) => ())
       }
     } { refNs =>
-//      removeRefIds(ns, attr, refNs, seq.asInstanceOf[Set[Long]])
-      ???
+      if (seq.nonEmpty) {
+        update.insertRefIds(attr, refNs, seq.asInstanceOf[Set[Long]])
+      }
     }
   }
 
@@ -211,12 +190,15 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-//    updateMapEqJdbc(attr, "", map,
-//      (ps: PS, paramIndex: Int) => {
-//        ps.setString(paramIndex, map2json(map, value2json))
-//      }
-//    )
-    ???
+    val paramIndex = update.setCol(s"$attr = ?")
+    if (map.isEmpty) {
+      update.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
+    } else {
+      setAttrPresence(ns, attr)
+      update.addColSetter((ps: PS) =>
+        ps.setString(paramIndex, map2json(map, value2json))
+      )
+    }
   }
 
   override protected def updateMapAdd[T](
@@ -229,19 +211,17 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
     value2json: (StringBuffer, T) => StringBuffer,
   ): Unit = {
     if (map.nonEmpty) {
-      colsOLD += attr
-      if (!isUpsert) {
-        addToUpdateColsNotNull(attr)
-      }
-      val pairs = map.flatMap {
+      setAttrPresence(ns, attr)
+      val pairs   = map.flatMap {
         case (k, v) => List(
           s"'$$.${validKey(k)}'",
           value2json(new StringBuffer(1), v).toString
         )
       }.mkString(", ")
-      placeHolders = placeHolders :+
+      val setAttr =
         s"$attr = JSON_SET(IFNULL($attr, JSON_OBJECT()), $pairs)"
-      addColSetter(curRefPath, (_: PS, _: IdsMap, _: RowIndex) => ())
+      update.setCol(setAttr)
+      update.addColSetter((_: PS) => ())
     }
   }
 
@@ -253,12 +233,9 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
     exts: List[String],
   ): Unit = {
     if (keys.nonEmpty) {
-      colsOLD += attr
-      if (!isUpsert) {
-        addToUpdateColsNotNull(attr)
-      }
-      val keys1 = keys.map(k => s"'$$.${validKey(k)}'").mkString(", ")
-      placeHolders = placeHolders :+
+      setAttrPresence(ns, attr)
+      val keys1   = keys.map(k => s"'$$.${validKey(k)}'").mkString(", ")
+      val setAttr =
         s"""$attr = (
            |    CASE JSON_REMOVE($attr, $keys1)
            |    WHEN '{}' THEN NULL
@@ -266,7 +243,8 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
            |    ELSE JSON_REMOVE($attr, $keys1)
            |    END
            |  )""".stripMargin
-      addColSetter(curRefPath, (_: PS, _: IdsMap, _: RowIndex) => ())
+      update.setCol(setAttr)
+      update.addColSetter((_: PS) => ())
     }
   }
 
@@ -276,33 +254,27 @@ trait Update_sqlite extends SqlUpdate { self: ResolveUpdate =>
   private def updateIterableEq[T, M[_] <: Iterable[_]](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     iterable: M[T],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    refNs.fold {
-      colsOLD += attr
-      placeHolders = placeHolders :+ s"$attr = ?"
-      val colSetter = if (iterable.nonEmpty) {
-        if (!isUpsert) {
-          addToUpdateColsNotNull(attr)
-        }
-        (ps: PS, _: IdsMap, _: RowIndex) => {
+    optRefNs.fold {
+      val paramIndex = update.setCol(s"$attr = ?")
+      if (iterable.nonEmpty) {
+        setAttrPresence(ns, attr)
+        update.addColSetter((ps: PS) => {
           val json = iterable2json(iterable.asInstanceOf[Iterable[T]], value2json)
-          ps.setString(curParamIndex, json)
-          curParamIndex += 1
-        }
+          ps.setString(paramIndex, json)
+        })
       } else {
-        (ps: PS, _: IdsMap, _: RowIndex) => {
-          ps.setNull(curParamIndex, 0)
-          curParamIndex += 1
-        }
+        update.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
       }
-      addColSetter(curRefPath, colSetter)
     } { refNs =>
-//      setRefIds(ns, attr, refNs, iterable.asInstanceOf[Set[Long]])
-      ???
+      update.deleteRefIds(attr, refNs, getUpdateId)
+      val refIds = iterable.asInstanceOf[Set[Long]]
+      if (refIds.nonEmpty) {
+        update.insertRefIds(attr, refNs, refIds)
+      }
     }
   }
-
 }

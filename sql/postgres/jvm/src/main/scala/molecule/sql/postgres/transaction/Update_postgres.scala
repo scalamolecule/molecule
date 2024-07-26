@@ -1,20 +1,12 @@
 package molecule.sql.postgres.transaction
 
 import java.sql.{PreparedStatement => PS}
-import molecule.boilerplate.ast.Model._
 import molecule.core.transaction.ResolveUpdate
-import molecule.sql.core.query.Model2SqlQuery
 import molecule.sql.core.transaction.SqlUpdate
-import molecule.sql.postgres.query.Model2SqlQuery_postgres
-import scala.annotation.tailrec
+import molecule.sql.core.transaction.strategy.SqlOps
 
-trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
-
-  override def model2SqlQuery(elements: List[Element]): Model2SqlQuery =
-    new Model2SqlQuery_postgres(elements)
-
-  protected var curParamIndex = 1
-
+trait Update_postgres
+  extends SqlUpdate { self: ResolveUpdate with SqlOps =>
 
   override def updateSetRemove[T](
     ns: String,
@@ -51,11 +43,15 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-//    updateMapEqJdbc(attr, "::jsonb", map,
-//      (ps: PS, paramIndex: Int) =>
-//        ps.setString(paramIndex, map2json(map, value2json))
-//    )
-    ???
+    val paramIndex = update.setCol(s"$attr = ?::jsonb")
+    if (map.isEmpty) {
+      update.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
+    } else {
+      setAttrPresence(ns, attr)
+      update.addColSetter((ps: PS) =>
+        ps.setString(paramIndex, map2json(map, value2json))
+      )
+    }
   }
 
   override def updateMapAdd[T](
@@ -68,21 +64,17 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
     value2json: (StringBuffer, T) => StringBuffer,
   ): Unit = {
     if (map.nonEmpty) {
-      colsOLD += attr
-      if (!isUpsert) {
-        addToUpdateColsNotNull(attr)
-      }
-      placeHolders = placeHolders :+
+      setAttrPresence(ns, attr)
+      val setAttr    =
         s"""$attr = CASE
            |    WHEN $attr IS NULL THEN '{}'::jsonb
            |    ELSE $attr::jsonb
            |  END || ?::jsonb""".stripMargin
-      val json      = map2json(map, value2json)
-      val colSetter = (ps: PS, _: IdsMap, _: RowIndex) => {
-        ps.setString(curParamIndex, json)
-        curParamIndex += 1
-      }
-      addColSetter(curRefPath, colSetter)
+      val json       = map2json(map, value2json)
+      val paramIndex = update.setCol(setAttr)
+      update.addColSetter((ps: PS) =>
+        ps.setString(paramIndex, json)
+      )
     }
   }
 
@@ -94,23 +86,19 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
     exts: List[String],
   ): Unit = {
     if (keys.nonEmpty) {
-      colsOLD += attr
-      if (!isUpsert) {
-        addToUpdateColsNotNull(attr)
-      }
-      placeHolders = placeHolders :+
+      setAttrPresence(ns, attr)
+      val setAttr    =
         s"""$attr = CASE
            |    WHEN $attr::jsonb - ? = '{}' THEN NULL
            |    ELSE $attr::jsonb - ?
            |  END""".stripMargin
-      val colSetter           = (ps: PS, _: IdsMap, _: RowIndex) => {
+      val paramIndex = update.setCol(setAttr)
+      update.addColSetter((ps: PS) => {
         val conn  = ps.getConnection
         val array = conn.createArrayOf("text", keys.toArray)
-        ps.setArray(curParamIndex, array)
-        ps.setArray(curParamIndex + 1, array)
-        curParamIndex += 2
-      }
-      addColSetter(curRefPath, colSetter)
+        ps.setArray(paramIndex, array)
+        ps.setArray(paramIndex + 1, array)
+      })
     }
   }
 
@@ -126,12 +114,9 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
   ): Unit = {
     optRefNs.fold {
       if (iterable.nonEmpty) {
-        colsOLD += attr
-        if (!isUpsert) {
-          addToUpdateColsNotNull(attr)
-        }
-        val cast = exts(2)
-        placeHolders = placeHolders :+
+        setAttrPresence(ns, attr)
+        val cast          = exts(2)
+        val setAttr       =
           s"""$attr = (
              |    SELECT ARRAY_AGG(_v)
              |    FROM UNNEST($attr$cast[]) AS _v
@@ -139,17 +124,18 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
              |  )""".stripMargin
         val negatives     = set2array(iterable)
         val arrayBaseType = exts(3)
-        val colSetter     = (ps: PS, _: IdsMap, _: RowIndex) => {
+        val paramIndex    = update.setCol(setAttr)
+        update.addColSetter((ps: PS) => {
           val conn  = ps.getConnection
           val array = conn.createArrayOf(arrayBaseType, negatives)
-          ps.setArray(curParamIndex, array)
-          curParamIndex += 1
-        }
-        addColSetter(curRefPath, colSetter)
+          ps.setArray(paramIndex, array)
+        })
       }
     } { refNs =>
-//      removeRefIds(ns, attr, refNs, iterable.asInstanceOf[Set[Long]])
-      ???
+      if (iterable.nonEmpty) {
+        val refIds = iterable.asInstanceOf[Set[Long]]
+        update.deleteRefIds(attr, refNs, getUpdateId, refIds)
+      }
     }
   }
 

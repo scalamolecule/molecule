@@ -1,18 +1,17 @@
 package molecule.sql.core.transaction.strategy.save
 
-import java.sql.Connection
+import java.sql.{PreparedStatement => PS}
 import molecule.sql.core.transaction.strategy.SqlOps
 import scala.collection.mutable.ListBuffer
 
 case class SaveRefOne(
   parent: SaveAction,
-  sqlConn: Connection,
   sqlOps: SqlOps,
   ns: String,
   refAttr: String,
   refNs: String,
   refAttrIndex: Int
-) extends SaveAction(parent, sqlConn, sqlOps, refNs) {
+) extends SaveAction(parent, sqlOps, refNs) {
 
   rowSetters += ListBuffer.empty[PS => Unit]
 

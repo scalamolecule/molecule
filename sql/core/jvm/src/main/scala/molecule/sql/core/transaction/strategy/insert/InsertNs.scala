@@ -1,15 +1,13 @@
 package molecule.sql.core.transaction.strategy.insert
 
-import java.sql.Connection
 import molecule.sql.core.transaction.strategy.SqlOps
 
 case class InsertNs(
   parent: InsertAction,
-  sqlConn: Connection,
   sqlOps: SqlOps,
   ns: String,
   action: String,
-) extends InsertAction(parent, sqlConn, sqlOps, ns) {
+) extends InsertAction(parent, sqlOps, ns) {
 
   override def rootAction: InsertAction = parent.rootAction
 

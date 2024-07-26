@@ -2,10 +2,11 @@ package molecule.sql.postgres.transaction
 
 import java.sql.{PreparedStatement => PS}
 import molecule.core.transaction.ResolveSave
-import molecule.core.transaction.ops.SaveOps
-import molecule.sql.core.transaction.{SqlSave, Table}
+import molecule.sql.core.transaction.SqlSave
+import molecule.sql.core.transaction.strategy.SqlOps
 
-trait Save_postgres extends SaveOps with SqlSave with TxBase_postgres { self: ResolveSave =>
+trait Save_postgres
+  extends SqlSave { self: ResolveSave with SqlOps =>
 
   override protected def addMap[T](
     ns: String,

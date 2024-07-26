@@ -5,45 +5,40 @@ import boopickle.Default._
 import molecule.base.ast.CardOne
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
-import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ResolveUpdate
 import molecule.core.transaction.ops.UpdateOps
-import molecule.sql.core.query.Model2SqlQuery
 import molecule.sql.core.spi.SpiHelpers
+import molecule.sql.core.transaction.strategy.SqlOps
 import molecule.sql.core.transaction.strategy.update.{UpdateAction, UpdateRoot}
 import scala.collection.mutable.ListBuffer
 
 trait SqlUpdate
-  extends SqlBase_JVM
-    with UpdateOps
+  extends UpdateOps
     with SqlBaseOps
-    with SpiHelpers
-    with MoleculeLogging { self: ResolveUpdate =>
+    with SpiHelpers { self: ResolveUpdate with SqlOps =>
 
   protected var root  : UpdateRoot   = null
   protected var update: UpdateAction = null
 
   private var isRefUpdate = false
-  private var usesFilters = false
+  private var hasFilters  = false
   private var ns          = ""
-  private val join        = if (isUpsert) "LEFT JOIN" else "INNER JOIN"
+
+  // Set after isUpsert has been set
+  private lazy val join = if (isUpsert) "LEFT JOIN" else "INNER JOIN"
 
   // Build query for ids of each namespace involved in update
   private object query {
-    var ids            = List.empty[Long]
-    val idCols         = ListBuffer.empty[String]
-    val joins          = ListBuffer.empty[String]
-    val filterElements = ListBuffer.empty[Element]
+    var ids         = List.empty[Long]
+    val idCols      = ListBuffer.empty[String]
+    val joins       = ListBuffer.empty[String]
+    val filterAttrs = ListBuffer.empty[Element]
   }
 
-  def model2SqlQuery(elements: List[Element]): Model2SqlQuery
-
-
   def getUpdateAction(elements: List[Element]): UpdateAction = {
-    val m2q = (elements: ListBuffer[Element]) => model2SqlQuery(elements.toList)
     ns = getInitialNs(elements)
     query.idCols += s"$ns.id"
-    root = UpdateRoot(sqlConn, m2q, ns, isUpsert)
+    root = UpdateRoot(sqlOps, ns)
     update = root.firstNs
     resolve(elements)
     initRoot()
@@ -52,10 +47,10 @@ trait SqlUpdate
 
 
   private def initRoot(): Unit = {
-    if (usesFilters || isRefUpdate) {
+    if (hasFilters || isRefUpdate) {
       // Query for ids of each namespace
-      val idsQuery = sqlOps.selectStmt(ns, query.idCols, query.joins,
-        model2SqlQuery(query.filterElements.toList).getWhereClauses2
+      val idsQuery = selectStmt(ns, query.idCols, query.joins,
+        m2q(query.filterAttrs.toList).getWhereClauses
       )
       val nsCount  = query.idCols.length
       val refIds   = new Array[ListBuffer[Long]](nsCount)
@@ -75,6 +70,27 @@ trait SqlUpdate
       root.idsQuery = idsQuery
       root.refIds = refIdLists
       root.firstNs.completeIds(refIdLists)
+    }
+  }
+
+  override def handleIds(ns: String, ids0: Seq[Long]): Unit = {
+    if (query.ids.nonEmpty) {
+      throw ModelError(s"Can't apply entity ids twice in update.")
+    }
+    query.filterAttrs += AttrOneManID(ns, "id", Eq, ids0)
+    query.ids = ids0.toList
+
+    // Set here if no need for distributing ids across multiple namespaces
+    update.ids = query.ids
+  }
+
+  override def handleFilterAttr[T <: Attr with Tacit](filterAttr: T): Unit = {
+    filterAttr.asInstanceOf[Attr] match {
+      case a: AttrSeqTac if a.op == Eq => noCollectionFilterEq(a.name)
+      case a: AttrSetTac if a.op == Eq => noCollectionFilterEq(a.name)
+      case _                           =>
+        hasFilters = true
+        query.filterAttrs += filterAttr
     }
   }
 
@@ -98,33 +114,15 @@ trait SqlUpdate
         update.addColSetter((ps: PS) =>
           ps.setNull(paramIndex, 0))
 
-      case vs => throw ExecutionError(
-        s"Can only update one value for attribute `$ns.$attr`. " +
-          s"Found: " + vs.mkString(", ")
-      )
+      case vs =>
+        val cleanAttr = attr.replace("_", "")
+        throw ExecutionError(
+          s"Can only update one value for attribute `$ns.$cleanAttr`. " +
+            s"Found: " + vs.mkString(", ")
+        )
     }
   }
 
-  override def handleIds(ns: String, ids0: Seq[Long]): Unit = {
-    if (query.ids.nonEmpty) {
-      throw ModelError(s"Can't apply entity ids twice in update.")
-    }
-    query.filterElements += AttrOneManID(ns, "id", Eq, ids0)
-    query.ids = ids0.toList
-
-    // Set here if no need for distributing ids across multiple namespaces
-    update.ids = query.ids
-  }
-
-  override def handleFilterAttr[T <: Attr with Tacit](filterAttr: T): Unit = {
-    filterAttr.asInstanceOf[Attr] match {
-      case a: AttrSeqTac if a.op == Eq => noCollectionFilterEq(a.name)
-      case a: AttrSetTac if a.op == Eq => noCollectionFilterEq(a.name)
-      case _                           =>
-        usesFilters = true
-        query.filterElements += filterAttr
-    }
-  }
 
   override def handleRef(ref: Ref): Unit = {
     isRefUpdate = true
@@ -312,12 +310,12 @@ trait SqlUpdate
   private def updateIterableEq[T, M[_] <: Iterable[_]](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     iterable: M[T],
     exts: List[String],
     vs2array: M[T] => Array[AnyRef],
   ): Unit = {
-    refNs.fold {
+    optRefNs.fold {
       val dbBaseType = exts(1)
       val paramIndex = update.setCol(s"$attr = ?")
       if (iterable.nonEmpty) {
@@ -338,12 +336,12 @@ trait SqlUpdate
   private def updateIterableAdd[T, M[_] <: Iterable[_]](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     iterable: M[T],
     exts: List[String],
     iterable2array: M[T] => Array[AnyRef],
   ): Unit = {
-    refNs.fold {
+    optRefNs.fold {
       if (iterable.nonEmpty) {
         setAttrPresence(ns, attr)
         val dbBaseType = exts(1)
@@ -365,12 +363,12 @@ trait SqlUpdate
   private def updateIterableRemove[T, M[_] <: Iterable[_]](
     ns: String,
     attr: String,
-    refNs: Option[String],
+    optRefNs: Option[String],
     iterable: M[T],
     exts: List[String],
     iterable2array: M[T] => Array[AnyRef]
   ): Unit = {
-    refNs.fold {
+    optRefNs.fold {
       if (iterable.nonEmpty) {
         setAttrPresence(ns, attr)
         val scalaBaseType = exts.head
@@ -388,13 +386,13 @@ trait SqlUpdate
   }
 
 
-  private def setAttrPresence(ns: String, attr: String): Unit = {
+  protected def setAttrPresence(ns: String, attr: String): Unit = {
     if (isUpsert) {
       // Allow finding where clauses for ids query. Not used otherwise
-      query.filterElements += AttrOneOptByte(ns, attr)
+      query.filterAttrs += AttrOneOptByte(ns, attr)
     } else {
       // Attribute value present in updated data
-      query.filterElements += AttrOneTacByte(ns, attr)
+      query.filterAttrs += AttrOneTacByte(ns, attr)
 
       // Used for single ns update with ids and no filters
       update.mandatoryCols += s"$ns.$attr IS NOT NULL"
@@ -419,10 +417,6 @@ trait SqlUpdate
       )
     }
   }
-
-  // todo: remove
-  def getUpdateData(elements: List[Element]): Data = ???
-  protected def addToUpdateColsNotNull(attr: String) = ???
 
   override protected lazy val extsID             = List("ID", "BIGINT", "")
   override protected lazy val extsString         = List("String", "LONGVARCHAR", "")

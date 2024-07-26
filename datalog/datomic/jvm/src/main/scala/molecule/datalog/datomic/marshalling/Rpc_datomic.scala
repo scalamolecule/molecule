@@ -8,7 +8,6 @@ import molecule.core.marshalling.Boopicklers._
 import molecule.core.marshalling._
 import molecule.core.marshalling.deserialize.UnpickleTpls
 import molecule.core.spi.TxReport
-import molecule.core.transaction._
 import molecule.core.util.Executor._
 import molecule.core.util.FutureUtils
 import molecule.datalog.datomic.async._
@@ -22,42 +21,42 @@ object Rpc_datomic
 
   /**
    * Tuple type is not marshalled from client to server. So we signal this with
-   * the 'Any' type parameter. Model elements are used to pickle the correct types
+   * the 'AnyTpl' type parameter. Model elements are used to pickle the correct types
    * here on the server side. And once wired to the client side we can unpickle
    * the data again from the model and cast to type `Tpl`.
    */
-  override def query[Any](
+  override def query[AnyTpl](
     proxy: ConnProxy,
     elements: List[Element],
     limit: Option[Int]
-  ): Future[Either[MoleculeError, List[Any]]] = either {
+  ): Future[Either[MoleculeError, List[AnyTpl]]] = either {
     for {
       conn <- getConn(proxy)
-      tpls <- Query[Any](elements, limit, proxy.dbView).get(conn, global)
+      tpls <- Query[AnyTpl](elements, limit, proxy.dbView).get(conn, global)
     } yield tpls
   }
 
-  override def queryOffset[Any](
+  override def queryOffset[AnyTpl](
     proxy: ConnProxy,
     elements: List[Element],
     limit: Option[Int],
     offset: Int
-  ): Future[Either[MoleculeError, (List[Any], Int, Boolean)]] = either {
+  ): Future[Either[MoleculeError, (List[AnyTpl], Int, Boolean)]] = either {
     for {
       conn <- getConn(proxy)
-      tpls <- QueryOffset[Any](elements, limit, offset, proxy.dbView).get(conn, global)
+      tpls <- QueryOffset[AnyTpl](elements, limit, offset, proxy.dbView).get(conn, global)
     } yield tpls
   }
 
-  override def queryCursor[Any](
+  override def queryCursor[AnyTpl](
     proxy: ConnProxy,
     elements: List[Element],
     limit: Option[Int],
     cursor: String
-  ): Future[Either[MoleculeError, (List[Any], String, Boolean)]] = either {
+  ): Future[Either[MoleculeError, (List[AnyTpl], String, Boolean)]] = either {
     for {
       conn <- getConn(proxy)
-      tpls <- QueryCursor[Any](elements, limit, cursor, proxy.dbView).get(conn, global)
+      tpls <- QueryCursor[AnyTpl](elements, limit, cursor, proxy.dbView).get(conn, global)
     } yield tpls
   }
 
@@ -67,8 +66,7 @@ object Rpc_datomic
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
-      stmts = (new ResolveSave with Save_datomic).getStmts(elements)
-      txReport <- conn.transact_async(stmts)
+      txReport <- save_transact(Save(elements))(conn, global)
     } yield txReport
   }
 
@@ -85,10 +83,9 @@ object Rpc_datomic
           (if (countValueAttrs(elements) == 1) {
             tpls.map(Tuple1(_))
           } else tpls).asInstanceOf[Seq[Product]]
-        case Left(err)   => throw err // catched in outer either wrapper
+        case Left(err)   => throw err // catch in outer either wrapper
       }
-      stmts = (new ResolveInsert with Insert_datomic).getStmts(elements, tpls)
-      txReport <- conn.transact_async(stmts)
+      txReport <- insert_transact(Insert(elements, tpls))(conn, global)
     } yield txReport
   }
 
@@ -100,9 +97,7 @@ object Rpc_datomic
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
-      stmts = (new ResolveUpdate(conn.proxy, isUpsert) with Update_datomic)
-        .getStmts(conn, elements, true)
-      txReport <- conn.transact_async(stmts)
+      txReport <- update_transact(Update(elementsRaw, isUpsert))(conn, global)
     } yield txReport
   }
 
@@ -112,8 +107,7 @@ object Rpc_datomic
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
-      stmts = (new ResolveDelete with Delete_datomic).getData(conn, elements)
-      txReport <- conn.transact_async(stmts)
+      txReport <- delete_transact(Delete(elements))(conn, global)
     } yield txReport
   }
 }

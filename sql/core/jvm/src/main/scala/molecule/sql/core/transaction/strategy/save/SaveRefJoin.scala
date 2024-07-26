@@ -1,17 +1,15 @@
 package molecule.sql.core.transaction.strategy.save
 
-import java.sql.Connection
 import molecule.sql.core.transaction.strategy.SqlOps
 
 case class SaveRefJoin(
   parent: SaveAction,
   ref: SaveAction,
-  sqlConn: Connection,
   sqlOps: SqlOps,
   ns: String,
   refAttr: String,
   refNs: String,
-) extends SaveAction(parent, sqlConn, sqlOps, refNs) {
+) extends SaveAction(parent, sqlOps, refNs) {
 
   override def execute(): Unit = {
     val ps = prepare(curStmt)

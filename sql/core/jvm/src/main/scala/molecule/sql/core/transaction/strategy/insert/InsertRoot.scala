@@ -1,15 +1,14 @@
 package molecule.sql.core.transaction.strategy.insert
 
-import java.sql.Connection
 import molecule.sql.core.transaction.strategy.SqlOps
 
 case class InsertRoot(
-  sqlConn: Connection,
+  sqlOps: SqlOps,
   ns: String,
-)(implicit sqlOps: SqlOps) extends InsertAction(null, sqlConn, sqlOps, ns) {
+) extends InsertAction(null, sqlOps, ns) {
 
   val insertNs: InsertNs = {
-    val first = InsertNs(this, sqlConn, sqlOps, ns, "Ns")
+    val first = InsertNs(this, sqlOps, ns, "Ns")
     children += first
     first
   }

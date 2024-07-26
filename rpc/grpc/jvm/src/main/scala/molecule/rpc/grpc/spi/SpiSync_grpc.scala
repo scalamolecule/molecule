@@ -126,7 +126,7 @@ trait SpiSync_grpc
     ???
   }
   def update_getStmts(update: Update, conn: GraphqlConn_JVM): Data = {
-//    (new ResolveUpdate(conn.proxy, update.isUpsert) with Update_datomic)
+//    (new ResolveUpdate(update.isUpsert) with Update_datomic)
 //      .getStmts(conn, update.elements)
     ???
   }

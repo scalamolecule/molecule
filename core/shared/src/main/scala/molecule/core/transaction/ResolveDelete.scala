@@ -5,7 +5,7 @@ import molecule.boilerplate.ast.Model._
 import molecule.core.transaction.ops.DeleteOps
 import scala.annotation.tailrec
 
-class ResolveDelete { self: DeleteOps =>
+trait ResolveDelete { self: DeleteOps =>
 
   @tailrec
   final def resolve(elements: List[Element], topLevel: Boolean): Unit = {
@@ -34,7 +34,7 @@ class ResolveDelete { self: DeleteOps =>
 
         case _: Nested    => throw ModelError(s"Nested data structure not allowed in delete molecule.")
         case _: OptNested => throw ModelError(s"Optional nested data structure not allowed in delete molecule.")
-        case _            =>
+        case _            => // Ref, OptRef
           addFilterElement(element)
           resolve(tail, false)
       }

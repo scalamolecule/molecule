@@ -3,8 +3,10 @@ package molecule.sql.postgres.transaction
 import java.sql.{PreparedStatement => PS}
 import molecule.core.transaction.{InsertResolvers_, ResolveInsert}
 import molecule.sql.core.transaction.SqlInsert
+import molecule.sql.core.transaction.strategy.SqlOps
 
-trait Insert_postgres extends SqlInsert { self: ResolveInsert with InsertResolvers_ =>
+trait Insert_postgres
+  extends SqlInsert { self: ResolveInsert with InsertResolvers_ with SqlOps =>
 
   override protected def addMap[T](
     ns: String,

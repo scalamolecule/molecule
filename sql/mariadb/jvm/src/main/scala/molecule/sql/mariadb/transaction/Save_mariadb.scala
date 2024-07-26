@@ -5,8 +5,11 @@ import java.util.Date
 import molecule.base.util.BaseHelpers
 import molecule.core.transaction.ResolveSave
 import molecule.sql.core.transaction.SqlSave
+import molecule.sql.core.transaction.strategy.SqlOps
 
-trait Save_mariadb extends SqlSave with BaseHelpers { self: ResolveSave =>
+trait Save_mariadb
+  extends SqlSave
+    with BaseHelpers { self: ResolveSave with SqlOps =>
 
   override protected def addSet[T](
     ns: String,
@@ -18,7 +21,7 @@ trait Save_mariadb extends SqlSave with BaseHelpers { self: ResolveSave =>
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    addIterable(ns, attr, optRefNs, optSet, value2json)
+    addIterable(attr, optRefNs, optSet, value2json)
   }
 
   override protected def addSeq[T](
@@ -31,7 +34,7 @@ trait Save_mariadb extends SqlSave with BaseHelpers { self: ResolveSave =>
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    addIterable(ns, attr, optRefNs, optSeq, value2json)
+    addIterable(attr, optRefNs, optSeq, value2json)
   }
 
   override protected def addMap[T](
@@ -55,7 +58,6 @@ trait Save_mariadb extends SqlSave with BaseHelpers { self: ResolveSave =>
   // Helpers -------------------------------------------------------------------
 
   private def addIterable[T](
-    ns: String,
     attr: String,
     optRefNs: Option[String],
     optIterable: Option[Iterable[T]],
@@ -71,9 +73,7 @@ trait Save_mariadb extends SqlSave with BaseHelpers { self: ResolveSave =>
       }
     } { refNs =>
       optIterable.foreach(refIds =>
-        save.insertJoins(
-          ns, attr, refNs, refIds.asInstanceOf[Set[Long]]
-        )
+        save.refIds(attr, refNs, refIds.asInstanceOf[Set[Long]])
       )
     }
   }

@@ -1,3 +1,4 @@
+import org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv
 import org.scalajs.linker.interface.ESVersion
 import sbt.Keys.libraryDependencies
 import scala.collection.Seq
@@ -182,46 +183,46 @@ lazy val datalogDatomic = crossProject(JSPlatform, JVMPlatform)
   .settings(
     testFrameworks := testingFrameworks,
 
-    //    // Temporarily limit number of tests to be compiled by sbt (comment out this whole sbt setting to test all)
-    //    // Note that intellij doesn't recognize this setting - there you can right-click on files and exclude
-    //    unmanagedSources / excludeFilter := {
-    //      val test = "src/test/scala/molecule/datalog/datomic"
-    //      def path(platform: String) = (baseDirectory.value / s"../$platform/$test").getCanonicalPath
-    //      val jsTests     = path("js")
-    //      val jvmTests    = path("jvm")
-    //      val sharedTests = path("shared")
-    //      val allowed     = Seq(
-    //        //        sharedTests + "/compliance/aggr",
-    //        //        sharedTests + "/compliance/api",
-    //        //        sharedTests + "/compliance/crud",
-    //        //        sharedTests + "/compliance/crud/update",
-    //        //        sharedTests + "/compliance/crud/update/ops",
-    //        //        sharedTests + "/compliance/crud/update/relation",
-    //        //        sharedTests + "/compliance/filter",
-    //        //        sharedTests + "/compliance/filterAttr",
-    //        //        sharedTests + "/compliance/inspect",
-    //        //        sharedTests + "/compliance/pagination",
-    //        //        sharedTests + "/compliance/partitions",
-    //        //        sharedTests + "/compliance/relation",
-    //        //        sharedTests + "/compliance/sort",
-    //        //        sharedTests + "/compliance/subscription",
-    //        //        sharedTests + "/compliance/time",
-    //        //        sharedTests + "/compliance/validation",
-    //        //        sharedTests + "/compliance",
-    //        sharedTests + "/setup",
-    //        jvmTests + "/setup",
-    //        jsTests + "/setup",
-    //        jsTests + "/AdhocJS_datomic.scala",
-    //        //        jvmTests + "/AdhocJVM_datomic.scala",
-    //        //        sharedTests + "/Adhoc_datomic.scala",
-    //      )
-    //      new SimpleFileFilter(f =>
-    //        (f.getCanonicalPath.startsWith(jsTests)
-    //          || f.getCanonicalPath.startsWith(jvmTests)
-    //          || f.getCanonicalPath.startsWith(sharedTests)) &&
-    //          !allowed.exists(p => f.getCanonicalPath.startsWith(p))
-    //      )
-    //    },
+//    // Temporarily limit number of tests to be compiled by sbt (comment out this whole sbt setting to test all)
+//    // Note that intellij doesn't recognize this setting - there you can right-click on files and exclude
+//    unmanagedSources / excludeFilter := {
+//      val test = "src/test/scala/molecule/datalog/datomic"
+//      def path(platform: String) = (baseDirectory.value / s"../$platform/$test").getCanonicalPath
+//      val jsTests     = path("js")
+//      val jvmTests    = path("jvm")
+//      val sharedTests = path("shared")
+//      val allowed     = Seq(
+//        //        sharedTests + "/compliance/aggr",
+//        //        sharedTests + "/compliance/api",
+//        //        sharedTests + "/compliance/crud",
+//        //        sharedTests + "/compliance/crud/update",
+//        //        sharedTests + "/compliance/crud/update/ops",
+//        //        sharedTests + "/compliance/crud/update/relation",
+//        //        sharedTests + "/compliance/filter",
+//        //        sharedTests + "/compliance/filterAttr",
+//        //        sharedTests + "/compliance/inspect",
+//        //        sharedTests + "/compliance/pagination",
+//        //        sharedTests + "/compliance/partitions",
+//        //        sharedTests + "/compliance/relation",
+//        //        sharedTests + "/compliance/sort",
+//        //        sharedTests + "/compliance/subscription",
+//        //        sharedTests + "/compliance/time",
+//        //        sharedTests + "/compliance/validation",
+//        //        sharedTests + "/compliance",
+//        sharedTests + "/setup",
+//        jvmTests + "/setup",
+//        jsTests + "/setup",
+//        jsTests + "/AdhocJS_datomic.scala",
+//        //        jvmTests + "/AdhocJVM_datomic.scala",
+//        //        sharedTests + "/Adhoc_datomic.scala",
+//      )
+//      new SimpleFileFilter(f =>
+//        (f.getCanonicalPath.startsWith(jsTests)
+//          || f.getCanonicalPath.startsWith(jvmTests)
+//          || f.getCanonicalPath.startsWith(sharedTests)) &&
+//          !allowed.exists(p => f.getCanonicalPath.startsWith(p))
+//      )
+//    },
   )
   .jsSettings(jsEnvironment)
   .dependsOn(datalogCore)
@@ -301,7 +302,50 @@ lazy val sqlH2 = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("sql/h2"))
   .settings(name := "molecule-sql-h2")
-  .settings(testFrameworks := testingFrameworks)
+  .settings(
+    testFrameworks := testingFrameworks,
+
+//    unmanagedSources / excludeFilter := {
+//      val test = "src/test/scala/molecule/sql/h2"
+//      def path(platform: String) = (baseDirectory.value / s"../$platform/$test").getCanonicalPath
+//      val jsTests     = path("js")
+//      val jvmTests    = path("jvm")
+//      val sharedTests = path("shared")
+//      val allowed     = Seq(
+//        //        sharedTests + "/compliance/aggr",
+//        //        sharedTests + "/compliance/api",
+//        //        sharedTests + "/compliance/crud",
+//        //        sharedTests + "/compliance/crud/update",
+//        //        sharedTests + "/compliance/crud/update/ops",
+//        //        sharedTests + "/compliance/crud/update/relation",
+//        //        sharedTests + "/compliance/filter",
+//        //        sharedTests + "/compliance/filter/set",
+//        //        sharedTests + "/compliance/filterAttr",
+//        //        sharedTests + "/compliance/inspect",
+//        //        sharedTests + "/compliance/pagination",
+//        //        sharedTests + "/compliance/partitions",
+//        //        sharedTests + "/compliance/relation",
+//        //        sharedTests + "/compliance/sort",
+//        //        sharedTests + "/compliance/subscription",
+//        //        sharedTests + "/compliance/time",
+//        //        sharedTests + "/compliance/validation",
+//        //        sharedTests + "/compliance",
+//        sharedTests + "/setup",
+//        jvmTests + "/setup",
+//        jsTests + "/setup",
+//        jsTests + "/AdhocJS_h2.scala",
+//        //        jvmTests + "/AdhocJVM_datomic.scala",
+//        //        sharedTests + "/Adhoc_datomic.scala",
+//      )
+//      new SimpleFileFilter(f =>
+//        (f.getCanonicalPath.startsWith(jsTests)
+//          || f.getCanonicalPath.startsWith(jvmTests)
+//          || f.getCanonicalPath.startsWith(sharedTests)) &&
+//          !allowed.exists(p => f.getCanonicalPath.startsWith(p))
+//      )
+//    },
+
+  )
   .settings(doPublish)
   .settings(compilerArgs)
   .jsSettings(jsEnvironment)
@@ -394,7 +438,18 @@ lazy val testingFrameworks = Seq(
 
 lazy val jsEnvironment = {
   Seq(
-    jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
+
+    jsEnv := new JSDOMNodeJSEnv(
+      JSDOMNodeJSEnv
+        .Config()
+        // for some reason still needed...
+        // https://github.com/scala-js/scala-js-js-envs/issues/12
+        .withArgs(List("--dns-result-order=ipv4first"))
+    ),
+    // "Error: connect ECONNREFUSED ::1:8080" with this one alone... shouldn't it work?
+    // jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
+
+
     // Allowing unicode characters in regex expressions (used in email regex)
     // https://www.scala-js.org/doc/regular-expressions.html
     scalaJSLinkerConfig ~= (_.withESFeatures(_.withESVersion(ESVersion.ES2018))),

@@ -1,18 +1,11 @@
 package molecule.sql.mariadb.transaction
 
 import java.sql.{PreparedStatement => PS}
-import molecule.boilerplate.ast.Model._
 import molecule.core.transaction.ResolveUpdate
-import molecule.sql.core.query.Model2SqlQuery
 import molecule.sql.core.transaction.SqlUpdate
-import molecule.sql.mariadb.query.Model2SqlQuery_mariadb
+import molecule.sql.core.transaction.strategy.SqlOps
 
-trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
-
-  override def model2SqlQuery(elements: List[Element]): Model2SqlQuery =
-    new Model2SqlQuery_mariadb(elements)
-
-  protected var curParamIndex = 1
+trait Update_mariadb extends SqlUpdate { self: ResolveUpdate with SqlOps =>
 
   override def updateSetEq[T](
     ns: String,
@@ -102,18 +95,12 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
     value2json: (StringBuffer, T) => StringBuffer,
   ): Unit = {
     if (map.nonEmpty) {
-      colsOLD += attr
-      if (!isUpsert) {
-        addToUpdateColsNotNull(attr)
-      }
-      placeHolders = placeHolders :+
-        s"$ns.$attr = JSON_MERGE_PATCH(IFNULL($ns.$attr, JSON_OBJECT()), ?)"
-      val jsonBytes  = map2jsonByteArray(map, value2json)
-      val colSetter = (ps: PS, _: IdsMap, _: RowIndex) => {
-        ps.setBytes(curParamIndex, jsonBytes)
-        curParamIndex += 1
-      }
-      addColSetter(curRefPath, colSetter)
+      setAttrPresence(ns, attr)
+      val setAttr    = s"$ns.$attr = JSON_MERGE_PATCH(IFNULL($ns.$attr, JSON_OBJECT()), ?)"
+      val paramIndex = update.setCol(setAttr)
+      update.addColSetter((ps: PS) =>
+        ps.setBytes(paramIndex, map2jsonByteArray(map, value2json))
+      )
     }
   }
 
@@ -125,17 +112,15 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
     exts: List[String],
   ): Unit = {
     if (keys.nonEmpty) {
-      colsOLD += attr
-      if (!isUpsert) {
-        addToUpdateColsNotNull(attr)
-      }
+      setAttrPresence(ns, attr)
       val keys1 = keys.map(k => s"'$$.$k'").mkString(", ")
-      placeHolders = placeHolders :+
+      update.setCol(
         s"""$ns.$attr = CASE JSON_REMOVE(IFNULL($ns.$attr, NULL), $keys1)
            |    WHEN JSON_OBJECT() THEN NULL
            |    ELSE JSON_REMOVE($ns.$attr, $keys1)
            |  END""".stripMargin
-      addColSetter(curRefPath, (ps: PS, _: IdsMap, _: RowIndex) => ())
+      )
+      update.addColSetter((_: PS) => ())
     }
   }
 
@@ -150,27 +135,22 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     refNs.fold {
-      colsOLD += attr
-      placeHolders = placeHolders :+ s"$attr = ?"
-      val colSetter = if (iterable.nonEmpty) {
-        if (!isUpsert) {
-          addToUpdateColsNotNull(attr)
-        }
-        (ps: PS, _: IdsMap, _: RowIndex) => {
+      val paramIndex = update.setCol(s"$attr = ?")
+      if (iterable.nonEmpty) {
+        setAttrPresence(ns, attr)
+        update.addColSetter((ps: PS) => {
           val json = iterable2json(iterable.asInstanceOf[Iterable[T]], value2json)
-          ps.setString(curParamIndex, json)
-          curParamIndex += 1
-        }
+          ps.setString(paramIndex, json)
+        })
       } else {
-        (ps: PS, _: IdsMap, _: RowIndex) => {
-          ps.setNull(curParamIndex, 0)
-          curParamIndex += 1
-        }
+        update.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
       }
-      addColSetter(curRefPath, colSetter)
     } { refNs =>
-//      setRefIds(ns, attr, refNs, iterable.asInstanceOf[Set[Long]])
-      ???
+      update.deleteRefIds(attr, refNs, getUpdateId)
+      val refIds = iterable.asInstanceOf[Set[Long]]
+      if (refIds.nonEmpty) {
+        update.insertRefIds(attr, refNs, refIds)
+      }
     }
   }
 
@@ -183,20 +163,18 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
   ): Unit = {
     refNs.fold {
       if (iterable.nonEmpty) {
-        colsOLD += attr
-        if (!isUpsert) {
-          addToUpdateColsNotNull(attr)
-        }
-        placeHolders = placeHolders :+ s"$attr = JSON_MERGE(IFNULL($attr, '[]'), ?)"
-        val json = iterable2json(iterable.asInstanceOf[Iterable[T]], value2json)
-        addColSetter(curRefPath, (ps: PS, _: IdsMap, _: RowIndex) => {
-          ps.setString(curParamIndex, json)
-          curParamIndex += 1
+        setAttrPresence(ns, attr)
+        val setAttr    = s"$attr = JSON_MERGE(IFNULL($attr, '[]'), ?)"
+        val paramIndex = update.setCol(setAttr)
+        update.addColSetter((ps: PS) => {
+          val json = iterable2json(iterable.asInstanceOf[Iterable[T]], value2json)
+          ps.setString(paramIndex, json)
         })
       }
     } { refNs =>
-//      addRefIds(ns, attr, refNs, iterable.asInstanceOf[Set[Long]])
-      ???
+      if (iterable.nonEmpty) {
+        update.insertRefIds(attr, refNs, iterable.asInstanceOf[Set[Long]])
+      }
     }
   }
 
@@ -210,24 +188,25 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
   ): Unit = {
     refNs.fold {
       if (iterable.nonEmpty) {
-        colsOLD += attr
-        if (!isUpsert) {
-          addToUpdateColsNotNull(attr)
-        }
-        val valueTable    = "table_" + (placeHolders.size + 1)
+        setAttrPresence(ns, attr)
+        val valueTable    = "table_" + update.colCount
         val dbType        = exts(1)
         val retractValues = iterable.asInstanceOf[Iterable[T]].map(one2json).mkString(", ")
-        placeHolders = placeHolders :+
+
+        update.setCol(
           s"""$attr = (
              |    SELECT JSON_ARRAYAGG($valueTable.v)
              |    FROM   JSON_TABLE($ns.$attr, '$$[*]' COLUMNS (v $dbType PATH '$$')) $valueTable
              |    WHERE  $valueTable.v NOT IN ($retractValues) AND $ns.id IS NOT NULL
              |  )""".stripMargin
-        addColSetter(curRefPath, (_: PS, _: IdsMap, _: RowIndex) => ())
+        )
+        update.addColSetter((_: PS) => ())
       }
     } { refNs =>
-//      removeRefIds(ns, attr, refNs, iterable.asInstanceOf[Set[Long]])
-      ???
+      if (iterable.nonEmpty) {
+        val refIds = iterable.asInstanceOf[Set[Long]]
+        update.deleteRefIds(attr, refNs, getUpdateId, refIds)
+      }
     }
   }
 

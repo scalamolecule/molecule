@@ -1,17 +1,15 @@
 package molecule.sql.core.transaction.strategy.insert
 
-import java.sql.Connection
 import molecule.sql.core.transaction.strategy.SqlOps
 
 case class InsertNestedJoins(
   curNs: InsertAction,
   nested: InsertNs,
-  sqlConn: Connection,
   sqlOps: SqlOps,
   ns: String,
   refAttr: String,
   refNs: String,
-) extends InsertAction(curNs, sqlConn, sqlOps, refNs) {
+) extends InsertAction(curNs, sqlOps, refNs) {
 
   // Keep track of nested counts for joins
   private var nestedCounts = List.empty[Int]

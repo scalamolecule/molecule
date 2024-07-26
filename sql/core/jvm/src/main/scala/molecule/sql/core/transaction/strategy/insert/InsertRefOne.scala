@@ -1,17 +1,16 @@
 package molecule.sql.core.transaction.strategy.insert
 
-import java.sql.Connection
+import java.sql.{PreparedStatement => PS}
 import molecule.sql.core.transaction.strategy.SqlOps
 
 case class InsertRefOne(
   parent: InsertAction,
-  sqlConn: Connection,
   sqlOps: SqlOps,
   ns: String,
   refAttr: String,
   refNs: String,
   refAttrIndex: Int
-) extends InsertAction(parent, sqlConn, sqlOps, refNs) {
+) extends InsertAction(parent, sqlOps, refNs) {
 
   override def rootAction: InsertAction = parent.rootAction
 

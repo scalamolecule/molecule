@@ -9,8 +9,12 @@ import scala.concurrent.{ExecutionContext, Future}
 abstract class Conn(val proxy: ConnProxy)
   extends ModelUtils { self: DataType =>
 
-  def transact_async(data: Data)(implicit ec: ExecutionContext): Future[TxReport] = throw jvmOnly("transact_async")
-  def transact_sync(data: Data): TxReport = throw jvmOnly("transact_sync")
+  def transact_async(data: Data)
+                    (implicit ec: ExecutionContext): Future[TxReport] =
+    throw jvmOnly("transact_async")
+
+  def transact_sync(data: Data): TxReport =
+    throw jvmOnly("transact_sync")
 
   def db: Any = ???
 
@@ -22,7 +26,6 @@ abstract class Conn(val proxy: ConnProxy)
   protected def jvmOnly(method: String): ExecutionError =
     ExecutionError(s"`$method` only implemented on JVM platform.")
 
-  var startTime = 0L
 
   // Subscriptions --------------------------------------------------------------
 

@@ -24,13 +24,14 @@ object AdhocJVM_mysql extends TestSuite_mysql {
       for {
 
 
-        _ <- Ns.i.uuid.insert(List(
-          (1, uuid1),
-          (2, uuid2),
-          (2, uuid2),
-          (2, uuid3),
-        )).i.transact
+        id <- Ns.i(42).save.transact.map(_.id)
 
+        // Map attribute not yet asserted
+        _ <- Ns.intMap.query.get.map(_ ==> Nil)
+
+        // When attribute is not already asserted, an update has no effect
+        _ <- Ns(id).intMap(Map(pint1, pint2)).update.i.transact
+        _ <- Ns.intMap.query.get.map(_ ==> Nil)
 
       } yield ()
     }
@@ -40,10 +41,38 @@ object AdhocJVM_mysql extends TestSuite_mysql {
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
 
-        _ <- A.i.insert(2).transact
-        _ <- A.i.query.get.map(_ ==> List(2))
+        List(a, b, c, d, e, f) <- A.i.a1.Bb.*?(B.s_?.iMap_?).insert(
+          (1, List()),
+          (2, List((Some("a"), None))),
+          (3, List((Some("b"), None), (Some("c"), None))),
+          (4, List((Some("d"), Some(Map(pint1, pint2))))),
+          (5, List((Some("e"), Some(Map(pint2, pint3))), (Some("f"), Some(Map(pint3, pint4))))),
+          (6, List((Some("g"), Some(Map(pint4, pint5))), (Some("h"), None))),
+        ).transact.map(_.ids)
 
+        // Filter by A ids, update B values
+        _ <- A(a, b, c, d, e, f).Bb.iMap(Map(pint4, pint5)).update.transact
 
+        _ <- A.i.a1.Bb.*?(B.s_?.a1.iMap).query.get.map(_ ==> List(
+          (1, List()), //                                                               no B.i value
+          (2, List()), //                                                               no B.i value
+          (3, List()), //                                                               no B.i value
+          (4, List((Some("d"), Map(pint4, pint5)))), //                                 update in 1 ref entity
+          (5, List((Some("e"), Map(pint4, pint5)), (Some("f"), Map(pint4, pint5)))), // update in 2 ref entities
+          (6, List((Some("g"), Map(pint4, pint5)))), //                                 already had same value
+        ))
+
+        // Filter by A ids, upsert B values
+        _ <- A(a, b, c, d, e, f).Bb.iMap(Map(pint5, pint6)).upsert.transact
+
+        _ <- A.i.a1.Bb.*?(B.s_?.a1.iMap).query.get.map(_ ==> List(
+          (1, List((None, Map(pint5, pint6)))), //                                      ref + addition
+          (2, List((Some("a"), Map(pint5, pint6)))), //                                 addition in 1 ref entity
+          (3, List((Some("b"), Map(pint5, pint6)), (Some("c"), Map(pint5, pint6)))), // addition in 2 ref entities
+          (4, List((Some("d"), Map(pint5, pint6)))), //                                 update in 1 ref entity
+          (5, List((Some("e"), Map(pint5, pint6)), (Some("f"), Map(pint5, pint6)))), // update in 2 ref entities
+          (6, List((Some("g"), Map(pint5, pint6)), (Some("h"), Map(pint5, pint6)))), // update in one ref entity and addition in another
+        ))
         //        _ <- rawTransact(
         //          """UPDATE B
         //            |SET

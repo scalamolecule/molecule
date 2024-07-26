@@ -1,17 +1,15 @@
 package molecule.sql.core.transaction.strategy.insert
 
-import java.sql.Connection
 import molecule.sql.core.transaction.strategy.SqlOps
 import scala.collection.mutable.ListBuffer
 
 case class InsertRefIds(
   parent: InsertAction,
-  sqlConn: Connection,
   sqlOps: SqlOps,
   ns: String,
   refAttr: String,
   refNs: String,
-) extends InsertAction(parent, sqlConn, sqlOps, refNs) {
+) extends InsertAction(parent, sqlOps, refNs) {
 
   // Cache card-many ref ids for each row
   val refIdss = ListBuffer.empty[Iterable[Long]]

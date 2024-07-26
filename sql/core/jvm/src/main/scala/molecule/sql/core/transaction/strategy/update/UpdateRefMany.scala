@@ -1,20 +1,16 @@
 package molecule.sql.core.transaction.strategy.update
 
-import java.sql.Connection
-import molecule.boilerplate.ast.Model.Element
-import molecule.sql.core.query.Model2SqlQuery
+import java.sql.{PreparedStatement => PS}
 import molecule.sql.core.transaction.strategy.SqlOps
 import scala.collection.mutable.ListBuffer
 
 case class UpdateRefMany(
   parent: UpdateAction,
-  sqlConn: Connection,
   sqlOps: SqlOps,
-  isUpsert: Boolean,
   ns: String,
   refAttr: String,
   refNs: String,
-) extends UpdateAction(parent, sqlConn, sqlOps, isUpsert, refNs) {
+) extends UpdateAction(parent, sqlOps, refNs) {
 
   rowSetters += ListBuffer.empty[PS => Unit]
 
@@ -26,6 +22,8 @@ case class UpdateRefMany(
   override def curStmt: String = {
     if (cols.isEmpty) {
       s"no update columns in $refNs ..."
+    } else if (ids.isEmpty) {
+      s"no ids found to be updated in $ns ..."
     } else {
       val idClause = s"$refNs.id IN(" + ids.mkString(", ") + ")"
       sqlOps.updateStmt(refNs, cols, List(idClause))
@@ -42,7 +40,7 @@ case class UpdateRefMany(
 
     // Add joins from parent to new refs
     val joinUpdates = sqlOps.insertJoinStmt(ns, refAttr, refNs)
-    val addJoins     = prepare(joinUpdates)
+    val addJoins    = prepare(joinUpdates)
     parent.ids.zip(knownIds).foreach {
       case (nsId, 0)  => // missing ref
         addJoins.setLong(1, nsId) // left id of join

@@ -1,6 +1,6 @@
 package molecule.sql.core.spi
 
-import java.sql.{ResultSetMetaData, Statement}
+import java.sql.{ResultSet, ResultSetMetaData, Statement}
 import molecule.base.error._
 import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
@@ -10,25 +10,26 @@ import molecule.core.spi._
 import molecule.core.validation.TxModelValidation
 import molecule.core.validation.insert.InsertValidation
 import molecule.sql.core.facade.JdbcConn_JVM
-import molecule.sql.core.query.{SqlQueryResolveCursor, SqlQueryResolveOffset}
+import molecule.sql.core.query.{Model2SqlQuery, SqlQueryBase, SqlQueryResolveCursor, SqlQueryResolveOffset}
 import molecule.sql.core.transaction.strategy.SqlAction
+import molecule.sql.core.transaction.strategy.delete.DeleteAction
 import molecule.sql.core.transaction.strategy.insert.InsertAction
 import molecule.sql.core.transaction.strategy.save.SaveAction
 import molecule.sql.core.transaction.strategy.update.UpdateAction
-import molecule.sql.core.transaction.strategy.updateOld.UpdateHelper
-import molecule.sql.core.transaction.{SqlBase_JVM, SqlUpdateSetValidator}
+import molecule.sql.core.transaction.{ConnectionPool, SqlUpdateSetValidator}
 import scala.collection.mutable.ListBuffer
 import scala.util.control.NonFatal
+import molecule.sql.core.javaSql.{ResultSetInterface => Row}
 
 
 trait SpiSyncBase
   extends SpiSync
-    with UpdateHelper
-    with SqlBase_JVM
+    with ConnectionPool
     with SpiHelpers
     with SqlUpdateSetValidator
     with Renderer
     with BaseHelpers {
+
 
   // Query --------------------------------------------------------
 
@@ -127,7 +128,7 @@ trait SpiSyncBase
   override def save_inspect(save: Save)(implicit conn0: Conn): Unit = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
     tryInspect("save", save.elements) {
-      printInspectTx2("SAVE", save.elements, save_getAction(save, conn))
+      printInspectTx("SAVE", save.elements, save_getAction(save, conn))
     }
   }
 
@@ -164,7 +165,7 @@ trait SpiSyncBase
   override def insert_inspect(insert: Insert)(implicit conn: Conn): Unit = {
     tryInspect("insert", insert.elements) {
       val jdbcConn = conn.asInstanceOf[JdbcConn_JVM]
-      printInspectTx2("INSERT", insert.elements, insert_getAction(insert, jdbcConn), insert.tpls)
+      printInspectTx("INSERT", insert.elements, insert_getAction(insert, jdbcConn), insert.tpls)
     }
   }
 
@@ -185,21 +186,8 @@ trait SpiSyncBase
       update_inspect(update)
     val errors = update_validate(update0) // validate original elements against meta model
     if (errors.isEmpty) {
-
-      lazy val data = if (isRefUpdate(update.elements)) {
-        if (update0.isUpsert)
-          refUpserts(update.elements)(conn)
-        else
-          refUpdates(update.elements, update.isUpsert)(conn)
-      } else {
-        update_getData(conn, update)
-      }
-
-      lazy val action = update_getAction(update, conn)
-
-      //      val txReport = conn.transact_sync(data)
+      val action   = update_getAction(update, conn)
       val txReport = conn.transact_sync(action)
-
       conn.callback(update.elements)
       txReport
     } else {
@@ -211,43 +199,55 @@ trait SpiSyncBase
     val conn   = conn0.asInstanceOf[JdbcConn_JVM]
     val action = if (update.isUpsert) "UPSERT" else "UPDATE"
     tryInspect(action, update.elements) {
-
-      //      val old = true
-      val old = false
-
-      if (old) {
-        if (isRefUpdate(update.elements)) {
-          val (idsModel, updateModels) = prepareMultipleUpdates(update.elements, update.isUpsert)
-
-          val refIds =
-            s"""REF IDS MODEL ----------------
-               |${idsModel.mkString("\n")}
-               |
-               |${refIdsQuery(idsModel, conn.proxy)}
-               |""".stripMargin
-
-          val updates = updateModels
-            .map(_(42L)) // dummy value
-            .map { m =>
-              val elements = m.mkString("\n")
-              val tables   = update_getData(conn, Update(m, update.isUpsert))._1
-              tables.headOption.fold(elements)(table => elements + "\n" + table.stmt)
-            }
-            .mkString(action + "S ----------------------\n", "\n------------\n", "")
-
-          printRaw(action, update.elements, refIds + "\n" + updates)
-        } else {
-          printInspectTx(action, update.elements, update_getData(conn, update))
-        }
-      } else {
-        printInspectTx2(action, update.elements, update_getAction(update, conn))
-      }
+      //      if (isRefUpdate(update.elements)) {
+      //        val (idsModel, updateModels) = prepareMultipleUpdates(update.elements, update.isUpsert)
+      //
+      //        val refIds =
+      //          s"""REF IDS MODEL ----------------
+      //             |${idsModel.mkString("\n")}
+      //             |
+      //             |${refIdsQuery(idsModel, conn.proxy)}
+      //             |""".stripMargin
+      //
+      //        val updates = updateModels
+      //          .map(_(42L)) // dummy value
+      //          .map { m =>
+      //            val elements = m.mkString("\n")
+      //            val tables   = update_getData(conn, Update(m, update.isUpsert))._1
+      //            tables.headOption.fold(elements)(table => elements + "\n" + table.stmt)
+      //          }
+      //          .mkString(action + "S ----------------------\n", "\n------------\n", "")
+      //
+      //        printRaw(action, update.elements, refIds + "\n" + updates)
+      //      } else {
+      //        printInspectTx(action, update.elements, update_getData(conn, update))
+      //      }
+      printInspectTx(action, update.elements, update_getAction(update, conn))
     }
   }
 
-
   // Implement for each sql database
-  def update_getAction(update: Update, conn: JdbcConn_JVM): UpdateAction = ???
+  def update_getAction(update: Update, conn: JdbcConn_JVM): UpdateAction
+
+
+  override def update_validate(
+    update: Update
+  )(implicit conn0: Conn): Map[String, Seq[String]] = {
+    val conn            = conn0.asInstanceOf[JdbcConn_JVM]
+    val query2resultSet = (query: String) => {
+      val ps = conn.sqlConn.prepareStatement(
+        query, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY
+      )
+      conn.resultSet(ps.executeQuery())
+    }
+    validateUpdateSet(conn.proxy, update.elements, query2resultSet)
+  }
+
+  def validateUpdateSet(
+    proxy: ConnProxy,
+    elements: List[Element],
+    query2resultSet: String => Row
+  ): Map[String, Seq[String]]
 
 
   // Delete --------------------------------------------------------
@@ -258,22 +258,21 @@ trait SpiSyncBase
     if (delete.doInspect) {
       delete_inspect(delete)
     }
-    delete_getExecutioner(conn, delete).fold(TxReport(Nil)) { executions =>
-      val txReport = conn.atomicTransaction(executions)
-      conn.callback(delete.elements, true)
-      txReport
-    }
+
+    lazy val action = delete_getAction(conn, delete)
+    val txReport = conn.transact_sync(action)
+    conn.callback(delete.elements, true)
+    txReport
   }
 
   override def delete_inspect(delete: Delete)(implicit conn0: Conn): Unit = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
     tryInspect("delete", delete.elements) {
-      printInspectTx("DELETE", delete.elements, delete_getInspectionData(conn, delete))
+      printInspectTx("DELETE", delete.elements, delete_getAction(conn, delete))
     }
   }
 
-  // Only used for inspection
-  def delete_getInspectionData(conn: JdbcConn_JVM, delete: Delete): Data
+  def delete_getAction(conn: JdbcConn_JVM, delete: Delete): DeleteAction
 
 
   // Inspect --------------------------------------------------------
@@ -289,19 +288,6 @@ trait SpiSyncBase
   }
 
   private def printInspectTx(
-    label: String, elements: List[Element], stmts: Data, tpls: Seq[Product] = Nil
-  ): Unit = {
-    val (tables, joinTables) = stmts
-    val tableStmts           = tables.reverse.map(_.stmt).mkString("\n--------\n")
-    val joinTableStmts       = if (joinTables.isEmpty) {
-      ""
-    } else {
-      "\n\n--------------\n\n" + joinTables.map(_.stmt).mkString("\n--------\n")
-    }
-    printRaw(label, elements, tableStmts + joinTableStmts, tpls.mkString("\n"))
-  }
-
-  private def printInspectTx2(
     label: String,
     elements: List[Element],
     action: SqlAction,
@@ -313,6 +299,8 @@ trait SpiSyncBase
 
   // Util --------------------------------------
 
+  def getModel2SqlQuery(elements: List[Element]): Model2SqlQuery with SqlQueryBase
+
   override def fallback_rawTransact(
     stmt: String,
     doPrint: Boolean = false
@@ -322,7 +310,9 @@ trait SpiSyncBase
     debug("\n=============================================================================")
     debug(stmt)
 
-    val ps = conn.sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
+    val ps = conn.sqlConn.prepareStatement(
+      stmt, Statement.RETURN_GENERATED_KEYS
+    )
     ps.execute()
 
     val resultSet = ps.getGeneratedKeys // is empty if no nested data

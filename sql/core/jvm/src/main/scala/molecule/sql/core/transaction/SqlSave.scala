@@ -4,22 +4,21 @@ import java.sql.{PreparedStatement => PS}
 import boopickle.Default._
 import molecule.base.ast._
 import molecule.boilerplate.ast.Model._
-import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ResolveSave
 import molecule.core.transaction.ops.SaveOps
 import molecule.core.util.SerializationUtils
+import molecule.sql.core.transaction.strategy.SqlOps
 import molecule.sql.core.transaction.strategy.save.{SaveAction, SaveRoot}
 
 trait SqlSave
-  extends SqlBase_JVM
-    with SaveOps with SqlBaseOps
-    with MoleculeLogging
-    with SerializationUtils { self: ResolveSave =>
+  extends SaveOps
+    with SqlBaseOps
+    with SerializationUtils { self: ResolveSave with SqlOps =>
 
   protected var save: SaveAction = null
 
   def getSaveAction(elements: List[Element]): SaveAction = {
-    save = SaveRoot(sqlConn, getInitialNs(elements)).saveNs
+    save = SaveRoot(sqlOps, getInitialNs(elements)).saveNs
     resolve(elements)
     save.rootAction
   }

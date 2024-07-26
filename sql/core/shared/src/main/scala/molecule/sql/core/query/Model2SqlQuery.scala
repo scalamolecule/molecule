@@ -43,39 +43,10 @@ abstract class Model2SqlQuery(elements0: List[Element])
     resolve(elements2)
   }
 
-
   def getWhereClauses: ListBuffer[String] = {
     resolveElements(elements0)
-    val clauses    = where.map {
-      case (col, expr) => s"$col $expr"
-    }
-    //    println("------ joins --------")
-    //    println(formattedJoins)
-    val joinsExist = if (joins.isEmpty) Nil else
-      List(
-        s"""EXISTS (
-           |  SELECT * FROM Ns
-           |    ${mkJoins(2).trim}
-           |)""".stripMargin)
-    clauses ++ joinsExist
+    where.map { case (col, expr) => s"$col $expr" }
   }
-  def getWhereClauses2: ListBuffer[String] = {
-    resolveElements(elements0)
-    val clauses    = where.map {
-      case (col, expr) => s"$col $expr"
-    }
-    //    println("------ joins --------")
-    //    println(formattedJoins)
-//    val joinsExist = if (joins.isEmpty) Nil else
-//      List(
-//        s"""EXISTS (
-//           |  SELECT * FROM Ns
-//           |    ${mkJoins(2).trim}
-//           |)""".stripMargin)
-//    clauses ++ joinsExist
-    clauses
-  }
-
 
   final private def renderSqlQuery(
     optLimit: Option[Int],

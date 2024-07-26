@@ -20,16 +20,22 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
 
-        _ <- Ns.i.stringMap.insert(1, Map(pstring1, pstring2)).i.transact
+        id <- Ns.i(42).save.transact.map(_.id)
 
-        _ <- Ns.i.query.get.map(_ ==> List(1))
-        _ <- Ns.i.stringMap.query.i.get.map(_ ==> List((1, Map(pstring1, pstring2))))
+        // Map attribute not yet asserted
+        _ <- Ns.intMap.query.get.map(_ ==> Nil)
 
+        // Removing pair by key from non-asserted Map has no effect
+        _ <- Ns(id).intMap.remove(string1).update.transact
+        _ <- Ns.intMap.query.get.map(_ ==> Nil)
 
+        // Start with some pairs
+        _ <- Ns(id).intMap.add(pint1, pint2, pint3, pint4, pint5, pint6, pint7).upsert.transact
 
-        _ <- Ns.int.i.stringSeq_?.insert(1, 1, Option.empty[List[String]]).transact
+        // Remove pair by String key
+        _ <- Ns(id).intMap.remove(string7).update.i.transact
+        _ <- Ns.intMap.query.get.map(_.head ==> Map(pint1, pint2, pint3, pint4, pint5, pint6))
 
-        _ <- Ns.int.i.stringSeq_?.insert(1, 2, Some(List.empty[String])).transact
 
       } yield ()
     }
@@ -40,7 +46,14 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
       for {
 
 
-        _ <- A.B.Cc.i.insert(1).transact
+        _ <- A.i.insert(1).transact
+        _ <- A.i.B.i.insert((2, 20), (3, 30)).transact
+
+        _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
+        _ <- A.i.a1.B.i.query.get.map(_ ==> List((2, 20), (3, 30)))
+
+        // Nothing deleted since entity 1 doesn't have a ref
+        _ <- A.i_(1).B.i_.delete.i.transact
 
 
         //        _ <- rawTransact(

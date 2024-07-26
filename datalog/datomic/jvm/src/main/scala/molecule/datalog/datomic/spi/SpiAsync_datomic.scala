@@ -170,7 +170,7 @@ trait SpiAsync_datomic
     SpiSync_datomic.update_inspect(update)
   }
 
-  private def update_getStmts(update: Update, conn: DatomicConn_JVM): Data = {
+  def update_getStmts(update: Update, conn: DatomicConn_JVM): Data = {
     SpiSync_datomic.update_getStmts(update, conn)
   }
 

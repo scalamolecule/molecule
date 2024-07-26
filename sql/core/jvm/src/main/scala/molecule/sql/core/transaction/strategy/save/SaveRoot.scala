@@ -1,15 +1,13 @@
 package molecule.sql.core.transaction.strategy.save
 
-import java.sql.Connection
-import molecule.sql.core.transaction.strategy.{SqlAction, SqlOps}
-import scala.collection.mutable.ListBuffer
+import molecule.sql.core.transaction.strategy.SqlOps
 
 case class SaveRoot(
-  sqlConn: Connection,
-  ns: String,
-)(implicit sqlOps: SqlOps) extends SaveAction(null, sqlConn, sqlOps, ns) {
+  sqlOps: SqlOps,
+  ns: String
+) extends SaveAction(null, sqlOps, ns) {
 
-  val saveNs = SaveNs(this, sqlConn, sqlOps, ns, "Ns")
+  val saveNs = SaveNs(this, sqlOps, ns, "Ns")
   children += saveNs
 
   override def rootAction: SaveAction = this

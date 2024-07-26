@@ -1,313 +1,94 @@
 package molecule.sql.core.transaction
 
-import java.sql.{ResultSet, Statement, PreparedStatement => PS}
 import molecule.base.ast._
+import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
-import molecule.boilerplate.util.MoleculeLogging
-import molecule.core.marshalling.ConnProxy
 import molecule.core.transaction.ResolveDelete
 import molecule.core.transaction.ops.DeleteOps
-import molecule.core.util.{MetaModelUtils, ModelUtils}
-import molecule.sql.core.query.Model2SqlQuery
-import scala.annotation.tailrec
+import molecule.core.util.ModelUtils
+import molecule.sql.core.transaction.strategy.SqlOps
+import molecule.sql.core.transaction.strategy.delete.{DeleteAction, DeleteRoot}
 import scala.collection.mutable.ListBuffer
 
 trait SqlDelete
-  extends SqlBase_JVM
-    with DeleteOps
-    with MetaModelUtils
-    with ModelUtils
-    with MoleculeLogging { self: ResolveDelete =>
+  extends DeleteOps
+    with ModelUtils { self: ResolveDelete with SqlOps =>
 
-  def model2SqlQuery(elements: List[Element]): Model2SqlQuery
+  protected var root  : DeleteRoot   = null
+  protected var delete: DeleteAction = null
 
-//  protected var filterElementsOLD = List.empty[Element]
+  private var needsIdQuery = false
+  private var ns           = ""
 
+  private object query {
+    val idCols         = ListBuffer.empty[String]
+    val joins          = ListBuffer.empty[String]
+    val filterElements = ListBuffer.empty[Element]
+  }
 
-  def getDeleteExecutioner(
+  def getDeleteAction(
     elements: List[Element],
     nsMap: Map[String, MetaNs],
     fkConstraintParam: String,
     fkConstraintOff: String,
-    fkConstraintOn: String,
-  ): Option[() => List[Long]] = {
-    val refPath = List(getInitialNs(elements))
+    fkConstraintOn: String
+  ): DeleteAction = {
+    ns = getInitialNs(elements)
+    query.idCols += s"$ns.id"
+    root = DeleteRoot(
+      nsMap, sqlOps, sqlConn.createStatement(), ns,
+      fkConstraintParam, fkConstraintOff, fkConstraintOn
+    )
+    delete = root.firstNs
     resolve(elements, true)
-    if (idsOLD.nonEmpty) {
-      deleteExecutioner(refPath, nsMap, idsOLD, fkConstraintParam, fkConstraintOff, fkConstraintOn)
-    } else if (filterElementsOLD.nonEmpty) {
-      idsOLD = getIds
-      if (idsOLD.nonEmpty)
-        deleteExecutioner(refPath, nsMap, idsOLD, fkConstraintParam, fkConstraintOff, fkConstraintOn)
-      else
-        None
-    } else {
-      None
-    }
+    initRoot(sqlOps)
+    root
   }
 
-  private def deleteExecutioner(
-    refPath: List[String],
-    nsMap: Map[String, MetaNs],
-    ids: Seq[Long],
-    fkConstraintParam: String,
-    fkConstraintOff: String,
-    fkConstraintOn: String,
-  ): Option[() => List[Long]] = {
-    val tables               = getDeleteTables(refPath, nsMap, ids)
-    val disableFkConstraints = fkConstraintParam.nonEmpty
-    Some(
-      () => {
-        val s = sqlConn.createStatement()
-        if (disableFkConstraints) {
-          //          println(s"-------------------- $fkConstraintParam = $fkConstraintOff")
-          s.addBatch(s"$fkConstraintParam = $fkConstraintOff")
-        }
-        tables.foreach { t =>
-          //          println("  €€€€€€€€€  " + t.stmt)
-          s.addBatch(t.stmt)
-        }
-        if (disableFkConstraints) {
-          //        println(s"-------------------- $fkConstraintParam = $fkConstraintOn")
-          s.addBatch(s"$fkConstraintParam = $fkConstraintOn")
-        }
-        s.executeBatch
-        s.close()
-        ids.toList
+
+  private def initRoot(sqlOps: SqlOps): Unit = {
+    if (needsIdQuery) {
+      val idsQuery  = sqlOps.selectStmt(
+        ns, query.idCols, query.joins,
+        m2q(query.filterElements.toList).getWhereClauses
+      )
+      val ids       = ListBuffer.empty[Long]
+      val resultSet = sqlOps.sqlConn.prepareStatement(idsQuery).executeQuery()
+      while (resultSet.next()) {
+        ids += resultSet.getLong(1)
       }
-    )
-  }
-
-  private def getDeleteTables(
-    refPath: List[String], nsMap: Map[String, MetaNs], ids: Seq[Long]
-  ): List[Table] = {
-    val ns = refPath.head
-
-    // Delete join rows matching deleted entities
-    val joinTables: List[Table] = nsMap(ns).attrs
-      .filter(attr => attr.refNs.nonEmpty && attr.card == CardSet && !attr.options.contains("owner"))
-      .map { metaAttr =>
-        val refNs     = metaAttr.refNs.get
-        val joinTable = ss(ns, metaAttr.attr, refNs)
-        val idCol     = ss(ns, if (ns == refNs) "1_id" else "id")
-        prepareTable(refPath, joinTable, idCol, ids)
-      }.toList
-
-    // Recursively delete owned entities
-    val ownedTables = deleteOwned(refPath, nsMap, Seq(nsMap(ns)), Set.empty[String], Nil, ids)
-
-    val table = prepareTable(refPath, ns, s"$ns.id", ids)
-
-    joinTables ++ ownedTables.toList ++ List(table)
-  }
-
-
-  def getDeleteDataForInspection(elements: List[Element], nsMap: Map[String, MetaNs]): Data = {
-    val refPath = List(getInitialNs(elements))
-    resolve(elements, true)
-    if (idsOLD.nonEmpty) {
-      inspectionTableDataForDeletion(refPath, nsMap, idsOLD)
-    } else if (filterElementsOLD.nonEmpty) {
-      idsOLD = getIds
-      if (idsOLD.nonEmpty)
-        inspectionTableDataForDeletion(refPath, nsMap, idsOLD)
-      else
-        (Nil, Nil)
-    } else {
-      (Nil, Nil)
+      delete.ids = ids.toList
     }
   }
 
-  private def inspectionTableDataForDeletion(
-    refPath: List[String], nsMap: Map[String, MetaNs], ids: Seq[Long]
-  ): Data = {
-    val ns = refPath.head
-
-    // Delete join rows matching deleted entities
-    val joinTables: List[Table] = nsMap(ns).attrs
-      .filter(attr => attr.refNs.nonEmpty && attr.card == CardSet && !attr.options.contains("owner"))
-      .map { metaAttr =>
-        val refNs     = metaAttr.refNs.get
-        val joinTable = ss(ns, metaAttr.attr, refNs)
-        val idCol     = ss(ns, if (ns == refNs) "1_id" else "id")
-        prepareTable(refPath, joinTable, idCol, ids)
-      }.toList
-
-    // Recursively delete owned entities
-    val ownedTables  = deleteOwned(refPath, nsMap, Seq(nsMap(ns)), Set.empty[String], Nil, ids)
-    val table: Table = prepareTable(refPath, ns, s"$ns.id", ids)
-    (joinTables ++ ownedTables ++ List(table), Nil)
-  }
-
-
-  private def getIds: List[Long] = {
-    val ns                    = getInitialNs(filterElementsOLD)
-    val filterElementsWithIds = AttrOneManID(ns, "id", V) +: filterElementsOLD
-    val query                 = model2SqlQuery(filterElementsWithIds).getSqlQuery(Nil, None, None, None)
-    val ps                    = sqlConn.prepareStatement(
-      query,
-      //      ResultSet.TYPE_SCROLL_INSENSITIVE,
-      //      ResultSet.CONCUR_READ_ONLY,
-      //      Statement.RETURN_GENERATED_KEYS
-
-      ResultSet.TYPE_FORWARD_ONLY,
-      ResultSet.CONCUR_READ_ONLY,
-    )
-    val resultSet             = ps.executeQuery()
-    val ids                   = ListBuffer.empty[Long]
-    while (resultSet.next()) {
-      ids += resultSet.getLong(1)
+  override def addIds(ids: Seq[Long]): Unit = {
+    if (delete.ids.nonEmpty) {
+      throw ModelError(s"Can't apply entity ids twice in delete.")
     }
-    ids.toList
+    delete.ids = ids.toList
   }
 
-
-  private def prepareTable(
-    refPath: List[String], table: String, idColumn: String, ids: Seq[Long]
-  ): Table = {
-    val ids_       = ids.mkString(", ")
-    val stmt       = s"DELETE FROM $table WHERE $idColumn IN ($ids_)"
-    val populatePS = (ps: PS, _: IdsMap, _: RowIndex) => {
-      ps.addBatch()
-    }
-    Table(refPath, stmt, populatePS)
-  }
-
-
-  @tailrec
-  private def deleteOwned(
-    refPath: List[String],
-    nsMap: Map[String, MetaNs],
-    metaNss: Seq[MetaNs],
-    processedNss: Set[String],
-    ownedTables: Seq[Table],
-    nsIds: Seq[Long],
-  ): Seq[Table] = {
-    metaNss match {
-      case Nil              =>
-        ownedTables
-      case metaNs :: nsTail =>
-        val ns            = metaNs.ns
-        val processedNss1 = processedNss + ns
-        metaNs.attrs match {
-          case Nil => deleteOwned(refPath, nsMap, nsTail, processedNss1, ownedTables, nsIds)
-
-          case metaAttr :: attrTail if metaAttr.options.contains("owner") =>
-            val refNs     = metaAttr.refNs.get
-            val refAttr   = metaAttr.attr
-            val refMetaNs = nsMap(refNs)
-
-            metaAttr.card match {
-              case _: CardOne =>
-                val refIds       = if (nsIds.isEmpty) Nil else {
-                  val stmt =
-                    s"""SELECT $refNs.id
-                       |FROM $refNs
-                       |INNER JOIN $ns AS _ns on _ns.$refAttr = $refNs.id
-                       |WHERE _ns.id in (${nsIds.mkString(", ")})
-                       |""".stripMargin
-
-
-                  val resultSet = sqlConn.createStatement().executeQuery(stmt)
-                  var refIds    = List.empty[Long]
-                  while (resultSet.next()) {
-                    refIds = refIds :+ resultSet.getLong(1)
-                  }
-                  //                  println("------------ 1  " + metaNss.map(_.ns))
-                  //                  print(stmt)
-                  //                  println(refIds)
-                  //                  println("")
-                  refIds
-                }
-                val ownedTables1 = if (refIds.nonEmpty)
-                  Seq(prepareTable(refPath, refNs, "id", refIds))
-                else
-                  Nil
-
-
-                val x = if (processedNss1.contains(refNs)) {
-                  List.empty[MetaNs]
-                } else {
-                  List.empty[MetaNs]
-                }
-
-                val nsToCheck: Seq[MetaNs] = (MetaNs(ns, attrTail) +: nsTail) ++ (
-                  if (processedNss1.contains(refNs)) Nil else List(refMetaNs))
-
-                deleteOwned(
-                  refPath,
-                  nsMap,
-                  nsToCheck,
-                  processedNss1,
-                  ownedTables ++ ownedTables1,
-                  nsIds
-                )
-
-              case _: CardSet =>
-                val joinTable         = ss(ns, metaAttr.attr, refNs)
-                val (ns_id, refNs_id) = if (ns == refNs) {
-                  (ss(ns, "1_id"), ss(refNs, "2_id"))
-                } else {
-                  (ss(ns, "id"), ss(refNs, "id"))
-                }
-                val refIds            = if (nsIds.isEmpty) Nil else {
-                  val stmt      =
-                    s"""SELECT $joinTable.$refNs_id
-                       |FROM $joinTable
-                       |INNER JOIN $ns AS _ns on _ns.id = $joinTable.$ns_id
-                       |WHERE _ns.id in (${nsIds.mkString(", ")})
-                       |""".stripMargin
-                  val resultSet = sqlConn.createStatement().executeQuery(stmt)
-                  var refIds    = List.empty[Long]
-                  while (resultSet.next()) {
-                    refIds = refIds :+ resultSet.getLong(1)
-                  }
-                  //                  println("------------ 2 ------------  " + metaNss.map(_.ns))
-                  //                  print(stmt)
-                  //                  println(refIds)
-                  //                  println("")
-                  refIds
-                }
-                val ownedTables1      = if (refIds.isEmpty) Nil else {
-                  Seq(
-                    prepareTable(refPath, joinTable, ss(ns, "id"), nsIds),
-                    prepareTable(refPath, refNs, "id", refIds)
-                  )
-                }
-
-                val nsToCheck: Seq[MetaNs] = (MetaNs(ns, attrTail) +: nsTail) ++ (
-                  if (processedNss1.contains(refNs)) Nil else List(refMetaNs))
-
-                deleteOwned(
-                  refPath,
-                  nsMap,
-                  nsToCheck,
-                  processedNss1,
-                  ownedTables ++ ownedTables1,
-                  nsIds)
-
-              case _: CardSeq => ???
-              case _: CardMap => ???
-            }
-
-          case _ :: tail => deleteOwned(
-            refPath,
-            nsMap,
-            List(MetaNs(ns, tail)),
-            processedNss1,
-            ownedTables,
-            nsIds
-          )
-        }
-    }
-  }
-
-
-  override def addIds(ids1: Seq[Long]): Unit = {
-    idsOLD = idsOLD ++ ids1
-  }
 
   override def addFilterElement(element: Element): Unit = {
-    filterElementsOLD = filterElementsOLD :+ element
+    needsIdQuery = true
+    element match {
+      case Ref(ns, refAttr, refNs, card, _, _) =>
+        card match {
+          case CardOne =>
+            query.joins += s"INNER JOIN $refNs ON $ns.$refAttr = $refNs.id"
+
+          case _ =>
+            val joinTable = ss(ns, refAttr, refNs)
+            val ns_id     = s"${ns}_id"
+            val ref_id    = s"${refNs}_id"
+            query.joins ++= List(
+              s"INNER JOIN $joinTable ON $ns.id = $joinTable.$ns_id",
+              s"INNER JOIN $refNs ON $joinTable.$ref_id = $refNs.id",
+            )
+        }
+
+      case filterAttr =>
+        query.filterElements += filterAttr
+    }
   }
 }

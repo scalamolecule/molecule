@@ -4,8 +4,10 @@ import java.sql.{PreparedStatement => PS}
 import java.util.Date
 import molecule.core.transaction.{InsertResolvers_, ResolveInsert}
 import molecule.sql.core.transaction.SqlInsert
+import molecule.sql.core.transaction.strategy.SqlOps
 
-trait Insert_mariadb extends SqlInsert { self: ResolveInsert with InsertResolvers_ =>
+trait Insert_mariadb
+  extends SqlInsert  { self: ResolveInsert with InsertResolvers_ with SqlOps =>
 
   override protected def addSet[T](
     ns: String,
@@ -17,7 +19,7 @@ trait Insert_mariadb extends SqlInsert { self: ResolveInsert with InsertResolver
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    addIterable(ns, attr, optRefNs, tplIndex, value2json)
+    addIterable(attr, optRefNs, tplIndex, value2json)
   }
 
   override protected def addSetOpt[T](
@@ -30,7 +32,7 @@ trait Insert_mariadb extends SqlInsert { self: ResolveInsert with InsertResolver
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    addOptIterable(ns, attr, optRefNs, tplIndex, value2json)
+    addOptIterable(attr, optRefNs, tplIndex, value2json)
   }
 
   override protected def addSeq[T](
@@ -43,7 +45,7 @@ trait Insert_mariadb extends SqlInsert { self: ResolveInsert with InsertResolver
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    addIterable(ns, attr, optRefNs, tplIndex, value2json)
+    addIterable(attr, optRefNs, tplIndex, value2json)
   }
 
   override protected def addSeqOpt[T](
@@ -56,7 +58,7 @@ trait Insert_mariadb extends SqlInsert { self: ResolveInsert with InsertResolver
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    addOptIterable(ns, attr, optRefNs, tplIndex, value2json)
+    addOptIterable(attr, optRefNs, tplIndex, value2json)
   }
 
   override protected def addMap[T](
@@ -89,7 +91,6 @@ trait Insert_mariadb extends SqlInsert { self: ResolveInsert with InsertResolver
   // Helpers -------------------------------------------------------------------
 
   private def addIterable[T, M[_] <: Iterable[_]](
-    ns: String,
     attr: String,
     optRefNs: Option[String],
     tplIndex: Int,
@@ -99,7 +100,7 @@ trait Insert_mariadb extends SqlInsert { self: ResolveInsert with InsertResolver
     optRefNs.fold {
       val paramIndex = stableInsert.setCol(attr)
       (tpl: Product) => {
-        val iterable  = tpl.productElement(tplIndex).asInstanceOf[Iterable[T]]
+        val iterable = tpl.productElement(tplIndex).asInstanceOf[Iterable[T]]
         if (iterable.nonEmpty) {
           val json = iterable2json(iterable, value2json)
           stableInsert.addColSetter((ps: PS) =>
@@ -110,15 +111,15 @@ trait Insert_mariadb extends SqlInsert { self: ResolveInsert with InsertResolver
         }
       }
     } { refNs =>
+      val insertRefIds = insert.refIds(attr, refNs)
       (tpl: Product) => {
         val refIds = tpl.productElement(tplIndex).asInstanceOf[Iterable[Long]]
-        stableInsert.insertJoins(ns, attr, refNs, refIds.asInstanceOf[Set[Long]])
+        insertRefIds.addRefIds(refIds)
       }
     }
   }
 
   private def addOptIterable[T, M[_] <: Iterable[_]](
-    ns: String,
     attr: String,
     optRefNs: Option[String],
     tplIndex: Int,
@@ -143,13 +144,13 @@ trait Insert_mariadb extends SqlInsert { self: ResolveInsert with InsertResolver
               ps.setNull(paramIndex, java.sql.Types.NULL))
         }
     } { refNs =>
+      val insertRefIds = insert.refIds(attr, refNs)
       (tpl: Product) => {
         tpl.productElement(tplIndex) match {
-          case Some(set: Iterable[_]) if set.nonEmpty =>
-            stableInsert.insertJoins(
-              ns, attr, refNs, set.asInstanceOf[Set[Long]]
-            )
-          case _                                      => ()
+          case Some(set: Iterable[_]) =>
+            insertRefIds.addRefIds(set.asInstanceOf[Iterable[Long]])
+          case _                      =>
+            insertRefIds.addRefIds(Iterable.empty[Long])
         }
       }
     }
@@ -157,5 +158,4 @@ trait Insert_mariadb extends SqlInsert { self: ResolveInsert with InsertResolver
 
   override protected lazy val transformDate =
     (v: Date) => (ps: PS, n: Int) => ps.setLong(n, v.getTime)
-
 }

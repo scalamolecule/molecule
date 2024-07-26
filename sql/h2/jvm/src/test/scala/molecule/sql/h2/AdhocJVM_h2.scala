@@ -16,23 +16,21 @@ import scala.language.implicitConversions
 
 //object AdhocJVM_h2 extends TestSuiteArray_h2 {
 object AdhocJVM_h2 extends TestSuite_h2 {
-  List(1).zip(List(2))
+
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+
       for {
 
-
-        id <- Ns.i(42).save.transact.map(_.id)
-
-        // Attribute not yet asserted
-        _ <- Ns.int.query.get.map(_ ==> Nil)
-
-        // When attribute is not already asserted, an update has no effect
-        _ <- Ns(id).int(int1).update.i.transact
-        _ <- Ns.int.query.get.map(_ ==> Nil)
+        List(a, b) <- Ns.int.insert(1, 2).transact.map(_.ids)
+        _ <- Ns.int(3).save.transact
+        _ <- Ns.int.a1.query.get.map(_ ==> List(1, 2, 3))
+        _ <- Ns(a).int(10).update.transact
+        _ <- Ns(b).delete.transact
+        _ <- Ns.int.a1.query.get.map(_ ==> List(3, 10))
 
       } yield ()
     }
@@ -52,40 +50,30 @@ object AdhocJVM_h2 extends TestSuite_h2 {
 
       for {
 
+        a <- A.i(1).save.transact.map(_.id)
+        b <- A.i(2).B.s("b").save.transact.map(_.id)
+        c <- A.i(3).B.s("c").i(3).save.transact.map(_.id)
 
-        List(a, b, c, d, e, f) <- A.i.Bb.*?(B.s_?.i_?).insert(
-//        List(f) <- A.i.Bb.*?(B.s_?.i_?).insert(
-          (1, List()),
-          (2, List((Some("a"), None))),
-          (3, List((Some("b"), None), (Some("c"), None))),
-          (4, List((Some("d"), Some(1)))),
-          (5, List((Some("e"), Some(2)), (Some("f"), Some(3)))),
-          (6, List((Some("g"), Some(4)), (Some("h"), None))),
-        ).transact.map(_.ids)
+        //        // Current entity with A value and ref to B value
+        //        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
+        //          (3, 3)
+        //        ))
+        //
+        //        // Filter by A ids, update existing B values
+        //        _ <- A(a, b, c).B.i(4).update.transact
+        //
+        //        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
+        //          (3, 4) // B value updated since there was a previous value
+        //        ))
 
-        // Filter by A ids, update B values
-        _ <- A(a, b, c, d, e, f).Bb.i(4).update.i.transact
+        // Filter by A ids, upsert B values (insert if not already present)
+        _ <- A(a, b, c).B.i(5).upsert.i.transact
 
-        _ <- A.i.a1.Bb.*?(B.s_?.a1.i).query.i.get.map(_ ==> List(
-          (1, List()), //                                no B.i value
-          (2, List()), //                                no B.i value
-          (3, List()), //                                no B.i value
-          (4, List((Some("d"), 4))), //                  update in 1 ref entity
-          (5, List((Some("e"), 4), (Some("f"), 4))), //  update in 2 ref entities
-          (6, List((Some("g"), 4))), //                  already had same value
-        ))
-
-        // Filter by A ids, upsert B values
-        _ <- A(a, b, c, d, e, f).Bb.i(5).upsert.i.transact
-//        _ <- A(f).Bb.i(5).upsert.i.transact
-
-        _ <- A.i.a1.Bb.*?(B.s_?.a1.i).query.get.map(_ ==> List(
-          (1, List((None, 5))), //                       ref + insert
-          (2, List((Some("a"), 5))), //                  addition in 1 ref entity
-          (3, List((Some("b"), 5), (Some("c"), 5))), //  addition in 2 ref entities
-          (4, List((Some("d"), 5))), //                  update in 1 ref entity
-          (5, List((Some("e"), 5), (Some("f"), 5))), //  update in 2 ref entities
-          (6, List((Some("g"), 5), (Some("h"), 5))), //  update in one ref entity and insertion in another
+        // Now three A entities with referenced B value
+        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
+          (1, 5), // relationship to B created + B value inserted
+          (2, 5), // B value inserted
+          (3, 5), // B value updated
         ))
 
 

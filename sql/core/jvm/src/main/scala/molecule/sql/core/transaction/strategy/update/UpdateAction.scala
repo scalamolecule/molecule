@@ -1,27 +1,18 @@
 package molecule.sql.core.transaction.strategy.update
 
-import java.sql.Connection
-import molecule.boilerplate.ast.Model.Element
 import molecule.sql.core.transaction.strategy.{SqlAction, SqlOps}
-import scala.collection.mutable.ListBuffer
 
 abstract class UpdateAction(
   parent: UpdateAction,
-  sqlConn: Connection,
   sqlOps: SqlOps,
-  isUpsert: Boolean,
   ns: String
-) extends SqlAction(parent, sqlConn, sqlOps, ns) {
-
-  private[transaction] val joins          = ListBuffer.empty[String]
-  private[transaction] val filterElements = ListBuffer.empty[Element]
+) extends SqlAction(parent, sqlOps, ns) {
 
 
   // Execute update ----------------------------------------
 
   def update(): Unit = {
-    val stmt = curStmt
-    if (cols.isEmpty || stmt.isEmpty) {
+    if (cols.isEmpty || ids.isEmpty) {
       // No update if no columns are set or supplied collections are empty
       ()
 
@@ -36,7 +27,7 @@ abstract class UpdateAction(
         ps.close()
         ids
       } else {
-        sqlOps.getIds(sqlConn, ns, ps)
+        sqlOps.getIds(ps, ns)
       }
     }
   }
@@ -48,23 +39,23 @@ abstract class UpdateAction(
     refAttr: String, refNs: String, nsId: Long, refIds: Set[Long] = Set.empty[Long]
   ): Unit = {
     addSibling(UpdateRefIdsDelete(
-      parent, sqlConn, sqlOps, isUpsert, ns, refAttr, refNs, nsId, refIds
+      parent, sqlOps, ns, refAttr, refNs, nsId, refIds
     ))
   }
   def insertRefIds(
     refAttr: String, refNs: String, refIds: Set[Long]
   ): Unit = {
     addSibling(UpdateRefIdsInsert(
-      parent, sqlConn, sqlOps, isUpsert, ns, refAttr, refNs, refIds
+      parent, sqlOps, ns, refAttr, refNs, refIds
     ))
   }
 
   def refOne(ns: String, refAttr: String, refNs: String): UpdateAction = {
-    addChild(UpdateRefOne(this, sqlConn, sqlOps, isUpsert, ns, refAttr, refNs))
+    addChild(UpdateRefOne(this, sqlOps, ns, refAttr, refNs))
   }
 
   def refMany(ns: String, refAttr: String, refNs: String): UpdateAction = {
-    addChild(UpdateRefMany(this, sqlConn, sqlOps, isUpsert, ns, refAttr, refNs))
+    addChild(UpdateRefMany(this, sqlOps, ns, refAttr, refNs))
   }
 
   def backRef: UpdateAction = parent
@@ -93,7 +84,7 @@ abstract class UpdateAction(
     val insertEmptyRefRows = prepare(sqlOps.insertStmt(refNs, Nil, Nil))
     (1 to knownIds.count(_ == 0L))
       .foreach(_ => insertEmptyRefRows.addBatch())
-    sqlOps.getIds(sqlConn, refNs, insertEmptyRefRows)
+    sqlOps.getIds(insertEmptyRefRows, refNs)
   }
 
   protected def mergeKnownAndNewRefIds(

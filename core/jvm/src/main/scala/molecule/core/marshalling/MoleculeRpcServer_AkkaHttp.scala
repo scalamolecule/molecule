@@ -11,7 +11,9 @@ import molecule.core.marshalling.Boopicklers._
 import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.language.implicitConversions
 
-abstract class MoleculeRpcServer_AkkaHttp(rpc: MoleculeRpc) extends RpcHandlers(rpc) {
+abstract class MoleculeRpcServer_AkkaHttp(rpc: MoleculeRpc)
+  extends RpcHandlers(rpc) {
+
   implicit val system          : ActorSystem              = ActorSystem()
   implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 

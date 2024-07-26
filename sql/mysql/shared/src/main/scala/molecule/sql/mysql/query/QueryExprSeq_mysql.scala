@@ -62,7 +62,6 @@ trait QueryExprSeq_mysql
   override protected def seqFilterHas[T](
     col: String, filterAttr: String, res: ResSeq[T], mandatory: Boolean
   ): Unit = {
-//    where += (("", s"JSON_CONTAINS($col, JSON_ARRAY($filterAttr))"))
     where += (("", hasClause(col, filterAttr, res)))
     mandatoryCast(res, mandatory)
   }
@@ -70,7 +69,6 @@ trait QueryExprSeq_mysql
   override protected def seqFilterHasNo[T](
     col: String, filterAttr: String, res: ResSeq[T], mandatory: Boolean
   ): Unit = {
-//    where += (("", s"NOT JSON_CONTAINS($col, JSON_ARRAY($filterAttr))"))
     where += (("", s"NOT ${hasClause(col, filterAttr, res)}"))
     mandatoryCast(res, mandatory)
   }

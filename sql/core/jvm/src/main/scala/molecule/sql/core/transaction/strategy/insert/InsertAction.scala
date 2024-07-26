@@ -1,36 +1,34 @@
 package molecule.sql.core.transaction.strategy.insert
 
-import java.sql.Connection
+import java.sql.{PreparedStatement => PS}
 import molecule.sql.core.transaction.strategy.{SqlAction, SqlOps}
 import scala.collection.mutable.ListBuffer
 
-
 abstract class InsertAction(
   parent: InsertAction,
-  sqlConn: Connection,
   sqlOps: SqlOps,
   ns: String
-) extends SqlAction(parent, sqlConn, sqlOps, ns) {
+) extends SqlAction(parent, sqlOps, ns) {
 
   // Build execution graph ----------------------------------------
 
   def refIds(refAttr: String, refNs: String): InsertRefIds = {
     addSibling(InsertRefIds(
-      parent, sqlConn, sqlOps, ns, refAttr, refNs
+      parent, sqlOps, ns, refAttr, refNs
     ))
   }
 
   def refOne(ns: String, refAttr: String, refNs: String): InsertAction = {
     addChild(InsertRefOne(
-      this, sqlConn, sqlOps, ns, refAttr, refNs, setCol(refAttr)
+      this, sqlOps, ns, refAttr, refNs, setCol(refAttr)
     ))
   }
 
   def refMany(ns: String, refAttr: String, refNs: String): InsertAction = {
-    val ref = addChild(InsertNs(this, sqlConn, sqlOps, refNs, "RefMany"))
+    val ref = addChild(InsertNs(this, sqlOps, refNs, "RefMany"))
 
     // Make joins to refs after current and refs have been inserted
-    addSibling(InsertRefJoin(this, ref, sqlConn, sqlOps, ns, refAttr, refNs))
+    addSibling(InsertRefJoin(this, ref, sqlOps, ns, refAttr, refNs))
 
     // Continue in ref namespace
     ref
@@ -40,10 +38,10 @@ abstract class InsertAction(
 
   def nest(ns: String, refAttr: String, refNs: String): InsertNestedJoins = {
     // Nested namespace
-    val nested = addChild(InsertNs(this, sqlConn, sqlOps, refNs, "Nested"))
+    val nested = addChild(InsertNs(this, sqlOps, refNs, "Nested"))
 
     // Make joins to nested after current and nested have been inserted
-    addSibling(InsertNestedJoins(this, nested, sqlConn, sqlOps, ns, refAttr, refNs))
+    addSibling(InsertNestedJoins(this, nested, sqlOps, ns, refAttr, refNs))
   }
 
   def optRef: InsertAction = ???
@@ -56,9 +54,9 @@ abstract class InsertAction(
   def nextRow(): Unit = {
     rowSetters += ListBuffer.empty[PS => Unit]
     children.foreach {
-      case InsertNs(_, _, _, _, "Nested") => ()
-      case child: InsertAction            => child.nextRow()
-      case _                              => ()
+      case InsertNs(_, _, _, "Nested") => ()
+      case child: InsertAction         => child.nextRow()
+      case _                           => ()
     }
   }
 
