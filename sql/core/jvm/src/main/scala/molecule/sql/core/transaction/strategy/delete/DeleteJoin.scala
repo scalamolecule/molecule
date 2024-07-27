@@ -14,7 +14,7 @@ case class DeleteJoin(
   refNs: String,
 ) extends DeleteAction(nsMap, parent, sqlStmt, sqlOps, refNs) {
 
-  override def execute(): Unit = {
+  override def process(): Unit = {
     sqlStmt.addBatch(curStmt)
   }
 

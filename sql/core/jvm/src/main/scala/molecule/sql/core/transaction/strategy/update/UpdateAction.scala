@@ -11,7 +11,7 @@ abstract class UpdateAction(
 
   // Execute update ----------------------------------------
 
-  def update(): Unit = {
+  def updateThisAction(): Unit = {
     if (cols.isEmpty || ids.isEmpty) {
       // No update if no columns are set or supplied collections are empty
       ()

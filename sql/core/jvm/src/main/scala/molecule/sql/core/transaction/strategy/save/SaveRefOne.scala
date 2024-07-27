@@ -17,9 +17,9 @@ case class SaveRefOne(
 
   override def rootAction: SaveAction = parent.rootAction
 
-  override def execute(): Unit = {
-    children.foreach(_.execute())
-    insert()
+  override def process(): Unit = {
+    children.foreach(_.process())
+    insertIntoTable()
 
     parent.rowSetters.last += {
       (ps: PS) => ps.setLong(refAttrIndex, ids.head)

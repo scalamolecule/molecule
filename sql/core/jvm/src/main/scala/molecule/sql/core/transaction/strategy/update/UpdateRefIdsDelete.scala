@@ -13,7 +13,7 @@ case class UpdateRefIdsDelete(
   refIds: Set[Long]
 ) extends UpdateAction(parent, sqlOps, ns) with BaseHelpers {
 
-  override def execute(): Unit = {
+  override def process(): Unit = {
     val ps = prepare(curStmt)
     ps.addBatch()
     ps.executeBatch()

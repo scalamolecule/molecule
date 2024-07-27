@@ -14,9 +14,9 @@ case class UpdateRefOne(
 
   rowSetters += ListBuffer.empty[PS => Unit]
 
-  override def execute(): Unit = {
-    children.foreach(_.execute())
-    update()
+  override def process(): Unit = {
+    children.foreach(_.process())
+    updateThisAction()
   }
 
   override def curStmt: String = {

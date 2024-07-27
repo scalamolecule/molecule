@@ -24,6 +24,23 @@ abstract class InsertAction(
     ))
   }
 
+  //  def optRef(ns: String, refAttr: String, refNs: String): InsertOptionalRefs = {
+  def optRef(ns: String, refAttr: String, refNs: String): InsertOptionalRefs = {
+
+    // Add ref attr to current ns
+    val refAttrIndex = setCol(refAttr)
+    addChild(InsertOptionalRefs(this, sqlOps, ns, refAttr, refNs, refAttrIndex))
+
+    //    // Optional namespace
+    //    val optional = addChild(InsertNs(this, sqlOps, refNs, "Nested"))
+    //
+    //    // Make joins to nested after current and nested have been inserted
+    //    addSibling(InsertOptionalRefs(
+    //      this, optional, sqlOps, ns, refAttr, refNs, setCol(refAttr)
+    //    ))
+  }
+  def optRefNest: InsertAction = ???
+
   def refMany(ns: String, refAttr: String, refNs: String): InsertAction = {
     val ref = addChild(InsertNs(this, sqlOps, refNs, "RefMany"))
 
@@ -34,6 +51,7 @@ abstract class InsertAction(
     ref
   }
 
+
   def backRef: InsertAction = parent
 
   def nest(ns: String, refAttr: String, refNs: String): InsertNestedJoins = {
@@ -43,9 +61,6 @@ abstract class InsertAction(
     // Make joins to nested after current and nested have been inserted
     addSibling(InsertNestedJoins(this, nested, sqlOps, ns, refAttr, refNs))
   }
-
-  def optRef: InsertAction = ???
-  def optRefNest: InsertAction = ???
 
   // Traverse back and up to initial InsertAction
   def rootAction: InsertAction = ???

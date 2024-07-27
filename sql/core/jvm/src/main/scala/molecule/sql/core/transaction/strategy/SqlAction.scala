@@ -7,9 +7,9 @@ abstract class SqlAction(parent: SqlAction, sqlOps: SqlOps, ns: String) {
 
   // Strategy execution -----------------------------------------
 
-  def executeRoot: List[Long] = ???
+  def execute: List[Long] = ???
 
-  private[transaction] def execute(): Unit = ???
+  private[transaction] def process(): Unit = ???
 
 
   // Housekeeping ----------------------------------------------------
@@ -61,7 +61,10 @@ abstract class SqlAction(parent: SqlAction, sqlOps: SqlOps, ns: String) {
 
   // Execution --------------------------------------
 
-  def insert(): Unit = {
+  def insertIntoTable(enforce: Boolean = true): Unit = {
+    //    val stmt = curStmt
+    //    println(stmt)
+    //    val ps = prepare(stmt)
     val ps = prepare(curStmt)
     rowSetters.foreach {
       case rowSetter if rowSetter.nonEmpty =>
@@ -70,7 +73,9 @@ abstract class SqlAction(parent: SqlAction, sqlOps: SqlOps, ns: String) {
         }
         ps.addBatch()
 
-      case _ => ps.addBatch() // Add empty row (for joins)
+      case _ if enforce => ps.addBatch() // Add empty row for joins
+
+      case _ => () // optional ref is None - add no ref
     }
     // Cache generated ids (various db implementations)
     // Closes prepared statement

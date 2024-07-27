@@ -35,7 +35,7 @@ case class JdbcConn_JVM(
   }
 
   override def transact_sync(action: SqlAction): TxReport = {
-    atomicTransaction(() => action.executeRoot)
+    atomicTransaction(() => action.execute)
   }
 
   def atomicTransaction(executions: () => List[Long]): TxReport = {

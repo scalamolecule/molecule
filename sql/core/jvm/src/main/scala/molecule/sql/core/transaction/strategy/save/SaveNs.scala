@@ -15,9 +15,9 @@ case class SaveNs(
 
   override def rootAction: SaveAction = parent.rootAction
 
-  override def execute(): Unit = {
-    children.foreach(_.execute())
-    insert()
+  override def process(): Unit = {
+    children.foreach(_.process())
+    insertIntoTable()
   }
 
   override def curStmt: String = {

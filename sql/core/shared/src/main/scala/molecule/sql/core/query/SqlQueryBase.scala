@@ -5,7 +5,7 @@ import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
 import molecule.core.util.JavaConversions
 import molecule.sql.core.javaSql.{PrepStmt, ResultSetInterface}
-import molecule.sql.core.query.casting.{CastStrategy, CastTuple}
+import molecule.sql.core.query.casting.strategy.{CastStrategy, CastTuple}
 import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 

@@ -11,7 +11,7 @@ case class InsertRefJoin(
   refNs: String,
 ) extends InsertAction(parent, sqlOps, refNs) {
 
-  override def execute(): Unit = {
+  override def process(): Unit = {
     val ps     = prepare(curStmt)
     val nsIds  = parent.ids.iterator
     val refIds = ref.ids.iterator

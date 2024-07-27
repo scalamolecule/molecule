@@ -14,9 +14,9 @@ case class DeleteNs(
   refNs: String,
 ) extends DeleteAction(nsMap, parent, sqlStmt, sqlOps, refNs) {
 
-  override def execute(): Unit = {
+  override def process(): Unit = {
     buildExecutionGraph()
-    children.foreach(_.execute())
+    children.foreach(_.process())
     sqlStmt.addBatch(curStmt)
   }
 

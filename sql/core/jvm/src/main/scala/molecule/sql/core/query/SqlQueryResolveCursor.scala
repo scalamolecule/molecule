@@ -8,7 +8,7 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.query.Pagination
 import molecule.core.util.FutureUtils
 import molecule.sql.core.facade.JdbcConn_JVM
-import molecule.sql.core.query.casting.{CastNested, CastOptRefNested, CastTuple}
+import molecule.sql.core.query.casting.strategy._
 import molecule.sql.core.query.cursorStrategy.{NoUnique, PrimaryUnique, SubUnique}
 
 case class SqlQueryResolveCursor[Tpl](

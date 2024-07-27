@@ -11,7 +11,7 @@ case class SaveRefIds(
   refIds0: Set[Long]
 ) extends SaveAction(parent, sqlOps, refNs) {
 
-  override def execute(): Unit = {
+  override def process(): Unit = {
     val ps     = prepare(curStmt)
     val curNs  = parent.children.head
     val nsId   = curNs.ids.head // Single card-one id

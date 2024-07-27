@@ -11,14 +11,14 @@ case class InsertNestedJoins(
   refNs: String,
 ) extends InsertAction(curNs, sqlOps, refNs) {
 
-  // Keep track of nested counts for joins
+  // Keep track of nested count of joins for each row
   private var nestedCounts = List.empty[Int]
 
   def addNestedCount(n: Int): Unit = {
     nestedCounts = nestedCounts :+ n
   }
 
-  override def execute(): Unit = {
+  override def process(): Unit = {
     sameLength(curNs.ids.length, nestedCounts.length, refAttr, refNs)
     val ps        = prepare(curStmt)
     val parentIds = curNs.ids.iterator

@@ -38,44 +38,33 @@ object AdhocJVM_h2 extends TestSuite_h2 {
 
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
-      //      val a0: Future[List[(Int, String, Seq[(Int, String)])]]                   = A.i.s.Bb.*?(B.i.s).query.get
-      //      val a1: Future[List[(Int, String, Seq[(Int, String)])]]                   = A.i.s.Bb.*(B.i.s).query.get
-      //      val a2: Future[List[(Int, String, Option[(Int, String)])]]                = A.i.s.B.?(B.i.s).query.get
-      //      val a3: Future[List[(Int, String, Option[(Int, Option[String])])]]        = A.i.s.B.?(B.i.s_?).query.get
-      //      val a4: Future[List[(Int, String, Int, String)]]                          = A.i.s.B.i.s.query.get
-      //      val a6: Future[List[(Int, Option[(Int, String, Int, String)])]]           = A.i.B.?(B.i.s.C.i.s).query.get
-      //      val a7: Future[List[(Int, Option[(Int, String)])]]                        = A.i.B.?(B.i.s).query.get
-      //      val a5: Future[List[(Int, Option[(Int, String, Option[(Int, String)])])]] = A.i.B.?(B.i.s.C.?(C.i.s)).query.get
-      //      val a8: Future[List[(Int, Option[(Int, String)], Option[(Int, String)])]] = A.i.B.?(B.i.s).C.?(C.i.s).query.get
+      //      val a0: Future[List[(Int, String, Seq[(Int, String)])]]                                = A.i.s.Bb.*?(B.i.s).query.get
+      //      val a1: Future[List[(Int, String, Seq[(Int, String)])]]                                = A.i.s.Bb.*(B.i.s).query.get
+      //      val a2: Future[List[(Int, String, Option[(Int, String)])]]                             = A.i.s.B.?(B.i.s).query.get
+      //      val a3: Future[List[(Int, String, Option[(Int, Option[String])])]]                     = A.i.s.B.?(B.i.s_?).query.get
+      //      val a4: Future[List[(Int, String, Int, String)]]                                       = A.i.s.B.i.s.query.get
+      //      val a5: Future[List[(Int, Option[(Int, String, Int, String)])]]                        = A.i.B.?(B.i.s.C.i.s).query.get
+      //      val a6: Future[List[(Int, Option[(Int, String)])]]                                     = A.i.B.?(B.i.s).query.get
+      //      val a7: Future[List[(Int, Option[(Int, String, Option[(Int, String)])])]]              = A.i.B.?(B.i.s.C.?(C.i.s)).query.get
+      //      val a8: Future[List[(Int, Option[(Int, String)], Option[(Int, String)])]]              = A.i.B.?(B.i.s).C.?(C.i.s).query.get
+      //      val a9: Future[List[(Int, Option[(String, Int, String, Int)], Option[(String, Int)])]] = A.i.B.?(B.s.i.C.s.i).D.?(D.s.i).query.get
 
       for {
 
-        a <- A.i(1).save.transact.map(_.id)
-        b <- A.i(2).B.s("b").save.transact.map(_.id)
-        c <- A.i(3).B.s("c").i(3).save.transact.map(_.id)
 
-        //        // Current entity with A value and ref to B value
-        //        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
-        //          (3, 3)
-        //        ))
-        //
-        //        // Filter by A ids, update existing B values
-        //        _ <- A(a, b, c).B.i(4).update.transact
-        //
-        //        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
-        //          (3, 4) // B value updated since there was a previous value
-        //        ))
 
-        // Filter by A ids, upsert B values (insert if not already present)
-        _ <- A(a, b, c).B.i(5).upsert.i.transact
+        _ <- A.i.B.?(B.s.i.C.?(C.s.i)).insert(List(
+            (1, None),
+            (2, Some(("b", 20, None))),
+            (3, Some(("b", 30, Some(("c", 300))))),
+          )).i.transact
 
-        // Now three A entities with referenced B value
-        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
-          (1, 5), // relationship to B created + B value inserted
-          (2, 5), // B value inserted
-          (3, 5), // B value updated
-        ))
 
+        _ <- A.i.B.?(B.s.i.C.?(C.s.i)).query.get.map(_ ==> List(
+            (1, None),
+            (2, Some(("b", 20, None))),
+            (3, Some(("b", 30, Some(("c", 300))))),
+          ))
 
         //        _ <- rawQuery(
         //          """select count(*) from Ns

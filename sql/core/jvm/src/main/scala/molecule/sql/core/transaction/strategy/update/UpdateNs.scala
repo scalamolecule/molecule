@@ -15,9 +15,9 @@ case class UpdateNs(
 
   override def rootAction: UpdateAction = parent.rootAction
 
-  override def execute(): Unit = {
-    children.foreach(_.execute())
-    update()
+  override def process(): Unit = {
+    children.foreach(_.process())
+    updateThisAction()
   }
 
   override def curStmt: String = {

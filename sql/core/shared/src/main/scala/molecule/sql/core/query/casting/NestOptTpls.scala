@@ -2,6 +2,7 @@ package molecule.sql.core.query.casting
 
 import java.lang.{Long => jLong}
 import molecule.sql.core.query.SqlQueryBase
+import molecule.sql.core.query.casting.strategy._
 import scala.collection.mutable.ListBuffer
 
 

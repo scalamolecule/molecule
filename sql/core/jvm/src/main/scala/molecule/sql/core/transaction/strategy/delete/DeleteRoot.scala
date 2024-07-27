@@ -19,13 +19,34 @@ case class DeleteRoot(
   val firstNs = DeleteNs(nsMap, this, sqlStmt, sqlOps, "", "", ns)
   children += firstNs
 
-  override def executeRoot: List[Long] = {
+  override def execute: List[Long] = {
     if (firstNs.ids.isEmpty) Nil else {
       fkConstraintParam match {
         case "SQlite" => executeRoot_sqlite
         case _        => executeRoot_other
       }
     }
+  }
+
+  private def executeRoot_other: List[Long] = {
+    val disableFkConstraints = fkConstraintParam.nonEmpty
+
+    if (disableFkConstraints) {
+      // Disarm foreign key constraints while deleting relationships
+      // to avoid violation warnings
+      sqlStmt.addBatch(s"$fkConstraintParam = $fkConstraintOff")
+    }
+
+    // Add batches of all delete statements in graph
+    children.foreach(_.process())
+
+    if (disableFkConstraints) {
+      sqlStmt.addBatch(s"$fkConstraintParam = $fkConstraintOn")
+    }
+    sqlStmt.executeBatch
+    sqlStmt.close()
+
+    firstNs.ids
   }
 
   private def executeRoot_sqlite: List[Long] = {
@@ -39,7 +60,7 @@ case class DeleteRoot(
     sqlConn.setAutoCommit(false)
 
     // Add batches of all delete statements in graph
-    children.foreach(_.execute())
+    children.foreach(_.process())
 
     sqlStmt.executeBatch
     sqlStmt.close()
@@ -50,27 +71,6 @@ case class DeleteRoot(
     val on = sqlConn.prepareStatement("PRAGMA foreign_keys = 1")
     on.executeUpdate()
     on.close()
-
-    firstNs.ids
-  }
-
-  private def executeRoot_other: List[Long] = {
-    val disableFkConstraints = fkConstraintParam.nonEmpty
-
-    if (disableFkConstraints) {
-      // Disarm foreign key constraints while deleting relationships
-      // to avoid violation warnings
-      sqlStmt.addBatch(s"$fkConstraintParam = $fkConstraintOff")
-    }
-
-    // Add batches of all delete statements in graph
-    children.foreach(_.execute())
-
-    if (disableFkConstraints) {
-      sqlStmt.addBatch(s"$fkConstraintParam = $fkConstraintOn")
-    }
-    sqlStmt.executeBatch
-    sqlStmt.close()
 
     firstNs.ids
   }

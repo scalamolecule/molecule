@@ -19,10 +19,11 @@ trait Model2Query extends QueryExpr with ModelUtils {
   protected val expectedFilterAttrs = mutable.Set.empty[String]
   protected var optNestedLeafIsSet  = Option.empty[Boolean]
 
-  final var hasOptRef   = false
-  final var isNested    = false
-  final var isManNested = false
-  final var isOptNested = false
+  final var insideOptRef = false
+  final var hasOptRef    = false
+  final var isNested     = false
+  final var isManNested  = false
+  final var isOptNested  = false
 
 
   @tailrec

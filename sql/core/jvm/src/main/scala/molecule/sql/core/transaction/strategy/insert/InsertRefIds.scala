@@ -18,7 +18,7 @@ case class InsertRefIds(
     refIdss += refIds
   }
 
-  override def execute(): Unit = {
+  override def process(): Unit = {
     val curNs = parent.children.head
     sameLength(curNs.ids.length, refIdss.length, refAttr, refNs)
 

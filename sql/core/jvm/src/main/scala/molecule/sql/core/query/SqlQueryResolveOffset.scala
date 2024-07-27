@@ -4,7 +4,8 @@ import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.util.{FutureUtils, ModelUtils}
 import molecule.sql.core.facade.JdbcConn_JVM
-import molecule.sql.core.query.casting._
+import molecule.sql.core.query.casting.{NestOptTpls, NestTpls}
+import molecule.sql.core.query.casting.strategy._
 
 case class SqlQueryResolveOffset[Tpl](
   elements: List[Element],

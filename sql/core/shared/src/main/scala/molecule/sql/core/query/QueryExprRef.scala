@@ -58,14 +58,14 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
   override protected def queryOptRef(
     ref: Ref, optionalElements: List[Element]
   ): Unit = {
-    println(ref)
-    println(s"========================= $hasOptRef  A  ")
+//    println(ref)
+//    println(s"========================= $hasOptRef  A  ")
     if (hasOptRef) {
-      println("-------- B  ")
+//      println("-------- B  ")
       // transfer previous predicates from where
       addPredicatesToLastLeftJoin()
     }
-    hasOptRef = true
+    insideOptRef = true
 
     // Know where we should steal predicates from subsequent `where` additions
     whereSplit = where.length
@@ -85,6 +85,8 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
 
     casts = casts.optRef
     resolve(optionalElements)
+    insideOptRef = false
+    hasOptRef = true
   }
 
 
@@ -116,6 +118,10 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
   private def resolveNested(
     ref: Ref, nestedElements: List[Element], joinType: String
   ): Unit = {
+    if (insideOptRef) {
+      throw ModelError("Cardinality-many nesting not allowed inside optional ref.")
+    }
+
     val Ref(ns, refAttr, refNs, _, _, _) = ref
     level += 1
     checkOnlyOptRef()

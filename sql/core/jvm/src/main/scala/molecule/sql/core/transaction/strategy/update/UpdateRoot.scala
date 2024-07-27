@@ -17,8 +17,8 @@ case class UpdateRoot(
 
   override def rootAction: UpdateAction = this
 
-  override def executeRoot: List[Long] = {
-    children.foreach(_.execute())
+  override def execute: List[Long] = {
+    children.foreach(_.process())
     children.head.ids
   }
 

@@ -11,7 +11,7 @@ case class SaveRefJoin(
   refNs: String,
 ) extends SaveAction(parent, sqlOps, refNs) {
 
-  override def execute(): Unit = {
+  override def process(): Unit = {
     val ps = prepare(curStmt)
     ps.setLong(1, parent.ids.last)
     ps.setLong(2, ref.ids.last)

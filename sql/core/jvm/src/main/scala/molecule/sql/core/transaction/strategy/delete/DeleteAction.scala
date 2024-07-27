@@ -18,7 +18,7 @@ abstract class DeleteAction(
 
   override def buildExecutionGraph(): Unit = {
     if (ids.nonEmpty) {
-      val actions     = prepareDeleteOwned
+      val actions     = prepareQueryAndActions
       val refIdsQuery = makeOwnedRefIdsQuery
       val refIdss     = extractRefIds(refIdsQuery)
       populateDeleteActions(actions, refIdss)
@@ -26,7 +26,7 @@ abstract class DeleteAction(
   }
 
 
-  private def prepareDeleteOwned: Seq[() => DeleteNs] = {
+  private def prepareQueryAndActions: Seq[() => DeleteNs] = {
     nsMap(ns).attrs.collect {
       case MetaAttr(refAttr, card, _, Some(refNs), options, _, _, _, _, _)
         if options.contains("owner") =>
@@ -122,6 +122,4 @@ abstract class DeleteAction(
         addChild(action)
     }
   }
-
-
 }

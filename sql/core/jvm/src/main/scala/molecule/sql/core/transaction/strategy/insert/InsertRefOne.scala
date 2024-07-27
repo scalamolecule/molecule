@@ -14,15 +14,21 @@ case class InsertRefOne(
 
   override def rootAction: InsertAction = parent.rootAction
 
-  override def execute(): Unit = {
-    children.foreach(_.execute())
-    insert()
-    val refSetters = parent.rowSetters.iterator
-    val refIds     = ids.iterator
+  override def process(): Unit = {
+    // Process children of ref ns
+    children.foreach(_.process())
+
+    // Add ref rows
+    insertIntoTable()
+
+    // Add ref ids from parent to ref
+    val parentRowSetters = parent.rowSetters.iterator
+    val refIds           = ids.iterator
     while (refIds.hasNext) {
-      val refSetter = refSetters.next()
-      val refId     = refIds.next()
-      refSetter += ((ps: PS) => ps.setLong(refAttrIndex, refId))
+      val parentRowSetter = parentRowSetters.next()
+      val refId           = refIds.next()
+      val refIdSetter     = (ps: PS) => ps.setLong(refAttrIndex, refId)
+      parentRowSetter += refIdSetter
     }
   }
 
