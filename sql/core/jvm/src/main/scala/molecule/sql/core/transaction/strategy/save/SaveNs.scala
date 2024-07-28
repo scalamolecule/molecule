@@ -17,7 +17,7 @@ case class SaveNs(
 
   override def process(): Unit = {
     children.foreach(_.process())
-    insertIntoTable()
+    insert()
   }
 
   override def curStmt: String = {

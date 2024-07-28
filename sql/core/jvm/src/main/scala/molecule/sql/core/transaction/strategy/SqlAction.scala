@@ -49,6 +49,9 @@ abstract class SqlAction(parent: SqlAction, sqlOps: SqlOps, ns: String) {
   }
 
   def addColSetter(colSetter: PS => Unit): Unit = {
+//    println(s"########  $ns  " + colSetter)
+//    println(colSetter)
+
     rowSetters.last += colSetter
   }
 
@@ -61,25 +64,35 @@ abstract class SqlAction(parent: SqlAction, sqlOps: SqlOps, ns: String) {
 
   // Execution --------------------------------------
 
-  def insertIntoTable(enforce: Boolean = true): Unit = {
-    //    val stmt = curStmt
-    //    println(stmt)
-    //    val ps = prepare(stmt)
-    val ps = prepare(curStmt)
+  def insert(enforce: Boolean = true): Unit = {
+    println(s"\n=========================== ENFORCE  $enforce  " + rowSetters.size)
+    val stmt = curStmt
+//    println(stmt)
+    val ps = prepare(stmt)
+
+//    val ps = prepare(curStmt)
     rowSetters.foreach {
       case rowSetter if rowSetter.nonEmpty =>
+        println("ROWSETTER SIZE: " + rowSetter.size)
         rowSetter.foreach { colSetter =>
           colSetter(ps)
         }
         ps.addBatch()
 
-      case _ if enforce => ps.addBatch() // Add empty row for joins
+      case _ if enforce =>
+        println("ADD EMPTY")
+        ps.addBatch() // Add empty row for joins
 
-      case _ => () // optional ref is None - add no ref
+      case _ =>
+        println("NONE")
+        () // optional ref is None - add no ref
     }
+
     // Cache generated ids (various db implementations)
     // Closes prepared statement
     ids = sqlOps.getIds(ps, ns)
+
+    println(s"--------------------------- ids: $ids\n")
   }
 
 

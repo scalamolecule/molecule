@@ -61,7 +61,6 @@ abstract class UpdateAction(
   def backRef: UpdateAction = parent
 
   def optRef: UpdateAction = ???
-  def optRefNest: UpdateAction = ???
 
   // Traverse back to initial InsertAction
   def rootAction: UpdateAction = ???

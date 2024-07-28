@@ -7,13 +7,23 @@ case class InsertNs(
   sqlOps: SqlOps,
   ns: String,
   action: String,
-) extends InsertAction(parent, sqlOps, ns) {
+  rowCount: Int
+) extends InsertAction(parent, sqlOps, ns, rowCount) {
 
   override def rootAction: InsertAction = parent.rootAction
 
   override def process(): Unit = {
     children.foreach(_.process())
-    insertIntoTable()
+
+    println(s"++++++++++++++++++++++++++++++++++++++++++++++++++++++++  $ns  ")
+
+    println("rowSetters")
+    println(rowSetters.map { rs => rs.toList.mkString("\n   ") }.mkString("   ", "\n   -----\n   ", ""))
+
+    println("parent.rowSetters")
+    println(parent.rowSetters.map { rs => rs.toList.mkString("\n   ") }.mkString("   ", "\n   -----\n   ", ""))
+
+    insert()
   }
 
   override def curStmt: String = {

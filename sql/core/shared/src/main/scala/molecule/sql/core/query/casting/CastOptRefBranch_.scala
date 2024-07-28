@@ -46,7 +46,7 @@ object CastOptRefBranch_ extends SqlQueryBase {
     firstIndex: ParamIndex
   ): (RS, Option[Any]) => Option[Any] = {
     val List(c1) = casts
-    val List(i1) = (firstIndex until firstIndex + 2).toList
+    val List(i1) = (firstIndex until firstIndex + 1).toList
     (row: RS, nestedOption: Option[Any]) => {
       val r1 = row.getObject(i1)
       val v1 = c1(row, i1)

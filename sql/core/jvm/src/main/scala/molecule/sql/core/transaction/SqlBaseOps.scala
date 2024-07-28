@@ -9,8 +9,14 @@ import molecule.core.transaction.ops.BaseOps
 trait SqlBaseOps { self: BaseOps =>
 
   override protected lazy val transformID             = (v: Long) => (ps: PS, n: Int) => ps.setLong(n, v)
-  override protected lazy val transformString         = (v: String) => (ps: PS, n: Int) => ps.setString(n, v)
-  override protected lazy val transformInt            = (v: Int) => (ps: PS, n: Int) => ps.setInt(n, v)
+  override protected lazy val transformString         = (v: String) => (ps: PS, n: Int) => {
+    println(s"  $n  $v")
+    ps.setString(n, v)
+  }
+  override protected lazy val transformInt            = (v: Int) => (ps: PS, n: Int) => {
+    println(s"  $n  $v")
+    ps.setInt(n, v)
+  }
   override protected lazy val transformLong           = (v: Long) => (ps: PS, n: Int) => ps.setLong(n, v)
   override protected lazy val transformFloat          = (v: Float) => (ps: PS, n: Int) => ps.setFloat(n, v)
   override protected lazy val transformDouble         = (v: Double) => (ps: PS, n: Int) => ps.setDouble(n, v)

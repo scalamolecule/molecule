@@ -7,71 +7,83 @@ import scala.collection.mutable.ListBuffer
 abstract class InsertAction(
   parent: InsertAction,
   sqlOps: SqlOps,
-  ns: String
+  ns: String,
+  rowCount: Int
 ) extends SqlAction(parent, sqlOps, ns) {
 
   // Build execution graph ----------------------------------------
 
   def refIds(refAttr: String, refNs: String): InsertRefIds = {
     addSibling(InsertRefIds(
-      parent, sqlOps, ns, refAttr, refNs
+      parent, sqlOps, ns, refAttr, refNs, rowCount
     ))
   }
 
   def refOne(ns: String, refAttr: String, refNs: String): InsertAction = {
+    // Add ref attr to current ns
+    val refAttrIndex = setCol(refAttr)
     addChild(InsertRefOne(
-      this, sqlOps, ns, refAttr, refNs, setCol(refAttr)
+      this, sqlOps, ns, refAttr, refNs, refAttrIndex, rowCount
     ))
   }
 
-  //  def optRef(ns: String, refAttr: String, refNs: String): InsertOptionalRefs = {
-  def optRef(ns: String, refAttr: String, refNs: String): InsertOptionalRefs = {
-
-    // Add ref attr to current ns
-    val refAttrIndex = setCol(refAttr)
-    addChild(InsertOptionalRefs(this, sqlOps, ns, refAttr, refNs, refAttrIndex))
-
-    //    // Optional namespace
-    //    val optional = addChild(InsertNs(this, sqlOps, refNs, "Nested"))
-    //
-    //    // Make joins to nested after current and nested have been inserted
-    //    addSibling(InsertOptionalRefs(
-    //      this, optional, sqlOps, ns, refAttr, refNs, setCol(refAttr)
-    //    ))
-  }
-  def optRefNest: InsertAction = ???
-
   def refMany(ns: String, refAttr: String, refNs: String): InsertAction = {
-    val ref = addChild(InsertNs(this, sqlOps, refNs, "RefMany"))
+    val ref = addChild(InsertNs(this, sqlOps, refNs, "RefMany", rowCount))
 
     // Make joins to refs after current and refs have been inserted
-    addSibling(InsertRefJoin(this, ref, sqlOps, ns, refAttr, refNs))
+    addSibling(InsertRefJoin(this, ref, sqlOps, ns, refAttr, refNs, rowCount))
 
     // Continue in ref namespace
     ref
   }
 
-
   def backRef: InsertAction = parent
+
+  def optRefNested(
+    ns: String, refAttr: String, refNs: String
+  ): InsertOptRefNested = {
+    // Add ref attr to current ns
+    val refAttrIndex = setCol(refAttr)
+    addChild(InsertOptRefNested(
+      this, sqlOps, ns, refAttr, refNs, refAttrIndex, rowCount
+    ))
+  }
+
+  def optRefAdjacent(
+    ns: String, refAttr: String, refNs: String
+  ): InsertOptRefAdjacent = {
+    // Add ref attr to current ns
+    val refAttrIndex = setCol(refAttr)
+    addChild(InsertOptRefAdjacent(
+      this, sqlOps, ns, refAttr, refNs, refAttrIndex, rowCount
+    ))
+  }
 
   def nest(ns: String, refAttr: String, refNs: String): InsertNestedJoins = {
     // Nested namespace
-    val nested = addChild(InsertNs(this, sqlOps, refNs, "Nested"))
+    val nested = addChild(InsertNs(this, sqlOps, refNs, "Nested", rowCount))
 
     // Make joins to nested after current and nested have been inserted
-    addSibling(InsertNestedJoins(this, nested, sqlOps, ns, refAttr, refNs))
+    addSibling(InsertNestedJoins(
+      this, nested, sqlOps, ns, refAttr, refNs, rowCount
+    ))
   }
 
   // Traverse back and up to initial InsertAction
   def rootAction: InsertAction = ???
 
 
+  // Helpers ------------------------------------------------
+
+  var rowIndex = -1
+
   def nextRow(): Unit = {
+    rowIndex += 1
     rowSetters += ListBuffer.empty[PS => Unit]
     children.foreach {
-      case InsertNs(_, _, _, "Nested") => ()
-      case child: InsertAction         => child.nextRow()
-      case _                           => ()
+      case InsertNs(_, _, _, "Nested", _) => ()
+      case child: InsertAction            => child.nextRow()
+      case _                              => ()
     }
   }
 

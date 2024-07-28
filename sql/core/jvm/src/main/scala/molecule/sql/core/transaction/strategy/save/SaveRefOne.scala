@@ -19,7 +19,7 @@ case class SaveRefOne(
 
   override def process(): Unit = {
     children.foreach(_.process())
-    insertIntoTable()
+    insert()
 
     parent.rowSetters.last += {
       (ps: PS) => ps.setLong(refAttrIndex, ids.head)

@@ -9,8 +9,9 @@ case class InsertRefOne(
   ns: String,
   refAttr: String,
   refNs: String,
-  refAttrIndex: Int
-) extends InsertAction(parent, sqlOps, refNs) {
+  refAttrIndex: Int,
+  rowCount: Int
+) extends InsertAction(parent, sqlOps, refNs, rowCount) {
 
   override def rootAction: InsertAction = parent.rootAction
 
@@ -19,7 +20,7 @@ case class InsertRefOne(
     children.foreach(_.process())
 
     // Add ref rows
-    insertIntoTable()
+    insert()
 
     // Add ref ids from parent to ref
     val parentRowSetters = parent.rowSetters.iterator

@@ -9,7 +9,8 @@ case class InsertRefIds(
   ns: String,
   refAttr: String,
   refNs: String,
-) extends InsertAction(parent, sqlOps, refNs) {
+  rowCount: Int
+) extends InsertAction(parent, sqlOps, refNs, rowCount) {
 
   // Cache card-many ref ids for each row
   val refIdss = ListBuffer.empty[Iterable[Long]]

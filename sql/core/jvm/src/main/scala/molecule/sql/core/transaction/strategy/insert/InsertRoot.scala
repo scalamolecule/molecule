@@ -5,10 +5,11 @@ import molecule.sql.core.transaction.strategy.SqlOps
 case class InsertRoot(
   sqlOps: SqlOps,
   ns: String,
-) extends InsertAction(null, sqlOps, ns) {
+  rowCount: Int
+) extends InsertAction(null, sqlOps, ns, rowCount) {
 
   val insertNs: InsertNs = {
-    val first = InsertNs(this, sqlOps, ns, "Ns")
+    val first = InsertNs(this, sqlOps, ns, "Ns", rowCount)
     children += first
     first
   }

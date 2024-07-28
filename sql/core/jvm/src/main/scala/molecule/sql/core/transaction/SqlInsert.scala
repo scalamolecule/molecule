@@ -18,7 +18,7 @@ trait SqlInsert
     elements: List[Element],
     tpls: Seq[Product]
   ): InsertAction = {
-    insert = InsertRoot(sqlOps, getInitialNs(elements)).insertNs
+    insert = InsertRoot(sqlOps, getInitialNs(elements), tpls.length).insertNs
     val stableInsert = insert
     val resolveTpl   = getResolver(elements)
     tpls.foreach { tpl =>
@@ -42,101 +42,9 @@ trait SqlInsert
     (tpl: Product) => {
       val scalaValue  = tpl.productElement(tplIndex).asInstanceOf[T]
       val valueSetter = transformValue(scalaValue).asInstanceOf[(PS, Int) => Unit]
-      stableInsert.addColSetter((ps: PS) => valueSetter(ps, paramIndex))
-    }
-  }
-
-
-  override protected def addRef(
-    ns: String,
-    refAttr: String,
-    refNs: String,
-    card: Card,
-  ): Product => Unit = {
-    insert = card match {
-      case CardOne => insert.refOne(ns, refAttr, refNs)
-      case _       => insert.refMany(ns, refAttr, refNs)
-    }
-    (tpl: Product) => {
-      println(tpl)
-      ()
-    }
-  }
-
-  override protected def addBackRef(backRefNs: String): Product => Unit = {
-    insert = insert.backRef
-    (_: Product) => ()
-  }
-
-  override protected def addOptRef(
-    tplIndex: Int,
-    ns: String,
-    refAttr: String,
-    refNs: String,
-    optionalElements: List[Element]
-  ): Product => Unit = {
-    val optionalRef = insert.optRef(ns, refAttr, refNs)
-    insert = optionalRef
-
-    // Recursively resolve optional data
-    val resolveOptional = getResolver(optionalElements)
-
-    countValueAttrs(optionalElements) match {
-      case 1 =>
-        (tpl: Product) => {
-          val optionalValue = tpl.productElement(tplIndex).asInstanceOf[Option[Any]]
-          optionalRef.addOptionalDefined(optionalValue.isDefined)
-//          println("optValue: " + optionalValue)
-          optionalValue.foreach { value =>
-//            println("value   : " + value)
-            resolveOptional(Tuple1(value))
-          }
-        }
-      case _ =>
-        (tpl: Product) => {
-          val optionalTpl = tpl.productElement(tplIndex).asInstanceOf[Option[Product]]
-          optionalRef.addOptionalDefined(optionalTpl.isDefined)
-          optionalTpl.foreach { tpl =>
-            resolveOptional(tpl)
-
-          }
-        }
-    }
-  }
-
-  override protected def addNested(
-    tplIndex: Int,
-    ns: String,
-    refAttr: String,
-    refNs: String,
-    nestedElements: List[Element]
-  ): Product => Unit = {
-    val nestedJoins  = insert.nest(ns, refAttr, refNs)
-    val nestedInsert = nestedJoins.nested
-    insert = nestedInsert
-
-    // Recursively resolve nested data
-    val resolveNested = getResolver(nestedElements)
-
-    countValueAttrs(nestedElements) match {
-      case 1 =>
-        (tpl: Product) => {
-          val nestedValues = tpl.productElement(tplIndex).asInstanceOf[Seq[Any]]
-          nestedJoins.addNestedCount(nestedValues.length)
-          nestedValues.foreach { nestedSingleValue =>
-            nestedInsert.nextRow()
-            resolveNested(Tuple1(nestedSingleValue))
-          }
-        }
-      case _ =>
-        (tpl: Product) => {
-          val nestedTpls = tpl.productElement(tplIndex).asInstanceOf[Seq[Product]]
-          nestedJoins.addNestedCount(nestedTpls.length)
-          nestedTpls.foreach { nestedTpl =>
-            nestedInsert.nextRow()
-            resolveNested(nestedTpl)
-          }
-        }
+      stableInsert.addColSetter((ps: PS) => {
+        valueSetter(ps, paramIndex)
+      })
     }
   }
 
@@ -290,6 +198,93 @@ trait SqlInsert
     }
   }
 
+  override protected def addRef(
+    ns: String,
+    refAttr: String,
+    refNs: String,
+    card: Card,
+  ): Product => Unit = {
+    insert = card match {
+      case CardOne => insert.refOne(ns, refAttr, refNs)
+      case _       => insert.refMany(ns, refAttr, refNs)
+    }
+    (_: Product) => ()
+  }
+
+  override protected def addBackRef(backRefNs: String): Product => Unit = {
+    insert = insert.backRef
+    (_: Product) => ()
+  }
+
+  override protected def addOptRef(
+    tplIndex: Int,
+    ns: String,
+    refAttr: String,
+    refNs: String,
+    optionalElements: List[Element]
+  ): Product => Unit = {
+    val insertOptRef = insert.optRefNested(ns, refAttr, refNs)
+    insert = insertOptRef
+
+    // Recursively resolve optional data
+    val resolveOptional = getResolver(optionalElements)
+
+    countValueAttrs(optionalElements) match {
+      case 1 =>
+        (tpl: Product) => {
+          val optionalValue = tpl.productElement(tplIndex).asInstanceOf[Option[Any]]
+          insertOptRef.setOptionalDefined(optionalValue.isDefined)
+          optionalValue.foreach { value =>
+            resolveOptional(Tuple1(value))
+          }
+        }
+      case _ =>
+        (tpl: Product) => {
+          val optionalTpl = tpl.productElement(tplIndex).asInstanceOf[Option[Product]]
+          val x           = s"   $ns.$refAttr   " + optionalTpl
+          insertOptRef.setOptionalDefined(optionalTpl.isDefined)
+          optionalTpl.foreach { tpl =>
+            resolveOptional(tpl)
+          }
+        }
+    }
+  }
+
+  override protected def addNested(
+    tplIndex: Int,
+    ns: String,
+    refAttr: String,
+    refNs: String,
+    nestedElements: List[Element]
+  ): Product => Unit = {
+    val nestedJoins  = insert.nest(ns, refAttr, refNs)
+    val nestedInsert = nestedJoins.nested
+    insert = nestedInsert
+
+    // Recursively resolve nested data
+    val resolveNested = getResolver(nestedElements)
+
+    countValueAttrs(nestedElements) match {
+      case 1 =>
+        (tpl: Product) => {
+          val nestedValues = tpl.productElement(tplIndex).asInstanceOf[Seq[Any]]
+          nestedJoins.addNestedCount(nestedValues.length)
+          nestedValues.foreach { nestedSingleValue =>
+            nestedInsert.nextRow()
+            resolveNested(Tuple1(nestedSingleValue))
+          }
+        }
+      case _ =>
+        (tpl: Product) => {
+          val nestedTpls = tpl.productElement(tplIndex).asInstanceOf[Seq[Product]]
+          nestedJoins.addNestedCount(nestedTpls.length)
+          nestedTpls.foreach { nestedTpl =>
+            nestedInsert.nextRow()
+            resolveNested(nestedTpl)
+          }
+        }
+    }
+  }
 
 
 

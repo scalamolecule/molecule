@@ -202,7 +202,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query with SqlQueryBase with 
   // attr ----------------------------------------------------------------------
 
   private def attrV(col: String): Unit = {
-    if (!isOptNested) {
+    if (!isOptNested && !insideOptRef) {
       setNotNull(col)
     }
   }

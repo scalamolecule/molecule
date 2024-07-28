@@ -58,10 +58,10 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
   override protected def queryOptRef(
     ref: Ref, optionalElements: List[Element]
   ): Unit = {
-//    println(ref)
-//    println(s"========================= $hasOptRef  A  ")
+    //    println(ref)
+    //    println(s"========================= $hasOptRef  A  ")
     if (hasOptRef) {
-//      println("-------- B  ")
+      //      println("-------- B  ")
       // transfer previous predicates from where
       addPredicatesToLastLeftJoin()
     }

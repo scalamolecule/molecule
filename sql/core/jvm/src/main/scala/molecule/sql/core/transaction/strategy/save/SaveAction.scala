@@ -35,7 +35,6 @@ abstract class SaveAction(
   def backRef: SaveAction = parent
 
   def optRef: SaveAction = ???
-  def optRefNest: SaveAction = ???
 
 
   // Traverse back and up to initial SaveAction

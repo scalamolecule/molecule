@@ -9,7 +9,8 @@ case class InsertRefJoin(
   ns: String,
   refAttr: String,
   refNs: String,
-) extends InsertAction(parent, sqlOps, refNs) {
+  rowCount: Int
+) extends InsertAction(parent, sqlOps, refNs, rowCount) {
 
   override def process(): Unit = {
     val ps     = prepare(curStmt)

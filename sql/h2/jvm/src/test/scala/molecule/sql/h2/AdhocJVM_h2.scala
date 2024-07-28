@@ -53,18 +53,33 @@ object AdhocJVM_h2 extends TestSuite_h2 {
 
 
 
-        _ <- A.i.B.?(B.s.i.C.?(C.s.i)).insert(List(
-            (1, None),
-            (2, Some(("b", 20, None))),
-            (3, Some(("b", 30, Some(("c", 300))))),
-          )).i.transact
+        _ <- A.i.B.?(B.s).C.?(C.s).insert(List(
+//          (1, None, None),
+//          (2, None, Some("c")),
+//          (3, Some("b"), None),
+          (4, Some("b"), Some("c")),
+        )).transact
+
+        _ <- A.i.a1.B.?(B.s).C.?(C.s).query.get.map(_ ==> List(
+//          (1, None, None),
+//          (2, None, Some("c")),
+//          (3, Some("b"), None),
+          (4, Some("b"), Some("c")),
+        ))
 
 
-        _ <- A.i.B.?(B.s.i.C.?(C.s.i)).query.get.map(_ ==> List(
-            (1, None),
-            (2, Some(("b", 20, None))),
-            (3, Some(("b", 30, Some(("c", 300))))),
-          ))
+        //        _ <- A.i.B.?(B.s.i.C.?(C.s.i)).insert(List(
+        //          (1, None),
+        //          (2, Some(("b", 20, None))),
+        //          (3, Some(("b", 30, Some(("c", 300))))),
+        //        )).i.transact
+        //
+        //
+        //        _ <- A.i.B.?(B.s.i.C.?(C.s.i)).query.get.map(_ ==> List(
+        //          (1, None),
+        //          (2, Some(("b", 20, None))),
+        //          (3, Some(("b", 30, Some(("c", 300))))),
+        //        ))
 
         //        _ <- rawQuery(
         //          """select count(*) from Ns
