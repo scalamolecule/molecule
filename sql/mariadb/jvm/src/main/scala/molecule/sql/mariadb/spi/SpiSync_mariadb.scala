@@ -61,9 +61,8 @@ trait SpiSync_mariadb extends SpiSyncBase {
 
   case class SqlOps_mariadb(conn: JdbcConn_JVM) extends SqlOps {
     override val sqlConn = conn.sqlConn
-
-    override val m2q =
-      (elements: List[Element]) => new Model2SqlQuery_mariadb(elements)
+    override val m2q     = (elements: List[Element]) =>
+      new Model2SqlQuery_mariadb(elements)
   }
 
   override def validateUpdateSet(

@@ -21,7 +21,6 @@ trait ResultSetInterface {
   def getURL(columnIndex: Int): URL
   def getObject(columnIndex: Int): AnyRef
 
-
   def getArray(columnIndex: Int): ArrayInterface
 
   def isBeforeFirst: Boolean

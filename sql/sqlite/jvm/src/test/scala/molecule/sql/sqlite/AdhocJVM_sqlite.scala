@@ -19,11 +19,11 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
       for {
 
         List(a, b) <- Ns.int.insert(1, 2).transact.map(_.ids)
-//        _ <- Ns.int(3).save.transact
-//        _ <- Ns.int.a1.query.get.map(_ ==> List(1, 2, 3))
-//        _ <- Ns(a).int(10).update.transact
-//        _ <- Ns(b).delete.transact
-//        _ <- Ns.int.a1.query.get.map(_ ==> List(3, 10))
+        //        _ <- Ns.int(3).save.transact
+        //        _ <- Ns.int.a1.query.get.map(_ ==> List(1, 2, 3))
+        //        _ <- Ns(a).int(10).update.transact
+        //        _ <- Ns(b).delete.transact
+        //        _ <- Ns.int.a1.query.get.map(_ ==> List(3, 10))
 
       } yield ()
     }
@@ -35,31 +35,36 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
 
       for {
 
-        a <- A.i(1).save.transact.map(_.id)
-        b <- A.i(2).B.s("b").save.transact.map(_.id)
-        c <- A.i(3).B.s("c").i(3).save.transact.map(_.id)
+//        _ <- A.i(1).save.transact
 
-//        // Current entity with A value and ref to B value
-//        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
-//          (3, 3)
-//        ))
-//
-//        // Filter by A ids, update existing B values
-//        _ <- A(a, b, c).B.i(4).update.transact
-//
-//        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
-//          (3, 4) // B value updated since there was a previous value
+//        _ <- A.i.B.?(B.i).query.get.map(_ ==> List(
+//          (1, None),
 //        ))
 
-        // Filter by A ids, upsert B values (insert if not already present)
-        _ <- A(a, b, c).B.i(5).upsert.i.transact
 
-        // Now three A entities with referenced B value
-        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
-          (1, 5), // relationship to B created + B value inserted
-          (2, 5), // B value inserted
-          (3, 5), // B value updated
+        _ <- A.i(2).B.i(3).save.transact
+
+
+//        _ <- rawQuery(
+//          """SELECT DISTINCT
+//            |  A.i,
+//            |  ifnull(B.i, null)
+//            |FROM A
+//            |  LEFT JOIN B ON
+//            |    A.b = B.id
+//            |WHERE
+//            |  A.i IS NOT NULL;
+//            |""".stripMargin, true)
+
+        _ <- A.i.B.?(B.i).query.i.get.map(_ ==> List(
+//          (1, None),
+          (2, Some(3)),
         ))
+
+
+//        _ <- A.i.B.i.query.get.map(_ ==> List(
+//          (2, 3),
+//        ))
 
         //        _ <- rawQuery(
         //          """SELECT DISTINCT

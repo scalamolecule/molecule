@@ -59,7 +59,7 @@ trait FlatRefOptNested extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (6, Some((60, "b", Some(("c", 600))))),
         ))
 
-        _ <- A.i.a1.B.?(B.i.s.C.?(C.s.i_?)).query.i.get.map(_ ==> List(
+        _ <- A.i.a1.B.?(B.i.s.C.?(C.s.i_?)).query.get.map(_ ==> List(
           (1, None),
           (2, None),
           (3, None),
@@ -68,7 +68,7 @@ trait FlatRefOptNested extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (6, Some((60, "b", Some(("c", Some(600)))))),
         ))
 
-        _ <- A.i.a1.B.?(B.i.s_?.C.?(C.s.i)).query.i.get.map(_ ==> List(
+        _ <- A.i.a1.B.?(B.i.s_?.C.?(C.s.i)).query.get.map(_ ==> List(
           (1, None),
           (2, Some((20, None, None))),
           (3, Some((30, None, Some(("c", 300))))),
@@ -77,7 +77,7 @@ trait FlatRefOptNested extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (6, Some((60, Some("b"), Some(("c", 600))))),
         ))
 
-        _ <- A.i.a1.B.?(B.i.s_?.C.?(C.s.i_?)).query.i.get.map(_ ==> List(
+        _ <- A.i.a1.B.?(B.i.s_?.C.?(C.s.i_?)).query.get.map(_ ==> List(
           (1, None),
           (2, Some((20, None, None))),
           (3, Some((30, None, Some(("c", Some(300)))))),

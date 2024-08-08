@@ -61,11 +61,8 @@ trait SpiSync_postgres extends SpiSyncBase {
 
   case class SqlOps_postgres(conn: JdbcConn_JVM) extends SqlOps {
     override val sqlConn = conn.sqlConn
-
-    override val m2q =
-      (elements: List[Element]) => new Model2SqlQuery_postgres(elements)
-
-    override val defaultValues = "(id) VALUES (DEFAULT)"
+    override val m2q     = (elements: List[Element]) =>
+      new Model2SqlQuery_postgres(elements)
   }
 
   override def validateUpdateSet(

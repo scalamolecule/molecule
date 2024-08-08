@@ -71,14 +71,14 @@ trait FlatRefOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         // No relationship and empty row are indistinguishable
         // when all optional ref attributes (B.i_?) are optional
-        _ <- A.i.B.?(B.i_?).query.i.get.map(_ ==> List(
+        _ <- A.i.a1.B.?(B.i_?).query.get.map(_ ==> List(
           (1, Some(None)), // no relationship
           (2, Some(None)), // relationship to empty ref row
           (3, Some(Some(30))),
         ))
 
         // Mandatory B.i makes result more clear
-        _ <- A.i.B.?(B.i).query.get.map(_ ==> List(
+        _ <- A.i.a1.B.?(B.i).query.get.map(_ ==> List(
           (1, None),
           (2, None),
           (3, Some(30)),
@@ -96,20 +96,20 @@ trait FlatRefOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         )).transact
 
 
-        _ <- A.i.B.?(B.s.i_?).query.get.map(_ ==> List(
+        _ <- A.i.a1.B.?(B.s.i_?).query.get.map(_ ==> List(
           (1, None),
           (2, Some(("a", None))),
           (3, Some(("b", Some(4)))),
         ))
 
-        _ <- A.i.B.?(B.s.i).query.get.map(_ ==> List(
+        _ <- A.i.a1.B.?(B.s.i).query.get.map(_ ==> List(
           (1, None),
           (2, None),
           (3, Some(("b", 4))),
         ))
 
 
-        _ <- A.i.B.s.i_?.query.get.map(_ ==> List(
+        _ <- A.i.a1.B.s.i_?.query.get.map(_ ==> List(
           (2, "a", None),
           (3, "b", Some(4)),
         ))
@@ -157,13 +157,13 @@ trait FlatRefOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         ).transact
 
 
-        _ <- A.i.B.?(B.i).query.get.map(_ ==> List(
+        _ <- A.i.a1.B.?(B.i).query.get.map(_ ==> List(
           (1, None),
           (2, Some(2)),
           (3, Some(3)),
         ))
 
-        _ <- A.i.B.?(B.i.C.i).query.get.map(_ ==> List(
+        _ <- A.i.a1.B.?(B.i.C.i).query.get.map(_ ==> List(
           (1, None),
           (2, None),
           (3, Some((3, 3))),

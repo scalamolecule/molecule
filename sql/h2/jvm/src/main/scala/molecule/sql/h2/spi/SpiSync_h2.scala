@@ -59,11 +59,8 @@ trait SpiSync_h2 extends SpiSyncBase {
 
   case class SqlOps_h2(conn: JdbcConn_JVM) extends SqlOps {
     override val sqlConn = conn.sqlConn
-
-    override val m2q =
-      (elements: List[Element]) => new Model2SqlQuery_h2(elements)
-
-    override val defaultValues = "(id) VALUES (DEFAULT)"
+    override val m2q     = (elements: List[Element]) =>
+      new Model2SqlQuery_h2(elements)
   }
 
   override def validateUpdateSet(

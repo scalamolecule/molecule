@@ -64,10 +64,10 @@ trait SpiSync_sqlite extends SpiSyncBase {
   // Util --------------------------------------
 
   case class SqlOps_sqlite(conn: JdbcConn_JVM) extends SqlOps {
-    override val sqlConn = conn.sqlConn
-
-    override val m2q =
-      (elements: List[Element]) => new Model2SqlQuery_sqlite(elements)
+    override val sqlConn       = conn.sqlConn
+    override val defaultValues = "DEFAULT VALUES"
+    override val m2q           = (elements: List[Element]) =>
+      new Model2SqlQuery_sqlite(elements)
 
     // Since SQlite doesn't allow us to get ps.getGeneratedKeys after an
     // executeBatch(), we get the affected ids by brute force with a query instead.

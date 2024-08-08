@@ -40,8 +40,37 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
 
-        _ <- A.i.B.i.insert(1, 2).transact
-        _ <- A.i.B.i.query.get.map(_ ==> List((1, 2)))
+
+//        _ <- A.i(1).save.transact
+
+        //        _ <- A.i.B.?(B.i).query.get.map(_ ==> List(
+        //          (1, None),
+        //        ))
+
+
+        _ <- A.i(2).B.i(3).save.transact
+
+
+        //        _ <- rawQuery(
+        //          """SELECT DISTINCT
+        //            |  A.i,
+        //            |  B.i
+        //            |FROM A
+        //            |  LEFT JOIN B ON
+        //            |    A.b = B.id
+        //            |WHERE
+        //            |  A.i IS NOT NULL;
+        //            |""".stripMargin, true)
+
+        _ <- A.i.B.?(B.i).query.i.get.map(_ ==> List(
+//          (1, None),
+          (2, Some(3)),
+        ))
+
+
+        //        _ <- A.i.B.i.query.get.map(_ ==> List(
+        //          (2, 3),
+        //        ))
 
         //        _ <- rawQuery(
         //          """select count(*) from Ns

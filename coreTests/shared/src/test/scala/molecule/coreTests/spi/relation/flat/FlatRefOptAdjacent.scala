@@ -25,7 +25,7 @@ trait FlatRefOptAdjacent extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             (4, Some((40, "b")), Some(("c", 400))),
           )).transact
 
-        _ <- A.i
+        _ <- A.i.a1
           .B.?(B.i.s)
           .C.?(C.s.i).query.get.map(_ ==> List(
             (1, None, None),
@@ -60,7 +60,7 @@ trait FlatRefOptAdjacent extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (8, Some((80, "b")), Some(("c", 800))),
         ))
 
-        _ <- A.i.a1.B.?(B.i.s).C.?(C.s.i_?).query.i.get.map(_ ==> List(
+        _ <- A.i.a1.B.?(B.i.s).C.?(C.s.i_?).query.get.map(_ ==> List(
           (1, None, None),
           (2, None, None),
           (3, Some((30, "b")), None),
@@ -71,7 +71,7 @@ trait FlatRefOptAdjacent extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (8, Some((80, "b")), Some(("c", Some(800)))),
         ))
 
-        _ <- A.i.a1.B.?(B.i.s_?).C.?(C.s.i).query.i.get.map(_ ==> List(
+        _ <- A.i.a1.B.?(B.i.s_?).C.?(C.s.i).query.get.map(_ ==> List(
           (1, None, None),
           (2, Some((20, None)), None),
           (3, Some((30, Some("b"))), None),
@@ -82,7 +82,7 @@ trait FlatRefOptAdjacent extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (8, Some((80, Some("b"))), Some(("c", 800))),
         ))
 
-        _ <- A.i.a1.B.?(B.i.s_?).C.?(C.s.i_?).query.i.get.map(_ ==> List(
+        _ <- A.i.a1.B.?(B.i.s_?).C.?(C.s.i_?).query.get.map(_ ==> List(
           (1, None, None),
           (2, Some((20, None)), None),
           (3, Some((30, Some("b"))), None),
@@ -110,15 +110,15 @@ trait FlatRefOptAdjacent extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- A.i.B.i.s._A.C.s.i.query.get.map(_ ==> List(
           (8, 80, "b", "c", 800),
         ))
-        _ <- A.i.B.i.s._A.C.s.i_?.query.get.map(_ ==> List(
+        _ <- A.i.a1.B.i.s._A.C.s.i_?.query.get.map(_ ==> List(
           (7, 70, "b", "c", None),
           (8, 80, "b", "c", Some(800)),
         ))
-        _ <- A.i.B.i.s_?._A.C.s.i.query.get.map(_ ==> List(
+        _ <- A.i.a1.B.i.s_?._A.C.s.i.query.get.map(_ ==> List(
           (5, 50, None, "c", 500),
           (8, 80, Some("b"), "c", 800),
         ))
-        _ <- A.i.B.i.s_?._A.C.s.i_?.query.get.map(_ ==> List(
+        _ <- A.i.a1.B.i.s_?._A.C.s.i_?.query.get.map(_ ==> List(
           (4, 40, None, "c", None),
           (5, 50, None, "c", Some(500)),
           (7, 70, Some("b"), "c", None),

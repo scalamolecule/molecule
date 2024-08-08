@@ -62,11 +62,8 @@ trait SpiSync_mysql extends SpiSyncBase {
 
   case class SqlOps_mysql(conn: JdbcConn_JVM) extends SqlOps {
     override val sqlConn = conn.sqlConn
-
-    override val m2q =
-      (elements: List[Element]) => new Model2SqlQuery_mysql(elements)
-
-    override val defaultValues = "(id) VALUES (DEFAULT)"
+    override val m2q     = (elements: List[Element]) =>
+      new Model2SqlQuery_mysql(elements)
   }
 
   override def validateUpdateSet(

@@ -404,7 +404,7 @@ trait One_One extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- A.i.B.i._A.C.i.query.get.map(_ ==> List((10, 20, 30)))
 
         // Upsert, adding C.s("x")
-        _ <- A(id).i(11).B.i(21)._A.C.s("x").upsert.i.transact
+        _ <- A(id).i(11).B.i(21)._A.C.s("x").upsert.transact
         _ <- A.i.B.i._A.C.s.query.get.map(_ ==> List((11, 21, "x")))
       } yield ()
     }

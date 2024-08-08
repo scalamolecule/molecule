@@ -47,10 +47,6 @@ class ResultSetImpl_sqlite(val underlying: ResultSet) extends ResultSetInterface
     rowIndex += 1
   }
 
-  //  println("......")
-  //  rows.filterNot(_ == null).foreach(row => println(row.toList))
-  //  println("......")
-
   val totalRowCount = rowIndex
 
   // Move row index/cursor to start (before first row) after loading has completed
@@ -97,19 +93,25 @@ class ResultSetImpl_sqlite(val underlying: ResultSet) extends ResultSetInterface
     case l: java.lang.Long    => l.longValue()
     case i: java.lang.Integer => i.longValue()
   }
-  override def getFloat(columnIndex: Int): Float = value(columnIndex).asInstanceOf[Double].toFloat
-  override def getDouble(columnIndex: Int): Double = value(columnIndex).asInstanceOf[Double]
-  override def getBytes(columnIndex: Int): Array[Byte] = value(columnIndex).asInstanceOf[Array[Byte]]
 
-  override def getBigDecimal(columnIndex: Int): jBigDecimal = value(columnIndex) match {
-    case null            => null.asInstanceOf[jBigDecimal]
-    case s: String       => new jBigDecimal(s)
-    case bd: jBigDecimal => bd
-  }
+  override def getFloat(columnIndex: Int): Float =
+    value(columnIndex).asInstanceOf[Double].toFloat
+
+  override def getDouble(columnIndex: Int): Double =
+    value(columnIndex).asInstanceOf[Double]
+
+  override def getBytes(columnIndex: Int): Array[Byte] =
+    value(columnIndex).asInstanceOf[Array[Byte]]
+
+  override def getBigDecimal(columnIndex: Int): jBigDecimal =
+    value(columnIndex) match {
+      case null            => null.asInstanceOf[jBigDecimal]
+      case s: String       => new jBigDecimal(s)
+      case bd: jBigDecimal => bd
+    }
 
   override def getURL(columnIndex: Int): URL = value(columnIndex).asInstanceOf[URL]
-  override def getObject(columnIndex: Int): AnyRef = underlying.getObject(columnIndex)
-
+  override def getObject(columnIndex: Int): AnyRef = value(columnIndex)
 
   override def getArray(columnIndex: Int): ArrayInterface =
     new ArrayImpl(value(columnIndex).asInstanceOf[java.sql.Array])
@@ -126,34 +128,32 @@ class ResultSetImpl_sqlite(val underlying: ResultSet) extends ResultSetInterface
 
   override def beforeFirst(): Unit = {
     rowIndex = -1
-    //    println("rowIndex, beforeFirst: " + rowIndex)
   }
 
   override def afterLast(): Unit = {
     rowIndex = totalRowCount
-    //    println("rowIndex, afterLast  : " + rowIndex)
   }
 
   override def first(): Boolean = {
     rowIndex = 0
-    //    println("rowIndex, first      : " + rowIndex)
     true
   }
+
   override def last(): Boolean = {
     rowIndex = totalRowCount - 1
-    //    println("rowIndex, last       : " + rowIndex)
     true
   }
+
   override def next(): Boolean = {
     rowIndex += 1
-    //    println("rowIndex, next       : " + rowIndex)
     rowIndex != totalRowCount
   }
+
   override def previous(): Boolean = {
     rowIndex -= 1
-    //    println("rowIndex, previous   : " + rowIndex)
     rowIndex != -1
   }
+
   override def isClosed: Boolean = underlying.isClosed
 
   override def getRow: Int = rowIndex + 1

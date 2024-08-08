@@ -12,9 +12,9 @@ trait SqlOps extends BaseHelpers {
 
   val sqlConn: java.sql.Connection
 
-  val m2q: List[Element] => Model2SqlQuery
+  val defaultValues = "(id) VALUES (DEFAULT)"
 
-  val defaultValues = "DEFAULT VALUES"
+  val m2q: List[Element] => Model2SqlQuery
 
 
   def getIds(ps: PS, table: String = ""): List[Long] = {
