@@ -76,7 +76,10 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
     castStrategy = castStrategy.optRef(nestedOptRef)
 
     nestedOptRef = true
+
+    // Recursively resolve optional nested elements
     resolve(optionalElements)
+
     nestedOptRef = false
     hasOptRef = true
   }

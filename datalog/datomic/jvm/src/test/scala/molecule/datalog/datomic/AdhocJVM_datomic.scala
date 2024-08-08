@@ -28,44 +28,37 @@ object AdhocJVM_datomic extends TestSuite_datomic {
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
+        id <- A.i(1).B.i(2)._A.C.i(3).save.transact.map(_.id)
+        _ <- A.i.B.i._A.C.i.query.get.map(_ ==> List((1, 2, 3)))
 
-//        _ <- A.i.B.iSet.insert((1, Set.empty[Int])).transact
+        // Updating A.B.i and A.C.i
+        _ <- A(id).i(10).B.i(20)._A.C.i(30).update.transact
+        _ <- A.i.B.i._A.C.i.query.get.map(_ ==> List((10, 20, 30)))
+
+        // Upsert, adding C.s("x")
+        _ <- A(id).i(11).B.i(21)._A.C.s("x").upsert.transact
+        _ <- A.i.B.i._A.C.s.query.get.map(_ ==> List((11, 21, "x")))
+
+
+
+//        _ <- A.i(1).save.transact
 //
-//        // A.i was inserted
-//        _ <- A.i.query.get.map(_ ==> List(1))
+//        _ <- A.i.B.?(B.i).query.get.map(_ ==> List(
+//          (1, None),
+//        ))
+
+
+//        _ <- A.i(2).B.i(3).save.transact
 //
-//        // B.ii was not inserted
-//        _ <- A.i.B.iSet_?.query.get.map(_ ==> List((1, None)))
+//        _ <- A.i.B.?(B.i).query.get.map(_ ==> List(
+//          (1, None),
+//          (2, Some(3)),
+//        ))
 //
-//        // Ref created though (empty row in B namespace)
-//        _ <- A.i.b_.query.get.map(_ ==> List(1))
-//        _ <- A.i.b_?.query.get.map(_ ==> List((1, None)))
-
-        _ <- A.B.i(1).save.transact
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Please add at least 1 attribute to namespace A before relating to B"
-          }
-
-        _ <- A.Bb.i(1).save.transact
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Please add at least 1 attribute to namespace A before relating to Bb"
-          }
-
-
-        _ <- A.i.B.iSet.insert((20, Set.empty[Int])).i.transact.map(_.id)
-        _ <- A.i.B.iSet_?.query.get.map(_ ==> List((20, None)))
-        _ <- A.i.b_.query.get.map(_ ==> Nil)
-//        _ <- A.i.b_.query.get.map(_ ==> List(20))
-
-
 //
-//        refId <- A.i_.b.query.get.map(_.head)
-//
-//        _ = println("=====================================")
-//        _ <- B(refId).iSet().update.i.transact
-//
-//        _ <- A.i.B.iSet.query.get.map(_ ==> Nil)
-//        _ <- A.i.B.iSet.query.get.map(_ ==> List((20, None)))
+//        _ <- A.i.B.i.query.get.map(_ ==> List(
+//          (2, 3),
+//        ))
 
 
 

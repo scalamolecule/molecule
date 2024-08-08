@@ -213,8 +213,7 @@ trait UpdateFilters extends ModelUtils {
         }
 
         case r: Ref => if (hasFilter) {
-          // Pad current paths. We can safely do this since backrefs are not
-          // allowed in upserts, so we'll have a straight ns path.
+          // Pad current paths
           val requiredNsPaths1 = requiredNsPaths.map(cur => List(r.ns, r.refAttr) ::: cur)
           getUpsertFilters(
             tail,
@@ -233,7 +232,7 @@ trait UpdateFilters extends ModelUtils {
           getUpsertFilters(tail, AttrOneOptID(r.ns, r.refAttr) :: Nil, requiredNsPaths = requiredNsPaths1)
         }
 
-        case _: BackRef => throw ModelError("Back refs not allowed in upserts")
+        case _: BackRef => getUpsertFilters(tail)
         case _: OptRef  => ???
         case _          => noNested
       }

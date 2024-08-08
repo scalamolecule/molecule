@@ -29,7 +29,40 @@ trait QueryExprRef[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] with N
 
 
   override protected def queryOptRef(ref: Ref, optionalElements: List[Element]): Unit = {
+//    if (hasOptRef) {
+//      // transfer previous predicates from `where`
+//      addPredicatesToLastLeftJoin()
+//    }
+//
+//    // Know where we should steal predicates from subsequent `where` additions
+//    whereSplit = where.length
+//
+//    val Ref(ns, refAttr, refNs, _, _, _) = ref
+//    handleRef(refAttr, refNs)
+//
+//    val nsExt           = getOptExt(path.dropRight(2)).getOrElse("")
+//    val (refAs, refExt) = getOptExt().fold(("", ""))(ext => (refNs + ext, ext))
+//    joins += ((s"LEFT JOIN", refNs, refAs, List(s"$ns$nsExt.$refAttr = $refNs$refExt.id")))
+//
+//    // Cast next nested/adjacent opt ref
+//    castStrategy = castStrategy.optRef(nestedOptRef)
+//
+//    nestedOptRef = true
+//    resolve(optionalElements)
+//    nestedOptRef = false
+//    hasOptRef = true
 
+
+
+    val (e, refAttr, refId) = (es.last, s":${ref.ns}/${ref.refAttr}", vv)
+    refConfirmed = false
+    val card = if (ref.card.isInstanceOf[CardOne]) "one" else "set"
+    varPath = varPath ++ List(card, refAttr, refId)
+    path = path ++ List(ref.refAttr, ref.refNs)
+    where += s"[$e $refAttr $refId]" -> wClause
+    es = es :+ refId
+
+    ???
   }
 
 
@@ -81,7 +114,7 @@ trait QueryExprRef[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] with N
 
     aritiesNested()
 
-    val e = es.last
+    val e        = es.last
     val nestedId = "?id" + nestedIds.size
     if (where.isEmpty) {
       val Ref(ns, refAttrClean, refNs, _, _, _) = nestedRef
