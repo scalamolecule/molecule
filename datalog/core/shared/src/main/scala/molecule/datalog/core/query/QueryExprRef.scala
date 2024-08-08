@@ -54,15 +54,16 @@ trait QueryExprRef[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] with N
 
 
 
-    val (e, refAttr, refId) = (es.last, s":${ref.ns}/${ref.refAttr}", vv)
-    refConfirmed = false
-    val card = if (ref.card.isInstanceOf[CardOne]) "one" else "set"
-    varPath = varPath ++ List(card, refAttr, refId)
-    path = path ++ List(ref.refAttr, ref.refNs)
-    where += s"[$e $refAttr $refId]" -> wClause
-    es = es :+ refId
-
-    ???
+//    val (e, refAttr, refId) = (es.last, s":${ref.ns}/${ref.refAttr}", vv)
+//    refConfirmed = false
+//    val card = if (ref.card.isInstanceOf[CardOne]) "one" else "set"
+//    varPath = varPath ++ List(card, refAttr, refId)
+//    path = path ++ List(ref.refAttr, ref.refNs)
+//    where += s"[$e $refAttr $refId]" -> wClause
+//    es = es :+ refId
+//
+//    ???
+    ()
   }
 
 

@@ -60,13 +60,13 @@ trait SpiAsync  {
   private def noJS(method: String): Nothing =
     throw new Exception(s"Fallback method '$method' not available from JS platform")
 
-  def fallback_rawQuery(
-    query: String,
-    debug: Boolean = false,
-  )(implicit conn: Conn, ec: EC): Future[List[List[Any]]] = noJS("rawQuery")
-
   def fallback_rawTransact(
     txData: String,
     debug: Boolean = false
   )(implicit conn: Conn, ec: EC): Future[TxReport] = noJS("rawTransact")
+
+  def fallback_rawQuery(
+    query: String,
+    debug: Boolean = false,
+  )(implicit conn: Conn, ec: EC): Future[List[List[Any]]] = noJS("rawQuery")
 }

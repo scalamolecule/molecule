@@ -150,7 +150,7 @@ trait SpiSync_datomic
   }
 
   def update_getStmts(update: Update, conn: DatomicConn_JVM): Data = {
-    new ResolveUpdate with Update_datomic{
+    new ResolveUpdate with Update_datomic {
       override val isUpsert: Boolean = update.isUpsert
     }.getStmts(conn, update.elements)
   }
@@ -172,13 +172,6 @@ trait SpiSync_datomic
 
   // Fallbacks --------------------------------------------------------
 
-  override def fallback_rawQuery(
-    query: String, debug: Boolean = false,
-  )(implicit conn: Conn): List[List[Any]] = {
-    Peer.q(query, conn.db.asInstanceOf[AnyRef])
-      .asScala.toList.map(_.asScala.toList.map(toScala(_)))
-  }
-
   override def fallback_rawTransact(
     txData: String, debug: Boolean = false
   )(implicit conn: Conn): TxReport = {
@@ -191,6 +184,32 @@ trait SpiSync_datomic
     } catch {
       case t: Throwable => throw ModelError(t.toString)
     }
+  }
+
+  override def fallback_rawQuery(
+    query: String, debug: Boolean = false,
+  )(implicit conn: Conn): List[List[Any]] = {
+    val rows = Peer.q(query, conn.db.asInstanceOf[AnyRef])
+      .asScala.toList.map(_.asScala.toList.map(toScala(_)))
+    if (debug) {
+      renderRawQueryData(query, rows)
+    }
+    rows
+  }
+
+  def renderRawQueryData(
+    query: String,
+    rows: List[List[Any]],
+  ): Unit = {
+    println("\n=============================================================================")
+    println(query)
+    val max      = 10
+    val showRows = rows.length - max match {
+      case 1          => rows.take(max) :+ "1 more row..."
+      case n if n > 1 => rows.take(max) :+ s"$n more rows..."
+      case _          => rows
+    }
+    println(showRows.mkString("List(\n  ", ",\n  ", "\n)\n"))
   }
 
   private def printInspectTx(

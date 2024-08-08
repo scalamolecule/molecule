@@ -28,38 +28,30 @@ object AdhocJVM_datomic extends TestSuite_datomic {
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
-        id <- A.i(1).B.i(2)._A.C.i(3).save.transact.map(_.id)
-        _ <- A.i.B.i._A.C.i.query.get.map(_ ==> List((1, 2, 3)))
 
-        // Updating A.B.i and A.C.i
-        _ <- A(id).i(10).B.i(20)._A.C.i(30).update.transact
-        _ <- A.i.B.i._A.C.i.query.get.map(_ ==> List((10, 20, 30)))
+        _ <- A.i(1).save.transact
 
-        // Upsert, adding C.s("x")
-        _ <- A(id).i(11).B.i(21)._A.C.s("x").upsert.transact
-        _ <- A.i.B.i._A.C.s.query.get.map(_ ==> List((11, 21, "x")))
+        _ <- rawQuery(
+          """[:find  ?b
+            | :where [?a :A/i ?b]]
+            |""".stripMargin, true)
 
-
-
-//        _ <- A.i(1).save.transact
-//
-//        _ <- A.i.B.?(B.i).query.get.map(_ ==> List(
-//          (1, None),
-//        ))
+        _ <- A.i.B.?(B.i).query.i.get.map(_ ==> List(
+          (1, None),
+        ))
 
 
-//        _ <- A.i(2).B.i(3).save.transact
-//
-//        _ <- A.i.B.?(B.i).query.get.map(_ ==> List(
-//          (1, None),
-//          (2, Some(3)),
-//        ))
-//
-//
-//        _ <- A.i.B.i.query.get.map(_ ==> List(
-//          (2, 3),
-//        ))
-
+        //        _ <- A.i(2).B.i(3).save.transact
+        //
+        //        _ <- A.i.B.?(B.i).query.get.map(_ ==> List(
+        //          (1, None),
+        //          (2, Some(3)),
+        //        ))
+        //
+        //
+        //        _ <- A.i.B.i.query.get.map(_ ==> List(
+        //          (2, 3),
+        //        ))
 
 
       } yield ()
