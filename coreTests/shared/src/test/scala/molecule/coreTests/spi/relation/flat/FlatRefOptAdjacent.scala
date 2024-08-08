@@ -14,7 +14,7 @@ trait FlatRefOptAdjacent extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 
-    "Basic optional ref nested" - refs { implicit conn =>
+    "Basic adjacent optional refs" - refs { implicit conn =>
       for {
         _ <- A.i
           .B.?(B.i.s)
@@ -37,106 +37,109 @@ trait FlatRefOptAdjacent extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "Optional ref adjacent" - refs { implicit conn =>
+
+    "Adjacent optional refs with opt attr" - refs { implicit conn =>
       for {
         _ <- A.i(1).save.transact
         _ <- A.i(2).B.i(20).save.transact
-        _ <- A.i(3).B.i(30)._A.C.s("c").i(300).save.transact
-        _ <- A.i(4).B.i(40).s("b").save.transact
-        _ <- A.i(5).B.i(50).s("b")._A.C.s("c").save.transact
-        _ <- A.i(6).B.i(60).s("b")._A.C.s("c").i(600).save.transact
+        _ <- A.i(3).B.i(30).s("b").save.transact
+        _ <- A.i(4).B.i(40)._A.C.s("c").save.transact
+        _ <- A.i(5).B.i(50)._A.C.s("c").i(500).save.transact
+        _ <- A.i(6).B.i(60).s("b").save.transact
+        _ <- A.i(7).B.i(70).s("b")._A.C.s("c").save.transact
+        _ <- A.i(8).B.i(80).s("b")._A.C.s("c").i(800).save.transact
 
-        _ <- A.i.B.?(B.i.s).C.?(C.s.i).query.get.map(_ ==> List(
-          (1, None),
-          (2, None),
-          (3, None),
-          (4, Some((40, "b")), None),
-          (5, Some((50, "b")), None),
-          (6, Some((60, "b")), Some(("c", 600))),
+        _ <- A.i.a1.B.?(B.i.s).C.?(C.s.i).query.get.map(_ ==> List(
+          (1, None, None),
+          (2, None, None),
+          (3, Some((30, "b")), None),
+          (4, None, None),
+          (5, None, Some(("c", 500))),
+          (6, Some((60, "b")), None),
+          (7, Some((70, "b")), None),
+          (8, Some((80, "b")), Some(("c", 800))),
         ))
 
-        _ <- A.i.B.?(B.i.s).C.?(C.s.i_?).query.i.get.map(_ ==> List(
-          (1, None),
-          (2, None),
-          (3, None),
-          (4, Some((40, "b")), None),
-          (5, Some((50, "b")), Some(("c", None))),
-          (6, Some((60, "b")), Some(("c", Some(600)))),
+        _ <- A.i.a1.B.?(B.i.s).C.?(C.s.i_?).query.i.get.map(_ ==> List(
+          (1, None, None),
+          (2, None, None),
+          (3, Some((30, "b")), None),
+          (4, None, Some(("c", None))),
+          (5, None, Some(("c", Some(500)))),
+          (6, Some((60, "b")), None),
+          (7, Some((70, "b")), Some(("c", None))),
+          (8, Some((80, "b")), Some(("c", Some(800)))),
         ))
 
-        _ <- A.i.B.?(B.i.s_?).C.?(C.s.i).query.i.get.map(_ ==> List(
-          (1, None),
+        _ <- A.i.a1.B.?(B.i.s_?).C.?(C.s.i).query.i.get.map(_ ==> List(
+          (1, None, None),
           (2, Some((20, None)), None),
-          (3, Some((30, None)), Some(("c", 300))),
-          (4, Some((40, Some("b"))), None),
-          (5, Some((50, Some("b"))), None),
-          (6, Some((60, Some("b"))), Some(("c", 600))),
+          (3, Some((30, Some("b"))), None),
+          (4, Some((40, None)), None),
+          (5, Some((50, None)), Some(("c", 500))),
+          (6, Some((60, Some("b"))), None),
+          (7, Some((70, Some("b"))), None),
+          (8, Some((80, Some("b"))), Some(("c", 800))),
         ))
 
-        _ <- A.i.B.?(B.i.s_?).C.?(C.s.i_?).query.i.get.map(_ ==> List(
-          (1, None),
+        _ <- A.i.a1.B.?(B.i.s_?).C.?(C.s.i_?).query.i.get.map(_ ==> List(
+          (1, None, None),
           (2, Some((20, None)), None),
-          (3, Some((30, None)), Some(("c", Some(300)))),
-          (4, Some((40, Some("b"))), None),
-          (5, Some((50, Some("b"))), Some(("c", None))),
-          (6, Some((60, Some("b"))), Some(("c", Some(600)))),
+          (3, Some((30, Some("b"))), None),
+          (4, Some((40, None)), Some(("c", None))),
+          (5, Some((50, None)), Some(("c", Some(500)))),
+          (6, Some((60, Some("b"))), None),
+          (7, Some((70, Some("b"))), Some(("c", None))),
+          (8, Some((80, Some("b"))), Some(("c", Some(800)))),
         ))
       } yield ()
     }
 
 
-    "Ref (for comparison)" - refs { implicit conn =>
+    "Adjacent refs for comparison" - refs { implicit conn =>
       for {
         _ <- A.i(1).save.transact
         _ <- A.i(2).B.i(20).save.transact
-        _ <- A.i(3).B.i(30)._A.C.s("c").i(300).save.transact
-        _ <- A.i(4).B.i(40).s("b").save.transact
-        _ <- A.i(5).B.i(50).s("b")._A.C.s("c").save.transact
-        _ <- A.i(6).B.i(60).s("b")._A.C.s("c").i(600).save.transact
+        _ <- A.i(3).B.i(30).s("b").save.transact
+        _ <- A.i(4).B.i(40)._A.C.s("c").save.transact
+        _ <- A.i(5).B.i(50)._A.C.s("c").i(500).save.transact
+        _ <- A.i(6).B.i(60).s("b").save.transact
+        _ <- A.i(7).B.i(70).s("b")._A.C.s("c").save.transact
+        _ <- A.i(8).B.i(80).s("b")._A.C.s("c").i(800).save.transact
 
         _ <- A.i.B.i.s._A.C.s.i.query.get.map(_ ==> List(
-          (6, 60, "b", "c", 600),
+          (8, 80, "b", "c", 800),
         ))
         _ <- A.i.B.i.s._A.C.s.i_?.query.get.map(_ ==> List(
-          (5, 50, "b", "c", None),
-          (6, 60, "b", "c", Some(600)),
+          (7, 70, "b", "c", None),
+          (8, 80, "b", "c", Some(800)),
         ))
         _ <- A.i.B.i.s_?._A.C.s.i.query.get.map(_ ==> List(
-          (3, 30, None, "c", 300),
-          (6, 60, Some("b"), "c", 600),
+          (5, 50, None, "c", 500),
+          (8, 80, Some("b"), "c", 800),
         ))
         _ <- A.i.B.i.s_?._A.C.s.i_?.query.get.map(_ ==> List(
-          (3, 30, None, "c", Some(300)),
-          (5, 50, Some("b"), "c", None),
-          (6, 60, Some("b"), "c", Some(600)),
+          (4, 40, None, "c", None),
+          (5, 50, None, "c", Some(500)),
+          (7, 70, Some("b"), "c", None),
+          (8, 80, Some("b"), "c", Some(800)),
         ))
       } yield ()
     }
 
 
-    "Basic optional ref nested" - refs { implicit conn =>
+    "Adjacent optional refs with inner ref" - refs { implicit conn =>
       for {
-        _ <- A.i.D.s.i.insert(
-          1, "d", 1
-        ).transact
+        _ <- A.i.a1.B.?(B.s.i.C.s.i).D.?(D.s.i).insert(List(
+          (1, None, Some(("d", 1))),
+          (2, Some(("b", 2, "c", 2)), None),
+          (3, Some(("b", 3, "c", 3)), Some(("d", 3))),
+        )).transact
 
-        _ <- A.i.B.s.i._A.D.s.i.insert(
-          2, "b", 2, "d", 2
-        ).transact
-
-        _ <- A.i.B.s.i.C.s.i.insert(
-          3, "b", 3, "c", 3
-        ).transact
-
-        _ <- A.i.B.s.i.C.s.i._A.D.s.i.insert(
-          4, "b", 4, "c", 4, "d", 4
-        ).transact
-
-        _ <- A.i.B.?(B.s.i.C.s.i).D.?(D.s.i).query.get.map(_ ==> List(
-          (1, None, Some(("d", 4))),
-          (2, None, Some(("d", 2))),
-          (3, Some(("b", 3, "c", 3)), None),
-          (4, Some(("b", 4, "c", 4)), Some(("d", 4))),
+        _ <- A.i.a1.B.?(B.s.i.C.s.i).D.?(D.s.i).query.get.map(_ ==> List(
+          (1, None, Some(("d", 1))),
+          (2, Some(("b", 2, "c", 2)), None),
+          (3, Some(("b", 3, "c", 3)), Some(("d", 3))),
         ))
       } yield ()
     }

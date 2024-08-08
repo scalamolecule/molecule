@@ -112,9 +112,9 @@ trait QueryExprOne extends QueryExpr { self: Model2Query with SqlQueryBase with 
     select += col
     groupByCols += col // if we later need to group by non-aggregated columns
     if (isOptNested) {
-      casts.add(res.sql2oneOrNull)
+      castStrategy.add(res.sql2oneOrNull)
     } else {
-      casts.add(res.sql2one)
+      castStrategy.add(res.sql2one)
     }
     addSort(attr, col)
     attr.filterAttr.fold {
@@ -184,7 +184,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query with SqlQueryBase with 
     val col = getCol(attr: Attr)
     select += col
     groupByCols += col // if we later need to group by non-aggregated columns
-    casts.add(resOpt.sql2oneOpt)
+    castStrategy.add(resOpt.sql2oneOpt)
     addSort(attr, col)
     attr.op match {
       case V     => () // selected col can already be a value or null
@@ -202,7 +202,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query with SqlQueryBase with 
   // attr ----------------------------------------------------------------------
 
   private def attrV(col: String): Unit = {
-    if (!isOptNested && !insideOptRef) {
+    if (!isOptNested && !nestedOptRef) {
       setNotNull(col)
     }
   }
@@ -328,7 +328,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query with SqlQueryBase with 
         select += s"ARRAY_AGG(DISTINCT $col)"
         groupByCols -= col
         aggregate = true
-        casts.replace(res.array2set)
+        castStrategy.replace(res.array2set)
 
       case "min" =>
         select += s"MIN($col)"
@@ -347,7 +347,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query with SqlQueryBase with 
              |  )""".stripMargin
         groupByCols -= col
         aggregate = true
-        casts.replace(res.array2set)
+        castStrategy.replace(res.array2set)
 
       case "max" =>
         select += s"MAX($col)"
@@ -366,7 +366,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query with SqlQueryBase with 
              |  )""".stripMargin
         groupByCols -= col
         aggregate = true
-        casts.replace(res.array2set)
+        castStrategy.replace(res.array2set)
 
       case "sample" =>
         distinct = false
@@ -386,21 +386,21 @@ trait QueryExprOne extends QueryExpr { self: Model2Query with SqlQueryBase with 
              |  )""".stripMargin
         groupByCols -= col
         aggregate = true
-        casts.replace(res.array2set)
+        castStrategy.replace(res.array2set)
 
       case "count" =>
         distinct = false
         groupByCols -= col
         aggregate = true
         selectWithOrder(col, "COUNT", "")
-        casts.replace(toInt)
+        castStrategy.replace(toInt)
 
       case "countDistinct" =>
         distinct = false
         groupByCols -= col
         aggregate = true
         selectWithOrder(col, "COUNT")
-        casts.replace(toInt)
+        castStrategy.replace(toInt)
 
       case "sum" =>
         groupByCols -= col

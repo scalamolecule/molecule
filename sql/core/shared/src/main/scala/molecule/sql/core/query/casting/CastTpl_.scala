@@ -6,7 +6,10 @@ import molecule.sql.core.query.SqlQueryBase
 
 object CastTpl_ extends SqlQueryBase {
 
-  final def cast(casts: List[Cast], firstIndex: ParamIndex): RS => Any = {
+  final def cast(
+    casts: List[Cast],
+    firstIndex: ParamIndex
+  ): RS => Any = {
     casts.length match {
       case 1  => cast1(casts, firstIndex)
       case 2  => cast2(casts, firstIndex)

@@ -19,17 +19,30 @@ case class InsertRefOne(
     // Process children of ref ns
     children.foreach(_.process())
 
-    // Add ref rows
-    insert()
+    // Add ref rows (don't enforce empty row)
+    insert(false)
 
-    // Add ref ids from parent to ref
-    val parentRowSetters = parent.rowSetters.iterator
-    val refIds           = ids.iterator
-    while (refIds.hasNext) {
-      val parentRowSetter = parentRowSetters.next()
-      val refId           = refIds.next()
-      val refIdSetter     = (ps: PS) => ps.setLong(refAttrIndex, refId)
-      parentRowSetter += refIdSetter
+    // Add ref ids from parent (previous ns) to ref
+    val refIds = ids.iterator
+    parent match {
+      case _: InsertOptRef =>
+        // make ref only when parent/prev ns has value
+        parent.rowSetters.zip(parent.optionalDefineds).foreach {
+          case (setter, true) =>
+            setter += ((ps: PS) => ps.setLong(refAttrIndex, refIds.next()))
+
+          case (setter, _) =>
+            setter += ((ps: PS) => ps.setNull(refAttrIndex, 0))
+        }
+
+      case _ =>
+        val parentRowSetters = parent.rowSetters.iterator
+        while (refIds.hasNext) {
+          val parentRowSetter = parentRowSetters.next()
+          val refId           = refIds.next()
+          val refIdSetter     = (ps: PS) => ps.setLong(refAttrIndex, refId)
+          parentRowSetter += refIdSetter
+        }
     }
   }
 

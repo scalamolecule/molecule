@@ -29,6 +29,8 @@ trait FlatRefOptNested extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         ))
 
         _ <- A.i.a1.B.?(B.s.i.C.s.i).query.get.map(_ ==> List(
+          (1, None),
+          (2, None),
           (3, Some(("b", 3, "c", 3)))
         ))
 

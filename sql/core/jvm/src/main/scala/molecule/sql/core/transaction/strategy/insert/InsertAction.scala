@@ -39,22 +39,12 @@ abstract class InsertAction(
 
   def backRef: InsertAction = parent
 
-  def optRefNested(
+  def optRef(
     ns: String, refAttr: String, refNs: String
-  ): InsertOptRefNested = {
+  ): InsertOptRef = {
     // Add ref attr to current ns
     val refAttrIndex = setCol(refAttr)
-    addChild(InsertOptRefNested(
-      this, sqlOps, ns, refAttr, refNs, refAttrIndex, rowCount
-    ))
-  }
-
-  def optRefAdjacent(
-    ns: String, refAttr: String, refNs: String
-  ): InsertOptRefAdjacent = {
-    // Add ref attr to current ns
-    val refAttrIndex = setCol(refAttr)
-    addChild(InsertOptRefAdjacent(
+    addChild(InsertOptRef(
       this, sqlOps, ns, refAttr, refNs, refAttrIndex, rowCount
     ))
   }
@@ -75,6 +65,13 @@ abstract class InsertAction(
 
   // Helpers ------------------------------------------------
 
+  // Options empty by default on this level for all insert rows
+  var optionalDefineds = Array.fill(rowCount)(false)
+
+  def setOptionalDefined(defined: Boolean): Unit = {
+    optionalDefineds.update(rowIndex, defined)
+  }
+
   var rowIndex = -1
 
   def nextRow(): Unit = {
@@ -87,7 +84,7 @@ abstract class InsertAction(
     }
   }
 
-  def sameLength(l1: Int, l2: Int, refAttr: String, refNs: String) = {
+  def sameLength(l1: Int, l2: Int, refAttr: String, refNs: String): Unit = {
     // Make sure arities match (not needed once implementation is stabilized)
     if (l1 != l2) {
       throw new Exception(

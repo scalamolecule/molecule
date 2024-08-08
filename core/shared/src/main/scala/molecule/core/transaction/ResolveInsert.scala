@@ -81,8 +81,8 @@ trait ResolveInsert
           resolve(tail, resolvers :+ backRefResolver, tplIndex, Nil)
 
         case OptRef(Ref(ns, refAttr, refNs, _, _, _), optRefElements) =>
-          val nestedResolver = addOptRef(tplIndex, ns, refAttr, refNs, optRefElements)
-          resolve(tail, resolvers :+ nestedResolver, tplIndex, Nil)
+          val optRefResolver = addOptRef(tplIndex, ns, refAttr, refNs, optRefElements)
+          resolve(tail, resolvers :+ optRefResolver, tplIndex + 1, Nil)
 
         case Nested(Ref(ns, refAttr, refNs, _, _, _), nestedElements) =>
           val nestedResolver = addNested(tplIndex, ns, refAttr, refNs, nestedElements)

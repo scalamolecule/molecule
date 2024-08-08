@@ -134,7 +134,6 @@ trait FlatRefOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // or this, if both B and C are refs from A
         _ <- A.i.C.i._A.B.?(B.i.s).query.get
 
-
         _ <- A.i.B.?(B.i.s).Cc.*(C.i).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Only further optional refs allowed after optional ref."
@@ -164,14 +163,12 @@ trait FlatRefOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (3, Some(3)),
         ))
 
-        // Mandatory ref from B to C excludes first two rows
         _ <- A.i.B.?(B.i.C.i).query.get.map(_ ==> List(
-          // (1, None),
-          // (2, None),
+          (1, None),
+          (2, None),
           (3, Some((3, 3))),
         ))
 
-        // Generally a normal ref would do the job in this case
         _ <- A.i.B.i.C.i.query.get.map(_ ==> List(
           (3, 3, 3),
         ))

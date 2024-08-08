@@ -35,7 +35,7 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions {
   final protected var hardLimit   = 0
   final           val inputs      = new ListBuffer[PrepStmt => Unit]
 
-  final var casts: CastStrategy = CastTuple()
+  final var castStrategy: CastStrategy = CastTuple()
 
   final protected val nestedIds = new ArrayBuffer[String]
   final protected var level     = 0

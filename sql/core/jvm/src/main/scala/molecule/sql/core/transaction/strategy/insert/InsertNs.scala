@@ -15,13 +15,13 @@ case class InsertNs(
   override def process(): Unit = {
     children.foreach(_.process())
 
-    println(s"++++++++++++++++++++++++++++++++++++++++++++++++++++++++  $ns  ")
-
-    println("rowSetters")
-    println(rowSetters.map { rs => rs.toList.mkString("\n   ") }.mkString("   ", "\n   -----\n   ", ""))
-
-    println("parent.rowSetters")
-    println(parent.rowSetters.map { rs => rs.toList.mkString("\n   ") }.mkString("   ", "\n   -----\n   ", ""))
+    //    println(s"++++++++++++++++++++++++++++++++++++++++++++++++++++++++  $ns  ")
+    //
+    //    println("rowSetters")
+    //    println(rowSetters.map { rs => rs.toList.mkString("\n   ") }.mkString("   ", "\n   -----\n   ", ""))
+    //
+    //    println("parent.rowSetters")
+    //    println(parent.rowSetters.map { rs => rs.toList.mkString("\n   ") }.mkString("   ", "\n   -----\n   ", ""))
 
     insert()
   }

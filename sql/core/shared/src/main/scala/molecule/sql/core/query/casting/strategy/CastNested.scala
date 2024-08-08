@@ -9,6 +9,5 @@ case class CastNested(private val tupleCasters0: List[CastTuple])
     val casters1 = tupleCasters.map(c => c.copy(firstIndex = c.firstIndex + 1))
     CastNested(casters1 :+ CastTuple(Nil, casters1.last.lastIndex))
   }
-  override def optRef: CastOptRefNested = ???
 }
 

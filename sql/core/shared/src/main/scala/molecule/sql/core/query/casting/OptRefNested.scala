@@ -3,10 +3,11 @@ package molecule.sql.core.query.casting
 import molecule.sql.core.query.SqlQueryBase
 import molecule.sql.core.query.casting.strategy._
 
-object NestOptRef extends SqlQueryBase {
+object OptRefNested extends SqlQueryBase {
 
   final def row2nestedOptions(casters: List[CastTuple]): RS => Any = {
     casters.length match {
+      case 1 => row2nestedOptions0(casters)
       case 2 => row2nestedOptions1(casters)
       case 3 => row2nestedOptions2(casters)
       case 4 => row2nestedOptions3(casters)
@@ -17,16 +18,22 @@ object NestOptRef extends SqlQueryBase {
     }
   }
 
+  final private def row2nestedOptions0(casters: List[CastTuple]): RS => Any = {
+    val leaf: RS => Option[Any] = casters(0).optTupleCaster
+    (row: RS) =>
+      leaf(row)
+  }
+
   final private def row2nestedOptions1(casters: List[CastTuple]): RS => Any = {
-    val branch0: (RS, Option[Any]) => Any = casters(0).branchOptionCaster
-    val leaf   : RS => Option[Any]        = casters(1).optTupleCaster
+    val branch0: (RS, Option[Any]) => Option[Any] = casters(0).nestedOptRefCaster
+    val leaf   : RS => Option[Any]                = casters(1).optTupleCaster
     (row: RS) =>
       branch0(row,
         leaf(row))
   }
 
   final private def row2nestedOptions2(casters: List[CastTuple]): RS => Any = {
-    val branch0: (RS, Option[Any]) => Any         = casters(0).branchOptionCaster
+    val branch0: (RS, Option[Any]) => Option[Any] = casters(0).nestedOptRefCaster
     val branch1: (RS, Option[Any]) => Option[Any] = casters(1).nestedOptRefCaster
     val leaf   : RS => Option[Any]                = casters(2).optTupleCaster
     (row: RS) => {
@@ -37,7 +44,7 @@ object NestOptRef extends SqlQueryBase {
   }
 
   final private def row2nestedOptions3(casters: List[CastTuple]): RS => Any = {
-    val branch0: (RS, Option[Any]) => Any         = casters(0).branchOptionCaster
+    val branch0: (RS, Option[Any]) => Option[Any] = casters(0).nestedOptRefCaster
     val branch1: (RS, Option[Any]) => Option[Any] = casters(1).nestedOptRefCaster
     val branch2: (RS, Option[Any]) => Option[Any] = casters(2).nestedOptRefCaster
     val leaf   : RS => Option[Any]                = casters(3).optTupleCaster
@@ -49,7 +56,7 @@ object NestOptRef extends SqlQueryBase {
   }
 
   final private def row2nestedOptions4(casters: List[CastTuple]): RS => Any = {
-    val branch0: (RS, Option[Any]) => Any         = casters(0).branchOptionCaster
+    val branch0: (RS, Option[Any]) => Option[Any] = casters(0).nestedOptRefCaster
     val branch1: (RS, Option[Any]) => Option[Any] = casters(1).nestedOptRefCaster
     val branch2: (RS, Option[Any]) => Option[Any] = casters(2).nestedOptRefCaster
     val branch3: (RS, Option[Any]) => Option[Any] = casters(3).nestedOptRefCaster
@@ -63,7 +70,7 @@ object NestOptRef extends SqlQueryBase {
   }
 
   final private def row2nestedOptions5(casters: List[CastTuple]): RS => Any = {
-    val branch0: (RS, Option[Any]) => Any         = casters(0).branchOptionCaster
+    val branch0: (RS, Option[Any]) => Option[Any] = casters(0).nestedOptRefCaster
     val branch1: (RS, Option[Any]) => Option[Any] = casters(1).nestedOptRefCaster
     val branch2: (RS, Option[Any]) => Option[Any] = casters(2).nestedOptRefCaster
     val branch3: (RS, Option[Any]) => Option[Any] = casters(3).nestedOptRefCaster
@@ -79,7 +86,7 @@ object NestOptRef extends SqlQueryBase {
   }
 
   final private def row2nestedOptions6(casters: List[CastTuple]): RS => Any = {
-    val branch0: (RS, Option[Any]) => Any         = casters(0).branchOptionCaster
+    val branch0: (RS, Option[Any]) => Option[Any] = casters(0).nestedOptRefCaster
     val branch1: (RS, Option[Any]) => Option[Any] = casters(1).nestedOptRefCaster
     val branch2: (RS, Option[Any]) => Option[Any] = casters(2).nestedOptRefCaster
     val branch3: (RS, Option[Any]) => Option[Any] = casters(3).nestedOptRefCaster
@@ -97,7 +104,7 @@ object NestOptRef extends SqlQueryBase {
   }
 
   final private def row2nestedOptions7(casters: List[CastTuple]): RS => Any = {
-    val branch0: (RS, Option[Any]) => Any         = casters(0).branchOptionCaster
+    val branch0: (RS, Option[Any]) => Option[Any] = casters(0).nestedOptRefCaster
     val branch1: (RS, Option[Any]) => Option[Any] = casters(1).nestedOptRefCaster
     val branch2: (RS, Option[Any]) => Option[Any] = casters(2).nestedOptRefCaster
     val branch3: (RS, Option[Any]) => Option[Any] = casters(3).nestedOptRefCaster

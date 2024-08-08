@@ -12,7 +12,11 @@ trait SqlInsert
   extends InsertOps
     with SqlBaseOps { self: ResolveInsert with InsertResolvers_ with SqlOps =>
 
-  protected var insert: InsertAction = null
+  protected var baseAction: Option[InsertAction] = None
+  protected var insert    : InsertAction         = null
+
+  private var firstOptRef = true
+
 
   def getInsertAction(
     elements: List[Element],
@@ -223,11 +227,24 @@ trait SqlInsert
     refNs: String,
     optionalElements: List[Element]
   ): Product => Unit = {
-    val insertOptRef = insert.optRefNested(ns, refAttr, refNs)
+    if (firstOptRef) {
+      baseAction.fold {
+        baseAction = Some(insert)
+      } { baseAction =>
+        insert = baseAction
+      }
+    }
+
+    // Cache stable insert instance
+    val insertOptRef = insert.optRef(ns, refAttr, refNs)
     insert = insertOptRef
+    firstOptRef = false
 
     // Recursively resolve optional data
-    val resolveOptional = getResolver(optionalElements)
+    val resolveOptionalRefData = getResolver(optionalElements)
+
+    firstOptRef = true
+    insert = baseAction.get
 
     countValueAttrs(optionalElements) match {
       case 1 =>
@@ -235,16 +252,15 @@ trait SqlInsert
           val optionalValue = tpl.productElement(tplIndex).asInstanceOf[Option[Any]]
           insertOptRef.setOptionalDefined(optionalValue.isDefined)
           optionalValue.foreach { value =>
-            resolveOptional(Tuple1(value))
+            resolveOptionalRefData(Tuple1(value))
           }
         }
       case _ =>
         (tpl: Product) => {
           val optionalTpl = tpl.productElement(tplIndex).asInstanceOf[Option[Product]]
-          val x           = s"   $ns.$refAttr   " + optionalTpl
           insertOptRef.setOptionalDefined(optionalTpl.isDefined)
           optionalTpl.foreach { tpl =>
-            resolveOptional(tpl)
+            resolveOptionalRefData(tpl)
           }
         }
     }
@@ -285,7 +301,6 @@ trait SqlInsert
         }
     }
   }
-
 
 
   // Helpers -------------------------------------------------------------------

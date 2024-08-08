@@ -28,7 +28,7 @@ trait QueryExprSet_mariadb
     selectWithOrder(col, res.tpeDb, "JSON_ARRAYAGG", "DISTINCT ", true)
     groupByCols -= col
     aggregate = true
-    casts.replace((row: RS, paramIndex: Int) =>
+    castStrategy.replace((row: RS, paramIndex: Int) =>
       res.json2optArray(row.getString(paramIndex)).map(_.toSet)
     )
   }
@@ -146,7 +146,7 @@ trait QueryExprSet_mariadb
 
   private def mandatoryCast[T](res: ResSet[T], mandatory: Boolean): Unit = {
     if (mandatory) {
-      casts.replace((row: RS, paramIndex: Int) =>
+      castStrategy.replace((row: RS, paramIndex: Int) =>
         res.json2array(row.getString(paramIndex)).toSet
       )
     }

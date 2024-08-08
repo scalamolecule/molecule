@@ -35,7 +35,7 @@ trait QueryExprSet_sqlite
     select += s"JSON_GROUP_ARRAY($colTable.VALUE) AS $attr"
     joins += (("LEFT JOIN", s"JSON_EACH($col)", colTable, Nil))
     aggregate = true
-    casts.replace((row: RS, paramIndex: Int) =>
+    castStrategy.replace((row: RS, paramIndex: Int) =>
       res.json2optArray(row.getString(paramIndex)).map(_.toSet)
     )
   }
@@ -195,7 +195,7 @@ trait QueryExprSet_sqlite
 
   private def mandatoryCast[T](res: ResSet[T], mandatory: Boolean): Unit = {
     if (mandatory) {
-      casts.replace((row: RS, paramIndex: Int) =>
+      castStrategy.replace((row: RS, paramIndex: Int) =>
         res.json2array(row.getString(paramIndex)).toSet
       )
     }

@@ -18,8 +18,6 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
     checkOnlyOptRef()
     handleRef(refAttr, refNs)
 
-    val singleOptSet = tail.length == 1 && tail.head.isInstanceOf[AttrSetOpt]
-
     val nsExt = if (ns == refNs)
       "" // self-joins
     else
@@ -27,9 +25,10 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
 
     if (ref.card == CardOne) {
       val (refAs, refExt) = getOptExt().fold(("", ""))(ext => (refNs + ext, ext))
-      val joinType        = if (isOptNested) "LEFT" else "INNER"
+      val joinType        = if (isOptNested || nestedOptRef) "LEFT" else "INNER"
       joins += ((s"$joinType JOIN", refNs, refAs, List(s"$ns$nsExt.$refAttr = $refNs$refExt.id")))
     } else {
+      val singleOptSet = tail.length == 1 && tail.head.isInstanceOf[AttrSetOpt]
       val joinType = if (singleOptSet) "LEFT" else "INNER"
       addJoins(ns, nsExt, refAttr, refNs, joinType)
     }
@@ -58,14 +57,10 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
   override protected def queryOptRef(
     ref: Ref, optionalElements: List[Element]
   ): Unit = {
-    //    println(ref)
-    //    println(s"========================= $hasOptRef  A  ")
     if (hasOptRef) {
-      //      println("-------- B  ")
-      // transfer previous predicates from where
+      // transfer previous predicates from `where`
       addPredicatesToLastLeftJoin()
     }
-    insideOptRef = true
 
     // Know where we should steal predicates from subsequent `where` additions
     whereSplit = where.length
@@ -77,15 +72,12 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
     val (refAs, refExt) = getOptExt().fold(("", ""))(ext => (refNs + ext, ext))
     joins += ((s"LEFT JOIN", refNs, refAs, List(s"$ns$nsExt.$refAttr = $refNs$refExt.id")))
 
-    //    println("===================================")
-    //    println(self.elements0)
-    //    joins.foreach(println)
-    //    println("----------")
-    //    where.foreach(println)
+    // Cast next nested/adjacent opt ref
+    castStrategy = castStrategy.optRef(nestedOptRef)
 
-    casts = casts.optRef
+    nestedOptRef = true
     resolve(optionalElements)
-    insideOptRef = false
+    nestedOptRef = false
     hasOptRef = true
   }
 
@@ -118,7 +110,7 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
   private def resolveNested(
     ref: Ref, nestedElements: List[Element], joinType: String
   ): Unit = {
-    if (insideOptRef) {
+    if (nestedOptRef) {
       throw ModelError("Cardinality-many nesting not allowed inside optional ref.")
     }
 
@@ -135,7 +127,7 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
     nestedIds += id
     groupByCols += id // if we later need to group by non-aggregated columns
 
-    casts = casts.nest
+    castStrategy = castStrategy.nest
     resolve(nestedElements)
   }
 

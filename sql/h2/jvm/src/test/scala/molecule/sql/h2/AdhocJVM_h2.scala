@@ -38,48 +38,10 @@ object AdhocJVM_h2 extends TestSuite_h2 {
 
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
-      //      val a0: Future[List[(Int, String, Seq[(Int, String)])]]                                = A.i.s.Bb.*?(B.i.s).query.get
-      //      val a1: Future[List[(Int, String, Seq[(Int, String)])]]                                = A.i.s.Bb.*(B.i.s).query.get
-      //      val a2: Future[List[(Int, String, Option[(Int, String)])]]                             = A.i.s.B.?(B.i.s).query.get
-      //      val a3: Future[List[(Int, String, Option[(Int, Option[String])])]]                     = A.i.s.B.?(B.i.s_?).query.get
-      //      val a4: Future[List[(Int, String, Int, String)]]                                       = A.i.s.B.i.s.query.get
-      //      val a5: Future[List[(Int, Option[(Int, String, Int, String)])]]                        = A.i.B.?(B.i.s.C.i.s).query.get
-      //      val a6: Future[List[(Int, Option[(Int, String)])]]                                     = A.i.B.?(B.i.s).query.get
-      //      val a7: Future[List[(Int, Option[(Int, String, Option[(Int, String)])])]]              = A.i.B.?(B.i.s.C.?(C.i.s)).query.get
-      //      val a8: Future[List[(Int, Option[(Int, String)], Option[(Int, String)])]]              = A.i.B.?(B.i.s).C.?(C.i.s).query.get
-      //      val a9: Future[List[(Int, Option[(String, Int, String, Int)], Option[(String, Int)])]] = A.i.B.?(B.s.i.C.s.i).D.?(D.s.i).query.get
-
       for {
 
-
-
-        _ <- A.i.B.?(B.s).C.?(C.s).insert(List(
-//          (1, None, None),
-//          (2, None, Some("c")),
-//          (3, Some("b"), None),
-          (4, Some("b"), Some("c")),
-        )).transact
-
-        _ <- A.i.a1.B.?(B.s).C.?(C.s).query.get.map(_ ==> List(
-//          (1, None, None),
-//          (2, None, Some("c")),
-//          (3, Some("b"), None),
-          (4, Some("b"), Some("c")),
-        ))
-
-
-        //        _ <- A.i.B.?(B.s.i.C.?(C.s.i)).insert(List(
-        //          (1, None),
-        //          (2, Some(("b", 20, None))),
-        //          (3, Some(("b", 30, Some(("c", 300))))),
-        //        )).i.transact
-        //
-        //
-        //        _ <- A.i.B.?(B.s.i.C.?(C.s.i)).query.get.map(_ ==> List(
-        //          (1, None),
-        //          (2, Some(("b", 20, None))),
-        //          (3, Some(("b", 30, Some(("c", 300))))),
-        //        ))
+        _ <- A.i.B.i.insert(1, 2).transact
+        _ <- A.i.B.i.query.get.map(_ ==> List((1, 2)))
 
         //        _ <- rawQuery(
         //          """select count(*) from Ns

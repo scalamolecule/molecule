@@ -59,7 +59,7 @@ trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: Model2Query 
     select += s"ARRAY_AGG($joinTable.$ref_id) $refIds"
     joins += (("INNER JOIN", joinTable, "", List(s"$nsId = $joinTable.$ns_id")))
     groupBy += nsId
-    casts.add(res.sql2set)
+    castStrategy.add(res.sql2set)
 
     attr.filterAttr.fold {
       val pathAttr = path :+ attr.cleanAttr
@@ -90,7 +90,7 @@ trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: Model2Query 
     select += s"ARRAY_AGG($joinTable.$ref_id) $refIds"
     joins += (("LEFT JOIN", joinTable, "", List(s"$nsId = $joinTable.$ns_id")))
     groupBy += nsId
-    casts.add(resOpt.sql2setOpt)
+    castStrategy.add(resOpt.sql2setOpt)
     attr.op match {
       case V     => ()
       case Eq    => noCollectionMatching(attr)

@@ -15,7 +15,10 @@ object _CastTpl extends SqlGenBase("CastTpl", "/query/casting") {
        |
        |object $fileName_ extends SqlQueryBase {
        |
-       |  final def cast(casts: List[Cast], firstIndex: ParamIndex): RS => Any = {
+       |  final def cast(
+       |    casts: List[Cast],
+       |    firstIndex: ParamIndex
+       |  ): RS => Any = {
        |    casts.length match {
        |      $caseX
        |    }

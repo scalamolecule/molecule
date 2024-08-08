@@ -18,9 +18,9 @@ trait QueryExprSet_postgres
     groupByCols += col // if we later need to group by non-aggregated columns
 
     if (isOptNested) {
-      casts.add(res.sql2setOrNull)
+      castStrategy.add(res.sql2setOrNull)
     } else {
-      casts.add(res.sql2set)
+      castStrategy.add(res.sql2set)
       setNotNull(col)
     }
 
@@ -98,7 +98,7 @@ trait QueryExprSet_postgres
       groupByCols -= col
       having += "COUNT(*) > 0"
       aggregate = true
-      casts.replace(res.array2set)
+      castStrategy.replace(res.array2set)
     }
     where += (("", s"ARRAY(SELECT UNNEST($col) INTERSECT SELECT $filterAttr) = '{}'"))
   }
@@ -115,11 +115,11 @@ trait QueryExprSet_postgres
         select += s"ARRAY_AGG(DISTINCT $colAlias)"
         val tpe = res.tpeDb
         tempTables += s"UNNEST(CASE WHEN $col IS NULL THEN array[null]::$tpe[] ELSE $col END) AS $colAlias"
-        casts.replace(res.array2set)
+        castStrategy.replace(res.array2set)
 
       case "opt" =>
         select += s"COALESCE(ARRAY_AGG($col) FILTER (WHERE $col <> '{}'), '{}')"
-        casts.replace(res.nestedArray2optCoalescedSet)
+        castStrategy.replace(res.nestedArray2optCoalescedSet)
 
       case "tac" =>
         where += (("", s"$col <> '{}'"))

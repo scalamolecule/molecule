@@ -64,14 +64,14 @@ trait QueryExprSeq_postgres
       if (isOptNested) {
         // Allow empty optional nested rows.
         // So let non-asserted Seq values (null) be checked in NestedOpt
-        casts.replace((row: RS, paramIndex: Int) => {
+        castStrategy.replace((row: RS, paramIndex: Int) => {
           row.getString(paramIndex) match {
             case null => null
             case _    => res.array2list(row, paramIndex)
           }
         })
       } else {
-        casts.replace((row: RS, paramIndex: Int) =>
+        castStrategy.replace((row: RS, paramIndex: Int) =>
           res.array2list(row, paramIndex)
         )
       }

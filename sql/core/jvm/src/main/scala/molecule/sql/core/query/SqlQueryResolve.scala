@@ -118,7 +118,7 @@ abstract class SqlQueryResolve[Tpl](
     if (flatRowCount == 0) {
       (Nil, "", false)
     } else {
-      m2q.casts match {
+      m2q.castStrategy match {
         case c: CastTuple  => paginateTuples(c, limit, forward, allTokens, identifiers, identifyTpl, nextCursor, sortedRows, conn)
         case c: CastNested => paginateNested(c, limit, forward, allTokens, identifiers, identifyTpl, nextCursor, sortedRows)
         case _             => ???

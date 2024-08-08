@@ -23,11 +23,11 @@ case class SqlQueryResolveOffset[Tpl](
   : (List[Tpl], Int, Boolean) = {
     offsetLimitCheck(optLimit, optOffset)
     val sortedRows = getData(conn, optLimit, optOffset)
-    m2q.casts match {
-      case c: CastTuple        => handleTuples(c, sortedRows, conn)
-      case c: CastOptRefNested => handleTuples(c, sortedRows, conn)
-      case c: CastNested       => handleNested(c, sortedRows, conn)
-      case _                   => ???
+    m2q.castStrategy match {
+      case c: CastTuple   => handleTuples(c, sortedRows, conn)
+      case c: CastOptRefs => handleTuples(c, sortedRows, conn)
+      case c: CastNested  => handleNested(c, sortedRows, conn)
+      case _              => ???
     }
   }
 

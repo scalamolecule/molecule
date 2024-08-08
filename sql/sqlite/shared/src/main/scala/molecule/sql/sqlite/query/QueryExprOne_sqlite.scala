@@ -39,7 +39,7 @@ trait QueryExprOne_sqlite
         select += s"json_group_array(DISTINCT $col)"
         groupByCols -= col
         aggregate = true
-        casts.replace((row: RS, paramIndex: Int) =>
+        castStrategy.replace((row: RS, paramIndex: Int) =>
           res.json2array(row.getString(paramIndex)).toSet
         )
 
@@ -53,7 +53,7 @@ trait QueryExprOne_sqlite
         select += "<replace>" // add to maintain correct indexing
         groupByCols -= col
         aggregate = true
-        casts.replace((row: RS, paramIndex: Int) =>
+        castStrategy.replace((row: RS, paramIndex: Int) =>
           res.json2array(row.getString(paramIndex)).toSet
         )
 
@@ -67,7 +67,7 @@ trait QueryExprOne_sqlite
         select += "<replace>" // add to maintain correct indexing
         groupByCols -= col
         aggregate = true
-        casts.replace((row: RS, paramIndex: Int) =>
+        castStrategy.replace((row: RS, paramIndex: Int) =>
           res.json2array(row.getString(paramIndex)).toSet
         )
 
@@ -80,7 +80,7 @@ trait QueryExprOne_sqlite
         select += "<replace>" // add to maintain correct indexing
         groupByCols -= col
         aggregate = true
-        casts.replace((row: RS, paramIndex: Int) =>
+        castStrategy.replace((row: RS, paramIndex: Int) =>
           res.json2array(row.getString(paramIndex)).toSet
         )
 
@@ -89,14 +89,14 @@ trait QueryExprOne_sqlite
         groupByCols -= col
         aggregate = true
         selectWithOrder(col, "COUNT", "")
-        casts.replace(toInt)
+        castStrategy.replace(toInt)
 
       case "countDistinct" =>
         distinct = false
         groupByCols -= col
         aggregate = true
         selectWithOrder(col, "COUNT")
-        casts.replace(toInt)
+        castStrategy.replace(toInt)
 
       case "sum" =>
         groupByCols -= col
@@ -128,7 +128,7 @@ trait QueryExprOne_sqlite
         select += s"json_group_array($col)"
         groupByCols -= col
         aggregate = true
-        casts.replace(
+        castStrategy.replace(
           (row: RS, paramIndex: Int) =>
             getMedian(jsonArray2doubles(row.getString(paramIndex)))
         )
@@ -146,7 +146,7 @@ trait QueryExprOne_sqlite
         select += s"json_group_array($col)"
         groupByCols -= col
         aggregate = true
-        casts.replace(
+        castStrategy.replace(
           (row: RS, paramIndex: Int) =>
             varianceOf(jsonArray2doubles(row.getString(paramIndex)))
         )
@@ -158,7 +158,7 @@ trait QueryExprOne_sqlite
         groupByCols -= col
         aggregate = true
         select += s"json_group_array($col)"
-        casts.replace(
+        castStrategy.replace(
           (row: RS, paramIndex: Int) =>
             stdDevOf(jsonArray2doubles(row.getString(paramIndex)))
         )

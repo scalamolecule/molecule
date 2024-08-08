@@ -98,7 +98,7 @@ trait QueryExprMap extends QueryExpr { self: Model2Query with SqlQueryBase with 
     if (!isOptNested) {
       setNotNull(col)
     }
-    casts.add(resMap.sqlJson2map)
+    castStrategy.add(resMap.sqlJson2map)
     attr.op match {
       case V       => ()
       case Has     => key2value(col, keys.head, resMap)
@@ -128,7 +128,7 @@ trait QueryExprMap extends QueryExpr { self: Model2Query with SqlQueryBase with 
   ): Unit = {
     val col = getCol(attr: Attr)
     select += col
-    casts.add(resMapOpt.sql2optMap)
+    castStrategy.add(resMapOpt.sql2optMap)
     attr.op match {
       case V     => ()
       case Has   => key2optValue(col, keys.head, resMap)
@@ -147,7 +147,7 @@ trait QueryExprMap extends QueryExpr { self: Model2Query with SqlQueryBase with 
     select -= col
     select += value
     where += ((value, s"IS NOT NULL"))
-    casts.replace((row: RS, paramIndex: Int) =>
+    castStrategy.replace((row: RS, paramIndex: Int) =>
       resMap.json2tpe(row.getString(paramIndex))
     )
   }
@@ -157,7 +157,7 @@ trait QueryExprMap extends QueryExpr { self: Model2Query with SqlQueryBase with 
   ): Unit = {
     select -= col
     select += s"""($col)."$key""""
-    casts.replace((row: RS, paramIndex: Int) => {
+    castStrategy.replace((row: RS, paramIndex: Int) => {
       val value = row.getString(paramIndex)
       if (row.wasNull()) Option.empty[T] else Some(resMap.json2tpe(value))
     })

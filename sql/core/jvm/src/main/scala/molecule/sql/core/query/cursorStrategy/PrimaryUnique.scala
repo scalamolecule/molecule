@@ -43,7 +43,7 @@ case class PrimaryUnique[Tpl](
     if (flatRowCount == 0) {
       (Nil, "", false)
     } else {
-      m2q.casts match {
+      m2q.castStrategy match {
         case c: CastTuple  => handleTuples(c, limit, forward, sortedRows, conn)
         case c: CastNested => handleNested(c, limit, forward, sortedRows, conn)
         case _             => ???

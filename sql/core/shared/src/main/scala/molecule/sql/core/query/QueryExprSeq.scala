@@ -102,7 +102,7 @@ trait QueryExprSeq extends QueryExpr { self: Model2Query with SqlQueryBase with 
     if (!isOptNested) {
       setNotNull(col)
     }
-    casts.add(res.sql2list)
+    castStrategy.add(res.sql2list)
     attr.filterAttr.fold {
       val pathAttr = path :+ attr.cleanAttr
       if (filterAttrVars.contains(pathAttr) && attr.op != V) {
@@ -160,7 +160,7 @@ trait QueryExprSeq extends QueryExpr { self: Model2Query with SqlQueryBase with 
   ): Unit = {
     val col = getCol(attr: Attr)
     select += col
-    casts.add(resOpt.sql2listOpt)
+    castStrategy.add(resOpt.sql2listOpt)
     attr.op match {
       case V     => seqOptAttr(res)
       case Eq    => noCollectionMatching(attr)
@@ -242,7 +242,7 @@ trait QueryExprSeq extends QueryExpr { self: Model2Query with SqlQueryBase with 
       throw ModelError(s"Filter attributes not allowed with byte arrays.")
     }
     // return Byte array as-is
-    casts.add((row: RS, paramIndex: Int) => row.getBytes(paramIndex))
+    castStrategy.add((row: RS, paramIndex: Int) => row.getBytes(paramIndex))
   }
 
   private def tacByteArray(attr: Attr, byteArray: Array[Byte]): Unit = {
@@ -296,7 +296,7 @@ trait QueryExprSeq extends QueryExpr { self: Model2Query with SqlQueryBase with 
         val col = getCol(attr: Attr)
         select += col
         // return optional Byte array as-is
-        casts.add((row: RS, paramIndex: Int) =>
+        castStrategy.add((row: RS, paramIndex: Int) =>
           row.getBytes(paramIndex) match {
             case null      => Option.empty[Array[Byte]]
             case byteArray => Some(byteArray)

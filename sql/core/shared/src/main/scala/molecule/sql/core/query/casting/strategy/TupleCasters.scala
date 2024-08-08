@@ -1,7 +1,9 @@
 package molecule.sql.core.query.casting.strategy
 
 
-class TupleCasters(tupleCasters0: List[CastTuple]) extends CastBase { self: CastStrategy =>
+class TupleCasters(tupleCasters0: List[CastTuple])
+  extends CastBase { self: CastStrategy =>
+
   private var _tupleCasters = tupleCasters0
 
   // Add cast to last CastTuple

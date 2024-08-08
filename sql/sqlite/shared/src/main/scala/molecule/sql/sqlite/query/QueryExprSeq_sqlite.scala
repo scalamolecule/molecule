@@ -19,7 +19,7 @@ trait QueryExprSeq_sqlite
   override protected def seqOptAttr[T](
     res: ResSeq[T]
   ): Unit = {
-    casts.replace((row: RS, paramIndex: Int) => row.getString(paramIndex) match {
+    castStrategy.replace((row: RS, paramIndex: Int) => row.getString(paramIndex) match {
       case null | "[]" => Option.empty[Set[T]]
       case json        => Some(res.json2array(json).toList)
     })
@@ -112,14 +112,14 @@ trait QueryExprSeq_sqlite
       if (isOptNested) {
         // Allow empty optional nested rows.
         // So let non-asserted Seq values (null) be checked in OptNested
-        casts.replace((row: RS, paramIndex: Int) => {
+        castStrategy.replace((row: RS, paramIndex: Int) => {
           row.getString(paramIndex) match {
             case null => null
             case s    => res.json2array(s).toList
           }
         })
       } else {
-        casts.replace((row: RS, paramIndex: Int) =>
+        castStrategy.replace((row: RS, paramIndex: Int) =>
           res.json2array(row.getString(paramIndex)).toList
         )
       }

@@ -7,6 +7,7 @@ case class CastTuple(
   casts0: List[(ResultSetInterface, Int) => Any] = Nil,
   firstIndex: Int = 1
 ) extends CastStrategy {
+
   private var casts = casts0
   def getCasts: List[Cast] = casts
   def lastIndex: Int = firstIndex + casts.length
@@ -33,22 +34,39 @@ case class CastTuple(
     casts = casts.init :+ cast
   }
 
+  // First opt ref
+  override def optRef(nested: Boolean): CastOptRefs = {
+    CastOptRefs(
+      CastTuple(casts, firstIndex), // initial casts before first opt ref
+      List(
+        CastOptRefNested(
+          List(
+            CastTuple(Nil, lastIndex) // optional casts to be added here
+          )
+        )
+      )
+    )
+  }
+
   override def nest: CastNested = {
     val levelId = 1
     CastNested(
       List(
         CastTuple(casts, levelId + firstIndex),
-        CastTuple(Nil, levelId + lastIndex)
+        CastTuple(Nil, levelId + lastIndex) // nested casts to be added here
       ),
     )
   }
 
-  override def optRef: CastOptRefNested = {
-    CastOptRefNested(
-      List(
-        CastTuple(casts, firstIndex),
-        CastTuple(Nil, lastIndex)
-      ),
-    )
+  override def render(indent: Int): String = {
+    val p        = "  " * indent
+    val castList = if (casts0.isEmpty) "" else
+      casts0.mkString(s"\n$p    ", s",\n$p    ", s"\n$p  ")
+    s"""${p}CastTuple(
+       |${p}  List($castList),
+       |${p}  $firstIndex
+       |${p})""".stripMargin
   }
+
+  override def toString: String = render(0)
 }
