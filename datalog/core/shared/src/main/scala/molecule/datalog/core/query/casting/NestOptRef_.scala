@@ -22,60 +22,46 @@ trait NestOptRef_[Tpl]
   private lazy val pullCasts6 = pullCastss(5)
   private lazy val pullCasts7 = pullCastss(6)
 
-  private lazy val pullSorts1 = pullSortss.head
-  private lazy val pullSorts2 = pullSortss(1)
-  private lazy val pullSorts3 = pullSortss(2)
-  private lazy val pullSorts4 = pullSortss(3)
-  private lazy val pullSorts5 = pullSortss(4)
-  private lazy val pullSorts6 = pullSortss(5)
-  private lazy val pullSorts7 = pullSortss(6)
-
   private lazy val pullBranch1: jIterator[_] => Option[Any] = {
     if (levels == 1)
       pullOptRefLeaf(aritiess(1), pullCasts1)
     else
-      pullOptRefBranch(
-        aritiess(1),
-        pullCasts1,
-        pullSorts1,
-        pullBranch2,
-        refDepths(1)
-      )
+      pullOptRefBranch(aritiess(1), pullCasts1, pullBranch2)
   }
 
   private lazy val pullBranch2: jIterator[_] => Option[Any] = {
     if (levels == 2)
       pullOptRefLeaf(aritiess(2), pullCasts2)
     else
-      pullOptRefBranch(aritiess(2), pullCasts2, pullSorts2, pullBranch3, refDepths(2))
+      pullOptRefBranch(aritiess(2), pullCasts2, pullBranch3)
   }
 
   private lazy val pullBranch3: jIterator[_] => Option[Any] = {
     if (levels == 3)
       pullOptRefLeaf(aritiess(3), pullCasts3)
     else
-      pullOptRefBranch(aritiess(3), pullCasts3, pullSorts3, pullBranch4, refDepths(3))
+      pullOptRefBranch(aritiess(3), pullCasts3, pullBranch4)
   }
 
   private lazy val pullBranch4: jIterator[_] => Option[Any] = {
     if (levels == 4)
       pullOptRefLeaf(aritiess(4), pullCasts4)
     else
-      pullOptRefBranch(aritiess(4), pullCasts4, pullSorts4, pullBranch5, refDepths(4))
+      pullOptRefBranch(aritiess(4), pullCasts4, pullBranch5)
   }
 
   private lazy val pullBranch5: jIterator[_] => Option[Any] = {
     if (levels == 5)
       pullOptRefLeaf(aritiess(5), pullCasts5)
     else
-      pullOptRefBranch(aritiess(5), pullCasts5, pullSorts5, pullBranch6, refDepths(5))
+      pullOptRefBranch(aritiess(5), pullCasts5, pullBranch6)
   }
 
   private lazy val pullBranch6: jIterator[_] => Option[Any] = {
     if (levels == 6)
       pullOptRefLeaf(aritiess(6), pullCasts6)
     else
-      pullOptRefBranch(aritiess(6), pullCasts6, pullSorts6, pullBranch7, refDepths(6))
+      pullOptRefBranch(aritiess(6), pullCasts6, pullBranch7)
   }
 
   private lazy val pullBranch7: jIterator[_] => Option[Any] = {
@@ -85,8 +71,8 @@ trait NestOptRef_[Tpl]
   protected lazy val pullOptRefData: AnyRef => AnyRef = {
     (rowValue: AnyRef) => {
 
-      println("=== " + rowValue)
-      println("=== " + rowValue.asInstanceOf[jMap[_, _]].values)
+//      println("=== " + rowValue)
+//      println("=== " + rowValue.asInstanceOf[jMap[_, _]].values)
       pullBranch1(rowValue.asInstanceOf[jMap[_, _]].values.iterator)
     }
   }
@@ -154,21 +140,21 @@ trait NestOptRef_[Tpl]
 
   final private def cast2(casters: List[Row => AnyRef]): Row => Tpl = {
     val List(c1, c2) = casters
-    println("C")
-    (row: Row) =>{
-      println("-----------")
-      val v1 = c1(row)
-      println("---  " + v1)
-      val v2 = c2(row)
-      println("---  " + v2)
-
-      (
-        v1, v2
-      ).asInstanceOf[Tpl]
+//    println("C")
+    (row: Row) => {
+//      println("-----------")
+//      val v1 = c1(row)
+//      println("---  " + v1)
+//      val v2 = c2(row)
+//      println("---  " + v2)
+//
 //      (
-//        c1(row),
-//        c2(row)
+//        v1, v2
 //      ).asInstanceOf[Tpl]
+      (
+        c1(row),
+        c2(row)
+      ).asInstanceOf[Tpl]
     }
   }
 

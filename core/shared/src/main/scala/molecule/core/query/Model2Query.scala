@@ -108,12 +108,11 @@ trait Model2Query extends QueryExpr with ModelUtils {
                   validate(tail, prevElements)
 
                 case _: BackRef =>
-                  handleBackRef()
+                  handleBackRef.apply()
                   validate(tail, prevElements)
 
-                case OptRef(r, es) =>
-                  //                  ???
-                  ()
+                case OptRef(_, es) =>
+                  validate(es ++ tail, prevElements)
 
                 case Nested(r, es) =>
                   handleRef(r.refAttr, r.refNs)
@@ -137,6 +136,7 @@ trait Model2Query extends QueryExpr with ModelUtils {
             case element :: tail =>
               element match {
                 case a: Attr          => validateAttr(a); validate(tail, prevElements :+ a)
+                case OptRef(_, es)    => validate(es ++ tail, prevElements)
                 case Nested(_, es)    => validateNested(); validate(es, prevElements)
                 case OptNested(_, es) => validateOptNested(prevElements); validate(es, prevElements)
                 case _                => validate(tail, prevElements)

@@ -33,7 +33,8 @@ case class DatomicQueryResolveOffset[Tpl](
   }
 
   // Optional use of DB_AFTER for subscriptions
-  def getListFromOffset_sync(altDb: Option[datomic.Database])(implicit conn: DatomicConn_JVM)
+  def getListFromOffset_sync(altDb: Option[datomic.Database])
+                            (implicit conn: DatomicConn_JVM)
   : (List[Tpl], Int, Boolean) = {
     offsetLimitCheck(optLimit, optOffset)
     val rows       = getRawData(conn, altDb = altDb)
@@ -63,7 +64,9 @@ case class DatomicQueryResolveOffset[Tpl](
         postAdjustPullCasts()
         val row2tpl = m2q.pullOptRefRow2tpl
         offsetRaw(sortedRows, fromUntil).forEach { row =>
-          println("ROW: " + row)
+
+          //          println("================= ROW: " + row)
+
           tuples += row2tpl(row)
         }
         (tuples.toList.filterNot(_ == Nil), totalCount, hasMore)
@@ -77,7 +80,6 @@ case class DatomicQueryResolveOffset[Tpl](
       }
     }
   }
-
 
   def subscribe(
     conn: DatomicConn_JVM,

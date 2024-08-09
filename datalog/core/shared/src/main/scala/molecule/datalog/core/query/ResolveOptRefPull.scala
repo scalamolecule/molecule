@@ -73,7 +73,7 @@ trait ResolveOptRefPull[Tpl]
 
             case ref: Ref             => (acc, Some(ref), tail, attrIndex)
             case backRef: BackRef     => (acc, Some(backRef), tail, attrIndex)
-            case optRef: OptRef       => ??? //(acc, Some(optRef), Nil, attrIndex)
+            case optRef: OptRef       => (acc, Some(optRef), Nil, attrIndex)
             case nestedOpt: OptNested => (acc, Some(nestedOpt), Nil, attrIndex)
             case _: Nested            => noMixedNestedModes
 
@@ -99,7 +99,6 @@ trait ResolveOptRefPull[Tpl]
       val refAttr = s":${ref.ns}/${ref.refAttr}"
       addPullAttrs(elements, level, attrIndex, "") match {
         case (acc1, None, Nil, _) =>
-//          val res = s"""\n$indent{($refAttr :default "$none") [$acc1]}"""
           val res =
             s"""
                |$indent{($refAttr :default "$none") [$acc1
@@ -149,6 +148,22 @@ trait ResolveOptRefPull[Tpl]
           aritiesNested()
           val (attrs, append1) = resolvePullRef(ref1, elements1, level + 1, 0, "")
           val res              = s"""\n$indent{($refAttr :limit nil :default "$none") [$acc1$attrs$append1]}"""
+          (res, "")
+
+        case (acc1, Some(OptRef(ref1, elements1)), _, _) =>
+          // New sub level
+          pullCastss = pullCastss :+ pullCasts.toList
+          pullCasts.clear()
+          pullSortss = pullSortss :+ pullSorts.sortBy(_._1).map(_._2).toList
+          pullSorts.clear()
+          refDepths = refDepths :+ 0
+          aritiesNested()
+          val (attrs, append1) = resolvePullRef(ref1, elements1, level + 2, 0, "")
+          val res              =
+            s"""
+               |$indent{($refAttr :default "$none") [$acc1$attrs$append1
+               |$indent  ]
+               |$indent}""".stripMargin
           (res, "")
 
         case (_, Some(other), _, _) => unexpectedElement(other)

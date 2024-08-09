@@ -29,37 +29,183 @@ object AdhocJVM_datomic extends TestSuite_datomic {
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
 
+        //        _ <- A.i(1).save.transact
+        //        _ <- A.i(1).B.i(1).save.transact
+        //        _ <- A.i(2).B.i(1).s("b").save.transact
+        //        _ <- A.i(2).B.i(2).s("b").save.transact
+        //
+        //        _ <- A.i(3).B.i(3).s("b").C.i(3).save.transact
+        //        _ <- A.i(3).B.i(3).s("b").C.i(4).s("c").save.transact
+//        _ <- A.i(3).B.i(4).s("b").C.i(5).s("c").save.transact
+
+        _ <- A.i(1).B.i(2).C.i(3).save.transact
+
+//        _ <- A.i.a1.B.?(B.i.a2.s.C.?(C.i.a3.s)).query.i.get.map(_ ==> List(
+        _ <- A.i.B.?(B.i.C.?(C.i)).query.i.get.map(_ ==> List(
+          //                  (1, None),
+          //                  (1, None),
+          //                  (2, Some((1, "b", None))),
+          //                  (2, Some((2, "b", None))),
+          //
+          //                  (3, Some((3, "b", None))),
+          //                  (3, Some((3, "b", Some((4, "c"))))),
+          (1, Some((2, Some(3)))),
+        ))
+        //
+        //        _ <- A.i.d3.B.?(B.i.d2.s.C.?(C.i.d1.s)).query.i.get.map(_ ==> List(
+        //          (3, Some((4, "b", Some((5, "c"))))),
+        //          (3, Some((3, "b", Some((4, "c"))))),
+        //          (3, Some((3, "b", None))),
+        //
+        //          (2, Some((2, "b", None))),
+        //          (2, Some((1, "b", None))),
+        //          (1, None),
+        //          (1, None),
+        //        ))
+
+        //        _ <- A.i(1).save.transact
+        //        _ <- A.i(1).B.i(1).save.transact
+        //        _ <- A.i(2).B.i(1).s("b").save.transact
+        //        _ <- A.i(2).B.i(2).s("b").save.transact
+        //
+        //        _ <- A.i(3).B.i(3).s("b")._A.C.i(3).save.transact
+        //        _ <- A.i(3).B.i(3).s("b")._A.C.i(4).s("c").save.transact
+        //        _ <- A.i(3).B.i(4).s("b")._A.C.i(5).s("c").save.transact
+        //
+        //
+        //        _ <- A.i.a1.B.?(B.i.a2.s).C.?(C.i.a3.s).query.i.get.map(_ ==> List(
+        //          (1, None, None),
+        //          (1, None, None),
+        //          (2, Some((1, "b")), None),
+        //          (2, Some((2, "b")), None),
+        //
+        //          (3, Some((3, "b")), None),
+        //          (3, Some((3, "b")), Some((4, "c"))),
+        //          (3, Some((4, "b")), Some((5, "c"))),
+        //        ))
+        //
+        //        _ <- A.i.d3.B.?(B.i.d2.s).C.?(C.i.d1.s).query.i.get.map(_ ==> List(
+        //          (3, Some((4, "b")), Some((5, "c"))),
+        //          (3, Some((3, "b")), Some((4, "c"))),
+        //          (3, Some((3, "b")), None),
+        //
+        //          (2, Some((2, "b")), None),
+        //          (2, Some((1, "b")), None),
+        //          (1, None, None),
+        //          (1, None, None),
+        //        ))
+
+
+//        _ <- A.i.B.?(B.i).insert(List(
+//          (1, None),
+//          (2, Some(2)),
+//        )).transact
+//
+//        _ <- A.i.a1.B.?(B.i).query.i.get.map(_ ==> List(
+//          (1, None),
+//          (2, Some(2)),
+//        ))
+//        _ <- A.i.d1.B.?(B.i).query.i.get.map(_ ==> List(
+//          (2, Some(2)),
+//          (1, None),
+//        ))
+
+
+        //        _ <- A.i(1).save.transact
+        //        _ <- A.i(1).B.i(1).save.transact
+        //        _ <- A.i(2).B.i(1).save.transact
+        //        _ <- A.i(2).B.i(2).save.transact
+        //
+        //        //        _ <- A.i.B.?(B.i).insert(List(
+        //        //          (1, None),
+        //        //          (1, Some(1)),
+        //        //          (2, Some(1)),
+        //        //          (2, Some(2)),
+        //        //        )).transact
+        //
+        //        _ <- A.i.a1.B.?(B.i.a2).query.i.get.map(_ ==> List(
+        //          (1, None),
+        //          (1, Some(1)),
+        //          (2, Some(1)),
+        //          (2, Some(2)),
+        //        ))
+        //        _ <- A.i.a1.B.?(B.i.d2).query.i.get.map(_ ==> List(
+        //          (1, Some(1)),
+        //          (1, None),
+        //          (2, Some(2)),
+        //          (2, Some(1)),
+        //        ))
+        //        _ <- A.i.d1.B.?(B.i.a2).query.i.get.map(_ ==> List(
+        //          (2, Some(1)),
+        //          (2, Some(2)),
+        //          (1, None),
+        //          (1, Some(1)),
+        //        ))
+        //        _ <- A.i.d1.B.?(B.i.d2).query.i.get.map(_ ==> List(
+        //          (2, Some(2)),
+        //          (2, Some(1)),
+        //          (1, Some(1)),
+        //          (1, None),
+        //        ))
+        //
+        //
+        //        _ <- A.i.a2.B.?(B.i.a1).query.i.get.map(_ ==> List(
+        //          (1, None),
+        //          (1, Some(1)),
+        //          (2, Some(1)),
+        //          (2, Some(2)),
+        //        ))
+        //        _ <- A.i.d2.B.?(B.i.a1).query.i.get.map(_ ==> List(
+        //          (1, None),
+        //          (2, Some(1)),
+        //          (1, Some(1)),
+        //          (2, Some(2)),
+        //        ))
+        //        _ <- A.i.a2.B.?(B.i.d1).query.i.get.map(_ ==> List(
+        //          (2, Some(2)),
+        //          (1, Some(1)),
+        //          (2, Some(1)),
+        //          (1, None),
+        //        ))
+        //        _ <- A.i.d2.B.?(B.i.d1).query.i.get.map(_ ==> List(
+        //          (2, Some(2)),
+        //          (2, Some(1)),
+        //          (1, Some(1)),
+        //          (1, None),
+        //        ))
+
         //        _ <- A.i.Bb.*?(B.i).insert(
         //          (5, List(6))
         //        ).transact
         //        _ <- A.i.Bb.*?(B.i).query.i.get
 
-        _ <- A.i(1).save.transact
-        _ <- A.i(2).B.i(3).save.transact
-        _ <- A.i(4).B.i(5).s("x").save.transact
-
-        _ <- rawQuery(
-          """[:find  ?b
-            |        (
-            |          pull ?id0 [
-            |            {:A/b [
-            |                (:B/i :default "__none__")
-            |              ]
-            |            }
-            |          ]
-            |        )
-            | :where [?a :A/i ?b]
-            |        [(identity ?a) ?id0]]
-            |""".stripMargin, true)
-        //            |                (:B/s :default "__none__")
-
-        //        _ <- A.i.B.i.query.i.get
-
-        _ <- A.i.a1.B.?(B.i).query.i.get.map(_ ==> List(
-          (1, None),
-          (2, Some(3)),
-          (4, Some(5)),
-        ))
+        //        _ <- A.i(1).save.transact
+        //        _ <- A.i(2).B.i(3).save.transact
+        //        _ <- A.i(4).B.i(5).s("x").save.transact
+        //
+        //        _ <- rawQuery(
+        //          """[:find  ?b
+        //            |        (
+        //            |          pull ?id0 [
+        //            |            {:A/b [
+        //            |                (:B/i :default "__none__")
+        //            |              ]
+        //            |            }
+        //            |          ]
+        //            |        )
+        //            | :where [?a :A/i ?b]
+        //            |        [(identity ?a) ?id0]]
+        //            |""".stripMargin, true)
+        //        //            |                (:B/s :default "__none__")
+        //
+        //        //        _ <- A.i.B.i.query.i.get
+        //
+        //        _ <- A.i.a1.B.?(B.i).query.i.get.map(_ ==> List(
+        ////        _ <- A.i.B.?(B.i.d1).query.i.get.map(_ ==> List(
+        //          (1, None),
+        //          (2, Some(3)),
+        //          (4, Some(5)),
+        //        ))
 
 
         //
