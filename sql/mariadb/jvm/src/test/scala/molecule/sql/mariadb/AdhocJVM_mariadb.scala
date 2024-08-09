@@ -46,16 +46,48 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
       for {
 
 
-        _ <- A.i.insert(1).transact
-        _ <- A.i.B.i.insert((2, 20), (3, 30)).transact
+        //        _ <- A.i.B.?(B.iSet).insert(
+        //          (0, None),
+        //          (1, Some(Set(1, 2))),
+        //        ).transact
+        //
+        //        _ <- A.i.B.?(B.iSet).query.i.get.map(_ ==> List(
+        //          (0, None),
+        //          (1, Some(Set(1, 2))),
+        //        ))
+//
+//        _ <- A.i.B.?(B.iSeq).insert(
+//          (0, None),
+//          (1, Some(Seq(1, 2, 1))),
+//        ).transact
+//
+//        _ <- rawQuery(
+//          """SELECT DISTINCT
+//            |  A.i,
+//            |  B.iSeq
+//            |FROM A
+//            |  LEFT JOIN B ON
+//            |    A.b = B.id AND
+//            |    B.iSeq IS NOT NULL
+//            |WHERE
+//            |  A.i IS NOT NULL;
+//            |""".stripMargin, true)
+//
+//
+//        _ <- A.i.B.?(B.iSeq).query.i.get.map(_ ==> List(
+//          (0, None),
+//          (1, Some(Seq(1, 2, 1))),
+//        ))
 
-        _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
-        _ <- A.i.a1.B.i.query.get.map(_ ==> List((2, 20), (3, 30)))
+                _ <- A.i.B.?(B.iMap).insert(
+                  (0, None),
+                  (1, Some(Map("a" -> 1, "b" -> 2))),
+                ).transact
 
-        // Nothing deleted since entity 1 doesn't have a ref
-        _ <- A.i_(1).B.i_.delete.i.transact
-
-
+                _ <- A.i.B.?(B.iMap).query.i.get.map(_ ==> List(
+                  (0, None),
+                  (1, Some(Map("a" -> 1, "b" -> 2))),
+                ))
         //        _ <- rawTransact(
         //          """UPDATE B
         //            |SET
@@ -73,42 +105,42 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
     }
 
 
-//    "unique" - unique { implicit conn =>
-//      import molecule.coreTests.dataModels.core.dsl.Uniques._
-//
-//
-//      for {
-//
+    //    "unique" - unique { implicit conn =>
+    //      import molecule.coreTests.dataModels.core.dsl.Uniques._
+    //
+    //
+    //      for {
+    //
 
-//
-//
-//
-//        _ <- Uniques.int.insert(1, 2).transact
-//
-//
-//      } yield ()
-//    }
-//
-//
-//    "validation" - validation { implicit conn =>
-//      import molecule.coreTests.dataModels.core.dsl.Validation._
-//      for {
-//        id <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf", "stamps")).save.transact.map(_.id)
-//
-//        // We can remove a value from a Set as long as it's not the last value
-//        _ <- MandatoryAttr(id).hobbies.remove("stamps").update.i.transact
-//
-//        //        // Can't remove the last value of a mandatory attribute Set of values
-//        //        _ <- MandatoryAttr(id).hobbies.remove("golf").update.transact
-//        //          .map(_ ==> "Unexpected success").recover {
-//        //            case ModelError(error) =>
-//        //              error ==>
-//        //                """Can't delete mandatory attributes (or remove last values of card-many attributes):
-//        //                  |  MandatoryAttr.hobbies
-//        //                  |""".stripMargin
-//        //          }
-//
-//      } yield ()
-//    }
+    //
+    //
+    //
+    //        _ <- Uniques.int.insert(1, 2).transact
+    //
+    //
+    //      } yield ()
+    //    }
+    //
+    //
+    //    "validation" - validation { implicit conn =>
+    //      import molecule.coreTests.dataModels.core.dsl.Validation._
+    //      for {
+    //        id <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf", "stamps")).save.transact.map(_.id)
+    //
+    //        // We can remove a value from a Set as long as it's not the last value
+    //        _ <- MandatoryAttr(id).hobbies.remove("stamps").update.i.transact
+    //
+    //        //        // Can't remove the last value of a mandatory attribute Set of values
+    //        //        _ <- MandatoryAttr(id).hobbies.remove("golf").update.transact
+    //        //          .map(_ ==> "Unexpected success").recover {
+    //        //            case ModelError(error) =>
+    //        //              error ==>
+    //        //                """Can't delete mandatory attributes (or remove last values of card-many attributes):
+    //        //                  |  MandatoryAttr.hobbies
+    //        //                  |""".stripMargin
+    //        //          }
+    //
+    //      } yield ()
+    //    }
   }
 }

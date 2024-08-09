@@ -160,12 +160,12 @@ trait ResolveNestedPull[Tpl]
       case _: AttrSeq if !a.isInstanceOf[AttrSeqManByte] && !a.isInstanceOf[AttrSeqOptByte] =>
         val (ns, attr) = (a.ns, a.attr)
         s"""
-           |$indent{(:$ns/$attr :limit nil :default "__none__") [
+           |$indent{(:$ns/$attr :limit nil :default "$none") [
            |$indent  :$ns.$attr/i_ :$ns.$attr/v_]}""".stripMargin
       case _: AttrMap                                                                       =>
         val (ns, attr) = (a.ns, a.attr)
         s"""
-           |$indent{(:$ns/$attr :limit nil :default "__none__") [
+           |$indent{(:$ns/$attr :limit nil :default "$none") [
            |$indent  :$ns.$attr/k_ :$ns.$attr/v_]}""".stripMargin
       case _                                                                                =>
         s"""\n$indent(:${a.ns}/${a.attr} :limit nil :default "$none")"""

@@ -20,7 +20,7 @@ trait QueryExprSet_sqlite
       select += s"JSON_GROUP_ARRAY($colTable.VALUE) AS $attr"
 
       // Allow empty mandatory value in optional nested structures
-      val mode = if (isOptNested) "LEFT" else "INNER"
+      val mode = if (isOptNested || nestedOptRef) "LEFT" else "INNER"
       joins += ((s"$mode JOIN", s"JSON_EACH($col)", colTable, Nil))
       having += "COUNT(*) > 0"
       aggregate = true
@@ -50,7 +50,7 @@ trait QueryExprSet_sqlite
       select += s"JSON_GROUP_ARRAY($colTable.VALUE) AS $attr"
 
       // Allow empty mandatory value in optional nested structures
-      val mode = if (isOptNested) "LEFT" else "INNER"
+      val mode = if (isOptNested || nestedOptRef) "LEFT" else "INNER"
       joins += ((s"$mode JOIN", s"JSON_EACH($col)", colTable, Nil))
       having += "COUNT(*) > 0"
       aggregate = true
@@ -87,7 +87,7 @@ trait QueryExprSet_sqlite
       select += s"JSON_GROUP_ARRAY($colTable.VALUE) AS $attr"
 
       // Allow empty mandatory value in optional nested structures
-      val mode = if (isOptNested) "LEFT" else "INNER"
+      val mode = if (isOptNested || nestedOptRef) "LEFT" else "INNER"
       joins += ((s"$mode JOIN", s"JSON_EACH($col)", colTable, Nil))
       aggregate = true
       mandatoryCast(res, mandatory)
@@ -139,7 +139,7 @@ trait QueryExprSet_sqlite
       select += s"JSON_GROUP_ARRAY($colTable.VALUE) AS $attr"
 
       // Allow empty mandatory value in optional nested structures
-      val mode = if (isOptNested) "LEFT" else "INNER"
+      val mode = if (isOptNested || nestedOptRef) "LEFT" else "INNER"
       joins += ((s"$mode JOIN", s"JSON_EACH($col)", colTable, Nil))
       having += "COUNT(*) > 0"
       aggregate = true

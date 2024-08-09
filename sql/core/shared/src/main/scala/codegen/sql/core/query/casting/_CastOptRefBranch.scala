@@ -35,11 +35,9 @@ object _CastOptRefBranch extends SqlGenBase("CastOptRefBranch", "/query/casting"
        |    firstIndex: ParamIndex
        |  ): (RS, Option[Any]) => Option[Any] = {
        |    val List(c1) = casts
-       |    val List(i1) = (firstIndex until firstIndex + 1).toList
        |    (row: RS, nestedOption: Option[Any]) => {
-       |      val r1 = row.getObject(i1)
-       |      val v1 = c1(row, i1)
-       |      if (r1 == null && v1 != None)
+       |      val v1 = c1(row, firstIndex)
+       |      if (hasEmpty(row, firstIndex, List(v1)))
        |        Option.empty[Any]
        |      else
        |        Some((v1, nestedOption))
@@ -50,13 +48,11 @@ object _CastOptRefBranch extends SqlGenBase("CastOptRefBranch", "/query/casting"
   }
 
   case class Chunk(i: Int) extends TemplateVals(i) {
-    val casters    = (1 to i).map("c" + _).mkString(", ")
-    val indexes    = (1 to i).map("i" + _).mkString(", ")
-    val results    = (1 to i).map("r" + _).mkString(", ")
-    val values     = (1 to i).map("v" + _).mkString(", ")
-    val castings   = (1 to i).map { j => s"c$j(row, i$j)" }.mkString(",\n        ")
-    val nullChecks = (1 to i).map { j => s"r$j == null && v$j != None" }.mkString("\n||        || ")
-    val body       =
+    val casters  = (1 to i).map("c" + _).mkString(", ")
+    val indexes  = (1 to i).map("i" + _).mkString(", ")
+    val values   = (1 to i).map("v" + _).mkString(", ")
+    val castings = (1 to i).map { j => s"c$j(row, i$j)" }.mkString(",\n        ")
+    val body     =
       s"""
          |  final private def cast$i(
          |    casts: List[(RS, ParamIndex) => Any],
@@ -65,12 +61,12 @@ object _CastOptRefBranch extends SqlGenBase("CastOptRefBranch", "/query/casting"
          |    val List($casters) = casts
          |    val List($indexes) = (firstIndex until firstIndex + $i).toList
          |    (row: RS, nestedOption: Option[Any]) => {
-         |      val List($results) = List($indexes).map(row.getObject)
-         |      val ($values)     = (
+         |      val ($values) = (
          |        $castings
          |      )
-         |      if ($nullChecks
-         |      ) Option.empty[Any] else
+         |      if (hasEmpty(row, firstIndex, List($values)))
+         |        Option.empty[Any]
+         |      else
          |        Some(($values, nestedOption))
          |    }
          |  }""".stripMargin

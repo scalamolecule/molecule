@@ -40,7 +40,7 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
   ): (String, String, String) = {
     val elements  = if (altElements.isEmpty) elements0 else altElements
     val elements1 = if (validate)
-      validateQueryModel(elements, Some(addFilterAttrCallback))._1 else elements
+      validateQueryModel(elements, Some(addFilterAttrCallback()))._1 else elements
 
     // Remember first entity id variable
     firstId = vv
@@ -80,7 +80,7 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
     (preQuery, mainQuery, queryStrs)
   }
 
-  final private def addFilterAttrCallback: (List[String], Model.Attr) => Unit = {
+  final private def addFilterAttrCallback(): (List[String], Model.Attr) => Unit = {
     (pathAttr: List[String], a: Attr) => {
       filterAttrVars.get(pathAttr).fold {
         // Create datomic variable for this filter attribute

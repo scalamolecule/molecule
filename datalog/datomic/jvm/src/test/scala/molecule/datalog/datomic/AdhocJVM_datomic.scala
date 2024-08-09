@@ -29,19 +29,34 @@ object AdhocJVM_datomic extends TestSuite_datomic {
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
 
+        //        _ <- A.i.Bb.*?(B.i).query.i.get
+
         _ <- A.i(1).save.transact
+        _ <- A.i(2).B.i(3).save.transact
+        _ <- A.i(2).B.i(3).s("x").save.transact
 
         _ <- rawQuery(
           """[:find  ?b
-            | :where [?a :A/i ?b]]
+            |        (
+            |          pull ?id0 [
+            |            {:A/b [
+            |                (:B/i :default "__none__")
+            |                (:B/s :default "__none__")
+            |              ]
+            |            }
+            |          ]
+            |        )
+            | :where [?a :A/i ?b]
+            |        [(identity ?a) ?id0]]
             |""".stripMargin, true)
+
+        _ <- A.i.B.i.query.i.get
 
         _ <- A.i.B.?(B.i).query.i.get.map(_ ==> List(
           (1, None),
         ))
 
 
-        //        _ <- A.i(2).B.i(3).save.transact
         //
         //        _ <- A.i.B.?(B.i).query.get.map(_ ==> List(
         //          (1, None),

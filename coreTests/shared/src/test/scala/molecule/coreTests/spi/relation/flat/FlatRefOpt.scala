@@ -206,5 +206,174 @@ trait FlatRefOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           }
       } yield ()
     }
+
+
+    "Expression inside optional nested" - refs { implicit conn =>
+      if (database != "Datomic") {
+        // Seems not possible to add expressions inside Datomic nested pulls
+        for {
+          _ <- A.i.B.?(B.i).insert(
+            (0, None),
+            (1, Some(1)),
+            (2, Some(2)),
+            (3, Some(3)),
+          ).transact
+
+          _ <- A.i.a1.B.?(B.i).query.get.map(_ ==> List(
+            (0, None),
+            (1, Some(1)),
+            (2, Some(2)),
+            (3, Some(3)),
+          ))
+
+          _ <- A.i.a1.B.?(B.i(1)).query.get.map(_ ==> List(
+            (0, None),
+            (1, Some(1)),
+            (2, None),
+            (3, None),
+          ))
+          _ <- A.i_.B.?(B.i(1)).query.get.map(_ ==> List(
+            None,
+            Some(1),
+          ))
+
+          _ <- A.i.a1.B.?(B.i.<(2)).query.get.map(_ ==> List(
+            (0, None),
+            (1, Some(1)),
+            (2, None),
+            (3, None),
+          ))
+          _ <- A.i_.B.?(B.i.<(2)).query.get.map(_ ==> List(
+            None,
+            Some(1),
+          ))
+
+          _ <- A.i.a1.B.?(B.i.<=(2).a1).query.get.map(_ ==> List(
+            (0, None),
+            (1, Some(1)),
+            (2, Some(2)),
+            (3, None),
+          ))
+          _ <- A.i_.B.?(B.i.<=(2).a1).query.get.map(_ ==> List(
+            None,
+            Some(1),
+            Some(2),
+          ))
+
+          _ <- A.i.a1.B.?(B.i.>(2)).query.get.map(_ ==> List(
+            (0, None),
+            (1, None),
+            (2, None),
+            (3, Some(3)),
+          ))
+          _ <- A.i_.B.?(B.i.>(2)).query.get.map(_ ==> List(
+            None,
+            Some(3),
+          ))
+
+          _ <- A.i.a1.B.?(B.i.>=(2)).query.get.map(_ ==> List(
+            (0, None),
+            (1, None),
+            (2, Some(2)),
+            (3, Some(3)),
+          ))
+          _ <- A.i_.B.?(B.i.>=(2)).query.get.map(_ ==> List(
+            None,
+            Some(2),
+            Some(3),
+          ))
+        } yield ()
+      }
+    }
+
+
+    "Expression inside optional nested not in Datomic" - refs { implicit conn =>
+      if (database == "Datomic") {
+        // Seems not possible to add expressions inside Datomic nested pulls
+        for {
+          _ <- A.i.B.?(B.i).insert(
+            (0, None),
+            (1, Some(1)),
+            (2, Some(2)),
+            (3, Some(3)),
+          ).transact
+
+          // Expression before optional nested ok
+          _ <- A.i(1).B.?(B.i).query.get.map(_ ==> List(
+            (1, Some(1)),
+          ))
+
+          // Expressions inside optional nested not allowed
+
+          _ <- A.i_.B.?(B.i(1)).query.get
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+              err ==> "Expressions not allowed in optional ref queries (B.i)."
+            }
+
+          _ <- A.i_.B.?(B.i.<(2)).query.get
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+              err ==> "Expressions not allowed in optional ref queries (B.i)."
+            }
+
+          _ <- A.i_.B.?(B.i.<=(2)).query.get
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+              err ==> "Expressions not allowed in optional ref queries (B.i)."
+            }
+
+          _ <- A.i_.B.?(B.i.>(2)).query.get
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+              err ==> "Expressions not allowed in optional ref queries (B.i)."
+            }
+
+          _ <- A.i_.B.?(B.i.>=(2)).query.get
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+              err ==> "Expressions not allowed in optional ref queries (B.i)."
+            }
+        } yield ()
+      }
+    }
+
+
+    "Opt ref with Set attr" - refs { implicit conn =>
+      for {
+        _ <- A.i.B.?(B.iSet).insert(
+          (0, None),
+          (1, Some(Set(1, 2))),
+        ).transact
+
+        _ <- A.i.a1.B.?(B.iSet).query.get.map(_ ==> List(
+          (0, None),
+          (1, Some(Set(1, 2))),
+        ))
+      } yield ()
+    }
+
+    "Opt ref with Seq attr" - refs { implicit conn =>
+      for {
+        _ <- A.i.B.?(B.iSeq).insert(
+          (0, None),
+          (1, Some(Seq(1, 2, 1))),
+        ).transact
+
+        _ <- A.i.a1.B.?(B.iSeq).query.get.map(_ ==> List(
+          (0, None),
+          (1, Some(Seq(1, 2, 1))),
+        ))
+      } yield ()
+    }
+
+    "Opt ref with Map attr" - refs { implicit conn =>
+      for {
+        _ <- A.i.B.?(B.iMap).insert(
+          (0, None),
+          (1, Some(Map("a" -> 1, "b" -> 2))),
+        ).transact
+
+        _ <- A.i.a1.B.?(B.iMap).query.get.map(_ ==> List(
+          (0, None),
+          (1, Some(Map("a" -> 1, "b" -> 2))),
+        ))
+      } yield ()
+    }
   }
 }

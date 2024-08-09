@@ -61,7 +61,7 @@ trait QueryExprSeq_postgres
 
   private def mandatoryCast[T](res: ResSeq[T], mandatory: Boolean): Unit = {
     if (mandatory) {
-      if (isOptNested) {
+      if (isOptNested || nestedOptRef) {
         // Allow empty optional nested rows.
         // So let non-asserted Seq values (null) be checked in NestedOpt
         castStrategy.replace((row: RS, paramIndex: Int) => {

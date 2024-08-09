@@ -35,36 +35,51 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
 
       for {
 
-//        _ <- A.i(1).save.transact
+        _ <- A.i.B.?(B.iSet).insert(
+          (0, None),
+          (1, Some(Set(1, 2))),
+        ).transact
 
-//        _ <- A.i.B.?(B.i).query.get.map(_ ==> List(
-//          (1, None),
-//        ))
+        _ <- rawQuery(
+          """SELECT DISTINCT
+            |  A.i,
+            |  JSON_GROUP_ARRAY(_B_iSet.VALUE) AS B_iSet
+            |FROM A
+            |  LEFT JOIN B ON
+            |    A.b = B.id
+            |  left JOIN JSON_EACH(B.iSet) _B_iSet ON
+            |    B.iSet IS NOT NULL
+            |WHERE
+            |  A.i IS NOT NULL
+            |GROUP BY A.i
+            |HAVING COUNT(*) > 0;
+            |""".stripMargin, true)
 
-
-        _ <- A.i(2).B.i(3).save.transact
-
-
-//        _ <- rawQuery(
-//          """SELECT DISTINCT
-//            |  A.i,
-//            |  ifnull(B.i, null)
-//            |FROM A
-//            |  LEFT JOIN B ON
-//            |    A.b = B.id
-//            |WHERE
-//            |  A.i IS NOT NULL;
-//            |""".stripMargin, true)
-
-        _ <- A.i.B.?(B.i).query.i.get.map(_ ==> List(
-//          (1, None),
-          (2, Some(3)),
+        _ <- A.i.B.?(B.iSet).query.i.get.map(_ ==> List(
+          (0, None),
+          (1, Some(Set(1, 2))),
         ))
 
+        //        _ <- A.i.B.?(B.iSeq).insert(
+        //          (0, None),
+        //          (1, Some(Seq(1, 2, 1))),
+        //        ).transact
+        //
+        //        _ <- A.i.B.?(B.iSeq).query.i.get.map(_ ==> List(
+        //          (0, None),
+        //          (1, Some(Seq(1, 2, 1))),
+        //        ))
 
-//        _ <- A.i.B.i.query.get.map(_ ==> List(
-//          (2, 3),
-//        ))
+        //        _ <- A.i.B.?(B.iMap).insert(
+        //          (0, None),
+        //          (1, Some(Map("a" -> 1, "b" -> 2))),
+        //        ).transact
+        //
+        //        _ <- A.i.B.?(B.iMap).query.i.get.map(_ ==> List(
+        //          (0, None),
+        //          (1, Some(Map("a" -> 1, "b" -> 2))),
+        //        ))
+
 
         //        _ <- rawQuery(
         //          """SELECT DISTINCT

@@ -30,24 +30,22 @@ object _CastOptTpl extends SqlGenBase("CastOptTpl", "/query/casting") {
        |  ): RS => Option[Any] = {
        |    val List(c1) = casts
        |    (row: RS) =>
-       |      val v = c1(row, firstIndex)
-       |      if (row.getObject(firstIndex) == null && v != None)
+       |      val v1 = c1(row, firstIndex)
+       |      if (hasEmpty(row, firstIndex, List(v1)))
        |        Option.empty[Any]
        |      else
-       |        Some(v)
+       |        Some(v1)
        |  }
        |$resolveMethods
        |}""".stripMargin
   }
 
   case class Chunk(i: Int) extends TemplateVals(i) {
-    val casters    = (1 to i).map("c" + _).mkString(", ")
-    val indexes    = (1 to i).map("i" + _).mkString(", ")
-    val results    = (1 to i).map("r" + _).mkString(", ")
-    val values     = (1 to i).map("v" + _).mkString(", ")
-    val castings   = (1 to i).map { j => s"c$j(row, i$j)" }.mkString(",\n        ")
-    val nullChecks = (1 to i).map { j => s"r$j == null && v$j != None" }.mkString("\n||          || ")
-    val body       =
+    val casters  = (1 to i).map("c" + _).mkString(", ")
+    val indexes  = (1 to i).map("i" + _).mkString(", ")
+    val values   = (1 to i).map("v" + _).mkString(", ")
+    val castings = (1 to i).map { j => s"c$j(row, i$j)" }.mkString(",\n        ")
+    val body     =
       s"""
          |  final private def cast$i(
          |    casts: List[(RS, ParamIndex) => Any],
@@ -56,13 +54,11 @@ object _CastOptTpl extends SqlGenBase("CastOptTpl", "/query/casting") {
          |    val List($casters) = casts
          |    val List($indexes) = (firstIndex until firstIndex + $i).toList
          |    (row: RS) => {
-         |      val List($results) = List($indexes).map(row.getObject)
          |      val ($values) = (
          |        $castings
          |      )
-         |      if (
-         |        $nullChecks
-         |      ) Option.empty[Any]
+         |      if (hasEmpty(row, firstIndex, List($values)))
+         |        Option.empty[Any]
          |      else
          |        Some(($values))
          |    }

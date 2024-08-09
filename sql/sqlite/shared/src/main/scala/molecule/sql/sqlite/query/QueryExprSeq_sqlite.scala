@@ -109,7 +109,7 @@ trait QueryExprSeq_sqlite
 
   private def mandatoryCast[T](res: ResSeq[T], mandatory: Boolean): Unit = {
     if (mandatory) {
-      if (isOptNested) {
+      if (isOptNested || nestedOptRef) {
         // Allow empty optional nested rows.
         // So let non-asserted Seq values (null) be checked in OptNested
         castStrategy.replace((row: RS, paramIndex: Int) => {
