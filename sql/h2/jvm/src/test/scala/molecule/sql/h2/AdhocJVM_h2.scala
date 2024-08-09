@@ -43,38 +43,32 @@ object AdhocJVM_h2 extends TestSuite_h2 {
 
 
 
-
-
-
-//        _ <- A.i.B.?(B.iSet).insert(
-//          (0, None),
-//          (1, Some(Set(1, 2))),
-//        ).transact
+        //        _ <- A.i(1).save.transact
+        _ <- A.i(2).B.i(3).save.transact
+        //        _ <- A.i(4).B.i(5).s("x").save.transact
 //
-//        _ <- A.i.B.?(B.iSet).query.i.get.map(_ ==> List(
-//          (0, None),
-//          (1, Some(Set(1, 2))),
-//        ))
-//
-        _ <- A.i.B.?(B.iSeq).insert(
-          (0, None),
-          (1, Some(Seq(1, 2, 1))),
-        ).transact
+//        _ <- rawQuery(
+//          """[:find  ?b
+//            |        (
+//            |          pull ?id0 [
+//            |            {:A/b [
+//            |                (:B/i :default "__none__")
+//            |                (:B/s :default "__none__")
+//            |              ]
+//            |            }
+//            |          ]
+//            |        )
+//            | :where [?a :A/i ?b]
+//            |        [(identity ?a) ?id0]]
+//            |""".stripMargin, true)
 
-        _ <- A.i.B.?(B.iSeq).query.i.get.map(_ ==> List(
-          (0, None),
-          (1, Some(Seq(1, 2, 1))),
+        //        _ <- A.i.B.i.query.i.get
+
+        _ <- A.i.B.?(B.i).query.i.get.map(_ ==> List(
+          //          (1, None),
+          (2, Some(3)),
+          //          (4, Some(5)),
         ))
-
-//        _ <- A.i.B.?(B.iMap).insert(
-//          (0, None),
-//          (1, Some(Map("a" -> 1, "b" -> 2))),
-//        ).transact
-//
-//        _ <- A.i.B.?(B.iMap).query.i.get.map(_ ==> List(
-//          (0, None),
-//          (1, Some(Map("a" -> 1, "b" -> 2))),
-//        ))
 
 
 

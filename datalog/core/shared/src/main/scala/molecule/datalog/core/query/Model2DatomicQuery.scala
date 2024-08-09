@@ -18,12 +18,16 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
     with QueryExprMap[Tpl]
     with QueryExprRef[Tpl]
     with ResolveNestedPull[Tpl]
+    with ResolveOptRefPull[Tpl]
     with CastNestedBranch_
     with CastRow2Tpl_
     with CastOptNestedBranch_
     with CastOptNestedLeaf_
+    with CastOptRefBranch_
+    with CastOptRefLeaf_
     with Nest[Tpl]
     with NestOpt_[Tpl]
+    with NestOptRef_[Tpl]
     with DatomicQueryBase
     with MoleculeLogging {
 

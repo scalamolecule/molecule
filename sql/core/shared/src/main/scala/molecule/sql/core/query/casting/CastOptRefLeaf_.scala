@@ -4,7 +4,7 @@ package molecule.sql.core.query.casting
 import molecule.sql.core.query.SqlQueryBase
 
 
-object CastOptTpl_ extends SqlQueryBase {
+object CastOptRefLeaf_ extends SqlQueryBase {
 
   final def cast(
     casts: List[Cast],

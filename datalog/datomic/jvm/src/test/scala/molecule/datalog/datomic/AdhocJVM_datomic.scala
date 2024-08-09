@@ -29,11 +29,14 @@ object AdhocJVM_datomic extends TestSuite_datomic {
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
 
+        //        _ <- A.i.Bb.*?(B.i).insert(
+        //          (5, List(6))
+        //        ).transact
         //        _ <- A.i.Bb.*?(B.i).query.i.get
 
         _ <- A.i(1).save.transact
         _ <- A.i(2).B.i(3).save.transact
-        _ <- A.i(2).B.i(3).s("x").save.transact
+        _ <- A.i(4).B.i(5).s("x").save.transact
 
         _ <- rawQuery(
           """[:find  ?b
@@ -41,7 +44,6 @@ object AdhocJVM_datomic extends TestSuite_datomic {
             |          pull ?id0 [
             |            {:A/b [
             |                (:B/i :default "__none__")
-            |                (:B/s :default "__none__")
             |              ]
             |            }
             |          ]
@@ -49,11 +51,14 @@ object AdhocJVM_datomic extends TestSuite_datomic {
             | :where [?a :A/i ?b]
             |        [(identity ?a) ?id0]]
             |""".stripMargin, true)
+        //            |                (:B/s :default "__none__")
 
-        _ <- A.i.B.i.query.i.get
+        //        _ <- A.i.B.i.query.i.get
 
-        _ <- A.i.B.?(B.i).query.i.get.map(_ ==> List(
+        _ <- A.i.a1.B.?(B.i).query.i.get.map(_ ==> List(
           (1, None),
+          (2, Some(3)),
+          (4, Some(5)),
         ))
 
 

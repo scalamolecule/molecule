@@ -151,7 +151,16 @@ abstract class DatomicQueryResolve[Tpl](
           postAdjustPullCasts()
           if (!forward) Collections.reverse(sortedRows)
           val count          = getCount(limit, forward, totalCount)
-          val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(true), m2q.pullRow2tpl)
+          val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(true), m2q.pullOptNestedRow2tpl)
+          val tpls           = (if (forward) tuples else tuples.reverse).filterNot(_ == Nil)
+          val cursor         = nextCursor(tpls, allTokens)
+          (tpls, cursor, more > 0)
+
+        } else if (m2q.nestedOptRef) {
+          postAdjustPullCasts()
+          if (!forward) Collections.reverse(sortedRows)
+          val count          = getCount(limit, forward, totalCount)
+          val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(true), m2q.pullOptRefRow2tpl)
           val tpls           = (if (forward) tuples else tuples.reverse).filterNot(_ == Nil)
           val cursor         = nextCursor(tpls, allTokens)
           (tpls, cursor, more > 0)

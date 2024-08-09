@@ -2,7 +2,7 @@ package codegen.sql.core.query.casting
 
 import codegen.sql.SqlGenBase
 
-object _CastOptTpl extends SqlGenBase("CastOptTpl", "/query/casting") {
+object _CastOptRefLeaf extends SqlGenBase("CastOptRefLeaf", "/query/casting") {
 
   override val content = {
     val resolveX       = (1 to 22).map(i => s"case ${caseN(i)} => cast$i(casts, firstIndex)").mkString("\n      ")

@@ -53,14 +53,26 @@ case class DatomicQueryResolveOffset[Tpl](
 
       if (m2q.isOptNested) {
         postAdjustPullCasts()
+        val row2tpl = m2q.pullOptNestedRow2tpl
         offsetRaw(sortedRows, fromUntil).forEach { row =>
-          tuples += m2q.pullRow2tpl(row)
+          tuples += row2tpl(row)
+        }
+        (tuples.toList.filterNot(_ == Nil), totalCount, hasMore)
+
+      } else if (m2q.nestedOptRef) {
+        postAdjustPullCasts()
+        val row2tpl = m2q.pullOptRefRow2tpl
+        offsetRaw(sortedRows, fromUntil).forEach { row =>
+          println("ROW: " + row)
+          tuples += row2tpl(row)
         }
         (tuples.toList.filterNot(_ == Nil), totalCount, hasMore)
 
       } else {
         val row2tpl = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0, None)
-        offsetRaw(sortedRows, fromUntil).forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
+        offsetRaw(sortedRows, fromUntil).forEach(row =>
+          tuples += row2tpl(row).asInstanceOf[Tpl]
+        )
         (tuples.toList, totalCount, hasMore)
       }
     }

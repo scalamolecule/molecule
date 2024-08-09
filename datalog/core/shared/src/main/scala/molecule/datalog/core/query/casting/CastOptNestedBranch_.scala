@@ -29,7 +29,7 @@ trait CastOptNestedBranch_
     }
   }
 
-  final protected def pullBranch(
+  final protected def pullOptNestedBranch(
     arities: List[Int],
     pullCasts0: List[jIterator[_] => Any],
     pullSorts: List[Int => (Row, Row) => Int],

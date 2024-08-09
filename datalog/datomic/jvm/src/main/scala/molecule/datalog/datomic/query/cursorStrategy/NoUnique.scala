@@ -33,9 +33,9 @@ case class NoUnique[Tpl](
 
     val identifyTpl = (tpl: Tpl) => tpl.hashCode()
     val identifyRow = (isOptNested: Boolean) => if (isOptNested)
-      (row: m2q.Row) => m2q.pullRow2tpl(row).hashCode()
+      (row: m2q.Row) => m2q.pullOptNestedRow2tpl(row).hashCode()
     else {
-      val row2AnyTpl     = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0, None)
+      val row2AnyTpl = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0, None)
       (row: m2q.Row) => row2AnyTpl(row).hashCode()
     }
 

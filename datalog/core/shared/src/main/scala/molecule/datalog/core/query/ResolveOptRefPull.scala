@@ -9,7 +9,7 @@ import molecule.core.util.ModelUtils
 import scala.annotation.tailrec
 
 
-trait ResolveNestedPull[Tpl]
+trait ResolveOptRefPull[Tpl]
   extends SortOneOptFlat_[Tpl]
     with SortOneSpecial[Tpl]
     with LambdasOne
@@ -20,7 +20,11 @@ trait ResolveNestedPull[Tpl]
     with MoleculeLogging { self: Model2DatomicQuery[Tpl] =>
 
 
-  final protected def resolveOptNestedElements(ref: Ref, elements: List[Element]): Unit = {
+  final protected def resolveOptRefElements(
+    refId: String,
+    ref: Ref,
+    optionalElements: List[Element]
+  ): Unit = {
     @tailrec
     def addPullAttrs(
       elements: List[Element],
@@ -28,7 +32,7 @@ trait ResolveNestedPull[Tpl]
       attrIndex: Int,
       acc: String
     ): (String, Option[Element], List[Element], Int) = {
-      val i = "  " * (level + 6)
+      val indent = "  " * (level + 8)
       elements match {
         case head :: tail =>
           head match {
@@ -37,35 +41,35 @@ trait ResolveNestedPull[Tpl]
             )
             case a: AttrOneMan        =>
               resAttrOneMan(a, attrIndex)
-              addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(i, a))
+              addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(indent, a))
 
             case a: AttrOneOpt =>
               resAttrOneOpt(a, attrIndex)
-              addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(i, a))
+              addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(indent, a))
 
             case a: AttrSetMan =>
               resAttrSetMan(a)
-              addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(i, a))
+              addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(indent, a))
 
             case a: AttrSetOpt =>
               resttrSetOpt(a)
-              addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(i, a))
+              addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(indent, a))
 
             case a: AttrSeqMan =>
               resAttrSeqMan(a)
-              addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(i, a))
+              addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(indent, a))
 
             case a: AttrSeqOpt =>
               resAttrSeqOpt(a)
-              addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(i, a))
+              addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(indent, a))
 
             case a: AttrMapMan =>
               resAttrMapMan(a)
-              addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(i, a))
+              addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(indent, a))
 
             case a: AttrMapOpt =>
               resAttrMapOpt(a)
-              addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(i, a))
+              addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(indent, a))
 
             case ref: Ref             => (acc, Some(ref), tail, attrIndex)
             case backRef: BackRef     => (acc, Some(backRef), tail, attrIndex)
@@ -91,11 +95,16 @@ trait ResolveNestedPull[Tpl]
       attrIndex: Int,
       append: String
     ): (String, String) = {
-      val indent  = "  " * (level + 5)
+      val indent  = "  " * (level + 6)
       val refAttr = s":${ref.ns}/${ref.refAttr}"
       addPullAttrs(elements, level, attrIndex, "") match {
         case (acc1, None, Nil, _) =>
-          val res = s"""\n$indent{($refAttr :limit nil :default "$none") [$acc1]}"""
+//          val res = s"""\n$indent{($refAttr :default "$none") [$acc1]}"""
+          val res =
+            s"""
+               |$indent{($refAttr :default "$none") [$acc1
+               |$indent  ]
+               |$indent}""".stripMargin
           (res, append)
 
         case (acc1, Some(ref1@Ref(_, _, _, CardOne, _, _)), tail, attrIndex1) =>
@@ -147,9 +156,17 @@ trait ResolveNestedPull[Tpl]
       }
     }
 
-    val (attrs, append) = resolvePullRef(ref, elements, 0, 0, "")
-    val nestedId        = "?id" + nestedIds.size
-    find += s"(pull $nestedId [$attrs$append])\n       "
+    val (attrs, append) = resolvePullRef(ref, optionalElements, 0, 0, "")
+
+
+//    println("------- attrs :  " + attrs)
+//    println("------- append:  " + append)
+    find +=
+      s"""(
+         |          pull $refId [$attrs$append
+         |          ]
+         |        )
+         |       """.stripMargin
   }
 
 
@@ -169,11 +186,10 @@ trait ResolveNestedPull[Tpl]
            |$indent{(:$ns/$attr :limit nil :default "$none") [
            |$indent  :$ns.$attr/k_ :$ns.$attr/v_]}""".stripMargin
 
-      case _ =>
-        s"""\n$indent(:${a.ns}/${a.attr} :limit nil :default "$none")"""
+      case _          =>
+        s"""
+           |$indent(:${a.ns}/${a.attr} :default "$none")""".stripMargin
     }
-
-
   }
 
   private def add(

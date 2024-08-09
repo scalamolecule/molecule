@@ -66,7 +66,16 @@ case class PrimaryUnique[Tpl](
 
         if (m2q.isOptNested) {
           postAdjustPullCasts()
-          sortedRows.subList(0, limitAbs).forEach(row => tuples += m2q.pullRow2tpl(row))
+          val row2tpl = m2q.pullOptNestedRow2tpl
+          sortedRows.subList(0, limitAbs).forEach(row => tuples += row2tpl(row))
+          val tpls   = if (forward) tuples.toList else tuples.toList.reverse
+          val cursor = nextCursorUniques(tpls, tokens)
+          (tpls, cursor, hasMore)
+
+        } else if (m2q.nestedOptRef) {
+          postAdjustPullCasts()
+          val row2tpl = m2q.pullOptRefRow2tpl
+          sortedRows.subList(0, limitAbs).forEach(row => tuples += row2tpl(row))
           val tpls   = if (forward) tuples.toList else tuples.toList.reverse
           val cursor = nextCursorUniques(tpls, tokens)
           (tpls, cursor, hasMore)

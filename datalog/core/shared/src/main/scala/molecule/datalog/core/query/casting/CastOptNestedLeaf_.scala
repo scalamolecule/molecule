@@ -12,7 +12,7 @@ import scala.util.control.NonFatal
 trait CastOptNestedLeaf_
   extends CastRow2Tpl_ with CastIt2Tpl_ { self: Model2Query with DatomicQueryBase =>
 
-  val rowList = new ListBuffer[Any]
+  private val rowList = new ListBuffer[Any]
 
   @tailrec
   final private def resolveArities(
@@ -33,7 +33,7 @@ trait CastOptNestedLeaf_
   }
 
 
-  final protected def pullLeaf(
+  final protected def pullOptNestedLeaf(
     arities: List[Int],
     pullCasts0: List[jIterator[_] => Any],
     pullSorts: List[Int => (Row, Row) => Int]
@@ -59,6 +59,7 @@ trait CastOptNestedLeaf_
       } else None
     }
     val pullCasts     = resolveArities(arities, pullCasts0, Nil)
+    println("======= " + pullCasts.length)
     pullCasts.length match {
       case 1  => pullLeaf1(pullCasts, optComparator)
       case 2  => pullLeaf2(pullCasts, optComparator)
@@ -191,8 +192,7 @@ trait CastOptNestedLeaf_
               val rowIt = rowsIt.next.asInstanceOf[jMap[_, _]].values().iterator()
               while (search && rowIt.hasNext) {
                 rowIt.next match {
-                  case "__none__" =>
-                    ()
+                  case "__none__" => ()
 
                   case value: jMap[_, _] if value.values().iterator().next.isInstanceOf[jList[_]] =>
                     isSet = true

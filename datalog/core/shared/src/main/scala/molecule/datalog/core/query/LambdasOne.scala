@@ -340,6 +340,7 @@ trait LambdasOne extends ResolveBase {
     case v: jLong   => v.toInt.asInstanceOf[AnyRef]
     case v: Integer => v.toInt.asInstanceOf[AnyRef]
     case `none`     => nullValue
+//    case null => null
     case other      => unexpectedValue(other)
   }
 

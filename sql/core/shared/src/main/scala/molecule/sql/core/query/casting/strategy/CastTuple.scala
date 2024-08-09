@@ -18,11 +18,11 @@ case class CastTuple(
   def branchListCaster: (RS, List[Any]) => Any =
     new CastBranch_[List[Any]].cast(casts, firstIndex)
 
-  def nestedOptRefCaster: (RS, Option[Any]) => Option[Any] =
+  def optRefBranchCaster: (RS, Option[Any]) => Option[Any] =
     CastOptRefBranch_.cast(casts, firstIndex)
 
-  def optTupleCaster: RS => Option[Any] =
-    CastOptTpl_.cast(casts, firstIndex)
+  def optRefLeafCaster: RS => Option[Any] =
+    CastOptRefLeaf_.cast(casts, firstIndex)
 
   override def add(cast: Cast): Unit = {
     casts = casts :+ cast
