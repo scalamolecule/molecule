@@ -28,8 +28,11 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
       val joinType        = if (isOptNested || nestedOptRef) "LEFT" else "INNER"
       joins += ((s"$joinType JOIN", refNs, refAs, List(s"$ns$nsExt.$refAttr = $refNs$refExt.id")))
     } else {
+      if (nestedOptRef) {
+        onlyCardOneInsideOptRef(ref)
+      }
       val singleOptSet = tail.length == 1 && tail.head.isInstanceOf[AttrSetOpt]
-      val joinType     = if (singleOptSet || nestedOptRef) "LEFT" else "INNER"
+      val joinType     = if (singleOptSet) "LEFT" else "INNER"
       addJoins(ns, nsExt, refAttr, refNs, joinType)
     }
   }

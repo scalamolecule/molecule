@@ -11,10 +11,10 @@ object _CastOptRefBranch extends DatomicGenBase("CastOptRefBranch", "/query/cast
        |package molecule.datalog.core.query.casting
        |
        |import java.util.{ArrayList => jArrayList, Iterator => jIterator, Map => jMap}
-       |import molecule.datalog.core.query.DatomicQueryBase
+       |import molecule.core.util.JavaConversions
        |
        |
-       |trait $fileName_ { self: DatomicQueryBase =>
+       |trait $fileName_ extends JavaConversions {
        |
        |  final protected def pullOptRefBranch(
        |    pullCasts0: List[jIterator[_] => Any],

@@ -120,9 +120,7 @@ trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
           sortedRows.add(flatten(list, row).asInstanceOf[Row])
       }
       Collections.sort(sortedRows, comparator)
-      //      println("sortedRows: " + sortedRows)
       val tupleList = sortedRows.asScala.flatMap { row =>
-        //        println("row: " + row)
         try {
           Some(cast(row.iterator))
         } catch {
@@ -130,7 +128,6 @@ trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
           case NonFatal(e)           => throw e
         }
       }.toList
-      //      println("tupleList: " + tupleList)
       tupleList
   }
 
@@ -192,8 +189,7 @@ trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
                 try {
                   rowList += cast(flatten(list, row).iterator)
                 } catch {
-                  case _: NullValueException =>
-                    ()
+                  case _: NullValueException => ()
                 }
             }
             // Coalesce Sets
@@ -211,8 +207,7 @@ trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
                 try {
                   rowList += cast(flatten(list, row).iterator)
                 } catch {
-                  case _: NullValueException =>
-                    ()
+                  case _: NullValueException => ()
                 }
             }
             rowList.toList

@@ -18,19 +18,20 @@ trait FlatRefOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- A.i(1).save.transact
 
+        // Optional card-one ref (SQL left join)
         _ <- A.i.B.?(B.i).query.get.map(_ ==> List(
           (1, None),
         ))
 
-
         _ <- A.i(2).B.i(3).save.transact
 
+        // Optional card-one ref (SQL left join)
         _ <- A.i.B.?(B.i).query.get.map(_ ==> List(
           (1, None),
           (2, Some(3)),
         ))
 
-
+        // Mandatory ref
         _ <- A.i.B.i.query.get.map(_ ==> List(
           (2, 3),
         ))
@@ -94,7 +95,7 @@ trait FlatRefOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             (1, None), // no relationship created
             (2, Some(None)), // no relationship created
             (3, Some(Some(30))),
-          )).i.transact
+          )).transact
 
           // 1 relationship created
           _ <- A.b(count).query.get.map(_.head ==> 1)
@@ -212,7 +213,7 @@ trait FlatRefOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, "b", 2, List("x", "y"))
         )).transact
 
-        _ <- A.i.B.?(B.s.i.Cc.s).query.i.get
+        _ <- A.i.B.?(B.s.i.Cc.s).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Only cardinality-one refs allowed in optional ref queries (B.cc)."
           }
@@ -415,11 +416,11 @@ trait FlatRefOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Some(2)),
         )).transact
 
-        _ <- A.i.a1.B.?(B.i).query.i.get.map(_ ==> List(
+        _ <- A.i.a1.B.?(B.i).query.get.map(_ ==> List(
           (1, None),
           (2, Some(2)),
         ))
-        _ <- A.i.d1.B.?(B.i).query.i.get.map(_ ==> List(
+        _ <- A.i.d1.B.?(B.i).query.get.map(_ ==> List(
           (2, Some(2)),
           (1, None),
         ))
@@ -438,25 +439,25 @@ trait FlatRefOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           )).transact
 
           // Sort initial attr first
-          _ <- A.i.a1.B.?(B.i.a2).query.i.get.map(_ ==> List(
+          _ <- A.i.a1.B.?(B.i.a2).query.get.map(_ ==> List(
             (1, None),
             (1, Some(1)),
             (2, Some(1)),
             (2, Some(2)),
           ))
-          _ <- A.i.a1.B.?(B.i.d2).query.i.get.map(_ ==> List(
+          _ <- A.i.a1.B.?(B.i.d2).query.get.map(_ ==> List(
             (1, Some(1)),
             (1, None),
             (2, Some(2)),
             (2, Some(1)),
           ))
-          _ <- A.i.d1.B.?(B.i.a2).query.i.get.map(_ ==> List(
+          _ <- A.i.d1.B.?(B.i.a2).query.get.map(_ ==> List(
             (2, Some(1)),
             (2, Some(2)),
             (1, None),
             (1, Some(1)),
           ))
-          _ <- A.i.d1.B.?(B.i.d2).query.i.get.map(_ ==> List(
+          _ <- A.i.d1.B.?(B.i.d2).query.get.map(_ ==> List(
             (2, Some(2)),
             (2, Some(1)),
             (1, Some(1)),
@@ -464,25 +465,25 @@ trait FlatRefOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           ))
 
           // Sort optional attr first
-          _ <- A.i.a2.B.?(B.i.a1).query.i.get.map(_ ==> List(
+          _ <- A.i.a2.B.?(B.i.a1).query.get.map(_ ==> List(
             (1, None),
             (1, Some(1)),
             (2, Some(1)),
             (2, Some(2)),
           ))
-          _ <- A.i.d2.B.?(B.i.a1).query.i.get.map(_ ==> List(
+          _ <- A.i.d2.B.?(B.i.a1).query.get.map(_ ==> List(
             (1, None),
             (2, Some(1)),
             (1, Some(1)),
             (2, Some(2)),
           ))
-          _ <- A.i.a2.B.?(B.i.d1).query.i.get.map(_ ==> List(
+          _ <- A.i.a2.B.?(B.i.d1).query.get.map(_ ==> List(
             (2, Some(2)),
             (1, Some(1)),
             (2, Some(1)),
             (1, None),
           ))
-          _ <- A.i.d2.B.?(B.i.d1).query.i.get.map(_ ==> List(
+          _ <- A.i.d2.B.?(B.i.d1).query.get.map(_ ==> List(
             (2, Some(2)),
             (2, Some(1)),
             (1, Some(1)),
@@ -505,7 +506,7 @@ trait FlatRefOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- A.i(3).B.i(4).s("b").C.i(5).s("c").save.transact
 
 
-          _ <- A.i.a1.B.?(B.i.a2.s.C.?(C.i.a3.s)).query.i.get.map(_ ==> List(
+          _ <- A.i.a1.B.?(B.i.a2.s.C.?(C.i.a3.s)).query.get.map(_ ==> List(
             (1, None),
             (1, None),
             (2, Some((1, "b", None))),
@@ -516,7 +517,7 @@ trait FlatRefOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             (3, Some((4, "b", Some((5, "c"))))),
           ))
 
-          _ <- A.i.d3.B.?(B.i.d2.s.C.?(C.i.d1.s)).query.i.get.map(_ ==> List(
+          _ <- A.i.d3.B.?(B.i.d2.s.C.?(C.i.d1.s)).query.get.map(_ ==> List(
             (3, Some((4, "b", Some((5, "c"))))),
             (3, Some((3, "b", Some((4, "c"))))),
             (3, Some((3, "b", None))),
@@ -543,7 +544,7 @@ trait FlatRefOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- A.i(3).B.i(4).s("b")._A.C.i(5).s("c").save.transact
 
 
-          _ <- A.i.a1.B.?(B.i.a2.s).C.?(C.i.a3.s).query.i.get.map(_ ==> List(
+          _ <- A.i.a1.B.?(B.i.a2.s).C.?(C.i.a3.s).query.get.map(_ ==> List(
             (1, None, None),
             (1, None, None),
             (2, Some((1, "b")), None),
@@ -554,7 +555,7 @@ trait FlatRefOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             (3, Some((4, "b")), Some((5, "c"))),
           ))
 
-          _ <- A.i.d3.B.?(B.i.d2.s).C.?(C.i.d1.s).query.i.get.map(_ ==> List(
+          _ <- A.i.d3.B.?(B.i.d2.s).C.?(C.i.d1.s).query.get.map(_ ==> List(
             (3, Some((4, "b")), Some((5, "c"))),
             (3, Some((3, "b")), Some((4, "c"))),
             (3, Some((3, "b")), None),

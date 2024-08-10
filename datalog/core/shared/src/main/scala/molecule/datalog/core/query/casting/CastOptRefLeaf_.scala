@@ -2,18 +2,14 @@
 package molecule.datalog.core.query.casting
 
 import java.util.{ArrayList => jArrayList, Iterator => jIterator, Map => jMap}
-import molecule.datalog.core.query.DatomicQueryBase
+import molecule.core.util.JavaConversions
 
 
-trait CastOptRefLeaf_ { self: DatomicQueryBase =>
+trait CastOptRefLeaf_ extends JavaConversions {
 
   final protected def pullOptRefLeaf(
     pullCasts: List[jIterator[_] => Any]
   ): jIterator[_] => Option[Any] = {
-
-    println("L  pullCasts --------------------")
-    pullCasts.foreach(println)
-
     pullCasts.length match {
       case 1  => pullLeaf1(pullCasts)
       case 2  => pullLeaf2(pullCasts)
@@ -55,7 +51,7 @@ trait CastOptRefLeaf_ { self: DatomicQueryBase =>
     arity: Int,
     cast: java.util.Iterator[_] => Any
   ): jIterator[_] => Option[Any] = {
-    val list = new jArrayList[Any](arity)
+    val list      = new jArrayList[Any](arity)
     val handleMap = (optionalData: jMap[_, _]) => {
       list.clear()
       Some(cast(flatten(list, optionalData).iterator()))
@@ -79,7 +75,7 @@ trait CastOptRefLeaf_ { self: DatomicQueryBase =>
     resolve(1, (it: java.util.Iterator[_]) =>
       (
         c1(it)
-      )
+        )
     )
   }
 

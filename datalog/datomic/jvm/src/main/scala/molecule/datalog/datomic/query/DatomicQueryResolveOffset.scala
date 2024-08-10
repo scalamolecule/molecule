@@ -61,23 +61,9 @@ case class DatomicQueryResolveOffset[Tpl](
         (tuples.toList.filterNot(_ == Nil), totalCount, hasMore)
 
       } else if (m2q.nestedOptRef) {
-        postAdjustPullCasts()
-
-
-        println("--- castss --------------------")
-        m2q.castss.map(_.mkString("List(\n  ", ",\n  ", ")")).foreach(println)
-
-//        println("--- pullCasts --------------------")
-//        m2q.pullCasts.foreach(println)
-//
-//        println("--- pullCastss --------------------")
-//        m2q.pullCastss.map(_.mkString("List(\n  ", ",\n  ", ")")).foreach(println)
-
         val row2tpl = m2q.castRow2AnyTpl(m2q.castss.head, 0)
         offsetRaw(sortedRows, fromUntil).forEach { row =>
-
-          println("\n================= ROW: " + row)
-
+          //          println("\n================= ROW: " + row)
           tuples += row2tpl(row).asInstanceOf[Tpl]
         }
         (tuples.toList.filterNot(_ == Nil), totalCount, hasMore)
@@ -85,10 +71,6 @@ case class DatomicQueryResolveOffset[Tpl](
       } else {
         val row2tpl = m2q.castRow2AnyTpl(m2q.castss.head, 0)
         offsetRaw(sortedRows, fromUntil).forEach { row =>
-
-          println("\n================= ROW: " + row)
-//          println("================= ROW: " + row.getClass.getSimpleName)
-
           tuples += row2tpl(row).asInstanceOf[Tpl]
         }
         (tuples.toList, totalCount, hasMore)

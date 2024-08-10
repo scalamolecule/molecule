@@ -4,26 +4,16 @@ import java.util.{Iterator => jIterator}
 import molecule.base.ast._
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
-import molecule.boilerplate.util.MoleculeLogging
-import molecule.core.util.ModelUtils
 import scala.annotation.tailrec
 
 
-trait ResolveOptRefPull[Tpl]
-  extends SortOneOptFlat_[Tpl]
-    with SortOneSpecial[Tpl]
-    with LambdasOne
-    with LambdasSet
-    with LambdasSeq
-    with LambdasMap
-    with ModelUtils
-    with MoleculeLogging { self: Model2DatomicQuery[Tpl] =>
-
+trait ResolveOptRefPull[Tpl] { self: Model2DatomicQuery[Tpl] =>
 
   final protected def resolveOptRefElements(
     ref: Ref,
     optionalElements: List[Element]
-  ): Unit = {
+  ): List[List[jIterator[_] => Any]] = {
+
     @tailrec
     def addPullAttrs(
       elements: List[Element],
@@ -39,11 +29,11 @@ trait ResolveOptRefPull[Tpl]
               s"Expressions not allowed in optional ref queries (${a.name})."
             )
             case a: AttrOneMan        =>
-              resAttrOneMan(a, attrIndex)
+              resAttrOneMan(a)
               addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(indent, a))
 
             case a: AttrOneOpt =>
-              resAttrOneOpt(a, attrIndex)
+              resAttrOneOpt(a)
               addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(indent, a))
 
             case a: AttrSetMan =>
@@ -104,62 +94,63 @@ trait ResolveOptRefPull[Tpl]
       elements: List[Element],
       level: Int,
       attrIndex: Int,
-      append: String
-    ): (String, String) = {
+    ): String = {
       val indent  = "  " * (level + 6)
       val refAttr = s":${ref.ns}/${ref.refAttr}"
       addPullAttrs(elements, level, attrIndex, "") match {
         case (acc1, None, Nil, _) =>
-          val res =
-            s"""
-               |$indent{($refAttr :default "$none") [$acc1
-               |$indent]}""".stripMargin
-          (res, append)
+          s"""
+             |$indent{($refAttr :default "$none") [$acc1
+             |$indent]}""".stripMargin
 
         case (acc1, Some(ref1@Ref(_, _, _, CardOne, _, _)), tail, attrIndex1) =>
           refDepths = refDepths.init :+ refDepths.last + 1
           // Continue increasing attrIndex after refs
-          val (attrs, append1) = resolvePullRef(ref1, tail, level + 1, attrIndex1, "")
-          val res              =
-            s"""
-               |$indent{($refAttr :default "$none") [$acc1$attrs
-               |$indent]}""".stripMargin
-          (res, append + append1)
+          val attrs = resolvePullRef(ref1, tail, level + 1, attrIndex1)
+          s"""
+             |$indent{($refAttr :default "$none") [$acc1$attrs
+             |$indent]}""".stripMargin
 
-        case (_, Some(ref: Ref), _, _) =>
-          throw ModelError(
-            s"Only cardinality-one refs allowed in optional ref queries (${ref.ns}.${ref.refAttr})."
-          )
+        case (_, Some(ref: Ref), _, _) => onlyCardOneInsideOptRef(ref)
 
         case (acc1, Some(OptRef(ref1, elements1)), _, _) =>
+          // Add casts on this level
           pullCastss = pullCastss :+ pullCasts.toList
+
+          // start new nested level of casts
           pullCasts.clear()
-          pullSortss = pullSortss :+ pullSorts.sortBy(_._1).map(_._2).toList
-          pullSorts.clear()
           refDepths = refDepths :+ 0
 
-          val (attrs, append1) = resolvePullRef(ref1, elements1, level + 1, 0, "")
-          val res              =
-            s"""
-               |$indent{($refAttr :default "$none") [$acc1$attrs$append1
-               |$indent  ]
-               |$indent}""".stripMargin
-          (res, "")
+          val attrs = resolvePullRef(ref1, elements1, level + 1, 0)
+          s"""
+             |$indent{($refAttr :default "$none") [$acc1$attrs
+             |$indent  ]
+             |$indent}""".stripMargin
 
         case (_, Some(other), _, _) => unexpectedElement(other)
         case other                  => throw ModelError("Unexpected resolvePullRef coordinates: " + other)
       }
     }
 
-    val (attrs, append) = resolvePullRef(ref, optionalElements, 0, 0, "")
-    val e               = es.last
-    val refId           = "?id" + (castss.size - 1)
+    val attrs = resolvePullRef(ref, optionalElements, 0, 0)
+    val e     = es.last
+    val refId = "?id" + varIndex
     find +=
       s"""(
-         |          pull $refId [$attrs$append
+         |          pull $refId [$attrs
          |          ]
          |        )""".stripMargin
     where += s"[(identity $e) $refId]" -> wGround
+
+    // Casts for this possibly nested optional ref data
+    val nestedOptRefCasts = pullCastss :+ pullCasts.toList
+
+    // Start over for next adjacent optional ref data
+    pullCastss = Nil
+    pullCasts.clear()
+    varIndex += 1
+
+    nestedOptRefCasts
   }
 
 
@@ -185,71 +176,61 @@ trait ResolveOptRefPull[Tpl]
     }
   }
 
-  private def add(
-    sorter: Option[(Int, Int => (Row, Row) => Int)],
-    lambda: jIterator[_] => Any,
-    lambda2: AnyRef => AnyRef = identity
-  ): Unit = {
-    pullCasts += lambda
-    addCast(lambda2)
-    sorter.foreach(pullSorts += _)
+
+  private def resAttrOneMan(a: AttrOneMan): Unit = {
+    pullCasts += (a match {
+      case _: AttrOneManID             => it2Id
+      case _: AttrOneManString         => it2String
+      case _: AttrOneManInt            => it2Int
+      case _: AttrOneManLong           => it2Long
+      case _: AttrOneManFloat          => it2Float
+      case _: AttrOneManDouble         => it2Double
+      case _: AttrOneManBoolean        => it2Boolean
+      case _: AttrOneManBigInt         => it2BigInt
+      case _: AttrOneManBigDecimal     => it2BigDecimal
+      case _: AttrOneManDate           => it2Date
+      case _: AttrOneManDuration       => it2Duration
+      case _: AttrOneManInstant        => it2Instant
+      case _: AttrOneManLocalDate      => it2LocalDate
+      case _: AttrOneManLocalTime      => it2LocalTime
+      case _: AttrOneManLocalDateTime  => it2LocalDateTime
+      case _: AttrOneManOffsetTime     => it2OffsetTime
+      case _: AttrOneManOffsetDateTime => it2OffsetDateTime
+      case _: AttrOneManZonedDateTime  => it2ZonedDateTime
+      case _: AttrOneManUUID           => it2UUID
+      case _: AttrOneManURI            => it2URI
+      case _: AttrOneManByte           => it2Byte
+      case _: AttrOneManShort          => it2Short
+      case _: AttrOneManChar           => it2Char
+    })
   }
 
-
-  private def resAttrOneMan(a: AttrOneMan, attrIndex: Int): Unit = {
-    a match {
-      case a: AttrOneManID             => add(sortOneID(a, attrIndex), it2Id, it2Id2)
-      case a: AttrOneManString         => add(sortOneString(a, attrIndex), it2String, it2String2)
-      case a: AttrOneManInt            => add(intSorter(a, attrIndex), it2Int, it2Int2)
-      case a: AttrOneManLong           => add(sortOneLong(a, attrIndex), it2Long)
-      case a: AttrOneManFloat          => add(floatSorter(a, attrIndex), it2Float)
-      case a: AttrOneManDouble         => add(sortOneDouble(a, attrIndex), it2Double)
-      case a: AttrOneManBoolean        => add(sortOneBooleanOptNested(a, attrIndex), it2Boolean)
-      case a: AttrOneManBigInt         => add(bigIntSorter(a, attrIndex), it2BigInt)
-      case a: AttrOneManBigDecimal     => add(sortOneBigDecimal(a, attrIndex), it2BigDecimal)
-      case a: AttrOneManDate           => add(sortOneDate(a, attrIndex), it2Date)
-      case a: AttrOneManDuration       => add(sortOneDuration(a, attrIndex), it2Duration)
-      case a: AttrOneManInstant        => add(sortOneInstant(a, attrIndex), it2Instant)
-      case a: AttrOneManLocalDate      => add(sortOneLocalDate(a, attrIndex), it2LocalDate)
-      case a: AttrOneManLocalTime      => add(sortOneLocalTime(a, attrIndex), it2LocalTime)
-      case a: AttrOneManLocalDateTime  => add(sortOneLocalDateTime(a, attrIndex), it2LocalDateTime)
-      case a: AttrOneManOffsetTime     => add(sortOneOffsetTime(a, attrIndex), it2OffsetTime)
-      case a: AttrOneManOffsetDateTime => add(sortOneOffsetDateTime(a, attrIndex), it2OffsetDateTime)
-      case a: AttrOneManZonedDateTime  => add(sortOneZonedDateTime(a, attrIndex), it2ZonedDateTime)
-      case a: AttrOneManUUID           => add(sortOneUUID(a, attrIndex), it2UUID)
-      case a: AttrOneManURI            => add(sortOneURI(a, attrIndex), it2URI)
-      case a: AttrOneManByte           => add(byteSorter(a, attrIndex), it2Byte)
-      case a: AttrOneManShort          => add(shortSorter(a, attrIndex), it2Short)
-      case a: AttrOneManChar           => add(sortOneChar(a, attrIndex), it2Char)
-    }
-  }
-
-  private def resAttrOneOpt(a: AttrOneOpt, attrIndex: Int): Unit = {
-    a match {
-      case _: AttrOneOptID             => add(sortOneOptFlatId(a, attrIndex), it2OptId)
-      case _: AttrOneOptString         => add(sortOneOptFlatString(a, attrIndex), it2OptString)
-      case _: AttrOneOptInt            => add(sortOneOptFlatInt(a, attrIndex), it2OptInt)
-      case _: AttrOneOptLong           => add(sortOneOptFlatLong(a, attrIndex), it2OptLong)
-      case _: AttrOneOptFloat          => add(sortOneOptFlatFloat(a, attrIndex), it2OptFloat)
-      case _: AttrOneOptDouble         => add(sortOneOptFlatDouble(a, attrIndex), it2OptDouble)
-      case _: AttrOneOptBoolean        => add(sortOneOptFlatBoolean(a, attrIndex), it2Boolean)
-      case _: AttrOneOptBigInt         => add(sortOneOptFlatBigInt(a, attrIndex), it2OptBigInt)
-      case _: AttrOneOptBigDecimal     => add(sortOneOptFlatBigDecimal(a, attrIndex), it2OptBigDecimal)
-      case _: AttrOneOptDate           => add(sortOneOptFlatDate(a, attrIndex), it2OptDate)
-      case _: AttrOneOptDuration       => add(sortOneOptFlatDuration(a, attrIndex), it2OptDuration)
-      case _: AttrOneOptInstant        => add(sortOneOptFlatInstant(a, attrIndex), it2OptInstant)
-      case _: AttrOneOptLocalDate      => add(sortOneOptFlatLocalDate(a, attrIndex), it2OptLocalDate)
-      case _: AttrOneOptLocalTime      => add(sortOneOptFlatLocalTime(a, attrIndex), it2OptLocalTime)
-      case _: AttrOneOptLocalDateTime  => add(sortOneOptFlatLocalDateTime(a, attrIndex), it2OptLocalDateTime)
-      case _: AttrOneOptOffsetTime     => add(sortOneOptFlatOffsetTime(a, attrIndex), it2OptOffsetTime)
-      case _: AttrOneOptOffsetDateTime => add(sortOneOptFlatOffsetDateTime(a, attrIndex), it2OptOffsetDateTime)
-      case _: AttrOneOptZonedDateTime  => add(sortOneOptFlatZonedDateTime(a, attrIndex), it2OptZonedDateTime)
-      case _: AttrOneOptUUID           => add(sortOneOptFlatUUID(a, attrIndex), it2OptUUID)
-      case _: AttrOneOptURI            => add(sortOneOptFlatURI(a, attrIndex), it2OptURI)
-      case _: AttrOneOptByte           => add(sortOneOptFlatByte(a, attrIndex), it2OptByte)
-      case _: AttrOneOptShort          => add(sortOneOptFlatShort(a, attrIndex), it2OptShort)
-      case _: AttrOneOptChar           => add(sortOneOptFlatChar(a, attrIndex), it2OptChar)
-    }
+  private def resAttrOneOpt(a: AttrOneOpt): Unit = {
+    pullCasts += (a match {
+      case _: AttrOneOptID             => it2OptId
+      case _: AttrOneOptString         => it2OptString
+      case _: AttrOneOptInt            => it2OptInt
+      case _: AttrOneOptLong           => it2OptLong
+      case _: AttrOneOptFloat          => it2OptFloat
+      case _: AttrOneOptDouble         => it2OptDouble
+      case _: AttrOneOptBoolean        => it2Boolean
+      case _: AttrOneOptBigInt         => it2OptBigInt
+      case _: AttrOneOptBigDecimal     => it2OptBigDecimal
+      case _: AttrOneOptDate           => it2OptDate
+      case _: AttrOneOptDuration       => it2OptDuration
+      case _: AttrOneOptInstant        => it2OptInstant
+      case _: AttrOneOptLocalDate      => it2OptLocalDate
+      case _: AttrOneOptLocalTime      => it2OptLocalTime
+      case _: AttrOneOptLocalDateTime  => it2OptLocalDateTime
+      case _: AttrOneOptOffsetTime     => it2OptOffsetTime
+      case _: AttrOneOptOffsetDateTime => it2OptOffsetDateTime
+      case _: AttrOneOptZonedDateTime  => it2OptZonedDateTime
+      case _: AttrOneOptUUID           => it2OptUUID
+      case _: AttrOneOptURI            => it2OptURI
+      case _: AttrOneOptByte           => it2OptByte
+      case _: AttrOneOptShort          => it2OptShort
+      case _: AttrOneOptChar           => it2OptChar
+    })
   }
 
   private def resAttrSetMan(a: AttrSetMan): Unit = {

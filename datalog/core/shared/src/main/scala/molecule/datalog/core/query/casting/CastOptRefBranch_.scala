@@ -2,10 +2,10 @@
 package molecule.datalog.core.query.casting
 
 import java.util.{ArrayList => jArrayList, Iterator => jIterator, Map => jMap}
-import molecule.datalog.core.query.DatomicQueryBase
+import molecule.core.util.JavaConversions
 
 
-trait CastOptRefBranch_ { self: DatomicQueryBase =>
+trait CastOptRefBranch_ extends JavaConversions {
 
   final protected def pullOptRefBranch(
     pullCasts0: List[jIterator[_] => Any],

@@ -27,7 +27,7 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
     with CastOptRefLeaf_
     with Nest[Tpl]
     with NestOpt
-    with OptRefNested
+    with OptRefNested[Tpl]
     with DatomicQueryBase
     with MoleculeLogging {
 

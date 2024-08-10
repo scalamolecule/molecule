@@ -32,9 +32,6 @@ object AdhocJVM_datomic extends TestSuite_datomic {
         _ <- Ns.i.a1.intMap_.hasNo(List.empty[Int]).query.get.map(_ ==> List(1, 2))
 
 
-
-
-
       } yield ()
     }
 
@@ -43,70 +40,40 @@ object AdhocJVM_datomic extends TestSuite_datomic {
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
 
-        _ <- A.i.B.s.i.Cc.*(C.s).insert(List(
-          (1, "a", 1, Nil),
-          (2, "b", 2, List("x", "y"))
+
+        //        _ <- A.i.a1.B.?(B.s.i.C.s.i).query.get.map(_ ==> List(
+        //          (1, None),
+        //          (2, None),
+        //          (3, Some(("b", 3, "c", 3)))
+        //        ))
+        //
+        //        _ <- A.i.B.s.i.C.s.i.query.get.map(_ ==> List(
+        //          (3, "b", 3, "c", 3)
+        //        ))
+
+        //        _ <- A.s.i.insert("a", 1).transact
+        //        _ <- A.s.i.query.get.map(_ ==> List(("a", 1)))
+
+        //        _ <- A.i.B.?(B.i.s.C.?(C.s.i)).D.?(D.s.i.E.?(E.i)).insert(List(
+        //          //        _ <- A.i.B.?(B.i.C.?(C.s.i)).D.?(D.s.i.E.?(E.i)).insert(List(
+        //          //            (1, None, None),
+        //          //            (2, Some(20), None),
+        //          //            (3, None, Some(300)),
+        //          //                    (4, Some(40), Some(400)),
+        //          (4, Some((40, "b", Some(("c", 400)))), Some(("d", 42, Some(4000)))),
+        //          //          (4, Some((40, Some(("c", 400)))), Some(("d", 42, Some(4000)))),
+        //
+        //        )).transact
+        //
+        //        _ <- A.i.a1.B.?(B.i.s.C.?(C.s.i)).query.get
+        //        _ = println("@@@@@@@@@@@@@@@@@@@@@@@@@")
+        //        _ <- A.i.a1.B.?(B.i.s.C.?(C.s.i)).D.?(D.s.E.?(E.i)).query.get
+
+        //
+        _ <- A.s.i.B.?(B.i.C.?(C.i)).D.?(D.i).insert(List(
+          ("a", 1, Some((2, Some(3))), Some(4)),
         )).transact
 
-//        _ <- A.i.B.?(B.s.i.Cc.s).query.i.get
-//          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-//            err ==> "Only cardinality-one refs allowed in optional ref queries (B.cc)."
-//          }
-//
-//        // Instead, please use flat card-many ref
-//        _ <- A.i.B.s.i.Cc.s.query.get.map(_ ==> List(
-//          (2, "b", 2, "x"),
-//          (2, "b", 2, "y"),
-//        ))
-        // or better, a nested query
-        _ <- A.i.B.s.i.Cc.*(C.s.a1).query.get.map(_ ==> List(
-          (2, "b", 2, List("x", "y")),
-        ))
-
-//        _ <- A.i.B.?(B.i.s.Cc.*(C.s)).query.get
-//          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-//            err ==> "Cardinality-many nesting not allowed inside optional ref."
-//          }
-//        _ <- A.i.B.?(B.i.s.Cc.*?(C.s)).query.get
-//          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-//            err ==> "Cardinality-many nesting not allowed inside optional ref."
-//          }
-
-
-
-//        _ <- A.i.a1.B.?(B.s.i.C.s.i).query.get.map(_ ==> List(
-//          (1, None),
-//          (2, None),
-//          (3, Some(("b", 3, "c", 3)))
-//        ))
-//
-//        _ <- A.i.B.s.i.C.s.i.query.get.map(_ ==> List(
-//          (3, "b", 3, "c", 3)
-//        ))
-
-//        _ <- A.s.i.insert("a", 1).transact
-//        _ <- A.s.i.query.get.map(_ ==> List(("a", 1)))
-
-//        _ <- A.i.B.?(B.i.s.C.?(C.s.i)).D.?(D.s.i.E.?(E.i)).insert(List(
-//          //        _ <- A.i.B.?(B.i.C.?(C.s.i)).D.?(D.s.i.E.?(E.i)).insert(List(
-//          //            (1, None, None),
-//          //            (2, Some(20), None),
-//          //            (3, None, Some(300)),
-//          //                    (4, Some(40), Some(400)),
-//          (4, Some((40, "b", Some(("c", 400)))), Some(("d", 42, Some(4000)))),
-//          //          (4, Some((40, Some(("c", 400)))), Some(("d", 42, Some(4000)))),
-//
-//        )).transact
-//
-//        _ <- A.i.a1.B.?(B.i.s.C.?(C.s.i)).query.get
-//        _ = println("@@@@@@@@@@@@@@@@@@@@@@@@@")
-//        _ <- A.i.a1.B.?(B.i.s.C.?(C.s.i)).D.?(D.s.E.?(E.i)).query.get
-
-//
-//        _ <- A.s.i.B.?(B.i.C.?(C.i)).D.?(D.i).insert(List(
-//          ("a", 1, Some((2, Some(3))), Some(4)),
-//        )).transact
-//
 //        _ <- A.s.i.a1.B.?(B.i).query.get.map(_ ==> List(
 //          ("a", 1, Some(2)),
 //        ))
@@ -115,9 +82,32 @@ object AdhocJVM_datomic extends TestSuite_datomic {
 //          ("a", 1, Some((2, Some(3)))),
 //        ))
 //        _ = println("@@@@@@@@@@@@@@@@@@@@@@@@@")
-//        _ <- A.s.i.a1.B.?(B.i).D.?(D.i).query.get.map(_ ==> List(
-//          ("a", 1, Some(2), Some(4)),
-//        ))
+
+        //        _ <- rawQuery(
+        //          """[:find  ?b ?c
+        //            |        (
+        //            |          pull ?id1 [
+        //            |            {(:A/b :default "__none__") [
+        //            |              (:B/i :default "__none__")
+        //            |            ]}
+        //            |          ]
+        //            |        )
+        //            |        (
+        //            |          pull ?id2 [
+        //            |            {(:A/d :default "__none__") [
+        //            |              (:D/i :default "__none__")
+        //            |            ]}
+        //            |          ]
+        //            |        )
+        //            | :where [?a :A/s ?b]
+        //            |        [?a :A/i ?c]
+        //            |        [(identity ?a) ?id1]
+        //            |        [(identity ?a) ?id2]]
+        //            |""".stripMargin, true)
+
+        _ <- A.s.i.a1.B.?(B.i).D.?(D.i).query.i.get.map(_ ==> List(
+          ("a", 1, Some(2), Some(4)),
+        ))
 
 
         //        _ <- A.i

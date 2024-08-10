@@ -72,10 +72,7 @@ trait Model2Query extends QueryExpr with ModelUtils {
 
       case ref: Ref                             => queryRef(ref, tail); resolve(tail)
       case backRef: BackRef                     => queryBackRef(backRef, tail); resolve(tail)
-      case OptRef(ref, refElements)             =>
-        println(s"#######  " + ref)
-
-        queryOptRef(ref, refElements); resolve(tail)
+      case OptRef(ref, refElements)             => queryOptRef(ref, refElements); resolve(tail)
       case Nested(ref, nestedElements)          => queryNested(ref, nestedElements); resolve(tail)
       case OptNested(nestedRef, nestedElements) => queryOptNested(nestedRef, nestedElements); resolve(tail)
     }
@@ -539,7 +536,6 @@ trait Model2Query extends QueryExpr with ModelUtils {
                 case other         => other
               }
 
-
             //            case a: AttrSeq => ???
             //            case a: AttrMap => ???
 
@@ -587,6 +583,9 @@ trait Model2Query extends QueryExpr with ModelUtils {
 
   protected def noMixedNestedModes: Nothing = throw ModelError(
     "Can't mix mandatory/optional nested queries."
+  )
+  protected def onlyCardOneInsideOptRef(ref: Ref): Nothing = throw ModelError(
+    s"Only cardinality-one refs allowed in optional ref queries (${ref.ns}.${ref.refAttr})."
   )
   protected def noCardManyInsideOptRef(): Unit = if (nestedOptRef) {
     throw ModelError(

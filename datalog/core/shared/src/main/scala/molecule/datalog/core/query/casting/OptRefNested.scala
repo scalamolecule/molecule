@@ -1,79 +1,37 @@
 package molecule.datalog.core.query.casting
 
 import java.util.{Iterator => jIterator, Map => jMap}
-import molecule.datalog.core.query.DatomicQueryBase
+import molecule.boilerplate.ast.Model.{Element, Ref}
+import molecule.datalog.core.query.{DatomicQueryBase, Model2DatomicQuery, ResolveOptRefPull}
 
 
-trait OptRefNested
+trait OptRefNested[Tpl]
   extends CastOptRefBranch_
     with CastOptRefLeaf_
     with CastRow2AnyTpl_
-    with DatomicQueryBase {
+    with DatomicQueryBase
+    with ResolveOptRefPull[Tpl] { self: Model2DatomicQuery[Tpl] =>
 
-  private lazy val levels = pullCastss.length
-
-  private lazy val pullCasts1 = pullCastss.head
-  private lazy val pullCasts2 = pullCastss(1)
-  private lazy val pullCasts3 = pullCastss(2)
-  private lazy val pullCasts4 = pullCastss(3)
-  private lazy val pullCasts5 = pullCastss(4)
-  private lazy val pullCasts6 = pullCastss(5)
-  private lazy val pullCasts7 = pullCastss(6)
-
-  private lazy val pullBranch1: jIterator[_] => Option[Any] = {
-    if (levels == 1)
-      pullOptRefLeaf(pullCasts1)
-    else
-      pullOptRefBranch(pullCasts1, pullBranch2, refDepths(1))
-  }
-
-  private lazy val pullBranch2: jIterator[_] => Option[Any] = {
-    if (levels == 2)
-      pullOptRefLeaf(pullCasts2)
-    else
-      pullOptRefBranch(pullCasts2, pullBranch3, refDepths(2))
-  }
-
-  private lazy val pullBranch3: jIterator[_] => Option[Any] = {
-    if (levels == 3)
-      pullOptRefLeaf(pullCasts3)
-    else
-      pullOptRefBranch(pullCasts3, pullBranch4, refDepths(3))
-  }
-
-  private lazy val pullBranch4: jIterator[_] => Option[Any] = {
-    if (levels == 4)
-      pullOptRefLeaf(pullCasts4)
-    else
-      pullOptRefBranch(pullCasts4, pullBranch5, refDepths(4))
-  }
-
-  private lazy val pullBranch5: jIterator[_] => Option[Any] = {
-    if (levels == 5)
-      pullOptRefLeaf(pullCasts5)
-    else
-      pullOptRefBranch(pullCasts5, pullBranch6, refDepths(5))
-  }
-
-  private lazy val pullBranch6: jIterator[_] => Option[Any] = {
-    if (levels == 6)
-      pullOptRefLeaf(pullCasts6)
-    else
-      pullOptRefBranch(pullCasts6, pullBranch7, refDepths(6))
-  }
-
-  private lazy val pullBranch7: jIterator[_] => Option[Any] = {
-    pullOptRefLeaf(pullCasts7)
-  }
-
-  protected def pullOptRefData: AnyRef => AnyRef = {
-    val lambda = (rowValue: AnyRef) => {
-
-      println("=== " + rowValue)
-      //      println("=== " + rowValue.asInstanceOf[jMap[_, _]].values.iterator().next)
-      pullBranch1(rowValue.asInstanceOf[jMap[_, _]].values.iterator)
+  protected def pullOptRefData(
+    ref: Ref, optionalElements: List[Element]
+  ): AnyRef => AnyRef = {
+    val nestedOptRefCasts = resolveOptRefElements(ref, optionalElements)
+    val caster = rec(nestedOptRefCasts, refDepths)
+    (rowValue: AnyRef) => {
+      // println(s"===  ${nestedOptRefCasts.size}   " + rowValue)
+      caster(rowValue.asInstanceOf[jMap[_, _]].values.iterator)
     }
-    println(s"lambda: " + lambda)
-    lambda
+  }
+
+  def rec(
+    castss: List[List[jIterator[_] => Any]],
+    refDepths: List[Int],
+    leaf: jIterator[_] => Option[Any] = null // when leaf materializes
+  ): jIterator[_] => Option[Any] = {
+    castss match {
+      case casts :: Nil  => rec(Nil, Nil, pullOptRefLeaf(casts))
+      case casts :: more => pullOptRefBranch(casts, rec(more, refDepths.tail), refDepths.head)
+      case Nil           => leaf
+    }
   }
 }

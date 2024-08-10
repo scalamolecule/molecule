@@ -34,7 +34,7 @@ trait Nest[Tpl] { self: DatomicQueryBase with CastNestedBranch_ with CastRow2Any
 
   // First attr index for each level
   private lazy val i0 = nestedLevels
-  private lazy val i1 = i0 + castss.head.length
+  private lazy val i1 = i0 + castss(0).length
   private lazy val i2 = i1 + castss(1).length
   private lazy val i3 = i2 + castss(2).length
   private lazy val i4 = i3 + castss(3).length
@@ -127,12 +127,6 @@ trait Nest[Tpl] { self: DatomicQueryBase with CastNestedBranch_ with CastRow2Any
 
 
   final private def rows2nested2(rows: jArrayList[Row]): List[Tpl] = {
-
-
-    println("--- castss --------------------")
-    castss.map(_.mkString("List(\n  ", ",\n  ", ")")).foreach(println)
-
-
     if (rows.size == 1) {
       row = rows.get(0)
       List(tplBranch0(row,

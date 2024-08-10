@@ -106,9 +106,7 @@ object _CastOptNestedLeaf extends DatomicGenBase("CastOptNestedLeaf", "/query/ca
        |          sortedRows.add(flatten(list, row).asInstanceOf[Row])
        |      }
        |      Collections.sort(sortedRows, comparator)
-       |      //      println("sortedRows: " + sortedRows)
        |      val tupleList = sortedRows.asScala.flatMap { row =>
-       |        //        println("row: " + row)
        |        try {
        |          Some(cast(row.iterator))
        |        } catch {
@@ -116,7 +114,6 @@ object _CastOptNestedLeaf extends DatomicGenBase("CastOptNestedLeaf", "/query/ca
        |          case NonFatal(e)           => throw e
        |        }
        |      }.toList
-       |      //      println("tupleList: " + tupleList)
        |      tupleList
        |  }
        |
@@ -154,8 +151,7 @@ object _CastOptNestedLeaf extends DatomicGenBase("CastOptNestedLeaf", "/query/ca
        |              val rowIt = rowsIt.next.asInstanceOf[jMap[_, _]].values().iterator()
        |              while (search && rowIt.hasNext) {
        |                rowIt.next match {
-       |                  case "__none__" =>
-       |                    ()
+       |                  case "__none__" => ()
        |
        |                  case value: jMap[_, _] if value.values().iterator().next.isInstanceOf[jList[_]] =>
        |                    isSet = true
@@ -179,8 +175,7 @@ object _CastOptNestedLeaf extends DatomicGenBase("CastOptNestedLeaf", "/query/ca
        |                try {
        |                  rowList += cast(flatten(list, row).iterator)
        |                } catch {
-       |                  case _: NullValueException =>
-       |                    ()
+       |                  case _: NullValueException => ()
        |                }
        |            }
        |            // Coalesce Sets
