@@ -11,7 +11,6 @@ trait QueryExprSet[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] with L
 
 
   override protected def queryAttrSetMan(attr: AttrSetMan): Unit = {
-    aritiesAttr()
     attrIndex += 1
     val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
     attr match {
@@ -71,7 +70,6 @@ trait QueryExprSet[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] with L
   }
 
   override protected def queryAttrSetOpt(attr: AttrSetOpt): Unit = {
-    aritiesAttr()
     attrIndex += 1
     val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
     attr match {

@@ -2,39 +2,17 @@
 package molecule.datalog.core.query.casting
 
 import java.util.{Collections, Comparator, ArrayList => jArrayList, Iterator => jIterator, List => jList, Map => jMap}
-import molecule.core.query.Model2Query
 import molecule.datalog.core.query.DatomicQueryBase
-import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 import scala.util.control.NonFatal
 
 
-trait CastOptNestedLeaf_ extends CastRow2AnyTpl_ { self: Model2Query with DatomicQueryBase =>
+trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
 
   private val rowList = new ListBuffer[Any]
 
-  @tailrec
-  final private def resolveArities(
-    arities: List[Int],
-    casts: List[jIterator[_] => Any],
-    acc: List[jIterator[_] => Any],
-  ): List[jIterator[_] => Any] = {
-    arities match {
-      case 0 :: as =>
-        resolveArities(as, casts.tail, acc :+ casts.head)
-
-      // Nested
-      case -1 :: Nil =>
-        resolveArities(Nil, casts.tail, acc :+ casts.head)
-
-      case _ => acc
-    }
-  }
-
-
   final protected def pullOptNestedLeaf(
-    arities: List[Int],
-    pullCasts0: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[_] => Any],
     pullSorts: List[Int => (Row, Row) => Int]
   ): jIterator[_] => List[Any] = {
     val optComparator = {
@@ -57,7 +35,7 @@ trait CastOptNestedLeaf_ extends CastRow2AnyTpl_ { self: Model2Query with Datomi
         )
       } else None
     }
-    val pullCasts     = resolveArities(arities, pullCasts0, Nil)
+
     pullCasts.length match {
       case 1  => pullLeaf1(pullCasts, optComparator)
       case 2  => pullLeaf2(pullCasts, optComparator)

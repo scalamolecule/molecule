@@ -138,7 +138,6 @@ trait ResolveOptRefPull[Tpl]
           pullSorts.clear()
           refDepths = refDepths :+ 0
 
-          aritiesNested()
           val (attrs, append1) = resolvePullRef(ref1, elements1, level + 1, 0, "")
           val res              =
             s"""
@@ -198,7 +197,6 @@ trait ResolveOptRefPull[Tpl]
 
 
   private def resAttrOneMan(a: AttrOneMan, attrIndex: Int): Unit = {
-    aritiesAttr()
     a match {
       case a: AttrOneManID             => add(sortOneID(a, attrIndex), it2Id, it2Id2)
       case a: AttrOneManString         => add(sortOneString(a, attrIndex), it2String, it2String2)
@@ -227,7 +225,6 @@ trait ResolveOptRefPull[Tpl]
   }
 
   private def resAttrOneOpt(a: AttrOneOpt, attrIndex: Int): Unit = {
-    aritiesAttr()
     a match {
       case _: AttrOneOptID             => add(sortOneOptFlatId(a, attrIndex), it2OptId)
       case _: AttrOneOptString         => add(sortOneOptFlatString(a, attrIndex), it2OptString)
@@ -256,7 +253,6 @@ trait ResolveOptRefPull[Tpl]
   }
 
   private def resAttrSetMan(a: AttrSetMan): Unit = {
-    aritiesAttr()
     pullCasts += (a match {
       case _: AttrSetManID             => it2SetId
       case _: AttrSetManString         => it2SetString
@@ -285,7 +281,6 @@ trait ResolveOptRefPull[Tpl]
   }
 
   private def resttrSetOpt(a: AttrSetOpt): Unit = {
-    aritiesAttr()
     pullCasts += (a match {
       case _: AttrSetOptID             => it2OptSetId
       case _: AttrSetOptString         => it2OptSetString
@@ -314,7 +309,6 @@ trait ResolveOptRefPull[Tpl]
   }
 
   private def resAttrSeqMan(a: AttrSeqMan): Unit = {
-    aritiesAttr()
     pullCasts += (a match {
       case _: AttrSeqManID             => it2ListId
       case _: AttrSeqManString         => it2ListString
@@ -343,7 +337,6 @@ trait ResolveOptRefPull[Tpl]
   }
 
   private def resAttrSeqOpt(a: AttrSeqOpt): Unit = {
-    aritiesAttr()
     pullCasts += (a match {
       case _: AttrSeqOptID             => it2OptListId
       case _: AttrSeqOptString         => it2OptListString
@@ -372,7 +365,6 @@ trait ResolveOptRefPull[Tpl]
   }
 
   private def resAttrMapMan(a: AttrMapMan): Unit = {
-    aritiesAttr()
     pullCasts += (a match {
       case _: AttrMapManID             => noId
       case _: AttrMapManString         => it2MapString
@@ -401,7 +393,6 @@ trait ResolveOptRefPull[Tpl]
   }
 
   private def resAttrMapOpt(a: AttrMapOpt): Unit = {
-    aritiesAttr()
     pullCasts += (a match {
       case _: AttrMapOptID             => noId
       case _: AttrMapOptString         => it2OptMapString

@@ -24,52 +24,52 @@ trait OptRefNested
     if (levels == 1)
       pullOptRefLeaf(pullCasts1)
     else
-      pullOptRefBranch(aritiess(1), pullCasts1, pullBranch2, refDepths(1))
+      pullOptRefBranch(pullCasts1, pullBranch2, refDepths(1))
   }
 
   private lazy val pullBranch2: jIterator[_] => Option[Any] = {
     if (levels == 2)
       pullOptRefLeaf(pullCasts2)
     else
-      pullOptRefBranch(aritiess(2), pullCasts2, pullBranch3, refDepths(2))
+      pullOptRefBranch(pullCasts2, pullBranch3, refDepths(2))
   }
 
   private lazy val pullBranch3: jIterator[_] => Option[Any] = {
     if (levels == 3)
       pullOptRefLeaf(pullCasts3)
     else
-      pullOptRefBranch(aritiess(3), pullCasts3, pullBranch4, refDepths(3))
+      pullOptRefBranch(pullCasts3, pullBranch4, refDepths(3))
   }
 
   private lazy val pullBranch4: jIterator[_] => Option[Any] = {
     if (levels == 4)
       pullOptRefLeaf(pullCasts4)
     else
-      pullOptRefBranch(aritiess(4), pullCasts4, pullBranch5, refDepths(4))
+      pullOptRefBranch(pullCasts4, pullBranch5, refDepths(4))
   }
 
   private lazy val pullBranch5: jIterator[_] => Option[Any] = {
     if (levels == 5)
       pullOptRefLeaf(pullCasts5)
     else
-      pullOptRefBranch(aritiess(5), pullCasts5, pullBranch6, refDepths(5))
+      pullOptRefBranch(pullCasts5, pullBranch6, refDepths(5))
   }
 
   private lazy val pullBranch6: jIterator[_] => Option[Any] = {
     if (levels == 6)
       pullOptRefLeaf(pullCasts6)
     else
-      pullOptRefBranch(aritiess(6), pullCasts6, pullBranch7, refDepths(6))
+      pullOptRefBranch(pullCasts6, pullBranch7, refDepths(6))
   }
 
   private lazy val pullBranch7: jIterator[_] => Option[Any] = {
     pullOptRefLeaf(pullCasts7)
   }
 
-  protected lazy val pullOptRefData: AnyRef => AnyRef = {
+  protected def pullOptRefData: AnyRef => AnyRef = {
     val lambda = (rowValue: AnyRef) => {
 
-      //      println("=== " + rowValue)
+      println("=== " + rowValue)
       //      println("=== " + rowValue.asInstanceOf[jMap[_, _]].values.iterator().next)
       pullBranch1(rowValue.asInstanceOf[jMap[_, _]].values.iterator)
     }

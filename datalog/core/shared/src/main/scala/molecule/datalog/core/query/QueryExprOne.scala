@@ -11,7 +11,6 @@ trait QueryExprOne[Tpl]
     with QueryExpr { self: Model2DatomicQuery[Tpl] with LambdasOne =>
 
   override protected def queryAttrOneMan(attr: AttrOneMan): Unit = {
-    aritiesAttr()
     attrIndex += 1
     val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
     attr match {
@@ -73,7 +72,6 @@ trait QueryExprOne[Tpl]
   }
 
   override protected def queryAttrOneOpt(attr: AttrOneOpt): Unit = {
-    aritiesAttr()
     attrIndex += 1
     val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
     attr match {

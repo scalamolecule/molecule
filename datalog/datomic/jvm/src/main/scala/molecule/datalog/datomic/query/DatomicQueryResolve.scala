@@ -151,7 +151,7 @@ abstract class DatomicQueryResolve[Tpl](
           postAdjustPullCasts()
           if (!forward) Collections.reverse(sortedRows)
           val count          = getCount(limit, forward, totalCount)
-          val row2tpl        = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0)
+          val row2tpl        = m2q.castRow2AnyTpl(m2q.castss.head, 0)
           val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(()), row2tpl)
           val tpls           = (if (forward) tuples else tuples.reverse).filterNot(_ == Nil)
           val cursor         = nextCursor(tpls, allTokens)
@@ -161,7 +161,7 @@ abstract class DatomicQueryResolve[Tpl](
           postAdjustPullCasts()
           if (!forward) Collections.reverse(sortedRows)
           val count          = getCount(limit, forward, totalCount)
-          val row2tpl        = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0)
+          val row2tpl        = m2q.castRow2AnyTpl(m2q.castss.head, 0)
           val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(()), row2tpl)
           val tpls           = (if (forward) tuples else tuples.reverse).filterNot(_ == Nil)
           val cursor         = nextCursor(tpls, allTokens)
@@ -170,7 +170,7 @@ abstract class DatomicQueryResolve[Tpl](
         } else {
           if (!forward) Collections.reverse(sortedRows)
           val count          = getCount(limit, forward, totalCount)
-          val row2AnyTpl     = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0)
+          val row2AnyTpl     = m2q.castRow2AnyTpl(m2q.castss.head, 0)
           val row2tpl        = (row: m2q.Row) => row2AnyTpl(row).asInstanceOf[Tpl]
           val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(()), row2tpl)
           val tpls           = if (forward) tuples else tuples.reverse

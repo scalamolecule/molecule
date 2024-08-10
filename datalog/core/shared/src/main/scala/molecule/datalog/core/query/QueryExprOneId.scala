@@ -11,7 +11,6 @@ trait QueryExprOneId[Tpl]
     with QueryExpr { self: Model2DatomicQuery[Tpl] with LambdasOne =>
 
   override protected def queryIdMan(attr: AttrOneMan): Unit = {
-    aritiesAttr()
     attrIndex += 1
     val e = es.last
     attr match {

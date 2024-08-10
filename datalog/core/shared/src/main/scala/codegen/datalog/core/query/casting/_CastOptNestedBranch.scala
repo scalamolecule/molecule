@@ -8,37 +8,15 @@ object _CastOptNestedBranch extends DatomicGenBase("CastOptNestedBranch", "/quer
     val pullBranchX    = (1 to 21).map(i => s"case ${caseN(i)} => pullBranch$i(pullCasts, optComparator, refDepth)").mkString("\n      ")
     val resolveMethods = (1 to 21).map(arity => Chunk(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************
-       |package molecule.datomic.query.casting
+       |package molecule.datalog.core.query.casting
        |
        |import java.util.{Collections, Comparator, ArrayList => jArrayList, Iterator => jIterator, List => jList, Map => jMap}
-       |import molecule.core.query.Model2Query
-       |import molecule.datomic.query.DatomicQueryBase
-       |import scala.annotation.tailrec
+       |import molecule.datalog.core.query.DatomicQueryBase
        |
        |
-       |trait $fileName_[Tpl] { self: Model2Query with DatomicQueryBase =>
+       |trait $fileName_ { self: DatomicQueryBase =>
        |
-       |  @tailrec
-       |  final private def resolveArities(
-       |    arities: List[List[Int]],
-       |    casts: List[jIterator[_] => Any],
-       |    pullNested: jIterator[_] => List[Any],
-       |    acc: List[jIterator[_] => Any],
-       |  ): List[jIterator[_] => Any] = {
-       |    arities match {
-       |      case List(1) :: as =>
-       |        resolveArities(as, casts.tail, pullNested, acc :+ casts.head)
-       |
-       |      // Nested
-       |      case List(-1) :: Nil =>
-       |        resolveArities(Nil, Nil, pullNested, acc :+ pullNested)
-       |
-       |      case _ => acc
-       |    }
-       |  }
-       |
-       |  final protected def pullBranch(
-       |    arities: List[List[Int]],
+       |  final protected def pullOptNestedBranch(
        |    pullCasts0: List[jIterator[_] => Any],
        |    pullSorts: List[Int => (Row, Row) => Int],
        |    pullNested: jIterator[_] => List[Any],
@@ -64,7 +42,7 @@ object _CastOptNestedBranch extends DatomicGenBase("CastOptNestedBranch", "/quer
        |        )
        |      } else None
        |    }
-       |    val pullCasts     = resolveArities(arities, pullCasts0, pullNested, Nil)
+       |    val pullCasts     = pullCasts0 :+ pullNested
        |    pullCasts.length match {
        |      $pullBranchX
        |    }

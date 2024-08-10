@@ -1,43 +1,19 @@
 // GENERATED CODE ********************************
 package molecule.datalog.core.query.casting
 
-import molecule.core.query.Model2Query
 import molecule.datalog.core.query.DatomicQueryBase
-import scala.annotation.tailrec
 
 
-trait CastNestedBranch_
-  extends CastRow2AnyTpl_ { self: Model2Query with DatomicQueryBase =>
-
-  @tailrec
-  final private def resolveArities(
-    arities: List[Int],
-    casts: List[AnyRef => AnyRef],
-    attrIndex: AttrIndex,
-    attrIndexTx: AttrIndex,
-    acc: List[(Row, NestedTpls) => Any]
-  ): List[(Row, NestedTpls) => Any] = {
-    arities match {
-      case 0 :: as =>
-        val cast = (row: Row, _: NestedTpls) => casts.head(row.get(attrIndex))
-        resolveArities(as, casts.tail, attrIndex + 1, attrIndexTx, acc :+ cast)
-
-      // Nested
-      case -1 :: as =>
-        val cast = (_: Row, nested: NestedTpls) => nested
-        resolveArities(as, casts, attrIndexTx, attrIndexTx, acc :+ cast)
-
-      case _ => acc
-    }
-  }
+trait CastNestedBranch_ { self: DatomicQueryBase =>
 
   final protected def castBranch[T](
-    arities: List[Int],
     casts: List[AnyRef => AnyRef],
     firstAttrIndex: AttrIndex,
-    firstAttrIndexTx: AttrIndex
   ): (Row, NestedTpls) => T = {
-    val casters = resolveArities(arities, casts, firstAttrIndex, firstAttrIndexTx, Nil)
+    val casters = casts.zipWithIndex.map { case (cast, i) =>
+      (row: Row, _: NestedTpls) => cast(row.get(firstAttrIndex + i))
+    } :+ ((_: Row, nested: NestedTpls) => nested)
+
     casters.length match {
       case 0  => cast0[T]
       case 1  => cast1[T](casters)

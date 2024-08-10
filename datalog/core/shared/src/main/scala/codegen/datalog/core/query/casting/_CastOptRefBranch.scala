@@ -12,37 +12,16 @@ object _CastOptRefBranch extends DatomicGenBase("CastOptRefBranch", "/query/cast
        |
        |import java.util.{ArrayList => jArrayList, Iterator => jIterator, Map => jMap}
        |import molecule.datalog.core.query.DatomicQueryBase
-       |import scala.annotation.tailrec
        |
        |
        |trait $fileName_ { self: DatomicQueryBase =>
        |
-       |  @tailrec
-       |  final private def resolveArities(
-       |    arities: List[Int],
-       |    casts: List[jIterator[_] => Any],
-       |    pullNested: jIterator[_] => Option[Any],
-       |    acc: List[jIterator[_] => Any],
-       |  ): List[jIterator[_] => Any] = {
-       |    arities match {
-       |      case 1 :: as =>
-       |        resolveArities(as, casts.tail, pullNested, acc :+ casts.head)
-       |
-       |      // Nested
-       |      case -1 :: Nil =>
-       |        resolveArities(Nil, Nil, pullNested, acc :+ pullNested)
-       |
-       |      case _ => acc
-       |    }
-       |  }
-       |
        |  final protected def pullOptRefBranch(
-       |    arities: List[Int],
        |    pullCasts0: List[jIterator[_] => Any],
        |    pullNested: jIterator[_] => Option[Any],
        |    refDepth: Int
        |  ): jIterator[_] => Option[Any] = {
-       |    val pullCasts = resolveArities(arities, pullCasts0, pullNested, Nil)
+       |    val pullCasts = pullCasts0 :+ pullNested
        |    pullCasts.length match {
        |      $pullBranchX
        |    }

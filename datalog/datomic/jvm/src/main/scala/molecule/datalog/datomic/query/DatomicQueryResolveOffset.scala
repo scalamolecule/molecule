@@ -54,7 +54,7 @@ case class DatomicQueryResolveOffset[Tpl](
 
       if (m2q.isOptNested) {
         postAdjustPullCasts()
-        val row2tpl = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0)
+        val row2tpl = m2q.castRow2AnyTpl(m2q.castss.head, 0)
         offsetRaw(sortedRows, fromUntil).forEach { row =>
           tuples += row2tpl(row).asInstanceOf[Tpl]
         }
@@ -62,8 +62,18 @@ case class DatomicQueryResolveOffset[Tpl](
 
       } else if (m2q.nestedOptRef) {
         postAdjustPullCasts()
-//        val row2tpl = m2q.pullOptRefRow2tpl
-        val row2tpl = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0)
+
+
+        println("--- castss --------------------")
+        m2q.castss.map(_.mkString("List(\n  ", ",\n  ", ")")).foreach(println)
+
+//        println("--- pullCasts --------------------")
+//        m2q.pullCasts.foreach(println)
+//
+//        println("--- pullCastss --------------------")
+//        m2q.pullCastss.map(_.mkString("List(\n  ", ",\n  ", ")")).foreach(println)
+
+        val row2tpl = m2q.castRow2AnyTpl(m2q.castss.head, 0)
         offsetRaw(sortedRows, fromUntil).forEach { row =>
 
           println("\n================= ROW: " + row)
@@ -73,11 +83,11 @@ case class DatomicQueryResolveOffset[Tpl](
         (tuples.toList.filterNot(_ == Nil), totalCount, hasMore)
 
       } else {
-        val row2tpl = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0)
+        val row2tpl = m2q.castRow2AnyTpl(m2q.castss.head, 0)
         offsetRaw(sortedRows, fromUntil).forEach { row =>
 
           println("\n================= ROW: " + row)
-          println("================= ROW: " + row.getClass.getSimpleName)
+//          println("================= ROW: " + row.getClass.getSimpleName)
 
           tuples += row2tpl(row).asInstanceOf[Tpl]
         }

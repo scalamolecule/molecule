@@ -7,7 +7,6 @@ import molecule.core.util.JavaConversions
 trait QueryExprMap[Tpl] extends QueryExpr with JavaConversions { self: Model2DatomicQuery[Tpl] with LambdasMap =>
 
   override protected def queryAttrMapMan(attr: AttrMapMan): Unit = {
-    aritiesAttr()
     attrIndex += 1
     val e = es.last
     attr match {
@@ -38,7 +37,6 @@ trait QueryExprMap[Tpl] extends QueryExpr with JavaConversions { self: Model2Dat
   }
 
   override protected def queryAttrMapOpt(attr: AttrMapOpt): Unit = {
-    aritiesAttr()
     attrIndex += 1
     val e = es.last
     attr match {
@@ -293,7 +291,7 @@ trait QueryExprMap[Tpl] extends QueryExpr with JavaConversions { self: Model2Dat
       where += s"[(empty? $v4)]" -> wClause
     } else {
       // Get all
-      mapAttr(attr, e, v, resMap, true)
+      mapAttr(attr, e, v, resMap, false)
     }
   }
 

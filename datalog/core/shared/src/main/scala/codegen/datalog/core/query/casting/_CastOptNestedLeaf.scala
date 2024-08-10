@@ -11,39 +11,17 @@ object _CastOptNestedLeaf extends DatomicGenBase("CastOptNestedLeaf", "/query/ca
        |package molecule.datalog.core.query.casting
        |
        |import java.util.{Collections, Comparator, ArrayList => jArrayList, Iterator => jIterator, List => jList, Map => jMap}
-       |import molecule.core.query.Model2QueryBase
        |import molecule.datalog.core.query.DatomicQueryBase
-       |import scala.annotation.tailrec
        |import scala.collection.mutable.ListBuffer
+       |import scala.util.control.NonFatal
        |
        |
-       |trait $fileName_
-       |  extends CastRow2Tpl_ { self: Model2QueryBase with DatomicQueryBase =>
+       |trait $fileName_ { self: DatomicQueryBase =>
        |
        |  val rowList = new ListBuffer[Any]
        |
-       |  @tailrec
-       |  final private def resolveArities(
-       |    arities: List[Int],
-       |    casts: List[jIterator[_] => Any],
-       |    acc: List[jIterator[_] => Any],
-       |  ): List[jIterator[_] => Any] = {
-       |    arities match {
-       |      case 1 :: as =>
-       |        resolveArities(as, casts.tail, acc :+ casts.head)
-       |
-       |      // Nested
-       |      case -1 :: Nil =>
-       |        resolveArities(Nil, casts.tail, acc :+ casts.head)
-       |
-       |      case _ => acc
-       |    }
-       |  }
-       |
-       |
-       |  final protected def pullLeaf(
-       |    arities: List[Int],
-       |    pullCasts0: List[jIterator[_] => Any],
+       |  final protected def pullOptNestedLeaf(
+       |    pullCasts: List[jIterator[_] => Any],
        |    pullSorts: List[Int => (Row, Row) => Int]
        |  ): jIterator[_] => List[Any] = {
        |    val optComparator = {
@@ -66,7 +44,7 @@ object _CastOptNestedLeaf extends DatomicGenBase("CastOptNestedLeaf", "/query/ca
        |        )
        |      } else None
        |    }
-       |    val pullCasts     = resolveArities(arities, pullCasts0, Nil)
+       |
        |    pullCasts.length match {
        |      $pullLeafX
        |    }

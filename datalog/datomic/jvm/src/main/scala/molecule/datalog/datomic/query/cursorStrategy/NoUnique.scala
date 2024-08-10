@@ -33,7 +33,7 @@ case class NoUnique[Tpl](
 
     val identifyTpl = (tpl: Tpl) => tpl.hashCode()
     val identifyRow = (_: Unit) => {
-      val row2AnyTpl = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0)
+      val row2AnyTpl = m2q.castRow2AnyTpl(m2q.castss.head, 0)
       (row: m2q.Row) => row2AnyTpl(row).hashCode()
     }
     paginateFromIdentifiers(

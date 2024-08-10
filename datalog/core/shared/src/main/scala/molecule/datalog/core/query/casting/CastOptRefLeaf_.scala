@@ -7,14 +7,12 @@ import molecule.datalog.core.query.DatomicQueryBase
 
 trait CastOptRefLeaf_ { self: DatomicQueryBase =>
 
-
   final protected def pullOptRefLeaf(
     pullCasts: List[jIterator[_] => Any]
   ): jIterator[_] => Option[Any] = {
 
     println("L  pullCasts --------------------")
     pullCasts.foreach(println)
-
 
     pullCasts.length match {
       case 1  => pullLeaf1(pullCasts)

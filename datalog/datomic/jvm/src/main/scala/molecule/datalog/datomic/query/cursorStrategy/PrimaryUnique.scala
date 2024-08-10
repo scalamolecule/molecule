@@ -1,6 +1,5 @@
 package molecule.datalog.datomic.query.cursorStrategy
 
-import java.util.Base64
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.ops.ModelTransformations_
@@ -66,7 +65,7 @@ case class PrimaryUnique[Tpl](
 
         if (m2q.isOptNested) {
           postAdjustPullCasts()
-          val row2tpl = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0)
+          val row2tpl = m2q.castRow2AnyTpl(m2q.castss.head, 0)
           sortedRows.subList(0, limitAbs).forEach(row =>
             tuples += row2tpl(row).asInstanceOf[Tpl]
           )
@@ -76,8 +75,7 @@ case class PrimaryUnique[Tpl](
 
         } else if (m2q.nestedOptRef) {
           postAdjustPullCasts()
-//          val row2tpl = m2q.pullOptRefRow2tpl
-          val row2tpl = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0)
+          val row2tpl = m2q.castRow2AnyTpl(m2q.castss.head, 0)
           sortedRows.subList(0, limitAbs).forEach(row =>
             tuples += row2tpl(row).asInstanceOf[Tpl]
           )
@@ -86,7 +84,7 @@ case class PrimaryUnique[Tpl](
           (tpls, cursor, hasMore)
 
         } else {
-          val row2tpl = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0)
+          val row2tpl = m2q.castRow2AnyTpl(m2q.castss.head, 0)
           sortedRows.subList(0, limitAbs).forEach(row =>
             tuples += row2tpl(row).asInstanceOf[Tpl]
           )

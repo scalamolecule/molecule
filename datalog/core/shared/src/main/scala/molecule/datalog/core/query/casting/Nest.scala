@@ -2,13 +2,10 @@ package molecule.datalog.core.query.casting
 
 import java.lang.{Long => jLong}
 import java.util.{ArrayList => jArrayList}
-import molecule.core.query.Model2Query
 import molecule.datalog.core.query.DatomicQueryBase
 
 
-trait Nest[Tpl] { self: Model2Query
-  with DatomicQueryBase
-  with CastNestedBranch_ =>
+trait Nest[Tpl] { self: DatomicQueryBase with CastNestedBranch_ with CastRow2AnyTpl_ =>
 
   private var row    : Row = new jArrayList[AnyRef]()
   private var prevRow: Row = new jArrayList[AnyRef]()
@@ -37,30 +34,30 @@ trait Nest[Tpl] { self: Model2Query
 
   // First attr index for each level
   private lazy val i0 = nestedLevels
-  private lazy val i1 = i0 + aritiess.head.count(_ == 0)
-  private lazy val i2 = i1 + aritiess(1).count(_ == 0)
-  private lazy val i3 = i2 + aritiess(2).count(_ == 0)
-  private lazy val i4 = i3 + aritiess(3).count(_ == 0)
-  private lazy val i5 = i4 + aritiess(4).count(_ == 0)
-  private lazy val i6 = i5 + aritiess(5).count(_ == 0)
-  private lazy val i7 = i6 + aritiess(6).count(_ == 0)
+  private lazy val i1 = i0 + castss.head.length
+  private lazy val i2 = i1 + castss(1).length
+  private lazy val i3 = i2 + castss(2).length
+  private lazy val i4 = i3 + castss(3).length
+  private lazy val i5 = i4 + castss(4).length
+  private lazy val i6 = i5 + castss(5).length
+  private lazy val i7 = i6 + castss(6).length
 
   private lazy val rowIndexTx                          = row.size()
-  private lazy val tplBranch0: (Row, List[Any]) => Tpl = castBranch[Tpl](aritiess(0), castss(0), i0, rowIndexTx)
-  private lazy val tplBranch1: (Row, List[Any]) => Any = castBranch[Any](aritiess(1), castss(1), i1, 0)
-  private lazy val tplBranch2: (Row, List[Any]) => Any = castBranch[Any](aritiess(2), castss(2), i2, 0)
-  private lazy val tplBranch3: (Row, List[Any]) => Any = castBranch[Any](aritiess(3), castss(3), i3, 0)
-  private lazy val tplBranch4: (Row, List[Any]) => Any = castBranch[Any](aritiess(4), castss(4), i4, 0)
-  private lazy val tplBranch5: (Row, List[Any]) => Any = castBranch[Any](aritiess(5), castss(5), i5, 0)
-  private lazy val tplBranch6: (Row, List[Any]) => Any = castBranch[Any](aritiess(6), castss(6), i6, 0)
+  private lazy val tplBranch0: (Row, List[Any]) => Tpl = castBranch[Tpl](castss(0), i0)
+  private lazy val tplBranch1: (Row, List[Any]) => Any = castBranch[Any](castss(1), i1)
+  private lazy val tplBranch2: (Row, List[Any]) => Any = castBranch[Any](castss(2), i2)
+  private lazy val tplBranch3: (Row, List[Any]) => Any = castBranch[Any](castss(3), i3)
+  private lazy val tplBranch4: (Row, List[Any]) => Any = castBranch[Any](castss(4), i4)
+  private lazy val tplBranch5: (Row, List[Any]) => Any = castBranch[Any](castss(5), i5)
+  private lazy val tplBranch6: (Row, List[Any]) => Any = castBranch[Any](castss(6), i6)
 
-  private lazy val tplLeaf1: Row => Any = castRow2AnyTpl(aritiess(1), castss(1), i1)
-  private lazy val tplLeaf2: Row => Any = castRow2AnyTpl(aritiess(2), castss(2), i2)
-  private lazy val tplLeaf3: Row => Any = castRow2AnyTpl(aritiess(3), castss(3), i3)
-  private lazy val tplLeaf4: Row => Any = castRow2AnyTpl(aritiess(4), castss(4), i4)
-  private lazy val tplLeaf5: Row => Any = castRow2AnyTpl(aritiess(5), castss(5), i5)
-  private lazy val tplLeaf6: Row => Any = castRow2AnyTpl(aritiess(6), castss(6), i6)
-  private lazy val tplLeaf7: Row => Any = castRow2AnyTpl(aritiess(7), castss(7), i7)
+  private lazy val tplLeaf1: Row => Any = castRow2AnyTpl(castss(1), i1)
+  private lazy val tplLeaf2: Row => Any = castRow2AnyTpl(castss(2), i2)
+  private lazy val tplLeaf3: Row => Any = castRow2AnyTpl(castss(3), i3)
+  private lazy val tplLeaf4: Row => Any = castRow2AnyTpl(castss(4), i4)
+  private lazy val tplLeaf5: Row => Any = castRow2AnyTpl(castss(5), i5)
+  private lazy val tplLeaf6: Row => Any = castRow2AnyTpl(castss(6), i6)
+  private lazy val tplLeaf7: Row => Any = castRow2AnyTpl(castss(7), i7)
 
   private var acc0: List[Tpl] = List.empty[Tpl]
   private var acc1: List[Any] = List.empty[Any]
@@ -130,6 +127,12 @@ trait Nest[Tpl] { self: Model2Query
 
 
   final private def rows2nested2(rows: jArrayList[Row]): List[Tpl] = {
+
+
+    println("--- castss --------------------")
+    castss.map(_.mkString("List(\n  ", ",\n  ", ")")).foreach(println)
+
+
     if (rows.size == 1) {
       row = rows.get(0)
       List(tplBranch0(row,

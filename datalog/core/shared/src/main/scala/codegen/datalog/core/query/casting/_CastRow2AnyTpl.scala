@@ -10,43 +10,21 @@ object _CastRow2AnyTpl extends DatomicGenBase("CastRow2AnyTpl", "/query/casting"
     s"""// GENERATED CODE ********************************
        |package molecule.datomic.query.casting
        |
-       |import molecule.core.query.Model2Query
-       |import molecule.datomic.query.DatomicQueryBase
-       |import scala.annotation.tailrec
+       |import molecule.datalog.core.query.DatomicQueryBase
        |
        |
-       |trait $fileName_[Tpl] { self: Model2Query with DatomicQueryBase =>
-       |
-       |  @tailrec
-       |  final private def resolveArities(
-       |    arities: List[Int],
-       |    casts: List[AnyRef => AnyRef],
-       |    attrIndex: AttrIndex,
-       |    acc: List[Row => Any]
-       |  ): List[Row => Any] = {
-       |    arities match {
-       |      case 0 :: as =>
-       |        // Attribute
-       |        val cast = (row: Row) => casts.head(row.get(attrIndex))
-       |        resolveArities(as, casts.tail, attrIndex + 1, acc :+ cast)
-       |
-       |      case -2 :: as =>
-       |        // Optional ref data
-       |        val cast = (row: Row) => casts.head(row.get(attrIndex))
-       |        resolveArities(as, casts.tail, 0, acc :+ cast)
-       |
-       |      case _ => acc
-       |    }
-       |  }
+       |trait $fileName_[Tpl] { self: DatomicQueryBase =>
        |
        |  final protected def castRow2AnyTpl(
-       |    arities: List[List[Int]],
        |    casts: List[AnyRef => AnyRef],
        |    attrIndex: AttrIndex,
        |    nested: Option[NestedTpls]
        |  ): Row => Any = {
-       |    val casters = resolveArities(arities, casts, attrIndex, Nil)
-       |    arities.length match {
+       |    val casters: List[Row => Any] = casts.zipWithIndex.map {
+       |      case (cast, i) =>
+       |        (row: Row) => cast(row.get(attrIndex + i))
+       |    }
+       |    casters.length match {
        |      $resolveX
        |    }
        |  }

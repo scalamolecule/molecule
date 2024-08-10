@@ -1,43 +1,20 @@
 // GENERATED CODE ********************************
 package molecule.datalog.core.query.casting
 
-import molecule.core.query.Model2Query
 import molecule.datalog.core.query.DatomicQueryBase
-import scala.annotation.tailrec
 
 
-trait CastRow2AnyTpl_ { self: Model2Query with DatomicQueryBase =>
-
-  @tailrec
-  final private def resolveArities(
-    arities: List[Int],
-    casts: List[AnyRef => AnyRef],
-    attrIndex: AttrIndex,
-    acc: List[Row => Any]
-  ): List[Row => Any] = {
-    arities match {
-      case 0 :: as =>
-        // Attribute
-        val cast = (row: Row) => casts.head(row.get(attrIndex))
-        resolveArities(as, casts.tail, attrIndex + 1, acc :+ cast)
-
-      case -2 :: as =>
-        // Optional ref data
-        val cast = (row: Row) => casts.head(row.get(attrIndex))
-        resolveArities(as, casts.tail, 0, acc :+ cast)
-
-      case _ => acc
-    }
-  }
+trait CastRow2AnyTpl_ { self: DatomicQueryBase =>
 
   final def castRow2AnyTpl(
-    arities: List[Int],
     casts: List[AnyRef => AnyRef],
     attrIndex: AttrIndex
   ): Row => Any = {
-    //    println("++++++++++++++")
-    val casters = resolveArities(arities, casts, attrIndex, Nil)
-    arities.length match {
+    val casters: List[Row => Any] = casts.zipWithIndex.map {
+      case (cast, i) =>
+        (row: Row) => cast(row.get(attrIndex + i))
+    }
+    casters.length match {
       case 1  => cast1(casters)
       case 2  => cast2(casters)
       case 3  => cast3(casters)

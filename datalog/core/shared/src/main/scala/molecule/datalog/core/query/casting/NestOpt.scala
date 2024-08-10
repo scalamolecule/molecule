@@ -30,48 +30,48 @@ trait NestOpt
 
   private lazy val pullBranch1: jIterator[_] => List[Any] = {
     if (levels == 1)
-      pullOptNestedLeaf(aritiess(1), pullCasts1, pullSorts1)
+      pullOptNestedLeaf(pullCasts1, pullSorts1)
     else
-      pullOptNestedBranch(aritiess(1), pullCasts1, pullSorts1, pullBranch2, refDepths(1))
+      pullOptNestedBranch(pullCasts1, pullSorts1, pullBranch2, refDepths(1))
   }
 
   private lazy val pullBranch2: jIterator[_] => List[Any] = {
     if (levels == 2)
-      pullOptNestedLeaf(aritiess(2), pullCasts2, pullSorts2)
+      pullOptNestedLeaf(pullCasts2, pullSorts2)
     else
-      pullOptNestedBranch(aritiess(2), pullCasts2, pullSorts2, pullBranch3, refDepths(2))
+      pullOptNestedBranch(pullCasts2, pullSorts2, pullBranch3, refDepths(2))
   }
 
   private lazy val pullBranch3: jIterator[_] => List[Any] = {
     if (levels == 3)
-      pullOptNestedLeaf(aritiess(3), pullCasts3, pullSorts3)
+      pullOptNestedLeaf(pullCasts3, pullSorts3)
     else
-      pullOptNestedBranch(aritiess(3), pullCasts3, pullSorts3, pullBranch4, refDepths(3))
+      pullOptNestedBranch(pullCasts3, pullSorts3, pullBranch4, refDepths(3))
   }
 
   private lazy val pullBranch4: jIterator[_] => List[Any] = {
     if (levels == 4)
-      pullOptNestedLeaf(aritiess(4), pullCasts4, pullSorts4)
+      pullOptNestedLeaf(pullCasts4, pullSorts4)
     else
-      pullOptNestedBranch(aritiess(4), pullCasts4, pullSorts4, pullBranch5, refDepths(4))
+      pullOptNestedBranch(pullCasts4, pullSorts4, pullBranch5, refDepths(4))
   }
 
   private lazy val pullBranch5: jIterator[_] => List[Any] = {
     if (levels == 5)
-      pullOptNestedLeaf(aritiess(5), pullCasts5, pullSorts5)
+      pullOptNestedLeaf(pullCasts5, pullSorts5)
     else
-      pullOptNestedBranch(aritiess(5), pullCasts5, pullSorts5, pullBranch6, refDepths(5))
+      pullOptNestedBranch(pullCasts5, pullSorts5, pullBranch6, refDepths(5))
   }
 
   private lazy val pullBranch6: jIterator[_] => List[Any] = {
     if (levels == 6)
-      pullOptNestedLeaf(aritiess(6), pullCasts6, pullSorts6)
+      pullOptNestedLeaf(pullCasts6, pullSorts6)
     else
-      pullOptNestedBranch(aritiess(6), pullCasts6, pullSorts6, pullBranch7, refDepths(6))
+      pullOptNestedBranch(pullCasts6, pullSorts6, pullBranch7, refDepths(6))
   }
 
   private lazy val pullBranch7: jIterator[_] => List[Any] = {
-    pullOptNestedLeaf(aritiess(7), pullCasts7, pullSorts7)
+    pullOptNestedLeaf(pullCasts7, pullSorts7)
   }
 
   protected lazy val pullOptNestedData: AnyRef => AnyRef = {

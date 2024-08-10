@@ -2,34 +2,12 @@
 package molecule.datalog.core.query.casting
 
 import java.util.{Collections, Comparator, ArrayList => jArrayList, Iterator => jIterator, List => jList, Map => jMap}
-import molecule.core.query.Model2Query
 import molecule.datalog.core.query.DatomicQueryBase
-import scala.annotation.tailrec
 
 
-trait CastOptNestedBranch_ { self: Model2Query with DatomicQueryBase =>
-
-  @tailrec
-  final private def resolveArities(
-    arities: List[Int],
-    casts: List[jIterator[_] => Any],
-    pullNested: jIterator[_] => List[Any],
-    acc: List[jIterator[_] => Any],
-  ): List[jIterator[_] => Any] = {
-    arities match {
-      case 0 :: as =>
-        resolveArities(as, casts.tail, pullNested, acc :+ casts.head)
-
-      // Nested
-      case -1 :: Nil =>
-        resolveArities(Nil, Nil, pullNested, acc :+ pullNested)
-
-      case _ => acc
-    }
-  }
+trait CastOptNestedBranch_ { self: DatomicQueryBase =>
 
   final protected def pullOptNestedBranch(
-    arities: List[Int],
     pullCasts0: List[jIterator[_] => Any],
     pullSorts: List[Int => (Row, Row) => Int],
     pullNested: jIterator[_] => List[Any],
@@ -55,7 +33,7 @@ trait CastOptNestedBranch_ { self: Model2Query with DatomicQueryBase =>
         )
       } else None
     }
-    val pullCasts     = resolveArities(arities, pullCasts0, pullNested, Nil)
+    val pullCasts     = pullCasts0 :+ pullNested
     pullCasts.length match {
       case 1  => pullBranch1(pullCasts, optComparator, refDepth)
       case 2  => pullBranch2(pullCasts, optComparator, refDepth)

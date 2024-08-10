@@ -32,34 +32,12 @@ trait QueryExprRef[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] =>
 
   private var firstOptRef = true
 
-  protected def queryOptRefOLD(ref: Ref, optionalElements: List[Element]): Unit = {
-    nestedOptRef = true
-    hasOptRef = true
-    aritiesNested()
-
-//    println(s"--- $firstOptRef")
-//    println(optionalElements.last)
-
-    firstOptRef = false
-
-    // Add opt ref caster
-    castss = (castss.head :+ pullOptRefData) +: castss.tail
-
-    // Start new level of casts
-    castss = castss :+ Nil
-
-    resolveOptRefElements(ref, optionalElements)
-    firstOptRef = true
-  }
-
   override protected def queryOptRef(ref: Ref, optionalElements: List[Element]): Unit = {
     nestedOptRef = true
     hasOptRef = true
-//    aritiesNested()
-    aritiesOptRef()
 
-    //    println(s"--- $firstOptRef")
-    //    println(optionalElements.last)
+    println(s"--- $firstOptRef")
+    println(optionalElements.last)
 
     firstOptRef = false
 
@@ -70,8 +48,6 @@ trait QueryExprRef[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] =>
     castss = castss :+ Nil
 
     resolveOptRefElements(ref, optionalElements)
-//    castss = (castss.head :+ pullOptRefData) +: castss.tail
-
 
     firstOptRef = true
   }
@@ -89,10 +65,6 @@ trait QueryExprRef[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] =>
 
     // On top level, move past nested pull date to tx metadata (if any)
     attrIndex += 1
-
-//    aritiesNested()
-    aritiesOptRef()
-
 
     val e        = es.last
     val nestedId = "?id" + nestedIds.size
@@ -133,7 +105,6 @@ trait QueryExprRef[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] =>
       noMixedNestedModes
     }
     validateRefNs(ref, nestedElements)
-    aritiesNested()
 
     val (e, refAttr, refId) = (es.last, s":${ref.ns}/${ref.refAttr}", vv)
     varPath = varPath ++ List(refAttr, refId)

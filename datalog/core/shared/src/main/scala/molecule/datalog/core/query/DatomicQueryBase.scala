@@ -54,10 +54,9 @@ trait DatomicQueryBase
   final val wherePost = new ArrayBuffer[(String, Int)]
 
   // Input args and cast lambdas
-  final val preArgs  = new ArrayBuffer[AnyRef]
-  final val args     = new ArrayBuffer[AnyRef]
-  final var castss   = List(List.empty[AnyRef => AnyRef])
-  final var aritiess = List(List.empty[Int])
+  final val preArgs = new ArrayBuffer[AnyRef]
+  final val args    = new ArrayBuffer[AnyRef]
+  final var castss  = List(List.empty[AnyRef => AnyRef])
 
   // Sorting
   final var sortss    = List(List.empty[(Int, Int => (Row, Row) => Int)])
@@ -84,7 +83,7 @@ trait DatomicQueryBase
 
   // Paths
   final var varPath: List[String] = List.empty[String]
-  final var path        = List.empty[String]
+  final var path                  = List.empty[String]
 
 
   final protected def addCast(cast: AnyRef => AnyRef): Unit = {
@@ -105,24 +104,6 @@ trait DatomicQueryBase
   }
   final protected def replaceSort(sorter: Option[(Int, Int => (Row, Row) => Int)]): Unit = {
     sorter.foreach(s => sortss = sortss.init :+ (sortss.last.init :+ s))
-  }
-
-  final protected def aritiesNested(): Unit = {
-    val newLevel           = Nil
-    val curLevel           = aritiess.last
-    val curLevelWithNested = curLevel :+ -1
-    aritiess = (aritiess.init :+ curLevelWithNested) :+ newLevel
-  }
-  final protected def aritiesOptRef(): Unit = {
-    val newLevel           = Nil
-    val curLevel           = aritiess.last
-    val curLevelWithNested = curLevel :+ -2
-    aritiess = (aritiess.init :+ curLevelWithNested) :+ newLevel
-  }
-
-  final protected def aritiesAttr(): Unit = {
-    // Add new arity of 1
-    aritiess = aritiess.init :+ (aritiess.last :+ 0)
   }
 
   final def getFlatSorters(

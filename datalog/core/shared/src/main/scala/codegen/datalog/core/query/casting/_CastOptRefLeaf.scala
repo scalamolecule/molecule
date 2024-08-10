@@ -12,34 +12,13 @@ object _CastOptRefLeaf extends DatomicGenBase("CastOptRefLeaf", "/query/casting"
        |
        |import java.util.{ArrayList => jArrayList, Iterator => jIterator, Map => jMap}
        |import molecule.datalog.core.query.DatomicQueryBase
-       |import scala.annotation.tailrec
        |
        |
        |trait $fileName_ { self: DatomicQueryBase =>
        |
-       |  @tailrec
-       |  final private def resolveArities(
-       |    arities: List[Int],
-       |    casts: List[jIterator[_] => Any],
-       |    acc: List[jIterator[_] => Any],
-       |  ): List[jIterator[_] => Any] = {
-       |    arities match {
-       |      case 1 :: as =>
-       |        resolveArities(as, casts.tail, acc :+ casts.head)
-       |
-       |      // Nested
-       |      case -1 :: Nil =>
-       |        resolveArities(Nil, casts.tail, acc :+ casts.head)
-       |
-       |      case _ => acc
-       |    }
-       |  }
-       |
        |  final protected def pullOptRefLeaf(
-       |    arities: List[Int],
-       |    pullCasts0: List[jIterator[_] => Any]
+       |    pullCasts: List[jIterator[_] => Any]
        |  ): jIterator[_] => Option[Any] = {
-       |    val pullCasts = resolveArities(arities, pullCasts0, Nil)
        |    pullCasts.length match {
        |      $pullLeafX
        |    }

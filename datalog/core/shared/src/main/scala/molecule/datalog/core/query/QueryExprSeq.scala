@@ -9,7 +9,6 @@ import scala.reflect.ClassTag
 trait QueryExprSeq[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] with LambdasSeq =>
 
   override protected def queryAttrSeqMan(attr: AttrSeqMan): Unit = {
-    aritiesAttr()
     attrIndex += 1
     val e = es.last
     attr match {
@@ -70,7 +69,6 @@ trait QueryExprSeq[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] with L
   }
 
   override protected def queryAttrSeqOpt(attr: AttrSeqOpt): Unit = {
-    aritiesAttr()
     attrIndex += 1
     val e = es.last
     attr match {
