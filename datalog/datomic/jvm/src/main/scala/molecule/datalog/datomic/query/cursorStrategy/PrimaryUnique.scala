@@ -19,7 +19,7 @@ import scala.collection.mutable.ListBuffer
  * Then we can easily filter by its previous value in either direction.
  *
  * @param elements Molecule model
- * @param optLimit    When going forward from start, use a positive number.
+ * @param optLimit When going forward from start, use a positive number.
  *                 And vice versa from end with a negative number. Can't be zero.
  * @param cursor   Base64 encoded cursor meta information
  * @tparam Tpl Type of each row
@@ -66,23 +66,30 @@ case class PrimaryUnique[Tpl](
 
         if (m2q.isOptNested) {
           postAdjustPullCasts()
-          val row2tpl = m2q.pullOptNestedRow2tpl
-          sortedRows.subList(0, limitAbs).forEach(row => tuples += row2tpl(row))
+          val row2tpl = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0)
+          sortedRows.subList(0, limitAbs).forEach(row =>
+            tuples += row2tpl(row).asInstanceOf[Tpl]
+          )
           val tpls   = if (forward) tuples.toList else tuples.toList.reverse
           val cursor = nextCursorUniques(tpls, tokens)
           (tpls, cursor, hasMore)
 
         } else if (m2q.nestedOptRef) {
           postAdjustPullCasts()
-          val row2tpl = m2q.pullOptRefRow2tpl
-          sortedRows.subList(0, limitAbs).forEach(row => tuples += row2tpl(row))
+//          val row2tpl = m2q.pullOptRefRow2tpl
+          val row2tpl = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0)
+          sortedRows.subList(0, limitAbs).forEach(row =>
+            tuples += row2tpl(row).asInstanceOf[Tpl]
+          )
           val tpls   = if (forward) tuples.toList else tuples.toList.reverse
           val cursor = nextCursorUniques(tpls, tokens)
           (tpls, cursor, hasMore)
 
         } else {
-          val row2tpl = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0, None)
-          sortedRows.subList(0, limitAbs).forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
+          val row2tpl = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0)
+          sortedRows.subList(0, limitAbs).forEach(row =>
+            tuples += row2tpl(row).asInstanceOf[Tpl]
+          )
           val tpls   = if (forward) tuples.toList else tuples.toList.reverse
           val cursor = nextCursorUniques(tpls, tokens)
           (tpls, cursor, hasMore)

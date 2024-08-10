@@ -89,7 +89,7 @@ trait InsertValidationExtraction
         case OptRef(Ref(ns, refAttr, _, _, _, _), optRefElements) =>
           curElements = optRefElements
           getValidators(nsMap, tail, validators :+
-            addOptRef(nsMap, tplIndex, ns, refAttr, optRefElements), tplIndex, Nil)
+            addOptRef(nsMap, tplIndex, ns, refAttr, optRefElements), tplIndex + 1, Nil)
 
         case Nested(Ref(ns, refAttr, _, _, _, _), nestedElements) =>
           curElements = nestedElements
@@ -113,7 +113,7 @@ trait InsertValidationExtraction
     refAttr: String,
     optElements: List[Element]
   ): Product => Seq[InsertError] = {
-    // Recursively validate nested data
+    // Recursively validate optional data
     val validate    = getInsertValidator(nsMap, optElements)
     val fullRefAttr = ns + "." + refAttr
     countValueAttrs(optElements) match {

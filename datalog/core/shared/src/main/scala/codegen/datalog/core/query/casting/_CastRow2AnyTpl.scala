@@ -2,7 +2,7 @@ package codegen.datalog.core.query.casting
 
 import codegen.DatomicGenBase
 
-object _CastRow2Tpl extends DatomicGenBase("CastRow2Tpl", "/query/casting") {
+object _CastRow2AnyTpl extends DatomicGenBase("CastRow2AnyTpl", "/query/casting") {
 
   val content = {
     val resolveX       = (1 to 22).map(i => s"case ${caseN(i)} => cast$i(casters)").mkString("\n      ")
@@ -19,21 +19,21 @@ object _CastRow2Tpl extends DatomicGenBase("CastRow2Tpl", "/query/casting") {
        |
        |  @tailrec
        |  final private def resolveArities(
-       |    arities: List[List[Int]],
+       |    arities: List[Int],
        |    casts: List[AnyRef => AnyRef],
        |    attrIndex: AttrIndex,
-       |    acc: List[Row => Any],
-       |    nested: Option[NestedTpls]
+       |    acc: List[Row => Any]
        |  ): List[Row => Any] = {
        |    arities match {
-       |      case List(1) :: as =>
+       |      case 0 :: as =>
+       |        // Attribute
        |        val cast = (row: Row) => casts.head(row.get(attrIndex))
-       |        resolveArities(as, casts.tail, attrIndex + 1, acc :+ cast, nested)
+       |        resolveArities(as, casts.tail, attrIndex + 1, acc :+ cast)
        |
-       |      // Nested
-       |      case List(-1) :: Nil =>
-       |        val cast = (_: Row) => nested.get
-       |        resolveArities(Nil, casts, 0, acc :+ cast, None)
+       |      case -2 :: as =>
+       |        // Optional ref data
+       |        val cast = (row: Row) => casts.head(row.get(attrIndex))
+       |        resolveArities(as, casts.tail, 0, acc :+ cast)
        |
        |      case _ => acc
        |    }
@@ -45,7 +45,7 @@ object _CastRow2Tpl extends DatomicGenBase("CastRow2Tpl", "/query/casting") {
        |    attrIndex: AttrIndex,
        |    nested: Option[NestedTpls]
        |  ): Row => Any = {
-       |    val casters = resolveArities(arities, casts, attrIndex, Nil, nested)
+       |    val casters = resolveArities(arities, casts, attrIndex, Nil)
        |    arities.length match {
        |      $resolveX
        |    }

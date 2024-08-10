@@ -21,7 +21,6 @@ trait ResolveOptRefPull[Tpl]
 
 
   final protected def resolveOptRefElements(
-    refId: String,
     ref: Ref,
     optionalElements: List[Element]
   ): Unit = {
@@ -32,12 +31,12 @@ trait ResolveOptRefPull[Tpl]
       attrIndex: Int,
       acc: String
     ): (String, Option[Element], List[Element], Int) = {
-      val indent = "  " * (level + 8)
+      val indent = "  " * (level + 7)
       elements match {
         case head :: tail =>
           head match {
             case a: Attr if a.op != V => throw ModelError(
-              s"Expressions not allowed in optional nested queries (${a.name})."
+              s"Expressions not allowed in optional ref queries (${a.name})."
             )
             case a: AttrOneMan        =>
               resAttrOneMan(a, attrIndex)
@@ -71,17 +70,29 @@ trait ResolveOptRefPull[Tpl]
               resAttrMapOpt(a)
               addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(indent, a))
 
-            case ref: Ref             => (acc, Some(ref), tail, attrIndex)
-            case backRef: BackRef     => (acc, Some(backRef), tail, attrIndex)
-            case optRef: OptRef       => (acc, Some(optRef), Nil, attrIndex)
-            case nestedOpt: OptNested => (acc, Some(nestedOpt), Nil, attrIndex)
-            case _: Nested            => noMixedNestedModes
+            case ref: Ref         => (acc, Some(ref), tail, attrIndex)
+            case backRef: BackRef => (acc, Some(backRef), tail, attrIndex)
+            case optRef: OptRef   => (acc, Some(optRef), Nil, attrIndex)
+
+            case nestedOpt: OptNested =>
+              if (isManNested) {
+                noMixedNestedModes
+              }
+              noCardManyInsideOptRef()
+              (acc, Some(nestedOpt), Nil, attrIndex)
+
+            case _: Nested =>
+              if (isOptNested) {
+                noMixedNestedModes
+              }
+              noCardManyInsideOptRef()
+              noMixedNestedModes
 
             case a: AttrOneTac => throw ModelError(
-              s"Tacit attributes not allowed in optional nested queries (${a.name}_).")
+              s"Tacit attributes not allowed in optional ref queries (${a.name}_).")
 
             case other => throw ModelError(
-              "Unexpected element in optional nested molecule: " + other
+              "Unexpected element in optional ref molecule: " + other
             )
           }
         case Nil          => (acc, None, Nil, attrIndex)
@@ -102,63 +113,33 @@ trait ResolveOptRefPull[Tpl]
           val res =
             s"""
                |$indent{($refAttr :default "$none") [$acc1
-               |$indent  ]
-               |$indent}""".stripMargin
+               |$indent]}""".stripMargin
           (res, append)
 
         case (acc1, Some(ref1@Ref(_, _, _, CardOne, _, _)), tail, attrIndex1) =>
           refDepths = refDepths.init :+ refDepths.last + 1
           // Continue increasing attrIndex after refs
           val (attrs, append1) = resolvePullRef(ref1, tail, level + 1, attrIndex1, "")
-          val res              = s"""\n$indent{($refAttr :limit nil :default "$none") [$acc1$attrs]}"""
+          val res              =
+            s"""
+               |$indent{($refAttr :default "$none") [$acc1$attrs
+               |$indent]}""".stripMargin
           (res, append + append1)
 
-        case (_, Some(ref: Ref), _, _) => throw ModelError(
-          s"Only cardinality-one refs allowed in optional nested queries (${ref.ns}.${ref.refAttr})."
-        )
-
-        case (acc1, Some(BackRef(backRef, _, _)), tail, attrIndex1) =>
-          // Finish initialization of previous ref before stepping back
-          val prevRef = s"""\n$indent{($refAttr :limit nil :default "$none") [$acc1"""
-
-          @tailrec
-          def rec(elements: List[Element], level1: Int): (List[Element], String, String) = elements.head match {
-            case ref1: Ref  =>
-              // End previous ref
-              val (attrs, append1) = resolvePullRef(ref1, elements.tail, level1, attrIndex1, "]}")
-              (Nil, prevRef, append + attrs + append1)
-            case _: BackRef => rec(elements.tail, level1 - 1)
-            case a: Attr    => throw ModelError(
-              s"Expected ref after backref _$backRef. " +
-                s"Please add attribute ${a.ns}.${a.attr} to initial namespace ${a.ns} " +
-                s"instead of after backref _$backRef."
-            )
-            case other      => unexpectedElement(other)
-          }
-          val (_, acc2, append2) = rec(tail, level)
-          (acc2, append2)
-
-        case (acc1, Some(OptNested(ref1, elements1)), _, _) =>
-          // New sub level
-          pullCastss = pullCastss :+ pullCasts.toList
-          pullCasts.clear()
-          pullSortss = pullSortss :+ pullSorts.sortBy(_._1).map(_._2).toList
-          pullSorts.clear()
-          refDepths = refDepths :+ 0
-          aritiesNested()
-          val (attrs, append1) = resolvePullRef(ref1, elements1, level + 1, 0, "")
-          val res              = s"""\n$indent{($refAttr :limit nil :default "$none") [$acc1$attrs$append1]}"""
-          (res, "")
+        case (_, Some(ref: Ref), _, _) =>
+          throw ModelError(
+            s"Only cardinality-one refs allowed in optional ref queries (${ref.ns}.${ref.refAttr})."
+          )
 
         case (acc1, Some(OptRef(ref1, elements1)), _, _) =>
-          // New sub level
           pullCastss = pullCastss :+ pullCasts.toList
           pullCasts.clear()
           pullSortss = pullSortss :+ pullSorts.sortBy(_._1).map(_._2).toList
           pullSorts.clear()
           refDepths = refDepths :+ 0
+
           aritiesNested()
-          val (attrs, append1) = resolvePullRef(ref1, elements1, level + 2, 0, "")
+          val (attrs, append1) = resolvePullRef(ref1, elements1, level + 1, 0, "")
           val res              =
             s"""
                |$indent{($refAttr :default "$none") [$acc1$attrs$append1
@@ -172,16 +153,14 @@ trait ResolveOptRefPull[Tpl]
     }
 
     val (attrs, append) = resolvePullRef(ref, optionalElements, 0, 0, "")
-
-
-//    println("------- attrs :  " + attrs)
-//    println("------- append:  " + append)
+    val e               = es.last
+    val refId           = "?id" + (castss.size - 1)
     find +=
       s"""(
          |          pull $refId [$attrs$append
          |          ]
-         |        )
-         |       """.stripMargin
+         |        )""".stripMargin
+    where += s"[(identity $e) $refId]" -> wGround
   }
 
 
@@ -201,7 +180,7 @@ trait ResolveOptRefPull[Tpl]
            |$indent{(:$ns/$attr :limit nil :default "$none") [
            |$indent  :$ns.$attr/k_ :$ns.$attr/v_]}""".stripMargin
 
-      case _          =>
+      case _ =>
         s"""
            |$indent(:${a.ns}/${a.attr} :default "$none")""".stripMargin
     }

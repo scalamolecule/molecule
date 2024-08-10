@@ -1,122 +1,79 @@
-//package molecule.datalog.core.query.casting
-//
-//object OptRefNested extends SqlQueryBase {
-//
-//  final def row2nestedOptions(casters: List[CastTuple]): RS => Any = {
-//    casters.length match {
-//      case 1 => row2nestedOptions0(casters)
-//      case 2 => row2nestedOptions1(casters)
-//      case 3 => row2nestedOptions2(casters)
-//      case 4 => row2nestedOptions3(casters)
-//      case 5 => row2nestedOptions4(casters)
-//      case 6 => row2nestedOptions5(casters)
-//      case 7 => row2nestedOptions6(casters)
-//      case 8 => row2nestedOptions7(casters)
-//    }
-//  }
-//
-//  final private def row2nestedOptions0(casters: List[CastTuple]): RS => Any = {
-//    val leaf: RS => Option[Any] = casters(0).optTupleCaster
-//    (row: RS) =>
-//      leaf(row)
-//  }
-//
-//  final private def row2nestedOptions1(casters: List[CastTuple]): RS => Any = {
-//    val branch0: (RS, Option[Any]) => Option[Any] = casters(0).nestedOptRefCaster
-//    val leaf   : RS => Option[Any]                = casters(1).optTupleCaster
-//    (row: RS) =>
-//      branch0(row,
-//        leaf(row))
-//  }
-//
-//  final private def row2nestedOptions2(casters: List[CastTuple]): RS => Any = {
-//    val branch0: (RS, Option[Any]) => Option[Any] = casters(0).nestedOptRefCaster
-//    val branch1: (RS, Option[Any]) => Option[Any] = casters(1).nestedOptRefCaster
-//    val leaf   : RS => Option[Any]                = casters(2).optTupleCaster
-//    (row: RS) => {
-//      branch0(row,
-//        branch1(row,
-//          leaf(row)))
-//    }
-//  }
-//
-//  final private def row2nestedOptions3(casters: List[CastTuple]): RS => Any = {
-//    val branch0: (RS, Option[Any]) => Option[Any] = casters(0).nestedOptRefCaster
-//    val branch1: (RS, Option[Any]) => Option[Any] = casters(1).nestedOptRefCaster
-//    val branch2: (RS, Option[Any]) => Option[Any] = casters(2).nestedOptRefCaster
-//    val leaf   : RS => Option[Any]                = casters(3).optTupleCaster
-//    (row: RS) =>
-//      branch0(row,
-//        branch1(row,
-//          branch2(row,
-//            leaf(row))))
-//  }
-//
-//  final private def row2nestedOptions4(casters: List[CastTuple]): RS => Any = {
-//    val branch0: (RS, Option[Any]) => Option[Any] = casters(0).nestedOptRefCaster
-//    val branch1: (RS, Option[Any]) => Option[Any] = casters(1).nestedOptRefCaster
-//    val branch2: (RS, Option[Any]) => Option[Any] = casters(2).nestedOptRefCaster
-//    val branch3: (RS, Option[Any]) => Option[Any] = casters(3).nestedOptRefCaster
-//    val leaf   : RS => Option[Any]                = casters(4).optTupleCaster
-//    (row: RS) =>
-//      branch0(row,
-//        branch1(row,
-//          branch2(row,
-//            branch3(row,
-//              leaf(row)))))
-//  }
-//
-//  final private def row2nestedOptions5(casters: List[CastTuple]): RS => Any = {
-//    val branch0: (RS, Option[Any]) => Option[Any] = casters(0).nestedOptRefCaster
-//    val branch1: (RS, Option[Any]) => Option[Any] = casters(1).nestedOptRefCaster
-//    val branch2: (RS, Option[Any]) => Option[Any] = casters(2).nestedOptRefCaster
-//    val branch3: (RS, Option[Any]) => Option[Any] = casters(3).nestedOptRefCaster
-//    val branch4: (RS, Option[Any]) => Option[Any] = casters(4).nestedOptRefCaster
-//    val leaf   : RS => Option[Any]                = casters(5).optTupleCaster
-//    (row: RS) =>
-//      branch0(row,
-//        branch1(row,
-//          branch2(row,
-//            branch3(row,
-//              branch4(row,
-//                leaf(row))))))
-//  }
-//
-//  final private def row2nestedOptions6(casters: List[CastTuple]): RS => Any = {
-//    val branch0: (RS, Option[Any]) => Option[Any] = casters(0).nestedOptRefCaster
-//    val branch1: (RS, Option[Any]) => Option[Any] = casters(1).nestedOptRefCaster
-//    val branch2: (RS, Option[Any]) => Option[Any] = casters(2).nestedOptRefCaster
-//    val branch3: (RS, Option[Any]) => Option[Any] = casters(3).nestedOptRefCaster
-//    val branch4: (RS, Option[Any]) => Option[Any] = casters(4).nestedOptRefCaster
-//    val branch5: (RS, Option[Any]) => Option[Any] = casters(5).nestedOptRefCaster
-//    val leaf   : RS => Option[Any]                = casters(6).optTupleCaster
-//    (row: RS) =>
-//      branch0(row,
-//        branch1(row,
-//          branch2(row,
-//            branch3(row,
-//              branch4(row,
-//                branch5(row,
-//                  leaf(row)))))))
-//  }
-//
-//  final private def row2nestedOptions7(casters: List[CastTuple]): RS => Any = {
-//    val branch0: (RS, Option[Any]) => Option[Any] = casters(0).nestedOptRefCaster
-//    val branch1: (RS, Option[Any]) => Option[Any] = casters(1).nestedOptRefCaster
-//    val branch2: (RS, Option[Any]) => Option[Any] = casters(2).nestedOptRefCaster
-//    val branch3: (RS, Option[Any]) => Option[Any] = casters(3).nestedOptRefCaster
-//    val branch4: (RS, Option[Any]) => Option[Any] = casters(4).nestedOptRefCaster
-//    val branch5: (RS, Option[Any]) => Option[Any] = casters(5).nestedOptRefCaster
-//    val branch6: (RS, Option[Any]) => Option[Any] = casters(6).nestedOptRefCaster
-//    val leaf   : RS => Option[Any]                = casters(7).optTupleCaster
-//    (row: RS) =>
-//      branch0(row,
-//        branch1(row,
-//          branch2(row,
-//            branch3(row,
-//              branch4(row,
-//                branch5(row,
-//                  branch6(row,
-//                    leaf(row))))))))
-//  }
-//}
+package molecule.datalog.core.query.casting
+
+import java.util.{Iterator => jIterator, Map => jMap}
+import molecule.datalog.core.query.DatomicQueryBase
+
+
+trait OptRefNested
+  extends CastOptRefBranch_
+    with CastOptRefLeaf_
+    with CastRow2AnyTpl_
+    with DatomicQueryBase {
+
+  private lazy val levels = pullCastss.length
+
+  private lazy val pullCasts1 = pullCastss.head
+  private lazy val pullCasts2 = pullCastss(1)
+  private lazy val pullCasts3 = pullCastss(2)
+  private lazy val pullCasts4 = pullCastss(3)
+  private lazy val pullCasts5 = pullCastss(4)
+  private lazy val pullCasts6 = pullCastss(5)
+  private lazy val pullCasts7 = pullCastss(6)
+
+  private lazy val pullBranch1: jIterator[_] => Option[Any] = {
+    if (levels == 1)
+      pullOptRefLeaf(pullCasts1)
+    else
+      pullOptRefBranch(aritiess(1), pullCasts1, pullBranch2, refDepths(1))
+  }
+
+  private lazy val pullBranch2: jIterator[_] => Option[Any] = {
+    if (levels == 2)
+      pullOptRefLeaf(pullCasts2)
+    else
+      pullOptRefBranch(aritiess(2), pullCasts2, pullBranch3, refDepths(2))
+  }
+
+  private lazy val pullBranch3: jIterator[_] => Option[Any] = {
+    if (levels == 3)
+      pullOptRefLeaf(pullCasts3)
+    else
+      pullOptRefBranch(aritiess(3), pullCasts3, pullBranch4, refDepths(3))
+  }
+
+  private lazy val pullBranch4: jIterator[_] => Option[Any] = {
+    if (levels == 4)
+      pullOptRefLeaf(pullCasts4)
+    else
+      pullOptRefBranch(aritiess(4), pullCasts4, pullBranch5, refDepths(4))
+  }
+
+  private lazy val pullBranch5: jIterator[_] => Option[Any] = {
+    if (levels == 5)
+      pullOptRefLeaf(pullCasts5)
+    else
+      pullOptRefBranch(aritiess(5), pullCasts5, pullBranch6, refDepths(5))
+  }
+
+  private lazy val pullBranch6: jIterator[_] => Option[Any] = {
+    if (levels == 6)
+      pullOptRefLeaf(pullCasts6)
+    else
+      pullOptRefBranch(aritiess(6), pullCasts6, pullBranch7, refDepths(6))
+  }
+
+  private lazy val pullBranch7: jIterator[_] => Option[Any] = {
+    pullOptRefLeaf(pullCasts7)
+  }
+
+  protected lazy val pullOptRefData: AnyRef => AnyRef = {
+    val lambda = (rowValue: AnyRef) => {
+
+      //      println("=== " + rowValue)
+      //      println("=== " + rowValue.asInstanceOf[jMap[_, _]].values.iterator().next)
+      pullBranch1(rowValue.asInstanceOf[jMap[_, _]].values.iterator)
+    }
+    println(s"lambda: " + lambda)
+    lambda
+  }
+}

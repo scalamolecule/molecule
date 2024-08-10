@@ -5,12 +5,13 @@ import molecule.base.ast.CardOne
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.core.query.QueryExpr
-import molecule.datalog.core.query.casting.NestOpt_
+import molecule.datalog.core.query.casting.NestOpt
 
 
-trait QueryExprRef[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] with NestOpt_[Tpl] =>
+trait QueryExprRef[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] =>
 
   override protected def queryRef(ref: Ref, tail: List[Element]): Unit = {
+    checkOnlyOptRef()
     val (e, refAttr, refId) = (es.last, s":${ref.ns}/${ref.refAttr}", vv)
     refConfirmed = false
     val card = if (ref.card.isInstanceOf[CardOne]) "one" else "set"
@@ -22,21 +23,24 @@ trait QueryExprRef[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] with N
 
 
   override protected def queryBackRef(backRef: BackRef, tail: List[Element]): Unit = {
+    checkOnlyOptRef()
     varPath = varPath.dropRight(3)
     path = path.dropRight(2)
     es = es.init
   }
 
 
-  override protected def queryOptRef(ref: Ref, optionalElements: List[Element]): Unit = {
+  private var firstOptRef = true
+
+  protected def queryOptRefOLD(ref: Ref, optionalElements: List[Element]): Unit = {
     nestedOptRef = true
-//    attrIndex += 1
-
-    val e        = es.last
-    val refId = "?id" + nestedIds.size
-    where += s"[(identity $e) $refId]" -> wGround
-
+    hasOptRef = true
     aritiesNested()
+
+//    println(s"--- $firstOptRef")
+//    println(optionalElements.last)
+
+    firstOptRef = false
 
     // Add opt ref caster
     castss = (castss.head :+ pullOptRefData) +: castss.tail
@@ -44,7 +48,32 @@ trait QueryExprRef[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] with N
     // Start new level of casts
     castss = castss :+ Nil
 
-    resolveOptRefElements(refId, ref, optionalElements)
+    resolveOptRefElements(ref, optionalElements)
+    firstOptRef = true
+  }
+
+  override protected def queryOptRef(ref: Ref, optionalElements: List[Element]): Unit = {
+    nestedOptRef = true
+    hasOptRef = true
+//    aritiesNested()
+    aritiesOptRef()
+
+    //    println(s"--- $firstOptRef")
+    //    println(optionalElements.last)
+
+    firstOptRef = false
+
+    // Add opt ref caster
+    castss = (castss.head :+ pullOptRefData) +: castss.tail
+
+    // Start new level of casts
+    castss = castss :+ Nil
+
+    resolveOptRefElements(ref, optionalElements)
+//    castss = (castss.head :+ pullOptRefData) +: castss.tail
+
+
+    firstOptRef = true
   }
 
 
@@ -61,7 +90,9 @@ trait QueryExprRef[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] with N
     // On top level, move past nested pull date to tx metadata (if any)
     attrIndex += 1
 
-    aritiesNested()
+//    aritiesNested()
+    aritiesOptRef()
+
 
     val e        = es.last
     val nestedId = "?id" + nestedIds.size
@@ -96,6 +127,8 @@ trait QueryExprRef[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] with N
 
   override protected def queryNested(ref: Ref, nestedElements: List[Element]): Unit = {
     isNested = true
+    checkOnlyOptRef()
+    noCardManyInsideOptRef()
     if (isOptNested) {
       noMixedNestedModes
     }

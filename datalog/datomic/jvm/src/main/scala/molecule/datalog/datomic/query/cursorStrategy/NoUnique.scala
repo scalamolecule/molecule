@@ -32,13 +32,10 @@ case class NoUnique[Tpl](
     }
 
     val identifyTpl = (tpl: Tpl) => tpl.hashCode()
-    val identifyRow = (isOptNested: Boolean) => if (isOptNested)
-      (row: m2q.Row) => m2q.pullOptNestedRow2tpl(row).hashCode()
-    else {
-      val row2AnyTpl = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0, None)
+    val identifyRow = (_: Unit) => {
+      val row2AnyTpl = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0)
       (row: m2q.Row) => row2AnyTpl(row).hashCode()
     }
-
     paginateFromIdentifiers(
       conn,
       limit,

@@ -29,7 +29,7 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
       joins += ((s"$joinType JOIN", refNs, refAs, List(s"$ns$nsExt.$refAttr = $refNs$refExt.id")))
     } else {
       val singleOptSet = tail.length == 1 && tail.head.isInstanceOf[AttrSetOpt]
-      val joinType = if (singleOptSet) "LEFT" else "INNER"
+      val joinType     = if (singleOptSet || nestedOptRef) "LEFT" else "INNER"
       addJoins(ns, nsExt, refAttr, refNs, joinType)
     }
   }
@@ -113,13 +113,11 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
   private def resolveNested(
     ref: Ref, nestedElements: List[Element], joinType: String
   ): Unit = {
-    if (nestedOptRef) {
-      throw ModelError("Cardinality-many nesting not allowed inside optional ref.")
-    }
+    noCardManyInsideOptRef()
+    checkOnlyOptRef()
 
     val Ref(ns, refAttr, refNs, _, _, _) = ref
     level += 1
-    checkOnlyOptRef()
     validateRefNs(ref, nestedElements)
 
     handleRef(refAttr, refNs)

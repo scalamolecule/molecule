@@ -312,13 +312,50 @@ trait Insert_datomic
       e = backRefs(backRefNs)
   }
 
+
+  private var firstOptRef = true
+
   override protected def addOptRef(
     tplIndex: Int,
     ns: String,
     refAttr: String,
     refNs: String,
-    elements: List[Element]
-  ): Product => Unit = ???
+    nestedElements: List[Element]
+  ): Product => Unit = {
+    val useBaseId = firstOptRef
+    firstOptRef = false
+
+    // Recursively resolve nested data
+    val nested2stmts = getResolver(nestedElements)
+    firstOptRef = true
+
+    countValueAttrs(nestedElements) match {
+      case 1 => // Nested arity-1 values
+        (tpl: Product) => {
+          val values = tpl.productElement(tplIndex).asInstanceOf[Option[Any]]
+          val baseId = if (useBaseId) e0 else e
+          values.foreach { value =>
+            e = baseId
+            val nestedTpl = Tuple1(value)
+            addRef(ns, refAttr, refNs, CardOne)(nestedTpl)
+            unusedRefIds -= e
+            nested2stmts(nestedTpl)
+          }
+        }
+
+      case _ =>
+        (tpl: Product) => {
+          val nestedTpls = tpl.productElement(tplIndex).asInstanceOf[Option[Product]]
+          val baseId     = if (useBaseId) e0 else e
+          nestedTpls.foreach { nestedTpl =>
+            e = baseId
+            addRef(ns, refAttr, refNs, CardOne)(nestedTpl)
+            unusedRefIds -= e
+            nested2stmts(nestedTpl)
+          }
+        }
+    }
+  }
 
   override protected def addNested(
     tplIndex: Int,

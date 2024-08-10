@@ -9,8 +9,7 @@ import scala.collection.mutable.ListBuffer
 import scala.util.control.NonFatal
 
 
-trait CastOptNestedLeaf_
-  extends CastRow2Tpl_ with CastIt2Tpl_ { self: Model2Query with DatomicQueryBase =>
+trait CastOptNestedLeaf_ extends CastRow2AnyTpl_ { self: Model2Query with DatomicQueryBase =>
 
   private val rowList = new ListBuffer[Any]
 
@@ -59,7 +58,6 @@ trait CastOptNestedLeaf_
       } else None
     }
     val pullCasts     = resolveArities(arities, pullCasts0, Nil)
-    println("======= " + pullCasts.length)
     pullCasts.length match {
       case 1  => pullLeaf1(pullCasts, optComparator)
       case 2  => pullLeaf2(pullCasts, optComparator)

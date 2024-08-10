@@ -7,7 +7,7 @@ import scala.annotation.tailrec
 
 
 trait CastNestedBranch_
-  extends CastRow2Tpl_ { self: Model2Query with DatomicQueryBase =>
+  extends CastRow2AnyTpl_ { self: Model2Query with DatomicQueryBase =>
 
   @tailrec
   final private def resolveArities(

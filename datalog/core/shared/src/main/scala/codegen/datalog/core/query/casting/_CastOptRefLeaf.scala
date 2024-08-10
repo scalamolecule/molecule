@@ -10,11 +10,12 @@ object _CastOptRefLeaf extends DatomicGenBase("CastOptRefLeaf", "/query/casting"
     s"""// GENERATED CODE ********************************
        |package molecule.datalog.core.query.casting
        |
-       |import java.util.{Iterator => jIterator, Map => jMap}
+       |import java.util.{ArrayList => jArrayList, Iterator => jIterator, Map => jMap}
+       |import molecule.datalog.core.query.DatomicQueryBase
        |import scala.annotation.tailrec
        |
        |
-       |trait $fileName_ {
+       |trait $fileName_ { self: DatomicQueryBase =>
        |
        |  @tailrec
        |  final private def resolveArities(
@@ -23,11 +24,11 @@ object _CastOptRefLeaf extends DatomicGenBase("CastOptRefLeaf", "/query/casting"
        |    acc: List[jIterator[_] => Any],
        |  ): List[jIterator[_] => Any] = {
        |    arities match {
-       |      case List(1) :: as =>
+       |      case 1 :: as =>
        |        resolveArities(as, casts.tail, acc :+ casts.head)
        |
        |      // Nested
-       |      case List(-1) :: Nil =>
+       |      case -1 :: Nil =>
        |        resolveArities(Nil, casts.tail, acc :+ casts.head)
        |
        |      case _ => acc
@@ -44,11 +45,26 @@ object _CastOptRefLeaf extends DatomicGenBase("CastOptRefLeaf", "/query/casting"
        |    }
        |  }
        |
+       |  final private def flatten(
+       |    list: jArrayList[Any],
+       |    map: jMap[_, _]
+       |  ): jArrayList[Any] = {
+       |    map.values.asScala.foreach {
+       |      case map: jMap[_, _] => flatten(list, map)
+       |      case v               => list.add(v)
+       |    }
+       |    list
+       |  }
+       |
        |  final private def resolve(
+       |    arity: Int,
        |    cast: java.util.Iterator[_] => Any
        |  ): jIterator[_] => Option[Any] = {
-       |    val handleMap = (optionalData: jMap[_, _]) =>
-       |      Some(cast(optionalData.values().iterator()))
+       |    val list = new jArrayList[Any](arity)
+       |    val handleMap = (optionalData: jMap[_, _]) => {
+       |      list.clear()
+       |      Some(cast(flatten(list, optionalData).iterator()))
+       |    }
        |    (it: jIterator[_]) =>
        |      try {
        |        it.next match {
@@ -73,7 +89,7 @@ object _CastOptRefLeaf extends DatomicGenBase("CastOptRefLeaf", "/query/casting"
          |    pullCasts: List[jIterator[_] => Any]
          |  ): jIterator[_] => Option[Any] = {
          |    val List($casters) = pullCasts
-         |    resolve((it: java.util.Iterator[_]) =>
+         |    resolve($i, (it: java.util.Iterator[_]) =>
          |      (
          |        $castings
          |      )

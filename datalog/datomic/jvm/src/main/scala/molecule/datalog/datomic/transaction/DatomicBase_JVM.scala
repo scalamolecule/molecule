@@ -34,7 +34,6 @@ trait DatomicBase_JVM extends DatomicDataType_JVM with ModelUtils {
   protected var ids            = List.empty[AnyRef]
   protected var filterElements = List.empty[Element]
 
-
   protected var stmt        : jList[AnyRef]       = null
   protected var backRefs    : Map[String, AnyRef] = Map.empty[String, AnyRef]
   protected val usedRefIds  : ListBuffer[AnyRef]  = new ListBuffer[AnyRef]

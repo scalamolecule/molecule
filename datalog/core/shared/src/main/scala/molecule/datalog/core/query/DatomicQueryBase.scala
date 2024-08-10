@@ -113,6 +113,12 @@ trait DatomicQueryBase
     val curLevelWithNested = curLevel :+ -1
     aritiess = (aritiess.init :+ curLevelWithNested) :+ newLevel
   }
+  final protected def aritiesOptRef(): Unit = {
+    val newLevel           = Nil
+    val curLevel           = aritiess.last
+    val curLevelWithNested = curLevel :+ -2
+    aritiess = (aritiess.init :+ curLevelWithNested) :+ newLevel
+  }
 
   final protected def aritiesAttr(): Unit = {
     // Add new arity of 1

@@ -51,7 +51,7 @@ case class SubUnique[Tpl](
     }
 
     val identifyTpl = (tpl: Tpl) => tpl.asInstanceOf[Product].productElement(uniqueIndex)
-    val identifyRow = (_: Boolean) => (row: m2q.Row) => row.get(uniqueIndex)
+    val identifyRow = (_: Unit) => (row: m2q.Row) => row.get(uniqueIndex)
     paginateFromIdentifiers(
       conn,
       limit,

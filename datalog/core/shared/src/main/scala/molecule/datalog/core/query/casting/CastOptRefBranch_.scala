@@ -1,11 +1,12 @@
 // GENERATED CODE ********************************
 package molecule.datalog.core.query.casting
 
-import java.util.{Iterator => jIterator, Map => jMap}
+import java.util.{ArrayList => jArrayList, Iterator => jIterator, Map => jMap}
+import molecule.datalog.core.query.DatomicQueryBase
 import scala.annotation.tailrec
 
 
-trait CastOptRefBranch_ {
+trait CastOptRefBranch_ { self: DatomicQueryBase =>
 
   @tailrec
   final private def resolveArities(
@@ -15,7 +16,7 @@ trait CastOptRefBranch_ {
     acc: List[jIterator[_] => Any],
   ): List[jIterator[_] => Any] = {
     arities match {
-      case 1 :: as =>
+      case 0 :: as =>
         resolveArities(as, casts.tail, pullNested, acc :+ casts.head)
 
       // Nested
@@ -29,39 +30,70 @@ trait CastOptRefBranch_ {
   final protected def pullOptRefBranch(
     arities: List[Int],
     pullCasts0: List[jIterator[_] => Any],
-    pullNested: jIterator[_] => Option[Any]
+    pullNested: jIterator[_] => Option[Any],
+    refDepth: Int
   ): jIterator[_] => Option[Any] = {
     val pullCasts = resolveArities(arities, pullCasts0, pullNested, Nil)
+
+
+
+//    println(s"\nB  pullCasts0 -------------------- $refDepth")
+//    pullCasts0.foreach(println)
+//
+//    println("B  pullCasts --------------------")
+//    pullCasts.foreach(println)
+
+
+
     pullCasts.length match {
-      case 1  => pullBranch1(pullCasts)
-      case 2  => pullBranch2(pullCasts)
-      case 3  => pullBranch3(pullCasts)
-      case 4  => pullBranch4(pullCasts)
-      case 5  => pullBranch5(pullCasts)
-      case 6  => pullBranch6(pullCasts)
-      case 7  => pullBranch7(pullCasts)
-      case 8  => pullBranch8(pullCasts)
-      case 9  => pullBranch9(pullCasts)
-      case 10 => pullBranch10(pullCasts)
-      case 11 => pullBranch11(pullCasts)
-      case 12 => pullBranch12(pullCasts)
-      case 13 => pullBranch13(pullCasts)
-      case 14 => pullBranch14(pullCasts)
-      case 15 => pullBranch15(pullCasts)
-      case 16 => pullBranch16(pullCasts)
-      case 17 => pullBranch17(pullCasts)
-      case 18 => pullBranch18(pullCasts)
-      case 19 => pullBranch19(pullCasts)
-      case 20 => pullBranch20(pullCasts)
-      case 21 => pullBranch21(pullCasts)
+      case 1  => pullBranch1(pullCasts, refDepth)
+      case 2  => pullBranch2(pullCasts, refDepth)
+      case 3  => pullBranch3(pullCasts, refDepth)
+      case 4  => pullBranch4(pullCasts, refDepth)
+      case 5  => pullBranch5(pullCasts, refDepth)
+      case 6  => pullBranch6(pullCasts, refDepth)
+      case 7  => pullBranch7(pullCasts, refDepth)
+      case 8  => pullBranch8(pullCasts, refDepth)
+      case 9  => pullBranch9(pullCasts, refDepth)
+      case 10 => pullBranch10(pullCasts, refDepth)
+      case 11 => pullBranch11(pullCasts, refDepth)
+      case 12 => pullBranch12(pullCasts, refDepth)
+      case 13 => pullBranch13(pullCasts, refDepth)
+      case 14 => pullBranch14(pullCasts, refDepth)
+      case 15 => pullBranch15(pullCasts, refDepth)
+      case 16 => pullBranch16(pullCasts, refDepth)
+      case 17 => pullBranch17(pullCasts, refDepth)
+      case 18 => pullBranch18(pullCasts, refDepth)
+      case 19 => pullBranch19(pullCasts, refDepth)
+      case 20 => pullBranch20(pullCasts, refDepth)
+      case 21 => pullBranch21(pullCasts, refDepth)
     }
   }
 
+  final private def flatten(
+    list: jArrayList[Any],
+    map: jMap[_, _],
+    max: Int,
+    cur: Int
+  ): jArrayList[Any] = {
+    map.values.asScala.foreach {
+      case map: jMap[_, _] if cur == max => list.add(map)
+      case map: jMap[_, _]               => flatten(list, map, max, cur + 1)
+      case v                             => list.add(v)
+    }
+    list
+  }
+
   final private def resolve(
+    arity: Int,
+    refDepth: Int,
     cast: java.util.Iterator[_] => Any
   ): jIterator[_] => Option[Any] = {
-    val handleMap = (optionalData: jMap[_, _]) =>
-      Some(cast(optionalData.values().iterator()))
+    val list      = new jArrayList[Any](arity)
+    val handleMap = (optionalData: jMap[_, _]) => {
+      list.clear()
+      Some(cast(flatten(list, optionalData, refDepth, 0).iterator()))
+    }
     (it: jIterator[_]) =>
       try {
         it.next match {
@@ -75,10 +107,11 @@ trait CastOptRefBranch_ {
   }
 
   final private def pullBranch1(
-    pullCasts: List[jIterator[_] => Any]
+    pullCasts: List[jIterator[_] => Any],
+    refDepth: Int
   ): jIterator[_] => Option[Any] = {
     val List(c1) = pullCasts
-    resolve((it: java.util.Iterator[_]) =>
+    resolve(1, refDepth, (it: java.util.Iterator[_]) =>
       (
         c1(it)
       )
@@ -86,10 +119,11 @@ trait CastOptRefBranch_ {
   }
 
   final private def pullBranch2(
-    pullCasts: List[jIterator[_] => Any]
+    pullCasts: List[jIterator[_] => Any],
+    refDepth: Int
   ): jIterator[_] => Option[Any] = {
     val List(c1, c2) = pullCasts
-    resolve((it: java.util.Iterator[_]) =>
+    resolve(2, refDepth, (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it)
@@ -98,10 +132,11 @@ trait CastOptRefBranch_ {
   }
 
   final private def pullBranch3(
-    pullCasts: List[jIterator[_] => Any]
+    pullCasts: List[jIterator[_] => Any],
+    refDepth: Int
   ): jIterator[_] => Option[Any] = {
     val List(c1, c2, c3) = pullCasts
-    resolve((it: java.util.Iterator[_]) =>
+    resolve(3, refDepth, (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -111,10 +146,11 @@ trait CastOptRefBranch_ {
   }
 
   final private def pullBranch4(
-    pullCasts: List[jIterator[_] => Any]
+    pullCasts: List[jIterator[_] => Any],
+    refDepth: Int
   ): jIterator[_] => Option[Any] = {
     val List(c1, c2, c3, c4) = pullCasts
-    resolve((it: java.util.Iterator[_]) =>
+    resolve(4, refDepth, (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -125,10 +161,11 @@ trait CastOptRefBranch_ {
   }
 
   final private def pullBranch5(
-    pullCasts: List[jIterator[_] => Any]
+    pullCasts: List[jIterator[_] => Any],
+    refDepth: Int
   ): jIterator[_] => Option[Any] = {
     val List(c1, c2, c3, c4, c5) = pullCasts
-    resolve((it: java.util.Iterator[_]) =>
+    resolve(5, refDepth, (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -140,10 +177,11 @@ trait CastOptRefBranch_ {
   }
 
   final private def pullBranch6(
-    pullCasts: List[jIterator[_] => Any]
+    pullCasts: List[jIterator[_] => Any],
+    refDepth: Int
   ): jIterator[_] => Option[Any] = {
     val List(c1, c2, c3, c4, c5, c6) = pullCasts
-    resolve((it: java.util.Iterator[_]) =>
+    resolve(6, refDepth, (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -156,10 +194,11 @@ trait CastOptRefBranch_ {
   }
 
   final private def pullBranch7(
-    pullCasts: List[jIterator[_] => Any]
+    pullCasts: List[jIterator[_] => Any],
+    refDepth: Int
   ): jIterator[_] => Option[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7) = pullCasts
-    resolve((it: java.util.Iterator[_]) =>
+    resolve(7, refDepth, (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -173,10 +212,11 @@ trait CastOptRefBranch_ {
   }
 
   final private def pullBranch8(
-    pullCasts: List[jIterator[_] => Any]
+    pullCasts: List[jIterator[_] => Any],
+    refDepth: Int
   ): jIterator[_] => Option[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8) = pullCasts
-    resolve((it: java.util.Iterator[_]) =>
+    resolve(8, refDepth, (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -191,10 +231,11 @@ trait CastOptRefBranch_ {
   }
 
   final private def pullBranch9(
-    pullCasts: List[jIterator[_] => Any]
+    pullCasts: List[jIterator[_] => Any],
+    refDepth: Int
   ): jIterator[_] => Option[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9) = pullCasts
-    resolve((it: java.util.Iterator[_]) =>
+    resolve(9, refDepth, (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -210,10 +251,11 @@ trait CastOptRefBranch_ {
   }
 
   final private def pullBranch10(
-    pullCasts: List[jIterator[_] => Any]
+    pullCasts: List[jIterator[_] => Any],
+    refDepth: Int
   ): jIterator[_] => Option[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10) = pullCasts
-    resolve((it: java.util.Iterator[_]) =>
+    resolve(10, refDepth, (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -230,10 +272,11 @@ trait CastOptRefBranch_ {
   }
 
   final private def pullBranch11(
-    pullCasts: List[jIterator[_] => Any]
+    pullCasts: List[jIterator[_] => Any],
+    refDepth: Int
   ): jIterator[_] => Option[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) = pullCasts
-    resolve((it: java.util.Iterator[_]) =>
+    resolve(11, refDepth, (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -251,10 +294,11 @@ trait CastOptRefBranch_ {
   }
 
   final private def pullBranch12(
-    pullCasts: List[jIterator[_] => Any]
+    pullCasts: List[jIterator[_] => Any],
+    refDepth: Int
   ): jIterator[_] => Option[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12) = pullCasts
-    resolve((it: java.util.Iterator[_]) =>
+    resolve(12, refDepth, (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -273,10 +317,11 @@ trait CastOptRefBranch_ {
   }
 
   final private def pullBranch13(
-    pullCasts: List[jIterator[_] => Any]
+    pullCasts: List[jIterator[_] => Any],
+    refDepth: Int
   ): jIterator[_] => Option[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13) = pullCasts
-    resolve((it: java.util.Iterator[_]) =>
+    resolve(13, refDepth, (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -296,10 +341,11 @@ trait CastOptRefBranch_ {
   }
 
   final private def pullBranch14(
-    pullCasts: List[jIterator[_] => Any]
+    pullCasts: List[jIterator[_] => Any],
+    refDepth: Int
   ): jIterator[_] => Option[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14) = pullCasts
-    resolve((it: java.util.Iterator[_]) =>
+    resolve(14, refDepth, (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -320,10 +366,11 @@ trait CastOptRefBranch_ {
   }
 
   final private def pullBranch15(
-    pullCasts: List[jIterator[_] => Any]
+    pullCasts: List[jIterator[_] => Any],
+    refDepth: Int
   ): jIterator[_] => Option[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15) = pullCasts
-    resolve((it: java.util.Iterator[_]) =>
+    resolve(15, refDepth, (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -345,10 +392,11 @@ trait CastOptRefBranch_ {
   }
 
   final private def pullBranch16(
-    pullCasts: List[jIterator[_] => Any]
+    pullCasts: List[jIterator[_] => Any],
+    refDepth: Int
   ): jIterator[_] => Option[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16) = pullCasts
-    resolve((it: java.util.Iterator[_]) =>
+    resolve(16, refDepth, (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -371,10 +419,11 @@ trait CastOptRefBranch_ {
   }
 
   final private def pullBranch17(
-    pullCasts: List[jIterator[_] => Any]
+    pullCasts: List[jIterator[_] => Any],
+    refDepth: Int
   ): jIterator[_] => Option[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17) = pullCasts
-    resolve((it: java.util.Iterator[_]) =>
+    resolve(17, refDepth, (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -398,10 +447,11 @@ trait CastOptRefBranch_ {
   }
 
   final private def pullBranch18(
-    pullCasts: List[jIterator[_] => Any]
+    pullCasts: List[jIterator[_] => Any],
+    refDepth: Int
   ): jIterator[_] => Option[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18) = pullCasts
-    resolve((it: java.util.Iterator[_]) =>
+    resolve(18, refDepth, (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -426,10 +476,11 @@ trait CastOptRefBranch_ {
   }
 
   final private def pullBranch19(
-    pullCasts: List[jIterator[_] => Any]
+    pullCasts: List[jIterator[_] => Any],
+    refDepth: Int
   ): jIterator[_] => Option[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19) = pullCasts
-    resolve((it: java.util.Iterator[_]) =>
+    resolve(19, refDepth, (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -455,10 +506,11 @@ trait CastOptRefBranch_ {
   }
 
   final private def pullBranch20(
-    pullCasts: List[jIterator[_] => Any]
+    pullCasts: List[jIterator[_] => Any],
+    refDepth: Int
   ): jIterator[_] => Option[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20) = pullCasts
-    resolve((it: java.util.Iterator[_]) =>
+    resolve(20, refDepth, (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),
@@ -485,10 +537,11 @@ trait CastOptRefBranch_ {
   }
 
   final private def pullBranch21(
-    pullCasts: List[jIterator[_] => Any]
+    pullCasts: List[jIterator[_] => Any],
+    refDepth: Int
   ): jIterator[_] => Option[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21) = pullCasts
-    resolve((it: java.util.Iterator[_]) =>
+    resolve(21, refDepth, (it: java.util.Iterator[_]) =>
       (
         c1(it),
         c2(it),

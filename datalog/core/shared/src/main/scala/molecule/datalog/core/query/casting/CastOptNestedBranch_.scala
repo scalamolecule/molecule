@@ -7,8 +7,7 @@ import molecule.datalog.core.query.DatomicQueryBase
 import scala.annotation.tailrec
 
 
-trait CastOptNestedBranch_
-  extends CastIt2Tpl_ { self: Model2Query with DatomicQueryBase =>
+trait CastOptNestedBranch_ { self: Model2Query with DatomicQueryBase =>
 
   @tailrec
   final private def resolveArities(

@@ -585,6 +585,11 @@ trait Model2Query extends QueryExpr with ModelUtils {
   protected def noMixedNestedModes: Nothing = throw ModelError(
     "Can't mix mandatory/optional nested queries."
   )
+  protected def noCardManyInsideOptRef(): Unit = if (nestedOptRef) {
+    throw ModelError(
+      "Cardinality-many nesting not allowed inside optional ref."
+    )
+  }
 
   protected def noCollectionMatching(attr: Attr): Nothing = {
     val a = attr.cleanName

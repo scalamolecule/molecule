@@ -41,143 +41,66 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       for {
 
 
+        _ <- A.i.B.s.i.Cc.*(C.s).insert(List(
+          (1, "a", 1, Nil),
+          (2, "b", 2, List("x", "y"))
+        )).transact
 
-        _ <- A.i(1).save.transact
-        _ <- A.i(1).B.i(1).save.transact
-        _ <- A.i(2).B.i(1).s("b").save.transact
-        _ <- A.i(2).B.i(2).s("b").save.transact
+        //        _ <- rawQuery(
+        //          """SELECT DISTINCT
+        //            |  A.i,
+        //            |  B.s,
+        //            |  B.i,
+        //            |  C.s
+        //            |FROM A
+        //            |  LEFT JOIN B ON
+        //            |    A.b = B.id
+        //            |  INNER JOIN B_cc_C ON
+        //            |    B.id = B_cc_C.B_id
+        //            |  INNER JOIN C ON
+        //            |    B_cc_C.C_id = C.id
+        //            |WHERE
+        //            |  A.i IS NOT NULL;
+        //            |""".stripMargin, true)
 
-        _ <- A.i(3).B.i(3).s("b").C.i(3).save.transact
-        _ <- A.i(3).B.i(3).s("b").C.i(4).s("c").save.transact
-        _ <- A.i(3).B.i(4).s("b").C.i(5).s("c").save.transact
+        // todo: use left join inside optional refs
+        _ <- rawQuery(
+          """SELECT DISTINCT
+            |  A.i,
+            |  B.s,
+            |  B.i,
+            |  C.s
+            |FROM A
+            |  LEFT JOIN B ON
+            |    A.b = B.id
+            |  left JOIN B_cc_C ON
+            |    B.id = B_cc_C.B_id
+            |  left JOIN C ON
+            |    B_cc_C.C_id = C.id
+            |WHERE
+            |  A.i IS NOT NULL;
+            |""".stripMargin, true)
 
-
-        _ <- A.i.a1.B.?(B.i.a2.s.C.?(C.i.a3.s)).query.i.get.map(_ ==> List(
+        _ <- A.i.B.?(B.s.i.Cc.s).query.i.get.map(_ ==> List(
           (1, None),
-          (1, None),
-          (2, Some((1, "b", None))),
-          (2, Some((2, "b", None))),
-
-          (3, Some((3, "b", None))),
-          (3, Some((3, "b", Some((4, "c"))))),
-          (3, Some((4, "b", Some((5, "c"))))),
+          (2, Some(("b", 2, "x"))),
+          (2, Some(("b", 2, "y"))), // (A and B values repeated)
         ))
-//
-//        _ <- A.i.d3.B.?(B.i.d2.s.C.?(C.i.d1.s)).query.i.get.map(_ ==> List(
-//          (3, Some((4, "b", Some((5, "c"))))),
-//          (3, Some((3, "b", Some((4, "c"))))),
-//          (3, Some((3, "b", None))),
-//
-//          (2, Some((2, "b", None))),
-//          (2, Some((1, "b", None))),
-//          (1, None),
-//          (1, None),
-//        ))
 
-//        _ <- A.i(1).save.transact
-//        _ <- A.i(1).B.i(1).save.transact
-//        _ <- A.i(2).B.i(1).s("b").save.transact
-//        _ <- A.i(2).B.i(2).s("b").save.transact
-//
-//        _ <- A.i(3).B.i(3).s("b")._A.C.i(3).save.transact
-//        _ <- A.i(3).B.i(3).s("b")._A.C.i(4).s("c").save.transact
-//        _ <- A.i(3).B.i(4).s("b")._A.C.i(5).s("c").save.transact
-//
-//
-//        _ <- A.i.a1.B.?(B.i.a2.s).C.?(C.i.a3.s).query.i.get.map(_ ==> List(
-//          (1, None, None),
-//          (1, None, None),
-//          (2, Some((1, "b")), None),
-//          (2, Some((2, "b")), None),
-//
-//          (3, Some((3, "b")), None),
-//          (3, Some((3, "b")), Some((4, "c"))),
-//          (3, Some((4, "b")), Some((5, "c"))),
-//        ))
-//
-//        _ <- A.i.d3.B.?(B.i.d2.s).C.?(C.i.d1.s).query.i.get.map(_ ==> List(
-//          (3, Some((4, "b")), Some((5, "c"))),
-//          (3, Some((3, "b")), Some((4, "c"))),
-//          (3, Some((3, "b")), None),
-//
-//          (2, Some((2, "b")), None),
-//          (2, Some((1, "b")), None),
-//          (1, None, None),
-//          (1, None, None),
-//        ))
+        // As with card-one ref, a normal flat card-many ref would be preferred
+        _ <- A.i.B.s.i.Cc.s.query.get.map(_ ==> List(
+          (2, "b", 2, "x"),
+          (2, "b", 2, "y"),
+        ))
+        // or better, a nested query
+        _ <- A.i.B.s.i.Cc.*(C.s).query.get.map(_ ==> List(
+          (2, "b", 2, List("x", "y")),
+        ))
 
-
-
-//        _ <- A.i.B.?(B.i).insert(List(
-//          (1, None),
-//          (1, Some(1)),
-//          (2, Some(1)),
-//          (2, Some(2)),
-//        )).transact
-//
-//        _ <- A.i.a1.B.?(B.i.a2).query.i.get.map(_ ==> List(
-//          (1, None),
-//          (1, Some(1)),
-//          (2, Some(1)),
-//          (2, Some(2)),
-//        ))
-//        _ <- A.i.a1.B.?(B.i.d2).query.i.get.map(_ ==> List(
-//          (1, Some(1)),
-//          (1, None),
-//          (2, Some(2)),
-//          (2, Some(1)),
-//        ))
-//        _ <- A.i.d1.B.?(B.i.a2).query.i.get.map(_ ==> List(
-//          (2, Some(1)),
-//          (2, Some(2)),
-//          (1, None),
-//          (1, Some(1)),
-//        ))
-//        _ <- A.i.d1.B.?(B.i.d2).query.i.get.map(_ ==> List(
-//          (2, Some(2)),
-//          (2, Some(1)),
-//          (1, Some(1)),
-//          (1, None),
-//        ))
-//
-//
-//        _ <- A.i.a2.B.?(B.i.a1).query.i.get.map(_ ==> List(
-//          (1, None),
-//          (1, Some(1)),
-//          (2, Some(1)),
-//          (2, Some(2)),
-//        ))
-//        _ <- A.i.d2.B.?(B.i.a1).query.i.get.map(_ ==> List(
-//          (1, None),
-//          (2, Some(1)),
-//          (1, Some(1)),
-//          (2, Some(2)),
-//        ))
-//        _ <- A.i.a2.B.?(B.i.d1).query.i.get.map(_ ==> List(
-//          (2, Some(2)),
-//          (1, Some(1)),
-//          (2, Some(1)),
-//          (1, None),
-//        ))
-//        _ <- A.i.d2.B.?(B.i.d1).query.i.get.map(_ ==> List(
-//          (2, Some(2)),
-//          (2, Some(1)),
-//          (1, Some(1)),
-//          (1, None),
-//        ))
-
-
-
-
-        //        _ <- A.i(1).save.transact
-
-        //        _ <- A.i.B.?(B.i).query.get.map(_ ==> List(
-        //          (1, None),
-        //        ))
-
-
-        //        _ <- A.i(2).B.i(3).save.transact
-        //
+        _ <- A.i.B.?(B.i.s.Cc.*(C.s)).query.get
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Cardinality-many nesting not allowed inside optional ref."
+          }
         //
         //        //        _ <- rawQuery(
         //        //          """SELECT DISTINCT

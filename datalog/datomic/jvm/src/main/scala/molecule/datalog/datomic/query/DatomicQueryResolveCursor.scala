@@ -92,9 +92,9 @@ case class DatomicQueryResolveCursor[Tpl](
           (Nil, "", false)
         } else {
           val selectedRows = sortedRows.subList(0, limitAbs)
-          val row2tpl = m2q.pullOptNestedRow2tpl
+          val row2tpl = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0)
           selectedRows.forEach(row =>
-            tuples += row2tpl(row)
+            tuples += row2tpl(row).asInstanceOf[Tpl]
           )
           val tpls   = (if (forward) tuples.toList else tuples.toList.reverse).filterNot(_ == Nil)
           val cursor = initialCursor(conn, elements, tpls)
@@ -107,9 +107,10 @@ case class DatomicQueryResolveCursor[Tpl](
           (Nil, "", false)
         } else {
           val selectedRows = sortedRows.subList(0, limitAbs)
-          val row2tpl = m2q.pullOptRefRow2tpl
+//          val row2tpl      = m2q.pullOptRefRow2tpl
+          val row2tpl = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0)
           selectedRows.forEach(row =>
-            tuples += row2tpl(row)
+            tuples += row2tpl(row).asInstanceOf[Tpl]
           )
           val tpls   = (if (forward) tuples.toList else tuples.toList.reverse).filterNot(_ == Nil)
           val cursor = initialCursor(conn, elements, tpls)
@@ -120,7 +121,7 @@ case class DatomicQueryResolveCursor[Tpl](
         if (totalCount == 0) {
           (Nil, "", false)
         } else {
-          val row2tpl      = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0, None)
+          val row2tpl      = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0)
           val selectedRows = sortedRows.subList(0, limitAbs)
           selectedRows.forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
           val tpls   = if (forward) tuples.toList else tuples.toList.reverse

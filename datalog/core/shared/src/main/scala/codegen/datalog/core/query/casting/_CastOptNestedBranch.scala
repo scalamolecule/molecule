@@ -16,8 +16,7 @@ object _CastOptNestedBranch extends DatomicGenBase("CastOptNestedBranch", "/quer
        |import scala.annotation.tailrec
        |
        |
-       |trait $fileName_[Tpl]
-       |  extends CastIt2Tpl_ { self: Model2Query with DatomicQueryBase =>
+       |trait $fileName_[Tpl] { self: Model2Query with DatomicQueryBase =>
        |
        |  @tailrec
        |  final private def resolveArities(

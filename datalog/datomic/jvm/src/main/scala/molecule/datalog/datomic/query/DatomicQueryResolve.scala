@@ -34,7 +34,7 @@ abstract class DatomicQueryResolve[Tpl](
   ): jCollection[jList[AnyRef]] = {
     val db = altDb.getOrElse(getDb(conn))
     m2q.getDatomicQueries(conn.optimizeQuery, altElements, validate) match {
-      case ("", query, _)       =>
+      case ("", query, _) =>
         distinct(Peer.q(query, db +: m2q.inputs: _*))
 
       case (preQuery, query, _) =>
@@ -109,7 +109,7 @@ abstract class DatomicQueryResolve[Tpl](
     attrTokens: List[String],
     identifiers: List[Any],
     identifyTpl: Tpl => Any,
-    identifyRow: Boolean => m2q.Row => Any,
+    identifyRow: Unit => m2q.Row => Any,
     nextCursor: (List[Tpl], List[String]) => String
   ): (List[Tpl], String, Boolean) = {
     // Filter query by primary non-unique sort attribute
@@ -151,7 +151,8 @@ abstract class DatomicQueryResolve[Tpl](
           postAdjustPullCasts()
           if (!forward) Collections.reverse(sortedRows)
           val count          = getCount(limit, forward, totalCount)
-          val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(true), m2q.pullOptNestedRow2tpl)
+          val row2tpl        = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0)
+          val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(()), row2tpl)
           val tpls           = (if (forward) tuples else tuples.reverse).filterNot(_ == Nil)
           val cursor         = nextCursor(tpls, allTokens)
           (tpls, cursor, more > 0)
@@ -160,7 +161,8 @@ abstract class DatomicQueryResolve[Tpl](
           postAdjustPullCasts()
           if (!forward) Collections.reverse(sortedRows)
           val count          = getCount(limit, forward, totalCount)
-          val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(true), m2q.pullOptRefRow2tpl)
+          val row2tpl        = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0)
+          val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(()), row2tpl)
           val tpls           = (if (forward) tuples else tuples.reverse).filterNot(_ == Nil)
           val cursor         = nextCursor(tpls, allTokens)
           (tpls, cursor, more > 0)
@@ -168,9 +170,9 @@ abstract class DatomicQueryResolve[Tpl](
         } else {
           if (!forward) Collections.reverse(sortedRows)
           val count          = getCount(limit, forward, totalCount)
-          val row2AnyTpl     = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0, None)
+          val row2AnyTpl     = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0)
           val row2tpl        = (row: m2q.Row) => row2AnyTpl(row).asInstanceOf[Tpl]
-          val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(false), row2tpl)
+          val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(()), row2tpl)
           val tpls           = if (forward) tuples else tuples.reverse
           val cursor         = nextCursor(tpls, allTokens)
           (tpls, cursor, more > 0)
@@ -184,7 +186,7 @@ abstract class DatomicQueryResolve[Tpl](
     sortedRows: jList[jList[AnyRef]],
     identifiers: List[Any],
     identify: m2q.Row => Any,
-    row2tpl: m2q.Row => Tpl,
+    row2tpl: m2q.Row => Any,
   ): (List[Tpl], Int) = {
     val tuples = ListBuffer.empty[Tpl]
     var window = false
@@ -195,7 +197,7 @@ abstract class DatomicQueryResolve[Tpl](
       identifiers match {
         case identifier :: remainingIdentifiers =>
           sortedRows.forEach {
-            case row if window && i != count        => i += 1; tuples += row2tpl(row)
+            case row if window && i != count        => i += 1; tuples += row2tpl(row).asInstanceOf[Tpl]
             case row if identify(row) == identifier => window = true
             case _                                  => if (window) more += 1
           }

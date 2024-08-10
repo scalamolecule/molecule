@@ -5,16 +5,17 @@ import codegen.DatomicGenBase
 object _CastOptRefBranch extends DatomicGenBase("CastOptRefBranch", "/query/casting") {
 
   val content = {
-    val pullBranchX    = (1 to 21).map(i => s"case ${caseN(i)} => pullBranch$i(pullCasts)").mkString("\n      ")
+    val pullBranchX    = (1 to 21).map(i => s"case ${caseN(i)} => pullBranch$i(pullCasts, refDepth)").mkString("\n      ")
     val resolveMethods = (1 to 21).map(arity => Chunk(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************
        |package molecule.datalog.core.query.casting
        |
-       |import java.util.{Iterator => jIterator, Map => jMap}
+       |import java.util.{ArrayList => jArrayList, Iterator => jIterator, Map => jMap}
+       |import molecule.datalog.core.query.DatomicQueryBase
        |import scala.annotation.tailrec
        |
        |
-       |trait $fileName_ {
+       |trait $fileName_ { self: DatomicQueryBase =>
        |
        |  @tailrec
        |  final private def resolveArities(
@@ -38,7 +39,8 @@ object _CastOptRefBranch extends DatomicGenBase("CastOptRefBranch", "/query/cast
        |  final protected def pullOptRefBranch(
        |    arities: List[Int],
        |    pullCasts0: List[jIterator[_] => Any],
-       |    pullNested: jIterator[_] => Option[Any]
+       |    pullNested: jIterator[_] => Option[Any],
+       |    refDepth: Int
        |  ): jIterator[_] => Option[Any] = {
        |    val pullCasts = resolveArities(arities, pullCasts0, pullNested, Nil)
        |    pullCasts.length match {
@@ -46,11 +48,30 @@ object _CastOptRefBranch extends DatomicGenBase("CastOptRefBranch", "/query/cast
        |    }
        |  }
        |
+       |  final private def flatten(
+       |    list: jArrayList[Any],
+       |    map: jMap[_, _],
+       |    max: Int,
+       |    cur: Int
+       |  ): jArrayList[Any] = {
+       |    map.values.asScala.foreach {
+       |      case map: jMap[_, _] if cur == max => list.add(map)
+       |      case map: jMap[_, _]               => flatten(list, map, max, cur + 1)
+       |      case v                             => list.add(v)
+       |    }
+       |    list
+       |  }
+       |
        |  final private def resolve(
+       |    arity: Int,
+       |    refDepth: Int,
        |    cast: java.util.Iterator[_] => Any
        |  ): jIterator[_] => Option[Any] = {
-       |    val handleMap = (optionalData: jMap[_, _]) =>
-       |      Some(cast(optionalData.values().iterator()))
+       |    val list      = new jArrayList[Any](arity)
+       |    val handleMap = (optionalData: jMap[_, _]) => {
+       |      list.clear()
+       |      Some(cast(flatten(list, optionalData, refDepth, 0).iterator()))
+       |    }
        |    (it: jIterator[_]) =>
        |      try {
        |        it.next match {
@@ -72,10 +93,11 @@ object _CastOptRefBranch extends DatomicGenBase("CastOptRefBranch", "/query/cast
     val body     =
       s"""
          |  final private def pullBranch$i(
-         |    pullCasts: List[jIterator[_] => Any]
+         |    pullCasts: List[jIterator[_] => Any],
+         |    refDepth: Int
          |  ): jIterator[_] => Option[Any] = {
          |    val List($casters) = pullCasts
-         |    resolve((it: java.util.Iterator[_]) =>
+         |    resolve($i, refDepth, (it: java.util.Iterator[_]) =>
          |      (
          |        $castings
          |      )

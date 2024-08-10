@@ -45,7 +45,7 @@ trait FlatRefOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Some(20)),
         )).transact
 
-        _ <- A.i.B.?(B.i).query.get.map(_ ==> List(
+        _ <- A.i.a1.B.?(B.i).query.get.map(_ ==> List(
           (1, None),
           (2, Some(20)),
         ))
@@ -57,32 +57,62 @@ trait FlatRefOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "Only optional attributes in optional ref" - refs { implicit conn =>
-      for {
-        _ <- A.i.B.?(B.i_?).insert(List(
-          (1, None), // no relationship created
-          (2, Some(None)), // relationship to empty row created
-          (3, Some(Some(30))),
-        )).transact
+    "Only optional attributes in optional ref - SQL" - refs { implicit conn =>
+      if (database != "Datomic") {
+        for {
+          _ <- A.i.B.?(B.i_?).insert(List(
+            (1, None), // no relationship created
+            (2, Some(None)), // relationship to empty row created
+            (3, Some(Some(30))),
+          )).transact
 
-        // Confirming only 2 relationships created
-        _ <- A.b(count).query.get.map(_.head ==> 2)
+          // 2 relationships created
+          _ <- A.b(count).query.get.map(_.head ==> 2)
 
-        // No relationship and empty row are indistinguishable
-        // when all optional ref attributes (B.i_?) are optional
-        _ <- A.i.a1.B.?(B.i_?).query.get.map(_ ==> List(
-          (1, Some(None)), // no relationship
-          (2, Some(None)), // relationship to empty ref row
-          (3, Some(Some(30))),
-        ))
+          // No relationship and empty row are indistinguishable
+          // when all optional ref attributes (B.i_?) are optional
+          _ <- A.i.a1.B.?(B.i_?).query.get.map(_ ==> List(
+            (1, Some(None)), // no relationship
+            (2, Some(None)), // relationship to empty ref row
+            (3, Some(Some(30))),
+          ))
 
-        // Mandatory B.i makes result more clear
-        _ <- A.i.a1.B.?(B.i).query.get.map(_ ==> List(
-          (1, None),
-          (2, None),
-          (3, Some(30)),
-        ))
-      } yield ()
+          // Mandatory B.i makes result more clear
+          _ <- A.i.a1.B.?(B.i).query.get.map(_ ==> List(
+            (1, None),
+            (2, None),
+            (3, Some(30)),
+          ))
+        } yield ()
+      }
+    }
+
+    "Only optional attributes in optional ref - Datomic" - refs { implicit conn =>
+      if (database == "Datomic") {
+        for {
+          _ <- A.i.B.?(B.i_?).insert(List(
+            (1, None), // no relationship created
+            (2, Some(None)), // no relationship created
+            (3, Some(Some(30))),
+          )).i.transact
+
+          // 1 relationship created
+          _ <- A.b(count).query.get.map(_.head ==> 1)
+
+          _ <- A.i.a1.B.?(B.i_?).query.get.map(_ ==> List(
+            (1, None),
+            (2, None),
+            (3, Some(Some(30))),
+          ))
+
+          // Mandatory B.i makes result more clear
+          _ <- A.i.a1.B.?(B.i).query.get.map(_ ==> List(
+            (1, None),
+            (2, None),
+            (3, Some(30)),
+          ))
+        } yield ()
+      }
     }
 
 
@@ -175,31 +205,33 @@ trait FlatRefOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "Card-many ref inside opt ref" - refs { implicit conn =>
+    "No card-many ref inside opt ref" - refs { implicit conn =>
       for {
         _ <- A.i.B.s.i.Cc.*(C.s).insert(List(
           (1, "a", 1, Nil),
           (2, "b", 2, List("x", "y"))
         )).transact
 
-        // Mandatory ref from B to C excludes first row
-        _ <- A.i.B.?(B.s.i.Cc.s).query.get.map(_ ==> List(
-          // (1, None),
-          (2, Some(("b", 2, "x"))),
-          (2, Some(("b", 2, "y"))), // (A and B values repeated)
-        ))
+        _ <- A.i.B.?(B.s.i.Cc.s).query.i.get
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Only cardinality-one refs allowed in optional ref queries (B.cc)."
+          }
 
-        // As with card-one ref, a normal flat card-many ref would be preferred
+        // Instead, please use flat card-many ref
         _ <- A.i.B.s.i.Cc.s.query.get.map(_ ==> List(
           (2, "b", 2, "x"),
           (2, "b", 2, "y"),
         ))
         // or better, a nested query
-        _ <- A.i.B.s.i.Cc.*(C.s).query.get.map(_ ==> List(
+        _ <- A.i.B.s.i.Cc.*(C.s.a1).query.get.map(_ ==> List(
           (2, "b", 2, List("x", "y")),
         ))
 
         _ <- A.i.B.?(B.i.s.Cc.*(C.s)).query.get
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Cardinality-many nesting not allowed inside optional ref."
+          }
+        _ <- A.i.B.?(B.i.s.Cc.*?(C.s)).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Cardinality-many nesting not allowed inside optional ref."
           }
@@ -396,7 +428,7 @@ trait FlatRefOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
     "Opt ref with sorting" - refs { implicit conn =>
-      if (database != "datomic") {
+      if (database != "Datomic") {
         for {
           _ <- A.i.B.?(B.i).insert(List(
             (1, None),
@@ -461,7 +493,7 @@ trait FlatRefOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
     "Opt ref with sorting, 2 levels" - refs { implicit conn =>
-      if (database != "datomic") {
+      if (database != "Datomic") {
         for {
           _ <- A.i(1).save.transact
           _ <- A.i(1).B.i(1).save.transact
@@ -499,7 +531,7 @@ trait FlatRefOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
     "Opt ref with sorting, adjacent" - refs { implicit conn =>
-      if (database != "datomic") {
+      if (database != "Datomic") {
         for {
           _ <- A.i(1).save.transact
           _ <- A.i(1).B.i(1).save.transact
