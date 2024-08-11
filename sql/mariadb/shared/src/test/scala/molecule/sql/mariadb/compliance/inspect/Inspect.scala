@@ -7,29 +7,35 @@ import molecule.sql.mariadb.setup.TestSuite_mariadb
 import utest._
 import scala.language.implicitConversions
 
-object Inspect extends TestSuite_mariadb {
+object Test_Inspect extends TestSuite_mariadb {
 
   override lazy val tests = Tests {
+
+    /*
+        Notice how the attribute name `int` is transparently
+        renamed to `int_` in queries and transactions to avoid
+        collision with mariadb keywords.
+     */
 
     "Query" - {
 
       "Inspect without fetching" - types { implicit conn =>
         for {
           _ <- Ns.string("a").int(1).save.transact
-          _ <- Ns.string.int.query.inspect.map(_ ==> ()) // returns Unit
+          _ <- Ns.string.int.query.inspect.map(_ ==> ((): Unit)) // returns Unit
           /*
           ========================================
           QUERY:
-          AttrOneManString("Ns", "string", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 5))
-          AttrOneManInt("Ns", "int", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 6))
+          AttrOneManString("Ns", "string", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 7))
+          AttrOneManInt("Ns", "int", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 8))
 
           SELECT DISTINCT
             Ns.string,
-            Ns.int
+            Ns.int_
           FROM Ns
           WHERE
             Ns.string IS NOT NULL AND
-            Ns.int    IS NOT NULL;
+            Ns.int_   IS NOT NULL;
           ----------------------------------------
           */
         } yield ()
@@ -42,16 +48,16 @@ object Inspect extends TestSuite_mariadb {
           /*
           ========================================
           QUERY:
-          AttrOneManString("Ns", "string", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 5))
-          AttrOneManInt("Ns", "int", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 6))
+          AttrOneManString("Ns", "string", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 7))
+          AttrOneManInt("Ns", "int", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 8))
 
           SELECT DISTINCT
             Ns.string,
-            Ns.int
+            Ns.int_
           FROM Ns
           WHERE
             Ns.string IS NOT NULL AND
-            Ns.int    IS NOT NULL;
+            Ns.int_   IS NOT NULL;
           ----------------------------------------
           */
         } yield ()
@@ -64,27 +70,27 @@ object Inspect extends TestSuite_mariadb {
           ========================================
           QUERY:
           AttrOneManInt("Ns", "i", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 1))
-          AttrOneManDouble("Ns", "int", Fn(avg,None), Seq(), None, None, Nil, Nil, None, Some("a1"), Seq(0, 6))
+          AttrOneManDouble("Ns", "int", Fn(avg,None), Seq(), None, None, Nil, Nil, None, Some("a1"), Seq(0, 8))
           Nested(
-            Ref("Ns", "refs", "Ref", CardSet, Seq(0, 51, 1)),
+            Ref("Ns", "refs", "Ref", CardSet, false, Seq(0, 53, 1)),
             List(
-              AttrOneManString("Ref", "string", Eq, Seq("foo"), None, None, Nil, Nil, None, None, Seq(1, 55))))
+              AttrOneManString("Ref", "string", Eq, Seq("foo"), None, None, Nil, Nil, None, None, Seq(1, 101))))
 
           SELECT DISTINCT
             Ns.id,
             Ns.i,
-            AVG(DISTINCT Ns.int) Ns_int_avg,
+            AVG(Ns.int_) Ns_int__avg,
             Ref.string
           FROM Ns
-            INNER JOIN Ns_refs_Ref ON Ns.id = Ns_refs_Ref.Ns_id
-            INNER JOIN Ref         ON Ns_refs_Ref.Ref_id = Ref.id
+            INNER JOIN Ns_refs_Ref ON
+              Ns.id = Ns_refs_Ref.Ns_id
+            INNER JOIN Ref ON
+              Ns_refs_Ref.Ref_id = Ref.id
           WHERE
-            Ref.string = 'foo' AND
             Ns.i       IS NOT NULL AND
-            Ns.int     IS NOT NULL AND
-            Ref.string IS NOT NULL
-          GROUP BY Ns.i, Ref.string
-          ORDER BY Ns_int_avg;
+            Ref.string = 'foo'
+          GROUP BY Ns.i, Ns.id, Ref.string
+          ORDER BY Ns_int__avg;
           ----------------------------------------
           */
         } yield ()
@@ -100,13 +106,17 @@ object Inspect extends TestSuite_mariadb {
           /*
           ========================================
           SAVE:
-          AttrOneManString("Ns", "string", Eq, Seq("a"), None, None, Nil, Nil, None, None, Seq(0, 5))
-          AttrOneManInt("Ns", "int", Eq, Seq(1), None, None, Nil, Nil, None, None, Seq(0, 6))
+          AttrOneManString("Ns", "string", Eq, Seq("a"), None, None, Nil, Nil, None, None, Seq(0, 7))
+          AttrOneManInt("Ns", "int", Eq, Seq(1), None, None, Nil, Nil, None, None, Seq(0, 8))
 
-          INSERT INTO Ns (
-            string,
-            int
-          ) VALUES (?, ?)
+          Save(
+            Ns(
+              INSERT INTO Ns (
+                string,
+                int_
+              ) VALUES (?, ?)
+            )
+          )
           ----------------------------------------
           */
           // (values are visible in the model elements)
@@ -122,13 +132,17 @@ object Inspect extends TestSuite_mariadb {
           /*
           ========================================
           SAVE:
-          AttrOneManString("Ns", "string", Eq, Seq("a"), None, None, Nil, Nil, None, None, Seq(0, 5))
-          AttrOneManInt("Ns", "int", Eq, Seq(1), None, None, Nil, Nil, None, None, Seq(0, 6))
+          AttrOneManString("Ns", "string", Eq, Seq("a"), None, None, Nil, Nil, None, None, Seq(0, 7))
+          AttrOneManInt("Ns", "int", Eq, Seq(1), None, None, Nil, Nil, None, None, Seq(0, 8))
 
-          INSERT INTO Ns (
-            string,
-            int
-          ) VALUES (?, ?)
+          Save(
+            Ns(
+              INSERT INTO Ns (
+                string,
+                int_
+              ) VALUES (?, ?)
+            )
+          )
           ----------------------------------------
           */
           // (values are visible in the model elements)
@@ -148,13 +162,17 @@ object Inspect extends TestSuite_mariadb {
           /*
           ========================================
           INSERT:
-          AttrOneManString("Ns", "string", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 5))
-          AttrOneManInt("Ns", "int_", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 6))
+          AttrOneManString("Ns", "string", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 7))
+          AttrOneManInt("Ns", "int", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 8))
 
-          INSERT INTO Ns (
-            string,
-            int_
-          ) VALUES (?, ?)
+          Insert(
+            Ns(
+              INSERT INTO Ns (
+                string,
+                int_
+              ) VALUES (?, ?)
+            )
+          )
 
           (a,1)
           (b,2)
@@ -172,13 +190,17 @@ object Inspect extends TestSuite_mariadb {
           /*
           ========================================
           INSERT:
-          AttrOneManString("Ns", "string", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 5))
-          AttrOneManInt("Ns", "int_", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 6))
+          AttrOneManString("Ns", "string", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 7))
+          AttrOneManInt("Ns", "int", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 8))
 
-          INSERT INTO Ns (
-            string,
-            int_
-          ) VALUES (?, ?)
+          Insert(
+            Ns(
+              INSERT INTO Ns (
+                string,
+                int_
+              ) VALUES (?, ?)
+            )
+          )
 
           (a,1)
           (b,2)
@@ -201,14 +223,19 @@ object Inspect extends TestSuite_mariadb {
           /*
           ========================================
           UPDATE:
-          AttrOneTacID("Ns", "id", Eq, Seq("1"), None, None, Nil, Nil, None, None, Seq(0, 0))
-          AttrOneManString("Ns", "string", Eq, Seq("ZZZ"), None, None, Nil, Nil, None, None, Seq(0, 5))
+          AttrOneTacID("Ns", "id", Eq, Seq(1L), None, None, Nil, Nil, None, None, Seq(0, 0))
+          AttrOneManString("Ns", "string", Eq, Seq("ZZZ"), None, None, Nil, Nil, None, None, Seq(0, 7))
 
-          UPDATE Ns
-          SET
-            string = ?
-          WHERE Ns.id IN(1) AND
-            Ns.string IS NOT NULL
+          Update(
+            Ns(
+              UPDATE Ns
+              SET
+                string = ?
+              WHERE
+                Ns.id IN(1) AND
+                Ns.string IS NOT NULL
+            )
+          )
           ----------------------------------------
           */
           // (values are visible in the model elements)
@@ -225,14 +252,19 @@ object Inspect extends TestSuite_mariadb {
           /*
           ========================================
           UPDATE:
-          AttrOneTacID("Ns", "id", Eq, Seq("1"), None, None, Nil, Nil, None, None, Seq(0, 0))
-          AttrOneManString("Ns", "string", Eq, Seq("ZZZ"), None, None, Nil, Nil, None, None, Seq(0, 5))
+          AttrOneTacID("Ns", "id", Eq, Seq(1L), None, None, Nil, Nil, None, None, Seq(0, 0))
+          AttrOneManString("Ns", "string", Eq, Seq("ZZZ"), None, None, Nil, Nil, None, None, Seq(0, 7))
 
-          UPDATE Ns
-          SET
-            string = ?
-          WHERE Ns.id IN(1) AND
-            Ns.string IS NOT NULL
+          Update(
+            Ns(
+              UPDATE Ns
+              SET
+                string = ?
+              WHERE
+                Ns.id IN(1) AND
+                Ns.string IS NOT NULL
+            )
+          )
           ----------------------------------------
           */
           // (values are visible in the model elements)
@@ -250,16 +282,16 @@ object Inspect extends TestSuite_mariadb {
         for {
           List(a, b) <- Ns.string.int.insert(("a", 1), ("b", 2)).transact.map(_.ids)
           _ <- Ns(a).delete.inspect
-
-          // Deletions make sure not to orphan possible joins involving the deleted ids
           /*
           ========================================
           DELETE:
-          AttrOneTacID("Ns", "id", Eq, Seq("1"), None, None, Nil, Nil, None, None, Seq(0, 0))
+          AttrOneTacID("Ns", "id", Eq, Seq(1L), None, None, Nil, Nil, None, None, Seq(0, 0))
 
-          DELETE FROM Ns_refs_Ref WHERE Ns_id IN (1)
-          --------
-          DELETE FROM Ns WHERE Ns.id IN (1)
+          Delete(
+            Ns (
+              DELETE FROM Ns WHERE id IN (1)
+            )
+          )
           ----------------------------------------
           */
 
@@ -275,11 +307,13 @@ object Inspect extends TestSuite_mariadb {
           /*
           ========================================
           DELETE:
-          AttrOneTacID("Ns", "id", Eq, Seq("1"), None, None, Nil, Nil, None, None, Seq(0, 0))
+          AttrOneTacID("Ns", "id", Eq, Seq(1L), None, None, Nil, Nil, None, None, Seq(0, 0))
 
-          DELETE FROM Ns_refs_Ref WHERE Ns_id IN (1)
-          --------
-          DELETE FROM Ns WHERE Ns.id IN (1)
+          Delete(
+            Ns (
+              DELETE FROM Ns WHERE id IN (1)
+            )
+          )
           ----------------------------------------
           */
 

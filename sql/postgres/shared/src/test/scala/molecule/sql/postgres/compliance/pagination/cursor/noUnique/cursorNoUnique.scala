@@ -3,12 +3,12 @@ package molecule.sql.postgres.compliance.pagination.cursor.noUnique
 import molecule.coreTests.spi.pagination.cursor.noUnique._
 import molecule.sql.postgres.setup.TestAsync_postgres
 
-object AttrOrderMandatory extends AttrOrderMandatory with TestAsync_postgres
-object AttrOrderOptional extends AttrOrderOptional with TestAsync_postgres
-object DirectionsMandatory extends DirectionsMandatory with TestAsync_postgres
-object DirectionsOptional extends DirectionsOptional with TestAsync_postgres
-object MutationAdd extends MutationAdd with TestAsync_postgres
-object MutationDelete extends MutationDelete with TestAsync_postgres
-object Nested extends Nested with TestAsync_postgres
-object OptNested extends OptNested with TestAsync_postgres
-object TypesOptional extends TypesOptional with TestAsync_postgres
+object Test_AttrOrderMandatory extends AttrOrderMandatory with TestAsync_postgres
+object Test_AttrOrderOptional extends AttrOrderOptional with TestAsync_postgres
+object Test_DirectionsMandatory extends DirectionsMandatory with TestAsync_postgres
+object Test_DirectionsOptional extends DirectionsOptional with TestAsync_postgres
+object Test_MutationAdd extends MutationAdd with TestAsync_postgres
+object Test_MutationDelete extends MutationDelete with TestAsync_postgres
+object Test_Nested extends Nested with TestAsync_postgres
+object Test_OptNested extends OptNested with TestAsync_postgres
+object Test_TypesOptional extends TypesOptional with TestAsync_postgres

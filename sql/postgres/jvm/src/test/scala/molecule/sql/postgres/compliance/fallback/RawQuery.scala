@@ -11,7 +11,7 @@ import upickle.default.read
 import utest._
 import scala.language.implicitConversions
 
-object RawQuery extends TestSuite_postgres {
+object Test_RawQuery extends TestSuite_postgres {
 
   override lazy val tests = Tests {
 

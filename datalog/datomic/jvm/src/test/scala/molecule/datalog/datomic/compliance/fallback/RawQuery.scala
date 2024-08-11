@@ -7,7 +7,7 @@ import molecule.datalog.datomic.setup.TestSuite_datomic
 import utest._
 import scala.language.implicitConversions
 
-object RawQuery extends TestSuite_datomic {
+object Test_RawQuery extends TestSuite_datomic {
 
   override lazy val tests = Tests {
 

@@ -9,7 +9,7 @@ import utest._
 import scala.language.implicitConversions
 import java.math.{BigDecimal => jBigDecimal}
 
-object RawQuery extends TestSuite_mariadb {
+object Test_RawQuery extends TestSuite_mariadb {
 
   override lazy val tests = Tests {
 

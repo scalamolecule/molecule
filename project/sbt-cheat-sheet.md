@@ -1,4 +1,4 @@
-# Build cheat sheet
+# Sbt cheat sheet
 
 
 ## Compile
@@ -39,14 +39,12 @@ To have molecule jars generated, add `-Dmolecule=true`
 
 1) Set molecule build version to new version
 2) `sbt ++2.12.19 "project baseJVM" publishLocal` (using sbt-molecule snapshot)
-3) Set sbt-molecule to new version and `sbt publishLocal`
-4) Molecule `sbt +publishLocal`
-5) Test sbt-molecule `./test-all.sh`
-6) sbt-molecule: `sbt publishSigned`
-7) molecule
-   - `sbt +compile`
-   - `sbt +publishSigned -Ddocs=true`
-
+3) Set sbt-molecule to new version and `molecule-base` dep to new molecule version in all sbt/sbt test build files 
+4) sbt-molecule: `sbt publishLocal`
+5) molecule: `sbt +publishLocal`
+6) Test sbt-molecule `./test-all.sh`
+7) sbt-molecule: `sbt publishSigned`
+8) molecule: `sbt +publishSigned -Ddocs=true`
 
 
 Publish versions separately

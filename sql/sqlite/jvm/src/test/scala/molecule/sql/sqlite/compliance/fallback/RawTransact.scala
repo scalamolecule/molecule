@@ -7,7 +7,7 @@ import molecule.sql.sqlite.setup.TestSuite_sqlite
 import utest._
 import scala.language.implicitConversions
 
-object RawTransact extends TestSuite_sqlite {
+object Test_RawTransact extends TestSuite_sqlite {
 
   override lazy val tests = Tests {
 

@@ -7,7 +7,7 @@ import molecule.sql.mysql.setup.TestSuite_mysql
 import utest._
 import scala.language.implicitConversions
 
-object RawTransact extends TestSuite_mysql {
+object Test_RawTransact extends TestSuite_mysql {
 
   override lazy val tests = Tests {
 

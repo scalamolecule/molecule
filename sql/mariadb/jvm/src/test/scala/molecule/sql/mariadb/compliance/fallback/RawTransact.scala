@@ -7,7 +7,7 @@ import molecule.sql.mariadb.setup.TestSuite_mariadb
 import utest._
 import scala.language.implicitConversions
 
-object RawTransact extends TestSuite_mariadb {
+object Test_RawTransact extends TestSuite_mariadb {
 
   override lazy val tests = Tests {
 

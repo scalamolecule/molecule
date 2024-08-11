@@ -93,7 +93,7 @@ trait ResolveOptRefPull[Tpl] { self: Model2DatomicQuery[Tpl] =>
       ref: Ref,
       elements: List[Element],
       level: Int,
-      attrIndex: Int,
+      attrIndex: Int
     ): String = {
       val indent  = "  " * (level + 6)
       val refAttr = s":${ref.ns}/${ref.refAttr}"

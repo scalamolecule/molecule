@@ -8,7 +8,7 @@ import utest._
 import scala.language.implicitConversions
 import upickle.default.read
 
-object RawQuery extends TestSuite_sqlite {
+object Test_RawQuery extends TestSuite_sqlite {
 
   override lazy val tests = Tests {
 

@@ -3,8 +3,8 @@ package molecule.datalog.datomic.compliance.validation.crud.insert
 import molecule.coreTests.spi.validation.insert._
 import molecule.datalog.datomic.setup.TestAsync_datomic
 
-object FormatConstants  extends FormatConstants with TestAsync_datomic
-object FormatVariables extends FormatVariables with TestAsync_datomic
+object Test_FormatConstants  extends FormatConstants with TestAsync_datomic
+object Test_FormatVariables extends FormatVariables with TestAsync_datomic
 object Nested extends Nested with TestAsync_datomic
 object Semantics extends Semantics with TestAsync_datomic
 object TypesOne extends TypesOne with TestAsync_datomic

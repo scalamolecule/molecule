@@ -105,6 +105,7 @@ object AdhocJVM_datomic extends TestSuite_datomic {
         //            |        [(identity ?a) ?id2]]
         //            |""".stripMargin, true)
 
+
         _ <- A.s.i.a1.B.?(B.i).D.?(D.i).query.i.get.map(_ ==> List(
           ("a", 1, Some(2), Some(4)),
         ))

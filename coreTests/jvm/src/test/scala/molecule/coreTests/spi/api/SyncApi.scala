@@ -27,6 +27,26 @@ trait SyncApi extends CoreTestSuite with ApiSync { spi: SpiSync =>
       }
 
 
+      "Opt ref" - refs { implicit conn =>
+        import molecule.coreTests.dataModels.core.dsl.Refs._
+
+        A.i(1).save.transact
+
+        // Optional card-one ref (SQL left join)
+        A.i.B.?(B.i).query.get ==> List(
+          (1, None),
+        )
+
+        A.i(2).B.i(3).s("b").save.transact
+
+        // Optional card-one ref (SQL left join)
+        A.i.B.?(B.i.s).query.i.get ==> List(
+          (1, None),
+          (2, Some((3, "b"))),
+        )
+      }
+
+
       "Error handling" - validation { implicit conn =>
         import molecule.coreTests.dataModels.core.dsl.Validation.Type
 

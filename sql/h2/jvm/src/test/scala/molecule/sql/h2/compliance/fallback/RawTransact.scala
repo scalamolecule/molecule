@@ -7,7 +7,7 @@ import molecule.sql.h2.setup.TestSuite_h2
 import utest._
 import scala.language.implicitConversions
 
-object RawTransact extends TestSuite_h2 {
+object Test_RawTransact extends TestSuite_h2 {
 
   override lazy val tests = Tests {
 

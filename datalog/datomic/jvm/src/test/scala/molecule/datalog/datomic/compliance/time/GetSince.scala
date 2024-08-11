@@ -9,7 +9,7 @@ import utest._
 import scala.language.implicitConversions
 
 
-object GetSince extends TestSuite_datomic {
+object Test_GetSince extends TestSuite_datomic {
 
   override lazy val tests = Tests {
 

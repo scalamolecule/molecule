@@ -7,7 +7,7 @@ import molecule.datalog.datomic.setup.TestSuite_datomic
 import utest._
 import scala.language.implicitConversions
 
-object Inspect extends TestSuite_datomic {
+object Test_Inspect extends TestSuite_datomic {
 
   override lazy val tests = Tests {
 
@@ -16,12 +16,12 @@ object Inspect extends TestSuite_datomic {
       "Inspect without fetching" - types { implicit conn =>
         for {
           _ <- Ns.string("a").int(1).save.transact
-          _ <- Ns.string.int.query.inspect.map(_ ==> ()) // returns Unit
+          _ <- Ns.string.int.query.inspect.map(_ ==> ((): Unit)) // returns Unit
           /*
           ========================================
           QUERY:
-          AttrOneManString("Ns", "string", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 5))
-          AttrOneManInt("Ns", "int", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 6))
+          AttrOneManString("Ns", "string", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 7))
+          AttrOneManInt("Ns", "int", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 8))
 
           [:find  ?b ?c
            :where [?a :Ns/string ?b]
@@ -38,8 +38,8 @@ object Inspect extends TestSuite_datomic {
           /*
           ========================================
           QUERY:
-          AttrOneManString("Ns", "string", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 5))
-          AttrOneManInt("Ns", "int", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 6))
+          AttrOneManString("Ns", "string", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 7))
+          AttrOneManInt("Ns", "int", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 8))
 
           [:find  ?b ?c
            :where [?a :Ns/string ?b]
@@ -56,14 +56,15 @@ object Inspect extends TestSuite_datomic {
           ========================================
           QUERY:
           AttrOneManInt("Ns", "i", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 1))
-          AttrOneManDouble("Ns", "int", Fn(avg,None), Seq(), None, None, Nil, Nil, None, Some("a1"), Seq(0, 6))
+          AttrOneManDouble("Ns", "int", Fn(avg,None), Seq(), None, None, Nil, Nil, None, Some("a1"), Seq(0, 8))
           Nested(
-            Ref("Ns", "refs", "Ref", CardSet, Seq(0, 51, 1)),
+            Ref("Ns", "refs", "Ref", CardSet, false, Seq(0, 53, 1)),
             List(
-              AttrOneManString("Ref", "string", Eq, Seq("foo"), None, None, Nil, Nil, None, None, Seq(1, 55))))
+              AttrOneManString("Ref", "string", Eq, Seq("foo"), None, None, Nil, Nil, None, None, Seq(1, 101))))
 
           [:find  ?id0 ?b
                   (avg ?c) ?e
+           :with  ?a
            :in    $ [?e ...]
            :where [?a :Ns/i ?b]
                   [?a :Ns/int ?c]
@@ -87,8 +88,8 @@ object Inspect extends TestSuite_datomic {
           /*
           ========================================
           SAVE:
-          AttrOneManString("Ns", "string", Eq, Seq("a"), None, None, Nil, Nil, None, None, Seq(0, 5))
-          AttrOneManInt("Ns", "int", Eq, Seq(1), None, None, Nil, Nil, None, None, Seq(0, 6))
+          AttrOneManString("Ns", "string", Eq, Seq("a"), None, None, Nil, Nil, None, None, Seq(0, 7))
+          AttrOneManInt("Ns", "int", Eq, Seq(1), None, None, Nil, Nil, None, None, Seq(0, 8))
 
           [
             [:db/add #db/id[db.part/user -1] :Ns/string a]
@@ -108,8 +109,8 @@ object Inspect extends TestSuite_datomic {
           /*
           ========================================
           SAVE:
-          AttrOneManString("Ns", "string", Eq, Seq("a"), None, None, Nil, Nil, None, None, Seq(0, 5))
-          AttrOneManInt("Ns", "int", Eq, Seq(1), None, None, Nil, Nil, None, None, Seq(0, 6))
+          AttrOneManString("Ns", "string", Eq, Seq("a"), None, None, Nil, Nil, None, None, Seq(0, 7))
+          AttrOneManInt("Ns", "int", Eq, Seq(1), None, None, Nil, Nil, None, None, Seq(0, 8))
 
           [
             [:db/add #db/id[db.part/user -1] :Ns/string a]
@@ -133,8 +134,8 @@ object Inspect extends TestSuite_datomic {
           /*
           ========================================
           INSERT:
-          AttrOneManString("Ns", "string", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 5))
-          AttrOneManInt("Ns", "int", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 6))
+          AttrOneManString("Ns", "string", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 7))
+          AttrOneManInt("Ns", "int", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 8))
 
           [
             [:db/add #db/id[db.part/user -1] :Ns/string a]
@@ -156,8 +157,8 @@ object Inspect extends TestSuite_datomic {
           /*
           ========================================
           INSERT:
-          AttrOneManString("Ns", "string", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 5))
-          AttrOneManInt("Ns", "int", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 6))
+          AttrOneManString("Ns", "string", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 7))
+          AttrOneManInt("Ns", "int", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 8))
 
           [
             [:db/add #db/id[db.part/user -1] :Ns/string a]
@@ -184,8 +185,8 @@ object Inspect extends TestSuite_datomic {
           /*
           ========================================
           UPDATE:
-          AttrOneTacID("Ns", "id", Eq, Seq("17592186045418"), None, None, Nil, Nil, None, None, Seq(0, 0))
-          AttrOneManString("Ns", "string", Eq, Seq("ZZZ"), None, None, Nil, Nil, None, None, Seq(0, 5))
+          AttrOneTacID("Ns", "id", Eq, Seq(17592186045418L), None, None, Nil, Nil, None, None, Seq(0, 0))
+          AttrOneManString("Ns", "string", Eq, Seq("ZZZ"), None, None, Nil, Nil, None, None, Seq(0, 7))
 
           [
             [:db/add 17592186045418 :Ns/string ZZZ]
@@ -205,8 +206,8 @@ object Inspect extends TestSuite_datomic {
           /*
           ========================================
           UPDATE:
-          AttrOneTacID("Ns", "id", Eq, Seq("17592186045418"), None, None, Nil, Nil, None, None, Seq(0, 0))
-          AttrOneManString("Ns", "string", Eq, Seq("ZZZ"), None, None, Nil, Nil, None, None, Seq(0, 5))
+          AttrOneTacID("Ns", "id", Eq, Seq(17592186045418L), None, None, Nil, Nil, None, None, Seq(0, 0))
+          AttrOneManString("Ns", "string", Eq, Seq("ZZZ"), None, None, Nil, Nil, None, None, Seq(0, 7))
 
           [
             [:db/add 17592186045418 :Ns/string ZZZ]
@@ -227,11 +228,10 @@ object Inspect extends TestSuite_datomic {
         for {
           List(a, b) <- Ns.string.int.insert(("a", 1), ("b", 2)).transact.map(_.ids)
           _ <- Ns(a).delete.inspect
-
           /*
           ========================================
           DELETE:
-          AttrOneTacID("Ns", "id", Eq, Seq("17592186045418"), None, None, Nil, Nil, None, None, Seq(0, 0))
+          AttrOneTacID("Ns", "id", Eq, Seq(17592186045418L), None, None, Nil, Nil, None, None, Seq(0, 0))
 
           [
             [:db/retractEntity 17592186045418]
@@ -251,7 +251,7 @@ object Inspect extends TestSuite_datomic {
           /*
           ========================================
           DELETE:
-          AttrOneTacID("Ns", "id", Eq, Seq("17592186045418"), None, None, Nil, Nil, None, None, Seq(0, 0))
+          AttrOneTacID("Ns", "id", Eq, Seq(17592186045418L), None, None, Nil, Nil, None, None, Seq(0, 0))
 
           [
             [:db/retractEntity 17592186045418]

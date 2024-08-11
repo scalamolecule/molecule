@@ -3,11 +3,11 @@ package molecule.sql.mysql.compliance.pagination.cursor.subUnique
 import molecule.coreTests.spi.pagination.cursor.subUnique._
 import molecule.sql.mysql.setup.TestAsync_mysql
 
-object AttrOrder extends AttrOrder with TestAsync_mysql
-object DirectionsStandardUnique extends DirectionsStandardUnique with TestAsync_mysql
-object DirectionsUniqueStandard extends DirectionsUniqueStandard with TestAsync_mysql
-object MutationAdd extends MutationAdd with TestAsync_mysql
-object MutationDelete extends MutationDelete with TestAsync_mysql
-object Nested extends Nested with TestAsync_mysql
-object OptNested extends OptNested with TestAsync_mysql
-object TypesUniqueValue extends TypesUniqueValue with TestAsync_mysql
+object Test_AttrOrder extends AttrOrder with TestAsync_mysql
+object Test_DirectionsStandardUnique extends DirectionsStandardUnique with TestAsync_mysql
+object Test_DirectionsUniqueStandard extends DirectionsUniqueStandard with TestAsync_mysql
+object Test_MutationAdd extends MutationAdd with TestAsync_mysql
+object Test_MutationDelete extends MutationDelete with TestAsync_mysql
+object Test_Nested extends Nested with TestAsync_mysql
+object Test_OptNested extends OptNested with TestAsync_mysql
+object Test_TypesUniqueValue extends TypesUniqueValue with TestAsync_mysql

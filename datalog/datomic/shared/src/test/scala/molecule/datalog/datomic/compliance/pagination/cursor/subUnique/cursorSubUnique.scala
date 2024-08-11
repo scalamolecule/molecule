@@ -3,11 +3,11 @@ package molecule.datalog.datomic.compliance.pagination.cursor.subUnique
 import molecule.coreTests.spi.pagination.cursor.subUnique._
 import molecule.datalog.datomic.setup.TestAsync_datomic
 
-object AttrOrder extends AttrOrder with TestAsync_datomic
-object DirectionsStandardUnique extends DirectionsStandardUnique with TestAsync_datomic
-object DirectionsUniqueStandard extends DirectionsUniqueStandard with TestAsync_datomic
-object MutationAdd extends MutationAdd with TestAsync_datomic
-object MutationDelete extends MutationDelete with TestAsync_datomic
+object Test_AttrOrder extends AttrOrder with TestAsync_datomic
+object Test_DirectionsStandardUnique extends DirectionsStandardUnique with TestAsync_datomic
+object Test_DirectionsUniqueStandard extends DirectionsUniqueStandard with TestAsync_datomic
+object Test_MutationAdd extends MutationAdd with TestAsync_datomic
+object Test_MutationDelete extends MutationDelete with TestAsync_datomic
 object Nested extends Nested with TestAsync_datomic
-object OptNested extends OptNested with TestAsync_datomic
+object Test_OptNested extends OptNested with TestAsync_datomic
 object TypesUniqueValue extends TypesUniqueValue with TestAsync_datomic

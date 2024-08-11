@@ -50,7 +50,7 @@ Data can also be fetched asynchronously in a `Future` or `ZIO`.
 ## Main features of Molecule
 
 - Support for [PostgreSQL](https://www.postgresql.org), [SQlite](https://sqlite.org), [MySQL](https://www.mysql.com), [MariaDB](https://mariadb.com), [H2](https://h2database.com/html/main.html) and [Datomic](http://www.datomic.com) databases. More can easily be added
-- Molecules for any database behave identically (each db pass the same SPI compliance 1400+ test suite)
+- Molecules for any database behave identically. Each db pass the same SPI compliance test suite (~1500 tests).
 - Targets Scala 3.3, 2.13 and 2.12 on JVM and JS platforms
 - Synchronous, Asynchronous (Future) and ZIO APIs
 - All Scala primitive types and collection types available as molecule attributes (!)
@@ -181,13 +181,13 @@ Add the following to your build files:
 `project/build.properties`:
 
 ```
-sbt.version = 1.10.1
+sbt.version = 1.10.0
 ```
 
 `project/plugins.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.8.1")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.9.0")
 ```
 
 `build.sbt`:
@@ -198,12 +198,12 @@ lazy val yourProject = project.in(file("app"))
   .settings(
     libraryDependencies ++= Seq(
       // One or more of:
-      "org.scalamolecule" %%% "molecule-sql-postgres" % "0.9.1",
-      "org.scalamolecule" %%% "molecule-sql-sqlite" % "0.9.1",
-      "org.scalamolecule" %%% "molecule-sql-mysql" % "0.9.1",
-      "org.scalamolecule" %%% "molecule-sql-mariadb" % "0.9.1",
-      "org.scalamolecule" %%% "molecule-sql-h2" % "0.9.1",
-      "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.9.1",
+      "org.scalamolecule" %%% "molecule-sql-postgres" % "0.10.0",
+      "org.scalamolecule" %%% "molecule-sql-sqlite" % "0.10.0",
+      "org.scalamolecule" %%% "molecule-sql-mysql" % "0.10.0",
+      "org.scalamolecule" %%% "molecule-sql-mariadb" % "0.10.0",
+      "org.scalamolecule" %%% "molecule-sql-h2" % "0.10.0",
+      "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.10.0",
     ),
     moleculeSchemas := Seq("app") // paths to your data model definitions
   )
@@ -211,7 +211,7 @@ lazy val yourProject = project.in(file("app"))
 
 ## Explore code
 
-The `coreTests` module in this repo has several data model definitions and more than 1400 tests that show all details of
+The `coreTests` module in this repo has several data model definitions and ~1500 tests that show all details of
 how molecule can be used. This forms the Service Provider Interface that each database implementation needs to comply to
 in order to offer all functionality of Molecule.
 

@@ -8,7 +8,7 @@ import upickle.default.read
 import utest._
 import scala.language.implicitConversions
 
-object RawQuery extends TestSuite_mysql {
+object Test_RawQuery extends TestSuite_mysql {
 
   override lazy val tests = Tests {
 

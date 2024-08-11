@@ -40,47 +40,35 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
           (1, Some(Set(1, 2))),
         ).transact
 
-        _ <- rawQuery(
-          """SELECT DISTINCT
-            |  A.i,
-            |  JSON_GROUP_ARRAY(_B_iSet.VALUE) AS B_iSet
-            |FROM A
-            |  LEFT JOIN B ON
-            |    A.b = B.id
-            |  left JOIN JSON_EACH(B.iSet) _B_iSet ON
-            |    B.iSet IS NOT NULL
-            |WHERE
-            |  A.i IS NOT NULL
-            |GROUP BY A.i
-            |HAVING COUNT(*) > 0;
-            |""".stripMargin, true)
-
-        _ <- A.i.B.?(B.iSet).query.i.get.map(_ ==> List(
+        _ <- A.i.a1.B.?(B.iSet).query.i.get.map(_ ==> List(
           (0, None),
           (1, Some(Set(1, 2))),
         ))
+/*
+========================================
+QUERY:
+AttrOneManInt("A", "i", V, Seq(), None, None, Nil, Nil, None, Some("a1"), Seq(0, 1))
+OptRef(
+  Ref("A", "b", "B", CardOne, false, Seq(0, 8, 1)),
+  List(
+    AttrSetManInt("B", "iSet", V, Set(), None, None, Nil, Nil, None, None, Seq(1, 25))))
 
-        //        _ <- A.i.B.?(B.iSeq).insert(
-        //          (0, None),
-        //          (1, Some(Seq(1, 2, 1))),
-        //        ).transact
-        //
-        //        _ <- A.i.B.?(B.iSeq).query.i.get.map(_ ==> List(
-        //          (0, None),
-        //          (1, Some(Seq(1, 2, 1))),
-        //        ))
-
-        //        _ <- A.i.B.?(B.iMap).insert(
-        //          (0, None),
-        //          (1, Some(Map("a" -> 1, "b" -> 2))),
-        //        ).transact
-        //
-        //        _ <- A.i.B.?(B.iMap).query.i.get.map(_ ==> List(
-        //          (0, None),
-        //          (1, Some(Map("a" -> 1, "b" -> 2))),
-        //        ))
-
-
+SELECT DISTINCT
+  A.i,
+  JSON_GROUP_ARRAY(_B_iSet.VALUE) AS B_iSet
+FROM A
+  LEFT JOIN B ON
+    A.b = B.id
+  LEFT JOIN JSON_EACH(B.iSet) _B_iSet ON
+    B.iSet IS NOT NULL
+WHERE
+  A.i    IS NOT NULL AND
+  B.iSet IS NOT NULL
+GROUP BY A.i
+HAVING COUNT(*) > 0
+ORDER BY A.i;
+----------------------------------------
+ */
         //        _ <- rawQuery(
         //          """SELECT DISTINCT
         //            |  i,

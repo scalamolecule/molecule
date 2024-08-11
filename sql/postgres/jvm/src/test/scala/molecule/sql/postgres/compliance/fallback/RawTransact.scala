@@ -7,7 +7,7 @@ import molecule.sql.postgres.setup.TestSuite_postgres
 import utest._
 import scala.language.implicitConversions
 
-object RawTransact extends TestSuite_postgres {
+object Test_RawTransact extends TestSuite_postgres {
 
   override lazy val tests = Tests {
 

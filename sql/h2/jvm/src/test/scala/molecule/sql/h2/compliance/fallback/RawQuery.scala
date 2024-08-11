@@ -10,7 +10,7 @@ import upickle.default.read
 import utest._
 import scala.language.implicitConversions
 
-object RawQuery extends TestSuite_h2 {
+object Test_RawQuery extends TestSuite_h2 {
 
   override lazy val tests = Tests {
 

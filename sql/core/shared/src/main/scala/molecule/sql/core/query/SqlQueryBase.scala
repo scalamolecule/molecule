@@ -68,7 +68,13 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions {
     val leftJoinPredicates               = where.drop(whereSplit).map { case (col, pred) => s"$col $pred" }
     val updatedLeftJoin                  = (leftJoin, table, as, colsMatch ++ leftJoinPredicates)
     joins.update(joins.length - 1, updatedLeftJoin)
-    where.takeInPlace(whereSplit)
+
+    val firstPredicates = where.dropRight(where.length - whereSplit)
+    where.clear()
+    where ++= firstPredicates
+
+    // Same as (but doesn't exist in scala 2.12):
+    // where.takeInPlace(whereSplit)
   }
 
   private var index = 0
