@@ -91,13 +91,12 @@ object Rpc_datomic
 
   override def update(
     proxy: ConnProxy,
-    elementsRaw: List[Element],
     elements: List[Element],
     isUpsert: Boolean = false
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
-      txReport <- update_transact(Update(elementsRaw, isUpsert))(conn, global)
+      txReport <- update_transact(Update(elements, isUpsert))(conn, global)
     } yield txReport
   }
 

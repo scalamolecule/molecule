@@ -181,7 +181,7 @@ Add the following to your build files:
 `project/build.properties`:
 
 ```
-sbt.version = 1.10.0
+sbt.version = 1.10.1
 ```
 
 `project/plugins.sbt`:
@@ -198,12 +198,12 @@ lazy val yourProject = project.in(file("app"))
   .settings(
     libraryDependencies ++= Seq(
       // One or more of:
-      "org.scalamolecule" %%% "molecule-sql-postgres" % "0.10.0",
-      "org.scalamolecule" %%% "molecule-sql-sqlite" % "0.10.0",
-      "org.scalamolecule" %%% "molecule-sql-mysql" % "0.10.0",
-      "org.scalamolecule" %%% "molecule-sql-mariadb" % "0.10.0",
-      "org.scalamolecule" %%% "molecule-sql-h2" % "0.10.0",
-      "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.10.0",
+      "org.scalamolecule" %%% "molecule-sql-postgres" % "0.10.1",
+      "org.scalamolecule" %%% "molecule-sql-sqlite" % "0.10.1",
+      "org.scalamolecule" %%% "molecule-sql-mysql" % "0.10.1",
+      "org.scalamolecule" %%% "molecule-sql-mariadb" % "0.10.1",
+      "org.scalamolecule" %%% "molecule-sql-h2" % "0.10.1",
+      "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.10.1",
     ),
     moleculeSchemas := Seq("app") // paths to your data model definitions
   )

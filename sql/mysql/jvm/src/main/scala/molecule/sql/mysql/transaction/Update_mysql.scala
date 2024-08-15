@@ -96,12 +96,12 @@ trait Update_mysql
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    val paramIndex = update.setCol(s"$attr = ?")
+    val paramIndex = updateAction.setCol(s"$attr = ?")
     if (map.isEmpty) {
-      update.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
+      updateAction.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
     } else {
       setAttrPresence(ns, attr)
-      update.addColSetter((ps: PS) =>
+      updateAction.addColSetter((ps: PS) =>
         ps.setString(paramIndex, map2json(map, value2json))
       )
     }
@@ -119,9 +119,9 @@ trait Update_mysql
     if (map.nonEmpty) {
       setAttrPresence(ns, attr)
       val setAttr    = s"$ns.$attr = JSON_MERGE_PATCH(IFNULL($ns.$attr, JSON_OBJECT()), ?)"
-      val paramIndex = update.setCol(setAttr)
+      val paramIndex = updateAction.setCol(setAttr)
       val json       = map2json(map, value2json)
-      update.addColSetter((ps: PS) =>
+      updateAction.addColSetter((ps: PS) =>
         ps.setString(paramIndex, json)
       )
     }
@@ -142,8 +142,8 @@ trait Update_mysql
            |    WHEN JSON_OBJECT() THEN NULL
            |    ELSE JSON_REMOVE($ns.$attr, $keys1)
            |  END""".stripMargin
-      update.setCol(setAttr)
-      update.addColSetter((_: PS) => ())
+      updateAction.setCol(setAttr)
+      updateAction.addColSetter((_: PS) => ())
     }
   }
 
@@ -157,19 +157,19 @@ trait Update_mysql
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     refNs.fold {
-      val paramIndex = update.setCol(s"$attr = ?")
+      val paramIndex = updateAction.setCol(s"$attr = ?")
       if (iterable.nonEmpty) {
         setAttrPresence(ns, attr)
         val json = iterable2json(iterable.asInstanceOf[Iterable[T]], value2json)
-        update.addColSetter((ps: PS) => ps.setString(paramIndex, json))
+        updateAction.addColSetter((ps: PS) => ps.setString(paramIndex, json))
       } else {
-        update.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
+        updateAction.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
       }
     } { refNs =>
-      update.deleteRefIds(attr, refNs, getUpdateId)
+      updateAction.deleteRefIds(attr, refNs, getUpdateId)
       val refIds = iterable.asInstanceOf[Set[Long]]
       if (refIds.nonEmpty) {
-        update.insertRefIds(attr, refNs, refIds)
+        updateAction.insertRefIds(attr, refNs, refIds)
       }
     }
   }
@@ -185,15 +185,15 @@ trait Update_mysql
       if (iterable.nonEmpty) {
         setAttrPresence(ns, attr)
         val setAttr    = s"$attr = JSON_MERGE(IFNULL($attr, '[]'), ?)"
-        val paramIndex = update.setCol(setAttr)
-        update.addColSetter((ps: PS) => {
+        val paramIndex = updateAction.setCol(setAttr)
+        updateAction.addColSetter((ps: PS) => {
           val json = iterable2json(iterable.asInstanceOf[Iterable[T]], value2json)
           ps.setString(paramIndex, json)
         })
       }
     } { refNs =>
       if (iterable.nonEmpty) {
-        update.insertRefIds(attr, refNs, iterable.asInstanceOf[Set[Long]])
+        updateAction.insertRefIds(attr, refNs, iterable.asInstanceOf[Set[Long]])
       }
     }
   }
@@ -209,23 +209,23 @@ trait Update_mysql
     refNs.fold {
       if (iterable.nonEmpty) {
         setAttrPresence(ns, attr)
-        val valueTable    = "table_" + update.colCount
+        val valueTable    = "table_" + updateAction.colCount
         val cast          = exts(1)
         val retractValues = iterable.asInstanceOf[Iterable[T]].map(one2json).mkString(", ")
 
-        update.setCol(
+        updateAction.setCol(
           s"""$attr = (
              |    SELECT JSON_ARRAYAGG($valueTable.v)
              |    FROM   JSON_TABLE($ns.$attr, '$$[*]' COLUMNS (v $cast PATH '$$')) $valueTable
              |    WHERE  $valueTable.v NOT IN ($retractValues)
              |  )""".stripMargin
         )
-        update.addColSetter((_: PS) => ())
+        updateAction.addColSetter((_: PS) => ())
       }
     } { refNs =>
       if (iterable.nonEmpty) {
         val refIds = iterable.asInstanceOf[Set[Long]]
-        update.deleteRefIds(attr, refNs, getUpdateId, refIds)
+        updateAction.deleteRefIds(attr, refNs, getUpdateId, refIds)
       }
     }
   }

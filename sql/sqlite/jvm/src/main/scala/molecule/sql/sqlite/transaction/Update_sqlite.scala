@@ -44,12 +44,12 @@ trait Update_sqlite
              |    )
              |  )""".stripMargin
         val json       = iterable2json(set, value2json)
-        val paramIndex = update.setCol(setAttr)
-        update.addColSetter((ps: PS) => ps.setString(paramIndex, json))
+        val paramIndex = updateAction.setCol(setAttr)
+        updateAction.addColSetter((ps: PS) => ps.setString(paramIndex, json))
       }
     } { refNs =>
       if (set.nonEmpty) {
-        update.insertRefIds(attr, refNs, set.asInstanceOf[Set[Long]])
+        updateAction.insertRefIds(attr, refNs, set.asInstanceOf[Set[Long]])
       }
     }
   }
@@ -68,7 +68,7 @@ trait Update_sqlite
       if (set.nonEmpty) {
         setAttrPresence(ns, attr)
         val retractValues = set.map(one2json).mkString(", ")
-        update.setCol(
+        updateAction.setCol(
           s"""$attr = (
              |    SELECT (
              |      CASE JSON_GROUP_ARRAY(VALUE)
@@ -85,12 +85,12 @@ trait Update_sqlite
              |    )
              |  )""".stripMargin
         )
-        update.addColSetter((_: PS) => ())
+        updateAction.addColSetter((_: PS) => ())
       }
     } { refNs =>
       if (set.nonEmpty) {
         val refIds = set.asInstanceOf[Set[Long]]
-        update.deleteRefIds(attr, refNs, getUpdateId, refIds)
+        updateAction.deleteRefIds(attr, refNs, getUpdateId, refIds)
       }
     }
   }
@@ -131,12 +131,12 @@ trait Update_sqlite
              |    )
              |  )""".stripMargin
         val json       = iterable2json(seq, value2json)
-        val paramIndex = update.setCol(setAttr)
-        update.addColSetter((ps: PS) => ps.setString(paramIndex, json))
+        val paramIndex = updateAction.setCol(setAttr)
+        updateAction.addColSetter((ps: PS) => ps.setString(paramIndex, json))
       }
     } { refNs =>
       if (seq.nonEmpty) {
-        update.insertRefIds(attr, refNs, seq.asInstanceOf[Set[Long]])
+        updateAction.insertRefIds(attr, refNs, seq.asInstanceOf[Set[Long]])
       }
     }
   }
@@ -155,7 +155,7 @@ trait Update_sqlite
       if (seq.nonEmpty) {
         setAttrPresence(ns, attr)
         val retractValues = seq.map(one2json).mkString(", ")
-        update.setCol(
+        updateAction.setCol(
           s"""$attr = (
              |    SELECT (
              |      CASE JSON_GROUP_ARRAY(VALUE)
@@ -172,11 +172,11 @@ trait Update_sqlite
              |    )
              |  )""".stripMargin
         )
-        update.addColSetter((_: PS) => ())
+        updateAction.addColSetter((_: PS) => ())
       }
     } { refNs =>
       if (seq.nonEmpty) {
-        update.insertRefIds(attr, refNs, seq.asInstanceOf[Set[Long]])
+        updateAction.insertRefIds(attr, refNs, seq.asInstanceOf[Set[Long]])
       }
     }
   }
@@ -190,12 +190,12 @@ trait Update_sqlite
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    val paramIndex = update.setCol(s"$attr = ?")
+    val paramIndex = updateAction.setCol(s"$attr = ?")
     if (map.isEmpty) {
-      update.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
+      updateAction.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
     } else {
       setAttrPresence(ns, attr)
-      update.addColSetter((ps: PS) =>
+      updateAction.addColSetter((ps: PS) =>
         ps.setString(paramIndex, map2json(map, value2json))
       )
     }
@@ -220,8 +220,8 @@ trait Update_sqlite
       }.mkString(", ")
       val setAttr =
         s"$attr = JSON_SET(IFNULL($attr, JSON_OBJECT()), $pairs)"
-      update.setCol(setAttr)
-      update.addColSetter((_: PS) => ())
+      updateAction.setCol(setAttr)
+      updateAction.addColSetter((_: PS) => ())
     }
   }
 
@@ -243,8 +243,8 @@ trait Update_sqlite
            |    ELSE JSON_REMOVE($attr, $keys1)
            |    END
            |  )""".stripMargin
-      update.setCol(setAttr)
-      update.addColSetter((_: PS) => ())
+      updateAction.setCol(setAttr)
+      updateAction.addColSetter((_: PS) => ())
     }
   }
 
@@ -259,21 +259,21 @@ trait Update_sqlite
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     optRefNs.fold {
-      val paramIndex = update.setCol(s"$attr = ?")
+      val paramIndex = updateAction.setCol(s"$attr = ?")
       if (iterable.nonEmpty) {
         setAttrPresence(ns, attr)
-        update.addColSetter((ps: PS) => {
+        updateAction.addColSetter((ps: PS) => {
           val json = iterable2json(iterable.asInstanceOf[Iterable[T]], value2json)
           ps.setString(paramIndex, json)
         })
       } else {
-        update.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
+        updateAction.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
       }
     } { refNs =>
-      update.deleteRefIds(attr, refNs, getUpdateId)
+      updateAction.deleteRefIds(attr, refNs, getUpdateId)
       val refIds = iterable.asInstanceOf[Set[Long]]
       if (refIds.nonEmpty) {
-        update.insertRefIds(attr, refNs, refIds)
+        updateAction.insertRefIds(attr, refNs, refIds)
       }
     }
   }

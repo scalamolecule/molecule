@@ -17,8 +17,8 @@ trait SqlUpdate
     with SqlBaseOps
     with SpiHelpers { self: ResolveUpdate with SqlOps =>
 
-  protected var root  : UpdateRoot   = null
-  protected var update: UpdateAction = null
+  protected var root        : UpdateRoot   = null
+  protected var updateAction: UpdateAction = null
 
   private var isRefUpdate = false
   private var hasFilters  = false
@@ -39,7 +39,7 @@ trait SqlUpdate
     ns = getInitialNs(elements)
     query.idCols += s"$ns.id"
     root = UpdateRoot(sqlOps, ns)
-    update = root.firstNs
+    updateAction = root.firstNs
     resolve(elements)
     initRoot()
     root
@@ -81,7 +81,7 @@ trait SqlUpdate
     query.ids = ids0.toList
 
     // Set here if no need for distributing ids across multiple namespaces
-    update.ids = query.ids
+    updateAction.ids = query.ids
   }
 
   override def handleFilterAttr[T <: Attr with Tacit](filterAttr: T): Unit = {
@@ -102,16 +102,16 @@ trait SqlUpdate
     exts: List[String],
   ): Unit = {
     val cast       = exts(2)
-    val paramIndex = update.setCol(s"$attr = ?$cast")
+    val paramIndex = updateAction.setCol(s"$attr = ?$cast")
     vs match {
       case Seq(v) =>
         setAttrPresence(ns, attr)
-        update.addColSetter((ps: PS) =>
+        updateAction.addColSetter((ps: PS) =>
           transformValue(v).asInstanceOf[(PS, Int) => Unit](ps, paramIndex)
         )
 
       case Nil =>
-        update.addColSetter((ps: PS) =>
+        updateAction.addColSetter((ps: PS) =>
           ps.setNull(paramIndex, 0))
 
       case vs =>
@@ -127,12 +127,12 @@ trait SqlUpdate
   override def handleRef(ref: Ref): Unit = {
     isRefUpdate = true
     val Ref(ns, refAttr, refNs, card, _, _) = ref
-    update = card match {
+    updateAction = card match {
       case CardOne =>
         query.idCols += s"$refNs.id"
         query.joins += s"$join $refNs ON $ns.$refAttr = $refNs.id"
         // Switch strategy
-        update.refOne(ns, refAttr, refNs)
+        updateAction.refOne(ns, refAttr, refNs)
 
       case _ =>
         val joinTable = ss(ns, refAttr, refNs)
@@ -144,7 +144,7 @@ trait SqlUpdate
           s"$join $refNs ON $joinTable.$ref_id = $refNs.id",
         )
         // Switch strategy
-        update.refMany(ns, refAttr, refNs)
+        updateAction.refMany(ns, refAttr, refNs)
     }
   }
 
@@ -231,11 +231,11 @@ trait SqlUpdate
     attr: String,
     byteArray: Array[Byte],
   ): Unit = {
-    val paramIndex = update.setCol(s"$attr = ?")
+    val paramIndex = updateAction.setCol(s"$attr = ?")
     if (byteArray.isEmpty) {
-      update.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
+      updateAction.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
     } else {
-      update.addColSetter((ps: PS) => ps.setBytes(paramIndex, byteArray))
+      updateAction.addColSetter((ps: PS) => ps.setBytes(paramIndex, byteArray))
     }
   }
 
@@ -248,12 +248,12 @@ trait SqlUpdate
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    val paramIndex = update.setCol(s"$attr = ?")
+    val paramIndex = updateAction.setCol(s"$attr = ?")
     if (map.isEmpty) {
-      update.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
+      updateAction.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
     } else {
       setAttrPresence(ns, attr)
-      update.addColSetter((ps: PS) =>
+      updateAction.addColSetter((ps: PS) =>
         ps.setBytes(paramIndex, map2jsonByteArray(map, value2json))
       )
     }
@@ -272,8 +272,8 @@ trait SqlUpdate
       setAttrPresence(ns, attr)
       val scalaBaseType = exts.head
       val setAttr       = s"$attr = addPairs_$scalaBaseType($attr, ?)"
-      val paramIndex    = update.setCol(setAttr)
-      update.addColSetter((ps: PS) =>
+      val paramIndex    = updateAction.setCol(setAttr)
+      updateAction.addColSetter((ps: PS) =>
         ps.setBytes(paramIndex, map2jsonByteArray(map, value2json))
       )
     }
@@ -291,8 +291,8 @@ trait SqlUpdate
       setAttrPresence(ns, attr)
       val scalaBaseType = exts.head
       val setAttr       = s"$attr = removePairs_$scalaBaseType($attr, ?)"
-      val paramIndex    = update.setCol(setAttr)
-      update.addColSetter((ps: PS) =>
+      val paramIndex    = updateAction.setCol(setAttr)
+      updateAction.addColSetter((ps: PS) =>
         ps.setArray(paramIndex,
           ps.getConnection.createArrayOf("String", keys.toArray))
       )
@@ -301,7 +301,7 @@ trait SqlUpdate
 
   override def handleBackRef(backRef: BackRef): Unit = {
     // Switch strategy to previous action
-    update = update.backRef
+    updateAction = updateAction.backRef
   }
 
 
@@ -317,18 +317,18 @@ trait SqlUpdate
   ): Unit = {
     optRefNs.fold {
       val dbBaseType = exts(1)
-      val paramIndex = update.setCol(s"$attr = ?")
+      val paramIndex = updateAction.setCol(s"$attr = ?")
       if (iterable.nonEmpty) {
         setAttrPresence(ns, attr)
         addArray(paramIndex, dbBaseType, vs2array(iterable))
       } else {
-        update.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
+        updateAction.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
       }
     } { refNs =>
-      update.deleteRefIds(attr, refNs, getUpdateId)
+      updateAction.deleteRefIds(attr, refNs, getUpdateId)
       val refIds = iterable.asInstanceOf[Set[Long]]
       if (refIds.nonEmpty) {
-        update.insertRefIds(attr, refNs, refIds)
+        updateAction.insertRefIds(attr, refNs, refIds)
       }
     }
   }
@@ -350,12 +350,12 @@ trait SqlUpdate
           case tpe => tpe + "[]"
         }
         val setAttr    = s"$attr = COALESCE($attr, ARRAY[]$cast) || ?"
-        val paramIndex = update.setCol(setAttr)
+        val paramIndex = updateAction.setCol(setAttr)
         addArray(paramIndex, dbBaseType, iterable2array(iterable))
       }
     } { refNs =>
       if (iterable.nonEmpty) {
-        update.insertRefIds(attr, refNs, iterable.asInstanceOf[Set[Long]])
+        updateAction.insertRefIds(attr, refNs, iterable.asInstanceOf[Set[Long]])
       }
     }
   }
@@ -374,13 +374,13 @@ trait SqlUpdate
         val scalaBaseType = exts.head
         val dbBaseType    = exts(1)
         val setAttr       = s"$attr = removeFromArray_$scalaBaseType($attr, ?)"
-        val paramIndex    = update.setCol(setAttr)
+        val paramIndex    = updateAction.setCol(setAttr)
         addArray(paramIndex, dbBaseType, iterable2array(iterable))
       }
     } { refNs =>
       if (iterable.nonEmpty) {
         val refIds = iterable.asInstanceOf[Set[Long]]
-        update.deleteRefIds(attr, refNs, getUpdateId, refIds)
+        updateAction.deleteRefIds(attr, refNs, getUpdateId, refIds)
       }
     }
   }
@@ -395,14 +395,14 @@ trait SqlUpdate
       query.filterAttrs += AttrOneTacByte(ns, attr)
 
       // Used for single ns update with ids and no filters
-      update.mandatoryCols += s"$ns.$attr IS NOT NULL"
+      updateAction.mandatoryCols += s"$ns.$attr IS NOT NULL"
     }
   }
 
   private def addArray(
     paramIndex: Int, dbBaseType: String, array: Array[AnyRef]
   ): Unit = {
-    update.addColSetter((ps: PS) => {
+    updateAction.addColSetter((ps: PS) => {
       val conn = ps.getConnection
       ps.setArray(paramIndex, conn.createArrayOf(dbBaseType, array))
     })
@@ -410,7 +410,7 @@ trait SqlUpdate
 
 
   protected def getUpdateId: Long = {
-    update.ids match {
+    updateAction.ids match {
       case List(v) => v
       case other   => throw ModelError(
         "Expected to update one entity. Found multiple ids: " + other

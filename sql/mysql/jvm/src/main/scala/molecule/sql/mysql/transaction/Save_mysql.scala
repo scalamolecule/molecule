@@ -42,13 +42,13 @@ trait Save_mysql
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    val paramIndex = save.setCol(attr)
+    val paramIndex = saveAction.setCol(attr)
     optMap match {
       case Some(map: Map[_, _]) if map.nonEmpty =>
-        save.addColSetter((ps: PS) =>
+        saveAction.addColSetter((ps: PS) =>
           ps.setString(paramIndex, map2json(map, value2json)))
       case _                                    =>
-        save.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
+        saveAction.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
     }
   }
 
@@ -62,16 +62,16 @@ trait Save_mysql
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     optRefNs.fold {
-      val paramIndex = save.setCol(attr)
+      val paramIndex = saveAction.setCol(attr)
       if (optIterable.nonEmpty && optIterable.get.nonEmpty) {
         val json = iterable2json(optIterable.get, value2json)
-        save.addColSetter((ps: PS) => ps.setString(paramIndex, json))
+        saveAction.addColSetter((ps: PS) => ps.setString(paramIndex, json))
       } else {
-        save.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
+        saveAction.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
       }
     } { refNs =>
       optIterable.foreach(refIds =>
-        save.refIds(attr, refNs, refIds.asInstanceOf[Set[Long]])
+        saveAction.refIds(attr, refNs, refIds.asInstanceOf[Set[Long]])
       )
     }
   }

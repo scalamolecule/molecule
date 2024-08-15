@@ -15,12 +15,12 @@ trait SqlSave
     with SqlBaseOps
     with SerializationUtils { self: ResolveSave with SqlOps =>
 
-  protected var save: SaveAction = null
+  protected var saveAction: SaveAction = null
 
   def getSaveAction(elements: List[Element]): SaveAction = {
-    save = SaveRoot(sqlOps, getInitialNs(elements)).saveNs
+    saveAction = SaveRoot(sqlOps, getInitialNs(elements)).saveNs
     resolve(elements)
-    save.rootAction
+    saveAction.rootAction
   }
 
   override protected def addOne[T](
@@ -30,12 +30,12 @@ trait SqlSave
     transformValue: T => Any,
     exts: List[String] = Nil
   ): Unit = {
-    val paramIndex = save.setCol(attr, exts(2))
+    val paramIndex = saveAction.setCol(attr, exts(2))
     optValue.fold {
-      save.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
+      saveAction.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
     } { value =>
       val setter = transformValue(value).asInstanceOf[(PS, Int) => Unit]
-      save.addColSetter((ps: PS) => setter(ps, paramIndex))
+      saveAction.addColSetter((ps: PS) => setter(ps, paramIndex))
     }
   }
 
@@ -70,11 +70,11 @@ trait SqlSave
     attr: String,
     optArray: Option[Array[Byte]],
   ): Unit = {
-    val paramIndex = save.setCol(attr)
+    val paramIndex = saveAction.setCol(attr)
     if (optArray.nonEmpty && optArray.get.nonEmpty) {
-      save.addColSetter((ps: PS) => ps.setBytes(paramIndex, optArray.get))
+      saveAction.addColSetter((ps: PS) => ps.setBytes(paramIndex, optArray.get))
     } else {
-      save.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
+      saveAction.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
     }
   }
 
@@ -85,27 +85,27 @@ trait SqlSave
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    val paramIndex = save.setCol(attr)
+    val paramIndex = saveAction.setCol(attr)
     optMap match {
       case Some(map: Map[_, _]) if map.nonEmpty =>
-        save.addColSetter((ps: PS) =>
+        saveAction.addColSetter((ps: PS) =>
           ps.setBytes(paramIndex, map2jsonByteArray(map, value2json)))
       case _                                    =>
-        save.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
+        saveAction.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
     }
   }
 
   override protected def addRef(
     ns: String, refAttr: String, refNs: String, card: Card
   ): Unit = {
-    save = card match {
-      case CardOne => save.refOne(ns, refAttr, refNs)
-      case _       => save.refMany(ns, refAttr, refNs)
+    saveAction = card match {
+      case CardOne => saveAction.refOne(ns, refAttr, refNs)
+      case _       => saveAction.refMany(ns, refAttr, refNs)
     }
   }
 
   override protected def addBackRef(backRefNs: String): Unit = {
-    save = save.backRef
+    saveAction = saveAction.backRef
   }
 
   override protected def handleRefNs(refNs: String): Unit = ()
@@ -121,20 +121,20 @@ trait SqlSave
     iterable2array: M[T] => Array[AnyRef],
   ): Unit = {
     optRefNs.fold {
-      val paramIndex = save.setCol(attr)
+      val paramIndex = saveAction.setCol(attr)
       if (optIterable.nonEmpty && optIterable.get.nonEmpty) {
         val iterable = optIterable.get
-        save.addColSetter((ps: PS) => {
+        saveAction.addColSetter((ps: PS) => {
           val conn  = ps.getConnection
           val array = conn.createArrayOf(sqlTpe, iterable2array(iterable))
           ps.setArray(paramIndex, array)
         })
       } else {
-        save.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
+        saveAction.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
       }
     } { refNs =>
       optIterable.foreach(refIds =>
-        save.refIds(attr, refNs, refIds.asInstanceOf[Set[Long]])
+        saveAction.refIds(attr, refNs, refIds.asInstanceOf[Set[Long]])
       )
     }
   }

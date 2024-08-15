@@ -16,8 +16,8 @@ trait Insert_postgres
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    val paramIndex   = insert.setCol(attr, "::jsonb")
-    val stableInsert = insert
+    val paramIndex   = insertAction.setCol(attr, "::jsonb")
+    val stableInsert = insertAction
     (tpl: Product) => {
       tpl.productElement(tplIndex).asInstanceOf[Map[String, _]] match {
         case map if map.nonEmpty =>
@@ -42,8 +42,8 @@ trait Insert_postgres
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    val paramIndex   = insert.setCol(attr, "::jsonb")
-    val stableInsert = insert
+    val paramIndex   = insertAction.setCol(attr, "::jsonb")
+    val stableInsert = insertAction
     (tpl: Product) => {
       tpl.productElement(tplIndex) match {
         case Some(map: Map[_, _]) if map.nonEmpty =>

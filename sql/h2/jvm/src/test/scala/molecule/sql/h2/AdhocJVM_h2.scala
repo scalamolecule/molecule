@@ -46,56 +46,7 @@ object AdhocJVM_h2 extends TestSuite_h2 {
           (2, "b", 2, List("x", "y"))
         )).transact
 
-        //        _ <- rawQuery(
-        //          """SELECT DISTINCT
-        //            |  A.i,
-        //            |  B.s,
-        //            |  B.i,
-        //            |  C.s
-        //            |FROM A
-        //            |  LEFT JOIN B ON
-        //            |    A.b = B.id
-        //            |  INNER JOIN B_cc_C ON
-        //            |    B.id = B_cc_C.B_id
-        //            |  INNER JOIN C ON
-        //            |    B_cc_C.C_id = C.id
-        //            |WHERE
-        //            |  A.i IS NOT NULL;
-        //            |""".stripMargin, true)
 
-        // todo: use left join inside optional refs
-        _ <- rawQuery(
-          """SELECT DISTINCT
-            |  A.i,
-            |  B.s,
-            |  B.i,
-            |  C.s
-            |FROM A
-            |  LEFT JOIN B ON
-            |    A.b = B.id
-            |  left JOIN B_cc_C ON
-            |    B.id = B_cc_C.B_id
-            |  left JOIN C ON
-            |    B_cc_C.C_id = C.id
-            |WHERE
-            |  A.i IS NOT NULL;
-            |""".stripMargin, true)
-
-        _ <- A.i.B.?(B.s.i.Cc.s).query.i.get.map(_ ==> List(
-          (1, None),
-          (2, Some(("b", 2, "x"))),
-          (2, Some(("b", 2, "y"))), // (A and B values repeated)
-        ))
-
-        // As with card-one ref, a normal flat card-many ref would be preferred
-        _ <- A.i.B.s.i.Cc.s.query.get.map(_ ==> List(
-          (2, "b", 2, "x"),
-          (2, "b", 2, "y"),
-        ))
-        // or better, a nested query
-        _ <- A.i.B.s.i.Cc.*(C.s).query.get.map(_ ==> List(
-          (2, "b", 2, List("x", "y")),
-        ))
 
         _ <- A.i.B.?(B.i.s.Cc.*(C.s)).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>

@@ -85,7 +85,7 @@ trait SpiAsyncBase extends SpiAsync with Renderer with FutureUtils {
 
   // Save --------------------------------------------------------
 
-  override def save_transact(save0: Save)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
+  override def save_transact(save: Save)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
 //    val conn = conn0.asInstanceOf[JdbcConn_JS]
 //    val save = save0.copy(elements = noKeywords(save0.elements, Some(conn.proxy)))
 //    for {
@@ -116,7 +116,7 @@ trait SpiAsyncBase extends SpiAsync with Renderer with FutureUtils {
 
   // Insert --------------------------------------------------------
 
-  override def insert_transact(insert0: Insert)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
+  override def insert_transact(insert: Insert)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
 //    val conn   = conn0.asInstanceOf[JdbcConn_JS]
 //    val insert = insert0.copy(elements = noKeywords(insert0.elements, Some(conn.proxy)))
 //    for {
@@ -149,7 +149,7 @@ trait SpiAsyncBase extends SpiAsync with Renderer with FutureUtils {
 
   // Update --------------------------------------------------------
 
-  override def update_transact(update0: Update)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
+  override def update_transact(update: Update)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
 //    val conn   = conn0.asInstanceOf[JdbcConn_JS]
 //    val update = update0.copy(elements = noKeywords(update0.elements, Some(conn.proxy)))
 //    for {
@@ -183,7 +183,7 @@ trait SpiAsyncBase extends SpiAsync with Renderer with FutureUtils {
 
   // Delete --------------------------------------------------------
 
-  override def delete_transact(delete0: Delete)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
+  override def delete_transact(delete: Delete)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
 //    val conn   = conn0.asInstanceOf[JdbcConn_JS]
 //    val delete = delete0.copy(elements = noKeywords(delete0.elements, Some(conn.proxy)))
 //    conn.rpc.delete(conn.proxy, delete.elements).future.map { txReport =>

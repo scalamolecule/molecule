@@ -14,8 +14,8 @@ trait SqlDelete
   extends DeleteOps
     with ModelUtils { self: ResolveDelete with SqlOps =>
 
-  protected var root  : DeleteRoot   = null
-  protected var delete: DeleteAction = null
+  protected var root        : DeleteRoot   = null
+  protected var deleteAction: DeleteAction = null
 
   private var needsIdQuery = false
   private var ns           = ""
@@ -39,7 +39,7 @@ trait SqlDelete
       nsMap, sqlOps, sqlConn.createStatement(), ns,
       fkConstraintParam, fkConstraintOff, fkConstraintOn
     )
-    delete = root.firstNs
+    deleteAction = root.firstNs
     resolve(elements, true)
     initRoot(sqlOps)
     root
@@ -57,15 +57,15 @@ trait SqlDelete
       while (resultSet.next()) {
         ids += resultSet.getLong(1)
       }
-      delete.ids = ids.toList
+      deleteAction.ids = ids.toList
     }
   }
 
   override def addIds(ids: Seq[Long]): Unit = {
-    if (delete.ids.nonEmpty) {
+    if (deleteAction.ids.nonEmpty) {
       throw ModelError(s"Can't apply entity ids twice in delete.")
     }
-    delete.ids = ids.toList
+    deleteAction.ids = ids.toList
   }
 
 

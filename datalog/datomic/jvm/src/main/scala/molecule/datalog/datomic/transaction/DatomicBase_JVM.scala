@@ -83,29 +83,15 @@ trait DatomicBase_JVM extends DatomicDataType_JVM with ModelUtils {
     stmts.add(stmt)
   }
 
-  // Connection pool ---------------------------------------------
+  /*
+    "Datomic’s public API is threadsafe, and there is no need to pool the Datomic connection.
+    Datomic will return the same instance of Connection for a given URI, no matter how many
+    times you ask. And Datomic will cache that single instance even if you don’t."
 
-  // todo: real solution
-  private val connectionPool = mutable.HashMap.empty[UUID, Future[DatomicConn_JVM]]
-
-  //  override def clearConnPool: Future[Unit] = Future {
-  //    // logger.debug(s"Connection pool with ${connectionPool.size} connections cleared.")
-  //    connectionPool.clear()
-  //  }
-
+    - Stuart Halloway 2013-06-25
+    https://groups.google.com/g/datomic/c/ekwfTZbMCaE/m/GL4J0AyonI8J
+   */
   protected def getConn(proxy: ConnProxy): Future[DatomicConn_JVM] = {
-    val futConn             = connectionPool.getOrElse(proxy.uuid, getFreshConn(proxy))
-    val futConnTimeAdjusted = futConn.map { conn =>
-      //      conn.updateAdhocDbView(proxy.adhocDbView)
-      //      conn.updateTestDbView(proxy.testDbView, proxy.testDbStatus)
-      conn
-    }
-    connectionPool(proxy.uuid) = futConnTimeAdjusted
-    // logger.debug("connectionPool.size: " + connectionPool.size)
-    futConnTimeAdjusted
-  }
-
-  private def getFreshConn(proxy: ConnProxy): Future[DatomicConn_JVM] = {
     proxy match {
       case proxy@DatomicProxy(protocol, dbIdentifier, _, _, _, _, _, _, _, _, _, _) =>
         protocol match {

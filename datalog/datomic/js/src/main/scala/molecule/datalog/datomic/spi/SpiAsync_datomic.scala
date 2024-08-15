@@ -80,12 +80,11 @@ trait SpiAsync_datomic extends SpiAsync with DatomicSpiAsyncBase with FutureUtil
 
   // Save --------------------------------------------------------
 
-  override def save_transact(save0: Save)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
+  override def save_transact(save: Save)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
     val conn = conn0.asInstanceOf[DatomicConn_JS]
-    val save = save0.copy(elements = noKeywords(save0.elements, Some(conn.proxy)))
     for {
       _ <- if (save.doInspect) save_inspect(save) else Future.unit
-      errors <- save_validate(save0) // validate original elements against meta model
+      errors <- save_validate(save) // validate original elements against meta model
       txReport <- errors match {
         case errors if errors.isEmpty => conn.rpc.save(conn.proxy, save.elements).future
         case errors                   => throw ValidationErrors(errors)
@@ -108,12 +107,11 @@ trait SpiAsync_datomic extends SpiAsync with DatomicSpiAsyncBase with FutureUtil
 
   // Insert --------------------------------------------------------
 
-  override def insert_transact(insert0: Insert)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
-    val conn   = conn0.asInstanceOf[DatomicConn_JS]
-    val insert = insert0.copy(elements = noKeywords(insert0.elements, Some(conn.proxy)))
+  override def insert_transact(insert: Insert)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
+    val conn = conn0.asInstanceOf[DatomicConn_JS]
     for {
       _ <- if (insert.doInspect) insert_inspect(insert) else Future.unit
-      errors <- insert_validate(insert0) // validate original elements against meta model
+      errors <- insert_validate(insert) // validate original elements against meta model
       txReport <- errors match {
         case errors if errors.isEmpty =>
           val tplsSerialized = PickleTpls(insert.elements, true).pickle(Right(insert.tpls))
@@ -137,15 +135,14 @@ trait SpiAsync_datomic extends SpiAsync with DatomicSpiAsyncBase with FutureUtil
 
   // Update --------------------------------------------------------
 
-  override def update_transact(update0: Update)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
-    val conn   = conn0.asInstanceOf[DatomicConn_JS]
-    val update = update0.copy(elements = noKeywords(update0.elements, Some(conn.proxy)))
+  override def update_transact(update: Update)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
+    val conn = conn0.asInstanceOf[DatomicConn_JS]
     for {
       _ <- if (update.doInspect) update_inspect(update) else Future.unit
-      errors <- update_validate(update0) // validate original elements against meta model
+      errors <- update_validate(update) // validate original elements against meta model
       txReport <- errors match {
         case errors if errors.isEmpty =>
-          conn.rpc.update(conn.proxy, update0.elements, update.elements, update.isUpsert).future
+          conn.rpc.update(conn.proxy, update.elements, update.isUpsert).future
         case errors                   => throw ValidationErrors(errors)
       }
     } yield {
@@ -160,17 +157,14 @@ trait SpiAsync_datomic extends SpiAsync with DatomicSpiAsyncBase with FutureUtil
 
   override def update_validate(update: Update)(implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = future {
     val proxy = conn.proxy
-//    if (update.isUpsert && isRefUpdate(update.elements))
-//      throw ModelError("Can't upsert referenced attributes. Please update instead.")
     TxModelValidation(proxy.nsMap, proxy.attrMap, "update").validate(update.elements)
   }
 
 
   // Delete --------------------------------------------------------
 
-  override def delete_transact(delete0: Delete)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
-    val conn   = conn0.asInstanceOf[DatomicConn_JS]
-    val delete = delete0.copy(elements = noKeywords(delete0.elements, Some(conn.proxy)))
+  override def delete_transact(delete: Delete)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
+    val conn = conn0.asInstanceOf[DatomicConn_JS]
     conn.rpc.delete(conn.proxy, delete.elements).future.map { txReport =>
       conn.callback(delete.elements, true)
       txReport

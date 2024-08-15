@@ -10,21 +10,21 @@ import molecule.core.spi._
 import molecule.core.validation.TxModelValidation
 import molecule.core.validation.insert.InsertValidation
 import molecule.sql.core.facade.JdbcConn_JVM
+import molecule.sql.core.javaSql.{ResultSetInterface => Row}
 import molecule.sql.core.query.{Model2SqlQuery, SqlQueryBase, SqlQueryResolveCursor, SqlQueryResolveOffset}
 import molecule.sql.core.transaction.strategy.SqlAction
 import molecule.sql.core.transaction.strategy.delete.DeleteAction
 import molecule.sql.core.transaction.strategy.insert.InsertAction
 import molecule.sql.core.transaction.strategy.save.SaveAction
 import molecule.sql.core.transaction.strategy.update.UpdateAction
-import molecule.sql.core.transaction.{ConnectionPool, SqlUpdateSetValidator}
+import molecule.sql.core.transaction.{CachedConnection, SqlUpdateSetValidator}
 import scala.collection.mutable.ListBuffer
 import scala.util.control.NonFatal
-import molecule.sql.core.javaSql.{ResultSetInterface => Row}
 
 
 trait SpiSyncBase
   extends SpiSync
-    with ConnectionPool
+    with CachedConnection
     with SpiHelpers
     with SqlUpdateSetValidator
     with Renderer
@@ -120,7 +120,7 @@ trait SpiSyncBase
     val errors    = save_validate(save) // validate original elements against meta model
     if (errors.isEmpty) {
       val txReport = conn.transact_sync(save_getAction(saveClean, conn))
-      conn.callback(saveClean.elements)
+      conn.callback(save.elements)
       txReport
     } else {
       throw ValidationErrors(errors)
@@ -158,7 +158,7 @@ trait SpiSyncBase
         TxReport(Nil)
       } else {
         val txReport = conn.transact_sync(insert_getAction(insertClean, conn))
-        conn.callback(insertClean.elements)
+        conn.callback(insert.elements)
         txReport
       }
     } else {
@@ -192,7 +192,7 @@ trait SpiSyncBase
     if (errors.isEmpty) {
       val action   = update_getAction(updateClean, conn)
       val txReport = conn.transact_sync(action)
-      conn.callback(updateClean.elements)
+      conn.callback(update.elements)
       txReport
     } else {
       throw ValidationErrors(errors)
@@ -241,7 +241,7 @@ trait SpiSyncBase
     val deleteClean = delete.copy(elements = noKeywords(delete.elements, Some(conn.proxy)))
     lazy val action = delete_getAction(conn, deleteClean)
     val txReport = conn.transact_sync(action)
-    conn.callback(deleteClean.elements, true)
+    conn.callback(delete.elements, true)
     txReport
   }
 

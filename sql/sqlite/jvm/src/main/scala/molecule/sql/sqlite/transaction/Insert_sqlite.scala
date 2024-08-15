@@ -69,8 +69,8 @@ trait Insert_sqlite
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    val paramIndex   = insert.setCol(attr)
-    val stableInsert = insert
+    val paramIndex   = insertAction.setCol(attr)
+    val stableInsert = insertAction
     (tpl: Product) => {
       tpl.productElement(tplIndex).asInstanceOf[Map[String, _]] match {
         case map if map.nonEmpty =>
@@ -95,8 +95,8 @@ trait Insert_sqlite
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    val paramIndex   = insert.setCol(attr)
-    val stableInsert = insert
+    val paramIndex   = insertAction.setCol(attr)
+    val stableInsert = insertAction
     (tpl: Product) => {
       tpl.productElement(tplIndex) match {
         case Some(map: Map[_, _]) if map.nonEmpty =>
@@ -122,7 +122,7 @@ trait Insert_sqlite
     tplIndex: Int,
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    val stableInsert = insert
+    val stableInsert = insertAction
     optRefNs.fold {
       val paramIndex = stableInsert.setCol(attr)
       (tpl: Product) => {
@@ -137,7 +137,7 @@ trait Insert_sqlite
         }
       }
     } { refNs =>
-      val insertRefIds = insert.refIds(attr, refNs)
+      val insertRefIds = insertAction.refIds(attr, refNs)
       (tpl: Product) => {
         val refIds = tpl.productElement(tplIndex).asInstanceOf[Iterable[Long]]
         insertRefIds.addRefIds(refIds)
@@ -151,7 +151,7 @@ trait Insert_sqlite
     tplIndex: Int,
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    val stableInsert = insert
+    val stableInsert = insertAction
     optRefNs.fold {
       val paramIndex = stableInsert.setCol(attr)
       (tpl: Product) =>
@@ -170,7 +170,7 @@ trait Insert_sqlite
               ps.setNull(paramIndex, java.sql.Types.NULL))
         }
     } { refNs =>
-      val insertRefIds = insert.refIds(attr, refNs)
+      val insertRefIds = insertAction.refIds(attr, refNs)
       (tpl: Product) => {
         tpl.productElement(tplIndex) match {
           case Some(set: Iterable[_]) =>

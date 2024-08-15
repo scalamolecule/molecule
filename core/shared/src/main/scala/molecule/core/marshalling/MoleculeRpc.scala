@@ -40,9 +40,6 @@ trait MoleculeRpc {
 
   def update(
     proxy: ConnProxy,
-    // Elements before db keyword collision check
-    elementsRaw: List[Element],
-    // Elements with "_"-suffixed attribute names when colliding with db keyword
     elements: List[Element],
     isUpsert: Boolean = false
   ): Future[Either[MoleculeError, TxReport]]

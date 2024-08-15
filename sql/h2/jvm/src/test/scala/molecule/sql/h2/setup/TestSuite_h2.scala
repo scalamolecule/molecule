@@ -28,7 +28,6 @@ trait TestSuite_h2 extends CoreTestSuite with BaseHelpers {
     )
     var conn  = JdbcConn_JVM(proxy, null)
     try {
-      Class.forName("org.h2.Driver")
       conn = JdbcHandler_JVM.recreateDb(proxy)
       test(conn)
     } catch {

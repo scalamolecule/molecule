@@ -15,12 +15,12 @@ trait Save_postgres
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    val paramIndex = save.setCol(attr, "::jsonb")
+    val paramIndex = saveAction.setCol(attr, "::jsonb")
     optMap match {
       case Some(map: Map[_, _]) if map.nonEmpty =>
-        save.addColSetter((ps: PS) => ps.setString(paramIndex, map2json(map, value2json)))
+        saveAction.addColSetter((ps: PS) => ps.setString(paramIndex, map2json(map, value2json)))
       case _                                    =>
-        save.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
+        saveAction.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
     }
   }
 

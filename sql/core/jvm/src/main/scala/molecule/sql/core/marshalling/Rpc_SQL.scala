@@ -10,13 +10,13 @@ import molecule.core.marshalling.deserialize.UnpickleTpls
 import molecule.core.spi.{SpiSync, TxReport}
 import molecule.core.util.Executor._
 import molecule.core.util.FutureUtils
-import molecule.sql.core.transaction.ConnectionPool
+import molecule.sql.core.transaction.CachedConnection
 import scala.concurrent.Future
 
 
 trait Rpc_SQL
   extends MoleculeRpc
-    with ConnectionPool
+    with CachedConnection
     with FutureUtils { self: SpiSync =>
 
   /**
@@ -91,12 +91,11 @@ trait Rpc_SQL
 
   override def update(
     proxy: ConnProxy,
-    elementsRaw: List[Element],
     elements: List[Element],
     isUpsert: Boolean = false
   ): Future[Either[MoleculeError, TxReport]] = either {
     getConn(proxy).map { conn =>
-      update_transact(Update(elementsRaw, isUpsert))(conn)
+      update_transact(Update(elements, isUpsert))(conn)
     }
   }
 

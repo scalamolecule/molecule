@@ -97,8 +97,8 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate with SqlOps =>
     if (map.nonEmpty) {
       setAttrPresence(ns, attr)
       val setAttr    = s"$ns.$attr = JSON_MERGE_PATCH(IFNULL($ns.$attr, JSON_OBJECT()), ?)"
-      val paramIndex = update.setCol(setAttr)
-      update.addColSetter((ps: PS) =>
+      val paramIndex = updateAction.setCol(setAttr)
+      updateAction.addColSetter((ps: PS) =>
         ps.setBytes(paramIndex, map2jsonByteArray(map, value2json))
       )
     }
@@ -114,13 +114,13 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate with SqlOps =>
     if (keys.nonEmpty) {
       setAttrPresence(ns, attr)
       val keys1 = keys.map(k => s"'$$.$k'").mkString(", ")
-      update.setCol(
+      updateAction.setCol(
         s"""$ns.$attr = CASE JSON_REMOVE(IFNULL($ns.$attr, NULL), $keys1)
            |    WHEN JSON_OBJECT() THEN NULL
            |    ELSE JSON_REMOVE($ns.$attr, $keys1)
            |  END""".stripMargin
       )
-      update.addColSetter((_: PS) => ())
+      updateAction.addColSetter((_: PS) => ())
     }
   }
 
@@ -135,21 +135,21 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate with SqlOps =>
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     refNs.fold {
-      val paramIndex = update.setCol(s"$attr = ?")
+      val paramIndex = updateAction.setCol(s"$attr = ?")
       if (iterable.nonEmpty) {
         setAttrPresence(ns, attr)
-        update.addColSetter((ps: PS) => {
+        updateAction.addColSetter((ps: PS) => {
           val json = iterable2json(iterable.asInstanceOf[Iterable[T]], value2json)
           ps.setString(paramIndex, json)
         })
       } else {
-        update.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
+        updateAction.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
       }
     } { refNs =>
-      update.deleteRefIds(attr, refNs, getUpdateId)
+      updateAction.deleteRefIds(attr, refNs, getUpdateId)
       val refIds = iterable.asInstanceOf[Set[Long]]
       if (refIds.nonEmpty) {
-        update.insertRefIds(attr, refNs, refIds)
+        updateAction.insertRefIds(attr, refNs, refIds)
       }
     }
   }
@@ -165,15 +165,15 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate with SqlOps =>
       if (iterable.nonEmpty) {
         setAttrPresence(ns, attr)
         val setAttr    = s"$attr = JSON_MERGE(IFNULL($attr, '[]'), ?)"
-        val paramIndex = update.setCol(setAttr)
-        update.addColSetter((ps: PS) => {
+        val paramIndex = updateAction.setCol(setAttr)
+        updateAction.addColSetter((ps: PS) => {
           val json = iterable2json(iterable.asInstanceOf[Iterable[T]], value2json)
           ps.setString(paramIndex, json)
         })
       }
     } { refNs =>
       if (iterable.nonEmpty) {
-        update.insertRefIds(attr, refNs, iterable.asInstanceOf[Set[Long]])
+        updateAction.insertRefIds(attr, refNs, iterable.asInstanceOf[Set[Long]])
       }
     }
   }
@@ -189,23 +189,23 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate with SqlOps =>
     refNs.fold {
       if (iterable.nonEmpty) {
         setAttrPresence(ns, attr)
-        val valueTable    = "table_" + update.colCount
+        val valueTable    = "table_" + updateAction.colCount
         val dbType        = exts(1)
         val retractValues = iterable.asInstanceOf[Iterable[T]].map(one2json).mkString(", ")
 
-        update.setCol(
+        updateAction.setCol(
           s"""$attr = (
              |    SELECT JSON_ARRAYAGG($valueTable.v)
              |    FROM   JSON_TABLE($ns.$attr, '$$[*]' COLUMNS (v $dbType PATH '$$')) $valueTable
              |    WHERE  $valueTable.v NOT IN ($retractValues) AND $ns.id IS NOT NULL
              |  )""".stripMargin
         )
-        update.addColSetter((_: PS) => ())
+        updateAction.addColSetter((_: PS) => ())
       }
     } { refNs =>
       if (iterable.nonEmpty) {
         val refIds = iterable.asInstanceOf[Set[Long]]
-        update.deleteRefIds(attr, refNs, getUpdateId, refIds)
+        updateAction.deleteRefIds(attr, refNs, getUpdateId, refIds)
       }
     }
   }

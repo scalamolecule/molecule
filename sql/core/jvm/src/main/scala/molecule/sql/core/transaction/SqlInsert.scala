@@ -12,8 +12,8 @@ trait SqlInsert
   extends InsertOps
     with SqlBaseOps { self: ResolveInsert with InsertResolvers_ with SqlOps =>
 
-  protected var baseAction: Option[InsertAction] = None
-  protected var insert    : InsertAction         = null
+  protected var baseAction  : Option[InsertAction] = None
+  protected var insertAction: InsertAction         = null
 
   private var firstOptRef = true
 
@@ -22,15 +22,15 @@ trait SqlInsert
     elements: List[Element],
     tpls: Seq[Product]
   ): InsertAction = {
-    insert = InsertRoot(sqlOps, getInitialNs(elements), tpls.length).insertNs
-    val stableInsert = insert
+    insertAction = InsertRoot(sqlOps, getInitialNs(elements), tpls.length).insertNs
+    val stableInsert = insertAction
     val resolveTpl   = getResolver(elements)
     tpls.foreach { tpl =>
       //      println("------------------------------- " + tpl)
       stableInsert.nextRow()
       resolveTpl(tpl)
     }
-    insert.rootAction
+    insertAction.rootAction
   }
 
 
@@ -41,8 +41,8 @@ trait SqlInsert
     transformValue: T => Any,
     exts: List[String] = Nil
   ): Product => Unit = {
-    val paramIndex   = insert.setCol(attr, exts(2))
-    val stableInsert = insert
+    val paramIndex   = insertAction.setCol(attr, exts(2))
+    val stableInsert = insertAction
     (tpl: Product) => {
       val scalaValue  = tpl.productElement(tplIndex).asInstanceOf[T]
       val valueSetter = transformValue(scalaValue).asInstanceOf[(PS, Int) => Unit]
@@ -59,8 +59,8 @@ trait SqlInsert
     transformValue: T => Any,
     exts: List[String] = Nil
   ): Product => Unit = {
-    val paramIndex   = insert.setCol(attr, exts(2))
-    val stableInsert = insert
+    val paramIndex   = insertAction.setCol(attr, exts(2))
+    val stableInsert = insertAction
     (tpl: Product) => {
       tpl.productElement(tplIndex) match {
         case Some(scalaValue) =>
@@ -132,8 +132,8 @@ trait SqlInsert
     attr: String,
     tplIndex: Int,
   ): Product => Unit = {
-    val paramIndex   = insert.setCol(attr)
-    val stableInsert = insert
+    val paramIndex   = insertAction.setCol(attr)
+    val stableInsert = insertAction
     (tpl: Product) => {
       tpl.productElement(tplIndex) match {
         case byteArray: Array[_] if byteArray.nonEmpty =>
@@ -158,8 +158,8 @@ trait SqlInsert
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    val paramIndex   = insert.setCol(attr)
-    val stableInsert = insert
+    val paramIndex   = insertAction.setCol(attr)
+    val stableInsert = insertAction
     (tpl: Product) => {
       tpl.productElement(tplIndex).asInstanceOf[Map[String, _]] match {
         case map if map.nonEmpty =>
@@ -184,8 +184,8 @@ trait SqlInsert
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    val paramIndex   = insert.setCol(attr)
-    val stableInsert = insert
+    val paramIndex   = insertAction.setCol(attr)
+    val stableInsert = insertAction
     (tpl: Product) => {
       tpl.productElement(tplIndex) match {
         case Some(map: Map[_, _]) if map.nonEmpty =>
@@ -208,15 +208,15 @@ trait SqlInsert
     refNs: String,
     card: Card,
   ): Product => Unit = {
-    insert = card match {
-      case CardOne => insert.refOne(ns, refAttr, refNs)
-      case _       => insert.refMany(ns, refAttr, refNs)
+    insertAction = card match {
+      case CardOne => insertAction.refOne(ns, refAttr, refNs)
+      case _       => insertAction.refMany(ns, refAttr, refNs)
     }
     (_: Product) => ()
   }
 
   override protected def addBackRef(backRefNs: String): Product => Unit = {
-    insert = insert.backRef
+    insertAction = insertAction.backRef
     (_: Product) => ()
   }
 
@@ -229,22 +229,22 @@ trait SqlInsert
   ): Product => Unit = {
     if (firstOptRef) {
       baseAction.fold {
-        baseAction = Some(insert)
+        baseAction = Some(insertAction)
       } { baseAction =>
-        insert = baseAction
+        insertAction = baseAction
       }
     }
 
     // Cache stable insert instance
-    val insertOptRef = insert.optRef(ns, refAttr, refNs)
-    insert = insertOptRef
+    val insertOptRef = insertAction.optRef(ns, refAttr, refNs)
+    insertAction = insertOptRef
     firstOptRef = false
 
     // Recursively resolve optional data
     val resolveOptionalRefData = getResolver(optionalElements)
 
     firstOptRef = true
-    insert = baseAction.get
+    insertAction = baseAction.get
 
     countValueAttrs(optionalElements) match {
       case 1 =>
@@ -273,9 +273,9 @@ trait SqlInsert
     refNs: String,
     nestedElements: List[Element]
   ): Product => Unit = {
-    val nestedJoins  = insert.nest(ns, refAttr, refNs)
+    val nestedJoins  = insertAction.nest(ns, refAttr, refNs)
     val nestedInsert = nestedJoins.nested
-    insert = nestedInsert
+    insertAction = nestedInsert
 
     // Recursively resolve nested data
     val resolveNested = getResolver(nestedElements)
@@ -313,7 +313,7 @@ trait SqlInsert
     iterable2array: M[T] => Array[AnyRef],
   ): Product => Unit = {
     optRefNs.fold {
-      val stableInsert = insert
+      val stableInsert = insertAction
       val paramIndex   = stableInsert.setCol(attr)
       (tpl: Product) => {
         val array = iterable2array(tpl.productElement(tplIndex).asInstanceOf[M[T]])
@@ -332,7 +332,7 @@ trait SqlInsert
         }
       }
     } { refNs =>
-      val insertRefIds = insert.refIds(attr, refNs)
+      val insertRefIds = insertAction.refIds(attr, refNs)
       (tpl: Product) => {
         val refIds = tpl.productElement(tplIndex).asInstanceOf[Iterable[Long]]
         insertRefIds.addRefIds(refIds)
@@ -348,7 +348,7 @@ trait SqlInsert
     iterable2array: M[T] => Array[AnyRef],
   ): Product => Unit = {
     optRefNs.fold {
-      val stableInsert = insert
+      val stableInsert = insertAction
       val paramIndex   = stableInsert.setCol(attr)
       (tpl: Product) => {
         tpl.productElement(tplIndex) match {
@@ -366,7 +366,7 @@ trait SqlInsert
         }
       }
     } { refNs =>
-      val insertRefIds = insert.refIds(attr, refNs)
+      val insertRefIds = insertAction.refIds(attr, refNs)
       (tpl: Product) => {
         tpl.productElement(tplIndex) match {
           case Some(set: Iterable[_]) =>

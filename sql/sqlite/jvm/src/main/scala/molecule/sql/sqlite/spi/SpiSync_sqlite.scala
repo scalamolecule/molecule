@@ -42,11 +42,11 @@ trait SpiSync_sqlite extends SpiSyncBase {
   }
 
   override def update_getAction(
-    update0: Update, conn0: JdbcConn_JVM
+    update: Update, conn0: JdbcConn_JVM
   ): UpdateAction = {
     new SqlOps_sqlite(conn0) with ResolveUpdate with Update_sqlite {
-      override val isUpsert: Boolean = update0.isUpsert
-    }.getUpdateAction(update0.elements)
+      override val isUpsert: Boolean = update.isUpsert
+    }.getUpdateAction(update.elements)
   }
 
   override def delete_getAction(

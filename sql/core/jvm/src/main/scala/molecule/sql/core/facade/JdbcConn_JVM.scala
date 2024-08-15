@@ -7,7 +7,7 @@ import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.{Conn, TxReport}
 import molecule.core.util.ModelUtils
 import molecule.sql.core.javaSql.{ResultSetImpl, ResultSetInterface}
-import molecule.sql.core.transaction.{ConnectionPool, SqlDataType_JVM}
+import molecule.sql.core.transaction.{CachedConnection, SqlDataType_JVM}
 import molecule.sql.core.transaction.strategy.SqlAction
 import scala.util.control.NonFatal
 
@@ -15,7 +15,7 @@ case class JdbcConn_JVM(
   override val proxy: JdbcProxy,
   private val sqlConn0: sql.Connection
 ) extends Conn(proxy)
-  with ConnectionPool
+  with CachedConnection
   with SqlDataType_JVM
   with ModelUtils
   with MoleculeLogging {
@@ -43,7 +43,7 @@ case class JdbcConn_JVM(
       // Atomic transaction of all statements
       sqlConn.setAutoCommit(false)
 
-      // Execute batches
+      // Execute batches and get ids of affected entities of initial namespace
       val ids = executions()
 
       // commit or fail all
@@ -55,16 +55,18 @@ case class JdbcConn_JVM(
       case e: SQLException =>
         try {
           sqlConn.rollback()
-          logger.warn("Successfully rolled back unsuccessful insertion with error: " + e)
+          logger.warn(
+            "Successfully rolled back unsuccessful insertion with error: " + e
+          )
           throw e
         } catch {
           case e: SQLException =>
-            logger.error("Couldn't roll back unsuccessful insertion: " + e)
+            logger.error("Couldn't roll back unsuccessful transaction: " + e)
             throw e
         }
       case NonFatal(e)     =>
-        logger.error("Unexpected insertion error: " + e)
+        logger.error("Unexpected transaction error: " + e)
         throw e
-    }
+    }  finally sqlConn0.setAutoCommit(true)
   }
 }

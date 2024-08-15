@@ -43,12 +43,12 @@ trait Update_postgres
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    val paramIndex = update.setCol(s"$attr = ?::jsonb")
+    val paramIndex = updateAction.setCol(s"$attr = ?::jsonb")
     if (map.isEmpty) {
-      update.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
+      updateAction.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
     } else {
       setAttrPresence(ns, attr)
-      update.addColSetter((ps: PS) =>
+      updateAction.addColSetter((ps: PS) =>
         ps.setString(paramIndex, map2json(map, value2json))
       )
     }
@@ -71,8 +71,8 @@ trait Update_postgres
            |    ELSE $attr::jsonb
            |  END || ?::jsonb""".stripMargin
       val json       = map2json(map, value2json)
-      val paramIndex = update.setCol(setAttr)
-      update.addColSetter((ps: PS) =>
+      val paramIndex = updateAction.setCol(setAttr)
+      updateAction.addColSetter((ps: PS) =>
         ps.setString(paramIndex, json)
       )
     }
@@ -92,8 +92,8 @@ trait Update_postgres
            |    WHEN $attr::jsonb - ? = '{}' THEN NULL
            |    ELSE $attr::jsonb - ?
            |  END""".stripMargin
-      val paramIndex = update.setCol(setAttr)
-      update.addColSetter((ps: PS) => {
+      val paramIndex = updateAction.setCol(setAttr)
+      updateAction.addColSetter((ps: PS) => {
         val conn  = ps.getConnection
         val array = conn.createArrayOf("text", keys.toArray)
         ps.setArray(paramIndex, array)
@@ -124,8 +124,8 @@ trait Update_postgres
              |  )""".stripMargin
         val negatives     = set2array(iterable)
         val arrayBaseType = exts(3)
-        val paramIndex    = update.setCol(setAttr)
-        update.addColSetter((ps: PS) => {
+        val paramIndex    = updateAction.setCol(setAttr)
+        updateAction.addColSetter((ps: PS) => {
           val conn  = ps.getConnection
           val array = conn.createArrayOf(arrayBaseType, negatives)
           ps.setArray(paramIndex, array)
@@ -134,7 +134,7 @@ trait Update_postgres
     } { refNs =>
       if (iterable.nonEmpty) {
         val refIds = iterable.asInstanceOf[Set[Long]]
-        update.deleteRefIds(attr, refNs, getUpdateId, refIds)
+        updateAction.deleteRefIds(attr, refNs, getUpdateId, refIds)
       }
     }
   }
