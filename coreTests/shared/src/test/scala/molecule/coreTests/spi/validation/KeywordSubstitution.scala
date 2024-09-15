@@ -13,7 +13,7 @@ trait KeywordSubstitution extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
   override lazy val tests = Tests {
 
     "Colliding keyword in sql correctly resolved" - types { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Types._
+      import molecule.coreTests.dataModels.dsl.Types._
       for {
         _ <- Other.select(1).save.transact
         _ <- Other.select.query.get.map(_ ==> List(1))

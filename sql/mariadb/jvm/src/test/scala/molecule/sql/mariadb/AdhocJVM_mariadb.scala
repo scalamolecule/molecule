@@ -5,7 +5,7 @@ import java.time.{Duration, Instant, LocalDate, LocalDateTime, LocalTime, Offset
 import java.util.{Date, UUID}
 import molecule.base.error.{InsertErrors, ModelError, ValidationErrors}
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.core.dsl.Refs.A
+import molecule.coreTests.dataModels.dsl.Refs.A
 import molecule.sql.mariadb.async._
 import molecule.sql.mariadb.setup.TestSuite_mariadb
 import utest._
@@ -16,7 +16,7 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Types._
+      import molecule.coreTests.dataModels.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
 
@@ -42,7 +42,7 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
 
 
     "refs" - refs { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Refs._
+      import molecule.coreTests.dataModels.dsl.Refs._
       for {
 
 
@@ -106,7 +106,7 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
 
 
     //    "unique" - unique { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Uniques._
+    //      import molecule.coreTests.dataModels.dsl.Uniques._
     //
     //
     //      for {
@@ -123,7 +123,7 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
     //
     //
     //    "validation" - validation { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Validation._
+    //      import molecule.coreTests.dataModels.dsl.Validation._
     //      for {
     //        id <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf", "stamps")).save.transact.map(_.id)
     //

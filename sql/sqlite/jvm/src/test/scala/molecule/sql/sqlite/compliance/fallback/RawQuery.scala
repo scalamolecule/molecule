@@ -1,7 +1,7 @@
 package molecule.sql.sqlite.compliance.fallback
 
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.core.dsl.Types._
+import molecule.coreTests.dataModels.dsl.Types._
 import molecule.sql.sqlite.async._
 import molecule.sql.sqlite.setup.TestSuite_sqlite
 import utest._

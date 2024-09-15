@@ -2,7 +2,7 @@ package molecule.sql.postgres
 
 import boopickle.Default._
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.core.dsl.Types._
+import molecule.coreTests.dataModels.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import molecule.sql.postgres.async._
 import molecule.sql.postgres.setup.TestSuite_postgres
@@ -23,7 +23,7 @@ object AdhocJS_postgres extends TestSuite_postgres {
 
 
     "refs" - refs { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Refs._
+      import molecule.coreTests.dataModels.dsl.Refs._
       for {
 
         _ <- A.i.insert(1).transact
@@ -34,7 +34,7 @@ object AdhocJS_postgres extends TestSuite_postgres {
 
     //
     //    "validation" - validation { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Validation._
+    //      import molecule.coreTests.dataModels.dsl.Validation._
     //      for {
     //
     //        List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)

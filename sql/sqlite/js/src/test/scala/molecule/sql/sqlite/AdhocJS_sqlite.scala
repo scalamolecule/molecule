@@ -2,7 +2,7 @@ package molecule.sql.sqlite
 
 import boopickle.Default._
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.core.dsl.Types._
+import molecule.coreTests.dataModels.dsl.Types._
 import molecule.sql.sqlite.async._
 import molecule.sql.sqlite.setup.TestSuite_sqlite
 import utest._
@@ -21,7 +21,7 @@ object AdhocJS_sqlite extends TestSuite_sqlite {
 
 
 //    "refs" - refs { implicit conn =>
-//      import molecule.coreTests.dataModels.core.dsl.Refs._
+//      import molecule.coreTests.dataModels.dsl.Refs._
 //      for {
 //
 //        _ <- A.i(1).save.transact
@@ -55,7 +55,7 @@ object AdhocJS_sqlite extends TestSuite_sqlite {
 
     //
     //    "validation" - validation { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Validation._
+    //      import molecule.coreTests.dataModels.dsl.Validation._
     //      for {
     //
     //        List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)

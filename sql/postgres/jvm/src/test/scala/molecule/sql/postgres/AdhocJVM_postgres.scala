@@ -3,7 +3,7 @@ package molecule.sql.postgres
 import java.time.Duration
 import molecule.base.error.InsertErrors
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.core.dsl.Types.Ns
+import molecule.coreTests.dataModels.dsl.Types.Ns
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.postgres.async._
 import molecule.sql.postgres.setup.{TestSuiteArray_postgres, TestSuite_postgres}
@@ -17,7 +17,7 @@ object AdhocJVM_postgres extends TestSuite_postgres {
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Types._
+      import molecule.coreTests.dataModels.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
 //        _ <- Ns.int.insert(1).transact
@@ -39,7 +39,7 @@ object AdhocJVM_postgres extends TestSuite_postgres {
 
 
     "refs" - refs { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Refs._
+      import molecule.coreTests.dataModels.dsl.Refs._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
       for {
@@ -78,7 +78,7 @@ object AdhocJVM_postgres extends TestSuite_postgres {
 
 
     //    "unique" - unique { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Uniques._
+    //      import molecule.coreTests.dataModels.dsl.Uniques._
     //      for {
     //        _ <- Uniques.i(1).save.transact
     //
@@ -87,7 +87,7 @@ object AdhocJVM_postgres extends TestSuite_postgres {
     //
     //
     //    "validation" - validation { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Validation._
+    //      import molecule.coreTests.dataModels.dsl.Validation._
     //      for {
     //        _ <- Type.string.insert("a").transact
     //          .map(_ ==> "Unexpected success").recover {

@@ -4,7 +4,7 @@ import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
 import molecule.coreTests.async._
-import molecule.coreTests.dataModels.core.dsl.Refs._
+import molecule.coreTests.dataModels.dsl.Refs._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
@@ -37,7 +37,7 @@ trait NestedBasic extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "Nested" - {
 
       "one" - refs { implicit conn =>
-        import molecule.coreTests.dataModels.core.dsl.Refs._
+        import molecule.coreTests.dataModels.dsl.Refs._
         for {
           _ <- A.i.Bb.*(B.i).insert(2, List(3, 4)).transact
           _ <- A.i.Bb.*(B.i.a1).query.get.map(_ ==> List((2, List(3, 4))))
@@ -45,7 +45,7 @@ trait NestedBasic extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       }
 
       "set" - refs { implicit conn =>
-        import molecule.coreTests.dataModels.core.dsl.Refs._
+        import molecule.coreTests.dataModels.dsl.Refs._
         for {
           _ <- A.i.Bb.*(B.iSet).insert(List((2, List(Set(3, 4))))).transact
           _ <- A.i.Bb.*(B.iSet).query.get.map(_ ==> List((2, List(Set(3, 4)))))
@@ -57,7 +57,7 @@ trait NestedBasic extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "Nested owned" - {
 
       "one" - refs { implicit conn =>
-        import molecule.coreTests.dataModels.core.dsl.Refs._
+        import molecule.coreTests.dataModels.dsl.Refs._
         for {
           _ <- A.i.OwnBb.*(B.i).insert(2, List(3, 4)).transact
           _ <- A.i.OwnBb.*(B.i.a1).query.get.map(_ ==> List((2, List(3, 4))))
@@ -65,7 +65,7 @@ trait NestedBasic extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       }
 
       "set" - refs { implicit conn =>
-        import molecule.coreTests.dataModels.core.dsl.Refs._
+        import molecule.coreTests.dataModels.dsl.Refs._
         for {
           _ <- A.i.OwnBb.*(B.iSet).insert(List((2, List(Set(3, 4))))).transact
           _ <- A.i.OwnBb.*(B.iSet).query.get.map(_ ==> List((2, List(Set(3, 4)))))

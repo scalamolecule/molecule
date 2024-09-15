@@ -3,7 +3,7 @@ package molecule.sql.h2
 import boopickle.Default._
 import molecule.base.error.ModelError
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.core.dsl.Types._
+import molecule.coreTests.dataModels.dsl.Types._
 import molecule.sql.h2.async._
 import molecule.sql.h2.setup.TestSuite_h2
 import utest._
@@ -27,7 +27,7 @@ object AdhocJS_h2 extends TestSuite_h2 {
 
 
     //    "refs" - refs { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Refs._
+    //      import molecule.coreTests.dataModels.dsl.Refs._
     //      for {
     //
     //        _ <- A.i(1).save.transact
@@ -61,7 +61,7 @@ object AdhocJS_h2 extends TestSuite_h2 {
     //
     //
     //    "validation" - validation { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Validation._
+    //      import molecule.coreTests.dataModels.dsl.Validation._
     //      for {
     //
     //        id <- MandatoryAttr.name("Bob").age(42)

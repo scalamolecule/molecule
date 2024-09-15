@@ -1,7 +1,7 @@
 package molecule.sql.mariadb.compliance.fallback
 
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.core.dsl.Types._
+import molecule.coreTests.dataModels.dsl.Types._
 import molecule.sql.mariadb.async._
 import molecule.sql.mariadb.setup.TestSuite_mariadb
 import upickle.default.read

@@ -3,7 +3,7 @@ package molecule.coreTests.setup
 import molecule.base.api.Schema
 import molecule.core.spi.Conn
 import molecule.core.util.{AggrUtils, JavaConversions}
-import molecule.coreTests.dataModels.core.schema._
+import molecule.coreTests.dataModels.schema._
 import utest._
 import utest.framework.Formatter
 import scala.concurrent.Future

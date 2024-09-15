@@ -187,7 +187,7 @@ sbt.version = 1.10.1
 `project/plugins.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.9.0")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.9.1")
 ```
 
 `build.sbt`:
@@ -205,7 +205,7 @@ lazy val yourProject = project.in(file("app"))
       "org.scalamolecule" %%% "molecule-sql-h2" % "0.10.1",
       "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.10.1",
     ),
-    moleculeSchemas := Seq("app") // paths to your data model definitions
+    moleculeSchemas := Seq("app/dataModel") // paths to directories with Data Model definition files
   )
 ```
 
@@ -271,7 +271,7 @@ And hereafter you can just pull the latest changes in each repository directory
 To generate the boilerplate code with the latest plugin, run the following commands:
 
     cd molecule
-    sbt ++2.12.19 "project baseJVM" publishLocal  # Used by sbt-molecule
+    sbt ++2.12.20 "project baseJVM" publishLocal  # Used by sbt-molecule
     cd ../sbt-molecule
     sbt publishLocal                              # Make the plugin available
     cd ../molecule

@@ -5,7 +5,7 @@ import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
 import molecule.coreTests.async._
-import molecule.coreTests.dataModels.core.dsl.Validation._
+import molecule.coreTests.dataModels.dsl.Validation._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 import scala.language.implicitConversions
@@ -79,67 +79,67 @@ trait Semantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
     "2 rows, 2 errors" - validation { implicit conn =>
-      for {
-        _ <- Type.int.long.insert(
-            (0, 0L),
-            (1, 1L),
-          ).transact
-          .map(_ ==> "Unexpected success").recover {
-            case InsertErrors(errors, _) =>
-              errors ==> Seq(
-                (
-                  0, // first row
-                  Seq(
-                    InsertError(
-                      0, // tuple index, int
-                      "Type.int",
-                      Seq(
-                        s"""Type.int with value `0` doesn't satisfy validation:
-                           |_ > 2
-                           |""".stripMargin
-                      ),
-                      Nil
-                    ),
-                    InsertError(
-                      1, // tuple index, long
-                      "Type.long",
-                      Seq(
-                        s"""Type.long with value `0` doesn't satisfy validation:
-                           |_ > 2L
-                           |""".stripMargin
-                      ),
-                      Nil
-                    )
-                  )
+for {
+  _ <- Type.int.long.insert(
+      (0, 0L),
+      (1, 1L),
+    ).transact
+    .map(_ ==> "Unexpected success").recover {
+      case InsertErrors(errors, _) =>
+        errors ==> Seq(
+          (
+            0, // first row
+            Seq(
+              InsertError(
+                0, // tuple index, int
+                "Type.int",
+                Seq(
+                  s"""Type.int with value `0` doesn't satisfy validation:
+                     |_ > 2
+                     |""".stripMargin
                 ),
-                (
-                  1, // second row
-                  Seq(
-                    InsertError(
-                      0, // tuple index, int
-                      "Type.int",
-                      Seq(
-                        s"""Type.int with value `1` doesn't satisfy validation:
-                           |_ > 2
-                           |""".stripMargin
-                      ),
-                      Nil
-                    ),
-                    InsertError(
-                      1, // tuple index, long
-                      "Type.long",
-                      Seq(
-                        s"""Type.long with value `1` doesn't satisfy validation:
-                           |_ > 2L
-                           |""".stripMargin
-                      ),
-                      Nil
-                    )
-                  )
-                )
+                Nil
+              ),
+              InsertError(
+                1, // tuple index, long
+                "Type.long",
+                Seq(
+                  s"""Type.long with value `0` doesn't satisfy validation:
+                     |_ > 2L
+                     |""".stripMargin
+                ),
+                Nil
               )
-          }
-      } yield ()
+            )
+          ),
+          (
+            1, // second row
+            Seq(
+              InsertError(
+                0, // tuple index, int
+                "Type.int",
+                Seq(
+                  s"""Type.int with value `1` doesn't satisfy validation:
+                     |_ > 2
+                     |""".stripMargin
+                ),
+                Nil
+              ),
+              InsertError(
+                1, // tuple index, long
+                "Type.long",
+                Seq(
+                  s"""Type.long with value `1` doesn't satisfy validation:
+                     |_ > 2L
+                     |""".stripMargin
+                ),
+                Nil
+              )
+            )
+          )
+        )
+    }
+} yield ()
     }
 
 

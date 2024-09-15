@@ -3,7 +3,7 @@ package molecule.coreTests.spi.api
 import molecule.base.error._
 import molecule.core.api.ApiZio
 import molecule.core.spi.SpiZio
-import molecule.coreTests.dataModels.core.dsl.Types.Ns
+import molecule.coreTests.dataModels.dsl.Types.Ns
 import molecule.coreTests.setup.CoreTestZioSpec
 import molecule.coreTests.zio._
 import zio._
@@ -32,7 +32,7 @@ trait ZioApi extends CoreTestZioSpec with ApiZio { spi: SpiZio =>
       }.provide(types.orDie),
 
       test("Error handling") {
-        import molecule.coreTests.dataModels.core.dsl.Validation.Type
+        import molecule.coreTests.dataModels.dsl.Validation.Type
 
         Type.string("a").save.transact.flip.map {
           case ValidationErrors(errorMap) => assertTrue(
@@ -88,7 +88,7 @@ trait ZioApi extends CoreTestZioSpec with ApiZio { spi: SpiZio =>
       ).provide(types.orDie),
 
       test("Cursor query") {
-        import molecule.coreTests.dataModels.core.dsl.Uniques._
+        import molecule.coreTests.dataModels.dsl.Uniques._
         val query = Uniques.int.a1.query
         for {
           _ <- Uniques.int.insert(1, 2, 3, 4, 5).transact

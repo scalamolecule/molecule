@@ -3,8 +3,8 @@ package molecule.sql.h2
 import java.time.Instant
 import molecule.base.error.{ExecutionError, ModelError}
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.core.dsl.Refs.{A, B}
-import molecule.coreTests.dataModels.core.dsl.Types.Ns
+import molecule.coreTests.dataModels.dsl.Refs.{A, B}
+import molecule.coreTests.dataModels.dsl.Types.Ns
 import molecule.coreTests.util.Array2List
 import molecule.sql.h2.async._
 import molecule.sql.h2.setup.{TestSuiteArray_h2, TestSuite_h2}
@@ -20,7 +20,7 @@ object AdhocJVM_h2 extends TestSuite_h2 {
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Types._
+      import molecule.coreTests.dataModels.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
       for {
@@ -37,7 +37,7 @@ object AdhocJVM_h2 extends TestSuite_h2 {
 
 
     "refs" - refs { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Refs._
+      import molecule.coreTests.dataModels.dsl.Refs._
       for {
 
 
@@ -93,7 +93,7 @@ object AdhocJVM_h2 extends TestSuite_h2 {
 
 
     //    "unique" - unique { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Uniques._
+    //      import molecule.coreTests.dataModels.dsl.Uniques._
     //      val triples             = getTriples.map(t => (t._3, t._1, t._2))
     //      val List(a, b, c, d, e) = triples.sortBy(p => (p._2, p._3, p._1))
     //      val query               = (c: String, l: Int) => Uniques.int.a3.s.a1.i.a2.query.from(c).limit(l)
@@ -105,7 +105,7 @@ object AdhocJVM_h2 extends TestSuite_h2 {
     //
     //
     //    "validation" - validation { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Validation._
+    //      import molecule.coreTests.dataModels.dsl.Validation._
     //      for {
     //        id <- MandatoryAttr.name("Bob").age(42)
     //          .hobbies(Set("golf")).save.transact.map(_.id)
@@ -129,7 +129,7 @@ object AdhocJVM_h2 extends TestSuite_h2 {
     //    }
     //
     //    "partitions" - partition { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Partitions._
+    //      import molecule.coreTests.dataModels.dsl.Partitions._
     //      for {
     //
     //        _ <- lit_Book.title.Reviewers.name.Professions.*(gen_Profession.name)

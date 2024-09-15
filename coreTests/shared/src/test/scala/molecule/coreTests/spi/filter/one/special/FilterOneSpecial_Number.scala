@@ -4,7 +4,7 @@ import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
 import molecule.coreTests.async._
-import molecule.coreTests.dataModels.core.dsl.Types._
+import molecule.coreTests.dataModels.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
@@ -59,7 +59,7 @@ trait FilterOneSpecial_Number extends CoreTestSuite with ApiAsync { spi: SpiAsyn
     }
 
     "Int ref" - types { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Types._
+      import molecule.coreTests.dataModels.dsl.Types._
       for {
         _ <- Ns.i.Ref.int.insert(
           (1, 1),

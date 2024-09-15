@@ -5,7 +5,7 @@ import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
 import molecule.coreTests.async._
-import molecule.coreTests.dataModels.core.dsl.Refs._
+import molecule.coreTests.dataModels.dsl.Refs._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 

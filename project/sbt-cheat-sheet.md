@@ -10,8 +10,8 @@ Compile to current version only:
 
 Compile to 2.12 only:
 
-    sbt ++2.12.19 compile
-    sbt ++2.12.19 clean compile
+    sbt ++2.12.20 compile
+    sbt ++2.12.20 clean compile
 
 Compile to 3.3 only:
 
@@ -38,7 +38,7 @@ To have molecule jars generated, add `-Dmolecule=true`
 ## Publish
 
 1) Set molecule build version to new version
-2) `sbt ++2.12.19 "project baseJVM" publishLocal` (using sbt-molecule snapshot)
+2) `sbt ++2.12.20 "project baseJVM" publishLocal` (using sbt-molecule snapshot)
 3) Set sbt-molecule to new version and `molecule-base` dep to new molecule version in all sbt/sbt test build files 
 4) sbt-molecule: `sbt publishLocal`
 5) molecule: `sbt +publishLocal`
@@ -49,8 +49,8 @@ To have molecule jars generated, add `-Dmolecule=true`
 
 Publish versions separately
 
-    sbt ++2.12.19 publishLocal
-    sbt ++2.12.19 publishSigned -Ddocs=true
+    sbt ++2.12.20 publishLocal
+    sbt ++2.12.20 publishSigned -Ddocs=true
 
 
 ### Misc

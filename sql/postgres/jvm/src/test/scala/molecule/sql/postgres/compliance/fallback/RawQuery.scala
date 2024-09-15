@@ -2,7 +2,7 @@ package molecule.sql.postgres.compliance.fallback
 
 import java.math.{BigDecimal => jBigDecimal}
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.core.dsl.Types._
+import molecule.coreTests.dataModels.dsl.Types._
 import molecule.sql.postgres.async._
 import molecule.sql.postgres.setup.TestSuite_postgres
 import org.postgresql.jdbc.PgArray

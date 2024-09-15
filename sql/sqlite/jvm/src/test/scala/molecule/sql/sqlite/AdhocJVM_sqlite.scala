@@ -13,7 +13,7 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Types._
+      import molecule.coreTests.dataModels.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
       for {
@@ -30,7 +30,7 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
 
 
     "refs" - refs { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Refs._
+      import molecule.coreTests.dataModels.dsl.Refs._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
       for {
@@ -97,7 +97,7 @@ ORDER BY A.i;
 
 
     //    "unique" - unique { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Uniques._
+    //      import molecule.coreTests.dataModels.dsl.Uniques._
     //      //          val triples             = getTriples.map(t => (t._3, t._1, t._2))
     //      //          val List(a, b, c, d, e) = triples.sortBy(p => (p._2, p._3, p._1))
     //      //          val query               = (c: String, l: Int) => Uniques.int.a3.s.a1.i.a2.query.from(c).limit(l)
@@ -119,7 +119,7 @@ ORDER BY A.i;
 
 
     //    "validation" - validation { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Validation._
+    //      import molecule.coreTests.dataModels.dsl.Validation._
     //      for {
     //        id <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf", "stamps")).save.transact.map(_.id)
     //
@@ -140,7 +140,7 @@ ORDER BY A.i;
     //    }
     //
     //    "partitions" - partition { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Partitions._
+    //      import molecule.coreTests.dataModels.dsl.Partitions._
     //      for {
     //
     //        _ <- lit_Book.title.Reviewers.name.Professions.*(gen_Profession.name)

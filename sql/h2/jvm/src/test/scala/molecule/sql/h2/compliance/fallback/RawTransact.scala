@@ -1,7 +1,7 @@
 package molecule.sql.h2.compliance.fallback
 
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.core.dsl.Types._
+import molecule.coreTests.dataModels.dsl.Types._
 import molecule.sql.h2.async._
 import molecule.sql.h2.setup.TestSuite_h2
 import utest._

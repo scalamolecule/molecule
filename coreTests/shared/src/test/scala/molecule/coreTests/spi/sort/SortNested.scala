@@ -4,7 +4,7 @@ import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
 import molecule.coreTests.async._
-import molecule.coreTests.dataModels.core.dsl.Refs._
+import molecule.coreTests.dataModels.dsl.Refs._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 import scala.concurrent.Future
@@ -15,7 +15,7 @@ trait SortNested extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
   override lazy val tests = Tests {
 
     "Basic types, ascending" - types { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Types._
+      import molecule.coreTests.dataModels.dsl.Types._
       for {
         _ <- Ref.i.Nss.*(Ns.string).insert((1, List(string1, string2))).transact
         _ <- Ref.i.Nss.*(Ns.int).insert((2, List(int1, int2))).transact
@@ -100,7 +100,7 @@ trait SortNested extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
     "Basic types, descending" - types { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Types._
+      import molecule.coreTests.dataModels.dsl.Types._
       for {
         _ <- Ref.i.Nss.*(Ns.string).insert((1, List(string1, string2))).transact
         _ <- Ref.i.Nss.*(Ns.int).insert((2, List(int1, int2))).transact
@@ -183,7 +183,7 @@ trait SortNested extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
     "OptNested type, optional" - types { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Types._
+      import molecule.coreTests.dataModels.dsl.Types._
       for {
         _ <- Ref.i.Nss.*(Ns.i.string_?).insert((1, List(
           (1, Some(string1)),

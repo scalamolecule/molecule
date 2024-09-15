@@ -4,7 +4,7 @@ import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
 import molecule.coreTests.async._
-import molecule.coreTests.dataModels.core.dsl.Uniques._
+import molecule.coreTests.dataModels.dsl.Uniques._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 import scala.annotation.nowarn
@@ -47,7 +47,7 @@ trait Directions extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
     "Near-unique primary sort" - {
-      import molecule.coreTests.dataModels.core.dsl.Types._
+      import molecule.coreTests.dataModels.dsl.Types._
       val query = Ns.date.a1.query
 
       "From start" - types { implicit conn =>

@@ -5,7 +5,7 @@ import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
 import molecule.coreTests.async._
-import molecule.coreTests.dataModels.core.dsl.Refs._
+import molecule.coreTests.dataModels.dsl.Refs._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 import scala.concurrent.Future
@@ -45,7 +45,7 @@ trait Delete_filter extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
     "Expression" - {
-      import molecule.coreTests.dataModels.core.dsl.Types._
+      import molecule.coreTests.dataModels.dsl.Types._
 
       "equal 0" - types { implicit conn =>
         for {
@@ -188,7 +188,7 @@ trait Delete_filter extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
     "Ref owned" - refs { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Refs._
+      import molecule.coreTests.dataModels.dsl.Refs._
       for {
         _ <- A.i.insert(1).transact
         _ <- A.i.OwnB.i.insert((2, 20), (3, 30)).transact

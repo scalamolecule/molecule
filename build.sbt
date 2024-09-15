@@ -4,7 +4,7 @@ import sbt.Keys.libraryDependencies
 import scala.collection.Seq
 
 
-val scala212 = "2.12.19"
+val scala212 = "2.12.20"
 val scala213 = "2.13.14"
 val scala3   = "3.3.3"
 val allScala = Seq(scala212, scala213, scala3)
@@ -20,7 +20,7 @@ inThisBuild(
     organizationName := "ScalaMolecule",
     organizationHomepage := Some(url("http://www.scalamolecule.org")),
     versionScheme := Some("early-semver"),
-    version := "0.10.1",
+    version := "0.10.2-SNAPSHOT",
     scalaVersion := scala213,
     crossScalaVersions := allScala,
 
@@ -137,7 +137,7 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
 
     // Multiple directories with data models
     moleculeDataModelPaths := Seq(
-      "molecule/coreTests/dataModels/core"
+      "molecule/coreTests/dataModels"
     ),
 
     // Suppress "un-used" keys warning
@@ -431,6 +431,44 @@ lazy val sqlSQlite = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(sqlCore)
   .dependsOn(coreTests % "test->test")
 
+////lazy val website = project // new documentation project
+//lazy val docs = project // new documentation project
+////  .in(file("website")) // important: it must not be docs/
+//  .in(file("docs-gen")) // important: it must not be docs/
+//  .dependsOn(
+//    datalogDatomic.jvm,
+//    sqlH2.jvm
+//  )
+//  //  .enablePlugins(BuildInfoPlugin, MdocPlugin)
+//  //  .enablePlugins(MdocPlugin, DocusaurPlugin)
+//  //  .enablePlugins(MdocPlugin)
+//  .enablePlugins(MdocPlugin, DocusaurusPlugin)
+//  //  .enablePlugins(DocusaurusPlugin)
+//  .settings(
+////    moduleName := "website",
+//    moduleName := "docs-gen",
+//    crossScalaVersions := List(scala213),
+//    scalaVersion := scala213,
+//    publish / skip := true,
+//    //    buildInfoKeys := Seq[BuildInfoKey]("molecule-base" -> base),
+//    //    buildInfoPackage := "docs",
+//    //mdocExtraArguments := List("--no-link-hygiene"),
+//
+//    watchSources += (ThisBuild / baseDirectory).value / "docs",
+//
+//    //    mdoc := (Compile / run).evaluated,
+////    mdocIn := file("website/docs"),
+//    mdocIn := (ThisBuild / baseDirectory).value / "docs",
+//    mdocOut := (ThisBuild / baseDirectory).value / "website" / "docs",
+////    mdocOut := (ThisBuild / baseDirectory).value / "docs-gen" / "docs",
+//
+//    mdocVariables := Map(
+//      "VERSION" -> version.value.replaceFirst("\\+.*", ""),
+//      "SCALA_BINARY_VERSION" -> scalaBinaryVersion.value,
+//      "SCALA_VERSION" -> scalaVersion.value
+//    ),
+//  )
+
 lazy val testingFrameworks = Seq(
   new TestFramework("utest.runner.Framework"),
   new TestFramework("zio.test.sbt.ZTestFramework")
@@ -464,9 +502,8 @@ lazy val compilerArgs = Def.settings(
     "-language:higherKinds",
     "-language:existentials",
     "-unchecked",
-    "-Xfatal-warnings",
-    //    "-source:11", // ?
-    //    "-target:11"
+    "11"
+    //    "-Xfatal-warnings",
   ) ++ (CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((2, 12)) =>
       Seq(
@@ -492,6 +529,9 @@ lazy val compilerArgs = Def.settings(
       Seq(
         "-explain-types",
         "-Ykind-projector"
+        //        "-experimental",
+        //        "-rewrite",
+        //        "-source:3.4-migration",
       )
     case _            => Nil
   })

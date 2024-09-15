@@ -12,7 +12,7 @@ object AdhocDatomic extends TestSuite_datomic {
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Types._
+      import molecule.coreTests.dataModels.dsl.Types._
       for {
         _ <- Ns.int(3).save.transact
         _ <- Ns.int.query.get.map(_ ==> List(3))
@@ -49,7 +49,7 @@ object AdhocDatomic extends TestSuite_datomic {
 
 
     //    "refs" - refs { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Refs._
+    //      import molecule.coreTests.dataModels.dsl.Refs._
     //      for {
     //        _ <- Ns.i.Tx(R2.i).insert(1, 2).transact
     //          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>

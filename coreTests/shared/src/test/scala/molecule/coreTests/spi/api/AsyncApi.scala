@@ -5,7 +5,7 @@ import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
 import molecule.coreTests.async._
-import molecule.coreTests.dataModels.core.dsl.Types._
+import molecule.coreTests.dataModels.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 import scala.annotation.nowarn
@@ -29,7 +29,7 @@ trait AsyncApi extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
       "Error handling" - validation { implicit conn =>
-        import molecule.coreTests.dataModels.core.dsl.Validation.Type
+        import molecule.coreTests.dataModels.dsl.Validation.Type
 
         for {
           _ <- Type.string("a").save.transact
@@ -87,7 +87,7 @@ trait AsyncApi extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
       "Cursor query" - unique { implicit conn =>
-        import molecule.coreTests.dataModels.core.dsl.Uniques._
+        import molecule.coreTests.dataModels.dsl.Uniques._
         val query = Uniques.int.a1.query
         for {
           _ <- Uniques.int.insert(1, 2, 3, 4, 5).transact

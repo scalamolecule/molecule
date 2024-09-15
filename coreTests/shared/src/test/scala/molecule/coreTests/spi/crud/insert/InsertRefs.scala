@@ -5,7 +5,7 @@ import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
 import molecule.coreTests.async._
-import molecule.coreTests.dataModels.core.dsl.Refs._
+import molecule.coreTests.dataModels.dsl.Refs._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 import scala.language.implicitConversions
@@ -238,7 +238,7 @@ trait InsertRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
     "ids, backref" - refs { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Refs._
+      import molecule.coreTests.dataModels.dsl.Refs._
       for {
         // ref - ref
         List(a1, a2) <- A.i.B.i._A.C.i.insert(
@@ -287,7 +287,7 @@ trait InsertRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
     "ids, nested" - refs { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Refs._
+      import molecule.coreTests.dataModels.dsl.Refs._
       for {
         // 2 A entity ids returned (no Bb ref ids)
         List(a1, a2) <- A.i.Bb.*(B.i).insert(
@@ -303,7 +303,7 @@ trait InsertRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
     "ids, nested + ref" - refs { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Refs._
+      import molecule.coreTests.dataModels.dsl.Refs._
       for {
         // Ids of first namespace entities returned
         List(a1, a2) <- A.i.Bb.*(B.i.C.i).insert(
@@ -319,7 +319,7 @@ trait InsertRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
     "ids, ref + nested + ref " - refs { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Refs._
+      import molecule.coreTests.dataModels.dsl.Refs._
       for {
         // Ids of first namespace entities returned
         List(a1, a2) <- A.i.B.i.Cc.*(C.i.D.i).insert(
@@ -335,7 +335,7 @@ trait InsertRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
     "ids, self-join + nested + ref " - refs { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Refs._
+      import molecule.coreTests.dataModels.dsl.Refs._
       for {
         // Ids of first namespace entities returned
         List(a1, a2) <- A.i.A.i.Cc.*(C.i.D.i).insert(

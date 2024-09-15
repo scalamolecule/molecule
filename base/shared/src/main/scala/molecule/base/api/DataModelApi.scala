@@ -289,15 +289,33 @@ trait DataModelApi {
    */
   sealed trait Options[Self, Tpe, BaseTpe] extends Requierable {
 
+    /** Description of attribute
+     *
+     * @param description
+     * @return
+     */
+    def descr(description: String): Self = ???
+    def apply(description: String): Self = ???
+
+    // Allowed values (like enumerations)
+    def enums(vs: BaseTpe*): Self = ???
+    def enums(vs: Seq[BaseTpe], failureMsg: String): Self = ???
+
+    /** Alias to non-compatible attribute name like `type` or `first-name` etc.
+     *
+     * Molecule then creates an alias to the special name in the schema so that
+     * queries will match both the attribute name and the alias.
+     * */
+    def alias(altAttrName: String): Self = ???
+
     /** Index option (defaults to true).
      * <br><br>
-     * Generated index for this attribute. By default all attributes are set with
-     * the indexed option automatically by Molecule, so you don't need to set this.
+     * Generated index for this attribute.
+     *
+     * For the Datomic database, all attributes are set by default with the indexed option
+     * automatically.
      * */
     lazy val index: Self = ???
-
-    /** No history option. */
-    lazy val noHistory: Self = ???
 
     /** Unique identity option.
      * <br><br>
@@ -319,31 +337,16 @@ trait DataModelApi {
 
     lazy val mandatory: Self = ???
 
-
-    /** Alias to non-compatible attribute name like `type` or `first-name` etc.
-     *
-     * Molecule then creates an alias to the special name in the schema so that
-     * queries will match both the attribute name and the alias.
-     * */
-    def alias(altAttrName: String): Self = ???
-
-    /** Description of attribute
-     *
-     * @param s
-     * @return
-     */
-    def descr(description: String): Self = ???
-    def apply(description: String): Self = ???
-
-    // Allowed values (like enumerations)
-    def enums(vs: BaseTpe*): Self = ???
-    def enums(vs: Seq[BaseTpe], failureMsg: String): Self = ???
-
     // Tupled attributes
     def require(attrs: Requierable*): Self = ???
 
     // Value accessor for validation code
     val value: Tpe = ???
+
+
+    /** No history option (effect in Datomic only). */
+    lazy val noHistory: Self = ???
+
   }
 
 

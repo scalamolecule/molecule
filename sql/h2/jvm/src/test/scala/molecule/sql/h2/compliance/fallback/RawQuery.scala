@@ -2,7 +2,7 @@ package molecule.sql.h2.compliance.fallback
 
 import java.math.{BigDecimal => jBigDecimal}
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.core.dsl.Types._
+import molecule.coreTests.dataModels.dsl.Types._
 import molecule.sql.h2.async._
 import molecule.sql.h2.setup.TestSuite_h2
 import org.h2.jdbc.JdbcArray

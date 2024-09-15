@@ -2,7 +2,7 @@ package molecule.datalog.datomic
 
 import boopickle.Default._
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.core.dsl.Types._
+import molecule.coreTests.dataModels.dsl.Types._
 import molecule.datalog.datomic.async._
 import molecule.datalog.datomic.setup.TestSuite_datomic
 import utest._
@@ -25,7 +25,7 @@ object AdhocJS_datomic extends TestSuite_datomic {
 
 
     //    "refs" - refs { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Refs._
+    //      import molecule.coreTests.dataModels.dsl.Refs._
     //      for {
     //
     //        _ <- A.i.insert(2).transact

@@ -15,7 +15,7 @@ object AdhocJVM_datomic extends TestSuite_datomic {
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Types._
+      import molecule.coreTests.dataModels.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
 
@@ -37,7 +37,7 @@ object AdhocJVM_datomic extends TestSuite_datomic {
 
 
     "refs" - refs { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Refs._
+      import molecule.coreTests.dataModels.dsl.Refs._
       for {
 
 
@@ -173,7 +173,7 @@ object AdhocJVM_datomic extends TestSuite_datomic {
 
 
     //    "unique" - unique { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Uniques._
+    //      import molecule.coreTests.dataModels.dsl.Uniques._
     //      for {
     //        _ <- Uniques.int.s.i.insert(triples).transact
     //
@@ -182,7 +182,7 @@ object AdhocJVM_datomic extends TestSuite_datomic {
     //
     //
     //        "validation" - validation { implicit conn =>
-    //          import molecule.coreTests.dataModels.core.dsl.Validation._
+    //          import molecule.coreTests.dataModels.dsl.Validation._
     //          for {
     //
     //            id <- MandatoryRefB.i(1).RefB.i(2).save.transact.map(_.id)
@@ -201,7 +201,7 @@ object AdhocJVM_datomic extends TestSuite_datomic {
     //
     //
     //    "refs" - refs { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Refs._
+    //      import molecule.coreTests.dataModels.dsl.Refs._
     //      for {
     ////        _ <- A.s.Bb.*(B.i).insert(
     ////          ("a", List(1, 2)),

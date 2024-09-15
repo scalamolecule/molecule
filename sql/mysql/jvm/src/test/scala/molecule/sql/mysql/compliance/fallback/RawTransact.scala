@@ -1,7 +1,7 @@
 package molecule.sql.mysql.compliance.fallback
 
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.core.dsl.Types._
+import molecule.coreTests.dataModels.dsl.Types._
 import molecule.sql.mysql.async._
 import molecule.sql.mysql.setup.TestSuite_mysql
 import utest._

@@ -1,4 +1,4 @@
-package molecule.coreTests.dataModels.core.dataModel
+package molecule.coreTests.dataModels
 
 import java.time._
 import java.util.Date
@@ -190,91 +190,91 @@ object Validation extends DataModel(5) {
     // val intx = oneInt.value
 
 
-    val int        = oneInt
-    val noErrorMsg = oneInt.validate(_ > int.value)
+val int        = oneInt
+val noErrorMsg = oneInt.validate(_ > int.value)
 
-    val int1     = oneInt
-    val errorMsg = oneInt.validate(
-      _ > int1.value,
-      "One-line error msg"
-    )
+val int1     = oneInt
+val errorMsg = oneInt.validate(
+  _ > int1.value,
+  "One-line error msg"
+)
 
-    val int2              = oneInt
-    val errorMsgWithValue = oneInt.validate(
-      _ > int2.value,
-      "One-line error msg. Found $v"
-    )
+val int2              = oneInt
+val errorMsgWithValue = oneInt.validate(
+  _ > int2.value,
+  "One-line error msg. Found $v"
+)
 
-    val int3         = oneInt
-    val multilineMsg = oneInt.validate((v: Int) => v.>(int3.value),
-      """Validation failed:
-        |Input value `$v` is not bigger than `int3` value `$int3`.""".stripMargin
-    )
+val int3         = oneInt
+val multilineMsg = oneInt.validate((v: Int) => v.>(int3.value),
+  """Validation failed:
+    |Input value `$v` is not bigger than `int3` value `$int3`.""".stripMargin
+)
 
-    val int4      = oneInt
-    val multiLine = oneInt.validate { v =>
-      val data   = 22
-      val result = data % int4.value
-      v > result
+val int4      = oneInt
+val multiLine = oneInt.validate { v =>
+  val data   = 22
+  val result = data % int4.value
+  v > result
+}
+
+val int5       = oneInt
+val multiLine2 = oneInt.validate(
+  { v =>
+    val data   = 22
+    val result = {
+      data % int5.value
     }
+    v > result
+  },
+  "One-line error msg"
+)
 
-    val int5       = oneInt
-    val multiLine2 = oneInt.validate(
-      { v =>
-        val data   = 22
-        val result = {
-          data % int5.value
-        }
-        v > result
-      },
-      "One-line error msg"
-    )
+val int6       = oneInt
+val multiLine3 = oneInt.validate({ v =>
+  val data   = 22
+  val result = data % int6.value
+  v > result
+},
+  """Long error explanation
+    |with multiple lines""".stripMargin
+)
 
-    val int6       = oneInt
-    val multiLine3 = oneInt.validate({ v =>
-      val data   = 22
-      val result = data % int6.value
-      v > result
-    },
-      """Long error explanation
-        |with multiple lines""".stripMargin
-    )
+val int7  = oneInt
+val logic = oneInt.validate(
+  v => v >= 3 && v <= 9 && v != int7.value && v % 2 == 1,
+  "Value must be an odd number between 3 and 9 but not `int7` value `$int7`"
+)
 
-    val int7  = oneInt
-    val logic = oneInt.validate(
-      v => v >= 3 && v <= 9 && v != int7.value && v % 2 == 1,
-      "Value must be an odd number between 3 and 9 but not `int7` value `$int7`"
-    )
+val int8   = oneInt
+val str    = oneString
+val intSet = setInt
+val strs   = setString
 
-    val int8   = oneInt
-    val str    = oneString
-    val intSet = setInt
-    val strs   = setString
+val multipleErrors = oneInt.validate(
+  {
+    case v if v > 4 =>
+      "Test 1: Number must be bigger than 4. Found: $v"
 
-    val multipleErrors = oneInt.validate(
-      {
-        case v if v > 4 =>
-          "Test 1: Number must be bigger than 4. Found: $v"
+    case v if v > int8.value =>
+      "Test 2: Number must be bigger than `int8` value `$int8`. Found: $v"
 
-        case v if v > int8.value =>
-          "Test 2: Number must be bigger than `int8` value `$int8`. Found: $v"
+    case v if v < str.value.length * 2 =>
+      "Test 3: Number must be smaller than `str` value `$str` length `${str.length}` * 2. Found: $v"
 
-        case v if v < str.value.length * 2 =>
-          "Test 3: Number must be smaller than `str` value `$str` length `${str.length}` * 2. Found: $v"
+    case v if {
+      v != intSet.value.head - 3
+    } => "Test 4: Number must not be `intSet` head value `${intSet.head}` minus 3. Found: $v"
 
-        case v if {
-          v != intSet.value.head - 3
-        } => "Test 4: Number must not be `intSet` head value `${intSet.head}` minus 3. Found: $v"
-
-        case v if {
-          val divider = strs.value.size
-          v % divider == 1
-        } =>
-          """Test 5: Number must
-            |be odd. Found: $v""".stripMargin
-      }: PartialFunction[Int, String] // Not needed in Scala 2.13 and 3.x
-    )
-  }
+    case v if {
+      val divider = strs.value.size
+      v % divider == 1
+    } =>
+      """Test 5: Number must
+        |be odd. Found: $v""".stripMargin
+  }: PartialFunction[Int, String] // Not needed in Scala 2.13 and 3.x
+)
+}
 
 
   trait MandatoryAttr {

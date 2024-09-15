@@ -2,7 +2,7 @@ package molecule.sql.mysql
 
 import boopickle.Default._
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.core.dsl.Types._
+import molecule.coreTests.dataModels.dsl.Types._
 import molecule.sql.mysql.async._
 import molecule.sql.mysql.setup.TestSuite_mysql
 import utest._
@@ -21,7 +21,7 @@ object AdhocJS_mysql extends TestSuite_mysql {
 
 
     //    "refs" - refs { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Refs._
+    //      import molecule.coreTests.dataModels.dsl.Refs._
     //      for {
     //
     //        _ <- Ns.i.Rs1.*(R1.i).insert(0, List(1)).transact
@@ -31,7 +31,7 @@ object AdhocJS_mysql extends TestSuite_mysql {
 
     //
     //    "validation" - validation { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Validation._
+    //      import molecule.coreTests.dataModels.dsl.Validation._
     //      for {
     //
     //        List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)

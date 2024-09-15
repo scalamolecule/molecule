@@ -6,7 +6,7 @@ import java.time.{Duration, Instant, LocalDate, LocalDateTime, LocalTime, Offset
 import java.util.{Date, UUID}
 import molecule.base.error.{ExecutionError, ModelError, ValidationErrors}
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.core.dsl.Uniques.Uniques
+import molecule.coreTests.dataModels.dsl.Uniques.Uniques
 import molecule.sql.mysql.async._
 import molecule.sql.mysql.setup.TestSuite_mysql
 import utest._
@@ -19,7 +19,7 @@ object AdhocJVM_mysql extends TestSuite_mysql {
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Types._
+      import molecule.coreTests.dataModels.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
 
@@ -38,7 +38,7 @@ object AdhocJVM_mysql extends TestSuite_mysql {
 
 
     "refs" - refs { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Refs._
+      import molecule.coreTests.dataModels.dsl.Refs._
       for {
 
         //        _ <- A.i.B.?(B.iSet).insert(
@@ -97,7 +97,7 @@ object AdhocJVM_mysql extends TestSuite_mysql {
 
 
     //    "unique" - unique { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Uniques._
+    //      import molecule.coreTests.dataModels.dsl.Uniques._
     //      for {
     //        _ <- Uniques.i(1).save.transact
     //
@@ -106,7 +106,7 @@ object AdhocJVM_mysql extends TestSuite_mysql {
     //
     //
     //    "validation" - validation { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Validation._
+    //      import molecule.coreTests.dataModels.dsl.Validation._
     //      for {
     //        List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)
     //

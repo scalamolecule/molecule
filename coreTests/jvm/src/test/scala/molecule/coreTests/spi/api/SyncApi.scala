@@ -3,7 +3,7 @@ package molecule.coreTests.spi.api
 import molecule.base.error._
 import molecule.core.api.ApiSync
 import molecule.core.spi.SpiSync
-import molecule.coreTests.dataModels.core.dsl.Types._
+import molecule.coreTests.dataModels.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import molecule.coreTests.sync._
 import utest._
@@ -28,7 +28,7 @@ trait SyncApi extends CoreTestSuite with ApiSync { spi: SpiSync =>
 
 
       "Opt ref" - refs { implicit conn =>
-        import molecule.coreTests.dataModels.core.dsl.Refs._
+        import molecule.coreTests.dataModels.dsl.Refs._
 
         A.i(1).save.transact
 
@@ -48,7 +48,7 @@ trait SyncApi extends CoreTestSuite with ApiSync { spi: SpiSync =>
 
 
       "Error handling" - validation { implicit conn =>
-        import molecule.coreTests.dataModels.core.dsl.Validation.Type
+        import molecule.coreTests.dataModels.dsl.Validation.Type
 
         intercept[ValidationErrors](
           Type.string("a").save.transact
@@ -102,7 +102,7 @@ trait SyncApi extends CoreTestSuite with ApiSync { spi: SpiSync =>
 
 
       "Cursor query" - unique { implicit conn =>
-        import molecule.coreTests.dataModels.core.dsl.Uniques._
+        import molecule.coreTests.dataModels.dsl.Uniques._
 
         val query = Uniques.int.a1.query
         Uniques.int.insert(1, 2, 3, 4, 5).transact
