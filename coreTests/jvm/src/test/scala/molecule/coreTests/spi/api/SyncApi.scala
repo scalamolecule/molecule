@@ -5,7 +5,6 @@ import molecule.core.api.ApiSync
 import molecule.core.spi.SpiSync
 import molecule.coreTests.dataModels.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
-import molecule.coreTests.sync._
 import utest._
 import scala.annotation.nowarn
 
@@ -141,19 +140,19 @@ trait SyncApi extends CoreTestSuite with ApiSync { spi: SpiSync =>
 
         // For testing purpose, allow each mutation to finish so that we can
         // catch the intermediary callback result in order
-        delay(50)(())
+//        delay(50)(())
 
         Ns.i.insert(3, 4).transact
         Ns.i.a1.query.get ==> List(1, 2, 3, 4)
-        delay(50)(())
+//        delay(50)(())
 
         Ns(id).i(20).update.transact
         Ns.i.a1.query.get ==> List(1, 3, 4, 20)
-        delay(50)(())
+//        delay(50)(())
 
         Ns(id).delete.transact
         Ns.i.a1.query.get ==> List(1, 3, 4)
-        delay(50)(())
+//        delay(50)(())
 
         // Mutations with no callback-involved attributes don't call back
         Ns.string("foo").save.transact

@@ -27,7 +27,7 @@ To have molecule jars generated, add `-Dmolecule=true`
 
     sbt +compile -Dmolecule=true
     sbt clean +compile -Dmolecule=true
-      
+
 
 ## Compile JS
 

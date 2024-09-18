@@ -4,7 +4,6 @@ import molecule.base.error._
 import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.async._
 import molecule.coreTests.dataModels.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
@@ -107,7 +106,7 @@ trait AsyncApi extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i(1).save.transact
 
           // Start subscription
-          _ = Ns.i.query.subscribe { freshResult =>
+          _ <- Ns.i.query.subscribe { freshResult =>
             intermediaryCallbackResults = intermediaryCallbackResults :+ freshResult
           }
 
@@ -117,19 +116,19 @@ trait AsyncApi extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
           // For testing purpose, allow each mutation to finish so that we can
           // catch the intermediary callback result in order
-          _ <- delay(50)(())
+//          _ <- delay(50)(())
 
           _ <- Ns.i.insert(3, 4).transact
           _ <- Ns.i.a1.query.get.map(_ ==> List(1, 2, 3, 4))
-          _ <- delay(50)(())
+//          _ <- delay(50)(())
 
           _ <- Ns(id).i(20).update.transact
           _ <- Ns.i.a1.query.get.map(_ ==> List(1, 3, 4, 20))
-          _ <- delay(50)(())
+//          _ <- delay(50)(())
 
           _ <- Ns(id).delete.transact
           _ <- Ns.i.a1.query.get.map(_ ==> List(1, 3, 4))
-          _ <- delay(50)(())
+//          _ <- delay(50)(())
 
           // Mutations with no callback-involved attributes don't call back
           _ <- Ns.string("foo").save.transact

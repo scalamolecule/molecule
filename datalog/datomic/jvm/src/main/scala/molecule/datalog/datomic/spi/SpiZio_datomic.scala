@@ -6,7 +6,6 @@ import molecule.core.spi.{Conn, SpiZio, TxReport}
 import molecule.core.util.Executor._
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import zio.ZIO
-import scala.concurrent.{Future, ExecutionContext => EC}
 
 trait SpiZio_datomic
   extends SpiZio

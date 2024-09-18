@@ -6,8 +6,8 @@ import molecule.datalog.datomic.setup.TestSuite_datomic
 import utest._
 import scala.language.implicitConversions
 
-
 object AdhocDatomic extends TestSuite_datomic {
+
 
   override lazy val tests = Tests {
 
@@ -16,8 +16,6 @@ object AdhocDatomic extends TestSuite_datomic {
       for {
         _ <- Ns.int(3).save.transact
         _ <- Ns.int.query.get.map(_ ==> List(3))
-
-
       } yield ()
     }
 

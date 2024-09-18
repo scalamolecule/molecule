@@ -1,6 +1,8 @@
 package molecule.coreTests.setup
 
-trait CoreTest extends TestData {
+import molecule.core.MoleculeImplicits_
+
+trait CoreTest extends TestData with MoleculeImplicits_ {
   val isJsPlatform: Boolean
   val database    : String
   val platform    : String

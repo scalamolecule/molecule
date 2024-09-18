@@ -6,7 +6,6 @@ import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
 import molecule.core.util.SerializationUtils
-import molecule.coreTests.async._
 import molecule.coreTests.dataModels.dsl.Validation._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._

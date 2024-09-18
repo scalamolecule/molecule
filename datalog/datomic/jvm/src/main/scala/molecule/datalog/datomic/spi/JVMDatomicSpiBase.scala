@@ -12,7 +12,7 @@ import molecule.datalog.datomic.facade.DatomicConn_JVM
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
-trait JVMDatomicSpiBase extends ModelUtils with JavaConversions{
+trait JVMDatomicSpiBase extends ModelUtils with JavaConversions {
 
   protected def validateUpdate(conn0: Conn, update: Update): Map[String, Seq[String]] = {
     val conn  = conn0.asInstanceOf[DatomicConn_JVM]

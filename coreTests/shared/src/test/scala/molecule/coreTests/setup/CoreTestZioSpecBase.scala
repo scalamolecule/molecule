@@ -9,7 +9,7 @@ import zio.{Task, ZLayer}
 
 trait CoreTestZioSpecBase extends ZIOSpecDefault with CoreTest {
 
-  def inMem[T](schemaTx: Schema): ZLayer[T, Throwable, Conn]
+  def inMem[T](schema: Schema): ZLayer[T, Throwable, Conn]
 
   def types[T]: ZLayer[T, Throwable, Conn] = inMem(TypesSchema)
   def refs[T]: ZLayer[T, Throwable, Conn] = inMem(RefsSchema)

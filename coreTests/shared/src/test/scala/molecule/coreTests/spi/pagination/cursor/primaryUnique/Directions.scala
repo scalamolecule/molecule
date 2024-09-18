@@ -3,7 +3,6 @@ package molecule.coreTests.spi.pagination.cursor.primaryUnique
 import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.async._
 import molecule.coreTests.dataModels.dsl.Uniques._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._

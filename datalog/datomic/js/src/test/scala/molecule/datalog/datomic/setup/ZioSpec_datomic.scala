@@ -24,6 +24,6 @@ trait ZioSpec_datomic extends CoreTestZioSpec {
       schema.attrMap,
       schema.uniqueAttrs,
     )
-    ZLayer.succeed(DatomicConn_JS(proxy, RpcRequest.request))
+    ZLayer.succeed(DatomicConn_JS.apply(proxy, RpcRequest.request))
   }
 }
