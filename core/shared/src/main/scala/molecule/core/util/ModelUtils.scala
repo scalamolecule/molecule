@@ -143,6 +143,9 @@ trait ModelUtils {
   def noNested: Nothing =
     throw ModelError(s"Nested data structure not allowed in update molecule.")
 
+  def noOptRef: Nothing =
+    throw ModelError(s"Optional ref data structure not allowed in update molecule.")
+
   def noNsReUseAfterBackref(
     nextElement: Element,
     prevRefs: List[String],

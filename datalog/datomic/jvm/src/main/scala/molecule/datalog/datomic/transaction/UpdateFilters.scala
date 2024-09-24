@@ -233,7 +233,7 @@ trait UpdateFilters extends ModelUtils {
         }
 
         case _: BackRef => getUpsertFilters(tail)
-        case _: OptRef  => ???
+        case _: OptRef  => noOptRef
         case _          => noNested
       }
 
@@ -450,7 +450,7 @@ trait UpdateFilters extends ModelUtils {
 
         case r: Ref      => getUpdateFilters(tail, r :: AttrOneManID(r.refNs, "id") :: filterElements, true)
         case br: BackRef => getUpdateFilters(tail, br :: filterElements, hasFilter)
-        case r: OptRef   => ???
+        case r: OptRef   => noOptRef
         case _           => noNested
       }
 

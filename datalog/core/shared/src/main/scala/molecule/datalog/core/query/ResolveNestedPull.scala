@@ -69,7 +69,7 @@ trait ResolveNestedPull[Tpl]
 
             case ref: Ref             => (acc, Some(ref), tail, attrIndex)
             case backRef: BackRef     => (acc, Some(backRef), tail, attrIndex)
-            case optRef: OptRef       => ??? //(acc, Some(optRef), Nil, attrIndex)
+            case optRef: OptRef       => (acc, Some(optRef), Nil, attrIndex)
             case nestedOpt: OptNested => (acc, Some(nestedOpt), Nil, attrIndex)
             case _: Nested            => noMixedNestedModes
 

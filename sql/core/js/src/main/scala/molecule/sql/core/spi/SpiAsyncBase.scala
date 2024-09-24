@@ -100,8 +100,12 @@ trait SpiAsyncBase extends SpiAsync with Renderer with FutureUtils {
   }
 
   override def save_validate(save: Save)(implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = future {
-    val proxy = conn.proxy
-    TxModelValidation(proxy.nsMap, proxy.attrMap, "save").validate(save.elements)
+    if (save.doValidate) {
+      val proxy = conn.proxy
+      TxModelValidation(proxy.nsMap, proxy.attrMap, "save").validate(save.elements)
+    } else {
+      Map.empty[String, Seq[String]]
+    }
   }
 
 
@@ -117,7 +121,7 @@ trait SpiAsyncBase extends SpiAsync with Renderer with FutureUtils {
         if (insert.tpls.isEmpty) {
           Future(TxReport(Nil))
         } else {
-          val tplsSerialized = PickleTpls(insert.elements, true).pickle(Right(insert.tpls))
+          val tplsSerialized = PickleTpls(insert.elements, true).pickleEither(Right(insert.tpls))
           val txReport       = conn.rpc.insert(conn.proxy, insert.elements, tplsSerialized).future
           conn.callback(insert.elements)
           txReport
@@ -136,7 +140,11 @@ trait SpiAsyncBase extends SpiAsync with Renderer with FutureUtils {
 
   override def insert_validate(insert: Insert)
                               (implicit conn: Conn, ec: EC): Future[Seq[(Int, Seq[InsertError])]] = future {
-    InsertValidation.validate(conn, insert.elements, insert.tpls)
+    if (insert.doValidate) {
+      InsertValidation.validate(conn, insert.elements, insert.tpls)
+    } else {
+      Seq.empty[(Int, Seq[InsertError])]
+    }
   }
 
 

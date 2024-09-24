@@ -3,7 +3,6 @@ package molecule.core.spi
 import cats.effect.IO
 import molecule.base.error.InsertError
 import molecule.core.action._
-import scala.concurrent.Future
 
 /**
  * Choosing pragmatic IO[T] as Doobie does:

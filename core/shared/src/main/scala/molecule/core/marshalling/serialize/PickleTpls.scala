@@ -29,7 +29,7 @@ case class PickleTpls(
   private val enc   = state.enc
   type DummyNotUsed = Int
 
-  def pickle(result: Either[MoleculeError, Seq[Any]]): Array[Byte] = {
+  def pickleEither(result: Either[MoleculeError, Seq[Any]]): Array[Byte] = {
     result match {
       case Right(tpls) => pickleTpls(tpls)
       case Left(err)   => LeftPickler[MoleculeError, DummyNotUsed].pickle(Left(err))(state)
@@ -131,7 +131,9 @@ case class PickleTpls(
           }
           resolvePicklers(tail, picklers, tplIndex)
 
-        case OptRef(_, optRefElements) => ???
+        case OptRef(refAttr, optRefElements) =>
+          prevRefs.clear()
+          resolvePicklers(tail, picklers :+ pickleOptRef(tplIndex, optRefElements), tplIndex + 1)
 
         case Nested(_, nestedElements) =>
           prevRefs.clear()
@@ -142,6 +144,36 @@ case class PickleTpls(
           resolvePicklers(tail, picklers :+ pickleNested(tplIndex, nestedElements), tplIndex + 1)
       }
       case Nil             => picklers
+    }
+  }
+
+  private def pickleOptRef(
+    tplIndex: Int,
+    optRefElements: List[Element]
+  ): Product => Unit = {
+    // Recursively pickle nested optional refs
+    val pickleOptData = getPickler(optRefElements)
+    countValueAttrs(optRefElements) match {
+      case 1 => // Single nested values
+        (tpl: Product) => {
+          val optValue = tpl.productElement(tplIndex).asInstanceOf[Option[Any]]
+          optValue match {
+            case None        => enc.writeInt(1)
+            case Some(value) =>
+              enc.writeInt(2)
+              pickleOptData(Tuple1(value))
+          }
+        }
+      case _ =>
+        (tpl: Product) => {
+          val optTuple = tpl.productElement(tplIndex).asInstanceOf[Option[Product]]
+          optTuple match {
+            case None      => enc.writeInt(1)
+            case Some(tpl) =>
+              enc.writeInt(2)
+              pickleOptData(tpl)
+          }
+        }
     }
   }
 

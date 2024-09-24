@@ -36,14 +36,24 @@ trait SpiIO_datomic
     val elements         = q.elements
     val involvedAttrs    = getAttrNames(elements)
     val involvedDeleteNs = getInitialNs(elements)
-
-    println("A")
-    val maybeCallback    = (mutationAttrs: Set[String], isDelete: Boolean) => {
+    val maybeCallback = (mutationAttrs: Set[String], isDelete: Boolean) => {
       if (
         mutationAttrs.exists(involvedAttrs.contains) ||
           isDelete && mutationAttrs.head.startsWith(involvedDeleteNs)
       ) {
-        conn.rpc.query[Tpl](conn.proxy, q.elements, q.optLimit).io.map(callback)
+        conn.rpc.query[Tpl](conn.proxy, q.elements, q.optLimit).map {
+            case Right(result)       => callback(result)
+            case Left(moleculeError) => throw moleculeError
+          }
+          .recover {
+            case e: MoleculeError =>
+              logger.debug(e)
+              throw e
+            case e: Throwable     =>
+              logger.error(e.toString + "\n" + e.getStackTrace.toList.mkString("\n"))
+              // Re-throw to preserve original stacktrace
+              throw e
+          }
         ()
       }
     }
@@ -121,7 +131,7 @@ trait SpiIO_datomic
       errors <- insert_validate(insert) // validate original elements against meta model
       txReport <- errors match {
         case errors if errors.isEmpty =>
-          val tplsSerialized = PickleTpls(insert.elements, true).pickle(Right(insert.tpls))
+          val tplsSerialized = PickleTpls(insert.elements, true).pickleEither(Right(insert.tpls))
           conn.rpc.insert(conn.proxy, insert.elements, tplsSerialized).io
         case errors                   => throw InsertErrors(errors)
       }

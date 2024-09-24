@@ -110,7 +110,7 @@ trait SpiAsync_datomic
   // Insert --------------------------------------------------------
 
   override def insert_transact(
-    insert: Insert
+    insert: Insert //, rpc: Boolean = false
   )(implicit conn0: Conn, ec: EC): Future[TxReport] = {
     val conn = conn0.asInstanceOf[DatomicConn_JVM]
     for {

@@ -66,7 +66,7 @@ object Rpc_datomic
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
-      txReport <- save_transact(Save(elements))(conn, global)
+      txReport <- save_transact(Save(elements, doValidate = false))(conn, global)
     } yield txReport
   }
 
@@ -77,7 +77,7 @@ object Rpc_datomic
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
-      tplsEither = UnpickleTpls[Any](elements, ByteBuffer.wrap(tplsSerialized)).unpickle
+      tplsEither = UnpickleTpls[Any](elements, ByteBuffer.wrap(tplsSerialized)).unpickleEither
       tpls = tplsEither match {
         case Right(tpls) =>
           (if (countValueAttrs(elements) == 1) {
@@ -85,7 +85,7 @@ object Rpc_datomic
           } else tpls).asInstanceOf[Seq[Product]]
         case Left(err)   => throw err // catch in outer either wrapper
       }
-      txReport <- insert_transact(Insert(elements, tpls))(conn, global)
+      txReport <- insert_transact(Insert(elements, tpls, doValidate = false))(conn, global)
     } yield txReport
   }
 

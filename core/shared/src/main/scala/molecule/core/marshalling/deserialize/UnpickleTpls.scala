@@ -29,7 +29,7 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
   )
   private val dec   = state.dec
 
-  def unpickle: Either[MoleculeError, List[Tpl]] = {
+  def unpickleEither: Either[MoleculeError, List[Tpl]] = {
     dec.readInt match { // decode Left/Right
       case 2 => Right(unpickleTpls)
       case _ => Left(Unpickle.apply[MoleculeError].fromState(state))
@@ -115,7 +115,8 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
           resolveUnpicklers(tail, unpicklers)
 
         case OptRef(_, optRefElements) =>
-          ???
+          prevRefs.clear()
+          resolveUnpicklers(tail, unpicklers :+ unpickleOptRef(optRefElements))
 
         case Nested(_, nestedElements) =>
           prevRefs.clear()
@@ -129,6 +130,18 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
     }
   }
 
+
+  private def unpickleOptRef(
+    optRefElements: List[Element]
+  ): () => Any = {
+    () =>
+      dec.readInt match {
+        case 1 => Option.empty[Any]
+        case 2 =>
+          // Recursively unpickle opt ref data
+          Some(getUnpickler(optRefElements)())
+      }
+  }
 
   private def unpickleNested(
     nestedElements: List[Element]

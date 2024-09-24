@@ -21,7 +21,7 @@ abstract class RpcHandlers(rpc: MoleculeRpc) extends MoleculeLogging with Serial
     val (proxy, elements, limit) = Unpickle.apply[(ConnProxy, List[Element], Option[Int])]
       .fromBytes(argsSerialized)
     rpc.query[Any](proxy, elements, limit).map(result =>
-      PickleTpls(elements, false).pickle(result)
+      PickleTpls(elements, false).pickleEither(result)
     )
   }
 

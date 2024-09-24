@@ -1,7 +1,6 @@
 package molecule.coreTests.setup
 
 import molecule.base.api.Schema
-import molecule.core.MoleculeImplicits_
 import molecule.core.spi.Conn
 import molecule.core.util.{AggrUtils, JavaConversions}
 import molecule.coreTests.dataModels.schema._

@@ -102,9 +102,13 @@ trait SpiSync_datomic
   override def save_validate(
     save: Save
   )(implicit conn: Conn): Map[String, Seq[String]] = {
-    val proxy = conn.proxy
-    TxModelValidation(proxy.nsMap, proxy.attrMap, "save")
-      .validate(save.elements)
+    if (save.doValidate) {
+      val proxy = conn.proxy
+      TxModelValidation(proxy.nsMap, proxy.attrMap, "save")
+        .validate(save.elements)
+    } else {
+      Map.empty[String, Seq[String]]
+    }
   }
 
   def save_getStmts(save: Save): Data = {
@@ -125,7 +129,11 @@ trait SpiSync_datomic
   override def insert_validate(
     insert: Insert
   )(implicit conn: Conn): Seq[(Int, Seq[InsertError])] = {
-    InsertValidation.validate(conn, insert.elements, insert.tpls)
+    if (insert.doValidate) {
+      InsertValidation.validate(conn, insert.elements, insert.tpls)
+    } else {
+      Seq.empty[(Int, Seq[InsertError])]
+    }
   }
 
   def insert_getStmts(insert: Insert): Data = {

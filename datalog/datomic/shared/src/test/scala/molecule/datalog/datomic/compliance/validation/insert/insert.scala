@@ -1,4 +1,4 @@
-package molecule.datalog.datomic.compliance.validation.crud.insert
+package molecule.datalog.datomic.compliance.validation.insert
 
 import molecule.coreTests.spi.validation.insert._
 import molecule.datalog.datomic.setup.TestAsync_datomic

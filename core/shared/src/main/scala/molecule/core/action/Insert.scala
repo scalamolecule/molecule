@@ -5,7 +5,8 @@ import molecule.boilerplate.ast.Model.Element
 case class Insert(
   elements: List[Element],
   tpls: Seq[Product],
-  private[molecule] val doInspect: Boolean = false
+  private[molecule] val doInspect: Boolean = false,
+  private[molecule] val doValidate: Boolean = true
 ) extends Action(elements) {
 
   // Inspect also

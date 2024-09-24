@@ -19,7 +19,7 @@ object Serialization extends TestSuite {
         AttrOneManString("R2", "s", V, Seq(), None, None, Nil, Nil, None, None)
       )
       val data         = Right(List((2, "b")))
-      val serialized   = PickleTpls(elements, false).pickle(data)
+      val serialized   = PickleTpls(elements, false).pickleEither(data)
       val deserialized = Unpickle.apply[Either[MoleculeError, List[(Int, String)]]].fromBytes(ByteBuffer.wrap(serialized))
 
       deserialized ==> data

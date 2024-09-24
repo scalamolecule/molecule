@@ -65,30 +65,6 @@ object Boopicklers extends MoleculeLogging {
   pickleOp.addConcreteType[Remove.type]
   pickleOp.addConcreteType[Fn]
 
-  implicit val pickleValidator: CompositePickler[Validator] = compositePickler[Validator]
-  pickleValidator.addConcreteType[ValidateID]
-  pickleValidator.addConcreteType[ValidateString]
-  pickleValidator.addConcreteType[ValidateInt]
-  pickleValidator.addConcreteType[ValidateLong]
-  pickleValidator.addConcreteType[ValidateFloat]
-  pickleValidator.addConcreteType[ValidateDouble]
-  pickleValidator.addConcreteType[ValidateBoolean]
-  pickleValidator.addConcreteType[ValidateBigInt]
-  pickleValidator.addConcreteType[ValidateBigDecimal]
-  pickleValidator.addConcreteType[ValidateDate]
-  pickleValidator.addConcreteType[ValidateDuration]
-  pickleValidator.addConcreteType[ValidateInstant]
-  pickleValidator.addConcreteType[ValidateLocalDate]
-  pickleValidator.addConcreteType[ValidateLocalTime]
-  pickleValidator.addConcreteType[ValidateLocalDateTime]
-  pickleValidator.addConcreteType[ValidateOffsetTime]
-  pickleValidator.addConcreteType[ValidateOffsetDateTime]
-  pickleValidator.addConcreteType[ValidateZonedDateTime]
-  pickleValidator.addConcreteType[ValidateUUID]
-  pickleValidator.addConcreteType[ValidateURI]
-  pickleValidator.addConcreteType[ValidateByte]
-  pickleValidator.addConcreteType[ValidateShort]
-  pickleValidator.addConcreteType[ValidateChar]
 
   implicit val pickleValue: CompositePickler[Value] = compositePickler[Value]
   pickleValue.addConcreteType[OneString]
@@ -707,6 +683,32 @@ object Boopicklers extends MoleculeLogging {
   pickleElement.addConcreteType[AttrMapTacChar]
 
 
+
+  implicit val pickleValidator: CompositePickler[Validator] = compositePickler[Validator]
+  pickleValidator.addConcreteType[ValidateID]
+  pickleValidator.addConcreteType[ValidateString]
+  pickleValidator.addConcreteType[ValidateInt]
+  pickleValidator.addConcreteType[ValidateLong]
+  pickleValidator.addConcreteType[ValidateFloat]
+  pickleValidator.addConcreteType[ValidateDouble]
+  pickleValidator.addConcreteType[ValidateBoolean]
+  pickleValidator.addConcreteType[ValidateBigInt]
+  pickleValidator.addConcreteType[ValidateBigDecimal]
+  pickleValidator.addConcreteType[ValidateDate]
+  pickleValidator.addConcreteType[ValidateDuration]
+  pickleValidator.addConcreteType[ValidateInstant]
+  pickleValidator.addConcreteType[ValidateLocalDate]
+  pickleValidator.addConcreteType[ValidateLocalTime]
+  pickleValidator.addConcreteType[ValidateLocalDateTime]
+  pickleValidator.addConcreteType[ValidateOffsetTime]
+  pickleValidator.addConcreteType[ValidateOffsetDateTime]
+  pickleValidator.addConcreteType[ValidateZonedDateTime]
+  pickleValidator.addConcreteType[ValidateUUID]
+  pickleValidator.addConcreteType[ValidateURI]
+  pickleValidator.addConcreteType[ValidateByte]
+  pickleValidator.addConcreteType[ValidateShort]
+  pickleValidator.addConcreteType[ValidateChar]
+
   implicit val pickleInsertError: CompositePickler[InsertError] =
     compositePickler[InsertError]
 
@@ -718,7 +720,7 @@ object Boopicklers extends MoleculeLogging {
     .addConcreteType[InsertErrors]
     .addConcreteType[ExecutionError]
 
-  implicit val pickleFileNotFoundEception: CompositePickler[FileNotFoundException] =
+  implicit val pickleFileNotFoundException: CompositePickler[FileNotFoundException] =
     compositePickler[FileNotFoundException]
 
   implicit val pickleConnProxy: CompositePickler[ConnProxy] =

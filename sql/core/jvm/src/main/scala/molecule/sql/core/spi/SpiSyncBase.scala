@@ -21,7 +21,6 @@ import molecule.sql.core.transaction.{CachedConnection, SqlUpdateSetValidator}
 import scala.collection.mutable.ListBuffer
 import scala.util.control.NonFatal
 
-
 trait SpiSyncBase
   extends SpiSync
     with CachedConnection
@@ -117,7 +116,7 @@ trait SpiSyncBase
     if (save.doInspect)
       save_inspect(save)
     val saveClean = save.copy(elements = noKeywords(save.elements, Some(conn.proxy)))
-    val errors    = save_validate(save) // validate original elements against meta model
+    val errors    = save_validate(save)
     if (errors.isEmpty) {
       val txReport = conn.transact_sync(save_getAction(saveClean, conn))
       conn.callback(save.elements)
@@ -140,8 +139,12 @@ trait SpiSyncBase
 
 
   override def save_validate(save: Save)(implicit conn: Conn): Map[String, Seq[String]] = {
-    val proxy = conn.proxy
-    TxModelValidation(proxy.nsMap, proxy.attrMap, "save").validate(save.elements)
+    if (save.doValidate) {
+      val proxy = conn.proxy
+      TxModelValidation(proxy.nsMap, proxy.attrMap, "save").validate(save.elements)
+    } else {
+      Map.empty[String, Seq[String]]
+    }
   }
 
 
@@ -177,7 +180,11 @@ trait SpiSyncBase
   def insert_getAction(insert: Insert, conn: JdbcConn_JVM): InsertAction
 
   override def insert_validate(insert: Insert)(implicit conn: Conn): Seq[(Int, Seq[InsertError])] = {
-    InsertValidation.validate(conn, insert.elements, insert.tpls)
+    if (insert.doValidate) {
+      InsertValidation.validate(conn, insert.elements, insert.tpls)
+    } else {
+      Seq.empty[(Int, Seq[InsertError])]
+    }
   }
 
 
@@ -215,14 +222,18 @@ trait SpiSyncBase
   override def update_validate(
     update: Update
   )(implicit conn0: Conn): Map[String, Seq[String]] = {
-    val conn            = conn0.asInstanceOf[JdbcConn_JVM]
-    val query2resultSet = (query: String) => {
-      val ps = conn.sqlConn.prepareStatement(
-        query, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY
-      )
-      conn.resultSet(ps.executeQuery())
+    if (update.doValidate) {
+      val conn            = conn0.asInstanceOf[JdbcConn_JVM]
+      val query2resultSet = (query: String) => {
+        val ps = conn.sqlConn.prepareStatement(
+          query, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY
+        )
+        conn.resultSet(ps.executeQuery())
+      }
+      validateUpdateSet(conn.proxy, update.elements, query2resultSet)
+    } else {
+      Map.empty[String, Seq[String]]
     }
-    validateUpdateSet(conn.proxy, update.elements, query2resultSet)
   }
 
   def validateUpdateSet(

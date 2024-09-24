@@ -36,8 +36,9 @@ trait SpiAsync_datomic extends SpiAsync with DatomicSpiAsyncBase with FutureUtil
         mutationAttrs.exists(involvedAttrs.contains) ||
           isDelete && mutationAttrs.head.startsWith(involvedDeleteNs)
       ) {
-        conn.rpc.query[Tpl](conn.proxy, q.elements, q.optLimit).future.map(callback)
-        ()
+        conn.rpc.query[Tpl](conn.proxy, q.elements, q.optLimit)
+          .future
+          .foreach(callback)
       }
     }
     Future(conn.addCallback(elements -> maybeCallback))
@@ -114,7 +115,7 @@ trait SpiAsync_datomic extends SpiAsync with DatomicSpiAsyncBase with FutureUtil
       errors <- insert_validate(insert) // validate original elements against meta model
       txReport <- errors match {
         case errors if errors.isEmpty =>
-          val tplsSerialized = PickleTpls(insert.elements, true).pickle(Right(insert.tpls))
+          val tplsSerialized = PickleTpls(insert.elements, true).pickleEither(Right(insert.tpls))
           conn.rpc.insert(conn.proxy, insert.elements, tplsSerialized).future
         case errors                   => throw InsertErrors(errors)
       }
@@ -139,12 +140,8 @@ trait SpiAsync_datomic extends SpiAsync with DatomicSpiAsyncBase with FutureUtil
     val conn = conn0.asInstanceOf[DatomicConn_JS]
     for {
       _ <- if (update.doInspect) update_inspect(update) else Future.unit
-      errors <- update_validate(update) // validate original elements against meta model
-      txReport <- errors match {
-        case errors if errors.isEmpty =>
-          conn.rpc.update(conn.proxy, update.elements, update.isUpsert).future
-        case errors                   => throw ValidationErrors(errors)
-      }
+      // Error handling on jvm side since it needs db lookups
+      txReport <- conn.rpc.update(conn.proxy, update.elements, update.isUpsert).future
     } yield {
       conn.callback(update.elements)
       txReport
