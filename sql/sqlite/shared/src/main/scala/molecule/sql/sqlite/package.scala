@@ -5,7 +5,7 @@ import molecule.core.api._
 import molecule.sql.sqlite.spi._
 
 package object sqlite {
-  object async extends MoleculeImplicits_ with ApiAsync with Spi_sqlite_async
-  object sync extends MoleculeImplicits_ with ApiSync with Spi_sqlite_sync
-  object zio extends MoleculeImplicits_ with ApiZio with Spi_sqlite_zio
+  object async extends MoleculeImplicits_ with Api_async with Spi_sqlite_async
+  object sync extends MoleculeImplicits_ with Api_sync with Spi_sqlite_sync
+  object zio extends MoleculeImplicits_ with Api_zio with Spi_sqlite_zio
 }

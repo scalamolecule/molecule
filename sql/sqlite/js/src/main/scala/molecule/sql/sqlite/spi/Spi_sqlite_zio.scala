@@ -2,12 +2,12 @@ package molecule.sql.sqlite.spi
 
 import molecule.base.error._
 import molecule.core.action._
-import molecule.core.spi.{Conn, SpiZio, TxReport}
+import molecule.core.spi.{Conn, Spi_zio, TxReport}
 import molecule.sql.core.facade.JdbcConn_JS
 import zio._
 import scala.concurrent.{Future, ExecutionContext => EC}
 
-trait Spi_sqlite_zio extends SpiZio with SpiBase_sqlite_zio {
+trait Spi_sqlite_zio extends Spi_zio with SpiBase_sqlite_zio {
 
   // Query --------------------------------------------------------
 

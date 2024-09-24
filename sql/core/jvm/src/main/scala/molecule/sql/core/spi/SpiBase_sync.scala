@@ -22,7 +22,7 @@ import scala.collection.mutable.ListBuffer
 import scala.util.control.NonFatal
 
 trait SpiBase_sync
-  extends SpiSync
+  extends Spi_sync
     with CachedConnection
     with SpiHelpers
     with SqlUpdateSetValidator

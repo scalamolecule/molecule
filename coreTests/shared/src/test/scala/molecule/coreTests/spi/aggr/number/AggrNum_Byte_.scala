@@ -1,14 +1,14 @@
 // GENERATED CODE ********************************
 package molecule.coreTests.spi.aggr.number
 
-import molecule.core.api.ApiAsync
-import molecule.core.spi.SpiAsync
+import molecule.core.api.Api_async
+import molecule.core.spi.Spi_async
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
-trait AggrNum_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
+trait AggrNum_Byte_ extends CoreTestSuite with Api_async { spi: Spi_async =>
 
   // Using tolerant equality so that the test works with decimal number types too
 

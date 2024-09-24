@@ -4,7 +4,7 @@ import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.core.action._
 import molecule.core.marshalling.serialize.PickleTpls
-import molecule.core.spi.{Conn, SpiAsync, TxReport}
+import molecule.core.spi.{Conn, Spi_async, TxReport}
 import molecule.core.util.FutureUtils
 import molecule.core.validation.TxModelValidation
 import molecule.core.validation.insert.InsertValidation
@@ -14,7 +14,7 @@ import scala.concurrent.{Future, ExecutionContext => EC}
 
 object Spi_datomic_async extends Spi_datomic_async
 
-trait Spi_datomic_async extends SpiAsync with SpiBase_datomic_async with FutureUtils {
+trait Spi_datomic_async extends Spi_async with SpiBase_datomic_async with FutureUtils {
 
   // Query --------------------------------------------------------
 

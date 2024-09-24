@@ -12,7 +12,7 @@ import molecule.core.action._
  *      If IO[Either[MoleculeError, T]] was preferred:
  * @see https://guillaumebogard.dev/posts/functional-error-handling/
  */
-trait SpiIO {
+trait Spi_io {
 
   def query_get[Tpl](
     q: Query[Tpl]

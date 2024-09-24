@@ -3,11 +3,11 @@ package molecule.datalog.datomic.spi
 import cats.effect.IO
 import molecule.base.error._
 import molecule.core.action._
-import molecule.core.spi.{Conn, SpiIO, TxReport}
+import molecule.core.spi.{Conn, Spi_io, TxReport}
 import molecule.core.util.Executor.{global => ec}
 
 trait Spi_datomic_io
-  extends SpiIO
+  extends Spi_io
     with JVMDatomicSpiBase
     with SpiBase_datomic_io {
 

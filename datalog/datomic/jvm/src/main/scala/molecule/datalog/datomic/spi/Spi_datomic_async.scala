@@ -3,7 +3,7 @@ package molecule.datalog.datomic.spi
 import molecule.base.error._
 import molecule.core.action._
 import molecule.core.marshalling.ConnProxy
-import molecule.core.spi.{Conn, SpiAsync, TxReport}
+import molecule.core.spi.{Conn, Spi_async, TxReport}
 import molecule.core.util.FutureUtils
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import molecule.datalog.datomic.marshalling.Rpc_datomic.Data
@@ -12,7 +12,7 @@ import scala.concurrent.{Future, ExecutionContext => EC}
 object Spi_datomic_async extends Spi_datomic_async
 
 trait Spi_datomic_async
-  extends SpiAsync
+  extends Spi_async
     with JVMDatomicSpiBase
     with SpiBase_datomic_async
     with FutureUtils {

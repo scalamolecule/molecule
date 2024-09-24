@@ -1,7 +1,7 @@
 package molecule.coreTests.spi.pagination.cursor.noUnique
 
-import molecule.core.api.ApiAsync
-import molecule.core.spi.SpiAsync
+import molecule.core.api.Api_async
+import molecule.core.spi.Spi_async
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
@@ -9,7 +9,7 @@ import utest._
 import scala.annotation.{nowarn, tailrec}
 import scala.util.Random
 
-trait AttrOrderMandatory extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
+trait AttrOrderMandatory extends CoreTestSuite with Api_async { spi: Spi_async =>
 
   @tailrec
   final def getTriples(acc: List[(String, Int, Int)]): List[(String, Int, Int)] = {

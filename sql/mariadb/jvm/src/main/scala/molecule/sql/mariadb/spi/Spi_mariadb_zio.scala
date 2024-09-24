@@ -2,12 +2,12 @@ package molecule.sql.mariadb.spi
 
 import molecule.base.error._
 import molecule.core.action._
-import molecule.core.spi.{Conn, SpiZio, TxReport}
+import molecule.core.spi.{Conn, Spi_zio, TxReport}
 import molecule.core.util.ModelUtils
 import molecule.sql.core.facade.JdbcConn_JVM
 import zio.ZIO
 
-trait Spi_mariadb_zio extends SpiZio with SpiBase_mariadb_zio with ModelUtils {
+trait Spi_mariadb_zio extends Spi_zio with SpiBase_mariadb_zio with ModelUtils {
 
   // Query --------------------------------------------------------
 

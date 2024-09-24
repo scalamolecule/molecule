@@ -4,7 +4,7 @@ import molecule.base.api.Schema
 import molecule.base.util.BaseHelpers
 import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.Conn
-import molecule.coreTests.setup.CoreTestSuite
+import molecule.coreTests.setup.{CoreTestSuite, CoreTestSuite_io}
 import molecule.sql.sqlite.facade.{JdbcConnSQlite_JVM, JdbcHandlerSQlite_JVM}
 import scala.util.control.NonFatal
 
@@ -14,7 +14,7 @@ trait TestSuite_sqlite extends CoreTestSuite with BaseHelpers {
   override val database = "SQlite"
 
   override def inMem[T](test: Conn => T, schema: Schema): T = {
-    val proxy = JdbcProxy(
+    val proxy                    = JdbcProxy(
       "jdbc:sqlite::memory:",
       schema.sqlSchema_sqlite,
       schema.metaSchema,
@@ -23,7 +23,7 @@ trait TestSuite_sqlite extends CoreTestSuite with BaseHelpers {
       schema.uniqueAttrs,
       reserved = schema.sqlReserved_sqlite
     )
-    var conn: JdbcConnSQlite_JVM  = null
+    var conn: JdbcConnSQlite_JVM = null
     try {
       conn = JdbcHandlerSQlite_JVM.recreateDb(proxy)
       test(conn)

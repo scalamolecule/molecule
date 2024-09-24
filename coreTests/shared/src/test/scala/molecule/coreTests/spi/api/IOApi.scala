@@ -1,14 +1,14 @@
 package molecule.coreTests.spi.api
 
 import molecule.base.error.{InsertErrors, ValidationErrors}
-import molecule.core.api.ApiIO
-import molecule.core.spi.SpiIO
+import molecule.core.api.Api_io
+import molecule.core.spi.Spi_io
 import molecule.coreTests.dataModels.dsl.Types.Ns
 import molecule.coreTests.setup.CoreTestSuite_io
 import scala.annotation.nowarn
 import scala.language.implicitConversions
 
-trait IOApi extends CoreTestSuite_io with ApiIO { spi: SpiIO =>
+trait IOApi extends CoreTestSuite_io with Api_io { spi: Spi_io =>
 
   test("Crud actions") {
     types { implicit conn =>

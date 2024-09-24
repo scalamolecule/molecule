@@ -2,7 +2,7 @@ package molecule.sql.mysql.setup
 
 import molecule.base.api.Schema
 import molecule.core.spi.Conn
-import molecule.coreTests.setup.CoreTestSuite
+import molecule.coreTests.setup.{CoreTestSuite, CoreTestSuite_io}
 
 
 trait TestSuite_mysql extends CoreTestSuite with ConnectionJS_mysql {

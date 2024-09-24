@@ -5,7 +5,7 @@ import molecule.base.error.{InsertError, InsertErrors, ModelError, ValidationErr
 import molecule.boilerplate.ast.Model._
 import molecule.core.action._
 import molecule.core.marshalling.serialize.PickleTpls
-import molecule.core.spi.{Conn, Renderer, SpiAsync, TxReport}
+import molecule.core.spi.{Conn, Renderer, Spi_async, TxReport}
 import molecule.core.util.FutureUtils
 import molecule.core.validation.TxModelValidation
 import molecule.core.validation.insert.InsertValidation
@@ -13,7 +13,7 @@ import molecule.sql.core.facade.JdbcConn_JS
 import scala.concurrent.{Future, ExecutionContext => EC}
 
 
-trait SpiBase_async extends SpiAsync with Renderer with FutureUtils {
+trait SpiBase_async extends Spi_async with Renderer with FutureUtils {
 
   // Query --------------------------------------------------------
 

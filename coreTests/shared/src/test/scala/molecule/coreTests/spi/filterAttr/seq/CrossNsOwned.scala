@@ -1,13 +1,13 @@
 package molecule.coreTests.spi.filterAttr.seq
 
-import molecule.core.api.ApiAsync
-import molecule.core.spi.SpiAsync
+import molecule.core.api.Api_async
+import molecule.core.spi.Spi_async
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.dsl.Refs._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
-trait CrossNsOwned extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
+trait CrossNsOwned extends CoreTestSuite with Api_async { spi: Spi_async =>
 
   val a = (1, List(1, 2), List(1, 2, 3, 3), 3)
   val b = (2, List(2, 3), List(2, 3), 3)

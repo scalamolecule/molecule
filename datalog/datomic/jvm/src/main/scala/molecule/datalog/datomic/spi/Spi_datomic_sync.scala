@@ -5,7 +5,7 @@ import molecule.base.error.{InsertError, ModelError}
 import molecule.boilerplate.ast.Model._
 import molecule.core.action._
 import molecule.core.marshalling.ConnProxy
-import molecule.core.spi.{Conn, SpiSync, TxReport}
+import molecule.core.spi.{Conn, Spi_sync, TxReport}
 import molecule.core.transaction.{ResolveDelete, ResolveInsert, ResolveSave, ResolveUpdate}
 import molecule.core.util.FutureUtils
 import molecule.core.validation.TxModelValidation
@@ -22,7 +22,7 @@ import scala.concurrent.duration.DurationInt
 object Spi_datomic_sync extends Spi_datomic_sync
 
 trait Spi_datomic_sync
-  extends SpiSync
+  extends Spi_sync
     with SpiBase_datomic_sync
     with JVMDatomicSpiBase
     with FutureUtils {

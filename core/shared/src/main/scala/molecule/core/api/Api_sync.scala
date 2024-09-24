@@ -2,9 +2,9 @@ package molecule.core.api
 
 import molecule.base.error.InsertError
 import molecule.core.action._
-import molecule.core.spi.{Conn, SpiSync, TxReport}
+import molecule.core.spi.{Conn, Spi_sync, TxReport}
 
-trait ApiSync { spi: SpiSync =>
+trait Api_sync { spi: Spi_sync =>
 
   implicit class QueryApiAsync[Tpl](q: Query[Tpl]) {
     def get(implicit conn: Conn): List[Tpl] = query_get(q)

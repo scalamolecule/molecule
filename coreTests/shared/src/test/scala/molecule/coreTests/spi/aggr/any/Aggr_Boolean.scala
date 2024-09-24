@@ -1,13 +1,13 @@
 package molecule.coreTests.spi.aggr.any
 
-import molecule.core.api.ApiAsync
-import molecule.core.spi.SpiAsync
+import molecule.core.api.Api_async
+import molecule.core.spi.Spi_async
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
-trait Aggr_Boolean extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
+trait Aggr_Boolean extends CoreTestSuite with Api_async { spi: Spi_async =>
 
   override lazy val tests = Tests {
 

@@ -1,15 +1,15 @@
 package molecule.coreTests.spi.crud.update.ops
 
 import molecule.base.error.ExecutionError
-import molecule.core.api.ApiAsync
-import molecule.core.spi.SpiAsync
+import molecule.core.api.Api_async
+import molecule.core.spi.Spi_async
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.dsl.Refs.{A, B}
 import molecule.coreTests.dataModels.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
-trait OpsOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
+trait OpsOne extends CoreTestSuite with Api_async { spi: Spi_async =>
 
   override lazy val tests = Tests {
 

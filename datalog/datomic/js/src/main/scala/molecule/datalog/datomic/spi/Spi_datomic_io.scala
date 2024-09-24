@@ -4,9 +4,9 @@ import cats.effect.IO
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.core.action._
-import molecule.core.api.ApiIO
+import molecule.core.api.Api_io
 import molecule.core.marshalling.serialize.PickleTpls
-import molecule.core.spi.{Conn, SpiIO, TxReport}
+import molecule.core.spi.{Conn, Spi_io, TxReport}
 import molecule.core.util.Executor.{global => ec}
 import molecule.core.util.IOUtils
 import molecule.core.validation.TxModelValidation
@@ -16,8 +16,8 @@ import scala.concurrent.{ExecutionContext => EC}
 
 
 trait Spi_datomic_io
-  extends SpiIO
-    with ApiIO
+  extends Spi_io
+    with Api_io
     with IOUtils
     with SpiBase_datomic_io {
 

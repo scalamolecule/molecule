@@ -2,10 +2,10 @@ package molecule.core.api
 
 import molecule.base.error._
 import molecule.core.action._
-import molecule.core.spi.{Conn, SpiZio, TxReport}
+import molecule.core.spi.{Conn, Spi_zio, TxReport}
 import zio.ZIO
 
-trait ApiZio { spi: SpiZio =>
+trait Api_zio { spi: Spi_zio =>
 
   implicit class QueryApiAsync[Tpl](q: Query[Tpl]) {
     def get: ZIO[Conn, MoleculeError, List[Tpl]] = query_get(q)

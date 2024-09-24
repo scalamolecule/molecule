@@ -6,7 +6,7 @@ import molecule.core.spi._
 import molecule.core.util.ModelUtils
 import scala.concurrent.{Future, ExecutionContext => EC}
 
-trait ApiAsync extends ModelUtils { spi: SpiAsync =>
+trait Api_async extends ModelUtils { spi: Spi_async =>
 
   implicit class QueryApiAsync[Tpl](q: Query[Tpl]) {
     def get(implicit conn: Conn, ec: EC): Future[List[Tpl]] = query_get(q)

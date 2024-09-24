@@ -2,13 +2,13 @@ package molecule.datalog.datomic.spi
 
 import molecule.base.error._
 import molecule.core.action._
-import molecule.core.spi.{Conn, SpiZio, TxReport}
+import molecule.core.spi.{Conn, Spi_zio, TxReport}
 import molecule.core.util.Executor._
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import zio.ZIO
 
 trait Spi_datomic_zio
-  extends SpiZio
+  extends Spi_zio
     with JVMDatomicSpiBase
     with SpiBase_datomic_zio {
 

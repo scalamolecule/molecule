@@ -2,12 +2,12 @@ package molecule.sql.mysql.spi
 
 import molecule.base.error.InsertError
 import molecule.core.action._
-import molecule.core.spi.{Conn, SpiAsync, TxReport}
+import molecule.core.spi.{Conn, Spi_async, TxReport}
 import molecule.core.util.ModelUtils
 import molecule.sql.mysql.sync.getModel2SqlQuery
 import scala.concurrent.{Future, ExecutionContext => EC}
 
-trait Spi_mysql_async extends SpiAsync with ModelUtils {
+trait Spi_mysql_async extends Spi_async with ModelUtils {
 
   override def query_get[Tpl](q: Query[Tpl])
                              (implicit conn: Conn, ec: EC): Future[List[Tpl]] = Future {

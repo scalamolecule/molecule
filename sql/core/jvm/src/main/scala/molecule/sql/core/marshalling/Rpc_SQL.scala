@@ -7,7 +7,7 @@ import molecule.core.action._
 import molecule.core.marshalling.Boopicklers._
 import molecule.core.marshalling._
 import molecule.core.marshalling.deserialize.UnpickleTpls
-import molecule.core.spi.{SpiSync, TxReport}
+import molecule.core.spi.{Spi_sync, TxReport}
 import molecule.core.util.Executor._
 import molecule.core.util.FutureUtils
 import molecule.sql.core.transaction.CachedConnection
@@ -17,7 +17,7 @@ import scala.concurrent.Future
 trait Rpc_SQL
   extends MoleculeRpc
     with CachedConnection
-    with FutureUtils { self: SpiSync =>
+    with FutureUtils { self: Spi_sync =>
 
   /**
    * Tuple type is not marshalled from client to server. So we signal this with

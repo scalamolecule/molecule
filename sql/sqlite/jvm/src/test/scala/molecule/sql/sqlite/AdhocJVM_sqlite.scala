@@ -10,7 +10,7 @@ import scala.language.implicitConversions
 //object AdhocJVM_sqlite extends TestSuite_sqlite_array {
 object AdhocJVM_sqlite extends TestSuite_sqlite {
 
-  override lazy val tests = Tests {
+   lazy val tests = Tests {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.dsl.Types._

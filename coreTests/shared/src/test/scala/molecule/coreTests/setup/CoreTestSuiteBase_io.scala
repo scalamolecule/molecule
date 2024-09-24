@@ -3,11 +3,17 @@ package molecule.coreTests.setup
 import cats.effect.IO
 import molecule.base.api.Schema
 import molecule.core.spi.Conn
+import molecule.core.util.{AggrUtils, JavaConversions}
 import molecule.coreTests.dataModels.schema._
 import munit.CatsEffectSuite
 
 
-trait CoreTestSuiteBase_io extends CatsEffectSuite with CoreTest {
+trait CoreTestSuiteBase_io
+  extends CatsEffectSuite
+    with CoreTest
+    with JavaConversions
+    with TolerantEquality
+    with AggrUtils {
 
   def inMem[T](test: Conn => T, schema: Schema): T
 
