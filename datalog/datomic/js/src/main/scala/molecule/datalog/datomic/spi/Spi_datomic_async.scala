@@ -14,7 +14,10 @@ import scala.concurrent.{Future, ExecutionContext => EC}
 
 object Spi_datomic_async extends Spi_datomic_async
 
-trait Spi_datomic_async extends Spi_async with SpiBase_datomic_async with FutureUtils {
+trait Spi_datomic_async
+  extends Spi_async
+    with SpiBase_datomic_async
+    with FutureUtils {
 
   // Query --------------------------------------------------------
 

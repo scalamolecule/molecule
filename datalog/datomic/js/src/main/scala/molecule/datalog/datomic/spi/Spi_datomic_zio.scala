@@ -9,7 +9,10 @@ import molecule.datalog.datomic.facade.DatomicConn_JS
 import zio._
 import scala.concurrent.{Future, ExecutionContext => EC}
 
-trait Spi_datomic_zio extends Spi_zio with SpiBase_datomic_zio with Api_zio with FutureUtils {
+trait Spi_datomic_zio
+  extends Spi_zio
+    with SpiBase_datomic_zio
+    with FutureUtils {
 
   override def query_get[Tpl](
     q: Query[Tpl]
