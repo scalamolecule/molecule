@@ -1,6 +1,6 @@
 package molecule.sql.postgres.compliance.partitions
 
 import molecule.coreTests.spi.partitions.PartitionTests
-import molecule.sql.postgres.setup.TestAsync_postgres
+import molecule.sql.postgres.setup.Test_postgres_async
 
-object Test_PartitionTests extends PartitionTests with TestAsync_postgres
+object Test_PartitionTests extends PartitionTests with Test_postgres_async

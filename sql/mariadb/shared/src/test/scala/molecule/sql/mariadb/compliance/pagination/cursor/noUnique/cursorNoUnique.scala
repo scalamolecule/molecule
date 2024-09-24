@@ -1,14 +1,14 @@
 package molecule.sql.mariadb.compliance.pagination.cursor.noUnique
 
 import molecule.coreTests.spi.pagination.cursor.noUnique._
-import molecule.sql.mariadb.setup.TestAsync_mariadb
+import molecule.sql.mariadb.setup.Test_mariadb_async
 
-object Test_AttrOrderMandatory extends AttrOrderMandatory with TestAsync_mariadb
-object Test_AttrOrderOptional extends AttrOrderOptional with TestAsync_mariadb
-object Test_DirectionsMandatory extends DirectionsMandatory with TestAsync_mariadb
-object Test_DirectionsOptional extends DirectionsOptional with TestAsync_mariadb
-object Test_MutationAdd extends MutationAdd with TestAsync_mariadb
-object Test_MutationDelete extends MutationDelete with TestAsync_mariadb
-object Test_Nested extends Nested with TestAsync_mariadb
-object Test_OptNested extends OptNested with TestAsync_mariadb
-object Test_TypesOptional extends TypesOptional with TestAsync_mariadb
+object Test_AttrOrderMandatory extends AttrOrderMandatory with Test_mariadb_async
+object Test_AttrOrderOptional extends AttrOrderOptional with Test_mariadb_async
+object Test_DirectionsMandatory extends DirectionsMandatory with Test_mariadb_async
+object Test_DirectionsOptional extends DirectionsOptional with Test_mariadb_async
+object Test_MutationAdd extends MutationAdd with Test_mariadb_async
+object Test_MutationDelete extends MutationDelete with Test_mariadb_async
+object Test_Nested extends Nested with Test_mariadb_async
+object Test_OptNested extends OptNested with Test_mariadb_async
+object Test_TypesOptional extends TypesOptional with Test_mariadb_async

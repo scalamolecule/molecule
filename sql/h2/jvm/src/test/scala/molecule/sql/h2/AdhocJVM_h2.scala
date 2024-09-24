@@ -7,14 +7,14 @@ import molecule.coreTests.dataModels.dsl.Refs.{A, B}
 import molecule.coreTests.dataModels.dsl.Types.Ns
 import molecule.coreTests.util.Array2List
 import molecule.sql.h2.async._
-import molecule.sql.h2.setup.{TestSuiteArray_h2, TestSuite_h2}
+import molecule.sql.h2.setup.{TestSuite_h2_array, TestSuite_h2}
 import utest._
 import scala.collection.mutable
 import scala.concurrent.Future
 import scala.language.implicitConversions
 
 
-//object AdhocJVM_h2 extends TestSuiteArray_h2 {
+//object AdhocJVM_h2 extends TestSuite_h2_array {
 object AdhocJVM_h2 extends TestSuite_h2 {
 
   override lazy val tests = Tests {

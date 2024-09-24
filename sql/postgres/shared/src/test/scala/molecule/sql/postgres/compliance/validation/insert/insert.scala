@@ -1,15 +1,15 @@
 package molecule.sql.postgres.compliance.validation.types.insert
 
 import molecule.coreTests.spi.validation.insert._
-import molecule.sql.postgres.setup.TestAsync_postgres
+import molecule.sql.postgres.setup.Test_postgres_async
 
-object Test_FormatConstants extends FormatConstants with TestAsync_postgres
-object Test_FormatVariables extends FormatVariables with TestAsync_postgres
-object Test_Nested extends Nested with TestAsync_postgres
-object Test_Semantics extends Semantics with TestAsync_postgres
-object Test_TypesOne extends TypesOne with TestAsync_postgres
-object Test_TypesOneOpt extends TypesOneOpt with TestAsync_postgres
-object Test_TypesSeq extends TypesSeq with TestAsync_postgres
-object Test_TypesSeqOpt extends TypesSeqOpt with TestAsync_postgres
-object Test_TypesSet extends TypesSet with TestAsync_postgres
-object Test_TypesSetOpt extends TypesSetOpt with TestAsync_postgres
+object Test_FormatConstants extends FormatConstants with Test_postgres_async
+object Test_FormatVariables extends FormatVariables with Test_postgres_async
+object Test_Nested extends Nested with Test_postgres_async
+object Test_Semantics extends Semantics with Test_postgres_async
+object Test_TypesOne extends TypesOne with Test_postgres_async
+object Test_TypesOneOpt extends TypesOneOpt with Test_postgres_async
+object Test_TypesSeq extends TypesSeq with Test_postgres_async
+object Test_TypesSeqOpt extends TypesSeqOpt with Test_postgres_async
+object Test_TypesSet extends TypesSet with Test_postgres_async
+object Test_TypesSetOpt extends TypesSetOpt with Test_postgres_async

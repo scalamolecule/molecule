@@ -1,12 +1,12 @@
 package molecule.sql.mysql.compliance.crud.insert
 
 import molecule.coreTests.spi.crud.insert._
-import molecule.sql.mysql.setup.{TestAsync_mysql, TestSuiteArray_mysql}
-import molecule.sql.mysql.spi.SpiAsync_mysql
+import molecule.sql.mysql.setup.{Test_mysql_async, TestSuite_mysql_array}
+import molecule.sql.mysql.spi.Spi_mysql_async
 
-object Test_InsertCardOne extends InsertCardOne with TestAsync_mysql
-object Test_InsertCardSeq extends InsertCardSeq with TestSuiteArray_mysql with SpiAsync_mysql
-object Test_InsertCardSet extends InsertCardSet with TestAsync_mysql
-object Test_InsertCardMap extends InsertCardMap with TestAsync_mysql
-object Test_InsertRefs extends InsertRefs with TestAsync_mysql
-object Test_InsertSemantics extends InsertSemantics with TestAsync_mysql
+object Test_InsertCardOne extends InsertCardOne with Test_mysql_async
+object Test_InsertCardSeq extends InsertCardSeq with TestSuite_mysql_array with Spi_mysql_async
+object Test_InsertCardSet extends InsertCardSet with Test_mysql_async
+object Test_InsertCardMap extends InsertCardMap with Test_mysql_async
+object Test_InsertRefs extends InsertRefs with Test_mysql_async
+object Test_InsertSemantics extends InsertSemantics with Test_mysql_async

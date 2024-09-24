@@ -6,12 +6,12 @@ import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.dsl.Types.Ns
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.postgres.async._
-import molecule.sql.postgres.setup.{TestSuiteArray_postgres, TestSuite_postgres}
+import molecule.sql.postgres.setup.{TestSuite_postgres_array, TestSuite_postgres}
 import utest._
 import scala.concurrent.Future
 import scala.language.implicitConversions
 
-//object AdhocJVM_postgres extends TestSuiteArray_postgres {
+//object AdhocJVM_postgres extends TestSuite_postgres_array {
 object AdhocJVM_postgres extends TestSuite_postgres {
 
   override lazy val tests = Tests {

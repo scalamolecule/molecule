@@ -4,11 +4,11 @@ import molecule.base.error.{InsertErrors, ValidationErrors}
 import molecule.core.api.ApiIO
 import molecule.core.spi.SpiIO
 import molecule.coreTests.dataModels.dsl.Types.Ns
-import molecule.coreTests.setup.CoreTestIOSpec
+import molecule.coreTests.setup.CoreTestSuite_io
 import scala.annotation.nowarn
 import scala.language.implicitConversions
 
-trait IOApi extends CoreTestIOSpec with ApiIO { spi: SpiIO =>
+trait IOApi extends CoreTestSuite_io with ApiIO { spi: SpiIO =>
 
   test("Crud actions") {
     types { implicit conn =>
@@ -65,7 +65,7 @@ trait IOApi extends CoreTestIOSpec with ApiIO { spi: SpiIO =>
   test("Inspection") {
     types { implicit conn =>
       Ns.int.insert(1, 2).transact.map(_.ids).flatMap {
-        case  List(a, b)  =>
+        case List(a, b) =>
           for {
             _ <- Ns.int.insert(1, 2).inspect
             _ <- Ns.int(3).save.inspect

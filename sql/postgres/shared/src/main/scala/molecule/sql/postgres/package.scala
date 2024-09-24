@@ -5,7 +5,7 @@ import molecule.core.api._
 import molecule.sql.postgres.spi._
 
 package object postgres {
-  object async extends MoleculeImplicits_ with ApiAsync with SpiAsync_postgres
-  object sync extends MoleculeImplicits_ with ApiSync with SpiSync_postgres
-  object zio extends MoleculeImplicits_ with ApiZio with SpiZio_postgres
+  object async extends MoleculeImplicits_ with ApiAsync with Spi_postgres_async
+  object sync extends MoleculeImplicits_ with ApiSync with Spi_postgres_sync
+  object zio extends MoleculeImplicits_ with ApiZio with Spi_postgres_zio
 }

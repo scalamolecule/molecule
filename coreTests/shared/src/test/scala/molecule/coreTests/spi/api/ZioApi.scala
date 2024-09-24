@@ -4,14 +4,14 @@ import molecule.base.error._
 import molecule.core.api.ApiZio
 import molecule.core.spi.SpiZio
 import molecule.coreTests.dataModels.dsl.Types.Ns
-import molecule.coreTests.setup.CoreTestZioSpec
+import molecule.coreTests.setup.CoreTestSuite_zio
 import zio._
 import zio.test.TestAspect._
 import zio.test._
 import scala.annotation.nowarn
 
 
-trait ZioApi extends CoreTestZioSpec with ApiZio { spi: SpiZio =>
+trait ZioApi extends CoreTestSuite_zio with ApiZio { spi: SpiZio =>
 
   @nowarn override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("Molecule ZIO api")(
@@ -117,16 +117,16 @@ trait ZioApi extends CoreTestZioSpec with ApiZio { spi: SpiZio =>
 
           // For testing purpose, allow each mutation to finish so that we can
           // catch the intermediary callback result in order
-//          _ <- delay(50)(())
+          //          _ <- delay(50)(())
 
           _ <- Ns.i.insert(3, 4).transact
-//          _ <- delay(50)(())
+          //          _ <- delay(50)(())
 
           _ <- Ns(id).i(20).update.transact
-//          _ <- delay(50)(())
+          //          _ <- delay(50)(())
 
           _ <- Ns(id).delete.transact
-//          _ <- delay(50)(())
+          //          _ <- delay(50)(())
 
           // Mutations with no callback-involved attributes don't call back
           _ <- Ns.string("foo").save.transact

@@ -1,14 +1,14 @@
 package molecule.sql.h2.compliance.pagination.cursor.noUnique
 
 import molecule.coreTests.spi.pagination.cursor.noUnique._
-import molecule.sql.h2.setup.TestAsync_h2
+import molecule.sql.h2.setup.Test_h2_async
 
-object Test_AttrOrderMandatory extends AttrOrderMandatory with TestAsync_h2
-object Test_AttrOrderOptional extends AttrOrderOptional with TestAsync_h2
-object Test_DirectionsMandatory extends DirectionsMandatory with TestAsync_h2
-object Test_DirectionsOptional extends DirectionsOptional with TestAsync_h2
-object Test_MutationAdd extends MutationAdd with TestAsync_h2
-object Test_MutationDelete extends MutationDelete with TestAsync_h2
-object Test_Nested extends Nested with TestAsync_h2
-object Test_OptNested extends OptNested with TestAsync_h2
-object Test_TypesOptional extends TypesOptional with TestAsync_h2
+object Test_AttrOrderMandatory extends AttrOrderMandatory with Test_h2_async
+object Test_AttrOrderOptional extends AttrOrderOptional with Test_h2_async
+object Test_DirectionsMandatory extends DirectionsMandatory with Test_h2_async
+object Test_DirectionsOptional extends DirectionsOptional with Test_h2_async
+object Test_MutationAdd extends MutationAdd with Test_h2_async
+object Test_MutationDelete extends MutationDelete with Test_h2_async
+object Test_Nested extends Nested with Test_h2_async
+object Test_OptNested extends OptNested with Test_h2_async
+object Test_TypesOptional extends TypesOptional with Test_h2_async

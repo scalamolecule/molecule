@@ -1,12 +1,12 @@
 package molecule.sql.h2.compliance.crud.insert
 
 import molecule.coreTests.spi.crud.insert._
-import molecule.sql.h2.setup.{TestAsync_h2, TestSuiteArray_h2}
-import molecule.sql.h2.spi.SpiAsync_h2
+import molecule.sql.h2.setup.{TestSuite_h2_array, Test_h2_async}
+import molecule.sql.h2.spi.Spi_h2_async
 
-object Test_InsertCardOne extends InsertCardOne with TestAsync_h2
-object Test_InsertCardSet extends InsertCardSet with TestAsync_h2
-object Test_InsertCardMap extends InsertCardMap with TestAsync_h2
-object Test_InsertCardSeq extends InsertCardSeq with TestSuiteArray_h2 with SpiAsync_h2
-object Test_InsertRefs extends InsertRefs with TestAsync_h2
-object Test_InsertSemantics extends InsertSemantics with TestAsync_h2
+object Test_InsertCardOne extends InsertCardOne with Test_h2_async
+object Test_InsertCardSet extends InsertCardSet with Test_h2_async
+object Test_InsertCardMap extends InsertCardMap with Test_h2_async
+object Test_InsertCardSeq extends InsertCardSeq with TestSuite_h2_array with Spi_h2_async
+object Test_InsertRefs extends InsertRefs with Test_h2_async
+object Test_InsertSemantics extends InsertSemantics with Test_h2_async

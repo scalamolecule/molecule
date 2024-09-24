@@ -1,13 +1,13 @@
 package molecule.sql.sqlite.compliance.pagination.cursor.subUnique
 
 import molecule.coreTests.spi.pagination.cursor.subUnique._
-import molecule.sql.sqlite.setup.TestAsync_sqlite
+import molecule.sql.sqlite.setup.Test_sqlite_async
 
-object Test_AttrOrder extends AttrOrder with TestAsync_sqlite
-object Test_DirectionsStandardUnique extends DirectionsStandardUnique with TestAsync_sqlite
-object Test_DirectionsUniqueStandard extends DirectionsUniqueStandard with TestAsync_sqlite
-object Test_MutationAdd extends MutationAdd with TestAsync_sqlite
-object Test_MutationDelete extends MutationDelete with TestAsync_sqlite
-object Test_Nested extends Nested with TestAsync_sqlite
-object Test_OptNested extends OptNested with TestAsync_sqlite
-object Test_TypesUniqueValue extends TypesUniqueValue with TestAsync_sqlite
+object Test_AttrOrder extends AttrOrder with Test_sqlite_async
+object Test_DirectionsStandardUnique extends DirectionsStandardUnique with Test_sqlite_async
+object Test_DirectionsUniqueStandard extends DirectionsUniqueStandard with Test_sqlite_async
+object Test_MutationAdd extends MutationAdd with Test_sqlite_async
+object Test_MutationDelete extends MutationDelete with Test_sqlite_async
+object Test_Nested extends Nested with Test_sqlite_async
+object Test_OptNested extends OptNested with Test_sqlite_async
+object Test_TypesUniqueValue extends TypesUniqueValue with Test_sqlite_async

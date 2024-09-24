@@ -76,7 +76,7 @@ trait SpiSync_openapi
 
 
   override def save_transact(save: Save)(implicit conn: Conn): TxReport = {
-//    await(SpiAsync_datomic.save_transact(save)(conn, global))
+//    await(Spi_datomic_async.save_transact(save)(conn, global))
     ???
   }
   override def save_inspect(save: Save)(implicit conn: Conn): Unit = {
@@ -95,7 +95,7 @@ trait SpiSync_openapi
   }
 
   override def insert_transact(insert: Insert)(implicit conn: Conn): TxReport = {
-//    await(SpiAsync_datomic.insert_transact(insert)(conn, global))
+//    await(Spi_datomic_async.insert_transact(insert)(conn, global))
     ???
   }
   override def insert_inspect(insert: Insert)(implicit conn: Conn): Unit = {
@@ -113,7 +113,7 @@ trait SpiSync_openapi
   }
 
   override def update_transact(update: Update)(implicit conn: Conn): TxReport = {
-//    await(SpiAsync_datomic.update_transact(update)(conn, global))
+//    await(Spi_datomic_async.update_transact(update)(conn, global))
     ???
   }
   override def update_inspect(update: Update)(implicit conn: Conn): Unit = {
@@ -132,7 +132,7 @@ trait SpiSync_openapi
   }
 
   override def delete_transact(delete: Delete)(implicit conn: Conn): TxReport = {
-//    await(SpiAsync_datomic.delete_transact(delete)(conn, global))
+//    await(Spi_datomic_async.delete_transact(delete)(conn, global))
     ???
   }
   override def delete_inspect(delete: Delete)(implicit conn: Conn): Unit = {
@@ -222,7 +222,7 @@ trait SpiSync_openapi
   )(implicit conn: Conn): TxReport = {
 //    try {
 //      import molecule.core.util.Executor.global
-//      Await.result(SpiAsync_datomic.fallback_rawTransact(txData, debug)(conn, global), 10.seconds)
+//      Await.result(Spi_datomic_async.fallback_rawTransact(txData, debug)(conn, global), 10.seconds)
 //      ???
 //    } catch {
 //      case t: Throwable => throw ModelError(t.toString)

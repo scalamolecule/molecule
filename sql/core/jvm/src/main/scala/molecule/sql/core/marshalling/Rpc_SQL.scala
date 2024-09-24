@@ -74,7 +74,7 @@ trait Rpc_SQL
     getConn(proxy).map { conn =>
       val tplsEither = UnpickleTpls[Any](
         elements, ByteBuffer.wrap(tplsSerialized)
-      ).unpickle
+      ).unpickleEither
       val tpls       = tplsEither match {
         case Right(tpls) =>
           if (countValueAttrs(elements) == 1) {

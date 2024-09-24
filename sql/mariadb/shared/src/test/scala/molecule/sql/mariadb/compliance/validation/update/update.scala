@@ -1,11 +1,11 @@
-package molecule.sql.mariadb.compliance.validation.crud.update
+package molecule.sql.mariadb.compliance.validation.update
 
 import molecule.coreTests.spi.validation.update._
-import molecule.sql.mariadb.setup.TestAsync_mariadb
+import molecule.sql.mariadb.setup.Test_mariadb_async
 
-object Test_TypesOne extends TypesOne with TestAsync_mariadb
-object Test_TypesOneOpt extends TypesOneOpt with TestAsync_mariadb
-object Test_TypesSeq extends TypesSeq with TestAsync_mariadb
-object Test_TypesSeqOpt extends TypesSeqOpt with TestAsync_mariadb
-object Test_TypesSet extends TypesSet with TestAsync_mariadb
-object Test_TypesSetOpt extends TypesSetOpt with TestAsync_mariadb
+object Test_TypesOne extends TypesOne with Test_mariadb_async
+object Test_TypesOneOpt extends TypesOneOpt with Test_mariadb_async
+object Test_TypesSeq extends TypesSeq with Test_mariadb_async
+object Test_TypesSeqOpt extends TypesSeqOpt with Test_mariadb_async
+object Test_TypesSet extends TypesSet with Test_mariadb_async
+object Test_TypesSetOpt extends TypesSetOpt with Test_mariadb_async

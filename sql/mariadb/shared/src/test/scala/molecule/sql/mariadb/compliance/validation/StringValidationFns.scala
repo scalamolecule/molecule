@@ -1,6 +1,6 @@
 package molecule.sql.mariadb.compliance.validation
 
 import molecule.coreTests.spi.validation.StringValidationFns
-import molecule.sql.mariadb.setup.TestAsync_mariadb
+import molecule.sql.mariadb.setup.Test_mariadb_async
 
-object Test_StringValidationFns extends StringValidationFns with TestAsync_mariadb
+object Test_StringValidationFns extends StringValidationFns with Test_mariadb_async

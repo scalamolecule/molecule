@@ -24,51 +24,51 @@ trait SpiAsync_graphql
 
   override def query_get[Tpl](q: Query[Tpl])
                              (implicit conn: Conn, ec: EC): Future[List[Tpl]] = {
-//    future(SpiSync_datomic.query_get(q))
+//    future(Spi_datomic_sync.query_get(q))
     ???
   }
 
   override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)
                                    (implicit conn: Conn, ec: EC): Future[Unit] = {
-//    future(SpiSync_datomic.query_subscribe(q, callback))
+//    future(Spi_datomic_sync.query_subscribe(q, callback))
     ???
   }
 
   override def query_unsubscribe[Tpl](q: Query[Tpl])
                                      (implicit conn: Conn, ec: EC): Future[Unit] = {
-//    future(SpiSync_datomic.query_unsubscribe(q))
+//    future(Spi_datomic_sync.query_unsubscribe(q))
     ???
   }
 
   override def query_inspect[Tpl](q: Query[Tpl])
                                  (implicit conn: Conn, ec: EC): Future[Unit] = {
-//    future(SpiSync_datomic.query_inspect(q))
+//    future(Spi_datomic_sync.query_inspect(q))
     ???
   }
 
 
   override def queryOffset_get[Tpl](q: QueryOffset[Tpl])
                                    (implicit conn: Conn, ec: EC): Future[(List[Tpl], Int, Boolean)] = {
-//    future(SpiSync_datomic.queryOffset_get(q))
+//    future(Spi_datomic_sync.queryOffset_get(q))
     ???
   }
 
   override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])
                                        (implicit conn: Conn, ec: EC): Future[Unit] = {
-//    future(SpiSync_datomic.queryOffset_inspect(q))
+//    future(Spi_datomic_sync.queryOffset_inspect(q))
     ???
   }
 
 
   override def queryCursor_get[Tpl](q: QueryCursor[Tpl])
                                    (implicit conn: Conn, ec: EC): Future[(List[Tpl], String, Boolean)] = {
-//    future(SpiSync_datomic.queryCursor_get(q))
+//    future(Spi_datomic_sync.queryCursor_get(q))
     ???
   }
 
   override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])
                                        (implicit conn: Conn, ec: EC): Future[Unit] = {
-//    future(SpiSync_datomic.queryCursor_inspect(q))
+//    future(Spi_datomic_sync.queryCursor_inspect(q))
     ???
   }
 
@@ -92,17 +92,17 @@ trait SpiAsync_graphql
   }
 
   override def save_inspect(save: Save)(implicit conn: Conn, ec: EC): Future[Unit] = future {
-//    SpiSync_datomic.save_inspect(save)
+//    Spi_datomic_sync.save_inspect(save)
     ???
   }
 
   private def save_getStmts(save: Save): Data = {
-//    SpiSync_datomic.save_getStmts(save)
+//    Spi_datomic_sync.save_getStmts(save)
     ???
   }
 
   override def save_validate(save: Save)(implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = future {
-//    SpiSync_datomic.save_validate(save)
+//    Spi_datomic_sync.save_validate(save)
     ???
   }
 
@@ -126,18 +126,18 @@ trait SpiAsync_graphql
   }
 
   override def insert_inspect(insert: Insert)(implicit conn: Conn, ec: EC): Future[Unit] = future {
-//    SpiSync_datomic.insert_inspect(insert)
+//    Spi_datomic_sync.insert_inspect(insert)
     ???
   }
 
   private def insert_getStmts(insert: Insert, proxy: ConnProxy): Data = {
-//    SpiSync_datomic.insert_getStmts(insert, proxy)
+//    Spi_datomic_sync.insert_getStmts(insert, proxy)
     ???
   }
 
   override def insert_validate(insert: Insert)
                               (implicit conn: Conn, ec: EC): Future[Seq[(Int, Seq[InsertError])]] = future {
-//    SpiSync_datomic.insert_validate(insert)
+//    Spi_datomic_sync.insert_validate(insert)
     ???
   }
 
@@ -161,17 +161,17 @@ trait SpiAsync_graphql
   }
 
   override def update_inspect(update: Update)(implicit conn: Conn, ec: EC): Future[Unit] = future {
-//    SpiSync_datomic.update_inspect(update)
+//    Spi_datomic_sync.update_inspect(update)
     ???
   }
 
   private def update_getStmts(update: Update, conn: GraphqlConn_JVM): Data = {
-//    SpiSync_datomic.update_getStmts(update, conn)
+//    Spi_datomic_sync.update_getStmts(update, conn)
     ???
   }
 
   override def update_validate(update: Update)(implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = future {
-//    SpiSync_datomic.update_validate(update)
+//    Spi_datomic_sync.update_validate(update)
     ???
   }
 
@@ -191,12 +191,12 @@ trait SpiAsync_graphql
   }
 
   override def delete_inspect(delete: Delete)(implicit conn: Conn, ec: EC): Future[Unit] = future {
-//    SpiSync_datomic.delete_inspect(delete)
+//    Spi_datomic_sync.delete_inspect(delete)
     ???
   }
 
   private def delete_getStmts(delete: Delete, conn: GraphqlConn_JVM): Data = {
-//    SpiSync_datomic.delete_getStmts(delete, conn)
+//    Spi_datomic_sync.delete_getStmts(delete, conn)
     ???
   }
 
@@ -207,7 +207,7 @@ trait SpiAsync_graphql
     query: String,
     debug: Boolean = false,
   )(implicit conn: Conn, ec: EC): Future[List[List[Any]]] = future {
-//    SpiSync_datomic.fallback_rawQuery(query, debug)
+//    Spi_datomic_sync.fallback_rawQuery(query, debug)
     ???
   }
 

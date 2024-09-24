@@ -2,7 +2,7 @@ package molecule.sql.postgres.marshalling
 
 import molecule.core.marshalling.Boopicklers._
 import molecule.sql.core.marshalling.Rpc_SQL
-import molecule.sql.postgres.spi.SpiSync_postgres
+import molecule.sql.postgres.spi.Spi_postgres_sync
 
 
-object Rpc_postgres extends SpiSync_postgres with Rpc_SQL
+object Rpc_postgres extends Spi_postgres_sync with Rpc_SQL

@@ -1,9 +1,9 @@
 package molecule.sql.postgres.compliance.crud.update.filter
 
 import molecule.coreTests.spi.crud.update.filter._
-import molecule.sql.postgres.setup.TestAsync_postgres
+import molecule.sql.postgres.setup.Test_postgres_async
 
-object Test_FilterOne extends FilterOne with TestAsync_postgres
-object Test_FilterSet extends FilterSet with TestAsync_postgres
-object Test_FilterSeq extends FilterSeq with TestAsync_postgres
-object Test_FilterMap extends FilterMap with TestAsync_postgres
+object Test_FilterOne extends FilterOne with Test_postgres_async
+object Test_FilterSet extends FilterSet with Test_postgres_async
+object Test_FilterSeq extends FilterSeq with Test_postgres_async
+object Test_FilterMap extends FilterMap with Test_postgres_async

@@ -1,12 +1,12 @@
 package molecule.datalog.datomic.compliance.crud.insert
 
 import molecule.coreTests.spi.crud.insert._
-import molecule.datalog.datomic.setup.{TestAsync_datomic, TestSuiteArray_datomic}
-import molecule.datalog.datomic.spi.SpiAsync_datomic
+import molecule.datalog.datomic.setup.{TestSuite_datomic_array, Test_datomic_async}
+import molecule.datalog.datomic.spi.Spi_datomic_async
 
-object Test_InsertCardOne extends InsertCardOne with TestAsync_datomic
-object Test_InsertCardSeq extends InsertCardSeq with TestSuiteArray_datomic with SpiAsync_datomic
-object Test_InsertCardSet extends InsertCardSet with TestAsync_datomic
-object Test_InsertCardMap extends InsertCardMap with TestAsync_datomic
-object Test_InsertRefs extends InsertRefs with TestAsync_datomic
-object Test_InsertSemantics extends InsertSemantics with TestAsync_datomic
+object Test_InsertCardOne extends InsertCardOne with Test_datomic_async
+object Test_InsertCardSeq extends InsertCardSeq with TestSuite_datomic_array with Spi_datomic_async
+object Test_InsertCardSet extends InsertCardSet with Test_datomic_async
+object Test_InsertCardMap extends InsertCardMap with Test_datomic_async
+object Test_InsertRefs extends InsertRefs with Test_datomic_async
+object Test_InsertSemantics extends InsertSemantics with Test_datomic_async

@@ -1,6 +1,6 @@
 package molecule.datalog.datomic.compliance.validation
 
 import molecule.coreTests.spi.validation.KeywordSubstitution
-import molecule.datalog.datomic.setup.TestAsync_datomic
+import molecule.datalog.datomic.setup.Test_datomic_async
 
-object Test_KeywordSubstitution extends KeywordSubstitution with TestAsync_datomic
+object Test_KeywordSubstitution extends KeywordSubstitution with Test_datomic_async

@@ -1,10 +1,10 @@
 package molecule.sql.mysql.compliance.aggr
 
 import molecule.coreTests.spi.aggr.refNum._
-import molecule.sql.mysql.setup.TestAsync_mysql
+import molecule.sql.mysql.setup.Test_mysql_async
 
-object Test_AggrRefNum_sum extends AggrRefNum_sum with TestAsync_mysql
-object Test_AggrRefNum_median extends AggrRefNum_median with TestAsync_mysql
-object Test_AggrRefNum_avg extends AggrRefNum_avg with TestAsync_mysql
-object Test_AggrRefNum_variance extends AggrRefNum_variance with TestAsync_mysql
-object Test_AggrRefNum_stddev extends AggrRefNum_stddev with TestAsync_mysql
+object Test_AggrRefNum_sum extends AggrRefNum_sum with Test_mysql_async
+object Test_AggrRefNum_median extends AggrRefNum_median with Test_mysql_async
+object Test_AggrRefNum_avg extends AggrRefNum_avg with Test_mysql_async
+object Test_AggrRefNum_variance extends AggrRefNum_variance with Test_mysql_async
+object Test_AggrRefNum_stddev extends AggrRefNum_stddev with Test_mysql_async

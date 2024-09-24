@@ -84,7 +84,7 @@ trait SpiZio_rest
 //      txReport <- mapError(
 //        ZIO.fromFuture(ec =>
 //          SpiSync_rest.save_validate(save)(conn) match {
-//            case errors if errors.isEmpty => SpiAsync_datomic.save_transact(
+//            case errors if errors.isEmpty => Spi_datomic_async.save_transact(
 //              save.copy(elements = noKeywords(save.elements, Some(conn.proxy)))
 //            )(conn, ec)
 //            case errors                   => throw ValidationErrors(errors)
@@ -115,7 +115,7 @@ trait SpiZio_rest
 //      txReport <- mapError(
 //        ZIO.fromFuture(ec =>
 //          SpiSync_rest.insert_validate(insert)(conn) match {
-//            case errors if errors.isEmpty => SpiAsync_datomic.insert_transact(
+//            case errors if errors.isEmpty => Spi_datomic_async.insert_transact(
 //              insert.copy(elements = noKeywords(insert.elements, Some(conn.proxy)))
 //            )(conn, ec)
 //            case errors                   => throw InsertErrors(errors)
@@ -146,7 +146,7 @@ trait SpiZio_rest
 //      txReport <- mapError(
 //        ZIO.fromFuture(ec =>
 //          SpiSync_rest.update_validate(update)(conn) match {
-//            case errors if errors.isEmpty => SpiAsync_datomic.update_transact(
+//            case errors if errors.isEmpty => Spi_datomic_async.update_transact(
 //              update.copy(elements = noKeywords(update.elements, Some(conn.proxy)))
 //            )(conn, ec)
 //            case errors                   => throw ValidationErrors(errors)
@@ -176,7 +176,7 @@ trait SpiZio_rest
 //      conn = conn0.asInstanceOf[DatomicConn_JVM]
 //      txReport <- mapError(
 //        ZIO.fromFuture(ec =>
-//          SpiAsync_datomic.delete_transact(
+//          Spi_datomic_async.delete_transact(
 //            delete.copy(elements = noKeywords(delete.elements, Some(conn.proxy)))
 //          )(conn, ec)
 //        )
@@ -215,7 +215,7 @@ trait SpiZio_rest
 //      conn0 <- ZIO.service[Conn]
 //      conn = conn0.asInstanceOf[DatomicConn_JVM]
 //      result <- mapError(ZIO.fromFuture(_ =>
-//        SpiAsync_datomic.fallback_rawTransact(txData, debug)(conn, global)
+//        Spi_datomic_async.fallback_rawTransact(txData, debug)(conn, global)
 //      ))
 //    } yield result
     ???

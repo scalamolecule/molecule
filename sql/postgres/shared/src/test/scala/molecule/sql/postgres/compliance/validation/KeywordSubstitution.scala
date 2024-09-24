@@ -1,6 +1,6 @@
 package molecule.sql.postgres.compliance.validation
 
 import molecule.coreTests.spi.validation.KeywordSubstitution
-import molecule.sql.postgres.setup.TestAsync_postgres
+import molecule.sql.postgres.setup.Test_postgres_async
 
-object Test_KeywordSubstitution extends KeywordSubstitution with TestAsync_postgres
+object Test_KeywordSubstitution extends KeywordSubstitution with Test_postgres_async

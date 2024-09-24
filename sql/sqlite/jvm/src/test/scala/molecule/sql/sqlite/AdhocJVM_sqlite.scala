@@ -7,7 +7,7 @@ import utest._
 import scala.language.implicitConversions
 
 
-//object AdhocJVM_sqlite extends TestSuiteArray_sqlite {
+//object AdhocJVM_sqlite extends TestSuite_sqlite_array {
 object AdhocJVM_sqlite extends TestSuite_sqlite {
 
   override lazy val tests = Tests {
