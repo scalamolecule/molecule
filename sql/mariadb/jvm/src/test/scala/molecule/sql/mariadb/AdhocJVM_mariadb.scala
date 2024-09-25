@@ -45,61 +45,15 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
       import molecule.coreTests.dataModels.dsl.Refs._
       for {
 
+        _ <- A.i.B.?(B.iMap).insert(
+          (0, None),
+          (1, Some(Map("a" -> 1, "b" -> 2))),
+        ).transact
 
-        //        _ <- A.i.B.?(B.iSet).insert(
-        //          (0, None),
-        //          (1, Some(Set(1, 2))),
-        //        ).transact
-        //
-        //        _ <- A.i.B.?(B.iSet).query.i.get.map(_ ==> List(
-        //          (0, None),
-        //          (1, Some(Set(1, 2))),
-        //        ))
-//
-//        _ <- A.i.B.?(B.iSeq).insert(
-//          (0, None),
-//          (1, Some(Seq(1, 2, 1))),
-//        ).transact
-//
-//        _ <- rawQuery(
-//          """SELECT DISTINCT
-//            |  A.i,
-//            |  B.iSeq
-//            |FROM A
-//            |  LEFT JOIN B ON
-//            |    A.b = B.id AND
-//            |    B.iSeq IS NOT NULL
-//            |WHERE
-//            |  A.i IS NOT NULL;
-//            |""".stripMargin, true)
-//
-//
-//        _ <- A.i.B.?(B.iSeq).query.i.get.map(_ ==> List(
-//          (0, None),
-//          (1, Some(Seq(1, 2, 1))),
-//        ))
-
-                _ <- A.i.B.?(B.iMap).insert(
-                  (0, None),
-                  (1, Some(Map("a" -> 1, "b" -> 2))),
-                ).transact
-
-                _ <- A.i.B.?(B.iMap).query.i.get.map(_ ==> List(
-                  (0, None),
-                  (1, Some(Map("a" -> 1, "b" -> 2))),
-                ))
-        //        _ <- rawTransact(
-        //          """UPDATE B
-        //            |SET
-        //            |  iSeq = (
-        //            |      SELECT JSON_ARRAYAGG(list.v)
-        //            |      FROM   JSON_TABLE(B.iSeq, '$[*]' COLUMNS (v INT PATH '$')) as list
-        //            |      WHERE  list.v NOT IN (3, 4) and B.id is not null
-        //            |    )
-        //            |WHERE
-        //            |  B.iSeq is not null and
-        //            |  B.id IN(1, 2, 3)
-        //            |""".stripMargin)
+        _ <- A.i.B.?(B.iMap).query.i.get.map(_ ==> List(
+          (0, None),
+          (1, Some(Map("a" -> 1, "b" -> 2))),
+        ))
 
       } yield ()
     }

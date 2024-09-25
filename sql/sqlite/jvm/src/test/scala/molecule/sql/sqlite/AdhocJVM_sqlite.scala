@@ -10,7 +10,7 @@ import scala.language.implicitConversions
 //object AdhocJVM_sqlite extends TestSuite_sqlite_array {
 object AdhocJVM_sqlite extends TestSuite_sqlite {
 
-   lazy val tests = Tests {
+  lazy val tests = Tests {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.dsl.Types._
@@ -19,11 +19,11 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
       for {
 
         List(a, b) <- Ns.int.insert(1, 2).transact.map(_.ids)
-        //        _ <- Ns.int(3).save.transact
-        //        _ <- Ns.int.a1.query.get.map(_ ==> List(1, 2, 3))
-        //        _ <- Ns(a).int(10).update.transact
-        //        _ <- Ns(b).delete.transact
-        //        _ <- Ns.int.a1.query.get.map(_ ==> List(3, 10))
+        _ <- Ns.int(3).save.transact
+        _ <- Ns.int.a1.query.get.map(_ ==> List(1, 2, 3))
+        _ <- Ns(a).int(10).update.transact
+        _ <- Ns(b).delete.transact
+        _ <- Ns.int.a1.query.get.map(_ ==> List(3, 10))
 
       } yield ()
     }
@@ -40,57 +40,10 @@ object AdhocJVM_sqlite extends TestSuite_sqlite {
           (1, Some(Set(1, 2))),
         ).transact
 
-        _ <- A.i.a1.B.?(B.iSet).query.i.get.map(_ ==> List(
+        _ <- A.i.a1.B.?(B.iSet).query.get.map(_ ==> List(
           (0, None),
           (1, Some(Set(1, 2))),
         ))
-/*
-========================================
-QUERY:
-AttrOneManInt("A", "i", V, Seq(), None, None, Nil, Nil, None, Some("a1"), Seq(0, 1))
-OptRef(
-  Ref("A", "b", "B", CardOne, false, Seq(0, 8, 1)),
-  List(
-    AttrSetManInt("B", "iSet", V, Set(), None, None, Nil, Nil, None, None, Seq(1, 25))))
-
-SELECT DISTINCT
-  A.i,
-  JSON_GROUP_ARRAY(_B_iSet.VALUE) AS B_iSet
-FROM A
-  LEFT JOIN B ON
-    A.b = B.id
-  LEFT JOIN JSON_EACH(B.iSet) _B_iSet ON
-    B.iSet IS NOT NULL
-WHERE
-  A.i    IS NOT NULL AND
-  B.iSet IS NOT NULL
-GROUP BY A.i
-HAVING COUNT(*) > 0
-ORDER BY A.i;
-----------------------------------------
- */
-        //        _ <- rawQuery(
-        //          """SELECT DISTINCT
-        //            |  i,
-        //            |  json_group_array(iSet)
-        //            |FROM A
-        //            |where iSet is not null
-        //            |group by i
-        //            |""".stripMargin, true)
-
-
-        //        _ <- rawTransact(
-        //          """UPDATE Ns
-        //            |SET
-        //            |  i = 7
-        //            |WHERE
-        //            |  Ns.i IS NOT NULL AND
-        //            |  exists (
-        //            |    select * from Ns
-        //            |      INNER JOIN Ns_refs_Ref ON Ns.id = Ns_refs_Ref.Ns_id
-        //            |  )
-        //            |""".stripMargin)
-
 
       } yield ()
     }

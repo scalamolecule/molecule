@@ -5,7 +5,6 @@ import molecule.base.error.InsertError
 import molecule.core.action._
 import molecule.core.spi.{Conn, Spi_io, TxReport}
 import molecule.core.util.ModelUtils
-import scala.concurrent.{ExecutionContext => EC}
 
 trait Spi_h2_io extends Spi_io with ModelUtils {
 

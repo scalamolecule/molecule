@@ -28,9 +28,11 @@ trait TestSuite_sqlite extends CoreTestSuite with BaseHelpers {
       conn = JdbcHandlerSQlite_JVM.recreateDb(proxy)
       test(conn)
     } catch {
-      case NonFatal(exc) => throw exc
+      case NonFatal(exc) =>
+        exc.printStackTrace()
+        throw exc
     } finally {
-      if (conn.sqlConn != null) {
+      if (conn != null && conn.sqlConn != null) {
         // Closing connection after each test
         conn.sqlConn.close()
       }

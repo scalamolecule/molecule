@@ -67,6 +67,8 @@ case class JdbcConn_JVM(
       case NonFatal(e)     =>
         logger.error("Unexpected transaction error: " + e)
         throw e
-    }  finally sqlConn0.setAutoCommit(true)
+    }  finally {
+      sqlConn0.setAutoCommit(true)
+    }
   }
 }

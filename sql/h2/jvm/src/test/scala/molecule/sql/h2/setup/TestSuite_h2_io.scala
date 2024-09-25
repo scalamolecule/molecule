@@ -31,11 +31,14 @@ trait TestSuite_h2_io extends CoreTestSuite_io with BaseHelpers {
       conn = JdbcHandler_JVM.recreateDb(proxy)
       test(conn)
     } catch {
-      case NonFatal(exc) => throw exc
+      case NonFatal(exc) =>
+        exc.printStackTrace()
+        throw exc
     } finally {
-      if (conn.sqlConn != null) {
+      if (conn != null && conn.sqlConn != null) {
         // Closing connection after each test
-        conn.sqlConn.close()
+        // Doesn't work with munit tests - maybe not necessary with memory db?
+        //        conn.sqlConn.close()
       }
     }
   }

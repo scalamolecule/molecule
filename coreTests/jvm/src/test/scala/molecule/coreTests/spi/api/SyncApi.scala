@@ -39,7 +39,7 @@ trait SyncApi extends CoreTestSuite with Api_sync { spi: Spi_sync =>
         A.i(2).B.i(3).s("b").save.transact
 
         // Optional card-one ref (SQL left join)
-        A.i.B.?(B.i.s).query.i.get ==> List(
+        A.i.a1.B.?(B.i.s).query.i.get ==> List(
           (1, None),
           (2, Some((3, "b"))),
         )

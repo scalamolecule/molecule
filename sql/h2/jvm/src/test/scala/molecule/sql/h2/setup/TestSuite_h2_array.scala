@@ -34,9 +34,11 @@ trait TestSuite_h2_array extends CoreTestSuiteBase with Array2List with BaseHelp
       conn = JdbcHandler_JVM.recreateDb(proxy)
       test(conn)
     } catch {
-      case NonFatal(exc) => throw exc
+      case NonFatal(exc) =>
+        exc.printStackTrace()
+        throw exc
     } finally {
-      if (conn.sqlConn != null) {
+      if (conn != null && conn.sqlConn != null) {
         conn.sqlConn.close()
       }
     }

@@ -85,6 +85,9 @@ lazy val boilerplate = crossProject(JSPlatform, JVMPlatform)
       "org.slf4j" % "slf4j-api" % "1.7.36",
       "org.slf4j" % "slf4j-nop" % "1.7.36"
     ),
+    excludeDependencies ++= Seq(
+      ExclusionRule("junit", "junit")
+    )
   )
   .dependsOn(base)
 
@@ -338,7 +341,7 @@ lazy val sqlCore = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies ++= Seq(
       // For json de-serialisation in molecule.sql.core.query.LambdasMap
       "com.lihaoyi" %%% "upickle" % "3.3.1",
-    )
+    ),
   )
   .jsSettings(jsEnvironment)
   //  .jvmSettings(
@@ -360,7 +363,8 @@ lazy val sqlH2 = crossProject(JSPlatform, JVMPlatform)
   .jvmSettings(
     libraryDependencies ++= Seq(
       "com.h2database" % "h2" % "2.2.224"
-    )
+    ),
+    Test / fork := true
   )
   .dependsOn(sqlCore)
   .dependsOn(coreTests % "test->test")
@@ -380,7 +384,7 @@ lazy val sqlMariaDB = crossProject(JSPlatform, JVMPlatform)
       "org.mariadb.jdbc" % "mariadb-java-client" % "3.4.0",
       "ch.qos.logback" % "logback-classic" % logbackVersion % Test
     ),
-    //    Test / fork := true
+    Test / fork := true
   )
   .dependsOn(sqlCore)
   .dependsOn(coreTests % "test->test")
@@ -399,6 +403,7 @@ lazy val sqlMySQL = crossProject(JSPlatform, JVMPlatform)
       "org.testcontainers" % "mysql" % "1.19.8",
       "mysql" % "mysql-connector-java" % "8.0.33",
     ),
+    Test / fork := true
   )
   .dependsOn(sqlCore)
   .dependsOn(coreTests % "test->test")
@@ -418,6 +423,7 @@ lazy val sqlPostgreSQL = crossProject(JSPlatform, JVMPlatform)
       "org.postgresql" % "postgresql" % "42.7.2",
       "ch.qos.logback" % "logback-classic" % logbackVersion % Test
     ),
+    Test / fork := true
   )
   .dependsOn(sqlCore)
   .dependsOn(coreTests % "test->test")
@@ -433,8 +439,9 @@ lazy val sqlSQlite = crossProject(JSPlatform, JVMPlatform)
   .jsSettings(jsEnvironment)
   .jvmSettings(
     libraryDependencies ++= Seq(
-      "org.xerial" % "sqlite-jdbc" % "3.46.0.0"
-    )
+      "org.xerial" % "sqlite-jdbc" % "3.46.1.2"
+    ),
+    Test / fork := true
   )
   .dependsOn(sqlCore)
   .dependsOn(coreTests % "test->test")
