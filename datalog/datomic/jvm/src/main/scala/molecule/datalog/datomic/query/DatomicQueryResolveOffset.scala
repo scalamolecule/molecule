@@ -3,10 +3,12 @@ package molecule.datalog.datomic.query
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.dbView.DbView
+import molecule.core.util.Executor.global
 import molecule.core.util.FutureUtils
 import molecule.datalog.core.query.{DatomicQueryBase, Model2DatomicQuery}
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import scala.collection.mutable.ListBuffer
+import scala.concurrent.Future
 
 /**
  * @param elements  Molecule model
@@ -89,11 +91,13 @@ case class DatomicQueryResolveOffset[Tpl](
         mutationAttrs.exists(involvedAttrs.contains) ||
           isDelete && mutationAttrs.head.startsWith(involvedDeleteNs)
       ) {
-        val m2q = new Model2DatomicQuery[Tpl](elements)
-        callback(
-          DatomicQueryResolveOffset(elements, optLimit, None, None, m2q).getListFromOffset_sync(conn)._1
-        )
-      }
+        Future {
+          val m2q = new Model2DatomicQuery[Tpl](elements)
+          callback(
+            DatomicQueryResolveOffset(elements, optLimit, None, None, m2q).getListFromOffset_sync(conn)._1
+          )
+        }
+      } else Future.unit
     }
     conn.addCallback(elements -> maybeCallback)
   }

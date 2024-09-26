@@ -84,8 +84,8 @@ trait Spi_datomic_async
           conn.transact_async(save_getStmts(save))
         case errors                   => throw ValidationErrors(errors)
       }
+      _ <- conn.callback(save.elements)
     } yield {
-      conn.callback(save.elements)
       txReport
     }
   }
@@ -121,8 +121,8 @@ trait Spi_datomic_async
           conn.transact_async(insert_getStmts(insert))
         case errors                   => throw InsertErrors(errors)
       }
+      _ <- conn.callback(insert.elements)
     } yield {
-      conn.callback(insert.elements)
       txReport
     }
   }
@@ -158,8 +158,8 @@ trait Spi_datomic_async
           conn.transact_async(update_getStmts(update, conn))
         case errors                   => throw ValidationErrors(errors)
       }
+      _ <- conn.callback(update.elements)
     } yield {
-      conn.callback(update.elements)
       txReport
     }
   }
@@ -190,8 +190,8 @@ trait Spi_datomic_async
     for {
       _ <- if (delete.doInspect) delete_inspect(delete) else Future.unit
       txReport <- conn.transact_async(delete_getStmts(delete, conn))
+      _ <- conn.callback(delete.elements, true)
     } yield {
-      conn.callback(delete.elements, true)
       txReport
     }
   }

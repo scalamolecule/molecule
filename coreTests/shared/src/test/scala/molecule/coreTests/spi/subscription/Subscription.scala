@@ -27,22 +27,14 @@ trait Subscription extends CoreTestSuite with Api_async { spi: Spi_async =>
         id <- Ns.i(2).save.transact.map(_.id)
         _ <- Ns.i.a1.query.get.map(_ ==> List(1, 2))
 
-        // For testing purpose on the JS platform where calls to the server
-        // are run/fetched asynchronously, allow each mutation to finish so that
-        // we can catch the intermediary callback result in order.
-        _ <- delay(50)(())
-
         _ <- Ns.i.insert(3, 4).transact
         _ <- Ns.i.a1.query.get.map(_ ==> List(1, 2, 3, 4))
-        _ <- delay(50)(())
 
         _ <- Ns(id).i(20).update.transact
         _ <- Ns.i.a1.query.get.map(_ ==> List(1, 3, 4, 20))
-        _ <- delay(50)(())
 
         _ <- Ns(id).delete.transact
         _ <- Ns.i.a1.query.get.map(_ ==> List(1, 3, 4))
-        _ <- delay(50)(())
 
         // Mutations with no callback-involved attributes don't call back
         _ <- Ns.string("foo").save.transact
@@ -81,20 +73,13 @@ trait Subscription extends CoreTestSuite with Api_async { spi: Spi_async =>
         _ <- Ns.i(2).save.transact
         _ <- Ns.s("b").save.transact
 
-        // For testing purpose on the JS platform where calls to the server
-        // are run/fetched asynchronously, allow each mutation to finish so that
-        // we can catch the intermediary callback result in order.
-        _ <- delay(50)(())
-
         _ <- Ns.i(3).save.transact
         _ <- Ns.s("c").save.transact
-        _ <- delay(50)(())
 
         // Non-matching transactions don't trigger callbacks
         _ <- Ns.string("foo").save.transact
 
         // Intermediary results have been pushed to correct subscriptions
-        // Since callbacks run in parallel, order is not guaranteed
         _ = fooResults ==> List(
           List(1, 2),
           List(1, 2, 3),
@@ -110,7 +95,6 @@ trait Subscription extends CoreTestSuite with Api_async { spi: Spi_async =>
         // Mutate some more
         _ <- Ns.s("x").save.transact
         _ <- Ns.i(4).save.transact
-        _ <- delay(50)(())
 
         // After unsubscribing, barResults is no longer automatically updated (x wasn't added)
         _ = barResults ==> List(

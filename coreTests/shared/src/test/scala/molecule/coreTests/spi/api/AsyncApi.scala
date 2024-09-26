@@ -114,21 +114,14 @@ trait AsyncApi extends CoreTestSuite with Api_async { spi: Spi_async =>
           id <- Ns.i(2).save.transact.map(_.id)
           _ <- Ns.i.a1.query.get.map(_ ==> List(1, 2))
 
-          // For testing purpose, allow each mutation to finish so that we can
-          // catch the intermediary callback result in order
-//          _ <- delay(50)(())
-
           _ <- Ns.i.insert(3, 4).transact
           _ <- Ns.i.a1.query.get.map(_ ==> List(1, 2, 3, 4))
-//          _ <- delay(50)(())
 
           _ <- Ns(id).i(20).update.transact
           _ <- Ns.i.a1.query.get.map(_ ==> List(1, 3, 4, 20))
-//          _ <- delay(50)(())
 
           _ <- Ns(id).delete.transact
           _ <- Ns.i.a1.query.get.map(_ ==> List(1, 3, 4))
-//          _ <- delay(50)(())
 
           // Mutations with no callback-involved attributes don't call back
           _ <- Ns.string("foo").save.transact

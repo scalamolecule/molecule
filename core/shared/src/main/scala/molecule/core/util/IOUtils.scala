@@ -3,12 +3,13 @@ package molecule.core.util
 import cats.effect.IO
 import molecule.base.error._
 import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.spi.TxReport
 import scala.concurrent.duration.{Duration, DurationInt}
 import scala.concurrent.{Await, ExecutionContext, Future}
 
 trait IOUtils extends ModelUtils with MoleculeLogging {
 
-  implicit class futEither2fut[T](fut: Future[Either[MoleculeError, T]])(implicit ec: ExecutionContext) {
+  implicit class futEither2io[T](fut: Future[Either[MoleculeError, T]])(implicit ec: ExecutionContext) {
     def io: IO[T] = {
       IO.fromFuture {
         IO {
@@ -17,6 +18,44 @@ trait IOUtils extends ModelUtils with MoleculeLogging {
               case Right(result)       => result
               case Left(moleculeError) => throw moleculeError
             }
+            .recover {
+              case e: MoleculeError =>
+                logger.debug(e)
+                throw e
+              case e: Throwable     =>
+                logger.error(e.toString + "\n" + e.getStackTrace.toList.mkString("\n"))
+                // Re-throw to preserve original stacktrace
+                throw e
+            }
+        }
+      }
+    }
+  }
+
+  implicit class futTxReport2io(fut: Future[TxReport])(implicit ec: ExecutionContext) {
+    def io: IO[TxReport] = {
+      IO.fromFuture {
+        IO {
+          fut
+            .recover {
+              case e: MoleculeError =>
+                logger.debug(e)
+                throw e
+              case e: Throwable     =>
+                logger.error(e.toString + "\n" + e.getStackTrace.toList.mkString("\n"))
+                // Re-throw to preserve original stacktrace
+                throw e
+            }
+        }
+      }
+    }
+  }
+
+  implicit class futListUnit2io(fut: Future[List[Unit]])(implicit ec: ExecutionContext) {
+    def io: IO[List[Unit]] = {
+      IO.fromFuture {
+        IO {
+          fut
             .recover {
               case e: MoleculeError =>
                 logger.debug(e)
@@ -49,7 +88,7 @@ trait IOUtils extends ModelUtils with MoleculeLogging {
     }
   }
 
-  def future[T](body: => T)(implicit ec: ExecutionContext): IO[T] = {
+  def io[T](body: => T): IO[T] = {
     IO(body).recover {
       case e: MoleculeError =>
         logger.debug(e)

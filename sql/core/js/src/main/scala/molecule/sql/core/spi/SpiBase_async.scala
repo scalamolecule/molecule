@@ -34,9 +34,10 @@ trait SpiBase_async extends Spi_async with Renderer with FutureUtils {
         mutationAttrs.exists(involvedAttrs.contains) ||
           isDelete && mutationAttrs.head.startsWith(involvedDeleteNs)
       ) {
-        conn.rpc.query[Tpl](conn.proxy, q.elements, q.optLimit).future.map(callback)
-        ()
-      }
+        conn.rpc.query[Tpl](conn.proxy, q.elements, q.optLimit)
+          .future
+          .map(callback)
+      } else Future.unit
     }
     Future(conn.addCallback(elements -> maybeCallback))
   }
@@ -89,8 +90,8 @@ trait SpiBase_async extends Spi_async with Renderer with FutureUtils {
       } else {
         throw ValidationErrors(errors)
       }
+      _ <- conn.callback(save.elements)
     } yield {
-      conn.callback(save.elements)
       txReport
     }
   }
@@ -122,13 +123,12 @@ trait SpiBase_async extends Spi_async with Renderer with FutureUtils {
           Future(TxReport(Nil))
         } else {
           val tplsSerialized = PickleTpls(insert.elements, true).pickleEither(Right(insert.tpls))
-          val txReport       = conn.rpc.insert(conn.proxy, insert.elements, tplsSerialized).future
-          conn.callback(insert.elements)
-          txReport
+          conn.rpc.insert(conn.proxy, insert.elements, tplsSerialized).future
         }
       } else {
         throw InsertErrors(errors)
       }
+      _ <- conn.callback(insert.elements)
     } yield {
       txReport
     }
@@ -156,8 +156,8 @@ trait SpiBase_async extends Spi_async with Renderer with FutureUtils {
       _ <- if (update.doInspect) update_inspect(update) else Future.unit
       // Validating on JVM side only since it requires db lookups
       txReport <- conn.rpc.update(conn.proxy, update.elements, update.isUpsert).future
+      _ <- conn.callback(update.elements)
     } yield {
-      conn.callback(update.elements)
       txReport
     }
   }
@@ -177,10 +177,10 @@ trait SpiBase_async extends Spi_async with Renderer with FutureUtils {
 
   override def delete_transact(delete: Delete)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
     val conn = conn0.asInstanceOf[JdbcConn_JS]
-    conn.rpc.delete(conn.proxy, delete.elements).future.map { txReport =>
-      conn.callback(delete.elements, true)
-      txReport
-    }
+    for{
+      txReport <- conn.rpc.delete(conn.proxy, delete.elements).future
+      _ <- conn.callback(delete.elements, true)
+    } yield txReport
   }
 
   override def delete_inspect(delete: Delete)(implicit conn: Conn, ec: EC): Future[Unit] = {

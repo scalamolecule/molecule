@@ -138,21 +138,14 @@ trait SyncApi extends CoreTestSuite with Api_sync { spi: Spi_sync =>
         val id = Ns.i(2).save.transact.id
         Ns.i.a1.query.get ==> List(1, 2)
 
-        // For testing purpose, allow each mutation to finish so that we can
-        // catch the intermediary callback result in order
-//        delay(50)(())
-
         Ns.i.insert(3, 4).transact
         Ns.i.a1.query.get ==> List(1, 2, 3, 4)
-//        delay(50)(())
 
         Ns(id).i(20).update.transact
         Ns.i.a1.query.get ==> List(1, 3, 4, 20)
-//        delay(50)(())
 
         Ns(id).delete.transact
         Ns.i.a1.query.get ==> List(1, 3, 4)
-//        delay(50)(())
 
         // Mutations with no callback-involved attributes don't call back
         Ns.string("foo").save.transact

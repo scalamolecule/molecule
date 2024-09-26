@@ -7,6 +7,8 @@ import molecule.boilerplate.ast.Model._
 import molecule.core.action._
 import molecule.core.marshalling.ConnProxy
 import molecule.core.spi._
+import molecule.core.util.Executor._
+import molecule.core.util.FutureUtils
 import molecule.core.validation.TxModelValidation
 import molecule.core.validation.insert.InsertValidation
 import molecule.sql.core.facade.JdbcConn_JVM
@@ -21,12 +23,14 @@ import molecule.sql.core.transaction.{CachedConnection, SqlUpdateSetValidator}
 import scala.collection.mutable.ListBuffer
 import scala.util.control.NonFatal
 
+
 trait SpiBase_sync
   extends Spi_sync
     with CachedConnection
     with SpiHelpers
     with SqlUpdateSetValidator
     with Renderer
+    with FutureUtils
     with BaseHelpers {
 
 
@@ -119,7 +123,7 @@ trait SpiBase_sync
     val errors    = save_validate(save)
     if (errors.isEmpty) {
       val txReport = conn.transact_sync(save_getAction(saveClean, conn))
-      conn.callback(save.elements)
+      await(conn.callback(save.elements))
       txReport
     } else {
       throw ValidationErrors(errors)
@@ -161,7 +165,7 @@ trait SpiBase_sync
         TxReport(Nil)
       } else {
         val txReport = conn.transact_sync(insert_getAction(insertClean, conn))
-        conn.callback(insert.elements)
+        await(conn.callback(insert.elements))
         txReport
       }
     } else {
@@ -199,7 +203,7 @@ trait SpiBase_sync
     if (errors.isEmpty) {
       val action   = update_getAction(updateClean, conn)
       val txReport = conn.transact_sync(action)
-      conn.callback(update.elements)
+      await(conn.callback(update.elements))
       txReport
     } else {
       throw ValidationErrors(errors)
@@ -252,7 +256,7 @@ trait SpiBase_sync
     val deleteClean = delete.copy(elements = noKeywords(delete.elements, Some(conn.proxy)))
     lazy val action = delete_getAction(conn, deleteClean)
     val txReport = conn.transact_sync(action)
-    conn.callback(delete.elements, true)
+    await(conn.callback(delete.elements, true))
     txReport
   }
 

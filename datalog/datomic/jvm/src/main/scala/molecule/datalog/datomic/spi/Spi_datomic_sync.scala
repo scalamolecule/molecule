@@ -4,9 +4,9 @@ import datomic.Peer
 import molecule.base.error.{InsertError, ModelError}
 import molecule.boilerplate.ast.Model._
 import molecule.core.action._
-import molecule.core.marshalling.ConnProxy
 import molecule.core.spi.{Conn, Spi_sync, TxReport}
 import molecule.core.transaction.{ResolveDelete, ResolveInsert, ResolveSave, ResolveUpdate}
+import molecule.core.util.Executor._
 import molecule.core.util.FutureUtils
 import molecule.core.validation.TxModelValidation
 import molecule.core.validation.insert.InsertValidation
@@ -16,7 +16,6 @@ import molecule.datalog.datomic.marshalling.Rpc_datomic.Data
 import molecule.datalog.datomic.query.{DatomicQueryResolveCursor, DatomicQueryResolveOffset}
 import molecule.datalog.datomic.transaction.{Delete_datomic, Insert_datomic, Save_datomic, Update_datomic}
 import scala.concurrent.Await
-import scala.concurrent.ExecutionContext.global
 import scala.concurrent.duration.DurationInt
 
 object Spi_datomic_sync extends Spi_datomic_sync

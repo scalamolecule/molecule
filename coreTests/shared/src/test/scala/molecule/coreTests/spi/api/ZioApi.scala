@@ -115,18 +115,11 @@ trait ZioApi extends CoreTestSuite_zio with Api_zio { spi: Spi_zio =>
           // Mutations to be monitored by subscription
           id <- Ns.i(2).save.transact.map(_.id)
 
-          // For testing purpose, allow each mutation to finish so that we can
-          // catch the intermediary callback result in order
-          //          _ <- delay(50)(())
-
           _ <- Ns.i.insert(3, 4).transact
-          //          _ <- delay(50)(())
 
           _ <- Ns(id).i(20).update.transact
-          //          _ <- delay(50)(())
 
           _ <- Ns(id).delete.transact
-          //          _ <- delay(50)(())
 
           // Mutations with no callback-involved attributes don't call back
           _ <- Ns.string("foo").save.transact

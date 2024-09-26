@@ -4,15 +4,14 @@ import cats.effect.IO
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.core.action._
-import molecule.core.api.Api_io
 import molecule.core.marshalling.serialize.PickleTpls
 import molecule.core.spi.{Conn, Spi_io, TxReport}
-import molecule.core.util.Executor.{global => ec}
+import molecule.core.util.Executor._
 import molecule.core.util.IOUtils
 import molecule.core.validation.TxModelValidation
 import molecule.core.validation.insert.InsertValidation
 import molecule.datalog.datomic.facade.DatomicConn_JS
-import scala.concurrent.{ExecutionContext => EC}
+import scala.concurrent.{Future, ExecutionContext => EC}
 
 
 trait Spi_datomic_io
@@ -35,12 +34,13 @@ trait Spi_datomic_io
     val elements         = q.elements
     val involvedAttrs    = getAttrNames(elements)
     val involvedDeleteNs = getInitialNs(elements)
-    val maybeCallback = (mutationAttrs: Set[String], isDelete: Boolean) => {
+    val maybeCallback    = (mutationAttrs: Set[String], isDelete: Boolean) => {
       if (
         mutationAttrs.exists(involvedAttrs.contains) ||
           isDelete && mutationAttrs.head.startsWith(involvedDeleteNs)
       ) {
-        conn.rpc.query[Tpl](conn.proxy, q.elements, q.optLimit).map {
+        conn.rpc.query[Tpl](conn.proxy, q.elements, q.optLimit)
+          .map {
             case Right(result)       => callback(result)
             case Left(moleculeError) => throw moleculeError
           }
@@ -53,8 +53,7 @@ trait Spi_datomic_io
               // Re-throw to preserve original stacktrace
               throw e
           }
-        ()
-      }
+      } else Future.unit
     }
     IO(conn.addCallback(elements -> maybeCallback))
   }
@@ -105,8 +104,8 @@ trait Spi_datomic_io
         case errors if errors.isEmpty => conn.rpc.save(conn.proxy, save.elements).io
         case errors                   => throw ValidationErrors(errors)
       }
+      _ <- conn.callback(save.elements).io
     } yield {
-      conn.callback(save.elements)
       txReport
     }
   }
@@ -115,7 +114,7 @@ trait Spi_datomic_io
     printInspectTx("SAVE", save.elements)
   }
 
-  override def save_validate(save: Save)(implicit conn: Conn): IO[Map[String, Seq[String]]] = future {
+  override def save_validate(save: Save)(implicit conn: Conn): IO[Map[String, Seq[String]]] = io {
     val proxy = conn.proxy
     TxModelValidation(proxy.nsMap, proxy.attrMap, "save").validate(save.elements)
   }
@@ -134,8 +133,8 @@ trait Spi_datomic_io
           conn.rpc.insert(conn.proxy, insert.elements, tplsSerialized).io
         case errors                   => throw InsertErrors(errors)
       }
+      _ <- conn.callback(insert.elements).io
     } yield {
-      conn.callback(insert.elements)
       txReport
     }
   }
@@ -144,7 +143,7 @@ trait Spi_datomic_io
     printInspectTx("INSERT", insert.elements)
   }
 
-  override def insert_validate(insert: Insert)(implicit conn: Conn): IO[Seq[(Int, Seq[InsertError])]] = future {
+  override def insert_validate(insert: Insert)(implicit conn: Conn): IO[Seq[(Int, Seq[InsertError])]] = io {
     InsertValidation.validate(conn, insert.elements, insert.tpls)
   }
 
@@ -161,8 +160,8 @@ trait Spi_datomic_io
           conn.rpc.update(conn.proxy, update.elements, update.isUpsert).io
         case errors                   => throw ValidationErrors(errors)
       }
+      _ <- conn.callback(update.elements).io
     } yield {
-      conn.callback(update.elements)
       txReport
     }
   }
@@ -171,7 +170,7 @@ trait Spi_datomic_io
     printInspectTx("UPDATE", update.elements)
   }
 
-  override def update_validate(update: Update)(implicit conn: Conn): IO[Map[String, Seq[String]]] = future {
+  override def update_validate(update: Update)(implicit conn: Conn): IO[Map[String, Seq[String]]] = io {
     val proxy = conn.proxy
     TxModelValidation(proxy.nsMap, proxy.attrMap, "update").validate(update.elements)
   }
@@ -181,10 +180,10 @@ trait Spi_datomic_io
 
   override def delete_transact(delete: Delete)(implicit conn0: Conn): IO[TxReport] = {
     val conn = conn0.asInstanceOf[DatomicConn_JS]
-    conn.rpc.delete(conn.proxy, delete.elements).io.map { txReport =>
-      conn.callback(delete.elements, true)
-      txReport
-    }
+    for {
+      txReport <- conn.rpc.delete(conn.proxy, delete.elements).io
+      _ <- conn.callback(delete.elements, true).io
+    } yield txReport
   }
 
   override def delete_inspect(delete: Delete)(implicit conn: Conn): IO[Unit] = {

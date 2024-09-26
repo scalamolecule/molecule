@@ -2,22 +2,21 @@ package molecule.sql.core.spi
 
 import boopickle.Default._
 import cats.effect.IO
-import molecule.base.error.{InsertError, InsertErrors, ValidationErrors}
+import molecule.base.error.{InsertError, InsertErrors, MoleculeError, ValidationErrors}
 import molecule.boilerplate.ast.Model._
 import molecule.core.action._
-import molecule.core.api.Api_io
 import molecule.core.marshalling.serialize.PickleTpls
 import molecule.core.spi.{Conn, Renderer, Spi_io, TxReport}
+import molecule.core.util.Executor.{global => ec}
 import molecule.core.util.IOUtils
 import molecule.core.validation.TxModelValidation
 import molecule.core.validation.insert.InsertValidation
 import molecule.sql.core.facade.JdbcConn_JS
-import molecule.core.util.Executor.{global => ec}
+import scala.concurrent.Future
 
 
 trait SpiBase_io
   extends Spi_io
-    with Api_io
     with Renderer
     with IOUtils {
 
@@ -40,9 +39,21 @@ trait SpiBase_io
         mutationAttrs.exists(involvedAttrs.contains) ||
           isDelete && mutationAttrs.head.startsWith(involvedDeleteNs)
       ) {
-        conn.rpc.query[Tpl](conn.proxy, q.elements, q.optLimit).io.map(callback)
-        ()
-      }
+        conn.rpc.query[Tpl](conn.proxy, q.elements, q.optLimit)
+          .map {
+            case Right(result)       => callback(result)
+            case Left(moleculeError) => throw moleculeError
+          }
+          .recover {
+            case e: MoleculeError =>
+              logger.debug(e)
+              throw e
+            case e: Throwable     =>
+              logger.error(e.toString + "\n" + e.getStackTrace.toList.mkString("\n"))
+              // Re-throw to preserve original stacktrace
+              throw e
+          }
+      } else Future.unit
     }
     IO(conn.addCallback(elements -> maybeCallback))
   }
@@ -95,8 +106,8 @@ trait SpiBase_io
       } else {
         throw ValidationErrors(errors)
       }
+      _ <- conn.callback(save.elements).io
     } yield {
-      conn.callback(save.elements)
       txReport
     }
   }
@@ -128,13 +139,12 @@ trait SpiBase_io
           IO(TxReport(Nil))
         } else {
           val tplsSerialized = PickleTpls(insert.elements, true).pickleEither(Right(insert.tpls))
-          val txReport       = conn.rpc.insert(conn.proxy, insert.elements, tplsSerialized).io
-          conn.callback(insert.elements)
-          txReport
+          conn.rpc.insert(conn.proxy, insert.elements, tplsSerialized).io
         }
       } else {
         throw InsertErrors(errors)
       }
+      _ <- conn.callback(insert.elements).io
     } yield {
       txReport
     }
@@ -162,8 +172,8 @@ trait SpiBase_io
       _ <- if (update.doInspect) update_inspect(update) else IO.unit
       // Validating on JVM side only since it requires db lookups
       txReport <- conn.rpc.update(conn.proxy, update.elements, update.isUpsert).io
+      _ <- conn.callback(update.elements).io
     } yield {
-      conn.callback(update.elements)
       txReport
     }
   }
@@ -183,10 +193,10 @@ trait SpiBase_io
 
   override def delete_transact(delete: Delete)(implicit conn0: Conn): IO[TxReport] = {
     val conn = conn0.asInstanceOf[JdbcConn_JS]
-    conn.rpc.delete(conn.proxy, delete.elements).io.map { txReport =>
-      conn.callback(delete.elements, true)
-      txReport
-    }
+    for {
+      txReport <- conn.rpc.delete(conn.proxy, delete.elements).io
+      _ <- conn.callback(delete.elements, true).io
+    } yield txReport
   }
 
   override def delete_inspect(delete: Delete)(implicit conn: Conn): IO[Unit] = {

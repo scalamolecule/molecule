@@ -20,7 +20,7 @@ object AdhocJS_h2 extends TestSuite_h2 {
         _ <- Ns.int.a1.query.get.map(_ ==> List(1, 2, 3))
         _ <- Ns(a).int(10).update.transact
         _ <- Ns(b).delete.transact
-        _ <- Ns.int.a1.query.get.map(_ ==> List(3, 10))
+        _ <- Ns.int.a1.query.get.map(_ ==> List(3, 11))
 
       } yield ()
     }
@@ -85,3 +85,6 @@ object AdhocJS_h2 extends TestSuite_h2 {
     //    }
   }
 }
+
+// testOnly molecule.datalog.datomic.compliance.subscription.Test_Subscription
+// testOnly molecule.coreTests.spi.api.Test_IOApi

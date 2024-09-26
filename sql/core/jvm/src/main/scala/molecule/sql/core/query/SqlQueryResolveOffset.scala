@@ -2,10 +2,12 @@ package molecule.sql.core.query
 
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.util.Executor.global
 import molecule.core.util.{FutureUtils, ModelUtils}
 import molecule.sql.core.facade.JdbcConn_JVM
-import molecule.sql.core.query.casting.{NestOptTpls, NestTpls}
 import molecule.sql.core.query.casting.strategy._
+import molecule.sql.core.query.casting.{NestOptTpls, NestTpls}
+import scala.concurrent.Future
 
 case class SqlQueryResolveOffset[Tpl](
   elements: List[Element],
@@ -84,11 +86,13 @@ case class SqlQueryResolveOffset[Tpl](
         mutationAttrs.exists(involvedAttrs.contains) ||
           isDelete && mutationAttrs.head.startsWith(involvedDeleteNs)
       ) {
-        callback(
-          SqlQueryResolveOffset(elements, optLimit, None, freshM2q(elements))
-            .getListFromOffset_sync(conn)._1
+        Future(
+          callback(
+            SqlQueryResolveOffset(elements, optLimit, None, freshM2q(elements))
+              .getListFromOffset_sync(conn)._1
+          )
         )
-      }
+      } else Future.unit
     }
     conn.addCallback(elements -> maybeCallback)
   }

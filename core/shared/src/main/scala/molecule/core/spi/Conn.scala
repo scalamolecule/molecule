@@ -29,16 +29,18 @@ abstract class Conn(val proxy: ConnProxy)
 
   // Subscriptions --------------------------------------------------------------
 
-  private var callbacks = List.empty[(List[Element], (Set[String], Boolean) => Unit)]
+  private var callbacks = List.empty[(List[Element], (Set[String], Boolean) => Future[Unit])]
 
-  def callback(mutation: List[Element], isDelete: Boolean = false): Unit = {
+  def callback(mutation: List[Element], isDelete: Boolean = false)
+              (implicit ec: ExecutionContext): Future[List[Unit]] = {
     val mutationAttrs = getAttrNames(mutation)
-    callbacks.foreach {
+    // Ensure all callbacks are called
+    Future.sequence(callbacks.map {
       case (_, callback) => callback(mutationAttrs, isDelete)
-    }
+    })
   }
 
-  def addCallback(callback: (List[Element], (Set[String], Boolean) => Unit)): Unit = {
+  def addCallback(callback: (List[Element], (Set[String], Boolean) => Future[Unit])): Unit = {
     callbacks = callbacks :+ callback
   }
 
