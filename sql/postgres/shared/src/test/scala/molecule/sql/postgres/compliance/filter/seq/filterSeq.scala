@@ -1,8 +1,9 @@
 package molecule.sql.postgres.compliance.filter.seq
 
+import molecule.coreTests.spi.filter.seq.SeqSemantics
 import molecule.coreTests.spi.filter.seq.ref._
 import molecule.coreTests.spi.filter.seq.types._
-import molecule.sql.postgres.setup.{Test_postgres_async, TestSuite_postgres_array}
+import molecule.sql.postgres.setup.{TestSuite_postgres_array, Test_postgres_async}
 import molecule.sql.postgres.spi.Spi_postgres_async
 
 object Test_FilterSeq_String_ extends FilterSeq_String_ with Test_postgres_async
@@ -27,6 +28,8 @@ object Test_FilterSeq_URI_ extends FilterSeq_URI_ with Test_postgres_async
 object Test_FilterSeq_Byte_ extends FilterSeq_ByteArray with TestSuite_postgres_array with Spi_postgres_async
 object Test_FilterSeq_Short_ extends FilterSeq_Short_ with Test_postgres_async
 object Test_FilterSeq_Char_ extends FilterSeq_Char_ with Test_postgres_async
+
+object Test_SeqSemantics extends SeqSemantics with Test_postgres_async
 
 
 object Test_FilterRefSeq_Card1Ref extends FilterRefSeq_Card1Ref with Test_postgres_async

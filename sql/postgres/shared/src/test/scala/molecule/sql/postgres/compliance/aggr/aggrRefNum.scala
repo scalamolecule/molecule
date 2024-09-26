@@ -1,6 +1,6 @@
 package molecule.sql.postgres.compliance.aggr
 
-import molecule.coreTests.spi.aggr.refNum.{AggrRefNum_avg, AggrRefNum_median, AggrRefNum_stddev, AggrRefNum_sum, AggrRefNum_variance}
+import molecule.coreTests.spi.aggr.refNum._
 import molecule.sql.postgres.setup.Test_postgres_async
 
 object Test_AggrOneRefNum_sum extends AggrRefNum_sum with Test_postgres_async

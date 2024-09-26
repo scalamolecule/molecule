@@ -1,8 +1,9 @@
 package molecule.sql.sqlite.compliance.filter.seq
 
+import molecule.coreTests.spi.filter.seq.SeqSemantics
 import molecule.coreTests.spi.filter.seq.ref._
 import molecule.coreTests.spi.filter.seq.types._
-import molecule.sql.sqlite.setup.{Test_sqlite_async, TestSuite_sqlite_array}
+import molecule.sql.sqlite.setup.{TestSuite_sqlite_array, Test_sqlite_async}
 import molecule.sql.sqlite.spi.Spi_sqlite_async
 
 object Test_FilterSeq_String_ extends FilterSeq_String_ with Test_sqlite_async
@@ -27,6 +28,8 @@ object Test_FilterSeq_URI_ extends FilterSeq_URI_ with Test_sqlite_async
 object Test_FilterSeq_ByteArray extends FilterSeq_ByteArray with TestSuite_sqlite_array with Spi_sqlite_async
 object Test_FilterSeq_Short_ extends FilterSeq_Short_ with Test_sqlite_async
 object Test_FilterSeq_Char_ extends FilterSeq_Char_ with Test_sqlite_async
+
+object Test_SeqSemantics extends SeqSemantics with Test_sqlite_async
 
 
 object Test_FilterRefSeq_Card1Ref extends FilterRefSeq_Card1Ref with Test_sqlite_async

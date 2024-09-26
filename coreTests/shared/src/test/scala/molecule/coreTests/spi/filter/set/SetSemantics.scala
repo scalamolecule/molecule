@@ -45,7 +45,7 @@ trait SetSemantics extends CoreTestSuite with Api_async { spi: Spi_async =>
         // Can't query for empty attribute
         _ <- Ns.i.intSet().query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Applying nothing to mandatory attribute is reserved for updates to retract."
+            err ==> "Applying nothing to mandatory attribute (Ns.intSet) is reserved for updates to retract."
           }
       } yield ()
     }

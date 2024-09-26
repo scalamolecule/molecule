@@ -131,7 +131,7 @@ case class PickleTpls(
           }
           resolvePicklers(tail, picklers, tplIndex)
 
-        case OptRef(refAttr, optRefElements) =>
+        case OptRef(_, optRefElements) =>
           prevRefs.clear()
           resolvePicklers(tail, picklers :+ pickleOptRef(tplIndex, optRefElements), tplIndex + 1)
 

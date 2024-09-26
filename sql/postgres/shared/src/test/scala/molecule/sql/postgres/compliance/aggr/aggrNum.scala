@@ -1,6 +1,6 @@
 package molecule.sql.postgres.compliance.aggr
 
-import molecule.coreTests.spi.aggr.number.{AggrNum_BigDecimal_, AggrNum_BigInt_, AggrNum_Byte_, AggrNum_Double_, AggrNum_Float_, AggrNum_Int, AggrNum_Long_, AggrNum_Short_}
+import molecule.coreTests.spi.aggr.number._
 import molecule.sql.postgres.setup.Test_postgres_async
 
 object Test_AggrOneNum_Int extends AggrNum_Int with Test_postgres_async

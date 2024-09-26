@@ -79,10 +79,3 @@ object AdhocJS_sqlite extends TestSuite_sqlite {
     //    }
   }
 }
-
-/*
-testOnly molecule.sql.sqlite.compliance.crud.delete.Delete_id
-testOnly molecule.sql.sqlite.compliance.crud.delete.Delete_filter
-testOnly molecule.sql.sqlite.compliance.crud.update.relation.one.One_Set_add
-testOnly molecule.sql.sqlite.compliance.pagination.cursor.noUnique.DirectionsOptional
- */

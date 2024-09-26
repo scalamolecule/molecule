@@ -133,8 +133,7 @@ trait IOApi extends CoreTestSuite_io with Api_io { spi: Spi_io =>
         _ <- Ns.string("foo").save.transact
 
         // Intermediary callback results
-        //        _ = intermediaryCallbackResults.map(_.sorted) ==> List(
-        _ = intermediaryCallbackResults ==> List(
+        _ = intermediaryCallbackResults.map(_.sorted) ==> List(
           List(1, 2), // query result after 2 was saved
           List(1, 2, 3, 4), // query result after 3 and 4 were inserted
           List(1, 3, 4, 20), // query result after 2 was updated to 20

@@ -1,6 +1,6 @@
 package molecule.sql.postgres.compliance.aggr
 
-import molecule.coreTests.spi.aggr.ref.{AggrRef_count, AggrRef_distinct, AggrRef_min_max, AggrRef_min_max_n, AggrRef_sample, AggrRef_sample_n}
+import molecule.coreTests.spi.aggr.ref._
 import molecule.sql.postgres.setup.Test_postgres_async
 
 object Test_AggrOneRef_count extends AggrRef_count with Test_postgres_async

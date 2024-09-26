@@ -66,6 +66,7 @@ object Rpc_datomic
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
+      // Validation already done on JS side
       txReport <- save_transact(Save(elements, doValidate = false))(conn, global)
     } yield txReport
   }
@@ -85,6 +86,7 @@ object Rpc_datomic
           } else tpls).asInstanceOf[Seq[Product]]
         case Left(err)   => throw err // catch in outer either wrapper
       }
+      // Validation already done on JS side
       txReport <- insert_transact(Insert(elements, tpls, doValidate = false))(conn, global)
     } yield txReport
   }

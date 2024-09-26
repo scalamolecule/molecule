@@ -62,7 +62,8 @@ trait Rpc_SQL
     elements: List[Element]
   ): Future[Either[MoleculeError, TxReport]] = either {
     getConn(proxy).map(conn =>
-      save_transact(Save(elements))(conn)
+      // Validation already done on JS side
+      save_transact(Save(elements, doValidate = false))(conn)
     )
   }
 
@@ -85,7 +86,8 @@ trait Rpc_SQL
 
         case Left(err) => throw err // catch in `either`
       }
-      insert_transact(Insert(elements, tpls))(conn)
+      // Validation already done on JS side
+      insert_transact(Insert(elements, tpls, doValidate = false))(conn)
     }
   }
 

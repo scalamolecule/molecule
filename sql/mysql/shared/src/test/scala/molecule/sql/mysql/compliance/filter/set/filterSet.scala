@@ -1,5 +1,6 @@
 package molecule.sql.mysql.compliance.filter.set
 
+import molecule.coreTests.spi.filter.set.SetSemantics
 import molecule.coreTests.spi.filter.set.ref._
 import molecule.coreTests.spi.filter.set.types._
 import molecule.sql.mysql.setup.Test_mysql_async
@@ -28,6 +29,8 @@ object Test_FilterSet_Short_ extends FilterSet_Short_ with Test_mysql_async
 object Test_FilterSet_Char_ extends FilterSet_Char_ with Test_mysql_async
 
 object Test_FilterSet_ref_ extends FilterSet_ref with Test_mysql_async
+
+object Test_FilterSetSemantics extends SetSemantics with Test_mysql_async
 
 object Test_FilterRefSet_Card1Ref extends FilterRefSet_Card1Ref with Test_mysql_async
 object Test_FilterRefSet_Card1RefOwned extends FilterRefSet_Card1RefOwned with Test_mysql_async
