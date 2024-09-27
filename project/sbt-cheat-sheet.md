@@ -33,9 +33,46 @@ To have molecule jars generated, add `-Dmolecule=true`
 
     sbt
     moleculeJS/fastLinkJS
+    Test/moleculeJS/fastLinkJS
 
 
-## Publish
+## Test
+
+Specific Scala version can be set initially
+
+    sbt ++2.12.15
+
+## Test JVM
+
+    sbt
+    project sqlSQliteJVM
+    test
+    // or
+    testOnly moleculemolecule.sql.sqlite.AdhocJS_sqlite
+    testOnly moleculemolecule.sql.sqlite.*
+    testOnly moleculemolecule.sql.*
+
+## Test JS
+
+Process 1:
+
+    sbt
+    sqlSQliteJVM/run
+
+Process 2:
+
+    sbt
+    project sqlSQliteJS
+    test
+    // or
+    testOnly moleculemolecule.sql.sqlite.AdhocJS_sqlite
+    testOnly moleculemolecule.sql.sqlite.*
+    testOnly moleculemolecule.sql.*
+
+Compilation on JS side can take some time.
+
+
+## Publish with sbt-molecule update too
 
 1) Set molecule build version to new version
 2) `sbt ++2.12.20 "project baseJVM" publishLocal` (using sbt-molecule snapshot)
@@ -47,7 +84,14 @@ To have molecule jars generated, add `-Dmolecule=true`
 8) molecule: `sbt +publishSigned -Ddocs=true`
 
 
-Publish versions separately
+## Publish without sbt-molecule update
+
+1) Set molecule build version to new version
+2) molecule: `sbt +publishLocal`
+3) molecule: `sbt +publishSigned -Ddocs=true`
+
+
+### Publish versions separately
 
     sbt ++2.12.20 publishLocal
     sbt ++2.12.20 publishSigned -Ddocs=true

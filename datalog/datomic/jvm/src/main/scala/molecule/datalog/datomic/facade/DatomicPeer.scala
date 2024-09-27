@@ -1,12 +1,14 @@
 package molecule.datalog.datomic.facade
 
 import java.util.UUID.randomUUID
+import cats.effect.IO
 import datomic.Peer
 import molecule.base.api.Schema
 import molecule.base.util.BaseHelpers
 import molecule.core.marshalling.DatomicProxy
+import zio.{ZIO, ZLayer}
 import scala.concurrent.{ExecutionContext, Future, blocking}
-
+import molecule.core.util.Executor._
 
 /** Facade to Datomic Peer with selected methods.
  *
@@ -34,7 +36,7 @@ trait DatomicPeer extends BaseHelpers {
     protocol: String,
     dbIdentifier: String
   ): DatomicConn_JVM = blocking {
-    val id = if (dbIdentifier == "") randomUUID().toString else dbIdentifier
+    val id  = if (dbIdentifier == "") randomUUID().toString else dbIdentifier
     val uri = s"datomic:$protocol://$id"
     DatomicConn_JVM(proxy, Peer.connect(uri))
   }
@@ -94,6 +96,88 @@ trait DatomicPeer extends BaseHelpers {
     dbIdentifier: String = ""
   )(implicit ec: ExecutionContext): Future[DatomicConn_JVM] = blocking {
     recreateDb(
+      DatomicProxy(
+        protocol,
+        dbIdentifier,
+        schema.datomicPartitions,
+        schema.datomicSchema,
+        schema.datomicAliases,
+        schema.metaSchema,
+        schema.nsMap,
+        schema.attrMap,
+        schema.uniqueAttrs,
+      ),
+      protocol,
+      dbIdentifier
+    )
+  }
+
+  def recreateDbIO(
+    proxy: DatomicProxy,
+    protocol: String,
+    dbIdentifier: String
+  ): IO[DatomicConn_JVM] = {
+    val id = if (dbIdentifier == "")
+      randomUUID().toString
+    else
+      dbIdentifier
+    deleteDatabase(protocol, id)
+    createDatabase(protocol, id)
+    val conn = connect(proxy, protocol, id)
+    // Ensure each transaction finishes before the next
+    for {
+      // partitions
+      _ <- if (proxy.datomicPartitions.nonEmpty)
+        conn.transactEdnIO(proxy.datomicPartitions) else IO.unit
+      // attributes
+      _ <- if (proxy.datomicSchema.nonEmpty)
+        conn.transactEdnIO(proxy.datomicSchema) else IO.unit
+      // aliases
+      _ <- if (proxy.datomicAliases.nonEmpty)
+        conn.transactEdnIO(proxy.datomicAliases) else IO.unit
+    } yield conn
+  }
+
+  def recreateDbIO(
+    schema: Schema,
+    protocol: String = "mem",
+    dbIdentifier: String = ""
+  ): IO[DatomicConn_JVM] = {
+    recreateDbIO(
+      DatomicProxy(
+        protocol,
+        dbIdentifier,
+        schema.datomicPartitions,
+        schema.datomicSchema,
+        schema.datomicAliases,
+        schema.metaSchema,
+        schema.nsMap,
+        schema.attrMap,
+        schema.uniqueAttrs,
+      ),
+      protocol,
+      dbIdentifier
+    )
+  }
+
+  def recreateDbZLayer[T](
+    proxy: DatomicProxy,
+    protocol: String,
+    dbIdentifier: String
+  ): ZLayer[T, Throwable, DatomicConn_JVM] = {
+    ZLayer.scoped(
+      ZIO.fromFuture(
+        _ => recreateDb(proxy, protocol, dbIdentifier)
+      )
+    )
+  }
+
+  def recreateDbZLayer[T](
+    schema: Schema,
+    protocol: String = "mem",
+    dbIdentifier: String = ""
+  ): ZLayer[T, Throwable, DatomicConn_JVM] = {
+    recreateDbZLayer(
       DatomicProxy(
         protocol,
         dbIdentifier,

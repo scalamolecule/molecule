@@ -3,12 +3,14 @@ package molecule.datalog.datomic.facade
 import java.io.StringReader
 import java.util.{List => jList}
 import java.{lang => jl, util => ju}
+import cats.effect.IO
 import datomic.Util.readAll
 import datomic.{Connection => DatomicConnection, Datom => _, _}
 import molecule.base.error._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.DatomicProxy
 import molecule.core.spi.{Conn, TxReport}
+import molecule.core.util.Executor
 import molecule.datalog.datomic.transaction.DatomicDataType_JVM
 import molecule.datalog.datomic.util.MakeTxReport
 import scala.concurrent.duration.DurationInt
@@ -35,13 +37,17 @@ case class DatomicConn_JVM(
   final def transactEdn(edn: String)(implicit ec: ExecutionContext): Future[TxReport] = {
     transact_async(readAll(new StringReader(edn)).get(0).asInstanceOf[Data])
   }
+  final def transactEdnIO(edn: String): IO[TxReport] = {
+    IO.fromFuture(
+      IO(
+        transact_async(
+          readAll(new StringReader(edn)).get(0).asInstanceOf[Data]
+        )(Executor.global)
+      )
+    )
+  }
 
   override def transact_async(javaStmts: Data)(implicit ec: ExecutionContext): Future[TxReport] = {
-    //    println("##########")
-    //    val it = javaStmts.iterator()
-    //    while (it.hasNext) {
-    //      println(it.next)
-    //    }
     bridgeDatomicFuture(peerConn.transactAsync(javaStmts))
       .map(MakeTxReport(_))
       .recover {

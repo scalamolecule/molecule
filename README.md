@@ -50,9 +50,9 @@ Data can also be fetched asynchronously in a `Future` or `ZIO`.
 ## Main features of Molecule
 
 - Support for [PostgreSQL](https://www.postgresql.org), [SQlite](https://sqlite.org), [MySQL](https://www.mysql.com), [MariaDB](https://mariadb.com), [H2](https://h2database.com/html/main.html) and [Datomic](http://www.datomic.com) databases. More can easily be added
-- Molecules for any database behave identically. Each db pass the same SPI compliance test suite (~1500 tests).
+- Molecules for any database behave identically. Each db pass the same SPI compliance test suite (+1500 tests).
 - Targets Scala 3.3, 2.13 and 2.12 on JVM and JS platforms
-- Synchronous, Asynchronous (Future) and ZIO APIs
+- Synchronous, Asynchronous (Future), ZIO and cats.effect.IO APIs
 - All Scala primitive types and collection types available as molecule attributes (!)
 - Typed methods to compose even complex molecules:
     - Expression/aggregation functions
@@ -133,6 +133,15 @@ val persons: ZIO[Conn, MoleculeError, List[(String, Int, String)]] =
   Person.name.age.Address.street.query.get
 ```
 
+IO API
+
+```scala
+import molecule.sql.postgres.io._
+
+val persons: cats.effect.IO[List[(String, Int, String)]] =
+  Person.name.age.Address.street.query.get
+```
+
 ### Transact data
 
 Save one entity
@@ -181,7 +190,7 @@ Add the following to your build files:
 `project/build.properties`:
 
 ```
-sbt.version = 1.10.1
+sbt.version = 1.10.2
 ```
 
 `project/plugins.sbt`:
@@ -198,12 +207,12 @@ lazy val yourProject = project.in(file("app"))
   .settings(
     libraryDependencies ++= Seq(
       // One or more of:
-      "org.scalamolecule" %%% "molecule-sql-postgres" % "0.10.1",
-      "org.scalamolecule" %%% "molecule-sql-sqlite" % "0.10.1",
-      "org.scalamolecule" %%% "molecule-sql-mysql" % "0.10.1",
-      "org.scalamolecule" %%% "molecule-sql-mariadb" % "0.10.1",
-      "org.scalamolecule" %%% "molecule-sql-h2" % "0.10.1",
-      "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.10.1",
+      "org.scalamolecule" %%% "molecule-sql-postgres" % "0.11.0",
+      "org.scalamolecule" %%% "molecule-sql-sqlite" % "0.11.0",
+      "org.scalamolecule" %%% "molecule-sql-mysql" % "0.11.0",
+      "org.scalamolecule" %%% "molecule-sql-mariadb" % "0.11.0",
+      "org.scalamolecule" %%% "molecule-sql-h2" % "0.11.0",
+      "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.11.0",
     ),
     moleculeSchemas := Seq("app/dataModel") // paths to directories with Data Model definition files
   )
