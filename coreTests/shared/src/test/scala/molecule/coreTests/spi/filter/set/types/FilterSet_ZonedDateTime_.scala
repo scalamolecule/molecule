@@ -11,15 +11,16 @@ import utest._
 
 trait FilterSet_ZonedDateTime_ extends CoreTestSuite with Api_async { spi: Spi_async =>
 
+  val a = (1, Set(zonedDateTime1, zonedDateTime2))
+  val b = (2, Set(zonedDateTime2, zonedDateTime3, zonedDateTime4))
+
   override lazy val tests = Tests {
 
     "Mandatory" - {
 
       "has" - types { implicit conn =>
-        val a = (1, Set(zonedDateTime1, zonedDateTime2))
-        val b = (2, Set(zonedDateTime2, zonedDateTime3, zonedDateTime4))
         for {
-          _ <- Ns.i.zonedDateTimeSet.insert(List(a, b)).transact
+          _ <- Ns.i.zonedDateTimeSet.insert(a, b).transact
 
           // Sets with one or more values matching
 
@@ -34,7 +35,6 @@ trait FilterSet_ZonedDateTime_ extends CoreTestSuite with Api_async { spi: Spi_a
           _ <- Ns.i.a1.zonedDateTimeSet.has(Seq(zonedDateTime2)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.zonedDateTimeSet.has(Seq(zonedDateTime3)).query.get.map(_ ==> List(b))
 
-
           // OR semantics when multiple values
 
           // "Has this OR that"
@@ -48,6 +48,7 @@ trait FilterSet_ZonedDateTime_ extends CoreTestSuite with Api_async { spi: Spi_a
           _ <- Ns.i.a1.zonedDateTimeSet.has(Seq(zonedDateTime2, zonedDateTime3)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.zonedDateTimeSet.has(Seq(zonedDateTime1, zonedDateTime2, zonedDateTime3)).query.get.map(_ ==> List(a, b))
 
+
           // Empty Seq/Sets match nothing
           _ <- Ns.i.a1.zonedDateTimeSet.has(Seq.empty[ZonedDateTime]).query.get.map(_ ==> List())
         } yield ()
@@ -55,10 +56,8 @@ trait FilterSet_ZonedDateTime_ extends CoreTestSuite with Api_async { spi: Spi_a
 
 
       "hasNo" - types { implicit conn =>
-        val a = (1, Set(zonedDateTime1, zonedDateTime2))
-        val b = (2, Set(zonedDateTime2, zonedDateTime3, zonedDateTime4))
         for {
-          _ <- Ns.i.zonedDateTimeSet.insert(List(a, b)).transact
+          _ <- Ns.i.zonedDateTimeSet.insert(a, b).transact
 
           // Sets without one or more values matching
 
@@ -77,7 +76,6 @@ trait FilterSet_ZonedDateTime_ extends CoreTestSuite with Api_async { spi: Spi_a
           _ <- Ns.i.a1.zonedDateTimeSet.hasNo(Seq(zonedDateTime4)).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.zonedDateTimeSet.hasNo(Seq(zonedDateTime5)).query.get.map(_ ==> List(a, b))
 
-
           // OR semantics when multiple values
 
           // "Has neither this OR that"
@@ -91,7 +89,6 @@ trait FilterSet_ZonedDateTime_ extends CoreTestSuite with Api_async { spi: Spi_a
           _ <- Ns.i.a1.zonedDateTimeSet.hasNo(Seq(zonedDateTime1, zonedDateTime4)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.zonedDateTimeSet.hasNo(Seq(zonedDateTime1, zonedDateTime5)).query.get.map(_ ==> List(b))
 
-
           // Negating empty Seqs/Sets has no effect
           _ <- Ns.i.a1.zonedDateTimeSet.hasNo(Seq.empty[ZonedDateTime]).query.get.map(_ ==> List(a, b))
         } yield ()
@@ -103,11 +100,7 @@ trait FilterSet_ZonedDateTime_ extends CoreTestSuite with Api_async { spi: Spi_a
 
       "has" - types { implicit conn =>
         for {
-          _ <- Ns.i(0).save.transact
-          _ <- Ns.i.zonedDateTimeSet.insert(List(
-            (1, Set(zonedDateTime1, zonedDateTime2)),
-            (2, Set(zonedDateTime2, zonedDateTime3, zonedDateTime4))
-          )).transact
+          _ <- Ns.i.zonedDateTimeSet.insert(a, b).transact
 
           // Sets with one or more values matching
 
@@ -122,7 +115,6 @@ trait FilterSet_ZonedDateTime_ extends CoreTestSuite with Api_async { spi: Spi_a
           _ <- Ns.i.a1.zonedDateTimeSet_.has(Seq(zonedDateTime2)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.zonedDateTimeSet_.has(Seq(zonedDateTime3)).query.get.map(_ ==> List(2))
 
-
           // OR semantics when multiple values
 
           // "Has this OR that"
@@ -132,11 +124,11 @@ trait FilterSet_ZonedDateTime_ extends CoreTestSuite with Api_async { spi: Spi_a
           _ <- Ns.i.a1.zonedDateTimeSet_.has(zonedDateTime2, zonedDateTime3).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.zonedDateTimeSet_.has(zonedDateTime3, zonedDateTime4).query.get.map(_ ==> List(2))
           // Same as
+          _ <- Ns.i.a1.zonedDateTimeSet_.has(Seq(zonedDateTime0, zonedDateTime1)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.zonedDateTimeSet_.has(Seq(zonedDateTime1, zonedDateTime2)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.zonedDateTimeSet_.has(Seq(zonedDateTime1, zonedDateTime3)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.zonedDateTimeSet_.has(Seq(zonedDateTime2, zonedDateTime3)).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.zonedDateTimeSet_.has(Seq(zonedDateTime1, zonedDateTime2, zonedDateTime3)).query.get.map(_ ==> List(1, 2))
-
+          _ <- Ns.i.a1.zonedDateTimeSet_.has(Seq(zonedDateTime3, zonedDateTime4)).query.get.map(_ ==> List(2))
 
           // Empty Seq/Sets match nothing
           _ <- Ns.i.a1.zonedDateTimeSet_.has(Seq.empty[ZonedDateTime]).query.get.map(_ ==> List())
@@ -146,11 +138,7 @@ trait FilterSet_ZonedDateTime_ extends CoreTestSuite with Api_async { spi: Spi_a
 
       "hasNo" - types { implicit conn =>
         for {
-          _ <- Ns.i(0).save.transact
-          _ <- Ns.i.zonedDateTimeSet.insert(List(
-            (1, Set(zonedDateTime1, zonedDateTime2)),
-            (2, Set(zonedDateTime2, zonedDateTime3, zonedDateTime4))
-          )).transact
+          _ <- Ns.i.zonedDateTimeSet.insert(a, b).transact
 
           // Sets without one or more values matching
 
@@ -169,7 +157,6 @@ trait FilterSet_ZonedDateTime_ extends CoreTestSuite with Api_async { spi: Spi_a
           _ <- Ns.i.a1.zonedDateTimeSet_.hasNo(Seq(zonedDateTime4)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.zonedDateTimeSet_.hasNo(Seq(zonedDateTime5)).query.get.map(_ ==> List(1, 2))
 
-
           // OR semantics when multiple values
 
           // "Has neither this OR that"
@@ -182,7 +169,6 @@ trait FilterSet_ZonedDateTime_ extends CoreTestSuite with Api_async { spi: Spi_a
           _ <- Ns.i.a1.zonedDateTimeSet_.hasNo(Seq(zonedDateTime1, zonedDateTime3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.zonedDateTimeSet_.hasNo(Seq(zonedDateTime1, zonedDateTime4)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.zonedDateTimeSet_.hasNo(Seq(zonedDateTime1, zonedDateTime5)).query.get.map(_ ==> List(2))
-
 
           // Negating empty Seqs/Sets has no effect
           _ <- Ns.i.a1.zonedDateTimeSet_.hasNo(Seq.empty[ZonedDateTime]).query.get.map(_ ==> List(1, 2))

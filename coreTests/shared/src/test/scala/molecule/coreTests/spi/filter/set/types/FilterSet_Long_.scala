@@ -10,15 +10,16 @@ import utest._
 
 trait FilterSet_Long_ extends CoreTestSuite with Api_async { spi: Spi_async =>
 
+  val a = (1, Set(long1, long2))
+  val b = (2, Set(long2, long3, long4))
+
   override lazy val tests = Tests {
 
     "Mandatory" - {
 
       "has" - types { implicit conn =>
-        val a = (1, Set(long1, long2))
-        val b = (2, Set(long2, long3, long4))
         for {
-          _ <- Ns.i.longSet.insert(List(a, b)).transact
+          _ <- Ns.i.longSet.insert(a, b).transact
 
           // Sets with one or more values matching
 
@@ -33,7 +34,6 @@ trait FilterSet_Long_ extends CoreTestSuite with Api_async { spi: Spi_async =>
           _ <- Ns.i.a1.longSet.has(Seq(long2)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.longSet.has(Seq(long3)).query.get.map(_ ==> List(b))
 
-
           // OR semantics when multiple values
 
           // "Has this OR that"
@@ -47,6 +47,7 @@ trait FilterSet_Long_ extends CoreTestSuite with Api_async { spi: Spi_async =>
           _ <- Ns.i.a1.longSet.has(Seq(long2, long3)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.longSet.has(Seq(long1, long2, long3)).query.get.map(_ ==> List(a, b))
 
+
           // Empty Seq/Sets match nothing
           _ <- Ns.i.a1.longSet.has(Seq.empty[Long]).query.get.map(_ ==> List())
         } yield ()
@@ -54,10 +55,8 @@ trait FilterSet_Long_ extends CoreTestSuite with Api_async { spi: Spi_async =>
 
 
       "hasNo" - types { implicit conn =>
-        val a = (1, Set(long1, long2))
-        val b = (2, Set(long2, long3, long4))
         for {
-          _ <- Ns.i.longSet.insert(List(a, b)).transact
+          _ <- Ns.i.longSet.insert(a, b).transact
 
           // Sets without one or more values matching
 
@@ -76,7 +75,6 @@ trait FilterSet_Long_ extends CoreTestSuite with Api_async { spi: Spi_async =>
           _ <- Ns.i.a1.longSet.hasNo(Seq(long4)).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.longSet.hasNo(Seq(long5)).query.get.map(_ ==> List(a, b))
 
-
           // OR semantics when multiple values
 
           // "Has neither this OR that"
@@ -90,7 +88,6 @@ trait FilterSet_Long_ extends CoreTestSuite with Api_async { spi: Spi_async =>
           _ <- Ns.i.a1.longSet.hasNo(Seq(long1, long4)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.longSet.hasNo(Seq(long1, long5)).query.get.map(_ ==> List(b))
 
-
           // Negating empty Seqs/Sets has no effect
           _ <- Ns.i.a1.longSet.hasNo(Seq.empty[Long]).query.get.map(_ ==> List(a, b))
         } yield ()
@@ -102,11 +99,7 @@ trait FilterSet_Long_ extends CoreTestSuite with Api_async { spi: Spi_async =>
 
       "has" - types { implicit conn =>
         for {
-          _ <- Ns.i(0).save.transact
-          _ <- Ns.i.longSet.insert(List(
-            (1, Set(long1, long2)),
-            (2, Set(long2, long3, long4))
-          )).transact
+          _ <- Ns.i.longSet.insert(a, b).transact
 
           // Sets with one or more values matching
 
@@ -121,7 +114,6 @@ trait FilterSet_Long_ extends CoreTestSuite with Api_async { spi: Spi_async =>
           _ <- Ns.i.a1.longSet_.has(Seq(long2)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.longSet_.has(Seq(long3)).query.get.map(_ ==> List(2))
 
-
           // OR semantics when multiple values
 
           // "Has this OR that"
@@ -131,11 +123,11 @@ trait FilterSet_Long_ extends CoreTestSuite with Api_async { spi: Spi_async =>
           _ <- Ns.i.a1.longSet_.has(long2, long3).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.longSet_.has(long3, long4).query.get.map(_ ==> List(2))
           // Same as
+          _ <- Ns.i.a1.longSet_.has(Seq(long0, long1)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.longSet_.has(Seq(long1, long2)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.longSet_.has(Seq(long1, long3)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.longSet_.has(Seq(long2, long3)).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.longSet_.has(Seq(long1, long2, long3)).query.get.map(_ ==> List(1, 2))
-
+          _ <- Ns.i.a1.longSet_.has(Seq(long3, long4)).query.get.map(_ ==> List(2))
 
           // Empty Seq/Sets match nothing
           _ <- Ns.i.a1.longSet_.has(Seq.empty[Long]).query.get.map(_ ==> List())
@@ -145,11 +137,7 @@ trait FilterSet_Long_ extends CoreTestSuite with Api_async { spi: Spi_async =>
 
       "hasNo" - types { implicit conn =>
         for {
-          _ <- Ns.i(0).save.transact
-          _ <- Ns.i.longSet.insert(List(
-            (1, Set(long1, long2)),
-            (2, Set(long2, long3, long4))
-          )).transact
+          _ <- Ns.i.longSet.insert(a, b).transact
 
           // Sets without one or more values matching
 
@@ -168,7 +156,6 @@ trait FilterSet_Long_ extends CoreTestSuite with Api_async { spi: Spi_async =>
           _ <- Ns.i.a1.longSet_.hasNo(Seq(long4)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.longSet_.hasNo(Seq(long5)).query.get.map(_ ==> List(1, 2))
 
-
           // OR semantics when multiple values
 
           // "Has neither this OR that"
@@ -181,7 +168,6 @@ trait FilterSet_Long_ extends CoreTestSuite with Api_async { spi: Spi_async =>
           _ <- Ns.i.a1.longSet_.hasNo(Seq(long1, long3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.longSet_.hasNo(Seq(long1, long4)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.longSet_.hasNo(Seq(long1, long5)).query.get.map(_ ==> List(2))
-
 
           // Negating empty Seqs/Sets has no effect
           _ <- Ns.i.a1.longSet_.hasNo(Seq.empty[Long]).query.get.map(_ ==> List(1, 2))

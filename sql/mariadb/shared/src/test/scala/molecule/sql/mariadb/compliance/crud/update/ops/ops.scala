@@ -7,4 +7,3 @@ object Test_OpsOne extends OpsOne with Test_mariadb_async
 object Test_OpsSet extends OpsSet with Test_mariadb_async
 object Test_OpsSeq extends OpsSeq with Test_mariadb_async
 object Test_OpsMap extends OpsMap with Test_mariadb_async
-object Test_OpsByteArray extends OpsByteArray with Test_mariadb_async

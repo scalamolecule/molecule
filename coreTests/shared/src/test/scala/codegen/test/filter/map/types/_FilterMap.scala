@@ -7,6 +7,7 @@ import molecule.base.util.{BaseHelpers, CodeGenBase}
 object _FilterMap extends CodeGenBase with BaseHelpers {
 
   //  def generate(): Unit = (("Boolean", "Boolean", "boolean", "") +: tpeVarImp)
+  //  def generate(): Unit = tpeVarImp.take(1) // String
   def generate(): Unit = tpeVarImp
     .filterNot(_._1 == "ref")
     .foreach { case (name, tpe, v, imp) =>

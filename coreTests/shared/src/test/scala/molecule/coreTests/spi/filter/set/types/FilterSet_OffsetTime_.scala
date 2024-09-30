@@ -11,15 +11,16 @@ import utest._
 
 trait FilterSet_OffsetTime_ extends CoreTestSuite with Api_async { spi: Spi_async =>
 
+  val a = (1, Set(offsetTime1, offsetTime2))
+  val b = (2, Set(offsetTime2, offsetTime3, offsetTime4))
+
   override lazy val tests = Tests {
 
     "Mandatory" - {
 
       "has" - types { implicit conn =>
-        val a = (1, Set(offsetTime1, offsetTime2))
-        val b = (2, Set(offsetTime2, offsetTime3, offsetTime4))
         for {
-          _ <- Ns.i.offsetTimeSet.insert(List(a, b)).transact
+          _ <- Ns.i.offsetTimeSet.insert(a, b).transact
 
           // Sets with one or more values matching
 
@@ -34,7 +35,6 @@ trait FilterSet_OffsetTime_ extends CoreTestSuite with Api_async { spi: Spi_asyn
           _ <- Ns.i.a1.offsetTimeSet.has(Seq(offsetTime2)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.offsetTimeSet.has(Seq(offsetTime3)).query.get.map(_ ==> List(b))
 
-
           // OR semantics when multiple values
 
           // "Has this OR that"
@@ -48,6 +48,7 @@ trait FilterSet_OffsetTime_ extends CoreTestSuite with Api_async { spi: Spi_asyn
           _ <- Ns.i.a1.offsetTimeSet.has(Seq(offsetTime2, offsetTime3)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.offsetTimeSet.has(Seq(offsetTime1, offsetTime2, offsetTime3)).query.get.map(_ ==> List(a, b))
 
+
           // Empty Seq/Sets match nothing
           _ <- Ns.i.a1.offsetTimeSet.has(Seq.empty[OffsetTime]).query.get.map(_ ==> List())
         } yield ()
@@ -55,10 +56,8 @@ trait FilterSet_OffsetTime_ extends CoreTestSuite with Api_async { spi: Spi_asyn
 
 
       "hasNo" - types { implicit conn =>
-        val a = (1, Set(offsetTime1, offsetTime2))
-        val b = (2, Set(offsetTime2, offsetTime3, offsetTime4))
         for {
-          _ <- Ns.i.offsetTimeSet.insert(List(a, b)).transact
+          _ <- Ns.i.offsetTimeSet.insert(a, b).transact
 
           // Sets without one or more values matching
 
@@ -77,7 +76,6 @@ trait FilterSet_OffsetTime_ extends CoreTestSuite with Api_async { spi: Spi_asyn
           _ <- Ns.i.a1.offsetTimeSet.hasNo(Seq(offsetTime4)).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.offsetTimeSet.hasNo(Seq(offsetTime5)).query.get.map(_ ==> List(a, b))
 
-
           // OR semantics when multiple values
 
           // "Has neither this OR that"
@@ -91,7 +89,6 @@ trait FilterSet_OffsetTime_ extends CoreTestSuite with Api_async { spi: Spi_asyn
           _ <- Ns.i.a1.offsetTimeSet.hasNo(Seq(offsetTime1, offsetTime4)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetTimeSet.hasNo(Seq(offsetTime1, offsetTime5)).query.get.map(_ ==> List(b))
 
-
           // Negating empty Seqs/Sets has no effect
           _ <- Ns.i.a1.offsetTimeSet.hasNo(Seq.empty[OffsetTime]).query.get.map(_ ==> List(a, b))
         } yield ()
@@ -103,11 +100,7 @@ trait FilterSet_OffsetTime_ extends CoreTestSuite with Api_async { spi: Spi_asyn
 
       "has" - types { implicit conn =>
         for {
-          _ <- Ns.i(0).save.transact
-          _ <- Ns.i.offsetTimeSet.insert(List(
-            (1, Set(offsetTime1, offsetTime2)),
-            (2, Set(offsetTime2, offsetTime3, offsetTime4))
-          )).transact
+          _ <- Ns.i.offsetTimeSet.insert(a, b).transact
 
           // Sets with one or more values matching
 
@@ -122,7 +115,6 @@ trait FilterSet_OffsetTime_ extends CoreTestSuite with Api_async { spi: Spi_asyn
           _ <- Ns.i.a1.offsetTimeSet_.has(Seq(offsetTime2)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.offsetTimeSet_.has(Seq(offsetTime3)).query.get.map(_ ==> List(2))
 
-
           // OR semantics when multiple values
 
           // "Has this OR that"
@@ -132,11 +124,11 @@ trait FilterSet_OffsetTime_ extends CoreTestSuite with Api_async { spi: Spi_asyn
           _ <- Ns.i.a1.offsetTimeSet_.has(offsetTime2, offsetTime3).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.offsetTimeSet_.has(offsetTime3, offsetTime4).query.get.map(_ ==> List(2))
           // Same as
+          _ <- Ns.i.a1.offsetTimeSet_.has(Seq(offsetTime0, offsetTime1)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.offsetTimeSet_.has(Seq(offsetTime1, offsetTime2)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.offsetTimeSet_.has(Seq(offsetTime1, offsetTime3)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.offsetTimeSet_.has(Seq(offsetTime2, offsetTime3)).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.offsetTimeSet_.has(Seq(offsetTime1, offsetTime2, offsetTime3)).query.get.map(_ ==> List(1, 2))
-
+          _ <- Ns.i.a1.offsetTimeSet_.has(Seq(offsetTime3, offsetTime4)).query.get.map(_ ==> List(2))
 
           // Empty Seq/Sets match nothing
           _ <- Ns.i.a1.offsetTimeSet_.has(Seq.empty[OffsetTime]).query.get.map(_ ==> List())
@@ -146,11 +138,7 @@ trait FilterSet_OffsetTime_ extends CoreTestSuite with Api_async { spi: Spi_asyn
 
       "hasNo" - types { implicit conn =>
         for {
-          _ <- Ns.i(0).save.transact
-          _ <- Ns.i.offsetTimeSet.insert(List(
-            (1, Set(offsetTime1, offsetTime2)),
-            (2, Set(offsetTime2, offsetTime3, offsetTime4))
-          )).transact
+          _ <- Ns.i.offsetTimeSet.insert(a, b).transact
 
           // Sets without one or more values matching
 
@@ -169,7 +157,6 @@ trait FilterSet_OffsetTime_ extends CoreTestSuite with Api_async { spi: Spi_asyn
           _ <- Ns.i.a1.offsetTimeSet_.hasNo(Seq(offsetTime4)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.offsetTimeSet_.hasNo(Seq(offsetTime5)).query.get.map(_ ==> List(1, 2))
 
-
           // OR semantics when multiple values
 
           // "Has neither this OR that"
@@ -182,7 +169,6 @@ trait FilterSet_OffsetTime_ extends CoreTestSuite with Api_async { spi: Spi_asyn
           _ <- Ns.i.a1.offsetTimeSet_.hasNo(Seq(offsetTime1, offsetTime3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetTimeSet_.hasNo(Seq(offsetTime1, offsetTime4)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetTimeSet_.hasNo(Seq(offsetTime1, offsetTime5)).query.get.map(_ ==> List(2))
-
 
           // Negating empty Seqs/Sets has no effect
           _ <- Ns.i.a1.offsetTimeSet_.hasNo(Seq.empty[OffsetTime]).query.get.map(_ ==> List(1, 2))

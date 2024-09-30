@@ -3,7 +3,6 @@ package molecule.coreTests.spi.crud.save
 import java.net.URI
 import java.time._
 import java.util.{Date, UUID}
-import molecule.base.error._
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
 import molecule.core.util.Executor._
@@ -11,6 +10,7 @@ import molecule.coreTests.dataModels.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuiteBase
 import molecule.coreTests.util.Array2List
 import utest._
+import scala.collection.immutable._
 
 trait SaveCardSeq extends CoreTestSuiteBase with Array2List with Api_async { spi: Spi_async =>
 

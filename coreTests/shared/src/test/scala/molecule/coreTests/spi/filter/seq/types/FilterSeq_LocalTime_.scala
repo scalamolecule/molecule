@@ -11,15 +11,16 @@ import utest._
 
 trait FilterSeq_LocalTime_ extends CoreTestSuite with Api_async { spi: Spi_async =>
 
+  val a = (1, List(localTime1, localTime2))
+  val b = (2, List(localTime2, localTime3, localTime3))
+
   override lazy val tests = Tests {
 
     "Mandatory" - {
 
       "has" - types { implicit conn =>
-        val a = (1, List(localTime1, localTime2))
-        val b = (2, List(localTime2, localTime3, localTime3))
         for {
-          _ <- Ns.i.localTimeSeq.insert(List(a, b)).transact
+          _ <- Ns.i.localTimeSeq.insert(a, b).transact
 
           // Seqs with one or more values matching
 
@@ -34,20 +35,20 @@ trait FilterSeq_LocalTime_ extends CoreTestSuite with Api_async { spi: Spi_async
           _ <- Ns.i.a1.localTimeSeq.has(List(localTime2)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.localTimeSeq.has(List(localTime3)).query.get.map(_ ==> List(b))
 
-
           // OR semantics when multiple values
 
           // "Has this OR that"
+          _ <- Ns.i.a1.localTimeSeq.has(localTime0, localTime1).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.localTimeSeq.has(localTime1, localTime2).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.localTimeSeq.has(localTime1, localTime3).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.localTimeSeq.has(localTime2, localTime3).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.localTimeSeq.has(localTime1, localTime2, localTime3).query.get.map(_ ==> List(a, b))
           // Same as
+          _ <- Ns.i.a1.localTimeSeq.has(List(localTime0, localTime1)).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.localTimeSeq.has(List(localTime1, localTime2)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.localTimeSeq.has(List(localTime1, localTime3)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.localTimeSeq.has(List(localTime2, localTime3)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.localTimeSeq.has(List(localTime1, localTime2, localTime3)).query.get.map(_ ==> List(a, b))
-
 
           // Empty Seq/Seqs match nothing
           _ <- Ns.i.a1.localTimeSeq.has(List.empty[LocalTime]).query.get.map(_ ==> List())
@@ -56,10 +57,8 @@ trait FilterSeq_LocalTime_ extends CoreTestSuite with Api_async { spi: Spi_async
 
 
       "hasNo" - types { implicit conn =>
-        val a = (1, List(localTime1, localTime2))
-        val b = (2, List(localTime2, localTime3, localTime3))
         for {
-          _ <- Ns.i.localTimeSeq.insert(List(a, b)).transact
+          _ <- Ns.i.localTimeSeq.insert(a, b).transact
 
           // Seqs without one or more values matching
 
@@ -78,7 +77,6 @@ trait FilterSeq_LocalTime_ extends CoreTestSuite with Api_async { spi: Spi_async
           _ <- Ns.i.a1.localTimeSeq.hasNo(List(localTime3)).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.localTimeSeq.hasNo(List(localTime5)).query.get.map(_ ==> List(a, b))
 
-
           // OR semantics when multiple values
 
           // "Has neither this OR that"
@@ -92,7 +90,6 @@ trait FilterSeq_LocalTime_ extends CoreTestSuite with Api_async { spi: Spi_async
           _ <- Ns.i.a1.localTimeSeq.hasNo(List(localTime1, localTime3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localTimeSeq.hasNo(List(localTime1, localTime5)).query.get.map(_ ==> List(b))
 
-
           // Negating empty Seqs has no effect
           _ <- Ns.i.a1.localTimeSeq.hasNo(List.empty[LocalTime]).query.get.map(_ ==> List(a, b))
         } yield ()
@@ -104,11 +101,7 @@ trait FilterSeq_LocalTime_ extends CoreTestSuite with Api_async { spi: Spi_async
 
       "has" - types { implicit conn =>
         for {
-          _ <- Ns.i(0).save.transact
-          _ <- Ns.i.localTimeSeq.insert(List(
-            (1, List(localTime1, localTime2)),
-            (2, List(localTime2, localTime3, localTime3))
-          )).transact
+          _ <- Ns.i.localTimeSeq.insert(a, b).transact
 
           // Seqs with one or more values matching
 
@@ -123,20 +116,20 @@ trait FilterSeq_LocalTime_ extends CoreTestSuite with Api_async { spi: Spi_async
           _ <- Ns.i.a1.localTimeSeq_.has(List(localTime2)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.localTimeSeq_.has(List(localTime3)).query.get.map(_ ==> List(2))
 
-
           // OR semantics when multiple values
 
           // "Has this OR that"
+          _ <- Ns.i.a1.localTimeSeq_.has(localTime0, localTime1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.localTimeSeq_.has(localTime1, localTime2).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.localTimeSeq_.has(localTime1, localTime3).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.localTimeSeq_.has(localTime2, localTime3).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.localTimeSeq_.has(localTime1, localTime2, localTime3).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.localTimeSeq_.has(localTime3, localTime4).query.get.map(_ ==> List(2))
           // Same as
+          _ <- Ns.i.a1.localTimeSeq_.has(List(localTime0, localTime1)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.localTimeSeq_.has(List(localTime1, localTime2)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.localTimeSeq_.has(List(localTime1, localTime3)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.localTimeSeq_.has(List(localTime2, localTime3)).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.localTimeSeq_.has(List(localTime1, localTime2, localTime3)).query.get.map(_ ==> List(1, 2))
-
+          _ <- Ns.i.a1.localTimeSeq_.has(List(localTime3, localTime4)).query.get.map(_ ==> List(2))
 
           // Empty Seq/Seqs match nothing
           _ <- Ns.i.a1.localTimeSeq_.has(List.empty[LocalTime]).query.get.map(_ ==> List())
@@ -146,11 +139,7 @@ trait FilterSeq_LocalTime_ extends CoreTestSuite with Api_async { spi: Spi_async
 
       "hasNo" - types { implicit conn =>
         for {
-          _ <- Ns.i(0).save.transact
-          _ <- Ns.i.localTimeSeq.insert(List(
-            (1, List(localTime1, localTime2)),
-            (2, List(localTime2, localTime3, localTime3))
-          )).transact
+          _ <- Ns.i.localTimeSeq.insert(a, b).transact
 
           // Seqs without one or more values matching
 
@@ -169,7 +158,6 @@ trait FilterSeq_LocalTime_ extends CoreTestSuite with Api_async { spi: Spi_async
           _ <- Ns.i.a1.localTimeSeq_.hasNo(List(localTime3)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.localTimeSeq_.hasNo(List(localTime5)).query.get.map(_ ==> List(1, 2))
 
-
           // OR semantics when multiple values
 
           // "Has neither this OR that"
@@ -182,7 +170,6 @@ trait FilterSeq_LocalTime_ extends CoreTestSuite with Api_async { spi: Spi_async
           _ <- Ns.i.a1.localTimeSeq_.hasNo(List(localTime1, localTime3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localTimeSeq_.hasNo(List(localTime1, localTime3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.localTimeSeq_.hasNo(List(localTime1, localTime5)).query.get.map(_ ==> List(2))
-
 
           // Negating empty Seqs has no effect
           _ <- Ns.i.a1.localTimeSeq_.hasNo(List.empty[LocalTime]).query.get.map(_ ==> List(1, 2))

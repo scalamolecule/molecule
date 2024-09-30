@@ -85,11 +85,11 @@ trait OpsSet extends CoreTestSuite with Api_async { spi: Spi_async =>
         _ <- Ns(id).intSet.add(int3, int4).update.transact
         _ <- Ns.intSet.query.get.map(_.head ==> Set(int1, int2, int3, int4))
 
-        // Add multiple values with Iterable
-        _ <- Ns(id).intSet.add(List(int5, int6)).update.transact
+        // Add multiple values with Set
+        _ <- Ns(id).intSet.add(Set(int5, int6)).update.transact
         _ <- Ns.intSet.query.get.map(_.head ==> Set(int1, int2, int3, int4, int5, int6))
 
-        // Adding empty Iterable of values has no effect
+        // Adding empty Set of values has no effect
         _ <- Ns(id).intSet.add(Set.empty[Int]).update.transact
         _ <- Ns.intSet.query.get.map(_.head ==> Set(int1, int2, int3, int4, int5, int6))
       } yield ()
@@ -127,12 +127,12 @@ trait OpsSet extends CoreTestSuite with Api_async { spi: Spi_async =>
         _ <- Ns(id).intSet.remove(int4, int5).update.transact
         _ <- Ns.intSet.query.get.map(_.head ==> Set(int1, int2, int3))
 
-        // Remove multiple values with Iterable
-        _ <- Ns(id).intSet.remove(List(int2, int3)).update.transact
+        // Remove multiple values with Set
+        _ <- Ns(id).intSet.remove(Set(int2, int3)).update.transact
         _ <- Ns.intSet.query.get.map(_.head ==> Set(int1))
 
-        // Removing empty Iterable of values has no effect
-        _ <- Ns(id).intSet.remove(Vector.empty[Int]).update.transact
+        // Removing empty Set of values has no effect
+        _ <- Ns(id).intSet.remove(Set.empty[Int]).update.transact
         _ <- Ns.intSet.query.get.map(_.head ==> Set(int1))
 
         // Removing all remaining elements deletes the attribute

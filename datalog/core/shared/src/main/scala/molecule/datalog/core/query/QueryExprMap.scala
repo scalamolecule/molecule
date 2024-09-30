@@ -11,28 +11,28 @@ trait QueryExprMap[Tpl] extends QueryExpr with JavaConversions { self: Model2Dat
     val e = es.last
     attr match {
       case at: AttrMapManID             => noId
-      case at: AttrMapManString         => mapMan(attr, e, at.keys, resMapString)
-      case at: AttrMapManInt            => mapMan(attr, e, at.keys, resMapInt)
-      case at: AttrMapManLong           => mapMan(attr, e, at.keys, resMapLong)
-      case at: AttrMapManFloat          => mapMan(attr, e, at.keys, resMapFloat)
-      case at: AttrMapManDouble         => mapMan(attr, e, at.keys, resMapDouble)
-      case at: AttrMapManBoolean        => mapMan(attr, e, at.keys, resMapBoolean)
-      case at: AttrMapManBigInt         => mapMan(attr, e, at.keys, resMapBigInt)
-      case at: AttrMapManBigDecimal     => mapMan(attr, e, at.keys, resMapBigDecimal)
-      case at: AttrMapManDate           => mapMan(attr, e, at.keys, resMapDate)
-      case at: AttrMapManDuration       => mapMan(attr, e, at.keys, resMapDuration)
-      case at: AttrMapManInstant        => mapMan(attr, e, at.keys, resMapInstant)
-      case at: AttrMapManLocalDate      => mapMan(attr, e, at.keys, resMapLocalDate)
-      case at: AttrMapManLocalTime      => mapMan(attr, e, at.keys, resMapLocalTime)
-      case at: AttrMapManLocalDateTime  => mapMan(attr, e, at.keys, resMapLocalDateTime)
-      case at: AttrMapManOffsetTime     => mapMan(attr, e, at.keys, resMapOffsetTime)
-      case at: AttrMapManOffsetDateTime => mapMan(attr, e, at.keys, resMapOffsetDateTime)
-      case at: AttrMapManZonedDateTime  => mapMan(attr, e, at.keys, resMapZonedDateTime)
-      case at: AttrMapManUUID           => mapMan(attr, e, at.keys, resMapUUID)
-      case at: AttrMapManURI            => mapMan(attr, e, at.keys, resMapURI)
-      case at: AttrMapManByte           => mapMan(attr, e, at.keys, resMapByte)
-      case at: AttrMapManShort          => mapMan(attr, e, at.keys, resMapShort)
-      case at: AttrMapManChar           => mapMan(attr, e, at.keys, resMapChar)
+      case at: AttrMapManString         => mapMan(attr, e, at.keys, at.values, resMapString)
+      case at: AttrMapManInt            => mapMan(attr, e, at.keys, at.values, resMapInt)
+      case at: AttrMapManLong           => mapMan(attr, e, at.keys, at.values, resMapLong)
+      case at: AttrMapManFloat          => mapMan(attr, e, at.keys, at.values, resMapFloat)
+      case at: AttrMapManDouble         => mapMan(attr, e, at.keys, at.values, resMapDouble)
+      case at: AttrMapManBoolean        => mapMan(attr, e, at.keys, at.values, resMapBoolean)
+      case at: AttrMapManBigInt         => mapMan(attr, e, at.keys, at.values, resMapBigInt)
+      case at: AttrMapManBigDecimal     => mapMan(attr, e, at.keys, at.values, resMapBigDecimal)
+      case at: AttrMapManDate           => mapMan(attr, e, at.keys, at.values, resMapDate)
+      case at: AttrMapManDuration       => mapMan(attr, e, at.keys, at.values, resMapDuration)
+      case at: AttrMapManInstant        => mapMan(attr, e, at.keys, at.values, resMapInstant)
+      case at: AttrMapManLocalDate      => mapMan(attr, e, at.keys, at.values, resMapLocalDate)
+      case at: AttrMapManLocalTime      => mapMan(attr, e, at.keys, at.values, resMapLocalTime)
+      case at: AttrMapManLocalDateTime  => mapMan(attr, e, at.keys, at.values, resMapLocalDateTime)
+      case at: AttrMapManOffsetTime     => mapMan(attr, e, at.keys, at.values, resMapOffsetTime)
+      case at: AttrMapManOffsetDateTime => mapMan(attr, e, at.keys, at.values, resMapOffsetDateTime)
+      case at: AttrMapManZonedDateTime  => mapMan(attr, e, at.keys, at.values, resMapZonedDateTime)
+      case at: AttrMapManUUID           => mapMan(attr, e, at.keys, at.values, resMapUUID)
+      case at: AttrMapManURI            => mapMan(attr, e, at.keys, at.values, resMapURI)
+      case at: AttrMapManByte           => mapMan(attr, e, at.keys, at.values, resMapByte)
+      case at: AttrMapManShort          => mapMan(attr, e, at.keys, at.values, resMapShort)
+      case at: AttrMapManChar           => mapMan(attr, e, at.keys, at.values, resMapChar)
     }
   }
 
@@ -108,15 +108,31 @@ trait QueryExprMap[Tpl] extends QueryExpr with JavaConversions { self: Model2Dat
   private def nsAttr(attr: Attr): String = s":${attr.ns}/${attr.attr}"
 
   private def mapMan[T](
-    attr: Attr, e: Var, keys: Seq[String], resMap: ResMap[T]
+    attr: Attr, e: Var, keys: Seq[String], values: Seq[T], resMap: ResMap[T]
   ): Unit = {
     val v = vv
     find += v
     attr.op match {
       case V       => mapAttr(attr, e, v, resMap, true)
-      case Has     => key2value(attr, e, v, keys.head, resMap)
-      case Eq      => noCollectionMatching(attr)
+      case Eq      => mapManKey2value(attr, e, v, keys, resMap)
+      case Has     => mapManHasValues(attr, e, v, values, resMap)
+      case HasNo   => mapManHasNoValues(attr, e, v, values, resMap)
       case NoValue => noApplyNothing(attr)
+      case other   => unexpectedOp(other)
+    }
+  }
+
+  private def mapTac[T](
+    attr: Attr, e: Var, keys: Seq[String], values: Seq[T], resMap: ResMap[T],
+  ): Unit = {
+    val v = vv
+    attr.op match {
+      case V       => mapAttr(attr, e, v, resMap, false)
+      case Eq      => mapTacKeys(attr, e, v, keys)
+      case Neq     => mapTacNoKeys(attr, e, v, keys)
+      case Has     => mapTacHasValues(attr, e, v, values, resMap)
+      case HasNo   => mapTacHasNoValues(attr, e, v, values, resMap)
+      case NoValue => mapTacNoValue(attr, e)
       case other   => unexpectedOp(other)
     }
   }
@@ -128,26 +144,12 @@ trait QueryExprMap[Tpl] extends QueryExpr with JavaConversions { self: Model2Dat
     find += v
     attr.op match {
       case V     => mapOptAttr(attr, e, v, resMapOpt)
-      case Has   => key2optValue(attr, e, v, keys.head, resMapOpt)
+      case Has   => mapOptKey2optValue(attr, e, v, keys.head, resMapOpt)
       case Eq    => noCollectionMatching(attr)
       case other => unexpectedOp(other)
     }
   }
 
-  private def mapTac[T](
-    attr: Attr, e: Var, keys: Seq[String], values: Seq[T], resMap: ResMap[T],
-  ): Unit = {
-    val v = vv
-    attr.op match {
-      case V       => mapAttr(attr, e, v, resMap, false)
-      case Eq      => mapContainsKeys(attr, e, v, keys)
-      case Neq     => mapContainsNoKeys(attr, e, v, keys)
-      case Has     => mapHasValues(attr, e, v, values, resMap)
-      case HasNo   => mapHasNoValues(attr, e, v, values, resMap)
-      case NoValue => mapNoValue(attr, e)
-      case other   => unexpectedOp(other)
-    }
-  }
 
 
   // attr ----------------------------------------------------------------------
@@ -185,18 +187,23 @@ trait QueryExprMap[Tpl] extends QueryExpr with JavaConversions { self: Model2Dat
 
   // value lookup by key -------------------------------------------------------
 
-  private def key2value[T](
-    attr: Attr, e: Var, v: Var, key: String, resMap: ResMap[T]
+  private def mapManKey2value[T](
+    attr: Attr, e: Var, v: Var, keys: Seq[String], resMap: ResMap[T]
   ): Unit = {
-    val (a, ak, av, k_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
-    where += s"[$e $a $v1]" -> wClause
-    where += s"""[$v1 $ak "$key"]""" -> wClause
-    where += s"[$v1 $av $v]" -> wClause
-    addCast(resMap.j2s)
+    if (keys.nonEmpty) {
+      val key = keys.head
+      val (a, ak, av, k_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
+      where += s"[$e $a $v1]" -> wClause
+      where += s"""[$v1 $ak "$key"]""" -> wClause
+      where += s"[$v1 $av $v]" -> wClause
+      addCast(resMap.j2s)
+    } else {
+      noCollectionMatching(attr)
+    }
   }
 
 
-  private def key2optValue[T](
+  private def mapOptKey2optValue[T](
     attr: Attr, e: Var, v: Var, key: String, resMapOpt: ResMapOpt[T]
   ): Unit = {
     val (a, ak, av, k_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
@@ -213,9 +220,73 @@ trait QueryExprMap[Tpl] extends QueryExpr with JavaConversions { self: Model2Dat
   }
 
 
+  // mandatory -----------------------------------------------------------------
+
+  private def mapManHasValues[T](
+    attr: Attr, e: Var, v: Var, values: Seq[T], resMap: ResMap[T]
+  ): Unit = {
+    val (a, ak, av, k_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
+    if (values.nonEmpty) {
+      args += values.map(resMap.s2j).asJava
+      in += s"[$v2 ...]"
+      where += s"[$e $a $v1]" -> wClause
+      where += s"[$v1 $av $v2]" -> wClause
+      where +=
+        s"""[(datomic.api/q
+           |          "[:find (distinct $pair)
+           |            :in $$ $e
+           |            :where [$e $a $v]
+           |                   [$v $ak $k_]
+           |                   [$v $av $v_]
+           |                   [(vector $k_ $v_) $pair]]" $$ $e) [[$v]]]""".stripMargin -> wClause
+      addCast(resMap.j2sMap)
+    } else {
+      // Match nothing
+      where += s"[$e $a $v]" -> wClause
+      where += s"[(ground nil) $v]" -> wGround
+    }
+  }
+
+  private def mapManHasNoValues[T](
+    attr: Attr, e: Var, v: Var, values: Seq[T], resMap: ResMap[T]
+  ): Unit = {
+    val (a, ak, av, k_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
+    if (values.nonEmpty) {
+      args += values.map(resMap.s2j).asJava
+      in += v1
+      where += s"[$e $a _]" -> wClause
+
+      // Exclude maps containing needles
+      where +=
+        s"""[(datomic.api/q
+           |          "[:find (distinct $v_)
+           |            :in $$ $e
+           |            :where [$e $a $v]
+           |                   [$v $av $v_]]" $$ $e) [[$v2]]]""".stripMargin -> wClause
+      where += s"[(set $v1) $v3]" -> wClause
+      where += s"[(clojure.set/intersection $v2 $v3) $v4]" -> wClause
+      where += s"[(empty? $v4)]" -> wClause
+
+      // Include full maps
+      where +=
+        s"""[(datomic.api/q
+           |          "[:find (distinct $pair)
+           |            :in $$ $e
+           |            :where [$e $a $v]
+           |                   [$v $ak $k_]
+           |                   [$v $av $v_]
+           |                   [(vector $k_ $v_) $pair]]" $$ $e) [[$v]]]""".stripMargin -> wClause
+      addCast(resMap.j2sMap)
+    } else {
+      // Get all
+      mapAttr(attr, e, v, resMap, true)
+    }
+  }
+
+
   // tacit ---------------------------------------------------------------------
 
-  private def mapContainsKeys(
+  private def mapTacKeys(
     attr: Attr, e: Var, v: Var, keys: Seq[String]
   ): Unit = {
     val (a, ak, av, k_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
@@ -231,7 +302,7 @@ trait QueryExprMap[Tpl] extends QueryExpr with JavaConversions { self: Model2Dat
   }
 
 
-  private def mapContainsNoKeys(
+  private def mapTacNoKeys(
     attr: Attr, e: Var, v: Var, keys: Seq[String]
   ): Unit = {
     val (a, ak, av, k_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
@@ -250,29 +321,24 @@ trait QueryExprMap[Tpl] extends QueryExpr with JavaConversions { self: Model2Dat
   }
 
 
-  private def mapHasValues[T](
+  private def mapTacHasValues[T](
     attr: Attr, e: Var, v: Var, values: Seq[T], resMap: ResMap[T]
   ): Unit = {
     val (a, ak, av, k_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
     if (values.nonEmpty) {
       args += values.map(resMap.s2j).asJava
-      in += v1
-      where += s"[$e $a _]" -> wClause
-      where +=
-        s"""[(datomic.api/q
-           |          "[:find (distinct $v)
-           |            :in $$ $e [$v1 ...]
-           |            :where [$e $a $v]
-           |                   [$v $av $v1]]" $$ $e $v1) [[$v2]]]""".stripMargin -> wClause
+      in += s"[$v2 ...]"
+      where += s"[$e $a $v1]" -> wClause
+      where += s"[$v1 $av $v2]" -> wClause
     } else {
       // Match nothing
-      where += s"[$e $a $v3]" -> wClause
-      where += s"[(ground nil) $v3]" -> wGround
+      where += s"[$e $a $v]" -> wClause
+      where += s"[(ground nil) $v]" -> wGround
     }
   }
 
 
-  private def mapHasNoValues[T](
+  private def mapTacHasNoValues[T](
     attr: Attr, e: Var, v: Var, values: Seq[T], resMap: ResMap[T]
   ): Unit = {
     val (a, ak, av, k_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
@@ -296,7 +362,7 @@ trait QueryExprMap[Tpl] extends QueryExpr with JavaConversions { self: Model2Dat
   }
 
 
-  private def mapNoValue(attr: Attr, e: Var): Unit = {
+  private def mapTacNoValue(attr: Attr, e: Var): Unit = {
     val a = nsAttr(attr)
     where += s"(not [$e $a])" -> wNeqOne
   }

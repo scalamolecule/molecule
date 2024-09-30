@@ -10,15 +10,16 @@ import utest._
 
 trait FilterSeq_Long_ extends CoreTestSuite with Api_async { spi: Spi_async =>
 
+  val a = (1, List(long1, long2))
+  val b = (2, List(long2, long3, long3))
+
   override lazy val tests = Tests {
 
     "Mandatory" - {
 
       "has" - types { implicit conn =>
-        val a = (1, List(long1, long2))
-        val b = (2, List(long2, long3, long3))
         for {
-          _ <- Ns.i.longSeq.insert(List(a, b)).transact
+          _ <- Ns.i.longSeq.insert(a, b).transact
 
           // Seqs with one or more values matching
 
@@ -33,20 +34,20 @@ trait FilterSeq_Long_ extends CoreTestSuite with Api_async { spi: Spi_async =>
           _ <- Ns.i.a1.longSeq.has(List(long2)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.longSeq.has(List(long3)).query.get.map(_ ==> List(b))
 
-
           // OR semantics when multiple values
 
           // "Has this OR that"
+          _ <- Ns.i.a1.longSeq.has(long0, long1).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.longSeq.has(long1, long2).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.longSeq.has(long1, long3).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.longSeq.has(long2, long3).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.longSeq.has(long1, long2, long3).query.get.map(_ ==> List(a, b))
           // Same as
+          _ <- Ns.i.a1.longSeq.has(List(long0, long1)).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.longSeq.has(List(long1, long2)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.longSeq.has(List(long1, long3)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.longSeq.has(List(long2, long3)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.longSeq.has(List(long1, long2, long3)).query.get.map(_ ==> List(a, b))
-
 
           // Empty Seq/Seqs match nothing
           _ <- Ns.i.a1.longSeq.has(List.empty[Long]).query.get.map(_ ==> List())
@@ -55,10 +56,8 @@ trait FilterSeq_Long_ extends CoreTestSuite with Api_async { spi: Spi_async =>
 
 
       "hasNo" - types { implicit conn =>
-        val a = (1, List(long1, long2))
-        val b = (2, List(long2, long3, long3))
         for {
-          _ <- Ns.i.longSeq.insert(List(a, b)).transact
+          _ <- Ns.i.longSeq.insert(a, b).transact
 
           // Seqs without one or more values matching
 
@@ -77,7 +76,6 @@ trait FilterSeq_Long_ extends CoreTestSuite with Api_async { spi: Spi_async =>
           _ <- Ns.i.a1.longSeq.hasNo(List(long3)).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.longSeq.hasNo(List(long5)).query.get.map(_ ==> List(a, b))
 
-
           // OR semantics when multiple values
 
           // "Has neither this OR that"
@@ -91,7 +89,6 @@ trait FilterSeq_Long_ extends CoreTestSuite with Api_async { spi: Spi_async =>
           _ <- Ns.i.a1.longSeq.hasNo(List(long1, long3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.longSeq.hasNo(List(long1, long5)).query.get.map(_ ==> List(b))
 
-
           // Negating empty Seqs has no effect
           _ <- Ns.i.a1.longSeq.hasNo(List.empty[Long]).query.get.map(_ ==> List(a, b))
         } yield ()
@@ -103,11 +100,7 @@ trait FilterSeq_Long_ extends CoreTestSuite with Api_async { spi: Spi_async =>
 
       "has" - types { implicit conn =>
         for {
-          _ <- Ns.i(0).save.transact
-          _ <- Ns.i.longSeq.insert(List(
-            (1, List(long1, long2)),
-            (2, List(long2, long3, long3))
-          )).transact
+          _ <- Ns.i.longSeq.insert(a, b).transact
 
           // Seqs with one or more values matching
 
@@ -122,20 +115,20 @@ trait FilterSeq_Long_ extends CoreTestSuite with Api_async { spi: Spi_async =>
           _ <- Ns.i.a1.longSeq_.has(List(long2)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.longSeq_.has(List(long3)).query.get.map(_ ==> List(2))
 
-
           // OR semantics when multiple values
 
           // "Has this OR that"
+          _ <- Ns.i.a1.longSeq_.has(long0, long1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.longSeq_.has(long1, long2).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.longSeq_.has(long1, long3).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.longSeq_.has(long2, long3).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.longSeq_.has(long1, long2, long3).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.longSeq_.has(long3, long4).query.get.map(_ ==> List(2))
           // Same as
+          _ <- Ns.i.a1.longSeq_.has(List(long0, long1)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.longSeq_.has(List(long1, long2)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.longSeq_.has(List(long1, long3)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.longSeq_.has(List(long2, long3)).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.longSeq_.has(List(long1, long2, long3)).query.get.map(_ ==> List(1, 2))
-
+          _ <- Ns.i.a1.longSeq_.has(List(long3, long4)).query.get.map(_ ==> List(2))
 
           // Empty Seq/Seqs match nothing
           _ <- Ns.i.a1.longSeq_.has(List.empty[Long]).query.get.map(_ ==> List())
@@ -145,11 +138,7 @@ trait FilterSeq_Long_ extends CoreTestSuite with Api_async { spi: Spi_async =>
 
       "hasNo" - types { implicit conn =>
         for {
-          _ <- Ns.i(0).save.transact
-          _ <- Ns.i.longSeq.insert(List(
-            (1, List(long1, long2)),
-            (2, List(long2, long3, long3))
-          )).transact
+          _ <- Ns.i.longSeq.insert(a, b).transact
 
           // Seqs without one or more values matching
 
@@ -168,7 +157,6 @@ trait FilterSeq_Long_ extends CoreTestSuite with Api_async { spi: Spi_async =>
           _ <- Ns.i.a1.longSeq_.hasNo(List(long3)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.longSeq_.hasNo(List(long5)).query.get.map(_ ==> List(1, 2))
 
-
           // OR semantics when multiple values
 
           // "Has neither this OR that"
@@ -181,7 +169,6 @@ trait FilterSeq_Long_ extends CoreTestSuite with Api_async { spi: Spi_async =>
           _ <- Ns.i.a1.longSeq_.hasNo(List(long1, long3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.longSeq_.hasNo(List(long1, long3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.longSeq_.hasNo(List(long1, long5)).query.get.map(_ ==> List(2))
-
 
           // Negating empty Seqs has no effect
           _ <- Ns.i.a1.longSeq_.hasNo(List.empty[Long]).query.get.map(_ ==> List(1, 2))

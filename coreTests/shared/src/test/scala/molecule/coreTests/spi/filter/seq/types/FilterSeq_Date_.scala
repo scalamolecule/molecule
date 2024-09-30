@@ -11,15 +11,16 @@ import utest._
 
 trait FilterSeq_Date_ extends CoreTestSuite with Api_async { spi: Spi_async =>
 
+  val a = (1, List(date1, date2))
+  val b = (2, List(date2, date3, date3))
+
   override lazy val tests = Tests {
 
     "Mandatory" - {
 
       "has" - types { implicit conn =>
-        val a = (1, List(date1, date2))
-        val b = (2, List(date2, date3, date3))
         for {
-          _ <- Ns.i.dateSeq.insert(List(a, b)).transact
+          _ <- Ns.i.dateSeq.insert(a, b).transact
 
           // Seqs with one or more values matching
 
@@ -34,20 +35,20 @@ trait FilterSeq_Date_ extends CoreTestSuite with Api_async { spi: Spi_async =>
           _ <- Ns.i.a1.dateSeq.has(List(date2)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.dateSeq.has(List(date3)).query.get.map(_ ==> List(b))
 
-
           // OR semantics when multiple values
 
           // "Has this OR that"
+          _ <- Ns.i.a1.dateSeq.has(date0, date1).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.dateSeq.has(date1, date2).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.dateSeq.has(date1, date3).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.dateSeq.has(date2, date3).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.dateSeq.has(date1, date2, date3).query.get.map(_ ==> List(a, b))
           // Same as
+          _ <- Ns.i.a1.dateSeq.has(List(date0, date1)).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.dateSeq.has(List(date1, date2)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.dateSeq.has(List(date1, date3)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.dateSeq.has(List(date2, date3)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.dateSeq.has(List(date1, date2, date3)).query.get.map(_ ==> List(a, b))
-
 
           // Empty Seq/Seqs match nothing
           _ <- Ns.i.a1.dateSeq.has(List.empty[Date]).query.get.map(_ ==> List())
@@ -56,10 +57,8 @@ trait FilterSeq_Date_ extends CoreTestSuite with Api_async { spi: Spi_async =>
 
 
       "hasNo" - types { implicit conn =>
-        val a = (1, List(date1, date2))
-        val b = (2, List(date2, date3, date3))
         for {
-          _ <- Ns.i.dateSeq.insert(List(a, b)).transact
+          _ <- Ns.i.dateSeq.insert(a, b).transact
 
           // Seqs without one or more values matching
 
@@ -78,7 +77,6 @@ trait FilterSeq_Date_ extends CoreTestSuite with Api_async { spi: Spi_async =>
           _ <- Ns.i.a1.dateSeq.hasNo(List(date3)).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.dateSeq.hasNo(List(date5)).query.get.map(_ ==> List(a, b))
 
-
           // OR semantics when multiple values
 
           // "Has neither this OR that"
@@ -92,7 +90,6 @@ trait FilterSeq_Date_ extends CoreTestSuite with Api_async { spi: Spi_async =>
           _ <- Ns.i.a1.dateSeq.hasNo(List(date1, date3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.dateSeq.hasNo(List(date1, date5)).query.get.map(_ ==> List(b))
 
-
           // Negating empty Seqs has no effect
           _ <- Ns.i.a1.dateSeq.hasNo(List.empty[Date]).query.get.map(_ ==> List(a, b))
         } yield ()
@@ -104,11 +101,7 @@ trait FilterSeq_Date_ extends CoreTestSuite with Api_async { spi: Spi_async =>
 
       "has" - types { implicit conn =>
         for {
-          _ <- Ns.i(0).save.transact
-          _ <- Ns.i.dateSeq.insert(List(
-            (1, List(date1, date2)),
-            (2, List(date2, date3, date3))
-          )).transact
+          _ <- Ns.i.dateSeq.insert(a, b).transact
 
           // Seqs with one or more values matching
 
@@ -123,20 +116,20 @@ trait FilterSeq_Date_ extends CoreTestSuite with Api_async { spi: Spi_async =>
           _ <- Ns.i.a1.dateSeq_.has(List(date2)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.dateSeq_.has(List(date3)).query.get.map(_ ==> List(2))
 
-
           // OR semantics when multiple values
 
           // "Has this OR that"
+          _ <- Ns.i.a1.dateSeq_.has(date0, date1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.dateSeq_.has(date1, date2).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.dateSeq_.has(date1, date3).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.dateSeq_.has(date2, date3).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.dateSeq_.has(date1, date2, date3).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.dateSeq_.has(date3, date4).query.get.map(_ ==> List(2))
           // Same as
+          _ <- Ns.i.a1.dateSeq_.has(List(date0, date1)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.dateSeq_.has(List(date1, date2)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.dateSeq_.has(List(date1, date3)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.dateSeq_.has(List(date2, date3)).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.dateSeq_.has(List(date1, date2, date3)).query.get.map(_ ==> List(1, 2))
-
+          _ <- Ns.i.a1.dateSeq_.has(List(date3, date4)).query.get.map(_ ==> List(2))
 
           // Empty Seq/Seqs match nothing
           _ <- Ns.i.a1.dateSeq_.has(List.empty[Date]).query.get.map(_ ==> List())
@@ -146,11 +139,7 @@ trait FilterSeq_Date_ extends CoreTestSuite with Api_async { spi: Spi_async =>
 
       "hasNo" - types { implicit conn =>
         for {
-          _ <- Ns.i(0).save.transact
-          _ <- Ns.i.dateSeq.insert(List(
-            (1, List(date1, date2)),
-            (2, List(date2, date3, date3))
-          )).transact
+          _ <- Ns.i.dateSeq.insert(a, b).transact
 
           // Seqs without one or more values matching
 
@@ -169,7 +158,6 @@ trait FilterSeq_Date_ extends CoreTestSuite with Api_async { spi: Spi_async =>
           _ <- Ns.i.a1.dateSeq_.hasNo(List(date3)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.dateSeq_.hasNo(List(date5)).query.get.map(_ ==> List(1, 2))
 
-
           // OR semantics when multiple values
 
           // "Has neither this OR that"
@@ -182,7 +170,6 @@ trait FilterSeq_Date_ extends CoreTestSuite with Api_async { spi: Spi_async =>
           _ <- Ns.i.a1.dateSeq_.hasNo(List(date1, date3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.dateSeq_.hasNo(List(date1, date3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.dateSeq_.hasNo(List(date1, date5)).query.get.map(_ ==> List(2))
-
 
           // Negating empty Seqs has no effect
           _ <- Ns.i.a1.dateSeq_.hasNo(List.empty[Date]).query.get.map(_ ==> List(1, 2))

@@ -2295,6 +2295,31 @@ trait ModelTransformations_ {
 
   protected def addMapVs[T](es: List[Element], op: Op, vs: Seq[T]): List[Element] = {
     val last = es.last match {
+      case a: AttrMapMan => a match {
+        case a: AttrMapManID             => a.copy(op = op, values = vs.asInstanceOf[Seq[Long]])
+        case a: AttrMapManString         => a.copy(op = op, values = vs.asInstanceOf[Seq[String]])
+        case a: AttrMapManInt            => a.copy(op = op, values = vs.asInstanceOf[Seq[Int]])
+        case a: AttrMapManLong           => a.copy(op = op, values = vs.asInstanceOf[Seq[Long]])
+        case a: AttrMapManFloat          => a.copy(op = op, values = vs.asInstanceOf[Seq[Float]])
+        case a: AttrMapManDouble         => a.copy(op = op, values = vs.asInstanceOf[Seq[Double]])
+        case a: AttrMapManBoolean        => a.copy(op = op, values = vs.asInstanceOf[Seq[Boolean]])
+        case a: AttrMapManBigInt         => a.copy(op = op, values = vs.asInstanceOf[Seq[BigInt]])
+        case a: AttrMapManBigDecimal     => a.copy(op = op, values = vs.asInstanceOf[Seq[BigDecimal]])
+        case a: AttrMapManDate           => a.copy(op = op, values = vs.asInstanceOf[Seq[Date]])
+        case a: AttrMapManDuration       => a.copy(op = op, values = vs.asInstanceOf[Seq[Duration]])
+        case a: AttrMapManInstant        => a.copy(op = op, values = vs.asInstanceOf[Seq[Instant]])
+        case a: AttrMapManLocalDate      => a.copy(op = op, values = vs.asInstanceOf[Seq[LocalDate]])
+        case a: AttrMapManLocalTime      => a.copy(op = op, values = vs.asInstanceOf[Seq[LocalTime]])
+        case a: AttrMapManLocalDateTime  => a.copy(op = op, values = vs.asInstanceOf[Seq[LocalDateTime]])
+        case a: AttrMapManOffsetTime     => a.copy(op = op, values = vs.asInstanceOf[Seq[OffsetTime]])
+        case a: AttrMapManOffsetDateTime => a.copy(op = op, values = vs.asInstanceOf[Seq[OffsetDateTime]])
+        case a: AttrMapManZonedDateTime  => a.copy(op = op, values = vs.asInstanceOf[Seq[ZonedDateTime]])
+        case a: AttrMapManUUID           => a.copy(op = op, values = vs.asInstanceOf[Seq[UUID]])
+        case a: AttrMapManURI            => a.copy(op = op, values = vs.asInstanceOf[Seq[URI]])
+        case a: AttrMapManByte           => a.copy(op = op, values = vs.asInstanceOf[Seq[Byte]])
+        case a: AttrMapManShort          => a.copy(op = op, values = vs.asInstanceOf[Seq[Short]])
+        case a: AttrMapManChar           => a.copy(op = op, values = vs.asInstanceOf[Seq[Char]])
+      }
       case a: AttrMapTac => a match {
         case a: AttrMapTacID             => a.copy(op = op, values = vs.asInstanceOf[Seq[Long]])
         case a: AttrMapTacString         => a.copy(op = op, values = vs.asInstanceOf[Seq[String]])
@@ -3367,8 +3392,8 @@ trait ModelTransformations_ {
           case _             => topLevelAttrCount(tail, count)
         }
         case _: Ref           => topLevelAttrCount(tail, count)
+        case _: OptRef        => topLevelAttrCount(tail, count)
         case _: BackRef       => topLevelAttrCount(tail, count)
-        case OptRef(_, es)    => ???
         case Nested(_, es)    => topLevelAttrCount(tail, count + countNested(es))
         case OptNested(_, es) => topLevelAttrCount(tail, count + countNested(es))
       }

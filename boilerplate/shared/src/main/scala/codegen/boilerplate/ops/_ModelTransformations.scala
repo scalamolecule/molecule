@@ -193,8 +193,11 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |
        |  protected def addMapVs[T](es: List[Element], op: Op, vs: Seq[T]): List[Element] = {
        |    val last = es.last match {
+       |      case a: AttrMapMan => a match {
+       |        ${addMapVs("Man")}
+       |      }
        |      case a: AttrMapTac => a match {
-       |        $addMapVs
+       |        ${addMapVs("Tac")}
        |      }
        |      case a             => unexpected(a)
        |    }
@@ -561,10 +564,10 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
     }.mkString("\n        ")
   }
 
-  private def addMapVs: String = {
+  private def addMapVs(mode: String): String = {
     baseTypesWithSpaces.map { case (baseTpe, space) =>
       val tpe = if (baseTpe == "ID") "Long" else baseTpe
-      s"""case a: AttrMapTac$baseTpe $space=> a.copy(op = op, values = vs.asInstanceOf[Seq[$tpe]])""".stripMargin
+      s"""case a: AttrMap$mode$baseTpe $space=> a.copy(op = op, values = vs.asInstanceOf[Seq[$tpe]])""".stripMargin
     }.mkString("\n        ")
   }
 

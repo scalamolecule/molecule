@@ -85,12 +85,12 @@ trait OpsSeq extends CoreTestSuite with Api_async { spi: Spi_async =>
         _ <- Ns(id).intSeq.add(int3, int4).update.transact
         _ <- Ns.intSeq.query.get.map(_.head ==> List(int1, int1, int2, int3, int4))
 
-        // Add multiple values with Iterable
+        // Add multiple values with Seq
         _ <- Ns(id).intSeq.add(List(int4, int5)).update.transact
         _ <- Ns.intSeq.query.get.map(_.head ==> List(int1, int1, int2, int3, int4, int4, int5))
 
-        // Adding empty Iterable of values has no effect
-        _ <- Ns(id).intSeq.add(Set.empty[Int]).update.transact
+        // Adding empty Seq of values has no effect
+        _ <- Ns(id).intSeq.add(List.empty[Int]).update.transact
         _ <- Ns.intSeq.query.get.map(_.head ==> List(int1, int1, int2, int3, int4, int4, int5))
       } yield ()
     }
@@ -141,19 +141,19 @@ trait OpsSeq extends CoreTestSuite with Api_async { spi: Spi_async =>
           int1, int2, int3,
         ))
 
-        // Remove multiple values with Iterable
+        // Remove multiple values with Seq
         _ <- Ns(id).intSeq.remove(List(int2, int3)).update.transact
         _ <- Ns.intSeq.query.get.map(_.head ==> List(
           int1,
           int1
         ))
 
-        // Removing empty Iterable of values has no effect
-        _ <- Ns(id).intSeq.remove(Vector.empty[Int]).update.transact
+        // Removing empty Seq of values has no effect
+        _ <- Ns(id).intSeq.remove(List.empty[Int]).update.transact
         _ <- Ns.intSeq.query.get.map(_.head ==> List(int1, int1))
 
         // Removing all remaining values deletes the attribute
-        _ <- Ns(id).intSeq.remove(Set(int1)).update.transact
+        _ <- Ns(id).intSeq.remove(List(int1)).update.transact
         _ <- Ns.intSeq.query.get.map(_ ==> Nil)
       } yield ()
     }

@@ -11,15 +11,16 @@ import utest._
 
 trait FilterSeq_Instant_ extends CoreTestSuite with Api_async { spi: Spi_async =>
 
+  val a = (1, List(instant1, instant2))
+  val b = (2, List(instant2, instant3, instant3))
+
   override lazy val tests = Tests {
 
     "Mandatory" - {
 
       "has" - types { implicit conn =>
-        val a = (1, List(instant1, instant2))
-        val b = (2, List(instant2, instant3, instant3))
         for {
-          _ <- Ns.i.instantSeq.insert(List(a, b)).transact
+          _ <- Ns.i.instantSeq.insert(a, b).transact
 
           // Seqs with one or more values matching
 
@@ -34,20 +35,20 @@ trait FilterSeq_Instant_ extends CoreTestSuite with Api_async { spi: Spi_async =
           _ <- Ns.i.a1.instantSeq.has(List(instant2)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.instantSeq.has(List(instant3)).query.get.map(_ ==> List(b))
 
-
           // OR semantics when multiple values
 
           // "Has this OR that"
+          _ <- Ns.i.a1.instantSeq.has(instant0, instant1).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.instantSeq.has(instant1, instant2).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.instantSeq.has(instant1, instant3).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.instantSeq.has(instant2, instant3).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.instantSeq.has(instant1, instant2, instant3).query.get.map(_ ==> List(a, b))
           // Same as
+          _ <- Ns.i.a1.instantSeq.has(List(instant0, instant1)).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.instantSeq.has(List(instant1, instant2)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.instantSeq.has(List(instant1, instant3)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.instantSeq.has(List(instant2, instant3)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.instantSeq.has(List(instant1, instant2, instant3)).query.get.map(_ ==> List(a, b))
-
 
           // Empty Seq/Seqs match nothing
           _ <- Ns.i.a1.instantSeq.has(List.empty[Instant]).query.get.map(_ ==> List())
@@ -56,10 +57,8 @@ trait FilterSeq_Instant_ extends CoreTestSuite with Api_async { spi: Spi_async =
 
 
       "hasNo" - types { implicit conn =>
-        val a = (1, List(instant1, instant2))
-        val b = (2, List(instant2, instant3, instant3))
         for {
-          _ <- Ns.i.instantSeq.insert(List(a, b)).transact
+          _ <- Ns.i.instantSeq.insert(a, b).transact
 
           // Seqs without one or more values matching
 
@@ -78,7 +77,6 @@ trait FilterSeq_Instant_ extends CoreTestSuite with Api_async { spi: Spi_async =
           _ <- Ns.i.a1.instantSeq.hasNo(List(instant3)).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.instantSeq.hasNo(List(instant5)).query.get.map(_ ==> List(a, b))
 
-
           // OR semantics when multiple values
 
           // "Has neither this OR that"
@@ -92,7 +90,6 @@ trait FilterSeq_Instant_ extends CoreTestSuite with Api_async { spi: Spi_async =
           _ <- Ns.i.a1.instantSeq.hasNo(List(instant1, instant3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.instantSeq.hasNo(List(instant1, instant5)).query.get.map(_ ==> List(b))
 
-
           // Negating empty Seqs has no effect
           _ <- Ns.i.a1.instantSeq.hasNo(List.empty[Instant]).query.get.map(_ ==> List(a, b))
         } yield ()
@@ -104,11 +101,7 @@ trait FilterSeq_Instant_ extends CoreTestSuite with Api_async { spi: Spi_async =
 
       "has" - types { implicit conn =>
         for {
-          _ <- Ns.i(0).save.transact
-          _ <- Ns.i.instantSeq.insert(List(
-            (1, List(instant1, instant2)),
-            (2, List(instant2, instant3, instant3))
-          )).transact
+          _ <- Ns.i.instantSeq.insert(a, b).transact
 
           // Seqs with one or more values matching
 
@@ -123,20 +116,20 @@ trait FilterSeq_Instant_ extends CoreTestSuite with Api_async { spi: Spi_async =
           _ <- Ns.i.a1.instantSeq_.has(List(instant2)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.instantSeq_.has(List(instant3)).query.get.map(_ ==> List(2))
 
-
           // OR semantics when multiple values
 
           // "Has this OR that"
+          _ <- Ns.i.a1.instantSeq_.has(instant0, instant1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.instantSeq_.has(instant1, instant2).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.instantSeq_.has(instant1, instant3).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.instantSeq_.has(instant2, instant3).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.instantSeq_.has(instant1, instant2, instant3).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.instantSeq_.has(instant3, instant4).query.get.map(_ ==> List(2))
           // Same as
+          _ <- Ns.i.a1.instantSeq_.has(List(instant0, instant1)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.instantSeq_.has(List(instant1, instant2)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.instantSeq_.has(List(instant1, instant3)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.instantSeq_.has(List(instant2, instant3)).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.instantSeq_.has(List(instant1, instant2, instant3)).query.get.map(_ ==> List(1, 2))
-
+          _ <- Ns.i.a1.instantSeq_.has(List(instant3, instant4)).query.get.map(_ ==> List(2))
 
           // Empty Seq/Seqs match nothing
           _ <- Ns.i.a1.instantSeq_.has(List.empty[Instant]).query.get.map(_ ==> List())
@@ -146,11 +139,7 @@ trait FilterSeq_Instant_ extends CoreTestSuite with Api_async { spi: Spi_async =
 
       "hasNo" - types { implicit conn =>
         for {
-          _ <- Ns.i(0).save.transact
-          _ <- Ns.i.instantSeq.insert(List(
-            (1, List(instant1, instant2)),
-            (2, List(instant2, instant3, instant3))
-          )).transact
+          _ <- Ns.i.instantSeq.insert(a, b).transact
 
           // Seqs without one or more values matching
 
@@ -169,7 +158,6 @@ trait FilterSeq_Instant_ extends CoreTestSuite with Api_async { spi: Spi_async =
           _ <- Ns.i.a1.instantSeq_.hasNo(List(instant3)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.instantSeq_.hasNo(List(instant5)).query.get.map(_ ==> List(1, 2))
 
-
           // OR semantics when multiple values
 
           // "Has neither this OR that"
@@ -182,7 +170,6 @@ trait FilterSeq_Instant_ extends CoreTestSuite with Api_async { spi: Spi_async =
           _ <- Ns.i.a1.instantSeq_.hasNo(List(instant1, instant3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.instantSeq_.hasNo(List(instant1, instant3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.instantSeq_.hasNo(List(instant1, instant5)).query.get.map(_ ==> List(2))
-
 
           // Negating empty Seqs has no effect
           _ <- Ns.i.a1.instantSeq_.hasNo(List.empty[Instant]).query.get.map(_ ==> List(1, 2))

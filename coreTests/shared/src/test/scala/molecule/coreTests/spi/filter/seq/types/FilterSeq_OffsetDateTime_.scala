@@ -11,15 +11,16 @@ import utest._
 
 trait FilterSeq_OffsetDateTime_ extends CoreTestSuite with Api_async { spi: Spi_async =>
 
+  val a = (1, List(offsetDateTime1, offsetDateTime2))
+  val b = (2, List(offsetDateTime2, offsetDateTime3, offsetDateTime3))
+
   override lazy val tests = Tests {
 
     "Mandatory" - {
 
       "has" - types { implicit conn =>
-        val a = (1, List(offsetDateTime1, offsetDateTime2))
-        val b = (2, List(offsetDateTime2, offsetDateTime3, offsetDateTime3))
         for {
-          _ <- Ns.i.offsetDateTimeSeq.insert(List(a, b)).transact
+          _ <- Ns.i.offsetDateTimeSeq.insert(a, b).transact
 
           // Seqs with one or more values matching
 
@@ -34,20 +35,20 @@ trait FilterSeq_OffsetDateTime_ extends CoreTestSuite with Api_async { spi: Spi_
           _ <- Ns.i.a1.offsetDateTimeSeq.has(List(offsetDateTime2)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.offsetDateTimeSeq.has(List(offsetDateTime3)).query.get.map(_ ==> List(b))
 
-
           // OR semantics when multiple values
 
           // "Has this OR that"
+          _ <- Ns.i.a1.offsetDateTimeSeq.has(offsetDateTime0, offsetDateTime1).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.offsetDateTimeSeq.has(offsetDateTime1, offsetDateTime2).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.offsetDateTimeSeq.has(offsetDateTime1, offsetDateTime3).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.offsetDateTimeSeq.has(offsetDateTime2, offsetDateTime3).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.offsetDateTimeSeq.has(offsetDateTime1, offsetDateTime2, offsetDateTime3).query.get.map(_ ==> List(a, b))
           // Same as
+          _ <- Ns.i.a1.offsetDateTimeSeq.has(List(offsetDateTime0, offsetDateTime1)).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.offsetDateTimeSeq.has(List(offsetDateTime1, offsetDateTime2)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.offsetDateTimeSeq.has(List(offsetDateTime1, offsetDateTime3)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.offsetDateTimeSeq.has(List(offsetDateTime2, offsetDateTime3)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.offsetDateTimeSeq.has(List(offsetDateTime1, offsetDateTime2, offsetDateTime3)).query.get.map(_ ==> List(a, b))
-
 
           // Empty Seq/Seqs match nothing
           _ <- Ns.i.a1.offsetDateTimeSeq.has(List.empty[OffsetDateTime]).query.get.map(_ ==> List())
@@ -56,10 +57,8 @@ trait FilterSeq_OffsetDateTime_ extends CoreTestSuite with Api_async { spi: Spi_
 
 
       "hasNo" - types { implicit conn =>
-        val a = (1, List(offsetDateTime1, offsetDateTime2))
-        val b = (2, List(offsetDateTime2, offsetDateTime3, offsetDateTime3))
         for {
-          _ <- Ns.i.offsetDateTimeSeq.insert(List(a, b)).transact
+          _ <- Ns.i.offsetDateTimeSeq.insert(a, b).transact
 
           // Seqs without one or more values matching
 
@@ -78,7 +77,6 @@ trait FilterSeq_OffsetDateTime_ extends CoreTestSuite with Api_async { spi: Spi_
           _ <- Ns.i.a1.offsetDateTimeSeq.hasNo(List(offsetDateTime3)).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.offsetDateTimeSeq.hasNo(List(offsetDateTime5)).query.get.map(_ ==> List(a, b))
 
-
           // OR semantics when multiple values
 
           // "Has neither this OR that"
@@ -92,7 +90,6 @@ trait FilterSeq_OffsetDateTime_ extends CoreTestSuite with Api_async { spi: Spi_
           _ <- Ns.i.a1.offsetDateTimeSeq.hasNo(List(offsetDateTime1, offsetDateTime3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetDateTimeSeq.hasNo(List(offsetDateTime1, offsetDateTime5)).query.get.map(_ ==> List(b))
 
-
           // Negating empty Seqs has no effect
           _ <- Ns.i.a1.offsetDateTimeSeq.hasNo(List.empty[OffsetDateTime]).query.get.map(_ ==> List(a, b))
         } yield ()
@@ -104,11 +101,7 @@ trait FilterSeq_OffsetDateTime_ extends CoreTestSuite with Api_async { spi: Spi_
 
       "has" - types { implicit conn =>
         for {
-          _ <- Ns.i(0).save.transact
-          _ <- Ns.i.offsetDateTimeSeq.insert(List(
-            (1, List(offsetDateTime1, offsetDateTime2)),
-            (2, List(offsetDateTime2, offsetDateTime3, offsetDateTime3))
-          )).transact
+          _ <- Ns.i.offsetDateTimeSeq.insert(a, b).transact
 
           // Seqs with one or more values matching
 
@@ -123,20 +116,20 @@ trait FilterSeq_OffsetDateTime_ extends CoreTestSuite with Api_async { spi: Spi_
           _ <- Ns.i.a1.offsetDateTimeSeq_.has(List(offsetDateTime2)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.offsetDateTimeSeq_.has(List(offsetDateTime3)).query.get.map(_ ==> List(2))
 
-
           // OR semantics when multiple values
 
           // "Has this OR that"
+          _ <- Ns.i.a1.offsetDateTimeSeq_.has(offsetDateTime0, offsetDateTime1).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.offsetDateTimeSeq_.has(offsetDateTime1, offsetDateTime2).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.offsetDateTimeSeq_.has(offsetDateTime1, offsetDateTime3).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.offsetDateTimeSeq_.has(offsetDateTime2, offsetDateTime3).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.offsetDateTimeSeq_.has(offsetDateTime1, offsetDateTime2, offsetDateTime3).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.offsetDateTimeSeq_.has(offsetDateTime3, offsetDateTime4).query.get.map(_ ==> List(2))
           // Same as
+          _ <- Ns.i.a1.offsetDateTimeSeq_.has(List(offsetDateTime0, offsetDateTime1)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.offsetDateTimeSeq_.has(List(offsetDateTime1, offsetDateTime2)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.offsetDateTimeSeq_.has(List(offsetDateTime1, offsetDateTime3)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.offsetDateTimeSeq_.has(List(offsetDateTime2, offsetDateTime3)).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.offsetDateTimeSeq_.has(List(offsetDateTime1, offsetDateTime2, offsetDateTime3)).query.get.map(_ ==> List(1, 2))
-
+          _ <- Ns.i.a1.offsetDateTimeSeq_.has(List(offsetDateTime3, offsetDateTime4)).query.get.map(_ ==> List(2))
 
           // Empty Seq/Seqs match nothing
           _ <- Ns.i.a1.offsetDateTimeSeq_.has(List.empty[OffsetDateTime]).query.get.map(_ ==> List())
@@ -146,11 +139,7 @@ trait FilterSeq_OffsetDateTime_ extends CoreTestSuite with Api_async { spi: Spi_
 
       "hasNo" - types { implicit conn =>
         for {
-          _ <- Ns.i(0).save.transact
-          _ <- Ns.i.offsetDateTimeSeq.insert(List(
-            (1, List(offsetDateTime1, offsetDateTime2)),
-            (2, List(offsetDateTime2, offsetDateTime3, offsetDateTime3))
-          )).transact
+          _ <- Ns.i.offsetDateTimeSeq.insert(a, b).transact
 
           // Seqs without one or more values matching
 
@@ -169,7 +158,6 @@ trait FilterSeq_OffsetDateTime_ extends CoreTestSuite with Api_async { spi: Spi_
           _ <- Ns.i.a1.offsetDateTimeSeq_.hasNo(List(offsetDateTime3)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.offsetDateTimeSeq_.hasNo(List(offsetDateTime5)).query.get.map(_ ==> List(1, 2))
 
-
           // OR semantics when multiple values
 
           // "Has neither this OR that"
@@ -182,7 +170,6 @@ trait FilterSeq_OffsetDateTime_ extends CoreTestSuite with Api_async { spi: Spi_
           _ <- Ns.i.a1.offsetDateTimeSeq_.hasNo(List(offsetDateTime1, offsetDateTime3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetDateTimeSeq_.hasNo(List(offsetDateTime1, offsetDateTime3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.offsetDateTimeSeq_.hasNo(List(offsetDateTime1, offsetDateTime5)).query.get.map(_ ==> List(2))
-
 
           // Negating empty Seqs has no effect
           _ <- Ns.i.a1.offsetDateTimeSeq_.hasNo(List.empty[OffsetDateTime]).query.get.map(_ ==> List(1, 2))

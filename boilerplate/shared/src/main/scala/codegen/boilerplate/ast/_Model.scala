@@ -59,15 +59,11 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
         case ("Seq", "Opt", _)      => s"vs: Option[Seq[$baseTpe]] = None"
         case ("Seq", _, _)          => s"vs: Seq[$baseTpe] = Nil"
 
-        case ("Map", "Man", _)      =>
-          s"""map: Map[String, $baseTpe] = Map.empty[String, $baseTpe],
-             |    override val keys: Seq[String] = Nil""".stripMargin
-
-        case ("Map", "Opt", _)          =>
+        case ("Map", "Opt", _) =>
           s"""map: Option[Map[String, $baseTpe]] = None,
              |    override val keys: Seq[String] = Nil""".stripMargin
 
-        case ("Map", "Tac", _)      =>
+        case ("Map", _, _) =>
           s"""map: Map[String, $baseTpe] = Map.empty[String, $baseTpe],
              |    override val keys: Seq[String] = Nil,
              |    values: Seq[$baseTpe] = Nil""".stripMargin
@@ -168,14 +164,16 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
                  |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
         }
         case "Map"                      => mode match {
-          case "Man"     =>
+          case "Man" =>
             if (format_?)
               s"""def format(v: $baseTpe): String = if ($nullCheck) "null" else $format
                  |      def pairs: String = map.map { case (k, v) => s\"\"\"("$$k", $${format(v)})\"\"\" }.mkString("Map(", ", ", ")")
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$pairs, $$ks, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
+                 |      def vs: String = if (values.isEmpty) "Nil" else values.mkString("Seq(", ", ", ")")
+                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$pairs, $$ks, $$vs, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
             else
               s"""def pairs: String = map.map { case (k, v) => s\"\"\"("$$k", $$v)\"\"\" }.mkString("Map(", ", ", ")")
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$pairs, $$ks, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
+                 |      def vs: String = if (values.isEmpty) "Nil" else values.mkString("Seq(", ", ", ")")
+                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$pairs, $$ks, $$vs, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
 
           case "Opt" =>
             if (format_?)
