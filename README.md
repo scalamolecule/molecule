@@ -55,9 +55,9 @@ Data can also be fetched asynchronously in a `Future` or `ZIO`.
 - Synchronous, Asynchronous (Future), ZIO and cats.effect.IO APIs
 - All Scala primitive types and collection types available as molecule attributes (!)
 - Typed methods to compose even complex molecules:
-    - Expression/aggregation functions
+    - Filter/aggregation functions
     - Validation
-    - Nested data
+    - Nested and optional relationships
     - Sorting
     - Pagination (offset/cursor)
     - Subscriptions
@@ -196,7 +196,7 @@ sbt.version = 1.10.2
 `project/plugins.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.9.1")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.9.2")
 ```
 
 `build.sbt`:
@@ -207,12 +207,12 @@ lazy val yourProject = project.in(file("app"))
   .settings(
     libraryDependencies ++= Seq(
       // One or more of:
-      "org.scalamolecule" %%% "molecule-sql-postgres" % "0.11.0",
-      "org.scalamolecule" %%% "molecule-sql-sqlite" % "0.11.0",
-      "org.scalamolecule" %%% "molecule-sql-mysql" % "0.11.0",
-      "org.scalamolecule" %%% "molecule-sql-mariadb" % "0.11.0",
-      "org.scalamolecule" %%% "molecule-sql-h2" % "0.11.0",
-      "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.11.0",
+      "org.scalamolecule" %%% "molecule-sql-postgres" % "0.12.0",
+      "org.scalamolecule" %%% "molecule-sql-sqlite" % "0.12.0",
+      "org.scalamolecule" %%% "molecule-sql-mysql" % "0.12.0",
+      "org.scalamolecule" %%% "molecule-sql-mariadb" % "0.12.0",
+      "org.scalamolecule" %%% "molecule-sql-h2" % "0.12.0",
+      "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.12.0",
     ),
     moleculeSchemas := Seq("app/dataModel") // paths to directories with Data Model definition files
   )
@@ -220,7 +220,7 @@ lazy val yourProject = project.in(file("app"))
 
 ## Explore code
 
-The `coreTests` module in this repo has several data model definitions and ~1500 tests that show all details of
+The `coreTests` module in this repo has several data model definitions and +1500 tests that show all details of
 how molecule can be used. This forms the Service Provider Interface that each database implementation needs to comply to
 in order to offer all functionality of Molecule.
 

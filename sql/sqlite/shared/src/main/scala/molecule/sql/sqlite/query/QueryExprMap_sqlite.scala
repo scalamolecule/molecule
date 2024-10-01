@@ -13,15 +13,21 @@ trait QueryExprMap_sqlite
 
   // value lookup by key -------------------------------------------------------
 
-  override protected def key2value[T](
-    col: String, key: String, resMap: ResMap[T]
+  override protected def mapManKey2value[T](
+    col: String, keys: Seq[String], resMap: ResMap[T]
   ): Unit = {
-    val value = s"JSON_EXTRACT($col, '$$.$key')"
-    select -= col
-    select += value
-    where += ((value, s"IS NOT NULL"))
-    castStrategy.replace((row: RS, paramIndex: Int) =>
-      resMap.json2tpe(row.getString(paramIndex)))
+    if (keys.nonEmpty) {
+      val key = keys.head
+      val value = s"JSON_EXTRACT($col, '$$.$key')"
+      select -= col
+      select += value
+      where += ((value, s"IS NOT NULL"))
+      castStrategy.replace((row: RS, paramIndex: Int) =>
+        resMap.json2tpe(row.getString(paramIndex))
+      )
+    } else {
+      noCollectionMatching(col)
+    }
   }
 
   override protected def key2optValue[T](
@@ -36,33 +42,9 @@ trait QueryExprMap_sqlite
   }
 
 
-  // tacit ---------------------------------------------------------------------
+  // mandatory -----------------------------------------------------------------
 
-  override protected def mapContainsKeys(
-    col: String, keys: Seq[String]
-  ): Unit = {
-    keys.size match {
-      case 0 => where += (("FALSE", ""))
-      case 1 => where += ((s"""JSON_EXTRACT($col, '$$.${keys.head}')""", s"IS NOT NULL"))
-      case _ => where += (("", keys.map(key =>
-        s"""JSON_EXTRACT($col, '$$.$key') IS NOT NULL"""
-      ).mkString("(", " OR\n   ", ")")))
-    }
-  }
-
-  override protected def mapContainsNoKeys(
-    col: String, keys: Seq[String]
-  ): Unit = {
-    keys.size match {
-      case 0 => () // get all
-      case 1 => where += (("", s"JSON_EXTRACT($col, '$$.${keys.head}') IS NULL"))
-      case _ => where += (("", keys.map(key =>
-        s"""JSON_EXTRACT($col, '$$.$key') IS NULL"""
-      ).mkString("(", " AND\n   ", ")")))
-    }
-  }
-
-  override protected def mapHasValues[T](
+  override protected def mapManHasValues[T](
     col: String, values: Seq[T], resMap: ResMap[T]
   ): Unit = {
     if (values.nonEmpty) {
@@ -74,7 +56,58 @@ trait QueryExprMap_sqlite
     }
   }
 
-  override protected def mapHasNoValues[T](
+  override protected def mapManHasNoValues[T](
+    col: String, values: Seq[T], resMap: ResMap[T]
+  ): Unit = {
+    if (values.nonEmpty) {
+      val values1 = values.map(resMap.one2json)
+      where += (("", s"""$col REGEXP '${regex(resMap.tpe, values1)}' = 0"""))
+    } else {
+      // Get all
+      ()
+    }
+  }
+
+
+  // tacit ---------------------------------------------------------------------
+
+  override protected def mapTacKeys(
+    col: String, keys: Seq[String]
+  ): Unit = {
+    keys.size match {
+      case 0 => where += (("FALSE", ""))
+      case 1 => where += ((s"""JSON_EXTRACT($col, '$$.${keys.head}')""", s"IS NOT NULL"))
+      case _ => where += (("", keys.map(key =>
+        s"""JSON_EXTRACT($col, '$$.$key') IS NOT NULL"""
+      ).mkString("(", " OR\n   ", ")")))
+    }
+  }
+
+  override protected def mapTacNoKeys(
+    col: String, keys: Seq[String]
+  ): Unit = {
+    keys.size match {
+      case 0 => () // get all
+      case 1 => where += (("", s"JSON_EXTRACT($col, '$$.${keys.head}') IS NULL"))
+      case _ => where += (("", keys.map(key =>
+        s"""JSON_EXTRACT($col, '$$.$key') IS NULL"""
+      ).mkString("(", " AND\n   ", ")")))
+    }
+  }
+
+  override protected def mapTacHasValues[T](
+    col: String, values: Seq[T], resMap: ResMap[T]
+  ): Unit = {
+    if (values.nonEmpty) {
+      val values1 = values.map(resMap.one2json)
+      where += (("", s"""$col REGEXP '${regex(resMap.tpe, values1)}' = 1"""))
+    } else {
+      // Get none
+      where += (("FALSE", ""))
+    }
+  }
+
+  override protected def mapTacHasNoValues[T](
     col: String, values: Seq[T], resMap: ResMap[T]
   ): Unit = {
     if (values.nonEmpty) {

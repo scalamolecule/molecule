@@ -594,8 +594,10 @@ trait Model2Query extends QueryExpr with ModelUtils {
   }
 
   protected def noCollectionMatching(attr: Attr): Nothing = {
-    val a = attr.cleanName
-    throw ModelError(s"Matching collections ($a) not supported in queries.")
+    noCollectionMatching(attr.cleanName)
+  }
+  protected def noCollectionMatching(attr: String): Nothing = {
+    throw ModelError(s"Matching collections ($attr) not supported in queries.")
   }
 
   protected def noApplyNothing(attr: Attr): Nothing = {

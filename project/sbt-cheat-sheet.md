@@ -78,10 +78,11 @@ Compilation on JS side can take some time.
 2) `sbt ++2.12.20 "project baseJVM" publishLocal` (using sbt-molecule snapshot)
 3) Set sbt-molecule to new version and `molecule-base` dep to new molecule version in all sbt/sbt test build files 
 4) sbt-molecule: `sbt publishLocal`
-5) molecule: `sbt +publishLocal`
-6) Test sbt-molecule `./test-all.sh`
-7) sbt-molecule: `sbt publishSigned`
-8) molecule: `sbt +publishSigned -Ddocs=true`
+5) molecule: set sbt-molecule plugin version to new plugin version
+6) molecule: `sbt +publishLocal`
+7) Test sbt-molecule `./test-all.sh`
+8) sbt-molecule: `sbt publishSigned`
+9) molecule: `sbt +publishSigned -Ddocs=true`
 
 
 ## Publish without sbt-molecule update

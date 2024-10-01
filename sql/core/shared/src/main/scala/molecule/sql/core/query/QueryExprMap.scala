@@ -7,29 +7,29 @@ trait QueryExprMap extends QueryExpr { self: Model2Query with SqlQueryBase with 
 
   override protected def queryAttrMapMan(attr: AttrMapMan): Unit = {
     attr match {
-      case at: AttrMapManID             => mapMan(attr, at.keys, resMapId)
-      case at: AttrMapManString         => mapMan(attr, at.keys, resMapString)
-      case at: AttrMapManInt            => mapMan(attr, at.keys, resMapInt)
-      case at: AttrMapManLong           => mapMan(attr, at.keys, resMapLong)
-      case at: AttrMapManFloat          => mapMan(attr, at.keys, resMapFloat)
-      case at: AttrMapManDouble         => mapMan(attr, at.keys, resMapDouble)
-      case at: AttrMapManBoolean        => mapMan(attr, at.keys, resMapBoolean)
-      case at: AttrMapManBigInt         => mapMan(attr, at.keys, resMapBigInt)
-      case at: AttrMapManBigDecimal     => mapMan(attr, at.keys, resMapBigDecimal)
-      case at: AttrMapManDate           => mapMan(attr, at.keys, resMapDate)
-      case at: AttrMapManDuration       => mapMan(attr, at.keys, resMapDuration)
-      case at: AttrMapManInstant        => mapMan(attr, at.keys, resMapInstant)
-      case at: AttrMapManLocalDate      => mapMan(attr, at.keys, resMapLocalDate)
-      case at: AttrMapManLocalTime      => mapMan(attr, at.keys, resMapLocalTime)
-      case at: AttrMapManLocalDateTime  => mapMan(attr, at.keys, resMapLocalDateTime)
-      case at: AttrMapManOffsetTime     => mapMan(attr, at.keys, resMapOffsetTime)
-      case at: AttrMapManOffsetDateTime => mapMan(attr, at.keys, resMapOffsetDateTime)
-      case at: AttrMapManZonedDateTime  => mapMan(attr, at.keys, resMapZonedDateTime)
-      case at: AttrMapManUUID           => mapMan(attr, at.keys, resMapUUID)
-      case at: AttrMapManURI            => mapMan(attr, at.keys, resMapURI)
-      case at: AttrMapManByte           => mapMan(attr, at.keys, resMapByte)
-      case at: AttrMapManShort          => mapMan(attr, at.keys, resMapShort)
-      case at: AttrMapManChar           => mapMan(attr, at.keys, resMapChar)
+      case at: AttrMapManID             => mapMan(attr, at.keys, at.values, resMapId)
+      case at: AttrMapManString         => mapMan(attr, at.keys, at.values, resMapString)
+      case at: AttrMapManInt            => mapMan(attr, at.keys, at.values, resMapInt)
+      case at: AttrMapManLong           => mapMan(attr, at.keys, at.values, resMapLong)
+      case at: AttrMapManFloat          => mapMan(attr, at.keys, at.values, resMapFloat)
+      case at: AttrMapManDouble         => mapMan(attr, at.keys, at.values, resMapDouble)
+      case at: AttrMapManBoolean        => mapMan(attr, at.keys, at.values, resMapBoolean)
+      case at: AttrMapManBigInt         => mapMan(attr, at.keys, at.values, resMapBigInt)
+      case at: AttrMapManBigDecimal     => mapMan(attr, at.keys, at.values, resMapBigDecimal)
+      case at: AttrMapManDate           => mapMan(attr, at.keys, at.values, resMapDate)
+      case at: AttrMapManDuration       => mapMan(attr, at.keys, at.values, resMapDuration)
+      case at: AttrMapManInstant        => mapMan(attr, at.keys, at.values, resMapInstant)
+      case at: AttrMapManLocalDate      => mapMan(attr, at.keys, at.values, resMapLocalDate)
+      case at: AttrMapManLocalTime      => mapMan(attr, at.keys, at.values, resMapLocalTime)
+      case at: AttrMapManLocalDateTime  => mapMan(attr, at.keys, at.values, resMapLocalDateTime)
+      case at: AttrMapManOffsetTime     => mapMan(attr, at.keys, at.values, resMapOffsetTime)
+      case at: AttrMapManOffsetDateTime => mapMan(attr, at.keys, at.values, resMapOffsetDateTime)
+      case at: AttrMapManZonedDateTime  => mapMan(attr, at.keys, at.values, resMapZonedDateTime)
+      case at: AttrMapManUUID           => mapMan(attr, at.keys, at.values, resMapUUID)
+      case at: AttrMapManURI            => mapMan(attr, at.keys, at.values, resMapURI)
+      case at: AttrMapManByte           => mapMan(attr, at.keys, at.values, resMapByte)
+      case at: AttrMapManShort          => mapMan(attr, at.keys, at.values, resMapShort)
+      case at: AttrMapManChar           => mapMan(attr, at.keys, at.values, resMapChar)
     }
   }
 
@@ -91,7 +91,7 @@ trait QueryExprMap extends QueryExpr { self: Model2Query with SqlQueryBase with 
 
 
   protected def mapMan[T](
-    attr: Attr, keys: Seq[String], resMap: ResMap[T]
+    attr: Attr, keys: Seq[String], values: Seq[T], resMap: ResMap[T]
   ): Unit = {
     val col = getCol(attr: Attr)
     select += col
@@ -101,9 +101,10 @@ trait QueryExprMap extends QueryExpr { self: Model2Query with SqlQueryBase with 
     castStrategy.add(resMap.sqlJson2map)
     attr.op match {
       case V       => ()
-      case Has     => key2value(col, keys.head, resMap)
+      case Eq      => mapManKey2value(col, keys, resMap)
+      case Has     => mapManHasValues(col, values, resMap)
+      case HasNo   => mapManHasNoValues(col, values, resMap)
       case NoValue => noApplyNothing(attr)
-      case Eq      => noCollectionMatching(attr)
       case other   => unexpectedOp(other)
     }
   }
@@ -114,11 +115,11 @@ trait QueryExprMap extends QueryExpr { self: Model2Query with SqlQueryBase with 
     val col = getCol(attr: Attr)
     attr.op match {
       case V       => where += ((col, s"IS NOT NULL"))
-      case Eq      => mapContainsKeys(col, keys)
-      case Neq     => mapContainsNoKeys(col, keys)
-      case Has     => mapHasValues(col, values, resMap)
-      case HasNo   => mapHasNoValues(col, values, resMap)
-      case NoValue => mapNoValue(col)
+      case Eq      => mapTacKeys(col, keys)
+      case Neq     => mapTacNoKeys(col, keys)
+      case Has     => mapTacHasValues(col, values, resMap)
+      case HasNo   => mapTacHasNoValues(col, values, resMap)
+      case NoValue => mapTacNoValue(col)
       case other   => unexpectedOp(other)
     }
   }
@@ -140,16 +141,21 @@ trait QueryExprMap extends QueryExpr { self: Model2Query with SqlQueryBase with 
 
   // value lookup by key -------------------------------------------------------
 
-  protected def key2value[T](
-    col: String, key: String, resMap: ResMap[T]
+  protected def mapManKey2value[T](
+    col: String, keys: Seq[String], resMap: ResMap[T]
   ): Unit = {
-    val value = s"""($col)."$key""""
-    select -= col
-    select += value
-    where += ((value, s"IS NOT NULL"))
-    castStrategy.replace((row: RS, paramIndex: Int) =>
-      resMap.json2tpe(row.getString(paramIndex))
-    )
+    if (keys.nonEmpty) {
+      val key = keys.head
+      val value = s"""($col)."$key""""
+      select -= col
+      select += value
+      where += ((value, s"IS NOT NULL"))
+      castStrategy.replace((row: RS, paramIndex: Int) =>
+        resMap.json2tpe(row.getString(paramIndex))
+      )
+    } else {
+      noCollectionMatching(col)
+    }
   }
 
   protected def key2optValue[T](
@@ -164,33 +170,9 @@ trait QueryExprMap extends QueryExpr { self: Model2Query with SqlQueryBase with 
   }
 
 
-  // tacit ---------------------------------------------------------------------
+  // mandatory -----------------------------------------------------------------
 
-  protected def mapContainsKeys(
-    col: String, keys: Seq[String]
-  ): Unit = {
-    keys.size match {
-      case 0 => where += (("FALSE", ""))
-      case 1 => where += (("", s"""($col)."${keys.head}" IS NOT NULL"""))
-      case _ => where += (("", keys.map(key =>
-        s"""($col)."$key" IS NOT NULL"""
-      ).mkString("(", " OR\n   ", ")")))
-    }
-  }
-
-  protected def mapContainsNoKeys(
-    col: String, keys: Seq[String]
-  ): Unit = {
-    keys.size match {
-      case 0 => () // get all
-      case 1 => where += (("", s"""($col)."${keys.head}" IS NULL"""))
-      case _ => where += (("", keys.map(key =>
-        s"""($col)."$key" IS NULL"""
-      ).mkString("(", " AND\n   ", ")")))
-    }
-  }
-
-  protected def mapHasValues[T](
+  protected def mapManHasValues[T](
     col: String, values: Seq[T], resMap: ResMap[T]
   ): Unit = {
     if (values.nonEmpty) {
@@ -202,7 +184,7 @@ trait QueryExprMap extends QueryExpr { self: Model2Query with SqlQueryBase with 
     }
   }
 
-  protected def mapHasNoValues[T](
+  protected def mapManHasNoValues[T](
     col: String, values: Seq[T], resMap: ResMap[T]
   ): Unit = {
     if (values.nonEmpty) {
@@ -214,7 +196,58 @@ trait QueryExprMap extends QueryExpr { self: Model2Query with SqlQueryBase with 
     }
   }
 
-  protected def mapNoValue(col: String): Unit = {
+
+  // tacit ---------------------------------------------------------------------
+
+  protected def mapTacKeys(
+    col: String, keys: Seq[String]
+  ): Unit = {
+    keys.size match {
+      case 0 => where += (("FALSE", ""))
+      case 1 => where += (("", s"""($col)."${keys.head}" IS NOT NULL"""))
+      case _ => where += (("", keys.map(key =>
+        s"""($col)."$key" IS NOT NULL"""
+      ).mkString("(", " OR\n   ", ")")))
+    }
+  }
+
+  protected def mapTacNoKeys(
+    col: String, keys: Seq[String]
+  ): Unit = {
+    keys.size match {
+      case 0 => () // get all
+      case 1 => where += (("", s"""($col)."${keys.head}" IS NULL"""))
+      case _ => where += (("", keys.map(key =>
+        s"""($col)."$key" IS NULL"""
+      ).mkString("(", " AND\n   ", ")")))
+    }
+  }
+
+  protected def mapTacHasValues[T](
+    col: String, values: Seq[T], resMap: ResMap[T]
+  ): Unit = {
+    if (values.nonEmpty) {
+      val values1 = values.map(resMap.one2json)
+      where += (("", s"""REGEXP_LIKE($col, '(${regex(resMap.tpe, values1)})')"""))
+    } else {
+      // Get none
+      where += (("FALSE", ""))
+    }
+  }
+
+  protected def mapTacHasNoValues[T](
+    col: String, values: Seq[T], resMap: ResMap[T]
+  ): Unit = {
+    if (values.nonEmpty) {
+      val values1 = values.map(resMap.one2json)
+      where += (("", s"""NOT(REGEXP_LIKE($col, '(${regex(resMap.tpe, values1)})'))"""))
+    } else {
+      // Get all
+      ()
+    }
+  }
+
+  protected def mapTacNoValue(col: String): Unit = {
     setNull(col)
   }
 

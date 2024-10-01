@@ -1,4 +1,4 @@
-package molecule.sql.postgres.compliance.validation.types.update
+package molecule.sql.postgres.compliance.validation.update
 
 import molecule.coreTests.spi.validation.update._
 import molecule.sql.postgres.setup.Test_postgres_async

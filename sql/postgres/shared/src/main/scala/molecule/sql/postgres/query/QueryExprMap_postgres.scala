@@ -11,14 +11,20 @@ trait QueryExprMap_postgres
 
   // value lookup by key -------------------------------------------------------
 
-  override protected def key2value[T](
-    col: String, key: String, resMap: ResMap[T]
+  override protected def mapManKey2value[T](
+    col: String, keys: Seq[String], resMap: ResMap[T]
   ): Unit = {
-    select -= col
-    select += s"$col ->> '$key'"
-    where += (("", s"$col ?? '$key'"))
-    castStrategy.replace((row: RS, paramIndex: Int) =>
-      resMap.json2tpe(row.getString(paramIndex)))
+    if (keys.nonEmpty) {
+      val key = keys.head
+      select -= col
+      select += s"$col ->> '$key'"
+      where += (("", s"$col ?? '$key'"))
+      castStrategy.replace((row: RS, paramIndex: Int) =>
+        resMap.json2tpe(row.getString(paramIndex))
+      )
+    } else {
+      noCollectionMatching(col)
+    }
   }
 
   override protected def key2optValue[T](
@@ -33,29 +39,9 @@ trait QueryExprMap_postgres
   }
 
 
-  // tacit ---------------------------------------------------------------------
+  // mandatory -----------------------------------------------------------------
 
-  override protected def mapContainsKeys(
-    col: String, keys: Seq[String]
-  ): Unit = {
-    if (keys.nonEmpty) {
-      where += (("", keys.map(k => s"$col ?? '$k'").mkString("(", " OR\n   ", ")")))
-    } else {
-      where += (("FALSE", ""))
-    }
-  }
-
-  override protected def mapContainsNoKeys(
-    col: String, keys: Seq[String]
-  ): Unit = {
-    if (keys.nonEmpty) {
-      where += (("", keys.map(k => s"$col ?? '$k'").mkString("NOT (", " OR\n   ", ")")))
-    } else {
-      () // get all
-    }
-  }
-
-  override protected def mapHasValues[T](
+  override protected def mapManHasValues[T](
     col: String, values: Seq[T], resMap: ResMap[T]
   ): Unit = {
     if (values.nonEmpty) {
@@ -69,7 +55,7 @@ trait QueryExprMap_postgres
     }
   }
 
-  override protected def mapHasNoValues[T](
+  override protected def mapManHasNoValues[T](
     col: String, values: Seq[T], resMap: ResMap[T]
   ): Unit = {
     if (values.nonEmpty) {
@@ -83,7 +69,58 @@ trait QueryExprMap_postgres
     }
   }
 
-  override protected def mapNoValue(col: String): Unit = {
+
+  // tacit ---------------------------------------------------------------------
+
+  override protected def mapTacKeys(
+    col: String, keys: Seq[String]
+  ): Unit = {
+    if (keys.nonEmpty) {
+      where += (("", keys.map(k => s"$col ?? '$k'").mkString("(", " OR\n   ", ")")))
+    } else {
+      where += (("FALSE", ""))
+    }
+  }
+
+  override protected def mapTacNoKeys(
+    col: String, keys: Seq[String]
+  ): Unit = {
+    if (keys.nonEmpty) {
+      where += (("", keys.map(k => s"$col ?? '$k'").mkString("NOT (", " OR\n   ", ")")))
+    } else {
+      () // get all
+    }
+  }
+
+  override protected def mapTacHasValues[T](
+    col: String, values: Seq[T], resMap: ResMap[T]
+  ): Unit = {
+    if (values.nonEmpty) {
+      val values1 = values.map(v =>
+        s"JSONB_PATH_QUERY_ARRAY($col, '$$.*') @> '${resMap.one2json(v)}'"
+      )
+      where += (("", values1.mkString("(", " OR\n   ", ")")))
+    } else {
+      // Get none
+      where += (("FALSE", ""))
+    }
+  }
+
+  override protected def mapTacHasNoValues[T](
+    col: String, values: Seq[T], resMap: ResMap[T]
+  ): Unit = {
+    if (values.nonEmpty) {
+      val values1 = values.map(v =>
+        s"JSONB_PATH_QUERY_ARRAY($col, '$$.*') @> '${resMap.one2json(v)}'"
+      )
+      where += (("", values1.mkString("NOT (", " OR\n   ", ")")))
+    } else {
+      // Get all
+      ()
+    }
+  }
+
+  override protected def mapTacNoValue(col: String): Unit = {
     setNull(col)
   }
 
