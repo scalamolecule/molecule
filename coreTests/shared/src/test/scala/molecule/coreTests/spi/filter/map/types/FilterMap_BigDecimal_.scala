@@ -17,7 +17,7 @@ trait FilterMap_BigDecimal_ extends CoreTestSuite with Api_async { spi: Spi_asyn
 
     "Mandatory" - {
 
-      "Mandatory Map (no filter)" - types { implicit conn =>
+      "Mandatory map (no filter)" - types { implicit conn =>
         for {
           _ <- Ns.i.bigDecimalMap.insert(a, b).transact
           _ <- Ns.i.a1.bigDecimalMap.query.get.map(_ ==> List(a, b))
@@ -25,7 +25,7 @@ trait FilterMap_BigDecimal_ extends CoreTestSuite with Api_async { spi: Spi_asyn
       }
 
 
-      "Value by key" - types { implicit conn =>
+      "Map with certain keys" - types { implicit conn =>
         for {
           _ <- Ns.i.bigDecimalMap.insert(a, b).transact
 
@@ -40,7 +40,34 @@ trait FilterMap_BigDecimal_ extends CoreTestSuite with Api_async { spi: Spi_asyn
       }
 
 
-      "Map having values" - types { implicit conn =>
+      "Map without certain keys" - types { implicit conn =>
+        for {
+          _ <- Ns.i.bigDecimalMap.insert(a, b).transact
+
+          // Get Map without certain key(s)
+
+          // "Map contains neither this OR that key"
+          _ <- Ns.i.a1.bigDecimalMap.not("_").query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.bigDecimalMap.not("a").query.get.map(_ ==> List())
+          _ <- Ns.i.a1.bigDecimalMap.not("b").query.get.map(_ ==> List())
+          _ <- Ns.i.a1.bigDecimalMap.not("c").query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.bigDecimalMap.not("a", "c").query.get.map(_ ==> List())
+          _ <- Ns.i.a1.bigDecimalMap.not("_", "c").query.get.map(_ ==> List(a))
+          // Same as
+          _ <- Ns.i.a1.bigDecimalMap.not(List("_")).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.bigDecimalMap.not(List("a")).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.bigDecimalMap.not(List("b")).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.bigDecimalMap.not(List("c")).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.bigDecimalMap.not(List("a", "c")).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.bigDecimalMap.not(List("_", "c")).query.get.map(_ ==> List(a))
+
+          // Negating empty Seq of keys matches all
+          _ <- Ns.i.a1.bigDecimalMap.not(List.empty[String]).query.get.map(_ ==> List(a, b))
+        } yield ()
+      }
+
+
+      "Map with certain values" - types { implicit conn =>
         for {
           _ <- Ns.i.bigDecimalMap.insert(a, b).transact
 
@@ -81,7 +108,7 @@ trait FilterMap_BigDecimal_ extends CoreTestSuite with Api_async { spi: Spi_asyn
       }
 
 
-      "Map not having values" - types { implicit conn =>
+      "Map without certain values" - types { implicit conn =>
         for {
           _ <- Ns.i.bigDecimalMap.insert(a, b).transact
 
@@ -130,7 +157,7 @@ trait FilterMap_BigDecimal_ extends CoreTestSuite with Api_async { spi: Spi_asyn
       }
 
 
-      "Map contains key(s)" - types { implicit conn =>
+      "Match map with certain keys" - types { implicit conn =>
         for {
           _ <- Ns.i.insert(0).transact // Entity without map attribute
           _ <- Ns.i.bigDecimalMap.insert(a, b).transact
@@ -159,7 +186,7 @@ trait FilterMap_BigDecimal_ extends CoreTestSuite with Api_async { spi: Spi_asyn
       }
 
 
-      "doesn't contain key(s)" - types { implicit conn =>
+      "Match map without certain keys" - types { implicit conn =>
         for {
           _ <- Ns.i.bigDecimalMap.insert(a, b).transact
 
@@ -184,7 +211,7 @@ trait FilterMap_BigDecimal_ extends CoreTestSuite with Api_async { spi: Spi_asyn
       }
 
 
-      "has value(s)" - types { implicit conn =>
+      "Match map with certain values" - types { implicit conn =>
         for {
           _ <- Ns.i.bigDecimalMap.insert(a, b).transact
 
@@ -219,7 +246,7 @@ trait FilterMap_BigDecimal_ extends CoreTestSuite with Api_async { spi: Spi_asyn
       }
 
 
-      "doesn't have value(s)" - types { implicit conn =>
+      "Match map without certain values" - types { implicit conn =>
         for {
           _ <- Ns.i.bigDecimalMap.insert(a, b).transact
 
@@ -268,7 +295,7 @@ trait FilterMap_BigDecimal_ extends CoreTestSuite with Api_async { spi: Spi_asyn
       }
 
 
-      "Get optional value by key" - types { implicit conn =>
+      "Optional map values by key" - types { implicit conn =>
 
         for {
           _ <- Ns.i.bigDecimalMap.insert(a, b).transact

@@ -102,6 +102,7 @@ trait QueryExprMap extends QueryExpr { self: Model2Query with SqlQueryBase with 
     attr.op match {
       case V       => ()
       case Eq      => mapManKey2value(col, keys, resMap)
+      case Neq     => mapManNoKey2value(col, keys)
       case Has     => mapManHasValues(col, values, resMap)
       case HasNo   => mapManHasNoValues(col, values, resMap)
       case NoValue => noApplyNothing(attr)
@@ -145,7 +146,7 @@ trait QueryExprMap extends QueryExpr { self: Model2Query with SqlQueryBase with 
     col: String, keys: Seq[String], resMap: ResMap[T]
   ): Unit = {
     if (keys.nonEmpty) {
-      val key = keys.head
+      val key   = keys.head
       val value = s"""($col)."$key""""
       select -= col
       select += value
@@ -155,6 +156,23 @@ trait QueryExprMap extends QueryExpr { self: Model2Query with SqlQueryBase with 
       )
     } else {
       noCollectionMatching(col)
+    }
+  }
+
+  protected def mapManNoKey2value[T](
+    col: String, keys: Seq[String]
+  ): Unit = {
+    if (keys.nonEmpty) {
+      keys.size match {
+        case 0 => () // get all
+        case 1 => where += (("", s"""($col)."${keys.head}" IS NULL"""))
+        case _ => where += (("", keys.map(key =>
+          s"""($col)."$key" IS NULL"""
+        ).mkString("(", " AND\n   ", ")")))
+      }
+    } else {
+      // Get all
+      ()
     }
   }
 

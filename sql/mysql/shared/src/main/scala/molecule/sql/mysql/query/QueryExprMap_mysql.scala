@@ -27,6 +27,23 @@ trait QueryExprMap_mysql
     }
   }
 
+  override protected def mapManNoKey2value[T](
+    col: String, keys: Seq[String]
+  ): Unit = {
+    if (keys.nonEmpty) {
+      keys.size match {
+        case 0 => () // get all
+        case 1 => where += (("", s"JSON_VALUE($col, '$$.${keys.head}') IS NULL"))
+        case _ => where += (("", keys.map(key =>
+          s"""JSON_VALUE($col, '$$.$key') IS NULL"""
+        ).mkString("(", " AND\n   ", ")")))
+      }
+    } else {
+      // Get all
+      ()
+    }
+  }
+
   override protected def key2optValue[T](
     col: String, key: String, resMap: ResMap[T]
   ): Unit = {

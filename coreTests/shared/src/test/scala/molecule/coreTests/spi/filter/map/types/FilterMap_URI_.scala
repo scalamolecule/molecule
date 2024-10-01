@@ -18,7 +18,7 @@ trait FilterMap_URI_ extends CoreTestSuite with Api_async { spi: Spi_async =>
 
     "Mandatory" - {
 
-      "Mandatory Map (no filter)" - types { implicit conn =>
+      "Mandatory map (no filter)" - types { implicit conn =>
         for {
           _ <- Ns.i.uriMap.insert(a, b).transact
           _ <- Ns.i.a1.uriMap.query.get.map(_ ==> List(a, b))
@@ -26,7 +26,7 @@ trait FilterMap_URI_ extends CoreTestSuite with Api_async { spi: Spi_async =>
       }
 
 
-      "Value by key" - types { implicit conn =>
+      "Map with certain keys" - types { implicit conn =>
         for {
           _ <- Ns.i.uriMap.insert(a, b).transact
 
@@ -41,7 +41,34 @@ trait FilterMap_URI_ extends CoreTestSuite with Api_async { spi: Spi_async =>
       }
 
 
-      "Map having values" - types { implicit conn =>
+      "Map without certain keys" - types { implicit conn =>
+        for {
+          _ <- Ns.i.uriMap.insert(a, b).transact
+
+          // Get Map without certain key(s)
+
+          // "Map contains neither this OR that key"
+          _ <- Ns.i.a1.uriMap.not("_").query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uriMap.not("a").query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uriMap.not("b").query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uriMap.not("c").query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uriMap.not("a", "c").query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uriMap.not("_", "c").query.get.map(_ ==> List(a))
+          // Same as
+          _ <- Ns.i.a1.uriMap.not(List("_")).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uriMap.not(List("a")).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uriMap.not(List("b")).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uriMap.not(List("c")).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uriMap.not(List("a", "c")).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uriMap.not(List("_", "c")).query.get.map(_ ==> List(a))
+
+          // Negating empty Seq of keys matches all
+          _ <- Ns.i.a1.uriMap.not(List.empty[String]).query.get.map(_ ==> List(a, b))
+        } yield ()
+      }
+
+
+      "Map with certain values" - types { implicit conn =>
         for {
           _ <- Ns.i.uriMap.insert(a, b).transact
 
@@ -82,7 +109,7 @@ trait FilterMap_URI_ extends CoreTestSuite with Api_async { spi: Spi_async =>
       }
 
 
-      "Map not having values" - types { implicit conn =>
+      "Map without certain values" - types { implicit conn =>
         for {
           _ <- Ns.i.uriMap.insert(a, b).transact
 
@@ -131,7 +158,7 @@ trait FilterMap_URI_ extends CoreTestSuite with Api_async { spi: Spi_async =>
       }
 
 
-      "Map contains key(s)" - types { implicit conn =>
+      "Match map with certain keys" - types { implicit conn =>
         for {
           _ <- Ns.i.insert(0).transact // Entity without map attribute
           _ <- Ns.i.uriMap.insert(a, b).transact
@@ -160,7 +187,7 @@ trait FilterMap_URI_ extends CoreTestSuite with Api_async { spi: Spi_async =>
       }
 
 
-      "doesn't contain key(s)" - types { implicit conn =>
+      "Match map without certain keys" - types { implicit conn =>
         for {
           _ <- Ns.i.uriMap.insert(a, b).transact
 
@@ -185,7 +212,7 @@ trait FilterMap_URI_ extends CoreTestSuite with Api_async { spi: Spi_async =>
       }
 
 
-      "has value(s)" - types { implicit conn =>
+      "Match map with certain values" - types { implicit conn =>
         for {
           _ <- Ns.i.uriMap.insert(a, b).transact
 
@@ -220,7 +247,7 @@ trait FilterMap_URI_ extends CoreTestSuite with Api_async { spi: Spi_async =>
       }
 
 
-      "doesn't have value(s)" - types { implicit conn =>
+      "Match map without certain values" - types { implicit conn =>
         for {
           _ <- Ns.i.uriMap.insert(a, b).transact
 
@@ -269,7 +296,7 @@ trait FilterMap_URI_ extends CoreTestSuite with Api_async { spi: Spi_async =>
       }
 
 
-      "Get optional value by key" - types { implicit conn =>
+      "Optional map values by key" - types { implicit conn =>
 
         for {
           _ <- Ns.i.uriMap.insert(a, b).transact

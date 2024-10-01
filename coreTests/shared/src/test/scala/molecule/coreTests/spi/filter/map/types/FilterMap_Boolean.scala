@@ -24,7 +24,7 @@ trait FilterMap_Boolean extends CoreTestSuite with Api_async { spi: Spi_async =>
       }
 
 
-      "Value by key" - types { implicit conn =>
+      "Map with certain keys" - types { implicit conn =>
         for {
           _ <- Ns.i.booleanMap.insert(a, b).transact
 
@@ -38,7 +38,32 @@ trait FilterMap_Boolean extends CoreTestSuite with Api_async { spi: Spi_async =>
       }
 
 
-      "Map having values" - types { implicit conn =>
+      "Match map without certain keys" - types { implicit conn =>
+        for {
+          _ <- Ns.i.booleanMap.insert(a, b).transact
+
+          // "Map contains neither this OR that key"
+          _ <- Ns.i.a1.booleanMap.not("_").query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.booleanMap.not("a").query.get.map(_ ==> List())
+          _ <- Ns.i.a1.booleanMap.not("b").query.get.map(_ ==> List())
+          _ <- Ns.i.a1.booleanMap.not("c").query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.booleanMap.not("a", "c").query.get.map(_ ==> List())
+          _ <- Ns.i.a1.booleanMap.not("_", "c").query.get.map(_ ==> List(a))
+          // Same as
+          _ <- Ns.i.a1.booleanMap.not(List("_")).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.booleanMap.not(List("a")).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.booleanMap.not(List("b")).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.booleanMap.not(List("c")).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.booleanMap.not(List("a", "c")).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.booleanMap.not(List("_", "c")).query.get.map(_ ==> List(a))
+
+          // Negating empty Seq of keys matches all
+          _ <- Ns.i.a1.booleanMap.not(List.empty[String]).query.get.map(_ ==> List(a, b))
+        } yield ()
+      }
+
+
+      "Map with certain values" - types { implicit conn =>
         val a = (1, Map("a" -> boolean1))
         val b = (2, Map("a" -> boolean1, "b" -> boolean2))
         val c = (3, Map("c" -> boolean2))
@@ -66,7 +91,7 @@ trait FilterMap_Boolean extends CoreTestSuite with Api_async { spi: Spi_async =>
       }
 
 
-      "Map not having values" - types { implicit conn =>
+      "Map without certain values" - types { implicit conn =>
         val a = (1, Map("a" -> boolean1))
         val b = (2, Map("a" -> boolean1, "b" -> boolean2))
         val c = (3, Map("c" -> boolean2))
@@ -104,12 +129,10 @@ trait FilterMap_Boolean extends CoreTestSuite with Api_async { spi: Spi_async =>
       }
 
 
-      "Map contains key(s)" - types { implicit conn =>
+      "Match map with certain keys" - types { implicit conn =>
         for {
           _ <- Ns.i.insert(0).transact // Entity without map attribute
           _ <- Ns.i.booleanMap.insert(a, b).transact
-
-          // OR semantics! (different from Set and Seq)
 
           // "Map contains this OR that key"
           _ <- Ns.i.a1.booleanMap_("_").query.get.map(_ ==> List())
@@ -135,11 +158,9 @@ trait FilterMap_Boolean extends CoreTestSuite with Api_async { spi: Spi_async =>
       }
 
 
-      "doesn't contain key(s)" - types { implicit conn =>
+      "Match map without certain keys" - types { implicit conn =>
         for {
           _ <- Ns.i.booleanMap.insert(a, b).transact
-
-          // OR semantics! (different from Set and Seq)
 
           // "Map contains neither this OR that key"
           _ <- Ns.i.a1.booleanMap_.not("_").query.get.map(_ ==> List(1, 2))
@@ -187,7 +208,7 @@ trait FilterMap_Boolean extends CoreTestSuite with Api_async { spi: Spi_async =>
       }
 
 
-      "doesn't have value(s)" - types { implicit conn =>
+      "Match map with certain values" - types { implicit conn =>
         val aFalse = "a" -> boolean1
         val bFalse = "b" -> boolean1
         val cTrue  = "c" -> boolean2
@@ -226,7 +247,7 @@ trait FilterMap_Boolean extends CoreTestSuite with Api_async { spi: Spi_async =>
       }
 
 
-      "Get optional value by key" - types { implicit conn =>
+      "Optional map values by key" - types { implicit conn =>
         for {
           _ <- Ns.i.booleanMap.insert(a, b).transact
           _ <- Ns.i(3).save.transact // entity without intMap

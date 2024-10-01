@@ -115,6 +115,7 @@ trait QueryExprMap[Tpl] extends QueryExpr with JavaConversions { self: Model2Dat
     attr.op match {
       case V       => mapAttr(attr, e, v, resMap, true)
       case Eq      => mapManKey2value(attr, e, v, keys, resMap)
+      case Neq     => mapManNoKey2value(attr, e, v, keys, resMap)
       case Has     => mapManHasValues(attr, e, v, values, resMap)
       case HasNo   => mapManHasNoValues(attr, e, v, values, resMap)
       case NoValue => noApplyNothing(attr)
@@ -202,6 +203,42 @@ trait QueryExprMap[Tpl] extends QueryExpr with JavaConversions { self: Model2Dat
     }
   }
 
+  private def mapManNoKey2value[T](
+    attr: Attr, e: Var, v: Var, keys: Seq[String], resMap: ResMap[T]
+  ): Unit = {
+    val (a, ak, av, k_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
+    if (keys.nonEmpty) {
+      args += keys.asJava
+      in += v1
+      where += s"[$e $a _]" -> wClause
+
+      // Exclude maps containing certain keys
+      where +=
+        s"""[(datomic.api/q
+           |          "[:find (distinct $k_)
+           |            :in $$ $e
+           |            :where [$e $a $v]
+           |                   [$v $ak $k_]]" $$ $e) [[$v2]]]""".stripMargin -> wClause
+      where += s"[(set $v1) $v3]" -> wClause
+      where += s"[(clojure.set/intersection $v2 $v3) $v4]" -> wClause
+      where += s"[(empty? $v4)]" -> wClause
+
+      // Include full maps
+      where +=
+        s"""[(datomic.api/q
+           |          "[:find (distinct $pair)
+           |            :in $$ $e
+           |            :where [$e $a $v]
+           |                   [$v $ak $k_]
+           |                   [$v $av $v_]
+           |                   [(vector $k_ $v_) $pair]]" $$ $e) [[$v]]]""".stripMargin -> wClause
+      addCast(resMap.j2sMap)
+    } else {
+      // Get all
+      mapAttr(attr, e, v, resMap, true)
+    }
+  }
+
 
   private def mapOptKey2optValue[T](
     attr: Attr, e: Var, v: Var, key: String, resMapOpt: ResMapOpt[T]
@@ -256,7 +293,7 @@ trait QueryExprMap[Tpl] extends QueryExpr with JavaConversions { self: Model2Dat
       in += v1
       where += s"[$e $a _]" -> wClause
 
-      // Exclude maps containing needles
+      // Exclude maps containing certain values
       where +=
         s"""[(datomic.api/q
            |          "[:find (distinct $v_)

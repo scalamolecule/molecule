@@ -27,6 +27,17 @@ trait QueryExprMap_postgres
     }
   }
 
+  override protected def mapManNoKey2value[T](
+    col: String, keys: Seq[String]
+  ): Unit = {
+    if (keys.nonEmpty) {
+      where += (("", keys.map(k => s"$col ?? '$k'").mkString("NOT (", " OR\n   ", ")")))
+    } else {
+      // Get all
+      ()
+    }
+  }
+
   override protected def key2optValue[T](
     col: String, key: String, resMap: ResMap[T]
   ): Unit = {
