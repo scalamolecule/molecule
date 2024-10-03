@@ -20,7 +20,7 @@ inThisBuild(
     organizationName := "ScalaMolecule",
     organizationHomepage := Some(url("http://www.scalamolecule.org")),
     versionScheme := Some("early-semver"),
-    version := "0.12.1",
+    version := "0.12.2-SNAPSHOT",
     scalaVersion := scala213,
     crossScalaVersions := allScala,
 
@@ -122,6 +122,7 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
     // Generate Molecule boilerplate code for tests with `sbt clean compile -Dmolecule=true`
     moleculePluginActive := sys.props.get("molecule").contains("true"),
     moleculeDataModelPaths := Seq("molecule/coreTests/dataModels"),
+    //moleculeMakeJars := false,
 
     // Find scala version specific jars in respective libs
     unmanagedBase := {

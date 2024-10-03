@@ -5,7 +5,6 @@ import molecule.sql.mysql.setup.Test_mysql_async
 
 object Test_Adjacent extends Adjacent with Test_mysql_async
 object Test_CrossNs extends CrossNs with Test_mysql_async
-object Test_CrossNsOwned extends CrossNsOwned with Test_mysql_async
 object Test_FilterAttr_id extends FilterAttr_id with Test_mysql_async
 object Test_FilterAttrNested extends FilterAttrNested with Test_mysql_async
 object Test_FilterAttrRef extends FilterAttrRef with Test_mysql_async

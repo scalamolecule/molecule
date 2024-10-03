@@ -47,66 +47,6 @@ trait FilterAttrRef extends CoreTestSuite with Api_async { spi: Spi_async =>
       } yield ()
     }
 
-    "Ref-Own" - refs { implicit conn =>
-      for {
-        _ <- A.s.i.B.i.OwnC.i.insert(
-          ("a", 1, 1, 0),
-          ("b", 1, 0, 1),
-          ("c", 0, 1, 1),
-        ).transact
-
-        // Forwards
-        _ <- A.s.i_(B.i_).B.i_.OwnC.i_.query.get.map(_ ==> List("a"))
-        _ <- A.s.i_(C.i_).B.i_.OwnC.i_.query.get.map(_ ==> List("b"))
-        _ <- A.s.i_.B.i_(C.i_).OwnC.i_.query.get.map(_ ==> List("c"))
-
-        // Backwards
-        _ <- A.s.i_.B.i_(A.i_).OwnC.i_.query.get.map(_ ==> List("a"))
-        _ <- A.s.i_.B.i_.OwnC.i_(A.i_).query.get.map(_ ==> List("b"))
-        _ <- A.s.i_.B.i_.OwnC.i_(B.i_).query.get.map(_ ==> List("c"))
-      } yield ()
-    }
-
-    "Own-Ref" - refs { implicit conn =>
-      for {
-        _ <- A.s.i.OwnB.i.C.i.insert(
-          ("a", 1, 1, 0),
-          ("b", 1, 0, 1),
-          ("c", 0, 1, 1),
-        ).transact
-
-        // Forwards
-        _ <- A.s.i_(B.i_).OwnB.i_.C.i_.query.get.map(_ ==> List("a"))
-        _ <- A.s.i_(C.i_).OwnB.i_.C.i_.query.get.map(_ ==> List("b"))
-        _ <- A.s.i_.OwnB.i_(C.i_).C.i_.query.get.map(_ ==> List("c"))
-
-        // Backwards
-        _ <- A.s.i_.OwnB.i_(A.i_).C.i_.query.get.map(_ ==> List("a"))
-        _ <- A.s.i_.OwnB.i_.C.i_(A.i_).query.get.map(_ ==> List("b"))
-        _ <- A.s.i_.OwnB.i_.C.i_(B.i_).query.get.map(_ ==> List("c"))
-      } yield ()
-    }
-
-    "Own-Own" - refs { implicit conn =>
-      for {
-        _ <- A.s.i.OwnB.i.OwnC.i.insert(
-          ("a", 1, 1, 0),
-          ("b", 1, 0, 1),
-          ("c", 0, 1, 1),
-        ).transact
-
-        // Forwards
-        _ <- A.s.i_(B.i_).OwnB.i_.OwnC.i_.query.get.map(_ ==> List("a"))
-        _ <- A.s.i_(C.i_).OwnB.i_.OwnC.i_.query.get.map(_ ==> List("b"))
-        _ <- A.s.i_.OwnB.i_(C.i_).OwnC.i_.query.get.map(_ ==> List("c"))
-
-        // Backwards
-        _ <- A.s.i_.OwnB.i_(A.i_).OwnC.i_.query.get.map(_ ==> List("a"))
-        _ <- A.s.i_.OwnB.i_.OwnC.i_(A.i_).query.get.map(_ ==> List("b"))
-        _ <- A.s.i_.OwnB.i_.OwnC.i_(B.i_).query.get.map(_ ==> List("c"))
-      } yield ()
-    }
-
 
     "Optional qualifying" - refs { implicit conn =>
       for {
@@ -132,24 +72,6 @@ trait FilterAttrRef extends CoreTestSuite with Api_async { spi: Spi_async =>
 
         // Backwards there's only one unambiguous value pointed to.
         _ <- A.s.i_.<(2).i_.not(0).B.i_(A.i_).query.get.map(_ ==> List("b"))
-      } yield ()
-    }
-
-
-    "Optional qualifying, owned" - refs { implicit conn =>
-      for {
-        _ <- A.s.i.OwnB.i.insert(
-          ("a", 1, 0),
-          ("b", 1, 1),
-        ).transact
-
-        _ <- A.s.i_(A.OwnB.i_).OwnB.i_.query.get.map(_ ==> List("b"))
-        _ <- A.s.i_(B.i_).OwnB.i_.query.get.map(_ ==> List("b"))
-
-        _ <- A.s.i_(B.i_).OwnB.i_.<(2).i_.not(0).query.get.map(_ ==> List("b"))
-        _ <- A.s.i_(A.OwnB.i_).OwnB.i_.<(2).i_.not(0).query.get.map(_ ==> List("b"))
-
-        _ <- A.s.i_.<(2).i_.not(0).OwnB.i_(A.i_).query.get.map(_ ==> List("b"))
       } yield ()
     }
 

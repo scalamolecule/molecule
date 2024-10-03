@@ -5,7 +5,6 @@ import molecule.datalog.datomic.setup.Test_datomic_async
 
 object Test_Adjacent extends Adjacent with Test_datomic_async
 object Test_CrossNs extends CrossNs with Test_datomic_async
-object Test_CrossNsOwned extends CrossNsOwned with Test_datomic_async
 object Test_FilterAttr_id extends FilterAttr_id with Test_datomic_async
 object Test_FilterAttrNested extends FilterAttrNested with Test_datomic_async
 object Test_FilterAttrRef extends FilterAttrRef with Test_datomic_async

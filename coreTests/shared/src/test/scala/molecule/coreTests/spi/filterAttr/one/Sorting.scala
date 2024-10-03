@@ -106,39 +106,5 @@ trait Sorting extends CoreTestSuite with Api_async { spi: Spi_async =>
         _ <- A.i.d2.B.i.>(A.i_).d1.query.get.map(_ ==> List((1, 4), (2, 3), (1, 3)))
       } yield ()
     }
-
-
-    "CrossNs owned" - refs { implicit conn =>
-      for {
-        _ <- A.i.OwnB.i.insert(
-          (2, 3),
-          (1, 4),
-          (1, 3),
-          (7, 3)
-        ).transact
-
-        _ <- A.i.<(B.i_).a1.OwnB.i.a2.query.get.map(_ ==> List((1, 3), (1, 4), (2, 3)))
-        _ <- A.i.<(B.i_).a1.OwnB.i.d2.query.get.map(_ ==> List((1, 4), (1, 3), (2, 3)))
-        _ <- A.i.<(B.i_).d1.OwnB.i.a2.query.get.map(_ ==> List((2, 3), (1, 3), (1, 4)))
-        _ <- A.i.<(B.i_).d1.OwnB.i.d2.query.get.map(_ ==> List((2, 3), (1, 4), (1, 3)))
-
-        _ <- A.i.<(B.i_).a2.OwnB.i.a1.query.get.map(_ ==> List((1, 3), (2, 3), (1, 4)))
-        _ <- A.i.<(B.i_).a2.OwnB.i.d1.query.get.map(_ ==> List((1, 4), (1, 3), (2, 3)))
-        _ <- A.i.<(B.i_).d2.OwnB.i.a1.query.get.map(_ ==> List((2, 3), (1, 3), (1, 4)))
-        _ <- A.i.<(B.i_).d2.OwnB.i.d1.query.get.map(_ ==> List((1, 4), (2, 3), (1, 3)))
-
-        // Same as
-
-        _ <- A.i.a1.OwnB.i.>(A.i_).a2.query.get.map(_ ==> List((1, 3), (1, 4), (2, 3)))
-        _ <- A.i.a1.OwnB.i.>(A.i_).d2.query.get.map(_ ==> List((1, 4), (1, 3), (2, 3)))
-        _ <- A.i.d1.OwnB.i.>(A.i_).a2.query.get.map(_ ==> List((2, 3), (1, 3), (1, 4)))
-        _ <- A.i.d1.OwnB.i.>(A.i_).d2.query.get.map(_ ==> List((2, 3), (1, 4), (1, 3)))
-
-        _ <- A.i.a2.OwnB.i.>(A.i_).a1.query.get.map(_ ==> List((1, 3), (2, 3), (1, 4)))
-        _ <- A.i.a2.OwnB.i.>(A.i_).d1.query.get.map(_ ==> List((1, 4), (1, 3), (2, 3)))
-        _ <- A.i.d2.OwnB.i.>(A.i_).a1.query.get.map(_ ==> List((2, 3), (1, 3), (1, 4)))
-        _ <- A.i.d2.OwnB.i.>(A.i_).d1.query.get.map(_ ==> List((1, 4), (2, 3), (1, 3)))
-      } yield ()
-    }
   }
 }

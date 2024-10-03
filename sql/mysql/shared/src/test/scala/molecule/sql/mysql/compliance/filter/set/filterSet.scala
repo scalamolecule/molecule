@@ -33,6 +33,4 @@ object Test_FilterSet_ref_ extends FilterSet_ref with Test_mysql_async
 object Test_FilterSetSemantics extends SetSemantics with Test_mysql_async
 
 object Test_FilterRefSet_Card1Ref extends FilterRefSet_Card1Ref with Test_mysql_async
-object Test_FilterRefSet_Card1RefOwned extends FilterRefSet_Card1RefOwned with Test_mysql_async
 object Test_FilterRefSet_Card2Ref extends FilterRefSet_Card2Ref with Test_mysql_async
-object Test_FilterRefSet_Card2RefOwned extends FilterRefSet_Card2RefOwned with Test_mysql_async

@@ -33,6 +33,4 @@ object Test_SeqSemantics extends SeqSemantics with Test_sqlite_async
 
 
 object Test_FilterRefSeq_Card1Ref extends FilterRefSeq_Card1Ref with Test_sqlite_async
-object Test_FilterRefSeq_Card1RefOwned extends FilterRefSeq_Card1RefOwned with Test_sqlite_async
 object Test_FilterRefSeq_Card2Ref extends FilterRefSeq_Card2Ref with Test_sqlite_async
-object Test_FilterRefSeq_Card2RefOwned extends FilterRefSeq_Card2RefOwned with Test_sqlite_async

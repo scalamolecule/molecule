@@ -24,7 +24,6 @@ trait CrossNs extends CoreTestSuite with Api_async { spi: Spi_async =>
         _ <- A.s.i_(B.i_).B.i.query.get.map(_ ==> List(("b", 3))) // A.i
         _ <- A.s.i_(B.i_).B.i_.query.get.map(_ ==> List("b"))
 
-        // Filter compare attribute itself
         _ <- A.s.i(B.i_).B.i(3).query.get.map(_ ==> List(("b", 3, 3)))
         _ <- A.s.i(B.i_).B.i.not(3).query.get.map(_ ==> List())
         _ <- A.s.i(B.i_).B.i.>(3).query.get.map(_ ==> List())
@@ -61,7 +60,6 @@ trait CrossNs extends CoreTestSuite with Api_async { spi: Spi_async =>
         _ <- A.s.i_.B.i(A.i_).query.get.map(_ ==> List(("b", 3))) // A.i
         _ <- A.s.i_.B.i_(A.i_).query.get.map(_ ==> List("b"))
 
-        // Filter compare attribute itself
         _ <- A.s.i(3).B.i(A.i_).query.get.map(_ ==> List(("b", 3, 3)))
         _ <- A.s.i.not(3).B.i(A.i_).query.get.map(_ ==> List())
         _ <- A.s.i.>(3).B.i(A.i_).query.get.map(_ ==> List())
@@ -106,7 +104,6 @@ trait CrossNs extends CoreTestSuite with Api_async { spi: Spi_async =>
         _ <- A.s.a1.i_.not(B.i_).B.i.query.get.map(_ ==> List(("a", 2), ("c", 4)))
         _ <- A.s.a1.i_.not(B.i_).B.i_.query.get.map(_ ==> List("a", "c"))
 
-        // Filter compare attribute itself
         _ <- A.s.i.not(B.i_).B.i(2).query.get.map(_ ==> List(("a", 1, 2)))
         _ <- A.s.i.not(B.i_).B.i.not(2).query.get.map(_ ==> List(("c", 5, 4)))
         _ <- A.s.i.not(B.i_).B.i.>(4).query.get.map(_ ==> List())
@@ -143,7 +140,6 @@ trait CrossNs extends CoreTestSuite with Api_async { spi: Spi_async =>
         _ <- A.s.a1.i_.B.i.not(A.i_).query.get.map(_ ==> List(("a", 2), ("c", 4)))
         _ <- A.s.a1.i_.B.i_.not(A.i_).query.get.map(_ ==> List("a", "c"))
 
-        // Filter compare attribute itself
         _ <- A.s.i(1).B.i.not(A.i_).query.get.map(_ ==> List(("a", 1, 2)))
         _ <- A.s.i.not(1).B.i.not(A.i_).query.get.map(_ ==> List(("c", 5, 4)))
         _ <- A.s.i.>(5).B.i.not(A.i_).query.get.map(_ ==> List())
@@ -188,7 +184,6 @@ trait CrossNs extends CoreTestSuite with Api_async { spi: Spi_async =>
         _ <- A.s.i_.<(B.i_).B.i.query.get.map(_ ==> List(("a", 2)))
         _ <- A.s.i_.<(B.i_).B.i_.query.get.map(_ ==> List("a"))
 
-        // Filter compare attribute itself
         _ <- A.s.i.<(B.i_).B.i(2).query.get.map(_ ==> List(("a", 1, 2)))
         _ <- A.s.i.<(B.i_).B.i.not(2).query.get.map(_ ==> List())
         _ <- A.s.i.<(B.i_).B.i.>(2).query.get.map(_ ==> List())
@@ -225,7 +220,6 @@ trait CrossNs extends CoreTestSuite with Api_async { spi: Spi_async =>
         _ <- A.s.i_.B.i.<(A.i_).query.get.map(_ ==> List(("c", 4)))
         _ <- A.s.i_.B.i_.<(A.i_).query.get.map(_ ==> List("c"))
 
-        // Filter compare attribute itself
         _ <- A.s.i(5).B.i.<(A.i_).query.get.map(_ ==> List(("c", 5, 4)))
         _ <- A.s.i.not(5).B.i.<(A.i_).query.get.map(_ ==> List())
         _ <- A.s.i.>(5).B.i.<(A.i_).query.get.map(_ ==> List())
@@ -270,7 +264,6 @@ trait CrossNs extends CoreTestSuite with Api_async { spi: Spi_async =>
         _ <- A.s.a1.i_.<=(B.i_).B.i.query.get.map(_ ==> List(("a", 2), ("b", 3)))
         _ <- A.s.a1.i_.<=(B.i_).B.i_.query.get.map(_ ==> List("a", "b"))
 
-        // Filter compare attribute itself
         _ <- A.s.a1.i.<=(B.i_).B.i(2).query.get.map(_ ==> List(("a", 1, 2)))
         _ <- A.s.a1.i.<=(B.i_).B.i.not(2).query.get.map(_ ==> List(("b", 3, 3)))
         _ <- A.s.a1.i.<=(B.i_).B.i.>(2).query.get.map(_ ==> List(("b", 3, 3)))
@@ -307,7 +300,6 @@ trait CrossNs extends CoreTestSuite with Api_async { spi: Spi_async =>
         _ <- A.s.a1.i_.B.i.<=(A.i_).query.get.map(_ ==> List(("b", 3), ("c", 4)))
         _ <- A.s.a1.i_.B.i_.<=(A.i_).query.get.map(_ ==> List("b", "c"))
 
-        // Filter compare attribute itself
         _ <- A.s.a1.i(5).B.i.<=(A.i_).query.get.map(_ ==> List(("c", 5, 4)))
         _ <- A.s.a1.i.not(5).B.i.<=(A.i_).query.get.map(_ ==> List(("b", 3, 3)))
         _ <- A.s.a1.i.>(5).B.i.<=(A.i_).query.get.map(_ ==> List())
@@ -352,7 +344,6 @@ trait CrossNs extends CoreTestSuite with Api_async { spi: Spi_async =>
         _ <- A.s.i_.>(B.i_).B.i.query.get.map(_ ==> List(("c", 4)))
         _ <- A.s.i_.>(B.i_).B.i_.query.get.map(_ ==> List("c"))
 
-        // Filter compare attribute itself
         _ <- A.s.i.>(B.i_).B.i(4).query.get.map(_ ==> List(("c", 5, 4)))
         _ <- A.s.i.>(B.i_).B.i.not(4).query.get.map(_ ==> List())
         _ <- A.s.i.>(B.i_).B.i.>(4).query.get.map(_ ==> List())
@@ -389,7 +380,6 @@ trait CrossNs extends CoreTestSuite with Api_async { spi: Spi_async =>
         _ <- A.s.i_.B.i.>(A.i_).query.get.map(_ ==> List(("a", 2)))
         _ <- A.s.i_.B.i_.>(A.i_).query.get.map(_ ==> List("a"))
 
-        // Filter compare attribute itself
         _ <- A.s.i(1).B.i.>(A.i_).query.get.map(_ ==> List(("a", 1, 2)))
         _ <- A.s.i.not(1).B.i.>(A.i_).query.get.map(_ ==> List())
         _ <- A.s.i.>(1).B.i.>(A.i_).query.get.map(_ ==> List())
@@ -434,7 +424,6 @@ trait CrossNs extends CoreTestSuite with Api_async { spi: Spi_async =>
         _ <- A.s.a1.i_.>=(B.i_).B.i.query.get.map(_ ==> List(("b", 3), ("c", 4)))
         _ <- A.s.a1.i_.>=(B.i_).B.i_.query.get.map(_ ==> List("b", "c"))
 
-        // Filter compare attribute itself
         _ <- A.s.a1.i.>=(B.i_).B.i(3).query.get.map(_ ==> List(("b", 3, 3)))
         _ <- A.s.a1.i.>=(B.i_).B.i.not(3).query.get.map(_ ==> List(("c", 5, 4)))
         _ <- A.s.a1.i.>=(B.i_).B.i.>(3).query.get.map(_ ==> List(("c", 5, 4)))
@@ -471,7 +460,6 @@ trait CrossNs extends CoreTestSuite with Api_async { spi: Spi_async =>
         _ <- A.s.a1.i_.B.i.>=(A.i_).query.get.map(_ ==> List(("a", 2), ("b", 3)))
         _ <- A.s.a1.i_.B.i_.>=(A.i_).query.get.map(_ ==> List("a", "b"))
 
-        // Filter compare attribute itself
         _ <- A.s.a1.i(1).B.i.>=(A.i_).query.get.map(_ ==> List(("a", 1, 2)))
         _ <- A.s.a1.i.not(1).B.i.>=(A.i_).query.get.map(_ ==> List(("b", 3, 3)))
         _ <- A.s.a1.i.>(1).B.i.>=(A.i_).query.get.map(_ ==> List(("b", 3, 3)))
