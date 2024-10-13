@@ -42,13 +42,18 @@ case class SubUnique[Tpl](
     val attrsTokens = allTokens.drop(2).grouped(13).toList.sortBy(_(2))
 
     val (uniqueIndex, uniqueValues) = {
-      val List(_, _, _, tpe, _, _, i, a, b, c, x, y, z) = attrsTokens.find(_.head == "UNIQUE").get
+      val List(_, _, _, tpe, _, _, i, a, b, c, x, y, z) =
+        attrsTokens.find(_.head == "UNIQUE").get
 
-      val uniqueValues = (if (forward) List(z, y, x) else List(a, b, c)).filter(_.nonEmpty).map(decoder(tpe))
+      val uniqueValues = (if (forward)
+        List(z, y, x)
+      else
+        List(a, b, c)).filter(_.nonEmpty).map(decoder(tpe))
       (i.toInt, uniqueValues)
     }
 
-    val identifyTpl = (tpl: Tpl) => tpl.asInstanceOf[Product].productElement(uniqueIndex)
+    val identifyTpl = (tpl: Tpl) =>
+      tpl.asInstanceOf[Product].productElement(uniqueIndex)
 
     paginateFromIdentifiers(
       conn,

@@ -175,7 +175,7 @@ trait Update_datomic
             ids.foreach(e => appendStmt(retract, e, a, currentValue.asInstanceOf[AnyRef]))
             attrIndex += 1
         }
-      case vs     => throw ExecutionError(
+      case vs     => throw ModelError(
         s"Can only update one value for attribute `$ns.$attr`. Found: " + vs.mkString(", ")
       )
     }

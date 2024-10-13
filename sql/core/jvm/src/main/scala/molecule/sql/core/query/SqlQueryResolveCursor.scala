@@ -62,7 +62,9 @@ case class SqlQueryResolveCursor[Tpl](
         case c: CastTuple   => handleTuples(c, limit, forward, sortedRows, conn)
         case c: CastOptRefs => handleTuples(c, limit, forward, sortedRows, conn)
         case c: CastNested  => handleNested(c, limit, forward, sortedRows, conn)
-        case _                   => ???
+        case other          => throw ModelError(
+          "Un-allowed element for cursor pagination: " + other
+        )
       }
     }
   }

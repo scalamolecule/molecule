@@ -1,6 +1,6 @@
 package molecule.datalog.datomic
 
-import datomic.{Peer, Util}
+import datomic.{Database, Peer, Util}
 import molecule.base.error.ModelError
 import molecule.boilerplate.api.{NestedInit_01, NestedInit_02}
 import molecule.core.util.Executor._
@@ -13,72 +13,23 @@ import scala.language.implicitConversions
 //object AdhocJVM_datomic extends TestSuite_datomic_array {
 object AdhocJVM_datomic extends TestSuite_datomic {
 
-
-  //  val (a1, a2, b2) = ("a" -> int1, "a" -> int2, "b" -> int2)
-  //  val (b3, c4)     = ("b" -> int3, "c" -> int4)
-
-  //  val a = (1, Map(a1, b2))
-  //  val b = (2, Map(a2, b3, c4))
-
-  val a = (1, Map("a" -> int1, "b" -> int2))
-  val b = (2, Map("a" -> int2, "b" -> int3, "c" -> int4))
-
-
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
-      //          val (a1, b2) = ("a" -> int1, "b" -> int2)
-      //          val (b3, c4) = ("b" -> int3, "c" -> int4)
-
       for {
 
-        //            _ <- Ns.i.intMap.insert(List(
-        //              (1, Map(a1, b2)),
-        //              (2, Map(b3, c4)),
-        //            )).transact
-        //
-        //            _ <- Ns.i.a1.intMap_.hasNo(List.empty[Int]).query.get.map(_ ==> List(1, 2))
+        _ <- Ns.int(3).save.transact
+        _ <- Ns.int.query.get.map(_ ==> List(3))
 
 
-//        _ <- Ns.i(0).save.transact
-        _ <- Ns.i.intMap.insert(a, b).transact
-
-
-//        _ = Peer.q(
-//          """[:find  ?b ?c
-//            | :in    $ ?c1
-//            | :where [?a :Ns/i ?b]
-//            |        [?a :Ns/intMap _]
-//            |        [(datomic.api/q
-//            |          "[:find (distinct ?c-v)
-//            |            :in $ ?a
-//            |            :where [?a :Ns/intMap ?c]
-//            |                   [?c :Ns.intMap/v_ ?c-v]]" $ ?a) [[?c2]]]
-//            |        [(set ?c1) ?c3]
-//            |        [(clojure.set/intersection ?c2 ?c3) ?c4]
-//            |        [(empty? ?c4)]
-//            |        [(datomic.api/q
-//            |          "[:find (distinct ?c-pair)
-//            |            :in $ ?a
-//            |            :where [?a :Ns/intMap ?c]
-//            |                   [?c :Ns.intMap/k_ ?c-k]
-//            |                   [?c :Ns.intMap/v_ ?c-v]
-//            |                   [(vector ?c-k ?c-v) ?c-pair]]" $ ?a) [[?c]]]
-//            |        ]
-//            |""".stripMargin, conn.db, Set(1).asJava
-//        ).forEach(r => println(r))
-
-
-        _ <- Ns.i(3).save.transact // entity without intMap
-
-        // Like calling `get` on a Scala Map.
-        _ <- Ns.i.a1.intMap_?("_").query.get.map(_ ==> List((1, None), (2, None), (3, None)))
-        _ <- Ns.i.a1.intMap_?("a").query.get.map(_ ==> List((1, Some(int1)), (2, Some(int2)), (3, None)))
-        _ <- Ns.i.a1.intMap_?("b").query.get.map(_ ==> List((1, Some(int2)), (2, Some(int3)), (3, None)))
-        _ <- Ns.i.a1.intMap_?("c").query.get.map(_ ==> List((1, None), (2, Some(int4)), (3, None)))
+        //        _ = Peer.q(
+        //          """[:find  ?tx ?e ?v ?op
+        //            | :where [?e :Ns/int ?v ?tx ?op]]
+        //            |""".stripMargin, conn.db.asInstanceOf[Database].history()
+        //        ).forEach(r => println(r))
 
 
       } yield ()
@@ -101,9 +52,9 @@ object AdhocJVM_datomic extends TestSuite_datomic {
 
 
     //    "unique" - unique { implicit conn =>
-    //      import molecule.coreTests.dataModels.dsl.Uniques._
+    //      import molecule.coreTests.dataModels.dsl.Ns._
     //      for {
-    //        _ <- Uniques.int.s.i.insert(triples).transact
+    //        _ <- Ns.int.s.i.insert(triples).transact
     //
     //      } yield ()
     //    }

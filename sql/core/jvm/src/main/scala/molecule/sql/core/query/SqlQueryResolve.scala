@@ -1,5 +1,6 @@
 package molecule.sql.core.query
 
+import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.core.query.Pagination
 import molecule.core.util.ModelUtils
@@ -119,15 +120,18 @@ abstract class SqlQueryResolve[Tpl](
       (Nil, "", false)
     } else {
       m2q.castStrategy match {
-        case c: CastTuple  => paginateTuples(c, limit, forward, allTokens, identifiers, identifyTpl, nextCursor, sortedRows, conn)
-        case c: CastNested => paginateNested(c, limit, forward, allTokens, identifiers, identifyTpl, nextCursor, sortedRows)
-        case _             => ???
+        case c: CastTuple   => paginateTuples(c, limit, forward, allTokens, identifiers, identifyTpl, nextCursor, sortedRows, conn)
+        case c: CastOptRefs => paginateTuples(c, limit, forward, allTokens, identifiers, identifyTpl, nextCursor, sortedRows, conn)
+        case c: CastNested  => paginateNested(c, limit, forward, allTokens, identifiers, identifyTpl, nextCursor, sortedRows)
+        case other          => throw ModelError(
+          "Un-allowed element for cursor pagination: " + other
+        )
       }
     }
   }
 
-  protected def paginateTuples(
-    c: CastTuple,
+  private def paginateTuples(
+    c: CastStrategy,
     limit: Int,
     forward: Boolean,
     allTokens: List[String],
@@ -143,7 +147,7 @@ abstract class SqlQueryResolve[Tpl](
 
   }
 
-  protected def paginateNested(
+  private def paginateNested(
     c: CastNested,
     limit: Int,
     forward: Boolean,

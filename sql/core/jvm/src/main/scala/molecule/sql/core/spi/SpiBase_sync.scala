@@ -363,7 +363,7 @@ trait SpiBase_sync
     metaData: ResultSetMetaData
   ): Unit = {
     println("\n=============================================================================")
-    println(query)
+    println(query.trim)
     val max      = 10
     val showRows = rows.length - max match {
       case 1          => rows.take(max) :+ "1 more row..."
@@ -396,7 +396,7 @@ trait SpiBase_sync
       println(col + padS(maxCol + sep, col) + tpe + padS(maxTpe + sep, tpe) + dbTpe)
     }
 
-    println(showRows.mkString("List(\n  ", ",\n  ", "\n)\n"))
+    println("\n" + showRows.mkString("List(\n  ", ",\n  ", "\n)\n"))
     tpeLine(col, tpe, dbTpe)
     println("-" * (maxCol + sep + maxTpe + sep + maxDbTpe))
     typeData.foreach {

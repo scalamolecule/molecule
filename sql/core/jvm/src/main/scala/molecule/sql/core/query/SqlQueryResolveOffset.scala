@@ -1,5 +1,6 @@
 package molecule.sql.core.query
 
+import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.util.Executor.global
@@ -29,7 +30,9 @@ case class SqlQueryResolveOffset[Tpl](
       case c: CastTuple   => handleTuples(c, sortedRows, conn)
       case c: CastOptRefs => handleTuples(c, sortedRows, conn)
       case c: CastNested  => handleNested(c, sortedRows, conn)
-      case _              => ???
+      case other          => throw ModelError(
+        "Un-allowed element for offset pagination: " + other
+      )
     }
   }
 

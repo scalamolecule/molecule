@@ -116,7 +116,7 @@ trait SqlUpdate
 
       case vs =>
         val cleanAttr = attr.replace("_", "")
-        throw ExecutionError(
+        throw ModelError(
           s"Can only update one value for attribute `$ns.$cleanAttr`. " +
             s"Found: " + vs.mkString(", ")
         )

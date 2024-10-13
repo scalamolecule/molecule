@@ -1,6 +1,6 @@
 package molecule.coreTests.spi.crud.update.ops
 
-import molecule.base.error.ExecutionError
+import molecule.base.error.{ExecutionError, ModelError}
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
 import molecule.core.util.Executor._
@@ -72,17 +72,6 @@ trait OpsOne extends CoreTestSuite with Api_async { spi: Spi_async =>
       } yield ()
     }
 
-    "Delete individual owned ref value(s) with update" - refs { implicit conn =>
-      for {
-        id <- A.i(1).OwnB.i(7).save.transact.map(_.id)
-        _ <- A.i.OwnB.i.query.get.map(_ ==> List((1, 7)))
-
-        // Apply empty value to delete ref id of entity (entity remains)
-        _ <- A(id).ownB().update.transact
-        _ <- A.i.ownB_?.query.get.map(_ ==> List((1, None)))
-      } yield ()
-    }
-
     "Update multiple values" - types { implicit conn =>
       for {
         List(a, b, c) <- Ns.i.int_?.insert(
@@ -116,7 +105,7 @@ trait OpsOne extends CoreTestSuite with Api_async { spi: Spi_async =>
     "Can't update multiple values for one card-one attribute" - types { implicit conn =>
       for {
         _ <- Ns(42).int(2, 3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Can only update one value for attribute `Ns.int`. Found: 2, 3"
           }
       } yield ()

@@ -14,12 +14,12 @@ trait MutationDelete extends CoreTestSuite with Api_async { spi: Spi_async =>
 
   @tailrec
   final def getPairs(n: Int, acc: List[(Int, Int)]): List[(Int, Int)] = {
-    if (acc.length != n) {
+    if (acc.length == n) {
+      acc
+    } else {
       val pair = (Random.nextInt(3) + 1, Random.nextInt(n + 1) + 1)
       // No duplicate rows
       if (!acc.contains(pair)) getPairs(n, acc :+ pair) else getPairs(n, acc)
-    } else {
-      acc
     }
   }
 

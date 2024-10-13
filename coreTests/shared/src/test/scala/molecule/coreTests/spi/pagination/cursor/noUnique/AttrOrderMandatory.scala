@@ -13,7 +13,9 @@ trait AttrOrderMandatory extends CoreTestSuite with Api_async { spi: Spi_async =
 
   @tailrec
   final def getTriples(acc: List[(String, Int, Int)]): List[(String, Int, Int)] = {
-    if (acc.length != 5) {
+    if (acc.length == 5) {
+      acc
+    } else {
       val pair = (
         ('a' + scala.util.Random.nextInt(3)).toChar.toString, // "a" or "b"
         Random.nextInt(3) + 1,
@@ -21,8 +23,6 @@ trait AttrOrderMandatory extends CoreTestSuite with Api_async { spi: Spi_async =
       )
       // No duplicate rows
       if (!acc.contains(pair)) getTriples(acc :+ pair) else getTriples(acc)
-    } else {
-      acc
     }
   }
 

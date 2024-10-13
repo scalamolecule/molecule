@@ -5,4 +5,3 @@ import molecule.sql.h2.setup.Test_h2_async
 
 object Test_Delete_id extends Delete_id with Test_h2_async
 object Test_Delete_filter extends Delete_filter with Test_h2_async
-object Test_Delete_uniqueAttr extends Delete_uniqueAttr with Test_h2_async

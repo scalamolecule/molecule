@@ -13,15 +13,15 @@ trait DirectionsOptional extends CoreTestSuite with Api_async { spi: Spi_async =
 
   @tailrec
   final def getPairs(acc: List[(Int, Option[Int])]): List[(Int, Option[Int])] = {
-    if (acc.length != 5) {
+    if (acc.length == 5) {
+      acc
+    } else {
       val pair = (
         Random.nextInt(3) + 1,
         if (Random.nextInt(3) + 1 == 1) Some(Random.nextInt(6) + 1) else None
       )
       // No duplicate rows
       if (!acc.contains(pair)) getPairs(acc :+ pair) else getPairs(acc)
-    } else {
-      acc
     }
   }
 

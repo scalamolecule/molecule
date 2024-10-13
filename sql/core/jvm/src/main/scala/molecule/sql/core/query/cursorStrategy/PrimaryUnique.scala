@@ -1,18 +1,20 @@
 package molecule.sql.core.query.cursorStrategy
 
+import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.ops.ModelTransformations_
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.query.Pagination
 import molecule.core.util.FutureUtils
 import molecule.sql.core.facade.JdbcConn_JVM
-import molecule.sql.core.query.casting.strategy.{CastNested, CastTuple}
+import molecule.sql.core.query.casting.strategy.{CastNested, CastOptRefs, CastTuple}
 import molecule.sql.core.query.{Model2SqlQuery, SqlQueryBase, SqlQueryResolve}
 
 /**
  * Molecule has a unique attribute that is sorted first.
  *
- * Then we can easily filter by its previous value in either direction.
+ * Then we can easily filter by its previous value in either direction
+ * to skip previously shown data.
  *
  * @param elements Molecule model
  * @param optLimit When going forward from start, use a positive number.
@@ -44,9 +46,12 @@ case class PrimaryUnique[Tpl](
       (Nil, "", false)
     } else {
       m2q.castStrategy match {
-        case c: CastTuple  => handleTuples(c, limit, forward, sortedRows, conn)
-        case c: CastNested => handleNested(c, limit, forward, sortedRows, conn)
-        case _             => ???
+        case c: CastTuple   => handleTuples(c, limit, forward, sortedRows, conn)
+        case c: CastOptRefs => handleTuples(c, limit, forward, sortedRows, conn)
+        case c: CastNested  => handleNested(c, limit, forward, sortedRows, conn)
+        case other          => throw ModelError(
+          "Un-allowed element for primary unique cursor pagination: " + other
+        )
       }
     }
   }

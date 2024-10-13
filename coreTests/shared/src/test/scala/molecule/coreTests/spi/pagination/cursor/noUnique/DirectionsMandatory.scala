@@ -13,12 +13,12 @@ trait DirectionsMandatory extends CoreTestSuite with Api_async { spi: Spi_async 
 
   @tailrec
   final def getPairs(acc: List[(Int, Int)]): List[(Int, Int)] = {
-    if (acc.length != 5) {
+    if (acc.length == 5) {
+      acc
+    } else {
       val pair = (Random.nextInt(3) + 1, Random.nextInt(6) + 1)
       // No duplicate rows
       if (!acc.contains(pair)) getPairs(acc :+ pair) else getPairs(acc)
-    } else {
-      acc
     }
   }
 

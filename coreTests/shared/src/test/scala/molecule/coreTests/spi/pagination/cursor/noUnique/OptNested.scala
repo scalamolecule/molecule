@@ -13,12 +13,12 @@ trait OptNested extends CoreTestSuite with Api_async { spi: Spi_async =>
 
   @tailrec
   final def getData(acc: List[(Int, Int, List[Int])]): List[(Int, Int, List[Int])] = {
-    if (acc.length != 5) {
+    if (acc.length == 5) {
+      acc
+    } else {
       val pair = (Random.nextInt(3) + 1, Random.nextInt(6) + 1, List(1))
       // No duplicate rows
       if (!acc.contains(pair)) getData(acc :+ pair) else getData(acc)
-    } else {
-      acc
     }
   }
 
