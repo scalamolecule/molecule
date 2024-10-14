@@ -25,15 +25,13 @@ object AdhocJVM_h2 extends TestSuite_h2 {
 
       for {
 
-//        List(a, b) <- Ns.int.insert(1, 2).transact.map(_.ids)
-//        _ <- Ns.int(3).save.transact
-//        _ <- Ns.int.a1.query.get.map(_ ==> List(1, 2, 3))
-//        _ <- Ns(a).int(10).update.transact
-//        _ <- Ns(b).delete.transact
-//        _ <- Ns.int.a1.query.get.map(_ ==> List(3, 10))
+        List(a, b) <- Ns.int.insert(1, 2).transact.map(_.ids)
+        _ <- Ns.int(3).save.transact
+        _ <- Ns.int.a1.query.get.map(_ ==> List(1, 2, 3))
+        _ <- Ns(a).int(10).update.transact
+        _ <- Ns(b).delete.transact
+        _ <- Ns.int.a1.query.get.map(_ ==> List(3, 10))
 
-        _ <- Ns.localTime(localTime1).save.i.transact
-        _ <- Ns.localTime.query.get.map(_ ==> List(localTime1))
 
       } yield ()
     }

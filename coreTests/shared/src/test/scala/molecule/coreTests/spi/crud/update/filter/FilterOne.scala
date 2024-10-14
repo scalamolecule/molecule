@@ -157,7 +157,7 @@ trait FilterOne extends CoreTestSuite with Api_async { spi: Spi_async =>
     }
 
 
-    "Range" - types { implicit conn =>
+    "Comparison" - types { implicit conn =>
       for {
         List(a, b, c) <- Ns.i.int.insert(
           (1, 1),
@@ -202,6 +202,29 @@ trait FilterOne extends CoreTestSuite with Api_async { spi: Spi_async =>
           (a, 1, 7),
           (b, 1, 7),
           (c, 2, 7),
+        ))
+      } yield ()
+    }
+
+
+    "Multiple filters" - types { implicit conn =>
+      for {
+        _ <- Ns.i.int.insert(
+          (1, 1),
+          (2, 2),
+          (3, 3),
+          (4, 4),
+        ).transact
+
+        // Update all entities where `i` is between 1 and 4
+        _ <- Ns.i_.>(1).i_.<(4).int(5).update.transact
+
+        // 2 entities deleted
+        _ <- Ns.i.a1.int.query.get.map(_ ==> List(
+          (1, 1),
+          (2, 5), // updated
+          (3, 5), // updated
+          (4, 4),
         ))
       } yield ()
     }

@@ -165,7 +165,10 @@ case class TxModelValidation(
 
     if (prev(level)(group).contains(attrPrefixed))
       dup(attr)
-    prev(level)(group) = prev(level)(group) :+ attrPrefixed
+
+    // Allow duplicate tacit update filter attributes (for ranges etc.)
+    if (!a.isInstanceOf[Tacit])
+      prev(level)(group) = prev(level)(group) :+ attrPrefixed
   }
 
   private def onlyMandatory(a: Attr) = {

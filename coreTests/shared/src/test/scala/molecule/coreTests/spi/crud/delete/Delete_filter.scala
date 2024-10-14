@@ -41,18 +41,42 @@ trait Delete_filter extends CoreTestSuite with Api_async { spi: Spi_async =>
       } yield ()
     }
 
-    "Multiple entities deleted" - types { implicit conn =>
-      import molecule.coreTests.dataModels.dsl.Types._
-      for {
-        _ <- Ns.int.insert(1, 2, 3).transact
-        _ <- Ns.int_(1, 2).delete.transact
-        _ <- Ns.int.query.get.map(_ ==> List(3))
-      } yield ()
-    }
 
-
-    "Expression" - {
+    "Filters" - {
       import molecule.coreTests.dataModels.dsl.Types._
+
+      "not null" - types { implicit conn =>
+        for {
+          _ <- Ns.string.insert(string1, string2).transact
+          _ <- Ns.int.insert(int1, int2).transact
+
+          _ <- Ns.int_.delete.transact
+
+          _ <- Ns.string.int_?.query.get.map(_ ==> List(
+            (string1, None),
+            (string2, None),
+          ))
+        } yield ()
+      }
+
+      "null" - types { implicit conn =>
+        for {
+          _ <- Ns.string.insert(string1, string2).transact
+          _ <- Ns.int.insert(int1, int2).transact
+
+          _ <- if (database == "Datomic") {
+            // Datomic needs at least one present attribute (string_ here)
+            Ns.string_.int_().delete.transact
+          } else {
+            Ns.int_().delete.transact
+          }
+
+          _ <- Ns.string_?.int.query.get.map(_ ==> List(
+            (None, int1),
+            (None, int2),
+          ))
+        } yield ()
+      }
 
       "equal 0" - types { implicit conn =>
         for {
@@ -136,7 +160,8 @@ trait Delete_filter extends CoreTestSuite with Api_async { spi: Spi_async =>
       }
     }
 
-    "Multiple expressions" - refs { implicit conn =>
+
+    "Multiple filters" - refs { implicit conn =>
       for {
         _ <- A.i.s.insert(
           (1, "a"),
@@ -157,6 +182,19 @@ trait Delete_filter extends CoreTestSuite with Api_async { spi: Spi_async =>
           (1, "a"),
           (3, "c"),
         ))
+      } yield ()
+    }
+
+
+    "Range" - refs { implicit conn =>
+      for {
+        _ <- A.i.insert(1, 2, 3, 4).transact
+
+        // Delete all entities where `i` is between 1 and 4
+        _ <- A.i_.>(1).i_.<(4).delete.transact
+
+        // 2 entities deleted
+        _ <- A.i.a1.query.get.map(_ ==> List(1, 4))
       } yield ()
     }
 
