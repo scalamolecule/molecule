@@ -73,7 +73,8 @@ trait AttrOpInteger_Byte_ extends CoreTestSuite with Api_async { spi: Spi_async 
       for {
         ids <- Ns.byte.insert(-1.toByte, byte2).transact.map(_.ids)
         _ <- Ns(ids).byte.absNeg.update.transact
-        _ <- Ns.byte.d1.query.get.map(_ ==> List(-1.toByte, -2.toByte))
+        // (sorting on result to avoid incorrect sorting of negative BigInt in SQlite)
+        _ <- Ns.byte.query.get.map(_.sorted.reverse ==> List(-1.toByte, -2.toByte))
       } yield ()
     }
 

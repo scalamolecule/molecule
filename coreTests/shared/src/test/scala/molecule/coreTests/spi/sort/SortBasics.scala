@@ -417,29 +417,5 @@ trait SortBasics extends CoreTestSuite with Api_async { spi: Spi_async =>
           }
       } yield ()
     }
-
-
-    "Sorting negative BigInt and BigDecimal in SQlite incorrect" - types { implicit conn =>
-      if (database == "SQlite") {
-        for {
-          _ <- Ns.bigInt.a1.query.get
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-              err ==>
-                "Can't sort BigInt and BigDecimal attribute values correctly since " +
-                  "SQlite forces us to save data as text strings that don't " +
-                  "sort correctly lexicographically for negative numbers"
-            }
-
-          _ <- Ns.bigDecimal.a1.query.get
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-              err ==>
-                "Can't sort BigInt and BigDecimal attribute values correctly since " +
-                  "SQlite forces us to save data as text strings that don't " +
-                  "sort correctly lexicographically for negative numbers"
-            }
-
-        } yield ()
-      }
-    }
   }
 }

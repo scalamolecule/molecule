@@ -72,7 +72,8 @@ trait AttrOpDecimal_Double extends CoreTestSuite with Api_async { spi: Spi_async
       for {
         ids <- Ns.double.insert(-double1, double2).transact.map(_.ids)
         _ <- Ns(ids).double.absNeg.update.transact
-        _ <- Ns.double.d1.query.get.map(_ ==> List(-double1, -double2))
+        // (sorting on result to avoid incorrect sorting of negative BigDecimal in SQlite)
+        _ <- Ns.double.query.get.map(_.sorted.reverse ==> List(-double1, -double2))
       } yield ()
     }
 

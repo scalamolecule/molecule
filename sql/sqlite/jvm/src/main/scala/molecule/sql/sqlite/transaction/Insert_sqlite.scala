@@ -5,10 +5,9 @@ import java.util.Date
 import molecule.core.transaction.{InsertResolvers_, ResolveInsert}
 import molecule.sql.core.transaction.SqlInsert
 import molecule.sql.core.transaction.strategy.SqlOps
-import molecule.sql.sqlite.util.BigEncoding
 
 trait Insert_sqlite
-  extends SqlInsert with BigEncoding { self: ResolveInsert with InsertResolvers_ with SqlOps =>
+  extends SqlInsert { self: ResolveInsert with InsertResolvers_ with SqlOps =>
 
   override protected def addSet[T](
     ns: String,
@@ -186,9 +185,6 @@ trait Insert_sqlite
   // Save Floats as Doubles (REAL PRECISION) in SQlite
   override protected lazy val transformFloat =
     (v: Float) => (ps: PS, n: Int) => ps.setDouble(n, v.toString.toDouble)
-
-//  override protected lazy val transformBigInt =
-//    (v: BigInt) => (ps: PS, n: Int) => ps.setString(n, encodeBigInt(v))
 
   override protected lazy val transformDate =
     (v: Date) => (ps: PS, n: Int) => ps.setLong(n, v.getTime)

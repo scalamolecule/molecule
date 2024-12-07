@@ -9,7 +9,7 @@ import molecule.coreTests.dataModels.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
-trait AttrOpInteger_BigInt extends CoreTestSuite with Api_async { spi: Spi_async =>
+trait AttrOpInteger_BigInt_ extends CoreTestSuite with Api_async { spi: Spi_async =>
 
   override lazy val tests = Tests {
 
@@ -58,7 +58,6 @@ trait AttrOpInteger_BigInt extends CoreTestSuite with Api_async { spi: Spi_async
         ids <- Ns.bigInt.insert(-bigInt1, bigInt2).transact.map(_.ids)
         _ <- Ns(ids).bigInt.negate.update.transact
         _ <- Ns.bigInt.d1.query.get.map(_ ==> List(bigInt1, -bigInt2))
-//        _ <- Ns.bigInt.query.get.map(_.sorted.reverse ==> List(bigInt1, -bigInt2))
       } yield ()
     }
 
@@ -67,7 +66,6 @@ trait AttrOpInteger_BigInt extends CoreTestSuite with Api_async { spi: Spi_async
         ids <- Ns.bigInt.insert(-bigInt1, bigInt2).transact.map(_.ids)
         _ <- Ns(ids).bigInt.abs.update.transact
         _ <- Ns.bigInt.a1.query.get.map(_ ==> List(bigInt1, bigInt2))
-//        _ <- Ns.bigInt.query.get.map(_.sorted ==> List(bigInt1, bigInt2))
       } yield ()
     }
 
@@ -75,8 +73,8 @@ trait AttrOpInteger_BigInt extends CoreTestSuite with Api_async { spi: Spi_async
       for {
         ids <- Ns.bigInt.insert(-bigInt1, bigInt2).transact.map(_.ids)
         _ <- Ns(ids).bigInt.absNeg.update.transact
-//        _ <- Ns.bigInt.query.get.map(_.sorted.reverse ==> List(-bigInt1, -bigInt2))
-        _ <- Ns.bigInt.d1.query.get.map(_ ==> List(-bigInt1, -bigInt2))
+        // (sorting on result to avoid incorrect sorting of negative BigInt in SQlite)
+        _ <- Ns.bigInt.query.get.map(_.sorted.reverse ==> List(-bigInt1, -bigInt2))
       } yield ()
     }
 

@@ -4,10 +4,12 @@ import java.sql.{PreparedStatement => PS}
 import molecule.core.transaction.ResolveUpdate
 import molecule.sql.core.transaction.SqlUpdate
 import molecule.sql.core.transaction.strategy.SqlOps
-import molecule.sql.sqlite.util.BigEncoding
 
 trait Update_sqlite
-  extends SqlUpdate with BigEncoding { self: ResolveUpdate with SqlOps =>
+  extends SqlUpdate { self: ResolveUpdate with SqlOps =>
+
+  override def handleReplaceAll[T](attr: String, vs: Seq[T]) = s"REPLACE($attr, ?, '${vs(1)}')"
+
 
   override def updateSetEq[T](
     ns: String,
@@ -278,8 +280,4 @@ trait Update_sqlite
       }
     }
   }
-
-
-//  override protected lazy val transformBigInt =
-//    (v: BigInt) => (ps: PS, n: Int) => ps.setString(n, encodeBigInt(v))
 }

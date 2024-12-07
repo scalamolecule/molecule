@@ -39,11 +39,21 @@ trait AttrOp_String extends CoreTestSuite with Api_async { spi: Spi_async =>
 
 
     "replaceAll" - types { implicit conn =>
-      for {
-        ids <- Ns.string.insert("Hello", "World").transact.map(_.ids)
-        _ <- Ns(ids).string.replaceAll("[oW]", "X").update.transact
-        _ <- Ns.string.a1.query.get.map(_ ==> List("HellX", "XXrld"))
-      } yield ()
+      if (database == "SQlite") {
+        for {
+          ids <- Ns.string.insert("Hello", "World").transact.map(_.ids)
+          // replaceAll with SQlite matches static text ("W")
+          _ <- Ns(ids).string.replaceAll("W", "X").update.i.transact
+          _ <- Ns.string.a1.query.get.map(_ ==> List("Hello", "Xorld"))
+        } yield ()
+      } else {
+        for {
+          ids <- Ns.string.insert("Hello", "World").transact.map(_.ids)
+          // replaceAll with other database matches regex pattern ("[oW]")
+          _ <- Ns(ids).string.replaceAll("[oW]", "X").update.i.transact
+          _ <- Ns.string.a1.query.get.map(_ ==> List("HellX", "XXrld"))
+        } yield ()
+      }
     }
 
 

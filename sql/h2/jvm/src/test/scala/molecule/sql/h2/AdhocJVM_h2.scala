@@ -23,33 +23,13 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       import molecule.coreTests.dataModels.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
-
       for {
-
-//        List(a, b) <- Ns.int.insert(1, 2).transact.map(_.ids)
-////        _ <- Ns.int(3).save.transact
-////        _ <- Ns.int.a1.query.get.map(_ ==> List(1, 2, 3))
-//        _ <- Ns(a).int(10).update.i.transact
-////        _ <- Ns.int_(10).int(11).update.i.transact
-////        _ <- Ns(b).delete.transact
-////        _ <- Ns.int.a1.query.get.map(_ ==> List(3, 10))
-//
-//
-//
-////        _ <- Ns(a).int.>(10).update.inspect
-//        _ <- Ns(a).int.+(7).update.i.transact
-//        _ <- Ns(a).boolean.&&(true).update.i.transact
-//        _ <- Ns(a).boolean.||(true).update.i.transact
-//        _ <- Ns(a).boolean.!.update.i.transact
-//
-//        _ <- Ns.int.a1.query.get.map(_ ==> List(2, 17))
-
-
-
-        ids <- Ns.string.insert("Hello", "World").transact.map(_.ids)
-        _ <- Ns(ids).string.toUpper.update.transact
-        _ <- Ns.string.a1.query.get.map(_ ==> List("HELLO", "WORLD"))
-
+        List(a, b) <- Ns.int.insert(1, 2).transact.map(_.ids)
+        _ <- Ns.int(3).save.transact
+        _ <- Ns.int.a1.query.get.map(_ ==> List(1, 2, 3))
+        _ <- Ns(a).int(10).update.transact
+        _ <- Ns(b).delete.transact
+        _ <- Ns.int.a1.query.get.map(_ ==> List(3, 10))
 
 
       } yield ()

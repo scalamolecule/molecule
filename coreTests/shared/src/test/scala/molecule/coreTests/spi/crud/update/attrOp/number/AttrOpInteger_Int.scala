@@ -72,7 +72,8 @@ trait AttrOpInteger_Int extends CoreTestSuite with Api_async { spi: Spi_async =>
       for {
         ids <- Ns.int.insert(-int1, int2).transact.map(_.ids)
         _ <- Ns(ids).int.absNeg.update.transact
-        _ <- Ns.int.d1.query.get.map(_ ==> List(-int1, -int2))
+        // (sorting on result to avoid incorrect sorting of negative BigInt in SQlite)
+        _ <- Ns.int.query.get.map(_.sorted.reverse ==> List(-int1, -int2))
       } yield ()
     }
 

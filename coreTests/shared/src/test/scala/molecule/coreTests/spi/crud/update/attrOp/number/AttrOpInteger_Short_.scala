@@ -73,7 +73,8 @@ trait AttrOpInteger_Short_ extends CoreTestSuite with Api_async { spi: Spi_async
       for {
         ids <- Ns.short.insert(-1.toShort, short2).transact.map(_.ids)
         _ <- Ns(ids).short.absNeg.update.transact
-        _ <- Ns.short.d1.query.get.map(_ ==> List(-1.toShort, -2.toShort))
+        // (sorting on result to avoid incorrect sorting of negative BigInt in SQlite)
+        _ <- Ns.short.query.get.map(_.sorted.reverse ==> List(-1.toShort, -2.toShort))
       } yield ()
     }
 

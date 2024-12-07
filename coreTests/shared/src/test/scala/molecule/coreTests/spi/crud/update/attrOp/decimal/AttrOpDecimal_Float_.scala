@@ -73,7 +73,8 @@ trait AttrOpDecimal_Float_ extends CoreTestSuite with Api_async { spi: Spi_async
       for {
         ids <- Ns.float.insert(-float1, float2).transact.map(_.ids)
         _ <- Ns(ids).float.absNeg.update.transact
-        _ <- Ns.float.d1.query.get.map(_ ==> List(-float1, -float2))
+        // (sorting on result to avoid incorrect sorting of negative BigDecimal in SQlite)
+        _ <- Ns.float.query.get.map(_.sorted.reverse ==> List(-float1, -float2))
       } yield ()
     }
 
