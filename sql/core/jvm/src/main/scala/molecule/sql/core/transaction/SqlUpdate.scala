@@ -95,6 +95,8 @@ trait SqlUpdate
   }
 
 
+  def handleAppend(attr: String, cast: String) = s"($attr || ?$cast)"
+  def handlePrepend(attr: String, cast: String) = s"(?$cast || $attr)"
   def handleReplaceAll[T](attr: String, vs: Seq[T]) = s"REGEXP_REPLACE($attr, ?, '${vs(1)}')"
 
   override protected def updateOne[T](
@@ -105,6 +107,7 @@ trait SqlUpdate
     transformValue: T => Any,
     exts: List[String],
   ): Unit = {
+    lazy val cleanAttr = attr.replace("_", "")
     val cast: String = exts(2)
     op match {
       case Eq | NoValue =>
@@ -121,7 +124,6 @@ trait SqlUpdate
               ps.setNull(paramIndex, 0))
 
           case vs =>
-            val cleanAttr = attr.replace("_", "")
             throw ModelError(
               s"Can only update one value for attribute `$ns.$cleanAttr`. " +
                 s"Found: " + vs.mkString(", ")
@@ -140,8 +142,8 @@ trait SqlUpdate
         }
 
         op match {
-          case AttrOp.Append                   => handle(s"($attr || ?$cast)")
-          case AttrOp.Prepend                  => handle(s"(?$cast || $attr)")
+          case AttrOp.Append                   => handle(handleAppend(attr, cast))
+          case AttrOp.Prepend                  => handle(handlePrepend(attr, cast))
           case AttrOp.SubString(start, length) => handle(s"SUBSTRING($attr, $start, $length)")
           case AttrOp.ReplaceAll               => handle(handleReplaceAll(attr, vs))
           case AttrOp.ToLower                  => handle(s"LOWER($attr)")
@@ -162,17 +164,17 @@ trait SqlUpdate
         }
 
       case Even | Odd => throw ModelError(
-        s"$ns.$attr.even and $ns.$attr.odd can't be used with updates."
+        s"$ns.$cleanAttr.even and $ns.$cleanAttr.odd can't be used with updates."
       )
 
       case Remainder =>
         val divider = vs.head
         throw ModelError(
-          s"Please use `$ns.$attr.%($divider)` to update attribute to the remainder after dividing by $divider."
+          s"Please use `$ns.$cleanAttr.%($divider)` to update attribute to the remainder after dividing by $divider."
         )
 
       case _ => throw ModelError(
-        s"Can't update attribute $ns.$attr without an applied or computed value."
+        s"Can't update attribute $ns.$cleanAttr without an applied or computed value."
       )
     }
   }

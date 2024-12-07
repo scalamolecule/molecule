@@ -17,24 +17,44 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.dsl.Types._
-      implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+      //      implicit val tolerance = tolerantDoubleEquality(toleranceDouble)
+      implicit val tolerance = tolerantFloatEquality(toleranceFloat)
       for {
 
-        id <- Ns.i(42).save.transact.map(_.id)
+        //        id <- Ns.i(42).save.transact.map(_.id)
+        //
+        //        // Map attribute not yet asserted
+        //        _ <- Ns.intMap.query.get.map(_ ==> Nil)
+        //
+        //        // Removing pair by key from non-asserted Map has no effect
+        //        _ <- Ns(id).intMap.remove(string1).update.transact
+        //        _ <- Ns.intMap.query.get.map(_ ==> Nil)
+        //
+        //        // Start with some pairs
+        //        _ <- Ns(id).intMap.add(pint1, pint2, pint3, pint4, pint5, pint6, pint7).upsert.transact
+        //
+        //        // Remove pair by String key
+        //        _ <- Ns(id).intMap.remove(string7).update.i.transact
+        //        _ <- Ns.intMap.query.get.map(_.head ==> Map(pint1, pint2, pint3, pint4, pint5, pint6))
+        //
+        //
 
-        // Map attribute not yet asserted
-        _ <- Ns.intMap.query.get.map(_ ==> Nil)
 
-        // Removing pair by key from non-asserted Map has no effect
-        _ <- Ns(id).intMap.remove(string1).update.transact
-        _ <- Ns.intMap.query.get.map(_ ==> Nil)
 
-        // Start with some pairs
-        _ <- Ns(id).intMap.add(pint1, pint2, pint3, pint4, pint5, pint6, pint7).upsert.transact
 
-        // Remove pair by String key
-        _ <- Ns(id).intMap.remove(string7).update.i.transact
-        _ <- Ns.intMap.query.get.map(_.head ==> Map(pint1, pint2, pint3, pint4, pint5, pint6))
+
+//        _ <- rawTransact(
+//          """UPDATE Ns
+//            |    SET
+//            |      string = concat("x", "b")
+//            |    WHERE
+//            |      Ns.id IN(1) AND
+//            |      Ns.string IS NOT NULL
+//            |""".stripMargin)
+
+        id <- Ns.string("a").save.transact.map(_.id)
+        _ <- Ns(id).string.prepend("b").update.transact
+        _ <- Ns.string.query.get.map(_.head ==> "ba")
 
 
       } yield ()

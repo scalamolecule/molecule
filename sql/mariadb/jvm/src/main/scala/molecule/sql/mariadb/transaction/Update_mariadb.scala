@@ -7,6 +7,10 @@ import molecule.sql.core.transaction.strategy.SqlOps
 
 trait Update_mariadb extends SqlUpdate { self: ResolveUpdate with SqlOps =>
 
+  override def handleAppend(attr: String, cast: String) = s"CONCAT($attr, ?$cast)"
+  override def handlePrepend(attr: String, cast: String) = s"CONCAT(?$cast, $attr)"
+
+
   override def updateSetEq[T](
     ns: String,
     attr: String,
