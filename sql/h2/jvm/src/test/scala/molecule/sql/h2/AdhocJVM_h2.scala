@@ -46,12 +46,11 @@ object AdhocJVM_h2 extends TestSuite_h2 {
 
 
 
-//        ids <- Ns.string.insert("Hello", "World").transact.map(_.ids)
-//        _ <- Ns(ids).string.toUpper.update.transact
-//        _ <- Ns.string.a1.query.get.map(_ ==> List("HELLO", "WORLD"))
+        ids <- Ns.string.insert("Hello", "World").transact.map(_.ids)
+        _ <- Ns(ids).string.toUpper.update.transact
+        _ <- Ns.string.a1.query.get.map(_ ==> List("HELLO", "WORLD"))
 
-        _ <- Ns.bigInt(BigInt("123456789012345678901234567890")).save.transact
-        _ <- Ns.bigInt.query.get.map(_.head ==> BigInt("123456789012345678901234567890"))
+
 
       } yield ()
     }

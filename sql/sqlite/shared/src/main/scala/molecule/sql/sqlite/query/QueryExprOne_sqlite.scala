@@ -1,6 +1,7 @@
 package molecule.sql.sqlite.query
 
 import molecule.base.error.ModelError
+import molecule.boilerplate.ast.Model._
 import molecule.core.query.Model2Query
 import molecule.sql.core.query.{QueryExprOne, SqlQueryBase}
 import scala.reflect.ClassTag
@@ -8,6 +9,30 @@ import scala.reflect.ClassTag
 trait QueryExprOne_sqlite
   extends QueryExprOne
     with LambdasOne_sqlite { self: Model2Query with SqlQueryBase =>
+
+
+  override protected def addSort(attr: Attr, col: String): Unit = {
+    attr.sort.foreach { sort =>
+//      attr match {
+//        case _: AttrOneManBigInt     => cantSortBig()
+//        case _: AttrOneManBigDecimal => cantSortBig()
+//        case _: AttrOneOptBigInt     => cantSortBig()
+//        case _: AttrOneOptBigDecimal => cantSortBig()
+//        case _                       => ()
+//      }
+//      def cantSortBig() = throw ModelError(
+//        "Can't sort BigInt and BigDecimal attribute values correctly since " +
+//          "SQlite forces us to save data as text strings that don't " +
+//          "sort correctly lexicographically for negative numbers"
+//      )
+
+      val (dir, arity) = (sort.head, sort.substring(1, 2).toInt)
+      dir match {
+        case 'a' => orderBy += ((level, arity, col, ""))
+        case 'd' => orderBy += ((level, arity, col, " DESC"))
+      }
+    }
+  }
 
   override protected def matches(col: String, regex: String): Unit = {
     if (regex.nonEmpty)
@@ -226,13 +251,13 @@ trait QueryExprOne_sqlite
         .map(ns_attr => s"_$from.${ns_attr.split('.')(1)} = $ns_attr")
         .mkString("\n      WHERE ", " AND\n        ", "")
 
-    if(joins.isEmpty) {
+    if (joins.isEmpty) {
       s"FROM $from AS _$from $where"
-    } else{
+    } else {
       val joinTables = joins.map {
         case (join, table, as, predicates) =>
-          val table_    = table + " AS _" + table
-          val as_ = if (as.isEmpty) "" else " " + as
+          val table_     = table + " AS _" + table
+          val as_        = if (as.isEmpty) "" else " " + as
           val predicate_ = "_" + predicates.head.replace(" = ", " = _")
           s"$join $table_$as_ ON $predicate_"
       }.mkString("\n      ")
