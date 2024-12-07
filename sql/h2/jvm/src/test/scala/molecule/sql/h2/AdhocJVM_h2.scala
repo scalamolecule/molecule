@@ -23,15 +23,35 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       import molecule.coreTests.dataModels.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
+
       for {
 
-        List(a, b) <- Ns.int.insert(1, 2).transact.map(_.ids)
-        _ <- Ns.int(3).save.transact
-        _ <- Ns.int.a1.query.get.map(_ ==> List(1, 2, 3))
-        _ <- Ns(a).int(10).update.transact
-        _ <- Ns(b).delete.transact
-        _ <- Ns.int.a1.query.get.map(_ ==> List(3, 10))
+//        List(a, b) <- Ns.int.insert(1, 2).transact.map(_.ids)
+////        _ <- Ns.int(3).save.transact
+////        _ <- Ns.int.a1.query.get.map(_ ==> List(1, 2, 3))
+//        _ <- Ns(a).int(10).update.i.transact
+////        _ <- Ns.int_(10).int(11).update.i.transact
+////        _ <- Ns(b).delete.transact
+////        _ <- Ns.int.a1.query.get.map(_ ==> List(3, 10))
+//
+//
+//
+////        _ <- Ns(a).int.>(10).update.inspect
+//        _ <- Ns(a).int.+(7).update.i.transact
+//        _ <- Ns(a).boolean.&&(true).update.i.transact
+//        _ <- Ns(a).boolean.||(true).update.i.transact
+//        _ <- Ns(a).boolean.!.update.i.transact
+//
+//        _ <- Ns.int.a1.query.get.map(_ ==> List(2, 17))
 
+
+
+//        ids <- Ns.string.insert("Hello", "World").transact.map(_.ids)
+//        _ <- Ns(ids).string.toUpper.update.transact
+//        _ <- Ns.string.a1.query.get.map(_ ==> List("HELLO", "WORLD"))
+
+        _ <- Ns.bigInt(BigInt("123456789012345678901234567890")).save.transact
+        _ <- Ns.bigInt.query.get.map(_.head ==> BigInt("123456789012345678901234567890"))
 
       } yield ()
     }
@@ -41,18 +61,14 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       import molecule.coreTests.dataModels.dsl.Refs._
       for {
 
+        refId <- B.i(7).save.transact.map(_.id)
+        id <- A.i.b.insert(1, refId).transact.map(_.id)
+        _ <- A.i.b.query.get.map(_ ==> List((1, refId)))
 
-        _ <- A.i.B.s.i.Cc.*(C.s).insert(List(
-          (1, "a", 1, Nil),
-          (2, "b", 2, List("x", "y"))
-        )).transact
+        // Apply empty value to delete ref id of entity (entity remains)
+        _ <- A(id).b().update.i.transact
+        _ <- A.i.b_?.query.get.map(_ ==> List((1, None)))
 
-
-
-        _ <- A.i.B.?(B.i.s.Cc.*(C.s)).query.get
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Cardinality-many nesting not allowed inside optional ref."
-          }
         //
         //        //        _ <- rawQuery(
         //        //          """SELECT DISTINCT

@@ -1,7 +1,6 @@
 package molecule.sql.postgres.compliance.filter.one
 
 import molecule.coreTests.spi.filter.one._
-import molecule.coreTests.spi.filter.one.special._
 import molecule.coreTests.spi.filter.one.types._
 import molecule.sql.postgres.setup.Test_postgres_async
 
@@ -31,7 +30,6 @@ object Test_FilterOne_Char_ extends FilterOne_Char_ with Test_postgres_async
 object Test_FilterOne_ref_ extends FilterOne_ref_ with Test_postgres_async
 object Test_FilterOne_id extends FilterOne_id with Test_postgres_async
 
-object Test_FilterOneSpecial_Number extends FilterOneSpecial_Number with Test_postgres_async
 object Test_FilterOneSpecial_String extends FilterOneSpecial_String with Test_postgres_async
 
 object Test_FilterRefOne extends FilterRefOne with Test_postgres_async

@@ -63,7 +63,7 @@ trait ResolveUpdate
 
         case r: Ref      => handleRef(r); resolve(tail)
         case br: BackRef => handleBackRef(br); resolve(tail)
-        case r: OptRef   => ???
+        case _: OptRef   => throw ModelError("Optional ref in update not supported.")
         case _           => noNested
       }
       case Nil             => ()
@@ -77,32 +77,29 @@ trait ResolveUpdate
       case a if a.attr == "id" => throw ModelError(
         s"Generic id attribute not allowed in update molecule (${a.name}).")
 
-      case a if a.op != Eq && a.op != NoValue => throw ModelError(
-        s"Can't update attributes without an applied value (${a.name}).")
-
-      case a: AttrOneManID             => updateOne(ns, attr, a.vs, transformID, extsID)
-      case a: AttrOneManString         => updateOne(ns, attr, a.vs, transformString, extsString)
-      case a: AttrOneManInt            => updateOne(ns, attr, a.vs, transformInt, extsInt)
-      case a: AttrOneManLong           => updateOne(ns, attr, a.vs, transformLong, extsLong)
-      case a: AttrOneManFloat          => updateOne(ns, attr, a.vs, transformFloat, extsFloat)
-      case a: AttrOneManDouble         => updateOne(ns, attr, a.vs, transformDouble, extsDouble)
-      case a: AttrOneManBoolean        => updateOne(ns, attr, a.vs, transformBoolean, extsBoolean)
-      case a: AttrOneManBigInt         => updateOne(ns, attr, a.vs, transformBigInt, extsBigInt)
-      case a: AttrOneManBigDecimal     => updateOne(ns, attr, a.vs, transformBigDecimal, extsBigDecimal)
-      case a: AttrOneManDate           => updateOne(ns, attr, a.vs, transformDate, extsDate)
-      case a: AttrOneManDuration       => updateOne(ns, attr, a.vs, transformDuration, extsDuration)
-      case a: AttrOneManInstant        => updateOne(ns, attr, a.vs, transformInstant, extsInstant)
-      case a: AttrOneManLocalDate      => updateOne(ns, attr, a.vs, transformLocalDate, extsLocalDate)
-      case a: AttrOneManLocalTime      => updateOne(ns, attr, a.vs, transformLocalTime, extsLocalTime)
-      case a: AttrOneManLocalDateTime  => updateOne(ns, attr, a.vs, transformLocalDateTime, extsLocalDateTime)
-      case a: AttrOneManOffsetTime     => updateOne(ns, attr, a.vs, transformOffsetTime, extsOffsetTime)
-      case a: AttrOneManOffsetDateTime => updateOne(ns, attr, a.vs, transformOffsetDateTime, extsOffsetDateTime)
-      case a: AttrOneManZonedDateTime  => updateOne(ns, attr, a.vs, transformZonedDateTime, extsZonedDateTime)
-      case a: AttrOneManUUID           => updateOne(ns, attr, a.vs, transformUUID, extsUUID)
-      case a: AttrOneManURI            => updateOne(ns, attr, a.vs, transformURI, extsURI)
-      case a: AttrOneManByte           => updateOne(ns, attr, a.vs, transformByte, extsByte)
-      case a: AttrOneManShort          => updateOne(ns, attr, a.vs, transformShort, extsShort)
-      case a: AttrOneManChar           => updateOne(ns, attr, a.vs, transformChar, extsChar)
+      case a: AttrOneManID             => updateOne(ns, attr, a.op, a.vs, transformID, extsID)
+      case a: AttrOneManString         => updateOne(ns, attr, a.op, a.vs, transformString, extsString)
+      case a: AttrOneManInt            => updateOne(ns, attr, a.op, a.vs, transformInt, extsInt)
+      case a: AttrOneManLong           => updateOne(ns, attr, a.op, a.vs, transformLong, extsLong)
+      case a: AttrOneManFloat          => updateOne(ns, attr, a.op, a.vs, transformFloat, extsFloat)
+      case a: AttrOneManDouble         => updateOne(ns, attr, a.op, a.vs, transformDouble, extsDouble)
+      case a: AttrOneManBoolean        => updateOne(ns, attr, a.op, a.vs, transformBoolean, extsBoolean)
+      case a: AttrOneManBigInt         => updateOne(ns, attr, a.op, a.vs, transformBigInt, extsBigInt)
+      case a: AttrOneManBigDecimal     => updateOne(ns, attr, a.op, a.vs, transformBigDecimal, extsBigDecimal)
+      case a: AttrOneManDate           => updateOne(ns, attr, a.op, a.vs, transformDate, extsDate)
+      case a: AttrOneManDuration       => updateOne(ns, attr, a.op, a.vs, transformDuration, extsDuration)
+      case a: AttrOneManInstant        => updateOne(ns, attr, a.op, a.vs, transformInstant, extsInstant)
+      case a: AttrOneManLocalDate      => updateOne(ns, attr, a.op, a.vs, transformLocalDate, extsLocalDate)
+      case a: AttrOneManLocalTime      => updateOne(ns, attr, a.op, a.vs, transformLocalTime, extsLocalTime)
+      case a: AttrOneManLocalDateTime  => updateOne(ns, attr, a.op, a.vs, transformLocalDateTime, extsLocalDateTime)
+      case a: AttrOneManOffsetTime     => updateOne(ns, attr, a.op, a.vs, transformOffsetTime, extsOffsetTime)
+      case a: AttrOneManOffsetDateTime => updateOne(ns, attr, a.op, a.vs, transformOffsetDateTime, extsOffsetDateTime)
+      case a: AttrOneManZonedDateTime  => updateOne(ns, attr, a.op, a.vs, transformZonedDateTime, extsZonedDateTime)
+      case a: AttrOneManUUID           => updateOne(ns, attr, a.op, a.vs, transformUUID, extsUUID)
+      case a: AttrOneManURI            => updateOne(ns, attr, a.op, a.vs, transformURI, extsURI)
+      case a: AttrOneManByte           => updateOne(ns, attr, a.op, a.vs, transformByte, extsByte)
+      case a: AttrOneManShort          => updateOne(ns, attr, a.op, a.vs, transformShort, extsShort)
+      case a: AttrOneManChar           => updateOne(ns, attr, a.op, a.vs, transformChar, extsChar)
     }
   }
 

@@ -146,6 +146,7 @@ trait Update_datomic
   override protected def updateOne[T](
     ns: String,
     attr: String,
+    op: Op,
     vs: Seq[T],
     transformValue: T => Any,
     exts: List[String],

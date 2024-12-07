@@ -13,7 +13,7 @@ object Connection_mysql {
   private val baseUrl = s"mysql:8.0.33"
 
   private val mysql = {
-    println(s"Starting $baseUrl")
+    println(s"Starting $baseUrl ...")
     val pg = new MySQLContainer(baseUrl)
     pg.start()
     println("Mysql started")

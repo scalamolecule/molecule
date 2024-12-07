@@ -1,12 +1,11 @@
 import org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv
 import org.scalajs.linker.interface.ESVersion
 import sbt.Keys.libraryDependencies
-import scala.collection.Seq
 
 
 val scala212 = "2.12.20"
 val scala213 = "2.13.15"
-val scala3   = "3.3.3"
+val scala3   = "3.3.4"
 val allScala = Seq(scala212, scala213, scala3)
 
 val akkaVersion          = "2.8.3"
@@ -145,6 +144,8 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
       "org.typelevel" %%% "munit-cats-effect" % "2.0.0", // also used in main (IO api)
     ),
   )
+
+
   .jsSettings(
     jsEnvironment,
     libraryDependencies ++= Seq(
@@ -161,6 +162,28 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
     ),
   )
   .dependsOn(core)
+  .settings(
+
+    TaskKey[Unit]("checkSources") := (updateClassifiers map checkSources).value,
+    TaskKey[Unit]("checkBinaries") := (update map checkBinaries).value
+  )
+
+def getSources(report: UpdateReport) = report.matching(artifactFilter(`classifier` = "sources"))
+def checkSources(report: UpdateReport): Unit = {
+  val srcs = getSources(report)
+  if (srcs.isEmpty)
+    sys.error(s"No sources retrieved\n\n$report")
+  else if (srcs.size != 2)
+    sys.error("Incorrect sources retrieved:\n\t" + srcs.mkString("\n\t"))
+  else
+    ()
+}
+
+def checkBinaries(report: UpdateReport): Unit = {
+  val srcs = getSources(report)
+  if (srcs.nonEmpty) sys.error("Sources retrieved:\n\t" + srcs.mkString("\n\t"))
+  else ()
+}
 
 
 lazy val datalogCore = crossProject(JSPlatform, JVMPlatform)

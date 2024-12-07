@@ -1,0 +1,12 @@
+package molecule.sql.postgres.compliance.crud.update.attrOp
+
+import molecule.coreTests.spi.crud.update.attrOp.number._
+import molecule.sql.postgres.setup.Test_postgres_async
+
+
+object Test_AttrOpSpecial_Int extends AttrOpInteger_Int with Test_postgres_async
+object Test_AttrOpSpecial_Long_ extends AttrOpInteger_Long_ with Test_postgres_async
+object Test_AttrOpSpecial_BigInt_ extends AttrOpInteger_BigInt_ with Test_postgres_async
+object Test_AttrOpSpecial_Byte_ extends AttrOpInteger_Byte_ with Test_postgres_async
+object Test_AttrOpSpecial_Short_ extends AttrOpInteger_Short_ with Test_postgres_async
+

@@ -4,7 +4,7 @@ import molecule.base.api.Schema
 import molecule.base.util.BaseHelpers
 import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.Conn
-import molecule.coreTests.setup.{CoreTestSuite, CoreTestSuite_io}
+import molecule.coreTests.setup.CoreTestSuite
 import molecule.sql.sqlite.facade.{JdbcConnSQlite_JVM, JdbcHandlerSQlite_JVM}
 import scala.util.control.NonFatal
 

@@ -6,8 +6,6 @@ import molecule.core.marshalling.JdbcProxy
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.javaSql.ResultSetInterface
 import molecule.sql.sqlite.javaSql.ResultSetImpl_sqlite
-import scala.collection.mutable
-import scala.collection.mutable.ListBuffer
 
 class JdbcConnSQlite_JVM(
   override val proxy: JdbcProxy,

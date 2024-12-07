@@ -28,7 +28,8 @@ object Connection_postgres {
   dataSource.setPreparedStatementCacheQueries(0)
 
   // JVM tests run sequentially so we can re-use
-  // the same database and reset it before each test
+  // the same database and reset it before each test.
+  // This is much faster than re-creating a new database for each test.
   private val reusedSqlConn = dataSource.getConnection
 
   private val resetDb =

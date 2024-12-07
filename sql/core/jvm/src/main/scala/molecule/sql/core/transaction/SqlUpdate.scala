@@ -97,29 +97,77 @@ trait SqlUpdate
   override protected def updateOne[T](
     ns: String,
     attr: String,
+    op: Op,
     vs: Seq[T],
     transformValue: T => Any,
     exts: List[String],
   ): Unit = {
-    val cast       = exts(2)
-    val paramIndex = updateAction.setCol(s"$attr = ?$cast")
-    vs match {
-      case Seq(v) =>
+    val cast = exts(2)
+    op match {
+      case Eq | NoValue =>
+        val paramIndex = updateAction.setCol(s"$attr = ?$cast")
+        vs match {
+          case Seq(v) =>
+            setAttrPresence(ns, attr)
+            updateAction.addColSetter((ps: PS) =>
+              transformValue(v).asInstanceOf[(PS, Int) => Unit](ps, paramIndex)
+            )
+
+          case Nil =>
+            updateAction.addColSetter((ps: PS) =>
+              ps.setNull(paramIndex, 0))
+
+          case vs =>
+            val cleanAttr = attr.replace("_", "")
+            throw ModelError(
+              s"Can only update one value for attribute `$ns.$cleanAttr`. " +
+                s"Found: " + vs.mkString(", ")
+            )
+        }
+      case op: AttrOp   =>
         setAttrPresence(ns, attr)
-        updateAction.addColSetter((ps: PS) =>
-          transformValue(v).asInstanceOf[(PS, Int) => Unit](ps, paramIndex)
-        )
+        def handle(computedValue: String): Unit = {
+          val paramIndex = updateAction.setCol(s"$attr = $computedValue")
+          val colSetter  = if (vs.isEmpty) (_: PS) => () else
+            (ps: PS) => transformValue(vs.head).asInstanceOf[(PS, Int) => Unit](ps, paramIndex)
+          updateAction.addColSetter(colSetter
+          )
+        }
+        op match {
+          case AttrOp.Append                   => handle(s"($attr || ?$cast)")
+          case AttrOp.Prepend                  => handle(s"(?$cast || $attr)")
+          case AttrOp.SubString(start, length) => handle(s"SUBSTRING($attr, $start, $length)")
+          case AttrOp.ReplaceAll               => handle(s"REGEXP_REPLACE($attr, ?, '${vs(1)}')")
+          case AttrOp.ToLower                  => handle(s"LOWER($attr)")
+          case AttrOp.ToUpper                  => handle(s"UPPER($attr)")
+          case AttrOp.Plus                     => handle(s"$attr + ?$cast")
+          case AttrOp.Minus                    => handle(s"$attr - ?$cast")
+          case AttrOp.Times                    => handle(s"$attr * ?$cast")
+          case AttrOp.Divide                   => handle(s"$attr / ?$cast")
+          case AttrOp.Modulo                   => handle(s"MOD($attr, ?$cast)")
+          case AttrOp.Negate                   => handle(s"-$attr")
+          case AttrOp.Abs                      => handle(s"ABS($attr)")
+          case AttrOp.AbsNeg                   => handle(s"-ABS($attr)")
+          case AttrOp.Ceil                     => handle(s"CEIL($attr)")
+          case AttrOp.Floor                    => handle(s"FLOOR($attr)")
+          case AttrOp.And                      => handle(s"$attr AND ?$cast")
+          case AttrOp.Or                       => handle(s"$attr OR ?$cast")
+          case AttrOp.Not                      => handle(s"NOT($attr)")
+        }
 
-      case Nil =>
-        updateAction.addColSetter((ps: PS) =>
-          ps.setNull(paramIndex, 0))
+      case Even | Odd => throw ModelError(
+        s"$ns.$attr.even and $ns.$attr.odd can't be used with updates."
+      )
 
-      case vs =>
-        val cleanAttr = attr.replace("_", "")
+      case Remainder =>
+        val divider = vs.head
         throw ModelError(
-          s"Can only update one value for attribute `$ns.$cleanAttr`. " +
-            s"Found: " + vs.mkString(", ")
+          s"Please use `$ns.$attr.%($divider)` to update attribute to the remainder after dividing by $divider."
         )
+
+      case _ => throw ModelError(
+        s"Can't update attribute $ns.$attr without an applied or computed value."
+      )
     }
   }
 

@@ -2,7 +2,6 @@ package codegen.test.filter.seq.types
 
 import java.nio.file.{Files, Paths}
 import codegen.SpiTestGenBase
-import codegen.test.crud.update.seq.ops._UpdateSeqOps.tpeVarImp
 import molecule.base.util.{BaseHelpers, CodeGenBase}
 
 object _FilterSeq extends CodeGenBase with BaseHelpers {

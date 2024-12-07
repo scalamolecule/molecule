@@ -1,0 +1,67 @@
+package molecule.coreTests.spi.crud.update.attrOp
+
+import molecule.core.api.Api_async
+import molecule.core.spi.Spi_async
+import molecule.core.util.Executor._
+import molecule.coreTests.dataModels.dsl.Types._
+import molecule.coreTests.setup.CoreTestSuite
+import utest._
+
+trait AttrOp_String extends CoreTestSuite with Api_async { spi: Spi_async =>
+
+  override lazy val tests = Tests {
+
+    "append" - types { implicit conn =>
+      for {
+        id <- Ns.string("a").save.transact.map(_.id)
+        _ <- Ns(id).string.+("b").update.transact
+        _ <- Ns.string.query.get.map(_.head ==> "ab")
+      } yield ()
+    }
+
+
+    "prepend" - types { implicit conn =>
+      for {
+        id <- Ns.string("a").save.transact.map(_.id)
+        _ <- Ns(id).string.prepend("b").update.transact
+        _ <- Ns.string.query.get.map(_.head ==> "ba")
+      } yield ()
+    }
+
+
+    "substring" - types { implicit conn =>
+      for {
+        ids <- Ns.string.insert("Hello", "World").transact.map(_.ids)
+        _ <- Ns(ids).string.substring(4, 3).update.transact
+        _ <- Ns.string.d1.query.get.map(_ ==> List("lo", "ld"))
+      } yield ()
+    }
+
+
+    "replaceAll" - types { implicit conn =>
+      for {
+        ids <- Ns.string.insert("Hello", "World").transact.map(_.ids)
+        _ <- Ns(ids).string.replaceAll("[oW]", "X").update.transact
+        _ <- Ns.string.a1.query.get.map(_ ==> List("HellX", "XXrld"))
+      } yield ()
+    }
+
+
+    "toLower" - types { implicit conn =>
+      for {
+        ids <- Ns.string.insert("Hello", "World").transact.map(_.ids)
+        _ <- Ns(ids).string.toLower.update.transact
+        _ <- Ns.string.a1.query.get.map(_ ==> List("hello", "world"))
+      } yield ()
+    }
+
+
+    "toUpper" - types { implicit conn =>
+      for {
+        ids <- Ns.string.insert("Hello", "World").transact.map(_.ids)
+        _ <- Ns(ids).string.toUpper.update.transact
+        _ <- Ns.string.a1.query.get.map(_ ==> List("HELLO", "WORLD"))
+      } yield ()
+    }
+  }
+}
