@@ -5,7 +5,7 @@ import java.time._
 import java.util.{List => jList, Map => jMap, Set => jSet}
 import clojure.lang.Keyword
 import datomic.query.EntityMap
-import datomic.{Database, Peer}
+import datomic.{Database, Peer, Util}
 import molecule.base.ast.CardOne
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
@@ -15,10 +15,11 @@ import molecule.core.transaction.ResolveUpdate
 import molecule.core.transaction.ops.UpdateOps
 import molecule.core.util.JavaConversions
 import molecule.core.validation.TxModelValidation
-import molecule.datalog.core.query.Model2DatomicQuery
+import molecule.datalog.core.query.{Model2DatomicQuery, ResolveBase}
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import molecule.datalog.datomic.query.DatomicQueryResolveOffset
 import scala.collection.mutable.ListBuffer
+import scala.math.BigDecimal.RoundingMode
 
 trait Update_datomic
   extends DatomicBase_JVM
@@ -26,6 +27,7 @@ trait Update_datomic
     with UpdateFilters
     with ModelTransformations_
     with MoleculeLogging
+    with ResolveBase
     with JavaConversions { self: ResolveUpdate =>
 
   // Use current data rows for comparison
@@ -143,6 +145,10 @@ trait Update_datomic
   }
 
 
+  def handleAppend(attr: String, cast: String) = s"($attr || ?$cast)"
+  def handlePrepend(attr: String, cast: String) = s"(?$cast || $attr)"
+  def handleReplaceAll[T](attr: String, vs: Seq[T]) = s"REGEXP_REPLACE($attr, ?, '${vs(1)}')"
+
   override protected def updateOne[T](
     ns: String,
     attr: String,
@@ -152,36 +158,229 @@ trait Update_datomic
     exts: List[String],
   ): Unit = {
     val a = kw(ns, attr)
-    vs match {
-      case Seq(v) =>
-        rowResolvers += { _ =>
-          ids.foreach(e => appendStmt(add, e, a, transformValue(v).asInstanceOf[AnyRef]))
-          attrIndex += 1
-        }
-      case Nil    =>
-        rowResolvers += {
-          case row: jList[AnyRef] if isUpsert =>
-            val currentValue = row.get(attrIndex).asInstanceOf[jMap[_, _]].get(a) match {
-              case map: jMap[_, _] => map.get(dbId)
-              case v               => v
+    lazy val cleanAttr = attr.replace("_", "")
+    op match {
+      case Eq | NoValue =>
+        vs match {
+          case Seq(v) =>
+            rowResolvers += { _ =>
+              ids.foreach(e => appendStmt(add, e, a, transformValue(v).asInstanceOf[AnyRef]))
+              attrIndex += 1
             }
-            ids.foreach(e => appendStmt(retract, e, a, currentValue.asInstanceOf[AnyRef]))
-            attrIndex += 1
+          case Nil    =>
+            rowResolvers += {
+              case row: jList[AnyRef] if isUpsert =>
+                val currentValue = row.get(attrIndex).asInstanceOf[jMap[_, _]].get(a) match {
+                  case map: jMap[_, _] => map.get(dbId)
+                  case v               => v
+                }
+                ids.foreach(e => appendStmt(retract, e, a, currentValue.asInstanceOf[AnyRef]))
+                attrIndex += 1
 
-          case row: jList[AnyRef] =>
-            val currentValue = row.get(attrIndex) match {
-              case map: jMap[_, _] => map.get(dbId)
-              case v               => v
+              case row: jList[AnyRef] =>
+                val currentValue = row.get(attrIndex) match {
+                  case map: jMap[_, _] => map.get(dbId)
+                  case v               => v
+                }
+                ids.foreach(e => appendStmt(retract, e, a, currentValue.asInstanceOf[AnyRef]))
+                attrIndex += 1
             }
-            ids.foreach(e => appendStmt(retract, e, a, currentValue.asInstanceOf[AnyRef]))
-            attrIndex += 1
+          case vs     => throw ModelError(
+            s"Can only update one value for attribute `$ns.$attr`. Found: " + vs.mkString(", ")
+          )
         }
-      case vs     => throw ModelError(
-        s"Can only update one value for attribute `$ns.$attr`. Found: " + vs.mkString(", ")
+
+      case op: AttrOp =>
+        object ops extends ops(exts.head, vs)
+        def handle(op: (AnyRef, Keyword) => T): Unit = {
+          rowResolvers += { _ =>
+            ids.foreach(e => appendStmt(add, e, a, transformValue(op(e, a)).asInstanceOf[AnyRef]))
+            attrIndex += 1
+          }
+        }
+        op match {
+          // String
+          case AttrOp.Append                   => handle(ops.plus)
+          case AttrOp.Prepend                  => handle(ops.prepend)
+          case AttrOp.SubString(start, length) => handle(ops.substring(start, length))
+          case AttrOp.ReplaceAll               => handle(ops.replaceAll)
+          case AttrOp.ToLower                  => handle(ops.toLower)
+          case AttrOp.ToUpper                  => handle(ops.toUpper)
+
+          // Number
+          case AttrOp.Plus   => handle(ops.plus)
+          case AttrOp.Minus  => handle(ops.minus)
+          case AttrOp.Times  => handle(ops.times)
+          case AttrOp.Divide => handle(ops.divide)
+          case AttrOp.Negate => handle(ops.negate)
+          case AttrOp.Abs    => handle(ops.abs)
+          case AttrOp.AbsNeg => handle(ops.absNeg)
+          case AttrOp.Ceil   => handle(ops.ceil)
+          case AttrOp.Floor  => handle(ops.floor)
+
+          // Boolean
+          case AttrOp.And => handle(ops.and)
+          case AttrOp.Or  => handle(ops.or)
+          case AttrOp.Not => handle(ops.not)
+        }
+
+      case Even | Odd => throw ModelError(
+        s"$ns.$cleanAttr.even and $ns.$cleanAttr.odd can't be used with updates."
+      )
+
+      case Remainder => throw ModelError(
+        s"Modulo operations like $ns.$cleanAttr.%(${vs.head}) can't be used with updates."
+      )
+
+      case _ => throw ModelError(
+        s"Can't update attribute $ns.$cleanAttr without an applied or computed value."
       )
     }
   }
 
+  class ops[T](tpe: String, vs: Seq[T]) {
+    def v: T = vs.head
+
+    def w(e: AnyRef, a: Keyword): AnyRef = db.entity(e).get(a)
+
+    def prepend: (AnyRef, Keyword) => T = (e: AnyRef, a: Keyword) =>
+      (v.asInstanceOf[String] + j2String(w(e, a))).asInstanceOf[T]
+
+    def substring(start: Int, end: Int): (AnyRef, Keyword) => T = (e: AnyRef, a: Keyword) => {
+      if (start < 0)
+        throw ModelError("Start index should be 0 or more")
+
+      if (start >= end)
+        throw ModelError("Start index should be smaller than end index")
+
+      val input = j2String(w(e, a))
+
+      val safeStart = start.max(0).min(input.length)
+      val safeEnd   = end.max(0).min(input.length)
+      if (safeStart < safeEnd) {
+        input.substring(safeStart, safeEnd).asInstanceOf[T]
+      } else {
+        // Empty string returned if start is after end
+        // OBS: beware of saved empty string values!
+        "".asInstanceOf[T]
+      }
+    }
+
+    def replaceAll: (AnyRef, Keyword) => T = (e: AnyRef, a: Keyword) =>
+      j2String(w(e, a)).replaceAll(v.asInstanceOf[String], vs(1).asInstanceOf[String]).asInstanceOf[T]
+
+    def toLower: (AnyRef, Keyword) => T = (e: AnyRef, a: Keyword) =>
+      j2String(w(e, a)).toLowerCase.asInstanceOf[T]
+
+    def toUpper: (AnyRef, Keyword) => T = (e: AnyRef, a: Keyword) =>
+      j2String(w(e, a)).toUpperCase.asInstanceOf[T]
+
+    def plus: (AnyRef, Keyword) => T = tpe match {
+      case "String"     => (e: AnyRef, a: Keyword) => (j2String(w(e, a)) + v.asInstanceOf[String]).asInstanceOf[T]
+      case "Int"        => (e: AnyRef, a: Keyword) => (j2Int(w(e, a)) + v.asInstanceOf[Int]).asInstanceOf[T]
+      case "Long"       => (e: AnyRef, a: Keyword) => (j2Long(w(e, a)) + v.asInstanceOf[Long]).asInstanceOf[T]
+      case "Float"      => (e: AnyRef, a: Keyword) => (j2Float(w(e, a)) + v.asInstanceOf[Float]).asInstanceOf[T]
+      case "Double"     => (e: AnyRef, a: Keyword) => (j2Double(w(e, a)) + v.asInstanceOf[Double]).asInstanceOf[T]
+      case "BigInt"     => (e: AnyRef, a: Keyword) => (j2BigInt(w(e, a)) + v.asInstanceOf[BigInt]).asInstanceOf[T]
+      case "BigDecimal" => (e: AnyRef, a: Keyword) => (j2BigDecimal(w(e, a)) + v.asInstanceOf[BigDecimal]).asInstanceOf[T]
+      case "Byte"       => (e: AnyRef, a: Keyword) => ((j2Byte(w(e, a)) + v.asInstanceOf[Byte]).toByte.asInstanceOf[T])
+      case "Short"      => (e: AnyRef, a: Keyword) => (j2Short(w(e, a)) + v.asInstanceOf[Short]).toShort.asInstanceOf[T]
+      case "Char"       => (e: AnyRef, a: Keyword) => (j2Char(w(e, a)) + v.asInstanceOf[Char]).asInstanceOf[T]
+    }
+
+    def minus: (AnyRef, Keyword) => T = tpe match {
+      case "Int"        => (e: AnyRef, a: Keyword) => (j2Int(w(e, a)) - v.asInstanceOf[Int]).asInstanceOf[T]
+      case "Long"       => (e: AnyRef, a: Keyword) => (j2Long(w(e, a)) - v.asInstanceOf[Long]).asInstanceOf[T]
+      case "Float"      => (e: AnyRef, a: Keyword) => (j2Float(w(e, a)) - v.asInstanceOf[Float]).asInstanceOf[T]
+      case "Double"     => (e: AnyRef, a: Keyword) => (j2Double(w(e, a)) - v.asInstanceOf[Double]).asInstanceOf[T]
+      case "BigInt"     => (e: AnyRef, a: Keyword) => (j2BigInt(w(e, a)) - v.asInstanceOf[BigInt]).asInstanceOf[T]
+      case "BigDecimal" => (e: AnyRef, a: Keyword) => (j2BigDecimal(w(e, a)) - v.asInstanceOf[BigDecimal]).asInstanceOf[T]
+      case "Byte"       => (e: AnyRef, a: Keyword) => (j2Byte(w(e, a)) - v.asInstanceOf[Byte]).toByte.asInstanceOf[T]
+      case "Short"      => (e: AnyRef, a: Keyword) => (j2Short(w(e, a)) - v.asInstanceOf[Short]).toShort.asInstanceOf[T]
+      case "Char"       => (e: AnyRef, a: Keyword) => (j2Char(w(e, a)) - v.asInstanceOf[Char]).asInstanceOf[T]
+    }
+
+    def times: (AnyRef, Keyword) => T = tpe match {
+      case "Int"        => (e: AnyRef, a: Keyword) => (j2Int(w(e, a)) * v.asInstanceOf[Int]).asInstanceOf[T]
+      case "Long"       => (e: AnyRef, a: Keyword) => (j2Long(w(e, a)) * v.asInstanceOf[Long]).asInstanceOf[T]
+      case "Float"      => (e: AnyRef, a: Keyword) => (j2Float(w(e, a)) * v.asInstanceOf[Float]).asInstanceOf[T]
+      case "Double"     => (e: AnyRef, a: Keyword) => (j2Double(w(e, a)) * v.asInstanceOf[Double]).asInstanceOf[T]
+      case "BigInt"     => (e: AnyRef, a: Keyword) => (j2BigInt(w(e, a)) * v.asInstanceOf[BigInt]).asInstanceOf[T]
+      case "BigDecimal" => (e: AnyRef, a: Keyword) => (j2BigDecimal(w(e, a)) * v.asInstanceOf[BigDecimal]).asInstanceOf[T]
+      case "Byte"       => (e: AnyRef, a: Keyword) => (j2Byte(w(e, a)) * v.asInstanceOf[Byte]).toByte.asInstanceOf[T]
+      case "Short"      => (e: AnyRef, a: Keyword) => (j2Short(w(e, a)) * v.asInstanceOf[Short]).toShort.asInstanceOf[T]
+      case "Char"       => (e: AnyRef, a: Keyword) => (j2Char(w(e, a)) * v.asInstanceOf[Char]).asInstanceOf[T]
+    }
+
+    def divide: (AnyRef, Keyword) => T = tpe match {
+      case "Int"        => (e: AnyRef, a: Keyword) => (j2Int(w(e, a)) / v.asInstanceOf[Int]).asInstanceOf[T]
+      case "Long"       => (e: AnyRef, a: Keyword) => (j2Long(w(e, a)) / v.asInstanceOf[Long]).asInstanceOf[T]
+      case "Float"      => (e: AnyRef, a: Keyword) => (j2Float(w(e, a)) / v.asInstanceOf[Float]).asInstanceOf[T]
+      case "Double"     => (e: AnyRef, a: Keyword) => (j2Double(w(e, a)) / v.asInstanceOf[Double]).asInstanceOf[T]
+      case "BigInt"     => (e: AnyRef, a: Keyword) => (j2BigInt(w(e, a)) / v.asInstanceOf[BigInt]).asInstanceOf[T]
+      case "BigDecimal" => (e: AnyRef, a: Keyword) => (j2BigDecimal(w(e, a)) / v.asInstanceOf[BigDecimal]).asInstanceOf[T]
+      case "Byte"       => (e: AnyRef, a: Keyword) => (j2Byte(w(e, a)) / v.asInstanceOf[Byte]).toByte.asInstanceOf[T]
+      case "Short"      => (e: AnyRef, a: Keyword) => (j2Short(w(e, a)) / v.asInstanceOf[Short]).toShort.asInstanceOf[T]
+      case "Char"       => (e: AnyRef, a: Keyword) => (j2Char(w(e, a)) / v.asInstanceOf[Char]).asInstanceOf[T]
+    }
+
+    def negate: (AnyRef, Keyword) => T = tpe match {
+      case "Int"        => (e: AnyRef, a: Keyword) => (-j2Int(w(e, a))).asInstanceOf[T]
+      case "Long"       => (e: AnyRef, a: Keyword) => (-j2Long(w(e, a))).asInstanceOf[T]
+      case "Float"      => (e: AnyRef, a: Keyword) => (-j2Float(w(e, a))).asInstanceOf[T]
+      case "Double"     => (e: AnyRef, a: Keyword) => (-j2Double(w(e, a))).asInstanceOf[T]
+      case "BigInt"     => (e: AnyRef, a: Keyword) => (-j2BigInt(w(e, a))).asInstanceOf[T]
+      case "BigDecimal" => (e: AnyRef, a: Keyword) => (-j2BigDecimal(w(e, a))).asInstanceOf[T]
+      case "Byte"       => (e: AnyRef, a: Keyword) => (-j2Byte(w(e, a))).toByte.asInstanceOf[T]
+      case "Short"      => (e: AnyRef, a: Keyword) => (-j2Short(w(e, a))).toShort.asInstanceOf[T]
+      case "Char"       => (e: AnyRef, a: Keyword) => (-j2Char(w(e, a))).asInstanceOf[T]
+    }
+
+    def abs: (AnyRef, Keyword) => T = tpe match {
+      case "Int"        => (e: AnyRef, a: Keyword) => j2Int(w(e, a)).abs.asInstanceOf[T]
+      case "Long"       => (e: AnyRef, a: Keyword) => j2Long(w(e, a)).abs.asInstanceOf[T]
+      case "Float"      => (e: AnyRef, a: Keyword) => j2Float(w(e, a)).abs.asInstanceOf[T]
+      case "Double"     => (e: AnyRef, a: Keyword) => j2Double(w(e, a)).abs.asInstanceOf[T]
+      case "BigInt"     => (e: AnyRef, a: Keyword) => j2BigInt(w(e, a)).abs.asInstanceOf[T]
+      case "BigDecimal" => (e: AnyRef, a: Keyword) => j2BigDecimal(w(e, a)).abs.asInstanceOf[T]
+      case "Byte"       => (e: AnyRef, a: Keyword) => j2Byte(w(e, a)).abs.asInstanceOf[T]
+      case "Short"      => (e: AnyRef, a: Keyword) => j2Short(w(e, a)).abs.asInstanceOf[T]
+      case "Char"       => (e: AnyRef, a: Keyword) => j2Char(w(e, a)).abs.asInstanceOf[T]
+    }
+
+    def absNeg: (AnyRef, Keyword) => T = tpe match {
+      case "Int"        => (e: AnyRef, a: Keyword) => (-j2Int(w(e, a)).abs).asInstanceOf[T]
+      case "Long"       => (e: AnyRef, a: Keyword) => (-j2Long(w(e, a)).abs).asInstanceOf[T]
+      case "Float"      => (e: AnyRef, a: Keyword) => (-j2Float(w(e, a)).abs).asInstanceOf[T]
+      case "Double"     => (e: AnyRef, a: Keyword) => (-j2Double(w(e, a)).abs).asInstanceOf[T]
+      case "BigInt"     => (e: AnyRef, a: Keyword) => (-j2BigInt(w(e, a)).abs).asInstanceOf[T]
+      case "BigDecimal" => (e: AnyRef, a: Keyword) => (-j2BigDecimal(w(e, a)).abs).asInstanceOf[T]
+      case "Byte"       => (e: AnyRef, a: Keyword) => (-j2Byte(w(e, a)).abs).toByte.asInstanceOf[T]
+      case "Short"      => (e: AnyRef, a: Keyword) => (-j2Short(w(e, a)).abs).toShort.asInstanceOf[T]
+      case "Char"       => (e: AnyRef, a: Keyword) => (-j2Char(w(e, a)).abs).asInstanceOf[T]
+    }
+
+    def ceil: (AnyRef, Keyword) => T = tpe match {
+      case "Float"      => (e: AnyRef, a: Keyword) => (j2Float(w(e, a)).ceil).asInstanceOf[T]
+      case "Double"     => (e: AnyRef, a: Keyword) => (j2Double(w(e, a)).ceil).asInstanceOf[T]
+      case "BigDecimal" => (e: AnyRef, a: Keyword) => (j2BigDecimal(w(e, a)).setScale(0, RoundingMode.CEILING)).asInstanceOf[T]
+    }
+
+    def floor: (AnyRef, Keyword) => T = tpe match {
+      case "Float"      => (e: AnyRef, a: Keyword) => (j2Float(w(e, a)).floor).asInstanceOf[T]
+      case "Double"     => (e: AnyRef, a: Keyword) => (j2Double(w(e, a)).floor).asInstanceOf[T]
+      case "BigDecimal" => (e: AnyRef, a: Keyword) => (j2BigDecimal(w(e, a)).setScale(0, RoundingMode.FLOOR)).asInstanceOf[T]
+    }
+
+    def and: (AnyRef, Keyword) => T = (e: AnyRef, a: Keyword) =>
+      (j2Boolean(w(e, a)) && v.asInstanceOf[Boolean]).asInstanceOf[T]
+
+    def or: (AnyRef, Keyword) => T = (e: AnyRef, a: Keyword) =>
+      (j2Boolean(w(e, a)) || v.asInstanceOf[Boolean]).asInstanceOf[T]
+
+    def not: (AnyRef, Keyword) => T = (e: AnyRef, a: Keyword) =>
+      (!j2Boolean(w(e, a))).asInstanceOf[T]
+  }
 
   override protected def updateSetEq[T](
     ns: String,

@@ -160,23 +160,25 @@ trait QueryExprOne[Tpl]
     resOne: ResOne[T]
   ): Unit = {
     op match {
-      case V          => attrV(e, a, v)
-      case Eq         => equal(e, a, v, args, resOne.s2j)
-      case Neq        => neq(e, a, v, args, resOne.tpe, resOne.toDatalog)
-      case Lt         => compare(e, a, v, args.head, "<", resOne.s2j)
-      case Gt         => compare(e, a, v, args.head, ">", resOne.s2j)
-      case Le         => compare(e, a, v, args.head, "<=", resOne.s2j)
-      case Ge         => compare(e, a, v, args.head, ">=", resOne.s2j)
-      case NoValue    => noValue(e, a)
-      case Fn(kw, n)  => aggr(attr, e, a, v, kw, n, resOne)
-      case StartsWith => stringOp(e, a, v, args.head, "starts-with?")
-      case EndsWith   => stringOp(e, a, v, args.head, "ends-with?")
-      case Contains   => stringOp(e, a, v, args.head, "includes?")
-      case Matches    => regex(e, a, v, args.head)
-      case Remainder  => remainder(e, a, v, args)
-      case Even       => even(e, a, v)
-      case Odd        => odd(e, a, v)
-      case other      => unexpectedOp(other)
+      case V            => attrV(e, a, v)
+      case Eq           => equal(e, a, v, args, resOne.s2j)
+      case Neq          => neq(e, a, v, args, resOne.tpe, resOne.toDatalog)
+      case Lt           => compare(e, a, v, args.head, "<", resOne.s2j)
+      case Gt           => compare(e, a, v, args.head, ">", resOne.s2j)
+      case Le           => compare(e, a, v, args.head, "<=", resOne.s2j)
+      case Ge           => compare(e, a, v, args.head, ">=", resOne.s2j)
+      case NoValue      => noValue(e, a)
+      case Fn(kw, n)    => aggr(attr, e, a, v, kw, n, resOne)
+      case StartsWith   => stringOp(e, a, v, args.head, "starts-with?")
+      case EndsWith     => stringOp(e, a, v, args.head, "ends-with?")
+      case Contains     => stringOp(e, a, v, args.head, "includes?")
+      case Matches      => regex(e, a, v, args.head)
+      case Remainder    => remainder(e, a, v, args)
+      case Even         => even(e, a, v)
+      case Odd          => odd(e, a, v)
+      case AttrOp.Ceil  => ceil(e, a, v)
+      case AttrOp.Floor => floor(e, a, v)
+      case other        => unexpectedOp(other)
     }
   }
   private def expr2(
@@ -352,6 +354,18 @@ trait QueryExprOne[Tpl]
   private def odd(e: Var, a: Att, v: Var): Unit = {
     where += s"[$e $a $v]" -> wClause
     where += s"""[(odd? $v)]""" -> wNeqOne
+  }
+
+  protected def ceil(e: Var, a: Att, v: Var): Unit = {
+    val v0 = v + "0"
+    where += s"[$e $a $v0]" -> wClause
+    where += s"""[(Math/ceil $v0) $v]""" -> wNeqOne
+  }
+
+  protected def floor(e: Var, a: Att, v: Var): Unit = {
+    val v0 = v + "0"
+    where += s"[$e $a $v0]" -> wClause
+    where += s"""[(Math/floor $v0) $v]""" -> wNeqOne
   }
 
 

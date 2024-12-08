@@ -43,8 +43,10 @@ trait ResolveBase extends BaseHelpers {
     case v: jBigInt => BigInt(v)
     case v          => BigInt(v.toString)
   }
-  protected lazy val j2sBigDecimal    : AnyRef => AnyRef =
-    (v: AnyRef) => BigDecimal(v.asInstanceOf[jBigDecimal])
+  protected lazy val j2sBigDecimal    : AnyRef => AnyRef = {
+    case v: jBigDecimal => BigDecimal(v)
+    case v              => BigDecimal(v.toString)
+  }
   protected lazy val j2sDate          : AnyRef => AnyRef = identity
   protected lazy val j2sDuration      : AnyRef => AnyRef = (v: AnyRef) => Duration.parse(v.asInstanceOf[String])
   protected lazy val j2sInstant       : AnyRef => AnyRef = (v: AnyRef) => Instant.parse(v.asInstanceOf[String])

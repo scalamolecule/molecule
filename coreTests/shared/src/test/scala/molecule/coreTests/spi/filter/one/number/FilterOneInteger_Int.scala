@@ -21,11 +21,11 @@ trait FilterOneInteger_Int extends CoreTestSuite with Api_async { spi: Spi_async
           (2, int2),
         ).transact
 
-        _ <- Ns.int.even.query.get.map(_ ==> List(-int2, int0, int2))
-        _ <- Ns.i.int_.even.query.get.map(_ ==> List(-2, 0, 2))
+        _ <- Ns.int.even.a1.query.get.map(_ ==> List(-int2, int0, int2))
+        _ <- Ns.i.a1.int_.even.query.get.map(_ ==> List(-2, 0, 2))
 
-        _ <- Ns.int.odd.query.get.map(_ ==> List(-int1, int1))
-        _ <- Ns.i.int_.odd.query.get.map(_ ==> List(-1, 1))
+        _ <- Ns.int.odd.a1.query.get.map(_ ==> List(-int1, int1))
+        _ <- Ns.i.a1.int_.odd.query.get.map(_ ==> List(-1, 1))
       } yield ()
     }
 

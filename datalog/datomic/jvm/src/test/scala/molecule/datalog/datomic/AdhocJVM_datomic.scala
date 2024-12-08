@@ -1,6 +1,7 @@
 package molecule.datalog.datomic
 
 import datomic.{Database, Peer, Util}
+import datomic.Util._
 import molecule.base.error.ModelError
 import molecule.boilerplate.api.{NestedInit_01, NestedInit_02}
 import molecule.core.util.Executor._
@@ -9,6 +10,7 @@ import molecule.datalog.datomic.setup.TestSuite_datomic
 import utest._
 import scala.concurrent.Future
 import scala.language.implicitConversions
+
 
 //object AdhocJVM_datomic extends TestSuite_datomic_array {
 object AdhocJVM_datomic extends TestSuite_datomic {
@@ -19,10 +21,13 @@ object AdhocJVM_datomic extends TestSuite_datomic {
       import molecule.coreTests.dataModels.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
+      //      println("hello".substring(-2, 1))
+
+
       for {
 
-        _ <- Ns.int(3).save.transact
-        _ <- Ns.int.query.get.map(_ ==> List(3))
+        //        _ <- Ns.int(3).save.transact
+        //        _ <- Ns.int.query.get.map(_ ==> List(3))
 
 
         //        _ = Peer.q(
@@ -30,6 +35,57 @@ object AdhocJVM_datomic extends TestSuite_datomic {
         //            | :where [?e :Ns/int ?v ?tx ?op]]
         //            |""".stripMargin, conn.db.asInstanceOf[Database].history()
         //        ).forEach(r => println(r))
+
+
+//        ids <- Ns.string.insert("Hello", "World").transact.map(_.ids)
+//
+//        _ <- Ns(ids).string.substring(-2, 3).update.transact
+//          .map(_ ==> "Unexpected success").recover { case ModelError(error) =>
+//            error ==> "Start index should be 0 or more"
+//          }
+//
+//        _ <- Ns(ids).string.substring(4, 3).update.transact
+//          .map(_ ==> "Unexpected success").recover { case ModelError(error) =>
+//            error ==> "Start index should be smaller than end index"
+//          }
+//
+//        // No change if start is after end
+//        _ <- Ns(ids).string.substring(10, 11).update.transact
+//        _ <- Ns.string.a1.query.get.map(_ ==> List("Hello", "World"))
+//
+//
+//        // End index after string length leaves tail as-is
+//        _ <- Ns(ids).string.substring(1, 10).update.transact
+//        _ <- Ns.string.a1.query.get.map(_ ==> List("ello", "orld"))
+//
+//        // Pick some middle part
+//        _ <- Ns(ids).string.substring(1, 3).update.transact
+//        _ <- Ns.string.a1.query.get.map(_ ==> List("ll", "rl"))
+
+        ids <- Ns.string.insert("Hello", "World").transact.map(_.ids)
+
+        _ <- Ns(ids).string.substring(-2, 3).update.transact
+          .map(_ ==> "Unexpected success").recover { case ModelError(error) =>
+            error ==> "Start index should be 0 or more"
+          }
+
+        _ <- Ns(ids).string.substring(4, 3).update.transact
+          .map(_ ==> "Unexpected success").recover { case ModelError(error) =>
+            error ==> "Start index should be smaller than end index"
+          }
+
+        // Pick index after end to keep rest of string
+        _ <- Ns(ids).string.substring(1, 100).update.transact
+        _ <- Ns.string.a1.query.get.map(_ ==> List("ello", "orld"))
+
+        // Pick some middle part
+        _ <- Ns(ids).string.substring(1, 3).update.transact
+        _ <- Ns.string.a1.query.get.map(_ ==> List("ll", "rl"))
+
+        // Empty string returned if start is after end
+        // OBS: beware of saved empty string values!
+        _ <- Ns(ids).string.substring(10, 11).update.transact
+        _ <- Ns.string.a1.query.get.map(_ ==> List(""))
 
 
       } yield ()

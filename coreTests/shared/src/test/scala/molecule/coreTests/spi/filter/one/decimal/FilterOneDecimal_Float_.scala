@@ -24,7 +24,7 @@ trait FilterOneDecimal_Float_ extends CoreTestSuite with Api_async { spi: Spi_as
 
         // To avoid changing type, Molecule returns whole decimal numbers
 
-        _ <- Ns.float.ceil.query.i.get.map(_.sorted ==> List(
+        _ <- Ns.float.ceil.query.get.map(_.sorted ==> List(
           -float20, // -2.0
           -float10, // -1.0
           float0, //    0.0

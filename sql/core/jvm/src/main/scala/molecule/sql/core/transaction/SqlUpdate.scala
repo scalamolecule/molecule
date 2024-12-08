@@ -95,9 +95,21 @@ trait SqlUpdate
   }
 
 
-  def handleAppend(attr: String, cast: String) = s"($attr || ?$cast)"
-  def handlePrepend(attr: String, cast: String) = s"(?$cast || $attr)"
-  def handleReplaceAll[T](attr: String, vs: Seq[T]) = s"REGEXP_REPLACE($attr, ?, '${vs(1)}')"
+  def handleAppend(attr: String, cast: String): String = s"($attr || ?$cast)"
+  def handlePrepend(attr: String, cast: String): String = s"(?$cast || $attr)"
+  def handleReplaceAll[T](attr: String, vs: Seq[T]): String = s"REGEXP_REPLACE($attr, ?, '${vs(1)}')"
+
+  def substring(attr: String, start: Int, end: Int): String = {
+    if (start < 0)
+      throw ModelError("Start index should be 0 or more")
+
+    if (start >= end)
+      throw ModelError("Start index should be smaller than end index")
+
+    val length = end - start
+    val s = start + 1
+    s"SUBSTRING($attr, $s, $length)"
+  }
 
   override protected def updateOne[T](
     ns: String,
@@ -129,22 +141,24 @@ trait SqlUpdate
                 s"Found: " + vs.mkString(", ")
             )
         }
-      case op: AttrOp   =>
+
+      case op: AttrOp =>
         setAttrPresence(ns, attr)
         val cast: String = exts(2)
         def handle(computedValue: String): Unit = {
           val paramIndex = updateAction.setCol(s"$attr = $computedValue")
-          val colSetter  = if (vs.isEmpty) (_: PS) => () else
+          val colSetter  = if (vs.isEmpty)
+            (_: PS) => ()
+          else
             (ps: PS) => transformValue(vs.head).asInstanceOf[(PS, Int) => Unit](ps, paramIndex)
-          updateAction.addColSetter(colSetter
-          )
+          updateAction.addColSetter(colSetter)
         }
 
         op match {
           // String
           case AttrOp.Append                   => handle(handleAppend(attr, cast))
           case AttrOp.Prepend                  => handle(handlePrepend(attr, cast))
-          case AttrOp.SubString(start, length) => handle(s"SUBSTRING($attr, $start, $length)")
+          case AttrOp.SubString(start, length) => handle(substring(attr, start, length))
           case AttrOp.ReplaceAll               => handle(handleReplaceAll(attr, vs))
           case AttrOp.ToLower                  => handle(s"LOWER($attr)")
           case AttrOp.ToUpper                  => handle(s"UPPER($attr)")

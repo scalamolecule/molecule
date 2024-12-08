@@ -22,11 +22,11 @@ trait FilterOneInteger_BigInt_ extends CoreTestSuite with Api_async { spi: Spi_a
           (2, bigInt2),
         ).transact
 
-        _ <- Ns.bigInt.even.query.get.map(_ ==> List(-bigInt2, bigInt0, bigInt2))
-        _ <- Ns.i.bigInt_.even.query.get.map(_ ==> List(-2, 0, 2))
+        _ <- Ns.bigInt.even.a1.query.get.map(_ ==> List(-bigInt2, bigInt0, bigInt2))
+        _ <- Ns.i.a1.bigInt_.even.query.get.map(_ ==> List(-2, 0, 2))
 
-        _ <- Ns.bigInt.odd.query.get.map(_ ==> List(-bigInt1, bigInt1))
-        _ <- Ns.i.bigInt_.odd.query.get.map(_ ==> List(-1, 1))
+        _ <- Ns.bigInt.odd.a1.query.get.map(_ ==> List(-bigInt1, bigInt1))
+        _ <- Ns.i.a1.bigInt_.odd.query.get.map(_ ==> List(-1, 1))
       } yield ()
     }
 

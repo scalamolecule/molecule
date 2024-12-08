@@ -23,6 +23,7 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       import molecule.coreTests.dataModels.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
+      println("hello".substring(5, 5))
       for {
         //        List(a, b) <- Ns.int.insert(1, 2).transact.map(_.ids)
         //        _ <- Ns.int(3).save.transact
@@ -31,46 +32,34 @@ object AdhocJVM_h2 extends TestSuite_h2 {
         //        _ <- Ns(b).delete.transact
         //        _ <- Ns.int.a1.query.get.map(_ ==> List(3, 10))
 
-        _ <- Ns.i.int.insert(
-          (-2, -int2),
-          (-1, -int1),
-          (0, int0),
-          (1, int1),
-          (2, int2),
-        ).transact
+        ids <- Ns.string.insert("Hello", "World").transact.map(_.ids)
 
-        // Mandatory
-        _ <- Ns.int.even.query.get.map(_ ==> List(-int2, int0, int2))
-        _ <- Ns.int.odd.query.get.map(_ ==> List(-int1, int1))
+        _ <- Ns(ids).string.substring(-2, 3).update.transact
+          .map(_ ==> "Unexpected success").recover { case ModelError(error) =>
+            error ==> "Start index should be 0 or more"
+          }
 
-        // Tacit
-        _ <- Ns.i.int_.even.query.get.map(_ ==> List(-2, 0, 2))
-        _ <- Ns.i.int_.odd.query.get.map(_ ==> List(-1, 1))
+        _ <- Ns(ids).string.substring(4, 3).update.transact
+          .map(_ ==> "Unexpected success").recover { case ModelError(error) =>
+            error ==> "Start index should be smaller than end index"
+          }
 
-//        // Mandatory
-//        _ <- Ns.int.even.query.get.map(_ ==> List(int2, int4))
-//        _ <- Ns.int.odd.query.get.map(_ ==> List(int1, int3, int5))
-//
-//        // Tacit
-//        _ <- Ns.i.int_.even.query.get.map(_ ==> List(2, 4))
-//        _ <- Ns.i.int_.odd.query.get.map(_ ==> List(1, 3, 5))
+        // Pick index after end to keep rest of string
+        _ <- Ns(ids).string.substring(1, 100).update.transact
+        _ <- Ns.string.a1.query.get.map(_ ==> List("ello", "orld"))
+
+        // Pick some middle part
+        _ <- Ns(ids).string.substring(1, 3).update.transact
+        _ <- Ns.string.a1.query.get.map(_ ==> List("ll", "rl"))
+
+        // Empty string returned if start is after end
+        // OBS: beware of saved empty string values!
+        _ <- Ns(ids).string.substring(10, 11).update.transact
+        _ <- Ns.string.a1.query.get.map(_ ==> List(""))
 
       } yield ()
     }
 
-    /*
-
-    _ <- if (database == "SQlite" && int1.isInstanceOf[BigInt]) {
-          // Generated tests for `BigInt`s are not sorted correctly since
-          // `BigInt`s have to be saved as Text in SQlite and therefore
-          // sort lexicographically which gives wrong numeric order.
-          // So in this special case we simply sort the output:
-          Ns.int.query.get.map(_.sorted.reverse ==> List(-int1, -int2))
-        } else {
-          // In all other cases, normal correct sorting applies
-          Ns.int.d1.query.get.map(_ ==> List(-int1, -int2))
-        }
-     */
 
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.dsl.Refs._

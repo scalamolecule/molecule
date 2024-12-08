@@ -24,7 +24,7 @@ trait FilterOneDecimal_BigDecimal_ extends CoreTestSuite with Api_async { spi: S
 
         // To avoid changing type, Molecule returns whole decimal numbers
 
-        _ <- Ns.bigDecimal.ceil.query.i.get.map(_.sorted ==> List(
+        _ <- Ns.bigDecimal.ceil.query.get.map(_.sorted ==> List(
           -bigDecimal20, // -2.0
           -bigDecimal10, // -1.0
           bigDecimal0, //    0.0

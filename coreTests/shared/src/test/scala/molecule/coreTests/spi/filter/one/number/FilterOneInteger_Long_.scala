@@ -22,11 +22,11 @@ trait FilterOneInteger_Long_ extends CoreTestSuite with Api_async { spi: Spi_asy
           (2, long2),
         ).transact
 
-        _ <- Ns.long.even.query.get.map(_ ==> List(-long2, long0, long2))
-        _ <- Ns.i.long_.even.query.get.map(_ ==> List(-2, 0, 2))
+        _ <- Ns.long.even.a1.query.get.map(_ ==> List(-long2, long0, long2))
+        _ <- Ns.i.a1.long_.even.query.get.map(_ ==> List(-2, 0, 2))
 
-        _ <- Ns.long.odd.query.get.map(_ ==> List(-long1, long1))
-        _ <- Ns.i.long_.odd.query.get.map(_ ==> List(-1, 1))
+        _ <- Ns.long.odd.a1.query.get.map(_ ==> List(-long1, long1))
+        _ <- Ns.i.a1.long_.odd.query.get.map(_ ==> List(-1, 1))
       } yield ()
     }
 

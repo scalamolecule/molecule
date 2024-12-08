@@ -146,7 +146,7 @@ trait Model extends Validations with Values with BaseHelpers {
     // String ops
     case object Append extends AttrOp
     case object Prepend extends AttrOp
-    case class SubString(start: Int, length: Int) extends AttrOp
+    case class SubString(start: Int, end: Int) extends AttrOp
     case object ReplaceAll extends AttrOp
     case object ToLower extends AttrOp
     case object ToUpper extends AttrOp

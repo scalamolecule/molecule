@@ -23,7 +23,7 @@ trait FilterOneDecimal_Double extends CoreTestSuite with Api_async { spi: Spi_as
 
         // To avoid changing type, Molecule returns whole decimal numbers
 
-        _ <- Ns.double.ceil.query.i.get.map(_.sorted ==> List(
+        _ <- Ns.double.ceil.query.get.map(_.sorted ==> List(
           -double20, // -2.0
           -double10, // -1.0
           double0, //    0.0

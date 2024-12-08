@@ -22,11 +22,11 @@ trait FilterOneInteger_Byte_ extends CoreTestSuite with Api_async { spi: Spi_asy
           (2, byte2),
         ).transact
 
-        _ <- Ns.byte.even.query.get.map(_ ==> List(-2.toByte, byte0, byte2))
-        _ <- Ns.i.byte_.even.query.get.map(_ ==> List(-2, 0, 2))
+        _ <- Ns.byte.even.a1.query.get.map(_ ==> List(-2.toByte, byte0, byte2))
+        _ <- Ns.i.a1.byte_.even.query.get.map(_ ==> List(-2, 0, 2))
 
-        _ <- Ns.byte.odd.query.get.map(_ ==> List(-1.toByte, byte1))
-        _ <- Ns.i.byte_.odd.query.get.map(_ ==> List(-1, 1))
+        _ <- Ns.byte.odd.a1.query.get.map(_ ==> List(-1.toByte, byte1))
+        _ <- Ns.i.a1.byte_.odd.query.get.map(_ ==> List(-1, 1))
       } yield ()
     }
 
