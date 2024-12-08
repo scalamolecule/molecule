@@ -32,30 +32,17 @@ object AdhocJVM_h2 extends TestSuite_h2 {
         //        _ <- Ns(b).delete.transact
         //        _ <- Ns.int.a1.query.get.map(_ ==> List(3, 10))
 
-        ids <- Ns.string.insert("Hello", "World").transact.map(_.ids)
+        ids <- Ns.string.insert("Hello").transact.map(_.ids)
 
-        _ <- Ns(ids).string.substring(-2, 3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ModelError(error) =>
-            error ==> "Start index should be 0 or more"
-          }
+//        _ <- Ns(ids).string.replaceAll("[eo]", "X").update.transact
+//        _ <- Ns.string.a1.query.get.map(_ ==> List("HXllX"))
 
-        _ <- Ns(ids).string.substring(4, 3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ModelError(error) =>
-            error ==> "Start index should be smaller than end index"
-          }
+//        _ <- Ns(ids).string.replaceAll("l", "_").update.transact
+//        _ <- Ns.string.a1.query.get.map(_ ==> List("He__o"))
 
-        // Pick index after end to keep rest of string
-        _ <- Ns(ids).string.substring(1, 100).update.transact
-        _ <- Ns.string.a1.query.get.map(_ ==> List("ello", "orld"))
-
-        // Pick some middle part
-        _ <- Ns(ids).string.substring(1, 3).update.transact
+        _ <- Ns(ids).string.substring(2, 4).update.transact
         _ <- Ns.string.a1.query.get.map(_ ==> List("ll", "rl"))
 
-        // Empty string returned if start is after end
-        // OBS: beware of saved empty string values!
-        _ <- Ns(ids).string.substring(10, 11).update.transact
-        _ <- Ns.string.a1.query.get.map(_ ==> List(""))
 
       } yield ()
     }

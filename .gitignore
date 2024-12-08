@@ -34,3 +34,5 @@ node_modules/
 /coreTests/js/lib/
 /coreTests/jvm/lib/
 /coreTests/shared/lib/
+
+*.cache

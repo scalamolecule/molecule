@@ -15,8 +15,8 @@ Compile to 2.12 only:
 
 Compile to 3.3 only:
 
-    sbt ++3.3.3 compile
-    sbt ++3.3.3 clean compile
+    sbt ++3.3.4 compile
+    sbt ++3.3.4 clean compile
 
 Compile to all versions:
 
@@ -80,16 +80,18 @@ Compilation on JS side can take some time.
 4) sbt-molecule: `sbt publishLocal`
 5) molecule: set sbt-molecule plugin version to new plugin version
 6) molecule: `sbt +publishLocal`
-7) Test sbt-molecule `./test-all.sh`
-8) sbt-molecule: `sbt publishSigned`
-9) molecule: `sbt +publishSigned -Ddocs=true`
+7) sbt-molecule: `./test-all.sh`
+8) molecule-samples: set new molecule and sbt-molecule versions and compile+test each sample project
+9) sbt-molecule: `sbt publishSigned`
+10) molecule: `sbt +publishSigned -Ddocs=true`
 
 
 ## Publish without sbt-molecule update
 
 1) Set molecule build version to new version
 2) molecule: `sbt +publishLocal`
-3) molecule: `sbt +publishSigned -Ddocs=true`
+3) molecule-samples: `./test-all.sh`
+4) molecule: `sbt +publishSigned -Ddocs=true`
 
 
 ### Publish versions separately
