@@ -37,8 +37,12 @@ trait TestData extends DateHandling { self: CoreTest =>
   //    (0.0f, 1.1f, 2.2f, 3.3f, 4.4f, 5.5f, 6.6f, 7.7f, 8.8f, 9.9f, Float.MinValue, Float.MaxValue)
   //                                                                       ^^ gives weird exponential value
 
+  lazy val (float10, float20, float30, float40, float50) = (1.0f, 2.0f, 3.0f, 4.0f, 5.0f)
+
   lazy val (double0, double1, double2, double3, double4, double5, double6, double7, double8, double9, doubleMin, doubleMax) =
     (0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, Double.MinValue, Double.MaxValue)
+
+  lazy val (double10, double20, double30, double40, double50) = (1.0, 2.0, 3.0, 4.0, 5.0)
 
   lazy val (boolean0, boolean1, boolean2, boolean3, boolean4, boolean5, boolean6, boolean7, boolean8, boolean9) =
     (false, false, true, false, true, false, true, false, true, false) // make boolean1 sort before boolean2 (false before true)
@@ -52,6 +56,9 @@ trait TestData extends DateHandling { self: CoreTest =>
   bigDecimal5, bigDecimal6, bigDecimal7, bigDecimal8, bigDecimal9, bigDecimalNeg, bigDecimalPos) =
     (bd(0.0), bd(1.1), bd(2.2), bd(3.3), bd(4.4), bd(5.5), bd(6.6), bd(7.7), bd(8.8), bd(9.9),
       BigDecimal(s"-$n.$n"), BigDecimal(s"$n.$n"))
+
+  lazy val (bigDecimal10, bigDecimal20, bigDecimal30, bigDecimal40, bigDecimal50) =
+    (bd(1.0), bd(2.0), bd(3.0), bd(4.0), bd(5.0))
 
   lazy val (date0, date1, date2, date3, date4, date5, date6, date7, date8, date9) =
     (da(0), da(1), da(2), da(3), da(4), da(5), da(6), da(7), da(8), da(9))

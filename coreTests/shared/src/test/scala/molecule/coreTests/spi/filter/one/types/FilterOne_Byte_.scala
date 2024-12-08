@@ -141,5 +141,26 @@ trait FilterOne_Byte_ extends CoreTestSuite with Api_async { spi: Spi_async =>
         _ <- Ns.i.a1.byte_().query.get.map(_ ==> List(4))
       } yield ()
     }
+
+
+    "Combinations" - types { implicit conn =>
+      for {
+        _ <- Ns.i.byte.insert(
+          (1, byte1),
+          (2, byte2),
+          (3, byte3),
+          (4, byte4),
+          (5, byte5),
+          (6, byte6),
+          (7, byte7),
+          (8, byte8),
+          (9, byte9),
+        ).transact
+
+        _ <- Ns.i.a1.byte_.>(byte2).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8, 9))
+        _ <- Ns.i.a1.byte_.>(byte2).byte_.<=(byte8).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8))
+        _ <- Ns.i.a1.byte_.>(byte2).byte_.<=(byte8).byte_.not(byte4, byte5).query.get.map(_ ==> List(3, 6, 7, 8))
+      } yield ()
+    }
   }
 }

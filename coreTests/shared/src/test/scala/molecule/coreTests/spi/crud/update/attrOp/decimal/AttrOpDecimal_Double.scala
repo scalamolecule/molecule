@@ -44,14 +44,6 @@ trait AttrOpDecimal_Double extends CoreTestSuite with Api_async { spi: Spi_async
       } yield ()
     }
 
-    "modulo" - types { implicit conn =>
-      for {
-        id <- Ns.double(double4).save.transact.map(_.id)
-        _ <- Ns(id).double.%(double3).update.transact
-        _ <- Ns.double.query.get.map(_.head ==~ double1)
-      } yield ()
-    }
-
     "negate" - types { implicit conn =>
       for {
         ids <- Ns.double.insert(-double1, double2).transact.map(_.ids)
@@ -72,10 +64,12 @@ trait AttrOpDecimal_Double extends CoreTestSuite with Api_async { spi: Spi_async
       for {
         ids <- Ns.double.insert(-double1, double2).transact.map(_.ids)
         _ <- Ns(ids).double.absNeg.update.transact
-        // (sorting on result to avoid incorrect sorting of negative BigDecimal in SQlite)
-        _ <- Ns.double.query.get.map(_.sorted.reverse ==> List(-double1, -double2))
+        _ <- Ns.double.d1.query.get.map(_ ==> List(-double1, -double2))
       } yield ()
     }
+
+
+    // ceil/floor only available for decimal numbers
 
     "ceil" - types { implicit conn =>
       for {

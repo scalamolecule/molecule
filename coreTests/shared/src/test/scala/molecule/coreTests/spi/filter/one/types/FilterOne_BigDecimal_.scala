@@ -141,5 +141,26 @@ trait FilterOne_BigDecimal_ extends CoreTestSuite with Api_async { spi: Spi_asyn
         _ <- Ns.i.a1.bigDecimal_().query.get.map(_ ==> List(4))
       } yield ()
     }
+
+
+    "Combinations" - types { implicit conn =>
+      for {
+        _ <- Ns.i.bigDecimal.insert(
+          (1, bigDecimal1),
+          (2, bigDecimal2),
+          (3, bigDecimal3),
+          (4, bigDecimal4),
+          (5, bigDecimal5),
+          (6, bigDecimal6),
+          (7, bigDecimal7),
+          (8, bigDecimal8),
+          (9, bigDecimal9),
+        ).transact
+
+        _ <- Ns.i.a1.bigDecimal_.>(bigDecimal2).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8, 9))
+        _ <- Ns.i.a1.bigDecimal_.>(bigDecimal2).bigDecimal_.<=(bigDecimal8).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8))
+        _ <- Ns.i.a1.bigDecimal_.>(bigDecimal2).bigDecimal_.<=(bigDecimal8).bigDecimal_.not(bigDecimal4, bigDecimal5).query.get.map(_ ==> List(3, 6, 7, 8))
+      } yield ()
+    }
   }
 }

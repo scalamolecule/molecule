@@ -43,11 +43,9 @@ trait ExprOneTac_0_String[t, Ns1[_], Ns2[_, _]] extends ExprOneTac_0[t, Ns1, Ns2
   def contains  (needle: t      ): Ns1[t] with CardOne = _exprOneTac(Contains  , Seq(needle))
   def matches   (regex : t      ): Ns1[t] with CardOne = _exprOneTac(Matches   , Seq(regex) )
 }
-trait ExprOneTac_0_Integer[t, Ns1[_], Ns2[_, _]] extends ExprOneTac_0_Decimal[t, Ns1, Ns2] {
+trait ExprOneTac_0_Integer[t, Ns1[_], Ns2[_, _]] extends ExprOneTac_0[t, Ns1, Ns2] {
   def even                       : Ns1[t] with CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Ns1[t] with CardOne = _exprOneTac(Odd       , Nil                    )
-}
-trait ExprOneTac_0_Decimal[t, Ns1[_], Ns2[_, _]] extends ExprOneTac_0[t, Ns1, Ns2] {
   def %(divider: t, remainder: t): Ns1[t] with CardOne = _exprOneTac(Remainder , Seq(divider, remainder))
 }
 
@@ -88,11 +86,9 @@ trait ExprOneTac_1_String[A, t, Ns1[_, _], Ns2[_, _, _]] extends ExprOneTac_1[A,
   def contains  (needle: t      ): Ns1[A, t] with CardOne = _exprOneTac(Contains  , Seq(needle))
   def matches   (regex : t      ): Ns1[A, t] with CardOne = _exprOneTac(Matches   , Seq(regex) )
 }
-trait ExprOneTac_1_Integer[A, t, Ns1[_, _], Ns2[_, _, _]] extends ExprOneTac_1_Decimal[A, t, Ns1, Ns2] {
+trait ExprOneTac_1_Integer[A, t, Ns1[_, _], Ns2[_, _, _]] extends ExprOneTac_1[A, t, Ns1, Ns2] {
   def even                       : Ns1[A, t] with CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Ns1[A, t] with CardOne = _exprOneTac(Odd       , Nil                    )
-}
-trait ExprOneTac_1_Decimal[A, t, Ns1[_, _], Ns2[_, _, _]] extends ExprOneTac_1[A, t, Ns1, Ns2] {
   def %(divider: t, remainder: t): Ns1[A, t] with CardOne = _exprOneTac(Remainder , Seq(divider, remainder))
 }
 
@@ -133,11 +129,9 @@ trait ExprOneTac_2_String[A, B, t, Ns1[_, _, _], Ns2[_, _, _, _]] extends ExprOn
   def contains  (needle: t      ): Ns1[A, B, t] with CardOne = _exprOneTac(Contains  , Seq(needle))
   def matches   (regex : t      ): Ns1[A, B, t] with CardOne = _exprOneTac(Matches   , Seq(regex) )
 }
-trait ExprOneTac_2_Integer[A, B, t, Ns1[_, _, _], Ns2[_, _, _, _]] extends ExprOneTac_2_Decimal[A, B, t, Ns1, Ns2] {
+trait ExprOneTac_2_Integer[A, B, t, Ns1[_, _, _], Ns2[_, _, _, _]] extends ExprOneTac_2[A, B, t, Ns1, Ns2] {
   def even                       : Ns1[A, B, t] with CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Ns1[A, B, t] with CardOne = _exprOneTac(Odd       , Nil                    )
-}
-trait ExprOneTac_2_Decimal[A, B, t, Ns1[_, _, _], Ns2[_, _, _, _]] extends ExprOneTac_2[A, B, t, Ns1, Ns2] {
   def %(divider: t, remainder: t): Ns1[A, B, t] with CardOne = _exprOneTac(Remainder , Seq(divider, remainder))
 }
 
@@ -178,11 +172,9 @@ trait ExprOneTac_3_String[A, B, C, t, Ns1[_, _, _, _], Ns2[_, _, _, _, _]] exten
   def contains  (needle: t      ): Ns1[A, B, C, t] with CardOne = _exprOneTac(Contains  , Seq(needle))
   def matches   (regex : t      ): Ns1[A, B, C, t] with CardOne = _exprOneTac(Matches   , Seq(regex) )
 }
-trait ExprOneTac_3_Integer[A, B, C, t, Ns1[_, _, _, _], Ns2[_, _, _, _, _]] extends ExprOneTac_3_Decimal[A, B, C, t, Ns1, Ns2] {
+trait ExprOneTac_3_Integer[A, B, C, t, Ns1[_, _, _, _], Ns2[_, _, _, _, _]] extends ExprOneTac_3[A, B, C, t, Ns1, Ns2] {
   def even                       : Ns1[A, B, C, t] with CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Ns1[A, B, C, t] with CardOne = _exprOneTac(Odd       , Nil                    )
-}
-trait ExprOneTac_3_Decimal[A, B, C, t, Ns1[_, _, _, _], Ns2[_, _, _, _, _]] extends ExprOneTac_3[A, B, C, t, Ns1, Ns2] {
   def %(divider: t, remainder: t): Ns1[A, B, C, t] with CardOne = _exprOneTac(Remainder , Seq(divider, remainder))
 }
 
@@ -223,11 +215,9 @@ trait ExprOneTac_4_String[A, B, C, D, t, Ns1[_, _, _, _, _], Ns2[_, _, _, _, _, 
   def contains  (needle: t      ): Ns1[A, B, C, D, t] with CardOne = _exprOneTac(Contains  , Seq(needle))
   def matches   (regex : t      ): Ns1[A, B, C, D, t] with CardOne = _exprOneTac(Matches   , Seq(regex) )
 }
-trait ExprOneTac_4_Integer[A, B, C, D, t, Ns1[_, _, _, _, _], Ns2[_, _, _, _, _, _]] extends ExprOneTac_4_Decimal[A, B, C, D, t, Ns1, Ns2] {
+trait ExprOneTac_4_Integer[A, B, C, D, t, Ns1[_, _, _, _, _], Ns2[_, _, _, _, _, _]] extends ExprOneTac_4[A, B, C, D, t, Ns1, Ns2] {
   def even                       : Ns1[A, B, C, D, t] with CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Ns1[A, B, C, D, t] with CardOne = _exprOneTac(Odd       , Nil                    )
-}
-trait ExprOneTac_4_Decimal[A, B, C, D, t, Ns1[_, _, _, _, _], Ns2[_, _, _, _, _, _]] extends ExprOneTac_4[A, B, C, D, t, Ns1, Ns2] {
   def %(divider: t, remainder: t): Ns1[A, B, C, D, t] with CardOne = _exprOneTac(Remainder , Seq(divider, remainder))
 }
 
@@ -268,11 +258,9 @@ trait ExprOneTac_5_String[A, B, C, D, E, t, Ns1[_, _, _, _, _, _], Ns2[_, _, _, 
   def contains  (needle: t      ): Ns1[A, B, C, D, E, t] with CardOne = _exprOneTac(Contains  , Seq(needle))
   def matches   (regex : t      ): Ns1[A, B, C, D, E, t] with CardOne = _exprOneTac(Matches   , Seq(regex) )
 }
-trait ExprOneTac_5_Integer[A, B, C, D, E, t, Ns1[_, _, _, _, _, _], Ns2[_, _, _, _, _, _, _]] extends ExprOneTac_5_Decimal[A, B, C, D, E, t, Ns1, Ns2] {
+trait ExprOneTac_5_Integer[A, B, C, D, E, t, Ns1[_, _, _, _, _, _], Ns2[_, _, _, _, _, _, _]] extends ExprOneTac_5[A, B, C, D, E, t, Ns1, Ns2] {
   def even                       : Ns1[A, B, C, D, E, t] with CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Ns1[A, B, C, D, E, t] with CardOne = _exprOneTac(Odd       , Nil                    )
-}
-trait ExprOneTac_5_Decimal[A, B, C, D, E, t, Ns1[_, _, _, _, _, _], Ns2[_, _, _, _, _, _, _]] extends ExprOneTac_5[A, B, C, D, E, t, Ns1, Ns2] {
   def %(divider: t, remainder: t): Ns1[A, B, C, D, E, t] with CardOne = _exprOneTac(Remainder , Seq(divider, remainder))
 }
 
@@ -313,11 +301,9 @@ trait ExprOneTac_6_String[A, B, C, D, E, F, t, Ns1[_, _, _, _, _, _, _], Ns2[_, 
   def contains  (needle: t      ): Ns1[A, B, C, D, E, F, t] with CardOne = _exprOneTac(Contains  , Seq(needle))
   def matches   (regex : t      ): Ns1[A, B, C, D, E, F, t] with CardOne = _exprOneTac(Matches   , Seq(regex) )
 }
-trait ExprOneTac_6_Integer[A, B, C, D, E, F, t, Ns1[_, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _]] extends ExprOneTac_6_Decimal[A, B, C, D, E, F, t, Ns1, Ns2] {
+trait ExprOneTac_6_Integer[A, B, C, D, E, F, t, Ns1[_, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _]] extends ExprOneTac_6[A, B, C, D, E, F, t, Ns1, Ns2] {
   def even                       : Ns1[A, B, C, D, E, F, t] with CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Ns1[A, B, C, D, E, F, t] with CardOne = _exprOneTac(Odd       , Nil                    )
-}
-trait ExprOneTac_6_Decimal[A, B, C, D, E, F, t, Ns1[_, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _]] extends ExprOneTac_6[A, B, C, D, E, F, t, Ns1, Ns2] {
   def %(divider: t, remainder: t): Ns1[A, B, C, D, E, F, t] with CardOne = _exprOneTac(Remainder , Seq(divider, remainder))
 }
 
@@ -358,11 +344,9 @@ trait ExprOneTac_7_String[A, B, C, D, E, F, G, t, Ns1[_, _, _, _, _, _, _, _], N
   def contains  (needle: t      ): Ns1[A, B, C, D, E, F, G, t] with CardOne = _exprOneTac(Contains  , Seq(needle))
   def matches   (regex : t      ): Ns1[A, B, C, D, E, F, G, t] with CardOne = _exprOneTac(Matches   , Seq(regex) )
 }
-trait ExprOneTac_7_Integer[A, B, C, D, E, F, G, t, Ns1[_, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _]] extends ExprOneTac_7_Decimal[A, B, C, D, E, F, G, t, Ns1, Ns2] {
+trait ExprOneTac_7_Integer[A, B, C, D, E, F, G, t, Ns1[_, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _]] extends ExprOneTac_7[A, B, C, D, E, F, G, t, Ns1, Ns2] {
   def even                       : Ns1[A, B, C, D, E, F, G, t] with CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Ns1[A, B, C, D, E, F, G, t] with CardOne = _exprOneTac(Odd       , Nil                    )
-}
-trait ExprOneTac_7_Decimal[A, B, C, D, E, F, G, t, Ns1[_, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _]] extends ExprOneTac_7[A, B, C, D, E, F, G, t, Ns1, Ns2] {
   def %(divider: t, remainder: t): Ns1[A, B, C, D, E, F, G, t] with CardOne = _exprOneTac(Remainder , Seq(divider, remainder))
 }
 
@@ -403,11 +387,9 @@ trait ExprOneTac_8_String[A, B, C, D, E, F, G, H, t, Ns1[_, _, _, _, _, _, _, _,
   def contains  (needle: t      ): Ns1[A, B, C, D, E, F, G, H, t] with CardOne = _exprOneTac(Contains  , Seq(needle))
   def matches   (regex : t      ): Ns1[A, B, C, D, E, F, G, H, t] with CardOne = _exprOneTac(Matches   , Seq(regex) )
 }
-trait ExprOneTac_8_Integer[A, B, C, D, E, F, G, H, t, Ns1[_, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_8_Decimal[A, B, C, D, E, F, G, H, t, Ns1, Ns2] {
+trait ExprOneTac_8_Integer[A, B, C, D, E, F, G, H, t, Ns1[_, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_8[A, B, C, D, E, F, G, H, t, Ns1, Ns2] {
   def even                       : Ns1[A, B, C, D, E, F, G, H, t] with CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Ns1[A, B, C, D, E, F, G, H, t] with CardOne = _exprOneTac(Odd       , Nil                    )
-}
-trait ExprOneTac_8_Decimal[A, B, C, D, E, F, G, H, t, Ns1[_, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_8[A, B, C, D, E, F, G, H, t, Ns1, Ns2] {
   def %(divider: t, remainder: t): Ns1[A, B, C, D, E, F, G, H, t] with CardOne = _exprOneTac(Remainder , Seq(divider, remainder))
 }
 
@@ -448,11 +430,9 @@ trait ExprOneTac_9_String[A, B, C, D, E, F, G, H, I, t, Ns1[_, _, _, _, _, _, _,
   def contains  (needle: t      ): Ns1[A, B, C, D, E, F, G, H, I, t] with CardOne = _exprOneTac(Contains  , Seq(needle))
   def matches   (regex : t      ): Ns1[A, B, C, D, E, F, G, H, I, t] with CardOne = _exprOneTac(Matches   , Seq(regex) )
 }
-trait ExprOneTac_9_Integer[A, B, C, D, E, F, G, H, I, t, Ns1[_, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_9_Decimal[A, B, C, D, E, F, G, H, I, t, Ns1, Ns2] {
+trait ExprOneTac_9_Integer[A, B, C, D, E, F, G, H, I, t, Ns1[_, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_9[A, B, C, D, E, F, G, H, I, t, Ns1, Ns2] {
   def even                       : Ns1[A, B, C, D, E, F, G, H, I, t] with CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Ns1[A, B, C, D, E, F, G, H, I, t] with CardOne = _exprOneTac(Odd       , Nil                    )
-}
-trait ExprOneTac_9_Decimal[A, B, C, D, E, F, G, H, I, t, Ns1[_, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_9[A, B, C, D, E, F, G, H, I, t, Ns1, Ns2] {
   def %(divider: t, remainder: t): Ns1[A, B, C, D, E, F, G, H, I, t] with CardOne = _exprOneTac(Remainder , Seq(divider, remainder))
 }
 
@@ -493,11 +473,9 @@ trait ExprOneTac_10_String[A, B, C, D, E, F, G, H, I, J, t, Ns1[_, _, _, _, _, _
   def contains  (needle: t      ): Ns1[A, B, C, D, E, F, G, H, I, J, t] with CardOne = _exprOneTac(Contains  , Seq(needle))
   def matches   (regex : t      ): Ns1[A, B, C, D, E, F, G, H, I, J, t] with CardOne = _exprOneTac(Matches   , Seq(regex) )
 }
-trait ExprOneTac_10_Integer[A, B, C, D, E, F, G, H, I, J, t, Ns1[_, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_10_Decimal[A, B, C, D, E, F, G, H, I, J, t, Ns1, Ns2] {
+trait ExprOneTac_10_Integer[A, B, C, D, E, F, G, H, I, J, t, Ns1[_, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_10[A, B, C, D, E, F, G, H, I, J, t, Ns1, Ns2] {
   def even                       : Ns1[A, B, C, D, E, F, G, H, I, J, t] with CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Ns1[A, B, C, D, E, F, G, H, I, J, t] with CardOne = _exprOneTac(Odd       , Nil                    )
-}
-trait ExprOneTac_10_Decimal[A, B, C, D, E, F, G, H, I, J, t, Ns1[_, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_10[A, B, C, D, E, F, G, H, I, J, t, Ns1, Ns2] {
   def %(divider: t, remainder: t): Ns1[A, B, C, D, E, F, G, H, I, J, t] with CardOne = _exprOneTac(Remainder , Seq(divider, remainder))
 }
 
@@ -538,11 +516,9 @@ trait ExprOneTac_11_String[A, B, C, D, E, F, G, H, I, J, K, t, Ns1[_, _, _, _, _
   def contains  (needle: t      ): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] with CardOne = _exprOneTac(Contains  , Seq(needle))
   def matches   (regex : t      ): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] with CardOne = _exprOneTac(Matches   , Seq(regex) )
 }
-trait ExprOneTac_11_Integer[A, B, C, D, E, F, G, H, I, J, K, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_11_Decimal[A, B, C, D, E, F, G, H, I, J, K, t, Ns1, Ns2] {
+trait ExprOneTac_11_Integer[A, B, C, D, E, F, G, H, I, J, K, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_11[A, B, C, D, E, F, G, H, I, J, K, t, Ns1, Ns2] {
   def even                       : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] with CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] with CardOne = _exprOneTac(Odd       , Nil                    )
-}
-trait ExprOneTac_11_Decimal[A, B, C, D, E, F, G, H, I, J, K, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_11[A, B, C, D, E, F, G, H, I, J, K, t, Ns1, Ns2] {
   def %(divider: t, remainder: t): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] with CardOne = _exprOneTac(Remainder , Seq(divider, remainder))
 }
 
@@ -583,11 +559,9 @@ trait ExprOneTac_12_String[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns1[_, _, _, _
   def contains  (needle: t      ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] with CardOne = _exprOneTac(Contains  , Seq(needle))
   def matches   (regex : t      ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] with CardOne = _exprOneTac(Matches   , Seq(regex) )
 }
-trait ExprOneTac_12_Integer[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_12_Decimal[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns1, Ns2] {
+trait ExprOneTac_12_Integer[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns1, Ns2] {
   def even                       : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] with CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] with CardOne = _exprOneTac(Odd       , Nil                    )
-}
-trait ExprOneTac_12_Decimal[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns1, Ns2] {
   def %(divider: t, remainder: t): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] with CardOne = _exprOneTac(Remainder , Seq(divider, remainder))
 }
 
@@ -628,11 +602,9 @@ trait ExprOneTac_13_String[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns1[_, _, _
   def contains  (needle: t      ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] with CardOne = _exprOneTac(Contains  , Seq(needle))
   def matches   (regex : t      ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] with CardOne = _exprOneTac(Matches   , Seq(regex) )
 }
-trait ExprOneTac_13_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_13_Decimal[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns1, Ns2] {
+trait ExprOneTac_13_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns1, Ns2] {
   def even                       : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] with CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] with CardOne = _exprOneTac(Odd       , Nil                    )
-}
-trait ExprOneTac_13_Decimal[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns1, Ns2] {
   def %(divider: t, remainder: t): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] with CardOne = _exprOneTac(Remainder , Seq(divider, remainder))
 }
 
@@ -673,11 +645,9 @@ trait ExprOneTac_14_String[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns1[_, _
   def contains  (needle: t      ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] with CardOne = _exprOneTac(Contains  , Seq(needle))
   def matches   (regex : t      ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] with CardOne = _exprOneTac(Matches   , Seq(regex) )
 }
-trait ExprOneTac_14_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_14_Decimal[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns1, Ns2] {
+trait ExprOneTac_14_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns1, Ns2] {
   def even                       : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] with CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] with CardOne = _exprOneTac(Odd       , Nil                    )
-}
-trait ExprOneTac_14_Decimal[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns1, Ns2] {
   def %(divider: t, remainder: t): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] with CardOne = _exprOneTac(Remainder , Seq(divider, remainder))
 }
 
@@ -718,11 +688,9 @@ trait ExprOneTac_15_String[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns1[_
   def contains  (needle: t      ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] with CardOne = _exprOneTac(Contains  , Seq(needle))
   def matches   (regex : t      ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] with CardOne = _exprOneTac(Matches   , Seq(regex) )
 }
-trait ExprOneTac_15_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_15_Decimal[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns1, Ns2] {
+trait ExprOneTac_15_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns1, Ns2] {
   def even                       : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] with CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] with CardOne = _exprOneTac(Odd       , Nil                    )
-}
-trait ExprOneTac_15_Decimal[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns1, Ns2] {
   def %(divider: t, remainder: t): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] with CardOne = _exprOneTac(Remainder , Seq(divider, remainder))
 }
 
@@ -763,11 +731,9 @@ trait ExprOneTac_16_String[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns
   def contains  (needle: t      ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] with CardOne = _exprOneTac(Contains  , Seq(needle))
   def matches   (regex : t      ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] with CardOne = _exprOneTac(Matches   , Seq(regex) )
 }
-trait ExprOneTac_16_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_16_Decimal[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns1, Ns2] {
+trait ExprOneTac_16_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns1, Ns2] {
   def even                       : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] with CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] with CardOne = _exprOneTac(Odd       , Nil                    )
-}
-trait ExprOneTac_16_Decimal[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns1, Ns2] {
   def %(divider: t, remainder: t): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] with CardOne = _exprOneTac(Remainder , Seq(divider, remainder))
 }
 
@@ -808,11 +774,9 @@ trait ExprOneTac_17_String[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t,
   def contains  (needle: t      ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] with CardOne = _exprOneTac(Contains  , Seq(needle))
   def matches   (regex : t      ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] with CardOne = _exprOneTac(Matches   , Seq(regex) )
 }
-trait ExprOneTac_17_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_17_Decimal[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns1, Ns2] {
+trait ExprOneTac_17_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns1, Ns2] {
   def even                       : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] with CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] with CardOne = _exprOneTac(Odd       , Nil                    )
-}
-trait ExprOneTac_17_Decimal[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns1, Ns2] {
   def %(divider: t, remainder: t): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] with CardOne = _exprOneTac(Remainder , Seq(divider, remainder))
 }
 
@@ -853,11 +817,9 @@ trait ExprOneTac_18_String[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R,
   def contains  (needle: t      ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] with CardOne = _exprOneTac(Contains  , Seq(needle))
   def matches   (regex : t      ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] with CardOne = _exprOneTac(Matches   , Seq(regex) )
 }
-trait ExprOneTac_18_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_18_Decimal[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Ns1, Ns2] {
+trait ExprOneTac_18_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Ns1, Ns2] {
   def even                       : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] with CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] with CardOne = _exprOneTac(Odd       , Nil                    )
-}
-trait ExprOneTac_18_Decimal[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Ns1, Ns2] {
   def %(divider: t, remainder: t): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] with CardOne = _exprOneTac(Remainder , Seq(divider, remainder))
 }
 
@@ -898,11 +860,9 @@ trait ExprOneTac_19_String[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R,
   def contains  (needle: t      ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] with CardOne = _exprOneTac(Contains  , Seq(needle))
   def matches   (regex : t      ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] with CardOne = _exprOneTac(Matches   , Seq(regex) )
 }
-trait ExprOneTac_19_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_19_Decimal[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Ns1, Ns2] {
+trait ExprOneTac_19_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Ns1, Ns2] {
   def even                       : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] with CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] with CardOne = _exprOneTac(Odd       , Nil                    )
-}
-trait ExprOneTac_19_Decimal[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Ns1, Ns2] {
   def %(divider: t, remainder: t): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] with CardOne = _exprOneTac(Remainder , Seq(divider, remainder))
 }
 
@@ -943,11 +903,9 @@ trait ExprOneTac_20_String[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R,
   def contains  (needle: t      ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] with CardOne = _exprOneTac(Contains  , Seq(needle))
   def matches   (regex : t      ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] with CardOne = _exprOneTac(Matches   , Seq(regex) )
 }
-trait ExprOneTac_20_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_20_Decimal[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Ns1, Ns2] {
+trait ExprOneTac_20_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Ns1, Ns2] {
   def even                       : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] with CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] with CardOne = _exprOneTac(Odd       , Nil                    )
-}
-trait ExprOneTac_20_Decimal[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Ns1, Ns2] {
   def %(divider: t, remainder: t): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] with CardOne = _exprOneTac(Remainder , Seq(divider, remainder))
 }
 
@@ -988,11 +946,9 @@ trait ExprOneTac_21_String[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R,
   def contains  (needle: t      ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] with CardOne = _exprOneTac(Contains  , Seq(needle))
   def matches   (regex : t      ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] with CardOne = _exprOneTac(Matches   , Seq(regex) )
 }
-trait ExprOneTac_21_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_21_Decimal[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Ns1, Ns2] {
+trait ExprOneTac_21_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Ns1, Ns2] {
   def even                       : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] with CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] with CardOne = _exprOneTac(Odd       , Nil                    )
-}
-trait ExprOneTac_21_Decimal[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Ns1, Ns2] {
   def %(divider: t, remainder: t): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] with CardOne = _exprOneTac(Remainder , Seq(divider, remainder))
 }
 
@@ -1026,10 +982,8 @@ trait ExprOneTac_22_String[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R,
   def contains  (needle: t      ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] with CardOne = _exprOneTac(Contains  , Seq(needle))
   def matches   (regex : t      ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] with CardOne = _exprOneTac(Matches   , Seq(regex) )
 }
-trait ExprOneTac_22_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_22_Decimal[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Ns1, Ns2] {
+trait ExprOneTac_22_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Ns1, Ns2] {
   def even                       : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] with CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] with CardOne = _exprOneTac(Odd       , Nil                    )
-}
-trait ExprOneTac_22_Decimal[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Ns1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Ns2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Ns1, Ns2] {
   def %(divider: t, remainder: t): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] with CardOne = _exprOneTac(Remainder , Seq(divider, remainder))
 }

@@ -141,5 +141,26 @@ trait FilterOne_Double_ extends CoreTestSuite with Api_async { spi: Spi_async =>
         _ <- Ns.i.a1.double_().query.get.map(_ ==> List(4))
       } yield ()
     }
+
+
+    "Combinations" - types { implicit conn =>
+      for {
+        _ <- Ns.i.double.insert(
+          (1, double1),
+          (2, double2),
+          (3, double3),
+          (4, double4),
+          (5, double5),
+          (6, double6),
+          (7, double7),
+          (8, double8),
+          (9, double9),
+        ).transact
+
+        _ <- Ns.i.a1.double_.>(double2).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8, 9))
+        _ <- Ns.i.a1.double_.>(double2).double_.<=(double8).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8))
+        _ <- Ns.i.a1.double_.>(double2).double_.<=(double8).double_.not(double4, double5).query.get.map(_ ==> List(3, 6, 7, 8))
+      } yield ()
+    }
   }
 }

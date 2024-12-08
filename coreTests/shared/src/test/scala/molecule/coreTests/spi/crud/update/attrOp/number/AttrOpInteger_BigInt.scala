@@ -9,7 +9,7 @@ import molecule.coreTests.dataModels.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
-trait AttrOpInteger_BigInt_ extends CoreTestSuite with Api_async { spi: Spi_async =>
+trait AttrOpInteger_BigInt extends CoreTestSuite with Api_async { spi: Spi_async =>
 
   override lazy val tests = Tests {
 
@@ -45,14 +45,6 @@ trait AttrOpInteger_BigInt_ extends CoreTestSuite with Api_async { spi: Spi_asyn
       } yield ()
     }
 
-    "modulo" - types { implicit conn =>
-      for {
-        id <- Ns.bigInt(bigInt4).save.transact.map(_.id)
-        _ <- Ns(id).bigInt.%(bigInt3).update.transact
-        _ <- Ns.bigInt.query.get.map(_.head ==> bigInt1)
-      } yield ()
-    }
-
     "negate" - types { implicit conn =>
       for {
         ids <- Ns.bigInt.insert(-bigInt1, bigInt2).transact.map(_.ids)
@@ -73,11 +65,18 @@ trait AttrOpInteger_BigInt_ extends CoreTestSuite with Api_async { spi: Spi_asyn
       for {
         ids <- Ns.bigInt.insert(-bigInt1, bigInt2).transact.map(_.ids)
         _ <- Ns(ids).bigInt.absNeg.update.transact
-        // (sorting on result to avoid incorrect sorting of negative BigInt in SQlite)
-        _ <- Ns.bigInt.query.get.map(_.sorted.reverse ==> List(-bigInt1, -bigInt2))
+
+        _ <- if (database == "SQlite") {
+          // Sort output instead since BigInts saved as Text in SQlite sort lexicographically
+          Ns.bigInt.query.get.map(_.sorted.reverse ==> List(-bigInt1, -bigInt2))
+        } else {
+          Ns.bigInt.d1.query.get.map(_ ==> List(-bigInt1, -bigInt2))
+        }
       } yield ()
     }
 
+
+    // even/odd/modulo not allowed for updates
 
     "No even" - types { implicit conn =>
       for {
@@ -99,12 +98,12 @@ trait AttrOpInteger_BigInt_ extends CoreTestSuite with Api_async { spi: Spi_asyn
       } yield ()
     }
 
-    "Modulo with only divider" - types { implicit conn =>
+    "No modulo" - types { implicit conn =>
       for {
         id <- Ns.bigInt(bigInt4).save.transact.map(_.id)
         _ <- Ns(id).bigInt.%(bigInt3, bigInt2).update.transact
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Please use `Ns.bigInt.%(3)` to update attribute to the remainder after dividing by 3."
+            err ==> "Modulo operations like Ns.bigInt.%(3) can't be used with updates."
           }
       } yield ()
     }

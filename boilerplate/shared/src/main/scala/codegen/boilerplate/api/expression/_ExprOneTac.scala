@@ -69,11 +69,9 @@ object _ExprOneTac extends BoilerplateGenBase("ExprOneTac", "/api/expression") {
          |  def contains  (needle: t      ): Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Contains  , Seq(needle))
          |  def matches   (regex : t      ): Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Matches   , Seq(regex) )
          |}
-         |trait $fileName_${arity}_Integer[${`A..V, `}t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]] extends $fileName_${arity}_Decimal[${`A..V, `}t, Ns1, Ns2] {
+         |trait $fileName_${arity}_Integer[${`A..V, `}t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]] extends $fileName_${arity}[${`A..V, `}t, Ns1, Ns2] {
          |  def even                       : Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Even      , Nil                    )
          |  def odd                        : Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Odd       , Nil                    )
-         |}
-         |trait $fileName_${arity}_Decimal[${`A..V, `}t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]] extends $fileName_$arity[${`A..V, `}t, Ns1, Ns2] {
          |  def %(divider: t, remainder: t): Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Remainder , Seq(divider, remainder))
          |}""".stripMargin
   }

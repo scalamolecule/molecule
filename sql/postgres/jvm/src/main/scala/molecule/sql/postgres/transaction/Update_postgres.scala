@@ -8,6 +8,8 @@ import molecule.sql.core.transaction.strategy.SqlOps
 trait Update_postgres
   extends SqlUpdate { self: ResolveUpdate with SqlOps =>
 
+  override def handleReplaceAll[T](attr: String, vs: Seq[T]) = s"REGEXP_REPLACE($attr, ?, '${vs(1)}', 'g')"
+
   override def updateSetRemove[T](
     ns: String,
     attr: String,

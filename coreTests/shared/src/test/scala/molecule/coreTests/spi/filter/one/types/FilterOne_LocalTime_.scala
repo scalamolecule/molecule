@@ -142,5 +142,26 @@ trait FilterOne_LocalTime_ extends CoreTestSuite with Api_async { spi: Spi_async
         _ <- Ns.i.a1.localTime_().query.get.map(_ ==> List(4))
       } yield ()
     }
+
+
+    "Combinations" - types { implicit conn =>
+      for {
+        _ <- Ns.i.localTime.insert(
+          (1, localTime1),
+          (2, localTime2),
+          (3, localTime3),
+          (4, localTime4),
+          (5, localTime5),
+          (6, localTime6),
+          (7, localTime7),
+          (8, localTime8),
+          (9, localTime9),
+        ).transact
+
+        _ <- Ns.i.a1.localTime_.>(localTime2).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8, 9))
+        _ <- Ns.i.a1.localTime_.>(localTime2).localTime_.<=(localTime8).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8))
+        _ <- Ns.i.a1.localTime_.>(localTime2).localTime_.<=(localTime8).localTime_.not(localTime4, localTime5).query.get.map(_ ==> List(3, 6, 7, 8))
+      } yield ()
+    }
   }
 }

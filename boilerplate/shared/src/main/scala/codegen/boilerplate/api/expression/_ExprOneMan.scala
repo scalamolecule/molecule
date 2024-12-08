@@ -80,18 +80,17 @@ object _ExprOneMan extends BoilerplateGenBase("ExprOneMan", "/api/expression") {
          |trait $fileName_${arity}_Integer[${`A..V`}, t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]] extends $fileName_${arity}_Number[${`A..V, `}t, Ns1, Ns2] {
          |  def even                       : Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Even         , Nil                    )
          |  def odd                        : Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Odd          , Nil                    )
+         |  def %(divider: t, remainder: t): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Remainder    , Seq(divider, remainder))
          |}
          |trait $fileName_${arity}_Decimal[${`A..V`}, t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]] extends $fileName_${arity}_Number[${`A..V, `}t, Ns1, Ns2] {
          |  def ceil                       : Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(AttrOp.Ceil  , Nil                    )
          |  def floor                      : Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(AttrOp.Floor , Nil                    )
          |}
          |trait $fileName_${arity}_Number[${`A..V`}, t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]] extends $fileName_$arity[${`A..V, `}t, Ns1, Ns2] {
-         |  def %(divider: t, remainder: t): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Remainder    , Seq(divider, remainder))
          |  def +(v: t)                    : Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(AttrOp.Plus  , Seq(v)                 )
          |  def -(v: t)                    : Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(AttrOp.Minus , Seq(v)                 )
          |  def *(v: t)                    : Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(AttrOp.Times , Seq(v)                 )
          |  def /(v: t)                    : Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(AttrOp.Divide, Seq(v)                 )
-         |  def %(divider: t)              : Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(AttrOp.Modulo, Seq(divider)           )
          |  def negate                     : Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(AttrOp.Negate, Nil                    )
          |  def abs                        : Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(AttrOp.Abs   , Nil                    )
          |  def absNeg                     : Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(AttrOp.AbsNeg, Nil                    )

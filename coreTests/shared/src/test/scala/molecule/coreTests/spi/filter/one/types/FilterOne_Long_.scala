@@ -141,5 +141,26 @@ trait FilterOne_Long_ extends CoreTestSuite with Api_async { spi: Spi_async =>
         _ <- Ns.i.a1.long_().query.get.map(_ ==> List(4))
       } yield ()
     }
+
+
+    "Combinations" - types { implicit conn =>
+      for {
+        _ <- Ns.i.long.insert(
+          (1, long1),
+          (2, long2),
+          (3, long3),
+          (4, long4),
+          (5, long5),
+          (6, long6),
+          (7, long7),
+          (8, long8),
+          (9, long9),
+        ).transact
+
+        _ <- Ns.i.a1.long_.>(long2).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8, 9))
+        _ <- Ns.i.a1.long_.>(long2).long_.<=(long8).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8))
+        _ <- Ns.i.a1.long_.>(long2).long_.<=(long8).long_.not(long4, long5).query.get.map(_ ==> List(3, 6, 7, 8))
+      } yield ()
+    }
   }
 }

@@ -44,14 +44,6 @@ trait AttrOpInteger_Int extends CoreTestSuite with Api_async { spi: Spi_async =>
       } yield ()
     }
 
-    "modulo" - types { implicit conn =>
-      for {
-        id <- Ns.int(int4).save.transact.map(_.id)
-        _ <- Ns(id).int.%(int3).update.transact
-        _ <- Ns.int.query.get.map(_.head ==> int1)
-      } yield ()
-    }
-
     "negate" - types { implicit conn =>
       for {
         ids <- Ns.int.insert(-int1, int2).transact.map(_.ids)
@@ -72,11 +64,12 @@ trait AttrOpInteger_Int extends CoreTestSuite with Api_async { spi: Spi_async =>
       for {
         ids <- Ns.int.insert(-int1, int2).transact.map(_.ids)
         _ <- Ns(ids).int.absNeg.update.transact
-        // (sorting on result to avoid incorrect sorting of negative BigInt in SQlite)
-        _ <- Ns.int.query.get.map(_.sorted.reverse ==> List(-int1, -int2))
+        _ <- Ns.int.d1.query.get.map(_ ==> List(-int1, -int2))
       } yield ()
     }
 
+
+    // even/odd/modulo not allowed for updates
 
     "No even" - types { implicit conn =>
       for {
@@ -98,12 +91,12 @@ trait AttrOpInteger_Int extends CoreTestSuite with Api_async { spi: Spi_async =>
       } yield ()
     }
 
-    "Modulo with only divider" - types { implicit conn =>
+    "No modulo" - types { implicit conn =>
       for {
         id <- Ns.int(int4).save.transact.map(_.id)
         _ <- Ns(id).int.%(int3, int2).update.transact
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Please use `Ns.int.%(3)` to update attribute to the remainder after dividing by 3."
+            err ==> "Modulo operations like Ns.int.%(3) can't be used with updates."
           }
       } yield ()
     }

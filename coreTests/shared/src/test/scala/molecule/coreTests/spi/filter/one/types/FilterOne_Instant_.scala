@@ -142,5 +142,26 @@ trait FilterOne_Instant_ extends CoreTestSuite with Api_async { spi: Spi_async =
         _ <- Ns.i.a1.instant_().query.get.map(_ ==> List(4))
       } yield ()
     }
+
+
+    "Combinations" - types { implicit conn =>
+      for {
+        _ <- Ns.i.instant.insert(
+          (1, instant1),
+          (2, instant2),
+          (3, instant3),
+          (4, instant4),
+          (5, instant5),
+          (6, instant6),
+          (7, instant7),
+          (8, instant8),
+          (9, instant9),
+        ).transact
+
+        _ <- Ns.i.a1.instant_.>(instant2).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8, 9))
+        _ <- Ns.i.a1.instant_.>(instant2).instant_.<=(instant8).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8))
+        _ <- Ns.i.a1.instant_.>(instant2).instant_.<=(instant8).instant_.not(instant4, instant5).query.get.map(_ ==> List(3, 6, 7, 8))
+      } yield ()
+    }
   }
 }

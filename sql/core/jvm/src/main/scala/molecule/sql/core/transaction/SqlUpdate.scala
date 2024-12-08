@@ -131,7 +131,6 @@ trait SqlUpdate
         }
       case op: AttrOp   =>
         setAttrPresence(ns, attr)
-        //        computeAttrOp(attr, op, vs, transformValue, exts)
         val cast: String = exts(2)
         def handle(computedValue: String): Unit = {
           val paramIndex = updateAction.setCol(s"$attr = $computedValue")
@@ -142,36 +141,38 @@ trait SqlUpdate
         }
 
         op match {
+          // String
           case AttrOp.Append                   => handle(handleAppend(attr, cast))
           case AttrOp.Prepend                  => handle(handlePrepend(attr, cast))
           case AttrOp.SubString(start, length) => handle(s"SUBSTRING($attr, $start, $length)")
           case AttrOp.ReplaceAll               => handle(handleReplaceAll(attr, vs))
           case AttrOp.ToLower                  => handle(s"LOWER($attr)")
           case AttrOp.ToUpper                  => handle(s"UPPER($attr)")
-          case AttrOp.Plus                     => handle(s"$attr + ?$cast")
-          case AttrOp.Minus                    => handle(s"$attr - ?$cast")
-          case AttrOp.Times                    => handle(s"$attr * ?$cast")
-          case AttrOp.Divide                   => handle(s"$attr / ?$cast")
-          case AttrOp.Modulo                   => handle(s"MOD($attr, ?$cast)")
-          case AttrOp.Negate                   => handle(s"-$attr")
-          case AttrOp.Abs                      => handle(s"ABS($attr)")
-          case AttrOp.AbsNeg                   => handle(s"-ABS($attr)")
-          case AttrOp.Ceil                     => handle(s"CEIL($attr)")
-          case AttrOp.Floor                    => handle(s"FLOOR($attr)")
-          case AttrOp.And                      => handle(s"$attr AND ?$cast")
-          case AttrOp.Or                       => handle(s"$attr OR ?$cast")
-          case AttrOp.Not                      => handle(s"NOT($attr)")
+
+          // Number
+          case AttrOp.Plus   => handle(s"$attr + ?$cast")
+          case AttrOp.Minus  => handle(s"$attr - ?$cast")
+          case AttrOp.Times  => handle(s"$attr * ?$cast")
+          case AttrOp.Divide => handle(s"$attr / ?$cast")
+          case AttrOp.Negate => handle(s"-$attr")
+          case AttrOp.Abs    => handle(s"ABS($attr)")
+          case AttrOp.AbsNeg => handle(s"-ABS($attr)")
+          case AttrOp.Ceil   => handle(s"CEIL($attr)")
+          case AttrOp.Floor  => handle(s"FLOOR($attr)")
+
+          // Boolean
+          case AttrOp.And => handle(s"$attr AND ?$cast")
+          case AttrOp.Or  => handle(s"$attr OR ?$cast")
+          case AttrOp.Not => handle(s"NOT($attr)")
         }
 
       case Even | Odd => throw ModelError(
         s"$ns.$cleanAttr.even and $ns.$cleanAttr.odd can't be used with updates."
       )
 
-      case Remainder =>
-        val divider = vs.head
-        throw ModelError(
-          s"Please use `$ns.$cleanAttr.%($divider)` to update attribute to the remainder after dividing by $divider."
-        )
+      case Remainder => throw ModelError(
+        s"Modulo operations like $ns.$cleanAttr.%(${vs.head}) can't be used with updates."
+      )
 
       case _ => throw ModelError(
         s"Can't update attribute $ns.$cleanAttr without an applied or computed value."

@@ -142,31 +142,24 @@ trait Model extends Validations with Values with BaseHelpers {
 
 
   sealed trait AttrOp extends Op
-  object AttrOp extends AttrOp {
+  object AttrOp  {
     // String ops
     case object Append extends AttrOp
     case object Prepend extends AttrOp
     case class SubString(start: Int, length: Int) extends AttrOp
     case object ReplaceAll extends AttrOp
-    case object ReplaceFirst extends AttrOp
     case object ToLower extends AttrOp
     case object ToUpper extends AttrOp
-
     // Numeric ops
     case object Plus extends AttrOp
     case object Minus extends AttrOp
     case object Times extends AttrOp
     case object Divide extends AttrOp
-    case object Modulo extends AttrOp
     case object Negate extends AttrOp
     case object Abs extends AttrOp
     case object AbsNeg extends AttrOp
     case object Ceil extends AttrOp
     case object Floor extends AttrOp
-    //    case object BitwiseAnd extends ColOp
-    //    case object BitwiseOr extends ColOp
-    //    case object BitwiseXor extends ColOp
-
     // Boolean ops
     case object And extends AttrOp
     case object Or extends AttrOp

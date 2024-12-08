@@ -141,5 +141,26 @@ trait FilterOne_BigInt_ extends CoreTestSuite with Api_async { spi: Spi_async =>
         _ <- Ns.i.a1.bigInt_().query.get.map(_ ==> List(4))
       } yield ()
     }
+
+
+    "Combinations" - types { implicit conn =>
+      for {
+        _ <- Ns.i.bigInt.insert(
+          (1, bigInt1),
+          (2, bigInt2),
+          (3, bigInt3),
+          (4, bigInt4),
+          (5, bigInt5),
+          (6, bigInt6),
+          (7, bigInt7),
+          (8, bigInt8),
+          (9, bigInt9),
+        ).transact
+
+        _ <- Ns.i.a1.bigInt_.>(bigInt2).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8, 9))
+        _ <- Ns.i.a1.bigInt_.>(bigInt2).bigInt_.<=(bigInt8).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8))
+        _ <- Ns.i.a1.bigInt_.>(bigInt2).bigInt_.<=(bigInt8).bigInt_.not(bigInt4, bigInt5).query.get.map(_ ==> List(3, 6, 7, 8))
+      } yield ()
+    }
   }
 }

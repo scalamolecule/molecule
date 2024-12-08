@@ -142,5 +142,26 @@ trait FilterOne_Date_ extends CoreTestSuite with Api_async { spi: Spi_async =>
         _ <- Ns.i.a1.date_().query.get.map(_ ==> List(4))
       } yield ()
     }
+
+
+    "Combinations" - types { implicit conn =>
+      for {
+        _ <- Ns.i.date.insert(
+          (1, date1),
+          (2, date2),
+          (3, date3),
+          (4, date4),
+          (5, date5),
+          (6, date6),
+          (7, date7),
+          (8, date8),
+          (9, date9),
+        ).transact
+
+        _ <- Ns.i.a1.date_.>(date2).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8, 9))
+        _ <- Ns.i.a1.date_.>(date2).date_.<=(date8).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8))
+        _ <- Ns.i.a1.date_.>(date2).date_.<=(date8).date_.not(date4, date5).query.get.map(_ ==> List(3, 6, 7, 8))
+      } yield ()
+    }
   }
 }

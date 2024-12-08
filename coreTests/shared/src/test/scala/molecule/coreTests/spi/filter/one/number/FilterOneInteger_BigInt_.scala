@@ -12,6 +12,25 @@ trait FilterOneInteger_BigInt_ extends CoreTestSuite with Api_async { spi: Spi_a
 
   override lazy val tests = Tests {
 
+    "odd/even" - types { implicit conn =>
+      for {
+        _ <- Ns.i.bigInt.insert(
+          (-2, -bigInt2),
+          (-1, -bigInt1),
+          (0, bigInt0),
+          (1, bigInt1),
+          (2, bigInt2),
+        ).transact
+
+        _ <- Ns.bigInt.even.query.get.map(_ ==> List(-bigInt2, bigInt0, bigInt2))
+        _ <- Ns.i.bigInt_.even.query.get.map(_ ==> List(-2, 0, 2))
+
+        _ <- Ns.bigInt.odd.query.get.map(_ ==> List(-bigInt1, bigInt1))
+        _ <- Ns.i.bigInt_.odd.query.get.map(_ ==> List(-1, 1))
+      } yield ()
+    }
+
+
     "modulo" - types { implicit conn =>
       for {
         _ <- Ns.i.bigInt.insert(
@@ -43,51 +62,6 @@ trait FilterOneInteger_BigInt_ extends CoreTestSuite with Api_async { spi: Spi_a
         _ <- Ns.i.bigInt_.%(bigInt3, bigInt0).query.get.map(_ ==> List(3, 6, 9))
         _ <- Ns.i.bigInt_.%(bigInt3, bigInt1).query.get.map(_ ==> List(1, 4, 7))
         _ <- Ns.i.bigInt_.%(bigInt3, bigInt2).query.get.map(_ ==> List(2, 5, 8))
-      } yield ()
-    }
-
-
-    "odd/even" - types { implicit conn =>
-      for {
-        _ <- Ns.i.bigInt.insert(
-          (1, bigInt1),
-          (2, bigInt2),
-          (3, bigInt3),
-          (4, bigInt4),
-          (5, bigInt5),
-          (6, bigInt6),
-          (7, bigInt7),
-          (8, bigInt8),
-          (9, bigInt9),
-        ).transact
-
-        _ <- Ns.bigInt.even.query.get.map(_ ==> List(bigInt2, bigInt4, bigInt6, bigInt8))
-        _ <- Ns.bigInt.odd.query.get.map(_ ==> List(bigInt1, bigInt3, bigInt5, bigInt7, bigInt9))
-
-        _ <- Ns.i.bigInt_.even.query.get.map(_ ==> List(2, 4, 6, 8))
-        _ <- Ns.i.bigInt_.odd.query.get.map(_ ==> List(1, 3, 5, 7, 9))
-      } yield ()
-    }
-
-
-    "comparison" - types { implicit conn =>
-      for {
-        _ <- Ns.i.bigInt.insert(
-          (1, bigInt1),
-          (2, bigInt2),
-          (3, bigInt3),
-          (4, bigInt4),
-          (5, bigInt5),
-          (6, bigInt6),
-          (7, bigInt7),
-          (8, bigInt8),
-          (9, bigInt9),
-        ).transact
-
-        _ <- Ns.i.a1.bigInt_.>(bigInt2).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8, 9))
-        _ <- Ns.i.a1.bigInt_.>(bigInt2).bigInt_.<=(bigInt8).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8))
-        _ <- Ns.i.a1.bigInt_.>(bigInt2).bigInt_.<=(bigInt8).bigInt_.not(bigInt4, bigInt5).query.get.map(_ ==> List(3, 6, 7, 8))
-        _ <- Ns.i.a1.bigInt_.>(bigInt2).bigInt_.<=(bigInt8).bigInt_.not(bigInt4, bigInt5).bigInt_.odd.query.get.map(_ ==> List(3, 7))
       } yield ()
     }
   }

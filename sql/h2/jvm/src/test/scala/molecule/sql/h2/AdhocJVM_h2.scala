@@ -24,17 +24,53 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
       for {
-        List(a, b) <- Ns.int.insert(1, 2).transact.map(_.ids)
-        _ <- Ns.int(3).save.transact
-        _ <- Ns.int.a1.query.get.map(_ ==> List(1, 2, 3))
-        _ <- Ns(a).int(10).update.transact
-        _ <- Ns(b).delete.transact
-        _ <- Ns.int.a1.query.get.map(_ ==> List(3, 10))
+        //        List(a, b) <- Ns.int.insert(1, 2).transact.map(_.ids)
+        //        _ <- Ns.int(3).save.transact
+        //        _ <- Ns.int.a1.query.get.map(_ ==> List(1, 2, 3))
+        //        _ <- Ns(a).int(10).update.transact
+        //        _ <- Ns(b).delete.transact
+        //        _ <- Ns.int.a1.query.get.map(_ ==> List(3, 10))
 
+        _ <- Ns.i.int.insert(
+          (-2, -int2),
+          (-1, -int1),
+          (0, int0),
+          (1, int1),
+          (2, int2),
+        ).transact
+
+        // Mandatory
+        _ <- Ns.int.even.query.get.map(_ ==> List(-int2, int0, int2))
+        _ <- Ns.int.odd.query.get.map(_ ==> List(-int1, int1))
+
+        // Tacit
+        _ <- Ns.i.int_.even.query.get.map(_ ==> List(-2, 0, 2))
+        _ <- Ns.i.int_.odd.query.get.map(_ ==> List(-1, 1))
+
+//        // Mandatory
+//        _ <- Ns.int.even.query.get.map(_ ==> List(int2, int4))
+//        _ <- Ns.int.odd.query.get.map(_ ==> List(int1, int3, int5))
+//
+//        // Tacit
+//        _ <- Ns.i.int_.even.query.get.map(_ ==> List(2, 4))
+//        _ <- Ns.i.int_.odd.query.get.map(_ ==> List(1, 3, 5))
 
       } yield ()
     }
 
+    /*
+
+    _ <- if (database == "SQlite" && int1.isInstanceOf[BigInt]) {
+          // Generated tests for `BigInt`s are not sorted correctly since
+          // `BigInt`s have to be saved as Text in SQlite and therefore
+          // sort lexicographically which gives wrong numeric order.
+          // So in this special case we simply sort the output:
+          Ns.int.query.get.map(_.sorted.reverse ==> List(-int1, -int2))
+        } else {
+          // In all other cases, normal correct sorting applies
+          Ns.int.d1.query.get.map(_ ==> List(-int1, -int2))
+        }
+     */
 
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.dsl.Refs._

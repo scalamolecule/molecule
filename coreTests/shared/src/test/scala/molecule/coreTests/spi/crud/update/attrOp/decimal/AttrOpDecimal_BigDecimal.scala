@@ -1,3 +1,4 @@
+// GENERATED CODE ********************************
 package molecule.coreTests.spi.crud.update.attrOp.decimal
 
 import molecule.core.api.Api_async
@@ -7,7 +8,7 @@ import molecule.coreTests.dataModels.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
-trait AttrOpDecimal_BigDecimal_ extends CoreTestSuite with Api_async { spi: Spi_async =>
+trait AttrOpDecimal_BigDecimal extends CoreTestSuite with Api_async { spi: Spi_async =>
 
   override lazy val tests = Tests {
     implicit val tolerance = tolerantBigDecimalEquality(toleranceBigDecimal)
@@ -44,14 +45,6 @@ trait AttrOpDecimal_BigDecimal_ extends CoreTestSuite with Api_async { spi: Spi_
       } yield ()
     }
 
-    "modulo" - types { implicit conn =>
-      for {
-        id <- Ns.bigDecimal(bigDecimal4).save.transact.map(_.id)
-        _ <- Ns(id).bigDecimal.%(bigDecimal3).update.transact
-        _ <- Ns.bigDecimal.query.get.map(_.head ==~ bigDecimal1)
-      } yield ()
-    }
-
     "negate" - types { implicit conn =>
       for {
         ids <- Ns.bigDecimal.insert(-bigDecimal1, bigDecimal2).transact.map(_.ids)
@@ -72,10 +65,18 @@ trait AttrOpDecimal_BigDecimal_ extends CoreTestSuite with Api_async { spi: Spi_
       for {
         ids <- Ns.bigDecimal.insert(-bigDecimal1, bigDecimal2).transact.map(_.ids)
         _ <- Ns(ids).bigDecimal.absNeg.update.transact
-        // (sorting on result to avoid incorrect sorting of negative BigDecimal in SQlite)
-        _ <- Ns.bigDecimal.query.get.map(_.sorted.reverse ==> List(-bigDecimal1, -bigDecimal2))
+
+        _ <- if (database == "SQlite") {
+          // Sort output instead since BigDecimals saved as Text in SQlite sort lexicographically
+          Ns.bigDecimal.query.get.map(_.sorted.reverse ==> List(-bigDecimal1, -bigDecimal2))
+        } else {
+          Ns.bigDecimal.d1.query.get.map(_ ==> List(-bigDecimal1, -bigDecimal2))
+        }
       } yield ()
     }
+
+
+    // ceil/floor only available for decimal numbers
 
     "ceil" - types { implicit conn =>
       for {

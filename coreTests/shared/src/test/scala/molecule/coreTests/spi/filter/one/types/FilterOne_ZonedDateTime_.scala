@@ -142,5 +142,26 @@ trait FilterOne_ZonedDateTime_ extends CoreTestSuite with Api_async { spi: Spi_a
         _ <- Ns.i.a1.zonedDateTime_().query.get.map(_ ==> List(4))
       } yield ()
     }
+
+
+    "Combinations" - types { implicit conn =>
+      for {
+        _ <- Ns.i.zonedDateTime.insert(
+          (1, zonedDateTime1),
+          (2, zonedDateTime2),
+          (3, zonedDateTime3),
+          (4, zonedDateTime4),
+          (5, zonedDateTime5),
+          (6, zonedDateTime6),
+          (7, zonedDateTime7),
+          (8, zonedDateTime8),
+          (9, zonedDateTime9),
+        ).transact
+
+        _ <- Ns.i.a1.zonedDateTime_.>(zonedDateTime2).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8, 9))
+        _ <- Ns.i.a1.zonedDateTime_.>(zonedDateTime2).zonedDateTime_.<=(zonedDateTime8).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8))
+        _ <- Ns.i.a1.zonedDateTime_.>(zonedDateTime2).zonedDateTime_.<=(zonedDateTime8).zonedDateTime_.not(zonedDateTime4, zonedDateTime5).query.get.map(_ ==> List(3, 6, 7, 8))
+      } yield ()
+    }
   }
 }

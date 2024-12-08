@@ -142,5 +142,26 @@ trait FilterOne_OffsetDateTime_ extends CoreTestSuite with Api_async { spi: Spi_
         _ <- Ns.i.a1.offsetDateTime_().query.get.map(_ ==> List(4))
       } yield ()
     }
+
+
+    "Combinations" - types { implicit conn =>
+      for {
+        _ <- Ns.i.offsetDateTime.insert(
+          (1, offsetDateTime1),
+          (2, offsetDateTime2),
+          (3, offsetDateTime3),
+          (4, offsetDateTime4),
+          (5, offsetDateTime5),
+          (6, offsetDateTime6),
+          (7, offsetDateTime7),
+          (8, offsetDateTime8),
+          (9, offsetDateTime9),
+        ).transact
+
+        _ <- Ns.i.a1.offsetDateTime_.>(offsetDateTime2).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8, 9))
+        _ <- Ns.i.a1.offsetDateTime_.>(offsetDateTime2).offsetDateTime_.<=(offsetDateTime8).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8))
+        _ <- Ns.i.a1.offsetDateTime_.>(offsetDateTime2).offsetDateTime_.<=(offsetDateTime8).offsetDateTime_.not(offsetDateTime4, offsetDateTime5).query.get.map(_ ==> List(3, 6, 7, 8))
+      } yield ()
+    }
   }
 }

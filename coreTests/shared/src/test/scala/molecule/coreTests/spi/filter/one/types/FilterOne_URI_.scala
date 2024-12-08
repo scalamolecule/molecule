@@ -142,5 +142,26 @@ trait FilterOne_URI_ extends CoreTestSuite with Api_async { spi: Spi_async =>
         _ <- Ns.i.a1.uri_().query.get.map(_ ==> List(4))
       } yield ()
     }
+
+
+    "Combinations" - types { implicit conn =>
+      for {
+        _ <- Ns.i.uri.insert(
+          (1, uri1),
+          (2, uri2),
+          (3, uri3),
+          (4, uri4),
+          (5, uri5),
+          (6, uri6),
+          (7, uri7),
+          (8, uri8),
+          (9, uri9),
+        ).transact
+
+        _ <- Ns.i.a1.uri_.>(uri2).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8, 9))
+        _ <- Ns.i.a1.uri_.>(uri2).uri_.<=(uri8).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8))
+        _ <- Ns.i.a1.uri_.>(uri2).uri_.<=(uri8).uri_.not(uri4, uri5).query.get.map(_ ==> List(3, 6, 7, 8))
+      } yield ()
+    }
   }
 }

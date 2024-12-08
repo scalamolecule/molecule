@@ -142,23 +142,25 @@ trait QueryExprOne extends QueryExpr { self: Model2Query with SqlQueryBase with 
     res: ResOne[T],
   ): Unit = {
     op match {
-      case V          => attrV(col)
-      case Eq         => equal(col, args, res.one2sql)
-      case Neq        => neq(col, args, res.one2sql)
-      case Lt         => compare(col, args.head, "<", res.one2sql)
-      case Gt         => compare(col, args.head, ">", res.one2sql)
-      case Le         => compare(col, args.head, "<=", res.one2sql)
-      case Ge         => compare(col, args.head, ">=", res.one2sql)
-      case NoValue    => noValue(col)
-      case Fn(kw, n)  => aggr(ns, attr, col, kw, n, res)
-      case StartsWith => startsWith(col, args.head)
-      case EndsWith   => endsWith(col, args.head)
-      case Contains   => contains(col, args.head)
-      case Matches    => matches(col, args.head.toString)
-      case Remainder  => remainder(col, args)
-      case Even       => even(col)
-      case Odd        => odd(col)
-      case other      => unexpectedOp(other)
+      case V            => attrV(col)
+      case Eq           => equal(col, args, res.one2sql)
+      case Neq          => neq(col, args, res.one2sql)
+      case Lt           => compare(col, args.head, "<", res.one2sql)
+      case Gt           => compare(col, args.head, ">", res.one2sql)
+      case Le           => compare(col, args.head, "<=", res.one2sql)
+      case Ge           => compare(col, args.head, ">=", res.one2sql)
+      case NoValue      => noValue(col)
+      case Fn(kw, n)    => aggr(ns, attr, col, kw, n, res)
+      case StartsWith   => startsWith(col, args.head)
+      case EndsWith     => endsWith(col, args.head)
+      case Contains     => contains(col, args.head)
+      case Matches      => matches(col, args.head.toString)
+      case Remainder    => remainder(col, args)
+      case Even         => even(col)
+      case Odd          => odd(col)
+      case AttrOp.Ceil  => ceil(col)
+      case AttrOp.Floor => floor(col)
+      case other        => unexpectedOp(other)
     }
   }
 
@@ -305,7 +307,17 @@ trait QueryExprOne extends QueryExpr { self: Model2Query with SqlQueryBase with 
 
   protected def even(col: String): Unit = where += ((col, s"% 2 = 0"))
 
-  protected def odd(col: String): Unit = where += ((col, s"% 2 = 1"))
+  protected def odd(col: String): Unit = where += (("", s"$col % 2 IN (1, -1)"))
+
+  protected def ceil(col: String): Unit = {
+    select -= col
+    select += s"CEIL($col)"
+  }
+
+  protected def floor(col: String): Unit = {
+    select -= col
+    select += s"FLOOR($col)"
+  }
 
 
 

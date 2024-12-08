@@ -140,5 +140,26 @@ trait FilterOne_Int extends CoreTestSuite with Api_async { spi: Spi_async =>
         _ <- Ns.i.a1.int_().query.get.map(_ ==> List(4))
       } yield ()
     }
+
+
+    "Combinations" - types { implicit conn =>
+      for {
+        _ <- Ns.i.int.insert(
+          (1, int1),
+          (2, int2),
+          (3, int3),
+          (4, int4),
+          (5, int5),
+          (6, int6),
+          (7, int7),
+          (8, int8),
+          (9, int9),
+        ).transact
+
+        _ <- Ns.i.a1.int_.>(int2).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8, 9))
+        _ <- Ns.i.a1.int_.>(int2).int_.<=(int8).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8))
+        _ <- Ns.i.a1.int_.>(int2).int_.<=(int8).int_.not(int4, int5).query.get.map(_ ==> List(3, 6, 7, 8))
+      } yield ()
+    }
   }
 }

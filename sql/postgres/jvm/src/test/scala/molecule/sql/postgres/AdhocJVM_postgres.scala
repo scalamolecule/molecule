@@ -20,19 +20,47 @@ object AdhocJVM_postgres extends TestSuite_postgres {
       import molecule.coreTests.dataModels.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
-//        _ <- Ns.int.insert(1).transact
-//        _ <- Ns.int.query.get.map(_ ==> List(1))
+        //        _ <- Ns.int.insert(1).transact
+        //        _ <- Ns.int.query.get.map(_ ==> List(1))
 
-//        _ <- Ns.uuid(uuid1).save.transact
+        //        _ <- Ns.uuid(uuid1).save.transact
 
 
 
-        _ <- Ns.i.uuid.insert(List(
-          (1, uuid1),
-          (2, uuid2),
-          (2, uuid2),
-          (2, uuid3),
-        )).i.transact
+
+        id <- Ns.int(int4).save.transact.map(_.id)
+        _ <- rawQuery(
+          """SELECT DISTINCT
+            |  Ns.int,
+            |  mod(Ns.int, 3)
+            |FROM Ns
+            |""".stripMargin, true)
+
+
+        id <- Ns.double(double4).save.transact.map(_.id)
+
+//        _ <- rawTransact(
+//          """UPDATE Ns
+//            |    SET
+//            |      string = concat("x", "b")
+//            |    WHERE
+//            |      Ns.id IN(1) AND
+//            |      Ns.string IS NOT NULL
+//            |""".stripMargin)
+//
+
+
+        _ <- rawQuery(
+          """SELECT DISTINCT
+            |  Ns.double,
+            |  mod(Ns.double, 3)
+            |FROM Ns
+            |WHERE
+            |  Ns.double IS NOT NULL;
+            |""".stripMargin, true)
+
+//        _ <- Ns(id).double.%(double3).update.transact
+//        _ <- Ns.double.query.i.get.map(_.head ==~ double1)
 
       } yield ()
     }

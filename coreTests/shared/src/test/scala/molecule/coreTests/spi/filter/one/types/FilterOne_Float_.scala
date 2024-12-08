@@ -141,5 +141,26 @@ trait FilterOne_Float_ extends CoreTestSuite with Api_async { spi: Spi_async =>
         _ <- Ns.i.a1.float_().query.get.map(_ ==> List(4))
       } yield ()
     }
+
+
+    "Combinations" - types { implicit conn =>
+      for {
+        _ <- Ns.i.float.insert(
+          (1, float1),
+          (2, float2),
+          (3, float3),
+          (4, float4),
+          (5, float5),
+          (6, float6),
+          (7, float7),
+          (8, float8),
+          (9, float9),
+        ).transact
+
+        _ <- Ns.i.a1.float_.>(float2).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8, 9))
+        _ <- Ns.i.a1.float_.>(float2).float_.<=(float8).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8))
+        _ <- Ns.i.a1.float_.>(float2).float_.<=(float8).float_.not(float4, float5).query.get.map(_ ==> List(3, 6, 7, 8))
+      } yield ()
+    }
   }
 }

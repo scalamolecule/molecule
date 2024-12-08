@@ -45,14 +45,6 @@ trait AttrOpDecimal_Float_ extends CoreTestSuite with Api_async { spi: Spi_async
       } yield ()
     }
 
-    "modulo" - types { implicit conn =>
-      for {
-        id <- Ns.float(float4).save.transact.map(_.id)
-        _ <- Ns(id).float.%(float3).update.transact
-        _ <- Ns.float.query.get.map(_.head ==~ float1)
-      } yield ()
-    }
-
     "negate" - types { implicit conn =>
       for {
         ids <- Ns.float.insert(-float1, float2).transact.map(_.ids)
@@ -73,10 +65,12 @@ trait AttrOpDecimal_Float_ extends CoreTestSuite with Api_async { spi: Spi_async
       for {
         ids <- Ns.float.insert(-float1, float2).transact.map(_.ids)
         _ <- Ns(ids).float.absNeg.update.transact
-        // (sorting on result to avoid incorrect sorting of negative BigDecimal in SQlite)
-        _ <- Ns.float.query.get.map(_.sorted.reverse ==> List(-float1, -float2))
+        _ <- Ns.float.d1.query.get.map(_ ==> List(-float1, -float2))
       } yield ()
     }
+
+
+    // ceil/floor only available for decimal numbers
 
     "ceil" - types { implicit conn =>
       for {

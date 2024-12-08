@@ -142,5 +142,26 @@ trait FilterOne_Duration_ extends CoreTestSuite with Api_async { spi: Spi_async 
         _ <- Ns.i.a1.duration_().query.get.map(_ ==> List(4))
       } yield ()
     }
+
+
+    "Combinations" - types { implicit conn =>
+      for {
+        _ <- Ns.i.duration.insert(
+          (1, duration1),
+          (2, duration2),
+          (3, duration3),
+          (4, duration4),
+          (5, duration5),
+          (6, duration6),
+          (7, duration7),
+          (8, duration8),
+          (9, duration9),
+        ).transact
+
+        _ <- Ns.i.a1.duration_.>(duration2).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8, 9))
+        _ <- Ns.i.a1.duration_.>(duration2).duration_.<=(duration8).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8))
+        _ <- Ns.i.a1.duration_.>(duration2).duration_.<=(duration8).duration_.not(duration4, duration5).query.get.map(_ ==> List(3, 6, 7, 8))
+      } yield ()
+    }
   }
 }

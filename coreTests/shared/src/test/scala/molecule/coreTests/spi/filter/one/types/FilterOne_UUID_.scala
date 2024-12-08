@@ -142,5 +142,26 @@ trait FilterOne_UUID_ extends CoreTestSuite with Api_async { spi: Spi_async =>
         _ <- Ns.i.a1.uuid_().query.get.map(_ ==> List(4))
       } yield ()
     }
+
+
+    "Combinations" - types { implicit conn =>
+      for {
+        _ <- Ns.i.uuid.insert(
+          (1, uuid1),
+          (2, uuid2),
+          (3, uuid3),
+          (4, uuid4),
+          (5, uuid5),
+          (6, uuid6),
+          (7, uuid7),
+          (8, uuid8),
+          (9, uuid9),
+        ).transact
+
+        _ <- Ns.i.a1.uuid_.>(uuid2).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8, 9))
+        _ <- Ns.i.a1.uuid_.>(uuid2).uuid_.<=(uuid8).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8))
+        _ <- Ns.i.a1.uuid_.>(uuid2).uuid_.<=(uuid8).uuid_.not(uuid4, uuid5).query.get.map(_ ==> List(3, 6, 7, 8))
+      } yield ()
+    }
   }
 }
