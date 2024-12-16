@@ -52,7 +52,7 @@ trait ModelUtils {
   }
 
 
-  def isRefUpdate(elements: List[Element]) = {
+  def hasRef(elements: List[Element]) = {
     elements.exists {
       case _: Ref => true
       case _      => false

@@ -31,13 +31,14 @@ trait SqlDelete
     nsMap: Map[String, MetaNs],
     fkConstraintParam: String,
     fkConstraintOff: String,
-    fkConstraintOn: String
+    fkConstraintOn: String,
+    disableFKs: Boolean
   ): DeleteAction = {
     ns = getInitialNs(elements)
     query.idCols += s"$ns.id"
     root = DeleteRoot(
       nsMap, sqlOps, sqlConn.createStatement(), ns,
-      fkConstraintParam, fkConstraintOff, fkConstraintOn
+      fkConstraintParam, fkConstraintOff, fkConstraintOn, disableFKs
     )
     deleteAction = root.firstNs
     resolve(elements, true)

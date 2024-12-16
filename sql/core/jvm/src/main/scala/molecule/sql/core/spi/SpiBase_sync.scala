@@ -254,7 +254,11 @@ trait SpiBase_sync
     if (delete.doInspect)
       delete_inspect(delete)
     val deleteClean = delete.copy(elements = noKeywords(delete.elements, Some(conn.proxy)))
-    lazy val action = delete_getAction(conn, deleteClean)
+    if (conn.hasSavepoint && hasRef(delete.elements)) {
+      throw ModelError("Deletes with relationships not implemented for savepoints.")
+    }
+    //    println(s"------  ${conn.hasSavepoint}  ${hasRef(delete.elements)}")
+    lazy val action = delete_getAction(conn, deleteClean, !conn.hasSavepoint)
     val txReport = conn.transact_sync(action)
     await(conn.callback(delete.elements, true))
     txReport
@@ -264,11 +268,12 @@ trait SpiBase_sync
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
     tryInspect("delete", delete.elements) {
       val deleteClean = delete.copy(elements = noKeywords(delete.elements, Some(conn.proxy)))
-      printInspectTx("DELETE", delete.elements, delete_getAction(conn, deleteClean))
+      val disableFKS  = conn.hasSavepoint && hasRef(delete.elements)
+      printInspectTx("DELETE", delete.elements, delete_getAction(conn, deleteClean, disableFKS))
     }
   }
 
-  def delete_getAction(conn: JdbcConn_JVM, delete: Delete): DeleteAction
+  def delete_getAction(conn: JdbcConn_JVM, delete: Delete, disableFKs: Boolean): DeleteAction = ???
 
 
   // Inspect --------------------------------------------------------

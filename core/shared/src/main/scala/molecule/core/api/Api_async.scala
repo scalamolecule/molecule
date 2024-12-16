@@ -58,4 +58,56 @@ trait Api_async extends ModelUtils { spi: Spi_async =>
     txData: String,
     doPrint: Boolean = false
   )(implicit conn: Conn, ec: EC): Future[TxReport] = fallback_rawTransact(txData, doPrint)
+
+
+  def transact(a1: Action, a2: Action, aa: Action*)(implicit conn: Conn, ec: EC): Future[Seq[TxReport]] = {
+    var ok = true
+    conn.waitCommitting()
+    val txReports = Future.sequence(
+      (a1 +: a2 +: aa).flatMap {
+        case action if ok => Some(
+          (action match {
+            case save: Save     => save_transact(save)
+            case insert: Insert => insert_transact(insert)
+            case update: Update => update_transact(update)
+            case delete: Delete => delete_transact(delete)
+          }).recover { case e =>
+            // Rollback all executed actions so far
+            conn.rollback()
+            ok = false
+            throw e
+          }
+        )
+
+        case _ => None // Don't execute remaining actions
+      }
+    )
+
+    // Commit if all executions succeeded
+    if (ok) conn.commit()
+
+    // Return transaction reports of all actions (can be failed Future)
+    txReports
+  }
+
+  def unitOfWork[T](block: => Future[T])
+                   (implicit conn: Conn, ec: EC): Future[T] = {
+    conn.waitCommitting()
+    block
+      .map { txReport =>
+        // Commit all actions
+        conn.commit()
+        txReport
+      }
+      .recover { case e =>
+        // Rollback all executed actions so far
+        conn.rollback()
+        throw e
+      }
+  }
+
+  def savepoint[T](block: Savepoint => Future[T])
+                  (implicit conn: Conn, ec: EC): Future[T] = {
+    conn.savepoint_async(block)
+  }
 }

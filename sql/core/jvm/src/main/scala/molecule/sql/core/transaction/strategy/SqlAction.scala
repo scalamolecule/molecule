@@ -52,7 +52,7 @@ abstract class SqlAction(parent: SqlAction, sqlOps: SqlOps, ns: String) {
     rowSetters.last += colSetter
   }
 
-  def colCount = cols.length
+  def colCount: Int = cols.length
 
   def prepare(stmt: String): PS = {
     sqlOps.sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)

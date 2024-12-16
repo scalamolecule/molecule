@@ -11,13 +11,17 @@ case class DeleteRoot(
   ns: String,
   fkConstraintParam: String,
   fkConstraintOff: String,
-  fkConstraintOn: String
+  fkConstraintOn: String,
+  disableFKs: Boolean = true,
 ) extends DeleteAction(nsMap, null, sqlStmt, sqlOps, ns) {
 
   val sqlConn: Connection = sqlOps.sqlConn
 
   val firstNs = DeleteNs(nsMap, this, sqlStmt, sqlOps, "", "", ns)
   children += firstNs
+
+  private lazy val disableFkConstraints = disableFKs && fkConstraintParam.nonEmpty
+  //  println("disableFkConstraints: " + disableFkConstraints)
 
   override def execute: List[Long] = {
     if (firstNs.ids.isEmpty) Nil else {
@@ -28,9 +32,8 @@ case class DeleteRoot(
     }
   }
 
-  private def executeRoot_other: List[Long] = {
-    val disableFkConstraints = fkConstraintParam.nonEmpty
 
+  private def executeRoot_other: List[Long] = {
     if (disableFkConstraints) {
       // Disarm foreign key constraints while deleting relationships
       // to avoid violation warnings
@@ -50,14 +53,16 @@ case class DeleteRoot(
   }
 
   private def executeRoot_sqlite: List[Long] = {
-    // Turn autoCommit back one to save pragma key before deletions
-    sqlConn.setAutoCommit(true)
-    val off = sqlConn.prepareStatement("PRAGMA foreign_keys = 0")
-    off.executeUpdate()
-    off.close()
+    if (disableFkConstraints) {
+      // Turn autoCommit back one to save pragma key before deletions
+      sqlConn.setAutoCommit(true)
+      val off = sqlConn.prepareStatement("PRAGMA foreign_keys = 0")
+      off.executeUpdate()
+      off.close()
 
-    // Execute all batches in one transaction here to be committed
-    sqlConn.setAutoCommit(false)
+      // Execute all batches in one transaction here to be committed
+      sqlConn.setAutoCommit(false)
+    }
 
     // Add batches of all delete statements in graph
     children.foreach(_.process())
@@ -65,12 +70,14 @@ case class DeleteRoot(
     sqlStmt.executeBatch
     sqlStmt.close()
 
-    // Commit all or fail
-    sqlConn.commit()
+    if (disableFkConstraints) {
+      // Commit all or fail
+      sqlConn.commit()
 
-    val on = sqlConn.prepareStatement("PRAGMA foreign_keys = 1")
-    on.executeUpdate()
-    on.close()
+      val on = sqlConn.prepareStatement("PRAGMA foreign_keys = 1")
+      on.executeUpdate()
+      on.close()
+    }
 
     firstNs.ids
   }

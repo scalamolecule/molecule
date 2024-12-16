@@ -1,17 +1,16 @@
 package molecule.sql.h2
 
-import java.time.Instant
-import molecule.base.error.{ExecutionError, ModelError}
+import java.lang.Exception
+import molecule.base.error.ValidationErrors
+import molecule.core.spi.Conn
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.dsl.Refs.{A, B}
-import molecule.coreTests.dataModels.dsl.Types.Ns
-import molecule.coreTests.util.Array2List
+import molecule.coreTests.dataModels.dsl.Types._
 import molecule.sql.h2.async._
-import molecule.sql.h2.setup.{TestSuite_h2_array, TestSuite_h2}
+import molecule.sql.h2.setup.TestSuite_h2
 import utest._
-import scala.collection.mutable
 import scala.concurrent.Future
 import scala.language.implicitConversions
+import scala.util.control.{Exception, NonFatal}
 
 
 //object AdhocJVM_h2 extends TestSuite_h2_array {
@@ -25,23 +24,12 @@ object AdhocJVM_h2 extends TestSuite_h2 {
 
       println("hello".substring(5, 5))
       for {
-        //        List(a, b) <- Ns.int.insert(1, 2).transact.map(_.ids)
-        //        _ <- Ns.int(3).save.transact
-        //        _ <- Ns.int.a1.query.get.map(_ ==> List(1, 2, 3))
-        //        _ <- Ns(a).int(10).update.transact
-        //        _ <- Ns(b).delete.transact
-        //        _ <- Ns.int.a1.query.get.map(_ ==> List(3, 10))
-
-        ids <- Ns.string.insert("Hello").transact.map(_.ids)
-
-//        _ <- Ns(ids).string.replaceAll("[eo]", "X").update.transact
-//        _ <- Ns.string.a1.query.get.map(_ ==> List("HXllX"))
-
-//        _ <- Ns(ids).string.replaceAll("l", "_").update.transact
-//        _ <- Ns.string.a1.query.get.map(_ ==> List("He__o"))
-
-        _ <- Ns(ids).string.substring(2, 4).update.transact
-        _ <- Ns.string.a1.query.get.map(_ ==> List("ll", "rl"))
+        List(a, b) <- Ns.int.insert(1, 2).transact.map(_.ids)
+        _ <- Ns.int(3).save.transact
+        _ <- Ns.int.a1.query.get.map(_ ==> List(1, 2, 3))
+        _ <- Ns(a).int(10).update.transact
+        _ <- Ns(b).delete.transact
+        _ <- Ns.int.a1.query.get.map(_ ==> List(3, 10))
 
 
       } yield ()
@@ -51,26 +39,30 @@ object AdhocJVM_h2 extends TestSuite_h2 {
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.dsl.Refs._
       for {
+        //        _ <- A.i.insert(1, 2).transact
+        ////        _ <- A.i_(1).delete.i.transact
+        //        _ <- A(1).delete.i.transact
+        ////        _ <- rawTransact("DELETE FROM A WHERE id IN (1)", true)
+        //        _ <- A.i.query.get.map(_ ==> List(2))
 
-        refId <- B.i(7).save.transact.map(_.id)
-        id <- A.i.b.insert(1, refId).transact.map(_.id)
-        _ <- A.i.b.query.get.map(_ ==> List((1, refId)))
 
-        // Apply empty value to delete ref id of entity (entity remains)
-        _ <- A(id).b().update.i.transact
-        _ <- A.i.b_?.query.get.map(_ ==> List((1, None)))
 
-        //
-        //        //        _ <- rawQuery(
-        //        //          """SELECT DISTINCT
-        //        //            |  A.i,
-        //        //            |  B.i
-        //        //            |FROM A
-        //        //            |  LEFT JOIN B ON
-        //        //            |    A.b = B.id
-        //        //            |WHERE
-        //        //            |  A.i IS NOT NULL;
-        //        //            |""".stripMargin, true)
+
+        _ <- A.i.insert(1).transact
+        _ <- A.i.OwnB.i.insert((2, 20), (3, 30)).transact
+
+        _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
+        _ <- A.i.a1.OwnB.i.query.get.map(_ ==> List((2, 20), (3, 30)))
+
+        // Nothing deleted since entity 1 doesn't have a ref
+        _ <- A.i_(1).OwnB.i_.delete.transact
+        _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
+
+        // Second entity has a ref and will be deleted
+        _ <- A.i_(2).OwnB.i_.delete.i.transact
+        _ <- A.i.a1.query.get.map(_ ==> List(1, 3))
+        _ <- A.i.OwnB.i.query.get.map(_ ==> List((3, 30)))
+
         //
         //        _ <- A.i.B.?(B.i).query.i.get.map(_ ==> List(
         //          //          (1, None),
@@ -111,30 +103,54 @@ object AdhocJVM_h2 extends TestSuite_h2 {
     //      } yield ()
     //    }
     //
-    //
-    //    "validation" - validation { implicit conn =>
-    //      import molecule.coreTests.dataModels.dsl.Validation._
-    //      for {
-    //        id <- MandatoryAttr.name("Bob").age(42)
-    //          .hobbies(Set("golf")).save.transact.map(_.id)
-    //        //          .hobbies(Set("golf", "stamps")).save.transact.map(_.id)
-    //
-    //        _ = println("+++++++++++++++++++++")
-    //        //        // We can remove a value from a Set as long as it's not the last value
-    //        //        _ <- MandatoryAttr(id).hobbies.remove("stamps").update.transact
-    //
-    //        // Can't remove the last value of a mandatory attribute Set of values
-    //        _ <- MandatoryAttr(id).hobbies.remove("golf").update.transact
-    //          .map(_ ==> "Unexpected success").recover {
-    //            case ModelError(error) =>
-    //              error ==>
-    //                """Can't delete mandatory attributes (or remove last values of card-many attributes):
-    //                  |  MandatoryAttr.hobbies
-    //                  |""".stripMargin
-    //          }
-    //
-    //      } yield ()
-    //    }
+
+    "validation" - validation { implicit conn =>
+      import molecule.coreTests.dataModels.dsl.Validation._
+
+      for {
+
+        //        _ <- Type.int(1).save.transact
+        //          .recover {
+        //            case ValidationErrors(errorMap) =>
+        //              errorMap.head._2.head ==>
+        //                s"""Type.int with value `1` doesn't satisfy validation:
+        //                   |_ > 2
+        //                   |""".stripMargin
+        //          }
+
+        //        _ <- Type.int(3).save.transact
+        //        _ <- transact(Type.int(3).save, Type.int(5).save)
+        //                _ <- transact(Type.int(1).save, Type.int.insert(5, 6)).recover {
+        _ <- transact(
+          Type.int.insert(5, 6),
+          Type.int(1).save
+        ).recover {
+          case ValidationErrors(errorMap) =>
+            errorMap.head._2.head ==>
+              s"""Type.int with value `1` doesn't satisfy validation:
+                 |_ > 2
+                 |""".stripMargin
+        }
+
+        _ <- unitOfWork {
+          for {
+            last <- Type.int.insert(5, 6).transact
+            last <- Type.int(1).save.transact
+          } yield last
+        }.recover {
+          case ValidationErrors(errorMap) =>
+            errorMap.head._2.head ==>
+              s"""Type.int with value `1` doesn't satisfy validation:
+                 |_ > 2
+                 |""".stripMargin
+        }
+
+        // No data has been transacted
+        _ <- Type.int.query.get.map(_ ==> List())
+        //        _ <- Type.int.query.get.map(_ ==> List(3, 5))
+
+      } yield ()
+    }
     //
     //    "partitions" - partition { implicit conn =>
     //      import molecule.coreTests.dataModels.dsl.Partitions._

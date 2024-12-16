@@ -45,12 +45,12 @@ trait Spi_h2_sync extends SpiBase_sync {
   }
 
   override def delete_getAction(
-    conn: JdbcConn_JVM, delete: Delete
+    conn: JdbcConn_JVM, delete: Delete, disableFKs: Boolean
   ): DeleteAction = {
     new SqlOps_h2(conn) with ResolveDelete with SqlDelete {}
       .getDeleteAction(
         delete.elements, conn.proxy.nsMap,
-        "SET REFERENTIAL_INTEGRITY", "FALSE", "TRUE"
+        "SET REFERENTIAL_INTEGRITY", "FALSE", "TRUE", disableFKs
       )
   }
 

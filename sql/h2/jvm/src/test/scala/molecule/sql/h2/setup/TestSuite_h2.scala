@@ -26,7 +26,8 @@ trait TestSuite_h2 extends CoreTestSuite with BaseHelpers {
       schema.uniqueAttrs,
       reserved = schema.sqlReserved_h2
     )
-    var conn  = JdbcConn_JVM(proxy, null)
+
+    var conn: JdbcConn_JVM = null
     try {
       conn = JdbcHandler_JVM.recreateDb(proxy)
       test(conn)

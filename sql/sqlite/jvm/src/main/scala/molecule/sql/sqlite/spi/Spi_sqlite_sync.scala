@@ -50,13 +50,13 @@ trait Spi_sqlite_sync extends SpiBase_sync {
   }
 
   override def delete_getAction(
-    conn: JdbcConn_JVM, delete: Delete
+    conn: JdbcConn_JVM, delete: Delete, disableFKs: Boolean
   ): DeleteAction = {
     new SqlOps_sqlite(conn)
       with ResolveDelete with SqlDelete {}
       .getDeleteAction(
         delete.elements, conn.proxy.nsMap,
-        "SQlite", "", ""
+        "SQlite", "", "", disableFKs
       )
   }
 

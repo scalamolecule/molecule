@@ -46,13 +46,13 @@ trait Spi_mariadb_sync extends SpiBase_sync {
   }
 
   override def delete_getAction(
-    conn: JdbcConn_JVM, delete: Delete
+    conn: JdbcConn_JVM, delete: Delete, disableFKs: Boolean
   ): DeleteAction = {
     new SqlOps_mariadb(conn)
       with ResolveDelete with Spi_mariadb_sync with SqlDelete {}
       .getDeleteAction(
         delete.elements, conn.proxy.nsMap,
-        "SET FOREIGN_KEY_CHECKS", "0", "1"
+        "SET FOREIGN_KEY_CHECKS", "0", "1", disableFKs
       )
   }
 

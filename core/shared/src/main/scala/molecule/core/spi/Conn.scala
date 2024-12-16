@@ -2,12 +2,19 @@ package molecule.core.spi
 
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
+import molecule.core.api.Savepoint
 import molecule.core.marshalling.{ConnProxy, MoleculeRpc}
 import molecule.core.util.ModelUtils
 import scala.concurrent.{ExecutionContext, Future}
 
 abstract class Conn(val proxy: ConnProxy)
   extends ModelUtils { self: DataType =>
+
+  protected var commit_ = true
+
+  def waitCommitting(): Unit = ???
+  def commit(): Unit = ???
+  def rollback(): Unit = ???
 
   def transact_async(data: Data)
                     (implicit ec: ExecutionContext): Future[TxReport] =
@@ -47,4 +54,12 @@ abstract class Conn(val proxy: ConnProxy)
   def removeCallback(elements: List[Element]): Unit = {
     callbacks = callbacks.filterNot(_._1 == elements)
   }
+
+  def savepoint_sync[T](block: Savepoint => T): T = ???
+  def savepoint_async[T](block: Savepoint => Future[T])
+                        (implicit ec: ExecutionContext): Future[T] = ???
+
+  def hasSavepoint: Boolean = ???
+
+  def setAutoCopmmit(bool: Boolean): Unit = ???
 }

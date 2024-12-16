@@ -19,7 +19,7 @@ inThisBuild(
     organizationName := "ScalaMolecule",
     organizationHomepage := Some(url("http://www.scalamolecule.org")),
     versionScheme := Some("early-semver"),
-    version := "0.13.0",
+    version := "0.13.1-SNAPSHOT",
     scalaVersion := scala213,
     crossScalaVersions := allScala,
 

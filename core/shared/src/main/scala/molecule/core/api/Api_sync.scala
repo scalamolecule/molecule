@@ -3,6 +3,7 @@ package molecule.core.api
 import molecule.base.error.InsertError
 import molecule.core.action._
 import molecule.core.spi.{Conn, Spi_sync, TxReport}
+import scala.util.control.NonFatal
 
 trait Api_sync { spi: Spi_sync =>
 
@@ -55,4 +56,46 @@ trait Api_sync { spi: Spi_sync =>
     txData: String,
     debug: Boolean = false
   )(implicit conn: Conn): TxReport = fallback_rawTransact(txData, debug)
+
+
+  def transact(a1: Action, a2: Action, aa: Action*)(implicit conn: Conn): Seq[TxReport] = {
+    conn.waitCommitting()
+    try {
+      val txReports = (a1 +: a2 +: aa).map {
+        case save: Save     =>
+          save_transact(save)
+        case insert: Insert =>
+          insert_transact(insert)
+        case update: Update => update_transact(update)
+        case delete: Delete => delete_transact(delete)
+      }
+      // Commit if all executions succeeded
+      conn.commit()
+      txReports
+    } catch {
+      case NonFatal(e) =>
+        // Rollback all executed actions so far
+        conn.rollback()
+        throw e
+    }
+  }
+
+  def unitOfWork[T](block: => T)(implicit conn: Conn): T = {
+    conn.waitCommitting()
+    try {
+      val result = block
+      // Commit all actions
+      conn.commit()
+      result
+    } catch {
+      case NonFatal(e) =>
+        // Rollback all executed actions so far
+        conn.rollback()
+        throw e
+    }
+  }
+
+  def savepoint[T](block: Savepoint => T)(implicit conn: Conn): T = {
+    conn.savepoint_sync(block)
+  }
 }

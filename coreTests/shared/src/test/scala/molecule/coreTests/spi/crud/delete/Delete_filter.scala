@@ -16,7 +16,7 @@ trait Delete_filter extends CoreTestSuite with Api_async { spi: Spi_async =>
     "Filter by 1 non-ns value" - refs { implicit conn =>
       for {
         _ <- A.i.insert(1, 2).transact
-        _ <- A.i_(1).delete.transact
+        _ <- A.i_(1).delete.i.transact
         _ <- A.i.query.get.map(_ ==> List(2))
       } yield ()
     }

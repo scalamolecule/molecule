@@ -174,7 +174,7 @@ trait SpiAsyncBase extends SpiAsync with Renderer with FutureUtils {
   override def update_validate(update: Update)
                               (implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = future {
 //    val proxy = conn.proxy
-//    if (update.isUpsert && isRefUpdate(update.elements))
+//    if (update.isUpsert && hasRef(update.elements))
 //      throw ModelError("Can't upsert referenced attributes. Please update instead.")
 //    TxModelValidation(proxy.nsMap, proxy.attrMap, "update").validate(update.elements)
     ???

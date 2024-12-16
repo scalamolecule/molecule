@@ -46,13 +46,13 @@ trait Spi_postgres_sync extends SpiBase_sync {
   }
 
   override def delete_getAction(
-    conn: JdbcConn_JVM, delete: Delete
+    conn: JdbcConn_JVM, delete: Delete, disableFKs: Boolean
   ): DeleteAction = {
     new SqlOps_postgres(conn)
       with ResolveDelete with Spi_postgres_sync with SqlDelete {}
       .getDeleteAction(
         delete.elements, conn.proxy.nsMap,
-        "SET session_replication_role", "replica", "default"
+        "SET session_replication_role", "replica", "default", disableFKs
       )
   }
 
