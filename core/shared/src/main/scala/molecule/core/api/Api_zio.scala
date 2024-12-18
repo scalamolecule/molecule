@@ -56,4 +56,46 @@ trait Api_zio { spi: Spi_zio =>
     txData: String,
     debug: Boolean = false
   ): ZIO[Conn, MoleculeError, TxReport] = fallback_rawTransact(txData, debug)
+
+
+  def transact(
+    a1: Action, a2: Action, aa: Action*
+  ): ZIO[Conn, MoleculeError, Seq[TxReport]] = transact(a1 +: a2 +: aa)
+
+
+  def transact(actions: Seq[Action]): ZIO[Conn, MoleculeError, Seq[TxReport]] = {
+    ZIO.collectAll(
+      actions.map {
+        case save: Save     => save_transact(save)
+        case insert: Insert => insert_transact(insert)
+        case update: Update => update_transact(update)
+        case delete: Delete => delete_transact(delete)
+      }
+    )
+  }
+
+  def unitOfWork[T](body: => ZIO[Conn, MoleculeError, T]): ZIO[Conn, MoleculeError, T] = {
+    for {
+      conn <- ZIO.service[Conn]
+      _ = conn.waitCommitting()
+      result <- body
+        .map { t =>
+          // Commit all actions
+          conn.commit()
+          t
+        }
+        .mapError { error =>
+          // Rollback all executed actions so far
+          conn.rollback()
+          error
+        }
+    } yield result
+  }
+
+  def savepoint[T](body: Savepoint => ZIO[Conn, MoleculeError, T]): ZIO[Conn, MoleculeError, T] = {
+    for {
+      conn <- ZIO.service[Conn]
+      result <- conn.savepoint_zio(body)
+    } yield result
+  }
 }

@@ -14,150 +14,215 @@ trait SyncApi extends CoreTestSuite with Api_sync { spi: Spi_sync =>
 
   @nowarn override lazy val tests = Tests {
 
-    "Molecule synchronous api" - {
+    "Crud actions" - types { implicit conn =>
+      val List(a, b) = Ns.int.insert(1, 2).transact.ids
+      Ns.int(3).save.transact
+      Ns.int.a1.query.get ==> List(1, 2, 3)
+      Ns(a).int(10).update.transact
+      Ns(b).delete.transact
+      Ns.int.a1.query.get ==> List(3, 10)
+    }
 
-      "Crud actions" - types { implicit conn =>
-        val List(a, b) = Ns.int.insert(1, 2).transact.ids
-        Ns.int(3).save.transact
-        Ns.int.a1.query.get ==> List(1, 2, 3)
-        Ns(a).int(10).update.transact
-        Ns(b).delete.transact
-        Ns.int.a1.query.get ==> List(3, 10)
+    "Transaction bundle" - types { implicit conn =>
+      // Mutation actions only
+      transact(
+        Ns.int(1).save, //         List(1)
+        Ns.int.insert(2, 3), //    List(1, 2, 3)
+        Ns(1).delete, //           List(2, 3)
+        Ns(3).int.*(10).update, // List(2, 30)
+      )
+      Ns.int.query.get ==> List(2, 30)
+    }
+
+    "Unit of work" - types { implicit conn =>
+      // Use a unitOfWork when both mutations and queries are needed
+
+      // Initial balance in two bank accounts
+      Ns.s("fromAccount").int(100).save.transact
+      Ns.s("toAccount").int(50).save.transact
+      try {
+        unitOfWork {
+          Ns.s_("fromAccount").int.-(200).update.transact
+          Ns.s_("toAccount").int.+(200).update.transact
+
+          val res         = Ns.s_("fromAccount").int.query.get
+          //                    .map { res =>
+          val fromBalance = res.head
+          // Check that fromAccount had sufficient funds
+          if (fromBalance < 0) {
+            // Abort all transactions in this unit of work
+            throw new Exception(
+              "Insufficient funds in fromAccount..."
+            )
+          }
+        }
+      } catch {
+        case e: Exception =>
+          // Do something with failure...
+          e.getMessage ==> "Insufficient funds in fromAccount..."
       }
 
+      // No data transacted
+      Ns.s.int.query.get ==> List(
+        ("fromAccount", 100),
+        ("toAccount", 50),
+      )
+    }
 
-      "Opt ref" - refs { implicit conn =>
-        import molecule.coreTests.dataModels.dsl.Refs._
+    "Savepoint" - types { implicit conn =>
+      // Use savepoint within unitOfWork to
+      // rollback transactions within the savepoint body
+      unitOfWork {
+        Ns.int.insert(1 to 4).transact
+        Ns.int(count).query.get.head ==> 4
 
-        A.i(1).save.transact
+        savepoint { sp =>
+          // Delete all
+          Ns.int_.delete.transact
+          Ns.int(count).query.get.head ==> 0
 
-        // Optional card-one ref (SQL left join)
-        A.i.B.?(B.i).query.get ==> List(
-          (1, None),
-        )
+          // Roll back delete
+          sp.rollback()
+          Ns.int(count).query.get.head ==> 4
+        }
 
-        A.i(2).B.i(3).s("b").save.transact
+        // Nothing deleted
+        Ns.int(count).query.get.head ==> 4
+      }
+    }
 
-        // Optional card-one ref (SQL left join)
-        A.i.a1.B.?(B.i.s).query.i.get ==> List(
-          (1, None),
-          (2, Some((3, "b"))),
-        )
+
+    "Opt ref" - refs { implicit conn =>
+      import molecule.coreTests.dataModels.dsl.Refs._
+
+      A.i(1).save.transact
+
+      // Optional card-one ref (SQL left join)
+      A.i.B.?(B.i).query.get ==> List(
+        (1, None),
+      )
+
+      A.i(2).B.i(3).s("b").save.transact
+
+      // Optional card-one ref (SQL left join)
+      A.i.a1.B.?(B.i.s).query.i.get ==> List(
+        (1, None),
+        (2, Some((3, "b"))),
+      )
+    }
+
+
+    "Validation" - validation { implicit conn =>
+      import molecule.coreTests.dataModels.dsl.Validation.Type
+
+      intercept[ValidationErrors](
+        Type.string("a").save.transact
+      ) match {
+        case ValidationErrors(errorMap) =>
+          errorMap.head._2.head ==>
+            s"""Type.string with value `a` doesn't satisfy validation:
+               |_ > "b"
+               |""".stripMargin
+      }
+      intercept[InsertErrors](
+        Type.string.insert("a").transact
+      ) match {
+        case InsertErrors(errors, _) =>
+          errors.head._2.head.errors.head ==
+            s"""Type.string with value `a` doesn't satisfy validation:
+               |_ > "b"
+               |""".stripMargin
       }
 
+      val id = Type.string("c").save.transact.ids.head
+      intercept[ValidationErrors](
+        Type(id).string("a").update.transact
+      ) match {
+        case ValidationErrors(errorMap) =>
+          errorMap.head._2.head ==>
+            s"""Type.string with value `a` doesn't satisfy validation:
+               |_ > "b"
+               |""".stripMargin
+      }
+    }
 
-      "Error handling" - validation { implicit conn =>
-        import molecule.coreTests.dataModels.dsl.Validation.Type
 
-        intercept[ValidationErrors](
-          Type.string("a").save.transact
-        ) match {
-          case ValidationErrors(errorMap) =>
-            errorMap.head._2.head ==>
-              s"""Type.string with value `a` doesn't satisfy validation:
-                 |_ > "b"
-                 |""".stripMargin
-        }
-        intercept[InsertErrors](
-          Type.string.insert("a").transact
-        ) match {
-          case InsertErrors(errors, _) =>
-            errors.head._2.head.errors.head ==
-              s"""Type.string with value `a` doesn't satisfy validation:
-                 |_ > "b"
-                 |""".stripMargin
-        }
+    "Inspection" - types { implicit conn =>
+      val List(a, b) = Ns.int.insert(1, 2).transact.ids // Need data for update and delete
+      Ns.int.insert(1, 2).inspect
+      Ns.int(3).save.inspect
+      Ns.int.query.inspect
+      Ns(a).int(10).update.inspect
+      Ns(b).delete.inspect
+    }
 
-        val id = Type.string("c").save.transact.ids.head
-        intercept[ValidationErrors](
-          Type(id).string("a").update.transact
-        ) match {
-          case ValidationErrors(errorMap) =>
-            errorMap.head._2.head ==>
-              s"""Type.string with value `a` doesn't satisfy validation:
-                 |_ > "b"
-                 |""".stripMargin
-        }
+
+    "Offset query" - types { implicit conn =>
+      Ns.int.insert(1, 2, 3).transact
+      Ns.int.a1.query.get ==> List(1, 2, 3)
+      Ns.int.a1.query.limit(2).get ==> List(1, 2)
+      Ns.int.a1.query.offset(1).get ==> (List(2, 3), 3, false)
+      Ns.int.a1.query.offset(1).limit(1).get ==> (List(2), 3, true)
+    }
+
+
+    "Cursor query" - unique { implicit conn =>
+      import molecule.coreTests.dataModels.dsl.Uniques._
+
+      val query = Uniques.int.a1.query
+      Uniques.int.insert(1, 2, 3, 4, 5).transact
+      val c1 = query.from("").limit(2).get match {
+        case (List(1, 2), c, true) => c
+      }
+      val c2 = query.from(c1).limit(2).get match {
+        case (List(3, 4), c, true) => c
+      }
+      val c3 = query.from(c2).limit(2).get match {
+        case (List(5), c, false) => c
+      }
+      val c4 = query.from(c3).limit(-2).get match {
+        case (List(3, 4), c, true) => c
+      }
+      query.from(c4).limit(-2).get match {
+        case (List(1, 2), _, false) => ()
+      }
+    }
+
+
+    "Subscription" - types { implicit conn =>
+      var intermediaryCallbackResults = List.empty[List[Int]]
+
+      // Initial data
+      Ns.i(1).save.transact
+
+      // Start subscription
+      Ns.i.query.subscribe { freshResult =>
+        intermediaryCallbackResults = intermediaryCallbackResults :+ freshResult
       }
 
+      // Mutations to be monitored by subscription
+      val id = Ns.i(2).save.transact.id
+      Ns.i.a1.query.get ==> List(1, 2)
 
-      "Inspection" - types { implicit conn =>
-        val List(a, b) = Ns.int.insert(1, 2).transact.ids // Need data for update and delete
-        Ns.int.insert(1, 2).inspect
-        Ns.int(3).save.inspect
-        Ns.int.query.inspect
-        Ns(a).int(10).update.inspect
-        Ns(b).delete.inspect
-      }
+      Ns.i.insert(3, 4).transact
+      Ns.i.a1.query.get ==> List(1, 2, 3, 4)
 
+      Ns(id).i(20).update.transact
+      Ns.i.a1.query.get ==> List(1, 3, 4, 20)
 
-      "Offset query" - types { implicit conn =>
-        Ns.int.insert(1, 2, 3).transact
-        Ns.int.a1.query.get ==> List(1, 2, 3)
-        Ns.int.a1.query.limit(2).get ==> List(1, 2)
-        Ns.int.a1.query.offset(1).get ==> (List(2, 3), 3, false)
-        Ns.int.a1.query.offset(1).limit(1).get ==> (List(2), 3, true)
-      }
+      Ns(id).delete.transact
+      Ns.i.a1.query.get ==> List(1, 3, 4)
 
+      // Mutations with no callback-involved attributes don't call back
+      Ns.string("foo").save.transact
 
-      "Cursor query" - unique { implicit conn =>
-        import molecule.coreTests.dataModels.dsl.Uniques._
-
-        val query = Uniques.int.a1.query
-        Uniques.int.insert(1, 2, 3, 4, 5).transact
-        val c1 = query.from("").limit(2).get match {
-          case (List(1, 2), c, true) => c
-        }
-        val c2 = query.from(c1).limit(2).get match {
-          case (List(3, 4), c, true) => c
-        }
-        val c3 = query.from(c2).limit(2).get match {
-          case (List(5), c, false) => c
-        }
-        val c4 = query.from(c3).limit(-2).get match {
-          case (List(3, 4), c, true) => c
-        }
-        query.from(c4).limit(-2).get match {
-          case (List(1, 2), _, false) => ()
-        }
-      }
-
-
-      "Subscription" - types { implicit conn =>
-        var intermediaryCallbackResults = List.empty[List[Int]]
-
-        // Initial data
-        Ns.i(1).save.transact
-
-        // Start subscription
-        Ns.i.query.subscribe { freshResult =>
-          intermediaryCallbackResults = intermediaryCallbackResults :+ freshResult
-        }
-
-        // Mutations to be monitored by subscription
-        val id = Ns.i(2).save.transact.id
-        Ns.i.a1.query.get ==> List(1, 2)
-
-        Ns.i.insert(3, 4).transact
-        Ns.i.a1.query.get ==> List(1, 2, 3, 4)
-
-        Ns(id).i(20).update.transact
-        Ns.i.a1.query.get ==> List(1, 3, 4, 20)
-
-        Ns(id).delete.transact
-        Ns.i.a1.query.get ==> List(1, 3, 4)
-
-        // Mutations with no callback-involved attributes don't call back
-        Ns.string("foo").save.transact
-
-        // Callback catched all intermediary results correctly
-        intermediaryCallbackResults.map(_.sorted) ==> List(
-          List(1, 2), // query result after 2 was saved
-          List(1, 2, 3, 4), // query result after 3 and 4 were inserted
-          List(1, 3, 4, 20), // query result after 2 was updated to 20
-          List(1, 3, 4), // query result after 20 was deleted
-        )
-      }
+      // Callback catched all intermediary results correctly
+      intermediaryCallbackResults.map(_.sorted) ==> List(
+        List(1, 2), // query result after 2 was saved
+        List(1, 2, 3, 4), // query result after 3 and 4 were inserted
+        List(1, 3, 4, 20), // query result after 2 was updated to 20
+        List(1, 3, 4), // query result after 20 was deleted
+      )
     }
   }
 }

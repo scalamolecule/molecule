@@ -47,6 +47,7 @@ trait Api_sync { spi: Spi_sync =>
     def inspect(implicit conn0: Conn): Unit = delete_inspect(delete)
   }
 
+
   def rawQuery(
     query: String,
     debug: Boolean = false,
@@ -58,14 +59,15 @@ trait Api_sync { spi: Spi_sync =>
   )(implicit conn: Conn): TxReport = fallback_rawTransact(txData, debug)
 
 
-  def transact(a1: Action, a2: Action, aa: Action*)(implicit conn: Conn): Seq[TxReport] = {
+  def transact(a1: Action, a2: Action, aa: Action*)
+              (implicit conn: Conn): Seq[TxReport] = transact(a1 +: a2 +: aa)
+
+  def transact(actions: Seq[Action])(implicit conn: Conn): Seq[TxReport] = {
     conn.waitCommitting()
     try {
-      val txReports = (a1 +: a2 +: aa).map {
-        case save: Save     =>
-          save_transact(save)
-        case insert: Insert =>
-          insert_transact(insert)
+      val txReports = actions.map {
+        case save: Save     => save_transact(save)
+        case insert: Insert => insert_transact(insert)
         case update: Update => update_transact(update)
         case delete: Delete => delete_transact(delete)
       }
@@ -80,10 +82,11 @@ trait Api_sync { spi: Spi_sync =>
     }
   }
 
-  def unitOfWork[T](block: => T)(implicit conn: Conn): T = {
+
+  def unitOfWork[T](body: => T)(implicit conn: Conn): T = {
     conn.waitCommitting()
     try {
-      val result = block
+      val result = body
       // Commit all actions
       conn.commit()
       result
@@ -93,9 +96,10 @@ trait Api_sync { spi: Spi_sync =>
         conn.rollback()
         throw e
     }
+
   }
 
-  def savepoint[T](block: Savepoint => T)(implicit conn: Conn): T = {
-    conn.savepoint_sync(block)
+  def savepoint[T](body: Savepoint => T)(implicit conn: Conn): T = {
+    conn.savepoint_sync(body)
   }
 }

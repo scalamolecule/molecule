@@ -298,9 +298,7 @@ trait SpiBase_sync
   }
 
 
-  // Util --------------------------------------
-
-  def getModel2SqlQuery(elements: List[Element]): Model2SqlQuery with SqlQueryBase
+  // Fallback --------------------------------------
 
   override def fallback_rawTransact(
     stmt: String,
@@ -360,6 +358,11 @@ trait SpiBase_sync
     resultSet.close()
     rows.toList
   }
+
+
+  // Util --------------------------------------
+
+  def getModel2SqlQuery(elements: List[Element]): Model2SqlQuery with SqlQueryBase
 
   private def renderRawQueryData(
     query: String,

@@ -1,10 +1,12 @@
 package molecule.core.spi
 
+import cats.effect.IO
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.core.api.Savepoint
 import molecule.core.marshalling.{ConnProxy, MoleculeRpc}
 import molecule.core.util.ModelUtils
+import zio.ZIO
 import scala.concurrent.{ExecutionContext, Future}
 
 abstract class Conn(val proxy: ConnProxy)
@@ -55,11 +57,17 @@ abstract class Conn(val proxy: ConnProxy)
     callbacks = callbacks.filterNot(_._1 == elements)
   }
 
-  def savepoint_sync[T](block: Savepoint => T): T = ???
-  def savepoint_async[T](block: Savepoint => Future[T])
+  def savepoint_sync[T](body: Savepoint => T): T = ???
+  def savepoint_async[T](body: Savepoint => Future[T])
                         (implicit ec: ExecutionContext): Future[T] = ???
+
+  def savepoint_zio[T](
+    body: Savepoint => ZIO[Conn, MoleculeError, T]
+  ): ZIO[Conn, MoleculeError, T] = ???
+
+  def savepoint_io[T](body: Savepoint => IO[T]): IO[T] = ???
 
   def hasSavepoint: Boolean = ???
 
-  def setAutoCopmmit(bool: Boolean): Unit = ???
+  def setAutoCommit(bool: Boolean): Unit = ???
 }

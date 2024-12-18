@@ -8,6 +8,7 @@ import datomic.Util.readAll
 import datomic.{Connection => DatomicConnection, Datom => _, _}
 import molecule.base.error._
 import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.api.Savepoint
 import molecule.core.marshalling.DatomicProxy
 import molecule.core.spi.{Conn, TxReport}
 import molecule.core.util.Executor
@@ -33,6 +34,10 @@ case class DatomicConn_JVM(
     optimizeQueries = flag
   }
   def optimizeQuery: Boolean = optimizeQueries
+
+  override def waitCommitting(): Unit = ()
+  override def commit(): Unit = ()
+  override def rollback(): Unit = ()
 
   final def transactEdn(edn: String)(implicit ec: ExecutionContext): Future[TxReport] = {
     transact_async(readAll(new StringReader(edn)).get(0).asInstanceOf[Data])
@@ -112,4 +117,13 @@ case class DatomicConn_JVM(
     )
     p.future
   }
+
+
+  override def savepoint_sync[T](body: Savepoint => T): T = ???
+  override def savepoint_async[T](body: Savepoint => Future[T])
+                                 (implicit ec: ExecutionContext): Future[T] = ???
+
+  override def hasSavepoint: Boolean = ???
+
+  override def setAutoCommit(bool: Boolean): Unit = ()
 }

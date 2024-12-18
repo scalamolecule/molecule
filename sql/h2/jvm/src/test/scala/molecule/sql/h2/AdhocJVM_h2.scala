@@ -36,6 +36,19 @@ object AdhocJVM_h2 extends TestSuite_h2 {
     }
 
 
+    "mixed" - types { implicit conn =>
+      for {
+        _ <- transact(
+          Ns.int(1).save, //         List(1)
+          Ns.int.insert(2, 3), //    List(1, 2, 3)
+          Ns(1).delete, //           List(2, 3)
+          Ns(3).int.*(10).update, // List(2, 30)
+        )
+        _ <- Ns.int.query.get.map(_ ==> List(2, 30))
+      } yield ()
+    }
+
+
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.dsl.Refs._
       for {

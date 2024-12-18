@@ -1,6 +1,7 @@
 package molecule.datalog.datomic
 
 import molecule.core.util.Executor._
+import molecule.coreTests.dataModels.dsl.Types._
 import molecule.datalog.datomic.async._
 import molecule.datalog.datomic.setup.TestSuite_datomic
 import utest._
@@ -12,13 +13,22 @@ object AdhocDatomic extends TestSuite_datomic {
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
-      import molecule.coreTests.dataModels.dsl.Types._
       for {
         _ <- Ns.int(3).save.transact
         _ <- Ns.int.query.get.map(_ ==> List(3))
       } yield ()
     }
 
+
+    "commit" - types { implicit conn =>
+      for {
+        _ <- Ns.int.insert(1 to 7).transact
+        _ <- Ns.int(count).query.get.map(_.head ==> 7)
+
+        _ <- Ns.int_.delete.transact
+        _ <- Ns.int(count).query.get.map(_.head ==> 0)
+      } yield ()
+    }
 
     //    "validation" - validation { implicit conn =>
     //      for {

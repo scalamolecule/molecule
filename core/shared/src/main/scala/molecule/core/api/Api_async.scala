@@ -60,11 +60,15 @@ trait Api_async extends ModelUtils { spi: Spi_async =>
   )(implicit conn: Conn, ec: EC): Future[TxReport] = fallback_rawTransact(txData, doPrint)
 
 
-  def transact(a1: Action, a2: Action, aa: Action*)(implicit conn: Conn, ec: EC): Future[Seq[TxReport]] = {
+  def transact(a1: Action, a2: Action, aa: Action*)
+              (implicit conn: Conn, ec: EC): Future[Seq[TxReport]] = transact(a1 +: a2 +: aa)
+
+  def transact(actions: Seq[Action])
+              (implicit conn: Conn, ec: EC): Future[Seq[TxReport]] = {
     var ok = true
     conn.waitCommitting()
     val txReports = Future.sequence(
-      (a1 +: a2 +: aa).flatMap {
+      actions.flatMap {
         case action if ok => Some(
           (action match {
             case save: Save     => save_transact(save)
@@ -90,14 +94,15 @@ trait Api_async extends ModelUtils { spi: Spi_async =>
     txReports
   }
 
-  def unitOfWork[T](block: => Future[T])
+
+  def unitOfWork[T](body: => Future[T])
                    (implicit conn: Conn, ec: EC): Future[T] = {
     conn.waitCommitting()
-    block
-      .map { txReport =>
+    body
+      .map { t =>
         // Commit all actions
         conn.commit()
-        txReport
+        t
       }
       .recover { case e =>
         // Rollback all executed actions so far
@@ -106,8 +111,9 @@ trait Api_async extends ModelUtils { spi: Spi_async =>
       }
   }
 
-  def savepoint[T](block: Savepoint => Future[T])
+
+  def savepoint[T](body: Savepoint => Future[T])
                   (implicit conn: Conn, ec: EC): Future[T] = {
-    conn.savepoint_async(block)
+    conn.savepoint_async(body)
   }
 }
