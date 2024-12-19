@@ -35,10 +35,6 @@ case class DatomicConn_JVM(
   }
   def optimizeQuery: Boolean = optimizeQueries
 
-  override def waitCommitting(): Unit = ()
-  override def commit(): Unit = ()
-  override def rollback(): Unit = ()
-
   final def transactEdn(edn: String)(implicit ec: ExecutionContext): Future[TxReport] = {
     transact_async(readAll(new StringReader(edn)).get(0).asInstanceOf[Data])
   }
@@ -117,13 +113,4 @@ case class DatomicConn_JVM(
     )
     p.future
   }
-
-
-  override def savepoint_sync[T](body: Savepoint => T): T = ???
-  override def savepoint_async[T](body: Savepoint => Future[T])
-                                 (implicit ec: ExecutionContext): Future[T] = ???
-
-  override def hasSavepoint: Boolean = ???
-
-  override def setAutoCommit(bool: Boolean): Unit = ()
 }

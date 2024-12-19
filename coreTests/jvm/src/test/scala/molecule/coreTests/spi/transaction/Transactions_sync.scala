@@ -119,18 +119,7 @@ trait Transactions_sync extends CoreTestSuite with Api_sync with Api_sync_transa
       }
 
 
-      "mixed, unified actions" - types { implicit conn =>
-        unitOfWork {
-          Ns.int(1).save.transact
-          Ns.int.insert(2, 3).transact
-          Ns(1).delete.transact
-          Ns(3).int.*(10).update.transact
-        }
-        Ns.int.query.get ==> List(2, 30)
-      }
-
-
-      "mixed, with queries" - types { implicit conn =>
+      "mixed with queries" - types { implicit conn =>
         unitOfWork {
           Ns.int(1).save.transact
           Ns.int.query.get ==> List(1)
@@ -145,6 +134,95 @@ trait Transactions_sync extends CoreTestSuite with Api_sync with Api_sync_transa
           Ns.int.query.get ==> List(2, 30)
         }
         Ns.int.query.get ==> List(2, 30)
+      }
+
+
+      "abort save" - types { implicit conn =>
+        Ns.int(1).save.transact
+        try {
+          unitOfWork {
+            Ns.int(2).save.transact
+            Ns.int.query.get ==> List(1, 2)
+            throw new Exception()
+          }
+        } catch {
+          case _: Exception => ()
+        }
+        Ns.int.query.get ==> List(1)
+      }
+
+
+      "abort insert" - types { implicit conn =>
+        Ns.int(1).save.transact
+        try {
+          unitOfWork {
+            Ns.int.insert(2, 3).transact
+            Ns.int.query.get ==> List(1, 2, 3)
+            throw new Exception()
+          }
+        } catch {
+          case _: Exception => ()
+        }
+        Ns.int.query.get ==> List(1)
+      }
+
+
+      "abort update" - types { implicit conn =>
+        Ns.int(1).save.transact
+        try {
+          unitOfWork {
+            Ns(1).int.*(10).update.transact
+            Ns.int.query.get ==> List(10)
+            throw new Exception()
+          }
+        } catch {
+          case _: Exception => ()
+        }
+        Ns.int.query.get ==> List(1)
+      }
+
+
+      "abort delete" - types { implicit conn =>
+        Ns.int.insert(1, 2).transact
+        try {
+          unitOfWork {
+            Ns(1).delete.transact
+            Ns.int.query.get ==> List(2)
+            throw new Exception()
+          }
+        } catch {
+          case _: Exception => ()
+        }
+        Ns.int.query.get ==> List(1, 2)
+      }
+
+
+      "abort mixed" - types { implicit conn =>
+        // Initial data
+        Ns.int(1).save.transact
+
+        try {
+          unitOfWork {
+            Ns.int(2).save.transact
+            Ns.int.query.get ==> List(1, 2)
+
+            Ns.int.insert(3, 4).transact
+            Ns.int.query.get ==> List(1, 2, 3, 4)
+
+            Ns(2).delete.transact
+            Ns.int.query.get ==> List(1, 3, 4)
+
+            Ns(4).int.*(10).update.transact
+            Ns.int.query.get ==> List(1, 3, 40)
+
+            throw new Exception()
+          }
+        } catch {
+          case _: Exception => ()
+        }
+
+        // Initial data remains intact
+        Ns.int.query.get ==> List(1)
       }
 
 
@@ -175,7 +253,7 @@ trait Transactions_sync extends CoreTestSuite with Api_sync with Api_sync_transa
         // No data transacted
         Ns.s.int.query.get ==> List(
           ("fromAccount", 100),
-          ("toAccount", 501),
+          ("toAccount", 50),
         )
       }
 
@@ -319,6 +397,8 @@ trait Transactions_sync extends CoreTestSuite with Api_sync with Api_sync_transa
           // 1-3 deleted withing uow
           Ns.int(count).query.get.head ==> 4
         }
+
+        Ns.int(count).query.get.head ==> 4
       }
 
 

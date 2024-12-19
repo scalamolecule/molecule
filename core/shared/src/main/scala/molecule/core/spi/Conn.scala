@@ -12,11 +12,6 @@ import scala.concurrent.{ExecutionContext, Future}
 abstract class Conn(val proxy: ConnProxy)
   extends ModelUtils { self: DataType =>
 
-  protected var commit_ = true
-
-  def waitCommitting(): Unit = ???
-  def commit(): Unit = ???
-  def rollback(): Unit = ???
 
   def transact_async(data: Data)
                     (implicit ec: ExecutionContext): Future[TxReport] =
@@ -36,7 +31,7 @@ abstract class Conn(val proxy: ConnProxy)
     ExecutionError(s"`$method` only implemented on JVM platform.")
 
 
-  // Subscriptions --------------------------------------------------------------
+  // Subscriptions -------------------------------------------------------------
 
   private var callbacks = List.empty[(List[Element], (Set[String], Boolean) => Future[Unit])]
 
@@ -57,6 +52,16 @@ abstract class Conn(val proxy: ConnProxy)
     callbacks = callbacks.filterNot(_._1 == elements)
   }
 
+
+  // Transaction handling ------------------------------------------------------
+
+  private   var uow_    = false
+  protected var commit_ = true
+
+  def waitCommitting(): Unit = ???
+  def commit(): Unit = ???
+  def rollback(): Unit = ???
+
   def savepoint_sync[T](body: Savepoint => T): T = ???
   def savepoint_async[T](body: Savepoint => Future[T])
                         (implicit ec: ExecutionContext): Future[T] = ???
@@ -67,7 +72,11 @@ abstract class Conn(val proxy: ConnProxy)
 
   def savepoint_io[T](body: Savepoint => IO[T]): IO[T] = ???
 
-  def hasSavepoint: Boolean = ???
+
+  def setInsideUOW(inside: Boolean): Unit = uow_ = inside
+  def isInsideUOW: Boolean = uow_
+
+  def isInsideSavepoint: Boolean = ???
 
   def setAutoCommit(bool: Boolean): Unit = ???
 }

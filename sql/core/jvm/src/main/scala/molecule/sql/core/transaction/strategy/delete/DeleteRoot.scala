@@ -54,7 +54,7 @@ case class DeleteRoot(
 
   private def executeRoot_sqlite: List[Long] = {
     if (disableFkConstraints) {
-      // Turn autoCommit back one to save pragma key before deletions
+      // Turn autoCommit back on to save pragma key before deletions
       sqlConn.setAutoCommit(true)
       val off = sqlConn.prepareStatement("PRAGMA foreign_keys = 0")
       off.executeUpdate()

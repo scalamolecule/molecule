@@ -93,11 +93,13 @@ trait Api_io_transact { api: Api_io with Spi_io =>
 
 
   def unitOfWork[T](body: => IO[T])(implicit conn: Conn): IO[T] = {
+    conn.setInsideUOW(true)
     conn.waitCommitting()
     body.attempt.map {
       case Right(t)            =>
         // Commit all actions
         conn.commit()
+        conn.setInsideUOW(false)
         t
       case Left(error: Throwable) =>
         // Rollback all executed actions so far

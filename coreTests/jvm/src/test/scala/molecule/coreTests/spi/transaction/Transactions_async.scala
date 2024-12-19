@@ -132,22 +132,7 @@ trait Transactions_async extends CoreTestSuite with Api_async with Api_async_tra
       }
 
 
-      "mixed, unified actions" - types { implicit conn =>
-        for {
-          _ <- unitOfWork {
-            for {
-              _ <- Ns.int(1).save.transact
-              _ <- Ns.int.insert(2, 3).transact
-              _ <- Ns(1).delete.transact
-              _ <- Ns(3).int.*(10).update.transact
-            } yield ()
-          }
-          _ <- Ns.int.query.get.map(_ ==> List(2, 30))
-        } yield ()
-      }
-
-
-      "mixed, with queries" - types { implicit conn =>
+      "mixed with queries" - types { implicit conn =>
         for {
           _ <- unitOfWork {
             for {
@@ -165,6 +150,105 @@ trait Transactions_async extends CoreTestSuite with Api_async with Api_async_tra
             } yield ()
           }
           _ <- Ns.int.query.get.map(_ ==> List(2, 30))
+        } yield ()
+      }
+
+
+      "abort save" - types { implicit conn =>
+        for {
+          _ <- Ns.int(1).save.transact
+          _ <- unitOfWork {
+            for {
+              _ <- Ns.int(2).save.transact
+              _ <- Ns.int.query.get.map(_ ==> List(1, 2))
+              _ = throw new Exception()
+            } yield ()
+          }.recover {
+            case _: Exception => ()
+          }
+          _ <- Ns.int.query.get.map(_ ==> List(1))
+        } yield ()
+      }
+
+
+      "abort insert" - types { implicit conn =>
+        for {
+          _ <- Ns.int(1).save.transact
+          _ <- unitOfWork {
+            for {
+              _ <- Ns.int.insert(2, 3).transact
+              _ <- Ns.int.query.get.map(_ ==> List(1, 2, 3))
+              _ = throw new Exception()
+            } yield ()
+          }.recover {
+            case _: Exception => ()
+          }
+          _ <- Ns.int.query.get.map(_ ==> List(1))
+        } yield ()
+      }
+
+
+      "abort update" - types { implicit conn =>
+        for {
+          _ <- Ns.int(1).save.transact
+          _ <- unitOfWork {
+            for {
+              _ <- Ns(1).int.*(10).update.transact
+              _ <- Ns.int.query.get.map(_ ==> List(10))
+              _ = throw new Exception()
+            } yield ()
+          }.recover {
+            case _: Exception => ()
+          }
+          _ <- Ns.int.query.get.map(_ ==> List(1))
+        } yield ()
+      }
+
+
+      "abort delete" - types { implicit conn =>
+        for {
+          _ <- Ns.int.insert(1, 2).transact
+          _ <- unitOfWork {
+            for {
+              _ <- Ns(1).delete.transact
+              _ <- Ns.int.query.get.map(_ ==> List(1, 2))
+              _ = throw new Exception()
+            } yield ()
+          }.recover {
+            case _: Exception => ()
+          }
+          _ <- Ns.int.query.get.map(_ ==> List(1, 2))
+        } yield ()
+      }
+
+
+      "abort mixed" - types { implicit conn =>
+        for {
+          // Initial data
+          _ <- Ns.int(1).save.transact
+
+          _ <- unitOfWork {
+            for {
+              _ <- Ns.int(2).save.transact
+              _ <- Ns.int.query.get.map(_ ==> List(1, 2))
+
+              _ <- Ns.int.insert(3, 4).transact
+              _ <- Ns.int.query.get.map(_ ==> List(1, 2, 3, 4))
+
+              _ <- Ns(2).delete.transact
+              _ <- Ns.int.query.get.map(_ ==> List(1, 3, 4))
+
+              _ <- Ns(4).int.*(10).update.transact
+              _ <- Ns.int.query.get.map(_ ==> List(1, 3, 40))
+
+              _ = throw new Exception()
+            } yield ()
+          }.recover {
+            case _: Exception => ()
+          }
+
+          // Initial data remains intact
+          _ <- Ns.int.query.get.map(_ ==> List(1))
         } yield ()
       }
 
@@ -273,7 +357,7 @@ trait Transactions_async extends CoreTestSuite with Api_async with Api_async_tra
         }
       }
 
-        // Without rollbacks, the above is the same as the following:
+      // Without rollbacks, the above is the same as the following:
       "commit2" - types { implicit conn =>
         for {
           _ <- Ns.int.insert(1 to 4).transact

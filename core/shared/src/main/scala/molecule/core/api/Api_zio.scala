@@ -80,11 +80,13 @@ trait Api_zio_transact { api: Api_zio with Spi_zio =>
   def unitOfWork[T](body: => ZIO[Conn, MoleculeError, T]): ZIO[Conn, MoleculeError, T] = {
     for {
       conn <- ZIO.service[Conn]
+      _ = conn.setInsideUOW(true)
       _ = conn.waitCommitting()
       result <- body
         .map { t =>
           // Commit all actions
           conn.commit()
+          conn.setInsideUOW(false)
           t
         }
         .mapError { error =>

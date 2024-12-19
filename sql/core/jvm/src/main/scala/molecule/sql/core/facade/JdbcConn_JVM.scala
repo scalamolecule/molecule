@@ -28,38 +28,6 @@ case class JdbcConn_JVM(
 
   val sqlConn: Connection = sqlConn0
 
-  // (Using ListBuffer instead of ArrayDeque for compatibility with Scala 2.12)
-  val savepointStack = mutable.ListBuffer.empty[java.sql.Savepoint]
-
-  override def waitCommitting(): Unit = {
-    commit_ = false
-  }
-
-  override def commit(): Unit = {
-    commit_ = true
-    sqlConn.commit()
-  }
-
-  override def rollback(): Unit = {
-    commit_ = false
-    savepointStack.clear()
-    try {
-      sqlConn.setAutoCommit(false)
-      sqlConn.rollback()
-      logger.info(
-        "Successfully rolled back"
-      )
-    } catch {
-      case e: SQLException =>
-        logger.error("Couldn't roll back unsuccessful transaction: " + e)
-        throw e
-      case NonFatal(e)     =>
-        logger.error("Unexpected rollback error: " + e)
-        throw e
-    }
-  }
-
-
   def queryStmt(query: String): PreparedStatement = {
     sqlConn.prepareStatement(
       query,
@@ -118,6 +86,37 @@ case class JdbcConn_JVM(
   // Savepoint --------------------------------------------------------
   // Thankfully taken from ScalaSql
 
+  // (Using ListBuffer instead of ArrayDeque for compatibility with Scala 2.12)
+  val savepointStack = mutable.ListBuffer.empty[java.sql.Savepoint]
+
+  override def waitCommitting(): Unit = {
+    commit_ = false
+  }
+
+  override def commit(): Unit = {
+    commit_ = true
+    sqlConn.commit()
+  }
+
+  override def rollback(): Unit = {
+    commit_ = false
+    savepointStack.clear()
+    try {
+      sqlConn.setAutoCommit(false)
+      sqlConn.rollback()
+      logger.info(
+        "Successfully rolled back"
+      )
+    } catch {
+      case e: SQLException =>
+        logger.error("Couldn't roll back unsuccessful transaction: " + e)
+        throw e
+      case NonFatal(e)     =>
+        logger.error("Unexpected rollback error: " + e)
+        throw e
+    }
+  }
+
   override def savepoint_sync[T](body: Savepoint => T): T = {
     setAutoCommit(false)
     val savepoint = sqlConn.setSavepoint()
@@ -137,7 +136,6 @@ case class JdbcConn_JVM(
         throw e
     }
   }
-
 
   override def savepoint_async[T](body: Savepoint => Future[T])
                                  (implicit ec: ExecutionContext): Future[T] = {
@@ -190,7 +188,7 @@ case class JdbcConn_JVM(
     savepointStack.append(savepoint)
     val sp = new SavepointImpl(savepoint, () => rollbackSavepoint(savepoint))
     body(sp).attempt.map {
-      case Right(t)            =>
+      case Right(t)    =>
         if (savepointStack.lastOption.exists(_ eq savepoint)) {
           // Only release if this savepoint has not been rolled back,
           // directly or indirectly
@@ -210,13 +208,16 @@ case class JdbcConn_JVM(
   private def rollbackSavepoint(savepoint: java.sql.Savepoint): Unit = {
     savepointStack.indexOf(savepoint) match {
       case -1             => // do nothing
-      case savepointIndex =>
+      case savepointIndex => {
         sqlConn.rollback(savepointStack(savepointIndex))
-        savepointStack.remove(savepointIndex)
+        savepointStack.remove(savepointIndex, savepointStack.length - savepointIndex)
+        // Could use takeInPlace instead, but not available on Scala 2.12
+        // savepointStack.takeInPlace(savepointIndex)
+      }
     }
   }
 
-  override def hasSavepoint: Boolean = savepointStack.nonEmpty
+  override def isInsideSavepoint: Boolean = savepointStack.nonEmpty
 
   override def setAutoCommit(bool: Boolean): Unit = sqlConn.setAutoCommit(false)
 }

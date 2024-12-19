@@ -87,11 +87,13 @@ trait Api_sync_transact { api: Api_sync with Spi_sync =>
 
 
   def unitOfWork[T](body: => T)(implicit conn: Conn): T = {
+    conn.setInsideUOW(true)
     conn.waitCommitting()
     try {
       val result = body
       // Commit all actions
       conn.commit()
+      conn.setInsideUOW(false)
       result
     } catch {
       case NonFatal(e) =>

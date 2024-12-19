@@ -22,7 +22,6 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       import molecule.coreTests.dataModels.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
-      println("hello".substring(5, 5))
       for {
         List(a, b) <- Ns.int.insert(1, 2).transact.map(_.ids)
         _ <- Ns.int(3).save.transact

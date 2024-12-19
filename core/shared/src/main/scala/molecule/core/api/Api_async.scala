@@ -100,11 +100,13 @@ trait Api_async_transact { api: Api_async with Spi_async =>
 
   def unitOfWork[T](body: => Future[T])
                    (implicit conn: Conn, ec: EC): Future[T] = {
+    conn.setInsideUOW(true)
     conn.waitCommitting()
     body
       .map { t =>
         // Commit all actions
         conn.commit()
+        conn.setInsideUOW(false)
         t
       }
       .recover { case e =>

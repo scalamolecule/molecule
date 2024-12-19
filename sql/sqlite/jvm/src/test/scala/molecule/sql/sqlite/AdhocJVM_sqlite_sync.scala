@@ -13,7 +13,7 @@ import molecule.sql.sqlite.sync._
 
 
 //object AdhocJVM_h2 extends TestSuite_h2_array {
-object AdhocJVM_sqlite_sync extends  TestSuite_sqlite {
+object AdhocJVM_sqlite_sync extends TestSuite_sqlite {
 
   override lazy val tests = Tests {
 
@@ -43,7 +43,6 @@ object AdhocJVM_sqlite_sync extends  TestSuite_sqlite {
         Ns.int.query.get ==> List(1, 2)
       }
     }
-
 
 
     "validation" - validation { implicit conn =>
