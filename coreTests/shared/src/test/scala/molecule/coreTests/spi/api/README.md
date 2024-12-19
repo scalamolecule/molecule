@@ -1,0 +1,1 @@
+Sync api only supported on jvm side since js side needs asynchronous calls to backend. Sync api tests are therefore in jvm module.

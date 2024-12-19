@@ -5,8 +5,8 @@ object SpiTestGenerator extends App {
 
   //  test.aggr.any._Aggr.generate()
   //  test.aggr.number._AggrNum.generate()
-  //  test.crud.update.attrOp.decimal._AttrOpDecimal.generate()
-  //  test.crud.update.attrOp.number._AttrOpInteger.generate()
+  //  test.transact.update.attrOp.decimal._AttrOpDecimal.generate()
+  //  test.transact.update.attrOp.number._AttrOpInteger.generate()
   //  test.filter.one.decimal._FilterOneDecimal.generate()
   //  test.filter.one.number._FilterOneInteger.generate()
   //  test.filter.one.types._FilterOne.generate()

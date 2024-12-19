@@ -58,7 +58,10 @@ trait Api_async extends ModelUtils { spi: Spi_async =>
     txData: String,
     doPrint: Boolean = false
   )(implicit conn: Conn, ec: EC): Future[TxReport] = fallback_rawTransact(txData, doPrint)
+}
 
+
+trait Api_async_transact { api: Api_async with Spi_async =>
 
   def transact(a1: Action, a2: Action, aa: Action*)
               (implicit conn: Conn, ec: EC): Future[Seq[TxReport]] = transact(a1 +: a2 +: aa)

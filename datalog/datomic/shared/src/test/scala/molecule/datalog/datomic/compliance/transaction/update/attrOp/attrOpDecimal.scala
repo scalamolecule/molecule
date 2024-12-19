@@ -1,0 +1,10 @@
+package molecule.datalog.datomic.compliance.transaction.update.attrOp
+
+import molecule.coreTests.spi.transaction.update.attrOp.decimal._
+import molecule.datalog.datomic.setup.Test_datomic_async
+
+
+object Test_AttrOpSpecial_Float_ extends AttrOpDecimal_Float_ with Test_datomic_async
+object Test_AttrOpSpecial_Double_ extends AttrOpDecimal_Double with Test_datomic_async
+object Test_AttrOpSpecial_BigDecimal_ extends AttrOpDecimal_BigDecimal with Test_datomic_async
+

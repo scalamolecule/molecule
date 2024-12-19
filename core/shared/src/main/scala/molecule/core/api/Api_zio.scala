@@ -56,7 +56,10 @@ trait Api_zio { spi: Spi_zio =>
     txData: String,
     debug: Boolean = false
   ): ZIO[Conn, MoleculeError, TxReport] = fallback_rawTransact(txData, debug)
+}
 
+
+trait Api_zio_transact { api: Api_zio with Spi_zio =>
 
   def transact(
     a1: Action, a2: Action, aa: Action*

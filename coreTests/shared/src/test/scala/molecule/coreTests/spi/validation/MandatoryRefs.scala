@@ -2,7 +2,7 @@ package molecule.coreTests.spi.validation
 
 import boopickle.Default._
 import molecule.base.error._
-import molecule.core.api.Api_async
+import molecule.core.api.{Api_async, Api_async_transact}
 import molecule.core.spi.Spi_async
 import molecule.core.util.Executor._
 import molecule.core.util.SerializationUtils
@@ -11,7 +11,7 @@ import molecule.coreTests.setup.CoreTestSuite
 import utest._
 import scala.language.implicitConversions
 
-trait MandatoryRefs extends CoreTestSuite with Api_async with SerializationUtils { spi: Spi_async =>
+trait MandatoryRefs extends CoreTestSuite with Api_async with Api_async_transact with SerializationUtils { spi: Spi_async =>
 
   override lazy val tests = Tests {
 

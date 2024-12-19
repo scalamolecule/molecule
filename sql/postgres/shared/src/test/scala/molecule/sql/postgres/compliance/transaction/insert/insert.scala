@@ -1,0 +1,12 @@
+package molecule.sql.postgres.compliance.transaction.insert
+
+import molecule.coreTests.spi.transaction.insert._
+import molecule.sql.postgres.setup.{Test_postgres_async, TestSuite_postgres_array}
+import molecule.sql.postgres.spi.Spi_postgres_async
+
+object Test_InsertCardOne extends InsertCardOne with Test_postgres_async
+object Test_InsertCardSeq extends InsertCardSeq with TestSuite_postgres_array with Spi_postgres_async
+object Test_InsertCardSet extends InsertCardSet with Test_postgres_async
+object Test_InsertCardMap extends InsertCardMap with Test_postgres_async
+object Test_InsertRefs extends InsertRefs with Test_postgres_async
+object Test_InsertSemantics extends InsertSemantics with Test_postgres_async

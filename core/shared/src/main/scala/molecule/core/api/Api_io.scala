@@ -1,7 +1,6 @@
 package molecule.core.api
 
 import cats.effect._
-import cats.implicits.toTraverseOps
 import molecule.base.error.InsertError
 import molecule.core.action._
 import molecule.core.spi._
@@ -59,26 +58,44 @@ trait Api_io extends ModelUtils { spi: Spi_io =>
     txData: String,
     doPrint: Boolean = false
   )(implicit conn: Conn): IO[TxReport] = fallback_rawTransact(txData, doPrint)
+}
 
+
+trait Api_io_transact { api: Api_io with Spi_io =>
 
   def transact(
     a1: Action, a2: Action, aa: Action*
   )(implicit conn: Conn): IO[Seq[TxReport]] = transact(a1 +: a2 +: aa)
 
-
   def transact(actions: Seq[Action])(implicit conn: Conn): IO[Seq[TxReport]] = {
-    actions.map {
-      case save: Save     => save_transact(save)
-      case insert: Insert => insert_transact(insert)
-      case update: Update => update_transact(update)
-      case delete: Delete => delete_transact(delete)
-    }.sequence
+    actions.foldLeft(IO.pure(Seq.empty[TxReport])) { (acc, action) =>
+      val next = action match {
+        case save: Save     => save_transact(save)
+        case insert: Insert => insert_transact(insert)
+        case update: Update => update_transact(update)
+        case delete: Delete => delete_transact(delete)
+      }
+      for {
+        reports <- acc
+        report  <- next
+      } yield reports :+ report
+    }
   }
+  //  import cats.implicits._
+  //  def transact(actions: Seq[Action])(implicit conn: Conn): IO[Seq[TxReport]] = {
+  //    actions.map {
+  //      case save: Save     => save_transact(save)
+  //      case insert: Insert => insert_transact(insert)
+  //      case update: Update => update_transact(update)
+  //      case delete: Delete => delete_transact(delete)
+  //    }.toList.sequence // `sequence` not working with Scala 2.12
+  //  }
+
 
   def unitOfWork[T](body: => IO[T])(implicit conn: Conn): IO[T] = {
     conn.waitCommitting()
     body.attempt.map {
-      case Right(t: T)            =>
+      case Right(t)            =>
         // Commit all actions
         conn.commit()
         t

@@ -1,0 +1,13 @@
+package molecule.sql.postgres.compliance.aggregation
+
+import molecule.coreTests.spi.aggregation.number._
+import molecule.sql.postgres.setup.Test_postgres_async
+
+object Test_AggrOneNum_Int extends AggrNum_Int with Test_postgres_async
+object Test_AggrOneNum_Long extends AggrNum_Long_ with Test_postgres_async
+object Test_AggrOneNum_Float extends AggrNum_Float_ with Test_postgres_async
+object Test_AggrOneNum_Double extends AggrNum_Double_ with Test_postgres_async
+object Test_AggrOneNum_BigInt extends AggrNum_BigInt_ with Test_postgres_async
+object Test_AggrOneNum_BigDecimal extends AggrNum_BigDecimal_ with Test_postgres_async
+object Test_AggrOneNum_Byte extends AggrNum_Byte_ with Test_postgres_async
+object Test_AggrOneNum_Short extends AggrNum_Short_ with Test_postgres_async

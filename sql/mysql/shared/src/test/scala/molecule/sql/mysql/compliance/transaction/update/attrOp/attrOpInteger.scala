@@ -1,0 +1,13 @@
+package molecule.sql.mysql.compliance.transaction.update.attrOp
+
+import molecule.coreTests.spi.transaction.update.attrOp.number._
+import molecule.sql.mysql.setup.Test_mysql_async
+
+
+object Test_AttrOpSpecial_Int extends AttrOpInteger_Int with Test_mysql_async
+object Test_AttrOpSpecial_Long_ extends AttrOpInteger_Long_ with Test_mysql_async
+object Test_AttrOpSpecial_BigInt_ extends AttrOpInteger_BigInt with Test_mysql_async
+object Test_AttrOpSpecial_Byte_ extends AttrOpInteger_Byte_ with Test_mysql_async
+object Test_AttrOpSpecial_Short_ extends AttrOpInteger_Short_ with Test_mysql_async
+
+

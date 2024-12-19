@@ -57,7 +57,10 @@ trait Api_sync { spi: Spi_sync =>
     txData: String,
     debug: Boolean = false
   )(implicit conn: Conn): TxReport = fallback_rawTransact(txData, debug)
+}
 
+
+trait Api_sync_transact { api: Api_sync with Spi_sync =>
 
   def transact(a1: Action, a2: Action, aa: Action*)
               (implicit conn: Conn): Seq[TxReport] = transact(a1 +: a2 +: aa)
@@ -96,7 +99,6 @@ trait Api_sync { spi: Spi_sync =>
         conn.rollback()
         throw e
     }
-
   }
 
   def savepoint[T](body: Savepoint => T)(implicit conn: Conn): T = {

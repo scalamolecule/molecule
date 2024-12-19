@@ -84,14 +84,19 @@ Compilation on JS side can take some time.
 8) molecule-samples: set new molecule and sbt-molecule versions and compile+test each sample project
 9) sbt-molecule: `sbt publishSigned`
 10) molecule: `sbt +publishSigned -Ddocs=true`
+11) commit and push molecule and molecule-samples to github
+12) molecule github: create release
 
 
 ## Publish without sbt-molecule update
 
 1) Set molecule build version to new version
 2) molecule: `sbt +publishLocal`
-3) molecule-samples: `./test-all.sh`
-4) molecule: `sbt +publishSigned -Ddocs=true`
+3) molecule-samples: update to new version
+4) molecule-samples: `./test-all.sh`
+5) molecule: `sbt +publishSigned -Ddocs=true`
+6) commit and push molecule and molecule-samples to github
+7) molecule github: create release
 
 
 ### Publish versions separately

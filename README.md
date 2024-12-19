@@ -50,7 +50,7 @@ Data can also be fetched asynchronously in a `Future` or `ZIO`.
 ## Main features of Molecule
 
 - Support for [PostgreSQL](https://www.postgresql.org), [SQlite](https://sqlite.org), [MySQL](https://www.mysql.com), [MariaDB](https://mariadb.com), [H2](https://h2database.com/html/main.html) and [Datomic](http://www.datomic.com) databases. More can easily be added
-- Molecules for any database behave identically. Each db pass the same SPI compliance test suite (+1600 tests).
+- Molecules for any database behave identically. Each db pass the same SPI compliance test suite (+1700 tests).
 - Targets Scala 3.3, 2.13 and 2.12 on JVM and JS platforms
 - Synchronous, Asynchronous (Future), ZIO and cats.effect.IO APIs
 - All Scala primitive types and collection types available as molecule attributes (!)
@@ -207,12 +207,12 @@ lazy val yourProject = project.in(file("app"))
   .settings(
     libraryDependencies ++= Seq(
       // One or more of:
-      "org.scalamolecule" %%% "molecule-sql-postgres" % "0.13.0",
-      "org.scalamolecule" %%% "molecule-sql-sqlite" % "0.13.0",
-      "org.scalamolecule" %%% "molecule-sql-mysql" % "0.13.0",
-      "org.scalamolecule" %%% "molecule-sql-mariadb" % "0.13.0",
-      "org.scalamolecule" %%% "molecule-sql-h2" % "0.13.0",
-      "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.13.0",
+      "org.scalamolecule" %%% "molecule-sql-postgres" % "0.14.0",
+      "org.scalamolecule" %%% "molecule-sql-sqlite" % "0.14.0",
+      "org.scalamolecule" %%% "molecule-sql-mysql" % "0.14.0",
+      "org.scalamolecule" %%% "molecule-sql-mariadb" % "0.14.0",
+      "org.scalamolecule" %%% "molecule-sql-h2" % "0.14.0",
+      "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.14.0",
     ),
     moleculeSchemas := Seq("app/dataModel") // paths to directories with Data Model definition files
   )
@@ -220,7 +220,7 @@ lazy val yourProject = project.in(file("app"))
 
 ## Explore code
 
-The `coreTests` module in this repo has several data model definitions and +1600 tests that show all details of
+The `coreTests` module in this repo has several data model definitions and +1700 tests that show all details of
 how molecule can be used. This forms the Service Provider Interface that each database implementation needs to comply to
 in order to offer all functionality of Molecule.
 

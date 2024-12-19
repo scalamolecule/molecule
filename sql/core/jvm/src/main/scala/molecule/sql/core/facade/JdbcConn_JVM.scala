@@ -28,8 +28,8 @@ case class JdbcConn_JVM(
 
   val sqlConn: Connection = sqlConn0
 
-  val savepointStack: mutable.ArrayDeque[java.sql.Savepoint] =
-    collection.mutable.ArrayDeque.empty[java.sql.Savepoint]
+  // (Using ListBuffer instead of ArrayDeque for compatibility with Scala 2.12)
+  val savepointStack = mutable.ListBuffer.empty[java.sql.Savepoint]
 
   override def waitCommitting(): Unit = {
     commit_ = false
@@ -190,14 +190,14 @@ case class JdbcConn_JVM(
     savepointStack.append(savepoint)
     val sp = new SavepointImpl(savepoint, () => rollbackSavepoint(savepoint))
     body(sp).attempt.map {
-      case Right(t: T)            =>
+      case Right(t)            =>
         if (savepointStack.lastOption.exists(_ eq savepoint)) {
           // Only release if this savepoint has not been rolled back,
           // directly or indirectly
           sqlConn.releaseSavepoint(savepoint)
         }
         t
-      case Left(error: Throwable) =>
+      case Left(error) =>
         // Rollback all executed actions so far
         rollbackSavepoint(savepoint)
         throw error
@@ -212,7 +212,7 @@ case class JdbcConn_JVM(
       case -1             => // do nothing
       case savepointIndex =>
         sqlConn.rollback(savepointStack(savepointIndex))
-        savepointStack.takeInPlace(savepointIndex)
+        savepointStack.remove(savepointIndex)
     }
   }
 

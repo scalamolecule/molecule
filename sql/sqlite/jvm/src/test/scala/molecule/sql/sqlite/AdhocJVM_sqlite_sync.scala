@@ -1,7 +1,8 @@
 package molecule.sql.sqlite
 
 import molecule.base.error.ValidationErrors
-import molecule.core.spi.Conn
+import molecule.core.api.{Api_async, Api_async_transact}
+import molecule.core.spi.{Conn, Spi_sync}
 import molecule.coreTests.dataModels.dsl.Types._
 import molecule.sql.sqlite.setup.TestSuite_sqlite
 import utest._
@@ -12,7 +13,7 @@ import molecule.sql.sqlite.sync._
 
 
 //object AdhocJVM_h2 extends TestSuite_h2_array {
-object AdhocJVM_sqlite_sync extends TestSuite_sqlite {
+object AdhocJVM_sqlite_sync extends  TestSuite_sqlite {
 
   override lazy val tests = Tests {
 
