@@ -19,6 +19,7 @@ import molecule.sql.postgres.query._
 import molecule.sql.postgres.transaction._
 import scala.concurrent.Future
 
+
 object Spi_postgres_sync extends Spi_postgres_sync
 
 trait Spi_postgres_sync extends SpiBase_sync {
@@ -46,14 +47,11 @@ trait Spi_postgres_sync extends SpiBase_sync {
   }
 
   override def delete_getAction(
-    conn: JdbcConn_JVM, delete: Delete, disableFKs: Boolean
+    delete: Delete, conn: JdbcConn_JVM
   ): DeleteAction = {
     new SqlOps_postgres(conn)
       with ResolveDelete with Spi_postgres_sync with SqlDelete {}
-      .getDeleteAction(
-        delete.elements, conn.proxy.nsMap,
-        "SET session_replication_role", "replica", "default", disableFKs
-      )
+      .getDeleteAction(delete.elements, conn.proxy.nsMap)
   }
 
 

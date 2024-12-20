@@ -134,6 +134,54 @@ trait Delete_id extends CoreTestSuite with Api_async { spi: Spi_async =>
     }
 
 
+    "Orphan refs" - {
+
+      "delete ref" - refs { implicit conn =>
+        for {
+          b <- B.i(2).save.transact.map(_.id)
+          _ <- A.i(1).b(b).save.transact
+
+          // Delete B entity
+          _ <- B(b).delete.transact
+          _ <- B(b).i.query.get.map(_ ==> List())
+
+          _ <- if (database == "Datomic") {
+            // In Datomic the ref id and the referenced entity id is the same and therefore gone
+            A.b.query.get.map(_ ==> List())
+          } else {
+            // Orphan ref to B remains in the SQL A table
+            A.b.query.get.map(_ ==> List(b))
+          }
+
+          // But orphan ref points to nothing (the deleted ref entity)
+          _ <- A.i.B.i.query.get.map(_ ==> List())
+
+          // Add foreign key constraint to database schema manually to forbid deleting
+          // entities that other entities refer to (creating orphans).
+          // Copy constraints from the generated schema and add them to your live schema.
+        } yield ()
+      }
+
+      "delete ref and orphan ref id manually" - refs { implicit conn =>
+        for {
+          b <- B.i(2).save.transact.map(_.id)
+          a <- A.i(1).b(b).save.transact.map(_.id)
+
+          // Delete B entity
+          _ <- B(b).delete.transact
+          _ <- B(b).i.query.get.map(_ ==> List())
+
+          // Delete ref id to avoid orphan ref id hanging around pointing to nothing
+          _ <- A(a).b().update.transact
+
+          // No orphan ref and no relationship
+          _ <- A.b.query.get.map(_ ==> List())
+          _ <- A.i.B.i.query.get.map(_ ==> List())
+        } yield ()
+      }
+    }
+
+
     "Owned entities" - {
 
       "Card-one" - refs { implicit conn =>

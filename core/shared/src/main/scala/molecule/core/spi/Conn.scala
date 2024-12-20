@@ -55,7 +55,6 @@ abstract class Conn(val proxy: ConnProxy)
 
   // Transaction handling ------------------------------------------------------
 
-  private   var uow_    = false
   protected var commit_ = true
 
   def waitCommitting(): Unit = ???
@@ -63,20 +62,9 @@ abstract class Conn(val proxy: ConnProxy)
   def rollback(): Unit = ???
 
   def savepoint_sync[T](body: Savepoint => T): T = ???
-  def savepoint_async[T](body: Savepoint => Future[T])
-                        (implicit ec: ExecutionContext): Future[T] = ???
-
-  def savepoint_zio[T](
-    body: Savepoint => ZIO[Conn, MoleculeError, T]
-  ): ZIO[Conn, MoleculeError, T] = ???
-
+  def savepoint_async[T](body: Savepoint => Future[T])(implicit ec: ExecutionContext): Future[T] = ???
+  def savepoint_zio[T](body: Savepoint => ZIO[Conn, MoleculeError, T]): ZIO[Conn, MoleculeError, T] = ???
   def savepoint_io[T](body: Savepoint => IO[T]): IO[T] = ???
-
-
-  def setInsideUOW(inside: Boolean): Unit = uow_ = inside
-  def isInsideUOW: Boolean = uow_
-
-  def isInsideSavepoint: Boolean = ???
 
   def setAutoCommit(bool: Boolean): Unit = ???
 }

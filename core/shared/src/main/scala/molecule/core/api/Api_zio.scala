@@ -77,16 +77,14 @@ trait Api_zio_transact { api: Api_zio with Spi_zio =>
     )
   }
 
-  def unitOfWork[T](body: => ZIO[Conn, MoleculeError, T]): ZIO[Conn, MoleculeError, T] = {
+  def unitOfWork[T](runUOW: => ZIO[Conn, MoleculeError, T]): ZIO[Conn, MoleculeError, T] = {
     for {
       conn <- ZIO.service[Conn]
-      _ = conn.setInsideUOW(true)
       _ = conn.waitCommitting()
-      result <- body
+      result <- runUOW
         .map { t =>
           // Commit all actions
           conn.commit()
-          conn.setInsideUOW(false)
           t
         }
         .mapError { error =>
@@ -97,10 +95,10 @@ trait Api_zio_transact { api: Api_zio with Spi_zio =>
     } yield result
   }
 
-  def savepoint[T](body: Savepoint => ZIO[Conn, MoleculeError, T]): ZIO[Conn, MoleculeError, T] = {
+  def savepoint[T](runSavepoint: Savepoint => ZIO[Conn, MoleculeError, T]): ZIO[Conn, MoleculeError, T] = {
     for {
       conn <- ZIO.service[Conn]
-      result <- conn.savepoint_zio(body)
+      result <- conn.savepoint_zio(runSavepoint)
     } yield result
   }
 }

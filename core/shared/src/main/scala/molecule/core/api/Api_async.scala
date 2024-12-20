@@ -98,15 +98,13 @@ trait Api_async_transact { api: Api_async with Spi_async =>
   }
 
 
-  def unitOfWork[T](body: => Future[T])
+  def unitOfWork[T](runUOW: => Future[T])
                    (implicit conn: Conn, ec: EC): Future[T] = {
-    conn.setInsideUOW(true)
     conn.waitCommitting()
-    body
+    runUOW
       .map { t =>
         // Commit all actions
         conn.commit()
-        conn.setInsideUOW(false)
         t
       }
       .recover { case e =>
@@ -117,8 +115,8 @@ trait Api_async_transact { api: Api_async with Spi_async =>
   }
 
 
-  def savepoint[T](body: Savepoint => Future[T])
+  def savepoint[T](runSavepoint: Savepoint => Future[T])
                   (implicit conn: Conn, ec: EC): Future[T] = {
-    conn.savepoint_async(body)
+    conn.savepoint_async(runSavepoint)
   }
 }

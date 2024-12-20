@@ -86,14 +86,12 @@ trait Api_sync_transact { api: Api_sync with Spi_sync =>
   }
 
 
-  def unitOfWork[T](body: => T)(implicit conn: Conn): T = {
-    conn.setInsideUOW(true)
+  def unitOfWork[T](runUOW: => T)(implicit conn: Conn): T = {
     conn.waitCommitting()
     try {
-      val result = body
+      val result = runUOW
       // Commit all actions
       conn.commit()
-      conn.setInsideUOW(false)
       result
     } catch {
       case NonFatal(e) =>
@@ -103,7 +101,7 @@ trait Api_sync_transact { api: Api_sync with Spi_sync =>
     }
   }
 
-  def savepoint[T](body: Savepoint => T)(implicit conn: Conn): T = {
-    conn.savepoint_sync(body)
+  def savepoint[T](runSavepoint: Savepoint => T)(implicit conn: Conn): T = {
+    conn.savepoint_sync(runSavepoint)
   }
 }

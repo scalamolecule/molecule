@@ -20,28 +20,11 @@ object AdhocJVM_sqlite_sync extends TestSuite_sqlite {
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.dsl.Types._
 
-      unitOfWork {
-        Ns.int.insert(1, 2).transact
+      Ns.int.insert(1 to 7).transact
+      Ns.int(count).query.get.head ==> 7
 
-        savepoint { sp =>
-
-          Ns.int_(1).delete.transact
-
-          //          implicit val conn2 = conn.getsql.asInstanceOf[Connection]
-          //          val sp0 = conn2.setSavepoint()
-          //          val sp1 = new SavepointImpl(sp0, () => {conn.rb()})
-
-          //          Ns.int(3).save.transact
-          //          Ns.int_.int.+(10).update.transact
-          //          Ns.int.query.get ==> List(11, 12)
-
-          sp.rollback()
-          //          sp1.rollback()
-          //          Ns.int.query.get ==> List(2)
-          //          throw new Exception("bam")
-        }
-        Ns.int.query.get ==> List(1, 2)
-      }
+      Ns.int_.delete.transact
+      Ns.int(count).query.get.head ==> 0
     }
 
 

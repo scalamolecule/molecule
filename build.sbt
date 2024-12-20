@@ -19,7 +19,7 @@ inThisBuild(
     organizationName := "ScalaMolecule",
     organizationHomepage := Some(url("http://www.scalamolecule.org")),
     versionScheme := Some("early-semver"),
-    version := "0.14.1",
+    version := "0.15.0",
     scalaVersion := scala213,
     crossScalaVersions := allScala,
 
@@ -162,28 +162,6 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
     ),
   )
   .dependsOn(core)
-  .settings(
-
-    TaskKey[Unit]("checkSources") := (updateClassifiers map checkSources).value,
-    TaskKey[Unit]("checkBinaries") := (update map checkBinaries).value
-  )
-
-def getSources(report: UpdateReport) = report.matching(artifactFilter(`classifier` = "sources"))
-def checkSources(report: UpdateReport): Unit = {
-  val srcs = getSources(report)
-  if (srcs.isEmpty)
-    sys.error(s"No sources retrieved\n\n$report")
-  else if (srcs.size != 2)
-    sys.error("Incorrect sources retrieved:\n\t" + srcs.mkString("\n\t"))
-  else
-    ()
-}
-
-def checkBinaries(report: UpdateReport): Unit = {
-  val srcs = getSources(report)
-  if (srcs.nonEmpty) sys.error("Sources retrieved:\n\t" + srcs.mkString("\n\t"))
-  else ()
-}
 
 
 lazy val datalogCore = crossProject(JSPlatform, JVMPlatform)

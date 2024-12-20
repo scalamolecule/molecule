@@ -117,13 +117,13 @@ case class JdbcConn_JVM(
     }
   }
 
-  override def savepoint_sync[T](body: Savepoint => T): T = {
+  override def savepoint_sync[T](runSavepoint: Savepoint => T): T = {
     setAutoCommit(false)
     val savepoint = sqlConn.setSavepoint()
     savepointStack.append(savepoint)
     try {
       val sp  = new SavepointImpl(savepoint, () => rollbackSavepoint(savepoint))
-      val res = body(sp)
+      val res = runSavepoint(sp)
       if (savepointStack.lastOption.exists(_ eq savepoint)) {
         // Only release if this savepoint has not been rolled back,
         // directly or indirectly
@@ -137,13 +137,13 @@ case class JdbcConn_JVM(
     }
   }
 
-  override def savepoint_async[T](body: Savepoint => Future[T])
+  override def savepoint_async[T](runSavepoint: Savepoint => Future[T])
                                  (implicit ec: ExecutionContext): Future[T] = {
     setAutoCommit(false)
     val savepoint = sqlConn.setSavepoint()
     savepointStack.append(savepoint)
     val sp = new SavepointImpl(savepoint, () => rollbackSavepoint(savepoint))
-    body(sp)
+    runSavepoint(sp)
       .map { res =>
         if (savepointStack.lastOption.exists(_ eq savepoint)) {
           // Only release if this savepoint has not been rolled back,
@@ -160,13 +160,13 @@ case class JdbcConn_JVM(
   }
 
   override def savepoint_zio[T](
-    body: Savepoint => ZIO[Conn, MoleculeError, T]
+    runSavepoint: Savepoint => ZIO[Conn, MoleculeError, T]
   ): ZIO[Conn, MoleculeError, T] = {
     setAutoCommit(false)
     val savepoint = sqlConn.setSavepoint()
     savepointStack.append(savepoint)
     val sp = new SavepointImpl(savepoint, () => rollbackSavepoint(savepoint))
-    body(sp)
+    runSavepoint(sp)
       .map { res =>
         if (savepointStack.lastOption.exists(_ eq savepoint)) {
           // Only release if this savepoint has not been rolled back,
@@ -182,12 +182,12 @@ case class JdbcConn_JVM(
       }
   }
 
-  override def savepoint_io[T](body: Savepoint => IO[T]): IO[T] = {
+  override def savepoint_io[T](runSavepoint: Savepoint => IO[T]): IO[T] = {
     setAutoCommit(false)
     val savepoint = sqlConn.setSavepoint()
     savepointStack.append(savepoint)
     val sp = new SavepointImpl(savepoint, () => rollbackSavepoint(savepoint))
-    body(sp).attempt.map {
+    runSavepoint(sp).attempt.map {
       case Right(t)    =>
         if (savepointStack.lastOption.exists(_ eq savepoint)) {
           // Only release if this savepoint has not been rolled back,
@@ -216,8 +216,6 @@ case class JdbcConn_JVM(
       }
     }
   }
-
-  override def isInsideSavepoint: Boolean = savepointStack.nonEmpty
 
   override def setAutoCommit(bool: Boolean): Unit = sqlConn.setAutoCommit(false)
 }

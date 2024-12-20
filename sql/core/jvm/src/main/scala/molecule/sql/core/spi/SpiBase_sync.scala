@@ -254,11 +254,7 @@ trait SpiBase_sync
     if (delete.doInspect)
       delete_inspect(delete)
     val deleteClean = delete.copy(elements = noKeywords(delete.elements, Some(conn.proxy)))
-    if (conn.isInsideSavepoint && hasRef(delete.elements)) {
-      throw ModelError("Deletes with relationships not implemented for savepoints.")
-    }
-    // println(s"------  ${conn.isInsideUOW}  ${conn.isInsideSavepoint}  ${hasRef(delete.elements)}")
-    lazy val action = delete_getAction(conn, deleteClean, !conn.isInsideUOW && !conn.isInsideSavepoint)
+    val action = delete_getAction(deleteClean, conn)
     val txReport = conn.transact_sync(action)
     await(conn.callback(delete.elements, true))
     txReport
@@ -268,12 +264,11 @@ trait SpiBase_sync
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
     tryInspect("delete", delete.elements) {
       val deleteClean = delete.copy(elements = noKeywords(delete.elements, Some(conn.proxy)))
-      val disableFKS  = conn.isInsideSavepoint && hasRef(delete.elements)
-      printInspectTx("DELETE", delete.elements, delete_getAction(conn, deleteClean, disableFKS))
+      printInspectTx("DELETE", delete.elements, delete_getAction(deleteClean, conn))
     }
   }
 
-  def delete_getAction(conn: JdbcConn_JVM, delete: Delete, disableFKs: Boolean): DeleteAction = ???
+  def delete_getAction(delete: Delete, conn: JdbcConn_JVM): DeleteAction = ???
 
 
   // Inspect --------------------------------------------------------

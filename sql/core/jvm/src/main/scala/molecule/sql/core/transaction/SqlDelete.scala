@@ -27,19 +27,11 @@ trait SqlDelete
   }
 
   def getDeleteAction(
-    elements: List[Element],
-    nsMap: Map[String, MetaNs],
-    fkConstraintParam: String,
-    fkConstraintOff: String,
-    fkConstraintOn: String,
-    disableFKs: Boolean
+    elements: List[Element], nsMap: Map[String, MetaNs]
   ): DeleteAction = {
     ns = getInitialNs(elements)
     query.idCols += s"$ns.id"
-    root = DeleteRoot(
-      nsMap, sqlOps, sqlConn.createStatement(), ns,
-      fkConstraintParam, fkConstraintOff, fkConstraintOn, disableFKs
-    )
+    root = DeleteRoot(nsMap, sqlOps, sqlConn.createStatement(), ns)
     deleteAction = root.firstNs
     resolve(elements, true)
     initRoot(sqlOps)
