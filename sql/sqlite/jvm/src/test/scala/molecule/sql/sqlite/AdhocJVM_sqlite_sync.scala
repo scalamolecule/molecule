@@ -1,79 +1,69 @@
 package molecule.sql.sqlite
 
 import molecule.base.error.ValidationErrors
-import molecule.coreTests.setup.{MUnitSuite, TestUtils}
+import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.sql.sqlite.setup.DbProviders_sqlite
 import molecule.sql.sqlite.sync._
 import scala.language.implicitConversions
 import scala.util.control.NonFatal
 
 
-class AdhocJVM_sqlite_sync extends MUnitSuite with DbProviders_sqlite with TestUtils {
+class AdhocJVM_sqlite_sync extends Test with DbProviders_sqlite with TestUtils {
 
-  "types" - types { implicit conn =>
-    import molecule.coreTests.domains.dsl.Types._
+//  "types" - types { implicit conn =>
+//    import molecule.coreTests.domains.dsl.Types._
+//
+//    Entity.int(1).save.transact
+//    Entity.int.query.get.head ==> 1
+//  }
 
-    Entity.int.insert(1 to 7).transact
-    Entity.int(count).query.get.head ==> 7
+  "refs" - refs { implicit conn =>
+    import molecule.coreTests.domains.dsl.Refs._
 
-    Entity.int_.delete.transact
-    Entity.int(count).query.get.head ==> 0
+    A.i(1).save.transact
+    A.i.query.get.head ==> 1
+
+//    val List(e1, e2, _) = A.i.insert(1, 2, 3).transact.ids
+//    A.i.a1.query.get ==> List(1, 2, 3)
+
+//    Thread.sleep(500)
+
+//    B.i(1).save.transact
+//    A.i(1).save.transact
+//
+//    A.i(1).B.i(2).save.transact
+//    A.i.B.i.query.i.get
+//
+//    rawQuery(
+////      """select * from A""",
+//      """select * from A_ownAa_A""",
+//    true
+//    )
+//
+////    A(e1).delete.transact
+//    A(1).delete.transact
+    // or
+//    A.id_(e2).delete.transact
+//    A.i.query.get ==> List(3)
   }
 
 
-  "validation" - validation { implicit conn =>
-    import molecule.coreTests.domains.dsl.Validation._
-
-    try {
-      transact(
-        Type.int.insert(5, 6),
-        Type.int(1).save,
-      )
-    } catch {
-      case ValidationErrors(errorMap) =>
-        errorMap.head._2.head ==>
-          s"""Type.int with value `1` doesn't satisfy validation:
-             |_ > 2
-             |""".stripMargin
-      case NonFatal(e)                =>
-        println("ERROR: " + e)
-    }
-
-
-    try {
-      unitOfWork {
-        Type.int.insert(5, 6).transact
-        // Updated database is queryable - useful for intermediate checks
-        Type.int.query.get ==> List(5, 6)
-        // Some error action will roll back the entire uow
-        Type.int(1).save.transact
-      }
-    } catch {
-      case ValidationErrors(errorMap) =>
-        errorMap.head._2.head ==>
-          s"""Type.int with value `1` doesn't satisfy validation:
-             |_ > 2
-             |""".stripMargin
-    }
-
-
-    try {
-      unitOfWork {
-        Type.int.insert(5, 6).transact
-        // Updated database is queryable - useful for intermediate checks
-        Type.int.query.get ==> List(5, 6)
-        // Some error action will roll back the entire uow
-        Type.int(1).save.transact
-      }
-    } catch {
-      case ValidationErrors(errorMap) =>
-        errorMap.head._2.head ==>
-          s"""Type.int with value `1` doesn't satisfy validation:
-             |_ > 2
-             |""".stripMargin
-    }
-
-
-    Type.int.query.get ==> List()
-  }
+//  "validation" - validation { implicit conn =>
+//    import molecule.coreTests.domains.dsl.Validation._
+//
+//    try {
+//      transact(
+//        Type.int.insert(5, 6),
+//        Type.int(1).save,
+//      )
+//    } catch {
+//      case ValidationErrors(errorMap) =>
+//        errorMap.head._2.head ==>
+//          s"""Type.int with value `1` doesn't satisfy validation:
+//             |_ > 2
+//             |""".stripMargin
+//      case NonFatal(e)                =>
+//        println("ERROR: " + e)
+//    }
+//  }
 }

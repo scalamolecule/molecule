@@ -1,30 +1,30 @@
 package molecule.sql.mariadb.compliance.pagination.cursor.subUnique
 
-import molecule.coreTests.setup.MUnitSuite
+import molecule.coreTests.setup.Test
 import molecule.coreTests.spi.pagination.cursor.subUnique._
 import molecule.sql.mariadb.setup.Api_mariadb_async
 
-class AttrOrder extends MUnitSuite {
+class AttrOrder extends Test {
   AttrOrder(this, Api_mariadb_async)
 }
-class DirectionsStandardUnique extends MUnitSuite {
+class DirectionsStandardUnique extends Test {
   DirectionsStandardUnique(this, Api_mariadb_async)
 }
-class DirectionsUniqueStandard extends MUnitSuite {
+class DirectionsUniqueStandard extends Test {
   DirectionsUniqueStandard(this, Api_mariadb_async)
 }
-class MutationAdd extends MUnitSuite {
+class MutationAdd extends Test {
   MutationAdd(this, Api_mariadb_async)
 }
-class MutationDelete extends MUnitSuite {
+class MutationDelete extends Test {
   MutationDelete(this, Api_mariadb_async)
 }
-class Nested extends MUnitSuite {
+class Nested extends Test {
   Nested(this, Api_mariadb_async)
 }
-class OptNested extends MUnitSuite {
+class OptNested extends Test {
   OptNested(this, Api_mariadb_async)
 }
-class TypesUniqueValue extends MUnitSuite {
+class TypesUniqueValue extends Test {
   TypesUniqueValue(this, Api_mariadb_async)
 }

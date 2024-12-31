@@ -3,12 +3,12 @@ package molecule.sql.sqlite
 import boopickle.Default._
 import molecule.core.util.Executor._
 import molecule.coreTests.domains.dsl.Types._
-import molecule.coreTests.setup.{MUnitSuite, TestUtils}
+import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.sql.sqlite.async._
 import molecule.sql.sqlite.setup.DbProviders_sqlite
 
 
-class AdhocJS_sqlite extends MUnitSuite with DbProviders_sqlite with TestUtils {
+class AdhocJS_sqlite extends Test with DbProviders_sqlite with TestUtils {
 
 
   "types" - types { implicit conn =>

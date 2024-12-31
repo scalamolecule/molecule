@@ -1,13 +1,13 @@
 package molecule.sql.h2
 
 import molecule.coreTests.domains.dsl.Types._
-import molecule.coreTests.setup.{MUnitSuite, TestUtils}
+import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.sql.h2.setup.DbProviders_h2
 import molecule.sql.h2.sync._
 import scala.language.implicitConversions
 
 
-class AdhocJVM_h2_sync extends MUnitSuite with DbProviders_h2 with TestUtils {
+class AdhocJVM_h2_sync extends Test with DbProviders_h2 with TestUtils {
 
 
   "commit" - types { implicit conn =>

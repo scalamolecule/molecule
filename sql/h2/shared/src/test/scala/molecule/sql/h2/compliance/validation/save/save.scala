@@ -1,35 +1,33 @@
 package molecule.sql.h2.compliance.validation.save
 
-import molecule.coreTests.setup.MUnitSuite
-import molecule.coreTests.spi.validation.insert.FormatConstants
+import molecule.coreTests.setup.Test
 import molecule.coreTests.spi.validation.save._
 import molecule.sql.h2.setup.Api_h2_async
 
-class FormatConstants extends MUnitSuite {
+class FormatConstants extends Test {
   FormatConstants(this, Api_h2_async)
 }
-
-class FormatVariables extends MUnitSuite {
+class FormatVariables extends Test {
   FormatVariables(this, Api_h2_async)
 }
-class Semantics extends MUnitSuite {
+class Semantics extends Test {
   Semantics(this, Api_h2_async)
 }
-class TypesOne extends MUnitSuite {
+class TypesOne extends Test {
   TypesOne(this, Api_h2_async)
 }
-class TypesOneOpt extends MUnitSuite {
+class TypesOneOpt extends Test {
   TypesOneOpt(this, Api_h2_async)
 }
-class TypesSeq extends MUnitSuite {
+class TypesSeq extends Test {
   TypesSeq(this, Api_h2_async)
 }
-class TypesSeqOpt extends MUnitSuite {
+class TypesSeqOpt extends Test {
   TypesSeqOpt(this, Api_h2_async)
 }
-class TypesSet extends MUnitSuite {
+class TypesSet extends Test {
   TypesSet(this, Api_h2_async)
 }
-class TypesSetOpt extends MUnitSuite {
+class TypesSetOpt extends Test {
   TypesSetOpt(this, Api_h2_async)
 }

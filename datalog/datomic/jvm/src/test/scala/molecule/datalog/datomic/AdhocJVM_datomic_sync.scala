@@ -1,13 +1,13 @@
 package molecule.datalog.datomic
 
 import molecule.coreTests.domains.dsl.Types._
-import molecule.coreTests.setup.{MUnitSuite, TestUtils}
+import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.datalog.datomic.setup.DbProviders_datomic
 import molecule.datalog.datomic.sync._
 import scala.language.implicitConversions
 
 
-class AdhocJVM_datomic_sync extends MUnitSuite with DbProviders_datomic with TestUtils {
+class AdhocJVM_datomic_sync extends Test with DbProviders_datomic with TestUtils {
 
 
   "commit" - types { implicit conn =>

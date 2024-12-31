@@ -7,7 +7,7 @@ import molecule.coreTests.domains.dsl.Refs._
 import molecule.coreTests.setup._
 
 case class FilterRefSet_Card2Ref(
-  suite: MUnitSuite,
+  suite: Test,
   api: Api_async with Spi_async with DbProviders
 ) extends TestUtils {
 

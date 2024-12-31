@@ -8,7 +8,7 @@ import molecule.coreTests.domains.dsl.Validation._
 import molecule.coreTests.setup._
 
 case class FormatVariables(
-  suite: MUnitSuite,
+  suite: Test,
   api: Api_async with Spi_async with DbProviders
 ) extends TestUtils {
 

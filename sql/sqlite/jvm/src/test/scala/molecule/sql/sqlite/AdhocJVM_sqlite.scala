@@ -1,30 +1,30 @@
 package molecule.sql.sqlite
 
 import molecule.core.util.Executor._
-import molecule.coreTests.setup.{MUnitSuite, TestUtils}
+import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.sql.sqlite.async._
 import molecule.sql.sqlite.setup.DbProviders_sqlite
 import scala.language.implicitConversions
 
 
-class AdhocJVM_sqlite extends MUnitSuite with DbProviders_sqlite with TestUtils {
+class AdhocJVM_sqlite extends Test with DbProviders_sqlite with TestUtils {
 
 
-  "types" - types { implicit conn =>
-    import molecule.coreTests.domains.dsl.Types._
-    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
-
-    for {
-      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
-      _ <- Entity.int(3).save.transact
-      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
-      _ <- Entity(a).int(10).update.transact
-      _ <- Entity(b).delete.transact
-      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
-
-
-    } yield ()
-  }
+//  "types" - types { implicit conn =>
+//    import molecule.coreTests.domains.dsl.Types._
+//    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+//
+//    for {
+//      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
+//      _ <- Entity.int(3).save.transact
+//      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
+//      _ <- Entity(a).int(10).update.transact
+//      _ <- Entity(b).delete.transact
+//      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
+//
+//
+//    } yield ()
+//  }
 
 
   "refs" - refs { implicit conn =>
@@ -33,15 +33,12 @@ class AdhocJVM_sqlite extends MUnitSuite with DbProviders_sqlite with TestUtils 
 
     for {
 
-      _ <- A.i.B.?(B.iSet).insert(
-        (0, None),
-        (1, Some(Set(1, 2))),
-      ).transact
-
-      _ <- A.i.a1.B.?(B.iSet).query.get.map(_ ==> List(
-        (0, None),
-        (1, Some(Set(1, 2))),
-      ))
+      List(e1, e2, _) <- A.i.insert(1, 2, 3).transact.map(_.ids)
+      _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
+      _ <- A(e1).delete.transact
+      // or
+      _ <- A.id_(e2).delete.transact
+      _ <- A.i.query.get.map(_ ==> List(3))
 
     } yield ()
   }

@@ -32,8 +32,8 @@ case class JdbcConn_JVM(
   def queryStmt(query: String): PreparedStatement = {
     sqlConn.prepareStatement(
       query,
-      ResultSet.TYPE_SCROLL_INSENSITIVE,
-      //      ResultSet.TYPE_FORWARD_ONLY,
+            ResultSet.TYPE_SCROLL_INSENSITIVE,
+//      ResultSet.TYPE_FORWARD_ONLY,
 
       ResultSet.CONCUR_READ_ONLY
     )

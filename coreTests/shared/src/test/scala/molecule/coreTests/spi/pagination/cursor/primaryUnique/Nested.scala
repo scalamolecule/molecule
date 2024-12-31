@@ -5,9 +5,11 @@ import molecule.core.spi.Spi_async
 import molecule.core.util.Executor._
 import molecule.coreTests.domains.dsl.Uniques._
 import molecule.coreTests.setup._
+import scala.annotation.nowarn
 
+@nowarn
 case class Nested(
-  suite: MUnitSuite,
+  suite: Test,
   api: Api_async with Spi_async with DbProviders
 ) extends TestUtils {
   val x    = ""

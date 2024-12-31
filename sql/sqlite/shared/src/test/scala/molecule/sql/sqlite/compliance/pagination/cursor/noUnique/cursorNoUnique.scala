@@ -1,33 +1,33 @@
 package molecule.sql.sqlite.compliance.pagination.cursor.noUnique
 
-import molecule.coreTests.setup.MUnitSuite
+import molecule.coreTests.setup.Test
 import molecule.coreTests.spi.pagination.cursor.noUnique._
 import molecule.sql.sqlite.setup.Api_sqlite_async
 
-class AttrOrderMandatory extends MUnitSuite {
+class AttrOrderMandatory extends Test {
   AttrOrderMandatory(this, Api_sqlite_async)
 }
-class AttrOrderOptional extends MUnitSuite {
+class AttrOrderOptional extends Test {
   AttrOrderOptional(this, Api_sqlite_async)
 }
-class DirectionsMandatory extends MUnitSuite {
+class DirectionsMandatory extends Test {
   DirectionsMandatory(this, Api_sqlite_async)
 }
-class DirectionsOptional extends MUnitSuite {
+class DirectionsOptional extends Test {
   DirectionsOptional(this, Api_sqlite_async)
 }
-class MutationAdd extends MUnitSuite {
+class MutationAdd extends Test {
   MutationAdd(this, Api_sqlite_async)
 }
-class MutationDelete extends MUnitSuite {
+class MutationDelete extends Test {
   MutationDelete(this, Api_sqlite_async)
 }
-class Nested extends MUnitSuite {
+class Nested extends Test {
   Nested(this, Api_sqlite_async)
 }
-class OptNested extends MUnitSuite {
+class OptNested extends Test {
   OptNested(this, Api_sqlite_async)
 }
-class TypesOptional extends MUnitSuite {
+class TypesOptional extends Test {
   TypesOptional(this, Api_sqlite_async)
 }

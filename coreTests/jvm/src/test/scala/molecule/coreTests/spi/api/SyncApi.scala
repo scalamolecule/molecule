@@ -4,12 +4,14 @@ import molecule.base.error._
 import molecule.core.api.Api_sync
 import molecule.core.spi.Spi_sync
 import molecule.coreTests.domains.dsl.Types._
-import molecule.coreTests.setup.{DbProviders, MUnitSuite, TestUtils}
+import molecule.coreTests.setup.{DbProviders, Test, TestUtils}
+import scala.annotation.nowarn
 
 // Testing the synchronous api only on the JVM platform since the JS platform
 // is dependent on asynchronous retrieval of data from the server.
+@nowarn
 case class SyncApi(
-  suite: MUnitSuite,
+  suite: Test,
   api: Api_sync with Spi_sync with DbProviders
 ) extends TestUtils {
 
@@ -63,7 +65,7 @@ case class SyncApi(
       Type.string.insert("a").transact
     ) match {
       case InsertErrors(errors, _) =>
-        errors.head._2.head.errors.head ==
+        errors.head._2.head.errors.head ==>
           s"""Type.string with value `a` doesn't satisfy validation:
              |_ > "b"
              |""".stripMargin

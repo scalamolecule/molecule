@@ -5,9 +5,7 @@ import molecule.core.marshalling.{JdbcProxy_mysql, RpcRequest}
 import molecule.core.spi.Conn
 import molecule.coreTests.setup.DbConnection
 import molecule.sql.core.facade.JdbcConn_JS
-import scala.concurrent.{Future, Promise}
-import scala.scalajs.js.timers.setTimeout
-import scala.util.{Random, Try}
+import scala.util.Random
 
 trait DbConnection_mysql extends DbConnection {
 
@@ -28,13 +26,5 @@ trait DbConnection_mysql extends DbConnection {
 
   def run(test: Conn => Any, schema: Schema_mysql): Any = {
     test(getConnection(schema))
-  }
-
-  def delay[T](ms: Int)(body: => T): Future[T] = {
-    val promise = Promise[T]()
-    setTimeout(ms)(
-      promise.complete(Try(body))
-    )
-    promise.future
   }
 }

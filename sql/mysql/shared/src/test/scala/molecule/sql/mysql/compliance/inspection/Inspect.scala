@@ -2,12 +2,12 @@ package molecule.sql.mysql.compliance.inspection
 
 import molecule.core.util.Executor._
 import molecule.coreTests.domains.dsl.Types._
-import molecule.coreTests.setup.{MUnitSuite, TestUtils}
+import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.sql.mysql.async._
 import molecule.sql.mysql.setup.DbProviders_mysql
 import scala.language.implicitConversions
 
-class Test_Inspect extends MUnitSuite with DbProviders_mysql with TestUtils {
+class Test_Inspect extends Test with DbProviders_mysql with TestUtils {
 
   /*
       Notice how both the attribute names `string` and `int` are transparently

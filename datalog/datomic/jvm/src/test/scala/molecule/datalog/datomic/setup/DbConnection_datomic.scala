@@ -6,9 +6,8 @@ import molecule.core.spi.Conn
 import molecule.core.util.Executor._
 import molecule.coreTests.setup.DbConnection
 import molecule.datalog.datomic.facade.DatomicPeer
-import scala.concurrent.{Await, Future, Promise}
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
-import scala.util.Try
 
 trait DbConnection_datomic extends DbConnection {
 
@@ -24,7 +23,6 @@ trait DbConnection_datomic extends DbConnection {
     )
     test(conn)
   }
-
 
   def delay[T](ms: Int)(body: => T): Future[T] = Future {
     Thread.sleep(ms)

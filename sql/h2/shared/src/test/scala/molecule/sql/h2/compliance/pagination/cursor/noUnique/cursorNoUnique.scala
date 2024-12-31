@@ -1,33 +1,33 @@
 package molecule.sql.h2.compliance.pagination.cursor.noUnique
 
-import molecule.coreTests.setup.MUnitSuite
+import molecule.coreTests.setup.Test
 import molecule.coreTests.spi.pagination.cursor.noUnique._
 import molecule.sql.h2.setup.Api_h2_async
 
-class AttrOrderMandatory extends MUnitSuite {
+class AttrOrderMandatory extends Test {
   AttrOrderMandatory(this, Api_h2_async)
 }
-class AttrOrderOptional extends MUnitSuite {
+class AttrOrderOptional extends Test {
   AttrOrderOptional(this, Api_h2_async)
 }
-class DirectionsMandatory extends MUnitSuite {
+class DirectionsMandatory extends Test {
   DirectionsMandatory(this, Api_h2_async)
 }
-class DirectionsOptional extends MUnitSuite {
+class DirectionsOptional extends Test {
   DirectionsOptional(this, Api_h2_async)
 }
-class MutationAdd extends MUnitSuite {
+class MutationAdd extends Test {
   MutationAdd(this, Api_h2_async)
 }
-class MutationDelete extends MUnitSuite {
+class MutationDelete extends Test {
   MutationDelete(this, Api_h2_async)
 }
-class Nested extends MUnitSuite {
+class Nested extends Test {
   Nested(this, Api_h2_async)
 }
-class OptNested extends MUnitSuite {
+class OptNested extends Test {
   OptNested(this, Api_h2_async)
 }
-class TypesOptional extends MUnitSuite {
+class TypesOptional extends Test {
   TypesOptional(this, Api_h2_async)
 }

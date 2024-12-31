@@ -7,7 +7,6 @@ import molecule.coreTests.setup.DbConnection
 import molecule.sql.core.facade.{JdbcConn_JVM, JdbcHandler_JVM}
 import org.postgresql.ds.PGSimpleDataSource
 import org.testcontainers.containers.PostgreSQLContainer
-import scala.concurrent.Future
 
 trait DbConnection_postgres extends DbConnection {
 
@@ -48,13 +47,5 @@ trait DbConnection_postgres extends DbConnection {
     val proxy = JdbcProxy_postgres(baseUrl, schema, resetDb + schema.schemaData.head)
     val conn = JdbcConn_JVM(proxy, reusedSqlConn)
     test(JdbcHandler_JVM.recreateDb(conn))
-  }
-
-
-  import molecule.core.util.Executor._
-
-  def delay[T](ms: Int)(body: => T): Future[T] = Future {
-    Thread.sleep(ms)
-    body
   }
 }

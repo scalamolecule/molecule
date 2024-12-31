@@ -2,12 +2,12 @@ package molecule.sql.mysql.compliance.fallback
 
 import molecule.core.util.Executor._
 import molecule.coreTests.domains.dsl.Types._
-import molecule.coreTests.setup.{MUnitSuite, TestUtils}
+import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.sql.mysql.async._
 import molecule.sql.mysql.setup.DbProviders_mysql
 import scala.language.implicitConversions
 
-class RawTransact extends MUnitSuite with DbProviders_mysql with TestUtils {
+class RawTransact extends Test with DbProviders_mysql with TestUtils {
 
   "Semantics" - types { implicit conn =>
     for {

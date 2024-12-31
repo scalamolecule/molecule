@@ -1,15 +1,15 @@
 package molecule.datalog.datomic.compliance.filterAttr.seq
 
-import molecule.coreTests.setup.MUnitSuite
+import molecule.coreTests.setup.Test
 import molecule.coreTests.spi.filterAttr.seq._
 import molecule.datalog.datomic.setup.Api_datomic_async
 
-class Adjacent extends MUnitSuite {
+class Adjacent extends Test {
   Adjacent(this, Api_datomic_async)
 }
-class CrossNs extends MUnitSuite {
+class CrossNs extends Test {
   CrossNs(this, Api_datomic_async)
 }
-class Types extends MUnitSuite {
+class Types extends Test {
   Types(this, Api_datomic_async)
 }

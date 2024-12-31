@@ -3,7 +3,7 @@ package molecule.sql.postgres.compliance.fallback
 import java.math.{BigDecimal => jBigDecimal}
 import molecule.core.util.Executor._
 import molecule.coreTests.domains.dsl.Types._
-import molecule.coreTests.setup.{MUnitSuite, TestUtils}
+import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.sql.postgres.async._
 import molecule.sql.postgres.setup.DbProviders_postgres
 import org.postgresql.jdbc.PgArray
@@ -11,7 +11,7 @@ import org.postgresql.util.PGobject
 import upickle.default.read
 import scala.language.implicitConversions
 
-class RawQuery extends MUnitSuite with DbProviders_postgres with TestUtils {
+class RawQuery extends Test with DbProviders_postgres with TestUtils {
 
   "Lists of Lists of Any" - types { implicit conn =>
     for {

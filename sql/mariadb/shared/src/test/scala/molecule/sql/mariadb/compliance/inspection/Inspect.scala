@@ -2,12 +2,12 @@ package molecule.sql.mariadb.compliance.inspection
 
 import molecule.core.util.Executor._
 import molecule.coreTests.domains.dsl.Types._
-import molecule.coreTests.setup.{MUnitSuite, TestUtils}
+import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.sql.mariadb.async._
 import molecule.sql.mariadb.setup.DbProviders_mariadb
 import scala.language.implicitConversions
 
-class Test_Inspect extends MUnitSuite with DbProviders_mariadb with TestUtils {
+class Test_Inspect extends Test with DbProviders_mariadb with TestUtils {
 
   /*
       Notice how the attribute name `int` is transparently

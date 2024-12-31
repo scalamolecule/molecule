@@ -40,7 +40,9 @@ case class SqlQueryResolveOffset[Tpl](
     c: CastStrategy, sortedRows: RS, conn: JdbcConn_JVM
   ): (List[Tpl], Int, Boolean) = {
     val tpls       = castTuples(c.row2tpl, sortedRows, forward)
-    val totalCount = optOffset.fold(m2q.getRowCount(sortedRows))(_ => getTotalCount(conn))
+    val totalCount = optOffset.fold(
+      m2q.getRowCount(sortedRows)
+    )(_ => getTotalCount(conn))
     val fromUntil  = getFromUntil(totalCount, optLimit, optOffset)
     val hasMore    = fromUntil.fold(totalCount > 0)(_._3)
     (tpls, totalCount, hasMore)

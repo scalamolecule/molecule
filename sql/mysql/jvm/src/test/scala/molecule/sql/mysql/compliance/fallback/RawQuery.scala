@@ -2,13 +2,13 @@ package molecule.sql.mysql.compliance.fallback
 
 import molecule.core.util.Executor._
 import molecule.coreTests.domains.dsl.Types._
-import molecule.coreTests.setup.{MUnitSuite, TestUtils}
+import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.sql.mysql.async._
 import molecule.sql.mysql.setup.DbProviders_mysql
 import upickle.default.read
 import scala.language.implicitConversions
 
-class RawQuery extends MUnitSuite with DbProviders_mysql with TestUtils {
+class RawQuery extends Test with DbProviders_mysql with TestUtils {
 
   "Lists of Lists of Any" - types { implicit conn =>
     for {

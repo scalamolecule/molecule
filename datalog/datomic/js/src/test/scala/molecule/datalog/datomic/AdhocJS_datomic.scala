@@ -3,12 +3,12 @@ package molecule.datalog.datomic
 import boopickle.Default._
 import molecule.core.util.Executor._
 import molecule.coreTests.domains.dsl.Types._
-import molecule.coreTests.setup.{MUnitSuite, TestUtils}
+import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.datalog.datomic.async._
 import molecule.datalog.datomic.setup.DbProviders_datomic
 
 
-class AdhocJS_datomic extends MUnitSuite with DbProviders_datomic with TestUtils {
+class AdhocJS_datomic extends Test with DbProviders_datomic with TestUtils {
 
   "types" - types { implicit conn =>
     for {

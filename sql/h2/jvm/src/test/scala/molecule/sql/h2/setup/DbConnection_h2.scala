@@ -7,7 +7,6 @@ import molecule.core.spi.Conn
 import molecule.coreTests.setup.DbConnection
 import molecule.sql.core.facade.JdbcConn_JVM
 import org.h2.jdbcx.JdbcDataSource
-import scala.concurrent.Future
 import scala.util.Using.Manager
 
 
@@ -27,13 +26,5 @@ trait DbConnection_h2 extends DbConnection {
       val conn  = JdbcConn_JVM(proxy, sqlConn)
       test(conn)
     }.get
-  }
-
-
-  import molecule.core.util.Executor._
-
-  def delay[T](ms: Int)(body: => T): Future[T] = Future {
-    Thread.sleep(ms)
-    body
   }
 }

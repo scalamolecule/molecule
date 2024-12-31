@@ -7,7 +7,7 @@ import molecule.coreTests.domains.dsl.Types._
 import molecule.coreTests.setup._
 
 case class Types(
-  suite: MUnitSuite,
+  suite: Test,
   api: Api_async with Spi_async with DbProviders
 ) extends TestUtils {
 
@@ -15,15 +15,15 @@ case class Types(
   import suite._
 
   "Byte arrays not allowed to filter" - types { implicit conn =>
-    compileErrors("Entity.byteArray.apply(Ref.byteArray_).Ref.byteArray.query.get")
-    compileErrors("Entity.byteArray.not(Ref.byteArray_).Ref.byteArray.query.get")
-    compileErrors("Entity.byteArray.has(Ref.byteArray_).Ref.byteArray.query.get")
-    compileErrors("Entity.byteArray.hasNo(Ref.byteArray_).Ref.byteArray.query.get")
+    compileErrors("Entity.byteArray.apply(Ref.byteArray_).Ref.byteArray.query.get") ==> ""
+    compileErrors("Entity.byteArray.not(Ref.byteArray_).Ref.byteArray.query.get") ==> ""
+    compileErrors("Entity.byteArray.has(Ref.byteArray_).Ref.byteArray.query.get") ==> ""
+    compileErrors("Entity.byteArray.hasNo(Ref.byteArray_).Ref.byteArray.query.get") ==> ""
 
-    compileErrors("Entity.byteArray_.apply(Ref.byteArray_).Ref.byteArray.query.get")
-    compileErrors("Entity.byteArray_.not(Ref.byteArray_).Ref.byteArray.query.get")
-    compileErrors("Entity.byteArray_.has(Ref.byteArray_).Ref.byteArray.query.get")
-    compileErrors("Entity.byteArray_.hasNo(Ref.byteArray_).Ref.byteArray.query.get")
+    compileErrors("Entity.byteArray_.apply(Ref.byteArray_).Ref.byteArray.query.get") ==> ""
+    compileErrors("Entity.byteArray_.not(Ref.byteArray_).Ref.byteArray.query.get") ==> ""
+    compileErrors("Entity.byteArray_.has(Ref.byteArray_).Ref.byteArray.query.get") ==> ""
+    compileErrors("Entity.byteArray_.hasNo(Ref.byteArray_).Ref.byteArray.query.get") ==> ""
   }
 
 

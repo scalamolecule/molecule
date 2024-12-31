@@ -1,9 +1,9 @@
 package molecule.sql.sqlite.spi
 
-import java.sql.{Statement, PreparedStatement => PS}
+import java.sql.{DriverManager, Statement, PreparedStatement => PS}
 import molecule.boilerplate.ast.Model._
 import molecule.core.action._
-import molecule.core.marshalling.{ConnProxy, JdbcProxy}
+import molecule.core.marshalling.{ConnProxy, JdbcProxy, JdbcProxy_sqlite}
 import molecule.core.spi._
 import molecule.core.transaction._
 import molecule.core.util.Executor._
@@ -21,6 +21,7 @@ import molecule.sql.sqlite.query.Model2SqlQuery_sqlite
 import molecule.sql.sqlite.transaction._
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
+import scala.util.Using.Manager
 
 
 object Spi_sqlite_sync extends Spi_sqlite_sync
@@ -107,10 +108,16 @@ trait Spi_sqlite_sync extends SpiBase_sync {
     new Model2SqlQuery_sqlite(elements)
 
   // Creating connection from RPC proxy
-  override protected def getJdbcConn(proxy: ConnProxy): Future[JdbcConn_JVM] = {
-    Future(
-      JdbcHandlerSQlite_JVM.recreateDb(proxy.asInstanceOf[JdbcProxy])
-    )
+  override protected def getJdbcConn(
+    proxy0: ConnProxy
+  ): Future[JdbcConn_JVM] = Future {
+    // todo: use Hikari connection pool?
+    Manager { use =>
+      val proxy   = proxy0.asInstanceOf[JdbcProxy]
+      val sqlConn = use(DriverManager.getConnection(proxy.url))
+      val conn    = use(JdbcHandlerSQlite_JVM.recreateDb(proxy, sqlConn))
+      conn
+    }.get
   }
 
   override def fallback_rawTransact(

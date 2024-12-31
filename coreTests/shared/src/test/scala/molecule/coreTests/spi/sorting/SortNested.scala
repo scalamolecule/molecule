@@ -9,7 +9,7 @@ import scala.concurrent.Future
 
 
 case class SortNested(
-  suite: MUnitSuite,
+  suite: Test,
   api: Api_async with Spi_async with DbProviders
 ) extends TestUtils {
 

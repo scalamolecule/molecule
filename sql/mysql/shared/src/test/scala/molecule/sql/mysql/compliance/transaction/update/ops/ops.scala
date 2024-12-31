@@ -1,18 +1,18 @@
 package molecule.sql.mysql.compliance.transaction.update.ops
 
-import molecule.coreTests.setup.{MUnitSuite, MUnitSuiteWithArrays}
-import molecule.coreTests.spi.action.update.ops._
+import molecule.coreTests.setup.{Test, MUnitSuiteWithArrays}
+import molecule.coreTests.spi.transaction.update.ops._
 import molecule.sql.mysql.setup.Api_mysql_async
 
-class OpsOne extends MUnitSuite {
+class OpsOne extends Test {
   OpsOne(this, Api_mysql_async)
 }
-class OpsSet extends MUnitSuite {
+class OpsSet extends Test {
   OpsSet(this, Api_mysql_async)
 }
 class OpsSeq extends MUnitSuiteWithArrays {
   OpsSeq(this, Api_mysql_async)
 }
-class OpsMap extends MUnitSuite {
+class OpsMap extends Test {
   OpsMap(this, Api_mysql_async)
 }

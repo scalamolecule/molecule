@@ -1,12 +1,12 @@
 package molecule.sql.mariadb
 
 import molecule.core.util.Executor._
-import molecule.coreTests.setup.{MUnitSuite, TestUtils}
+import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.sql.mariadb.async._
 import molecule.sql.mariadb.setup.DbProviders_mariadb
 import scala.language.implicitConversions
 
-class AdhocJVM_mariadb extends MUnitSuite with DbProviders_mariadb with TestUtils {
+class AdhocJVM_mariadb extends Test with DbProviders_mariadb with TestUtils {
 
 
   "types" - types { implicit conn =>

@@ -1,18 +1,18 @@
 package molecule.sql.mariadb.compliance.relation
 
-import molecule.coreTests.setup.MUnitSuite
+import molecule.coreTests.setup.Test
 import molecule.coreTests.spi.relation.flat._
 import molecule.sql.mariadb.setup.Api_mariadb_async
 
-class FlatRef extends MUnitSuite {
+class FlatRef extends Test {
   FlatRef(this, Api_mariadb_async)
 }
-class FlatRefOpt extends MUnitSuite {
+class FlatRefOpt extends Test {
   FlatRefOpt(this, Api_mariadb_async)
 }
-class FlatRefOptNested extends MUnitSuite {
+class FlatRefOptNested extends Test {
   FlatRefOptNested(this, Api_mariadb_async)
 }
-class FlatRefOptAdjacent extends MUnitSuite {
+class FlatRefOptAdjacent extends Test {
   FlatRefOptAdjacent(this, Api_mariadb_async)
 }

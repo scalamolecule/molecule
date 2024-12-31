@@ -3,12 +3,12 @@ package molecule.sql.mysql
 import boopickle.Default._
 import molecule.core.util.Executor._
 import molecule.coreTests.domains.dsl.Types._
-import molecule.coreTests.setup.{MUnitSuite, TestUtils}
+import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.sql.mysql.async._
 import molecule.sql.mysql.setup.DbProviders_mysql
 
 
-class AdhocJS_mysql extends MUnitSuite with DbProviders_mysql with TestUtils {
+class AdhocJS_mysql extends Test with DbProviders_mysql with TestUtils {
 
 
   "types" - types { implicit conn =>

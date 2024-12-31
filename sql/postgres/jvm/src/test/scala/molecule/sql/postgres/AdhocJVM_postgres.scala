@@ -1,12 +1,12 @@
 package molecule.sql.postgres
 
 import molecule.core.util.Executor._
-import molecule.coreTests.setup.{MUnitSuite, TestUtils}
+import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.sql.postgres.async._
 import molecule.sql.postgres.setup.DbProviders_postgres
 import scala.language.implicitConversions
 
-class AdhocJVM_postgres extends MUnitSuite with DbProviders_postgres with TestUtils {
+class AdhocJVM_postgres extends Test with DbProviders_postgres with TestUtils {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.domains.dsl.Types._

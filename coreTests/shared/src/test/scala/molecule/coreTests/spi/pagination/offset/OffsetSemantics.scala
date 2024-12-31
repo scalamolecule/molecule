@@ -11,7 +11,7 @@ import molecule.coreTests.setup._
 // https://medium.com/swlh/sql-pagination-you-are-probably-doing-it-wrong-d0f2719cc166
 
 case class OffsetSemantics(
-  suite: MUnitSuite,
+  suite: Test,
   api: Api_async with Spi_async with DbProviders
 ) extends TestUtils {
 

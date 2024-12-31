@@ -8,7 +8,7 @@ import molecule.coreTests.domains.dsl.Types._
 import molecule.coreTests.setup._
 
 case class FilterOneDecimal_BigDecimal_(
-  suite: MUnitSuite,
+  suite: Test,
   api: Api_async with Spi_async with DbProviders
 ) extends TestUtils {
 

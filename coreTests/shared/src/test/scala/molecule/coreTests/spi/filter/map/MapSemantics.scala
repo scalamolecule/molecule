@@ -9,7 +9,7 @@ import molecule.coreTests.setup._
 import scala.concurrent.Future
 
 case class MapSemantics(
-  suite: MUnitSuite,
+  suite: Test,
   api: Api_async with Spi_async with DbProviders
 ) extends TestUtils {
 

@@ -1,34 +1,33 @@
 package molecule.sql.mysql.compliance.validation.save
 
-import molecule.coreTests.setup.MUnitSuite
-import molecule.coreTests.spi.validation.insert.FormatConstants
+import molecule.coreTests.setup.Test
 import molecule.coreTests.spi.validation.save._
 import molecule.sql.mysql.setup.Api_mysql_async
 
-class FormatConstants extends MUnitSuite {
+class FormatConstants extends Test {
   FormatConstants(this, Api_mysql_async)
 }
-class FormatVariables extends MUnitSuite {
+class FormatVariables extends Test {
   FormatVariables(this, Api_mysql_async)
 }
-class Semantics extends MUnitSuite {
+class Semantics extends Test {
   Semantics(this, Api_mysql_async)
 }
-class TypesOne extends MUnitSuite {
+class TypesOne extends Test {
   TypesOne(this, Api_mysql_async)
 }
-class TypesOneOpt extends MUnitSuite {
+class TypesOneOpt extends Test {
   TypesOneOpt(this, Api_mysql_async)
 }
-class TypesSeq extends MUnitSuite {
+class TypesSeq extends Test {
   TypesSeq(this, Api_mysql_async)
 }
-class TypesSeqOpt extends MUnitSuite {
+class TypesSeqOpt extends Test {
   TypesSeqOpt(this, Api_mysql_async)
 }
-class TypesSet extends MUnitSuite {
+class TypesSet extends Test {
   TypesSet(this, Api_mysql_async)
 }
-class TypesSetOpt extends MUnitSuite {
+class TypesSetOpt extends Test {
   TypesSetOpt(this, Api_mysql_async)
 }

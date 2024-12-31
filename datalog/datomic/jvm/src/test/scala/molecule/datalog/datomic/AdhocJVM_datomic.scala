@@ -2,13 +2,13 @@ package molecule.datalog.datomic
 
 import molecule.base.error.ModelError
 import molecule.core.util.Executor._
-import molecule.coreTests.setup.{MUnitSuite, TestUtils}
+import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.datalog.datomic.async._
 import molecule.datalog.datomic.setup.DbProviders_datomic
 import scala.language.implicitConversions
 
 
-class AdhocJVM_datomic extends MUnitSuite with DbProviders_datomic with TestUtils {
+class AdhocJVM_datomic extends Test with DbProviders_datomic with TestUtils {
 
 
   "types" - types { implicit conn =>

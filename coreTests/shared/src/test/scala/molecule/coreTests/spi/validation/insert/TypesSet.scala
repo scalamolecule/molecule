@@ -11,7 +11,7 @@ import molecule.coreTests.setup._
 import scala.language.implicitConversions
 
 case class TypesSet(
-  suite: MUnitSuite,
+  suite: Test,
   api: Api_async with Spi_async with DbProviders
 ) extends TestUtils {
 

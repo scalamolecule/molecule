@@ -4,12 +4,12 @@ import molecule.base.error.{InsertErrors, ValidationErrors}
 import molecule.core.api.Api_io
 import molecule.core.spi.Spi_io
 import molecule.coreTests.domains.dsl.Types._
-import molecule.coreTests.setup.{DbProviders, MUnitSuite, TestUtils}
+import molecule.coreTests.setup.{DbProviders, Test, TestUtils}
 import scala.annotation.nowarn
 import scala.language.implicitConversions
 
 case class IOApi(
-  suite: MUnitSuite,
+  suite: Test,
   api: Api_io with Spi_io with DbProviders
 ) extends TestUtils {
 

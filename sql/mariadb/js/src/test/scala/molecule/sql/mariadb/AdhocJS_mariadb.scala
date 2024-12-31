@@ -3,12 +3,12 @@ package molecule.sql.mariadb
 import boopickle.Default._
 import molecule.core.util.Executor._
 import molecule.coreTests.domains.dsl.Types._
-import molecule.coreTests.setup.{MUnitSuite, TestUtils}
+import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.sql.mariadb.async._
 import molecule.sql.mariadb.setup.DbProviders_mariadb
 
 
-class AdhocJS_mariadb extends MUnitSuite with DbProviders_mariadb with TestUtils {
+class AdhocJS_mariadb extends Test with DbProviders_mariadb with TestUtils {
 
   "types" - types { implicit conn =>
     for {

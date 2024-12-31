@@ -2,12 +2,12 @@ package molecule.sql.sqlite.compliance.inspection
 
 import molecule.core.util.Executor._
 import molecule.coreTests.domains.dsl.Types._
-import molecule.coreTests.setup.{MUnitSuite, TestUtils}
+import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.sql.sqlite.async._
 import molecule.sql.sqlite.setup.DbProviders_sqlite
 import scala.language.implicitConversions
 
-class Test_Inspect extends MUnitSuite with DbProviders_sqlite with TestUtils {
+class Test_Inspect extends Test with DbProviders_sqlite with TestUtils {
 
   "Query" - {
 

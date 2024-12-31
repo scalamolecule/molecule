@@ -2,12 +2,12 @@ package molecule.datalog.datomic.compliance.fallback
 
 import molecule.core.util.Executor._
 import molecule.coreTests.domains.dsl.Types._
-import molecule.coreTests.setup.{MUnitSuite, TestUtils}
+import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.datalog.datomic.async._
 import molecule.datalog.datomic.setup.DbProviders_datomic
 import scala.language.implicitConversions
 
-class RawTransact extends MUnitSuite with DbProviders_datomic with TestUtils {
+class RawTransact extends Test with DbProviders_datomic with TestUtils {
 
   "Semantics" - types { implicit conn =>
     for {

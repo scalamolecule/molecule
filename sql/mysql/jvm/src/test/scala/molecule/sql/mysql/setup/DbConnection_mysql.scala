@@ -7,7 +7,6 @@ import molecule.core.spi.Conn
 import molecule.coreTests.setup.DbConnection
 import molecule.sql.core.facade.{JdbcConn_JVM, JdbcHandler_JVM}
 import org.testcontainers.containers.MySQLContainer
-import scala.concurrent.Future
 
 trait DbConnection_mysql extends DbConnection {
 
@@ -58,13 +57,5 @@ trait DbConnection_mysql extends DbConnection {
 
   def run(test: Conn => Any, schema: Schema_mysql): Any = {
     test(getConnection(schema))
-  }
-
-
-  import molecule.core.util.Executor._
-
-  def delay[T](ms: Int)(body: => T): Future[T] = Future {
-    Thread.sleep(ms)
-    body
   }
 }

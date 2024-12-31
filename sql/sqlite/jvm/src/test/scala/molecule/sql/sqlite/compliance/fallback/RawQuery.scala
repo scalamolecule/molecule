@@ -2,14 +2,14 @@ package molecule.sql.sqlite.compliance.fallback
 
 import molecule.core.util.Executor._
 import molecule.coreTests.domains.dsl.Types._
-import molecule.coreTests.setup.{MUnitSuite, TestUtils}
+import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.sql.sqlite.async._
 import molecule.sql.sqlite.setup.DbProviders_sqlite
 import upickle.default.read
 import scala.language.implicitConversions
 
 
-class RawQuery extends MUnitSuite with DbProviders_sqlite with TestUtils {
+class RawQuery extends Test with DbProviders_sqlite with TestUtils {
 
   "Lists of Lists of Any" - types { implicit conn =>
     for {
