@@ -1,6 +1,9 @@
 package molecule.sql.sqlite.compliance.pagination.cursor
 
+import molecule.coreTests.setup.MUnitSuite
 import molecule.coreTests.spi.pagination.cursor.SharedSemantics
-import molecule.sql.sqlite.setup.Test_sqlite_async
+import molecule.sql.sqlite.setup.Api_sqlite_async
 
-object Test_SharedSemantics extends SharedSemantics with Test_sqlite_async
+class SharedSemantics extends MUnitSuite {
+  SharedSemantics(this, Api_sqlite_async)
+}

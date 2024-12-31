@@ -5,7 +5,7 @@ import java.time._
 import java.util.{List => jList, Map => jMap, Set => jSet}
 import clojure.lang.Keyword
 import datomic.query.EntityMap
-import datomic.{Database, Peer, Util}
+import datomic.{Database, Peer}
 import molecule.base.ast.CardOne
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
@@ -37,7 +37,7 @@ trait Update_datomic
 
   private var db: Database = null
 
-  // Cache entities for each namespace to be able to go back with BackRef and use previous namespace entities
+  // Cache entities to be able to go back with BackRef and use previous entities
   private var idLists = List.empty[List[AnyRef]] // Long or String (#db/id[db.part/user -1])
 
   private var requiredNsPaths = List(List.empty[String])
@@ -73,8 +73,8 @@ trait Update_datomic
       }
 
       val validationErrors = TxModelValidation(
-        conn.proxy.nsMap,
-        conn.proxy.attrMap,
+        conn.proxy.schema.entityMap,
+        conn.proxy.schema.attrMap,
         if (isUpsert) "upsert" else "update",
         Some(getCurSetValues)
       ).validate(elements)
@@ -111,7 +111,7 @@ trait Update_datomic
       val it = filterMatchRows.iterator()
       if (it.hasNext) {
         val firstRow = it.next()
-        // First namespace entity id of first row
+        // First entity id of first row
         ids = List(firstRow.get(0))
         idLists = List(ids)
         rowSize = firstRow.size
@@ -884,7 +884,7 @@ trait Update_datomic
               // Don't add ref if it's not required (when removing only)
               // Add required ref
               if (requiredNsPaths.contains(currentNsPath)) {
-                // Add ref to next namespace
+                // Add ref to next entity
                 val ref = newId
                 appendStmt(add, ids.head, refAttr, ref)
                 List(ref)
@@ -906,7 +906,7 @@ trait Update_datomic
         } else {
           idLists.last.map {
             case tempRefId: String =>
-              // Add existing temporary ref id to next namespace
+              // Add existing temporary ref id to next entity
               appendStmt(add, ids.head, refAttr, tempRefId)
               tempRefId
 
@@ -916,7 +916,7 @@ trait Update_datomic
                 case set: jSet[_]  => set.iterator.next.asInstanceOf[EntityMap].get(dbId)
                 case em: EntityMap => em.get(dbId)
                 case null          =>
-                  // Add ref to next namespace
+                  // Add ref to next entity
                   val tempRefId = newId
                   appendStmt(add, ids.head, refAttr, tempRefId)
                   tempRefId

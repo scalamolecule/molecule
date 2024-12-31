@@ -3,7 +3,7 @@ package molecule.datalog.datomic.transaction
 import java.lang.{Boolean => jBoolean}
 import java.util.{UUID, ArrayList => jArrayList, List => jList}
 import clojure.lang.Keyword
-import molecule.base.error.{ExecutionError, ModelError}
+import molecule.base.error.ExecutionError
 import molecule.boilerplate.ast.Model._
 import molecule.core.marshalling.{ConnProxy, DatomicProxy}
 import molecule.core.util.Executor._
@@ -116,10 +116,10 @@ trait DatomicBase_JVM extends DatomicDataType_JVM with ModelUtils {
    */
   protected def getFreshConn(proxy: ConnProxy): Future[DatomicConn_JVM] = {
     proxy match {
-      case proxy@DatomicProxy(protocol, dbIdentifier, _, _, _, _, _, _, _, _, _, _) =>
+      case proxy@DatomicProxy(protocol, dbIdentifier, _, _) =>
         protocol match {
           case "mem" =>
-            DatomicPeer.recreateDb(proxy, protocol, dbIdentifier)
+            DatomicPeer.recreateDb(proxy)
               .recover {
                 case exc: Throwable => throw ExecutionError(exc.getMessage)
               }

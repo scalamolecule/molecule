@@ -2,7 +2,6 @@ package molecule.sql.core.transaction
 
 import java.util.UUID
 import molecule.core.marshalling.ConnProxy
-import molecule.core.util.Executor._
 import molecule.sql.core.facade.JdbcConn_JVM
 import scala.collection.mutable
 import scala.concurrent.Future

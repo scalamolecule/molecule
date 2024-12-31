@@ -1,13 +1,24 @@
 package molecule.datalog.datomic.compliance.filter.one
 
+import molecule.coreTests.setup.MUnitSuite
 import molecule.coreTests.spi.filter.one.number._
-import molecule.datalog.datomic.setup.Test_datomic_async
+import molecule.datalog.datomic.setup.Api_datomic_async
 
 
-object Test_FilterOneSpecial_Int extends FilterOneInteger_Int with Test_datomic_async
-object Test_FilterOneSpecial_Long_ extends FilterOneInteger_Long_ with Test_datomic_async
-object Test_FilterOneSpecial_BigInt_ extends FilterOneInteger_BigInt_ with Test_datomic_async
-object Test_FilterOneSpecial_Byte_ extends FilterOneInteger_Byte_ with Test_datomic_async
-object Test_FilterOneSpecial_Short_ extends FilterOneInteger_Short_ with Test_datomic_async
+class FilterOneInteger_Int extends MUnitSuite {
+  FilterOneInteger_Int(this, Api_datomic_async)
+}
+class FilterOneInteger_Long_ extends MUnitSuite {
+  FilterOneInteger_Long_(this, Api_datomic_async)
+}
+class FilterOneInteger_BigInt_ extends MUnitSuite {
+  FilterOneInteger_BigInt_(this, Api_datomic_async)
+}
+class FilterOneInteger_Byte_ extends MUnitSuite {
+  FilterOneInteger_Byte_(this, Api_datomic_async)
+}
+class FilterOneInteger_Short_ extends MUnitSuite {
+  FilterOneInteger_Short_(this, Api_datomic_async)
+}
 
 

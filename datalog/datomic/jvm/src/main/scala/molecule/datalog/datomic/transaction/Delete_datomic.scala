@@ -46,7 +46,7 @@ trait Delete_datomic
     ids1.foreach(addRetractEntityStmt)
 
     // Prevent deleting mandatory referenced entities
-    if (getHasMandatoryRefs(conn.proxy.nsMap)) {
+    if (getHasMandatoryRefs(conn.proxy.schema.entityMap)) {
       val referrers = Peer.q(
         s"""[:find  ?ns ?attr ?refs
            | :in    $$ [?ids ...]

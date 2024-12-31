@@ -5,15 +5,15 @@ import molecule.base.ast._
 import molecule.sql.core.transaction.strategy.SqlOps
 
 case class DeleteRoot(
-  nsMap: Map[String, MetaNs],
+  entityMap: Map[String, MetaEntity],
   sqlOps: SqlOps,
   sqlStmt: Statement,
   ns: String
-) extends DeleteAction(nsMap, null, sqlStmt, sqlOps, ns) {
+) extends DeleteAction(entityMap, null, sqlStmt, sqlOps, ns) {
 
   val sqlConn: Connection = sqlOps.sqlConn
 
-  val firstNs = DeleteNs(nsMap, this, sqlStmt, sqlOps, "", "", ns)
+  val firstNs = DeleteEntity(entityMap, this, sqlStmt, sqlOps, "", "", ns)
   children += firstNs
 
   override def execute: List[Long] = {

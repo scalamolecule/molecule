@@ -1,13 +1,30 @@
 package molecule.sql.sqlite.compliance.pagination.cursor.subUnique
 
+import molecule.coreTests.setup.MUnitSuite
 import molecule.coreTests.spi.pagination.cursor.subUnique._
-import molecule.sql.sqlite.setup.Test_sqlite_async
+import molecule.sql.sqlite.setup.Api_sqlite_async
 
-object Test_AttrOrder extends AttrOrder with Test_sqlite_async
-object Test_DirectionsStandardUnique extends DirectionsStandardUnique with Test_sqlite_async
-object Test_DirectionsUniqueStandard extends DirectionsUniqueStandard with Test_sqlite_async
-object Test_MutationAdd extends MutationAdd with Test_sqlite_async
-object Test_MutationDelete extends MutationDelete with Test_sqlite_async
-object Test_Nested extends Nested with Test_sqlite_async
-object Test_OptNested extends OptNested with Test_sqlite_async
-object Test_TypesUniqueValue extends TypesUniqueValue with Test_sqlite_async
+class AttrOrder extends MUnitSuite {
+  AttrOrder(this, Api_sqlite_async)
+}
+class DirectionsStandardUnique extends MUnitSuite {
+  DirectionsStandardUnique(this, Api_sqlite_async)
+}
+class DirectionsUniqueStandard extends MUnitSuite {
+  DirectionsUniqueStandard(this, Api_sqlite_async)
+}
+class MutationAdd extends MUnitSuite {
+  MutationAdd(this, Api_sqlite_async)
+}
+class MutationDelete extends MUnitSuite {
+  MutationDelete(this, Api_sqlite_async)
+}
+class Nested extends MUnitSuite {
+  Nested(this, Api_sqlite_async)
+}
+class OptNested extends MUnitSuite {
+  OptNested(this, Api_sqlite_async)
+}
+class TypesUniqueValue extends MUnitSuite {
+  TypesUniqueValue(this, Api_sqlite_async)
+}

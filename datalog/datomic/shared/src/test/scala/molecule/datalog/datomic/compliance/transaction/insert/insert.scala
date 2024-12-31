@@ -1,12 +1,24 @@
 package molecule.datalog.datomic.compliance.transaction.insert
 
-import molecule.coreTests.spi.transaction.insert._
-import molecule.datalog.datomic.setup.{TestSuite_datomic_array, Test_datomic_async}
-import molecule.datalog.datomic.spi.Spi_datomic_async
+import molecule.coreTests.setup.{MUnitSuite, MUnitSuiteWithArrays}
+import molecule.coreTests.spi.action.insert._
+import molecule.datalog.datomic.setup.Api_datomic_async
 
-object Test_InsertCardOne extends InsertCardOne with Test_datomic_async
-object Test_InsertCardSeq extends InsertCardSeq with TestSuite_datomic_array with Spi_datomic_async
-object Test_InsertCardSet extends InsertCardSet with Test_datomic_async
-object Test_InsertCardMap extends InsertCardMap with Test_datomic_async
-object Test_InsertRefs extends InsertRefs with Test_datomic_async
-object Test_InsertSemantics extends InsertSemantics with Test_datomic_async
+class InsertCardOne extends MUnitSuite {
+  InsertCardOne(this, Api_datomic_async)
+}
+class InsertCardSeq extends MUnitSuiteWithArrays {
+  InsertCardSeq(this, Api_datomic_async)
+}
+class InsertCardSet extends MUnitSuite {
+  InsertCardSet(this, Api_datomic_async)
+}
+class InsertCardMap extends MUnitSuite {
+  InsertCardMap(this, Api_datomic_async)
+}
+class InsertRefs extends MUnitSuite {
+  InsertRefs(this, Api_datomic_async)
+}
+class InsertSemantics extends MUnitSuite {
+  InsertSemantics(this, Api_datomic_async)
+}

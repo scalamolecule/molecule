@@ -1,8 +1,15 @@
 package molecule.sql.mysql.compliance.pagination.offset
 
+import molecule.coreTests.setup.MUnitSuite
 import molecule.coreTests.spi.pagination.offset._
-import molecule.sql.mysql.setup.Test_mysql_async
+import molecule.sql.mysql.setup.Api_mysql_async
 
-object Test_OffsetBackwards extends OffsetBackwards with Test_mysql_async
-object Test_OffsetForward extends OffsetForward with Test_mysql_async
-object Test_OffsetSemantics extends OffsetSemantics with Test_mysql_async
+class OffsetBackwards extends MUnitSuite {
+  OffsetBackwards(this, Api_mysql_async)
+}
+class OffsetForward extends MUnitSuite {
+  OffsetForward(this, Api_mysql_async)
+}
+class OffsetSemantics extends MUnitSuite {
+  OffsetSemantics(this, Api_mysql_async)
+}

@@ -114,7 +114,7 @@ trait LambdasMap extends ResolveBase with JavaConversions {
 
   private def j2optValue[T](decode: Any => T): AnyRef => Option[T] = (v: AnyRef) => {
     val seq = v.asInstanceOf[jList[_]]
-    if(seq.isEmpty) Option.empty[T] else Some(decode(seq.get(0)))
+    if (seq.isEmpty) Option.empty[T] else Some(decode(seq.get(0)))
   }
 
   private lazy val j2optValueString         = j2optValue(j2String)

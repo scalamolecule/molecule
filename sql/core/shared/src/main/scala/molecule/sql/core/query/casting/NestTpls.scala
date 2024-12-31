@@ -24,7 +24,7 @@ class NestTpls extends SqlQueryBase {
   protected var e5: jLong = 0L
   protected var e6: jLong = 0L
 
-  protected var nextRow  = false
+  protected var nextRow = false
 
   protected var acc0: List[Any] = List.empty[Any]
   protected var acc1: List[Any] = List.empty[Any]

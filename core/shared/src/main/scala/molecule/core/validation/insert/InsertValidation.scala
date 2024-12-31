@@ -12,13 +12,13 @@ object InsertValidation extends InsertValidationExtraction with InsertValidation
     elements: List[Element],
     tpls: Seq[Product]
   ): Seq[(Int, Seq[InsertError])] = {
-    val (nsMap, attrMap) = (conn.proxy.nsMap, conn.proxy.attrMap)
+    val (entityMap, attrMap) = (conn.proxy.schema.entityMap, conn.proxy.schema.attrMap)
 
     // Basic model validation
-    TxModelValidation(nsMap, attrMap, "insert").validate(elements)
+    TxModelValidation(entityMap, attrMap, "insert").validate(elements)
 
     // Validator to validate each row
-    val validate = getInsertValidator(nsMap, elements)
+    val validate = getInsertValidator(entityMap, elements)
 
     val rowErrors = tpls.zipWithIndex.flatMap { case (tpl, rowIndex) =>
       val rowErrors = validate(tpl)

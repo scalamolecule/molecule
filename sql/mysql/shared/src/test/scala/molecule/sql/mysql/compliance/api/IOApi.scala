@@ -1,6 +1,9 @@
 package molecule.sql.mysql.compliance.api
 
+import molecule.coreTests.setup.MUnitSuite
 import molecule.coreTests.spi.api._
-import molecule.sql.mysql.setup.Test_mysql_io
+import molecule.sql.mysql.setup.Api_mysql_io
 
-class Test_IOApi extends IOApi with Test_mysql_io
+class IOApi extends MUnitSuite {
+  IOApi(this, Api_mysql_io)
+}

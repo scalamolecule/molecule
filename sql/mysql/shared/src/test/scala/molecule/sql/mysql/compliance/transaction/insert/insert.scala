@@ -1,12 +1,24 @@
 package molecule.sql.mysql.compliance.transaction.insert
 
-import molecule.coreTests.spi.transaction.insert._
-import molecule.sql.mysql.setup.{Test_mysql_async, TestSuite_mysql_array}
-import molecule.sql.mysql.spi.Spi_mysql_async
+import molecule.coreTests.setup.{MUnitSuite, MUnitSuiteWithArrays}
+import molecule.coreTests.spi.action.insert._
+import molecule.sql.mysql.setup.Api_mysql_async
 
-object Test_InsertCardOne extends InsertCardOne with Test_mysql_async
-object Test_InsertCardSeq extends InsertCardSeq with TestSuite_mysql_array with Spi_mysql_async
-object Test_InsertCardSet extends InsertCardSet with Test_mysql_async
-object Test_InsertCardMap extends InsertCardMap with Test_mysql_async
-object Test_InsertRefs extends InsertRefs with Test_mysql_async
-object Test_InsertSemantics extends InsertSemantics with Test_mysql_async
+class InsertCardOne extends MUnitSuite {
+  InsertCardOne(this, Api_mysql_async)
+}
+class InsertCardSeq extends MUnitSuiteWithArrays {
+  InsertCardSeq(this, Api_mysql_async)
+}
+class InsertCardSet extends MUnitSuite {
+  InsertCardSet(this, Api_mysql_async)
+}
+class InsertCardMap extends MUnitSuite {
+  InsertCardMap(this, Api_mysql_async)
+}
+class InsertRefs extends MUnitSuite {
+  InsertRefs(this, Api_mysql_async)
+}
+class InsertSemantics extends MUnitSuite {
+  InsertSemantics(this, Api_mysql_async)
+}

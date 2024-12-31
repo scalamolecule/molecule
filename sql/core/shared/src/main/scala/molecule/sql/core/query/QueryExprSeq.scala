@@ -121,7 +121,7 @@ trait QueryExprSeq extends QueryExpr { self: Model2Query with SqlQueryBase with 
     attr: Attr, args: Seq[T], res: ResSeq[T]
   ): Unit = {
     val col = getCol(attr: Attr)
-      setNotNull(col)
+    setNotNull(col)
     attr.filterAttr.fold {
       seqExpr(attr, col, args, res, false)
     } { case (dir, filterPath, filterAttr) =>

@@ -1,6 +1,9 @@
 package molecule.sql.postgres.compliance.api
 
+import molecule.coreTests.setup.MUnitSuite
 import molecule.coreTests.spi.api.SyncApi
-import molecule.sql.postgres.setup.Test_postgres_sync
+import molecule.sql.postgres.setup.Api_postgres_sync
 
-object Test_SyncApi extends SyncApi with Test_postgres_sync
+class SyncApi extends MUnitSuite {
+  SyncApi(this, Api_postgres_sync)
+}

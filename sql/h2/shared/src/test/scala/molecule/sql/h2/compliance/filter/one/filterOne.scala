@@ -1,35 +1,88 @@
 package molecule.sql.h2.compliance.filter.one
 
+import molecule.coreTests.setup.MUnitSuite
 import molecule.coreTests.spi.filter.one._
 import molecule.coreTests.spi.filter.one.types._
-import molecule.sql.h2.setup.Test_h2_async
+import molecule.sql.h2.setup.Api_h2_async
 
-object Test_FilterOne_String_ extends FilterOne_String_ with Test_h2_async
-object Test_FilterOne_Int extends FilterOne_Int with Test_h2_async
-object Test_FilterOne_Long_ extends FilterOne_Long_ with Test_h2_async
-object Test_FilterOne_Float_ extends FilterOne_Float_ with Test_h2_async
-object Test_FilterOne_Double_ extends FilterOne_Double_ with Test_h2_async
-object Test_FilterOne_Boolean extends FilterOne_Boolean with Test_h2_async
-object Test_FilterOne_BigInt_ extends FilterOne_BigInt_ with Test_h2_async
-object Test_FilterOne_BigDecimal_ extends FilterOne_BigDecimal_ with Test_h2_async
-object Test_FilterOne_Date_ extends FilterOne_Date_ with Test_h2_async
-object Test_FilterOne_Duration_ extends FilterOne_Duration_ with Test_h2_async
-object Test_FilterOne_Instant_ extends FilterOne_Instant_ with Test_h2_async
-object Test_FilterOne_LocalDate_ extends FilterOne_LocalDate_ with Test_h2_async
-object Test_FilterOne_LocalTime_ extends FilterOne_LocalTime_ with Test_h2_async
-object Test_FilterOne_LocalDateTime_ extends FilterOne_LocalDateTime_ with Test_h2_async
-object Test_FilterOne_OffsetTime_ extends FilterOne_OffsetTime_ with Test_h2_async
-object Test_FilterOne_OffsetDateTime_ extends FilterOne_OffsetDateTime_ with Test_h2_async
-object Test_FilterOne_ZonedDateTime_ extends FilterOne_ZonedDateTime_ with Test_h2_async
-object Test_FilterOne_UUID_ extends FilterOne_UUID_ with Test_h2_async
-object Test_FilterOne_URI_ extends FilterOne_URI_ with Test_h2_async
-object Test_FilterOne_Byte_ extends FilterOne_Byte_ with Test_h2_async
-object Test_FilterOne_Short_ extends FilterOne_Short_ with Test_h2_async
-object Test_FilterOne_Char_ extends FilterOne_Char_ with Test_h2_async
+class FilterOne_String_ extends MUnitSuite {
+  FilterOne_String_(this, Api_h2_async)
+}
+class FilterOne_Int extends MUnitSuite {
+  FilterOne_Int(this, Api_h2_async)
+}
+class FilterOne_Long_ extends MUnitSuite {
+  FilterOne_Long_(this, Api_h2_async)
+}
+class FilterOne_Float_ extends MUnitSuite {
+  FilterOne_Float_(this, Api_h2_async)
+}
+class FilterOne_Double_ extends MUnitSuite {
+  FilterOne_Double_(this, Api_h2_async)
+}
+class FilterOne_Boolean extends MUnitSuite {
+  FilterOne_Boolean(this, Api_h2_async)
+}
+class FilterOne_BigInt_ extends MUnitSuite {
+  FilterOne_BigInt_(this, Api_h2_async)
+}
+class FilterOne_BigDecimal_ extends MUnitSuite {
+  FilterOne_BigDecimal_(this, Api_h2_async)
+}
+class FilterOne_Date_ extends MUnitSuite {
+  FilterOne_Date_(this, Api_h2_async)
+}
+class FilterOne_Duration_ extends MUnitSuite {
+  FilterOne_Duration_(this, Api_h2_async)
+}
+class FilterOne_Instant_ extends MUnitSuite {
+  FilterOne_Instant_(this, Api_h2_async)
+}
+class FilterOne_LocalDate_ extends MUnitSuite {
+  FilterOne_LocalDate_(this, Api_h2_async)
+}
+class FilterOne_LocalTime_ extends MUnitSuite {
+  FilterOne_LocalTime_(this, Api_h2_async)
+}
+class FilterOne_LocalDateTime_ extends MUnitSuite {
+  FilterOne_LocalDateTime_(this, Api_h2_async)
+}
+class FilterOne_OffsetTime_ extends MUnitSuite {
+  FilterOne_OffsetTime_(this, Api_h2_async)
+}
+class FilterOne_OffsetDateTime_ extends MUnitSuite {
+  FilterOne_OffsetDateTime_(this, Api_h2_async)
+}
+class FilterOne_ZonedDateTime_ extends MUnitSuite {
+  FilterOne_ZonedDateTime_(this, Api_h2_async)
+}
+class FilterOne_UUID_ extends MUnitSuite {
+  FilterOne_UUID_(this, Api_h2_async)
+}
+class FilterOne_URI_ extends MUnitSuite {
+  FilterOne_URI_(this, Api_h2_async)
+}
+class FilterOne_Byte_ extends MUnitSuite {
+  FilterOne_Byte_(this, Api_h2_async)
+}
+class FilterOne_Short_ extends MUnitSuite {
+  FilterOne_Short_(this, Api_h2_async)
+}
+class FilterOne_Char_ extends MUnitSuite {
+  FilterOne_Char_(this, Api_h2_async)
+}
 
-object Test_FilterOne_ref_ extends FilterOne_ref with Test_h2_async
-object Test_FilterOne_id extends FilterOne_id with Test_h2_async
+class FilterOne_ref extends MUnitSuite {
+  FilterOne_ref(this, Api_h2_async)
+}
+class FilterOne_id extends MUnitSuite {
+  FilterOne_id(this, Api_h2_async)
+}
 
-object Test_FilterOneSpecial_String extends FilterOneSpecial_String with Test_h2_async
+class FilterOneSpecial_String extends MUnitSuite {
+  FilterOneSpecial_String(this, Api_h2_async)
+}
 
-object Test_FilterRefOne extends FilterRefOne with Test_h2_async
+class FilterRefOne extends MUnitSuite {
+  FilterRefOne(this, Api_h2_async)
+}

@@ -1,14 +1,33 @@
 package molecule.sql.mysql.compliance.pagination.cursor.noUnique
 
+import molecule.coreTests.setup.MUnitSuite
 import molecule.coreTests.spi.pagination.cursor.noUnique._
-import molecule.sql.mysql.setup.Test_mysql_async
+import molecule.sql.mysql.setup.Api_mysql_async
 
-object Test_AttrOrderMandatory extends AttrOrderMandatory with Test_mysql_async
-object Test_AttrOrderOptional extends AttrOrderOptional with Test_mysql_async
-object Test_DirectionsMandatory extends DirectionsMandatory with Test_mysql_async
-object Test_DirectionsOptional extends DirectionsOptional with Test_mysql_async
-object Test_MutationAdd extends MutationAdd with Test_mysql_async
-object Test_MutationDelete extends MutationDelete with Test_mysql_async
-object Test_Nested extends Nested with Test_mysql_async
-object Test_OptNested extends OptNested with Test_mysql_async
-object Test_TypesOptional extends TypesOptional with Test_mysql_async
+class AttrOrderMandatory extends MUnitSuite {
+  AttrOrderMandatory(this, Api_mysql_async)
+}
+class AttrOrderOptional extends MUnitSuite {
+  AttrOrderOptional(this, Api_mysql_async)
+}
+class DirectionsMandatory extends MUnitSuite {
+  DirectionsMandatory(this, Api_mysql_async)
+}
+class DirectionsOptional extends MUnitSuite {
+  DirectionsOptional(this, Api_mysql_async)
+}
+class MutationAdd extends MUnitSuite {
+  MutationAdd(this, Api_mysql_async)
+}
+class MutationDelete extends MUnitSuite {
+  MutationDelete(this, Api_mysql_async)
+}
+class Nested extends MUnitSuite {
+  Nested(this, Api_mysql_async)
+}
+class OptNested extends MUnitSuite {
+  OptNested(this, Api_mysql_async)
+}
+class TypesOptional extends MUnitSuite {
+  TypesOptional(this, Api_mysql_async)
+}

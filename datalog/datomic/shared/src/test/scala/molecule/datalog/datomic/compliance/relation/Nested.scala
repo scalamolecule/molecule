@@ -1,13 +1,27 @@
 package molecule.datalog.datomic.compliance.relation
 
+import molecule.coreTests.setup.{MUnitSuite, MUnitSuiteWithArrays}
 import molecule.coreTests.spi.relation.nested._
-import molecule.datalog.datomic.setup.{Test_datomic_async, TestSuite_datomic_array}
-import molecule.datalog.datomic.spi.Spi_datomic_async
+import molecule.datalog.datomic.setup.Api_datomic_async
 
-object Test_NestedBasic extends NestedBasic with Test_datomic_async
-object Test_NestedExpr extends NestedExpr with Test_datomic_async
-object Test_NestedLevels extends NestedLevels with Test_datomic_async
-object Test_NestedOptional extends NestedOptional with Test_datomic_async
-object Test_NestedRef extends NestedRef with Test_datomic_async
-object Test_NestedSemantics extends NestedSemantics with Test_datomic_async
-object Test_NestedTypes extends NestedTypes with TestSuite_datomic_array with Spi_datomic_async
+class NestedBasic extends MUnitSuite {
+  NestedBasic(this, Api_datomic_async)
+}
+class NestedExpr extends MUnitSuite {
+  NestedExpr(this, Api_datomic_async)
+}
+class NestedLevels extends MUnitSuite {
+  NestedLevels(this, Api_datomic_async)
+}
+class NestedOptional extends MUnitSuite {
+  NestedOptional(this, Api_datomic_async)
+}
+class NestedRef extends MUnitSuite {
+  NestedRef(this, Api_datomic_async)
+}
+class NestedSemantics extends MUnitSuite {
+  NestedSemantics(this, Api_datomic_async)
+}
+class NestedTypes extends MUnitSuiteWithArrays {
+  NestedTypes(this, Api_datomic_async)
+}

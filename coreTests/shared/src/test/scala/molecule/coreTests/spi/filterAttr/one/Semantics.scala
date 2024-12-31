@@ -4,41 +4,43 @@ import molecule.base.error.ModelError
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.dsl.Types._
-import molecule.coreTests.setup.CoreTestSuite
-import utest._
+import molecule.coreTests.domains.dsl.Types._
+import molecule.coreTests.setup._
 
-trait Semantics extends CoreTestSuite with Api_async { spi: Spi_async =>
+case class Semantics(
+  suite: MUnitSuite,
+  api: Api_async with Spi_async with DbProviders
+) extends TestUtils {
 
-  override lazy val tests = Tests {
+  import api._
+  import suite._
 
-    "Missing filter attributes" - types { implicit conn =>
-      for {
-        _ <- Ns.int(Ref.int_).query.get
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Please add missing filter attribute Ref.int"
-          }
-      } yield ()
-    }
-
-
-    "No expression in cross-ns definition" - types { implicit conn =>
-      for {
-        _ <- Ns.s.i(Ref.int_.not(3)).Ref.int.query.get
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Filtering inside cross-namespace attribute filter not allowed."
-          }
-      } yield ()
-    }
+  "Missing filter attributes" - types { implicit conn =>
+    for {
+      _ <- Entity.int(Ref.int_).query.get
+        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+          err ==> "Please add missing filter attribute Ref.int"
+        }
+    } yield ()
+  }
 
 
-    "Can't filter by same attribute" - types { implicit conn =>
-      for {
-        _ <- Ns.s.i(Ns.i).query.get
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't filter by the same attribute `Ns.i`"
-          }
-      } yield ()
-    }
+  "No expression in cross-ns definition" - types { implicit conn =>
+    for {
+      _ <- Entity.s.i(Ref.int_.not(3)).Ref.int.query.get
+        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+          err ==> "Filtering inside cross-entity attribute filter not allowed."
+        }
+    } yield ()
+  }
+
+
+  "Can't filter by same attribute" - types { implicit conn =>
+    for {
+      _ <- Entity.s.i(Entity.i).query.get
+        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+          err ==> "Can't filter by the same attribute `Entity.i`"
+        }
+    } yield ()
   }
 }

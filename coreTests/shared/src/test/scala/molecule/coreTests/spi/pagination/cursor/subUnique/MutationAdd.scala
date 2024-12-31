@@ -3,84 +3,78 @@ package molecule.coreTests.spi.pagination.cursor.subUnique
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.dsl.Uniques._
-import molecule.coreTests.setup.CoreTestSuite
-import utest._
-import scala.annotation.nowarn
+import molecule.coreTests.domains.dsl.Uniques._
+import molecule.coreTests.setup._
 import scala.util.Random
 
-trait MutationAdd extends CoreTestSuite with Api_async { spi: Spi_async =>
+case class MutationAdd(
+  suite: MUnitSuite,
+  api: Api_async with Spi_async with DbProviders
+) extends TestUtils {
 
   val query = Uniques.i.a1.int.a2.query
 
-  @nowarn lazy val tests = Tests {
+  import api._
+  import suite._
 
-    "Forward" - {
+  "Forward: Add row before" - unique { implicit conn =>
+    val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _))
+    val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
+    for {
+      _ <- Uniques.i.int.insert(a, c, e).transact
+      cur <- query.from("").limit(2).get.map { case (List(`a`, `c`), cur, true) => cur }
 
-      "Add row before" - unique { implicit conn =>
-        val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _))
-        val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
-        for {
-          _ <- Uniques.i.int.insert(a, c, e).transact
-          cur <- query.from("").limit(2).get.map { case (List(`a`, `c`), cur, true) => cur }
+      // Add row before next page
+      _ <- Uniques.i.int.insert(b).transact
 
-          // Add row before next page
-          _ <- Uniques.i.int.insert(b).transact
+      // Next page unaffected
+      _ <- query.from(cur).limit(2).get.map { case (List(`e`), _, false) => () }
+    } yield ()
+  }
 
-          // Next page unaffected
-          _ <- query.from(cur).limit(2).get.map { case (List(`e`), _, false) => () }
-        } yield ()
-      }
+  "Forward: Add row after" - unique { implicit conn =>
+    val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _))
+    val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
+    for {
+      _ <- Uniques.i.int.insert(a, c, e).transact
+      cur <- query.from("").limit(2).get.map { case (List(`a`, `c`), cur, true) => cur }
 
-      "Add row after" - unique { implicit conn =>
-        val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _))
-        val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
-        for {
-          _ <- Uniques.i.int.insert(a, c, e).transact
-          cur <- query.from("").limit(2).get.map { case (List(`a`, `c`), cur, true) => cur }
+      // Add row after this page
+      _ <- Uniques.i.int.insert(d).transact
 
-          // Add row after this page
-          _ <- Uniques.i.int.insert(d).transact
-
-          // Next page includes new row
-          _ <- query.from(cur).limit(2).get.map { case (List(`d`, `e`), _, false) => () }
-        } yield ()
-      }
-    }
+      // Next page includes new row
+      _ <- query.from(cur).limit(2).get.map { case (List(`d`, `e`), _, false) => () }
+    } yield ()
+  }
 
 
-    "Backwards" - {
+  "Backwards: Add row before" - unique { implicit conn =>
+    val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _))
+    val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
+    for {
+      _ <- Uniques.i.int.insert(a, c, e).transact
+      cur <- query.from("").limit(-2).get.map { case (List(`c`, `e`), cur, true) => cur }
 
-      "Add row before" - unique { implicit conn =>
-        val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _))
-        val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
-        for {
-          _ <- Uniques.i.int.insert(a, c, e).transact
-          cur <- query.from("").limit(-2).get.map { case (List(`c`, `e`), cur, true) => cur }
+      // Add row before next page
+      _ <- Uniques.i.int.insert(d).transact
 
-          // Add row before next page
-          _ <- Uniques.i.int.insert(d).transact
+      // Next page unaffected
+      _ <- query.from(cur).limit(-2).get.map { case (List(`a`), _, false) => () }
+    } yield ()
+  }
 
-          // Next page unaffected
-          _ <- query.from(cur).limit(-2).get.map { case (List(`a`), _, false) => () }
-        } yield ()
-      }
+  "Backwards: Add row after" - unique { implicit conn =>
+    val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _))
+    val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
+    for {
+      _ <- Uniques.i.int.insert(a, c, e).transact
+      cur <- query.from("").limit(-2).get.map { case (List(`c`, `e`), cur, true) => cur }
 
-      "Add row after" - unique { implicit conn =>
-        val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _))
-        val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
-        for {
-          _ <- Uniques.i.int.insert(a, c, e).transact
-          cur <- query.from("").limit(-2).get.map { case (List(`c`, `e`), cur, true) => cur }
+      // Add row after this page
+      _ <- Uniques.i.int.insert(b).transact
 
-          // Add row after this page
-          _ <- Uniques.i.int.insert(b).transact
-
-          // Next page includes new row
-          _ <- query.from(cur).limit(-2).get.map { case (List(`a`, `b`), _, false) => () }
-        } yield ()
-      }
-    }
-
+      // Next page includes new row
+      _ <- query.from(cur).limit(-2).get.map { case (List(`a`, `b`), _, false) => () }
+    } yield ()
   }
 }

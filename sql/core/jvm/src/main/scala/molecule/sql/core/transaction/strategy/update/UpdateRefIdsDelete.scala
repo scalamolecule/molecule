@@ -6,12 +6,12 @@ import molecule.sql.core.transaction.strategy.SqlOps
 case class UpdateRefIdsDelete(
   parent: UpdateAction,
   sqlOps: SqlOps,
-  ns: String,
+  ent: String,
   refAttr: String,
-  refNs: String,
+  refEnt: String,
   nsId: Long,
   refIds: Set[Long]
-) extends UpdateAction(parent, sqlOps, ns) with BaseHelpers {
+) extends UpdateAction(parent, sqlOps, ent) with BaseHelpers {
 
   override def process(): Unit = {
     val ps = prepare(curStmt)
@@ -21,14 +21,14 @@ case class UpdateRefIdsDelete(
   }
 
   override def curStmt: String = {
-    val joinTable    = ss(ns, refAttr, refNs)
-    val ns_id        = ss(ns, "id")
-    val refNs_id     = ss(refNs, "id")
-    val nsIdClause   = s"$ns_id = $nsId"
+    val joinTable    = ss(ent, refAttr, refEnt)
+    val eid          = ss(ent, "id")
+    val refEnt_id    = ss(refEnt, "id")
+    val nsIdClause   = s"$eid = $nsId"
     val refIdsClause = refIds.size match {
       case 0 => Nil
-      case 1 => List(s"$refNs_id = " + refIds.head)
-      case _ => List(s"$refNs_id IN (${refIds.mkString(", ")})")
+      case 1 => List(s"$refEnt_id = " + refIds.head)
+      case _ => List(s"$refEnt_id IN (${refIds.mkString(", ")})")
     }
     sqlOps.deleteStmt(joinTable, nsIdClause +: refIdsClause)
   }

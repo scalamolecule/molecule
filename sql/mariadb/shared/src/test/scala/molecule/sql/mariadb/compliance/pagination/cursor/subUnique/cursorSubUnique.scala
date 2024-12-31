@@ -1,13 +1,30 @@
 package molecule.sql.mariadb.compliance.pagination.cursor.subUnique
 
+import molecule.coreTests.setup.MUnitSuite
 import molecule.coreTests.spi.pagination.cursor.subUnique._
-import molecule.sql.mariadb.setup.Test_mariadb_async
+import molecule.sql.mariadb.setup.Api_mariadb_async
 
-object Test_AttrOrder extends AttrOrder with Test_mariadb_async
-object Test_DirectionsStandardUnique extends DirectionsStandardUnique with Test_mariadb_async
-object Test_DirectionsUniqueStandard extends DirectionsUniqueStandard with Test_mariadb_async
-object Test_MutationAdd extends MutationAdd with Test_mariadb_async
-object Test_MutationDelete extends MutationDelete with Test_mariadb_async
-object Test_Nested extends Nested with Test_mariadb_async
-object Test_OptNested extends OptNested with Test_mariadb_async
-object Test_TypesUniqueValue extends TypesUniqueValue with Test_mariadb_async
+class AttrOrder extends MUnitSuite {
+  AttrOrder(this, Api_mariadb_async)
+}
+class DirectionsStandardUnique extends MUnitSuite {
+  DirectionsStandardUnique(this, Api_mariadb_async)
+}
+class DirectionsUniqueStandard extends MUnitSuite {
+  DirectionsUniqueStandard(this, Api_mariadb_async)
+}
+class MutationAdd extends MUnitSuite {
+  MutationAdd(this, Api_mariadb_async)
+}
+class MutationDelete extends MUnitSuite {
+  MutationDelete(this, Api_mariadb_async)
+}
+class Nested extends MUnitSuite {
+  Nested(this, Api_mariadb_async)
+}
+class OptNested extends MUnitSuite {
+  OptNested(this, Api_mariadb_async)
+}
+class TypesUniqueValue extends MUnitSuite {
+  TypesUniqueValue(this, Api_mariadb_async)
+}

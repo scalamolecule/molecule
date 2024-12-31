@@ -1,13 +1,30 @@
 package molecule.sql.postgres.compliance.aggregation
 
+import molecule.coreTests.setup.MUnitSuite
 import molecule.coreTests.spi.aggregation.number._
-import molecule.sql.postgres.setup.Test_postgres_async
+import molecule.sql.postgres.setup.Api_postgres_async
 
-object Test_AggrOneNum_Int extends AggrNum_Int with Test_postgres_async
-object Test_AggrOneNum_Long extends AggrNum_Long_ with Test_postgres_async
-object Test_AggrOneNum_Float extends AggrNum_Float_ with Test_postgres_async
-object Test_AggrOneNum_Double extends AggrNum_Double_ with Test_postgres_async
-object Test_AggrOneNum_BigInt extends AggrNum_BigInt_ with Test_postgres_async
-object Test_AggrOneNum_BigDecimal extends AggrNum_BigDecimal_ with Test_postgres_async
-object Test_AggrOneNum_Byte extends AggrNum_Byte_ with Test_postgres_async
-object Test_AggrOneNum_Short extends AggrNum_Short_ with Test_postgres_async
+class AggrNum_Int extends MUnitSuite {
+  AggrNum_Int(this, Api_postgres_async)
+}
+class AggrNum_Long_ extends MUnitSuite {
+  AggrNum_Long_(this, Api_postgres_async)
+}
+class AggrNum_Float_ extends MUnitSuite {
+  AggrNum_Float_(this, Api_postgres_async)
+}
+class AggrNum_Double_ extends MUnitSuite {
+  AggrNum_Double_(this, Api_postgres_async)
+}
+class AggrNum_BigInt_ extends MUnitSuite {
+  AggrNum_BigInt_(this, Api_postgres_async)
+}
+class AggrNum_BigDecimal_ extends MUnitSuite {
+  AggrNum_BigDecimal_(this, Api_postgres_async)
+}
+class AggrNum_Byte_ extends MUnitSuite {
+  AggrNum_Byte_(this, Api_postgres_async)
+}
+class AggrNum_Short_ extends MUnitSuite {
+  AggrNum_Short_(this, Api_postgres_async)
+}

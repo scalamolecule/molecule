@@ -6,9 +6,9 @@ import datomic.Peer
 import molecule.base.api.Schema
 import molecule.base.util.BaseHelpers
 import molecule.core.marshalling.DatomicProxy
+import molecule.core.util.Executor._
 import zio.{ZIO, ZLayer}
 import scala.concurrent.{ExecutionContext, Future, blocking}
-import molecule.core.util.Executor._
 
 /** Facade to Datomic Peer with selected methods.
  *
@@ -50,13 +50,14 @@ trait DatomicPeer extends BaseHelpers {
       DatomicProxy(
         protocol,
         dbIdentifier,
-        schema.datomicPartitions,
-        schema.datomicSchema,
-        schema.datomicAliases,
-        schema.metaSchema,
-        schema.nsMap,
-        schema.attrMap,
-        schema.uniqueAttrs,
+        schema,
+        //        schema.datomicPartitions,
+        //        schema.datomicSchema,
+        //        schema.datomicAliases,
+        //        schema.metaDomain,
+        //        schema.entityMap,
+        //        schema.attrMap,
+        //        schema.uniqueAttrs,
       ),
       protocol,
       dbIdentifier
@@ -66,27 +67,33 @@ trait DatomicPeer extends BaseHelpers {
   // OBS: if dbIdentifier is supplied, this database will be deleted entirely! Take care
   def recreateDb(
     proxy: DatomicProxy,
-    protocol: String,
-    dbIdentifier: String
+    //    protocol: String,
+    //    dbIdentifier: String
   )(implicit ec: ExecutionContext): Future[DatomicConn_JVM] = blocking {
+    val protocol     = proxy.protocol
+    val dbIdentifier = proxy.dbIdentifier
+
     val id = if (dbIdentifier == "")
       randomUUID().toString
     else
       dbIdentifier
     deleteDatabase(protocol, id)
     createDatabase(protocol, id)
-    val conn = connect(proxy, protocol, id)
+    val conn                                                   = connect(proxy, protocol, id)
+    val List(datomicPartitions, datomicSchema, datomicAliases) =
+      conn.proxy.schema.schemaData
+
     // Ensure each transaction finishes before the next
     for {
       // partitions
-      _ <- if (proxy.datomicPartitions.nonEmpty)
-        conn.transactEdn(proxy.datomicPartitions) else Future.unit
+      _ <- if (datomicPartitions.nonEmpty)
+        conn.transactEdn(datomicPartitions) else Future.unit
       // attributes
-      _ <- if (proxy.datomicSchema.nonEmpty)
-        conn.transactEdn(proxy.datomicSchema) else Future.unit
+      _ <- if (datomicSchema.nonEmpty)
+        conn.transactEdn(datomicSchema) else Future.unit
       // aliases
-      _ <- if (proxy.datomicAliases.nonEmpty)
-        conn.transactEdn(proxy.datomicAliases) else Future.unit
+      _ <- if (datomicAliases.nonEmpty)
+        conn.transactEdn(datomicAliases) else Future.unit
     } yield conn
   }
 
@@ -99,16 +106,17 @@ trait DatomicPeer extends BaseHelpers {
       DatomicProxy(
         protocol,
         dbIdentifier,
-        schema.datomicPartitions,
-        schema.datomicSchema,
-        schema.datomicAliases,
-        schema.metaSchema,
-        schema.nsMap,
-        schema.attrMap,
-        schema.uniqueAttrs,
+        schema,
+        //        schema.datomicPartitions,
+        //        schema.datomicSchema,
+        //        schema.datomicAliases,
+        //        schema.metaDomain,
+        //        schema.entityMap,
+        //        schema.attrMap,
+        //        schema.uniqueAttrs,
       ),
-      protocol,
-      dbIdentifier
+      //      protocol,
+      //      dbIdentifier
     )
   }
 
@@ -123,18 +131,21 @@ trait DatomicPeer extends BaseHelpers {
       dbIdentifier
     deleteDatabase(protocol, id)
     createDatabase(protocol, id)
-    val conn = connect(proxy, protocol, id)
+    val conn                                                   = connect(proxy, protocol, id)
+    val List(datomicPartitions, datomicSchema, datomicAliases) =
+      conn.proxy.schema.schemaData
+
     // Ensure each transaction finishes before the next
     for {
       // partitions
-      _ <- if (proxy.datomicPartitions.nonEmpty)
-        conn.transactEdnIO(proxy.datomicPartitions) else IO.unit
+      _ <- if (datomicPartitions.nonEmpty)
+        conn.transactEdnIO(datomicPartitions) else IO.unit
       // attributes
-      _ <- if (proxy.datomicSchema.nonEmpty)
-        conn.transactEdnIO(proxy.datomicSchema) else IO.unit
+      _ <- if (datomicSchema.nonEmpty)
+        conn.transactEdnIO(datomicSchema) else IO.unit
       // aliases
-      _ <- if (proxy.datomicAliases.nonEmpty)
-        conn.transactEdnIO(proxy.datomicAliases) else IO.unit
+      _ <- if (datomicAliases.nonEmpty)
+        conn.transactEdnIO(datomicAliases) else IO.unit
     } yield conn
   }
 
@@ -147,13 +158,14 @@ trait DatomicPeer extends BaseHelpers {
       DatomicProxy(
         protocol,
         dbIdentifier,
-        schema.datomicPartitions,
-        schema.datomicSchema,
-        schema.datomicAliases,
-        schema.metaSchema,
-        schema.nsMap,
-        schema.attrMap,
-        schema.uniqueAttrs,
+        schema,
+        //        schema.datomicPartitions,
+        //        schema.datomicSchema,
+        //        schema.datomicAliases,
+        //        schema.metaDomain,
+        //        schema.entityMap,
+        //        schema.attrMap,
+        //        schema.uniqueAttrs,
       ),
       protocol,
       dbIdentifier
@@ -167,7 +179,8 @@ trait DatomicPeer extends BaseHelpers {
   ): ZLayer[T, Throwable, DatomicConn_JVM] = {
     ZLayer.scoped(
       ZIO.fromFuture(
-        _ => recreateDb(proxy, protocol, dbIdentifier)
+        //        _ => recreateDb(proxy, protocol, dbIdentifier)
+        _ => recreateDb(proxy)
       )
     )
   }
@@ -181,13 +194,14 @@ trait DatomicPeer extends BaseHelpers {
       DatomicProxy(
         protocol,
         dbIdentifier,
-        schema.datomicPartitions,
-        schema.datomicSchema,
-        schema.datomicAliases,
-        schema.metaSchema,
-        schema.nsMap,
-        schema.attrMap,
-        schema.uniqueAttrs,
+        schema,
+        //        schema.datomicPartitions,
+        //        schema.datomicSchema,
+        //        schema.datomicAliases,
+        //        schema.metaDomain,
+        //        schema.entityMap,
+        //        schema.attrMap,
+        //        schema.uniqueAttrs,
       ),
       protocol,
       dbIdentifier

@@ -1,7 +1,7 @@
 package molecule.sql.core.spi
 
 import boopickle.Default._
-import molecule.base.error.{InsertError, InsertErrors, ModelError, ValidationErrors}
+import molecule.base.error.{InsertError, InsertErrors, ValidationErrors}
 import molecule.boilerplate.ast.Model._
 import molecule.core.action._
 import molecule.core.marshalling.serialize.PickleTpls
@@ -18,9 +18,8 @@ trait SpiBase_async extends Spi_async with Renderer with FutureUtils {
   // Query --------------------------------------------------------
 
   override def query_get[Tpl](q: Query[Tpl])(implicit conn0: Conn, ec: EC): Future[List[Tpl]] = {
-    val conn  = conn0.asInstanceOf[JdbcConn_JS]
-    val proxy = conn.proxy.copy(dbView = q.dbView)
-    conn.rpc.query[Tpl](proxy, q.elements, q.optLimit).future
+    val conn = conn0.asInstanceOf[JdbcConn_JS]
+    conn.rpc.query[Tpl](conn.proxy, q.elements, q.optLimit).future
   }
 
   override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)
@@ -53,9 +52,8 @@ trait SpiBase_async extends Spi_async with Renderer with FutureUtils {
 
   override def queryOffset_get[Tpl](q: QueryOffset[Tpl])
                                    (implicit conn0: Conn, ec: EC): Future[(List[Tpl], Int, Boolean)] = {
-    val conn  = conn0.asInstanceOf[JdbcConn_JS]
-    val proxy = conn.proxy.copy(dbView = q.dbView)
-    conn.rpc.queryOffset[Tpl](proxy, q.elements, q.optLimit, q.offset).future
+    val conn = conn0.asInstanceOf[JdbcConn_JS]
+    conn.rpc.queryOffset[Tpl](conn.proxy, q.elements, q.optLimit, q.offset).future
   }
 
   override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])
@@ -66,9 +64,8 @@ trait SpiBase_async extends Spi_async with Renderer with FutureUtils {
 
   override def queryCursor_get[Tpl](q: QueryCursor[Tpl])
                                    (implicit conn0: Conn, ec: EC): Future[(List[Tpl], String, Boolean)] = {
-    val conn  = conn0.asInstanceOf[JdbcConn_JS]
-    val proxy = conn.proxy.copy(dbView = q.dbView)
-    conn.rpc.queryCursor[Tpl](proxy, q.elements, q.optLimit, q.cursor).future
+    val conn = conn0.asInstanceOf[JdbcConn_JS]
+    conn.rpc.queryCursor[Tpl](conn.proxy, q.elements, q.optLimit, q.cursor).future
   }
 
   override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])
@@ -83,7 +80,6 @@ trait SpiBase_async extends Spi_async with Renderer with FutureUtils {
     val conn = conn0.asInstanceOf[JdbcConn_JS]
     for {
       _ <- if (save.doInspect) save_inspect(save) else Future.unit
-      // Validating on JS side since it doesn't require db lookups
       errors <- save_validate(save) // validate original elements against meta model
       txReport <- if (errors.isEmpty) {
         conn.rpc.save(conn.proxy, save.elements).future
@@ -103,7 +99,7 @@ trait SpiBase_async extends Spi_async with Renderer with FutureUtils {
   override def save_validate(save: Save)(implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = future {
     if (save.doValidate) {
       val proxy = conn.proxy
-      TxModelValidation(proxy.nsMap, proxy.attrMap, "save").validate(save.elements)
+      TxModelValidation(proxy.schema.entityMap, proxy.schema.attrMap, "save").validate(save.elements)
     } else {
       Map.empty[String, Seq[String]]
     }
@@ -169,7 +165,7 @@ trait SpiBase_async extends Spi_async with Renderer with FutureUtils {
   override def update_validate(update: Update)
                               (implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = future {
     val proxy = conn.proxy
-    TxModelValidation(proxy.nsMap, proxy.attrMap, "update").validate(update.elements)
+    TxModelValidation(proxy.schema.entityMap, proxy.schema.attrMap, "update").validate(update.elements)
   }
 
 
@@ -177,7 +173,7 @@ trait SpiBase_async extends Spi_async with Renderer with FutureUtils {
 
   override def delete_transact(delete: Delete)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
     val conn = conn0.asInstanceOf[JdbcConn_JS]
-    for{
+    for {
       txReport <- conn.rpc.delete(conn.proxy, delete.elements).future
       _ <- conn.callback(delete.elements, true)
     } yield txReport

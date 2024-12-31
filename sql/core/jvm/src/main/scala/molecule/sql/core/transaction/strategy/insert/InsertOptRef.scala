@@ -38,7 +38,7 @@ case class InsertOptRef(
     //    println("parent.rowSetters")
     //    println(parent.rowSetters.map(rs => rs.toList.mkString("\n   ")).mkString("   ", "\n   -----\n   ", ""))
 
-    // Add ref rows for this namespace/table (don't enforce empty row)
+    // Add ref rows for this entity/table (don't enforce empty row)
     insert(false)
 
     val refIds = ids.iterator

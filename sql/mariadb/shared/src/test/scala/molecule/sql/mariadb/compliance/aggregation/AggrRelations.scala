@@ -1,6 +1,9 @@
 package molecule.sql.mariadb.compliance.aggregation
 
+import molecule.coreTests.setup.MUnitSuite
 import molecule.coreTests.spi.aggregation.AggrRelations
-import molecule.sql.mariadb.setup.Test_mariadb_async
+import molecule.sql.mariadb.setup.Api_mariadb_async
 
-object Test_AggrRelations extends AggrRelations with Test_mariadb_async
+class AggrRelations extends MUnitSuite {
+  AggrRelations(this, Api_mariadb_async)
+}

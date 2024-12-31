@@ -1,22 +1,20 @@
 package molecule.datalog.datomic
 
-import molecule.coreTests.dataModels.dsl.Types._
-import molecule.datalog.datomic.setup.TestSuite_datomic
+import molecule.coreTests.domains.dsl.Types._
+import molecule.coreTests.setup.{MUnitSuite, TestUtils}
+import molecule.datalog.datomic.setup.DbProviders_datomic
 import molecule.datalog.datomic.sync._
-import utest._
 import scala.language.implicitConversions
 
 
-object AdhocJVM_datomic_sync extends TestSuite_datomic {
+class AdhocJVM_datomic_sync extends MUnitSuite with DbProviders_datomic with TestUtils {
 
-  override lazy val tests = Tests {
 
-    "commit" - types { implicit conn =>
-      Ns.int.insert(1 to 7).transact
-      Ns.int(count).query.get.head ==> 7
+  "commit" - types { implicit conn =>
+    Entity.int.insert(1 to 7).transact
+    Entity.int(count).query.get.head ==> 7
 
-      Ns.int_.delete.transact
-      Ns.int(count).query.i.get.head ==> 0
-    }
+    Entity.int_.delete.transact
+    Entity.int(count).query.i.get.head ==> 0
   }
 }

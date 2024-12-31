@@ -14,7 +14,7 @@ trait QueryExprMap_mariadb
     col: String, keys: Seq[String], resMap: ResMap[T]
   ): Unit = {
     if (keys.nonEmpty) {
-      val key = keys.head
+      val key   = keys.head
       val value = s"JSON_VALUE($col, '$$.$key')"
       select -= col
       select += value

@@ -1,11 +1,24 @@
 package molecule.sql.postgres.compliance.aggregation
 
+import molecule.coreTests.setup.MUnitSuite
 import molecule.coreTests.spi.aggregation.ref._
-import molecule.sql.postgres.setup.Test_postgres_async
+import molecule.sql.postgres.setup.Api_postgres_async
 
-object Test_AggrOneRef_count extends AggrRef_count with Test_postgres_async
-object Test_AggrOneRef_distinct extends AggrRef_distinct with Test_postgres_async
-object Test_AggrOneRef_min_max extends AggrRef_min_max with Test_postgres_async
-object Test_AggrOneRef_min_max_n extends AggrRef_min_max_n with Test_postgres_async
-object Test_AggrOneRef_sample extends AggrRef_sample with Test_postgres_async
-object Test_AggrOneRef_sample_n extends AggrRef_sample_n with Test_postgres_async
+class AggrRef_count extends MUnitSuite {
+  AggrRef_count(this, Api_postgres_async)
+}
+class AggrRef_distinct extends MUnitSuite {
+  AggrRef_distinct(this, Api_postgres_async)
+}
+class AggrRef_min_max extends MUnitSuite {
+  AggrRef_min_max(this, Api_postgres_async)
+}
+class AggrRef_min_max_n extends MUnitSuite {
+  AggrRef_min_max_n(this, Api_postgres_async)
+}
+class AggrRef_sample extends MUnitSuite {
+  AggrRef_sample(this, Api_postgres_async)
+}
+class AggrRef_sample_n extends MUnitSuite {
+  AggrRef_sample_n(this, Api_postgres_async)
+}

@@ -10,7 +10,7 @@ import molecule.graphql.client.schema.StarwarsSchema
 trait TestSuiteArray_graphql extends CoreTestSuiteBase with BaseHelpers {
 
   override val platform              = "jvm"
-  override val database              = "Postgres"
+  override val database              = "postgres"
   override val isJsPlatform: Boolean = false
 
   override def inMem[T](test: Conn => T, schema: Schema): T = {

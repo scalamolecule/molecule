@@ -1,10 +1,17 @@
 package molecule.sql.h2.compliance.filter.one
 
+import molecule.coreTests.setup.MUnitSuite
 import molecule.coreTests.spi.filter.one.decimal._
-import molecule.sql.h2.setup.Test_h2_async
+import molecule.sql.h2.setup.Api_h2_async
 
 
-object Test_FilterOneSpecial_Float_ extends FilterOneDecimal_Float_ with Test_h2_async
-object Test_FilterOneSpecial_Double_ extends FilterOneDecimal_Double with Test_h2_async
-object Test_FilterOneSpecial_BigDecimal_ extends FilterOneDecimal_BigDecimal_ with Test_h2_async
+class FilterOneDecimal_Float_ extends MUnitSuite {
+  FilterOneDecimal_Float_(this, Api_h2_async)
+}
+class FilterOneDecimal_Double extends MUnitSuite {
+  FilterOneDecimal_Double(this, Api_h2_async)
+}
+class FilterOneDecimal_BigDecimal_ extends MUnitSuite {
+  FilterOneDecimal_BigDecimal_(this, Api_h2_async)
+}
 

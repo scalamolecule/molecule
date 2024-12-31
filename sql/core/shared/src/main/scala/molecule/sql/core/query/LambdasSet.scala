@@ -1,12 +1,11 @@
 package molecule.sql.core.query
 
+import java.lang.{Short => jShort}
+import java.math.{BigDecimal => jBigDecimal}
 import java.net.URI
 import java.time._
 import java.util.{Date, UUID}
-import java.math.{BigDecimal => jBigDecimal}
-import java.lang.{Short => jShort}
 import molecule.core.util.JavaConversions
-import scala.collection.mutable.ListBuffer
 
 trait LambdasSet extends LambdasBase with JavaConversions { self: SqlQueryBase =>
 

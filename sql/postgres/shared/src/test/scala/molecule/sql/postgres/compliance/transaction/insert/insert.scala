@@ -1,12 +1,24 @@
 package molecule.sql.postgres.compliance.transaction.insert
 
-import molecule.coreTests.spi.transaction.insert._
-import molecule.sql.postgres.setup.{Test_postgres_async, TestSuite_postgres_array}
-import molecule.sql.postgres.spi.Spi_postgres_async
+import molecule.coreTests.setup.{MUnitSuite, MUnitSuiteWithArrays}
+import molecule.coreTests.spi.action.insert._
+import molecule.sql.postgres.setup.Api_postgres_async
 
-object Test_InsertCardOne extends InsertCardOne with Test_postgres_async
-object Test_InsertCardSeq extends InsertCardSeq with TestSuite_postgres_array with Spi_postgres_async
-object Test_InsertCardSet extends InsertCardSet with Test_postgres_async
-object Test_InsertCardMap extends InsertCardMap with Test_postgres_async
-object Test_InsertRefs extends InsertRefs with Test_postgres_async
-object Test_InsertSemantics extends InsertSemantics with Test_postgres_async
+class InsertCardOne extends MUnitSuite {
+  InsertCardOne(this, Api_postgres_async)
+}
+class InsertCardSeq extends MUnitSuiteWithArrays {
+  InsertCardSeq(this, Api_postgres_async)
+}
+class InsertCardSet extends MUnitSuite {
+  InsertCardSet(this, Api_postgres_async)
+}
+class InsertCardMap extends MUnitSuite {
+  InsertCardMap(this, Api_postgres_async)
+}
+class InsertRefs extends MUnitSuite {
+  InsertRefs(this, Api_postgres_async)
+}
+class InsertSemantics extends MUnitSuite {
+  InsertSemantics(this, Api_postgres_async)
+}

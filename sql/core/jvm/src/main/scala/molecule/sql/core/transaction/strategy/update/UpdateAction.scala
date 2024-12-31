@@ -17,7 +17,7 @@ abstract class UpdateAction(
       ()
 
     } else {
-      // Execute this namespace update
+      // Execute this entity update
       val ps = prepare(curStmt)
       rowSetters.head.foreach(_(ps)) // set values in prepared update stmt
       ps.addBatch()

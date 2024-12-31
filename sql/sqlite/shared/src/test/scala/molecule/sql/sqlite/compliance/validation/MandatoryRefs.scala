@@ -1,6 +1,9 @@
 package molecule.sql.sqlite.compliance.validation
 
+import molecule.coreTests.setup.MUnitSuiteWithArrays
 import molecule.coreTests.spi.validation.MandatoryRefs
-import molecule.sql.sqlite.setup.Test_sqlite_async
+import molecule.sql.sqlite.setup.Api_sqlite_async
 
-object Test_MandatoryRefs extends MandatoryRefs with Test_sqlite_async
+class MandatoryRefs extends MUnitSuiteWithArrays {
+  MandatoryRefs(this, Api_sqlite_async)
+}

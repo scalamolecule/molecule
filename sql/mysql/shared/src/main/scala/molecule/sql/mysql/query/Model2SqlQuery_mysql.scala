@@ -17,17 +17,20 @@ class Model2SqlQuery_mysql(elements0: List[Element])
 
   override def getWhereClauses: ListBuffer[String] = {
     resolveElements(elements0)
-    val clauses = where.map {
+    val clauses    = where.map {
       case (col, expr) => s"$col $expr"
     }
-    val joinsExist = if (joins.isEmpty) Nil else
-      List(
-        s"""Ns.id IN (
-           |  SELECT Ns.id FROM (
-           |    SELECT Ns.id FROM Ns
-           |      ${mkJoins(2).trim}
-           |  ) AS t
-           |)""".stripMargin)
+    val joinsExist = Nil
+
+    // This would be a false positive only working for `Entity`...
+    //    val joinsExist = if (joins.isEmpty) Nil else
+    //      List(
+    //        s"""Entity.id IN (
+    //           |  SELECT Entity.id FROM (
+    //           |    SELECT Entity.id FROM Ns
+    //           |      ${mkJoins(2).trim}
+    //           |  ) AS t
+    //           |)""".stripMargin)
 
     clauses ++ joinsExist
   }

@@ -283,7 +283,7 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |    val attrs       = es.last match {
        |      case a: Attr =>
        |        val (tacitFilterAttr, adjacent) = if (a.ns == filterAttr0.ns) {
-       |          // Rudimentary checked for same current namespace (it's the only information
+       |          // Rudimentary checked for same current entity (it's the only information
        |          // we have now during molecule buildup). At least we can rule out if the
        |          // filter attribute is not adjacent to the caller attribute.
        |          // Could point to other branch - have to be checked later.

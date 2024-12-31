@@ -28,7 +28,7 @@ object JdbcHandlerSQlite_JVM {
 
     val conn = new JdbcConnSQlite_JVM(proxy, sqlConn)
     val stmt = conn.sqlConn.createStatement
-    stmt.executeUpdate(proxy.createSchema)
+    stmt.executeUpdate(proxy.schema.schemaData.head)
     stmt.close()
     conn
   }

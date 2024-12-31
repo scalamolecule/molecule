@@ -1,6 +1,9 @@
 package molecule.sql.mariadb.compliance.transaction.update
 
-import molecule.coreTests.spi.transaction.update._
-import molecule.sql.mariadb.setup.Test_mariadb_async
+import molecule.coreTests.setup.MUnitSuite
+import molecule.coreTests.spi.action.update._
+import molecule.sql.mariadb.setup.Api_mariadb_async
 
-object Test_Basics extends Basics with Test_mariadb_async
+class Basics extends MUnitSuite {
+  Basics(this, Api_mariadb_async)
+}

@@ -1,12 +1,24 @@
 package molecule.sql.mariadb.compliance.transaction.save
 
-import molecule.coreTests.spi.transaction.save._
-import molecule.sql.mariadb.setup.{Test_mariadb_async, TestSuite_mariadb_array}
-import molecule.sql.mariadb.spi.Spi_mariadb_async
+import molecule.coreTests.setup.{MUnitSuite, MUnitSuiteWithArrays}
+import molecule.coreTests.spi.action.save._
+import molecule.sql.mariadb.setup.Api_mariadb_async
 
-object Test_SaveCardOne extends SaveCardOne with Test_mariadb_async
-object Test_SaveCardSeq extends SaveCardSeq with TestSuite_mariadb_array with Spi_mariadb_async
-object Test_SaveCardSet extends SaveCardSet with Test_mariadb_async
-object Test_SaveCardMap extends SaveCardMap with Test_mariadb_async
-object Test_SaveRefs extends SaveRefs with Test_mariadb_async
-object Test_SaveSemantics extends SaveSemantics with Test_mariadb_async
+class SaveCardOne extends MUnitSuite {
+  SaveCardOne(this, Api_mariadb_async)
+}
+class SaveCardSeq extends MUnitSuiteWithArrays {
+  SaveCardSeq(this, Api_mariadb_async)
+}
+class SaveCardSet extends MUnitSuite {
+  SaveCardSet(this, Api_mariadb_async)
+}
+class SaveCardMap extends MUnitSuite {
+  SaveCardMap(this, Api_mariadb_async)
+}
+class SaveRefs extends MUnitSuite {
+  SaveRefs(this, Api_mariadb_async)
+}
+class SaveSemantics extends MUnitSuite {
+  SaveSemantics(this, Api_mariadb_async)
+}

@@ -12,7 +12,7 @@ object JdbcHandler_JVM {
     val sqlConn = DriverManager.getConnection(proxy.url)
     val conn    = JdbcConn_JVM(proxy, sqlConn)
     val stmt    = conn.sqlConn.createStatement
-    stmt.executeUpdate(proxy.createSchema)
+    stmt.executeUpdate(proxy.schemaStr)
     stmt.close()
     conn
   }
@@ -20,7 +20,7 @@ object JdbcHandler_JVM {
   // For docker test containers
   def recreateDb(conn: JdbcConn_JVM): JdbcConn_JVM = blocking {
     val stmt = conn.sqlConn.createStatement
-    stmt.executeUpdate(conn.proxy.createSchema)
+    stmt.executeUpdate(conn.proxy.schemaStr)
     stmt.close()
     conn
   }

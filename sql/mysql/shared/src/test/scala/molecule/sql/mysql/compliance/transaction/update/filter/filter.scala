@@ -1,9 +1,18 @@
 package molecule.sql.mysql.compliance.transaction.update.filter
 
-import molecule.coreTests.spi.transaction.update.filter._
-import molecule.sql.mysql.setup.Test_mysql_async
+import molecule.coreTests.setup.MUnitSuite
+import molecule.coreTests.spi.action.update.filter._
+import molecule.sql.mysql.setup.Api_mysql_async
 
-object Test_FilterOne extends FilterOne with Test_mysql_async
-object Test_FilterSet extends FilterSet with Test_mysql_async
-object Test_FilterSeq extends FilterSeq with Test_mysql_async
-object Test_FilterMap extends FilterMap with Test_mysql_async
+class FilterOne extends MUnitSuite {
+  FilterOne(this, Api_mysql_async)
+}
+class FilterSet extends MUnitSuite {
+  FilterSet(this, Api_mysql_async)
+}
+class FilterSeq extends MUnitSuite {
+  FilterSeq(this, Api_mysql_async)
+}
+class FilterMap extends MUnitSuite {
+  FilterMap(this, Api_mysql_async)
+}

@@ -1,30 +1,77 @@
 package molecule.sql.mysql.compliance.filter.map
 
+import molecule.coreTests.setup.MUnitSuite
 import molecule.coreTests.spi.filter.map.MapSemantics
 import molecule.coreTests.spi.filter.map.types._
-import molecule.sql.mysql.setup.Test_mysql_async
+import molecule.sql.mysql.setup.Api_mysql_async
 
-object Test_MapSemantics extends MapSemantics with Test_mysql_async
+class MapSemantics extends MUnitSuite {
+  MapSemantics(this, Api_mysql_async)
+}
 
-object Test_FilterMap_String_ extends FilterMap_String_ with Test_mysql_async
-object Test_FilterMap_Int extends FilterMap_Int with Test_mysql_async
-object Test_FilterMap_Long_ extends FilterMap_Long_ with Test_mysql_async
-object Test_FilterMap_Float_ extends FilterMap_Float_ with Test_mysql_async
-object Test_FilterMap_Double_ extends FilterMap_Double_ with Test_mysql_async
-object Test_FilterMap_Boolean extends FilterMap_Boolean with Test_mysql_async
-object Test_FilterMap_BigInt_ extends FilterMap_BigInt_ with Test_mysql_async
-object Test_FilterMap_BigDecimal_ extends FilterMap_BigDecimal_ with Test_mysql_async
-object Test_FilterMap_Date_ extends FilterMap_Date_ with Test_mysql_async
-object Test_FilterMap_Duration_ extends FilterMap_Duration_ with Test_mysql_async
-object Test_FilterMap_Instant_ extends FilterMap_Instant_ with Test_mysql_async
-object Test_FilterMap_LocalDate_ extends FilterMap_LocalDate_ with Test_mysql_async
-object Test_FilterMap_LocalTime_ extends FilterMap_LocalTime_ with Test_mysql_async
-object Test_FilterMap_LocalDateTime_ extends FilterMap_LocalDateTime_ with Test_mysql_async
-object Test_FilterMap_OffsetTime_ extends FilterMap_OffsetTime_ with Test_mysql_async
-object Test_FilterMap_OffsetDateTime_ extends FilterMap_OffsetDateTime_ with Test_mysql_async
-object Test_FilterMap_ZonedDateTime_ extends FilterMap_ZonedDateTime_ with Test_mysql_async
-object Test_FilterMap_UUID_ extends FilterMap_UUID_ with Test_mysql_async
-object Test_FilterMap_URI_ extends FilterMap_URI_ with Test_mysql_async
-object Test_FilterMap_Byte_ extends FilterMap_Byte_ with Test_mysql_async
-object Test_FilterMap_Short_ extends FilterMap_Short_ with Test_mysql_async
-object Test_FilterMap_Char_ extends FilterMap_Char_ with Test_mysql_async
+class FilterMap_String_ extends MUnitSuite {
+  FilterMap_String_(this, Api_mysql_async)
+}
+class FilterMap_Int extends MUnitSuite {
+  FilterMap_Int(this, Api_mysql_async)
+}
+class FilterMap_Long_ extends MUnitSuite {
+  FilterMap_Long_(this, Api_mysql_async)
+}
+class FilterMap_Float_ extends MUnitSuite {
+  FilterMap_Float_(this, Api_mysql_async)
+}
+class FilterMap_Double_ extends MUnitSuite {
+  FilterMap_Double_(this, Api_mysql_async)
+}
+class FilterMap_Boolean extends MUnitSuite {
+  FilterMap_Boolean(this, Api_mysql_async)
+}
+class FilterMap_BigInt_ extends MUnitSuite {
+  FilterMap_BigInt_(this, Api_mysql_async)
+}
+class FilterMap_BigDecimal_ extends MUnitSuite {
+  FilterMap_BigDecimal_(this, Api_mysql_async)
+}
+class FilterMap_Date_ extends MUnitSuite {
+  FilterMap_Date_(this, Api_mysql_async)
+}
+class FilterMap_Duration_ extends MUnitSuite {
+  FilterMap_Duration_(this, Api_mysql_async)
+}
+class FilterMap_Instant_ extends MUnitSuite {
+  FilterMap_Instant_(this, Api_mysql_async)
+}
+class FilterMap_LocalDate_ extends MUnitSuite {
+  FilterMap_LocalDate_(this, Api_mysql_async)
+}
+class FilterMap_LocalTime_ extends MUnitSuite {
+  FilterMap_LocalTime_(this, Api_mysql_async)
+}
+class FilterMap_LocalDateTime_ extends MUnitSuite {
+  FilterMap_LocalDateTime_(this, Api_mysql_async)
+}
+class FilterMap_OffsetTime_ extends MUnitSuite {
+  FilterMap_OffsetTime_(this, Api_mysql_async)
+}
+class FilterMap_OffsetDateTime_ extends MUnitSuite {
+  FilterMap_OffsetDateTime_(this, Api_mysql_async)
+}
+class FilterMap_ZonedDateTime_ extends MUnitSuite {
+  FilterMap_ZonedDateTime_(this, Api_mysql_async)
+}
+class FilterMap_UUID_ extends MUnitSuite {
+  FilterMap_UUID_(this, Api_mysql_async)
+}
+class FilterMap_URI_ extends MUnitSuite {
+  FilterMap_URI_(this, Api_mysql_async)
+}
+class FilterMap_Byte_ extends MUnitSuite {
+  FilterMap_Byte_(this, Api_mysql_async)
+}
+class FilterMap_Short_ extends MUnitSuite {
+  FilterMap_Short_(this, Api_mysql_async)
+}
+class FilterMap_Char_ extends MUnitSuite {
+  FilterMap_Char_(this, Api_mysql_async)
+}

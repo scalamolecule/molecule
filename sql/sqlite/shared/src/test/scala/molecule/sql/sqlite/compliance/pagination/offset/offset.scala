@@ -1,8 +1,15 @@
 package molecule.sql.sqlite.compliance.pagination.offset
 
+import molecule.coreTests.setup.MUnitSuite
 import molecule.coreTests.spi.pagination.offset._
-import molecule.sql.sqlite.setup.Test_sqlite_async
+import molecule.sql.sqlite.setup.Api_sqlite_async
 
-object Test_OffsetBackwards extends OffsetBackwards with Test_sqlite_async
-object Test_OffsetForward extends OffsetForward with Test_sqlite_async
-object Test_OffsetSemantics extends OffsetSemantics with Test_sqlite_async
+class OffsetBackwards extends MUnitSuite {
+  OffsetBackwards(this, Api_sqlite_async)
+}
+class OffsetForward extends MUnitSuite {
+  OffsetForward(this, Api_sqlite_async)
+}
+class OffsetSemantics extends MUnitSuite {
+  OffsetSemantics(this, Api_sqlite_async)
+}

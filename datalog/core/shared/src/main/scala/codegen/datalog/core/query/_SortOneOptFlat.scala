@@ -1,7 +1,6 @@
 package codegen.datalog.core.query
 
 import codegen.DatomicGenBase
-import codegen.datalog.core.query._SortOneOpt.javaTypes
 
 object _SortOneOptFlat extends DatomicGenBase("SortOneOptFlat", "/query") {
 

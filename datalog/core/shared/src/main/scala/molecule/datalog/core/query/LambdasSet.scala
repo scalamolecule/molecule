@@ -1,7 +1,6 @@
 package molecule.datalog.core.query
 
-import java.lang.{Double => jDouble, Float => jFloat, Long => jLong}
-import java.math.{BigDecimal => jBigDecimal, BigInteger => jBigInt}
+import java.lang.{Long => jLong}
 import java.net.URI
 import java.time._
 import java.util.{Date, UUID, Iterator => jIterator, List => jList, Map => jMap, Set => jSet}

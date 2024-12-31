@@ -137,7 +137,7 @@ case class RestConn_JVM(
 //        ps.executeBatch()
 //    }
 //
-//    // Return ids of first namespace entities
+//    // Return ids of first entities
 //    idsMap.collectFirst {
 //      case (List(ns), ids)      => ids
 //      case (List("0", ns), ids) => ids // nested

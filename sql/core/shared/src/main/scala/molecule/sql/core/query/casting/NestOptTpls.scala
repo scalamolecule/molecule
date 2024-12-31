@@ -26,7 +26,7 @@ class NestOptTpls extends SqlQueryBase {
   protected var e5: jLong = 0L
   protected var e6: jLong = 0L
 
-  protected var nextRow  = false
+  protected var nextRow = false
 
   protected var acc0: List[Any] = List.empty[Any]
   protected var acc1: List[Any] = List.empty[Any]
@@ -36,8 +36,8 @@ class NestOptTpls extends SqlQueryBase {
   protected var acc5: List[Any] = List.empty[Any]
   protected var acc6: List[Any] = List.empty[Any]
   protected var acc7: List[Any] = List.empty[Any]
-  
-  
+
+
   final def rows2optNested(rows: RS, casters: List[CastTuple]): List[Any] = {
     val result = casters.length match {
       case 2 => rows2optNested1(rows, casters)

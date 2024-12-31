@@ -16,7 +16,7 @@ trait InsertValidationExtraction
 
   @tailrec
   final override def getValidators(
-    nsMap: Map[String, MetaNs],
+    entityMap: Map[String, MetaEntity],
     elements: List[Element],
     validators: List[Product => Seq[InsertError]],
     tplIndex: Int,
@@ -33,10 +33,10 @@ trait InsertValidationExtraction
           }
           a match {
             case a: AttrOne => a match {
-              case a: AttrOneMan => getValidators(nsMap, tail, validators :+
+              case a: AttrOneMan => getValidators(entityMap, tail, validators :+
                 resolveAttrOneMan(a, tplIndex), tplIndex + 1, prevRefs)
 
-              case a: AttrOneOpt => getValidators(nsMap, tail, validators :+
+              case a: AttrOneOpt => getValidators(entityMap, tail, validators :+
                 resolveAttrOneOpt(a, tplIndex), tplIndex + 1, prevRefs)
 
               case a => noEmpty(a)
@@ -44,11 +44,11 @@ trait InsertValidationExtraction
 
             case a: AttrSet => a match {
               case a: AttrSetMan =>
-                val mandatory = nsMap(a.ns).mandatoryAttrs.contains(a.attr)
-                getValidators(nsMap, tail, validators :+
+                val mandatory = entityMap(a.ns).mandatoryAttrs.contains(a.attr)
+                getValidators(entityMap, tail, validators :+
                   resolveAttrSetMan(a, tplIndex, mandatory), tplIndex + 1, prevRefs)
 
-              case a: AttrSetOpt => getValidators(nsMap, tail, validators :+
+              case a: AttrSetOpt => getValidators(entityMap, tail, validators :+
                 resolveAttrSetOpt(a, tplIndex), tplIndex + 1, prevRefs)
 
               case a => noEmpty(a)
@@ -56,11 +56,11 @@ trait InsertValidationExtraction
 
             case a: AttrSeq => a match {
               case a: AttrSeqMan =>
-                val mandatory = nsMap(a.ns).mandatoryAttrs.contains(a.attr)
-                getValidators(nsMap, tail, validators :+
+                val mandatory = entityMap(a.ns).mandatoryAttrs.contains(a.attr)
+                getValidators(entityMap, tail, validators :+
                   resolveAttrSeqMan(a, tplIndex, mandatory), tplIndex + 1, prevRefs)
 
-              case a: AttrSeqOpt => getValidators(nsMap, tail, validators :+
+              case a: AttrSeqOpt => getValidators(entityMap, tail, validators :+
                 resolveAttrSeqOpt(a, tplIndex), tplIndex + 1, prevRefs)
 
               case a => noEmpty(a)
@@ -68,11 +68,11 @@ trait InsertValidationExtraction
 
             case a: AttrMap => a match {
               case a: AttrMapMan =>
-                val mandatory = nsMap(a.ns).mandatoryAttrs.contains(a.attr)
-                getValidators(nsMap, tail, validators :+
+                val mandatory = entityMap(a.ns).mandatoryAttrs.contains(a.attr)
+                getValidators(entityMap, tail, validators :+
                   resolveAttrMapMan(a, tplIndex, mandatory), tplIndex + 1, prevRefs)
 
-              case a: AttrMapOpt => getValidators(nsMap, tail, validators :+
+              case a: AttrMapOpt => getValidators(entityMap, tail, validators :+
                 resolveAttrMapOpt(a, tplIndex), tplIndex + 1, prevRefs)
 
               case a => noEmpty(a)
@@ -80,26 +80,26 @@ trait InsertValidationExtraction
           }
 
         case Ref(_, refAttr, _, _, _, _) =>
-          getValidators(nsMap, tail, validators, tplIndex, prevRefs :+ refAttr)
+          getValidators(entityMap, tail, validators, tplIndex, prevRefs :+ refAttr)
 
         case BackRef(backRefNs, _, _) =>
           noNsReUseAfterBackref(tail.head, prevRefs, backRefNs)
-          getValidators(nsMap, tail, validators, tplIndex, prevRefs)
+          getValidators(entityMap, tail, validators, tplIndex, prevRefs)
 
         case OptRef(Ref(ns, refAttr, _, _, _, _), optRefElements) =>
           curElements = optRefElements
-          getValidators(nsMap, tail, validators :+
-            addOptRef(nsMap, tplIndex, ns, refAttr, optRefElements), tplIndex + 1, Nil)
+          getValidators(entityMap, tail, validators :+
+            addOptRef(entityMap, tplIndex, ns, refAttr, optRefElements), tplIndex + 1, Nil)
 
         case Nested(Ref(ns, refAttr, _, _, _, _), nestedElements) =>
           curElements = nestedElements
-          getValidators(nsMap, tail, validators :+
-            addNested(nsMap, tplIndex, ns, refAttr, nestedElements), tplIndex, Nil)
+          getValidators(entityMap, tail, validators :+
+            addNested(entityMap, tplIndex, ns, refAttr, nestedElements), tplIndex, Nil)
 
         case OptNested(Ref(ns, refAttr, _, _, _, _), nestedElements) =>
           curElements = nestedElements
-          getValidators(nsMap, tail, validators :+
-            addNested(nsMap, tplIndex, ns, refAttr, nestedElements), tplIndex, Nil)
+          getValidators(entityMap, tail, validators :+
+            addNested(entityMap, tplIndex, ns, refAttr, nestedElements), tplIndex, Nil)
       }
       case Nil             => validators
     }
@@ -107,14 +107,14 @@ trait InsertValidationExtraction
 
 
   private def addOptRef(
-    nsMap: Map[String, MetaNs],
+    entityMap: Map[String, MetaEntity],
     tplIndex: Int,
     ns: String,
     refAttr: String,
     optElements: List[Element]
   ): Product => Seq[InsertError] = {
     // Recursively validate optional data
-    val validate    = getInsertValidator(nsMap, optElements)
+    val validate    = getInsertValidator(entityMap, optElements)
     val fullRefAttr = ns + "." + refAttr
     countValueAttrs(optElements) match {
       case 1 => // Nested arity-1 values
@@ -153,14 +153,14 @@ trait InsertValidationExtraction
   }
 
   private def addNested(
-    nsMap: Map[String, MetaNs],
+    entityMap: Map[String, MetaEntity],
     tplIndex: Int,
     ns: String,
     refAttr: String,
     nestedElements: List[Element]
   ): Product => Seq[InsertError] = {
     // Recursively validate nested data
-    val validate    = getInsertValidator(nsMap, nestedElements)
+    val validate    = getInsertValidator(entityMap, nestedElements)
     val fullRefAttr = ns + "." + refAttr
     countValueAttrs(nestedElements) match {
       case 1 => // Nested arity-1 values

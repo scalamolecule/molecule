@@ -1,10 +1,17 @@
 package molecule.sql.postgres.compliance.filter.one
 
+import molecule.coreTests.setup.MUnitSuite
 import molecule.coreTests.spi.filter.one.decimal._
-import molecule.sql.postgres.setup.Test_postgres_async
+import molecule.sql.postgres.setup.Api_postgres_async
 
 
-object Test_FilterOneSpecial_Float_ extends FilterOneDecimal_Float_ with Test_postgres_async
-object Test_FilterOneSpecial_Double_ extends FilterOneDecimal_Double with Test_postgres_async
-object Test_FilterOneSpecial_BigDecimal_ extends FilterOneDecimal_BigDecimal_ with Test_postgres_async
+class FilterOneDecimal_Float_ extends MUnitSuite {
+  FilterOneDecimal_Float_(this, Api_postgres_async)
+}
+class FilterOneDecimal_Double extends MUnitSuite {
+  FilterOneDecimal_Double(this, Api_postgres_async)
+}
+class FilterOneDecimal_BigDecimal_ extends MUnitSuite {
+  FilterOneDecimal_BigDecimal_(this, Api_postgres_async)
+}
 

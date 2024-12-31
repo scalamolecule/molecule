@@ -5,7 +5,7 @@ import molecule.base.ast._
 
 trait MetaModelUtils {
 
-  def getHasMandatoryRefs(nsMap: Map[String, MetaNs]): Boolean = nsMap.exists {
+  def getHasMandatoryRefs(entityMap: Map[String, MetaEntity]): Boolean = entityMap.exists {
     case (_, ns) if ns.mandatoryRefs.nonEmpty => true
     case _                                    => false
   }

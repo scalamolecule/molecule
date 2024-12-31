@@ -1,6 +1,9 @@
 package molecule.sql.mysql.compliance.api
 
+import molecule.coreTests.setup.MUnitSuite
 import molecule.coreTests.spi.api._
-import molecule.sql.mysql.setup.Test_mysql_zio
+import molecule.sql.mysql.setup.Api_mysql_zio
 
-object Test_ZioApi extends ZioApi with Test_mysql_zio
+class ZioApi extends MUnitSuite {
+  ZioApi(this, Api_mysql_zio)
+}

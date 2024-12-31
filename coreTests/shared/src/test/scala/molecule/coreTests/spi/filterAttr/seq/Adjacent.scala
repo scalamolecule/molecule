@@ -3,99 +3,101 @@ package molecule.coreTests.spi.filterAttr.seq
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.dsl.Types._
-import molecule.coreTests.setup.CoreTestSuite
-import utest._
+import molecule.coreTests.domains.dsl.Types._
+import molecule.coreTests.setup._
 
-trait Adjacent extends CoreTestSuite with Api_async { spi: Spi_async =>
+case class Adjacent(
+  suite: MUnitSuite,
+  api: Api_async with Spi_async with DbProviders
+) extends TestUtils {
 
-  override lazy val tests = Tests {
+  import api._
+  import suite._
 
-    "has" - types { implicit conn =>
-      for {
-        _ <- Ns.s.iSeq.i.insert(
-          ("a", List(1, 2), 1),
-          ("b", List(3), 2),
-        ).transact
+  "has" - types { implicit conn =>
+    for {
+      _ <- Entity.s.iSeq.i.insert(
+        ("a", List(1, 2), 1),
+        ("b", List(3), 2),
+      ).transact
 
-        _ <- Ns.s.iSeq.has(Ns.i).query.get.map(_ ==> List(("a", List(1, 2), 1)))
-        _ <- Ns.s.iSeq.has(Ns.i_).query.get.map(_ ==> List(("a", List(1, 2))))
-        _ <- Ns.s.iSeq_.has(Ns.i).query.get.map(_ ==> List(("a", 1)))
-        _ <- Ns.s.iSeq_.has(Ns.i_).query.get.map(_ ==> List("a"))
+      _ <- Entity.s.iSeq.has(Entity.i).query.get.map(_ ==> List(("a", List(1, 2), 1)))
+      _ <- Entity.s.iSeq.has(Entity.i_).query.get.map(_ ==> List(("a", List(1, 2))))
+      _ <- Entity.s.iSeq_.has(Entity.i).query.get.map(_ ==> List(("a", 1)))
+      _ <- Entity.s.iSeq_.has(Entity.i_).query.get.map(_ ==> List("a"))
 
-        // Filter compare attribute itself
-        _ <- Ns.s.iSeq.has(Ns.i(1)).query.get.map(_ ==> List(("a", List(1, 2), 1)))
-        _ <- Ns.s.iSeq.has(Ns.i.not(1)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq.has(Ns.i.<(1)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq.has(Ns.i.<=(1)).query.get.map(_ ==> List(("a", List(1, 2), 1)))
-        _ <- Ns.s.iSeq.has(Ns.i.>(1)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq.has(Ns.i.>=(1)).query.get.map(_ ==> List(("a", List(1, 2), 1)))
+      // Filter compare attribute itself
+      _ <- Entity.s.iSeq.has(Entity.i(1)).query.get.map(_ ==> List(("a", List(1, 2), 1)))
+      _ <- Entity.s.iSeq.has(Entity.i.not(1)).query.get.map(_ ==> List())
+      _ <- Entity.s.iSeq.has(Entity.i.<(1)).query.get.map(_ ==> List())
+      _ <- Entity.s.iSeq.has(Entity.i.<=(1)).query.get.map(_ ==> List(("a", List(1, 2), 1)))
+      _ <- Entity.s.iSeq.has(Entity.i.>(1)).query.get.map(_ ==> List())
+      _ <- Entity.s.iSeq.has(Entity.i.>=(1)).query.get.map(_ ==> List(("a", List(1, 2), 1)))
 
-        _ <- Ns.s.iSeq.has(Ns.i_(1)).query.get.map(_ ==> List(("a", List(1, 2))))
-        _ <- Ns.s.iSeq.has(Ns.i_.not(1)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq.has(Ns.i_.<(1)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq.has(Ns.i_.<=(1)).query.get.map(_ ==> List(("a", List(1, 2))))
-        _ <- Ns.s.iSeq.has(Ns.i_.>(1)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq.has(Ns.i_.>=(1)).query.get.map(_ ==> List(("a", List(1, 2))))
+      _ <- Entity.s.iSeq.has(Entity.i_(1)).query.get.map(_ ==> List(("a", List(1, 2))))
+      _ <- Entity.s.iSeq.has(Entity.i_.not(1)).query.get.map(_ ==> List())
+      _ <- Entity.s.iSeq.has(Entity.i_.<(1)).query.get.map(_ ==> List())
+      _ <- Entity.s.iSeq.has(Entity.i_.<=(1)).query.get.map(_ ==> List(("a", List(1, 2))))
+      _ <- Entity.s.iSeq.has(Entity.i_.>(1)).query.get.map(_ ==> List())
+      _ <- Entity.s.iSeq.has(Entity.i_.>=(1)).query.get.map(_ ==> List(("a", List(1, 2))))
 
-        _ <- Ns.s.iSeq_.has(Ns.i(1)).query.get.map(_ ==> List(("a", 1)))
-        _ <- Ns.s.iSeq_.has(Ns.i.not(1)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq_.has(Ns.i.<(1)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq_.has(Ns.i.<=(1)).query.get.map(_ ==> List(("a", 1)))
-        _ <- Ns.s.iSeq_.has(Ns.i.>(1)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq_.has(Ns.i.>=(1)).query.get.map(_ ==> List(("a", 1)))
+      _ <- Entity.s.iSeq_.has(Entity.i(1)).query.get.map(_ ==> List(("a", 1)))
+      _ <- Entity.s.iSeq_.has(Entity.i.not(1)).query.get.map(_ ==> List())
+      _ <- Entity.s.iSeq_.has(Entity.i.<(1)).query.get.map(_ ==> List())
+      _ <- Entity.s.iSeq_.has(Entity.i.<=(1)).query.get.map(_ ==> List(("a", 1)))
+      _ <- Entity.s.iSeq_.has(Entity.i.>(1)).query.get.map(_ ==> List())
+      _ <- Entity.s.iSeq_.has(Entity.i.>=(1)).query.get.map(_ ==> List(("a", 1)))
 
-        _ <- Ns.s.iSeq_.has(Ns.i_(1)).query.get.map(_ ==> List("a"))
-        _ <- Ns.s.iSeq_.has(Ns.i_.not(1)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq_.has(Ns.i_.<(1)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq_.has(Ns.i_.<=(1)).query.get.map(_ ==> List("a"))
-        _ <- Ns.s.iSeq_.has(Ns.i_.>(1)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq_.has(Ns.i_.>=(1)).query.get.map(_ ==> List("a"))
-      } yield ()
-    }
+      _ <- Entity.s.iSeq_.has(Entity.i_(1)).query.get.map(_ ==> List("a"))
+      _ <- Entity.s.iSeq_.has(Entity.i_.not(1)).query.get.map(_ ==> List())
+      _ <- Entity.s.iSeq_.has(Entity.i_.<(1)).query.get.map(_ ==> List())
+      _ <- Entity.s.iSeq_.has(Entity.i_.<=(1)).query.get.map(_ ==> List("a"))
+      _ <- Entity.s.iSeq_.has(Entity.i_.>(1)).query.get.map(_ ==> List())
+      _ <- Entity.s.iSeq_.has(Entity.i_.>=(1)).query.get.map(_ ==> List("a"))
+    } yield ()
+  }
 
 
-    "hasNo" - types { implicit conn =>
-      for {
-        _ <- Ns.s.iSeq.i.insert(
-          ("a", List(1, 2), 1),
-          ("b", List(3), 2),
-        ).transact
+  "hasNo" - types { implicit conn =>
+    for {
+      _ <- Entity.s.iSeq.i.insert(
+        ("a", List(1, 2), 1),
+        ("b", List(3), 2),
+      ).transact
 
-        _ <- Ns.s.iSeq.hasNo(Ns.i).query.get.map(_ ==> List(("b", List(3), 2)))
-        _ <- Ns.s.iSeq.hasNo(Ns.i_).query.get.map(_ ==> List(("b", List(3))))
-        _ <- Ns.s.iSeq_.hasNo(Ns.i).query.get.map(_ ==> List(("b", 2)))
-        _ <- Ns.s.iSeq_.hasNo(Ns.i_).query.get.map(_ ==> List("b"))
+      _ <- Entity.s.iSeq.hasNo(Entity.i).query.get.map(_ ==> List(("b", List(3), 2)))
+      _ <- Entity.s.iSeq.hasNo(Entity.i_).query.get.map(_ ==> List(("b", List(3))))
+      _ <- Entity.s.iSeq_.hasNo(Entity.i).query.get.map(_ ==> List(("b", 2)))
+      _ <- Entity.s.iSeq_.hasNo(Entity.i_).query.get.map(_ ==> List("b"))
 
-        // Filter compare attribute itself
-        _ <- Ns.s.iSeq.hasNo(Ns.i(1)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq.hasNo(Ns.i.not(1)).query.get.map(_ ==> List(("b", List(3), 2)))
-        _ <- Ns.s.iSeq.hasNo(Ns.i.<(2)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq.hasNo(Ns.i.<=(2)).query.get.map(_ ==> List(("b", List(3), 2)))
-        _ <- Ns.s.iSeq.hasNo(Ns.i.>(2)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq.hasNo(Ns.i.>=(2)).query.get.map(_ ==> List(("b", List(3), 2)))
+      // Filter compare attribute itself
+      _ <- Entity.s.iSeq.hasNo(Entity.i(1)).query.get.map(_ ==> List())
+      _ <- Entity.s.iSeq.hasNo(Entity.i.not(1)).query.get.map(_ ==> List(("b", List(3), 2)))
+      _ <- Entity.s.iSeq.hasNo(Entity.i.<(2)).query.get.map(_ ==> List())
+      _ <- Entity.s.iSeq.hasNo(Entity.i.<=(2)).query.get.map(_ ==> List(("b", List(3), 2)))
+      _ <- Entity.s.iSeq.hasNo(Entity.i.>(2)).query.get.map(_ ==> List())
+      _ <- Entity.s.iSeq.hasNo(Entity.i.>=(2)).query.get.map(_ ==> List(("b", List(3), 2)))
 
-        _ <- Ns.s.iSeq.hasNo(Ns.i_(1)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq.hasNo(Ns.i_.not(1)).query.get.map(_ ==> List(("b", List(3))))
-        _ <- Ns.s.iSeq.hasNo(Ns.i_.<(2)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq.hasNo(Ns.i_.<=(2)).query.get.map(_ ==> List(("b", List(3))))
-        _ <- Ns.s.iSeq.hasNo(Ns.i_.>(2)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq.hasNo(Ns.i_.>=(2)).query.get.map(_ ==> List(("b", List(3))))
+      _ <- Entity.s.iSeq.hasNo(Entity.i_(1)).query.get.map(_ ==> List())
+      _ <- Entity.s.iSeq.hasNo(Entity.i_.not(1)).query.get.map(_ ==> List(("b", List(3))))
+      _ <- Entity.s.iSeq.hasNo(Entity.i_.<(2)).query.get.map(_ ==> List())
+      _ <- Entity.s.iSeq.hasNo(Entity.i_.<=(2)).query.get.map(_ ==> List(("b", List(3))))
+      _ <- Entity.s.iSeq.hasNo(Entity.i_.>(2)).query.get.map(_ ==> List())
+      _ <- Entity.s.iSeq.hasNo(Entity.i_.>=(2)).query.get.map(_ ==> List(("b", List(3))))
 
-        _ <- Ns.s.iSeq_.hasNo(Ns.i(1)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq_.hasNo(Ns.i.not(1)).query.get.map(_ ==> List(("b", 2)))
-        _ <- Ns.s.iSeq_.hasNo(Ns.i.<(2)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq_.hasNo(Ns.i.<=(2)).query.get.map(_ ==> List(("b", 2)))
-        _ <- Ns.s.iSeq_.hasNo(Ns.i.>(2)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq_.hasNo(Ns.i.>=(2)).query.get.map(_ ==> List(("b", 2)))
+      _ <- Entity.s.iSeq_.hasNo(Entity.i(1)).query.get.map(_ ==> List())
+      _ <- Entity.s.iSeq_.hasNo(Entity.i.not(1)).query.get.map(_ ==> List(("b", 2)))
+      _ <- Entity.s.iSeq_.hasNo(Entity.i.<(2)).query.get.map(_ ==> List())
+      _ <- Entity.s.iSeq_.hasNo(Entity.i.<=(2)).query.get.map(_ ==> List(("b", 2)))
+      _ <- Entity.s.iSeq_.hasNo(Entity.i.>(2)).query.get.map(_ ==> List())
+      _ <- Entity.s.iSeq_.hasNo(Entity.i.>=(2)).query.get.map(_ ==> List(("b", 2)))
 
-        _ <- Ns.s.iSeq_.hasNo(Ns.i_(1)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq_.hasNo(Ns.i_.not(1)).query.get.map(_ ==> List("b"))
-        _ <- Ns.s.iSeq_.hasNo(Ns.i_.<(2)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq_.hasNo(Ns.i_.<=(2)).query.get.map(_ ==> List("b"))
-        _ <- Ns.s.iSeq_.hasNo(Ns.i_.>(2)).query.get.map(_ ==> List())
-        _ <- Ns.s.iSeq_.hasNo(Ns.i_.>=(2)).query.get.map(_ ==> List("b"))
-      } yield ()
-    }
+      _ <- Entity.s.iSeq_.hasNo(Entity.i_(1)).query.get.map(_ ==> List())
+      _ <- Entity.s.iSeq_.hasNo(Entity.i_.not(1)).query.get.map(_ ==> List("b"))
+      _ <- Entity.s.iSeq_.hasNo(Entity.i_.<(2)).query.get.map(_ ==> List())
+      _ <- Entity.s.iSeq_.hasNo(Entity.i_.<=(2)).query.get.map(_ ==> List("b"))
+      _ <- Entity.s.iSeq_.hasNo(Entity.i_.>(2)).query.get.map(_ ==> List())
+      _ <- Entity.s.iSeq_.hasNo(Entity.i_.>=(2)).query.get.map(_ ==> List("b"))
+    } yield ()
   }
 }

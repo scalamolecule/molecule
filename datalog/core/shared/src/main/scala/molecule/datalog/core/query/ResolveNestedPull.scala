@@ -122,7 +122,7 @@ trait ResolveNestedPull[Tpl]
             case _: BackRef => rec(elements.tail, level1 - 1)
             case a: Attr    => throw ModelError(
               s"Expected ref after backref _$backRef. " +
-                s"Please add attribute ${a.ns}.${a.attr} to initial namespace ${a.ns} " +
+                s"Please add attribute ${a.ns}.${a.attr} to initial entity ${a.ns} " +
                 s"instead of after backref _$backRef."
             )
             case other      => unexpectedElement(other)

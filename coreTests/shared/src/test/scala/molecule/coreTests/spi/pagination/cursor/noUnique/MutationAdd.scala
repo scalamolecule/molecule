@@ -3,13 +3,15 @@ package molecule.coreTests.spi.pagination.cursor.noUnique
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.dsl.Types._
-import molecule.coreTests.setup.CoreTestSuite
-import utest._
-import scala.annotation.{nowarn, tailrec}
+import molecule.coreTests.domains.dsl.Types._
+import molecule.coreTests.setup._
+import scala.annotation.tailrec
 import scala.util.Random
 
-trait MutationAdd extends CoreTestSuite with Api_async { spi: Spi_async =>
+case class MutationAdd(
+  suite: MUnitSuite,
+  api: Api_async with Spi_async with DbProviders
+) extends TestUtils {
 
   @tailrec
   final def getPairs(acc: List[(Int, Int)]): List[(Int, Int)] = {
@@ -22,76 +24,69 @@ trait MutationAdd extends CoreTestSuite with Api_async { spi: Spi_async =>
     }
   }
 
-  val query = Ns.i.a1.int.a2.query
+  val query = Entity.i.a1.int.a2.query
 
-  @nowarn lazy val tests = Tests {
+  import api._
+  import suite._
 
-    "Forward" - {
+  "Forward: Add row before" - types { implicit conn =>
+    val pairs               = getPairs(Nil)
+    val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
+    for {
+      _ <- Entity.i.int.insert(a, c, e).transact
+      cur <- query.from("").limit(2).get.map { case (List(`a`, `c`), cur, true) => cur }
 
-      "Add row before" - types { implicit conn =>
-        val pairs               = getPairs(Nil)
-        val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
-        for {
-          _ <- Ns.i.int.insert(a, c, e).transact
-          cur <- query.from("").limit(2).get.map { case (List(`a`, `c`), cur, true) => cur }
+      // Add row before next page
+      _ <- Entity.i.int.insert(b).transact
 
-          // Add row before next page
-          _ <- Ns.i.int.insert(b).transact
+      // Next page unaffected
+      _ <- query.from(cur).limit(2).get.map { case (List(`e`), _, false) => () }
+    } yield ()
+  }
 
-          // Next page unaffected
-          _ <- query.from(cur).limit(2).get.map { case (List(`e`), _, false) => () }
-        } yield ()
-      }
+  "Forward: Add row after" - types { implicit conn =>
+    val pairs               = getPairs(Nil)
+    val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
+    for {
+      _ <- Entity.i.int.insert(a, c, e).transact
+      cur <- query.from("").limit(2).get.map { case (List(`a`, `c`), cur, true) => cur }
 
-      "Add row after" - types { implicit conn =>
-        val pairs               = getPairs(Nil)
-        val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
-        for {
-          _ <- Ns.i.int.insert(a, c, e).transact
-          cur <- query.from("").limit(2).get.map { case (List(`a`, `c`), cur, true) => cur }
+      // Add row after this page
+      _ <- Entity.i.int.insert(d).transact
 
-          // Add row after this page
-          _ <- Ns.i.int.insert(d).transact
-
-          // Next page includes new row
-          _ <- query.from(cur).limit(2).get.map { case (List(`d`, `e`), _, false) => () }
-        } yield ()
-      }
-    }
+      // Next page includes new row
+      _ <- query.from(cur).limit(2).get.map { case (List(`d`, `e`), _, false) => () }
+    } yield ()
+  }
 
 
-    "Backwards" - {
+  "Backwards: Add row before" - types { implicit conn =>
+    val pairs               = getPairs(Nil)
+    val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
+    for {
+      _ <- Entity.i.int.insert(a, c, e).transact
+      cur <- query.from("").limit(-2).get.map { case (List(`c`, `e`), cur, true) => cur }
 
-      "Add row before" - types { implicit conn =>
-        val pairs               = getPairs(Nil)
-        val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
-        for {
-          _ <- Ns.i.int.insert(a, c, e).transact
-          cur <- query.from("").limit(-2).get.map { case (List(`c`, `e`), cur, true) => cur }
+      // Add row before next page
+      _ <- Entity.i.int.insert(d).transact
 
-          // Add row before next page
-          _ <- Ns.i.int.insert(d).transact
+      // Next page unaffected
+      _ <- query.from(cur).limit(-2).get.map { case (List(`a`), _, false) => () }
+    } yield ()
+  }
 
-          // Next page unaffected
-          _ <- query.from(cur).limit(-2).get.map { case (List(`a`), _, false) => () }
-        } yield ()
-      }
+  "Backwards: Add row after" - types { implicit conn =>
+    val pairs               = getPairs(Nil)
+    val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
+    for {
+      _ <- Entity.i.int.insert(a, c, e).transact
+      cur <- query.from("").limit(-2).get.map { case (List(`c`, `e`), cur, true) => cur }
 
-      "Add row after" - types { implicit conn =>
-        val pairs               = getPairs(Nil)
-        val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
-        for {
-          _ <- Ns.i.int.insert(a, c, e).transact
-          cur <- query.from("").limit(-2).get.map { case (List(`c`, `e`), cur, true) => cur }
+      // Add row after this page
+      _ <- Entity.i.int.insert(b).transact
 
-          // Add row after this page
-          _ <- Ns.i.int.insert(b).transact
-
-          // Next page includes new row
-          _ <- query.from(cur).limit(-2).get.map { case (List(`a`, `b`), _, false) => () }
-        } yield ()
-      }
-    }
-
+      // Next page includes new row
+      _ <- query.from(cur).limit(-2).get.map { case (List(`a`, `b`), _, false) => () }
+    } yield ()
   }
 }

@@ -23,7 +23,7 @@ import molecule.datalog.datomic.query.DatomicQueryResolve
  * Presumes that the row with the previous unique value hasn't been altered.
  *
  * @param elements Molecule model
- * @param optLimit    When going forward from start, use a positive number.
+ * @param optLimit When going forward from start, use a positive number.
  *                 And vice versa from end with a negative number. Can't be zero.
  * @param cursor   Base64 encoded cursor meta information, including previous edge values.
  * @tparam Tpl Type of each row

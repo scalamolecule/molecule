@@ -8,7 +8,7 @@ import molecule.boilerplate.ast.Model._
 trait InsertValidationResolvers_ {
 
   def getValidators(
-    nsMap: Map[String, MetaNs],
+    entityMap: Map[String, MetaEntity],
     elements: List[Element],
     validators: List[Product => Seq[InsertError]],
     tplIndex: Int,
@@ -16,11 +16,11 @@ trait InsertValidationResolvers_ {
   ): List[Product => Seq[InsertError]]
 
   def getInsertValidator(
-    nsMap: Map[String, MetaNs],
+    entityMap: Map[String, MetaEntity],
     elements: List[Element],
   ): Product => Seq[InsertError] = {
     val validators: List[Product => Seq[InsertError]] =
-      getValidators(nsMap, elements, Nil, 0, Nil)
+      getValidators(entityMap, elements, Nil, 0, Nil)
 
     validators.length match {
       case 1  => validate1(validators)

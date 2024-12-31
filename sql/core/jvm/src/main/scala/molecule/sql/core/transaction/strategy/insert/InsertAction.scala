@@ -33,7 +33,7 @@ abstract class InsertAction(
     // Make joins to refs after current and refs have been inserted
     addSibling(InsertRefJoin(this, ref, sqlOps, ns, refAttr, refNs, rowCount))
 
-    // Continue in ref namespace
+    // Continue with ref entity
     ref
   }
 
@@ -50,7 +50,7 @@ abstract class InsertAction(
   }
 
   def nest(ns: String, refAttr: String, refNs: String): InsertNestedJoins = {
-    // Nested namespace
+    // Nested entity
     val nested = addChild(InsertNs(this, sqlOps, refNs, "Nested", rowCount))
 
     // Make joins to nested after current and nested have been inserted

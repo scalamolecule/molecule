@@ -76,7 +76,7 @@ trait ModelUtils {
 
 
   protected def noKeywords(elements: List[Element], optProxy: Option[ConnProxy]): List[Element] = {
-    if (optProxy.isEmpty || optProxy.get.reserved.isEmpty)
+    if (optProxy.isEmpty || optProxy.get.schema.reservedEntities.isEmpty)
       return elements
 
     @tailrec
@@ -153,7 +153,7 @@ trait ModelUtils {
   ): Unit = {
     nextElement match {
       case Ref(_, refAttr, _, _, _, _) if prevRefs.contains(refAttr) => throw ModelError(
-        s"Can't re-use previous namespace ${refAttr.capitalize} after backref _$backRefNs."
+        s"Can't re-use previous entity ${refAttr.capitalize} after backref _$backRefNs."
       )
 
       case _ => () // ok
@@ -170,14 +170,15 @@ trait ModelUtils {
   private final def nonReservedAttr(a: Attr, proxy: ConnProxy): (String, String) = {
     val (nsIndex, attrIndex, _) = indexes(a.coord)
     (
-      if (proxy.reserved.get.reservedNss.apply(nsIndex)) a.ns + "_" else a.ns,
-      if (proxy.reserved.get.reservedAttrs(attrIndex)) a.attr + "_" else a.attr
+      if (proxy.schema.reservedEntities(nsIndex)) a.ns + "_" else a.ns,
+      if (proxy.schema.reservedAttributes(attrIndex)) a.attr + "_" else a.attr
     )
   }
 
   private final def nonReservedRef(ref: Ref, proxy: ConnProxy): (String, String, String) = {
     val Seq(nsIndex, refAttrIndex, refNsIndex) = ref.coord
-    val (reservedNss, reservedAttrs)           = (proxy.reserved.get.reservedNss, proxy.reserved.get.reservedAttrs)
+    val schema                                 = proxy.schema
+    val (reservedNss, reservedAttrs)           = (schema.reservedEntities, schema.reservedAttributes)
     val refNs                                  = ref.refNs
     (
       if (reservedNss(nsIndex)) ref.ns + "_" else ref.ns,
@@ -188,10 +189,10 @@ trait ModelUtils {
 
   private final def nonReservedBackRef(backRef: BackRef, proxy: ConnProxy): (String, String) = {
     val Seq(prevNsIndex, curNsIndex) = backRef.coord
-    val reservedNss                  = proxy.reserved.get.reservedNss
+    val reservedEntitites            = proxy.schema.reservedEntities
     (
-      if (reservedNss(prevNsIndex)) backRef.prevNs + "_" else backRef.prevNs,
-      if (reservedNss(curNsIndex)) backRef.curNs + "_" else backRef.curNs,
+      if (reservedEntitites(prevNsIndex)) backRef.prevNs + "_" else backRef.prevNs,
+      if (reservedEntitites(curNsIndex)) backRef.curNs + "_" else backRef.curNs,
     )
   }
 

@@ -15,7 +15,7 @@ trait ResolveDelete { self: DeleteOps =>
           case AttrOneTacID(_, "id", Eq, ids1, _, _, _, _, _, _, _) =>
             if (!topLevel)
               throw ModelError(
-                s"Can only apply entity ids to be deleted to the initial namespace."
+                s"Can only apply entity ids to be deleted to the initial entity."
               )
             addIds(ids1)
             resolve(tail, topLevel)

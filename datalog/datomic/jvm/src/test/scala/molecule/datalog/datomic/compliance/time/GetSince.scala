@@ -2,101 +2,98 @@ package molecule.datalog.datomic.compliance.time
 
 import java.util.Date
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.dsl.Types._
+import molecule.coreTests.domains.dsl.Types._
+import molecule.coreTests.setup.{MUnitSuite, TestUtils}
 import molecule.datalog.datomic.async._
-import molecule.datalog.datomic.setup.TestSuite_datomic
-import utest._
+import molecule.datalog.datomic.setup.DbProviders_datomic
 import scala.language.implicitConversions
 
 
-object Test_GetSince extends TestSuite_datomic {
+class Test_GetSince extends MUnitSuite with DbProviders_datomic with TestUtils {
 
-  override lazy val tests = Tests {
+  "save" - types { implicit conn =>
+    for {
+      tx1 <- Entity.int(1).save.transact
+      tx2 <- Entity.int(2).save.transact
+      tx3 <- Entity.int(3).save.transact
 
-    "save" - types { implicit conn =>
-      for {
-        tx1 <- Ns.int(1).save.transact
-        tx2 <- Ns.int(2).save.transact
-        tx3 <- Ns.int(3).save.transact
+      // Current state same as of tx3
+      _ <- Entity.int.query.get.map(_ ==> List(1, 2, 3))
 
-        // Current state same as of tx3
-        _ <- Ns.int.query.get.map(_ ==> List(1, 2, 3))
-
-        _ <- Ns.int.query.since(tx1).get.map(_ ==> List(2, 3))
-        _ <- Ns.int.query.since(tx2).get.map(_ ==> List(3))
-        _ <- Ns.int.query.since(tx3).get.map(_ ==> List())
-      } yield ()
-    }
+      _ <- Entity.int.query.since(tx1).get.map(_ ==> List(2, 3))
+      _ <- Entity.int.query.since(tx2).get.map(_ ==> List(3))
+      _ <- Entity.int.query.since(tx3).get.map(_ ==> List())
+    } yield ()
+  }
 
 
-    "update" - types { implicit conn =>
-      for {
-        tx1 <- Ns.int(1).save.transact
-        e = tx1.id
-        _ <- Ns.int.query.since(tx1).get.map(_ ==> List())
+  "update" - types { implicit conn =>
+    for {
+      tx1 <- Entity.int(1).save.transact
+      e = tx1.id
+      _ <- Entity.int.query.since(tx1).get.map(_ ==> List())
 
-        tx2 <- Ns(e).int(2).update.transact
-        _ <- Ns.int.query.since(tx1).get.map(_ ==> List(2))
-        _ <- Ns.int.query.since(tx2).get.map(_ ==> List())
+      tx2 <- Entity(e).int(2).update.transact
+      _ <- Entity.int.query.since(tx1).get.map(_ ==> List(2))
+      _ <- Entity.int.query.since(tx2).get.map(_ ==> List())
 
-        tx3 <- Ns(e).int(3).update.transact
-        _ <- Ns.int.query.since(tx1).get.map(_ ==> List(3))
-        _ <- Ns.int.query.since(tx2).get.map(_ ==> List(3))
-        _ <- Ns.int.query.since(tx3).get.map(_ ==> List())
+      tx3 <- Entity(e).int(3).update.transact
+      _ <- Entity.int.query.since(tx1).get.map(_ ==> List(3))
+      _ <- Entity.int.query.since(tx2).get.map(_ ==> List(3))
+      _ <- Entity.int.query.since(tx3).get.map(_ ==> List())
 
-        // Current state same as of tx3
-        _ <- Ns.int.query.get.map(_ ==> List(3))
-      } yield ()
-    }
-
-
-    "delete" - types { implicit conn =>
-      for {
-        tx1 <- Ns.int(1).save.transact
-        _ <- Ns.int.query.since(tx1).get.map(_ ==> List())
-
-        tx2 <- Ns.int(2).save.transact
-        _ <- Ns.int.query.since(tx1).get.map(_ ==> List(2))
-        _ <- Ns.int.query.since(tx2).get.map(_ ==> List())
-
-        tx3 <- Ns(tx2.id).delete.transact
-        _ <- Ns.int.query.since(tx1).get.map(_ ==> List())
-        _ <- Ns.int.query.since(tx2).get.map(_ ==> List())
-        _ <- Ns.int.query.since(tx3).get.map(_ ==> List())
-
-        // Current state same as of tx3
-        _ <- Ns.int.query.get.map(_ ==> List(1))
-      } yield ()
-    }
+      // Current state same as of tx3
+      _ <- Entity.int.query.get.map(_ ==> List(3))
+    } yield ()
+  }
 
 
-    "Using date" - types { implicit conn =>
-      for {
-        _ <- Ns.int(1).save.transact
-        d1 = new Date()
-        _ <- delay(2)(()) // Ensure dateSet are not within the same ms
-        _ <- Ns.int(2).save.transact
-        d2 = new Date()
-        _ <- delay(2)(())
-        _ <- Ns.int(3).save.transact
-        d3 = new Date()
+  "delete" - types { implicit conn =>
+    for {
+      tx1 <- Entity.int(1).save.transact
+      _ <- Entity.int.query.since(tx1).get.map(_ ==> List())
 
-        _ <- Ns.int.query.since(d1).get.map(_ ==> List(2, 3))
-        _ <- Ns.int.query.since(d2).get.map(_ ==> List(3))
-        _ <- Ns.int.query.since(d3).get.map(_ ==> List())
-      } yield ()
-    }
+      tx2 <- Entity.int(2).save.transact
+      _ <- Entity.int.query.since(tx1).get.map(_ ==> List(2))
+      _ <- Entity.int.query.since(tx2).get.map(_ ==> List())
 
-    "Using transaction entity id" - types { implicit conn =>
-      for {
-        tx1 <- Ns.int(1).save.transact
-        tx2 <- Ns.int(2).save.transact
-        tx3 <- Ns.int(3).save.transact
+      tx3 <- Entity(tx2.id).delete.transact
+      _ <- Entity.int.query.since(tx1).get.map(_ ==> List())
+      _ <- Entity.int.query.since(tx2).get.map(_ ==> List())
+      _ <- Entity.int.query.since(tx3).get.map(_ ==> List())
 
-        _ <- Ns.int.query.since(tx1.tx).get.map(_ ==> List(2, 3))
-        _ <- Ns.int.query.since(tx2.tx).get.map(_ ==> List(3))
-        _ <- Ns.int.query.since(tx3.tx).get.map(_ ==> List())
-      } yield ()
-    }
+      // Current state same as of tx3
+      _ <- Entity.int.query.get.map(_ ==> List(1))
+    } yield ()
+  }
+
+
+  "Using date" - types { implicit conn =>
+    for {
+      _ <- Entity.int(1).save.transact
+      d1 = new Date()
+      _ <- delay(2)(()) // Ensure dateSet are not within the same ms
+      _ <- Entity.int(2).save.transact
+      d2 = new Date()
+      _ <- delay(2)(())
+      _ <- Entity.int(3).save.transact
+      d3 = new Date()
+
+      _ <- Entity.int.query.since(d1).get.map(_ ==> List(2, 3))
+      _ <- Entity.int.query.since(d2).get.map(_ ==> List(3))
+      _ <- Entity.int.query.since(d3).get.map(_ ==> List())
+    } yield ()
+  }
+
+  "Using transaction entity id" - types { implicit conn =>
+    for {
+      tx1 <- Entity.int(1).save.transact
+      tx2 <- Entity.int(2).save.transact
+      tx3 <- Entity.int(3).save.transact
+
+      _ <- Entity.int.query.since(tx1.tx).get.map(_ ==> List(2, 3))
+      _ <- Entity.int.query.since(tx2.tx).get.map(_ ==> List(3))
+      _ <- Entity.int.query.since(tx3.tx).get.map(_ ==> List())
+    } yield ()
   }
 }

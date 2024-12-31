@@ -6,6 +6,7 @@ import java.time._
 import java.util.Date
 import boopickle.CompositePickler
 import boopickle.Default._
+import molecule.base.api._
 import molecule.base.ast._
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
@@ -31,16 +32,16 @@ object Boopicklers extends MoleculeLogging {
   pickleCard.addConcreteType[CardSeq.type]
   pickleCard.addConcreteType[CardMap.type]
 
-  implicit val pickleMetaAttr  : Pickler[MetaAttr]   = generatePickler[MetaAttr]
-  implicit val pickleMetaNs    : Pickler[MetaNs]     = generatePickler[MetaNs]
-  implicit val pickleMetaPart  : Pickler[MetaPart]   = generatePickler[MetaPart]
-  implicit val pickleMetaSchema: Pickler[MetaSchema] = generatePickler[MetaSchema]
+  implicit val pickleMetaAttr  : Pickler[MetaAttribute] = generatePickler[MetaAttribute]
+  implicit val pickleMetaEntity: Pickler[MetaEntity]    = generatePickler[MetaEntity]
+  implicit val pickleMetaGroup : Pickler[MetaGroup]     = generatePickler[MetaGroup]
+  implicit val pickleMetaDomain: Pickler[MetaDomain]    = generatePickler[MetaDomain]
 
   implicit val pickleMetaModel: CompositePickler[MetaModel] = compositePickler[MetaModel]
-  pickleMetaModel.addConcreteType[MetaAttr]
-  pickleMetaModel.addConcreteType[MetaNs]
-  pickleMetaModel.addConcreteType[MetaPart]
-  pickleMetaModel.addConcreteType[MetaSchema]
+  pickleMetaModel.addConcreteType[MetaAttribute]
+  pickleMetaModel.addConcreteType[MetaEntity]
+  pickleMetaModel.addConcreteType[MetaGroup]
+  pickleMetaModel.addConcreteType[MetaDomain]
 
   implicit val pickleOp: CompositePickler[Op] = compositePickler[Op]
   pickleOp.addConcreteType[NoValue.type]
@@ -683,7 +684,6 @@ object Boopicklers extends MoleculeLogging {
   pickleElement.addConcreteType[AttrMapTacChar]
 
 
-
   implicit val pickleValidator: CompositePickler[Validator] = compositePickler[Validator]
   pickleValidator.addConcreteType[ValidateID]
   pickleValidator.addConcreteType[ValidateString]
@@ -722,6 +722,14 @@ object Boopicklers extends MoleculeLogging {
 
   implicit val pickleFileNotFoundException: CompositePickler[FileNotFoundException] =
     compositePickler[FileNotFoundException]
+
+  implicit val pickleSchema         : CompositePickler[Schema]          = compositePickler[Schema]
+  implicit val pickleSchema_datomic : CompositePickler[Schema_datomic]  = compositePickler[Schema_datomic]
+  implicit val pickleSchema_h2      : CompositePickler[Schema_h2]       = compositePickler[Schema_h2]
+  implicit val pickleSchema_mariadb : CompositePickler[Schema_mariadb]  = compositePickler[Schema_mariadb]
+  implicit val pickleSchema_mysql   : CompositePickler[Schema_mysql]    = compositePickler[Schema_mysql]
+  implicit val pickleSchema_postgres: CompositePickler[Schema_postgres] = compositePickler[Schema_postgres]
+  implicit val pickleSchema_sqlite  : CompositePickler[Schema_sqlite]   = compositePickler[Schema_sqlite]
 
   implicit val pickleConnProxy: CompositePickler[ConnProxy] =
     compositePickler[ConnProxy]

@@ -1,146 +1,147 @@
 // GENERATED CODE ********************************
 package molecule.coreTests.spi.aggregation.any
 
-import java.time.LocalDate
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.dsl.Types._
-import molecule.coreTests.setup.CoreTestSuite
-import utest._
+import molecule.coreTests.domains.dsl.Types._
+import molecule.coreTests.setup._
 
-trait Aggr_LocalDate_ extends CoreTestSuite with Api_async { spi: Spi_async =>
+case class Aggr_LocalDate_(
+  suite: MUnitSuite,
+  api: Api_async with Spi_async with DbProviders
+) extends TestUtils {
 
-  override lazy val tests = Tests {
+  import api._
+  import suite._
 
-    "distinct" - types { implicit conn =>
-      for {
-        _ <- Ns.i.localDate.insert(List(
-          (1, localDate1),
-          (2, localDate2),
-          (2, localDate2),
-          (2, localDate3),
-        )).transact
+  "distinct" - types { implicit conn =>
+    for {
+      _ <- Entity.i.localDate.insert(List(
+        (1, localDate1),
+        (2, localDate2),
+        (2, localDate2),
+        (2, localDate3),
+      )).transact
 
-        _ <- Ns.i.localDate.a1.query.get.map(_ ==> List(
-          (1, localDate1),
-          (2, localDate2), // 2 rows coalesced
-          (2, localDate3),
-        ))
+      _ <- Entity.i.localDate.a1.query.get.map(_ ==> List(
+        (1, localDate1),
+        (2, localDate2), // 2 rows coalesced
+        (2, localDate3),
+      ))
 
-        // Distinct values are returned in a Set
-        _ <- Ns.i.a1.localDate(distinct).query.get.map(_ ==> List(
-          (1, Set(localDate1)),
-          (2, Set(localDate2, localDate3)),
-        ))
+      // Distinct values are returned in a Set
+      _ <- Entity.i.a1.localDate(distinct).query.get.map(_ ==> List(
+        (1, Set(localDate1)),
+        (2, Set(localDate2, localDate3)),
+      ))
 
-        _ <- Ns.localDate(distinct).query.get.map(_.head ==> Set(
-          localDate1, localDate2, localDate3
-        ))
-      } yield ()
-    }
-
-
-    "min/max" - types { implicit conn =>
-      for {
-        _ <- Ns.i.localDate.insert(
-          (1, localDate1),
-          (1, localDate2),
-          (1, localDate3),
-          (2, localDate4),
-          (2, localDate5),
-          (2, localDate6),
-        ).transact
-
-        _ <- Ns.localDate(min).query.get.map(_ ==> List(localDate1))
-        _ <- Ns.localDate(max).query.get.map(_ ==> List(localDate6))
-        _ <- Ns.localDate(min).localDate(max).query.get.map(_ ==> List((localDate1, localDate6)))
-
-        _ <- Ns.i.a1.localDate(min).query.get.map(_ ==> List(
-          (1, localDate1),
-          (2, localDate4)
-        ))
-
-        _ <- Ns.i.a1.localDate(max).query.get.map(_ ==> List(
-          (1, localDate3),
-          (2, localDate6)
-        ))
-
-        _ <- Ns.i.a1.localDate(min).localDate(max).query.get.map(_ ==> List(
-          (1, localDate1, localDate3),
-          (2, localDate4, localDate6)
-        ))
-      } yield ()
-    }
-
-    "min/max n" - types { implicit conn =>
-      for {
-        _ <- Ns.i.localDate.insert(
-          (1, localDate1),
-          (1, localDate2),
-          (1, localDate3),
-          (2, localDate4),
-          (2, localDate5),
-          (2, localDate6),
-          (2, localDate6), // (make sure grouped values coalesce)
-        ).transact
-
-        _ <- Ns.localDate(min(1)).query.get.map(_ ==> List(Set(localDate1)))
-        _ <- Ns.localDate(min(2)).query.get.map(_ ==> List(Set(localDate1, localDate2)))
-
-        _ <- Ns.localDate(max(1)).query.get.map(_ ==> List(Set(localDate6)))
-        _ <- Ns.localDate(max(2)).query.get.map(_ ==> List(Set(localDate5, localDate6)))
-
-        _ <- Ns.i.a1.localDate(min(2)).query.get.map(_ ==> List(
-          (1, Set(localDate1, localDate2)),
-          (2, Set(localDate4, localDate5))
-        ))
-
-        _ <- Ns.i.a1.localDate(max(2)).query.get.map(_ ==> List(
-          (1, Set(localDate2, localDate3)),
-          (2, Set(localDate5, localDate6))
-        ))
-
-        _ <- Ns.i.a1.localDate(min(2)).localDate(max(2)).query.get.map(_ ==> List(
-          (1, Set(localDate1, localDate2), Set(localDate2, localDate3)),
-          (2, Set(localDate4, localDate5), Set(localDate5, localDate6))
-        ))
-      } yield ()
-    }
+      _ <- Entity.localDate(distinct).query.get.map(_.head ==> Set(
+        localDate1, localDate2, localDate3
+      ))
+    } yield ()
+  }
 
 
-    "sample" - types { implicit futConn =>
-      val all = Set(localDate1, localDate2, localDate3, localDate4)
-      for {
-        _ <- Ns.localDate.insert(List(localDate1, localDate2, localDate3)).transact
-        _ <- Ns.localDate(sample).query.get.map(res => all.contains(res.head) ==> true)
-        _ <- Ns.localDate(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- Ns.localDate(sample(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-      } yield ()
-    }
+  "min/max" - types { implicit conn =>
+    for {
+      _ <- Entity.i.localDate.insert(
+        (1, localDate1),
+        (1, localDate2),
+        (1, localDate3),
+        (2, localDate4),
+        (2, localDate5),
+        (2, localDate6),
+      ).transact
+
+      _ <- Entity.localDate(min).query.get.map(_ ==> List(localDate1))
+      _ <- Entity.localDate(max).query.get.map(_ ==> List(localDate6))
+      _ <- Entity.localDate(min).localDate(max).query.get.map(_ ==> List((localDate1, localDate6)))
+
+      _ <- Entity.i.a1.localDate(min).query.get.map(_ ==> List(
+        (1, localDate1),
+        (2, localDate4)
+      ))
+
+      _ <- Entity.i.a1.localDate(max).query.get.map(_ ==> List(
+        (1, localDate3),
+        (2, localDate6)
+      ))
+
+      _ <- Entity.i.a1.localDate(min).localDate(max).query.get.map(_ ==> List(
+        (1, localDate1, localDate3),
+        (2, localDate4, localDate6)
+      ))
+    } yield ()
+  }
+
+  "min/max n" - types { implicit conn =>
+    for {
+      _ <- Entity.i.localDate.insert(
+        (1, localDate1),
+        (1, localDate2),
+        (1, localDate3),
+        (2, localDate4),
+        (2, localDate5),
+        (2, localDate6),
+        (2, localDate6), // (make sure grouped values coalesce)
+      ).transact
+
+      _ <- Entity.localDate(min(1)).query.get.map(_ ==> List(Set(localDate1)))
+      _ <- Entity.localDate(min(2)).query.get.map(_ ==> List(Set(localDate1, localDate2)))
+
+      _ <- Entity.localDate(max(1)).query.get.map(_ ==> List(Set(localDate6)))
+      _ <- Entity.localDate(max(2)).query.get.map(_ ==> List(Set(localDate5, localDate6)))
+
+      _ <- Entity.i.a1.localDate(min(2)).query.get.map(_ ==> List(
+        (1, Set(localDate1, localDate2)),
+        (2, Set(localDate4, localDate5))
+      ))
+
+      _ <- Entity.i.a1.localDate(max(2)).query.get.map(_ ==> List(
+        (1, Set(localDate2, localDate3)),
+        (2, Set(localDate5, localDate6))
+      ))
+
+      _ <- Entity.i.a1.localDate(min(2)).localDate(max(2)).query.get.map(_ ==> List(
+        (1, Set(localDate1, localDate2), Set(localDate2, localDate3)),
+        (2, Set(localDate4, localDate5), Set(localDate5, localDate6))
+      ))
+    } yield ()
+  }
 
 
-    "count" - types { implicit conn =>
-      for {
-        _ <- Ns.i.localDate.insert(List(
-          (1, localDate1),
-          (2, localDate2),
-          (2, localDate2),
-          (2, localDate3),
-        )).transact
+  "sample" - types { implicit futConn =>
+    val all = Set(localDate1, localDate2, localDate3, localDate4)
+    for {
+      _ <- Entity.localDate.insert(List(localDate1, localDate2, localDate3)).transact
+      _ <- Entity.localDate(sample).query.get.map(res => all.contains(res.head) ==> true)
+      _ <- Entity.localDate(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
+      _ <- Entity.localDate(sample(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
+    } yield ()
+  }
 
-        _ <- Ns.localDate(count).query.get.map(_ ==> List(4))
-        _ <- Ns.i.a1.localDate(count).query.get.map(_ ==> List(
-          (1, 1),
-          (2, 3)
-        ))
 
-        _ <- Ns.localDate(countDistinct).query.get.map(_ ==> List(3))
-        _ <- Ns.i.a1.localDate(countDistinct).query.get.map(_ ==> List(
-          (1, 1),
-          (2, 2)
-        ))
-      } yield ()
-    }
+  "count" - types { implicit conn =>
+    for {
+      _ <- Entity.i.localDate.insert(List(
+        (1, localDate1),
+        (2, localDate2),
+        (2, localDate2),
+        (2, localDate3),
+      )).transact
+
+      _ <- Entity.localDate(count).query.get.map(_ ==> List(4))
+      _ <- Entity.i.a1.localDate(count).query.get.map(_ ==> List(
+        (1, 1),
+        (2, 3)
+      ))
+
+      _ <- Entity.localDate(countDistinct).query.get.map(_ ==> List(3))
+      _ <- Entity.i.a1.localDate(countDistinct).query.get.map(_ ==> List(
+        (1, 1),
+        (2, 2)
+      ))
+    } yield ()
   }
 }

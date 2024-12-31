@@ -27,7 +27,7 @@ case class InsertNestedJoins(
     val nestedIds = nested.ids.iterator
     var i         = 0
     while (parentIds.hasNext) {
-      val parentId    = parentIds.next()
+      val parentId = parentIds.next()
       val rowCount = counts.next()
       i = 0
       while (i < rowCount) {

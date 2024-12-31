@@ -1,5 +1,5 @@
 ///*
-//* AUTO-GENERATED Molecule DSL boilerplate code for namespace `Droid`
+//* AUTO-GENERATED Molecule DSL boilerplate code for entity `Droid`
 //*
 //* To change:
 //* 1. Edit data model in molecule.graphql.client.dsl.dataModel.Starwars

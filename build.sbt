@@ -19,7 +19,7 @@ inThisBuild(
     organizationName := "ScalaMolecule",
     organizationHomepage := Some(url("http://www.scalamolecule.org")),
     versionScheme := Some("early-semver"),
-    version := "0.15.0",
+    version := "0.15.1-SNAPSHOT",
     scalaVersion := scala213,
     crossScalaVersions := allScala,
 
@@ -120,8 +120,8 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
   .settings(
     // Generate Molecule boilerplate code for tests with `sbt clean compile -Dmolecule=true`
     moleculePluginActive := sys.props.get("molecule").contains("true"),
-    moleculeDataModelPaths := Seq("molecule/coreTests/dataModels"),
-    //moleculeMakeJars := false,
+    moleculeDomainPaths := Seq("molecule/coreTests/domains"),
+    //    moleculeMakeJars := false,
 
     // Find scala version specific jars in respective libs
     unmanagedBase := {
@@ -133,15 +133,16 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
     },
 
     libraryDependencies ++= Seq(
-      "com.lihaoyi" %%% "utest" % "0.8.4" % Test,
+      "org.scalameta" %% "munit" % "1.0.3" % Test,
+//      "com.lihaoyi" %%% "utest" % "0.8.4" % Test,
       "org.scalactic" %%% "scalactic" % "3.2.18" % Test, // Tolerant roundings with triple equal on js platform
       "io.github.cquiroz" %%% "scala-java-time" % "2.5.0" % Test,
 
-      "dev.zio" %%% "zio-streams" % zioVersion % Test,
-      "dev.zio" %%% "zio-test" % zioVersion % Test,
-      "dev.zio" %%% "zio-test-sbt" % zioVersion % Test,
+//      "dev.zio" %%% "zio-streams" % zioVersion % Test,
+//      "dev.zio" %%% "zio-test" % zioVersion % Test,
+//      "dev.zio" %%% "zio-test-sbt" % zioVersion % Test,
 
-      "org.typelevel" %%% "munit-cats-effect" % "2.0.0", // also used in main (IO api)
+//      "org.typelevel" %%% "munit-cats-effect" % "2.0.0", // also used in main (IO api)
     ),
   )
 
@@ -187,52 +188,6 @@ lazy val datalogDatomic = crossProject(JSPlatform, JVMPlatform)
   .jsSettings(jsEnvironment)
   .dependsOn(datalogCore)
   .dependsOn(coreTests % "test->test")
-
-
-//lazy val graphql = crossProject(JSPlatform, JVMPlatform)
-//  .crossType(CrossType.Full)
-//  .in(file("graphql/client"))
-//  .settings(name := "molecule-graphql-client")
-//  .settings(doPublish)
-//  .settings(compilerArgs)
-//  .enablePlugins(MoleculePlugin)
-//  .settings(
-//    // Generate Molecule boilerplate code for tests with `sbt clean compile -Dmolecule=true`
-//    moleculePluginActive := sys.props.get("molecule").contains("true"),
-//    //    moleculeMakeJars := !sys.props.get("moleculeJars").contains("false"), // default: true
-//    moleculeMakeJars := false, // default: true
-//
-//    // Multiple directories with data models
-//    moleculeDataModelPaths := Seq(
-//      "molecule/graphql/client"
-//    ),
-//
-//    // Suppress "un-used" keys warning
-//    Global / excludeLintKeys ++= Set(
-//      moleculePluginActive,
-//      moleculeDataModelPaths,
-//      moleculeMakeJars
-//    ),
-//
-//    // Find scala version specific jars in respective libs
-//    unmanagedBase := {
-//      CrossVersion.partialVersion(scalaVersion.value) match {
-//        case Some((2, 13)) => file(unmanagedBase.value.getPath ++ "/2.13")
-//        case Some((2, 12)) => file(unmanagedBase.value.getPath ++ "/2.12")
-//        case _             => file(unmanagedBase.value.getPath ++ "/3.3")
-//      }
-//    },
-//    //    testFrameworks += new TestFramework("utest.runner.Framework"),
-//  )
-//  .settings(
-//    libraryDependencies ++= Seq(
-//      "com.github.ghostdogpr" %% "caliban-tools" % "2.5.2",
-//      "com.github.ghostdogpr" %% "caliban-client" % "2.5.2",
-//    ),
-//  )
-//  .jsSettings(jsEnvironment)
-//  .dependsOn(core)
-//  .dependsOn(coreTests % "test->test")
 
 
 lazy val sqlCore = crossProject(JSPlatform, JVMPlatform)
@@ -318,7 +273,7 @@ lazy val sqlPostgreSQL = crossProject(JSPlatform, JVMPlatform)
     testFrameworks := testingFrameworks,
     libraryDependencies ++= Seq(
       // For some reason needed here too for munit tests to pass
-      "org.typelevel" %%% "munit-cats-effect" % "2.0.0",
+//      "org.typelevel" %%% "munit-cats-effect" % "2.0.0",
     )
   )
   .jsSettings(jsEnvironment)
@@ -352,11 +307,7 @@ lazy val sqlSQlite = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(coreTests % "test->test")
 
 
-lazy val testingFrameworks = Seq(
-  new TestFramework("utest.runner.Framework"),
-  new TestFramework("zio.test.sbt.ZTestFramework"),
-  new TestFramework("munit.Framework"),
-)
+lazy val testingFrameworks = Seq(new TestFramework("munit.Framework"))
 
 lazy val jsEnvironment = {
   Seq(
@@ -474,3 +425,49 @@ lazy val withoutDocs = Def.settings(
   doc / sources := Seq.empty,
   packageDoc / publishArtifact := false
 )
+
+
+//lazy val graphql = crossProject(JSPlatform, JVMPlatform)
+//  .crossType(CrossType.Full)
+//  .in(file("graphql/client"))
+//  .settings(name := "molecule-graphql-client")
+//  .settings(doPublish)
+//  .settings(compilerArgs)
+//  .enablePlugins(MoleculePlugin)
+//  .settings(
+//    // Generate Molecule boilerplate code for tests with `sbt clean compile -Dmolecule=true`
+//    moleculePluginActive := sys.props.get("molecule").contains("true"),
+//    //    moleculeMakeJars := !sys.props.get("moleculeJars").contains("false"), // default: true
+//    moleculeMakeJars := false, // default: true
+//
+//    // Multiple directories with data models
+//    moleculeDataModelPaths := Seq(
+//      "molecule/graphql/client"
+//    ),
+//
+//    // Suppress "un-used" keys warning
+//    Global / excludeLintKeys ++= Set(
+//      moleculePluginActive,
+//      moleculeDataModelPaths,
+//      moleculeMakeJars
+//    ),
+//
+//    // Find scala version specific jars in respective libs
+//    unmanagedBase := {
+//      CrossVersion.partialVersion(scalaVersion.value) match {
+//        case Some((2, 13)) => file(unmanagedBase.value.getPath ++ "/2.13")
+//        case Some((2, 12)) => file(unmanagedBase.value.getPath ++ "/2.12")
+//        case _             => file(unmanagedBase.value.getPath ++ "/3.3")
+//      }
+//    },
+//    //    testFrameworks += new TestFramework("utest.runner.Framework"),
+//  )
+//  .settings(
+//    libraryDependencies ++= Seq(
+//      "com.github.ghostdogpr" %% "caliban-tools" % "2.5.2",
+//      "com.github.ghostdogpr" %% "caliban-client" % "2.5.2",
+//    ),
+//  )
+//  .jsSettings(jsEnvironment)
+//  .dependsOn(core)
+//  .dependsOn(coreTests % "test->test")

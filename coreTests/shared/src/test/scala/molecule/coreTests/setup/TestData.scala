@@ -4,9 +4,8 @@ import java.net.URI
 import java.time._
 import java.util.{Date, UUID}
 import molecule.base.util.DateHandling
-import scala.math.BigInt
 
-trait TestData extends DateHandling { self: CoreTest =>
+trait TestData extends DateHandling {
 
   private def da(i: Int): Date = {
     // Alternate between winter/summer time to test daylight savings too

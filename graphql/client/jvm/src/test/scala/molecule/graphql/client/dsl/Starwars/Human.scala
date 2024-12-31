@@ -1,5 +1,5 @@
 ///*
-//* AUTO-GENERATED Molecule DSL boilerplate code for namespace `Human`
+//* AUTO-GENERATED Molecule DSL boilerplate code for entity `Human`
 //*
 //* To change:
 //* 1. Edit data model in molecule.graphql.client.dsl.dataModel.Starwars

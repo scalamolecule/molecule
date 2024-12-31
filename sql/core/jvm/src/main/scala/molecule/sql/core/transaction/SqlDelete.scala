@@ -27,11 +27,11 @@ trait SqlDelete
   }
 
   def getDeleteAction(
-    elements: List[Element], nsMap: Map[String, MetaNs]
+    elements: List[Element], entityMap: Map[String, MetaEntity]
   ): DeleteAction = {
     ns = getInitialNs(elements)
     query.idCols += s"$ns.id"
-    root = DeleteRoot(nsMap, sqlOps, sqlConn.createStatement(), ns)
+    root = DeleteRoot(entityMap, sqlOps, sqlConn.createStatement(), ns)
     deleteAction = root.firstNs
     resolve(elements, true)
     initRoot(sqlOps)
@@ -72,11 +72,11 @@ trait SqlDelete
 
           case _ =>
             val joinTable = ss(ns, refAttr, refNs)
-            val ns_id     = s"${ns}_id"
-            val ref_id    = s"${refNs}_id"
+            val eid       = s"${ns}_id"
+            val rid       = s"${refNs}_id"
             query.joins ++= List(
-              s"INNER JOIN $joinTable ON $ns.id = $joinTable.$ns_id",
-              s"INNER JOIN $refNs ON $joinTable.$ref_id = $refNs.id",
+              s"INNER JOIN $joinTable ON $ns.id = $joinTable.$eid",
+              s"INNER JOIN $refNs ON $joinTable.$rid = $refNs.id",
             )
         }
 

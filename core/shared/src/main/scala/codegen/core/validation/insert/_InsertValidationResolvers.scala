@@ -17,7 +17,7 @@ object _InsertValidationResolvers extends CoreGenBase("InsertValidationResolvers
        |trait $fileName_ {
        |
        |  def getValidators(
-       |    nsMap: Map[String, MetaNs],
+       |    entityMap: Map[String, MetaEntity],
        |    elements: List[Element],
        |    validators: List[Product => Seq[InsertError]],
        |    tplIndex: Int,
@@ -25,11 +25,11 @@ object _InsertValidationResolvers extends CoreGenBase("InsertValidationResolvers
        |  ): List[Product => Seq[InsertError]]
        |
        |  def getInsertValidator(
-       |    nsMap: Map[String, MetaNs],
+       |    entityMap: Map[String, MetaEntity],
        |    elements: List[Element],
        |  ): Product => Seq[InsertError] = {
        |    val validators: List[Product => Seq[InsertError]] =
-       |      getValidators(nsMap, elements, Nil, 0, Nil)
+       |      getValidators(entityMap, elements, Nil, 0, Nil)
        |
        |    validators.length match {
        |      $validateX

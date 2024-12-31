@@ -1,8 +1,5 @@
 package molecule.sql.sqlite.query
 
-import java.net.URI
-import java.time.{Duration, Instant, LocalDate, LocalDateTime, LocalTime, OffsetDateTime, OffsetTime, ZonedDateTime}
-import java.util.{Date, UUID}
 import molecule.core.query.Model2Query
 import molecule.sql.core.query.{QueryExprMap, SqlQueryBase}
 
@@ -17,7 +14,7 @@ trait QueryExprMap_sqlite
     col: String, keys: Seq[String], resMap: ResMap[T]
   ): Unit = {
     if (keys.nonEmpty) {
-      val key = keys.head
+      val key   = keys.head
       val value = s"JSON_EXTRACT($col, '$$.$key')"
       select -= col
       select += value

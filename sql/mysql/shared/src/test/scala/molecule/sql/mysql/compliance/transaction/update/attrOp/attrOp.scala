@@ -1,9 +1,14 @@
 package molecule.sql.mysql.compliance.transaction.update.attrOp
 
-import molecule.coreTests.spi.transaction.update.attrOp._
-import molecule.sql.mysql.setup.Test_mysql_async
+import molecule.coreTests.setup.MUnitSuite
+import molecule.coreTests.spi.action.update.attrOp._
+import molecule.sql.mysql.setup.Api_mysql_async
 
 
-object Test_AttrOp_Boolean extends AttrOp_Boolean with Test_mysql_async
-object Test_AttrOp_String extends AttrOp_String with Test_mysql_async
+class AttrOp_Boolean extends MUnitSuite {
+  AttrOp_Boolean(this, Api_mysql_async)
+}
+class AttrOp_String extends MUnitSuite {
+  AttrOp_String(this, Api_mysql_async)
+}
 

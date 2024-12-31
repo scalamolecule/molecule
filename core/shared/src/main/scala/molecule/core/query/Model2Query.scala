@@ -298,11 +298,11 @@ trait Model2Query extends QueryExpr with ModelUtils {
         } else if (filterPath :+ fa.cleanAttr == path :+ a.cleanAttr) {
           throw ModelError(s"Can't filter by the same attribute `${a.name}`")
         } else if (fa.isInstanceOf[Mandatory]) {
-          throw ModelError(s"Filter attribute $filterNsAttr pointing to other namespace should be tacit.")
+          throw ModelError(s"Filter attribute $filterNsAttr pointing to other entity should be tacit.")
         } else if (filterPath != path && fa.op != V) {
-          throw ModelError("Filtering inside cross-namespace attribute filter not allowed.")
+          throw ModelError("Filtering inside cross-entity attribute filter not allowed.")
         } else {
-          // Expect filter attribute in other namespace
+          // Expect filter attribute in other entity
           expectedFilterAttrs += fa.cleanName
         }
 
@@ -421,7 +421,7 @@ trait Model2Query extends QueryExpr with ModelUtils {
           val dir                 = directions.indexOf(fullFilterAttrPath) match {
             case -1                                   =>
               throw ModelError(s"Unexpectedly couldn't find direction index for $fullFilterAttrPath")
-            case _ if path == fullFilterAttrPath.init => 0 //  same namespace
+            case _ if path == fullFilterAttrPath.init => 0 //  same entity
             case j if j < i                           => -1 // filter attribute points backwards
             case _                                    => 1 //  filter attribute points forward
           }

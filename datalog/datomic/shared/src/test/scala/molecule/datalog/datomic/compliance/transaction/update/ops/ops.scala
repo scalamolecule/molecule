@@ -1,9 +1,18 @@
 package molecule.datalog.datomic.compliance.transaction.update.ops
 
-import molecule.coreTests.spi.transaction.update.ops._
-import molecule.datalog.datomic.setup.Test_datomic_async
+import molecule.coreTests.setup.{MUnitSuite, MUnitSuiteWithArrays}
+import molecule.coreTests.spi.action.update.ops._
+import molecule.datalog.datomic.setup.Api_datomic_async
 
-object Test_OpsOne extends OpsOne with Test_datomic_async
-object Test_OpsSet extends OpsSet with Test_datomic_async
-object Test_OpsSeq extends OpsSeq with Test_datomic_async
-object Test_OpsMap extends OpsMap with Test_datomic_async
+class OpsOne extends MUnitSuite {
+  OpsOne(this, Api_datomic_async)
+}
+class OpsSet extends MUnitSuite {
+  OpsSet(this, Api_datomic_async)
+}
+class OpsSeq extends MUnitSuiteWithArrays {
+  OpsSeq(this, Api_datomic_async)
+}
+class OpsMap extends MUnitSuite {
+  OpsMap(this, Api_datomic_async)
+}

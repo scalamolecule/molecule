@@ -3,7 +3,6 @@ package molecule.datalog.core.query
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.core.query.QueryExpr
-import scala.reflect.ClassTag
 
 trait QueryExprOneId[Tpl]
   extends SortOneSpecial[Tpl]

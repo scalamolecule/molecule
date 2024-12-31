@@ -1,7 +1,12 @@
 package molecule.sql.h2.compliance.transaction.delete
 
-import molecule.coreTests.spi.transaction.delete._
-import molecule.sql.h2.setup.Test_h2_async
+import molecule.coreTests.setup.MUnitSuite
+import molecule.coreTests.spi.action.delete._
+import molecule.sql.h2.setup.Api_h2_async
 
-object Test_Delete_id extends Delete_id with Test_h2_async
-object Test_Delete_filter extends Delete_filter with Test_h2_async
+class Delete_id extends MUnitSuite {
+  Delete_id(this, Api_h2_async)
+}
+class Delete_filter extends MUnitSuite {
+  Delete_filter(this, Api_h2_async)
+}

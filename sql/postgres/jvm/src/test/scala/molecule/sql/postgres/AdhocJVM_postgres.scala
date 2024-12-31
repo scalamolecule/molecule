@@ -1,40 +1,32 @@
 package molecule.sql.postgres
 
-import java.time.Duration
-import molecule.base.error.InsertErrors
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.dsl.Types.Ns
-import molecule.sql.core.facade.JdbcConn_JVM
+import molecule.coreTests.setup.{MUnitSuite, TestUtils}
 import molecule.sql.postgres.async._
-import molecule.sql.postgres.setup.{TestSuite_postgres_array, TestSuite_postgres}
-import utest._
-import scala.concurrent.Future
+import molecule.sql.postgres.setup.DbProviders_postgres
 import scala.language.implicitConversions
 
-//object AdhocJVM_postgres extends TestSuite_postgres_array {
-object AdhocJVM_postgres extends TestSuite_postgres {
-
-  override lazy val tests = Tests {
+class AdhocJVM_postgres extends MUnitSuite with DbProviders_postgres with TestUtils {
 
     "types" - types { implicit conn =>
-      import molecule.coreTests.dataModels.dsl.Types._
+      import molecule.coreTests.domains.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
 
-        id <- Ns.i(42).save.transact.map(_.id)
+        id <- Entity.i(42).save.transact.map(_.id)
 
         // Map attribute not yet asserted
-        _ <- Ns.intMap.query.get.map(_ ==> Nil)
+        _ <- Entity.intMap.query.get.map(_ ==> Nil)
 
         // When attribute is not already asserted, an update has no effect
-        _ <- Ns(id).intMap(Map(pint1, pint2)).update.i.transact
-        _ <- Ns.intMap.query.get.map(_ ==> Nil)
+        _ <- Entity(id).intMap(Map(pint1, pint2)).update.i.transact
+        _ <- Entity.intMap.query.get.map(_ ==> Nil)
       } yield ()
     }
 
 
     "refs" - refs { implicit conn =>
-      import molecule.coreTests.dataModels.dsl.Refs._
+      import molecule.coreTests.domains.dsl.Refs._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
       for {
@@ -73,7 +65,7 @@ object AdhocJVM_postgres extends TestSuite_postgres {
 
 
     //    "unique" - unique { implicit conn =>
-    //      import molecule.coreTests.dataModels.dsl.Uniques._
+    //      import molecule.coreTests.domains.dsl.Uniques._
     //      for {
     //        _ <- Uniques.i(1).save.transact
     //
@@ -82,7 +74,7 @@ object AdhocJVM_postgres extends TestSuite_postgres {
     //
     //
     //    "validation" - validation { implicit conn =>
-    //      import molecule.coreTests.dataModels.dsl.Validation._
+    //      import molecule.coreTests.domains.dsl.Validation._
     //      for {
     //        _ <- Type.string.insert("a").transact
     //          .map(_ ==> "Unexpected success").recover {
@@ -94,5 +86,4 @@ object AdhocJVM_postgres extends TestSuite_postgres {
     //          }
     //      } yield ()
     //    }
-  }
 }

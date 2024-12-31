@@ -82,11 +82,11 @@ trait SpiHelpers extends ModelUtils {
         hasData = false
 
       case BackRef(_, ns, _) => curNs = ns
-      case r: OptRef => ???
+      case r: OptRef         => ???
       case _                 => noNested
     }
 
-    // Handle last namespace
+    // Handle last entity
     if (hasData) {
       filterModel += AttrOneManID(curNs, "id")
       arity += 1
@@ -324,7 +324,7 @@ trait SpiHelpers extends ModelUtils {
         if (firstNs) {
           firstNs = false
           val tacitElements = updateModel.toList
-          // First namespace already has a tacit id attribute
+          // First entity already has a tacit id attribute
           updateModels = updateModels :+ ((_: Long) => tacitElements)
 
         } else if (prevNs.nonEmpty) {
@@ -342,7 +342,7 @@ trait SpiHelpers extends ModelUtils {
         updateModel.clear()
 
       case ref: Ref => throw ModelError(
-        s"Can't $update attributes in card-many referenced namespace `${ref.refAttr.capitalize}`"
+        s"Can't $update attributes in card-many referenced entity `${ref.refAttr.capitalize}`"
       )
 
       case ref: OptRef => ???
@@ -367,7 +367,7 @@ trait SpiHelpers extends ModelUtils {
   private type S = Long
 
   def getRefIds(refIdsAnyCardinality: List[Any]): List[Long] = {
-    // Start with dummy id (not used) to mark first namespace
+    // Start with dummy id (not used) to mark first entity
     refIdsAnyCardinality.headOption.fold(List(0L)) {
       case a: S                                                                                                                                 => 0L +: List(a)
       case (a: S, b: S)                                                                                                                         => 0L +: List(a, b)

@@ -28,7 +28,7 @@ abstract class SaveAction(
     // Make join after current ns is inserted
     addSibling(SaveRefJoin(this, ref, sqlOps, ns, refAttr, refNs))
 
-    // Continue in ref namespace
+    // Continue with ref entity
     ref
   }
 

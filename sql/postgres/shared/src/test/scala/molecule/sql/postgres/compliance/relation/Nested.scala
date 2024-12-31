@@ -1,14 +1,28 @@
 package molecule.sql.postgres.compliance.relation
 
+import molecule.coreTests.setup.{MUnitSuite, MUnitSuiteWithArrays}
 import molecule.coreTests.spi.relation.nested._
-import molecule.sql.postgres.setup.{Test_postgres_async, TestSuite_postgres_array}
-import molecule.sql.postgres.spi.Spi_postgres_async
+import molecule.sql.postgres.setup.Api_postgres_async
 
-object Test_NestedBasic extends NestedBasic with Test_postgres_async
-object Test_NestedExpr extends NestedExpr with Test_postgres_async
-object Test_NestedLevels extends NestedLevels with Test_postgres_async
-object Test_NestedOptional extends NestedOptional with Test_postgres_async
-object Test_NestedRef extends NestedRef with Test_postgres_async
-object Test_NestedSemantics extends NestedSemantics with Test_postgres_async
-object Test_NestedTypes extends NestedTypes with TestSuite_postgres_array with Spi_postgres_async
+class NestedBasic extends MUnitSuite {
+  NestedBasic(this, Api_postgres_async)
+}
+class NestedExpr extends MUnitSuite {
+  NestedExpr(this, Api_postgres_async)
+}
+class NestedLevels extends MUnitSuite {
+  NestedLevels(this, Api_postgres_async)
+}
+class NestedOptional extends MUnitSuite {
+  NestedOptional(this, Api_postgres_async)
+}
+class NestedRef extends MUnitSuite {
+  NestedRef(this, Api_postgres_async)
+}
+class NestedSemantics extends MUnitSuite {
+  NestedSemantics(this, Api_postgres_async)
+}
+class NestedTypes extends MUnitSuiteWithArrays {
+  NestedTypes(this, Api_postgres_async)
+}
 

@@ -117,7 +117,7 @@ trait QueryExprSet extends QueryExpr { self: Model2Query with SqlQueryBase with 
     attr: Attr, args: Set[T], res: ResSet[T]
   ): Unit = {
     val col = getCol(attr: Attr)
-      setNotNull(col)
+    setNotNull(col)
     attr.filterAttr.fold {
       setExpr(attr, col, args, res, false)
     } { case (dir, filterPath, filterAttr) =>

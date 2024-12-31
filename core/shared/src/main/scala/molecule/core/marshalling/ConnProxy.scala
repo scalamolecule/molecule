@@ -1,55 +1,87 @@
 package molecule.core.marshalling
 
 import java.util.UUID
-import molecule.base.ast._
+import molecule.base.api._
 import molecule.core.marshalling.dbView.DbView
 
 sealed trait ConnProxy {
 
-  val metaSchema : MetaSchema
-  val nsMap      : Map[String, MetaNs]
-  val attrMap    : Map[String, (Card, String, Seq[String])]
-  val uniqueAttrs: List[String]
+  val schema: Schema
 
-  /** Internal holder of optional alternative Db view (asOf, since, widh). Used by Datomic */
-  val dbView: Option[DbView]
+//  val reserved: Option[Reserved] = None
+
+//  val metaDomain : MetaDomain                               = schema.metaDomain
+//  val entityMap  : Map[String, MetaEntity]                  = schema.entityMap
+//  val attrMap    : Map[String, (Card, String, Seq[String])] = schema.attrMap
+//  val uniqueAttrs: List[String]                             = schema.uniqueAttrs
+
+//  /** Internal holder of optional alternative Db view (asOf, since, widh). Used by Datomic */
+  val dbView: Option[DbView] = None
 
   /** Unique internal identifier for cached proxy connection on server side */
-  val uuid: UUID
-
-  val reserved: Option[Reserved]
+  val uuid: UUID = UUID.randomUUID()
 }
 
 
 case class DatomicProxy(
   protocol: String,
   dbIdentifier: String,
-
-  datomicPartitions: String,
-  datomicSchema: String,
-  datomicAliases: String,
-
-  override val metaSchema: MetaSchema,
-  override val nsMap: Map[String, MetaNs],
-  override val attrMap: Map[String, (Card, String, Seq[String])],
-  override val uniqueAttrs: List[String],
+  override val schema: Schema,
+//  override val reserved: Option[Reserved] = None,
   override val dbView: Option[DbView] = None,
-  override val uuid: UUID = UUID.randomUUID(),
-  override val reserved: Option[Reserved] = None,
+//  override val uuid: UUID = UUID.randomUUID(),
+) extends ConnProxy {
+//  val datomicPartitions: String = schema.datomicPartitions
+//  val datomicSchema    : String = schema.datomicSchema
+//  val datomicAliases   : String = schema.datomicAliases
+}
+
+
+sealed abstract class JdbcProxy(
+  val url: String,
+  override val schema: Schema,
+  val schemaStr: String,
 ) extends ConnProxy
 
 
-case class JdbcProxy(
-  url: String,
-  createSchema: String,
+case class JdbcProxy_h2(
+  override val url: String,
+  override val schema: Schema_h2,
+  adhocSchemaStr: String = "",
+) extends JdbcProxy(
+  url, schema, if (adhocSchemaStr.nonEmpty) adhocSchemaStr else schema.schemaData.head
+)
 
-  override val metaSchema: MetaSchema,
-  override val nsMap: Map[String, MetaNs],
-  override val attrMap: Map[String, (Card, String, Seq[String])],
-  override val uniqueAttrs: List[String],
-  override val dbView: Option[DbView] = None,
-  override val uuid: UUID = UUID.randomUUID(),
-  override val reserved: Option[Reserved] = None,
-  useTestContainer: Boolean = false
-) extends ConnProxy
+case class JdbcProxy_mariadb(
+  override val url: String,
+  override val schema: Schema_mariadb,
+  adhocSchemaStr: String = "",
+) extends JdbcProxy(
+  url, schema, if (adhocSchemaStr.nonEmpty) adhocSchemaStr else schema.schemaData.head
+)
+
+case class JdbcProxy_mysql(
+  override val url: String,
+  override val schema: Schema_mysql,
+  adhocSchemaStr: String = "",
+) extends JdbcProxy(
+  url, schema, if (adhocSchemaStr.nonEmpty) adhocSchemaStr else schema.schemaData.head
+)
+
+case class JdbcProxy_postgres(
+  override val url: String,
+  override val schema: Schema_postgres,
+  adhocSchemaStr: String = "",
+) extends JdbcProxy(
+  url, schema, if (adhocSchemaStr.nonEmpty) adhocSchemaStr else schema.schemaData.head
+)
+
+case class JdbcProxy_sqlite(
+  override val url: String,
+  override val schema: Schema_sqlite,
+  adhocSchemaStr: String = "",
+) extends JdbcProxy(
+  url, schema, if (adhocSchemaStr.nonEmpty) adhocSchemaStr else schema.schemaData.head
+)
+
 

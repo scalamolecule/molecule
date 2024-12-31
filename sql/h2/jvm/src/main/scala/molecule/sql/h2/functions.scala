@@ -10,11 +10,11 @@ import scala.reflect.ClassTag
 
 // H2 helper functions for updates that are likely not possible to implement with H2 SQL.
 // Create aliases in database to use functions.
-// @see molecule.coreTests.dataModels.schema.RefsSchema_H2
+// @see molecule.coreTests.domains.schema.RefsSchema_H2
 object functions {
 
   // Remove values from Set or Seq
-  // Example: Ns(id).iSeq.remove(1, 2)
+  // Example: Entity(id).iSeq.remove(1, 2)
   def removeFromArray_ID /*             */ (base: Array[String], remove: Array[String]): Array[String] = removeFromArray(base, remove)
   def removeFromArray_String /*         */ (base: Array[String], remove: Array[String]): Array[String] = removeFromArray(base, remove)
   def removeFromArray_Int /*            */ (base: Array[Integer], remove: Array[Integer]): Array[Integer] = removeFromArray(base, remove)
@@ -65,7 +65,7 @@ object functions {
 
 
   // Adding pairs to Map attributes
-  // Example: Ns(id).iMap.add("foo" -> 42)
+  // Example: Entity(id).iMap.add("foo" -> 42)
 
   type bb = Array[Byte]
   def addPairs_ID /*             */ (a: bb, b: bb): bb = addPairs(a, b, encodeMap_ID, decodeMap_ID)
@@ -116,7 +116,7 @@ object functions {
   }
 
   // Removing pairs from Map attributes (by String key)
-  // Example: Ns(id).iMap.remove("foo")
+  // Example: Entity(id).iMap.remove("foo")
 
   def removePairs_ID /*             */ (a: bb, b: Array[String]): bb = removePairs(a, b, encodeMap_ID, decodeMap_ID)
   def removePairs_String /*         */ (a: bb, b: Array[String]): bb = removePairs(a, b, encodeMap_String, decodeMap_String)

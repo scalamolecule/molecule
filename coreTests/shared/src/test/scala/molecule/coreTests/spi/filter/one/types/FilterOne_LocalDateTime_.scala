@@ -5,163 +5,165 @@ import java.time.LocalDateTime
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.dsl.Types._
-import molecule.coreTests.setup.CoreTestSuite
-import utest._
+import molecule.coreTests.domains.dsl.Types._
+import molecule.coreTests.setup._
 
-trait FilterOne_LocalDateTime_ extends CoreTestSuite with Api_async { spi: Spi_async =>
+case class FilterOne_LocalDateTime_(
+  suite: MUnitSuite,
+  api: Api_async with Spi_async with DbProviders
+) extends TestUtils {
 
-  override lazy val tests = Tests {
+  import api._
+  import suite._
 
-    "Mandatory" - types { implicit conn =>
-      val a = (1, localDateTime1)
-      val b = (2, localDateTime2)
-      val c = (3, localDateTime3)
-      for {
-        _ <- Ns.i.localDateTime.insert(List(a, b, c)).transact
+  "Mandatory" - types { implicit conn =>
+    val a = (1, localDateTime1)
+    val b = (2, localDateTime2)
+    val c = (3, localDateTime3)
+    for {
+      _ <- Entity.i.localDateTime.insert(List(a, b, c)).transact
 
-        // Find all attribute values
-        _ <- Ns.i.a1.localDateTime.query.get.map(_ ==> List(a, b, c))
+      // Find all attribute values
+      _ <- Entity.i.a1.localDateTime.query.get.map(_ ==> List(a, b, c))
 
-        // Find value(s) matching
-        _ <- Ns.i.a1.localDateTime(localDateTime0).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.localDateTime(localDateTime1).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.localDateTime(Seq(localDateTime0)).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.localDateTime(Seq(localDateTime1)).query.get.map(_ ==> List(a))
-        // OR semantics for multiple args ("is this or that")
-        _ <- Ns.i.a1.localDateTime(localDateTime1, localDateTime2).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.localDateTime(localDateTime1, localDateTime0).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.localDateTime(Seq(localDateTime1, localDateTime2)).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.localDateTime(Seq(localDateTime1, localDateTime0)).query.get.map(_ ==> List(a))
-        // Empty Seq of args matches no values
-        _ <- Ns.i.a1.localDateTime(Seq.empty[LocalDateTime]).query.get.map(_ ==> List())
+      // Find value(s) matching
+      _ <- Entity.i.a1.localDateTime(localDateTime0).query.get.map(_ ==> List())
+      _ <- Entity.i.a1.localDateTime(localDateTime1).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.localDateTime(Seq(localDateTime0)).query.get.map(_ ==> List())
+      _ <- Entity.i.a1.localDateTime(Seq(localDateTime1)).query.get.map(_ ==> List(a))
+      // OR semantics for multiple args ("is this or that")
+      _ <- Entity.i.a1.localDateTime(localDateTime1, localDateTime2).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.localDateTime(localDateTime1, localDateTime0).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.localDateTime(Seq(localDateTime1, localDateTime2)).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.localDateTime(Seq(localDateTime1, localDateTime0)).query.get.map(_ ==> List(a))
+      // Empty Seq of args matches no values
+      _ <- Entity.i.a1.localDateTime(Seq.empty[LocalDateTime]).query.get.map(_ ==> List())
 
-        // Find values not matching
-        _ <- Ns.i.a1.localDateTime.not(localDateTime0).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.localDateTime.not(localDateTime1).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.localDateTime.not(localDateTime2).query.get.map(_ ==> List(a, c))
-        _ <- Ns.i.a1.localDateTime.not(localDateTime3).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.localDateTime.not(Seq(localDateTime0)).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.localDateTime.not(Seq(localDateTime1)).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.localDateTime.not(Seq(localDateTime2)).query.get.map(_ ==> List(a, c))
-        _ <- Ns.i.a1.localDateTime.not(Seq(localDateTime3)).query.get.map(_ ==> List(a, b))
-        // OR semantics for multiple args
-        _ <- Ns.i.a1.localDateTime.not(localDateTime0, localDateTime1).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.localDateTime.not(localDateTime1, localDateTime2).query.get.map(_ ==> List(c))
-        _ <- Ns.i.a1.localDateTime.not(localDateTime2, localDateTime3).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.localDateTime.not(Seq(localDateTime0, localDateTime1)).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.localDateTime.not(Seq(localDateTime1, localDateTime2)).query.get.map(_ ==> List(c))
-        _ <- Ns.i.a1.localDateTime.not(Seq(localDateTime2, localDateTime3)).query.get.map(_ ==> List(a))
-        // Empty Seq of negation args matches all values
-        _ <- Ns.i.a1.localDateTime.not(Seq.empty[LocalDateTime]).query.get.map(_ ==> List(a, b, c))
+      // Find values not matching
+      _ <- Entity.i.a1.localDateTime.not(localDateTime0).query.get.map(_ ==> List(a, b, c))
+      _ <- Entity.i.a1.localDateTime.not(localDateTime1).query.get.map(_ ==> List(b, c))
+      _ <- Entity.i.a1.localDateTime.not(localDateTime2).query.get.map(_ ==> List(a, c))
+      _ <- Entity.i.a1.localDateTime.not(localDateTime3).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.localDateTime.not(Seq(localDateTime0)).query.get.map(_ ==> List(a, b, c))
+      _ <- Entity.i.a1.localDateTime.not(Seq(localDateTime1)).query.get.map(_ ==> List(b, c))
+      _ <- Entity.i.a1.localDateTime.not(Seq(localDateTime2)).query.get.map(_ ==> List(a, c))
+      _ <- Entity.i.a1.localDateTime.not(Seq(localDateTime3)).query.get.map(_ ==> List(a, b))
+      // OR semantics for multiple args
+      _ <- Entity.i.a1.localDateTime.not(localDateTime0, localDateTime1).query.get.map(_ ==> List(b, c))
+      _ <- Entity.i.a1.localDateTime.not(localDateTime1, localDateTime2).query.get.map(_ ==> List(c))
+      _ <- Entity.i.a1.localDateTime.not(localDateTime2, localDateTime3).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.localDateTime.not(Seq(localDateTime0, localDateTime1)).query.get.map(_ ==> List(b, c))
+      _ <- Entity.i.a1.localDateTime.not(Seq(localDateTime1, localDateTime2)).query.get.map(_ ==> List(c))
+      _ <- Entity.i.a1.localDateTime.not(Seq(localDateTime2, localDateTime3)).query.get.map(_ ==> List(a))
+      // Empty Seq of negation args matches all values
+      _ <- Entity.i.a1.localDateTime.not(Seq.empty[LocalDateTime]).query.get.map(_ ==> List(a, b, c))
 
-        // Find values in range
-        _ <- Ns.i.a1.localDateTime.<(localDateTime2).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.localDateTime.>(localDateTime2).query.get.map(_ ==> List(c))
-        _ <- Ns.i.a1.localDateTime.<=(localDateTime2).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.localDateTime.>=(localDateTime2).query.get.map(_ ==> List(b, c))
-      } yield ()
-    }
-
-
-    "Tacit" - types { implicit conn =>
-      val (a, b, c, x) = (1, 2, 3, 4)
-      for {
-        _ <- Ns.i.localDateTime_?.insert(List(
-          (a, Some(localDateTime1)),
-          (b, Some(localDateTime2)),
-          (c, Some(localDateTime3)),
-          (x, None)
-        )).transact
-
-        // Match asserted attribute without returning its value
-        _ <- Ns.i.a1.localDateTime_.query.get.map(_ ==> List(a, b, c))
-
-        // Match non-asserted attribute (null)
-        _ <- Ns.i.a1.localDateTime_().query.get.map(_ ==> List(x))
-
-        // Match attribute values without returning them
-        _ <- Ns.i.a1.localDateTime_(localDateTime0).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.localDateTime_(localDateTime1).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.localDateTime_(Seq(localDateTime0)).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.localDateTime_(Seq(localDateTime1)).query.get.map(_ ==> List(a))
-        // OR semantics for multiple args ("is this or that")
-        _ <- Ns.i.a1.localDateTime_(localDateTime1, localDateTime2).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.localDateTime_(localDateTime1, localDateTime0).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.localDateTime_(Seq(localDateTime1, localDateTime2)).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.localDateTime_(Seq(localDateTime1, localDateTime0)).query.get.map(_ ==> List(a))
-        // Empty Seq of args matches no values
-        _ <- Ns.i.a1.localDateTime_(Seq.empty[LocalDateTime]).query.get.map(_ ==> List())
-
-        // Match non-matching values without returning them
-        _ <- Ns.i.a1.localDateTime_.not(localDateTime0).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.localDateTime_.not(localDateTime1).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.localDateTime_.not(localDateTime2).query.get.map(_ ==> List(a, c))
-        _ <- Ns.i.a1.localDateTime_.not(localDateTime3).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.localDateTime_.not(Seq(localDateTime0)).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.localDateTime_.not(Seq(localDateTime1)).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.localDateTime_.not(Seq(localDateTime2)).query.get.map(_ ==> List(a, c))
-        _ <- Ns.i.a1.localDateTime_.not(Seq(localDateTime3)).query.get.map(_ ==> List(a, b))
-        // OR semantics for multiple args
-        _ <- Ns.i.a1.localDateTime_.not(localDateTime0, localDateTime1).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.localDateTime_.not(localDateTime1, localDateTime2).query.get.map(_ ==> List(c))
-        _ <- Ns.i.a1.localDateTime_.not(localDateTime2, localDateTime3).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.localDateTime_.not(Seq(localDateTime0, localDateTime1)).query.get.map(_ ==> List(b, c))
-        _ <- Ns.i.a1.localDateTime_.not(Seq(localDateTime1, localDateTime2)).query.get.map(_ ==> List(c))
-        _ <- Ns.i.a1.localDateTime_.not(Seq(localDateTime2, localDateTime3)).query.get.map(_ ==> List(a))
-        // Empty Seq of negation args matches all asserted values (non-null)
-        _ <- Ns.i.a1.localDateTime_.not(Seq.empty[LocalDateTime]).query.get.map(_ ==> List(a, b, c))
-
-        // Match value ranges without returning them
-        _ <- Ns.i.a1.localDateTime_.<(localDateTime2).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.localDateTime_.>(localDateTime2).query.get.map(_ ==> List(c))
-        _ <- Ns.i.a1.localDateTime_.<=(localDateTime2).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.localDateTime_.>=(localDateTime2).query.get.map(_ ==> List(b, c))
-      } yield ()
-    }
+      // Find values in range
+      _ <- Entity.i.a1.localDateTime.<(localDateTime2).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.localDateTime.>(localDateTime2).query.get.map(_ ==> List(c))
+      _ <- Entity.i.a1.localDateTime.<=(localDateTime2).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.localDateTime.>=(localDateTime2).query.get.map(_ ==> List(b, c))
+    } yield ()
+  }
 
 
-    "Optional" - types { implicit conn =>
-      val a = (1, Some(localDateTime1))
-      val b = (2, Some(localDateTime2))
-      val c = (3, Some(localDateTime3))
-      val x = (4, Option.empty[LocalDateTime])
-      for {
-        _ <- Ns.i.localDateTime_?.insert(List(a, b, c, x)).transact
+  "Tacit" - types { implicit conn =>
+    val (a, b, c, x) = (1, 2, 3, 4)
+    for {
+      _ <- Entity.i.localDateTime_?.insert(List(
+        (a, Some(localDateTime1)),
+        (b, Some(localDateTime2)),
+        (c, Some(localDateTime3)),
+        (x, None)
+      )).transact
 
-        // Find all optional attribute values
-        _ <- Ns.i.a1.localDateTime_?.query.get.map(_ ==> List(a, b, c, x))
+      // Match asserted attribute without returning its value
+      _ <- Entity.i.a1.localDateTime_.query.get.map(_ ==> List(a, b, c))
 
-        // Find optional values matching
-        _ <- Ns.i.a1.localDateTime_?(Some(localDateTime0)).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.localDateTime_?(Some(localDateTime1)).query.get.map(_ ==> List(a))
+      // Match non-asserted attribute (null)
+      _ <- Entity.i.a1.localDateTime_().query.get.map(_ ==> List(x))
 
-        // None matches non-asserted/null values
-        _ <- Ns.i.a1.localDateTime_?(Option.empty[LocalDateTime]).query.get.map(_ ==> List(x))
-        // Easier to apply nothing to tacit attribute
-        _ <- Ns.i.a1.localDateTime_().query.get.map(_ ==> List(4))
-      } yield ()
-    }
+      // Match attribute values without returning them
+      _ <- Entity.i.a1.localDateTime_(localDateTime0).query.get.map(_ ==> List())
+      _ <- Entity.i.a1.localDateTime_(localDateTime1).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.localDateTime_(Seq(localDateTime0)).query.get.map(_ ==> List())
+      _ <- Entity.i.a1.localDateTime_(Seq(localDateTime1)).query.get.map(_ ==> List(a))
+      // OR semantics for multiple args ("is this or that")
+      _ <- Entity.i.a1.localDateTime_(localDateTime1, localDateTime2).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.localDateTime_(localDateTime1, localDateTime0).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.localDateTime_(Seq(localDateTime1, localDateTime2)).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.localDateTime_(Seq(localDateTime1, localDateTime0)).query.get.map(_ ==> List(a))
+      // Empty Seq of args matches no values
+      _ <- Entity.i.a1.localDateTime_(Seq.empty[LocalDateTime]).query.get.map(_ ==> List())
+
+      // Match non-matching values without returning them
+      _ <- Entity.i.a1.localDateTime_.not(localDateTime0).query.get.map(_ ==> List(a, b, c))
+      _ <- Entity.i.a1.localDateTime_.not(localDateTime1).query.get.map(_ ==> List(b, c))
+      _ <- Entity.i.a1.localDateTime_.not(localDateTime2).query.get.map(_ ==> List(a, c))
+      _ <- Entity.i.a1.localDateTime_.not(localDateTime3).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.localDateTime_.not(Seq(localDateTime0)).query.get.map(_ ==> List(a, b, c))
+      _ <- Entity.i.a1.localDateTime_.not(Seq(localDateTime1)).query.get.map(_ ==> List(b, c))
+      _ <- Entity.i.a1.localDateTime_.not(Seq(localDateTime2)).query.get.map(_ ==> List(a, c))
+      _ <- Entity.i.a1.localDateTime_.not(Seq(localDateTime3)).query.get.map(_ ==> List(a, b))
+      // OR semantics for multiple args
+      _ <- Entity.i.a1.localDateTime_.not(localDateTime0, localDateTime1).query.get.map(_ ==> List(b, c))
+      _ <- Entity.i.a1.localDateTime_.not(localDateTime1, localDateTime2).query.get.map(_ ==> List(c))
+      _ <- Entity.i.a1.localDateTime_.not(localDateTime2, localDateTime3).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.localDateTime_.not(Seq(localDateTime0, localDateTime1)).query.get.map(_ ==> List(b, c))
+      _ <- Entity.i.a1.localDateTime_.not(Seq(localDateTime1, localDateTime2)).query.get.map(_ ==> List(c))
+      _ <- Entity.i.a1.localDateTime_.not(Seq(localDateTime2, localDateTime3)).query.get.map(_ ==> List(a))
+      // Empty Seq of negation args matches all asserted values (non-null)
+      _ <- Entity.i.a1.localDateTime_.not(Seq.empty[LocalDateTime]).query.get.map(_ ==> List(a, b, c))
+
+      // Match value ranges without returning them
+      _ <- Entity.i.a1.localDateTime_.<(localDateTime2).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.localDateTime_.>(localDateTime2).query.get.map(_ ==> List(c))
+      _ <- Entity.i.a1.localDateTime_.<=(localDateTime2).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.localDateTime_.>=(localDateTime2).query.get.map(_ ==> List(b, c))
+    } yield ()
+  }
 
 
-    "Combinations" - types { implicit conn =>
-      for {
-        _ <- Ns.i.localDateTime.insert(
-          (1, localDateTime1),
-          (2, localDateTime2),
-          (3, localDateTime3),
-          (4, localDateTime4),
-          (5, localDateTime5),
-          (6, localDateTime6),
-          (7, localDateTime7),
-          (8, localDateTime8),
-          (9, localDateTime9),
-        ).transact
+  "Optional" - types { implicit conn =>
+    val a = (1, Some(localDateTime1))
+    val b = (2, Some(localDateTime2))
+    val c = (3, Some(localDateTime3))
+    val x = (4, Option.empty[LocalDateTime])
+    for {
+      _ <- Entity.i.localDateTime_?.insert(List(a, b, c, x)).transact
 
-        _ <- Ns.i.a1.localDateTime_.>(localDateTime2).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8, 9))
-        _ <- Ns.i.a1.localDateTime_.>(localDateTime2).localDateTime_.<=(localDateTime8).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8))
-        _ <- Ns.i.a1.localDateTime_.>(localDateTime2).localDateTime_.<=(localDateTime8).localDateTime_.not(localDateTime4, localDateTime5).query.get.map(_ ==> List(3, 6, 7, 8))
-      } yield ()
-    }
+      // Find all optional attribute values
+      _ <- Entity.i.a1.localDateTime_?.query.get.map(_ ==> List(a, b, c, x))
+
+      // Find optional values matching
+      _ <- Entity.i.a1.localDateTime_?(Some(localDateTime0)).query.get.map(_ ==> List())
+      _ <- Entity.i.a1.localDateTime_?(Some(localDateTime1)).query.get.map(_ ==> List(a))
+
+      // None matches non-asserted/null values
+      _ <- Entity.i.a1.localDateTime_?(Option.empty[LocalDateTime]).query.get.map(_ ==> List(x))
+      // Easier to apply nothing to tacit attribute
+      _ <- Entity.i.a1.localDateTime_().query.get.map(_ ==> List(4))
+    } yield ()
+  }
+
+
+  "Combinations" - types { implicit conn =>
+    for {
+      _ <- Entity.i.localDateTime.insert(
+        (1, localDateTime1),
+        (2, localDateTime2),
+        (3, localDateTime3),
+        (4, localDateTime4),
+        (5, localDateTime5),
+        (6, localDateTime6),
+        (7, localDateTime7),
+        (8, localDateTime8),
+        (9, localDateTime9),
+      ).transact
+
+      _ <- Entity.i.a1.localDateTime_.>(localDateTime2).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8, 9))
+      _ <- Entity.i.a1.localDateTime_.>(localDateTime2).localDateTime_.<=(localDateTime8).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8))
+      _ <- Entity.i.a1.localDateTime_.>(localDateTime2).localDateTime_.<=(localDateTime8).localDateTime_.not(localDateTime4, localDateTime5).query.get.map(_ ==> List(3, 6, 7, 8))
+    } yield ()
   }
 }

@@ -1,14 +1,33 @@
 package molecule.sql.postgres.compliance.pagination.cursor.noUnique
 
+import molecule.coreTests.setup.MUnitSuite
 import molecule.coreTests.spi.pagination.cursor.noUnique._
-import molecule.sql.postgres.setup.Test_postgres_async
+import molecule.sql.postgres.setup.Api_postgres_async
 
-object Test_AttrOrderMandatory extends AttrOrderMandatory with Test_postgres_async
-object Test_AttrOrderOptional extends AttrOrderOptional with Test_postgres_async
-object Test_DirectionsMandatory extends DirectionsMandatory with Test_postgres_async
-object Test_DirectionsOptional extends DirectionsOptional with Test_postgres_async
-object Test_MutationAdd extends MutationAdd with Test_postgres_async
-object Test_MutationDelete extends MutationDelete with Test_postgres_async
-object Test_Nested extends Nested with Test_postgres_async
-object Test_OptNested extends OptNested with Test_postgres_async
-object Test_TypesOptional extends TypesOptional with Test_postgres_async
+class AttrOrderMandatory extends MUnitSuite {
+  AttrOrderMandatory(this, Api_postgres_async)
+}
+class AttrOrderOptional extends MUnitSuite {
+  AttrOrderOptional(this, Api_postgres_async)
+}
+class DirectionsMandatory extends MUnitSuite {
+  DirectionsMandatory(this, Api_postgres_async)
+}
+class DirectionsOptional extends MUnitSuite {
+  DirectionsOptional(this, Api_postgres_async)
+}
+class MutationAdd extends MUnitSuite {
+  MutationAdd(this, Api_postgres_async)
+}
+class MutationDelete extends MUnitSuite {
+  MutationDelete(this, Api_postgres_async)
+}
+class Nested extends MUnitSuite {
+  Nested(this, Api_postgres_async)
+}
+class OptNested extends MUnitSuite {
+  OptNested(this, Api_postgres_async)
+}
+class TypesOptional extends MUnitSuite {
+  TypesOptional(this, Api_postgres_async)
+}

@@ -1,8 +1,8 @@
 package molecule.rest.dataModel
 
-import molecule.DataModel
+import molecule.Domain
 
-object Starwars extends DataModel(6) {
+object Starwars extends Domain(6) {
 
   trait Character {
     val name      = oneString

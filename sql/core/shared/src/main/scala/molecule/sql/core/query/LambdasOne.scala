@@ -3,7 +3,6 @@ package molecule.sql.core.query
 import java.net.URI
 import java.time._
 import java.util.{Date, UUID}
-import java.math.{BigDecimal => jBigDecimal}
 
 trait LambdasOne extends LambdasBase { self: SqlQueryBase =>
 

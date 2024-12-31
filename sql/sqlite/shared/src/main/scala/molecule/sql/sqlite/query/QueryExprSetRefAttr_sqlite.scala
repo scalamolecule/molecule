@@ -11,8 +11,8 @@ trait QueryExprSetRefAttr_sqlite
   override protected def setRefMan[T](
     attr: Attr, args: Set[T], res: ResSet[T]
   ): Unit = {
-    select += s"json_group_array($joinTable.$ref_id) $refIds"
-    joins += (("INNER JOIN", joinTable, "", List(s"$nsId = $joinTable.$ns_id")))
+    select += s"json_group_array($joinTable.$rid) $refIds"
+    joins += (("INNER JOIN", joinTable, "", List(s"$nsId = $joinTable.$eid")))
     groupBy += nsId
     castStrategy.add(
       (row: RS, paramIndex: Int) =>
@@ -34,8 +34,8 @@ trait QueryExprSetRefAttr_sqlite
     attr: Attr, optSet: Option[Set[T]], resOpt: ResSetOpt[T], res: ResSet[T]
   ): Unit = {
     val col = getCol(attr: Attr)
-    select += s"json_group_array($joinTable.$ref_id) $refIds"
-    joins += (("LEFT JOIN", joinTable, "", List(s"$nsId = $joinTable.$ns_id")))
+    select += s"json_group_array($joinTable.$rid) $refIds"
+    joins += (("LEFT JOIN", joinTable, "", List(s"$nsId = $joinTable.$eid")))
     groupBy += nsId
     castStrategy.add((row: RS, paramIndex: Int) => {
       row.getString(paramIndex) match {
@@ -59,10 +59,10 @@ trait QueryExprSetRefAttr_sqlite
     val jsonValues = set.map(one2json).mkString(", ")
     s"""(
        |    SELECT
-       |      JSON_LENGTH(json_group_array($joinTable.$ref_id)) = $size AND
-       |      JSON_CONTAINS(json_group_array($joinTable.$ref_id), JSON_ARRAY($jsonValues))
+       |      JSON_LENGTH(json_group_array($joinTable.$rid)) = $size AND
+       |      JSON_CONTAINS(json_group_array($joinTable.$rid), JSON_ARRAY($jsonValues))
        |    FROM $joinTable
-       |    WHERE $joinTable.$ns_id = $nsId
+       |    WHERE $joinTable.$eid = $nsId
        |  )""".stripMargin
   }
 
@@ -74,9 +74,9 @@ trait QueryExprSetRefAttr_sqlite
     optSet.fold[Unit] {
       where += (("",
         s"""(
-           |    SELECT count($joinTable.$ref_id) = 0
+           |    SELECT count($joinTable.$rid) = 0
            |    FROM $joinTable
-           |    WHERE $joinTable.$ns_id = $nsId
+           |    WHERE $joinTable.$eid = $nsId
            |  )""".stripMargin
       ))
     } { set =>
@@ -90,7 +90,7 @@ trait QueryExprSetRefAttr_sqlite
 
   override protected def setRefOptNeq[T](optSet: Option[Set[T]], res: ResSet[T]): Unit = {
     optSet.foreach(set => setRefNeq(set, res))
-    setNotNull(s"$joinTable.$ns_id")
+    setNotNull(s"$joinTable.$eid")
   }
 
 
@@ -99,13 +99,13 @@ trait QueryExprSetRefAttr_sqlite
        |    SELECT
        |      ${matches.mkString(s" $logic\n      ")}
        |    FROM $joinTable
-       |    WHERE $joinTable.$ns_id = $nsId
+       |    WHERE $joinTable.$eid = $nsId
        |  )""".stripMargin
   }
 
   private def arrayMatch[T](set: Set[T], not: String = ""): String = {
     s"""${not}JSON_CONTAINS(
-       |        JSON_ARRAYAGG($joinTable.$ref_id),
+       |        JSON_ARRAYAGG($joinTable.$rid),
        |        JSON_ARRAY(${set.mkString(", ")})
        |      )""".stripMargin
   }
@@ -118,17 +118,17 @@ trait QueryExprSetRefAttr_sqlite
            |    SELECT *
            |    FROM $joinTable
            |    WHERE
-           |      $joinTable.$ns_id = $nsId AND
-           |      $joinTable.$ref_id = ${set.head}
+           |      $joinTable.$eid = $nsId AND
+           |      $joinTable.$rid = ${set.head}
            |  )""".stripMargin
-        ))
+      ))
       case _ => where += (("",
         s"""EXISTS (
            |    SELECT *
            |    FROM $joinTable
            |    WHERE
-           |      $joinTable.$ns_id = $nsId AND
-           |      $joinTable.$ref_id IN (${set.mkString(", ")})
+           |      $joinTable.$eid = $nsId AND
+           |      $joinTable.$rid IN (${set.mkString(", ")})
            |  )""".stripMargin
       ))
     }
@@ -142,8 +142,8 @@ trait QueryExprSetRefAttr_sqlite
            |    SELECT *
            |    FROM $joinTable
            |    WHERE
-           |      $joinTable.$ns_id = $nsId AND
-           |      $joinTable.$ref_id = ${set.head}
+           |      $joinTable.$eid = $nsId AND
+           |      $joinTable.$rid = ${set.head}
            |  )""".stripMargin
       ))
       case _ => where += (("",
@@ -151,8 +151,8 @@ trait QueryExprSetRefAttr_sqlite
            |    SELECT *
            |    FROM $joinTable
            |    WHERE
-           |      $joinTable.$ns_id = $nsId AND
-           |      $joinTable.$ref_id IN (${set.mkString(", ")})
+           |      $joinTable.$eid = $nsId AND
+           |      $joinTable.$rid IN (${set.mkString(", ")})
            |  )""".stripMargin
       ))
     }

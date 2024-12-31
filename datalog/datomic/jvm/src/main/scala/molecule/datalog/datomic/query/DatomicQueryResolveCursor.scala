@@ -11,7 +11,6 @@ import molecule.core.util.FutureUtils
 import molecule.datalog.core.query.{DatomicQueryBase, Model2DatomicQuery}
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import molecule.datalog.datomic.query.cursorStrategy.{NoUnique, PrimaryUnique, SubUnique}
-import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
 /**

@@ -21,6 +21,7 @@ case class JdbcConn_JVM(
   override val proxy: JdbcProxy,
   private val sqlConn0: sql.Connection
 ) extends Conn(proxy)
+  with AutoCloseable
   with CachedConnection
   with SqlDataType_JVM
   with ModelUtils
@@ -32,6 +33,8 @@ case class JdbcConn_JVM(
     sqlConn.prepareStatement(
       query,
       ResultSet.TYPE_SCROLL_INSENSITIVE,
+      //      ResultSet.TYPE_FORWARD_ONLY,
+
       ResultSet.CONCUR_READ_ONLY
     )
   }
@@ -50,7 +53,7 @@ case class JdbcConn_JVM(
       // Atomic transaction of all statements
       sqlConn.setAutoCommit(false)
 
-      // Execute and get affected entity ids of initial namespace
+      // Execute and get affected initial entity ids
       val ids = executions()
 
       if (commit_) {
@@ -218,4 +221,6 @@ case class JdbcConn_JVM(
   }
 
   override def setAutoCommit(bool: Boolean): Unit = sqlConn.setAutoCommit(false)
+
+  override def close(): Unit = sqlConn.close()
 }

@@ -8,7 +8,6 @@ import datomic.Util.readAll
 import datomic.{Connection => DatomicConnection, Datom => _, _}
 import molecule.base.error._
 import molecule.boilerplate.util.MoleculeLogging
-import molecule.core.api.Savepoint
 import molecule.core.marshalling.DatomicProxy
 import molecule.core.spi.{Conn, TxReport}
 import molecule.core.util.Executor

@@ -16,17 +16,17 @@ object _InsertResolvers extends CoreGenBase("InsertResolvers", "/transaction") {
        |trait $fileName_ {
        |
        |  protected def resolve(
-       |    nsMap: Map[String, MetaNs],
+       |    entityMap: Map[String, MetaEntity],
        |    elements: List[Element],
        |    resolvers: List[Product => Unit],
        |    tplIndex: Int
        |  ): List[Product => Unit]
        |
        |  def getResolver(
-       |    nsMap: Map[String, MetaNs],
+       |    entityMap: Map[String, MetaEntity],
        |    elements: List[Element]
        |  ): Product => Unit = {
-       |    val resolvers: List[Product => Unit] = resolve(nsMap, elements, Nil, 0)
+       |    val resolvers: List[Product => Unit] = resolve(entityMap, elements, Nil, 0)
        |    resolvers.length match {
        |      $resolveX
        |    }

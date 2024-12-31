@@ -1,12 +1,24 @@
 package molecule.sql.mariadb.compliance.transaction.insert
 
-import molecule.coreTests.spi.transaction.insert._
-import molecule.sql.mariadb.setup.{Test_mariadb_async, TestSuite_mariadb_array}
-import molecule.sql.mariadb.spi.Spi_mariadb_async
+import molecule.coreTests.setup.{MUnitSuite, MUnitSuiteWithArrays}
+import molecule.coreTests.spi.action.insert._
+import molecule.sql.mariadb.setup.Api_mariadb_async
 
-object Test_InsertCardOne extends InsertCardOne with Test_mariadb_async
-object Test_InsertCardSeq extends InsertCardSeq with TestSuite_mariadb_array with Spi_mariadb_async
-object Test_InsertCardSet extends InsertCardSet with Test_mariadb_async
-object Test_InsertCardMap extends InsertCardMap with Test_mariadb_async
-object Test_InsertRefs extends InsertRefs with Test_mariadb_async
-object Test_InsertSemantics extends InsertSemantics with Test_mariadb_async
+class InsertCardOne extends MUnitSuite {
+  InsertCardOne(this, Api_mariadb_async)
+}
+class InsertCardSeq extends MUnitSuiteWithArrays {
+  InsertCardSeq(this, Api_mariadb_async)
+}
+class InsertCardSet extends MUnitSuite {
+  InsertCardSet(this, Api_mariadb_async)
+}
+class InsertCardMap extends MUnitSuite {
+  InsertCardMap(this, Api_mariadb_async)
+}
+class InsertRefs extends MUnitSuite {
+  InsertRefs(this, Api_mariadb_async)
+}
+class InsertSemantics extends MUnitSuite {
+  InsertSemantics(this, Api_mariadb_async)
+}

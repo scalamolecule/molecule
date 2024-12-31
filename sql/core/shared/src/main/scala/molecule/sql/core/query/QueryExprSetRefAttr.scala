@@ -8,16 +8,16 @@ trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: Model2Query 
 
   protected var joinTable: String = ""
   protected var nsId     : String = ""
-  protected var ns_id    : String = ""
-  protected var ref_id   : String = ""
+  protected var eid      : String = ""
+  protected var rid      : String = ""
   protected var refIds   : String = ""
 
   protected def setCoords(attr: Attr): Unit = {
     val (ns, refAttr, refNs) = (attr.ns, attr.attr, attr.refNs.get)
     joinTable = ss(ns, refAttr, refNs)
     nsId = ns + ".id"
-    ns_id = ss(ns, "id")
-    ref_id = ss(refNs, "id")
+    eid = ss(ns, "id")
+    rid = ss(refNs, "id")
     refIds = s"${ns}_$refAttr"
   }
 
@@ -56,8 +56,8 @@ trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: Model2Query 
 
 
   protected def setRefMan[T](attr: Attr, args: Set[T], res: ResSet[T]): Unit = {
-    select += s"ARRAY_AGG($joinTable.$ref_id) $refIds"
-    joins += (("INNER JOIN", joinTable, "", List(s"$nsId = $joinTable.$ns_id")))
+    select += s"ARRAY_AGG($joinTable.$rid) $refIds"
+    joins += (("INNER JOIN", joinTable, "", List(s"$nsId = $joinTable.$eid")))
     groupBy += nsId
     castStrategy.add(res.sql2set)
 
@@ -74,7 +74,7 @@ trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: Model2Query 
 
   protected def setRefTac[T](attr: Attr, args: Set[T], res: ResSet[T]): Unit = {
     val col = getCol(attr: Attr)
-    joins += (("INNER JOIN", joinTable, "", List(s"$nsId = $joinTable.$ns_id")))
+    joins += (("INNER JOIN", joinTable, "", List(s"$nsId = $joinTable.$eid")))
     groupBy += nsId
     attr.filterAttr.fold {
       setRefExpr(attr, col, attr.op, args)
@@ -87,8 +87,8 @@ trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: Model2Query 
   protected def setRefOpt[T](
     attr: Attr, optSet: Option[Set[T]], resOpt: ResSetOpt[T], res: ResSet[T]
   ): Unit = {
-    select += s"ARRAY_AGG($joinTable.$ref_id) $refIds"
-    joins += (("LEFT JOIN", joinTable, "", List(s"$nsId = $joinTable.$ns_id")))
+    select += s"ARRAY_AGG($joinTable.$rid) $refIds"
+    joins += (("LEFT JOIN", joinTable, "", List(s"$nsId = $joinTable.$eid")))
     groupBy += nsId
     castStrategy.add(resOpt.sql2setOpt)
     attr.op match {
@@ -107,7 +107,7 @@ trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: Model2Query 
       case Has     => refHas(set)
       case HasNo   => refHasNo(set)
       case NoValue =>
-        refNoValue(s"$joinTable.$ns_id")
+        refNoValue(s"$joinTable.$eid")
       case other   => unexpectedOp(other)
     }
   }
@@ -121,11 +121,11 @@ trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: Model2Query 
   }
 
   protected def contains(v: String): String = {
-    s"(SELECT ARRAY_CONTAINS(ARRAY_AGG($joinTable.$ref_id), $v) FROM $joinTable WHERE $joinTable.$ns_id = $nsId)"
+    s"(SELECT ARRAY_CONTAINS(ARRAY_AGG($joinTable.$rid), $v) FROM $joinTable WHERE $joinTable.$eid = $nsId)"
   }
 
   protected def sizeCheck(size: Int): String = {
-    s"(SELECT CARDINALITY(ARRAY_AGG($joinTable.$ref_id)) = $size FROM $joinTable WHERE $joinTable.$ns_id = $nsId)"
+    s"(SELECT CARDINALITY(ARRAY_AGG($joinTable.$rid)) = $size FROM $joinTable WHERE $joinTable.$eid = $nsId)"
   }
 
   protected def setRefMatchSet(set: Set[String]): String = {
@@ -142,9 +142,9 @@ trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: Model2Query 
     optSets.fold[Unit] {
       where += (("",
         s"""(
-           |    SELECT count($joinTable.$ref_id) = 0
+           |    SELECT count($joinTable.$rid) = 0
            |    FROM $joinTable
-           |    WHERE $joinTable.$ns_id = $nsId
+           |    WHERE $joinTable.$eid = $nsId
            |  )""".stripMargin
       ))
     } { sets =>
@@ -158,7 +158,7 @@ trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: Model2Query 
 
   protected def setRefOptNeq[T](optSet: Option[Set[T]], res: ResSet[T]): Unit = {
     optSet.foreach(set => setRefNeq(set, res))
-    setNotNull(s"$joinTable.$ns_id")
+    setNotNull(s"$joinTable.$eid")
   }
 
 
@@ -167,7 +167,7 @@ trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: Model2Query 
        |    SELECT
        |      $arrayContains
        |    FROM $joinTable
-       |    WHERE $joinTable.$ns_id = $nsId
+       |    WHERE $joinTable.$eid = $nsId
        |  )""".stripMargin
   }
 
@@ -176,12 +176,12 @@ trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: Model2Query 
       case 0 => where += (("FALSE", ""))
       case 1 =>
         val arrayContains = arrayMatches(
-          s"  ARRAY_CONTAINS(ARRAY_AGG($joinTable.$ref_id), ${set.head})"
+          s"  ARRAY_CONTAINS(ARRAY_AGG($joinTable.$rid), ${set.head})"
         )
         where += (("", arrayContains))
       case _ =>
         val arrayContains = set
-          .map(v => s"ARRAY_CONTAINS(ARRAY_AGG($joinTable.$ref_id), $v)")
+          .map(v => s"ARRAY_CONTAINS(ARRAY_AGG($joinTable.$rid), $v)")
           .mkString(" OR\n      ")
         where += (("", arrayMatches(arrayContains)))
     }
@@ -193,7 +193,7 @@ trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: Model2Query 
 
   protected def refOptHas[T](col: String, optSets: Option[Set[T]]): Unit = {
     optSets.fold[Unit] {
-      where += ((s"$joinTable.$ref_id", s"IS NULL"))
+      where += ((s"$joinTable.$rid", s"IS NULL"))
     } { sets =>
       refHas(sets)
     }
@@ -204,12 +204,12 @@ trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: Model2Query 
       case 0 => ()
       case 1 => where += (("",
         arrayMatches(
-          s"  " + s"NOT ARRAY_CONTAINS(ARRAY_AGG($joinTable.$ref_id), ${set.head})"
+          s"  " + s"NOT ARRAY_CONTAINS(ARRAY_AGG($joinTable.$rid), ${set.head})"
         )
       ))
       case _ =>
         val arrayContains = set
-          .map(v => s"NOT ARRAY_CONTAINS(ARRAY_AGG($joinTable.$ref_id), $v)")
+          .map(v => s"NOT ARRAY_CONTAINS(ARRAY_AGG($joinTable.$rid), $v)")
           .mkString(" AND\n        ")
         where += (("", arrayMatches(arrayContains)))
     }
@@ -221,7 +221,7 @@ trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: Model2Query 
 
   protected def refOptHasNo[T](optSet: Option[Set[T]]): Unit = {
     optSet.fold[Unit] {
-      where += ((s"$joinTable.$ref_id", s"IS NOT NULL"))
+      where += ((s"$joinTable.$rid", s"IS NOT NULL"))
     } { set =>
       refHasNo(set)
     }

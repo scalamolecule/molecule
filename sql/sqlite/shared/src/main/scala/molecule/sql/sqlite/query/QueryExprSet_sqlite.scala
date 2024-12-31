@@ -73,7 +73,7 @@ trait QueryExprSet_sqlite
              |    FROM JSON_EACH($col)
              |    WHERE JSON_EACH.VALUE IN ($values)
              |  )""".stripMargin
-      ))
+        ))
     }
   }
 

@@ -3,32 +3,38 @@ package molecule.coreTests.spi.api
 import molecule.base.error.{InsertErrors, ValidationErrors}
 import molecule.core.api.Api_io
 import molecule.core.spi.Spi_io
-import molecule.coreTests.dataModels.dsl.Types.Ns
-import molecule.coreTests.setup.CoreTestSuite_io
+import molecule.coreTests.domains.dsl.Types._
+import molecule.coreTests.setup.{DbProviders, MUnitSuite, TestUtils}
 import scala.annotation.nowarn
 import scala.language.implicitConversions
 
-trait IOApi extends CoreTestSuite_io with Api_io { spi: Spi_io =>
+case class IOApi(
+  suite: MUnitSuite,
+  api: Api_io with Spi_io with DbProviders
+) extends TestUtils {
+
+  import api._
+  import suite._
 
   test("Crud actions") {
     types { implicit conn =>
       // (can't have this line in for expression since Cats IO doesn't
       // have withFilter and better-monadic-for doesn't fix this on scalajs)
-      Ns.int.insert(1, 2).transact.map(_.ids).flatMap {
+      Entity.int.insert(1, 2).transact.map(_.ids).flatMap {
         case List(a, b) =>
           for {
-            _ <- Ns.int(3).save.transact
-            _ <- Ns.int.a1.query.get.map(_ ==> List(1, 2, 3))
-            _ <- Ns(a).int(10).update.transact
-            _ <- Ns(b).delete.transact
-            _ <- Ns.int.a1.query.get.map(_ ==> List(3, 10))
+            _ <- Entity.int(3).save.transact
+            _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
+            _ <- Entity(a).int(10).update.transact
+            _ <- Entity(b).delete.transact
+            _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
           } yield ()
       }: @nowarn
     }
   }
 
   test("Validation") {
-    import molecule.coreTests.dataModels.dsl.Validation.Type
+    import molecule.coreTests.domains.dsl.Validation.Type
     validation { implicit conn =>
       for {
         _ <- Type.string("a").save.transact
@@ -64,14 +70,14 @@ trait IOApi extends CoreTestSuite_io with Api_io { spi: Spi_io =>
 
   test("Inspection") {
     types { implicit conn =>
-      Ns.int.insert(1, 2).transact.map(_.ids).flatMap {
+      Entity.int.insert(1, 2).transact.map(_.ids).flatMap {
         case List(a, b) =>
           for {
-            _ <- Ns.int.insert(1, 2).inspect
-            _ <- Ns.int(3).save.inspect
-            _ <- Ns.int.query.inspect
-            _ <- Ns(a).int(10).update.inspect
-            _ <- Ns(b).delete.inspect
+            _ <- Entity.int.insert(1, 2).inspect
+            _ <- Entity.int(3).save.inspect
+            _ <- Entity.int.query.inspect
+            _ <- Entity(a).int(10).update.inspect
+            _ <- Entity(b).delete.inspect
           } yield ()
       }: @nowarn
     }
@@ -80,18 +86,18 @@ trait IOApi extends CoreTestSuite_io with Api_io { spi: Spi_io =>
   test("Offset query") {
     types { implicit conn =>
       for {
-        _ <- Ns.int.insert(1, 2, 3).transact
-        _ <- Ns.int.a1.query.get.map(_ ==> List(1, 2, 3))
-        _ <- Ns.int.a1.query.limit(2).get.map(_ ==> List(1, 2))
-        _ <- Ns.int.a1.query.offset(1).get.map(_ ==> (List(2, 3), 3, false))
-        _ <- Ns.int.a1.query.offset(1).limit(1).get.map(_ ==> (List(2), 3, true))
+        _ <- Entity.int.insert(1, 2, 3).transact
+        _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
+        _ <- Entity.int.a1.query.limit(2).get.map(_ ==> List(1, 2))
+        _ <- Entity.int.a1.query.offset(1).get.map(_ ==> (List(2, 3), 3, false))
+        _ <- Entity.int.a1.query.offset(1).limit(1).get.map(_ ==> (List(2), 3, true))
       } yield ()
     }
   }
 
   test("Cursor query") {
     unique { implicit conn =>
-      import molecule.coreTests.dataModels.dsl.Uniques._
+      import molecule.coreTests.domains.dsl.Uniques._
       val query = Uniques.int.a1.query
       for {
         _ <- Uniques.int.insert(1, 2, 3, 4, 5).transact
@@ -109,28 +115,28 @@ trait IOApi extends CoreTestSuite_io with Api_io { spi: Spi_io =>
       var intermediaryCallbackResults = List.empty[List[Int]]
       for {
         // Initial data
-        _ <- Ns.i(1).save.transact
+        _ <- Entity.i(1).save.transact
 
         // Start subscription
-        _ <- Ns.i.query.subscribe { freshResult =>
+        _ <- Entity.i.query.subscribe { freshResult =>
           intermediaryCallbackResults = intermediaryCallbackResults :+ freshResult
         }
 
         // Mutations to be monitored by subscription
-        id <- Ns.i(2).save.transact.map(_.id)
-        _ <- Ns.i.a1.query.get.map(_ ==> List(1, 2))
+        id <- Entity.i(2).save.transact.map(_.id)
+        _ <- Entity.i.a1.query.get.map(_ ==> List(1, 2))
 
-        _ <- Ns.i.insert(3, 4).transact
-        _ <- Ns.i.a1.query.get.map(_ ==> List(1, 2, 3, 4))
+        _ <- Entity.i.insert(3, 4).transact
+        _ <- Entity.i.a1.query.get.map(_ ==> List(1, 2, 3, 4))
 
-        _ <- Ns(id).i(20).update.transact
-        _ <- Ns.i.a1.query.get.map(_ ==> List(1, 3, 4, 20))
+        _ <- Entity(id).i(20).update.transact
+        _ <- Entity.i.a1.query.get.map(_ ==> List(1, 3, 4, 20))
 
-        _ <- Ns(id).delete.transact
-        _ <- Ns.i.a1.query.get.map(_ ==> List(1, 3, 4))
+        _ <- Entity(id).delete.transact
+        _ <- Entity.i.a1.query.get.map(_ ==> List(1, 3, 4))
 
         // Mutations with no callback-involved attributes don't call back
-        _ <- Ns.string("foo").save.transact
+        _ <- Entity.string("foo").save.transact
 
         // Intermediary callback results
         _ = intermediaryCallbackResults.map(_.sorted) ==> List(

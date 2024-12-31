@@ -1,8 +1,5 @@
 package molecule.sql.sqlite.query
 
-import java.net.URI
-import java.time.{Duration, Instant, LocalDate, LocalDateTime, LocalTime, OffsetDateTime, OffsetTime, ZonedDateTime}
-import java.util.{Date, UUID}
 import molecule.sql.core.query.{LambdasMap, SqlQueryBase}
 
 trait LambdasMap_sqlite extends LambdasMap { self: SqlQueryBase =>

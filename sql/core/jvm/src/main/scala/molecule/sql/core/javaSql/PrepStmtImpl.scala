@@ -1,7 +1,7 @@
 package molecule.sql.core.javaSql
 
-import java.sql.{Date, PreparedStatement, Time, Timestamp}
 import java.math.{BigDecimal => jBigDecimal}
+import java.sql.{Date, PreparedStatement, Time, Timestamp}
 
 
 class PrepStmtImpl(val underlying: PreparedStatement) extends PrepStmt {

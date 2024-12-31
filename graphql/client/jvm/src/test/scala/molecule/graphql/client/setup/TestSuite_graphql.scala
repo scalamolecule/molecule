@@ -3,7 +3,7 @@ package molecule.graphql.client.setup
 import molecule.base.api.Schema
 import molecule.base.util.BaseHelpers
 import molecule.core.spi.Conn
-import molecule.coreTests.dataModels.schema._
+import molecule.coreTests.domains.schema._
 import molecule.coreTests.setup.CoreTestSuite
 import molecule.graphql.client.schema.StarwarsSchema
 
@@ -11,7 +11,7 @@ import molecule.graphql.client.schema.StarwarsSchema
 trait TestSuite_graphql extends CoreTestSuite with BaseHelpers {
 
   override val platform = "jvm"
-  override val database = "Postgres"
+  override val database = "postgres"
 
   override def inMem[T](test: Conn => T, schema: Schema): T = {
     val conn = schema match {

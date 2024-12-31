@@ -116,7 +116,7 @@ trait Spi_datomic_io
 
   override def save_validate(save: Save)(implicit conn: Conn): IO[Map[String, Seq[String]]] = io {
     val proxy = conn.proxy
-    TxModelValidation(proxy.nsMap, proxy.attrMap, "save").validate(save.elements)
+    TxModelValidation(proxy.schema.entityMap, proxy.schema.attrMap, "save").validate(save.elements)
   }
 
 
@@ -172,7 +172,7 @@ trait Spi_datomic_io
 
   override def update_validate(update: Update)(implicit conn: Conn): IO[Map[String, Seq[String]]] = io {
     val proxy = conn.proxy
-    TxModelValidation(proxy.nsMap, proxy.attrMap, "update").validate(update.elements)
+    TxModelValidation(proxy.schema.entityMap, proxy.schema.attrMap, "update").validate(update.elements)
   }
 
 

@@ -1,11 +1,12 @@
 package molecule.sql.postgres.spi
 
+import java.sql.DriverManager
 import molecule.boilerplate.ast.Model._
 import molecule.core.action._
 import molecule.core.marshalling.{ConnProxy, JdbcProxy}
 import molecule.core.transaction._
 import molecule.core.util.Executor._
-import molecule.sql.core.facade.JdbcConn_JVM
+import molecule.sql.core.facade.{JdbcConn_JVM, JdbcHandler_JVM}
 import molecule.sql.core.javaSql.{ResultSetInterface => Row}
 import molecule.sql.core.spi.SpiBase_sync
 import molecule.sql.core.transaction.SqlDelete
@@ -14,7 +15,6 @@ import molecule.sql.core.transaction.strategy.delete.DeleteAction
 import molecule.sql.core.transaction.strategy.insert.InsertAction
 import molecule.sql.core.transaction.strategy.save.SaveAction
 import molecule.sql.core.transaction.strategy.update.UpdateAction
-import molecule.sql.postgres.marshalling.Connection_postgres
 import molecule.sql.postgres.query._
 import molecule.sql.postgres.transaction._
 import scala.concurrent.Future
@@ -51,7 +51,7 @@ trait Spi_postgres_sync extends SpiBase_sync {
   ): DeleteAction = {
     new SqlOps_postgres(conn)
       with ResolveDelete with Spi_postgres_sync with SqlDelete {}
-      .getDeleteAction(delete.elements, conn.proxy.nsMap)
+      .getDeleteAction(delete.elements, conn.proxy.schema.entityMap)
   }
 
 
@@ -75,7 +75,13 @@ trait Spi_postgres_sync extends SpiBase_sync {
   // Creating connection from RPC proxy
   override protected def getJdbcConn(proxy: ConnProxy): Future[JdbcConn_JVM] = {
     Future(
-      Connection_postgres.getNewConnection(proxy.asInstanceOf[JdbcProxy])
+      getNewConnection(proxy.asInstanceOf[JdbcProxy])
+    )
+  }
+
+  private def getNewConnection(proxy: JdbcProxy): JdbcConn_JVM = {
+    JdbcHandler_JVM.recreateDb(
+      JdbcConn_JVM(proxy, DriverManager.getConnection(proxy.url))
     )
   }
 }

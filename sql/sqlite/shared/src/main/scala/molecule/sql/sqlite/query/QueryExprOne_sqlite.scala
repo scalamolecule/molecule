@@ -116,7 +116,7 @@ trait QueryExprOne_sqlite
         //             |    LIMIT 2 - (SELECT COUNT(*) FROM Ns) % 2
         //             |    OFFSET (SELECT (COUNT(*) - 1) / 2 FROM Ns)
         //             |  )""".stripMargin
-        //        joins += (("INNER JOIN", subSelect, "_Ns", "", ""))
+        //        joins += (("INNER JOIN", subSelect, "_Entity", "", ""))
 
         // There should be a solution using percent_rank ...
         //        selectWithOrder(col, "percent_rank", "0.5) WITHIN GROUP (ORDER BY ")

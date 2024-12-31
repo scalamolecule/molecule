@@ -3,7 +3,7 @@ package molecule.base.error
 /** Insert error - validation errors for an insert row of data
  *
  * @param tplIndex     Index of attribute value in data tuple
- * @param fullAttr     Full attribute name (Ns.attr)
+ * @param fullAttr     Full attribute name (Entity.attr)
  * @param errors       Error messages
 * @param nestedErrors Nested errors
  */

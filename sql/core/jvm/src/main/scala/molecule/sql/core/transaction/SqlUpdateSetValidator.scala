@@ -28,11 +28,11 @@ trait SqlUpdateSetValidator extends SpiHelpers {
       ) { refNs =>
         val joinTable = ss(ns, attr, refNs)
         val refNs_id  = ss(refNs, "id")
-        val ns_id     = ss(ns, "id")
+        val eid       = ss(ns, "id")
         s"""SELECT DISTINCT
            |  ARRAY_AGG($joinTable.$refNs_id)
            |FROM $ns
-           |INNER JOIN $joinTable ON $ns.id = $joinTable.$ns_id
+           |INNER JOIN $joinTable ON $ns.id = $joinTable.$eid
            |GROUP BY $ns.id;""".stripMargin
       }
 
@@ -44,7 +44,7 @@ trait SqlUpdateSetValidator extends SpiHelpers {
         throw ExecutionError(
           s"Unexpected error trying to find current values of mandatory attribute ${a.name}")
     }
-    TxModelValidation(proxy.nsMap, proxy.attrMap, "update", Some(curSetValues)).validate(elements)
+    TxModelValidation(proxy.schema.entityMap, proxy.schema.attrMap, "update", Some(curSetValues)).validate(elements)
   }
 
   protected def validateUpdateSet_json(
@@ -65,11 +65,11 @@ trait SqlUpdateSetValidator extends SpiHelpers {
       ) { refNs =>
         val joinTable = ss(ns, attr, refNs)
         val refNs_id  = ss(refNs, "id")
-        val ns_id     = ss(ns, "id")
+        val eid       = ss(ns, "id")
         s"""SELECT DISTINCT
            |  JSON_ARRAYAGG($joinTable.$refNs_id)
            |FROM $ns
-           |INNER JOIN $joinTable ON $ns.id = $joinTable.$ns_id
+           |INNER JOIN $joinTable ON $ns.id = $joinTable.$eid
            |GROUP BY $ns.id;""".stripMargin
       }
       jsonArray2coalescedSet(a, query2resultSet(query))
@@ -80,7 +80,7 @@ trait SqlUpdateSetValidator extends SpiHelpers {
         throw ExecutionError(
           s"Unexpected error trying to find current values of mandatory attribute ${a.name}")
     }
-    TxModelValidation(proxy.nsMap, proxy.attrMap, "update", Some(curSetValues)).validate(elements)
+    TxModelValidation(proxy.schema.entityMap, proxy.schema.attrMap, "update", Some(curSetValues)).validate(elements)
   }
 
   protected def validateUpdateSet_sqlite(
@@ -104,11 +104,11 @@ trait SqlUpdateSetValidator extends SpiHelpers {
       ) { refNs =>
         val joinTable = ss(ns, attr, refNs)
         val refNs_id  = ss(refNs, "id")
-        val ns_id     = ss(ns, "id")
+        val eid       = ss(ns, "id")
         s"""SELECT DISTINCT
            |  json_group_array($joinTable.$refNs_id)
            |FROM $ns
-           |  INNER JOIN $joinTable ON $ns.id = $joinTable.$ns_id
+           |  INNER JOIN $joinTable ON $ns.id = $joinTable.$eid
            |GROUP BY $ns.id""".stripMargin
       }
       jsonArray2coalescedSet(a, query2resultSet(query))
@@ -119,7 +119,7 @@ trait SqlUpdateSetValidator extends SpiHelpers {
         throw ExecutionError(
           s"Unexpected error trying to find current values of mandatory attribute ${a.name}")
     }
-    TxModelValidation(proxy.nsMap, proxy.attrMap, "update", Some(curSetValues)).validate(elements)
+    TxModelValidation(proxy.schema.entityMap, proxy.schema.attrMap, "update", Some(curSetValues)).validate(elements)
   }
 
   // Mysql data types

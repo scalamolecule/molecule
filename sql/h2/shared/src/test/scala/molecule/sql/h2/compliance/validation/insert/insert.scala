@@ -1,15 +1,37 @@
 package molecule.sql.h2.compliance.validation.insert
 
+import molecule.coreTests.setup.MUnitSuite
 import molecule.coreTests.spi.validation.insert._
-import molecule.sql.h2.setup.Test_h2_async
+import molecule.sql.h2.setup.Api_h2_async
 
-object Test_FormatConstants  extends FormatConstants with Test_h2_async
-object Test_FormatVariables extends FormatVariables with Test_h2_async
-object Test_Nested extends Nested with Test_h2_async
-object Test_Semantics extends Semantics with Test_h2_async
-object Test_TypesOne extends TypesOne with Test_h2_async
-object Test_TypesOneOpt extends TypesOneOpt with Test_h2_async
-object Test_TypesSeq extends TypesSeq with Test_h2_async
-object Test_TypesSeqOpt extends TypesSeqOpt with Test_h2_async
-object Test_TypesSet extends TypesSet with Test_h2_async
-object Test_TypesSetOpt extends TypesSetOpt with Test_h2_async
+class FormatConstants extends MUnitSuite {
+  FormatConstants(this, Api_h2_async)
+}
+
+class FormatVariables extends MUnitSuite {
+  FormatVariables(this, Api_h2_async)
+}
+class Nested extends MUnitSuite {
+  Nested(this, Api_h2_async)
+}
+class Semantics extends MUnitSuite {
+  Semantics(this, Api_h2_async)
+}
+class TypesOne extends MUnitSuite {
+  TypesOne(this, Api_h2_async)
+}
+class TypesOneOpt extends MUnitSuite {
+  TypesOneOpt(this, Api_h2_async)
+}
+class TypesSeq extends MUnitSuite {
+  TypesSeq(this, Api_h2_async)
+}
+class TypesSeqOpt extends MUnitSuite {
+  TypesSeqOpt(this, Api_h2_async)
+}
+class TypesSet extends MUnitSuite {
+  TypesSet(this, Api_h2_async)
+}
+class TypesSetOpt extends MUnitSuite {
+  TypesSetOpt(this, Api_h2_async)
+}

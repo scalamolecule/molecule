@@ -8,7 +8,7 @@ import scala.annotation.tailrec
 
 
 case class TxModelValidation(
-  nsMap: Map[String, MetaNs],
+  entityMap: Map[String, MetaEntity],
   attrMap: Map[String, (Card, String, Seq[String])],
   action: String,
   getCurSetValues: Option[Attr => Set[Any]] = None
@@ -69,11 +69,11 @@ case class TxModelValidation(
 
         case BackRef(prevNs1, curNs, _) =>
           if (group == 0) {
-            throw ModelError(s"Can't use backref namespace _$prevNs1 from here")
+            throw ModelError(s"Can't use backref entity _$prevNs1 from here")
           }
           if (prevNs == prevNs1) {
             throw ModelError(
-              s"Please add attributes to namespace $curNs before going back to namespace $prevNs1"
+              s"Please add attributes to entity $curNs before going back to entity $prevNs1"
             )
           }
           group -= 1
@@ -123,8 +123,8 @@ case class TxModelValidation(
   private def register(a: Attr, attr: String) = {
     if (prevNs != a.ns) {
       prevNs = a.ns
-      mandatoryAttrs ++= nsMap(a.ns).mandatoryAttrs.map(attr => a.ns + "." + attr)
-      mandatoryRefs ++= nsMap(a.ns).mandatoryRefs.map { case (attr, refNs) => (a.ns + "." + attr) -> refNs }
+      mandatoryAttrs ++= entityMap(a.ns).mandatoryAttrs.map(attr => a.ns + "." + attr)
+      mandatoryRefs ++= entityMap(a.ns).mandatoryRefs.map { case (attr, refNs) => (a.ns + "." + attr) -> refNs }
     }
     requiredAttrs ++= attrMap(attr)._3
     presentAttrs += a.attr
@@ -138,7 +138,7 @@ case class TxModelValidation(
   }
 
   private def checkPath(a: Attr, attr: String) = {
-    // Distinguish multiple ref paths to the same namespace
+    // Distinguish multiple ref paths to the same entity
     val attrPrefixed = if (isUpdate) {
       val mode = a match {
         case _: AttrOneMan => "man"
@@ -178,7 +178,7 @@ case class TxModelValidation(
   private def noEmpty(ns: String, refAttr: String): Unit = {
     if (presentAttrs.isEmpty && !isUpdate) {
       throw ModelError(
-        s"Please add at least 1 attribute to namespace $ns " +
+        s"Please add at least 1 attribute to entity $ns " +
           s"before relating to " + refAttr.capitalize
       )
     }
@@ -295,7 +295,7 @@ case class TxModelValidation(
     }
     if (!isUpdate && mandatoryRefs.nonEmpty) {
       val list = mandatoryRefs.map {
-        case (a, refNs) => s"$a pointing to namespace $refNs"
+        case (a, refNs) => s"$a pointing to entity $refNs"
       }.mkString("\n  ")
       throw ModelError(
         s"""Missing/empty mandatory references:

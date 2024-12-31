@@ -27,7 +27,7 @@ trait SqlUpdate
   // Set after isUpsert has been set
   private lazy val join = if (isUpsert) "LEFT JOIN" else "INNER JOIN"
 
-  // Build query for ids of each namespace involved in update
+  // Build query for ids of each entity involved in update
   private object query {
     var ids         = List.empty[Long]
     val idCols      = ListBuffer.empty[String]
@@ -48,7 +48,7 @@ trait SqlUpdate
 
   private def initRoot(): Unit = {
     if (hasFilters || isRefUpdate) {
-      // Query for ids of each namespace
+      // Query for ids of each entity
       val idsQuery = selectStmt(ns, query.idCols, query.joins,
         m2q(query.filterAttrs.toList).getWhereClauses
       )
@@ -80,7 +80,7 @@ trait SqlUpdate
     query.filterAttrs += AttrOneManID(ns, "id", Eq, ids0)
     query.ids = ids0.toList
 
-    // Set here if no need for distributing ids across multiple namespaces
+    // Set here if no need for distributing ids across multiple entities
     updateAction.ids = query.ids
   }
 
@@ -107,7 +107,7 @@ trait SqlUpdate
       throw ModelError("Start index should be smaller than end index")
 
     val length = end - start
-    val s = start + 1
+    val s      = start + 1
     s"SUBSTRING($attr, $s, $length)"
   }
 
@@ -207,12 +207,12 @@ trait SqlUpdate
 
       case _ =>
         val joinTable = ss(ns, refAttr, refNs)
-        val ns_id     = s"${ns}_id"
-        val ref_id    = s"${refNs}_id"
+        val eid       = s"${ns}_id"
+        val rid       = s"${refNs}_id"
         query.idCols += s"$refNs.id"
         query.joins ++= List(
-          s"$join $joinTable ON $ns.id = $joinTable.$ns_id",
-          s"$join $refNs ON $joinTable.$ref_id = $refNs.id",
+          s"$join $joinTable ON $ns.id = $joinTable.$eid",
+          s"$join $refNs ON $joinTable.$rid = $refNs.id",
         )
         // Switch strategy
         updateAction.refMany(ns, refAttr, refNs)

@@ -1,30 +1,30 @@
 package molecule.sql.core.transaction.strategy.delete
 
 import java.sql.Statement
-import molecule.base.ast.MetaNs
+import molecule.base.ast.MetaEntity
 import molecule.sql.core.transaction.strategy.SqlOps
 
 case class DeleteJoin(
-  nsMap: Map[String, MetaNs],
+  entityMap: Map[String, MetaEntity],
   parent: DeleteAction,
   sqlStmt: Statement,
   sqlOps: SqlOps,
-  ns: String,
+  entity: String,
   refAttr: String,
-  refNs: String,
-) extends DeleteAction(nsMap, parent, sqlStmt, sqlOps, refNs) {
+  refEntity: String,
+) extends DeleteAction(entityMap, parent, sqlStmt, sqlOps, refEntity) {
 
   override def process(): Unit = {
     sqlStmt.addBatch(curStmt)
   }
 
   override def curStmt: String = {
-    val joinTable  = ss(ns, refAttr, refNs)
-    val (ns_id, _) = sqlOps.joinIdNames(ns, refNs)
-    s"DELETE FROM $joinTable WHERE $ns_id IN (" + ids.mkString(", ") + ")"
+    val joinTable = ss(entity, refAttr, refEntity)
+    val (eid, _)  = sqlOps.joinIdNames(entity, refEntity)
+    s"DELETE FROM $joinTable WHERE $eid IN (" + ids.mkString(", ") + ")"
   }
 
   override def render(indent: Int): String = {
-    recurseRender(indent, s"$ns.$refAttr.$refNs ")
+    recurseRender(indent, s"$entity.$refAttr.$refEntity ")
   }
 }

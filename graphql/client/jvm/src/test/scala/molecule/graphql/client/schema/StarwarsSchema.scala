@@ -60,7 +60,7 @@ object StarwarsSchema extends Schema
     ))
 
 
-  val nsMap: Map[String, MetaNs] = Map(
+  val entityMap: Map[String, MetaNs] = Map(
     "Character" -> 
       MetaNs("Character", Seq(
         MetaAttr("id"       , CardOne, "ID"    , None, Nil, None, None, Nil, Nil, Nil),

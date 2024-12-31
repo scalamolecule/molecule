@@ -1,36 +1,89 @@
 package molecule.sql.mariadb.compliance.filter.set
 
+import molecule.coreTests.setup.MUnitSuite
 import molecule.coreTests.spi.filter.set.SetSemantics
 import molecule.coreTests.spi.filter.set.ref._
 import molecule.coreTests.spi.filter.set.types._
-import molecule.sql.mariadb.setup.Test_mariadb_async
+import molecule.sql.mariadb.setup.Api_mariadb_async
 
-object Test_FilterSet_String_ extends FilterSet_String_ with Test_mariadb_async
-object Test_FilterSet_Int extends FilterSet_Int with Test_mariadb_async
-object Test_FilterSet_Long_ extends FilterSet_Long_ with Test_mariadb_async
-object Test_FilterSet_Float_ extends FilterSet_Float_ with Test_mariadb_async
-object Test_FilterSet_Double_ extends FilterSet_Double_ with Test_mariadb_async
-object Test_FilterSet_Boolean extends FilterSet_Boolean with Test_mariadb_async
-object Test_FilterSet_BigInt_ extends FilterSet_BigInt_ with Test_mariadb_async
-object Test_FilterSet_BigDecimal_ extends FilterSet_BigDecimal_ with Test_mariadb_async
-object Test_FilterSet_Date_ extends FilterSet_Date_ with Test_mariadb_async
-object Test_FilterSet_Duration_ extends FilterSet_Duration_ with Test_mariadb_async
-object Test_FilterSet_Instant_ extends FilterSet_Instant_ with Test_mariadb_async
-object Test_FilterSet_LocalDate_ extends FilterSet_LocalDate_ with Test_mariadb_async
-object Test_FilterSet_LocalTime_ extends FilterSet_LocalTime_ with Test_mariadb_async
-object Test_FilterSet_LocalDateTime_ extends FilterSet_LocalDateTime_ with Test_mariadb_async
-object Test_FilterSet_OffsetTime_ extends FilterSet_OffsetTime_ with Test_mariadb_async
-object Test_FilterSet_OffsetDateTime_ extends FilterSet_OffsetDateTime_ with Test_mariadb_async
-object Test_FilterSet_ZonedDateTime_ extends FilterSet_ZonedDateTime_ with Test_mariadb_async
-object Test_FilterSet_UUID_ extends FilterSet_UUID_ with Test_mariadb_async
-object Test_FilterSet_URI_ extends FilterSet_URI_ with Test_mariadb_async
-object Test_FilterSet_Byte_ extends FilterSet_Byte_ with Test_mariadb_async
-object Test_FilterSet_Short_ extends FilterSet_Short_ with Test_mariadb_async
-object Test_FilterSet_Char_ extends FilterSet_Char_ with Test_mariadb_async
+class FilterSet_String_ extends MUnitSuite {
+  FilterSet_String_(this, Api_mariadb_async)
+}
+class FilterSet_Int extends MUnitSuite {
+  FilterSet_Int(this, Api_mariadb_async)
+}
+class FilterSet_Long_ extends MUnitSuite {
+  FilterSet_Long_(this, Api_mariadb_async)
+}
+class FilterSet_Float_ extends MUnitSuite {
+  FilterSet_Float_(this, Api_mariadb_async)
+}
+class FilterSet_Double_ extends MUnitSuite {
+  FilterSet_Double_(this, Api_mariadb_async)
+}
+class FilterSet_Boolean extends MUnitSuite {
+  FilterSet_Boolean(this, Api_mariadb_async)
+}
+class FilterSet_BigInt_ extends MUnitSuite {
+  FilterSet_BigInt_(this, Api_mariadb_async)
+}
+class FilterSet_BigDecimal_ extends MUnitSuite {
+  FilterSet_BigDecimal_(this, Api_mariadb_async)
+}
+class FilterSet_Date_ extends MUnitSuite {
+  FilterSet_Date_(this, Api_mariadb_async)
+}
+class FilterSet_Duration_ extends MUnitSuite {
+  FilterSet_Duration_(this, Api_mariadb_async)
+}
+class FilterSet_Instant_ extends MUnitSuite {
+  FilterSet_Instant_(this, Api_mariadb_async)
+}
+class FilterSet_LocalDate_ extends MUnitSuite {
+  FilterSet_LocalDate_(this, Api_mariadb_async)
+}
+class FilterSet_LocalTime_ extends MUnitSuite {
+  FilterSet_LocalTime_(this, Api_mariadb_async)
+}
+class FilterSet_LocalDateTime_ extends MUnitSuite {
+  FilterSet_LocalDateTime_(this, Api_mariadb_async)
+}
+class FilterSet_OffsetTime_ extends MUnitSuite {
+  FilterSet_OffsetTime_(this, Api_mariadb_async)
+}
+class FilterSet_OffsetDateTime_ extends MUnitSuite {
+  FilterSet_OffsetDateTime_(this, Api_mariadb_async)
+}
+class FilterSet_ZonedDateTime_ extends MUnitSuite {
+  FilterSet_ZonedDateTime_(this, Api_mariadb_async)
+}
+class FilterSet_UUID_ extends MUnitSuite {
+  FilterSet_UUID_(this, Api_mariadb_async)
+}
+class FilterSet_URI_ extends MUnitSuite {
+  FilterSet_URI_(this, Api_mariadb_async)
+}
+class FilterSet_Byte_ extends MUnitSuite {
+  FilterSet_Byte_(this, Api_mariadb_async)
+}
+class FilterSet_Short_ extends MUnitSuite {
+  FilterSet_Short_(this, Api_mariadb_async)
+}
+class FilterSet_Char_ extends MUnitSuite {
+  FilterSet_Char_(this, Api_mariadb_async)
+}
 
-object Test_FilterSet_ref_ extends FilterSet_ref with Test_mariadb_async
+class FilterSet_ref extends MUnitSuite {
+  FilterSet_ref(this, Api_mariadb_async)
+}
 
-object Test_FilterSetSemantics extends SetSemantics with Test_mariadb_async
+class SetSemantics extends MUnitSuite {
+  SetSemantics(this, Api_mariadb_async)
+}
 
-object Test_FilterRefSet_Card1Ref extends FilterRefSet_Card1Ref with Test_mariadb_async
-object Test_FilterRefSet_Card2Ref extends FilterRefSet_Card2Ref with Test_mariadb_async
+class FilterRefSet_Card1Ref extends MUnitSuite {
+  FilterRefSet_Card1Ref(this, Api_mariadb_async)
+}
+class FilterRefSet_Card2Ref extends MUnitSuite {
+  FilterRefSet_Card2Ref(this, Api_mariadb_async)
+}

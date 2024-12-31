@@ -54,7 +54,7 @@ trait Spi_sqlite_sync extends SpiBase_sync {
   ): DeleteAction = {
     new SqlOps_sqlite(conn)
       with ResolveDelete with SqlDelete {}
-      .getDeleteAction(delete.elements, conn.proxy.nsMap)
+      .getDeleteAction(delete.elements, conn.proxy.schema.entityMap)
   }
 
 

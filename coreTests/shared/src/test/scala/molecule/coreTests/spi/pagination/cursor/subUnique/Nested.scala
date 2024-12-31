@@ -3,135 +3,136 @@ package molecule.coreTests.spi.pagination.cursor.subUnique
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.dsl.Uniques._
-import molecule.coreTests.setup.CoreTestSuite
-import utest._
-import scala.annotation.nowarn
+import molecule.coreTests.domains.dsl.Uniques._
+import molecule.coreTests.setup._
 import scala.util.Random
 
-trait Nested extends CoreTestSuite with Api_async { spi: Spi_async =>
+case class Nested(
+  suite: MUnitSuite,
+  api: Api_async with Spi_async with DbProviders
+) extends TestUtils {
 
-  @nowarn lazy val tests = Tests {
+  import api._
+  import suite._
 
-    "Forward, asc asc" - unique { implicit conn =>
-      val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
-      val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
-      val query               = (cursor: String, limit: Int) =>
-        Uniques.i.a1.int.a2.Refs.*(Ref.i).query.from(cursor).limit(limit)
-      for {
-        _ <- Uniques.i.int.Refs.*(Ref.i).insert(pairs).transact
-        c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
-        c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
-        c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
-        c2 <- query(c3, -2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
-        _ <- query(c2, -2).get.map { case (List(`a`, `b`), _, false) => () }
-      } yield ()
-    }
+  "Forward, asc asc" - unique { implicit conn =>
+    val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
+    val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
+    val query               = (cursor: String, limit: Int) =>
+      Uniques.i.a1.int.a2.Refs.*(Ref.i).query.from(cursor).limit(limit)
+    for {
+      _ <- Uniques.i.int.Refs.*(Ref.i).insert(pairs).transact
+      c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
+      c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
+      c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
+      c2 <- query(c3, -2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
+      _ <- query(c2, -2).get.map { case (List(`a`, `b`), _, false) => () }
+    } yield ()
+  }
 
-    "Forward, desc asc" - unique { implicit conn =>
-      val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
-      val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, p._2))
-      val query               = (cursor: String, limit: Int) =>
-        Uniques.i.d1.int.a2.Refs.*(Ref.i).query.from(cursor).limit(limit)
-      for {
-        _ <- Uniques.i.int.Refs.*(Ref.i).insert(pairs).transact
-        c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
-        c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
-        c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
-        c2 <- query(c3, -2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
-        _ <- query(c2, -2).get.map { case (List(`a`, `b`), _, false) => () }
-      } yield ()
-    }
+  "Forward, desc asc" - unique { implicit conn =>
+    val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
+    val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, p._2))
+    val query               = (cursor: String, limit: Int) =>
+      Uniques.i.d1.int.a2.Refs.*(Ref.i).query.from(cursor).limit(limit)
+    for {
+      _ <- Uniques.i.int.Refs.*(Ref.i).insert(pairs).transact
+      c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
+      c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
+      c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
+      c2 <- query(c3, -2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
+      _ <- query(c2, -2).get.map { case (List(`a`, `b`), _, false) => () }
+    } yield ()
+  }
 
-    "Forward, asc desc" - unique { implicit conn =>
-      val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
-      val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, -p._2))
-      val query               = (cursor: String, limit: Int) =>
-        Uniques.i.a1.int.d2.Refs.*(Ref.i).query.from(cursor).limit(limit)
-      for {
-        _ <- Uniques.i.int.Refs.*(Ref.i).insert(pairs).transact
-        c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
-        c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
-        c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
-        c2 <- query(c3, -2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
-        _ <- query(c2, -2).get.map { case (List(`a`, `b`), _, false) => () }
-      } yield ()
-    }
+  "Forward, asc desc" - unique { implicit conn =>
+    val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
+    val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, -p._2))
+    val query               = (cursor: String, limit: Int) =>
+      Uniques.i.a1.int.d2.Refs.*(Ref.i).query.from(cursor).limit(limit)
+    for {
+      _ <- Uniques.i.int.Refs.*(Ref.i).insert(pairs).transact
+      c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
+      c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
+      c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
+      c2 <- query(c3, -2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
+      _ <- query(c2, -2).get.map { case (List(`a`, `b`), _, false) => () }
+    } yield ()
+  }
 
-    "Forward, desc desc" - unique { implicit conn =>
-      val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
-      val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, -p._2))
-      val query               = (cursor: String, limit: Int) =>
-        Uniques.i.d1.int.d2.Refs.*(Ref.i).query.from(cursor).limit(limit)
-      for {
-        _ <- Uniques.i.int.Refs.*(Ref.i).insert(pairs).transact
-        c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
-        c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
-        c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
-        c2 <- query(c3, -2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
-        _ <- query(c2, -2).get.map { case (List(`a`, `b`), _, false) => () }
-      } yield ()
-    }
+  "Forward, desc desc" - unique { implicit conn =>
+    val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
+    val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, -p._2))
+    val query               = (cursor: String, limit: Int) =>
+      Uniques.i.d1.int.d2.Refs.*(Ref.i).query.from(cursor).limit(limit)
+    for {
+      _ <- Uniques.i.int.Refs.*(Ref.i).insert(pairs).transact
+      c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
+      c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
+      c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
+      c2 <- query(c3, -2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
+      _ <- query(c2, -2).get.map { case (List(`a`, `b`), _, false) => () }
+    } yield ()
+  }
 
 
-    "Backwards, asc asc" - unique { implicit conn =>
-      val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
-      val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
-      val query               = (cursor: String, limit: Int) =>
-        Uniques.i.a1.int.a2.Refs.*(Ref.i).query.from(cursor).limit(limit)
-      for {
-        _ <- Uniques.i.int.Refs.*(Ref.i).insert(pairs).transact
-        c1 <- query("", -2).get.map { case (List(`d`, `e`), cursor, true) => cursor }
-        c2 <- query(c1, -2).get.map { case (List(`b`, `c`), cursor, true) => cursor }
-        c3 <- query(c2, -2).get.map { case (List(`a`), cursor, false) => cursor }
-        c2 <- query(c3, 2).get.map { case (List(`b`, `c`), cursor, true) => cursor }
-        _ <- query(c2, 2).get.map { case (List(`d`, `e`), _, false) => () }
-      } yield ()
-    }
+  "Backwards, asc asc" - unique { implicit conn =>
+    val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
+    val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
+    val query               = (cursor: String, limit: Int) =>
+      Uniques.i.a1.int.a2.Refs.*(Ref.i).query.from(cursor).limit(limit)
+    for {
+      _ <- Uniques.i.int.Refs.*(Ref.i).insert(pairs).transact
+      c1 <- query("", -2).get.map { case (List(`d`, `e`), cursor, true) => cursor }
+      c2 <- query(c1, -2).get.map { case (List(`b`, `c`), cursor, true) => cursor }
+      c3 <- query(c2, -2).get.map { case (List(`a`), cursor, false) => cursor }
+      c2 <- query(c3, 2).get.map { case (List(`b`, `c`), cursor, true) => cursor }
+      _ <- query(c2, 2).get.map { case (List(`d`, `e`), _, false) => () }
+    } yield ()
+  }
 
-    "Backwards, desc asc" - unique { implicit conn =>
-      val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
-      val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, p._2))
-      val query               = (cursor: String, limit: Int) =>
-        Uniques.i.d1.int.a2.Refs.*(Ref.i).query.from(cursor).limit(limit)
-      for {
-        _ <- Uniques.i.int.Refs.*(Ref.i).insert(pairs).transact
-        c1 <- query("", -2).get.map { case (List(`d`, `e`), cursor, true) => cursor }
-        c2 <- query(c1, -2).get.map { case (List(`b`, `c`), cursor, true) => cursor }
-        c3 <- query(c2, -2).get.map { case (List(`a`), cursor, false) => cursor }
-        c2 <- query(c3, 2).get.map { case (List(`b`, `c`), cursor, true) => cursor }
-        _ <- query(c2, 2).get.map { case (List(`d`, `e`), _, false) => () }
-      } yield ()
-    }
+  "Backwards, desc asc" - unique { implicit conn =>
+    val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
+    val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, p._2))
+    val query               = (cursor: String, limit: Int) =>
+      Uniques.i.d1.int.a2.Refs.*(Ref.i).query.from(cursor).limit(limit)
+    for {
+      _ <- Uniques.i.int.Refs.*(Ref.i).insert(pairs).transact
+      c1 <- query("", -2).get.map { case (List(`d`, `e`), cursor, true) => cursor }
+      c2 <- query(c1, -2).get.map { case (List(`b`, `c`), cursor, true) => cursor }
+      c3 <- query(c2, -2).get.map { case (List(`a`), cursor, false) => cursor }
+      c2 <- query(c3, 2).get.map { case (List(`b`, `c`), cursor, true) => cursor }
+      _ <- query(c2, 2).get.map { case (List(`d`, `e`), _, false) => () }
+    } yield ()
+  }
 
-    "Backwards, asc desc" - unique { implicit conn =>
-      val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
-      val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, -p._2))
-      val query               = (cursor: String, limit: Int) =>
-        Uniques.i.a1.int.d2.Refs.*(Ref.i).query.from(cursor).limit(limit)
-      for {
-        _ <- Uniques.i.int.Refs.*(Ref.i).insert(pairs).transact
-        c1 <- query("", -2).get.map { case (List(`d`, `e`), cursor, true) => cursor }
-        c2 <- query(c1, -2).get.map { case (List(`b`, `c`), cursor, true) => cursor }
-        c3 <- query(c2, -2).get.map { case (List(`a`), cursor, false) => cursor }
-        c2 <- query(c3, 2).get.map { case (List(`b`, `c`), cursor, true) => cursor }
-        _ <- query(c2, 2).get.map { case (List(`d`, `e`), _, false) => () }
-      } yield ()
-    }
+  "Backwards, asc desc" - unique { implicit conn =>
+    val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
+    val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, -p._2))
+    val query               = (cursor: String, limit: Int) =>
+      Uniques.i.a1.int.d2.Refs.*(Ref.i).query.from(cursor).limit(limit)
+    for {
+      _ <- Uniques.i.int.Refs.*(Ref.i).insert(pairs).transact
+      c1 <- query("", -2).get.map { case (List(`d`, `e`), cursor, true) => cursor }
+      c2 <- query(c1, -2).get.map { case (List(`b`, `c`), cursor, true) => cursor }
+      c3 <- query(c2, -2).get.map { case (List(`a`), cursor, false) => cursor }
+      c2 <- query(c3, 2).get.map { case (List(`b`, `c`), cursor, true) => cursor }
+      _ <- query(c2, 2).get.map { case (List(`d`, `e`), _, false) => () }
+    } yield ()
+  }
 
-    "Backwards, desc desc" - unique { implicit conn =>
-      val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
-      val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, -p._2))
-      val query               = (cursor: String, limit: Int) =>
-        Uniques.i.d1.int.d2.Refs.*(Ref.i).query.from(cursor).limit(limit)
-      for {
-        _ <- Uniques.i.int.Refs.*(Ref.i).insert(pairs).transact
-        c1 <- query("", -2).get.map { case (List(`d`, `e`), cursor, true) => cursor }
-        c2 <- query(c1, -2).get.map { case (List(`b`, `c`), cursor, true) => cursor }
-        c3 <- query(c2, -2).get.map { case (List(`a`), cursor, false) => cursor }
-        c2 <- query(c3, 2).get.map { case (List(`b`, `c`), cursor, true) => cursor }
-        _ <- query(c2, 2).get.map { case (List(`d`, `e`), _, false) => () }
-      } yield ()
-    }
+  "Backwards, desc desc" - unique { implicit conn =>
+    val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
+    val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, -p._2))
+    val query               = (cursor: String, limit: Int) =>
+      Uniques.i.d1.int.d2.Refs.*(Ref.i).query.from(cursor).limit(limit)
+    for {
+      _ <- Uniques.i.int.Refs.*(Ref.i).insert(pairs).transact
+      c1 <- query("", -2).get.map { case (List(`d`, `e`), cursor, true) => cursor }
+      c2 <- query(c1, -2).get.map { case (List(`b`, `c`), cursor, true) => cursor }
+      c3 <- query(c2, -2).get.map { case (List(`a`), cursor, false) => cursor }
+      c2 <- query(c3, 2).get.map { case (List(`b`, `c`), cursor, true) => cursor }
+      _ <- query(c2, 2).get.map { case (List(`d`, `e`), _, false) => () }
+    } yield ()
   }
 }

@@ -5,7 +5,6 @@ import molecule.base.ast.CardOne
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.core.query.QueryExpr
-import molecule.datalog.core.query.casting.NestOpt
 
 
 trait QueryExprRef[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] =>

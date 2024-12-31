@@ -3,8 +3,6 @@ package molecule.datalog.core.query
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.core.query.QueryExpr
-import molecule.core.util.JavaConversions
-import scala.reflect.ClassTag
 
 trait QueryExprSeq[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] with LambdasSeq =>
 

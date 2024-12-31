@@ -10,10 +10,10 @@ trait QueryExprSetRefAttr_postgres
   private def refMatchArray(sqlArray: (String, Int)): String = {
     s"""(
        |    SELECT
-       |      ${sqlArray._1} <@ ARRAY_AGG($joinTable.$ref_id) AND
-       |      CARDINALITY(ARRAY_AGG($joinTable.$ref_id)) = ${sqlArray._2}
+       |      ${sqlArray._1} <@ ARRAY_AGG($joinTable.$rid) AND
+       |      CARDINALITY(ARRAY_AGG($joinTable.$rid)) = ${sqlArray._2}
        |    FROM $joinTable
-       |    WHERE $joinTable.$ns_id = $nsId
+       |    WHERE $joinTable.$eid = $nsId
        |  )""".stripMargin
   }
 
@@ -29,10 +29,10 @@ trait QueryExprSetRefAttr_postgres
   override protected def refHas[T](set: Set[T]): Unit = {
     set.size match {
       case 0 => where += (("FALSE", ""))
-      case 1 => where += (("", arrayMatches(s"  ${set.head} = ANY(ARRAY_AGG($joinTable.$ref_id))")))
+      case 1 => where += (("", arrayMatches(s"  ${set.head} = ANY(ARRAY_AGG($joinTable.$rid))")))
       case _ =>
         val arrayContains = set.map(v =>
-          s"ARRAY[$v]::bigint[] <@ ARRAY_AGG($joinTable.$ref_id)"
+          s"ARRAY[$v]::bigint[] <@ ARRAY_AGG($joinTable.$rid)"
         ).mkString(" OR\n      ")
         where += (("", arrayMatches(arrayContains)))
     }
@@ -41,10 +41,10 @@ trait QueryExprSetRefAttr_postgres
   override protected def refHasNo[T](set: Set[T]): Unit = {
     set.size match {
       case 0 => ()
-      case 1 => where += (("", arrayMatches(s"  ${set.head} != ALL(ARRAY_AGG($joinTable.$ref_id))")))
+      case 1 => where += (("", arrayMatches(s"  ${set.head} != ALL(ARRAY_AGG($joinTable.$rid))")))
       case _ =>
         val arrayContains = set.map(v =>
-          s"NOT (ARRAY[$v]::bigint[] <@ ARRAY_AGG($joinTable.$ref_id))"
+          s"NOT (ARRAY[$v]::bigint[] <@ ARRAY_AGG($joinTable.$rid))"
         ).mkString(" AND\n      ")
         where += (("", arrayMatches(arrayContains)))
     }

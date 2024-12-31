@@ -4,310 +4,302 @@ package molecule.coreTests.spi.filter.map.types
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.dsl.Types._
-import molecule.coreTests.setup.CoreTestSuite
-import utest._
+import molecule.coreTests.domains.dsl.Types._
+import molecule.coreTests.setup._
 
-trait FilterMap_BigInt_ extends CoreTestSuite with Api_async { spi: Spi_async =>
+case class FilterMap_BigInt_(
+  suite: MUnitSuite,
+  api: Api_async with Spi_async with DbProviders
+) extends TestUtils {
 
   val a = (1, Map("a" -> bigInt1, "b" -> bigInt2))
   val b = (2, Map("a" -> bigInt2, "b" -> bigInt3, "c" -> bigInt4))
 
-  override lazy val tests = Tests {
-
-    "Mandatory" - {
-
-      "Mandatory map (no filter)" - types { implicit conn =>
-        for {
-          _ <- Ns.i.bigIntMap.insert(a, b).transact
-          _ <- Ns.i.a1.bigIntMap.query.get.map(_ ==> List(a, b))
-        } yield ()
-      }
+  import api._
+  import suite._
 
 
-      "Map with certain keys" - types { implicit conn =>
-        for {
-          _ <- Ns.i.bigIntMap.insert(a, b).transact
-
-          // Get Map value by key
-
-          // Like calling `apply` on a Scala Map.
-          _ <- Ns.i.a1.bigIntMap("_").query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigIntMap("a").query.get.map(_ ==> List((1, bigInt1), (2, bigInt2)))
-          _ <- Ns.i.a1.bigIntMap("b").query.get.map(_ ==> List((1, bigInt2), (2, bigInt3)))
-          _ <- Ns.i.a1.bigIntMap("c").query.get.map(_ ==> List((2, bigInt4)))
-        } yield ()
-      }
+  "Mandatory: Mandatory map (no filter)" - types { implicit conn =>
+    for {
+      _ <- Entity.i.bigIntMap.insert(a, b).transact
+      _ <- Entity.i.a1.bigIntMap.query.get.map(_ ==> List(a, b))
+    } yield ()
+  }
 
 
-      "Map without certain keys" - types { implicit conn =>
-        for {
-          _ <- Ns.i.bigIntMap.insert(a, b).transact
+  "Mandatory: Map with certain keys" - types { implicit conn =>
+    for {
+      _ <- Entity.i.bigIntMap.insert(a, b).transact
 
-          // Get Map without certain key(s)
+      // Get Map value by key
 
-          // "Map contains neither this OR that key"
-          _ <- Ns.i.a1.bigIntMap.not("_").query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.bigIntMap.not("a").query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigIntMap.not("b").query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigIntMap.not("c").query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.bigIntMap.not("a", "c").query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigIntMap.not("_", "c").query.get.map(_ ==> List(a))
-          // Same as
-          _ <- Ns.i.a1.bigIntMap.not(List("_")).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.bigIntMap.not(List("a")).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigIntMap.not(List("b")).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigIntMap.not(List("c")).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.bigIntMap.not(List("a", "c")).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigIntMap.not(List("_", "c")).query.get.map(_ ==> List(a))
-
-          // Negating empty Seq of keys matches all
-          _ <- Ns.i.a1.bigIntMap.not(List.empty[String]).query.get.map(_ ==> List(a, b))
-        } yield ()
-      }
+      // Like calling `apply` on a Scala Map.
+      _ <- Entity.i.a1.bigIntMap("_").query.get.map(_ ==> List())
+      _ <- Entity.i.a1.bigIntMap("a").query.get.map(_ ==> List((1, bigInt1), (2, bigInt2)))
+      _ <- Entity.i.a1.bigIntMap("b").query.get.map(_ ==> List((1, bigInt2), (2, bigInt3)))
+      _ <- Entity.i.a1.bigIntMap("c").query.get.map(_ ==> List((2, bigInt4)))
+    } yield ()
+  }
 
 
-      "Map with certain values" - types { implicit conn =>
-        for {
-          _ <- Ns.i.bigIntMap.insert(a, b).transact
+  "Mandatory: Map without certain keys" - types { implicit conn =>
+    for {
+      _ <- Entity.i.bigIntMap.insert(a, b).transact
 
-          // Maps containing value
+      // "Map contains neither this OR that key"
+      _ <- Entity.i.a1.bigIntMap.not("_").query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.bigIntMap.not("a").query.get.map(_ ==> List())
+      _ <- Entity.i.a1.bigIntMap.not("b").query.get.map(_ ==> List())
+      _ <- Entity.i.a1.bigIntMap.not("c").query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.bigIntMap.not("a", "c").query.get.map(_ ==> List())
+      _ <- Entity.i.a1.bigIntMap.not("_", "c").query.get.map(_ ==> List(a))
+      // Same as
+      _ <- Entity.i.a1.bigIntMap.not(List("_")).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.bigIntMap.not(List("a")).query.get.map(_ ==> List())
+      _ <- Entity.i.a1.bigIntMap.not(List("b")).query.get.map(_ ==> List())
+      _ <- Entity.i.a1.bigIntMap.not(List("c")).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.bigIntMap.not(List("a", "c")).query.get.map(_ ==> List())
+      _ <- Entity.i.a1.bigIntMap.not(List("_", "c")).query.get.map(_ ==> List(a))
 
-          _ <- Ns.i.a1.bigIntMap.has(bigInt0).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigIntMap.has(bigInt1).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.bigIntMap.has(bigInt2).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.bigIntMap.has(bigInt3).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.bigIntMap.has(bigInt4).query.get.map(_ ==> List(b))
-          // Same as
-          _ <- Ns.i.a1.bigIntMap.has(Seq(bigInt0)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigIntMap.has(Seq(bigInt1)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.bigIntMap.has(Seq(bigInt2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.bigIntMap.has(Seq(bigInt3)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.bigIntMap.has(Seq(bigInt4)).query.get.map(_ ==> List(b))
-
-          // OR semantics when multiple values
-
-          // "Has this OR that" value
-          _ <- Ns.i.a1.bigIntMap.has(bigInt0, bigInt1).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.bigIntMap.has(bigInt1, bigInt2).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.bigIntMap.has(bigInt2, bigInt3).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.bigIntMap.has(bigInt3, bigInt4).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.bigIntMap.has(bigInt4, bigInt5).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.bigIntMap.has(bigInt5, bigInt6).query.get.map(_ ==> List())
-          // Same as
-          _ <- Ns.i.a1.bigIntMap.has(Seq(bigInt0, bigInt1)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.bigIntMap.has(Seq(bigInt1, bigInt2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.bigIntMap.has(Seq(bigInt2, bigInt3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.bigIntMap.has(Seq(bigInt3, bigInt4)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.bigIntMap.has(Seq(bigInt4, bigInt5)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.bigIntMap.has(Seq(bigInt5, bigInt6)).query.get.map(_ ==> List())
-
-          // No values match nothing
-          _ <- Ns.i.a1.bigIntMap.has(Seq.empty[BigInt]).query.get.map(_ ==> List())
-        } yield ()
-      }
+      // Negating empty Seq of keys matches all
+      _ <- Entity.i.a1.bigIntMap.not(List.empty[String]).query.get.map(_ ==> List(a, b))
+    } yield ()
+  }
 
 
-      "Map without certain values" - types { implicit conn =>
-        for {
-          _ <- Ns.i.bigIntMap.insert(a, b).transact
+  "Mandatory: Map with certain values" - types { implicit conn =>
+    for {
+      _ <- Entity.i.bigIntMap.insert(a, b).transact
 
-          // "Doesn't have this"
-          _ <- Ns.i.a1.bigIntMap.hasNo(bigInt0).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.bigIntMap.hasNo(bigInt1).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.bigIntMap.hasNo(bigInt2).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigIntMap.hasNo(bigInt3).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.bigIntMap.hasNo(bigInt3).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.bigIntMap.hasNo(bigInt5).query.get.map(_ ==> List(a, b))
-          // Same as
-          _ <- Ns.i.a1.bigIntMap.hasNo(List(bigInt0)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.bigIntMap.hasNo(List(bigInt1)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.bigIntMap.hasNo(List(bigInt2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigIntMap.hasNo(List(bigInt3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.bigIntMap.hasNo(List(bigInt3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.bigIntMap.hasNo(List(bigInt5)).query.get.map(_ ==> List(a, b))
+      // Maps containing value
 
-          // OR semantics when multiple values
+      _ <- Entity.i.a1.bigIntMap.has(bigInt0).query.get.map(_ ==> List())
+      _ <- Entity.i.a1.bigIntMap.has(bigInt1).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.bigIntMap.has(bigInt2).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.bigIntMap.has(bigInt3).query.get.map(_ ==> List(b))
+      _ <- Entity.i.a1.bigIntMap.has(bigInt4).query.get.map(_ ==> List(b))
+      // Same as
+      _ <- Entity.i.a1.bigIntMap.has(Seq(bigInt0)).query.get.map(_ ==> List())
+      _ <- Entity.i.a1.bigIntMap.has(Seq(bigInt1)).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.bigIntMap.has(Seq(bigInt2)).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.bigIntMap.has(Seq(bigInt3)).query.get.map(_ ==> List(b))
+      _ <- Entity.i.a1.bigIntMap.has(Seq(bigInt4)).query.get.map(_ ==> List(b))
 
-          // "Has neither this OR that"
-          _ <- Ns.i.a1.bigIntMap.hasNo(bigInt1, bigInt2).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigIntMap.hasNo(bigInt1, bigInt3).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigIntMap.hasNo(bigInt1, bigInt3).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigIntMap.hasNo(bigInt1, bigInt5).query.get.map(_ ==> List(b))
-          // Same as
-          _ <- Ns.i.a1.bigIntMap.hasNo(List(bigInt1, bigInt2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigIntMap.hasNo(List(bigInt1, bigInt3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigIntMap.hasNo(List(bigInt1, bigInt3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigIntMap.hasNo(List(bigInt1, bigInt5)).query.get.map(_ ==> List(b))
+      // OR semantics when multiple values
 
-          // No values match nothing
-          _ <- Ns.i.a1.bigIntMap.hasNo(List.empty[BigInt]).query.get.map(_ ==> List(a, b))
-        } yield ()
-      }
-    }
+      // "Has this OR that" value
+      _ <- Entity.i.a1.bigIntMap.has(bigInt0, bigInt1).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.bigIntMap.has(bigInt1, bigInt2).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.bigIntMap.has(bigInt2, bigInt3).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.bigIntMap.has(bigInt3, bigInt4).query.get.map(_ ==> List(b))
+      _ <- Entity.i.a1.bigIntMap.has(bigInt4, bigInt5).query.get.map(_ ==> List(b))
+      _ <- Entity.i.a1.bigIntMap.has(bigInt5, bigInt6).query.get.map(_ ==> List())
+      // Same as
+      _ <- Entity.i.a1.bigIntMap.has(Seq(bigInt0, bigInt1)).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.bigIntMap.has(Seq(bigInt1, bigInt2)).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.bigIntMap.has(Seq(bigInt2, bigInt3)).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.bigIntMap.has(Seq(bigInt3, bigInt4)).query.get.map(_ ==> List(b))
+      _ <- Entity.i.a1.bigIntMap.has(Seq(bigInt4, bigInt5)).query.get.map(_ ==> List(b))
+      _ <- Entity.i.a1.bigIntMap.has(Seq(bigInt5, bigInt6)).query.get.map(_ ==> List())
 
-
-    "Tacit" - {
-
-      "Tacit Map (no filter)" - types { implicit conn =>
-        for {
-          _ <- Ns.i.bigIntMap.insert(a, b).transact
-          _ <- Ns.i.a1.bigIntMap_.query.get.map(_ ==> List(1, 2))
-        } yield ()
-      }
+      // No values match nothing
+      _ <- Entity.i.a1.bigIntMap.has(Seq.empty[BigInt]).query.get.map(_ ==> List())
+    } yield ()
+  }
 
 
-      "Match map with certain keys" - types { implicit conn =>
-        for {
-          _ <- Ns.i.insert(0).transact // Entity without map attribute
-          _ <- Ns.i.bigIntMap.insert(a, b).transact
+  "Mandatory: Map without certain values" - types { implicit conn =>
+    for {
+      _ <- Entity.i.bigIntMap.insert(a, b).transact
 
-          // "Map contains this OR that key"
-          _ <- Ns.i.a1.bigIntMap_("_").query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigIntMap_("a").query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.bigIntMap_("b").query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.bigIntMap_("c").query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.bigIntMap_("a", "c").query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.bigIntMap_("_", "c").query.get.map(_ ==> List(2))
-          // Same as
-          _ <- Ns.i.a1.bigIntMap_(List("_")).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigIntMap_(List("a")).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.bigIntMap_(List("b")).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.bigIntMap_(List("c")).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.bigIntMap_(List("a", "c")).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.bigIntMap_(List("_", "c")).query.get.map(_ ==> List(2))
+      // "Doesn't have this"
+      _ <- Entity.i.a1.bigIntMap.hasNo(bigInt0).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.bigIntMap.hasNo(bigInt1).query.get.map(_ ==> List(b))
+      _ <- Entity.i.a1.bigIntMap.hasNo(bigInt2).query.get.map(_ ==> List())
+      _ <- Entity.i.a1.bigIntMap.hasNo(bigInt3).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.bigIntMap.hasNo(bigInt3).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.bigIntMap.hasNo(bigInt5).query.get.map(_ ==> List(a, b))
+      // Same as
+      _ <- Entity.i.a1.bigIntMap.hasNo(List(bigInt0)).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.bigIntMap.hasNo(List(bigInt1)).query.get.map(_ ==> List(b))
+      _ <- Entity.i.a1.bigIntMap.hasNo(List(bigInt2)).query.get.map(_ ==> List())
+      _ <- Entity.i.a1.bigIntMap.hasNo(List(bigInt3)).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.bigIntMap.hasNo(List(bigInt3)).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.bigIntMap.hasNo(List(bigInt5)).query.get.map(_ ==> List(a, b))
 
-          // Empty Seq of keys matches nothing
-          _ <- Ns.i.a1.bigIntMap_(List.empty[String]).query.get.map(_ ==> List())
+      // OR semantics when multiple values
 
-          // Match entities without map attribute
-          _ <- Ns.i.a1.bigIntMap_().query.get.map(_ ==> List(0))
-        } yield ()
-      }
+      // "Has neither this OR that"
+      _ <- Entity.i.a1.bigIntMap.hasNo(bigInt1, bigInt2).query.get.map(_ ==> List())
+      _ <- Entity.i.a1.bigIntMap.hasNo(bigInt1, bigInt3).query.get.map(_ ==> List())
+      _ <- Entity.i.a1.bigIntMap.hasNo(bigInt1, bigInt3).query.get.map(_ ==> List())
+      _ <- Entity.i.a1.bigIntMap.hasNo(bigInt1, bigInt5).query.get.map(_ ==> List(b))
+      // Same as
+      _ <- Entity.i.a1.bigIntMap.hasNo(List(bigInt1, bigInt2)).query.get.map(_ ==> List())
+      _ <- Entity.i.a1.bigIntMap.hasNo(List(bigInt1, bigInt3)).query.get.map(_ ==> List())
+      _ <- Entity.i.a1.bigIntMap.hasNo(List(bigInt1, bigInt3)).query.get.map(_ ==> List())
+      _ <- Entity.i.a1.bigIntMap.hasNo(List(bigInt1, bigInt5)).query.get.map(_ ==> List(b))
 
-
-      "Match map without certain keys" - types { implicit conn =>
-        for {
-          _ <- Ns.i.bigIntMap.insert(a, b).transact
-
-          // "Map contains neither this OR that key"
-          _ <- Ns.i.a1.bigIntMap_.not("_").query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.bigIntMap_.not("a").query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigIntMap_.not("b").query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigIntMap_.not("c").query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.bigIntMap_.not("a", "c").query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigIntMap_.not("_", "c").query.get.map(_ ==> List(1))
-          // Same as
-          _ <- Ns.i.a1.bigIntMap_.not(List("_")).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.bigIntMap_.not(List("a")).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigIntMap_.not(List("b")).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigIntMap_.not(List("c")).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.bigIntMap_.not(List("a", "c")).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigIntMap_.not(List("_", "c")).query.get.map(_ ==> List(1))
-
-          // Negating empty Seq of keys matches all
-          _ <- Ns.i.a1.bigIntMap_.not(List.empty[String]).query.get.map(_ ==> List(1, 2))
-        } yield ()
-      }
+      // No values match nothing
+      _ <- Entity.i.a1.bigIntMap.hasNo(List.empty[BigInt]).query.get.map(_ ==> List(a, b))
+    } yield ()
+  }
 
 
-      "Match map with certain values" - types { implicit conn =>
-        for {
-          _ <- Ns.i.bigIntMap.insert(a, b).transact
-
-          // "Map contains this OR that value"
-          _ <- Ns.i.a1.bigIntMap_.has(bigInt0).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigIntMap_.has(bigInt1).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.bigIntMap_.has(bigInt2).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.bigIntMap_.has(bigInt3).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.bigIntMap_.has(bigInt4).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.bigIntMap_.has(bigInt0, bigInt1).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.bigIntMap_.has(bigInt1, bigInt2).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.bigIntMap_.has(bigInt2, bigInt3).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.bigIntMap_.has(bigInt3, bigInt4).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.bigIntMap_.has(bigInt4, bigInt5).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.bigIntMap_.has(bigInt5, bigInt6).query.get.map(_ ==> List())
-          // Same as
-          _ <- Ns.i.a1.bigIntMap_.has(List(bigInt0)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigIntMap_.has(List(bigInt1)).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.bigIntMap_.has(List(bigInt2)).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.bigIntMap_.has(List(bigInt3)).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.bigIntMap_.has(List(bigInt4)).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.bigIntMap_.has(List(bigInt0, bigInt1)).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.bigIntMap_.has(List(bigInt1, bigInt2)).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.bigIntMap_.has(List(bigInt2, bigInt3)).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.bigIntMap_.has(List(bigInt3, bigInt4)).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.bigIntMap_.has(List(bigInt4, bigInt5)).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.bigIntMap_.has(List(bigInt5, bigInt6)).query.get.map(_ ==> List())
-
-          // Empty Seq of values matches nothing
-          _ <- Ns.i.a1.bigIntMap_.has(List.empty[BigInt]).query.get.map(_ ==> List())
-        } yield ()
-      }
+  "Tacit: Tacit Map (no filter)" - types { implicit conn =>
+    for {
+      _ <- Entity.i.bigIntMap.insert(a, b).transact
+      _ <- Entity.i.a1.bigIntMap_.query.get.map(_ ==> List(1, 2))
+    } yield ()
+  }
 
 
-      "Match map without certain values" - types { implicit conn =>
-        for {
-          _ <- Ns.i.bigIntMap.insert(a, b).transact
+  "Tacit: Match map with certain keys" - types { implicit conn =>
+    for {
+      _ <- Entity.i.insert(0).transact // Entity without map attribute
+      _ <- Entity.i.bigIntMap.insert(a, b).transact
 
-          // "Map contains neither this OR that value"
-          _ <- Ns.i.a1.bigIntMap_.hasNo(bigInt0).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.bigIntMap_.hasNo(bigInt1).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.bigIntMap_.hasNo(bigInt2).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigIntMap_.hasNo(bigInt3).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.bigIntMap_.hasNo(bigInt4).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.bigIntMap_.hasNo(bigInt0, bigInt1).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.bigIntMap_.hasNo(bigInt1, bigInt2).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigIntMap_.hasNo(bigInt2, bigInt3).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigIntMap_.hasNo(bigInt3, bigInt4).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.bigIntMap_.hasNo(bigInt4, bigInt5).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.bigIntMap_.hasNo(bigInt5, bigInt6).query.get.map(_ ==> List(1, 2))
-          // Same as
-          _ <- Ns.i.a1.bigIntMap_.hasNo(List(bigInt0)).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.bigIntMap_.hasNo(List(bigInt1)).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.bigIntMap_.hasNo(List(bigInt2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigIntMap_.hasNo(List(bigInt3)).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.bigIntMap_.hasNo(List(bigInt4)).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.bigIntMap_.hasNo(List(bigInt0, bigInt1)).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.bigIntMap_.hasNo(List(bigInt1, bigInt2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigIntMap_.hasNo(List(bigInt2, bigInt3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigIntMap_.hasNo(List(bigInt3, bigInt4)).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.bigIntMap_.hasNo(List(bigInt4, bigInt5)).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.bigIntMap_.hasNo(List(bigInt5, bigInt6)).query.get.map(_ ==> List(1, 2))
+      // "Map contains this OR that key"
+      _ <- Entity.i.a1.bigIntMap_("_").query.get.map(_ ==> List())
+      _ <- Entity.i.a1.bigIntMap_("a").query.get.map(_ ==> List(1, 2))
+      _ <- Entity.i.a1.bigIntMap_("b").query.get.map(_ ==> List(1, 2))
+      _ <- Entity.i.a1.bigIntMap_("c").query.get.map(_ ==> List(2))
+      _ <- Entity.i.a1.bigIntMap_("a", "c").query.get.map(_ ==> List(1, 2))
+      _ <- Entity.i.a1.bigIntMap_("_", "c").query.get.map(_ ==> List(2))
+      // Same as
+      _ <- Entity.i.a1.bigIntMap_(List("_")).query.get.map(_ ==> List())
+      _ <- Entity.i.a1.bigIntMap_(List("a")).query.get.map(_ ==> List(1, 2))
+      _ <- Entity.i.a1.bigIntMap_(List("b")).query.get.map(_ ==> List(1, 2))
+      _ <- Entity.i.a1.bigIntMap_(List("c")).query.get.map(_ ==> List(2))
+      _ <- Entity.i.a1.bigIntMap_(List("a", "c")).query.get.map(_ ==> List(1, 2))
+      _ <- Entity.i.a1.bigIntMap_(List("_", "c")).query.get.map(_ ==> List(2))
 
-          // Negating empty Seq of values matches all
-          _ <- Ns.i.a1.bigIntMap_.hasNo(List.empty[BigInt]).query.get.map(_ ==> List(1, 2))
-        } yield ()
-      }
-    }
+      // Empty Seq of keys matches nothing
+      _ <- Entity.i.a1.bigIntMap_(List.empty[String]).query.get.map(_ ==> List())
+
+      // Match entities without map attribute
+      _ <- Entity.i.a1.bigIntMap_().query.get.map(_ ==> List(0))
+    } yield ()
+  }
 
 
-    "Optional" - {
+  "Tacit: Match map without certain keys" - types { implicit conn =>
+    for {
+      _ <- Entity.i.bigIntMap.insert(a, b).transact
 
-      "Optional map (no filter)" - types { implicit conn =>
-        val a = (1, Some(Map("a" -> bigInt1, "b" -> bigInt2)))
-        val b = (2, Some(Map("a" -> bigInt2, "b" -> bigInt3, "c" -> bigInt4)))
-        val c = (3, None)
-        for {
-          _ <- Ns.i.bigIntMap_?.insert(a, b, c).transact
-          _ <- Ns.i.a1.bigIntMap_?.query.get.map(_ ==> List(a, b, c))
-        } yield ()
-      }
+      // "Map contains neither this OR that key"
+      _ <- Entity.i.a1.bigIntMap_.not("_").query.get.map(_ ==> List(1, 2))
+      _ <- Entity.i.a1.bigIntMap_.not("a").query.get.map(_ ==> List())
+      _ <- Entity.i.a1.bigIntMap_.not("b").query.get.map(_ ==> List())
+      _ <- Entity.i.a1.bigIntMap_.not("c").query.get.map(_ ==> List(1))
+      _ <- Entity.i.a1.bigIntMap_.not("a", "c").query.get.map(_ ==> List())
+      _ <- Entity.i.a1.bigIntMap_.not("_", "c").query.get.map(_ ==> List(1))
+      // Same as
+      _ <- Entity.i.a1.bigIntMap_.not(List("_")).query.get.map(_ ==> List(1, 2))
+      _ <- Entity.i.a1.bigIntMap_.not(List("a")).query.get.map(_ ==> List())
+      _ <- Entity.i.a1.bigIntMap_.not(List("b")).query.get.map(_ ==> List())
+      _ <- Entity.i.a1.bigIntMap_.not(List("c")).query.get.map(_ ==> List(1))
+      _ <- Entity.i.a1.bigIntMap_.not(List("a", "c")).query.get.map(_ ==> List())
+      _ <- Entity.i.a1.bigIntMap_.not(List("_", "c")).query.get.map(_ ==> List(1))
+
+      // Negating empty Seq of keys matches all
+      _ <- Entity.i.a1.bigIntMap_.not(List.empty[String]).query.get.map(_ ==> List(1, 2))
+    } yield ()
+  }
 
 
-      "Optional map values by key" - types { implicit conn =>
+  "Tacit: Match map with certain values" - types { implicit conn =>
+    for {
+      _ <- Entity.i.bigIntMap.insert(a, b).transact
 
-        for {
-          _ <- Ns.i.bigIntMap.insert(a, b).transact
-          _ <- Ns.i(3).save.transact // entity without bigIntMap
+      // "Map contains this OR that value"
+      _ <- Entity.i.a1.bigIntMap_.has(bigInt0).query.get.map(_ ==> List())
+      _ <- Entity.i.a1.bigIntMap_.has(bigInt1).query.get.map(_ ==> List(1))
+      _ <- Entity.i.a1.bigIntMap_.has(bigInt2).query.get.map(_ ==> List(1, 2))
+      _ <- Entity.i.a1.bigIntMap_.has(bigInt3).query.get.map(_ ==> List(2))
+      _ <- Entity.i.a1.bigIntMap_.has(bigInt4).query.get.map(_ ==> List(2))
+      _ <- Entity.i.a1.bigIntMap_.has(bigInt0, bigInt1).query.get.map(_ ==> List(1))
+      _ <- Entity.i.a1.bigIntMap_.has(bigInt1, bigInt2).query.get.map(_ ==> List(1, 2))
+      _ <- Entity.i.a1.bigIntMap_.has(bigInt2, bigInt3).query.get.map(_ ==> List(1, 2))
+      _ <- Entity.i.a1.bigIntMap_.has(bigInt3, bigInt4).query.get.map(_ ==> List(2))
+      _ <- Entity.i.a1.bigIntMap_.has(bigInt4, bigInt5).query.get.map(_ ==> List(2))
+      _ <- Entity.i.a1.bigIntMap_.has(bigInt5, bigInt6).query.get.map(_ ==> List())
+      // Same as
+      _ <- Entity.i.a1.bigIntMap_.has(List(bigInt0)).query.get.map(_ ==> List())
+      _ <- Entity.i.a1.bigIntMap_.has(List(bigInt1)).query.get.map(_ ==> List(1))
+      _ <- Entity.i.a1.bigIntMap_.has(List(bigInt2)).query.get.map(_ ==> List(1, 2))
+      _ <- Entity.i.a1.bigIntMap_.has(List(bigInt3)).query.get.map(_ ==> List(2))
+      _ <- Entity.i.a1.bigIntMap_.has(List(bigInt4)).query.get.map(_ ==> List(2))
+      _ <- Entity.i.a1.bigIntMap_.has(List(bigInt0, bigInt1)).query.get.map(_ ==> List(1))
+      _ <- Entity.i.a1.bigIntMap_.has(List(bigInt1, bigInt2)).query.get.map(_ ==> List(1, 2))
+      _ <- Entity.i.a1.bigIntMap_.has(List(bigInt2, bigInt3)).query.get.map(_ ==> List(1, 2))
+      _ <- Entity.i.a1.bigIntMap_.has(List(bigInt3, bigInt4)).query.get.map(_ ==> List(2))
+      _ <- Entity.i.a1.bigIntMap_.has(List(bigInt4, bigInt5)).query.get.map(_ ==> List(2))
+      _ <- Entity.i.a1.bigIntMap_.has(List(bigInt5, bigInt6)).query.get.map(_ ==> List())
 
-          // Like calling `get` on a Scala Map.
-          _ <- Ns.i.a1.bigIntMap_?("_").query.get.map(_ ==> List((1, None), (2, None), (3, None)))
-          _ <- Ns.i.a1.bigIntMap_?("a").query.get.map(_ ==> List((1, Some(bigInt1)), (2, Some(bigInt2)), (3, None)))
-          _ <- Ns.i.a1.bigIntMap_?("b").query.get.map(_ ==> List((1, Some(bigInt2)), (2, Some(bigInt3)), (3, None)))
-          _ <- Ns.i.a1.bigIntMap_?("c").query.get.map(_ ==> List((1, None), (2, Some(bigInt4)), (3, None)))
-        } yield ()
-      }
-    }
+      // Empty Seq of values matches nothing
+      _ <- Entity.i.a1.bigIntMap_.has(List.empty[BigInt]).query.get.map(_ ==> List())
+    } yield ()
+  }
+
+
+  "Tacit: Match map without certain values" - types { implicit conn =>
+    for {
+      _ <- Entity.i.bigIntMap.insert(a, b).transact
+
+      // "Map contains neither this OR that value"
+      _ <- Entity.i.a1.bigIntMap_.hasNo(bigInt0).query.get.map(_ ==> List(1, 2))
+      _ <- Entity.i.a1.bigIntMap_.hasNo(bigInt1).query.get.map(_ ==> List(2))
+      _ <- Entity.i.a1.bigIntMap_.hasNo(bigInt2).query.get.map(_ ==> List())
+      _ <- Entity.i.a1.bigIntMap_.hasNo(bigInt3).query.get.map(_ ==> List(1))
+      _ <- Entity.i.a1.bigIntMap_.hasNo(bigInt4).query.get.map(_ ==> List(1))
+      _ <- Entity.i.a1.bigIntMap_.hasNo(bigInt0, bigInt1).query.get.map(_ ==> List(2))
+      _ <- Entity.i.a1.bigIntMap_.hasNo(bigInt1, bigInt2).query.get.map(_ ==> List())
+      _ <- Entity.i.a1.bigIntMap_.hasNo(bigInt2, bigInt3).query.get.map(_ ==> List())
+      _ <- Entity.i.a1.bigIntMap_.hasNo(bigInt3, bigInt4).query.get.map(_ ==> List(1))
+      _ <- Entity.i.a1.bigIntMap_.hasNo(bigInt4, bigInt5).query.get.map(_ ==> List(1))
+      _ <- Entity.i.a1.bigIntMap_.hasNo(bigInt5, bigInt6).query.get.map(_ ==> List(1, 2))
+      // Same as
+      _ <- Entity.i.a1.bigIntMap_.hasNo(List(bigInt0)).query.get.map(_ ==> List(1, 2))
+      _ <- Entity.i.a1.bigIntMap_.hasNo(List(bigInt1)).query.get.map(_ ==> List(2))
+      _ <- Entity.i.a1.bigIntMap_.hasNo(List(bigInt2)).query.get.map(_ ==> List())
+      _ <- Entity.i.a1.bigIntMap_.hasNo(List(bigInt3)).query.get.map(_ ==> List(1))
+      _ <- Entity.i.a1.bigIntMap_.hasNo(List(bigInt4)).query.get.map(_ ==> List(1))
+      _ <- Entity.i.a1.bigIntMap_.hasNo(List(bigInt0, bigInt1)).query.get.map(_ ==> List(2))
+      _ <- Entity.i.a1.bigIntMap_.hasNo(List(bigInt1, bigInt2)).query.get.map(_ ==> List())
+      _ <- Entity.i.a1.bigIntMap_.hasNo(List(bigInt2, bigInt3)).query.get.map(_ ==> List())
+      _ <- Entity.i.a1.bigIntMap_.hasNo(List(bigInt3, bigInt4)).query.get.map(_ ==> List(1))
+      _ <- Entity.i.a1.bigIntMap_.hasNo(List(bigInt4, bigInt5)).query.get.map(_ ==> List(1))
+      _ <- Entity.i.a1.bigIntMap_.hasNo(List(bigInt5, bigInt6)).query.get.map(_ ==> List(1, 2))
+
+      // Negating empty Seq of values matches all
+      _ <- Entity.i.a1.bigIntMap_.hasNo(List.empty[BigInt]).query.get.map(_ ==> List(1, 2))
+    } yield ()
+  }
+
+
+  "Optional map (no filter)" - types { implicit conn =>
+    val a = (1, Some(Map("a" -> bigInt1, "b" -> bigInt2)))
+    val b = (2, Some(Map("a" -> bigInt2, "b" -> bigInt3, "c" -> bigInt4)))
+    val c = (3, None)
+    for {
+      _ <- Entity.i.bigIntMap_?.insert(a, b, c).transact
+      _ <- Entity.i.a1.bigIntMap_?.query.get.map(_ ==> List(a, b, c))
+    } yield ()
+  }
+
+
+  "Optional map values by key" - types { implicit conn =>
+
+    for {
+      _ <- Entity.i.bigIntMap.insert(a, b).transact
+      _ <- Entity.i(3).save.transact // entity without bigIntMap
+
+      // Like calling `get` on a Scala Map.
+      _ <- Entity.i.a1.bigIntMap_?("_").query.get.map(_ ==> List((1, None), (2, None), (3, None)))
+      _ <- Entity.i.a1.bigIntMap_?("a").query.get.map(_ ==> List((1, Some(bigInt1)), (2, Some(bigInt2)), (3, None)))
+      _ <- Entity.i.a1.bigIntMap_?("b").query.get.map(_ ==> List((1, Some(bigInt2)), (2, Some(bigInt3)), (3, None)))
+      _ <- Entity.i.a1.bigIntMap_?("c").query.get.map(_ ==> List((1, None), (2, Some(bigInt4)), (3, None)))
+    } yield ()
   }
 }

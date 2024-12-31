@@ -7,7 +7,7 @@ import molecule.sql.core.transaction.SqlInsert
 import molecule.sql.core.transaction.strategy.SqlOps
 
 trait Insert_mariadb
-  extends SqlInsert  { self: ResolveInsert with InsertResolvers_ with SqlOps =>
+  extends SqlInsert { self: ResolveInsert with InsertResolvers_ with SqlOps =>
 
   override protected def addSet[T](
     ns: String,

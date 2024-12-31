@@ -1,13 +1,30 @@
 package molecule.sql.mysql.compliance.pagination.cursor.subUnique
 
+import molecule.coreTests.setup.MUnitSuite
 import molecule.coreTests.spi.pagination.cursor.subUnique._
-import molecule.sql.mysql.setup.Test_mysql_async
+import molecule.sql.mysql.setup.Api_mysql_async
 
-object Test_AttrOrder extends AttrOrder with Test_mysql_async
-object Test_DirectionsStandardUnique extends DirectionsStandardUnique with Test_mysql_async
-object Test_DirectionsUniqueStandard extends DirectionsUniqueStandard with Test_mysql_async
-object Test_MutationAdd extends MutationAdd with Test_mysql_async
-object Test_MutationDelete extends MutationDelete with Test_mysql_async
-object Test_Nested extends Nested with Test_mysql_async
-object Test_OptNested extends OptNested with Test_mysql_async
-object Test_TypesUniqueValue extends TypesUniqueValue with Test_mysql_async
+class AttrOrder extends MUnitSuite {
+  AttrOrder(this, Api_mysql_async)
+}
+class DirectionsStandardUnique extends MUnitSuite {
+  DirectionsStandardUnique(this, Api_mysql_async)
+}
+class DirectionsUniqueStandard extends MUnitSuite {
+  DirectionsUniqueStandard(this, Api_mysql_async)
+}
+class MutationAdd extends MUnitSuite {
+  MutationAdd(this, Api_mysql_async)
+}
+class MutationDelete extends MUnitSuite {
+  MutationDelete(this, Api_mysql_async)
+}
+class Nested extends MUnitSuite {
+  Nested(this, Api_mysql_async)
+}
+class OptNested extends MUnitSuite {
+  OptNested(this, Api_mysql_async)
+}
+class TypesUniqueValue extends MUnitSuite {
+  TypesUniqueValue(this, Api_mysql_async)
+}

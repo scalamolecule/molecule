@@ -4,142 +4,144 @@ package molecule.coreTests.spi.aggregation.any
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.dsl.Types._
-import molecule.coreTests.setup.CoreTestSuite
-import utest._
+import molecule.coreTests.domains.dsl.Types._
+import molecule.coreTests.setup._
 
-trait Aggr_String_ extends CoreTestSuite with Api_async { spi: Spi_async =>
+case class Aggr_String_(
+  suite: MUnitSuite,
+  api: Api_async with Spi_async with DbProviders
+) extends TestUtils {
 
-  override lazy val tests = Tests {
+  import api._
+  import suite._
 
-    "distinct" - types { implicit conn =>
-      for {
-        _ <- Ns.i.string.insert(List(
-          (1, string1),
-          (2, string2),
-          (2, string2),
-          (2, string3),
-        )).transact
+  "distinct" - types { implicit conn =>
+    for {
+      _ <- Entity.i.string.insert(List(
+        (1, string1),
+        (2, string2),
+        (2, string2),
+        (2, string3),
+      )).transact
 
-        _ <- Ns.i.string.a1.query.get.map(_ ==> List(
-          (1, string1),
-          (2, string2), // 2 rows coalesced
-          (2, string3),
-        ))
+      _ <- Entity.i.string.a1.query.get.map(_ ==> List(
+        (1, string1),
+        (2, string2), // 2 rows coalesced
+        (2, string3),
+      ))
 
-        // Distinct values are returned in a Set
-        _ <- Ns.i.a1.string(distinct).query.get.map(_ ==> List(
-          (1, Set(string1)),
-          (2, Set(string2, string3)),
-        ))
+      // Distinct values are returned in a Set
+      _ <- Entity.i.a1.string(distinct).query.get.map(_ ==> List(
+        (1, Set(string1)),
+        (2, Set(string2, string3)),
+      ))
 
-        _ <- Ns.string(distinct).query.get.map(_.head ==> Set(
-          string1, string2, string3
-        ))
-      } yield ()
-    }
-
-
-    "min/max" - types { implicit conn =>
-      for {
-        _ <- Ns.i.string.insert(
-          (1, string1),
-          (1, string2),
-          (1, string3),
-          (2, string4),
-          (2, string5),
-          (2, string6),
-        ).transact
-
-        _ <- Ns.string(min).query.get.map(_ ==> List(string1))
-        _ <- Ns.string(max).query.get.map(_ ==> List(string6))
-        _ <- Ns.string(min).string(max).query.get.map(_ ==> List((string1, string6)))
-
-        _ <- Ns.i.a1.string(min).query.get.map(_ ==> List(
-          (1, string1),
-          (2, string4)
-        ))
-
-        _ <- Ns.i.a1.string(max).query.get.map(_ ==> List(
-          (1, string3),
-          (2, string6)
-        ))
-
-        _ <- Ns.i.a1.string(min).string(max).query.get.map(_ ==> List(
-          (1, string1, string3),
-          (2, string4, string6)
-        ))
-      } yield ()
-    }
-
-    "min/max n" - types { implicit conn =>
-      for {
-        _ <- Ns.i.string.insert(
-          (1, string1),
-          (1, string2),
-          (1, string3),
-          (2, string4),
-          (2, string5),
-          (2, string6),
-          (2, string6), // (make sure grouped values coalesce)
-        ).transact
-
-        _ <- Ns.string(min(1)).query.get.map(_ ==> List(Set(string1)))
-        _ <- Ns.string(min(2)).query.get.map(_ ==> List(Set(string1, string2)))
-
-        _ <- Ns.string(max(1)).query.get.map(_ ==> List(Set(string6)))
-        _ <- Ns.string(max(2)).query.get.map(_ ==> List(Set(string5, string6)))
-
-        _ <- Ns.i.a1.string(min(2)).query.get.map(_ ==> List(
-          (1, Set(string1, string2)),
-          (2, Set(string4, string5))
-        ))
-
-        _ <- Ns.i.a1.string(max(2)).query.get.map(_ ==> List(
-          (1, Set(string2, string3)),
-          (2, Set(string5, string6))
-        ))
-
-        _ <- Ns.i.a1.string(min(2)).string(max(2)).query.get.map(_ ==> List(
-          (1, Set(string1, string2), Set(string2, string3)),
-          (2, Set(string4, string5), Set(string5, string6))
-        ))
-      } yield ()
-    }
+      _ <- Entity.string(distinct).query.get.map(_.head ==> Set(
+        string1, string2, string3
+      ))
+    } yield ()
+  }
 
 
-    "sample" - types { implicit futConn =>
-      val all = Set(string1, string2, string3, string4)
-      for {
-        _ <- Ns.string.insert(List(string1, string2, string3)).transact
-        _ <- Ns.string(sample).query.get.map(res => all.contains(res.head) ==> true)
-        _ <- Ns.string(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- Ns.string(sample(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-      } yield ()
-    }
+  "min/max" - types { implicit conn =>
+    for {
+      _ <- Entity.i.string.insert(
+        (1, string1),
+        (1, string2),
+        (1, string3),
+        (2, string4),
+        (2, string5),
+        (2, string6),
+      ).transact
+
+      _ <- Entity.string(min).query.get.map(_ ==> List(string1))
+      _ <- Entity.string(max).query.get.map(_ ==> List(string6))
+      _ <- Entity.string(min).string(max).query.get.map(_ ==> List((string1, string6)))
+
+      _ <- Entity.i.a1.string(min).query.get.map(_ ==> List(
+        (1, string1),
+        (2, string4)
+      ))
+
+      _ <- Entity.i.a1.string(max).query.get.map(_ ==> List(
+        (1, string3),
+        (2, string6)
+      ))
+
+      _ <- Entity.i.a1.string(min).string(max).query.get.map(_ ==> List(
+        (1, string1, string3),
+        (2, string4, string6)
+      ))
+    } yield ()
+  }
+
+  "min/max n" - types { implicit conn =>
+    for {
+      _ <- Entity.i.string.insert(
+        (1, string1),
+        (1, string2),
+        (1, string3),
+        (2, string4),
+        (2, string5),
+        (2, string6),
+        (2, string6), // (make sure grouped values coalesce)
+      ).transact
+
+      _ <- Entity.string(min(1)).query.get.map(_ ==> List(Set(string1)))
+      _ <- Entity.string(min(2)).query.get.map(_ ==> List(Set(string1, string2)))
+
+      _ <- Entity.string(max(1)).query.get.map(_ ==> List(Set(string6)))
+      _ <- Entity.string(max(2)).query.get.map(_ ==> List(Set(string5, string6)))
+
+      _ <- Entity.i.a1.string(min(2)).query.get.map(_ ==> List(
+        (1, Set(string1, string2)),
+        (2, Set(string4, string5))
+      ))
+
+      _ <- Entity.i.a1.string(max(2)).query.get.map(_ ==> List(
+        (1, Set(string2, string3)),
+        (2, Set(string5, string6))
+      ))
+
+      _ <- Entity.i.a1.string(min(2)).string(max(2)).query.get.map(_ ==> List(
+        (1, Set(string1, string2), Set(string2, string3)),
+        (2, Set(string4, string5), Set(string5, string6))
+      ))
+    } yield ()
+  }
 
 
-    "count" - types { implicit conn =>
-      for {
-        _ <- Ns.i.string.insert(List(
-          (1, string1),
-          (2, string2),
-          (2, string2),
-          (2, string3),
-        )).transact
+  "sample" - types { implicit futConn =>
+    val all = Set(string1, string2, string3, string4)
+    for {
+      _ <- Entity.string.insert(List(string1, string2, string3)).transact
+      _ <- Entity.string(sample).query.get.map(res => all.contains(res.head) ==> true)
+      _ <- Entity.string(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
+      _ <- Entity.string(sample(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
+    } yield ()
+  }
 
-        _ <- Ns.string(count).query.get.map(_ ==> List(4))
-        _ <- Ns.i.a1.string(count).query.get.map(_ ==> List(
-          (1, 1),
-          (2, 3)
-        ))
 
-        _ <- Ns.string(countDistinct).query.get.map(_ ==> List(3))
-        _ <- Ns.i.a1.string(countDistinct).query.get.map(_ ==> List(
-          (1, 1),
-          (2, 2)
-        ))
-      } yield ()
-    }
+  "count" - types { implicit conn =>
+    for {
+      _ <- Entity.i.string.insert(List(
+        (1, string1),
+        (2, string2),
+        (2, string2),
+        (2, string3),
+      )).transact
+
+      _ <- Entity.string(count).query.get.map(_ ==> List(4))
+      _ <- Entity.i.a1.string(count).query.get.map(_ ==> List(
+        (1, 1),
+        (2, 3)
+      ))
+
+      _ <- Entity.string(countDistinct).query.get.map(_ ==> List(3))
+      _ <- Entity.i.a1.string(countDistinct).query.get.map(_ ==> List(
+        (1, 1),
+        (2, 2)
+      ))
+    } yield ()
   }
 }

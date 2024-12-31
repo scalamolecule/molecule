@@ -11,7 +11,7 @@ object CastOptRefBranch_ extends SqlQueryBase {
     firstIndex: ParamIndex
   ): (RS, Option[Any]) => Option[Any] = {
     casts.length match {
-      case 0 => cast0
+      case 0  => cast0
       case 1  => cast1(casts, firstIndex)
       case 2  => cast2(casts, firstIndex)
       case 3  => cast3(casts, firstIndex)

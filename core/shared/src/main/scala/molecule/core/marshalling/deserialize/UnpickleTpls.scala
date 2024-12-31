@@ -108,7 +108,7 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
         case BackRef(backRefNs, _, _) =>
           tail.head match {
             case Ref(_, refAttr, _, _, _, _) if prevRefs.contains(refAttr) => throw ModelError(
-              s"Can't re-use previous namespace ${refAttr.capitalize} after backref _$backRefNs."
+              s"Can't re-use previous entity ${refAttr.capitalize} after backref _$backRefNs."
             )
             case _                                                         => // ok
           }

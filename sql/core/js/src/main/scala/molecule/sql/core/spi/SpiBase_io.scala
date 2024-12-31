@@ -23,9 +23,8 @@ trait SpiBase_io
   // Query --------------------------------------------------------
 
   override def query_get[Tpl](q: Query[Tpl])(implicit conn0: Conn): IO[List[Tpl]] = {
-    val conn  = conn0.asInstanceOf[JdbcConn_JS]
-    val proxy = conn.proxy.copy(dbView = q.dbView)
-    conn.rpc.query[Tpl](proxy, q.elements, q.optLimit).io
+    val conn = conn0.asInstanceOf[JdbcConn_JS]
+    conn.rpc.query[Tpl](conn.proxy, q.elements, q.optLimit).io
   }
 
   override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)
@@ -69,9 +68,8 @@ trait SpiBase_io
 
   override def queryOffset_get[Tpl](q: QueryOffset[Tpl])
                                    (implicit conn0: Conn): IO[(List[Tpl], Int, Boolean)] = {
-    val conn  = conn0.asInstanceOf[JdbcConn_JS]
-    val proxy = conn.proxy.copy(dbView = q.dbView)
-    conn.rpc.queryOffset[Tpl](proxy, q.elements, q.optLimit, q.offset).io
+    val conn = conn0.asInstanceOf[JdbcConn_JS]
+    conn.rpc.queryOffset[Tpl](conn.proxy, q.elements, q.optLimit, q.offset).io
   }
 
   override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])
@@ -82,9 +80,8 @@ trait SpiBase_io
 
   override def queryCursor_get[Tpl](q: QueryCursor[Tpl])
                                    (implicit conn0: Conn): IO[(List[Tpl], String, Boolean)] = {
-    val conn  = conn0.asInstanceOf[JdbcConn_JS]
-    val proxy = conn.proxy.copy(dbView = q.dbView)
-    conn.rpc.queryCursor[Tpl](proxy, q.elements, q.optLimit, q.cursor).io
+    val conn = conn0.asInstanceOf[JdbcConn_JS]
+    conn.rpc.queryCursor[Tpl](conn.proxy, q.elements, q.optLimit, q.cursor).io
   }
 
   override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])
@@ -119,7 +116,7 @@ trait SpiBase_io
   override def save_validate(save: Save)(implicit conn: Conn): IO[Map[String, Seq[String]]] = IO {
     if (save.doValidate) {
       val proxy = conn.proxy
-      TxModelValidation(proxy.nsMap, proxy.attrMap, "save").validate(save.elements)
+      TxModelValidation(proxy.schema.entityMap, proxy.schema.attrMap, "save").validate(save.elements)
     } else {
       Map.empty[String, Seq[String]]
     }
@@ -185,7 +182,7 @@ trait SpiBase_io
   override def update_validate(update: Update)
                               (implicit conn: Conn): IO[Map[String, Seq[String]]] = IO {
     val proxy = conn.proxy
-    TxModelValidation(proxy.nsMap, proxy.attrMap, "update").validate(update.elements)
+    TxModelValidation(proxy.schema.entityMap, proxy.schema.attrMap, "update").validate(update.elements)
   }
 
 

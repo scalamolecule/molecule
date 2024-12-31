@@ -1,9 +1,14 @@
 package molecule.datalog.datomic.compliance.transaction.update.attrOp
 
-import molecule.coreTests.spi.transaction.update.attrOp._
-import molecule.datalog.datomic.setup.Test_datomic_async
+import molecule.coreTests.setup.MUnitSuite
+import molecule.coreTests.spi.action.update.attrOp._
+import molecule.datalog.datomic.setup.Api_datomic_async
 
 
-object Test_AttrOp_Boolean extends AttrOp_Boolean with Test_datomic_async
-object Test_AttrOp_String extends AttrOp_String with Test_datomic_async
+class AttrOp_Boolean extends MUnitSuite {
+  AttrOp_Boolean(this, Api_datomic_async)
+}
+class AttrOp_String extends MUnitSuite {
+  AttrOp_String(this, Api_datomic_async)
+}
 

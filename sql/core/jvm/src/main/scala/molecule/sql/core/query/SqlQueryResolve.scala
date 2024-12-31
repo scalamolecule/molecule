@@ -6,8 +6,8 @@ import molecule.core.query.Pagination
 import molecule.core.util.ModelUtils
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.javaSql.{PrepStmt, PrepStmtImpl, ResultSetInterface}
-import molecule.sql.core.query.casting.{NestOptTpls, NestTpls}
 import molecule.sql.core.query.casting.strategy._
+import molecule.sql.core.query.casting.{NestOptTpls, NestTpls}
 import scala.collection.mutable.ListBuffer
 
 abstract class SqlQueryResolve[Tpl](

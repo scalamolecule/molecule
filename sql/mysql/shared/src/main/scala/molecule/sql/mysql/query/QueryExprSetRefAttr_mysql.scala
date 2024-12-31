@@ -10,8 +10,8 @@ trait QueryExprSetRefAttr_mysql
 
 
   override protected def setRefMan[T](attr: Attr, args: Set[T], res: ResSet[T]): Unit = {
-    select += s"JSON_ARRAYAGG($joinTable.$ref_id) $refIds"
-    joins += (("INNER JOIN", joinTable, "", List(s"$nsId = $joinTable.$ns_id")))
+    select += s"JSON_ARRAYAGG($joinTable.$rid) $refIds"
+    joins += (("INNER JOIN", joinTable, "", List(s"$nsId = $joinTable.$eid")))
     groupBy += nsId
     castStrategy.add(
       (row: RS, paramIndex: Int) =>
@@ -36,8 +36,8 @@ trait QueryExprSetRefAttr_mysql
     res: ResSet[T]
   ): Unit = {
     val col = getCol(attr: Attr)
-    select += s"JSON_ARRAYAGG($joinTable.$ref_id) $refIds"
-    joins += (("LEFT JOIN", joinTable, "", List(s"$nsId = $joinTable.$ns_id")))
+    select += s"JSON_ARRAYAGG($joinTable.$rid) $refIds"
+    joins += (("LEFT JOIN", joinTable, "", List(s"$nsId = $joinTable.$eid")))
     groupBy += nsId
     castStrategy.add((row: RS, paramIndex: Int) => {
       row.getString(paramIndex) match {
@@ -61,10 +61,10 @@ trait QueryExprSetRefAttr_mysql
     val jsonValues = set.map(one2json).mkString(", ")
     s"""(
        |    SELECT
-       |      JSON_LENGTH(JSON_ARRAYAGG($joinTable.$ref_id)) = $size AND
-       |      JSON_CONTAINS(JSON_ARRAYAGG($joinTable.$ref_id), JSON_ARRAY($jsonValues))
+       |      JSON_LENGTH(JSON_ARRAYAGG($joinTable.$rid)) = $size AND
+       |      JSON_CONTAINS(JSON_ARRAYAGG($joinTable.$rid), JSON_ARRAY($jsonValues))
        |    FROM $joinTable
-       |    WHERE $joinTable.$ns_id = $nsId
+       |    WHERE $joinTable.$eid = $nsId
        |  )""".stripMargin
   }
 
@@ -76,9 +76,9 @@ trait QueryExprSetRefAttr_mysql
     optSet.fold[Unit] {
       where += (("",
         s"""(
-           |    SELECT count($joinTable.$ref_id) = 0
+           |    SELECT count($joinTable.$rid) = 0
            |    FROM $joinTable
-           |    WHERE $joinTable.$ns_id = $nsId
+           |    WHERE $joinTable.$eid = $nsId
            |  )""".stripMargin
       ))
     } { set =>
@@ -94,7 +94,7 @@ trait QueryExprSetRefAttr_mysql
     if (optSets.isDefined && optSets.get.nonEmpty) {
       setRefNeq(optSets.get, res)
     }
-    setNotNull(s"$joinTable.$ns_id")
+    setNotNull(s"$joinTable.$eid")
   }
 
 
@@ -103,13 +103,13 @@ trait QueryExprSetRefAttr_mysql
        |    SELECT
        |      ${matches.mkString(s" $logic\n      ")}
        |    FROM $joinTable
-       |    WHERE $joinTable.$ns_id = $nsId
+       |    WHERE $joinTable.$eid = $nsId
        |  )""".stripMargin
   }
 
   private def arrayMatch[T](set: Set[T], not: String = ""): String = {
     s"""${not}JSON_CONTAINS(
-       |        JSON_ARRAYAGG($joinTable.$ref_id),
+       |        JSON_ARRAYAGG($joinTable.$rid),
        |        JSON_ARRAY(${set.mkString(", ")})
        |      )""".stripMargin
   }

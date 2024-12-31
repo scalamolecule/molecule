@@ -1,6 +1,9 @@
 package molecule.datalog.datomic.compliance.validation
 
+import molecule.coreTests.setup.MUnitSuiteWithArrays
 import molecule.coreTests.spi.validation.MandatoryRefs
-import molecule.datalog.datomic.setup.Test_datomic_async
+import molecule.datalog.datomic.setup.Api_datomic_async
 
-object Test_MandatoryRefs extends MandatoryRefs with Test_datomic_async
+class MandatoryRefs extends MUnitSuiteWithArrays {
+  MandatoryRefs(this, Api_datomic_async)
+}

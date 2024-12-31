@@ -1,18 +1,18 @@
 package molecule.sql.core.transaction.strategy.delete
 
 import java.sql.Statement
-import molecule.base.ast.{CardOne, MetaAttr, MetaNs}
+import molecule.base.ast.{CardOne, MetaAttribute, MetaEntity}
 import molecule.base.util.BaseHelpers
 import molecule.sql.core.transaction.strategy.{SqlAction, SqlOps}
 import scala.collection.mutable.ListBuffer
 
 abstract class DeleteAction(
-  nsMap: Map[String, MetaNs],
+  entityMap: Map[String, MetaEntity],
   parent: DeleteAction,
   sqlStmt: Statement,
   sqlOps: SqlOps,
-  ns: String,
-) extends SqlAction(parent, sqlOps, ns)
+  entity: String,
+) extends SqlAction(parent, sqlOps, entity)
   with BaseHelpers {
 
 
@@ -26,39 +26,39 @@ abstract class DeleteAction(
   }
 
 
-  private def prepareQueryAndActions: Seq[() => DeleteNs] = {
-    nsMap(ns).attrs.collect {
-      case MetaAttr(refAttr, card, _, Some(refNs), options, _, _, _, _, _)
+  private def prepareQueryAndActions: Seq[() => DeleteEntity] = {
+    entityMap(entity).attrs.collect {
+      case MetaAttribute(refAttr, card, _, Some(refEntity), options, _, _, _, _, _)
         if options.contains("owner") =>
         if (card.isInstanceOf[CardOne]) {
-          cols += ns + "." + refAttr
+          cols += entity + "." + refAttr
 
           () => {
             // Make delete action if we find ref-one ids
-            DeleteNs(
-              nsMap, parent, sqlStmt, sqlOps, ns, refAttr, refNs
+            DeleteEntity(
+              entityMap, parent, sqlStmt, sqlOps, entity, refAttr, refEntity
             )
           }
 
         } else {
-          val t               = refAttr + "_" + refNs
-          val joinTable       = ss(ns, refAttr, refNs)
-          val (ns_id, ref_id) = sqlOps.joinIdNames(ns, refNs)
+          val t          = refAttr + "_" + refEntity
+          val joinTable  = ss(entity, refAttr, refEntity)
+          val (eid, rid) = sqlOps.joinIdNames(entity, refEntity)
           cols += s"$t.id"
           joins ++= List(
-            s"LEFT JOIN $joinTable", "", s" ON $ns.id", s" = $joinTable.$ns_id",
-            s"LEFT JOIN $refNs", s" AS $t", s" ON $joinTable.$ref_id", s" = $t.id"
+            s"LEFT JOIN $joinTable", "", s" ON $entity.id", s" = $joinTable.$eid",
+            s"LEFT JOIN $refEntity", s" AS $t", s" ON $joinTable.$rid", s" = $t.id"
           )
           () => {
             // Make delete action if we find ref-many ids
-            val deleteRef  = DeleteNs(
-              nsMap, parent, sqlStmt, sqlOps, ns, refAttr, refNs
+            val deleteRef  = DeleteEntity(
+              entityMap, parent, sqlStmt, sqlOps, entity, refAttr, refEntity
             )
             // Delete rows in join table
             val deleteJoin = DeleteJoin(
-              nsMap, parent, sqlStmt, sqlOps, ns, refAttr, refNs
+              entityMap, parent, sqlStmt, sqlOps, entity, refAttr, refEntity
             )
-            // We can simply delete by the left ids of the parent namespace (ns)
+            // We can simply delete by the left ids of the parent entity (ns)
             deleteJoin.ids = ids
 
             // Make join deletion a child of (delete before) ref deletion
@@ -71,9 +71,9 @@ abstract class DeleteAction(
 
 
   private def makeOwnedRefIdsQuery: String = {
-    clauses += s"$ns.id IN (${ids.mkString(", ")})"
+    clauses += s"$entity.id IN (${ids.mkString(", ")})"
     if (joins.isEmpty) {
-      sqlOps.selectStmt(ns, cols, Nil, clauses)
+      sqlOps.selectStmt(entity, cols, Nil, clauses)
     } else {
       val joinGroups = joins.toList.grouped(4).toList
       val max1       = joinGroups.map(_.head.length).max
@@ -83,7 +83,7 @@ abstract class DeleteAction(
         case List(j, as, l, r) =>
           j + padS(max1, j) + as + padS(max2, as) + l + padS(max3, l) + r
       }
-      sqlOps.selectStmt(ns, cols, joins1, clauses)
+      sqlOps.selectStmt(entity, cols, joins1, clauses)
     }
   }
 
@@ -112,9 +112,9 @@ abstract class DeleteAction(
 
 
   private def populateDeleteActions(
-    actions: Seq[() => DeleteNs],
+    actions: Seq[() => DeleteEntity],
     refIdss: Array[ListBuffer[Long]]
-  ): Seq[DeleteNs] = {
+  ): Seq[DeleteEntity] = {
     actions.zip(refIdss).collect {
       case (deleteAction, refIds) if refIds.nonEmpty =>
         val action = deleteAction()

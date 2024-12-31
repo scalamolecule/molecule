@@ -1,146 +1,147 @@
 // GENERATED CODE ********************************
 package molecule.coreTests.spi.aggregation.any
 
-import java.time.OffsetTime
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.dsl.Types._
-import molecule.coreTests.setup.CoreTestSuite
-import utest._
+import molecule.coreTests.domains.dsl.Types._
+import molecule.coreTests.setup._
 
-trait Aggr_OffsetTime_ extends CoreTestSuite with Api_async { spi: Spi_async =>
+case class Aggr_OffsetTime_(
+  suite: MUnitSuite,
+  api: Api_async with Spi_async with DbProviders
+) extends TestUtils {
 
-  override lazy val tests = Tests {
+  import api._
+  import suite._
 
-    "distinct" - types { implicit conn =>
-      for {
-        _ <- Ns.i.offsetTime.insert(List(
-          (1, offsetTime1),
-          (2, offsetTime2),
-          (2, offsetTime2),
-          (2, offsetTime3),
-        )).transact
+  "distinct" - types { implicit conn =>
+    for {
+      _ <- Entity.i.offsetTime.insert(List(
+        (1, offsetTime1),
+        (2, offsetTime2),
+        (2, offsetTime2),
+        (2, offsetTime3),
+      )).transact
 
-        _ <- Ns.i.offsetTime.a1.query.get.map(_ ==> List(
-          (1, offsetTime1),
-          (2, offsetTime2), // 2 rows coalesced
-          (2, offsetTime3),
-        ))
+      _ <- Entity.i.offsetTime.a1.query.get.map(_ ==> List(
+        (1, offsetTime1),
+        (2, offsetTime2), // 2 rows coalesced
+        (2, offsetTime3),
+      ))
 
-        // Distinct values are returned in a Set
-        _ <- Ns.i.a1.offsetTime(distinct).query.get.map(_ ==> List(
-          (1, Set(offsetTime1)),
-          (2, Set(offsetTime2, offsetTime3)),
-        ))
+      // Distinct values are returned in a Set
+      _ <- Entity.i.a1.offsetTime(distinct).query.get.map(_ ==> List(
+        (1, Set(offsetTime1)),
+        (2, Set(offsetTime2, offsetTime3)),
+      ))
 
-        _ <- Ns.offsetTime(distinct).query.get.map(_.head ==> Set(
-          offsetTime1, offsetTime2, offsetTime3
-        ))
-      } yield ()
-    }
-
-
-    "min/max" - types { implicit conn =>
-      for {
-        _ <- Ns.i.offsetTime.insert(
-          (1, offsetTime1),
-          (1, offsetTime2),
-          (1, offsetTime3),
-          (2, offsetTime4),
-          (2, offsetTime5),
-          (2, offsetTime6),
-        ).transact
-
-        _ <- Ns.offsetTime(min).query.get.map(_ ==> List(offsetTime1))
-        _ <- Ns.offsetTime(max).query.get.map(_ ==> List(offsetTime6))
-        _ <- Ns.offsetTime(min).offsetTime(max).query.get.map(_ ==> List((offsetTime1, offsetTime6)))
-
-        _ <- Ns.i.a1.offsetTime(min).query.get.map(_ ==> List(
-          (1, offsetTime1),
-          (2, offsetTime4)
-        ))
-
-        _ <- Ns.i.a1.offsetTime(max).query.get.map(_ ==> List(
-          (1, offsetTime3),
-          (2, offsetTime6)
-        ))
-
-        _ <- Ns.i.a1.offsetTime(min).offsetTime(max).query.get.map(_ ==> List(
-          (1, offsetTime1, offsetTime3),
-          (2, offsetTime4, offsetTime6)
-        ))
-      } yield ()
-    }
-
-    "min/max n" - types { implicit conn =>
-      for {
-        _ <- Ns.i.offsetTime.insert(
-          (1, offsetTime1),
-          (1, offsetTime2),
-          (1, offsetTime3),
-          (2, offsetTime4),
-          (2, offsetTime5),
-          (2, offsetTime6),
-          (2, offsetTime6), // (make sure grouped values coalesce)
-        ).transact
-
-        _ <- Ns.offsetTime(min(1)).query.get.map(_ ==> List(Set(offsetTime1)))
-        _ <- Ns.offsetTime(min(2)).query.get.map(_ ==> List(Set(offsetTime1, offsetTime2)))
-
-        _ <- Ns.offsetTime(max(1)).query.get.map(_ ==> List(Set(offsetTime6)))
-        _ <- Ns.offsetTime(max(2)).query.get.map(_ ==> List(Set(offsetTime5, offsetTime6)))
-
-        _ <- Ns.i.a1.offsetTime(min(2)).query.get.map(_ ==> List(
-          (1, Set(offsetTime1, offsetTime2)),
-          (2, Set(offsetTime4, offsetTime5))
-        ))
-
-        _ <- Ns.i.a1.offsetTime(max(2)).query.get.map(_ ==> List(
-          (1, Set(offsetTime2, offsetTime3)),
-          (2, Set(offsetTime5, offsetTime6))
-        ))
-
-        _ <- Ns.i.a1.offsetTime(min(2)).offsetTime(max(2)).query.get.map(_ ==> List(
-          (1, Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3)),
-          (2, Set(offsetTime4, offsetTime5), Set(offsetTime5, offsetTime6))
-        ))
-      } yield ()
-    }
+      _ <- Entity.offsetTime(distinct).query.get.map(_.head ==> Set(
+        offsetTime1, offsetTime2, offsetTime3
+      ))
+    } yield ()
+  }
 
 
-    "sample" - types { implicit futConn =>
-      val all = Set(offsetTime1, offsetTime2, offsetTime3, offsetTime4)
-      for {
-        _ <- Ns.offsetTime.insert(List(offsetTime1, offsetTime2, offsetTime3)).transact
-        _ <- Ns.offsetTime(sample).query.get.map(res => all.contains(res.head) ==> true)
-        _ <- Ns.offsetTime(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- Ns.offsetTime(sample(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-      } yield ()
-    }
+  "min/max" - types { implicit conn =>
+    for {
+      _ <- Entity.i.offsetTime.insert(
+        (1, offsetTime1),
+        (1, offsetTime2),
+        (1, offsetTime3),
+        (2, offsetTime4),
+        (2, offsetTime5),
+        (2, offsetTime6),
+      ).transact
+
+      _ <- Entity.offsetTime(min).query.get.map(_ ==> List(offsetTime1))
+      _ <- Entity.offsetTime(max).query.get.map(_ ==> List(offsetTime6))
+      _ <- Entity.offsetTime(min).offsetTime(max).query.get.map(_ ==> List((offsetTime1, offsetTime6)))
+
+      _ <- Entity.i.a1.offsetTime(min).query.get.map(_ ==> List(
+        (1, offsetTime1),
+        (2, offsetTime4)
+      ))
+
+      _ <- Entity.i.a1.offsetTime(max).query.get.map(_ ==> List(
+        (1, offsetTime3),
+        (2, offsetTime6)
+      ))
+
+      _ <- Entity.i.a1.offsetTime(min).offsetTime(max).query.get.map(_ ==> List(
+        (1, offsetTime1, offsetTime3),
+        (2, offsetTime4, offsetTime6)
+      ))
+    } yield ()
+  }
+
+  "min/max n" - types { implicit conn =>
+    for {
+      _ <- Entity.i.offsetTime.insert(
+        (1, offsetTime1),
+        (1, offsetTime2),
+        (1, offsetTime3),
+        (2, offsetTime4),
+        (2, offsetTime5),
+        (2, offsetTime6),
+        (2, offsetTime6), // (make sure grouped values coalesce)
+      ).transact
+
+      _ <- Entity.offsetTime(min(1)).query.get.map(_ ==> List(Set(offsetTime1)))
+      _ <- Entity.offsetTime(min(2)).query.get.map(_ ==> List(Set(offsetTime1, offsetTime2)))
+
+      _ <- Entity.offsetTime(max(1)).query.get.map(_ ==> List(Set(offsetTime6)))
+      _ <- Entity.offsetTime(max(2)).query.get.map(_ ==> List(Set(offsetTime5, offsetTime6)))
+
+      _ <- Entity.i.a1.offsetTime(min(2)).query.get.map(_ ==> List(
+        (1, Set(offsetTime1, offsetTime2)),
+        (2, Set(offsetTime4, offsetTime5))
+      ))
+
+      _ <- Entity.i.a1.offsetTime(max(2)).query.get.map(_ ==> List(
+        (1, Set(offsetTime2, offsetTime3)),
+        (2, Set(offsetTime5, offsetTime6))
+      ))
+
+      _ <- Entity.i.a1.offsetTime(min(2)).offsetTime(max(2)).query.get.map(_ ==> List(
+        (1, Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3)),
+        (2, Set(offsetTime4, offsetTime5), Set(offsetTime5, offsetTime6))
+      ))
+    } yield ()
+  }
 
 
-    "count" - types { implicit conn =>
-      for {
-        _ <- Ns.i.offsetTime.insert(List(
-          (1, offsetTime1),
-          (2, offsetTime2),
-          (2, offsetTime2),
-          (2, offsetTime3),
-        )).transact
+  "sample" - types { implicit futConn =>
+    val all = Set(offsetTime1, offsetTime2, offsetTime3, offsetTime4)
+    for {
+      _ <- Entity.offsetTime.insert(List(offsetTime1, offsetTime2, offsetTime3)).transact
+      _ <- Entity.offsetTime(sample).query.get.map(res => all.contains(res.head) ==> true)
+      _ <- Entity.offsetTime(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
+      _ <- Entity.offsetTime(sample(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
+    } yield ()
+  }
 
-        _ <- Ns.offsetTime(count).query.get.map(_ ==> List(4))
-        _ <- Ns.i.a1.offsetTime(count).query.get.map(_ ==> List(
-          (1, 1),
-          (2, 3)
-        ))
 
-        _ <- Ns.offsetTime(countDistinct).query.get.map(_ ==> List(3))
-        _ <- Ns.i.a1.offsetTime(countDistinct).query.get.map(_ ==> List(
-          (1, 1),
-          (2, 2)
-        ))
-      } yield ()
-    }
+  "count" - types { implicit conn =>
+    for {
+      _ <- Entity.i.offsetTime.insert(List(
+        (1, offsetTime1),
+        (2, offsetTime2),
+        (2, offsetTime2),
+        (2, offsetTime3),
+      )).transact
+
+      _ <- Entity.offsetTime(count).query.get.map(_ ==> List(4))
+      _ <- Entity.i.a1.offsetTime(count).query.get.map(_ ==> List(
+        (1, 1),
+        (2, 3)
+      ))
+
+      _ <- Entity.offsetTime(countDistinct).query.get.map(_ ==> List(3))
+      _ <- Entity.i.a1.offsetTime(countDistinct).query.get.map(_ ==> List(
+        (1, 1),
+        (2, 2)
+      ))
+    } yield ()
   }
 }

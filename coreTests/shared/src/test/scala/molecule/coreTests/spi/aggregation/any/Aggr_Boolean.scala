@@ -3,96 +3,98 @@ package molecule.coreTests.spi.aggregation.any
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.dsl.Types._
-import molecule.coreTests.setup.CoreTestSuite
-import utest._
+import molecule.coreTests.domains.dsl.Types._
+import molecule.coreTests.setup._
 
-trait Aggr_Boolean extends CoreTestSuite with Api_async { spi: Spi_async =>
+case class Aggr_Boolean(
+  suite: MUnitSuite,
+  api: Api_async with Spi_async with DbProviders
+) extends TestUtils {
 
-  override lazy val tests = Tests {
+  import api._
+  import suite._
 
-    "distinct" - types { implicit conn =>
-      for {
-        _ <- Ns.i.boolean.insert(List(
-          (1, true),
-          (2, false),
-          (2, false),
-          (2, true)
-        )).transact
-
-
-        _ <- Ns.i.a1.boolean.a2.query.get.map(_ ==> List(
-          (1, true),
-          (2, false), // 2 rows coalesced
-          (2, true),
-        ))
-
-        // Distinct values are returned in a Set
-        _ <- Ns.i.a1.boolean(distinct).query.get.map(_ ==> List(
-          (1, Set(true)),
-          (2, Set(false, true)),
-        ))
-
-        _ <- Ns.boolean(distinct).query.get.map(_.head ==> Set(false, true))
-      } yield ()
-    }
+  "distinct" - types { implicit conn =>
+    for {
+      _ <- Entity.i.boolean.insert(List(
+        (1, true),
+        (2, false),
+        (2, false),
+        (2, true)
+      )).transact
 
 
-    "min" - types { implicit conn =>
-      for {
-        _ <- Ns.boolean.insert(List(true, false, true)).transact
-        _ <- Ns.boolean(min).query.get.map(_.head ==> false)
-        _ <- Ns.boolean(min(1)).query.get.map(_.head ==> Set(false))
-        _ <- Ns.boolean(min(2)).query.get.map(_.head ==> Set(false, true))
-      } yield ()
-    }
+      _ <- Entity.i.a1.boolean.a2.query.get.map(_ ==> List(
+        (1, true),
+        (2, false), // 2 rows coalesced
+        (2, true),
+      ))
+
+      // Distinct values are returned in a Set
+      _ <- Entity.i.a1.boolean(distinct).query.get.map(_ ==> List(
+        (1, Set(true)),
+        (2, Set(false, true)),
+      ))
+
+      _ <- Entity.boolean(distinct).query.get.map(_.head ==> Set(false, true))
+    } yield ()
+  }
 
 
-    "max" - types { implicit futConn =>
-      for {
-        _ <- Ns.boolean.insert(List(true, false, true)).transact
-        _ <- Ns.boolean(max).query.get.map(_.head ==> true)
-        _ <- Ns.boolean(max(1)).query.get.map(_.head ==> Set(true))
-        _ <- Ns.boolean(max(2)).query.get.map(_.head ==> Set(true, false))
-      } yield ()
-    }
+  "min" - types { implicit conn =>
+    for {
+      _ <- Entity.boolean.insert(List(true, false, true)).transact
+      _ <- Entity.boolean(min).query.get.map(_.head ==> false)
+      _ <- Entity.boolean(min(1)).query.get.map(_.head ==> Set(false))
+      _ <- Entity.boolean(min(2)).query.get.map(_.head ==> Set(false, true))
+    } yield ()
+  }
 
 
-    "sample" - types { implicit futConn =>
-      for {
-        _ <- Ns.boolean.insert(List(true, false, true)).transact
-        all = Set(true, false)
-        _ <- Ns.boolean(sample).query.get.map(res => all.contains(res.head) ==> true)
-        _ <- Ns.boolean(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- Ns.boolean(sample(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-      } yield ()
-    }
+  "max" - types { implicit futConn =>
+    for {
+      _ <- Entity.boolean.insert(List(true, false, true)).transact
+      _ <- Entity.boolean(max).query.get.map(_.head ==> true)
+      _ <- Entity.boolean(max(1)).query.get.map(_.head ==> Set(true))
+      _ <- Entity.boolean(max(2)).query.get.map(_.head ==> Set(true, false))
+    } yield ()
+  }
 
 
-    "count, countDistinct" - types { implicit conn =>
-      for {
-        _ <- Ns.i.boolean.insert(List(
-          (1, true),
-          (2, false),
-          (2, false),
-          (2, true),
-        )).transact
+  "sample" - types { implicit futConn =>
+    for {
+      _ <- Entity.boolean.insert(List(true, false, true)).transact
+      all = Set(true, false)
+      _ <- Entity.boolean(sample).query.get.map(res => all.contains(res.head) ==> true)
+      _ <- Entity.boolean(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
+      _ <- Entity.boolean(sample(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
+    } yield ()
+  }
 
-        _ <- Ns.i(count).query.get.map(_ ==> List(4))
-        _ <- Ns.i(countDistinct).query.get.map(_ ==> List(2))
 
-        _ <- Ns.boolean(count).query.get.map(_ ==> List(4))
-        _ <- Ns.boolean(countDistinct).query.get.map(_ ==> List(2))
+  "count, countDistinct" - types { implicit conn =>
+    for {
+      _ <- Entity.i.boolean.insert(List(
+        (1, true),
+        (2, false),
+        (2, false),
+        (2, true),
+      )).transact
 
-        _ <- Ns.i.a1.boolean(count).query.get.map(_ ==> List(
-          (1, 1),
-          (2, 3)
-        ))
-        _ <- Ns.i.a1.boolean(countDistinct).query.get.map(_ ==> List(
-          (1, 1),
-          (2, 2)
-        ))
-      } yield ()
-    }
+      _ <- Entity.i(count).query.get.map(_ ==> List(4))
+      _ <- Entity.i(countDistinct).query.get.map(_ ==> List(2))
+
+      _ <- Entity.boolean(count).query.get.map(_ ==> List(4))
+      _ <- Entity.boolean(countDistinct).query.get.map(_ ==> List(2))
+
+      _ <- Entity.i.a1.boolean(count).query.get.map(_ ==> List(
+        (1, 1),
+        (2, 3)
+      ))
+      _ <- Entity.i.a1.boolean(countDistinct).query.get.map(_ ==> List(
+        (1, 1),
+        (2, 2)
+      ))
+    } yield ()
   }
 }

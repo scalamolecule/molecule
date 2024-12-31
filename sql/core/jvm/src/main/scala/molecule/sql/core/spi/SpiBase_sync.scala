@@ -145,7 +145,7 @@ trait SpiBase_sync
   override def save_validate(save: Save)(implicit conn: Conn): Map[String, Seq[String]] = {
     if (save.doValidate) {
       val proxy = conn.proxy
-      TxModelValidation(proxy.nsMap, proxy.attrMap, "save").validate(save.elements)
+      TxModelValidation(proxy.schema.entityMap, proxy.schema.attrMap, "save").validate(save.elements)
     } else {
       Map.empty[String, Seq[String]]
     }
@@ -254,8 +254,8 @@ trait SpiBase_sync
     if (delete.doInspect)
       delete_inspect(delete)
     val deleteClean = delete.copy(elements = noKeywords(delete.elements, Some(conn.proxy)))
-    val action = delete_getAction(deleteClean, conn)
-    val txReport = conn.transact_sync(action)
+    val action      = delete_getAction(deleteClean, conn)
+    val txReport    = conn.transact_sync(action)
     await(conn.callback(delete.elements, true))
     txReport
   }

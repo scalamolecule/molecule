@@ -11,7 +11,7 @@ class Model2SqlQuery_sqlite(elements0: List[Element])
     with QueryExprSeq_sqlite
     with QueryExprMap_sqlite
     with QueryExprSetRefAttr_sqlite
-    with SqlQueryBase{
+    with SqlQueryBase {
 
 
   override def pagination(

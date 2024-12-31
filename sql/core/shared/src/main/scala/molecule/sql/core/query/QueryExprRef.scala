@@ -47,7 +47,7 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
       tail.head match {
         case a: Attr => throw ModelError(
           s"Expected ref after backref _$bRef. " +
-            s"Please add attribute ${a.ns}.${a.attr} to initial namespace ${a.ns} " +
+            s"Please add attribute ${a.ns}.${a.attr} to initial entity ${a.ns} " +
             s"instead of after backref _$bRef."
         )
         case _       => ()
@@ -141,9 +141,9 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
     val (refAs, refExt) = getOptExt().fold(("", ""))(ext => (refNs + ext, ext))
     val joinTable       = ss(ns, refAttr, refNs)
     val (id1, id2)      = if (ns == refNs) ("1_id", "2_id") else ("id", "id")
-    val ns_id1          = ss(ns, id1)
+    val eid1            = ss(ns, id1)
     val refNs_id2       = ss(refNs, id2)
-    joins += ((s"$joinType JOIN", joinTable, "", List(s"$ns$nsExt.id = $joinTable.$ns_id1")))
+    joins += ((s"$joinType JOIN", joinTable, "", List(s"$ns$nsExt.id = $joinTable.$eid1")))
     joins += ((s"$joinType JOIN", refNs, refAs, List(s"$joinTable.$refNs_id2 = $refNs$refExt.id")))
   }
 }

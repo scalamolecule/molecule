@@ -1,15 +1,36 @@
 package molecule.sql.mariadb.compliance.transaction.update.relation.many
 
-import molecule.coreTests.spi.transaction.update.relation.many._
-import molecule.sql.mariadb.setup.Test_mariadb_async
+import molecule.coreTests.setup.MUnitSuite
+import molecule.coreTests.spi.action.update.relation.many._
+import molecule.sql.mariadb.setup.Api_mariadb_async
 
-object Test_Many_Map extends Many_Map with Test_mariadb_async
-object Test_Many_Map_add extends Many_Map_add with Test_mariadb_async
-object Test_Many_Map_remove extends Many_Map_remove with Test_mariadb_async
-object Test_Many_One extends Many_One with Test_mariadb_async
-object Test_Many_Seq extends Many_Seq with Test_mariadb_async
-object Test_Many_Seq_add extends Many_Seq_add with Test_mariadb_async
-object Test_Many_Seq_remove extends Many_Seq_remove with Test_mariadb_async
-object Test_Many_Set extends Many_Set with Test_mariadb_async
-object Test_Many_Set_add extends Many_Set_add with Test_mariadb_async
-object Test_Many_Set_remove extends Many_Set_remove with Test_mariadb_async
+class Many_Map extends MUnitSuite {
+  Many_Map(this, Api_mariadb_async)
+}
+class Many_Map_add extends MUnitSuite {
+  Many_Map_add(this, Api_mariadb_async)
+}
+class Many_Map_remove extends MUnitSuite {
+  Many_Map_remove(this, Api_mariadb_async)
+}
+class Many_One extends MUnitSuite {
+  Many_One(this, Api_mariadb_async)
+}
+class Many_Seq extends MUnitSuite {
+  Many_Seq(this, Api_mariadb_async)
+}
+class Many_Seq_add extends MUnitSuite {
+  Many_Seq_add(this, Api_mariadb_async)
+}
+class Many_Seq_remove extends MUnitSuite {
+  Many_Seq_remove(this, Api_mariadb_async)
+}
+class Many_Set extends MUnitSuite {
+  Many_Set(this, Api_mariadb_async)
+}
+class Many_Set_add extends MUnitSuite {
+  Many_Set_add(this, Api_mariadb_async)
+}
+class Many_Set_remove extends MUnitSuite {
+  Many_Set_remove(this, Api_mariadb_async)
+}

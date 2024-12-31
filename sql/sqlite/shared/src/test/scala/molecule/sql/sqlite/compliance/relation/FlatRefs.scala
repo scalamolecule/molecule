@@ -1,9 +1,18 @@
 package molecule.sql.sqlite.compliance.relation
 
+import molecule.coreTests.setup.MUnitSuite
 import molecule.coreTests.spi.relation.flat._
-import molecule.sql.sqlite.setup.Test_sqlite_async
+import molecule.sql.sqlite.setup.Api_sqlite_async
 
-object Test_FlatRefs extends FlatRef with Test_sqlite_async
-object Test_FlatRefOpt extends FlatRefOpt with Test_sqlite_async
-object Test_FlatRefOptNested extends FlatRefOptNested with Test_sqlite_async
-object Test_FlatRefOptAdjacent extends FlatRefOptAdjacent with Test_sqlite_async
+class FlatRef extends MUnitSuite {
+  FlatRef(this, Api_sqlite_async)
+}
+class FlatRefOpt extends MUnitSuite {
+  FlatRefOpt(this, Api_sqlite_async)
+}
+class FlatRefOptNested extends MUnitSuite {
+  FlatRefOptNested(this, Api_sqlite_async)
+}
+class FlatRefOptAdjacent extends MUnitSuite {
+  FlatRefOptAdjacent(this, Api_sqlite_async)
+}

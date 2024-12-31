@@ -1,14 +1,28 @@
 package molecule.sql.mysql.compliance.relation
 
+import molecule.coreTests.setup.{MUnitSuite, MUnitSuiteWithArrays}
 import molecule.coreTests.spi.relation.nested._
-import molecule.sql.mysql.setup.{Test_mysql_async, TestSuite_mysql_array}
-import molecule.sql.mysql.spi.Spi_mysql_async
+import molecule.sql.mysql.setup.Api_mysql_async
 
-object Test_NestedBasic extends NestedBasic with Test_mysql_async
-object Test_NestedExpr extends NestedExpr with Test_mysql_async
-object Test_NestedLevels extends NestedLevels with Test_mysql_async
-object Test_NestedOptional extends NestedOptional with Test_mysql_async
-object Test_NestedRef extends NestedRef with Test_mysql_async
-object Test_NestedSemantics extends NestedSemantics with Test_mysql_async
-object Test_NestedTypes extends NestedTypes with TestSuite_mysql_array with Spi_mysql_async
+class NestedBasic extends MUnitSuite {
+  NestedBasic(this, Api_mysql_async)
+}
+class NestedExpr extends MUnitSuite {
+  NestedExpr(this, Api_mysql_async)
+}
+class NestedLevels extends MUnitSuite {
+  NestedLevels(this, Api_mysql_async)
+}
+class NestedOptional extends MUnitSuite {
+  NestedOptional(this, Api_mysql_async)
+}
+class NestedRef extends MUnitSuite {
+  NestedRef(this, Api_mysql_async)
+}
+class NestedSemantics extends MUnitSuite {
+  NestedSemantics(this, Api_mysql_async)
+}
+class NestedTypes extends MUnitSuiteWithArrays {
+  NestedTypes(this, Api_mysql_async)
+}
 

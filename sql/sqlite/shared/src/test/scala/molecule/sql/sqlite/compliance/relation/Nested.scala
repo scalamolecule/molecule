@@ -1,14 +1,28 @@
 package molecule.sql.sqlite.compliance.relation
 
+import molecule.coreTests.setup.{MUnitSuite, MUnitSuiteWithArrays}
 import molecule.coreTests.spi.relation.nested._
-import molecule.sql.sqlite.setup.{Test_sqlite_async, TestSuite_sqlite_array}
-import molecule.sql.sqlite.spi.Spi_sqlite_async
+import molecule.sql.sqlite.setup.Api_sqlite_async
 
-object Test_NestedBasic extends NestedBasic with Test_sqlite_async
-object Test_NestedExpr extends NestedExpr with Test_sqlite_async
-object Test_NestedLevels extends NestedLevels with Test_sqlite_async
-object Test_NestedOptional extends NestedOptional with Test_sqlite_async
-object Test_NestedRef extends NestedRef with Test_sqlite_async
-object Test_NestedSemantics extends NestedSemantics with Test_sqlite_async
-object Test_NestedTypes extends NestedTypes with TestSuite_sqlite_array with Spi_sqlite_async
+class NestedBasic extends MUnitSuite {
+  NestedBasic(this, Api_sqlite_async)
+}
+class NestedExpr extends MUnitSuite {
+  NestedExpr(this, Api_sqlite_async)
+}
+class NestedLevels extends MUnitSuite {
+  NestedLevels(this, Api_sqlite_async)
+}
+class NestedOptional extends MUnitSuite {
+  NestedOptional(this, Api_sqlite_async)
+}
+class NestedRef extends MUnitSuite {
+  NestedRef(this, Api_sqlite_async)
+}
+class NestedSemantics extends MUnitSuite {
+  NestedSemantics(this, Api_sqlite_async)
+}
+class NestedTypes extends MUnitSuiteWithArrays {
+  NestedTypes(this, Api_sqlite_async)
+}
 

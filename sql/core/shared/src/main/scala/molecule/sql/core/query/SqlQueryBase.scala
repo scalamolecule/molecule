@@ -70,11 +70,11 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions {
     joins.update(joins.length - 1, updatedLeftJoin)
 
     val firstPredicates = where.dropRight(where.length - whereSplit)
-    where.clear()
-    where ++= firstPredicates
-
     // Same as (but doesn't exist in scala 2.12):
     // where.takeInPlace(whereSplit)
+
+    where.clear()
+    where ++= firstPredicates
   }
 
   private var index = 0

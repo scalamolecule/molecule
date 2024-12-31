@@ -1,11 +1,24 @@
 package molecule.sql.mysql.compliance.aggregation
 
+import molecule.coreTests.setup.MUnitSuite
 import molecule.coreTests.spi.aggregation.ref._
-import molecule.sql.mysql.setup.Test_mysql_async
+import molecule.sql.mysql.setup.Api_mysql_async
 
-object Test_AggrRef_count extends AggrRef_count with Test_mysql_async
-object Test_AggrRef_distinct extends AggrRef_distinct with Test_mysql_async
-object Test_AggrRef_min_max extends AggrRef_min_max with Test_mysql_async
-object Test_AggrRef_min_max_n extends AggrRef_min_max_n with Test_mysql_async
-object Test_AggrRef_sample extends AggrRef_sample with Test_mysql_async
-object Test_AggrRef_sample_n extends AggrRef_sample_n with Test_mysql_async
+class AggrRef_count extends MUnitSuite {
+  AggrRef_count(this, Api_mysql_async)
+}
+class AggrRef_distinct extends MUnitSuite {
+  AggrRef_distinct(this, Api_mysql_async)
+}
+class AggrRef_min_max extends MUnitSuite {
+  AggrRef_min_max(this, Api_mysql_async)
+}
+class AggrRef_min_max_n extends MUnitSuite {
+  AggrRef_min_max_n(this, Api_mysql_async)
+}
+class AggrRef_sample extends MUnitSuite {
+  AggrRef_sample(this, Api_mysql_async)
+}
+class AggrRef_sample_n extends MUnitSuite {
+  AggrRef_sample_n(this, Api_mysql_async)
+}

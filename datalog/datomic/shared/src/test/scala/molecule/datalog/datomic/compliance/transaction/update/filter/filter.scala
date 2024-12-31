@@ -1,9 +1,18 @@
 package molecule.datalog.datomic.compliance.transaction.update.filter
 
-import molecule.coreTests.spi.transaction.update.filter._
-import molecule.datalog.datomic.setup.Test_datomic_async
+import molecule.coreTests.setup.MUnitSuite
+import molecule.coreTests.spi.action.update.filter._
+import molecule.datalog.datomic.setup.Api_datomic_async
 
-object Test_FilterOne extends FilterOne with Test_datomic_async
-object Test_FilterSet extends FilterSet with Test_datomic_async
-object Test_FilterSeq extends FilterSeq with Test_datomic_async
-object Test_FilterMap extends FilterMap with Test_datomic_async
+class FilterOne extends MUnitSuite {
+  FilterOne(this, Api_datomic_async)
+}
+class FilterSet extends MUnitSuite {
+  FilterSet(this, Api_datomic_async)
+}
+class FilterSeq extends MUnitSuite {
+  FilterSeq(this, Api_datomic_async)
+}
+class FilterMap extends MUnitSuite {
+  FilterMap(this, Api_datomic_async)
+}

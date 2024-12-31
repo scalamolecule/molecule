@@ -4,7 +4,6 @@ import molecule.base.error.InsertError
 import molecule.core.action._
 import molecule.core.spi.{Conn, Spi_async, TxReport}
 import molecule.core.util.ModelUtils
-import molecule.sql.mariadb.sync.getModel2SqlQuery
 import scala.concurrent.{Future, ExecutionContext => EC}
 
 trait Spi_mariadb_async extends Spi_async with ModelUtils {

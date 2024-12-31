@@ -1,14 +1,33 @@
 package molecule.datalog.datomic.compliance.pagination.cursor.noUnique
 
+import molecule.coreTests.setup.MUnitSuite
 import molecule.coreTests.spi.pagination.cursor.noUnique._
-import molecule.datalog.datomic.setup.Test_datomic_async
+import molecule.datalog.datomic.setup.Api_datomic_async
 
-object Test_AttrOrderMandatory extends AttrOrderMandatory with Test_datomic_async
-object Test_AttrOrderOptional extends AttrOrderOptional with Test_datomic_async
-object Test_DirectionsMandatory extends DirectionsMandatory with Test_datomic_async
-object Test_DirectionsOptional extends DirectionsOptional with Test_datomic_async
-object Test_MutationAdd extends MutationAdd with Test_datomic_async
-object Test_MutationDelete extends MutationDelete with Test_datomic_async
-object Nested extends Nested with Test_datomic_async
-object Test_OptNested extends OptNested with Test_datomic_async
-object TypesOptional extends TypesOptional with Test_datomic_async
+class AttrOrderMandatory extends MUnitSuite {
+  AttrOrderMandatory(this, Api_datomic_async)
+}
+class AttrOrderOptional extends MUnitSuite {
+  AttrOrderOptional(this, Api_datomic_async)
+}
+class DirectionsMandatory extends MUnitSuite {
+  DirectionsMandatory(this, Api_datomic_async)
+}
+class DirectionsOptional extends MUnitSuite {
+  DirectionsOptional(this, Api_datomic_async)
+}
+class MutationAdd extends MUnitSuite {
+  MutationAdd(this, Api_datomic_async)
+}
+class MutationDelete extends MUnitSuite {
+  MutationDelete(this, Api_datomic_async)
+}
+class Nested extends MUnitSuite {
+  Nested(this, Api_datomic_async)
+}
+class OptNested extends MUnitSuite {
+  OptNested(this, Api_datomic_async)
+}
+class TypesOptional extends MUnitSuite {
+  TypesOptional(this, Api_datomic_async)
+}
