@@ -27,7 +27,7 @@ class Model2SqlQuery_mysql(elements0: List[Element])
     //      List(
     //        s"""Entity.id IN (
     //           |  SELECT Entity.id FROM (
-    //           |    SELECT Entity.id FROM Ns
+    //           |    SELECT Entity.id FROM Entity
     //           |      ${mkJoins(2).trim}
     //           |  ) AS t
     //           |)""".stripMargin)

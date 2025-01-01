@@ -1,7 +1,7 @@
 package molecule.sql.mariadb.compliance.transaction.delete
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.transaction.delete._
+import molecule.coreTests.spi.action.delete._
 import molecule.sql.mariadb.setup.Api_mariadb_async
 
 class Delete_id extends Test {

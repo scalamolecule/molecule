@@ -11,8 +11,6 @@ import scala.util.Try
 
 trait DbConnection_datomic extends DbConnection {
 
-  override val platform = "js"
-
   def run(test: Conn => Any, schema: Schema_datomic): Any = {
     val proxy = DatomicProxy("mem", "", schema)
     val conn  = DatomicConn_JS(proxy, RpcRequest.request)

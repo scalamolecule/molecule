@@ -14,8 +14,8 @@ class RawTransact extends Test with DbProviders_datomic with TestUtils {
       // Insert 1 row with 2 values
       txReport <- rawTransact(
         """[
-          |  [:db/add -1 :Ns/string "a"]
-          |  [:db/add -1 :Ns/int     1 ]
+          |  [:db/add -1 :Entity/string "a"]
+          |  [:db/add -1 :Entity/int     1 ]
           |]
           |""".stripMargin)
 
@@ -28,10 +28,10 @@ class RawTransact extends Test with DbProviders_datomic with TestUtils {
       // Insert 2 rows
       _ <- rawTransact(
         """[
-          |  [:db/add -1 :Ns/i       1    ]
-          |  [:db/add -1 :Ns/boolean true ]
-          |  [:db/add -2 :Ns/i       2    ]
-          |  [:db/add -2 :Ns/boolean false]
+          |  [:db/add -1 :Entity/i       1    ]
+          |  [:db/add -1 :Entity/boolean true ]
+          |  [:db/add -2 :Entity/i       2    ]
+          |  [:db/add -2 :Entity/boolean false]
           |]
           |""".stripMargin)
       // Rows saved
@@ -43,27 +43,27 @@ class RawTransact extends Test with DbProviders_datomic with TestUtils {
   "Insert" - types { implicit conn =>
     // URIs within EDN requires tricks and is therefore not tested here
     for {
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/string         "$string1"                    ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/int            $int1                         ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/long           $long1                        ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/float          $float1                       ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/double         $double1                      ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/boolean        $boolean1                     ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/bigInt         ${bigInt1}N                   ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/bigDecimal     ${bigDecimal1}M               ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/date           #inst "${date2datomic(date1)}"]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/duration       "${duration1.toString}"       ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/instant        "${instant1.toString}"        ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/localDate      "${localDate1.toString}"      ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/localTime      "${localTime1.toString}"      ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/localDateTime  "${localDateTime1.toString}"  ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/offsetTime     "${offsetTime1.toString}"     ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/offsetDateTime "${offsetDateTime1.toString}" ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/zonedDateTime  "${zonedDateTime1.toString}"  ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/uuid           #uuid "$uuid1"                ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/byte           $byte1                        ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/short          $short1                       ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/char           "$char1"                      ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/string         "$string1"                    ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/int            $int1                         ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/long           $long1                        ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/float          $float1                       ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/double         $double1                      ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/boolean        $boolean1                     ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/bigInt         ${bigInt1}N                   ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/bigDecimal     ${bigDecimal1}M               ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/date           #inst "${date2datomic(date1)}"]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/duration       "${duration1.toString}"       ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/instant        "${instant1.toString}"        ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/localDate      "${localDate1.toString}"      ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/localTime      "${localTime1.toString}"      ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/localDateTime  "${localDateTime1.toString}"  ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/offsetTime     "${offsetTime1.toString}"     ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/offsetDateTime "${offsetDateTime1.toString}" ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/zonedDateTime  "${zonedDateTime1.toString}"  ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/uuid           #uuid "$uuid1"                ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/byte           $byte1                        ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/short          $short1                       ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/char           "$char1"                      ]]""")
 
 
       // All types properly inserted
@@ -96,28 +96,28 @@ class RawTransact extends Test with DbProviders_datomic with TestUtils {
     // URIs within EDN requires tricks and is therefore not tested here
     for {
       _ <- Entity.iSet(Set(1, 2)).save.inspect
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/stringSet         "$string1"                    ][:db/add -1 :Ns/stringSet         "$string2"                    ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/intSet            $int1                         ][:db/add -1 :Ns/intSet            $int2                         ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/longSet           $long1                        ][:db/add -1 :Ns/longSet           $long2                        ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/floatSet          $float1                       ][:db/add -1 :Ns/floatSet          $float2                       ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/doubleSet         $double1                      ][:db/add -1 :Ns/doubleSet         $double2                      ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/booleanSet        $boolean1                     ][:db/add -1 :Ns/booleanSet        $boolean2                     ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/bigIntSet         ${bigInt1}N                   ][:db/add -1 :Ns/bigIntSet         ${bigInt2}N                   ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/bigDecimalSet     ${bigDecimal1}M               ][:db/add -1 :Ns/bigDecimalSet     ${bigDecimal2}M               ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/dateSet           #inst "${date2datomic(date1)}"][:db/add -1 :Ns/dateSet           #inst "${date2datomic(date2)}"]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/durationSet       "${duration1.toString}"       ][:db/add -1 :Ns/durationSet       "${duration2.toString}"       ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/instantSet        "${instant1.toString}"        ][:db/add -1 :Ns/instantSet        "${instant2.toString}"        ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/localDateSet      "${localDate1.toString}"      ][:db/add -1 :Ns/localDateSet      "${localDate2.toString}"      ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/localTimeSet      "${localTime1.toString}"      ][:db/add -1 :Ns/localTimeSet      "${localTime2.toString}"      ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/localDateTimeSet  "${localDateTime1.toString}"  ][:db/add -1 :Ns/localDateTimeSet  "${localDateTime2.toString}"  ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/offsetTimeSet     "${offsetTime1.toString}"     ][:db/add -1 :Ns/offsetTimeSet     "${offsetTime2.toString}"     ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/offsetDateTimeSet "${offsetDateTime1.toString}" ][:db/add -1 :Ns/offsetDateTimeSet "${offsetDateTime2.toString}" ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/zonedDateTimeSet  "${zonedDateTime1.toString}"  ][:db/add -1 :Ns/zonedDateTimeSet  "${zonedDateTime2.toString}"  ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/uuidSet           #uuid "$uuid1"                ][:db/add -1 :Ns/uuidSet           #uuid "$uuid2"                ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/byteSet           $byte1                        ][:db/add -1 :Ns/byteSet           $byte2                        ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/shortSet          $short1                       ][:db/add -1 :Ns/shortSet          $short2                       ]]""")
-      _ <- rawTransact(s"""[[:db/add -1 :Ns/charSet           "$char1"                      ][:db/add -1 :Ns/charSet           "$char2"                      ]]""")
-      //        _ <- rawTransact(s"""insert into Ns (uriSet           ) values (array['$uri1', '$uri2'])""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/stringSet         "$string1"                    ][:db/add -1 :Entity/stringSet         "$string2"                    ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/intSet            $int1                         ][:db/add -1 :Entity/intSet            $int2                         ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/longSet           $long1                        ][:db/add -1 :Entity/longSet           $long2                        ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/floatSet          $float1                       ][:db/add -1 :Entity/floatSet          $float2                       ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/doubleSet         $double1                      ][:db/add -1 :Entity/doubleSet         $double2                      ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/booleanSet        $boolean1                     ][:db/add -1 :Entity/booleanSet        $boolean2                     ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/bigIntSet         ${bigInt1}N                   ][:db/add -1 :Entity/bigIntSet         ${bigInt2}N                   ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/bigDecimalSet     ${bigDecimal1}M               ][:db/add -1 :Entity/bigDecimalSet     ${bigDecimal2}M               ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/dateSet           #inst "${date2datomic(date1)}"][:db/add -1 :Entity/dateSet           #inst "${date2datomic(date2)}"]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/durationSet       "${duration1.toString}"       ][:db/add -1 :Entity/durationSet       "${duration2.toString}"       ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/instantSet        "${instant1.toString}"        ][:db/add -1 :Entity/instantSet        "${instant2.toString}"        ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/localDateSet      "${localDate1.toString}"      ][:db/add -1 :Entity/localDateSet      "${localDate2.toString}"      ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/localTimeSet      "${localTime1.toString}"      ][:db/add -1 :Entity/localTimeSet      "${localTime2.toString}"      ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/localDateTimeSet  "${localDateTime1.toString}"  ][:db/add -1 :Entity/localDateTimeSet  "${localDateTime2.toString}"  ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/offsetTimeSet     "${offsetTime1.toString}"     ][:db/add -1 :Entity/offsetTimeSet     "${offsetTime2.toString}"     ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/offsetDateTimeSet "${offsetDateTime1.toString}" ][:db/add -1 :Entity/offsetDateTimeSet "${offsetDateTime2.toString}" ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/zonedDateTimeSet  "${zonedDateTime1.toString}"  ][:db/add -1 :Entity/zonedDateTimeSet  "${zonedDateTime2.toString}"  ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/uuidSet           #uuid "$uuid1"                ][:db/add -1 :Entity/uuidSet           #uuid "$uuid2"                ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/byteSet           $byte1                        ][:db/add -1 :Entity/byteSet           $byte2                        ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/shortSet          $short1                       ][:db/add -1 :Entity/shortSet          $short2                       ]]""")
+      _ <- rawTransact(s"""[[:db/add -1 :Entity/charSet           "$char1"                      ][:db/add -1 :Entity/charSet           "$char2"                      ]]""")
+      //        _ <- rawTransact(s"""insert into Entity (uriSet           ) values (array['$uri1', '$uri2'])""")
 
       // All types properly inserted
       _ <- Entity.stringSet.query.get.map(_.head ==> Set(string1, string2))
@@ -173,27 +173,27 @@ class RawTransact extends Test with DbProviders_datomic with TestUtils {
       id21 <- Entity.char(char1).save.transact.map(_.id)
 
       // Update all values
-      _ <- rawTransact(s"""[[:db/add $id1  :Ns/string         "$string2"                    ]]""")
-      _ <- rawTransact(s"""[[:db/add $id2  :Ns/int            $int2                         ]]""")
-      _ <- rawTransact(s"""[[:db/add $id3  :Ns/long           $long2                        ]]""")
-      _ <- rawTransact(s"""[[:db/add $id4  :Ns/float          $float2                       ]]""")
-      _ <- rawTransact(s"""[[:db/add $id5  :Ns/double         $double2                      ]]""")
-      _ <- rawTransact(s"""[[:db/add $id6  :Ns/boolean        $boolean2                     ]]""")
-      _ <- rawTransact(s"""[[:db/add $id7  :Ns/bigInt         ${bigInt2}N                   ]]""")
-      _ <- rawTransact(s"""[[:db/add $id8  :Ns/bigDecimal     ${bigDecimal2}M               ]]""")
-      _ <- rawTransact(s"""[[:db/add $id9  :Ns/date           #inst "${date2datomic(date2)}"]]""")
-      _ <- rawTransact(s"""[[:db/add $id10 :Ns/duration       "${duration2.toString}"       ]]""")
-      _ <- rawTransact(s"""[[:db/add $id11 :Ns/instant        "${instant2.toString}"        ]]""")
-      _ <- rawTransact(s"""[[:db/add $id12 :Ns/localDate      "${localDate2.toString}"      ]]""")
-      _ <- rawTransact(s"""[[:db/add $id13 :Ns/localTime      "${localTime2.toString}"      ]]""")
-      _ <- rawTransact(s"""[[:db/add $id14 :Ns/localDateTime  "${localDateTime2.toString}"  ]]""")
-      _ <- rawTransact(s"""[[:db/add $id15 :Ns/offsetTime     "${offsetTime2.toString}"     ]]""")
-      _ <- rawTransact(s"""[[:db/add $id16 :Ns/offsetDateTime "${offsetDateTime2.toString}" ]]""")
-      _ <- rawTransact(s"""[[:db/add $id17 :Ns/zonedDateTime  "${zonedDateTime2.toString}"  ]]""")
-      _ <- rawTransact(s"""[[:db/add $id18 :Ns/uuid           #uuid "$uuid2"                ]]""")
-      _ <- rawTransact(s"""[[:db/add $id19 :Ns/byte           $byte2                        ]]""")
-      _ <- rawTransact(s"""[[:db/add $id20 :Ns/short          $short2                       ]]""")
-      _ <- rawTransact(s"""[[:db/add $id21 :Ns/char           "$char2"                      ]]""")
+      _ <- rawTransact(s"""[[:db/add $id1  :Entity/string         "$string2"                    ]]""")
+      _ <- rawTransact(s"""[[:db/add $id2  :Entity/int            $int2                         ]]""")
+      _ <- rawTransact(s"""[[:db/add $id3  :Entity/long           $long2                        ]]""")
+      _ <- rawTransact(s"""[[:db/add $id4  :Entity/float          $float2                       ]]""")
+      _ <- rawTransact(s"""[[:db/add $id5  :Entity/double         $double2                      ]]""")
+      _ <- rawTransact(s"""[[:db/add $id6  :Entity/boolean        $boolean2                     ]]""")
+      _ <- rawTransact(s"""[[:db/add $id7  :Entity/bigInt         ${bigInt2}N                   ]]""")
+      _ <- rawTransact(s"""[[:db/add $id8  :Entity/bigDecimal     ${bigDecimal2}M               ]]""")
+      _ <- rawTransact(s"""[[:db/add $id9  :Entity/date           #inst "${date2datomic(date2)}"]]""")
+      _ <- rawTransact(s"""[[:db/add $id10 :Entity/duration       "${duration2.toString}"       ]]""")
+      _ <- rawTransact(s"""[[:db/add $id11 :Entity/instant        "${instant2.toString}"        ]]""")
+      _ <- rawTransact(s"""[[:db/add $id12 :Entity/localDate      "${localDate2.toString}"      ]]""")
+      _ <- rawTransact(s"""[[:db/add $id13 :Entity/localTime      "${localTime2.toString}"      ]]""")
+      _ <- rawTransact(s"""[[:db/add $id14 :Entity/localDateTime  "${localDateTime2.toString}"  ]]""")
+      _ <- rawTransact(s"""[[:db/add $id15 :Entity/offsetTime     "${offsetTime2.toString}"     ]]""")
+      _ <- rawTransact(s"""[[:db/add $id16 :Entity/offsetDateTime "${offsetDateTime2.toString}" ]]""")
+      _ <- rawTransact(s"""[[:db/add $id17 :Entity/zonedDateTime  "${zonedDateTime2.toString}"  ]]""")
+      _ <- rawTransact(s"""[[:db/add $id18 :Entity/uuid           #uuid "$uuid2"                ]]""")
+      _ <- rawTransact(s"""[[:db/add $id19 :Entity/byte           $byte2                        ]]""")
+      _ <- rawTransact(s"""[[:db/add $id20 :Entity/short          $short2                       ]]""")
+      _ <- rawTransact(s"""[[:db/add $id21 :Entity/char           "$char2"                      ]]""")
 
       // All types properly updated
       _ <- Entity.string.query.get.map(_.head ==> string2)

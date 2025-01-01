@@ -5,13 +5,9 @@ import com.dimafeng.testcontainers.MariaDBContainer
 import molecule.base.api.Schema_mariadb
 import molecule.core.marshalling.JdbcProxy_mariadb
 import molecule.core.spi.Conn
-import molecule.coreTests.setup.DbConnection
-import molecule.sql.core.facade.{JdbcConn_JVM, JdbcHandler_JVM}
+import molecule.sql.core.facade.JdbcHandler_JVM
 
-trait DbConnection_mariadb extends DbConnection {
-
-  override val platform = "jvm"
-
+object DbConnection_mariadb {
 
   private val url = s"jdbc:tc:mariadb:latest:///test" +
     s"?allowMultiQueries=true" +
@@ -19,14 +15,14 @@ trait DbConnection_mariadb extends DbConnection {
     s"&user=root" +
     s"&password="
 
-  // Using dimafeng container for MariaDB
-  // com.dimafeng.testcontainers.MariaDBContainer
-
-  println(s"Starting $url")
+  // Using dimafeng container for MariaDB to be able to config through url
+  println(s"Starting mariadb:latest docker container...")
   private val container = MariaDBContainer()
   Class.forName(container.driverClassName)
+  println("MariaDB docker container started")
+
+  // Re-use connection for all tests in this test suite
   private val reusedSqlConn = DriverManager.getConnection(url)
-  println("MariaDB started")
 
   private val resetDb =
     s"""DROP DATABASE IF EXISTS test;
@@ -35,8 +31,11 @@ trait DbConnection_mariadb extends DbConnection {
        |""".stripMargin
 
   def run(test: Conn => Any, schema: Schema_mariadb): Any = {
-    val proxy = JdbcProxy_mariadb(url, schema, resetDb + schema.schemaData.head)
-    val conn  = JdbcConn_JVM(proxy, reusedSqlConn)
-    test(JdbcHandler_JVM.recreateDb(conn))
+    val initSql = resetDb + schema.schemaData.head
+    val proxy   = JdbcProxy_mariadb(url, schema, initSql)
+
+    // Not closing the connection since we re-use it
+    val conn = JdbcHandler_JVM.recreateDb(proxy, reusedSqlConn)
+    test(conn)
   }
 }

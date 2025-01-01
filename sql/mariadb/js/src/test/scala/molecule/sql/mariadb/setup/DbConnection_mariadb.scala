@@ -7,9 +7,8 @@ import molecule.coreTests.setup.DbConnection
 import molecule.sql.core.facade.JdbcConn_JS
 import scala.util.Random
 
-trait DbConnection_mariadb extends DbConnection {
-
-  override val platform = "js"
+//trait DbConnection_mariadb extends DbConnection {
+object DbConnection_mariadb {
 
   def run(test: Conn => Any, schema: Schema_mariadb): Any = {
     // Since RPC calls run in parallel we need a new connection for

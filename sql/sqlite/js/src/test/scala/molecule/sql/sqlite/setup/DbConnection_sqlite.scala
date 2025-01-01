@@ -8,8 +8,6 @@ import molecule.sql.core.facade.JdbcConn_JS
 
 trait DbConnection_sqlite extends DbConnection {
 
-  override val platform = "js"
-
   def run(test: Conn => Any, schema: Schema_sqlite): Any = {
     val proxy = JdbcProxy_sqlite("jdbc:sqlite::memory:", schema)
     test(JdbcConn_JS(proxy, RpcRequest.request))

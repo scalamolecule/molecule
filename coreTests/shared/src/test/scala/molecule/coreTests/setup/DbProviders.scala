@@ -2,7 +2,7 @@ package molecule.coreTests.setup
 
 import molecule.core.spi.Conn
 
-trait DbProviders { self: DbConnection =>
+trait DbProviders { self: DbConnection with Platform =>
   val database: String
   val platform: String
 

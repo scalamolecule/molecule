@@ -7,9 +7,8 @@ import molecule.coreTests.setup.DbConnection
 import molecule.sql.core.facade.JdbcConn_JS
 import scala.util.Random
 
-trait DbConnection_mysql extends DbConnection {
-
-  override val platform = "js"
+//trait DbConnection_mysql extends DbConnection {
+object DbConnection_mysql {
 
   def getConnection(schema: Schema_mysql): JdbcConn_JS = {
     // Since RPC calls run in parallel we need a new connection for

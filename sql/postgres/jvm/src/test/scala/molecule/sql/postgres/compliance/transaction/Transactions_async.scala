@@ -1,14 +1,10 @@
 package molecule.sql.postgres.compliance.transaction
 
-import molecule.core.api.{Api_async, Api_async_transact}
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.transaction._
-import molecule.sql.postgres.setup.DbProviders_postgres
-import molecule.sql.postgres.spi.Spi_postgres_async
+import molecule.coreTests.spi.action._
+import molecule.sql.postgres.setup.Api_postgres_async
 
 
 class Transactions_async extends Test {
-  Transactions_async(this,
-    new Api_async with Api_async_transact with Spi_postgres_async with DbProviders_postgres {}
-  )
+  Transactions_async(this, Api_postgres_async)
 }

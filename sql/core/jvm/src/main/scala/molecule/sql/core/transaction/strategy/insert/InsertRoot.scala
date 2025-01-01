@@ -9,7 +9,7 @@ case class InsertRoot(
 ) extends InsertAction(null, sqlOps, ns, rowCount) {
 
   val insertNs: InsertNs = {
-    val first = InsertNs(this, sqlOps, ns, "Ns", rowCount)
+    val first = InsertNs(this, sqlOps, ns, "Entity", rowCount)
     children += first
     first
   }

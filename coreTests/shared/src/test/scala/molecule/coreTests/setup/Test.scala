@@ -1,8 +1,6 @@
 package molecule.coreTests.setup
 
 import munit.FunSuite
-import scala.concurrent.{Future, Promise}
-import scala.util.Try
 
 trait Test extends FunSuite {
 

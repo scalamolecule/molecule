@@ -7,7 +7,7 @@ case class UpdateRoot(
   ns: String
 ) extends UpdateAction(null, sqlOps, ns) {
 
-  val firstNs = UpdateNs(this, sqlOps, ns, "Ns")
+  val firstNs = UpdateNs(this, sqlOps, ns, "Entity")
   children += firstNs
 
   // set by SqlUpdate.initRoot()

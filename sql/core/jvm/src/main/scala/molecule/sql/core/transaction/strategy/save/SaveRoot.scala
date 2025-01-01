@@ -7,7 +7,7 @@ case class SaveRoot(
   ns: String
 ) extends SaveAction(null, sqlOps, ns) {
 
-  val saveNs: SaveNs = SaveNs(this, sqlOps, ns, "Ns")
+  val saveNs: SaveNs = SaveNs(this, sqlOps, ns, "Entity")
   children += saveNs
 
   override def rootAction: SaveAction = this

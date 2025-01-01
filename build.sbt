@@ -8,10 +8,11 @@ val scala213 = "2.13.15"
 val scala3   = "3.3.4"
 val allScala = Seq(scala212, scala213, scala3)
 
-val akkaVersion          = "2.8.3"
-val zioVersion           = "2.0.15"
-val testContainerVersion = "0.41.3"
-val logbackVersion       = "1.5.0"
+val akkaVersion              = "2.8.3"
+val zioVersion               = "2.0.15"
+val dimafengContainerVersion = "0.41.4"
+val testContainerVersion     = "1.20.4"
+val logbackVersion           = "1.5.0"
 
 inThisBuild(
   List(
@@ -97,7 +98,7 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies ++= Seq(
       "io.suzaku" %%% "boopickle" % "1.5.0", // binary serialization for rpc
       "dev.zio" %%% "zio" % zioVersion, // zio api
-      "org.typelevel" %%% "cats-effect" % "3.5.4", // cats api
+      "org.typelevel" %%% "cats-effect" % "3.5.7", // cats api
     )
   )
   .jvmSettings(
@@ -133,20 +134,14 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
     },
 
     libraryDependencies ++= Seq(
+      "com.zaxxer" % "HikariCP" % "6.2.1" % Test,
       "org.scalameta" %% "munit" % "1.0.3" % Test,
-//      "com.lihaoyi" %%% "utest" % "0.8.4" % Test,
-      "org.scalactic" %%% "scalactic" % "3.2.18" % Test, // Tolerant roundings with triple equal on js platform
-      "io.github.cquiroz" %%% "scala-java-time" % "2.5.0" % Test,
+      "com.dimafeng" %% "testcontainers-scala-munit" % dimafengContainerVersion % Test,
 
-//      "dev.zio" %%% "zio-streams" % zioVersion % Test,
-//      "dev.zio" %%% "zio-test" % zioVersion % Test,
-//      "dev.zio" %%% "zio-test-sbt" % zioVersion % Test,
-
-//      "org.typelevel" %%% "munit-cats-effect" % "2.0.0", // also used in main (IO api)
+      "org.scalactic" %%% "scalactic" % "3.2.19" % Test, // Tolerant roundings with triple equal on js platform
+      "io.github.cquiroz" %%% "scala-java-time" % "2.6.0" % Test,
     ),
   )
-
-
   .jsSettings(
     jsEnvironment,
     libraryDependencies ++= Seq(
@@ -172,7 +167,7 @@ lazy val datalogCore = crossProject(JSPlatform, JVMPlatform)
   .settings(doPublish)
   .settings(compilerArgs)
   .jvmSettings(
-    libraryDependencies += "com.datomic" % "peer" % "1.0.7187" // Requires Java 11
+    libraryDependencies += "com.datomic" % "peer" % "1.0.7277" // Requires Java 11
   )
   .jsSettings(jsEnvironment)
   .dependsOn(core)
@@ -199,7 +194,7 @@ lazy val sqlCore = crossProject(JSPlatform, JVMPlatform)
   .settings(
     libraryDependencies ++= Seq(
       // For json de-serialisation in molecule.sql.core.query.LambdasMap
-      "com.lihaoyi" %%% "upickle" % "3.3.1",
+      "com.lihaoyi" %%% "upickle" % "4.0.2",
     ),
   )
   .jsSettings(jsEnvironment)
@@ -234,8 +229,11 @@ lazy val sqlMariaDB = crossProject(JSPlatform, JVMPlatform)
   .jsSettings(jsEnvironment)
   .jvmSettings(
     libraryDependencies ++= Seq(
-      "com.dimafeng" %% "testcontainers-scala-mariadb" % testContainerVersion,
-      "org.mariadb.jdbc" % "mariadb-java-client" % "3.4.0",
+      "com.dimafeng" %% "testcontainers-scala-mariadb" % dimafengContainerVersion,
+
+//      "org.testcontainers" % "mariadb" % "1.20.4",
+
+      "org.mariadb.jdbc" % "mariadb-java-client" % "3.5.1",
       "ch.qos.logback" % "logback-classic" % logbackVersion % Test
     ),
     Test / fork := true
@@ -254,8 +252,10 @@ lazy val sqlMySQL = crossProject(JSPlatform, JVMPlatform)
   .jsSettings(jsEnvironment)
   .jvmSettings(
     libraryDependencies ++= Seq(
-      "org.testcontainers" % "mysql" % "1.19.8",
-      "mysql" % "mysql-connector-java" % "8.0.33",
+      "org.testcontainers" % "mysql" % testContainerVersion,
+
+      //      "com.dimafeng" %% "testcontainers-scala-mysql" % testContainerVersion % Test,
+      "com.mysql" % "mysql-connector-j" % "9.1.0" % Test,
     ),
     Test / fork := true
   )
@@ -269,18 +269,12 @@ lazy val sqlPostgreSQL = crossProject(JSPlatform, JVMPlatform)
   .settings(name := "molecule-sql-postgres")
   .settings(doPublish)
   .settings(compilerArgs)
-  .settings(
-    testFrameworks := testingFrameworks,
-    libraryDependencies ++= Seq(
-      // For some reason needed here too for munit tests to pass
-//      "org.typelevel" %%% "munit-cats-effect" % "2.0.0",
-    )
-  )
+  .settings(testFrameworks := testingFrameworks)
   .jsSettings(jsEnvironment)
   .jvmSettings(
     libraryDependencies ++= Seq(
-      "org.testcontainers" % "postgresql" % "1.19.8",
-      "org.postgresql" % "postgresql" % "42.7.2",
+      "org.testcontainers" % "postgresql" % testContainerVersion,
+      "org.postgresql" % "postgresql" % "42.7.4",
       "ch.qos.logback" % "logback-classic" % logbackVersion % Test
     ),
     Test / fork := true
@@ -299,7 +293,7 @@ lazy val sqlSQlite = crossProject(JSPlatform, JVMPlatform)
   .jsSettings(jsEnvironment)
   .jvmSettings(
     libraryDependencies ++= Seq(
-      "org.xerial" % "sqlite-jdbc" % "3.46.1.2"
+      "org.xerial" % "sqlite-jdbc" % "3.47.1.0"
     ),
     Test / fork := true
   )

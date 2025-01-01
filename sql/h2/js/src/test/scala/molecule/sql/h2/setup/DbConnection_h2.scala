@@ -9,8 +9,6 @@ import scala.util.Random
 
 trait DbConnection_h2 extends DbConnection {
 
-  override val platform = "js"
-
   def run(test: Conn => Any, schema: Schema_h2): Any = {
     val url   = s"jdbc:h2:mem:test" + Random.nextInt().abs
     val proxy = JdbcProxy_h2(url, schema)

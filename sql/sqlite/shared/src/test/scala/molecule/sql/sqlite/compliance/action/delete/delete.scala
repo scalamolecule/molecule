@@ -1,7 +1,7 @@
 package molecule.sql.sqlite.compliance.action.delete
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.transaction.delete._
+import molecule.coreTests.spi.action.delete._
 import molecule.sql.sqlite.setup.Api_sqlite_async
 
 class Delete_id extends Test {

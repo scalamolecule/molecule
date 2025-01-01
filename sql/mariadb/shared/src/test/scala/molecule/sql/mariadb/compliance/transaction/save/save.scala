@@ -1,7 +1,7 @@
 package molecule.sql.mariadb.compliance.transaction.save
 
 import molecule.coreTests.setup.{Test, MUnitSuiteWithArrays}
-import molecule.coreTests.spi.transaction.save._
+import molecule.coreTests.spi.action.save._
 import molecule.sql.mariadb.setup.Api_mariadb_async
 
 class SaveCardOne extends Test {

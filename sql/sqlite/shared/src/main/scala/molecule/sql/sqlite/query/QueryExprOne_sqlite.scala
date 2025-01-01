@@ -111,10 +111,10 @@ trait QueryExprOne_sqlite
         //        val subSelect =
         //          s"""(
         //             |    SELECT $col
-        //             |    FROM Ns
+        //             |    FROM Entity
         //             |    ORDER BY $col
-        //             |    LIMIT 2 - (SELECT COUNT(*) FROM Ns) % 2
-        //             |    OFFSET (SELECT (COUNT(*) - 1) / 2 FROM Ns)
+        //             |    LIMIT 2 - (SELECT COUNT(*) FROM Entity) % 2
+        //             |    OFFSET (SELECT (COUNT(*) - 1) / 2 FROM Entity)
         //             |  )""".stripMargin
         //        joins += (("INNER JOIN", subSelect, "_Entity", "", ""))
 

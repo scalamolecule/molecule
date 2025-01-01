@@ -11,8 +11,6 @@ import scala.concurrent.duration._
 
 trait DbConnection_datomic extends DbConnection {
 
-  override val platform = "jvm"
-
   def run(test: Conn => Any, schema: Schema_datomic): Any = {
     val proxy = DatomicProxy("mem", "", schema)
 

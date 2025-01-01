@@ -18,8 +18,8 @@ class RawQuery extends Test with DbProviders_datomic with TestUtils {
       // Each Row returned as a List of Any
       _ <- rawQuery(
         """[:find  ?b ?c
-          | :where [?a :Ns/string ?b]
-          |        [?a :Ns/int ?c]]
+          | :where [?a :Entity/string ?b]
+          |        [?a :Entity/int ?c]]
           |""".stripMargin)
         .map(_ ==> List(
           List("a", 1) // First row
@@ -28,8 +28,8 @@ class RawQuery extends Test with DbProviders_datomic with TestUtils {
       // Values are still typed
       _ <- rawQuery(
         """[:find  ?b ?c
-          | :where [?a :Ns/string ?b]
-          |        [?a :Ns/int ?c]]
+          | :where [?a :Entity/string ?b]
+          |        [?a :Entity/int ?c]]
           |""".stripMargin).map(_.head == List("a", "1") ==> false)
     } yield ()
   }
@@ -38,7 +38,7 @@ class RawQuery extends Test with DbProviders_datomic with TestUtils {
   "Card One types" - types { implicit conn =>
     def q(attr: String): String =
       s"""[:find  ?b
-         | :where [?a :Ns/$attr ?b]]
+         | :where [?a :Entity/$attr ?b]]
          |""".stripMargin
 
     for {
@@ -96,7 +96,7 @@ class RawQuery extends Test with DbProviders_datomic with TestUtils {
   "Card Set types" - types { implicit conn =>
     def q(attr: String): String =
       s"""[:find  (distinct ?b)
-         | :where [?a :Ns/$attr ?b]]
+         | :where [?a :Entity/$attr ?b]]
          |""".stripMargin
 
     for {
@@ -159,8 +159,8 @@ class RawQuery extends Test with DbProviders_datomic with TestUtils {
       _ <- rawQuery(
         """[:find  ?b
           |        (distinct ?c)
-          | :where [?a :Ns/i ?b]
-          |        [?a :Ns/int ?c]]
+          | :where [?a :Entity/i ?b]
+          |        [?a :Entity/int ?c]]
           |""".stripMargin,
         true // debug
       ).map(_.head ==> List(1, Set(2)))
@@ -184,8 +184,8 @@ class RawQuery extends Test with DbProviders_datomic with TestUtils {
 
       _ <- rawQuery(
         """[:find  ?b
-          |        (pull ?a-?c [[:Ns/stringSet :limit nil]])
-          | :where [?a :Ns/i ?b]
+          |        (pull ?a-?c [[:Entity/stringSet :limit nil]])
+          | :where [?a :Entity/i ?b]
           |        [(identity ?a) ?a-?c]]
           |""".stripMargin,
         true // debug
@@ -214,8 +214,8 @@ class RawQuery extends Test with DbProviders_datomic with TestUtils {
 
       _ <- rawQuery(
         """[:find  ?b
-          |        (pull ?a-?c [[:Ns/refs :limit nil]])
-          | :where [?a :Ns/i ?b]
+          |        (pull ?a-?c [[:Entity/refs :limit nil]])
+          | :where [?a :Entity/i ?b]
           |        [(identity ?a) ?a-?c]]
           |""".stripMargin,
         true // debug

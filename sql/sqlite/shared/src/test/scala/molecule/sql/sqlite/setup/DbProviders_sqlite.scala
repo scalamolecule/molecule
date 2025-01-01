@@ -2,9 +2,9 @@ package molecule.sql.sqlite.setup
 
 import molecule.core.spi.Conn
 import molecule.coreTests.domains.schema._
-import molecule.coreTests.setup.DbProviders
+import molecule.coreTests.setup.{DbProviders, Platform}
 
-trait DbProviders_sqlite extends DbProviders with DbConnection_sqlite {
+trait DbProviders_sqlite extends DbProviders with DbConnection_sqlite with Platform {
 
   override val database: String = "sqlite"
 

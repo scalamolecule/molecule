@@ -1,7 +1,7 @@
 package molecule.sql.sqlite.compliance.action.save
 
 import molecule.coreTests.setup.{Test, MUnitSuiteWithArrays}
-import molecule.coreTests.spi.transaction.save._
+import molecule.coreTests.spi.action.save._
 import molecule.sql.sqlite.setup.Api_sqlite_async
 
 class SaveCardOne extends Test {

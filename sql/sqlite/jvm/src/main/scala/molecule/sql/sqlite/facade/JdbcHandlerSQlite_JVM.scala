@@ -1,6 +1,6 @@
 package molecule.sql.sqlite.facade
 
-import java.sql.{Connection, DriverManager}
+import java.sql.Connection
 import java.util.regex.Pattern
 import molecule.core.marshalling.JdbcProxy
 import org.sqlite.Function
@@ -15,10 +15,10 @@ object JdbcHandlerSQlite_JVM {
   def recreateDb(
     proxy: JdbcProxy,
     sqlConn: Connection,
-    addRegexFn: Boolean = true
+    addRegexFn: Boolean = false
   ): JdbcConnSQlite_JVM = {
     if (addRegexFn) {
-      // Add custom regexp function to sqlite
+      // Add custom regexp function to sqlite (only necessary for in-mem)
       Function.create(sqlConn, "REGEXP", new Function() {
         override def xFunc(): Unit = {
           val expression = value_text(0)
@@ -34,7 +34,6 @@ object JdbcHandlerSQlite_JVM {
     Manager { use =>
       val conn = new JdbcConnSQlite_JVM(proxy, sqlConn)
       val stmt = use(conn.sqlConn.createStatement)
-//      val stmt = conn.sqlConn.createStatement
       stmt.executeUpdate(proxy.schema.schemaData.head)
       conn
     }.get

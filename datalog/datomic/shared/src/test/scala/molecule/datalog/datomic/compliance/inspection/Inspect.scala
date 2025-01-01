@@ -18,8 +18,8 @@ class Test_Inspect extends Test with DbProviders_datomic with TestUtils {
         /*
         ========================================
         QUERY:
-        AttrOneManString("Ns", "string", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 7))
-        AttrOneManInt("Ns", "int", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 8))
+        AttrOneManString("Entity", "string", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 7))
+        AttrOneManInt("Entity", "int", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 8))
 
         [:find  ?b ?c
          :where [?a :Ns/string ?b]
@@ -36,8 +36,8 @@ class Test_Inspect extends Test with DbProviders_datomic with TestUtils {
         /*
         ========================================
         QUERY:
-        AttrOneManString("Ns", "string", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 7))
-        AttrOneManInt("Ns", "int", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 8))
+        AttrOneManString("Entity", "string", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 7))
+        AttrOneManInt("Entity", "int", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 8))
 
         [:find  ?b ?c
          :where [?a :Ns/string ?b]
@@ -53,10 +53,10 @@ class Test_Inspect extends Test with DbProviders_datomic with TestUtils {
         /*
         ========================================
         QUERY:
-        AttrOneManInt("Ns", "i", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 1))
-        AttrOneManDouble("Ns", "int", Fn(avg,None), Seq(), None, None, Nil, Nil, None, Some("a1"), Seq(0, 8))
+        AttrOneManInt("Entity", "i", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 1))
+        AttrOneManDouble("Entity", "int", Fn(avg,None), Seq(), None, None, Nil, Nil, None, Some("a1"), Seq(0, 8))
         Nested(
-          Ref("Ns", "refs", "Ref", CardSet, false, Seq(0, 53, 1)),
+          Ref("Entity", "refs", "Ref", CardSet, false, Seq(0, 53, 1)),
           List(
             AttrOneManString("Ref", "string", Eq, Seq("foo"), None, None, Nil, Nil, None, None, Seq(1, 101))))
 
@@ -86,8 +86,8 @@ class Test_Inspect extends Test with DbProviders_datomic with TestUtils {
         /*
         ========================================
         SAVE:
-        AttrOneManString("Ns", "string", Eq, Seq("a"), None, None, Nil, Nil, None, None, Seq(0, 7))
-        AttrOneManInt("Ns", "int", Eq, Seq(1), None, None, Nil, Nil, None, None, Seq(0, 8))
+        AttrOneManString("Entity", "string", Eq, Seq("a"), None, None, Nil, Nil, None, None, Seq(0, 7))
+        AttrOneManInt("Entity", "int", Eq, Seq(1), None, None, Nil, Nil, None, None, Seq(0, 8))
 
         [
           [:db/add #db/id[db.part/user -1] :Ns/string a]
@@ -107,8 +107,8 @@ class Test_Inspect extends Test with DbProviders_datomic with TestUtils {
         /*
         ========================================
         SAVE:
-        AttrOneManString("Ns", "string", Eq, Seq("a"), None, None, Nil, Nil, None, None, Seq(0, 7))
-        AttrOneManInt("Ns", "int", Eq, Seq(1), None, None, Nil, Nil, None, None, Seq(0, 8))
+        AttrOneManString("Entity", "string", Eq, Seq("a"), None, None, Nil, Nil, None, None, Seq(0, 7))
+        AttrOneManInt("Entity", "int", Eq, Seq(1), None, None, Nil, Nil, None, None, Seq(0, 8))
 
         [
           [:db/add #db/id[db.part/user -1] :Ns/string a]
@@ -132,8 +132,8 @@ class Test_Inspect extends Test with DbProviders_datomic with TestUtils {
         /*
         ========================================
         INSERT:
-        AttrOneManString("Ns", "string", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 7))
-        AttrOneManInt("Ns", "int", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 8))
+        AttrOneManString("Entity", "string", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 7))
+        AttrOneManInt("Entity", "int", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 8))
 
         [
           [:db/add #db/id[db.part/user -1] :Ns/string a]
@@ -155,8 +155,8 @@ class Test_Inspect extends Test with DbProviders_datomic with TestUtils {
         /*
         ========================================
         INSERT:
-        AttrOneManString("Ns", "string", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 7))
-        AttrOneManInt("Ns", "int", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 8))
+        AttrOneManString("Entity", "string", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 7))
+        AttrOneManInt("Entity", "int", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 8))
 
         [
           [:db/add #db/id[db.part/user -1] :Ns/string a]
@@ -183,8 +183,8 @@ class Test_Inspect extends Test with DbProviders_datomic with TestUtils {
         /*
         ========================================
         UPDATE:
-        AttrOneTacID("Ns", "id", Eq, Seq(17592186045418L), None, None, Nil, Nil, None, None, Seq(0, 0))
-        AttrOneManString("Ns", "string", Eq, Seq("ZZZ"), None, None, Nil, Nil, None, None, Seq(0, 7))
+        AttrOneTacID("Entity", "id", Eq, Seq(17592186045418L), None, None, Nil, Nil, None, None, Seq(0, 0))
+        AttrOneManString("Entity", "string", Eq, Seq("ZZZ"), None, None, Nil, Nil, None, None, Seq(0, 7))
 
         [
           [:db/add 17592186045418 :Ns/string ZZZ]
@@ -204,8 +204,8 @@ class Test_Inspect extends Test with DbProviders_datomic with TestUtils {
         /*
         ========================================
         UPDATE:
-        AttrOneTacID("Ns", "id", Eq, Seq(17592186045418L), None, None, Nil, Nil, None, None, Seq(0, 0))
-        AttrOneManString("Ns", "string", Eq, Seq("ZZZ"), None, None, Nil, Nil, None, None, Seq(0, 7))
+        AttrOneTacID("Entity", "id", Eq, Seq(17592186045418L), None, None, Nil, Nil, None, None, Seq(0, 0))
+        AttrOneManString("Entity", "string", Eq, Seq("ZZZ"), None, None, Nil, Nil, None, None, Seq(0, 7))
 
         [
           [:db/add 17592186045418 :Ns/string ZZZ]
@@ -229,7 +229,7 @@ class Test_Inspect extends Test with DbProviders_datomic with TestUtils {
         /*
         ========================================
         DELETE:
-        AttrOneTacID("Ns", "id", Eq, Seq(17592186045418L), None, None, Nil, Nil, None, None, Seq(0, 0))
+        AttrOneTacID("Entity", "id", Eq, Seq(17592186045418L), None, None, Nil, Nil, None, None, Seq(0, 0))
 
         [
           [:db/retractEntity 17592186045418]
@@ -249,7 +249,7 @@ class Test_Inspect extends Test with DbProviders_datomic with TestUtils {
         /*
         ========================================
         DELETE:
-        AttrOneTacID("Ns", "id", Eq, Seq(17592186045418L), None, None, Nil, Nil, None, None, Seq(0, 0))
+        AttrOneTacID("Entity", "id", Eq, Seq(17592186045418L), None, None, Nil, Nil, None, None, Seq(0, 0))
 
         [
           [:db/retractEntity 17592186045418]
