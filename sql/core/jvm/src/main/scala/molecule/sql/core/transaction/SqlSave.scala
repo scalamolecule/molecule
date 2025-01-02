@@ -18,13 +18,13 @@ trait SqlSave
   protected var saveAction: SaveAction = null
 
   def getSaveAction(elements: List[Element]): SaveAction = {
-    saveAction = SaveRoot(sqlOps, getInitialNs(elements)).saveNs
+    saveAction = SaveRoot(sqlOps, getInitialNs(elements)).saveEnt
     resolve(elements)
     saveAction.rootAction
   }
 
   override protected def addOne[T](
-    ns: String,
+    ent: String,
     attr: String,
     optValue: Option[T],
     transformValue: T => Any,
@@ -40,33 +40,33 @@ trait SqlSave
   }
 
   override protected def addSet[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     optSet: Option[Set[T]],
     transformValue: T => Any,
     exts: List[String] = Nil,
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    addIterable(attr, optRefNs, optSet, exts(1), set2array)
+    addIterable(attr, optRef, optSet, exts(1), set2array)
   }
 
   override protected def addSeq[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     optSeq: Option[Seq[T]],
     transformValue: T => Any,
     exts: List[String],
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    addIterable(attr, optRefNs, optSeq, exts(1), seq2array)
+    addIterable(attr, optRef, optSeq, exts(1), seq2array)
   }
 
   override protected def addByteArray(
-    ns: String,
+    ent: String,
     attr: String,
     optArray: Option[Array[Byte]],
   ): Unit = {
@@ -79,7 +79,7 @@ trait SqlSave
   }
 
   override protected def addMap[T](
-    ns: String,
+    ent: String,
     attr: String,
     optMap: Option[Map[String, T]],
     transformValue: T => Any,
@@ -96,31 +96,31 @@ trait SqlSave
   }
 
   override protected def addRef(
-    ns: String, refAttr: String, refNs: String, card: Card
+    ent: String, refAttr: String, ref: String, card: Card
   ): Unit = {
     saveAction = card match {
-      case CardOne => saveAction.refOne(ns, refAttr, refNs)
-      case _       => saveAction.refMany(ns, refAttr, refNs)
+      case CardOne => saveAction.refOne(ent, refAttr, ref)
+      case _       => saveAction.refMany(ent, refAttr, ref)
     }
   }
 
-  override protected def addBackRef(backRefNs: String): Unit = {
+  override protected def addBackRef(backRef: String): Unit = {
     saveAction = saveAction.backRef
   }
 
-  override protected def handleRefNs(refNs: String): Unit = ()
+  override protected def handleRef(ref: String): Unit = ()
 
 
   // Helpers -------------------------------------------------------------------
 
   private def addIterable[T, M[_] <: Iterable[_]](
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     optIterable: Option[M[T]],
     sqlTpe: String,
     iterable2array: M[T] => Array[AnyRef],
   ): Unit = {
-    optRefNs.fold {
+    optRef.fold {
       val paramIndex = saveAction.setCol(attr)
       if (optIterable.nonEmpty && optIterable.get.nonEmpty) {
         val iterable = optIterable.get
@@ -132,9 +132,9 @@ trait SqlSave
       } else {
         saveAction.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
       }
-    } { refNs =>
+    } { ref =>
       optIterable.foreach(refIds =>
-        saveAction.refIds(attr, refNs, refIds.asInstanceOf[Set[Long]])
+        saveAction.refIds(attr, ref, refIds.asInstanceOf[Set[Long]])
       )
     }
   }

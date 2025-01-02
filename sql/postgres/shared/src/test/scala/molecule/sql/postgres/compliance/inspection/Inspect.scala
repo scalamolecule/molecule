@@ -216,7 +216,7 @@ class Test_Inspect extends Test with DbProviders_postgres with TestUtils {
 
         Update(
           Entity(
-            UPDATE Ns
+            UPDATE Entity
             SET
               string = ?::text
             WHERE
@@ -245,7 +245,7 @@ class Test_Inspect extends Test with DbProviders_postgres with TestUtils {
 
         Update(
           Entity(
-            UPDATE Ns
+            UPDATE Entity
             SET
               string = ?::text
             WHERE

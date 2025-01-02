@@ -11,20 +11,20 @@ case class DeleteJoin(
   sqlOps: SqlOps,
   entity: String,
   refAttr: String,
-  refEntity: String,
-) extends DeleteAction(entityMap, parent, sqlStmt, sqlOps, refEntity) {
+  refEnt: String,
+) extends DeleteAction(entityMap, parent, sqlStmt, sqlOps, refEnt) {
 
   override def process(): Unit = {
     sqlStmt.addBatch(curStmt)
   }
 
   override def curStmt: String = {
-    val joinTable = ss(entity, refAttr, refEntity)
-    val (eid, _)  = sqlOps.joinIdNames(entity, refEntity)
+    val joinTable = ss(entity, refAttr, refEnt)
+    val (eid, _)  = sqlOps.joinIdNames(entity, refEnt)
     s"DELETE FROM $joinTable WHERE $eid IN (" + ids.mkString(", ") + ")"
   }
 
   override def render(indent: Int): String = {
-    recurseRender(indent, s"$entity.$refAttr.$refEntity ")
+    recurseRender(indent, s"$entity.$refAttr.$refEnt ")
   }
 }

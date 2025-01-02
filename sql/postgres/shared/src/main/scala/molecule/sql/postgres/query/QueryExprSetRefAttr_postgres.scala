@@ -13,7 +13,7 @@ trait QueryExprSetRefAttr_postgres
        |      ${sqlArray._1} <@ ARRAY_AGG($joinTable.$rid) AND
        |      CARDINALITY(ARRAY_AGG($joinTable.$rid)) = ${sqlArray._2}
        |    FROM $joinTable
-       |    WHERE $joinTable.$eid = $nsId
+       |    WHERE $joinTable.$eid = $entId
        |  )""".stripMargin
   }
 

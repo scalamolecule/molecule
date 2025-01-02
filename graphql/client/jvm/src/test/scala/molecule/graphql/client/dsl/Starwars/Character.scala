@@ -20,16 +20,16 @@
 //trait Character_base {
 //  protected lazy val id_man       : AttrOneManID     = AttrOneManID    ("Character", "id"       , coord = Seq(0, 0   ))
 //  protected lazy val name_man     : AttrOneManString = AttrOneManString("Character", "name"     , coord = Seq(0, 1   ))
-//  protected lazy val friends_man  : AttrSetManID     = AttrSetManID    ("Character", "friends"  , coord = Seq(0, 2, 0), refNs = Some("Character"))
+//  protected lazy val friends_man  : AttrSetManID     = AttrSetManID    ("Character", "friends"  , coord = Seq(0, 2, 0), ref = Some("Character"))
 //  protected lazy val appearsIn_man: AttrSetManString = AttrSetManString("Character", "appearsIn", coord = Seq(0, 3   ), validator = Some(validation_appearsIn))
 //
 //  protected lazy val name_opt     : AttrOneOptString = AttrOneOptString("Character", "name"     , coord = Seq(0, 1   ))
-//  protected lazy val friends_opt  : AttrSetOptID     = AttrSetOptID    ("Character", "friends"  , coord = Seq(0, 2, 0), refNs = Some("Character"))
+//  protected lazy val friends_opt  : AttrSetOptID     = AttrSetOptID    ("Character", "friends"  , coord = Seq(0, 2, 0), ref = Some("Character"))
 //  protected lazy val appearsIn_opt: AttrSetOptString = AttrSetOptString("Character", "appearsIn", coord = Seq(0, 3   ), validator = Some(validation_appearsIn))
 //
 //  protected lazy val id_tac       : AttrOneTacID     = AttrOneTacID    ("Character", "id"       , coord = Seq(0, 0   ))
 //  protected lazy val name_tac     : AttrOneTacString = AttrOneTacString("Character", "name"     , coord = Seq(0, 1   ))
-//  protected lazy val friends_tac  : AttrSetTacID     = AttrSetTacID    ("Character", "friends"  , coord = Seq(0, 2, 0), refNs = Some("Character"))
+//  protected lazy val friends_tac  : AttrSetTacID     = AttrSetTacID    ("Character", "friends"  , coord = Seq(0, 2, 0), ref = Some("Character"))
 //  protected lazy val appearsIn_tac: AttrSetTacString = AttrSetTacString("Character", "appearsIn", coord = Seq(0, 3   ), validator = Some(validation_appearsIn))
 //
 //  private lazy val validation_appearsIn = new ValidateString {

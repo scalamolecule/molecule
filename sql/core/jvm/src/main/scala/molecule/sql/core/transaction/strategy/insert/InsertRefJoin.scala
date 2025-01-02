@@ -3,21 +3,21 @@ package molecule.sql.core.transaction.strategy.insert
 import molecule.sql.core.transaction.strategy.SqlOps
 
 case class InsertRefJoin(
-  parent: InsertAction,
-  ref: InsertAction,
+  parentInsert: InsertAction,
+  refInsert: InsertAction,
   sqlOps: SqlOps,
-  ns: String,
+  ent: String,
   refAttr: String,
-  refNs: String,
+  ref: String,
   rowCount: Int
-) extends InsertAction(parent, sqlOps, refNs, rowCount) {
+) extends InsertAction(parentInsert, sqlOps, ref, rowCount) {
 
   override def process(): Unit = {
     val ps     = prepare(curStmt)
-    val nsIds  = parent.ids.iterator
-    val refIds = ref.ids.iterator
-    while (nsIds.hasNext) {
-      ps.setLong(1, nsIds.next())
+    val entIds = parentInsert.ids.iterator
+    val refIds = refInsert.ids.iterator
+    while (entIds.hasNext) {
+      ps.setLong(1, entIds.next())
       ps.setLong(2, refIds.next())
       ps.addBatch()
     }
@@ -26,7 +26,7 @@ case class InsertRefJoin(
   }
 
   override def curStmt: String = {
-    sqlOps.insertJoinStmt(ns, refAttr, refNs)
+    sqlOps.insertJoinStmt(ent, refAttr, ref)
   }
 
   override def render(indent: Int): String = {

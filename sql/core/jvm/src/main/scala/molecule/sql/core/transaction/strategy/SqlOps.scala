@@ -35,7 +35,7 @@ trait SqlOps extends BaseHelpers {
   // Render sql statements --------------------------------------
 
   def selectStmt(
-    ns: String,
+    ent: String,
     cols0: Iterable[String],
     joins0: Iterable[String],
     clauses0: Iterable[String],
@@ -46,21 +46,21 @@ trait SqlOps extends BaseHelpers {
     val clauses = clauses0.mkString(" AND\n  ")
     s"""SELECT DISTINCT
        |  $cols
-       |FROM $ns$joins
+       |FROM $ent$joins
        |WHERE
        |  $clauses""".stripMargin
   }
 
-  def joinIdNames(ns: String, refNs: String): (String, String) = {
-    if (ns == refNs)
-      (ss(ns, "1_id"), ss(refNs, "2_id"))
+  def joinIdNames(ent: String, ref: String): (String, String) = {
+    if (ent == ref)
+      (ss(ent, "1_id"), ss(ref, "2_id"))
     else
-      (ss(ns, "id"), ss(refNs, "id"))
+      (ss(ent, "id"), ss(ref, "id"))
   }
 
-  def insertJoinStmt(ns: String, refAttr: String, refNs: String): String = {
-    val (id1, id2) = joinIdNames(ns, refNs)
-    s"""INSERT INTO ${ns}_${refAttr}_$refNs (
+  def insertJoinStmt(ent: String, refAttr: String, ref: String): String = {
+    val (id1, id2) = joinIdNames(ent, ref)
+    s"""INSERT INTO ${ent}_${refAttr}_$ref (
        |  $id1, $id2
        |) VALUES (?, ?)""".stripMargin
   }

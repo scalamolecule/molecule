@@ -97,15 +97,15 @@ trait QueryExprMap[Tpl] extends QueryExpr with JavaConversions { self: Model2Dat
 
 
   private def vars(attr: Attr, v: String) = {
-    val (ns, at) = (attr.ns, attr.attr)
+    val (ent, at) = (attr.ent, attr.attr)
     (
-      s":$ns/$at", s":$ns.$at/k_", s":$ns.$at/v_",
+      s":$ent/$at", s":$ent.$at/k_", s":$ent.$at/v_",
       v + "-k", v + "-v",
       v + 1, v + 2, v + 3, v + 4, v + 5, v + 6,
       v + "-pair"
     )
   }
-  private def nsAttr(attr: Attr): String = s":${attr.ns}/${attr.attr}"
+  private def entAttr(attr: Attr): String = s":${attr.ent}/${attr.attr}"
 
   private def mapMan[T](
     attr: Attr, e: Var, keys: Seq[String], values: Seq[T], resMap: ResMap[T]
@@ -192,7 +192,7 @@ trait QueryExprMap[Tpl] extends QueryExpr with JavaConversions { self: Model2Dat
     attr: Attr, e: Var, v: Var, keys: Seq[String], resMap: ResMap[T]
   ): Unit = {
     if (keys.nonEmpty) {
-      val key = keys.head
+      val key                                               = keys.head
       val (a, ak, av, k_, v_, v1, v2, v3, v4, v5, v6, pair) = vars(attr, v)
       where += s"[$e $a $v1]" -> wClause
       where += s"""[$v1 $ak "$key"]""" -> wClause
@@ -400,7 +400,7 @@ trait QueryExprMap[Tpl] extends QueryExpr with JavaConversions { self: Model2Dat
 
 
   private def mapTacNoValue(attr: Attr, e: Var): Unit = {
-    val a = nsAttr(attr)
+    val a = entAttr(attr)
     where += s"(not [$e $a])" -> wNeqOne
   }
 }

@@ -4,12 +4,12 @@ import java.sql.{PreparedStatement => PS}
 import molecule.sql.core.transaction.strategy.SqlOps
 import scala.collection.mutable.ListBuffer
 
-case class SaveNs(
+case class SaveEntity(
   parent: SaveAction,
   sqlOps: SqlOps,
-  ns: String,
+  ent: String,
   action: String,
-) extends SaveAction(parent, sqlOps, ns) {
+) extends SaveAction(parent, sqlOps, ent) {
 
   rowSetters += ListBuffer.empty[PS => Unit]
 
@@ -21,7 +21,7 @@ case class SaveNs(
   }
 
   override def curStmt: String = {
-    sqlOps.insertStmt(ns, cols, placeHolders)
+    sqlOps.insertStmt(ent, cols, placeHolders)
   }
 
   override def render(indent: Int): String = {

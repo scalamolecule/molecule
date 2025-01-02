@@ -114,7 +114,7 @@ abstract class DatomicQueryResolve[Tpl](
   ): (List[Tpl], String, Boolean) = {
     // Filter query by primary non-unique sort attribute
     val filterAttr  = {
-      val List(_, dir, _, tpe, ns, attr, _, a, b, c, x, y, z) = attrTokens
+      val List(_, dir, _, tpe, ent, attr, _, a, b, c, x, y, z) = attrTokens
 
       // Filter by most inclusive value
       val first   = List(c, b, a).filter(_.nonEmpty).head
@@ -125,7 +125,7 @@ abstract class DatomicQueryResolve[Tpl](
         case (_, "a")    => (Le, first)
         case (_, _)      => (Ge, last)
       }
-      getFilterAttr(tpe, ns, attr, fn, v)
+      getFilterAttr(tpe, ent, attr, fn, v)
     }
     val altElements = filterAttr +: elements
     val rows        = getRawData(conn, altElements)

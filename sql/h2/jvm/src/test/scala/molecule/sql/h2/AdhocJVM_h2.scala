@@ -81,7 +81,7 @@ class AdhocJVM_h2 extends Test with DbProviders_h2 with TestUtils {
       //        ))
 
       //        _ <- rawQuery(
-      //          """select count(*) from Ns
+      //          """select count(*) from Entity
       //            |    INNER JOIN Entity_refs_Ref ON Entity.id = Entity_refs_Ref.Entity_id
       //            |""".stripMargin, true)
       //

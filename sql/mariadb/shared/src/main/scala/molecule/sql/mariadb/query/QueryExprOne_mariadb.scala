@@ -16,7 +16,7 @@ trait QueryExprOne_mariadb
   }
 
   override protected def aggr[T: ClassTag](
-    ns: String,
+    ent: String,
     attr: String,
     col: String,
     fn: String,

@@ -6,7 +6,7 @@ import molecule.core.transaction.Action2Data
 trait UpdateOps extends Action2Data with BaseOps {
 
   protected def updateOne[T](
-    ns: String,
+    ent: String,
     attr: String,
     op: Op,
     vs: Seq[T],
@@ -14,13 +14,13 @@ trait UpdateOps extends Action2Data with BaseOps {
     exts: List[String],
   ): Unit
 
-  protected def handleIds(ns: String, ids: Seq[Long]): Unit
+  protected def handleIds(ent: String, ids: Seq[Long]): Unit
   protected def handleFilterAttr[T <: Attr with Tacit](filterAttr: T): Unit
 
   protected def updateSetEq[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     set: Set[T],
     transformValue: T => Any,
     exts: List[String],
@@ -29,9 +29,9 @@ trait UpdateOps extends Action2Data with BaseOps {
   ): Unit
 
   protected def updateSetAdd[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     set: Set[T],
     transformValue: T => Any,
     exts: List[String],
@@ -40,9 +40,9 @@ trait UpdateOps extends Action2Data with BaseOps {
   ): Unit
 
   protected def updateSetRemove[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     set: Set[T],
     transformValue: T => Any,
     exts: List[String],
@@ -51,9 +51,9 @@ trait UpdateOps extends Action2Data with BaseOps {
   ): Unit
 
   protected def updateSeqEq[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     seq: Seq[T],
     transformValue: T => Any,
     exts: List[String],
@@ -62,9 +62,9 @@ trait UpdateOps extends Action2Data with BaseOps {
   ): Unit
 
   protected def updateSeqAdd[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     seq: Seq[T],
     transformValue: T => Any,
     exts: List[String],
@@ -73,9 +73,9 @@ trait UpdateOps extends Action2Data with BaseOps {
   ): Unit
 
   protected def updateSeqRemove[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     seq: Seq[T],
     transformValue: T => Any,
     exts: List[String],
@@ -84,15 +84,15 @@ trait UpdateOps extends Action2Data with BaseOps {
   ): Unit
 
   protected def updateByteArray(
-    ns: String,
+    ent: String,
     attr: String,
     byteArray: Array[Byte],
   ): Unit
 
   protected def updateMapEq[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     noValue: Boolean,
     map: Map[String, T],
     transformValue: T => Any,
@@ -100,9 +100,9 @@ trait UpdateOps extends Action2Data with BaseOps {
   ): Unit
 
   protected def updateMapAdd[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     map: Map[String, T],
     transformValue: T => Any,
     exts: List[String],
@@ -110,9 +110,9 @@ trait UpdateOps extends Action2Data with BaseOps {
   ): Unit
 
   protected def updateMapRemove(
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     keys: Seq[String],
     exts: List[String],
   ): Unit

@@ -4,11 +4,11 @@ import molecule.sql.core.transaction.strategy.SqlOps
 
 case class UpdateRoot(
   sqlOps: SqlOps,
-  ns: String
-) extends UpdateAction(null, sqlOps, ns) {
+  ent: String
+) extends UpdateAction(null, sqlOps, ent) {
 
-  val firstNs = UpdateNs(this, sqlOps, ns, "Entity")
-  children += firstNs
+  val firstEnt = UpdateEntity(this, sqlOps, ent, "Entity")
+  children += firstEnt
 
   // set by SqlUpdate.initRoot()
   var idsQuery = ""

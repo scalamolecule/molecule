@@ -11,95 +11,95 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate with SqlOps =>
   override def handlePrepend(attr: String, cast: String) = s"CONCAT(?$cast, $attr)"
 
   override def updateSetEq[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     set: Set[T],
     transformValue: T => Any,
     exts: List[String],
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    updateIterableEq(ns, attr, optRefNs, set, value2json)
+    updateIterableEq(ent, attr, optRef, set, value2json)
   }
 
   override def updateSetAdd[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     set: Set[T],
     transformValue: T => Any,
     exts: List[String],
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    updateIterableAdd(ns, attr, optRefNs, set, value2json)
+    updateIterableAdd(ent, attr, optRef, set, value2json)
   }
 
   override def updateSetRemove[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     set: Set[T],
     transformValue: T => Any,
     exts: List[String],
     one2json: T => String,
     set2array: Set[T] => Array[AnyRef]
   ): Unit = {
-    updateIterableRemove(ns, attr, optRefNs, set, exts, one2json)
+    updateIterableRemove(ent, attr, optRef, set, exts, one2json)
   }
 
   override def updateSeqEq[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     seq: Seq[T],
     transformValue: T => Any,
     exts: List[String],
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    updateIterableEq(ns, attr, optRefNs, seq, value2json)
+    updateIterableEq(ent, attr, optRef, seq, value2json)
   }
 
   override def updateSeqAdd[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     seq: Seq[T],
     transformValue: T => Any,
     exts: List[String],
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    updateIterableAdd(ns, attr, optRefNs, seq, value2json)
+    updateIterableAdd(ent, attr, optRef, seq, value2json)
   }
 
   override def updateSeqRemove[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     seq: Seq[T],
     transformValue: T => Any,
     exts: List[String],
     one2json: T => String,
     seq2array: Seq[T] => Array[AnyRef]
   ): Unit = {
-    updateIterableRemove(ns, attr, optRefNs, seq, exts, one2json)
+    updateIterableRemove(ent, attr, optRef, seq, exts, one2json)
   }
 
   override protected def updateMapAdd[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     map: Map[String, T],
     transformValue: T => Any,
     exts: List[String],
     value2json: (StringBuffer, T) => StringBuffer,
   ): Unit = {
     if (map.nonEmpty) {
-      setAttrPresence(ns, attr)
-      val setAttr    = s"$ns.$attr = JSON_MERGE_PATCH(IFNULL($ns.$attr, JSON_OBJECT()), ?)"
+      setAttrPresence(ent, attr)
+      val setAttr    = s"$ent.$attr = JSON_MERGE_PATCH(IFNULL($ent.$attr, JSON_OBJECT()), ?)"
       val paramIndex = updateAction.setCol(setAttr)
       updateAction.addColSetter((ps: PS) =>
         ps.setBytes(paramIndex, map2jsonByteArray(map, value2json))
@@ -108,19 +108,19 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate with SqlOps =>
   }
 
   override protected def updateMapRemove(
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     keys: Seq[String],
     exts: List[String],
   ): Unit = {
     if (keys.nonEmpty) {
-      setAttrPresence(ns, attr)
+      setAttrPresence(ent, attr)
       val keys1 = keys.map(k => s"'$$.$k'").mkString(", ")
       updateAction.setCol(
-        s"""$ns.$attr = CASE JSON_REMOVE(IFNULL($ns.$attr, NULL), $keys1)
+        s"""$ent.$attr = CASE JSON_REMOVE(IFNULL($ent.$attr, NULL), $keys1)
            |    WHEN JSON_OBJECT() THEN NULL
-           |    ELSE JSON_REMOVE($ns.$attr, $keys1)
+           |    ELSE JSON_REMOVE($ent.$attr, $keys1)
            |  END""".stripMargin
       )
       updateAction.addColSetter((_: PS) => ())
@@ -131,16 +131,16 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate with SqlOps =>
   // Helpers -------------------------------------------------------------------
 
   private def updateIterableEq[T, M[_] <: Iterable[_]](
-    ns: String,
+    ent: String,
     attr: String,
-    refNs: Option[String],
+    ref: Option[String],
     iterable: M[T],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    refNs.fold {
+    ref.fold {
       val paramIndex = updateAction.setCol(s"$attr = ?")
       if (iterable.nonEmpty) {
-        setAttrPresence(ns, attr)
+        setAttrPresence(ent, attr)
         updateAction.addColSetter((ps: PS) => {
           val json = iterable2json(iterable.asInstanceOf[Iterable[T]], value2json)
           ps.setString(paramIndex, json)
@@ -148,25 +148,25 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate with SqlOps =>
       } else {
         updateAction.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
       }
-    } { refNs =>
-      updateAction.deleteRefIds(attr, refNs, getUpdateId)
+    } { ref =>
+      updateAction.deleteRefIds(attr, ref, getUpdateId)
       val refIds = iterable.asInstanceOf[Set[Long]]
       if (refIds.nonEmpty) {
-        updateAction.insertRefIds(attr, refNs, refIds)
+        updateAction.insertRefIds(attr, ref, refIds)
       }
     }
   }
 
   private def updateIterableAdd[T, M[_] <: Iterable[_]](
-    ns: String,
+    ent: String,
     attr: String,
-    refNs: Option[String],
+    ref: Option[String],
     iterable: M[T],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    refNs.fold {
+    ref.fold {
       if (iterable.nonEmpty) {
-        setAttrPresence(ns, attr)
+        setAttrPresence(ent, attr)
         val setAttr    = s"$attr = JSON_MERGE(IFNULL($attr, '[]'), ?)"
         val paramIndex = updateAction.setCol(setAttr)
         updateAction.addColSetter((ps: PS) => {
@@ -174,24 +174,24 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate with SqlOps =>
           ps.setString(paramIndex, json)
         })
       }
-    } { refNs =>
+    } { ref =>
       if (iterable.nonEmpty) {
-        updateAction.insertRefIds(attr, refNs, iterable.asInstanceOf[Set[Long]])
+        updateAction.insertRefIds(attr, ref, iterable.asInstanceOf[Set[Long]])
       }
     }
   }
 
   private def updateIterableRemove[T, M[_] <: Iterable[_]](
-    ns: String,
+    ent: String,
     attr: String,
-    refNs: Option[String],
+    ref: Option[String],
     iterable: M[T],
     exts: List[String],
     one2json: T => String
   ): Unit = {
-    refNs.fold {
+    ref.fold {
       if (iterable.nonEmpty) {
-        setAttrPresence(ns, attr)
+        setAttrPresence(ent, attr)
         val valueTable    = "table_" + updateAction.colCount
         val dbType        = exts(1)
         val retractValues = iterable.asInstanceOf[Iterable[T]].map(one2json).mkString(", ")
@@ -199,16 +199,16 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate with SqlOps =>
         updateAction.setCol(
           s"""$attr = (
              |    SELECT JSON_ARRAYAGG($valueTable.v)
-             |    FROM   JSON_TABLE($ns.$attr, '$$[*]' COLUMNS (v $dbType PATH '$$')) $valueTable
-             |    WHERE  $valueTable.v NOT IN ($retractValues) AND $ns.id IS NOT NULL
+             |    FROM   JSON_TABLE($ent.$attr, '$$[*]' COLUMNS (v $dbType PATH '$$')) $valueTable
+             |    WHERE  $valueTable.v NOT IN ($retractValues) AND $ent.id IS NOT NULL
              |  )""".stripMargin
         )
         updateAction.addColSetter((_: PS) => ())
       }
-    } { refNs =>
+    } { ref =>
       if (iterable.nonEmpty) {
         val refIds = iterable.asInstanceOf[Set[Long]]
-        updateAction.deleteRefIds(attr, refNs, getUpdateId, refIds)
+        updateAction.deleteRefIds(attr, ref, getUpdateId, refIds)
       }
     }
   }

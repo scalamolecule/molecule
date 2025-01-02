@@ -1,6 +1,6 @@
 package molecule.datalog.datomic.compliance.relation
 
-import molecule.coreTests.setup.{Test, MUnitSuiteWithArrays}
+import molecule.coreTests.setup.{MUnitSuiteWithArrays, Test}
 import molecule.coreTests.spi.relation.nested._
 import molecule.datalog.datomic.setup.Api_datomic_async
 

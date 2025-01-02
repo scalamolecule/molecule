@@ -12,7 +12,7 @@ trait QueryExprOne[Tpl]
 
   override protected def queryAttrOneMan(attr: AttrOneMan): Unit = {
     attrIndex += 1
-    val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
+    val (e, a) = (es.last, s":${attr.ent}/${attr.attr}")
     attr match {
       case at: AttrOneManID             => man(attr, e, a, at.vs, resId, sortOneID(at, attrIndex))
       case at: AttrOneManString         => man(attr, e, a, at.vs, resString, sortOneString(at, attrIndex))
@@ -41,7 +41,7 @@ trait QueryExprOne[Tpl]
   }
 
   override protected def queryAttrOneTac(attr: AttrOneTac): Unit = {
-    val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
+    val (e, a) = (es.last, s":${attr.ent}/${attr.attr}")
     if (isOptNested)
       throw ModelError(s"Tacit attributes not allowed in optional nested queries (${attr.name}_).")
     attr match {
@@ -73,7 +73,7 @@ trait QueryExprOne[Tpl]
 
   override protected def queryAttrOneOpt(attr: AttrOneOpt): Unit = {
     attrIndex += 1
-    val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
+    val (e, a) = (es.last, s":${attr.ent}/${attr.attr}")
     attr match {
       case at: AttrOneOptID             => opt(attr, e, a, at.vs, resOptId, sortOneOptId(at, attrIndex), sortOneID(at, attrIndex))
       case at: AttrOneOptString         => opt(attr, e, a, at.vs, resOptString, sortOneOptString(at, attrIndex), sortOneString(at, attrIndex))

@@ -3,7 +3,7 @@ package molecule.base.util
 
 trait CodeGenBase extends BaseHelpers {
 
-  val baseTypes                = Seq(
+  val baseTypes = Seq(
     "ID",
     "String",
     "Int",

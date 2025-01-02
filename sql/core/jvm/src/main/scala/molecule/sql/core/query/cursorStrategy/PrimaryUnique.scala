@@ -33,11 +33,11 @@ case class PrimaryUnique[Tpl](
 
   def getPage(tokens: List[String], limit: Int)
              (implicit conn: JdbcConn_JVM): (List[Tpl], String, Boolean) = {
-    val List(_, _, tpe, ns, attr, _, a, z) = tokens
+    val List(_, _, tpe, ent, attr, _, a, z) = tokens
 
     val forward      = limit > 0
     val (fn, v)      = if (forward) (Gt, z) else (Lt, a)
-    val filterAttr   = getFilterAttr(tpe, ns, attr, fn, v)
+    val filterAttr   = getFilterAttr(tpe, ent, attr, fn, v)
     val altElements  = filterAttr +: (if (forward) elements else reverseTopLevelSorting(elements))
     val sortedRows   = getRawData(conn, altElements, Some(limit.abs), None)
     val flatRowCount = m2q.getRowCount(sortedRows)

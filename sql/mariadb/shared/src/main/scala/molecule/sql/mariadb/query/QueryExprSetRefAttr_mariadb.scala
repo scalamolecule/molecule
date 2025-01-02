@@ -13,8 +13,8 @@ trait QueryExprSetRefAttr_mariadb
     attr: Attr, args: Set[T], res: ResSet[T]
   ): Unit = {
     select += s"JSON_ARRAYAGG($joinTable.$rid) $refIds"
-    joins += (("INNER JOIN", joinTable, "", List(s"$nsId = $joinTable.$eid")))
-    groupBy += nsId
+    joins += (("INNER JOIN", joinTable, "", List(s"$entId = $joinTable.$eid")))
+    groupBy += entId
     castStrategy.add(
       (row: RS, paramIndex: Int) =>
         res.json2array(row.getString(paramIndex)).toSet
@@ -36,8 +36,8 @@ trait QueryExprSetRefAttr_mariadb
   ): Unit = {
     val col = getCol(attr: Attr)
     select += s"JSON_ARRAYAGG($joinTable.$rid) $refIds"
-    joins += (("LEFT JOIN", joinTable, "", List(s"$nsId = $joinTable.$eid")))
-    groupBy += nsId
+    joins += (("LEFT JOIN", joinTable, "", List(s"$entId = $joinTable.$eid")))
+    groupBy += entId
     castStrategy.add((row: RS, paramIndex: Int) => {
       row.getString(paramIndex) match {
         case "[null]" => Option.empty[Set[T]]
@@ -63,7 +63,7 @@ trait QueryExprSetRefAttr_mariadb
        |      JSON_LENGTH(JSON_ARRAYAGG($joinTable.$rid)) = $size AND
        |      JSON_CONTAINS(JSON_ARRAYAGG($joinTable.$rid), JSON_ARRAY($jsonValues))
        |    FROM $joinTable
-       |    WHERE $joinTable.$eid = $nsId
+       |    WHERE $joinTable.$eid = $entId
        |  )""".stripMargin
   }
 
@@ -77,7 +77,7 @@ trait QueryExprSetRefAttr_mariadb
         s"""(
            |    SELECT count($joinTable.$rid) = 0
            |    FROM $joinTable
-           |    WHERE $joinTable.$eid = $nsId
+           |    WHERE $joinTable.$eid = $entId
            |  )""".stripMargin
       ))
     } { set =>
@@ -100,7 +100,7 @@ trait QueryExprSetRefAttr_mariadb
        |    SELECT
        |      ${matches.mkString(s" $logic\n      ")}
        |    FROM $joinTable
-       |    WHERE $joinTable.$eid = $nsId
+       |    WHERE $joinTable.$eid = $entId
        |  )""".stripMargin
   }
 

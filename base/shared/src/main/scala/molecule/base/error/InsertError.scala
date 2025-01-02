@@ -5,7 +5,7 @@ package molecule.base.error
  * @param tplIndex     Index of attribute value in data tuple
  * @param fullAttr     Full attribute name (Entity.attr)
  * @param errors       Error messages
-* @param nestedErrors Nested errors
+ * @param nestedErrors Nested errors
  */
 case class InsertError(
   tplIndex: Int,

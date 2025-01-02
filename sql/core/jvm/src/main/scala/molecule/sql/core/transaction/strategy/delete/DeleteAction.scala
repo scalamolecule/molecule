@@ -28,7 +28,7 @@ abstract class DeleteAction(
 
   private def prepareQueryAndActions: Seq[() => DeleteEntity] = {
     entityMap(entity).attrs.collect {
-      case MetaAttribute(refAttr, card, _, Some(refEntity), options, _, _, _, _, _)
+      case MetaAttribute(refAttr, card, _, Some(refEnt), options, _, _, _, _, _)
         if options.contains("owner") =>
         if (card.isInstanceOf[CardOne]) {
           cols += entity + "." + refAttr
@@ -36,29 +36,29 @@ abstract class DeleteAction(
           () => {
             // Make delete action if we find ref-one ids
             DeleteEntity(
-              entityMap, parent, sqlStmt, sqlOps, entity, refAttr, refEntity
+              entityMap, parent, sqlStmt, sqlOps, entity, refAttr, refEnt
             )
           }
 
         } else {
-          val t          = refAttr + "_" + refEntity
-          val joinTable  = ss(entity, refAttr, refEntity)
-          val (eid, rid) = sqlOps.joinIdNames(entity, refEntity)
+          val t          = refAttr + "_" + refEnt
+          val joinTable  = ss(entity, refAttr, refEnt)
+          val (eid, rid) = sqlOps.joinIdNames(entity, refEnt)
           cols += s"$t.id"
           joins ++= List(
             s"LEFT JOIN $joinTable", "", s" ON $entity.id", s" = $joinTable.$eid",
-            s"LEFT JOIN $refEntity", s" AS $t", s" ON $joinTable.$rid", s" = $t.id"
+            s"LEFT JOIN $refEnt", s" AS $t", s" ON $joinTable.$rid", s" = $t.id"
           )
           () => {
             // Make delete action if we find ref-many ids
             val deleteRef  = DeleteEntity(
-              entityMap, parent, sqlStmt, sqlOps, entity, refAttr, refEntity
+              entityMap, parent, sqlStmt, sqlOps, entity, refAttr, refEnt
             )
             // Delete rows in join table
             val deleteJoin = DeleteJoin(
-              entityMap, parent, sqlStmt, sqlOps, entity, refAttr, refEntity
+              entityMap, parent, sqlStmt, sqlOps, entity, refAttr, refEnt
             )
-            // We can simply delete by the left ids of the parent entity (ns)
+            // We can simply delete by the left ids of the parent entity
             deleteJoin.ids = ids
 
             // Make join deletion a child of (delete before) ref deletion

@@ -3,7 +3,6 @@ package molecule.sql.mysql.setup
 import molecule.base.api.Schema_mysql
 import molecule.core.marshalling.{JdbcProxy_mysql, RpcRequest}
 import molecule.core.spi.Conn
-import molecule.coreTests.setup.DbConnection
 import molecule.sql.core.facade.JdbcConn_JS
 import scala.util.Random
 

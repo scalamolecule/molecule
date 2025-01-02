@@ -82,7 +82,7 @@ trait Pagination[Tpl] {
                   // We use row hashes only when there's no unique sort attributes
                   val init          = setStrategy(3, tokens)
                   val (tpe, encode) = tpeEncode(a)
-                  val attrTokens    = List("OPTIONAL", dir, pos, tpe, a.ns, a.attr, i.toString)
+                  val attrTokens    = List("OPTIONAL", dir, pos, tpe, a.ent, a.attr, i.toString)
                   val uniqueValues  = getUniqueValues(tpls, i, encode)
                   val rowHashes1    = if (rowHashes.nonEmpty) rowHashes else getRowHashes(tpls)
                   checkSort(tail, 3, init ++ attrTokens ++ uniqueValues, i + 1, rowHashes1)
@@ -91,7 +91,7 @@ trait Pagination[Tpl] {
                   if (pos == "1") {
                     // 1. Unique primary sort attribute
                     val (tpe, encode) = tpeEncode(a)
-                    val initTokens    = List("1", getHash, tpe, a.ns, a.attr, i.toString)
+                    val initTokens    = List("1", getHash, tpe, a.ent, a.attr, i.toString)
                     val uniqueValues  = getUniquePair(tpls, i, encode)
                     // We can use this exclusively. So we don't need more data
                     checkSort(Nil, 1, initTokens ++ uniqueValues, -1, Nil)
@@ -101,7 +101,7 @@ trait Pagination[Tpl] {
                     val strategy1     = 2.min(strategy)
                     val init          = setStrategy(strategy1, tokens)
                     val (tpe, encode) = tpeEncode(a)
-                    val attrTokens    = List("UNIQUE", dir, pos, tpe, a.ns, a.attr, i.toString)
+                    val attrTokens    = List("UNIQUE", dir, pos, tpe, a.ent, a.attr, i.toString)
                     val uniqueValues  = getUniqueValues(tpls, i, encode)
                     // We might have a primary non-unique sort attribute after. So we continue
                     checkSort(tail, strategy1, init ++ attrTokens ++ uniqueValues, i + 1, Nil)
@@ -112,7 +112,7 @@ trait Pagination[Tpl] {
                   val strategy1     = 3.min(strategy)
                   val init          = setStrategy(strategy1, tokens)
                   val (tpe, encode) = tpeEncode(a)
-                  val attrTokens    = List("MANDATORY", dir, pos, tpe, a.ns, a.attr, i.toString)
+                  val attrTokens    = List("MANDATORY", dir, pos, tpe, a.ent, a.attr, i.toString)
                   val uniqueValues  = getUniqueValues(tpls, i, encode)
                   val rowHashes1    = if (rowHashes.nonEmpty) rowHashes else getRowHashes(tpls)
                   checkSort(tail, strategy1, init ++ attrTokens ++ uniqueValues, i + 1, rowHashes1)
@@ -217,8 +217,8 @@ trait Pagination[Tpl] {
 
   protected def nextCursorSubUnique(tpls: List[Tpl], tokens: List[String]): String = {
     val attrTokens = tokens.drop(2).grouped(13).toList.collect {
-      case List(kind, dir, pos, tpe, ns, attr, uniqueIndex, _, _, _, _, _, _) =>
-        List(kind, dir, pos, tpe, ns, attr, uniqueIndex) ++
+      case List(kind, dir, pos, tpe, ent, attr, uniqueIndex, _, _, _, _, _, _) =>
+        List(kind, dir, pos, tpe, ent, attr, uniqueIndex) ++
           getUniqueValues(tpls, uniqueIndex.toInt, encoder(tpe, kind))
     }.flatten
     val tokens1    = tokens.take(2) ++ attrTokens
@@ -228,8 +228,8 @@ trait Pagination[Tpl] {
 
   protected def nextCursorNoUnique(tpls: List[Tpl], tokens: List[String]): String = {
     val attrTokens = tokens.drop(2).dropRight(6).grouped(13).toList.collect {
-      case List(kind, dir, pos, tpe, ns, attr, uniqueIndex, _, _, _, _, _, _) =>
-        List(kind, dir, pos, tpe, ns, attr, uniqueIndex) ++
+      case List(kind, dir, pos, tpe, ent, attr, uniqueIndex, _, _, _, _, _, _) =>
+        List(kind, dir, pos, tpe, ent, attr, uniqueIndex) ++
           getUniqueValues(tpls, uniqueIndex.toInt, encoder(tpe, kind))
     }.flatten
     val tokens1    = tokens.take(2) ++ attrTokens ++ getRowHashes(tpls)
@@ -412,30 +412,30 @@ trait Pagination[Tpl] {
     }
   }
 
-  protected def getFilterAttr(tpe: String, ns: String, attr: String, fn: Op, v: String): AttrOneTac = {
+  protected def getFilterAttr(tpe: String, ent: String, attr: String, fn: Op, v: String): AttrOneTac = {
     tpe match {
-      case "String"         => AttrOneTacString(ns, attr, fn, Seq(unescStr(v)))
-      case "Int"            => AttrOneTacInt(ns, attr, fn, Seq(v.toInt))
-      case "Long"           => AttrOneTacLong(ns, attr, fn, Seq(v.toLong))
-      case "Float"          => AttrOneTacFloat(ns, attr, fn, Seq(v.toFloat))
-      case "Double"         => AttrOneTacDouble(ns, attr, fn, Seq(v.toDouble))
-      case "Boolean"        => AttrOneTacBoolean(ns, attr, fn, Seq(v.toBoolean))
-      case "BigInt"         => AttrOneTacBigInt(ns, attr, fn, Seq(BigInt(v)))
-      case "BigDecimal"     => AttrOneTacBigDecimal(ns, attr, fn, Seq(BigDecimal(v)))
-      case "Date"           => AttrOneTacDate(ns, attr, fn, Seq(str2date(v)))
-      case "Duration"       => AttrOneTacDuration(ns, attr, fn, Seq(Duration.parse(v)))
-      case "Instant"        => AttrOneTacInstant(ns, attr, fn, Seq(Instant.parse(v)))
-      case "LocalDate"      => AttrOneTacLocalDate(ns, attr, fn, Seq(LocalDate.parse(v)))
-      case "LocalTime"      => AttrOneTacLocalTime(ns, attr, fn, Seq(LocalTime.parse(v)))
-      case "LocalDateTime"  => AttrOneTacLocalDateTime(ns, attr, fn, Seq(LocalDateTime.parse(v)))
-      case "OffsetTime"     => AttrOneTacOffsetTime(ns, attr, fn, Seq(OffsetTime.parse(v)))
-      case "OffsetDateTime" => AttrOneTacOffsetDateTime(ns, attr, fn, Seq(OffsetDateTime.parse(v)))
-      case "ZonedDateTime"  => AttrOneTacZonedDateTime(ns, attr, fn, Seq(ZonedDateTime.parse(v)))
-      case "UUID"           => AttrOneTacUUID(ns, attr, fn, Seq(UUID.fromString(v)))
-      case "URI"            => AttrOneTacURI(ns, attr, fn, Seq(new URI(v)))
-      case "Byte"           => AttrOneTacByte(ns, attr, fn, Seq(v.toByte))
-      case "Short"          => AttrOneTacShort(ns, attr, fn, Seq(v.toShort))
-      case "Char"           => AttrOneTacChar(ns, attr, fn, Seq(v.charAt(0)))
+      case "String"         => AttrOneTacString(ent, attr, fn, Seq(unescStr(v)))
+      case "Int"            => AttrOneTacInt(ent, attr, fn, Seq(v.toInt))
+      case "Long"           => AttrOneTacLong(ent, attr, fn, Seq(v.toLong))
+      case "Float"          => AttrOneTacFloat(ent, attr, fn, Seq(v.toFloat))
+      case "Double"         => AttrOneTacDouble(ent, attr, fn, Seq(v.toDouble))
+      case "Boolean"        => AttrOneTacBoolean(ent, attr, fn, Seq(v.toBoolean))
+      case "BigInt"         => AttrOneTacBigInt(ent, attr, fn, Seq(BigInt(v)))
+      case "BigDecimal"     => AttrOneTacBigDecimal(ent, attr, fn, Seq(BigDecimal(v)))
+      case "Date"           => AttrOneTacDate(ent, attr, fn, Seq(str2date(v)))
+      case "Duration"       => AttrOneTacDuration(ent, attr, fn, Seq(Duration.parse(v)))
+      case "Instant"        => AttrOneTacInstant(ent, attr, fn, Seq(Instant.parse(v)))
+      case "LocalDate"      => AttrOneTacLocalDate(ent, attr, fn, Seq(LocalDate.parse(v)))
+      case "LocalTime"      => AttrOneTacLocalTime(ent, attr, fn, Seq(LocalTime.parse(v)))
+      case "LocalDateTime"  => AttrOneTacLocalDateTime(ent, attr, fn, Seq(LocalDateTime.parse(v)))
+      case "OffsetTime"     => AttrOneTacOffsetTime(ent, attr, fn, Seq(OffsetTime.parse(v)))
+      case "OffsetDateTime" => AttrOneTacOffsetDateTime(ent, attr, fn, Seq(OffsetDateTime.parse(v)))
+      case "ZonedDateTime"  => AttrOneTacZonedDateTime(ent, attr, fn, Seq(ZonedDateTime.parse(v)))
+      case "UUID"           => AttrOneTacUUID(ent, attr, fn, Seq(UUID.fromString(v)))
+      case "URI"            => AttrOneTacURI(ent, attr, fn, Seq(new URI(v)))
+      case "Byte"           => AttrOneTacByte(ent, attr, fn, Seq(v.toByte))
+      case "Short"          => AttrOneTacShort(ent, attr, fn, Seq(v.toShort))
+      case "Char"           => AttrOneTacChar(ent, attr, fn, Seq(v.charAt(0)))
     }
   }
 }

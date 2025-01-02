@@ -262,40 +262,40 @@ object ValidationSchema_postgres2 extends ValidationSchema2 with Schema_postgres
   override val reservedAttributes: Array[Boolean] = Array(
     // Strings
     false, false, false, false, false, false,
-    
+
     // Enum
     false, false, false,
-    
+
     // Type
     false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-    
+
     // Constants
     false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-    
+
     // Variables
     false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-    
+
     // MandatoryAttr
     false, false, false, false,
-    
+
     // MandatoryRefAB
     false, false, false,
-    
+
     // MandatoryRefB
     false, false, false,
-    
+
     // MandatoryRefsAB
     false, false, false,
-    
+
     // MandatoryRefsB
     false, false, false,
-    
+
     // RefA
     false, false, false,
-    
+
     // RefB
     false, false,
-    
+
     // Require
     false, false, false, false, false, false, false, false, false, false, false
   )

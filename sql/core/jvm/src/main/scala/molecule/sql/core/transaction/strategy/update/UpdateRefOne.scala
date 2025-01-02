@@ -7,10 +7,10 @@ import scala.collection.mutable.ListBuffer
 case class UpdateRefOne(
   parent: UpdateAction,
   sqlOps: SqlOps,
-  ns: String,
+  ent: String,
   refAttr: String,
-  refNs: String,
-) extends UpdateAction(parent, sqlOps, refNs) {
+  ref: String,
+) extends UpdateAction(parent, sqlOps, ref) {
 
   rowSetters += ListBuffer.empty[PS => Unit]
 
@@ -21,17 +21,17 @@ case class UpdateRefOne(
 
   override def curStmt: String = {
     if (cols.isEmpty) {
-      s"no update columns in $refNs ..."
+      s"no update columns in $ref ..."
     } else if (ids.isEmpty) {
-      s"no ids found to be updated in $ns ..."
+      s"no ids found to be updated in $ent ..."
     } else {
-      val idClause = s"$refNs.id IN(" + ids.mkString(", ") + ")"
-      sqlOps.updateStmt(refNs, cols, List(idClause))
+      val idClause = s"$ref.id IN(" + ids.mkString(", ") + ")"
+      sqlOps.updateStmt(ref, cols, List(idClause))
     }
   }
 
   override def completeIds(refIds: Array[List[Long]]): Unit = {
-    ids = getCompleteRefIds(refNs, refIds.head)
+    ids = getCompleteRefIds(ref, refIds.head)
     children.foreach(_.completeIds(refIds.tail))
   }
 
@@ -39,15 +39,15 @@ case class UpdateRefOne(
     val newRefIds1 = newRefIds.iterator
 
     // Add ref ids from parent to new refs
-    val parentUpdates = sqlOps.updateStmt(ns,
+    val parentUpdates = sqlOps.updateStmt(ent,
       List(s"$refAttr = ?"),
       List(s"id = ?")
     )
     val addRefIds     = prepare(parentUpdates)
     parent.ids.zip(knownIds).foreach {
-      case (nsId, 0)  => // missing ref
+      case (entId, 0) => // missing ref
         addRefIds.setLong(1, newRefIds1.next())
-        addRefIds.setLong(2, nsId)
+        addRefIds.setLong(2, entId)
         addRefIds.addBatch()
       case (_, refId) => () // existing ref id
     }

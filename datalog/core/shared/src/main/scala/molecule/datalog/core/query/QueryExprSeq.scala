@@ -37,7 +37,7 @@ trait QueryExprSeq[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] with L
   }
 
   override protected def queryAttrSeqTac(attr: AttrSeqTac): Unit = {
-//    val e = es.last
+    //    val e = es.last
     val e = es.last
     attr match {
       case at: AttrSeqTacID             => seqTac(attr, e, at.vs, resSeqId)
@@ -90,7 +90,7 @@ trait QueryExprSeq[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] with L
       case _: AttrSeqOptZonedDateTime  => seqOpt(attr, e, resOptSeqZonedDateTime)
       case _: AttrSeqOptUUID           => seqOpt(attr, e, resOptSeqUUID)
       case _: AttrSeqOptURI            => seqOpt(attr, e, resOptSeqURI)
-      case _: AttrSeqOptByte          => optByteArray(attr, e, resOptSeqByte) // Byte Array only semantics
+      case _: AttrSeqOptByte           => optByteArray(attr, e, resOptSeqByte) // Byte Array only semantics
       case _: AttrSeqOptShort          => seqOpt(attr, e, resOptSeqShort)
       case _: AttrSeqOptChar           => seqOpt(attr, e, resOptSeqChar)
     }
@@ -98,15 +98,15 @@ trait QueryExprSeq[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] with L
 
 
   private def vars(attr: Attr, v: String) = {
-    val (ns, at) = (attr.ns, attr.attr)
+    val (ent, at) = (attr.ent, attr.attr)
     (
-      s":$ns/$at", s":$ns.$at/i_", s":$ns.$at/v_",
+      s":$ent/$at", s":$ent.$at/i_", s":$ent.$at/v_",
       v + "-i", v + "-v",
       v + 1, v + 2, v + 3, v + 4, v + 5, v + 6,
       v + "-pair"
     )
   }
-  private def nsAttr(attr: Attr): String = s":${attr.ns}/${attr.attr}"
+  private def entAttr(attr: Attr): String = s":${attr.ent}/${attr.attr}"
 
   private def seqMan[T](
     attr: Attr, e: Var, seq: Seq[T], resSeq: ResSeq[T]
@@ -114,7 +114,7 @@ trait QueryExprSeq[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] with L
     val v = vv
     find += s"${v}3"
     addCast(resSeq.j2sList)
-    val a = nsAttr(attr)
+    val a = entAttr(attr)
     attr.filterAttr.fold {
       val pathAttr = varPath :+ attr.cleanAttr
       if (filterAttrVars.contains(pathAttr) && attr.op != V) {
@@ -124,7 +124,7 @@ trait QueryExprSeq[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] with L
       filterAttrVars1 = filterAttrVars1 + (a -> (e -> v))
       filterAttrVars2.get(a).foreach(_(e, v))
     } { case (dir, filterPath, filterAttr) =>
-      seqFilterExpr(attr, e, v, attr.op, s":${filterAttr.ns}/${filterAttr.attr}", resSeq)
+      seqFilterExpr(attr, e, v, attr.op, s":${filterAttr.ent}/${filterAttr.attr}", resSeq)
     }
   }
 
@@ -132,13 +132,13 @@ trait QueryExprSeq[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] with L
     attr: Attr, e: Var, seq: Seq[T], resSeq: ResSeq[T]
   ): Unit = {
     val v = vv
-    val a = nsAttr(attr)
+    val a = entAttr(attr)
     attr.filterAttr.fold {
       seqExpr(true, attr, e, v, attr.op, seq, resSeq)
       filterAttrVars1 = filterAttrVars1 + (a -> (e -> v))
       filterAttrVars2.get(a).foreach(_(e, v))
     } { case (dir, filterPath, filterAttr) =>
-      seqFilterExpr(attr, e, v, attr.op, s":${filterAttr.ns}/${filterAttr.attr}", resSeq)
+      seqFilterExpr(attr, e, v, attr.op, s":${filterAttr.ent}/${filterAttr.attr}", resSeq)
     }
   }
 
@@ -150,7 +150,7 @@ trait QueryExprSeq[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] with L
       case Eq      => noCollectionMatching(attr)
       case Has     => seqHas(tacit, attr, e, v, seq, resSeq)
       case HasNo   => seqHasNo(attr, e, v, seq, resSeq)
-      case NoValue => if (tacit) seqNoValue(e, nsAttr(attr)) else noApplyNothing(attr)
+      case NoValue => if (tacit) seqNoValue(e, entAttr(attr)) else noApplyNothing(attr)
       case other   => unexpectedOp(other)
     }
   }
@@ -417,7 +417,7 @@ trait QueryExprSeq[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] with L
 
   private def manByteArray(attr: Attr, e: Var, byteArray: Array[Byte]): Unit = {
     val v = vv
-    val a = nsAttr(attr)
+    val a = entAttr(attr)
     find += v
     attr.filterAttr.fold {
       where += s"[$e $a $v]" -> wClause
@@ -431,7 +431,7 @@ trait QueryExprSeq[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] with L
 
   private def tacByteArray(attr: Attr, e: Var, byteArray: Array[Byte]): Unit = {
     val v = vv
-    val a = nsAttr(attr)
+    val a = entAttr(attr)
     attr.filterAttr.fold {
       where += s"[$e $a $v]" -> wClause
       byteArrayOps(attr, v, byteArray)
@@ -479,7 +479,7 @@ trait QueryExprSeq[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] with L
     attr.op match {
       case V =>
         val v = vv
-        val a = nsAttr(attr)
+        val a = entAttr(attr)
         find += s"(pull $e-$v [[$a :limit nil]]) "
         where += s"[(identity $e) $e-$v]" -> wGround
         addCast(resSeqOpt.j2sOptList) // delegates to specialized cast for byte arrays

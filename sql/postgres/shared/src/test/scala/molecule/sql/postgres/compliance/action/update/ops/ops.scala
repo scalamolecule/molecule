@@ -1,6 +1,6 @@
 package molecule.sql.postgres.compliance.action.update.ops
 
-import molecule.coreTests.setup.{Test, MUnitSuiteWithArrays}
+import molecule.coreTests.setup.{MUnitSuiteWithArrays, Test}
 import molecule.coreTests.spi.action.update.ops._
 import molecule.sql.postgres.setup.Api_postgres_async
 

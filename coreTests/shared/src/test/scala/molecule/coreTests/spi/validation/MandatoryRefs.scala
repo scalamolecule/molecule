@@ -151,7 +151,7 @@ case class MandatoryRefs(
 
 
   // todo? This is easily done with Datomic. But from sql it seems that one would have to
-  //  - check every known table having a reference to the ns, or
+  //  - check every known table having a reference to the entity, or
   //  - create some trigger on delete if possible? That would be much better to having the
   //    db server automatically preventing orphaning mandatory relationships.
   // So for now, this test is only implemented for Datomic.

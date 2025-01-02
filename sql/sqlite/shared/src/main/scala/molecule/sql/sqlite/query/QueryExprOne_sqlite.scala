@@ -15,7 +15,7 @@ trait QueryExprOne_sqlite
   }
 
   override protected def aggr[T: ClassTag](
-    ns: String,
+    ent: String,
     attr: String,
     col: String,
     fn: String,
@@ -49,7 +49,7 @@ trait QueryExprOne_sqlite
         aggregate = true
 
       case "mins" =>
-        select2 = select2 + (select.length -> minMaxSelect(ns, attr, n, "ASC"))
+        select2 = select2 + (select.length -> minMaxSelect(ent, attr, n, "ASC"))
         select += "<replace>" // add to maintain correct indexing
         groupByCols -= col
         aggregate = true
@@ -63,7 +63,7 @@ trait QueryExprOne_sqlite
         aggregate = true
 
       case "maxs" =>
-        select2 = select2 + (select.length -> minMaxSelect(ns, attr, n, "DESC"))
+        select2 = select2 + (select.length -> minMaxSelect(ent, attr, n, "DESC"))
         select += "<replace>" // add to maintain correct indexing
         groupByCols -= col
         aggregate = true
@@ -72,11 +72,11 @@ trait QueryExprOne_sqlite
         )
 
       case "sample" =>
-        select2 = select2 + (select.length -> sampleSelect(ns, attr))
+        select2 = select2 + (select.length -> sampleSelect(ent, attr))
         select += "<replace>" // add to maintain correct indexing
 
       case "samples" =>
-        select2 = select2 + (select.length -> samplesSelect(ns, attr, n))
+        select2 = select2 + (select.length -> samplesSelect(ent, attr, n))
         select += "<replace>" // add to maintain correct indexing
         groupByCols -= col
         aggregate = true
@@ -169,51 +169,51 @@ trait QueryExprOne_sqlite
 
 
   def sampleSelect(
-    ns: String, attr: String
+    ent: String, attr: String
   ): (List[(String, String, String, List[String])], Set[String]) => String = {
     (joins: List[(String, String, String, List[String])], groupCols: Set[String]) => {
       s"""(
          |    SELECT $attr
          |    FROM (
-         |      SELECT distinct _$ns.$attr
+         |      SELECT distinct _$ent.$attr
          |      ${mkFrom(joins, groupCols)}
          |      ORDER BY RANDOM()
          |      LIMIT 1
          |    )
-         |  ) AS ${ns}_${attr}_samples""".stripMargin
+         |  ) AS ${ent}_${attr}_samples""".stripMargin
     }
   }
 
   def samplesSelect(
-    ns: String, attr: String, n: Int
+    ent: String, attr: String, n: Int
   ): (List[(String, String, String, List[String])], Set[String]) => String = {
     (joins: List[(String, String, String, List[String])], groupCols: Set[String]) => {
       s"""(
          |    SELECT JSON_GROUP_ARRAY($attr)
          |    FROM (
-         |      SELECT distinct _$ns.$attr
+         |      SELECT distinct _$ent.$attr
          |      ${mkFrom(joins, groupCols)}
          |      ORDER BY RANDOM()
          |      LIMIT $n
          |    )
-         |  ) AS ${ns}_${attr}_samples""".stripMargin
+         |  ) AS ${ent}_${attr}_samples""".stripMargin
     }
   }
 
   def minMaxSelect(
-    ns: String, attr: String, n: Int, dir: String
+    ent: String, attr: String, n: Int, dir: String
   ): (List[(String, String, String, List[String])], Set[String]) => String = {
     val fn = if (dir == "ASC") "_min" else "_max"
     (joins: List[(String, String, String, List[String])], groupCols: Set[String]) => {
       s"""(
          |    SELECT JSON_GROUP_ARRAY($attr)
          |    FROM (
-         |      SELECT distinct _$ns.$attr
+         |      SELECT distinct _$ent.$attr
          |      ${mkFrom(joins, groupCols)}
-         |      ORDER BY _$ns.$attr $dir
+         |      ORDER BY _$ent.$attr $dir
          |      LIMIT $n
          |    )
-         |  ) AS ${ns}_$attr$fn""".stripMargin
+         |  ) AS ${ent}_$attr$fn""".stripMargin
     }
   }
 
@@ -223,7 +223,7 @@ trait QueryExprOne_sqlite
   ): String = {
     val where = if (groupCols.isEmpty) "" else
       groupCols
-        .map(ns_attr => s"_$from.${ns_attr.split('.')(1)} = $ns_attr")
+        .map(ent_attr => s"_$from.${ent_attr.split('.')(1)} = $ent_attr")
         .mkString("\n      WHERE ", " AND\n        ", "")
 
     if (joins.isEmpty) {

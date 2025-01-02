@@ -3,7 +3,7 @@ package molecule.sql.sqlite.spi
 import java.sql.{DriverManager, Statement, PreparedStatement => PS}
 import molecule.boilerplate.ast.Model._
 import molecule.core.action._
-import molecule.core.marshalling.{ConnProxy, JdbcProxy, JdbcProxy_sqlite}
+import molecule.core.marshalling.{ConnProxy, JdbcProxy}
 import molecule.core.spi._
 import molecule.core.transaction._
 import molecule.core.util.Executor._

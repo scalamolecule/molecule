@@ -7,31 +7,31 @@ import scala.collection.mutable.ListBuffer
 abstract class InsertAction(
   parent: InsertAction,
   sqlOps: SqlOps,
-  ns: String,
+  ent: String,
   rowCount: Int
-) extends SqlAction(parent, sqlOps, ns) {
+) extends SqlAction(parent, sqlOps, ent) {
 
   // Build execution graph ----------------------------------------
 
-  def refIds(refAttr: String, refNs: String): InsertRefIds = {
+  def refIds(refAttr: String, ref: String): InsertRefIds = {
     addSibling(InsertRefIds(
-      parent, sqlOps, ns, refAttr, refNs, rowCount
+      parent, sqlOps, ent, refAttr, ref, rowCount
     ))
   }
 
-  def refOne(ns: String, refAttr: String, refNs: String): InsertAction = {
-    // Add ref attr to current ns
+  def refOne(ent: String, refAttr: String, ref: String): InsertAction = {
+    // Add ref attr to current entity
     val refAttrIndex = setCol(refAttr)
     addChild(InsertRefOne(
-      this, sqlOps, ns, refAttr, refNs, refAttrIndex, rowCount
+      this, sqlOps, ent, refAttr, ref, refAttrIndex, rowCount
     ))
   }
 
-  def refMany(ns: String, refAttr: String, refNs: String): InsertAction = {
-    val ref = addChild(InsertNs(this, sqlOps, refNs, "RefMany", rowCount))
+  def refMany(ent: String, refAttr: String, r: String): InsertAction = {
+    val ref = addChild(InsertEntity(this, sqlOps, r, "RefMany", rowCount))
 
     // Make joins to refs after current and refs have been inserted
-    addSibling(InsertRefJoin(this, ref, sqlOps, ns, refAttr, refNs, rowCount))
+    addSibling(InsertRefJoin(this, ref, sqlOps, ent, refAttr, r, rowCount))
 
     // Continue with ref entity
     ref
@@ -40,22 +40,22 @@ abstract class InsertAction(
   def backRef: InsertAction = parent
 
   def optRef(
-    ns: String, refAttr: String, refNs: String
+    ent: String, refAttr: String, ref: String
   ): InsertOptRef = {
-    // Add ref attr to current ns
+    // Add ref attr to current entity
     val refAttrIndex = setCol(refAttr)
     addChild(InsertOptRef(
-      this, sqlOps, ns, refAttr, refNs, refAttrIndex, rowCount
+      this, sqlOps, ent, refAttr, ref, refAttrIndex, rowCount
     ))
   }
 
-  def nest(ns: String, refAttr: String, refNs: String): InsertNestedJoins = {
+  def nest(ent: String, refAttr: String, ref: String): InsertNestedJoins = {
     // Nested entity
-    val nested = addChild(InsertNs(this, sqlOps, refNs, "Nested", rowCount))
+    val nested = addChild(InsertEntity(this, sqlOps, ref, "Nested", rowCount))
 
     // Make joins to nested after current and nested have been inserted
     addSibling(InsertNestedJoins(
-      this, nested, sqlOps, ns, refAttr, refNs, rowCount
+      this, nested, sqlOps, ent, refAttr, ref, rowCount
     ))
   }
 
@@ -78,18 +78,18 @@ abstract class InsertAction(
     rowIndex += 1
     rowSetters += ListBuffer.empty[PS => Unit]
     children.foreach {
-      case InsertNs(_, _, _, "Nested", _) => ()
-      case child: InsertAction            => child.nextRow()
-      case _                              => ()
+      case InsertEntity(_, _, _, "Nested", _) => ()
+      case child: InsertAction                => child.nextRow()
+      case _                                  => ()
     }
   }
 
-  def sameLength(l1: Int, l2: Int, refAttr: String, refNs: String): Unit = {
+  def sameLength(l1: Int, l2: Int, refAttr: String, ref: String): Unit = {
     // Make sure arities match (not needed once implementation is stabilized)
     if (l1 != l2) {
       throw new Exception(
         s"Unexpected different number of left/right ids for " +
-          s"joinTable ${ns}_${refAttr}_$refNs: $l1/$l2"
+          s"joinTable ${ent}_${refAttr}_$ref: $l1/$l2"
       )
     }
   }

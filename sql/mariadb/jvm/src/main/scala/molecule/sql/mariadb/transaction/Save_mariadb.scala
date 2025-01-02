@@ -12,33 +12,33 @@ trait Save_mariadb
     with BaseHelpers { self: ResolveSave with SqlOps =>
 
   override protected def addSet[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     optSet: Option[Set[T]],
     transformValue: T => Any,
     exts: List[String],
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    addIterable(attr, optRefNs, optSet, value2json)
+    addIterable(attr, optRef, optSet, value2json)
   }
 
   override protected def addSeq[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     optSeq: Option[Seq[T]],
     transformValue: T => Any,
     exts: List[String],
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    addIterable(attr, optRefNs, optSeq, value2json)
+    addIterable(attr, optRef, optSeq, value2json)
   }
 
   override protected def addMap[T](
-    ns: String,
+    ent: String,
     attr: String,
     optMap: Option[Map[String, T]],
     transformValue: T => Any,
@@ -59,11 +59,11 @@ trait Save_mariadb
 
   private def addIterable[T](
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     optIterable: Option[Iterable[T]],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    optRefNs.fold {
+    optRef.fold {
       val paramIndex = saveAction.setCol(attr)
       if (optIterable.nonEmpty && optIterable.get.nonEmpty) {
         val json = iterable2json(optIterable.get, value2json)
@@ -71,9 +71,9 @@ trait Save_mariadb
       } else {
         saveAction.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
       }
-    } { refNs =>
+    } { ref =>
       optIterable.foreach(refIds =>
-        saveAction.refIds(attr, refNs, refIds.asInstanceOf[Set[Long]])
+        saveAction.refIds(attr, ref, refIds.asInstanceOf[Set[Long]])
       )
     }
   }

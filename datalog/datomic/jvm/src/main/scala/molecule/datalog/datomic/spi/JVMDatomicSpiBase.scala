@@ -20,12 +20,12 @@ trait JVMDatomicSpiBase extends ModelUtils with JavaConversions {
     val db    = conn.peerConn.db()
 
     val getCurSetValues: Attr => Set[Any] = (attr: Attr) => {
-      val a = s":${attr.ns}/${attr.attr}"
+      val a = s":${attr.ent}/${attr.attr}"
       try {
         val curValues = Peer.q(s"[:find ?vs :where [_ $a ?vs]]", db)
         if (curValues.isEmpty) {
           throw ExecutionError(s"While checking to avoid removing the last values of mandatory " +
-            s"attribute ${attr.ns}.${attr.attr} the current Set of values couldn't be found.")
+            s"attribute ${attr.ent}.${attr.attr} the current Set of values couldn't be found.")
         }
         val vs = ListBuffer.empty[Any]
         curValues.forEach(row => vs += row.get(0))

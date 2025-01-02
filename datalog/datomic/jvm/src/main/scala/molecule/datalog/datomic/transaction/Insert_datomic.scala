@@ -59,14 +59,14 @@ trait Insert_datomic
   }
 
   override protected def addOne[T](
-    ns: String,
+    ent: String,
     attr: String,
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String] = Nil
   ): Product => Unit = {
-    val a = kw(ns, attr)
-    backRefs = backRefs + (ns -> e)
+    val a = kw(ent, attr)
+    backRefs = backRefs + (ent -> e)
     (tpl: Product) =>
       unusedRefIds -= e
       usedRefIds += e
@@ -76,14 +76,14 @@ trait Insert_datomic
   }
 
   override protected def addOneOpt[T](
-    ns: String,
+    ent: String,
     attr: String,
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String] = Nil
   ): Product => Unit = {
-    val a = kw(ns, attr)
-    backRefs = backRefs + (ns -> e)
+    val a = kw(ent, attr)
+    backRefs = backRefs + (ent -> e)
     (tpl: Product) =>
       tpl.productElement(tplIndex) match {
         case Some(value) =>
@@ -99,17 +99,17 @@ trait Insert_datomic
   }
 
   override protected def addSet[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String] = Nil,
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    val a = kw(ns, attr)
-    backRefs = backRefs + (ns -> e)
+    val a = kw(ent, attr)
+    backRefs = backRefs + (ent -> e)
     (tpl: Product) =>
       tpl.productElement(tplIndex).asInstanceOf[Set[_]] match {
         case set if set.isEmpty => ()
@@ -123,17 +123,17 @@ trait Insert_datomic
   }
 
   override protected def addSetOpt[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String] = Nil,
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    val a = kw(ns, attr)
-    backRefs = backRefs + (ns -> e)
+    val a = kw(ent, attr)
+    backRefs = backRefs + (ent -> e)
     (tpl: Product) =>
       tpl.productElement(tplIndex) match {
         case Some(set: Set[_]) =>
@@ -151,19 +151,19 @@ trait Insert_datomic
   }
 
   override protected def addSeq[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String] = Nil,
     set2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    val a   = kw(ns, attr)
-    val a_i = kw(s"$ns.$attr", "i_")
-    val a_v = kw(s"$ns.$attr", "v_")
-    backRefs = backRefs + (ns -> e)
+    val a   = kw(ent, attr)
+    val a_i = kw(s"$ent.$attr", "i_")
+    val a_v = kw(s"$ent.$attr", "v_")
+    backRefs = backRefs + (ent -> e)
     (tpl: Product) =>
       tpl.productElement(tplIndex).asInstanceOf[Seq[_]] match {
         case seq if seq.nonEmpty =>
@@ -183,19 +183,19 @@ trait Insert_datomic
   }
 
   override protected def addSeqOpt[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String] = Nil,
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    val a   = kw(ns, attr)
-    val a_i = kw(s"$ns.$attr", "i_")
-    val a_v = kw(s"$ns.$attr", "v_")
-    backRefs = backRefs + (ns -> e)
+    val a   = kw(ent, attr)
+    val a_i = kw(s"$ent.$attr", "i_")
+    val a_v = kw(s"$ent.$attr", "v_")
+    backRefs = backRefs + (ent -> e)
     (tpl: Product) =>
       tpl.productElement(tplIndex) match {
         case Some(seq: Seq[_]) if seq.nonEmpty =>
@@ -215,12 +215,12 @@ trait Insert_datomic
   }
 
   override protected def addByteArray(
-    ns: String,
+    ent: String,
     attr: String,
     tplIndex: Int,
   ): Product => Unit = {
-    val a = kw(ns, attr)
-    backRefs = backRefs + (ns -> e)
+    val a = kw(ent, attr)
+    backRefs = backRefs + (ent -> e)
     (tpl: Product) =>
       tpl.productElement(tplIndex) match {
         case array: Array[_] if array.nonEmpty => appendStmt(add, e, a, array.asInstanceOf[AnyRef])
@@ -231,17 +231,17 @@ trait Insert_datomic
 
 
   override protected def addMap[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    val a   = kw(ns, attr)
-    val a_k = kw(s"$ns.$attr", "k_")
-    val a_v = kw(s"$ns.$attr", "v_")
-    backRefs = backRefs + (ns -> e)
+    val a   = kw(ent, attr)
+    val a_k = kw(s"$ent.$attr", "k_")
+    val a_v = kw(s"$ent.$attr", "v_")
+    backRefs = backRefs + (ent -> e)
     (tpl: Product) =>
       tpl.productElement(tplIndex).asInstanceOf[Map[String, _]] match {
         case map if map.nonEmpty =>
@@ -259,17 +259,17 @@ trait Insert_datomic
   }
 
   override protected def addMapOpt[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    val a   = kw(ns, attr)
-    val a_k = kw(s"$ns.$attr", "k_")
-    val a_v = kw(s"$ns.$attr", "v_")
-    backRefs = backRefs + (ns -> e)
+    val a   = kw(ent, attr)
+    val a_k = kw(s"$ent.$attr", "k_")
+    val a_v = kw(s"$ent.$attr", "v_")
+    backRefs = backRefs + (ent -> e)
     (tpl: Product) =>
       tpl.productElement(tplIndex) match {
         case Some(map: Map[_, _]) if map.nonEmpty =>
@@ -287,14 +287,14 @@ trait Insert_datomic
   }
 
   override protected def addRef(
-    ns: String,
+    ent: String,
     refAttr: String,
-    refNs: String,
+    ref: String,
     card: Card,
   ): Product => Unit = {
-    val a = kw(ns, refAttr)
+    val a = kw(ent, refAttr)
     (_: Product) =>
-      backRefs = backRefs + (ns -> e)
+      backRefs = backRefs + (ent -> e)
       unusedRefIds -= e
       usedRefIds += e
       stmt = stmtList
@@ -307,9 +307,9 @@ trait Insert_datomic
       stmts.add(stmt)
   }
 
-  override protected def addBackRef(backRefNs: String): Product => Unit = {
+  override protected def addBackRef(backRef: String): Product => Unit = {
     (_: Product) =>
-      e = backRefs(backRefNs)
+      e = backRefs(backRef)
   }
 
 
@@ -317,9 +317,9 @@ trait Insert_datomic
 
   override protected def addOptRef(
     tplIndex: Int,
-    ns: String,
+    ent: String,
     refAttr: String,
-    refNs: String,
+    ref: String,
     nestedElements: List[Element]
   ): Product => Unit = {
     val useBaseId = firstOptRef
@@ -337,7 +337,7 @@ trait Insert_datomic
           values.foreach { value =>
             e = baseId
             val nestedTpl = Tuple1(value)
-            addRef(ns, refAttr, refNs, CardOne)(nestedTpl)
+            addRef(ent, refAttr, ref, CardOne)(nestedTpl)
             unusedRefIds -= e
             nested2stmts(nestedTpl)
           }
@@ -349,7 +349,7 @@ trait Insert_datomic
           val baseId     = if (useBaseId) e0 else e
           nestedTpls.foreach { nestedTpl =>
             e = baseId
-            addRef(ns, refAttr, refNs, CardOne)(nestedTpl)
+            addRef(ent, refAttr, ref, CardOne)(nestedTpl)
             unusedRefIds -= e
             nested2stmts(nestedTpl)
           }
@@ -359,9 +359,9 @@ trait Insert_datomic
 
   override protected def addNested(
     tplIndex: Int,
-    ns: String,
+    ent: String,
     refAttr: String,
-    refNs: String,
+    ref: String,
     nestedElements: List[Element]
   ): Product => Unit = {
     // Recursively resolve nested data
@@ -375,7 +375,7 @@ trait Insert_datomic
           values.foreach { value =>
             e = nestedBaseId
             val nestedTpl = Tuple1(value)
-            addRef(ns, refAttr, refNs, CardOne)(nestedTpl)
+            addRef(ent, refAttr, ref, CardOne)(nestedTpl)
             unusedRefIds -= e
             e0 = e
             nested2stmts(nestedTpl)
@@ -393,7 +393,7 @@ trait Insert_datomic
           nestedTpls.foreach { nestedTpl =>
             def process(): Unit = {
               e = nestedBaseId
-              addRef(ns, refAttr, refNs, CardOne)(nestedTpl)
+              addRef(ent, refAttr, ref, CardOne)(nestedTpl)
               unusedRefIds -= e
               e0 = e
               nested2stmts(nestedTpl)
@@ -412,7 +412,7 @@ trait Insert_datomic
           val nestedBaseId = e
           nestedTpls.foreach { nestedTpl =>
             e = nestedBaseId
-            addRef(ns, refAttr, refNs, CardOne)(nestedTpl)
+            addRef(ent, refAttr, ref, CardOne)(nestedTpl)
             unusedRefIds -= e
             e0 = e
             nested2stmts(nestedTpl)

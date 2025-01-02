@@ -10,61 +10,61 @@ trait Insert_sqlite
   extends SqlInsert { self: ResolveInsert with InsertResolvers_ with SqlOps =>
 
   override protected def addSet[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String] = Nil,
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    addIterable(attr, optRefNs, tplIndex, value2json)
+    addIterable(attr, optRef, tplIndex, value2json)
   }
 
   override protected def addSetOpt[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String] = Nil,
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    addOptIterable(attr, optRefNs, tplIndex, value2json)
+    addOptIterable(attr, optRef, tplIndex, value2json)
   }
 
   override protected def addSeq[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String],
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    addIterable(attr, optRefNs, tplIndex, value2json)
+    addIterable(attr, optRef, tplIndex, value2json)
   }
 
   override protected def addSeqOpt[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String] = Nil,
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    addOptIterable(attr, optRefNs, tplIndex, value2json)
+    addOptIterable(attr, optRef, tplIndex, value2json)
   }
 
   override protected def addMap[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
@@ -88,9 +88,9 @@ trait Insert_sqlite
   }
 
   override protected def addMapOpt[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
@@ -118,12 +118,12 @@ trait Insert_sqlite
 
   private def addIterable[T, M[_] <: Iterable[_]](
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     tplIndex: Int,
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
     val stableInsert = insertAction
-    optRefNs.fold {
+    optRef.fold {
       val paramIndex = stableInsert.setCol(attr)
       (tpl: Product) => {
         val iterable = tpl.productElement(tplIndex).asInstanceOf[Iterable[T]]
@@ -136,8 +136,8 @@ trait Insert_sqlite
             ps.setNull(paramIndex, java.sql.Types.NULL))
         }
       }
-    } { refNs =>
-      val insertRefIds = insertAction.refIds(attr, refNs)
+    } { ref =>
+      val insertRefIds = insertAction.refIds(attr, ref)
       (tpl: Product) => {
         val refIds = tpl.productElement(tplIndex).asInstanceOf[Iterable[Long]]
         insertRefIds.addRefIds(refIds)
@@ -147,12 +147,12 @@ trait Insert_sqlite
 
   private def addOptIterable[T, M[_] <: Iterable[_]](
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     tplIndex: Int,
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
     val stableInsert = insertAction
-    optRefNs.fold {
+    optRef.fold {
       val paramIndex = stableInsert.setCol(attr)
       (tpl: Product) =>
         tpl.productElement(tplIndex) match {
@@ -169,8 +169,8 @@ trait Insert_sqlite
             stableInsert.addColSetter((ps: PS) =>
               ps.setNull(paramIndex, java.sql.Types.NULL))
         }
-    } { refNs =>
-      val insertRefIds = insertAction.refIds(attr, refNs)
+    } { ref =>
+      val insertRefIds = insertAction.refIds(attr, ref)
       (tpl: Product) => {
         tpl.productElement(tplIndex) match {
           case Some(set: Iterable[_]) =>

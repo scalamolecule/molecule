@@ -6,11 +6,11 @@ import scala.collection.mutable.ListBuffer
 case class InsertRefIds(
   parent: InsertAction,
   sqlOps: SqlOps,
-  ns: String,
+  ent: String,
   refAttr: String,
-  refNs: String,
+  ref: String,
   rowCount: Int
-) extends InsertAction(parent, sqlOps, refNs, rowCount) {
+) extends InsertAction(parent, sqlOps, ref, rowCount) {
 
   // Cache card-many ref ids for each row
   val refIdss = ListBuffer.empty[Iterable[Long]]
@@ -20,18 +20,18 @@ case class InsertRefIds(
   }
 
   override def process(): Unit = {
-    val curNs = parent.children.head
-    sameLength(curNs.ids.length, refIdss.length, refAttr, refNs)
+    val curEnt = parent.children.head
+    sameLength(curEnt.ids.length, refIdss.length, refAttr, ref)
 
     // Insert all joins
     val ps        = prepare(curStmt)
-    val nsIds     = curNs.ids.iterator
+    val entIds    = curEnt.ids.iterator
     val refIdssIt = refIdss.iterator
-    while (nsIds.hasNext) {
-      val nsId   = nsIds.next()
+    while (entIds.hasNext) {
+      val entId  = entIds.next()
       val refIds = refIdssIt.next().iterator
       while (refIds.hasNext) {
-        ps.setLong(1, nsId)
+        ps.setLong(1, entId)
         ps.setLong(2, refIds.next())
         ps.addBatch()
       }
@@ -41,7 +41,7 @@ case class InsertRefIds(
   }
 
   override def curStmt: String = {
-    sqlOps.insertJoinStmt(ns, refAttr, refNs)
+    sqlOps.insertJoinStmt(ent, refAttr, ref)
   }
 
   override def render(indent: Int): String = {

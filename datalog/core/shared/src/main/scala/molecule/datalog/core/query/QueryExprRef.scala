@@ -11,11 +11,11 @@ trait QueryExprRef[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] =>
 
   override protected def queryRef(ref: Ref, tail: List[Element]): Unit = {
     checkOnlyOptRef()
-    val (e, refAttr, refId) = (es.last, s":${ref.ns}/${ref.refAttr}", vv)
+    val (e, refAttr, refId) = (es.last, s":${ref.ent}/${ref.refAttr}", vv)
     refConfirmed = false
     val card = if (ref.card.isInstanceOf[CardOne]) "one" else "set"
     varPath = varPath ++ List(card, refAttr, refId)
-    path = path ++ List(ref.refAttr, ref.refNs)
+    path = path ++ List(ref.refAttr, ref.ref)
     where += s"[$e $refAttr $refId]" -> wClause
     es = es :+ refId
   }
@@ -59,10 +59,10 @@ trait QueryExprRef[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] =>
     val e        = es.last
     val nestedId = "?id" + nestedIds.size
     if (where.isEmpty) {
-      val Ref(ns, refAttrClean, refNs, _, _, _) = nestedRef
-      val (refAttr, refId)                      = (s":$ns/$refAttrClean", vv)
+      val Ref(ent, refAttrClean, ref, _, _, _) = nestedRef
+      val (refAttr, refId)                     = (s":$ent/$refAttrClean", vv)
       varPath = varPath ++ List(refAttr, refId)
-      path = path ++ List(refAttrClean, refNs)
+      path = path ++ List(refAttrClean, ref)
       where += s"[$e $refAttr $refId]" -> wClause
     }
     where += s"[(identity $e) $nestedId]" -> wGround
@@ -96,9 +96,9 @@ trait QueryExprRef[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] =>
     }
     validateRefNs(ref, nestedElements)
 
-    val (e, refAttr, refId) = (es.last, s":${ref.ns}/${ref.refAttr}", vv)
+    val (e, refAttr, refId) = (es.last, s":${ref.ent}/${ref.refAttr}", vv)
     varPath = varPath ++ List(refAttr, refId)
-    path = path ++ List(ref.refAttr, ref.refNs)
+    path = path ++ List(ref.refAttr, ref.ref)
     firstId = refId
     val nestedId = "?id" + nestedIds.size
     nestedIds += nestedId

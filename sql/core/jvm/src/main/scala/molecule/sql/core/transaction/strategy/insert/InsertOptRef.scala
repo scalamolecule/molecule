@@ -6,22 +6,22 @@ import molecule.sql.core.transaction.strategy.SqlOps
 case class InsertOptRef(
   parent: InsertAction,
   sqlOps: SqlOps,
-  ns: String,
+  ent: String,
   refAttr: String,
-  refNs: String,
+  ref: String,
   refAttrIndex: Int,
   rowCount: Int
-) extends InsertAction(parent, sqlOps, refNs, rowCount) {
+) extends InsertAction(parent, sqlOps, ref, rowCount) {
 
   override def rootAction: InsertAction = parent.rootAction
 
 
   override def process(): Unit = {
-    // Process children of ref ns
+    // Process children of ref entity
     children.foreach(_.process())
 
     //    println(s"++++++++++++++++++++++++++++++++++++++++++++++++++++++++" +
-    //      s"  $refNs  " + optionalDefineds.mkString("Array(", ", ", ")"))
+    //      s"  $ref  " + optionalDefineds.mkString("Array(", ", ", ")"))
     //    println("rowSetters")
     //    println(rowSetters.map(rs => rs.toList.mkString("\n   ")).mkString("   ", "\n   -----\n   ", ""))
 
@@ -51,7 +51,7 @@ case class InsertOptRef(
     }
   }
   override def curStmt: String = {
-    sqlOps.insertStmt(refNs, cols, placeHolders)
+    sqlOps.insertStmt(ref, cols, placeHolders)
   }
 
   override def render(indent: Int): String = {

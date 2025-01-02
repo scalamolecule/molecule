@@ -107,14 +107,14 @@ trait DatomicQueryBase
   final var path                  = List.empty[String]
 
   // Pull coordinates
-  final val pullCasts   = new ListBuffer[jIterator[_] => Any]
-  final var pullCastss  = List.empty[List[jIterator[_] => Any]]
+  final val pullCasts  = new ListBuffer[jIterator[_] => Any]
+  final var pullCastss = List.empty[List[jIterator[_] => Any]]
 
   final var pullCastsss = List.empty[List[List[jIterator[_] => Any]]]
 
-  final val pullSorts   = new ListBuffer[(Int, Int => (Row, Row) => Int)]
-  final var pullSortss  = List.empty[List[Int => (Row, Row) => Int]]
-  final var refDepths   = List(0, 0)
+  final val pullSorts  = new ListBuffer[(Int, Int => (Row, Row) => Int)]
+  final var pullSortss = List.empty[List[Int => (Row, Row) => Int]]
+  final var refDepths  = List(0, 0)
 
   // Casting
   final var castss = List(List.empty[AnyRef => AnyRef])

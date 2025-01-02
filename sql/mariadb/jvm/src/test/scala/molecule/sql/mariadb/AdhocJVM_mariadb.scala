@@ -35,7 +35,7 @@ class AdhocJVM_mariadb extends Test with DbProviders_mariadb with TestUtils {
 
 
       //        _ <- rawTransact(
-      //          """UPDATE Ns
+      //          """UPDATE Entity
       //            |    SET
       //            |      string = concat("x", "b")
       //            |    WHERE

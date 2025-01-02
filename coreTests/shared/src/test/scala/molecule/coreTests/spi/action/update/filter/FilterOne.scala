@@ -42,7 +42,7 @@ case class FilterOne(
 
       // Order of attributes in update molecule makes no difference
       _ <- Entity.int(4).i_.update.transact
-      _ <- Entity.i_?.int.query.get.map(_ ==> List(
+      _ <- Entity.i_?.a1.int.query.get.map(_ ==> List(
         (None, 0),
         (Some(1), 4), // updated
         (Some(2), 4), // updated

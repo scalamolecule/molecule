@@ -6,7 +6,7 @@ import molecule.boilerplate.ast.Model._
 trait InsertOps extends BaseOps {
 
   protected def addOne[T](
-    ns: String,
+    ent: String,
     attr: String,
     tplIndex: Int,
     transformValue: T => Any,
@@ -14,7 +14,7 @@ trait InsertOps extends BaseOps {
   ): Product => Unit
 
   protected def addOneOpt[T](
-    ns: String,
+    ent: String,
     attr: String,
     tplIndex: Int,
     transformValue: T => Any,
@@ -22,9 +22,9 @@ trait InsertOps extends BaseOps {
   ): Product => Unit
 
   protected def addSet[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String],
@@ -33,9 +33,9 @@ trait InsertOps extends BaseOps {
   ): Product => Unit
 
   protected def addSetOpt[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String],
@@ -44,9 +44,9 @@ trait InsertOps extends BaseOps {
   ): Product => Unit
 
   protected def addSeq[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String],
@@ -55,9 +55,9 @@ trait InsertOps extends BaseOps {
   ): Product => Unit
 
   protected def addSeqOpt[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String],
@@ -66,53 +66,53 @@ trait InsertOps extends BaseOps {
   ): Product => Unit
 
   protected def addByteArray(
-    ns: String,
+    ent: String,
     attr: String,
     tplIndex: Int,
   ): Product => Unit
 
   protected def addMap[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit
 
   protected def addMapOpt[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit
 
   protected def addRef(
-    ns: String,
+    ent: String,
     refAttr: String,
-    refNs: String,
+    ref: String,
     card: Card
   ): Product => Unit
 
   protected def addBackRef(
-    backRefNs: String
+    backRef: String
   ): Product => Unit
 
   protected def addOptRef(
     tplIndex: Int,
-    ns: String,
+    ent: String,
     refAttr: String,
-    refNs: String,
+    ref: String,
     elements: List[Element]
   ): Product => Unit
 
   protected def addNested(
     tplIndex: Int,
-    ns: String,
+    ent: String,
     refAttr: String,
-    refNs: String,
+    ref: String,
     elements: List[Element]
   ): Product => Unit
 }

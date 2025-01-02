@@ -25,9 +25,9 @@ case class MetaDomain(
     val pad      = s"\n$p  "
     val pairs    = for {
       group <- groups
-      entity <- group.entities
+      entity <- group.ents
     } yield {
-      s""""${entity.entity}" -> $pad  ${entity.render(tabs + 2)}"""
+      s""""${entity.ent}" -> $pad  ${entity.render(tabs + 2)}"""
     }
     val attrsStr = if (pairs.isEmpty) "" else pairs.mkString(pad, s",\n$pad", s"\n$p")
     s"Map($attrsStr)"
@@ -38,10 +38,10 @@ case class MetaDomain(
     val pad      = s"\n$p  "
     val attrData = for {
       group <- groups
-      entity <- group.entities
+      entity <- group.ents
       attr <- entity.attrs
     } yield {
-      (s"${entity.entity}.${attr.attribute}", attr.card, attr.baseTpe, attr.requiredAttrs)
+      (s"${entity.ent}.${attr.attr}", attr.card, attr.baseTpe, attr.requiredAttrs)
     }
     val maxSp    = attrData.map(_._1.length).max
     val attrs    = attrData.map {
@@ -56,10 +56,10 @@ case class MetaDomain(
   def uniqueAttrs: String = {
     val attrs    = for {
       group <- groups
-      entity <- group.entities
+      entity <- group.ents
       attr <- entity.attrs if attr.options.exists(s => s == "unique" || s == "uniqueIdentity")
     } yield {
-      s""""${entity.entity}.${attr.attribute}""""
+      s""""${entity.ent}.${attr.attr}""""
     }
     val attrsStr = if (attrs.isEmpty) "" else attrs.mkString("\n    ", s",\n    ", s"\n  ")
     s"List($attrsStr)"
@@ -69,13 +69,13 @@ case class MetaDomain(
 
 case class MetaGroup(
   group: String,
-  entities: Seq[MetaEntity]
+  ents: Seq[MetaEntity]
 ) extends MetaModel with BaseHelpers {
   def render(tabs: Int): String = {
     val p           = indent(tabs)
     val pad         = s"\n$p  "
-    val entitiesStr = if (entities.isEmpty) "" else
-      entities.map(_.render(tabs + 1)).mkString(pad, s",\n$pad", s"\n$p")
+    val entitiesStr = if (ents.isEmpty) "" else
+      ents.map(_.render(tabs + 1)).mkString(pad, s",\n$pad", s"\n$p")
     s"""MetaGroup("$group", Seq($entitiesStr))"""
   }
 
@@ -84,38 +84,38 @@ case class MetaGroup(
 
 
 case class MetaEntity(
-  entity: String,
+  ent: String,
   attrs: Seq[MetaAttribute],
-  backRefEntities: Seq[String] = Nil,
+  backRefs: Seq[String] = Nil,
   mandatoryAttrs: Seq[String] = Nil,
   mandatoryRefs: Seq[(String, String)] = Nil
 ) extends MetaModel with BaseHelpers {
   def render(tabs: Int): String = {
-    val maxAttr           = attrs.map(_.attribute.length).max
+    val maxAttr           = attrs.map(_.attr.length).max
     val maxTpe            = attrs.map(_.baseTpe.length).max
     val attrsStr          = if (attrs.isEmpty) "" else {
       val p   = indent(tabs)
       val pad = s"\n$p  "
       attrs.map { attr =>
-        val attr1         = "\"" + attr.attribute + "\"" + padS(maxAttr, attr.attribute)
+        val attr1         = "\"" + attr.attr + "\"" + padS(maxAttr, attr.attr)
         val card          = attr.card
         val tpe           = "\"" + attr.baseTpe + "\"" + padS(maxTpe, attr.baseTpe)
-        val refNs         = o(attr.refEntity)
+        val ref           = o(attr.ref)
         val options       = sq(attr.options)
         val descr         = o(attr.description)
         val alias         = o(attr.alias)
         val requiredAttrs = sq(attr.requiredAttrs)
         val valueAttrs    = sq(attr.valueAttrs)
         val validations1  = renderValidations(attr.validations)
-        s"""MetaAttribute($attr1, $card, $tpe, $refNs, $options, $descr, $alias, $requiredAttrs, $valueAttrs, $validations1)"""
+        s"""MetaAttribute($attr1, $card, $tpe, $ref, $options, $descr, $alias, $requiredAttrs, $valueAttrs, $validations1)"""
       }.mkString(pad, s",$pad", s"\n$p")
     }
-    val backRefs          = if (backRefEntities.isEmpty) "" else backRefEntities.mkString("\"", "\", \"", "\"")
+    val backRefs1         = if (backRefs.isEmpty) "" else backRefs.mkString("\"", "\", \"", "\"")
     val mandatoryAttrsStr = if (mandatoryAttrs.isEmpty) "" else mandatoryAttrs.mkString("\"", "\", \"", "\"")
     val mandatoryRefsStr  = if (mandatoryRefs.isEmpty) "" else mandatoryRefs.map {
-      case (attr, refNs) => s"""\"$attr\" -> \"$refNs\""""
+      case (attr, ref) => s"""\"$attr\" -> \"$ref\""""
     }.mkString(", ")
-    s"""MetaEntity("$entity", Seq($attrsStr), Seq($backRefs), Seq($mandatoryAttrsStr), Seq($mandatoryRefsStr))"""
+    s"""MetaEntity("$ent", Seq($attrsStr), Seq($backRefs1), Seq($mandatoryAttrsStr), Seq($mandatoryRefsStr))"""
   }
 
   override def toString: String = render(0)
@@ -123,10 +123,10 @@ case class MetaEntity(
 
 
 case class MetaAttribute(
-  attribute: String,
+  attr: String,
   card: Card,
   baseTpe: String,
-  refEntity: Option[String] = None,
+  ref: Option[String] = None,
   options: Seq[String] = Nil,
   description: Option[String] = None,
   alias: Option[String] = None,
@@ -136,7 +136,7 @@ case class MetaAttribute(
 ) extends MetaModel with BaseHelpers {
   override def toString: String = {
     val validations1 = renderValidations(validations)
-    s"""MetaAttribute("$attribute", $card, "$baseTpe", ${o(refEntity)}, ${sq(options)}, ${o(description)}, ${o(alias)}, ${sq(requiredAttrs)}, ${sq(valueAttrs)}, $validations1)"""
+    s"""MetaAttribute("$attr", $card, "$baseTpe", ${o(ref)}, ${sq(options)}, ${o(description)}, ${o(alias)}, ${sq(requiredAttrs)}, ${sq(valueAttrs)}, $validations1)"""
   }
 }
 

@@ -4,13 +4,13 @@ import molecule.sql.core.transaction.strategy.SqlOps
 
 case class InsertNestedJoins(
   parent: InsertAction,
-  nested: InsertNs,
+  nested: InsertEntity,
   sqlOps: SqlOps,
-  ns: String,
+  ent: String,
   refAttr: String,
-  refNs: String,
+  ref: String,
   rowCount: Int
-) extends InsertAction(parent, sqlOps, refNs, rowCount) {
+) extends InsertAction(parent, sqlOps, ref, rowCount) {
 
   // Keep track of nested count of joins for each row
   private var rowCounts = List.empty[Int]
@@ -20,7 +20,7 @@ case class InsertNestedJoins(
   }
 
   override def process(): Unit = {
-    sameLength(parent.ids.length, rowCounts.length, refAttr, refNs)
+    sameLength(parent.ids.length, rowCounts.length, refAttr, ref)
     val ps        = prepare(curStmt)
     val parentIds = parent.ids.iterator
     val counts    = rowCounts.iterator
@@ -42,7 +42,7 @@ case class InsertNestedJoins(
   }
 
   override def curStmt: String = {
-    sqlOps.insertJoinStmt(ns, refAttr, refNs)
+    sqlOps.insertJoinStmt(ent, refAttr, ref)
   }
 
   override def render(indent: Int): String = {

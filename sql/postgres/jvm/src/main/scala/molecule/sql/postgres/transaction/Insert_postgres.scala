@@ -9,9 +9,9 @@ trait Insert_postgres
   extends SqlInsert { self: ResolveInsert with InsertResolvers_ with SqlOps =>
 
   override protected def addMap[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
@@ -35,9 +35,9 @@ trait Insert_postgres
   }
 
   override protected def addMapOpt[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer

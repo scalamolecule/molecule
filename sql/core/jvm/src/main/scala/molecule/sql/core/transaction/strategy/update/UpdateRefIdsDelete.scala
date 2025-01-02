@@ -9,7 +9,7 @@ case class UpdateRefIdsDelete(
   ent: String,
   refAttr: String,
   refEnt: String,
-  nsId: Long,
+  entId: Long,
   refIds: Set[Long]
 ) extends UpdateAction(parent, sqlOps, ent) with BaseHelpers {
 
@@ -24,13 +24,13 @@ case class UpdateRefIdsDelete(
     val joinTable    = ss(ent, refAttr, refEnt)
     val eid          = ss(ent, "id")
     val refEnt_id    = ss(refEnt, "id")
-    val nsIdClause   = s"$eid = $nsId"
+    val entIdClause  = s"$eid = $entId"
     val refIdsClause = refIds.size match {
       case 0 => Nil
       case 1 => List(s"$refEnt_id = " + refIds.head)
       case _ => List(s"$refEnt_id IN (${refIds.mkString(", ")})")
     }
-    sqlOps.deleteStmt(joinTable, nsIdClause +: refIdsClause)
+    sqlOps.deleteStmt(joinTable, entIdClause +: refIdsClause)
   }
 
   override def render(indent: Int): String = {

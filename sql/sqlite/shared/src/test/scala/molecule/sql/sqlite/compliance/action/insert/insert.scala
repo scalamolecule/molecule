@@ -1,6 +1,6 @@
 package molecule.sql.sqlite.compliance.action.insert
 
-import molecule.coreTests.setup.{Test, MUnitSuiteWithArrays}
+import molecule.coreTests.setup.{MUnitSuiteWithArrays, Test}
 import molecule.coreTests.spi.action.insert._
 import molecule.sql.sqlite.setup.Api_sqlite_async
 

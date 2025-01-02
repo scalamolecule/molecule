@@ -128,7 +128,7 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
     at: Attr,
     attrIndex: Int
   ): Option[(Int, Int => (Row, Row) => Int)] = {
-    if (at.refNs.isDefined)
+    if (at.ref.isDefined)
       sortOneOptLongRef(at, attrIndex)
     else
       sortOneOptLong(at, attrIndex)

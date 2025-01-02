@@ -6,7 +6,7 @@ import molecule.core.transaction.Action2Data
 trait SaveOps extends Action2Data with BaseOps {
 
   protected def addOne[T](
-    ns: String,
+    ent: String,
     attr: String,
     optValue: Option[T],
     transformValue: T => Any,
@@ -14,9 +14,9 @@ trait SaveOps extends Action2Data with BaseOps {
   ): Unit
 
   protected def addSet[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     optSet: Option[Set[T]],
     transformValue: T => Any,
     exts: List[String],
@@ -25,9 +25,9 @@ trait SaveOps extends Action2Data with BaseOps {
   ): Unit
 
   protected def addSeq[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     optSeq: Option[Seq[T]],
     transformValue: T => Any,
     exts: List[String],
@@ -36,13 +36,13 @@ trait SaveOps extends Action2Data with BaseOps {
   ): Unit
 
   protected def addByteArray(
-    ns: String,
+    ent: String,
     attr: String,
     optArray: Option[Array[Byte]],
   ): Unit
 
   protected def addMap[T](
-    ns: String,
+    ent: String,
     attr: String,
     optMap: Option[Map[String, T]],
     transformValue: T => Any,
@@ -50,15 +50,15 @@ trait SaveOps extends Action2Data with BaseOps {
   ): Unit
 
   protected def addRef(
-    ns: String,
+    ent: String,
     refAttr: String,
-    refNs: String,
+    ref: String,
     card: Card
   ): Unit
 
   protected def addBackRef(
-    backRefNs: String
+    backRef: String
   ): Unit
 
-  protected def handleRefNs(refNs: String): Unit
+  protected def handleRef(ref: String): Unit
 }

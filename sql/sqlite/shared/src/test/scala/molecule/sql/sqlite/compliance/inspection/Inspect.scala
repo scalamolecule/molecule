@@ -220,7 +220,7 @@ class Test_Inspect extends Test with DbProviders_sqlite with TestUtils {
 
         Update(
           Entity(
-            UPDATE Ns
+            UPDATE Entity
             SET
               string = ?
             WHERE
@@ -249,7 +249,7 @@ class Test_Inspect extends Test with DbProviders_sqlite with TestUtils {
 
         Update(
           Entity(
-            UPDATE Ns
+            UPDATE Entity
             SET
               string = ?
             WHERE

@@ -7,11 +7,11 @@ import scala.collection.mutable.ListBuffer
 case class SaveRefOne(
   parent: SaveAction,
   sqlOps: SqlOps,
-  ns: String,
+  ent: String,
   refAttr: String,
-  refNs: String,
+  ref: String,
   refAttrIndex: Int
-) extends SaveAction(parent, sqlOps, refNs) {
+) extends SaveAction(parent, sqlOps, ref) {
 
   rowSetters += ListBuffer.empty[PS => Unit]
 
@@ -27,7 +27,7 @@ case class SaveRefOne(
   }
 
   override def curStmt: String = {
-    sqlOps.insertStmt(refNs, cols, placeHolders)
+    sqlOps.insertStmt(ref, cols, placeHolders)
   }
 
   override def render(indent: Int): String = {

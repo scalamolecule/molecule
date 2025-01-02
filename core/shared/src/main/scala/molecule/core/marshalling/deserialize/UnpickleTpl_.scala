@@ -8,15 +8,15 @@ trait UnpickleTpl_[Tpl] { self: UnpickleTpls[Tpl] =>
   def getUnpickler(elements: List[Element]): () => Any = {
     val unpicklers: List[() => Any] = resolveUnpicklers(elements, Nil)
     unpicklers.length match {
-      case 1 => resolve1(unpicklers)
-      case 2 => resolve2(unpicklers)
-      case 3 => resolve3(unpicklers)
-      case 4 => resolve4(unpicklers)
-      case 5 => resolve5(unpicklers)
-      case 6 => resolve6(unpicklers)
-      case 7 => resolve7(unpicklers)
-      case 8 => resolve8(unpicklers)
-      case 9 => resolve9(unpicklers)
+      case 1  => resolve1(unpicklers)
+      case 2  => resolve2(unpicklers)
+      case 3  => resolve3(unpicklers)
+      case 4  => resolve4(unpicklers)
+      case 5  => resolve5(unpicklers)
+      case 6  => resolve6(unpicklers)
+      case 7  => resolve7(unpicklers)
+      case 8  => resolve8(unpicklers)
+      case 9  => resolve9(unpicklers)
       case 10 => resolve10(unpicklers)
       case 11 => resolve11(unpicklers)
       case 12 => resolve12(unpicklers)
@@ -38,7 +38,7 @@ trait UnpickleTpl_[Tpl] { self: UnpickleTpls[Tpl] =>
     () => {
       (
         u1()
-      )
+        )
     }
   }
 

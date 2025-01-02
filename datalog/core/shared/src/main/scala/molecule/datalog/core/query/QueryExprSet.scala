@@ -12,7 +12,7 @@ trait QueryExprSet[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] with L
 
   override protected def queryAttrSetMan(attr: AttrSetMan): Unit = {
     attrIndex += 1
-    val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
+    val (e, a) = (es.last, s":${attr.ent}/${attr.attr}")
     attr match {
       case at: AttrSetManID             => setMan(attr, e, a, at.vs, resSetId)
       case at: AttrSetManString         => setMan(attr, e, a, at.vs, resSetString)
@@ -41,7 +41,7 @@ trait QueryExprSet[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] with L
   }
 
   override protected def queryAttrSetTac(attr: AttrSetTac): Unit = {
-    val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
+    val (e, a) = (es.last, s":${attr.ent}/${attr.attr}")
     attr match {
       case at: AttrSetTacID             => setTac(attr, e, a, at.vs, resSetId)
       case at: AttrSetTacString         => setTac(attr, e, a, at.vs, resSetString)
@@ -71,7 +71,7 @@ trait QueryExprSet[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] with L
 
   override protected def queryAttrSetOpt(attr: AttrSetOpt): Unit = {
     attrIndex += 1
-    val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
+    val (e, a) = (es.last, s":${attr.ent}/${attr.attr}")
     attr match {
       case _: AttrSetOptID             => setOpt(attr, e, a, resOptSetId)
       case _: AttrSetOptString         => setOpt(attr, e, a, resOptSetString)
@@ -114,7 +114,7 @@ trait QueryExprSet[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] with L
       filterAttrVars1 = filterAttrVars1 + (a -> (e -> v))
       filterAttrVars2.get(a).foreach(_(e, v))
     } { case (dir, filterPath, filterAttr) =>
-      setFilterExpr(e, a, v, attr.op, s":${filterAttr.ns}/${filterAttr.attr}")
+      setFilterExpr(e, a, v, attr.op, s":${filterAttr.ent}/${filterAttr.attr}")
     }
     refConfirmed = true
   }
@@ -128,7 +128,7 @@ trait QueryExprSet[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] with L
       filterAttrVars1 = filterAttrVars1 + (a -> (e -> v))
       filterAttrVars2.get(a).foreach(_(e, v))
     } { case (dir, filterPath, filterAttr) =>
-      setFilterExpr(e, a, v, attr.op, s":${filterAttr.ns}/${filterAttr.attr}")
+      setFilterExpr(e, a, v, attr.op, s":${filterAttr.ent}/${filterAttr.attr}")
     }
     refConfirmed = true
   }

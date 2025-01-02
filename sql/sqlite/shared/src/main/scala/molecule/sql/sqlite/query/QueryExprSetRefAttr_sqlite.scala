@@ -12,8 +12,8 @@ trait QueryExprSetRefAttr_sqlite
     attr: Attr, args: Set[T], res: ResSet[T]
   ): Unit = {
     select += s"json_group_array($joinTable.$rid) $refIds"
-    joins += (("INNER JOIN", joinTable, "", List(s"$nsId = $joinTable.$eid")))
-    groupBy += nsId
+    joins += (("INNER JOIN", joinTable, "", List(s"$entId = $joinTable.$eid")))
+    groupBy += entId
     castStrategy.add(
       (row: RS, paramIndex: Int) =>
         res.json2array(row.getString(paramIndex)).toSet
@@ -35,8 +35,8 @@ trait QueryExprSetRefAttr_sqlite
   ): Unit = {
     val col = getCol(attr: Attr)
     select += s"json_group_array($joinTable.$rid) $refIds"
-    joins += (("LEFT JOIN", joinTable, "", List(s"$nsId = $joinTable.$eid")))
-    groupBy += nsId
+    joins += (("LEFT JOIN", joinTable, "", List(s"$entId = $joinTable.$eid")))
+    groupBy += entId
     castStrategy.add((row: RS, paramIndex: Int) => {
       row.getString(paramIndex) match {
         case "[null]" => Option.empty[Set[T]]
@@ -62,7 +62,7 @@ trait QueryExprSetRefAttr_sqlite
        |      JSON_LENGTH(json_group_array($joinTable.$rid)) = $size AND
        |      JSON_CONTAINS(json_group_array($joinTable.$rid), JSON_ARRAY($jsonValues))
        |    FROM $joinTable
-       |    WHERE $joinTable.$eid = $nsId
+       |    WHERE $joinTable.$eid = $entId
        |  )""".stripMargin
   }
 
@@ -76,7 +76,7 @@ trait QueryExprSetRefAttr_sqlite
         s"""(
            |    SELECT count($joinTable.$rid) = 0
            |    FROM $joinTable
-           |    WHERE $joinTable.$eid = $nsId
+           |    WHERE $joinTable.$eid = $entId
            |  )""".stripMargin
       ))
     } { set =>
@@ -99,7 +99,7 @@ trait QueryExprSetRefAttr_sqlite
        |    SELECT
        |      ${matches.mkString(s" $logic\n      ")}
        |    FROM $joinTable
-       |    WHERE $joinTable.$eid = $nsId
+       |    WHERE $joinTable.$eid = $entId
        |  )""".stripMargin
   }
 
@@ -118,7 +118,7 @@ trait QueryExprSetRefAttr_sqlite
            |    SELECT *
            |    FROM $joinTable
            |    WHERE
-           |      $joinTable.$eid = $nsId AND
+           |      $joinTable.$eid = $entId AND
            |      $joinTable.$rid = ${set.head}
            |  )""".stripMargin
       ))
@@ -127,7 +127,7 @@ trait QueryExprSetRefAttr_sqlite
            |    SELECT *
            |    FROM $joinTable
            |    WHERE
-           |      $joinTable.$eid = $nsId AND
+           |      $joinTable.$eid = $entId AND
            |      $joinTable.$rid IN (${set.mkString(", ")})
            |  )""".stripMargin
       ))
@@ -142,7 +142,7 @@ trait QueryExprSetRefAttr_sqlite
            |    SELECT *
            |    FROM $joinTable
            |    WHERE
-           |      $joinTable.$eid = $nsId AND
+           |      $joinTable.$eid = $entId AND
            |      $joinTable.$rid = ${set.head}
            |  )""".stripMargin
       ))
@@ -151,7 +151,7 @@ trait QueryExprSetRefAttr_sqlite
            |    SELECT *
            |    FROM $joinTable
            |    WHERE
-           |      $joinTable.$eid = $nsId AND
+           |      $joinTable.$eid = $entId AND
            |      $joinTable.$rid IN (${set.mkString(", ")})
            |  )""".stripMargin
       ))

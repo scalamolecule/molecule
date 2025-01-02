@@ -2,13 +2,13 @@ package molecule.sql.core.transaction.strategy.insert
 
 import molecule.sql.core.transaction.strategy.SqlOps
 
-case class InsertNs(
+case class InsertEntity(
   parent: InsertAction,
   sqlOps: SqlOps,
-  ns: String,
+  ent: String,
   action: String,
   rowCount: Int
-) extends InsertAction(parent, sqlOps, ns, rowCount) {
+) extends InsertAction(parent, sqlOps, ent, rowCount) {
 
   override def rootAction: InsertAction = parent.rootAction
 
@@ -27,7 +27,7 @@ case class InsertNs(
   }
 
   override def curStmt: String = {
-    sqlOps.insertStmt(ns, cols, placeHolders)
+    sqlOps.insertStmt(ent, cols, placeHolders)
   }
 
   override def render(indent: Int): String = {

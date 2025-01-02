@@ -92,7 +92,7 @@ trait ResolveNestedPull[Tpl]
       append: String
     ): (String, String) = {
       val indent  = "  " * (level + 5)
-      val refAttr = s":${ref.ns}/${ref.refAttr}"
+      val refAttr = s":${ref.ent}/${ref.refAttr}"
       addPullAttrs(elements, level, attrIndex, "") match {
         case (acc1, None, Nil, _) =>
           val res = s"""\n$indent{($refAttr :limit nil :default "$none") [$acc1]}"""
@@ -106,7 +106,7 @@ trait ResolveNestedPull[Tpl]
           (res, append + append1)
 
         case (_, Some(ref: Ref), _, _) => throw ModelError(
-          s"Only cardinality-one refs allowed in optional nested queries (${ref.ns}.${ref.refAttr})."
+          s"Only cardinality-one refs allowed in optional nested queries (${ref.ent}.${ref.refAttr})."
         )
 
         case (acc1, Some(BackRef(backRef, _, _)), tail, attrIndex1) =>
@@ -122,7 +122,7 @@ trait ResolveNestedPull[Tpl]
             case _: BackRef => rec(elements.tail, level1 - 1)
             case a: Attr    => throw ModelError(
               s"Expected ref after backref _$backRef. " +
-                s"Please add attribute ${a.ns}.${a.attr} to initial entity ${a.ns} " +
+                s"Please add attribute ${a.ent}.${a.attr} to initial entity ${a.ent} " +
                 s"instead of after backref _$backRef."
             )
             case other      => unexpectedElement(other)
@@ -158,19 +158,19 @@ trait ResolveNestedPull[Tpl]
       s"""\n$indent:db/id"""
     } else a match {
       case _: AttrSeq if !a.isInstanceOf[AttrSeqManByte] && !a.isInstanceOf[AttrSeqOptByte] =>
-        val (ns, attr) = (a.ns, a.attr)
+        val (ent, attr) = (a.ent, a.attr)
         s"""
-           |$indent{(:$ns/$attr :limit nil :default "$none") [
-           |$indent  :$ns.$attr/i_ :$ns.$attr/v_]}""".stripMargin
+           |$indent{(:$ent/$attr :limit nil :default "$none") [
+           |$indent  :$ent.$attr/i_ :$ent.$attr/v_]}""".stripMargin
 
       case _: AttrMap =>
-        val (ns, attr) = (a.ns, a.attr)
+        val (ent, attr) = (a.ent, a.attr)
         s"""
-           |$indent{(:$ns/$attr :limit nil :default "$none") [
-           |$indent  :$ns.$attr/k_ :$ns.$attr/v_]}""".stripMargin
+           |$indent{(:$ent/$attr :limit nil :default "$none") [
+           |$indent  :$ent.$attr/k_ :$ent.$attr/v_]}""".stripMargin
 
       case _ =>
-        s"""\n$indent(:${a.ns}/${a.attr} :limit nil :default "$none")"""
+        s"""\n$indent(:${a.ent}/${a.attr} :limit nil :default "$none")"""
     }
 
 

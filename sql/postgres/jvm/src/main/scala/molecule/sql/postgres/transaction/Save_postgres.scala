@@ -9,7 +9,7 @@ trait Save_postgres
   extends SqlSave { self: ResolveSave with SqlOps =>
 
   override protected def addMap[T](
-    ns: String,
+    ent: String,
     attr: String,
     optMap: Option[Map[String, T]],
     transformValue: T => Any,

@@ -46,7 +46,7 @@ trait Model2Query extends QueryExpr with ModelUtils {
           }
       }
 
-      case a: AttrSet if a.refNs.isDefined => a match {
+      case a: AttrSet if a.ref.isDefined => a match {
         case a: AttrSetMan => queryRefAttrSetMan(a); resolve(tail)
         case a: AttrSetTac => queryRefAttrSetTac(a); resolve(tail)
         case a: AttrSetOpt => queryRefAttrSetOpt(a); resolve(tail)
@@ -104,7 +104,7 @@ trait Model2Query extends QueryExpr with ModelUtils {
                   validate(tail, prevElements :+ a)
 
                 case r: Ref =>
-                  handleRef(r.refAttr, r.refNs)
+                  handleRef(r.refAttr, r.ref)
                   validate(tail, prevElements)
 
                 case _: BackRef =>
@@ -115,12 +115,12 @@ trait Model2Query extends QueryExpr with ModelUtils {
                   validate(es ++ tail, prevElements)
 
                 case Nested(r, es) =>
-                  handleRef(r.refAttr, r.refNs)
+                  handleRef(r.refAttr, r.ref)
                   validateNested()
                   validate(es, prevElements)
 
                 case OptNested(r, es) =>
-                  handleRef(r.refAttr, r.refNs)
+                  handleRef(r.refAttr, r.ref)
                   validateOptNested(prevElements)
                   validate(es, prevElements)
               }
@@ -247,14 +247,14 @@ trait Model2Query extends QueryExpr with ModelUtils {
 
   private def checkFilterAttrs(
     elements: List[Element],
-    initialNs: String,
+    initialEnt: String,
     addFilterAttr: Option[(List[String], Attr) => Unit]
   ): List[Element] = {
-    val nsAttrPaths    = mutable.Map.empty[String, List[List[String]]]
+    val entAttrPaths   = mutable.Map.empty[String, List[List[String]]]
     val qualifiedPaths = mutable.Map.empty[List[String], List[List[String]]]
     val directions     = ListBuffer.empty[List[String]]
-    var path           = List(initialNs)
-    var qualifiedPath  = List(initialNs)
+    var path           = List(initialEnt)
+    var qualifiedPath  = List(initialEnt)
     var filterAttrVars = Map.empty[List[String], String]
     var level          = 0
 
@@ -275,8 +275,8 @@ trait Model2Query extends QueryExpr with ModelUtils {
     }
 
     def checkAttr(a: Attr): Unit = {
-      val nsAttr = a.cleanName
-      nsAttrPaths(nsAttr) = nsAttrPaths.get(nsAttr).fold(List(path)) {
+      val entAttr = a.cleanName
+      entAttrPaths(entAttr) = entAttrPaths.get(entAttr).fold(List(path)) {
         case paths if !paths.contains(path) => paths :+ path
         case paths                          => paths
       }
@@ -291,14 +291,14 @@ trait Model2Query extends QueryExpr with ModelUtils {
 
       if (a.filterAttr.nonEmpty) {
         val (_, filterPath, fa) = a.filterAttr.get
-        val filterNsAttr        = fa.cleanName
+        val filterEntAttr       = fa.cleanName
 
         if (fa.filterAttr.nonEmpty) {
-          throw ModelError(s"Filter attributes inside filter attributes not allowed in ${a.ns}.${a.attr}")
+          throw ModelError(s"Filter attributes inside filter attributes not allowed in ${a.ent}.${a.attr}")
         } else if (filterPath :+ fa.cleanAttr == path :+ a.cleanAttr) {
           throw ModelError(s"Can't filter by the same attribute `${a.name}`")
         } else if (fa.isInstanceOf[Mandatory]) {
-          throw ModelError(s"Filter attribute $filterNsAttr pointing to other entity should be tacit.")
+          throw ModelError(s"Filter attribute $filterEntAttr pointing to other entity should be tacit.")
         } else if (filterPath != path && fa.op != V) {
           throw ModelError("Filtering inside cross-entity attribute filter not allowed.")
         } else {
@@ -311,16 +311,16 @@ trait Model2Query extends QueryExpr with ModelUtils {
         addFilterAttr.foreach(_(pathAttr, a))
 
         filterAttrVars.get(pathAttr).fold {
-          filterAttrVars = filterAttrVars + (pathAttr.takeRight(2) -> nsAttr)
-        }(_ => throw ModelError(s"Can't refer to ambiguous filter attribute $filterNsAttr"))
+          filterAttrVars = filterAttrVars + (pathAttr.takeRight(2) -> entAttr)
+        }(_ => throw ModelError(s"Can't refer to ambiguous filter attribute $filterEntAttr"))
       }
     }
 
     def handleRef(ref: Ref): Unit = {
       if (path.isEmpty) {
-        path = List(ref.ns, ref.refAttr, ref.refNs)
+        path = List(ref.ent, ref.refAttr, ref.ref)
       } else {
-        path ++= List(ref.refAttr, ref.refNs)
+        path ++= List(ref.refAttr, ref.ref)
       }
     }
     def handleBackRef(): Unit = {
@@ -333,8 +333,8 @@ trait Model2Query extends QueryExpr with ModelUtils {
 
     check(elements)
 
-    path = List(initialNs)
-    qualifiedPath = List(initialNs)
+    path = List(initialEnt)
+    qualifiedPath = List(initialEnt)
     var prevAttrName        = ""
     var prevWasFilterCallee = false
     var i                   = -1
@@ -364,8 +364,8 @@ trait Model2Query extends QueryExpr with ModelUtils {
         a.filterAttr.fold {
           prevWasFilterCallee = false
           qualifiedPath = Nil
-          val nsAttr = path.takeRight(1) :+ a.cleanAttr
-          if ((a.isInstanceOf[AttrSetMan] || a.isInstanceOf[AttrSeqMan]) && filterAttrVars.contains(nsAttr) && a.op != V) {
+          val entAttr = path.takeRight(1) :+ a.cleanAttr
+          if ((a.isInstanceOf[AttrSetMan] || a.isInstanceOf[AttrSeqMan]) && filterAttrVars.contains(entAttr) && a.op != V) {
             throw ModelError(s"Cardinality-many filter attributes ($attrName) not allowed to do additional filtering.")
           }
           List(a)
@@ -380,15 +380,15 @@ trait Model2Query extends QueryExpr with ModelUtils {
           val filterPathAttr      = filterPath :+ filterAttr.cleanAttr
           val filterAttrName      = filterAttr.cleanName
           val qualifiedFilterPath = qualifiedPaths.get(filterPathAttr).fold {
-            val nsPaths = nsAttrPaths.getOrElse(filterAttrName,
+            val entPaths = entAttrPaths.getOrElse(filterAttrName,
               throw ModelError(s"Please add missing filter attribute $filterAttrName")
             )
 
-            nsPaths.length match {
-              case 1 => nsPaths.head
-              case 0 => throw ModelError(s"Unexpectedly found nsPaths for filter attribute $filterAttrName")
+            entPaths.length match {
+              case 1 => entPaths.head
+              case 0 => throw ModelError(s"Unexpectedly found entPaths for filter attribute $filterAttrName")
               case _ =>
-                val prefixes = nsPaths.distinct.map { tokens =>
+                val prefixes = entPaths.distinct.map { tokens =>
                   var prefix = tokens.head
                   var even   = false
                   tokens.foreach {
@@ -547,7 +547,7 @@ trait Model2Query extends QueryExpr with ModelUtils {
     }
 
     def prepareRef(ref: Ref): Ref = {
-      path ++= List(ref.refAttr, ref.refNs)
+      path ++= List(ref.refAttr, ref.ref)
       ref
     }
     def prepareBackRef(backRef: BackRef): BackRef = {
@@ -555,11 +555,11 @@ trait Model2Query extends QueryExpr with ModelUtils {
       backRef
     }
     def prepareNested(nested: Nested): Nested = {
-      path ++= List(nested.ref.refAttr, nested.ref.refNs)
+      path ++= List(nested.ref.refAttr, nested.ref.ref)
       Nested(nested.ref, prepare(nested.elements, Nil))
     }
     def prepareOptNested(nested: OptNested): OptNested = {
-      path ++= List(nested.ref.refAttr, nested.ref.refNs)
+      path ++= List(nested.ref.refAttr, nested.ref.ref)
       OptNested(nested.ref, prepare(nested.elements, Nil))
     }
 
@@ -585,7 +585,7 @@ trait Model2Query extends QueryExpr with ModelUtils {
     "Can't mix mandatory/optional nested queries."
   )
   protected def onlyCardOneInsideOptRef(ref: Ref): Nothing = throw ModelError(
-    s"Only cardinality-one refs allowed in optional ref queries (${ref.ns}.${ref.refAttr})."
+    s"Only cardinality-one refs allowed in optional ref queries (${ref.ent}.${ref.refAttr})."
   )
   protected def noCardManyInsideOptRef(): Unit = if (nestedOptRef) {
     throw ModelError(
@@ -618,14 +618,14 @@ trait Model2Query extends QueryExpr with ModelUtils {
 
   protected def validateRefNs(ref: Ref, nestedElements: List[Element]): Unit = {
     val nestedNs = nestedElements.head match {
-      case a: Attr   => a.ns
-      case r: Ref    => r.ns
-      case r: OptRef => r.ref.ns
+      case a: Attr   => a.ent
+      case r: Ref    => r.ent
+      case r: OptRef => r.ref.ent
       case other     => unexpectedElement(other)
     }
-    if (ref.refNs != nestedNs) {
+    if (ref.ref != nestedNs) {
       val refName = ref.refAttr.capitalize
-      throw ModelError(s"`$refName` can only nest to `${ref.refNs}`. Found: `$nestedNs`")
+      throw ModelError(s"`$refName` can only nest to `${ref.ref}`. Found: `$nestedNs`")
     }
   }
 }

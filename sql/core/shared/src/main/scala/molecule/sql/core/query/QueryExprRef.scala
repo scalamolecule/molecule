@@ -8,32 +8,32 @@ import molecule.core.query.{Model2Query, QueryExpr}
 
 trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
 
-  override protected def queryRef(ref: Ref, tail: List[Element]): Unit = {
-    val Ref(ns, refAttr, refNs, card, _, _) = ref
+  override protected def queryRef(r: Ref, tail: List[Element]): Unit = {
+    val Ref(ent, refAttr, ref, card, _, _) = r
     if (isOptNested && card == CardSet) {
       throw ModelError(
-        s"Only cardinality-one refs allowed in optional nested queries ($ns.$refAttr)."
+        s"Only cardinality-one refs allowed in optional nested queries ($ent.$refAttr)."
       )
     }
     checkOnlyOptRef()
-    handleRef(refAttr, refNs)
+    handleRef(refAttr, ref)
 
-    val nsExt = if (ns == refNs)
+    val entExt = if (ent == ref)
       "" // self-joins
     else
       getOptExt(path.dropRight(2)).getOrElse("")
 
-    if (ref.card == CardOne) {
-      val (refAs, refExt) = getOptExt().fold(("", ""))(ext => (refNs + ext, ext))
+    if (card == CardOne) {
+      val (refAs, refExt) = getOptExt().fold(("", ""))(ext => (ref + ext, ext))
       val joinType        = if (isOptNested || nestedOptRef) "LEFT" else "INNER"
-      joins += ((s"$joinType JOIN", refNs, refAs, List(s"$ns$nsExt.$refAttr = $refNs$refExt.id")))
+      joins += ((s"$joinType JOIN", ref, refAs, List(s"$ent$entExt.$refAttr = $ref$refExt.id")))
     } else {
       if (nestedOptRef) {
-        onlyCardOneInsideOptRef(ref)
+        onlyCardOneInsideOptRef(r)
       }
       val singleOptSet = tail.length == 1 && tail.head.isInstanceOf[AttrSetOpt]
       val joinType     = if (singleOptSet) "LEFT" else "INNER"
-      addJoins(ns, nsExt, refAttr, refNs, joinType)
+      addJoins(ent, entExt, refAttr, ref, joinType)
     }
   }
 
@@ -47,7 +47,7 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
       tail.head match {
         case a: Attr => throw ModelError(
           s"Expected ref after backref _$bRef. " +
-            s"Please add attribute ${a.ns}.${a.attr} to initial entity ${a.ns} " +
+            s"Please add attribute ${a.ent}.${a.attr} to initial entity ${a.ent} " +
             s"instead of after backref _$bRef."
         )
         case _       => ()
@@ -58,7 +58,7 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
 
 
   override protected def queryOptRef(
-    ref: Ref, optionalElements: List[Element]
+    r: Ref, optionalElements: List[Element]
   ): Unit = {
     if (hasOptRef) {
       // transfer previous predicates from `where`
@@ -68,12 +68,12 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
     // Know where we should steal predicates from subsequent `where` additions
     whereSplit = where.length
 
-    val Ref(ns, refAttr, refNs, _, _, _) = ref
-    handleRef(refAttr, refNs)
+    val Ref(ent, refAttr, ref, _, _, _) = r
+    handleRef(refAttr, ref)
 
-    val nsExt           = getOptExt(path.dropRight(2)).getOrElse("")
-    val (refAs, refExt) = getOptExt().fold(("", ""))(ext => (refNs + ext, ext))
-    joins += ((s"LEFT JOIN", refNs, refAs, List(s"$ns$nsExt.$refAttr = $refNs$refExt.id")))
+    val entExt          = getOptExt(path.dropRight(2)).getOrElse("")
+    val (refAs, refExt) = getOptExt().fold(("", ""))(ext => (ref + ext, ext))
+    joins += ((s"LEFT JOIN", ref, refAs, List(s"$ent$entExt.$refAttr = $ref$refExt.id")))
 
     // Cast next nested/adjacent opt ref
     castStrategy = castStrategy.optRef(nestedOptRef)
@@ -114,20 +114,20 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
 
 
   private def resolveNested(
-    ref: Ref, nestedElements: List[Element], joinType: String
+    r: Ref, nestedElements: List[Element], joinType: String
   ): Unit = {
     noCardManyInsideOptRef()
     checkOnlyOptRef()
 
-    val Ref(ns, refAttr, refNs, _, _, _) = ref
+    val Ref(ent, refAttr, ref, _, _, _) = r
     level += 1
-    validateRefNs(ref, nestedElements)
+    validateRefNs(r, nestedElements)
 
-    handleRef(refAttr, refNs)
-    val nsExt = getOptExt(path.dropRight(2)).getOrElse("")
-    addJoins(ns, nsExt, refAttr, refNs, joinType)
+    handleRef(refAttr, ref)
+    val entExt = getOptExt(path.dropRight(2)).getOrElse("")
+    addJoins(ent, entExt, refAttr, ref, joinType)
 
-    val id = s"$ns.id"
+    val id = s"$ent.id"
     nestedIds += id
     groupByCols += id // if we later need to group by non-aggregated columns
 
@@ -136,14 +136,14 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
   }
 
   private def addJoins(
-    ns: String, nsExt: String, refAttr: String, refNs: String, joinType: String
+    ent: String, entExt: String, refAttr: String, ref: String, joinType: String
   ): Unit = {
-    val (refAs, refExt) = getOptExt().fold(("", ""))(ext => (refNs + ext, ext))
-    val joinTable       = ss(ns, refAttr, refNs)
-    val (id1, id2)      = if (ns == refNs) ("1_id", "2_id") else ("id", "id")
-    val eid1            = ss(ns, id1)
-    val refNs_id2       = ss(refNs, id2)
-    joins += ((s"$joinType JOIN", joinTable, "", List(s"$ns$nsExt.id = $joinTable.$eid1")))
-    joins += ((s"$joinType JOIN", refNs, refAs, List(s"$joinTable.$refNs_id2 = $refNs$refExt.id")))
+    val (refAs, refExt) = getOptExt().fold(("", ""))(ext => (ref + ext, ext))
+    val joinTable       = ss(ent, refAttr, ref)
+    val (id1, id2)      = if (ent == ref) ("1_id", "2_id") else ("id", "id")
+    val eid1            = ss(ent, id1)
+    val ref_id2         = ss(ref, id2)
+    joins += ((s"$joinType JOIN", joinTable, "", List(s"$ent$entExt.id = $joinTable.$eid1")))
+    joins += ((s"$joinType JOIN", ref, refAs, List(s"$joinTable.$ref_id2 = $ref$refExt.id")))
   }
 }

@@ -11,8 +11,8 @@ case class DeleteEntity(
   sqlOps: SqlOps,
   entity: String,
   refAttr: String,
-  refEntity: String,
-) extends DeleteAction(entityMap, parent, sqlStmt, sqlOps, refEntity) {
+  refEnt: String,
+) extends DeleteAction(entityMap, parent, sqlStmt, sqlOps, refEnt) {
 
   override def process(): Unit = {
     buildExecutionGraph()
@@ -21,12 +21,12 @@ case class DeleteEntity(
   }
 
   override def curStmt: String = {
-    s"DELETE FROM $refEntity WHERE id IN (" + ids.mkString(", ") + ")"
+    s"DELETE FROM $refEnt WHERE id IN (" + ids.mkString(", ") + ")"
   }
 
   override def render(indent: Int): String = {
     buildExecutionGraph()
-    val path = if (refAttr.isEmpty) s"$refEntity " else s"$entity.$refAttr.$refEntity "
+    val path = if (refAttr.isEmpty) s"$refEnt " else s"$entity.$refAttr.$refEnt "
     recurseRender(indent, path)
   }
 }

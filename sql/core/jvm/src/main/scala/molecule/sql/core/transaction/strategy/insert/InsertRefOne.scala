@@ -6,27 +6,27 @@ import molecule.sql.core.transaction.strategy.SqlOps
 case class InsertRefOne(
   parent: InsertAction,
   sqlOps: SqlOps,
-  ns: String,
+  ent: String,
   refAttr: String,
-  refNs: String,
+  ref: String,
   refAttrIndex: Int,
   rowCount: Int
-) extends InsertAction(parent, sqlOps, refNs, rowCount) {
+) extends InsertAction(parent, sqlOps, ref, rowCount) {
 
   override def rootAction: InsertAction = parent.rootAction
 
   override def process(): Unit = {
-    // Process children of ref ns
+    // Process children of ref
     children.foreach(_.process())
 
     // Add ref rows (don't enforce empty row)
     insert(false)
 
-    // Add ref ids from parent (previous ns) to ref
+    // Add ref ids from parent (previous entity) to ref
     val refIds = ids.iterator
     parent match {
       case _: InsertOptRef =>
-        // make ref only when parent/prev ns has value
+        // make ref only when parent/prev entity has value
         parent.rowSetters.zip(parent.optionalDefineds).foreach {
           case (setter, true) =>
             setter += ((ps: PS) => ps.setLong(refAttrIndex, refIds.next()))
@@ -47,7 +47,7 @@ case class InsertRefOne(
   }
 
   override def curStmt: String = {
-    sqlOps.insertStmt(refNs, cols, placeHolders)
+    sqlOps.insertStmt(ref, cols, placeHolders)
   }
 
   override def render(indent: Int): String = {

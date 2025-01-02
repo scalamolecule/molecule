@@ -4,11 +4,11 @@ import molecule.sql.core.transaction.strategy.SqlOps
 
 case class SaveRoot(
   sqlOps: SqlOps,
-  ns: String
-) extends SaveAction(null, sqlOps, ns) {
+  ent: String
+) extends SaveAction(null, sqlOps, ent) {
 
-  val saveNs: SaveNs = SaveNs(this, sqlOps, ns, "Entity")
-  children += saveNs
+  val saveEnt: SaveEntity = SaveEntity(this, sqlOps, ent, "Entity")
+  children += saveEnt
 
   override def rootAction: SaveAction = this
 

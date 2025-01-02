@@ -3,7 +3,6 @@ package molecule.sql.mariadb.setup
 import molecule.base.api.Schema_mariadb
 import molecule.core.marshalling.{JdbcProxy_mariadb, RpcRequest}
 import molecule.core.spi.Conn
-import molecule.coreTests.setup.DbConnection
 import molecule.sql.core.facade.JdbcConn_JS
 import scala.util.Random
 

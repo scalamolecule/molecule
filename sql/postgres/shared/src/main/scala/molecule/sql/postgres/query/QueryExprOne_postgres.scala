@@ -25,7 +25,7 @@ trait QueryExprOne_postgres
   }
 
   override protected def aggr[T: ClassTag](
-    ns: String,
+    ent: String,
     attr: String,
     col: String,
     fn: String,

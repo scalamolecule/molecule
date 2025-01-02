@@ -82,7 +82,7 @@ trait CastOptRefBranch_ extends JavaConversions {
     resolve(1, refDepth, (it: java.util.Iterator[_]) =>
       (
         c1(it)
-      )
+        )
     )
   }
 

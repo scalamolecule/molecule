@@ -23,20 +23,20 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |
        |  protected def toInt(es: List[Element], kw: Kw): List[Element] = {
        |    val last = es.last match {
-       |      case a: AttrOneMan => AttrOneManInt(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs, coord = a.coord)
+       |      case a: AttrOneMan => AttrOneManInt(a.ent, a.attr, Fn(kw.toString), ref = a.ref, coord = a.coord)
        |      case a: AttrSetMan => a match {
        |        case _: AttrSetManBoolean =>
        |          if (kw.isInstanceOf[count] || kw.isInstanceOf[countDistinct]) {
        |            // Catch unsupported aggregation of Sets of boolean values
-       |            AttrSetManInt(a.ns, a.attr, Fn(kw.toString, Some(-1)), refNs = a.refNs, coord = a.coord)
+       |            AttrSetManInt(a.ent, a.attr, Fn(kw.toString, Some(-1)), ref = a.ref, coord = a.coord)
        |          } else {
-       |            AttrSetManInt(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs, coord = a.coord)
+       |            AttrSetManInt(a.ent, a.attr, Fn(kw.toString), ref = a.ref, coord = a.coord)
        |          }
        |
-       |        case _ => AttrSetManInt(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs, coord = a.coord)
+       |        case _ => AttrSetManInt(a.ent, a.attr, Fn(kw.toString), ref = a.ref, coord = a.coord)
        |      }
-       |      case a: AttrSeqMan => AttrSeqManInt(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs, sort = a.sort, coord = a.coord)
-       |      case a: AttrMapMan => AttrMapManInt(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs, sort = a.sort, coord = a.coord)
+       |      case a: AttrSeqMan => AttrSeqManInt(a.ent, a.attr, Fn(kw.toString), ref = a.ref, sort = a.sort, coord = a.coord)
+       |      case a: AttrMapMan => AttrMapManInt(a.ent, a.attr, Fn(kw.toString), ref = a.ref, sort = a.sort, coord = a.coord)
        |      case a             => unexpected(a)
        |    }
        |    es.init :+ last
@@ -44,10 +44,10 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |
        |  protected def toDouble(es: List[Element], kw: Kw): List[Element] = {
        |    val last = es.last match {
-       |      case a: AttrOneMan => AttrOneManDouble(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs, coord = a.coord)
-       |      case a: AttrSetMan => AttrSetManDouble(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs, coord = a.coord)
-       |      case a: AttrSeqMan => AttrSeqManDouble(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs, coord = a.coord)
-       |      case a: AttrMapMan => AttrMapManDouble(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs, coord = a.coord)
+       |      case a: AttrOneMan => AttrOneManDouble(a.ent, a.attr, Fn(kw.toString), ref = a.ref, coord = a.coord)
+       |      case a: AttrSetMan => AttrSetManDouble(a.ent, a.attr, Fn(kw.toString), ref = a.ref, coord = a.coord)
+       |      case a: AttrSeqMan => AttrSeqManDouble(a.ent, a.attr, Fn(kw.toString), ref = a.ref, coord = a.coord)
+       |      case a: AttrMapMan => AttrMapManDouble(a.ent, a.attr, Fn(kw.toString), ref = a.ref, coord = a.coord)
        |      case a             => unexpected(a)
        |    }
        |    es.init :+ last
@@ -267,11 +267,11 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |    es match {
        |      case e :: tail => e match {
        |        case r: Ref  =>
-       |          val p = if (path.isEmpty) List(r.ns, r.refAttr, r.refNs) else List(r.refAttr, r.refNs)
+       |          val p = if (path.isEmpty) List(r.ent, r.refAttr, r.ref) else List(r.refAttr, r.ref)
        |          resolvePath(tail, path ++ p)
        |        case r: OptRef  =>
        |          ???
-       |        case a: Attr => resolvePath(tail, if (path.isEmpty) List(a.ns) else path)
+       |        case a: Attr => resolvePath(tail, if (path.isEmpty) List(a.ent) else path)
        |        case other   => throw ModelError("Invalid element in filter attribute path: " + other)
        |      }
        |      case Nil       => path
@@ -282,7 +282,7 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |    val filterAttr0 = filterAttrMolecule.elements.last.asInstanceOf[Attr]
        |    val attrs       = es.last match {
        |      case a: Attr =>
-       |        val (tacitFilterAttr, adjacent) = if (a.ns == filterAttr0.ns) {
+       |        val (tacitFilterAttr, adjacent) = if (a.ent == filterAttr0.ent) {
        |          // Rudimentary checked for same current entity (it's the only information
        |          // we have now during molecule buildup). At least we can rule out if the
        |          // filter attribute is not adjacent to the caller attribute.
@@ -593,10 +593,10 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
   private def liftFilterAttr(card: String): String = {
     baseTypesWithSpaces.map {
       case (baseTpe, space) if card == "Map" =>
-        s"case a: Attr${card}Man$baseTpe $space=> Attr${card}Tac$baseTpe(a.ns, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.refNs, a.sort, a.coord)"
+        s"case a: Attr${card}Man$baseTpe $space=> Attr${card}Tac$baseTpe(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)"
 
       case (baseTpe, space) =>
-        s"case a: Attr${card}Man$baseTpe $space=> Attr${card}Tac$baseTpe(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.refNs, a.sort, a.coord)"
+        s"case a: Attr${card}Man$baseTpe $space=> Attr${card}Tac$baseTpe(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)"
     }.mkString("\n              ")
   }
   private def addFilterAttr(card: String, mode: String): String = {

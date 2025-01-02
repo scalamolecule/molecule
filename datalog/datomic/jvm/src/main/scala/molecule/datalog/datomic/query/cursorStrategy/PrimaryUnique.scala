@@ -34,11 +34,11 @@ case class PrimaryUnique[Tpl](
 
   def getPage(tokens: List[String], limit: Int)
              (implicit conn: DatomicConn_JVM): (List[Tpl], String, Boolean) = try {
-    val List(_, _, tpe, ns, attr, _, a, z) = tokens
+    val List(_, _, tpe, ent, attr, _, a, z) = tokens
 
     val forward     = limit > 0
     val (fn, v)     = if (forward) (Gt, z) else (Lt, a)
-    val filterAttr  = getFilterAttr(tpe, ns, attr, fn, v)
+    val filterAttr  = getFilterAttr(tpe, ent, attr, fn, v)
     val altElements = filterAttr +: (if (forward) elements else reverseTopLevelSorting(elements))
     val rows        = getRawData(conn, altElements)
     val sortedRows  = sortRows(rows)

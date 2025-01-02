@@ -7,18 +7,18 @@ import molecule.core.query.{Model2Query, QueryExpr}
 trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: Model2Query with SqlQueryBase =>
 
   protected var joinTable: String = ""
-  protected var nsId     : String = ""
+  protected var entId    : String = ""
   protected var eid      : String = ""
   protected var rid      : String = ""
   protected var refIds   : String = ""
 
   protected def setCoords(attr: Attr): Unit = {
-    val (ns, refAttr, refNs) = (attr.ns, attr.attr, attr.refNs.get)
-    joinTable = ss(ns, refAttr, refNs)
-    nsId = ns + ".id"
-    eid = ss(ns, "id")
-    rid = ss(refNs, "id")
-    refIds = s"${ns}_$refAttr"
+    val (ent, refAttr, ref) = (attr.ent, attr.attr, attr.ref.get)
+    joinTable = ss(ent, refAttr, ref)
+    entId = ent + ".id"
+    eid = ss(ent, "id")
+    rid = ss(ref, "id")
+    refIds = s"${ent}_$refAttr"
   }
 
   override protected def queryRefAttrSetMan(attr: AttrSetMan): Unit = {
@@ -57,8 +57,8 @@ trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: Model2Query 
 
   protected def setRefMan[T](attr: Attr, args: Set[T], res: ResSet[T]): Unit = {
     select += s"ARRAY_AGG($joinTable.$rid) $refIds"
-    joins += (("INNER JOIN", joinTable, "", List(s"$nsId = $joinTable.$eid")))
-    groupBy += nsId
+    joins += (("INNER JOIN", joinTable, "", List(s"$entId = $joinTable.$eid")))
+    groupBy += entId
     castStrategy.add(res.sql2set)
 
     attr.filterAttr.fold {
@@ -74,8 +74,8 @@ trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: Model2Query 
 
   protected def setRefTac[T](attr: Attr, args: Set[T], res: ResSet[T]): Unit = {
     val col = getCol(attr: Attr)
-    joins += (("INNER JOIN", joinTable, "", List(s"$nsId = $joinTable.$eid")))
-    groupBy += nsId
+    joins += (("INNER JOIN", joinTable, "", List(s"$entId = $joinTable.$eid")))
+    groupBy += entId
     attr.filterAttr.fold {
       setRefExpr(attr, col, attr.op, args)
     } { case (dir, filterPath, filterAttr) =>
@@ -88,8 +88,8 @@ trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: Model2Query 
     attr: Attr, optSet: Option[Set[T]], resOpt: ResSetOpt[T], res: ResSet[T]
   ): Unit = {
     select += s"ARRAY_AGG($joinTable.$rid) $refIds"
-    joins += (("LEFT JOIN", joinTable, "", List(s"$nsId = $joinTable.$eid")))
-    groupBy += nsId
+    joins += (("LEFT JOIN", joinTable, "", List(s"$entId = $joinTable.$eid")))
+    groupBy += entId
     castStrategy.add(resOpt.sql2setOpt)
     attr.op match {
       case V     => ()
@@ -121,11 +121,11 @@ trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: Model2Query 
   }
 
   protected def contains(v: String): String = {
-    s"(SELECT ARRAY_CONTAINS(ARRAY_AGG($joinTable.$rid), $v) FROM $joinTable WHERE $joinTable.$eid = $nsId)"
+    s"(SELECT ARRAY_CONTAINS(ARRAY_AGG($joinTable.$rid), $v) FROM $joinTable WHERE $joinTable.$eid = $entId)"
   }
 
   protected def sizeCheck(size: Int): String = {
-    s"(SELECT CARDINALITY(ARRAY_AGG($joinTable.$rid)) = $size FROM $joinTable WHERE $joinTable.$eid = $nsId)"
+    s"(SELECT CARDINALITY(ARRAY_AGG($joinTable.$rid)) = $size FROM $joinTable WHERE $joinTable.$eid = $entId)"
   }
 
   protected def setRefMatchSet(set: Set[String]): String = {
@@ -144,7 +144,7 @@ trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: Model2Query 
         s"""(
            |    SELECT count($joinTable.$rid) = 0
            |    FROM $joinTable
-           |    WHERE $joinTable.$eid = $nsId
+           |    WHERE $joinTable.$eid = $entId
            |  )""".stripMargin
       ))
     } { sets =>
@@ -167,7 +167,7 @@ trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: Model2Query 
        |    SELECT
        |      $arrayContains
        |    FROM $joinTable
-       |    WHERE $joinTable.$eid = $nsId
+       |    WHERE $joinTable.$eid = $entId
        |  )""".stripMargin
   }
 
@@ -231,7 +231,7 @@ trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: Model2Query 
     unsetNotNull(col)
     // Make join optional
     joins.remove(joins.length - 1)
-    joins += (("LEFT JOIN", joinTable, "", List(s"$nsId = $col")))
+    joins += (("LEFT JOIN", joinTable, "", List(s"$entId = $col")))
     setNull(col)
   }
 }

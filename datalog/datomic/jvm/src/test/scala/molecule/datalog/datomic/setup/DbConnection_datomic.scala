@@ -6,8 +6,8 @@ import molecule.core.spi.Conn
 import molecule.core.util.Executor._
 import molecule.coreTests.setup.DbConnection
 import molecule.datalog.datomic.facade.DatomicPeer
-import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
 
 trait DbConnection_datomic extends DbConnection {
 

@@ -16,7 +16,7 @@ trait OptRefNested[Tpl]
     ref: Ref, optionalElements: List[Element]
   ): AnyRef => AnyRef = {
     val nestedOptRefCasts = resolveOptRefElements(ref, optionalElements)
-    val caster = rec(nestedOptRefCasts, refDepths)
+    val caster            = rec(nestedOptRefCasts, refDepths)
     (rowValue: AnyRef) => {
       // println(s"===  ${nestedOptRefCasts.size}   " + rowValue)
       caster(rowValue.asInstanceOf[jMap[_, _]].values.iterator)

@@ -24,7 +24,7 @@ case class TxModelValidation(
   private var level           : Int                         = 0
   private var group           : Int                         = 0
   private var refPath         : Seq[String]                 = Seq.empty[String]
-  private var prevNs          : String                      = ""
+  private var prevEnt         : String                      = ""
   private var mandatoryAttrs  : Set[String]                 = Set.empty[String]
   private var mandatoryRefs   : Set[(String, String)]       = Set.empty[(String, String)]
   private var requiredAttrs   : Set[String]                 = Set.empty[String]
@@ -36,7 +36,7 @@ case class TxModelValidation(
 
   @tailrec
   final def validate(elements: List[Element]): Map[String, Seq[String]] = {
-    if (prevNs.isEmpty)
+    if (prevEnt.isEmpty)
       curElements = elements
     elements match {
       case head :: tail => head match {
@@ -54,12 +54,12 @@ case class TxModelValidation(
           validate(tail)
 
         case r: Ref =>
-          val refAttr = r.ns + "." + r.refAttr
+          val refAttr = r.ent + "." + r.refAttr
           if (prev(level)(group).contains(refAttr))
             dup(refAttr)
           if (refPath.contains(refAttr))
             dup(refAttr)
-          noEmpty(r.ns, r.refAttr)
+          noEmpty(r.ent, r.refAttr)
           prev(level) = prev(level) :+ Array(refAttr)
           group += 1
           mandatoryRefs = mandatoryRefs.filterNot(_._1 == refAttr)
@@ -67,13 +67,13 @@ case class TxModelValidation(
           refPath = refPath :+ refAttr
           validate(tail)
 
-        case BackRef(prevNs1, curNs, _) =>
+        case BackRef(prevEnt1, curEnt, _) =>
           if (group == 0) {
-            throw ModelError(s"Can't use backref entity _$prevNs1 from here")
+            throw ModelError(s"Can't use backref entity _$prevEnt1 from here")
           }
-          if (prevNs == prevNs1) {
+          if (prevEnt == prevEnt1) {
             throw ModelError(
-              s"Please add attributes to entity $curNs before going back to entity $prevNs1"
+              s"Please add attributes to entity $curEnt before going back to entity $prevEnt1"
             )
           }
           group -= 1
@@ -81,7 +81,7 @@ case class TxModelValidation(
           validate(tail)
 
         case OptRef(r, es) =>
-          val refAttr = r.ns + "." + r.refAttr
+          val refAttr = r.ent + "." + r.refAttr
           if (prev(level)(group).contains(refAttr))
             dup(refAttr)
           if (refPath.contains(refAttr))
@@ -98,7 +98,7 @@ case class TxModelValidation(
           val ref = r.name
           if (prev(level)(group).contains(ref))
             dup(ref)
-          noEmpty(r.ns, r.refAttr)
+          noEmpty(r.ent, r.refAttr)
           prev = prev :+ Array(Array(ref))
           level += 1
           group = 0
@@ -121,10 +121,10 @@ case class TxModelValidation(
   }
 
   private def register(a: Attr, attr: String) = {
-    if (prevNs != a.ns) {
-      prevNs = a.ns
-      mandatoryAttrs ++= entityMap(a.ns).mandatoryAttrs.map(attr => a.ns + "." + attr)
-      mandatoryRefs ++= entityMap(a.ns).mandatoryRefs.map { case (attr, refNs) => (a.ns + "." + attr) -> refNs }
+    if (prevEnt != a.ent) {
+      prevEnt = a.ent
+      mandatoryAttrs ++= entityMap(a.ent).mandatoryAttrs.map(attr => a.ent + "." + attr)
+      mandatoryRefs ++= entityMap(a.ent).mandatoryRefs.map { case (attr, ref) => (a.ent + "." + attr) -> ref }
     }
     requiredAttrs ++= attrMap(attr)._3
     presentAttrs += a.attr
@@ -173,12 +173,12 @@ case class TxModelValidation(
 
   private def onlyMandatory(a: Attr) = {
     val mode = if (a.isInstanceOf[Tacit]) "tacit" else "optional"
-    throw ModelError(s"Required attributes have to be mandatory. Found $mode attribute ${a.ns}.${a.attr}")
+    throw ModelError(s"Required attributes have to be mandatory. Found $mode attribute ${a.ent}.${a.attr}")
   }
-  private def noEmpty(ns: String, refAttr: String): Unit = {
+  private def noEmpty(ent: String, refAttr: String): Unit = {
     if (presentAttrs.isEmpty && !isUpdate) {
       throw ModelError(
-        s"Please add at least 1 attribute to entity $ns " +
+        s"Please add at least 1 attribute to entity $ent " +
           s"before relating to " + refAttr.capitalize
       )
     }
@@ -204,7 +204,7 @@ case class TxModelValidation(
       val foundStr = if (found.isEmpty) "" else " " + found.mkString(", ")
       val missing  = needs.diff(found)
       throw ModelError(
-        s"""Attribute `${a.ns}.${a.attr}` is missing some attributes needed for its validations:
+        s"""Attribute `${a.ent}.${a.attr}` is missing some attributes needed for its validations:
            |  Needs  : ${needs.mkString(", ")}
            |  Found  :$foundStr
            |  Missing: ${missing.mkString(", ")}
@@ -215,7 +215,7 @@ case class TxModelValidation(
     def err = throw new Exception("Unexpected value validation attribute: " + a)
     def one[T](vs: Seq[T]): T = if (vs.length == 1) vs.head else {
       throw ExecutionError(
-        s"Please use `insert` to store multiple values for attribute ${a.ns}.${a.attr}"
+        s"Please use `insert` to store multiple values for attribute ${a.ent}.${a.attr}"
       )
     }
 
@@ -295,7 +295,7 @@ case class TxModelValidation(
     }
     if (!isUpdate && mandatoryRefs.nonEmpty) {
       val list = mandatoryRefs.map {
-        case (a, refNs) => s"$a pointing to entity $refNs"
+        case (a, ref) => s"$a pointing to entity $ref"
       }.mkString("\n  ")
       throw ModelError(
         s"""Missing/empty mandatory references:

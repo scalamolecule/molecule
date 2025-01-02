@@ -42,9 +42,9 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions {
 
   final protected var whereSplit = 0
 
-  final protected var prevRefNss = Set.empty[String]
-  final protected val preExts    = mutable.Map.empty[List[String], Option[String]]
-  final protected val exts       = mutable.Map.empty[List[String], Option[String]]
+  final protected var prevRefs = Set.empty[String]
+  final protected val preExts  = mutable.Map.empty[List[String], Option[String]]
+  final protected val exts     = mutable.Map.empty[List[String], Option[String]]
 
   //  override final var path = List.empty[String]
   final var path = List.empty[String]
@@ -92,21 +92,21 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions {
 
   final protected def getCol(attr: Attr, path: List[String] = path): String = {
     val ext = getOptExt(path).getOrElse("")
-    s"${attr.ns}$ext.${attr.attr}"
+    s"${attr.ent}$ext.${attr.attr}"
   }
 
   protected def getOptExt(path: List[String] = path): Option[String] = {
     exts.getOrElse(path, Option.empty[String])
   }
 
-  protected def handleRef(refAttr: String, refNs: String): Unit = {
-    path = path ++ List(refAttr, refNs)
-    if (prevRefNss.contains(refNs)) {
+  protected def handleRef(refAttr: String, ref: String): Unit = {
+    path = path ++ List(refAttr, ref)
+    if (prevRefs.contains(ref)) {
       preExts(path) = preExts.getOrElse(path, Some("_" + refAttr))
     } else {
       preExts(path) = preExts.getOrElse(path, None)
     }
-    prevRefNss += refNs
+    prevRefs += ref
   }
 
   protected def handleBackRef(): Unit = {

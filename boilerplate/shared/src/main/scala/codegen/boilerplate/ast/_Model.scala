@@ -104,64 +104,64 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
             if (format_?)
               s"""def format(v: $baseTpe): String = $format
                  |      def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ent", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(ref)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
             else
               s"""def vss: String = vs.fold("None")(_.mkString("Some(Seq(", ", ", "))"))
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ent", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(ref)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
           case _     =>
             if (format_?)
               s"""def format(v: $baseTpe): String = $format
                  |      def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ent", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(ref)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
             else
               s"""def vss: String = vs.mkString("Seq(", ", ", ")")
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ent", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(ref)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
         }
         case "Set"                      => mode match {
           case "Opt" =>
             if (format_?)
               s"""def format(v: $baseTpe): String = $format
                  |      def vss: String = vs.fold("None")(_.map(format).mkString("Some(Set(", ", ", "))"))
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ent", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(ref)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
             else
               s"""def vss: String = vs.fold("None")(_.mkString("Some(Set(", ", ", "))"))
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ent", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(ref)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
           case _     =>
             if (format_?)
               s"""def format(v: $baseTpe): String = $format
                  |      def vss: String = vs.map(format).mkString("Set(", ", ", ")")
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ent", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(ref)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
             else
               s"""def vss: String = vs.mkString("Set(", ", ", ")")
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ent", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(ref)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
         }
         case "Seq" if baseTpe == "Byte" => mode match {
           case "Opt" =>
             s"""def format(v: $baseTpe): String = $format
                |      def vss: String = vs.fold("None")(_.map(format).mkString("Some(Array(", ", ", "))"))
-               |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
+               |      s\"\"\"$attrType("$$ent", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(ref)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
           case _     =>
             s"""def format(v: $baseTpe): String = $format
                |      def vss: String = vs.map(format).mkString("Array(", ", ", ")")
-               |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
+               |      s\"\"\"$attrType("$$ent", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(ref)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
         }
         case "Seq"                      => mode match {
           case "Opt" =>
             if (format_?)
               s"""def format(v: $baseTpe): String = $format
                  |      def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ent", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(ref)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
             else
               s"""def vss: String = vs.fold("None")(_.mkString("Some(Seq(", ", ", "))"))
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ent", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(ref)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
           case _     =>
             if (format_?)
               s"""def format(v: $baseTpe): String = $format
                  |      def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ent", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(ref)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
             else
               s"""def vss: String = vs.mkString("Seq(", ", ", ")")
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ent", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(ref)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
         }
         case "Map"                      => mode match {
           case "Man" =>
@@ -169,37 +169,37 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
               s"""def format(v: $baseTpe): String = if ($nullCheck) "null" else $format
                  |      def pairs: String = map.map { case (k, v) => s\"\"\"("$$k", $${format(v)})\"\"\" }.mkString("Map(", ", ", ")")
                  |      def vs: String = if (values.isEmpty) "Nil" else values.mkString("Seq(", ", ", ")")
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$pairs, $$ks, $$vs, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ent", "$$attr", $$op, $$pairs, $$ks, $$vs, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(ref)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
             else
               s"""def pairs: String = map.map { case (k, v) => s\"\"\"("$$k", $$v)\"\"\" }.mkString("Map(", ", ", ")")
                  |      def vs: String = if (values.isEmpty) "Nil" else values.mkString("Seq(", ", ", ")")
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$pairs, $$ks, $$vs, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ent", "$$attr", $$op, $$pairs, $$ks, $$vs, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(ref)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
 
           case "Opt" =>
             if (format_?)
               s"""def format(v: $baseTpe): String = if ($nullCheck) "null" else $format
                  |      def pairs: String = map.fold("None")(_.map { case (k, v) => s\"\"\"("$$k", $${format(v)})\"\"\" }.mkString("Some(Map(", ", ", "))"))
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$pairs, $$ks, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ent", "$$attr", $$op, $$pairs, $$ks, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(ref)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
             else
               s"""def pairs: String = map.fold("None")(_.map { case (k, v) => s\"\"\"("$$k", $$v)\"\"\" }.mkString("Some(Map(", ", ", "))"))
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$pairs, $$ks, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ent", "$$attr", $$op, $$pairs, $$ks, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(ref)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
 
           case "Tac" =>
             if (format_?)
               s"""def format(v: $baseTpe): String = if ($nullCheck) "null" else $format
                  |      def pairs: String = map.map { case (k, v) => s\"\"\"("$$k", $${format(v)})\"\"\" }.mkString("Map(", ", ", ")")
                  |      def vs: String = if (values.isEmpty) "Nil" else values.mkString("Seq(", ", ", ")")
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$pairs, $$ks, $$vs, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ent", "$$attr", $$op, $$pairs, $$ks, $$vs, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(ref)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
             else
               s"""def pairs: String = map.map { case (k, v) => s\"\"\"("$$k", $$v)\"\"\" }.mkString("Map(", ", ", ")")
                  |      def vs: String = if (values.isEmpty) "Nil" else values.mkString("Seq(", ", ", ")")
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$pairs, $$ks, $$vs, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ent", "$$attr", $$op, $$pairs, $$ks, $$vs, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(ref)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
         }
       }
 
       s"""
          |  case class Attr$card$mode$baseTpe0(
-         |    override val ns: String,
+         |    override val ent: String,
          |    override val attr: String,
          |    override val op: Op = V,
          |    $vs,
@@ -207,7 +207,7 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
          |    override val validator: Option[Validate$baseTpe0] = None,
          |    override val valueAttrs: Seq[String] = Nil,
          |    override val errors: Seq[String] = Nil,
-         |    override val refNs: Option[String] = None,
+         |    override val ref: Option[String] = None,
          |    override val sort: Option[String] = None,
          |    override val coord: Seq[Int] = Nil
          |  ) extends Attr$card$mode {
@@ -226,6 +226,6 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
 
   override def generate(): Unit = {
     mkFile(fileName, content)
-    logger.info(s"Generated $path/$fileName.scala")
+    logger.warn(s"Generated $path/$fileName.scala")
   }
 }

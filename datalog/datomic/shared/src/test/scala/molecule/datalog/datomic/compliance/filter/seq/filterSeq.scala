@@ -1,6 +1,6 @@
 package molecule.datalog.datomic.compliance.filter.seq
 
-import molecule.coreTests.setup.{Test, MUnitSuiteWithArrays}
+import molecule.coreTests.setup.{MUnitSuiteWithArrays, Test}
 import molecule.coreTests.spi.filter.seq._
 import molecule.coreTests.spi.filter.seq.ref._
 import molecule.coreTests.spi.filter.seq.types._

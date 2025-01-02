@@ -5,7 +5,7 @@ import codegen.DatomicGenBase
 object _CastOptRefLeaf extends DatomicGenBase("CastOptRefLeaf", "/query/casting") {
 
   val content = {
-    val pullLeafX    = (1 to 22).map(i => s"case ${caseN(i)} => pullLeaf$i(pullCasts)").mkString("\n      ")
+    val pullLeafX      = (1 to 22).map(i => s"case ${caseN(i)} => pullLeaf$i(pullCasts)").mkString("\n      ")
     val resolveMethods = (1 to 22).map(arity => Chunk(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************
        |package molecule.datalog.core.query.casting

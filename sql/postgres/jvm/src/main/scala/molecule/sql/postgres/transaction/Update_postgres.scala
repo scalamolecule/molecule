@@ -11,35 +11,35 @@ trait Update_postgres
   override def handleReplaceAll[T](attr: String, vs: Seq[T]) = s"REGEXP_REPLACE($attr, ?, '${vs(1)}', 'g')"
 
   override def updateSetRemove[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     set: Set[T],
     transformValue: T => Any,
     exts: List[String],
     one2json: T => String,
     set2array: Set[T] => Array[AnyRef]
   ): Unit = {
-    updateIterableRemove(ns, attr, optRefNs, set, exts, set2array)
+    updateIterableRemove(ent, attr, optRef, set, exts, set2array)
   }
 
   override def updateSeqRemove[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     seq: Seq[T],
     transformValue: T => Any,
     exts: List[String],
     one2json: T => String,
     seq2array: Seq[T] => Array[AnyRef]
   ): Unit = {
-    updateIterableRemove(ns, attr, optRefNs, seq, exts, seq2array)
+    updateIterableRemove(ent, attr, optRef, seq, exts, seq2array)
   }
 
   override def updateMapEq[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     noValue: Boolean,
     map: Map[String, T],
     transformValue: T => Any,
@@ -49,7 +49,7 @@ trait Update_postgres
     if (map.isEmpty) {
       updateAction.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
     } else {
-      setAttrPresence(ns, attr)
+      setAttrPresence(ent, attr)
       updateAction.addColSetter((ps: PS) =>
         ps.setString(paramIndex, map2json(map, value2json))
       )
@@ -57,16 +57,16 @@ trait Update_postgres
   }
 
   override def updateMapAdd[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     map: Map[String, T],
     transformValue: T => Any,
     exts: List[String],
     value2json: (StringBuffer, T) => StringBuffer,
   ): Unit = {
     if (map.nonEmpty) {
-      setAttrPresence(ns, attr)
+      setAttrPresence(ent, attr)
       val setAttr    =
         s"""$attr = CASE
            |    WHEN $attr IS NULL THEN '{}'::jsonb
@@ -81,14 +81,14 @@ trait Update_postgres
   }
 
   override def updateMapRemove(
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     keys: Seq[String],
     exts: List[String],
   ): Unit = {
     if (keys.nonEmpty) {
-      setAttrPresence(ns, attr)
+      setAttrPresence(ent, attr)
       val setAttr    =
         s"""$attr = CASE
            |    WHEN $attr::jsonb - ? = '{}' THEN NULL
@@ -107,16 +107,16 @@ trait Update_postgres
   // Helpers -------------------------------------------------------------------
 
   private def updateIterableRemove[T, M[_] <: Iterable[_]](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     iterable: M[T],
     exts: List[String],
     set2array: M[T] => Array[AnyRef]
   ): Unit = {
-    optRefNs.fold {
+    optRef.fold {
       if (iterable.nonEmpty) {
-        setAttrPresence(ns, attr)
+        setAttrPresence(ent, attr)
         val cast          = exts(2)
         val setAttr       =
           s"""$attr = (
@@ -133,10 +133,10 @@ trait Update_postgres
           ps.setArray(paramIndex, array)
         })
       }
-    } { refNs =>
+    } { ref =>
       if (iterable.nonEmpty) {
         val refIds = iterable.asInstanceOf[Set[Long]]
-        updateAction.deleteRefIds(attr, refNs, getUpdateId, refIds)
+        updateAction.deleteRefIds(attr, ref, getUpdateId, refIds)
       }
     }
   }

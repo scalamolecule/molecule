@@ -8,21 +8,21 @@ case class DeleteRoot(
   entityMap: Map[String, MetaEntity],
   sqlOps: SqlOps,
   sqlStmt: Statement,
-  ns: String
-) extends DeleteAction(entityMap, null, sqlStmt, sqlOps, ns) {
+  ent: String
+) extends DeleteAction(entityMap, null, sqlStmt, sqlOps, ent) {
 
   val sqlConn: Connection = sqlOps.sqlConn
 
-  val firstNs = DeleteEntity(entityMap, this, sqlStmt, sqlOps, "", "", ns)
-  children += firstNs
+  val firstEnt = DeleteEntity(entityMap, this, sqlStmt, sqlOps, "", "", ent)
+  children += firstEnt
 
   override def execute: List[Long] = {
-    if (firstNs.ids.isEmpty) Nil else {
+    if (firstEnt.ids.isEmpty) Nil else {
       // Add batches of all delete statements in graph
       children.foreach(_.process())
       sqlStmt.executeBatch
       sqlStmt.close()
-      firstNs.ids
+      firstEnt.ids
     }
   }
 

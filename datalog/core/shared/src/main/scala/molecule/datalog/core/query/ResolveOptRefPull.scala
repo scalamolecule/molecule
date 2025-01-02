@@ -96,7 +96,7 @@ trait ResolveOptRefPull[Tpl] { self: Model2DatomicQuery[Tpl] =>
       attrIndex: Int
     ): String = {
       val indent  = "  " * (level + 6)
-      val refAttr = s":${ref.ns}/${ref.refAttr}"
+      val refAttr = s":${ref.ent}/${ref.refAttr}"
       addPullAttrs(elements, level, attrIndex, "") match {
         case (acc1, None, Nil, _) =>
           s"""
@@ -159,20 +159,20 @@ trait ResolveOptRefPull[Tpl] { self: Model2DatomicQuery[Tpl] =>
       s"""\n$indent:db/id"""
     } else a match {
       case _: AttrSeq if !a.isInstanceOf[AttrSeqManByte] && !a.isInstanceOf[AttrSeqOptByte] =>
-        val (ns, attr) = (a.ns, a.attr)
+        val (ent, attr) = (a.ent, a.attr)
         s"""
-           |$indent{(:$ns/$attr :limit nil :default "$none") [
-           |$indent  :$ns.$attr/i_ :$ns.$attr/v_]}""".stripMargin
+           |$indent{(:$ent/$attr :limit nil :default "$none") [
+           |$indent  :$ent.$attr/i_ :$ent.$attr/v_]}""".stripMargin
 
       case _: AttrMap =>
-        val (ns, attr) = (a.ns, a.attr)
+        val (ent, attr) = (a.ent, a.attr)
         s"""
-           |$indent{(:$ns/$attr :limit nil :default "$none") [
-           |$indent  :$ns.$attr/k_ :$ns.$attr/v_]}""".stripMargin
+           |$indent{(:$ent/$attr :limit nil :default "$none") [
+           |$indent  :$ent.$attr/k_ :$ent.$attr/v_]}""".stripMargin
 
       case _ =>
         s"""
-           |$indent(:${a.ns}/${a.attr} :default "$none")""".stripMargin
+           |$indent(:${a.ent}/${a.attr} :default "$none")""".stripMargin
     }
   }
 

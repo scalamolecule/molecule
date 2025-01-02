@@ -22,7 +22,7 @@ trait SqlUpdate
 
   private var isRefUpdate = false
   private var hasFilters  = false
-  private var ns          = ""
+  private var ent         = ""
 
   // Set after isUpsert has been set
   private lazy val join = if (isUpsert) "LEFT JOIN" else "INNER JOIN"
@@ -36,10 +36,10 @@ trait SqlUpdate
   }
 
   def getUpdateAction(elements: List[Element]): UpdateAction = {
-    ns = getInitialNs(elements)
-    query.idCols += s"$ns.id"
-    root = UpdateRoot(sqlOps, ns)
-    updateAction = root.firstNs
+    ent = getInitialNs(elements)
+    query.idCols += s"$ent.id"
+    root = UpdateRoot(sqlOps, ent)
+    updateAction = root.firstEnt
     resolve(elements)
     initRoot()
     root
@@ -49,35 +49,35 @@ trait SqlUpdate
   private def initRoot(): Unit = {
     if (hasFilters || isRefUpdate) {
       // Query for ids of each entity
-      val idsQuery = selectStmt(ns, query.idCols, query.joins,
+      val idsQuery = selectStmt(ent, query.idCols, query.joins,
         m2q(query.filterAttrs.toList).getWhereClauses
       )
-      val nsCount  = query.idCols.length
-      val refIds   = new Array[ListBuffer[Long]](nsCount)
+      val entCount = query.idCols.length
+      val refIds   = new Array[ListBuffer[Long]](entCount)
         .map(_ => ListBuffer.empty[Long])
 
       val resultSet = sqlConn.prepareStatement(idsQuery).executeQuery()
-      var nsIndex   = 0
+      var entIndex  = 0
       while (resultSet.next()) {
-        nsIndex = 0
-        while (nsIndex < nsCount) {
-          refIds(nsIndex) += resultSet.getLong(nsIndex + 1)
-          nsIndex += 1
+        entIndex = 0
+        while (entIndex < entCount) {
+          refIds(entIndex) += resultSet.getLong(entIndex + 1)
+          entIndex += 1
         }
       }
       val refIdLists = refIds.map(_.toList)
       root.cols ++= query.idCols
       root.idsQuery = idsQuery
       root.refIds = refIdLists
-      root.firstNs.completeIds(refIdLists)
+      root.firstEnt.completeIds(refIdLists)
     }
   }
 
-  override def handleIds(ns: String, ids0: Seq[Long]): Unit = {
+  override def handleIds(ent: String, ids0: Seq[Long]): Unit = {
     if (query.ids.nonEmpty) {
       throw ModelError(s"Can't apply entity ids twice in update.")
     }
-    query.filterAttrs += AttrOneManID(ns, "id", Eq, ids0)
+    query.filterAttrs += AttrOneManID(ent, "id", Eq, ids0)
     query.ids = ids0.toList
 
     // Set here if no need for distributing ids across multiple entities
@@ -112,7 +112,7 @@ trait SqlUpdate
   }
 
   override protected def updateOne[T](
-    ns: String,
+    ent: String,
     attr: String,
     op: Op,
     vs: Seq[T],
@@ -126,7 +126,7 @@ trait SqlUpdate
         val paramIndex = updateAction.setCol(s"$attr = ?$cast")
         vs match {
           case Seq(v) =>
-            setAttrPresence(ns, attr)
+            setAttrPresence(ent, attr)
             updateAction.addColSetter((ps: PS) =>
               transformValue(v).asInstanceOf[(PS, Int) => Unit](ps, paramIndex)
             )
@@ -137,13 +137,13 @@ trait SqlUpdate
 
           case vs =>
             throw ModelError(
-              s"Can only update one value for attribute `$ns.$cleanAttr`. " +
+              s"Can only update one value for attribute `$ent.$cleanAttr`. " +
                 s"Found: " + vs.mkString(", ")
             )
         }
 
       case op: AttrOp =>
-        setAttrPresence(ns, attr)
+        setAttrPresence(ent, attr)
         val cast: String = exts(2)
         def handle(computedValue: String): Unit = {
           val paramIndex = updateAction.setCol(s"$attr = $computedValue")
@@ -181,124 +181,124 @@ trait SqlUpdate
         }
 
       case Even | Odd => throw ModelError(
-        s"$ns.$cleanAttr.even and $ns.$cleanAttr.odd can't be used with updates."
+        s"$ent.$cleanAttr.even and $ent.$cleanAttr.odd can't be used with updates."
       )
 
       case Remainder => throw ModelError(
-        s"Modulo operations like $ns.$cleanAttr.%(${vs.head}) can't be used with updates."
+        s"Modulo operations like $ent.$cleanAttr.%(${vs.head}) can't be used with updates."
       )
 
       case _ => throw ModelError(
-        s"Can't update attribute $ns.$cleanAttr without an applied or computed value."
+        s"Can't update attribute $ent.$cleanAttr without an applied or computed value."
       )
     }
   }
 
 
-  override def handleRef(ref: Ref): Unit = {
+  override def handleRef(r: Ref): Unit = {
     isRefUpdate = true
-    val Ref(ns, refAttr, refNs, card, _, _) = ref
+    val Ref(ent, refAttr, ref, card, _, _) = r
     updateAction = card match {
       case CardOne =>
-        query.idCols += s"$refNs.id"
-        query.joins += s"$join $refNs ON $ns.$refAttr = $refNs.id"
+        query.idCols += s"$ref.id"
+        query.joins += s"$join $ref ON $ent.$refAttr = $ref.id"
         // Switch strategy
-        updateAction.refOne(ns, refAttr, refNs)
+        updateAction.refOne(ent, refAttr, ref)
 
       case _ =>
-        val joinTable = ss(ns, refAttr, refNs)
-        val eid       = s"${ns}_id"
-        val rid       = s"${refNs}_id"
-        query.idCols += s"$refNs.id"
+        val joinTable = ss(ent, refAttr, ref)
+        val eid       = s"${ent}_id"
+        val rid       = s"${ref}_id"
+        query.idCols += s"$ref.id"
         query.joins ++= List(
-          s"$join $joinTable ON $ns.id = $joinTable.$eid",
-          s"$join $refNs ON $joinTable.$rid = $refNs.id",
+          s"$join $joinTable ON $ent.id = $joinTable.$eid",
+          s"$join $ref ON $joinTable.$rid = $ref.id",
         )
         // Switch strategy
-        updateAction.refMany(ns, refAttr, refNs)
+        updateAction.refMany(ent, refAttr, ref)
     }
   }
 
   override protected def updateSetEq[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     set: Set[T],
     transformValue: T => Any,
     exts: List[String],
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    updateIterableEq(ns, attr, optRefNs, set, exts, set2array)
+    updateIterableEq(ent, attr, optRef, set, exts, set2array)
   }
 
   override protected def updateSetAdd[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     set: Set[T],
     transformValue: T => Any,
     exts: List[String],
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    updateIterableAdd(ns, attr, optRefNs, set, exts, set2array)
+    updateIterableAdd(ent, attr, optRef, set, exts, set2array)
   }
 
   override protected def updateSetRemove[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     set: Set[T],
     transformValue: T => Any,
     exts: List[String],
     one2json: T => String,
     set2array: Set[T] => Array[AnyRef]
   ): Unit = {
-    updateIterableRemove(ns, attr, optRefNs, set, exts, set2array)
+    updateIterableRemove(ent, attr, optRef, set, exts, set2array)
   }
 
   override protected def updateSeqEq[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     seq: Seq[T],
     transformValue: T => Any,
     exts: List[String],
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    updateIterableEq(ns, attr, optRefNs, seq, exts, seq2array)
+    updateIterableEq(ent, attr, optRef, seq, exts, seq2array)
   }
 
   override protected def updateSeqAdd[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     seq: Seq[T],
     transformValue: T => Any,
     exts: List[String],
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    updateIterableAdd(ns, attr, optRefNs, seq, exts, seq2array)
+    updateIterableAdd(ent, attr, optRef, seq, exts, seq2array)
   }
 
   override protected def updateSeqRemove[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     seq: Seq[T],
     transformValue: T => Any,
     exts: List[String],
     one2json: T => String,
     seq2array: Seq[T] => Array[AnyRef]
   ): Unit = {
-    updateIterableRemove(ns, attr, optRefNs, seq, exts, seq2array)
+    updateIterableRemove(ent, attr, optRef, seq, exts, seq2array)
   }
 
   override protected def updateByteArray(
-    ns: String,
+    ent: String,
     attr: String,
     byteArray: Array[Byte],
   ): Unit = {
@@ -311,9 +311,9 @@ trait SqlUpdate
   }
 
   override protected def updateMapEq[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     noValue: Boolean,
     map: Map[String, T],
     transformValue: T => Any,
@@ -323,7 +323,7 @@ trait SqlUpdate
     if (map.isEmpty) {
       updateAction.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
     } else {
-      setAttrPresence(ns, attr)
+      setAttrPresence(ent, attr)
       updateAction.addColSetter((ps: PS) =>
         ps.setBytes(paramIndex, map2jsonByteArray(map, value2json))
       )
@@ -331,16 +331,16 @@ trait SqlUpdate
   }
 
   override protected def updateMapAdd[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     map: Map[String, T],
     transformValue: T => Any,
     exts: List[String],
     value2json: (StringBuffer, T) => StringBuffer,
   ): Unit = {
     if (map.nonEmpty) {
-      setAttrPresence(ns, attr)
+      setAttrPresence(ent, attr)
       val scalaBaseType = exts.head
       val setAttr       = s"$attr = addPairs_$scalaBaseType($attr, ?)"
       val paramIndex    = updateAction.setCol(setAttr)
@@ -352,14 +352,14 @@ trait SqlUpdate
 
 
   override protected def updateMapRemove(
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     keys: Seq[String],
     exts: List[String],
   ): Unit = {
     if (keys.nonEmpty) {
-      setAttrPresence(ns, attr)
+      setAttrPresence(ent, attr)
       val scalaBaseType = exts.head
       val setAttr       = s"$attr = removePairs_$scalaBaseType($attr, ?)"
       val paramIndex    = updateAction.setCol(setAttr)
@@ -379,42 +379,42 @@ trait SqlUpdate
   // Helpers -------------------------------------------------------------------
 
   private def updateIterableEq[T, M[_] <: Iterable[_]](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     iterable: M[T],
     exts: List[String],
     vs2array: M[T] => Array[AnyRef],
   ): Unit = {
-    optRefNs.fold {
+    optRef.fold {
       val dbBaseType = exts(1)
       val paramIndex = updateAction.setCol(s"$attr = ?")
       if (iterable.nonEmpty) {
-        setAttrPresence(ns, attr)
+        setAttrPresence(ent, attr)
         addArray(paramIndex, dbBaseType, vs2array(iterable))
       } else {
         updateAction.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
       }
-    } { refNs =>
-      updateAction.deleteRefIds(attr, refNs, getUpdateId)
+    } { ref =>
+      updateAction.deleteRefIds(attr, ref, getUpdateId)
       val refIds = iterable.asInstanceOf[Set[Long]]
       if (refIds.nonEmpty) {
-        updateAction.insertRefIds(attr, refNs, refIds)
+        updateAction.insertRefIds(attr, ref, refIds)
       }
     }
   }
 
   private def updateIterableAdd[T, M[_] <: Iterable[_]](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     iterable: M[T],
     exts: List[String],
     iterable2array: M[T] => Array[AnyRef],
   ): Unit = {
-    optRefNs.fold {
+    optRef.fold {
       if (iterable.nonEmpty) {
-        setAttrPresence(ns, attr)
+        setAttrPresence(ent, attr)
         val dbBaseType = exts(1)
         val cast       = exts(2) match {
           case ""  => ""
@@ -424,49 +424,49 @@ trait SqlUpdate
         val paramIndex = updateAction.setCol(setAttr)
         addArray(paramIndex, dbBaseType, iterable2array(iterable))
       }
-    } { refNs =>
+    } { ref =>
       if (iterable.nonEmpty) {
-        updateAction.insertRefIds(attr, refNs, iterable.asInstanceOf[Set[Long]])
+        updateAction.insertRefIds(attr, ref, iterable.asInstanceOf[Set[Long]])
       }
     }
   }
 
   private def updateIterableRemove[T, M[_] <: Iterable[_]](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     iterable: M[T],
     exts: List[String],
     iterable2array: M[T] => Array[AnyRef]
   ): Unit = {
-    optRefNs.fold {
+    optRef.fold {
       if (iterable.nonEmpty) {
-        setAttrPresence(ns, attr)
+        setAttrPresence(ent, attr)
         val scalaBaseType = exts.head
         val dbBaseType    = exts(1)
         val setAttr       = s"$attr = removeFromArray_$scalaBaseType($attr, ?)"
         val paramIndex    = updateAction.setCol(setAttr)
         addArray(paramIndex, dbBaseType, iterable2array(iterable))
       }
-    } { refNs =>
+    } { ref =>
       if (iterable.nonEmpty) {
         val refIds = iterable.asInstanceOf[Set[Long]]
-        updateAction.deleteRefIds(attr, refNs, getUpdateId, refIds)
+        updateAction.deleteRefIds(attr, ref, getUpdateId, refIds)
       }
     }
   }
 
 
-  protected def setAttrPresence(ns: String, attr: String): Unit = {
+  protected def setAttrPresence(ent: String, attr: String): Unit = {
     if (isUpsert) {
       // Allow finding where clauses for ids query. Not used otherwise
-      query.filterAttrs += AttrOneOptByte(ns, attr)
+      query.filterAttrs += AttrOneOptByte(ent, attr)
     } else {
       // Attribute value present in updated data
-      query.filterAttrs += AttrOneTacByte(ns, attr)
+      query.filterAttrs += AttrOneTacByte(ent, attr)
 
-      // Used for single ns update with ids and no filters
-      updateAction.mandatoryCols += s"$ns.$attr IS NOT NULL"
+      // Used for single entity update with ids and no filters
+      updateAction.mandatoryCols += s"$ent.$attr IS NOT NULL"
     }
   }
 

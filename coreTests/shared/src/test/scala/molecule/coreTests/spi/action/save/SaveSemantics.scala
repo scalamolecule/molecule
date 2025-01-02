@@ -30,7 +30,7 @@ case class SaveSemantics(
   }
 
 
-  "Duplicate attributes not allowed, flat - Same ns" - refs { implicit conn =>
+  "Duplicate attributes not allowed, flat - Same entity" - refs { implicit conn =>
     for {
       _ <- A.i(1).i(2).save.transact
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>

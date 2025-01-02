@@ -29,7 +29,7 @@ abstract class Model2SqlQuery(elements0: List[Element])
 
   final protected def resolveElements(elements1: List[Element]): Unit = {
     from = getInitialNs(elements1)
-    prevRefNss = Set(from)
+    prevRefs = Set(from)
     path = List(from)
     preExts += path -> None
     val (elements2, _, _) = validateQueryModel(

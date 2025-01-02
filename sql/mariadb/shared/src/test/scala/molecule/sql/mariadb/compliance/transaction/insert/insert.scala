@@ -1,6 +1,6 @@
 package molecule.sql.mariadb.compliance.transaction.insert
 
-import molecule.coreTests.setup.{Test, MUnitSuiteWithArrays}
+import molecule.coreTests.setup.{MUnitSuiteWithArrays, Test}
 import molecule.coreTests.spi.action.insert._
 import molecule.sql.mariadb.setup.Api_mariadb_async
 

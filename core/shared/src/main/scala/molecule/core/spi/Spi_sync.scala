@@ -3,8 +3,8 @@ package molecule.core.spi
 import molecule.base.error.InsertError
 import molecule.core.action._
 
-trait Spi_sync  {
-  
+trait Spi_sync {
+
   private def noJS(method: String): Nothing = throw new Exception(
     s"Synchronous SPI method '$method' unexpectedly called from JS platform"
   )

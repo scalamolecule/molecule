@@ -117,7 +117,7 @@ case class TypesFilterAttr(
   }
 
   "Boolean" - types { implicit conn =>
-    // Can save only 2 ns boolean values
+    // Can save only 2 entity boolean values
     val pairs      = List(
       (1, boolean1),
       (2, boolean2),

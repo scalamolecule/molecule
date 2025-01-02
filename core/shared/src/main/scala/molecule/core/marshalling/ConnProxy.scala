@@ -8,14 +8,7 @@ sealed trait ConnProxy {
 
   val schema: Schema
 
-//  val reserved: Option[Reserved] = None
-
-//  val metaDomain : MetaDomain                               = schema.metaDomain
-//  val entityMap  : Map[String, MetaEntity]                  = schema.entityMap
-//  val attrMap    : Map[String, (Card, String, Seq[String])] = schema.attrMap
-//  val uniqueAttrs: List[String]                             = schema.uniqueAttrs
-
-//  /** Internal holder of optional alternative Db view (asOf, since, widh). Used by Datomic */
+  /** Internal holder of optional alternative Db view (asOf, since, widh). Used by Datomic */
   val dbView: Option[DbView] = None
 
   /** Unique internal identifier for cached proxy connection on server side */
@@ -27,14 +20,8 @@ case class DatomicProxy(
   protocol: String,
   dbIdentifier: String,
   override val schema: Schema,
-//  override val reserved: Option[Reserved] = None,
   override val dbView: Option[DbView] = None,
-//  override val uuid: UUID = UUID.randomUUID(),
-) extends ConnProxy {
-//  val datomicPartitions: String = schema.datomicPartitions
-//  val datomicSchema    : String = schema.datomicSchema
-//  val datomicAliases   : String = schema.datomicAliases
-}
+) extends ConnProxy
 
 
 sealed abstract class JdbcProxy(

@@ -4,12 +4,12 @@ import molecule.sql.core.transaction.strategy.SqlOps
 
 case class InsertRoot(
   sqlOps: SqlOps,
-  ns: String,
+  ent: String,
   rowCount: Int
-) extends InsertAction(null, sqlOps, ns, rowCount) {
+) extends InsertAction(null, sqlOps, ent, rowCount) {
 
-  val insertNs: InsertNs = {
-    val first = InsertNs(this, sqlOps, ns, "Entity", rowCount)
+  val insertEnt: InsertEntity = {
+    val first = InsertEntity(this, sqlOps, ent, "Entity", rowCount)
     children += first
     first
   }

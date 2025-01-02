@@ -1,6 +1,6 @@
 package molecule.sql.h2.compliance.relation
 
-import molecule.coreTests.setup.{Test, MUnitSuiteWithArrays}
+import molecule.coreTests.setup.{MUnitSuiteWithArrays, Test}
 import molecule.coreTests.spi.relation.nested._
 import molecule.sql.h2.setup.Api_h2_async
 

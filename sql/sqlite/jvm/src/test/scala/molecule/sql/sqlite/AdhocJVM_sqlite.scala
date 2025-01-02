@@ -10,21 +10,21 @@ import scala.language.implicitConversions
 class AdhocJVM_sqlite extends Test with DbProviders_sqlite with TestUtils {
 
 
-//  "types" - types { implicit conn =>
-//    import molecule.coreTests.domains.dsl.Types._
-//    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
-//
-//    for {
-//      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
-//      _ <- Entity.int(3).save.transact
-//      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
-//      _ <- Entity(a).int(10).update.transact
-//      _ <- Entity(b).delete.transact
-//      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
-//
-//
-//    } yield ()
-//  }
+  //  "types" - types { implicit conn =>
+  //    import molecule.coreTests.domains.dsl.Types._
+  //    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+  //
+  //    for {
+  //      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
+  //      _ <- Entity.int(3).save.transact
+  //      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
+  //      _ <- Entity(a).int(10).update.transact
+  //      _ <- Entity(b).delete.transact
+  //      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
+  //
+  //
+  //    } yield ()
+  //  }
 
 
   "refs" - refs { implicit conn =>

@@ -3,7 +3,7 @@ package molecule.sql.core.transaction.strategy
 import java.sql.{Statement, PreparedStatement => PS}
 import scala.collection.mutable.ListBuffer
 
-abstract class SqlAction(parent: SqlAction, sqlOps: SqlOps, ns: String) {
+abstract class SqlAction(parent: SqlAction, sqlOps: SqlOps, ent: String) {
 
   // Strategy execution -----------------------------------------
 
@@ -86,7 +86,7 @@ abstract class SqlAction(parent: SqlAction, sqlOps: SqlOps, ns: String) {
 
     // Cache generated ids (various db implementations)
     // Closes prepared statement
-    ids = sqlOps.getIds(ps, ns)
+    ids = sqlOps.getIds(ps, ent)
     //    println(s"--------------------------- ids: $ids\n")
   }
 

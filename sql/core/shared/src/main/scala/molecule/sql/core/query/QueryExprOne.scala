@@ -118,7 +118,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query with SqlQueryBase with 
     }
     addSort(attr, col)
     attr.filterAttr.fold {
-      expr(attr.ns, attr.attr, col, attr.op, args, res)
+      expr(attr.ent, attr.attr, col, attr.op, args, res)
     } { case (dir, filterPath, filterAttr) =>
       expr2(col, attr.op, filterAttr.name)
     }
@@ -127,14 +127,14 @@ trait QueryExprOne extends QueryExpr { self: Model2Query with SqlQueryBase with 
   protected def tac[T: ClassTag](attr: Attr, args: Seq[T], res: ResOne[T]): Unit = {
     val col = getCol(attr: Attr)
     attr.filterAttr.fold {
-      expr(attr.ns, attr.attr, col, attr.op, args, res)
+      expr(attr.ent, attr.attr, col, attr.op, args, res)
     } { case (dir, filterPath, filterAttr) =>
       expr2(col, attr.op, getCol(filterAttr, filterPath))
     }
   }
 
   protected def expr[T: ClassTag](
-    ns: String,
+    ent: String,
     attr: String,
     col: String,
     op: Op,
@@ -150,7 +150,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query with SqlQueryBase with 
       case Le           => compare(col, args.head, "<=", res.one2sql)
       case Ge           => compare(col, args.head, ">=", res.one2sql)
       case NoValue      => noValue(col)
-      case Fn(kw, n)    => aggr(ns, attr, col, kw, n, res)
+      case Fn(kw, n)    => aggr(ent, attr, col, kw, n, res)
       case StartsWith   => startsWith(col, args.head)
       case EndsWith     => endsWith(col, args.head)
       case Contains     => contains(col, args.head)
@@ -324,7 +324,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query with SqlQueryBase with 
   // aggregation ---------------------------------------------------------------
 
   protected def aggr[T: ClassTag](
-    ns: String,
+    ent: String,
     attr: String,
     col: String,
     fn: String,

@@ -18,7 +18,7 @@ trait SqlDelete
   protected var deleteAction: DeleteAction = null
 
   private var needsIdQuery = false
-  private var ns           = ""
+  private var ent          = ""
 
   private object query {
     val idCols         = ListBuffer.empty[String]
@@ -29,10 +29,10 @@ trait SqlDelete
   def getDeleteAction(
     elements: List[Element], entityMap: Map[String, MetaEntity]
   ): DeleteAction = {
-    ns = getInitialNs(elements)
-    query.idCols += s"$ns.id"
-    root = DeleteRoot(entityMap, sqlOps, sqlConn.createStatement(), ns)
-    deleteAction = root.firstNs
+    ent = getInitialNs(elements)
+    query.idCols += s"$ent.id"
+    root = DeleteRoot(entityMap, sqlOps, sqlConn.createStatement(), ent)
+    deleteAction = root.firstEnt
     resolve(elements, true)
     initRoot(sqlOps)
     root
@@ -42,7 +42,7 @@ trait SqlDelete
   private def initRoot(sqlOps: SqlOps): Unit = {
     if (needsIdQuery) {
       val idsQuery  = sqlOps.selectStmt(
-        ns, query.idCols, query.joins,
+        ent, query.idCols, query.joins,
         m2q(query.filterElements.toList).getWhereClauses
       )
       val ids       = ListBuffer.empty[Long]
@@ -65,18 +65,18 @@ trait SqlDelete
   override def addFilterElement(element: Element): Unit = {
     needsIdQuery = true
     element match {
-      case Ref(ns, refAttr, refNs, card, _, _) =>
+      case Ref(ent, refAttr, ref, card, _, _) =>
         card match {
           case CardOne =>
-            query.joins += s"INNER JOIN $refNs ON $ns.$refAttr = $refNs.id"
+            query.joins += s"INNER JOIN $ref ON $ent.$refAttr = $ref.id"
 
           case _ =>
-            val joinTable = ss(ns, refAttr, refNs)
-            val eid       = s"${ns}_id"
-            val rid       = s"${refNs}_id"
+            val joinTable = ss(ent, refAttr, ref)
+            val eid       = s"${ent}_id"
+            val rid       = s"${ref}_id"
             query.joins ++= List(
-              s"INNER JOIN $joinTable ON $ns.id = $joinTable.$eid",
-              s"INNER JOIN $refNs ON $joinTable.$rid = $refNs.id",
+              s"INNER JOIN $joinTable ON $ent.id = $joinTable.$eid",
+              s"INNER JOIN $ref ON $joinTable.$rid = $ref.id",
             )
         }
 

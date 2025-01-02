@@ -15,28 +15,28 @@ trait SqlUpdateSetValidator extends SpiHelpers {
     query2resultSet: String => Row
   ): Map[String, Seq[String]] = {
     val curSetValues: Attr => Set[Any] = (a: Attr) => try {
-      val ns    = a.ns
+      val ent   = a.ent
       val attr  = a.attr
-      val query = a.refNs.fold(
+      val query = a.ref.fold(
         s"""SELECT DISTINCT
-           |  ARRAY_AGG($ns.$attr)
-           |FROM $ns
+           |  ARRAY_AGG($ent.$attr)
+           |FROM $ent
            |WHERE
-           |  $ns.$attr IS NOT NULL
+           |  $ent.$attr IS NOT NULL
            |HAVING COUNT(*) > 0;""".stripMargin
 
-      ) { refNs =>
-        val joinTable = ss(ns, attr, refNs)
-        val refNs_id  = ss(refNs, "id")
-        val eid       = ss(ns, "id")
+      ) { ref =>
+        val joinTable = ss(ent, attr, ref)
+        val ref_id    = ss(ref, "id")
+        val eid       = ss(ent, "id")
         s"""SELECT DISTINCT
-           |  ARRAY_AGG($joinTable.$refNs_id)
-           |FROM $ns
-           |INNER JOIN $joinTable ON $ns.id = $joinTable.$eid
-           |GROUP BY $ns.id;""".stripMargin
+           |  ARRAY_AGG($joinTable.$ref_id)
+           |FROM $ent
+           |INNER JOIN $joinTable ON $ent.id = $joinTable.$eid
+           |GROUP BY $ent.id;""".stripMargin
       }
 
-      nestedArray2coalescedSet(a, query2resultSet(query), a.refNs.isEmpty)
+      nestedArray2coalescedSet(a, query2resultSet(query), a.ref.isEmpty)
     } catch {
       case e: MoleculeError => throw e
       case t: Throwable     =>
@@ -53,24 +53,24 @@ trait SqlUpdateSetValidator extends SpiHelpers {
     query2resultSet: String => Row
   ): Map[String, Seq[String]] = {
     val curSetValues: Attr => Set[Any] = (a: Attr) => try {
-      val ns    = a.ns
+      val ent   = a.ent
       val attr  = a.attr
       val tpe   = dbType(a)
-      val query = a.refNs.fold(
+      val query = a.ref.fold(
         s"""SELECT
            |  JSON_ARRAYAGG(t_1.vs)
            |FROM MandatoryAttr,
-           |  JSON_TABLE($ns.$attr, '$$[*]' columns(vs $tpe path '$$')) t_1
+           |  JSON_TABLE($ent.$attr, '$$[*]' columns(vs $tpe path '$$')) t_1
            |""".stripMargin
-      ) { refNs =>
-        val joinTable = ss(ns, attr, refNs)
-        val refNs_id  = ss(refNs, "id")
-        val eid       = ss(ns, "id")
+      ) { ref =>
+        val joinTable = ss(ent, attr, ref)
+        val ref_id    = ss(ref, "id")
+        val eid       = ss(ent, "id")
         s"""SELECT DISTINCT
-           |  JSON_ARRAYAGG($joinTable.$refNs_id)
-           |FROM $ns
-           |INNER JOIN $joinTable ON $ns.id = $joinTable.$eid
-           |GROUP BY $ns.id;""".stripMargin
+           |  JSON_ARRAYAGG($joinTable.$ref_id)
+           |FROM $ent
+           |INNER JOIN $joinTable ON $ent.id = $joinTable.$eid
+           |GROUP BY $ent.id;""".stripMargin
       }
       jsonArray2coalescedSet(a, query2resultSet(query))
     } catch {
@@ -89,27 +89,27 @@ trait SqlUpdateSetValidator extends SpiHelpers {
     query2resultSet: String => Row
   ): Map[String, Seq[String]] = {
     val curSetValues: Attr => Set[Any] = (a: Attr) => try {
-      val ns      = a.ns
-      val attr    = a.attr
-      val ns_attr = ns + "_" + attr
-      val query   = a.refNs.fold(
+      val ent      = a.ent
+      val attr     = a.attr
+      val ent_attr = ent + "_" + attr
+      val query    = a.ref.fold(
         s"""SELECT DISTINCT
-           |  JSON_GROUP_ARRAY(_$ns_attr.VALUE) AS $ns_attr
-           |FROM $ns
-           |  INNER JOIN JSON_EACH($ns.$attr) AS _$ns_attr
+           |  JSON_GROUP_ARRAY(_$ent_attr.VALUE) AS $ent_attr
+           |FROM $ent
+           |  INNER JOIN JSON_EACH($ent.$attr) AS _$ent_attr
            |WHERE
-           |  $ns.$attr IS NOT NULL
+           |  $ent.$attr IS NOT NULL
            |HAVING COUNT(*) > 0
            |""".stripMargin
-      ) { refNs =>
-        val joinTable = ss(ns, attr, refNs)
-        val refNs_id  = ss(refNs, "id")
-        val eid       = ss(ns, "id")
+      ) { ref =>
+        val joinTable = ss(ent, attr, ref)
+        val ref_id    = ss(ref, "id")
+        val eid       = ss(ent, "id")
         s"""SELECT DISTINCT
-           |  json_group_array($joinTable.$refNs_id)
-           |FROM $ns
-           |  INNER JOIN $joinTable ON $ns.id = $joinTable.$eid
-           |GROUP BY $ns.id""".stripMargin
+           |  json_group_array($joinTable.$ref_id)
+           |FROM $ent
+           |  INNER JOIN $joinTable ON $ent.id = $joinTable.$eid
+           |GROUP BY $ent.id""".stripMargin
       }
       jsonArray2coalescedSet(a, query2resultSet(query))
     } catch {

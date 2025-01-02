@@ -22,8 +22,8 @@ class Test_Inspect extends Test with DbProviders_datomic with TestUtils {
         AttrOneManInt("Entity", "int", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 8))
 
         [:find  ?b ?c
-         :where [?a :Ns/string ?b]
-                [?a :Ns/int ?c]]
+         :where [?a :Entity/string ?b]
+                [?a :Entity/int ?c]]
         ----------------------------------------
         */
       } yield ()
@@ -40,8 +40,8 @@ class Test_Inspect extends Test with DbProviders_datomic with TestUtils {
         AttrOneManInt("Entity", "int", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 8))
 
         [:find  ?b ?c
-         :where [?a :Ns/string ?b]
-                [?a :Ns/int ?c]]
+         :where [?a :Entity/string ?b]
+                [?a :Entity/int ?c]]
         ----------------------------------------
         */
       } yield ()
@@ -64,10 +64,10 @@ class Test_Inspect extends Test with DbProviders_datomic with TestUtils {
                 (avg ?c) ?e
          :with  ?a
          :in    $ [?e ...]
-         :where [?a :Ns/i ?b]
-                [?a :Ns/int ?c]
+         :where [?a :Entity/i ?b]
+                [?a :Entity/int ?c]
                 [(identity ?a) ?id0]
-                [?a :Ns/refs ?d]
+                [?a :Entity/refs ?d]
                 [?d :Ref/string ?e]]
 
         List(foo)
@@ -90,8 +90,8 @@ class Test_Inspect extends Test with DbProviders_datomic with TestUtils {
         AttrOneManInt("Entity", "int", Eq, Seq(1), None, None, Nil, Nil, None, None, Seq(0, 8))
 
         [
-          [:db/add #db/id[db.part/user -1] :Ns/string a]
-          [:db/add #db/id[db.part/user -1] :Ns/int 1]
+          [:db/add #db/id[db.part/user -1] :Entity/string a]
+          [:db/add #db/id[db.part/user -1] :Entity/int 1]
         ]
         ----------------------------------------
         */
@@ -111,8 +111,8 @@ class Test_Inspect extends Test with DbProviders_datomic with TestUtils {
         AttrOneManInt("Entity", "int", Eq, Seq(1), None, None, Nil, Nil, None, None, Seq(0, 8))
 
         [
-          [:db/add #db/id[db.part/user -1] :Ns/string a]
-          [:db/add #db/id[db.part/user -1] :Ns/int 1]
+          [:db/add #db/id[db.part/user -1] :Entity/string a]
+          [:db/add #db/id[db.part/user -1] :Entity/int 1]
         ]
         ----------------------------------------
         */
@@ -136,10 +136,10 @@ class Test_Inspect extends Test with DbProviders_datomic with TestUtils {
         AttrOneManInt("Entity", "int", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 8))
 
         [
-          [:db/add #db/id[db.part/user -1] :Ns/string a]
-          [:db/add #db/id[db.part/user -1] :Ns/int 1]
-          [:db/add #db/id[db.part/user -2] :Ns/string b]
-          [:db/add #db/id[db.part/user -2] :Ns/int 2]
+          [:db/add #db/id[db.part/user -1] :Entity/string a]
+          [:db/add #db/id[db.part/user -1] :Entity/int 1]
+          [:db/add #db/id[db.part/user -2] :Entity/string b]
+          [:db/add #db/id[db.part/user -2] :Entity/int 2]
         ]
         ----------------------------------------
         */
@@ -159,10 +159,10 @@ class Test_Inspect extends Test with DbProviders_datomic with TestUtils {
         AttrOneManInt("Entity", "int", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 8))
 
         [
-          [:db/add #db/id[db.part/user -1] :Ns/string a]
-          [:db/add #db/id[db.part/user -1] :Ns/int 1]
-          [:db/add #db/id[db.part/user -2] :Ns/string b]
-          [:db/add #db/id[db.part/user -2] :Ns/int 2]
+          [:db/add #db/id[db.part/user -1] :Entity/string a]
+          [:db/add #db/id[db.part/user -1] :Entity/int 1]
+          [:db/add #db/id[db.part/user -2] :Entity/string b]
+          [:db/add #db/id[db.part/user -2] :Entity/int 2]
         ]
         ----------------------------------------
         */
@@ -187,7 +187,7 @@ class Test_Inspect extends Test with DbProviders_datomic with TestUtils {
         AttrOneManString("Entity", "string", Eq, Seq("ZZZ"), None, None, Nil, Nil, None, None, Seq(0, 7))
 
         [
-          [:db/add 17592186045418 :Ns/string ZZZ]
+          [:db/add 17592186045418 :Entity/string ZZZ]
         ]
         ----------------------------------------
         */
@@ -208,7 +208,7 @@ class Test_Inspect extends Test with DbProviders_datomic with TestUtils {
         AttrOneManString("Entity", "string", Eq, Seq("ZZZ"), None, None, Nil, Nil, None, None, Seq(0, 7))
 
         [
-          [:db/add 17592186045418 :Ns/string ZZZ]
+          [:db/add 17592186045418 :Entity/string ZZZ]
         ]
         ----------------------------------------
         */

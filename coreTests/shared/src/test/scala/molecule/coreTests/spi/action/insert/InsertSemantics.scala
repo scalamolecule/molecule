@@ -187,7 +187,7 @@ case class InsertSemantics(
   }
 
 
-  "Duplicate attributes not allowed, flat: Same ns" - refs { implicit conn =>
+  "Duplicate attributes not allowed, flat: Same entity" - refs { implicit conn =>
     for {
       _ <- A.i.i.insert(1, 2).transact
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
@@ -216,7 +216,7 @@ case class InsertSemantics(
   }
 
 
-  "Duplicate attributes not allowed, nested: Same ns" - refs { implicit conn =>
+  "Duplicate attributes not allowed, nested: Same entity" - refs { implicit conn =>
     for {
       _ <- A.i.Bb.*(B.i.i).insert(1, List((2, 3))).transact
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>

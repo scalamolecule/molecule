@@ -4,12 +4,12 @@ import java.sql.{PreparedStatement => PS}
 import molecule.sql.core.transaction.strategy.SqlOps
 import scala.collection.mutable.ListBuffer
 
-case class UpdateNs(
+case class UpdateEntity(
   parent: UpdateAction,
   sqlOps: SqlOps,
-  ns: String,
+  ent: String,
   action: String
-) extends UpdateAction(parent, sqlOps, ns) {
+) extends UpdateAction(parent, sqlOps, ent) {
 
   rowSetters += ListBuffer.empty[PS => Unit]
 
@@ -22,12 +22,12 @@ case class UpdateNs(
 
   override def curStmt: String = {
     if (cols.isEmpty) {
-      s"no update columns in $ns ..."
+      s"no update columns in $ent ..."
     } else if (ids.isEmpty) {
-      s"no ids found to be updated in $ns ..."
+      s"no ids found to be updated in $ent ..."
     } else {
-      val idClause = s"$ns.id IN(" + ids.mkString(", ") + ")"
-      sqlOps.updateStmt(ns, cols, idClause +: mandatoryCols)
+      val idClause = s"$ent.id IN(" + ids.mkString(", ") + ")"
+      sqlOps.updateStmt(ent, cols, idClause +: mandatoryCols)
     }
   }
 

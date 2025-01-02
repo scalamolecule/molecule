@@ -29,7 +29,7 @@ trait Save_datomic
     e = id
     e0 = e
 
-    handleRefNs(getInitialNs(elements))
+    handleRef(getInitialNs(elements))
 
     // populate `stmts`
     resolve(elements)
@@ -46,21 +46,21 @@ trait Save_datomic
   }
 
   override protected def addOne[T](
-    ns: String,
+    ent: String,
     attr: String,
     optValue: Option[T],
     transformValue: T => Any,
     exts: List[String] = Nil
   ): Unit = {
     optValue.foreach { v =>
-      appendStmt(add, e, kw(ns, attr), transformValue(v).asInstanceOf[AnyRef])
+      appendStmt(add, e, kw(ent, attr), transformValue(v).asInstanceOf[AnyRef])
     }
   }
 
   override protected def addSet[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     optSet: Option[Set[T]],
     transformValue: T => Any,
     exts: List[String] = Nil,
@@ -68,7 +68,7 @@ trait Save_datomic
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     optSet.foreach { set =>
-      val a = kw(ns, attr)
+      val a = kw(ent, attr)
       set.foreach { v =>
         appendStmt(add, e, a, transformValue(v).asInstanceOf[AnyRef])
       }
@@ -76,9 +76,9 @@ trait Save_datomic
   }
 
   override protected def addSeq[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     optSeq: Option[Seq[T]],
     transformValue: T => Any,
     exts: List[String] = Nil,
@@ -86,9 +86,9 @@ trait Save_datomic
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     optSeq.foreach { seq =>
-      val a   = kw(ns, attr)
-      val a_i = kw(s"$ns.$attr", "i_")
-      val a_v = kw(s"$ns.$attr", "v_")
+      val a   = kw(ent, attr)
+      val a_i = kw(s"$ent.$attr", "i_")
+      val a_v = kw(s"$ent.$attr", "v_")
       unusedRefIds -= e
       usedRefIds += e
       var i = 0
@@ -103,26 +103,26 @@ trait Save_datomic
   }
 
   override protected def addByteArray(
-    ns: String,
+    ent: String,
     attr: String,
     optArray: Option[Array[Byte]],
   ): Unit = {
     optArray.foreach { array =>
-      appendStmt(add, e, kw(ns, attr), array.asInstanceOf[AnyRef])
+      appendStmt(add, e, kw(ent, attr), array.asInstanceOf[AnyRef])
     }
   }
 
   override protected def addMap[T](
-    ns: String,
+    ent: String,
     attr: String,
     optMap: Option[Map[String, T]],
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     optMap.foreach { map =>
-      val a   = kw(ns, attr)
-      val a_k = kw(s"$ns.$attr", "k_")
-      val a_v = kw(s"$ns.$attr", "v_")
+      val a   = kw(ent, attr)
+      val a_k = kw(s"$ent.$attr", "k_")
+      val a_v = kw(s"$ent.$attr", "v_")
       unusedRefIds -= e
       usedRefIds += e
       var i = 0
@@ -137,27 +137,27 @@ trait Save_datomic
   }
 
   override protected def addRef(
-    ns: String,
+    ent: String,
     refAttr: String,
-    refNs: String,
+    ref: String,
     card: Card,
   ): Unit = {
     stmt = stmtList
     stmt.add(add)
     stmt.add(e)
-    stmt.add(kw(ns, refAttr))
+    stmt.add(kw(ent, refAttr))
     e = newId
     stmt.add(e)
     stmts.add(stmt)
-    handleRefNs(refNs)
+    handleRef(ref)
   }
 
-  override protected def addBackRef(backRefNs: String): Unit = {
-    e = backRefs(backRefNs)
+  override protected def addBackRef(backRef: String): Unit = {
+    e = backRefs(backRef)
   }
 
-  override protected def handleRefNs(refNs: String): Unit = {
-    backRefs = backRefs + (refNs -> e)
+  override protected def handleRef(ref: String): Unit = {
+    backRefs = backRefs + (ref -> e)
   }
 
   // Save Int as Long in Datomic

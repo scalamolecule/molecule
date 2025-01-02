@@ -226,7 +226,7 @@ class Test_Inspect extends Test with DbProviders_mysql with TestUtils {
 
         Update(
           Entity(
-            UPDATE Ns
+            UPDATE Entity
             SET
               string_ = ?
             WHERE
@@ -255,7 +255,7 @@ class Test_Inspect extends Test with DbProviders_mysql with TestUtils {
 
         Update(
           Entity(
-            UPDATE Ns
+            UPDATE Entity
             SET
               string_ = ?
             WHERE

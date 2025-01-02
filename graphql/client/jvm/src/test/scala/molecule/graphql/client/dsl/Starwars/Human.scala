@@ -20,18 +20,18 @@
 //trait Human_base {
 //  protected lazy val id_man        : AttrOneManID     = AttrOneManID    ("Human", "id"        , coord = Seq(2, 9    ))
 //  protected lazy val name_man      : AttrOneManString = AttrOneManString("Human", "name"      , coord = Seq(2, 10   ))
-//  protected lazy val friends_man   : AttrSetManID     = AttrSetManID    ("Human", "friends"   , coord = Seq(2, 11, 0), refNs = Some("Character"))
+//  protected lazy val friends_man   : AttrSetManID     = AttrSetManID    ("Human", "friends"   , coord = Seq(2, 11, 0), ref = Some("Character"))
 //  protected lazy val appearsIn_man : AttrSetManString = AttrSetManString("Human", "appearsIn" , coord = Seq(2, 12   ), validator = Some(validation_appearsIn))
 //  protected lazy val homePlanet_man: AttrOneManString = AttrOneManString("Human", "homePlanet", coord = Seq(2, 13   ))
 //
 //  protected lazy val name_opt      : AttrOneOptString = AttrOneOptString("Human", "name"      , coord = Seq(2, 10   ))
-//  protected lazy val friends_opt   : AttrSetOptID     = AttrSetOptID    ("Human", "friends"   , coord = Seq(2, 11, 0), refNs = Some("Character"))
+//  protected lazy val friends_opt   : AttrSetOptID     = AttrSetOptID    ("Human", "friends"   , coord = Seq(2, 11, 0), ref = Some("Character"))
 //  protected lazy val appearsIn_opt : AttrSetOptString = AttrSetOptString("Human", "appearsIn" , coord = Seq(2, 12   ), validator = Some(validation_appearsIn))
 //  protected lazy val homePlanet_opt: AttrOneOptString = AttrOneOptString("Human", "homePlanet", coord = Seq(2, 13   ))
 //
 //  protected lazy val id_tac        : AttrOneTacID     = AttrOneTacID    ("Human", "id"        , coord = Seq(2, 9    ))
 //  protected lazy val name_tac      : AttrOneTacString = AttrOneTacString("Human", "name"      , coord = Seq(2, 10   ))
-//  protected lazy val friends_tac   : AttrSetTacID     = AttrSetTacID    ("Human", "friends"   , coord = Seq(2, 11, 0), refNs = Some("Character"))
+//  protected lazy val friends_tac   : AttrSetTacID     = AttrSetTacID    ("Human", "friends"   , coord = Seq(2, 11, 0), ref = Some("Character"))
 //  protected lazy val appearsIn_tac : AttrSetTacString = AttrSetTacString("Human", "appearsIn" , coord = Seq(2, 12   ), validator = Some(validation_appearsIn))
 //  protected lazy val homePlanet_tac: AttrOneTacString = AttrOneTacString("Human", "homePlanet", coord = Seq(2, 13   ))
 //

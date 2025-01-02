@@ -34,15 +34,15 @@ trait SortOneOpt_[Tpl] { self: Model2DatomicQuery[Tpl] =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
               compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
-                m1.values.iterator.next.asInstanceOf[jMap[_,_]].values.iterator.next.toString.toLong.compareTo(
-                  m2.values.iterator.next.asInstanceOf[jMap[_,_]].values.iterator.next.toString.toLong)
+                m1.values.iterator.next.asInstanceOf[jMap[_, _]].values.iterator.next.toString.toLong.compareTo(
+                  m2.values.iterator.next.asInstanceOf[jMap[_, _]].values.iterator.next.toString.toLong)
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
               compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
-                m1.values.iterator.next.asInstanceOf[jMap[_,_]].values.iterator.next.toString.toLong.compareTo(
-                  m2.values.iterator.next.asInstanceOf[jMap[_,_]].values.iterator.next.toString.toLong)
+                m1.values.iterator.next.asInstanceOf[jMap[_, _]].values.iterator.next.toString.toLong.compareTo(
+                  m2.values.iterator.next.asInstanceOf[jMap[_, _]].values.iterator.next.toString.toLong)
               )
         }
       )

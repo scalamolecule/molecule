@@ -40,8 +40,8 @@ trait Update_datomic
   // Cache entities to be able to go back with BackRef and use previous entities
   private var idLists = List.empty[List[AnyRef]] // Long or String (#db/id[db.part/user -1])
 
-  private var requiredNsPaths = List(List.empty[String])
-  private var currentNsPath   = List.empty[String]
+  private var requiredEntPaths = List(List.empty[String])
+  private var currentEntPath   = List.empty[String]
 
 
   def getStmts(
@@ -55,12 +55,12 @@ trait Update_datomic
       // Check against db on jvm if rpc from client
 
       val getCurSetValues: Attr => Set[Any] = (attr: Attr) => {
-        val a = s":${attr.ns}/${attr.attr}"
+        val a = s":${attr.ent}/${attr.attr}"
         try {
           val curValues = Peer.q(s"[:find ?vs :where [_ $a ?vs]]", db)
           if (curValues.isEmpty) {
             throw ExecutionError(s"While checking to avoid removing the last values of mandatory " +
-              s"attribute ${attr.ns}.${attr.attr} the current Set of values couldn't be found.")
+              s"attribute ${attr.ent}.${attr.attr} the current Set of values couldn't be found.")
           }
           val vs = ListBuffer.empty[Any]
           curValues.forEach(row => vs += row.get(0))
@@ -86,14 +86,14 @@ trait Update_datomic
     //    println("------ elements --------")
     //    elements.foreach(println)
 
-    val (filterElements1, requiredNsPaths1) = if (isUpsert)
+    val (filterElements1, requiredEntPaths1) = if (isUpsert)
       getUpsertFilters(elements.reverse)
     else
       getUpdateFilters(elements.reverse)
 
-    requiredNsPaths = requiredNsPaths1
-    //    println("------ requiredNsPaths ------")
-    //    requiredNsPaths.foreach(println)
+    requiredEntPaths = requiredEntPaths1
+    //    println("------ requiredEntPaths ------")
+    //    requiredEntPaths.foreach(println)
 
     val filters = AttrOneManID(getInitialNs(elements), "id", V) :: filterElements1
 
@@ -150,14 +150,14 @@ trait Update_datomic
   def handleReplaceAll[T](attr: String, vs: Seq[T]) = s"REGEXP_REPLACE($attr, ?, '${vs(1)}')"
 
   override protected def updateOne[T](
-    ns: String,
+    ent: String,
     attr: String,
     op: Op,
     vs: Seq[T],
     transformValue: T => Any,
     exts: List[String],
   ): Unit = {
-    val a = kw(ns, attr)
+    val a = kw(ent, attr)
     lazy val cleanAttr = attr.replace("_", "")
     op match {
       case Eq | NoValue =>
@@ -186,7 +186,7 @@ trait Update_datomic
                 attrIndex += 1
             }
           case vs     => throw ModelError(
-            s"Can only update one value for attribute `$ns.$attr`. Found: " + vs.mkString(", ")
+            s"Can only update one value for attribute `$ent.$attr`. Found: " + vs.mkString(", ")
           )
         }
 
@@ -225,15 +225,15 @@ trait Update_datomic
         }
 
       case Even | Odd => throw ModelError(
-        s"$ns.$cleanAttr.even and $ns.$cleanAttr.odd can't be used with updates."
+        s"$ent.$cleanAttr.even and $ent.$cleanAttr.odd can't be used with updates."
       )
 
       case Remainder => throw ModelError(
-        s"Modulo operations like $ns.$cleanAttr.%(${vs.head}) can't be used with updates."
+        s"Modulo operations like $ent.$cleanAttr.%(${vs.head}) can't be used with updates."
       )
 
       case _ => throw ModelError(
-        s"Can't update attribute $ns.$cleanAttr without an applied or computed value."
+        s"Can't update attribute $ent.$cleanAttr without an applied or computed value."
       )
     }
   }
@@ -383,16 +383,16 @@ trait Update_datomic
   }
 
   override protected def updateSetEq[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     set: Set[T],
     transformValue: T => Any,
     exts: List[String],
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    val a = kw(ns, attr)
+    val a = kw(ent, attr)
     if (set.nonEmpty) {
       val newSet = set.map(transformValue(_).asInstanceOf[AnyRef])
       rowResolvers += { (row: jList[AnyRef]) =>
@@ -402,7 +402,7 @@ trait Update_datomic
             // Resolved entity id
             if (attrIndex < rowSize) {
               // Cached values with known ref
-              val oldSet = cachedValues(row, optRefNs).toSet
+              val oldSet = cachedValues(row, optRef).toSet
               oldSet.diff(newSet).foreach(oldValues => appendStmt(retract, e, a, oldValues))
               newSet.diff(oldSet).foreach(newValues => appendStmt(add, e, a, newValues))
             } else {
@@ -422,7 +422,7 @@ trait Update_datomic
     } else {
       // Retract current Set
       rowResolvers += { (row: jList[AnyRef]) =>
-        cachedValues(row, optRefNs).foreach(oldValue =>
+        cachedValues(row, optRef).foreach(oldValue =>
           ids.foreach(e => appendStmt(retract, e, a, oldValue))
         )
         attrIndex += 1
@@ -431,9 +431,9 @@ trait Update_datomic
   }
 
   override protected def updateSetAdd[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     set: Set[T],
     transformValue: T => Any,
     exts: List[String],
@@ -441,7 +441,7 @@ trait Update_datomic
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     if (set.nonEmpty) {
-      val a         = kw(ns, attr)
+      val a         = kw(ent, attr)
       val addValues = set.map(transformValue(_).asInstanceOf[AnyRef])
       rowResolvers += { _ =>
         addValues.foreach(addValue =>
@@ -452,9 +452,9 @@ trait Update_datomic
   }
 
   override protected def updateSetRemove[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     set: Set[T],
     transformValue: T => Any,
     exts: List[String],
@@ -462,7 +462,7 @@ trait Update_datomic
     set2array: Set[T] => Array[AnyRef]
   ): Unit = {
     if (set.nonEmpty) {
-      val a            = kw(ns, attr)
+      val a            = kw(ent, attr)
       val removeValues = set.map(transformValue(_).asInstanceOf[AnyRef])
       rowResolvers += { _ =>
         removeValues.foreach(removeValue =>
@@ -473,22 +473,22 @@ trait Update_datomic
   }
 
   override protected def updateSeqEq[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     seq: Seq[T],
     transformValue: T => Any,
     exts: List[String],
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    val a = kw(ns, attr)
+    val a = kw(ent, attr)
     if (seq.nonEmpty) {
-      val a_i    = kw(s"$ns.$attr", "i_")
-      val a_v    = kw(s"$ns.$attr", "v_")
+      val a_i    = kw(s"$ent.$attr", "i_")
+      val a_v    = kw(s"$ent.$attr", "v_")
       val newSeq = seq.map(v => transformValue(v).asInstanceOf[AnyRef])
       rowResolvers += { (row: jList[AnyRef]) =>
-        retractCurrentSeqValues(row, a, optRefNs)
+        retractCurrentSeqValues(row, a, optRef)
 
         // Assert new values
         var i = 0
@@ -505,20 +505,20 @@ trait Update_datomic
       }
     } else {
       rowResolvers += { (row: jList[AnyRef]) =>
-        retractCurrentSeqValues(row, a, optRefNs)
+        retractCurrentSeqValues(row, a, optRef)
         attrIndex += 1
       }
     }
   }
 
   private def retractCurrentSeqValues(
-    row: jList[AnyRef], a: Keyword, optRefNs: Option[String]
+    row: jList[AnyRef], a: Keyword, optRef: Option[String]
   ): Unit = {
     if (attrIndex < rowSize) {
       // Cached values with known ref
       Peer.q(
         "[:find ?ref :in $ [?e ...] ?a [?v ...] :where [?e ?a ?ref][?ref ?v_ ?v]]",
-        db, ids.asJava, a, cachedValues(row, optRefNs).asJava
+        db, ids.asJava, a, cachedValues(row, optRef).asJava
       ).forEach(row =>
         addRetractEntityStmt(row.get(0))
       )
@@ -530,9 +530,9 @@ trait Update_datomic
 
 
   override protected def updateSeqAdd[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     seq: Seq[T],
     transformValue: T => Any,
     exts: List[String],
@@ -540,9 +540,9 @@ trait Update_datomic
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     if (seq.nonEmpty) {
-      val a         = kw(ns, attr)
-      val a_i       = kw(s"$ns.$attr", "i_")
-      val a_v       = kw(s"$ns.$attr", "v_")
+      val a         = kw(ent, attr)
+      val a_i       = kw(s"$ent.$attr", "i_")
+      val a_v       = kw(s"$ent.$attr", "v_")
       val addValues = seq.map(transformValue(_).asInstanceOf[AnyRef])
       rowResolvers += { _ =>
         ids.foreach { e =>
@@ -567,9 +567,9 @@ trait Update_datomic
   }
 
   override protected def updateSeqRemove[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     seq: Seq[T],
     transformValue: T => Any,
     exts: List[String],
@@ -578,18 +578,18 @@ trait Update_datomic
   ): Unit = {
     if (seq.nonEmpty) {
       rowResolvers += { (row: jList[AnyRef]) =>
-        retractSeqValues(row, ns, attr, seq, transformValue)
+        retractSeqValues(row, ent, attr, seq, transformValue)
         attrIndex += 1
       }
     }
   }
 
   private def retractSeqValues[T](
-    row: jList[AnyRef], ns: String, attr: String, seq: Seq[T], transformValue: T => Any
+    row: jList[AnyRef], ent: String, attr: String, seq: Seq[T], transformValue: T => Any
   ): Unit = {
-    val a            = kw(ns, attr)
-    val i_           = kw(s"$ns.$attr", "i_")
-    val v_           = kw(s"$ns.$attr", "v_")
+    val a            = kw(ent, attr)
+    val i_           = kw(s"$ent.$attr", "i_")
+    val v_           = kw(s"$ent.$attr", "v_")
     val removeValues = seq.map(transformValue(_).asInstanceOf[AnyRef])
     val remaining    = new ListBuffer[(AnyRef, AnyRef)]()
 
@@ -643,9 +643,9 @@ trait Update_datomic
   }
 
   override def updateByteArray(
-    ns: String, attr: String, newByteArray: Array[Byte]
+    ent: String, attr: String, newByteArray: Array[Byte]
   ): Unit = {
-    val a = kw(ns, attr)
+    val a = kw(ent, attr)
     if (newByteArray.nonEmpty) {
       val newValues = newByteArray
       rowResolvers += { (row: jList[AnyRef]) =>
@@ -673,20 +673,20 @@ trait Update_datomic
 
 
   override protected def updateMapEq[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     noValue: Boolean,
     map: Map[String, T],
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    val a  = kw(ns, attr)
-    val k_ = kw(s"$ns.$attr", "k_")
-    val v_ = kw(s"$ns.$attr", "v_")
+    val a  = kw(ent, attr)
+    val k_ = kw(s"$ent.$attr", "k_")
+    val v_ = kw(s"$ent.$attr", "v_")
     if (noValue) {
       rowResolvers += { (row: jList[AnyRef]) =>
-        retractCurrentMapPairs(row, a, k_, optRefNs)
+        retractCurrentMapPairs(row, a, k_, optRef)
         attrIndex += 1
       }
     } else {
@@ -694,7 +694,7 @@ trait Update_datomic
         case (k, v) => (validKey(k), transformValue(v).asInstanceOf[AnyRef])
       }
       rowResolvers += { (row: jList[AnyRef]) =>
-        retractCurrentMapPairs(row, a, k_, optRefNs)
+        retractCurrentMapPairs(row, a, k_, optRef)
 
         // Assert new pairs
         var i = 0
@@ -712,10 +712,10 @@ trait Update_datomic
     }
   }
 
-  private def retractCurrentMapPairs(row: jList[AnyRef], a: Keyword, a_k: Keyword, optRefNs: Option[String]): Unit = {
+  private def retractCurrentMapPairs(row: jList[AnyRef], a: Keyword, a_k: Keyword, optRef: Option[String]): Unit = {
     if (attrIndex < rowSize) {
       // Cached values with known ref
-      val cached = cachedValues(row, optRefNs)
+      val cached = cachedValues(row, optRef)
       val keys   = if (isUpsert) {
         cached.map(_.asInstanceOf[jMap[_, _]].get(a_k)).asJava
       } else {
@@ -753,8 +753,8 @@ trait Update_datomic
   }
 
 
-  private def cachedValues(row: jList[AnyRef], optRefNs: Option[String]): List[AnyRef] = {
-    (if (optRefNs.isEmpty) {
+  private def cachedValues(row: jList[AnyRef], optRef: Option[String]): List[AnyRef] = {
+    (if (optRef.isEmpty) {
       row.get(attrIndex) match {
         case vs: jSet[_]  => if (isUpsert)
           vs.iterator().next().asInstanceOf[jList[_]].toArray()
@@ -777,18 +777,18 @@ trait Update_datomic
 
 
   override protected def updateMapAdd[T](
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     map: Map[String, T],
     transformValue: T => Any,
     exts: List[String],
     value2json: (StringBuffer, T) => StringBuffer,
   ): Unit = {
     if (map.nonEmpty) {
-      val a        = kw(ns, attr)
-      val k_       = kw(s"$ns.$attr", "k_")
-      val v_       = kw(s"$ns.$attr", "v_")
+      val a        = kw(ent, attr)
+      val k_       = kw(s"$ent.$attr", "k_")
+      val v_       = kw(s"$ent.$attr", "v_")
       val newPairs = map.map {
         case (k, v) => (validKey(k), transformValue(v).asInstanceOf[AnyRef])
       }
@@ -843,15 +843,15 @@ trait Update_datomic
   }
 
   override protected def updateMapRemove(
-    ns: String,
+    ent: String,
     attr: String,
-    optRefNs: Option[String],
+    optRef: Option[String],
     keys: Seq[String],
     exts: List[String],
   ): Unit = {
     if (keys.nonEmpty) {
-      val a  = kw(ns, attr)
-      val k_ = kw(s"$ns.$attr", "k_")
+      val a  = kw(ent, attr)
+      val k_ = kw(s"$ent.$attr", "k_")
       rowResolvers += { (row: jList[AnyRef]) =>
         // Retract old pairs with same keys as new pairs (if any)
         retractPairs(keys, row, a, k_)
@@ -861,29 +861,25 @@ trait Update_datomic
   }
 
 
-  override def handleIds(ns: String, ids1: Seq[Long]): Unit = ()
+  override def handleIds(ent: String, ids1: Seq[Long]): Unit = ()
   override def handleFilterAttr[T <: Attr with Tacit](filterAttr: T): Unit = ()
 
-  override def handleRef(ref: Ref): Unit = {
-    val Ref(ns, refAttr0, refNs, card, _, _) = ref
+  override def handleRef(r: Ref): Unit = {
+    val Ref(ent, refAttr0, ref, card, _, _) = r
 
-    currentNsPath = currentNsPath match {
-      case Nil => List(ns, refAttr0, refNs)
-      case cur => cur ++ List(refAttr0, refNs)
+    currentEntPath = currentEntPath match {
+      case Nil => List(ent, refAttr0, ref)
+      case cur => cur ++ List(refAttr0, ref)
     }
-    //    println("  currentNsPath: " + currentNsPath)
-    val refAttr = kw(ns, refAttr0)
+    val refAttr = kw(ent, refAttr0)
     rowResolvers += {
       case row: jList[AnyRef] if isUpsert =>
         ids = if (attrIndex < rowSize) {
-          //          println("---------")
-          //          println(row)
-          //          println(attrIndex)
           row.get(attrIndex) match {
             case null =>
               // Don't add ref if it's not required (when removing only)
               // Add required ref
-              if (requiredNsPaths.contains(currentNsPath)) {
+              if (requiredEntPaths.contains(currentEntPath)) {
                 // Add ref to next entity
                 val ref = newId
                 appendStmt(add, ids.head, refAttr, ref)
@@ -935,7 +931,7 @@ trait Update_datomic
   }
 
   override def handleBackRef(backRef: BackRef): Unit = {
-    currentNsPath = currentNsPath.init
+    currentEntPath = currentEntPath.init
     rowResolvers += { _ =>
       idLists = idLists.init
       ids = idLists.last

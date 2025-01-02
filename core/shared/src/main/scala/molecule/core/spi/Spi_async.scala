@@ -4,7 +4,7 @@ import molecule.base.error.InsertError
 import molecule.core.action._
 import scala.concurrent.{Future, ExecutionContext => EC}
 
-trait Spi_async  {
+trait Spi_async {
 
   def query_get[Tpl](
     q: Query[Tpl]

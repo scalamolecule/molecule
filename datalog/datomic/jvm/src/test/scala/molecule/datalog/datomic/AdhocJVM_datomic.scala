@@ -26,7 +26,7 @@ class AdhocJVM_datomic extends Test with DbProviders_datomic with TestUtils {
 
       //        _ = Peer.q(
       //          """[:find  ?tx ?e ?v ?op
-      //            | :where [?e :Ns/int ?v ?tx ?op]]
+      //            | :where [?e :Entity/int ?v ?tx ?op]]
       //            |""".stripMargin, conn.db.asInstanceOf[Database].history()
       //        ).forEach(r => println(r))
 
@@ -102,7 +102,7 @@ class AdhocJVM_datomic extends Test with DbProviders_datomic with TestUtils {
 
 
   //    "unique" - unique { implicit conn =>
-  //      import molecule.coreTests.domains.dsl.Ns._
+  //      import molecule.coreTests.domains.dsl.Types._
   //      for {
   //        _ <- Entity.int.s.i.insert(triples).transact
   //

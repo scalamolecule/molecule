@@ -5,8 +5,8 @@ import molecule.sql.core.transaction.strategy.{SqlAction, SqlOps}
 abstract class UpdateAction(
   parent: UpdateAction,
   sqlOps: SqlOps,
-  ns: String
-) extends SqlAction(parent, sqlOps, ns) {
+  ent: String
+) extends SqlAction(parent, sqlOps, ent) {
 
 
   // Execute update ----------------------------------------
@@ -27,7 +27,7 @@ abstract class UpdateAction(
         ps.close()
         ids
       } else {
-        sqlOps.getIds(ps, ns)
+        sqlOps.getIds(ps, ent)
       }
     }
   }
@@ -36,26 +36,26 @@ abstract class UpdateAction(
   // Change strategy ----------------------------------------
 
   def deleteRefIds(
-    refAttr: String, refNs: String, nsId: Long, refIds: Set[Long] = Set.empty[Long]
+    refAttr: String, ref: String, entId: Long, refIds: Set[Long] = Set.empty[Long]
   ): Unit = {
     addSibling(UpdateRefIdsDelete(
-      parent, sqlOps, ns, refAttr, refNs, nsId, refIds
+      parent, sqlOps, ent, refAttr, ref, entId, refIds
     ))
   }
   def insertRefIds(
-    refAttr: String, refNs: String, refIds: Set[Long]
+    refAttr: String, ref: String, refIds: Set[Long]
   ): Unit = {
     addSibling(UpdateRefIdsInsert(
-      parent, sqlOps, ns, refAttr, refNs, refIds
+      parent, sqlOps, ent, refAttr, ref, refIds
     ))
   }
 
-  def refOne(ns: String, refAttr: String, refNs: String): UpdateAction = {
-    addChild(UpdateRefOne(this, sqlOps, ns, refAttr, refNs))
+  def refOne(ent: String, refAttr: String, ref: String): UpdateAction = {
+    addChild(UpdateRefOne(this, sqlOps, ent, refAttr, ref))
   }
 
-  def refMany(ns: String, refAttr: String, refNs: String): UpdateAction = {
-    addChild(UpdateRefMany(this, sqlOps, ns, refAttr, refNs))
+  def refMany(ent: String, refAttr: String, ref: String): UpdateAction = {
+    addChild(UpdateRefMany(this, sqlOps, ent, refAttr, ref))
   }
 
   def backRef: UpdateAction = parent
@@ -68,8 +68,8 @@ abstract class UpdateAction(
 
   // Add missing refs for upserts ----------------------------------------
 
-  def getCompleteRefIds(refNs: String, knownIds: List[Long]): List[Long] = {
-    val newRefIds = insertMissingRefRows(refNs, knownIds)
+  def getCompleteRefIds(ref: String, knownIds: List[Long]): List[Long] = {
+    val newRefIds = insertMissingRefRows(ref, knownIds)
     addRefs(knownIds, newRefIds)
     mergeKnownAndNewRefIds(knownIds, newRefIds)
   }
@@ -77,13 +77,13 @@ abstract class UpdateAction(
   def addRefs(knownIds: List[Long], newRefIds: List[Long]): Unit = ???
 
   protected def insertMissingRefRows(
-    refNs: String,
+    ref: String,
     knownIds: List[Long]
   ): List[Long] = {
-    val insertEmptyRefRows = prepare(sqlOps.insertStmt(refNs, Nil, Nil))
+    val insertEmptyRefRows = prepare(sqlOps.insertStmt(ref, Nil, Nil))
     (1 to knownIds.count(_ == 0L))
       .foreach(_ => insertEmptyRefRows.addBatch())
-    sqlOps.getIds(insertEmptyRefRows, refNs)
+    sqlOps.getIds(insertEmptyRefRows, ref)
   }
 
   protected def mergeKnownAndNewRefIds(

@@ -5,28 +5,28 @@ import molecule.sql.core.transaction.strategy.{SqlAction, SqlOps}
 abstract class SaveAction(
   parent: SaveAction,
   sqlOps: SqlOps,
-  ns: String
-) extends SqlAction(parent, sqlOps, ns) {
+  ent: String
+) extends SqlAction(parent, sqlOps, ent) {
 
   // Build execution graph ----------------------------------------
 
-  def refIds(refAttr: String, refNs: String, refIds: Set[Long]): Unit = {
+  def refIds(refAttr: String, ref: String, refIds: Set[Long]): Unit = {
     addSibling(SaveRefIds(
-      parent, sqlOps, ns, refAttr, refNs, refIds
+      parent, sqlOps, ent, refAttr, ref, refIds
     ))
   }
 
-  def refOne(ns: String, refAttr: String, refNs: String): SaveAction = {
+  def refOne(ent: String, refAttr: String, ref: String): SaveAction = {
     addChild(SaveRefOne(
-      this, sqlOps, ns, refAttr, refNs, setCol(refAttr)
+      this, sqlOps, ent, refAttr, ref, setCol(refAttr)
     ))
   }
 
-  def refMany(ns: String, refAttr: String, refNs: String): SaveAction = {
-    val ref = addChild(SaveNs(this, sqlOps, refNs, "RefMany"))
+  def refMany(ent: String, refAttr: String, r: String): SaveAction = {
+    val ref = addChild(SaveEntity(this, sqlOps, r, "RefMany"))
 
-    // Make join after current ns is inserted
-    addSibling(SaveRefJoin(this, ref, sqlOps, ns, refAttr, refNs))
+    // Make join after current entity is inserted
+    addSibling(SaveRefJoin(this, ref, sqlOps, ent, refAttr, r))
 
     // Continue with ref entity
     ref
