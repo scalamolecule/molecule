@@ -2,14 +2,18 @@ package molecule.datalog.datomic
 
 import molecule.base.error.ModelError
 import molecule.core.util.Executor._
+import molecule.coreTests.domains.schema.TypesSchema_datomic
 import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.datalog.datomic.async._
+import molecule.datalog.datomic.facade.DatomicPeer
 import molecule.datalog.datomic.setup.DbProviders_datomic
 import scala.language.implicitConversions
 
 
 class AdhocJVM_datomic extends Test with DbProviders_datomic with TestUtils {
 
+
+  DatomicPeer.recreateDb(TypesSchema_datomic)
 
   "types" - types { implicit conn =>
     import molecule.coreTests.domains.dsl.Types._

@@ -16,6 +16,22 @@ case class IOApi(
   import api._
   import suite._
 
+
+  "Crud actions" - types { implicit conn =>
+    // (can't have this line in for expression since Cats IO doesn't
+    // have withFilter and better-monadic-for doesn't fix this on scalajs)
+    Entity.int.insert(1, 2).transact.map(_.ids).flatMap {
+      case List(a, b) =>
+        for {
+          _ <- Entity.int(3).save.transact
+          _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
+          _ <- Entity(a).int(10).update.transact
+          _ <- Entity(b).delete.transact
+          _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
+        } yield ()
+    }: @nowarn
+  }
+
   test("Crud actions") {
     types { implicit conn =>
       // (can't have this line in for expression since Cats IO doesn't

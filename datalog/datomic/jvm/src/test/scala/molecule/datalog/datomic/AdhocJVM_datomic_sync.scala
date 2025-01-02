@@ -9,12 +9,11 @@ import scala.language.implicitConversions
 
 class AdhocJVM_datomic_sync extends Test with DbProviders_datomic with TestUtils {
 
-
   "commit" - types { implicit conn =>
     Entity.int.insert(1 to 7).transact
     Entity.int(count).query.get.head ==> 7
 
     Entity.int_.delete.transact
-    Entity.int(count).query.i.get.head ==> 0
+    Entity.int(count).query.i.get ==> Nil
   }
 }

@@ -47,18 +47,7 @@ trait DatomicPeer extends BaseHelpers {
     dbIdentifier: String = ""
   ): DatomicConn_JVM = blocking {
     connect(
-      DatomicProxy(
-        protocol,
-        dbIdentifier,
-        schema,
-        //        schema.datomicPartitions,
-        //        schema.datomicSchema,
-        //        schema.datomicAliases,
-        //        schema.metaDomain,
-        //        schema.entityMap,
-        //        schema.attrMap,
-        //        schema.uniqueAttrs,
-      ),
+      DatomicProxy(protocol, dbIdentifier, schema),
       protocol,
       dbIdentifier
     )
@@ -67,8 +56,6 @@ trait DatomicPeer extends BaseHelpers {
   // OBS: if dbIdentifier is supplied, this database will be deleted entirely! Take care
   def recreateDb(
     proxy: DatomicProxy,
-    //    protocol: String,
-    //    dbIdentifier: String
   )(implicit ec: ExecutionContext): Future[DatomicConn_JVM] = blocking {
     val protocol     = proxy.protocol
     val dbIdentifier = proxy.dbIdentifier
@@ -102,22 +89,7 @@ trait DatomicPeer extends BaseHelpers {
     protocol: String = "mem",
     dbIdentifier: String = ""
   )(implicit ec: ExecutionContext): Future[DatomicConn_JVM] = blocking {
-    recreateDb(
-      DatomicProxy(
-        protocol,
-        dbIdentifier,
-        schema,
-        //        schema.datomicPartitions,
-        //        schema.datomicSchema,
-        //        schema.datomicAliases,
-        //        schema.metaDomain,
-        //        schema.entityMap,
-        //        schema.attrMap,
-        //        schema.uniqueAttrs,
-      ),
-      //      protocol,
-      //      dbIdentifier
-    )
+    recreateDb(DatomicProxy(protocol, dbIdentifier, schema))
   }
 
   def recreateDbIO(
@@ -155,18 +127,7 @@ trait DatomicPeer extends BaseHelpers {
     dbIdentifier: String = ""
   ): IO[DatomicConn_JVM] = {
     recreateDbIO(
-      DatomicProxy(
-        protocol,
-        dbIdentifier,
-        schema,
-        //        schema.datomicPartitions,
-        //        schema.datomicSchema,
-        //        schema.datomicAliases,
-        //        schema.metaDomain,
-        //        schema.entityMap,
-        //        schema.attrMap,
-        //        schema.uniqueAttrs,
-      ),
+      DatomicProxy(protocol, dbIdentifier, schema),
       protocol,
       dbIdentifier
     )
@@ -179,7 +140,6 @@ trait DatomicPeer extends BaseHelpers {
   ): ZLayer[T, Throwable, DatomicConn_JVM] = {
     ZLayer.scoped(
       ZIO.fromFuture(
-        //        _ => recreateDb(proxy, protocol, dbIdentifier)
         _ => recreateDb(proxy)
       )
     )
@@ -191,18 +151,7 @@ trait DatomicPeer extends BaseHelpers {
     dbIdentifier: String = ""
   ): ZLayer[T, Throwable, DatomicConn_JVM] = {
     recreateDbZLayer(
-      DatomicProxy(
-        protocol,
-        dbIdentifier,
-        schema,
-        //        schema.datomicPartitions,
-        //        schema.datomicSchema,
-        //        schema.datomicAliases,
-        //        schema.metaDomain,
-        //        schema.entityMap,
-        //        schema.attrMap,
-        //        schema.uniqueAttrs,
-      ),
+      DatomicProxy(protocol, dbIdentifier, schema),
       protocol,
       dbIdentifier
     )

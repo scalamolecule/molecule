@@ -20,7 +20,7 @@ inThisBuild(
     organizationName := "ScalaMolecule",
     organizationHomepage := Some(url("http://www.scalamolecule.org")),
     versionScheme := Some("early-semver"),
-    version := "0.15.1-SNAPSHOT",
+    version := "0.15.1",
     scalaVersion := scala213,
     crossScalaVersions := allScala,
 
@@ -136,8 +136,6 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies ++= Seq(
       "com.zaxxer" % "HikariCP" % "6.2.1" % Test,
       "org.scalameta" %% "munit" % "1.0.3" % Test,
-      "com.dimafeng" %% "testcontainers-scala-munit" % dimafengContainerVersion % Test,
-
       "org.scalactic" %%% "scalactic" % "3.2.19" % Test, // Tolerant roundings with triple equal on js platform
       "io.github.cquiroz" %%% "scala-java-time" % "2.6.0" % Test,
     ),
@@ -230,9 +228,6 @@ lazy val sqlMariaDB = crossProject(JSPlatform, JVMPlatform)
   .jvmSettings(
     libraryDependencies ++= Seq(
       "com.dimafeng" %% "testcontainers-scala-mariadb" % dimafengContainerVersion,
-
-//      "org.testcontainers" % "mariadb" % "1.20.4",
-
       "org.mariadb.jdbc" % "mariadb-java-client" % "3.5.1",
       "ch.qos.logback" % "logback-classic" % logbackVersion % Test
     ),
@@ -358,7 +353,7 @@ lazy val compilerArgs = Def.settings(
     case Some((3, _)) =>
       Seq(
         "-explain-types",
-        "-Ykind-projector"
+        //        "-Ykind-projector"
         //        "-experimental",
         //        "-rewrite",
         //        "-source:3.4-migration",
@@ -383,7 +378,6 @@ lazy val withDocs = Def.settings(
   Compile / doc / scalacOptions ++= Seq(
     "-doc-root-content",
     baseDirectory.value + "/src/main/scaladoc/rootdoc.txt",
-    "-diagrams",
     "-groups",
     "-doc-version",
     version.value,
