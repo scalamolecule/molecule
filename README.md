@@ -214,7 +214,9 @@ lazy val yourProject = project.in(file("app"))
       "org.scalamolecule" %%% "molecule-sql-h2" % "0.15.1",
       "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.15.1",
     ),
-    moleculeDomainPaths := Seq("app") // paths to directories with Data Model definition files
+    
+    // Paths to directories with your Domain structure definition files
+    moleculeDomainPaths := Seq("app") 
   )
 ```
 
