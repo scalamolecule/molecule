@@ -1,6 +1,6 @@
 package molecule.boilerplate.api
 
-import molecule.boilerplate.ast.Model.Element
+import molecule.boilerplate.ast.DataModel.Element
 
 trait Molecule {
   val elements: List[Element]

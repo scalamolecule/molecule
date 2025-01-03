@@ -1,7 +1,7 @@
 package molecule.rpc.grpc.spi
 
 import boopickle.Default._
-import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.ast.DataModel._
 import scala.concurrent.{Future, ExecutionContext => EC}
 
 

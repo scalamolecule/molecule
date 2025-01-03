@@ -1,8 +1,8 @@
 package molecule.coreTests.domains
 
-import molecule.Domain
+import molecule.DomainStructure
 
-object Types extends Domain(5) {
+object Types extends DomainStructure(5) {
 
   trait Entity {
     val i    = oneInt

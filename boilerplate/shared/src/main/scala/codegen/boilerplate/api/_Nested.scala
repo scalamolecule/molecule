@@ -8,7 +8,7 @@ object _Nested extends BoilerplateGenBase("Nested", "/api") {
     s"""// GENERATED CODE ********************************
        |package molecule.boilerplate.api
        |
-       |import molecule.boilerplate.ast.Model._
+       |import molecule.boilerplate.ast.DataModel._
        |
        |$traits
        |""".stripMargin

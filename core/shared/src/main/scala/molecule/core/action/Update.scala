@@ -1,6 +1,6 @@
 package molecule.core.action
 
-import molecule.boilerplate.ast.Model.Element
+import molecule.boilerplate.ast.DataModel.Element
 
 case class Update(
   elements: List[Element],

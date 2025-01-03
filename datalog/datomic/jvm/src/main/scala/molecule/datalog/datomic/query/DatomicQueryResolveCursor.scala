@@ -2,7 +2,7 @@ package molecule.datalog.datomic.query
 
 import java.util.Base64
 import molecule.base.error.ModelError
-import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.ast.DataModel._
 import molecule.boilerplate.ops.ModelTransformations_
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.dbView.DbView

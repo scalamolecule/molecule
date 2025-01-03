@@ -15,7 +15,7 @@ trait ValidationSchema2 { _: Schema =>
 
   override val metaDomain: MetaDomain =
     MetaDomain("molecule.coreTests.domains", "Validation", 5, Seq(
-      MetaGroup("", Seq(
+      MetaSegment("", Seq(
         MetaEntity("Strings", Seq(
           MetaAttribute("id", CardOne, "ID", None, Nil, None, None, Nil, Nil, Nil),
           MetaAttribute("email", CardOne, "String", None, Nil, None, None, Nil, Nil, Seq(

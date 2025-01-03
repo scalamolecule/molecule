@@ -10,7 +10,7 @@ object _PickleTpl extends CoreGenBase("PickleTpl", "/marshalling/serialize") {
     s"""// GENERATED CODE ********************************
        |package molecule.core.marshalling.serialize
        |
-       |import molecule.boilerplate.ast.Model._
+       |import molecule.boilerplate.ast.DataModel._
        |
        |trait $fileName_ { self: PickleTpls =>
        |

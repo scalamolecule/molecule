@@ -4,7 +4,7 @@ import java.net.URI
 import java.time._
 import java.util.{Base64, Date, UUID}
 import molecule.base.error.ModelError
-import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.ast.DataModel._
 import molecule.core.spi.Conn
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer

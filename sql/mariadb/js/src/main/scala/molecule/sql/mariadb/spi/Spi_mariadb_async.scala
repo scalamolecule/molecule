@@ -1,7 +1,7 @@
 package molecule.sql.mariadb.spi
 
 import boopickle.Default._
-import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.ast.DataModel._
 import molecule.sql.core.spi.SpiBase_async
 import molecule.sql.mariadb.query.Model2SqlQuery_mariadb
 import scala.concurrent.{Future, ExecutionContext => EC}

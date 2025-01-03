@@ -2,7 +2,7 @@ package molecule.sql.core.transaction
 
 import java.sql.{PreparedStatement => PS}
 import molecule.base.ast._
-import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.ast.DataModel._
 import molecule.core.transaction.ops.InsertOps
 import molecule.core.transaction.{InsertResolvers_, ResolveInsert}
 import molecule.sql.core.transaction.strategy.SqlOps

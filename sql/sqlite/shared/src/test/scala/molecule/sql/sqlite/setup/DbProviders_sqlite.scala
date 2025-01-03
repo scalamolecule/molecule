@@ -12,5 +12,5 @@ trait DbProviders_sqlite extends DbProviders with DbConnection_sqlite with Platf
   override def refs(test: Conn => Any): Any = run(test, RefsSchema_sqlite)
   override def unique(test: Conn => Any): Any = run(test, UniquesSchema_sqlite)
   override def validation(test: Conn => Any): Any = run(test, ValidationSchema_sqlite)
-  override def grouped(test: Conn => Any): Any = run(test, GroupsSchema_sqlite)
+  override def segments(test: Conn => Any): Any = run(test, SegmentsSchema_sqlite)
 }

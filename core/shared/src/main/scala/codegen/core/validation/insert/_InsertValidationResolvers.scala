@@ -12,7 +12,7 @@ object _InsertValidationResolvers extends CoreGenBase("InsertValidationResolvers
        |
        |import molecule.base.ast._
        |import molecule.base.error.InsertError
-       |import molecule.boilerplate.ast.Model._
+       |import molecule.boilerplate.ast.DataModel._
        |
        |trait $fileName_ {
        |

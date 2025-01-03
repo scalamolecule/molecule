@@ -3,7 +3,7 @@ package molecule.datalog.datomic.spi
 import java.util.{Date, UUID, Collection => jCollection}
 import datomic.Peer
 import molecule.base.error._
-import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.ast.DataModel._
 import molecule.core.action.Update
 import molecule.core.spi.Conn
 import molecule.core.util.{JavaConversions, ModelUtils}

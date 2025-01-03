@@ -10,5 +10,5 @@ trait DbProviders { self: DbConnection with Platform =>
   def refs(test: Conn => Any): Any = ???
   def unique(test: Conn => Any): Any = ???
   def validation(test: Conn => Any): Any = ???
-  def grouped(test: Conn => Any): Any = ???
+  def segments(test: Conn => Any): Any = ???
 }

@@ -7,8 +7,8 @@ import molecule.base.ast._
 import molecule.base.util.BaseHelpers
 
 
-object Model extends Model
-trait Model extends Validations with Values with BaseHelpers {
+object DataModel extends DataModel
+trait DataModel extends Validations with Values with BaseHelpers {
 
   sealed trait Mode
   trait Mandatory extends Mode

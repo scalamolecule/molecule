@@ -30,11 +30,12 @@ import java.util.{Date, UUID}
  *   // Additional entities...
  * }
  * }}}
- * For larger projects, it is recommended to group entity traits in objects:
+ * For larger projects, it is recommended to organize the domain structure in
+ * segments of related entity traits within objects:
  * {{{
  * object Seattle extends Domain(15) {
  *
- *   object customer { // Group of "customer" entity traits
+ *   object customer { // "customer" segment
  *     trait Person {
  *       val name    = oneString
  *       val age     = oneInt
@@ -45,24 +46,24 @@ import java.util.{Date, UUID}
  *       val street = oneString.fulltext
  *       val city   = oneInt
  *     }
- *     // ..more entities in the `customer` group
+ *     // ..more entities in the `customer` segment
  *   }
  *
- *   object products { // Group of "products" entity traits
+ *   object products { // "products" segment
  *     trait Item {
  *       val title   = oneString
  *       val inStock = oneInt
  *     }
- *     // ..more entities in the `products` group
+ *     // ..more entities in the `products` segment
  *   }
  *
- *   // Additional groups...
+ *   // Additional segments...
  * }
  * }}}
  *
  * @param maxArity Number of possible attributes in molecule output.
  */
-abstract class Domain(maxArity: Int) {
+abstract class DomainStructure(maxArity: Int) {
 
   // Types ..................................................
 

@@ -1,6 +1,6 @@
 package molecule.datalog.datomic.query
 
-import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.ast.DataModel._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.dbView.DbView
 import molecule.core.util.Executor.global

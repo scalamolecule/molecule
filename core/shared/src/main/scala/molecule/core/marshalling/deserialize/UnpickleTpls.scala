@@ -8,7 +8,7 @@ import boopickle.BasicPicklers._
 import boopickle.Default._
 import boopickle._
 import molecule.base.error._
-import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.ast.DataModel._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.Boopicklers._
 import molecule.core.util.ModelUtils

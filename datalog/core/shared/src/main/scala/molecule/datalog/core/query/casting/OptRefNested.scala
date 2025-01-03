@@ -1,7 +1,7 @@
 package molecule.datalog.core.query.casting
 
 import java.util.{Iterator => jIterator, Map => jMap}
-import molecule.boilerplate.ast.Model.{Element, Ref}
+import molecule.boilerplate.ast.DataModel.{Element, Ref}
 import molecule.datalog.core.query.{DatomicQueryBase, Model2DatomicQuery, ResolveOptRefPull}
 
 

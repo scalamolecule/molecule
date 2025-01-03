@@ -1,6 +1,6 @@
 package molecule.sql.core.query
 
-import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.ast.DataModel._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.ConnProxy
 import molecule.core.query.{Model2Query, QueryExpr}

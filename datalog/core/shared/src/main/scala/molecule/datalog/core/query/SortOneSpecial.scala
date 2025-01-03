@@ -4,7 +4,7 @@ import java.lang.{Boolean => jBoolean, Double => jDouble, Float => jFloat, Integ
 import java.math.{BigDecimal => jBigDecimal, BigInteger => jBigInt}
 import java.net.URI
 import java.util.{Date, UUID, List => jList, Map => jMap}
-import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.ast.DataModel._
 import molecule.core.util.AggrUtils
 
 trait SortOneSpecial[Tpl]

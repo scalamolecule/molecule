@@ -1,9 +1,10 @@
 package molecule.coreTests.domains
 
-import molecule.Domain
+import molecule.DomainStructure
 
-object Groups extends Domain(5) {
+object Segments extends DomainStructure(5) {
 
+  // General segment
   object gen {
     trait Profession {
       val name = oneString
@@ -16,6 +17,8 @@ object Groups extends Domain(5) {
     }
   }
 
+
+  // Literature segment
   object lit {
     trait Book {
       val title     = oneString
@@ -29,8 +32,7 @@ object Groups extends Domain(5) {
   }
 
 
-  // other domain
-
+  // Accounting segment
   object accounting {
     trait Invoice {
       val no          = oneInt

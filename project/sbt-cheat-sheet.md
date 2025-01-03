@@ -79,8 +79,8 @@ Compilation on JS side can take some time.
 
 ## Publish with sbt-molecule update too
 
-1) Snapshot, molecule: `sbt +publishLocal` with snapshot version
-1) Snapshot, sbt-molecule: `./test-all.sh` with snapshot version and molecule snapshot dependency
+1) Snapshot, molecule: `sbt +publishLocal`
+1) Snapshot, sbt-molecule: `./test-all.sh` (with molecule snapshot dependency)
 1) Snapshot, Fix sbt-molecule until all tests pass
 1) Snapshot, sbt-molecule: `sbt publishLocal` (still snapshot version)
 1) Snapshot, moleucle: `sbt clean compile -Dmolecule=true`

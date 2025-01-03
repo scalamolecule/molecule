@@ -14,5 +14,5 @@ trait DbProviders_mariadb extends DbProviders with DbConnection with Platform {
   override def refs(test: Conn => Any): Any = db.run(test, RefsSchema_mariadb)
   override def unique(test: Conn => Any): Any = db.run(test, UniquesSchema_mariadb)
   override def validation(test: Conn => Any): Any = db.run(test, ValidationSchema_mariadb)
-  override def grouped(test: Conn => Any): Any = db.run(test, GroupsSchema_mariadb)
+  override def segments(test: Conn => Any): Any = db.run(test, SegmentsSchema_mariadb)
 }

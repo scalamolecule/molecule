@@ -1,7 +1,7 @@
 package molecule.sql.h2.spi
 
 import java.sql.DriverManager
-import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.ast.DataModel._
 import molecule.core.action._
 import molecule.core.marshalling.{ConnProxy, JdbcProxy}
 import molecule.core.transaction._

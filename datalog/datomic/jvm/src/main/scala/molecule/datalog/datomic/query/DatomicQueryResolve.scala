@@ -4,7 +4,7 @@ import java.util
 import java.util.{Collections, Comparator, ArrayList => jArrayList, Collection => jCollection, List => jList}
 import datomic.{Database, Peer}
 import molecule.base.error.ModelError
-import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.ast.DataModel._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.dbView._
 import molecule.core.query.Pagination

@@ -13,7 +13,7 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
     val delimiter = "// GENERATED from here and below (edit in _Model generator)"
     if (!lines.exists(_.contains(delimiter)))
       throw ExecutionError(
-        s"Couldn't find delimiting text '$delimiter' in file Model. " +
+        s"Couldn't find delimiting text '$delimiter' in file DataModel. " +
           "Please insert it before code to be generated."
       )
     lines.takeWhile(!_.contains(delimiter)).mkString("\n")
@@ -36,7 +36,7 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
 
   override val content = {
     val attrClasses = cardMode.map {
-      case (card, mode, modeFull) => makeAttrGroup(card, mode, modeFull)
+      case (card, mode, modeFull) => makeGroupOfAttrs(card, mode, modeFull)
     }.mkString("\n")
     customCode +
       s"""
@@ -44,7 +44,7 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
          |  $attrClasses}""".stripMargin
   }
 
-  private def makeAttrGroup(card: String, mode: String, modeFull: String): String = {
+  private def makeGroupOfAttrs(card: String, mode: String, modeFull: String): String = {
     // Render attribute toString method so that a printout can be directly used as valid Scala code
     def body(baseTpe0: String): String = {
       val baseTpe   = if (baseTpe0 == "ID") "Long" else baseTpe0

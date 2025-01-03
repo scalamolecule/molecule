@@ -2,7 +2,7 @@ package molecule.datalog.datomic.spi
 
 import datomic.Peer
 import molecule.base.error.{InsertError, ModelError}
-import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.ast.DataModel._
 import molecule.core.action._
 import molecule.core.spi.{Conn, Spi_sync, TxReport}
 import molecule.core.transaction.{ResolveDelete, ResolveInsert, ResolveSave, ResolveUpdate}

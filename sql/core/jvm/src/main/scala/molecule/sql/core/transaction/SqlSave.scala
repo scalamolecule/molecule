@@ -3,7 +3,7 @@ package molecule.sql.core.transaction
 import java.sql.{PreparedStatement => PS}
 import boopickle.Default._
 import molecule.base.ast._
-import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.ast.DataModel._
 import molecule.core.transaction.ResolveSave
 import molecule.core.transaction.ops.SaveOps
 import molecule.core.util.SerializationUtils

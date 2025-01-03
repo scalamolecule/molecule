@@ -1,6 +1,6 @@
 package molecule.datalog.core.query
 
-import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.ast.DataModel._
 import molecule.core.query.QueryExpr
 
 trait QueryExprSet[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] with LambdasSet =>

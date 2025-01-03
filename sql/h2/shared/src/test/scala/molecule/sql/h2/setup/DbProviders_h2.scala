@@ -12,5 +12,5 @@ trait DbProviders_h2 extends DbProviders with DbConnection_h2 with Platform {
   override def refs(test: Conn => Any): Any = run(test, RefsSchema_h2)
   override def unique(test: Conn => Any): Any = run(test, UniquesSchema_h2)
   override def validation(test: Conn => Any): Any = run(test, ValidationSchema_h2)
-  override def grouped(test: Conn => Any): Any = run(test, GroupsSchema_h2)
+  override def segments(test: Conn => Any): Any = run(test, SegmentsSchema_h2)
 }

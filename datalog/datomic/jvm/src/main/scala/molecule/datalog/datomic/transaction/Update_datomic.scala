@@ -8,7 +8,7 @@ import datomic.query.EntityMap
 import datomic.{Database, Peer}
 import molecule.base.ast.CardOne
 import molecule.base.error._
-import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.ast.DataModel._
 import molecule.boilerplate.ops.ModelTransformations_
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ResolveUpdate

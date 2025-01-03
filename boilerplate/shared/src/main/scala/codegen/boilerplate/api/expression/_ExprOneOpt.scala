@@ -10,7 +10,7 @@ object _ExprOneOpt extends BoilerplateGenBase("ExprOneOpt", "/api/expression") {
        |package molecule.boilerplate.api.expression
        |
        |import molecule.boilerplate.api._
-       |import molecule.boilerplate.ast.Model._
+       |import molecule.boilerplate.ast.DataModel._
        |import scala.language.higherKinds
        |$traits
        |""".stripMargin

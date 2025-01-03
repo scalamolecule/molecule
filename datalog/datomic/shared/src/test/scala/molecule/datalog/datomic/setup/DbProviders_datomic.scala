@@ -12,5 +12,5 @@ trait DbProviders_datomic extends DbProviders with DbConnection_datomic with Pla
   override def refs(test: Conn => Any): Any = run(test, RefsSchema_datomic)
   override def unique(test: Conn => Any): Any = run(test, UniquesSchema_datomic)
   override def validation(test: Conn => Any): Any = run(test, ValidationSchema_datomic)
-  override def grouped(test: Conn => Any): Any = run(test, GroupsSchema_datomic)
+  override def segments(test: Conn => Any): Any = run(test, SegmentsSchema_datomic)
 }

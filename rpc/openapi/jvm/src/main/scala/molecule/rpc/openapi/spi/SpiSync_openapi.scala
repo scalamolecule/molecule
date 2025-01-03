@@ -1,7 +1,7 @@
 package molecule.rpc.openapi.spi
 
 import molecule.base.error.InsertError
-import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.ast.DataModel._
 import molecule.core.action._
 import molecule.core.marshalling.ConnProxy
 import molecule.core.spi.{Conn, Renderer, SpiSync, TxReport}

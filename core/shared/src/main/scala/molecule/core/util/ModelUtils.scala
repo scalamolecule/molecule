@@ -1,7 +1,7 @@
 package molecule.core.util
 
 import molecule.base.error.ModelError
-import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.ast.DataModel._
 import molecule.core.marshalling.ConnProxy
 import scala.annotation.tailrec
 

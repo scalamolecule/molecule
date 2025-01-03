@@ -2,7 +2,7 @@ package molecule.core.validation
 
 import molecule.base.ast._
 import molecule.base.error._
-import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.ast.DataModel._
 import molecule.boilerplate.ops.ModelTransformations_
 import scala.annotation.tailrec
 

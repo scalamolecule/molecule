@@ -12,8 +12,8 @@
 //import molecule.boilerplate.api.Keywords._
 //import molecule.boilerplate.api._
 //import molecule.boilerplate.api.expression._
-//import molecule.boilerplate.ast.Model
-//import molecule.boilerplate.ast.Model._
+//import molecule.boilerplate.ast.DataModel
+//import molecule.boilerplate.ast.DataModel._
 //import scala.reflect.ClassTag
 //
 //
@@ -80,7 +80,7 @@
 //    override protected def _nestedOpt[NestedTpl](nestedElements: List[Element]): NestedInit_00[NestedTpl] = new NestedInit_00(self.elements.init :+ NestedOpt(self.elements.last.asInstanceOf[Ref], nestedElements))
 //  }
 //
-//  object Friends extends Character_0[t](elements :+ Model.Ref("Droid", "friends", "Character", CardSet, false, Seq(1, 6, 0))) with NestedInit
+//  object Friends extends Character_0[t](elements :+ DataModel.Ref("Droid", "friends", "Character", CardSet, false, Seq(1, 6, 0))) with NestedInit
 //}
 //
 //
@@ -126,7 +126,7 @@
 //    override protected def _nestedOpt[NestedTpl](nestedElements: List[Element]): NestedInit_01[A, NestedTpl] = new NestedInit_01(self.elements.init :+ NestedOpt(self.elements.last.asInstanceOf[Ref], nestedElements))
 //  }
 //
-//  object Friends extends Character_1[A, t](elements :+ Model.Ref("Droid", "friends", "Character", CardSet, false, Seq(1, 6, 0))) with NestedInit
+//  object Friends extends Character_1[A, t](elements :+ DataModel.Ref("Droid", "friends", "Character", CardSet, false, Seq(1, 6, 0))) with NestedInit
 //}
 //
 //
@@ -172,7 +172,7 @@
 //    override protected def _nestedOpt[NestedTpl](nestedElements: List[Element]): NestedInit_02[A, B, NestedTpl] = new NestedInit_02(self.elements.init :+ NestedOpt(self.elements.last.asInstanceOf[Ref], nestedElements))
 //  }
 //
-//  object Friends extends Character_2[A, B, t](elements :+ Model.Ref("Droid", "friends", "Character", CardSet, false, Seq(1, 6, 0))) with NestedInit
+//  object Friends extends Character_2[A, B, t](elements :+ DataModel.Ref("Droid", "friends", "Character", CardSet, false, Seq(1, 6, 0))) with NestedInit
 //}
 //
 //
@@ -218,7 +218,7 @@
 //    override protected def _nestedOpt[NestedTpl](nestedElements: List[Element]): NestedInit_03[A, B, C, NestedTpl] = new NestedInit_03(self.elements.init :+ NestedOpt(self.elements.last.asInstanceOf[Ref], nestedElements))
 //  }
 //
-//  object Friends extends Character_3[A, B, C, t](elements :+ Model.Ref("Droid", "friends", "Character", CardSet, false, Seq(1, 6, 0))) with NestedInit
+//  object Friends extends Character_3[A, B, C, t](elements :+ DataModel.Ref("Droid", "friends", "Character", CardSet, false, Seq(1, 6, 0))) with NestedInit
 //}
 //
 //
@@ -264,7 +264,7 @@
 //    override protected def _nestedOpt[NestedTpl](nestedElements: List[Element]): NestedInit_04[A, B, C, D, NestedTpl] = new NestedInit_04(self.elements.init :+ NestedOpt(self.elements.last.asInstanceOf[Ref], nestedElements))
 //  }
 //
-//  object Friends extends Character_4[A, B, C, D, t](elements :+ Model.Ref("Droid", "friends", "Character", CardSet, false, Seq(1, 6, 0))) with NestedInit
+//  object Friends extends Character_4[A, B, C, D, t](elements :+ DataModel.Ref("Droid", "friends", "Character", CardSet, false, Seq(1, 6, 0))) with NestedInit
 //}
 //
 //
@@ -310,7 +310,7 @@
 //    override protected def _nestedOpt[NestedTpl](nestedElements: List[Element]): NestedInit_05[A, B, C, D, E, NestedTpl] = new NestedInit_05(self.elements.init :+ NestedOpt(self.elements.last.asInstanceOf[Ref], nestedElements))
 //  }
 //
-//  object Friends extends Character_5[A, B, C, D, E, t](elements :+ Model.Ref("Droid", "friends", "Character", CardSet, false, Seq(1, 6, 0))) with NestedInit
+//  object Friends extends Character_5[A, B, C, D, E, t](elements :+ DataModel.Ref("Droid", "friends", "Character", CardSet, false, Seq(1, 6, 0))) with NestedInit
 //}
 //
 //
@@ -338,6 +338,6 @@
 //  override protected def _attrSortTac[ns1[_], ns2[_, _]](op: Op, a: ModelOps_0[t, ns1, ns2] with CardOne) = new Droid_6[A, B, C, D, E, F, t](filterAttr(elements, op, a)) with SortAttrs_6[A, B, C, D, E, F, t, Droid_6]
 //  override protected def _attrTac    [ns1[_], ns2[_, _]](op: Op, a: ModelOps_0[t, ns1, ns2]             ) = new Droid_6[A, B, C, D, E, F, t](filterAttr(elements, op, a))
 //
-//  object Friends extends Character_6[A, B, C, D, E, F, t](elements :+ Model.Ref("Droid", "friends", "Character", CardSet, false, Seq(1, 6, 0)))
+//  object Friends extends Character_6[A, B, C, D, E, F, t](elements :+ DataModel.Ref("Droid", "friends", "Character", CardSet, false, Seq(1, 6, 0)))
 //}
 //

@@ -11,7 +11,7 @@ object _InsertResolvers extends CoreGenBase("InsertResolvers", "/transaction") {
        |package molecule.core.transaction
        |
        |import molecule.base.ast._
-       |import molecule.boilerplate.ast.Model._
+       |import molecule.boilerplate.ast.DataModel._
        |
        |trait $fileName_ {
        |

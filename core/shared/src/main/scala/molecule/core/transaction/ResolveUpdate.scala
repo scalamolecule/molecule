@@ -1,7 +1,7 @@
 package molecule.core.transaction
 
 import molecule.base.error._
-import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.ast.DataModel._
 import molecule.core.transaction.ops.UpdateOps
 import molecule.core.util.ModelUtils
 import scala.annotation.tailrec

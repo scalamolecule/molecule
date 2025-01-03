@@ -9,13 +9,14 @@ case class MetaDomain(
   pkg: String,
   domain: String,
   maxArity: Int,
-  groups: Seq[MetaGroup]
+  segments: Seq[MetaSegment]
 ) extends MetaModel with BaseHelpers {
   def render(tabs: Int = 0): String = {
-    val p         = indent(tabs)
-    val pad       = s"\n$p  "
-    val groupsStr = if (groups.isEmpty) "" else groups.map(_.render(tabs + 1)).mkString(pad, s",\n\n$pad", s"\n$p")
-    s"""MetaDomain("$pkg", "$domain", $maxArity, Seq($groupsStr))"""
+    val p           = indent(tabs)
+    val pad         = s"\n$p  "
+    val segmentsStr = if (segments.isEmpty) "" else
+      segments.map(_.render(tabs + 1)).mkString(pad, s",\n\n$pad", s"\n$p")
+    s"""MetaDomain("$pkg", "$domain", $maxArity, Seq($segmentsStr))"""
   }
 
   override def toString: String = render(0)
@@ -24,8 +25,8 @@ case class MetaDomain(
     val p        = indent(tabs)
     val pad      = s"\n$p  "
     val pairs    = for {
-      group <- groups
-      entity <- group.ents
+      segment <- segments
+      entity <- segment.ents
     } yield {
       s""""${entity.ent}" -> $pad  ${entity.render(tabs + 2)}"""
     }
@@ -37,8 +38,8 @@ case class MetaDomain(
     val p        = indent(tabs)
     val pad      = s"\n$p  "
     val attrData = for {
-      group <- groups
-      entity <- group.ents
+      segment <- segments
+      entity <- segment.ents
       attr <- entity.attrs
     } yield {
       (s"${entity.ent}.${attr.attr}", attr.card, attr.baseTpe, attr.requiredAttrs)
@@ -55,8 +56,8 @@ case class MetaDomain(
 
   def uniqueAttrs: String = {
     val attrs    = for {
-      group <- groups
-      entity <- group.ents
+      segment <- segments
+      entity <- segment.ents
       attr <- entity.attrs if attr.options.exists(s => s == "unique" || s == "uniqueIdentity")
     } yield {
       s""""${entity.ent}.${attr.attr}""""
@@ -67,8 +68,8 @@ case class MetaDomain(
 }
 
 
-case class MetaGroup(
-  group: String,
+case class MetaSegment(
+  segment: String,
   ents: Seq[MetaEntity]
 ) extends MetaModel with BaseHelpers {
   def render(tabs: Int): String = {
@@ -76,7 +77,7 @@ case class MetaGroup(
     val pad         = s"\n$p  "
     val entitiesStr = if (ents.isEmpty) "" else
       ents.map(_.render(tabs + 1)).mkString(pad, s",\n$pad", s"\n$p")
-    s"""MetaGroup("$group", Seq($entitiesStr))"""
+    s"""MetaSegment("$segment", Seq($entitiesStr))"""
   }
 
   override def toString: String = render(0)

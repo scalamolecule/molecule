@@ -2,9 +2,9 @@ package molecule.coreTests.domains
 
 import java.time._
 import java.util.Date
-import molecule.Domain
+import molecule.DomainStructure
 
-object Validation extends Domain(5) {
+object Validation extends DomainStructure(5) {
 
   trait Strings {
     val email        = oneString.email

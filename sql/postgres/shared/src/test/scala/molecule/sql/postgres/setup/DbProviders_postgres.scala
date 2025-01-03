@@ -14,5 +14,5 @@ trait DbProviders_postgres extends DbProviders with DbConnection with Platform {
   override def refs(test: Conn => Any): Any = db.run(test, RefsSchema_postgres)
   override def unique(test: Conn => Any): Any = db.run(test, UniquesSchema_postgres)
   override def validation(test: Conn => Any): Any = db.run(test, ValidationSchema_postgres)
-  override def grouped(test: Conn => Any): Any = db.run(test, GroupsSchema_postgres)
+  override def segments(test: Conn => Any): Any = db.run(test, SegmentsSchema_postgres)
 }

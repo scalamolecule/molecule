@@ -1,6 +1,6 @@
 package molecule.core.query
 
-import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.ast.DataModel._
 
 trait QueryExpr {
 

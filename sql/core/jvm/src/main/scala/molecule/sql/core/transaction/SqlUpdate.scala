@@ -4,7 +4,7 @@ import java.sql.{PreparedStatement => PS}
 import boopickle.Default._
 import molecule.base.ast.CardOne
 import molecule.base.error._
-import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.ast.DataModel._
 import molecule.core.transaction.ResolveUpdate
 import molecule.core.transaction.ops.UpdateOps
 import molecule.sql.core.spi.SpiHelpers

@@ -1,13 +1,13 @@
-package molecule.coreTests.spi.entityName
+package molecule.coreTests.spi.segments
 
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
 import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Groups._
+import molecule.coreTests.domains.dsl.Segments._
 import molecule.coreTests.setup._
 
 
-case class Scoped(
+case class Prefixed(
   suite: Test,
   api: Api_async with Spi_async with DbProviders
 ) extends TestUtils {
@@ -15,7 +15,7 @@ case class Scoped(
   import api._
   import suite._
 
-  "Nested 2 levels" - grouped { implicit conn =>
+  "Nested 2 levels" - segments { implicit conn =>
     for {
       _ <- lit_Book.title.Reviewers.name.Professions.*(gen_Profession.name)
         .insert("book", "Jan", List("Musician")).transact
@@ -30,7 +30,7 @@ case class Scoped(
   }
 
 
-  "Back only" - grouped { implicit conn =>
+  "Back only" - segments { implicit conn =>
     for {
       _ <- lit_Book.title("A good book").cat("good").Author.name("Marc").save.transact
       _ <- lit_Book.title.Author.name._lit_Book.cat
@@ -39,7 +39,7 @@ case class Scoped(
   }
 
 
-  "Adjacent" - grouped { implicit conn =>
+  "Adjacent" - segments { implicit conn =>
     for {
       _ <- lit_Book.title.Author.name._lit_Book.Reviewers.name
         .insert("book", "John", "Marc").transact
@@ -53,7 +53,7 @@ case class Scoped(
   }
 
 
-  "Nested" - grouped { implicit conn =>
+  "Nested" - segments { implicit conn =>
     for {
       _ <- lit_Book.title.Author.name._lit_Book.Reviewers.*(gen_Person.name)
         .insert("book", "John", List("Marc")).transact
@@ -67,7 +67,7 @@ case class Scoped(
   }
 
 
-  "Nested + adjacent" - grouped { implicit conn =>
+  "Nested + adjacent" - segments { implicit conn =>
     for {
       _ <- lit_Book.title.Author.name._lit_Book.Reviewers.*(
         gen_Person.name.Professions.name
@@ -82,7 +82,7 @@ case class Scoped(
   }
 
 
-  "Nested + nested" - grouped { implicit conn =>
+  "Nested + nested" - segments { implicit conn =>
     for {
       _ <- lit_Book.title.Author.name._lit_Book.Reviewers.*(
           gen_Person.name.Professions.*(

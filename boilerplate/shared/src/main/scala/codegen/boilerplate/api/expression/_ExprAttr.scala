@@ -10,7 +10,7 @@ object _ExprAttr extends BoilerplateGenBase("ExprAttr", "/api/expression") {
        |
        |import molecule.base.ast._
        |import molecule.boilerplate.api._
-       |import molecule.boilerplate.ast.Model._
+       |import molecule.boilerplate.ast.DataModel._
        |import scala.language.higherKinds
        |
        |

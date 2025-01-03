@@ -1,8 +1,8 @@
 package molecule.datalog.core.query
 
 import molecule.base.error.ModelError
-import molecule.boilerplate.ast.Model
-import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.ast.DataModel
+import molecule.boilerplate.ast.DataModel._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.query.QueryExpr
 import molecule.datalog.core.query.casting._
@@ -84,7 +84,7 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
     (preQuery, mainQuery, queryStrs)
   }
 
-  final private def addFilterAttrCallback(): (List[String], Model.Attr) => Unit = {
+  final private def addFilterAttrCallback(): (List[String], DataModel.Attr) => Unit = {
     (pathAttr: List[String], a: Attr) => {
       filterAttrVars.get(pathAttr).fold {
         // Create datomic variable for this filter attribute

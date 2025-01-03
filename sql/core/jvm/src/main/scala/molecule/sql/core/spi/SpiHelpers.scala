@@ -5,7 +5,7 @@ import java.time._
 import java.util.{Date, UUID}
 import molecule.base.ast._
 import molecule.base.error.ModelError
-import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.ast.DataModel._
 import molecule.core.action.Query
 import molecule.core.util.ModelUtils
 import molecule.sql.core.javaSql.{ResultSetInterface => Row}

@@ -2,7 +2,7 @@ package molecule.datalog.datomic.marshalling
 
 import java.nio.ByteBuffer
 import molecule.base.error.MoleculeError
-import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.ast.DataModel._
 import molecule.core.action._
 import molecule.core.marshalling.Boopicklers._
 import molecule.core.marshalling._

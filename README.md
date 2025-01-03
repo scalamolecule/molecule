@@ -196,7 +196,7 @@ sbt.version = 1.10.7
 `project/plugins.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.11.1")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.11.2")
 ```
 
 `build.sbt`:
@@ -207,15 +207,15 @@ lazy val yourProject = project.in(file("app"))
   .settings(
     libraryDependencies ++= Seq(
       // One or more of:
-      "org.scalamolecule" %%% "molecule-sql-postgres" % "0.15.1",
-      "org.scalamolecule" %%% "molecule-sql-sqlite" % "0.15.1",
-      "org.scalamolecule" %%% "molecule-sql-mysql" % "0.15.1",
-      "org.scalamolecule" %%% "molecule-sql-mariadb" % "0.15.1",
-      "org.scalamolecule" %%% "molecule-sql-h2" % "0.15.1",
-      "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.15.1",
+      "org.scalamolecule" %%% "molecule-sql-postgres" % "0.15.2",
+      "org.scalamolecule" %%% "molecule-sql-sqlite" % "0.15.2",
+      "org.scalamolecule" %%% "molecule-sql-mysql" % "0.15.2",
+      "org.scalamolecule" %%% "molecule-sql-mariadb" % "0.15.2",
+      "org.scalamolecule" %%% "molecule-sql-h2" % "0.15.2",
+      "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.15.2",
     ),
     
-    // Paths to directories with your Domain structure definition files
+    // Paths to directories with your domain structure definition files
     moleculeDomainPaths := Seq("app") 
   )
 ```

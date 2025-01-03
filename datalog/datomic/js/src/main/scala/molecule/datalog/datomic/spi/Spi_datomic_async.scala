@@ -1,7 +1,7 @@
 package molecule.datalog.datomic.spi
 
 import molecule.base.error._
-import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.ast.DataModel._
 import molecule.core.action._
 import molecule.core.marshalling.serialize.PickleTpls
 import molecule.core.spi.{Conn, Spi_async, TxReport}

@@ -1,6 +1,6 @@
 package molecule.sql.h2.query
 
-import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.ast.DataModel._
 import molecule.sql.core.query._
 
 
