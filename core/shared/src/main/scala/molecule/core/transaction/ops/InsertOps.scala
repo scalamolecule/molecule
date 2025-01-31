@@ -1,7 +1,7 @@
 package molecule.core.transaction.ops
 
 import molecule.base.ast._
-import molecule.boilerplate.ast.DataModel._
+import molecule.core.ast.DataModel.Element
 
 trait InsertOps extends BaseOps {
 

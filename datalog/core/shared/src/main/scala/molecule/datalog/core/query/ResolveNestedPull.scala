@@ -3,9 +3,8 @@ package molecule.datalog.core.query
 import java.util.{Iterator => jIterator}
 import molecule.base.ast._
 import molecule.base.error.ModelError
-import molecule.boilerplate.ast.DataModel._
-import molecule.boilerplate.util.MoleculeLogging
-import molecule.core.util.ModelUtils
+import molecule.core.ast.DataModel._
+import molecule.core.util.{ModelUtils, MoleculeLogging}
 import scala.annotation.tailrec
 
 

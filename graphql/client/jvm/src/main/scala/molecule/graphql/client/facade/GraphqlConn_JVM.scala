@@ -2,7 +2,7 @@ package molecule.graphql.client.facade
 
 import java.sql
 import java.sql.{Connection, SQLException}
-import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.util.MoleculeLogging
 import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.{Conn, TxReport}
 import molecule.core.util.ModelUtils

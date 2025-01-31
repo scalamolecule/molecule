@@ -2,7 +2,7 @@ package molecule.sql.sqlite.spi
 
 import boopickle.Default._
 import cats.effect.IO
-import molecule.boilerplate.ast.DataModel._
+import molecule.core.ast.DataModel.Element
 import molecule.sql.core.spi.SpiBase_io
 import molecule.sql.sqlite.query.Model2SqlQuery_sqlite
 

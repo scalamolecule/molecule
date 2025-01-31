@@ -1,14 +1,14 @@
 package molecule.sql.core.query
 
 import molecule.base.error.ModelError
-import molecule.boilerplate.ast.DataModel._
-import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.ast.DataModel.Element
 import molecule.core.util.Executor.global
-import molecule.core.util.{FutureUtils, ModelUtils}
+import molecule.core.util.{FutureUtils, ModelUtils, MoleculeLogging}
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.query.casting.strategy._
 import molecule.sql.core.query.casting.{NestOptTpls, NestTpls}
 import scala.concurrent.Future
+
 
 case class SqlQueryResolveOffset[Tpl](
   elements: List[Element],

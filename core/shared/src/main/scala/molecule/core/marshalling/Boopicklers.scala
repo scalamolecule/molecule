@@ -9,8 +9,8 @@ import boopickle.Default._
 import molecule.base.api._
 import molecule.base.ast._
 import molecule.base.error._
-import molecule.boilerplate.ast.DataModel._
-import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.ast.DataModel._
+import molecule.core.util.MoleculeLogging
 
 
 object Boopicklers extends MoleculeLogging {

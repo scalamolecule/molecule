@@ -1,11 +1,10 @@
 package molecule.sql.core.query.cursorStrategy
 
 import molecule.base.error.ModelError
-import molecule.boilerplate.ast.DataModel._
-import molecule.boilerplate.ops.ModelTransformations_
-import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.ast.DataModel._
+import molecule.core.ops.ModelTransformations_
 import molecule.core.query.Pagination
-import molecule.core.util.FutureUtils
+import molecule.core.util.{FutureUtils, MoleculeLogging}
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.query.casting.strategy.{CastNested, CastOptRefs, CastTuple}
 import molecule.sql.core.query.{Model2SqlQuery, SqlQueryBase, SqlQueryResolve}

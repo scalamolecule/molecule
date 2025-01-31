@@ -1,10 +1,10 @@
 package molecule.datalog.core.query
 
 import molecule.base.error.ModelError
-import molecule.boilerplate.ast.DataModel
-import molecule.boilerplate.ast.DataModel._
-import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.ast.DataModel
+import molecule.core.ast.DataModel._
 import molecule.core.query.QueryExpr
+import molecule.core.util.MoleculeLogging
 import molecule.datalog.core.query.casting._
 import scala.collection.mutable.ArrayBuffer
 

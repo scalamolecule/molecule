@@ -1,6 +1,6 @@
 package molecule.core.transaction.ops
 
-import molecule.boilerplate.ast.DataModel.Element
+import molecule.core.ast.DataModel.Element
 
 trait DeleteOps {
 

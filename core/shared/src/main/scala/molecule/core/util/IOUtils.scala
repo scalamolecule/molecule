@@ -2,7 +2,6 @@ package molecule.core.util
 
 import cats.effect.IO
 import molecule.base.error._
-import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.spi.TxReport
 import scala.concurrent.duration.{Duration, DurationInt}
 import scala.concurrent.{Await, ExecutionContext, Future}

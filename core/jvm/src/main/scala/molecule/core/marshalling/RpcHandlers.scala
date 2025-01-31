@@ -3,16 +3,14 @@ package molecule.core.marshalling
 import java.nio.ByteBuffer
 import boopickle.Default._
 import molecule.base.error._
-import molecule.boilerplate.ast.DataModel._
-import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.ast.DataModel._
 import molecule.core.marshalling.Boopicklers._
 import molecule.core.marshalling.serialize.PickleTpls
 import molecule.core.spi.TxReport
 import molecule.core.util.Executor._
-import molecule.core.util.SerializationUtils
+import molecule.core.util.{MoleculeLogging, SerializationUtils}
 import scala.concurrent.Future
 import scala.language.implicitConversions
-
 
 // Data is only typed when un-serialized on the client side
 abstract class RpcHandlers(rpc: MoleculeRpc) extends MoleculeLogging with SerializationUtils {

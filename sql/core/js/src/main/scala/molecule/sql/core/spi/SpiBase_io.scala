@@ -3,8 +3,8 @@ package molecule.sql.core.spi
 import boopickle.Default._
 import cats.effect.IO
 import molecule.base.error.{InsertError, InsertErrors, MoleculeError, ValidationErrors}
-import molecule.boilerplate.ast.DataModel._
 import molecule.core.action._
+import molecule.core.ast.DataModel.Element
 import molecule.core.marshalling.serialize.PickleTpls
 import molecule.core.spi.{Conn, Renderer, Spi_io, TxReport}
 import molecule.core.util.Executor.{global => ec}
@@ -13,7 +13,6 @@ import molecule.core.validation.TxModelValidation
 import molecule.core.validation.insert.InsertValidation
 import molecule.sql.core.facade.JdbcConn_JS
 import scala.concurrent.Future
-
 
 trait SpiBase_io
   extends Spi_io

@@ -3,7 +3,7 @@ package molecule.core.validation.insert
 
 import molecule.base.ast._
 import molecule.base.error.InsertError
-import molecule.boilerplate.ast.DataModel._
+import molecule.core.ast.DataModel._
 
 trait InsertValidationResolvers_ {
 

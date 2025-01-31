@@ -1,8 +1,8 @@
 package molecule.sql.postgres.query
 
-import molecule.boilerplate.ast.DataModel._
 import molecule.core.query.Model2Query
 import molecule.sql.core.query.{QueryExprSet, SqlQueryBase}
+import molecule.core.ast.DataModel._
 
 
 trait QueryExprSet_postgres

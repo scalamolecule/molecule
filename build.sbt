@@ -20,7 +20,7 @@ inThisBuild(
     organizationName := "ScalaMolecule",
     organizationHomepage := Some(url("http://www.scalamolecule.org")),
     versionScheme := Some("early-semver"),
-    version := "0.15.2",
+    version := "0.15.3-SNAPSHOT",
     scalaVersion := scala213,
     crossScalaVersions := allScala,
 
@@ -40,8 +40,6 @@ lazy val root = project
   .aggregate(
     base.js,
     base.jvm,
-    boilerplate.js,
-    boilerplate.jvm,
     core.js,
     core.jvm,
     coreTests.js,
@@ -73,22 +71,6 @@ lazy val base = crossProject(JSPlatform, JVMPlatform)
   .settings(doPublish)
 
 
-lazy val boilerplate = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Full)
-  .settings(name := "molecule-boilerplate")
-  .settings(doPublish)
-  .settings(
-    libraryDependencies ++= Seq(
-      "com.outr" %%% "scribe" % "3.13.0", // logging
-
-      // Enforce one version to avoid warnings of multiple dependency versions when running tests
-      "org.slf4j" % "slf4j-api" % "1.7.36",
-      "org.slf4j" % "slf4j-nop" % "1.7.36"
-    ),
-  )
-  .dependsOn(base)
-
-
 lazy val core = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .settings(name := "molecule-core")
@@ -96,6 +78,7 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
   .settings(compilerArgs)
   .settings(
     libraryDependencies ++= Seq(
+      "com.outr" %%% "scribe" % "3.13.0", // logging
       "io.suzaku" %%% "boopickle" % "1.5.0", // binary serialization for rpc
       "dev.zio" %%% "zio" % zioVersion, // zio api
       "org.typelevel" %%% "cats-effect" % "3.5.7", // cats api
@@ -109,7 +92,7 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
       "ch.megard" %% "akka-http-cors" % "1.2.0",
     )
   )
-  .dependsOn(boilerplate)
+  .dependsOn(base)
 
 
 lazy val coreTests = crossProject(JSPlatform, JVMPlatform)

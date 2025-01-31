@@ -1,6 +1,6 @@
 package molecule.core.spi
 
-import molecule.boilerplate.ast.DataModel._
+import molecule.core.ast.DataModel.Element
 
 trait Renderer {
 

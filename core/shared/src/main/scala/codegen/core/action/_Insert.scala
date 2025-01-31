@@ -9,7 +9,7 @@ object _Insert extends CoreGenBase( "Insert", "/action") {
     s"""// GENERATED CODE ********************************
        |package molecule.core.action
        |
-       |import molecule.boilerplate.ast.DataModel.Element
+       |import molecule.core.ast.DataModel.Element
        |
        |case class ${fileName}_1[A](elements: List[Element]) {
        |  final def apply(a: A, as: A*) = Insert(elements, (a +: as).map(a => Tuple1(a)))

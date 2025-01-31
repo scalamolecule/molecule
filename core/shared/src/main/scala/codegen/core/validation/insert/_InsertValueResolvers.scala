@@ -13,7 +13,7 @@ object _InsertValueResolvers extends CoreGenBase("InsertValueResolvers", "/valid
        |import java.net.URI
        |import java.time._
        |import java.util.{Date, UUID}
-       |import molecule.boilerplate.ast.DataModel._
+       |import molecule.core.ast.DataModel._
        |
        |trait $fileName_ {
        |

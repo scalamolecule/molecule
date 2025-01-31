@@ -1,7 +1,6 @@
 package molecule.sql.postgres.spi
 
 import java.sql.DriverManager
-import molecule.boilerplate.ast.DataModel._
 import molecule.core.action._
 import molecule.core.marshalling.{ConnProxy, JdbcProxy}
 import molecule.core.transaction._
@@ -18,6 +17,7 @@ import molecule.sql.core.transaction.strategy.update.UpdateAction
 import molecule.sql.postgres.query._
 import molecule.sql.postgres.transaction._
 import scala.concurrent.Future
+import molecule.core.ast.DataModel.Element
 
 
 object Spi_postgres_sync extends Spi_postgres_sync

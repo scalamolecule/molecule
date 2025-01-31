@@ -1,7 +1,7 @@
 package molecule.sql.sqlite.spi
 
 import boopickle.Default._
-import molecule.boilerplate.ast.DataModel._
+import molecule.core.ast.DataModel.Element
 import molecule.sql.core.spi.SpiBase_async
 import molecule.sql.sqlite.query.Model2SqlQuery_sqlite
 import scala.concurrent.{Future, ExecutionContext => EC}

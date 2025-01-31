@@ -8,18 +8,18 @@ import datomic.query.EntityMap
 import datomic.{Database, Peer}
 import molecule.base.ast.CardOne
 import molecule.base.error._
-import molecule.boilerplate.ast.DataModel._
-import molecule.boilerplate.ops.ModelTransformations_
-import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.ops.ModelTransformations_
 import molecule.core.transaction.ResolveUpdate
 import molecule.core.transaction.ops.UpdateOps
-import molecule.core.util.JavaConversions
+import molecule.core.util.{JavaConversions, MoleculeLogging}
 import molecule.core.validation.TxModelValidation
 import molecule.datalog.core.query.{Model2DatomicQuery, ResolveBase}
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import molecule.datalog.datomic.query.DatomicQueryResolveOffset
 import scala.collection.mutable.ListBuffer
 import scala.math.BigDecimal.RoundingMode
+import molecule.core.ast.DataModel._
+
 
 trait Update_datomic
   extends DatomicBase_JVM

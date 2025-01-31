@@ -2,7 +2,7 @@ package molecule.sql.core.transaction
 
 import molecule.base.ast._
 import molecule.base.error.ModelError
-import molecule.boilerplate.ast.DataModel._
+import molecule.core.ast.DataModel._
 import molecule.core.transaction.ResolveDelete
 import molecule.core.transaction.ops.DeleteOps
 import molecule.core.util.ModelUtils

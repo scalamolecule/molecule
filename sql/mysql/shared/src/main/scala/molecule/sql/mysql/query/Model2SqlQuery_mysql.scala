@@ -1,9 +1,8 @@
 package molecule.sql.mysql.query
 
-import molecule.boilerplate.ast.DataModel._
+import molecule.core.ast.DataModel.Element
 import molecule.sql.core.query._
 import scala.collection.mutable.ListBuffer
-
 
 class Model2SqlQuery_mysql(elements0: List[Element])
   extends Model2SqlQuery(elements0)

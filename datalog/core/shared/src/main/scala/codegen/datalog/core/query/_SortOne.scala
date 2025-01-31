@@ -14,7 +14,7 @@ object _SortOne extends DatomicGenBase("SortOne", "/query") {
        |import java.net.URI
        |import java.time._
        |import java.util.{Date, UUID}
-       |import molecule.boilerplate.ast.DataModel._
+       |import molecule.core.ast.DataModel._
        |
        |
        |trait $fileName_[Tpl] { self: Model2DatomicQuery[Tpl] =>

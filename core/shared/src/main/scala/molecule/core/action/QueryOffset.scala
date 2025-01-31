@@ -1,6 +1,6 @@
 package molecule.core.action
 
-import molecule.boilerplate.ast.DataModel.Element
+import molecule.core.ast.DataModel.Element
 import molecule.core.marshalling.dbView.DbView
 
 case class QueryOffset[Tpl](

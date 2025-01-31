@@ -2,8 +2,8 @@ package molecule.datalog.datomic.spi
 
 import cats.effect.IO
 import molecule.base.error._
-import molecule.boilerplate.ast.DataModel._
 import molecule.core.action._
+import molecule.core.ast.DataModel.Element
 import molecule.core.marshalling.serialize.PickleTpls
 import molecule.core.spi.{Conn, Spi_io, TxReport}
 import molecule.core.util.Executor._

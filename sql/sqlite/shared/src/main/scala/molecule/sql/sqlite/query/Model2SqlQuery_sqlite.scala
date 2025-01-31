@@ -1,8 +1,7 @@
 package molecule.sql.sqlite.query
 
-import molecule.boilerplate.ast.DataModel._
+import molecule.core.ast.DataModel.Element
 import molecule.sql.core.query._
-
 
 class Model2SqlQuery_sqlite(elements0: List[Element])
   extends Model2SqlQuery(elements0)

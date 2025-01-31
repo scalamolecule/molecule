@@ -4,11 +4,10 @@ import java.sql
 import java.sql.{Connection, PreparedStatement, ResultSet, SQLException}
 import cats.effect.IO
 import molecule.base.error.MoleculeError
-import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.api.Savepoint
 import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.{Conn, TxReport}
-import molecule.core.util.ModelUtils
+import molecule.core.util.{ModelUtils, MoleculeLogging}
 import molecule.sql.core.javaSql.{ResultSetImpl, ResultSetInterface}
 import molecule.sql.core.transaction.strategy.SqlAction
 import molecule.sql.core.transaction.{CachedConnection, SavepointImpl, SqlDataType_JVM}

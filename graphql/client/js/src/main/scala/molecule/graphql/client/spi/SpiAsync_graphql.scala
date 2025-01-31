@@ -1,7 +1,7 @@
 package molecule.graphql.client.spi
 
 import boopickle.Default._
-import molecule.boilerplate.ast.DataModel._
+import molecule.core.ast.DataModel._
 import scala.concurrent.{Future, ExecutionContext => EC}
 
 

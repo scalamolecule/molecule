@@ -1,10 +1,9 @@
 package molecule.sql.core.query
 
-import molecule.boilerplate.ast.DataModel._
-import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.ast.DataModel.Element
 import molecule.core.marshalling.ConnProxy
 import molecule.core.query.{Model2Query, QueryExpr}
-import molecule.core.util.ModelUtils
+import molecule.core.util.{ModelUtils, MoleculeLogging}
 import scala.collection.mutable.ListBuffer
 
 

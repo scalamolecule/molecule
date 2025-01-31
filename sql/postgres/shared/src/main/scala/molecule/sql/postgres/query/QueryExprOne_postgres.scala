@@ -1,9 +1,10 @@
 package molecule.sql.postgres.query
 
-import molecule.boilerplate.ast.DataModel._
 import molecule.core.query.Model2Query
 import molecule.sql.core.query.{QueryExprOne, SqlQueryBase}
 import scala.reflect.ClassTag
+import molecule.core.ast.DataModel._
+
 
 trait QueryExprOne_postgres
   extends QueryExprOne

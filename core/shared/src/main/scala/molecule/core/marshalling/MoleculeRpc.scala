@@ -1,7 +1,7 @@
 package molecule.core.marshalling
 
 import molecule.base.error.MoleculeError
-import molecule.boilerplate.ast.DataModel._
+import molecule.core.ast.DataModel._
 import molecule.core.spi.TxReport
 import scala.concurrent.Future
 

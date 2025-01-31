@@ -2,8 +2,8 @@ package molecule.core.marshalling
 
 import java.nio.ByteBuffer
 import boopickle.Default._
-import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.util.Executor._
+import molecule.core.util.MoleculeLogging
 import org.scalajs.dom
 import org.scalajs.dom.XMLHttpRequest
 import scala.concurrent.{Future, Promise}

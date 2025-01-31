@@ -2,8 +2,8 @@ package molecule.sql.core.spi
 
 import boopickle.Default._
 import molecule.base.error.{InsertError, InsertErrors, ValidationErrors}
-import molecule.boilerplate.ast.DataModel._
 import molecule.core.action._
+import molecule.core.ast.DataModel.Element
 import molecule.core.marshalling.serialize.PickleTpls
 import molecule.core.spi.{Conn, Renderer, Spi_async, TxReport}
 import molecule.core.util.FutureUtils

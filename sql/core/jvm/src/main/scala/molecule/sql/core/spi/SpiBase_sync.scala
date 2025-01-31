@@ -3,8 +3,8 @@ package molecule.sql.core.spi
 import java.sql.{ResultSet, ResultSetMetaData, Statement}
 import molecule.base.error._
 import molecule.base.util.BaseHelpers
-import molecule.boilerplate.ast.DataModel._
 import molecule.core.action._
+import molecule.core.ast.DataModel.Element
 import molecule.core.marshalling.ConnProxy
 import molecule.core.spi._
 import molecule.core.util.Executor._

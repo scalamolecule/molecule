@@ -1,7 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.core.marshalling.deserialize
 
-import molecule.boilerplate.ast.DataModel._
+import molecule.core.ast.DataModel._
 
 trait UnpickleTpl_[Tpl] { self: UnpickleTpls[Tpl] =>
 

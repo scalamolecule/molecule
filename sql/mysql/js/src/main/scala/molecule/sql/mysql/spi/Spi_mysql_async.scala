@@ -1,7 +1,7 @@
 package molecule.sql.mysql.spi
 
 import boopickle.Default._
-import molecule.boilerplate.ast.DataModel._
+import molecule.core.ast.DataModel.Element
 import molecule.sql.core.spi.SpiBase_async
 import molecule.sql.mysql.query.Model2SqlQuery_mysql
 import scala.concurrent.{Future, ExecutionContext => EC}

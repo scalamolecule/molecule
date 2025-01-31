@@ -2,12 +2,11 @@ package molecule.datalog.datomic.query
 
 import java.util.Base64
 import molecule.base.error.ModelError
-import molecule.boilerplate.ast.DataModel._
-import molecule.boilerplate.ops.ModelTransformations_
-import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.ast.DataModel.Element
 import molecule.core.marshalling.dbView.DbView
+import molecule.core.ops.ModelTransformations_
 import molecule.core.query.Pagination
-import molecule.core.util.FutureUtils
+import molecule.core.util.{FutureUtils, MoleculeLogging}
 import molecule.datalog.core.query.{DatomicQueryBase, Model2DatomicQuery}
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import molecule.datalog.datomic.query.cursorStrategy.{NoUnique, PrimaryUnique, SubUnique}

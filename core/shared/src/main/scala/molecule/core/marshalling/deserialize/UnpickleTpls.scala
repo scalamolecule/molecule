@@ -8,12 +8,12 @@ import boopickle.BasicPicklers._
 import boopickle.Default._
 import boopickle._
 import molecule.base.error._
-import molecule.boilerplate.ast.DataModel._
-import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.ast.DataModel._
 import molecule.core.marshalling.Boopicklers._
-import molecule.core.util.ModelUtils
+import molecule.core.util.{ModelUtils, MoleculeLogging}
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
+
 
 case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuffer)
   extends UnpickleTpl_[Tpl]

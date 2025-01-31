@@ -7,10 +7,9 @@ import cats.effect.IO
 import datomic.Util.readAll
 import datomic.{Connection => DatomicConnection, Datom => _, _}
 import molecule.base.error._
-import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.DatomicProxy
 import molecule.core.spi.{Conn, TxReport}
-import molecule.core.util.Executor
+import molecule.core.util.{Executor, MoleculeLogging}
 import molecule.datalog.datomic.transaction.DatomicDataType_JVM
 import molecule.datalog.datomic.util.MakeTxReport
 import scala.concurrent.duration.DurationInt

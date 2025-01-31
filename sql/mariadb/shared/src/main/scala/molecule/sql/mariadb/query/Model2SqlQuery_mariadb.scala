@@ -1,6 +1,6 @@
 package molecule.sql.mariadb.query
 
-import molecule.boilerplate.ast.DataModel._
+import molecule.core.ast.DataModel.Element
 import molecule.sql.core.query._
 
 

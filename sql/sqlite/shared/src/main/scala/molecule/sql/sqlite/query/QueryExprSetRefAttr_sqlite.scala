@@ -1,8 +1,9 @@
 package molecule.sql.sqlite.query
 
-import molecule.boilerplate.ast.DataModel._
 import molecule.core.query.Model2Query
 import molecule.sql.core.query.{QueryExprSetRefAttr, SqlQueryBase}
+import molecule.core.ast.DataModel._
+
 
 trait QueryExprSetRefAttr_sqlite
   extends QueryExprSetRefAttr

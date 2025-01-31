@@ -7,13 +7,11 @@ import boopickle.BasicPicklers._
 import boopickle.Default._
 import boopickle._
 import molecule.base.error.{ModelError, MoleculeError}
-import molecule.boilerplate.ast.DataModel._
-import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.ast.DataModel._
 import molecule.core.marshalling.Boopicklers._
-import molecule.core.util.{ModelUtils, SerializationUtils}
+import molecule.core.util.{ModelUtils, MoleculeLogging, SerializationUtils}
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
-
 
 case class PickleTpls(
   elements: List[Element],
