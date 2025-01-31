@@ -5,7 +5,7 @@ import molecule.core.action._
 import molecule.core.spi.{Conn, Spi_sync, TxReport}
 import scala.util.control.NonFatal
 
-trait Api_sync { spi: Spi_sync =>
+trait Api_sync extends Keywords { spi: Spi_sync =>
 
   implicit class QueryApiSync[Tpl](q: Query[Tpl]) {
     def get(implicit conn: Conn): List[Tpl] = query_get(q)

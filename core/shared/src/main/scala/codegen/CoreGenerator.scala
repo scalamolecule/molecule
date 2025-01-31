@@ -2,7 +2,7 @@ package codegen
 
 object CoreGenerator extends App {
 
-//  core._MoleculeActions.generate()
+  //  core.api._Molecules.generate()
   //  core.action._Actions.generate()
   //  core.action._Insert.generate()
   //  core.marshalling.deserialize._UnpickleTpl.generate()

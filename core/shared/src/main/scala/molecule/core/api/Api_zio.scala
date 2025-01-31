@@ -5,7 +5,7 @@ import molecule.core.action._
 import molecule.core.spi.{Conn, Spi_zio, TxReport}
 import zio.ZIO
 
-trait Api_zio { spi: Spi_zio =>
+trait Api_zio extends Keywords { spi: Spi_zio =>
 
   implicit class QueryApiZIO[Tpl](q: Query[Tpl]) {
     def get: ZIO[Conn, MoleculeError, List[Tpl]] = query_get(q)

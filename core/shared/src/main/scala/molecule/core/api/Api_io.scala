@@ -6,7 +6,7 @@ import molecule.core.action._
 import molecule.core.spi._
 import molecule.core.util.ModelUtils
 
-trait Api_io extends ModelUtils { spi: Spi_io =>
+trait Api_io extends ModelUtils with Keywords { spi: Spi_io =>
 
   implicit class QueryApiIO[Tpl](q: Query[Tpl]) {
     def get(implicit conn: Conn): IO[List[Tpl]] = query_get(q)
@@ -77,7 +77,7 @@ trait Api_io_transact { api: Api_io with Spi_io =>
       }
       for {
         reports <- acc
-        report  <- next
+        report <- next
       } yield reports :+ report
     }
   }
@@ -95,7 +95,7 @@ trait Api_io_transact { api: Api_io with Spi_io =>
   def unitOfWork[T](runUOW: => IO[T])(implicit conn: Conn): IO[T] = {
     conn.waitCommitting()
     runUOW.attempt.map {
-      case Right(t)            =>
+      case Right(t)               =>
         // Commit all actions
         conn.commit()
         t

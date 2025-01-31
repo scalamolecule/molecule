@@ -12,7 +12,6 @@ class AdhocJVM_h2_sync extends Test with DbProviders_h2 with TestUtils {
 
   "commit" - types { implicit conn =>
     Entity.int.insert(1 to 7).transact
-//    Entity.int.xx.insert(1 to 7).transact
     Entity.int(count).query.get.head ==> 7
 
     Entity.int_.delete.transact
