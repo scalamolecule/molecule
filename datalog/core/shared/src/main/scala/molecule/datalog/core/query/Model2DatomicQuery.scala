@@ -49,7 +49,7 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
     // Remember first entity id variable
     firstId = vv
     varPath = List(firstId)
-    path = List(getInitialNs(elements1))
+    path = List(getInitialEntity(elements1))
 
     es = List(firstId)
     // Recursively resolve molecule elements

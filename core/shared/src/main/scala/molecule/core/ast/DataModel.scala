@@ -60,7 +60,7 @@ trait DataModel extends Validations with Values with BaseHelpers {
     refAttr: String,
     ref: String = "",
     card: Card = CardOne,
-    owner: Boolean,
+    owner: Boolean = false,
     coord: Seq[Int] = Nil
   ) extends Element {
     override def toString: String = {

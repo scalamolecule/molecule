@@ -28,7 +28,7 @@ trait Save_datomic
     e = id
     e0 = e
 
-    handleRef(getInitialNs(elements))
+    handleRef(getInitialEntity(elements))
 
     // populate `stmts`
     resolve(elements)

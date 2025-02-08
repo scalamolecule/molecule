@@ -84,11 +84,11 @@ case class DatomicQueryResolveOffset[Tpl](
     callback: List[Tpl] => Unit
   ): Unit = {
     val involvedAttrs    = getAttrNames(elements)
-    val involvedDeleteNs = getInitialNs(elements)
+    val involvedDeleteEntity = getInitialEntity(elements)
     val maybeCallback    = (mutationAttrs: Set[String], isDelete: Boolean) => {
       if (
         mutationAttrs.exists(involvedAttrs.contains) ||
-          isDelete && mutationAttrs.head.startsWith(involvedDeleteNs)
+          isDelete && mutationAttrs.head.startsWith(involvedDeleteEntity)
       ) {
         Future {
           val m2q = new Model2DatomicQuery[Tpl](elements)

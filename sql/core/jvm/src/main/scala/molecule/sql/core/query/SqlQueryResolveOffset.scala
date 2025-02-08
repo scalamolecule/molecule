@@ -85,11 +85,11 @@ case class SqlQueryResolveOffset[Tpl](
     freshM2q: List[Element] => Model2SqlQuery with SqlQueryBase
   ): Unit = {
     val involvedAttrs    = getAttrNames(elements)
-    val involvedDeleteNs = getInitialNs(elements)
+    val involvedDeleteEntity = getInitialEntity(elements)
     val maybeCallback    = (mutationAttrs: Set[String], isDelete: Boolean) => {
       if (
         mutationAttrs.exists(involvedAttrs.contains) ||
-          isDelete && mutationAttrs.head.startsWith(involvedDeleteNs)
+          isDelete && mutationAttrs.head.startsWith(involvedDeleteEntity)
       ) {
         Future(
           callback(

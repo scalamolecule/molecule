@@ -28,7 +28,7 @@ trait SpiHelpers extends ModelUtils {
   final def getUpdateIdsModel(elements: List[Element]): (Int, List[Element]) = {
     var hasData     = false
     var arity       = 0
-    val firstEnt    = getInitialNs(elements)
+    val firstEnt    = getInitialEntity(elements)
     var curEnt      = firstEnt
     val filterModel = ListBuffer.empty[Element]
 
@@ -105,7 +105,7 @@ trait SpiHelpers extends ModelUtils {
     val dummyCoord   = Seq(0, 0) // irrelevant for id columns that will never collide with keywords
     var hasId        = false
     var hasData      = false
-    val firstEnt     = getInitialNs(elements)
+    val firstEnt     = getInitialEntity(elements)
     var curEnt       = firstEnt
     var refPath      = List(firstEnt)
     val updateModel  = ListBuffer.empty[Element]

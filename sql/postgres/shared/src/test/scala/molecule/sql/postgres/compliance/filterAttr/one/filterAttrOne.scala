@@ -7,8 +7,8 @@ import molecule.sql.postgres.setup.Api_postgres_async
 class Adjacent extends Test {
   Adjacent(this, Api_postgres_async)
 }
-class CrossNs extends Test {
-  CrossNs(this, Api_postgres_async)
+class CrossEntity extends Test {
+  CrossEntity(this, Api_postgres_async)
 }
 class FilterAttr_id extends Test {
   FilterAttr_id(this, Api_postgres_async)

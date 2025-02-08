@@ -83,7 +83,7 @@ trait InsertValidationExtraction
           getValidators(entityMap, tail, validators, tplIndex, prevRefs :+ refAttr)
 
         case BackRef(backRef, _, _) =>
-          noNsReUseAfterBackref(tail.head, prevRefs, backRef)
+          noEntityReUseAfterBackref(tail.head, prevRefs, backRef)
           getValidators(entityMap, tail, validators, tplIndex, prevRefs)
 
         case OptRef(Ref(ent, refAttr, _, _, _, _), optRefElements) =>

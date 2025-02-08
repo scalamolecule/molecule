@@ -95,7 +95,7 @@ trait Update_datomic
     //    println("------ requiredEntPaths ------")
     //    requiredEntPaths.foreach(println)
 
-    val filters = AttrOneManID(getInitialNs(elements), "id", V) :: filterElements1
+    val filters = AttrOneManID(getInitialEntity(elements), "id", V) :: filterElements1
 
     //    println("------ filters --------")
     //    filters.foreach(println)

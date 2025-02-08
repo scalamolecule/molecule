@@ -6,7 +6,7 @@ import molecule.core.action._
 import molecule.core.spi._
 import molecule.core.util.ModelUtils
 
-trait Api_io extends ModelUtils with Keywords { spi: Spi_io =>
+trait Api_io extends Keywords with ModelUtils { spi: Spi_io =>
 
   implicit class QueryApiIO[Tpl](q: Query[Tpl]) {
     def get(implicit conn: Conn): IO[List[Tpl]] = query_get(q)

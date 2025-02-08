@@ -7,8 +7,8 @@ import molecule.sql.h2.setup.Api_h2_async
 class Adjacent extends Test {
   Adjacent(this, Api_h2_async)
 }
-class CrossNs extends Test {
-  CrossNs(this, Api_h2_async)
+class CrossEntity extends Test {
+  CrossEntity(this, Api_h2_async)
 }
 class FilterAttr_id extends Test {
   FilterAttr_id(this, Api_h2_async)

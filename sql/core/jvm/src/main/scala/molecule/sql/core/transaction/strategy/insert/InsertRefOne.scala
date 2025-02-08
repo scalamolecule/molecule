@@ -19,8 +19,20 @@ case class InsertRefOne(
     // Process children of ref
     children.foreach(_.process())
 
+
+    println(s"+++ InsertRefOne ++++++++++++++++++++++++++++++++++++" +
+      s"  $ref  " + optionalDefineds.mkString("Array(", ", ", ")"))
+    println("rowSetters")
+    println(rowSetters.map(rs => rs.toList.mkString("\n   ")).mkString("   ", "\n   -----\n   ", ""))
+
+    println("\nparent.rowSetters")
+    println(parent.rowSetters.map(rs => rs.toList.mkString("\n   ")).mkString("   ", "\n   -----\n   ", ""))
+
+    println("========= " + ids.length)
+
     // Add ref rows (don't enforce empty row)
     insert(false)
+    println("========= " + ids.length)
 
     // Add ref ids from parent (previous entity) to ref
     val refIds = ids.iterator
@@ -34,6 +46,16 @@ case class InsertRefOne(
           case (setter, _) =>
             setter += ((ps: PS) => ps.setNull(refAttrIndex, 0))
         }
+
+//      case _: InsertOptRefRight =>
+//        // make ref only when parent/prev entity has value
+//        parent.rowSetters.zip(parent.optionalDefineds).foreach {
+//          case (setter, true) =>
+//            setter += ((ps: PS) => ps.setLong(refAttrIndex, refIds.next()))
+//
+//          case (setter, _) =>
+//            setter += ((ps: PS) => ps.setNull(refAttrIndex, 0))
+//        }
 
       case _ =>
         val parentRowSetters = parent.rowSetters.iterator

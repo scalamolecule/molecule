@@ -18,7 +18,7 @@ trait SqlSave
   protected var saveAction: SaveAction = null
 
   def getSaveAction(elements: List[Element]): SaveAction = {
-    saveAction = SaveRoot(sqlOps, getInitialNs(elements)).saveEnt
+    saveAction = SaveRoot(sqlOps, getInitialEntity(elements)).saveEnt
     resolve(elements)
     saveAction.rootAction
   }

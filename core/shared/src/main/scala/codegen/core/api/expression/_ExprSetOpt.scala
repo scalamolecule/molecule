@@ -19,13 +19,13 @@ object _ExprSetOpt extends CoreGenBase( "ExprSetOpt", "/api/expression") {
     val body =
       s"""
          |
-         |trait ${fileName}Ops_$arity[${`A..V`}, t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]] extends ExprAttr_$arity[${`A..V, `}t, Ns1, Ns2] {
-         |  protected def _exprSetOpt(op: Op, optSet: Option[Set[t]]): Ns1[${`A..V`}, t] = ???
+         |trait ${fileName}Ops_$arity[${`A..V`}, t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]] extends ExprAttr_$arity[${`A..V, `}t, Entity1, Entity2] {
+         |  protected def _exprSetOpt(op: Op, optSet: Option[Set[t]]): Entity1[${`A..V`}, t] = ???
          |}
          |
-         |trait $fileName_$arity[${`A..V`}, t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]]
-         |  extends ${fileName}Ops_$arity[${`A..V`}, t, Ns1, Ns2] {
-         |  def apply(optSet: Option[Set[t]]): Ns1[${`A..V`}, t] = _exprSetOpt(Eq, optSet)
+         |trait $fileName_$arity[${`A..V`}, t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]]
+         |  extends ${fileName}Ops_$arity[${`A..V`}, t, Entity1, Entity2] {
+         |  def apply(optSet: Option[Set[t]]): Entity1[${`A..V`}, t] = _exprSetOpt(Eq, optSet)
          |}""".stripMargin
   }
 }

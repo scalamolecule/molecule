@@ -7,8 +7,8 @@ import molecule.sql.sqlite.setup.Api_sqlite_async
 class Adjacent extends Test {
   Adjacent(this, Api_sqlite_async)
 }
-class CrossNs extends Test {
-  CrossNs(this, Api_sqlite_async)
+class CrossEntity extends Test {
+  CrossEntity(this, Api_sqlite_async)
 }
 class Types extends Test {
   Types(this, Api_sqlite_async)

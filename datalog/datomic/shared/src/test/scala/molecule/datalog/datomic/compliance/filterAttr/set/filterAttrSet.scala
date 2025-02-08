@@ -7,8 +7,8 @@ import molecule.datalog.datomic.setup.Api_datomic_async
 class Adjacent extends Test {
   Adjacent(this, Api_datomic_async)
 }
-class CrossNs extends Test {
-  CrossNs(this, Api_datomic_async)
+class CrossEntity extends Test {
+  CrossEntity(this, Api_datomic_async)
 }
 class Types extends Test {
   Types(this, Api_datomic_async)

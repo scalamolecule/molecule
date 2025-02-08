@@ -150,13 +150,13 @@ trait Model2Query extends QueryExpr with ModelUtils {
     checkSorting()
     checkBinding()
 
-    val initialNs = getInitialNonGenericNs(elements)
+    val initialEntity = getInitialNonGenericEntity(elements)
 
     val elements1 = if (hasFilterAttr) {
-      checkFilterAttrs(elements, initialNs, addFilterAttr)
+      checkFilterAttrs(elements, initialEntity, addFilterAttr)
     } else elements
 
-    (elements1, initialNs, hasFilterAttr)
+    (elements1, initialEntity, hasFilterAttr)
   }
 
   private def validateAttr(a: Attr): Unit = {
@@ -616,16 +616,16 @@ trait Model2Query extends QueryExpr with ModelUtils {
     throw ModelError(s"Only further optional refs allowed after optional ref.")
   }
 
-  protected def validateRefNs(ref: Ref, nestedElements: List[Element]): Unit = {
-    val nestedNs = nestedElements.head match {
+  protected def validateRefEntity(ref: Ref, nestedElements: List[Element]): Unit = {
+    val nestedEntity = nestedElements.head match {
       case a: Attr   => a.ent
       case r: Ref    => r.ent
       case r: OptRef => r.ref.ent
       case other     => unexpectedElement(other)
     }
-    if (ref.ref != nestedNs) {
+    if (ref.ref != nestedEntity) {
       val refName = ref.refAttr.capitalize
-      throw ModelError(s"`$refName` can only nest to `${ref.ref}`. Found: `$nestedNs`")
+      throw ModelError(s"`$refName` can only nest to `${ref.ref}`. Found: `$nestedEntity`")
     }
   }
 }

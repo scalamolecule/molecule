@@ -3,7 +3,7 @@ package molecule.sql.core.transaction.strategy.insert
 import java.sql.{PreparedStatement => PS}
 import molecule.sql.core.transaction.strategy.SqlOps
 
-case class InsertOptRef(
+case class InsertOptRefRight(
   parent: InsertAction,
   sqlOps: SqlOps,
   ent: String,
@@ -20,29 +20,29 @@ case class InsertOptRef(
     // Process children of ref entity
     children.foreach(_.process())
 
-    println(s"+++ InsertOptRef ++++++++++++++++++++++++++++++++++++" +
+    println(s"+++ InsertOptRefRight ++++++++++++++++++++++++++++++++++++" +
       s"  $ref  " + optionalDefineds.mkString("Array(", ", ", ")"))
     println("rowSetters")
     println(rowSetters.map(rs => rs.toList.mkString("\n   ")).mkString("   ", "\n   -----\n   ", ""))
 
-    // Don't insert rows for empty branches (leafs have no optional refs)
-    val isBranch = children.nonEmpty
-    if (isBranch) {
-      optionalDefineds.zipWithIndex.collect {
-        case (false, i) =>
-          rowSetters.remove(i)
-      }
-    }
+//    // Don't insert rows for empty branches (leafs have no optional refs)
+//    val isBranch = children.nonEmpty
+//    if (isBranch) {
+//      optionalDefineds.zipWithIndex.collect {
+//        case (false, i) =>
+//          rowSetters.remove(i)
+//      }
+//    }
 
     println("\nparent.rowSetters")
     println(parent.rowSetters.map(rs => rs.toList.mkString("\n   ")).mkString("   ", "\n   -----\n   ", ""))
 
     println("========= " + ids.length)
 
-
     // Add ref rows for this entity/table (don't enforce empty row)
     insert(false)
     println("========= " + ids.length)
+
 
     val refIds = ids.iterator
     parent.rowSetters.zip(optionalDefineds).foreach {

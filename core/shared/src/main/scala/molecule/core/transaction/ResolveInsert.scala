@@ -9,6 +9,8 @@ trait ResolveInsert
   extends InsertResolvers_
     with InsertValidators_ { self: InsertOps =>
 
+  var isRightJoin = false
+
   @tailrec
   final override def resolve(
     elements: List[Element],
@@ -71,12 +73,18 @@ trait ResolveInsert
             }
           }
 
+        case Ref("_right_", _, _, _, _, _) =>
+//          val refResolver = addRef(ent, refAttr, ref, card, true)
+//          resolve(tail, resolvers :+ refResolver, tplIndex, prevRefs :+ refAttr)
+          isRightJoin = true
+          resolve(tail, resolvers, tplIndex, prevRefs)
+
         case Ref(ent, refAttr, ref, card, _, _) =>
-          val refResolver = addRef(ent, refAttr, ref, card)
+          val refResolver = addRef(ent, refAttr, ref, card, isRightJoin)
           resolve(tail, resolvers :+ refResolver, tplIndex, prevRefs :+ refAttr)
 
         case BackRef(backRef, _, _) =>
-          noNsReUseAfterBackref(tail.head, prevRefs, backRef)
+          noEntityReUseAfterBackref(tail.head, prevRefs, backRef)
           val backRefResolver = addBackRef(backRef)
           resolve(tail, resolvers :+ backRefResolver, tplIndex, Nil)
 

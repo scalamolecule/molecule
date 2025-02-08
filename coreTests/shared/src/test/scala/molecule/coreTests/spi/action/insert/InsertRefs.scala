@@ -351,12 +351,31 @@ case class InsertRefs(
     } yield ()
   }
 
-  "Optional ref" - refs { implicit conn =>
+  "Optional ref (left join)" - refs { implicit conn =>
     for {
-      _ <- A.i(1).B.?(B.i(2)).save.transact
-        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Optional ref not allowed in save molecule. Please use mandatory ref or insert instead."
-        }
+      _ <- A.i.B.?(B.s).insert(
+        (1, Some("a")),
+        (2, None),
+      ).transact
+
+      _ <- A.i.a1.B.?(B.s).query.get.map(_ ==> List(
+        (1, Some("a")),
+        (2, None),
+      ))
+    } yield ()
+  }
+
+  "Optional ref (right join)" - refs { implicit conn =>
+    for {
+      _ <- A.?(A.i).B.s.insert(
+        (Some(1), "a"),
+        (None, "b"),
+      ).transact
+
+      _ <- A.?(A.i).B.s.query.get.map(_ ==> List(
+        (Some(1), "a"),
+        (None, "b"),
+      ))
     } yield ()
   }
 }

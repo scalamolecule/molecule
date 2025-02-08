@@ -4,8 +4,8 @@ import sbt.Keys.libraryDependencies
 
 
 val scala212 = "2.12.20"
-val scala213 = "2.13.15"
-val scala3   = "3.3.4"
+val scala213 = "2.13.16"
+val scala3   = "3.3.5"
 val allScala = Seq(scala212, scala213, scala3)
 
 val akkaVersion              = "2.8.3"
@@ -105,7 +105,7 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
     // Generate Molecule boilerplate code for tests with `sbt clean compile -Dmolecule=true`
     moleculePluginActive := sys.props.get("molecule").contains("true"),
     moleculeDomainPaths := Seq("molecule/coreTests/domains"),
-//    moleculeMakeJars := false,
+    moleculeMakeJars := false,
 
     // Find scala version specific jars in respective libs
     unmanagedBase := {

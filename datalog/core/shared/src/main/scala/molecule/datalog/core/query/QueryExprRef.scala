@@ -51,7 +51,7 @@ trait QueryExprRef[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] =>
     if (expectedFilterAttrs.nonEmpty) {
       throw ModelError("Filter attributes not allowed in optional nested queries.")
     }
-    validateRefNs(nestedRef, nestedElements)
+    validateRefEntity(nestedRef, nestedElements)
 
     // On top level, move past nested pull date to tx metadata (if any)
     attrIndex += 1
@@ -94,7 +94,7 @@ trait QueryExprRef[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] =>
     if (isOptNested) {
       noMixedNestedModes
     }
-    validateRefNs(ref, nestedElements)
+    validateRefEntity(ref, nestedElements)
 
     val (e, refAttr, refId) = (es.last, s":${ref.ent}/${ref.refAttr}", vv)
     varPath = varPath ++ List(refAttr, refId)

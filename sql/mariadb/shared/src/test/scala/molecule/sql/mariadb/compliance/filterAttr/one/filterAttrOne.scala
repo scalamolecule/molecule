@@ -7,8 +7,8 @@ import molecule.sql.mariadb.setup.Api_mariadb_async
 class Adjacent extends Test {
   Adjacent(this, Api_mariadb_async)
 }
-class CrossNs extends Test {
-  CrossNs(this, Api_mariadb_async)
+class CrossEntity extends Test {
+  CrossEntity(this, Api_mariadb_async)
 }
 class FilterAttr_id extends Test {
   FilterAttr_id(this, Api_mariadb_async)

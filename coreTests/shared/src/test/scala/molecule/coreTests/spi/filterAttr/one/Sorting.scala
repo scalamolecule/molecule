@@ -27,11 +27,11 @@ case class Sorting(
       // Sort by Entity.i ASC, then Entity.int ASC
       // Sort marker for Entity.i is still primary even though it "comes after"
       // the expression having the secondary sort marker
-      //       --------------
-      //      |              |
+      //           ------------------
+      //          |                  |
       _ <- Entity.i.<(Entity.int.a2).a1.query.get.map(_ ==> List((1, 3), (1, 4), (2, 3)))
-      //              |  |
-      //               --
+      //                         |   |
+      //                          ---
       // Secondary sort marker for Entity.int (even though it "comes before" the primary sort marker)
 
       _ <- Entity.i.<(Entity.int.d2).a1.query.get.map(_ ==> List(
@@ -74,7 +74,7 @@ case class Sorting(
   }
 
 
-  "CrossNs" - refs { implicit conn =>
+  "CrossEntity" - refs { implicit conn =>
     for {
       _ <- A.i.B.i.insert(
         (2, 3),

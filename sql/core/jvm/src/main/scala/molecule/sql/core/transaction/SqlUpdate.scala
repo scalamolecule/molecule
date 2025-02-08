@@ -36,7 +36,7 @@ trait SqlUpdate
   }
 
   def getUpdateAction(elements: List[Element]): UpdateAction = {
-    ent = getInitialNs(elements)
+    ent = getInitialEntity(elements)
     query.idCols += s"$ent.id"
     root = UpdateRoot(sqlOps, ent)
     updateAction = root.firstEnt

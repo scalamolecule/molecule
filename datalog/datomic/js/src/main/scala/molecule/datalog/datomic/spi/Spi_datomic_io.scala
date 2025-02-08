@@ -33,11 +33,11 @@ trait Spi_datomic_io
     val conn             = conn0.asInstanceOf[DatomicConn_JS]
     val elements         = q.elements
     val involvedAttrs    = getAttrNames(elements)
-    val involvedDeleteNs = getInitialNs(elements)
+    val involvedDeleteEntity = getInitialEntity(elements)
     val maybeCallback    = (mutationAttrs: Set[String], isDelete: Boolean) => {
       if (
         mutationAttrs.exists(involvedAttrs.contains) ||
-          isDelete && mutationAttrs.head.startsWith(involvedDeleteNs)
+          isDelete && mutationAttrs.head.startsWith(involvedDeleteEntity)
       ) {
         conn.rpc.query[Tpl](conn.proxy, q.elements, q.optLimit)
           .map {

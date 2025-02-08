@@ -93,7 +93,8 @@ trait InsertOps extends BaseOps {
     ent: String,
     refAttr: String,
     ref: String,
-    card: Card
+    card: Card,
+    isRightJoin: Boolean
   ): Product => Unit
 
   protected def addBackRef(

@@ -121,7 +121,7 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
 
     val Ref(ent, refAttr, ref, _, _, _) = r
     level += 1
-    validateRefNs(r, nestedElements)
+    validateRefEntity(r, nestedElements)
 
     handleRef(refAttr, ref)
     val entExt = getOptExt(path.dropRight(2)).getOrElse("")

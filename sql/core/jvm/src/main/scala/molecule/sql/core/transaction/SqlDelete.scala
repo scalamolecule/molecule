@@ -29,7 +29,7 @@ trait SqlDelete
   def getDeleteAction(
     elements: List[Element], entityMap: Map[String, MetaEntity]
   ): DeleteAction = {
-    ent = getInitialNs(elements)
+    ent = getInitialEntity(elements)
     query.idCols += s"$ent.id"
     root = DeleteRoot(entityMap, sqlOps, sqlConn.createStatement(), ent)
     deleteAction = root.firstEnt

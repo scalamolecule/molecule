@@ -22,7 +22,7 @@ trait SqlInsert
     elements: List[Element],
     tpls: Seq[Product]
   ): InsertAction = {
-    insertAction = InsertRoot(sqlOps, getInitialNs(elements), tpls.length).insertEnt
+    insertAction = InsertRoot(sqlOps, getInitialEntity(elements), tpls.length).insertEnt
     val stableInsert = insertAction
     val resolveTpl   = getResolver(elements)
     tpls.foreach { tpl =>
@@ -207,9 +207,10 @@ trait SqlInsert
     refAttr: String,
     ref: String,
     card: Card,
+    isRightJoin: Boolean
   ): Product => Unit = {
     insertAction = card match {
-      case CardOne => insertAction.refOne(ent, refAttr, ref)
+      case CardOne => insertAction.refOne(ent, refAttr, ref, isRightJoin)
       case _       => insertAction.refMany(ent, refAttr, ref)
     }
     (_: Product) => ()

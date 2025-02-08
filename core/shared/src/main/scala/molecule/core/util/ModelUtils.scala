@@ -26,7 +26,7 @@ trait ModelUtils {
     count(elements, 0)
   }
 
-  final protected def getInitialNs(elements: List[Element]): String = {
+  final protected def getInitialEntity(elements: List[Element]): String = {
     elements.head match {
       case a: Attr                               => a.ent
       case r: Ref                                => r.ent
@@ -38,9 +38,9 @@ trait ModelUtils {
   }
 
   @tailrec
-  final protected def getInitialNonGenericNs(elements: List[Element]): String = {
+  final protected def getInitialNonGenericEntity(elements: List[Element]): String = {
     elements.head match {
-      case a: Attr if a.attr == "id"             => getInitialNonGenericNs(elements.tail)
+      case a: Attr if a.attr == "id"             => getInitialNonGenericEntity(elements.tail)
       case a: Attr                               => a.ent
       case r: Ref                                => r.ent
       case OptRef(Ref(ent, _, _, _, _, _), _)    => ent
@@ -104,8 +104,8 @@ trait ModelUtils {
     }
 
     def prepareRef(ref: Ref): Ref = {
-      val (ent, refAttr, refNs) = nonReservedRef(ref, optProxy.get)
-      ref.copy(ent = ent, refAttr = refAttr, ref = refNs)
+      val (ent, refAttr, refEntity) = nonReservedRef(ref, optProxy.get)
+      ref.copy(ent = ent, refAttr = refAttr, ref = refEntity)
     }
 
     def prepareBackRef(backRef: BackRef): BackRef = {
@@ -145,7 +145,7 @@ trait ModelUtils {
   def noOptRef: Nothing =
     throw ModelError(s"Optional ref data structure not allowed in update molecule.")
 
-  def noNsReUseAfterBackref(
+  def noEntityReUseAfterBackref(
     nextElement: Element,
     prevRefs: List[String],
     backRef: String

@@ -30,7 +30,7 @@ trait Delete_datomic
     resolve(elements, true)
 
     val (filterQuery, inputs) = if (ids.isEmpty && filterElements.nonEmpty) {
-      val filterElements1 = AttrOneManID("DummyNs", "id", V) +: filterElements
+      val filterElements1 = AttrOneManID("DummyEntity", "id", V) +: filterElements
       val (query, inputs) = new Model2DatomicQuery[Any](filterElements1).getIdQueryWithInputs
       (Some(query), inputs)
     } else {

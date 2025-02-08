@@ -16,8 +16,8 @@ import scala.concurrent.Future
 trait DatomicBase_JVM extends DatomicDataType_JVM with ModelUtils {
 
   protected def initTxBase(elements: List[Element], idIndex: Int = 0): Unit = {
-    entFull = getInitialNs(elements)
-    part = fns.partNs(entFull).head
+    entFull = getInitialEntity(elements)
+    part = fns.partEntity(entFull).head
     lowest = idIndex
   }
 
