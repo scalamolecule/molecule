@@ -32,7 +32,8 @@ trait QueryExpr {
 
   protected def queryRef(ref: Ref, tail: List[Element]): Unit
   protected def queryBackRef(backRef: BackRef, tail: List[Element]): Unit
-  protected def queryOptRef(ref: Ref, optionalElements: List[Element]): Unit
+  protected def queryOptRef(ref: Ref, optElements: List[Element]): Unit
+  protected def queryOptEntity(optElements: List[Element], ref: Ref): Unit
   protected def queryNested(ref: Ref, nestedElements: List[Element]): Unit
   protected def queryOptNested(ref: Ref, nestedElements: List[Element]): Unit
 }

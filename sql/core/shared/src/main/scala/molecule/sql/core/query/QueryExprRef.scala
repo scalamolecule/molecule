@@ -58,7 +58,7 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
 
 
   override protected def queryOptRef(
-    r: Ref, optionalElements: List[Element]
+    r: Ref, optElements: List[Element]
   ): Unit = {
     if (hasOptRef) {
       // transfer previous predicates from `where`
@@ -81,7 +81,39 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
     nestedOptRef = true
 
     // Recursively resolve optional nested elements
-    resolve(optionalElements)
+    resolve(optElements)
+
+    nestedOptRef = false
+    hasOptRef = true
+  }
+
+
+  override protected def queryOptEntity(
+    optElements: List[Element],
+    r: Ref
+  ): Unit = {
+    if (hasOptRef) {
+      // transfer previous predicates from `where`
+      addPredicatesToLastLeftJoin()
+    }
+
+    // Know where we should steal predicates from subsequent `where` additions
+    whereSplit = where.length
+
+    val Ref(ent, refAttr, ref, _, _, _) = r
+    handleRef(refAttr, ref)
+
+    val entExt          = getOptExt(path.dropRight(2)).getOrElse("")
+    val (refAs, refExt) = getOptExt().fold(("", ""))(ext => (ref + ext, ext))
+    joins += ((s"LEFT JOIN", ref, refAs, List(s"$ent$entExt.$refAttr = $ref$refExt.id")))
+
+    // Cast next nested/adjacent opt ref
+    castStrategy = castStrategy.optRef(nestedOptRef)
+
+    nestedOptRef = true
+
+    // Recursively resolve optional nested elements
+    resolve(optElements)
 
     nestedOptRef = false
     hasOptRef = true

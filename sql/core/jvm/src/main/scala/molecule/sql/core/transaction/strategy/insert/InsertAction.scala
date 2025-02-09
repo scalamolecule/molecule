@@ -19,18 +19,12 @@ abstract class InsertAction(
     ))
   }
 
-  def refOne(ent: String, refAttr: String, ref: String, isRightJoin: Boolean): InsertAction = {
+  def refOne(ent: String, refAttr: String, ref: String): InsertAction = {
     // Add ref attr to current entity
     val refAttrIndex = setCol(refAttr)
-    val child        = if (isRightJoin)
-      InsertOptRefRight(
-        this, sqlOps, ent, refAttr, ref, refAttrIndex, rowCount
-      )
-    else
-      InsertRefOne(
-        this, sqlOps, ent, refAttr, ref, refAttrIndex, rowCount
-      )
-    addChild(child)
+    addChild(InsertRefOne(
+      this, sqlOps, ent, refAttr, ref, refAttrIndex, rowCount
+    ))
   }
 
   def refMany(ent: String, refAttr: String, r: String): InsertAction = {
@@ -44,6 +38,16 @@ abstract class InsertAction(
   }
 
   def backRef: InsertAction = parent
+
+  def optEntity(
+    ent: String, refAttr: String, ref: String
+  ): InsertOptEntity = {
+    // Add ref attr to current entity
+    val refAttrIndex = setCol(refAttr)
+    addChild(InsertOptEntity(
+      this, sqlOps, ent, refAttr, ref, refAttrIndex, rowCount
+    ))
+  }
 
   def optRef(
     ent: String, refAttr: String, ref: String

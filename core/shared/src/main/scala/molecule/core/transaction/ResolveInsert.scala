@@ -9,8 +9,6 @@ trait ResolveInsert
   extends InsertResolvers_
     with InsertValidators_ { self: InsertOps =>
 
-  var isRightJoin = false
-
   @tailrec
   final override def resolve(
     elements: List[Element],
@@ -73,14 +71,8 @@ trait ResolveInsert
             }
           }
 
-        case Ref("_right_", _, _, _, _, _) =>
-//          val refResolver = addRef(ent, refAttr, ref, card, true)
-//          resolve(tail, resolvers :+ refResolver, tplIndex, prevRefs :+ refAttr)
-          isRightJoin = true
-          resolve(tail, resolvers, tplIndex, prevRefs)
-
         case Ref(ent, refAttr, ref, card, _, _) =>
-          val refResolver = addRef(ent, refAttr, ref, card, isRightJoin)
+          val refResolver = addRef(ent, refAttr, ref, card)
           resolve(tail, resolvers :+ refResolver, tplIndex, prevRefs :+ refAttr)
 
         case BackRef(backRef, _, _) =>
@@ -91,6 +83,10 @@ trait ResolveInsert
         case OptRef(Ref(ent, refAttr, ref, _, _, _), optRefElements) =>
           val optRefResolver = addOptRef(tplIndex, ent, refAttr, ref, optRefElements)
           resolve(tail, resolvers :+ optRefResolver, tplIndex + 1, Nil)
+
+        case OptEntity(optEntityElements, Ref(ent, refAttr, ref, _, _, _)) =>
+          val optEntityResolver = addOptEntity(ent, refAttr, ref, optEntityElements)
+          resolve(tail, resolvers :+ optEntityResolver, tplIndex + 1, Nil)
 
         case Nested(Ref(ent, refAttr, ref, _, _, _), nestedElements) =>
           val nestedResolver = addNested(tplIndex, ent, refAttr, ref, nestedElements)

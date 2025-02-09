@@ -449,6 +449,7 @@ object _ModelTransformations extends CoreGenBase("ModelTransformations", "/ops")
        |        }
        |        case _: Ref           => topLevelAttrCount(tail, count)
        |        case _: OptRef        => topLevelAttrCount(tail, count)
+       |        case _: OptEntity     => topLevelAttrCount(tail, count)
        |        case _: BackRef       => topLevelAttrCount(tail, count)
        |        case Nested(_, es)    => topLevelAttrCount(tail, count + countNested(es))
        |        case OptNested(_, es) => topLevelAttrCount(tail, count + countNested(es))

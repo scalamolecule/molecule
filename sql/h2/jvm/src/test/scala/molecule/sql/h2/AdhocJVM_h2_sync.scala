@@ -20,15 +20,15 @@ class AdhocJVM_h2_sync extends Test with DbProviders_h2 with TestUtils {
     //
 
 
-    Entity.i.Ref.s.insert(
-      (1, "a"),
-      (2, "b"),
-    ).i.transact
-
-    Entity.i.Ref.?(Ref.s).insert(
-      (1, Some("a")),
-      (2, None),
-    ).i.transact
+//    Entity.i.Ref.s.insert(
+//      (1, "a"),
+//      (2, "b"),
+//    ).i.transact
+//
+//    Entity.i.Ref.?(Ref.s).insert(
+//      (1, Some("a")),
+//      (2, None),
+//    ).i.transact
 
     /*
 Insert(

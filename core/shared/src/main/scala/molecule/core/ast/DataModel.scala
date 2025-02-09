@@ -81,6 +81,17 @@ trait DataModel extends Validations with Values with BaseHelpers {
     }
   }
 
+  case class OptEntity(elements: List[Element], ref: Ref) extends Element {
+    override def render(i: Int): String = {
+      val indent = "  " * i
+      s"""|${indent}OptEntity(
+          |${indent}  List(
+          |${renders(elements, i + 2)})
+          |${indent}  $ref)""".stripMargin
+    }
+    override def toString: String = render(0)
+  }
+
   case class OptRef(ref: Ref, elements: List[Element]) extends Element {
     override def render(i: Int): String = {
       val indent = "  " * i

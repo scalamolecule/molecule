@@ -131,7 +131,11 @@ case class PickleTpls(
 
         case OptRef(_, optRefElements) =>
           prevRefs.clear()
-          resolvePicklers(tail, picklers :+ pickleOptRef(tplIndex, optRefElements), tplIndex + 1)
+          resolvePicklers(tail, picklers :+ pickleOptElements(tplIndex, optRefElements), tplIndex + 1)
+
+        case OptEntity(optEntityElements, _) =>
+          prevRefs.clear()
+          resolvePicklers(tail, picklers :+ pickleOptElements(tplIndex, optEntityElements), tplIndex + 1)
 
         case Nested(_, nestedElements) =>
           prevRefs.clear()
@@ -145,13 +149,13 @@ case class PickleTpls(
     }
   }
 
-  private def pickleOptRef(
+  private def pickleOptElements(
     tplIndex: Int,
-    optRefElements: List[Element]
+    optElements: List[Element]
   ): Product => Unit = {
     // Recursively pickle nested optional refs
-    val pickleOptData = getPickler(optRefElements)
-    countValueAttrs(optRefElements) match {
+    val pickleOptData = getPickler(optElements)
+    countValueAttrs(optElements) match {
       case 1 => // Single nested values
         (tpl: Product) => {
           val optValue = tpl.productElement(tplIndex).asInstanceOf[Option[Any]]

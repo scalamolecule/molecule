@@ -28,6 +28,7 @@ case class InsertRefOne(
     println("\nparent.rowSetters")
     println(parent.rowSetters.map(rs => rs.toList.mkString("\n   ")).mkString("   ", "\n   -----\n   ", ""))
 
+    println("######### " + parent.ids.length)
     println("========= " + ids.length)
 
     // Add ref rows (don't enforce empty row)

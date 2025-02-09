@@ -116,7 +116,11 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
 
         case OptRef(_, optRefElements) =>
           prevRefs.clear()
-          resolveUnpicklers(tail, unpicklers :+ unpickleOptRef(optRefElements))
+          resolveUnpicklers(tail, unpicklers :+ unpickleOptElements(optRefElements))
+
+        case OptEntity(optEntityElements, _) =>
+          prevRefs.clear()
+          resolveUnpicklers(tail, unpicklers :+ unpickleOptElements(optEntityElements))
 
         case Nested(_, nestedElements) =>
           prevRefs.clear()
@@ -131,15 +135,15 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
   }
 
 
-  private def unpickleOptRef(
-    optRefElements: List[Element]
+  private def unpickleOptElements(
+    optElements: List[Element]
   ): () => Any = {
     () =>
       dec.readInt match {
         case 1 => Option.empty[Any]
         case 2 =>
           // Recursively unpickle opt ref data
-          Some(getUnpickler(optRefElements)())
+          Some(getUnpickler(optElements)())
       }
   }
 

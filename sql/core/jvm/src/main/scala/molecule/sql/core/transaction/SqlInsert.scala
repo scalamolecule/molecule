@@ -206,11 +206,10 @@ trait SqlInsert
     ent: String,
     refAttr: String,
     ref: String,
-    card: Card,
-    isRightJoin: Boolean
+    card: Card
   ): Product => Unit = {
     insertAction = card match {
-      case CardOne => insertAction.refOne(ent, refAttr, ref, isRightJoin)
+      case CardOne => insertAction.refOne(ent, refAttr, ref)
       case _       => insertAction.refMany(ent, refAttr, ref)
     }
     (_: Product) => ()
@@ -219,6 +218,51 @@ trait SqlInsert
   override protected def addBackRef(backRef: String): Product => Unit = {
     insertAction = insertAction.backRef
     (_: Product) => ()
+  }
+
+  override protected def addOptEntity(
+    ent: String,
+    refAttr: String,
+    ref: String,
+    optElements: List[Element]
+  ): Product => Unit = {
+    if (firstOptRef) {
+      baseAction.fold {
+        baseAction = Some(insertAction)
+      } { baseAction =>
+        insertAction = baseAction
+      }
+    }
+
+    // Cache stable insert instance
+    val insertOptEntity = insertAction.optEntity(ent, refAttr, ref)
+    insertAction = insertOptEntity
+    firstOptRef = false
+
+    // Recursively resolve optional data
+    val resolveOptionalRefData = getResolver(optElements)
+
+    firstOptRef = true
+    insertAction = baseAction.get
+
+    countValueAttrs(optElements) match {
+      case 1 =>
+        (tpl: Product) => {
+          val optionalValue = tpl.productElement(0).asInstanceOf[Option[Any]]
+          insertOptEntity.setOptionalDefined(optionalValue.isDefined)
+          optionalValue.foreach { value =>
+            resolveOptionalRefData(Tuple1(value))
+          }
+        }
+      case _ =>
+        (tpl: Product) => {
+          val optionalTpl = tpl.productElement(0).asInstanceOf[Option[Product]]
+          insertOptEntity.setOptionalDefined(optionalTpl.isDefined)
+          optionalTpl.foreach { tpl =>
+            resolveOptionalRefData(tpl)
+          }
+        }
+    }
   }
 
   override protected def addOptRef(

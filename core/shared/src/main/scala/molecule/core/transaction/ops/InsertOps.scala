@@ -93,13 +93,19 @@ trait InsertOps extends BaseOps {
     ent: String,
     refAttr: String,
     ref: String,
-    card: Card,
-    isRightJoin: Boolean
+    card: Card
   ): Product => Unit
 
   protected def addBackRef(
     backRef: String
   ): Product => Unit
+
+  protected def addOptEntity(
+    ent: String,
+    refAttr: String,
+    ref: String,
+    elements: List[Element]
+  ): Product => Unit = ???
 
   protected def addOptRef(
     tplIndex: Int,

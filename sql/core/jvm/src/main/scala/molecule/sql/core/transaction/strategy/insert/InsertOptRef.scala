@@ -37,6 +37,7 @@ case class InsertOptRef(
     println("\nparent.rowSetters")
     println(parent.rowSetters.map(rs => rs.toList.mkString("\n   ")).mkString("   ", "\n   -----\n   ", ""))
 
+    println("######### " + parent.ids.length)
     println("========= " + ids.length)
 
 

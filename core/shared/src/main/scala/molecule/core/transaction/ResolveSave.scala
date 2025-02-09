@@ -53,6 +53,10 @@ trait ResolveSave { self: SaveOps =>
           "Optional ref not allowed in save molecule. Please use mandatory ref or insert instead."
         )
 
+        case _: OptEntity => throw ModelError(
+          "Optional entity not allowed in save molecule. Please use mandatory entity or insert instead."
+        )
+
         case _: Nested    => throw ModelError(
           "Nested data structure not allowed in save molecule. Please use insert instead."
         )

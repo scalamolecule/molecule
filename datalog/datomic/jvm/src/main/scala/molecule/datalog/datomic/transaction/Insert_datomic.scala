@@ -290,8 +290,7 @@ trait Insert_datomic
     ent: String,
     refAttr: String,
     ref: String,
-    card: Card,
-    isRightJoin: Boolean
+    card: Card
   ): Product => Unit = {
     val a = kw(ent, refAttr)
     (_: Product) =>

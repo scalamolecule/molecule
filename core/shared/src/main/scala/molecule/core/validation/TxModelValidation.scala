@@ -93,6 +93,20 @@ case class TxModelValidation(
           refPath = refPath :+ refAttr
           validate(es ++ tail)
 
+        // todo: simply copied OptRef handling - does this work?
+        case OptEntity(es, r) =>
+          val refAttr = r.ent + "." + r.refAttr
+          if (prev(level)(group).contains(refAttr))
+            dup(refAttr)
+          if (refPath.contains(refAttr))
+            dup(refAttr)
+          prev(level) = prev(level) :+ Array(refAttr)
+          group += 1
+          mandatoryRefs = mandatoryRefs.filterNot(_._1 == refAttr)
+          presentAttrs += r.refAttr
+          refPath = refPath :+ refAttr
+          validate(es ++ tail)
+
         case Nested(r, es) =>
           curElements = es
           val ref = r.name

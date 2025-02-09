@@ -3,7 +3,7 @@ package molecule.sql.core.transaction.strategy.insert
 import java.sql.{PreparedStatement => PS}
 import molecule.sql.core.transaction.strategy.SqlOps
 
-case class InsertOptRefRight(
+case class InsertOptEntity(
   parent: InsertAction,
   sqlOps: SqlOps,
   ent: String,
@@ -11,7 +11,8 @@ case class InsertOptRefRight(
   ref: String,
   refAttrIndex: Int,
   rowCount: Int
-) extends InsertAction(parent, sqlOps, ref, rowCount) {
+//) extends InsertAction(parent, sqlOps, ref, rowCount) {
+) extends InsertAction(parent, sqlOps, ent, rowCount) {
 
   override def rootAction: InsertAction = parent.rootAction
 
@@ -20,7 +21,7 @@ case class InsertOptRefRight(
     // Process children of ref entity
     children.foreach(_.process())
 
-    println(s"+++ InsertOptRefRight ++++++++++++++++++++++++++++++++++++" +
+    println(s"+++ InsertOptEntity ++++++++++++++++++++++++++++++++++++" +
       s"  $ref  " + optionalDefineds.mkString("Array(", ", ", ")"))
     println("rowSetters")
     println(rowSetters.map(rs => rs.toList.mkString("\n   ")).mkString("   ", "\n   -----\n   ", ""))
@@ -37,6 +38,7 @@ case class InsertOptRefRight(
     println("\nparent.rowSetters")
     println(parent.rowSetters.map(rs => rs.toList.mkString("\n   ")).mkString("   ", "\n   -----\n   ", ""))
 
+    println("######### " + parent.ids.length)
     println("========= " + ids.length)
 
     // Add ref rows for this entity/table (don't enforce empty row)

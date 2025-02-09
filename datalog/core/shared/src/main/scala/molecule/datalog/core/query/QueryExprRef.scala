@@ -31,15 +31,28 @@ trait QueryExprRef[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] =>
 
   private var firstOptRef = true
 
-  override protected def queryOptRef(ref: Ref, optionalElements: List[Element]): Unit = {
+  override protected def queryOptRef(ref: Ref, optElements: List[Element]): Unit = {
     nestedOptRef = true
     hasOptRef = true
     firstOptRef = false
 
     // Add opt ref caster
-    castss = castss.init :+ (castss.last :+ pullOptRefData(ref, optionalElements))
+    castss = castss.init :+ (castss.last :+ pullOptRefData(ref, optElements))
 
     firstOptRef = true
+  }
+
+  override protected def queryOptEntity(optElements: List[Element], ref: Ref): Unit = {
+//    nestedOptRef = true
+//    hasOptRef = true
+//    firstOptRef = false
+//
+//    // Add opt ref caster
+//    castss = castss.init :+ (castss.last :+ pullOptRefData(ref, optElements))
+//
+//    firstOptRef = true
+
+    ???
   }
 
 

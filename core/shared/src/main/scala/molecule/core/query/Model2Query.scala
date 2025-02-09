@@ -73,6 +73,7 @@ trait Model2Query extends QueryExpr with ModelUtils {
       case ref: Ref                             => queryRef(ref, tail); resolve(tail)
       case backRef: BackRef                     => queryBackRef(backRef, tail); resolve(tail)
       case OptRef(ref, refElements)             => queryOptRef(ref, refElements); resolve(tail)
+      case OptEntity(refElements, ref)          => queryOptEntity(refElements, ref); resolve(tail)
       case Nested(ref, nestedElements)          => queryNested(ref, nestedElements); resolve(tail)
       case OptNested(nestedRef, nestedElements) => queryOptNested(nestedRef, nestedElements); resolve(tail)
     }
@@ -114,6 +115,9 @@ trait Model2Query extends QueryExpr with ModelUtils {
                 case OptRef(_, es) =>
                   validate(es ++ tail, prevElements)
 
+                case OptEntity(es, _) =>
+                  validate(es ++ tail, prevElements)
+
                 case Nested(r, es) =>
                   handleRef(r.refAttr, r.ref)
                   validateNested()
@@ -137,6 +141,7 @@ trait Model2Query extends QueryExpr with ModelUtils {
               element match {
                 case a: Attr          => validateAttr(a); validate(tail, prevElements :+ a)
                 case OptRef(_, es)    => validate(es ++ tail, prevElements)
+                case OptEntity(es, _) => validate(es ++ tail, prevElements)
                 case Nested(_, es)    => validateNested(); validate(es, prevElements)
                 case OptNested(_, es) => validateOptNested(prevElements); validate(es, prevElements)
                 case _                => validate(tail, prevElements)
@@ -266,7 +271,8 @@ trait Model2Query extends QueryExpr with ModelUtils {
             case a: Attr      => checkAttr(a); check(tail)
             case r: Ref       => handleRef(r); check(tail)
             case _: BackRef   => handleBackRef(); check(tail)
-            case n: OptRef    => ???
+            case _: OptRef    => ???
+            case _: OptEntity => ???
             case n: Nested    => handleNested(n.ref); check(n.elements ++ tail)
             case n: OptNested => handleNested(n.ref); check(n.elements ++ tail)
           }
@@ -346,7 +352,8 @@ trait Model2Query extends QueryExpr with ModelUtils {
             case a: Attr      => prepare(tail, acc ++ prepareAttr(a))
             case r: Ref       => prepare(tail, acc :+ prepareRef(r))
             case b: BackRef   => prepare(tail, acc :+ prepareBackRef(b))
-            case r: OptRef    => ???
+            case _: OptRef    => ???
+            case _: OptEntity => ???
             case n: Nested    => prepare(tail, acc :+ prepareNested(n))
             case n: OptNested => prepare(tail, acc :+ prepareOptNested(n))
           }
