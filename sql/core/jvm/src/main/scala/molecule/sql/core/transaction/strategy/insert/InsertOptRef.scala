@@ -20,10 +20,10 @@ case class InsertOptRef(
     // Process children of ref entity
     children.foreach(_.process())
 
-    println(s"+++ InsertOptRef ++++++++++++++++++++++++++++++++++++" +
-      s"  $ref  " + optionalDefineds.mkString("Array(", ", ", ")"))
-    println("rowSetters")
-    println(rowSetters.map(rs => rs.toList.mkString("\n   ")).mkString("   ", "\n   -----\n   ", ""))
+    //    println(s"+++ InsertOptRef ++++++++++++++++++++++++++++++++++++" +
+    //      s"  $ref  " + optionalDefineds.mkString("Array(", ", ", ")"))
+    //    println("rowSetters")
+    //    println(rowSetters.map(rs => rs.toList.mkString("\n   ")).mkString("   ", "\n   -----\n   ", ""))
 
     // Don't insert rows for empty branches (leafs have no optional refs)
     val isBranch = children.nonEmpty
@@ -34,12 +34,10 @@ case class InsertOptRef(
       }
     }
 
-    println("\nparent.rowSetters")
-    println(parent.rowSetters.map(rs => rs.toList.mkString("\n   ")).mkString("   ", "\n   -----\n   ", ""))
-
-    println("######### " + parent.ids.length)
-    println("========= " + ids.length)
-
+    //    println("\nparent.rowSetters")
+    //    println(parent.rowSetters.map(rs => rs.toList.mkString("\n   ")).mkString("   ", "\n   -----\n   ", ""))
+    //    println("######### " + parent.ids.length)
+    //    println("========= " + ids.length)
 
     // Add ref rows for this entity/table (don't enforce empty row)
     insert(false)
@@ -59,8 +57,6 @@ case class InsertOptRef(
   }
 
   override def render(indent: Int): String = {
-    // Add refAttr to parent insert
-    parent.setCol(refAttr)
-    recurseRender(indent, "RefOpt")
+    recurseRender(indent, "OptRef")
   }
 }

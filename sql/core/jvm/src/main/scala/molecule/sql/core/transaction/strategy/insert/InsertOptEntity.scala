@@ -11,8 +11,8 @@ case class InsertOptEntity(
   ref: String,
   refAttrIndex: Int,
   rowCount: Int
-//) extends InsertAction(parent, sqlOps, ref, rowCount) {
-) extends InsertAction(parent, sqlOps, ent, rowCount) {
+  //) extends InsertAction(parent, sqlOps, ref, rowCount) {
+) extends InsertAction(parent, sqlOps, ref, rowCount) {
 
   override def rootAction: InsertAction = parent.rootAction
 
@@ -21,30 +21,17 @@ case class InsertOptEntity(
     // Process children of ref entity
     children.foreach(_.process())
 
-    println(s"+++ InsertOptEntity ++++++++++++++++++++++++++++++++++++" +
-      s"  $ref  " + optionalDefineds.mkString("Array(", ", ", ")"))
-    println("rowSetters")
-    println(rowSetters.map(rs => rs.toList.mkString("\n   ")).mkString("   ", "\n   -----\n   ", ""))
-
-//    // Don't insert rows for empty branches (leafs have no optional refs)
-//    val isBranch = children.nonEmpty
-//    if (isBranch) {
-//      optionalDefineds.zipWithIndex.collect {
-//        case (false, i) =>
-//          rowSetters.remove(i)
-//      }
-//    }
-
-    println("\nparent.rowSetters")
-    println(parent.rowSetters.map(rs => rs.toList.mkString("\n   ")).mkString("   ", "\n   -----\n   ", ""))
-
-    println("######### " + parent.ids.length)
-    println("========= " + ids.length)
+    //    println(s"+++ InsertOptEntity ++++++++++++++++++++++++++++++++++++" +
+    //      s"  $ref  " + optionalDefineds.mkString("Array(", ", ", ")"))
+    //    println("rowSetters")
+    //    println(rowSetters.map(rs => rs.toList.mkString("\n   ")).mkString("   ", "\n   -----\n   ", ""))
+    //    println("\nparent.rowSetters")
+    //    println(parent.rowSetters.map(rs => rs.toList.mkString("\n   ")).mkString("   ", "\n   -----\n   ", ""))
+    //    println("######### " + parent.ids.length)
+    //    println("========= " + ids.length)
 
     // Add ref rows for this entity/table (don't enforce empty row)
     insert(false)
-    println("========= " + ids.length)
-
 
     val refIds = ids.iterator
     parent.rowSetters.zip(optionalDefineds).foreach {
@@ -60,8 +47,6 @@ case class InsertOptEntity(
   }
 
   override def render(indent: Int): String = {
-    // Add refAttr to parent insert
-    parent.setCol(refAttr)
-    recurseRender(indent, "RefOpt")
+    recurseRender(indent, "OptEntity")
   }
 }

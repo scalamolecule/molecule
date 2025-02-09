@@ -39,22 +39,22 @@ abstract class InsertAction(
 
   def backRef: InsertAction = parent
 
-  def optEntity(
-    ent: String, refAttr: String, ref: String
-  ): InsertOptEntity = {
-    // Add ref attr to current entity
-    val refAttrIndex = setCol(refAttr)
-    addChild(InsertOptEntity(
-      this, sqlOps, ent, refAttr, ref, refAttrIndex, rowCount
-    ))
-  }
-
   def optRef(
     ent: String, refAttr: String, ref: String
   ): InsertOptRef = {
     // Add ref attr to current entity
     val refAttrIndex = setCol(refAttr)
     addChild(InsertOptRef(
+      this, sqlOps, ent, refAttr, ref, refAttrIndex, rowCount
+    ))
+  }
+
+  def optEntity(
+    ent: String, refAttr: String, ref: String
+  ): InsertOptEntity = {
+    // Add ref attr to current entity
+    val refAttrIndex = setCol(refAttr)
+    addChild(InsertOptEntity(
       this, sqlOps, ent, refAttr, ref, refAttrIndex, rowCount
     ))
   }

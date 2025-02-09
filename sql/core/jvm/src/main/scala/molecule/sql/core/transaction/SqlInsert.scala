@@ -12,11 +12,7 @@ trait SqlInsert
   extends InsertOps
     with SqlBaseOps { self: ResolveInsert with InsertResolvers_ with SqlOps =>
 
-  protected var baseAction  : Option[InsertAction] = None
-  protected var insertAction: InsertAction         = null
-
-  private var firstOptRef = true
-
+  protected var insertAction: InsertAction = null
 
   def getInsertAction(
     elements: List[Element],
@@ -30,7 +26,9 @@ trait SqlInsert
       stableInsert.nextRow()
       resolveTpl(tpl)
     }
-    insertAction.rootAction
+    val xx = insertAction.rootAction
+
+    xx
   }
 
 
@@ -220,78 +218,25 @@ trait SqlInsert
     (_: Product) => ()
   }
 
-  override protected def addOptEntity(
-    ent: String,
-    refAttr: String,
-    ref: String,
-    optElements: List[Element]
-  ): Product => Unit = {
-    if (firstOptRef) {
-      baseAction.fold {
-        baseAction = Some(insertAction)
-      } { baseAction =>
-        insertAction = baseAction
-      }
-    }
-
-    // Cache stable insert instance
-    val insertOptEntity = insertAction.optEntity(ent, refAttr, ref)
-    insertAction = insertOptEntity
-    firstOptRef = false
-
-    // Recursively resolve optional data
-    val resolveOptionalRefData = getResolver(optElements)
-
-    firstOptRef = true
-    insertAction = baseAction.get
-
-    countValueAttrs(optElements) match {
-      case 1 =>
-        (tpl: Product) => {
-          val optionalValue = tpl.productElement(0).asInstanceOf[Option[Any]]
-          insertOptEntity.setOptionalDefined(optionalValue.isDefined)
-          optionalValue.foreach { value =>
-            resolveOptionalRefData(Tuple1(value))
-          }
-        }
-      case _ =>
-        (tpl: Product) => {
-          val optionalTpl = tpl.productElement(0).asInstanceOf[Option[Product]]
-          insertOptEntity.setOptionalDefined(optionalTpl.isDefined)
-          optionalTpl.foreach { tpl =>
-            resolveOptionalRefData(tpl)
-          }
-        }
-    }
-  }
-
   override protected def addOptRef(
     tplIndex: Int,
     ent: String,
     refAttr: String,
     ref: String,
-    optionalElements: List[Element]
+    optRefElements: List[Element]
   ): Product => Unit = {
-    if (firstOptRef) {
-      baseAction.fold {
-        baseAction = Some(insertAction)
-      } { baseAction =>
-        insertAction = baseAction
-      }
-    }
+    val baseAction = insertAction
 
     // Cache stable insert instance
     val insertOptRef = insertAction.optRef(ent, refAttr, ref)
     insertAction = insertOptRef
-    firstOptRef = false
 
     // Recursively resolve optional data
-    val resolveOptionalRefData = getResolver(optionalElements)
+    val resolveOptionalRefData = getResolver(optRefElements)
 
-    firstOptRef = true
-    insertAction = baseAction.get
+    insertAction = baseAction
 
-    countValueAttrs(optionalElements) match {
+    countValueAttrs(optRefElements) match {
       case 1 =>
         (tpl: Product) => {
           val optionalValue = tpl.productElement(tplIndex).asInstanceOf[Option[Any]]
@@ -306,6 +251,39 @@ trait SqlInsert
           insertOptRef.setOptionalDefined(optionalTpl.isDefined)
           optionalTpl.foreach { tpl =>
             resolveOptionalRefData(tpl)
+          }
+        }
+    }
+  }
+
+  override protected def addOptEntity(
+    ent: String,
+    refAttr: String,
+    ref: String,
+    optEntityElements: List[Element]
+  ): Product => Unit = {
+    val insertOptEntity = insertAction.optEntity(ent, refAttr, ref)
+
+    // Recursively resolve optional entity data
+    val resolveOptEntityData = getResolver(optEntityElements)
+
+    insertAction = insertOptEntity
+
+    countValueAttrs(optEntityElements) match {
+      case 1 =>
+        (tpl: Product) => {
+          val optionalValue = tpl.productElement(0).asInstanceOf[Option[Any]]
+          insertOptEntity.setOptionalDefined(optionalValue.isDefined)
+          optionalValue.foreach { value =>
+            resolveOptEntityData(Tuple1(value))
+          }
+        }
+      case _ =>
+        (tpl: Product) => {
+          val optionalTpl = tpl.productElement(0).asInstanceOf[Option[Product]]
+          insertOptEntity.setOptionalDefined(optionalTpl.isDefined)
+          optionalTpl.foreach { tpl =>
+            resolveOptEntityData(tpl)
           }
         }
     }
