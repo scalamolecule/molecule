@@ -8,7 +8,7 @@ class FlatRef extends Test {
   FlatRef(this, Api_datomic_async)
 }
 class FlatRefOpt extends Test {
-  FlatRefOpt(this, Api_datomic_async)
+  FlatOptRef(this, Api_datomic_async)
 }
 class FlatRefOptNested extends Test {
   FlatRefOptNested(this, Api_datomic_async)

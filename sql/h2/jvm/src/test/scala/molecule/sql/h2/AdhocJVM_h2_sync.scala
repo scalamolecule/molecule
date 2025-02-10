@@ -67,36 +67,31 @@ Insert(
     Entity.?(Entity.i).Ref.s.insert(
       (Some(1), "a"),
       (None, "b"),
-    ).i.transact
+    ).transact
 
-    rawQuery(
-      """SELECT Entity.i, Ref.s
-        |FROM Entity
-        |RIGHT JOIN Ref ON Entity.ref = Ref.id
-        |""".stripMargin, true
+//    rawQuery(
+//      """SELECT Entity.i, Ref.s
+//        |FROM Entity
+//        |RIGHT JOIN Ref ON Entity.ref = Ref.id
+//        |""".stripMargin, true
+//    )
+//
+//    rawQuery(
+//      """SELECT DISTINCT
+//        |  Entity.i,
+//        |  Ref.s
+//        |FROM Entity
+//        |  RIGHT JOIN Ref ON
+//        |    Entity.ref = Ref.id AND
+//        |    Ref.s IS NOT NULL;
+//        |""".stripMargin, true
+//    )
+
+
+    Entity.?(Entity.i).Ref.s.a1.query.i.get ==> List(
+      (Some(1), "a"),
+      (None, "b"),
     )
-
-    /*
-Insert(
-  Entity(
-    RefOpt(
-      INSERT INTO Ref (
-        s
-      ) VALUES (?)
-    )
-    ---------------------------
-    INSERT INTO Entity (
-      i,
-      ref
-    ) VALUES (?, ?)
-  )
-)
-     */
-
-    //    Entity.?(Entity.i).Ref.s.query.get ==> List(
-    //      (Some(1), "a"),
-    //      (None, "b"),
-    //    )
 
     //    Entity.i(1).Ref.s("a").save
     //    Ref.s("b").save

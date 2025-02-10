@@ -365,14 +365,14 @@ case class InsertRefs(
     } yield ()
   }
 
-  "Optional ref (right join)" - refs { implicit conn =>
+  "Optional entity (right join)" - refs { implicit conn =>
     for {
       _ <- A.?(A.i).B.s.insert(
         (Some(1), "a"),
         (None, "b"),
       ).transact
 
-      _ <- A.?(A.i).B.s.query.get.map(_ ==> List(
+      _ <- A.?(A.i).B.s.a1.query.get.map(_ ==> List(
         (Some(1), "a"),
         (None, "b"),
       ))

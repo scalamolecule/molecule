@@ -262,9 +262,8 @@ trait SqlInsert
     ref: String,
     optEntityElements: List[Element]
   ): Product => Unit = {
-    val insertOptEntity = insertAction.optEntity(ent, refAttr, ref)
-
-    // Recursively resolve optional entity data
+    // Resolve optional entity data
+    val insertOptEntity      = insertAction.optEntity(ent, refAttr, ref)
     val resolveOptEntityData = getResolver(optEntityElements)
 
     insertAction = insertOptEntity

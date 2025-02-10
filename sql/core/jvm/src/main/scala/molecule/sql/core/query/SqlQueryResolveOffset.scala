@@ -27,10 +27,11 @@ case class SqlQueryResolveOffset[Tpl](
     offsetLimitCheck(optLimit, optOffset)
     val sortedRows = getData(conn, optLimit, optOffset)
     m2q.castStrategy match {
-      case c: CastTuple   => handleTuples(c, sortedRows, conn)
-      case c: CastOptRefs => handleTuples(c, sortedRows, conn)
-      case c: CastNested  => handleNested(c, sortedRows, conn)
-      case other          => throw ModelError(
+      case c: CastTuple     => handleTuples(c, sortedRows, conn)
+      case c: CastOptRefs   => handleTuples(c, sortedRows, conn)
+//      case c: CastOptEntity => handleTuples(c, sortedRows, conn)
+      case c: CastNested    => handleNested(c, sortedRows, conn)
+      case other            => throw ModelError(
         "Un-allowed element for offset pagination: " + other
       )
     }
@@ -84,9 +85,9 @@ case class SqlQueryResolveOffset[Tpl](
     callback: List[Tpl] => Unit,
     freshM2q: List[Element] => Model2SqlQuery with SqlQueryBase
   ): Unit = {
-    val involvedAttrs    = getAttrNames(elements)
+    val involvedAttrs        = getAttrNames(elements)
     val involvedDeleteEntity = getInitialEntity(elements)
-    val maybeCallback    = (mutationAttrs: Set[String], isDelete: Boolean) => {
+    val maybeCallback        = (mutationAttrs: Set[String], isDelete: Boolean) => {
       if (
         mutationAttrs.exists(involvedAttrs.contains) ||
           isDelete && mutationAttrs.head.startsWith(involvedDeleteEntity)

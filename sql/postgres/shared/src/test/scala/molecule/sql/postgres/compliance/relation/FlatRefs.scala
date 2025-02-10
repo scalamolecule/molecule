@@ -8,7 +8,7 @@ class FlatRef extends Test {
   FlatRef(this, Api_postgres_async)
 }
 class FlatRefOpt extends Test {
-  FlatRefOpt(this, Api_postgres_async)
+  FlatOptRef(this, Api_postgres_async)
 }
 class FlatRefOptNested extends Test {
   FlatRefOptNested(this, Api_postgres_async)

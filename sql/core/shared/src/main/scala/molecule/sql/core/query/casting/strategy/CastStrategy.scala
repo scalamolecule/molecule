@@ -8,6 +8,8 @@ trait CastStrategy extends CastBase {
 
   def optRef(nested: Boolean): CastOptRefs = ???
 
+  def optEntity: CastTuple = ???
+
   def nest: CastNested = ???
 
   def render(indent: Int): String = ???
