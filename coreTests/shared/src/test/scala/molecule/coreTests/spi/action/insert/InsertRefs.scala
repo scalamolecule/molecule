@@ -365,6 +365,20 @@ case class InsertRefs(
     } yield ()
   }
 
+  "Optional ref 2 (left join)" - refs { implicit conn =>
+    for {
+      _ <- A.i.B.?(B.i.s).insert(
+        (1, Some((10, "a"))),
+        (2, None),
+      ).transact
+
+      _ <- A.i.a1.B.?(B.i.s).query.get.map(_ ==> List(
+        (1, Some((10, "a"))),
+        (2, None),
+      ))
+    } yield ()
+  }
+
   "Optional entity (right join)" - refs { implicit conn =>
     for {
       _ <- A.?(A.i).B.s.insert(
@@ -374,6 +388,20 @@ case class InsertRefs(
 
       _ <- A.?(A.i).B.s.a1.query.get.map(_ ==> List(
         (Some(1), "a"),
+        (None, "b"),
+      ))
+    } yield ()
+  }
+
+  "Optional entity 2 (right join)" - refs { implicit conn =>
+    for {
+      _ <- A.?(A.i.s).B.s.insert(
+        (Some((1, "x")), "a"),
+        (None, "b"),
+      ).transact
+
+      _ <- A.?(A.i.s).B.s.a1.query.get.map(_ ==> List(
+        (Some((1, "x")), "a"),
         (None, "b"),
       ))
     } yield ()

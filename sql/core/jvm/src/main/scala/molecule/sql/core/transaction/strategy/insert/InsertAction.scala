@@ -39,9 +39,7 @@ abstract class InsertAction(
 
   def backRef: InsertAction = parent
 
-  def optRef(
-    ent: String, refAttr: String, ref: String
-  ): InsertOptRef = {
+  def optRef(ent: String, refAttr: String, ref: String): InsertOptRef = {
     // Add ref attr to current entity
     val refAttrIndex = setCol(refAttr)
     addChild(InsertOptRef(
@@ -49,14 +47,8 @@ abstract class InsertAction(
     ))
   }
 
-  def optEntity(
-    ent: String, refAttr: String, ref: String
-  ): InsertOptEntity = {
-    // Add ref attr to current entity
-    val refAttrIndex = setCol(refAttr)
-    addChild(InsertOptEntity(
-      this, sqlOps, ent, refAttr, ref, refAttrIndex, rowCount
-    ))
+  def optEntity(ent: String): InsertOptEntity = {
+    replaceSibling(InsertOptEntity(this, sqlOps, ent, rowCount))
   }
 
   def nest(ent: String, refAttr: String, ref: String): InsertNestedJoins = {

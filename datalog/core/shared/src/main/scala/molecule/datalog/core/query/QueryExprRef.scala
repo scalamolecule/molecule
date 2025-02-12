@@ -42,7 +42,7 @@ trait QueryExprRef[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] =>
     firstOptRef = true
   }
 
-  override protected def queryOptEntity(optElements: List[Element], ref: Ref): Unit = {
+  override protected def queryOptEntity(optElements: List[Element]): Unit = {
 //    nestedOptRef = true
 //    hasOptRef = true
 //    firstOptRef = false

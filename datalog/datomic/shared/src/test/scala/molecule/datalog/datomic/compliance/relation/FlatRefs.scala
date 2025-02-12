@@ -7,12 +7,15 @@ import molecule.datalog.datomic.setup.Api_datomic_async
 class FlatRef extends Test {
   FlatRef(this, Api_datomic_async)
 }
-class FlatRefOpt extends Test {
+class FlatOptEntity extends Test {
+  FlatOptEntity(this, Api_datomic_async)
+}
+class FlatOptRef extends Test {
   FlatOptRef(this, Api_datomic_async)
 }
-class FlatRefOptNested extends Test {
-  FlatRefOptNested(this, Api_datomic_async)
+class FlatOptRefNested extends Test {
+  FlatOptRefNested(this, Api_datomic_async)
 }
-class FlatRefOptAdjacent extends Test {
-  FlatRefOptAdjacent(this, Api_datomic_async)
+class FlatOptRefAdjacent extends Test {
+  FlatOptRefAdjacent(this, Api_datomic_async)
 }

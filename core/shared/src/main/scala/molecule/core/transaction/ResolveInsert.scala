@@ -84,8 +84,12 @@ trait ResolveInsert
           val optRefResolver = addOptRef(tplIndex, ent, refAttr, ref, optRefElements)
           resolve(tail, resolvers :+ optRefResolver, tplIndex + 1, Nil)
 
-        case OptEntity(optEntityElements, Ref(ent, refAttr, ref, _, _, _)) =>
-          val optEntityResolver = addOptEntity(ent, refAttr, ref, optEntityElements)
+//        case OptEntity(optEntityElements, Ref(ent, refAttr, ref, _, _, _)) =>
+//          val optEntityResolver = addOptEntity(ent, refAttr, ref, optEntityElements)
+//          resolve(tail, resolvers :+ optEntityResolver, tplIndex + 1, Nil)
+
+        case OptEntity(attrs) =>
+          val optEntityResolver = addOptEntity(attrs)
           resolve(tail, resolvers :+ optEntityResolver, tplIndex + 1, Nil)
 
         case Nested(Ref(ent, refAttr, ref, _, _, _), nestedElements) =>

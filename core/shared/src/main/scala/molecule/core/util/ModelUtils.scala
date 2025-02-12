@@ -32,7 +32,7 @@ trait ModelUtils {
       case a: Attr                               => a.ent
       case r: Ref                                => r.ent
       case OptRef(Ref(ent, _, _, _, _, _), _)    => ent
-      case OptEntity(_, Ref(ent, _, _, _, _, _)) => ent
+      case OptEntity(attrs)                      => attrs.head.ent
       case Nested(Ref(ent, _, _, _, _, _), _)    => ent
       case OptNested(Ref(ent, _, _, _, _, _), _) => ent
       case other                                 => throw ModelError("Unexpected head element: " + other)
@@ -46,7 +46,7 @@ trait ModelUtils {
       case a: Attr                               => a.ent
       case r: Ref                                => r.ent
       case OptRef(Ref(ent, _, _, _, _, _), _)    => ent
-      case OptEntity(_, Ref(ent, _, _, _, _, _)) => ent
+      case OptEntity(attrs)                      => attrs.head.ent
       case Nested(Ref(ent, _, _, _, _, _), _)    => ent
       case OptNested(Ref(ent, _, _, _, _, _), _) => ent
       case other                                 => throw ModelError("Unexpected head element: " + other)
@@ -68,7 +68,7 @@ trait ModelUtils {
       case element :: tail => element match {
         case a: Attr          => getAttrNames(tail, attrs + a.name)
         case OptRef(_, es)    => getAttrNames(tail ++ es, attrs)
-        case OptEntity(es, _) => getAttrNames(tail ++ es, attrs)
+        case OptEntity(as)    => getAttrNames(tail ++ as, attrs)
         case Nested(_, es)    => getAttrNames(tail ++ es, attrs)
         case OptNested(_, es) => getAttrNames(tail ++ es, attrs)
         case _                => getAttrNames(tail, attrs)
@@ -91,7 +91,7 @@ trait ModelUtils {
             case r: Ref       => prepare(tail, acc :+ prepareRef(r))
             case b: BackRef   => prepare(tail, acc :+ prepareBackRef(b))
             case r: OptRef    => prepare(tail, acc :+ prepareOptRef(r))
-            case r: OptEntity => prepare(tail, acc :+ prepareOptEntity(r))
+            case e: OptEntity => prepare(tail, acc :+ prepareOptEntity(e))
             case n: Nested    => prepare(tail, acc :+ prepareNested(n))
             case n: OptNested => prepare(tail, acc :+ prepareOptNested(n))
           }
@@ -123,7 +123,7 @@ trait ModelUtils {
     }
 
     def prepareOptEntity(optEntity: OptEntity): OptEntity = {
-      OptEntity(prepare(optEntity.elements, Nil), optEntity.ref)
+      OptEntity(prepare(optEntity.attrs, Nil).asInstanceOf[List[Attr]])
     }
 
     def prepareNested(nested: Nested): Nested = {

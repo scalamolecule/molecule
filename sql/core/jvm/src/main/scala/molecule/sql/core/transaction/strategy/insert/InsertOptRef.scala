@@ -41,7 +41,6 @@ case class InsertOptRef(
 
     // Add ref rows for this entity/table (don't enforce empty row)
     insert(false)
-    println("========= " + ids.length)
 
     val refIds = ids.iterator
     parent.rowSetters.zip(optionalDefineds).foreach {

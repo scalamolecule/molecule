@@ -24,6 +24,7 @@ trait Model2Query extends QueryExpr with ModelUtils {
   final var isNested     = false
   final var isManNested  = false
   final var isOptNested  = false
+  final var optEntity    = false
 
 
   @tailrec
@@ -73,7 +74,7 @@ trait Model2Query extends QueryExpr with ModelUtils {
       case ref: Ref                             => queryRef(ref, tail); resolve(tail)
       case backRef: BackRef                     => queryBackRef(backRef, tail); resolve(tail)
       case OptRef(ref, refElements)             => queryOptRef(ref, refElements); resolve(tail)
-      case OptEntity(refElements, ref)          => queryOptEntity(refElements, ref); resolve(tail)
+      case OptEntity(refElements)               => queryOptEntity(refElements); resolve(tail)
       case Nested(ref, nestedElements)          => queryNested(ref, nestedElements); resolve(tail)
       case OptNested(nestedRef, nestedElements) => queryOptNested(nestedRef, nestedElements); resolve(tail)
     }
@@ -115,8 +116,8 @@ trait Model2Query extends QueryExpr with ModelUtils {
                 case OptRef(_, es) =>
                   validate(es ++ tail, prevElements)
 
-                case OptEntity(es, _) =>
-                  validate(es ++ tail, prevElements)
+                case OptEntity(attrs) =>
+                  validate(validateOptEntity(attrs) ++ tail, prevElements)
 
                 case Nested(r, es) =>
                   handleRef(r.refAttr, r.ref)
@@ -141,7 +142,7 @@ trait Model2Query extends QueryExpr with ModelUtils {
               element match {
                 case a: Attr          => validateAttr(a); validate(tail, prevElements :+ a)
                 case OptRef(_, es)    => validate(es ++ tail, prevElements)
-                case OptEntity(es, _) => validate(es ++ tail, prevElements)
+                case OptEntity(attrs) => validate(attrs ++ tail, prevElements)
                 case Nested(_, es)    => validateNested(); validate(es, prevElements)
                 case OptNested(_, es) => validateOptNested(prevElements); validate(es, prevElements)
                 case _                => validate(tail, prevElements)
@@ -171,6 +172,15 @@ trait Model2Query extends QueryExpr with ModelUtils {
     a.filterAttr.foreach(_ => hasFilterAttr = true)
     if (a.isInstanceOf[Mandatory] || a.isInstanceOf[Tacit]) {
       hasBinding = true
+    }
+  }
+
+  private def validateOptEntity(elements: List[Element]): List[Element] = {
+    elements.map {
+      case a: Attr => a
+      case other   => throw ModelError(
+        "Only attributes of initial entity allowed in optional entity. Found:\n" + other
+      )
     }
   }
 
@@ -237,13 +247,6 @@ trait Model2Query extends QueryExpr with ModelUtils {
       noMultiAggrSet()
     }
     hasAggr = true
-  }
-  protected def checkAggrSet(): Unit = {
-    if (hasAggr) {
-      noMultiAggrSet()
-    }
-    hasAggr = true
-    hasAggrSet = true
   }
 
   private def noMultiAggrSet() = throw ModelError(
@@ -619,8 +622,11 @@ trait Model2Query extends QueryExpr with ModelUtils {
       s"Cardinality-many filter attributes not allowed to do additional filtering (${attr.name}).")
   }
 
-  protected def checkOnlyOptRef(): Unit = if (hasOptRef) {
-    throw ModelError(s"Only further optional refs allowed after optional ref.")
+  protected def checkOnlyOptRef(): Unit = if (hasOptRef && !optEntity) {
+    throw ModelError("Only further optional refs allowed after optional ref.")
+  }
+  protected def checkOnlyRefAfterOptEntity(): Unit = if (optEntity) {
+    throw ModelError("Only mandatory ref allowed after optional entity.")
   }
 
   protected def validateRefEntity(ref: Ref, nestedElements: List[Element]): Unit = {

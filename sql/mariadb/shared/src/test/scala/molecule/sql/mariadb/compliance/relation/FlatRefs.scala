@@ -7,12 +7,15 @@ import molecule.sql.mariadb.setup.Api_mariadb_async
 class FlatRef extends Test {
   FlatRef(this, Api_mariadb_async)
 }
-class FlatRefOpt extends Test {
+class FlatOptEntity extends Test {
+  FlatOptEntity(this, Api_mariadb_async)
+}
+class FlatOptRef extends Test {
   FlatOptRef(this, Api_mariadb_async)
 }
-class FlatRefOptNested extends Test {
-  FlatRefOptNested(this, Api_mariadb_async)
+class FlatOptRefNested extends Test {
+  FlatOptRefNested(this, Api_mariadb_async)
 }
-class FlatRefOptAdjacent extends Test {
-  FlatRefOptAdjacent(this, Api_mariadb_async)
+class FlatOptRefAdjacent extends Test {
+  FlatOptRefAdjacent(this, Api_mariadb_async)
 }

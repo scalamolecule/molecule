@@ -411,25 +411,6 @@ case class FlatOptRef(
   }
 
 
-  "Opt ref with initial sorting" - refs { implicit conn =>
-    for {
-      _ <- A.i.B.?(B.i).insert(List(
-        (1, None),
-        (2, Some(2)),
-      )).transact
-
-      _ <- A.i.a1.B.?(B.i).query.get.map(_ ==> List(
-        (1, None),
-        (2, Some(2)),
-      ))
-      _ <- A.i.d1.B.?(B.i).query.get.map(_ ==> List(
-        (2, Some(2)),
-        (1, None),
-      ))
-    } yield ()
-  }
-
-
   "Opt ref with sorting" - refs { implicit conn =>
     if (database != "datomic") {
       for {

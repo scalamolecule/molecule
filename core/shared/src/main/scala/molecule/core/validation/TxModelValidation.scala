@@ -93,19 +93,19 @@ case class TxModelValidation(
           refPath = refPath :+ refAttr
           validate(es ++ tail)
 
-        // todo: simply copied OptRef handling - does this work?
-        case OptEntity(es, r) =>
-          val refAttr = r.ent + "." + r.refAttr
-          if (prev(level)(group).contains(refAttr))
-            dup(refAttr)
-          if (refPath.contains(refAttr))
-            dup(refAttr)
-          prev(level) = prev(level) :+ Array(refAttr)
-          group += 1
-          mandatoryRefs = mandatoryRefs.filterNot(_._1 == refAttr)
-          presentAttrs += r.refAttr
-          refPath = refPath :+ refAttr
-          validate(es ++ tail)
+        case OptEntity(attrs) =>
+          validateOptEntity(attrs)
+//          val refAttr = r.ent + "." + r.refAttr
+//          if (prev(level)(group).contains(refAttr))
+//            dup(refAttr)
+//          if (refPath.contains(refAttr))
+//            dup(refAttr)
+//          prev(level) = prev(level) :+ Array(refAttr)
+//          group += 1
+//          mandatoryRefs = mandatoryRefs.filterNot(_._1 == refAttr)
+//          presentAttrs += r.refAttr
+//          refPath = refPath :+ refAttr
+          validate(attrs ++ tail)
 
         case Nested(r, es) =>
           curElements = es
@@ -194,6 +194,15 @@ case class TxModelValidation(
       throw ModelError(
         s"Please add at least 1 attribute to entity $ent " +
           s"before relating to " + refAttr.capitalize
+      )
+    }
+  }
+
+  private def validateOptEntity(elements: List[Element]): List[Element] = {
+    elements.map {
+      case a: Attr => a
+      case other   => throw ModelError(
+        "Only attributes of initial entity allowed in optional entity. Found:\n" + other
       )
     }
   }

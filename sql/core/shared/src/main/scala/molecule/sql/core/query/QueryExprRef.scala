@@ -25,7 +25,13 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
 
     if (card == CardOne) {
       val (refAs, refExt) = getOptExt().fold(("", ""))(ext => (ref + ext, ext))
-      val joinType        = if (isOptNested || nestedOptRef) "LEFT" else "INNER"
+      val joinType        = if (optEntity) {
+        "RIGHT"
+      } else if (isOptNested || nestedOptRef) {
+        "LEFT"
+      } else {
+        "INNER"
+      }
       joins += ((s"$joinType JOIN", ref, refAs, List(s"$ent$entExt.$refAttr = $ref$refExt.id")))
     } else {
       if (nestedOptRef) {
@@ -42,6 +48,7 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
     backRef: BackRef, tail: List[Element]
   ): Unit = {
     checkOnlyOptRef()
+    checkOnlyRefAfterOptEntity()
     if (isManNested || isOptNested) {
       val BackRef(bRef, _, _) = backRef
       tail.head match {
@@ -60,6 +67,8 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
   override protected def queryOptRef(
     r: Ref, optRefElements: List[Element]
   ): Unit = {
+    checkOnlyRefAfterOptEntity()
+
     if (hasOptRef) {
       // transfer previous predicates from `where`
       addPredicatesToLastLeftJoin()
@@ -88,22 +97,15 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
   }
 
 
-  override protected def queryOptEntity(
-    optEntityElements: List[Element],
-    r: Ref
-  ): Unit = {
+  override protected def queryOptEntity(attrs: List[Element]): Unit = {
     // Resolve optional entity casts
-    resolve(optEntityElements)
+    resolve(attrs)
 
-    // Collect casts in optional tuple
+    // Flag for Right join
+    optEntity = true
+
+    // Continue collecting casts in CastOptEntity
     castStrategy = castStrategy.optEntity
-
-    val Ref(ent, refAttr, ref, _, _, _) = r
-    handleRef(refAttr, ref)
-
-    val entExt          = getOptExt(path.dropRight(2)).getOrElse("")
-    val (refAs, refExt) = getOptExt().fold(("", ""))(ext => (ref + ext, ext))
-    joins += ((s"RIGHT JOIN", ref, refAs, List(s"$ent$entExt.$refAttr = $ref$refExt.id")))
 
     // Collect None too
     hasOptRef = true
@@ -114,6 +116,7 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
     ref: Ref, nestedElements: List[Element]
   ): Unit = {
     isManNested = true
+    checkOnlyRefAfterOptEntity()
     if (isOptNested) {
       noMixedNestedModes
     }
@@ -125,6 +128,7 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
     ref: Ref, nestedElements: List[Element]
   ): Unit = {
     isOptNested = true
+    checkOnlyRefAfterOptEntity()
     if (isManNested) {
       noMixedNestedModes
     }

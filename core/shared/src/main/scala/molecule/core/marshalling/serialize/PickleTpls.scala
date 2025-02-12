@@ -133,9 +133,9 @@ case class PickleTpls(
           prevRefs.clear()
           resolvePicklers(tail, picklers :+ pickleOptElements(tplIndex, optRefElements), tplIndex + 1)
 
-        case OptEntity(optEntityElements, _) =>
+        case OptEntity(attrs) =>
           prevRefs.clear()
-          resolvePicklers(tail, picklers :+ pickleOptElements(tplIndex, optEntityElements), tplIndex + 1)
+          resolvePicklers(tail, picklers :+ pickleOptElements(tplIndex, attrs), tplIndex + 1)
 
         case Nested(_, nestedElements) =>
           prevRefs.clear()

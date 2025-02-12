@@ -41,6 +41,15 @@ abstract class SqlAction(parent: SqlAction, sqlOps: SqlOps, ent: String) {
     sibling
   }
 
+  def replaceSibling[T <: SqlAction](sibling: T, addRowSetter: Boolean = false): T = {
+    parent.children.clear()
+    parent.children += sibling
+    if (addRowSetter) {
+      sibling.rowSetters += ListBuffer.empty[PS => Unit]
+    }
+    sibling
+  }
+
   def setCol(attr: String): Int = setCol(attr, "")
   def setCol(attr: String, typeCast: String): Int = {
     cols += attr
@@ -62,7 +71,7 @@ abstract class SqlAction(parent: SqlAction, sqlOps: SqlOps, ent: String) {
   // Execution --------------------------------------
 
   def insert(enforce: Boolean = true): Unit = {
-    //    println(s"\n=========================== ENFORCE  $enforce  " + rowSetters.size)
+    //    println(s"\n=========================== ENFORCE: $enforce   rowSetters.size: " + rowSetters.size)
     val stmt = curStmt
     //    println(stmt)
     val ps   = prepare(stmt)

@@ -19,21 +19,26 @@ case class InsertRefOne(
     // Process children of ref
     children.foreach(_.process())
 
-    //    println(s"+++ InsertRefOne ++++++++++++++++++++++++++++++++++++" +
-    //      s"  $ref  " + optionalDefineds.mkString("Array(", ", ", ")"))
+//    println(s"+++ InsertRefOne ++++++++++++++++++++++++++++++++++++" +
+//      s"  $ref  " + optionalDefineds.mkString("Array(", ", ", ")"))
     //    println("rowSetters")
     //    println(rowSetters.map(rs => rs.toList.mkString("\n   ")).mkString("   ", "\n   -----\n   ", ""))
-    //    println("\nparent.rowSetters")
+    //
+    //    println("\nparent.rowSetters  " + parent.rowSetters.length)
     //    println(parent.rowSetters.map(rs => rs.toList.mkString("\n   ")).mkString("   ", "\n   -----\n   ", ""))
-    //    println("######### " + parent.ids.length)
-    //    println("========= " + ids.length)
+    //    //
+    //    println("\nparent.optionalDefineds  " + parent.optionalDefineds.length)
+    //    println(parent.optionalDefineds.mkString("\n  ", ",\n  ", ""))
+    //
+    //    println("\nparent.rowSetters.zip(parent.optionalDefineds)")
+    //    println(parent.rowSetters.zip(parent.optionalDefineds).mkString("   ", "\n   -----\n   ", ""))
 
     // Add ref rows (don't enforce empty row)
     insert(false)
-    //    println("========= " + ids.length)
 
     // Add ref ids from parent (previous entity) to ref
     val refIds = ids.iterator
+
     parent match {
       case _: InsertOptRef =>
         // make ref only when parent/prev entity has value
@@ -44,6 +49,20 @@ case class InsertRefOne(
           case (setter, _) =>
             setter += ((ps: PS) => ps.setNull(refAttrIndex, 0))
         }
+
+      case _: InsertOptEntity =>
+        val entityResolvers = parent.rowSetters.flatMap {
+          case rowSetter if rowSetter.isEmpty =>
+            refIds.next() // skip unused ref id
+            None // no optional entity created
+
+          case rowSetter =>
+            val refId = refIds.next()
+            rowSetter += ((ps: PS) => ps.setLong(refAttrIndex, refId))
+            Some(rowSetter)
+        }
+        parent.rowSetters.clear()
+        parent.rowSetters.addAll(entityResolvers)
 
       case _ =>
         val parentRowSetters = parent.rowSetters.iterator

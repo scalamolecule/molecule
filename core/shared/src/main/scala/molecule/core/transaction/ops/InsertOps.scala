@@ -1,7 +1,7 @@
 package molecule.core.transaction.ops
 
 import molecule.base.ast._
-import molecule.core.ast.DataModel.Element
+import molecule.core.ast.DataModel.{Attr, Element}
 
 trait InsertOps extends BaseOps {
 
@@ -101,10 +101,10 @@ trait InsertOps extends BaseOps {
   ): Product => Unit
 
   protected def addOptEntity(
-    ent: String,
-    refAttr: String,
-    ref: String,
-    elements: List[Element]
+//    ent: String,
+//    refAttr: String,
+//    ref: String,
+    attrs: List[Attr]
   ): Product => Unit = ???
 
   protected def addOptRef(

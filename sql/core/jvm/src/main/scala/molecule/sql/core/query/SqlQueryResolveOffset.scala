@@ -29,7 +29,7 @@ case class SqlQueryResolveOffset[Tpl](
     m2q.castStrategy match {
       case c: CastTuple     => handleTuples(c, sortedRows, conn)
       case c: CastOptRefs   => handleTuples(c, sortedRows, conn)
-//      case c: CastOptEntity => handleTuples(c, sortedRows, conn)
+      case c: CastOptEntity => handleTuples(c, sortedRows, conn)
       case c: CastNested    => handleNested(c, sortedRows, conn)
       case other            => throw ModelError(
         "Un-allowed element for offset pagination: " + other

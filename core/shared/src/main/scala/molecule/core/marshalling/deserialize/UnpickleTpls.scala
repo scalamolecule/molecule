@@ -118,9 +118,9 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
           prevRefs.clear()
           resolveUnpicklers(tail, unpicklers :+ unpickleOptElements(optRefElements))
 
-        case OptEntity(optEntityElements, _) =>
+        case OptEntity(attrs) =>
           prevRefs.clear()
-          resolveUnpicklers(tail, unpicklers :+ unpickleOptElements(optEntityElements))
+          resolveUnpicklers(tail, unpicklers :+ unpickleOptElements(attrs))
 
         case Nested(_, nestedElements) =>
           prevRefs.clear()

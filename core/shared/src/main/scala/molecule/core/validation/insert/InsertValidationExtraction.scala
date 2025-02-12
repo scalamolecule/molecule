@@ -92,10 +92,12 @@ trait InsertValidationExtraction
             addOptRef(entityMap, tplIndex, ent, refAttr, optRefElements), tplIndex + 1, Nil)
 
         // todo: simply copied OptRef handling - does this work?
-        case OptEntity(optRefElements, Ref(ent, refAttr, _, _, _, _)) =>
+//        case OptEntity(optRefElements, Ref(ent, refAttr, _, _, _, _)) =>
+        case OptEntity(optRefElements) =>
           curElements = optRefElements
+//          val ent = fi
           getValidators(entityMap, tail, validators :+
-            addOptRef(entityMap, tplIndex, ent, refAttr, optRefElements), tplIndex + 1, Nil)
+            addOptRef(entityMap, tplIndex, "Optional", "entity", optRefElements), tplIndex + 1, Nil)
 
         case Nested(Ref(ent, refAttr, _, _, _, _), nestedElements) =>
           curElements = nestedElements

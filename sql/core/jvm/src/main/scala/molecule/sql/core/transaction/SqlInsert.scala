@@ -2,11 +2,11 @@ package molecule.sql.core.transaction
 
 import java.sql.{PreparedStatement => PS}
 import molecule.base.ast._
-import molecule.core.ast.DataModel.Element
+import molecule.core.ast.DataModel.{Attr, Element, OptEntity}
 import molecule.core.transaction.ops.InsertOps
 import molecule.core.transaction.{InsertResolvers_, ResolveInsert}
 import molecule.sql.core.transaction.strategy.SqlOps
-import molecule.sql.core.transaction.strategy.insert.{InsertAction, InsertRoot}
+import molecule.sql.core.transaction.strategy.insert.{InsertAction, InsertOptEntity, InsertRoot}
 
 trait SqlInsert
   extends InsertOps
@@ -18,17 +18,15 @@ trait SqlInsert
     elements: List[Element],
     tpls: Seq[Product]
   ): InsertAction = {
-    insertAction = InsertRoot(sqlOps, getInitialEntity(elements), tpls.length).insertEnt
-    val stableInsert = insertAction
-    val resolveTpl   = getResolver(elements)
+    val rootInsert = InsertRoot(sqlOps, getInitialEntity(elements), tpls.length)
+    insertAction = rootInsert.insertEnt
+    val resolveTpl = getResolver(elements)
     tpls.foreach { tpl =>
       //      println("------------------------------- " + tpl)
-      stableInsert.nextRow()
+      rootInsert.nextRow()
       resolveTpl(tpl)
     }
-    val xx = insertAction.rootAction
-
-    xx
+    insertAction.rootAction
   }
 
 
@@ -256,23 +254,16 @@ trait SqlInsert
     }
   }
 
+
   override protected def addOptEntity(
-    ent: String,
-    refAttr: String,
-    ref: String,
-    optEntityElements: List[Element]
+    attrs: List[Attr]
   ): Product => Unit = {
-    // Resolve optional entity data
-    val insertOptEntity      = insertAction.optEntity(ent, refAttr, ref)
-    val resolveOptEntityData = getResolver(optEntityElements)
-
-    insertAction = insertOptEntity
-
-    countValueAttrs(optEntityElements) match {
+    insertAction = insertAction.optEntity(attrs.head.ent)
+    val resolveOptEntityData = getResolver(attrs)
+    countValueAttrs(attrs) match {
       case 1 =>
         (tpl: Product) => {
           val optionalValue = tpl.productElement(0).asInstanceOf[Option[Any]]
-          insertOptEntity.setOptionalDefined(optionalValue.isDefined)
           optionalValue.foreach { value =>
             resolveOptEntityData(Tuple1(value))
           }
@@ -280,7 +271,6 @@ trait SqlInsert
       case _ =>
         (tpl: Product) => {
           val optionalTpl = tpl.productElement(0).asInstanceOf[Option[Product]]
-          insertOptEntity.setOptionalDefined(optionalTpl.isDefined)
           optionalTpl.foreach { tpl =>
             resolveOptEntityData(tpl)
           }

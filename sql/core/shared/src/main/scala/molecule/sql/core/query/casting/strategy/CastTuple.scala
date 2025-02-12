@@ -9,7 +9,6 @@ case class CastTuple(
 ) extends CastStrategy {
 
   private var casts = casts0
-  //  override def getCasts: List[Cast] = casts
   def getCasts: List[Cast] = casts
   def lastIndex: Int = firstIndex + casts.length
 
@@ -46,15 +45,10 @@ case class CastTuple(
     )
   }
 
-  // First opt entity
-  override def optEntity: CastTuple = {
-    CastTuple(
-      List(
-        (row: RS, _: ParamIndex) => {
-          // Collect optional entity casts in Option
-          CastOptRefLeaf_.cast(casts, 1)(row)
-        }
-      )
+  override def optEntity: CastOptEntity = {
+    CastOptEntity(
+      CastTuple(casts), // optional entity attribute casts
+      CastTuple(Nil) // following casts
     )
   }
 
