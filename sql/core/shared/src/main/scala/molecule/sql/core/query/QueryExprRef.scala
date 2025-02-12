@@ -4,6 +4,7 @@ import molecule.base.ast._
 import molecule.base.error.ModelError
 import molecule.core.ast.DataModel._
 import molecule.core.query.{Model2Query, QueryExpr}
+import scala.collection.mutable.ListBuffer
 
 
 trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
@@ -25,14 +26,29 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
 
     if (card == CardOne) {
       val (refAs, refExt) = getOptExt().fold(("", ""))(ext => (ref + ext, ext))
-      val joinType        = if (optEntity) {
-        "RIGHT"
-      } else if (isOptNested || nestedOptRef) {
-        "LEFT"
-      } else {
-        "INNER"
-      }
-      joins += ((s"$joinType JOIN", ref, refAs, List(s"$ent$entExt.$refAttr = $ref$refExt.id")))
+      val joinPredicates  = ListBuffer.empty[String]
+      val joinType        =
+        if (insideOptEntity) {
+          if (select.nonEmpty) {
+            // Ensure clauses become join predicates
+            where.foreach {
+              case (attr, predicate) => joinPredicates += s"$attr $predicate"
+            }
+            where.clear()
+          } else {
+            // Optional entity attrs all tacit
+            hasOptEntityAttrs = false
+          }
+          insideOptEntity = false
+          "RIGHT"
+        } else if (isOptNested || nestedOptRef) {
+          "LEFT"
+        } else {
+          "INNER"
+        }
+      joins += ((s"$joinType JOIN", ref, refAs,
+        List(s"$ent$entExt.$refAttr = $ref$refExt.id") ++ joinPredicates
+      ))
     } else {
       if (nestedOptRef) {
         onlyCardOneInsideOptRef(r)
@@ -102,13 +118,13 @@ trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
     resolve(attrs)
 
     // Flag for Right join
-    optEntity = true
+    insideOptEntity = true
 
     // Continue collecting casts in CastOptEntity
     castStrategy = castStrategy.optEntity
 
-    // Collect None too
-    hasOptRef = true
+    // Assume optional entity attributes
+    hasOptEntityAttrs = true
   }
 
 

@@ -11,6 +11,7 @@ object CastOptRefLeaf_ extends SqlQueryBase {
     firstIndex: ParamIndex
   ): RS => Option[Any] = {
     casts.length match {
+      case 0  => (_: RS) => Option.empty[Any]
       case 1  => cast1(casts, firstIndex)
       case 2  => cast2(casts, firstIndex)
       case 3  => cast3(casts, firstIndex)

@@ -50,7 +50,7 @@ abstract class Model2SqlQuery(elements0: List[Element])
     optLimit: Option[Int],
     optOffset: Option[Int]
   ): String = {
-    if (hasOptRef) {
+    if (hasOptRef || hasOptEntityAttrs) {
       addPredicatesToLastLeftJoin()
     }
 

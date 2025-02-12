@@ -62,6 +62,43 @@ case class FlatOptEntity(
   }
 
 
+  "No entities pointing to ref" - refs { implicit conn =>
+    for {
+      _ <- A.?(A.i).B.i.insert(List(
+        (None, 1),
+        (Some(20), 2),
+      )).transact
+
+      _ <- A.?(A.i).B.i.a1.query.get.map(_ ==> List(
+        (None, 1),
+        (Some(20), 2),
+      ))
+
+      // No ref to B - None returned for A entity
+      _ <- A.?(A.b_()).B.i.query.get.map(_ ==> List(
+        (None, 1),
+      ))
+    } yield ()
+  }
+
+
+  "Basic with following refs" - refs { implicit conn =>
+    for {
+      _ <- A.?(A.i.s).B.s.C.i.insert(
+        (None, "-", 0),
+        (Some((10, "x")), "a", 1),
+        (Some((20, "y")), "b", 2),
+      ).transact
+
+      _ <- A.?(A.i.s).B.s.C.i.a1.query.i.get.map(_ ==> List(
+        (None, "-", 0),
+        (Some((10, "x")), "a", 1),
+        (Some((20, "y")), "b", 2),
+      ))
+    } yield ()
+  }
+
+
   "Only optional attributes in optional entity - SQL" - refs { implicit conn =>
     if (database != "datomic") {
       for {

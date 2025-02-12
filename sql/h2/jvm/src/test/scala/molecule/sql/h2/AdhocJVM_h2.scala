@@ -6,6 +6,7 @@ import molecule.coreTests.domains.dsl.Types._
 import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.sql.h2.async._
 import molecule.sql.h2.setup.DbProviders_h2
+import scala.concurrent.Future
 import scala.language.implicitConversions
 
 
@@ -44,127 +45,54 @@ class AdhocJVM_h2 extends Test with DbProviders_h2 with TestUtils {
 
   "refs" - refs { implicit conn =>
     import molecule.coreTests.domains.dsl.Refs._
-
-
-    //    Insert(
-    //      Entity(
-    //        OptEntity(
-    //          RefOne(
-    //            INSERT INTO B (
-    //              s
-    //            ) VALUES (?)
-    //          )
-    //            ---------------------------
-    //            INSERT INTO A (
-    //            i,
-    //            b
-    //          ) VALUES (?, ?)
-    //        )
-    //          ---------------------------
-    //          INSERT INTO A (id) VALUES (DEFAULT)
-    //      )
-    //    )
-
     for {
-
-      //      _ <- A.i.B.s.insert((1,"a")).i.transact
-      //
-      //      _ <- A.i.B.?(B.s).insert((1,Some("a"))).i.transact
-
-      //      _ <- B.c.insert(1,2,3).transact
-
-      //            _ <- A.?(A.i).insert(
-      //              Some(1),
-      //              None
-      //            ).transact
-      //
-      //            _ <- A.i.query.get.map(_ ==> List(
-      //              1
-      //            ))
-      //      //
-      //      _ <- A.?(A.i.s).insert(
-      //        Some((1, "a")),
-      //        None
-      //      ).transact
-      //
-      //      _ <- A.i.s.query.get.map(_ ==> List(
-      //        (1, "a")
-      //      ))
-
-      _ <- A.?(A.i.s).B.s.insert(
-        (None, "-"),
-        (Some((10, "x")), "a"),
-        (Some((20, "y")), "b"),
-      ).transact
-
-      //      _ <- rawQuery(
-      //        """SELECT DISTINCT
-      //          |  B.id,
-      //          |  B.s
-      //          |FROM B where c is null
-      //          |""".stripMargin, true)
-      //
-            _ <- rawQuery(
-              """SELECT DISTINCT
-                |  B.s
-                |FROM A
-                |  RIGHT JOIN B ON
-                |    A.b = B.id AND
-                |    A.b IS NULL AND
-                |    B.s IS NOT NULL
-                |ORDER BY B.s;
-                |""".stripMargin, true)
-
-      _ <- A.?(A.i.s).B.s.a1.query.get.map(_ ==> List(
-        (None, "-"),
-        (Some((10, "x")), "a"),
-        (Some((20, "y")), "b"),
-      ))
-
-//      _ <- A.?(A.i(10)).B.s.a1.query.i.get.map(_ ==> List(
-////        (None, "-"),
+//      _ <- A.?(A.i.s).B.s.insert(
+//        (None, "-"),
 //        (Some((10, "x")), "a"),
-////        (Some((20, "y")), "b"),
+//        (Some((20, "y")), "b"),
+//      ).transact
+//      //
+//      //      //      _ <- rawQuery(
+//      //      //        """SELECT DISTINCT
+//      //      //          |  B.id,
+//      //      //          |  B.s
+//      //      //          |FROM B where c is null
+//      //      //          |""".stripMargin, true)
+//      //      //
+//      //      _ <- rawQuery(
+//      //        """SELECT DISTINCT
+//      //          |  B.s
+//      //          |FROM A
+//      //          |  RIGHT JOIN B ON
+//      //          |    A.b = B.id // and A.b IS NULL
+//      //          |where A.b IS NULL
+//      //          |ORDER BY B.s;
+//      //          |""".stripMargin, true)
+//      //
+//      ////      x <- A.?(A.i.s).B.s.a1.query.get
+//      //      _ <- A.?(A.i.s).B.s.a1.query.get.map(_ ==> List(
+//      //        (None, "-"),
+//      //        (Some((10, "x")), "a"),
+//      //        (Some((20, "y")), "b"),
+//      //      ))
+//
+//      _ <- A.?(A.b_()).B.s.a1.query.i.get.map(_ ==> List(
+//        (None, "-"),
 //      ))
 
+      _ <- A.?(A.i).B.i.insert(List(
+        (None, 1),
+        (Some(20), 2),
+      )).transact
 
-      //      _ <- A.?(A.i). B.s.insert(
-      //        (Some(10), "a"),
-      //        (None, "X"),
-      //        (Some(20), "b"),
-      //      ).i.transact
+      _ <- A.?(A.i).B.i.a1.query.get.map(_ ==> List(
+        (None, 1),
+        (Some(20), 2),
+      ))
 
-      //      _ <- rawQuery(
-      //        """SELECT DISTINCT
-      //          |  B.id,
-      //          |  B.s
-      //          |FROM B where c is null
-      //          |""".stripMargin, true)
-      //
-      //      _ <- rawQuery(
-      //        """SELECT DISTINCT
-      //          |  A.id,
-      //          |  A.i,
-      //          |  A.b
-      //          |FROM A
-      //          |""".stripMargin, true)
-      //
-      //      _ <- A.?(A.i).B.s.a1.query.i.get.map(_ ==> List(
-      //        (None, "X"),
-      //        (Some(10), "a"),
-      //        (Some(20), "b"),
-      //      ))
-
-
-      //
-      //        _ <- rawTransact(
-      //          """UPDATE B
-      //            |SET
-      //            |  i = ?
-      //            |WHERE
-      //            |  i IS NOT NULL AND
-      //            |  B.id IN(42)
-      //            |""".stripMargin)
+      _ <- A.?(A.b_()).B.i.a1.query.get.map(_ ==> List(
+        (None, 1),
+      ))
     } yield ()
   }
 

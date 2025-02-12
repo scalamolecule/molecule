@@ -20,6 +20,7 @@ object _CastOptRefLeaf extends SqlGenBase("CastOptRefLeaf", "/query/casting") {
        |    firstIndex: ParamIndex
        |  ): RS => Option[Any] = {
        |    casts.length match {
+       |      case 0  => (_: RS) => Option.empty[Any]
        |      $resolveX
        |    }
        |  }

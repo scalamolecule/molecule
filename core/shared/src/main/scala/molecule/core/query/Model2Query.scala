@@ -19,12 +19,13 @@ trait Model2Query extends QueryExpr with ModelUtils {
   protected val expectedFilterAttrs = mutable.Set.empty[String]
   protected var optNestedLeafIsSet  = Option.empty[Boolean]
 
-  final var nestedOptRef = false
-  final var hasOptRef    = false
-  final var isNested     = false
-  final var isManNested  = false
-  final var isOptNested  = false
-  final var optEntity    = false
+  final var nestedOptRef      = false
+  final var hasOptRef         = false
+  final var hasOptEntityAttrs = false
+  final var isNested          = false
+  final var isManNested       = false
+  final var isOptNested       = false
+  final var insideOptEntity   = false
 
 
   @tailrec
@@ -622,10 +623,10 @@ trait Model2Query extends QueryExpr with ModelUtils {
       s"Cardinality-many filter attributes not allowed to do additional filtering (${attr.name}).")
   }
 
-  protected def checkOnlyOptRef(): Unit = if (hasOptRef && !optEntity) {
+  protected def checkOnlyOptRef(): Unit = if (hasOptRef && !insideOptEntity) {
     throw ModelError("Only further optional refs allowed after optional ref.")
   }
-  protected def checkOnlyRefAfterOptEntity(): Unit = if (optEntity) {
+  protected def checkOnlyRefAfterOptEntity(): Unit = if (insideOptEntity) {
     throw ModelError("Only mandatory ref allowed after optional entity.")
   }
 
