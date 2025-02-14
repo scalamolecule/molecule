@@ -80,19 +80,51 @@ class AdhocJVM_h2 extends Test with DbProviders_h2 with TestUtils {
 //        (None, "-"),
 //      ))
 
-      _ <- A.?(A.i).B.i.insert(List(
-        (None, 1),
-        (Some(20), 2),
+      _ <- A.?(A.i).B.s.insert(List(
+        (None, "-"),
+        (Some(1), "a"),
       )).transact
 
-      _ <- A.?(A.i).B.i.a1.query.get.map(_ ==> List(
-        (None, 1),
-        (Some(20), 2),
+      _ <- A.?(A.i).B.s.a1.query.get.map(_ ==> List(
+        (None, "-"),
+        (Some(1), "a"),
       ))
 
-      _ <- A.?(A.b_()).B.i.a1.query.get.map(_ ==> List(
-        (None, 1),
+      // Using only tacit attributes of the optional entity
+      // always returns None when matching
+
+      // Find B data with A.i existing
+      _ <- A.?(A.i_).B.s.a1.query.get.map(_ ==> List(
+        (None, "a"),
       ))
+
+      // Find B data where A.i > 0
+      _ <- A.?(A.i_.>(0)).B.s.a1.query.get.map(_ ==> List(
+        (None, "a"),
+      ))
+
+      // Find B data where A.i > 1 - no match!
+      _ <- A.?(A.i_.>(1)).B.s.a1.query.get.map(_ ==> Nil)
+
+      // Find B data with no relationship from A to B
+      _ <- A.?(A.b_()).B.s.a1.query.get.map(_ ==> List(
+        (None, "-"),
+      ))
+
+
+
+//      _ <- A.?(A.i.s).B.s.C.i.insert(
+//        (None, "-", 0),
+//        (Some((10, "x")), "a", 1),
+//        (Some((20, "y")), "b", 2),
+//      ).transact
+//
+//      _ <- A.?(A.i.s).B.s.C.i.a1.query.i.get.map(_ ==> List(
+//        (None, "-", 0),
+//        (Some((10, "x")), "a", 1),
+//        (Some((20, "y")), "b", 2),
+//      ))
+
     } yield ()
   }
 

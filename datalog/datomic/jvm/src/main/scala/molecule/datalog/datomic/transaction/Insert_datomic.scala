@@ -3,6 +3,7 @@ package molecule.datalog.datomic.transaction
 import java.time._
 import java.util.{ArrayList => jArrayList, List => jList}
 import molecule.base.ast._
+import molecule.base.error.ModelError
 import molecule.core.transaction.ops.InsertOps
 import molecule.core.transaction.{InsertResolvers_, ResolveInsert}
 import molecule.core.util.{ModelUtils, MoleculeLogging}
@@ -310,6 +311,14 @@ trait Insert_datomic
   override protected def addBackRef(backRef: String): Product => Unit = {
     (_: Product) =>
       e = backRefs(backRef)
+  }
+
+  override protected def addOptEntity(
+    attrs: List[Attr]
+  ): Product => Unit = {
+    throw ModelError(
+      "Optional entity not implement for Datomic."
+    )
   }
 
 

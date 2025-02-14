@@ -101,11 +101,8 @@ trait InsertOps extends BaseOps {
   ): Product => Unit
 
   protected def addOptEntity(
-//    ent: String,
-//    refAttr: String,
-//    ref: String,
     attrs: List[Attr]
-  ): Product => Unit = ???
+  ): Product => Unit
 
   protected def addOptRef(
     tplIndex: Int,

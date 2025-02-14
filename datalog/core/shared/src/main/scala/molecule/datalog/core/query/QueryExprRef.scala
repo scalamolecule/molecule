@@ -43,16 +43,9 @@ trait QueryExprRef[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] =>
   }
 
   override protected def queryOptEntity(optElements: List[Element]): Unit = {
-//    nestedOptRef = true
-//    hasOptRef = true
-//    firstOptRef = false
-//
-//    // Add opt ref caster
-//    castss = castss.init :+ (castss.last :+ pullOptRefData(ref, optElements))
-//
-//    firstOptRef = true
-
-    ???
+    throw ModelError(
+      "Optional entity not implement for Datomic."
+    )
   }
 
 
