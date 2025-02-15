@@ -227,7 +227,10 @@ trait LambdasBase extends BaseHelpers with AggrUtils with JsonBase { self: SqlQu
     }
   }
   protected def strings(json: String): Array[String] = trimString(json).split("\", ?\"")
-  protected def elements(json: String): Array[String] = json.substring(1, json.length - 1).split(", ?")
+  protected def elements(json: String): Array[String] = if (json == null)
+    Array.empty[String] // Optional entity is empty for Seq types
+  else
+    json.substring(1, json.length - 1).split(", ?")
 
   protected lazy val jsonArrayId            : String => Array[String] = (json: String) => elements(json)
   protected lazy val jsonArrayString        : String => Array[String] = (json: String) => strings(json) // todo: un-escape quotes in strings

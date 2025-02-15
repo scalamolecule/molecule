@@ -286,7 +286,7 @@ case class FlatOptEntity(
             (None, 2),
             (None, 3),
           ))
-          _ <- A.?(A.i(1)).B.i_.query.get.map(_ ==> List(
+          _ <- A.?(A.i(1).a1).B.i_.query.get.map(_ ==> List(
             None,
             Some(1),
           ))
@@ -297,7 +297,7 @@ case class FlatOptEntity(
             (None, 2),
             (None, 3),
           ))
-          _ <- A.?(A.i.<(2)).B.i_.query.get.map(_ ==> List(
+          _ <- A.?(A.i.<(2).a1).B.i_.query.get.map(_ ==> List(
             None,
             Some(1),
           ))
@@ -320,7 +320,7 @@ case class FlatOptEntity(
             (None, 2),
             (Some(3), 3),
           ))
-          _ <- A.?(A.i.>(2)).B.i_.query.get.map(_ ==> List(
+          _ <- A.?(A.i.>(2).a1).B.i_.query.get.map(_ ==> List(
             None,
             Some(3),
           ))
@@ -331,7 +331,7 @@ case class FlatOptEntity(
             (Some(2), 2),
             (Some(3), 3),
           ))
-          _ <- A.?(A.i.>=(2)).B.i_.query.get.map(_ ==> List(
+          _ <- A.?(A.i.>=(2).a1).B.i_.query.get.map(_ ==> List(
             None,
             Some(2),
             Some(3),

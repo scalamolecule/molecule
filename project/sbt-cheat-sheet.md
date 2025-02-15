@@ -81,18 +81,18 @@ Compilation on JS side can take some time.
 
 1) Snapshot, molecule: `sbt +publishLocal`
 1) Snapshot, sbt-molecule: `./test-all.sh` (with molecule snapshot dependency)
-1) Snapshot, Fix sbt-molecule until all tests pass
+1) Snapshot, molecule-samples: `./test-all.sh` (with molecule snapshot dependency)
+1) Snapshot, Fix molecule/sbt-molecule until all tests pass
 1) Snapshot, sbt-molecule: `sbt publishLocal` (still snapshot version)
-1) Snapshot, moleucle: `sbt clean compile -Dmolecule=true`
+1) Snapshot, molecule: `sbt clean compile -Dmolecule=true`
 1) Snapshot, when all molecule tests pass, set molecule build version to new version
 1) molecule: `sbt ++2.12.20 "project baseJVM" publishLocal`
 1) Set sbt-molecule to new version and `molecule-base` dep to new molecule version in all sbt/sbt test build files
 1) sbt-molecule: `sbt publishLocal`
 1) sbt-molecule: `sbt publishSigned`
 1) molecule: set sbt-molecule plugin version to new plugin version
-1) molecule-samples: set new molecule and sbt-molecule versions and compile+test each sample project
 1) molecule: `sbt +publishSigned -Ddocs=true`
-1) commit and push molecule and molecule-samples to github
+1) commit and push molecule, sbt-molecule and molecule-samples to github
 1) molecule github: create release
 
 ## Publish without sbt-molecule update
