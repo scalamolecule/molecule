@@ -379,31 +379,34 @@ case class InsertRefs(
     } yield ()
   }
 
-  "Optional entity (right join)" - refs { implicit conn =>
-    for {
-      _ <- A.?(A.i).B.s.insert(
-        (Some(1), "a"),
-        (None, "b"),
-      ).transact
 
-      _ <- A.?(A.i).B.s.a1.query.get.map(_ ==> List(
-        (Some(1), "a"),
-        (None, "b"),
-      ))
-    } yield ()
-  }
+  if (database != "datomic") {
+    "Optional entity (right join)" - refs { implicit conn =>
+      for {
+        _ <- A.?(A.i).B.s.insert(
+          (Some(1), "a"),
+          (None, "b"),
+        ).transact
 
-  "Optional entity 2 (right join)" - refs { implicit conn =>
-    for {
-      _ <- A.?(A.i.s).B.s.insert(
-        (Some((1, "x")), "a"),
-        (None, "b"),
-      ).transact
+        _ <- A.?(A.i).B.s.a1.query.get.map(_ ==> List(
+          (Some(1), "a"),
+          (None, "b"),
+        ))
+      } yield ()
+    }
 
-      _ <- A.?(A.i.s).B.s.a1.query.get.map(_ ==> List(
-        (Some((1, "x")), "a"),
-        (None, "b"),
-      ))
-    } yield ()
+    "Optional entity 2 (right join)" - refs { implicit conn =>
+      for {
+        _ <- A.?(A.i.s).B.s.insert(
+          (Some((1, "x")), "a"),
+          (None, "b"),
+        ).transact
+
+        _ <- A.?(A.i.s).B.s.a1.query.get.map(_ ==> List(
+          (Some((1, "x")), "a"),
+          (None, "b"),
+        ))
+      } yield ()
+    }
   }
 }

@@ -13,30 +13,28 @@ class AdhocJVM_h2_sync extends Test with DbProviders_h2 with TestUtils {
   "commit1" - refs { implicit conn =>
     import molecule.coreTests.domains.dsl.Refs._
 
-    A.?(A.i).B.s.insert(
-//      (Some(1), "a"),
-            (None, "b"),
-    ).transact
+
+    A.i(1).save.transact
+    A.i(2).B.s("a").save.transact
+    B.s("b").save.transact
 
 
-    rawQuery(
-      """SELECT DISTINCT
-        |  A.i,
-        |  B.s
-        |FROM A
-        |  RIGHT JOIN B ON
-        |    A.b = B.id AND
-        |    A.i IS NOT NULL AND
-        |    B.s IS NOT NULL
-        |ORDER BY B.s;
-        |""".stripMargin, true
+    A.i.B.s.query.get ==> List(
+      (2, "a")
+    )
+
+    A.i.B.?(B.s).query.get ==> List(
+      (1, None),
+      (2, Some("a")),
+    )
+
+    A.?(A.i).B.s.a1.query.get ==> List(
+      (Some(2), "a"),
+      (None, "b"),
     )
 
 
-    A.?(A.i).B.s.a1.query.i.get ==> List(
-//      (Some(1), "a"),
-            (None, "b"),
-    )
+
 
 
 

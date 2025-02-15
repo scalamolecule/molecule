@@ -36,15 +36,15 @@ class AdhocJVM_datomic extends Test with DbProviders_datomic with TestUtils {
     import molecule.coreTests.domains.dsl.Refs._
     for {
 
-//      _ <- A.?(A.i).insert(Some(1)).transact
-//        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-//          err ==> "Optional entity not implement for Datomic."
-//        }
-//
-//      _ <- A.i.query.get.map(_ ==> List(1))
-//        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-//          err ==> "Optional entity not implement for Datomic."
-//        }
+      //      _ <- A.?(A.i).insert(Some(1)).transact
+      //        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+      //          err ==> "Optional entity not implement for Datomic."
+      //        }
+      //
+      //      _ <- A.i.query.get.map(_ ==> List(1))
+      //        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+      //          err ==> "Optional entity not implement for Datomic."
+      //        }
 
 
       _ <- A.?(A.i).B.i.insert(List((None, 1))).transact

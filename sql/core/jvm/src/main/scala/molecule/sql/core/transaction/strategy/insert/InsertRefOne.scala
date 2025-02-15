@@ -62,7 +62,7 @@ case class InsertRefOne(
             Some(rowSetter)
         }
         parent.rowSetters.clear()
-        parent.rowSetters.addAll(entityResolvers)
+        parent.rowSetters ++= entityResolvers
 
       case _ =>
         val parentRowSetters = parent.rowSetters.iterator
