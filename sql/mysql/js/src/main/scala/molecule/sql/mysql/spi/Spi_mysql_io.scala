@@ -11,7 +11,7 @@ object Spi_mysql_io extends Spi_mysql_io
 
 trait Spi_mysql_io extends SpiBase_io {
 
-  override protected def printInspectQuery(label: String, elements: List[Element]): IO[Unit] = IO {
+  override protected def printInspectQuery(label: String, elements: List[Element]): IO[Unit] = IO.blocking {
     val query = new Model2SqlQuery_mysql(elements).getSqlQuery(Nil, None, None, None)
     printRaw(label, Nil, query)
   }

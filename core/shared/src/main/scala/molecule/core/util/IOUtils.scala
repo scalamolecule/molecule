@@ -11,7 +11,7 @@ trait IOUtils extends ModelUtils with MoleculeLogging {
   implicit class futEither2io[T](fut: Future[Either[MoleculeError, T]])(implicit ec: ExecutionContext) {
     def io: IO[T] = {
       IO.fromFuture {
-        IO {
+        IO.blocking {
           fut
             .map {
               case Right(result)       => result
@@ -34,7 +34,7 @@ trait IOUtils extends ModelUtils with MoleculeLogging {
   implicit class futTxReport2io(fut: Future[TxReport])(implicit ec: ExecutionContext) {
     def io: IO[TxReport] = {
       IO.fromFuture {
-        IO {
+        IO.blocking {
           fut
             .recover {
               case e: MoleculeError =>
@@ -53,7 +53,7 @@ trait IOUtils extends ModelUtils with MoleculeLogging {
   implicit class futListUnit2io(fut: Future[List[Unit]])(implicit ec: ExecutionContext) {
     def io: IO[List[Unit]] = {
       IO.fromFuture {
-        IO {
+        IO.blocking {
           fut
             .recover {
               case e: MoleculeError =>
@@ -71,7 +71,7 @@ trait IOUtils extends ModelUtils with MoleculeLogging {
 
   def either[T](fut: Future[T])(implicit ec: ExecutionContext): IO[Either[MoleculeError, T]] = {
     IO.fromFuture {
-      IO {
+      IO.blocking {
         fut
           .map(txR => Right(txR))
           .recover {

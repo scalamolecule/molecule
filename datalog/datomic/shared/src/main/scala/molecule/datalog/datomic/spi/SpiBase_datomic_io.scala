@@ -10,7 +10,7 @@ trait SpiBase_datomic_io extends Renderer {
   protected def printInspectQuery(
     label: String,
     elements: List[Element]
-  ): IO[Unit] = IO {
+  ): IO[Unit] = IO.blocking {
     val queries = new Model2DatomicQuery(elements).getDatomicQueries(true)._3
     printRaw(label, Nil, queries)
   }

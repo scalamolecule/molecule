@@ -112,7 +112,7 @@ trait SpiBase_io
     printInspectTx("SAVE", save.elements)
   }
 
-  override def save_validate(save: Save)(implicit conn: Conn): IO[Map[String, Seq[String]]] = IO {
+  override def save_validate(save: Save)(implicit conn: Conn): IO[Map[String, Seq[String]]] = IO.blocking {
     if (save.doValidate) {
       val proxy = conn.proxy
       TxModelValidation(proxy.schema.entityMap, proxy.schema.attrMap, "save").validate(save.elements)
@@ -151,7 +151,7 @@ trait SpiBase_io
   }
 
   override def insert_validate(insert: Insert)
-                              (implicit conn: Conn): IO[Seq[(Int, Seq[InsertError])]] = IO {
+                              (implicit conn: Conn): IO[Seq[(Int, Seq[InsertError])]] = IO.blocking {
     if (insert.doValidate) {
       InsertValidation.validate(conn, insert.elements, insert.tpls)
     } else {
@@ -179,7 +179,7 @@ trait SpiBase_io
   }
 
   override def update_validate(update: Update)
-                              (implicit conn: Conn): IO[Map[String, Seq[String]]] = IO {
+                              (implicit conn: Conn): IO[Map[String, Seq[String]]] = IO.blocking {
     val proxy = conn.proxy
     TxModelValidation(proxy.schema.entityMap, proxy.schema.attrMap, "update").validate(update.elements)
   }

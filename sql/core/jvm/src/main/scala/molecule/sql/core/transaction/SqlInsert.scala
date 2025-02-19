@@ -216,6 +216,30 @@ trait SqlInsert
     (_: Product) => ()
   }
 
+  override protected def addOptEntity(
+    attrs: List[Attr]
+  ): Product => Unit = {
+    insertAction = insertAction.optEntity(attrs.head.ent)
+    val resolveOptEntityData = getResolver(attrs)
+    countValueAttrs(attrs) match {
+      case 1 =>
+        (tpl: Product) => {
+          // Optional entity can only be first
+          val optionalValue = tpl.productElement(0).asInstanceOf[Option[Any]]
+          optionalValue.foreach { value =>
+            resolveOptEntityData(Tuple1(value))
+          }
+        }
+      case _ =>
+        (tpl: Product) => {
+          val optionalTpl = tpl.productElement(0).asInstanceOf[Option[Product]]
+          optionalTpl.foreach { tpl =>
+            resolveOptEntityData(tpl)
+          }
+        }
+    }
+  }
+
   override protected def addOptRef(
     tplIndex: Int,
     ent: String,
@@ -249,30 +273,6 @@ trait SqlInsert
           insertOptRef.setOptionalDefined(optionalTpl.isDefined)
           optionalTpl.foreach { tpl =>
             resolveOptionalRefData(tpl)
-          }
-        }
-    }
-  }
-
-
-  override protected def addOptEntity(
-    attrs: List[Attr]
-  ): Product => Unit = {
-    insertAction = insertAction.optEntity(attrs.head.ent)
-    val resolveOptEntityData = getResolver(attrs)
-    countValueAttrs(attrs) match {
-      case 1 =>
-        (tpl: Product) => {
-          val optionalValue = tpl.productElement(0).asInstanceOf[Option[Any]]
-          optionalValue.foreach { value =>
-            resolveOptEntityData(Tuple1(value))
-          }
-        }
-      case _ =>
-        (tpl: Product) => {
-          val optionalTpl = tpl.productElement(0).asInstanceOf[Option[Product]]
-          optionalTpl.foreach { tpl =>
-            resolveOptEntityData(tpl)
           }
         }
     }

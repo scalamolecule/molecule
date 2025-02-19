@@ -67,7 +67,7 @@ trait Spi_datomic_io
 
   override def save_transact(save: Save)(implicit conn: Conn): IO[TxReport] = {
     IO.fromFuture {
-      IO {
+      IO.blocking {
         Spi_datomic_sync.save_validate(save)(conn) match {
           case errors if errors.isEmpty =>
             Spi_datomic_async.save_transact(
@@ -92,7 +92,7 @@ trait Spi_datomic_io
 
   override def insert_transact(insert: Insert)(implicit conn: Conn): IO[TxReport] = {
     IO.fromFuture {
-      IO {
+      IO.blocking {
         Spi_datomic_sync.insert_validate(insert)(conn) match {
           case errors if errors.isEmpty => Spi_datomic_async.insert_transact(
             insert.copy(elements = noKeywords(insert.elements, Some(conn.proxy)))
@@ -116,7 +116,7 @@ trait Spi_datomic_io
 
   override def update_transact(update: Update)(implicit conn: Conn): IO[TxReport] = {
     IO.fromFuture {
-      IO {
+      IO.blocking {
         Spi_datomic_sync.update_validate(update)(conn) match {
           case errors if errors.isEmpty => Spi_datomic_async.update_transact(
             update.copy(elements = noKeywords(update.elements, Some(conn.proxy)))
@@ -140,7 +140,7 @@ trait Spi_datomic_io
 
   override def delete_transact(delete: Delete)(implicit conn: Conn): IO[TxReport] = {
     IO.fromFuture {
-      IO {
+      IO.blocking {
         Spi_datomic_async.delete_transact(
           delete.copy(elements = noKeywords(delete.elements, Some(conn.proxy)))
         )(conn, ec)
@@ -167,7 +167,7 @@ trait Spi_datomic_io
     debug: Boolean = false
   )(implicit conn: Conn): IO[TxReport] = {
     IO.fromFuture {
-      IO {
+      IO.blocking {
         Spi_datomic_async.fallback_rawTransact(txData, debug)
       }
     }
