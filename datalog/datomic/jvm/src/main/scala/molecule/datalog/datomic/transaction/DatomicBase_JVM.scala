@@ -116,7 +116,7 @@ trait DatomicBase_JVM extends DatomicDataType_JVM with ModelUtils {
    */
   protected def getFreshConn(proxy: ConnProxy): Future[DatomicConn_JVM] = {
     proxy match {
-      case proxy@DatomicProxy(protocol, dbIdentifier, _, _) =>
+      case proxy@DatomicProxy(protocol, dbIdentifier, _, _, _, _, _, _, _, _, _) =>
         protocol match {
           case "mem" =>
             DatomicPeer.recreateDb(proxy)

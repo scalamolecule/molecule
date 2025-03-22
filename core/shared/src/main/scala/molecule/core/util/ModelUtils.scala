@@ -79,7 +79,7 @@ trait ModelUtils {
 
 
   protected def noKeywords(elements: List[Element], optProxy: Option[ConnProxy]): List[Element] = {
-    if (optProxy.isEmpty || optProxy.get.schema.reservedEntities.isEmpty)
+    if (optProxy.isEmpty || optProxy.get.reservedEntities.isEmpty)
       return elements
 
     @tailrec
@@ -178,15 +178,14 @@ trait ModelUtils {
   private final def nonReservedAttr(a: Attr, proxy: ConnProxy): (String, String) = {
     val (entIndex, attrIndex, _) = indexes(a.coord)
     (
-      if (proxy.schema.reservedEntities(entIndex)) a.ent + "_" else a.ent,
-      if (proxy.schema.reservedAttributes(attrIndex)) a.attr + "_" else a.attr
+      if (proxy.reservedEntities(entIndex)) a.ent + "_" else a.ent,
+      if (proxy.reservedAttributes(attrIndex)) a.attr + "_" else a.attr
     )
   }
 
   private final def nonReservedRef(r: Ref, proxy: ConnProxy): (String, String, String) = {
     val Seq(entIndex, refAttrIndex, refIndex) = r.coord
-    val schema                                = proxy.schema
-    val (reservedEnts, reservedAttrs)         = (schema.reservedEntities, schema.reservedAttributes)
+    val (reservedEnts, reservedAttrs)         = (proxy.reservedEntities, proxy.reservedAttributes)
     val ref                                   = r.ref
     (
       if (reservedEnts(entIndex)) r.ent + "_" else r.ent,
@@ -197,7 +196,7 @@ trait ModelUtils {
 
   private final def nonReservedBackRef(backRef: BackRef, proxy: ConnProxy): (String, String) = {
     val Seq(prevEntIndex, curEntIndex) = backRef.coord
-    val reservedEntitites              = proxy.schema.reservedEntities
+    val reservedEntitites              = proxy.reservedEntities
     (
       if (reservedEntitites(prevEntIndex)) backRef.prev + "_" else backRef.prev,
       if (reservedEntitites(curEntIndex)) backRef.cur + "_" else backRef.cur,

@@ -1,5 +1,6 @@
 package molecule.core.spi
 
+import geny.Generator
 import molecule.base.error.InsertError
 import molecule.core.action._
 
@@ -12,6 +13,10 @@ trait Spi_sync {
   def query_get[Tpl](
     q: Query[Tpl]
   )(implicit conn: Conn): List[Tpl] = noJS("query_get")
+
+  def query_stream[Tpl](
+    q: Query[Tpl]
+  )(implicit conn: Conn): Generator[Tpl] = noJS("query_stream")
 
   def query_subscribe[Tpl](
     q: Query[Tpl], callback: List[Tpl] => Unit

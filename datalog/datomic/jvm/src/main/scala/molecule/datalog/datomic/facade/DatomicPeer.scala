@@ -68,7 +68,7 @@ trait DatomicPeer extends BaseHelpers {
     createDatabase(protocol, id)
     val conn                                                   = connect(proxy, protocol, id)
     val List(datomicPartitions, datomicSchema, datomicAliases) =
-      conn.proxy.schema.schemaData
+      conn.proxy.schemaData
 
     // Ensure each transaction finishes before the next
     for {
@@ -105,7 +105,7 @@ trait DatomicPeer extends BaseHelpers {
     createDatabase(protocol, id)
     val conn                                                   = connect(proxy, protocol, id)
     val List(datomicPartitions, datomicSchema, datomicAliases) =
-      conn.proxy.schema.schemaData
+      conn.proxy.schemaData
 
     // Ensure each transaction finishes before the next
     for {

@@ -1,7 +1,7 @@
 package molecule.sql.postgres.setup
 
 import molecule.base.api.Schema_postgres
-import molecule.core.marshalling.{JdbcProxy_postgres, RpcRequest}
+import molecule.core.marshalling.{JdbcProxy, RpcRequest}
 import molecule.core.spi.Conn
 import molecule.sql.core.facade.JdbcConn_JS
 import scala.util.Random
@@ -17,7 +17,7 @@ object DbConnection_postgres {
     val url = s"jdbc:tc:postgresql:16://localhost:5432/test$n" +
       s"?preparedStatementCacheQueries=0"
 
-    val proxy = JdbcProxy_postgres(url, schema)
+    val proxy = JdbcProxy(url, schema)
     JdbcConn_JS(proxy, RpcRequest.request)
   }
 

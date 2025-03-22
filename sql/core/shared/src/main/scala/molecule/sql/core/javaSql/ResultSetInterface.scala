@@ -7,6 +7,7 @@ trait ResultSetInterface {
   def next(): Boolean
   def close(): Unit
   def wasNull(): Boolean
+  def setFetchSize(size: Int): Unit
 
   def getString(columnIndex: Int): String
   def getBoolean(columnIndex: Int): Boolean
@@ -42,4 +43,5 @@ trait ResultSetInterface {
   def cancelRowUpdates(): Unit
   def moveToInsertRow(): Unit
   def moveToCurrentRow(): Unit
+
 }

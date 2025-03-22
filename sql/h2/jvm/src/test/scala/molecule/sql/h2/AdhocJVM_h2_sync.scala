@@ -1,5 +1,6 @@
 package molecule.sql.h2
 
+import geny.Generator
 import molecule.coreTests.domains.dsl.Types._
 import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.sql.h2.setup.DbProviders_h2
@@ -14,38 +15,19 @@ class AdhocJVM_h2_sync extends Test with DbProviders_h2 with TestUtils {
     import molecule.coreTests.domains.dsl.Refs._
 
 
+    A.i.insert(1, 2, 3).transact
 
-    // Save 3 combinations of related data
-    // A --
-    // A -- B
-    //   -- B
-    A.i(1).save.transact
-    A.i(2).B.s("a").save.transact
-    B.s("b").save.transact
+//    A.i.query.get ==> List(1, 2, 3)
+//    A.i.query.limit(2).get ==> List(1, 2, 3)
 
-    // Data can also be inserted with a right join.
-    // We could have inserted the two last saves from above with this:
-    A.?(A.i).B.s.insert(
-      (Some(2), "a"),
-      (None, "b"),
-    ).transact
+    val a: Generator[Int] = A.i.query.stream
 
-    // A -- B  Inner join (both sides mandatory)
-    A.i.B.s.query.get ==> List(
-      (2, "a")
-    )
 
-    // A -- B?  Left join (left side mandatory)
-    A.i.B.?(B.s).query.get ==> List(
-      (1, None),
-      (2, Some("a")),
-    )
 
-    // A? -- B  Right join (right side mandatory)
-    A.?(A.i).B.s.a1.query.get ==> List(
-      (Some(2), "a"),
-      (None, "b"),
-    )
+//    val b = a.take(2)
+    a.take(2).toList ==> List(1, 2)
+    a.toList ==> List(1, 2, 3)
+
 
 
 

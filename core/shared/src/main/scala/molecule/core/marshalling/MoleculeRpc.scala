@@ -1,5 +1,6 @@
 package molecule.core.marshalling
 
+import cats.effect.IO
 import molecule.base.error.MoleculeError
 import molecule.core.ast.DataModel._
 import molecule.core.spi.TxReport
@@ -12,6 +13,12 @@ trait MoleculeRpc {
     elements: List[Element],
     limit: Option[Int]
   ): Future[Either[MoleculeError, List[Tpl]]]
+
+  def queryStream[Tpl](
+    proxy: ConnProxy,
+    elements: List[Element],
+    limit: Option[Int]
+  ): fs2.Stream[IO, Either[MoleculeError, List[Tpl]]] = ???
 
   def queryOffset[Tpl](
     proxy: ConnProxy,

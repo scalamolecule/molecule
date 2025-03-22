@@ -3,7 +3,7 @@ package molecule.sql.mysql.setup
 
 import com.mysql.cj.jdbc.MysqlDataSource
 import molecule.base.api.Schema_mysql
-import molecule.core.marshalling.JdbcProxy_mysql
+import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.Conn
 import molecule.sql.core.facade.JdbcHandler_JVM
 import org.testcontainers.containers.MySQLContainer
@@ -38,7 +38,7 @@ object DbConnection_mysql {
 
   def run(test: Conn => Any, schema: Schema_mysql): Any = {
     val initSql = resetDb + schema.schemaData.head
-    val proxy   = JdbcProxy_mysql(baseUrl, schema, initSql)
+    val proxy   = JdbcProxy(baseUrl, schema, initSql)
 
     // Not closing the connection since we re-use it
     val conn = JdbcHandler_JVM.recreateDb(proxy, reusedSqlConn)

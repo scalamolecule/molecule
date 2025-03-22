@@ -57,6 +57,7 @@ class ResultSetImpl_sqlite(val underlying: ResultSet) extends ResultSetInterface
     rows(rowIndex)(columnIndex)
   }
 
+  override def setFetchSize(size: Int): Unit = underlying.setFetchSize(size)
 
   // Data ---------------------------------------------
 

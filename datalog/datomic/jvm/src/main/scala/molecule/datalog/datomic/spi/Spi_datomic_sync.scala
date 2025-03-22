@@ -104,7 +104,7 @@ trait Spi_datomic_sync
   )(implicit conn: Conn): Map[String, Seq[String]] = {
     if (save.doValidate) {
       val proxy = conn.proxy
-      TxModelValidation(proxy.schema.entityMap, proxy.schema.attrMap, "save")
+      TxModelValidation(proxy.entityMap, proxy.attrMap, "save")
         .validate(save.elements)
     } else {
       Map.empty[String, Seq[String]]

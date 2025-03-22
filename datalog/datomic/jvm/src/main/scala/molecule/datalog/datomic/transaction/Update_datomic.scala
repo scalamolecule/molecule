@@ -73,8 +73,8 @@ trait Update_datomic
       }
 
       val validationErrors = TxModelValidation(
-        conn.proxy.schema.entityMap,
-        conn.proxy.schema.attrMap,
+        conn.proxy.entityMap,
+        conn.proxy.attrMap,
         if (isUpsert) "upsert" else "update",
         Some(getCurSetValues)
       ).validate(elements)

@@ -3,7 +3,7 @@ package molecule.sql.sqlite.setup
 import java.sql.DriverManager
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import molecule.base.api.Schema_sqlite
-import molecule.core.marshalling.JdbcProxy_sqlite
+import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.Conn
 import molecule.coreTests.setup.DbConnection
 import molecule.sql.sqlite.facade.JdbcHandlerSQlite_JVM
@@ -21,7 +21,7 @@ trait DbConnection_sqlite extends DbConnection {
 
   def runMemDb(test: Conn => Any, schema: Schema_sqlite): Any = {
     Manager { use =>
-      val proxy   = JdbcProxy_sqlite("jdbc:sqlite::memory:", schema)
+      val proxy   = JdbcProxy("jdbc:sqlite::memory:", schema)
       val sqlConn = use(DriverManager.getConnection(proxy.url))
       val conn    = use(JdbcHandlerSQlite_JVM.recreateDb(proxy, sqlConn, true))
       test(conn)
@@ -34,7 +34,7 @@ trait DbConnection_sqlite extends DbConnection {
     val tempDbFilePath = tempDbPath
     ds.setUrl("jdbc:sqlite:" + tempDbFilePath)
     Manager { use =>
-      val proxy   = JdbcProxy_sqlite(ds.getUrl, schema)
+      val proxy   = JdbcProxy(ds.getUrl, schema)
       val sqlConn = use(ds.getConnection)
       val conn    = use(JdbcHandlerSQlite_JVM.recreateDb(proxy, sqlConn))
       test(conn)
@@ -52,7 +52,7 @@ trait DbConnection_sqlite extends DbConnection {
     config.setJdbcUrl("jdbc:sqlite:" + tempDbFilePath)
     Manager { use =>
       val ds      = use(new HikariDataSource(config))
-      val proxy   = JdbcProxy_sqlite(ds.getJdbcUrl, schema)
+      val proxy   = JdbcProxy(ds.getJdbcUrl, schema)
       val sqlConn = use(ds.getConnection)
       val conn    = use(JdbcHandlerSQlite_JVM.recreateDb(proxy, sqlConn))
       test(conn)

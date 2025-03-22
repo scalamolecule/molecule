@@ -288,8 +288,7 @@ To generate the boilerplate code with the latest plugin, run the following comma
     cd ../molecule
     sbt compile -Dmolecule=true                   # Generate boilerplate code
 
-Now the boilerplate code for the core tests is generated and the various test suites can be run from your IDE
-(be prepared that it takes a while to compile all the tests for all SPI implementations).
+Now the boilerplate code for the core tests is generated and the various test suites can be run from your IDE.
 </details>
 
 

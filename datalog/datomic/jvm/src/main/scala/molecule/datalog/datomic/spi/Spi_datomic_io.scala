@@ -19,6 +19,11 @@ trait Spi_datomic_io
     IO(Spi_datomic_sync.query_get(q)(conn))
   }
 
+  override def query_stream[Tpl](
+    q: Query[Tpl],
+    chunkSize: Int
+  )(implicit conn: Conn): fs2.Stream[IO, Tpl] = ???
+
   override def query_subscribe[Tpl](
     q: Query[Tpl], callback: List[Tpl] => Unit
   )(implicit conn: Conn): IO[Unit] = {

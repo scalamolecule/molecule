@@ -2,6 +2,7 @@ package molecule.sql.sqlite.spi
 
 import java.sql.{DriverManager, Statement, PreparedStatement => PS}
 import molecule.core.action._
+import molecule.core.ast.DataModel.Element
 import molecule.core.marshalling.{ConnProxy, JdbcProxy}
 import molecule.core.spi._
 import molecule.core.transaction._
@@ -21,7 +22,6 @@ import molecule.sql.sqlite.transaction._
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 import scala.util.Using.Manager
-import molecule.core.ast.DataModel.Element
 
 object Spi_sqlite_sync extends Spi_sqlite_sync
 
@@ -54,7 +54,7 @@ trait Spi_sqlite_sync extends SpiBase_sync {
   ): DeleteAction = {
     new SqlOps_sqlite(conn)
       with ResolveDelete with SqlDelete {}
-      .getDeleteAction(delete.elements, conn.proxy.schema.entityMap)
+      .getDeleteAction(delete.elements, conn.proxy.entityMap)
   }
 
 

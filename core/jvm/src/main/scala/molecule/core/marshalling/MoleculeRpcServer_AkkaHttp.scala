@@ -37,7 +37,7 @@ abstract class MoleculeRpcServer_AkkaHttp(rpc: MoleculeRpc)
   }
 
   private val prefix = "molecule"
-  val moleculeRpcRoute = cors() {
+  val moleculeRpcRoute: Route = cors() {
     path(prefix / "query")(toRoute(handleQuery)) ~
       path(prefix / "queryOffset")(toRoute(handleQueryOffset)) ~
       path(prefix / "queryCursor")(toRoute(handleQueryCursor)) ~

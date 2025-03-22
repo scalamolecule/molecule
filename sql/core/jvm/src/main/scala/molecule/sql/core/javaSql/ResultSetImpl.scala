@@ -9,6 +9,7 @@ class ResultSetImpl(val underlying: ResultSet) extends ResultSetInterface {
   override def next(): Boolean = underlying.next
   override def close(): Unit = underlying.close()
   override def wasNull(): Boolean = underlying.wasNull
+  override def setFetchSize(size: Int): Unit = underlying.setFetchSize(size)
 
   override def getString(columnIndex: Int): String = underlying.getString(columnIndex)
   override def getBoolean(columnIndex: Int): Boolean = underlying.getBoolean(columnIndex)

@@ -17,7 +17,6 @@ import molecule.sql.core.transaction.strategy.update.UpdateAction
 import molecule.sql.core.transaction.{SqlDelete, SqlInsert, SqlSave, SqlUpdate}
 import molecule.sql.h2.query.Model2SqlQuery_h2
 import scala.concurrent.Future
-import scala.util.Using.Manager
 
 
 object Spi_h2_sync extends Spi_h2_sync
@@ -51,7 +50,7 @@ trait Spi_h2_sync extends SpiBase_sync {
   ): DeleteAction = {
     new SqlOps_h2(conn)
       with ResolveDelete with SqlDelete {}
-      .getDeleteAction(delete.elements, conn.proxy.schema.entityMap)
+      .getDeleteAction(delete.elements, conn.proxy.entityMap)
   }
 
 
@@ -74,11 +73,8 @@ trait Spi_h2_sync extends SpiBase_sync {
 
   // Creating connection from RPC proxy
   override protected def getJdbcConn(proxy0: ConnProxy): Future[JdbcConn_JVM] = Future {
-    Manager { use =>
-      val proxy   = proxy0.asInstanceOf[JdbcProxy]
-      val sqlConn = use(DriverManager.getConnection(proxy.url))
-      val conn    = use(JdbcHandler_JVM.recreateDb(proxy, sqlConn))
-      conn
-    }.get
+    val proxy   = proxy0.asInstanceOf[JdbcProxy]
+    val sqlConn = DriverManager.getConnection(proxy.url)
+    JdbcHandler_JVM.recreateDb(proxy, sqlConn)
   }
 }

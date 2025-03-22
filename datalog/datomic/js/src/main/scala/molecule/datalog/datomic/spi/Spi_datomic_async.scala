@@ -1,5 +1,6 @@
 package molecule.datalog.datomic.spi
 
+import cats.effect.IO
 import molecule.base.error._
 import molecule.core.action._
 import molecule.core.ast.DataModel.Element
@@ -27,6 +28,11 @@ trait Spi_datomic_async
     val proxy = conn.proxy.copy(dbView = q.dbView)
     conn.rpc.query[Tpl](proxy, q.elements, q.optLimit).future
   }
+
+  override def query_stream[Tpl](
+    q: Query[Tpl],
+    chunkSize: Int
+  )(implicit conn: Conn): fs2.Stream[IO, Tpl] = ???
 
   override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)
                                    (implicit conn0: Conn, ec: EC): Future[Unit] = {
@@ -105,7 +111,7 @@ trait Spi_datomic_async
 
   override def save_validate(save: Save)(implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = future {
     val proxy = conn.proxy
-    TxModelValidation(proxy.schema.entityMap, proxy.schema.attrMap, "save").validate(save.elements)
+    TxModelValidation(proxy.entityMap, proxy.attrMap, "save").validate(save.elements)
   }
 
 
@@ -157,7 +163,7 @@ trait Spi_datomic_async
 
   override def update_validate(update: Update)(implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = future {
     val proxy = conn.proxy
-    TxModelValidation(proxy.schema.entityMap, proxy.schema.attrMap, "update").validate(update.elements)
+    TxModelValidation(proxy.entityMap, proxy.attrMap, "update").validate(update.elements)
   }
 
 

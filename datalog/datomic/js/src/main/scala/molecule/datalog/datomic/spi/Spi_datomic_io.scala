@@ -28,6 +28,11 @@ trait Spi_datomic_io
     conn.rpc.query[Tpl](proxy, q.elements, q.optLimit).io
   }
 
+  override def query_stream[Tpl](
+    q: Query[Tpl],
+    chunkSize: Int
+  )(implicit conn: Conn): fs2.Stream[IO, Tpl] = ???
+
   override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)
                                    (implicit conn0: Conn): IO[Unit] = {
     val conn             = conn0.asInstanceOf[DatomicConn_JS]
@@ -116,7 +121,7 @@ trait Spi_datomic_io
 
   override def save_validate(save: Save)(implicit conn: Conn): IO[Map[String, Seq[String]]] = io {
     val proxy = conn.proxy
-    TxModelValidation(proxy.schema.entityMap, proxy.schema.attrMap, "save").validate(save.elements)
+    TxModelValidation(proxy.entityMap, proxy.attrMap, "save").validate(save.elements)
   }
 
 
@@ -172,7 +177,7 @@ trait Spi_datomic_io
 
   override def update_validate(update: Update)(implicit conn: Conn): IO[Map[String, Seq[String]]] = io {
     val proxy = conn.proxy
-    TxModelValidation(proxy.schema.entityMap, proxy.schema.attrMap, "update").validate(update.elements)
+    TxModelValidation(proxy.entityMap, proxy.attrMap, "update").validate(update.elements)
   }
 
 

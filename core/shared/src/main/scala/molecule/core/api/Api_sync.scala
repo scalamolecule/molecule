@@ -1,5 +1,6 @@
 package molecule.core.api
 
+import geny.Generator
 import molecule.base.error.InsertError
 import molecule.core.action._
 import molecule.core.spi.{Conn, Spi_sync, TxReport}
@@ -9,6 +10,7 @@ trait Api_sync extends Keywords { spi: Spi_sync =>
 
   implicit class QueryApiSync[Tpl](q: Query[Tpl]) {
     def get(implicit conn: Conn): List[Tpl] = query_get(q)
+    def stream(implicit conn: Conn): Generator[Tpl] = query_stream(q)
     def subscribe(callback: List[Tpl] => Unit)(implicit conn: Conn): Unit = query_subscribe(q, callback)
     def unsubscribe()(implicit conn: Conn): Unit = query_unsubscribe(q)
     def inspect(implicit conn: Conn): Unit = query_inspect(q)

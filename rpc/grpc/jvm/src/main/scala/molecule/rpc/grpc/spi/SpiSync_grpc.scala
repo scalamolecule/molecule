@@ -85,7 +85,7 @@ trait SpiSync_grpc
   }
   override def save_validate(save: Save)(implicit conn: Conn): Map[String, Seq[String]] = {
     //    val proxy = conn.proxy
-    //    TxModelValidation(proxy.schema.entityMap, proxy.schema.attrMap, "save").validate(save.elements)
+    //    TxModelValidation(proxy.entityMap, proxy.attrMap, "save").validate(save.elements)
     ???
   }
 
@@ -108,7 +108,7 @@ trait SpiSync_grpc
   }
   def insert_getStmts(insert: Insert, proxy: ConnProxy): Data = {
     //    (new ResolveInsert with Insert_datomic)
-    //      .getStmts(proxy.schema.entityMap, insert.elements, insert.tpls)
+    //      .getStmts(proxy.entityMap, insert.elements, insert.tpls)
     ???
   }
 

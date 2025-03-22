@@ -39,8 +39,8 @@ trait JVMDatomicSpiBase extends ModelUtils with JavaConversions {
     }
 
     TxModelValidation(
-      proxy.schema.entityMap,
-      proxy.schema.attrMap,
+      proxy.entityMap,
+      proxy.attrMap,
       "update",
       Some(getCurSetValues)
     ).validate(update.elements)

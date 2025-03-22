@@ -18,6 +18,11 @@ trait Spi_io {
     q: Query[Tpl]
   )(implicit conn: Conn): IO[List[Tpl]]
 
+  def query_stream[Tpl](
+    q: Query[Tpl],
+    chunkSize: Int
+  )(implicit conn: Conn): fs2.Stream[IO, Tpl]
+
   def query_subscribe[Tpl](
     q: Query[Tpl], callback: List[Tpl] => Unit
   )(implicit conn: Conn): IO[Unit]

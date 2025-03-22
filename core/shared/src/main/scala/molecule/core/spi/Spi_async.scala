@@ -1,5 +1,6 @@
 package molecule.core.spi
 
+import cats.effect.IO
 import molecule.base.error.InsertError
 import molecule.core.action._
 import scala.concurrent.{Future, ExecutionContext => EC}
@@ -9,6 +10,12 @@ trait Spi_async {
   def query_get[Tpl](
     q: Query[Tpl]
   )(implicit conn: Conn, ec: EC): Future[List[Tpl]]
+
+
+  def query_stream[Tpl](
+    q: Query[Tpl],
+    chunkSize: Int = 100
+  )(implicit conn: Conn): fs2.Stream[IO, Tpl] = ???
 
   def query_subscribe[Tpl](
     q: Query[Tpl], callback: List[Tpl] => Unit

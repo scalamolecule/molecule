@@ -1,7 +1,7 @@
 package molecule.sql.postgres.setup
 
 import molecule.base.api.Schema_postgres
-import molecule.core.marshalling.JdbcProxy_postgres
+import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.Conn
 import molecule.sql.core.facade.JdbcHandler_JVM
 import org.postgresql.ds.PGSimpleDataSource
@@ -34,7 +34,7 @@ object DbConnection_postgres {
 
   def run(test: Conn => Any, schema: Schema_postgres): Any = {
     val initSql = resetDb + schema.schemaData.head
-    val proxy   = JdbcProxy_postgres(baseUrl, schema, initSql)
+    val proxy   = JdbcProxy(baseUrl, schema, initSql)
 
     // Not closing the connection since we re-use it
     val conn = JdbcHandler_JVM.recreateDb(proxy, reusedSqlConn)

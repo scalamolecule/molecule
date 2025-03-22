@@ -9,10 +9,42 @@ val scala3   = "3.3.5"
 val allScala = Seq(scala212, scala213, scala3)
 
 val akkaVersion              = "2.8.3"
-val zioVersion               = "2.0.15"
 val dimafengContainerVersion = "0.41.4"
-val testContainerVersion     = "1.20.4"
 val logbackVersion           = "1.5.0"
+val sttpVersion              = "3.10.3"
+val tapirVersion             = "1.11.17"
+val testContainerVersion     = "1.20.4"
+val zioVersion               = "2.0.21"
+
+
+//val akkaVersion               = "2.6.20"
+val akkaHttpVersion           = "10.2.10"
+val catsEffect3Version        = "3.5.7"
+val catsMtlVersion            = "1.5.0"
+val circeVersion              = "0.14.10"
+val fs2Version                = "3.11.0"
+val http4sVersion             = "0.23.30"
+val javaTimeVersion           = "2.6.0"
+val jsoniterVersion           = "2.33.2"
+val laminextVersion           = "0.17.0"
+val magnoliaScala2Version     = "1.1.10"
+val magnoliaScala3Version     = "1.3.16"
+val pekkoHttpVersion          = "1.1.0"
+val playVersion               = "3.0.6"
+val playJsonVersion           = "3.0.4"
+val scalafmtVersion           = "3.8.0"
+//val sttpVersion               = "3.10.3"
+//val tapirVersion              = "1.11.17"
+//val zioVersion                = "2.1.16"
+val zioInteropCats2Version    = "22.0.0.0"
+val zioInteropCats3Version    = "23.1.0.4"
+val zioInteropReactiveVersion = "2.0.2"
+val zioConfigVersion          = "4.0.3"
+val zqueryVersion             = "0.7.6"
+val zioJsonVersion            = "0.7.39"
+val zioHttpVersion            = "3.0.1"
+val zioOpenTelemetryVersion   = "3.1.2"
+
 
 inThisBuild(
   List(
@@ -44,6 +76,8 @@ lazy val root = project
     core.jvm,
     coreTests.js,
     coreTests.jvm,
+    frontendTests.js,
+    frontendTests.jvm,
     datalogCore.js,
     datalogCore.jvm,
     datalogDatomic.js,
@@ -81,7 +115,12 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
       "com.outr" %%% "scribe" % "3.13.0", // logging
       "io.suzaku" %%% "boopickle" % "1.5.0", // binary serialization for rpc
       "dev.zio" %%% "zio" % zioVersion, // zio api
+      "dev.zio" %%% "zio-streams" % zioVersion,
       "org.typelevel" %%% "cats-effect" % "3.5.7", // cats api
+
+      // Streaming
+      "com.lihaoyi" %%% "geny" % "1.1.1",
+      "co.fs2" %% "fs2-core" % "3.11.0",
     )
   )
   .jvmSettings(
@@ -105,7 +144,7 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
     // Generate Molecule boilerplate code for tests with `sbt clean compile -Dmolecule=true`
     moleculePluginActive := sys.props.get("molecule").contains("true"),
     moleculeDomainPaths := Seq("molecule/coreTests/domains"),
-    moleculeMakeJars := false,
+//    moleculeMakeJars := false,
 
     // Find scala version specific jars in respective libs
     unmanagedBase := {
@@ -118,7 +157,7 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
 
     libraryDependencies ++= Seq(
       "com.zaxxer" % "HikariCP" % "6.2.1" % Test,
-      "org.scalameta" %% "munit" % "1.0.3" % Test,
+      "org.scalameta" %%% "munit" % "1.0.3" % Test,
       "org.scalactic" %%% "scalactic" % "3.2.19" % Test, // Tolerant roundings with triple equal on js platform
       "io.github.cquiroz" %%% "scala-java-time" % "2.6.0" % Test,
     ),
@@ -139,6 +178,54 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
     ),
   )
   .dependsOn(core)
+
+
+lazy val frontendTests = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
+  .settings(name := "molecule-frontendTests")
+  .settings(publish / skip := true)
+  .settings(compilerArgs)
+  .enablePlugins(MoleculePlugin)
+  .settings(
+    // Generate Molecule boilerplate code for tests with `sbt clean compile -Dmolecule=true`
+    moleculePluginActive := sys.props.get("molecule").contains("true"),
+    moleculeDomainPaths := Seq("molecule/frontendTests/domains"),
+//    moleculeMakeJars := false,
+
+    // Find scala version specific jars in respective libs
+    unmanagedBase := {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, 13)) => file(unmanagedBase.value.getPath ++ "/2.13")
+        case Some((2, 12)) => file(unmanagedBase.value.getPath ++ "/2.12")
+        case _             => file(unmanagedBase.value.getPath ++ "/3.3")
+      }
+    },
+
+    libraryDependencies ++= Seq(
+      "com.zaxxer" % "HikariCP" % "6.2.1" % Test,
+      "org.scalameta" %%% "munit" % "1.0.3" % Test,
+      "org.scalactic" %%% "scalactic" % "3.2.19" % Test, // Tolerant roundings with triple equal on js platform
+      "io.github.cquiroz" %%% "scala-java-time" % "2.6.0" % Test,
+    ),
+  )
+  .jsSettings(
+    jsEnvironment,
+    libraryDependencies ++= Seq(
+      "org.scala-js" %%% "scalajs-dom" % "2.8.0",
+      "org.scala-js" %%% "scala-js-macrotask-executor" % "1.1.1",
+      "org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0" cross CrossVersion.for3Use2_13
+    )
+  )
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      // Enforce one version to avoid warnings of multiple dependency versions when running tests
+      "org.slf4j" % "slf4j-api" % "1.7.36",
+      "org.slf4j" % "slf4j-nop" % "1.7.36",
+//      "com.h2database" % "h2" % "2.3.232"
+
+    ),
+  )
+  .dependsOn(sqlH2)
 
 
 lazy val datalogCore = crossProject(JSPlatform, JVMPlatform)
@@ -194,6 +281,47 @@ lazy val sqlH2 = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies ++= Seq(
       "com.h2database" % "h2" % "2.3.232"
     ),
+
+//    unmanagedSources / excludeFilter := {
+//      val test = "src/test/scala/molecule/sql/h2"
+//      def path(platform: String) = (baseDirectory.value / s"../$platform/$test").getCanonicalPath
+//      val jsTests     = path("js")
+//      val jvmTests    = path("jvm")
+//      val sharedTests = path("shared")
+//      val allowed     = Seq(
+//        //        sharedTests + "/compliance/aggr",
+//        //        sharedTests + "/compliance/api",
+//        //        sharedTests + "/compliance/crud",
+//        //        sharedTests + "/compliance/crud/update",
+//        //        sharedTests + "/compliance/crud/update/ops",
+//        //        sharedTests + "/compliance/crud/update/relation",
+//        //        sharedTests + "/compliance/filter",
+//        //        sharedTests + "/compliance/filter/set",
+//        //        sharedTests + "/compliance/filterAttr",
+//        //        sharedTests + "/compliance/inspect",
+//        //        sharedTests + "/compliance/pagination",
+//        //        sharedTests + "/compliance/partitions",
+//        //        sharedTests + "/compliance/relation",
+//        //        sharedTests + "/compliance/sort",
+//        //        sharedTests + "/compliance/subscription",
+//        //        sharedTests + "/compliance/time",
+//        //        sharedTests + "/compliance/validation",
+//        //        sharedTests + "/compliance",
+//        sharedTests + "/setup",
+//        jvmTests + "/setup",
+//        jsTests + "/setup",
+//        jsTests + "/AdhocJS_h2.scala",
+//        //        jvmTests + "/AdhocJVM_datomic.scala",
+//        //        sharedTests + "/Adhoc_datomic.scala",
+//      )
+//      new SimpleFileFilter(f =>
+//        (f.getCanonicalPath.startsWith(jsTests) ||
+//          f.getCanonicalPath.startsWith(jvmTests) ||
+//          f.getCanonicalPath.startsWith(sharedTests)) &&
+//          !allowed.exists(p => f.getCanonicalPath.startsWith(p))
+//      )
+//    },
+
     Test / fork := true
   )
   .dependsOn(sqlCore)
@@ -278,6 +406,115 @@ lazy val sqlSQlite = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(sqlCore)
   .dependsOn(coreTests % "test->test")
 
+
+//lazy val http4s = crossProject(JSPlatform, JVMPlatform)
+//  .crossType(CrossType.Full)
+lazy val adapterHttp4s = project
+  .in(file("adapters/http4s"))
+  .settings(name := "molecule-adapter-http4s")
+  //  .settings(commonSettings)
+  //  .settings(enableMimaSettingsJVM)
+  //  .disablePlugins(AssemblyPlugin)
+  .settings(
+    libraryDependencies ++= {
+      if (scalaVersion.value == scala3) Seq()
+      else Seq(compilerPlugin(("org.typelevel" %% "kind-projector" % "0.13.3").cross(CrossVersion.full)))
+    } ++
+      Seq(
+        "dev.zio" %% "zio-interop-cats" % zioInteropCats3Version,
+        "org.typelevel" %% "cats-effect" % catsEffect3Version,
+        "com.softwaremill.sttp.tapir" %% "tapir-http4s-server-zio" % tapirVersion,
+        "org.http4s" %% "http4s-ember-server" % http4sVersion % Test,
+        //        "dev.zio"                     %% "zio-test"                % zioVersion    % Test,
+        //        "dev.zio"                     %% "zio-test-sbt"            % zioVersion    % Test
+      )
+  )
+  .dependsOn(
+    core.jvm % "compile->compile;test->test"
+    //    tapirInterop % "compile->compile;test->test",
+    //    catsInterop
+  )
+
+//lazy val zioHttp = project
+//  .in(file("adapters/zio-http"))
+//  .settings(name := "caliban-zio-http")
+//  .settings(commonSettings)
+//  .settings(enableMimaSettingsJVM)
+//  .disablePlugins(AssemblyPlugin)
+//  .dependsOn(core, quickAdapter)
+//
+//lazy val quickAdapter = project
+//  .in(file("adapters/quick"))
+//  .settings(name := "caliban-quick")
+//  .settings(commonSettings)
+//  .settings(enableMimaSettingsJVM)
+//  .disablePlugins(AssemblyPlugin)
+//  .settings(
+//    libraryDependencies ++= Seq(
+//      "dev.zio" %% "zio-http" % zioHttpVersion
+//    )
+//  )
+//  .dependsOn(core, tapirInterop % "test->test")
+//
+//lazy val akkaHttp = project
+//  .in(file("adapters/akka-http"))
+//  .settings(name := "caliban-akka-http")
+//  .settings(commonSettings)
+//  .settings(enableMimaSettingsJVM)
+//  .disablePlugins(AssemblyPlugin)
+//  .settings(
+//    skip           := (scalaVersion.value == scala3),
+//    ideSkipProject := (scalaVersion.value == scala3),
+//    crossScalaVersions -= scala3,
+//    libraryDependencies ++= Seq(
+//      "com.typesafe.akka"           %% "akka-http"                  % akkaHttpVersion,
+//      "com.typesafe.akka"           %% "akka-serialization-jackson" % akkaVersion,
+//      "com.softwaremill.sttp.tapir" %% "tapir-akka-http-server"     % tapirVersion,
+//      compilerPlugin(("org.typelevel" %% "kind-projector" % "0.13.3").cross(CrossVersion.full))
+//    )
+//  )
+//  .dependsOn(core, tapirInterop % "compile->compile;test->test")
+//
+//lazy val pekkoHttp = project
+//  .in(file("adapters/pekko-http"))
+//  .settings(name := "caliban-pekko-http")
+//  .settings(commonSettings)
+//  .settings(enableMimaSettingsJVM)
+//  .disablePlugins(AssemblyPlugin)
+//  .settings(
+//    libraryDependencies ++= {
+//      if (scalaVersion.value == scala3) Seq()
+//      else Seq(compilerPlugin(("org.typelevel" %% "kind-projector" % "0.13.3").cross(CrossVersion.full)))
+//    } ++ Seq(
+//      "org.apache.pekko"            %% "pekko-http"              % pekkoHttpVersion,
+//      "com.softwaremill.sttp.tapir" %% "tapir-pekko-http-server" % tapirVersion
+//    )
+//  )
+//  .dependsOn(core, tapirInterop % "compile->compile;test->test")
+//
+//lazy val play = project
+//  .in(file("adapters/play"))
+//  .settings(name := "caliban-play")
+//  .settings(commonSettings)
+//  .settings(enableMimaSettingsJVM)
+//  .disablePlugins(AssemblyPlugin)
+//  .settings(
+//    skip           := (scalaVersion.value == scala212),
+//    ideSkipProject := (scalaVersion.value == scala212),
+//    crossScalaVersions -= scala212,
+//    libraryDependencies ++= {
+//      if (scalaVersion.value == scala3) Seq()
+//      else Seq(compilerPlugin(("org.typelevel" %% "kind-projector" % "0.13.3").cross(CrossVersion.full)))
+//    },
+//    libraryDependencies ++= Seq(
+//      "org.playframework"           %% "play"                   % playVersion,
+//      "com.softwaremill.sttp.tapir" %% "tapir-play-server"      % tapirVersion,
+//      "dev.zio"                     %% "zio-test"               % zioVersion  % Test,
+//      "dev.zio"                     %% "zio-test-sbt"           % zioVersion  % Test,
+//      "org.playframework"           %% "play-pekko-http-server" % playVersion % Test
+//    )
+//  )
+//  .dependsOn(core, tapirInterop % "compile->compile;test->test")
 
 lazy val testingFrameworks = Seq(new TestFramework("munit.Framework"))
 

@@ -3,7 +3,7 @@ package molecule.sql.mariadb.setup
 import java.sql.DriverManager
 import com.dimafeng.testcontainers.MariaDBContainer
 import molecule.base.api.Schema_mariadb
-import molecule.core.marshalling.JdbcProxy_mariadb
+import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.Conn
 import molecule.sql.core.facade.JdbcHandler_JVM
 
@@ -32,7 +32,7 @@ object DbConnection_mariadb {
 
   def run(test: Conn => Any, schema: Schema_mariadb): Any = {
     val initSql = resetDb + schema.schemaData.head
-    val proxy   = JdbcProxy_mariadb(url, schema, initSql)
+    val proxy   = JdbcProxy(url, schema, initSql)
 
     // Not closing the connection since we re-use it
     val conn = JdbcHandler_JVM.recreateDb(proxy, reusedSqlConn)

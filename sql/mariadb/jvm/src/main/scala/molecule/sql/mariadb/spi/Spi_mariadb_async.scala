@@ -1,12 +1,14 @@
 package molecule.sql.mariadb.spi
 
+import cats.effect.IO
 import molecule.base.error.InsertError
 import molecule.core.action._
 import molecule.core.spi.{Conn, Spi_async, TxReport}
 import molecule.core.util.ModelUtils
+import molecule.sql.core.spi.Streaming
 import scala.concurrent.{Future, ExecutionContext => EC}
 
-trait Spi_mariadb_async extends Spi_async with ModelUtils {
+trait Spi_mariadb_async extends Spi_async with Streaming with ModelUtils {
 
   override def query_get[Tpl](q: Query[Tpl])
                              (implicit conn: Conn, ec: EC): Future[List[Tpl]] = Future {
@@ -18,6 +20,16 @@ trait Spi_mariadb_async extends Spi_async with ModelUtils {
 
     Spi_mariadb_sync.query_get(q)
   }
+
+  override def query_stream[Tpl](
+    q: Query[Tpl],
+    chunkSize: Int
+  )(implicit conn: Conn): fs2.Stream[IO, Tpl] = fs2stream(
+    q, chunkSize,
+    (q: Query[Tpl], conn: Conn) => Spi_mariadb_sync.query_inspect[Tpl](q)(conn),
+    Spi_mariadb_sync.getResultSet[Tpl]
+  )
+
   override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)
                                    (implicit conn: Conn, ec: EC): Future[Unit] = Future {
     Spi_mariadb_sync.query_subscribe(q, callback)

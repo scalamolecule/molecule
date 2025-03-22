@@ -1,6 +1,7 @@
 package molecule.core.marshalling
 
 import boopickle.Default._
+import cats.effect.IO
 import molecule.base.error._
 import molecule.core.ast.DataModel._
 import molecule.core.marshalling.Boopicklers._
@@ -27,6 +28,12 @@ case class MoleculeRpcJS(interface: String, port: Int)
       UnpickleTpls[Tpl](elements, resultSerialized).unpickleEither
     )
   }.flatten
+
+//  override def queryStream[Tpl](
+//    proxy: ConnProxy,
+//    elements: List[Element],
+//    limit: Option[Int]
+//  ): fs2.Stream[IO, Either[MoleculeError, List[Tpl]]] = ???
 
   override def queryOffset[Tpl](
     proxy: ConnProxy,

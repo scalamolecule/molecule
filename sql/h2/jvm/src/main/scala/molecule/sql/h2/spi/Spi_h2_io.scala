@@ -1,12 +1,15 @@
 package molecule.sql.h2.spi
 
 import cats.effect.IO
+import fs2.Stream
 import molecule.base.error.InsertError
 import molecule.core.action._
 import molecule.core.spi.{Conn, Spi_io, TxReport}
 import molecule.core.util.ModelUtils
+import molecule.sql.core.javaSql.{ResultSetInterface => Row}
+import molecule.sql.core.spi.Streaming
 
-trait Spi_h2_io extends Spi_io with ModelUtils {
+trait Spi_h2_io extends Spi_io with Streaming with ModelUtils {
 
   override def query_get[Tpl](q: Query[Tpl])
                              (implicit conn: Conn): IO[List[Tpl]] = IO.blocking {
@@ -18,6 +21,16 @@ trait Spi_h2_io extends Spi_io with ModelUtils {
 
     Spi_h2_sync.query_get(q)
   }
+
+  override def query_stream[Tpl](
+    q: Query[Tpl],
+    chunkSize: Int
+  )(implicit conn: Conn): fs2.Stream[IO, Tpl] = fs2stream(
+    q, chunkSize,
+    (q: Query[Tpl], conn: Conn) => Spi_h2_sync.query_inspect[Tpl](q)(conn),
+    Spi_h2_sync.getResultSet[Tpl]
+  )
+
 
   override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)
                                    (implicit conn: Conn): IO[Unit] = IO.blocking {

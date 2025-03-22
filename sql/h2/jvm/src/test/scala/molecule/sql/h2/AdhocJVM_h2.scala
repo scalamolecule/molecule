@@ -1,5 +1,6 @@
 package molecule.sql.h2
 
+import cats.effect.IO
 import molecule.base.error.{ModelError, ValidationErrors}
 import molecule.core.util.Executor._
 import molecule.coreTests.domains.dsl.Types._
@@ -8,26 +9,27 @@ import molecule.sql.h2.async._
 import molecule.sql.h2.setup.DbProviders_h2
 import scala.concurrent.Future
 import scala.language.implicitConversions
+import cats.effect.unsafe.implicits.{global => ioRuntime}
 
 
 class AdhocJVM_h2 extends Test with DbProviders_h2 with TestUtils {
 
 
-  //  "types" - types { implicit conn =>
-  //    import molecule.coreTests.domains.dsl.Types._
-  //    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
-  //
-  //    for {
-  //      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
-  //      _ <- Entity.int(3).save.transact
-  //      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
-  //      _ <- Entity(a).int(10).update.transact
-  //      _ <- Entity(b).delete.transact
-  //      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
-  //
-  //
-  //    } yield ()
-  //  }
+    "types" - types { implicit conn =>
+      import molecule.coreTests.domains.dsl.Types._
+      implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+
+      for {
+        List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
+        _ <- Entity.int(3).save.transact
+        _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
+        _ <- Entity(a).int(10).update.transact
+        _ <- Entity(b).delete.transact
+        _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
+
+
+      } yield ()
+    }
   //
   //
   //  "mixed" - types { implicit conn =>
@@ -43,90 +45,36 @@ class AdhocJVM_h2 extends Test with DbProviders_h2 with TestUtils {
   //  }
 
 
-  "refs" - refs { implicit conn =>
-    import molecule.coreTests.domains.dsl.Refs._
-    for {
-//      _ <- A.?(A.i.s).B.s.insert(
-//        (None, "-"),
-//        (Some((10, "x")), "a"),
-//        (Some((20, "y")), "b"),
-//      ).transact
-//      //
-//      //      //      _ <- rawQuery(
-//      //      //        """SELECT DISTINCT
-//      //      //          |  B.id,
-//      //      //          |  B.s
-//      //      //          |FROM B where c is null
-//      //      //          |""".stripMargin, true)
-//      //      //
-//      //      _ <- rawQuery(
-//      //        """SELECT DISTINCT
-//      //          |  B.s
-//      //          |FROM A
-//      //          |  RIGHT JOIN B ON
-//      //          |    A.b = B.id // and A.b IS NULL
-//      //          |where A.b IS NULL
-//      //          |ORDER BY B.s;
-//      //          |""".stripMargin, true)
-//      //
-//      ////      x <- A.?(A.i.s).B.s.a1.query.get
-//      //      _ <- A.?(A.i.s).B.s.a1.query.get.map(_ ==> List(
-//      //        (None, "-"),
-//      //        (Some((10, "x")), "a"),
-//      //        (Some((20, "y")), "b"),
-//      //      ))
+//  "refs" - refs { implicit conn =>
+//    import molecule.coreTests.domains.dsl.Refs._
+//    for {
 //
-//      _ <- A.?(A.b_()).B.s.a1.query.i.get.map(_ ==> List(
-//        (None, "-"),
-//      ))
-
-      _ <- A.?(A.i).B.s.insert(List(
-        (None, "-"),
-        (Some(1), "a"),
-      )).transact
-
-      _ <- A.?(A.i).B.s.a1.query.get.map(_ ==> List(
-        (None, "-"),
-        (Some(1), "a"),
-      ))
-
-      // Using only tacit attributes of the optional entity
-      // always returns None when matching
-
-      // Find B data with A.i existing
-      _ <- A.?(A.i_).B.s.a1.query.get.map(_ ==> List(
-        (None, "a"),
-      ))
-
-      // Find B data where A.i > 0
-      _ <- A.?(A.i_.>(0)).B.s.a1.query.get.map(_ ==> List(
-        (None, "a"),
-      ))
-
-      // Find B data where A.i > 1 - no match!
-      _ <- A.?(A.i_.>(1)).B.s.a1.query.get.map(_ ==> Nil)
-
-      // Find B data with no relationship from A to B
-      _ <- A.?(A.b_()).B.s.a1.query.get.map(_ ==> List(
-        (None, "-"),
-      ))
-
-
-
-//      _ <- A.?(A.i.s).B.s.C.i.insert(
-//        (None, "-", 0),
-//        (Some((10, "x")), "a", 1),
-//        (Some((20, "y")), "b", 2),
-//      ).transact
 //
-//      _ <- A.?(A.i.s).B.s.C.i.a1.query.i.get.map(_ ==> List(
-//        (None, "-", 0),
-//        (Some((10, "x")), "a", 1),
-//        (Some((20, "y")), "b", 2),
-//      ))
-
-    } yield ()
-  }
+//      _ <- A.i.insert(1, 2, 3, 4, 5).transact
+////      _ <- A.i.insert(1).transact
+//
+//      //          A.i.query.get ==> List(1, 2, 3)
+//      //    A.i.query.limit(2).get ==> List(1, 2, 3)
+//
+//      _ = A.i.query.stream
+//        .evalMap(IO.println) // Print each row
+//        .compile.drain
+//        .unsafeRunSync()
+//
+//
+//
+//      //    val b = a.take(2)
+//      //      _ =   a
+//      //        .evalMap(IO.println) // Print each row
+//      //        .compile.drain
+//      //        .unsafeRunSync()
+//
+//      //        .take(2).toList ==> List(1, 2)
+//      //      _ <-   a.toList ==> List(1, 2, 3)
+//
+//
+//    } yield ()
+//  }
 
 
 

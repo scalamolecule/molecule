@@ -2,6 +2,7 @@ package molecule.sql.mysql.spi
 
 import java.sql.DriverManager
 import molecule.core.action._
+import molecule.core.ast.DataModel.Element
 import molecule.core.marshalling.{ConnProxy, JdbcProxy}
 import molecule.core.transaction._
 import molecule.core.util.Executor._
@@ -17,7 +18,6 @@ import molecule.sql.core.transaction.strategy.update.UpdateAction
 import molecule.sql.mysql.query.Model2SqlQuery_mysql
 import molecule.sql.mysql.transaction._
 import scala.concurrent.Future
-import molecule.core.ast.DataModel.Element
 
 
 object Spi_mysql_sync extends Spi_mysql_sync
@@ -51,7 +51,7 @@ trait Spi_mysql_sync extends SpiBase_sync {
   ): DeleteAction = {
     new SqlOps_mysql(conn)
       with ResolveDelete with Spi_mysql_sync with SqlDelete {}
-      .getDeleteAction(delete.elements, conn.proxy.schema.entityMap)
+      .getDeleteAction(delete.elements, conn.proxy.entityMap)
   }
 
 

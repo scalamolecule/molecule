@@ -1,21 +1,12 @@
 package molecule.sql.core.facade
 
-import java.sql.{Connection, DriverManager}
+import java.sql.Connection
 import molecule.core.marshalling.JdbcProxy
 import scala.concurrent.blocking
 import scala.util.Using.Manager
 
 
 object JdbcHandler_JVM {
-
-  //    def recreateDb(proxy: JdbcProxy): JdbcConn_JVM = blocking {
-  //      val sqlConn = DriverManager.getConnection(proxy.url)
-  //      val conn    = JdbcConn_JVM(proxy, sqlConn)
-  //      val stmt    = conn.sqlConn.createStatement
-  //      stmt.executeUpdate(proxy.schemaStr)
-  //      stmt.close()
-  //      conn
-  //    }
 
   // For docker test containers
   def recreateDb(conn: JdbcConn_JVM): JdbcConn_JVM = blocking {
@@ -34,7 +25,7 @@ object JdbcHandler_JVM {
       val sql  = if (proxy.schemaStr.nonEmpty)
         proxy.schemaStr
       else
-        proxy.schema.schemaData.head
+        proxy.schemaData.head
       stmt.executeUpdate(sql)
       sqlConn.commit()
       conn

@@ -50,7 +50,7 @@ trait Pagination[Tpl] {
   }
 
   protected def initialCursor(conn: Conn, elements: List[Element], tpls: List[Tpl]): String = {
-    val unique = conn.proxy.schema.uniqueAttrs
+    val unique = conn.proxy.uniqueAttrs
     @tailrec
     def checkSort(
       elements: List[Element],

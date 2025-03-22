@@ -21,7 +21,7 @@ abstract class Model2SqlQuery(elements0: List[Element])
     optProxy: Option[ConnProxy]
   ): String = {
     val elements1 = if (altElements.isEmpty) elements0 else altElements
-    optProxy.foreach(p => attrMap = p.schema.attrMap)
+    optProxy.foreach(p => attrMap = p.attrMap)
     resolveElements(elements1)
     renderSqlQuery(optLimit, optOffset)
   }

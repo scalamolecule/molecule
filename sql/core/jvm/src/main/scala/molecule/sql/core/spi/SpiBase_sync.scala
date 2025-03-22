@@ -1,6 +1,7 @@
 package molecule.sql.core.spi
 
 import java.sql.{ResultSet, ResultSetMetaData, Statement}
+import geny.Generator
 import molecule.base.error._
 import molecule.base.util.BaseHelpers
 import molecule.core.action._
@@ -12,7 +13,8 @@ import molecule.core.util.FutureUtils
 import molecule.core.validation.TxModelValidation
 import molecule.core.validation.insert.InsertValidation
 import molecule.sql.core.facade.JdbcConn_JVM
-import molecule.sql.core.javaSql.{ResultSetInterface => Row}
+import molecule.sql.core.javaSql.{PrepStmtImpl, ResultSetInterface => Row}
+import molecule.sql.core.query.casting.strategy.{CastNested, CastOptEntity, CastOptRefNested, CastOptRefs, CastTuple}
 import molecule.sql.core.query.{Model2SqlQuery, SqlQueryBase, SqlQueryResolveCursor, SqlQueryResolveOffset}
 import molecule.sql.core.transaction.strategy.SqlAction
 import molecule.sql.core.transaction.strategy.delete.DeleteAction
@@ -45,6 +47,27 @@ trait SpiBase_sync
     SqlQueryResolveOffset[Tpl](queryClean.elements, queryClean.optLimit, None, m2q)
       .getListFromOffset_sync(conn)._1
   }
+
+
+  // Simple geny Generator stream implementation.
+  // Plugs in nicely with the Lihaoyi ecosystem.
+  // See https://github.com/com-lihaoyi/geny
+  override def query_stream[Tpl](
+    q: Query[Tpl]
+  )(implicit conn0: Conn): Generator[Tpl] = new Generator[Tpl] {
+    // callback function
+    def generate(handleTuple: Tpl => Generator.Action): Generator.Action = {
+      if (q.doInspect)
+        query_inspect(q)
+      val (resultSet, row2tpl)     = getResultSet(q, conn0)
+      var action: Generator.Action = Generator.Continue
+      while (resultSet.next() && action == Generator.Continue) {
+        action = handleTuple(row2tpl(resultSet).asInstanceOf[Tpl])
+      }
+      action
+    }
+  }
+
 
   override def query_subscribe[Tpl](query: Query[Tpl], callback: List[Tpl] => Unit)
                                    (implicit conn0: Conn): Unit = {
@@ -97,7 +120,8 @@ trait SpiBase_sync
     printInspectQuery("QUERY (cursor)", q.elements, q.optLimit, None, conn.proxy)
   }
 
-  private def printInspectQuery(
+
+  protected def printInspectQuery(
     label: String,
     elements: List[Element],
     optLimit: Option[Int],
@@ -145,7 +169,7 @@ trait SpiBase_sync
   override def save_validate(save: Save)(implicit conn: Conn): Map[String, Seq[String]] = {
     if (save.doValidate) {
       val proxy = conn.proxy
-      TxModelValidation(proxy.schema.entityMap, proxy.schema.attrMap, "save").validate(save.elements)
+      TxModelValidation(proxy.entityMap, proxy.attrMap, "save").validate(save.elements)
     } else {
       Map.empty[String, Seq[String]]
     }
@@ -358,6 +382,25 @@ trait SpiBase_sync
   // Util --------------------------------------
 
   def getModel2SqlQuery(elements: List[Element]): Model2SqlQuery with SqlQueryBase
+
+
+  def getResultSet[Tpl](q0: Query[Tpl], conn0: Conn): (Row, Row => Any) = {
+    val conn         = conn0.asInstanceOf[JdbcConn_JVM]
+    val queryClean   = q0.copy(elements = noKeywords(q0.elements, Some(conn.proxy)))
+    val m2q          = getModel2SqlQuery(queryClean.elements)
+    val castStrategy = m2q.castStrategy match {
+      case c: CastTuple     => c
+      case c: CastOptRefs   => c
+      case c: CastOptEntity => c
+      case _                => throw ModelError("Nested data not available for streaming.")
+    }
+    val query        = m2q.getSqlQuery(Nil, None, None, Some(conn.proxy))
+    val ps           = conn.queryStmt(query)
+    val ps1          = new PrepStmtImpl(ps)
+    val inputs       = m2q.inputs.toList
+    inputs.foreach(_(ps1)) // set input values corresponding to '?' in queries
+    (conn.resultSet(ps.executeQuery()), castStrategy.row2tpl)
+  }
 
   private def renderRawQueryData(
     query: String,

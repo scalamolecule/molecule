@@ -3,7 +3,7 @@ package molecule.sql.h2.setup
 import java.sql.DriverManager
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import molecule.base.api.Schema_h2
-import molecule.core.marshalling.JdbcProxy_h2
+import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.Conn
 import molecule.coreTests.setup.DbConnection
 import molecule.sql.core.facade.JdbcHandler_JVM
@@ -24,7 +24,7 @@ trait DbConnection_h2 extends DbConnection {
   def runMemDb(test: Conn => Any, schema: Schema_h2): Any = {
     val url = "jdbc:h2:mem:test" + Random.nextInt().abs
     Manager { use =>
-      val proxy   = JdbcProxy_h2(url, schema)
+      val proxy   = JdbcProxy(url, schema)
       val sqlConn = use(DriverManager.getConnection(proxy.url))
       val conn    = use(JdbcHandler_JVM.recreateDb(proxy, sqlConn))
       test(conn)
@@ -37,7 +37,7 @@ trait DbConnection_h2 extends DbConnection {
     val tempDbFilePath = tempDbPath
     ds.setUrl("jdbc:h2:" + tempDbFilePath)
     Manager { use =>
-      val proxy   = JdbcProxy_h2(ds.getUrl, schema)
+      val proxy   = JdbcProxy(ds.getUrl, schema)
       val sqlConn = use(ds.getConnection)
       val conn    = use(JdbcHandler_JVM.recreateDb(proxy, sqlConn))
       test(conn)
@@ -55,7 +55,7 @@ trait DbConnection_h2 extends DbConnection {
     config.setJdbcUrl("jdbc:h2:" + tempDbFilePath)
     Manager { use =>
       val ds      = use(new HikariDataSource(config))
-      val proxy   = JdbcProxy_h2(ds.getJdbcUrl, schema)
+      val proxy   = JdbcProxy(ds.getJdbcUrl, schema)
       val sqlConn = use(ds.getConnection)
       val conn    = use(JdbcHandler_JVM.recreateDb(proxy, sqlConn))
       test(conn)

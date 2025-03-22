@@ -10,6 +10,9 @@ trait Api_io extends Keywords with ModelUtils { spi: Spi_io =>
 
   implicit class QueryApiIO[Tpl](q: Query[Tpl]) {
     def get(implicit conn: Conn): IO[List[Tpl]] = query_get(q)
+    def stream(implicit conn: Conn): fs2.Stream[IO, Tpl] = query_stream(q, 100)
+    def stream(chunkSize: Int)(implicit conn: Conn): fs2.Stream[IO, Tpl] = query_stream(q, chunkSize)
+
     def subscribe(callback: List[Tpl] => Unit)
                  (implicit conn: Conn): IO[Unit] = query_subscribe(q, callback)
     def unsubscribe()(implicit conn: Conn): IO[Unit] = query_unsubscribe(q)

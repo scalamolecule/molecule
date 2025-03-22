@@ -1,6 +1,7 @@
 package molecule.sql.core.spi
 
 import boopickle.Default._
+import cats.effect.IO
 import molecule.base.error.{InsertError, InsertErrors, ValidationErrors}
 import molecule.core.action._
 import molecule.core.ast.DataModel.Element
@@ -21,6 +22,11 @@ trait SpiBase_async extends Spi_async with Renderer with FutureUtils {
     val conn = conn0.asInstanceOf[JdbcConn_JS]
     conn.rpc.query[Tpl](conn.proxy, q.elements, q.optLimit).future
   }
+
+  override def query_stream[Tpl](
+    q: Query[Tpl],
+    chunkSize: Int
+  )(implicit conn: Conn): fs2.Stream[IO, Tpl] = ???
 
   override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)
                                    (implicit conn0: Conn, ec: EC): Future[Unit] = {
@@ -99,7 +105,7 @@ trait SpiBase_async extends Spi_async with Renderer with FutureUtils {
   override def save_validate(save: Save)(implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = future {
     if (save.doValidate) {
       val proxy = conn.proxy
-      TxModelValidation(proxy.schema.entityMap, proxy.schema.attrMap, "save").validate(save.elements)
+      TxModelValidation(proxy.entityMap, proxy.attrMap, "save").validate(save.elements)
     } else {
       Map.empty[String, Seq[String]]
     }
@@ -165,7 +171,7 @@ trait SpiBase_async extends Spi_async with Renderer with FutureUtils {
   override def update_validate(update: Update)
                               (implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = future {
     val proxy = conn.proxy
-    TxModelValidation(proxy.schema.entityMap, proxy.schema.attrMap, "update").validate(update.elements)
+    TxModelValidation(proxy.entityMap, proxy.attrMap, "update").validate(update.elements)
   }
 
 

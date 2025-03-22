@@ -1,8 +1,11 @@
 package molecule.sql.h2
 
+import boopickle.CompositePickler
 import boopickle.Default._
+import molecule.core.marshalling.Boopicklers._
 import molecule.core.util.Executor._
 import molecule.coreTests.domains.dsl.Types._
+import molecule.coreTests.domains.schema._
 import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.sql.h2.async._
 import molecule.sql.h2.setup.DbProviders_h2

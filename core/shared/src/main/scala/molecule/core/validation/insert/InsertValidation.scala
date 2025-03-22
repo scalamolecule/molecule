@@ -12,7 +12,7 @@ object InsertValidation extends InsertValidationExtraction with InsertValidation
     elements: List[Element],
     tpls: Seq[Product]
   ): Seq[(Int, Seq[InsertError])] = {
-    val (entityMap, attrMap) = (conn.proxy.schema.entityMap, conn.proxy.schema.attrMap)
+    val (entityMap, attrMap) = (conn.proxy.entityMap, conn.proxy.attrMap)
 
     // Basic model validation
     TxModelValidation(entityMap, attrMap, "insert").validate(elements)

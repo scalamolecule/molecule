@@ -1,7 +1,7 @@
 package molecule.sql.mariadb.setup
 
 import molecule.base.api.Schema_mariadb
-import molecule.core.marshalling.{JdbcProxy_mariadb, RpcRequest}
+import molecule.core.marshalling.{JdbcProxy, RpcRequest}
 import molecule.core.spi.Conn
 import molecule.sql.core.facade.JdbcConn_JS
 import scala.util.Random
@@ -21,7 +21,7 @@ object DbConnection_mariadb {
       s"&user=root" +
       s"&password="
 
-    val proxy = JdbcProxy_mariadb(url, schema)
+    val proxy = JdbcProxy(url, schema)
     val conn  = JdbcConn_JS(proxy, RpcRequest.request)
     test(conn)
   }

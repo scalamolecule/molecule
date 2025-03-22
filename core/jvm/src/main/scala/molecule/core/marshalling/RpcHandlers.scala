@@ -23,6 +23,9 @@ abstract class RpcHandlers(rpc: MoleculeRpc) extends MoleculeLogging with Serial
     )
   }
 
+  def handleQueryStream(argsSerialized: ByteBuffer) = ???
+
+
   def handleQueryOffset(argsSerialized: ByteBuffer): Future[Array[Byte]] = handleErrors {
     val (proxy, elements, limit, offset) = Unpickle.apply[(ConnProxy, List[Element], Option[Int], Int)]
       .fromBytes(argsSerialized: ByteBuffer)
