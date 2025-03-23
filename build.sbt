@@ -9,11 +9,10 @@ val scala3   = "3.3.5"
 val allScala = Seq(scala212, scala213, scala3)
 
 val akkaVersion              = "2.8.3"
-val dimafengContainerVersion = "0.41.4"
+val dimafengContainerVersion = "0.43.0"
 val logbackVersion           = "1.5.0"
 val sttpVersion              = "3.10.3"
 val tapirVersion             = "1.11.17"
-val testContainerVersion     = "1.20.4"
 val zioVersion               = "2.0.21"
 
 
@@ -199,7 +198,7 @@ lazy val frontendTests = crossProject(JSPlatform, JVMPlatform)
     // Generate Molecule boilerplate code for tests with `sbt clean compile -Dmolecule=true`
     moleculePluginActive := sys.props.get("molecule").contains("true"),
     moleculeDomainPaths := Seq("molecule/frontendTests/domains"),
-//    moleculeMakeJars := false,
+    //    moleculeMakeJars := false,
 
     // Find scala version specific jars in respective libs
     unmanagedBase := {
@@ -242,7 +241,7 @@ lazy val frontendTests = crossProject(JSPlatform, JVMPlatform)
 
     ),
   )
-  .dependsOn(sqlH2, sqlSQlite)
+  .dependsOn(sqlH2, sqlMariaDB, sqlMySQL, sqlPostgreSQL, sqlSQlite)
 
 
 lazy val datalogCore = crossProject(JSPlatform, JVMPlatform)
@@ -334,10 +333,8 @@ lazy val sqlMySQL = crossProject(JSPlatform, JVMPlatform)
   .jsSettings(jsEnvironment)
   .jvmSettings(
     libraryDependencies ++= Seq(
-      "org.testcontainers" % "mysql" % testContainerVersion,
-
-      //      "com.dimafeng" %% "testcontainers-scala-mysql" % testContainerVersion % Test,
-      "com.mysql" % "mysql-connector-j" % "9.1.0" % Test,
+      "org.testcontainers" % "mysql" % "1.20.6",
+      "com.mysql" % "mysql-connector-j" % "9.2.0",
     ),
     Test / fork := true
   )
@@ -355,8 +352,8 @@ lazy val sqlPostgreSQL = crossProject(JSPlatform, JVMPlatform)
   .jsSettings(jsEnvironment)
   .jvmSettings(
     libraryDependencies ++= Seq(
-      "org.testcontainers" % "postgresql" % testContainerVersion,
-      "org.postgresql" % "postgresql" % "42.7.4",
+      "org.testcontainers" % "postgresql" % "1.20.6",
+      "org.postgresql" % "postgresql" % "42.7.5",
       "ch.qos.logback" % "logback-classic" % logbackVersion % Test
     ),
     Test / fork := true
