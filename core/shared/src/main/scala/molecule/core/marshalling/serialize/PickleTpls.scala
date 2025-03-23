@@ -135,7 +135,15 @@ case class PickleTpls(
 
         case OptEntity(attrs) =>
           prevRefs.clear()
-          resolvePicklers(tail, picklers :+ pickleOptElements(tplIndex, attrs), tplIndex + 1)
+          val all                      = attrs.length
+          val pickler: Product => Unit = attrs.collect {
+            case e if e.isInstanceOf[Tacit] => e
+          }.length match {
+            // Pickle None if all optional attributes are tacit
+            case `all` => (_: Product) => enc.writeInt(1)
+            case _     => pickleOptElements(tplIndex, attrs)
+          }
+          resolvePicklers(tail, picklers :+ pickler, tplIndex + 1)
 
         case Nested(_, nestedElements) =>
           prevRefs.clear()
@@ -578,11 +586,11 @@ case class PickleTpls(
 
   private def pickleAttrMapMan(a: AttrMapMan, tplIndex: Int): Product => Unit = {
     a.op match {
-      case Has => pickleAttrMapManHas(a, tplIndex)
-      case _   => pickleAttrMapManOther(a, tplIndex)
+      case Eq => pickleAttrMapManValue(a, tplIndex)
+      case _  => pickleAttrMapManOther(a, tplIndex)
     }
   }
-  private def pickleAttrMapManHas(a: AttrMapMan, tplIndex: Int): Product => Unit = {
+  private def pickleAttrMapManValue(a: AttrMapMan, tplIndex: Int): Product => Unit = {
     a match {
       case _: AttrMapManID             => (tpl: Product) => enk.writeLong(tpl.productElement(tplIndex).asInstanceOf[Long])
       case _: AttrMapManString         => (tpl: Product) => enk.writeString(tpl.productElement(tplIndex).asInstanceOf[String])

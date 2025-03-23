@@ -281,7 +281,7 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
 
     def readOpt[T](reader: => T): () => Option[T] = {
       () => {
-        state.dec.readInt match {
+        dec.readInt match {
           case 2 => Some(reader)
           case 1 => None
         }
@@ -290,7 +290,7 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
 
     def readOptSet[T](reader: => T): () => Option[Set[T]] = {
       () => {
-        state.dec.readInt match {
+        dec.readInt match {
           case 2 => Some(readSet(reader)())
           case 1 => None
         }
@@ -299,7 +299,7 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
 
     def readOptSeq[T](reader: => T): () => Option[Seq[T]] = {
       () => {
-        state.dec.readInt match {
+        dec.readInt match {
           case 2 => Some(readSeq(reader)())
           case 1 => None
         }
@@ -308,7 +308,7 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
 
     def readOptByteArray: () => Option[Array[Byte]] = {
       () => {
-        state.dec.readInt match {
+        dec.readInt match {
           case 2 => Some(readByteArray())
           case 1 => None
         }
@@ -317,7 +317,7 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
 
     def readOptMap[T](reader: => T): () => Option[Map[String, T]] = {
       () => {
-        state.dec.readInt match {
+        dec.readInt match {
           case 2 => Some(readMap(reader)())
           case 1 => None
         }
@@ -537,11 +537,11 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
 
   private def unpickleAttrMapMan(a: AttrMapMan): () => Any = {
     a.op match {
-      case Has => unpickleAttrMapManHas(a)
-      case _   => unpickleAttrMapManOther(a)
+      case Eq => unpickleAttrMapManValue(a)
+      case _  => unpickleAttrMapManOther(a)
     }
   }
-  private def unpickleAttrMapManHas(a: AttrMapMan): () => Any = {
+  private def unpickleAttrMapManValue(a: AttrMapMan): () => Any = {
     a match {
       case _: AttrMapManID             => () => dek.readLong
       case _: AttrMapManString         => () => dek.readString

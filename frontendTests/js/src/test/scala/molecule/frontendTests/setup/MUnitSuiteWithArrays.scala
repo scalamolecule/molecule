@@ -1,11 +1,8 @@
-package molecule.coreTests.setup
+package molecule.frontendTests.setup
 
 import munit.FunSuite
-import scala.concurrent.duration.{DurationInt, FiniteDuration}
 
 trait MUnitSuiteWithArrays extends FunSuite {
-
-  override def munitTimeout: FiniteDuration = 3.minutes
 
   implicit class TestableString(s: String) {
     def -(x: => Any): Unit = test(s)(x)

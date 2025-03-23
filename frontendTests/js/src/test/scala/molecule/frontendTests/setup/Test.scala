@@ -3,22 +3,21 @@ package molecule.frontendTests.setup
 import molecule.base.api.Schema_h2
 import molecule.core.marshalling.{JdbcProxy, RpcRequest}
 import molecule.core.spi.Conn
-import molecule.frontendTests.domains.schema.TypesSchema_h2
+import molecule.frontendTests.domains.schema._
 import molecule.sql.core.facade.JdbcConn_JS
 import munit.FunSuite
+import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.util.Random
 
-trait Test extends FunSuite {
+trait Test { _: FunSuite =>
 
-  implicit class TestableString(s: String) {
-    def -(x: => Any): Unit = test(s)(x)
-  }
-
-  implicit class ArrowAssert(lhs: Any) {
-    def ==>[V](rhs: V): Unit = assertEquals(lhs, rhs)
-  }
+  override def munitTimeout: FiniteDuration = 3.minutes
 
   def types(test: Conn => Any): Any = run(test, TypesSchema_h2)
+  def refs(test: Conn => Any): Any = run(test, RefsSchema_h2)
+  def unique(test: Conn => Any): Any = run(test, UniquesSchema_h2)
+  def validation(test: Conn => Any): Any = run(test, ValidationSchema_h2)
+  def segments(test: Conn => Any): Any = run(test, SegmentsSchema_h2)
 
   def run(test: Conn => Any, schema: Schema_h2): Any = {
     val url   = s"jdbc:h2:mem:test" + Random.nextInt().abs + ";DB_CLOSE_DELAY=-1"

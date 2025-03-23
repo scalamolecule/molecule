@@ -25,6 +25,7 @@ case class ZioApi(
     }
   }
 
+
   "Crud actions" - types { implicit conn =>
     val List(a, b) = runZIO(Entity.int.insert(1, 2).transact.map(_.ids))
     runZIO(Entity.int(3).save.transact)

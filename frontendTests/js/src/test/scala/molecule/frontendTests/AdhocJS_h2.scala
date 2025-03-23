@@ -1,18 +1,22 @@
 package molecule.frontendTests
 
 import boopickle.Default._
+import molecule.base.error.{InsertErrors, ModelError, MoleculeError, ValidationErrors}
 import molecule.core.marshalling.Boopicklers._
+import molecule.core.spi.Conn
 import molecule.core.util.Executor._
 import molecule.frontendTests.domains.dsl.Types._
-import molecule.frontendTests.setup.Test
+import molecule.frontendTests.setup.{MUnitSuite, MUnitSuiteWithArrays, Test, TestData}
 import molecule.sql.h2.async._
+import scala.concurrent.Future
 
-class AdhocJS_h2 extends Test {
+
+//class AdhocJS_h2 extends MUnitSuiteWithArrays with Test with TestData {
+class AdhocJS_h2 extends MUnitSuite with Test with TestData {
 
 
   "types" - types { implicit conn =>
     for {
-//      List(a) <- Entity.int.insert(1).transact.map(_.ids)
       List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
       _ <- Entity.int(3).save.transact
       _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
@@ -23,62 +27,143 @@ class AdhocJS_h2 extends Test {
     } yield ()
   }
 
+  //    runZIO(Entity.int(3).save.transact)
+  //    runZIO(Entity.int.a1.query.get.map(_ ==> List(1, 2, 3)))
+  //    runZIO(Entity(a).int(10).update.transact)
+  //    runZIO(Entity(b).delete.transact)
+  //    runZIO(Entity.int.a1.query.get.map(_ ==> List(3, 10)))
 
-  //    "refs" - refs { implicit conn =>
-  //      import molecule.coreTests.domains.dsl.Refs._
-  //      for {
+
+  //  "Opt ref" - refs { implicit conn =>
+  //    import molecule.frontendTests.domains.dsl.Refs._
   //
-  //        _ <- A.i(1).save.transact
-  //        _ <- A.i(2).B.s("b").save.transact
-  //        _ <- A.i(3).B.s("c").i(3).save.transact
+  //    runZIO(A.i(1).save.transact)
   //
-  //        // Current entity with A value and ref to B value
-  //        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
-  //          (3, 3)
-  //        ))
+  //    // Optional card-one ref (SQL left join)
+  //    runZIO(A.i.B.?(B.i).query.get) ==> List(
+  //      (1, None),
+  //    )
   //
-  //        // Filter by A value, update existing B values
-  //        _ <- A.i_.B.i(4).update.transact
+  //    runZIO(A.i(2).B.i(3).s("b").save.transact)
   //
-  //        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
-  //          (3, 4) // B value updated since there was a previous value
-  //        ))
+  //    // Optional card-one ref (SQL left join)
+  //    runZIO(A.i.a1.B.?(B.i.s).query.get) ==> List(
+  //      (1, None),
+  //      (2, Some((3, "b"))),
+  //    )
+  //  }
   //
-  //        // Filter by A ids, upsert B values (insert if not already present)
-  //        _ <- A.i_.B.i(5).upsert.i.transact
   //
-  //        // Now three A entities with referenced B value
-  //        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
-  //          (1, 5), // relationship to B created and B value inserted
-  //          (2, 5), // B value inserted
-  //          (3, 5), // B value updated
-  //        ))
+  //  "Validation" - validation { implicit conn =>
+  //    import molecule.frontendTests.domains.dsl.Validation.Type
   //
-  //      } yield ()
+  //    intercept[ValidationErrors](
+  //      runZIO(Type.string("a").save.transact)
+  //    ) match {
+  //      case ValidationErrors(errorMap) =>
+  //        errorMap.head._2.head ==>
+  //          s"""Type.string with value `a` doesn't satisfy validation:
+  //             |_ > "b"
+  //             |""".stripMargin
+  //    }
+  //    intercept[InsertErrors](
+  //      runZIO(Type.string.insert("a").transact)
+  //    ) match {
+  //      case InsertErrors(errors, _) =>
+  //        errors.head._2.head.errors.head ==
+  //          s"""Type.string with value `a` doesn't satisfy validation:
+  //             |_ > "b"
+  //             |""".stripMargin
   //    }
   //
-  //
-  //    "validation" - validation { implicit conn =>
-  //      import molecule.coreTests.domains.dsl.Validation._
-  //      for {
-  //
-  //        id <- MandatoryAttr.name("Bob").age(42)
-  //          .hobbies(Set("golf")).save.transact.map(_.id)
-  //        //          .hobbies(Set("golf", "stamps")).save.transact.map(_.id)
-  //
-  //        //        // We can remove a value from a Set as long as it's not the last value
-  //        //        _ <- MandatoryAttr(id).hobbies.remove("stamps").update.transact
-  //
-  //        // Can't remove the last value of a mandatory attribute Set of values
-  //        _ <- MandatoryAttr(id).hobbies.remove("golf").update.transact
-  //          .map(_ ==> "Unexpected success").recover {
-  //            case ModelError(error) =>
-  //              error ==>
-  //                """Can't delete mandatory attributes (or remove last values of card-many attributes):
-  //                  |  MandatoryAttr.hobbies
-  //                  |""".stripMargin
-  //          }
-  //
-  //      } yield ()
+  //    val id = runZIO(Type.string("c").save.transact).ids.head
+  //    intercept[ValidationErrors](
+  //      runZIO(Type(id).string("a").update.transact)
+  //    ) match {
+  //      case ValidationErrors(errorMap) =>
+  //        errorMap.head._2.head ==>
+  //          s"""Type.string with value `a` doesn't satisfy validation:
+  //             |_ > "b"
+  //             |""".stripMargin
   //    }
+  //  }
+  //
+  //
+  //  "Inspection" - types { implicit conn =>
+  //    val List(a, b) = runZIO(Entity.int.insert(1, 2).transact).ids // Need data for update and delete
+  //    runZIO(Entity.int.insert(1, 2).inspect)
+  //    runZIO(Entity.int(3).save.inspect)
+  //    runZIO(Entity.int.query.inspect)
+  //    runZIO(Entity(a).int(10).update.inspect)
+  //    runZIO(Entity(b).delete.inspect)
+  //  }
+  //
+  //
+  //  "Offset query" - types { implicit conn =>
+  //    runZIO(Entity.int.insert(1, 2, 3).transact)
+  //    runZIO(Entity.int.a1.query.get) ==> List(1, 2, 3)
+  //    runZIO(Entity.int.a1.query.limit(2).get) ==> List(1, 2)
+  //    runZIO(Entity.int.a1.query.offset(1).get) ==> (List(2, 3), 3, false)
+  //    runZIO(Entity.int.a1.query.offset(1).limit(1).get) ==> (List(2), 3, true)
+  //  }
+  //
+  //
+  //  "Cursor query" - unique { implicit conn =>
+  //    import molecule.frontendTests.domains.dsl.Uniques._
+  //
+  //    val query = Uniques.int.a1.query
+  //    runZIO(Uniques.int.insert(1, 2, 3, 4, 5).transact)
+  //    val c1 = runZIO(query.from("").limit(2).get) match {
+  //      case (List(1, 2), c, true) => c
+  //    }
+  //    val c2 = runZIO(query.from(c1).limit(2).get) match {
+  //      case (List(3, 4), c, true) => c
+  //    }
+  //    val c3 = runZIO(query.from(c2).limit(2).get) match {
+  //      case (List(5), c, false) => c
+  //    }
+  //    val c4 = runZIO(query.from(c3).limit(-2).get) match {
+  //      case (List(3, 4), c, true) => c
+  //    }
+  //    runZIO(query.from(c4).limit(-2).get) match {
+  //      case (List(1, 2), _, false) => ()
+  //    }
+  //  }
+  //
+  //
+  //  "Subscription" - types { implicit conn =>
+  //    var intermediaryCallbackResults = List.empty[List[Int]]
+  //
+  //    // Initial data
+  //    runZIO(Entity.i(1).save.transact)
+  //
+  //    // Start subscription
+  //    runZIO(Entity.i.query.subscribe { freshResult =>
+  //      intermediaryCallbackResults = intermediaryCallbackResults :+ freshResult
+  //    })
+  //
+  //    // Mutations to be monitored by subscription
+  //    val id = runZIO(Entity.i(2).save.transact).id
+  //    runZIO(Entity.i.a1.query.get) ==> List(1, 2)
+  //
+  //    runZIO(Entity.i.insert(3, 4).transact)
+  //    runZIO(Entity.i.a1.query.get) ==> List(1, 2, 3, 4)
+  //
+  //    runZIO(Entity(id).i(20).update.transact)
+  //    runZIO(Entity.i.a1.query.get) ==> List(1, 3, 4, 20)
+  //
+  //    runZIO(Entity(id).delete.transact)
+  //    runZIO(Entity.i.a1.query.get) ==> List(1, 3, 4)
+  //
+  //    // Mutations with no callback-involved attributes don't call back
+  //    runZIO(Entity.string("foo").save.transact)
+  //
+  //    // Callback catched all intermediary results correctly
+  //    intermediaryCallbackResults.map(_.sorted) ==> List(
+  //      List(1, 2), // query result after 2 was saved
+  //      List(1, 2, 3, 4), // query result after 3 and 4 were inserted
+  //      List(1, 3, 4, 20), // query result after 2 was updated to 20
+  //      List(1, 3, 4), // query result after 20 was deleted
+  //    )
+  //  }
 }

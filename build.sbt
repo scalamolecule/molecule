@@ -144,7 +144,7 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
     // Generate Molecule boilerplate code for tests with `sbt clean compile -Dmolecule=true`
     moleculePluginActive := sys.props.get("molecule").contains("true"),
     moleculeDomainPaths := Seq("molecule/coreTests/domains"),
-//    moleculeMakeJars := false,
+    //    moleculeMakeJars := false,
 
     // Find scala version specific jars in respective libs
     unmanagedBase := {
@@ -159,23 +159,32 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
       "com.zaxxer" % "HikariCP" % "6.2.1" % Test,
       "org.scalameta" %%% "munit" % "1.0.3" % Test,
       "org.scalactic" %%% "scalactic" % "3.2.19" % Test, // Tolerant roundings with triple equal on js platform
-      "io.github.cquiroz" %%% "scala-java-time" % "2.6.0" % Test,
+      "io.github.cquiroz" %%% "scala-java-time" % "2.6.0", // % Test, // we need main for time zone plugin
     ),
   )
+  .jsConfigure(_.enablePlugins(TzdbPlugin))
   .jsSettings(
     jsEnvironment,
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % "2.8.0",
       "org.scala-js" %%% "scala-js-macrotask-executor" % "1.1.1",
       "org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0" cross CrossVersion.for3Use2_13
-    )
+    ),
+    zonesFilter := { (z: String) =>
+      List(
+        // Add your time zone...
+        "America/Santiago",
+        "Pacific/Honolulu",
+        "Europe/Stockholm",
+      ).contains(z)
+    },
   )
   .jvmSettings(
     libraryDependencies ++= Seq(
       // Enforce one version to avoid warnings of multiple dependency versions when running tests
       "org.slf4j" % "slf4j-api" % "1.7.36",
       "org.slf4j" % "slf4j-nop" % "1.7.36"
-    ),
+    )
   )
   .dependsOn(core)
 
@@ -205,23 +214,31 @@ lazy val frontendTests = crossProject(JSPlatform, JVMPlatform)
       "com.zaxxer" % "HikariCP" % "6.2.1" % Test,
       "org.scalameta" %%% "munit" % "1.0.3" % Test,
       "org.scalactic" %%% "scalactic" % "3.2.19" % Test, // Tolerant roundings with triple equal on js platform
-      "io.github.cquiroz" %%% "scala-java-time" % "2.6.0" % Test,
+      "io.github.cquiroz" %%% "scala-java-time" % "2.6.0",
     ),
   )
+  .jsConfigure(_.enablePlugins(TzdbPlugin))
   .jsSettings(
     jsEnvironment,
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % "2.8.0",
       "org.scala-js" %%% "scala-js-macrotask-executor" % "1.1.1",
       "org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0" cross CrossVersion.for3Use2_13
-    )
+    ),
+    zonesFilter := { (z: String) =>
+      List(
+        // Add your time zone...
+        "America/Santiago",
+        "Pacific/Honolulu",
+        "Europe/Stockholm",
+      ).contains(z)
+    },
   )
   .jvmSettings(
     libraryDependencies ++= Seq(
       // Enforce one version to avoid warnings of multiple dependency versions when running tests
       "org.slf4j" % "slf4j-api" % "1.7.36",
       "org.slf4j" % "slf4j-nop" % "1.7.36",
-//      "com.h2database" % "h2" % "2.3.232"
 
     ),
   )
@@ -281,47 +298,6 @@ lazy val sqlH2 = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies ++= Seq(
       "com.h2database" % "h2" % "2.3.232"
     ),
-
-//    unmanagedSources / excludeFilter := {
-//      val test = "src/test/scala/molecule/sql/h2"
-//      def path(platform: String) = (baseDirectory.value / s"../$platform/$test").getCanonicalPath
-//      val jsTests     = path("js")
-//      val jvmTests    = path("jvm")
-//      val sharedTests = path("shared")
-//      val allowed     = Seq(
-//        //        sharedTests + "/compliance/aggr",
-//        //        sharedTests + "/compliance/api",
-//        //        sharedTests + "/compliance/crud",
-//        //        sharedTests + "/compliance/crud/update",
-//        //        sharedTests + "/compliance/crud/update/ops",
-//        //        sharedTests + "/compliance/crud/update/relation",
-//        //        sharedTests + "/compliance/filter",
-//        //        sharedTests + "/compliance/filter/set",
-//        //        sharedTests + "/compliance/filterAttr",
-//        //        sharedTests + "/compliance/inspect",
-//        //        sharedTests + "/compliance/pagination",
-//        //        sharedTests + "/compliance/partitions",
-//        //        sharedTests + "/compliance/relation",
-//        //        sharedTests + "/compliance/sort",
-//        //        sharedTests + "/compliance/subscription",
-//        //        sharedTests + "/compliance/time",
-//        //        sharedTests + "/compliance/validation",
-//        //        sharedTests + "/compliance",
-//        sharedTests + "/setup",
-//        jvmTests + "/setup",
-//        jsTests + "/setup",
-//        jsTests + "/AdhocJS_h2.scala",
-//        //        jvmTests + "/AdhocJVM_datomic.scala",
-//        //        sharedTests + "/Adhoc_datomic.scala",
-//      )
-//      new SimpleFileFilter(f =>
-//        (f.getCanonicalPath.startsWith(jsTests) ||
-//          f.getCanonicalPath.startsWith(jvmTests) ||
-//          f.getCanonicalPath.startsWith(sharedTests)) &&
-//          !allowed.exists(p => f.getCanonicalPath.startsWith(p))
-//      )
-//    },
-
     Test / fork := true
   )
   .dependsOn(sqlCore)
