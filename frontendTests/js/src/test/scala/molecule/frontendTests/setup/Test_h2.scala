@@ -6,12 +6,9 @@ import molecule.core.spi.Conn
 import molecule.frontendTests.domains.schema._
 import molecule.sql.core.facade.JdbcConn_JS
 import munit.FunSuite
-import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.util.Random
 
-trait Test { _: FunSuite =>
-
-  override def munitTimeout: FiniteDuration = 3.minutes
+trait Test_h2 { _: FunSuite =>
 
   def types(test: Conn => Any): Any = run(test, TypesSchema_h2)
   def refs(test: Conn => Any): Any = run(test, RefsSchema_h2)

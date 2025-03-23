@@ -8,7 +8,7 @@ import scala.util.Using.Manager
 
 /** SQlite connection factory
  *
- * Generates custom regex function as default
+ * Can generate custom regex function (for in-mem)
  * */
 object JdbcHandlerSQlite_JVM {
 

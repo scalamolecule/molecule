@@ -6,13 +6,13 @@ import molecule.core.marshalling.Boopicklers._
 import molecule.core.spi.Conn
 import molecule.core.util.Executor._
 import molecule.frontendTests.domains.dsl.Types._
-import molecule.frontendTests.setup.{MUnitSuite, MUnitSuiteWithArrays, Test, TestData}
+import molecule.frontendTests.setup.{MUnitSuite, MUnitSuiteWithArrays, Test_h2, TestData}
 import molecule.sql.h2.async._
 import scala.concurrent.Future
 
 
-//class AdhocJS_h2 extends MUnitSuiteWithArrays with Test with TestData {
-class AdhocJS_h2 extends MUnitSuite with Test with TestData {
+//class AdhocJS extends MUnitSuiteWithArrays with Test_h2 with TestData {
+class AdhocJS_h2 extends MUnitSuite with Test_h2 with TestData {
 
 
   "types" - types { implicit conn =>

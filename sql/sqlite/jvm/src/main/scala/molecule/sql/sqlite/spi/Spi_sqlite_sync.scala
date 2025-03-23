@@ -110,13 +110,9 @@ trait Spi_sqlite_sync extends SpiBase_sync {
   override protected def getJdbcConn(
     proxy0: ConnProxy
   ): Future[JdbcConn_JVM] = Future {
-    // todo: use Hikari connection pool?
-    Manager { use =>
-      val proxy   = proxy0.asInstanceOf[JdbcProxy]
-      val sqlConn = use(DriverManager.getConnection(proxy.url))
-      val conn    = use(JdbcHandlerSQlite_JVM.recreateDb(proxy, sqlConn))
-      conn
-    }.get
+    val proxy   = proxy0.asInstanceOf[JdbcProxy]
+    val sqlConn = DriverManager.getConnection(proxy.url)
+    JdbcHandlerSQlite_JVM.recreateDb(proxy, sqlConn, true)
   }
 
   override def fallback_rawTransact(

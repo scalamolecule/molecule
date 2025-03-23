@@ -242,7 +242,7 @@ lazy val frontendTests = crossProject(JSPlatform, JVMPlatform)
 
     ),
   )
-  .dependsOn(sqlH2)
+  .dependsOn(sqlH2, sqlSQlite)
 
 
 lazy val datalogCore = crossProject(JSPlatform, JVMPlatform)
@@ -375,7 +375,7 @@ lazy val sqlSQlite = crossProject(JSPlatform, JVMPlatform)
   .jsSettings(jsEnvironment)
   .jvmSettings(
     libraryDependencies ++= Seq(
-      "org.xerial" % "sqlite-jdbc" % "3.47.1.0"
+      "org.xerial" % "sqlite-jdbc" % "3.49.1.0"
     ),
     Test / fork := true
   )
