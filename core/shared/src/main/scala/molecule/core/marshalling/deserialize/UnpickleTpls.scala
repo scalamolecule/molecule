@@ -32,19 +32,19 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
   def unpickleEither: Either[MoleculeError, List[Tpl]] = {
     dec.readInt match { // decode Left/Right
       case 2 => Right(unpickleTpls)
-      case _ => Left(Unpickle.apply[MoleculeError].fromState(state))
+      case _ => Left(Unpickle[MoleculeError].fromState(state))
     }
   }
   def unpickleOffset: Either[MoleculeError, (List[Tpl], Int, Boolean)] = {
     dec.readInt match { // decode Left/Right
       case 2 => Right((unpickleTpls, dek.readInt, dek.readBoolean))
-      case _ => Left(Unpickle.apply[MoleculeError].fromState(state))
+      case _ => Left(Unpickle[MoleculeError].fromState(state))
     }
   }
   def unpickleCursor: Either[MoleculeError, (List[Tpl], String, Boolean)] = {
     dec.readInt match { // decode Left/Right
       case 2 => Right((unpickleTpls, dek.readString, dek.readBoolean))
-      case _ => Left(Unpickle.apply[MoleculeError].fromState(state))
+      case _ => Left(Unpickle[MoleculeError].fromState(state))
     }
   }
 

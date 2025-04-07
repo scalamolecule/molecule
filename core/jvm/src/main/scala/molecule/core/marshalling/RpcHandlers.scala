@@ -16,7 +16,7 @@ import scala.language.implicitConversions
 abstract class RpcHandlers(rpc: MoleculeRpc) extends MoleculeLogging with SerializationUtils {
 
   def handleQuery(argsSerialized: ByteBuffer): Future[Array[Byte]] = handleErrors {
-    val (proxy, elements, limit) = Unpickle.apply[(ConnProxy, List[Element], Option[Int])]
+    val (proxy, elements, limit) = Unpickle[(ConnProxy, List[Element], Option[Int])]
       .fromBytes(argsSerialized)
     rpc.query[Any](proxy, elements, limit).map(result =>
       PickleTpls(elements, false).pickleEither(result)
@@ -27,14 +27,14 @@ abstract class RpcHandlers(rpc: MoleculeRpc) extends MoleculeLogging with Serial
 
 
   def handleQueryOffset(argsSerialized: ByteBuffer): Future[Array[Byte]] = handleErrors {
-    val (proxy, elements, limit, offset) = Unpickle.apply[(ConnProxy, List[Element], Option[Int], Int)]
+    val (proxy, elements, limit, offset) = Unpickle[(ConnProxy, List[Element], Option[Int], Int)]
       .fromBytes(argsSerialized: ByteBuffer)
     rpc.queryOffset[Any](proxy, elements, limit, offset).map(result =>
       PickleTpls(elements, false).pickleOffset(result)
     )
   }
   def handleQueryCursor(argsSerialized: ByteBuffer): Future[Array[Byte]] = handleErrors {
-    val (proxy, elements, limit, cursor) = Unpickle.apply[(ConnProxy, List[Element], Option[Int], String)]
+    val (proxy, elements, limit, cursor) = Unpickle[(ConnProxy, List[Element], Option[Int], String)]
       .fromBytes(argsSerialized: ByteBuffer)
     rpc.queryCursor[Any](proxy, elements, limit, cursor).map(result =>
       PickleTpls(elements, false).pickleCursor(result)
@@ -42,7 +42,7 @@ abstract class RpcHandlers(rpc: MoleculeRpc) extends MoleculeLogging with Serial
   }
 
   def handleSave(argsSerialized: ByteBuffer): Future[Array[Byte]] = handleErrors {
-    val (proxy, elements) = Unpickle.apply[(ConnProxy, List[Element])]
+    val (proxy, elements) = Unpickle[(ConnProxy, List[Element])]
       .fromBytes(argsSerialized: ByteBuffer)
     rpc.save(proxy, elements).map(either =>
       Pickle.intoBytes[Either[MoleculeError, TxReport]](either).toArray
@@ -51,7 +51,7 @@ abstract class RpcHandlers(rpc: MoleculeRpc) extends MoleculeLogging with Serial
 
   def handleInsert(argsSerialized: ByteBuffer): Future[Array[Byte]] = handleErrors {
     val (proxy, tplElements, tplsSerialized) =
-      Unpickle.apply[(ConnProxy, List[Element], Array[Byte])]
+      Unpickle[(ConnProxy, List[Element], Array[Byte])]
         .fromBytes(argsSerialized: ByteBuffer)
     rpc.insert(proxy, tplElements, tplsSerialized).map(either =>
       Pickle.intoBytes[Either[MoleculeError, TxReport]](either).toArray
@@ -60,7 +60,7 @@ abstract class RpcHandlers(rpc: MoleculeRpc) extends MoleculeLogging with Serial
 
   def handleUpdate(argsSerialized: ByteBuffer): Future[Array[Byte]] = handleErrors {
     val (proxy, elements, isUpsert) =
-      Unpickle.apply[(ConnProxy, List[Element], Boolean)]
+      Unpickle[(ConnProxy, List[Element], Boolean)]
         .fromBytes(argsSerialized: ByteBuffer)
     rpc.update(proxy, elements, isUpsert).map(either =>
       Pickle.intoBytes[Either[MoleculeError, TxReport]](either).toArray
@@ -69,7 +69,7 @@ abstract class RpcHandlers(rpc: MoleculeRpc) extends MoleculeLogging with Serial
 
   def handleDelete(argsSerialized: ByteBuffer): Future[Array[Byte]] = handleErrors {
     val (proxy, elements) =
-      Unpickle.apply[(ConnProxy, List[Element])]
+      Unpickle[(ConnProxy, List[Element])]
         .fromBytes(argsSerialized: ByteBuffer)
     rpc.delete(proxy, elements).map(either =>
       Pickle.intoBytes[Either[MoleculeError, TxReport]](either).toArray

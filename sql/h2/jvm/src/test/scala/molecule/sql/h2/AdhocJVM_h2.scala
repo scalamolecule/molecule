@@ -45,36 +45,36 @@ class AdhocJVM_h2 extends Test with DbProviders_h2 with TestUtils {
   //  }
 
 
-//  "refs" - refs { implicit conn =>
-//    import molecule.coreTests.domains.dsl.Refs._
-//    for {
-//
-//
-//      _ <- A.i.insert(1, 2, 3, 4, 5).transact
-////      _ <- A.i.insert(1).transact
-//
-//      //          A.i.query.get ==> List(1, 2, 3)
-//      //    A.i.query.limit(2).get ==> List(1, 2, 3)
-//
-//      _ = A.i.query.stream
-//        .evalMap(IO.println) // Print each row
-//        .compile.drain
-//        .unsafeRunSync()
-//
-//
-//
-//      //    val b = a.take(2)
-//      //      _ =   a
-//      //        .evalMap(IO.println) // Print each row
-//      //        .compile.drain
-//      //        .unsafeRunSync()
-//
-//      //        .take(2).toList ==> List(1, 2)
-//      //      _ <-   a.toList ==> List(1, 2, 3)
-//
-//
-//    } yield ()
-//  }
+  "refs" - refs { implicit conn =>
+    import molecule.coreTests.domains.dsl.Refs._
+    for {
+
+
+      _ <- A.i.insert(1, 2, 3, 4, 5).transact
+//      _ <- A.i.insert(1).transact
+
+      //          A.i.query.get ==> List(1, 2, 3)
+      //    A.i.query.limit(2).get ==> List(1, 2, 3)
+
+      _ = A.i.query.stream
+        .evalMap(IO.println) // Print each row
+        .compile.drain
+        .unsafeRunSync()
+
+
+
+      //    val b = a.take(2)
+      //      _ =   a
+      //        .evalMap(IO.println) // Print each row
+      //        .compile.drain
+      //        .unsafeRunSync()
+
+      //        .take(2).toList ==> List(1, 2)
+      //      _ <-   a.toList ==> List(1, 2, 3)
+
+
+    } yield ()
+  }
 
 
 

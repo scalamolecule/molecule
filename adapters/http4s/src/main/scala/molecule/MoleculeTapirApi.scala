@@ -116,15 +116,16 @@
 ////      .out(binaryBody(RawBodyType.ByteArrayBody)) // Corrected
 //
 //  // Query Stream (fs2.Stream)
-//  val fs2StreamEndpoint: PublicEndpoint[Array[Byte], String, Stream[IO, Byte], Fs2Streams[IO]] =
+//  def fs2StreamEndpoint[T: Pickler]: PublicEndpoint[Array[Byte], String, Stream[IO, Byte], Fs2Streams[IO]] =
 //    endpoint.post
 //      .in("molecule" / "queryStream")
-//      .in(binaryBody(RawBodyType.ByteArray))
+//      .in(binaryBodyx[T]) // Use the helper function for input
+////      .in(binaryBody(RawBodyType.ByteArray))
 //      .errorOut(stringBody)
 //      .out(streamBody(Fs2Streams[IO])(_.bytes))
 //
 //  // Query Stream (ZStream)
-//  val zStreamEndpoint: PublicEndpoint[Array[Byte], String, ZStream[Any, Throwable, Byte], ZioStreams] =
+//  def zStreamEndpoint[T: Pickler]: PublicEndpoint[Array[Byte], String, ZStream[Any, Throwable, Byte], ZioStreams] =
 //    endpoint.post
 //      .in("molecule" / "queryStream")
 //      .in(binaryBody(RawBodyType.ByteArray))

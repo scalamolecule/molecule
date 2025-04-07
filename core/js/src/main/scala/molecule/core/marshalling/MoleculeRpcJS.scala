@@ -29,11 +29,11 @@ case class MoleculeRpcJS(interface: String, port: Int)
     )
   }.flatten
 
-//  override def queryStream[Tpl](
-//    proxy: ConnProxy,
-//    elements: List[Element],
-//    limit: Option[Int]
-//  ): fs2.Stream[IO, Either[MoleculeError, List[Tpl]]] = ???
+  override def queryStream[Tpl](
+    proxy: ConnProxy,
+    elements: List[Element],
+    limit: Option[Int]
+  ): fs2.Stream[IO, Either[MoleculeError, List[Tpl]]] = ???
 
   override def queryOffset[Tpl](
     proxy: ConnProxy,
@@ -65,7 +65,7 @@ case class MoleculeRpcJS(interface: String, port: Int)
   ): Future[Either[MoleculeError, TxReport]] = Future {
     val argsSerialized = Pickle.intoBytes((proxy, elements)).typedArray()
     xmlHttpRequest("save", argsSerialized).map(resultSerialized =>
-      Unpickle.apply[Either[MoleculeError, TxReport]].fromBytes(resultSerialized)
+      Unpickle[Either[MoleculeError, TxReport]].fromBytes(resultSerialized)
     )
   }.flatten
 
@@ -76,7 +76,7 @@ case class MoleculeRpcJS(interface: String, port: Int)
   ): Future[Either[MoleculeError, TxReport]] = Future {
     val argsSerialized = Pickle.intoBytes((proxy, tplElements, tplsSerialized)).typedArray()
     xmlHttpRequest("insert", argsSerialized).map(resultSerialized =>
-      Unpickle.apply[Either[MoleculeError, TxReport]].fromBytes(resultSerialized)
+      Unpickle[Either[MoleculeError, TxReport]].fromBytes(resultSerialized)
     )
   }.flatten
 
@@ -87,7 +87,7 @@ case class MoleculeRpcJS(interface: String, port: Int)
   ): Future[Either[MoleculeError, TxReport]] = Future {
     val argsSerialized = Pickle.intoBytes((proxy, elements, isUpsert)).typedArray()
     xmlHttpRequest("update", argsSerialized).map(resultSerialized =>
-      Unpickle.apply[Either[MoleculeError, TxReport]].fromBytes(resultSerialized)
+      Unpickle[Either[MoleculeError, TxReport]].fromBytes(resultSerialized)
     )
   }.flatten
 
@@ -97,7 +97,7 @@ case class MoleculeRpcJS(interface: String, port: Int)
   ): Future[Either[MoleculeError, TxReport]] = Future {
     val argsSerialized = Pickle.intoBytes((proxy, elements)).typedArray()
     xmlHttpRequest("delete", argsSerialized).map(resultSerialized =>
-      Unpickle.apply[Either[MoleculeError, TxReport]].fromBytes(resultSerialized)
+      Unpickle[Either[MoleculeError, TxReport]].fromBytes(resultSerialized)
     )
   }.flatten
 }

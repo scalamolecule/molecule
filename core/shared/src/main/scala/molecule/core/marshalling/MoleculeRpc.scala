@@ -3,7 +3,8 @@ package molecule.core.marshalling
 import cats.effect.IO
 import molecule.base.error.MoleculeError
 import molecule.core.ast.DataModel._
-import molecule.core.spi.TxReport
+import molecule.core.spi.{Conn, TxReport}
+import zio.stream.ZStream
 import scala.concurrent.Future
 
 trait MoleculeRpc {
@@ -19,6 +20,12 @@ trait MoleculeRpc {
     elements: List[Element],
     limit: Option[Int]
   ): fs2.Stream[IO, Either[MoleculeError, List[Tpl]]] = ???
+
+  def queryStreamZio[Tpl](
+    proxy: ConnProxy,
+    elements: List[Element],
+    limit: Option[Int]
+  ): ZStream[Conn, MoleculeError, Tpl] = ???
 
   def queryOffset[Tpl](
     proxy: ConnProxy,

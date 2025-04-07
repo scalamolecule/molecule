@@ -9,7 +9,7 @@ sealed trait MoleculeError extends Throwable with Product with Serializable {
 
 case class ModelError(message: String) extends MoleculeError {
   override def msg: String = message
-  override def toString: String = message
+//  override def toString: String = message
 }
 
 

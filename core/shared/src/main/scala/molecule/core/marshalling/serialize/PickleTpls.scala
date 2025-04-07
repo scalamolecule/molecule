@@ -35,6 +35,16 @@ case class PickleTpls(
     state.toByteBuffer.toArray
   }
 
+  def pickleEither2(result: Either[MoleculeError, Seq[Any]]): Either[String, Array[Byte]] = {
+    result match {
+      case Right(tpls) =>
+        pickleTpls(tpls)
+        Right(state.toByteBuffer.toArray)
+      case Left(err)   =>
+        Left(err.getMessage)
+    }
+  }
+
   def pickleOffset(result: Either[MoleculeError, (Seq[Any], Int, Boolean)]): Array[Byte] = {
     result match {
       case Right((tpls, limit, more)) =>

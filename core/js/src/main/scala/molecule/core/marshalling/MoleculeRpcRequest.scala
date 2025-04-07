@@ -9,14 +9,14 @@ import org.scalajs.dom.XMLHttpRequest
 import scala.concurrent.{Future, Promise}
 import scala.scalajs.js.typedarray._
 
-class MoleculeRpcRequest(interface: String, port: Int) extends MoleculeLogging {
+class MoleculeRpcRequest(host: String, port: Int) extends MoleculeLogging {
 
   case class PostException(xhr: dom.XMLHttpRequest) extends Exception {
     def isTimeout: Boolean = xhr.status == 0 && xhr.readyState == 4
   }
 
   def xmlHttpRequest(action: String, argsSerialized: Int8Array): Future[ByteBuffer] = {
-    val url     = s"http://$interface:$port/molecule/$action"
+    val url     = s"http://$host:$port/molecule/$action"
     val req     = new dom.XMLHttpRequest()
     val promise = Promise[dom.XMLHttpRequest]()
     req.onreadystatechange = { (_: dom.Event) =>
