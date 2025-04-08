@@ -24,9 +24,10 @@ case class MoleculeRpcJS(interface: String, port: Int)
     limit: Option[Int]
   ): Future[Either[MoleculeError, List[Tpl]]] = Future {
     val argsSerialized = Pickle.intoBytes((proxy, elements, limit)).typedArray()
-    xmlHttpRequest("query", argsSerialized).map(resultSerialized =>
-      UnpickleTpls[Tpl](elements, resultSerialized).unpickleEither
-    )
+    xmlHttpRequest("query", argsSerialized)
+      .map(resultSerialized =>
+        UnpickleTpls[Tpl](elements, resultSerialized).unpickleEither
+      )
   }.flatten
 
   override def queryStream[Tpl](

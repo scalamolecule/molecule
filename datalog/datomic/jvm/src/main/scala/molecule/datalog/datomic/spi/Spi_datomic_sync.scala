@@ -11,7 +11,7 @@ import molecule.core.validation.TxModelValidation
 import molecule.core.validation.insert.InsertValidation
 import molecule.datalog.core.query.Model2DatomicQuery
 import molecule.datalog.datomic.facade.DatomicConn_JVM
-import molecule.datalog.datomic.marshalling.Rpc_datomic.Data
+import molecule.datalog.datomic.marshalling.MoleculeRpcJVM_datomic.Data
 import molecule.datalog.datomic.query.{DatomicQueryResolveCursor, DatomicQueryResolveOffset}
 import molecule.datalog.datomic.transaction.{Delete_datomic, Insert_datomic, Save_datomic, Update_datomic}
 import scala.concurrent.Await

@@ -28,6 +28,8 @@ trait SpiBase_async extends Spi_async with Renderer with FutureUtils {
     chunkSize: Int
   )(implicit conn: Conn): fs2.Stream[IO, Tpl] = ???
 
+  // Query backend if cached subscription attributes are mutated.
+  // Probably need a websocket solution instead
   override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)
                                    (implicit conn0: Conn, ec: EC): Future[Unit] = {
     val conn             = conn0.asInstanceOf[JdbcConn_JS]

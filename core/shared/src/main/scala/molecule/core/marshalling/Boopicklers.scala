@@ -738,6 +738,7 @@ object Boopicklers extends MoleculeLogging {
     .addConcreteType[InsertErrors]
     .addConcreteType[ExecutionError]
 
+
   implicit val pickleFileNotFoundException: CompositePickler[FileNotFoundException] =
     compositePickler[FileNotFoundException]
 

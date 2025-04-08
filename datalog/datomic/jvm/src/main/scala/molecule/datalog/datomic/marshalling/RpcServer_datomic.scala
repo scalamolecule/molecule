@@ -11,7 +11,7 @@ import scala.io.StdIn
  *
  * sbt datalogDatomicJVM/run
  */
-object RpcServer_datomic extends MoleculeRpcServer_AkkaHttp(Rpc_datomic) with App {
+object RpcServer_datomic extends MoleculeRpcServer_AkkaHttp(MoleculeRpcJVM_datomic) with App {
 
   Http()
     .newServerAt("localhost", 8080)

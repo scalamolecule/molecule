@@ -257,8 +257,8 @@ lazy val adhoc = crossProject(JSPlatform, JVMPlatform)
   .jvmSettings(
     libraryDependencies ++= Seq(
       // Enforce one version to avoid warnings of multiple dependency versions when running tests
-      "org.slf4j" % "slf4j-api" % "1.7.36",
-      "org.slf4j" % "slf4j-nop" % "1.7.36",
+//      "org.slf4j" % "slf4j-api" % "1.7.36",
+//      "org.slf4j" % "slf4j-nop" % "1.7.36",
 
 
 //      "com.softwaremill.sttp.tapir" %% "tapir-http4s-server-zio" % tapirVersion, // Tapir with Http4s and ZIO
@@ -272,6 +272,7 @@ lazy val adhoc = crossProject(JSPlatform, JVMPlatform)
 //      "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % "3.10.3",
 
       "com.softwaremill.sttp.tapir" %% "tapir-netty-server" % tapirVersion,
+//      "com.softwaremill.sttp.tapir" %% "tapir-netty-server-sync" % tapirVersion,
 
       // ZIO for async effects
 //      "dev.zio" %% "zio" % "2.0.21", // ZIO
@@ -436,7 +437,8 @@ lazy val adapterHttp4s = project
   .settings(
     libraryDependencies ++= {
       if (scalaVersion.value == scala3) Seq()
-      else Seq(compilerPlugin(("org.typelevel" %% "kind-projector" % "0.13.3").cross(CrossVersion.full)))
+      else Seq(compilerPlugin(("org.typelevel" %% "kind-projector" % "0.13.3")
+        .cross(CrossVersion.full)))
     } ++
       Seq(
         "dev.zio" %% "zio-interop-cats" % zioInteropCats3Version,

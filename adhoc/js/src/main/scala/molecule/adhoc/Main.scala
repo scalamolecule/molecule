@@ -1,15 +1,16 @@
 package molecule.adhoc
 
 import boopickle.Default._
-import molecule.adhoc.domains.HelloApi._
+import molecule.adhoc.domains.MoleculeEndpoints
+import molecule.core.util.Executor._
+import sttp.client4._
 
-object Main {
+
+object Main extends MoleculeClient(uri"http://localhost:8080") with MoleculeEndpoints{
 
   def main(args: Array[String]): Unit = {
-    val client = MoleculeClient("localhost", 8080)
-    client.callServer[String](helloEndpoint, Pickle.intoBytes[String]("Scala.js User"))
-    client.callServer[String](helloEndpoint, Pickle.intoBytes[String]("bob"))
-//    client.callServer2(helloEndpoint, Pickle.intoBytes[String]("Scala.js User"))
-//    client.callServer2(helloEndpoint, Pickle.intoBytes[String]("bob"))
+
+    fetch[String](moleculeEndpoint_Query, Pickle.intoBytes("world"))
+      .foreach(r => println(r))
   }
 }
