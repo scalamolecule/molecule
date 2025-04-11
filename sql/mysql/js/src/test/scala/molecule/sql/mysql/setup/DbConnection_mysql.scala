@@ -1,12 +1,12 @@
 package molecule.sql.mysql.setup
 
 import molecule.base.api.Schema_mysql
-import molecule.core.marshalling.{JdbcProxy, RpcRequest}
+import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.Conn
 import molecule.sql.core.facade.JdbcConn_JS
+import sttp.client4.UriContext
 import scala.util.Random
 
-//trait DbConnection_mysql extends DbConnection {
 object DbConnection_mysql {
 
   def getConnection(schema: Schema_mysql): JdbcConn_JS = {
@@ -19,7 +19,7 @@ object DbConnection_mysql {
       s"?allowMultiQueries=true"
 
     val proxy = JdbcProxy(url, schema)
-    JdbcConn_JS(proxy, RpcRequest.request)
+    JdbcConn_JS(proxy, uri"http://localhost:8080")
   }
 
   def run(test: Conn => Any, schema: Schema_mysql): Any = {

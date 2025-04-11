@@ -16,11 +16,6 @@ class AdhocJS_h2 extends Test with DbProviders_h2 with TestUtils {
 
   "types" - types { implicit conn =>
     for {
-      //            _ <- Entity.int(3).save.transact
-      //            _ <- Entity.int.a1.query.get.map(_ ==> List(3))
-
-
-      //      _ <- Entity.int.insert(1, 2).transact
       List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
       _ <- Entity.int(3).save.transact
       _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))

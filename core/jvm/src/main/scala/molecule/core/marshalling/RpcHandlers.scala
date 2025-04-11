@@ -29,23 +29,25 @@ abstract class RpcHandlers(rpc: MoleculeRpc) extends MoleculeLogging with Serial
   def handleQueryStream(args: ByteBuffer) = ???
 
   def handleQueryOffset(args: ByteBuffer): Future[Either[MoleculeError, ByteBuffer]] = {
-    val (proxy, elements, limit, offset) = Unpickle[(ConnProxy, List[Element], Option[Int], Int)]
-      .fromBytes(args: ByteBuffer)
+    val (proxy, elements, limit, offset) =
+      Unpickle[(ConnProxy, List[Element], Option[Int], Int)].fromBytes(args: ByteBuffer)
     rpc
       .queryOffset[Any](proxy, elements, limit, offset)
       .map {
-        case Right((tpls, limit, more)) => Right(PickleTpls(elements, false).pickleOffset(tpls, limit, more))
+        case Right((tpls, limit, more)) =>
+          Right(PickleTpls(elements, false).pickleOffset(tpls, limit, more))
         case Left(err)                  => Left(err)
       }
   }
 
   def handleQueryCursor(args: ByteBuffer): Future[Either[MoleculeError, ByteBuffer]] = {
-    val (proxy, elements, limit, cursor) = Unpickle[(ConnProxy, List[Element], Option[Int], String)]
-      .fromBytes(args: ByteBuffer)
+    val (proxy, elements, limit, cursor) =
+      Unpickle[(ConnProxy, List[Element], Option[Int], String)].fromBytes(args: ByteBuffer)
     rpc
       .queryCursor[Any](proxy, elements, limit, cursor)
       .map {
-        case Right((tpls, cursor, more)) => Right(PickleTpls(elements, false).pickleCursor(tpls, cursor, more))
+        case Right((tpls, cursor, more)) =>
+          Right(PickleTpls(elements, false).pickleCursor(tpls, cursor, more))
         case Left(err)                   => Left(err)
       }
   }

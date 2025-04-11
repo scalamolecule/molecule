@@ -1,9 +1,10 @@
 package molecule.sql.postgres.setup
 
 import molecule.base.api.Schema_postgres
-import molecule.core.marshalling.{JdbcProxy, RpcRequest}
+import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.Conn
 import molecule.sql.core.facade.JdbcConn_JS
+import sttp.client4.UriContext
 import scala.util.Random
 
 object DbConnection_postgres {
@@ -18,7 +19,7 @@ object DbConnection_postgres {
       s"?preparedStatementCacheQueries=0"
 
     val proxy = JdbcProxy(url, schema)
-    JdbcConn_JS(proxy, RpcRequest.request)
+    JdbcConn_JS(proxy, uri"http://localhost:8080")
   }
 
   def run(test: Conn => Any, schema: Schema_postgres): Any = {
