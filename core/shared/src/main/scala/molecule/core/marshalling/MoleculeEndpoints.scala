@@ -1,4 +1,4 @@
-package molecule.adhoc.domains
+package molecule.core.marshalling
 
 import java.nio.ByteBuffer
 import boopickle.CompositePickler
@@ -7,7 +7,6 @@ import molecule.base.error._
 import sttp.tapir.EndpointIO.Info
 import sttp.tapir.RawBodyType.ByteBufferBody
 import sttp.tapir._
-
 
 trait MoleculeEndpoints {
 

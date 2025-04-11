@@ -118,10 +118,17 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
       "dev.zio" %%% "zio-streams" % zioVersion,
       "org.typelevel" %%% "cats-effect" % "3.5.7", // cats api
 
+      "com.softwaremill.sttp.tapir" %%% "tapir-core" % tapirVersion, // Core Tapir API
+
       // Streaming
       "com.lihaoyi" %%% "geny" % "1.1.1",
       "co.fs2" %% "fs2-core" % "3.11.0",
     )
+  )
+  .jsSettings(
+    libraryDependencies ++= Seq(
+      "com.softwaremill.sttp.tapir" %%% "tapir-sttp-client4" % tapirVersion,
+    ),
   )
   .jvmSettings(
     libraryDependencies ++= Seq(
@@ -194,12 +201,12 @@ lazy val adhoc = crossProject(JSPlatform, JVMPlatform)
   .settings(name := "molecule-adhoc")
   .settings(publish / skip := true)
   .settings(compilerArgs)
-//  .enablePlugins(MoleculePlugin)
+  //  .enablePlugins(MoleculePlugin)
   .settings(
-//    // Generate Molecule boilerplate code for tests with `sbt clean compile -Dmolecule=true`
-//    moleculePluginActive := sys.props.get("molecule").contains("true"),
-//    moleculeDomainPaths := Seq("molecule/adhoc/domains"),
-//    //    moleculeMakeJars := false,
+    //    // Generate Molecule boilerplate code for tests with `sbt clean compile -Dmolecule=true`
+    //    moleculePluginActive := sys.props.get("molecule").contains("true"),
+    //    moleculeDomainPaths := Seq("molecule/adhoc/domains"),
+    //    //    moleculeMakeJars := false,
 
     // Find scala version specific jars in respective libs
     unmanagedBase := {
@@ -218,7 +225,7 @@ lazy val adhoc = crossProject(JSPlatform, JVMPlatform)
       "io.suzaku" %%% "boopickle" % "1.5.0", // Boopickle serialization
 
       "com.softwaremill.sttp.client4" %%% "core" % sttpVersion, // STTP core for HTTP client/server
-//      "com.softwaremill.sttp.client3" %%% "core" % sttpVersion, // STTP core for HTTP client/server
+      //      "com.softwaremill.sttp.client3" %%% "core" % sttpVersion, // STTP core for HTTP client/server
       //      "com.softwaremill.sttp.client3" %%% "fetch" % sttpVersion,
 
       //      "com.softwaremill.sttp.tapir" %%% "tapir-core" % tapirVersion // Tapir API
@@ -233,7 +240,7 @@ lazy val adhoc = crossProject(JSPlatform, JVMPlatform)
   )
   //  .jsConfigure(_.enablePlugins(TzdbPlugin))
   .jsSettings(
-//    jsEnvironment,
+    //    jsEnvironment,
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % "2.8.0",
       "org.scala-js" %%% "scala-js-macrotask-executor" % "1.1.1",
@@ -257,36 +264,36 @@ lazy val adhoc = crossProject(JSPlatform, JVMPlatform)
   .jvmSettings(
     libraryDependencies ++= Seq(
       // Enforce one version to avoid warnings of multiple dependency versions when running tests
-//      "org.slf4j" % "slf4j-api" % "1.7.36",
-//      "org.slf4j" % "slf4j-nop" % "1.7.36",
+      //      "org.slf4j" % "slf4j-api" % "1.7.36",
+      //      "org.slf4j" % "slf4j-nop" % "1.7.36",
 
 
-//      "com.softwaremill.sttp.tapir" %% "tapir-http4s-server-zio" % tapirVersion, // Tapir with Http4s and ZIO
+      //      "com.softwaremill.sttp.tapir" %% "tapir-http4s-server-zio" % tapirVersion, // Tapir with Http4s and ZIO
 
       // Http4s dependencies for the backend
-//      "org.http4s" %% "http4s-ember-server" % http4sVersion, // Http4s Ember server
-//      "org.http4s" %% "http4s-dsl" % http4sVersion, // Http4s DSL for routing
-//      "org.http4s" %% "http4s-blaze-server" % "0.23.17",
+      //      "org.http4s" %% "http4s-ember-server" % http4sVersion, // Http4s Ember server
+      //      "org.http4s" %% "http4s-dsl" % http4sVersion, // Http4s DSL for routing
+      //      "org.http4s" %% "http4s-blaze-server" % "0.23.17",
 
       // STTP client for backend (if you need backend HTTP requests)
-//      "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % "3.10.3",
+      //      "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % "3.10.3",
 
       "com.softwaremill.sttp.tapir" %% "tapir-netty-server" % tapirVersion,
-//      "com.softwaremill.sttp.tapir" %% "tapir-netty-server-sync" % tapirVersion,
+      //      "com.softwaremill.sttp.tapir" %% "tapir-netty-server-sync" % tapirVersion,
 
       // ZIO for async effects
-//      "dev.zio" %% "zio" % "2.0.21", // ZIO
-//      "dev.zio" %% "zio-interop-cats" % "23.1.0.4" // ZIO interop with Cats
+      //      "dev.zio" %% "zio" % "2.0.21", // ZIO
+      //      "dev.zio" %% "zio-interop-cats" % "23.1.0.4" // ZIO interop with Cats
     ),
   )
   //  .dependsOn(core) // sql only for now
   .dependsOn(
     core,
-//    sqlH2 % CompileAndTest,
-//    sqlMariaDB % CompileAndTest,
-//    sqlMySQL % CompileAndTest,
-//    sqlPostgreSQL % CompileAndTest,
-//    sqlSQlite % CompileAndTest,
+    //    sqlH2 % CompileAndTest,
+    //    sqlMariaDB % CompileAndTest,
+    //    sqlMySQL % CompileAndTest,
+    //    sqlPostgreSQL % CompileAndTest,
+    //    sqlSQlite % CompileAndTest,
   ) // sql only for now
 
 
@@ -341,7 +348,10 @@ lazy val sqlH2 = crossProject(JSPlatform, JVMPlatform)
   .jsSettings(jsEnvironment)
   .jvmSettings(
     libraryDependencies ++= Seq(
-      "com.h2database" % "h2" % "2.3.232"
+      "com.h2database" % "h2" % "2.3.232",
+
+      "com.softwaremill.sttp.tapir" %% "tapir-netty-server" % tapirVersion,
+
     ),
     Test / fork := true
   )
@@ -538,22 +548,21 @@ lazy val testingFrameworks = Seq(new TestFramework("munit.Framework"))
 
 lazy val jsEnvironment = {
   Seq(
-    jsEnv := new JSDOMNodeJSEnv(
-      JSDOMNodeJSEnv
-        .Config()
-        // for some reason still needed...
-        // https://github.com/scala-js/scala-js-js-envs/issues/12
-        .withArgs(List("--dns-result-order=ipv4first"))
-    ),
+//    jsEnv := new JSDOMNodeJSEnv(
+//      JSDOMNodeJSEnv
+//        .Config()
+//        // for some reason still needed...
+//        // https://github.com/scala-js/scala-js-js-envs/issues/12
+//        .withArgs(List("--dns-result-order=ipv4first"))
+//    ),
     // "Error: connect ECONNREFUSED ::1:8080" with this one alone... shouldn't it work?
     // jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
 
-    //    scalaJSLinkerConfig ~= {
-    //      // Allowing unicode characters in regex expressions (used in email regex)
-    //      // https://www.scala-js.org/doc/regular-expressions.html
-    //      //        .withESFeatures(_.withESVersion(ESVersion.ES2018))
-    //      _.withESFeatures(_.withESVersion(ESVersion.ES2018))
-    //    },
+    scalaJSLinkerConfig ~= {
+      // Allowing unicode characters in regex expressions (used in email regex)
+      // https://www.scala-js.org/doc/regular-expressions.html
+      _.withESFeatures(_.withESVersion(ESVersion.ES2018))
+    },
   )
 }
 

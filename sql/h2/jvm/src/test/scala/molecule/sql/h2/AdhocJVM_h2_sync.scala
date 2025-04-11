@@ -1,10 +1,14 @@
 package molecule.sql.h2
 
-import geny.Generator
-import molecule.coreTests.domains.dsl.Types._
+import boopickle.Default._
+import molecule.core.ast.DataModel.{AttrOneManInt, V}
+import molecule.core.marshalling.deserialize.UnpickleTpls
+import molecule.core.marshalling.serialize.PickleTpls
 import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.sql.h2.setup.DbProviders_h2
-import molecule.sql.h2.sync._
+
+
+
 import scala.language.implicitConversions
 
 
@@ -18,5 +22,8 @@ class AdhocJVM_h2_sync extends Test with DbProviders_h2 with TestUtils {
     //    Entity.int(count).query.get.head ==> 0
     //
     //
+
+    1 ==> 2
+
   }
 }

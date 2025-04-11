@@ -39,7 +39,7 @@ trait MoleculeServerEndpoints extends MoleculeEndpoints with MoleculeLogging wit
       moleculeEndpoint_Query,
       (args: ByteBuffer) => {
         val name     = Unpickle[String].fromBytes(args)
-        val response = Domain.query(name)
+        val response = Domain.query(name) // RpcHandlers.handleQuery...
         Pickle.intoBytes(response)
       }
     )
@@ -52,7 +52,7 @@ trait MoleculeServerEndpoints extends MoleculeEndpoints with MoleculeLogging wit
   //  val moleculeServerEndpoint_Update     : ServerEndpoint[Any, Future] = ???
   //  val moleculeServerEndpoint_Delete     : ServerEndpoint[Any, Future] = ???
 
-  val moleculeServerEndpoints: List[ServerEndpoint[Any, Future]] = List(
+  val moleculeServerEndpoints_async: List[ServerEndpoint[Any, Future]] = List(
     moleculeServerEndpoint_Query,
     //    moleculeServerEndpoint_QueryOffset,
     //    moleculeServerEndpoint_QueryCursor,

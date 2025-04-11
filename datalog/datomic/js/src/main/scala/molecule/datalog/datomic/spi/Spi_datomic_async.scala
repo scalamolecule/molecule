@@ -36,11 +36,11 @@ trait Spi_datomic_async
 
   override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)
                                    (implicit conn0: Conn, ec: EC): Future[Unit] = {
-    val conn             = conn0.asInstanceOf[DatomicConn_JS]
-    val elements         = q.elements
-    val involvedAttrs    = getAttrNames(elements)
+    val conn                 = conn0.asInstanceOf[DatomicConn_JS]
+    val elements             = q.elements
+    val involvedAttrs        = getAttrNames(elements)
     val involvedDeleteEntity = getInitialEntity(elements)
-    val maybeCallback    = (mutationAttrs: Set[String], isDelete: Boolean) => {
+    val maybeCallback        = (mutationAttrs: Set[String], isDelete: Boolean) => {
       if (
         mutationAttrs.exists(involvedAttrs.contains) ||
           isDelete && mutationAttrs.head.startsWith(involvedDeleteEntity)
@@ -124,7 +124,7 @@ trait Spi_datomic_async
       errors <- insert_validate(insert) // validate original elements against meta model
       txReport <- errors match {
         case errors if errors.isEmpty =>
-          val tplsSerialized = PickleTpls(insert.elements, true).pickleEither(Right(insert.tpls))
+          val tplsSerialized = PickleTpls(insert.elements, true).getPickledTpls(insert.tpls)
           conn.rpc.insert(conn.proxy, insert.elements, tplsSerialized).future
         case errors                   => throw InsertErrors(errors)
       }

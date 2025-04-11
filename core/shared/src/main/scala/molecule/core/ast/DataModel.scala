@@ -181,6 +181,10 @@ trait DataModel extends Validations with Values with BaseHelpers {
   // Allowing unicode characters
   val emailRegex = "^(?=.{1,64}@)[\\p{L}0-9_-]+(\\.[\\p{L}0-9_-]+)*@[^-][\\p{L}0-9-]+(\\.[\\p{L}0-9-]+)*(\\.[\\p{L}]{2,})$".r
 
+  //  // Bootzooka version
+  //  private val emailRegex =
+  //    """^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$""".r
+
 
   // GENERATED from here and below (edit in _Model generator) ======================================
 

@@ -70,22 +70,11 @@ trait MoleculeRpcJVM_SQL
   override def insert(
     proxy: ConnProxy,
     elements: List[Element],
-    tplsSerialized: Array[Byte],
+    tplsSerialized: ByteBuffer,
   ): Future[Either[MoleculeError, TxReport]] = either {
     getConn(proxy).map { conn =>
-      val tplsEither = UnpickleTpls[Any](
-        elements, ByteBuffer.wrap(tplsSerialized)
-      ).unpickleEither
-      val tpls       = tplsEither match {
-        case Right(tpls) =>
-          if (countValueAttrs(elements) == 1) {
-            tpls.map(Tuple1(_))
-          } else {
-            tpls.asInstanceOf[Seq[Product]]
-          }
+      val tpls = UnpickleTpls[Any](elements, tplsSerialized).unpickleSeqOfProduct
 
-        case Left(err) => throw err // catch in `either`
-      }
       // Validation already done on JS side
       insert_transact(Insert(elements, tpls, doValidate = false))(conn)
     }

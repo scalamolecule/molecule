@@ -126,7 +126,7 @@ trait SpiBase_async extends Spi_async with Renderer with FutureUtils {
         if (insert.tpls.isEmpty) {
           Future(TxReport(Nil))
         } else {
-          val tplsSerialized = PickleTpls(insert.elements, true).pickleEither(Right(insert.tpls))
+          val tplsSerialized = PickleTpls(insert.elements, true).getPickledTpls(insert.tpls)
           conn.rpc.insert(conn.proxy, insert.elements, tplsSerialized).future
         }
       } else {

@@ -29,26 +29,22 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
   )
   private val dec   = state.dec
 
-  def unpickleEither: Either[MoleculeError, List[Tpl]] = {
-    dec.readInt match { // decode Left/Right
-      case 2 => Right(unpickleTpls)
-      case _ => Left(Unpickle[MoleculeError].fromState(state))
-    }
-  }
-  def unpickleOffset: Either[MoleculeError, (List[Tpl], Int, Boolean)] = {
-    dec.readInt match { // decode Left/Right
-      case 2 => Right((unpickleTpls, dek.readInt, dek.readBoolean))
-      case _ => Left(Unpickle[MoleculeError].fromState(state))
-    }
-  }
-  def unpickleCursor: Either[MoleculeError, (List[Tpl], String, Boolean)] = {
-    dec.readInt match { // decode Left/Right
-      case 2 => Right((unpickleTpls, dek.readString, dek.readBoolean))
-      case _ => Left(Unpickle[MoleculeError].fromState(state))
+  def unpickleSeqOfProduct: Seq[Product] = {
+    val data = unpickleTpls
+    if (countValueAttrs(elements) == 1) {
+      data.map(Tuple1(_))
+    } else {
+      data.asInstanceOf[Seq[Product]]
     }
   }
 
-  private def unpickleTpls: List[Tpl] = {
+  def unpickleOffset: (List[Tpl], Int, Boolean) =
+    (unpickleTpls, dek.readInt, dek.readBoolean)
+
+  def unpickleCursor: (List[Tpl], String, Boolean) =
+    (unpickleTpls, dek.readString, dek.readBoolean)
+
+  def unpickleTpls: List[Tpl] = {
     dec.readInt match { // decode List size
       case 0   =>
         // empty result

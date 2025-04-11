@@ -139,7 +139,7 @@ trait SpiBase_io
         if (insert.tpls.isEmpty) {
           IO(TxReport(Nil))
         } else {
-          val tplsSerialized = PickleTpls(insert.elements, true).pickleEither(Right(insert.tpls))
+          val tplsSerialized = PickleTpls(insert.elements, true).getPickledTpls(insert.tpls)
           conn.rpc.insert(conn.proxy, insert.elements, tplsSerialized).io
         }
       } else {

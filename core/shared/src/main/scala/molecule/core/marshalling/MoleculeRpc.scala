@@ -1,5 +1,6 @@
 package molecule.core.marshalling
 
+import java.nio.ByteBuffer
 import cats.effect.IO
 import molecule.base.error.MoleculeError
 import molecule.core.ast.DataModel._
@@ -49,7 +50,7 @@ trait MoleculeRpc {
   def insert(
     proxy: ConnProxy,
     tplElements: List[Element],
-    tplsSerialized: Array[Byte]
+    tplsSerialized: ByteBuffer
   ): Future[Either[MoleculeError, TxReport]]
 
   def update(

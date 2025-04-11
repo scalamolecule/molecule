@@ -1,12 +1,13 @@
 package molecule.core.marshalling.serialize
 
 import java.net.URI
+import java.nio.ByteBuffer
 import java.time._
 import java.util.{Date, UUID}
 import boopickle.BasicPicklers._
 import boopickle.Default._
 import boopickle._
-import molecule.base.error.{ModelError, MoleculeError}
+import molecule.base.error.ModelError
 import molecule.core.ast.DataModel._
 import molecule.core.marshalling.Boopicklers._
 import molecule.core.util.{ModelUtils, MoleculeLogging, SerializationUtils}
@@ -25,52 +26,28 @@ case class PickleTpls(
 
   private val state = new PickleState(new EncoderSize(new HeapByteBufferProvider))
   private val enc   = state.enc
-  type DummyNotUsed = Int
 
-  def pickleEither(result: Either[MoleculeError, Seq[Any]]): Array[Byte] = {
-    result match {
-      case Right(tpls) => pickleTpls(tpls)
-      case Left(err)   => LeftPickler[MoleculeError, DummyNotUsed].pickle(Left(err))(state)
-    }
-    state.toByteBuffer.toArray
+
+  def pickleOffset(tpls: Seq[Any], limit: Int, more: Boolean): ByteBuffer = {
+    pickleTpls(tpls)
+    enk.writeInt(limit)
+    enk.writeBoolean(more)
+    state.toByteBuffer
   }
 
-  def pickleEither2(result: Either[MoleculeError, Seq[Any]]): Either[String, Array[Byte]] = {
-    result match {
-      case Right(tpls) =>
-        pickleTpls(tpls)
-        Right(state.toByteBuffer.toArray)
-      case Left(err)   =>
-        Left(err.getMessage)
-    }
+  def pickleCursor(tpls: Seq[Any], cursor: String, more: Boolean): ByteBuffer = {
+    pickleTpls(tpls)
+    enk.writeString(cursor)
+    enk.writeBoolean(more)
+    state.toByteBuffer
   }
 
-  def pickleOffset(result: Either[MoleculeError, (Seq[Any], Int, Boolean)]): Array[Byte] = {
-    result match {
-      case Right((tpls, limit, more)) =>
-        pickleTpls(tpls)
-        enk.writeInt(limit)
-        enk.writeBoolean(more)
-      case Left(err)                  =>
-        LeftPickler[MoleculeError, DummyNotUsed].pickle(Left(err))(state)
-    }
-    state.toByteBuffer.toArray
+  def getPickledTpls(tpls: Seq[Any]): ByteBuffer = {
+    pickleTpls(tpls)
+    state.toByteBuffer
   }
 
-  def pickleCursor(result: Either[MoleculeError, (Seq[Any], String, Boolean)]): Array[Byte] = {
-    result match {
-      case Right((tpls, cursor, more)) =>
-        pickleTpls(tpls)
-        enk.writeString(cursor)
-        enk.writeBoolean(more)
-      case Left(err)                   =>
-        LeftPickler[MoleculeError, DummyNotUsed].pickle(Left(err))(state)
-    }
-    state.toByteBuffer.toArray
-  }
-
-  private def pickleTpls(tpls: Seq[Any]): Unit = {
-    enc.writeInt(2) // Encode Right
+  def pickleTpls(tpls: Seq[Any]): Unit = {
     enc.writeInt(tpls.size) // encode length of List of Tpl
     if (tpls.nonEmpty) {
       if (allTuples) {

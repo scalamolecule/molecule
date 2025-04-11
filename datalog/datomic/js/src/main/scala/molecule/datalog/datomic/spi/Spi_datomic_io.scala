@@ -134,7 +134,7 @@ trait Spi_datomic_io
       errors <- insert_validate(insert) // validate original elements against meta model
       txReport <- errors match {
         case errors if errors.isEmpty =>
-          val tplsSerialized = PickleTpls(insert.elements, true).pickleEither(Right(insert.tpls))
+          val tplsSerialized = PickleTpls(insert.elements, true).getPickledTpls(insert.tpls)
           conn.rpc.insert(conn.proxy, insert.elements, tplsSerialized).io
         case errors                   => throw InsertErrors(errors)
       }

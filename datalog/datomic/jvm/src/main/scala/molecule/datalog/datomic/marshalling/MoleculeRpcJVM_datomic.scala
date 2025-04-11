@@ -74,18 +74,12 @@ object MoleculeRpcJVM_datomic
   override def insert(
     proxy: ConnProxy,
     elements: List[Element],
-    tplsSerialized: Array[Byte],
+    tplsSerialized: ByteBuffer,
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
-      tplsEither = UnpickleTpls[Any](elements, ByteBuffer.wrap(tplsSerialized)).unpickleEither
-      tpls = tplsEither match {
-        case Right(tpls) =>
-          (if (countValueAttrs(elements) == 1) {
-            tpls.map(Tuple1(_))
-          } else tpls).asInstanceOf[Seq[Product]]
-        case Left(err)   => throw err // catch in outer either wrapper
-      }
+      tpls = UnpickleTpls[Any](elements, tplsSerialized).unpickleSeqOfProduct
+
       // Validation already done on JS side
       txReport <- insert_transact(Insert(elements, tpls, doValidate = false))(conn, global)
     } yield txReport
