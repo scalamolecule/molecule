@@ -23,7 +23,7 @@ class AdhocJVM_h2_sync extends Test with DbProviders_h2 with TestUtils {
     //
     //
 
-    1 ==> 2
+    1 ==> 1
 
   }
 }

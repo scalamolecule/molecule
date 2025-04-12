@@ -35,6 +35,7 @@ sealed trait ConnProxy {
   val dbView: Option[DbView] = None
 }
 
+
 case class JdbcProxy(
   url: String,
   override val uuid: UUID,
@@ -87,6 +88,7 @@ case class DatomicProxy(
   override val reservedAttributes: Array[Boolean] = new Array[Boolean](0),
 
 ) extends ConnProxy
+
 
 object DatomicProxy {
   def apply(

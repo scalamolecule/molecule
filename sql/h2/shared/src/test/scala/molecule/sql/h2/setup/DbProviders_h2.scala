@@ -1,6 +1,5 @@
 package molecule.sql.h2.setup
 
-import boopickle.CompositePickler
 import boopickle.Default._
 import molecule.core.spi.Conn
 import molecule.coreTests.domains.schema._

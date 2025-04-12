@@ -15,13 +15,14 @@ import scala.util.Using.Manager
 trait DbConnection_h2 extends DbConnection {
 
   def run(test: Conn => Any, schema: Schema_h2): Any = {
-    // Choose running tests with in-memory or file-based database:
+    // Choose running tests with one of various setups
     runMemDb(test, schema)
     //    runFileDb(test, schema)
     //    runFileDbWithHikariCP(test, schema)
   }
 
-  def runMemDb(test: Conn => Any, schema: Schema_h2): Any = {
+  // Use in-memory H2 (fastest)
+  private def runMemDb(test: Conn => Any, schema: Schema_h2): Any = {
     val url = "jdbc:h2:mem:test" + Random.nextInt().abs
     Manager { use =>
       val proxy   = JdbcProxy(url, schema)
@@ -31,8 +32,8 @@ trait DbConnection_h2 extends DbConnection {
     }.get
   }
 
-
-  def runFileDb(test: Conn => Any, schema: Schema_h2): Any = {
+  // Use H2 saving to disk (slower but can persist)
+  private def runFileDb(test: Conn => Any, schema: Schema_h2): Any = {
     val ds             = new JdbcDataSource()
     val tempDbFilePath = tempDbPath
     ds.setUrl("jdbc:h2:" + tempDbFilePath)
@@ -50,7 +51,8 @@ trait DbConnection_h2 extends DbConnection {
   config.setMaximumPoolSize(10)
   config.setConnectionTimeout(3000)
 
-  def runFileDbWithHikariCP(test: Conn => Any, schema: Schema_h2): Any = {
+  // Use Hikari connection pool
+  private def runFileDbWithHikariCP(test: Conn => Any, schema: Schema_h2): Any = {
     val tempDbFilePath = tempDbPath
     config.setJdbcUrl("jdbc:h2:" + tempDbFilePath)
     Manager { use =>

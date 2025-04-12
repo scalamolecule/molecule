@@ -8,6 +8,9 @@ import molecule.core.spi.{Conn, TxReport}
 import zio.stream.ZStream
 import scala.concurrent.Future
 
+/**
+ * Unified shared RPC API for client/backend (JS/JVM)
+ */
 trait MoleculeRpc {
 
   def query[Tpl](

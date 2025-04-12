@@ -22,10 +22,9 @@ case class PickleTpls(
   with SerializationUtils
   with MoleculeLogging {
 
-  private val prevRefs: ListBuffer[String] = ListBuffer.empty[String]
-
-  private val state = new PickleState(new EncoderSize(new HeapByteBufferProvider))
-  private val enc   = state.enc
+  private val prevRefs = ListBuffer.empty[String]
+  private val state    = new PickleState(new EncoderSize(new HeapByteBufferProvider))
+  private val enc      = state.enc
 
 
   def pickleOffset(tpls: Seq[Any], limit: Int, more: Boolean): ByteBuffer = {

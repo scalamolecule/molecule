@@ -21,7 +21,7 @@ case class MoleculeClient(backendBaseUri: Uri)
     with MoleculeEndpoints
     with FutureUtils {
 
-  // Use Tapir endpoint to make request to backend
+  // Use Tapir endpoints to make request to backend
   private def fetch[T](
     endpoint: PublicEndpoint[ByteBuffer, MoleculeError, ByteBuffer, Any],
     args: ByteBuffer,
@@ -69,9 +69,7 @@ case class MoleculeClient(backendBaseUri: Uri)
     fetch[(List[Tpl], Int, Boolean)](
       moleculeEndpoint_QueryOffset,
       Pickle.intoBytes((proxy, elements, limit, offset)),
-      (result: ByteBuffer) =>
-        UnpickleTpls[Tpl](elements, result)
-          .unpickleOffset
+      (result: ByteBuffer) => UnpickleTpls[Tpl](elements, result).unpickleOffset
     )
   }
 
