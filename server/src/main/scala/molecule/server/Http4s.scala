@@ -13,6 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
 object Http4s extends MoleculeServerEndpoints(Rpc_h2) with IOApp {
 
   override def run(args: List[String]): IO[ExitCode] = {
+
     // Create a Dispatcher for the Future to IO conversion
     Dispatcher.parallel[IO].use { implicit dispatcher =>
       implicit val ec: ExecutionContext = ExecutionContext.global
@@ -42,7 +43,6 @@ object Http4s extends MoleculeServerEndpoints(Rpc_h2) with IOApp {
         }
     }
   }
-
 
   // Some helper functions to use Future endpoints with Http4s
 

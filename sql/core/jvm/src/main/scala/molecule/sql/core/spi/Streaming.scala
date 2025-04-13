@@ -2,6 +2,7 @@ package molecule.sql.core.spi
 
 import cats.effect.IO
 import fs2.Stream
+import molecule.base.error.{ExecutionError, MoleculeError}
 import molecule.core.action._
 import molecule.core.spi._
 import molecule.sql.core.javaSql.{ResultSetInterface => Row}
@@ -57,34 +58,46 @@ trait Streaming {
   }
 
 
+//  type Row = java.sql.ResultSet
+
   def zioStream[Tpl](
     q: Query[Tpl],
     chunkSize: Int,
     inspect: (Query[Tpl], Conn) => Unit,
-    getRS: (Query[Tpl], Conn) => (Row, Row => Any)
-  )(implicit conn: Conn): ZStream[Any, Throwable, Tpl] = {
+    getData: (Query[Tpl], Conn) => (Row, Row => Any)
+  ): ZStream[Conn, MoleculeError, Tpl] = {
+
+    def attemptBlockingMolecule[A](block: => A): ZIO[Any, MoleculeError, A] =
+      ZIO.attemptBlocking(block).mapError {
+        case e: MoleculeError => e
+        case other            => ExecutionError(other.getMessage)
+      }
 
     // Ensure the inspection runs in ZIO
-    val inspectZIO: UIO[Unit] =
-      if (q.doInspect) ZIO.attemptBlocking(inspect(q, conn)).orDie
-      else ZIO.unit
+    def inspectZIO(conn: Conn): ZIO[Any, MoleculeError, Unit] =
+      if (q.doInspect)
+        attemptBlockingMolecule(inspect(q, conn))
+      else
+        ZIO.unit
 
     // Resource handling for Statement & ResultSet
-    val acquire: Task[(Row, Row => Any)] = ZIO.attemptBlocking {
-      val (row, row2tpl) = getRS(q, conn)
-      row.setFetchSize(chunkSize)
-      (row, row2tpl)
-    }
+    def acquire(conn: Conn): ZIO[Any, MoleculeError, (Row, Row => Any)] =
+      attemptBlockingMolecule {
+        val (row, row2tpl) = getData(q, conn)
+        row.setFetchSize(chunkSize)
+        (row, row2tpl)
+      }
 
     val release: ((Row, Row => Any)) => UIO[Unit] = {
-      case (rs, _) => ZIO.attemptBlocking(rs.close()).orDie
+        case (rs, _) => ZIO.attemptBlocking(rs.close()).orDie
     }
 
     for {
-      _ <- ZStream.fromZIO(inspectZIO)
-      (rs, row2tpl) <- ZStream.acquireReleaseWith(acquire)(release)
+      conn <- ZStream.fromZIO(ZIO.service[Conn])
+      _ <- ZStream.fromZIO(inspectZIO(conn))
+      (rs, row2tpl) <- ZStream.acquireReleaseWith(acquire(conn))(release)
       element <- ZStream.fromIterableZIO(
-        ZIO.attemptBlocking {
+        attemptBlockingMolecule {
           val buffer = new collection.mutable.ListBuffer[Tpl]()
           var count  = 0
 

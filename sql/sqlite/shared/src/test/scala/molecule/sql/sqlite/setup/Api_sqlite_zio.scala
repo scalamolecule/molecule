@@ -7,6 +7,6 @@ object Api_sqlite_zio
   extends Api_zio
     with Api_zio_transact
     with Spi_sqlite_zio
-    with DbProviders_sqlite
+    with DbProviders_sqlite_zio
 
 

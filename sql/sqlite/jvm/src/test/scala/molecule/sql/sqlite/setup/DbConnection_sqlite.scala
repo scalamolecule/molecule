@@ -6,8 +6,11 @@ import molecule.base.api.Schema_sqlite
 import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.Conn
 import molecule.coreTests.setup.DbConnection
+import molecule.sql.core.facade.JdbcHandler_JVM
 import molecule.sql.sqlite.facade.JdbcHandlerSQlite_JVM
 import org.sqlite.SQLiteDataSource
+import zio.{ZIO, ZLayer}
+import scala.util.Random
 import scala.util.Using.Manager
 
 trait DbConnection_sqlite extends DbConnection {
@@ -17,6 +20,17 @@ trait DbConnection_sqlite extends DbConnection {
     runMemDb(test, schema)
     //    runFileDb(test, schema)
     //    runFileDbWithHikariCP(test, schema)
+  }
+
+  def connZLayer(schema: Schema_sqlite): ZLayer[Any, Throwable, Conn] = {
+    ZLayer.scoped(
+      ZIO.attemptBlocking {
+        val url     = "jdbc:h2:mem:test" + Random.nextInt().abs
+        val proxy   = JdbcProxy(url, schema)
+        val sqlConn = DriverManager.getConnection(proxy.url)
+        JdbcHandler_JVM.recreateDb(proxy, sqlConn)
+      }
+    )
   }
 
   def runMemDb(test: Conn => Any, schema: Schema_sqlite): Any = {

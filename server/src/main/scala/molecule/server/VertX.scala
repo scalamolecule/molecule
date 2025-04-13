@@ -10,7 +10,7 @@ import sttp.tapir.server.vertx.VertxFutureServerInterpreter
 import scala.compat.java8.FutureConverters._
 import scala.concurrent.Await
 import scala.concurrent.duration._
-import scala.io.StdIn  // Required for CompletionStage conversion
+import scala.io.StdIn
 
 object VertX extends MoleculeServerEndpoints(Rpc_h2) {
 

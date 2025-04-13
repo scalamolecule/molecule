@@ -1,10 +1,11 @@
 package molecule.sql.mysql.setup
 
-import molecule.base.api.Schema_mysql
+import molecule.base.api.{Schema, Schema_mysql}
 import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.Conn
 import molecule.sql.core.facade.JdbcConn_JS
 import sttp.client4.UriContext
+import zio.{ZIO, ZLayer}
 import scala.util.Random
 
 object DbConnection_mysql {
@@ -24,5 +25,13 @@ object DbConnection_mysql {
 
   def run(test: Conn => Any, schema: Schema_mysql): Any = {
     test(getConnection(schema))
+  }
+
+  def connZLayer(schema: Schema_mysql): ZLayer[Any, Throwable, Conn] = {
+    ZLayer.scoped(
+      ZIO.attemptBlocking {
+        getConnection(schema)
+      }
+    )
   }
 }

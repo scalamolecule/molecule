@@ -7,6 +7,6 @@ object Api_mariadb_zio
   extends Api_zio
     with Api_zio_transact
     with Spi_mariadb_zio
-    with DbProviders_mariadb
+    with DbProviders_mariadb_zio
 
 

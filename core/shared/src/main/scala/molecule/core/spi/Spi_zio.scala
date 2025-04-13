@@ -2,6 +2,7 @@ package molecule.core.spi
 
 import molecule.base.error._
 import molecule.core.action._
+import zio.stream.ZStream
 import zio.{Task, ZIO}
 
 trait Spi_zio {
@@ -9,6 +10,11 @@ trait Spi_zio {
   def query_get[Tpl](
     q: Query[Tpl]
   ): ZIO[Conn, MoleculeError, List[Tpl]]
+
+  def query_stream[Tpl](
+    q: Query[Tpl],
+    chunkSize: Int = 100
+  ): ZStream[Conn, MoleculeError, Tpl] = ???
 
   def query_subscribe[Tpl](
     q: Query[Tpl], callback: List[Tpl] => Unit

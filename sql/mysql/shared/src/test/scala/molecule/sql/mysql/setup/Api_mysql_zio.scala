@@ -7,6 +7,6 @@ object Api_mysql_zio
   extends Api_zio
     with Api_zio_transact
     with Spi_mysql_zio
-    with DbProviders_mysql
+    with DbProviders_mysql_zio
 
 

@@ -3,12 +3,15 @@ package molecule.core.api
 import molecule.base.error._
 import molecule.core.action._
 import molecule.core.spi.{Conn, Spi_zio, TxReport}
-import zio.ZIO
+import zio.stream.ZStream
+import zio.{Task, ZIO}
 
 trait Api_zio extends Keywords { spi: Spi_zio =>
 
   implicit class QueryApiZIO[Tpl](q: Query[Tpl]) {
     def get: ZIO[Conn, MoleculeError, List[Tpl]] = query_get(q)
+    def stream: ZStream[Conn, MoleculeError, Tpl] = query_stream(q, 100)
+    def stream(chunkSize: Int): ZStream[Conn, MoleculeError, Tpl] = query_stream(q, chunkSize)
     def subscribe(callback: List[Tpl] => Unit): ZIO[Conn, MoleculeError, Unit] = query_subscribe(q, callback)
     def unsubscribe(): ZIO[Conn, MoleculeError, Unit] = query_unsubscribe(q)
     def inspect: ZIO[Conn, MoleculeError, Unit] = query_inspect(q)

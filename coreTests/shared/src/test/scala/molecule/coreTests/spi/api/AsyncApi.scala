@@ -29,9 +29,29 @@ case class AsyncApi(
   }
 
 
+  "Opt ref" - refs { implicit conn =>
+    import molecule.coreTests.domains.dsl.Refs._
+    for {
+      _ <- A.i(1).save.transact
+
+      // Optional card-one ref (SQL left join)
+      _ <- A.i.B.?(B.i).query.get.map(_ ==> List(
+        (1, None),
+      ))
+
+      _ <- A.i(2).B.i(3).s("b").save.transact
+
+      // Optional card-one ref (SQL left join)
+      _ <- A.i.a1.B.?(B.i.s).query.i.get.map(_ ==> List(
+        (1, None),
+        (2, Some((3, "b"))),
+      ))
+    } yield ()
+  }
+
+
   "Validation" - validation { implicit conn =>
     import molecule.coreTests.domains.dsl.Validation.Type
-
     for {
       _ <- Type.string("a").save.transact
         .map(_ ==> "Unexpected success").recover {

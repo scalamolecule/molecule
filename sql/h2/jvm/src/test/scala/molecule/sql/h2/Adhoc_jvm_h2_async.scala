@@ -12,24 +12,22 @@ import scala.language.implicitConversions
 import cats.effect.unsafe.implicits.{global => ioRuntime}
 
 
-class AdhocJVM_h2 extends Test with DbProviders_h2 with TestUtils {
+class Adhoc_jvm_h2_async extends Test with DbProviders_h2 with TestUtils {
 
 
-    "types" - types { implicit conn =>
-      import molecule.coreTests.domains.dsl.Types._
-      implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
-
-      for {
-        List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
-        _ <- Entity.int(3).save.transact
-        _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
-        _ <- Entity(a).int(10).update.transact
-        _ <- Entity(b).delete.transact
-        _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
-
-
-      } yield ()
-    }
+//  "types" - types { implicit conn =>
+//    import molecule.coreTests.domains.dsl.Types._
+//    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+//
+//    for {
+//      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
+//      _ <- Entity.int(3).save.transact
+//      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
+//      _ <- Entity(a).int(10).update.transact
+//      _ <- Entity(b).delete.transact
+//      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
+//    } yield ()
+//  }
   //
   //
   //  "mixed" - types { implicit conn =>
@@ -51,12 +49,13 @@ class AdhocJVM_h2 extends Test with DbProviders_h2 with TestUtils {
 
 
       _ <- A.i.insert(1, 2, 3, 4, 5).transact
-//      _ <- A.i.insert(1).transact
+      //      _ <- A.i.insert(1).transact
 
       //          A.i.query.get ==> List(1, 2, 3)
       //    A.i.query.limit(2).get ==> List(1, 2, 3)
 
-      _ = A.i.query.stream
+      _ = A.i.query.
+        stream
         .evalMap(IO.println) // Print each row
         .compile.drain
         .unsafeRunSync()

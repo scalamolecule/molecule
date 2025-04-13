@@ -5,6 +5,7 @@ import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.Conn
 import molecule.sql.core.facade.JdbcConn_JS
 import sttp.client4.UriContext
+import zio.{ZIO, ZLayer}
 import scala.util.Random
 
 object DbConnection_postgres {
@@ -24,5 +25,13 @@ object DbConnection_postgres {
 
   def run(test: Conn => Any, schema: Schema_postgres): Any = {
     test(getConnection(schema))
+  }
+
+  def connZLayer(schema: Schema_postgres): ZLayer[Any, Throwable, Conn] = {
+    ZLayer.scoped(
+      ZIO.attemptBlocking {
+        getConnection(schema)
+      }
+    )
   }
 }

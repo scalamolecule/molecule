@@ -2,12 +2,13 @@ package molecule.sql.h2.setup
 
 import java.sql.DriverManager
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
-import molecule.base.api.Schema_h2
+import molecule.base.api.{Schema, Schema_h2}
 import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.Conn
 import molecule.coreTests.setup.DbConnection
 import molecule.sql.core.facade.JdbcHandler_JVM
 import org.h2.jdbcx.JdbcDataSource
+import zio.{ZIO, ZLayer}
 import scala.util.Random
 import scala.util.Using.Manager
 
@@ -19,6 +20,17 @@ trait DbConnection_h2 extends DbConnection {
     runMemDb(test, schema)
     //    runFileDb(test, schema)
     //    runFileDbWithHikariCP(test, schema)
+  }
+
+  def connZLayer(schema: Schema_h2): ZLayer[Any, Throwable, Conn] = {
+    ZLayer.scoped(
+      ZIO.attemptBlocking {
+        val url     = "jdbc:h2:mem:test" + Random.nextInt().abs
+        val proxy   = JdbcProxy(url, schema)
+        val sqlConn = DriverManager.getConnection(proxy.url)
+        JdbcHandler_JVM.recreateDb(proxy, sqlConn)
+      }
+    )
   }
 
   // Use in-memory H2 (fastest)

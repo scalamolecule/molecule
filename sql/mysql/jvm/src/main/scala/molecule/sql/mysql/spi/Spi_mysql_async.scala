@@ -24,7 +24,7 @@ trait Spi_mysql_async extends Spi_async with Streaming with ModelUtils {
   override def query_stream[Tpl](
     q: Query[Tpl],
     chunkSize: Int
-  )(implicit conn: Conn): fs2.Stream[IO, Tpl] = fs2stream(
+  )(implicit conn: Conn, ec: EC): fs2.Stream[IO, Tpl] = fs2stream(
     q, chunkSize,
     (q: Query[Tpl], conn: Conn) => Spi_mysql_sync.query_inspect[Tpl](q)(conn),
     Spi_mysql_sync.getResultSet[Tpl]

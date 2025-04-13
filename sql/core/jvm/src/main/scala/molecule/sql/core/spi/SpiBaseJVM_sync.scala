@@ -26,7 +26,7 @@ import scala.collection.mutable.ListBuffer
 import scala.util.control.NonFatal
 
 
-trait SpiBase_sync
+trait SpiBaseJVM_sync
   extends Spi_sync
     with CachedConnection
     with SpiHelpers

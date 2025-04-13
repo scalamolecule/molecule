@@ -7,6 +7,6 @@ object Api_h2_zio
   extends Api_zio
     with Api_zio_transact
     with Spi_h2_zio
-    with DbProviders_h2
+    with DbProviders_h2_zio
 
 

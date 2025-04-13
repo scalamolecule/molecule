@@ -1,13 +1,12 @@
 package molecule.sql.mysql.setup
 
-
 import com.mysql.cj.jdbc.MysqlDataSource
-import molecule.base.api.Schema_mysql
+import molecule.base.api.{Schema, Schema_mysql}
 import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.Conn
-import molecule.sql.core.facade.JdbcHandler_JVM
+import molecule.sql.core.facade.{JdbcConn_JVM, JdbcHandler_JVM}
 import org.testcontainers.containers.MySQLContainer
-
+import zio.{ZIO, ZLayer}
 
 object DbConnection_mysql {
 
@@ -35,13 +34,23 @@ object DbConnection_mysql {
        |USE test;
        |""".stripMargin
 
-
-  def run(test: Conn => Any, schema: Schema_mysql): Any = {
+  def getConnection(schema:Schema_mysql): JdbcConn_JVM = {
     val initSql = resetDb + schema.schemaData.head
     val proxy   = JdbcProxy(baseUrl, schema, initSql)
 
     // Not closing the connection since we re-use it
-    val conn = JdbcHandler_JVM.recreateDb(proxy, reusedSqlConn)
-    test(conn)
+    JdbcHandler_JVM.recreateDb(proxy, reusedSqlConn)
+  }
+
+  def run(test: Conn => Any, schema: Schema_mysql): Any = {
+    test(getConnection(schema))
+  }
+
+  def connZLayer(schema: Schema_mysql): ZLayer[Any, Throwable, Conn] = {
+    ZLayer.scoped(
+      ZIO.attemptBlocking {
+        getConnection(schema)
+      }
+    )
   }
 }

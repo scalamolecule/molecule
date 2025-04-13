@@ -8,6 +8,7 @@ val scala213 = "2.13.16"
 val scala3   = "3.3.5"
 val allScala = Seq(scala212, scala213, scala3)
 
+val munitVersion             = "1.1.0"
 val akkaVersion              = "2.8.3"
 val dimafengContainerVersion = "0.43.0"
 val logbackVersion           = "1.5.0"
@@ -19,7 +20,6 @@ val sttpVersion              = "4.0.0-RC4"
 val tapirVersion             = "1.11.24"
 val testContainerVersion     = "1.20.6"
 val zioVersion               = "2.0.21"
-
 
 //val akkaVersion               = "2.6.20"
 val akkaHttpVersion           = "10.2.10"
@@ -161,9 +161,14 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
 
     libraryDependencies ++= Seq(
       "com.zaxxer" % "HikariCP" % "6.2.1" % Test,
-      "org.scalameta" %%% "munit" % "1.0.3" % Test,
       "org.scalactic" %%% "scalactic" % "3.2.19" % Test, // Tolerant roundings with triple equal on js platform
       "io.github.cquiroz" %%% "scala-java-time" % "2.6.0", // % Test, // we need main for time zone plugin
+
+      // Test frameworks
+      "org.scalameta" %%% "munit" % munitVersion % Test,
+      "dev.zio" %%% "zio-streams" % zioVersion % Test,
+      "dev.zio" %%% "zio-test" % zioVersion % Test,
+      "dev.zio" %%% "zio-test-sbt" % zioVersion % Test,
     ),
   )
   .jsConfigure(_.enablePlugins(TzdbPlugin))
@@ -241,7 +246,7 @@ lazy val sqlH2 = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies ++= Seq(
       "com.h2database" % "h2" % "2.3.232",
     ),
-    //    Test / fork := true
+    Test / fork := true // necessary for sbt testing
   )
   .dependsOn(sqlCore, coreTests % "test->test")
 
@@ -259,7 +264,7 @@ lazy val sqlMariaDB = crossProject(JSPlatform, JVMPlatform)
       "org.mariadb.jdbc" % "mariadb-java-client" % "3.5.1",
       "ch.qos.logback" % "logback-classic" % logbackVersion % Test
     ),
-    //    Test / fork := true
+    Test / fork := true
   )
   .dependsOn(sqlCore, coreTests % "test->test")
 
@@ -276,7 +281,7 @@ lazy val sqlMySQL = crossProject(JSPlatform, JVMPlatform)
       "org.testcontainers" % "mysql" % testContainerVersion,
       "com.mysql" % "mysql-connector-j" % "9.2.0",
     ),
-    //    Test / fork := true
+    Test / fork := true
   )
   .dependsOn(sqlCore, coreTests % "test->test")
 
@@ -294,7 +299,7 @@ lazy val sqlPostgreSQL = crossProject(JSPlatform, JVMPlatform)
       "org.postgresql" % "postgresql" % "42.7.5",
       "ch.qos.logback" % "logback-classic" % logbackVersion % Test
     ),
-    //    Test / fork := true
+    Test / fork := true
   )
   .dependsOn(sqlCore, coreTests % "test->test")
 
@@ -311,7 +316,7 @@ lazy val sqlSQlite = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies ++= Seq(
       "org.xerial" % "sqlite-jdbc" % "3.49.1.0"
     ),
-    //    Test / fork := true
+    Test / fork := true
   )
   .dependsOn(sqlCore, coreTests % "test->test")
 
@@ -322,49 +327,45 @@ lazy val server = project
   .settings(
     name := "molecule-server",
     publish / skip := true,
-    libraryDependencies ++=
-      Seq(
-        "com.softwaremill.sttp.tapir" %% "tapir-akka-http-server" % tapirVersion,
+    libraryDependencies ++= Seq(
+      // 1. Akka Http
+      "com.softwaremill.sttp.tapir" %% "tapir-akka-http-server" % tapirVersion,
 
-        // A bit lower version to avoid conflicts with pekko
-        "com.softwaremill.sttp.tapir" %% "tapir-armeria-server" % "1.11.9" ,
+      // 2. Armeria
+      // Lower version to avoid conflicts with pekko
+      "com.softwaremill.sttp.tapir" %% "tapir-armeria-server" % "1.11.9",
 
-        "org.http4s" %% "http4s-ember-server" % http4sVersion,
-        "org.http4s" %% "http4s-blaze-server" % http4sVersion,
-        "org.http4s" %% "http4s-dsl" % http4sVersion,
-        "org.http4s" %% "http4s-core" % http4sVersion,
-        "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % tapirVersion,
+      // 3. Http4s
+      "org.http4s" %% "http4s-ember-server" % http4sVersion,
+      "org.http4s" %% "http4s-blaze-server" % http4sVersion,
+      "org.http4s" %% "http4s-dsl" % http4sVersion,
+      "org.http4s" %% "http4s-core" % http4sVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % tapirVersion,
 
-        "com.softwaremill.sttp.tapir" %% "tapir-netty-server" % tapirVersion,
+      // 4. Netty
+      "com.softwaremill.sttp.tapir" %% "tapir-netty-server" % tapirVersion,
 
+      // 5. Pekko
+      // Force same Pekko version
+      "org.apache.pekko" %% "pekko-actor-typed" % pekkoVersion,
+      "org.apache.pekko" %% "pekko-actor" % pekkoVersion,
+      "org.apache.pekko" %% "pekko-serialization-jackson" % pekkoVersion,
+      "org.apache.pekko" %% "pekko-protobuf-v3" % pekkoVersion,
+      "org.apache.pekko" %% "pekko-slf4j" % pekkoVersion,
+      "org.apache.pekko" %% "pekko-stream" % pekkoVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-pekko-http-server" % tapirVersion,
 
+      // 6. Play (with PekkoHttpServer)
+      "com.softwaremill.sttp.tapir" %% "tapir-play-server" % tapirVersion,
 
+      // 7. Vert.X
+      "com.softwaremill.sttp.tapir" %% "tapir-vertx-server" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-zio-http-server" % tapirVersion,
 
-
-        // Force same Pekko version
-        "org.apache.pekko" %% "pekko-actor-typed" % pekkoVersion,
-        "org.apache.pekko" %% "pekko-actor" % pekkoVersion,
-        "org.apache.pekko" %% "pekko-serialization-jackson" % pekkoVersion,
-        "org.apache.pekko" %% "pekko-protobuf-v3" % pekkoVersion,
-        "org.apache.pekko" %% "pekko-slf4j" % pekkoVersion,
-        "org.apache.pekko" %% "pekko-stream" % pekkoVersion,
-
-        "com.softwaremill.sttp.tapir" %% "tapir-pekko-http-server" % tapirVersion,
-
-
-
-
-
-        "com.softwaremill.sttp.tapir" %% "tapir-play-server" % tapirVersion,
-
-        "com.softwaremill.sttp.tapir" %% "tapir-vertx-server" % tapirVersion,
-
-        "com.softwaremill.sttp.tapir" %% "tapir-zio-http-server" % tapirVersion,
-
-
-        // Avoid "No SLF4J providers were found." errors
-        "org.slf4j" % "slf4j-nop" % "2.0.17" //% Test
-      )
+      // 8. ZioHttp
+      // Avoid "No SLF4J providers were found." errors
+      "org.slf4j" % "slf4j-nop" % "2.0.17" //% Test
+    )
   )
   .dependsOn(
     sqlH2.jvm,
@@ -375,12 +376,15 @@ lazy val server = project
   )
 
 
-lazy val testingFrameworks = Seq(new TestFramework("munit.Framework"))
+lazy val testingFrameworks = Seq(
+  new TestFramework("munit.Framework"),
+  new TestFramework("zio.test.sbt.ZTestFramework"),
+)
 
 lazy val jsEnvironment = {
   Seq(
     scalaJSLinkerConfig ~= {
-      // Allowing unicode characters in regex expressions (used in emailRegex)
+      // Allow unicode characters in regex expressions (emailRegex)
       // https://www.scala-js.org/doc/regular-expressions.html
       _.withESFeatures(_.withESVersion(ESVersion.ES2018))
     },

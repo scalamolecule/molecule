@@ -9,7 +9,7 @@ import molecule.core.transaction._
 import molecule.core.util.Executor._
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.javaSql.{ResultSetInterface => Row}
-import molecule.sql.core.spi.SpiBase_sync
+import molecule.sql.core.spi.SpiBaseJVM_sync
 import molecule.sql.core.transaction.SqlDelete
 import molecule.sql.core.transaction.strategy.SqlOps
 import molecule.sql.core.transaction.strategy.delete.DeleteAction
@@ -25,7 +25,7 @@ import scala.util.Using.Manager
 
 object Spi_sqlite_sync extends Spi_sqlite_sync
 
-trait Spi_sqlite_sync extends SpiBase_sync {
+trait Spi_sqlite_sync extends SpiBaseJVM_sync {
 
   override def save_getAction(
     save: Save, conn: JdbcConn_JVM

@@ -1,10 +1,12 @@
 package molecule.sql.mariadb.setup
 
-import molecule.base.api.Schema_mariadb
+import molecule.base.api.{Schema, Schema_mariadb}
 import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.Conn
+import molecule.coreTests.setup.DbConnection
 import molecule.sql.core.facade.JdbcConn_JS
 import sttp.client4.UriContext
+import zio.{ZIO, ZLayer}
 import scala.util.Random
 
 //trait DbConnection_mariadb extends DbConnection {
@@ -25,5 +27,15 @@ object DbConnection_mariadb {
     val proxy = JdbcProxy(url, schema)
     val conn  = JdbcConn_JS(proxy, uri"http://localhost:8080")
     test(conn)
+  }
+
+  def connZLayer(schema: Schema): ZLayer[Any, Throwable, Conn] = {
+    val url = "jdbc:h2:mem:test" + Random.nextInt().abs
+    ZLayer.scoped(
+      ZIO.attemptBlocking {
+        val proxy = JdbcProxy(url, schema)
+        JdbcConn_JS(proxy, uri"http://localhost:8080")
+      }
+    )
   }
 }

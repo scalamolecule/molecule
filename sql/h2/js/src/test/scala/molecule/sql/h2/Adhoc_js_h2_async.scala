@@ -9,7 +9,7 @@ import molecule.sql.h2.async._
 import molecule.sql.h2.setup.DbProviders_h2
 
 
-class AdhocJS_h2 extends Test with DbProviders_h2 with TestUtils {
+class Adhoc_js_h2_async extends Test with DbProviders_h2 with TestUtils {
 
 
   "types" - types { implicit conn =>

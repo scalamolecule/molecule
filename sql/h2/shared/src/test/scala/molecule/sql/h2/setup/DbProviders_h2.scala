@@ -6,7 +6,6 @@ import molecule.coreTests.domains.schema._
 import molecule.coreTests.setup.{DbProviders, Platform}
 
 trait DbProviders_h2 extends DbProviders with DbConnection_h2 with Platform {
-
   override val database: String = "h2"
 
   override def types(test: Conn => Any): Any = run(test, TypesSchema_h2)

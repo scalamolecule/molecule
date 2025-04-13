@@ -7,6 +7,6 @@ object Api_postgres_zio
   extends Api_zio
     with Api_zio_transact
     with Spi_postgres_zio
-    with DbProviders_postgres
+    with DbProviders_postgres_zio
 
 

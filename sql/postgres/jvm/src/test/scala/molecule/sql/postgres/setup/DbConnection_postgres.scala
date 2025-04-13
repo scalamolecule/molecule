@@ -3,9 +3,10 @@ package molecule.sql.postgres.setup
 import molecule.base.api.Schema_postgres
 import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.Conn
-import molecule.sql.core.facade.JdbcHandler_JVM
+import molecule.sql.core.facade.{JdbcConn_JVM, JdbcHandler_JVM}
 import org.postgresql.ds.PGSimpleDataSource
 import org.testcontainers.containers.PostgreSQLContainer
+import zio.{ZIO, ZLayer}
 
 object DbConnection_postgres {
 
@@ -32,12 +33,23 @@ object DbConnection_postgres {
        |""".stripMargin
 
 
-  def run(test: Conn => Any, schema: Schema_postgres): Any = {
+  def getConnection(schema: Schema_postgres): JdbcConn_JVM = {
     val initSql = resetDb + schema.schemaData.head
     val proxy   = JdbcProxy(baseUrl, schema, initSql)
 
     // Not closing the connection since we re-use it
-    val conn = JdbcHandler_JVM.recreateDb(proxy, reusedSqlConn)
-    test(conn)
+    JdbcHandler_JVM.recreateDb(proxy, reusedSqlConn)
+  }
+
+  def run(test: Conn => Any, schema: Schema_postgres): Any = {
+    test(getConnection(schema))
+  }
+
+  def connZLayer(schema: Schema_postgres): ZLayer[Any, Throwable, Conn] = {
+    ZLayer.scoped(
+      ZIO.attemptBlocking {
+        getConnection(schema)
+      }
+    )
   }
 }

@@ -1,102 +1,121 @@
 package molecule.coreTests.spi.action
 
 
-import molecule.base.error.{ModelError, MoleculeError}
+import molecule.base.error.{ExecutionError, InsertErrors, ValidationErrors}
 import molecule.core.api.{Api_zio, Api_zio_transact}
-import molecule.core.spi.{Conn, Spi_zio}
+import molecule.core.spi.Spi_zio
 import molecule.coreTests.domains.dsl.Types._
-import molecule.coreTests.setup.{DbProviders, Test, TestUtils}
-import zio.{Runtime, Unsafe, ZEnvironment, ZIO}
+import molecule.coreTests.setup.{DbProviders_zio, TestUtils}
+import zio._
+import zio.test.TestAspect._
+import zio.test.{ZIOSpecDefault, _}
+import scala.annotation.nowarn
 
-case class Transactions_zio(
-  suite: Test,
-  api: Api_zio_transact with Api_zio with Spi_zio with DbProviders
-) extends TestUtils {
+
+@nowarn
+case class Transactions_zio(api: Api_zio_transact with Api_zio with Spi_zio with DbProviders_zio)
+  extends ZIOSpecDefault with TestUtils {
 
   import api._
-  import suite._
+
+  @nowarn override def spec: Spec[TestEnvironment with Scope, Any] =
+    suite("transactions")(
+      test("commit") {
+        for {
+          _ <- Entity.int.insert(1 to 7).transact
+          a <- Entity.int(count).query.get.map(_.head)
+
+          _ <- Entity.int_.delete.transact
+          b <- Entity.int(count).query.get.map(_.head)
+        } yield {
+          assertTrue(a == 7) && assertTrue(b == 0)
+        }
+      }.provide(types.orDie),
 
 
-  def runIO[A](io: ZIO[Conn, MoleculeError, A])(implicit conn: Conn): A = {
-    Unsafe.unsafe { implicit unsafe =>
-      val runtime = Runtime.default
-      runtime.unsafe.run(io.provideEnvironment(ZEnvironment(conn))).getOrThrow()
-    }
-  }
+      test("Transaction bundle") {
+        for {
+          _ <- transact(
+            Entity.int(1).save, //         List(1)
+            Entity.int.insert(2, 3), //    List(1, 2, 3)
+            Entity(1).delete, //           List(2, 3)
+            Entity(3).int.*(10).update, // List(2, 30)
+          )
+          a <- Entity.int.a1.query.get
+        } yield {
+          assertTrue(a == List(2, 30))
+        }
+      }.provide(types.orDie),
 
-  test("Transaction bundle") {
-    types { implicit conn =>
-      // Mutation actions only
-      runIO(transact(
-        Entity.int(1).save, //         List(1)
-        Entity.int.insert(2, 3), //    List(1, 2, 3)
-        Entity(1).delete, //           List(2, 3)
-        Entity(3).int.*(10).update, // List(2, 30)
-      ))
-      runIO(Entity.int.a1.query.get.map(_ ==> List(2, 30)))
-    }
-  }
 
-  test("Unit of work") {
-    types { implicit conn =>
-      // Use a unitOfWork when both mutations and queries are needed
-      // Initial balance in two bank accounts
-      runIO(Entity.s("fromAccount").int(100).save.transact)
-      runIO(Entity.s("toAccount").int(50).save.transact)
+      test("Unit of work") {
+        // Use a unitOfWork when both mutations and queries are needed
+        for {
+          // Initial balance in two bank accounts
+          _ <- Entity.s("fromAccount").int(100).save.transact
+          _ <- Entity.s("toAccount").int(50).save.transact
 
-      runIO(
-        unitOfWork {
-          for {
-            _ <- Entity.s_("fromAccount").int.-(200).update.transact
-            _ <- Entity.s_("toAccount").int.+(200).update.transact
+          _ <- unitOfWork {
+            for {
+              _ <- Entity.s_("fromAccount").int.-(200).update.transact
+              _ <- Entity.s_("toAccount").int.+(200).update.transact
 
-            _ <- Entity.s_("fromAccount").int.query.get
-              .flatMap {
-                // Check that fromAccount had sufficient funds
-                case i if i.head < 0 =>
-                  // Abort all transactions in this unit of work
-                  ZIO.fail(ModelError("Insufficient funds in fromAccount..."))
-                case i               => ZIO.succeed(i)
-              }
-          } yield ()
-        }.either // don't let failed ZIO fail test
-      )
+              _ <- Entity.s_("fromAccount").int.query.get
+                .flatMap { res =>
+                  val fromBalance = res.head
+                  // Check that fromAccount had sufficient funds
+                  if (fromBalance < 0) {
+                    // Abort all transactions in this unit of work
+                    ZIO.fail(ExecutionError("Insufficient funds in fromAccount..."))
+                  } else ZIO.unit
+                }
+            } yield ()
+          }.flip.map(error =>
+            assertTrue(
+              error.getMessage == "Insufficient funds in fromAccount..."
+            )
+          )
 
-      // No transfer transacted
-      runIO(Entity.s.int.query.get) ==> List(
-        ("fromAccount", 100),
-        ("toAccount", 50),
-      )
-    }
-  }
+          // No transfer transacted
+          a <- Entity.s.int.query.get
+        } yield {
+          assertTrue(a == List(
+            ("fromAccount", 100),
+            ("toAccount", 50),
+          ))
+        }
+      }.provide(types.orDie),
 
-  test("Savepoint") {
-    types { implicit conn =>
-      // Use savepoint within unitOfWork to
-      // rollback transactions within the savepoint body
-      runIO(
+
+      test("Savepoint") {
+        // Use savepoint within unitOfWork to
+        // rollback transactions within the savepoint body
         unitOfWork {
           for {
             _ <- Entity.int.insert(1 to 4).transact
-            _ <- Entity.int(count).query.get.map(_.head ==> 4)
+            a <- Entity.int(count).query.get.map(_.head)
 
             _ <- savepoint { sp =>
               for {
                 // Delete all
                 _ <- Entity.int_.delete.transact
-                _ <- Entity.int(count).query.get.map(_.head ==> 0)
+                x <- Entity.int(count).query.get.map(_.head)
 
                 // Roll back delete
                 _ = sp.rollback()
-                _ <- Entity.int(count).query.get.map(_.head ==> 4)
-              } yield ()
+                y <- Entity.int(count).query.get.map(_.head)
+              } yield {
+                assertTrue(x == 4) && assertTrue(y == 4)
+              }
             }
 
             // Nothing deleted
-            _ <- Entity.int(count).query.get.map(_.head ==> 4)
-          } yield ()
+            b <- Entity.int(count).query.get.map(_.head)
+          } yield {
+            assertTrue(a == 4) && assertTrue(b == 4)
+          }
         }
-      )
-    }
-  }
+      }.provide(types.orDie),
+
+    ) @@ sequential
 }

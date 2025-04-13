@@ -15,7 +15,7 @@ trait Spi_async {
   def query_stream[Tpl](
     q: Query[Tpl],
     chunkSize: Int = 100
-  )(implicit conn: Conn): fs2.Stream[IO, Tpl] = ???
+  )(implicit conn: Conn, ec: EC): fs2.Stream[IO, Tpl] = ???
 
   def query_subscribe[Tpl](
     q: Query[Tpl], callback: List[Tpl] => Unit

@@ -14,7 +14,7 @@ import molecule.sql.core.facade.JdbcConn_JS
 import scala.concurrent.{Future, ExecutionContext => EC}
 
 
-trait SpiBase_async extends Spi_async with Renderer with FutureUtils {
+trait SpiBaseJS_async extends Spi_async with Renderer with FutureUtils {
 
   // Query --------------------------------------------------------
 
@@ -26,7 +26,7 @@ trait SpiBase_async extends Spi_async with Renderer with FutureUtils {
   override def query_stream[Tpl](
     q: Query[Tpl],
     chunkSize: Int
-  )(implicit conn: Conn): fs2.Stream[IO, Tpl] = ???
+  )(implicit conn: Conn, ec: EC): fs2.Stream[IO, Tpl] = ???
 
   // Query backend if cached subscription attributes are mutated.
   // Probably need a websocket solution instead
