@@ -29,6 +29,15 @@ case class SyncApi(
   }
 
 
+  "Streaming" - types { implicit conn =>
+    Entity.i.insert(1, 2, 3).transact
+
+    // Returning a geny Generator[Int] from the lihaoyi ecosystem
+    Entity.i.query.stream
+      .toList ==> List(1, 2, 3)
+  }
+
+
   "Opt ref" - refs { implicit conn =>
     import molecule.coreTests.domains.dsl.Refs._
 

@@ -46,6 +46,7 @@ object DbConnection_mysql {
     test(getConnection(schema))
   }
 
+
   def connZLayer(schema: Schema_mysql): ZLayer[Any, Throwable, Conn] = {
     ZLayer.scoped(
       ZIO.attemptBlocking {

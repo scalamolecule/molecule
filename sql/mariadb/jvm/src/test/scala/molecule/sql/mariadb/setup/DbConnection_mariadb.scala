@@ -45,6 +45,7 @@ object DbConnection_mariadb  {
     test(getConnection(schema))
   }
 
+
   def connZLayer(schema: Schema_mariadb): ZLayer[Any, Throwable, Conn] = {
     ZLayer.scoped(
       ZIO.attemptBlocking {

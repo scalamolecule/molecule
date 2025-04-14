@@ -1,5 +1,6 @@
 package molecule.coreTests.spi.api
 
+import cats.effect.unsafe.implicits.{global => ioRuntime}
 import molecule.base.error._
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
@@ -7,6 +8,7 @@ import molecule.core.util.Executor._
 import molecule.coreTests.domains.dsl.Types._
 import molecule.coreTests.setup._
 import scala.annotation.nowarn
+
 
 @nowarn
 case class AsyncApi(
@@ -25,6 +27,22 @@ case class AsyncApi(
       _ <- Entity(a).int(10).update.transact
       _ <- Entity(b).delete.transact
       _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
+    } yield ()
+  }
+
+
+  "Streaming" - types { implicit conn =>
+    for {
+      _ <- Entity.i.insert(1, 2, 3).transact
+
+      // Returning an fs2.Stream[IO, Int]
+      // Then you can use all the usual operation on the stream.
+      // Here we simply convert it to a List in a Future to satisfy the munit test
+      _ <- Entity.i.query.stream
+        .compile
+        .toList
+        .unsafeToFuture()
+        .map(_.sorted ==> List(1, 2, 3))
     } yield ()
   }
 

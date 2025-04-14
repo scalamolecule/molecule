@@ -1,6 +1,4 @@
-import org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv
 import org.scalajs.linker.interface.ESVersion
-import sbt.Keys.libraryDependencies
 
 
 val scala212 = "2.12.20"
@@ -8,44 +6,19 @@ val scala213 = "2.13.16"
 val scala3   = "3.3.5"
 val allScala = Seq(scala212, scala213, scala3)
 
-val munitVersion             = "1.1.0"
-val akkaVersion              = "2.8.3"
+val munitVersion           = "1.1.0"
+val munitCatsEffectVersion = "2.1.0"
+val tapirVersion           = "1.11.24"
+val http4sVersion          = "0.23.17" // latest possible to satisfy blaze + tapir
+val pekkoVersion           = "1.1.3"
+val catsVersion            = "3.12.0"
+val catsEffectVersion      = "3.6.1"
+val zioVersion             = "2.0.21"
+
+// Db test containers
 val dimafengContainerVersion = "0.43.0"
-val logbackVersion           = "1.5.0"
-val http4sVersion            = "0.23.17" // latest to satisfy blaze + tapir
-//val http4sVersion            = "0.23.30"
-//val http4sVersion            = "1.0.0-M30"
-val pekkoVersion             = "1.1.3"
-val sttpVersion              = "4.0.0-RC4"
-val tapirVersion             = "1.11.24"
 val testContainerVersion     = "1.20.6"
-val zioVersion               = "2.0.21"
-
-//val akkaVersion               = "2.6.20"
-val akkaHttpVersion           = "10.2.10"
-val catsEffect3Version        = "3.5.7"
-val catsMtlVersion            = "1.5.0"
-val circeVersion              = "0.14.10"
-val fs2Version                = "3.11.0"
-val javaTimeVersion           = "2.6.0"
-val jsoniterVersion           = "2.33.2"
-val laminextVersion           = "0.17.0"
-val magnoliaScala2Version     = "1.1.10"
-val magnoliaScala3Version     = "1.3.16"
-val pekkoHttpVersion          = "1.1.0"
-val playVersion               = "3.0.6"
-val playJsonVersion           = "3.0.4"
-val scalafmtVersion           = "3.8.0"
-val zioInteropCats2Version    = "22.0.0.0"
-val zioInteropCats3Version    = "23.1.0.4"
-val zioInteropReactiveVersion = "2.0.2"
-val zioConfigVersion          = "4.0.3"
-val zqueryVersion             = "0.7.6"
-val zioJsonVersion            = "0.7.39"
-val zioHttpVersion            = "3.0.1"
-val zioOpenTelemetryVersion   = "3.1.2"
-
-val CompileAndTest = "compile->compile;test->test"
+val logbackVersion           = "1.5.0"
 
 
 inThisBuild(
@@ -84,8 +57,7 @@ lazy val root = project
     datalogCore.jvm,
     datalogDatomic.js,
     datalogDatomic.jvm,
-    //    graphql.js,
-    //    graphql.jvm,
+    server,
     sqlCore.js,
     sqlCore.jvm,
     sqlH2.js,
@@ -98,7 +70,8 @@ lazy val root = project
     sqlPostgreSQL.jvm,
     sqlSQlite.js,
     sqlSQlite.jvm,
-    server
+    //    graphql.js,
+    //    graphql.jvm,
   )
 
 lazy val base = crossProject(JSPlatform, JVMPlatform)
@@ -119,7 +92,8 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
       // Effect APIs
       "dev.zio" %%% "zio" % zioVersion,
       "dev.zio" %%% "zio-streams" % zioVersion,
-      "org.typelevel" %%% "cats-effect" % "3.5.7",
+      //      "org.typelevel" %%% "cats-effect" % "3.5.7",
+      "org.typelevel" %%% "cats-effect" % catsEffectVersion,
 
       // RPC
       "io.suzaku" %%% "boopickle" % "1.5.0", // binary serialization
@@ -127,7 +101,7 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
 
       // Streaming
       "com.lihaoyi" %%% "geny" % "1.1.1",
-      "co.fs2" %% "fs2-core" % "3.11.0",
+      "co.fs2" %%% "fs2-core" % catsVersion,
     )
   )
   .jsSettings(
@@ -166,6 +140,8 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
 
       // Test frameworks
       "org.scalameta" %%% "munit" % munitVersion % Test,
+      "org.typelevel" %%% "munit-cats-effect" % munitCatsEffectVersion % Test,
+
       "dev.zio" %%% "zio-streams" % zioVersion % Test,
       "dev.zio" %%% "zio-test" % zioVersion % Test,
       "dev.zio" %%% "zio-test-sbt" % zioVersion % Test,
@@ -295,9 +271,15 @@ lazy val sqlPostgreSQL = crossProject(JSPlatform, JVMPlatform)
   .jsSettings(jsEnvironment)
   .jvmSettings(
     libraryDependencies ++= Seq(
+      //      "org.slf4j" % "slf4j-api" % "2.0.17",
+      //      "org.slf4j" % "slf4j-nop" % "2.0.17", //% Test
+
+
       "org.testcontainers" % "postgresql" % testContainerVersion,
       "org.postgresql" % "postgresql" % "42.7.5",
-      "ch.qos.logback" % "logback-classic" % logbackVersion % Test
+      "ch.qos.logback" % "logback-classic" % logbackVersion % Test,
+
+
     ),
     Test / fork := true
   )
@@ -332,7 +314,7 @@ lazy val server = project
       "com.softwaremill.sttp.tapir" %% "tapir-akka-http-server" % tapirVersion,
 
       // 2. Armeria
-      // Lower version to avoid conflicts with pekko
+      // Lower version to avoid conflicts with pekko!
       "com.softwaremill.sttp.tapir" %% "tapir-armeria-server" % "1.11.9",
 
       // 3. Http4s
@@ -364,7 +346,7 @@ lazy val server = project
 
       // 8. ZioHttp
       // Avoid "No SLF4J providers were found." errors
-      "org.slf4j" % "slf4j-nop" % "2.0.17" //% Test
+      "org.slf4j" % "slf4j-nop" % "2.0.17"
     )
   )
   .dependsOn(

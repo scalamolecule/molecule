@@ -18,6 +18,7 @@ case class ZioApi(api: Api_zio with Spi_zio with DbProviders_zio)
 
   @nowarn override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("Molecule ZIO api")(
+
       test("Crud actions") {
         for {
           ids <- Entity.int.insert(1, 2).transact.map(_.ids)
@@ -27,9 +28,27 @@ case class ZioApi(api: Api_zio with Spi_zio with DbProviders_zio)
           _ <- Entity(ids(1)).delete.transact
           b <- Entity.int.a1.query.get
         } yield {
-          assertTrue(ids.size == 2) &&
-            assertTrue(a == List(1, 2, 3)) &&
-            assertTrue(b == List(3, 10))
+          assertTrue(
+            ids.size == 2
+          ) && assertTrue(
+            a == List(1, 2, 3)
+          ) && assertTrue(
+            b == List(3, 10)
+          )
+        }
+      }.provide(types.orDie),
+
+
+      test("Streaming") {
+        for {
+          _ <- Entity.i.insert(1, 2, 3).transact
+
+          // Returning a ZStream[Conn, MoleculeError, Int]
+          // Then you can use all the usual operation on the stream.
+          // Here we simply compare a chunk
+          chunk <- Entity.i.query.stream.runCollect
+        } yield {
+          assertTrue(chunk.toList.sorted == List(1, 2, 3))
         }
       }.provide(types.orDie),
 
@@ -108,10 +127,15 @@ case class ZioApi(api: Api_zio with Spi_zio with DbProviders_zio)
           c <- Entity.int.a1.query.offset(1).get
           d <- Entity.int.a1.query.offset(1).limit(1).get
         } yield
-          assertTrue(a == List(1, 2, 3)) &&
-            assertTrue(b == List(1, 2)) &&
-            assertTrue(c == (List(2, 3), 3, false)) &&
-            assertTrue(d == (List(2), 3, true))
+          assertTrue(
+            a == List(1, 2, 3)
+          ) && assertTrue(
+            b == List(1, 2)
+          ) && assertTrue(
+            c == (List(2, 3), 3, false)
+          ) && assertTrue(
+            d == (List(2), 3, true)
+          )
       ).provide(types.orDie),
 
 
@@ -165,32 +189,6 @@ case class ZioApi(api: Api_zio with Spi_zio with DbProviders_zio)
           ))
         }
       }.provide(types.orDie),
-
-      //      // todo: Make more zio-idiomatic. There's some concurrency issue with setting the Ref...
-      //
-      //      test("Subscription") {
-      //        for {
-      //          r <- zio.Ref.make(List.empty[List[Int]])
-      //          // _ <- r.getAndUpdate(_ :+ List(42)) // this works fine
-      //          _ <- Entity.i(1).save.transact
-      //          // start subscription in separate thread
-      //          _ <- Entity.i.query.subscribe { freshResult =>
-      //            println("####### " + freshResult)
-      //            // todo: why is the ref not updated?
-      //            r.getAndUpdate(_ :+ freshResult) // in another thread/fiber?
-      //          }
-      //          _ <- Entity.i(2).save.transact
-      //          _ <- Entity.i(3).save.transact
-      //          // Allow subscription thread to catch up
-      //          _ <- TestClock.adjust(200.milliseconds)
-      //          intermediaryResults <- r.get
-      //        } yield {
-      //          assertTrue(intermediaryResults == List(
-      //            List(1, 2), // query result after 2 was added
-      //            List(1, 2, 3) // query result after 3 was added
-      //          ))
-      //        }
-      //      }.provide(types.orDie),
 
     ) @@ sequential
 }

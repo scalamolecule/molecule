@@ -7,5 +7,5 @@ import molecule.graphql.client.spi.{SpiAsync_graphql, SpiSync_graphql, SpiZio_gr
 package object client {
   object async extends MoleculeImplicits_ with ApiAsync with SpiAsync_graphql
   object sync extends MoleculeImplicits_ with ApiSync with SpiSync_graphql
-  object zio extends MoleculeImplicits_ with ApiZio with SpiZio_graphql
+  object Zio extends MoleculeImplicits_ with ApiZio with SpiZio_graphql
 }

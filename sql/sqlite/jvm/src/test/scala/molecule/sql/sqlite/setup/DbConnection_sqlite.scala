@@ -22,17 +22,6 @@ trait DbConnection_sqlite extends DbConnection {
     //    runFileDbWithHikariCP(test, schema)
   }
 
-  def connZLayer(schema: Schema_sqlite): ZLayer[Any, Throwable, Conn] = {
-    ZLayer.scoped(
-      ZIO.attemptBlocking {
-        val url     = "jdbc:h2:mem:test" + Random.nextInt().abs
-        val proxy   = JdbcProxy(url, schema)
-        val sqlConn = DriverManager.getConnection(proxy.url)
-        JdbcHandler_JVM.recreateDb(proxy, sqlConn)
-      }
-    )
-  }
-
   def runMemDb(test: Conn => Any, schema: Schema_sqlite): Any = {
     Manager { use =>
       val proxy   = JdbcProxy("jdbc:sqlite::memory:", schema)
@@ -40,6 +29,12 @@ trait DbConnection_sqlite extends DbConnection {
       val conn    = use(JdbcHandlerSQlite_JVM.recreateDb(proxy, sqlConn, true))
       test(conn)
     }.get
+
+    // Not closing the connection between each test to allow stream
+    val proxy   = JdbcProxy("jdbc:sqlite::memory:", schema)
+    val sqlConn = DriverManager.getConnection(proxy.url)
+    val conn    = JdbcHandlerSQlite_JVM.recreateDb(proxy, sqlConn, true)
+    test(conn)
   }
 
 
@@ -72,5 +67,17 @@ trait DbConnection_sqlite extends DbConnection {
       test(conn)
       tempDbFilePath.toFile.delete()
     }.get
+  }
+
+
+  def connZLayer(schema: Schema_sqlite): ZLayer[Any, Throwable, Conn] = {
+    ZLayer.scoped(
+      ZIO.attemptBlocking {
+        val url     = "jdbc:h2:mem:test" + Random.nextInt().abs
+        val proxy   = JdbcProxy(url, schema)
+        val sqlConn = DriverManager.getConnection(proxy.url)
+        JdbcHandler_JVM.recreateDb(proxy, sqlConn)
+      }
+    )
   }
 }

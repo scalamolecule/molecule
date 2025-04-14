@@ -9,6 +9,8 @@ import molecule.coreTests.setup.DbConnection
 import molecule.sql.core.facade.JdbcHandler_JVM
 import org.h2.jdbcx.JdbcDataSource
 import zio.{ZIO, ZLayer}
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration.Duration
 import scala.util.Random
 import scala.util.Using.Manager
 
@@ -16,24 +18,26 @@ import scala.util.Using.Manager
 trait DbConnection_h2 extends DbConnection {
 
   def run(test: Conn => Any, schema: Schema_h2): Any = {
+
+    // Using unclosed, gc'ed connection to avoid fs2 Stream
+    // to materialize in test assertion after db has been closed.
+    runMemDbUnclosed(test, schema)
+
     // Choose running tests with one of various setups
-    runMemDb(test, schema)
+    //    runMemDb(test, schema)
     //    runFileDb(test, schema)
     //    runFileDbWithHikariCP(test, schema)
   }
 
-  def connZLayer(schema: Schema_h2): ZLayer[Any, Throwable, Conn] = {
-    ZLayer.scoped(
-      ZIO.attemptBlocking {
-        val url     = "jdbc:h2:mem:test" + Random.nextInt().abs
-        val proxy   = JdbcProxy(url, schema)
-        val sqlConn = DriverManager.getConnection(proxy.url)
-        JdbcHandler_JVM.recreateDb(proxy, sqlConn)
-      }
-    )
+  // Use in-memory H2 (fastest)
+  private def runMemDbUnclosed(test: Conn => Any, schema: Schema_h2): Any = {
+    val url     = "jdbc:h2:mem:test" + Random.nextInt().abs
+    val proxy   = JdbcProxy(url, schema)
+    val sqlConn = DriverManager.getConnection(proxy.url)
+    val conn    = JdbcHandler_JVM.recreateDb(proxy, sqlConn)
+    test(conn)
   }
 
-  // Use in-memory H2 (fastest)
   private def runMemDb(test: Conn => Any, schema: Schema_h2): Any = {
     val url = "jdbc:h2:mem:test" + Random.nextInt().abs
     Manager { use =>
@@ -43,6 +47,7 @@ trait DbConnection_h2 extends DbConnection {
       test(conn)
     }.get
   }
+
 
   // Use H2 saving to disk (slower but can persist)
   private def runFileDb(test: Conn => Any, schema: Schema_h2): Any = {
@@ -75,5 +80,17 @@ trait DbConnection_h2 extends DbConnection {
       test(conn)
       tempDbFilePath.toFile.delete()
     }.get
+  }
+
+
+  def connZLayer(schema: Schema_h2): ZLayer[Any, Throwable, Conn] = {
+    ZLayer.scoped(
+      ZIO.attemptBlocking {
+        val url     = "jdbc:h2:mem:test" + Random.nextInt().abs
+        val proxy   = JdbcProxy(url, schema)
+        val sqlConn = DriverManager.getConnection(proxy.url)
+        JdbcHandler_JVM.recreateDb(proxy, sqlConn)
+      }
+    )
   }
 }
