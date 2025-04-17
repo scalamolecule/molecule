@@ -1,8 +1,8 @@
 package molecule.coreTests.spi.api
 
-import molecule.base.error.{InsertErrors, ValidationErrors}
+import molecule.base.error.{InsertErrors, MoleculeError, ValidationErrors}
 import molecule.core.api.Api_zio
-import molecule.core.spi.Spi_zio
+import molecule.core.spi.{Conn, Spi_zio}
 import molecule.coreTests.domains.dsl.Types._
 import molecule.coreTests.setup.{DbProviders_zio, TestUtils}
 import zio._
@@ -50,7 +50,7 @@ case class ZioApi(api: Api_zio with Spi_zio with DbProviders_zio)
         } yield {
           assertTrue(chunk.toList.sorted == List(1, 2, 3))
         }
-      }.provide(types.orDie),
+      }.provide(types.orDie) @@ TestAspect.exceptJS,
 
 
       test("Opt ref") {

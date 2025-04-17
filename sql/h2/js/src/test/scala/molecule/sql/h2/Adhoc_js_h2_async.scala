@@ -7,6 +7,7 @@ import molecule.coreTests.domains.dsl.Types._
 import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.sql.h2.async._
 import molecule.sql.h2.setup.DbProviders_h2
+import cats.effect.unsafe.implicits.{global => ioRuntime}
 
 
 class Adhoc_js_h2_async extends Test with DbProviders_h2 with TestUtils {
@@ -20,6 +21,15 @@ class Adhoc_js_h2_async extends Test with DbProviders_h2 with TestUtils {
       _ <- Entity(a).int(10).update.transact
       _ <- Entity(b).delete.transact
       _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
+
+
+
+      //      _ <- Entity.i.insert(1, 2, 3).transact
+      //      _ <- Entity.i.query.stream
+      //        .compile
+      //        .toList
+      //        .unsafeToFuture()
+      //        .map(_.sorted ==> List(1, 2, 3))
 
     } yield ()
   }

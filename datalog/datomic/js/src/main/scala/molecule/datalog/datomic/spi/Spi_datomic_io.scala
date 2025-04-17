@@ -16,7 +16,6 @@ import scala.concurrent.{Future, ExecutionContext => EC}
 
 trait Spi_datomic_io
   extends Spi_io
-    with IOUtils
     with SpiBase_datomic_io {
 
   // Query --------------------------------------------------------

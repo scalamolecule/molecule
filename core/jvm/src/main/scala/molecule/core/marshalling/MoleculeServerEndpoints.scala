@@ -51,7 +51,6 @@ abstract class MoleculeServerEndpoints(rpc: MoleculeRpc)
     }
   }
 
-
   /** Tapir server endpoints to Molecule actions
    *
    * Add to Tapir backend server of your choice like this:
@@ -62,16 +61,14 @@ abstract class MoleculeServerEndpoints(rpc: MoleculeRpc)
    *   ...
    */
   val moleculeServerEndpoints: List[ServerEndpoint[Any, Future]] = List(
-    mkServerEndpoint(moleculeEndpoint_Query, executeQuery),
-    mkServerEndpoint(moleculeEndpoint_QueryOffset, executeQueryOffset),
-    mkServerEndpoint(moleculeEndpoint_QueryCursor, executeQueryCursor),
-    mkServerEndpoint(moleculeEndpoint_QueryStream, executeQueryStream),
-    mkServerEndpoint(moleculeEndpoint_Save, executeSave),
-    mkServerEndpoint(moleculeEndpoint_Insert, executeInsert),
-    mkServerEndpoint(moleculeEndpoint_Update, executeUpdate),
-    mkServerEndpoint(moleculeEndpoint_Delete, executeDelete),
+    mkServerEndpoint(moleculeEndpoint_query, executeQuery),
+    mkServerEndpoint(moleculeEndpoint_queryOffset, executeQueryOffset),
+    mkServerEndpoint(moleculeEndpoint_queryCursor, executeQueryCursor),
+    mkServerEndpoint(moleculeEndpoint_save, executeSave),
+    mkServerEndpoint(moleculeEndpoint_insert, executeInsert),
+    mkServerEndpoint(moleculeEndpoint_update, executeUpdate),
+    mkServerEndpoint(moleculeEndpoint_delete, executeDelete),
   )
-
 
   /** Server logic
    *

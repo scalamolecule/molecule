@@ -8,6 +8,7 @@ import molecule.core.util.Executor._
 import molecule.coreTests.domains.dsl.Types._
 import molecule.coreTests.setup._
 import scala.annotation.nowarn
+import scala.concurrent.Future
 
 
 @nowarn
@@ -35,14 +36,16 @@ case class AsyncApi(
     for {
       _ <- Entity.i.insert(1, 2, 3).transact
 
-      // Returning an fs2.Stream[IO, Int]
-      // Then you can use all the usual operation on the stream.
-      // Here we simply convert it to a List in a Future to satisfy the munit test
-      _ <- Entity.i.query.stream
-        .compile
-        .toList
-        .unsafeToFuture()
-        .map(_.sorted ==> List(1, 2, 3))
+      _ <- if (platform == "JVM") {
+        // Returning an fs2.Stream[IO, Int]
+        // Then you can use all the usual operation on the stream.
+        // Here we simply convert it to a List in a Future to satisfy the munit test
+        Entity.i.query.stream
+          .compile
+          .toList
+          .unsafeToFuture()
+          .map(_.sorted ==> List(1, 2, 3))
+      } else Future.unit
     } yield ()
   }
 

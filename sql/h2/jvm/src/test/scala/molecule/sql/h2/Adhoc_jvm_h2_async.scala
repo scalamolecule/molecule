@@ -60,7 +60,7 @@ class Adhoc_jvm_h2_async
       _ <- A.i.query.stream // fs2.Stream[IO, List[Int]]
         .compile
         .toList
-        .map(_ ==> List(1, 2, 4)) // should fail
+        .map(_ ==> List(1, 2, 3))
         .unsafeToFuture()
 
       //        .unsafeRunSync()

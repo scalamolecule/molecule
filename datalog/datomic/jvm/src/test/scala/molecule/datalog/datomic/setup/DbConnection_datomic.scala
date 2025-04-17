@@ -1,7 +1,7 @@
 package molecule.datalog.datomic.setup
 
-import molecule.base.api.{Schema_datomic, Schema_sqlite}
-import molecule.core.marshalling.{DatomicProxy, JdbcProxy}
+import molecule.base.api.Schema_datomic
+import molecule.core.marshalling.DatomicProxy
 import molecule.core.spi.Conn
 import molecule.core.util.Executor._
 import molecule.coreTests.setup.DbConnection

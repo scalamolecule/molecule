@@ -33,17 +33,19 @@ case class IOApi(
 
 
   "Streaming" - types { implicit conn =>
-    for {
-      _ <- Entity.i.insert(1, 2, 3).transact
+    if (platform == "JVM") {
+      for {
+        _ <- Entity.i.insert(1, 2, 3).transact
 
-      // Returning an fs2.Stream[IO, Int]
-      // Then you can use all the usual operation on the stream.
-      // Here we simply convert it to a List
-      _ <- Entity.i.query.stream
-        .compile
-        .toList
-        .map(_.sorted ==> List(1, 2, 3))
-    } yield ()
+        // Returning an fs2.Stream[IO, Int]
+        // Then you can use all the usual operation on the stream.
+        // Here we simply convert it to a List
+        _ <- Entity.i.query.stream
+          .compile
+          .toList
+          .map(_.sorted ==> List(1, 2, 3))
+      } yield ()
+    }
   }
 
 

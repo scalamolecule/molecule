@@ -18,13 +18,14 @@ trait MoleculeEndpoints {
   implicit private val pickleMoleculeError: Pickler[MoleculeError] =
     generatePickler[MoleculeError]
 
-  private val codec = Codec.byteBuffer.map(
-    Unpickle[MoleculeError].fromBytes(_)
-  )(
-    Pickle.intoBytes(_)
-  )
+  private val boopickleCodec: Codec[ByteBuffer, MoleculeError, CodecFormat.OctetStream] =
+    Codec.byteBuffer.map(
+      Unpickle[MoleculeError].fromBytes(_)
+    )(
+      Pickle.intoBytes(_)
+    )
 
-  private val errors = EndpointIO.Body(ByteBufferBody, codec, Info.empty)
+  private val errors = EndpointIO.Body(ByteBufferBody, boopickleCodec, Info.empty)
 
   private def mkEndpoint(action: String): publicEndpoint =
     endpoint.post
@@ -33,12 +34,11 @@ trait MoleculeEndpoints {
       .out(byteBufferBody)
       .errorOut(errors)
 
-  val moleculeEndpoint_Query      : publicEndpoint = mkEndpoint("query")
-  val moleculeEndpoint_QueryOffset: publicEndpoint = mkEndpoint("queryOffset")
-  val moleculeEndpoint_QueryCursor: publicEndpoint = mkEndpoint("queryCursor")
-  val moleculeEndpoint_QueryStream: publicEndpoint = mkEndpoint("queryStream")
-  val moleculeEndpoint_Save       : publicEndpoint = mkEndpoint("save")
-  val moleculeEndpoint_Insert     : publicEndpoint = mkEndpoint("insert")
-  val moleculeEndpoint_Update     : publicEndpoint = mkEndpoint("update")
-  val moleculeEndpoint_Delete     : publicEndpoint = mkEndpoint("delete")
+  val moleculeEndpoint_query      : publicEndpoint = mkEndpoint("query")
+  val moleculeEndpoint_queryOffset: publicEndpoint = mkEndpoint("queryOffset")
+  val moleculeEndpoint_queryCursor: publicEndpoint = mkEndpoint("queryCursor")
+  val moleculeEndpoint_save       : publicEndpoint = mkEndpoint("save")
+  val moleculeEndpoint_insert     : publicEndpoint = mkEndpoint("insert")
+  val moleculeEndpoint_update     : publicEndpoint = mkEndpoint("update")
+  val moleculeEndpoint_delete     : publicEndpoint = mkEndpoint("delete")
 }

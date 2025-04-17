@@ -21,8 +21,9 @@ case class Subscription(
       // Initial data
       _ <- Entity.i(1).save.transact
 
-      // Start subscription
+      // Start subscription and define a callback function
       _ <- Entity.i.query.subscribe { freshResult =>
+        // Do something with fresh result
         intermediaryCallbackResults = intermediaryCallbackResults :+ freshResult.sorted
       }
 

@@ -20,7 +20,7 @@ class Adhoc_jvm_h2_io extends Test_io
       _ <- Entity.i.query.stream
         .compile
         .toList
-        .map(_ ==> List(1, 2, 4))
+        .map(_ ==> List(1, 2, 3))
     } yield ()
   }
 }

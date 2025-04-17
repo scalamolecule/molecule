@@ -6,14 +6,21 @@ val scala213 = "2.13.16"
 val scala3   = "3.3.5"
 val allScala = Seq(scala212, scala213, scala3)
 
+// testing
 val munitVersion           = "1.1.0"
 val munitCatsEffectVersion = "2.1.0"
-val tapirVersion           = "1.11.24"
-val http4sVersion          = "0.23.17" // latest possible to satisfy blaze + tapir
-val pekkoVersion           = "1.1.3"
-val catsVersion            = "3.12.0"
-val catsEffectVersion      = "3.6.1"
-val zioVersion             = "2.0.21"
+
+// Marshalling
+val tapirVersion   = "1.11.24"
+val client4Version = "4.0.2"
+val http4sVersion  = "0.23.17" // latest possible to satisfy blaze + tapir
+val pekkoVersion   = "1.1.3"
+
+// Effect systems
+val catsVersion       = "3.12.0" // 4.x only for scala 3...
+val catsEffectVersion = "3.6.1" // downgrade to match Monix 3.x
+val monixVersion      = "3.4.1"
+val zioVersion        = "2.0.21"
 
 // Db test containers
 val dimafengContainerVersion = "0.43.0"
@@ -92,17 +99,26 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
       // Effect APIs
       "dev.zio" %%% "zio" % zioVersion,
       "dev.zio" %%% "zio-streams" % zioVersion,
-      //      "org.typelevel" %%% "cats-effect" % "3.5.7",
       "org.typelevel" %%% "cats-effect" % catsEffectVersion,
 
       // RPC
       "io.suzaku" %%% "boopickle" % "1.5.0", // binary serialization
       "com.softwaremill.sttp.tapir" %%% "tapir-core" % tapirVersion,
+      //      "com.softwaremill.sttp.tapir" %%% "tapir-websockets" % tapirVersion,
+      //      "com.softwaremill.sttp.tapir" %%% "tapir-fs2" % tapirVersion,
+
+      "com.softwaremill.sttp.client4" %%% "fs2" % client4Version,
 
       // Streaming
       "com.lihaoyi" %%% "geny" % "1.1.1",
-      "co.fs2" %%% "fs2-core" % catsVersion,
-    )
+      "co.fs2" %%% "fs2-core" % catsEffectVersion,
+    ),
+  )
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      // Streaming
+      //      "com.lihaoyi" %%% "geny" % "1.1.1",
+    ),
   )
   .jsSettings(
     libraryDependencies ++= Seq(
@@ -271,15 +287,9 @@ lazy val sqlPostgreSQL = crossProject(JSPlatform, JVMPlatform)
   .jsSettings(jsEnvironment)
   .jvmSettings(
     libraryDependencies ++= Seq(
-      //      "org.slf4j" % "slf4j-api" % "2.0.17",
-      //      "org.slf4j" % "slf4j-nop" % "2.0.17", //% Test
-
-
       "org.testcontainers" % "postgresql" % testContainerVersion,
       "org.postgresql" % "postgresql" % "42.7.5",
       "ch.qos.logback" % "logback-classic" % logbackVersion % Test,
-
-
     ),
     Test / fork := true
   )
@@ -401,7 +411,8 @@ lazy val compilerArgs = Def.settings(
     case Some((2, 13)) =>
       Seq(
         "-Xlint:-byname-implicit",
-        "-explaintypes"
+        "-explaintypes",
+        //"-Ylog-classpath"
       )
 
     case Some((3, _)) =>

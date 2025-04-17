@@ -26,17 +26,21 @@ trait SpiBaseJS_async extends Spi_async with Renderer with FutureUtils {
   override def query_stream[Tpl](
     q: Query[Tpl],
     chunkSize: Int
-  )(implicit conn: Conn, ec: EC): fs2.Stream[IO, Tpl] = ???
+  )(implicit conn0: Conn, ec: EC): fs2.Stream[IO, Tpl] = {
+    val conn = conn0.asInstanceOf[JdbcConn_JS]
+    conn.rpc.queryFs2Stream[Tpl](conn.proxy, q.elements, q.optLimit)
+  }
 
   // Query backend if cached subscription attributes are mutated.
   // Probably need a websocket solution instead
-  override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)
-                                   (implicit conn0: Conn, ec: EC): Future[Unit] = {
-    val conn             = conn0.asInstanceOf[JdbcConn_JS]
-    val elements         = q.elements
-    val involvedAttrs    = getAttrNames(elements)
+  override def query_subscribe[Tpl](
+    q: Query[Tpl], callback: List[Tpl] => Unit
+  )(implicit conn0: Conn, ec: EC): Future[Unit] = {
+    val conn                 = conn0.asInstanceOf[JdbcConn_JS]
+    val elements             = q.elements
+    val involvedAttrs        = getAttrNames(elements)
     val involvedDeleteEntity = getInitialEntity(elements)
-    val maybeCallback    = (mutationAttrs: Set[String], isDelete: Boolean) => {
+    val maybeCallback        = (mutationAttrs: Set[String], isDelete: Boolean) => {
       if (
         mutationAttrs.exists(involvedAttrs.contains) ||
           isDelete && mutationAttrs.head.startsWith(involvedDeleteEntity)

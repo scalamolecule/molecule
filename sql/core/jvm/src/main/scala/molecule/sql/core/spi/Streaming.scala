@@ -58,8 +58,6 @@ trait Streaming {
   }
 
 
-//  type Row = java.sql.ResultSet
-
   def zioStream[Tpl](
     q: Query[Tpl],
     chunkSize: Int,
@@ -89,7 +87,7 @@ trait Streaming {
       }
 
     val release: ((Row, Row => Any)) => UIO[Unit] = {
-        case (rs, _) => ZIO.attemptBlocking(rs.close()).orDie
+      case (rs, _) => ZIO.attemptBlocking(rs.close()).orDie
     }
 
     for {

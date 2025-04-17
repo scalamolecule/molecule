@@ -19,17 +19,26 @@ trait MoleculeRpc {
     limit: Option[Int]
   ): Future[Either[MoleculeError, List[Tpl]]]
 
-  def queryStream[Tpl](
+  def subscribe[Tpl](
     proxy: ConnProxy,
     elements: List[Element],
     limit: Option[Int]
-  ): fs2.Stream[IO, Either[MoleculeError, List[Tpl]]] = ???
+  ): fs2.Stream[IO, Tpl] = ???
 
-  def queryStreamZio[Tpl](
+
+  def queryFs2Stream[Tpl](
+    proxy: ConnProxy,
+    elements: List[Element],
+    limit: Option[Int]
+  ): fs2.Stream[IO, Tpl] = ???
+
+  def queryZStream[Tpl](
     proxy: ConnProxy,
     elements: List[Element],
     limit: Option[Int]
   ): ZStream[Conn, MoleculeError, Tpl] = ???
+
+
 
   def queryOffset[Tpl](
     proxy: ConnProxy,

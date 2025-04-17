@@ -2,18 +2,18 @@ package molecule.core.marshalling
 
 import java.nio.ByteBuffer
 import boopickle.Default._
-import cats.effect.IO
 import molecule.base.error._
 import molecule.core.ast.DataModel._
 import molecule.core.marshalling.Boopicklers._
 import molecule.core.marshalling.deserialize.UnpickleTpls
-import molecule.core.spi.TxReport
+import molecule.core.spi.{Conn, TxReport}
 import molecule.core.util.Executor._
 import molecule.core.util.FutureUtils
 import sttp.client4.fetch.FetchBackend
 import sttp.model.Uri
 import sttp.tapir.PublicEndpoint
 import sttp.tapir.client.sttp4.SttpClientInterpreter
+import zio.stream.ZStream
 import scala.concurrent.Future
 
 case class MoleculeClient(backendBaseUri: Uri)
@@ -48,17 +48,19 @@ case class MoleculeClient(backendBaseUri: Uri)
     limit: Option[Int]
   ): Future[Either[MoleculeError, List[Tpl]]] = {
     fetch[List[Tpl]](
-      moleculeEndpoint_Query,
+      moleculeEndpoint_query,
       Pickle.intoBytes((proxy, elements, limit)),
       (result: ByteBuffer) => UnpickleTpls[Tpl](elements, result).unpickleTpls
     )
   }
 
-  override def queryStream[Tpl](
-    proxy: ConnProxy,
-    elements: List[Element],
-    limit: Option[Int]
-  ): fs2.Stream[IO, Either[MoleculeError, List[Tpl]]] = ???
+
+//  override def queryZStream[Tpl](
+//    proxy: ConnProxy,
+//    elements: List[Element],
+//    limit: Option[Int]
+//  ): ZStream[Conn, MoleculeError, Tpl] = ???
+
 
   override def queryOffset[Tpl](
     proxy: ConnProxy,
@@ -67,7 +69,7 @@ case class MoleculeClient(backendBaseUri: Uri)
     offset: Int
   ): Future[Either[MoleculeError, (List[Tpl], Int, Boolean)]] = {
     fetch[(List[Tpl], Int, Boolean)](
-      moleculeEndpoint_QueryOffset,
+      moleculeEndpoint_queryOffset,
       Pickle.intoBytes((proxy, elements, limit, offset)),
       (result: ByteBuffer) => UnpickleTpls[Tpl](elements, result).unpickleOffset
     )
@@ -80,7 +82,7 @@ case class MoleculeClient(backendBaseUri: Uri)
     cursor: String
   ): Future[Either[MoleculeError, (List[Tpl], String, Boolean)]] = {
     fetch[(List[Tpl], String, Boolean)](
-      moleculeEndpoint_QueryCursor,
+      moleculeEndpoint_queryCursor,
       Pickle.intoBytes((proxy, elements, limit, cursor)),
       (result: ByteBuffer) => UnpickleTpls[Tpl](elements, result).unpickleCursor
     )
@@ -91,7 +93,7 @@ case class MoleculeClient(backendBaseUri: Uri)
     elements: List[Element]
   ): Future[Either[MoleculeError, TxReport]] = {
     fetch(
-      moleculeEndpoint_Save,
+      moleculeEndpoint_save,
       Pickle.intoBytes((proxy, elements)),
       (result: ByteBuffer) => Unpickle[TxReport].fromBytes(result)
     )
@@ -103,7 +105,7 @@ case class MoleculeClient(backendBaseUri: Uri)
     tplsSerialized: ByteBuffer,
   ): Future[Either[MoleculeError, TxReport]] = {
     fetch(
-      moleculeEndpoint_Insert,
+      moleculeEndpoint_insert,
       Pickle.intoBytes((proxy, elements, tplsSerialized)),
       (result: ByteBuffer) => Unpickle[TxReport].fromBytes(result)
     )
@@ -115,7 +117,7 @@ case class MoleculeClient(backendBaseUri: Uri)
     isUpsert: Boolean = false
   ): Future[Either[MoleculeError, TxReport]] = {
     fetch(
-      moleculeEndpoint_Update,
+      moleculeEndpoint_update,
       Pickle.intoBytes((proxy, elements, isUpsert)),
       (result: ByteBuffer) => Unpickle[TxReport].fromBytes(result)
     )
@@ -126,7 +128,7 @@ case class MoleculeClient(backendBaseUri: Uri)
     elements: List[Element]
   ): Future[Either[MoleculeError, TxReport]] = {
     fetch(
-      moleculeEndpoint_Delete,
+      moleculeEndpoint_delete,
       Pickle.intoBytes((proxy, elements)),
       (result: ByteBuffer) => Unpickle[TxReport].fromBytes(result)
     )
