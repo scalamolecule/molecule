@@ -253,26 +253,25 @@ Run the coreTests on the jvm with a databases of your choice:
 
 To test using molecules from ScalaJS, you need to have a ScalaJVM backend server running in a separate process that can receive the queries and send data back to ScalaJS.
 
-In the `server` module you can see 8 different minimal Tapir backend setups that you can start out from and successively add your own api endpoints to. In one process you can start up one of those backends where you will be asked which backend you want to use:
+In the `server` module you can see 7 different minimal Tapir backend setups that you can start out from and successively add your own api endpoints to. In one process you can start up one of those backends where you will be asked which backend you want to use:
 
 ```
 sbt server/run
 
 Multiple main classes detected. Select one to run:
- [1] molecule.server.Akka
- [2] molecule.server.Armeria
- [3] molecule.server.Http4s
- [4] molecule.server.Netty
- [5] molecule.server.Pekko
- [6] molecule.server.Play
- [7] molecule.server.VertX
- [8] molecule.server.ZioHttp
+ [1] molecule.server.Armeria
+ [2] molecule.server.Http4s
+ [3] molecule.server.Netty
+ [4] molecule.server.Pekko
+ [5] molecule.server.Play
+ [6] molecule.server.VertX
+ [7] molecule.server.ZioHttp
 
 Enter number: 
 ```
-Let's enter 4 to use the Netty server:
+Let's enter 3 to use the Netty server:
 ```
-Enter number: 4
+Enter number: 3
 [info] running molecule.server.Netty 
 Press ENTER to stop the server.
 ✅ Netty server running on http://localhost:8080
