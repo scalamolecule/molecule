@@ -9,7 +9,7 @@ import molecule.coreTests.setup._
 
 case class AggrNum_BigDecimal_(
   suite: Test,
-  api: Api_async with Spi_async with DbProviders
+  api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 
   // Using tolerant equality so that the test works with decimal number types too

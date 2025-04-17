@@ -15,7 +15,7 @@ trait Insert_datomic
     with InsertOps
     with DatomicDataType_JVM
     with ModelUtils
-    with MoleculeLogging { self: ResolveInsert with InsertResolvers_ =>
+    with MoleculeLogging { self: ResolveInsert & InsertResolvers_ =>
 
   def getStmts(
     elements: List[Element],
@@ -112,7 +112,7 @@ trait Insert_datomic
     val a = kw(ent, attr)
     backRefs = backRefs + (ent -> e)
     (tpl: Product) =>
-      tpl.productElement(tplIndex).asInstanceOf[Set[_]] match {
+      tpl.productElement(tplIndex).asInstanceOf[Set[?]] match {
         case set if set.isEmpty => ()
         case set                =>
           unusedRefIds -= e
@@ -166,7 +166,7 @@ trait Insert_datomic
     val a_v = kw(s"$ent.$attr", "v_")
     backRefs = backRefs + (ent -> e)
     (tpl: Product) =>
-      tpl.productElement(tplIndex).asInstanceOf[Seq[_]] match {
+      tpl.productElement(tplIndex).asInstanceOf[Seq[?]] match {
         case seq if seq.nonEmpty =>
           unusedRefIds -= e
           usedRefIds += e
@@ -244,7 +244,7 @@ trait Insert_datomic
     val a_v = kw(s"$ent.$attr", "v_")
     backRefs = backRefs + (ent -> e)
     (tpl: Product) =>
-      tpl.productElement(tplIndex).asInstanceOf[Map[String, _]] match {
+      tpl.productElement(tplIndex).asInstanceOf[Map[String, ?]] match {
         case map if map.nonEmpty =>
           unusedRefIds -= e
           usedRefIds += e

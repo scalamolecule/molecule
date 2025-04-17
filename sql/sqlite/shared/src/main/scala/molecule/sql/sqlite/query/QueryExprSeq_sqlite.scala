@@ -5,7 +5,7 @@ import molecule.sql.core.query.{QueryExprSeq, SqlQueryBase}
 
 trait QueryExprSeq_sqlite
   extends QueryExprSeq
-    with LambdasSeq_sqlite { self: Model2Query with SqlQueryBase =>
+    with LambdasSeq_sqlite { self: Model2Query & SqlQueryBase =>
 
 
   // attr ----------------------------------------------------------------------

@@ -3,7 +3,7 @@ package molecule.coreTests.setup
 import molecule.core.spi.Conn
 import zio.ZLayer
 
-trait DbProviders_zio { self: DbConnection with Platform =>
+trait DbProviders_zio { self: DbConnection & Platform =>
   val database: String
   val platform: String
 

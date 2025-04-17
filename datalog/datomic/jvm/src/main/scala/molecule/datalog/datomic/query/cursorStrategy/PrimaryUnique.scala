@@ -27,7 +27,7 @@ case class PrimaryUnique[Tpl](
   optLimit: Option[Int],
   cursor: String,
   dbView: Option[DbView],
-  m2q: Model2DatomicQuery[Tpl] with DatomicQueryBase
+  m2q: Model2DatomicQuery[Tpl] & DatomicQueryBase
 ) extends DatomicQueryResolve[Tpl](elements, dbView, m2q)
   with FutureUtils with Pagination[Tpl] with ModelTransformations_ with MoleculeLogging {
 

@@ -5,7 +5,7 @@ import molecule.core.transaction.ResolveUpdate
 import molecule.sql.core.transaction.SqlUpdate
 import molecule.sql.core.transaction.strategy.SqlOps
 
-trait Update_mariadb extends SqlUpdate { self: ResolveUpdate with SqlOps =>
+trait Update_mariadb extends SqlUpdate { self: ResolveUpdate & SqlOps =>
 
   override def handleAppend(attr: String, cast: String) = s"CONCAT($attr, ?$cast)"
   override def handlePrepend(attr: String, cast: String) = s"CONCAT(?$cast, $attr)"
@@ -130,7 +130,7 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate with SqlOps =>
 
   // Helpers -------------------------------------------------------------------
 
-  private def updateIterableEq[T, M[_] <: Iterable[_]](
+  private def updateIterableEq[T, M[_] <: Iterable[?]](
     ent: String,
     attr: String,
     ref: Option[String],
@@ -157,7 +157,7 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate with SqlOps =>
     }
   }
 
-  private def updateIterableAdd[T, M[_] <: Iterable[_]](
+  private def updateIterableAdd[T, M[_] <: Iterable[?]](
     ent: String,
     attr: String,
     ref: Option[String],
@@ -181,7 +181,7 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate with SqlOps =>
     }
   }
 
-  private def updateIterableRemove[T, M[_] <: Iterable[_]](
+  private def updateIterableRemove[T, M[_] <: Iterable[?]](
     ent: String,
     attr: String,
     ref: Option[String],

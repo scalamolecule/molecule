@@ -13,7 +13,7 @@ import molecule.sql.core.transaction.strategy.save.{SaveAction, SaveRoot}
 trait SqlSave
   extends SaveOps
     with SqlBaseOps
-    with SerializationUtils { self: ResolveSave with SqlOps =>
+    with SerializationUtils { self: ResolveSave & SqlOps =>
 
   protected var saveAction: SaveAction = null
 
@@ -113,7 +113,7 @@ trait SqlSave
 
   // Helpers -------------------------------------------------------------------
 
-  private def addIterable[T, M[_] <: Iterable[_]](
+  private def addIterable[T, M[_] <: Iterable[?]](
     attr: String,
     optRef: Option[String],
     optIterable: Option[M[T]],

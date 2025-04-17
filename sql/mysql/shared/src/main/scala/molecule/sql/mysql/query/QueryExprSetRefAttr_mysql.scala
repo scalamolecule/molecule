@@ -6,7 +6,7 @@ import molecule.sql.core.query.{QueryExprSetRefAttr, SqlQueryBase}
 
 trait QueryExprSetRefAttr_mysql
   extends QueryExprSetRefAttr
-    with LambdasSet_mysql { self: Model2Query with SqlQueryBase =>
+    with LambdasSet_mysql { self: Model2Query & SqlQueryBase =>
 
 
   override protected def setRefMan[T](attr: Attr, args: Set[T], res: ResSet[T]): Unit = {

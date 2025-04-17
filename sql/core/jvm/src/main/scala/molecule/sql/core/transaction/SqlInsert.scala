@@ -10,7 +10,7 @@ import molecule.sql.core.transaction.strategy.insert.{InsertAction, InsertOptEnt
 
 trait SqlInsert
   extends InsertOps
-    with SqlBaseOps { self: ResolveInsert with InsertResolvers_ with SqlOps =>
+    with SqlBaseOps { self: ResolveInsert & InsertResolvers_ & SqlOps =>
 
   protected var insertAction: InsertAction = null
 
@@ -157,7 +157,7 @@ trait SqlInsert
     val paramIndex   = insertAction.setCol(attr)
     val stableInsert = insertAction
     (tpl: Product) => {
-      tpl.productElement(tplIndex).asInstanceOf[Map[String, _]] match {
+      tpl.productElement(tplIndex).asInstanceOf[Map[String, ?]] match {
         case map if map.nonEmpty =>
           stableInsert.addColSetter((ps: PS) =>
             ps.setBytes(
@@ -317,7 +317,7 @@ trait SqlInsert
 
   // Helpers -------------------------------------------------------------------
 
-  private def addIterable[T, M[_] <: Iterable[_]](
+  private def addIterable[T, M[_] <: Iterable[?]](
     attr: String,
     optRef: Option[String],
     sqlTpe: String,
@@ -352,7 +352,7 @@ trait SqlInsert
     }
   }
 
-  private def addOptIterable[T, M[_] <: Iterable[_]](
+  private def addOptIterable[T, M[_] <: Iterable[?]](
     attr: String,
     optRef: Option[String],
     sqlTpe: String,

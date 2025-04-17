@@ -5,6 +5,6 @@ import molecule.coreTests.spi.action._
 import molecule.sql.h2.setup.Api_h2_io
 
 
-class Transactions_io extends Test {
+class Transactions_ioTest extends Test {
   Transactions_io(this, Api_h2_io)
 }

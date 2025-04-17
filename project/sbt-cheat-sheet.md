@@ -2,51 +2,28 @@
 
 ## Compile
 
-Compile to current version only:
-
     sbt compile
+    // or
     sbt clean compile
 
-Compile to 2.12 only:
-
-    sbt ++2.12.20 compile
-    sbt ++2.12.20 clean compile
-
-Compile to 3.3 only:
-
-    sbt ++3.3.5 compile
-    sbt ++3.3.5 clean compile
-
-Compile to all versions:
-
-    sbt +compile
-    sbt clean +compile
 
 To have molecule jars generated, add `-Dmolecule=true`
 
-    sbt +compile -Dmolecule=true
-    sbt clean +compile -Dmolecule=true
+    sbt compile -Dmolecule=true
+    // or
+    sbt clean compile -Dmolecule=true
 
-## Compile JS
 
-    sbt
-    moleculeJS/fastLinkJS
-    Test/moleculeJS/fastLinkJS
-
-## Test
-
-Specific Scala version can be set initially
-
-    sbt ++2.12.20
 
 ## Test JVM
 
     sbt
-    project sqlSQliteJVM
+    project sqlH2JVM
+
+    // some of:
     test
-    // or
-    testOnly moleculemolecule.sql.sqlite.AdhocJS_sqlite
-    testOnly moleculemolecule.sql.sqlite.*
+    testOnly moleculemolecule.sql.H2.AdhocJS_H2
+    testOnly moleculemolecule.sql.H2.*
     testOnly moleculemolecule.sql.*
 
 ## Test JS
@@ -54,19 +31,22 @@ Specific Scala version can be set initially
 Process 1:
 
     sbt
-    sqlSQliteJVM/run
+    sqlH2JVM/run
 
 Process 2:
 
     sbt
-    project sqlSQliteJS
+    project sqlH2JS
     test
     // or
-    testOnly moleculemolecule.sql.sqlite.AdhocJS_sqlite
-    testOnly moleculemolecule.sql.sqlite.*
+    testOnly moleculemolecule.sql.H2.AdhocJS_H2
+    testOnly moleculemolecule.sql.H2.*
     testOnly moleculemolecule.sql.*
 
-Compilation on JS side can take some time.
+Compilation on JS side can take some time and be quite memory hungry. You might give sbt some extra memory:
+
+    sbt -mem 10000
+
 
 ## Changes to molecule and sbt-molecule
 
@@ -91,7 +71,7 @@ Compilation on JS side can take some time.
 1) sbt-molecule: `sbt publishLocal`
 1) sbt-molecule: `sbt publishSigned`
 1) molecule: set sbt-molecule plugin version to new plugin version
-1) molecule: `sbt +publishSigned -Ddocs=true`
+1) molecule: `sbt +publishSigned -Ddocs=true` (publish for 2.12 and 3.3)
 1) commit and push molecule, sbt-molecule and molecule-samples to github
 1) molecule github: create release
                            
@@ -107,10 +87,6 @@ Compilation on JS side can take some time.
 1) commit and push molecule and molecule-samples to github
 1) molecule github: create release
 
-### Publish versions separately
-
-    sbt ++2.12.20 publishLocal
-    sbt ++2.12.20 publishSigned -Ddocs=true
 
 ### Misc
 

@@ -4,15 +4,15 @@ import molecule.coreTests.setup.Test
 import molecule.coreTests.spi.sorting._
 import molecule.datalog.datomic.setup.Api_datomic_async
 
-class SortAggr extends Test {
+class SortAggrTest extends Test {
   SortAggr(this, Api_datomic_async)
 }
-class SortBasics extends Test {
+class SortBasicsTest extends Test {
   SortBasics(this, Api_datomic_async)
 }
-class SortDynamic extends Test {
+class SortDynamicTest extends Test {
   SortDynamic(this, Api_datomic_async)
 }
-class SortNested extends Test {
+class SortNestedTest extends Test {
   SortNested(this, Api_datomic_async)
 }

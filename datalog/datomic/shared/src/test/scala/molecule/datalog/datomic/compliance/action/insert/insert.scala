@@ -4,21 +4,21 @@ import molecule.coreTests.setup.{MUnitSuiteWithArrays, Test}
 import molecule.coreTests.spi.action.insert._
 import molecule.datalog.datomic.setup.Api_datomic_async
 
-class InsertCardOne extends Test {
+class InsertCardOneTest extends Test {
   InsertCardOne(this, Api_datomic_async)
 }
-class InsertCardSeq extends MUnitSuiteWithArrays {
+class InsertCardSeqTest extends MUnitSuiteWithArrays {
   InsertCardSeq(this, Api_datomic_async)
 }
-class InsertCardSet extends Test {
+class InsertCardSetTest extends Test {
   InsertCardSet(this, Api_datomic_async)
 }
-class InsertCardMap extends Test {
+class InsertCardMapTest extends Test {
   InsertCardMap(this, Api_datomic_async)
 }
-class InsertRefs extends Test {
+class InsertRefsTest extends Test {
   InsertRefs(this, Api_datomic_async)
 }
-class InsertSemantics extends Test {
+class InsertSemanticsTest extends Test {
   InsertSemantics(this, Api_datomic_async)
 }

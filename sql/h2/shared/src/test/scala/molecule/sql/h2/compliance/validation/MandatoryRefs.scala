@@ -4,6 +4,6 @@ import molecule.coreTests.setup.MUnitSuiteWithArrays
 import molecule.coreTests.spi.validation._
 import molecule.sql.h2.setup.Api_h2_async
 
-class MandatoryRefs extends MUnitSuiteWithArrays {
+class MandatoryRefsTest extends MUnitSuiteWithArrays {
   MandatoryRefs(this, Api_h2_async)
 }

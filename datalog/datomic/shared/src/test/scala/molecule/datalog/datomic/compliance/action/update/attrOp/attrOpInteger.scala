@@ -5,19 +5,19 @@ import molecule.coreTests.spi.action.update.attrOp.number._
 import molecule.datalog.datomic.setup.Api_datomic_async
 
 
-class AttrOpInteger_Int extends Test {
+class AttrOpInteger_IntTest extends Test {
   AttrOpInteger_Int(this, Api_datomic_async)
 }
-class AttrOpInteger_Long_ extends Test {
+class AttrOpInteger_Long_Test extends Test {
   AttrOpInteger_Long_(this, Api_datomic_async)
 }
-class AttrOpInteger_BigInt extends Test {
+class AttrOpInteger_BigIntTest extends Test {
   AttrOpInteger_BigInt(this, Api_datomic_async)
 }
-class AttrOpInteger_Byte_ extends Test {
+class AttrOpInteger_Byte_Test extends Test {
   AttrOpInteger_Byte_(this, Api_datomic_async)
 }
-class AttrOpInteger_Short_ extends Test {
+class AttrOpInteger_Short_Test extends Test {
   AttrOpInteger_Short_(this, Api_datomic_async)
 }
 

@@ -8,7 +8,7 @@ import scala.util.Random
 
 trait QueryExprOne_mysql
   extends QueryExprOne
-    with LambdasOne_mysql { self: Model2Query with SqlQueryBase =>
+    with LambdasOne_mysql { self: Model2Query & SqlQueryBase =>
 
   override protected def matches(col: String, regex: String): Unit = {
     if (regex.nonEmpty)

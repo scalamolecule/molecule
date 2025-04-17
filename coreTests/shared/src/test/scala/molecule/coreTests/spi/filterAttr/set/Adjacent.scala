@@ -8,7 +8,7 @@ import molecule.coreTests.setup._
 
 case class Adjacent(
   suite: Test,
-  api: Api_async with Spi_async with DbProviders
+  api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 
   val a = (1, Set(0, 1, 2), Set(1, 2, 3))

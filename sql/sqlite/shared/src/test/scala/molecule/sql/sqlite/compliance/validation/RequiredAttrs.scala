@@ -4,6 +4,6 @@ import molecule.coreTests.setup.Test
 import molecule.coreTests.spi.validation._
 import molecule.sql.sqlite.setup.Api_sqlite_async
 
-class RequiredAttrs extends Test {
+class RequiredAttrsTest extends Test {
   RequiredAttrs(this, Api_sqlite_async)
 }

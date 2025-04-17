@@ -3,7 +3,7 @@ package molecule.sql.core.query
 import molecule.core.ast.DataModel._
 import molecule.core.query.{Model2Query, QueryExpr}
 
-trait QueryExprMap extends QueryExpr { self: Model2Query with SqlQueryBase with LambdasMap =>
+trait QueryExprMap extends QueryExpr { self: Model2Query & SqlQueryBase & LambdasMap =>
 
   override protected def queryAttrMapMan(attr: AttrMapMan): Unit = {
     attr match {

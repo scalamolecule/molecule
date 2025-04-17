@@ -6,7 +6,7 @@ import molecule.sql.core.transaction.SqlSave
 import molecule.sql.core.transaction.strategy.SqlOps
 
 trait Save_postgres
-  extends SqlSave { self: ResolveSave with SqlOps =>
+  extends SqlSave { self: ResolveSave & SqlOps =>
 
   override protected def addMap[T](
     ent: String,

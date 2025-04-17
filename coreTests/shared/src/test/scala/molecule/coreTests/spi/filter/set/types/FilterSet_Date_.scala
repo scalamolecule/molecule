@@ -10,7 +10,7 @@ import molecule.coreTests.setup._
 
 case class FilterSet_Date_(
   suite: Test,
-  api: Api_async with Spi_async with DbProviders
+  api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 
   val a = (1, Set(date1, date2))

@@ -12,7 +12,7 @@ import scala.util.Random
 @nowarn
 case class MutationDelete(
   suite: Test,
-  api: Api_async with Spi_async with DbProviders
+  api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 
   val query = Uniques.i.a1.int.a2.query

@@ -4,12 +4,12 @@ import molecule.coreTests.setup.Test
 import molecule.coreTests.spi.pagination.offset._
 import molecule.sql.sqlite.setup.Api_sqlite_async
 
-class OffsetBackwards extends Test {
+class OffsetBackwardsTest extends Test {
   OffsetBackwards(this, Api_sqlite_async)
 }
-class OffsetForward extends Test {
+class OffsetForwardTest extends Test {
   OffsetForward(this, Api_sqlite_async)
 }
-class OffsetSemantics extends Test {
+class OffsetSemanticsTest extends Test {
   OffsetSemantics(this, Api_sqlite_async)
 }

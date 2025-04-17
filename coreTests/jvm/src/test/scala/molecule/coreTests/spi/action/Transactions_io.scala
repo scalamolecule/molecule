@@ -8,7 +8,7 @@ import scala.language.implicitConversions
 
 case class Transactions_io(
   suite: Test,
-  api: Api_io_transact with Api_io with Spi_io with DbProviders
+  api: Api_io_transact & Api_io & Spi_io & DbProviders
 ) extends TestUtils {
 
   import api._

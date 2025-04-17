@@ -10,7 +10,7 @@ import scala.annotation.nowarn
 @nowarn
 case class DirectionsUniqueStandard(
   suite: Test,
-  api: Api_async with Spi_async with DbProviders
+  api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 
   // (Allow pattern matching the result without warnings)

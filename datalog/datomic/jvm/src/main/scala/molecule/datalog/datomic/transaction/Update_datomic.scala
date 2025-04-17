@@ -170,7 +170,7 @@ trait Update_datomic
           case Nil    =>
             rowResolvers += {
               case row: jList[AnyRef] if isUpsert =>
-                val currentValue = row.get(attrIndex).asInstanceOf[jMap[_, _]].get(a) match {
+                val currentValue = row.get(attrIndex).asInstanceOf[jMap[?, ?]].get(a) match {
                   case map: jMap[_, _] => map.get(dbId)
                   case v               => v
                 }
@@ -650,9 +650,9 @@ trait Update_datomic
       val newValues = newByteArray
       rowResolvers += { (row: jList[AnyRef]) =>
         val oldByteArray = if (isUpsert)
-          row.get(attrIndex).asInstanceOf[jMap[_, _]].values.iterator().next()
+          row.get(attrIndex).asInstanceOf[jMap[?, ?]].values.iterator().next()
         else
-          row.get(attrIndex).asInstanceOf[Array[_]]
+          row.get(attrIndex).asInstanceOf[Array[?]]
         ids.foreach { e =>
           appendStmt(retract, e, a, oldByteArray.asInstanceOf[AnyRef])
           appendStmt(add, e, a, newValues.asInstanceOf[AnyRef])
@@ -662,9 +662,9 @@ trait Update_datomic
     } else {
       rowResolvers += { (row: jList[AnyRef]) =>
         val oldByteArray = if (isUpsert)
-          row.get(attrIndex).asInstanceOf[jMap[_, _]].values.iterator().next()
+          row.get(attrIndex).asInstanceOf[jMap[?, ?]].values.iterator().next()
         else
-          row.get(attrIndex).asInstanceOf[Array[_]]
+          row.get(attrIndex).asInstanceOf[Array[?]]
         ids.foreach(e => appendStmt(retract, e, a, oldByteArray.asInstanceOf[AnyRef]))
         attrIndex += 1
       }
@@ -717,9 +717,9 @@ trait Update_datomic
       // Cached values with known ref
       val cached = cachedValues(row, optRef)
       val keys   = if (isUpsert) {
-        cached.map(_.asInstanceOf[jMap[_, _]].get(a_k)).asJava
+        cached.map(_.asInstanceOf[jMap[?, ?]].get(a_k)).asJava
       } else {
-        cached.map(_.asInstanceOf[jList[_]].get(0)).asJava
+        cached.map(_.asInstanceOf[jList[?]].get(0)).asJava
       }
       Peer.q(
         "[:find ?ref :in $ [?e ...] ?a ?a_k [?k ...] :where [?e ?a ?ref][?ref ?a_k ?k]]",
@@ -757,7 +757,7 @@ trait Update_datomic
     (if (optRef.isEmpty) {
       row.get(attrIndex) match {
         case vs: jSet[_]  => if (isUpsert)
-          vs.iterator().next().asInstanceOf[jList[_]].toArray()
+          vs.iterator().next().asInstanceOf[jList[?]].toArray()
         else
           vs.toArray()
         case vs: jList[_] => vs.toArray()
@@ -766,12 +766,12 @@ trait Update_datomic
     } else {
       if (isUpsert)
         row.get(attrIndex)
-          .asInstanceOf[jSet[_]].iterator().next()
-          .asInstanceOf[jList[_]].toArray().map {
+          .asInstanceOf[jSet[?]].iterator().next()
+          .asInstanceOf[jList[?]].toArray().map {
             case map: jMap[_, _] => map.get(dbId).asInstanceOf[AnyRef]
           }
       else
-        row.get(attrIndex).asInstanceOf[jSet[_]].toArray
+        row.get(attrIndex).asInstanceOf[jSet[?]].toArray
     }).toList
   }
 
@@ -862,7 +862,7 @@ trait Update_datomic
 
 
   override def handleIds(ent: String, ids1: Seq[Long]): Unit = ()
-  override def handleFilterAttr[T <: Attr with Tacit](filterAttr: T): Unit = ()
+  override def handleFilterAttr[T <: Attr & Tacit](filterAttr: T): Unit = ()
 
   override def handleRef(r: Ref): Unit = {
     val Ref(ent, refAttr0, ref, card, _, _) = r
@@ -891,11 +891,11 @@ trait Update_datomic
             case map: jMap[_, _] =>
               if (card == CardOne) {
                 // Current ref
-                List(map.get(refAttr).asInstanceOf[jMap[_, _]].get(dbId).asInstanceOf[AnyRef])
+                List(map.get(refAttr).asInstanceOf[jMap[?, ?]].get(dbId).asInstanceOf[AnyRef])
               } else {
                 // Extract entity ids from vector of current card-many refs
-                map.get(refAttr).asInstanceOf[jList[_]].asScala.toList.map(entityMap =>
-                  entityMap.asInstanceOf[jMap[_, _]].get(dbId).asInstanceOf[AnyRef]
+                map.get(refAttr).asInstanceOf[jList[?]].asScala.toList.map(entityMap =>
+                  entityMap.asInstanceOf[jMap[?, ?]].get(dbId).asInstanceOf[AnyRef]
                 )
               }
           }

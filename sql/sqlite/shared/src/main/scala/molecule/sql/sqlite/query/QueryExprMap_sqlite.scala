@@ -5,7 +5,7 @@ import molecule.sql.core.query.{QueryExprMap, SqlQueryBase}
 
 trait QueryExprMap_sqlite
   extends QueryExprMap
-    with LambdasMap_sqlite { self: Model2Query with SqlQueryBase =>
+    with LambdasMap_sqlite { self: Model2Query & SqlQueryBase =>
 
 
   // value lookup by key -------------------------------------------------------

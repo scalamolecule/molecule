@@ -62,7 +62,7 @@ trait Api_sync extends Keywords { spi: Spi_sync =>
 }
 
 
-trait Api_sync_transact { api: Api_sync with Spi_sync =>
+trait Api_sync_transact { api: Api_sync & Spi_sync =>
 
   def transact(a1: Action, a2: Action, aa: Action*)
               (implicit conn: Conn): Seq[TxReport] = transact(a1 +: a2 +: aa)

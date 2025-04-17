@@ -7,7 +7,7 @@ import molecule.core.ast.DataModel._
 
 trait QueryExprSet_postgres
   extends QueryExprSet
-    with LambdasSet_postgres { self: Model2Query with SqlQueryBase =>
+    with LambdasSet_postgres { self: Model2Query & SqlQueryBase =>
 
 
   override protected def setMan[T](

@@ -29,8 +29,8 @@ abstract class CodeGenTemplate(val fileName: String, dir: String, basePath: Stri
 
     lazy val `_, _`    = Seq.fill(arity + 1)("_").mkString(", ")
     lazy val `_, _, _` = Seq.fill(arity + 2)("_").mkString(", ")
-    lazy val _0        = "_" + arity
-    lazy val _1        = "_" + (arity + 1)
+    lazy val a0        = "_" + arity
+    lazy val a1        = "_" + (arity + 1)
 
     def padN(n: Int) = if (n < 10) s"0$n" else n
     val n0 = padN(arity)

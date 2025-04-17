@@ -10,7 +10,7 @@ import scala.language.implicitConversions
 
 case class IOApi(
   suite: Test_io,
-  api: Api_io with Spi_io with DbProviders
+  api: Api_io & Spi_io & DbProviders
 ) extends TestUtils {
 
   import api._

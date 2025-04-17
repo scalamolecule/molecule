@@ -149,7 +149,7 @@ trait LambdasSeq extends LambdasBase with JavaConversions { self: SqlQueryBase =
         val outerArray = outerArrayResultSet.getArray(2)
         // Allow null/None
         if (outerArray.getUnderlyingArray != null) {
-          outerArray.getArray.asInstanceOf[Array[_]].foreach { value =>
+          outerArray.getArray.asInstanceOf[Array[?]].foreach { value =>
             set += j2s(value)
           }
         }
@@ -189,7 +189,7 @@ trait LambdasSeq extends LambdasBase with JavaConversions { self: SqlQueryBase =
       Option.empty[Set[T]]
     } else {
       var set = Set.empty[T]
-      array.getArray.asInstanceOf[Array[_]].foreach { value =>
+      array.getArray.asInstanceOf[Array[?]].foreach { value =>
         set += j2s(value)
       }
       if (set.nonEmpty) Some(set) else Option.empty[Set[T]]
@@ -231,7 +231,7 @@ trait LambdasSeq extends LambdasBase with JavaConversions { self: SqlQueryBase =
         val array0 = outerArrayResultSet.getArray(2)
         // Account for empty Sets
         if (array0.getUnderlyingArray != null) {
-          array0.getArray.asInstanceOf[Array[_]].foreach { value =>
+          array0.getArray.asInstanceOf[Array[?]].foreach { value =>
             buf += j2s(value)
           }
         }
@@ -320,7 +320,7 @@ trait LambdasSeq extends LambdasBase with JavaConversions { self: SqlQueryBase =
       Set.empty[T]
     } else {
       var set = Set.empty[T]
-      array.getArray.asInstanceOf[Array[_]].foreach { value =>
+      array.getArray.asInstanceOf[Array[?]].foreach { value =>
         set += j2s(value)
       }
       set
@@ -385,7 +385,7 @@ trait LambdasSeq extends LambdasBase with JavaConversions { self: SqlQueryBase =
       val outerArrayResultSet = array.getResultSet
       val list                = ListBuffer.empty[T]
       while (outerArrayResultSet.next()) {
-        outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]].foreach { value =>
+        outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[?]].foreach { value =>
           list += j2s(value)
         }
       }
@@ -521,7 +521,7 @@ trait LambdasSeq extends LambdasBase with JavaConversions { self: SqlQueryBase =
       var sets                = Set.empty[Set[T]]
       while (outerArrayResultSet.next()) {
         var set = Set.empty[T]
-        outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]].foreach { value =>
+        outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[?]].foreach { value =>
           set += getValue(value)
         }
         sets += set
@@ -555,53 +555,53 @@ trait LambdasSeq extends LambdasBase with JavaConversions { self: SqlQueryBase =
   private lazy val nestedArray2nestedSetChar          : (RS, Int) => Set[Set[Char]]           = (row: RS, paramIndex: Int) => sqlNestedArrays2nestedSeq(row, paramIndex, j2Char)
 
 
-  private lazy val array2setFirstId            : (RS, Int) => Set[Long]           = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Id).min)
-  private lazy val array2setFirstString        : (RS, Int) => Set[String]         = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2String).min)
-  private lazy val array2setFirstInt           : (RS, Int) => Set[Int]            = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Int).min)
-  private lazy val array2setFirstLong          : (RS, Int) => Set[Long]           = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Long).min)
-  private lazy val array2setFirstFloat         : (RS, Int) => Set[Float]          = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Float).min)
-  private lazy val array2setFirstDouble        : (RS, Int) => Set[Double]         = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Double).min)
-  private lazy val array2setFirstBoolean       : (RS, Int) => Set[Boolean]        = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Boolean).min)
-  private lazy val array2setFirstBigInt        : (RS, Int) => Set[BigInt]         = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2BigInt).min)
-  private lazy val array2setFirstBigDecimal    : (RS, Int) => Set[BigDecimal]     = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2BigDecimal).min)
-  private lazy val array2setFirstDate          : (RS, Int) => Set[Date]           = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Date).min)
-  private lazy val array2setFirstDuration      : (RS, Int) => Set[Duration]       = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Duration).min)
-  private lazy val array2setFirstInstant       : (RS, Int) => Set[Instant]        = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Instant).min)
-  private lazy val array2setFirstLocalDate     : (RS, Int) => Set[LocalDate]      = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2LocalDate).min)
-  private lazy val array2setFirstLocalTime     : (RS, Int) => Set[LocalTime]      = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2LocalTime).min)
-  private lazy val array2setFirstLocalDateTime : (RS, Int) => Set[LocalDateTime]  = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2LocalDateTime).min)
-  private lazy val array2setFirstOffsetTime    : (RS, Int) => Set[OffsetTime]     = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2OffsetTime).min)
-  private lazy val array2setFirstOffsetDateTime: (RS, Int) => Set[OffsetDateTime] = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2OffsetDateTime).min)
-  private lazy val array2setFirstZonedDateTime : (RS, Int) => Set[ZonedDateTime]  = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2ZonedDateTime).min)
-  private lazy val array2setFirstUUID          : (RS, Int) => Set[UUID]           = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2UUID).min)
-  private lazy val array2setFirstURI           : (RS, Int) => Set[URI]            = (row: RS, paramIndex: Int) => Set(new URI(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2String).min)) // URI saved as String
-  private lazy val array2setFirstByte          : (RS, Int) => Set[Byte]           = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Byte).min)
-  private lazy val array2setFirstShort         : (RS, Int) => Set[Short]          = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Short).min)
-  private lazy val array2setFirstChar          : (RS, Int) => Set[Char]           = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Char).min)
+  private lazy val array2setFirstId            : (RS, Int) => Set[Long]           = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2Id).min)
+  private lazy val array2setFirstString        : (RS, Int) => Set[String]         = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2String).min)
+  private lazy val array2setFirstInt           : (RS, Int) => Set[Int]            = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2Int).min)
+  private lazy val array2setFirstLong          : (RS, Int) => Set[Long]           = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2Long).min)
+  private lazy val array2setFirstFloat         : (RS, Int) => Set[Float]          = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2Float).min)
+  private lazy val array2setFirstDouble        : (RS, Int) => Set[Double]         = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2Double).min)
+  private lazy val array2setFirstBoolean       : (RS, Int) => Set[Boolean]        = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2Boolean).min)
+  private lazy val array2setFirstBigInt        : (RS, Int) => Set[BigInt]         = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2BigInt).min)
+  private lazy val array2setFirstBigDecimal    : (RS, Int) => Set[BigDecimal]     = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2BigDecimal).min)
+  private lazy val array2setFirstDate          : (RS, Int) => Set[Date]           = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2Date).min)
+  private lazy val array2setFirstDuration      : (RS, Int) => Set[Duration]       = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2Duration).min)
+  private lazy val array2setFirstInstant       : (RS, Int) => Set[Instant]        = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2Instant).min)
+  private lazy val array2setFirstLocalDate     : (RS, Int) => Set[LocalDate]      = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2LocalDate).min)
+  private lazy val array2setFirstLocalTime     : (RS, Int) => Set[LocalTime]      = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2LocalTime).min)
+  private lazy val array2setFirstLocalDateTime : (RS, Int) => Set[LocalDateTime]  = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2LocalDateTime).min)
+  private lazy val array2setFirstOffsetTime    : (RS, Int) => Set[OffsetTime]     = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2OffsetTime).min)
+  private lazy val array2setFirstOffsetDateTime: (RS, Int) => Set[OffsetDateTime] = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2OffsetDateTime).min)
+  private lazy val array2setFirstZonedDateTime : (RS, Int) => Set[ZonedDateTime]  = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2ZonedDateTime).min)
+  private lazy val array2setFirstUUID          : (RS, Int) => Set[UUID]           = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2UUID).min)
+  private lazy val array2setFirstURI           : (RS, Int) => Set[URI]            = (row: RS, paramIndex: Int) => Set(new URI(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2String).min)) // URI saved as String
+  private lazy val array2setFirstByte          : (RS, Int) => Set[Byte]           = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2Byte).min)
+  private lazy val array2setFirstShort         : (RS, Int) => Set[Short]          = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2Short).min)
+  private lazy val array2setFirstChar          : (RS, Int) => Set[Char]           = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2Char).min)
 
-  private lazy val array2setLastId            : (RS, Int) => Set[Long]           = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Id).max)
-  private lazy val array2setLastString        : (RS, Int) => Set[String]         = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2String).max)
-  private lazy val array2setLastInt           : (RS, Int) => Set[Int]            = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Int).max)
-  private lazy val array2setLastLong          : (RS, Int) => Set[Long]           = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Long).max)
-  private lazy val array2setLastFloat         : (RS, Int) => Set[Float]          = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Float).max)
-  private lazy val array2setLastDouble        : (RS, Int) => Set[Double]         = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Double).max)
-  private lazy val array2setLastBoolean       : (RS, Int) => Set[Boolean]        = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Boolean).max)
-  private lazy val array2setLastBigInt        : (RS, Int) => Set[BigInt]         = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2BigInt).max)
-  private lazy val array2setLastBigDecimal    : (RS, Int) => Set[BigDecimal]     = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2BigDecimal).max)
-  private lazy val array2setLastDate          : (RS, Int) => Set[Date]           = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Date).max)
-  private lazy val array2setLastDuration      : (RS, Int) => Set[Duration]       = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Duration).max)
-  private lazy val array2setLastInstant       : (RS, Int) => Set[Instant]        = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Instant).max)
-  private lazy val array2setLastLocalDate     : (RS, Int) => Set[LocalDate]      = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2LocalDate).max)
-  private lazy val array2setLastLocalTime     : (RS, Int) => Set[LocalTime]      = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2LocalTime).max)
-  private lazy val array2setLastLocalDateTime : (RS, Int) => Set[LocalDateTime]  = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2LocalDateTime).max)
-  private lazy val array2setLastOffsetTime    : (RS, Int) => Set[OffsetTime]     = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2OffsetTime).max)
-  private lazy val array2setLastOffsetDateTime: (RS, Int) => Set[OffsetDateTime] = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2OffsetDateTime).max)
-  private lazy val array2setLastZonedDateTime : (RS, Int) => Set[ZonedDateTime]  = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2ZonedDateTime).max)
-  private lazy val array2setLastUUID          : (RS, Int) => Set[UUID]           = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2UUID).max)
-  private lazy val array2setLastURI           : (RS, Int) => Set[URI]            = (row: RS, paramIndex: Int) => Set(new URI(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2String).max)) // URI saved as String
-  private lazy val array2setLastByte          : (RS, Int) => Set[Byte]           = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Byte).max)
-  private lazy val array2setLastShort         : (RS, Int) => Set[Short]          = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Short).max)
-  private lazy val array2setLastChar          : (RS, Int) => Set[Char]           = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Char).max)
+  private lazy val array2setLastId            : (RS, Int) => Set[Long]           = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2Id).max)
+  private lazy val array2setLastString        : (RS, Int) => Set[String]         = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2String).max)
+  private lazy val array2setLastInt           : (RS, Int) => Set[Int]            = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2Int).max)
+  private lazy val array2setLastLong          : (RS, Int) => Set[Long]           = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2Long).max)
+  private lazy val array2setLastFloat         : (RS, Int) => Set[Float]          = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2Float).max)
+  private lazy val array2setLastDouble        : (RS, Int) => Set[Double]         = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2Double).max)
+  private lazy val array2setLastBoolean       : (RS, Int) => Set[Boolean]        = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2Boolean).max)
+  private lazy val array2setLastBigInt        : (RS, Int) => Set[BigInt]         = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2BigInt).max)
+  private lazy val array2setLastBigDecimal    : (RS, Int) => Set[BigDecimal]     = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2BigDecimal).max)
+  private lazy val array2setLastDate          : (RS, Int) => Set[Date]           = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2Date).max)
+  private lazy val array2setLastDuration      : (RS, Int) => Set[Duration]       = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2Duration).max)
+  private lazy val array2setLastInstant       : (RS, Int) => Set[Instant]        = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2Instant).max)
+  private lazy val array2setLastLocalDate     : (RS, Int) => Set[LocalDate]      = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2LocalDate).max)
+  private lazy val array2setLastLocalTime     : (RS, Int) => Set[LocalTime]      = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2LocalTime).max)
+  private lazy val array2setLastLocalDateTime : (RS, Int) => Set[LocalDateTime]  = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2LocalDateTime).max)
+  private lazy val array2setLastOffsetTime    : (RS, Int) => Set[OffsetTime]     = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2OffsetTime).max)
+  private lazy val array2setLastOffsetDateTime: (RS, Int) => Set[OffsetDateTime] = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2OffsetDateTime).max)
+  private lazy val array2setLastZonedDateTime : (RS, Int) => Set[ZonedDateTime]  = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2ZonedDateTime).max)
+  private lazy val array2setLastUUID          : (RS, Int) => Set[UUID]           = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2UUID).max)
+  private lazy val array2setLastURI           : (RS, Int) => Set[URI]            = (row: RS, paramIndex: Int) => Set(new URI(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2String).max)) // URI saved as String
+  private lazy val array2setLastByte          : (RS, Int) => Set[Byte]           = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2Byte).max)
+  private lazy val array2setLastShort         : (RS, Int) => Set[Short]          = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2Short).max)
+  private lazy val array2setLastChar          : (RS, Int) => Set[Char]           = (row: RS, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[?]].map(j2Char).max)
 
 
   case class ResSeqOpt[T](

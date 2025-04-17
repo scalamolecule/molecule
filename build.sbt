@@ -1,27 +1,15 @@
 import org.scalajs.linker.interface.ESVersion
 
-val moleculeVersion = "0.17.0"
+val moleculeVersion = "0.18.0"
 
 val scala212 = "2.12.20"
-val scala213 = "2.13.16"
 val scala3   = "3.3.5"
-val allScala = Seq(scala212, scala213, scala3)
 
-// testing
-val munitVersion           = "1.1.0"
-val munitCatsEffectVersion = "2.1.0"
-
-// Marshalling
-val tapirVersion   = "1.11.24"
+val tapirVersion   = "1.11.25"
 val client4Version = "4.0.2"
-val http4sVersion  = "0.23.17" // latest possible to satisfy blaze + tapir
+val http4sVersion  = "0.23.30"
 val pekkoVersion   = "1.1.3"
-
-// Effect systems
-val catsVersion       = "3.12.0" // 4.x only for scala 3...
-val catsEffectVersion = "3.6.1" // downgrade to match Monix 3.x
-val monixVersion      = "3.4.1"
-val zioVersion        = "2.0.21"
+val zioVersion     = "2.1.17"
 
 // Db test containers
 val dimafengContainerVersion = "0.43.0"
@@ -36,14 +24,12 @@ inThisBuild(
     organizationHomepage := Some(url("http://www.scalamolecule.org")),
     versionScheme := Some("early-semver"),
     version := moleculeVersion,
-    scalaVersion := scala213,
-    crossScalaVersions := allScala,
+    scalaVersion := scala3,
+    publishTo := Some(releases),
 
     // Run tests for all systems sequentially to avoid data locks with db
     // Only applies on JVM. On JS platform there's no parallelism anyway.
     Test / parallelExecution := false,
-
-    publishTo := Some(releases)
   )
 )
 
@@ -85,6 +71,8 @@ lazy val root = project
 lazy val base = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .settings(compilerArgs, doPublish,
+    // 2.12 for sbt-molecule plugin on sbt 1.x
+    crossScalaVersions := Seq(scala212, scala3),
     name := "molecule-base"
   )
 
@@ -95,24 +83,23 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
     name := "molecule-core",
     libraryDependencies ++= Seq(
       // logging
-      "com.outr" %%% "scribe" % "3.13.0",
+      "com.outr" %%% "scribe" % "3.16.1",
 
       // Effect APIs
       "dev.zio" %%% "zio" % zioVersion,
       "dev.zio" %%% "zio-streams" % zioVersion,
-      "org.typelevel" %%% "cats-effect" % catsEffectVersion,
+      "org.typelevel" %%% "cats-effect" % "3.6.1",
 
       // RPC
       "io.suzaku" %%% "boopickle" % "1.5.0", // binary serialization
       "com.softwaremill.sttp.tapir" %%% "tapir-core" % tapirVersion,
       //      "com.softwaremill.sttp.tapir" %%% "tapir-websockets" % tapirVersion,
       //      "com.softwaremill.sttp.tapir" %%% "tapir-fs2" % tapirVersion,
-
-      "com.softwaremill.sttp.client4" %%% "fs2" % client4Version,
+      //      "com.softwaremill.sttp.client4" %%% "fs2" % client4Version,
 
       // Streaming
       "com.lihaoyi" %%% "geny" % "1.1.1",
-      "co.fs2" %%% "fs2-core" % catsEffectVersion,
+      "co.fs2" %%% "fs2-core" % "3.12.0",
     ),
   )
   .jsSettings(
@@ -122,6 +109,33 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
   )
   .dependsOn(base)
 
+// Tapir backend examples serving Molecule RPC
+lazy val server = project
+  .in(file("server"))
+  .settings(
+    name := "molecule-server",
+    publish / skip := true,
+    libraryDependencies ++= Seq(
+      "com.softwaremill.sttp.tapir" %% "tapir-armeria-server" % tapirVersion,
+      "org.http4s" %% "http4s-ember-server" % http4sVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-netty-server" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-pekko-http-server" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-play-server" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-vertx-server" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-zio-http-server" % tapirVersion,
+
+      // Avoid "No SLF4J providers were found." errors
+      "org.slf4j" % "slf4j-nop" % "2.0.17",
+    )
+  )
+  .dependsOn(
+    sqlH2.jvm,
+    sqlMySQL.jvm,
+    sqlMariaDB.jvm,
+    sqlPostgreSQL.jvm,
+    sqlSQlite.jvm,
+  )
 
 lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
@@ -135,27 +149,17 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
     moleculeDomainPaths := Seq("molecule/coreTests/domains"),
     //    moleculeMakeJars := false,
 
-    // Find scala version specific jars in respective libs
-    unmanagedBase := {
-      CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, 13)) => file(unmanagedBase.value.getPath ++ "/2.13")
-        case Some((2, 12)) => file(unmanagedBase.value.getPath ++ "/2.12")
-        case _             => file(unmanagedBase.value.getPath ++ "/3.3")
-      }
-    },
-
     libraryDependencies ++= Seq(
       "com.zaxxer" % "HikariCP" % "6.2.1" % Test,
       "org.scalactic" %%% "scalactic" % "3.2.19" % Test, // Tolerant roundings with triple equal on js platform
       "io.github.cquiroz" %%% "scala-java-time" % "2.6.0", // % Test, // we need main for time zone plugin
 
       // Test frameworks
-      "org.scalameta" %%% "munit" % munitVersion % Test,
-      "org.typelevel" %%% "munit-cats-effect" % munitCatsEffectVersion % Test,
-
-      "dev.zio" %%% "zio-streams" % zioVersion % Test,
+      "org.scalameta" %%% "munit" % "1.1.0" % Test,
+      "org.typelevel" %%% "munit-cats-effect" % "2.1.0" % Test,
       "dev.zio" %%% "zio-test" % zioVersion % Test,
       "dev.zio" %%% "zio-test-sbt" % zioVersion % Test,
+      "dev.zio" %%% "zio-streams" % zioVersion % Test,
     ),
   )
   .jsConfigure(_.enablePlugins(TzdbPlugin))
@@ -308,61 +312,6 @@ lazy val sqlSQlite = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(sqlCore, coreTests % "test->test")
 
 
-// Tapir backend examples serving Molecule RPC
-lazy val server = project
-  .in(file("server"))
-  .settings(
-    name := "molecule-server",
-    publish / skip := true,
-    libraryDependencies ++= Seq(
-      // 1. Akka Http
-      "com.softwaremill.sttp.tapir" %% "tapir-akka-http-server" % tapirVersion,
-
-      // 2. Armeria
-      // Lower version to avoid conflicts with pekko!
-      "com.softwaremill.sttp.tapir" %% "tapir-armeria-server" % "1.11.9",
-
-      // 3. Http4s
-      "org.http4s" %% "http4s-ember-server" % http4sVersion,
-      "org.http4s" %% "http4s-blaze-server" % http4sVersion,
-      "org.http4s" %% "http4s-dsl" % http4sVersion,
-      "org.http4s" %% "http4s-core" % http4sVersion,
-      "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % tapirVersion,
-
-      // 4. Netty
-      "com.softwaremill.sttp.tapir" %% "tapir-netty-server" % tapirVersion,
-
-      // 5. Pekko
-      // Force same Pekko version
-      "org.apache.pekko" %% "pekko-actor-typed" % pekkoVersion,
-      "org.apache.pekko" %% "pekko-actor" % pekkoVersion,
-      "org.apache.pekko" %% "pekko-serialization-jackson" % pekkoVersion,
-      "org.apache.pekko" %% "pekko-protobuf-v3" % pekkoVersion,
-      "org.apache.pekko" %% "pekko-slf4j" % pekkoVersion,
-      "org.apache.pekko" %% "pekko-stream" % pekkoVersion,
-      "com.softwaremill.sttp.tapir" %% "tapir-pekko-http-server" % tapirVersion,
-
-      // 6. Play (with PekkoHttpServer)
-      "com.softwaremill.sttp.tapir" %% "tapir-play-server" % tapirVersion,
-
-      // 7. Vert.X
-      "com.softwaremill.sttp.tapir" %% "tapir-vertx-server" % tapirVersion,
-      "com.softwaremill.sttp.tapir" %% "tapir-zio-http-server" % tapirVersion,
-
-      // 8. ZioHttp
-      // Avoid "No SLF4J providers were found." errors
-      "org.slf4j" % "slf4j-nop" % "2.0.17"
-    )
-  )
-  .dependsOn(
-    sqlH2.jvm,
-    sqlMySQL.jvm,
-    sqlMariaDB.jvm,
-    sqlPostgreSQL.jvm,
-    sqlSQlite.jvm,
-  )
-
-
 lazy val testingFrameworks = Seq(
   new TestFramework("munit.Framework"),
   new TestFramework("zio.test.sbt.ZTestFramework"),
@@ -379,48 +328,18 @@ lazy val jsEnvironment = {
 }
 
 lazy val compilerArgs = Def.settings(
-  scalacOptions ++= Seq(
-    "-deprecation",
-    "-encoding",
-    "UTF-8",
-    "-feature",
-    "-language:higherKinds",
-    "-language:existentials",
-    "-unchecked",
-    //    "-Xfatal-warnings",
-  ) ++ (CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, 12)) =>
-      Seq(
-        "-Xsource:2.13",
-        "-Ypartial-unification",
-        "-Ywarn-extra-implicit",
-        "-Ywarn-inaccessible",
-        "-Ywarn-infer-any",
-        "-Ywarn-unused:-nowarn",
-        "-Ywarn-nullary-override",
-        "-Ywarn-nullary-unit",
-        "-opt-warnings",
-        "-opt:l:inline",
-        "-explaintypes"
-      )
-    case Some((2, 13)) =>
-      Seq(
-        "-Xlint:-byname-implicit",
-        "-explaintypes",
-        //"-Ylog-classpath"
-      )
-
+  scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((3, _)) =>
       Seq(
+        "-deprecation",
+        "-unchecked",
         "-explain-types",
-        //        "-Ykind-projector"
-        //        "-experimental",
-        //        "-rewrite",
-        //        "-source:3.4-migration",
+        //    "-Xfatal-warnings",
       )
-    case _            => Nil
+    case _            => Nil // 2.12 base module for sbt-molecule plugin
   })
 )
+
 
 lazy val snapshots =
   "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"

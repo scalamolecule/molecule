@@ -5,7 +5,7 @@ import java.util.{ArrayList => jArrayList}
 import molecule.datalog.core.query.DatomicQueryBase
 
 
-trait Nest[Tpl] { self: DatomicQueryBase with CastNestedBranch_ with CastRow2AnyTpl_ =>
+trait Nest[Tpl] { self: DatomicQueryBase & CastNestedBranch_ & CastRow2AnyTpl_ =>
 
   private var row    : Row = new jArrayList[AnyRef]()
   private var prevRow: Row = new jArrayList[AnyRef]()

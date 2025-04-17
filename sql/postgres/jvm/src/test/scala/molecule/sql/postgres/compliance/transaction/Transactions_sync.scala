@@ -5,7 +5,7 @@ import molecule.coreTests.spi.action._
 import molecule.sql.postgres.setup.Api_postgres_sync
 
 
-class Transactions_sync extends Test {
+class Transactions_syncTest extends Test {
   Transactions_sync(this, Api_postgres_sync)
 
 

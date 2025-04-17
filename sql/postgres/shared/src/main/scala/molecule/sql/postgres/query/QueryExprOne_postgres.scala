@@ -8,7 +8,7 @@ import molecule.core.ast.DataModel._
 
 trait QueryExprOne_postgres
   extends QueryExprOne
-    with LambdasOne_postgres { self: Model2Query with SqlQueryBase =>
+    with LambdasOne_postgres { self: Model2Query & SqlQueryBase =>
 
   override protected def addSort(attr: Attr, col: String): Unit = {
     attr.sort.foreach { sort =>

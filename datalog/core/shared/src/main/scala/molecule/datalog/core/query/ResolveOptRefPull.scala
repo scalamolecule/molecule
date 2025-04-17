@@ -12,7 +12,7 @@ trait ResolveOptRefPull[Tpl] { self: Model2DatomicQuery[Tpl] =>
   final protected def resolveOptRefElements(
     ref: Ref,
     optionalElements: List[Element]
-  ): List[List[jIterator[_] => Any]] = {
+  ): List[List[jIterator[?] => Any]] = {
 
     @tailrec
     def addPullAttrs(

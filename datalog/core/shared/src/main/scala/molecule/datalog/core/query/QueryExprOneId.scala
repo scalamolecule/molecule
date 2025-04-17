@@ -7,7 +7,7 @@ import molecule.core.query.QueryExpr
 trait QueryExprOneId[Tpl]
   extends SortOneSpecial[Tpl]
     with SortOneOpt_[Tpl]
-    with QueryExpr { self: Model2DatomicQuery[Tpl] with LambdasOne =>
+    with QueryExpr { self: Model2DatomicQuery[Tpl] & LambdasOne =>
 
   override protected def queryIdMan(attr: AttrOneMan): Unit = {
     attrIndex += 1

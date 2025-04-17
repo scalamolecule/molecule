@@ -23,7 +23,7 @@ object _SortOneOpt extends DatomicGenBase("SortOneOpt", "/query") {
        |    a: Row,
        |    b: Row,
        |    i: Int,
-       |    compareMapValues: (jMap[_, _], jMap[_, _]) => Int
+       |    compareMapValues: (jMap[?, ?], jMap[?, ?]) => Int
        |  ): Int = {
        |    (a.get(i), b.get(i)) match {
        |      case (null, null)                     => 0
@@ -38,7 +38,7 @@ object _SortOneOpt extends DatomicGenBase("SortOneOpt", "/query") {
 
   def sorter(tpe: String): String = {
     val cast: String => String = tpe match {
-      case "Id"             => (map: String) => s"$map.values.iterator.next.asInstanceOf[jMap[_,_]].values.iterator.next.toString.toLong"
+      case "ID"             => (map: String) => s"$map.values.iterator.next.asInstanceOf[jMap[?, ?]].values.iterator.next.toString.toLong"
       case "Int"            => (map: String) => s"$map.values.iterator.next.toString.toInt"
       case "Duration"       => (map: String) => s"Duration.parse($map.values.iterator.next.toString)"
       case "Instant"        => (map: String) => s"Instant.parse($map.values.iterator.next.toString)"
@@ -59,14 +59,14 @@ object _SortOneOpt extends DatomicGenBase("SortOneOpt", "/query") {
        |          case 'a' => (nestedIdsCount: Int) =>
        |            val i = nestedIdsCount + attrIndex
        |            (a: Row, b: Row) =>
-       |              compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+       |              compare(a, b, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
        |                ${cast("m1")}.compareTo(
        |                  ${cast("m2")})
        |              )
        |          case 'd' => (nestedIdsCount: Int) =>
        |            val i = nestedIdsCount + attrIndex
        |            (a: Row, b: Row) =>
-       |              compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+       |              compare(b, a, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
        |                ${cast("m1")}.compareTo(
        |                  ${cast("m2")})
        |              )

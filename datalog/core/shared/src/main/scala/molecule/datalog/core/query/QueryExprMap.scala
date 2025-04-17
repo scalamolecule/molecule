@@ -4,7 +4,7 @@ import molecule.core.ast.DataModel._
 import molecule.core.query.QueryExpr
 import molecule.core.util.JavaConversions
 
-trait QueryExprMap[Tpl] extends QueryExpr with JavaConversions { self: Model2DatomicQuery[Tpl] with LambdasMap =>
+trait QueryExprMap[Tpl] extends QueryExpr with JavaConversions { self: Model2DatomicQuery[Tpl] & LambdasMap =>
 
   override protected def queryAttrMapMan(attr: AttrMapMan): Unit = {
     attrIndex += 1

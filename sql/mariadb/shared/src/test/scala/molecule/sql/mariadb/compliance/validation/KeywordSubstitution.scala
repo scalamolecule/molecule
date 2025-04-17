@@ -4,6 +4,6 @@ import molecule.coreTests.setup.Test
 import molecule.coreTests.spi.validation._
 import molecule.sql.mariadb.setup.Api_mariadb_async
 
-class KeywordSubstitution extends Test {
+class KeywordSubstitutionTest extends Test {
   KeywordSubstitution(this, Api_mariadb_async)
 }

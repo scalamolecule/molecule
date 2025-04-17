@@ -5,13 +5,13 @@ import molecule.coreTests.spi.filter.one.decimal._
 import molecule.sql.sqlite.setup.Api_sqlite_async
 
 
-class FilterOneDecimal_Float_ extends Test {
+class FilterOneDecimal_Float_Test extends Test {
   FilterOneDecimal_Float_(this, Api_sqlite_async)
 }
-class FilterOneDecimal_Double extends Test {
+class FilterOneDecimal_DoubleTest extends Test {
   FilterOneDecimal_Double(this, Api_sqlite_async)
 }
-class FilterOneDecimal_BigDecimal_ extends Test {
+class FilterOneDecimal_BigDecimal_Test extends Test {
   FilterOneDecimal_BigDecimal_(this, Api_sqlite_async)
 }
 

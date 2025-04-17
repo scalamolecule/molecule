@@ -4,16 +4,16 @@ import molecule.coreTests.setup.Test
 import molecule.coreTests.spi.sorting._
 import molecule.sql.mysql.setup.Api_mysql_async
 
-class SortAggr extends Test {
+class SortAggrTest extends Test {
   SortAggr(this, Api_mysql_async)
 }
-class SortBasics extends Test {
+class SortBasicsTest extends Test {
   SortBasics(this, Api_mysql_async)
 }
-class SortDynamic extends Test {
+class SortDynamicTest extends Test {
   SortDynamic(this, Api_mysql_async)
 }
-class SortNested extends Test {
+class SortNestedTest extends Test {
   SortNested(this, Api_mysql_async)
 }
 

@@ -9,7 +9,7 @@ import molecule.coreTests.setup._
 
 case class FilterAttr_id(
   suite: Test,
-  api: Api_async with Spi_async with DbProviders
+  api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 
   // Can't use entity ids with filter attributes

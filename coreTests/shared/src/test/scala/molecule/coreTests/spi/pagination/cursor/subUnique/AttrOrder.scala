@@ -10,7 +10,7 @@ import scala.annotation.nowarn
 @nowarn
 case class AttrOrder(
   suite: Test,
-  api: Api_async with Spi_async with DbProviders
+  api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 
   def getTriples: List[(String, Int, Int)] = (1 to 5).toList.map { int =>

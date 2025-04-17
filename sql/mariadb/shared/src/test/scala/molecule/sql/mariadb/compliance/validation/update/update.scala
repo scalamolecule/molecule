@@ -4,21 +4,21 @@ import molecule.coreTests.setup.Test
 import molecule.coreTests.spi.validation.update._
 import molecule.sql.mariadb.setup.Api_mariadb_async
 
-class TypesOne extends Test {
+class TypesOneTest extends Test {
   TypesOne(this, Api_mariadb_async)
 }
-class TypesOneOpt extends Test {
+class TypesOneOptTest extends Test {
   TypesOneOpt(this, Api_mariadb_async)
 }
-class TypesSeq extends Test {
+class TypesSeqTest extends Test {
   TypesSeq(this, Api_mariadb_async)
 }
-class TypesSeqOpt extends Test {
+class TypesSeqOptTest extends Test {
   TypesSeqOpt(this, Api_mariadb_async)
 }
-class TypesSet extends Test {
+class TypesSetTest extends Test {
   TypesSet(this, Api_mariadb_async)
 }
-class TypesSetOpt extends Test {
+class TypesSetOptTest extends Test {
   TypesSetOpt(this, Api_mariadb_async)
 }

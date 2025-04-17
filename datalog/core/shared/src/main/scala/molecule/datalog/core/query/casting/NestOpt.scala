@@ -28,53 +28,53 @@ trait NestOpt
   private lazy val pullSorts6 = pullSortss(5)
   private lazy val pullSorts7 = pullSortss(6)
 
-  private lazy val pullBranch1: jIterator[_] => List[Any] = {
+  private lazy val pullBranch1: jIterator[?] => List[Any] = {
     if (levels == 1)
       pullOptNestedLeaf(pullCasts1, pullSorts1)
     else
       pullOptNestedBranch(pullCasts1, pullSorts1, pullBranch2, refDepths(1))
   }
 
-  private lazy val pullBranch2: jIterator[_] => List[Any] = {
+  private lazy val pullBranch2: jIterator[?] => List[Any] = {
     if (levels == 2)
       pullOptNestedLeaf(pullCasts2, pullSorts2)
     else
       pullOptNestedBranch(pullCasts2, pullSorts2, pullBranch3, refDepths(2))
   }
 
-  private lazy val pullBranch3: jIterator[_] => List[Any] = {
+  private lazy val pullBranch3: jIterator[?] => List[Any] = {
     if (levels == 3)
       pullOptNestedLeaf(pullCasts3, pullSorts3)
     else
       pullOptNestedBranch(pullCasts3, pullSorts3, pullBranch4, refDepths(3))
   }
 
-  private lazy val pullBranch4: jIterator[_] => List[Any] = {
+  private lazy val pullBranch4: jIterator[?] => List[Any] = {
     if (levels == 4)
       pullOptNestedLeaf(pullCasts4, pullSorts4)
     else
       pullOptNestedBranch(pullCasts4, pullSorts4, pullBranch5, refDepths(4))
   }
 
-  private lazy val pullBranch5: jIterator[_] => List[Any] = {
+  private lazy val pullBranch5: jIterator[?] => List[Any] = {
     if (levels == 5)
       pullOptNestedLeaf(pullCasts5, pullSorts5)
     else
       pullOptNestedBranch(pullCasts5, pullSorts5, pullBranch6, refDepths(5))
   }
 
-  private lazy val pullBranch6: jIterator[_] => List[Any] = {
+  private lazy val pullBranch6: jIterator[?] => List[Any] = {
     if (levels == 6)
       pullOptNestedLeaf(pullCasts6, pullSorts6)
     else
       pullOptNestedBranch(pullCasts6, pullSorts6, pullBranch7, refDepths(6))
   }
 
-  private lazy val pullBranch7: jIterator[_] => List[Any] = {
+  private lazy val pullBranch7: jIterator[?] => List[Any] = {
     pullOptNestedLeaf(pullCasts7, pullSorts7)
   }
 
   protected lazy val pullOptNestedData: AnyRef => AnyRef = {
-    (rowValue: AnyRef) => pullBranch1(rowValue.asInstanceOf[jMap[_, _]].values.iterator)
+    (rowValue: AnyRef) => pullBranch1(rowValue.asInstanceOf[jMap[?, ?]].values.iterator)
   }
 }

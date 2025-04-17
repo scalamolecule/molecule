@@ -12,7 +12,7 @@ import scala.collection.mutable.ListBuffer
 
 trait SqlDelete
   extends DeleteOps
-    with ModelUtils { self: ResolveDelete with SqlOps =>
+    with ModelUtils { self: ResolveDelete & SqlOps =>
 
   protected var root        : DeleteRoot   = null
   protected var deleteAction: DeleteAction = null

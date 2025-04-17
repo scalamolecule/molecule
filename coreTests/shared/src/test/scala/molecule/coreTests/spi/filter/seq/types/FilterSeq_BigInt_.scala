@@ -9,7 +9,7 @@ import molecule.coreTests.setup._
 
 case class FilterSeq_BigInt_(
   suite: Test,
-  api: Api_async with Spi_async with DbProviders
+  api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 
   val a = (1, List(bigInt1, bigInt2))

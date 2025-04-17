@@ -134,7 +134,7 @@ trait LambdasSet extends LambdasBase with JavaConversions { self: SqlQueryBase =
         val outerArray = outerArrayResultSet.getArray(2)
         // Allow null/None
         if (outerArray.getUnderlyingArray != null) {
-          outerArray.getArray.asInstanceOf[Array[_]].foreach { value =>
+          outerArray.getArray.asInstanceOf[Array[?]].foreach { value =>
             set += j2s(value)
           }
         }
@@ -174,7 +174,7 @@ trait LambdasSet extends LambdasBase with JavaConversions { self: SqlQueryBase =
       Option.empty[Set[T]]
     } else {
       var set = Set.empty[T]
-      array.getArray.asInstanceOf[Array[_]].foreach { value =>
+      array.getArray.asInstanceOf[Array[?]].foreach { value =>
         set += j2s(value)
       }
       if (set.nonEmpty) Some(set) else Option.empty[Set[T]]
@@ -216,7 +216,7 @@ trait LambdasSet extends LambdasBase with JavaConversions { self: SqlQueryBase =
         val array0 = outerArrayResultSet.getArray(2)
         // Account for empty Sets
         if (array0.getUnderlyingArray != null) {
-          array0.getArray.asInstanceOf[Array[_]].foreach { value =>
+          array0.getArray.asInstanceOf[Array[?]].foreach { value =>
             set += j2s(value)
           }
         }

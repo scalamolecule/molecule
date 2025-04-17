@@ -12,9 +12,9 @@ trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
   private val rowList = new ListBuffer[Any]
 
   final protected def pullOptNestedLeaf(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     pullSorts: List[Int => (Row, Row) => Int]
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val optComparator = {
       if (pullSorts.nonEmpty) {
         val n = pullSorts.length
@@ -64,7 +64,7 @@ trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
 
   final private def flatten(
     list: jArrayList[Any],
-    map: jMap[_, _]
+    map: jMap[?, ?]
   ): jArrayList[Any] = {
     map.values.asScala.foreach {
       case map: jMap[_, _] => flatten(list, map)
@@ -76,8 +76,8 @@ trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
   final private def resolve(
     arity: Int,
     optComparator: Option[Comparator[Row]],
-    cast: java.util.Iterator[_] => Any,
-  ): jIterator[_] => List[Any] = {
+    cast: java.util.Iterator[?] => Any,
+  ): jIterator[?] => List[Any] = {
     val handleMaps = optComparator.fold(
       handleRows(arity, cast)
     )(comparator =>
@@ -88,20 +88,18 @@ trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
 
   private def handleRows(
     arity: Int,
-    cast: java.util.Iterator[_] => Any
-  ): jList[_] => List[Any] = {
+    cast: java.util.Iterator[?] => Any
+  ): jList[?] => List[Any] = {
     val list = new jArrayList[Any](arity)
-    (rows: jList[_]) =>
+    (rows: jList[?]) =>
       rowList.clear()
       rows.asScala.toList.foreach {
         case row: jMap[_, _] =>
           list.clear()
           try {
-            rowList +=
-              cast(flatten(list, row).iterator)
+            rowList += cast(flatten(list, row).iterator)
           } catch {
-            case _: NullValueException =>
-              ()
+            case _: NullValueException => ()
           }
       }
       rowList.toList
@@ -109,10 +107,10 @@ trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
 
   private def handleRowsSorted(
     arity: Int,
-    cast: java.util.Iterator[_] => Any,
+    cast: java.util.Iterator[?] => Any,
     comparator: Comparator[Row]
-  ): jList[_] => List[Any] = {
-    (rows: jList[_]) =>
+  ): jList[?] => List[Any] = {
+    (rows: jList[?]) =>
       val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
       rows.asScala.foreach {
         case row: jMap[_, _] =>
@@ -132,9 +130,9 @@ trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
   }
 
   final private def resolveNested(
-    handleMaps: jList[_] => List[Any]
-  ): jIterator[_] => List[Any] = {
-    (it: jIterator[_]) =>
+    handleMaps: jList[?] => List[Any]
+  ): jIterator[?] => List[Any] = {
+    (it: jIterator[?]) =>
       try {
         it.next match {
           case maps: jList[_] => handleMaps(maps)
@@ -148,26 +146,26 @@ trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
 
 
   final private def pullLeaf1(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]]
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1) = pullCasts
-    val cast     = (it: java.util.Iterator[_]) => c1(it)
+    val cast     = (it: java.util.Iterator[?]) => c1(it)
     resolveNested(
       optComparator.fold {
         val list = new jArrayList[Any](1)
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           val isSets = optNestedLeafIsSet.getOrElse {
             val rowsIt = rows.iterator()
             var isSet  = false
             var search = true
             while (search && rowsIt.hasNext) {
-              val rowIt = rowsIt.next.asInstanceOf[jMap[_, _]].values().iterator()
+              val rowIt = rowsIt.next.asInstanceOf[jMap[?, ?]].values().iterator()
               while (search && rowIt.hasNext) {
                 rowIt.next match {
                   case "__none__" => ()
 
-                  case value: jMap[_, _] if value.values().iterator().next.isInstanceOf[jList[_]] =>
+                  case value: jMap[_, _] if value.values().iterator().next.isInstanceOf[jList[?]] =>
                     isSet = true
                     search = false
                     optNestedLeafIsSet = Some(true)
@@ -214,7 +212,7 @@ trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
           }
 
       } { comparator =>
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
@@ -228,11 +226,11 @@ trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
   }
 
   final private def pullLeaf2(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]]
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2) = pullCasts
-    val cast         = (it: java.util.Iterator[_]) =>
+    val cast = (it: java.util.Iterator[?]) =>
       (
         c1(it),
         c2(it)
@@ -241,11 +239,11 @@ trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
   }
 
   final private def pullLeaf3(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]]
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3) = pullCasts
-    val cast             = (it: java.util.Iterator[_]) =>
+    val cast = (it: java.util.Iterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -255,11 +253,11 @@ trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
   }
 
   final private def pullLeaf4(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]]
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4) = pullCasts
-    val cast                 = (it: java.util.Iterator[_]) =>
+    val cast = (it: java.util.Iterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -270,11 +268,11 @@ trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
   }
 
   final private def pullLeaf5(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]]
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5) = pullCasts
-    val cast                     = (it: java.util.Iterator[_]) =>
+    val cast = (it: java.util.Iterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -286,11 +284,11 @@ trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
   }
 
   final private def pullLeaf6(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]]
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6) = pullCasts
-    val cast                         = (it: java.util.Iterator[_]) =>
+    val cast = (it: java.util.Iterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -303,11 +301,11 @@ trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
   }
 
   final private def pullLeaf7(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]]
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7) = pullCasts
-    val cast                             = (it: java.util.Iterator[_]) =>
+    val cast = (it: java.util.Iterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -321,11 +319,11 @@ trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
   }
 
   final private def pullLeaf8(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]]
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8) = pullCasts
-    val cast                                 = (it: java.util.Iterator[_]) =>
+    val cast = (it: java.util.Iterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -340,11 +338,11 @@ trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
   }
 
   final private def pullLeaf9(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]]
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9) = pullCasts
-    val cast                                     = (it: java.util.Iterator[_]) =>
+    val cast = (it: java.util.Iterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -360,11 +358,11 @@ trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
   }
 
   final private def pullLeaf10(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]]
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10) = pullCasts
-    val cast                                          = (it: java.util.Iterator[_]) =>
+    val cast = (it: java.util.Iterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -381,11 +379,11 @@ trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
   }
 
   final private def pullLeaf11(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]]
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) = pullCasts
-    val cast                                               = (it: java.util.Iterator[_]) =>
+    val cast = (it: java.util.Iterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -403,11 +401,11 @@ trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
   }
 
   final private def pullLeaf12(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]]
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12) = pullCasts
-    val cast                                                    = (it: java.util.Iterator[_]) =>
+    val cast = (it: java.util.Iterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -426,11 +424,11 @@ trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
   }
 
   final private def pullLeaf13(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]]
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13) = pullCasts
-    val cast                                                         = (it: java.util.Iterator[_]) =>
+    val cast = (it: java.util.Iterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -450,11 +448,11 @@ trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
   }
 
   final private def pullLeaf14(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]]
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14) = pullCasts
-    val cast                                                              = (it: java.util.Iterator[_]) =>
+    val cast = (it: java.util.Iterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -475,11 +473,11 @@ trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
   }
 
   final private def pullLeaf15(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]]
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15) = pullCasts
-    val cast                                                                   = (it: java.util.Iterator[_]) =>
+    val cast = (it: java.util.Iterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -501,11 +499,11 @@ trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
   }
 
   final private def pullLeaf16(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]]
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16) = pullCasts
-    val cast                                                                        = (it: java.util.Iterator[_]) =>
+    val cast = (it: java.util.Iterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -528,11 +526,11 @@ trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
   }
 
   final private def pullLeaf17(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]]
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17) = pullCasts
-    val cast                                                                             = (it: java.util.Iterator[_]) =>
+    val cast = (it: java.util.Iterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -556,11 +554,11 @@ trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
   }
 
   final private def pullLeaf18(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]]
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18) = pullCasts
-    val cast                                                                                  = (it: java.util.Iterator[_]) =>
+    val cast = (it: java.util.Iterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -585,11 +583,11 @@ trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
   }
 
   final private def pullLeaf19(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]]
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19) = pullCasts
-    val cast                                                                                       = (it: java.util.Iterator[_]) =>
+    val cast = (it: java.util.Iterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -615,11 +613,11 @@ trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
   }
 
   final private def pullLeaf20(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]]
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20) = pullCasts
-    val cast                                                                                            = (it: java.util.Iterator[_]) =>
+    val cast = (it: java.util.Iterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -646,11 +644,11 @@ trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
   }
 
   final private def pullLeaf21(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]]
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21) = pullCasts
-    val cast                                                                                                 = (it: java.util.Iterator[_]) =>
+    val cast = (it: java.util.Iterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -678,11 +676,11 @@ trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
   }
 
   final private def pullLeaf22(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]]
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21, c22) = pullCasts
-    val cast                                                                                                      = (it: java.util.Iterator[_]) =>
+    val cast = (it: java.util.Iterator[?]) =>
       (
         c1(it),
         c2(it),

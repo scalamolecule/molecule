@@ -9,29 +9,29 @@ import java.util.{Date, UUID, Iterator => jIterator, List => jList, Map => jMap,
 trait LambdasOne extends ResolveBase {
 
   // Single sample value extracted from clojure LazySeq
-  private lazy val firstIdx           : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
-  private lazy val firstString        : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
-  private lazy val firstInt           : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).toString.toInt.asInstanceOf[AnyRef]
-  private lazy val firstLong          : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
-  private lazy val firstFloat         : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
-  private lazy val firstDouble        : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
-  private lazy val firstBoolean       : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
-  private lazy val firstBigInt        : AnyRef => AnyRef = (v: AnyRef) => BigInt(v.asInstanceOf[jList[_]].get(0).asInstanceOf[jBigInt]).asInstanceOf[AnyRef]
-  private lazy val firstBigDecimal    : AnyRef => AnyRef = (v: AnyRef) => BigDecimal(v.asInstanceOf[jList[_]].get(0).asInstanceOf[jBigDecimal]).asInstanceOf[AnyRef]
-  private lazy val firstDate          : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
-  private lazy val firstDuration      : AnyRef => AnyRef = (v: AnyRef) => Duration.parse(v.asInstanceOf[jList[_]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
-  private lazy val firstInstant       : AnyRef => AnyRef = (v: AnyRef) => Instant.parse(v.asInstanceOf[jList[_]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
-  private lazy val firstLocalDate     : AnyRef => AnyRef = (v: AnyRef) => LocalDate.parse(v.asInstanceOf[jList[_]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
-  private lazy val firstLocalTime     : AnyRef => AnyRef = (v: AnyRef) => LocalTime.parse(v.asInstanceOf[jList[_]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
-  private lazy val firstLocalDateTime : AnyRef => AnyRef = (v: AnyRef) => LocalDateTime.parse(v.asInstanceOf[jList[_]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
-  private lazy val firstOffsetTime    : AnyRef => AnyRef = (v: AnyRef) => OffsetTime.parse(v.asInstanceOf[jList[_]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
-  private lazy val firstOffsetDateTime: AnyRef => AnyRef = (v: AnyRef) => OffsetDateTime.parse(v.asInstanceOf[jList[_]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
-  private lazy val firstZonedDateTime : AnyRef => AnyRef = (v: AnyRef) => ZonedDateTime.parse(v.asInstanceOf[jList[_]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
-  private lazy val firstUUID          : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
-  private lazy val firstURI           : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
-  private lazy val firstByte          : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[Integer].toByte.asInstanceOf[AnyRef]
-  private lazy val firstShort         : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[Integer].toShort.asInstanceOf[AnyRef]
-  private lazy val firstChar          : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[String].charAt(0).asInstanceOf[AnyRef]
+  private lazy val firstIdx           : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[?]].get(0).asInstanceOf[AnyRef]
+  private lazy val firstString        : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[?]].get(0).asInstanceOf[AnyRef]
+  private lazy val firstInt           : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[?]].get(0).toString.toInt.asInstanceOf[AnyRef]
+  private lazy val firstLong          : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[?]].get(0).asInstanceOf[AnyRef]
+  private lazy val firstFloat         : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[?]].get(0).asInstanceOf[AnyRef]
+  private lazy val firstDouble        : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[?]].get(0).asInstanceOf[AnyRef]
+  private lazy val firstBoolean       : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[?]].get(0).asInstanceOf[AnyRef]
+  private lazy val firstBigInt        : AnyRef => AnyRef = (v: AnyRef) => BigInt(v.asInstanceOf[jList[?]].get(0).asInstanceOf[jBigInt]).asInstanceOf[AnyRef]
+  private lazy val firstBigDecimal    : AnyRef => AnyRef = (v: AnyRef) => BigDecimal(v.asInstanceOf[jList[?]].get(0).asInstanceOf[jBigDecimal]).asInstanceOf[AnyRef]
+  private lazy val firstDate          : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[?]].get(0).asInstanceOf[AnyRef]
+  private lazy val firstDuration      : AnyRef => AnyRef = (v: AnyRef) => Duration.parse(v.asInstanceOf[jList[?]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
+  private lazy val firstInstant       : AnyRef => AnyRef = (v: AnyRef) => Instant.parse(v.asInstanceOf[jList[?]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
+  private lazy val firstLocalDate     : AnyRef => AnyRef = (v: AnyRef) => LocalDate.parse(v.asInstanceOf[jList[?]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
+  private lazy val firstLocalTime     : AnyRef => AnyRef = (v: AnyRef) => LocalTime.parse(v.asInstanceOf[jList[?]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
+  private lazy val firstLocalDateTime : AnyRef => AnyRef = (v: AnyRef) => LocalDateTime.parse(v.asInstanceOf[jList[?]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
+  private lazy val firstOffsetTime    : AnyRef => AnyRef = (v: AnyRef) => OffsetTime.parse(v.asInstanceOf[jList[?]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
+  private lazy val firstOffsetDateTime: AnyRef => AnyRef = (v: AnyRef) => OffsetDateTime.parse(v.asInstanceOf[jList[?]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
+  private lazy val firstZonedDateTime : AnyRef => AnyRef = (v: AnyRef) => ZonedDateTime.parse(v.asInstanceOf[jList[?]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
+  private lazy val firstUUID          : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[?]].get(0).asInstanceOf[AnyRef]
+  private lazy val firstURI           : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[?]].get(0).asInstanceOf[AnyRef]
+  private lazy val firstByte          : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[?]].get(0).asInstanceOf[Integer].toByte.asInstanceOf[AnyRef]
+  private lazy val firstShort         : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[?]].get(0).asInstanceOf[Integer].toShort.asInstanceOf[AnyRef]
+  private lazy val firstChar          : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[?]].get(0).asInstanceOf[String].charAt(0).asInstanceOf[AnyRef]
 
   private lazy val set2setId            : AnyRef => AnyRef = set2set
   private lazy val set2setString        : AnyRef => AnyRef = set2set
@@ -58,10 +58,10 @@ trait LambdasOne extends ResolveBase {
   private lazy val set2setChar          : AnyRef => AnyRef = set2set((v: AnyRef) => v.asInstanceOf[String].charAt(0))
 
   private def set2set: AnyRef => AnyRef =
-    (v: AnyRef) => v.asInstanceOf[jSet[_]].toArray.toSet
+    (v: AnyRef) => v.asInstanceOf[jSet[?]].toArray.toSet
 
   private def set2set(value: AnyRef => Any): AnyRef => AnyRef =
-    (v: AnyRef) => v.asInstanceOf[jSet[_]].toArray.map(value).toSet
+    (v: AnyRef) => v.asInstanceOf[jSet[?]].toArray.map(value).toSet
 
   private lazy val vector2setId            : AnyRef => AnyRef = jvector2set
   private lazy val vector2setString        : AnyRef => AnyRef = jvector2set
@@ -345,224 +345,224 @@ trait LambdasOne extends ResolveBase {
   }
 
 
-  lazy val it2Id            : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2Id            : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none`   => nullValue
     case v: jLong => v
     case other    => unexpectedValue(other)
   }
-  lazy val it2String        : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2String        : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none`    => nullValue
     case v: String => v
     case other     => unexpectedValue(other)
   }
-  lazy val it2Int           : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2Int           : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     // Datomic can return both Integer or Long
     case `none`     => nullValue
     case v: jLong   => v.toInt
     case v: Integer => v.toInt
     case other      => unexpectedValue(other)
   }
-  lazy val it2Long          : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2Long          : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none`   => nullValue
     case v: jLong => v.toLong
     case other    => unexpectedValue(other)
   }
-  lazy val it2Float         : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2Float         : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none`    => nullValue
     case v: jFloat => v.toFloat
     case other     => unexpectedValue(other)
   }
-  lazy val it2Double        : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2Double        : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none`     => nullValue
     case v: jDouble => v.toDouble
     case other      => unexpectedValue(other)
   }
-  lazy val it2Boolean       : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2Boolean       : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none`      => nullValue
     case v: jBoolean => v
     case other       => unexpectedValue(other)
   }
-  lazy val it2BigInt        : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2BigInt        : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none`     => nullValue
     case v: jBigInt => BigInt(v)
     case other      => unexpectedValue(other)
   }
-  lazy val it2BigDecimal    : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2BigDecimal    : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none`         => nullValue
     case v: jBigDecimal => BigDecimal(v)
     case other          => unexpectedValue(other)
   }
-  lazy val it2Date          : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2Date          : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none`  => nullValue
     case v: Date => v
     case other   => unexpectedValue(other)
   }
-  lazy val it2Duration      : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2Duration      : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none`    => nullValue
     case v: String => Duration.parse(v)
     case other     => unexpectedValue(other)
   }
-  lazy val it2Instant       : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2Instant       : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none`    => nullValue
     case v: String => Instant.parse(v)
     case other     => unexpectedValue(other)
   }
-  lazy val it2LocalDate     : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2LocalDate     : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none`    => nullValue
     case v: String => LocalDate.parse(v)
     case other     => unexpectedValue(other)
   }
-  lazy val it2LocalTime     : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2LocalTime     : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none`    => nullValue
     case v: String => LocalTime.parse(v)
     case other     => unexpectedValue(other)
   }
-  lazy val it2LocalDateTime : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2LocalDateTime : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none`    => nullValue
     case v: String => LocalDateTime.parse(v)
     case other     => unexpectedValue(other)
   }
-  lazy val it2OffsetTime    : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2OffsetTime    : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none`    => nullValue
     case v: String => OffsetTime.parse(v)
     case other     => unexpectedValue(other)
   }
-  lazy val it2OffsetDateTime: jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2OffsetDateTime: jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none`    => nullValue
     case v: String => OffsetDateTime.parse(v)
     case other     => unexpectedValue(other)
   }
-  lazy val it2ZonedDateTime : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2ZonedDateTime : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none`    => nullValue
     case v: String => ZonedDateTime.parse(v)
     case other     => unexpectedValue(other)
   }
-  lazy val it2UUID          : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2UUID          : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none`  => nullValue
     case v: UUID => v
     case other   => unexpectedValue(other)
   }
-  lazy val it2URI           : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2URI           : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none` => nullValue
     case v: URI => v
     case other  => unexpectedValue(other)
   }
-  lazy val it2Byte          : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2Byte          : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none`     => nullValue
     case v: Integer => v.toByte
     case other      => unexpectedValue(other)
   }
-  lazy val it2Short         : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2Short         : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none`     => nullValue
     case v: Integer => v.toShort
     case other      => unexpectedValue(other)
   }
-  lazy val it2Char          : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2Char          : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none`    => nullValue
     case v: String => v.charAt(0)
     case other     => unexpectedValue(other)
   }
 
 
-  lazy val it2OptId            : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2OptId            : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none` => None
     case v      => Some(v)
   }
-  lazy val it2OptString        : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2OptString        : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none` => None
     case v      => Some(v.toString)
   }
-  lazy val it2OptInt           : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2OptInt           : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     // Datomic can return both Integer or Long
     case `none`     => None
     case v: Integer => Some(v.toInt)
     case v: jLong   => Some(v.toInt)
   }
-  lazy val it2OptLong          : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2OptLong          : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none` => None
     case v      => Some(v.asInstanceOf[jLong].toLong)
   }
-  lazy val it2OptFloat         : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2OptFloat         : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none` => None
     case v      => Some(v.asInstanceOf[jFloat].toFloat)
   }
-  lazy val it2OptDouble        : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2OptDouble        : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none` => None
     case v      => Some(v.asInstanceOf[jDouble].toDouble)
   }
-  lazy val it2OptBoolean       : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2OptBoolean       : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none` => None
     case v      => Some(v.asInstanceOf[Boolean])
   }
-  lazy val it2OptBigInt        : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2OptBigInt        : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none` => None
     case v      => Some(BigInt(v.asInstanceOf[jBigInt]))
   }
-  lazy val it2OptBigDecimal    : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2OptBigDecimal    : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none` => None
     case v      => Some(BigDecimal(v.asInstanceOf[jBigDecimal]))
   }
-  lazy val it2OptDate          : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2OptDate          : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none` => None
     case v      => Some(v.asInstanceOf[Date])
   }
-  lazy val it2OptDuration      : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2OptDuration      : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none`    => None
     case v: String => Some(Duration.parse(v))
     case other     => unexpectedValue(other)
   }
-  lazy val it2OptInstant       : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2OptInstant       : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none`    => None
     case v: String => Some(Instant.parse(v))
     case other     => unexpectedValue(other)
   }
-  lazy val it2OptLocalDate     : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2OptLocalDate     : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none`    => None
     case v: String => Some(LocalDate.parse(v))
     case other     => unexpectedValue(other)
   }
-  lazy val it2OptLocalTime     : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2OptLocalTime     : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none`    => None
     case v: String => Some(LocalTime.parse(v))
     case other     => unexpectedValue(other)
   }
-  lazy val it2OptLocalDateTime : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2OptLocalDateTime : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none`    => None
     case v: String => Some(LocalDateTime.parse(v))
     case other     => unexpectedValue(other)
   }
-  lazy val it2OptOffsetTime    : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2OptOffsetTime    : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none`    => None
     case v: String => Some(OffsetTime.parse(v))
     case other     => unexpectedValue(other)
   }
-  lazy val it2OptOffsetDateTime: jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2OptOffsetDateTime: jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none`    => None
     case v: String => Some(OffsetDateTime.parse(v))
     case other     => unexpectedValue(other)
   }
-  lazy val it2OptZonedDateTime : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2OptZonedDateTime : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none`    => None
     case v: String => Some(ZonedDateTime.parse(v))
     case other     => unexpectedValue(other)
   }
-  lazy val it2OptUUID          : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2OptUUID          : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none` => None
     case v      => Some(v.asInstanceOf[UUID])
   }
-  lazy val it2OptURI           : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2OptURI           : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none` => None
     case v      => Some(v.asInstanceOf[URI])
   }
-  lazy val it2OptByte          : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2OptByte          : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none` => None
     case v      => Some(v.asInstanceOf[Integer].toByte)
   }
-  lazy val it2OptShort         : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2OptShort         : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none` => None
     case v      => Some(v.asInstanceOf[Integer].toShort)
   }
-  lazy val it2OptChar          : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  lazy val it2OptChar          : jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case `none` => None
     case v      => Some(v.asInstanceOf[String].charAt(0))
   }

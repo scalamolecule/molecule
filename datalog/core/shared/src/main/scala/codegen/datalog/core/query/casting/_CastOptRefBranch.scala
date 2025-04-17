@@ -17,10 +17,10 @@ object _CastOptRefBranch extends DatomicGenBase("CastOptRefBranch", "/query/cast
        |trait $fileName_ extends JavaConversions {
        |
        |  final protected def pullOptRefBranch(
-       |    pullCasts0: List[jIterator[_] => Any],
-       |    pullNested: jIterator[_] => Option[Any],
+       |    pullCasts0: List[jIterator[?] => Any],
+       |    pullNested: jIterator[?] => Option[Any],
        |    refDepth: Int
-       |  ): jIterator[_] => Option[Any] = {
+       |  ): jIterator[?] => Option[Any] = {
        |    val pullCasts = pullCasts0 :+ pullNested
        |    pullCasts.length match {
        |      $pullBranchX
@@ -29,7 +29,7 @@ object _CastOptRefBranch extends DatomicGenBase("CastOptRefBranch", "/query/cast
        |
        |  final private def flatten(
        |    list: jArrayList[Any],
-       |    map: jMap[_, _],
+       |    map: jMap[?, ?],
        |    max: Int,
        |    cur: Int
        |  ): jArrayList[Any] = {
@@ -44,14 +44,14 @@ object _CastOptRefBranch extends DatomicGenBase("CastOptRefBranch", "/query/cast
        |  final private def resolve(
        |    arity: Int,
        |    refDepth: Int,
-       |    cast: java.util.Iterator[_] => Any
-       |  ): jIterator[_] => Option[Any] = {
+       |    cast: java.util.Iterator[?] => Any
+       |  ): jIterator[?] => Option[Any] = {
        |    val list      = new jArrayList[Any](arity)
-       |    val handleMap = (optionalData: jMap[_, _]) => {
+       |    val handleMap = (optionalData: jMap[?, ?]) => {
        |      list.clear()
        |      Some(cast(flatten(list, optionalData, refDepth, 0).iterator()))
        |    }
-       |    (it: jIterator[_]) =>
+       |    (it: jIterator[?]) =>
        |      try {
        |        it.next match {
        |          case maps: jMap[_, _] => handleMap(maps)
@@ -72,11 +72,11 @@ object _CastOptRefBranch extends DatomicGenBase("CastOptRefBranch", "/query/cast
     val body     =
       s"""
          |  final private def pullBranch$i(
-         |    pullCasts: List[jIterator[_] => Any],
+         |    pullCasts: List[jIterator[?] => Any],
          |    refDepth: Int
-         |  ): jIterator[_] => Option[Any] = {
+         |  ): jIterator[?] => Option[Any] = {
          |    val List($casters) = pullCasts
-         |    resolve($i, refDepth, (it: java.util.Iterator[_]) =>
+         |    resolve($i, refDepth, (it: java.util.Iterator[?]) =>
          |      (
          |        $castings
          |      )

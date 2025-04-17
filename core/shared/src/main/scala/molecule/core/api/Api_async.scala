@@ -64,7 +64,7 @@ trait Api_async extends Keywords with ModelUtils { spi: Spi_async =>
 }
 
 
-trait Api_async_transact { api: Api_async with Spi_async =>
+trait Api_async_transact { api: Api_async & Spi_async =>
 
   def transact(a1: Action, a2: Action, aa: Action*)
               (implicit conn: Conn, ec: EC): Future[Seq[TxReport]] = transact(a1 +: a2 +: aa)

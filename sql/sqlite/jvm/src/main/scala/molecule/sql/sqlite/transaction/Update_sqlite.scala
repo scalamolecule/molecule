@@ -6,7 +6,7 @@ import molecule.sql.core.transaction.SqlUpdate
 import molecule.sql.core.transaction.strategy.SqlOps
 
 trait Update_sqlite
-  extends SqlUpdate { self: ResolveUpdate with SqlOps =>
+  extends SqlUpdate { self: ResolveUpdate & SqlOps =>
 
   override def handleReplaceAll[T](attr: String, vs: Seq[T]) = s"REPLACE($attr, ?, '${vs(1)}')"
 
@@ -254,7 +254,7 @@ trait Update_sqlite
 
   // Helpers -------------------------------------------------------------------
 
-  private def updateIterableEq[T, M[_] <: Iterable[_]](
+  private def updateIterableEq[T, M[_] <: Iterable[?]](
     ent: String,
     attr: String,
     optRef: Option[String],

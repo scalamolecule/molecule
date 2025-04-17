@@ -9,7 +9,7 @@ import molecule.sql.core.transaction.strategy.SqlOps
 
 trait Save_mariadb
   extends SqlSave
-    with BaseHelpers { self: ResolveSave with SqlOps =>
+    with BaseHelpers { self: ResolveSave & SqlOps =>
 
   override protected def addSet[T](
     ent: String,

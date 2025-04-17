@@ -5,7 +5,7 @@ import molecule.core.ast.DataModel._
 import molecule.core.query.{Model2Query, QueryExpr}
 import scala.reflect.ClassTag
 
-trait QueryExprOne extends QueryExpr { self: Model2Query with SqlQueryBase with LambdasOne =>
+trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & LambdasOne =>
 
   override protected def queryIdMan(a: AttrOneMan): Unit = queryAttrOneMan(a)
   override protected def queryIdTac(a: AttrOneTac): Unit = queryAttrOneTac(a)

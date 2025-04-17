@@ -17,10 +17,10 @@ object _OptRef extends CoreGenBase("OptRef", "/api") {
   case class Trait(arity: Int) extends TemplateVals(arity) {
     val body =
       s"""
-         |trait ${fileName}Op${_0}[${`A..V, `}Entity[${`_, _, _`}]] {
+         |trait ${fileName}Op${a0}[${`A..V, `}Entity[${`_, _, _`}]] {
          |  protected def _optRef[RefTpl](optRefElements: List[Element]): Entity[${`A..V, `}Option[RefTpl], Any] = ???
          |}
-         |trait $fileName_$arity[${`A..V, `}Entity[${`_, _, _`}]] { self: ${fileName}Op${_0}[${`A..V, `}Entity] =>
+         |trait $fileName_$arity[${`A..V, `}Entity[${`_, _, _`}]] { self: ${fileName}Op${a0}[${`A..V, `}Entity] =>
          |  final def ?[a                                                               ] (optRef: Molecule_01[a                                                               ]): Entity[${`A..V, `}Option[a                                                                 ], Any] = _optRef[a                                                                 ](optRef.elements)
          |  final def ?[a, b                                                            ] (optRef: Molecule_02[a, b                                                            ]): Entity[${`A..V, `}Option[(a, b                                                            )], Any] = _optRef[(a, b                                                            )](optRef.elements)
          |  final def ?[a, b, c                                                         ] (optRef: Molecule_03[a, b, c                                                         ]): Entity[${`A..V, `}Option[(a, b, c                                                         )], Any] = _optRef[(a, b, c                                                         )](optRef.elements)

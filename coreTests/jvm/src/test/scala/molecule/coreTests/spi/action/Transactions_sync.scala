@@ -12,7 +12,7 @@ import molecule.coreTests.setup.{DbProviders, Test, TestUtils}
 //trait Transactions_sync extends CoreTestSuite with Api_sync with Api_sync_transact { spi: Spi_sync =>
 case class Transactions_sync(
   suite: Test,
-  api: Api_sync_transact with Api_sync with Spi_sync with DbProviders
+  api: Api_sync_transact & Api_sync & Spi_sync & DbProviders
 ) extends TestUtils {
 
   import api._

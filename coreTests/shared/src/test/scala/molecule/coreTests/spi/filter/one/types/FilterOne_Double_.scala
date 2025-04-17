@@ -9,7 +9,7 @@ import molecule.coreTests.setup._
 
 case class FilterOne_Double_(
   suite: Test,
-  api: Api_async with Spi_async with DbProviders
+  api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 
   import api._

@@ -4,25 +4,25 @@ import molecule.coreTests.setup.{MUnitSuiteWithArrays, Test}
 import molecule.coreTests.spi.relation.nested._
 import molecule.sql.h2.setup.Api_h2_async
 
-class NestedBasic extends Test {
+class NestedBasicTest extends Test {
   NestedBasic(this, Api_h2_async)
 }
-class NestedExpr extends Test {
+class NestedExprTest extends Test {
   NestedExpr(this, Api_h2_async)
 }
-class NestedLevels extends Test {
+class NestedLevelsTest extends Test {
   NestedLevels(this, Api_h2_async)
 }
-class NestedOptional extends Test {
+class NestedOptionalTest extends Test {
   NestedOptional(this, Api_h2_async)
 }
-class NestedRef extends Test {
+class NestedRefTest extends Test {
   NestedRef(this, Api_h2_async)
 }
-class NestedSemantics extends Test {
+class NestedSemanticsTest extends Test {
   NestedSemantics(this, Api_h2_async)
 }
-class NestedTypes extends MUnitSuiteWithArrays {
+class NestedTypesTest extends MUnitSuiteWithArrays {
   NestedTypes(this, Api_h2_async)
 }
 

@@ -4,12 +4,12 @@ import molecule.coreTests.setup.Test
 import molecule.coreTests.spi.filterAttr.set._
 import molecule.sql.sqlite.setup.Api_sqlite_async
 
-class Adjacent extends Test {
+class AdjacentTest extends Test {
   Adjacent(this, Api_sqlite_async)
 }
-class CrossEntity extends Test {
+class CrossEntityTest extends Test {
   CrossEntity(this, Api_sqlite_async)
 }
-class Types extends Test {
+class TypesTest extends Test {
   Types(this, Api_sqlite_async)
 }

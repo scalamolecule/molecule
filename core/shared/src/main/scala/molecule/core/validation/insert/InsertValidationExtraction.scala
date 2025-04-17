@@ -293,13 +293,13 @@ trait InsertValidationExtraction
   ): Product => Seq[InsertError] = {
     optValidator.fold {
       (tpl: Product) =>
-        if (mandatory && tpl.productElement(tplIndex).asInstanceOf[Set[_]].isEmpty)
+        if (mandatory && tpl.productElement(tplIndex).asInstanceOf[Set[?]].isEmpty)
           noEmptyCollection("Set", ent, attr, tplIndex) else Nil
 
     } { validator =>
       (tpl: Product) =>
         val validate = validator(tpl)
-        val set      = tpl.productElement(tplIndex).asInstanceOf[Set[_]]
+        val set      = tpl.productElement(tplIndex).asInstanceOf[Set[?]]
         if (mandatory && set.isEmpty) {
           noEmptyCollection("Set", ent, attr, tplIndex)
         } else {
@@ -394,13 +394,13 @@ trait InsertValidationExtraction
   ): Product => Seq[InsertError] = {
     optValidator.fold {
       (tpl: Product) =>
-        if (mandatory && tpl.productElement(tplIndex).asInstanceOf[Seq[_]].isEmpty)
+        if (mandatory && tpl.productElement(tplIndex).asInstanceOf[Seq[?]].isEmpty)
           noEmptyCollection("Seq", ent, attr, tplIndex) else Nil
 
     } { validator =>
       (tpl: Product) =>
         val validate = validator(tpl)
-        val seq      = tpl.productElement(tplIndex).asInstanceOf[Seq[_]]
+        val seq      = tpl.productElement(tplIndex).asInstanceOf[Seq[?]]
         if (mandatory && seq.isEmpty) {
           noEmptyCollection("Seq", ent, attr, tplIndex)
         } else {
@@ -495,13 +495,13 @@ trait InsertValidationExtraction
   ): Product => Seq[InsertError] = {
     optValidator.fold {
       (tpl: Product) =>
-        if (mandatory && tpl.productElement(tplIndex).asInstanceOf[Map[String, _]].isEmpty)
+        if (mandatory && tpl.productElement(tplIndex).asInstanceOf[Map[String, ?]].isEmpty)
           noEmptyCollection("Map", ent, attr, tplIndex) else Nil
 
     } { validator =>
       (tpl: Product) =>
         val validate = validator(tpl)
-        val map      = tpl.productElement(tplIndex).asInstanceOf[Map[String, _]]
+        val map      = tpl.productElement(tplIndex).asInstanceOf[Map[String, ?]]
         if (mandatory && map.isEmpty) {
           noEmptyCollection("Map", ent, attr, tplIndex)
         } else {

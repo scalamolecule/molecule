@@ -12,7 +12,7 @@ import scala.jdk.CollectionConverters._
 
 object MakeTxReport {
 
-  def apply(rawTxReport: jMap[_, _]): TxReport = {
+  def apply(rawTxReport: jMap[?, ?]): TxReport = {
     val dbAfter: Database = rawTxReport.get(DB_AFTER).asInstanceOf[Database]
     val t      : Long     = dbAfter.basisT
     val tx     : Long     = Peer.toTx(t).asInstanceOf[Long]
@@ -21,7 +21,7 @@ object MakeTxReport {
       val allIds           = ListBuffer.empty[Long]
       val refs             = mutable.Set.empty[Long]
       val datoms           = rawTxReport.get(TX_DATA).asInstanceOf[jList[PeerDatom]].iterator
-      val tempIds          = rawTxReport.get(TEMPIDS).asInstanceOf[jMap[_, _]].values().asScala.toBuffer
+      val tempIds          = rawTxReport.get(TEMPIDS).asInstanceOf[jMap[?, ?]].values().asScala.toBuffer
       var datom: PeerDatom = null
       var e                = 0L
 

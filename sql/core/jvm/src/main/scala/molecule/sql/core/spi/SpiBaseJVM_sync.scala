@@ -381,7 +381,7 @@ trait SpiBaseJVM_sync
 
   // Util --------------------------------------
 
-  def getModel2SqlQuery(elements: List[Element]): Model2SqlQuery with SqlQueryBase
+  def getModel2SqlQuery(elements: List[Element]): Model2SqlQuery & SqlQueryBase
 
 
   def getResultSet[Tpl](q0: Query[Tpl], conn0: Conn): (Row, Row => Any) = {

@@ -10,7 +10,7 @@ import scala.language.implicitConversions
 
 case class FormatVariables(
   suite: Test,
-  api: Api_async with Spi_async with DbProviders
+  api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 
   // As with FormatConstants, these test mainly check the formatting in

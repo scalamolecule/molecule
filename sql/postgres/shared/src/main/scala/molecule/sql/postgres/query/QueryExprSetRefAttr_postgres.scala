@@ -5,7 +5,7 @@ import molecule.sql.core.query.{QueryExprSetRefAttr, SqlQueryBase}
 
 trait QueryExprSetRefAttr_postgres
   extends QueryExprSetRefAttr
-    with LambdasSet_postgres { self: Model2Query with SqlQueryBase =>
+    with LambdasSet_postgres { self: Model2Query & SqlQueryBase =>
 
   private def refMatchArray(sqlArray: (String, Int)): String = {
     s"""(

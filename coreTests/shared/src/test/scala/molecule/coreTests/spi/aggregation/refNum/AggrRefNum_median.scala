@@ -8,7 +8,7 @@ import molecule.coreTests.setup._
 
 case class AggrRefNum_median(
   suite: Test,
-  api: Api_async with Spi_async with DbProviders
+  api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 
   // Median of unique values (Set semantics)

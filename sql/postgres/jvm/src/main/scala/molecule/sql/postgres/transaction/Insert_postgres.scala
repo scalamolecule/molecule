@@ -6,7 +6,7 @@ import molecule.sql.core.transaction.SqlInsert
 import molecule.sql.core.transaction.strategy.SqlOps
 
 trait Insert_postgres
-  extends SqlInsert { self: ResolveInsert with InsertResolvers_ with SqlOps =>
+  extends SqlInsert { self: ResolveInsert & InsertResolvers_ & SqlOps =>
 
   override protected def addMap[T](
     ent: String,
@@ -19,7 +19,7 @@ trait Insert_postgres
     val paramIndex   = insertAction.setCol(attr, "::jsonb")
     val stableInsert = insertAction
     (tpl: Product) => {
-      tpl.productElement(tplIndex).asInstanceOf[Map[String, _]] match {
+      tpl.productElement(tplIndex).asInstanceOf[Map[String, ?]] match {
         case map if map.nonEmpty =>
           stableInsert.addColSetter((ps: PS) =>
             ps.setString(

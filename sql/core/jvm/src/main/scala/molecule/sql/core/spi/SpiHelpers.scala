@@ -476,7 +476,7 @@ trait SpiHelpers extends ModelUtils {
       val resultSet = array.getResultSet
       var set       = Set.empty[T]
       while (resultSet.next()) {
-        resultSet.getArray(2).getArray.asInstanceOf[Array[_]].foreach { value =>
+        resultSet.getArray(2).getArray.asInstanceOf[Array[?]].foreach { value =>
           set += j2s(value)
         }
       }
@@ -488,7 +488,7 @@ trait SpiHelpers extends ModelUtils {
     val resultSet = row
     var set       = Set.empty[T]
     while (resultSet.next()) {
-      resultSet.getArray(1).getArray.asInstanceOf[Array[_]].foreach { value =>
+      resultSet.getArray(1).getArray.asInstanceOf[Array[?]].foreach { value =>
         set += j2s(value)
       }
     }

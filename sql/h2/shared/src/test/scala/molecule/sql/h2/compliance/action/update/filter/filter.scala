@@ -4,15 +4,15 @@ import molecule.coreTests.setup.Test
 import molecule.coreTests.spi.action.update.filter._
 import molecule.sql.h2.setup.Api_h2_async
 
-class FilterOne extends Test {
+class FilterOneTest extends Test {
   FilterOne(this, Api_h2_async)
 }
-class FilterSet extends Test {
+class FilterSetTest extends Test {
   FilterSet(this, Api_h2_async)
 }
-class FilterSeq extends Test {
+class FilterSeqTest extends Test {
   FilterSeq(this, Api_h2_async)
 }
-class FilterMap extends Test {
+class FilterMapTest extends Test {
   FilterMap(this, Api_h2_async)
 }

@@ -4,6 +4,6 @@ import molecule.coreTests.setup.Test
 import molecule.coreTests.spi.validation._
 import molecule.sql.mysql.setup.Api_mysql_async
 
-class Enumerations extends Test {
+class EnumerationsTest extends Test {
   Enumerations(this, Api_mysql_async)
 }

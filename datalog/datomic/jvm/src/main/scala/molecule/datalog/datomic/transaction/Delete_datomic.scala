@@ -39,7 +39,7 @@ trait Delete_datomic
 
     lazy val db = conn.peerConn.db()
     val ids1 = filterQuery.fold(ids)(query =>
-      Peer.q(query, db +: inputs: _*).asScala.toList.map(_.get(0))
+      Peer.q(query, db +: inputs*).asScala.toList.map(_.get(0))
     )
 
     // Add retract stmts

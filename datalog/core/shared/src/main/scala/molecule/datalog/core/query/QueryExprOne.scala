@@ -8,7 +8,7 @@ import scala.reflect.ClassTag
 trait QueryExprOne[Tpl]
   extends SortOneSpecial[Tpl]
     with SortOneOpt_[Tpl]
-    with QueryExpr { self: Model2DatomicQuery[Tpl] with LambdasOne =>
+    with QueryExpr { self: Model2DatomicQuery[Tpl] & LambdasOne =>
 
   override protected def queryAttrOneMan(attr: AttrOneMan): Unit = {
     attrIndex += 1
@@ -75,7 +75,7 @@ trait QueryExprOne[Tpl]
     attrIndex += 1
     val (e, a) = (es.last, s":${attr.ent}/${attr.attr}")
     attr match {
-      case at: AttrOneOptID             => opt(attr, e, a, at.vs, resOptId, sortOneOptId(at, attrIndex), sortOneID(at, attrIndex))
+      case at: AttrOneOptID             => opt(attr, e, a, at.vs, resOptId, sortOneOptID(at, attrIndex), sortOneID(at, attrIndex))
       case at: AttrOneOptString         => opt(attr, e, a, at.vs, resOptString, sortOneOptString(at, attrIndex), sortOneString(at, attrIndex))
       case at: AttrOneOptInt            => opt(attr, e, a, at.vs, resOptInt, sortOneOptInt(at, attrIndex), sortOneInt(at, attrIndex))
       case at: AttrOneOptLong           => opt(attr, e, a, at.vs, resOptLong, sorterOneOptLong(at, attrIndex), sortOneLong(at, attrIndex))

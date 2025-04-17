@@ -4,21 +4,21 @@ import molecule.coreTests.setup.Test
 import molecule.coreTests.spi.aggregation.ref._
 import molecule.sql.sqlite.setup.Api_sqlite_async
 
-class AggrRef_count extends Test {
+class AggrRef_countTest extends Test {
   AggrRef_count(this, Api_sqlite_async)
 }
-class AggrRef_distinct extends Test {
+class AggrRef_distinctTest extends Test {
   AggrRef_distinct(this, Api_sqlite_async)
 }
-class AggrRef_min_max extends Test {
+class AggrRef_min_maxTest extends Test {
   AggrRef_min_max(this, Api_sqlite_async)
 }
-class AggrRef_min_max_n extends Test {
+class AggrRef_min_max_nTest extends Test {
   AggrRef_min_max_n(this, Api_sqlite_async)
 }
-class AggrRef_sample extends Test {
+class AggrRef_sampleTest extends Test {
   AggrRef_sample(this, Api_sqlite_async)
 }
-class AggrRef_sample_n extends Test {
+class AggrRef_sample_nTest extends Test {
   AggrRef_sample_n(this, Api_sqlite_async)
 }

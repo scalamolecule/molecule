@@ -1,6 +1,6 @@
 ![](project/resources/Molecule-logo.png)
 
-Molecule is a Scala library to query SQL and NoSQL databases with the words of your domain.
+Molecule is a Scala 3 library to query SQL and NoSQL databases with the words of your domain.
 
 Compose an immutable "molecule" data structure:
 ```scala
@@ -51,7 +51,7 @@ Data can also be fetched asynchronously in a `Future` or `ZIO`.
 
 - Support for [PostgreSQL](https://www.postgresql.org), [SQlite](https://sqlite.org), [MySQL](https://www.mysql.com), [MariaDB](https://mariadb.com), [H2](https://h2database.com/html/main.html) and [Datomic](http://www.datomic.com) databases. More can easily be added
 - Molecules for any database behave identically. Each db pass the same SPI compliance test suite (+1700 tests).
-- Targets Scala 3.3, 2.13 and 2.12 on JVM and JS platforms
+- Targets Scala >=3.3.5 on JVM and JS platforms
 - Synchronous, Asynchronous (Future), ZIO and cats.effect.IO APIs
 - All Scala primitive types and collection types available as molecule attributes (!)
 - Typed methods to compose even complex molecules:
@@ -196,7 +196,7 @@ sbt.version = 1.10.11
 `project/plugins.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.12.1")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.13.0")
 ```
 
 `build.sbt`:
@@ -207,12 +207,12 @@ lazy val yourProject = project.in(file("app"))
   .settings(
     libraryDependencies ++= Seq(
       // One or more of:
-      "org.scalamolecule" %%% "molecule-sql-postgres" % "0.17.0",
-      "org.scalamolecule" %%% "molecule-sql-sqlite" % "0.17.0",
-      "org.scalamolecule" %%% "molecule-sql-mysql" % "0.17.0",
-      "org.scalamolecule" %%% "molecule-sql-mariadb" % "0.17.0",
-      "org.scalamolecule" %%% "molecule-sql-h2" % "0.17.0",
-      "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.17.0",
+      "org.scalamolecule" %%% "molecule-sql-postgres" % "0.18.0",
+      "org.scalamolecule" %%% "molecule-sql-sqlite" % "0.18.0",
+      "org.scalamolecule" %%% "molecule-sql-mysql" % "0.18.0",
+      "org.scalamolecule" %%% "molecule-sql-mariadb" % "0.18.0",
+      "org.scalamolecule" %%% "molecule-sql-h2" % "0.18.0",
+      "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.18.0",
     ),
     
     // Paths to directories with your domain structure definition files

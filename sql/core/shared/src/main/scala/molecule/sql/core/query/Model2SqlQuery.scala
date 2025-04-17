@@ -11,7 +11,7 @@ abstract class Model2SqlQuery(elements0: List[Element])
   extends Model2Query
     with QueryExprRef
     with ModelUtils
-    with MoleculeLogging { self: QueryExpr with SqlQueryBase =>
+    with MoleculeLogging { self: QueryExpr & SqlQueryBase =>
 
 
   final def getSqlQuery(

@@ -6,84 +6,84 @@ import molecule.coreTests.spi.filter.set.ref._
 import molecule.coreTests.spi.filter.set.types._
 import molecule.sql.sqlite.setup.Api_sqlite_async
 
-class FilterSet_String_ extends Test {
+class FilterSet_String_Test extends Test {
   FilterSet_String_(this, Api_sqlite_async)
 }
-class FilterSet_Int extends Test {
+class FilterSet_IntTest extends Test {
   FilterSet_Int(this, Api_sqlite_async)
 }
-class FilterSet_Long_ extends Test {
+class FilterSet_Long_Test extends Test {
   FilterSet_Long_(this, Api_sqlite_async)
 }
-class FilterSet_Float_ extends Test {
+class FilterSet_Float_Test extends Test {
   FilterSet_Float_(this, Api_sqlite_async)
 }
-class FilterSet_Double_ extends Test {
+class FilterSet_Double_Test extends Test {
   FilterSet_Double_(this, Api_sqlite_async)
 }
-class FilterSet_Boolean extends Test {
+class FilterSet_BooleanTest extends Test {
   FilterSet_Boolean(this, Api_sqlite_async)
 }
-class FilterSet_BigInt_ extends Test {
+class FilterSet_BigInt_Test extends Test {
   FilterSet_BigInt_(this, Api_sqlite_async)
 }
-class FilterSet_BigDecimal_ extends Test {
+class FilterSet_BigDecimal_Test extends Test {
   FilterSet_BigDecimal_(this, Api_sqlite_async)
 }
-class FilterSet_Date_ extends Test {
+class FilterSet_Date_Test extends Test {
   FilterSet_Date_(this, Api_sqlite_async)
 }
-class FilterSet_Duration_ extends Test {
+class FilterSet_Duration_Test extends Test {
   FilterSet_Duration_(this, Api_sqlite_async)
 }
-class FilterSet_Instant_ extends Test {
+class FilterSet_Instant_Test extends Test {
   FilterSet_Instant_(this, Api_sqlite_async)
 }
-class FilterSet_LocalDate_ extends Test {
+class FilterSet_LocalDate_Test extends Test {
   FilterSet_LocalDate_(this, Api_sqlite_async)
 }
-class FilterSet_LocalTime_ extends Test {
+class FilterSet_LocalTime_Test extends Test {
   FilterSet_LocalTime_(this, Api_sqlite_async)
 }
-class FilterSet_LocalDateTime_ extends Test {
+class FilterSet_LocalDateTime_Test extends Test {
   FilterSet_LocalDateTime_(this, Api_sqlite_async)
 }
-class FilterSet_OffsetTime_ extends Test {
+class FilterSet_OffsetTime_Test extends Test {
   FilterSet_OffsetTime_(this, Api_sqlite_async)
 }
-class FilterSet_OffsetDateTime_ extends Test {
+class FilterSet_OffsetDateTime_Test extends Test {
   FilterSet_OffsetDateTime_(this, Api_sqlite_async)
 }
-class FilterSet_ZonedDateTime_ extends Test {
+class FilterSet_ZonedDateTime_Test extends Test {
   FilterSet_ZonedDateTime_(this, Api_sqlite_async)
 }
-class FilterSet_UUID_ extends Test {
+class FilterSet_UUID_Test extends Test {
   FilterSet_UUID_(this, Api_sqlite_async)
 }
-class FilterSet_URI_ extends Test {
+class FilterSet_URI_Test extends Test {
   FilterSet_URI_(this, Api_sqlite_async)
 }
-class FilterSet_Byte_ extends Test {
+class FilterSet_Byte_Test extends Test {
   FilterSet_Byte_(this, Api_sqlite_async)
 }
-class FilterSet_Short_ extends Test {
+class FilterSet_Short_Test extends Test {
   FilterSet_Short_(this, Api_sqlite_async)
 }
-class FilterSet_Char_ extends Test {
+class FilterSet_Char_Test extends Test {
   FilterSet_Char_(this, Api_sqlite_async)
 }
 
-class FilterSet_ref extends Test {
+class FilterSet_refTest extends Test {
   FilterSet_ref(this, Api_sqlite_async)
 }
 
-class SetSemantics extends Test {
+class SetSemanticsTest extends Test {
   SetSemantics(this, Api_sqlite_async)
 }
 
-class FilterRefSet_Card1Ref extends Test {
+class FilterRefSet_Card1RefTest extends Test {
   FilterRefSet_Card1Ref(this, Api_sqlite_async)
 }
-class FilterRefSet_Card2Ref extends Test {
+class FilterRefSet_Card2RefTest extends Test {
   FilterRefSet_Card2Ref(this, Api_sqlite_async)
 }

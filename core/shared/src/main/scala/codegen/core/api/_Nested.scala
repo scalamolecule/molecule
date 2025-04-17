@@ -19,11 +19,11 @@ object _Nested extends CoreGenBase("Nested", "/api") {
       s"""
          |class NestedInit_$n0[${`A..V, `}NestedTpl](override val elements: List[Element]) extends Molecule_$n1[${`A..V, `}Seq[NestedTpl]]
          |
-         |trait ${fileName}Op${_0}${`[A..V]`} {
+         |trait ${fileName}Op${a0}${`[A..V]`} {
          |  protected def _nestedMan[NestedTpl](nestedElements: List[Element]): NestedInit_$n0[${`A..V, `}NestedTpl] = ???
          |  protected def _nestedOpt[NestedTpl](nestedElements: List[Element]): NestedInit_$n0[${`A..V, `}NestedTpl] = ???
          |}
-         |trait $fileName_$arity${`[A..V]`} { self: ${fileName}Op${_0}${`[A..V]`} =>
+         |trait $fileName_$arity${`[A..V]`} { self: ${fileName}Op${a0}${`[A..V]`} =>
          |  final def * [a                                                               ] (nested: Molecule_01[a                                                               ]): NestedInit_$n0[${`A..V, `}a                                                                 ] = _nestedMan[a                                                                 ](nested.elements)
          |  final def * [a, b                                                            ] (nested: Molecule_02[a, b                                                            ]): NestedInit_$n0[${`A..V, `}(a, b                                                            )] = _nestedMan[(a, b                                                            )](nested.elements)
          |  final def * [a, b, c                                                         ] (nested: Molecule_03[a, b, c                                                         ]): NestedInit_$n0[${`A..V, `}(a, b, c                                                         )] = _nestedMan[(a, b, c                                                         )](nested.elements)

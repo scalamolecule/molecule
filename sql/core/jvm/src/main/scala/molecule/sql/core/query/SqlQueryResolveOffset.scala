@@ -14,7 +14,7 @@ case class SqlQueryResolveOffset[Tpl](
   elements: List[Element],
   optLimit: Option[Int],
   optOffset: Option[Int],
-  m2q: Model2SqlQuery with SqlQueryBase
+  m2q: Model2SqlQuery & SqlQueryBase
 ) extends SqlQueryResolve[Tpl](elements, m2q)
   with FutureUtils
   with ModelUtils
@@ -83,7 +83,7 @@ case class SqlQueryResolveOffset[Tpl](
   def subscribe(
     conn: JdbcConn_JVM,
     callback: List[Tpl] => Unit,
-    freshM2q: List[Element] => Model2SqlQuery with SqlQueryBase
+    freshM2q: List[Element] => Model2SqlQuery & SqlQueryBase
   ): Unit = {
     val involvedAttrs        = getAttrNames(elements)
     val involvedDeleteEntity = getInitialEntity(elements)

@@ -62,7 +62,7 @@ trait Api_zio extends Keywords { spi: Spi_zio =>
 }
 
 
-trait Api_zio_transact { api: Api_zio with Spi_zio =>
+trait Api_zio_transact { api: Api_zio & Spi_zio =>
 
   def transact(
     a1: Action, a2: Action, aa: Action*

@@ -4,27 +4,27 @@ import molecule.coreTests.setup.Test
 import molecule.coreTests.spi.pagination.cursor.subUnique._
 import molecule.sql.h2.setup.Api_h2_async
 
-class AttrOrder extends Test {
+class AttrOrderTest extends Test {
   AttrOrder(this, Api_h2_async)
 }
-class DirectionsStandardUnique extends Test {
+class DirectionsStandardUniqueTest extends Test {
   DirectionsStandardUnique(this, Api_h2_async)
 }
-class DirectionsUniqueStandard extends Test {
+class DirectionsUniqueStandardTest extends Test {
   DirectionsUniqueStandard(this, Api_h2_async)
 }
-class MutationAdd extends Test {
+class MutationAddTest extends Test {
   MutationAdd(this, Api_h2_async)
 }
-class MutationDelete extends Test {
+class MutationDeleteTest extends Test {
   MutationDelete(this, Api_h2_async)
 }
-class Nested extends Test {
+class NestedTest extends Test {
   Nested(this, Api_h2_async)
 }
-class OptNested extends Test {
+class OptNestedTest extends Test {
   OptNested(this, Api_h2_async)
 }
-class TypesUniqueValue extends Test {
+class TypesUniqueValueTest extends Test {
   TypesUniqueValue(this, Api_h2_async)
 }

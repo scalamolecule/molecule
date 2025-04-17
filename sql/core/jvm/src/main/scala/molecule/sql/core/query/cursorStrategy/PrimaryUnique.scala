@@ -25,7 +25,7 @@ case class PrimaryUnique[Tpl](
   elements: List[Element],
   optLimit: Option[Int],
   cursor: String,
-  m2q: Model2SqlQuery with SqlQueryBase
+  m2q: Model2SqlQuery & SqlQueryBase
 ) extends SqlQueryResolve[Tpl](elements, m2q)
   with FutureUtils with Pagination[Tpl] with ModelTransformations_ with MoleculeLogging {
 

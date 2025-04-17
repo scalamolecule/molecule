@@ -5,7 +5,7 @@ import molecule.coreTests.spi.action._
 import molecule.sql.sqlite.setup.Api_sqlite_async
 
 
-class Transactions_async extends Test {
+class Transactions_asyncTest extends Test {
   Transactions_async(this, Api_sqlite_async)
 
 

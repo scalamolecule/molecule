@@ -17,7 +17,7 @@ import molecule.core.ast.DataModel._
 abstract class DatomicQueryResolve[Tpl](
   elements: List[Element],
   dbView: Option[DbView],
-  m2q: Model2DatomicQuery[Tpl] with DatomicQueryBase
+  m2q: Model2DatomicQuery[Tpl] & DatomicQueryBase
 ) extends Pagination[Tpl] with MoleculeLogging {
 
 
@@ -35,17 +35,17 @@ abstract class DatomicQueryResolve[Tpl](
     val db = altDb.getOrElse(getDb(conn))
     m2q.getDatomicQueries(conn.optimizeQuery, altElements, validate) match {
       case ("", query, _) =>
-        distinct(Peer.q(query, db +: m2q.inputs: _*))
+        distinct(Peer.q(query, db +: m2q.inputs*))
 
       case (preQuery, query, _) =>
         // Pre-query
-        val preRows = Peer.q(preQuery, db +: m2q.preInputs: _*)
+        val preRows = Peer.q(preQuery, db +: m2q.preInputs*)
         val preIds  = new java.util.HashSet[Long](preRows.size())
         preRows.forEach { row =>
           preIds.add(row.get(0).asInstanceOf[Long])
         }
         // Main query using entity ids from pre-query
-        distinct(Peer.q(query, db +: m2q.inputs :+ preIds: _*))
+        distinct(Peer.q(query, db +: m2q.inputs :+ preIds*))
     }
   }
 

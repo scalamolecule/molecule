@@ -13,7 +13,7 @@ import scala.collection.mutable.ListBuffer
 
 abstract class SqlQueryResolve[Tpl](
   elements: List[Element],
-  m2q: Model2SqlQuery with SqlQueryBase
+  m2q: Model2SqlQuery & SqlQueryBase
 ) extends Pagination[Tpl] with ModelUtils {
 
   type RS = ResultSetInterface

@@ -121,7 +121,7 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions {
         case map: Map[_, _] if map.isEmpty => true
 
         case sqlArray: java.sql.Array
-          if sqlArray.getArray.asInstanceOf[Array[_]].head == null =>
+          if sqlArray.getArray.asInstanceOf[Array[?]].head == null =>
           true
 
         case "[null]" => true // json array with empty Seq

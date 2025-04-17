@@ -24,11 +24,11 @@ object _ExprSetMan extends CoreGenBase( "ExprSetMan", "/api/expression") {
          |  def hasNo[ns1[_]](a: ModelOps_0[t, ns1, X2]): Entity1[${`A..V`}, t] = _attrTac(HasNo, a)""".stripMargin
     } else {
       s"""
-         |  def has  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardOne)(implicit x: X): Entity1[${`A..V`}, t] = _attrTac(Has  , a)
-         |  def hasNo[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardOne)(implicit x: X): Entity1[${`A..V`}, t] = _attrTac(HasNo, a)
+         |  def has  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] & CardOne)(implicit x: X): Entity1[${`A..V`}, t] = _attrTac(Has  , a)
+         |  def hasNo[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] & CardOne)(implicit x: X): Entity1[${`A..V`}, t] = _attrTac(HasNo, a)
          |
-         |  def has  [X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X, t, ns1, ns2] with CardOne): Entity2[${`A..V`}, X, t] = _attrMan(Has  , a)
-         |  def hasNo[X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X, t, ns1, ns2] with CardOne): Entity2[${`A..V`}, X, t] = _attrMan(HasNo, a)""".stripMargin
+         |  def has  [X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X, t, ns1, ns2] & CardOne): Entity2[${`A..V`}, X, t] = _attrMan(Has  , a)
+         |  def hasNo[X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X, t, ns1, ns2] & CardOne): Entity2[${`A..V`}, X, t] = _attrMan(HasNo, a)""".stripMargin
     }
 
     val body =

@@ -149,8 +149,8 @@ trait ResolveBase extends BaseHelpers {
 
 
   protected def jvector2set: AnyRef => AnyRef =
-    (v: AnyRef) => v.asInstanceOf[jList[_]].toArray.toSet
+    (v: AnyRef) => v.asInstanceOf[jList[?]].toArray.toSet
 
   protected def jvector2set(value: AnyRef => Any): AnyRef => AnyRef =
-    (v: AnyRef) => v.asInstanceOf[jList[_]].toArray.toSet.map(value)
+    (v: AnyRef) => v.asInstanceOf[jList[?]].toArray.toSet.map(value)
 }

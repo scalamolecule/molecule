@@ -37,7 +37,7 @@ trait LambdasMap extends ResolveBase with JavaConversions {
 
   private def j2Map[T](decode: Any => T): AnyRef => Map[String, T] = (pairs: AnyRef) => {
     val buf = ListBuffer.empty[(String, T)]
-    pairs.asInstanceOf[jSet[_]].forEach {
+    pairs.asInstanceOf[jSet[?]].forEach {
       case pair: jList[_] => buf += ((pair.get(0).asInstanceOf[String], decode(pair.get(1))))
       case `none`         => nullValue
       case other          => unexpectedValue(other)
@@ -75,7 +75,7 @@ trait LambdasMap extends ResolveBase with JavaConversions {
   lazy val resMapChar          : ResMap[Char]           = ResMap(j2sMapChar, s2jChar, j2sChar)
 
   private def j2optMap[T](decode: Any => T): AnyRef => Option[Map[String, T]] = (v: AnyRef) => {
-    val pairs = v.asInstanceOf[jList[_]]
+    val pairs = v.asInstanceOf[jList[?]]
     if (pairs.isEmpty) {
       Option.empty[Map[String, T]]
     } else {
@@ -113,7 +113,7 @@ trait LambdasMap extends ResolveBase with JavaConversions {
   private lazy val j2optMapChar           = j2optMap(j2Char)
 
   private def j2optValue[T](decode: Any => T): AnyRef => Option[T] = (v: AnyRef) => {
-    val seq = v.asInstanceOf[jList[_]]
+    val seq = v.asInstanceOf[jList[?]]
     if (seq.isEmpty) Option.empty[T] else Some(decode(seq.get(0)))
   }
 
@@ -172,7 +172,7 @@ trait LambdasMap extends ResolveBase with JavaConversions {
 
   // Nested opt ---------------------------------------------------------------------
 
-  private def it2Map[T](decode: Any => T): jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  private def it2Map[T](decode: Any => T): jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case maps: jList[_] =>
       val pairs = ListBuffer.empty[(String, T)]
       maps.forEach {
@@ -185,31 +185,31 @@ trait LambdasMap extends ResolveBase with JavaConversions {
     case other          => unexpectedValue(other)
   }
 
-  lazy val it2MapString        : jIterator[_] => Any = it2Map(j2String)
-  lazy val it2MapInt           : jIterator[_] => Any = it2Map(j2Int)
-  lazy val it2MapLong          : jIterator[_] => Any = it2Map(j2Long)
-  lazy val it2MapFloat         : jIterator[_] => Any = it2Map(j2Float)
-  lazy val it2MapDouble        : jIterator[_] => Any = it2Map(j2Double)
-  lazy val it2MapBoolean       : jIterator[_] => Any = it2Map(j2Boolean)
-  lazy val it2MapBigInt        : jIterator[_] => Any = it2Map(j2BigInt)
-  lazy val it2MapBigDecimal    : jIterator[_] => Any = it2Map(j2BigDecimal)
-  lazy val it2MapDate          : jIterator[_] => Any = it2Map(j2Date)
-  lazy val it2MapDuration      : jIterator[_] => Any = it2Map(j2Duration)
-  lazy val it2MapInstant       : jIterator[_] => Any = it2Map(j2Instant)
-  lazy val it2MapLocalDate     : jIterator[_] => Any = it2Map(j2LocalDate)
-  lazy val it2MapLocalTime     : jIterator[_] => Any = it2Map(j2LocalTime)
-  lazy val it2MapLocalDateTime : jIterator[_] => Any = it2Map(j2LocalDateTime)
-  lazy val it2MapOffsetTime    : jIterator[_] => Any = it2Map(j2OffsetTime)
-  lazy val it2MapOffsetDateTime: jIterator[_] => Any = it2Map(j2OffsetDateTime)
-  lazy val it2MapZonedDateTime : jIterator[_] => Any = it2Map(j2ZonedDateTime)
-  lazy val it2MapUUID          : jIterator[_] => Any = it2Map(j2UUID)
-  lazy val it2MapURI           : jIterator[_] => Any = it2Map(j2URI)
-  lazy val it2MapByte          : jIterator[_] => Any = it2Map(j2Byte)
-  lazy val it2MapShort         : jIterator[_] => Any = it2Map(j2Short)
-  lazy val it2MapChar          : jIterator[_] => Any = it2Map(j2Char)
+  lazy val it2MapString        : jIterator[?] => Any = it2Map(j2String)
+  lazy val it2MapInt           : jIterator[?] => Any = it2Map(j2Int)
+  lazy val it2MapLong          : jIterator[?] => Any = it2Map(j2Long)
+  lazy val it2MapFloat         : jIterator[?] => Any = it2Map(j2Float)
+  lazy val it2MapDouble        : jIterator[?] => Any = it2Map(j2Double)
+  lazy val it2MapBoolean       : jIterator[?] => Any = it2Map(j2Boolean)
+  lazy val it2MapBigInt        : jIterator[?] => Any = it2Map(j2BigInt)
+  lazy val it2MapBigDecimal    : jIterator[?] => Any = it2Map(j2BigDecimal)
+  lazy val it2MapDate          : jIterator[?] => Any = it2Map(j2Date)
+  lazy val it2MapDuration      : jIterator[?] => Any = it2Map(j2Duration)
+  lazy val it2MapInstant       : jIterator[?] => Any = it2Map(j2Instant)
+  lazy val it2MapLocalDate     : jIterator[?] => Any = it2Map(j2LocalDate)
+  lazy val it2MapLocalTime     : jIterator[?] => Any = it2Map(j2LocalTime)
+  lazy val it2MapLocalDateTime : jIterator[?] => Any = it2Map(j2LocalDateTime)
+  lazy val it2MapOffsetTime    : jIterator[?] => Any = it2Map(j2OffsetTime)
+  lazy val it2MapOffsetDateTime: jIterator[?] => Any = it2Map(j2OffsetDateTime)
+  lazy val it2MapZonedDateTime : jIterator[?] => Any = it2Map(j2ZonedDateTime)
+  lazy val it2MapUUID          : jIterator[?] => Any = it2Map(j2UUID)
+  lazy val it2MapURI           : jIterator[?] => Any = it2Map(j2URI)
+  lazy val it2MapByte          : jIterator[?] => Any = it2Map(j2Byte)
+  lazy val it2MapShort         : jIterator[?] => Any = it2Map(j2Short)
+  lazy val it2MapChar          : jIterator[?] => Any = it2Map(j2Char)
 
 
-  private def it2OptMap[T](decode: Any => T): jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+  private def it2OptMap[T](decode: Any => T): jIterator[?] => Any = (it: jIterator[?]) => it.next match {
     case maps: jList[_] =>
       val pairs = ListBuffer.empty[(String, T)]
       maps.forEach {
@@ -223,26 +223,26 @@ trait LambdasMap extends ResolveBase with JavaConversions {
     case other  => unexpectedValue(other)
   }
 
-  lazy val it2OptMapString        : jIterator[_] => Any = it2OptMap(j2String)
-  lazy val it2OptMapInt           : jIterator[_] => Any = it2OptMap(j2Int)
-  lazy val it2OptMapLong          : jIterator[_] => Any = it2OptMap(j2Long)
-  lazy val it2OptMapFloat         : jIterator[_] => Any = it2OptMap(j2Float)
-  lazy val it2OptMapDouble        : jIterator[_] => Any = it2OptMap(j2Double)
-  lazy val it2OptMapBoolean       : jIterator[_] => Any = it2OptMap(j2Boolean)
-  lazy val it2OptMapBigInt        : jIterator[_] => Any = it2OptMap(j2BigInt)
-  lazy val it2OptMapBigDecimal    : jIterator[_] => Any = it2OptMap(j2BigDecimal)
-  lazy val it2OptMapDate          : jIterator[_] => Any = it2OptMap(j2Date)
-  lazy val it2OptMapDuration      : jIterator[_] => Any = it2OptMap(j2Duration)
-  lazy val it2OptMapInstant       : jIterator[_] => Any = it2OptMap(j2Instant)
-  lazy val it2OptMapLocalDate     : jIterator[_] => Any = it2OptMap(j2LocalDate)
-  lazy val it2OptMapLocalTime     : jIterator[_] => Any = it2OptMap(j2LocalTime)
-  lazy val it2OptMapLocalDateTime : jIterator[_] => Any = it2OptMap(j2LocalDateTime)
-  lazy val it2OptMapOffsetTime    : jIterator[_] => Any = it2OptMap(j2OffsetTime)
-  lazy val it2OptMapOffsetDateTime: jIterator[_] => Any = it2OptMap(j2OffsetDateTime)
-  lazy val it2OptMapZonedDateTime : jIterator[_] => Any = it2OptMap(j2ZonedDateTime)
-  lazy val it2OptMapUUID          : jIterator[_] => Any = it2OptMap(j2UUID)
-  lazy val it2OptMapURI           : jIterator[_] => Any = it2OptMap(j2URI)
-  lazy val it2OptMapByte          : jIterator[_] => Any = it2OptMap(j2Byte)
-  lazy val it2OptMapShort         : jIterator[_] => Any = it2OptMap(j2Short)
-  lazy val it2OptMapChar          : jIterator[_] => Any = it2OptMap(j2Char)
+  lazy val it2OptMapString        : jIterator[?] => Any = it2OptMap(j2String)
+  lazy val it2OptMapInt           : jIterator[?] => Any = it2OptMap(j2Int)
+  lazy val it2OptMapLong          : jIterator[?] => Any = it2OptMap(j2Long)
+  lazy val it2OptMapFloat         : jIterator[?] => Any = it2OptMap(j2Float)
+  lazy val it2OptMapDouble        : jIterator[?] => Any = it2OptMap(j2Double)
+  lazy val it2OptMapBoolean       : jIterator[?] => Any = it2OptMap(j2Boolean)
+  lazy val it2OptMapBigInt        : jIterator[?] => Any = it2OptMap(j2BigInt)
+  lazy val it2OptMapBigDecimal    : jIterator[?] => Any = it2OptMap(j2BigDecimal)
+  lazy val it2OptMapDate          : jIterator[?] => Any = it2OptMap(j2Date)
+  lazy val it2OptMapDuration      : jIterator[?] => Any = it2OptMap(j2Duration)
+  lazy val it2OptMapInstant       : jIterator[?] => Any = it2OptMap(j2Instant)
+  lazy val it2OptMapLocalDate     : jIterator[?] => Any = it2OptMap(j2LocalDate)
+  lazy val it2OptMapLocalTime     : jIterator[?] => Any = it2OptMap(j2LocalTime)
+  lazy val it2OptMapLocalDateTime : jIterator[?] => Any = it2OptMap(j2LocalDateTime)
+  lazy val it2OptMapOffsetTime    : jIterator[?] => Any = it2OptMap(j2OffsetTime)
+  lazy val it2OptMapOffsetDateTime: jIterator[?] => Any = it2OptMap(j2OffsetDateTime)
+  lazy val it2OptMapZonedDateTime : jIterator[?] => Any = it2OptMap(j2ZonedDateTime)
+  lazy val it2OptMapUUID          : jIterator[?] => Any = it2OptMap(j2UUID)
+  lazy val it2OptMapURI           : jIterator[?] => Any = it2OptMap(j2URI)
+  lazy val it2OptMapByte          : jIterator[?] => Any = it2OptMap(j2Byte)
+  lazy val it2OptMapShort         : jIterator[?] => Any = it2OptMap(j2Short)
+  lazy val it2OptMapChar          : jIterator[?] => Any = it2OptMap(j2Char)
 }

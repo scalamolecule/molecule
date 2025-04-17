@@ -4,12 +4,12 @@ import molecule.coreTests.setup.Test
 import molecule.coreTests.spi.filterAttr.seq._
 import molecule.sql.mariadb.setup.Api_mariadb_async
 
-class Adjacent extends Test {
+class AdjacentTest extends Test {
   Adjacent(this, Api_mariadb_async)
 }
-class CrossEntity extends Test {
+class CrossEntityTest extends Test {
   CrossEntity(this, Api_mariadb_async)
 }
-class Types extends Test {
+class TypesTest extends Test {
   Types(this, Api_mariadb_async)
 }

@@ -4,34 +4,34 @@ import molecule.coreTests.setup.Test
 import molecule.coreTests.spi.validation.insert._
 import molecule.sql.h2.setup.Api_h2_async
 
-class FormatConstants extends Test {
+class FormatConstantsTest extends Test {
   FormatConstants(this, Api_h2_async)
 }
 
-class FormatVariables extends Test {
+class FormatVariablesTest extends Test {
   FormatVariables(this, Api_h2_async)
 }
-class Nested extends Test {
+class NestedTest extends Test {
   Nested(this, Api_h2_async)
 }
-class Semantics extends Test {
+class SemanticsTest extends Test {
   Semantics(this, Api_h2_async)
 }
-class TypesOne extends Test {
+class TypesOneTest extends Test {
   TypesOne(this, Api_h2_async)
 }
-class TypesOneOpt extends Test {
+class TypesOneOptTest extends Test {
   TypesOneOpt(this, Api_h2_async)
 }
-class TypesSeq extends Test {
+class TypesSeqTest extends Test {
   TypesSeq(this, Api_h2_async)
 }
-class TypesSeqOpt extends Test {
+class TypesSeqOptTest extends Test {
   TypesSeqOpt(this, Api_h2_async)
 }
-class TypesSet extends Test {
+class TypesSetTest extends Test {
   TypesSet(this, Api_h2_async)
 }
-class TypesSetOpt extends Test {
+class TypesSetOptTest extends Test {
   TypesSetOpt(this, Api_h2_async)
 }

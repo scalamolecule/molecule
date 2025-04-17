@@ -22,13 +22,13 @@ object _ExprOneOpt extends CoreGenBase("ExprOneOpt", "/api/expression") {
       s"""
          |
          |trait ${fileName}Ops_$arity[${`A..V`}, t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]] extends ExprAttr_$arity[${`A..V, `}t, Entity1, Entity2] {
-         |  protected def _exprOneOpt(op: Op, opt: Option[t]): Entity1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Entity1] = ???
+         |  protected def _exprOneOpt(op: Op, opt: Option[t]): Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] = ???
          |}
          |
          |trait $fileName_$arity[${`A..V`}, t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]]
          |  extends ${fileName}Ops_$arity[${`A..V`}, t, Entity1, Entity2]
          |    with SortAttrs_$arity[${`A..V`}, t, Entity1] {
-         |  def apply(opt: Option[t]): Entity1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Entity1] = _exprOneOpt(Eq, opt)
+         |  def apply(opt: Option[t]): Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] = _exprOneOpt(Eq, opt)
          |}""".stripMargin
   }
 }

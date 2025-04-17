@@ -15,7 +15,7 @@ trait UpdateOps extends Action2Data with BaseOps {
   ): Unit
 
   protected def handleIds(ent: String, ids: Seq[Long]): Unit
-  protected def handleFilterAttr[T <: Attr with Tacit](filterAttr: T): Unit
+  protected def handleFilterAttr[T <: Attr & Tacit](filterAttr: T): Unit
 
   protected def updateSetEq[T](
     ent: String,

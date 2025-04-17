@@ -17,8 +17,8 @@ object _CastOptRefLeaf extends DatomicGenBase("CastOptRefLeaf", "/query/casting"
        |trait $fileName_ extends JavaConversions {
        |
        |  final protected def pullOptRefLeaf(
-       |    pullCasts: List[jIterator[_] => Any]
-       |  ): jIterator[_] => Option[Any] = {
+       |    pullCasts: List[jIterator[?] => Any]
+       |  ): jIterator[?] => Option[Any] = {
        |    pullCasts.length match {
        |      $pullLeafX
        |    }
@@ -26,7 +26,7 @@ object _CastOptRefLeaf extends DatomicGenBase("CastOptRefLeaf", "/query/casting"
        |
        |  final private def flatten(
        |    list: jArrayList[Any],
-       |    map: jMap[_, _]
+       |    map: jMap[?, ?]
        |  ): jArrayList[Any] = {
        |    map.values.asScala.foreach {
        |      case map: jMap[_, _] => flatten(list, map)
@@ -37,14 +37,14 @@ object _CastOptRefLeaf extends DatomicGenBase("CastOptRefLeaf", "/query/casting"
        |
        |  final private def resolve(
        |    arity: Int,
-       |    cast: java.util.Iterator[_] => Any
-       |  ): jIterator[_] => Option[Any] = {
+       |    cast: java.util.Iterator[?] => Any
+       |  ): jIterator[?] => Option[Any] = {
        |    val list = new jArrayList[Any](arity)
-       |    val handleMap = (optionalData: jMap[_, _]) => {
+       |    val handleMap = (optionalData: jMap[?, ?]) => {
        |      list.clear()
        |      Some(cast(flatten(list, optionalData).iterator()))
        |    }
-       |    (it: jIterator[_]) =>
+       |    (it: jIterator[?]) =>
        |      try {
        |        it.next match {
        |          case map: jMap[_, _] => handleMap(map)
@@ -65,10 +65,10 @@ object _CastOptRefLeaf extends DatomicGenBase("CastOptRefLeaf", "/query/casting"
     val body     =
       s"""
          |  final private def pullLeaf$i(
-         |    pullCasts: List[jIterator[_] => Any]
-         |  ): jIterator[_] => Option[Any] = {
+         |    pullCasts: List[jIterator[?] => Any]
+         |  ): jIterator[?] => Option[Any] = {
          |    val List($casters) = pullCasts
-         |    resolve($i, (it: java.util.Iterator[_]) =>
+         |    resolve($i, (it: java.util.Iterator[?]) =>
          |      (
          |        $castings
          |      )

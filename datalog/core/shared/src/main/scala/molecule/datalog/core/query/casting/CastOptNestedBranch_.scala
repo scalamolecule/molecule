@@ -8,11 +8,11 @@ import molecule.datalog.core.query.DatomicQueryBase
 trait CastOptNestedBranch_ { self: DatomicQueryBase =>
 
   final protected def pullOptNestedBranch(
-    pullCasts0: List[jIterator[_] => Any],
+    pullCasts0: List[jIterator[?] => Any],
     pullSorts: List[Int => (Row, Row) => Int],
-    pullNested: jIterator[_] => List[Any],
+    pullNested: jIterator[?] => List[Any],
     refDepth: Int
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val optComparator = {
       if (pullSorts.nonEmpty) {
         val n = pullSorts.length
@@ -61,7 +61,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
 
   final private def flatten(
     list: jArrayList[Any],
-    map: jMap[_, _],
+    map: jMap[?, ?],
     max: Int,
     cur: Int
   ): jArrayList[Any] = {
@@ -74,9 +74,9 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
   }
 
   final private def resolve(
-    handleMaps: jList[_] => List[Any]
-  ): jIterator[_] => List[Any] = {
-    (it: jIterator[_]) =>
+    handleMaps: jList[?] => List[Any]
+  ): jIterator[?] => List[Any] = {
+    (it: jIterator[?]) =>
       try {
         it.next match {
           case maps: jList[_] => handleMaps(maps)
@@ -89,26 +89,26 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
   }
 
   final private def pullBranch1(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]],
     refDepth: Int
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1) = pullCasts
-    val cast     = (it: jIterator[_]) =>
+    val cast = (it: jIterator[?]) =>
       (
         c1(it)
-        )
+      )
     resolve(
       optComparator.fold {
         val list = new jArrayList[Any](1)
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           rows.asScala.toList.map {
             case row: jMap[_, _] =>
               list.clear()
               cast(flatten(list, row, refDepth, 0).iterator)
           }
       } { comparator =>
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
@@ -122,12 +122,12 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
   }
 
   final private def pullBranch2(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]],
     refDepth: Int
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2) = pullCasts
-    val cast         = (it: jIterator[_]) =>
+    val cast = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it)
@@ -135,14 +135,14 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     resolve(
       optComparator.fold {
         val list = new jArrayList[Any](2)
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           rows.asScala.toList.map {
             case row: jMap[_, _] =>
               list.clear()
               cast(flatten(list, row, refDepth, 0).iterator)
           }
       } { comparator =>
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
@@ -156,12 +156,12 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
   }
 
   final private def pullBranch3(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]],
     refDepth: Int
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3) = pullCasts
-    val cast             = (it: jIterator[_]) =>
+    val cast = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -170,14 +170,14 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     resolve(
       optComparator.fold {
         val list = new jArrayList[Any](3)
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           rows.asScala.toList.map {
             case row: jMap[_, _] =>
               list.clear()
               cast(flatten(list, row, refDepth, 0).iterator)
           }
       } { comparator =>
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
@@ -191,12 +191,12 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
   }
 
   final private def pullBranch4(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]],
     refDepth: Int
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4) = pullCasts
-    val cast                 = (it: jIterator[_]) =>
+    val cast = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -206,14 +206,14 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     resolve(
       optComparator.fold {
         val list = new jArrayList[Any](4)
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           rows.asScala.toList.map {
             case row: jMap[_, _] =>
               list.clear()
               cast(flatten(list, row, refDepth, 0).iterator)
           }
       } { comparator =>
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
@@ -227,12 +227,12 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
   }
 
   final private def pullBranch5(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]],
     refDepth: Int
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5) = pullCasts
-    val cast                     = (it: jIterator[_]) =>
+    val cast = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -243,14 +243,14 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     resolve(
       optComparator.fold {
         val list = new jArrayList[Any](5)
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           rows.asScala.toList.map {
             case row: jMap[_, _] =>
               list.clear()
               cast(flatten(list, row, refDepth, 0).iterator)
           }
       } { comparator =>
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
@@ -264,12 +264,12 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
   }
 
   final private def pullBranch6(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]],
     refDepth: Int
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6) = pullCasts
-    val cast                         = (it: jIterator[_]) =>
+    val cast = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -281,14 +281,14 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     resolve(
       optComparator.fold {
         val list = new jArrayList[Any](6)
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           rows.asScala.toList.map {
             case row: jMap[_, _] =>
               list.clear()
               cast(flatten(list, row, refDepth, 0).iterator)
           }
       } { comparator =>
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
@@ -302,12 +302,12 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
   }
 
   final private def pullBranch7(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]],
     refDepth: Int
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7) = pullCasts
-    val cast                             = (it: jIterator[_]) =>
+    val cast = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -320,14 +320,14 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     resolve(
       optComparator.fold {
         val list = new jArrayList[Any](7)
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           rows.asScala.toList.map {
             case row: jMap[_, _] =>
               list.clear()
               cast(flatten(list, row, refDepth, 0).iterator)
           }
       } { comparator =>
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
@@ -341,12 +341,12 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
   }
 
   final private def pullBranch8(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]],
     refDepth: Int
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8) = pullCasts
-    val cast                                 = (it: jIterator[_]) =>
+    val cast = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -360,14 +360,14 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     resolve(
       optComparator.fold {
         val list = new jArrayList[Any](8)
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           rows.asScala.toList.map {
             case row: jMap[_, _] =>
               list.clear()
               cast(flatten(list, row, refDepth, 0).iterator)
           }
       } { comparator =>
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
@@ -381,12 +381,12 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
   }
 
   final private def pullBranch9(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]],
     refDepth: Int
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9) = pullCasts
-    val cast                                     = (it: jIterator[_]) =>
+    val cast = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -401,14 +401,14 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     resolve(
       optComparator.fold {
         val list = new jArrayList[Any](9)
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           rows.asScala.toList.map {
             case row: jMap[_, _] =>
               list.clear()
               cast(flatten(list, row, refDepth, 0).iterator)
           }
       } { comparator =>
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
@@ -422,12 +422,12 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
   }
 
   final private def pullBranch10(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]],
     refDepth: Int
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10) = pullCasts
-    val cast                                          = (it: jIterator[_]) =>
+    val cast = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -443,14 +443,14 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     resolve(
       optComparator.fold {
         val list = new jArrayList[Any](10)
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           rows.asScala.toList.map {
             case row: jMap[_, _] =>
               list.clear()
               cast(flatten(list, row, refDepth, 0).iterator)
           }
       } { comparator =>
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
@@ -464,12 +464,12 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
   }
 
   final private def pullBranch11(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]],
     refDepth: Int
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) = pullCasts
-    val cast                                               = (it: jIterator[_]) =>
+    val cast = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -486,14 +486,14 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     resolve(
       optComparator.fold {
         val list = new jArrayList[Any](11)
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           rows.asScala.toList.map {
             case row: jMap[_, _] =>
               list.clear()
               cast(flatten(list, row, refDepth, 0).iterator)
           }
       } { comparator =>
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
@@ -507,12 +507,12 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
   }
 
   final private def pullBranch12(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]],
     refDepth: Int
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12) = pullCasts
-    val cast                                                    = (it: jIterator[_]) =>
+    val cast = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -530,14 +530,14 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     resolve(
       optComparator.fold {
         val list = new jArrayList[Any](12)
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           rows.asScala.toList.map {
             case row: jMap[_, _] =>
               list.clear()
               cast(flatten(list, row, refDepth, 0).iterator)
           }
       } { comparator =>
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
@@ -551,12 +551,12 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
   }
 
   final private def pullBranch13(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]],
     refDepth: Int
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13) = pullCasts
-    val cast                                                         = (it: jIterator[_]) =>
+    val cast = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -575,14 +575,14 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     resolve(
       optComparator.fold {
         val list = new jArrayList[Any](13)
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           rows.asScala.toList.map {
             case row: jMap[_, _] =>
               list.clear()
               cast(flatten(list, row, refDepth, 0).iterator)
           }
       } { comparator =>
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
@@ -596,12 +596,12 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
   }
 
   final private def pullBranch14(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]],
     refDepth: Int
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14) = pullCasts
-    val cast                                                              = (it: jIterator[_]) =>
+    val cast = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -621,14 +621,14 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     resolve(
       optComparator.fold {
         val list = new jArrayList[Any](14)
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           rows.asScala.toList.map {
             case row: jMap[_, _] =>
               list.clear()
               cast(flatten(list, row, refDepth, 0).iterator)
           }
       } { comparator =>
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
@@ -642,12 +642,12 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
   }
 
   final private def pullBranch15(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]],
     refDepth: Int
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15) = pullCasts
-    val cast                                                                   = (it: jIterator[_]) =>
+    val cast = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -668,14 +668,14 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     resolve(
       optComparator.fold {
         val list = new jArrayList[Any](15)
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           rows.asScala.toList.map {
             case row: jMap[_, _] =>
               list.clear()
               cast(flatten(list, row, refDepth, 0).iterator)
           }
       } { comparator =>
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
@@ -689,12 +689,12 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
   }
 
   final private def pullBranch16(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]],
     refDepth: Int
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16) = pullCasts
-    val cast                                                                        = (it: jIterator[_]) =>
+    val cast = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -716,14 +716,14 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     resolve(
       optComparator.fold {
         val list = new jArrayList[Any](16)
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           rows.asScala.toList.map {
             case row: jMap[_, _] =>
               list.clear()
               cast(flatten(list, row, refDepth, 0).iterator)
           }
       } { comparator =>
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
@@ -737,12 +737,12 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
   }
 
   final private def pullBranch17(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]],
     refDepth: Int
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17) = pullCasts
-    val cast                                                                             = (it: jIterator[_]) =>
+    val cast = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -765,14 +765,14 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     resolve(
       optComparator.fold {
         val list = new jArrayList[Any](17)
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           rows.asScala.toList.map {
             case row: jMap[_, _] =>
               list.clear()
               cast(flatten(list, row, refDepth, 0).iterator)
           }
       } { comparator =>
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
@@ -786,12 +786,12 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
   }
 
   final private def pullBranch18(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]],
     refDepth: Int
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18) = pullCasts
-    val cast                                                                                  = (it: jIterator[_]) =>
+    val cast = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -815,14 +815,14 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     resolve(
       optComparator.fold {
         val list = new jArrayList[Any](18)
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           rows.asScala.toList.map {
             case row: jMap[_, _] =>
               list.clear()
               cast(flatten(list, row, refDepth, 0).iterator)
           }
       } { comparator =>
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
@@ -836,12 +836,12 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
   }
 
   final private def pullBranch19(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]],
     refDepth: Int
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19) = pullCasts
-    val cast                                                                                       = (it: jIterator[_]) =>
+    val cast = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -866,14 +866,14 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     resolve(
       optComparator.fold {
         val list = new jArrayList[Any](19)
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           rows.asScala.toList.map {
             case row: jMap[_, _] =>
               list.clear()
               cast(flatten(list, row, refDepth, 0).iterator)
           }
       } { comparator =>
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
@@ -887,12 +887,12 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
   }
 
   final private def pullBranch20(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]],
     refDepth: Int
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20) = pullCasts
-    val cast                                                                                            = (it: jIterator[_]) =>
+    val cast = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -918,14 +918,14 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     resolve(
       optComparator.fold {
         val list = new jArrayList[Any](20)
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           rows.asScala.toList.map {
             case row: jMap[_, _] =>
               list.clear()
               cast(flatten(list, row, refDepth, 0).iterator)
           }
       } { comparator =>
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
@@ -939,12 +939,12 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
   }
 
   final private def pullBranch21(
-    pullCasts: List[jIterator[_] => Any],
+    pullCasts: List[jIterator[?] => Any],
     optComparator: Option[Comparator[Row]],
     refDepth: Int
-  ): jIterator[_] => List[Any] = {
+  ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21) = pullCasts
-    val cast                                                                                                 = (it: jIterator[_]) =>
+    val cast = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -971,14 +971,14 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     resolve(
       optComparator.fold {
         val list = new jArrayList[Any](21)
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           rows.asScala.toList.map {
             case row: jMap[_, _] =>
               list.clear()
               cast(flatten(list, row, refDepth, 0).iterator)
           }
       } { comparator =>
-        (rows: jList[_]) =>
+        (rows: jList[?]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>

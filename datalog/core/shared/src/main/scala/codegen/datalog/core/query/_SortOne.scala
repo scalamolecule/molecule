@@ -24,7 +24,7 @@ object _SortOne extends DatomicGenBase("SortOne", "/query") {
 
   def sorter(tpe: String): String = {
     val cast: String => String = tpe match {
-      case "Id"             => (row: String) => s"$row.get(i).asInstanceOf[jLong]"
+      case "ID"             => (row: String) => s"$row.get(i).asInstanceOf[jLong]"
       case "Int"            => (row: String) => s"$row.get(i).toString.toInt"
       case "Duration"       => (row: String) => s"Duration.parse($row.get(i).toString)"
       case "Instant"        => (row: String) => s"Instant.parse($row.get(i).toString)"

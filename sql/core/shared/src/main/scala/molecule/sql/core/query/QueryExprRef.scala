@@ -7,7 +7,7 @@ import molecule.core.query.{Model2Query, QueryExpr}
 import scala.collection.mutable.ListBuffer
 
 
-trait QueryExprRef extends QueryExpr { self: Model2Query with SqlQueryBase =>
+trait QueryExprRef extends QueryExpr { self: Model2Query & SqlQueryBase =>
 
   override protected def queryRef(r: Ref, tail: List[Element]): Unit = {
     val Ref(ent, refAttr, ref, card, _, _) = r

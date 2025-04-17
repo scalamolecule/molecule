@@ -4,15 +4,15 @@ import molecule.coreTests.setup.{MUnitSuiteWithArrays, Test}
 import molecule.coreTests.spi.action.update.ops._
 import molecule.sql.h2.setup.Api_h2_async
 
-class OpsOne extends Test {
+class OpsOneTest extends Test {
   OpsOne(this, Api_h2_async)
 }
-class OpsSet extends Test {
+class OpsSetTest extends Test {
   OpsSet(this, Api_h2_async)
 }
-class OpsSeq extends MUnitSuiteWithArrays {
+class OpsSeqTest extends MUnitSuiteWithArrays {
   OpsSeq(this, Api_h2_async)
 }
-class OpsMap extends Test {
+class OpsMapTest extends Test {
   OpsMap(this, Api_h2_async)
 }

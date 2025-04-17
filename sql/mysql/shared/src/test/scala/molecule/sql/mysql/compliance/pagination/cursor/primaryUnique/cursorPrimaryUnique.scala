@@ -4,18 +4,18 @@ import molecule.coreTests.setup.Test
 import molecule.coreTests.spi.pagination.cursor.primaryUnique._
 import molecule.sql.mysql.setup.Api_mysql_async
 
-class Directions extends Test {
+class DirectionsTest extends Test {
   Directions(this, Api_mysql_async)
 }
-class MutationAdd extends Test {
+class MutationAddTest extends Test {
   MutationAdd(this, Api_mysql_async)
 }
-class MutationDelete extends Test {
+class MutationDeleteTest extends Test {
   MutationDelete(this, Api_mysql_async)
 }
-class Nested extends Test {
+class NestedTest extends Test {
   Nested(this, Api_mysql_async)
 }
-class TypesFilterAttr extends Test {
+class TypesFilterAttrTest extends Test {
   TypesFilterAttr(this, Api_mysql_async)
 }

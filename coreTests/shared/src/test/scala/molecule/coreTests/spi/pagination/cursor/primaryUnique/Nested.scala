@@ -10,7 +10,7 @@ import scala.annotation.nowarn
 @nowarn
 case class Nested(
   suite: Test,
-  api: Api_async with Spi_async with DbProviders
+  api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
   val x    = ""
   val a    = (1, List(1))

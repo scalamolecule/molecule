@@ -2,9 +2,12 @@ package molecule.server
 
 import cats.effect.std.Dispatcher
 import cats.effect.{ExitCode, IO, IOApp}
+import com.comcast.ip4s.{ip, port}
 import molecule.core.marshalling.MoleculeServerEndpoints
 import molecule.sql.h2.marshalling.Rpc_h2
-import org.http4s.blaze.server.BlazeServerBuilder
+import org.http4s.*
+import org.http4s.ember.server.EmberServerBuilder
+import org.http4s.implicits.*
 import sttp.monad.{FutureMonad, MonadError}
 import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.server.http4s.Http4sServerInterpreter
@@ -25,21 +28,17 @@ object Http4s extends MoleculeServerEndpoints(Rpc_h2) with IOApp {
       val routes = Http4sServerInterpreter[IO]().toRoutes(ioEndpoints)
 
       // Start server
-      BlazeServerBuilder[IO]
-        .withExecutionContext(ec)
-        .bindHttp(8080, "0.0.0.0")
+      EmberServerBuilder.default[IO]
+        .withHost(ip"0.0.0.0")
+        .withPort(port"8080")
         .withHttpApp(routes.orNotFound)
-        .serve
-        .compile
-        .drain
-        .background // Runs server in background
+        .build
         .use { _ =>
           for {
-            _ <- IO.println("✅ Http4s server running on http://localhost:8080")
+            _ <- IO.println("✅ Ember Http4s server running on http://localhost:8080")
             _ <- IO.readLine
             _ <- IO.println("🛑 Shutting down server...")
           } yield ExitCode.Success
-
         }
     }
   }

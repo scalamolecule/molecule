@@ -3,7 +3,7 @@ package molecule.datalog.core.query
 import molecule.core.ast.DataModel._
 import molecule.core.query.QueryExpr
 
-trait QueryExprSet[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] with LambdasSet =>
+trait QueryExprSet[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] & LambdasSet =>
 
   override protected def queryRefAttrSetMan(a: AttrSetMan): Unit = queryAttrSetMan(a)
   override protected def queryRefAttrSetTac(a: AttrSetTac): Unit = queryAttrSetTac(a)

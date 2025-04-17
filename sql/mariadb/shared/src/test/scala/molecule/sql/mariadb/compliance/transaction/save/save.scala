@@ -4,21 +4,21 @@ import molecule.coreTests.setup.{MUnitSuiteWithArrays, Test}
 import molecule.coreTests.spi.action.save._
 import molecule.sql.mariadb.setup.Api_mariadb_async
 
-class SaveCardOne extends Test {
+class SaveCardOneTest extends Test {
   SaveCardOne(this, Api_mariadb_async)
 }
-class SaveCardSeq extends MUnitSuiteWithArrays {
+class SaveCardSeqTest extends MUnitSuiteWithArrays {
   SaveCardSeq(this, Api_mariadb_async)
 }
-class SaveCardSet extends Test {
+class SaveCardSetTest extends Test {
   SaveCardSet(this, Api_mariadb_async)
 }
-class SaveCardMap extends Test {
+class SaveCardMapTest extends Test {
   SaveCardMap(this, Api_mariadb_async)
 }
-class SaveRefs extends Test {
+class SaveRefsTest extends Test {
   SaveRefs(this, Api_mariadb_async)
 }
-class SaveSemantics extends Test {
+class SaveSemanticsTest extends Test {
   SaveSemantics(this, Api_mariadb_async)
 }

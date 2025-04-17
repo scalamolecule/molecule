@@ -66,8 +66,8 @@ trait JVMDatomicSpiBase extends ModelUtils with JavaConversions {
       case v: java.math.BigDecimal            => BigDecimal(v)
       case vs: Array[Byte]                    => vs
       case kw: clojure.lang.Keyword           => kw.toString
-      case vs: clojure.lang.PersistentHashSet => vs.asInstanceOf[java.util.Collection[_]].asScala.map(retrieve).toSet
-      case vs: clojure.lang.PersistentVector  => vs.asInstanceOf[java.util.Collection[_]].asScala.map(retrieve).toSet
+      case vs: clojure.lang.PersistentHashSet => vs.asInstanceOf[java.util.Collection[?]].asScala.map(retrieve).toSet
+      case vs: clojure.lang.PersistentVector  => vs.asInstanceOf[java.util.Collection[?]].asScala.map(retrieve).toSet
 
       case vs: clojure.lang.PersistentArrayMap =>
         @tailrec

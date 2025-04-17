@@ -63,7 +63,7 @@ case class DatomicConn_JVM(
 
   private def bridgeDatomicFuture[T](
     listenF: ListenableFuture[T],
-    javaStmts: Option[jList[_]] = None
+    javaStmts: Option[jList[?]] = None
   )(implicit ec: ExecutionContext): Future[T] = {
     val p = Promise[T]()
     listenF.addListener(

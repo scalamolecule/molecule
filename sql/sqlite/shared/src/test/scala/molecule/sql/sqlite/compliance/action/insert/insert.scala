@@ -4,21 +4,21 @@ import molecule.coreTests.setup.{MUnitSuiteWithArrays, Test}
 import molecule.coreTests.spi.action.insert._
 import molecule.sql.sqlite.setup.Api_sqlite_async
 
-class InsertCardOne extends Test {
+class InsertCardOneTest extends Test {
   InsertCardOne(this, Api_sqlite_async)
 }
-class InsertCardSet extends Test {
+class InsertCardSetTest extends Test {
   InsertCardSet(this, Api_sqlite_async)
 }
-class InsertCardMap extends Test {
+class InsertCardMapTest extends Test {
   InsertCardMap(this, Api_sqlite_async)
 }
-class InsertCardSeq extends MUnitSuiteWithArrays {
+class InsertCardSeqTest extends MUnitSuiteWithArrays {
   InsertCardSeq(this, Api_sqlite_async)
 }
-class InsertRefs extends Test {
+class InsertRefsTest extends Test {
   InsertRefs(this, Api_sqlite_async)
 }
-class InsertSemantics extends Test {
+class InsertSemanticsTest extends Test {
   InsertSemantics(this, Api_sqlite_async)
 }

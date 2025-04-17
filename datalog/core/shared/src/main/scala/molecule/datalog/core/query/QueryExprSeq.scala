@@ -4,7 +4,7 @@ import molecule.base.error.ModelError
 import molecule.core.ast.DataModel._
 import molecule.core.query.QueryExpr
 
-trait QueryExprSeq[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] with LambdasSeq =>
+trait QueryExprSeq[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] & LambdasSeq =>
 
   override protected def queryAttrSeqMan(attr: AttrSeqMan): Unit = {
     attrIndex += 1

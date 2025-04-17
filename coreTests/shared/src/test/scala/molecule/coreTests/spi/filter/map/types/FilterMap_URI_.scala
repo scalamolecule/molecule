@@ -10,7 +10,7 @@ import molecule.coreTests.setup._
 
 case class FilterMap_URI_(
   suite: Test,
-  api: Api_async with Spi_async with DbProviders
+  api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 
   val a = (1, Map("a" -> uri1, "b" -> uri2))

@@ -9,7 +9,7 @@ import scala.concurrent.Future
 
 case class NestedTypes(
   suite: MUnitSuiteWithArrays,
-  api: Api_async with Spi_async with DbProviders
+  api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 
   import api._

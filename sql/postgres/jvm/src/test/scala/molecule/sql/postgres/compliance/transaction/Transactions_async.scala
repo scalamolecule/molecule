@@ -5,6 +5,6 @@ import molecule.coreTests.spi.action._
 import molecule.sql.postgres.setup.Api_postgres_async
 
 
-class Transactions_async extends Test {
+class Transactions_asyncTest extends Test {
   Transactions_async(this, Api_postgres_async)
 }

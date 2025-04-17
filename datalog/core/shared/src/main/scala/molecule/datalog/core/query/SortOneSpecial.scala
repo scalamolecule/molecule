@@ -15,7 +15,7 @@ trait SortOneSpecial[Tpl]
     a: Row,
     b: Row,
     i: Int,
-    compareMapValues: (jMap[_, _], jMap[_, _]) => Int
+    compareMapValues: (jMap[?, ?], jMap[?, ?]) => Int
   ): Int = {
     (a.get(i), b.get(i)) match {
       case (null, null)                     => 0
@@ -144,24 +144,24 @@ trait SortOneSpecial[Tpl]
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
               compare(
-                a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+                a, b, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                   m1.values.iterator
-                    .next.asInstanceOf[jMap[_, _]].values.iterator
+                    .next.asInstanceOf[jMap[?, ?]].values.iterator
                     .next.asInstanceOf[jLong].compareTo(
                       m2.values.iterator
-                        .next.asInstanceOf[jMap[_, _]].values.iterator
+                        .next.asInstanceOf[jMap[?, ?]].values.iterator
                         .next.asInstanceOf[jLong])
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
               compare(
-                b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+                b, a, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                   m1.values.iterator
-                    .next.asInstanceOf[jMap[_, _]].values.iterator
+                    .next.asInstanceOf[jMap[?, ?]].values.iterator
                     .next.asInstanceOf[jLong].compareTo(
                       m2.values.iterator
-                        .next.asInstanceOf[jMap[_, _]].values.iterator
+                        .next.asInstanceOf[jMap[?, ?]].values.iterator
                         .next.asInstanceOf[jLong])
               )
         }
@@ -218,7 +218,7 @@ trait SortOneSpecial[Tpl]
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              a.get(i).asInstanceOf[jList[_]].iterator().next() match {
+              a.get(i).asInstanceOf[jList[?]].iterator().next() match {
                 case v: String      => v.compareTo(b.get(i).asInstanceOf[jList[String]].iterator.next())
                 case v: jInteger    => v.compareTo(b.get(i).asInstanceOf[jList[jInteger]].iterator.next())
                 case v: jLong       => v.compareTo(b.get(i).asInstanceOf[jList[jLong]].iterator.next())
@@ -234,7 +234,7 @@ trait SortOneSpecial[Tpl]
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              b.get(i).asInstanceOf[jList[_]].iterator().next() match {
+              b.get(i).asInstanceOf[jList[?]].iterator().next() match {
                 case v: String      => v.compareTo(a.get(i).asInstanceOf[jList[String]].iterator.next())
                 case v: jInteger    => v.compareTo(a.get(i).asInstanceOf[jList[jInteger]].iterator.next())
                 case v: jLong       => v.compareTo(a.get(i).asInstanceOf[jList[jLong]].iterator.next())

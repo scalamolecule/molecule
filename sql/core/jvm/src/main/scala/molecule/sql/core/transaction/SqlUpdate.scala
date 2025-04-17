@@ -15,7 +15,7 @@ import scala.collection.mutable.ListBuffer
 trait SqlUpdate
   extends UpdateOps
     with SqlBaseOps
-    with SpiHelpers { self: ResolveUpdate with SqlOps =>
+    with SpiHelpers { self: ResolveUpdate & SqlOps =>
 
   protected var root        : UpdateRoot   = null
   protected var updateAction: UpdateAction = null
@@ -84,7 +84,7 @@ trait SqlUpdate
     updateAction.ids = query.ids
   }
 
-  override def handleFilterAttr[T <: Attr with Tacit](filterAttr: T): Unit = {
+  override def handleFilterAttr[T <: Attr & Tacit](filterAttr: T): Unit = {
     filterAttr.asInstanceOf[Attr] match {
       case a: AttrSeqTac if a.op == Eq => noCollectionFilterEq(a.name)
       case a: AttrSetTac if a.op == Eq => noCollectionFilterEq(a.name)
@@ -378,7 +378,7 @@ trait SqlUpdate
 
   // Helpers -------------------------------------------------------------------
 
-  private def updateIterableEq[T, M[_] <: Iterable[_]](
+  private def updateIterableEq[T, M[_] <: Iterable[?]](
     ent: String,
     attr: String,
     optRef: Option[String],
@@ -404,7 +404,7 @@ trait SqlUpdate
     }
   }
 
-  private def updateIterableAdd[T, M[_] <: Iterable[_]](
+  private def updateIterableAdd[T, M[_] <: Iterable[?]](
     ent: String,
     attr: String,
     optRef: Option[String],
@@ -431,7 +431,7 @@ trait SqlUpdate
     }
   }
 
-  private def updateIterableRemove[T, M[_] <: Iterable[_]](
+  private def updateIterableRemove[T, M[_] <: Iterable[?]](
     ent: String,
     attr: String,
     optRef: Option[String],

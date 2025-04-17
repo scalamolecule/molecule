@@ -4,33 +4,33 @@ import molecule.coreTests.setup.Test
 import molecule.coreTests.spi.action.update.relation.many._
 import molecule.sql.postgres.setup.Api_postgres_async
 
-class Many_Map extends Test {
+class Many_MapTest extends Test {
   Many_Map(this, Api_postgres_async)
 }
-class Many_Map_add extends Test {
+class Many_Map_addTest extends Test {
   Many_Map_add(this, Api_postgres_async)
 }
-class Many_Map_remove extends Test {
+class Many_Map_removeTest extends Test {
   Many_Map_remove(this, Api_postgres_async)
 }
-class Many_One extends Test {
+class Many_OneTest extends Test {
   Many_One(this, Api_postgres_async)
 }
-class Many_Seq extends Test {
+class Many_SeqTest extends Test {
   Many_Seq(this, Api_postgres_async)
 }
-class Many_Seq_add extends Test {
+class Many_Seq_addTest extends Test {
   Many_Seq_add(this, Api_postgres_async)
 }
-class Many_Seq_remove extends Test {
+class Many_Seq_removeTest extends Test {
   Many_Seq_remove(this, Api_postgres_async)
 }
-class Many_Set extends Test {
+class Many_SetTest extends Test {
   Many_Set(this, Api_postgres_async)
 }
-class Many_Set_add extends Test {
+class Many_Set_addTest extends Test {
   Many_Set_add(this, Api_postgres_async)
 }
-class Many_Set_remove extends Test {
+class Many_Set_removeTest extends Test {
   Many_Set_remove(this, Api_postgres_async)
 }

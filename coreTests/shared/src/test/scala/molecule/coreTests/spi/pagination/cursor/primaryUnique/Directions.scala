@@ -11,7 +11,7 @@ import scala.annotation.nowarn
 @nowarn
 case class Directions(
   suite: Test,
-  api: Api_async with Spi_async with DbProviders
+  api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
   val x = ""
 

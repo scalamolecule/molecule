@@ -15,7 +15,7 @@ trait SortOneOpt_[Tpl] { self: Model2DatomicQuery[Tpl] =>
     a: Row,
     b: Row,
     i: Int,
-    compareMapValues: (jMap[_, _], jMap[_, _]) => Int
+    compareMapValues: (jMap[?, ?], jMap[?, ?]) => Int
   ): Int = {
     (a.get(i), b.get(i)) match {
       case (null, null)                     => 0
@@ -25,7 +25,7 @@ trait SortOneOpt_[Tpl] { self: Model2DatomicQuery[Tpl] =>
     }
   }
 
-  protected def sortOneOptId(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneOptID(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
@@ -33,16 +33,16 @@ trait SortOneOpt_[Tpl] { self: Model2DatomicQuery[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
-                m1.values.iterator.next.asInstanceOf[jMap[_, _]].values.iterator.next.toString.toLong.compareTo(
-                  m2.values.iterator.next.asInstanceOf[jMap[_, _]].values.iterator.next.toString.toLong)
+              compare(a, b, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
+                m1.values.iterator.next.asInstanceOf[jMap[?, ?]].values.iterator.next.toString.toLong.compareTo(
+                  m2.values.iterator.next.asInstanceOf[jMap[?, ?]].values.iterator.next.toString.toLong)
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
-                m1.values.iterator.next.asInstanceOf[jMap[_, _]].values.iterator.next.toString.toLong.compareTo(
-                  m2.values.iterator.next.asInstanceOf[jMap[_, _]].values.iterator.next.toString.toLong)
+              compare(b, a, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
+                m1.values.iterator.next.asInstanceOf[jMap[?, ?]].values.iterator.next.toString.toLong.compareTo(
+                  m2.values.iterator.next.asInstanceOf[jMap[?, ?]].values.iterator.next.toString.toLong)
               )
         }
       )
@@ -57,14 +57,14 @@ trait SortOneOpt_[Tpl] { self: Model2DatomicQuery[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(a, b, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 m1.values.iterator.next.asInstanceOf[String].compareTo(
                   m2.values.iterator.next.asInstanceOf[String])
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(b, a, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 m1.values.iterator.next.asInstanceOf[String].compareTo(
                   m2.values.iterator.next.asInstanceOf[String])
               )
@@ -81,14 +81,14 @@ trait SortOneOpt_[Tpl] { self: Model2DatomicQuery[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(a, b, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 m1.values.iterator.next.toString.toInt.compareTo(
                   m2.values.iterator.next.toString.toInt)
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(b, a, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 m1.values.iterator.next.toString.toInt.compareTo(
                   m2.values.iterator.next.toString.toInt)
               )
@@ -105,14 +105,14 @@ trait SortOneOpt_[Tpl] { self: Model2DatomicQuery[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(a, b, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 m1.values.iterator.next.asInstanceOf[jLong].compareTo(
                   m2.values.iterator.next.asInstanceOf[jLong])
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(b, a, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 m1.values.iterator.next.asInstanceOf[jLong].compareTo(
                   m2.values.iterator.next.asInstanceOf[jLong])
               )
@@ -129,14 +129,14 @@ trait SortOneOpt_[Tpl] { self: Model2DatomicQuery[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(a, b, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 m1.values.iterator.next.asInstanceOf[jFloat].compareTo(
                   m2.values.iterator.next.asInstanceOf[jFloat])
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(b, a, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 m1.values.iterator.next.asInstanceOf[jFloat].compareTo(
                   m2.values.iterator.next.asInstanceOf[jFloat])
               )
@@ -153,14 +153,14 @@ trait SortOneOpt_[Tpl] { self: Model2DatomicQuery[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(a, b, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 m1.values.iterator.next.asInstanceOf[jDouble].compareTo(
                   m2.values.iterator.next.asInstanceOf[jDouble])
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(b, a, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 m1.values.iterator.next.asInstanceOf[jDouble].compareTo(
                   m2.values.iterator.next.asInstanceOf[jDouble])
               )
@@ -177,14 +177,14 @@ trait SortOneOpt_[Tpl] { self: Model2DatomicQuery[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(a, b, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 m1.values.iterator.next.asInstanceOf[jBoolean].compareTo(
                   m2.values.iterator.next.asInstanceOf[jBoolean])
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(b, a, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 m1.values.iterator.next.asInstanceOf[jBoolean].compareTo(
                   m2.values.iterator.next.asInstanceOf[jBoolean])
               )
@@ -201,14 +201,14 @@ trait SortOneOpt_[Tpl] { self: Model2DatomicQuery[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(a, b, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 m1.values.iterator.next.asInstanceOf[jBigInt].compareTo(
                   m2.values.iterator.next.asInstanceOf[jBigInt])
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(b, a, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 m1.values.iterator.next.asInstanceOf[jBigInt].compareTo(
                   m2.values.iterator.next.asInstanceOf[jBigInt])
               )
@@ -225,14 +225,14 @@ trait SortOneOpt_[Tpl] { self: Model2DatomicQuery[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(a, b, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 m1.values.iterator.next.asInstanceOf[jBigDecimal].compareTo(
                   m2.values.iterator.next.asInstanceOf[jBigDecimal])
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(b, a, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 m1.values.iterator.next.asInstanceOf[jBigDecimal].compareTo(
                   m2.values.iterator.next.asInstanceOf[jBigDecimal])
               )
@@ -249,14 +249,14 @@ trait SortOneOpt_[Tpl] { self: Model2DatomicQuery[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(a, b, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 m1.values.iterator.next.asInstanceOf[Date].compareTo(
                   m2.values.iterator.next.asInstanceOf[Date])
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(b, a, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 m1.values.iterator.next.asInstanceOf[Date].compareTo(
                   m2.values.iterator.next.asInstanceOf[Date])
               )
@@ -273,14 +273,14 @@ trait SortOneOpt_[Tpl] { self: Model2DatomicQuery[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(a, b, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 Duration.parse(m1.values.iterator.next.toString).compareTo(
                   Duration.parse(m2.values.iterator.next.toString))
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(b, a, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 Duration.parse(m1.values.iterator.next.toString).compareTo(
                   Duration.parse(m2.values.iterator.next.toString))
               )
@@ -297,14 +297,14 @@ trait SortOneOpt_[Tpl] { self: Model2DatomicQuery[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(a, b, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 Instant.parse(m1.values.iterator.next.toString).compareTo(
                   Instant.parse(m2.values.iterator.next.toString))
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(b, a, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 Instant.parse(m1.values.iterator.next.toString).compareTo(
                   Instant.parse(m2.values.iterator.next.toString))
               )
@@ -321,14 +321,14 @@ trait SortOneOpt_[Tpl] { self: Model2DatomicQuery[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(a, b, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 LocalDate.parse(m1.values.iterator.next.toString).compareTo(
                   LocalDate.parse(m2.values.iterator.next.toString))
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(b, a, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 LocalDate.parse(m1.values.iterator.next.toString).compareTo(
                   LocalDate.parse(m2.values.iterator.next.toString))
               )
@@ -345,14 +345,14 @@ trait SortOneOpt_[Tpl] { self: Model2DatomicQuery[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(a, b, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 LocalTime.parse(m1.values.iterator.next.toString).compareTo(
                   LocalTime.parse(m2.values.iterator.next.toString))
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(b, a, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 LocalTime.parse(m1.values.iterator.next.toString).compareTo(
                   LocalTime.parse(m2.values.iterator.next.toString))
               )
@@ -369,14 +369,14 @@ trait SortOneOpt_[Tpl] { self: Model2DatomicQuery[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(a, b, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 LocalDateTime.parse(m1.values.iterator.next.toString).compareTo(
                   LocalDateTime.parse(m2.values.iterator.next.toString))
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(b, a, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 LocalDateTime.parse(m1.values.iterator.next.toString).compareTo(
                   LocalDateTime.parse(m2.values.iterator.next.toString))
               )
@@ -393,14 +393,14 @@ trait SortOneOpt_[Tpl] { self: Model2DatomicQuery[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(a, b, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 OffsetTime.parse(m1.values.iterator.next.toString).compareTo(
                   OffsetTime.parse(m2.values.iterator.next.toString))
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(b, a, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 OffsetTime.parse(m1.values.iterator.next.toString).compareTo(
                   OffsetTime.parse(m2.values.iterator.next.toString))
               )
@@ -417,14 +417,14 @@ trait SortOneOpt_[Tpl] { self: Model2DatomicQuery[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(a, b, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 OffsetDateTime.parse(m1.values.iterator.next.toString).compareTo(
                   OffsetDateTime.parse(m2.values.iterator.next.toString))
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(b, a, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 OffsetDateTime.parse(m1.values.iterator.next.toString).compareTo(
                   OffsetDateTime.parse(m2.values.iterator.next.toString))
               )
@@ -441,14 +441,14 @@ trait SortOneOpt_[Tpl] { self: Model2DatomicQuery[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(a, b, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 ZonedDateTime.parse(m1.values.iterator.next.toString).compareTo(
                   ZonedDateTime.parse(m2.values.iterator.next.toString))
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(b, a, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 ZonedDateTime.parse(m1.values.iterator.next.toString).compareTo(
                   ZonedDateTime.parse(m2.values.iterator.next.toString))
               )
@@ -465,14 +465,14 @@ trait SortOneOpt_[Tpl] { self: Model2DatomicQuery[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(a, b, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 m1.values.iterator.next.asInstanceOf[UUID].compareTo(
                   m2.values.iterator.next.asInstanceOf[UUID])
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(b, a, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 m1.values.iterator.next.asInstanceOf[UUID].compareTo(
                   m2.values.iterator.next.asInstanceOf[UUID])
               )
@@ -489,14 +489,14 @@ trait SortOneOpt_[Tpl] { self: Model2DatomicQuery[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(a, b, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 m1.values.iterator.next.asInstanceOf[URI].compareTo(
                   m2.values.iterator.next.asInstanceOf[URI])
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(b, a, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 m1.values.iterator.next.asInstanceOf[URI].compareTo(
                   m2.values.iterator.next.asInstanceOf[URI])
               )
@@ -513,14 +513,14 @@ trait SortOneOpt_[Tpl] { self: Model2DatomicQuery[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(a, b, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 m1.values.iterator.next.asInstanceOf[jInteger].compareTo(
                   m2.values.iterator.next.asInstanceOf[jInteger])
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(b, a, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 m1.values.iterator.next.asInstanceOf[jInteger].compareTo(
                   m2.values.iterator.next.asInstanceOf[jInteger])
               )
@@ -537,14 +537,14 @@ trait SortOneOpt_[Tpl] { self: Model2DatomicQuery[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(a, b, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 m1.values.iterator.next.asInstanceOf[jInteger].compareTo(
                   m2.values.iterator.next.asInstanceOf[jInteger])
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(b, a, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 m1.values.iterator.next.asInstanceOf[jInteger].compareTo(
                   m2.values.iterator.next.asInstanceOf[jInteger])
               )
@@ -561,14 +561,14 @@ trait SortOneOpt_[Tpl] { self: Model2DatomicQuery[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(a, b, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 m1.values.iterator.next.asInstanceOf[String].compareTo(
                   m2.values.iterator.next.asInstanceOf[String])
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+              compare(b, a, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
                 m1.values.iterator.next.asInstanceOf[String].compareTo(
                   m2.values.iterator.next.asInstanceOf[String])
               )

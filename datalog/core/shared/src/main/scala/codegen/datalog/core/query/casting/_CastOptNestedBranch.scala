@@ -17,11 +17,11 @@ object _CastOptNestedBranch extends DatomicGenBase("CastOptNestedBranch", "/quer
        |trait $fileName_ { self: DatomicQueryBase =>
        |
        |  final protected def pullOptNestedBranch(
-       |    pullCasts0: List[jIterator[_] => Any],
+       |    pullCasts0: List[jIterator[?] => Any],
        |    pullSorts: List[Int => (Row, Row) => Int],
-       |    pullNested: jIterator[_] => List[Any],
+       |    pullNested: jIterator[?] => List[Any],
        |    refDepth: Int
-       |  ): jIterator[_] => List[Any] = {
+       |  ): jIterator[?] => List[Any] = {
        |    val optComparator = {
        |      if (pullSorts.nonEmpty) {
        |        val n = pullSorts.length
@@ -50,7 +50,7 @@ object _CastOptNestedBranch extends DatomicGenBase("CastOptNestedBranch", "/quer
        |
        |  final private def flatten(
        |    list: jArrayList[Any],
-       |    map: jMap[_, _],
+       |    map: jMap[?, ?],
        |    max: Int,
        |    cur: Int
        |  ): jArrayList[Any] = {
@@ -63,9 +63,9 @@ object _CastOptNestedBranch extends DatomicGenBase("CastOptNestedBranch", "/quer
        |  }
        |
        |  final private def resolve(
-       |    handleMaps: jList[_] => List[Any]
-       |  ): jIterator[_] => List[Any] = {
-       |    (it: jIterator[_]) =>
+       |    handleMaps: jList[?] => List[Any]
+       |  ): jIterator[?] => List[Any] = {
+       |    (it: jIterator[?]) =>
        |      try {
        |        it.next match {
        |          case maps: jList[_] => handleMaps(maps)
@@ -86,26 +86,26 @@ object _CastOptNestedBranch extends DatomicGenBase("CastOptNestedBranch", "/quer
     val body     =
       s"""
          |  final private def pullBranch$i(
-         |    pullCasts: List[jIterator[_] => Any],
+         |    pullCasts: List[jIterator[?] => Any],
          |    optComparator: Option[Comparator[Row]],
          |    refDepth: Int
-         |  ): jIterator[_] => List[Any] = {
+         |  ): jIterator[?] => List[Any] = {
          |    val List($casters) = pullCasts
-         |    val cast = (it: jIterator[_]) =>
+         |    val cast = (it: jIterator[?]) =>
          |      (
          |        $castings
          |      )
          |    resolve(
          |      optComparator.fold {
          |        val list = new jArrayList[Any]($i)
-         |        (rows: jList[_]) =>
+         |        (rows: jList[?]) =>
          |          rows.asScala.toList.map {
          |            case row: jMap[_, _] =>
          |              list.clear()
          |              cast(flatten(list, row, refDepth, 0).iterator)
          |          }
          |      } { comparator =>
-         |        (rows: jList[_]) =>
+         |        (rows: jList[?]) =>
          |          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
          |          rows.asScala.foreach {
          |            case row: jMap[_, _] =>

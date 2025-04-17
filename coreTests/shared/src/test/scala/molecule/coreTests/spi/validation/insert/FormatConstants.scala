@@ -10,7 +10,7 @@ import scala.language.implicitConversions
 
 case class FormatConstants(
   suite: Test,
-  api: Api_async with Spi_async with DbProviders
+  api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 
   // These test are mainly to confirm that formatting of validation tests

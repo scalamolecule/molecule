@@ -19,15 +19,15 @@ trait OptRefNested[Tpl]
     val caster            = rec(nestedOptRefCasts, refDepths)
     (rowValue: AnyRef) => {
       // println(s"===  ${nestedOptRefCasts.size}   " + rowValue)
-      caster(rowValue.asInstanceOf[jMap[_, _]].values.iterator)
+      caster(rowValue.asInstanceOf[jMap[?, ?]].values.iterator)
     }
   }
 
   def rec(
-    castss: List[List[jIterator[_] => Any]],
+    castss: List[List[jIterator[?] => Any]],
     refDepths: List[Int],
-    leaf: jIterator[_] => Option[Any] = null // when leaf materializes
-  ): jIterator[_] => Option[Any] = {
+    leaf: jIterator[?] => Option[Any] = null // when leaf materializes
+  ): jIterator[?] => Option[Any] = {
     castss match {
       case casts :: Nil  => rec(Nil, Nil, pullOptRefLeaf(casts))
       case casts :: more => pullOptRefBranch(casts, rec(more, refDepths.tail), refDepths.head)

@@ -4,6 +4,6 @@ import molecule.coreTests.setup.Test
 import molecule.coreTests.spi.api._
 import molecule.sql.mysql.setup.Api_mysql_async
 
-class AsyncApi extends Test {
+class AsyncApiTest extends Test {
   AsyncApi(this, Api_mysql_async)
 }

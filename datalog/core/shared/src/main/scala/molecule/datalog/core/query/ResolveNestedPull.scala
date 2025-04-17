@@ -177,7 +177,7 @@ trait ResolveNestedPull[Tpl]
 
   private def add(
     sorter: Option[(Int, Int => (Row, Row) => Int)],
-    lambda: jIterator[_] => Any,
+    lambda: jIterator[?] => Any,
     lambda2: AnyRef => AnyRef = identity
   ): Unit = {
     pullCasts += lambda
