@@ -14,8 +14,8 @@ Compile to 2.12 only:
 
 Compile to 3.3 only:
 
-    sbt ++3.3.4 compile
-    sbt ++3.3.4 clean compile
+    sbt ++3.3.5 compile
+    sbt ++3.3.5 clean compile
 
 Compile to all versions:
 
@@ -37,7 +37,7 @@ To have molecule jars generated, add `-Dmolecule=true`
 
 Specific Scala version can be set initially
 
-    sbt ++2.12.15
+    sbt ++2.12.20
 
 ## Test JVM
 
@@ -94,13 +94,15 @@ Compilation on JS side can take some time.
 1) molecule: `sbt +publishSigned -Ddocs=true`
 1) commit and push molecule, sbt-molecule and molecule-samples to github
 1) molecule github: create release
+                           
 
 ## Publish without sbt-molecule update
 
-1) Set molecule build version to new version
+1) Set molecule build version to new version + "-SNAPSHOT"
 1) molecule: `sbt +publishLocal`
 1) molecule-samples: update to new version
 1) molecule-samples: `./test-all.sh`
+2) when all tests pass, take away -SNAPSHOT from molecule version in molecule and samples
 1) molecule: `sbt +publishSigned -Ddocs=true`
 1) commit and push molecule and molecule-samples to github
 1) molecule github: create release

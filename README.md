@@ -190,13 +190,13 @@ Add the following to your build files:
 `project/build.properties`:
 
 ```
-sbt.version = 1.10.7
+sbt.version = 1.10.11
 ```
 
 `project/plugins.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.12.0")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.12.1")
 ```
 
 `build.sbt`:
@@ -207,12 +207,12 @@ lazy val yourProject = project.in(file("app"))
   .settings(
     libraryDependencies ++= Seq(
       // One or more of:
-      "org.scalamolecule" %%% "molecule-sql-postgres" % "0.16.0",
-      "org.scalamolecule" %%% "molecule-sql-sqlite" % "0.16.0",
-      "org.scalamolecule" %%% "molecule-sql-mysql" % "0.16.0",
-      "org.scalamolecule" %%% "molecule-sql-mariadb" % "0.16.0",
-      "org.scalamolecule" %%% "molecule-sql-h2" % "0.16.0",
-      "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.16.0",
+      "org.scalamolecule" %%% "molecule-sql-postgres" % "0.17.0",
+      "org.scalamolecule" %%% "molecule-sql-sqlite" % "0.17.0",
+      "org.scalamolecule" %%% "molecule-sql-mysql" % "0.17.0",
+      "org.scalamolecule" %%% "molecule-sql-mariadb" % "0.17.0",
+      "org.scalamolecule" %%% "molecule-sql-h2" % "0.17.0",
+      "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.17.0",
     ),
     
     // Paths to directories with your domain structure definition files
@@ -223,18 +223,22 @@ lazy val yourProject = project.in(file("app"))
 ## Explore code
 
 The `coreTests` module in this repo has several data model definitions and +1700 tests that show all details of
-how molecule can be used. This forms the Service Provider Interface that each database implementation needs to comply to
-in order to offer all functionality of Molecule.
+how molecule can be used. This forms the Service Provider Interface (SPI) that each database implementation needs to comply with
+in order to offer all functionality of Molecule and be a valid implementation.
 
+First, clone the molecule project to your computer (or `git pull` to get the latest changes):
+```
+git clone https://github.com/scalamolecule/molecule.git
+cd molecule
+```
+Then run some tests on either ScalaJVM or ScalaJS:
 
-<details>
-
-<summary>Run JVM tests</summary>
+### Run JVM tests
 
 Make sure Docker is running to run tests for Postgres, SQlite, Mysql and MariaDB. Datomic and H2 can be run in memory for tests.
 On a mac you can for instance start Docker Desktop.
 
-Run the same test suite on jvm targeting various databases:
+Run the coreTests on the jvm with a databases of your choice:
 
     sbt sqlPostgresJVM/test
     sbt sqlSQliteJVM/test
@@ -243,53 +247,50 @@ Run the same test suite on jvm targeting various databases:
     sbt sqlH2JVM/test
     sbt datalogDatomicJVM/test
 
-</details>
+
+### Run JS tests
 
 
-<details>
+To test using molecules from ScalaJS, you need to have a ScalaJVM backend server running in a separate process that can receive the queries and send data back to ScalaJS.
 
-<summary>Run JS tests</summary>
+In the `server` module you can see 8 different minimal Tapir backend setups that you can start out from and successively add your own api endpoints to. In one process you can start up one of those backends where you will be asked which backend you want to use:
 
-To run tests from the client side with Scala.js, first run a jvm server (Akka Http) in one process:
+```
+sbt server/run
 
-    sbt sqlPostgresJVM/run
+Multiple main classes detected. Select one to run:
+ [1] molecule.server.Akka
+ [2] molecule.server.Armeria
+ [3] molecule.server.Http4s
+ [4] molecule.server.Netty
+ [5] molecule.server.Pekko
+ [6] molecule.server.Play
+ [7] molecule.server.VertX
+ [8] molecule.server.ZioHttp
 
-Then in another process/terminal window:
+Enter number: 
+```
+Let's enter 4 to use the Netty server:
+```
+Enter number: 4
+[info] running molecule.server.Netty 
+Press ENTER to stop the server.
+✅ Netty server running on http://localhost:8080
+```
+Now we have a backend running on ScalaJVM ready to take care of your molecule queries from ScalaJS! 
 
-    sbt sqlPostgresJS/test
+In another process you can then run one of the following commands to run the coreTests on ScalaJS with the database of your choice:
 
-</details>
+```
+sbt datalogDatomicJS/test
+sbt sqlH2JS/test
+sbt sqlMariaDBJS/test
+sbt sqlMySQLJS/test
+sbt sqlPostgreSQLJS/test
+sbt sqlSQliteJS/test
+```
+The tests are then automatically fetching data from the running backend - Molecule takes care of it transparently!
 
-
-<details>
-
-<summary>Test latest snapshot locally</summary>
-
-To be completely up-to-date, you can pull the latest snapshot from Github.
-Initially you clone the `sbt-molecule` and `molecule` repositories
-
-    git clone https://github.com/scalamolecule/sbt-molecule.git
-    cd ..
-    git clone https://github.com/scalamolecule/molecule.git
-
-And hereafter you can just pull the latest changes in each repository directory
-
-    cd sbt-molecule
-    git pull
-    cd ../molecule
-    git pull
-
-To generate the boilerplate code with the latest plugin, run the following commands:
-
-    cd molecule
-    sbt ++2.12.20 "project baseJVM" publishLocal  # Used by sbt-molecule
-    cd ../sbt-molecule
-    sbt publishLocal                              # Make the plugin available
-    cd ../molecule
-    sbt compile -Dmolecule=true                   # Generate boilerplate code
-
-Now the boilerplate code for the core tests is generated and the various test suites can be run from your IDE.
-</details>
 
 
 ### Author

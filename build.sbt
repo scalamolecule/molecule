@@ -1,5 +1,6 @@
 import org.scalajs.linker.interface.ESVersion
 
+val moleculeVersion = "0.17.0"
 
 val scala212 = "2.12.20"
 val scala213 = "2.13.16"
@@ -34,7 +35,7 @@ inThisBuild(
     organizationName := "ScalaMolecule",
     organizationHomepage := Some(url("http://www.scalamolecule.org")),
     versionScheme := Some("early-semver"),
-    version := "0.16.0",
+    version := moleculeVersion,
     scalaVersion := scala213,
     crossScalaVersions := allScala,
 
@@ -112,12 +113,6 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
       // Streaming
       "com.lihaoyi" %%% "geny" % "1.1.1",
       "co.fs2" %%% "fs2-core" % catsEffectVersion,
-    ),
-  )
-  .jvmSettings(
-    libraryDependencies ++= Seq(
-      // Streaming
-      //      "com.lihaoyi" %%% "geny" % "1.1.1",
     ),
   )
   .jsSettings(
