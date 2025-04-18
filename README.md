@@ -71,9 +71,9 @@ Data can also be fetched asynchronously in a `Future`, cats `IO` or `ZIO`.
 
 ## How does it work?
 
-1) Define a model of your domain data with Molecule's meta DSL
+1) Define the entity names and attributes of your domain structure with Molecule's meta DSL
 ```scala
-object MyDomain extends DataModel(5) { 
+object MyDomain extends DomainStructure(5) { 
 
   trait Person {
     val name     = oneString
@@ -127,7 +127,7 @@ val persons: Future[List[(String, Int, String)]] =
 ZIO API
 
 ```scala
-import molecule.sql.postgres.zio._
+import molecule.sql.postgres.Zio._
 
 val persons: ZIO[Conn, MoleculeError, List[(String, Int, String)]] =
   Person.name.age.Address.street.query.get
@@ -222,7 +222,7 @@ lazy val yourProject = project.in(file("app"))
 
 ## Explore code
 
-The `coreTests` module in this repo has several data model definitions and +1700 tests that show all details of
+The `coreTests` module in this repo has several domain structure definitions and +1700 tests that show all details of
 how molecule can be used. This forms the Service Provider Interface (SPI) that each database implementation needs to comply with
 in order to offer all functionality of Molecule and be a valid implementation.
 
