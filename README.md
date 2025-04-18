@@ -44,7 +44,7 @@ and get typed data matching the molecule from the database:
 val persons: List[(String, Int, String)] =
   Person.name.age.Address.street.query.get
 ```
-Data can also be fetched asynchronously in a `Future` or `ZIO`.
+Data can also be fetched asynchronously in a `Future`, cats `IO` or `ZIO`.
 
 
 ## Main features of Molecule
