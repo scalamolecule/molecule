@@ -1,12 +1,12 @@
 package molecule.coreTests.spi.api
 
-import cats.effect.unsafe.implicits.{global => ioRuntime}
-import molecule.base.error._
+import cats.effect.unsafe.implicits.global as ioRuntime
+import molecule.base.error.*
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
-import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Types._
-import molecule.coreTests.setup._
+import molecule.core.util.Executor.*
+import molecule.coreTests.domains.dsl.Types.*
+import molecule.coreTests.setup.*
 import scala.annotation.nowarn
 import scala.concurrent.Future
 
@@ -17,8 +17,8 @@ case class AsyncApi(
   api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 
-  import api._
-  import suite._
+  import api.*
+  import suite.*
 
   "Crud actions" - types { implicit conn =>
     for {
@@ -36,22 +36,35 @@ case class AsyncApi(
     for {
       _ <- Entity.i.insert(1, 2, 3).transact
 
-      _ <- if (platform == "JVM") {
+      _ <- if (platform == "jvm") {
         // Returning an fs2.Stream[IO, Int]
-        // Then you can use all the usual operation on the stream.
-        // Here we simply convert it to a List in a Future to satisfy the munit test
         Entity.i.query.stream
           .compile
           .toList
           .unsafeToFuture()
           .map(_.sorted ==> List(1, 2, 3))
-      } else Future.unit
+      } else {
+        Entity.i.query.stream
+          .compile
+          .toList
+          .attempt
+          .map {
+            case Left(e) =>
+              assertEquals(
+                e.getMessage,
+                "Streaming not implemented on JS platform. Maybe use subscribe instead?"
+              )
+            case Right(value) =>
+              fail(s"Expected exception but got value: $value")
+          }
+          .unsafeToFuture()
+      }
     } yield ()
   }
 
 
   "Opt ref" - refs { implicit conn =>
-    import molecule.coreTests.domains.dsl.Refs._
+    import molecule.coreTests.domains.dsl.Refs.*
     for {
       _ <- A.i(1).save.transact
 
@@ -129,7 +142,7 @@ case class AsyncApi(
 
 
   "Cursor query" - unique { implicit conn =>
-    import molecule.coreTests.domains.dsl.Uniques._
+    import molecule.coreTests.domains.dsl.Uniques.*
     val query = Uniques.int.a1.query
     for {
       _ <- Uniques.int.insert(1, 2, 3, 4, 5).transact

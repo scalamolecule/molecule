@@ -1,7 +1,7 @@
 package molecule.sql.postgres.compliance.pagination.offset
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.pagination.offset._
+import molecule.coreTests.spi.pagination.offset.*
 import molecule.sql.postgres.setup.Api_postgres_async
 
 class OffsetBackwardsTest extends Test {

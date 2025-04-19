@@ -1,10 +1,10 @@
 package molecule.sql.mysql.spi
 
-import boopickle.Default._
+import boopickle.Default.*
 import cats.effect.IO
+import molecule.core.ast.DataModel.Element
 import molecule.sql.core.spi.SpiBase_io
 import molecule.sql.mysql.query.Model2SqlQuery_mysql
-import molecule.core.ast.DataModel.Element
 
 
 object Spi_mysql_io extends Spi_mysql_io

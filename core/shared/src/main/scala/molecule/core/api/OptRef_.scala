@@ -1,7 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.core.api
 
-import molecule.core.ast.DataModel._
+import molecule.core.ast.DataModel.*
 
 trait OptRefOp_0[Entity[_, _]] {
   protected def _optRef[RefTpl](optRefElements: List[Element]): Entity[Option[RefTpl], Any] = ???

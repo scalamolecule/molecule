@@ -1,14 +1,14 @@
 package molecule.sql.sqlite.spi
 
-import java.sql.{DriverManager, Statement, PreparedStatement => PS}
-import molecule.core.action._
+import java.sql.{DriverManager, Statement, PreparedStatement as PS}
+import molecule.core.action.*
 import molecule.core.ast.DataModel.Element
 import molecule.core.marshalling.{ConnProxy, JdbcProxy}
-import molecule.core.spi._
-import molecule.core.transaction._
-import molecule.core.util.Executor._
+import molecule.core.spi.*
+import molecule.core.transaction.*
+import molecule.core.util.Executor.*
 import molecule.sql.core.facade.JdbcConn_JVM
-import molecule.sql.core.javaSql.{ResultSetInterface => Row}
+import molecule.sql.core.javaSql.ResultSetInterface as RS
 import molecule.sql.core.spi.SpiBaseJVM_sync
 import molecule.sql.core.transaction.SqlDelete
 import molecule.sql.core.transaction.strategy.SqlOps
@@ -18,7 +18,7 @@ import molecule.sql.core.transaction.strategy.save.SaveAction
 import molecule.sql.core.transaction.strategy.update.UpdateAction
 import molecule.sql.sqlite.facade.JdbcHandlerSQlite_JVM
 import molecule.sql.sqlite.query.Model2SqlQuery_sqlite
-import molecule.sql.sqlite.transaction._
+import molecule.sql.sqlite.transaction.*
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 import scala.util.Using.Manager
@@ -98,7 +98,7 @@ trait Spi_sqlite_sync extends SpiBaseJVM_sync {
   }
 
   override def validateUpdateSet(
-    proxy: ConnProxy, elements: List[Element], query2resultSet: String => Row
+    proxy: ConnProxy, elements: List[Element], query2resultSet: String => RS
   ): Map[String, Seq[String]] = {
     validateUpdateSet_sqlite(proxy, elements, query2resultSet)
   }

@@ -1,7 +1,7 @@
 package molecule.sql.mariadb.compliance.relation
 
 import molecule.coreTests.setup.{MUnitSuiteWithArrays, Test}
-import molecule.coreTests.spi.relation.nested._
+import molecule.coreTests.spi.relation.nested.*
 import molecule.sql.mariadb.setup.Api_mariadb_async
 
 class NestedBasicTest extends Test {

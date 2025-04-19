@@ -1,7 +1,7 @@
 package molecule.sql.sqlite.compliance.action.insert
 
 import molecule.coreTests.setup.{MUnitSuiteWithArrays, Test}
-import molecule.coreTests.spi.action.insert._
+import molecule.coreTests.spi.action.insert.*
 import molecule.sql.sqlite.setup.Api_sqlite_async
 
 class InsertCardOneTest extends Test {

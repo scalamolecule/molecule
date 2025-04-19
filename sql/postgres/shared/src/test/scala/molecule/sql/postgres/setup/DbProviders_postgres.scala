@@ -1,7 +1,7 @@
 package molecule.sql.postgres.setup
 
 import molecule.core.spi.Conn
-import molecule.coreTests.domains.schema._
+import molecule.coreTests.domains.schema.*
 import molecule.coreTests.setup.{DbConnection, DbProviders, Platform}
 
 trait DbProviders_postgres extends DbProviders with DbConnection with Platform {

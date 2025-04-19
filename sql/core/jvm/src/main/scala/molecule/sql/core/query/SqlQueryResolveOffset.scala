@@ -5,7 +5,7 @@ import molecule.core.ast.DataModel.Element
 import molecule.core.util.Executor.global
 import molecule.core.util.{FutureUtils, ModelUtils, MoleculeLogging}
 import molecule.sql.core.facade.JdbcConn_JVM
-import molecule.sql.core.query.casting.strategy._
+import molecule.sql.core.query.casting.strategy.*
 import molecule.sql.core.query.casting.{NestOptTpls, NestTpls}
 import scala.concurrent.Future
 
@@ -40,7 +40,7 @@ case class SqlQueryResolveOffset[Tpl](
   private def handleTuples(
     c: CastStrategy, sortedRows: RS, conn: JdbcConn_JVM
   ): (List[Tpl], Int, Boolean) = {
-    val tpls       = castTuples(c.row2tpl, sortedRows, forward)
+    val tpls       = castTuples(c.rs2row, sortedRows, forward)
     val totalCount = optOffset.fold(
       m2q.getRowCount(sortedRows)
     )(_ => getTotalCount(conn))

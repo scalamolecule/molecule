@@ -9,10 +9,9 @@ object _ExprOneTac extends CoreGenBase("ExprOneTac", "/api/expression") {
     s"""// GENERATED CODE ********************************
        |package molecule.core.api.expression
        |
-       |import molecule.base.ast._
-       |import molecule.core.api._
-       |import molecule.core.ast.DataModel._
-       |import scala.language.higherKinds
+       |import molecule.base.ast.*
+       |import molecule.core.api.*
+       |import molecule.core.ast.DataModel.*
        |$traits
        |""".stripMargin
   }

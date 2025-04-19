@@ -2,11 +2,11 @@ package molecule.core.marshalling
 
 import java.nio.ByteBuffer
 import boopickle.CompositePickler
-import boopickle.Default._
-import molecule.base.error._
+import boopickle.Default.*
+import molecule.base.error.*
+import sttp.tapir.*
 import sttp.tapir.EndpointIO.Info
 import sttp.tapir.RawBodyType.ByteBufferBody
-import sttp.tapir._
 
 trait MoleculeEndpoints {
 

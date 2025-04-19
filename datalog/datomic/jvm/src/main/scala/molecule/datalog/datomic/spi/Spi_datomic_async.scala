@@ -1,19 +1,28 @@
 package molecule.datalog.datomic.spi
 
-import molecule.base.error._
-import molecule.core.action._
+import java.util.List as jList
+import java.util.stream.Stream as jStream
+import cats.effect.IO
+import fs2.Stream
+import molecule.base.error.*
+import molecule.core.action.*
 import molecule.core.spi.{Conn, Spi_async, TxReport}
 import molecule.core.util.FutureUtils
+import molecule.datalog.core.query.Model2DatomicQuery
+import molecule.datalog.core.spi.StreamingDatomic
 import molecule.datalog.datomic.facade.DatomicConn_JVM
-import molecule.datalog.datomic.marshalling.MoleculeBackend_datomic.Data
-import scala.concurrent.{Future, ExecutionContext => EC}
+import molecule.datalog.datomic.query.{DatomicQueryResolveCursor, DatomicQueryResolveOffset}
+import molecule.datalog.datomic.transaction.DatomicDataType_JVM
+import scala.concurrent.{Future, ExecutionContext as EC}
 
 object Spi_datomic_async extends Spi_datomic_async
 
 trait Spi_datomic_async
   extends Spi_async
     with JVMDatomicSpiBase
+    with StreamingDatomic
     with SpiBase_datomic_async
+    with DatomicDataType_JVM
     with FutureUtils {
 
   // Query --------------------------------------------------------
@@ -22,18 +31,6 @@ trait Spi_datomic_async
     q: Query[Tpl]
   )(implicit conn: Conn, ec: EC): Future[List[Tpl]] = {
     future(Spi_datomic_sync.query_get(q))
-  }
-
-  override def query_subscribe[Tpl](
-    q: Query[Tpl], callback: List[Tpl] => Unit
-  )(implicit conn: Conn, ec: EC): Future[Unit] = {
-    future(Spi_datomic_sync.query_subscribe(q, callback))
-  }
-
-  override def query_unsubscribe[Tpl](
-    q: Query[Tpl]
-  )(implicit conn: Conn, ec: EC): Future[Unit] = {
-    future(Spi_datomic_sync.query_unsubscribe(q))
   }
 
   override def query_inspect[Tpl](
@@ -66,6 +63,30 @@ trait Spi_datomic_async
     q: QueryCursor[Tpl]
   )(implicit conn: Conn, ec: EC): Future[Unit] = {
     future(Spi_datomic_sync.queryCursor_inspect(q))
+  }
+
+
+  override def query_stream[Tpl](
+    q: Query[Tpl], chunkSize: Int
+  )(implicit conn0: Conn, ec: EC): fs2.Stream[IO, Tpl] = {
+    fs2streamDatomic(
+      q, chunkSize,
+      (q: Query[Tpl], conn: Conn) => Spi_datomic_sync.query_inspect[Tpl](q)(conn),
+      Spi_datomic_sync.getJavaStreamAndRowResolver[Tpl]
+    )
+  }
+
+
+  override def query_subscribe[Tpl](
+    q: Query[Tpl], callback: List[Tpl] => Unit
+  )(implicit conn: Conn, ec: EC): Future[Unit] = {
+    future(Spi_datomic_sync.query_subscribe(q, callback))
+  }
+
+  override def query_unsubscribe[Tpl](
+    q: Query[Tpl]
+  )(implicit conn: Conn, ec: EC): Future[Unit] = {
+    future(Spi_datomic_sync.query_unsubscribe(q))
   }
 
 

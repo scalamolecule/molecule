@@ -1,10 +1,10 @@
 package molecule.sql.postgres
 
-import boopickle.Default._
-import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Types._
+import boopickle.Default.*
+import molecule.core.util.Executor.*
+import molecule.coreTests.domains.dsl.Types.*
 import molecule.coreTests.setup.{Test, TestUtils}
-import molecule.sql.postgres.async._
+import molecule.sql.postgres.async.*
 import molecule.sql.postgres.setup.DbProviders_postgres
 
 
@@ -21,7 +21,7 @@ class AdhocJS_postgres extends Test with DbProviders_postgres with TestUtils {
 
 
   "refs" - refs { implicit conn =>
-    import molecule.coreTests.domains.dsl.Refs._
+    import molecule.coreTests.domains.dsl.Refs.*
     for {
 
       _ <- A.i.insert(1).transact

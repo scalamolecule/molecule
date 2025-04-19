@@ -1,7 +1,7 @@
 package molecule.sql.mariadb.query
 
 import molecule.core.ast.DataModel.Element
-import molecule.sql.core.query._
+import molecule.sql.core.query.*
 
 
 class Model2SqlQuery_mariadb(elements0: List[Element])

@@ -2,14 +2,14 @@ package molecule.core.marshalling.serialize
 
 import java.net.URI
 import java.nio.ByteBuffer
-import java.time._
+import java.time.*
 import java.util.{Date, UUID}
-import boopickle.BasicPicklers._
-import boopickle.Default._
-import boopickle._
+import boopickle.*
+import boopickle.BasicPicklers.*
+import boopickle.Default.*
 import molecule.base.error.ModelError
-import molecule.core.ast.DataModel._
-import molecule.core.marshalling.Boopicklers._
+import molecule.core.ast.DataModel.*
+import molecule.core.marshalling.Boopicklers.*
 import molecule.core.util.{ModelUtils, MoleculeLogging, SerializationUtils}
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer

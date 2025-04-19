@@ -1,7 +1,7 @@
 package molecule.core.marshalling
 
 import java.util.UUID
-import molecule.base.api._
+import molecule.base.api.*
 import molecule.base.ast.{Card, MetaEntity}
 import molecule.core.marshalling.dbView.DbView
 

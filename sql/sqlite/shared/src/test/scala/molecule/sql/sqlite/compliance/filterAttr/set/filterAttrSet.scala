@@ -1,7 +1,7 @@
 package molecule.sql.sqlite.compliance.filterAttr.set
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.filterAttr.set._
+import molecule.coreTests.spi.filterAttr.set.*
 import molecule.sql.sqlite.setup.Api_sqlite_async
 
 class AdjacentTest extends Test {

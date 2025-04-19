@@ -1,9 +1,9 @@
 package molecule.datalog.datomic.compliance.fallback
 
-import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Types._
+import molecule.core.util.Executor.*
+import molecule.coreTests.domains.dsl.Types.*
 import molecule.coreTests.setup.{Test, TestUtils}
-import molecule.datalog.datomic.async._
+import molecule.datalog.datomic.async.*
 import molecule.datalog.datomic.setup.DbProviders_datomic
 import scala.language.implicitConversions
 

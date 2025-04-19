@@ -1,12 +1,12 @@
 package molecule.datalog.datomic.spi
 
-import molecule.base.error._
-import molecule.core.action._
+import molecule.base.error.*
+import molecule.core.action.*
 import molecule.core.spi.{Conn, Spi_zio, TxReport}
 import molecule.core.util.FutureUtils
 import molecule.datalog.datomic.facade.DatomicConn_JS
-import zio._
-import scala.concurrent.{Future, ExecutionContext => EC}
+import zio.*
+import scala.concurrent.{Future, ExecutionContext as EC}
 
 trait Spi_datomic_zio
   extends Spi_zio

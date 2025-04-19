@@ -1,9 +1,9 @@
 package molecule.core.util
 
 import molecule.base.error.ModelError
+import molecule.core.ast.DataModel.*
 import molecule.core.marshalling.ConnProxy
 import scala.annotation.tailrec
-import molecule.core.ast.DataModel._
 
 trait ModelUtils {
 

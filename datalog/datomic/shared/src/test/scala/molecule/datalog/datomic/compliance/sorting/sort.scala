@@ -1,7 +1,7 @@
 package molecule.datalog.datomic.compliance.sorting
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.sorting._
+import molecule.coreTests.spi.sorting.*
 import molecule.datalog.datomic.setup.Api_datomic_async
 
 class SortAggrTest extends Test {

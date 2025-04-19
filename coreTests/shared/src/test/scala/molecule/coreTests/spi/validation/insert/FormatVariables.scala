@@ -1,11 +1,11 @@
 package molecule.coreTests.spi.validation.insert
 
-import molecule.base.error._
+import molecule.base.error.*
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
-import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Validation._
-import molecule.coreTests.setup._
+import molecule.core.util.Executor.*
+import molecule.coreTests.domains.dsl.Validation.*
+import molecule.coreTests.setup.*
 import scala.language.implicitConversions
 
 case class FormatVariables(
@@ -17,8 +17,8 @@ case class FormatVariables(
   // generated boilerplate code and error outputs. Here we substitute the
   // constants used earlier with attribute values in validation expressions.
 
-  import api._
-  import suite._
+  import api.*
+  import suite.*
 
   "Default msg" - validation { implicit conn =>
     for {

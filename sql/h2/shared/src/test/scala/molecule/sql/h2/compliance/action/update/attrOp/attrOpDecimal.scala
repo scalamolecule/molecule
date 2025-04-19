@@ -1,7 +1,7 @@
 package molecule.sql.h2.compliance.action.update.attrOp
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.action.update.attrOp.decimal._
+import molecule.coreTests.spi.action.update.attrOp.decimal.*
 import molecule.sql.h2.setup.Api_h2_async
 
 

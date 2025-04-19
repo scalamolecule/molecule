@@ -1,12 +1,13 @@
 package molecule.core.marshalling
 
 import java.nio.ByteBuffer
-import cats.effect.IO
+//import cats.effect.IO
 import molecule.base.error.MoleculeError
-import molecule.core.ast.DataModel._
+import molecule.core.ast.DataModel.*
 import molecule.core.spi.{Conn, TxReport}
-import zio.stream.ZStream
+//import zio.stream.ZStream
 import scala.concurrent.Future
+
 
 /**
  * Unified shared RPC API for client/backend (JS/JVM)
@@ -18,27 +19,6 @@ trait MoleculeRpc {
     elements: List[Element],
     limit: Option[Int]
   ): Future[Either[MoleculeError, List[Tpl]]]
-
-  def subscribe[Tpl](
-    proxy: ConnProxy,
-    elements: List[Element],
-    limit: Option[Int]
-  ): fs2.Stream[IO, Tpl] = ???
-
-
-  def queryFs2Stream[Tpl](
-    proxy: ConnProxy,
-    elements: List[Element],
-    limit: Option[Int]
-  ): fs2.Stream[IO, Tpl] = ???
-
-  def queryZStream[Tpl](
-    proxy: ConnProxy,
-    elements: List[Element],
-    limit: Option[Int]
-  ): ZStream[Conn, MoleculeError, Tpl] = ???
-
-
 
   def queryOffset[Tpl](
     proxy: ConnProxy,

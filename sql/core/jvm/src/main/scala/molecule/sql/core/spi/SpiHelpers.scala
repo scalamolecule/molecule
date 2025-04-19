@@ -1,14 +1,14 @@
 package molecule.sql.core.spi
 
 import java.net.URI
-import java.time._
+import java.time.*
 import java.util.{Date, UUID}
-import molecule.base.ast._
+import molecule.base.ast.*
 import molecule.base.error.ModelError
 import molecule.core.action.Query
-import molecule.core.ast.DataModel._
+import molecule.core.ast.DataModel.*
 import molecule.core.util.ModelUtils
-import molecule.sql.core.javaSql.{ResultSetInterface => Row}
+import molecule.sql.core.javaSql.ResultSetInterface as RS
 import scala.annotation.nowarn
 import scala.collection.mutable.ListBuffer
 
@@ -428,7 +428,7 @@ trait SpiHelpers extends ModelUtils {
     (idQuery, updateModels)
   }
 
-  protected def nestedArray2coalescedSet(a: Attr, rs: Row, isAttr: Boolean = true): Set[Any] = {
+  protected def nestedArray2coalescedSet(a: Attr, rs: RS, isAttr: Boolean = true): Set[Any] = {
     a match {
       case _: AttrSetManID             => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[Long])
       case _: AttrSetManString         => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[String])
@@ -460,17 +460,17 @@ trait SpiHelpers extends ModelUtils {
   }
 
 
-  private def sql2set[T](isAttr: Boolean, row: Row, j2s: Any => T): Set[T] = {
+  private def sql2set[T](isAttr: Boolean, rs: RS, j2s: Any => T): Set[T] = {
     if (isAttr)
-      sqlNestedArrays2coalescedSet(row, j2s)
+      sqlNestedArrays2coalescedSet(rs, j2s)
     else
-      sqlArrays2coalescedSet(row, j2s)
+      sqlArrays2coalescedSet(rs, j2s)
   }
 
-  private def sqlNestedArrays2coalescedSet[T](row: Row, j2s: Any => T): Set[T] = {
-    row.next()
-    val array = row.getArray(1)
-    if (row.wasNull()) {
+  private def sqlNestedArrays2coalescedSet[T](rs: RS, j2s: Any => T): Set[T] = {
+    rs.next()
+    val array = rs.getArray(1)
+    if (rs.wasNull()) {
       Set.empty[T]
     } else {
       val resultSet = array.getResultSet
@@ -484,18 +484,17 @@ trait SpiHelpers extends ModelUtils {
     }
   }
 
-  private def sqlArrays2coalescedSet[T](row: Row, j2s: Any => T): Set[T] = {
-    val resultSet = row
-    var set       = Set.empty[T]
-    while (resultSet.next()) {
-      resultSet.getArray(1).getArray.asInstanceOf[Array[?]].foreach { value =>
+  private def sqlArrays2coalescedSet[T](rs: RS, j2s: Any => T): Set[T] = {
+    var set = Set.empty[T]
+    while (rs.next()) {
+      rs.getArray(1).getArray.asInstanceOf[Array[?]].foreach { value =>
         set += j2s(value)
       }
     }
     set
   }
 
-  protected def jsonArray2coalescedSet(a: Attr, rs: Row): Set[Any] = {
+  protected def jsonArray2coalescedSet(a: Attr, rs: RS): Set[Any] = {
     rs.next()
     val json = rs.getString(1)
     a match {

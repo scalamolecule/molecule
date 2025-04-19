@@ -2,9 +2,9 @@
 package molecule.core.validation.insert
 
 import java.net.URI
-import java.time._
+import java.time.*
 import java.util.{Date, UUID}
-import molecule.core.ast.DataModel._
+import molecule.core.ast.DataModel.*
 
 trait InsertValueResolvers_ {
 

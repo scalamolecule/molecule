@@ -1,9 +1,9 @@
 package molecule.core.validation.insert
 
-import molecule.base.error._
+import molecule.base.error.*
+import molecule.core.ast.DataModel.Element
 import molecule.core.spi.Conn
 import molecule.core.validation.TxModelValidation
-import molecule.core.ast.DataModel.Element
 
 object InsertValidation extends InsertValidationExtraction with InsertValidationResolvers_ {
 

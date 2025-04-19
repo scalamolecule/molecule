@@ -8,7 +8,7 @@ object _OptRef extends CoreGenBase("OptRef", "/api") {
     s"""// GENERATED CODE ********************************
        |package molecule.core.api
        |
-       |import molecule.core.ast.DataModel._
+       |import molecule.core.ast.DataModel.*
        |
        |$traits
        |""".stripMargin

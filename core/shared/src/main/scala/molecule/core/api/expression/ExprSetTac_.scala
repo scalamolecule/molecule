@@ -1,10 +1,9 @@
 // GENERATED CODE ********************************
 package molecule.core.api.expression
 
-import molecule.base.ast._
-import molecule.core.api._
-import molecule.core.ast.DataModel._
-import scala.language.higherKinds
+import molecule.base.ast.*
+import molecule.core.api.*
+import molecule.core.ast.DataModel.*
 
 
 trait ExprSetTacOps_0[t, Entity1[_], Entity2[_, _]] extends ExprAttr_0[t, Entity1, Entity2] {

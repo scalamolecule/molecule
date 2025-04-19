@@ -1,7 +1,7 @@
 package molecule.datalog.datomic.compliance.action.save
 
 import molecule.coreTests.setup.{MUnitSuiteWithArrays, Test}
-import molecule.coreTests.spi.action.save._
+import molecule.coreTests.spi.action.save.*
 import molecule.datalog.datomic.setup.Api_datomic_async
 
 class SaveCardOneTest extends Test {

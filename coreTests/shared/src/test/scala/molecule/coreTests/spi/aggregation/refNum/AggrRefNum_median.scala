@@ -2,9 +2,9 @@ package molecule.coreTests.spi.aggregation.refNum
 
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
-import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Refs._
-import molecule.coreTests.setup._
+import molecule.core.util.Executor.*
+import molecule.coreTests.domains.dsl.Refs.*
+import molecule.coreTests.setup.*
 
 case class AggrRefNum_median(
   suite: Test,
@@ -13,8 +13,8 @@ case class AggrRefNum_median(
 
   // Median of unique values (Set semantics)
 
-  import api._
-  import suite._
+  import api.*
+  import suite.*
 
   // Different databases have different ways of calculating a median
   // when the count of values is even and there's no middle value

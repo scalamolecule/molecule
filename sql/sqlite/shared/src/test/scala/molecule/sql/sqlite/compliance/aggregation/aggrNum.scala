@@ -1,7 +1,7 @@
 package molecule.sql.sqlite.compliance.aggregation
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.aggregation.number._
+import molecule.coreTests.spi.aggregation.number.*
 import molecule.sql.sqlite.setup.Api_sqlite_async
 
 class AggrNum_IntTest extends Test {

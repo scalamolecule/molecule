@@ -1,7 +1,7 @@
 package molecule.datalog.datomic.compliance.validation.update
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.validation.update._
+import molecule.coreTests.spi.validation.update.*
 import molecule.datalog.datomic.setup.Api_datomic_async
 
 class TypesOneTest extends Test {

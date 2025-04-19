@@ -1,7 +1,7 @@
 package molecule.sql.mariadb.compliance.sorting
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.sorting._
+import molecule.coreTests.spi.sorting.*
 import molecule.sql.mariadb.setup.Api_mariadb_async
 
 class SortAggrTest extends Test {

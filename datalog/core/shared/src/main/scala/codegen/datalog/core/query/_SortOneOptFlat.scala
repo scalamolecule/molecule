@@ -12,9 +12,9 @@ object _SortOneOptFlat extends DatomicGenBase("SortOneOptFlat", "/query") {
        |import java.lang.{Boolean => jBoolean, Double => jDouble, Float => jFloat, Integer => jInteger, Long => jLong}
        |import java.math.{BigDecimal => jBigDecimal, BigInteger => jBigInt}
        |import java.net.URI
-       |import java.time._
+       |import java.time.*
        |import java.util.{Date, UUID}
-       |import molecule.core.ast.DataModel._
+       |import molecule.core.ast.DataModel.*
        |
        |
        |trait $fileName_[Tpl] extends ResolveBase { self: Model2DatomicQuery[Tpl] =>

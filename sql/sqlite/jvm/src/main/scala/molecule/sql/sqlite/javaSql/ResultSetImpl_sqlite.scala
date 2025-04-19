@@ -1,6 +1,6 @@
 package molecule.sql.sqlite.javaSql
 
-import java.math.{BigDecimal => jBigDecimal}
+import java.math.BigDecimal as jBigDecimal
 import java.net.URL
 import java.sql.ResultSet
 import molecule.sql.core.javaSql.{ArrayImpl, ArrayInterface, ResultSetInterface}
@@ -147,12 +147,12 @@ class ResultSetImpl_sqlite(val underlying: ResultSet) extends ResultSetInterface
 
   override def next(): Boolean = {
     rowIndex += 1
-    rowIndex != totalRowCount
+    rowIndex < totalRowCount
   }
 
   override def previous(): Boolean = {
     rowIndex -= 1
-    rowIndex != -1
+    rowIndex > -1
   }
 
   override def isClosed: Boolean = underlying.isClosed

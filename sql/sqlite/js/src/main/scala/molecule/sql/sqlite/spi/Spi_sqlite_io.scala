@@ -1,6 +1,6 @@
 package molecule.sql.sqlite.spi
 
-import boopickle.Default._
+import boopickle.Default.*
 import cats.effect.IO
 import molecule.core.ast.DataModel.Element
 import molecule.sql.core.spi.SpiBase_io

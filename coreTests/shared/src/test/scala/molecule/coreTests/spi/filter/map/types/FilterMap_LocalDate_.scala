@@ -4,9 +4,9 @@ package molecule.coreTests.spi.filter.map.types
 import java.time.LocalDate
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
-import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Types._
-import molecule.coreTests.setup._
+import molecule.core.util.Executor.*
+import molecule.coreTests.domains.dsl.Types.*
+import molecule.coreTests.setup.*
 
 case class FilterMap_LocalDate_(
   suite: Test,
@@ -16,8 +16,8 @@ case class FilterMap_LocalDate_(
   val a = (1, Map("a" -> localDate1, "b" -> localDate2))
   val b = (2, Map("a" -> localDate2, "b" -> localDate3, "c" -> localDate4))
 
-  import api._
-  import suite._
+  import api.*
+  import suite.*
 
 
   "Mandatory: Mandatory map (no filter)" - types { implicit conn =>

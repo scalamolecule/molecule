@@ -1,8 +1,8 @@
 package molecule.sql.core.transaction
 
 import java.net.URI
-import java.sql.{PreparedStatement => PS}
-import java.time._
+import java.sql.PreparedStatement as PS
+import java.time.*
 import java.util.{Date, UUID}
 import molecule.core.transaction.ops.BaseOps
 

@@ -1,7 +1,7 @@
 package molecule.sql.postgres.compliance.action.delete
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.action.delete._
+import molecule.coreTests.spi.action.delete.*
 import molecule.sql.postgres.setup.Api_postgres_async
 
 class Delete_idTest extends Test {

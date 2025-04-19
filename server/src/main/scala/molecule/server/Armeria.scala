@@ -1,13 +1,15 @@
 package molecule.server
 
+import java.util.concurrent.CompletableFuture
 import com.linecorp.armeria.server.Server
-import molecule.core.marshalling.MoleculeServerEndpoints
+import molecule.core.marshalling.{MoleculeRpc, MoleculeServerEndpoints}
 import molecule.sql.h2.marshalling.Rpc_h2
 import sttp.tapir.server.armeria.ArmeriaFutureServerInterpreter
+import scala.concurrent.Future
 
-object Armeria extends MoleculeServerEndpoints(Rpc_h2) {
+case class Armeria(rpc: MoleculeRpc) extends MoleculeServerEndpoints(rpc) {
 
-  def main(args: Array[String]): Unit = {
+  def run(db: String): CompletableFuture[Void] = {
 
     // Create Armeria HTTP service from Tapir endpoints
     val tapirService = ArmeriaFutureServerInterpreter()
@@ -20,11 +22,11 @@ object Armeria extends MoleculeServerEndpoints(Rpc_h2) {
       .build()
 
     server.start().join()
-    println("✅ Armeria server running on http://localhost:8080")
-    println("Press ENTER to stop the server.")
+    println(s"\n✅ Armeria server running on http://localhost:8080 for $db")
+    println("   Press ENTER to stop the server.")
     scala.io.StdIn.readLine()
 
     println("🛑 Shutting down server...")
-    server.stop().join()
+    server.stop() //.join()
   }
 }

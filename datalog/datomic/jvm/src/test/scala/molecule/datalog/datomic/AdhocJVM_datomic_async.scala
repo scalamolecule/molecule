@@ -1,66 +1,44 @@
 package molecule.datalog.datomic
 
+import cats.effect.unsafe.implicits.global as ioRuntime
 import molecule.base.error.ModelError
-import molecule.core.util.Executor._
+import molecule.core.util.Executor.*
 import molecule.coreTests.domains.schema.TypesSchema_datomic
 import molecule.coreTests.setup.{Test, TestUtils}
-import molecule.datalog.datomic.async._
+import molecule.datalog.datomic.async.*
 import molecule.datalog.datomic.facade.DatomicPeer
 import molecule.datalog.datomic.setup.DbProviders_datomic
-import scala.language.implicitConversions
 
 
-class AdhocJVM_datomic extends Test with DbProviders_datomic with TestUtils {
+class AdhocJVM_datomic_async extends Test with DbProviders_datomic with TestUtils {
 
+  //  DatomicPeer.recreateDb(TypesSchema_datomic)
 
-  DatomicPeer.recreateDb(TypesSchema_datomic)
-
-  "types" - types { implicit conn =>
-    import molecule.coreTests.domains.dsl.Types._
-    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
-    for {
-
-      _ <- Entity.int(3).save.transact
-      _ <- Entity.int.query.get.map(_ ==> List(3))
-
-      //        _ = Peer.q(
-      //          """[:find  ?tx ?e ?v ?op
-      //            | :where [?e :Entity/int ?v ?tx ?op]]
-      //            |""".stripMargin, conn.db.asInstanceOf[Database].history()
-      //        ).forEach(r => println(r))
-    } yield ()
-  }
-
+  //  "types" - types { implicit conn =>
+  //    import molecule.coreTests.domains.dsl.Types._
+  //    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+  //    for {
+  //
+  //      _ <- Entity.int(3).save.transact
+  //      _ <- Entity.int.query.get.map(_ ==> List(3))
+  //
+  //      //        _ = Peer.q(
+  //      //          """[:find  ?tx ?e ?v ?op
+  //      //            | :where [?e :Entity/int ?v ?tx ?op]]
+  //      //            |""".stripMargin, conn.db.asInstanceOf[Database].history()
+  //      //        ).forEach(r => println(r))
+  //    } yield ()
+  //  }
 
   "refs" - refs { implicit conn =>
-    import molecule.coreTests.domains.dsl.Refs._
+    import molecule.coreTests.domains.dsl.Refs.*
     for {
-
-      //      _ <- A.?(A.i).insert(Some(1)).transact
-      //        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-      //          err ==> "Optional entity not implement for Datomic."
-      //        }
-      //
-      //      _ <- A.i.query.get.map(_ ==> List(1))
-      //        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-      //          err ==> "Optional entity not implement for Datomic."
-      //        }
-
-
-      _ <- A.?(A.i).B.i.insert(List((None, 1))).transact
-        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Optional entity not implement for Datomic."
-        }
-
-      _ <- A.?(A.i).B.i.a1.query.get
-        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Optional entity not implement for Datomic."
-        }
-
-      //          _ <- A.i.query.i.get.map(_ ==> List(
-      //            1
-      //          ))
-
+      _ <- A.i.insert(1, 2, 3).transact
+      _ <- A.i.query.stream
+        .compile
+        .toList
+        .map(_.sorted ==> List(1, 2, 3))
+        .unsafeToFuture()
     } yield ()
   }
 

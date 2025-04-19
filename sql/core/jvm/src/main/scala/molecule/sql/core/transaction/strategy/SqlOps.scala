@@ -1,6 +1,6 @@
 package molecule.sql.core.transaction.strategy
 
-import java.sql.{PreparedStatement => PS}
+import java.sql.PreparedStatement as PS
 import molecule.base.util.BaseHelpers
 import molecule.core.ast.DataModel.Element
 import molecule.sql.core.query.Model2SqlQuery

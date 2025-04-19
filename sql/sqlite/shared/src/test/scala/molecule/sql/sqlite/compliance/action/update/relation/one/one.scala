@@ -1,7 +1,7 @@
 package molecule.sql.sqlite.compliance.action.update.relation.one
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.action.update.relation.one._
+import molecule.coreTests.spi.action.update.relation.one.*
 import molecule.sql.sqlite.setup.Api_sqlite_async
 
 class One_MapTest extends Test {

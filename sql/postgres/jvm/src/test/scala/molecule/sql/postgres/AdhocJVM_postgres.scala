@@ -1,15 +1,15 @@
 package molecule.sql.postgres
 
-import molecule.core.util.Executor._
+import molecule.core.util.Executor.*
 import molecule.coreTests.setup.{Test, TestUtils}
-import molecule.sql.postgres.async._
+import molecule.sql.postgres.async.*
 import molecule.sql.postgres.setup.DbProviders_postgres
 import scala.language.implicitConversions
 
 class AdhocJVM_postgres extends Test with DbProviders_postgres with TestUtils {
 
   "types" - types { implicit conn =>
-    import molecule.coreTests.domains.dsl.Types._
+    import molecule.coreTests.domains.dsl.Types.*
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
     for {
 
@@ -26,7 +26,7 @@ class AdhocJVM_postgres extends Test with DbProviders_postgres with TestUtils {
 
 
   "refs" - refs { implicit conn =>
-    import molecule.coreTests.domains.dsl.Refs._
+    import molecule.coreTests.domains.dsl.Refs.*
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
     for {

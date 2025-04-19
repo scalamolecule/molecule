@@ -1,9 +1,9 @@
 package molecule.coreTests.spi.action
 
-import molecule.base.error._
+import molecule.base.error.*
 import molecule.core.api.{Api_sync, Api_sync_transact}
 import molecule.core.spi.{Conn, Spi_sync}
-import molecule.coreTests.domains.dsl.Types._
+import molecule.coreTests.domains.dsl.Types.*
 import molecule.coreTests.setup.{DbProviders, Test, TestUtils}
 
 // Translated from
@@ -15,8 +15,8 @@ case class Transactions_sync(
   api: Api_sync_transact & Api_sync & Spi_sync & DbProviders
 ) extends TestUtils {
 
-  import api._
-  import suite._
+  import api.*
+  import suite.*
 
 
   "commit" - types { implicit conn =>
@@ -49,7 +49,7 @@ case class Transactions_sync(
 
 
   "Transact actions: validation 1" - validation { implicit conn =>
-    import molecule.coreTests.domains.dsl.Validation._
+    import molecule.coreTests.domains.dsl.Validation.*
     try {
       transact(
         Type.int(1).save, // not valid
@@ -69,7 +69,7 @@ case class Transactions_sync(
 
 
   "Transact actions: validation 2" - validation { implicit conn =>
-    import molecule.coreTests.domains.dsl.Validation._
+    import molecule.coreTests.domains.dsl.Validation.*
     try {
       transact(
         Type.int.insert(4, 5),
@@ -89,7 +89,7 @@ case class Transactions_sync(
 
 
   "Transact actions: validation 3" - validation { implicit conn =>
-    import molecule.coreTests.domains.dsl.Validation._
+    import molecule.coreTests.domains.dsl.Validation.*
     transact(
       Type.int.insert(4, 5),
       Type.int(3).save,

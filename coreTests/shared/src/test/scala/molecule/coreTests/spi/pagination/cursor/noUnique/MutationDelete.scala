@@ -3,9 +3,9 @@ package molecule.coreTests.spi.pagination.cursor.noUnique
 import molecule.base.error.ModelError
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
-import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Types._
-import molecule.coreTests.setup._
+import molecule.core.util.Executor.*
+import molecule.coreTests.domains.dsl.Types.*
+import molecule.coreTests.setup.*
 import scala.annotation.{nowarn, tailrec}
 import scala.util.Random
 
@@ -28,8 +28,8 @@ case class MutationDelete(
 
   val query = Entity.i.a1.int.a2.query
 
-  import api._
-  import suite._
+  import api.*
+  import suite.*
 
   "Forward: Delete row before" - types { implicit conn =>
     val pairs            = getPairs(4, Nil)

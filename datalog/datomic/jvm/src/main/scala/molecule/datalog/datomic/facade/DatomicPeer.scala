@@ -6,7 +6,7 @@ import datomic.Peer
 import molecule.base.api.Schema
 import molecule.base.util.BaseHelpers
 import molecule.core.marshalling.DatomicProxy
-import molecule.core.util.Executor._
+import molecule.core.util.Executor.*
 import zio.{ZIO, ZLayer}
 import scala.concurrent.{ExecutionContext, Future, blocking}
 

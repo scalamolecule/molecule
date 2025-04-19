@@ -1,9 +1,9 @@
 package molecule.coreTests.spi.api
 
-import molecule.base.error._
+import molecule.base.error.*
 import molecule.core.api.Api_sync
 import molecule.core.spi.Spi_sync
-import molecule.coreTests.domains.dsl.Types._
+import molecule.coreTests.domains.dsl.Types.*
 import molecule.coreTests.setup.{DbProviders, Test, TestUtils}
 import scala.annotation.nowarn
 
@@ -15,8 +15,8 @@ case class SyncApi(
   api: Api_sync with Spi_sync with DbProviders
 ) extends TestUtils {
 
-  import api._
-  import suite._
+  import api.*
+  import suite.*
 
 
   "Crud actions" - types { implicit conn =>
@@ -34,12 +34,12 @@ case class SyncApi(
 
     // Returning a geny Generator[Int] from the lihaoyi ecosystem
     Entity.i.query.stream
-      .toList ==> List(1, 2, 3)
+      .toList.sorted ==> List(1, 2, 3)
   }
 
 
   "Opt ref" - refs { implicit conn =>
-    import molecule.coreTests.domains.dsl.Refs._
+    import molecule.coreTests.domains.dsl.Refs.*
 
     A.i(1).save.transact
 
@@ -113,7 +113,7 @@ case class SyncApi(
 
 
   "Cursor query" - unique { implicit conn =>
-    import molecule.coreTests.domains.dsl.Uniques._
+    import molecule.coreTests.domains.dsl.Uniques.*
 
     val query = Uniques.int.a1.query
     Uniques.int.insert(1, 2, 3, 4, 5).transact

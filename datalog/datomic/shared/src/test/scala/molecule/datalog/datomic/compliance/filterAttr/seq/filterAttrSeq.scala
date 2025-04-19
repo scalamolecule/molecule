@@ -1,7 +1,7 @@
 package molecule.datalog.datomic.compliance.filterAttr.seq
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.filterAttr.seq._
+import molecule.coreTests.spi.filterAttr.seq.*
 import molecule.datalog.datomic.setup.Api_datomic_async
 
 class AdjacentTest extends Test {

@@ -7,11 +7,11 @@
 //*/
 //package molecule.graphql.client.dsl.Starwars
 //
-//import java.time._
-//import molecule.base.ast._
-//import molecule.core.api.Keywords._
-//import molecule.core.api._
-//import molecule.core.api.expression._
+//import java.time.*
+//import molecule.base.ast.*
+//import molecule.core.api.Keywords.*
+//import molecule.core.api.*
+//import molecule.core.api.expression.*
 //import molecule.core.ast.DataModel
 //import molecule.core.ast.DataModel._
 //import scala.reflect.ClassTag

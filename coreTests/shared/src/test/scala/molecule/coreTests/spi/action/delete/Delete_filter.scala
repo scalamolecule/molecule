@@ -1,19 +1,19 @@
 package molecule.coreTests.spi.action.delete
 
-import molecule.base.error._
+import molecule.base.error.*
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
-import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Refs._
-import molecule.coreTests.setup._
+import molecule.core.util.Executor.*
+import molecule.coreTests.domains.dsl.Refs.*
+import molecule.coreTests.setup.*
 
 case class Delete_filter(
   suite: Test,
   api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 
-  import api._
-  import suite._
+  import api.*
+  import suite.*
 
   "Filter by 1 non-ns value" - refs { implicit conn =>
     for {
@@ -44,7 +44,7 @@ case class Delete_filter(
   }
 
 
-  import molecule.coreTests.domains.dsl.Types._
+  import molecule.coreTests.domains.dsl.Types.*
 
   "Filters: not null" - types { implicit conn =>
     for {
@@ -233,7 +233,7 @@ case class Delete_filter(
   }
 
   "Ref owned" - refs { implicit conn =>
-    import molecule.coreTests.domains.dsl.Refs._
+    import molecule.coreTests.domains.dsl.Refs.*
     for {
       _ <- A.i.insert(1).transact
       _ <- A.i.OwnB.i.insert((2, 20), (3, 30)).transact
@@ -301,7 +301,7 @@ case class Delete_filter(
 
 
   "Filter types" - types { implicit conn =>
-    import molecule.coreTests.domains.dsl.Types._
+    import molecule.coreTests.domains.dsl.Types.*
     for {
       // Initial values
       _ <- Entity.i.string.insert((1, string1), (2, string2)).transact

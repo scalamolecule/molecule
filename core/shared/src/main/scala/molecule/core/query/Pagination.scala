@@ -1,10 +1,10 @@
 package molecule.core.query
 
 import java.net.URI
-import java.time._
+import java.time.*
 import java.util.{Base64, Date, UUID}
 import molecule.base.error.ModelError
-import molecule.core.ast.DataModel._
+import molecule.core.ast.DataModel.*
 import molecule.core.spi.Conn
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer

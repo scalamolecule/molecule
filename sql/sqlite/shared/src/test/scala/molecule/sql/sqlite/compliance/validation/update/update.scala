@@ -1,7 +1,7 @@
 package molecule.sql.sqlite.compliance.validation.update
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.validation.update._
+import molecule.coreTests.spi.validation.update.*
 import molecule.sql.sqlite.setup.Api_sqlite_async
 
 class TypesOneTest extends Test {

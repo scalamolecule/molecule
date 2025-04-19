@@ -1,10 +1,10 @@
 package molecule.sql.core.transaction
 
 import molecule.base.error.{ExecutionError, ModelError, MoleculeError}
-import molecule.core.ast.DataModel._
+import molecule.core.ast.DataModel.*
 import molecule.core.marshalling.ConnProxy
 import molecule.core.validation.TxModelValidation
-import molecule.sql.core.javaSql.{ResultSetInterface => Row}
+import molecule.sql.core.javaSql.ResultSetInterface as RS
 import molecule.sql.core.spi.SpiHelpers
 
 trait SqlUpdateSetValidator extends SpiHelpers {
@@ -12,7 +12,7 @@ trait SqlUpdateSetValidator extends SpiHelpers {
   protected def validateUpdateSet_array(
     proxy: ConnProxy,
     elements: List[Element],
-    query2resultSet: String => Row
+    query2resultSet: String => RS
   ): Map[String, Seq[String]] = {
     val curSetValues: Attr => Set[Any] = (a: Attr) => try {
       val ent   = a.ent
@@ -50,7 +50,7 @@ trait SqlUpdateSetValidator extends SpiHelpers {
   protected def validateUpdateSet_json(
     proxy: ConnProxy,
     elements: List[Element],
-    query2resultSet: String => Row
+    query2resultSet: String => RS
   ): Map[String, Seq[String]] = {
     val curSetValues: Attr => Set[Any] = (a: Attr) => try {
       val ent   = a.ent
@@ -86,7 +86,7 @@ trait SqlUpdateSetValidator extends SpiHelpers {
   protected def validateUpdateSet_sqlite(
     proxy: ConnProxy,
     elements: List[Element],
-    query2resultSet: String => Row
+    query2resultSet: String => RS
   ): Map[String, Seq[String]] = {
     val curSetValues: Attr => Set[Any] = (a: Attr) => try {
       val ent      = a.ent

@@ -1,7 +1,7 @@
 package molecule.sql.mysql.compliance.filter.one
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.filter.one.decimal._
+import molecule.coreTests.spi.filter.one.decimal.*
 import molecule.sql.mysql.setup.Api_mysql_async
 
 

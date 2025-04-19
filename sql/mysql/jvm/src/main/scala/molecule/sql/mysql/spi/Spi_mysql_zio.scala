@@ -1,22 +1,20 @@
 package molecule.sql.mysql.spi
 
-import molecule.base.error._
-import molecule.core.action._
+import molecule.base.error.*
+import molecule.core.action.*
 import molecule.core.spi.{Conn, Spi_zio, TxReport}
 import molecule.core.util.ModelUtils
 import molecule.sql.core.facade.JdbcConn_JVM
-import zio.ZIO
+import molecule.sql.core.spi.StreamingJdbc
+import zio.*
+import zio.stream.*
 
-trait Spi_mysql_zio extends Spi_zio with SpiBase_mysql_zio with ModelUtils {
+trait Spi_mysql_zio extends Spi_zio with SpiBase_mysql_zio with StreamingJdbc with ModelUtils {
 
   // Query --------------------------------------------------------
 
   override def query_get[Tpl](q: Query[Tpl]): ZIO[Conn, MoleculeError, List[Tpl]] = {
     sync2zio[List[Tpl]]((conn: JdbcConn_JVM) => Spi_mysql_sync.query_get(q)(conn))
-  }
-
-  override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit): ZIO[Conn, MoleculeError, Unit] = {
-    sync2zio[Unit]((conn: JdbcConn_JVM) => Spi_mysql_sync.query_subscribe(q, callback)(conn))
   }
 
   override def query_unsubscribe[Tpl](q: Query[Tpl]): ZIO[Conn, MoleculeError, Unit] = {
@@ -43,6 +41,23 @@ trait Spi_mysql_zio extends Spi_zio with SpiBase_mysql_zio with ModelUtils {
 
   override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl]): ZIO[Conn, MoleculeError, Unit] = {
     sync2zio[Unit]((conn: JdbcConn_JVM) => Spi_mysql_sync.queryCursor_inspect(q)(conn))
+  }
+
+
+  override def query_stream[Tpl](
+    q: Query[Tpl],
+    chunkSize: Int = 100
+  ): ZStream[Conn, MoleculeError, Tpl] = {
+    zioStream(
+      q, chunkSize,
+      (q: Query[Tpl], conn: Conn) => Spi_mysql_sync.query_inspect[Tpl](q)(conn),
+      Spi_mysql_sync.getResultSetAndRowResolver[Tpl]
+    )
+  }
+
+
+  override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit): ZIO[Conn, MoleculeError, Unit] = {
+    sync2zio[Unit]((conn: JdbcConn_JVM) => Spi_mysql_sync.query_subscribe(q, callback)(conn))
   }
 
 

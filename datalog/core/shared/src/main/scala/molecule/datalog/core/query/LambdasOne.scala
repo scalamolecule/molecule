@@ -1,10 +1,10 @@
 package molecule.datalog.core.query
 
-import java.lang.{Boolean => jBoolean, Double => jDouble, Float => jFloat, Integer => jInteger, Long => jLong}
-import java.math.{BigDecimal => jBigDecimal, BigInteger => jBigInt}
+import java.lang.{Boolean as jBoolean, Double as jDouble, Float as jFloat, Integer as jInteger, Long as jLong}
+import java.math.{BigDecimal as jBigDecimal, BigInteger as jBigInt}
 import java.net.URI
-import java.time._
-import java.util.{Date, UUID, Iterator => jIterator, List => jList, Map => jMap, Set => jSet}
+import java.time.*
+import java.util.{Date, UUID, Iterator as jIterator, List as jList, Map as jMap, Set as jSet}
 
 trait LambdasOne extends ResolveBase {
 

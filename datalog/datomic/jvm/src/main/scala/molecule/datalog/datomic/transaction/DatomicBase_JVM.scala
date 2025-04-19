@@ -1,12 +1,12 @@
 package molecule.datalog.datomic.transaction
 
-import java.lang.{Boolean => jBoolean}
-import java.util.{UUID, ArrayList => jArrayList, List => jList}
+import java.lang.Boolean as jBoolean
+import java.util.{UUID, ArrayList as jArrayList, List as jList}
 import clojure.lang.Keyword
 import molecule.base.error.ExecutionError
 import molecule.core.ast.DataModel.Element
 import molecule.core.marshalling.{ConnProxy, DatomicProxy}
-import molecule.core.util.Executor._
+import molecule.core.util.Executor.*
 import molecule.core.util.{ModelUtils, fns}
 import molecule.datalog.datomic.facade.{DatomicConn_JVM, DatomicPeer}
 import scala.collection.mutable

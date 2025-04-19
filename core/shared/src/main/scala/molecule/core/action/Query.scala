@@ -2,7 +2,7 @@ package molecule.core.action
 
 import java.util.Date
 import molecule.core.ast.DataModel.Element
-import molecule.core.marshalling.dbView._
+import molecule.core.marshalling.dbView.*
 import molecule.core.spi.TxReport
 
 case class Query[Tpl](

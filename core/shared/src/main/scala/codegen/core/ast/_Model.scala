@@ -2,7 +2,7 @@ package codegen.core.ast
 
 import java.io.File
 import codegen.CoreGenBase
-import molecule.base.error._
+import molecule.base.error.*
 import scala.io.Source
 
 object _Model extends CoreGenBase("Model", "/ast") {

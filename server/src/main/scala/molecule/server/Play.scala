@@ -1,18 +1,18 @@
 package molecule.server
 
-import boopickle.Default._
-import molecule.core.marshalling.MoleculeServerEndpoints
-import molecule.sql.h2.marshalling.Rpc_h2
-import org.apache.pekko.actor.ActorSystem
+import boopickle.Default.*
+import molecule.core.marshalling.{MoleculeRpc, MoleculeServerEndpoints}
+import org.apache.pekko.actor.{ActorSystem, Terminated}
 import play.api.Mode
-import play.core.server._
+import play.core.server.*
 import sttp.tapir.server.play.PlayServerInterpreter
+import scala.concurrent.Future
 import scala.io.StdIn
 
-object Play extends MoleculeServerEndpoints(Rpc_h2) {
+case class Play(rpc: MoleculeRpc) extends MoleculeServerEndpoints(rpc) {
 
-  // Start the server
-  def main(args: Array[String]): Unit = {
+  def run(db: String): Future[Terminated] = {
+
     implicit val actorSystem: ActorSystem = ActorSystem("tapir-play-server")
 
     //    val config = ServerConfig()
@@ -25,7 +25,8 @@ object Play extends MoleculeServerEndpoints(Rpc_h2) {
     // 3. Start the server (Netty backend)
     val server = PekkoHttpServer.fromRouterWithComponents(config)(_ => routes)
 
-    println("✅ PlayServerInterpreter/PekkoHttpServer running on http://localhost:8080")
+    println(s"\n✅ PlayServerInterpreter/PekkoHttpServer running on http://localhost:8080 for $db")
+    println("   Press ENTER to stop the server.")
 
     // 4. Block for shutdown
     StdIn.readLine()

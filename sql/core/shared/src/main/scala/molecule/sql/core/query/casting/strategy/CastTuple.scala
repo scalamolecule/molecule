@@ -1,7 +1,7 @@
 package molecule.sql.core.query.casting.strategy
 
 import molecule.sql.core.javaSql.ResultSetInterface
-import molecule.sql.core.query.casting._
+import molecule.sql.core.query.casting.*
 
 case class CastTuple(
   casts0: List[(ResultSetInterface, Int) => Any] = Nil,
@@ -12,7 +12,7 @@ case class CastTuple(
   def getCasts: List[Cast] = casts
   def lastIndex: Int = firstIndex + casts.length
 
-  override def row2tpl: RS => Any =
+  override def rs2row: RS => Any =
     CastTpl_.cast(casts, firstIndex)
 
   def branchListCaster: (RS, List[Any]) => Any =

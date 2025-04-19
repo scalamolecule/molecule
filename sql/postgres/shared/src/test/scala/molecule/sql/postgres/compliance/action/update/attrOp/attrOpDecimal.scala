@@ -1,7 +1,7 @@
 package molecule.sql.postgres.compliance.action.update.attrOp
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.action.update.attrOp.decimal._
+import molecule.coreTests.spi.action.update.attrOp.decimal.*
 import molecule.sql.postgres.setup.Api_postgres_async
 
 

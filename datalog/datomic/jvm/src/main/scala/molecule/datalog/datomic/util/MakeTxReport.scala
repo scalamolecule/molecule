@@ -1,14 +1,14 @@
 package molecule.datalog.datomic.util
 
-import java.lang.{Long => jLong}
-import java.util.{List => jList, Map => jMap}
+import java.lang.Long as jLong
+import java.util.{List as jList, Map as jMap}
 import datomic.Connection.{DB_AFTER, TEMPIDS, TX_DATA}
-import datomic.db.{Datum => PeerDatom}
-import datomic.{Datom => _, _}
+import datomic.db.Datum as PeerDatom
+import datomic.{Datom as _, *}
 import molecule.core.spi.TxReport
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 object MakeTxReport {
 

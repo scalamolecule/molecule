@@ -1,7 +1,7 @@
 package molecule.core.spi
 
-import molecule.base.error._
-import molecule.core.action._
+import molecule.base.error.*
+import molecule.core.action.*
 import zio.stream.ZStream
 import zio.{Task, ZIO}
 
@@ -10,19 +10,6 @@ trait Spi_zio {
   def query_get[Tpl](
     q: Query[Tpl]
   ): ZIO[Conn, MoleculeError, List[Tpl]]
-
-  def query_stream[Tpl](
-    q: Query[Tpl],
-    chunkSize: Int = 100
-  ): ZStream[Conn, MoleculeError, Tpl] = ???
-
-  def query_subscribe[Tpl](
-    q: Query[Tpl], callback: List[Tpl] => Unit
-  ): ZIO[Conn, MoleculeError, Unit]
-
-  def query_unsubscribe[Tpl](
-    q: Query[Tpl]
-  ): ZIO[Conn, MoleculeError, Unit]
 
   def query_inspect[Tpl](
     q: Query[Tpl]
@@ -44,6 +31,29 @@ trait Spi_zio {
 
   def queryCursor_inspect[Tpl](
     q: QueryCursor[Tpl]
+  ): ZIO[Conn, MoleculeError, Unit]
+
+
+  def query_stream[Tpl](
+    q: Query[Tpl], chunkSize: Int = 100
+  ): ZStream[Conn, MoleculeError, Tpl] = {
+    // (overridden on jvm side)
+    ZStream.fromZIO(
+      ZIO.fail(
+        ExecutionError(
+          "Streaming not implemented on JS platform. Maybe use subscribe instead?"
+        )
+      )
+    )
+  }
+
+
+  def query_subscribe[Tpl](
+    q: Query[Tpl], callback: List[Tpl] => Unit
+  ): ZIO[Conn, MoleculeError, Unit]
+
+  def query_unsubscribe[Tpl](
+    q: Query[Tpl]
   ): ZIO[Conn, MoleculeError, Unit]
 
 

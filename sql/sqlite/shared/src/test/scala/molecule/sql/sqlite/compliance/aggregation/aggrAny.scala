@@ -1,7 +1,7 @@
 package molecule.sql.sqlite.compliance.aggregation
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.aggregation.any._
+import molecule.coreTests.spi.aggregation.any.*
 import molecule.sql.sqlite.setup.Api_sqlite_async
 
 class Aggr_String_Test extends Test {

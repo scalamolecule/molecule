@@ -1,7 +1,7 @@
 package molecule.sql.mariadb.compliance.pagination.cursor.primaryUnique
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.pagination.cursor.primaryUnique._
+import molecule.coreTests.spi.pagination.cursor.primaryUnique.*
 import molecule.sql.mariadb.setup.Api_mariadb_async
 
 class DirectionsTest extends Test {

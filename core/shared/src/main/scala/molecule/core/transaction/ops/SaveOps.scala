@@ -1,6 +1,6 @@
 package molecule.core.transaction.ops
 
-import molecule.base.ast._
+import molecule.base.ast.*
 import molecule.core.transaction.Action2Data
 
 trait SaveOps extends Action2Data with BaseOps {

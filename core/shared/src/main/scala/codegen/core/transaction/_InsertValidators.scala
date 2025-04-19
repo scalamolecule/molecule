@@ -9,9 +9,9 @@ object _InsertValidators extends CoreGenBase("InsertValidators", "/transaction")
        |package molecule.core.transaction
        |
        |import java.net.URI
-       |import java.time._
+       |import java.time.*
        |import java.util.{Date, UUID}
-       |import molecule.core.ast.DataModel._
+       |import molecule.core.ast.DataModel.*
        |import molecule.core.validation.insert.InsertValueResolvers_
        |
        |trait $fileName_ extends InsertValueResolvers_ {

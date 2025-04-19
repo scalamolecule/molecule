@@ -1,15 +1,15 @@
 package molecule.sql.h2.spi
 
-import molecule.base.error._
-import molecule.core.action._
+import molecule.base.error.*
+import molecule.core.action.*
 import molecule.core.spi.{Conn, Spi_zio, TxReport}
 import molecule.core.util.ModelUtils
 import molecule.sql.core.facade.JdbcConn_JVM
-import molecule.sql.core.spi.Streaming
-import zio._
-import zio.stream._
+import molecule.sql.core.spi.StreamingJdbc
+import zio.*
+import zio.stream.*
 
-trait Spi_h2_zio extends Spi_zio with SpiBase_h2_zio with Streaming with ModelUtils {
+trait Spi_h2_zio extends Spi_zio with SpiBase_h2_zio with StreamingJdbc with ModelUtils {
 
   // Query --------------------------------------------------------
 
@@ -17,29 +17,6 @@ trait Spi_h2_zio extends Spi_zio with SpiBase_h2_zio with Streaming with ModelUt
     q: Query[Tpl]
   ): ZIO[Conn, MoleculeError, List[Tpl]] = {
     sync2zio[List[Tpl]]((conn: JdbcConn_JVM) => Spi_h2_sync.query_get(q)(conn))
-  }
-
-  override def query_stream[Tpl](
-    q: Query[Tpl],
-    chunkSize: Int = 100
-  ): ZStream[Conn, MoleculeError, Tpl] = {
-    zioStream(
-      q, chunkSize,
-      (q: Query[Tpl], conn: Conn) => Spi_h2_sync.query_inspect[Tpl](q)(conn),
-      Spi_h2_sync.getResultSet[Tpl]
-    )
-  }
-
-  override def query_subscribe[Tpl](
-    q: Query[Tpl], callback: List[Tpl] => Unit
-  ): ZIO[Conn, MoleculeError, Unit] = {
-    sync2zio[Unit]((conn: JdbcConn_JVM) => Spi_h2_sync.query_subscribe(q, callback)(conn))
-  }
-
-  override def query_unsubscribe[Tpl](
-    q: Query[Tpl]
-  ): ZIO[Conn, MoleculeError, Unit] = {
-    sync2zio[Unit]((conn: JdbcConn_JVM) => Spi_h2_sync.query_unsubscribe(q)(conn))
   }
 
   override def query_inspect[Tpl](
@@ -76,6 +53,29 @@ trait Spi_h2_zio extends Spi_zio with SpiBase_h2_zio with Streaming with ModelUt
     q: QueryCursor[Tpl]
   ): ZIO[Conn, MoleculeError, Unit] = {
     sync2zio[Unit]((conn: JdbcConn_JVM) => Spi_h2_sync.queryCursor_inspect(q)(conn))
+  }
+
+
+  override def query_stream[Tpl](
+    q: Query[Tpl], chunkSize: Int = 100
+  ): ZStream[Conn, MoleculeError, Tpl] = {
+    zioStream(
+      q, chunkSize,
+      (q: Query[Tpl], conn: Conn) => Spi_h2_sync.query_inspect[Tpl](q)(conn),
+      Spi_h2_sync.getResultSetAndRowResolver[Tpl]
+    )
+  }
+
+  override def query_subscribe[Tpl](
+    q: Query[Tpl], callback: List[Tpl] => Unit
+  ): ZIO[Conn, MoleculeError, Unit] = {
+    sync2zio[Unit]((conn: JdbcConn_JVM) => Spi_h2_sync.query_subscribe(q, callback)(conn))
+  }
+
+  override def query_unsubscribe[Tpl](
+    q: Query[Tpl]
+  ): ZIO[Conn, MoleculeError, Unit] = {
+    sync2zio[Unit]((conn: JdbcConn_JVM) => Spi_h2_sync.query_unsubscribe(q)(conn))
   }
 
 

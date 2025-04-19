@@ -9,8 +9,7 @@ object _ExprMapMan extends CoreGenBase("ExprMapMan", "/api/expression") {
     s"""// GENERATED CODE ********************************
        |package molecule.core.api.expression
        |
-       |import molecule.core.ast.DataModel._
-       |import scala.language.higherKinds
+       |import molecule.core.ast.DataModel.*
        |$traits
        |""".stripMargin
   }

@@ -7,7 +7,7 @@ case class CastOptRefs(
   optRefs: List[CastOptRefNested]
 ) extends CastStrategy {
 
-  override def row2tpl: RS => Any = {
+  override def rs2row: RS => Any = {
     CastTpl_.cast(
       initialTuple.casts0 ++ optRefs.map(_.getCast),
       1

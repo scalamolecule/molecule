@@ -1,7 +1,7 @@
 package molecule.sql.mysql.compliance.action.update.attrOp
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.action.update.attrOp.decimal._
+import molecule.coreTests.spi.action.update.attrOp.decimal.*
 import molecule.sql.mysql.setup.Api_mysql_async
 
 

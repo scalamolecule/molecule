@@ -1,6 +1,6 @@
 package molecule.sql.core.javaSql
 
-import java.math.{BigDecimal => jBigDecimal}
+import java.math.BigDecimal as jBigDecimal
 import java.sql.{Date, PreparedStatement, Time, Timestamp}
 
 

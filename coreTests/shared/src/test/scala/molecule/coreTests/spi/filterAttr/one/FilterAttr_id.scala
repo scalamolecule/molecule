@@ -3,9 +3,9 @@ package molecule.coreTests.spi.filterAttr.one
 import molecule.base.error.ModelError
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
-import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Types._
-import molecule.coreTests.setup._
+import molecule.core.util.Executor.*
+import molecule.coreTests.domains.dsl.Types.*
+import molecule.coreTests.setup.*
 
 case class FilterAttr_id(
   suite: Test,
@@ -14,8 +14,8 @@ case class FilterAttr_id(
 
   // Can't use entity ids with filter attributes
 
-  import api._
-  import suite._
+  import api.*
+  import suite.*
 
   "equal (apply)" - types { implicit conn =>
     for {

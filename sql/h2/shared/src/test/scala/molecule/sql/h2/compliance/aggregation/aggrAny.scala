@@ -1,7 +1,7 @@
 package molecule.sql.h2.compliance.aggregation
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.aggregation.any._
+import molecule.coreTests.spi.aggregation.any.*
 import molecule.sql.h2.setup.Api_h2_async
 
 class Aggr_String_Test extends Test {

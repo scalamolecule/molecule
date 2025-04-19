@@ -2,19 +2,19 @@ package molecule.datalog.datomic.marshalling
 
 import java.nio.ByteBuffer
 import molecule.base.error.MoleculeError
-import molecule.core.action._
-import molecule.core.ast.DataModel._
-import molecule.core.marshalling.Boopicklers._
-import molecule.core.marshalling._
+import molecule.core.action.*
+import molecule.core.ast.DataModel.*
+import molecule.core.marshalling.*
+import molecule.core.marshalling.Boopicklers.*
 import molecule.core.marshalling.deserialize.UnpickleTpls
 import molecule.core.spi.TxReport
-import molecule.core.util.Executor._
+import molecule.core.util.Executor.*
 import molecule.core.util.FutureUtils
-import molecule.datalog.datomic.async._
-import molecule.datalog.datomic.transaction._
+import molecule.datalog.datomic.async.*
+import molecule.datalog.datomic.transaction.*
 import scala.concurrent.Future
 
-object MoleculeBackend_datomic
+trait MoleculeBackend_datomic
   extends MoleculeRpc
     with DatomicBase_JVM
     with FutureUtils {

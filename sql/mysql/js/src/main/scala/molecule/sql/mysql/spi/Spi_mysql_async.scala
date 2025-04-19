@@ -1,10 +1,10 @@
 package molecule.sql.mysql.spi
 
-import boopickle.Default._
+import boopickle.Default.*
 import molecule.core.ast.DataModel.Element
 import molecule.sql.core.spi.SpiBaseJS_async
 import molecule.sql.mysql.query.Model2SqlQuery_mysql
-import scala.concurrent.{Future, ExecutionContext => EC}
+import scala.concurrent.{Future, ExecutionContext as EC}
 
 
 object Spi_mysql_async extends Spi_mysql_async

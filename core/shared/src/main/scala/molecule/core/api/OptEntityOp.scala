@@ -1,7 +1,7 @@
 package molecule.core.api
 
 import molecule.base.error.ModelError
-import molecule.core.ast.DataModel._
+import molecule.core.ast.DataModel.*
 
 // Initiate right join
 trait OptEntityOp_0[Entity[_, _]] {

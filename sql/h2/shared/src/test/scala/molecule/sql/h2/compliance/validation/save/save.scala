@@ -1,7 +1,7 @@
 package molecule.sql.h2.compliance.validation.save
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.validation.save._
+import molecule.coreTests.spi.validation.save.*
 import molecule.sql.h2.setup.Api_h2_async
 
 class FormatConstantsTest extends Test {

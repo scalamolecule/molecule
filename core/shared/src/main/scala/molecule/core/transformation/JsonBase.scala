@@ -1,6 +1,6 @@
 package molecule.core.transformation
 
-import boopickle.Default._
+import boopickle.Default.*
 import molecule.base.error.ModelError
 import molecule.core.util.{ModelUtils, SerializationUtils}
 

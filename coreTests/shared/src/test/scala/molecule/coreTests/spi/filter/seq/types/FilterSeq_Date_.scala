@@ -4,9 +4,9 @@ package molecule.coreTests.spi.filter.seq.types
 import java.util.Date
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
-import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Types._
-import molecule.coreTests.setup._
+import molecule.core.util.Executor.*
+import molecule.coreTests.domains.dsl.Types.*
+import molecule.coreTests.setup.*
 
 case class FilterSeq_Date_(
   suite: Test,
@@ -16,8 +16,8 @@ case class FilterSeq_Date_(
   val a = (1, List(date1, date2))
   val b = (2, List(date2, date3, date3))
 
-  import api._
-  import suite._
+  import api.*
+  import suite.*
 
 
   "Mandatory: has" - types { implicit conn =>

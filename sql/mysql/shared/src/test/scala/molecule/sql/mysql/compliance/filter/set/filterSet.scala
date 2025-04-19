@@ -1,9 +1,9 @@
 package molecule.sql.mysql.compliance.filter.set
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.filter.set._
-import molecule.coreTests.spi.filter.set.ref._
-import molecule.coreTests.spi.filter.set.types._
+import molecule.coreTests.spi.filter.set.*
+import molecule.coreTests.spi.filter.set.ref.*
+import molecule.coreTests.spi.filter.set.types.*
 import molecule.sql.mysql.setup.Api_mysql_async
 
 class FilterSet_String_Test extends Test {

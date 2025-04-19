@@ -1,20 +1,20 @@
 package molecule.coreTests.spi.api
 
-import molecule.base.error.{InsertErrors, MoleculeError, ValidationErrors}
+import molecule.base.error.{ExecutionError, InsertErrors, MoleculeError, ValidationErrors}
 import molecule.core.api.Api_zio
 import molecule.core.spi.{Conn, Spi_zio}
-import molecule.coreTests.domains.dsl.Types._
+import molecule.coreTests.domains.dsl.Types.*
 import molecule.coreTests.setup.{DbProviders_zio, TestUtils}
-import zio._
-import zio.test.TestAspect._
-import zio.test._
+import zio.*
+import zio.test.*
+import zio.test.TestAspect.*
 import scala.annotation.nowarn
 
 @nowarn
 case class ZioApi(api: Api_zio with Spi_zio with DbProviders_zio)
   extends ZIOSpecDefault with TestUtils {
 
-  import api._
+  import api.*
 
   @nowarn override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("Molecule ZIO api")(
@@ -23,56 +23,61 @@ case class ZioApi(api: Api_zio with Spi_zio with DbProviders_zio)
         for {
           ids <- Entity.int.insert(1, 2).transact.map(_.ids)
           _ <- Entity.int(3).save.transact
-          a <- Entity.int.a1.query.get
+          a <- Entity.int.a1.query.get.map(x => assertTrue(x == List(1, 2, 3)))
           _ <- Entity(ids(0)).int(10).update.transact
           _ <- Entity(ids(1)).delete.transact
-          b <- Entity.int.a1.query.get
-        } yield {
-          assertTrue(
-            ids.size == 2
-          ) && assertTrue(
-            a == List(1, 2, 3)
-          ) && assertTrue(
-            b == List(3, 10)
-          )
-        }
+          b <- Entity.int.a1.query.get.map(x => assertTrue(x == List(3, 10)))
+        } yield a && b
       }.provide(types.orDie),
 
 
       test("Streaming") {
         for {
           _ <- Entity.i.insert(1, 2, 3).transact
+          result <- if (platform == "jvm") {
+            Entity.i.query.stream
+              .runCollect
+              .map(chunk => assertTrue(chunk.toList.sorted == List(1, 2, 3)))
+          } else {
+            Entity.i.query.stream
+              .runCollect
+              .either
+              .map {
+                case Left(ExecutionError(msg)) =>
+                  assertTrue(
+                    msg == "Streaming not implemented on JS platform. Maybe use subscribe instead?"
+                  )
+                case Left(other)               =>
+                  println(s"Unexpected error: $other")
+                  assertTrue(false)
 
-          // Returning a ZStream[Conn, MoleculeError, Int]
-          // Then you can use all the usual operation on the stream.
-          // Here we simply compare a chunk
-          chunk <- Entity.i.query.stream.runCollect
-        } yield {
-          assertTrue(chunk.toList.sorted == List(1, 2, 3))
-        }
-      }.provide(types.orDie) @@ TestAspect.exceptJS,
+                case Right(value) =>
+                  println(s"Unexpected success: $value")
+                  assertTrue(false)
+              }
+          }
+        } yield result
+      }.provide(types.orDie),
 
 
       test("Opt ref") {
-        import molecule.coreTests.domains.dsl.Refs._
+        import molecule.coreTests.domains.dsl.Refs.*
         for {
           _ <- A.i(1).save.transact
 
           // Optional card-one ref (SQL left join)
-          a <- A.i.B.?(B.i).query.get
+          a <- A.i.B.?(B.i).query.get.map(x => assertTrue(x == List(
+            (1, None)
+          )))
 
           _ <- A.i(2).B.i(3).s("b").save.transact
 
           // Optional card-one ref (SQL left join)
-          b <- A.i.a1.B.?(B.i.s).query.i.get
-        } yield {
-          assertTrue(a == List(
-            (1, None)
-          )) && assertTrue(b == List(
+          b <- A.i.a1.B.?(B.i.s).query.i.get.map(x => assertTrue(x == List(
             (1, None),
             (2, Some((3, "b"))),
-          ))
-        }
+          )))
+        } yield a && b
       }.provide(refs.orDie),
 
 
@@ -122,25 +127,24 @@ case class ZioApi(api: Api_zio with Spi_zio with DbProviders_zio)
       test("Offset query")(
         for {
           _ <- Entity.int.insert(1, 2, 3).transact
-          a <- Entity.int.a1.query.get
-          b <- Entity.int.a1.query.limit(2).get
-          c <- Entity.int.a1.query.offset(1).get
-          d <- Entity.int.a1.query.offset(1).limit(1).get
-        } yield
-          assertTrue(
-            a == List(1, 2, 3)
-          ) && assertTrue(
-            b == List(1, 2)
-          ) && assertTrue(
-            c == (List(2, 3), 3, false)
-          ) && assertTrue(
-            d == (List(2), 3, true)
-          )
+          a <- Entity.int.a1.query.get.map(x => assertTrue(
+            x == List(1, 2, 3)
+          ))
+          b <- Entity.int.a1.query.limit(2).get.map(x => assertTrue(
+            x == List(1, 2)
+          ))
+          c <- Entity.int.a1.query.offset(1).get.map(x => assertTrue(
+            x == (List(2, 3), 3, false)
+          ))
+          d <- Entity.int.a1.query.offset(1).limit(1).get.map(x => assertTrue(
+            x == (List(2), 3, true)
+          ))
+        } yield a && b && c && d
       ).provide(types.orDie),
 
 
       test("Cursor query") {
-        import molecule.coreTests.domains.dsl.Uniques._
+        import molecule.coreTests.domains.dsl.Uniques.*
         val query = Uniques.int.a1.query
         for {
           _ <- Uniques.int.insert(1, 2, 3, 4, 5).transact

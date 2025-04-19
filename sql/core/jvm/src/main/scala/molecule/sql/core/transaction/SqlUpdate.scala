@@ -1,10 +1,10 @@
 package molecule.sql.core.transaction
 
-import java.sql.{PreparedStatement => PS}
-import boopickle.Default._
+import java.sql.PreparedStatement as PS
+import boopickle.Default.*
 import molecule.base.ast.CardOne
-import molecule.base.error._
-import molecule.core.ast.DataModel._
+import molecule.base.error.*
+import molecule.core.ast.DataModel.*
 import molecule.core.transaction.ResolveUpdate
 import molecule.core.transaction.ops.UpdateOps
 import molecule.sql.core.spi.SpiHelpers

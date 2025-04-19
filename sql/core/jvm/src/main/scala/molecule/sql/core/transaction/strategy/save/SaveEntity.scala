@@ -1,6 +1,6 @@
 package molecule.sql.core.transaction.strategy.save
 
-import java.sql.{PreparedStatement => PS}
+import java.sql.PreparedStatement as PS
 import molecule.sql.core.transaction.strategy.SqlOps
 import scala.collection.mutable.ListBuffer
 

@@ -1,7 +1,7 @@
 package molecule.sql.sqlite.setup
 
 import molecule.core.spi.Conn
-import molecule.coreTests.domains.schema._
+import molecule.coreTests.domains.schema.*
 import molecule.coreTests.setup.{DbProviders, Platform}
 
 trait DbProviders_sqlite extends DbProviders with DbConnection_sqlite with Platform {

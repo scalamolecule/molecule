@@ -1,29 +1,31 @@
 package molecule.datalog.datomic.spi
 
+import java.util.List as jList
+import java.util.stream.Stream as jStream
 import datomic.Peer
+import geny.Generator
 import molecule.base.error.{InsertError, ModelError}
-import molecule.core.action._
+import molecule.core.action.*
+import molecule.core.ast.DataModel.*
 import molecule.core.spi.{Conn, Spi_sync, TxReport}
 import molecule.core.transaction.{ResolveDelete, ResolveInsert, ResolveSave, ResolveUpdate}
-import molecule.core.util.Executor._
+import molecule.core.util.Executor.*
 import molecule.core.util.FutureUtils
 import molecule.core.validation.TxModelValidation
 import molecule.core.validation.insert.InsertValidation
 import molecule.datalog.core.query.Model2DatomicQuery
 import molecule.datalog.datomic.facade.DatomicConn_JVM
-import molecule.datalog.datomic.marshalling.MoleculeBackend_datomic.Data
 import molecule.datalog.datomic.query.{DatomicQueryResolveCursor, DatomicQueryResolveOffset}
-import molecule.datalog.datomic.transaction.{Delete_datomic, Insert_datomic, Save_datomic, Update_datomic}
+import molecule.datalog.datomic.transaction.*
 import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
-import molecule.core.ast.DataModel._
-
 
 object Spi_datomic_sync extends Spi_datomic_sync
 
 trait Spi_datomic_sync
   extends Spi_sync
     with SpiBase_datomic_sync
+    with DatomicDataType_JVM
     with JVMDatomicSpiBase
     with FutureUtils {
 
@@ -33,25 +35,6 @@ trait Spi_datomic_sync
     DatomicQueryResolveOffset[Tpl](
       q.elements, q.optLimit, None, q.dbView, m2q
     ).getListFromOffset_sync(conn.asInstanceOf[DatomicConn_JVM])._1
-  }
-
-  override def query_subscribe[Tpl](
-    q: Query[Tpl], callback: List[Tpl] => Unit
-  )(implicit conn: Conn): Unit = {
-    val datomicConn = conn.asInstanceOf[DatomicConn_JVM]
-    val m2q         = new Model2DatomicQuery[Tpl](q.elements)
-    DatomicQueryResolveOffset[Tpl](
-      q.elements, q.optLimit, None, q.dbView, m2q
-    ).subscribe(datomicConn, callback)
-  }
-
-  override def query_unsubscribe[Tpl](
-    q: Query[Tpl]
-  )(implicit conn: Conn): Unit = {
-    val datomicConn = conn.asInstanceOf[DatomicConn_JVM]
-    val m2q         = new Model2DatomicQuery[Tpl](q.elements)
-    DatomicQueryResolveOffset[Tpl](q.elements, q.optLimit, None, q.dbView, m2q)
-      .unsubscribe(datomicConn)
   }
 
   override def query_inspect[Tpl](q: Query[Tpl])(implicit conn: Conn): Unit = {
@@ -88,6 +71,47 @@ trait Spi_datomic_sync
     q: QueryCursor[Tpl]
   )(implicit conn: Conn): Unit = {
     printInspectQuery("QUERY (cursor)", q.elements)
+  }
+
+
+  // Simple geny Generator stream implementation.
+  // Plugs in nicely with the Lihaoyi ecosystem.
+  // See https://github.com/com-lihaoyi/geny
+  override def query_stream[Tpl](
+    q: Query[Tpl], chunkSize: Int
+  )(implicit conn0: Conn): Generator[Tpl] = new Generator[Tpl] {
+    // callback function
+    def generate(handleTuple: Tpl => Generator.Action): Generator.Action = {
+      if (q.doInspect)
+        query_inspect(q)
+      val (stream, row2tpl)        = getJavaStreamAndRowResolver(q, conn0)
+      val it                       = stream.iterator()
+      var action: Generator.Action = Generator.Continue
+      while (it.hasNext && action == Generator.Continue) {
+        action = handleTuple(row2tpl(it.next()).asInstanceOf[Tpl])
+      }
+      action
+    }
+  }
+
+
+  override def query_subscribe[Tpl](
+    q: Query[Tpl], callback: List[Tpl] => Unit
+  )(implicit conn: Conn): Unit = {
+    val datomicConn = conn.asInstanceOf[DatomicConn_JVM]
+    val m2q         = new Model2DatomicQuery[Tpl](q.elements)
+    DatomicQueryResolveOffset[Tpl](
+      q.elements, q.optLimit, None, q.dbView, m2q
+    ).subscribe(datomicConn, callback)
+  }
+
+  override def query_unsubscribe[Tpl](
+    q: Query[Tpl]
+  )(implicit conn: Conn): Unit = {
+    val datomicConn = conn.asInstanceOf[DatomicConn_JVM]
+    val m2q         = new Model2DatomicQuery[Tpl](q.elements)
+    DatomicQueryResolveOffset[Tpl](q.elements, q.optLimit, None, q.dbView, m2q)
+      .unsubscribe(datomicConn)
   }
 
 
@@ -227,5 +251,24 @@ trait Spi_datomic_sync
       .map(_.asScala.mkString("  [", " ", "]")).toList
       .mkString("[\n", "\n", "\n]")
     printRaw(label, elements, edn)
+  }
+
+
+  // Util --------------------------------------
+
+  def getJavaStreamAndRowResolver[Tpl](
+    q: Query[Tpl], conn0: Conn
+  ): (jStream[jList[AnyRef]], jList[AnyRef] => Any) = {
+    val conn       = conn0.asInstanceOf[DatomicConn_JVM]
+    val queryClean = q.copy(elements = noKeywords(q.elements, Some(conn.proxy)))
+    val m2q        = new Model2DatomicQuery[Tpl](q.elements)
+    if (m2q.isNested || m2q.isOptNested || m2q.nestedOptRef) {
+      throw ModelError("Nested data not allowed for streaming.")
+    }
+    val stream     = DatomicQueryResolveOffset[Tpl](
+      q.elements, q.optLimit, None, q.dbView, m2q
+    ).getJavaStream(conn)
+    val row2AnyTpl = m2q.castRow2AnyTpl(m2q.castss.head, 0)
+    (stream, row2AnyTpl)
   }
 }

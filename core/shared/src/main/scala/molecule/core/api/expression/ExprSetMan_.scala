@@ -1,10 +1,9 @@
 // GENERATED CODE ********************************
 package molecule.core.api.expression
 
-import molecule.base.ast._
-import molecule.core.api._
-import molecule.core.ast.DataModel._
-import scala.language.higherKinds
+import molecule.base.ast.*
+import molecule.core.api.*
+import molecule.core.ast.DataModel.*
 
 
 trait ExprSetMan_1[A, t, Entity1[_, _], Entity2[_, _, _]]

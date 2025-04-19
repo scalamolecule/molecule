@@ -1,7 +1,7 @@
 package molecule.sql.mysql.compliance.action.update.relation.one
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.action.update.relation.one._
+import molecule.coreTests.spi.action.update.relation.one.*
 import molecule.sql.mysql.setup.Api_mysql_async
 
 class One_MapTest extends Test {

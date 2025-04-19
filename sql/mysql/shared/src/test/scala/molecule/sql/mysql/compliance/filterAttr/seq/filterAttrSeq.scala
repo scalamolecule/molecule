@@ -1,7 +1,7 @@
 package molecule.sql.mysql.compliance.filterAttr.seq
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.filterAttr.seq._
+import molecule.coreTests.spi.filterAttr.seq.*
 import molecule.sql.mysql.setup.Api_mysql_async
 
 class AdjacentTest extends Test {

@@ -1,9 +1,9 @@
 package molecule.sql.mysql.compliance.inspection
 
-import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Types._
+import molecule.core.util.Executor.*
+import molecule.coreTests.domains.dsl.Types.*
 import molecule.coreTests.setup.{Test, TestUtils}
-import molecule.sql.mysql.async._
+import molecule.sql.mysql.async.*
 import molecule.sql.mysql.setup.DbProviders_mysql
 import scala.language.implicitConversions
 

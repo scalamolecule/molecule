@@ -2,9 +2,9 @@ package molecule.coreTests.spi.pagination.cursor.primaryUnique
 
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
-import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Uniques._
-import molecule.coreTests.setup._
+import molecule.core.util.Executor.*
+import molecule.coreTests.domains.dsl.Uniques.*
+import molecule.coreTests.setup.*
 import scala.annotation.nowarn
 
 @nowarn
@@ -15,8 +15,8 @@ case class MutationDelete(
   val x     = ""
   val query = Uniques.int.a1.query
 
-  import api._
-  import suite._
+  import api.*
+  import suite.*
 
   "Forward: Delete row before" - unique { implicit conn =>
     for {

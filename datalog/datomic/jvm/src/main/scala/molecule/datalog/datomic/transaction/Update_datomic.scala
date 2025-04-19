@@ -1,13 +1,14 @@
 package molecule.datalog.datomic.transaction
 
-import java.lang.{Long => jLong}
-import java.time._
-import java.util.{List => jList, Map => jMap, Set => jSet}
+import java.lang.Long as jLong
+import java.time.*
+import java.util.{List as jList, Map as jMap, Set as jSet}
 import clojure.lang.Keyword
 import datomic.query.EntityMap
 import datomic.{Database, Peer}
 import molecule.base.ast.CardOne
-import molecule.base.error._
+import molecule.base.error.*
+import molecule.core.ast.DataModel.*
 import molecule.core.ops.ModelTransformations_
 import molecule.core.transaction.ResolveUpdate
 import molecule.core.transaction.ops.UpdateOps
@@ -18,7 +19,6 @@ import molecule.datalog.datomic.facade.DatomicConn_JVM
 import molecule.datalog.datomic.query.DatomicQueryResolveOffset
 import scala.collection.mutable.ListBuffer
 import scala.math.BigDecimal.RoundingMode
-import molecule.core.ast.DataModel._
 
 
 trait Update_datomic

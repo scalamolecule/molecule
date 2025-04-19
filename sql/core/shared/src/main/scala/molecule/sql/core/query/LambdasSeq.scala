@@ -1,9 +1,9 @@
 package molecule.sql.core.query
 
-import java.lang.{Short => jShort}
-import java.math.{BigDecimal => jBigDecimal}
+import java.lang.Short as jShort
+import java.math.BigDecimal as jBigDecimal
 import java.net.URI
-import java.time._
+import java.time.*
 import java.util.{Date, UUID}
 import molecule.core.util.JavaConversions
 import scala.collection.mutable.ListBuffer

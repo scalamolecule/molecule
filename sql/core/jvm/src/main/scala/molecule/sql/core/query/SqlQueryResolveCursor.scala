@@ -7,7 +7,7 @@ import molecule.core.ops.ModelTransformations_
 import molecule.core.query.Pagination
 import molecule.core.util.{FutureUtils, MoleculeLogging}
 import molecule.sql.core.facade.JdbcConn_JVM
-import molecule.sql.core.query.casting.strategy._
+import molecule.sql.core.query.casting.strategy.*
 import molecule.sql.core.query.cursorStrategy.{NoUnique, PrimaryUnique, SubUnique}
 
 case class SqlQueryResolveCursor[Tpl](

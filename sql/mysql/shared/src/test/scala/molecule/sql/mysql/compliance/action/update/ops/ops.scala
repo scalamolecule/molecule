@@ -1,7 +1,7 @@
 package molecule.sql.mysql.compliance.action.update.ops
 
 import molecule.coreTests.setup.{MUnitSuiteWithArrays, Test}
-import molecule.coreTests.spi.action.update.ops._
+import molecule.coreTests.spi.action.update.ops.*
 import molecule.sql.mysql.setup.Api_mysql_async
 
 class OpsOneTest extends Test {

@@ -1,9 +1,9 @@
 package molecule.datalog.datomic.spi
 
+import molecule.core.ast.DataModel.Element
 import molecule.core.spi.Renderer
 import molecule.datalog.core.query.Model2DatomicQuery
 import scala.concurrent.{ExecutionContext, Future}
-import molecule.core.ast.DataModel.Element
 
 trait SpiBase_datomic_async extends Renderer {
 

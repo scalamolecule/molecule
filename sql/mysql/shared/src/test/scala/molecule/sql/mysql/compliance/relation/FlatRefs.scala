@@ -1,7 +1,7 @@
 package molecule.sql.mysql.compliance.relation
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.relation.flat._
+import molecule.coreTests.spi.relation.flat.*
 import molecule.sql.mysql.setup.Api_mysql_async
 
 class FlatRefTest extends Test {

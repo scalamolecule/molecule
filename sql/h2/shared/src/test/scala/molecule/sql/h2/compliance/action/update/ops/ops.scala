@@ -1,7 +1,7 @@
 package molecule.sql.h2.compliance.action.update.ops
 
 import molecule.coreTests.setup.{MUnitSuiteWithArrays, Test}
-import molecule.coreTests.spi.action.update.ops._
+import molecule.coreTests.spi.action.update.ops.*
 import molecule.sql.h2.setup.Api_h2_async
 
 class OpsOneTest extends Test {

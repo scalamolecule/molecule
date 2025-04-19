@@ -1,7 +1,7 @@
 package molecule.datalog
 
-import molecule.core.api._
-import molecule.datalog.datomic.spi._
+import molecule.core.api.*
+import molecule.datalog.datomic.spi.*
 
 package object datomic {
 

@@ -1,7 +1,7 @@
 package molecule.sql.mariadb.compliance.transaction.update.relation.one
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.action.update.relation.one._
+import molecule.coreTests.spi.action.update.relation.one.*
 import molecule.sql.mariadb.setup.Api_mariadb_async
 
 class One_MapTest extends Test {

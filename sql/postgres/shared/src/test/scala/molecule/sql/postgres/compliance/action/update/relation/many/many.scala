@@ -1,7 +1,7 @@
 package molecule.sql.postgres.compliance.action.update.relation.many
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.action.update.relation.many._
+import molecule.coreTests.spi.action.update.relation.many.*
 import molecule.sql.postgres.setup.Api_postgres_async
 
 class Many_MapTest extends Test {

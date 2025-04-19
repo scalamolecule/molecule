@@ -1,7 +1,7 @@
 package molecule.datalog.datomic.compliance.validation.save
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.validation.save._
+import molecule.coreTests.spi.validation.save.*
 import molecule.datalog.datomic.setup.Api_datomic_async
 
 class FormatConstantsTest extends Test {

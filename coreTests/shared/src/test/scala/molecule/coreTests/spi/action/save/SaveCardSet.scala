@@ -1,22 +1,22 @@
 package molecule.coreTests.spi.action.save
 
 import java.net.URI
-import java.time._
+import java.time.*
 import java.util.{Date, UUID}
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
-import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Types._
-import molecule.coreTests.setup._
-import scala.collection.immutable._
+import molecule.core.util.Executor.*
+import molecule.coreTests.domains.dsl.Types.*
+import molecule.coreTests.setup.*
+import scala.collection.immutable.*
 
 case class SaveCardSet(
   suite: Test,
   api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 
-  import api._
-  import suite._
+  import api.*
+  import suite.*
 
   "mandatory" - types { implicit conn =>
     for {

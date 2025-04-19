@@ -1,7 +1,7 @@
 package molecule.sql.sqlite.compliance.sorting
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.sorting._
+import molecule.coreTests.spi.sorting.*
 import molecule.sql.sqlite.setup.Api_sqlite_async
 
 class SortAggrTest extends Test {

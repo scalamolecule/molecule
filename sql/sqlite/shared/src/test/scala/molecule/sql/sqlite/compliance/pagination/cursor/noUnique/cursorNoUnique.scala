@@ -1,7 +1,7 @@
 package molecule.sql.sqlite.compliance.pagination.cursor.noUnique
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.pagination.cursor.noUnique._
+import molecule.coreTests.spi.pagination.cursor.noUnique.*
 import molecule.sql.sqlite.setup.Api_sqlite_async
 
 class AttrOrderMandatoryTest extends Test {

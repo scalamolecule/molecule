@@ -1,6 +1,6 @@
 package molecule.core.util
 
-import molecule.base.error._
+import molecule.base.error.*
 import scala.concurrent.duration.{Duration, DurationInt}
 import scala.concurrent.{Await, ExecutionContext, Future}
 

@@ -31,11 +31,19 @@ object JdbcHandlerSQlite_JVM {
         }
       })
     }
-    Manager { use =>
-      val conn = new JdbcConnSQlite_JVM(proxy, sqlConn)
-      val stmt = use(conn.sqlConn.createStatement)
-      stmt.executeUpdate(proxy.schemaData.head)
-      conn
-    }.get
+//    Manager { use =>
+//      val conn = new JdbcConnSQlite_JVM(proxy, sqlConn)
+//      val stmt = use(conn.sqlConn.createStatement)
+//      stmt.executeUpdate(proxy.schemaData.head)
+//      conn
+//    }.get
+
+
+    println("recreateDb...")
+
+    val conn = new JdbcConnSQlite_JVM(proxy, sqlConn)
+    val stmt = conn.sqlConn.createStatement
+    stmt.executeUpdate(proxy.schemaData.head)
+    conn
   }
 }

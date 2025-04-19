@@ -17,18 +17,21 @@ trait DbConnection_sqlite extends DbConnection {
 
   def run(test: Conn => Any, schema: Schema_sqlite): Any = {
     // Choose running tests with in-memory or file-based database:
-    runMemDb(test, schema)
-    //    runFileDb(test, schema)
+
+    println("########################")
+
+//    runMemDb(test, schema)
+        runFileDb(test, schema)
     //    runFileDbWithHikariCP(test, schema)
   }
 
   def runMemDb(test: Conn => Any, schema: Schema_sqlite): Any = {
-    Manager { use =>
-      val proxy   = JdbcProxy("jdbc:sqlite::memory:", schema)
-      val sqlConn = use(DriverManager.getConnection(proxy.url))
-      val conn    = use(JdbcHandlerSQlite_JVM.recreateDb(proxy, sqlConn, true))
-      test(conn)
-    }.get
+    //    Manager { use =>
+    //      val proxy   = JdbcProxy("jdbc:sqlite::memory:", schema)
+    //      val sqlConn = use(DriverManager.getConnection(proxy.url))
+    //      val conn    = use(JdbcHandlerSQlite_JVM.recreateDb(proxy, sqlConn, true))
+    //      test(conn)
+    //    }.get
 
     // Not closing the connection between each test to allow stream
     val proxy   = JdbcProxy("jdbc:sqlite::memory:", schema)

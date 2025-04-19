@@ -1,10 +1,10 @@
 package molecule.datalog.core.query
 
-import java.lang.{Double => jDouble, Float => jFloat, Long => jLong}
-import java.math.{BigDecimal => jBigDecimal, BigInteger => jBigInt}
+import java.lang.{Double as jDouble, Float as jFloat, Long as jLong}
+import java.math.{BigDecimal as jBigDecimal, BigInteger as jBigInt}
 import java.net.URI
-import java.time._
-import java.util.{Date, UUID, List => jList}
+import java.time.*
+import java.util.{Date, UUID, List as jList}
 import molecule.base.util.BaseHelpers
 import molecule.datalog.core.query.casting.NullValueException
 

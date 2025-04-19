@@ -1,8 +1,8 @@
 package molecule.sql.h2.compliance.filter.map
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.filter.map._
-import molecule.coreTests.spi.filter.map.types._
+import molecule.coreTests.spi.filter.map.*
+import molecule.coreTests.spi.filter.map.types.*
 import molecule.sql.h2.setup.Api_h2_async
 
 class MapSemanticsTest extends Test {

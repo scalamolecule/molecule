@@ -1,12 +1,12 @@
 package molecule.sql.core.query
 
 import molecule.base.error.ModelError
-import molecule.core.ast.DataModel._
+import molecule.core.ast.DataModel.*
 import molecule.core.query.Pagination
 import molecule.core.util.ModelUtils
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.javaSql.{PrepStmt, PrepStmtImpl, ResultSetInterface}
-import molecule.sql.core.query.casting.strategy._
+import molecule.sql.core.query.casting.strategy.*
 import molecule.sql.core.query.casting.{NestOptTpls, NestTpls}
 import scala.collection.mutable.ListBuffer
 
@@ -63,15 +63,15 @@ abstract class SqlQueryResolve[Tpl](
     val totalCount = getTotalCount(conn)
     val limitAbs   = limit.abs.min(totalCount)
     val hasMore    = limitAbs < totalCount
-    val tpls       = castTuples(c.row2tpl, sortedRows, forward)
+    val tpls       = castTuples(c.rs2row, sortedRows, forward)
     val cursor     = initialCursor(conn, elements, tpls)
     (tpls, cursor, hasMore)
   }
 
-  protected def castTuples(row2tpl: RS => Any, sortedRows: RS, forward: Boolean): List[Tpl] = {
+  protected def castTuples(rs2row: RS => Any, sortedRows: RS, forward: Boolean): List[Tpl] = {
     val tuples = ListBuffer.empty[Tpl]
     while (sortedRows.next()) {
-      tuples += row2tpl(sortedRows).asInstanceOf[Tpl]
+      tuples += rs2row(sortedRows).asInstanceOf[Tpl]
     }
     if (forward) tuples.toList else tuples.toList.reverse
   }
@@ -143,7 +143,7 @@ abstract class SqlQueryResolve[Tpl](
     conn: JdbcConn_JVM
   ): (List[Tpl], String, Boolean) = {
     val totalCount = getTotalCount(conn)
-    val nestedTpls = castTuples(c.row2tpl, sortedRows, forward)
+    val nestedTpls = castTuples(c.rs2row, sortedRows, forward)
     paginatedResult(limit, forward, allTokens, identifiers, identifyTpl, nextCursor, nestedTpls, totalCount)
 
   }

@@ -1,7 +1,7 @@
 package molecule.sql.postgres.compliance.filterAttr.set
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.filterAttr.set._
+import molecule.coreTests.spi.filterAttr.set.*
 import molecule.sql.postgres.setup.Api_postgres_async
 
 class AdjacentTest extends Test {

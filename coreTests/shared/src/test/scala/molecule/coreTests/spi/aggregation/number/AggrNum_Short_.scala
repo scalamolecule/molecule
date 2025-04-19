@@ -3,9 +3,9 @@ package molecule.coreTests.spi.aggregation.number
 
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
-import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Types._
-import molecule.coreTests.setup._
+import molecule.core.util.Executor.*
+import molecule.coreTests.domains.dsl.Types.*
+import molecule.coreTests.setup.*
 
 case class AggrNum_Short_(
   suite: Test,
@@ -14,8 +14,8 @@ case class AggrNum_Short_(
 
   // Using tolerant equality so that the test works with decimal number types too
 
-  import api._
-  import suite._
+  import api.*
+  import suite.*
 
   "sum" - types { implicit conn =>
     implicit val tolerant = tolerantShortEquality(toleranceShort)

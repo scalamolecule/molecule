@@ -1,10 +1,10 @@
 package molecule.datalog.core.query
 
-import java.lang.{Boolean => jBoolean, Double => jDouble, Float => jFloat, Integer => jInteger, Long => jLong}
-import java.math.{BigDecimal => jBigDecimal, BigInteger => jBigInt}
+import java.lang.{Boolean as jBoolean, Double as jDouble, Float as jFloat, Integer as jInteger, Long as jLong}
+import java.math.{BigDecimal as jBigDecimal, BigInteger as jBigInt}
 import java.net.URI
-import java.util.{Date, UUID, List => jList, Map => jMap}
-import molecule.core.ast.DataModel._
+import java.util.{Date, UUID, List as jList, Map as jMap}
+import molecule.core.ast.DataModel.*
 import molecule.core.util.AggrUtils
 
 trait SortOneSpecial[Tpl]

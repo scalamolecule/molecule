@@ -1,9 +1,9 @@
 package molecule.datalog.core.query
 
-import java.lang.{Long => jLong}
+import java.lang.Long as jLong
 import java.net.URI
-import java.time._
-import java.util.{Date, UUID, Iterator => jIterator, List => jList, Map => jMap, Set => jSet}
+import java.time.*
+import java.util.{Date, UUID, Iterator as jIterator, List as jList, Map as jMap, Set as jSet}
 import molecule.core.util.JavaConversions
 
 trait LambdasSet extends ResolveBase with JavaConversions {

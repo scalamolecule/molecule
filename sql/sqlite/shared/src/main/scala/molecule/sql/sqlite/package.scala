@@ -1,7 +1,7 @@
 package molecule.sql
 
-import molecule.core.api._
-import molecule.sql.sqlite.spi._
+import molecule.core.api.*
+import molecule.sql.sqlite.spi.*
 
 package object sqlite {
   object async extends Api_async with Api_async_transact with Spi_sqlite_async

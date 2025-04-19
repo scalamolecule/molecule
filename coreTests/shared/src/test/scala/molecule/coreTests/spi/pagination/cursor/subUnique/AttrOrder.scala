@@ -2,9 +2,9 @@ package molecule.coreTests.spi.pagination.cursor.subUnique
 
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
-import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Uniques._
-import molecule.coreTests.setup._
+import molecule.core.util.Executor.*
+import molecule.coreTests.domains.dsl.Uniques.*
+import molecule.coreTests.setup.*
 import scala.annotation.nowarn
 
 @nowarn
@@ -19,8 +19,8 @@ case class AttrOrder(
     (s, i, int)
   }
 
-  import api._
-  import suite._
+  import api.*
+  import suite.*
 
   "Unique first: u3-1-2" - unique { implicit conn =>
     val triples             = getTriples.map(t => (t._3, t._1, t._2))

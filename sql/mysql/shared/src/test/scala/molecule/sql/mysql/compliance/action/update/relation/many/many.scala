@@ -1,7 +1,7 @@
 package molecule.sql.mysql.compliance.action.update.relation.many
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.action.update.relation.many._
+import molecule.coreTests.spi.action.update.relation.many.*
 import molecule.sql.mysql.setup.Api_mysql_async
 
 class Many_MapTest extends Test {

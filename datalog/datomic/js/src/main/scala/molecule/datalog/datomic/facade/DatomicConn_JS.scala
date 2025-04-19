@@ -1,7 +1,7 @@
 package molecule.datalog.datomic.facade
 
-import boopickle.Default._
-import molecule.core.marshalling.Boopicklers._
+import boopickle.Default.*
+import molecule.core.marshalling.Boopicklers.*
 import molecule.core.marshalling.{DatomicProxy, MoleculeClient, MoleculeRpc}
 import molecule.core.spi.Conn
 import molecule.datalog.datomic.transaction.DatomicDataType_JS

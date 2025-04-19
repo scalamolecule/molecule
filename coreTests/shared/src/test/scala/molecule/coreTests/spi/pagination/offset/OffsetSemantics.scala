@@ -3,9 +3,9 @@ package molecule.coreTests.spi.pagination.offset
 import molecule.base.error.ModelError
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
-import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Types._
-import molecule.coreTests.setup._
+import molecule.core.util.Executor.*
+import molecule.coreTests.domains.dsl.Types.*
+import molecule.coreTests.setup.*
 
 // Offset with sql dbs is ineffective and should be avoided in favour of cursor pagination.
 // https://medium.com/swlh/sql-pagination-you-are-probably-doing-it-wrong-d0f2719cc166
@@ -15,8 +15,8 @@ case class OffsetSemantics(
   api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 
-  import api._
-  import suite._
+  import api.*
+  import suite.*
 
   "Different limit/offset sign" - types { implicit conn =>
     for {

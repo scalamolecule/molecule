@@ -1,8 +1,8 @@
 package molecule.sql.h2.setup
 
-import boopickle.Default._
+import boopickle.Default.*
 import molecule.core.spi.Conn
-import molecule.coreTests.domains.schema._
+import molecule.coreTests.domains.schema.*
 import molecule.coreTests.setup.{DbProviders, Platform}
 
 trait DbProviders_h2 extends DbProviders with DbConnection_h2 with Platform {

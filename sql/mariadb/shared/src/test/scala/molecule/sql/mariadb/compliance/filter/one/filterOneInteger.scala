@@ -1,7 +1,7 @@
 package molecule.sql.mariadb.compliance.filter.one
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.filter.one.number._
+import molecule.coreTests.spi.filter.one.number.*
 import molecule.sql.mariadb.setup.Api_mariadb_async
 
 

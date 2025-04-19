@@ -1,29 +1,15 @@
 package molecule.core.spi
 
 import cats.effect.IO
-import molecule.base.error.InsertError
-import molecule.core.action._
-import scala.concurrent.{Future, ExecutionContext => EC}
+import molecule.base.error.{ExecutionError, InsertError}
+import molecule.core.action.*
+import scala.concurrent.{Future, ExecutionContext as EC}
 
 trait Spi_async {
 
   def query_get[Tpl](
     q: Query[Tpl]
   )(implicit conn: Conn, ec: EC): Future[List[Tpl]]
-
-
-  def query_stream[Tpl](
-    q: Query[Tpl],
-    chunkSize: Int = 100
-  )(implicit conn: Conn, ec: EC): fs2.Stream[IO, Tpl] = ???
-
-  def query_subscribe[Tpl](
-    q: Query[Tpl], callback: List[Tpl] => Unit
-  )(implicit conn: Conn, ec: EC): Future[Unit]
-
-  def query_unsubscribe[Tpl](
-    q: Query[Tpl]
-  )(implicit conn: Conn, ec: EC): Future[Unit]
 
   def query_inspect[Tpl](
     q: Query[Tpl]
@@ -45,6 +31,29 @@ trait Spi_async {
 
   def queryCursor_inspect[Tpl](
     q: QueryCursor[Tpl]
+  )(implicit conn: Conn, ec: EC): Future[Unit]
+
+
+  def query_stream[Tpl](
+    q: Query[Tpl], chunkSize: Int = 100
+  )(implicit conn: Conn, ec: EC): fs2.Stream[IO, Tpl] = {
+    // (overridden on jvm side)
+    fs2.Stream.eval {
+      IO.raiseError(
+        ExecutionError(
+          "Streaming not implemented on JS platform. Maybe use subscribe instead?"
+        )
+      )
+    }
+  }
+
+
+  def query_subscribe[Tpl](
+    q: Query[Tpl], callback: List[Tpl] => Unit
+  )(implicit conn: Conn, ec: EC): Future[Unit]
+
+  def query_unsubscribe[Tpl](
+    q: Query[Tpl]
   )(implicit conn: Conn, ec: EC): Future[Unit]
 
 

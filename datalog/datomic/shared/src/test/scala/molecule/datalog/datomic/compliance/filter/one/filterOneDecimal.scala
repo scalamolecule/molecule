@@ -1,7 +1,7 @@
 package molecule.datalog.datomic.compliance.filter.one
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.filter.one.decimal._
+import molecule.coreTests.spi.filter.one.decimal.*
 import molecule.datalog.datomic.setup.Api_datomic_async
 
 

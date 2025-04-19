@@ -1,7 +1,7 @@
 package molecule.sql
 
-import molecule.core.api._
-import molecule.sql.mariadb.spi._
+import molecule.core.api.*
+import molecule.sql.mariadb.spi.*
 
 package object mariadb {
   object async extends Api_async with Api_async_transact with Spi_mariadb_async

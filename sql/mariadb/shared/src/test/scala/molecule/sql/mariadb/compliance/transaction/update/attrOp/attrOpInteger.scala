@@ -1,7 +1,7 @@
 package molecule.sql.mariadb.compliance.transaction.update.attrOp
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.action.update.attrOp.number._
+import molecule.coreTests.spi.action.update.attrOp.number.*
 import molecule.sql.mariadb.setup.Api_mariadb_async
 
 

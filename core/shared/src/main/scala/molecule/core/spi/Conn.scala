@@ -1,9 +1,9 @@
 package molecule.core.spi
 
 import cats.effect.IO
-import molecule.base.error._
+import molecule.base.error.*
 import molecule.core.api.Savepoint
-import molecule.core.ast.DataModel._
+import molecule.core.ast.DataModel.*
 import molecule.core.marshalling.{ConnProxy, MoleculeRpc}
 import molecule.core.util.ModelUtils
 import zio.ZIO

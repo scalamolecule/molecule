@@ -1,10 +1,10 @@
 package molecule.sql.mariadb.compliance.fallback
 
-import java.math.{BigDecimal => jBigDecimal}
-import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Types._
+import java.math.BigDecimal as jBigDecimal
+import molecule.core.util.Executor.*
+import molecule.coreTests.domains.dsl.Types.*
 import molecule.coreTests.setup.{Test, TestUtils}
-import molecule.sql.mariadb.async._
+import molecule.sql.mariadb.async.*
 import molecule.sql.mariadb.setup.DbProviders_mariadb
 import upickle.default.read
 import scala.language.implicitConversions

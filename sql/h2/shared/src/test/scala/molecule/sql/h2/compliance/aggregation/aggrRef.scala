@@ -1,7 +1,7 @@
 package molecule.sql.h2.compliance.aggregation
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.aggregation.ref._
+import molecule.coreTests.spi.aggregation.ref.*
 import molecule.sql.h2.setup.Api_h2_async
 
 class AggrRef_countTest extends Test {

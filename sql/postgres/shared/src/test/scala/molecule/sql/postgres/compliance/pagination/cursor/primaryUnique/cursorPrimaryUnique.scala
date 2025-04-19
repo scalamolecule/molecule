@@ -1,7 +1,7 @@
 package molecule.sql.postgres.compliance.pagination.cursor.primaryUnique
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.pagination.cursor.primaryUnique._
+import molecule.coreTests.spi.pagination.cursor.primaryUnique.*
 import molecule.sql.postgres.setup.Api_postgres_async
 
 class DirectionsTest extends Test {

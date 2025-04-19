@@ -9,9 +9,8 @@ object _ExprOneOpt extends CoreGenBase("ExprOneOpt", "/api/expression") {
     s"""// GENERATED CODE ********************************
        |package molecule.core.api.expression
        |
-       |import molecule.core.api._
-       |import molecule.core.ast.DataModel._
-       |import scala.language.higherKinds
+       |import molecule.core.api.*
+       |import molecule.core.ast.DataModel.*
        |$traits
        |""".stripMargin
   }

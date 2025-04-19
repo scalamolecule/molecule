@@ -1,7 +1,7 @@
 package molecule.sql.mysql.compliance.action.save
 
 import molecule.coreTests.setup.{MUnitSuiteWithArrays, Test}
-import molecule.coreTests.spi.action.save._
+import molecule.coreTests.spi.action.save.*
 import molecule.sql.mysql.setup.Api_mysql_async
 
 class SaveCardOneTest extends Test {

@@ -1,7 +1,7 @@
 package molecule.sql.h2.compliance.filterAttr.set
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.filterAttr.set._
+import molecule.coreTests.spi.filterAttr.set.*
 import molecule.sql.h2.setup.Api_h2_async
 
 class AdjacentTest extends Test {

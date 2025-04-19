@@ -10,8 +10,8 @@ object _InsertResolvers extends CoreGenBase("InsertResolvers", "/transaction") {
     s"""// GENERATED CODE ********************************
        |package molecule.core.transaction
        |
-       |import molecule.base.ast._
-       |import molecule.core.ast.DataModel._
+       |import molecule.base.ast.*
+       |import molecule.core.ast.DataModel.*
        |
        |trait $fileName_ {
        |

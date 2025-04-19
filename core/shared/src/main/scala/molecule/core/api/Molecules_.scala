@@ -1,7 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.core.api
 
-import molecule.core.action._
+import molecule.core.action.*
 import molecule.core.ast.DataModel.Element
 
 trait Molecule {

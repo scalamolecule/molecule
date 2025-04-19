@@ -8,7 +8,7 @@ object _Aggregates extends CoreGenBase("Aggregates", "/api") {
     s"""// GENERATED CODE ********************************
        |package molecule.core.api
        |
-       |import molecule.core.api.Keywords._
+       |import molecule.core.api.Keywords.*
        |$traits""".stripMargin
   }
 

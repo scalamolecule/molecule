@@ -1,8 +1,8 @@
 package molecule.datalog.datomic.compliance.filter.one
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.filter.one._
-import molecule.coreTests.spi.filter.one.types._
+import molecule.coreTests.spi.filter.one.*
+import molecule.coreTests.spi.filter.one.types.*
 import molecule.datalog.datomic.setup.Api_datomic_async
 
 class FilterOne_String_Test extends Test {

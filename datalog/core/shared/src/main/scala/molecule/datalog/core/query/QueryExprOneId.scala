@@ -1,7 +1,7 @@
 package molecule.datalog.core.query
 
 import molecule.base.error.ModelError
-import molecule.core.ast.DataModel._
+import molecule.core.ast.DataModel.*
 import molecule.core.query.QueryExpr
 
 trait QueryExprOneId[Tpl]

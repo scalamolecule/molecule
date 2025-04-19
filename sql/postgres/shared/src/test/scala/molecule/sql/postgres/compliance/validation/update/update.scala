@@ -1,7 +1,7 @@
 package molecule.sql.postgres.compliance.validation.update
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.validation.update._
+import molecule.coreTests.spi.validation.update.*
 import molecule.sql.postgres.setup.Api_postgres_async
 
 class TypesOneTest extends Test {

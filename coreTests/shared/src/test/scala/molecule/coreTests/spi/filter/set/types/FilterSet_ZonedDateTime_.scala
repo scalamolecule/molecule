@@ -4,9 +4,9 @@ package molecule.coreTests.spi.filter.set.types
 import java.time.ZonedDateTime
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
-import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Types._
-import molecule.coreTests.setup._
+import molecule.core.util.Executor.*
+import molecule.coreTests.domains.dsl.Types.*
+import molecule.coreTests.setup.*
 
 case class FilterSet_ZonedDateTime_(
   suite: Test,
@@ -16,8 +16,8 @@ case class FilterSet_ZonedDateTime_(
   val a = (1, Set(zonedDateTime1, zonedDateTime2))
   val b = (2, Set(zonedDateTime2, zonedDateTime3, zonedDateTime4))
 
-  import api._
-  import suite._
+  import api.*
+  import suite.*
 
 
   "Mandatory: has" - types { implicit conn =>

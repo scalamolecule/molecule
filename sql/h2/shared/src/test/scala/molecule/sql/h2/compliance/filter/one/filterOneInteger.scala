@@ -1,7 +1,7 @@
 package molecule.sql.h2.compliance.filter.one
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.filter.one.number._
+import molecule.coreTests.spi.filter.one.number.*
 import molecule.sql.h2.setup.Api_h2_async
 
 

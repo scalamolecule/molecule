@@ -1,7 +1,7 @@
 package molecule.sql.mariadb.setup
 
 import molecule.core.spi.Conn
-import molecule.coreTests.domains.schema._
+import molecule.coreTests.domains.schema.*
 import molecule.coreTests.setup.{DbConnection, DbProviders, Platform}
 
 trait DbProviders_mariadb extends DbProviders with DbConnection with Platform {

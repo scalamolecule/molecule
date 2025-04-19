@@ -3,20 +3,20 @@ package molecule.sql.core.spi
 import cats.effect.IO
 import fs2.Stream
 import molecule.base.error.{ExecutionError, MoleculeError}
-import molecule.core.action._
-import molecule.core.spi._
-import molecule.sql.core.javaSql.{ResultSetInterface => Row}
-import zio._
-import zio.stream._
+import molecule.core.action.*
+import molecule.core.spi.*
+import molecule.sql.core.javaSql.ResultSetInterface as RS
+import zio.*
+import zio.stream.*
 
-trait Streaming {
+trait StreamingJdbc {
 
   // Used by both async and io APIs
   def fs2stream[Tpl](
     q: Query[Tpl],
     chunkSize: Int,
     inspect: (Query[Tpl], Conn) => Unit,
-    getRS: (Query[Tpl], Conn) => (Row, Row => Any)
+    getResultSetAndResolver: (Query[Tpl], Conn) => (RS, RS => Any)
   )(implicit conn: Conn): fs2.Stream[IO, Tpl] = {
 
     // Ensure the inspection runs in IO
@@ -25,19 +25,19 @@ trait Streaming {
       else IO.unit
 
     // Resource handling for Statement & ResultSet
-    val acquire: IO[(Row, Row => Any)] = IO.blocking {
-      val (row, row2tpl) = getRS(q, conn)
-      row.setFetchSize(chunkSize)
-      (row, row2tpl)
+    val acquire: IO[(RS, RS => Any)] = IO.blocking {
+      val (rs, rs2row) = getResultSetAndResolver(q, conn)
+      rs.setFetchSize(chunkSize)
+      (rs, rs2row)
     }
 
-    val release: ((Row, Row => Any)) => IO[Unit] = {
+    val release: ((RS, RS => Any)) => IO[Unit] = {
       case (rs, _) => IO.blocking(rs.close())
     }
 
     for {
       _ <- Stream.eval(inspectIO)
-      (rs, row2tpl) <- Stream.bracket(acquire)(release)
+      (rs, rs2row) <- Stream.bracket(acquire)(release)
       chunk <- Stream.unfoldEval(()) { _ =>
         IO.blocking {
           val buffer = new collection.mutable.ListBuffer[Tpl]()
@@ -45,7 +45,7 @@ trait Streaming {
 
           // Fetch up to `chunkSize` rows
           while (count < chunkSize && rs.next()) {
-            buffer += row2tpl(rs).asInstanceOf[Tpl]
+            buffer += rs2row(rs).asInstanceOf[Tpl]
             count += 1
           }
 
@@ -62,7 +62,7 @@ trait Streaming {
     q: Query[Tpl],
     chunkSize: Int,
     inspect: (Query[Tpl], Conn) => Unit,
-    getData: (Query[Tpl], Conn) => (Row, Row => Any)
+    getResultSetAndResolver: (Query[Tpl], Conn) => (RS, RS => Any)
   ): ZStream[Conn, MoleculeError, Tpl] = {
 
     def attemptBlockingMolecule[A](block: => A): ZIO[Any, MoleculeError, A] =
@@ -79,21 +79,21 @@ trait Streaming {
         ZIO.unit
 
     // Resource handling for Statement & ResultSet
-    def acquire(conn: Conn): ZIO[Any, MoleculeError, (Row, Row => Any)] =
+    def acquire(conn: Conn): ZIO[Any, MoleculeError, (RS, RS => Any)] =
       attemptBlockingMolecule {
-        val (row, row2tpl) = getData(q, conn)
-        row.setFetchSize(chunkSize)
-        (row, row2tpl)
+        val (rs, rs2row) = getResultSetAndResolver(q, conn)
+        rs.setFetchSize(chunkSize)
+        (rs, rs2row)
       }
 
-    val release: ((Row, Row => Any)) => UIO[Unit] = {
+    val release: ((RS, RS => Any)) => UIO[Unit] = {
       case (rs, _) => ZIO.attemptBlocking(rs.close()).orDie
     }
 
     for {
       conn <- ZStream.fromZIO(ZIO.service[Conn])
       _ <- ZStream.fromZIO(inspectZIO(conn))
-      (rs, row2tpl) <- ZStream.acquireReleaseWith(acquire(conn))(release)
+      (rs, rs2row) <- ZStream.acquireReleaseWith(acquire(conn))(release)
       element <- ZStream.fromIterableZIO(
         attemptBlockingMolecule {
           val buffer = new collection.mutable.ListBuffer[Tpl]()
@@ -101,7 +101,7 @@ trait Streaming {
 
           // Fetch up to `chunkSize` rows
           while (count < chunkSize && rs.next()) {
-            buffer += row2tpl(rs).asInstanceOf[Tpl]
+            buffer += rs2row(rs).asInstanceOf[Tpl]
             count += 1
           }
 

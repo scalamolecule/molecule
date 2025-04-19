@@ -1,18 +1,18 @@
 package molecule.sql.mariadb
 
-import molecule.core.util.Executor._
+import molecule.core.util.Executor.*
 import molecule.coreTests.setup.{Test, TestUtils}
-import molecule.sql.mariadb.async._
+import molecule.sql.mariadb.async.*
 import molecule.sql.mariadb.setup.DbProviders_mariadb
 import scala.language.implicitConversions
 
 class AdhocJVM_mariadb extends Test with DbProviders_mariadb with TestUtils {
 
+  val a = (1, Map("a" -> localDate1, "b" -> localDate2))
+  val b = (2, Map("a" -> localDate2, "b" -> localDate3, "c" -> localDate4))
 
   "types" - types { implicit conn =>
-    import molecule.coreTests.domains.dsl.Types._
-    //      implicit val tolerance = tolerantDoubleEquality(toleranceDouble)
-    implicit val tolerance = tolerantFloatEquality(toleranceFloat)
+    import molecule.coreTests.domains.dsl.Types.*
     for {
 
       //        id <- Entity.i(42).save.transact.map(_.id)
@@ -43,31 +43,43 @@ class AdhocJVM_mariadb extends Test with DbProviders_mariadb with TestUtils {
       //            |      Entity.string IS NOT NULL
       //            |""".stripMargin)
 
-      id <- Entity.string("a").save.transact.map(_.id)
-      _ <- Entity(id).string.prepend("b").update.transact
-      _ <- Entity.string.query.get.map(_.head ==> "ba")
+//      id <- Entity.string("a").save.transact.map(_.id)
+//      _ <- Entity(id).string.prepend("b").update.transact
+//      _ <- Entity.string.query.get.map(_.head ==> "ba")
 
 
-    } yield ()
-  }
+      _ <- Entity.i.localDateMap.insert(a, b).transact
 
+      // Get Map value by key
 
-  "refs" - refs { implicit conn =>
-    import molecule.coreTests.domains.dsl.Refs._
-    for {
+      // Like calling `apply` on a Scala Map.
+//      _ <- Entity.i.localDateMap("_").query.get.map(_ ==> List())
+      _ <- Entity.i.a1.localDateMap("a").query.inspect
 
-      _ <- A.i.B.?(B.iMap).insert(
-        (0, None),
-        (1, Some(Map("a" -> 1, "b" -> 2))),
-      ).transact
-
-      _ <- A.i.B.?(B.iMap).query.i.get.map(_ ==> List(
-        (0, None),
-        (1, Some(Map("a" -> 1, "b" -> 2))),
-      ))
+      _ <- Entity.i.a1.localDateMap("a").query.get.map(_ ==> List((1, localDate1), (2, localDate2)))
+//      _ <- Entity.i.a1.localDateMap("b").query.get.map(_ ==> List((1, localDate2), (2, localDate3)))
+//      _ <- Entity.i.a1.localDateMap("c").query.get.map(_ ==> List((2, localDate4)))
 
     } yield ()
   }
+
+
+//  "refs" - refs { implicit conn =>
+//    import molecule.coreTests.domains.dsl.Refs.*
+//    for {
+//
+//      _ <- A.i.B.?(B.iMap).insert(
+//        (0, None),
+//        (1, Some(Map("a" -> 1, "b" -> 2))),
+//      ).transact
+//
+//      _ <- A.i.B.?(B.iMap).query.i.get.map(_ ==> List(
+//        (0, None),
+//        (1, Some(Map("a" -> 1, "b" -> 2))),
+//      ))
+//
+//    } yield ()
+//  }
 
 
   //    "unique" - unique { implicit conn =>

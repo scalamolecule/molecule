@@ -1,7 +1,7 @@
 package molecule.sql.mysql.compliance.aggregation
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.aggregation.ref._
+import molecule.coreTests.spi.aggregation.ref.*
 import molecule.sql.mysql.setup.Api_mysql_async
 
 class AggrRef_countTest extends Test {

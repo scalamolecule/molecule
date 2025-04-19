@@ -1,8 +1,8 @@
 package molecule.core.validation
 
-import molecule.base.ast._
-import molecule.base.error._
-import molecule.core.ast.DataModel._
+import molecule.base.ast.*
+import molecule.base.error.*
+import molecule.core.ast.DataModel.*
 import molecule.core.ops.ModelTransformations_
 import scala.annotation.tailrec
 

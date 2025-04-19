@@ -1,8 +1,8 @@
 package molecule.core.spi
 
 import cats.effect.IO
-import molecule.base.error.InsertError
-import molecule.core.action._
+import molecule.base.error.{ExecutionError, InsertError}
+import molecule.core.action.*
 
 /**
  * Choosing pragmatic IO[T] as Doobie does:
@@ -17,19 +17,6 @@ trait Spi_io {
   def query_get[Tpl](
     q: Query[Tpl]
   )(implicit conn: Conn): IO[List[Tpl]]
-
-  def query_stream[Tpl](
-    q: Query[Tpl],
-    chunkSize: Int
-  )(implicit conn: Conn): fs2.Stream[IO, Tpl]
-
-  def query_subscribe[Tpl](
-    q: Query[Tpl], callback: List[Tpl] => Unit
-  )(implicit conn: Conn): IO[Unit]
-
-  def query_unsubscribe[Tpl](
-    q: Query[Tpl]
-  )(implicit conn: Conn): IO[Unit]
 
   def query_inspect[Tpl](
     q: Query[Tpl]
@@ -49,8 +36,32 @@ trait Spi_io {
     q: QueryCursor[Tpl]
   )(implicit conn: Conn): IO[(List[Tpl], String, Boolean)]
 
+
   def queryCursor_inspect[Tpl](
     q: QueryCursor[Tpl]
+  )(implicit conn: Conn): IO[Unit]
+
+
+  def query_stream[Tpl](
+    q: Query[Tpl], chunkSize: Int = 100
+  )(implicit conn: Conn): fs2.Stream[IO, Tpl] = {
+    // (overridden on jvm side)
+    fs2.Stream.eval {
+      IO.raiseError(
+        ExecutionError(
+          "Streaming not implemented on JS platform. Maybe use subscribe instead?"
+        )
+      )
+    }
+  }
+
+
+  def query_subscribe[Tpl](
+    q: Query[Tpl], callback: List[Tpl] => Unit
+  )(implicit conn: Conn): IO[Unit]
+
+  def query_unsubscribe[Tpl](
+    q: Query[Tpl]
   )(implicit conn: Conn): IO[Unit]
 
 

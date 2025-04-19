@@ -8,7 +8,7 @@
 package molecule.graphql.client.schema
 
 import molecule.base.api.Schema
-import molecule.base.ast._
+import molecule.base.ast.*
 
 
 trait StarwarsSchema_H2 extends Schema {

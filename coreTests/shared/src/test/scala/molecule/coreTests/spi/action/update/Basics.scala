@@ -3,18 +3,18 @@ package molecule.coreTests.spi.action.update
 import molecule.base.error.ModelError
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
-import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Types._
-import molecule.coreTests.setup._
-import scala.collection.immutable._
+import molecule.core.util.Executor.*
+import molecule.coreTests.domains.dsl.Types.*
+import molecule.coreTests.setup.*
+import scala.collection.immutable.*
 
 case class Basics(
   suite: Test,
   api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 
-  import api._
-  import suite._
+  import api.*
+  import suite.*
 
   "Update entity with id" - types { implicit conn =>
     for {

@@ -2,9 +2,9 @@ package molecule.coreTests.spi.pagination.cursor.subUnique
 
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
-import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Uniques._
-import molecule.coreTests.setup._
+import molecule.core.util.Executor.*
+import molecule.coreTests.domains.dsl.Uniques.*
+import molecule.coreTests.setup.*
 import scala.annotation.nowarn
 
 @nowarn
@@ -15,8 +15,8 @@ case class DirectionsUniqueStandard(
 
   // (Allow pattern matching the result without warnings)
 
-  import api._
-  import suite._
+  import api.*
+  import suite.*
 
   "Forward, asc asc" - unique { implicit conn =>
     val pairs               = (1 to 5).toList.map((_, scala.util.Random.nextInt(3) + 1))

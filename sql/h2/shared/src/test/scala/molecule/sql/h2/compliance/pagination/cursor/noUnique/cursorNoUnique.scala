@@ -1,7 +1,7 @@
 package molecule.sql.h2.compliance.pagination.cursor.noUnique
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.pagination.cursor.noUnique._
+import molecule.coreTests.spi.pagination.cursor.noUnique.*
 import molecule.sql.h2.setup.Api_h2_async
 
 class AttrOrderMandatoryTest extends Test {

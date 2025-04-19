@@ -1,8 +1,8 @@
 package molecule.sql.core.transaction
 
-import java.sql.{PreparedStatement => PS}
-import boopickle.Default._
-import molecule.base.ast._
+import java.sql.PreparedStatement as PS
+import boopickle.Default.*
+import molecule.base.ast.*
 import molecule.core.ast.DataModel.Element
 import molecule.core.transaction.ResolveSave
 import molecule.core.transaction.ops.SaveOps

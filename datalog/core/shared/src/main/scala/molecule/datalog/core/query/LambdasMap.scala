@@ -1,8 +1,8 @@
 package molecule.datalog.core.query
 
 import java.net.URI
-import java.time._
-import java.util.{Date, UUID, Iterator => jIterator, List => jList, Map => jMap, Set => jSet}
+import java.time.*
+import java.util.{Date, UUID, Iterator as jIterator, List as jList, Map as jMap, Set as jSet}
 import molecule.base.error.ModelError
 import molecule.core.util.JavaConversions
 import scala.collection.mutable.ListBuffer

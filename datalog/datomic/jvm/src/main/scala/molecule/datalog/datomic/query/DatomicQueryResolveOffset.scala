@@ -1,5 +1,7 @@
 package molecule.datalog.datomic.query
 
+import java.util.List as jList
+import molecule.core.ast.DataModel.Element
 import molecule.core.marshalling.dbView.DbView
 import molecule.core.util.Executor.global
 import molecule.core.util.{FutureUtils, MoleculeLogging}
@@ -7,7 +9,6 @@ import molecule.datalog.core.query.{DatomicQueryBase, Model2DatomicQuery}
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
-import molecule.core.ast.DataModel.Element
 
 /**
  * @param elements  Molecule model
@@ -30,15 +31,8 @@ case class DatomicQueryResolveOffset[Tpl](
 
   // Datomic querying is synchronous
   def getListFromOffset_sync(implicit conn: DatomicConn_JVM): (List[Tpl], Int, Boolean) = {
-    getListFromOffset_sync(None)(conn)
-  }
-
-  // Optional use of DB_AFTER for subscriptions
-  def getListFromOffset_sync(altDb: Option[datomic.Database])
-                            (implicit conn: DatomicConn_JVM)
-  : (List[Tpl], Int, Boolean) = {
     offsetLimitCheck(optLimit, optOffset)
-    val rows       = getRawData(conn, altDb = altDb)
+    val rows       = getRawData(conn)
     val totalCount = rows.size
     val sortedRows = sortRows(rows)
     if (m2q.isNested) {
@@ -83,9 +77,9 @@ case class DatomicQueryResolveOffset[Tpl](
     conn: DatomicConn_JVM,
     callback: List[Tpl] => Unit
   ): Unit = {
-    val involvedAttrs    = getAttrNames(elements)
+    val involvedAttrs        = getAttrNames(elements)
     val involvedDeleteEntity = getInitialEntity(elements)
-    val maybeCallback    = (mutationAttrs: Set[String], isDelete: Boolean) => {
+    val maybeCallback        = (mutationAttrs: Set[String], isDelete: Boolean) => {
       if (
         mutationAttrs.exists(involvedAttrs.contains) ||
           isDelete && mutationAttrs.head.startsWith(involvedDeleteEntity)

@@ -1,7 +1,7 @@
 package molecule.sql.h2.compliance.pagination.cursor.primaryUnique
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.pagination.cursor.primaryUnique._
+import molecule.coreTests.spi.pagination.cursor.primaryUnique.*
 import molecule.sql.h2.setup.Api_h2_async
 
 class DirectionsTest extends Test {

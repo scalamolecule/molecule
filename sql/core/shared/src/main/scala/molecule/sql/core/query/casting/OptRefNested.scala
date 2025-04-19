@@ -1,7 +1,7 @@
 package molecule.sql.core.query.casting
 
 import molecule.sql.core.query.SqlQueryBase
-import molecule.sql.core.query.casting.strategy._
+import molecule.sql.core.query.casting.strategy.*
 
 object OptRefNested extends SqlQueryBase {
 

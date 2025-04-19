@@ -1,11 +1,11 @@
 package molecule.sql.sqlite.spi
 
-import molecule.base.error._
-import molecule.core.action._
+import molecule.base.error.*
+import molecule.core.action.*
 import molecule.core.spi.{Conn, Spi_zio, TxReport}
 import molecule.sql.core.facade.JdbcConn_JS
-import zio._
-import scala.concurrent.{Future, ExecutionContext => EC}
+import zio.*
+import scala.concurrent.{Future, ExecutionContext as EC}
 
 trait Spi_sqlite_zio extends Spi_zio with SpiBase_sqlite_zio {
 
@@ -13,14 +13,6 @@ trait Spi_sqlite_zio extends Spi_zio with SpiBase_sqlite_zio {
 
   override def query_get[Tpl](q: Query[Tpl]): ZIO[Conn, MoleculeError, List[Tpl]] = {
     async2zio[List[Tpl]]((conn: JdbcConn_JS, ec: EC) => Spi_sqlite_async.query_get(q)(conn, ec))
-  }
-
-  override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit): ZIO[Conn, MoleculeError, Unit] = {
-    async2zio[Unit]((conn: JdbcConn_JS, ec: EC) => Spi_sqlite_async.query_subscribe(q, callback)(conn, ec))
-  }
-
-  override def query_unsubscribe[Tpl](q: Query[Tpl]): ZIO[Conn, MoleculeError, Unit] = {
-    async2zio[Unit]((conn: JdbcConn_JS, ec: EC) => Spi_sqlite_async.query_unsubscribe(q)(conn, ec))
   }
 
   override def query_inspect[Tpl](q: Query[Tpl]): ZIO[Conn, MoleculeError, Unit] = {
@@ -43,6 +35,15 @@ trait Spi_sqlite_zio extends Spi_zio with SpiBase_sqlite_zio {
 
   override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl]): ZIO[Conn, MoleculeError, Unit] = {
     async2zio[Unit]((conn: JdbcConn_JS, ec: EC) => Spi_sqlite_async.queryCursor_inspect(q)(conn, ec))
+  }
+
+
+  override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit): ZIO[Conn, MoleculeError, Unit] = {
+    async2zio[Unit]((conn: JdbcConn_JS, ec: EC) => Spi_sqlite_async.query_subscribe(q, callback)(conn, ec))
+  }
+
+  override def query_unsubscribe[Tpl](q: Query[Tpl]): ZIO[Conn, MoleculeError, Unit] = {
+    async2zio[Unit]((conn: JdbcConn_JS, ec: EC) => Spi_sqlite_async.query_unsubscribe(q)(conn, ec))
   }
 
 

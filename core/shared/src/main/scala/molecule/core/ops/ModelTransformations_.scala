@@ -2,12 +2,12 @@
 package molecule.core.ops
 
 import java.net.URI
-import java.time._
+import java.time.*
 import java.util.{Date, UUID}
 import molecule.base.error.ModelError
-import molecule.core.api.Keywords._
-import molecule.core.api._
-import molecule.core.ast.DataModel._
+import molecule.core.api.*
+import molecule.core.api.Keywords.*
+import molecule.core.ast.DataModel.*
 import scala.annotation.tailrec
 
 

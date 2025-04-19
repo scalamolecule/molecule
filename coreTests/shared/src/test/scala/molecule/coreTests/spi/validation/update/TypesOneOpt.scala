@@ -5,9 +5,9 @@ import java.util.UUID
 import molecule.base.error.ValidationErrors
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
-import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Validation._
-import molecule.coreTests.setup._
+import molecule.core.util.Executor.*
+import molecule.coreTests.domains.dsl.Validation.*
+import molecule.coreTests.setup.*
 import scala.language.implicitConversions
 
 case class TypesOneOpt(
@@ -15,8 +15,8 @@ case class TypesOneOpt(
   api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 
-  import api._
-  import suite._
+  import api.*
+  import suite.*
 
   "Types" - validation { implicit conn =>
     for {

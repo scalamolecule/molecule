@@ -1,19 +1,18 @@
 package molecule.core.marshalling
 
 import java.nio.ByteBuffer
-import boopickle.Default._
-import molecule.base.error._
-import molecule.core.ast.DataModel._
-import molecule.core.marshalling.Boopicklers._
+import boopickle.Default.*
+import molecule.base.error.*
+import molecule.core.ast.DataModel.*
+import molecule.core.marshalling.Boopicklers.*
 import molecule.core.marshalling.deserialize.UnpickleTpls
 import molecule.core.spi.{Conn, TxReport}
-import molecule.core.util.Executor._
+import molecule.core.util.Executor.*
 import molecule.core.util.FutureUtils
 import sttp.client4.fetch.FetchBackend
 import sttp.model.Uri
 import sttp.tapir.PublicEndpoint
 import sttp.tapir.client.sttp4.SttpClientInterpreter
-import zio.stream.ZStream
 import scala.concurrent.Future
 
 case class MoleculeClient(backendBaseUri: Uri)
@@ -53,14 +52,6 @@ case class MoleculeClient(backendBaseUri: Uri)
       (result: ByteBuffer) => UnpickleTpls[Tpl](elements, result).unpickleTpls
     )
   }
-
-
-//  override def queryZStream[Tpl](
-//    proxy: ConnProxy,
-//    elements: List[Element],
-//    limit: Option[Int]
-//  ): ZStream[Conn, MoleculeError, Tpl] = ???
-
 
   override def queryOffset[Tpl](
     proxy: ConnProxy,

@@ -1,7 +1,7 @@
 package molecule.datalog.datomic.compliance.pagination.offset
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.pagination.offset._
+import molecule.coreTests.spi.pagination.offset.*
 import molecule.datalog.datomic.setup.Api_datomic_async
 
 class OffsetBackwardsTest extends Test {

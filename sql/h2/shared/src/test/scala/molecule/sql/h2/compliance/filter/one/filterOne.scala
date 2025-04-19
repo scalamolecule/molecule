@@ -1,8 +1,8 @@
 package molecule.sql.h2.compliance.filter.one
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.filter.one._
-import molecule.coreTests.spi.filter.one.types._
+import molecule.coreTests.spi.filter.one.*
+import molecule.coreTests.spi.filter.one.types.*
 import molecule.sql.h2.setup.Api_h2_async
 
 class FilterOne_String_Test extends Test {

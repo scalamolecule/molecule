@@ -1,7 +1,7 @@
 package molecule.datalog.datomic.compliance.relation
 
 import molecule.coreTests.setup.{MUnitSuiteWithArrays, Test}
-import molecule.coreTests.spi.relation.nested._
+import molecule.coreTests.spi.relation.nested.*
 import molecule.datalog.datomic.setup.Api_datomic_async
 
 class NestedBasicTest extends Test {

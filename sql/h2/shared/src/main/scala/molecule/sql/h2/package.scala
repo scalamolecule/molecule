@@ -1,7 +1,7 @@
 package molecule.sql
 
-import molecule.core.api._
-import molecule.sql.h2.spi._
+import molecule.core.api.*
+import molecule.sql.h2.spi.*
 
 package object h2 {
   object async extends Api_async with Api_async_transact with Spi_h2_async

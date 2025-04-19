@@ -1,6 +1,6 @@
 package molecule.sql.sqlite.transaction
 
-import java.sql.{PreparedStatement => PS}
+import java.sql.PreparedStatement as PS
 import molecule.core.transaction.ResolveUpdate
 import molecule.sql.core.transaction.SqlUpdate
 import molecule.sql.core.transaction.strategy.SqlOps

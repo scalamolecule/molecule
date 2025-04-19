@@ -1,7 +1,7 @@
 package molecule.sql.mysql.compliance.relation
 
 import molecule.coreTests.setup.{MUnitSuiteWithArrays, Test}
-import molecule.coreTests.spi.relation.nested._
+import molecule.coreTests.spi.relation.nested.*
 import molecule.sql.mysql.setup.Api_mysql_async
 
 class NestedBasicTest extends Test {

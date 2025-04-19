@@ -1,13 +1,13 @@
 package molecule.sql.core.spi
 
-import boopickle.Default._
+import boopickle.Default.*
 import cats.effect.IO
 import molecule.base.error.{InsertError, InsertErrors, MoleculeError, ValidationErrors}
-import molecule.core.action._
+import molecule.core.action.*
 import molecule.core.ast.DataModel.Element
 import molecule.core.marshalling.serialize.PickleTpls
 import molecule.core.spi.{Conn, Renderer, Spi_io, TxReport}
-import molecule.core.util.Executor.{global => ec}
+import molecule.core.util.Executor.global as ec
 import molecule.core.util.IOUtils
 import molecule.core.validation.TxModelValidation
 import molecule.core.validation.insert.InsertValidation
@@ -26,10 +26,10 @@ trait SpiBase_io
     conn.rpc.query[Tpl](conn.proxy, q.elements, q.optLimit).io
   }
 
-  override def query_stream[Tpl](
-    q: Query[Tpl],
-    chunkSize: Int
-  )(implicit conn: Conn): fs2.Stream[IO, Tpl] = ???
+  override def query_inspect[Tpl](q: Query[Tpl])(implicit conn: Conn): IO[Unit] = {
+    printInspectQuery("QUERY", q.elements)
+  }
+
 
   override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)
                                    (implicit conn0: Conn): IO[Unit] = {
@@ -63,10 +63,6 @@ trait SpiBase_io
 
   override def query_unsubscribe[Tpl](q: Query[Tpl])(implicit conn0: Conn): IO[Unit] = {
     IO(conn0.removeCallback(q.elements))
-  }
-
-  override def query_inspect[Tpl](q: Query[Tpl])(implicit conn: Conn): IO[Unit] = {
-    printInspectQuery("QUERY", q.elements)
   }
 
 

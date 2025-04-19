@@ -1,9 +1,10 @@
 package molecule.coreTests.spi.api
 
-import molecule.base.error._
+import cats.effect.IO
+import molecule.base.error.*
 import molecule.core.api.Api_io
 import molecule.core.spi.Spi_io
-import molecule.coreTests.domains.dsl.Types._
+import molecule.coreTests.domains.dsl.Types.*
 import molecule.coreTests.setup.{DbProviders, TestUtils, Test_io}
 import scala.annotation.nowarn
 import scala.language.implicitConversions
@@ -13,8 +14,8 @@ case class IOApi(
   api: Api_io & Spi_io & DbProviders
 ) extends TestUtils {
 
-  import api._
-  import suite._
+  import api.*
+  import suite.*
 
   "Crud actions" - types { implicit conn =>
     // (can't have this line in for expression since Cats IO doesn't
@@ -33,19 +34,31 @@ case class IOApi(
 
 
   "Streaming" - types { implicit conn =>
-    if (platform == "JVM") {
-      for {
-        _ <- Entity.i.insert(1, 2, 3).transact
+    for {
+      _ <- Entity.i.insert(1, 2, 3).transact
 
+      _ <- if (platform == "jvm") {
         // Returning an fs2.Stream[IO, Int]
-        // Then you can use all the usual operation on the stream.
-        // Here we simply convert it to a List
-        _ <- Entity.i.query.stream
+        Entity.i.query.stream
           .compile
           .toList
           .map(_.sorted ==> List(1, 2, 3))
-      } yield ()
-    }
+      } else {
+        Entity.i.query.stream
+          .compile
+          .toList
+          .attempt
+          .map {
+            case Left(e) =>
+              assertEquals(
+                e.getMessage,
+                "Streaming not implemented on JS platform. Maybe use subscribe instead?"
+              )
+            case Right(value) =>
+              fail(s"Expected exception but got value: $value")
+          }
+      }
+    } yield ()
   }
 
 
@@ -109,7 +122,7 @@ case class IOApi(
 
 
   "Cursor query" - unique { implicit conn =>
-    import molecule.coreTests.domains.dsl.Uniques._
+    import molecule.coreTests.domains.dsl.Uniques.*
     val query = Uniques.int.a1.query
     for {
       _ <- Uniques.int.insert(1, 2, 3, 4, 5).transact

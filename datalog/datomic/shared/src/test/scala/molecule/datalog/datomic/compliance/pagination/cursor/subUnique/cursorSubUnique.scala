@@ -1,7 +1,7 @@
 package molecule.datalog.datomic.compliance.pagination.cursor.subUnique
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.pagination.cursor.subUnique._
+import molecule.coreTests.spi.pagination.cursor.subUnique.*
 import molecule.datalog.datomic.setup.Api_datomic_async
 
 class AttrOrderTest extends Test {

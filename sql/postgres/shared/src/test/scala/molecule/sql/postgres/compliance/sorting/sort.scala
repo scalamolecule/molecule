@@ -1,7 +1,7 @@
 package molecule.sql.postgres.compliance.sorting
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.sorting._
+import molecule.coreTests.spi.sorting.*
 import molecule.sql.postgres.setup.Api_postgres_async
 
 class SortAggrTest extends Test {

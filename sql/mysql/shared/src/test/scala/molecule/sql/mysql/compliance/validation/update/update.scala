@@ -1,7 +1,7 @@
 package molecule.sql.mysql.compliance.validation.update
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.validation.update._
+import molecule.coreTests.spi.validation.update.*
 import molecule.sql.mysql.setup.Api_mysql_async
 
 class TypesOneTest extends Test {

@@ -10,7 +10,7 @@ object _UnpickleTpl extends CoreGenBase( "UnpickleTpl", "/marshalling/deserializ
     s"""// GENERATED CODE ********************************
        |package molecule.core.marshalling.deserialize
        |
-       |import molecule.core.ast.DataModel._
+       |import molecule.core.ast.DataModel.*
        |
        |trait $fileName_[Tpl] { self: UnpickleTpls[Tpl] =>
        |

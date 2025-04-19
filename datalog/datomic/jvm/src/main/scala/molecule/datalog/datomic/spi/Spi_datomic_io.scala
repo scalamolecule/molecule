@@ -1,14 +1,17 @@
 package molecule.datalog.datomic.spi
 
 import cats.effect.IO
-import molecule.base.error._
-import molecule.core.action._
+import molecule.base.error.*
+import molecule.core.action.*
 import molecule.core.spi.{Conn, Spi_io, TxReport}
-import molecule.core.util.Executor.{global => ec}
+import molecule.core.util.Executor.global as ec
+import molecule.datalog.core.spi.StreamingDatomic
+import scala.concurrent.ExecutionContext as EC
 
 trait Spi_datomic_io
   extends Spi_io
     with JVMDatomicSpiBase
+    with StreamingDatomic
     with SpiBase_datomic_io {
 
   // Query --------------------------------------------------------
@@ -17,22 +20,6 @@ trait Spi_datomic_io
     q: Query[Tpl]
   )(implicit conn: Conn): IO[List[Tpl]] = {
     IO(Spi_datomic_sync.query_get(q)(conn))
-  }
-
-  override def query_stream[Tpl](
-    q: Query[Tpl],
-    chunkSize: Int
-  )(implicit conn: Conn): fs2.Stream[IO, Tpl] = ???
-
-  override def query_subscribe[Tpl](
-    q: Query[Tpl], callback: List[Tpl] => Unit
-  )(implicit conn: Conn): IO[Unit] = {
-    IO(Spi_datomic_sync.query_subscribe(q, callback)(conn))
-  }
-  override def query_unsubscribe[Tpl](
-    q: Query[Tpl]
-  )(implicit conn: Conn): IO[Unit] = {
-    IO(Spi_datomic_sync.query_unsubscribe(q)(conn))
   }
 
   override def query_inspect[Tpl](
@@ -65,6 +52,30 @@ trait Spi_datomic_io
     q: QueryCursor[Tpl]
   )(implicit conn: Conn): IO[Unit] = {
     printInspectQuery("QUERY (cursor)", q.elements)
+  }
+
+
+  override def query_stream[Tpl](
+    q: Query[Tpl], chunkSize: Int
+  )(implicit conn0: Conn): fs2.Stream[IO, Tpl] = {
+    fs2streamDatomic(
+      q, chunkSize,
+      (q: Query[Tpl], conn: Conn) => Spi_datomic_sync.query_inspect[Tpl](q)(conn),
+      Spi_datomic_sync.getJavaStreamAndRowResolver[Tpl]
+    )
+  }
+
+
+  override def query_subscribe[Tpl](
+    q: Query[Tpl], callback: List[Tpl] => Unit
+  )(implicit conn: Conn): IO[Unit] = {
+    IO(Spi_datomic_sync.query_subscribe(q, callback)(conn))
+  }
+
+  override def query_unsubscribe[Tpl](
+    q: Query[Tpl]
+  )(implicit conn: Conn): IO[Unit] = {
+    IO(Spi_datomic_sync.query_unsubscribe(q)(conn))
   }
 
 

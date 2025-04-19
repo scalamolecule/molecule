@@ -1,9 +1,8 @@
 // GENERATED CODE ********************************
 package molecule.core.api.expression
 
-import molecule.core.api._
-import molecule.core.ast.DataModel._
-import scala.language.higherKinds
+import molecule.core.api.*
+import molecule.core.ast.DataModel.*
 
 
 trait ExprOneOptOps_1[A, t, Entity1[_, _], Entity2[_, _, _]] extends ExprAttr_1[A, t, Entity1, Entity2] {

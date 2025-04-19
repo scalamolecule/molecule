@@ -1,7 +1,7 @@
 package molecule.sql.mariadb.compliance.relation
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.relation.flat._
+import molecule.coreTests.spi.relation.flat.*
 import molecule.sql.mariadb.setup.Api_mariadb_async
 
 class FlatRefTest extends Test {

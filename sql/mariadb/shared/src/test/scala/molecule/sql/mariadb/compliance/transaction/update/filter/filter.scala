@@ -1,7 +1,7 @@
 package molecule.sql.mariadb.compliance.transaction.update.filter
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.action.update.filter._
+import molecule.coreTests.spi.action.update.filter.*
 import molecule.sql.mariadb.setup.Api_mariadb_async
 
 class FilterOneTest extends Test {

@@ -1,6 +1,6 @@
 package molecule.sql.core.transaction.strategy.insert
 
-import java.sql.{PreparedStatement => PS}
+import java.sql.PreparedStatement as PS
 import molecule.base.error.ModelError
 import molecule.sql.core.transaction.strategy.SqlOps
 

@@ -1,12 +1,12 @@
 package molecule.sql.h2
 
-import boopickle.Default._
+import boopickle.Default.*
+import molecule.base.error.ModelError
 import molecule.coreTests.domains.dsl.Types.Entity
 import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.sql.h2.setup.DbProviders_h2
-import molecule.sql.h2.sync._
+import molecule.sql.h2.sync.*
 import scala.language.implicitConversions
-import molecule.base.error.ModelError
 
 class Adhoc_js_h2_sync extends Test with DbProviders_h2 with TestUtils {
 

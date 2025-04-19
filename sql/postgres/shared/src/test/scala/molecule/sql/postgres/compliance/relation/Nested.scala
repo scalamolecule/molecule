@@ -1,7 +1,7 @@
 package molecule.sql.postgres.compliance.relation
 
 import molecule.coreTests.setup.{MUnitSuiteWithArrays, Test}
-import molecule.coreTests.spi.relation.nested._
+import molecule.coreTests.spi.relation.nested.*
 import molecule.sql.postgres.setup.Api_postgres_async
 
 class NestedBasicTest extends Test {

@@ -1,7 +1,7 @@
 package molecule.sql.postgres.compliance.validation.save
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.validation.save._
+import molecule.coreTests.spi.validation.save.*
 import molecule.sql.postgres.setup.Api_postgres_async
 
 class FormatConstantsTest extends Test {

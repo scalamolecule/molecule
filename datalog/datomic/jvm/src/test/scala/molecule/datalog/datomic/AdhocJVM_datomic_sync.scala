@@ -1,19 +1,18 @@
 package molecule.datalog.datomic
 
-import molecule.coreTests.domains.dsl.Types._
+import cats.effect.unsafe.implicits.global as ioRuntime
+import molecule.coreTests.domains.dsl.Types.*
 import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.datalog.datomic.setup.DbProviders_datomic
-import molecule.datalog.datomic.sync._
-import scala.language.implicitConversions
+import molecule.datalog.datomic.sync.*
 
 
 class AdhocJVM_datomic_sync extends Test with DbProviders_datomic with TestUtils {
 
-  "commit" - types { implicit conn =>
-    Entity.int.insert(1 to 7).transact
-    Entity.int(count).query.get.head ==> 7
+  "commit" - refs { implicit conn =>
+    import molecule.coreTests.domains.dsl.Refs.*
 
-    Entity.int_.delete.transact
-    Entity.int(count).query.i.get ==> Nil
+    A.i.insert(1, 2, 3).transact
+    A.i.query.stream.toList.sorted ==> List(1, 2, 3)
   }
 }

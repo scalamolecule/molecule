@@ -1,8 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.core.api.expression
 
-import molecule.core.ast.DataModel._
-import scala.language.higherKinds
+import molecule.core.ast.DataModel.*
 
 
 trait ExprBArTacOps_0[t, Entity1[_], Entity2[_, _]] {

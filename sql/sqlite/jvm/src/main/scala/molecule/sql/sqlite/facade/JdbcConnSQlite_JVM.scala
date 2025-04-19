@@ -23,5 +23,4 @@ class JdbcConnSQlite_JVM(
   override def resultSet(underlying: ResultSet): ResultSetInterface = {
     new ResultSetImpl_sqlite(underlying)
   }
-
 }

@@ -1,7 +1,7 @@
 package molecule.sql.mariadb.compliance.validation.save
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.validation.save._
+import molecule.coreTests.spi.validation.save.*
 import molecule.sql.mariadb.setup.Api_mariadb_async
 
 class FormatConstantsTest extends Test {

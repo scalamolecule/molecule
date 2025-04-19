@@ -1,10 +1,10 @@
 package molecule.sql.h2
 
-import java.math.{BigDecimal => jBigDecimal}
+import java.lang as ja
+import java.math.BigDecimal as jBigDecimal
 import java.net.URI
-import java.time._
+import java.time.*
 import java.util.{Date, UUID}
-import java.{lang => ja}
 import upickle.default.{read, write}
 import scala.reflect.ClassTag
 

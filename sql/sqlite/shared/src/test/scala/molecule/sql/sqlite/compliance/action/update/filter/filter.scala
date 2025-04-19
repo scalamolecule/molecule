@@ -1,7 +1,7 @@
 package molecule.sql.sqlite.compliance.action.update.filter
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.action.update.filter._
+import molecule.coreTests.spi.action.update.filter.*
 import molecule.sql.sqlite.setup.Api_sqlite_async
 
 class FilterOneTest extends Test {

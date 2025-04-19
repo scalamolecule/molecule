@@ -8,7 +8,7 @@ object _ModelOps extends CoreGenBase("ModelOps", "/api") {
     s"""// GENERATED CODE ********************************
        |package molecule.core.api
        |
-       |import molecule.core.api.expression._
+       |import molecule.core.api.expression.*
        |import molecule.core.ops.ModelTransformations_
        |
        |

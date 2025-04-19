@@ -1,21 +1,16 @@
 package molecule.sql.h2
 
-import cats.effect.IO
+import cats.effect.unsafe.implicits.global as ioRuntime
 import molecule.base.error.{ModelError, ValidationErrors}
-import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Types._
+import molecule.core.util.Executor.*
+import molecule.coreTests.domains.dsl.Types.*
 import molecule.coreTests.setup.{Test, TestUtils}
-import molecule.sql.h2.async._
+import molecule.sql.h2.async.*
 import molecule.sql.h2.setup.DbProviders_h2
 import scala.concurrent.Future
-import scala.language.implicitConversions
-import cats.effect.unsafe.implicits.{global => ioRuntime}
 
 
-class Adhoc_jvm_h2_async
-  extends Test
-    with DbProviders_h2
-    with TestUtils {
+class Adhoc_jvm_h2_async extends Test with DbProviders_h2 with TestUtils {
 
   //  "types" - types { implicit conn =>
   //    import molecule.coreTests.domains.dsl.Types._
@@ -30,45 +25,19 @@ class Adhoc_jvm_h2_async
   //      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
   //    } yield ()
   //  }
-  //
-  //
-  //  "mixed" - types { implicit conn =>
-  //    for {
-  //      _ <- transact(
-  //        Entity.int(1).save, //         List(1)
-  //        Entity.int.insert(2, 3), //    List(1, 2, 3)
-  //        Entity(1).delete, //           List(2, 3)
-  //        Entity(3).int.*(10).update, // List(2, 30)
-  //      )
-  //      _ <- Entity.int.query.get.map(_ ==> List(2, 30))
-  //    } yield ()
-  //  }
-
 
 
   "refs" - refs { implicit conn =>
-    import molecule.coreTests.domains.dsl.Refs._
-    //    for {
-    //      _ <- A.i.insert(1, 2, 3).transact // Future[TxReport]
-    //      _ <- A.i.query.stream // fs2.Stream[IO, List[Int]]
-    //        .compile.toList.map(x => x ==> List(1,2,3))
-    //    } yield ()
-
-
+    import molecule.coreTests.domains.dsl.Refs.*
     for {
       _ <- A.i.insert(1, 2, 3).transact
       _ <- A.i.query.stream // fs2.Stream[IO, List[Int]]
         .compile
         .toList
-        .map(_ ==> List(1, 2, 3))
+        .map(_.sorted ==> List(1, 2, 3))
         .unsafeToFuture()
-
-      //        .unsafeRunSync()
-      //      _ <- A.i(5).save.transact
-      //      _ <- A.i.query.get.map(_ ==> List(1, 2, 3, 6))
     } yield ()
   }
-
 
 
   //    "unique" - unique { implicit conn =>

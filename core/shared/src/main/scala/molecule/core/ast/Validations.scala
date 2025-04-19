@@ -1,9 +1,9 @@
 package molecule.core.ast
 
 import java.net.URI
-import java.time._
+import java.time.*
 import java.util.{Date, UUID}
-import DataModel._
+import molecule.core.ast.DataModel.*
 
 
 trait Validations {

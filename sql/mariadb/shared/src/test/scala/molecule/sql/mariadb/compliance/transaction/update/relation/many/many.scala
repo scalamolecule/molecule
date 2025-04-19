@@ -1,7 +1,7 @@
 package molecule.sql.mariadb.compliance.transaction.update.relation.many
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.action.update.relation.many._
+import molecule.coreTests.spi.action.update.relation.many.*
 import molecule.sql.mariadb.setup.Api_mariadb_async
 
 class Many_MapTest extends Test {

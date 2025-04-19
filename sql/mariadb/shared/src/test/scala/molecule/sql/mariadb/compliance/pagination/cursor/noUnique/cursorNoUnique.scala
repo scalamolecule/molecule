@@ -1,7 +1,7 @@
 package molecule.sql.mariadb.compliance.pagination.cursor.noUnique
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.pagination.cursor.noUnique._
+import molecule.coreTests.spi.pagination.cursor.noUnique.*
 import molecule.sql.mariadb.setup.Api_mariadb_async
 
 class AttrOrderMandatoryTest extends Test {

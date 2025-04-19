@@ -1,7 +1,7 @@
 package molecule.sql.mysql.compliance.pagination.cursor.primaryUnique
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.pagination.cursor.primaryUnique._
+import molecule.coreTests.spi.pagination.cursor.primaryUnique.*
 import molecule.sql.mysql.setup.Api_mysql_async
 
 class DirectionsTest extends Test {

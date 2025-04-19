@@ -1,10 +1,10 @@
 package molecule.sql.postgres.spi
 
-import boopickle.Default._
+import boopickle.Default.*
 import molecule.core.ast.DataModel.Element
 import molecule.sql.core.spi.SpiBaseJS_async
 import molecule.sql.postgres.query.Model2SqlQuery_postgres
-import scala.concurrent.{Future, ExecutionContext => EC}
+import scala.concurrent.{Future, ExecutionContext as EC}
 
 
 object Spi_postgres_async extends Spi_postgres_async

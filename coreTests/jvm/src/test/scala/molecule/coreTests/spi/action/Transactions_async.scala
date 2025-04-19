@@ -3,8 +3,8 @@ package molecule.coreTests.spi.action
 import molecule.base.error.ValidationErrors
 import molecule.core.api.{Api_async, Api_async_transact}
 import molecule.core.spi.{Conn, Spi_async}
-import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Types._
+import molecule.core.util.Executor.*
+import molecule.coreTests.domains.dsl.Types.*
 import molecule.coreTests.setup.{DbProviders, Test, TestUtils}
 import scala.concurrent.Future
 
@@ -16,8 +16,8 @@ case class Transactions_async(
   api: Api_async_transact & Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 
-  import api._
-  import suite._
+  import api.*
+  import suite.*
 
 
   "commit" - types { implicit conn =>
@@ -56,7 +56,7 @@ case class Transactions_async(
 
 
   "Transact actions: validation 1" - validation { implicit conn =>
-    import molecule.coreTests.domains.dsl.Validation._
+    import molecule.coreTests.domains.dsl.Validation.*
     for {
       _ <- transact(
         Type.int(1).save, // not valid
@@ -76,7 +76,7 @@ case class Transactions_async(
 
 
   "Transact actions: validation 2" - validation { implicit conn =>
-    import molecule.coreTests.domains.dsl.Validation._
+    import molecule.coreTests.domains.dsl.Validation.*
     for {
       _ <- transact(
         Type.int.insert(4, 5),
@@ -96,7 +96,7 @@ case class Transactions_async(
 
 
   "Transact actions: validation 3" - validation { implicit conn =>
-    import molecule.coreTests.domains.dsl.Validation._
+    import molecule.coreTests.domains.dsl.Validation.*
     for {
       _ <- transact(
         Type.int.insert(4, 5),

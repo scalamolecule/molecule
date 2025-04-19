@@ -1,7 +1,7 @@
 package molecule.sql.mariadb.compliance.pagination.offset
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.pagination.offset._
+import molecule.coreTests.spi.pagination.offset.*
 import molecule.sql.mariadb.setup.Api_mariadb_async
 
 class OffsetBackwardsTest extends Test {

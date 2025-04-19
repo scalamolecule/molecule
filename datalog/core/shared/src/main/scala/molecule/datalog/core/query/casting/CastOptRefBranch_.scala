@@ -1,7 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.datalog.core.query.casting
 
-import java.util.{ArrayList => jArrayList, Iterator => jIterator, Map => jMap}
+import java.util.{ArrayList as jArrayList, Iterator as jIterator, Map as jMap}
 import molecule.core.util.JavaConversions
 
 

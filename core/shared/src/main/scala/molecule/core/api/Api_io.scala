@@ -1,22 +1,23 @@
 package molecule.core.api
 
-import cats.effect._
+import cats.effect.*
 import molecule.base.error.InsertError
-import molecule.core.action._
-import molecule.core.spi._
+import molecule.core.action.*
+import molecule.core.spi.*
 import molecule.core.util.ModelUtils
 
 trait Api_io extends Keywords with ModelUtils { spi: Spi_io =>
 
   implicit class QueryApiIO[Tpl](q: Query[Tpl]) {
     def get(implicit conn: Conn): IO[List[Tpl]] = query_get(q)
+    def inspect(implicit conn: Conn): IO[Unit] = query_inspect(q)
+
     def stream(implicit conn: Conn): fs2.Stream[IO, Tpl] = query_stream(q, 100)
     def stream(chunkSize: Int)(implicit conn: Conn): fs2.Stream[IO, Tpl] = query_stream(q, chunkSize)
 
     def subscribe(callback: List[Tpl] => Unit)
                  (implicit conn: Conn): IO[Unit] = query_subscribe(q, callback)
     def unsubscribe()(implicit conn: Conn): IO[Unit] = query_unsubscribe(q)
-    def inspect(implicit conn: Conn): IO[Unit] = query_inspect(q)
   }
 
   implicit class QueryOffsetApiIO[Tpl](q: QueryOffset[Tpl]) {
@@ -70,27 +71,19 @@ trait Api_io_transact { api: Api_io & Spi_io =>
     a1: Action, a2: Action, aa: Action*
   )(implicit conn: Conn): IO[Seq[TxReport]] = transact(a1 +: a2 +: aa)
 
-//  def transact(actions: Seq[Action])(implicit conn: Conn): IO[Seq[TxReport]] = {
-//    actions.foldLeft(IO.pure(Seq.empty[TxReport])) { (acc, action) =>
-//      val next = action match {
-//        case save: Save     => save_transact(save)
-//        case insert: Insert => insert_transact(insert)
-//        case update: Update => update_transact(update)
-//        case delete: Delete => delete_transact(delete)
-//      }
-//      for {
-//        reports <- acc
-//        report <- next
-//      } yield reports :+ report
-//    }
-//  }
   def transact(actions: Seq[Action])(implicit conn: Conn): IO[Seq[TxReport]] = {
-    actions.map {
-      case save: Save     => save_transact(save)
-      case insert: Insert => insert_transact(insert)
-      case update: Update => update_transact(update)
-      case delete: Delete => delete_transact(delete)
-    }.toList.sequence // `sequence` not working with Scala 2.12
+    actions.foldLeft(IO.pure(Seq.empty[TxReport])) { (acc, action) =>
+      val next = action match {
+        case save: Save     => save_transact(save)
+        case insert: Insert => insert_transact(insert)
+        case update: Update => update_transact(update)
+        case delete: Delete => delete_transact(delete)
+      }
+      for {
+        reports <- acc
+        report <- next
+      } yield reports :+ report
+    }
   }
 
 

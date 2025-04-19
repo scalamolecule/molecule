@@ -1,6 +1,6 @@
 package molecule.sql.postgres.transaction
 
-import java.sql.{PreparedStatement => PS}
+import java.sql.PreparedStatement as PS
 import molecule.core.transaction.{InsertResolvers_, ResolveInsert}
 import molecule.sql.core.transaction.SqlInsert
 import molecule.sql.core.transaction.strategy.SqlOps

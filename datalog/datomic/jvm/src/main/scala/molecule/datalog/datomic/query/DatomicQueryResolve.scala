@@ -1,18 +1,20 @@
 package molecule.datalog.datomic.query
 
 import java.util
-import java.util.{Collections, Comparator, ArrayList => jArrayList, Collection => jCollection, List => jList}
+import java.util.stream.Stream as jStream
+import java.util.List as jList
+import java.util.{Collections, Comparator, stream, ArrayList as jArrayList, Collection as jCollection, List as jList}
 import datomic.{Database, Peer}
 import molecule.base.error.ModelError
-import molecule.core.marshalling.dbView._
+import molecule.core.ast.DataModel.*
+import molecule.core.marshalling.dbView.*
 import molecule.core.query.Pagination
 import molecule.core.util.MoleculeLogging
 import molecule.datalog.core.query.{DatomicQueryBase, Model2DatomicQuery}
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
-import molecule.core.ast.DataModel._
-
+import scala.jdk.StreamConverters.StreamHasToScala
 
 abstract class DatomicQueryResolve[Tpl](
   elements: List[Element],
@@ -46,6 +48,29 @@ abstract class DatomicQueryResolve[Tpl](
         }
         // Main query using entity ids from pre-query
         distinct(Peer.q(query, db +: m2q.inputs :+ preIds*))
+    }
+  }
+
+  def getJavaStream(
+    conn: DatomicConn_JVM,
+    altElements: List[Element] = Nil,
+    altDb: Option[datomic.Database] = None,
+    validate: Boolean = true
+  ): jStream[jList[AnyRef]] = {
+    val db = altDb.getOrElse(getDb(conn))
+    m2q.getDatomicQueries(conn.optimizeQuery, altElements, validate) match {
+      case ("", query, _) =>
+        Peer.qseq(query, db +: m2q.inputs*).asInstanceOf[jStream[jList[AnyRef]]]
+
+      case (preQuery, query, _) =>
+        // Pre-query
+        val preRows = Peer.q(preQuery, db +: m2q.preInputs*)
+        val preIds  = new java.util.HashSet[Long](preRows.size())
+        preRows.forEach { row =>
+          preIds.add(row.get(0).asInstanceOf[Long])
+        }
+        // Main query using entity ids from pre-query
+        Peer.qseq(query, db +: m2q.inputs :+ preIds*).asInstanceOf[jStream[jList[AnyRef]]]
     }
   }
 

@@ -1,9 +1,9 @@
 package molecule.sql.postgres.compliance.filter.seq
 
 import molecule.coreTests.setup.{MUnitSuiteWithArrays, Test}
-import molecule.coreTests.spi.filter.seq._
-import molecule.coreTests.spi.filter.seq.ref._
-import molecule.coreTests.spi.filter.seq.types._
+import molecule.coreTests.spi.filter.seq.*
+import molecule.coreTests.spi.filter.seq.ref.*
+import molecule.coreTests.spi.filter.seq.types.*
 import molecule.sql.postgres.setup.Api_postgres_async
 
 class FilterSeq_String_Test extends Test {

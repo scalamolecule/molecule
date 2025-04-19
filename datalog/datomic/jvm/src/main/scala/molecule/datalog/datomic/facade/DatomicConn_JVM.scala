@@ -1,12 +1,12 @@
 package molecule.datalog.datomic.facade
 
 import java.io.StringReader
-import java.util.{List => jList}
-import java.{lang => jl, util => ju}
+import java.util.List as jList
+import java.{lang as jl, util as ju}
 import cats.effect.IO
 import datomic.Util.readAll
-import datomic.{Connection => DatomicConnection, Datom => _, _}
-import molecule.base.error._
+import datomic.{Connection as DatomicConnection, Datom as _, *}
+import molecule.base.error.*
 import molecule.core.marshalling.DatomicProxy
 import molecule.core.spi.{Conn, TxReport}
 import molecule.core.util.{Executor, MoleculeLogging}
@@ -14,7 +14,7 @@ import molecule.datalog.datomic.transaction.DatomicDataType_JVM
 import molecule.datalog.datomic.util.MakeTxReport
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{Await, ExecutionContext, Future, Promise}
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 import scala.util.control.NonFatal
 
 case class DatomicConn_JVM(
@@ -55,7 +55,7 @@ case class DatomicConn_JVM(
   }
 
   override def transact_sync(javaStmts: Data): TxReport = try {
-    import molecule.core.util.Executor._
+    import molecule.core.util.Executor.*
     Await.result(transact_async(javaStmts), 10.seconds)
   } catch {
     case t: Throwable => throw ModelError(t.toString)

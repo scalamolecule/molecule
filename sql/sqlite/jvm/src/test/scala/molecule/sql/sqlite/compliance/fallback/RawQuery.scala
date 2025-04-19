@@ -1,9 +1,9 @@
 package molecule.sql.sqlite.compliance.fallback
 
-import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Types._
+import molecule.core.util.Executor.*
+import molecule.coreTests.domains.dsl.Types.*
 import molecule.coreTests.setup.{Test, TestUtils}
-import molecule.sql.sqlite.async._
+import molecule.sql.sqlite.async.*
 import molecule.sql.sqlite.setup.DbProviders_sqlite
 import upickle.default.read
 import scala.language.implicitConversions

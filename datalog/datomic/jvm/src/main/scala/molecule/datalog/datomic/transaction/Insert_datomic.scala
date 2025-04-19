@@ -1,13 +1,13 @@
 package molecule.datalog.datomic.transaction
 
-import java.time._
-import java.util.{ArrayList => jArrayList, List => jList}
-import molecule.base.ast._
+import java.time.*
+import java.util.{ArrayList as jArrayList, List as jList}
+import molecule.base.ast.*
 import molecule.base.error.ModelError
+import molecule.core.ast.DataModel.*
 import molecule.core.transaction.ops.InsertOps
 import molecule.core.transaction.{InsertResolvers_, ResolveInsert}
 import molecule.core.util.{ModelUtils, MoleculeLogging}
-import molecule.core.ast.DataModel._
 
 
 trait Insert_datomic

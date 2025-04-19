@@ -2,9 +2,9 @@ package molecule.coreTests.spi.relation.flat
 
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
-import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Refs._
-import molecule.coreTests.setup._
+import molecule.core.util.Executor.*
+import molecule.coreTests.domains.dsl.Refs.*
+import molecule.coreTests.setup.*
 
 
 case class FlatRef(
@@ -12,8 +12,8 @@ case class FlatRef(
   api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 
-  import api._
-  import suite._
+  import api.*
+  import suite.*
 
   "ref" - refs { implicit conn =>
     for {

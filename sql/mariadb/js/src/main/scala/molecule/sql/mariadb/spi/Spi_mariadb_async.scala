@@ -1,10 +1,10 @@
 package molecule.sql.mariadb.spi
 
-import boopickle.Default._
+import boopickle.Default.*
+import molecule.core.ast.DataModel.Element
 import molecule.sql.core.spi.SpiBaseJS_async
 import molecule.sql.mariadb.query.Model2SqlQuery_mariadb
-import scala.concurrent.{Future, ExecutionContext => EC}
-import molecule.core.ast.DataModel.Element
+import scala.concurrent.{Future, ExecutionContext as EC}
 
 
 object Spi_mariadb_async extends Spi_mariadb_async

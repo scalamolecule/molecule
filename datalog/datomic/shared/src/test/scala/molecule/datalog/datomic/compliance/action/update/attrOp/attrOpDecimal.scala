@@ -1,7 +1,7 @@
 package molecule.datalog.datomic.compliance.action.update.attrOp
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.action.update.attrOp.decimal._
+import molecule.coreTests.spi.action.update.attrOp.decimal.*
 import molecule.datalog.datomic.setup.Api_datomic_async
 
 

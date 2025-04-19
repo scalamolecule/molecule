@@ -1,7 +1,7 @@
 package molecule.sql.postgres.compliance.pagination.cursor.subUnique
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.pagination.cursor.subUnique._
+import molecule.coreTests.spi.pagination.cursor.subUnique.*
 import molecule.sql.postgres.setup.Api_postgres_async
 
 class AttrOrderTest extends Test {

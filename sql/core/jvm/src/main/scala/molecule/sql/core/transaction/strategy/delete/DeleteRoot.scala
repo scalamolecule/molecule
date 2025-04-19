@@ -1,7 +1,7 @@
 package molecule.sql.core.transaction.strategy.delete
 
 import java.sql.{Connection, Statement}
-import molecule.base.ast._
+import molecule.base.ast.*
 import molecule.sql.core.transaction.strategy.SqlOps
 
 case class DeleteRoot(

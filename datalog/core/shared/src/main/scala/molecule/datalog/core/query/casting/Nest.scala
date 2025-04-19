@@ -1,7 +1,7 @@
 package molecule.datalog.core.query.casting
 
-import java.lang.{Long => jLong}
-import java.util.{ArrayList => jArrayList}
+import java.lang.Long as jLong
+import java.util.ArrayList as jArrayList
 import molecule.datalog.core.query.DatomicQueryBase
 
 

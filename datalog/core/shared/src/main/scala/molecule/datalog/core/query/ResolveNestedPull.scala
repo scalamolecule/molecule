@@ -1,9 +1,9 @@
 package molecule.datalog.core.query
 
-import java.util.{Iterator => jIterator}
-import molecule.base.ast._
+import java.util.Iterator as jIterator
+import molecule.base.ast.*
 import molecule.base.error.ModelError
-import molecule.core.ast.DataModel._
+import molecule.core.ast.DataModel.*
 import molecule.core.util.{ModelUtils, MoleculeLogging}
 import scala.annotation.tailrec
 

@@ -1,7 +1,7 @@
 package molecule.datalog.datomic.setup
 
 import molecule.core.spi.Conn
-import molecule.coreTests.domains.schema._
+import molecule.coreTests.domains.schema.*
 import molecule.coreTests.setup.{DbProviders, Platform}
 
 trait DbProviders_datomic extends DbProviders with DbConnection_datomic with Platform {

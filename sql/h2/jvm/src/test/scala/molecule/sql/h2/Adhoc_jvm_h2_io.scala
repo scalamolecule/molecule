@@ -1,9 +1,9 @@
 package molecule.sql.h2
 
-import boopickle.Default._
+import boopickle.Default.*
 import molecule.coreTests.domains.dsl.Types.Entity
 import molecule.coreTests.setup.{TestUtils, Test_io}
-import molecule.sql.h2.io._
+import molecule.sql.h2.io.*
 import molecule.sql.h2.setup.DbProviders_h2
 import scala.language.implicitConversions
 

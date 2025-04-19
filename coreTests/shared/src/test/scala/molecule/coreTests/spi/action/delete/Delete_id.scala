@@ -2,9 +2,9 @@ package molecule.coreTests.spi.action.delete
 
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
-import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Refs._
-import molecule.coreTests.setup._
+import molecule.core.util.Executor.*
+import molecule.coreTests.domains.dsl.Refs.*
+import molecule.coreTests.setup.*
 import scala.concurrent.Future
 
 case class Delete_id(
@@ -12,8 +12,8 @@ case class Delete_id(
   api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 
-  import api._
-  import suite._
+  import api.*
+  import suite.*
 
   "1 entity" - refs { implicit conn =>
     for {

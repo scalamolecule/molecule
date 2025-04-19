@@ -1,7 +1,7 @@
 package molecule.sql.sqlite.compliance.transaction
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.action._
+import molecule.coreTests.spi.action.*
 import molecule.sql.sqlite.setup.Api_sqlite_io
 
 

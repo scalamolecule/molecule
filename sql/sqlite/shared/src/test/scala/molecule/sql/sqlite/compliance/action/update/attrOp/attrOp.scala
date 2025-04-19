@@ -1,7 +1,7 @@
 package molecule.sql.sqlite.compliance.action.update.attrOp
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.action.update.attrOp._
+import molecule.coreTests.spi.action.update.attrOp.*
 import molecule.sql.sqlite.setup.Api_sqlite_async
 
 

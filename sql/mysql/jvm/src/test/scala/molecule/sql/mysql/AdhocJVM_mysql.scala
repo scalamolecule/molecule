@@ -1,8 +1,8 @@
 package molecule.sql.mysql
 
-import molecule.core.util.Executor._
+import molecule.core.util.Executor.*
 import molecule.coreTests.setup.{Test, TestUtils}
-import molecule.sql.mysql.async._
+import molecule.sql.mysql.async.*
 import molecule.sql.mysql.setup.DbProviders_mysql
 import scala.language.implicitConversions
 
@@ -10,7 +10,7 @@ class AdhocJVM_mysql extends Test with DbProviders_mysql with TestUtils {
 
 
   "types" - types { implicit conn =>
-    import molecule.coreTests.domains.dsl.Types._
+    import molecule.coreTests.domains.dsl.Types.*
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
     for {
 
@@ -29,7 +29,7 @@ class AdhocJVM_mysql extends Test with DbProviders_mysql with TestUtils {
 
 
   "refs" - refs { implicit conn =>
-    import molecule.coreTests.domains.dsl.Refs._
+    import molecule.coreTests.domains.dsl.Refs.*
     for {
 
       //        _ <- A.i.B.?(B.iSet).insert(

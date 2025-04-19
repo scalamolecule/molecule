@@ -1,7 +1,7 @@
 package molecule.core.transaction
 
-import molecule.base.error._
-import molecule.core.ast.DataModel._
+import molecule.base.error.*
+import molecule.core.ast.DataModel.*
 import molecule.core.transaction.ops.SaveOps
 import scala.annotation.tailrec
 

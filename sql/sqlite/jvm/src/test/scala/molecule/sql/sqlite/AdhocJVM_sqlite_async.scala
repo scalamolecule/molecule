@@ -1,13 +1,13 @@
 package molecule.sql.sqlite
 
-import molecule.core.util.Executor._
+import cats.effect.unsafe.implicits.global as ioRuntime
+import molecule.core.util.Executor.*
 import molecule.coreTests.setup.{Test, TestUtils}
-import molecule.sql.sqlite.async._
+import molecule.sql.sqlite.async.*
 import molecule.sql.sqlite.setup.DbProviders_sqlite
-import scala.language.implicitConversions
 
 
-class AdhocJVM_sqlite extends Test with DbProviders_sqlite with TestUtils {
+class AdhocJVM_sqlite_async extends Test with DbProviders_sqlite with TestUtils {
 
 
   //  "types" - types { implicit conn =>
@@ -27,26 +27,23 @@ class AdhocJVM_sqlite extends Test with DbProviders_sqlite with TestUtils {
   //  }
 
 
+
   "refs" - refs { implicit conn =>
-    import molecule.coreTests.domains.dsl.Refs._
-    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
-
+    import molecule.coreTests.domains.dsl.Refs.*
     for {
-
-      List(e1, e2, _) <- A.i.insert(1, 2, 3).transact.map(_.ids)
-      _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
-      _ <- A(e1).delete.transact
-      // or
-      _ <- A.id_(e2).delete.transact
-      _ <- A.i.query.get.map(_ ==> List(3))
-
+      _ <- A.i.insert(1, 2).transact
+      _ <- A.i.query.stream // fs2.Stream[IO, List[Int]]
+        .compile
+        .toList
+        .map(_.sorted ==> List(1, 2))
+        .unsafeToFuture()
     } yield ()
   }
-
-
-  //    "unique" - unique { implicit conn =>
-  //      import molecule.coreTests.domains.dsl.Uniques._
-  //      //          val triples             = getTriples.map(t => (t._3, t._1, t._2))
+  //
+  //
+  //  //    "unique" - unique { implicit conn =>
+  //  //      import molecule.coreTests.domains.dsl.Uniques._
+  //  //      //          val triples             = getTriples.map(t => (t._3, t._1, t._2))
   //      //          val List(a, b, c, d, e) = triples.sortBy(p => (p._2, p._3, p._1))
   //      //          val query               = (c: String, l: Int) => Uniques.int.a3.s.a1.i.a2.query.from(c).limit(l)
   //      for {

@@ -1,7 +1,7 @@
 package molecule.sql.h2.query
 
 import java.net.URI
-import java.time._
+import java.time.*
 import java.util.{Date, UUID}
 import molecule.sql.core.query.{LambdasMap, SqlQueryBase}
 

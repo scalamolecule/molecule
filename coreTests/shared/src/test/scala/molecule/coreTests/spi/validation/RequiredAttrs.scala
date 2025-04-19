@@ -1,11 +1,11 @@
 package molecule.coreTests.spi.validation
 
-import molecule.base.error._
+import molecule.base.error.*
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
-import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Validation._
-import molecule.coreTests.setup._
+import molecule.core.util.Executor.*
+import molecule.coreTests.domains.dsl.Validation.*
+import molecule.coreTests.setup.*
 import scala.language.implicitConversions
 
 case class RequiredAttrs(
@@ -13,8 +13,8 @@ case class RequiredAttrs(
   api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 
-  import api._
-  import suite._
+  import api.*
+  import suite.*
 
   "Pair" - validation { implicit conn =>
     for {

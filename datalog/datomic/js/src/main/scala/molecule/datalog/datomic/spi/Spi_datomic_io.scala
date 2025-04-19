@@ -1,17 +1,17 @@
 package molecule.datalog.datomic.spi
 
 import cats.effect.IO
-import molecule.base.error._
-import molecule.core.action._
+import molecule.base.error.*
+import molecule.core.action.*
 import molecule.core.ast.DataModel.Element
 import molecule.core.marshalling.serialize.PickleTpls
 import molecule.core.spi.{Conn, Spi_io, TxReport}
-import molecule.core.util.Executor._
+import molecule.core.util.Executor.*
 import molecule.core.util.IOUtils
 import molecule.core.validation.TxModelValidation
 import molecule.core.validation.insert.InsertValidation
 import molecule.datalog.datomic.facade.DatomicConn_JS
-import scala.concurrent.{Future, ExecutionContext => EC}
+import scala.concurrent.{Future, ExecutionContext as EC}
 
 
 trait Spi_datomic_io

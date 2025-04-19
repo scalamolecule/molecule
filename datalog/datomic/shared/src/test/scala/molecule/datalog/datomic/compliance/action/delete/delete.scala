@@ -1,7 +1,7 @@
 package molecule.datalog.datomic.compliance.action.delete
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.action.delete._
+import molecule.coreTests.spi.action.delete.*
 import molecule.datalog.datomic.setup.Api_datomic_async
 
 class Delete_idTest extends Test {

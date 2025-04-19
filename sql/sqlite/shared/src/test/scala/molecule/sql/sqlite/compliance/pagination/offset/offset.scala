@@ -1,7 +1,7 @@
 package molecule.sql.sqlite.compliance.pagination.offset
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.pagination.offset._
+import molecule.coreTests.spi.pagination.offset.*
 import molecule.sql.sqlite.setup.Api_sqlite_async
 
 class OffsetBackwardsTest extends Test {

@@ -10,6 +10,8 @@ import zio.{ZIO, ZLayer}
 
 trait DbConnection_sqlite extends DbConnection {
 
+  println("AAA")
+
   def getConnection(schema: Schema_sqlite): JdbcConn_JS = {
     val proxy = JdbcProxy("jdbc:sqlite::memory:", schema)
     JdbcConn_JS(proxy, uri"http://localhost:8080")

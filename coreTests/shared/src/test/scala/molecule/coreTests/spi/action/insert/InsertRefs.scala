@@ -3,9 +3,9 @@ package molecule.coreTests.spi.action.insert
 import molecule.base.error.ModelError
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
-import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Refs._
-import molecule.coreTests.setup._
+import molecule.core.util.Executor.*
+import molecule.coreTests.domains.dsl.Refs.*
+import molecule.coreTests.setup.*
 import scala.language.implicitConversions
 
 
@@ -14,8 +14,8 @@ case class InsertRefs(
   api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 
-  import api._
-  import suite._
+  import api.*
+  import suite.*
 
   "card one" - refs { implicit conn =>
     for {
@@ -239,7 +239,7 @@ case class InsertRefs(
 
 
   "ids, backref" - refs { implicit conn =>
-    import molecule.coreTests.domains.dsl.Refs._
+    import molecule.coreTests.domains.dsl.Refs.*
     for {
       // ref - ref
       List(a1, a2) <- A.i.B.i._A.C.i.insert(
@@ -288,7 +288,7 @@ case class InsertRefs(
   }
 
   "ids, nested" - refs { implicit conn =>
-    import molecule.coreTests.domains.dsl.Refs._
+    import molecule.coreTests.domains.dsl.Refs.*
     for {
       // 2 A entity ids returned (no Bb ref ids)
       List(a1, a2) <- A.i.Bb.*(B.i).insert(
@@ -304,7 +304,7 @@ case class InsertRefs(
   }
 
   "ids, nested + ref" - refs { implicit conn =>
-    import molecule.coreTests.domains.dsl.Refs._
+    import molecule.coreTests.domains.dsl.Refs.*
     for {
       // Ids of A entities returned
       List(a1, a2) <- A.i.Bb.*(B.i.C.i).insert(
@@ -320,7 +320,7 @@ case class InsertRefs(
   }
 
   "ids, ref + nested + ref " - refs { implicit conn =>
-    import molecule.coreTests.domains.dsl.Refs._
+    import molecule.coreTests.domains.dsl.Refs.*
     for {
       // Ids of A entities returned
       List(a1, a2) <- A.i.B.i.Cc.*(C.i.D.i).insert(
@@ -336,7 +336,7 @@ case class InsertRefs(
   }
 
   "ids, self-join + nested + ref " - refs { implicit conn =>
-    import molecule.coreTests.domains.dsl.Refs._
+    import molecule.coreTests.domains.dsl.Refs.*
     for {
       // Ids of A entities returned
       List(a1, a2) <- A.i.A.i.Cc.*(C.i.D.i).insert(

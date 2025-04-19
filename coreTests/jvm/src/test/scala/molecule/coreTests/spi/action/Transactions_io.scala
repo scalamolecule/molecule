@@ -2,7 +2,7 @@ package molecule.coreTests.spi.action
 
 import molecule.core.api.{Api_io, Api_io_transact}
 import molecule.core.spi.Spi_io
-import molecule.coreTests.domains.dsl.Types._
+import molecule.coreTests.domains.dsl.Types.*
 import molecule.coreTests.setup.{DbProviders, Test, TestUtils}
 import scala.language.implicitConversions
 
@@ -11,8 +11,8 @@ case class Transactions_io(
   api: Api_io_transact & Api_io & Spi_io & DbProviders
 ) extends TestUtils {
 
-  import api._
-  import suite._
+  import api.*
+  import suite.*
 
 
   test("Transaction bundle") {

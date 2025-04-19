@@ -1,15 +1,18 @@
 package molecule.datalog.datomic.spi
 
-import molecule.base.error._
-import molecule.core.action._
+import molecule.base.error.*
+import molecule.core.action.*
 import molecule.core.spi.{Conn, Spi_zio, TxReport}
-import molecule.core.util.Executor._
+import molecule.core.util.Executor.*
+import molecule.datalog.core.spi.StreamingDatomic
 import molecule.datalog.datomic.facade.DatomicConn_JVM
-import zio.ZIO
+import zio.*
+import zio.stream.*
 
 trait Spi_datomic_zio
   extends Spi_zio
     with JVMDatomicSpiBase
+    with StreamingDatomic
     with SpiBase_datomic_zio {
 
   // Query --------------------------------------------------------
@@ -18,17 +21,6 @@ trait Spi_datomic_zio
     q: Query[Tpl]
   ): ZIO[Conn, MoleculeError, List[Tpl]] = {
     sync2zio[List[Tpl]]((conn: DatomicConn_JVM) => Spi_datomic_sync.query_get(q)(conn))
-  }
-
-  override def query_subscribe[Tpl](
-    q: Query[Tpl], callback: List[Tpl] => Unit
-  ): ZIO[Conn, MoleculeError, Unit] = {
-    sync2zio[Unit]((conn: DatomicConn_JVM) => Spi_datomic_sync.query_subscribe(q, callback)(conn))
-  }
-  override def query_unsubscribe[Tpl](
-    q: Query[Tpl]
-  ): ZIO[Conn, MoleculeError, Unit] = {
-    sync2zio[Unit]((conn: DatomicConn_JVM) => Spi_datomic_sync.query_unsubscribe(q)(conn))
   }
 
   override def query_inspect[Tpl](
@@ -61,6 +53,36 @@ trait Spi_datomic_zio
     q: QueryCursor[Tpl]
   ): ZIO[Conn, MoleculeError, Unit] = {
     printInspectQuery("QUERY (cursor)", q.elements)
+  }
+
+
+  override def query_stream[Tpl](
+    q: Query[Tpl], chunkSize: Int
+  ): ZStream[Conn, MoleculeError, Tpl] = {
+    //    zioStream(
+    //      q, chunkSize,
+    //      (q: Query[Tpl], conn: Conn) => Spi_datomic_sync.query_inspect[Tpl](q)(conn),
+    //      Spi_datomic_sync.getResultSet[Tpl]
+    //    )
+
+    zioStreamDatomic(
+      q, chunkSize,
+      (q: Query[Tpl], conn: Conn) => Spi_datomic_sync.query_inspect[Tpl](q)(conn),
+      Spi_datomic_sync.getJavaStreamAndRowResolver[Tpl]
+    )
+  }
+
+
+  override def query_subscribe[Tpl](
+    q: Query[Tpl], callback: List[Tpl] => Unit
+  ): ZIO[Conn, MoleculeError, Unit] = {
+    sync2zio[Unit]((conn: DatomicConn_JVM) => Spi_datomic_sync.query_subscribe(q, callback)(conn))
+  }
+
+  override def query_unsubscribe[Tpl](
+    q: Query[Tpl]
+  ): ZIO[Conn, MoleculeError, Unit] = {
+    sync2zio[Unit]((conn: DatomicConn_JVM) => Spi_datomic_sync.query_unsubscribe(q)(conn))
   }
 
 

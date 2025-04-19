@@ -2,9 +2,9 @@ package molecule.coreTests.spi.filterAttr.set
 
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
-import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Types._
-import molecule.coreTests.setup._
+import molecule.core.util.Executor.*
+import molecule.coreTests.domains.dsl.Types.*
+import molecule.coreTests.setup.*
 
 case class Adjacent(
   suite: Test,
@@ -15,8 +15,8 @@ case class Adjacent(
   val b = (2, Set(2, 3), Set(2, 3))
   val c = (3, Set(4), Set(3))
 
-  import api._
-  import suite._
+  import api.*
+  import suite.*
 
   "has" - types { implicit conn =>
     for {

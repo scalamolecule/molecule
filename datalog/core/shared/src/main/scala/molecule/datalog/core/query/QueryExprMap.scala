@@ -1,6 +1,6 @@
 package molecule.datalog.core.query
 
-import molecule.core.ast.DataModel._
+import molecule.core.ast.DataModel.*
 import molecule.core.query.QueryExpr
 import molecule.core.util.JavaConversions
 

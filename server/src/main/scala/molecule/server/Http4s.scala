@@ -3,8 +3,7 @@ package molecule.server
 import cats.effect.std.Dispatcher
 import cats.effect.{ExitCode, IO, IOApp}
 import com.comcast.ip4s.{ip, port}
-import molecule.core.marshalling.MoleculeServerEndpoints
-import molecule.sql.h2.marshalling.Rpc_h2
+import molecule.core.marshalling.{MoleculeRpc, MoleculeServerEndpoints}
 import org.http4s.*
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.implicits.*
@@ -13,9 +12,9 @@ import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.server.http4s.Http4sServerInterpreter
 import scala.concurrent.{ExecutionContext, Future}
 
-object Http4s extends MoleculeServerEndpoints(Rpc_h2) with IOApp {
+case class Http4s(rpc: MoleculeRpc) extends MoleculeServerEndpoints(rpc) {
 
-  override def run(args: List[String]): IO[ExitCode] = {
+  def run(db: String): IO[ExitCode] = {
 
     // Create a Dispatcher for the Future to IO conversion
     Dispatcher.parallel[IO].use { implicit dispatcher =>
@@ -35,7 +34,9 @@ object Http4s extends MoleculeServerEndpoints(Rpc_h2) with IOApp {
         .build
         .use { _ =>
           for {
-            _ <- IO.println("✅ Ember Http4s server running on http://localhost:8080")
+            _ <- IO.println(s"\n✅ Ember Http4s server running on http://localhost:8080 for $db")
+            _ <- IO.println("   Press ENTER to stop the server.")
+
             _ <- IO.readLine
             _ <- IO.println("🛑 Shutting down server...")
           } yield ExitCode.Success

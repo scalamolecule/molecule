@@ -1,13 +1,13 @@
 package molecule.datalog.datomic.query.cursorStrategy
 
 import molecule.base.error.ModelError
+import molecule.core.ast.DataModel.Element
 import molecule.core.marshalling.dbView.DbView
 import molecule.core.query.Pagination
 import molecule.core.util.{FutureUtils, MoleculeLogging}
 import molecule.datalog.core.query.{DatomicQueryBase, Model2DatomicQuery}
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import molecule.datalog.datomic.query.DatomicQueryResolve
-import molecule.core.ast.DataModel.Element
 
 
 case class NoUnique[Tpl](

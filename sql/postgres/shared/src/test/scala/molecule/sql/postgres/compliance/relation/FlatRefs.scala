@@ -1,7 +1,7 @@
 package molecule.sql.postgres.compliance.relation
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.relation.flat._
+import molecule.coreTests.spi.relation.flat.*
 import molecule.sql.postgres.setup.Api_postgres_async
 
 class FlatRefTest extends Test {

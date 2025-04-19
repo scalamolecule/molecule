@@ -1,7 +1,7 @@
 package molecule.sql.postgres.query
 
 import molecule.core.ast.DataModel.Element
-import molecule.sql.core.query._
+import molecule.sql.core.query.*
 
 class Model2SqlQuery_postgres(elements0: List[Element])
   extends Model2SqlQuery(elements0)

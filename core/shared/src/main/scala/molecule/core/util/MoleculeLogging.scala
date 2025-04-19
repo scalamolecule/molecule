@@ -1,6 +1,6 @@
 package molecule.core.util
 
-import scribe.format._
+import scribe.format.*
 import scribe.{Level, Logging}
 
 trait MoleculeLogging extends Logging {

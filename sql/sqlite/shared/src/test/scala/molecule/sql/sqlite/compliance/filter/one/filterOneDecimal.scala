@@ -1,7 +1,7 @@
 package molecule.sql.sqlite.compliance.filter.one
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.filter.one.decimal._
+import molecule.coreTests.spi.filter.one.decimal.*
 import molecule.sql.sqlite.setup.Api_sqlite_async
 
 

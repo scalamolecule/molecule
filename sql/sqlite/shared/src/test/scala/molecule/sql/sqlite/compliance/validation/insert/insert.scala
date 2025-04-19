@@ -1,7 +1,7 @@
 package molecule.sql.sqlite.compliance.validation.insert
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.validation.insert._
+import molecule.coreTests.spi.validation.insert.*
 import molecule.sql.sqlite.setup.Api_sqlite_async
 
 class FormatConstantsTest extends Test {

@@ -1,7 +1,7 @@
 package molecule.sql.mysql.compliance.sorting
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.sorting._
+import molecule.coreTests.spi.sorting.*
 import molecule.sql.mysql.setup.Api_mysql_async
 
 class SortAggrTest extends Test {

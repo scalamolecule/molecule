@@ -1,7 +1,7 @@
 package molecule.sql.mariadb.compliance.filterAttr.one
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.filterAttr.one._
+import molecule.coreTests.spi.filterAttr.one.*
 import molecule.sql.mariadb.setup.Api_mariadb_async
 
 class AdjacentTest extends Test {

@@ -2,7 +2,7 @@ package molecule.sql.sqlite
 
 import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.sql.sqlite.setup.DbProviders_sqlite
-import molecule.sql.sqlite.sync._
+import molecule.sql.sqlite.sync.*
 import scala.language.implicitConversions
 
 
@@ -16,7 +16,7 @@ class AdhocJVM_sqlite_sync extends Test with DbProviders_sqlite with TestUtils {
   //  }
 
   "refs" - refs { implicit conn =>
-    import molecule.coreTests.domains.dsl.Refs._
+    import molecule.coreTests.domains.dsl.Refs.*
 
     A.i(1).save.transact
     A.i.query.get.head ==> 1

@@ -4,11 +4,11 @@ package molecule.coreTests.spi.action
 import molecule.base.error.{ExecutionError, InsertErrors, ValidationErrors}
 import molecule.core.api.{Api_zio, Api_zio_transact}
 import molecule.core.spi.Spi_zio
-import molecule.coreTests.domains.dsl.Types._
+import molecule.coreTests.domains.dsl.Types.*
 import molecule.coreTests.setup.{DbProviders_zio, TestUtils}
-import zio._
-import zio.test.TestAspect._
-import zio.test.{ZIOSpecDefault, _}
+import zio.*
+import zio.test.TestAspect.*
+import zio.test.{ZIOSpecDefault, *}
 import scala.annotation.nowarn
 
 
@@ -16,7 +16,7 @@ import scala.annotation.nowarn
 case class Transactions_zio(api: Api_zio_transact with Api_zio with Spi_zio with DbProviders_zio)
   extends ZIOSpecDefault with TestUtils {
 
-  import api._
+  import api.*
 
   @nowarn override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("transactions")(

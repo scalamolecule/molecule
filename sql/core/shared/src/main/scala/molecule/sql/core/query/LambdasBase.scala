@@ -1,9 +1,9 @@
 package molecule.sql.core.query
 
 import java.net.URI
-import java.time._
+import java.time.*
 import java.util.{Date, UUID}
-import boopickle.Default._
+import boopickle.Default.*
 import molecule.base.util.BaseHelpers
 import molecule.core.transformation.JsonBase
 import molecule.core.util.AggrUtils

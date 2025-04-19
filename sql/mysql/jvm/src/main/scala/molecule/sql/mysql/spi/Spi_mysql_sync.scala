@@ -1,13 +1,13 @@
 package molecule.sql.mysql.spi
 
 import java.sql.DriverManager
-import molecule.core.action._
+import molecule.core.action.*
 import molecule.core.ast.DataModel.Element
 import molecule.core.marshalling.{ConnProxy, JdbcProxy}
-import molecule.core.transaction._
-import molecule.core.util.Executor._
+import molecule.core.transaction.*
+import molecule.core.util.Executor.*
 import molecule.sql.core.facade.{JdbcConn_JVM, JdbcHandler_JVM}
-import molecule.sql.core.javaSql.{ResultSetInterface => Row}
+import molecule.sql.core.javaSql.ResultSetInterface as RS
 import molecule.sql.core.spi.SpiBaseJVM_sync
 import molecule.sql.core.transaction.SqlDelete
 import molecule.sql.core.transaction.strategy.SqlOps
@@ -16,7 +16,7 @@ import molecule.sql.core.transaction.strategy.insert.InsertAction
 import molecule.sql.core.transaction.strategy.save.SaveAction
 import molecule.sql.core.transaction.strategy.update.UpdateAction
 import molecule.sql.mysql.query.Model2SqlQuery_mysql
-import molecule.sql.mysql.transaction._
+import molecule.sql.mysql.transaction.*
 import scala.concurrent.Future
 
 
@@ -64,7 +64,7 @@ trait Spi_mysql_sync extends SpiBaseJVM_sync {
   }
 
   override def validateUpdateSet(
-    proxy: ConnProxy, elements: List[Element], query2resultSet: String => Row
+    proxy: ConnProxy, elements: List[Element], query2resultSet: String => RS
   ): Map[String, Seq[String]] = {
     validateUpdateSet_json(proxy, elements, query2resultSet)
   }

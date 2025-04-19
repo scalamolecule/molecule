@@ -1,7 +1,7 @@
 package molecule.sql
 
-import molecule.core.api._
-import molecule.sql.postgres.spi._
+import molecule.core.api.*
+import molecule.sql.postgres.spi.*
 
 package object postgres {
   object async extends Api_async with Api_async_transact with Spi_postgres_async

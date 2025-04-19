@@ -2,41 +2,17 @@ package molecule.sql.mariadb.spi
 
 import cats.effect.IO
 import molecule.base.error.InsertError
-import molecule.core.action._
+import molecule.core.action.*
 import molecule.core.spi.{Conn, Spi_async, TxReport}
 import molecule.core.util.ModelUtils
-import molecule.sql.core.spi.Streaming
-import scala.concurrent.{Future, ExecutionContext => EC}
+import molecule.sql.core.spi.StreamingJdbc
+import scala.concurrent.{Future, ExecutionContext as EC}
 
-trait Spi_mariadb_async extends Spi_async with Streaming with ModelUtils {
+trait Spi_mariadb_async extends Spi_async with StreamingJdbc with ModelUtils {
 
   override def query_get[Tpl](q: Query[Tpl])
                              (implicit conn: Conn, ec: EC): Future[List[Tpl]] = Future {
-    //    // Check that rawQuery can handle all SPI queries
-    //    val q1  = q.copy(elements = noKeywords(q.elements, Some(conn.proxy)))
-    //    val m2q = getModel2SqlQuery(q1.elements)
-    //    val qu  = m2q.getSqlQuery(q1.elements, None, None)
-    //    SpiSync_mariadb.fallback_rawQuery(qu, true, true)
-
     Spi_mariadb_sync.query_get(q)
-  }
-
-  override def query_stream[Tpl](
-    q: Query[Tpl],
-    chunkSize: Int
-  )(implicit conn: Conn, ec: EC): fs2.Stream[IO, Tpl] = fs2stream(
-    q, chunkSize,
-    (q: Query[Tpl], conn: Conn) => Spi_mariadb_sync.query_inspect[Tpl](q)(conn),
-    Spi_mariadb_sync.getResultSet[Tpl]
-  )
-
-  override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)
-                                   (implicit conn: Conn, ec: EC): Future[Unit] = Future {
-    Spi_mariadb_sync.query_subscribe(q, callback)
-  }
-  override def query_unsubscribe[Tpl](q: Query[Tpl])
-                                     (implicit conn: Conn, ec: EC): Future[Unit] = Future {
-    Spi_mariadb_sync.query_unsubscribe(q)
   }
   override def query_inspect[Tpl](q: Query[Tpl])
                                  (implicit conn: Conn, ec: EC): Future[Unit] = Future {
@@ -59,6 +35,26 @@ trait Spi_mariadb_async extends Spi_async with Streaming with ModelUtils {
   override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])
                                        (implicit conn: Conn, ec: EC): Future[Unit] = Future {
     Spi_mariadb_sync.queryCursor_inspect(q)
+  }
+
+
+  override def query_stream[Tpl](
+    q: Query[Tpl],
+    chunkSize: Int
+  )(implicit conn: Conn, ec: EC): fs2.Stream[IO, Tpl] = fs2stream(
+    q, chunkSize,
+    (q: Query[Tpl], conn: Conn) => Spi_mariadb_sync.query_inspect[Tpl](q)(conn),
+    Spi_mariadb_sync.getResultSetAndRowResolver[Tpl]
+  )
+
+
+  override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)
+                                   (implicit conn: Conn, ec: EC): Future[Unit] = Future {
+    Spi_mariadb_sync.query_subscribe(q, callback)
+  }
+  override def query_unsubscribe[Tpl](q: Query[Tpl])
+                                     (implicit conn: Conn, ec: EC): Future[Unit] = Future {
+    Spi_mariadb_sync.query_unsubscribe(q)
   }
 
 

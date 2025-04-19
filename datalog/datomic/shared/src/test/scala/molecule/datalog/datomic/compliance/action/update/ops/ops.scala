@@ -1,7 +1,7 @@
 package molecule.datalog.datomic.compliance.action.update.ops
 
 import molecule.coreTests.setup.{MUnitSuiteWithArrays, Test}
-import molecule.coreTests.spi.action.update.ops._
+import molecule.coreTests.spi.action.update.ops.*
 import molecule.datalog.datomic.setup.Api_datomic_async
 
 class OpsOneTest extends Test {

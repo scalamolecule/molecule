@@ -1,9 +1,9 @@
 package molecule.sql.h2.compliance.fallback
 
-import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Types._
+import molecule.core.util.Executor.*
+import molecule.coreTests.domains.dsl.Types.*
 import molecule.coreTests.setup.{Test, TestUtils}
-import molecule.sql.h2.async._
+import molecule.sql.h2.async.*
 import molecule.sql.h2.setup.DbProviders_h2
 import scala.language.implicitConversions
 

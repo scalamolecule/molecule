@@ -2,40 +2,16 @@ package molecule.sql.mysql.spi
 
 import cats.effect.IO
 import molecule.base.error.InsertError
-import molecule.core.action._
+import molecule.core.action.*
 import molecule.core.spi.{Conn, Spi_io, TxReport}
 import molecule.core.util.ModelUtils
-import molecule.sql.core.spi.Streaming
+import molecule.sql.core.spi.StreamingJdbc
 
-trait Spi_mysql_io extends Spi_io with Streaming with ModelUtils {
+trait Spi_mysql_io extends Spi_io with StreamingJdbc with ModelUtils {
 
   override def query_get[Tpl](q: Query[Tpl])
                              (implicit conn: Conn): IO[List[Tpl]] = IO.blocking {
-    //    // Check that rawQuery can handle all SPI queries
-    //    val q1  = q.copy(elements = noKeywords(q.elements, Some(conn.proxy)))
-    //    val m2q = getModel2SqlQuery(q1.elements)
-    //    val qu  = m2q.getSqlQuery(q1.elements, None, None)
-    //    SpiSync_mysql.fallback_rawQuery(qu, true, true)
-
     Spi_mysql_sync.query_get(q)
-  }
-
-  override def query_stream[Tpl](
-    q: Query[Tpl],
-    chunkSize: Int
-  )(implicit conn: Conn): fs2.Stream[IO, Tpl] = fs2stream(
-    q, chunkSize,
-    (q: Query[Tpl], conn: Conn) => Spi_mysql_sync.query_inspect[Tpl](q)(conn),
-    Spi_mysql_sync.getResultSet[Tpl]
-  )
-
-  override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)
-                                   (implicit conn: Conn): IO[Unit] = IO.blocking {
-    Spi_mysql_sync.query_subscribe(q, callback)
-  }
-  override def query_unsubscribe[Tpl](q: Query[Tpl])
-                                     (implicit conn: Conn): IO[Unit] = IO.blocking {
-    Spi_mysql_sync.query_unsubscribe(q)
   }
   override def query_inspect[Tpl](q: Query[Tpl])
                                  (implicit conn: Conn): IO[Unit] = IO.blocking {
@@ -58,6 +34,27 @@ trait Spi_mysql_io extends Spi_io with Streaming with ModelUtils {
   override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])
                                        (implicit conn: Conn): IO[Unit] = IO.blocking {
     Spi_mysql_sync.queryCursor_inspect(q)
+  }
+
+
+  override def query_stream[Tpl](
+    q: Query[Tpl],
+    chunkSize: Int
+  )(implicit conn: Conn): fs2.Stream[IO, Tpl] = fs2stream(
+    q, chunkSize,
+    (q: Query[Tpl], conn: Conn) => Spi_mysql_sync.query_inspect[Tpl](q)(conn),
+    Spi_mysql_sync.getResultSetAndRowResolver[Tpl]
+  )
+
+
+  override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)
+                                   (implicit conn: Conn): IO[Unit] = IO.blocking {
+    Spi_mysql_sync.query_subscribe(q, callback)
+  }
+
+  override def query_unsubscribe[Tpl](q: Query[Tpl])
+                                     (implicit conn: Conn): IO[Unit] = IO.blocking {
+    Spi_mysql_sync.query_unsubscribe(q)
   }
 
 

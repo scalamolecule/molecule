@@ -1,10 +1,10 @@
 package molecule.sql.postgres.compliance.fallback
 
-import java.math.{BigDecimal => jBigDecimal}
-import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Types._
+import java.math.BigDecimal as jBigDecimal
+import molecule.core.util.Executor.*
+import molecule.coreTests.domains.dsl.Types.*
 import molecule.coreTests.setup.{Test, TestUtils}
-import molecule.sql.postgres.async._
+import molecule.sql.postgres.async.*
 import molecule.sql.postgres.setup.DbProviders_postgres
 import org.postgresql.jdbc.PgArray
 import org.postgresql.util.PGobject

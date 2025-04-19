@@ -2,9 +2,9 @@ package molecule.coreTests.spi.relation.nested
 
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
-import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Refs._
-import molecule.coreTests.setup._
+import molecule.core.util.Executor.*
+import molecule.coreTests.domains.dsl.Refs.*
+import molecule.coreTests.setup.*
 
 
 case class NestedBasic(
@@ -12,8 +12,8 @@ case class NestedBasic(
   api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 
-  import api._
-  import suite._
+  import api.*
+  import suite.*
 
   "Mandatory/optional rows" - refs { implicit conn =>
     for {
@@ -37,7 +37,7 @@ case class NestedBasic(
 
 
   "Nested: one" - refs { implicit conn =>
-    import molecule.coreTests.domains.dsl.Refs._
+    import molecule.coreTests.domains.dsl.Refs.*
     for {
       _ <- A.i.Bb.*(B.i).insert(2, List(3, 4)).transact
       _ <- A.i.Bb.*(B.i.a1).query.get.map(_ ==> List((2, List(3, 4))))
@@ -45,7 +45,7 @@ case class NestedBasic(
   }
 
   "Nested: set" - refs { implicit conn =>
-    import molecule.coreTests.domains.dsl.Refs._
+    import molecule.coreTests.domains.dsl.Refs.*
     for {
       _ <- A.i.Bb.*(B.iSet).insert(List((2, List(Set(3, 4))))).transact
       _ <- A.i.Bb.*(B.iSet).query.get.map(_ ==> List((2, List(Set(3, 4)))))
@@ -54,7 +54,7 @@ case class NestedBasic(
 
 
   "Nested owned: one" - refs { implicit conn =>
-    import molecule.coreTests.domains.dsl.Refs._
+    import molecule.coreTests.domains.dsl.Refs.*
     for {
       _ <- A.i.OwnBb.*(B.i).insert(2, List(3, 4)).transact
       _ <- A.i.OwnBb.*(B.i.a1).query.get.map(_ ==> List((2, List(3, 4))))
@@ -62,7 +62,7 @@ case class NestedBasic(
   }
 
   "Nested owned: set" - refs { implicit conn =>
-    import molecule.coreTests.domains.dsl.Refs._
+    import molecule.coreTests.domains.dsl.Refs.*
     for {
       _ <- A.i.OwnBb.*(B.iSet).insert(List((2, List(Set(3, 4))))).transact
       _ <- A.i.OwnBb.*(B.iSet).query.get.map(_ ==> List((2, List(Set(3, 4)))))

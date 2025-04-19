@@ -9,8 +9,8 @@ import molecule.coreTests.setup.DbConnection
 import molecule.sql.core.facade.JdbcHandler_JVM
 import org.h2.jdbcx.JdbcDataSource
 import zio.{ZIO, ZLayer}
-import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 import scala.util.Random
 import scala.util.Using.Manager
 

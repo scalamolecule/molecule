@@ -1,8 +1,8 @@
 package molecule.sql.sqlite.setup
 
-import boopickle.Default._
+import boopickle.Default.*
 import molecule.core.spi.Conn
-import molecule.coreTests.domains.schema._
+import molecule.coreTests.domains.schema.*
 import molecule.coreTests.setup.{DbProviders_zio, Platform}
 import zio.ZLayer
 

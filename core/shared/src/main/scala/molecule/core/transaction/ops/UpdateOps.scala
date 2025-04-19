@@ -1,7 +1,7 @@
 package molecule.core.transaction.ops
 
+import molecule.core.ast.DataModel.*
 import molecule.core.transaction.Action2Data
-import molecule.core.ast.DataModel._
 
 trait UpdateOps extends Action2Data with BaseOps {
 

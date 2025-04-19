@@ -1,7 +1,7 @@
 package molecule.sql.h2.compliance.action.update.relation.one
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.action.update.relation.one._
+import molecule.coreTests.spi.action.update.relation.one.*
 import molecule.sql.h2.setup.Api_h2_async
 
 class One_MapTest extends Test {

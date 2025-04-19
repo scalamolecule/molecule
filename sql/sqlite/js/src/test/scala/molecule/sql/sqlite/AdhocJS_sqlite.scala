@@ -1,10 +1,10 @@
 package molecule.sql.sqlite
 
-import boopickle.Default._
-import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Types._
+import boopickle.Default.*
+import molecule.core.util.Executor.*
+import molecule.coreTests.domains.dsl.Types.*
 import molecule.coreTests.setup.{Test, TestUtils}
-import molecule.sql.sqlite.async._
+import molecule.sql.sqlite.async.*
 import molecule.sql.sqlite.setup.DbProviders_sqlite
 
 

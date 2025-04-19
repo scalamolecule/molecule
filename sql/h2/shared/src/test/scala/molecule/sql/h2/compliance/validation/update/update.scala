@@ -1,7 +1,7 @@
 package molecule.sql.h2.compliance.validation.update
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.validation.update._
+import molecule.coreTests.spi.validation.update.*
 import molecule.sql.h2.setup.Api_h2_async
 
 class TypesOneTest extends Test {

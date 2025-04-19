@@ -1,20 +1,20 @@
 package molecule.server
 
-import boopickle.Default._
+import boopickle.Default.*
+import io.vertx.core
 import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
-import molecule.core.marshalling.MoleculeServerEndpoints
-import molecule.core.util.Executor._
-import molecule.sql.h2.marshalling.Rpc_h2
+import molecule.core.marshalling.{MoleculeRpc, MoleculeServerEndpoints}
+import molecule.core.util.Executor.*
 import sttp.tapir.server.vertx.VertxFutureServerInterpreter
-import scala.compat.java8.FutureConverters._
-import scala.concurrent.Await
-import scala.concurrent.duration._
+import scala.compat.java8.FutureConverters.*
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration.*
 import scala.io.StdIn
 
-object VertX extends MoleculeServerEndpoints(Rpc_h2) {
+case class VertX(rpc: MoleculeRpc) extends MoleculeServerEndpoints(rpc) {
 
-  def main(args: Array[String]): Unit = {
+  def run(db: String): core.Future[Void] = {
 
     // 1. Create Vertx instance and router
     val vertx = Vertx.vertx()
@@ -34,11 +34,10 @@ object VertX extends MoleculeServerEndpoints(Rpc_h2) {
 
     // 4. Block until server starts
     Await.result(serverFuture, 10.seconds)
-    println("✅ VertX server running on http://localhost:8080")
-
+    println(s"\n✅ VertX server running on http://localhost:8080 for $db")
 
     // 5. Shutdown hook
-    println("Press ENTER to stop the server.")
+    println("   Press ENTER to stop the server.")
     StdIn.readLine()
 
     println("🛑 Shutting down server...")

@@ -1,9 +1,9 @@
 package molecule.core.ast
 
 import java.net.URI
-import java.time._
+import java.time.*
 import java.util.{Date, UUID}
-import molecule.base.ast._
+import molecule.base.ast.*
 import molecule.base.util.BaseHelpers
 
 

@@ -2,9 +2,9 @@ package molecule.coreTests.spi.sorting
 
 import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
-import molecule.core.util.Executor._
-import molecule.coreTests.domains.dsl.Refs._
-import molecule.coreTests.setup._
+import molecule.core.util.Executor.*
+import molecule.coreTests.domains.dsl.Refs.*
+import molecule.coreTests.setup.*
 import scala.concurrent.Future
 
 
@@ -13,11 +13,11 @@ case class SortNested(
   api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 
-  import api._
-  import suite._
+  import api.*
+  import suite.*
 
   "Basic types, ascending" - types { implicit conn =>
-    import molecule.coreTests.domains.dsl.Types._
+    import molecule.coreTests.domains.dsl.Types.*
     for {
       _ <- Ref.i.Entities.*(Entity.string).insert((1, List(string1, string2))).transact
       _ <- Ref.i.Entities.*(Entity.int).insert((2, List(int1, int2))).transact
@@ -102,7 +102,7 @@ case class SortNested(
 
 
   "Basic types, descending" - types { implicit conn =>
-    import molecule.coreTests.domains.dsl.Types._
+    import molecule.coreTests.domains.dsl.Types.*
     for {
       _ <- Ref.i.Entities.*(Entity.string).insert((1, List(string1, string2))).transact
       _ <- Ref.i.Entities.*(Entity.int).insert((2, List(int1, int2))).transact
@@ -185,7 +185,7 @@ case class SortNested(
 
 
   "OptNested type, optional" - types { implicit conn =>
-    import molecule.coreTests.domains.dsl.Types._
+    import molecule.coreTests.domains.dsl.Types.*
     for {
       _ <- Ref.i.Entities.*(Entity.i.string_?).insert((1, List(
         (1, Some(string1)),

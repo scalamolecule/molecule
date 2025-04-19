@@ -1,7 +1,7 @@
 package molecule.sql.core.query.cursorStrategy
 
 import molecule.base.error.ModelError
-import molecule.core.ast.DataModel._
+import molecule.core.ast.DataModel.*
 import molecule.core.ops.ModelTransformations_
 import molecule.core.query.Pagination
 import molecule.core.util.{FutureUtils, MoleculeLogging}

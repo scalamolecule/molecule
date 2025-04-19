@@ -1,6 +1,6 @@
 package molecule.coreTests.domains
 
-import java.time._
+import java.time.*
 import java.util.Date
 import molecule.DomainStructure
 

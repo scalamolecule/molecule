@@ -1,7 +1,7 @@
 package molecule.sql.h2.compliance.pagination.offset
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.pagination.offset._
+import molecule.coreTests.spi.pagination.offset.*
 import molecule.sql.h2.setup.Api_h2_async
 
 class OffsetBackwardsTest extends Test {

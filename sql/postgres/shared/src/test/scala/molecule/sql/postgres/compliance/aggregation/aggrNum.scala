@@ -1,7 +1,7 @@
 package molecule.sql.postgres.compliance.aggregation
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.aggregation.number._
+import molecule.coreTests.spi.aggregation.number.*
 import molecule.sql.postgres.setup.Api_postgres_async
 
 class AggrNum_IntTest extends Test {

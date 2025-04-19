@@ -1,7 +1,7 @@
 package molecule.sql.postgres.compliance.action.insert
 
 import molecule.coreTests.setup.{MUnitSuiteWithArrays, Test}
-import molecule.coreTests.spi.action.insert._
+import molecule.coreTests.spi.action.insert.*
 import molecule.sql.postgres.setup.Api_postgres_async
 
 class InsertCardOneTest extends Test {

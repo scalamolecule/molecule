@@ -7,7 +7,7 @@ case class CastOptEntity(
   nextTuple: CastTuple
 ) extends CastStrategy {
 
-  override def row2tpl: RS => Any = {
+  override def rs2row: RS => Any = {
     val castOptEntity = (row: RS, _: ParamIndex) =>
       CastOptRefLeaf_.cast(optEntityTuple.casts0, 1)(row)
 

@@ -1,11 +1,11 @@
 package molecule.sql.h2
 
 import molecule.coreTests.domains.dsl.Types.Entity
-import molecule.sql.h2.Zio._
+import molecule.sql.h2.Zio.*
 import molecule.sql.h2.setup.DbProviders_h2_zio
-import zio._
-import zio.test.TestAspect._
-import zio.test._
+import zio.*
+import zio.test.*
+import zio.test.TestAspect.*
 import scala.annotation.nowarn
 import scala.language.implicitConversions
 

@@ -1,7 +1,6 @@
 package codegen.core.api.expression
 
 import codegen.CoreGenBase
-import scala.language.higherKinds
 
 
 object _ExprMapOpt extends CoreGenBase( "ExprMapOpt", "/api/expression") {
@@ -10,8 +9,7 @@ object _ExprMapOpt extends CoreGenBase( "ExprMapOpt", "/api/expression") {
     s"""// GENERATED CODE ********************************
        |package molecule.core.api.expression
        |
-       |import molecule.core.ast.DataModel._
-       |import scala.language.higherKinds
+       |import molecule.core.ast.DataModel.*
        |$traits
        |""".stripMargin
   }

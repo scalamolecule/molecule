@@ -1,7 +1,7 @@
 package molecule.sql.core.query
 
 import java.net.URI
-import java.time._
+import java.time.*
 import java.util.{Date, UUID}
 
 trait LambdasOne extends LambdasBase { self: SqlQueryBase =>

@@ -1,16 +1,16 @@
 package molecule.server
 
-import boopickle.Default._
-import molecule.core.marshalling.MoleculeServerEndpoints
-import molecule.sql.h2.marshalling.Rpc_h2
+import java.io.IOException
+import boopickle.Default.*
+import molecule.core.marshalling.{MoleculeRpc, MoleculeServerEndpoints}
 import sttp.monad.FutureMonad
 import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.server.ziohttp.ZioHttpInterpreter
-import zio._
-import zio.http._
+import zio.*
+import zio.http.*
 import scala.concurrent.{ExecutionContext, Future}
 
-object ZioHttp extends MoleculeServerEndpoints(Rpc_h2) with ZIOAppDefault {
+case class ZioHttp(rpc: MoleculeRpc) extends MoleculeServerEndpoints(rpc) {
 
   // Convert all endpoints
   private val zioEndpoints: List[ServerEndpoint[Any, Task]] =
@@ -20,13 +20,13 @@ object ZioHttp extends MoleculeServerEndpoints(Rpc_h2) with ZIOAppDefault {
   private val app = ZioHttpInterpreter().toHttp(zioEndpoints)
 
   // ZIO application entry point
-  override def run: ZIO[Environment with ZIOAppArgs with Scope, Any, Any] = {
+  def run(db: String): ZIO[Any, IOException, ExitCode] = {
     for {
       fiber <- Server.serve(app)
         .provide(Server.defaultWithPort(8080))
         .fork // Run server in background
-      _ <- Console.printLine("✅ ZioHttp server running on http://localhost:8080")
-      _ <- Console.printLine("Press ENTER to stop the server...")
+      _ <- Console.printLine(s"\n✅ ZioHttp server running on http://localhost:8080 for $db")
+      _ <- Console.printLine("   Press ENTER to stop the server...")
       _ <- Console.readLine
       _ <- Console.printLine("🛑 Shutting down server...")
       _ <- fiber.interrupt // Gracefully shutdown the server

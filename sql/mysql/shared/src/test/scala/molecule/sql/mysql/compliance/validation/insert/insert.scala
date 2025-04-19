@@ -1,7 +1,7 @@
 package molecule.sql.mysql.compliance.validation.insert
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.validation.insert._
+import molecule.coreTests.spi.validation.insert.*
 import molecule.sql.mysql.setup.Api_mysql_async
 
 class FormatConstantsTest extends Test {

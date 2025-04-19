@@ -1,7 +1,7 @@
 package molecule.sql.h2.compliance.action.update.filter
 
 import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.action.update.filter._
+import molecule.coreTests.spi.action.update.filter.*
 import molecule.sql.h2.setup.Api_h2_async
 
 class FilterOneTest extends Test {

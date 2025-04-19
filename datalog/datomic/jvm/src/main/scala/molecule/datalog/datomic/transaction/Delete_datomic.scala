@@ -2,13 +2,13 @@ package molecule.datalog.datomic.transaction
 
 import datomic.Peer
 import molecule.base.error.ExecutionError
+import molecule.core.ast.DataModel.*
 import molecule.core.transaction.ResolveDelete
 import molecule.core.transaction.ops.DeleteOps
 import molecule.core.util.{JavaConversions, MetaModelUtils, MoleculeLogging}
 import molecule.datalog.core.query.Model2DatomicQuery
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import scala.collection.mutable
-import molecule.core.ast.DataModel._
 
 
 trait Delete_datomic

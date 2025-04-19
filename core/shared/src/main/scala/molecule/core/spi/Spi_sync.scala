@@ -2,29 +2,18 @@ package molecule.core.spi
 
 import geny.Generator
 import molecule.base.error.InsertError
-import molecule.core.action._
+import molecule.core.action.*
 
 trait Spi_sync {
 
   private def noJS(method: String): Nothing = throw new Exception(
-    s"Synchronous SPI method '$method' unexpectedly called from JS platform"
+    s"Synchronous SPI on JS platform not implemented. " +
+      s"Method '$method' unexpectedly called from JS platform"
   )
 
   def query_get[Tpl](
     q: Query[Tpl]
   )(implicit conn: Conn): List[Tpl] = noJS("query_get")
-
-  def query_stream[Tpl](
-    q: Query[Tpl]
-  )(implicit conn: Conn): Generator[Tpl] = noJS("query_stream")
-
-  def query_subscribe[Tpl](
-    q: Query[Tpl], callback: List[Tpl] => Unit
-  )(implicit conn: Conn): Unit = noJS("query_subscribe")
-
-  def query_unsubscribe[Tpl](
-    q: Query[Tpl]
-  )(implicit conn: Conn): Unit = noJS("query_unsubscribe")
 
   def query_inspect[Tpl](
     q: Query[Tpl]
@@ -47,6 +36,20 @@ trait Spi_sync {
   def queryCursor_inspect[Tpl](
     q: QueryCursor[Tpl]
   )(implicit conn: Conn): Unit = noJS("queryCursor_inspect")
+
+
+  def query_stream[Tpl](
+    q: Query[Tpl], chunkSize: Int = 100
+  )(implicit conn: Conn): Generator[Tpl] = noJS("query_stream")
+
+
+  def query_subscribe[Tpl](
+    q: Query[Tpl], callback: List[Tpl] => Unit
+  )(implicit conn: Conn): Unit = noJS("query_subscribe")
+
+  def query_unsubscribe[Tpl](
+    q: Query[Tpl]
+  )(implicit conn: Conn): Unit = noJS("query_unsubscribe")
 
 
   def save_transact(save: Save)(implicit conn: Conn): TxReport = noJS("save_transact")

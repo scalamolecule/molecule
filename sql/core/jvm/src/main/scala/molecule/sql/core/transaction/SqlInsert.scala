@@ -1,7 +1,7 @@
 package molecule.sql.core.transaction
 
-import java.sql.{PreparedStatement => PS}
-import molecule.base.ast._
+import java.sql.PreparedStatement as PS
+import molecule.base.ast.*
 import molecule.core.ast.DataModel.{Attr, Element, OptEntity}
 import molecule.core.transaction.ops.InsertOps
 import molecule.core.transaction.{InsertResolvers_, ResolveInsert}

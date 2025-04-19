@@ -1,14 +1,15 @@
 import org.scalajs.linker.interface.ESVersion
 
-val moleculeVersion = "0.18.0"
+val moleculeVersion = "0.19.0-SNAPSHOT"
 
 val scala212 = "2.12.20"
-val scala3   = "3.3.5"
 
-val tapirVersion   = "1.11.25"
+val scala3        = "3.3.5"
+val tapirVersion  = "1.11.25"
+val pekkoVersion  = "1.1.3"
+val http4sVersion = "0.23.30"
+
 val client4Version = "4.0.2"
-val http4sVersion  = "0.23.30"
-val pekkoVersion   = "1.1.3"
 val zioVersion     = "2.1.17"
 
 // Db test containers
@@ -76,7 +77,6 @@ lazy val base = crossProject(JSPlatform, JVMPlatform)
     name := "molecule-base"
   )
 
-
 lazy val core = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .settings(compilerArgs, doPublish,
@@ -88,19 +88,20 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
       // Effect APIs
       "dev.zio" %%% "zio" % zioVersion,
       "dev.zio" %%% "zio-streams" % zioVersion,
-      "org.typelevel" %%% "cats-effect" % "3.6.1",
 
       // RPC
-      "io.suzaku" %%% "boopickle" % "1.5.0", // binary serialization
+      "io.suzaku" %%% "boopickle" % "1.5.0",
       "com.softwaremill.sttp.tapir" %%% "tapir-core" % tapirVersion,
-      //      "com.softwaremill.sttp.tapir" %%% "tapir-websockets" % tapirVersion,
-      //      "com.softwaremill.sttp.tapir" %%% "tapir-fs2" % tapirVersion,
-      //      "com.softwaremill.sttp.client4" %%% "fs2" % client4Version,
 
       // Streaming
       "com.lihaoyi" %%% "geny" % "1.1.1",
       "co.fs2" %%% "fs2-core" % "3.12.0",
     ),
+  )
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      "org.typelevel" %% "cats-effect" % "3.6.0",
+    )
   )
   .jsSettings(
     libraryDependencies ++= Seq(
@@ -115,19 +116,53 @@ lazy val server = project
   .settings(
     name := "molecule-server",
     publish / skip := true,
+    dependencyOverrides ++= Seq(
+      "com.fasterxml.jackson.core" % "jackson-databind" % "2.17.3",
+      "com.fasterxml.jackson.core" % "jackson-core" % "2.17.3",
+      "com.fasterxml.jackson.core" % "jackson-annotations" % "2.17.3",
+      "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.17.3",
+      "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % "2.17.3",
+      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.17.3",
+      "com.fasterxml.jackson.module" % "jackson-module-parameter-names" % "2.17.3",
+      "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % "2.17.3"
+    ),
     libraryDependencies ++= Seq(
-      "com.softwaremill.sttp.tapir" %% "tapir-armeria-server" % tapirVersion,
+      // Base Pekko dependencies
+      "org.apache.pekko" %% "pekko-actor-typed" % pekkoVersion,
+      "org.apache.pekko" %% "pekko-serialization-jackson" % pekkoVersion,
+
+      // 1. Armeria
+      "com.softwaremill.sttp.tapir" %% "tapir-armeria-server" % tapirVersion
+        exclude("com.fasterxml.jackson.core", "jackson-databind")
+        exclude("com.fasterxml.jackson.core", "jackson-core")
+        exclude("com.fasterxml.jackson.core", "jackson-annotations"),
+
+      // 2. Http4s
       "org.http4s" %% "http4s-ember-server" % http4sVersion,
       "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % tapirVersion,
-      "com.softwaremill.sttp.tapir" %% "tapir-netty-server" % tapirVersion,
+
+      // 3. Netty
+      "com.softwaremill.sttp.tapir" %% "tapir-netty-server" % tapirVersion
+        exclude("io.netty", "netty-handler"),
+
+      // 4. Pekko
       "com.softwaremill.sttp.tapir" %% "tapir-pekko-http-server" % tapirVersion,
-      "com.softwaremill.sttp.tapir" %% "tapir-play-server" % tapirVersion,
+
+      // 5. Play
+      "com.softwaremill.sttp.tapir" %% "tapir-play-server" % tapirVersion
+        exclude("org.apache.pekko", "pekko-actor-typed")
+        exclude("org.apache.pekko", "pekko-serialization-jackson"),
+
+      // 6. Vert.x
       "com.softwaremill.sttp.tapir" %% "tapir-vertx-server" % tapirVersion,
+
+      // 7. ZioHttp
       "com.softwaremill.sttp.tapir" %% "tapir-zio-http-server" % tapirVersion,
 
       // Avoid "No SLF4J providers were found." errors
       "org.slf4j" % "slf4j-nop" % "2.0.17",
-    )
+    ),
+//    resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
   )
   .dependsOn(
     sqlH2.jvm,
@@ -135,6 +170,7 @@ lazy val server = project
     sqlMariaDB.jvm,
     sqlPostgreSQL.jvm,
     sqlSQlite.jvm,
+    datalogDatomic.jvm,
   )
 
 lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
@@ -159,7 +195,7 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
       "org.typelevel" %%% "munit-cats-effect" % "2.1.0" % Test,
       "dev.zio" %%% "zio-test" % zioVersion % Test,
       "dev.zio" %%% "zio-test-sbt" % zioVersion % Test,
-      "dev.zio" %%% "zio-streams" % zioVersion % Test,
+      //      "dev.zio" %%% "zio-streams" % zioVersion % Test,
     ),
   )
   .jsConfigure(_.enablePlugins(TzdbPlugin))
