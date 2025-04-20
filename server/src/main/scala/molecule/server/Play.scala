@@ -11,11 +11,10 @@ import scala.io.StdIn
 
 case class Play(rpc: MoleculeRpc) extends MoleculeServerEndpoints(rpc) {
 
+  implicit val actorSystem: ActorSystem = ActorSystem("tapir-play-server")
+
   def run(db: String): Future[Terminated] = {
 
-    implicit val actorSystem: ActorSystem = ActorSystem("tapir-play-server")
-
-    //    val config = ServerConfig()
     val config = ServerConfig(
       port = Some(8080),
       mode = Mode.Dev

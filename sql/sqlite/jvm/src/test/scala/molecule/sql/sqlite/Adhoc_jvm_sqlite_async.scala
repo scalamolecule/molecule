@@ -7,7 +7,7 @@ import molecule.sql.sqlite.async.*
 import molecule.sql.sqlite.setup.DbProviders_sqlite
 
 
-class AdhocJVM_sqlite_async extends Test with DbProviders_sqlite with TestUtils {
+class Adhoc_jvm_sqlite_async extends Test with DbProviders_sqlite with TestUtils {
 
 
   //  "types" - types { implicit conn =>

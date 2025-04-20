@@ -15,13 +15,14 @@ case class Netty(rpc: MoleculeRpc) extends MoleculeServerEndpoints(rpc) {
       .addEndpoints(moleculeServerEndpoints)
       .start()
 
-    server.map { binding =>
+    server.foreach { _ =>
       println(s"\n✅ Netty server running on http://localhost:8080 for $db")
-      println("   Press ENTER to stop the server.")
-
-      StdIn.readLine() // block until user input
-      println("🛑 Shutting down server...")
-      binding.stop()
     }
+
+    println("Press ENTER to stop the server.")
+    StdIn.readLine() // Blocks until user presses ENTER
+
+    println("🛑 Shutting down server...")
+    server.flatMap(_.stop())
   }
 }

@@ -8,13 +8,17 @@ import molecule.sql.sqlite.async.*
 import molecule.sql.sqlite.setup.DbProviders_sqlite
 
 
-class AdhocJS_sqlite extends Test with DbProviders_sqlite with TestUtils {
+class Adhoc_js_sqlite_async extends Test with DbProviders_sqlite with TestUtils {
 
 
   "types" - types { implicit conn =>
     for {
-      _ <- Entity.int.insert(1).transact
-      _ <- Entity.int.query.get.map(_ ==> List(1))
+      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
+      _ <- Entity.int(3).save.transact
+      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
+      _ <- Entity(a).int(10).update.transact
+      _ <- Entity(b).delete.transact
+      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
     } yield ()
   }
 

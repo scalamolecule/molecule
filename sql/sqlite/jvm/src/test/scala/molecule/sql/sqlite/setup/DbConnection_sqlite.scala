@@ -17,11 +17,8 @@ trait DbConnection_sqlite extends DbConnection {
 
   def run(test: Conn => Any, schema: Schema_sqlite): Any = {
     // Choose running tests with in-memory or file-based database:
-
-    println("########################")
-
-//    runMemDb(test, schema)
-        runFileDb(test, schema)
+    runMemDb(test, schema)
+    //    runFileDb(test, schema)
     //    runFileDbWithHikariCP(test, schema)
   }
 

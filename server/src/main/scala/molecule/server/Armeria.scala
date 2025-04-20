@@ -9,7 +9,8 @@ import scala.concurrent.Future
 
 case class Armeria(rpc: MoleculeRpc) extends MoleculeServerEndpoints(rpc) {
 
-  def run(db: String): CompletableFuture[Void] = {
+//  def run(db: String): CompletableFuture[Void] = {
+  def run(db: String) = {
 
     // Create Armeria HTTP service from Tapir endpoints
     val tapirService = ArmeriaFutureServerInterpreter()
@@ -27,6 +28,6 @@ case class Armeria(rpc: MoleculeRpc) extends MoleculeServerEndpoints(rpc) {
     scala.io.StdIn.readLine()
 
     println("🛑 Shutting down server...")
-    server.stop() //.join()
+    server.stop().join()
   }
 }

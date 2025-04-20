@@ -14,7 +14,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 case class Http4s(rpc: MoleculeRpc) extends MoleculeServerEndpoints(rpc) {
 
-  def run(db: String): IO[ExitCode] = {
+  def run(db: String) = {
 
     // Create a Dispatcher for the Future to IO conversion
     Dispatcher.parallel[IO].use { implicit dispatcher =>
