@@ -22,9 +22,9 @@ To have molecule jars generated, add `-Dmolecule=true`
 
     // some of:
     test
-    testOnly moleculemolecule.sql.H2.AdhocJS_H2
-    testOnly moleculemolecule.sql.H2.*
-    testOnly moleculemolecule.sql.*
+    testOnly moleculemolecule.db.sql.H2.AdhocJS_H2
+    testOnly moleculemolecule.db.sql.H2.*
+    testOnly moleculemolecule.db.sql.*
 
 ## Test JS
 
@@ -39,9 +39,9 @@ Process 2:
     project sqlH2JS
     test
     // or
-    testOnly moleculemolecule.sql.H2.AdhocJS_H2
-    testOnly moleculemolecule.sql.H2.*
-    testOnly moleculemolecule.sql.*
+    testOnly moleculemolecule.db.sql.H2.AdhocJS_H2
+    testOnly moleculemolecule.db.sql.H2.*
+    testOnly moleculemolecule.db.sql.*
 
 Compilation on JS side can take some time and be quite memory hungry. You might give sbt some extra memory:
 

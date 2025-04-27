@@ -8,10 +8,10 @@ object _CastOptNestedBranch extends DatomicGenBase("CastOptNestedBranch", "/quer
     val pullBranchX    = (1 to 21).map(i => s"case ${caseN(i)} => pullBranch$i(pullCasts, optComparator, refDepth)").mkString("\n      ")
     val resolveMethods = (1 to 21).map(arity => Chunk(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************
-       |package molecule.datalog.core.query.casting
+       |package molecule.db.datalog.core.query.casting
        |
        |import java.util.{Collections, Comparator, ArrayList => jArrayList, Iterator => jIterator, List => jList, Map => jMap}
-       |import molecule.datalog.core.query.DatomicQueryBase
+       |import molecule.db.datalog.core.query.DatomicQueryBase
        |
        |
        |trait $fileName_ { self: DatomicQueryBase =>

@@ -8,7 +8,7 @@ object _CastOptRefLeaf extends DatomicGenBase("CastOptRefLeaf", "/query/casting"
     val pullLeafX      = (1 to 22).map(i => s"case ${caseN(i)} => pullLeaf$i(pullCasts)").mkString("\n      ")
     val resolveMethods = (1 to 22).map(arity => Chunk(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************
-       |package molecule.datalog.core.query.casting
+       |package molecule.db.datalog.core.query.casting
        |
        |import java.util.{ArrayList => jArrayList, Iterator => jIterator, Map => jMap}
        |import molecule.core.util.JavaConversions

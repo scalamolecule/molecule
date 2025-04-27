@@ -6,5 +6,5 @@ abstract class DatomicGenBase(fileName: String, dir: String)
   extends CodeGenTemplate(
     fileName,
     dir,
-    "datalog/core/shared/src/main/scala/molecule/datalog/core"
+    "datalog/core/shared/src/main/scala/molecule/db/datalog/core"
   )

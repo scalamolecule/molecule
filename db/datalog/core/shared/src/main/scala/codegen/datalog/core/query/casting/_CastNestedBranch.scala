@@ -8,9 +8,9 @@ object _CastNestedBranch extends DatomicGenBase("CastNestedBranch", "/query/cast
     val resolveX       = (1 to 21).map(i => s"case ${caseN(i)} => cast$i[T](casters)").mkString("\n      ")
     val resolveMethods = (1 to 21).map(arity => Chunk(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************
-       |package molecule.datalog.core.query.casting
+       |package molecule.db.datalog.core.query.casting
        |
-       |import molecule.datalog.core.query.DatomicQueryBase
+       |import molecule.db.datalog.core.query.DatomicQueryBase
        |
        |
        |trait $fileName_ { self: DatomicQueryBase =>

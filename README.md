@@ -100,7 +100,7 @@ Molecules using any Database/API combination return the same data, just in diffe
 Synchronous API, Datomic
 
 ```scala
-import molecule.datalog.datomic.sync._
+import molecule.db.datalog.datomic.sync._
 
 val persons: List[(String, Int, String)] =
   Person.name.age.Address.street.query.get
@@ -109,7 +109,7 @@ val persons: List[(String, Int, String)] =
 Synchronous API, PostgreSQL
 
 ```scala
-import molecule.sql.postgres.sync._
+import molecule.db.sql.postgres.sync._
 
 val persons: List[(String, Int, String)] =
   Person.name.age.Address.street.query.get
@@ -118,7 +118,7 @@ val persons: List[(String, Int, String)] =
 Asynchronous API
 
 ```scala
-import molecule.sql.postgres.async._
+import molecule.db.sql.postgres.async._
 
 val persons: Future[List[(String, Int, String)]] =
   Person.name.age.Address.street.query.get
@@ -127,7 +127,7 @@ val persons: Future[List[(String, Int, String)]] =
 ZIO API
 
 ```scala
-import molecule.sql.postgres.Zio._
+import molecule.db.sql.postgres.Zio._
 
 val persons: ZIO[Conn, MoleculeError, List[(String, Int, String)]] =
   Person.name.age.Address.street.query.get
@@ -136,7 +136,7 @@ val persons: ZIO[Conn, MoleculeError, List[(String, Int, String)]] =
 IO API
 
 ```scala
-import molecule.sql.postgres.io._
+import molecule.db.sql.postgres.io._
 
 val persons: cats.effect.IO[List[(String, Int, String)]] =
   Person.name.age.Address.street.query.get

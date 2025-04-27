@@ -7,8 +7,8 @@ import molecule.core.spi.{Conn, SpiAsync, TxReport}
 import molecule.core.util.FutureUtils
 import molecule.rpc.openapi.facade.GraphqlConn_JVM
 import molecule.rpc.openapi.transaction.GraphqlDataType_JVM
-//import molecule.datalog.datomic.facade.DatomicConn_JVM
-//import molecule.datalog.datomic.marshalling.Rpc_datomic.Data
+//import molecule.db.datalog.datomic.facade.DatomicConn_JVM
+//import molecule.db.datalog.datomic.marshalling.Rpc_datomic.Data
 import scala.concurrent.{Future, ExecutionContext => EC}
 
 object SpiAsync_openapi extends SpiAsync_openapi

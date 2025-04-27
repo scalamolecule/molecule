@@ -2,4 +2,4 @@ The main purpose of this project is to be able to independently change and publi
 
 So, relatively free from other changes in the molecule project we can publish this module when the sbt-molecule needs updated molecule library code:
 
-    sbt baseJVM/publishLocal
+    sbt ++2.12.20 "project baseJVM" publishLocal

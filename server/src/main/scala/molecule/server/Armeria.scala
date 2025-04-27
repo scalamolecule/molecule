@@ -3,7 +3,7 @@ package molecule.server
 import java.util.concurrent.CompletableFuture
 import com.linecorp.armeria.server.Server
 import molecule.core.marshalling.{MoleculeRpc, MoleculeServerEndpoints}
-import molecule.sql.h2.marshalling.Rpc_h2
+import molecule.db.sql.h2.marshalling.Rpc_h2
 import sttp.tapir.server.armeria.ArmeriaFutureServerInterpreter
 import scala.concurrent.Future
 

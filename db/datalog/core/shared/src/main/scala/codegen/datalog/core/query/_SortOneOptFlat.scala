@@ -7,7 +7,7 @@ object _SortOneOptFlat extends DatomicGenBase("SortOneOptFlat", "/query") {
   val content = {
     val sorters = baseTypes.map(sorter).mkString("\n")
     s"""// GENERATED CODE ********************************
-       |package molecule.datalog.core.query
+       |package molecule.db.datalog.core.query
        |
        |import java.lang.{Boolean => jBoolean, Double => jDouble, Float => jFloat, Integer => jInteger, Long => jLong}
        |import java.math.{BigDecimal => jBigDecimal, BigInteger => jBigInt}

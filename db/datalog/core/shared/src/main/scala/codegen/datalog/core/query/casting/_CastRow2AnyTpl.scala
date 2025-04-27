@@ -8,9 +8,9 @@ object _CastRow2AnyTpl extends DatomicGenBase("CastRow2AnyTpl", "/query/casting"
     val resolveX       = (1 to 22).map(i => s"case ${caseN(i)} => cast$i(casters)").mkString("\n      ")
     val resolveMethods = (1 to 22).map(arity => Chunk(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************
-       |package molecule.datalog.core.query.casting
+       |package molecule.db.datalog.core.query.casting
        |
-       |import molecule.datalog.core.query.DatomicQueryBase
+       |import molecule.db.datalog.core.query.DatomicQueryBase
        |
        |
        |trait $fileName_ { self: DatomicQueryBase =>

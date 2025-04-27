@@ -8,10 +8,10 @@ object _CastOptNestedLeaf extends DatomicGenBase("CastOptNestedLeaf", "/query/ca
     val pullLeafX      = (1 to 22).map(i => s"case ${caseN(i)} => pullLeaf$i(pullCasts, optComparator)").mkString("\n      ")
     val resolveMethods = (2 to 22).map(arity => Chunk(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************
-       |package molecule.datalog.core.query.casting
+       |package molecule.db.datalog.core.query.casting
        |
        |import java.util.{Collections, Comparator, ArrayList => jArrayList, Iterator => jIterator, List => jList, Map => jMap}
-       |import molecule.datalog.core.query.DatomicQueryBase
+       |import molecule.db.datalog.core.query.DatomicQueryBase
        |import scala.collection.mutable.ListBuffer
        |import scala.util.control.NonFatal
        |

@@ -8,9 +8,9 @@ object _CastOptRefBranch extends SqlGenBase("CastOptRefBranch", "/query/casting"
     val caseX          = (1 to 21).map(i => s"case ${caseN(i)} => cast$i(casts, firstIndex)").mkString("\n      ")
     val resolveMethods = (2 to 21).map(arity => Chunk(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************
-       |package molecule.sql.core.query.casting
+       |package molecule.db.sql.core.query.casting
        |
-       |import molecule.sql.core.query.SqlQueryBase
+       |import molecule.db.sql.core.query.SqlQueryBase
        |
        |
        |object $fileName_ extends SqlQueryBase {

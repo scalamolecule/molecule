@@ -6,5 +6,5 @@ abstract class SqlGenBase(fileName: String, dir: String)
   extends CodeGenTemplate(
     fileName,
     dir,
-    "sql/core/shared/src/main/scala/molecule/sql/core"
+    "sql/core/shared/src/main/scala/molecule/db/sql/core"
   )

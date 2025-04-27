@@ -7,8 +7,8 @@ import molecule.core.spi.{Conn, SpiAsync, TxReport}
 import molecule.core.util.FutureUtils
 import molecule.rest.facade.GraphqlConn_JVM
 import molecule.rest.transaction.GraphqlDataType_JVM
-//import molecule.datalog.datomic.facade.DatomicConn_JVM
-//import molecule.datalog.datomic.marshalling.Rpc_datomic.Data
+//import molecule.db.datalog.datomic.facade.DatomicConn_JVM
+//import molecule.db.datalog.datomic.marshalling.Rpc_datomic.Data
 import scala.concurrent.{Future, ExecutionContext => EC}
 
 object SpiAsync_rest extends SpiAsync_rest

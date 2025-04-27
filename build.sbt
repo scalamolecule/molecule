@@ -186,7 +186,7 @@ lazy val dbSqlCore = crossProject(JSPlatform, JVMPlatform)
   .settings(compilerArgs, doPublish,
     name := "molecule-db-sql-core",
     libraryDependencies ++= Seq(
-      // For json de-serialisation in molecule.sql.core.query.LambdasMap
+      // For json de-serialisation in molecule.db.sql.core.query.LambdasMap
       "com.lihaoyi" %%% "upickle" % "4.0.2",
     ),
   )
@@ -341,7 +341,8 @@ lazy val server = project
     dbSqlPostgreSQL.jvm,
     dbSqlSQlite.jvm,
   )
-
+//  /Users/mg/molecule/molecule/molecule/db/sql/core/jvm/src/main/scala/molecule/db/sql/core/query/SqlQueryResolveCursor.scala
+//  /Users/mg/molecule/molecule/molecule/db/sql/core/shared/src/main/scala/molecule/db/sql/core/query/casting/strategy/CastTuple.scala
 
 lazy val testingFrameworks = Seq(
   new TestFramework("munit.Framework"),
@@ -365,6 +366,7 @@ lazy val compilerArgs = Def.settings(
         "-deprecation",
         "-unchecked",
         "-explain-types",
+        //        "-explain",
         //    "-Xfatal-warnings",
       )
     case _            => Nil // 2.12 base module for sbt-molecule plugin

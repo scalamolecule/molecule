@@ -5,7 +5,7 @@ import molecule.core.action._
 import molecule.core.spi.{Conn, SpiZio, TxReport}
 import molecule.core.util.Executor._
 import molecule.rest.facade.GraphqlConn_JVM
-//import molecule.datalog.datomic.facade.DatomicConn_JVM
+//import molecule.db.datalog.datomic.facade.DatomicConn_JVM
 import zio.ZIO
 import scala.concurrent.{Future, ExecutionContext => EC}
 
