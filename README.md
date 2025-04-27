@@ -288,12 +288,12 @@ Now we have a backend running on ScalaJVM ready to take care of your molecule qu
 In another process you can then run one of the following commands to run the coreTests on ScalaJS with the database of your choice:
 
 ```
-sbt datalogDatomicJS/test
-sbt sqlH2JS/test
-sbt sqlMariaDBJS/test
-sbt sqlMySQLJS/test
-sbt sqlPostgreSQLJS/test
-sbt sqlSQliteJS/test
+sbt dbDatalogDatomicJS/test
+sbt dbSqlH2JS/test
+sbt dbSqlMariaDBJS/test
+sbt dbSqlMySQLJS/test
+sbt dbSqlPostgreSQLJS/test
+sbt dbSqlSQliteJS/test
 ```
 The tests are then automatically fetching data from the running backend - Molecule takes care of marshalling and fetching transparently!
 
