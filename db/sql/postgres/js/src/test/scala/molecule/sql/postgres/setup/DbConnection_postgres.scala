@@ -17,6 +17,7 @@ object DbConnection_postgres {
     // each test when using Docker containers.
     // This makes the test suite run slower compared to sequential runs
     // of jvm tests.
+    // todo: Find a way to reuse connections for parallel runs.
     val n   = Random.nextInt().abs
     val url = s"jdbc:tc:postgresql:17://localhost:5432/test$n" +
       s"?preparedStatementCacheQueries=0"

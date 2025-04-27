@@ -89,7 +89,7 @@ object MyDomain extends DomainStructure(5) {
   }
 }
 ```
-2) Run `sbt compile -Dmolecule=true` once to generate molecule-enabling boilerplate code and db schemas.
+2) Run `sbt moleculeGen` to generate molecule-enabling boilerplate code and db schemas.
 3) Compose fluent molecules with your domain terms to save and read data from your database.
 
 
@@ -196,7 +196,7 @@ sbt.version = 1.10.11
 `project/plugins.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.13.0")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.14.0")
 ```
 
 `build.sbt`:
@@ -207,16 +207,13 @@ lazy val yourProject = project.in(file("app"))
   .settings(
     libraryDependencies ++= Seq(
       // One or more of:
-      "org.scalamolecule" %%% "molecule-sql-postgres" % "0.18.0",
-      "org.scalamolecule" %%% "molecule-sql-sqlite" % "0.18.0",
-      "org.scalamolecule" %%% "molecule-sql-mysql" % "0.18.0",
-      "org.scalamolecule" %%% "molecule-sql-mariadb" % "0.18.0",
-      "org.scalamolecule" %%% "molecule-sql-h2" % "0.18.0",
-      "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.18.0",
-    ),
-    
-    // Paths to directories with your domain structure definition files
-    moleculeDomainPaths := Seq("app") 
+      "org.scalamolecule" %%% "molecule-db-sql-postgres" % "0.19.0",
+      "org.scalamolecule" %%% "molecule-db-sql-sqlite" % "0.19.0",
+      "org.scalamolecule" %%% "molecule-db-sql-mysql" % "0.19.0",
+      "org.scalamolecule" %%% "molecule-db-sql-mariadb" % "0.19.0",
+      "org.scalamolecule" %%% "molecule-db-sql-h2" % "0.19.0",
+      "org.scalamolecule" %%% "molecule-db-datalog-datomic" % "0.19.0",
+    )
   )
 ```
 
@@ -240,12 +237,12 @@ On a mac you can for instance start Docker Desktop.
 
 Run the coreTests on the jvm with a databases of your choice:
 
-    sbt sqlPostgresJVM/test
-    sbt sqlSQliteJVM/test
-    sbt sqlMysqlJVM/test
-    sbt sqlMariadbJVM/test
-    sbt sqlH2JVM/test
-    sbt datalogDatomicJVM/test
+    sbt dbSqlPostgresJVM/test
+    sbt dbSqlSQliteJVM/test
+    sbt dbSqlMysqlJVM/test
+    sbt dbSqlMariadbJVM/test
+    sbt dbSqlH2JVM/test
+    sbt dbDatalogDatomicJVM/test
 
 
 ### Run JS tests
@@ -258,25 +255,35 @@ In the `server` module you can see 7 different minimal Tapir backend setups that
 ```
 sbt server/run
 
-Multiple main classes detected. Select one to run:
- [1] molecule.server.Armeria
- [2] molecule.server.Http4s
- [3] molecule.server.Netty
- [4] molecule.server.Pekko
- [5] molecule.server.Play
- [6] molecule.server.VertX
- [7] molecule.server.ZioHttp
+Please choose a database and a server backend to test the Molecule RPC API:
 
-Enter number: 
-```
-Let's enter 3 to use the Netty server:
-```
-Enter number: 3
-[info] running molecule.server.Netty 
+  1  H2
+  2  MariaDB
+  3  MySQL
+  4  PostgreSQL
+  5  SQlite
+  6  Datomic
+
+Database: 1
+
+  1  Armeria
+  2  Http4s
+  3  Netty
+  4  Pekko
+  5  Play
+  6  Vert.x
+  7  ZioHttp
+
+Server: 3
+
 Press ENTER to stop the server.
-✅ Netty server running on http://localhost:8080
+✅ Netty server running on http://localhost:8080 for H2
+
+// running tests...
+
+🛑 Shutting down server...
 ```
-Now we have a backend running on ScalaJVM ready to take care of your molecule queries from ScalaJS! 
+Now we have a backend running on ScalaJVM ready to take care of your molecule queries from ScalaJS using the H2 database! 
 
 In another process you can then run one of the following commands to run the coreTests on ScalaJS with the database of your choice:
 
@@ -288,7 +295,7 @@ sbt sqlMySQLJS/test
 sbt sqlPostgreSQLJS/test
 sbt sqlSQliteJS/test
 ```
-The tests are then automatically fetching data from the running backend - Molecule takes care of it transparently!
+The tests are then automatically fetching data from the running backend - Molecule takes care of marshalling and fetching transparently!
 
 
 
