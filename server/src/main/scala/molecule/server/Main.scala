@@ -21,7 +21,9 @@ import scala.io.StdIn
 
 object Main extends App {
 
-  println("\nWhat database do you want to test?:")
+  println("\nPlease choose a database and a server backend to test the Molecule RPC API:\n")
+//  println("\n")
+//  println()
   List("H2", "MariaDB", "MySQL", "PostgreSQL", "SQlite", "Datomic")
     .zipWithIndex.foreach((db, i) => println(s"  ${i + 1}  $db"))
   println()
@@ -29,7 +31,7 @@ object Main extends App {
   val (rpc, db): (MoleculeRpc, String) = {
     @tailrec
     def chooseDb(): (MoleculeRpc, String) = {
-      StdIn.readLine("Choose DB: ").toIntOption match {
+      StdIn.readLine("Database: ").toIntOption match {
         case Some(1) => (Rpc_h2, "H2")
         case Some(2) => (Rpc_mariadb, "MariaDB")
         case Some(3) => (Rpc_mysql, "MySQL")
@@ -44,7 +46,7 @@ object Main extends App {
     chooseDb()
   }
 
-  println("\nWhat backend server do you want to test against?:")
+  println()
   List("Armeria", "Http4s", "Netty", "Pekko", "Play", "Vert.x", "ZioHttp")
     .zipWithIndex.foreach((server, i) => println(s"  ${i + 1}  $server"))
   println()
@@ -52,7 +54,7 @@ object Main extends App {
 
   @tailrec
   private def chooseServer(): Any = {
-    StdIn.readLine("Choose Server: ").toIntOption match {
+    StdIn.readLine("Server: ").toIntOption match {
       case Some(1) => Armeria(rpc).run(db)
       case Some(2) => Await.result(Http4s(rpc).run(db).unsafeToFuture(), Duration.Inf)
       case Some(3) => Netty(rpc).run(db)

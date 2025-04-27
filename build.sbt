@@ -1,23 +1,21 @@
 import org.scalajs.linker.interface.ESVersion
 
-val moleculeVersion = "0.19.0-SNAPSHOT"
+val moleculeVersion = "0.19.0"
 
 val scala212 = "2.12.20"
+val scala3   = "3.3.5"
 
-val scala3        = "3.3.5"
-val tapirVersion  = "1.11.25"
-val pekkoVersion  = "1.1.3"
-val http4sVersion = "0.23.30"
-
-val client4Version = "4.0.2"
-val zioVersion     = "2.1.17"
-
-// Db test containers
+val tapirVersion             = "1.11.25"
+val pekkoVersion             = "1.1.3"
+val http4sVersion            = "0.23.30"
+val client4Version           = "4.0.2"
+val zioVersion               = "2.1.17"
 val dimafengContainerVersion = "0.43.0"
 val testContainerVersion     = "1.20.6"
 val logbackVersion           = "1.5.0"
 
 
+name := "molecule"
 inThisBuild(
   List(
     organization := "org.scalamolecule",
@@ -29,17 +27,15 @@ inThisBuild(
     publishTo := Some(releases),
 
     // Run tests for all systems sequentially to avoid data locks with db
-    // Only applies on JVM. On JS platform there's no parallelism anyway.
+    // Only applies on JVM. On the JS platform there's no parallelism anyway.
     Test / parallelExecution := false,
   )
 )
 
+
 lazy val root = project
   .in(file("."))
-  .settings(
-    publish / skip := true,
-    name := "molecule"
-  )
+  .settings(publish / skip := true)
   .enablePlugins(ScalaJSPlugin)
   .aggregate(
     base.js,
@@ -48,29 +44,33 @@ lazy val root = project
     core.jvm,
     coreTests.js,
     coreTests.jvm,
-    datalogCore.js,
-    datalogCore.jvm,
-    datalogDatomic.js,
-    datalogDatomic.jvm,
+
+    dbDatalogCore.js,
+    dbDatalogCore.jvm,
+    dbDatalogDatomic.js,
+    dbDatalogDatomic.jvm,
+
+    dbSqlCore.js,
+    dbSqlCore.jvm,
+    dbSqlH2.js,
+    dbSqlH2.jvm,
+    dbSqlMariaDB.js,
+    dbSqlMariaDB.jvm,
+    dbSqlMySQL.js,
+    dbSqlMySQL.jvm,
+    dbSqlPostgreSQL.js,
+    dbSqlPostgreSQL.jvm,
+    dbSqlSQlite.js,
+    dbSqlSQlite.jvm,
+
     server,
-    sqlCore.js,
-    sqlCore.jvm,
-    sqlH2.js,
-    sqlH2.jvm,
-    sqlMariaDB.js,
-    sqlMariaDB.jvm,
-    sqlMySQL.js,
-    sqlMySQL.jvm,
-    sqlPostgreSQL.js,
-    sqlPostgreSQL.jvm,
-    sqlSQlite.js,
-    sqlSQlite.jvm,
     //    graphql.js,
     //    graphql.jvm,
   )
 
 lazy val base = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
+  .in(file("base"))
   .settings(compilerArgs, doPublish,
     // 2.12 for sbt-molecule plugin on sbt 1.x
     crossScalaVersions := Seq(scala212, scala3),
@@ -79,6 +79,7 @@ lazy val base = crossProject(JSPlatform, JVMPlatform)
 
 lazy val core = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
+  .in(file("core"))
   .settings(compilerArgs, doPublish,
     name := "molecule-core",
     libraryDependencies ++= Seq(
@@ -110,11 +111,180 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
   )
   .dependsOn(base)
 
-// Tapir backend examples serving Molecule RPC
+
+lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
+  .enablePlugins(MoleculePlugin)
+  .settings(compilerArgs,
+    publish / skip := true,
+    name := "molecule-coreTests",
+    libraryDependencies ++= Seq(
+      "com.zaxxer" % "HikariCP" % "6.2.1" % Test,
+      "org.scalactic" %%% "scalactic" % "3.2.19" % Test, // Tolerant roundings with triple equal on js platform
+      "io.github.cquiroz" %%% "scala-java-time" % "2.6.0", // % Test, // we need main for time zone plugin
+
+      // Test frameworks
+      "org.scalameta" %%% "munit" % "1.1.0" % Test,
+      "org.typelevel" %%% "munit-cats-effect" % "2.1.0" % Test,
+      "dev.zio" %%% "zio-test" % zioVersion % Test,
+      "dev.zio" %%% "zio-test-sbt" % zioVersion % Test,
+      //      "dev.zio" %%% "zio-streams" % zioVersion % Test,
+    ),
+  )
+  .jsConfigure(_.enablePlugins(TzdbPlugin))
+  .jsSettings(
+    jsEnvironment,
+    libraryDependencies ++= Seq(
+      "org.scala-js" %%% "scala-js-macrotask-executor" % "1.1.1",
+      "org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0" cross CrossVersion.for3Use2_13
+    ),
+    zonesFilter := { (z: String) =>
+      List(
+        // Add your time zone to have time-dependent test work correctly...
+        "America/Santiago",
+        "Pacific/Honolulu",
+        "Europe/Stockholm",
+      ).contains(z)
+    },
+  )
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      // Enforce one version to avoid warnings of multiple dependency versions when running tests
+      "org.slf4j" % "slf4j-nop" % "2.0.17" //% Test
+    )
+  )
+  .dependsOn(core)
+
+
+lazy val dbDatalogCore = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
+  .in(file("db/datalog/core"))
+  .settings(compilerArgs, doPublish,
+    name := "molecule-db-datalog-core"
+  )
+  .jvmSettings(
+    libraryDependencies += "com.datomic" % "peer" % "1.0.7277" // Requires Java 11
+  )
+  .jsSettings(jsEnvironment)
+  .dependsOn(core)
+
+
+lazy val dbDatalogDatomic = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
+  .in(file("db/datalog/datomic"))
+  .settings(compilerArgs, doPublish,
+    name := "molecule-db-datalog-datomic",
+    testFrameworks := testingFrameworks
+  )
+  .jsSettings(jsEnvironment)
+  .dependsOn(dbDatalogCore, coreTests % "test->test")
+
+
+lazy val dbSqlCore = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
+  .in(file("db/sql/core"))
+  .settings(compilerArgs, doPublish,
+    name := "molecule-db-sql-core",
+    libraryDependencies ++= Seq(
+      // For json de-serialisation in molecule.sql.core.query.LambdasMap
+      "com.lihaoyi" %%% "upickle" % "4.0.2",
+    ),
+  )
+  .jsSettings(jsEnvironment)
+  .dependsOn(core)
+
+
+lazy val dbSqlH2 = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
+  .in(file("db/sql/h2"))
+  .settings(compilerArgs, doPublish,
+    name := "molecule-db-sql-h2",
+    testFrameworks := testingFrameworks
+  )
+  .jsSettings(jsEnvironment)
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      "com.h2database" % "h2" % "2.3.232",
+    ),
+    Test / fork := true // necessary for sbt testing
+  )
+  .dependsOn(dbSqlCore, coreTests % "test->test")
+
+
+lazy val dbSqlMariaDB = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
+  .in(file("db/sql/mariadb"))
+  .settings(compilerArgs, doPublish,
+    name := "molecule-db-sql-mariadb",
+    testFrameworks := testingFrameworks)
+  .jsSettings(jsEnvironment)
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      "com.dimafeng" %% "testcontainers-scala-mariadb" % dimafengContainerVersion,
+      "org.mariadb.jdbc" % "mariadb-java-client" % "3.5.1",
+      "ch.qos.logback" % "logback-classic" % logbackVersion % Test
+    ),
+    Test / fork := true
+  )
+  .dependsOn(dbSqlCore, coreTests % "test->test")
+
+
+lazy val dbSqlMySQL = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
+  .in(file("db/sql/mysql"))
+  .settings(compilerArgs, doPublish,
+    name := "molecule-db-sql-mysql",
+    testFrameworks := testingFrameworks)
+  .jsSettings(jsEnvironment)
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      "org.testcontainers" % "mysql" % testContainerVersion,
+      "com.mysql" % "mysql-connector-j" % "9.2.0",
+    ),
+    Test / fork := true
+  )
+  .dependsOn(dbSqlCore, coreTests % "test->test")
+
+
+lazy val dbSqlPostgreSQL = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
+  .in(file("db/sql/postgres"))
+  .settings(compilerArgs, doPublish,
+    name := "molecule-db-sql-postgres",
+    testFrameworks := testingFrameworks)
+  .jsSettings(jsEnvironment)
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      "org.testcontainers" % "postgresql" % testContainerVersion,
+      "org.postgresql" % "postgresql" % "42.7.5",
+      "ch.qos.logback" % "logback-classic" % logbackVersion % Test,
+    ),
+    Test / fork := true
+  )
+  .dependsOn(dbSqlCore, coreTests % "test->test")
+
+
+lazy val dbSqlSQlite = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
+  .in(file("db/sql/sqlite"))
+  .settings(compilerArgs, doPublish,
+    name := "molecule-db-sql-sqlite",
+    testFrameworks := testingFrameworks
+  )
+  .jsSettings(jsEnvironment)
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      "org.xerial" % "sqlite-jdbc" % "3.49.1.0"
+    ),
+    Test / fork := true
+  )
+  .dependsOn(dbSqlCore, coreTests % "test->test")
+
+
+// Tapir example backend servers to test Molecule RPC
 lazy val server = project
   .in(file("server"))
   .settings(
-    name := "molecule-server",
     publish / skip := true,
     dependencyOverrides ++= Seq(
       "com.fasterxml.jackson.core" % "jackson-databind" % "2.17.3",
@@ -162,190 +332,15 @@ lazy val server = project
       // Avoid "No SLF4J providers were found." errors
       "org.slf4j" % "slf4j-nop" % "2.0.17",
     ),
-//    resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
   )
   .dependsOn(
-    sqlH2.jvm,
-    sqlMySQL.jvm,
-    sqlMariaDB.jvm,
-    sqlPostgreSQL.jvm,
-    sqlSQlite.jvm,
-    datalogDatomic.jvm,
+    dbDatalogDatomic.jvm,
+    dbSqlH2.jvm,
+    dbSqlMySQL.jvm,
+    dbSqlMariaDB.jvm,
+    dbSqlPostgreSQL.jvm,
+    dbSqlSQlite.jvm,
   )
-
-lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Full)
-  .enablePlugins(MoleculePlugin)
-  .settings(compilerArgs,
-    publish / skip := true,
-    name := "molecule-coreTests",
-
-    // Generate Molecule boilerplate code for tests with `sbt clean compile -Dmolecule=true`
-    moleculePluginActive := sys.props.get("molecule").contains("true"),
-    moleculeDomainPaths := Seq("molecule/coreTests/domains"),
-    //    moleculeMakeJars := false,
-
-    libraryDependencies ++= Seq(
-      "com.zaxxer" % "HikariCP" % "6.2.1" % Test,
-      "org.scalactic" %%% "scalactic" % "3.2.19" % Test, // Tolerant roundings with triple equal on js platform
-      "io.github.cquiroz" %%% "scala-java-time" % "2.6.0", // % Test, // we need main for time zone plugin
-
-      // Test frameworks
-      "org.scalameta" %%% "munit" % "1.1.0" % Test,
-      "org.typelevel" %%% "munit-cats-effect" % "2.1.0" % Test,
-      "dev.zio" %%% "zio-test" % zioVersion % Test,
-      "dev.zio" %%% "zio-test-sbt" % zioVersion % Test,
-      //      "dev.zio" %%% "zio-streams" % zioVersion % Test,
-    ),
-  )
-  .jsConfigure(_.enablePlugins(TzdbPlugin))
-  .jsSettings(
-    jsEnvironment,
-    libraryDependencies ++= Seq(
-      "org.scala-js" %%% "scala-js-macrotask-executor" % "1.1.1",
-      "org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0" cross CrossVersion.for3Use2_13
-    ),
-    zonesFilter := { (z: String) =>
-      List(
-        // Add your time zone to have time-dependent test work correctly...
-        "America/Santiago",
-        "Pacific/Honolulu",
-        "Europe/Stockholm",
-      ).contains(z)
-    },
-  )
-  .jvmSettings(
-    libraryDependencies ++= Seq(
-      // Enforce one version to avoid warnings of multiple dependency versions when running tests
-      "org.slf4j" % "slf4j-nop" % "2.0.17" //% Test
-    )
-  )
-  .dependsOn(core)
-
-
-lazy val datalogCore = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Full)
-  .in(file("datalog/core"))
-  .settings(compilerArgs, doPublish,
-    name := "molecule-datalog-core"
-  )
-  .jvmSettings(
-    libraryDependencies += "com.datomic" % "peer" % "1.0.7277" // Requires Java 11
-  )
-  .jsSettings(jsEnvironment)
-  .dependsOn(core)
-
-
-lazy val datalogDatomic = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Full)
-  .in(file("datalog/datomic"))
-  .settings(compilerArgs, doPublish,
-    name := "molecule-datalog-datomic",
-    testFrameworks := testingFrameworks
-  )
-  .jsSettings(jsEnvironment)
-  .dependsOn(datalogCore, coreTests % "test->test")
-
-
-lazy val sqlCore = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Full)
-  .in(file("sql/core"))
-  .settings(compilerArgs, doPublish,
-    name := "molecule-sql-core",
-    libraryDependencies ++= Seq(
-      // For json de-serialisation in molecule.sql.core.query.LambdasMap
-      "com.lihaoyi" %%% "upickle" % "4.0.2",
-    ),
-  )
-  .jsSettings(jsEnvironment)
-  .dependsOn(core)
-
-
-lazy val sqlH2 = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Full)
-  .in(file("sql/h2"))
-  .settings(compilerArgs, doPublish,
-    name := "molecule-sql-h2",
-    testFrameworks := testingFrameworks
-  )
-  .jsSettings(jsEnvironment)
-  .jvmSettings(
-    libraryDependencies ++= Seq(
-      "com.h2database" % "h2" % "2.3.232",
-    ),
-    Test / fork := true // necessary for sbt testing
-  )
-  .dependsOn(sqlCore, coreTests % "test->test")
-
-
-lazy val sqlMariaDB = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Full)
-  .in(file("sql/mariadb"))
-  .settings(compilerArgs, doPublish,
-    name := "molecule-sql-mariadb",
-    testFrameworks := testingFrameworks)
-  .jsSettings(jsEnvironment)
-  .jvmSettings(
-    libraryDependencies ++= Seq(
-      "com.dimafeng" %% "testcontainers-scala-mariadb" % dimafengContainerVersion,
-      "org.mariadb.jdbc" % "mariadb-java-client" % "3.5.1",
-      "ch.qos.logback" % "logback-classic" % logbackVersion % Test
-    ),
-    Test / fork := true
-  )
-  .dependsOn(sqlCore, coreTests % "test->test")
-
-
-lazy val sqlMySQL = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Full)
-  .in(file("sql/mysql"))
-  .settings(compilerArgs, doPublish,
-    name := "molecule-sql-mysql",
-    testFrameworks := testingFrameworks)
-  .jsSettings(jsEnvironment)
-  .jvmSettings(
-    libraryDependencies ++= Seq(
-      "org.testcontainers" % "mysql" % testContainerVersion,
-      "com.mysql" % "mysql-connector-j" % "9.2.0",
-    ),
-    Test / fork := true
-  )
-  .dependsOn(sqlCore, coreTests % "test->test")
-
-
-lazy val sqlPostgreSQL = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Full)
-  .in(file("sql/postgres"))
-  .settings(compilerArgs, doPublish,
-    name := "molecule-sql-postgres",
-    testFrameworks := testingFrameworks)
-  .jsSettings(jsEnvironment)
-  .jvmSettings(
-    libraryDependencies ++= Seq(
-      "org.testcontainers" % "postgresql" % testContainerVersion,
-      "org.postgresql" % "postgresql" % "42.7.5",
-      "ch.qos.logback" % "logback-classic" % logbackVersion % Test,
-    ),
-    Test / fork := true
-  )
-  .dependsOn(sqlCore, coreTests % "test->test")
-
-
-lazy val sqlSQlite = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Full)
-  .in(file("sql/sqlite"))
-  .settings(compilerArgs, doPublish,
-    name := "molecule-sql-sqlite",
-    testFrameworks := testingFrameworks
-  )
-  .jsSettings(jsEnvironment)
-  .jvmSettings(
-    libraryDependencies ++= Seq(
-      "org.xerial" % "sqlite-jdbc" % "3.49.1.0"
-    ),
-    Test / fork := true
-  )
-  .dependsOn(sqlCore, coreTests % "test->test")
 
 
 lazy val testingFrameworks = Seq(
@@ -474,3 +469,4 @@ lazy val withoutDocs = Def.settings(
 //  .jsSettings(jsEnvironment)
 //  .dependsOn(core)
 //  .dependsOn(coreTests % "test->test")
+

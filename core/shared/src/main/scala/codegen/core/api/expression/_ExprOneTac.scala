@@ -45,7 +45,8 @@ object _ExprOneTac extends CoreGenBase("ExprOneTac", "/api/expression") {
     val body =
       s"""
          |
-         |trait ${fileName}Ops_$arity[${`A..V, `}t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]] extends ExprAttr_$arity[${`A..V, `}t, Entity1, Entity2] {
+         |trait ${fileName}Ops_$arity[${`A..V, `}t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]]
+         |  extends ExprAttr_$arity[${`A..V, `}t, Entity1, Entity2] {
          |  protected def _exprOneTac(op: Op, vs: Seq[t]): Entity1[${`A..V, `}t] & CardOne = ???
          |}
          |

@@ -1,6 +1,6 @@
 package molecule.base.api
 
-import molecule.base.ast.*
+import molecule.base.ast._
 
 
 /** Schema transaction data interface

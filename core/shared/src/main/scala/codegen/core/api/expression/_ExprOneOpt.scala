@@ -20,7 +20,8 @@ object _ExprOneOpt extends CoreGenBase("ExprOneOpt", "/api/expression") {
     val body =
       s"""
          |
-         |trait ${fileName}Ops_$arity[${`A..V`}, t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]] extends ExprAttr_$arity[${`A..V, `}t, Entity1, Entity2] {
+         |trait ${fileName}Ops_$arity[${`A..V`}, t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]]
+         |  extends ExprAttr_$arity[${`A..V, `}t, Entity1, Entity2] {
          |  protected def _exprOneOpt(op: Op, opt: Option[t]): Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] = ???
          |}
          |

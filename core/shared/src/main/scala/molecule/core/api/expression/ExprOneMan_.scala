@@ -6,7 +6,8 @@ import molecule.core.api.*
 import molecule.core.ast.DataModel.*
 
 
-trait ExprOneManOps_1[A, t, Entity1[_, _], Entity2[_, _, _]] extends ExprAttr_1[A, t, Entity1, Entity2] {
+trait ExprOneManOps_1[A, t, Entity1[_, _], Entity2[_, _, _]]
+  extends ExprAttr_1[A, t, Entity1, Entity2] {
   protected def _exprOneMan(op: Op, vs: Seq[t]): Entity1[A, t] & SortAttrs_1[A, t, Entity1] & CardOne = ???
 }
 
@@ -75,7 +76,8 @@ trait ExprOneMan_1_Boolean[A, t, Entity1[_, _], Entity2[_, _, _]] extends ExprOn
 }
 
 
-trait ExprOneManOps_2[A, B, t, Entity1[_, _, _], Entity2[_, _, _, _]] extends ExprAttr_2[A, B, t, Entity1, Entity2] {
+trait ExprOneManOps_2[A, B, t, Entity1[_, _, _], Entity2[_, _, _, _]]
+  extends ExprAttr_2[A, B, t, Entity1, Entity2] {
   protected def _exprOneMan(op: Op, vs: Seq[t]): Entity1[A, B, t] & SortAttrs_2[A, B, t, Entity1] & CardOne = ???
 }
 
@@ -144,7 +146,8 @@ trait ExprOneMan_2_Boolean[A, B, t, Entity1[_, _, _], Entity2[_, _, _, _]] exten
 }
 
 
-trait ExprOneManOps_3[A, B, C, t, Entity1[_, _, _, _], Entity2[_, _, _, _, _]] extends ExprAttr_3[A, B, C, t, Entity1, Entity2] {
+trait ExprOneManOps_3[A, B, C, t, Entity1[_, _, _, _], Entity2[_, _, _, _, _]]
+  extends ExprAttr_3[A, B, C, t, Entity1, Entity2] {
   protected def _exprOneMan(op: Op, vs: Seq[t]): Entity1[A, B, C, t] & SortAttrs_3[A, B, C, t, Entity1] & CardOne = ???
 }
 
@@ -213,7 +216,8 @@ trait ExprOneMan_3_Boolean[A, B, C, t, Entity1[_, _, _, _], Entity2[_, _, _, _, 
 }
 
 
-trait ExprOneManOps_4[A, B, C, D, t, Entity1[_, _, _, _, _], Entity2[_, _, _, _, _, _]] extends ExprAttr_4[A, B, C, D, t, Entity1, Entity2] {
+trait ExprOneManOps_4[A, B, C, D, t, Entity1[_, _, _, _, _], Entity2[_, _, _, _, _, _]]
+  extends ExprAttr_4[A, B, C, D, t, Entity1, Entity2] {
   protected def _exprOneMan(op: Op, vs: Seq[t]): Entity1[A, B, C, D, t] & SortAttrs_4[A, B, C, D, t, Entity1] & CardOne = ???
 }
 
@@ -282,7 +286,8 @@ trait ExprOneMan_4_Boolean[A, B, C, D, t, Entity1[_, _, _, _, _], Entity2[_, _, 
 }
 
 
-trait ExprOneManOps_5[A, B, C, D, E, t, Entity1[_, _, _, _, _, _], Entity2[_, _, _, _, _, _, _]] extends ExprAttr_5[A, B, C, D, E, t, Entity1, Entity2] {
+trait ExprOneManOps_5[A, B, C, D, E, t, Entity1[_, _, _, _, _, _], Entity2[_, _, _, _, _, _, _]]
+  extends ExprAttr_5[A, B, C, D, E, t, Entity1, Entity2] {
   protected def _exprOneMan(op: Op, vs: Seq[t]): Entity1[A, B, C, D, E, t] & SortAttrs_5[A, B, C, D, E, t, Entity1] & CardOne = ???
 }
 
@@ -351,7 +356,8 @@ trait ExprOneMan_5_Boolean[A, B, C, D, E, t, Entity1[_, _, _, _, _, _], Entity2[
 }
 
 
-trait ExprOneManOps_6[A, B, C, D, E, F, t, Entity1[_, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _]] extends ExprAttr_6[A, B, C, D, E, F, t, Entity1, Entity2] {
+trait ExprOneManOps_6[A, B, C, D, E, F, t, Entity1[_, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _]]
+  extends ExprAttr_6[A, B, C, D, E, F, t, Entity1, Entity2] {
   protected def _exprOneMan(op: Op, vs: Seq[t]): Entity1[A, B, C, D, E, F, t] & SortAttrs_6[A, B, C, D, E, F, t, Entity1] & CardOne = ???
 }
 
@@ -420,7 +426,8 @@ trait ExprOneMan_6_Boolean[A, B, C, D, E, F, t, Entity1[_, _, _, _, _, _, _], En
 }
 
 
-trait ExprOneManOps_7[A, B, C, D, E, F, G, t, Entity1[_, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _]] extends ExprAttr_7[A, B, C, D, E, F, G, t, Entity1, Entity2] {
+trait ExprOneManOps_7[A, B, C, D, E, F, G, t, Entity1[_, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _]]
+  extends ExprAttr_7[A, B, C, D, E, F, G, t, Entity1, Entity2] {
   protected def _exprOneMan(op: Op, vs: Seq[t]): Entity1[A, B, C, D, E, F, G, t] & SortAttrs_7[A, B, C, D, E, F, G, t, Entity1] & CardOne = ???
 }
 
@@ -489,7 +496,8 @@ trait ExprOneMan_7_Boolean[A, B, C, D, E, F, G, t, Entity1[_, _, _, _, _, _, _, 
 }
 
 
-trait ExprOneManOps_8[A, B, C, D, E, F, G, H, t, Entity1[_, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _]] extends ExprAttr_8[A, B, C, D, E, F, G, H, t, Entity1, Entity2] {
+trait ExprOneManOps_8[A, B, C, D, E, F, G, H, t, Entity1[_, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _]]
+  extends ExprAttr_8[A, B, C, D, E, F, G, H, t, Entity1, Entity2] {
   protected def _exprOneMan(op: Op, vs: Seq[t]): Entity1[A, B, C, D, E, F, G, H, t] & SortAttrs_8[A, B, C, D, E, F, G, H, t, Entity1] & CardOne = ???
 }
 
@@ -558,7 +566,8 @@ trait ExprOneMan_8_Boolean[A, B, C, D, E, F, G, H, t, Entity1[_, _, _, _, _, _, 
 }
 
 
-trait ExprOneManOps_9[A, B, C, D, E, F, G, H, I, t, Entity1[_, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_9[A, B, C, D, E, F, G, H, I, t, Entity1, Entity2] {
+trait ExprOneManOps_9[A, B, C, D, E, F, G, H, I, t, Entity1[_, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _]]
+  extends ExprAttr_9[A, B, C, D, E, F, G, H, I, t, Entity1, Entity2] {
   protected def _exprOneMan(op: Op, vs: Seq[t]): Entity1[A, B, C, D, E, F, G, H, I, t] & SortAttrs_9[A, B, C, D, E, F, G, H, I, t, Entity1] & CardOne = ???
 }
 
@@ -627,7 +636,8 @@ trait ExprOneMan_9_Boolean[A, B, C, D, E, F, G, H, I, t, Entity1[_, _, _, _, _, 
 }
 
 
-trait ExprOneManOps_10[A, B, C, D, E, F, G, H, I, J, t, Entity1[_, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_10[A, B, C, D, E, F, G, H, I, J, t, Entity1, Entity2] {
+trait ExprOneManOps_10[A, B, C, D, E, F, G, H, I, J, t, Entity1[_, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _]]
+  extends ExprAttr_10[A, B, C, D, E, F, G, H, I, J, t, Entity1, Entity2] {
   protected def _exprOneMan(op: Op, vs: Seq[t]): Entity1[A, B, C, D, E, F, G, H, I, J, t] & SortAttrs_10[A, B, C, D, E, F, G, H, I, J, t, Entity1] & CardOne = ???
 }
 
@@ -696,7 +706,8 @@ trait ExprOneMan_10_Boolean[A, B, C, D, E, F, G, H, I, J, t, Entity1[_, _, _, _,
 }
 
 
-trait ExprOneManOps_11[A, B, C, D, E, F, G, H, I, J, K, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_11[A, B, C, D, E, F, G, H, I, J, K, t, Entity1, Entity2] {
+trait ExprOneManOps_11[A, B, C, D, E, F, G, H, I, J, K, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _]]
+  extends ExprAttr_11[A, B, C, D, E, F, G, H, I, J, K, t, Entity1, Entity2] {
   protected def _exprOneMan(op: Op, vs: Seq[t]): Entity1[A, B, C, D, E, F, G, H, I, J, K, t] & SortAttrs_11[A, B, C, D, E, F, G, H, I, J, K, t, Entity1] & CardOne = ???
 }
 
@@ -765,7 +776,8 @@ trait ExprOneMan_11_Boolean[A, B, C, D, E, F, G, H, I, J, K, t, Entity1[_, _, _,
 }
 
 
-trait ExprOneManOps_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Entity1, Entity2] {
+trait ExprOneManOps_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _]]
+  extends ExprAttr_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Entity1, Entity2] {
   protected def _exprOneMan(op: Op, vs: Seq[t]): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, t] & SortAttrs_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Entity1] & CardOne = ???
 }
 
@@ -834,7 +846,8 @@ trait ExprOneMan_12_Boolean[A, B, C, D, E, F, G, H, I, J, K, L, t, Entity1[_, _,
 }
 
 
-trait ExprOneManOps_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Entity1, Entity2] {
+trait ExprOneManOps_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
+  extends ExprAttr_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Entity1, Entity2] {
   protected def _exprOneMan(op: Op, vs: Seq[t]): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] & SortAttrs_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Entity1] & CardOne = ???
 }
 
@@ -903,7 +916,8 @@ trait ExprOneMan_13_Boolean[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Entity1[_,
 }
 
 
-trait ExprOneManOps_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Entity1, Entity2] {
+trait ExprOneManOps_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
+  extends ExprAttr_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Entity1, Entity2] {
   protected def _exprOneMan(op: Op, vs: Seq[t]): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] & SortAttrs_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Entity1] & CardOne = ???
 }
 
@@ -972,7 +986,8 @@ trait ExprOneMan_14_Boolean[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Entity1
 }
 
 
-trait ExprOneManOps_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Entity1, Entity2] {
+trait ExprOneManOps_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
+  extends ExprAttr_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Entity1, Entity2] {
   protected def _exprOneMan(op: Op, vs: Seq[t]): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] & SortAttrs_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Entity1] & CardOne = ???
 }
 
@@ -1041,7 +1056,8 @@ trait ExprOneMan_15_Boolean[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Enti
 }
 
 
-trait ExprOneManOps_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Entity1, Entity2] {
+trait ExprOneManOps_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
+  extends ExprAttr_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Entity1, Entity2] {
   protected def _exprOneMan(op: Op, vs: Seq[t]): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] & SortAttrs_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Entity1] & CardOne = ???
 }
 
@@ -1110,7 +1126,8 @@ trait ExprOneMan_16_Boolean[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, E
 }
 
 
-trait ExprOneManOps_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Entity1, Entity2] {
+trait ExprOneManOps_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
+  extends ExprAttr_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Entity1, Entity2] {
   protected def _exprOneMan(op: Op, vs: Seq[t]): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] & SortAttrs_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Entity1] & CardOne = ???
 }
 
@@ -1179,7 +1196,8 @@ trait ExprOneMan_17_Boolean[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t
 }
 
 
-trait ExprOneManOps_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Entity1, Entity2] {
+trait ExprOneManOps_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
+  extends ExprAttr_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Entity1, Entity2] {
   protected def _exprOneMan(op: Op, vs: Seq[t]): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] & SortAttrs_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Entity1] & CardOne = ???
 }
 
@@ -1248,7 +1266,8 @@ trait ExprOneMan_18_Boolean[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R
 }
 
 
-trait ExprOneManOps_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Entity1, Entity2] {
+trait ExprOneManOps_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
+  extends ExprAttr_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Entity1, Entity2] {
   protected def _exprOneMan(op: Op, vs: Seq[t]): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] & SortAttrs_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Entity1] & CardOne = ???
 }
 
@@ -1317,7 +1336,8 @@ trait ExprOneMan_19_Boolean[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R
 }
 
 
-trait ExprOneManOps_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Entity1, Entity2] {
+trait ExprOneManOps_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
+  extends ExprAttr_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Entity1, Entity2] {
   protected def _exprOneMan(op: Op, vs: Seq[t]): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] & SortAttrs_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Entity1] & CardOne = ???
 }
 
@@ -1386,7 +1406,8 @@ trait ExprOneMan_20_Boolean[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R
 }
 
 
-trait ExprOneManOps_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Entity1, Entity2] {
+trait ExprOneManOps_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
+  extends ExprAttr_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Entity1, Entity2] {
   protected def _exprOneMan(op: Op, vs: Seq[t]): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] & SortAttrs_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Entity1] & CardOne = ???
 }
 
@@ -1455,7 +1476,8 @@ trait ExprOneMan_21_Boolean[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R
 }
 
 
-trait ExprOneManOps_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Entity1, Entity2] {
+trait ExprOneManOps_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
+  extends ExprAttr_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Entity1, Entity2] {
   protected def _exprOneMan(op: Op, vs: Seq[t]): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] & SortAttrs_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Entity1] & CardOne = ???
 }
 

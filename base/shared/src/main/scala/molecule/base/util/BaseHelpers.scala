@@ -1,7 +1,7 @@
 package molecule.base.util
 
 import java.net.URI
-import java.time.*
+import java.time._
 import java.time.format.DateTimeFormatter
 import java.util.{Date, UUID}
 
