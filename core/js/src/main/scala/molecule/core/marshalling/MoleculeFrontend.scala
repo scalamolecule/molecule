@@ -6,16 +6,21 @@ import molecule.base.error.*
 import molecule.core.ast.DataModel.*
 import molecule.core.marshalling.Boopicklers.*
 import molecule.core.marshalling.deserialize.UnpickleTpls
-import molecule.core.spi.{Conn, TxReport}
+import molecule.core.spi.TxReport
 import molecule.core.util.Executor.*
 import molecule.core.util.FutureUtils
+import org.scalajs.dom
+import org.scalajs.dom.{MessageEvent, WebSocket}
+import sttp.client4.UriContext
 import sttp.client4.fetch.FetchBackend
-import sttp.model.Uri
 import sttp.tapir.PublicEndpoint
 import sttp.tapir.client.sttp4.SttpClientInterpreter
 import scala.concurrent.Future
+import scala.scalajs.js.typedarray.TypedArrayBufferOps.*
+import scala.scalajs.js.typedarray.{ArrayBuffer, TypedArrayBuffer}
 
-case class MoleculeClient(backendBaseUri: Uri)
+
+case class MoleculeFrontend(host: String, port: Int)
   extends MoleculeRpc
     with MoleculeEndpoints
     with FutureUtils {
@@ -24,10 +29,10 @@ case class MoleculeClient(backendBaseUri: Uri)
   private def fetch[T](
     endpoint: PublicEndpoint[ByteBuffer, MoleculeError, ByteBuffer, Any],
     args: ByteBuffer,
-    unpickle: ByteBuffer => T
+    unpickle: ByteBuffer => T,
   ): Future[Either[MoleculeError, T]] = {
     SttpClientInterpreter()
-      .toRequestThrowDecodeFailures(endpoint, Some(backendBaseUri))
+      .toRequestThrowDecodeFailures(endpoint, Some(uri"http://$host:$port"))
       .apply(args)
       .send(FetchBackend())
       .map { response =>
@@ -37,8 +42,62 @@ case class MoleculeClient(backendBaseUri: Uri)
         }
       }
       .recover {
-        case unexpected => Left(ExecutionError(unexpected.getMessage))
+        case unexpected: Throwable =>
+          unexpected.printStackTrace()
+          Left(ExecutionError(unexpected.getMessage))
       }
+  }
+
+
+  override def subscribe[Tpl](
+    proxy: ConnProxy,
+    elements: List[Element],
+    limit: Option[Int],
+    callback: List[Tpl] => Unit
+  ): Future[Unit] = Future {
+    // One websocket connection per subscription ??
+    //      val socket = new WebSocket(s"ws://$host:$port/molecule/subscribe/" + UUID.randomUUID())
+    val socket = new WebSocket(s"ws://$host:$port/molecule/subscribe")
+    socket.binaryType = "arraybuffer"
+    socket.onerror = {
+      case e: dom.Event =>
+        logger.error(s"WebSocket error: $e!")
+        //        keys(e).toList.foreach(k => println(s"$k -> ${apply(k)}"))
+        socket.close(1000, e.toString)
+    }
+    socket.onclose = {
+      case _: dom.CloseEvent => logger.warn("WebSocket onclose")
+    }
+    socket.onopen = {
+      case _: dom.Event =>
+        logger.trace(s"WebSocket onopen")
+        //        println("WebSocket onopen...")
+        socket.send(
+          Pickle.intoBytes((proxy, elements, limit)).typedArray().buffer
+        )
+    }
+    socket.onmessage = {
+      case e: MessageEvent =>
+        logger.trace(s"WebSocket onmessage")
+        //        println("WebSocket onmessage... ")
+        val resultSerialized = TypedArrayBuffer.wrap(e.data.asInstanceOf[ArrayBuffer])
+        UnpickleTpls[Tpl](elements, resultSerialized).unpickleEither match {
+          case Right(tpls)                      => callback(tpls)
+          case Left(ExecutionError("no match")) => // do nothing
+          case Left(moleculeError)              => logger.warn(moleculeError.toString)
+        }
+    }
+  }
+
+  override def unsubscribe(
+    proxy: ConnProxy,
+    elements: List[Element]
+  ): Future[Either[MoleculeError, Unit]] = {
+    fetch[Unit](
+      moleculeEndpoint_unsubscribe,
+      Pickle.intoBytes((proxy, elements)),
+      (_: ByteBuffer) => ()
+    )
   }
 
   override def query[Tpl](

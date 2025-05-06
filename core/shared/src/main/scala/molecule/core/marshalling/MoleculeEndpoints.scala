@@ -37,6 +37,7 @@ trait MoleculeEndpoints {
   val moleculeEndpoint_query      : publicEndpoint = mkEndpoint("query")
   val moleculeEndpoint_queryOffset: publicEndpoint = mkEndpoint("queryOffset")
   val moleculeEndpoint_queryCursor: publicEndpoint = mkEndpoint("queryCursor")
+  val moleculeEndpoint_unsubscribe: publicEndpoint = mkEndpoint("unsubscribe")
   val moleculeEndpoint_save       : publicEndpoint = mkEndpoint("save")
   val moleculeEndpoint_insert     : publicEndpoint = mkEndpoint("insert")
   val moleculeEndpoint_update     : publicEndpoint = mkEndpoint("update")

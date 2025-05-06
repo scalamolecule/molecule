@@ -94,6 +94,15 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
       "io.suzaku" %%% "boopickle" % "1.5.0",
       "com.softwaremill.sttp.tapir" %%% "tapir-core" % tapirVersion,
 
+
+
+//      "com.softwaremill.sttp.client4" %%% "fs2" % client4Version,
+//      "com.softwaremill.sttp.client4" %%% "pekko-http-backend" % client4Version,
+//      "org.apache.pekko" %%% "pekko-stream" % "1.1.3",
+
+
+
+
       // Streaming
       "com.lihaoyi" %%% "geny" % "1.1.1",
       "co.fs2" %%% "fs2-core" % "3.12.0",
@@ -102,6 +111,10 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
   .jvmSettings(
     libraryDependencies ++= Seq(
       "org.typelevel" %% "cats-effect" % "3.6.0",
+
+      "com.softwaremill.sttp.client4" %% "fs2" % client4Version,
+      "com.softwaremill.sttp.client4" %% "pekko-http-backend" % client4Version,
+      "org.apache.pekko" %% "pekko-stream" % "1.1.3",
     )
   )
   .jsSettings(

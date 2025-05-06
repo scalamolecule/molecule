@@ -10,22 +10,26 @@ import scala.language.implicitConversions
 case class Subscription(
   suite: Test,
   api: Api_async & Spi_async & DbProviders
-) extends TestUtils {
+) extends TestUtils with Platform {
 
   import api.*
   import suite.*
 
   "Mutations call back" - types { implicit conn =>
-    var intermediaryCallbackResults = List.empty[List[Int]]
+    var intermediaryResults = List.empty[List[Int]]
     for {
       // Initial data
       _ <- Entity.i(1).save.transact
 
       // Start subscription and define a callback function
-      _ <- Entity.i.query.subscribe { freshResult =>
-        // Do something with fresh result
-        intermediaryCallbackResults = intermediaryCallbackResults :+ freshResult.sorted
+      _ <- Entity.i.query.subscribe { updatedResult =>
+        // Do something with updated result
+        intermediaryResults = intermediaryResults :+ updatedResult.sorted
       }
+
+      // When calling from ScalaJS, calls are asynchronous, and we need to wait
+      // a bit for the subscription websocket to be ready to serve callbacks.
+      _ <- delay(500)
 
       // Mutations to be monitored by subscription
       id <- Entity.i(2).save.transact.map(_.id)
@@ -44,34 +48,38 @@ case class Subscription(
       _ <- Entity.string("foo").save.transact
 
       // Callback produced all intermediary results correctly
-      _ = intermediaryCallbackResults ==> List(
-        List(1, 2), // query result after 2 was saved
-        List(1, 2, 3, 4), // query result after 3 and 4 were inserted
+      _ = intermediaryResults ==> List(
+        List(1, 2), //        query result after 2 was saved
+        List(1, 2, 3, 4), //  query result after 3 and 4 were inserted
         List(1, 3, 4, 20), // query result after 2 was updated to 20
-        List(1, 3, 4), // query result after 20 was deleted
+        List(1, 3, 4), //     query result after 20 was deleted
       )
     } yield ()
   }
 
 
   "Multiple callbacks and unsubscribe" - types { implicit conn =>
-    var fooResults = List.empty[List[Int]]
-    var barResults = List.empty[List[String]]
+    var intResults    = List.empty[List[Int]]
+    var stringResults = List.empty[List[String]]
     for {
       // Initial data
       _ <- Entity.i(1).save.transact
       _ <- Entity.s("a").save.transact
 
-      // Start subscription for fooResults
-      _ <- Entity.i.query.subscribe { freshResult =>
-        fooResults = fooResults :+ freshResult.sorted
+      // Start subscription for intResults
+      _ <- Entity.i.query.subscribe { updatedInts =>
+        intResults = intResults :+ updatedInts.sorted
       }
 
-      // Start subscription for barResults
-      barQuery = Entity.s.query
-      _ <- barQuery.subscribe { freshResult =>
-        barResults = barResults :+ freshResult.sorted
+      // Start subscription for stringResults
+      stringQuery = Entity.s.query
+      _ <- stringQuery.subscribe { updatedStrings =>
+        stringResults = stringResults :+ updatedStrings.sorted
       }
+
+      // When calling from ScalaJS, calls are asynchronous, and we need to wait
+      // a bit for the subscription websockets to be ready to serve callbacks.
+      _ <- delay(500)
 
       // Transact additional data
       _ <- Entity.i(2).save.transact
@@ -84,30 +92,30 @@ case class Subscription(
       _ <- Entity.string("foo").save.transact
 
       // Intermediary results have been pushed to correct subscriptions
-      _ = fooResults ==> List(
+      _ = intResults ==> List(
         List(1, 2),
         List(1, 2, 3),
       )
-      _ = barResults ==> List(
+      _ = stringResults ==> List(
         List("a", "b"),
         List("a", "b", "c"),
       )
 
-      // Cancel barResults update subscription
-      _ <- barQuery.unsubscribe()
+      // Cancel stringResults update subscription
+      _ <- stringQuery.unsubscribe()
 
       // Mutate some more
       _ <- Entity.s("x").save.transact
       _ <- Entity.i(4).save.transact
 
-      // After unsubscribing, barResults is no longer automatically updated (x wasn't added)
-      _ = barResults ==> List(
+      // After unsubscribing, stringResults is no longer automatically updated (x wasn't added)
+      _ = stringResults ==> List(
         List("a", "b"),
         List("a", "b", "c"),
       )
 
-      // fooResults keeps subscribing (4 was added)
-      _ = fooResults ==> List(
+      // intResults keeps subscribing (4 was added)
+      _ = intResults ==> List(
         List(1, 2),
         List(1, 2, 3),
         List(1, 2, 3, 4),

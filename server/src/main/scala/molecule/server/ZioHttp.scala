@@ -14,7 +14,7 @@ case class ZioHttp(rpc: MoleculeRpc) extends MoleculeServerEndpoints(rpc) {
 
   // Convert all endpoints
   private val zioEndpoints: List[ServerEndpoint[Any, Task]] =
-    moleculeServerEndpoints.map(convertEndpoint[Any])
+    moleculeServerEndpoints_Future.map(convertEndpoint[Any])
 
   // Create ZIO HTTP app
   private val app = ZioHttpInterpreter().toHttp(zioEndpoints)

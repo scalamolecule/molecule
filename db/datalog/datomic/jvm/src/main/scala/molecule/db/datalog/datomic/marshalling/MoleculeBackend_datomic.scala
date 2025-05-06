@@ -62,6 +62,18 @@ trait MoleculeBackend_datomic
     } yield tpls
   }
 
+  override def subscribe[AnyTpl](
+    proxy: ConnProxy,
+    elements: List[Element],
+    limit: Option[Int],
+    callback: List[AnyTpl] => Unit
+  ): Future[Unit] = {
+    for {
+      conn <- getConn(proxy)
+      _ <- Query[AnyTpl](elements, limit).subscribe(callback)(conn, global)
+    } yield ()
+  }
+
   override def save(
     proxy: ConnProxy,
     elements: List[Element]

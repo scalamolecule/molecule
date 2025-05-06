@@ -13,7 +13,7 @@ trait DbConnection_sqlite extends DbConnection {
 
   def getConnection(schema: Schema_sqlite): JdbcConn_JS = {
     val proxy = JdbcProxy("jdbc:sqlite::memory:", schema)
-    JdbcConn_JS(proxy, uri"http://localhost:8080")
+    JdbcConn_JS(proxy, "localhost", 8080)
   }
 
   def run(test: Conn => Any, schema: Schema_sqlite): Any = {

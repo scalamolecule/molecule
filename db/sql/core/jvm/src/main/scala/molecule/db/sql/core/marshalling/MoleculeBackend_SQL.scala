@@ -58,6 +58,26 @@ trait MoleculeBackend_SQL
     )
   }
 
+
+  override def subscribe[AnyTpl](
+    proxy: ConnProxy,
+    elements: List[Element],
+    limit: Option[Int],
+    callback: List[AnyTpl] => Unit
+  ): Future[Unit] = {
+    getConn(proxy).map { conn =>
+      query_subscribe[AnyTpl](Query(elements, limit), callback)(conn)
+    }
+  }
+  override def unsubscribe(
+    proxy: ConnProxy,
+    elements: List[Element]
+  ): Future[Either[MoleculeError, Unit]] = either {
+    getConn(proxy).map { conn =>
+      query_unsubscribe[Unit](Query(elements))(conn)
+    }
+  }
+
   override def save(
     proxy: ConnProxy,
     elements: List[Element]

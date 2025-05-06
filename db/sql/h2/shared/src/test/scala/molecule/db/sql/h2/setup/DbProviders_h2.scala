@@ -4,7 +4,6 @@ import boopickle.Default.*
 import molecule.core.spi.Conn
 import molecule.coreTests.domains.schema.*
 import molecule.coreTests.setup.{DbProviders, Platform}
-import molecule.db.sql.h2
 
 trait DbProviders_h2 extends DbProviders with DbConnection_h2 with Platform {
   override val database: String = "h2"

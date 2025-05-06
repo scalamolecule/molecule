@@ -5,11 +5,10 @@ import molecule.core.marshalling.DatomicProxy
 import molecule.core.spi.Conn
 import molecule.core.util.Executor.*
 import molecule.coreTests.setup.DbConnection
-import molecule.db.datalog
 import molecule.db.datalog.datomic.facade.{DatomicConn_JVM, DatomicPeer}
 import zio.{ZIO, ZLayer}
+import scala.concurrent.Await
 import scala.concurrent.duration.*
-import scala.concurrent.{Await, Future}
 
 trait DbConnection_datomic extends DbConnection {
 
@@ -33,10 +32,5 @@ trait DbConnection_datomic extends DbConnection {
         getConnection(schema)
       }
     )
-  }
-
-  def delay[T](ms: Int)(body: => T): Future[T] = Future {
-    Thread.sleep(ms)
-    body
   }
 }

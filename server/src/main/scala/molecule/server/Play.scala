@@ -19,7 +19,7 @@ case class Play(rpc: MoleculeRpc) extends MoleculeServerEndpoints(rpc) {
       port = Some(8080),
       mode = Mode.Dev
     )
-    val routes = PlayServerInterpreter().toRoutes(moleculeServerEndpoints)
+    val routes = PlayServerInterpreter().toRoutes(moleculeServerEndpoints_Future)
 
     // 3. Start the server (Netty backend)
     val server = PekkoHttpServer.fromRouterWithComponents(config)(_ => routes)

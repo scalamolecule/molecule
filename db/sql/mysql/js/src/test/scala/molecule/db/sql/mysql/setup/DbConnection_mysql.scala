@@ -21,7 +21,7 @@ object DbConnection_mysql {
       s"?allowMultiQueries=true"
 
     val proxy = JdbcProxy(url, schema)
-    JdbcConn_JS(proxy, uri"http://localhost:8080")
+    JdbcConn_JS(proxy, "localhost", 8080)
   }
 
   def run(test: Conn => Any, schema: Schema_mysql): Any = {

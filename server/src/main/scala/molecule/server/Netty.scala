@@ -12,7 +12,7 @@ case class Netty(rpc: MoleculeRpc) extends MoleculeServerEndpoints(rpc) {
   def run(db: String): Future[Unit] = {
     val server = NettyFutureServer()
       .port(8080)
-      .addEndpoints(moleculeServerEndpoints)
+      .addEndpoints(moleculeServerEndpoints_Future)
       .start()
 
     server.foreach { _ =>

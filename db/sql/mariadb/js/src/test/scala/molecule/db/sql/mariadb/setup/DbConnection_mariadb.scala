@@ -26,7 +26,7 @@ object DbConnection_mariadb {
       s"&password="
 
     val proxy = JdbcProxy(url, schema)
-    val conn  = JdbcConn_JS(proxy, uri"http://localhost:8080")
+    val conn  = JdbcConn_JS(proxy, "localhost", 8080)
     test(conn)
   }
 
@@ -35,7 +35,7 @@ object DbConnection_mariadb {
     ZLayer.scoped(
       ZIO.attemptBlocking {
         val proxy = JdbcProxy(url, schema)
-        JdbcConn_JS(proxy, uri"http://localhost:8080")
+        JdbcConn_JS(proxy, "localhost", 8080)
       }
     )
   }

@@ -2,6 +2,10 @@ package molecule.core.marshalling
 
 import java.nio.ByteBuffer
 import boopickle.Default.*
+import cats.effect.std.Queue
+import cats.effect.unsafe.IORuntime
+import cats.effect.{IO, Ref}
+import fs2.Pipe
 import molecule.base.error.*
 import molecule.core.ast.DataModel.Element
 import molecule.core.marshalling.Boopicklers.*
@@ -9,15 +13,32 @@ import molecule.core.marshalling.serialize.PickleTpls
 import molecule.core.spi.TxReport
 import molecule.core.util.Executor.*
 import molecule.core.util.MoleculeLogging
+import org.apache.pekko.NotUsed
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.http.scaladsl.model.ws.{BinaryMessage, Message}
+import org.apache.pekko.stream.scaladsl.{Flow, Sink, Source, SourceQueueWithComplete}
+import org.apache.pekko.stream.{Materializer, OverflowStrategy}
+import org.apache.pekko.util.ByteString
+import sttp.capabilities.WebSockets
+import sttp.capabilities.fs2.Fs2Streams
 import sttp.tapir.*
 import sttp.tapir.server.ServerEndpoint
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.language.implicitConversions
 
 abstract class MoleculeServerEndpoints(rpc: MoleculeRpc)
   extends MoleculeEndpoints with MoleculeLogging {
 
   private val msg = "RPC failed on server: "
+
+  implicit class byteBuffer2byteArray(byteBuffer: ByteBuffer) {
+    def toArray: Array[Byte] = {
+      val length    = byteBuffer.remaining()
+      val byteArray = Array.ofDim[Byte](length)
+      System.arraycopy(byteBuffer.array(), 0, byteArray, 0, length)
+      byteArray
+    }
+  }
 
   // Execute Molecule action corresponding to each Tapir endpoint
   private def mkServerEndpoint(
@@ -56,19 +77,109 @@ abstract class MoleculeServerEndpoints(rpc: MoleculeRpc)
    * Add to Tapir backend server of your choice like this:
    *
    * val server = NettyFutureServer()
-   *   .port(8080)
-   *   .addEndpoints(moleculeServerEndpoints)
-   *   ...
+   * .port(8080)
+   * .addEndpoints(moleculeServerEndpoints)
+   * ...
    */
-  val moleculeServerEndpoints: List[ServerEndpoint[Any, Future]] = List(
+  val moleculeServerEndpoints_Future: List[ServerEndpoint[Any, Future]] = List(
     mkServerEndpoint(moleculeEndpoint_query, executeQuery),
     mkServerEndpoint(moleculeEndpoint_queryOffset, executeQueryOffset),
     mkServerEndpoint(moleculeEndpoint_queryCursor, executeQueryCursor),
+    mkServerEndpoint(moleculeEndpoint_unsubscribe, executeUnsubscribe),
     mkServerEndpoint(moleculeEndpoint_save, executeSave),
     mkServerEndpoint(moleculeEndpoint_insert, executeInsert),
     mkServerEndpoint(moleculeEndpoint_update, executeUpdate),
     mkServerEndpoint(moleculeEndpoint_delete, executeDelete),
   )
+
+  val moleculeEndpoint_subscribe = endpoint.get.in("molecule" / "subscribe" / path[String])
+
+
+  val websocket = webSocketBody[Array[Byte], CodecFormat.OctetStream, Array[Byte], CodecFormat.OctetStream]
+
+  val moleculeEndpoint_subscribe_IO = moleculeEndpoint_subscribe.out(websocket(Fs2Streams[IO]))
+
+
+  def moleculeSubscribePipe(implicit runtime: IORuntime): Pipe[IO, Array[Byte], Array[Byte]] = { in =>
+    fs2.Stream.eval {
+      for {
+        queue <- Queue.unbounded[IO, Array[Byte]]
+        ref <- Ref.of[IO, Boolean](false)
+
+        inProcessed = in.evalMap { msg =>
+          ref.get.flatMap {
+            case false =>
+              val (proxy, elements, limit) =
+                Unpickle[(ConnProxy, List[Element], Option[Int])].fromBytes(ByteBuffer.wrap(msg))
+
+              val callback: List[Any] => Unit = { result =>
+                val bytes = PickleTpls(elements, false).pickleEither2ByteArray(Right(result))
+                // Run offer in background since callback is synchronous
+                queue.offer(bytes).start.void.unsafeRunSync()
+              }
+
+              ref.set(true) *> IO(rpc.subscribe[Any](proxy, elements, limit, callback))
+
+            case true =>
+              IO.unit
+          }
+        }
+
+        out = fs2.Stream.fromQueueUnterminated(queue)
+
+      } yield inProcessed.drain.merge(out)
+    }.flatten
+  }
+
+
+  val moleculeServerEndpoint_subscribe: ServerEndpoint[Fs2Streams[IO] & WebSockets, IO] = {
+    moleculeEndpoint_subscribe_IO
+      .serverLogicSuccess(_ => IO.pure(moleculeSubscribePipe(cats.effect.unsafe.implicits.global)))
+  }
+
+
+  def wsFlow(implicit
+             system: ActorSystem,
+             mat: Materializer,
+             ec: ExecutionContext
+  ): Flow[Message, Message, NotUsed] = {
+    val (queue, source): (SourceQueueWithComplete[Message], Source[Message, NotUsed]) =
+      Source
+        .queue[Message](bufferSize = 16, OverflowStrategy.backpressure)
+        .preMaterialize()
+
+    val sink: Sink[Message, NotUsed] =
+      Sink.foreach[Message] {
+        case BinaryMessage.Strict(argsSerialized) =>
+          // Deserialize callback query coordinates
+          val (proxy, elements, limit) =
+            Unpickle[(ConnProxy, List[Element], Option[Int])]
+              .fromBytes(argsSerialized.asByteBuffer)
+
+          // Send query results if match
+          val callback: List[Any] => Unit = { (result: List[Any]) =>
+            queue.offer(
+              BinaryMessage(ByteString(
+                PickleTpls(elements, false).pickleEither(Right(result))
+              ))
+            ).recover {
+              case ex => system.log.warning(s"WebSocket queue offer failed: ${ex.getMessage}")
+            }
+          }
+          rpc.subscribe[Any](proxy, elements, limit, callback)
+
+        case _ =>
+          val errorMsg = BinaryMessage(ByteString(
+            Pickle.intoBytes[Either[ModelError, Int]](
+              Left(ModelError("Expected BinaryMessage.Strict from websocket queue"))
+            )
+          ))
+          queue.offer(errorMsg)
+      }.mapMaterializedValue(_ => NotUsed)
+
+    Flow.fromSinkAndSource(sink, source)
+  }
+
 
   /** Server logic
    *
@@ -88,8 +199,6 @@ abstract class MoleculeServerEndpoints(rpc: MoleculeRpc)
         case Left(err)     => Left(err)
       }
   }
-
-  def executeQueryStream(args: ByteBuffer) = ???
 
   def executeQueryOffset(args: ByteBuffer): Future[Either[MoleculeError, ByteBuffer]] = {
     val (proxy, elements, limit, offset) =
@@ -112,6 +221,17 @@ abstract class MoleculeServerEndpoints(rpc: MoleculeRpc)
         case Right((tpls, cursor, more)) =>
           Right(PickleTpls(elements, false).pickleCursor(tpls, cursor, more))
         case Left(err)                   => Left(err)
+      }
+  }
+
+  def executeUnsubscribe(args: ByteBuffer): Future[Either[MoleculeError, ByteBuffer]] = {
+    val (proxy, elements) =
+      Unpickle[(ConnProxy, List[Element])].fromBytes(args: ByteBuffer)
+    rpc
+      .unsubscribe(proxy, elements)
+      .map {
+        case Right(()) => Right(Pickle.intoBytes[Unit](()))
+        case Left(err) => Left(err)
       }
   }
 

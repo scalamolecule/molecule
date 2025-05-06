@@ -52,30 +52,16 @@ trait SpiBaseJS_async extends Spi_async with Renderer with FutureUtils {
   }
 
 
-  // Query backend if cached subscription attributes are mutated.
-  // Probably need a websocket solution instead
   override def query_subscribe[Tpl](
     q: Query[Tpl], callback: List[Tpl] => Unit
   )(implicit conn0: Conn, ec: EC): Future[Unit] = {
-    val conn                 = conn0.asInstanceOf[JdbcConn_JS]
-    val elements             = q.elements
-    val involvedAttrs        = getAttrNames(elements)
-    val involvedDeleteEntity = getInitialEntity(elements)
-    val maybeCallback        = (mutationAttrs: Set[String], isDelete: Boolean) => {
-      if (
-        mutationAttrs.exists(involvedAttrs.contains) ||
-          isDelete && mutationAttrs.head.startsWith(involvedDeleteEntity)
-      ) {
-        conn.rpc.query[Tpl](conn.proxy, q.elements, q.optLimit)
-          .future
-          .map(callback)
-      } else Future.unit
-    }
-    Future(conn.addCallback(elements -> maybeCallback))
+    val conn = conn0.asInstanceOf[JdbcConn_JS]
+    conn.rpc.subscribe[Tpl](conn.proxy, q.elements, q.optLimit, callback)
   }
 
   override def query_unsubscribe[Tpl](q: Query[Tpl])(implicit conn0: Conn, ec: EC): Future[Unit] = {
-    Future(conn0.removeCallback(q.elements))
+    val conn = conn0.asInstanceOf[JdbcConn_JS]
+    conn.rpc.unsubscribe(conn.proxy, q.elements).future
   }
 
 
@@ -91,7 +77,6 @@ trait SpiBaseJS_async extends Spi_async with Renderer with FutureUtils {
       } else {
         throw ValidationErrors(errors)
       }
-      _ <- conn.callback(save.elements)
     } yield {
       txReport
     }
@@ -129,7 +114,6 @@ trait SpiBaseJS_async extends Spi_async with Renderer with FutureUtils {
       } else {
         throw InsertErrors(errors)
       }
-      _ <- conn.callback(insert.elements)
     } yield {
       txReport
     }
@@ -157,7 +141,6 @@ trait SpiBaseJS_async extends Spi_async with Renderer with FutureUtils {
       _ <- if (update.doInspect) update_inspect(update) else Future.unit
       // Validating on JVM side only since it requires db lookups
       txReport <- conn.rpc.update(conn.proxy, update.elements, update.isUpsert).future
-      _ <- conn.callback(update.elements)
     } yield {
       txReport
     }
@@ -180,7 +163,6 @@ trait SpiBaseJS_async extends Spi_async with Renderer with FutureUtils {
     val conn = conn0.asInstanceOf[JdbcConn_JS]
     for {
       txReport <- conn.rpc.delete(conn.proxy, delete.elements).future
-      _ <- conn.callback(delete.elements, true)
     } yield txReport
   }
 

@@ -31,7 +31,7 @@ abstract class Conn(val proxy: ConnProxy)
     ExecutionError(s"`$method` only implemented on JVM platform.")
 
 
-  // Subscriptions -------------------------------------------------------------
+  // Subscription callbacks ----------------------------------------------------
 
   private var callbacks = List.empty[(List[Element], (Set[String], Boolean) => Future[Unit])]
 

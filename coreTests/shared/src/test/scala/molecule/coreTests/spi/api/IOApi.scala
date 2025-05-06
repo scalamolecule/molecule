@@ -5,14 +5,15 @@ import molecule.base.error.*
 import molecule.core.api.Api_io
 import molecule.core.spi.Spi_io
 import molecule.coreTests.domains.dsl.Types.*
-import molecule.coreTests.setup.{DbProviders, TestUtils, Test_io}
+import molecule.coreTests.setup.{DbProviders, Platform, TestUtils, Test_io}
 import scala.annotation.nowarn
+import scala.concurrent.duration.DurationInt
 import scala.language.implicitConversions
 
 case class IOApi(
   suite: Test_io,
   api: Api_io & Spi_io & DbProviders
-) extends TestUtils {
+) extends TestUtils with Platform {
 
   import api.*
   import suite.*
@@ -145,6 +146,10 @@ case class IOApi(
       _ <- Entity.i.query.subscribe { freshResult =>
         intermediaryCallbackResults = intermediaryCallbackResults :+ freshResult
       }
+
+      // When calling from ScalaJS, calls are asynchronous, and we need to wait
+      // a bit for the subscription websockets to be ready to serve callbacks.
+      _ <- IO.sleep(500.milliseconds)
 
       // Mutations to be monitored by subscription
       id <- Entity.i(2).save.transact.map(_.id)

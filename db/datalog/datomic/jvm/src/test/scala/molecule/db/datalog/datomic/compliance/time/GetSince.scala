@@ -73,10 +73,10 @@ class Test_GetSince extends Test with DbProviders_datomic with TestUtils {
     for {
       _ <- Entity.int(1).save.transact
       d1 = new Date()
-      _ <- delay(2)(()) // Ensure dateSet are not within the same ms
+      _ <- delay(2) // Ensure dateSet are not within the same ms
       _ <- Entity.int(2).save.transact
       d2 = new Date()
-      _ <- delay(2)(())
+      _ <- delay(2)
       _ <- Entity.int(3).save.transact
       d3 = new Date()
 

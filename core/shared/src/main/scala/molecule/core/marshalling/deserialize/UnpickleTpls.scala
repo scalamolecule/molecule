@@ -62,6 +62,13 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
     }
   }
 
+  def unpickleEither: Either[MoleculeError, List[Tpl]] = {
+    dec.readInt match { // decode Left/Right
+      case 2 => Right(unpickleTpls)
+      case _ => Left(Unpickle.apply[MoleculeError].fromState(state))
+    }
+  }
+
   @tailrec
   final protected def resolveUnpicklers(
     elements: List[Element],

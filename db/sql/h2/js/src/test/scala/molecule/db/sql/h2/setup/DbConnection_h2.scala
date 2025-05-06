@@ -15,7 +15,7 @@ trait DbConnection_h2 extends DbConnection {
   def run(test: Conn => Any, schema: Schema_h2): Any = {
     val url   = s"jdbc:h2:mem:test" + Random.nextInt().abs
     val proxy = JdbcProxy(url, schema)
-    val conn  = JdbcConn_JS(proxy, uri"http://localhost:8080")
+    val conn  = JdbcConn_JS(proxy, "localhost", 8080)
     test(conn)
   }
 
@@ -24,7 +24,7 @@ trait DbConnection_h2 extends DbConnection {
     ZLayer.scoped(
       ZIO.attemptBlocking {
         val proxy = JdbcProxy(url, schema)
-        JdbcConn_JS(proxy, uri"http://localhost:8080")
+        JdbcConn_JS(proxy, "localhost", 8080)
       }
     )
   }

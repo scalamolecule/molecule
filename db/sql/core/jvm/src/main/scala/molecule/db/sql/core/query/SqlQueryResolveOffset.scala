@@ -37,6 +37,7 @@ case class SqlQueryResolveOffset[Tpl](
     }
   }
 
+
   private def handleTuples(
     c: CastStrategy, sortedRows: RS, conn: JdbcConn_JVM
   ): (List[Tpl], Int, Boolean) = {
@@ -93,17 +94,13 @@ case class SqlQueryResolveOffset[Tpl](
           isDelete && mutationAttrs.head.startsWith(involvedDeleteEntity)
       ) {
         Future(
-          callback(
+          callback {
             SqlQueryResolveOffset(elements, optLimit, None, freshM2q(elements))
               .getListFromOffset_sync(conn)._1
-          )
+          }
         )
       } else Future.unit
     }
-    conn.addCallback(elements -> maybeCallback)
-  }
-
-  def unsubscribe(conn: JdbcConn_JVM): Unit = {
-    conn.removeCallback(elements)
+    conn.addCallback((elements, maybeCallback))
   }
 }

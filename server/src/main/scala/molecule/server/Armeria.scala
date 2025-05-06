@@ -14,7 +14,7 @@ case class Armeria(rpc: MoleculeRpc) extends MoleculeServerEndpoints(rpc) {
 
     // Create Armeria HTTP service from Tapir endpoints
     val tapirService = ArmeriaFutureServerInterpreter()
-      .toService(moleculeServerEndpoints)
+      .toService(moleculeServerEndpoints_Future)
 
     // Build and start the Armeria server
     val server = Server.builder()

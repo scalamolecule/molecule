@@ -7,6 +7,7 @@ import molecule.core.spi.Spi_async
 import molecule.core.util.Executor.*
 import molecule.coreTests.domains.dsl.Types.*
 import molecule.coreTests.setup.*
+import zio.test.TestClock
 import scala.annotation.nowarn
 import scala.concurrent.Future
 
@@ -15,7 +16,7 @@ import scala.concurrent.Future
 case class AsyncApi(
   suite: Test,
   api: Api_async & Spi_async & DbProviders
-) extends TestUtils {
+) extends TestUtils with Platform {
 
   import api.*
   import suite.*
@@ -165,6 +166,10 @@ case class AsyncApi(
       _ <- Entity.i.query.subscribe { freshResult =>
         intermediaryCallbackResults = intermediaryCallbackResults :+ freshResult
       }
+
+      // When calling from ScalaJS, calls are asynchronous, and we need to wait
+      // a bit for the subscription websockets to be ready to serve callbacks.
+      _ <- delay(500)
 
       // Mutations to be monitored by subscription
       id <- Entity.i(2).save.transact.map(_.id)

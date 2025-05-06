@@ -7,7 +7,7 @@ import java.util.{Date, UUID}
 import boopickle.*
 import boopickle.BasicPicklers.*
 import boopickle.Default.*
-import molecule.base.error.ModelError
+import molecule.base.error.{ModelError, MoleculeError}
 import molecule.core.ast.DataModel.*
 import molecule.core.marshalling.Boopicklers.*
 import molecule.core.util.{ModelUtils, MoleculeLogging, SerializationUtils}
@@ -23,8 +23,9 @@ case class PickleTpls(
   with MoleculeLogging {
 
   private val prevRefs = ListBuffer.empty[String]
-  private val state    = new PickleState(new EncoderSize(new HeapByteBufferProvider))
+  private val state    = new PickleState(new EncoderSize())
   private val enc      = state.enc
+  type DummyNotUsed = Int
 
 
   def pickleOffset(tpls: Seq[Any], limit: Int, more: Boolean): ByteBuffer = {
@@ -46,7 +47,7 @@ case class PickleTpls(
     state.toByteBuffer
   }
 
-  def pickleTpls(tpls: Seq[Any]): Unit = {
+  private def pickleTpls(tpls: Seq[Any]): Unit = {
     enc.writeInt(tpls.size) // encode length of List of Tpl
     if (tpls.nonEmpty) {
       if (allTuples) {
@@ -63,6 +64,23 @@ case class PickleTpls(
         }
       }
     }
+  }
+
+  def pickleEither2ByteArray(result: Either[MoleculeError, Seq[Any]]): Array[Byte] = {
+    result match {
+      case Right(tpls) => pickleTpls(tpls)
+      case Left(err)   => LeftPickler[MoleculeError, DummyNotUsed].pickle(Left(err))(state)
+    }
+    state.toByteBuffer.toArray
+  }
+  def pickleEither(result: Either[MoleculeError, Seq[Any]]): ByteBuffer = {
+    result match {
+      case Right(tpls) =>
+        enc.writeInt(2) // Encode Right
+        pickleTpls(tpls)
+      case Left(err)   => LeftPickler[MoleculeError, DummyNotUsed].pickle(Left(err))(state)
+    }
+    state.toByteBuffer
   }
 
 
@@ -210,10 +228,10 @@ case class PickleTpls(
     lazy val writeDouble: Double => Unit = (value: Double) => enc.writeString(value.toString)
 
     // todo: how can we make these work instead?
-    //    lazy val writeInt       : Int => Unit        = (value: Int) => enc.writeInt(value)
-    //    lazy val writeLong      : Long => Unit       = (value: Long) => enc.writeLong(value)
-    //    lazy val writeFloat     : Float => Unit      = (value: Float) => enc.writeFloat(value)
-    //    lazy val writeDouble    : Double => Unit     = (value: Double) => enc.writeDouble(value)
+    //    lazy val writeInt   : Int => Unit    = (value: Int) => enc.writeInt(value)
+    //    lazy val writeLong  : Long => Unit   = (value: Long) => enc.writeLong(value)
+    //    lazy val writeFloat : Float => Unit  = (value: Float) => enc.writeFloat(value)
+    //    lazy val writeDouble: Double => Unit = (value: Double) => enc.writeDouble(value)
 
     lazy val writeBoolean       : Boolean => Unit        = (value: Boolean) => BooleanPickler.pickle(value)(state)
     lazy val writeBigInt        : BigInt => Unit         = (value: BigInt) => {

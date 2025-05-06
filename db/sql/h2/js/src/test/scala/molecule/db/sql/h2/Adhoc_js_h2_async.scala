@@ -10,7 +10,9 @@ import molecule.db.sql
 import molecule.db.sql.h2
 import molecule.db.sql.h2.async.*
 import molecule.db.sql.h2.setup.DbProviders_h2
-
+import scala.concurrent.{Future, Promise}
+import scala.scalajs.js.timers.setTimeout
+import scala.util.Try
 
 class Adhoc_js_h2_async extends Test with DbProviders_h2 with TestUtils {
 
@@ -28,38 +30,39 @@ class Adhoc_js_h2_async extends Test with DbProviders_h2 with TestUtils {
   }
 
 
-//      "refs" - refs { implicit conn =>
-//        import molecule.coreTests.domains.dsl.Refs._
-//        for {
-//
-//          _ <- A.i(1).save.transact
-//          _ <- A.i(2).B.s("b").save.transact
-//          _ <- A.i(3).B.s("c").i(3).save.transact
-//
-//          // Current entity with A value and ref to B value
-//          _ <- A.i.a1.B.i.query.get.map(_ ==> List(
-//            (3, 3)
-//          ))
-//
-//          // Filter by A value, update existing B values
-//          _ <- A.i_.B.i(4).update.transact
-//
-//          _ <- A.i.a1.B.i.query.get.map(_ ==> List(
-//            (3, 4) // B value updated since there was a previous value
-//          ))
-//
-//          // Filter by A ids, upsert B values (insert if not already present)
-//          _ <- A.i_.B.i(5).upsert.i.transact
-//
-//          // Now three A entities with referenced B value
-//          _ <- A.i.a1.B.i.query.get.map(_ ==> List(
-//            (1, 5), // relationship to B created and B value inserted
-//            (2, 5), // B value inserted
-//            (3, 5), // B value updated
-//          ))
-//
-//        } yield ()
-//      }
+
+  //      "refs" - refs { implicit conn =>
+  //        import molecule.coreTests.domains.dsl.Refs._
+  //        for {
+  //
+  //          _ <- A.i(1).save.transact
+  //          _ <- A.i(2).B.s("b").save.transact
+  //          _ <- A.i(3).B.s("c").i(3).save.transact
+  //
+  //          // Current entity with A value and ref to B value
+  //          _ <- A.i.a1.B.i.query.get.map(_ ==> List(
+  //            (3, 3)
+  //          ))
+  //
+  //          // Filter by A value, update existing B values
+  //          _ <- A.i_.B.i(4).update.transact
+  //
+  //          _ <- A.i.a1.B.i.query.get.map(_ ==> List(
+  //            (3, 4) // B value updated since there was a previous value
+  //          ))
+  //
+  //          // Filter by A ids, upsert B values (insert if not already present)
+  //          _ <- A.i_.B.i(5).upsert.i.transact
+  //
+  //          // Now three A entities with referenced B value
+  //          _ <- A.i.a1.B.i.query.get.map(_ ==> List(
+  //            (1, 5), // relationship to B created and B value inserted
+  //            (2, 5), // B value inserted
+  //            (3, 5), // B value updated
+  //          ))
+  //
+  //        } yield ()
+  //      }
   //
   //
   //    "validation" - validation { implicit conn =>

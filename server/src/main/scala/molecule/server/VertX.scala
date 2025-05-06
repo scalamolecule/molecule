@@ -21,7 +21,7 @@ case class VertX(rpc: MoleculeRpc) extends MoleculeServerEndpoints(rpc) {
     val router = Router.router(vertx)
 
     // 2. Convert endpoints to Vert.x routes
-    moleculeServerEndpoints.foreach { endpoint =>
+    moleculeServerEndpoints_Future.foreach { endpoint =>
       VertxFutureServerInterpreter().route(endpoint)(router)
     }
 

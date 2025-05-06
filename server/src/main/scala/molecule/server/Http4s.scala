@@ -21,7 +21,7 @@ case class Http4s(rpc: MoleculeRpc) extends MoleculeServerEndpoints(rpc) {
       implicit val ec: ExecutionContext = ExecutionContext.global
 
       // Convert endpoints to using IO instead of Future
-      val ioEndpoints = moleculeServerEndpoints.map(convertEndpoint)
+      val ioEndpoints = moleculeServerEndpoints_Future.map(convertEndpoint)
 
       // Create http4s routes
       val routes = Http4sServerInterpreter[IO]().toRoutes(ioEndpoints)

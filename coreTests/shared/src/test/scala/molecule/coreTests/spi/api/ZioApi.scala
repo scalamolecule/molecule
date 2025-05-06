@@ -1,8 +1,8 @@
 package molecule.coreTests.spi.api
 
-import molecule.base.error.{ExecutionError, InsertErrors, MoleculeError, ValidationErrors}
+import molecule.base.error.{ExecutionError, InsertErrors, ValidationErrors}
 import molecule.core.api.Api_zio
-import molecule.core.spi.{Conn, Spi_zio}
+import molecule.core.spi.Spi_zio
 import molecule.coreTests.domains.dsl.Types.*
 import molecule.coreTests.setup.{DbProviders_zio, TestUtils}
 import zio.*
@@ -159,6 +159,9 @@ case class ZioApi(api: Api_zio with Spi_zio with DbProviders_zio)
       }.provide(unique.orDie),
 
 
+      // OBS: This test passes when run in isolation but not withing the test suite.
+      // Seems to be related to order of asynchronous callback executions.
+      // Maybe this should be set up differently with Zio?
       test("Subscription") {
         var intermediaryCallbackResults = List.empty[List[Int]]
         for {
@@ -169,6 +172,10 @@ case class ZioApi(api: Api_zio with Spi_zio with DbProviders_zio)
           _ <- Entity.i.query.subscribe { freshResult =>
             intermediaryCallbackResults = intermediaryCallbackResults :+ freshResult
           }
+
+          // When calling from ScalaJS, calls are asynchronous, and we need to wait
+          // a bit for the subscription websockets to be ready to serve callbacks.
+          _ <- TestClock.adjust(500.milliseconds)
 
           // Mutations to be monitored by subscription
           id <- Entity.i(2).save.transact.map(_.id)
