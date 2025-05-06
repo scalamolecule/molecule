@@ -95,8 +95,4 @@ case class DatomicQueryResolveOffset[Tpl](
     }
     conn.addCallback(elements -> maybeCallback)
   }
-
-  def unsubscribe(conn: DatomicConn_JVM): Unit = {
-    conn.removeCallback(elements)
-  }
 }

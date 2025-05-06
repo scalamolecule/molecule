@@ -20,6 +20,7 @@ abstract class Conn(val proxy: ConnProxy)
   def transact_sync(data: Data): TxReport =
     throw jvmOnly("transact_sync")
 
+  // Underlying real database connection
   def db: Any = ???
 
   private[molecule] lazy val rpc: MoleculeRpc = throw jsOnly("rpc")

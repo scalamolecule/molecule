@@ -74,6 +74,15 @@ trait MoleculeBackend_datomic
     } yield ()
   }
 
+  override def unsubscribe(
+    proxy: ConnProxy,
+    elements: List[Element]
+  ): Future[Either[MoleculeError, Unit]] = either {
+    getConn(proxy).map { conn =>
+      query_unsubscribe[Unit](Query(elements))(conn, global)
+    }
+  }
+
   override def save(
     proxy: ConnProxy,
     elements: List[Element]

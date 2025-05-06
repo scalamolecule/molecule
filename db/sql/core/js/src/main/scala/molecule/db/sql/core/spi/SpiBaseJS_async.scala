@@ -54,13 +54,11 @@ trait SpiBaseJS_async extends Spi_async with Renderer with FutureUtils {
 
   override def query_subscribe[Tpl](
     q: Query[Tpl], callback: List[Tpl] => Unit
-  )(implicit conn0: Conn, ec: EC): Future[Unit] = {
-    val conn = conn0.asInstanceOf[JdbcConn_JS]
+  )(implicit conn: Conn, ec: EC): Future[Unit] = {
     conn.rpc.subscribe[Tpl](conn.proxy, q.elements, q.optLimit, callback)
   }
 
-  override def query_unsubscribe[Tpl](q: Query[Tpl])(implicit conn0: Conn, ec: EC): Future[Unit] = {
-    val conn = conn0.asInstanceOf[JdbcConn_JS]
+  override def query_unsubscribe[Tpl](q: Query[Tpl])(implicit conn: Conn, ec: EC): Future[Unit] = {
     conn.rpc.unsubscribe(conn.proxy, q.elements).future
   }
 

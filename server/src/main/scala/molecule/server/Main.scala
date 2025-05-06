@@ -22,8 +22,7 @@ import scala.io.StdIn
 object Main extends App {
 
   println("\nPlease choose a database and a server backend to test the Molecule RPC API:\n")
-//  println("\n")
-//  println()
+
   List("H2", "MariaDB", "MySQL", "PostgreSQL", "SQlite", "Datomic")
     .zipWithIndex.foreach((db, i) => println(s"  ${i + 1}  $db"))
   println()
@@ -31,7 +30,8 @@ object Main extends App {
   val (rpc, db): (MoleculeRpc, String) = {
     @tailrec
     def chooseDb(): (MoleculeRpc, String) = {
-      StdIn.readLine("Database: ").toIntOption match {
+      Console.flush()
+      StdIn.readLine("Database: ").trim.toIntOption match {
         case Some(1) => (Rpc_h2, "H2")
         case Some(2) => (Rpc_mariadb, "MariaDB")
         case Some(3) => (Rpc_mysql, "MySQL")
@@ -54,7 +54,8 @@ object Main extends App {
 
   @tailrec
   private def chooseServer(): Any = {
-    StdIn.readLine("Server: ").toIntOption match {
+    Console.flush()
+    StdIn.readLine("Server: ").trim.toIntOption match {
       case Some(1) => Armeria(rpc).run(db)
       case Some(2) => Await.result(Http4s(rpc).run(db).unsafeToFuture(), Duration.Inf)
       case Some(3) => Netty(rpc).run(db)

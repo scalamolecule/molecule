@@ -129,8 +129,7 @@ trait SpiBaseJVM_sync
       .subscribe(conn, callback, (elements: List[Element]) => getModel2SqlQuery(elements))
   }
 
-  override def query_unsubscribe[Tpl](query: Query[Tpl])(implicit conn0: Conn): Unit = {
-    val conn = conn0.asInstanceOf[JdbcConn_JVM]
+  override def query_unsubscribe[Tpl](query: Query[Tpl])(implicit conn: Conn): Unit = {
     conn.removeCallback(query.elements)
   }
 

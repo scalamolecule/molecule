@@ -110,10 +110,7 @@ trait Spi_datomic_sync
   override def query_unsubscribe[Tpl](
     q: Query[Tpl]
   )(implicit conn: Conn): Unit = {
-    val datomicConn = conn.asInstanceOf[DatomicConn_JVM]
-    val m2q         = new Model2DatomicQuery[Tpl](q.elements)
-    DatomicQueryResolveOffset[Tpl](q.elements, q.optLimit, None, q.dbView, m2q)
-      .unsubscribe(datomicConn)
+    conn.removeCallback(q.elements)
   }
 
 

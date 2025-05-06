@@ -29,7 +29,7 @@ case class Subscription(
 
       // When calling from ScalaJS, calls are asynchronous, and we need to wait
       // a bit for the subscription websocket to be ready to serve callbacks.
-      _ <- delay(500)
+      _ <- delay(1000)
 
       // Mutations to be monitored by subscription
       id <- Entity.i(2).save.transact.map(_.id)
@@ -79,7 +79,7 @@ case class Subscription(
 
       // When calling from ScalaJS, calls are asynchronous, and we need to wait
       // a bit for the subscription websockets to be ready to serve callbacks.
-      _ <- delay(500)
+      _ <- delay(1000)
 
       // Transact additional data
       _ <- Entity.i(2).save.transact

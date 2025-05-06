@@ -64,27 +64,13 @@ trait Spi_datomic_async
 
 
   override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)
-                                   (implicit conn0: Conn, ec: EC): Future[Unit] = {
-    val conn                 = conn0.asInstanceOf[DatomicConn_JS]
-    val elements             = q.elements
-    val involvedAttrs        = getAttrNames(elements)
-    val involvedDeleteEntity = getInitialEntity(elements)
-    val maybeCallback        = (mutationAttrs: Set[String], isDelete: Boolean) => {
-      if (
-        mutationAttrs.exists(involvedAttrs.contains) ||
-          isDelete && mutationAttrs.head.startsWith(involvedDeleteEntity)
-      ) {
-        conn.rpc.query[Tpl](conn.proxy, q.elements, q.optLimit)
-          .future
-          .map(callback)
-      } else Future.unit
-    }
-    Future(conn.addCallback(elements -> maybeCallback))
+                                   (implicit conn: Conn, ec: EC): Future[Unit] = {
+    conn.rpc.subscribe[Tpl](conn.proxy, q.elements, q.optLimit, callback)
   }
 
   override def query_unsubscribe[Tpl](q: Query[Tpl])
                                      (implicit conn: Conn, ec: EC): Future[Unit] = {
-    Future(conn.removeCallback(q.elements))
+    conn.rpc.unsubscribe(conn.proxy, q.elements).future
   }
 
 

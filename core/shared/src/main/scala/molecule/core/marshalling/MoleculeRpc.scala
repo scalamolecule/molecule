@@ -44,7 +44,7 @@ trait MoleculeRpc {
   def unsubscribe(
     proxy: ConnProxy,
     elements: List[Element]
-  ): Future[Either[MoleculeError, Unit]] = ???
+  ): Future[Either[MoleculeError, Unit]]
 
   def save(
     proxy: ConnProxy,
