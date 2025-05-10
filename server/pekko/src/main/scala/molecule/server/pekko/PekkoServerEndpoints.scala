@@ -14,8 +14,7 @@ import org.apache.pekko.stream.{Materializer, OverflowStrategy}
 import org.apache.pekko.util.ByteString
 
 
-abstract class PekkoServerEndpoints(rpc: MoleculeRpc)
-  extends ServerEndpoints_async(rpc) {
+abstract class PekkoServerEndpoints(rpc: MoleculeRpc) extends ServerEndpoints_async(rpc) {
 
   def moleculeWebsocketHandler_MessageFlow(implicit mat: Materializer): Flow[Message, Message, NotUsed] = {
     val (queue, source): (SourceQueueWithComplete[Message], Source[Message, NotUsed]) =

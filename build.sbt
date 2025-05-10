@@ -317,7 +317,6 @@ lazy val server = project
     dbSqlPostgreSQL.jvm,
     dbSqlSQlite.jvm,
 
-//    serverArmeria % "test->test",
     serverHttp4s % "test->test",
     serverNetty % "test->test",
     serverPekko % "test->test",
@@ -402,6 +401,10 @@ lazy val serverVertX = project
       //      "org.apache.pekko" %% "pekko-serialization-jackson" % pekkoVersion,
 
       "org.scala-lang.modules" %% "scala-java8-compat" % "1.0.2",
+//      "io.vertx" % "vertx-core" % "4.5.11",
+
+//      "io.vertx" %% "vertx-lang-scala" % "4.5.11",
+      "io.vertx" %% "vertx-lang-scala" % "4.4.4",
 
       "com.softwaremill.sttp.tapir" %% "tapir-vertx-server" % tapirVersion,
     ),
