@@ -10,7 +10,6 @@ import molecule.core.marshalling.deserialize.UnpickleTpls
 import molecule.core.spi.TxReport
 import molecule.core.util.Executor.*
 import molecule.core.util.FutureUtils
-import molecule.db.datalog
 import molecule.db.datalog.datomic.async.*
 import molecule.db.datalog.datomic.transaction.*
 import scala.concurrent.Future

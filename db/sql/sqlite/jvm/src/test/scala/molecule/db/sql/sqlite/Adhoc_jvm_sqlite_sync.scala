@@ -4,7 +4,7 @@ import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.db.sql
 import molecule.db.sql.sqlite.setup.DbProviders_sqlite
 import molecule.db.sql.sqlite.sync.*
-import scala.language.implicitConversions
+//import scala.language.implicitConversions
 
 
 class Adhoc_jvm_sqlite_sync extends Test with DbProviders_sqlite with TestUtils {

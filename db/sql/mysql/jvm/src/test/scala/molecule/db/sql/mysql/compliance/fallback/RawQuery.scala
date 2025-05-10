@@ -7,7 +7,7 @@ import molecule.db.sql
 import molecule.db.sql.mysql.async.*
 import molecule.db.sql.mysql.setup.DbProviders_mysql
 import upickle.default.read
-import scala.language.implicitConversions
+//import scala.language.implicitConversions
 
 class RawQuery extends Test with DbProviders_mysql with TestUtils {
 

@@ -53,6 +53,8 @@ abstract class Conn(val proxy: ConnProxy)
     callbacks = callbacks.filterNot(_._1 == elements)
   }
 
+  def callbackCount = callbacks.length
+
 
   // Transaction handling ------------------------------------------------------
 

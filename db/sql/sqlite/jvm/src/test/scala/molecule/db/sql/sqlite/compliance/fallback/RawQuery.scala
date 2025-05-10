@@ -7,7 +7,7 @@ import molecule.db.sql
 import molecule.db.sql.sqlite.async.*
 import molecule.db.sql.sqlite.setup.DbProviders_sqlite
 import upickle.default.read
-import scala.language.implicitConversions
+//import scala.language.implicitConversions
 
 
 class RawQuery extends Test with DbProviders_sqlite with TestUtils {

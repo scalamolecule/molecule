@@ -6,7 +6,7 @@ import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.db.sql
 import molecule.db.sql.h2.async.*
 import molecule.db.sql.h2.setup.DbProviders_h2
-import scala.language.implicitConversions
+//import scala.language.implicitConversions
 
 class Test_Inspect extends Test with DbProviders_h2 with TestUtils {
 

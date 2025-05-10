@@ -42,4 +42,6 @@ trait MoleculeEndpoints {
   val moleculeEndpoint_insert     : publicEndpoint = mkEndpoint("insert")
   val moleculeEndpoint_update     : publicEndpoint = mkEndpoint("update")
   val moleculeEndpoint_delete     : publicEndpoint = mkEndpoint("delete")
+
+  // No subscribe endpoint here since each server has its own websocket implementation
 }

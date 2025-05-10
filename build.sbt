@@ -5,6 +5,7 @@ val moleculeVersion = "0.19.0"
 val scala212 = "2.12.20"
 val scala3   = "3.3.5"
 
+val catsVersion              = "3.6.0"
 val tapirVersion             = "1.11.25"
 val pekkoVersion             = "1.1.3"
 val http4sVersion            = "0.23.30"
@@ -13,6 +14,7 @@ val zioVersion               = "2.1.17"
 val dimafengContainerVersion = "0.43.0"
 val testContainerVersion     = "1.20.6"
 val logbackVersion           = "1.5.0"
+val jacksonVersion           = "2.17.3"
 
 
 name := "molecule"
@@ -63,6 +65,12 @@ lazy val root = project
     dbSqlSQlite.js,
     dbSqlSQlite.jvm,
 
+    serverHttp4s,
+    serverNetty,
+    serverPekko,
+    serverPlay,
+    serverVertX,
+    serverZioHttp,
     server,
     //    graphql.js,
     //    graphql.jvm,
@@ -86,36 +94,15 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
       // logging
       "com.outr" %%% "scribe" % "3.16.1",
 
-      // Effect APIs
-      "dev.zio" %%% "zio" % zioVersion,
-      "dev.zio" %%% "zio-streams" % zioVersion,
-
       // RPC
       "io.suzaku" %%% "boopickle" % "1.5.0",
       "com.softwaremill.sttp.tapir" %%% "tapir-core" % tapirVersion,
 
-
-
-//      "com.softwaremill.sttp.client4" %%% "fs2" % client4Version,
-//      "com.softwaremill.sttp.client4" %%% "pekko-http-backend" % client4Version,
-//      "org.apache.pekko" %%% "pekko-stream" % "1.1.3",
-
-
-
-
-      // Streaming
+      // Streaming + effects
       "com.lihaoyi" %%% "geny" % "1.1.1",
-      "co.fs2" %%% "fs2-core" % "3.12.0",
+      "dev.zio" %%% "zio-streams" % zioVersion, // + ZIO
+      "co.fs2" %%% "fs2-core" % "3.12.0", // + cats IO
     ),
-  )
-  .jvmSettings(
-    libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats-effect" % "3.6.0",
-
-      "com.softwaremill.sttp.client4" %% "fs2" % client4Version,
-      "com.softwaremill.sttp.client4" %% "pekko-http-backend" % client4Version,
-      "org.apache.pekko" %% "pekko-stream" % "1.1.3",
-    )
   )
   .jsSettings(
     libraryDependencies ++= Seq(
@@ -148,6 +135,7 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
   .jsSettings(
     jsEnvironment,
     libraryDependencies ++= Seq(
+      //      "org.scala-js" %%% "scalajs-dom" % "2.8.0",
       "org.scala-js" %%% "scala-js-macrotask-executor" % "1.1.1",
       "org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0" cross CrossVersion.for3Use2_13
     ),
@@ -214,7 +202,14 @@ lazy val dbSqlH2 = crossProject(JSPlatform, JVMPlatform)
     name := "molecule-db-sql-h2",
     testFrameworks := testingFrameworks
   )
-  .jsSettings(jsEnvironment)
+  .jsSettings(
+    jsEnvironment,
+    //    libraryDependencies ++= Seq(
+    //      "org.scala-js" %%% "scalajs-dom" % "2.8.0",
+    //      //      "org.scala-js" %%% "scala-js-macrotask-executor" % "1.1.1",
+    //      //      "org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0" cross CrossVersion.for3Use2_13
+    //    )
+  )
   .jvmSettings(
     libraryDependencies ++= Seq(
       "com.h2database" % "h2" % "2.3.232",
@@ -300,49 +295,17 @@ lazy val server = project
   .settings(
     publish / skip := true,
     dependencyOverrides ++= Seq(
-      "com.fasterxml.jackson.core" % "jackson-databind" % "2.17.3",
-      "com.fasterxml.jackson.core" % "jackson-core" % "2.17.3",
-      "com.fasterxml.jackson.core" % "jackson-annotations" % "2.17.3",
-      "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.17.3",
-      "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % "2.17.3",
-      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.17.3",
-      "com.fasterxml.jackson.module" % "jackson-module-parameter-names" % "2.17.3",
-      "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % "2.17.3"
+      "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
+      //      "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
+      //      "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
+      //      "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % jacksonVersion,
+      //      "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % jacksonVersion,
+      //      "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion,
+      //      "com.fasterxml.jackson.module" % "jackson-module-parameter-names" % jacksonVersion,
+      //      "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % jacksonVersion
     ),
     libraryDependencies ++= Seq(
-      // Base Pekko dependencies
-      "org.apache.pekko" %% "pekko-actor-typed" % pekkoVersion,
-      "org.apache.pekko" %% "pekko-serialization-jackson" % pekkoVersion,
-
-      // 1. Armeria
-      "com.softwaremill.sttp.tapir" %% "tapir-armeria-server" % tapirVersion
-        exclude("com.fasterxml.jackson.core", "jackson-databind")
-        exclude("com.fasterxml.jackson.core", "jackson-core")
-        exclude("com.fasterxml.jackson.core", "jackson-annotations"),
-
-      // 2. Http4s
-      "org.http4s" %% "http4s-ember-server" % http4sVersion,
-      "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % tapirVersion,
-
-      // 3. Netty
-      "com.softwaremill.sttp.tapir" %% "tapir-netty-server" % tapirVersion
-        exclude("io.netty", "netty-handler"),
-
-      // 4. Pekko
-      "com.softwaremill.sttp.tapir" %% "tapir-pekko-http-server" % tapirVersion,
-
-      // 5. Play
-      "com.softwaremill.sttp.tapir" %% "tapir-play-server" % tapirVersion
-        exclude("org.apache.pekko", "pekko-actor-typed")
-        exclude("org.apache.pekko", "pekko-serialization-jackson"),
-
-      // 6. Vert.x
-      "com.softwaremill.sttp.tapir" %% "tapir-vertx-server" % tapirVersion,
-
-      // 7. ZioHttp
-      "com.softwaremill.sttp.tapir" %% "tapir-zio-http-server" % tapirVersion,
-
-      // Avoid "No SLF4J providers were found." errors
+      // Avoid "No SLF4J providers were found" errors
       "org.slf4j" % "slf4j-nop" % "2.0.17",
     ),
   )
@@ -353,9 +316,108 @@ lazy val server = project
     dbSqlMariaDB.jvm,
     dbSqlPostgreSQL.jvm,
     dbSqlSQlite.jvm,
+
+//    serverArmeria % "test->test",
+    serverHttp4s % "test->test",
+    serverNetty % "test->test",
+    serverPekko % "test->test",
+    serverPlay % "test->test",
+    serverVertX % "test->test",
+    serverZioHttp % "test->test",
   )
-//  /Users/mg/molecule/molecule/molecule/db/sql/core/jvm/src/main/scala/molecule/db/sql/core/query/SqlQueryResolveCursor.scala
-//  /Users/mg/molecule/molecule/molecule/db/sql/core/shared/src/main/scala/molecule/db/sql/core/query/casting/strategy/CastTuple.scala
+
+
+lazy val serverCore = project
+  .in(file("server/core"))
+  .settings(
+    publish / skip := true,
+    libraryDependencies ++= Seq(
+      "com.softwaremill.sttp.tapir" %% "tapir-core" % tapirVersion,
+    ),
+  )
+  .dependsOn(core.jvm)
+
+lazy val serverPekko = project
+  .in(file("server/pekko"))
+  .settings(
+    name := "molecule-server-pekko",
+    publish / skip := true,
+    libraryDependencies ++= Seq(
+      // Enforce using same Pekko versions
+      "org.apache.pekko" %% "pekko-actor-typed" % pekkoVersion,
+      "org.apache.pekko" %% "pekko-serialization-jackson" % pekkoVersion,
+
+      "com.softwaremill.sttp.tapir" %% "tapir-pekko-http-server" % tapirVersion,
+    ),
+  )
+  .dependsOn(serverCore)
+
+
+lazy val serverHttp4s = project
+  .in(file("server/http4s"))
+  .settings(
+    publish / skip := true,
+    libraryDependencies ++= Seq(
+      "org.http4s" %% "http4s-ember-server" % http4sVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % tapirVersion,
+    ),
+  )
+  .dependsOn(serverCore)
+
+lazy val serverNetty = project
+  .in(file("server/netty"))
+  .settings(
+    publish / skip := true,
+    libraryDependencies ++= Seq(
+
+      //      "com.softwaremill.sttp.tapir" %% "tapir-netty-server" % tapirVersion,
+      //      "com.softwaremill.sttp.tapir" %% "tapir-netty-server" % tapirVersion
+      //        exclude("io.netty", "netty-handler"),
+
+      //      "com.softwaremill.sttp.tapir" %% "tapir-ztapir" % tapirVersion,
+
+      //      "org.typelevel" %% "cats-effect" % catsVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-netty-server-cats" % tapirVersion,
+    ),
+  )
+  .dependsOn(serverHttp4s)
+
+lazy val serverPlay = project
+  .in(file("server/play"))
+  .settings(
+    publish / skip := true,
+    libraryDependencies ++= Seq(
+      "com.softwaremill.sttp.tapir" %% "tapir-play-server" % tapirVersion,
+    ),
+  )
+  .dependsOn(serverPekko)
+
+lazy val serverVertX = project
+  .in(file("server/vertx"))
+  .settings(
+    publish / skip := true,
+    libraryDependencies ++= Seq(
+
+      //      "org.apache.pekko" %% "pekko-actor-typed" % pekkoVersion,
+      //      "org.apache.pekko" %% "pekko-serialization-jackson" % pekkoVersion,
+
+      "org.scala-lang.modules" %% "scala-java8-compat" % "1.0.2",
+
+      "com.softwaremill.sttp.tapir" %% "tapir-vertx-server" % tapirVersion,
+    ),
+  )
+  .dependsOn(serverCore)
+
+lazy val serverZioHttp = project
+  .in(file("server/zioHttp"))
+  .settings(
+    publish / skip := true,
+    libraryDependencies ++= Seq(
+      "com.softwaremill.sttp.tapir" %% "tapir-zio-http-server" % tapirVersion,
+    ),
+  )
+  .dependsOn(serverCore)
+
 
 lazy val testingFrameworks = Seq(
   new TestFramework("munit.Framework"),

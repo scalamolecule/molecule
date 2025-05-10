@@ -7,7 +7,7 @@ import molecule.core.ast.DataModel.*
 import molecule.core.marshalling.Boopicklers.*
 import molecule.core.marshalling.deserialize.UnpickleTpls
 import molecule.core.spi.TxReport
-import molecule.core.util.Executor.*
+import molecule.core.util.Executor.global as x
 import molecule.core.util.FutureUtils
 import org.scalajs.dom
 import org.scalajs.dom.{MessageEvent, WebSocket}
@@ -16,9 +16,10 @@ import sttp.client4.fetch.FetchBackend
 import sttp.tapir.PublicEndpoint
 import sttp.tapir.client.sttp4.SttpClientInterpreter
 import scala.concurrent.Future
+import scala.scalajs.js
+import scala.scalajs.js.Dynamic.global
 import scala.scalajs.js.typedarray.TypedArrayBufferOps.*
 import scala.scalajs.js.typedarray.{ArrayBuffer, TypedArrayBuffer}
-
 
 case class MoleculeFrontend(host: String, port: Int)
   extends MoleculeRpc
@@ -36,6 +37,7 @@ case class MoleculeFrontend(host: String, port: Int)
       .apply(args)
       .send(FetchBackend())
       .map { response =>
+        //        println(s"Response: $response")
         response.body match {
           case Right(result) => Right(unpickle(result))
           case Left(error)   => Left(error)
@@ -55,31 +57,37 @@ case class MoleculeFrontend(host: String, port: Int)
     limit: Option[Int],
     callback: List[Tpl] => Unit
   ): Future[Unit] = Future {
-    // One websocket connection per subscription ??
-    //      val socket = new WebSocket(s"ws://$host:$port/molecule/subscribe/" + UUID.randomUUID())
     val socket = new WebSocket(s"ws://$host:$port/molecule/subscribe")
     socket.binaryType = "arraybuffer"
     socket.onerror = {
       case e: dom.Event =>
-        logger.error(s"WebSocket error: $e!")
-        //        keys(e).toList.foreach(k => println(s"$k -> ${apply(k)}"))
-        socket.close(1000, e.toString)
+        println("WebSocket onerror")
+        global.console.log("WebSocket error event:", e.asInstanceOf[js.Any])
+        logger.error(s"WebSocket error (non-ErrorEvent): $e")
+      // socket.close(1000, e.toString) // not active since it can still try to close an already closed connection
     }
     socket.onclose = {
-      case _: dom.CloseEvent => logger.warn("WebSocket onclose")
+      case _: dom.CloseEvent =>
+        println("WebSocket onclose")
+        logger.warn("WebSocket onclose")
     }
     socket.onopen = {
       case _: dom.Event =>
+        println("WebSocket onopen")
         logger.trace(s"WebSocket onopen")
-        //        println("WebSocket onopen...")
+
+        //        val x = Pickle.intoBytes((proxy, elements, limit)).typedArray().buffer
+        //        println(s"Sending: $x")
+        //        socket.send(x)
+
         socket.send(
           Pickle.intoBytes((proxy, elements, limit)).typedArray().buffer
         )
     }
     socket.onmessage = {
       case e: MessageEvent =>
+        println("WebSocket onmessage")
         logger.trace(s"WebSocket onmessage")
-        //        println("WebSocket onmessage... ")
         val resultSerialized = TypedArrayBuffer.wrap(e.data.asInstanceOf[ArrayBuffer])
         UnpickleTpls[Tpl](elements, resultSerialized).unpickleEither match {
           case Right(tpls)                      => callback(tpls)

@@ -8,7 +8,7 @@ import molecule.coreTests.domains.dsl.Types.*
 import molecule.coreTests.setup.{DbProviders, Platform, TestUtils, Test_io}
 import scala.annotation.nowarn
 import scala.concurrent.duration.DurationInt
-import scala.language.implicitConversions
+//import scala.language.implicitConversions
 
 case class IOApi(
   suite: Test_io,

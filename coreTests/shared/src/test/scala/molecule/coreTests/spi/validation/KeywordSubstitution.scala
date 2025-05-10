@@ -4,7 +4,7 @@ import molecule.core.api.Api_async
 import molecule.core.spi.Spi_async
 import molecule.core.util.Executor.*
 import molecule.coreTests.setup.*
-import scala.language.implicitConversions
+//import scala.language.implicitConversions
 
 case class KeywordSubstitution(
   suite: Test,

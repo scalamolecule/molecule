@@ -7,7 +7,7 @@ import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.db.sql
 import molecule.db.sql.h2.setup.DbProviders_h2
 import molecule.db.sql.h2.sync.*
-import scala.language.implicitConversions
+//import scala.language.implicitConversions
 
 class Adhoc_js_h2_sync extends Test with DbProviders_h2 with TestUtils {
 

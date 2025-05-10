@@ -6,7 +6,7 @@ import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.db.sql
 import molecule.db.sql.postgres.async.*
 import molecule.db.sql.postgres.setup.DbProviders_postgres
-import scala.language.implicitConversions
+//import scala.language.implicitConversions
 
 class Test_Inspect extends Test with DbProviders_postgres with TestUtils {
 

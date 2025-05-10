@@ -6,7 +6,7 @@ import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.db.sql
 import molecule.db.sql.sqlite.async.*
 import molecule.db.sql.sqlite.setup.DbProviders_sqlite
-import scala.language.implicitConversions
+//import scala.language.implicitConversions
 
 
 class RawTransact extends Test with DbProviders_sqlite with TestUtils {

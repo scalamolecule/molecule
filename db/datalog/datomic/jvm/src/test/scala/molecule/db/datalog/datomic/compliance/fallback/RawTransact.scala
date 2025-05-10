@@ -6,7 +6,7 @@ import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.db.datalog
 import molecule.db.datalog.datomic.async.*
 import molecule.db.datalog.datomic.setup.DbProviders_datomic
-import scala.language.implicitConversions
+//import scala.language.implicitConversions
 
 class RawTransact extends Test with DbProviders_datomic with TestUtils {
 

@@ -1,0 +1,54 @@
+package molecule.server.http4s
+
+import java.nio.ByteBuffer
+import boopickle.Default.*
+import cats.effect.IO
+import cats.effect.std.Queue
+import cats.effect.unsafe.IORuntime
+import fs2.Pipe
+import molecule.core.ast.DataModel.Element
+import molecule.core.marshalling.Boopicklers.*
+import molecule.core.marshalling.serialize.PickleTpls
+import molecule.core.marshalling.{ConnProxy, MoleculeRpc}
+import molecule.server.core.ServerEndpoints_io
+import sttp.capabilities.WebSockets
+import sttp.capabilities.fs2.Fs2Streams
+import sttp.tapir.*
+import sttp.tapir.server.ServerEndpoint
+//import scala.language.implicitConversions
+
+abstract class Http4sServerEndpoints(rpc: MoleculeRpc) extends ServerEndpoints_io(rpc) {
+
+  val moleculeServerEndpoint_subscribe: ServerEndpoint[Fs2Streams[IO] & WebSockets, IO] = {
+    endpoint
+      .out(
+        webSocketBody[Array[Byte], CodecFormat.OctetStream, Array[Byte], CodecFormat.OctetStream](Fs2Streams[IO])
+      )
+      .serverLogicSuccess(_ => IO.pure(
+        moleculeWebsocketHandler_fs2Pipe(cats.effect.unsafe.implicits.global)
+      ))
+  }
+
+  def moleculeWebsocketHandler_fs2Pipe(implicit runtime: IORuntime): Pipe[IO, Array[Byte], Array[Byte]] = { in =>
+    fs2.Stream.eval {
+      for {
+        outgoingQueue <- Queue.unbounded[IO, Array[Byte]]
+        incoming = in.evalMap { msg =>
+          // Deserialize callback query coordinates
+          val (proxy, elements, limit) =
+            Unpickle[(ConnProxy, List[Element], Option[Int])].fromBytes(ByteBuffer.wrap(msg))
+
+          // Set up callback to serialize and emit results
+          val callback: List[Any] => Unit = { result =>
+            val outBytes = PickleTpls(elements, false).pickleEither2ByteArray(Right(result))
+            outgoingQueue.offer(outBytes).void.unsafeRunAndForget()
+          }
+
+          IO(rpc.subscribe[Any](proxy, elements, limit, callback))
+        }.handleErrorWith(_ => fs2.Stream.empty) // ignore "Reached End Of Stream"
+
+        outgoing = fs2.Stream.fromQueueUnterminated(outgoingQueue)
+      } yield outgoing.concurrently(incoming)
+    }.flatten
+  }
+}

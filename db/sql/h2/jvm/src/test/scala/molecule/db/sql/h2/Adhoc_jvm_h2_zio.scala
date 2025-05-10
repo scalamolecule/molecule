@@ -8,7 +8,7 @@ import zio.*
 import zio.test.*
 import zio.test.TestAspect.*
 import scala.annotation.nowarn
-import scala.language.implicitConversions
+//import scala.language.implicitConversions
 
 
 object Adhoc_jvm_h2_zio extends ZIOSpecDefault with DbProviders_h2_zio {

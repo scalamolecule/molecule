@@ -8,7 +8,7 @@ import molecule.core.spi.Spi_async
 import molecule.core.util.Executor.*
 import molecule.coreTests.domains.dsl.Validation.*
 import molecule.coreTests.setup.*
-import scala.language.implicitConversions
+//import scala.language.implicitConversions
 
 case class TypesOne(
   suite: Test,

@@ -10,7 +10,7 @@ import molecule.db.sql.postgres.setup.DbProviders_postgres
 import org.postgresql.jdbc.PgArray
 import org.postgresql.util.PGobject
 import upickle.default.read
-import scala.language.implicitConversions
+//import scala.language.implicitConversions
 
 class RawQuery extends Test with DbProviders_postgres with TestUtils {
 

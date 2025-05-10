@@ -8,7 +8,7 @@ import molecule.db.sql.h2.async.*
 import molecule.db.sql.h2.setup.DbProviders_h2
 import org.h2.jdbc.JdbcArray
 import upickle.default.read
-import scala.language.implicitConversions
+//import scala.language.implicitConversions
 
 class RawQuery extends Test with DbProviders_h2 with TestUtils {
 

@@ -4,7 +4,7 @@ import molecule.core.api.{Api_io, Api_io_transact}
 import molecule.core.spi.Spi_io
 import molecule.coreTests.domains.dsl.Types.*
 import molecule.coreTests.setup.{DbProviders, Test, TestUtils}
-import scala.language.implicitConversions
+//import scala.language.implicitConversions
 
 case class Transactions_io(
   suite: Test,

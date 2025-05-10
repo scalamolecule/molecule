@@ -68,11 +68,14 @@ case class PickleTpls(
 
   def pickleEither2ByteArray(result: Either[MoleculeError, Seq[Any]]): Array[Byte] = {
     result match {
-      case Right(tpls) => pickleTpls(tpls)
+      case Right(tpls) =>
+        enc.writeInt(2) // Encode Right
+        pickleTpls(tpls)
       case Left(err)   => LeftPickler[MoleculeError, DummyNotUsed].pickle(Left(err))(state)
     }
     state.toByteBuffer.toArray
   }
+
   def pickleEither(result: Either[MoleculeError, Seq[Any]]): ByteBuffer = {
     result match {
       case Right(tpls) =>

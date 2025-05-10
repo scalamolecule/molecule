@@ -6,7 +6,7 @@ import molecule.coreTests.setup.{Test, TestUtils}
 import molecule.db.sql
 import molecule.db.sql.mariadb.async.*
 import molecule.db.sql.mariadb.setup.DbProviders_mariadb
-import scala.language.implicitConversions
+//import scala.language.implicitConversions
 
 class Test_Inspect extends Test with DbProviders_mariadb with TestUtils {
 

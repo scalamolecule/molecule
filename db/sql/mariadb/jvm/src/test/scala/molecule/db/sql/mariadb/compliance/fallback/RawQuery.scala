@@ -8,7 +8,7 @@ import molecule.db.sql
 import molecule.db.sql.mariadb.async.*
 import molecule.db.sql.mariadb.setup.DbProviders_mariadb
 import upickle.default.read
-import scala.language.implicitConversions
+//import scala.language.implicitConversions
 
 class RawQuery extends Test with DbProviders_mariadb with TestUtils {
 
