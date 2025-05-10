@@ -8,10 +8,8 @@ import molecule.server.http4s.Http4sServerEndpoints
 import sttp.capabilities.WebSockets
 import sttp.capabilities.fs2.Fs2Streams
 import sttp.tapir.server.ServerEndpoint
-//import scala.language.implicitConversions
 
 abstract class NettyServerEndpoints(rpc: MoleculeRpc) extends Http4sServerEndpoints(rpc) {
-
 
   val moleculeServerEndpoints: List[ServerEndpoint[Fs2Streams[IO] with WebSockets, IO]] = {
     // Need to upcast for NettyCastServer to understand correct binary websocket handling

@@ -69,7 +69,6 @@ lazy val root = project
     serverNetty,
     serverPekko,
     serverPlay,
-    serverVertX,
     serverZioHttp,
     server,
     //    graphql.js,
@@ -202,14 +201,7 @@ lazy val dbSqlH2 = crossProject(JSPlatform, JVMPlatform)
     name := "molecule-db-sql-h2",
     testFrameworks := testingFrameworks
   )
-  .jsSettings(
-    jsEnvironment,
-    //    libraryDependencies ++= Seq(
-    //      "org.scala-js" %%% "scalajs-dom" % "2.8.0",
-    //      //      "org.scala-js" %%% "scala-js-macrotask-executor" % "1.1.1",
-    //      //      "org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0" cross CrossVersion.for3Use2_13
-    //    )
-  )
+  .jsSettings(jsEnvironment)
   .jvmSettings(
     libraryDependencies ++= Seq(
       "com.h2database" % "h2" % "2.3.232",
@@ -296,13 +288,6 @@ lazy val server = project
     publish / skip := true,
     dependencyOverrides ++= Seq(
       "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
-      //      "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
-      //      "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
-      //      "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % jacksonVersion,
-      //      "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % jacksonVersion,
-      //      "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion,
-      //      "com.fasterxml.jackson.module" % "jackson-module-parameter-names" % jacksonVersion,
-      //      "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % jacksonVersion
     ),
     libraryDependencies ++= Seq(
       // Avoid "No SLF4J providers were found" errors
@@ -321,7 +306,6 @@ lazy val server = project
     serverNetty % "test->test",
     serverPekko % "test->test",
     serverPlay % "test->test",
-    serverVertX % "test->test",
     serverZioHttp % "test->test",
   )
 
@@ -368,14 +352,6 @@ lazy val serverNetty = project
   .settings(
     publish / skip := true,
     libraryDependencies ++= Seq(
-
-      //      "com.softwaremill.sttp.tapir" %% "tapir-netty-server" % tapirVersion,
-      //      "com.softwaremill.sttp.tapir" %% "tapir-netty-server" % tapirVersion
-      //        exclude("io.netty", "netty-handler"),
-
-      //      "com.softwaremill.sttp.tapir" %% "tapir-ztapir" % tapirVersion,
-
-      //      "org.typelevel" %% "cats-effect" % catsVersion,
       "com.softwaremill.sttp.tapir" %% "tapir-netty-server-cats" % tapirVersion,
     ),
   )
@@ -390,26 +366,6 @@ lazy val serverPlay = project
     ),
   )
   .dependsOn(serverPekko)
-
-lazy val serverVertX = project
-  .in(file("server/vertx"))
-  .settings(
-    publish / skip := true,
-    libraryDependencies ++= Seq(
-
-      //      "org.apache.pekko" %% "pekko-actor-typed" % pekkoVersion,
-      //      "org.apache.pekko" %% "pekko-serialization-jackson" % pekkoVersion,
-
-      "org.scala-lang.modules" %% "scala-java8-compat" % "1.0.2",
-//      "io.vertx" % "vertx-core" % "4.5.11",
-
-//      "io.vertx" %% "vertx-lang-scala" % "4.5.11",
-      "io.vertx" %% "vertx-lang-scala" % "4.4.4",
-
-      "com.softwaremill.sttp.tapir" %% "tapir-vertx-server" % tapirVersion,
-    ),
-  )
-  .dependsOn(serverCore)
 
 lazy val serverZioHttp = project
   .in(file("server/zioHttp"))

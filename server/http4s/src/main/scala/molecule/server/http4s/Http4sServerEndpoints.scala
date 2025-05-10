@@ -15,19 +15,8 @@ import sttp.capabilities.WebSockets
 import sttp.capabilities.fs2.Fs2Streams
 import sttp.tapir.*
 import sttp.tapir.server.ServerEndpoint
-//import scala.language.implicitConversions
 
 abstract class Http4sServerEndpoints(rpc: MoleculeRpc) extends ServerEndpoints_io(rpc) {
-
-  val moleculeServerEndpoint_subscribe: ServerEndpoint[Fs2Streams[IO] & WebSockets, IO] = {
-    endpoint
-      .out(
-        webSocketBody[Array[Byte], CodecFormat.OctetStream, Array[Byte], CodecFormat.OctetStream](Fs2Streams[IO])
-      )
-      .serverLogicSuccess(_ => IO.pure(
-        moleculeWebsocketHandler_fs2Pipe(cats.effect.unsafe.implicits.global)
-      ))
-  }
 
   def moleculeWebsocketHandler_fs2Pipe(implicit runtime: IORuntime): Pipe[IO, Array[Byte], Array[Byte]] = { in =>
     fs2.Stream.eval {
@@ -50,5 +39,15 @@ abstract class Http4sServerEndpoints(rpc: MoleculeRpc) extends ServerEndpoints_i
         outgoing = fs2.Stream.fromQueueUnterminated(outgoingQueue)
       } yield outgoing.concurrently(incoming)
     }.flatten
+  }
+
+  val moleculeServerEndpoint_subscribe: ServerEndpoint[Fs2Streams[IO] & WebSockets, IO] = {
+    endpoint
+      .out(
+        webSocketBody[Array[Byte], CodecFormat.OctetStream, Array[Byte], CodecFormat.OctetStream](Fs2Streams[IO])
+      )
+      .serverLogicSuccess(_ => IO.pure(
+        moleculeWebsocketHandler_fs2Pipe(cats.effect.unsafe.implicits.global)
+      ))
   }
 }

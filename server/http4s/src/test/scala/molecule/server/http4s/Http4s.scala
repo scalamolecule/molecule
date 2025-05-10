@@ -11,8 +11,6 @@ import sttp.tapir.server.http4s.Http4sServerInterpreter
 case class Http4s(rpc: MoleculeRpc) extends Http4sServerEndpoints(rpc) {
 
   def run(db: String): IO[ExitCode] = {
-
-    // Start server
     EmberServerBuilder
       .default[IO]
       .withHost(ip"0.0.0.0")

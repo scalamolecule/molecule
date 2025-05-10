@@ -1,42 +1,54 @@
 package molecule.server.ziohttp
 
+import java.nio.ByteBuffer
 import boopickle.Default.*
+import molecule.core.ast.DataModel.Element
 import molecule.core.marshalling.Boopicklers.*
-import molecule.core.marshalling.MoleculeRpc
-import molecule.server.core.ServerEndpoints_async
+import molecule.core.marshalling.serialize.PickleTpls
+import molecule.core.marshalling.{ConnProxy, MoleculeRpc}
+import molecule.server.core.ServerEndpoints_zio
+import sttp.capabilities.WebSockets
+import sttp.capabilities.zio.ZioStreams
+import sttp.tapir.CodecFormat
+import sttp.tapir.server.ServerEndpoint
+import sttp.tapir.ztapir.*
+import zio.stream.ZStream
+import zio.{Queue, Runtime, Task, Unsafe, ZIO}
 
 
-abstract class ZiohttpServerEndpoints(rpc: MoleculeRpc) extends ServerEndpoints_async(rpc) {
+abstract class ZiohttpServerEndpoints(rpc: MoleculeRpc) extends ServerEndpoints_zio(rpc) {
 
-//  def moleculeWebsocketHandler_PekkoFlow(implicit mat: Materializer): Flow[Message, Message, NotUsed] = {
-//    val (queue, source): (SourceQueueWithComplete[Message], Source[Message, NotUsed]) =
-//      Source.queue[Message](bufferSize = 2, OverflowStrategy.backpressure).preMaterialize()
-//
-//    val sink: Sink[Message, NotUsed] =
-//      Sink.foreach[Message] {
-//        case BinaryMessage.Strict(argsSerialized) =>
-//          // Deserialize callback query coordinates
-//          val (proxy, elements, limit) =
-//            Unpickle[(ConnProxy, List[Element], Option[Int])]
-//              .fromBytes(argsSerialized.asByteBuffer)
-//
-//          // Send query results if match
-//          val callback: List[Any] => Unit = { (result: List[Any]) =>
-//            val bytes = PickleTpls(elements, false).pickleEither(Right(result))
-//            queue.offer(BinaryMessage(ByteString(bytes)))
-//          }
-//          rpc.subscribe[Any](proxy, elements, limit, callback)
-//
-//        case _ =>
-//          val errorMsg = BinaryMessage(ByteString(
-//            Pickle.intoBytes[Either[ModelError, Int]](
-//              Left(ModelError("Expected BinaryMessage.Strict from websocket queue"))
-//            )
-//          ))
-//          queue.offer(errorMsg)
-//      }.mapMaterializedValue(_ => NotUsed)
-//
-//    Flow.fromSinkAndSource(sink, source)
-//  }
+  def moleculeWebsocketHandler_zioPipe: ZStream[Any, Throwable, Array[Byte]] => ZStream[Any, Throwable, Array[Byte]] = { in =>
+    ZStream.fromZIO(Queue.unbounded[Array[Byte]]).flatMap { outgoingQueue =>
+      val incoming: ZStream[Any, Throwable, Nothing] = in.mapZIO { msg =>
+        ZIO
+          .attempt {
+            val (proxy, elements, limit) =
+              Unpickle[(ConnProxy, List[Element], Option[Int])].fromBytes(ByteBuffer.wrap(msg))
 
+            val callback: List[Any] => Unit = { result =>
+              val outBytes = PickleTpls(elements, false).pickleEither2ByteArray(Right(result))
+              Unsafe.unsafe { implicit u =>
+                Runtime.default.unsafe.run(outgoingQueue.offer(outBytes)).getOrThrowFiberFailure()
+              }
+            }
+
+            rpc.subscribe[Any](proxy, elements, limit, callback)
+          }
+          .catchAll(e => ZIO.logWarning(s"Deserialization failed: ${e.getMessage}"))
+      }.drain
+
+      val outgoing: ZStream[Any, Throwable, Array[Byte]] = ZStream.fromQueue(outgoingQueue)
+      outgoing.merge(incoming)
+    }
+  }
+
+  val moleculeServerEndpoint_subscribe: ServerEndpoint[ZioStreams with WebSockets, Task] =
+    endpoint
+      .in("molecule" / "subscribe")
+      .out(webSocketBody[Array[Byte], CodecFormat.OctetStream, Array[Byte], CodecFormat.OctetStream](ZioStreams))
+      .serverLogicSuccess(_ => ZIO.succeed(moleculeWebsocketHandler_zioPipe))
+
+  val moleculeServerEndpoints: List[ServerEndpoint[ZioStreams with WebSockets, Task]] =
+    moleculeServerEndpoints_ZIO :+ moleculeServerEndpoint_subscribe
 }

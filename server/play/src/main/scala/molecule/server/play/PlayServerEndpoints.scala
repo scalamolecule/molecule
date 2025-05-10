@@ -11,7 +11,11 @@ import molecule.server.pekko.PekkoServerEndpoints
 import org.apache.pekko.NotUsed
 import org.apache.pekko.stream.scaladsl.{Flow, Sink, Source, SourceQueueWithComplete}
 import org.apache.pekko.stream.{Materializer, OverflowStrategy}
-
+import sttp.capabilities.WebSockets
+import sttp.capabilities.pekko.PekkoStreams
+import sttp.tapir.*
+import sttp.tapir.server.ServerEndpoint
+import scala.concurrent.Future
 
 abstract class PlayServerEndpoints(rpc: MoleculeRpc) extends PekkoServerEndpoints(rpc) {
 
@@ -43,4 +47,16 @@ abstract class PlayServerEndpoints(rpc: MoleculeRpc) extends PekkoServerEndpoint
 
     Flow.fromSinkAndSource(sink, source)
   }
+
+  def moleculeServerEndpoint_subscribe(implicit mat: Materializer): ServerEndpoint[PekkoStreams with WebSockets, Future] =
+    endpoint
+      .in("molecule" / "subscribe")
+      .out(
+        webSocketBody[Array[Byte], CodecFormat.OctetStream, Array[Byte], CodecFormat.OctetStream](PekkoStreams)
+      )
+      .serverLogicSuccess(_ => Future.successful(moleculeWebsocketHandler_ByteFlow))
+
+  def moleculeServerEndpoints(implicit mat: Materializer): List[ServerEndpoint[PekkoStreams & WebSockets, Future]] =
+    moleculeServerEndpoints_Future :+ moleculeServerEndpoint_subscribe
+
 }

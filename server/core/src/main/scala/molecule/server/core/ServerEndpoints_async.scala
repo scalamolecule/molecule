@@ -9,7 +9,6 @@ import molecule.core.util.Executor.*
 import sttp.tapir.*
 import sttp.tapir.server.ServerEndpoint
 import scala.concurrent.Future
-//import scala.language.implicitConversions
 
 abstract class ServerEndpoints_async(rpc: MoleculeRpc) extends Execution(rpc) {
 
@@ -20,9 +19,6 @@ abstract class ServerEndpoints_async(rpc: MoleculeRpc) extends Execution(rpc) {
     executeAction: ByteBuffer => Future[Either[MoleculeError, ByteBuffer]]
   ): ServerEndpoint[Any, Future] = {
     endpoint.serverLogic { args =>
-
-      //      println("Executing action: " + args)
-
       executeAction(args)
         .recover {
           case e: ModelError =>

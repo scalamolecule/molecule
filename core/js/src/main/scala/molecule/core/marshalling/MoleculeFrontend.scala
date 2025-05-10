@@ -17,7 +17,6 @@ import sttp.tapir.PublicEndpoint
 import sttp.tapir.client.sttp4.SttpClientInterpreter
 import scala.concurrent.Future
 import scala.scalajs.js
-import scala.scalajs.js.Dynamic.global
 import scala.scalajs.js.typedarray.TypedArrayBufferOps.*
 import scala.scalajs.js.typedarray.{ArrayBuffer, TypedArrayBuffer}
 
@@ -37,7 +36,6 @@ case class MoleculeFrontend(host: String, port: Int)
       .apply(args)
       .send(FetchBackend())
       .map { response =>
-        //        println(s"Response: $response")
         response.body match {
           case Right(result) => Right(unpickle(result))
           case Left(error)   => Left(error)
@@ -61,32 +59,23 @@ case class MoleculeFrontend(host: String, port: Int)
     socket.binaryType = "arraybuffer"
     socket.onerror = {
       case e: dom.Event =>
-        println("WebSocket onerror")
-        global.console.log("WebSocket error event:", e.asInstanceOf[js.Any])
-        logger.error(s"WebSocket error (non-ErrorEvent): $e")
-      // socket.close(1000, e.toString) // not active since it can still try to close an already closed connection
+        logger.error(s"WebSocket error (non-ErrorEvent): " + e.asInstanceOf[js.Any])
+
+      // not called since it can still try to close an already closed connection
+      // socket.close(1000, e.toString)
     }
     socket.onclose = {
-      case _: dom.CloseEvent =>
-        println("WebSocket onclose")
-        logger.warn("WebSocket onclose")
+      case _: dom.CloseEvent => logger.warn("WebSocket onclose")
     }
     socket.onopen = {
       case _: dom.Event =>
-        println("WebSocket onopen")
         logger.trace(s"WebSocket onopen")
-
-        //        val x = Pickle.intoBytes((proxy, elements, limit)).typedArray().buffer
-        //        println(s"Sending: $x")
-        //        socket.send(x)
-
         socket.send(
           Pickle.intoBytes((proxy, elements, limit)).typedArray().buffer
         )
     }
     socket.onmessage = {
       case e: MessageEvent =>
-        println("WebSocket onmessage")
         logger.trace(s"WebSocket onmessage")
         val resultSerialized = TypedArrayBuffer.wrap(e.data.asInstanceOf[ArrayBuffer])
         UnpickleTpls[Tpl](elements, resultSerialized).unpickleEither match {

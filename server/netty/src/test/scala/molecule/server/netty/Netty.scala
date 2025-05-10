@@ -6,9 +6,7 @@ import cats.effect.kernel.Resource
 import molecule.core.marshalling.MoleculeRpc
 import sttp.tapir.server.netty.cats.NettyCatsServer
 import scala.io.StdIn
-//import scala.language.implicitConversions
 
-// Re-using server endpoints from Http4s
 case class Netty(rpc: MoleculeRpc) extends NettyServerEndpoints(rpc) {
 
   def run(db: String): Resource[IO, Unit] = {

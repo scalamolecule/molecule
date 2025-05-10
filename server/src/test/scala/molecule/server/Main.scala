@@ -13,7 +13,6 @@ import molecule.server.http4s.Http4s
 import molecule.server.netty.Netty
 import molecule.server.pekko.Pekko
 import molecule.server.play.Play
-import molecule.server.vertx.VertX
 import molecule.server.ziohttp.ZioHttp
 import zio.{Runtime, Unsafe}
 import scala.annotation.tailrec
@@ -33,8 +32,6 @@ object Main extends App {
   val (rpc, db): (MoleculeRpc, String) = {
     @tailrec
     def chooseDb(): (MoleculeRpc, String) = {
-      Console.flush()
-      Thread.sleep(100)
       StdIn.readLine("Database: ").trim.toIntOption match {
         case Some(1) => (Rpc_h2, "H2")
         case Some(2) => (Rpc_mariadb, "MariaDB")
@@ -51,22 +48,19 @@ object Main extends App {
   }
 
   println()
-  List("Http4s", "Netty", "Pekko", "Play", "Vert.x", "ZioHttp")
+  List("Http4s", "Netty", "Pekko", "Play", "ZioHttp")
     .zipWithIndex.foreach((server, i) => println(s"  ${i + 1}  $server"))
   println()
 
 
   @tailrec
   private def chooseServer(): Any = {
-    Console.flush()
-    Thread.sleep(100)
     StdIn.readLine("Server: ").trim.toIntOption match {
       case Some(1) => Await.result(Http4s(rpc).run(db).unsafeToFuture(), Duration.Inf)
       case Some(2) => Netty(rpc).run(db).use(_ => IO.unit).unsafeRunSync()
       case Some(3) => Pekko(rpc).run(db)
       case Some(4) => Play(rpc).run(db)
-      case Some(5) => VertX(rpc).run(db)
-      case Some(6) =>
+      case Some(5) =>
         Unsafe.unsafe { implicit u =>
           Runtime.default.unsafe.run(
             ZioHttp(rpc).run(db)
