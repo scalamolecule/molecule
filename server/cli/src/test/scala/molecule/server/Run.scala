@@ -20,8 +20,24 @@ import scala.concurrent.Await
 import scala.concurrent.duration.*
 import scala.io.StdIn
 
-
-object Main extends App {
+/**
+ * Test Molecule SPI test suite for various databases and servers in two steps:
+ *
+ * Select a server/database combination in one terminal process:
+ *
+ *   sbt server/Test/run
+ *
+ * Then, in another terminal process, select a scala JS project with the same database, for instance H2:
+ *
+ *   sbt
+ *   project dbSqlH2JS
+ *   test
+ *
+ * or
+ *   testOnly molecule.db.sql.h2.Adhoc_js_h2_async
+ * etc.
+ */
+object Run extends App {
 
   println("\nPlease choose a database and a server backend to test the Molecule RPC API:\n")
 

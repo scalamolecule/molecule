@@ -99,8 +99,8 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
 
       // Streaming + effects
       "com.lihaoyi" %%% "geny" % "1.1.1",
-      "dev.zio" %%% "zio-streams" % zioVersion, // + ZIO
-      "co.fs2" %%% "fs2-core" % "3.12.0", // + cats IO
+      "dev.zio" %%% "zio-streams" % zioVersion, // includes ZIO
+      "co.fs2" %%% "fs2-core" % "3.12.0", // includes cats IO
     ),
   )
   .jsSettings(
@@ -127,16 +127,14 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
       "org.typelevel" %%% "munit-cats-effect" % "2.1.0" % Test,
       "dev.zio" %%% "zio-test" % zioVersion % Test,
       "dev.zio" %%% "zio-test-sbt" % zioVersion % Test,
-      //      "dev.zio" %%% "zio-streams" % zioVersion % Test,
     ),
   )
   .jsConfigure(_.enablePlugins(TzdbPlugin))
   .jsSettings(
     jsEnvironment,
     libraryDependencies ++= Seq(
-      //      "org.scala-js" %%% "scalajs-dom" % "2.8.0",
       "org.scala-js" %%% "scala-js-macrotask-executor" % "1.1.1",
-      "org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0" cross CrossVersion.for3Use2_13
+      "org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0" cross CrossVersion.for3Use2_13 // for randomUUID
     ),
     zonesFilter := { (z: String) =>
       List(
@@ -281,9 +279,9 @@ lazy val dbSqlSQlite = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(dbSqlCore, coreTests % "test->test")
 
 
-// Tapir example backend servers to test Molecule RPC
+// Tapir example backend servers
 lazy val server = project
-  .in(file("server"))
+  .in(file("server/cli"))
   .settings(
     publish / skip := true,
     dependencyOverrides ++= Seq(
