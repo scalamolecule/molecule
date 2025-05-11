@@ -1,7 +1,7 @@
 package molecule.db.datalog.datomic.compliance.sorting
 
-import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.sorting.*
+import molecule.db.compliance.setup.Test
+import molecule.db.compliance.test.sorting.{SortAggr, SortBasics, SortDynamic, SortNested}
 import molecule.db.datalog
 import molecule.db.datalog.datomic.setup.Api_datomic_async
 

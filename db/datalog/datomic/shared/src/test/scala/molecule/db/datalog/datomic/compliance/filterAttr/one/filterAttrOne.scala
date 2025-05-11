@@ -1,7 +1,7 @@
 package molecule.db.datalog.datomic.compliance.filterAttr.one
 
-import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.filterAttr.one.*
+import molecule.db.compliance.setup.Test
+import molecule.db.compliance.test.filterAttr.one.{Adjacent, CrossEntity, FilterAttrNested, FilterAttrRef, FilterAttr_id, Semantics, Sorting, Types}
 import molecule.db.datalog
 import molecule.db.datalog.datomic.setup.Api_datomic_async
 

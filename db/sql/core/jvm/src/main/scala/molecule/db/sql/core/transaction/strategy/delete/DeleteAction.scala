@@ -1,8 +1,8 @@
 package molecule.db.sql.core.transaction.strategy.delete
 
 import java.sql.Statement
-import molecule.base.ast.{CardOne, MetaAttribute, MetaEntity}
-import molecule.base.util.BaseHelpers
+import molecule.db.base.ast.{CardOne, MetaAttribute, MetaEntity}
+import molecule.db.base.util.BaseHelpers
 import molecule.db.sql.core.transaction.strategy.{SqlAction, SqlOps}
 import scala.collection.mutable.ListBuffer
 

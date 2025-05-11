@@ -1,7 +1,7 @@
 package molecule.db.datalog.datomic.spi
 
-import molecule.base.error.ModelError
-import molecule.core.spi.Spi_sync
+import molecule.db.base.error.ModelError
+import molecule.db.core.spi.Spi_sync
 import molecule.db.datalog.datomic
 
 

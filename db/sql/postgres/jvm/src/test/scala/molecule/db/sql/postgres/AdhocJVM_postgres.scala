@@ -1,16 +1,16 @@
 package molecule.db.sql.postgres
 
-import molecule.core.util.Executor.*
-import molecule.coreTests.setup.{Test, TestUtils}
+import molecule.db.compliance.setup.{Test, TestUtils}
+import molecule.db.core.util.Executor.*
 import molecule.db.sql
 import molecule.db.sql.postgres.async.*
 import molecule.db.sql.postgres.setup.DbProviders_postgres
-//import scala.language.implicitConversions
+
 
 class AdhocJVM_postgres extends Test with DbProviders_postgres with TestUtils {
 
   "types" - types { implicit conn =>
-    import molecule.coreTests.domains.dsl.Types.*
+    import molecule.db.compliance.domains.dsl.Types.*
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
     for {
 
@@ -27,7 +27,7 @@ class AdhocJVM_postgres extends Test with DbProviders_postgres with TestUtils {
 
 
   "refs" - refs { implicit conn =>
-    import molecule.coreTests.domains.dsl.Refs.*
+    import molecule.db.compliance.domains.dsl.Refs.*
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
     for {
@@ -66,7 +66,7 @@ class AdhocJVM_postgres extends Test with DbProviders_postgres with TestUtils {
 
 
   //    "unique" - unique { implicit conn =>
-  //      import molecule.coreTests.domains.dsl.Uniques._
+  //      import molecule.db.compliance.domains.dsl.Uniques._
   //      for {
   //        _ <- Uniques.i(1).save.transact
   //
@@ -75,7 +75,7 @@ class AdhocJVM_postgres extends Test with DbProviders_postgres with TestUtils {
   //
   //
   //    "validation" - validation { implicit conn =>
-  //      import molecule.coreTests.domains.dsl.Validation._
+  //      import molecule.db.compliance.domains.dsl.Validation._
   //      for {
   //        _ <- Type.string.insert("a").transact
   //          .map(_ ==> "Unexpected success").recover {

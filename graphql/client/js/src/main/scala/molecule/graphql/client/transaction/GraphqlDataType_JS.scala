@@ -1,6 +1,6 @@
 package molecule.graphql.client.transaction
 
-import molecule.core.spi.DataType
+import molecule.db.core.spi.DataType
 
 trait GraphqlDataType_JS extends DataType {
 

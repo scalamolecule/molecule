@@ -1,7 +1,7 @@
 package molecule.db.sql.mysql.compliance.pagination.offset
 
-import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.pagination.offset.*
+import molecule.db.compliance.setup.Test
+import molecule.db.compliance.test.pagination.offset.{OffsetBackwards, OffsetForward, OffsetSemantics}
 import molecule.db.sql
 import molecule.db.sql.mysql.setup.Api_mysql_async
 

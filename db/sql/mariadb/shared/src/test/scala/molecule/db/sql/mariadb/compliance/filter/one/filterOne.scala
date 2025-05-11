@@ -1,8 +1,8 @@
 package molecule.db.sql.mariadb.compliance.filter.one
 
-import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.filter.one.*
-import molecule.coreTests.spi.filter.one.types.*
+import molecule.db.compliance.setup.Test
+import molecule.db.compliance.test.filter.one.{FilterOneSpecial_String, FilterOne_id, FilterRefOne}
+import molecule.db.compliance.test.filter.one.types.{FilterOne_BigDecimal_, FilterOne_BigInt_, FilterOne_Boolean, FilterOne_Byte_, FilterOne_Char_, FilterOne_Date_, FilterOne_Double_, FilterOne_Duration_, FilterOne_Float_, FilterOne_Instant_, FilterOne_Int, FilterOne_LocalDateTime_, FilterOne_LocalDate_, FilterOne_LocalTime_, FilterOne_Long_, FilterOne_OffsetDateTime_, FilterOne_OffsetTime_, FilterOne_Short_, FilterOne_String_, FilterOne_URI_, FilterOne_UUID_, FilterOne_ZonedDateTime_, FilterOne_ref}
 import molecule.db.sql
 import molecule.db.sql.mariadb.setup.Api_mariadb_async
 

@@ -1,11 +1,11 @@
 package molecule.db.sql.mariadb.spi
 
 import java.sql.DriverManager
-import molecule.core.action.*
-import molecule.core.ast.DataModel.Element
-import molecule.core.marshalling.{ConnProxy, JdbcProxy}
-import molecule.core.transaction.*
-import molecule.core.util.Executor.*
+import molecule.db.core.ast.Element
+import molecule.db.core.util.Executor.*
+import molecule.db.core.action.{Delete, Insert, Save, Update}
+import molecule.db.core.marshalling.{ConnProxy, JdbcProxy}
+import molecule.db.core.transaction.{ResolveDelete, ResolveInsert, ResolveSave, ResolveUpdate}
 import molecule.db.sql.core.facade.{JdbcConn_JVM, JdbcHandler_JVM}
 import molecule.db.sql.core.javaSql.ResultSetInterface as RS
 import molecule.db.sql.core.spi.SpiBaseJVM_sync

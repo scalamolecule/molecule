@@ -2,10 +2,10 @@ package molecule.db.sql.mariadb.setup
 
 import java.sql.DriverManager
 import com.dimafeng.testcontainers.MariaDBContainer
-import molecule.base.api.{Schema, Schema_mariadb}
-import molecule.core.marshalling.JdbcProxy
-import molecule.core.spi.Conn
-import molecule.coreTests.setup.DbConnection
+import molecule.db.base.api.{Schema, Schema_mariadb}
+import molecule.db.compliance.setup.DbConnection
+import molecule.db.core.marshalling.JdbcProxy
+import molecule.db.core.spi.Conn
 import molecule.db.sql.core.facade.{JdbcConn_JVM, JdbcHandler_JVM}
 import molecule.db.sql.mariadb
 import zio.{ZIO, ZLayer}

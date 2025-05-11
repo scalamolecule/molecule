@@ -1,8 +1,8 @@
 package molecule.rpc.openapi.spi
 
-import molecule.base.error._
-import molecule.core.action._
-import molecule.core.spi.{Conn, SpiZio, TxReport}
+import molecule.db.base.error._
+import molecule.db.core.action._
+import molecule.db.core.spi.{Conn, SpiZio, TxReport}
 import molecule.rpc.openapi.facade.GraphqlConn_JS
 import zio._
 import scala.concurrent.{Future, ExecutionContext => EC}

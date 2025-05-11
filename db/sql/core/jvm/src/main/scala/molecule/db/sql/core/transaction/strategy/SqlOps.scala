@@ -1,8 +1,8 @@
 package molecule.db.sql.core.transaction.strategy
 
 import java.sql.PreparedStatement as PS
-import molecule.base.util.BaseHelpers
-import molecule.core.ast.DataModel.Element
+import molecule.db.core.ast.Element
+import molecule.db.base.util.BaseHelpers
 import molecule.db.sql.core.query.Model2SqlQuery
 import scala.collection.mutable.ListBuffer
 

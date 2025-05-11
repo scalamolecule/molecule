@@ -1,16 +1,16 @@
 package molecule.db.sql.postgres.compliance.fallback
 
 import java.math.BigDecimal as jBigDecimal
-import molecule.core.util.Executor.*
-import molecule.coreTests.domains.dsl.Types.*
-import molecule.coreTests.setup.{Test, TestUtils}
+import molecule.db.core.util.Executor.*
+import molecule.db.compliance.domains.dsl.Types.*
+import molecule.db.compliance.setup.{Test, TestUtils}
 import molecule.db.sql
 import molecule.db.sql.postgres.async.*
 import molecule.db.sql.postgres.setup.DbProviders_postgres
 import org.postgresql.jdbc.PgArray
 import org.postgresql.util.PGobject
 import upickle.default.read
-//import scala.language.implicitConversions
+
 
 class RawQuery extends Test with DbProviders_postgres with TestUtils {
 

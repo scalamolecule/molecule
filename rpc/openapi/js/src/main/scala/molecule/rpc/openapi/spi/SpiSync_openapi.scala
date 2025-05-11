@@ -1,7 +1,7 @@
 package molecule.rpc.openapi.spi
 
-import molecule.base.error.ModelError
-import molecule.core.spi.SpiSync
+import molecule.db.base.error.ModelError
+import molecule.db.core.spi.SpiSync
 
 
 trait SpiSync_openapi extends SpiSync {

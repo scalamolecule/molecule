@@ -1,7 +1,7 @@
 package molecule.db.sql.mysql.compliance.validation.save
 
-import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.validation.save.*
+import molecule.db.compliance.setup.Test
+import molecule.db.compliance.test.validation.save.{FormatConstants, FormatVariables, Semantics, TypesOne, TypesOneOpt, TypesSeq, TypesSeqOpt, TypesSet, TypesSetOpt}
 import molecule.db.sql
 import molecule.db.sql.mysql.setup.Api_mysql_async
 

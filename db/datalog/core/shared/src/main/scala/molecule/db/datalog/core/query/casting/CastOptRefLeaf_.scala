@@ -2,7 +2,7 @@
 package molecule.db.datalog.core.query.casting
 
 import java.util.{ArrayList as jArrayList, Iterator as jIterator, Map as jMap}
-import molecule.core.util.JavaConversions
+import molecule.db.core.util.JavaConversions
 
 
 trait CastOptRefLeaf_ extends JavaConversions {

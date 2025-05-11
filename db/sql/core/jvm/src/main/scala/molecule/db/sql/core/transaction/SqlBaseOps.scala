@@ -4,7 +4,7 @@ import java.net.URI
 import java.sql.PreparedStatement as PS
 import java.time.*
 import java.util.{Date, UUID}
-import molecule.core.transaction.ops.BaseOps
+import molecule.db.core.transaction.ops.BaseOps
 
 trait SqlBaseOps { self: BaseOps =>
 

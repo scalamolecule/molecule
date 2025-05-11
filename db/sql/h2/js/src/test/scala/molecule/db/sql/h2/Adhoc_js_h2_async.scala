@@ -2,10 +2,9 @@ package molecule.db.sql.h2
 
 import boopickle.Default.*
 import cats.effect.unsafe.implicits.global as ioRuntime
-import molecule.core.marshalling.Boopicklers.*
-import molecule.core.util.Executor.*
-import molecule.coreTests.domains.dsl.Types.*
-import molecule.coreTests.setup.{Test, TestUtils}
+import molecule.db.core.marshalling.Boopicklers.*
+import molecule.db.compliance.domains.dsl.Types.*
+import molecule.db.compliance.setup.{Test, TestUtils}
 import molecule.db.sql
 import molecule.db.sql.h2
 import molecule.db.sql.h2.async.*
@@ -13,6 +12,7 @@ import molecule.db.sql.h2.setup.DbProviders_h2
 import scala.concurrent.{Future, Promise}
 import scala.scalajs.js.timers.setTimeout
 import scala.util.Try
+import molecule.db.core.util.Executor.*
 
 class Adhoc_js_h2_async extends Test with DbProviders_h2 with TestUtils {
 
@@ -29,7 +29,7 @@ class Adhoc_js_h2_async extends Test with DbProviders_h2 with TestUtils {
   }
 
   //      "refs" - refs { implicit conn =>
-  //        import molecule.coreTests.domains.dsl.Refs._
+  //        import molecule.db.compliance.domains.dsl.Refs._
   //        for {
   //
   //          _ <- A.i(1).save.transact
@@ -63,7 +63,7 @@ class Adhoc_js_h2_async extends Test with DbProviders_h2 with TestUtils {
   //
   //
   //    "validation" - validation { implicit conn =>
-  //      import molecule.coreTests.domains.dsl.Validation._
+  //      import molecule.db.compliance.domains.dsl.Validation._
   //      for {
   //
   //        id <- MandatoryAttr.name("Bob").age(42)

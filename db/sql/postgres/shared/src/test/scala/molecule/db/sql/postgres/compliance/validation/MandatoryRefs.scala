@@ -1,7 +1,7 @@
 package molecule.db.sql.postgres.compliance.validation
 
-import molecule.coreTests.setup.MUnitSuiteWithArrays
-import molecule.coreTests.spi.validation.*
+import molecule.db.compliance.setup.MUnitSuiteWithArrays
+import molecule.db.compliance.test.validation.MandatoryRefs
 import molecule.db.sql
 import molecule.db.sql.postgres.setup.Api_postgres_async
 

@@ -1,11 +1,11 @@
 package molecule.db.sql.core.query
 
 import java.util.Base64
-import molecule.base.error.ModelError
-import molecule.core.ast.DataModel.Element
-import molecule.core.ops.ModelTransformations_
-import molecule.core.query.Pagination
-import molecule.core.util.{FutureUtils, MoleculeLogging}
+import molecule.db.core.ast.Element
+import molecule.db.base.error.ModelError
+import molecule.db.core.ops.ModelTransformations_
+import molecule.db.core.query.Pagination
+import molecule.db.core.util.{FutureUtils, MoleculeLogging}
 import molecule.db.sql.core.facade.JdbcConn_JVM
 import molecule.db.sql.core.query.casting.strategy.*
 import molecule.db.sql.core.query.cursorStrategy.{NoUnique, PrimaryUnique, SubUnique}

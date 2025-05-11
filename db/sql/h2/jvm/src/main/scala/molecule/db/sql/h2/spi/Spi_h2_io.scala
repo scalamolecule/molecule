@@ -2,10 +2,10 @@ package molecule.db.sql.h2.spi
 
 import cats.effect.IO
 import fs2.Stream
-import molecule.base.error.InsertError
-import molecule.core.action.*
-import molecule.core.spi.{Conn, Spi_io, TxReport}
-import molecule.core.util.ModelUtils
+import molecule.db.base.error.InsertError
+import molecule.db.core.action.{Delete, Insert, Query, QueryCursor, QueryOffset, Save, Update}
+import molecule.db.core.spi.{Conn, Spi_io, TxReport}
+import molecule.db.core.util.ModelUtils
 import molecule.db.sql.core.spi.StreamingJdbc
 
 trait Spi_h2_io extends Spi_io with StreamingJdbc with ModelUtils {

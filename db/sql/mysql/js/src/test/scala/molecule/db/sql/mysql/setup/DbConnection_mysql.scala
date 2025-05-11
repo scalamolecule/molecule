@@ -1,8 +1,8 @@
 package molecule.db.sql.mysql.setup
 
-import molecule.base.api.{Schema, Schema_mysql}
-import molecule.core.marshalling.JdbcProxy
-import molecule.core.spi.Conn
+import molecule.db.base.api.{Schema, Schema_mysql}
+import molecule.db.core.marshalling.JdbcProxy
+import molecule.db.core.spi.Conn
 import molecule.db.sql.core.facade.JdbcConn_JS
 import molecule.db.sql.mysql
 import sttp.client4.UriContext

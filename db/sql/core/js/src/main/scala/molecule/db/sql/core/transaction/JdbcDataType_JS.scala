@@ -1,6 +1,6 @@
 package molecule.db.sql.core.transaction
 
-import molecule.core.spi.DataType
+import molecule.db.core.spi.DataType
 
 trait JdbcDataType_JS extends DataType {
 

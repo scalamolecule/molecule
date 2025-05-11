@@ -1,6 +1,6 @@
 package codegen
 
-import molecule.base.util.CodeGenTemplate
+import molecule.db.base.util.CodeGenTemplate
 
 abstract class DatomicGenBase(fileName: String, dir: String)
   extends CodeGenTemplate(

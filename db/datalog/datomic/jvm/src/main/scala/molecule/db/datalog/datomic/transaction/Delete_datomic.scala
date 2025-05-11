@@ -1,16 +1,15 @@
 package molecule.db.datalog.datomic.transaction
 
 import datomic.Peer
-import molecule.base.error.ExecutionError
-import molecule.core.ast.DataModel.*
-import molecule.core.transaction.ResolveDelete
-import molecule.core.transaction.ops.DeleteOps
-import molecule.core.util.{JavaConversions, MetaModelUtils, MoleculeLogging}
+import molecule.db.base.error.ExecutionError
+import molecule.db.core.transaction.ResolveDelete
+import molecule.db.core.transaction.ops.DeleteOps
+import molecule.db.core.util.{JavaConversions, MetaModelUtils, MoleculeLogging}
 import molecule.db.datalog
 import molecule.db.datalog.datomic.facade.DatomicConn_JVM
 import molecule.db.datalog.core.query.Model2DatomicQuery
 import scala.collection.mutable
-
+import molecule.db.core.ast._
 
 trait Delete_datomic
   extends DatomicBase_JVM

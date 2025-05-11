@@ -2,10 +2,10 @@ package molecule.rpc.openapi.facade
 
 import java.sql
 import java.sql.{Connection, SQLException}
-import molecule.core.util.MoleculeLogging
-import molecule.core.marshalling.JdbcProxy
-import molecule.core.spi.{Conn, TxReport}
-import molecule.core.util.ModelUtils
+import molecule.db.core.util.MoleculeLogging
+import molecule.db.core.marshalling.JdbcProxy
+import molecule.db.core.spi.{Conn, TxReport}
+import molecule.db.core.util.ModelUtils
 import molecule.rpc.openapi.transaction.GraphqlDataType_JVM
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal

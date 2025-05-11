@@ -1,6 +1,6 @@
 package molecule.rpc.openapi.transaction
 
-import molecule.core.spi.DataType
+import molecule.db.core.spi.DataType
 
 trait OpenapiDataType_JS extends DataType {
 

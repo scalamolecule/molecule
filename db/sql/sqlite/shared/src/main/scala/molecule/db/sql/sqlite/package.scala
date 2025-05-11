@@ -1,6 +1,6 @@
 package molecule.db.sql
 
-import molecule.core.api.*
+import molecule.db.core.api.{Api_async, Api_async_transact, Api_io, Api_io_transact, Api_sync, Api_sync_transact, Api_zio, Api_zio_transact}
 import molecule.db.sql.sqlite.spi.{Spi_sqlite_async, Spi_sqlite_io, Spi_sqlite_sync, Spi_sqlite_zio}
 import sqlite.spi.*
 

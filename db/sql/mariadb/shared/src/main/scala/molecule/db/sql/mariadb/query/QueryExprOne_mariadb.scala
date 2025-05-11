@@ -1,7 +1,7 @@
 package molecule.db.sql.mariadb.query
 
-import molecule.base.error.ModelError
-import molecule.core.query.Model2Query
+import molecule.db.base.error.ModelError
+import molecule.db.core.query.Model2Query
 import molecule.db.sql.core.query.{LambdasOne, QueryExprOne, SqlQueryBase}
 import scala.reflect.ClassTag
 import scala.util.Random

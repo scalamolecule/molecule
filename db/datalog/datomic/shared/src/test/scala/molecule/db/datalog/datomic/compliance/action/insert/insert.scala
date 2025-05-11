@@ -1,7 +1,7 @@
 package molecule.db.datalog.datomic.compliance.action.insert
 
-import molecule.coreTests.setup.{MUnitSuiteWithArrays, Test}
-import molecule.coreTests.spi.action.insert.*
+import molecule.db.compliance.setup.{MUnitSuiteWithArrays, Test}
+import molecule.db.compliance.test.action.insert.{InsertCardMap, InsertCardOne, InsertCardSeq, InsertCardSet, InsertRefs, InsertSemantics}
 import molecule.db.datalog
 import molecule.db.datalog.datomic.setup.Api_datomic_async
 

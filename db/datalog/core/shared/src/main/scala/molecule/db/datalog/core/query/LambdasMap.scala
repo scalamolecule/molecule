@@ -3,8 +3,8 @@ package molecule.db.datalog.core.query
 import java.net.URI
 import java.time.*
 import java.util.{Date, UUID, Iterator as jIterator, List as jList, Map as jMap, Set as jSet}
-import molecule.base.error.ModelError
-import molecule.core.util.JavaConversions
+import molecule.db.base.error.ModelError
+import molecule.db.core.util.JavaConversions
 import scala.collection.mutable.ListBuffer
 
 trait LambdasMap extends ResolveBase with JavaConversions {

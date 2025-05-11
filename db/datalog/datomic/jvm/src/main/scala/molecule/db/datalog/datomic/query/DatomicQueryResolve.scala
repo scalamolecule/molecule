@@ -5,17 +5,17 @@ import java.util.stream.Stream as jStream
 import java.util.List as jList
 import java.util.{Collections, Comparator, stream, ArrayList as jArrayList, Collection as jCollection, List as jList}
 import datomic.{Database, Peer}
-import molecule.base.error.ModelError
-import molecule.core.ast.DataModel.*
-import molecule.core.marshalling.dbView.*
-import molecule.core.query.Pagination
-import molecule.core.util.MoleculeLogging
+import molecule.db.core.marshalling.dbView.*
+import molecule.db.base.error.ModelError
+import molecule.db.core.query.Pagination
+import molecule.db.core.util.MoleculeLogging
 import molecule.db.datalog
 import molecule.db.datalog.datomic.facade.DatomicConn_JVM
 import molecule.db.datalog.core.query.{DatomicQueryBase, Model2DatomicQuery}
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 import scala.jdk.StreamConverters.StreamHasToScala
+import molecule.db.core.ast._
 
 abstract class DatomicQueryResolve[Tpl](
   elements: List[Element],

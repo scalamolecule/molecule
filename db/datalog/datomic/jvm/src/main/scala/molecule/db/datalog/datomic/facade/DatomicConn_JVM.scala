@@ -6,10 +6,11 @@ import java.{lang as jl, util as ju}
 import cats.effect.IO
 import datomic.Util.readAll
 import datomic.{Connection as DatomicConnection, Datom as _, *}
-import molecule.base.error.*
-import molecule.core.marshalling.DatomicProxy
-import molecule.core.spi.{Conn, TxReport}
-import molecule.core.util.{Executor, MoleculeLogging}
+import molecule.db.base.error.*
+import molecule.db.base.error.{ExecutionError, ModelError, MoleculeError}
+import molecule.db.core.marshalling.DatomicProxy
+import molecule.db.core.spi.{Conn, TxReport}
+import molecule.db.core.util.{Executor, MoleculeLogging}
 import molecule.db.datalog
 import molecule.db.datalog.datomic.transaction.DatomicDataType_JVM
 import molecule.db.datalog.datomic.util.MakeTxReport
@@ -56,7 +57,7 @@ case class DatomicConn_JVM(
   }
 
   override def transact_sync(javaStmts: Data): TxReport = try {
-    import molecule.core.util.Executor.*
+    import Executor.*
     Await.result(transact_async(javaStmts), 10.seconds)
   } catch {
     case t: Throwable => throw ModelError(t.toString)

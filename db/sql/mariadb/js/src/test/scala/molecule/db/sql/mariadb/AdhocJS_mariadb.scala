@@ -1,13 +1,12 @@
 package molecule.db.sql.mariadb
 
 import boopickle.Default.*
-import molecule.core.util.Executor.*
-import molecule.coreTests.domains.dsl.Types.*
-import molecule.coreTests.setup.{Test, TestUtils}
+import molecule.db.compliance.domains.dsl.Types.*
+import molecule.db.compliance.setup.{Test, TestUtils}
 import molecule.db.sql.mariadb
 import molecule.db.sql.mariadb.async.*
 import molecule.db.sql.mariadb.setup.DbProviders_mariadb
-
+import molecule.db.core.util.Executor.*
 
 class AdhocJS_mariadb extends Test with DbProviders_mariadb with TestUtils {
 //  val a = (1, Map("a" -> localDate1))
@@ -46,7 +45,7 @@ class AdhocJS_mariadb extends Test with DbProviders_mariadb with TestUtils {
 
 
   //    "refs" - refs { implicit conn =>
-  //      import molecule.coreTests.domains.dsl.Refs._
+  //      import molecule.db.compliance.domains.dsl.Refs._
   //      for {
   //
   //        _ <- Entity.i.Rs1.*(R1.i).insert(0, List(1)).transact
@@ -56,7 +55,7 @@ class AdhocJS_mariadb extends Test with DbProviders_mariadb with TestUtils {
 
   //
   //    "validation" - validation { implicit conn =>
-  //      import molecule.coreTests.domains.dsl.Validation._
+  //      import molecule.db.compliance.domains.dsl.Validation._
   //      for {
   //
   //        List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)

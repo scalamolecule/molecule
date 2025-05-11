@@ -2,7 +2,7 @@ package molecule.db.sql.sqlite.facade
 
 import java.sql
 import java.sql.{PreparedStatement, ResultSet}
-import molecule.core.marshalling.JdbcProxy
+import molecule.db.core.marshalling.JdbcProxy
 import molecule.db.sql.core.facade.JdbcConn_JVM
 import molecule.db.sql.core.javaSql.ResultSetInterface
 import molecule.db.sql.sqlite.javaSql.ResultSetImpl_sqlite

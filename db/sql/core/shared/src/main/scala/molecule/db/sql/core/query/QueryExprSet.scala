@@ -1,7 +1,7 @@
 package molecule.db.sql.core.query
 
-import molecule.core.ast.DataModel.*
-import molecule.core.query.{Model2Query, QueryExpr}
+import molecule.db.core.query.{Model2Query, QueryExpr}
+import molecule.db.core.ast._
 
 trait QueryExprSet extends QueryExpr { self: Model2Query & SqlQueryBase & LambdasSet =>
 

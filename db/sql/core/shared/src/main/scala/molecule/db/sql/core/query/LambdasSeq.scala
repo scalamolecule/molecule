@@ -5,7 +5,7 @@ import java.math.BigDecimal as jBigDecimal
 import java.net.URI
 import java.time.*
 import java.util.{Date, UUID}
-import molecule.core.util.JavaConversions
+import molecule.db.core.util.JavaConversions
 import scala.collection.mutable.ListBuffer
 
 trait LambdasSeq extends LambdasBase with JavaConversions { self: SqlQueryBase =>

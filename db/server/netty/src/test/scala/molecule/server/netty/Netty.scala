@@ -1,0 +1,34 @@
+package molecule.server.netty
+
+import boopickle.Default.*
+import cats.effect.*
+import cats.effect.kernel.Resource
+import molecule.db.core.marshalling.MoleculeRpc
+import sttp.tapir.server.netty.cats.NettyCatsServer
+import scala.io.StdIn
+
+case class Netty(rpc: MoleculeRpc) extends NettyServerEndpoints(rpc) {
+
+  def run(db: String): Resource[IO, Unit] = {
+    for {
+      server <- NettyCatsServer.io()
+      _ <- Resource.make(
+        server
+          .host("localhost")
+          .port(8080)
+          .addEndpoints(moleculeServerEndpoints)
+          .start()
+      )(_.stop())
+
+      _ <- Resource.eval {
+        for {
+          _ <- IO.println(s"✅ Netty server running on http://localhost:8080 for $db")
+          _ <- IO.println(s"   Press ENTER to stop the server.")
+          _ <- IO.blocking(StdIn.readLine())
+          _ <- IO.println("🛑 Shutting down server...")
+          _ <- IO(System.exit(0))
+        } yield ()
+      }
+    } yield ()
+  }
+}

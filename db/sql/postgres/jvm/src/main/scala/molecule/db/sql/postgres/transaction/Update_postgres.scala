@@ -1,7 +1,7 @@
 package molecule.db.sql.postgres.transaction
 
 import java.sql.PreparedStatement as PS
-import molecule.core.transaction.ResolveUpdate
+import molecule.db.core.transaction.ResolveUpdate
 import molecule.db.sql.core.transaction.SqlUpdate
 import molecule.db.sql.core.transaction.strategy.SqlOps
 

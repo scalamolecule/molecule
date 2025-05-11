@@ -1,12 +1,12 @@
 package molecule.db.sql.h2.compliance.fallback
 
-import molecule.core.util.Executor.*
-import molecule.coreTests.domains.dsl.Types.*
-import molecule.coreTests.setup.{Test, TestUtils}
+import molecule.db.core.util.Executor.*
+import molecule.db.compliance.domains.dsl.Types.*
+import molecule.db.compliance.setup.{Test, TestUtils}
 import molecule.db.sql
 import molecule.db.sql.h2.async.*
 import molecule.db.sql.h2.setup.DbProviders_h2
-//import scala.language.implicitConversions
+
 
 class RawTransact extends Test with DbProviders_h2 with TestUtils {
 

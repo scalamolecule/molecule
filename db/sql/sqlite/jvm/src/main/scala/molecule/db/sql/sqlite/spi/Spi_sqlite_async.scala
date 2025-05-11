@@ -1,10 +1,10 @@
 package molecule.db.sql.sqlite.spi
 
 import cats.effect.IO
-import molecule.base.error.InsertError
-import molecule.core.action.*
-import molecule.core.spi.{Conn, Spi_async, TxReport}
-import molecule.core.util.ModelUtils
+import molecule.db.base.error.InsertError
+import molecule.db.core.action.{Delete, Insert, Query, QueryCursor, QueryOffset, Save, Update}
+import molecule.db.core.spi.{Conn, Spi_async, TxReport}
+import molecule.db.core.util.ModelUtils
 import molecule.db.sql.core.spi.StreamingJdbc
 import scala.concurrent.{Future, ExecutionContext as EC}
 

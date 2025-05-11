@@ -31,8 +31,8 @@ project/plugins/project/
 project/project/
 node_modules/
 *.json
-/coreTests/js/lib/
-/coreTests/jvm/lib/
-/coreTests/shared/lib/
+/compliance/js/lib/
+/compliance/jvm/lib/
+/compliance/shared/lib/
 
 *.cache

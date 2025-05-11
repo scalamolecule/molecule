@@ -1,7 +1,7 @@
 package molecule.db.sql.mysql.compliance.action.delete
 
-import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.action.delete.*
+import molecule.db.compliance.setup.Test
+import molecule.db.compliance.test.action.delete.{Delete_filter, Delete_id}
 import molecule.db.sql
 import molecule.db.sql.mysql.setup.Api_mysql_async
 

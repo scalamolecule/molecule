@@ -1,7 +1,7 @@
 package molecule.db.sql.mysql.compliance.action.update.filter
 
-import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.action.update.filter.*
+import molecule.db.compliance.setup.Test
+import molecule.db.compliance.test.action.update.filter.{FilterMap, FilterOne, FilterSeq, FilterSet}
 import molecule.db.sql
 import molecule.db.sql.mysql.setup.Api_mysql_async
 

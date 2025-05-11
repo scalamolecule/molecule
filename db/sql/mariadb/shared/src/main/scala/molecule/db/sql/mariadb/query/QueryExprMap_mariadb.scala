@@ -1,6 +1,6 @@
 package molecule.db.sql.mariadb.query
 
-import molecule.core.query.Model2Query
+import molecule.db.core.query.Model2Query
 import molecule.db.sql.core.query.{LambdasMap, QueryExprMap, SqlQueryBase}
 
 

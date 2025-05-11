@@ -4,7 +4,7 @@ import java.lang.Integer as jInteger
 import java.net.URI
 import java.time.*
 import java.util.{Date, UUID, Iterator as jIterator, List as jList, Map as jMap, Set as jSet}
-import molecule.core.util.JavaConversions
+import molecule.db.core.util.JavaConversions
 import scala.collection.mutable.ListBuffer
 
 trait LambdasSeq extends ResolveBase with JavaConversions {

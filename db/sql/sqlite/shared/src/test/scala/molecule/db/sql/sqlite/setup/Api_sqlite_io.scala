@@ -1,6 +1,6 @@
 package molecule.db.sql.sqlite.setup
 
-import molecule.core.api.{Api_io, Api_io_transact}
+import molecule.db.core.api.{Api_io, Api_io_transact}
 import molecule.db.sql
 import molecule.db.sql.sqlite.spi.Spi_sqlite_io
 

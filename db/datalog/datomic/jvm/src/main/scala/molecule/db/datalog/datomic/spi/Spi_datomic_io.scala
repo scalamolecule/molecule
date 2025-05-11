@@ -1,10 +1,11 @@
 package molecule.db.datalog.datomic.spi
 
 import cats.effect.IO
-import molecule.base.error.*
-import molecule.core.action.*
-import molecule.core.spi.{Conn, Spi_io, TxReport}
-import molecule.core.util.Executor.global as ec
+import molecule.db.base.error.*
+import molecule.db.core.util.Executor.global as ec
+import molecule.db.base.error.{InsertError, InsertErrors, ValidationErrors}
+import molecule.db.core.action.{Delete, Insert, Query, QueryCursor, QueryOffset, Save, Update}
+import molecule.db.core.spi.{Conn, Spi_io, TxReport}
 import molecule.db.datalog
 import molecule.db.datalog.core.spi.StreamingDatomic
 import molecule.db.datalog.datomic

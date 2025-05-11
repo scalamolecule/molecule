@@ -1,10 +1,10 @@
 package molecule.db.sql.h2
 
 import cats.effect.unsafe.implicits.global as ioRuntime
-import molecule.base.error.{ModelError, ValidationErrors}
-import molecule.core.util.Executor.*
-import molecule.coreTests.domains.dsl.Types.*
-import molecule.coreTests.setup.{Test, TestUtils}
+import molecule.db.core.util.Executor.*
+import molecule.db.compliance.domains.dsl.Types.*
+import molecule.db.base.error.{ModelError, ValidationErrors}
+import molecule.db.compliance.setup.{Test, TestUtils}
 import molecule.db.sql
 import molecule.db.sql.h2.async.*
 import molecule.db.sql.h2.setup.DbProviders_h2
@@ -13,37 +13,64 @@ import scala.concurrent.Future
 
 class Adhoc_jvm_h2_async extends Test with DbProviders_h2 with TestUtils {
 
-  "types" - types { implicit conn =>
-    import molecule.coreTests.domains.dsl.Types.*
-    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+//  "types" - types { implicit conn =>
+//    import molecule.db.compliance.domains.dsl.Types.*
+//    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+//
+//    for {
+//      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
+//      _ <- Entity.int(3).save.transact
+//      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
+//      _ <- Entity(a).int(10).update.transact
+//      _ <- Entity(b).delete.transact
+//      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
+//
+//    } yield ()
+//  }
 
+  "Mutations call back" - types { implicit conn =>
+    var intermediaryResults = List.empty[List[Int]]
     for {
-      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
-      _ <- Entity.int(3).save.transact
-      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
-      _ <- Entity(a).int(10).update.transact
-      _ <- Entity(b).delete.transact
-      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
+      // Initial data
+      _ <- Entity.i(1).save.transact
 
+      // Start subscription and define a callback function
+      _ <- Entity.i.query.subscribe { updatedResult =>
+        intermediaryResults = intermediaryResults :+ updatedResult.sorted
+      }
+
+      // Mutations to be monitored by subscription
+      _ <- Entity.i(2).save.transact.map(_.id)
+
+      // Mutations with no callback-involved attributes don't call back
+      _ <- Entity.string("foo").save.transact
+
+      // Callback produced all intermediary results correctly
+      _ = intermediaryResults ==> List(
+        List(1, 2), //        query result after 2 was saved
+//        List(1, 2, 3, 4), //  query result after 3 and 4 were inserted
+//        List(1, 3, 4, 20), // query result after 2 was updated to 20
+//        List(1, 3, 4), //     query result after 20 was deleted
+      )
     } yield ()
   }
 
 
-  "refs" - refs { implicit conn =>
-    import molecule.coreTests.domains.dsl.Refs.*
-    for {
-      _ <- A.i.insert(1, 2, 3).transact
-      _ <- A.i.query.stream // fs2.Stream[IO, List[Int]]
-        .compile
-        .toList
-        .map(_.sorted ==> List(1, 2, 3))
-        .unsafeToFuture()
-    } yield ()
-  }
+//  "refs" - refs { implicit conn =>
+//    import molecule.db.compliance.domains.dsl.Refs.*
+//    for {
+//      _ <- A.i.insert(1, 2, 3).transact
+//      _ <- A.i.query.stream // fs2.Stream[IO, List[Int]]
+//        .compile
+//        .toList
+//        .map(_.sorted ==> List(1, 2, 3))
+//        .unsafeToFuture()
+//    } yield ()
+//  }
 
 
   //    "unique" - unique { implicit conn =>
-  //      import molecule.coreTests.domains.dsl.Uniques._
+  //      import molecule.db.compliance.domains.dsl.Uniques._
   //      val triples             = getTriples.map(t => (t._3, t._1, t._2))
   //      val List(a, b, c, d, e) = triples.sortBy(p => (p._2, p._3, p._1))
   //      val query               = (c: String, l: Int) => Uniques.int.a3.s.a1.i.a2.query.from(c).limit(l)
@@ -55,7 +82,7 @@ class Adhoc_jvm_h2_async extends Test with DbProviders_h2 with TestUtils {
   //
 
   //  "validation" - validation { implicit conn =>
-  //    import molecule.coreTests.domains.dsl.Validation._
+  //    import molecule.db.compliance.domains.dsl.Validation._
   //
   //    for {
   //
@@ -103,7 +130,7 @@ class Adhoc_jvm_h2_async extends Test with DbProviders_h2 with TestUtils {
   //  }
   //
   //    "partitions" - partition { implicit conn =>
-  //      import molecule.coreTests.domains.dsl.Groups._
+  //      import molecule.db.compliance.domains.dsl.Groups._
   //      for {
   //
   //        _ <- lit_Book.title.Reviewers.name.Professions.*(gen_Profession.name)

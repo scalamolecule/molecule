@@ -1,14 +1,13 @@
 package molecule.db.sql.sqlite
 
 import boopickle.Default.*
-import molecule.core.util.Executor.*
-import molecule.coreTests.domains.dsl.Types.*
-import molecule.coreTests.setup.{Test, TestUtils}
+import molecule.db.compliance.domains.dsl.Types.*
+import molecule.db.compliance.setup.{Test, TestUtils}
 import molecule.db.sql
 import molecule.db.sql.sqlite
 import molecule.db.sql.sqlite.async.*
 import molecule.db.sql.sqlite.setup.DbProviders_sqlite
-
+import molecule.db.core.util.Executor.*
 
 class Adhoc_js_sqlite_async extends Test with DbProviders_sqlite with TestUtils {
 
@@ -26,7 +25,7 @@ class Adhoc_js_sqlite_async extends Test with DbProviders_sqlite with TestUtils 
 
 
   //    "refs" - refs { implicit conn =>
-  //      import molecule.coreTests.domains.dsl.Refs._
+  //      import molecule.db.compliance.domains.dsl.Refs._
   //      for {
   //
   //        _ <- A.i(1).save.transact
@@ -60,7 +59,7 @@ class Adhoc_js_sqlite_async extends Test with DbProviders_sqlite with TestUtils 
 
   //
   //    "validation" - validation { implicit conn =>
-  //      import molecule.coreTests.domains.dsl.Validation._
+  //      import molecule.db.compliance.domains.dsl.Validation._
   //      for {
   //
   //        List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)

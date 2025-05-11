@@ -1,7 +1,7 @@
 package molecule.graphql
 
-import molecule.core.MoleculeImplicits_
-import molecule.core.api.{ApiAsync, ApiSync, ApiZio}
+import molecule.db.core.MoleculeImplicits_
+import molecule.db.core.api.{ApiAsync, ApiSync, ApiZio}
 import molecule.graphql.client.spi.{SpiAsync_graphql, SpiSync_graphql, SpiZio_graphql}
 
 package object client {

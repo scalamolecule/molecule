@@ -1,9 +1,9 @@
 package molecule.db.sql.mysql.compliance.filter.set
 
-import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.filter.set.*
-import molecule.coreTests.spi.filter.set.ref.*
-import molecule.coreTests.spi.filter.set.types.*
+import molecule.db.compliance.setup.Test
+import molecule.db.compliance.test.filter.set.SetSemantics
+import molecule.db.compliance.test.filter.set.ref.{FilterRefSet_Card1Ref, FilterRefSet_Card2Ref}
+import molecule.db.compliance.test.filter.set.types.{FilterSet_BigDecimal_, FilterSet_BigInt_, FilterSet_Boolean, FilterSet_Byte_, FilterSet_Char_, FilterSet_Date_, FilterSet_Double_, FilterSet_Duration_, FilterSet_Float_, FilterSet_Instant_, FilterSet_Int, FilterSet_LocalDateTime_, FilterSet_LocalDate_, FilterSet_LocalTime_, FilterSet_Long_, FilterSet_OffsetDateTime_, FilterSet_OffsetTime_, FilterSet_Short_, FilterSet_String_, FilterSet_URI_, FilterSet_UUID_, FilterSet_ZonedDateTime_, FilterSet_ref}
 import molecule.db.sql
 import molecule.db.sql.mysql.setup.Api_mysql_async
 

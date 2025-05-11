@@ -1,10 +1,10 @@
 package molecule.db.datalog.datomic.transaction
 
-import molecule.base.error.ModelError
-import molecule.core.ast.DataModel.*
-import molecule.core.util.ModelUtils
+import molecule.db.base.error.ModelError
+import molecule.db.core.util.ModelUtils
 import molecule.db.datalog.datomic
 import scala.annotation.tailrec
+import molecule.db.core.ast._
 
 
 trait UpdateFilters extends ModelUtils {

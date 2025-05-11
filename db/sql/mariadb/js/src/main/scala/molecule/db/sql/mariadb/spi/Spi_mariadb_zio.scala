@@ -1,8 +1,9 @@
 package molecule.db.sql.mariadb.spi
 
-import molecule.base.error.*
-import molecule.core.action.*
-import molecule.core.spi.{Conn, Spi_zio, TxReport}
+import molecule.db.base.error.*
+import molecule.db.base.error.{InsertError, MoleculeError}
+import molecule.db.core.action.{Delete, Insert, Query, QueryCursor, QueryOffset, Save, Update}
+import molecule.db.core.spi.{Conn, Spi_zio, TxReport}
 import molecule.db.sql.core.facade.JdbcConn_JS
 import zio.*
 import scala.concurrent.{Future, ExecutionContext as EC}

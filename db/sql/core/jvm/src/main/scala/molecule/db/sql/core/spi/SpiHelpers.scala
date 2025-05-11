@@ -3,15 +3,15 @@ package molecule.db.sql.core.spi
 import java.net.URI
 import java.time.*
 import java.util.{Date, UUID}
-import molecule.base.ast.*
-import molecule.base.error.ModelError
-import molecule.core.action.Query
-import molecule.core.ast.DataModel.*
-import molecule.core.util.ModelUtils
+import molecule.db.base.ast.*
+import molecule.db.base.ast.CardOne
+import molecule.db.base.error.ModelError
+import molecule.db.core.action.Query
+import molecule.db.core.util.ModelUtils
 import molecule.db.sql.core.javaSql.ResultSetInterface as RS
 import scala.annotation.nowarn
 import scala.collection.mutable.ListBuffer
-
+import molecule.db.core.ast._
 
 trait SpiHelpers extends ModelUtils {
 

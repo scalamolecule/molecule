@@ -1,7 +1,7 @@
 package molecule.db.sql.sqlite.compliance.pagination.cursor.primaryUnique
 
-import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.pagination.cursor.primaryUnique.*
+import molecule.db.compliance.setup.Test
+import molecule.db.compliance.test.pagination.cursor.primaryUnique.{Directions, MutationAdd, MutationDelete, Nested, TypesFilterAttr}
 import molecule.db.sql
 import molecule.db.sql.sqlite.setup.Api_sqlite_async
 

@@ -1,9 +1,9 @@
 package molecule.db.sql.h2.setup
 
 import boopickle.Default.*
-import molecule.core.spi.Conn
-import molecule.coreTests.domains.schema.*
-import molecule.coreTests.setup.{DbProviders, Platform}
+import molecule.db.compliance.domains.schema.*
+import molecule.db.compliance.setup.{DbProviders, Platform}
+import molecule.db.core.spi.Conn
 
 trait DbProviders_h2 extends DbProviders with DbConnection_h2 with Platform {
   override val database: String = "h2"

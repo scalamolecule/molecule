@@ -1,14 +1,15 @@
 package molecule.db.datalog.datomic.spi
 
 import cats.effect.IO
-import molecule.base.error.*
-import molecule.core.action.*
-import molecule.core.ast.DataModel.Element
-import molecule.core.marshalling.serialize.PickleTpls
-import molecule.core.spi.{Conn, Spi_async, TxReport}
-import molecule.core.util.FutureUtils
-import molecule.core.validation.TxModelValidation
-import molecule.core.validation.insert.InsertValidation
+import molecule.db.base.error.*
+import molecule.db.core.ast.Element
+import molecule.db.base.error.{InsertError, InsertErrors, ValidationErrors}
+import molecule.db.core.action.{Delete, Insert, Query, QueryCursor, QueryOffset, Save, Update}
+import molecule.db.core.marshalling.serialize.PickleTpls
+import molecule.db.core.spi.{Conn, Spi_async, TxReport}
+import molecule.db.core.util.FutureUtils
+import molecule.db.core.validation.TxModelValidation
+import molecule.db.core.validation.insert.InsertValidation
 import molecule.db.datalog
 import molecule.db.datalog.datomic.facade.DatomicConn_JS
 import molecule.db.datalog.datomic.spi.SpiBase_datomic_async

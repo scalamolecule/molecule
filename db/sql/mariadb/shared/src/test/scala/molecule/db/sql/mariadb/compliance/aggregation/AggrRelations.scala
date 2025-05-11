@@ -1,7 +1,7 @@
 package molecule.db.sql.mariadb.compliance.aggregation
 
-import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.aggregation.*
+import molecule.db.compliance.setup.Test
+import molecule.db.compliance.test.aggregation.AggrRelations
 import molecule.db.sql
 import molecule.db.sql.mariadb.setup.Api_mariadb_async
 

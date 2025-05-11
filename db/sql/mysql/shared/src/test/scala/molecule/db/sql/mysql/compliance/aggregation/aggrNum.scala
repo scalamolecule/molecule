@@ -1,7 +1,7 @@
 package molecule.db.sql.mysql.compliance.aggregation
 
-import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.aggregation.number.*
+import molecule.db.compliance.setup.Test
+import molecule.db.compliance.test.aggregation.number.{AggrNum_BigDecimal_, AggrNum_BigInt_, AggrNum_Byte_, AggrNum_Double_, AggrNum_Float_, AggrNum_Int, AggrNum_Long_, AggrNum_Short_}
 import molecule.db.sql
 import molecule.db.sql.mysql.setup.Api_mysql_async
 

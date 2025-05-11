@@ -1,7 +1,7 @@
 package molecule.db.sql.mariadb.compliance.pagination.cursor.noUnique
 
-import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.pagination.cursor.noUnique.*
+import molecule.db.compliance.setup.Test
+import molecule.db.compliance.test.pagination.cursor.noUnique.{AttrOrderMandatory, AttrOrderOptional, DirectionsMandatory, DirectionsOptional, MutationAdd, MutationDelete, Nested, OptNested, TypesOptional}
 import molecule.db.sql
 import molecule.db.sql.mariadb.setup.Api_mariadb_async
 

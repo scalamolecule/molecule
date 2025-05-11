@@ -1,7 +1,7 @@
 package molecule.db.sql.h2.compliance.action.update.relation.one
 
-import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.action.update.relation.one.*
+import molecule.db.compliance.setup.Test
+import molecule.db.compliance.test.action.update.relation.one.{One_Map, One_Map_add, One_Map_remove, One_One, One_Seq, One_Seq_add, One_Seq_remove, One_Set, One_Set_add, One_Set_remove}
 import molecule.db.sql
 import molecule.db.sql.h2.setup.Api_h2_async
 

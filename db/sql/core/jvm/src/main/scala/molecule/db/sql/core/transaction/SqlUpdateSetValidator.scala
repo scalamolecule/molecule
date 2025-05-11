@@ -1,13 +1,14 @@
 package molecule.db.sql.core.transaction
 
-import molecule.base.error.{ExecutionError, ModelError, MoleculeError}
-import molecule.core.ast.DataModel.*
-import molecule.core.marshalling.ConnProxy
-import molecule.core.validation.TxModelValidation
+import molecule.db.base.error.{ExecutionError, ModelError, MoleculeError}
+import molecule.db.base.util.BaseHelpers
+import molecule.db.core.marshalling.ConnProxy
+import molecule.db.core.validation.TxModelValidation
 import molecule.db.sql.core.javaSql.ResultSetInterface as RS
 import molecule.db.sql.core.spi.SpiHelpers
+import molecule.db.core.ast.*
 
-trait SqlUpdateSetValidator extends SpiHelpers {
+trait SqlUpdateSetValidator extends SpiHelpers with BaseHelpers {
 
   protected def validateUpdateSet_array(
     proxy: ConnProxy,

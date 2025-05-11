@@ -3,10 +3,10 @@ package molecule.db.datalog.datomic.facade
 import java.util.UUID.randomUUID
 import cats.effect.IO
 import datomic.Peer
-import molecule.base.api.Schema
-import molecule.base.util.BaseHelpers
-import molecule.core.marshalling.DatomicProxy
-import molecule.core.util.Executor.*
+import molecule.db.core.util.Executor.*
+import molecule.db.base.api.Schema
+import molecule.db.base.util.BaseHelpers
+import molecule.db.core.marshalling.DatomicProxy
 import molecule.db.datalog
 import zio.{ZIO, ZLayer}
 import scala.concurrent.{ExecutionContext, Future, blocking}

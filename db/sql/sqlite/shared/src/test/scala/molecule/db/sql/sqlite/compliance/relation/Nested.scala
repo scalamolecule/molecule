@@ -1,7 +1,7 @@
 package molecule.db.sql.sqlite.compliance.relation
 
-import molecule.coreTests.setup.{MUnitSuiteWithArrays, Test}
-import molecule.coreTests.spi.relation.nested.*
+import molecule.db.compliance.setup.{MUnitSuiteWithArrays, Test}
+import molecule.db.compliance.test.relation.nested.{NestedBasic, NestedExpr, NestedLevels, NestedOptional, NestedRef, NestedSemantics, NestedTypes}
 import molecule.db.sql
 import molecule.db.sql.sqlite.setup.Api_sqlite_async
 

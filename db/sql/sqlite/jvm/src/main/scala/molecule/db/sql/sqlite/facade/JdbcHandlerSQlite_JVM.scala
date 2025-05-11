@@ -2,7 +2,7 @@ package molecule.db.sql.sqlite.facade
 
 import java.sql.Connection
 import java.util.regex.Pattern
-import molecule.core.marshalling.JdbcProxy
+import molecule.db.core.marshalling.JdbcProxy
 import org.sqlite.Function
 import scala.util.Using.Manager
 

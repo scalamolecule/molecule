@@ -1,7 +1,7 @@
 package molecule.db.sql.h2.compliance.action.save
 
-import molecule.coreTests.setup.{MUnitSuiteWithArrays, Test}
-import molecule.coreTests.spi.action.save.*
+import molecule.db.compliance.setup.{MUnitSuiteWithArrays, Test}
+import molecule.db.compliance.test.action.save.{SaveCardMap, SaveCardOne, SaveCardSeq, SaveCardSet, SaveRefs, SaveSemantics}
 import molecule.db.sql
 import molecule.db.sql.h2.setup.Api_h2_async
 

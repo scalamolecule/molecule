@@ -1,6 +1,6 @@
 package codegen.sql
 
-import molecule.base.util.CodeGenTemplate
+import molecule.db.base.util.CodeGenTemplate
 
 abstract class SqlGenBase(fileName: String, dir: String)
   extends CodeGenTemplate(

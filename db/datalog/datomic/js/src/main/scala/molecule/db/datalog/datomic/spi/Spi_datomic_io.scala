@@ -1,15 +1,15 @@
 package molecule.db.datalog.datomic.spi
 
 import cats.effect.IO
-import molecule.base.error.*
-import molecule.core.action.*
-import molecule.core.ast.DataModel.Element
-import molecule.core.marshalling.serialize.PickleTpls
-import molecule.core.spi.{Conn, Spi_io, TxReport}
-import molecule.core.util.Executor.*
-import molecule.core.util.IOUtils
-import molecule.core.validation.TxModelValidation
-import molecule.core.validation.insert.InsertValidation
+import molecule.db.base.error.*
+import molecule.db.core.action.*
+import molecule.db.core.ast.Element
+import molecule.db.core.marshalling.serialize.PickleTpls
+import molecule.db.core.spi.{Conn, Spi_io, TxReport}
+import molecule.db.core.util.Executor.*
+import molecule.db.core.util.IOUtils
+import molecule.db.core.validation.TxModelValidation
+import molecule.db.core.validation.insert.InsertValidation
 import molecule.db.datalog
 import molecule.db.datalog.datomic.facade.DatomicConn_JS
 import molecule.db.datalog.datomic.spi.SpiBase_datomic_io

@@ -4,10 +4,11 @@ import java.util.List as jList
 import java.util.stream.Stream as jStream
 import cats.effect.IO
 import fs2.Stream
-import molecule.base.error.*
-import molecule.core.action.*
-import molecule.core.spi.{Conn, Spi_async, TxReport}
-import molecule.core.util.FutureUtils
+import molecule.db.base.error.*
+import molecule.db.base.error.{InsertError, InsertErrors, ValidationErrors}
+import molecule.db.core.action.{Delete, Insert, Query, QueryCursor, QueryOffset, Save, Update}
+import molecule.db.core.spi.{Conn, Spi_async, TxReport}
+import molecule.db.core.util.FutureUtils
 import molecule.db.datalog
 import molecule.db.datalog.datomic.facade.DatomicConn_JVM
 import molecule.db.datalog.datomic.query.{DatomicQueryResolveCursor, DatomicQueryResolveOffset}

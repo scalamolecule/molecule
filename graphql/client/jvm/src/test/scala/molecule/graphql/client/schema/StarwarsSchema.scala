@@ -7,8 +7,8 @@
 */
 package molecule.graphql.client.schema
 
-import molecule.base.api.Schema
-import molecule.base.ast.*
+import molecule.db.base.api.Schema
+import molecule.db.base.ast.*
 
 
 object StarwarsSchema extends Schema

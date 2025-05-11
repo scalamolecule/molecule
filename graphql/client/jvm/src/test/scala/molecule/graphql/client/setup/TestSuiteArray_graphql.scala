@@ -1,9 +1,9 @@
 package molecule.graphql.client.setup
 
-import molecule.base.api.Schema
-import molecule.base.util.BaseHelpers
-import molecule.core.spi.Conn
-import molecule.coreTests.setup.{CoreTestSuite, CoreTestSuiteBase}
+import molecule.db.base.api.Schema
+import molecule.db.base.util.BaseHelpers
+import molecule.db.core.spi.Conn
+import molecule.db.compliance.setup.{CoreTestSuite, CoreTestSuiteBase}
 import molecule.graphql.client.schema.StarwarsSchema
 
 

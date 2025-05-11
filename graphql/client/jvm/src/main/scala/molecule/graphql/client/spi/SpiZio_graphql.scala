@@ -1,9 +1,9 @@
 package molecule.graphql.client.spi
 
-import molecule.base.error._
-import molecule.core.action._
-import molecule.core.spi.{Conn, SpiZio, TxReport}
-import molecule.core.util.Executor._
+import molecule.db.base.error._
+import molecule.db.core.action._
+import molecule.db.core.spi.{Conn, SpiZio, TxReport}
+import molecule.db.core.util.Executor._
 import molecule.graphql.client.facade.GraphqlConn_JVM
 //import molecule.db.datalog.datomic.facade.DatomicConn_JVM
 import zio.ZIO

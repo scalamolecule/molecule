@@ -1,7 +1,7 @@
 package molecule.db.sql.postgres.compliance.api
 
-import molecule.coreTests.setup.Test_io
-import molecule.coreTests.spi.api.*
+import molecule.db.compliance.setup.Test_io
+import molecule.db.compliance.test.api.IOApi
 import molecule.db.sql
 import molecule.db.sql.postgres.setup.Api_postgres_io
 

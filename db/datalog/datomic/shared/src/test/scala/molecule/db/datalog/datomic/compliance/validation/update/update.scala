@@ -1,7 +1,7 @@
 package molecule.db.datalog.datomic.compliance.validation.update
 
-import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.validation.update.*
+import molecule.db.compliance.setup.Test
+import molecule.db.compliance.test.validation.update.{TypesOne, TypesOneOpt, TypesSeq, TypesSeqOpt, TypesSet, TypesSetOpt}
 import molecule.db.datalog
 import molecule.db.datalog.datomic.setup.Api_datomic_async
 

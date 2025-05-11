@@ -4,9 +4,9 @@ import java.util.stream.Stream as jStream
 import java.util.{ArrayList as jArrayList, Iterator as jIterator, List as jList}
 import cats.effect.IO
 import fs2.Stream
-import molecule.base.error.{ExecutionError, MoleculeError}
-import molecule.core.action.*
-import molecule.core.spi.*
+import molecule.db.base.error.{ExecutionError, MoleculeError}
+import molecule.db.core.action.Query
+import molecule.db.core.spi.Conn
 import zio.*
 import zio.stream.*
 

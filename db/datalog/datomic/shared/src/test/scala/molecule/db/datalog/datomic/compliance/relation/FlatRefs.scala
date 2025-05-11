@@ -1,7 +1,7 @@
 package molecule.db.datalog.datomic.compliance.relation
 
-import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.relation.flat.*
+import molecule.db.compliance.setup.Test
+import molecule.db.compliance.test.relation.flat.{FlatOptEntity, FlatOptRef, FlatOptRefAdjacent, FlatOptRefNested, FlatRef}
 import molecule.db.datalog
 import molecule.db.datalog.datomic.setup.Api_datomic_async
 

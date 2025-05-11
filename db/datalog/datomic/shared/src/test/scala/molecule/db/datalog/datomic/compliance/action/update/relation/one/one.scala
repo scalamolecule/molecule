@@ -1,7 +1,7 @@
 package molecule.db.datalog.datomic.compliance.action.update.relation.one
 
-import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.action.update.relation.one.*
+import molecule.db.compliance.setup.Test
+import molecule.db.compliance.test.action.update.relation.one.{One_Map, One_Map_add, One_Map_remove, One_One, One_Seq, One_Seq_add, One_Seq_remove, One_Set, One_Set_add, One_Set_remove}
 import molecule.db.datalog
 import molecule.db.datalog.datomic.setup.Api_datomic_async
 

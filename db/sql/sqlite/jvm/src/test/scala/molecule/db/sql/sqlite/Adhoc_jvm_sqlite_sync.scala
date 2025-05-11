@@ -1,23 +1,23 @@
 package molecule.db.sql.sqlite
 
-import molecule.coreTests.setup.{Test, TestUtils}
+import molecule.db.compliance.setup.{Test, TestUtils}
 import molecule.db.sql
 import molecule.db.sql.sqlite.setup.DbProviders_sqlite
 import molecule.db.sql.sqlite.sync.*
-//import scala.language.implicitConversions
+
 
 
 class Adhoc_jvm_sqlite_sync extends Test with DbProviders_sqlite with TestUtils {
 
   //  "types" - types { implicit conn =>
-  //    import molecule.coreTests.domains.dsl.Types._
+  //    import molecule.db.compliance.domains.dsl.Types._
   //
   //    Entity.int(1).save.transact
   //    Entity.int.query.get.head ==> 1
   //  }
 
   "refs" - refs { implicit conn =>
-    import molecule.coreTests.domains.dsl.Refs.*
+    import molecule.db.compliance.domains.dsl.Refs.*
 
     A.i(1).save.transact
     A.i.query.get.head ==> 1
@@ -48,7 +48,7 @@ class Adhoc_jvm_sqlite_sync extends Test with DbProviders_sqlite with TestUtils 
 
 
   //  "validation" - validation { implicit conn =>
-  //    import molecule.coreTests.domains.dsl.Validation._
+  //    import molecule.db.compliance.domains.dsl.Validation._
   //
   //    try {
   //      transact(

@@ -1,11 +1,11 @@
 package molecule.rpc.grpc.spi
 
-import molecule.base.error.InsertError
-import molecule.core.ast.DataModel._
-import molecule.core.action._
-import molecule.core.marshalling.ConnProxy
-import molecule.core.spi.{Conn, Renderer, SpiSync, TxReport}
-import molecule.core.util.{FutureUtils, JavaConversions}
+import molecule.db.base.error.InsertError
+import molecule.db.core.ast._
+import molecule.db.core.action._
+import molecule.db.core.marshalling.ConnProxy
+import molecule.db.core.spi.{Conn, Renderer, SpiSync, TxReport}
+import molecule.db.core.util.{FutureUtils, JavaConversions}
 import molecule.rpc.grpc.facade.GraphqlConn_JVM
 import molecule.rpc.grpc.transaction.GraphqlDataType_JVM
 
@@ -221,7 +221,7 @@ trait SpiSync_grpc
     debug: Boolean = false
   )(implicit conn: Conn): TxReport = {
     //    try {
-    //      import molecule.core.util.Executor.global
+    //      import molecule.db.core.util.Executor.global
     //      Await.result(Spi_datomic_async.fallback_rawTransact(txData, debug)(conn, global), 10.seconds)
     //      ???
     //    } catch {

@@ -4,15 +4,14 @@ import java.util.List as jList
 import java.util.stream.Stream as jStream
 import datomic.Peer
 import geny.Generator
-import molecule.base.error.{InsertError, ModelError}
-import molecule.core.action.*
-import molecule.core.ast.DataModel.*
-import molecule.core.spi.{Conn, Spi_sync, TxReport}
-import molecule.core.transaction.{ResolveDelete, ResolveInsert, ResolveSave, ResolveUpdate}
-import molecule.core.util.Executor.*
-import molecule.core.util.FutureUtils
-import molecule.core.validation.TxModelValidation
-import molecule.core.validation.insert.InsertValidation
+import molecule.db.core.util.Executor.*
+import molecule.db.base.error.{InsertError, ModelError}
+import molecule.db.core.action.{Delete, Insert, Query, QueryCursor, QueryOffset, Save, Update}
+import molecule.db.core.spi.{Conn, Spi_sync, TxReport}
+import molecule.db.core.transaction.{ResolveDelete, ResolveInsert, ResolveSave, ResolveUpdate}
+import molecule.db.core.util.FutureUtils
+import molecule.db.core.validation.TxModelValidation
+import molecule.db.core.validation.insert.InsertValidation
 import molecule.db.datalog
 import molecule.db.datalog.datomic.facade.DatomicConn_JVM
 import molecule.db.datalog.datomic.query.{DatomicQueryResolveCursor, DatomicQueryResolveOffset}
@@ -21,6 +20,7 @@ import molecule.db.datalog.core.query.Model2DatomicQuery
 import molecule.db.datalog.datomic.spi.SpiBase_datomic_sync
 import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
+import molecule.db.core.ast._
 
 object Spi_datomic_sync extends Spi_datomic_sync
 
@@ -207,7 +207,7 @@ trait Spi_datomic_sync
     txData: String, debug: Boolean = false
   )(implicit conn: Conn): TxReport = {
     try {
-      import molecule.core.util.Executor.global
+      import molecule.db.core.util.Executor.global
       Await.result(
         Spi_datomic_async.fallback_rawTransact(txData, debug)(conn, global),
         10.seconds

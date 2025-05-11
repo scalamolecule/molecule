@@ -1,9 +1,9 @@
 import org.scalajs.linker.interface.ESVersion
 
-val moleculeVersion = "0.19.0"
+val moleculeVersion = "0.20.0-SNAPSHOT"
 
 val scala212 = "2.12.20"
-val scala3   = "3.3.5"
+val scala3   = "3.3.6"
 
 val catsVersion              = "3.6.0"
 val tapirVersion             = "1.11.25"
@@ -40,12 +40,12 @@ lazy val root = project
   .settings(publish / skip := true)
   .enablePlugins(ScalaJSPlugin)
   .aggregate(
-    base.js,
-    base.jvm,
-    core.js,
-    core.jvm,
-    coreTests.js,
-    coreTests.jvm,
+    dbBase.js,
+    dbBase.jvm,
+    dbCore.js,
+    dbCore.jvm,
+    dbCompliance.js,
+    dbCompliance.jvm,
 
     dbDatalogCore.js,
     dbDatalogCore.jvm,
@@ -65,30 +65,31 @@ lazy val root = project
     dbSqlSQlite.js,
     dbSqlSQlite.jvm,
 
-    serverHttp4s,
-    serverNetty,
-    serverPekko,
-    serverPlay,
-    serverZioHttp,
-    server,
+    dbServerHttp4s,
+    dbServerNetty,
+    dbServerPekko,
+    dbServerPlay,
+    dbServerZioHttp,
+    dbServer,
+
     //    graphql.js,
     //    graphql.jvm,
   )
 
-lazy val base = crossProject(JSPlatform, JVMPlatform)
+lazy val dbBase = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
-  .in(file("base"))
+  .in(file("db/base"))
   .settings(compilerArgs, doPublish,
     // 2.12 for sbt-molecule plugin on sbt 1.x
     crossScalaVersions := Seq(scala212, scala3),
-    name := "molecule-base"
+    name := "molecule-db-base"
   )
 
-lazy val core = crossProject(JSPlatform, JVMPlatform)
+lazy val dbCore = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
-  .in(file("core"))
+  .in(file("db/core"))
   .settings(compilerArgs, doPublish,
-    name := "molecule-core",
+    name := "molecule-db-core",
     libraryDependencies ++= Seq(
       // logging
       "com.outr" %%% "scribe" % "3.16.1",
@@ -108,22 +109,23 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
       "com.softwaremill.sttp.tapir" %%% "tapir-sttp-client4" % tapirVersion,
     ),
   )
-  .dependsOn(base)
+  .dependsOn(dbBase)
 
 
-lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
+lazy val dbCompliance = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
+  .in(file("db/compliance"))
   .enablePlugins(MoleculePlugin)
   .settings(compilerArgs,
     publish / skip := true,
-    name := "molecule-coreTests",
+    name := "molecule-db-compliance",
     libraryDependencies ++= Seq(
       "com.zaxxer" % "HikariCP" % "6.2.1" % Test,
       "org.scalactic" %%% "scalactic" % "3.2.19" % Test, // Tolerant roundings with triple equal on js platform
       "io.github.cquiroz" %%% "scala-java-time" % "2.6.0", // % Test, // we need main for time zone plugin
 
       // Test frameworks
-      "org.scalameta" %%% "munit" % "1.1.0" % Test,
+      "org.scalameta" %%% "munit" % "1.1.1" % Test,
       "org.typelevel" %%% "munit-cats-effect" % "2.1.0" % Test,
       "dev.zio" %%% "zio-test" % zioVersion % Test,
       "dev.zio" %%% "zio-test-sbt" % zioVersion % Test,
@@ -151,7 +153,7 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
       "org.slf4j" % "slf4j-nop" % "2.0.17" //% Test
     )
   )
-  .dependsOn(core)
+  .dependsOn(dbCore)
 
 
 lazy val dbDatalogCore = crossProject(JSPlatform, JVMPlatform)
@@ -164,7 +166,7 @@ lazy val dbDatalogCore = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += "com.datomic" % "peer" % "1.0.7277" // Requires Java 11
   )
   .jsSettings(jsEnvironment)
-  .dependsOn(core)
+  .dependsOn(dbCore)
 
 
 lazy val dbDatalogDatomic = crossProject(JSPlatform, JVMPlatform)
@@ -175,7 +177,7 @@ lazy val dbDatalogDatomic = crossProject(JSPlatform, JVMPlatform)
     testFrameworks := testingFrameworks
   )
   .jsSettings(jsEnvironment)
-  .dependsOn(dbDatalogCore, coreTests % "test->test")
+  .dependsOn(dbDatalogCore, dbCompliance % "test->test")
 
 
 lazy val dbSqlCore = crossProject(JSPlatform, JVMPlatform)
@@ -189,7 +191,7 @@ lazy val dbSqlCore = crossProject(JSPlatform, JVMPlatform)
     ),
   )
   .jsSettings(jsEnvironment)
-  .dependsOn(core)
+  .dependsOn(dbCore)
 
 
 lazy val dbSqlH2 = crossProject(JSPlatform, JVMPlatform)
@@ -206,7 +208,7 @@ lazy val dbSqlH2 = crossProject(JSPlatform, JVMPlatform)
     ),
     Test / fork := true // necessary for sbt testing
   )
-  .dependsOn(dbSqlCore, coreTests % "test->test")
+  .dependsOn(dbSqlCore, dbCompliance % "test->test")
 
 
 lazy val dbSqlMariaDB = crossProject(JSPlatform, JVMPlatform)
@@ -220,11 +222,12 @@ lazy val dbSqlMariaDB = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies ++= Seq(
       "com.dimafeng" %% "testcontainers-scala-mariadb" % dimafengContainerVersion,
       "org.mariadb.jdbc" % "mariadb-java-client" % "3.5.1",
-      "ch.qos.logback" % "logback-classic" % logbackVersion % Test
+      "ch.qos.logback" % "logback-classic" % logbackVersion % Test,
+      "org.slf4j" % "slf4j-nop" % "2.0.17", // avoid slf4j warnings
     ),
     Test / fork := true
   )
-  .dependsOn(dbSqlCore, coreTests % "test->test")
+  .dependsOn(dbSqlCore, dbCompliance % "test->test")
 
 
 lazy val dbSqlMySQL = crossProject(JSPlatform, JVMPlatform)
@@ -238,10 +241,11 @@ lazy val dbSqlMySQL = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies ++= Seq(
       "org.testcontainers" % "mysql" % testContainerVersion,
       "com.mysql" % "mysql-connector-j" % "9.2.0",
+      "org.slf4j" % "slf4j-nop" % "2.0.17", // avoid slf4j warnings
     ),
     Test / fork := true
   )
-  .dependsOn(dbSqlCore, coreTests % "test->test")
+  .dependsOn(dbSqlCore, dbCompliance % "test->test")
 
 
 lazy val dbSqlPostgreSQL = crossProject(JSPlatform, JVMPlatform)
@@ -256,10 +260,11 @@ lazy val dbSqlPostgreSQL = crossProject(JSPlatform, JVMPlatform)
       "org.testcontainers" % "postgresql" % testContainerVersion,
       "org.postgresql" % "postgresql" % "42.7.5",
       "ch.qos.logback" % "logback-classic" % logbackVersion % Test,
+      "org.slf4j" % "slf4j-nop" % "2.0.17", // avoid slf4j warnings
     ),
     Test / fork := true
   )
-  .dependsOn(dbSqlCore, coreTests % "test->test")
+  .dependsOn(dbSqlCore, dbCompliance % "test->test")
 
 
 lazy val dbSqlSQlite = crossProject(JSPlatform, JVMPlatform)
@@ -272,16 +277,17 @@ lazy val dbSqlSQlite = crossProject(JSPlatform, JVMPlatform)
   .jsSettings(jsEnvironment)
   .jvmSettings(
     libraryDependencies ++= Seq(
-      "org.xerial" % "sqlite-jdbc" % "3.49.1.0"
+      "org.xerial" % "sqlite-jdbc" % "3.49.1.0",
+      "org.slf4j" % "slf4j-nop" % "2.0.17", // avoid slf4j warnings
     ),
     Test / fork := true
   )
-  .dependsOn(dbSqlCore, coreTests % "test->test")
+  .dependsOn(dbSqlCore, dbCompliance % "test->test")
 
 
 // Tapir example backend servers
-lazy val server = project
-  .in(file("server/cli"))
+lazy val dbServer = project
+  .in(file("db/server/cli"))
   .settings(
     publish / skip := true,
     dependencyOverrides ++= Seq(
@@ -300,28 +306,28 @@ lazy val server = project
     dbSqlPostgreSQL.jvm,
     dbSqlSQlite.jvm,
 
-    serverHttp4s % "test->test",
-    serverNetty % "test->test",
-    serverPekko % "test->test",
-    serverPlay % "test->test",
-    serverZioHttp % "test->test",
+    dbServerHttp4s % "test->test",
+    dbServerNetty % "test->test",
+    dbServerPekko % "test->test",
+    dbServerPlay % "test->test",
+    dbServerZioHttp % "test->test",
   )
 
 
-lazy val serverCore = project
-  .in(file("server/core"))
+lazy val dbServerCore = project
+  .in(file("db/server/core"))
   .settings(
     publish / skip := true,
     libraryDependencies ++= Seq(
       "com.softwaremill.sttp.tapir" %% "tapir-core" % tapirVersion,
     ),
   )
-  .dependsOn(core.jvm)
+  .dependsOn(dbCore.jvm)
 
-lazy val serverPekko = project
-  .in(file("server/pekko"))
-  .settings(
-    name := "molecule-server-pekko",
+lazy val dbServerPekko = project
+  .in(file("db/server/pekko"))
+  .settings(doPublish,
+    name := "molecule-db-server-pekko",
     publish / skip := true,
     libraryDependencies ++= Seq(
       // Enforce using same Pekko versions
@@ -331,11 +337,11 @@ lazy val serverPekko = project
       "com.softwaremill.sttp.tapir" %% "tapir-pekko-http-server" % tapirVersion,
     ),
   )
-  .dependsOn(serverCore)
+  .dependsOn(dbServerCore)
 
 
-lazy val serverHttp4s = project
-  .in(file("server/http4s"))
+lazy val dbServerHttp4s = project
+  .in(file("db/server/http4s"))
   .settings(
     publish / skip := true,
     libraryDependencies ++= Seq(
@@ -343,37 +349,37 @@ lazy val serverHttp4s = project
       "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % tapirVersion,
     ),
   )
-  .dependsOn(serverCore)
+  .dependsOn(dbServerCore)
 
-lazy val serverNetty = project
-  .in(file("server/netty"))
+lazy val dbServerNetty = project
+  .in(file("db/server/netty"))
   .settings(
     publish / skip := true,
     libraryDependencies ++= Seq(
       "com.softwaremill.sttp.tapir" %% "tapir-netty-server-cats" % tapirVersion,
     ),
   )
-  .dependsOn(serverHttp4s)
+  .dependsOn(dbServerHttp4s)
 
-lazy val serverPlay = project
-  .in(file("server/play"))
+lazy val dbServerPlay = project
+  .in(file("db/server/play"))
   .settings(
     publish / skip := true,
     libraryDependencies ++= Seq(
       "com.softwaremill.sttp.tapir" %% "tapir-play-server" % tapirVersion,
     ),
   )
-  .dependsOn(serverPekko)
+  .dependsOn(dbServerPekko)
 
-lazy val serverZioHttp = project
-  .in(file("server/zioHttp"))
+lazy val dbServerZioHttp = project
+  .in(file("db/server/zioHttp"))
   .settings(
     publish / skip := true,
     libraryDependencies ++= Seq(
       "com.softwaremill.sttp.tapir" %% "tapir-zio-http-server" % tapirVersion,
     ),
   )
-  .dependsOn(serverCore)
+  .dependsOn(dbServerCore)
 
 
 lazy val testingFrameworks = Seq(
@@ -492,7 +498,7 @@ lazy val withoutDocs = Def.settings(
 //        case _             => file(unmanagedBase.value.getPath ++ "/3.3")
 //      }
 //    },
-//    //    testFrameworks += new TestFramework("utest.runner.Framework"),
+//    //    testFrameworks += new TestFramework("munit.runner.Framework"),
 //  )
 //  .settings(
 //    libraryDependencies ++= Seq(

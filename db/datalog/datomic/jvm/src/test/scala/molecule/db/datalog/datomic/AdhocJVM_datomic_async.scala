@@ -1,10 +1,10 @@
 package molecule.db.datalog.datomic
 
 import cats.effect.unsafe.implicits.global as ioRuntime
-import molecule.base.error.ModelError
-import molecule.core.util.Executor.*
-import molecule.coreTests.domains.schema.TypesSchema_datomic
-import molecule.coreTests.setup.{Test, TestUtils}
+import molecule.db.core.util.Executor.*
+import molecule.db.compliance.domains.schema.TypesSchema_datomic
+import molecule.db.base.error.ModelError
+import molecule.db.compliance.setup.{Test, TestUtils}
 import molecule.db.datalog
 import molecule.db.datalog.datomic.async.*
 import molecule.db.datalog.datomic.facade.DatomicPeer
@@ -16,7 +16,7 @@ class AdhocJVM_datomic_async extends Test with DbProviders_datomic with TestUtil
   //  DatomicPeer.recreateDb(TypesSchema_datomic)
 
   //  "types" - types { implicit conn =>
-  //    import molecule.coreTests.domains.dsl.Types._
+  //    import molecule.db.compliance.domains.dsl.Types._
   //    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
   //    for {
   //
@@ -32,7 +32,7 @@ class AdhocJVM_datomic_async extends Test with DbProviders_datomic with TestUtil
   //  }
 
   "refs" - refs { implicit conn =>
-    import molecule.coreTests.domains.dsl.Refs.*
+    import molecule.db.compliance.domains.dsl.Refs.*
     for {
       _ <- A.i.insert(1, 2, 3).transact
       _ <- A.i.query.stream
@@ -45,7 +45,7 @@ class AdhocJVM_datomic_async extends Test with DbProviders_datomic with TestUtil
 
 
   //    "unique" - unique { implicit conn =>
-  //      import molecule.coreTests.domains.dsl.Types._
+  //      import molecule.db.compliance.domains.dsl.Types._
   //      for {
   //        _ <- Entity.int.s.i.insert(triples).transact
   //
@@ -54,7 +54,7 @@ class AdhocJVM_datomic_async extends Test with DbProviders_datomic with TestUtil
   //
   //
   //        "validation" - validation { implicit conn =>
-  //          import molecule.coreTests.domains.dsl.Validation._
+  //          import molecule.db.compliance.domains.dsl.Validation._
   //          for {
   //
   //            id <- MandatoryRefB.i(1).RefB.i(2).save.transact.map(_.id)
@@ -74,7 +74,7 @@ class AdhocJVM_datomic_async extends Test with DbProviders_datomic with TestUtil
   //
   //
   //    "validation" - validation { implicit conn =>
-  //      import molecule.coreTests.domains.dsl.Validation._
+  //      import molecule.db.compliance.domains.dsl.Validation._
   //      for {
   //        List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)
   //

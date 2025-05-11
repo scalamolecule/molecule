@@ -1,17 +1,17 @@
 package molecule.db.sql.mariadb
 
-import molecule.core.util.Executor.*
-import molecule.coreTests.setup.{Test, TestUtils}
+import molecule.db.compliance.setup.{Test, TestUtils}
+import molecule.db.core.util.Executor.*
 import molecule.db.sql
 import molecule.db.sql.mariadb.async.*
 import molecule.db.sql.mariadb.setup.DbProviders_mariadb
-//import scala.language.implicitConversions
+
 
 class Adhoc_jvm_mariadb extends Test with DbProviders_mariadb with TestUtils {
 
 
   "types" - types { implicit conn =>
-    import molecule.coreTests.domains.dsl.Types.*
+    import molecule.db.compliance.domains.dsl.Types.*
     for {
 
 
@@ -28,7 +28,7 @@ class Adhoc_jvm_mariadb extends Test with DbProviders_mariadb with TestUtils {
 
 
 //  "refs" - refs { implicit conn =>
-//    import molecule.coreTests.domains.dsl.Refs.*
+//    import molecule.db.compliance.domains.dsl.Refs.*
 //    for {
 //
 //      _ <- A.i.B.?(B.iMap).insert(
@@ -46,7 +46,7 @@ class Adhoc_jvm_mariadb extends Test with DbProviders_mariadb with TestUtils {
 
 
   //    "unique" - unique { implicit conn =>
-  //      import molecule.coreTests.domains.dsl.Uniques._
+  //      import molecule.db.compliance.domains.dsl.Uniques._
   //
   //
   //      for {
@@ -63,7 +63,7 @@ class Adhoc_jvm_mariadb extends Test with DbProviders_mariadb with TestUtils {
   //
   //
   //    "validation" - validation { implicit conn =>
-  //      import molecule.coreTests.domains.dsl.Validation._
+  //      import molecule.db.compliance.domains.dsl.Validation._
   //      for {
   //        id <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf", "stamps")).save.transact.map(_.id)
   //

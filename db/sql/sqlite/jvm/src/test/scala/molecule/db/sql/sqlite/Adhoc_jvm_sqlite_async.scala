@@ -1,8 +1,8 @@
 package molecule.db.sql.sqlite
 
 import cats.effect.unsafe.implicits.global as ioRuntime
-import molecule.core.util.Executor.*
-import molecule.coreTests.setup.{Test, TestUtils}
+import molecule.db.compliance.setup.{Test, TestUtils}
+import molecule.db.core.util.Executor.*
 import molecule.db.sql
 import molecule.db.sql.sqlite.async.*
 import molecule.db.sql.sqlite.setup.DbProviders_sqlite
@@ -12,7 +12,7 @@ class Adhoc_jvm_sqlite_async extends Test with DbProviders_sqlite with TestUtils
 
 
   //  "types" - types { implicit conn =>
-  //    import molecule.coreTests.domains.dsl.Types._
+  //    import molecule.db.compliance.domains.dsl.Types._
   //    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
   //
   //    for {
@@ -30,7 +30,7 @@ class Adhoc_jvm_sqlite_async extends Test with DbProviders_sqlite with TestUtils
 
 
   "refs" - refs { implicit conn =>
-    import molecule.coreTests.domains.dsl.Refs.*
+    import molecule.db.compliance.domains.dsl.Refs.*
     for {
       _ <- A.i.insert(1, 2).transact
       _ <- A.i.query.stream // fs2.Stream[IO, List[Int]]
@@ -43,7 +43,7 @@ class Adhoc_jvm_sqlite_async extends Test with DbProviders_sqlite with TestUtils
   //
   //
   //  //    "unique" - unique { implicit conn =>
-  //  //      import molecule.coreTests.domains.dsl.Uniques._
+  //  //      import molecule.db.compliance.domains.dsl.Uniques._
   //  //      //          val triples             = getTriples.map(t => (t._3, t._1, t._2))
   //      //          val List(a, b, c, d, e) = triples.sortBy(p => (p._2, p._3, p._1))
   //      //          val query               = (c: String, l: Int) => Uniques.int.a3.s.a1.i.a2.query.from(c).limit(l)
@@ -65,7 +65,7 @@ class Adhoc_jvm_sqlite_async extends Test with DbProviders_sqlite with TestUtils
 
 
   //    "validation" - validation { implicit conn =>
-  //      import molecule.coreTests.domains.dsl.Validation._
+  //      import molecule.db.compliance.domains.dsl.Validation._
   //      for {
   //        id <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf", "stamps")).save.transact.map(_.id)
   //
@@ -86,7 +86,7 @@ class Adhoc_jvm_sqlite_async extends Test with DbProviders_sqlite with TestUtils
   //    }
   //
   //    "partitions" - partition { implicit conn =>
-  //      import molecule.coreTests.domains.dsl.Groups._
+  //      import molecule.db.compliance.domains.dsl.Groups._
   //      for {
   //
   //        _ <- lit_Book.title.Reviewers.name.Professions.*(gen_Profession.name)

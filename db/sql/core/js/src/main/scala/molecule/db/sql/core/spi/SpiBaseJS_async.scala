@@ -2,14 +2,14 @@ package molecule.db.sql.core.spi
 
 import boopickle.Default.*
 import cats.effect.IO
-import molecule.base.error.{InsertError, InsertErrors, ValidationErrors}
-import molecule.core.action.*
-import molecule.core.ast.DataModel.Element
-import molecule.core.marshalling.serialize.PickleTpls
-import molecule.core.spi.{Conn, Renderer, Spi_async, TxReport}
-import molecule.core.util.FutureUtils
-import molecule.core.validation.TxModelValidation
-import molecule.core.validation.insert.InsertValidation
+import molecule.db.core.ast.Element
+import molecule.db.base.error.{InsertError, InsertErrors, ValidationErrors}
+import molecule.db.core.action.{Delete, Insert, Query, QueryCursor, QueryOffset, Save, Update}
+import molecule.db.core.marshalling.serialize.PickleTpls
+import molecule.db.core.spi.{Conn, Renderer, Spi_async, TxReport}
+import molecule.db.core.util.FutureUtils
+import molecule.db.core.validation.TxModelValidation
+import molecule.db.core.validation.insert.InsertValidation
 import molecule.db.sql.core.facade.JdbcConn_JS
 import scala.concurrent.{Future, ExecutionContext as EC}
 

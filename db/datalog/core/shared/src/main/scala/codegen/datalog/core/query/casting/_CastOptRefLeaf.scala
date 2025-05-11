@@ -11,7 +11,7 @@ object _CastOptRefLeaf extends DatomicGenBase("CastOptRefLeaf", "/query/casting"
        |package molecule.db.datalog.core.query.casting
        |
        |import java.util.{ArrayList => jArrayList, Iterator => jIterator, Map => jMap}
-       |import molecule.core.util.JavaConversions
+       |import molecule.db.core.util.JavaConversions
        |
        |
        |trait $fileName_ extends JavaConversions {

@@ -1,15 +1,14 @@
 package molecule.db.sql.core.query
 
-import molecule.base.error.ModelError
-import molecule.core.ast.DataModel.*
-import molecule.core.query.Pagination
-import molecule.core.util.ModelUtils
+import molecule.db.base.error.ModelError
+import molecule.db.core.query.Pagination
+import molecule.db.core.util.ModelUtils
 import molecule.db.sql.core.facade.JdbcConn_JVM
 import molecule.db.sql.core.javaSql.{PrepStmt, PrepStmtImpl, ResultSetInterface}
 import molecule.db.sql.core.query.casting.strategy.*
 import molecule.db.sql.core.query.casting.{NestOptTpls, NestTpls}
 import scala.collection.mutable.ListBuffer
-
+import molecule.db.core.ast._
 
 
 abstract class SqlQueryResolve[Tpl](

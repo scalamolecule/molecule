@@ -1,9 +1,9 @@
 package molecule.db.sql.core.query.cursorStrategy
 
-import molecule.base.error.ModelError
-import molecule.core.ast.DataModel.Element
-import molecule.core.query.Pagination
-import molecule.core.util.{FutureUtils, MoleculeLogging}
+import molecule.db.core.ast.Element
+import molecule.db.base.error.ModelError
+import molecule.db.core.query.Pagination
+import molecule.db.core.util.{FutureUtils, MoleculeLogging}
 import molecule.db.sql.core.facade.JdbcConn_JVM
 import molecule.db.sql.core.query.SqlQueryResolve
 import molecule.db.sql.core.query.{Model2SqlQuery, SqlQueryBase}

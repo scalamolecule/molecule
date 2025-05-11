@@ -1,7 +1,7 @@
 package molecule.db.sql.sqlite.compliance.action.update.attrOp
 
-import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.action.update.attrOp.decimal.*
+import molecule.db.compliance.setup.Test
+import molecule.db.compliance.test.action.update.attrOp.decimal.{AttrOpDecimal_BigDecimal, AttrOpDecimal_Double, AttrOpDecimal_Float_}
 import molecule.db.sql
 import molecule.db.sql.sqlite.setup.Api_sqlite_async
 

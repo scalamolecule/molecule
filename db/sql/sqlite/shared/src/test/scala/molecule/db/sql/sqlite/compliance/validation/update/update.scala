@@ -1,7 +1,7 @@
 package molecule.db.sql.sqlite.compliance.validation.update
 
-import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.validation.update.*
+import molecule.db.compliance.setup.Test
+import molecule.db.compliance.test.validation.update.{TypesOne, TypesOneOpt, TypesSeq, TypesSeqOpt, TypesSet, TypesSetOpt}
 import molecule.db.sql
 import molecule.db.sql.sqlite.setup.Api_sqlite_async
 

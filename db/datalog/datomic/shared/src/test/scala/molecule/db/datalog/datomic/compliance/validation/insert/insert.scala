@@ -1,7 +1,7 @@
 package molecule.db.datalog.datomic.compliance.validation.insert
 
-import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.validation.insert.*
+import molecule.db.compliance.setup.Test
+import molecule.db.compliance.test.validation.insert.{FormatConstants, FormatVariables, Nested, Semantics, TypesOne, TypesOneOpt, TypesSeq, TypesSeqOpt, TypesSet, TypesSetOpt}
 import molecule.db.datalog
 import molecule.db.datalog.datomic.setup.Api_datomic_async
 

@@ -4,7 +4,7 @@ import java.lang.Long as jLong
 import java.net.URI
 import java.time.*
 import java.util.{Date, UUID, Iterator as jIterator, List as jList, Map as jMap, Set as jSet}
-import molecule.core.util.JavaConversions
+import molecule.db.core.util.JavaConversions
 
 trait LambdasSet extends ResolveBase with JavaConversions {
 

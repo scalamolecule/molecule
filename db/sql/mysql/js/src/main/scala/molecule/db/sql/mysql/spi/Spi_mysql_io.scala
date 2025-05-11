@@ -2,7 +2,7 @@ package molecule.db.sql.mysql.spi
 
 import boopickle.Default.*
 import cats.effect.IO
-import molecule.core.ast.DataModel.Element
+import molecule.db.core.ast.Element
 import molecule.db.sql.core.spi.SpiBase_io
 import molecule.db.sql.mysql.query.Model2SqlQuery_mysql
 

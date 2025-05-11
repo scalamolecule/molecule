@@ -1,7 +1,7 @@
 package molecule.db.sql.core.facade
 
 import java.sql.Connection
-import molecule.core.marshalling.JdbcProxy
+import molecule.db.core.marshalling.JdbcProxy
 import scala.concurrent.blocking
 import scala.util.Using.Manager
 

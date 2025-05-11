@@ -1,7 +1,7 @@
 package molecule.db.sql.mariadb.compliance.filterAttr.set
 
-import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.filterAttr.set.*
+import molecule.db.compliance.setup.Test
+import molecule.db.compliance.test.filterAttr.set.{Adjacent, CrossEntity, Types}
 import molecule.db.sql
 import molecule.db.sql.mariadb.setup.Api_mariadb_async
 

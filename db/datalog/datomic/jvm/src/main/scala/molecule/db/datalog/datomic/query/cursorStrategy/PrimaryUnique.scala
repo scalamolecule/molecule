@@ -1,16 +1,16 @@
 package molecule.db.datalog.datomic.query.cursorStrategy
 
-import molecule.base.error.ModelError
-import molecule.core.ast.DataModel.*
-import molecule.core.marshalling.dbView.DbView
-import molecule.core.ops.ModelTransformations_
-import molecule.core.query.Pagination
-import molecule.core.util.{FutureUtils, MoleculeLogging}
+import molecule.db.core.marshalling.dbView.DbView
+import molecule.db.base.error.ModelError
+import molecule.db.core.ops.ModelTransformations_
+import molecule.db.core.query.Pagination
+import molecule.db.core.util.{FutureUtils, MoleculeLogging}
 import molecule.db.datalog
 import molecule.db.datalog.datomic.facade.DatomicConn_JVM
 import molecule.db.datalog.datomic.query.DatomicQueryResolve
 import molecule.db.datalog.core.query.{DatomicQueryBase, Model2DatomicQuery}
 import scala.collection.mutable.ListBuffer
+import molecule.db.core.ast._
 
 /**
  * Molecule has a unique attribute that is sorted first.

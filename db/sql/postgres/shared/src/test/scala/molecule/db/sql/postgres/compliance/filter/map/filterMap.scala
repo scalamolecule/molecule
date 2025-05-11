@@ -1,8 +1,8 @@
 package molecule.db.sql.postgres.compliance.filter.map
 
-import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.filter.map.*
-import molecule.coreTests.spi.filter.map.types.*
+import molecule.db.compliance.setup.Test
+import molecule.db.compliance.test.filter.map.MapSemantics
+import molecule.db.compliance.test.filter.map.types.{FilterMap_BigDecimal_, FilterMap_BigInt_, FilterMap_Boolean, FilterMap_Byte_, FilterMap_Char_, FilterMap_Date_, FilterMap_Double_, FilterMap_Duration_, FilterMap_Float_, FilterMap_Instant_, FilterMap_Int, FilterMap_LocalDateTime_, FilterMap_LocalDate_, FilterMap_LocalTime_, FilterMap_Long_, FilterMap_OffsetDateTime_, FilterMap_OffsetTime_, FilterMap_Short_, FilterMap_String_, FilterMap_URI_, FilterMap_UUID_, FilterMap_ZonedDateTime_}
 import molecule.db.sql
 import molecule.db.sql.postgres.setup.Api_postgres_async
 

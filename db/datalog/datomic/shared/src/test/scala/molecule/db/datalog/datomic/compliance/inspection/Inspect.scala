@@ -1,12 +1,12 @@
 package molecule.db.datalog.datomic.compliance.inspection
 
-import molecule.core.util.Executor.*
-import molecule.coreTests.domains.dsl.Types.*
-import molecule.coreTests.setup.{Test, TestUtils}
+import molecule.db.core.util.Executor.*
+import molecule.db.compliance.domains.dsl.Types.*
+import molecule.db.compliance.setup.{Test, TestUtils}
 import molecule.db.datalog
 import molecule.db.datalog.datomic.async.*
 import molecule.db.datalog.datomic.setup.DbProviders_datomic
-//import scala.language.implicitConversions
+
 
 class Test_Inspect extends Test with DbProviders_datomic with TestUtils {
 

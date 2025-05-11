@@ -1,7 +1,7 @@
 package molecule.db.sql.sqlite.compliance.action.update.attrOp
 
-import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.action.update.attrOp.number.*
+import molecule.db.compliance.setup.Test
+import molecule.db.compliance.test.action.update.attrOp.number.{AttrOpInteger_BigInt, AttrOpInteger_Byte_, AttrOpInteger_Int, AttrOpInteger_Long_, AttrOpInteger_Short_}
 import molecule.db.sql
 import molecule.db.sql.sqlite.setup.Api_sqlite_async
 

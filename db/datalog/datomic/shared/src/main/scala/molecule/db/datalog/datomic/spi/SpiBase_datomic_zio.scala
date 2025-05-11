@@ -1,8 +1,9 @@
 package molecule.db.datalog.datomic.spi
 
-import molecule.base.error.*
-import molecule.core.ast.DataModel.Element
-import molecule.core.spi.{Conn, Renderer}
+import molecule.db.base.error.*
+import molecule.db.core.ast.Element
+import molecule.db.base.error.MoleculeError
+import molecule.db.core.spi.{Conn, Renderer}
 import molecule.db.datalog.core.query.Model2DatomicQuery
 import zio.ZIO
 

@@ -1,9 +1,9 @@
 package molecule.db.sql.h2.setup
 
-import molecule.base.api.{Schema, Schema_h2}
-import molecule.core.marshalling.JdbcProxy
-import molecule.core.spi.Conn
-import molecule.coreTests.setup.DbConnection
+import molecule.db.base.api.{Schema, Schema_h2}
+import molecule.db.compliance.setup.DbConnection
+import molecule.db.core.marshalling.JdbcProxy
+import molecule.db.core.spi.Conn
 import molecule.db.sql.core.facade.JdbcConn_JS
 import molecule.db.sql.h2
 import sttp.client4.UriContext

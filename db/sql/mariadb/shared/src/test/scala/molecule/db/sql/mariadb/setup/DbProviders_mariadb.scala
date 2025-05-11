@@ -1,8 +1,8 @@
 package molecule.db.sql.mariadb.setup
 
-import molecule.core.spi.Conn
-import molecule.coreTests.domains.schema.*
-import molecule.coreTests.setup.{DbConnection, DbProviders, Platform}
+import molecule.db.compliance.domains.schema.*
+import molecule.db.compliance.setup.{DbConnection, DbProviders, Platform}
+import molecule.db.core.spi.Conn
 import molecule.db.sql.mariadb
 import molecule.db.sql.mariadb.setup.DbConnection_mariadb
 

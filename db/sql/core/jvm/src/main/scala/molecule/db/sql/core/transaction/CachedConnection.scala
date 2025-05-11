@@ -1,7 +1,7 @@
 package molecule.db.sql.core.transaction
 
 import java.util.UUID
-import molecule.core.marshalling.ConnProxy
+import molecule.db.core.marshalling.ConnProxy
 import molecule.db.sql.core.facade.JdbcConn_JVM
 import scala.collection.mutable
 import scala.concurrent.Future

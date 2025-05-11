@@ -1,6 +1,6 @@
 package molecule.db.sql.h2.compliance.transaction
 
-import molecule.coreTests.spi.action.*
+import molecule.db.compliance.test.action.Transactions_zio
 import molecule.db.sql
 import molecule.db.sql.h2.setup.Api_h2_zio
 

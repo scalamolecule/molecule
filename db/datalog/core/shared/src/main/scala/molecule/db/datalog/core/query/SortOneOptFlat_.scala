@@ -6,8 +6,7 @@ import java.math.{BigDecimal as jBigDecimal, BigInteger as jBigInt}
 import java.net.URI
 import java.time.*
 import java.util.{Date, UUID}
-import molecule.core.ast.DataModel.*
-
+import molecule.db.core.ast._
 
 trait SortOneOptFlat_[Tpl] extends ResolveBase { self: Model2DatomicQuery[Tpl] =>
 

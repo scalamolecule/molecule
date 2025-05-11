@@ -1,10 +1,10 @@
 package molecule.db.datalog.datomic.query
 
 import java.util.List as jList
-import molecule.core.ast.DataModel.Element
-import molecule.core.marshalling.dbView.DbView
-import molecule.core.util.Executor.global
-import molecule.core.util.{FutureUtils, MoleculeLogging}
+import molecule.db.core.ast.Element
+import molecule.db.core.marshalling.dbView.DbView
+import molecule.db.core.util.Executor.global
+import molecule.db.core.util.{FutureUtils, MoleculeLogging}
 import molecule.db.datalog
 import molecule.db.datalog.datomic.facade.DatomicConn_JVM
 import molecule.db.datalog.core.query.{DatomicQueryBase, Model2DatomicQuery}

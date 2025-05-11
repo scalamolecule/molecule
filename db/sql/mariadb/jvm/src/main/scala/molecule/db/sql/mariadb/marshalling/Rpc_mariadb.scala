@@ -1,6 +1,6 @@
 package molecule.db.sql.mariadb.marshalling
 
-import molecule.core.marshalling.Boopicklers.*
+import molecule.db.core.marshalling.Boopicklers.*
 import molecule.db.sql.core.marshalling.MoleculeBackend_SQL
 import molecule.db.sql.mariadb.spi.Spi_mariadb_sync
 

@@ -1,9 +1,9 @@
 package molecule.db.sql.core.facade
 
 import boopickle.Default.*
-import molecule.core.marshalling.Boopicklers.*
-import molecule.core.marshalling.{JdbcProxy, MoleculeFrontend, MoleculeRpc}
-import molecule.core.spi.Conn
+import molecule.db.core.marshalling.Boopicklers.*
+import molecule.db.core.marshalling.{JdbcProxy, MoleculeFrontend, MoleculeRpc}
+import molecule.db.core.spi.Conn
 import molecule.db.sql.core.transaction.JdbcDataType_JS
 
 

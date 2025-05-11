@@ -3,11 +3,12 @@ package molecule.db.datalog.datomic.transaction
 import java.net.URI
 import java.time.*
 import java.util.{Date, UUID}
-import molecule.base.ast.*
-import molecule.core.ast.DataModel.Element
-import molecule.core.transaction.ResolveSave
-import molecule.core.transaction.ops.SaveOps
-import molecule.core.util.{JavaConversions, MoleculeLogging}
+import molecule.db.base.ast.*
+import molecule.db.core.ast.Element
+import molecule.db.base.ast.Card
+import molecule.db.core.transaction.ResolveSave
+import molecule.db.core.transaction.ops.SaveOps
+import molecule.db.core.util.{JavaConversions, MoleculeLogging}
 import molecule.db.datalog.datomic
 
 trait Save_datomic

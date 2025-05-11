@@ -1,6 +1,6 @@
 package molecule.db.datalog.datomic.transaction
 
-import molecule.core.spi.DataType
+import molecule.db.core.spi.DataType
 import molecule.db.datalog.datomic
 
 trait DatomicDataType_JS extends DataType {

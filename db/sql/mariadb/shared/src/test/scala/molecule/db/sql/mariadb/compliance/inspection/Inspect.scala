@@ -1,12 +1,12 @@
 package molecule.db.sql.mariadb.compliance.inspection
 
-import molecule.core.util.Executor.*
-import molecule.coreTests.domains.dsl.Types.*
-import molecule.coreTests.setup.{Test, TestUtils}
+import molecule.db.core.util.Executor.*
+import molecule.db.compliance.domains.dsl.Types.*
+import molecule.db.compliance.setup.{Test, TestUtils}
 import molecule.db.sql
 import molecule.db.sql.mariadb.async.*
 import molecule.db.sql.mariadb.setup.DbProviders_mariadb
-//import scala.language.implicitConversions
+
 
 class Test_Inspect extends Test with DbProviders_mariadb with TestUtils {
 

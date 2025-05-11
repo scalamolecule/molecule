@@ -1,6 +1,6 @@
 package molecule.db.sql.mariadb.compliance.transaction
 
-import molecule.coreTests.spi.action.*
+import molecule.db.compliance.test.action.Transactions_zio
 import molecule.db.sql
 import molecule.db.sql.mariadb.setup.Api_mariadb_zio
 

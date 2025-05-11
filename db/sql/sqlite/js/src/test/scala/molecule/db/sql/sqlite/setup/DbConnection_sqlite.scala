@@ -1,9 +1,9 @@
 package molecule.db.sql.sqlite.setup
 
-import molecule.base.api.Schema_sqlite
-import molecule.core.marshalling.JdbcProxy
-import molecule.core.spi.Conn
-import molecule.coreTests.setup.DbConnection
+import molecule.db.base.api.Schema_sqlite
+import molecule.db.compliance.setup.DbConnection
+import molecule.db.core.marshalling.JdbcProxy
+import molecule.db.core.spi.Conn
 import molecule.db.sql.core.facade.JdbcConn_JS
 import molecule.db.sql.sqlite
 import sttp.client4.UriContext

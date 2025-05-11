@@ -1,10 +1,10 @@
 package molecule.rest.setup
 
-import molecule.base.api.Schema
-import molecule.base.util.BaseHelpers
-import molecule.core.spi.Conn
-import molecule.coreTests.domains.schema._
-import molecule.coreTests.setup.CoreTestSuite
+import molecule.db.base.api.Schema
+import molecule.db.base.util.BaseHelpers
+import molecule.db.core.spi.Conn
+import molecule.db.compliance.domains.schema._
+import molecule.db.compliance.setup.CoreTestSuite
 import molecule.rest.schema.StarwarsSchema
 
 

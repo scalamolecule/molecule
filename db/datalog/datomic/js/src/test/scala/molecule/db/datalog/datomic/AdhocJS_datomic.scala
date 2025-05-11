@@ -1,13 +1,12 @@
 package molecule.db.datalog.datomic
 
 import boopickle.Default.*
-import molecule.core.util.Executor.*
-import molecule.coreTests.domains.dsl.Types.*
-import molecule.coreTests.setup.{Test, TestUtils}
+import molecule.db.compliance.domains.dsl.Types.*
+import molecule.db.compliance.setup.{Test, TestUtils}
 import molecule.db.datalog
 import molecule.db.datalog.datomic.async.*
 import molecule.db.datalog.datomic.setup.DbProviders_datomic
-
+import molecule.db.core.util.Executor.*
 
 class AdhocJS_datomic extends Test with DbProviders_datomic with TestUtils {
 
@@ -26,7 +25,7 @@ class AdhocJS_datomic extends Test with DbProviders_datomic with TestUtils {
 
 
   //    "refs" - refs { implicit conn =>
-  //      import molecule.coreTests.domains.dsl.Refs._
+  //      import molecule.db.compliance.domains.dsl.Refs._
   //      for {
   //
   ////        _ <- A.i.B.?(B.i).insert(List(
@@ -66,7 +65,7 @@ class AdhocJS_datomic extends Test with DbProviders_datomic with TestUtils {
 
 
   //    "validation" - validation { implicit conn =>
-  //      import molecule.coreTests.domains.dsl.Validation._
+  //      import molecule.db.compliance.domains.dsl.Validation._
   //      for {
   //        List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)
   //

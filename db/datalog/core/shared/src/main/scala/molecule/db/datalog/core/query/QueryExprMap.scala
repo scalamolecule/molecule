@@ -1,8 +1,8 @@
 package molecule.db.datalog.core.query
 
-import molecule.core.ast.DataModel.*
-import molecule.core.query.QueryExpr
-import molecule.core.util.JavaConversions
+import molecule.db.core.query.QueryExpr
+import molecule.db.core.util.JavaConversions
+import molecule.db.core.ast._
 
 trait QueryExprMap[Tpl] extends QueryExpr with JavaConversions { self: Model2DatomicQuery[Tpl] & LambdasMap =>
 

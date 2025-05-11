@@ -1,13 +1,13 @@
 package molecule.db.datalog.core.query
 
-import molecule.base.error.ModelError
-import molecule.core.ast.DataModel
-import molecule.core.ast.DataModel.*
-import molecule.core.query.QueryExpr
-import molecule.core.util.MoleculeLogging
+import molecule.db.base.error.ModelError
+import molecule.db.core.ast.DataModel
+import molecule.db.core.query.QueryExpr
+import molecule.db.core.util.MoleculeLogging
 import molecule.db.datalog.core.query.casting.*
-import molecule.db.datalog.core.query.casting.{CastNestedBranch_, CastOptNestedBranch_, CastOptNestedLeaf_, CastOptRefBranch_, CastOptRefLeaf_, CastRow2AnyTpl_, Nest, NestOpt, OptRefNested}
+import molecule.db.datalog.core.query.casting.*
 import scala.collection.mutable.ArrayBuffer
+import molecule.db.core.ast._
 
 
 class Model2DatomicQuery[Tpl](elements0: List[Element])
@@ -85,7 +85,7 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
     (preQuery, mainQuery, queryStrs)
   }
 
-  final private def addFilterAttrCallback(): (List[String], DataModel.Attr) => Unit = {
+  final private def addFilterAttrCallback(): (List[String], Attr) => Unit = {
     (pathAttr: List[String], a: Attr) => {
       filterAttrVars.get(pathAttr).fold {
         // Create datomic variable for this filter attribute

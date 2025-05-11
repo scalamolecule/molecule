@@ -1,9 +1,10 @@
 package molecule.db.datalog.datomic.spi
 
-import molecule.base.error.*
-import molecule.core.action.*
-import molecule.core.spi.{Conn, Spi_zio, TxReport}
-import molecule.core.util.Executor.*
+import molecule.db.base.error.*
+import molecule.db.core.util.Executor.*
+import molecule.db.base.error.{InsertError, InsertErrors, MoleculeError, ValidationErrors}
+import molecule.db.core.action.{Delete, Insert, Query, QueryCursor, QueryOffset, Save, Update}
+import molecule.db.core.spi.{Conn, Spi_zio, TxReport}
 import molecule.db.datalog
 import molecule.db.datalog.datomic.facade.DatomicConn_JVM
 import molecule.db.datalog.core.spi.StreamingDatomic

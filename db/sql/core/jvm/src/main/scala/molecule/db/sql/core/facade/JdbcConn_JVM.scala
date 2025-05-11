@@ -3,11 +3,11 @@ package molecule.db.sql.core.facade
 import java.sql
 import java.sql.{Connection, PreparedStatement, ResultSet, SQLException}
 import cats.effect.IO
-import molecule.base.error.MoleculeError
-import molecule.core.api.Savepoint
-import molecule.core.marshalling.JdbcProxy
-import molecule.core.spi.{Conn, TxReport}
-import molecule.core.util.{ModelUtils, MoleculeLogging}
+import molecule.db.base.error.MoleculeError
+import molecule.db.core.api.Savepoint
+import molecule.db.core.marshalling.JdbcProxy
+import molecule.db.core.spi.{Conn, TxReport}
+import molecule.db.core.util.{ModelUtils, MoleculeLogging}
 import molecule.db.sql.core.javaSql.{ResultSetImpl, ResultSetInterface}
 import molecule.db.sql.core.transaction.{CachedConnection, SavepointImpl, SqlDataType_JVM}
 import molecule.db.sql.core.transaction.strategy.SqlAction

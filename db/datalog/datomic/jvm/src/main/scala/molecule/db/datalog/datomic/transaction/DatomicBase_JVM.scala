@@ -3,11 +3,11 @@ package molecule.db.datalog.datomic.transaction
 import java.lang.Boolean as jBoolean
 import java.util.{UUID, ArrayList as jArrayList, List as jList}
 import clojure.lang.Keyword
-import molecule.base.error.ExecutionError
-import molecule.core.ast.DataModel.Element
-import molecule.core.marshalling.{ConnProxy, DatomicProxy}
-import molecule.core.util.Executor.*
-import molecule.core.util.{ModelUtils, fns}
+import molecule.db.core.ast.Element
+import molecule.db.core.util.Executor.*
+import molecule.db.base.error.ExecutionError
+import molecule.db.core.marshalling.{ConnProxy, DatomicProxy}
+import molecule.db.core.util.{ModelUtils, fns}
 import molecule.db.datalog
 import molecule.db.datalog.datomic.facade.{DatomicConn_JVM, DatomicPeer}
 import scala.collection.mutable

@@ -1,9 +1,9 @@
 package molecule.db.datalog.datomic.facade
 
 import boopickle.Default.*
-import molecule.core.marshalling.Boopicklers.*
-import molecule.core.marshalling.{DatomicProxy, MoleculeFrontend, MoleculeRpc}
-import molecule.core.spi.Conn
+import molecule.db.core.marshalling.Boopicklers.*
+import molecule.db.core.marshalling.{DatomicProxy, MoleculeFrontend, MoleculeRpc}
+import molecule.db.core.spi.Conn
 import molecule.db.datalog.datomic.transaction.DatomicDataType_JS
 
 

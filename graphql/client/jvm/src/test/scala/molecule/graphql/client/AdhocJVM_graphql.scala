@@ -1,13 +1,13 @@
 package molecule.graphql.client
 
 import molecule.graphql.client.dsl.Starwars._
-import molecule.core.util.Executor._
+import molecule.db.core.util.Executor._
 import molecule.graphql.client.async._
 import molecule.graphql.client.schema.StarwarsSchema
 import molecule.graphql.client.setup.TestSuite_graphql
 import scala.concurrent.Future
 import scala.io.Source
-//import scala.language.implicitConversions
+
 import caliban.parsing.Parser
 import caliban.parsing.adt.Definition.TypeSystemDefinition.TypeDefinition._
 import caliban.parsing.adt.Document

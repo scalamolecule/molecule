@@ -1,7 +1,7 @@
 package molecule.db.datalog
 
-import molecule.core.api.*
 import datomic.spi.*
+import molecule.db.core.api.{Api_async, Api_io, Api_sync, Api_zio}
 
 package object datomic {
 

@@ -1,9 +1,9 @@
 package molecule.db.sql.core.query
 
-import molecule.base.error.ModelError
-import molecule.core.ast.DataModel.Element
-import molecule.core.util.Executor.global
-import molecule.core.util.{FutureUtils, ModelUtils, MoleculeLogging}
+import molecule.db.core.ast.Element
+import molecule.db.core.util.Executor.global
+import molecule.db.base.error.ModelError
+import molecule.db.core.util.{FutureUtils, ModelUtils, MoleculeLogging}
 import molecule.db.sql.core.facade.JdbcConn_JVM
 import molecule.db.sql.core.query.casting.{NestOptTpls, NestTpls}
 import scala.concurrent.Future
@@ -89,10 +89,15 @@ case class SqlQueryResolveOffset[Tpl](
     val involvedAttrs        = getAttrNames(elements)
     val involvedDeleteEntity = getInitialEntity(elements)
     val maybeCallback        = (mutationAttrs: Set[String], isDelete: Boolean) => {
+
+      println("involvedAttrs: " + involvedAttrs)
+      println("mutationAttrs: " + mutationAttrs)
+
       if (
         mutationAttrs.exists(involvedAttrs.contains) ||
           isDelete && mutationAttrs.head.startsWith(involvedDeleteEntity)
       ) {
+        println(s"  $mutationAttrs triggering callback")
         Future(
           callback {
             SqlQueryResolveOffset(elements, optLimit, None, freshM2q(elements))

@@ -1,6 +1,6 @@
 package molecule.db.sql.h2
 
-import molecule.coreTests.domains.dsl.Types.Entity
+import molecule.db.compliance.domains.dsl.Types.Entity
 import molecule.db.sql
 import molecule.db.sql.h2.Zio.*
 import molecule.db.sql.h2.setup.DbProviders_h2_zio
@@ -8,7 +8,7 @@ import zio.*
 import zio.test.*
 import zio.test.TestAspect.*
 import scala.annotation.nowarn
-//import scala.language.implicitConversions
+
 
 
 object Adhoc_jvm_h2_zio extends ZIOSpecDefault with DbProviders_h2_zio {
@@ -45,7 +45,7 @@ object Adhoc_jvm_h2_zio extends ZIOSpecDefault with DbProviders_h2_zio {
       //        }
       //      }.provide(types.orDie),
       //      test("Opt ref") {
-      //        import molecule.coreTests.domains.dsl.Refs._
+      //        import molecule.db.compliance.domains.dsl.Refs._
       //        for {
       //          _ <- A.i(1).save.transact
       //
@@ -68,7 +68,7 @@ object Adhoc_jvm_h2_zio extends ZIOSpecDefault with DbProviders_h2_zio {
       //
       //
       //      test("Validation") {
-      //        import molecule.coreTests.domains.dsl.Validation.Type
+      //        import molecule.db.compliance.domains.dsl.Validation.Type
       //        Type.string("a").save.transact.flip.map {
       //          case ValidationErrors(errorMap) => assertTrue(
       //            errorMap.head._2.head ==
@@ -126,7 +126,7 @@ object Adhoc_jvm_h2_zio extends ZIOSpecDefault with DbProviders_h2_zio {
       //
       //
       //      test("Cursor query") {
-      //        import molecule.coreTests.domains.dsl.Uniques._
+      //        import molecule.db.compliance.domains.dsl.Uniques._
       //        val query = Uniques.int.a1.query
       //        for {
       //          _ <- Uniques.int.insert(1, 2, 3, 4, 5).transact

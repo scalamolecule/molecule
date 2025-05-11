@@ -1,6 +1,6 @@
 package molecule.db.sql
 
-import molecule.core.api.*
+import molecule.db.core.api.{Api_async, Api_async_transact, Api_io, Api_io_transact, Api_sync, Api_sync_transact, Api_zio, Api_zio_transact}
 import molecule.db.sql.postgres.spi.{Spi_postgres_async, Spi_postgres_io, Spi_postgres_sync, Spi_postgres_zio}
 import postgres.spi.*
 

@@ -1,9 +1,9 @@
 package molecule.db.sql.mysql.setup
 
 import com.mysql.cj.jdbc.MysqlDataSource
-import molecule.base.api.{Schema, Schema_mysql}
-import molecule.core.marshalling.JdbcProxy
-import molecule.core.spi.Conn
+import molecule.db.base.api.{Schema, Schema_mysql}
+import molecule.db.core.marshalling.JdbcProxy
+import molecule.db.core.spi.Conn
 import molecule.db.sql
 import molecule.db.sql.core.facade.{JdbcConn_JVM, JdbcHandler_JVM}
 import org.testcontainers.containers.MySQLContainer

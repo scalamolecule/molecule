@@ -1,13 +1,12 @@
 package molecule.db.sql.mysql
 
 import boopickle.Default.*
-import molecule.core.util.Executor.*
-import molecule.coreTests.domains.dsl.Types.*
-import molecule.coreTests.setup.{Test, TestUtils}
+import molecule.db.compliance.domains.dsl.Types.*
+import molecule.db.compliance.setup.{Test, TestUtils}
 import molecule.db.sql.mysql
 import molecule.db.sql.mysql.async.*
 import molecule.db.sql.mysql.setup.DbProviders_mysql
-
+import molecule.db.core.util.Executor.*
 
 class AdhocJS_mysql extends Test with DbProviders_mysql with TestUtils {
 
@@ -21,7 +20,7 @@ class AdhocJS_mysql extends Test with DbProviders_mysql with TestUtils {
 
 
   //    "refs" - refs { implicit conn =>
-  //      import molecule.coreTests.domains.dsl.Refs._
+  //      import molecule.db.compliance.domains.dsl.Refs._
   //      for {
   //
   //        _ <- Entity.i.Rs1.*(R1.i).insert(0, List(1)).transact
@@ -31,7 +30,7 @@ class AdhocJS_mysql extends Test with DbProviders_mysql with TestUtils {
 
   //
   //    "validation" - validation { implicit conn =>
-  //      import molecule.coreTests.domains.dsl.Validation._
+  //      import molecule.db.compliance.domains.dsl.Validation._
   //      for {
   //
   //        List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)

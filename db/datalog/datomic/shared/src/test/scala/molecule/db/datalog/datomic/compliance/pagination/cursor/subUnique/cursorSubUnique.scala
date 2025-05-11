@@ -1,7 +1,7 @@
 package molecule.db.datalog.datomic.compliance.pagination.cursor.subUnique
 
-import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.pagination.cursor.subUnique.*
+import molecule.db.compliance.setup.Test
+import molecule.db.compliance.test.pagination.subUnique.{AttrOrder, DirectionsStandardUnique, DirectionsUniqueStandard, MutationAdd, MutationDelete, Nested, OptNested, TypesUniqueValue}
 import molecule.db.datalog
 import molecule.db.datalog.datomic.setup.Api_datomic_async
 

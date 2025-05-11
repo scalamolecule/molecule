@@ -1,0 +1,87 @@
+package molecule.db.compliance.test.validation.save
+
+import molecule.db.compliance.setup.*
+import molecule.db.base.error.ValidationErrors
+import molecule.db.compliance.setup.{DbProviders, Test, TestUtils}
+import molecule.db.core.api.Api_async
+import molecule.db.core.spi.Spi_async
+import molecule.db.core.util.Executor.*
+import molecule.db.compliance.domains.dsl.Types.*
+import molecule.db.compliance.domains.dsl.Refs.*
+import molecule.db.compliance.domains.dsl.Validation.*
+
+
+case class Semantics(
+  suite: Test,
+  api: Api_async & Spi_async & DbProviders
+) extends TestUtils {
+
+  import api.*
+  import suite.*
+
+  "1 attribute" - validation { implicit conn =>
+    for {
+      _ <- Type.int(1).save.transact
+        .map(_ ==> "Unexpected success").recover {
+          case ValidationErrors(errorMap) =>
+            errorMap ==>
+              Map(
+                "Type.int" -> Seq(
+                  s"""Type.int with value `1` doesn't satisfy validation:
+                     |_ > 2
+                     |""".stripMargin
+                )
+              )
+        }
+    } yield ()
+  }
+
+
+  "2 attributes" - validation { implicit conn =>
+    for {
+      _ <- Type.int(1).long(3L).save.transact
+        .map(_ ==> "Unexpected success").recover {
+          case ValidationErrors(errorMap) =>
+            errorMap ==>
+              Map(
+                "Type.int" -> Seq(
+                  s"""Type.int with value `1` doesn't satisfy validation:
+                     |_ > 2
+                     |""".stripMargin
+                )
+              )
+        }
+
+      _ <- Type.int(3).long(1L).save.transact
+        .map(_ ==> "Unexpected success").recover {
+          case ValidationErrors(errorMap) =>
+            errorMap ==>
+              Map(
+                "Type.long" -> Seq(
+                  s"""Type.long with value `1` doesn't satisfy validation:
+                     |_ > 2L
+                     |""".stripMargin
+                )
+              )
+        }
+
+      _ <- Type.int(1).long(1L).save.transact
+        .map(_ ==> "Unexpected success").recover {
+          case ValidationErrors(errorMap) =>
+            errorMap ==>
+              Map(
+                "Type.int" -> Seq(
+                  s"""Type.int with value `1` doesn't satisfy validation:
+                     |_ > 2
+                     |""".stripMargin
+                ),
+                "Type.long" -> Seq(
+                  s"""Type.long with value `1` doesn't satisfy validation:
+                     |_ > 2L
+                     |""".stripMargin
+                )
+              )
+        }
+    } yield ()
+  }
+}

@@ -1,10 +1,11 @@
 package molecule.db.datalog.core.query
 
 import java.util.Iterator as jIterator
-import molecule.base.ast.*
-import molecule.base.error.ModelError
-import molecule.core.ast.DataModel.*
+import molecule.db.base.ast.*
+import molecule.db.base.ast.CardOne
+import molecule.db.base.error.ModelError
 import scala.annotation.tailrec
+import molecule.db.core.ast._
 
 
 trait ResolveOptRefPull[Tpl] { self: Model2DatomicQuery[Tpl] =>

@@ -1,7 +1,7 @@
 package molecule.db.sql.sqlite.compliance.action.update.ops
 
-import molecule.coreTests.setup.{MUnitSuiteWithArrays, Test}
-import molecule.coreTests.spi.action.update.ops.*
+import molecule.db.compliance.setup.{MUnitSuiteWithArrays, Test}
+import molecule.db.compliance.test.action.update.ops.{OpsMap, OpsOne, OpsSeq, OpsSet}
 import molecule.db.sql
 import molecule.db.sql.sqlite.setup.Api_sqlite_async
 

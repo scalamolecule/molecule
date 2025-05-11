@@ -2,16 +2,17 @@ package molecule.db.datalog.datomic.spi
 
 import java.util.{Date, UUID, Collection as jCollection}
 import datomic.Peer
-import molecule.base.error.*
-import molecule.core.action.Update
-import molecule.core.ast.DataModel.*
-import molecule.core.spi.Conn
-import molecule.core.util.{JavaConversions, ModelUtils}
-import molecule.core.validation.TxModelValidation
+import molecule.db.base.error.*
+import molecule.db.base.error.{ExecutionError, MoleculeError}
+import molecule.db.core.action.Update
+import molecule.db.core.spi.Conn
+import molecule.db.core.util.{JavaConversions, ModelUtils}
+import molecule.db.core.validation.TxModelValidation
 import molecule.db.datalog
 import molecule.db.datalog.datomic.facade.DatomicConn_JVM
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
+import molecule.db.core.ast._
 
 
 trait JVMDatomicSpiBase extends ModelUtils with JavaConversions {

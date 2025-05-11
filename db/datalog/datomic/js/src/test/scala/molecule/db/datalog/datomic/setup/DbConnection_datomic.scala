@@ -1,9 +1,9 @@
 package molecule.db.datalog.datomic.setup
 
-import molecule.base.api.Schema_datomic
-import molecule.core.marshalling.DatomicProxy
-import molecule.core.spi.Conn
-import molecule.coreTests.setup.DbConnection
+import molecule.db.base.api.Schema_datomic
+import molecule.db.compliance.setup.DbConnection
+import molecule.db.core.marshalling.DatomicProxy
+import molecule.db.core.spi.Conn
 import molecule.db.datalog.datomic.facade.DatomicConn_JS
 import zio.{ZIO, ZLayer}
 

@@ -1,6 +1,6 @@
 package molecule.db.sql.mysql.setup
 
-import molecule.core.api.{Api_io, Api_io_transact}
+import molecule.db.core.api.{Api_io, Api_io_transact}
 import molecule.db.sql
 import molecule.db.sql.mysql.spi.Spi_mysql_io
 

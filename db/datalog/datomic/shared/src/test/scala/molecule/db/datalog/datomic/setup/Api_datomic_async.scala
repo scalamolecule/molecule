@@ -1,6 +1,6 @@
 package molecule.db.datalog.datomic.setup
 
-import molecule.core.api.Api_async
+import molecule.db.core.api.Api_async
 import molecule.db.datalog
 import molecule.db.datalog.datomic.spi.Spi_datomic_async
 

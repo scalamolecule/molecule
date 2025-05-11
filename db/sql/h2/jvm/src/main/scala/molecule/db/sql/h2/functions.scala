@@ -10,7 +10,7 @@ import scala.reflect.ClassTag
 
 // H2 helper functions for updates that are likely not possible to implement with H2 SQL.
 // Create aliases in database to use functions.
-// @see molecule.coreTests.domains.schema.RefsSchema_H2
+// @see molecule.db.compliance.domains.schema.RefsSchema_H2
 object functions {
 
   // Remove values from Set or Seq

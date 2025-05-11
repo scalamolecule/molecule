@@ -1,7 +1,7 @@
 package molecule.db.datalog.datomic.compliance.action.update.attrOp
 
-import molecule.coreTests.setup.Test
-import molecule.coreTests.spi.action.update.attrOp.decimal.*
+import molecule.db.compliance.setup.Test
+import molecule.db.compliance.test.action.update.attrOp.decimal.{AttrOpDecimal_BigDecimal, AttrOpDecimal_Double, AttrOpDecimal_Float_}
 import molecule.db.datalog
 import molecule.db.datalog.datomic.setup.Api_datomic_async
 
