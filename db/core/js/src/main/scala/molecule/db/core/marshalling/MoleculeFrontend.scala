@@ -2,12 +2,12 @@ package molecule.db.core.marshalling
 
 import java.nio.ByteBuffer
 import boopickle.Default.*
-import molecule.db.core.marshalling.Boopicklers.*
-import molecule.db.core.util.Executor.global as x
 import molecule.db.base.error.{ExecutionError, MoleculeError}
-import molecule.db.core.marshalling.{ConnProxy, MoleculeEndpoints, MoleculeRpc}
+import molecule.db.core.ast.*
+import molecule.db.core.marshalling.Boopicklers.*
 import molecule.db.core.marshalling.deserialize.UnpickleTpls
 import molecule.db.core.spi.TxReport
+import molecule.db.core.util.Executor.global as x
 import molecule.db.core.util.FutureUtils
 import org.scalajs.dom
 import org.scalajs.dom.{MessageEvent, WebSocket}
@@ -19,9 +19,6 @@ import scala.concurrent.Future
 import scala.scalajs.js
 import scala.scalajs.js.typedarray.TypedArrayBufferOps.*
 import scala.scalajs.js.typedarray.{ArrayBuffer, TypedArrayBuffer}
-import molecule.db.base.ast.*
-import molecule.db.base.error.*
-import molecule.db.core.ast._
 
 case class MoleculeFrontend(host: String, port: Int)
   extends MoleculeRpc

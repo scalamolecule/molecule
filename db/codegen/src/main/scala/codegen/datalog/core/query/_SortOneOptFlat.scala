@@ -38,7 +38,7 @@ object _SortOneOptFlat extends DatalogGenBase("SortOneOptFlat", "/query") {
 
   def sorter(tpe: String): String = {
     val cast: String => String = tpe match {
-      case "Id"             => (v: String) => s"$v.toString.toLong"
+      case "ID"             => (v: String) => s"$v.toString.toLong"
       case "Int"            => (v: String) => s"$v.toString.toInt"
       case "Duration"       => (v: String) => s"Duration.parse($v.toString)"
       case "Instant"        => (v: String) => s"Instant.parse($v.toString)"

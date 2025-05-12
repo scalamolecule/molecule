@@ -10,7 +10,7 @@ object _CastOptRefLeaf extends DatalogGenBase("CastOptRefLeaf", "/query/casting"
     s"""// GENERATED CODE ********************************
        |package molecule.db.datalog.core.query.casting
        |
-       |import java.util.{ArrayList => jArrayList, Iterator => jIterator, Map => jMap}
+       |import java.util.{ArrayList as jArrayList, Iterator as jIterator, Map as jMap}
        |import molecule.db.core.util.JavaConversions
        |
        |

@@ -8,6 +8,7 @@ import java.time.*
 import java.util.{Date, UUID}
 import molecule.db.core.ast._
 
+
 trait SortOne_[Tpl] { self: Model2DatomicQuery[Tpl] =>
 
   protected def sortOneID(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {

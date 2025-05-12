@@ -217,7 +217,7 @@ trait ResolveNestedPull[Tpl]
 
   private def resAttrOneOpt(a: AttrOneOpt, attrIndex: Int): Unit = {
     a match {
-      case _: AttrOneOptID             => add(sortOneOptFlatId(a, attrIndex), it2OptId)
+      case _: AttrOneOptID             => add(sortOneOptFlatID(a, attrIndex), it2OptId)
       case _: AttrOneOptString         => add(sortOneOptFlatString(a, attrIndex), it2OptString)
       case _: AttrOneOptInt            => add(sortOneOptFlatInt(a, attrIndex), it2OptInt)
       case _: AttrOneOptLong           => add(sortOneOptFlatLong(a, attrIndex), it2OptLong)

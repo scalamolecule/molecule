@@ -10,7 +10,7 @@ object _CastOptNestedBranch extends DatalogGenBase("CastOptNestedBranch", "/quer
     s"""// GENERATED CODE ********************************
        |package molecule.db.datalog.core.query.casting
        |
-       |import java.util.{Collections, Comparator, ArrayList => jArrayList, Iterator => jIterator, List => jList, Map => jMap}
+       |import java.util.{Collections, Comparator, ArrayList as jArrayList, Iterator as jIterator, List as jList, Map as jMap}
        |import molecule.db.datalog.core.query.DatomicQueryBase
        |
        |

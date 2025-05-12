@@ -8,6 +8,7 @@ import java.time.*
 import java.util.{Date, UUID, Map as jMap}
 import molecule.db.core.ast._
 
+
 trait SortOneOpt_[Tpl] { self: Model2DatomicQuery[Tpl] =>
 
   private def compare(

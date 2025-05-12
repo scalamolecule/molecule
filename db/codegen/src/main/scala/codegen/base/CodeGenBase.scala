@@ -127,7 +127,7 @@ trait CodeGenBase {
     ("Byte", "Byte", "byte", ""),
     ("Short", "Short", "short", ""),
     ("Char", "Char", "char", ""),
-    ("ref", "String", "ref", ""),
+    ("ref", "Long", "ref", ""),
   )
 
   // Number types except Int

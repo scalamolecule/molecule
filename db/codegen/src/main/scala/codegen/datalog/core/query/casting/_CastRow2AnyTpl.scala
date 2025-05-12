@@ -15,7 +15,7 @@ object _CastRow2AnyTpl extends DatalogGenBase("CastRow2AnyTpl", "/query/casting"
        |
        |trait $fileName_ { self: DatomicQueryBase =>
        |
-       |  final protected def castRow2AnyTpl(
+       |  final def castRow2AnyTpl(
        |    casts: List[AnyRef => AnyRef],
        |    attrIndex: AttrIndex
        |  ): Row => Any = {

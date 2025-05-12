@@ -1,12 +1,13 @@
 // GENERATED CODE ********************************
 package molecule.db.datalog.core.query
 
-import java.lang.{Boolean as jBoolean, Double as jDouble, Float as jFloat, Integer as jInteger, Long as jLong}
-import java.math.{BigDecimal as jBigDecimal, BigInteger as jBigInt}
+import java.lang.{Boolean => jBoolean, Double => jDouble, Float => jFloat, Integer => jInteger, Long => jLong}
+import java.math.{BigDecimal => jBigDecimal, BigInteger => jBigInt}
 import java.net.URI
 import java.time.*
 import java.util.{Date, UUID}
 import molecule.db.core.ast._
+
 
 trait SortOneOptFlat_[Tpl] extends ResolveBase { self: Model2DatomicQuery[Tpl] =>
 
@@ -24,7 +25,7 @@ trait SortOneOptFlat_[Tpl] extends ResolveBase { self: Model2DatomicQuery[Tpl] =
     }
   }
 
-  protected def sortOneOptFlatId(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneOptFlatID(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,

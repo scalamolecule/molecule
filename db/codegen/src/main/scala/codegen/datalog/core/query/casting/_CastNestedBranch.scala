@@ -24,7 +24,7 @@ object _CastNestedBranch extends DatalogGenBase("CastNestedBranch", "/query/cast
        |    } :+ ((_: Row, nested: NestedTpls) => nested)
        |
        |    casters.length match {
-       |      case 0 => cast0[T]
+       |      case 0  => cast0[T]
        |      $resolveX
        |    }
        |  }
