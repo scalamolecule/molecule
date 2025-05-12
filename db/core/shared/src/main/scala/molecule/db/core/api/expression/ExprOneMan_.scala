@@ -5,6 +5,7 @@ import molecule.db.base.ast.*
 import molecule.db.core.api.*
 import molecule.db.core.ast._
 
+
 trait ExprOneManOps_1[A, t, Entity1[_, _], Entity2[_, _, _]]
   extends ExprAttr_1[A, t, Entity1, Entity2] {
   protected def _exprOneMan(op: Op, vs: Seq[t]): Entity1[A, t] & SortAttrs_1[A, t, Entity1] & CardOne = ???

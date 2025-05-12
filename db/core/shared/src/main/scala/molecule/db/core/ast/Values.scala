@@ -5,8 +5,6 @@ import java.time.*
 import java.util.{Date, UUID}
 
 
-//trait Values2 {
-
 sealed trait Value
 
 case class OneString(v: String) extends Value
@@ -100,4 +98,3 @@ case class MapURI(v: Map[String, URI]) extends Value
 case class MapByte(v: Map[String, Byte]) extends Value
 case class MapShort(v: Map[String, Short]) extends Value
 case class MapChar(v: Map[String, Char]) extends Value
-//}

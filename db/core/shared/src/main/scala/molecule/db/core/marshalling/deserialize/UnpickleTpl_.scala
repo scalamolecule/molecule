@@ -38,7 +38,7 @@ trait UnpickleTpl_[Tpl] { self: UnpickleTpls[Tpl] =>
     () => {
       (
         u1()
-        )
+      )
     }
   }
 

@@ -2,7 +2,7 @@
 package molecule.db.core.validation.insert
 
 import molecule.db.base.ast.*
-import molecule.db.base.error.{InsertError, ModelError}
+import molecule.db.base.error.InsertError
 import molecule.db.core.ast._
 
 trait InsertValidationResolvers_ {

@@ -12,9 +12,9 @@ object _ModelTransformations extends CoreGenBase("ModelTransformations", "/ops")
        |import java.time.*
        |import java.util.{Date, UUID}
        |import molecule.db.base.error.ModelError
-       |import molecule.db.core.api.Keywords.*
        |import molecule.db.core.api.*
-       |import molecule.db.core.ast._
+       |import molecule.db.core.api.Keywords.*
+       |import molecule.db.core.ast.*
        |import scala.annotation.tailrec
        |
        |trait ModelTransformations_ {

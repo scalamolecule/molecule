@@ -3,10 +3,7 @@ package molecule.db.core.ast
 import java.net.URI
 import java.time.*
 import java.util.{Date, UUID}
-import molecule.db.core.ast._
 
-
-//trait Validations2 {
 
 sealed trait Validator {
   def withAttrs(_attrs: Seq[Attr]): Validator
@@ -150,4 +147,3 @@ case class ValidateChar(_attrs: Seq[Attr] = Nil, _values: Seq[Value] = Nil) exte
   override def withValues(_values: Seq[Value]): ValidateChar = ???
   def validate(v: Char): Seq[String] = ???
 }
-//}

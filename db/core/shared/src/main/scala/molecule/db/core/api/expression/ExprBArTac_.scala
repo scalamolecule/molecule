@@ -3,6 +3,7 @@ package molecule.db.core.api.expression
 
 import molecule.db.core.ast._
 
+
 trait ExprBArTacOps_0[t, Entity1[_], Entity2[_, _]] {
   protected def _exprBAr(op: Op, byteArray: Array[t]): Entity1[t] = ???
 }

@@ -5,6 +5,7 @@ import molecule.db.base.ast.*
 import molecule.db.core.api.*
 import molecule.db.core.ast._
 
+
 trait ExprSeqMan_1[A, t, Entity1[_, _], Entity2[_, _, _]]
   extends ExprSeqTacOps_1[A, t, Entity1, Entity2] {
 

@@ -1,19 +1,23 @@
 // GENERATED CODE ********************************
 package molecule.db.core.transaction
 
-import molecule.db.core.ast.Element
+import molecule.db.base.ast.*
+import molecule.db.core.ast._
 
 trait InsertResolvers_ {
 
   protected def resolve(
+    entityMap: Map[String, MetaEntity],
     elements: List[Element],
     resolvers: List[Product => Unit],
-    tplIndex: Int,
-    prevRefs: List[String]
+    tplIndex: Int
   ): List[Product => Unit]
 
-  def getResolver(elements: List[Element]): Product => Unit = {
-    val resolvers: List[Product => Unit] = resolve(elements, Nil, 0, Nil)
+  def getResolver(
+    entityMap: Map[String, MetaEntity],
+    elements: List[Element]
+  ): Product => Unit = {
+    val resolvers: List[Product => Unit] = resolve(entityMap, elements, Nil, 0)
     resolvers.length match {
       case 1  => resolve1(resolvers)
       case 2  => resolve2(resolvers)

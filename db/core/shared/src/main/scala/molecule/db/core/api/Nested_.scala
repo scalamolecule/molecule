@@ -3,6 +3,7 @@ package molecule.db.core.api
 
 import molecule.db.core.ast._
 
+
 class NestedInit_00[NestedTpl](override val elements: List[Element]) extends Molecule_01[Seq[NestedTpl]]
 
 trait NestedOp_0 {

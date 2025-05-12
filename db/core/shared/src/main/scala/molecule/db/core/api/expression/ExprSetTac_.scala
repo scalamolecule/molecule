@@ -5,6 +5,7 @@ import molecule.db.base.ast.*
 import molecule.db.core.api.*
 import molecule.db.core.ast._
 
+
 trait ExprSetTacOps_0[t, Entity1[_], Entity2[_, _]] extends ExprAttr_0[t, Entity1, Entity2] {
   protected def _exprSet(op: Op, set: Set[t]): Entity1[t] = ???
 }

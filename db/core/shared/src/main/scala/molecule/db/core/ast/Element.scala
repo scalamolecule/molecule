@@ -5808,4 +5808,3 @@ case class AttrMapTacChar(
     s"""AttrMapTacChar("$ent", "$attr", $op, $pairs, $ks, $vs, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
   }
 }
-//}

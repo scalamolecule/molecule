@@ -5,6 +5,7 @@ import molecule.db.base.ast.*
 import molecule.db.core.api.*
 import molecule.db.core.ast._
 
+
 trait ExprOneTacOps_0[t, Entity1[_], Entity2[_, _]]
   extends ExprAttr_0[t, Entity1, Entity2] {
   protected def _exprOneTac(op: Op, vs: Seq[t]): Entity1[t] & CardOne = ???

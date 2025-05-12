@@ -8,7 +8,7 @@ import molecule.db.core.ast._
 import molecule.db.core.validation.insert.InsertValueResolvers_
 
 trait InsertValidators_ extends InsertValueResolvers_ {
-
+  
   protected def validatorID(
     optValidator: Option[ValidateID],
     a: Attr,

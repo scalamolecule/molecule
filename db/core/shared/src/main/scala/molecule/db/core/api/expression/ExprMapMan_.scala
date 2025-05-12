@@ -3,6 +3,7 @@ package molecule.db.core.api.expression
 
 import molecule.db.core.ast._
 
+
 trait ExprMapMan_1[A, t, Entity1[_, _], Entity2[_, _, _]]
   extends ExprMapTacOps_1[A, t, Entity1, Entity2] {
   def apply (                                       ): Entity1[A, t] = _exprMap (NoValue, Map.empty[String, t] )

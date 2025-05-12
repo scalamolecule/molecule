@@ -4,6 +4,7 @@ package molecule.db.core.api.expression
 import molecule.db.core.api.*
 import molecule.db.core.ast._
 
+
 trait ExprOneOptOps_1[A, t, Entity1[_, _], Entity2[_, _, _]]
   extends ExprAttr_1[A, t, Entity1, Entity2] {
   protected def _exprOneOpt(op: Op, opt: Option[t]): Entity1[A, t] & SortAttrs_1[A, t, Entity1] = ???

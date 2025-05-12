@@ -3,6 +3,7 @@ package molecule.db.core.api.expression
 
 import molecule.db.core.ast._
 
+
 trait ExprMapTacOps_0[t, Entity1[_], Entity2[_, _]] extends ExprBase {
   protected def _exprMap (op: Op, map : Map[String, t]): Entity1[t] = ???
   protected def _exprMapK(op: Op, keys: Seq[String]   ): Entity1[t] = ???

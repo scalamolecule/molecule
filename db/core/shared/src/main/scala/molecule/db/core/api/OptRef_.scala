@@ -3,6 +3,7 @@ package molecule.db.core.api
 
 import molecule.db.core.ast._
 
+
 trait OptRefOp_0[Entity[_, _]] {
   protected def _optRef[RefTpl](optRefElements: List[Element]): Entity[Option[RefTpl], Any] = ???
 }
