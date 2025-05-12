@@ -1,13 +1,11 @@
 // GENERATED CODE ********************************
 package molecule.db.compliance.test.aggregation.any
 
-import molecule.db.compliance.setup.*
+import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.compliance.setup.{DbProviders, Test, TestUtils}
 import molecule.db.core.api.Api_async
 import molecule.db.core.spi.Spi_async
 import molecule.db.core.util.Executor.*
-import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.domains.dsl.Refs.*
 
 case class Aggr_ref_(
   suite: Test,
@@ -19,8 +17,6 @@ case class Aggr_ref_(
 
   "distinct" - types { implicit conn =>
     for {
-      List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
-
       _ <- Entity.i.ref.insert(List(
         (1, ref1),
         (2, ref2),
@@ -49,9 +45,6 @@ case class Aggr_ref_(
 
   "min/max" - types { implicit conn =>
     for {
-      List(ref1, ref2, ref3, ref4, ref5, ref6) <-
-        Ref.i.insert(1, 2, 3, 4, 5, 6).transact.map(_.ids)
-
       _ <- Entity.i.ref.insert(
         (1, ref1),
         (1, ref2),
@@ -84,9 +77,6 @@ case class Aggr_ref_(
 
   "min/max n" - types { implicit conn =>
     for {
-      List(ref1, ref2, ref3, ref4, ref5, ref6) <-
-        Ref.i.insert(1, 2, 3, 4, 5, 6).transact.map(_.ids)
-
       _ <- Entity.i.ref.insert(
         (1, ref1),
         (1, ref2),
@@ -122,10 +112,8 @@ case class Aggr_ref_(
 
 
   "sample" - types { implicit futConn =>
+    val all = Set(ref1, ref2, ref3, ref4)
     for {
-      List(ref1, ref2, ref3, ref4) <- Ref.i.insert(1, 2, 3, 4).transact.map(_.ids)
-      all = Set(ref1, ref2, ref3, ref4)
-
       _ <- Entity.ref.insert(List(ref1, ref2, ref3)).transact
       _ <- Entity.ref(sample).query.get.map(res => all.contains(res.head) ==> true)
       _ <- Entity.ref(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
@@ -136,8 +124,6 @@ case class Aggr_ref_(
 
   "count" - types { implicit conn =>
     for {
-      List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
-
       _ <- Entity.i.ref.insert(List(
         (1, ref1),
         (2, ref2),

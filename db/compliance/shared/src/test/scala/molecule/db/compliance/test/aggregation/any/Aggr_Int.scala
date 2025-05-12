@@ -1,12 +1,10 @@
 package molecule.db.compliance.test.aggregation.any
 
-import molecule.db.compliance.setup.*
+import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.compliance.setup.{DbProviders, Test, TestUtils}
 import molecule.db.core.api.Api_async
 import molecule.db.core.spi.Spi_async
 import molecule.db.core.util.Executor.*
-import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.domains.dsl.Refs.*
 
 case class Aggr_Int(
   suite: Test,
@@ -138,7 +136,7 @@ case class Aggr_Int(
         (2, 3)
       ))
 
-      _ <- Entity.int.apply(countDistinct).query.get.map(_ ==> List(3))
+      _ <- Entity.int(countDistinct).query.get.map(_ ==> List(3))
       _ <- Entity.i.a1.int(countDistinct).query.get.map(_ ==> List(
         (1, 1),
         (2, 2)

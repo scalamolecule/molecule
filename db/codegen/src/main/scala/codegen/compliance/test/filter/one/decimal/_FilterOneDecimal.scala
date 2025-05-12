@@ -8,7 +8,7 @@ object _FilterOneDecimal extends CodeGenBase {
 
   def generate(): Unit = Seq(
     ("Float", "float"),
-    ("BigDecimal", "bigDecimal"),
+    // ("BigDecimal", "bigDecimal"), // special case for SQlite
   ).foreach { case (tpe, v) =>
     TransformFile(tpe, v).generate()
   }
@@ -20,7 +20,7 @@ object _FilterOneDecimal extends CodeGenBase {
       new String(Files.readAllBytes(Paths.get(path, "FilterOneDecimal_Double.scala")), "UTF-8")
         .replace("package", "// GENERATED CODE ********************************\npackage")
         .replace("[Double]", s"[$tpe]")
-        .replace("Double extends", tpe + "_ extends")
+        .replace("Double(", tpe + "_(")
         .replace("double", v)
     }
   }

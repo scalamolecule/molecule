@@ -4,9 +4,9 @@ import java.nio.file.{Files, Paths}
 import codegen.base.CodeGenBase
 import codegen.compliance.ComplianceGenBase
 
-object _Aggr extends CodeGenBase  {
+object _Aggr extends CodeGenBase {
 
-  //  def generate(): Unit = tpeVarImp.take(1).foreach { case (name, tpe, v, imp) =>
+  //    def generate(): Unit = tpeVarImp.take(1).foreach { case (name, tpe, v, imp) =>
   def generate(): Unit = tpeVarImp.foreach { case (name, tpe, v, imp) =>
     TransformFile(name, tpe, v, imp).generate()
   }
@@ -19,7 +19,7 @@ object _Aggr extends CodeGenBase  {
         new String(Files.readAllBytes(Paths.get(path, "Aggr_Int.scala")), "UTF-8")
           .replace("package", "// GENERATED CODE ********************************\npackage")
           .replace("[Int]", s"[$tpe]")
-          .replace("Int extends", name + "_ extends")
+          .replace("Int(", name + "_(")
           .replace("int", v)
           .replace(v + "ersect", "intersect")
 

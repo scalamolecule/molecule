@@ -18,7 +18,7 @@ object _FilterOne extends CodeGenBase {
         new String(Files.readAllBytes(Paths.get(path, "FilterOne_Int.scala")), "UTF-8")
           .replace("package", "// GENERATED CODE ********************************\npackage")
           .replace("[Int]", s"[$tpe]")
-          .replace("Int extends", name + "_ extends")
+          .replace("Int(", name + "_(")
           .replace("int", v)
 
       if (imp.isEmpty) src else src.replace("\n\nimport", s"\n\nimport $imp\nimport")

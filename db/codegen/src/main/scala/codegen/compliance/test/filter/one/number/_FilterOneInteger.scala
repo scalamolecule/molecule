@@ -22,7 +22,7 @@ object _FilterOneInteger extends CodeGenBase {
       new String(Files.readAllBytes(Paths.get(path, "FilterOneInteger_Int.scala")), "UTF-8")
         .replace("package", "// GENERATED CODE ********************************\npackage")
         .replace("[Int]", s"[$tpe]")
-        .replace("Int extends", tpe + "_ extends")
+        .replace("Int(", tpe + "_(")
         .replace("int", v)
         .replace("-byte1", "-1.toByte")
         .replace("-byte2", "-2.toByte")

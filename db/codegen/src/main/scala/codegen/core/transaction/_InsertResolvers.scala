@@ -10,23 +10,19 @@ object _InsertResolvers extends CoreGenBase("InsertResolvers", "/transaction") {
     s"""// GENERATED CODE ********************************
        |package molecule.db.core.transaction
        |
-       |import molecule.db.base.ast.*
-       |import molecule.db.core.ast._
+       |import molecule.db.core.ast.*
        |
        |trait $fileName_ {
        |
        |  protected def resolve(
-       |    entityMap: Map[String, MetaEntity],
        |    elements: List[Element],
        |    resolvers: List[Product => Unit],
-       |    tplIndex: Int
+       |    tplIndex: Int,
+       |    prevRefs: List[String]
        |  ): List[Product => Unit]
        |
-       |  def getResolver(
-       |    entityMap: Map[String, MetaEntity],
-       |    elements: List[Element]
-       |  ): Product => Unit = {
-       |    val resolvers: List[Product => Unit] = resolve(entityMap, elements, Nil, 0)
+       |  def getResolver(elements: List[Element]): Product => Unit = {
+       |    val resolvers: List[Product => Unit] = resolve(elements, Nil, 0, Nil)
        |    resolvers.length match {
        |      $resolveX
        |    }

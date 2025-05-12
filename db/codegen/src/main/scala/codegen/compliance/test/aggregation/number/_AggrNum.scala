@@ -17,7 +17,7 @@ object _AggrNum extends CodeGenBase  {
       new String(Files.readAllBytes(Paths.get(path, "AggrNum_Int.scala")), "UTF-8")
         .replace("package", "// GENERATED CODE ********************************\npackage")
         .replace("[Int]", s"[$tpe]")
-        .replace("Int extends", name + "_ extends")
+        .replace("Int(", name + "_(")
         .replace("println", "prindln")
         .replace("tolerantIntEquality(toleranceInt)", s"tolerant${tpe}Equality(tolerance$tpe)")
         .replace("int", v)

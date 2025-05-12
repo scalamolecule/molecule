@@ -8,7 +8,7 @@ object _AttrOpInteger extends CodeGenBase {
 
   def generate(): Unit = Seq(
     ("Long", "long"),
-    ("BigInt", "bigInt"),
+    // ("BigInt", "bigInt"), // special case for SQlite
     ("Byte", "byte"),
     ("Short", "short"),
   ).foreach { case (tpe, v) =>
@@ -16,13 +16,13 @@ object _AttrOpInteger extends CodeGenBase {
   }
 
   case class TransformFile(tpe: String, v: String, imp: String = "")
-    extends ComplianceGenBase(s"AttrOpInteger_$tpe", "/transaction/update/attrOp/number") {
+    extends ComplianceGenBase(s"AttrOpInteger_$tpe", "/action/update/attrOp/number") {
 
     override val content = {
       new String(Files.readAllBytes(Paths.get(path, "AttrOpInteger_Int.scala")), "UTF-8")
         .replace("package", "// GENERATED CODE ********************************\npackage")
         .replace("[Int]", s"[$tpe]")
-        .replace("Int extends", tpe + "_ extends")
+        .replace("Int(", tpe + "_(")
         .replace("int", v)
         .replace("-byte1", "-1.toByte")
         .replace("-byte2", "-2.toByte")

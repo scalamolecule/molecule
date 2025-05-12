@@ -14,13 +14,13 @@ object _AttrOpDecimal extends CodeGenBase {
   }
 
   case class TransformFile(tpe: String, v: String, imp: String = "")
-    extends ComplianceGenBase(s"AttrOpDecimal_$tpe", "/transaction/update/attrOp/decimal") {
+    extends ComplianceGenBase(s"AttrOpDecimal_$tpe", "/action/update/attrOp/decimal") {
 
     override val content = {
       new String(Files.readAllBytes(Paths.get(path, "AttrOpDecimal_Double.scala")), "UTF-8")
         .replace("package", "// GENERATED CODE ********************************\npackage")
         .replace("[Double]", s"[$tpe]")
-        .replace("Double extends", tpe + "_ extends")
+        .replace("Double(", tpe + "_(")
         .replace("double", v)
         .replace("Double", tpe)
     }
