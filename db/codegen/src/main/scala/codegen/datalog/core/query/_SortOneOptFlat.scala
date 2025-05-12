@@ -1,8 +1,8 @@
 package codegen.datalog.core.query
 
-import codegen.datalog.DatomicGenBase
+import codegen.datalog.DatalogGenBase
 
-object _SortOneOptFlat extends DatomicGenBase("SortOneOptFlat", "/query") {
+object _SortOneOptFlat extends DatalogGenBase("SortOneOptFlat", "/query") {
 
   val content = {
     val sorters = baseTypes.map(sorter).mkString("\n")

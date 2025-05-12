@@ -2,7 +2,7 @@ package codegen.compliance.test.filter.one.decimal
 
 import java.nio.file.{Files, Paths}
 import codegen.base.CodeGenBase
-import codegen.compliance.SpiTestGenBase
+import codegen.compliance.ComplianceGenBase
 
 object _FilterOneDecimal extends CodeGenBase {
 
@@ -14,7 +14,7 @@ object _FilterOneDecimal extends CodeGenBase {
   }
 
   case class TransformFile(tpe: String, v: String, imp: String = "")
-    extends SpiTestGenBase(s"FilterOneDecimal_$tpe", "/filter/one/decimal") {
+    extends ComplianceGenBase(s"FilterOneDecimal_$tpe", "/filter/one/decimal") {
 
     override val content = {
       new String(Files.readAllBytes(Paths.get(path, "FilterOneDecimal_Double.scala")), "UTF-8")

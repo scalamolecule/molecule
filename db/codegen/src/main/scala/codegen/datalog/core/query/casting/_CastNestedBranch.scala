@@ -1,8 +1,8 @@
 package codegen.datalog.core.query.casting
 
-import codegen.datalog.DatomicGenBase
+import codegen.datalog.DatalogGenBase
 
-object _CastNestedBranch extends DatomicGenBase("CastNestedBranch", "/query/casting") {
+object _CastNestedBranch extends DatalogGenBase("CastNestedBranch", "/query/casting") {
 
   val content = {
     val resolveX       = (1 to 21).map(i => s"case ${caseN(i)} => cast$i[T](casters)").mkString("\n      ")

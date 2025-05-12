@@ -1,6 +1,6 @@
 package codegen.datalog
 
-object DatomicGenerator extends App {
+object DatalogGenerator extends App {
 
     codegen.datalog.core.query.casting._CastNestedBranch.generate()
     codegen.datalog.core.query.casting._CastOptNestedBranch.generate()

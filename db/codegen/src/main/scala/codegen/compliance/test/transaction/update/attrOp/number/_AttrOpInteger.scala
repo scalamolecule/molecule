@@ -2,7 +2,7 @@ package codegen.compliance.test.transaction.update.attrOp.number
 
 import java.nio.file.{Files, Paths}
 import codegen.base.CodeGenBase
-import codegen.compliance.SpiTestGenBase
+import codegen.compliance.ComplianceGenBase
 
 object _AttrOpInteger extends CodeGenBase {
 
@@ -16,7 +16,7 @@ object _AttrOpInteger extends CodeGenBase {
   }
 
   case class TransformFile(tpe: String, v: String, imp: String = "")
-    extends SpiTestGenBase(s"AttrOpInteger_$tpe", "/transaction/update/attrOp/number") {
+    extends ComplianceGenBase(s"AttrOpInteger_$tpe", "/transaction/update/attrOp/number") {
 
     override val content = {
       new String(Files.readAllBytes(Paths.get(path, "AttrOpInteger_Int.scala")), "UTF-8")

@@ -2,7 +2,7 @@ package codegen.compliance.test.aggregation.number
 
 import java.nio.file.{Files, Paths}
 import codegen.base.CodeGenBase
-import codegen.compliance.SpiTestGenBase
+import codegen.compliance.ComplianceGenBase
 
 object _AggrNum extends CodeGenBase  {
 
@@ -11,7 +11,7 @@ object _AggrNum extends CodeGenBase  {
   }
 
   case class TransformFile(name: String, tpe: String, v: String)
-    extends SpiTestGenBase(s"AggrNum_$name", "/aggregation/number") {
+    extends ComplianceGenBase(s"AggrNum_$name", "/aggregation/number") {
 
     override val content = {
       new String(Files.readAllBytes(Paths.get(path, "AggrNum_Int.scala")), "UTF-8")

@@ -2,7 +2,7 @@ package codegen.datalog
 
 import codegen.base.CodeGenTemplate
 
-abstract class DatomicGenBase(fileName: String, dir: String)
+abstract class DatalogGenBase(fileName: String, dir: String)
   extends CodeGenTemplate(
     fileName,
     dir,

@@ -2,7 +2,7 @@ package codegen.compliance.test.transaction.update.attrOp.decimal
 
 import java.nio.file.{Files, Paths}
 import codegen.base.CodeGenBase
-import codegen.compliance.SpiTestGenBase
+import codegen.compliance.ComplianceGenBase
 
 object _AttrOpDecimal extends CodeGenBase {
 
@@ -14,7 +14,7 @@ object _AttrOpDecimal extends CodeGenBase {
   }
 
   case class TransformFile(tpe: String, v: String, imp: String = "")
-    extends SpiTestGenBase(s"AttrOpDecimal_$tpe", "/transaction/update/attrOp/decimal") {
+    extends ComplianceGenBase(s"AttrOpDecimal_$tpe", "/transaction/update/attrOp/decimal") {
 
     override val content = {
       new String(Files.readAllBytes(Paths.get(path, "AttrOpDecimal_Double.scala")), "UTF-8")

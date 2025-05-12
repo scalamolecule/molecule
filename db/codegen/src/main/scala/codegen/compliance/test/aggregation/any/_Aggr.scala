@@ -2,7 +2,7 @@ package codegen.compliance.test.aggregation.any
 
 import java.nio.file.{Files, Paths}
 import codegen.base.CodeGenBase
-import codegen.compliance.SpiTestGenBase
+import codegen.compliance.ComplianceGenBase
 
 object _Aggr extends CodeGenBase  {
 
@@ -12,7 +12,7 @@ object _Aggr extends CodeGenBase  {
   }
 
   case class TransformFile(name: String, tpe: String, v: String, imp: String = "")
-    extends SpiTestGenBase(s"Aggr_$name", "/aggregation/any") {
+    extends ComplianceGenBase(s"Aggr_$name", "/aggregation/any") {
 
     override val content = {
       val src =

@@ -2,7 +2,7 @@ package codegen.compliance.test.filter.seq.types
 
 import java.nio.file.{Files, Paths}
 import codegen.base.CodeGenBase
-import codegen.compliance.SpiTestGenBase
+import codegen.compliance.ComplianceGenBase
 
 object _FilterSeq extends CodeGenBase {
 
@@ -13,7 +13,7 @@ object _FilterSeq extends CodeGenBase {
   }
 
   case class TransformFile(name: String, tpe: String, v: String, imp: String = "")
-    extends SpiTestGenBase(s"FilterSeq_$name", "/filter/seq/types") {
+    extends ComplianceGenBase(s"FilterSeq_$name", "/filter/seq/types") {
 
     override val content = {
       val src =

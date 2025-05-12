@@ -1,8 +1,8 @@
 package codegen.datalog.core.query.casting
 
-import codegen.datalog.DatomicGenBase
+import codegen.datalog.DatalogGenBase
 
-object _CastOptNestedBranch extends DatomicGenBase("CastOptNestedBranch", "/query/casting") {
+object _CastOptNestedBranch extends DatalogGenBase("CastOptNestedBranch", "/query/casting") {
 
   val content = {
     val pullBranchX    = (1 to 21).map(i => s"case ${caseN(i)} => pullBranch$i(pullCasts, optComparator, refDepth)").mkString("\n      ")
