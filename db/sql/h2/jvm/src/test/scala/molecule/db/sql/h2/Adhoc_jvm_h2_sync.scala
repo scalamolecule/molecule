@@ -21,6 +21,34 @@ class Adhoc_jvm_h2_sync extends Test with DbProviders_h2 with TestUtils {
   //    Entity.int.a1.query.get ==> List(3, 10)
   //  }
 
+//  import java.util.BitSet as jBitSet
+//  import boopickle._
+//
+//  implicit val bitSetPickler: Pickler[jBitSet] = new Pickler[jBitSet] {
+//    override def pickle(obj: jBitSet)(implicit state: PickleState): Unit = {
+//      state.enc.writeByteArray(obj.toByteArray)
+//    }
+//
+//    override def unpickle(implicit state: UnpickleState): jBitSet = {
+//      jBitSet.valueOf(state.dec.readByteArray())
+//    }
+//  }
+//
+//  val a = new java.util.BitSet()
+//  a.set(42)
+//  val b = Pickle.intoBytes[java.util.BitSet](a)
+//  val c = Unpickle[java.util.BitSet].fromBytes(b)
+//  assert(c == a)
+//  assert(!c.get(43))
+//  assert(c.get(42))
+
+
+  val a = Set(42)
+  val b = Pickle.intoBytes[Set[Int]](a)
+  val c = Unpickle[Set[Int]].fromBytes(b)
+  assert(c == a)
+//  assert(!c.get(43))
+//  assert(c.get(42))
 
   "Subscription" - types { implicit conn =>
     var intermediaryCallbackResults = List.empty[List[Int]]

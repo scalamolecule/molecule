@@ -2,7 +2,7 @@
 package molecule.db.core.api
 
 import molecule.db.base.error.ExecutionError
-import molecule.db.core.ast._
+
 
 trait SortAttrsOps_1[A, t, Entity[_, _]] {
   protected def _sort(sort: String): Entity[A, t]

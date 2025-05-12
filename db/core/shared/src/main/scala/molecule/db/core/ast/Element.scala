@@ -5,13 +5,6 @@ import java.time.*
 import java.util.{Date, UUID}
 import molecule.db.base.ast.*
 import molecule.db.base.util.BaseHelpers._
-//import molecule.db.core.ast.Validator
-
-//object DataModel extends DataModel
-//trait DataModel extends Validations with Values with BaseHelpers {
-
-
-
 
 
 sealed trait Element {

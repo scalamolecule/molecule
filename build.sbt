@@ -42,10 +42,11 @@ lazy val root = project
   .aggregate(
     dbBase.js,
     dbBase.jvm,
-    dbCore.js,
-    dbCore.jvm,
+    dbCodegen,
     dbCompliance.js,
     dbCompliance.jvm,
+    dbCore.js,
+    dbCore.jvm,
 
     dbDatalogCore.js,
     dbDatalogCore.jvm,
@@ -84,6 +85,12 @@ lazy val dbBase = crossProject(JSPlatform, JVMPlatform)
     crossScalaVersions := Seq(scala212, scala3),
     name := "molecule-db-base"
   )
+
+// Generate internal boilerplate code
+lazy val dbCodegen = project
+  .in(file("db/codegen"))
+  .settings(name := "molecule-db-codegen")
+
 
 lazy val dbCore = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)

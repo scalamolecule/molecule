@@ -21,6 +21,13 @@ object Boopicklers extends MoleculeLogging {
       state.enc.writeByteArray(obj.toByteArray)
     }
     override def unpickle(implicit state: UnpickleState): jBitSet = {
+//      jBitSet.valueOf(IArray(42.toByte))
+//
+//
+//      val x = Set(42.toByte) + 3.toByte
+//      jBitSet.valueOf(Array(42.toByte))
+//      jBitSet.valueOf(Set(42.toByte).toArray)
+
       jBitSet.valueOf(state.dec.readByteArray())
     }
   }
