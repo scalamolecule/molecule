@@ -32,11 +32,14 @@ trait SortOneOptFlat_[Tpl] extends ResolveBase { self: Model2DatomicQuery[Tpl] =
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(a, b, i, (v1, v2) =>
                 v1.toString.toLong.compareTo(v2.toString.toLong))
+
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(b, a, i, (v1, v2) =>
                 v1.toString.toLong.compareTo(v2.toString.toLong))
@@ -52,11 +55,14 @@ trait SortOneOptFlat_[Tpl] extends ResolveBase { self: Model2DatomicQuery[Tpl] =
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(a, b, i, (v1, v2) =>
                 v1.asInstanceOf[String].compareTo(v2.asInstanceOf[String]))
+
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(b, a, i, (v1, v2) =>
                 v1.asInstanceOf[String].compareTo(v2.asInstanceOf[String]))
@@ -72,11 +78,14 @@ trait SortOneOptFlat_[Tpl] extends ResolveBase { self: Model2DatomicQuery[Tpl] =
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(a, b, i, (v1, v2) =>
                 v1.toString.toInt.compareTo(v2.toString.toInt))
+
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(b, a, i, (v1, v2) =>
                 v1.toString.toInt.compareTo(v2.toString.toInt))
@@ -92,11 +101,14 @@ trait SortOneOptFlat_[Tpl] extends ResolveBase { self: Model2DatomicQuery[Tpl] =
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(a, b, i, (v1, v2) =>
                 v1.asInstanceOf[jLong].compareTo(v2.asInstanceOf[jLong]))
+
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(b, a, i, (v1, v2) =>
                 v1.asInstanceOf[jLong].compareTo(v2.asInstanceOf[jLong]))
@@ -112,11 +124,14 @@ trait SortOneOptFlat_[Tpl] extends ResolveBase { self: Model2DatomicQuery[Tpl] =
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(a, b, i, (v1, v2) =>
                 v1.asInstanceOf[jFloat].compareTo(v2.asInstanceOf[jFloat]))
+
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(b, a, i, (v1, v2) =>
                 v1.asInstanceOf[jFloat].compareTo(v2.asInstanceOf[jFloat]))
@@ -132,11 +147,14 @@ trait SortOneOptFlat_[Tpl] extends ResolveBase { self: Model2DatomicQuery[Tpl] =
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(a, b, i, (v1, v2) =>
                 v1.asInstanceOf[jDouble].compareTo(v2.asInstanceOf[jDouble]))
+
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(b, a, i, (v1, v2) =>
                 v1.asInstanceOf[jDouble].compareTo(v2.asInstanceOf[jDouble]))
@@ -152,11 +170,14 @@ trait SortOneOptFlat_[Tpl] extends ResolveBase { self: Model2DatomicQuery[Tpl] =
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(a, b, i, (v1, v2) =>
                 v1.asInstanceOf[jBoolean].compareTo(v2.asInstanceOf[jBoolean]))
+
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(b, a, i, (v1, v2) =>
                 v1.asInstanceOf[jBoolean].compareTo(v2.asInstanceOf[jBoolean]))
@@ -172,11 +193,14 @@ trait SortOneOptFlat_[Tpl] extends ResolveBase { self: Model2DatomicQuery[Tpl] =
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(a, b, i, (v1, v2) =>
                 v1.asInstanceOf[jBigInt].compareTo(v2.asInstanceOf[jBigInt]))
+
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(b, a, i, (v1, v2) =>
                 v1.asInstanceOf[jBigInt].compareTo(v2.asInstanceOf[jBigInt]))
@@ -192,11 +216,14 @@ trait SortOneOptFlat_[Tpl] extends ResolveBase { self: Model2DatomicQuery[Tpl] =
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(a, b, i, (v1, v2) =>
                 v1.asInstanceOf[jBigDecimal].compareTo(v2.asInstanceOf[jBigDecimal]))
+
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(b, a, i, (v1, v2) =>
                 v1.asInstanceOf[jBigDecimal].compareTo(v2.asInstanceOf[jBigDecimal]))
@@ -212,11 +239,14 @@ trait SortOneOptFlat_[Tpl] extends ResolveBase { self: Model2DatomicQuery[Tpl] =
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(a, b, i, (v1, v2) =>
                 v1.asInstanceOf[Date].compareTo(v2.asInstanceOf[Date]))
+
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(b, a, i, (v1, v2) =>
                 v1.asInstanceOf[Date].compareTo(v2.asInstanceOf[Date]))
@@ -232,11 +262,14 @@ trait SortOneOptFlat_[Tpl] extends ResolveBase { self: Model2DatomicQuery[Tpl] =
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(a, b, i, (v1, v2) =>
                 Duration.parse(v1.toString).compareTo(Duration.parse(v2.toString)))
+
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(b, a, i, (v1, v2) =>
                 Duration.parse(v1.toString).compareTo(Duration.parse(v2.toString)))
@@ -252,11 +285,14 @@ trait SortOneOptFlat_[Tpl] extends ResolveBase { self: Model2DatomicQuery[Tpl] =
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(a, b, i, (v1, v2) =>
                 Instant.parse(v1.toString).compareTo(Instant.parse(v2.toString)))
+
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(b, a, i, (v1, v2) =>
                 Instant.parse(v1.toString).compareTo(Instant.parse(v2.toString)))
@@ -272,11 +308,14 @@ trait SortOneOptFlat_[Tpl] extends ResolveBase { self: Model2DatomicQuery[Tpl] =
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(a, b, i, (v1, v2) =>
                 LocalDate.parse(v1.toString).compareTo(LocalDate.parse(v2.toString)))
+
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(b, a, i, (v1, v2) =>
                 LocalDate.parse(v1.toString).compareTo(LocalDate.parse(v2.toString)))
@@ -292,11 +331,14 @@ trait SortOneOptFlat_[Tpl] extends ResolveBase { self: Model2DatomicQuery[Tpl] =
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(a, b, i, (v1, v2) =>
                 LocalTime.parse(v1.toString).compareTo(LocalTime.parse(v2.toString)))
+
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(b, a, i, (v1, v2) =>
                 LocalTime.parse(v1.toString).compareTo(LocalTime.parse(v2.toString)))
@@ -312,11 +354,14 @@ trait SortOneOptFlat_[Tpl] extends ResolveBase { self: Model2DatomicQuery[Tpl] =
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(a, b, i, (v1, v2) =>
                 LocalDateTime.parse(v1.toString).compareTo(LocalDateTime.parse(v2.toString)))
+
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(b, a, i, (v1, v2) =>
                 LocalDateTime.parse(v1.toString).compareTo(LocalDateTime.parse(v2.toString)))
@@ -332,11 +377,14 @@ trait SortOneOptFlat_[Tpl] extends ResolveBase { self: Model2DatomicQuery[Tpl] =
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(a, b, i, (v1, v2) =>
                 OffsetTime.parse(v1.toString).compareTo(OffsetTime.parse(v2.toString)))
+
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(b, a, i, (v1, v2) =>
                 OffsetTime.parse(v1.toString).compareTo(OffsetTime.parse(v2.toString)))
@@ -352,11 +400,14 @@ trait SortOneOptFlat_[Tpl] extends ResolveBase { self: Model2DatomicQuery[Tpl] =
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(a, b, i, (v1, v2) =>
                 OffsetDateTime.parse(v1.toString).compareTo(OffsetDateTime.parse(v2.toString)))
+
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(b, a, i, (v1, v2) =>
                 OffsetDateTime.parse(v1.toString).compareTo(OffsetDateTime.parse(v2.toString)))
@@ -372,11 +423,14 @@ trait SortOneOptFlat_[Tpl] extends ResolveBase { self: Model2DatomicQuery[Tpl] =
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(a, b, i, (v1, v2) =>
                 ZonedDateTime.parse(v1.toString).compareTo(ZonedDateTime.parse(v2.toString)))
+
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(b, a, i, (v1, v2) =>
                 ZonedDateTime.parse(v1.toString).compareTo(ZonedDateTime.parse(v2.toString)))
@@ -392,11 +446,14 @@ trait SortOneOptFlat_[Tpl] extends ResolveBase { self: Model2DatomicQuery[Tpl] =
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(a, b, i, (v1, v2) =>
                 v1.asInstanceOf[UUID].compareTo(v2.asInstanceOf[UUID]))
+
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(b, a, i, (v1, v2) =>
                 v1.asInstanceOf[UUID].compareTo(v2.asInstanceOf[UUID]))
@@ -412,11 +469,14 @@ trait SortOneOptFlat_[Tpl] extends ResolveBase { self: Model2DatomicQuery[Tpl] =
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(a, b, i, (v1, v2) =>
                 v1.asInstanceOf[URI].compareTo(v2.asInstanceOf[URI]))
+
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(b, a, i, (v1, v2) =>
                 v1.asInstanceOf[URI].compareTo(v2.asInstanceOf[URI]))
@@ -432,11 +492,14 @@ trait SortOneOptFlat_[Tpl] extends ResolveBase { self: Model2DatomicQuery[Tpl] =
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(a, b, i, (v1, v2) =>
                 v1.asInstanceOf[jInteger].compareTo(v2.asInstanceOf[jInteger]))
+
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(b, a, i, (v1, v2) =>
                 v1.asInstanceOf[jInteger].compareTo(v2.asInstanceOf[jInteger]))
@@ -452,11 +515,14 @@ trait SortOneOptFlat_[Tpl] extends ResolveBase { self: Model2DatomicQuery[Tpl] =
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(a, b, i, (v1, v2) =>
                 v1.asInstanceOf[jInteger].compareTo(v2.asInstanceOf[jInteger]))
+
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(b, a, i, (v1, v2) =>
                 v1.asInstanceOf[jInteger].compareTo(v2.asInstanceOf[jInteger]))
@@ -472,11 +538,14 @@ trait SortOneOptFlat_[Tpl] extends ResolveBase { self: Model2DatomicQuery[Tpl] =
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(a, b, i, (v1, v2) =>
                 v1.asInstanceOf[String].compareTo(v2.asInstanceOf[String]))
+
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(b, a, i, (v1, v2) =>
                 v1.asInstanceOf[String].compareTo(v2.asInstanceOf[String]))

@@ -40,9 +40,10 @@ lazy val root = project
   .settings(publish / skip := true)
   .enablePlugins(ScalaJSPlugin)
   .aggregate(
+    boilerplate,
+
     dbBase.js,
     dbBase.jvm,
-    dbCodegen,
     dbCompliance.js,
     dbCompliance.jvm,
     dbCore.js,
@@ -87,9 +88,12 @@ lazy val dbBase = crossProject(JSPlatform, JVMPlatform)
   )
 
 // Generate internal boilerplate code
-lazy val dbCodegen = project
-  .in(file("db/codegen"))
-  .settings(name := "molecule-db-codegen")
+lazy val boilerplate = project
+  .in(file("boilerplate"))
+  .settings(
+    name := "molecule-boilerplate",
+    publish / skip := true,
+  )
 
 
 lazy val dbCore = crossProject(JSPlatform, JVMPlatform)

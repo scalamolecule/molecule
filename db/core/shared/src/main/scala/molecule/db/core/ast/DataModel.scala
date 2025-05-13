@@ -1,5 +1,4 @@
 package molecule.db.core.ast
-import java.util.BitSet as jBitSet
 
 case class DataModel(
   elements: List[Element],
