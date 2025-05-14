@@ -9,4 +9,3 @@ case class DataModel(
     copy(elements :+ attr, attrIndexes + attr.coord(1))
   }
 }
-

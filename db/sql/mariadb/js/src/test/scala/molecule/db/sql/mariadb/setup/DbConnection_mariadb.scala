@@ -1,6 +1,6 @@
 package molecule.db.sql.mariadb.setup
 
-import molecule.db.base.api.{Schema, Schema_mariadb}
+import molecule.db.core.api.{Schema, Schema_mariadb}
 import molecule.db.compliance.setup.DbConnection
 import molecule.db.core.marshalling.JdbcProxy
 import molecule.db.core.spi.Conn

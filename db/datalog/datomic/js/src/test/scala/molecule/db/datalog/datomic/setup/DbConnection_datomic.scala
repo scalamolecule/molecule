@@ -1,6 +1,6 @@
 package molecule.db.datalog.datomic.setup
 
-import molecule.db.base.api.Schema_datomic
+import molecule.db.core.api.Schema_datomic
 import molecule.db.compliance.setup.DbConnection
 import molecule.db.core.marshalling.DatomicProxy
 import molecule.db.core.spi.Conn

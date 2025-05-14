@@ -1,7 +1,7 @@
 package molecule.db.core.marshalling
 
 import java.util.UUID
-import molecule.db.base.api.*
+import molecule.db.core.api.*
 import molecule.db.base.ast.{Card, MetaEntity}
 import molecule.db.core.marshalling.dbView.DbView
 
@@ -26,10 +26,10 @@ sealed trait ConnProxy {
   val schemaData: List[String]
 
   /** Indexed flags for reserved entity names */
-  val reservedEntities: Array[Boolean] = new Array[Boolean](0)
+  val reservedEntities: IArray[Byte] = IArray.empty[Byte]
 
   /** Indexed flags for reserved attribute names */
-  val reservedAttributes: Array[Boolean] = new Array[Boolean](0)
+  val reservedAttributes: IArray[Byte] = IArray.empty[Byte]
 
   /** Internal holder of optional alternative Db view (asOf, since, widh). Used by Datomic only */
   val dbView: Option[DbView] = None
@@ -44,8 +44,8 @@ case class JdbcProxy(
   override val attrMap: Map[String, (Card, String, Seq[String])],
   override val uniqueAttrs: List[String],
   override val schemaData: List[String],
-  override val reservedEntities: Array[Boolean] = new Array[Boolean](0),
-  override val reservedAttributes: Array[Boolean] = new Array[Boolean](0)
+  override val reservedEntities: IArray[Byte] = IArray.empty[Byte],
+  override val reservedAttributes: IArray[Byte] = IArray.empty[Byte]
 ) extends ConnProxy
 
 object JdbcProxy {
@@ -84,8 +84,8 @@ case class DatomicProxy(
   override val attrMap: Map[String, (Card, String, Seq[String])],
   override val uniqueAttrs: List[String],
   override val schemaData: List[String],
-  override val reservedEntities: Array[Boolean] = new Array[Boolean](0),
-  override val reservedAttributes: Array[Boolean] = new Array[Boolean](0),
+  override val reservedEntities: IArray[Byte] = IArray.empty[Byte],
+  override val reservedAttributes: IArray[Byte] = IArray.empty[Byte],
 
 ) extends ConnProxy
 

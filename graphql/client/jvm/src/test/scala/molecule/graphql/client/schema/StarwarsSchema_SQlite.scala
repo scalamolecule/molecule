@@ -7,7 +7,7 @@
 */
 package molecule.graphql.client.schema
 
-import molecule.db.base.api.Schema
+import molecule.db.core.api.Schema
 import molecule.db.base.ast.*
 
 

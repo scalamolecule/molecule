@@ -10,7 +10,8 @@ case class MetaDomain(
   domain: String,
   maxArity: Int,
   segments: Seq[MetaSegment]
-) extends MetaModel with BaseHelpers {
+) extends MetaModel {
+  import BaseHelpers._ // import BaseHelpers methods instead of extending to avoid polluting namespace
   def render(tabs: Int = 0): String = {
     val p           = indent(tabs)
     val pad         = s"\n$p  "
@@ -71,7 +72,8 @@ case class MetaDomain(
 case class MetaSegment(
   segment: String,
   ents: Seq[MetaEntity]
-) extends MetaModel with BaseHelpers {
+) extends MetaModel {
+  import BaseHelpers._
   def render(tabs: Int): String = {
     val p           = indent(tabs)
     val pad         = s"\n$p  "
@@ -90,7 +92,8 @@ case class MetaEntity(
   backRefs: Seq[String] = Nil,
   mandatoryAttrs: Seq[String] = Nil,
   mandatoryRefs: Seq[(String, String)] = Nil
-) extends MetaModel with BaseHelpers {
+) extends MetaModel {
+  import BaseHelpers._
   def render(tabs: Int): String = {
     val maxAttr           = attrs.map(_.attr.length).max
     val maxTpe            = attrs.map(_.baseTpe.length).max
@@ -134,7 +137,8 @@ case class MetaAttribute(
   requiredAttrs: Seq[String] = Nil,
   valueAttrs: Seq[String] = Nil,
   validations: Seq[(String, String)] = Nil
-) extends MetaModel with BaseHelpers {
+) extends MetaModel {
+  import BaseHelpers._
   override def toString: String = {
     val validations1 = renderValidations(validations)
     s"""MetaAttribute("$attr", $card, "$baseTpe", ${o(ref)}, ${sq(options)}, ${o(description)}, ${o(alias)}, ${sq(requiredAttrs)}, ${sq(valueAttrs)}, $validations1)"""

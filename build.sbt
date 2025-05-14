@@ -78,23 +78,19 @@ lazy val root = project
     //    graphql.jvm,
   )
 
+// Generate internal boilerplate code
+lazy val boilerplate = project
+  .in(file("boilerplate"))
+  .settings(publish / skip := true)
+
 lazy val dbBase = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("db/base"))
   .settings(compilerArgs, doPublish,
+    name := "molecule-db-base",
     // 2.12 for sbt-molecule plugin on sbt 1.x
     crossScalaVersions := Seq(scala212, scala3),
-    name := "molecule-db-base"
   )
-
-// Generate internal boilerplate code
-lazy val boilerplate = project
-  .in(file("boilerplate"))
-  .settings(
-    name := "molecule-boilerplate",
-    publish / skip := true,
-  )
-
 
 lazy val dbCore = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
@@ -128,8 +124,8 @@ lazy val dbCompliance = crossProject(JSPlatform, JVMPlatform)
   .in(file("db/compliance"))
   .enablePlugins(MoleculePlugin)
   .settings(compilerArgs,
-    publish / skip := true,
     name := "molecule-db-compliance",
+    publish / skip := true,
     libraryDependencies ++= Seq(
       "com.zaxxer" % "HikariCP" % "6.2.1" % Test,
       "org.scalactic" %%% "scalactic" % "3.2.19" % Test, // Tolerant roundings with triple equal on js platform
@@ -296,7 +292,7 @@ lazy val dbSqlSQlite = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(dbSqlCore, dbCompliance % "test->test")
 
 
-// Tapir example backend servers
+// CLI to run Tapir example backend servers
 lazy val dbServer = project
   .in(file("db/server/cli"))
   .settings(

@@ -2,7 +2,7 @@ package molecule.db.sql.sqlite.setup
 
 import java.sql.DriverManager
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
-import molecule.db.base.api.Schema_sqlite
+import molecule.db.core.api.Schema_sqlite
 import molecule.db.compliance.setup.DbConnection
 import molecule.db.core.marshalling.JdbcProxy
 import molecule.db.core.spi.Conn

@@ -7,7 +7,7 @@
 */
 package molecule.graphql.client.schema
 
-import molecule.db.base.api.Schema
+import molecule.db.core.api.Schema
 import molecule.db.base.ast.*
 
 
@@ -52,12 +52,12 @@ trait StarwarsSchema_Mysql extends Schema {
       |""".stripMargin
 
 
-  override val sqlReserved_mysql: Option[Reserved] = Some(Reserved(
-    Array(true, false, false),
-    Array(
-      false, true, false, false,
-      false, true, false, false, false,
-      false, true, false, false, false
-    )
-  ))
+//  override val sqlReserved_mysql: Option[Reserved] = Some(Reserved(
+//    Array(true, false, false),
+//    Array(
+//      false, true, false, false,
+//      false, true, false, false, false,
+//      false, true, false, false, false
+//    )
+//  ))
 }

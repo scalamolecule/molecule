@@ -1,6 +1,6 @@
-package molecule.db.base.api
+package molecule.db.core.api
 
-import molecule.db.base.ast.{Card, MetaDomain, MetaEntity}
+import molecule.db.base.ast.*
 
 
 /** Schema transaction data interface
@@ -24,10 +24,10 @@ trait Schema {
   val schemaData: List[String]
 
   /** Indexed flags for reserved entity names */
-  val reservedEntities: Array[Boolean] = new Array[Boolean](0)
+  val reservedEntities: IArray[Byte] = IArray.empty[Byte]
 
   /** Indexed flags for reserved attribute names */
-  val reservedAttributes: Array[Boolean] = new Array[Boolean](0)
+  val reservedAttributes: IArray[Byte] = IArray.empty[Byte]
 }
 
 trait Schema_datomic extends Schema

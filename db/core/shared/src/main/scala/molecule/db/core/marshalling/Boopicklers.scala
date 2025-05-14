@@ -3,32 +3,25 @@ package molecule.db.core.marshalling
 import java.io.FileNotFoundException
 import java.net.URI
 import java.time.*
-import java.util.BitSet as jBitSet
 import java.util.Date
-import boopickle.CompositePickler
 import boopickle.Default.*
-import molecule.db.base.api.*
+import boopickle.{CompositePickler, Pickler}
 import molecule.db.base.ast.*
 import molecule.db.base.error.*
+import molecule.db.core.api.*
 import molecule.db.core.ast.*
 import molecule.db.core.util.MoleculeLogging
 
 
 object Boopicklers extends MoleculeLogging {
 
-  implicit val bitSetPickler: Pickler[jBitSet] = new Pickler[jBitSet] {
-    override def pickle(obj: jBitSet)(implicit state: PickleState): Unit = {
-      state.enc.writeByteArray(obj.toByteArray)
-    }
-    override def unpickle(implicit state: UnpickleState): jBitSet = {
-//      jBitSet.valueOf(IArray(42.toByte))
-//
-//
-//      val x = Set(42.toByte) + 3.toByte
-//      jBitSet.valueOf(Array(42.toByte))
-//      jBitSet.valueOf(Set(42.toByte).toArray)
 
-      jBitSet.valueOf(state.dec.readByteArray())
+  implicit val iArrayBytePickler: Pickler[IArray[Byte]] = new Pickler[IArray[Byte]] {
+    override def pickle(iArray: IArray[Byte])(implicit state: PickleState): Unit = {
+      state.enc.writeByteArray(IArray.genericWrapArray(iArray).toArray)
+    }
+    override def unpickle(implicit state: UnpickleState): IArray[Byte] = {
+      IArray.unsafeFromArray(state.unpickle[Array[Byte]])
     }
   }
 

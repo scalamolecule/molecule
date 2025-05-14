@@ -1,6 +1,6 @@
 package molecule.graphql.client.setup
 
-import molecule.db.base.api.Schema
+import molecule.db.core.api.Schema
 import molecule.db.base.util.BaseHelpers
 import molecule.db.core.spi.Conn
 import molecule.db.compliance.setup.{CoreTestSuite, CoreTestSuiteBase}

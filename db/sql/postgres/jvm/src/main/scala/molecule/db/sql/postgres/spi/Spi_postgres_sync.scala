@@ -3,7 +3,7 @@ package molecule.db.sql.postgres.spi
 import java.sql.DriverManager
 import molecule.db.core.ast.Element
 import molecule.db.core.util.Executor.*
-import molecule.db.base.api.Schema_postgres
+import molecule.db.core.api.Schema_postgres
 import molecule.db.core.action.{Delete, Insert, Save, Update}
 import molecule.db.core.marshalling.{ConnProxy, JdbcProxy}
 import molecule.db.core.spi.Conn
