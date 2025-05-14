@@ -85,7 +85,7 @@ trait SpiZio_graphql
 //        ZIO.fromFuture(ec =>
 //          SpiSync_graphql.save_validate(save)(conn) match {
 //            case errors if errors.isEmpty => Spi_datomic_async.save_transact(
-//              save.copy(elements = noKeywords(save.elements, Some(conn.proxy)))
+//              save.copy(elements = noKeywords(save.elements, conn.proxy))
 //            )(conn, ec)
 //            case errors                   => throw ValidationErrors(errors)
 //          }
@@ -116,7 +116,7 @@ trait SpiZio_graphql
 //        ZIO.fromFuture(ec =>
 //          SpiSync_graphql.insert_validate(insert)(conn) match {
 //            case errors if errors.isEmpty => Spi_datomic_async.insert_transact(
-//              insert.copy(elements = noKeywords(insert.elements, Some(conn.proxy)))
+//              insert.copy(elements = noKeywords(insert.elements, conn.proxy))
 //            )(conn, ec)
 //            case errors                   => throw InsertErrors(errors)
 //          }
@@ -147,7 +147,7 @@ trait SpiZio_graphql
 //        ZIO.fromFuture(ec =>
 //          SpiSync_graphql.update_validate(update)(conn) match {
 //            case errors if errors.isEmpty => Spi_datomic_async.update_transact(
-//              update.copy(elements = noKeywords(update.elements, Some(conn.proxy)))
+//              update.copy(elements = noKeywords(update.elements, conn.proxy))
 //            )(conn, ec)
 //            case errors                   => throw ValidationErrors(errors)
 //          }
@@ -177,7 +177,7 @@ trait SpiZio_graphql
 //      txReport <- mapError(
 //        ZIO.fromFuture(ec =>
 //          Spi_datomic_async.delete_transact(
-//            delete.copy(elements = noKeywords(delete.elements, Some(conn.proxy)))
+//            delete.copy(elements = noKeywords(delete.elements, conn.proxy))
 //          )(conn, ec)
 //        )
 //      )

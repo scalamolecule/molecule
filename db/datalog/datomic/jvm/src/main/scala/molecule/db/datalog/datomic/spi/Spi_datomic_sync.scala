@@ -259,7 +259,7 @@ trait Spi_datomic_sync
     q: Query[Tpl], conn0: Conn
   ): (jStream[jList[AnyRef]], jList[AnyRef] => Any) = {
     val conn       = conn0.asInstanceOf[DatomicConn_JVM]
-    val queryClean = q.copy(elements = noKeywords(q.elements, Some(conn.proxy)))
+    val queryClean = q.copy(elements = keywordsSuffixed(q.elements, conn.proxy))
     val m2q        = new Model2DatomicQuery[Tpl](q.elements)
     if (m2q.isNested || m2q.isOptNested || m2q.nestedOptRef) {
       throw ModelError("Nested data not allowed for streaming.")

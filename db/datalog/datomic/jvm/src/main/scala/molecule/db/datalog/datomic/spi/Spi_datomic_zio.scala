@@ -99,7 +99,7 @@ trait Spi_datomic_zio
         ZIO.fromFuture(ec =>
           Spi_datomic_sync.save_validate(save)(conn) match {
             case errors if errors.isEmpty => Spi_datomic_async.save_transact(
-              save.copy(elements = noKeywords(save.elements, Some(conn.proxy)))
+              save.copy(elements = keywordsSuffixed(save.elements, conn.proxy))
             )(conn, ec)
             case errors                   => throw ValidationErrors(errors)
           }
@@ -127,7 +127,7 @@ trait Spi_datomic_zio
         ZIO.fromFuture(ec =>
           Spi_datomic_sync.insert_validate(insert)(conn) match {
             case errors if errors.isEmpty => Spi_datomic_async.insert_transact(
-              insert.copy(elements = noKeywords(insert.elements, Some(conn.proxy)))
+              insert.copy(elements = keywordsSuffixed(insert.elements, conn.proxy))
             )(conn, ec)
             case errors                   => throw InsertErrors(errors)
           }
@@ -155,7 +155,7 @@ trait Spi_datomic_zio
         ZIO.fromFuture(ec =>
           Spi_datomic_sync.update_validate(update)(conn) match {
             case errors if errors.isEmpty => Spi_datomic_async.update_transact(
-              update.copy(elements = noKeywords(update.elements, Some(conn.proxy)))
+              update.copy(elements = keywordsSuffixed(update.elements, conn.proxy))
             )(conn, ec)
             case errors                   => throw ValidationErrors(errors)
           }
@@ -182,7 +182,7 @@ trait Spi_datomic_zio
       txReport <- mapError(
         ZIO.fromFuture(ec =>
           Spi_datomic_async.delete_transact(
-            delete.copy(elements = noKeywords(delete.elements, Some(conn.proxy)))
+            delete.copy(elements = keywordsSuffixed(delete.elements, conn.proxy))
           )(conn, ec)
         )
       )

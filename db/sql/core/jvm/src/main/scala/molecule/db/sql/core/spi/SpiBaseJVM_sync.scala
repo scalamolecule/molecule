@@ -43,7 +43,7 @@ trait SpiBaseJVM_sync
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
     if (q0.doInspect)
       query_inspect(q0)
-    val queryClean = q0.copy(elements = noKeywords(q0.elements, Some(conn.proxy)))
+    val queryClean = q0.copy(elements = keywordsSuffixed(q0.elements, conn.proxy))
     val m2q        = getModel2SqlQuery(queryClean.elements)
     SqlQueryResolveOffset[Tpl](queryClean.elements, queryClean.optLimit, None, m2q)
       .getListFromOffset_sync(conn)._1
@@ -59,7 +59,7 @@ trait SpiBaseJVM_sync
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
     if (query.doInspect)
       queryOffset_inspect(query)
-    val queryClean = query.copy(elements = noKeywords(query.elements, Some(conn.proxy)))
+    val queryClean = query.copy(elements = keywordsSuffixed(query.elements, conn.proxy))
     val m2q        = getModel2SqlQuery(queryClean.elements)
     SqlQueryResolveOffset[Tpl](queryClean.elements, queryClean.optLimit, Some(queryClean.offset), m2q)
       .getListFromOffset_sync(conn)
@@ -74,7 +74,7 @@ trait SpiBaseJVM_sync
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
     if (query.doInspect)
       queryCursor_inspect(query)
-    val queryClean = query.copy(elements = noKeywords(query.elements, Some(conn.proxy)))
+    val queryClean = query.copy(elements = keywordsSuffixed(query.elements, conn.proxy))
     val m2q        = getModel2SqlQuery(queryClean.elements)
     SqlQueryResolveCursor[Tpl](queryClean.elements, queryClean.optLimit, Some(queryClean.cursor), m2q)
       .getListFromCursor_sync(conn)
@@ -93,7 +93,7 @@ trait SpiBaseJVM_sync
     proxy: ConnProxy
   ): Unit = {
     tryInspect("query", elements) {
-      val elementsClean = noKeywords(elements, Some(proxy))
+      val elementsClean = keywordsSuffixed(elements, proxy)
       val query         = getModel2SqlQuery(elementsClean)
         .getSqlQuery(Nil, optLimit, optOffset, Some(proxy))
       printRaw(label, elements, query)
@@ -124,7 +124,7 @@ trait SpiBaseJVM_sync
   override def query_subscribe[Tpl](query: Query[Tpl], callback: List[Tpl] => Unit)
                                    (implicit conn0: Conn): Unit = {
     val conn       = conn0.asInstanceOf[JdbcConn_JVM]
-    val queryClean = query.copy(elements = noKeywords(query.elements, Some(conn.proxy)))
+    val queryClean = query.copy(elements = keywordsSuffixed(query.elements, conn.proxy))
     val m2q        = getModel2SqlQuery(queryClean.elements)
     SqlQueryResolveOffset[Tpl](queryClean.elements, queryClean.optLimit, None, m2q)
       .subscribe(conn, callback, (elements: List[Element]) => getModel2SqlQuery(elements))
@@ -141,7 +141,7 @@ trait SpiBaseJVM_sync
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
     if (save.doInspect)
       save_inspect(save)
-    val saveClean = save.copy(elements = noKeywords(save.elements, Some(conn.proxy)))
+    val saveClean = save.copy(elements = keywordsSuffixed(save.elements, conn.proxy))
     val errors    = save_validate(save)
     if (errors.isEmpty) {
       val txReport = conn.transact_sync(save_getAction(saveClean, conn))
@@ -155,7 +155,7 @@ trait SpiBaseJVM_sync
   override def save_inspect(save: Save)(implicit conn0: Conn): Unit = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
     tryInspect("save", save.elements) {
-      val saveClean = save.copy(elements = noKeywords(save.elements, Some(conn.proxy)))
+      val saveClean = save.copy(elements = keywordsSuffixed(save.elements, conn.proxy))
       printInspectTx("SAVE", save.elements, save_getAction(saveClean, conn))
     }
   }
@@ -180,7 +180,7 @@ trait SpiBaseJVM_sync
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
     if (insert.doInspect)
       insert_inspect(insert)
-    val insertClean = insert.copy(elements = noKeywords(insert.elements, Some(conn.proxy)))
+    val insertClean = insert.copy(elements = keywordsSuffixed(insert.elements, conn.proxy))
     val errors      = insert_validate(insert) // validate original elements against meta model
     if (errors.isEmpty) {
       if (insertClean.tpls.isEmpty) {
@@ -197,7 +197,7 @@ trait SpiBaseJVM_sync
   override def insert_inspect(insert: Insert)(implicit conn: Conn): Unit = {
     tryInspect("insert", insert.elements) {
       val jdbcConn    = conn.asInstanceOf[JdbcConn_JVM]
-      val insertClean = insert.copy(elements = noKeywords(insert.elements, Some(conn.proxy)))
+      val insertClean = insert.copy(elements = keywordsSuffixed(insert.elements, conn.proxy))
       printInspectTx("INSERT", insert.elements, insert_getAction(insertClean, jdbcConn), insert.tpls)
     }
   }
@@ -220,7 +220,7 @@ trait SpiBaseJVM_sync
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
     if (update.doInspect)
       update_inspect(update)
-    val updateClean = update.copy(elements = noKeywords(update.elements, Some(conn.proxy)))
+    val updateClean = update.copy(elements = keywordsSuffixed(update.elements, conn.proxy))
     val errors      = update_validate(update) // validate original elements against meta model
     if (errors.isEmpty) {
       val action   = update_getAction(updateClean, conn)
@@ -236,7 +236,7 @@ trait SpiBaseJVM_sync
     val conn   = conn0.asInstanceOf[JdbcConn_JVM]
     val action = if (update.isUpsert) "UPSERT" else "UPDATE"
     tryInspect(action, update.elements) {
-      val updateClean = update.copy(elements = noKeywords(update.elements, Some(conn.proxy)))
+      val updateClean = update.copy(elements = keywordsSuffixed(update.elements, conn.proxy))
       printInspectTx(action, update.elements, update_getAction(updateClean, conn))
     }
   }
@@ -275,7 +275,7 @@ trait SpiBaseJVM_sync
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
     if (delete.doInspect)
       delete_inspect(delete)
-    val deleteClean = delete.copy(elements = noKeywords(delete.elements, Some(conn.proxy)))
+    val deleteClean = delete.copy(elements = keywordsSuffixed(delete.elements, conn.proxy))
     val action      = delete_getAction(deleteClean, conn)
     val txReport    = conn.transact_sync(action)
     await(conn.callback(delete.elements, true))
@@ -285,7 +285,7 @@ trait SpiBaseJVM_sync
   override def delete_inspect(delete: Delete)(implicit conn0: Conn): Unit = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
     tryInspect("delete", delete.elements) {
-      val deleteClean = delete.copy(elements = noKeywords(delete.elements, Some(conn.proxy)))
+      val deleteClean = delete.copy(elements = keywordsSuffixed(delete.elements, conn.proxy))
       printInspectTx("DELETE", delete.elements, delete_getAction(deleteClean, conn))
     }
   }
@@ -384,7 +384,7 @@ trait SpiBaseJVM_sync
 
   def getResultSetAndRowResolver[Tpl](q0: Query[Tpl], conn0: Conn): (RS, RS => Any) = {
     val conn         = conn0.asInstanceOf[JdbcConn_JVM]
-    val queryClean   = q0.copy(elements = noKeywords(q0.elements, Some(conn.proxy)))
+    val queryClean   = q0.copy(elements = keywordsSuffixed(q0.elements, conn.proxy))
     val m2q          = getModel2SqlQuery(queryClean.elements)
     val castStrategy = m2q.castStrategy match {
       case c: CastTuple     => c

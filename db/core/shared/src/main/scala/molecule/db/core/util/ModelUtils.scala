@@ -78,8 +78,8 @@ trait ModelUtils {
   }
 
 
-  protected def noKeywords(elements: List[Element], optProxy: Option[ConnProxy]): List[Element] = {
-    if (optProxy.isEmpty || optProxy.get.reservedEntities.isEmpty)
+  protected def keywordsSuffixed(elements: List[Element], proxy: ConnProxy): List[Element] = {
+    if (proxy.reservedEntities.isEmpty)
       return elements
 
     @tailrec
@@ -101,20 +101,20 @@ trait ModelUtils {
 
     def prepareAttr(a: Attr): Attr = {
       a.filterAttr.fold {
-        resolveReservedNames(a, optProxy.get)
+        resolveReservedNames(a, proxy)
       } { case (dir, filterPath, filterAttr0) =>
-        val filterAttr = resolveReservedNames(filterAttr0, optProxy.get)
-        resolveReservedNames(a, optProxy.get, Some((dir, filterPath, filterAttr)))
+        val filterAttr = resolveReservedNames(filterAttr0, proxy)
+        resolveReservedNames(a, proxy, Some((dir, filterPath, filterAttr)))
       }
     }
 
     def prepareRef(ref: Ref): Ref = {
-      val (ent, refAttr, refEntity) = nonReservedRef(ref, optProxy.get)
+      val (ent, refAttr, refEntity) = nonReservedRef(ref, proxy)
       ref.copy(ent = ent, refAttr = refAttr, ref = refEntity)
     }
 
     def prepareBackRef(backRef: BackRef): BackRef = {
-      val (prevEnt, curEnt) = nonReservedBackRef(backRef, optProxy.get)
+      val (prevEnt, curEnt) = nonReservedBackRef(backRef, proxy)
       backRef.copy(prev = prevEnt, cur = curEnt)
     }
 

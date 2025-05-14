@@ -87,7 +87,7 @@ trait SpiAsyncBase extends SpiAsync with Renderer with FutureUtils {
 
   override def save_transact(save: Save)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
     //    val conn = conn0.asInstanceOf[JdbcConn_JS]
-    //    val save = save0.copy(elements = noKeywords(save0.elements, Some(conn.proxy)))
+    //    val save = save0.copy(elements = noKeywords(save0.elements, conn.proxy))
     //    for {
     //      _ <- if (save.doInspect) save_inspect(save) else Future.unit
     //      errors <- save_validate(save0) // validate original elements against meta model
@@ -118,7 +118,7 @@ trait SpiAsyncBase extends SpiAsync with Renderer with FutureUtils {
 
   override def insert_transact(insert: Insert)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
     //    val conn   = conn0.asInstanceOf[JdbcConn_JS]
-    //    val insert = insert0.copy(elements = noKeywords(insert0.elements, Some(conn.proxy)))
+    //    val insert = insert0.copy(elements = noKeywords(insert0.elements, conn.proxy))
     //    for {
     //      _ <- if (insert.doInspect) insert_inspect(insert) else Future.unit
     //      errors <- insert_validate(insert0) // validate original elements against meta model
@@ -151,7 +151,7 @@ trait SpiAsyncBase extends SpiAsync with Renderer with FutureUtils {
 
   override def update_transact(update: Update)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
     //    val conn   = conn0.asInstanceOf[JdbcConn_JS]
-    //    val update = update0.copy(elements = noKeywords(update0.elements, Some(conn.proxy)))
+    //    val update = update0.copy(elements = noKeywords(update0.elements, conn.proxy))
     //    for {
     //      _ <- if (update.doInspect) update_inspect(update) else Future.unit
     //      errors <- update_validate(update0) // validate original elements against meta model
@@ -185,7 +185,7 @@ trait SpiAsyncBase extends SpiAsync with Renderer with FutureUtils {
 
   override def delete_transact(delete: Delete)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
     //    val conn   = conn0.asInstanceOf[JdbcConn_JS]
-    //    val delete = delete0.copy(elements = noKeywords(delete0.elements, Some(conn.proxy)))
+    //    val delete = delete0.copy(elements = noKeywords(delete0.elements, conn.proxy))
     //    conn.rpc.delete(conn.proxy, delete.elements).future.map { txReport =>
     //      conn.callback(delete.elements, true)
     //      txReport
