@@ -3,7 +3,6 @@ package molecule.db.sql.sqlite
 import cats.effect.unsafe.implicits.global as ioRuntime
 import molecule.db.compliance.setup.{Test, TestUtils}
 import molecule.db.core.util.Executor.*
-import molecule.db.sql
 import molecule.db.sql.sqlite.async.*
 import molecule.db.sql.sqlite.setup.DbProviders_sqlite
 

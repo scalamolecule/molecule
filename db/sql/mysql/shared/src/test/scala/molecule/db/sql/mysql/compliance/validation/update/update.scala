@@ -1,8 +1,7 @@
 package molecule.db.sql.mysql.compliance.validation.update
 
 import molecule.db.compliance.setup.Test
-import molecule.db.compliance.test.validation.update.{TypesOne, TypesOneOpt, TypesSeq, TypesSeqOpt, TypesSet, TypesSetOpt}
-import molecule.db.sql
+import molecule.db.compliance.test.validation.update.*
 import molecule.db.sql.mysql.setup.Api_mysql_async
 
 class TypesOneTest extends Test {

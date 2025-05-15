@@ -1,9 +1,9 @@
 package molecule.db.datalog.core.query
 
 import molecule.db.base.error.ModelError
+import molecule.db.core.ast.*
 import molecule.db.core.query.QueryExpr
 import scala.reflect.ClassTag
-import molecule.db.core.ast._
 
 trait QueryExprOne[Tpl]
   extends SortOneSpecial[Tpl]

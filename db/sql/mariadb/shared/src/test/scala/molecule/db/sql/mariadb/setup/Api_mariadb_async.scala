@@ -1,7 +1,6 @@
 package molecule.db.sql.mariadb.setup
 
 import molecule.db.core.api.{Api_async, Api_async_transact}
-import molecule.db.sql
 import molecule.db.sql.mariadb.spi.Spi_mariadb_async
 
 object Api_mariadb_async

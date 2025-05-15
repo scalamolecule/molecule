@@ -14,7 +14,8 @@ trait ModelTransformations_ {
 
   private def unexpected(element: Element) = throw ModelError("Unexpected element: " + element)
 
-  protected def toInt(es: List[Element], kw: Kw): List[Element] = {
+  protected def toInt(dataModel: DataModel, kw: Kw): DataModel = {
+    val es   = dataModel.elements
     val last = es.last match {
       case a: AttrOneMan => AttrOneManInt(a.ent, a.attr, Fn(kw.toString), ref = a.ref, coord = a.coord)
       case a: AttrSetMan => a match {
@@ -32,10 +33,11 @@ trait ModelTransformations_ {
       case a: AttrMapMan => AttrMapManInt(a.ent, a.attr, Fn(kw.toString), ref = a.ref, sort = a.sort, coord = a.coord)
       case a             => unexpected(a)
     }
-    es.init :+ last
+    dataModel.copy(elements = es.init :+ last)
   }
 
-  protected def toDouble(es: List[Element], kw: Kw): List[Element] = {
+  protected def toDouble(dataModel: DataModel, kw: Kw): DataModel = {
+    val es   = dataModel.elements
     val last = es.last match {
       case a: AttrOneMan => AttrOneManDouble(a.ent, a.attr, Fn(kw.toString), ref = a.ref, coord = a.coord)
       case a: AttrSetMan => AttrSetManDouble(a.ent, a.attr, Fn(kw.toString), ref = a.ref, coord = a.coord)
@@ -43,10 +45,11 @@ trait ModelTransformations_ {
       case a: AttrMapMan => AttrMapManDouble(a.ent, a.attr, Fn(kw.toString), ref = a.ref, coord = a.coord)
       case a             => unexpected(a)
     }
-    es.init :+ last
+    dataModel.copy(elements = es.init :+ last)
   }
 
-  protected def asIs(es: List[Element], kw: Kw, n: Option[Int] = None): List[Element] = {
+  protected def asIs(dataModel: DataModel, kw: Kw, n: Option[Int] = None): DataModel = {
+    val es   = dataModel.elements
     val last = es.last match {
       case a: AttrOneMan => a match {
         case a: AttrOneManID             => a.copy(op = Fn(kw.toString, n))
@@ -150,10 +153,11 @@ trait ModelTransformations_ {
       }
       case a             => unexpected(a)
     }
-    es.init :+ last
+    dataModel.copy(elements = es.init :+ last)
   }
 
-  protected def addOne[T](es: List[Element], op: Op, vs: Seq[T]): List[Element] = {
+  protected def addOne[T](dataModel: DataModel, op: Op, vs: Seq[T]): DataModel = {
+    val es   = dataModel.elements
     val last = es.last match {
       case a: AttrOneMan => a match {
         case a: AttrOneManID =>
@@ -527,10 +531,11 @@ trait ModelTransformations_ {
       }
       case a             => unexpected(a)
     }
-    es.init :+ last
+    dataModel.copy(elements = es.init :+ last)
   }
 
-  protected def addOneOpt[T](es: List[Element], op: Op, v: Option[T]): List[Element] = {
+  protected def addOneOpt[T](dataModel: DataModel, op: Op, v: Option[T]): DataModel = {
+    val es   = dataModel.elements
     val last = es.last match {
       case a: AttrOneOpt => a match {
         case a: AttrOneOptID =>
@@ -696,10 +701,11 @@ trait ModelTransformations_ {
       }
       case a             => unexpected(a)
     }
-    es.init :+ last
+    dataModel.copy(elements = es.init :+ last)
   }
 
-  protected def addSet[T](es: List[Element], op: Op, vs: Set[T]): List[Element] = {
+  protected def addSet[T](dataModel: DataModel, op: Op, vs: Set[T]): DataModel = {
+    val es   = dataModel.elements
     val last = es.last match {
       case a: AttrSetMan => a match {
         case a: AttrSetManID =>
@@ -1073,10 +1079,11 @@ trait ModelTransformations_ {
       }
       case a             => unexpected(a)
     }
-    es.init :+ last
+    dataModel.copy(elements = es.init :+ last)
   }
 
-  protected def addSetOpt[T](es: List[Element], op: Op, vs: Option[Set[T]]): List[Element] = {
+  protected def addSetOpt[T](dataModel: DataModel, op: Op, vs: Option[Set[T]]): DataModel = {
+    val es   = dataModel.elements
     val last = es.last match {
       case a: AttrSetOpt => a match {
         case a: AttrSetOptID =>
@@ -1265,10 +1272,11 @@ trait ModelTransformations_ {
       }
       case a             => unexpected(a)
     }
-    es.init :+ last
+    dataModel.copy(elements = es.init :+ last)
   }
 
-  protected def addSeq[T](es: List[Element], op: Op, vs: Seq[T]): List[Element] = {
+  protected def addSeq[T](dataModel: DataModel, op: Op, vs: Seq[T]): DataModel = {
+    val es   = dataModel.elements
     val last = es.last match {
       case a: AttrSeqMan => a match {
         case a: AttrSeqManID =>
@@ -1630,10 +1638,11 @@ trait ModelTransformations_ {
       }
       case a             => unexpected(a)
     }
-    es.init :+ last
+    dataModel.copy(elements = es.init :+ last)
   }
 
-  protected def addSeqOpt[T](es: List[Element], op: Op, vs: Option[Seq[T]]): List[Element] = {
+  protected def addSeqOpt[T](dataModel: DataModel, op: Op, vs: Option[Seq[T]]): DataModel = {
+    val es   = dataModel.elements
     val last = es.last match {
       case a: AttrSeqOpt => a match {
         case a: AttrSeqOptID =>
@@ -1816,25 +1825,30 @@ trait ModelTransformations_ {
       }
       case a             => unexpected(a)
     }
-    es.init :+ last
+    dataModel.copy(elements = es.init :+ last)
   }
 
-  protected def addBAr[T](es: List[Element], op: Op, ba: Array[T]): List[Element] = {
-    es.init :+ (es.last match {
+  protected def addBAr[T](dataModel: DataModel, op: Op, ba: Array[T]): DataModel = {
+    val es          = dataModel.elements
+    val newElements = es.init :+ (es.last match {
       case a: AttrSeqManByte => a.copy(op = op, vs = ba.asInstanceOf[Array[Byte]])
       case a: AttrSeqTacByte => a.copy(op = op, vs = ba.asInstanceOf[Array[Byte]])
       case e                 => throw ModelError("Unexpected Element for adding byte array: " + e)
     })
+    dataModel.copy(elements = newElements)
   }
 
-  protected def addBArOpt[T](es: List[Element], op: Op, optBA: Option[Array[T]]): List[Element] = {
-    es.init :+ (es.last match {
+  protected def addBArOpt[T](dataModel: DataModel, op: Op, optBA: Option[Array[T]]): DataModel = {
+    val es = dataModel.elements
+    val newElements = es.init :+ (es.last match {
       case a: AttrSeqOptByte => a.copy(op = op, vs = optBA.asInstanceOf[Option[Array[Byte]]])
       case e                 => throw ModelError("Unexpected Element for adding byte array: " + e)
     })
+    dataModel.copy(elements = newElements)
   }
 
-  protected def addMap[T](es: List[Element], op: Op, vs: Map[String, T]): List[Element] = {
+  protected def addMap[T](dataModel: DataModel, op: Op, vs: Map[String, T]): DataModel = {
+    val es   = dataModel.elements
     val last = es.last match {
       case a: AttrMapMan => a match {
         case a: AttrMapManID =>
@@ -2208,10 +2222,11 @@ trait ModelTransformations_ {
       }
       case a             => unexpected(a)
     }
-    es.init :+ last
+    dataModel.copy(elements = es.init :+ last)
   }
 
-  protected def addMapKs(es: List[Element], op: Op, ks: Seq[String]): List[Element] = {
+  protected def addMapKs(dataModel: DataModel, op: Op, ks: Seq[String]): DataModel = {
+    val es   = dataModel.elements
     val last = es.last match {
       case a: AttrMapMan => a match {
         case a: AttrMapManID             => a.copy(op = op, keys = ks)
@@ -2290,10 +2305,11 @@ trait ModelTransformations_ {
       }
       case a             => unexpected(a)
     }
-    es.init :+ last
+    dataModel.copy(elements = es.init :+ last)
   }
 
-  protected def addMapVs[T](es: List[Element], op: Op, vs: Seq[T]): List[Element] = {
+  protected def addMapVs[T](dataModel: DataModel, op: Op, vs: Seq[T]): DataModel = {
+    val es   = dataModel.elements
     val last = es.last match {
       case a: AttrMapMan => a match {
         case a: AttrMapManID             => a.copy(op = op, values = vs.asInstanceOf[Seq[Long]])
@@ -2347,10 +2363,11 @@ trait ModelTransformations_ {
       }
       case a             => unexpected(a)
     }
-    es.init :+ last
+    dataModel.copy(elements = es.init :+ last)
   }
 
-  protected def addMapOpt[T](es: List[Element], op: Op, vs: Option[Map[String, T]]): List[Element] = {
+  protected def addMapOpt[T](dataModel: DataModel, op: Op, vs: Option[Map[String, T]]): DataModel = {
+    val es   = dataModel.elements
     val last = es.last match {
       case a: AttrMapOpt => a match {
         case a: AttrMapOptID =>
@@ -2539,11 +2556,12 @@ trait ModelTransformations_ {
       }
       case a             => unexpected(a)
     }
-    es.init :+ last
+    dataModel.copy(elements = es.init :+ last)
   }
 
-  protected def addSort(es: List[Element], sort: String): List[Element] = {
-    es.size match {
+  protected def addSort(dataModel: DataModel, sort: String): DataModel = {
+    val es             = dataModel.elements
+    val sortedElements = es.size match {
       case 1 =>
         List(setSort(es.last, sort))
       case 2 =>
@@ -2561,6 +2579,7 @@ trait ModelTransformations_ {
         }
         es.dropRight(2) ++ sorted
     }
+    dataModel.copy(elements = sortedElements)
   }
 
   private def setSort(e: Element, sort: String): Element = {
@@ -2726,20 +2745,21 @@ trait ModelTransformations_ {
   private def resolvePath(es: List[Element], path: List[String]): List[String] = {
     es match {
       case e :: tail => e match {
-        case r: Ref  =>
+        case r: Ref    =>
           val p = if (path.isEmpty) List(r.ent, r.refAttr, r.ref) else List(r.refAttr, r.ref)
           resolvePath(tail, path ++ p)
-        case r: OptRef  =>
+        case r: OptRef =>
           ???
-        case a: Attr => resolvePath(tail, if (path.isEmpty) List(a.ent) else path)
-        case other   => throw ModelError("Invalid element in filter attribute path: " + other)
+        case a: Attr   => resolvePath(tail, if (path.isEmpty) List(a.ent) else path)
+        case other     => throw ModelError("Invalid element in filter attribute path: " + other)
       }
       case Nil       => path
     }
   }
 
-  protected def filterAttr(es: List[Element], op: Op, filterAttrMolecule: Molecule): List[Element] = {
-    val filterAttr0 = filterAttrMolecule.elements.last.asInstanceOf[Attr]
+  protected def filterAttr(dataModel: DataModel, op: Op, filterAttrMolecule: Molecule): DataModel = {
+    val es          = dataModel.elements
+    val filterAttr0 = filterAttrMolecule.dataModel.elements.last.asInstanceOf[Attr]
     val attrs       = es.last match {
       case a: Attr =>
         val (tacitFilterAttr, adjacent) = if (a.ent == filterAttr0.ent) {
@@ -2856,7 +2876,7 @@ trait ModelTransformations_ {
           (tacitAttr, List(filterAttr0))
         } else (filterAttr0, Nil)
 
-        val filterPath         = resolvePath(filterAttrMolecule.elements, Nil)
+        val filterPath         = resolvePath(filterAttrMolecule.dataModel.elements, Nil)
         val attrWithFilterAttr = a match {
           case a: AttrOne => a match {
             case a: AttrOneMan => a match {
@@ -3078,7 +3098,7 @@ trait ModelTransformations_ {
         attrWithFilterAttr +: adjacent
       case e       => unexpected(e)
     }
-    es.init ++ attrs
+    dataModel.copy(elements = es.init ++ attrs)
   }
 
   protected def reverseTopLevelSorting(es: List[Element]): List[Element] = {
@@ -3142,229 +3162,6 @@ trait ModelTransformations_ {
   private def reverseSort(sort: String): String = sort.head match {
     case 'a' => "d" + sort.last
     case 'd' => "a" + sort.last
-  }
-
-  protected def cleanUpdateElements(elements: List[Element]): List[Element] = {
-    elements.map {
-      case a: Attr => a match {
-        case a: AttrOne => a match {
-          case a: AttrOneTac => a
-          case a: AttrOneMan => a match {
-            case a: AttrOneManID             => a.copy(op = V)
-            case a: AttrOneManString         => a.copy(op = V)
-            case a: AttrOneManInt            => a.copy(op = V)
-            case a: AttrOneManLong           => a.copy(op = V)
-            case a: AttrOneManFloat          => a.copy(op = V)
-            case a: AttrOneManDouble         => a.copy(op = V)
-            case a: AttrOneManBoolean        => a.copy(op = V)
-            case a: AttrOneManBigInt         => a.copy(op = V)
-            case a: AttrOneManBigDecimal     => a.copy(op = V)
-            case a: AttrOneManDate           => a.copy(op = V)
-            case a: AttrOneManDuration       => a.copy(op = V)
-            case a: AttrOneManInstant        => a.copy(op = V)
-            case a: AttrOneManLocalDate      => a.copy(op = V)
-            case a: AttrOneManLocalTime      => a.copy(op = V)
-            case a: AttrOneManLocalDateTime  => a.copy(op = V)
-            case a: AttrOneManOffsetTime     => a.copy(op = V)
-            case a: AttrOneManOffsetDateTime => a.copy(op = V)
-            case a: AttrOneManZonedDateTime  => a.copy(op = V)
-            case a: AttrOneManUUID           => a.copy(op = V)
-            case a: AttrOneManURI            => a.copy(op = V)
-            case a: AttrOneManByte           => a.copy(op = V)
-            case a: AttrOneManShort          => a.copy(op = V)
-            case a: AttrOneManChar           => a.copy(op = V)
-          }
-          case a: AttrOneOpt => a match {
-            case a: AttrOneOptID             => a.copy(op = V)
-            case a: AttrOneOptString         => a.copy(op = V)
-            case a: AttrOneOptInt            => a.copy(op = V)
-            case a: AttrOneOptLong           => a.copy(op = V)
-            case a: AttrOneOptFloat          => a.copy(op = V)
-            case a: AttrOneOptDouble         => a.copy(op = V)
-            case a: AttrOneOptBoolean        => a.copy(op = V)
-            case a: AttrOneOptBigInt         => a.copy(op = V)
-            case a: AttrOneOptBigDecimal     => a.copy(op = V)
-            case a: AttrOneOptDate           => a.copy(op = V)
-            case a: AttrOneOptDuration       => a.copy(op = V)
-            case a: AttrOneOptInstant        => a.copy(op = V)
-            case a: AttrOneOptLocalDate      => a.copy(op = V)
-            case a: AttrOneOptLocalTime      => a.copy(op = V)
-            case a: AttrOneOptLocalDateTime  => a.copy(op = V)
-            case a: AttrOneOptOffsetTime     => a.copy(op = V)
-            case a: AttrOneOptOffsetDateTime => a.copy(op = V)
-            case a: AttrOneOptZonedDateTime  => a.copy(op = V)
-            case a: AttrOneOptUUID           => a.copy(op = V)
-            case a: AttrOneOptURI            => a.copy(op = V)
-            case a: AttrOneOptByte           => a.copy(op = V)
-            case a: AttrOneOptShort          => a.copy(op = V)
-            case a: AttrOneOptChar           => a.copy(op = V)
-          }
-        }
-
-        case a: AttrSet => a match {
-          case a: AttrSetTac => a
-          case a: AttrSetMan => a match {
-            case a: AttrSetManID             => a.copy(op = V)
-            case a: AttrSetManString         => a.copy(op = V)
-            case a: AttrSetManInt            => a.copy(op = V)
-            case a: AttrSetManLong           => a.copy(op = V)
-            case a: AttrSetManFloat          => a.copy(op = V)
-            case a: AttrSetManDouble         => a.copy(op = V)
-            case a: AttrSetManBoolean        => a.copy(op = V)
-            case a: AttrSetManBigInt         => a.copy(op = V)
-            case a: AttrSetManBigDecimal     => a.copy(op = V)
-            case a: AttrSetManDate           => a.copy(op = V)
-            case a: AttrSetManDuration       => a.copy(op = V)
-            case a: AttrSetManInstant        => a.copy(op = V)
-            case a: AttrSetManLocalDate      => a.copy(op = V)
-            case a: AttrSetManLocalTime      => a.copy(op = V)
-            case a: AttrSetManLocalDateTime  => a.copy(op = V)
-            case a: AttrSetManOffsetTime     => a.copy(op = V)
-            case a: AttrSetManOffsetDateTime => a.copy(op = V)
-            case a: AttrSetManZonedDateTime  => a.copy(op = V)
-            case a: AttrSetManUUID           => a.copy(op = V)
-            case a: AttrSetManURI            => a.copy(op = V)
-            case a: AttrSetManByte           => a.copy(op = V)
-            case a: AttrSetManShort          => a.copy(op = V)
-            case a: AttrSetManChar           => a.copy(op = V)
-          }
-          case a: AttrSetOpt => a match {
-            case a: AttrSetOptID             => a.copy(op = V)
-            case a: AttrSetOptString         => a.copy(op = V)
-            case a: AttrSetOptInt            => a.copy(op = V)
-            case a: AttrSetOptLong           => a.copy(op = V)
-            case a: AttrSetOptFloat          => a.copy(op = V)
-            case a: AttrSetOptDouble         => a.copy(op = V)
-            case a: AttrSetOptBoolean        => a.copy(op = V)
-            case a: AttrSetOptBigInt         => a.copy(op = V)
-            case a: AttrSetOptBigDecimal     => a.copy(op = V)
-            case a: AttrSetOptDate           => a.copy(op = V)
-            case a: AttrSetOptDuration       => a.copy(op = V)
-            case a: AttrSetOptInstant        => a.copy(op = V)
-            case a: AttrSetOptLocalDate      => a.copy(op = V)
-            case a: AttrSetOptLocalTime      => a.copy(op = V)
-            case a: AttrSetOptLocalDateTime  => a.copy(op = V)
-            case a: AttrSetOptOffsetTime     => a.copy(op = V)
-            case a: AttrSetOptOffsetDateTime => a.copy(op = V)
-            case a: AttrSetOptZonedDateTime  => a.copy(op = V)
-            case a: AttrSetOptUUID           => a.copy(op = V)
-            case a: AttrSetOptURI            => a.copy(op = V)
-            case a: AttrSetOptByte           => a.copy(op = V)
-            case a: AttrSetOptShort          => a.copy(op = V)
-            case a: AttrSetOptChar           => a.copy(op = V)
-          }
-        }
-
-        case a: AttrSeq => a match {
-          case a: AttrSeqTac => a
-          case a: AttrSeqMan => a match {
-            case a: AttrSeqManID             => a.copy(op = V)
-            case a: AttrSeqManString         => a.copy(op = V)
-            case a: AttrSeqManInt            => a.copy(op = V)
-            case a: AttrSeqManLong           => a.copy(op = V)
-            case a: AttrSeqManFloat          => a.copy(op = V)
-            case a: AttrSeqManDouble         => a.copy(op = V)
-            case a: AttrSeqManBoolean        => a.copy(op = V)
-            case a: AttrSeqManBigInt         => a.copy(op = V)
-            case a: AttrSeqManBigDecimal     => a.copy(op = V)
-            case a: AttrSeqManDate           => a.copy(op = V)
-            case a: AttrSeqManDuration       => a.copy(op = V)
-            case a: AttrSeqManInstant        => a.copy(op = V)
-            case a: AttrSeqManLocalDate      => a.copy(op = V)
-            case a: AttrSeqManLocalTime      => a.copy(op = V)
-            case a: AttrSeqManLocalDateTime  => a.copy(op = V)
-            case a: AttrSeqManOffsetTime     => a.copy(op = V)
-            case a: AttrSeqManOffsetDateTime => a.copy(op = V)
-            case a: AttrSeqManZonedDateTime  => a.copy(op = V)
-            case a: AttrSeqManUUID           => a.copy(op = V)
-            case a: AttrSeqManURI            => a.copy(op = V)
-            case a: AttrSeqManByte           => a.copy(op = V)
-            case a: AttrSeqManShort          => a.copy(op = V)
-            case a: AttrSeqManChar           => a.copy(op = V)
-          }
-          case a: AttrSeqOpt => a match {
-            case a: AttrSeqOptID             => a.copy(op = V)
-            case a: AttrSeqOptString         => a.copy(op = V)
-            case a: AttrSeqOptInt            => a.copy(op = V)
-            case a: AttrSeqOptLong           => a.copy(op = V)
-            case a: AttrSeqOptFloat          => a.copy(op = V)
-            case a: AttrSeqOptDouble         => a.copy(op = V)
-            case a: AttrSeqOptBoolean        => a.copy(op = V)
-            case a: AttrSeqOptBigInt         => a.copy(op = V)
-            case a: AttrSeqOptBigDecimal     => a.copy(op = V)
-            case a: AttrSeqOptDate           => a.copy(op = V)
-            case a: AttrSeqOptDuration       => a.copy(op = V)
-            case a: AttrSeqOptInstant        => a.copy(op = V)
-            case a: AttrSeqOptLocalDate      => a.copy(op = V)
-            case a: AttrSeqOptLocalTime      => a.copy(op = V)
-            case a: AttrSeqOptLocalDateTime  => a.copy(op = V)
-            case a: AttrSeqOptOffsetTime     => a.copy(op = V)
-            case a: AttrSeqOptOffsetDateTime => a.copy(op = V)
-            case a: AttrSeqOptZonedDateTime  => a.copy(op = V)
-            case a: AttrSeqOptUUID           => a.copy(op = V)
-            case a: AttrSeqOptURI            => a.copy(op = V)
-            case a: AttrSeqOptByte           => a.copy(op = V)
-            case a: AttrSeqOptShort          => a.copy(op = V)
-            case a: AttrSeqOptChar           => a.copy(op = V)
-          }
-        }
-
-        case a: AttrMap => a match {
-          case a: AttrMapTac => a
-          case a: AttrMapMan => a match {
-            case a: AttrMapManID             => a.copy(op = V)
-            case a: AttrMapManString         => a.copy(op = V)
-            case a: AttrMapManInt            => a.copy(op = V)
-            case a: AttrMapManLong           => a.copy(op = V)
-            case a: AttrMapManFloat          => a.copy(op = V)
-            case a: AttrMapManDouble         => a.copy(op = V)
-            case a: AttrMapManBoolean        => a.copy(op = V)
-            case a: AttrMapManBigInt         => a.copy(op = V)
-            case a: AttrMapManBigDecimal     => a.copy(op = V)
-            case a: AttrMapManDate           => a.copy(op = V)
-            case a: AttrMapManDuration       => a.copy(op = V)
-            case a: AttrMapManInstant        => a.copy(op = V)
-            case a: AttrMapManLocalDate      => a.copy(op = V)
-            case a: AttrMapManLocalTime      => a.copy(op = V)
-            case a: AttrMapManLocalDateTime  => a.copy(op = V)
-            case a: AttrMapManOffsetTime     => a.copy(op = V)
-            case a: AttrMapManOffsetDateTime => a.copy(op = V)
-            case a: AttrMapManZonedDateTime  => a.copy(op = V)
-            case a: AttrMapManUUID           => a.copy(op = V)
-            case a: AttrMapManURI            => a.copy(op = V)
-            case a: AttrMapManByte           => a.copy(op = V)
-            case a: AttrMapManShort          => a.copy(op = V)
-            case a: AttrMapManChar           => a.copy(op = V)
-          }
-          case a: AttrMapOpt => a match {
-            case a: AttrMapOptID             => a.copy(op = V)
-            case a: AttrMapOptString         => a.copy(op = V)
-            case a: AttrMapOptInt            => a.copy(op = V)
-            case a: AttrMapOptLong           => a.copy(op = V)
-            case a: AttrMapOptFloat          => a.copy(op = V)
-            case a: AttrMapOptDouble         => a.copy(op = V)
-            case a: AttrMapOptBoolean        => a.copy(op = V)
-            case a: AttrMapOptBigInt         => a.copy(op = V)
-            case a: AttrMapOptBigDecimal     => a.copy(op = V)
-            case a: AttrMapOptDate           => a.copy(op = V)
-            case a: AttrMapOptDuration       => a.copy(op = V)
-            case a: AttrMapOptInstant        => a.copy(op = V)
-            case a: AttrMapOptLocalDate      => a.copy(op = V)
-            case a: AttrMapOptLocalTime      => a.copy(op = V)
-            case a: AttrMapOptLocalDateTime  => a.copy(op = V)
-            case a: AttrMapOptOffsetTime     => a.copy(op = V)
-            case a: AttrMapOptOffsetDateTime => a.copy(op = V)
-            case a: AttrMapOptZonedDateTime  => a.copy(op = V)
-            case a: AttrMapOptUUID           => a.copy(op = V)
-            case a: AttrMapOptURI            => a.copy(op = V)
-            case a: AttrMapOptByte           => a.copy(op = V)
-            case a: AttrMapOptShort          => a.copy(op = V)
-            case a: AttrMapOptChar           => a.copy(op = V)
-          }
-        }
-      }
-      case other   => other
-    }
   }
 
   protected def topLevelAttrCount(elements: List[Element], count: Int = 0): Int = {

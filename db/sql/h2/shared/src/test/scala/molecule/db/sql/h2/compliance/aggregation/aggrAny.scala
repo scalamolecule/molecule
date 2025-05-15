@@ -1,8 +1,7 @@
 package molecule.db.sql.h2.compliance.aggregation
 
 import molecule.db.compliance.setup.Test
-import molecule.db.compliance.test.aggregation.any.{Aggr_BigDecimal_, Aggr_BigInt_, Aggr_Boolean, Aggr_Byte_, Aggr_Char_, Aggr_Date_, Aggr_Double_, Aggr_Duration_, Aggr_Float_, Aggr_Instant_, Aggr_Int, Aggr_LocalDateTime_, Aggr_LocalDate_, Aggr_LocalTime_, Aggr_Long_, Aggr_OffsetDateTime_, Aggr_OffsetTime_, Aggr_Short_, Aggr_String_, Aggr_URI_, Aggr_UUID_, Aggr_ZonedDateTime_, Aggr_ref_}
-import molecule.db.sql
+import molecule.db.compliance.test.aggregation.any.*
 import molecule.db.sql.h2.setup.Api_h2_async
 
 class Aggr_String_Test extends Test {

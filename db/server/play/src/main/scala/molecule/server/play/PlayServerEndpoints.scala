@@ -2,7 +2,7 @@ package molecule.server.play
 
 import java.nio.ByteBuffer
 import boopickle.Default.*
-import molecule.db.core.ast.Element
+import molecule.db.core.ast.{DataModel, Element}
 import molecule.db.core.marshalling.Boopicklers.*
 import molecule.db.base.error.ModelError
 import molecule.db.core.marshalling.{ConnProxy, MoleculeRpc}
@@ -26,16 +26,16 @@ abstract class PlayServerEndpoints(rpc: MoleculeRpc) extends PekkoServerEndpoint
     val sink: Sink[Array[Byte], NotUsed] = Sink.foreach[Array[Byte]] { inBytes =>
       try {
         // Deserialize callback query coordinates
-        val (proxy, elements, limit) =
-          Unpickle[(ConnProxy, List[Element], Option[Int])].fromBytes(ByteBuffer.wrap(inBytes))
+        val (proxy, dataModel, limit) =
+          Unpickle[(ConnProxy, DataModel, Option[Int])].fromBytes(ByteBuffer.wrap(inBytes))
 
         // Set up callback to serialize and emit results
         val callback: List[Any] => Unit = { result =>
-          val outBytes = PickleTpls(elements, false).pickleEither2ByteArray(Right(result))
+          val outBytes = PickleTpls(dataModel, false).pickleEither2ByteArray(Right(result))
           queue.offer(outBytes)
         }
 
-        rpc.subscribe[Any](proxy, elements, limit, callback)
+        rpc.subscribe[Any](proxy, dataModel, limit, callback)
       } catch {
         case ex: Throwable =>
           val errorBytes = Pickle.intoBytes[Either[ModelError, Int]](

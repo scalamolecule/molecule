@@ -1,6 +1,7 @@
 package molecule.db.sql.core.query
 
 import molecule.db.base.error.ModelError
+import molecule.db.core.ast.*
 import molecule.db.core.query.Pagination
 import molecule.db.core.util.ModelUtils
 import molecule.db.sql.core.facade.JdbcConn_JVM
@@ -8,11 +9,10 @@ import molecule.db.sql.core.javaSql.{PrepStmt, PrepStmtImpl, ResultSetInterface}
 import molecule.db.sql.core.query.casting.strategy.*
 import molecule.db.sql.core.query.casting.{NestOptTpls, NestTpls}
 import scala.collection.mutable.ListBuffer
-import molecule.db.core.ast._
 
 
 abstract class SqlQueryResolve[Tpl](
-  elements: List[Element],
+  dataModel: DataModel,
   m2q: Model2SqlQuery & SqlQueryBase
 ) extends Pagination[Tpl] with ModelUtils {
 
@@ -64,7 +64,7 @@ abstract class SqlQueryResolve[Tpl](
     val limitAbs   = limit.abs.min(totalCount)
     val hasMore    = limitAbs < totalCount
     val tpls       = castTuples(c.rs2row, sortedRows, forward)
-    val cursor     = initialCursor(conn, elements, tpls)
+    val cursor     = initialCursor(conn, dataModel.elements, tpls)
     (tpls, cursor, hasMore)
   }
 
@@ -84,7 +84,7 @@ abstract class SqlQueryResolve[Tpl](
     val hasMore                     = limitAbs < topLevelCount
     val selectedRows                = nestedTpls.take(limitAbs)
     val tpls                        = if (forward) selectedRows else selectedRows.reverse
-    val cursor                      = initialCursor(conn, elements, tpls)
+    val cursor                      = initialCursor(conn, dataModel.elements, tpls)
     (tpls, cursor, hasMore)
   }
 
@@ -113,7 +113,7 @@ abstract class SqlQueryResolve[Tpl](
       }
       getFilterAttr(tpe, ent, attr, fn, v)
     }
-    val altElements  = filterAttr +: elements
+    val altElements  = filterAttr +: dataModel.elements
     val sortedRows   = getRawData(conn, altElements, None, None)
     val flatRowCount = m2q.getRowCount(sortedRows)
 

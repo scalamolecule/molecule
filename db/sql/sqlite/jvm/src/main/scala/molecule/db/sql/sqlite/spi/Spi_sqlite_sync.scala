@@ -1,12 +1,12 @@
 package molecule.db.sql.sqlite.spi
 
 import java.sql.{DriverManager, Statement, PreparedStatement as PS}
-import molecule.db.core.ast.Element
-import molecule.db.core.util.Executor.*
 import molecule.db.core.action.{Delete, Insert, Save, Update}
+import molecule.db.core.ast.Element
 import molecule.db.core.marshalling.{ConnProxy, JdbcProxy}
 import molecule.db.core.spi.{Conn, TxReport}
 import molecule.db.core.transaction.{ResolveDelete, ResolveInsert, ResolveSave, ResolveUpdate}
+import molecule.db.core.util.Executor.*
 import molecule.db.sql.core.facade.JdbcConn_JVM
 import molecule.db.sql.core.javaSql.ResultSetInterface as RS
 import molecule.db.sql.core.spi.SpiBaseJVM_sync
@@ -19,10 +19,8 @@ import molecule.db.sql.core.transaction.strategy.update.UpdateAction
 import molecule.db.sql.sqlite.facade.JdbcHandlerSQlite_JVM
 import molecule.db.sql.sqlite.query.Model2SqlQuery_sqlite
 import molecule.db.sql.sqlite.transaction.{Insert_sqlite, Save_sqlite, Update_sqlite}
-import molecule.db.sql.sqlite.transaction.*
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
-import scala.util.Using.Manager
 
 object Spi_sqlite_sync extends Spi_sqlite_sync
 
@@ -32,14 +30,14 @@ trait Spi_sqlite_sync extends SpiBaseJVM_sync {
     save: Save, conn: JdbcConn_JVM
   ): SaveAction = {
     new SqlOps_sqlite(conn) with ResolveSave with Save_sqlite {}
-      .getSaveAction(save.elements)
+      .getSaveAction(save.dataModel.elements)
   }
 
   override def insert_getAction(
     insert: Insert, conn: JdbcConn_JVM
   ): InsertAction = {
     new SqlOps_sqlite(conn) with ResolveInsert with Insert_sqlite {}
-      .getInsertAction(insert.elements, insert.tpls)
+      .getInsertAction(insert.dataModel.elements, insert.tpls)
   }
 
   override def update_getAction(
@@ -47,7 +45,7 @@ trait Spi_sqlite_sync extends SpiBaseJVM_sync {
   ): UpdateAction = {
     new SqlOps_sqlite(conn0) with ResolveUpdate with Update_sqlite {
       override val isUpsert: Boolean = update.isUpsert
-    }.getUpdateAction(update.elements)
+    }.getUpdateAction(update.dataModel.elements)
   }
 
   override def delete_getAction(
@@ -55,7 +53,7 @@ trait Spi_sqlite_sync extends SpiBaseJVM_sync {
   ): DeleteAction = {
     new SqlOps_sqlite(conn)
       with ResolveDelete with SqlDelete {}
-      .getDeleteAction(delete.elements, conn.proxy.entityMap)
+      .getDeleteAction(delete.dataModel.elements, conn.proxy.entityMap)
   }
 
 

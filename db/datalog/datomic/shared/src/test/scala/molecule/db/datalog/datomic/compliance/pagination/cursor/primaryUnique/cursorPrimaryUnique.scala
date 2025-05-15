@@ -1,8 +1,7 @@
 package molecule.db.datalog.datomic.compliance.pagination.cursor.primaryUnique
 
 import molecule.db.compliance.setup.Test
-import molecule.db.compliance.test.pagination.cursor.primaryUnique.{Directions, MutationAdd, MutationDelete, Nested, TypesFilterAttr}
-import molecule.db.datalog
+import molecule.db.compliance.test.pagination.cursor.primaryUnique.*
 import molecule.db.datalog.datomic.setup.Api_datomic_async
 
 class DirectionsTest extends Test {

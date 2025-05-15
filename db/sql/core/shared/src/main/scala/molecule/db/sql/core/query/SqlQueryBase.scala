@@ -2,12 +2,12 @@ package molecule.db.sql.core.query
 
 import molecule.db.base.ast.Card
 import molecule.db.base.util.BaseHelpers
+import molecule.db.core.ast.*
 import molecule.db.core.util.JavaConversions
 import molecule.db.sql.core.javaSql.{PrepStmt, ResultSetInterface}
 import molecule.db.sql.core.query.casting.strategy.{CastStrategy, CastTuple}
 import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
-import molecule.db.core.ast._
 
 trait SqlQueryBase extends BaseHelpers with JavaConversions {
 

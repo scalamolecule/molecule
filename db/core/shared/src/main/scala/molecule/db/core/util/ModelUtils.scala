@@ -171,7 +171,7 @@ trait ModelUtils {
   private val reserved: Byte = 1.toByte
 
   private final def nonReservedAttr(a: Attr, proxy: ConnProxy): (String, String) = {
-    val List(entityIndex, attrIndex) = a.coord.toList.take(2)
+    val List(entityIndex, attrIndex) = a.coord.take(2)
     (
       if (proxy.reservedEntities(entityIndex) == reserved) a.ent + "_" else a.ent,
       if (proxy.reservedAttributes(attrIndex) == reserved) a.attr + "_" else a.attr
@@ -179,7 +179,7 @@ trait ModelUtils {
   }
 
   private final def nonReservedRef(r: Ref, proxy: ConnProxy): (String, String, String) = {
-    val Seq(entityIndex, refAttrIndex, refIndex) = r.coord.toSeq
+    val List(entityIndex, refAttrIndex, refIndex) = r.coord
     (
       if (proxy.reservedEntities(entityIndex) == reserved) r.ent + "_" else r.ent,
       if (proxy.reservedAttributes(refAttrIndex) == reserved) r.refAttr + "_" else r.refAttr,

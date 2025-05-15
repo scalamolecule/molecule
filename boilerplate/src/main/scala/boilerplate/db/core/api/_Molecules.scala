@@ -9,22 +9,22 @@ object _Molecules extends CoreGenBase( "Molecules", "/api") {
     s"""// GENERATED CODE ********************************
        |package molecule.db.core.api
        |
-       |import molecule.db.core.action._
-       |import molecule.db.core.ast.Element
+       |import molecule.db.core.action.*
+       |import molecule.db.core.ast.DataModel
        |
        |trait Molecule {
-       |  val elements: List[Element]
+       |  val dataModel: DataModel
        |}
        |
        |trait Molecule_00 extends Molecule {
-       |  def delete = Delete(elements)
+       |  def delete = Delete(dataModel)
        |}
        |
        |trait MoleculeBase extends Molecule {
-       |  def save = Save(elements)
-       |  def update = Update(elements)
-       |  def upsert = Update(elements, true)
-       |  def delete = Delete(elements)
+       |  def save = Save(dataModel)
+       |  def update = Update(dataModel)
+       |  def upsert = Update(dataModel, true)
+       |  def delete = Delete(dataModel)
        |}
        |
        |$molecules
@@ -34,8 +34,8 @@ object _Molecules extends CoreGenBase( "Molecules", "/api") {
   case class MoleculeFactories(arity: Int) extends TemplateVals(arity) {
     val body =
       s"""  trait Molecule_$n0[${`A..V`}] extends MoleculeBase {
-         |    def insert = Insert_$arity[${`A..V`}](elements)
-         |    def query  = Query[${`(A..V)`}](elements)
+         |    def insert = Insert_$arity[${`A..V`}](dataModel)
+         |    def query  = Query[${`(A..V)`}](dataModel)
          |  }
          |  """.stripMargin
   }

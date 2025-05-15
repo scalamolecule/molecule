@@ -1,8 +1,8 @@
 package molecule.db.sql.core.query
 
 import java.util.Base64
-import molecule.db.core.ast.Element
 import molecule.db.base.error.ModelError
+import molecule.db.core.ast.DataModel
 import molecule.db.core.ops.ModelTransformations_
 import molecule.db.core.query.Pagination
 import molecule.db.core.util.{FutureUtils, MoleculeLogging}
@@ -11,11 +11,11 @@ import molecule.db.sql.core.query.casting.strategy.*
 import molecule.db.sql.core.query.cursorStrategy.{NoUnique, PrimaryUnique, SubUnique}
 
 case class SqlQueryResolveCursor[Tpl](
-  elements: List[Element],
+  dataModel: DataModel,
   optLimit: Option[Int],
   cursor: Option[String],
   m2q: Model2SqlQuery & SqlQueryBase
-) extends SqlQueryResolve[Tpl](elements, m2q)
+) extends SqlQueryResolve[Tpl](dataModel, m2q)
   with FutureUtils
   with Pagination[Tpl]
   with ModelTransformations_
@@ -32,13 +32,13 @@ case class SqlQueryResolveCursor[Tpl](
           val tokens   = raw.split("\n").toList
           val strategy = tokens.head
           val hash     = tokens(1)
-          if ((elements.hashCode() & 0xFFFFF) != hash.toInt) {
+          if ((dataModel.elements.hashCode() & 0xFFFFF) != hash.toInt) {
             throw ModelError("Can only use cursor for un-modified query.")
           } else {
             strategy match {
-              case "1" => PrimaryUnique(elements, optLimit, cursor, m2q).getPage(tokens, limit)
-              case "2" => SubUnique(elements, optLimit, cursor, m2q).getPage(tokens, limit)
-              case "3" => NoUnique(elements, optLimit, cursor, m2q).getPage(tokens, limit)
+              case "1" => PrimaryUnique(dataModel, optLimit, cursor, m2q).getPage(tokens, limit)
+              case "2" => SubUnique(dataModel, optLimit, cursor, m2q).getPage(tokens, limit)
+              case "3" => NoUnique(dataModel, optLimit, cursor, m2q).getPage(tokens, limit)
             }
           }
         case None         => throw ModelError("Unexpected undefined cursor.")
@@ -50,7 +50,7 @@ case class SqlQueryResolveCursor[Tpl](
   private def getInitialPage(limit: Int)(implicit conn: JdbcConn_JVM)
   : (List[Tpl], String, Boolean) = {
     val forward      = limit > 0
-    val altElements  = if (forward) elements else reverseTopLevelSorting(elements)
+    val altElements  = if (forward) dataModel.elements else reverseTopLevelSorting(dataModel.elements)
     val sortedRows   = getRawData(conn, altElements, Some(limit.abs), None)
     val flatRowCount = m2q.getRowCount(sortedRows)
 

@@ -2,7 +2,7 @@ package molecule.db.sql.mysql.spi
 
 import cats.effect.IO
 import molecule.db.base.error.InsertError
-import molecule.db.core.action.{Delete, Insert, Query, QueryCursor, QueryOffset, Save, Update}
+import molecule.db.core.action.*
 import molecule.db.core.spi.{Conn, Spi_async, TxReport}
 import molecule.db.core.util.ModelUtils
 import molecule.db.sql.core.spi.StreamingJdbc

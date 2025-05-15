@@ -1,21 +1,13 @@
 package molecule.db.datalog.datomic.spi
 
-import java.util.List as jList
-import java.util.stream.Stream as jStream
 import cats.effect.IO
-import fs2.Stream
-import molecule.db.base.error.*
 import molecule.db.base.error.{InsertError, InsertErrors, ValidationErrors}
-import molecule.db.core.action.{Delete, Insert, Query, QueryCursor, QueryOffset, Save, Update}
+import molecule.db.core.action.*
 import molecule.db.core.spi.{Conn, Spi_async, TxReport}
 import molecule.db.core.util.FutureUtils
-import molecule.db.datalog
-import molecule.db.datalog.datomic.facade.DatomicConn_JVM
-import molecule.db.datalog.datomic.query.{DatomicQueryResolveCursor, DatomicQueryResolveOffset}
-import molecule.db.datalog.datomic.transaction.DatomicDataType_JVM
-import molecule.db.datalog.core.query.Model2DatomicQuery
 import molecule.db.datalog.core.spi.StreamingDatomic
-import molecule.db.datalog.datomic.spi.SpiBase_datomic_async
+import molecule.db.datalog.datomic.facade.DatomicConn_JVM
+import molecule.db.datalog.datomic.transaction.DatomicDataType_JVM
 import scala.concurrent.{Future, ExecutionContext as EC}
 
 object Spi_datomic_async extends Spi_datomic_async
@@ -107,7 +99,7 @@ trait Spi_datomic_async
           conn.transact_async(save_getStmts(save))
         case errors                   => throw ValidationErrors(errors)
       }
-      _ <- conn.callback(save.elements)
+      _ <- conn.callback(save.dataModel)
     } yield {
       txReport
     }
@@ -144,7 +136,7 @@ trait Spi_datomic_async
           conn.transact_async(insert_getStmts(insert))
         case errors                   => throw InsertErrors(errors)
       }
-      _ <- conn.callback(insert.elements)
+      _ <- conn.callback(insert.dataModel)
     } yield {
       txReport
     }
@@ -181,7 +173,7 @@ trait Spi_datomic_async
           conn.transact_async(update_getStmts(update, conn))
         case errors                   => throw ValidationErrors(errors)
       }
-      _ <- conn.callback(update.elements)
+      _ <- conn.callback(update.dataModel)
     } yield {
       txReport
     }
@@ -213,7 +205,7 @@ trait Spi_datomic_async
     for {
       _ <- if (delete.doInspect) delete_inspect(delete) else Future.unit
       txReport <- conn.transact_async(delete_getStmts(delete, conn))
-      _ <- conn.callback(delete.elements, true)
+      _ <- conn.callback(delete.dataModel, true)
     } yield {
       txReport
     }

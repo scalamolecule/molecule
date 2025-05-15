@@ -4,23 +4,21 @@ import java.util.List as jList
 import java.util.stream.Stream as jStream
 import datomic.Peer
 import geny.Generator
-import molecule.db.core.util.Executor.*
 import molecule.db.base.error.{InsertError, ModelError}
-import molecule.db.core.action.{Delete, Insert, Query, QueryCursor, QueryOffset, Save, Update}
+import molecule.db.core.action.*
+import molecule.db.core.ast.*
 import molecule.db.core.spi.{Conn, Spi_sync, TxReport}
 import molecule.db.core.transaction.{ResolveDelete, ResolveInsert, ResolveSave, ResolveUpdate}
+import molecule.db.core.util.Executor.*
 import molecule.db.core.util.FutureUtils
 import molecule.db.core.validation.TxModelValidation
 import molecule.db.core.validation.insert.InsertValidation
-import molecule.db.datalog
+import molecule.db.datalog.core.query.Model2DatomicQuery
 import molecule.db.datalog.datomic.facade.DatomicConn_JVM
 import molecule.db.datalog.datomic.query.{DatomicQueryResolveCursor, DatomicQueryResolveOffset}
 import molecule.db.datalog.datomic.transaction.*
-import molecule.db.datalog.core.query.Model2DatomicQuery
-import molecule.db.datalog.datomic.spi.SpiBase_datomic_sync
 import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
-import molecule.db.core.ast._
 
 object Spi_datomic_sync extends Spi_datomic_sync
 
@@ -33,46 +31,46 @@ trait Spi_datomic_sync
 
   override def query_get[Tpl](q: Query[Tpl])(implicit conn: Conn): List[Tpl] = {
     if (q.doInspect) query_inspect(q)
-    val m2q = new Model2DatomicQuery[Tpl](q.elements)
+    val m2q = new Model2DatomicQuery[Tpl](q.dataModel)
     DatomicQueryResolveOffset[Tpl](
-      q.elements, q.optLimit, None, q.dbView, m2q
+      q.dataModel, q.optLimit, None, q.dbView, m2q
     ).getListFromOffset_sync(conn.asInstanceOf[DatomicConn_JVM])._1
   }
 
   override def query_inspect[Tpl](q: Query[Tpl])(implicit conn: Conn): Unit = {
-    printInspectQuery("QUERY", q.elements)
+    printInspectQuery("QUERY", q.dataModel)
   }
 
   override def queryOffset_get[Tpl](
     q: QueryOffset[Tpl]
   )(implicit conn: Conn): (List[Tpl], Int, Boolean) = {
     if (q.doInspect) queryOffset_inspect(q)
-    val m2q = new Model2DatomicQuery[Tpl](q.elements)
+    val m2q = new Model2DatomicQuery[Tpl](q.dataModel)
     DatomicQueryResolveOffset[Tpl](
-      q.elements, q.optLimit, Some(q.offset), q.dbView, m2q
+      q.dataModel, q.optLimit, Some(q.offset), q.dbView, m2q
     ).getListFromOffset_sync(conn.asInstanceOf[DatomicConn_JVM])
   }
 
   override def queryOffset_inspect[Tpl](
     q: QueryOffset[Tpl]
   )(implicit conn: Conn): Unit = {
-    printInspectQuery("QUERY (offset)", q.elements)
+    printInspectQuery("QUERY (offset)", q.dataModel)
   }
 
   override def queryCursor_get[Tpl](
     q: QueryCursor[Tpl]
   )(implicit conn: Conn): (List[Tpl], String, Boolean) = {
     if (q.doInspect) queryCursor_inspect(q)
-    val m2q = new Model2DatomicQuery[Tpl](q.elements)
+    val m2q = new Model2DatomicQuery[Tpl](q.dataModel)
     DatomicQueryResolveCursor[Tpl](
-      q.elements, q.optLimit, Some(q.cursor), q.dbView, m2q
+      q.dataModel, q.optLimit, Some(q.cursor), q.dbView, m2q
     ).getListFromCursor_sync(conn.asInstanceOf[DatomicConn_JVM])
   }
 
   override def queryCursor_inspect[Tpl](
     q: QueryCursor[Tpl]
   )(implicit conn: Conn): Unit = {
-    printInspectQuery("QUERY (cursor)", q.elements)
+    printInspectQuery("QUERY (cursor)", q.dataModel)
   }
 
 
@@ -101,16 +99,16 @@ trait Spi_datomic_sync
     q: Query[Tpl], callback: List[Tpl] => Unit
   )(implicit conn: Conn): Unit = {
     val datomicConn = conn.asInstanceOf[DatomicConn_JVM]
-    val m2q         = new Model2DatomicQuery[Tpl](q.elements)
+    val m2q         = new Model2DatomicQuery[Tpl](q.dataModel)
     DatomicQueryResolveOffset[Tpl](
-      q.elements, q.optLimit, None, q.dbView, m2q
+      q.dataModel, q.optLimit, None, q.dbView, m2q
     ).subscribe(datomicConn, callback)
   }
 
   override def query_unsubscribe[Tpl](
     q: Query[Tpl]
   )(implicit conn: Conn): Unit = {
-    conn.removeCallback(q.elements)
+    conn.removeCallback(q.dataModel)
   }
 
 
@@ -119,7 +117,7 @@ trait Spi_datomic_sync
   }
 
   override def save_inspect(save: Save)(implicit conn: Conn): Unit = {
-    printInspectTx("SAVE", save.elements, save_getStmts(save))
+    printInspectTx("SAVE", save.dataModel.elements, save_getStmts(save))
   }
 
   override def save_validate(
@@ -128,14 +126,14 @@ trait Spi_datomic_sync
     if (save.doValidate) {
       val proxy = conn.proxy
       TxModelValidation(proxy.entityMap, proxy.attrMap, "save")
-        .validate(save.elements)
+        .validate(save.dataModel.elements)
     } else {
       Map.empty[String, Seq[String]]
     }
   }
 
   def save_getStmts(save: Save): Data = {
-    (new ResolveSave with Save_datomic).getStmts(save.elements)
+    (new ResolveSave with Save_datomic).getStmts(save.dataModel.elements)
   }
 
   override def insert_transact(insert: Insert)(implicit conn: Conn): TxReport = {
@@ -145,7 +143,7 @@ trait Spi_datomic_sync
   override def insert_inspect(insert: Insert)(implicit conn: Conn): Unit = {
     printInspectTx(
       "INSERT",
-      insert.elements, insert_getStmts(insert)
+      insert.dataModel.elements, insert_getStmts(insert)
     )
   }
 
@@ -153,7 +151,7 @@ trait Spi_datomic_sync
     insert: Insert
   )(implicit conn: Conn): Seq[(Int, Seq[InsertError])] = {
     if (insert.doValidate) {
-      InsertValidation.validate(conn, insert.elements, insert.tpls)
+      InsertValidation.validate(conn, insert.dataModel.elements, insert.tpls)
     } else {
       Seq.empty[(Int, Seq[InsertError])]
     }
@@ -161,7 +159,7 @@ trait Spi_datomic_sync
 
   def insert_getStmts(insert: Insert): Data = {
     (new ResolveInsert with Insert_datomic)
-      .getStmts(insert.elements, insert.tpls)
+      .getStmts(insert.dataModel.elements, insert.tpls)
   }
 
   override def update_transact(update: Update)(implicit conn: Conn): TxReport = {
@@ -170,7 +168,7 @@ trait Spi_datomic_sync
 
   override def update_inspect(update: Update)(implicit conn: Conn): Unit = {
     val action = if (update.isUpsert) "UPSERT" else "UPDATE"
-    printInspectTx(action, update.elements,
+    printInspectTx(action, update.dataModel.elements,
       update_getStmts(update, conn.asInstanceOf[DatomicConn_JVM]))
   }
 
@@ -183,7 +181,7 @@ trait Spi_datomic_sync
   def update_getStmts(update: Update, conn: DatomicConn_JVM): Data = {
     new ResolveUpdate with Update_datomic {
       override val isUpsert: Boolean = update.isUpsert
-    }.getStmts(conn, update.elements)
+    }.getStmts(conn, update.dataModel)
   }
 
   override def delete_transact(delete: Delete)(implicit conn: Conn): TxReport = {
@@ -191,13 +189,13 @@ trait Spi_datomic_sync
   }
 
   override def delete_inspect(delete: Delete)(implicit conn: Conn): Unit = {
-    printInspectTx("DELETE", delete.elements,
+    printInspectTx("DELETE", delete.dataModel.elements,
       delete_getStmts(delete, conn.asInstanceOf[DatomicConn_JVM]))
   }
 
   def delete_getStmts(delete: Delete, conn: DatomicConn_JVM): Data = {
     (new ResolveDelete with Delete_datomic)
-      .getData(conn, delete.elements)
+      .getData(conn, delete.dataModel)
   }
 
 
@@ -256,16 +254,15 @@ trait Spi_datomic_sync
   // Util --------------------------------------
 
   def getJavaStreamAndRowResolver[Tpl](
-    q: Query[Tpl], conn0: Conn
+    query: Query[Tpl], conn0: Conn
   ): (jStream[jList[AnyRef]], jList[AnyRef] => Any) = {
-    val conn       = conn0.asInstanceOf[DatomicConn_JVM]
-    val queryClean = q.copy(elements = keywordsSuffixed(q.elements, conn.proxy))
-    val m2q        = new Model2DatomicQuery[Tpl](q.elements)
+    val conn = conn0.asInstanceOf[DatomicConn_JVM]
+    val m2q  = new Model2DatomicQuery[Tpl](query.dataModel)
     if (m2q.isNested || m2q.isOptNested || m2q.nestedOptRef) {
       throw ModelError("Nested data not allowed for streaming.")
     }
     val stream     = DatomicQueryResolveOffset[Tpl](
-      q.elements, q.optLimit, None, q.dbView, m2q
+      query.dataModel, query.optLimit, None, query.dbView, m2q
     ).getJavaStream(conn)
     val row2AnyTpl = m2q.castRow2AnyTpl(m2q.castss.head, 0)
     (stream, row2AnyTpl)

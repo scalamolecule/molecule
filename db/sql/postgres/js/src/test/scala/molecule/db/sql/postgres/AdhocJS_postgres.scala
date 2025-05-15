@@ -3,11 +3,9 @@ package molecule.db.sql.postgres
 import boopickle.Default.*
 import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.compliance.setup.{Test, TestUtils}
-import molecule.db.sql
-import molecule.db.sql.postgres
+import molecule.db.core.util.Executor.*
 import molecule.db.sql.postgres.async.*
 import molecule.db.sql.postgres.setup.DbProviders_postgres
-import molecule.db.core.util.Executor.*
 
 class AdhocJS_postgres extends Test with DbProviders_postgres with TestUtils {
 

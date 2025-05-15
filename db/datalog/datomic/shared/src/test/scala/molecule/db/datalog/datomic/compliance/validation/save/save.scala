@@ -1,8 +1,7 @@
 package molecule.db.datalog.datomic.compliance.validation.save
 
 import molecule.db.compliance.setup.Test
-import molecule.db.compliance.test.validation.save.{FormatConstants, FormatVariables, Semantics, TypesOne, TypesOneOpt, TypesSeq, TypesSeqOpt, TypesSet, TypesSetOpt}
-import molecule.db.datalog
+import molecule.db.compliance.test.validation.save.*
 import molecule.db.datalog.datomic.setup.Api_datomic_async
 
 class FormatConstantsTest extends Test {

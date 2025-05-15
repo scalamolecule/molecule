@@ -1,10 +1,10 @@
 package molecule.db.compliance.test.action
 
 import molecule.db.base.error.ValidationErrors
+import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.compliance.setup.{DbProviders, Test, TestUtils}
 import molecule.db.core.api.{Api_sync, Api_sync_transact}
 import molecule.db.core.spi.{Conn, Spi_sync}
-import molecule.db.compliance.domains.dsl.Types.*
 
 // Translated from
 // https://github.com/com-lihaoyi/scalasql/blob/main/scalasql/test/src/api/TransactionTests.scala

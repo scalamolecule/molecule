@@ -2,7 +2,7 @@ package molecule.server.core
 
 import java.nio.ByteBuffer
 import boopickle.Default.*
-import molecule.db.core.ast.Element
+import molecule.db.core.ast.{DataModel, Element}
 import molecule.db.core.marshalling.Boopicklers.*
 import molecule.db.core.util.Executor.*
 import molecule.db.base.error.MoleculeError
@@ -25,45 +25,45 @@ abstract class Execution(rpc: MoleculeRpc)
    * */
 
   def executeQuery(args: ByteBuffer): Future[Either[MoleculeError, ByteBuffer]] = {
-    val (proxy, elements, limit) =
-      Unpickle[(ConnProxy, List[Element], Option[Int])].fromBytes(args)
+    val (proxy, dataModel, limit) =
+      Unpickle[(ConnProxy, DataModel, Option[Int])].fromBytes(args)
     rpc
-      .query[Any](proxy, elements, limit)
+      .query[Any](proxy, dataModel, limit)
       .map {
-        case Right(result) => Right(PickleTpls(elements, false).getPickledTpls(result))
+        case Right(result) => Right(PickleTpls(dataModel, false).getPickledTpls(result))
         case Left(err)     => Left(err)
       }
   }
 
   def executeQueryOffset(args: ByteBuffer): Future[Either[MoleculeError, ByteBuffer]] = {
-    val (proxy, elements, limit, offset) =
-      Unpickle[(ConnProxy, List[Element], Option[Int], Int)].fromBytes(args: ByteBuffer)
+    val (proxy, dataModel, limit, offset) =
+      Unpickle[(ConnProxy, DataModel, Option[Int], Int)].fromBytes(args: ByteBuffer)
     rpc
-      .queryOffset[Any](proxy, elements, limit, offset)
+      .queryOffset[Any](proxy, dataModel, limit, offset)
       .map {
         case Right((tpls, limit, more)) =>
-          Right(PickleTpls(elements, false).pickleOffset(tpls, limit, more))
+          Right(PickleTpls(dataModel, false).pickleOffset(tpls, limit, more))
         case Left(err)                  => Left(err)
       }
   }
 
   def executeQueryCursor(args: ByteBuffer): Future[Either[MoleculeError, ByteBuffer]] = {
-    val (proxy, elements, limit, cursor) =
-      Unpickle[(ConnProxy, List[Element], Option[Int], String)].fromBytes(args: ByteBuffer)
+    val (proxy, dataModel, limit, cursor) =
+      Unpickle[(ConnProxy, DataModel, Option[Int], String)].fromBytes(args: ByteBuffer)
     rpc
-      .queryCursor[Any](proxy, elements, limit, cursor)
+      .queryCursor[Any](proxy, dataModel, limit, cursor)
       .map {
         case Right((tpls, cursor, more)) =>
-          Right(PickleTpls(elements, false).pickleCursor(tpls, cursor, more))
+          Right(PickleTpls(dataModel, false).pickleCursor(tpls, cursor, more))
         case Left(err)                   => Left(err)
       }
   }
 
   def executeUnsubscribe(args: ByteBuffer): Future[Either[MoleculeError, ByteBuffer]] = {
-    val (proxy, elements) =
-      Unpickle[(ConnProxy, List[Element])].fromBytes(args: ByteBuffer)
+    val (proxy, dataModel) =
+      Unpickle[(ConnProxy, DataModel)].fromBytes(args: ByteBuffer)
     rpc
-      .unsubscribe(proxy, elements)
+      .unsubscribe(proxy, dataModel)
       .map {
         case Right(()) => Right(Pickle.intoBytes[Unit](()))
         case Left(err) => Left(err)
@@ -71,9 +71,9 @@ abstract class Execution(rpc: MoleculeRpc)
   }
 
   def executeSave(args: ByteBuffer): Future[Either[MoleculeError, ByteBuffer]] = {
-    val (proxy, elements) = Unpickle[(ConnProxy, List[Element])].fromBytes(args)
+    val (proxy, dataModel) = Unpickle[(ConnProxy, DataModel)].fromBytes(args)
     rpc
-      .save(proxy, elements)
+      .save(proxy, dataModel)
       .map {
         case Right(txReport) => Right(Pickle.intoBytes[TxReport](txReport))
         case Left(err)       => Left(err)
@@ -81,10 +81,10 @@ abstract class Execution(rpc: MoleculeRpc)
   }
 
   def executeInsert(args: ByteBuffer): Future[Either[MoleculeError, ByteBuffer]] = {
-    val (proxy, tplElements, tplsSerialized) =
-      Unpickle[(ConnProxy, List[Element], ByteBuffer)].fromBytes(args: ByteBuffer)
+    val (proxy, tpldataModel, tplsSerialized) =
+      Unpickle[(ConnProxy, DataModel, ByteBuffer)].fromBytes(args: ByteBuffer)
     rpc
-      .insert(proxy, tplElements, tplsSerialized)
+      .insert(proxy, tpldataModel, tplsSerialized)
       .map {
         case Right(txReport) => Right(Pickle.intoBytes[TxReport](txReport))
         case Left(err)       => Left(err)
@@ -92,10 +92,10 @@ abstract class Execution(rpc: MoleculeRpc)
   }
 
   def executeUpdate(args: ByteBuffer): Future[Either[MoleculeError, ByteBuffer]] = {
-    val (proxy, elements, isUpsert) =
-      Unpickle[(ConnProxy, List[Element], Boolean)].fromBytes(args: ByteBuffer)
+    val (proxy, dataModel, isUpsert) =
+      Unpickle[(ConnProxy, DataModel, Boolean)].fromBytes(args: ByteBuffer)
     rpc
-      .update(proxy, elements, isUpsert)
+      .update(proxy, dataModel, isUpsert)
       .map {
         case Right(txReport) => Right(Pickle.intoBytes[TxReport](txReport))
         case Left(err)       => Left(err)
@@ -103,10 +103,10 @@ abstract class Execution(rpc: MoleculeRpc)
   }
 
   def executeDelete(args: ByteBuffer): Future[Either[MoleculeError, ByteBuffer]] = {
-    val (proxy, elements) =
-      Unpickle[(ConnProxy, List[Element])].fromBytes(args: ByteBuffer)
+    val (proxy, dataModel) =
+      Unpickle[(ConnProxy, DataModel)].fromBytes(args: ByteBuffer)
     rpc
-      .delete(proxy, elements)
+      .delete(proxy, dataModel)
       .map {
         case Right(txReport) => Right(Pickle.intoBytes[TxReport](txReport))
         case Left(err)       => Left(err)

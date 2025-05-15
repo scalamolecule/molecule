@@ -1,10 +1,9 @@
 package molecule.db.sql.mysql.setup
 
 import com.mysql.cj.jdbc.MysqlDataSource
-import molecule.db.core.api.{Schema, Schema_mysql}
+import molecule.db.core.api.Schema_mysql
 import molecule.db.core.marshalling.JdbcProxy
 import molecule.db.core.spi.Conn
-import molecule.db.sql
 import molecule.db.sql.core.facade.{JdbcConn_JVM, JdbcHandler_JVM}
 import org.testcontainers.containers.MySQLContainer
 import zio.{ZIO, ZLayer}
@@ -35,7 +34,7 @@ object DbConnection_mysql {
        |USE test;
        |""".stripMargin
 
-  def getConnection(schema:Schema_mysql): JdbcConn_JVM = {
+  def getConnection(schema: Schema_mysql): JdbcConn_JVM = {
     val initSql = resetDb + schema.schemaData.head
     val proxy   = JdbcProxy(baseUrl, schema, initSql)
 

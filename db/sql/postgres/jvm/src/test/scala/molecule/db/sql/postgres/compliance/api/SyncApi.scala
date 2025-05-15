@@ -2,7 +2,6 @@ package molecule.db.sql.postgres.compliance.api
 
 import molecule.db.compliance.setup.Test
 import molecule.db.compliance.test.api.SyncApi
-import molecule.db.sql
 import molecule.db.sql.postgres.setup.Api_postgres_sync
 
 class SyncApiTest extends Test {

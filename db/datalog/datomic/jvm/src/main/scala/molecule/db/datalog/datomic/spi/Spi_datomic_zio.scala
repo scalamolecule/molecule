@@ -1,14 +1,10 @@
 package molecule.db.datalog.datomic.spi
 
-import molecule.db.base.error.*
-import molecule.db.core.util.Executor.*
 import molecule.db.base.error.{InsertError, InsertErrors, MoleculeError, ValidationErrors}
-import molecule.db.core.action.{Delete, Insert, Query, QueryCursor, QueryOffset, Save, Update}
+import molecule.db.core.action.*
 import molecule.db.core.spi.{Conn, Spi_zio, TxReport}
-import molecule.db.datalog
-import molecule.db.datalog.datomic.facade.DatomicConn_JVM
 import molecule.db.datalog.core.spi.StreamingDatomic
-import molecule.db.datalog.datomic.spi.SpiBase_datomic_zio
+import molecule.db.datalog.datomic.facade.DatomicConn_JVM
 import zio.*
 import zio.stream.*
 
@@ -42,7 +38,7 @@ trait Spi_datomic_zio
   override def queryOffset_inspect[Tpl](
     q: QueryOffset[Tpl]
   ): ZIO[Conn, MoleculeError, Unit] = {
-    printInspectQuery("QUERY (offset)", q.elements)
+    printInspectQuery("QUERY (offset)", q.dataModel)
   }
 
 
@@ -55,7 +51,7 @@ trait Spi_datomic_zio
   override def queryCursor_inspect[Tpl](
     q: QueryCursor[Tpl]
   ): ZIO[Conn, MoleculeError, Unit] = {
-    printInspectQuery("QUERY (cursor)", q.elements)
+    printInspectQuery("QUERY (cursor)", q.dataModel)
   }
 
 
@@ -98,9 +94,11 @@ trait Spi_datomic_zio
       txReport <- mapError(
         ZIO.fromFuture(ec =>
           Spi_datomic_sync.save_validate(save)(conn) match {
-            case errors if errors.isEmpty => Spi_datomic_async.save_transact(
-              save.copy(elements = keywordsSuffixed(save.elements, conn.proxy))
-            )(conn, ec)
+            case errors if errors.isEmpty =>
+              val cleanElements  = keywordsSuffixed(save.dataModel.elements, conn.proxy)
+              val cleanDataModel = save.dataModel.copy(elements = cleanElements)
+              val saveClean      = save.copy(dataModel = cleanDataModel)
+              Spi_datomic_async.save_transact(saveClean)(conn, ec)
             case errors                   => throw ValidationErrors(errors)
           }
         )
@@ -126,9 +124,11 @@ trait Spi_datomic_zio
       txReport <- mapError(
         ZIO.fromFuture(ec =>
           Spi_datomic_sync.insert_validate(insert)(conn) match {
-            case errors if errors.isEmpty => Spi_datomic_async.insert_transact(
-              insert.copy(elements = keywordsSuffixed(insert.elements, conn.proxy))
-            )(conn, ec)
+            case errors if errors.isEmpty =>
+              val cleanElements  = keywordsSuffixed(insert.dataModel.elements, conn.proxy)
+              val cleanDataModel = insert.dataModel.copy(elements = cleanElements)
+              val insertClean    = insert.copy(dataModel = cleanDataModel)
+              Spi_datomic_async.insert_transact(insertClean)(conn, ec)
             case errors                   => throw InsertErrors(errors)
           }
         )
@@ -154,9 +154,11 @@ trait Spi_datomic_zio
       txReport <- mapError(
         ZIO.fromFuture(ec =>
           Spi_datomic_sync.update_validate(update)(conn) match {
-            case errors if errors.isEmpty => Spi_datomic_async.update_transact(
-              update.copy(elements = keywordsSuffixed(update.elements, conn.proxy))
-            )(conn, ec)
+            case errors if errors.isEmpty =>
+              val cleanElements  = keywordsSuffixed(update.dataModel.elements, conn.proxy)
+              val cleanDataModel = update.dataModel.copy(elements = cleanElements)
+              val updateClean    = update.copy(dataModel = cleanDataModel)
+              Spi_datomic_async.update_transact(updateClean)(conn, ec)
             case errors                   => throw ValidationErrors(errors)
           }
         )
@@ -180,11 +182,12 @@ trait Spi_datomic_zio
       conn0 <- ZIO.service[Conn]
       conn = conn0.asInstanceOf[DatomicConn_JVM]
       txReport <- mapError(
-        ZIO.fromFuture(ec =>
-          Spi_datomic_async.delete_transact(
-            delete.copy(elements = keywordsSuffixed(delete.elements, conn.proxy))
-          )(conn, ec)
-        )
+        ZIO.fromFuture(ec => {
+          val cleanElements  = keywordsSuffixed(delete.dataModel.elements, conn.proxy)
+          val cleanDataModel = delete.dataModel.copy(elements = cleanElements)
+          val deleteClean    = delete.copy(dataModel = cleanDataModel)
+          Spi_datomic_async.delete_transact(deleteClean)(conn, ec)
+        })
       )
     } yield txReport
   }
@@ -216,8 +219,8 @@ trait Spi_datomic_zio
     for {
       conn0 <- ZIO.service[Conn]
       conn = conn0.asInstanceOf[DatomicConn_JVM]
-      result <- mapError(ZIO.fromFuture(_ =>
-        Spi_datomic_async.fallback_rawTransact(txData, debug)(conn, global)
+      result <- mapError(ZIO.fromFuture(ec =>
+        Spi_datomic_async.fallback_rawTransact(txData, debug)(conn, ec)
       ))
     } yield result
   }

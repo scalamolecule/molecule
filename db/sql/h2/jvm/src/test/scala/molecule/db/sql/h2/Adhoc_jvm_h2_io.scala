@@ -3,10 +3,8 @@ package molecule.db.sql.h2
 import boopickle.Default.*
 import molecule.db.compliance.domains.dsl.Types.Entity
 import molecule.db.compliance.setup.{TestUtils, Test_io}
-import molecule.db.sql
 import molecule.db.sql.h2.io.*
 import molecule.db.sql.h2.setup.DbProviders_h2
-
 
 
 class Adhoc_jvm_h2_io extends Test_io

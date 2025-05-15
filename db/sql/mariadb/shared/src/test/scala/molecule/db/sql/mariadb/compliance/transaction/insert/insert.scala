@@ -1,8 +1,7 @@
 package molecule.db.sql.mariadb.compliance.transaction.insert
 
 import molecule.db.compliance.setup.{MUnitSuiteWithArrays, Test}
-import molecule.db.compliance.test.action.insert.{InsertCardMap, InsertCardOne, InsertCardSeq, InsertCardSet, InsertRefs, InsertSemantics}
-import molecule.db.sql
+import molecule.db.compliance.test.action.insert.*
 import molecule.db.sql.mariadb.setup.Api_mariadb_async
 
 class InsertCardOneTest extends Test {

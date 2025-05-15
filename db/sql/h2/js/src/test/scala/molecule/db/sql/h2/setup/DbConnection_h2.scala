@@ -1,12 +1,10 @@
 package molecule.db.sql.h2.setup
 
-import molecule.db.core.api.{Schema, Schema_h2}
 import molecule.db.compliance.setup.DbConnection
+import molecule.db.core.api.{Schema, Schema_h2}
 import molecule.db.core.marshalling.JdbcProxy
 import molecule.db.core.spi.Conn
 import molecule.db.sql.core.facade.JdbcConn_JS
-import molecule.db.sql.h2
-import sttp.client4.UriContext
 import zio.{ZIO, ZLayer}
 import scala.util.Random
 

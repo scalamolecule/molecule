@@ -1,8 +1,7 @@
 package molecule.db.sql.sqlite.compliance.aggregation
 
 import molecule.db.compliance.setup.Test
-import molecule.db.compliance.test.aggregation.refNum.{AggrRefNum_avg, AggrRefNum_median, AggrRefNum_stddev, AggrRefNum_sum, AggrRefNum_variance}
-import molecule.db.sql
+import molecule.db.compliance.test.aggregation.refNum.*
 import molecule.db.sql.sqlite.setup.Api_sqlite_async
 
 class AggrRefNum_sumTest extends Test {

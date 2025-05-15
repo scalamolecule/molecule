@@ -2,7 +2,6 @@ package molecule.db.sql.postgres.compliance.action.delete
 
 import molecule.db.compliance.setup.Test
 import molecule.db.compliance.test.action.delete.{Delete_filter, Delete_id}
-import molecule.db.sql
 import molecule.db.sql.postgres.setup.Api_postgres_async
 
 class Delete_idTest extends Test {

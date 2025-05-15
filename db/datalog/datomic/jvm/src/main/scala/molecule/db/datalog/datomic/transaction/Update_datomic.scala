@@ -6,21 +6,19 @@ import java.util.{List as jList, Map as jMap, Set as jSet}
 import clojure.lang.Keyword
 import datomic.query.EntityMap
 import datomic.{Database, Peer}
-import molecule.db.base.error.*
 import molecule.db.base.ast.CardOne
 import molecule.db.base.error.{ExecutionError, ModelError, MoleculeError, ValidationErrors}
+import molecule.db.core.ast.*
 import molecule.db.core.ops.ModelTransformations_
 import molecule.db.core.transaction.ResolveUpdate
 import molecule.db.core.transaction.ops.UpdateOps
 import molecule.db.core.util.{JavaConversions, MoleculeLogging}
 import molecule.db.core.validation.TxModelValidation
-import molecule.db.datalog
+import molecule.db.datalog.core.query.{Model2DatomicQuery, ResolveBase}
 import molecule.db.datalog.datomic.facade.DatomicConn_JVM
 import molecule.db.datalog.datomic.query.DatomicQueryResolveOffset
-import molecule.db.datalog.core.query.{Model2DatomicQuery, ResolveBase}
 import scala.collection.mutable.ListBuffer
 import scala.math.BigDecimal.RoundingMode
-import molecule.db.core.ast._
 
 
 trait Update_datomic
@@ -48,10 +46,11 @@ trait Update_datomic
 
   def getStmts(
     conn: DatomicConn_JVM,
-    elements: List[Element],
+    dataModel: DataModel,
     isRpcCall: Boolean = false,
     debug: Boolean = true
   ): Data = {
+    val elements = dataModel.elements
     db = conn.peerConn.db()
     if (isRpcCall) {
       // Check against db on jvm if rpc from client
@@ -97,13 +96,13 @@ trait Update_datomic
     //    println("------ requiredEntPaths ------")
     //    requiredEntPaths.foreach(println)
 
-    val filters = AttrOneManID(getInitialEntity(elements), "id", V) :: filterElements1
-
+    val filters     = AttrOneManID(getInitialEntity(elements), "id", V) :: filterElements1
+    val filterModel = DataModel(filters)
     //    println("------ filters --------")
     //    filters.foreach(println)
 
     val filterMatchRows = new DatomicQueryResolveOffset[Any](
-      filters, None, None, None, new Model2DatomicQuery[Any](filters)
+      filterModel, None, None, None, new Model2DatomicQuery[Any](filterModel)
     ).getRawData(conn, validate = false)
 
     //    println("--------- filterMatchRows")

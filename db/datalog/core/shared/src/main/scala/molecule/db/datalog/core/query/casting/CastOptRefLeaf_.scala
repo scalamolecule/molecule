@@ -51,7 +51,7 @@ trait CastOptRefLeaf_ extends JavaConversions {
     arity: Int,
     cast: java.util.Iterator[?] => Any
   ): jIterator[?] => Option[Any] = {
-    val list = new jArrayList[Any](arity)
+    val list      = new jArrayList[Any](arity)
     val handleMap = (optionalData: jMap[?, ?]) => {
       list.clear()
       Some(cast(flatten(list, optionalData).iterator()))
@@ -75,7 +75,7 @@ trait CastOptRefLeaf_ extends JavaConversions {
     resolve(1, (it: java.util.Iterator[?]) =>
       (
         c1(it)
-      )
+        )
     )
   }
 

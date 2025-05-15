@@ -3,7 +3,6 @@ package molecule.db.sql.sqlite.setup
 import molecule.db.compliance.domains.schema.*
 import molecule.db.compliance.setup.{DbProviders, Platform}
 import molecule.db.core.spi.Conn
-import molecule.db.sql.sqlite
 
 trait DbProviders_sqlite extends DbProviders with DbConnection_sqlite with Platform {
 

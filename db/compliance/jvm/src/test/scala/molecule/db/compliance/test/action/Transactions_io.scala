@@ -1,9 +1,9 @@
 package molecule.db.compliance.test.action
 
+import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.compliance.setup.{DbProviders, Test, TestUtils}
 import molecule.db.core.api.{Api_io, Api_io_transact}
 import molecule.db.core.spi.Spi_io
-import molecule.db.compliance.domains.dsl.Types.*
 
 
 case class Transactions_io(

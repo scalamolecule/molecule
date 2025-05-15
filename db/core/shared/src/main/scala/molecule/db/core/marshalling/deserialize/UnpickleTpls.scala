@@ -14,8 +14,10 @@ import scala.collection.mutable.ListBuffer
 import molecule.db.base.error.*
 import molecule.db.core.ast._
 
-
-case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuffer)
+case class UnpickleTpls[Tpl](
+  dataModel: DataModel,
+  eitherSerialized: ByteBuffer
+)
   extends UnpickleTpl_[Tpl]
     with ModelUtils
     with MoleculeLogging {
@@ -31,7 +33,7 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
 
   def unpickleSeqOfProduct: Seq[Product] = {
     val data = unpickleTpls
-    if (countValueAttrs(elements) == 1) {
+    if (countValueAttrs(dataModel.elements) == 1) {
       data.map(Tuple1(_))
     } else {
       data.asInstanceOf[Seq[Product]]
@@ -52,7 +54,7 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
       case len =>
         val tpls = ListBuffer.empty[Tpl]
         tpls.sizeHint(len)
-        val unpickleTpl = getUnpickler(elements)
+        val unpickleTpl = getUnpickler(dataModel.elements)
         var i           = 0
         while (i < len) {
           tpls += unpickleTpl().asInstanceOf[Tpl]

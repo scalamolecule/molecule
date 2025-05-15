@@ -1,8 +1,7 @@
 package molecule.db.sql.mysql.compliance.relation
 
 import molecule.db.compliance.setup.Test
-import molecule.db.compliance.test.relation.flat.{FlatOptEntity, FlatOptRef, FlatOptRefAdjacent, FlatOptRefNested, FlatRef}
-import molecule.db.sql
+import molecule.db.compliance.test.relation.flat.*
 import molecule.db.sql.mysql.setup.Api_mysql_async
 
 class FlatRefTest extends Test {

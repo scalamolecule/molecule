@@ -1,20 +1,19 @@
 package molecule.db.sql.core.query.cursorStrategy
 
-import molecule.db.core.ast.Element
 import molecule.db.base.error.ModelError
+import molecule.db.core.ast.DataModel
 import molecule.db.core.query.Pagination
 import molecule.db.core.util.{FutureUtils, MoleculeLogging}
 import molecule.db.sql.core.facade.JdbcConn_JVM
-import molecule.db.sql.core.query.SqlQueryResolve
-import molecule.db.sql.core.query.{Model2SqlQuery, SqlQueryBase}
+import molecule.db.sql.core.query.{Model2SqlQuery, SqlQueryBase, SqlQueryResolve}
 
 
 case class NoUnique[Tpl](
-  elements: List[Element],
+  dataModel: DataModel,
   optLimit: Option[Int],
   cursor: String,
   m2q: Model2SqlQuery & SqlQueryBase
-) extends SqlQueryResolve[Tpl](elements, m2q)
+) extends SqlQueryResolve[Tpl](dataModel, m2q)
   with FutureUtils with Pagination[Tpl] with MoleculeLogging {
 
 

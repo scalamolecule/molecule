@@ -1,9 +1,6 @@
 package molecule.db.datalog.datomic
 
-import cats.effect.unsafe.implicits.global as ioRuntime
-import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.compliance.setup.{Test, TestUtils}
-import molecule.db.datalog
 import molecule.db.datalog.datomic.setup.DbProviders_datomic
 import molecule.db.datalog.datomic.sync.*
 

@@ -3,7 +3,6 @@ package molecule.db.datalog.datomic.setup
 import molecule.db.compliance.domains.schema.*
 import molecule.db.compliance.setup.{DbProviders, Platform}
 import molecule.db.core.spi.Conn
-import molecule.db.datalog.datomic
 
 trait DbProviders_datomic extends DbProviders with DbConnection_datomic with Platform {
 

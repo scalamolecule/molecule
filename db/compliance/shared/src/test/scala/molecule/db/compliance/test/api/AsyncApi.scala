@@ -1,18 +1,14 @@
 package molecule.db.compliance.test.api
 
-import molecule.db.core.util.Executor.*
-import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.domains.dsl.Refs.*
-import molecule.db.compliance.setup.*
+import cats.effect.unsafe.implicits.global as ioRuntime
 import molecule.db.base.error.{InsertErrors, ValidationErrors}
+import molecule.db.compliance.domains.dsl.Refs.*
+import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.compliance.setup.{DbProviders, Platform, Test, TestUtils}
 import molecule.db.core.api.Api_async
 import molecule.db.core.spi.Spi_async
 import molecule.db.core.util.Executor.*
-import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.domains.dsl.Refs.*
 import scala.annotation.nowarn
-import cats.effect.unsafe.implicits.global as ioRuntime
 
 @nowarn
 case class AsyncApi(
@@ -52,7 +48,7 @@ case class AsyncApi(
           .toList
           .attempt
           .map {
-            case Left(e) =>
+            case Left(e)      =>
               assertEquals(
                 e.getMessage,
                 "Streaming not implemented on JS platform. Maybe use subscribe instead?"

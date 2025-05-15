@@ -3,10 +3,9 @@ package molecule.db.datalog.datomic
 import boopickle.Default.*
 import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.compliance.setup.{Test, TestUtils}
-import molecule.db.datalog
+import molecule.db.core.util.Executor.*
 import molecule.db.datalog.datomic.async.*
 import molecule.db.datalog.datomic.setup.DbProviders_datomic
-import molecule.db.core.util.Executor.*
 
 class AdhocJS_datomic extends Test with DbProviders_datomic with TestUtils {
 

@@ -2,8 +2,7 @@ package molecule.db.sql.mysql.compliance.filter.map
 
 import molecule.db.compliance.setup.Test
 import molecule.db.compliance.test.filter.map.MapSemantics
-import molecule.db.compliance.test.filter.map.types.{FilterMap_BigDecimal_, FilterMap_BigInt_, FilterMap_Boolean, FilterMap_Byte_, FilterMap_Char_, FilterMap_Date_, FilterMap_Double_, FilterMap_Duration_, FilterMap_Float_, FilterMap_Instant_, FilterMap_Int, FilterMap_LocalDateTime_, FilterMap_LocalDate_, FilterMap_LocalTime_, FilterMap_Long_, FilterMap_OffsetDateTime_, FilterMap_OffsetTime_, FilterMap_Short_, FilterMap_String_, FilterMap_URI_, FilterMap_UUID_, FilterMap_ZonedDateTime_}
-import molecule.db.sql
+import molecule.db.compliance.test.filter.map.types.*
 import molecule.db.sql.mysql.setup.Api_mysql_async
 
 class MapSemanticsTest extends Test {

@@ -4,8 +4,8 @@ import java.lang.{Boolean as jBoolean, Double as jDouble, Float as jFloat, Integ
 import java.math.{BigDecimal as jBigDecimal, BigInteger as jBigInt}
 import java.net.URI
 import java.util.{Date, UUID, List as jList, Map as jMap}
+import molecule.db.core.ast.*
 import molecule.db.core.util.AggrUtils
-import molecule.db.core.ast._
 
 trait SortOneSpecial[Tpl]
   extends SortOne_[Tpl]
@@ -88,10 +88,13 @@ trait SortOneSpecial[Tpl]
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               new jBigDecimal(a.get(i).toString).compareTo(new jBigDecimal(b.get(i).toString))
+
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               new jBigDecimal(b.get(i).toString).compareTo(new jBigDecimal(a.get(i).toString))
         }
@@ -106,10 +109,13 @@ trait SortOneSpecial[Tpl]
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               jLong.valueOf(a.get(i).toString).compareTo(jLong.valueOf(b.get(i).toString))
+
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               jLong.valueOf(b.get(i).toString).compareTo(jLong.valueOf(a.get(i).toString))
         }
@@ -124,10 +130,13 @@ trait SortOneSpecial[Tpl]
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               jDouble.parseDouble(a.get(i).toString).compareTo(jDouble.parseDouble(b.get(i).toString))
+
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               jDouble.parseDouble(b.get(i).toString).compareTo(jDouble.parseDouble(a.get(i).toString))
         }
@@ -142,6 +151,7 @@ trait SortOneSpecial[Tpl]
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(
                 a, b, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
@@ -152,8 +162,10 @@ trait SortOneSpecial[Tpl]
                         .next.asInstanceOf[jMap[?, ?]].values.iterator
                         .next.asInstanceOf[jLong])
               )
+
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               compare(
                 b, a, i, (m1: jMap[?, ?], m2: jMap[?, ?]) =>
@@ -179,6 +191,7 @@ trait SortOneSpecial[Tpl]
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) => {
               val x: jBoolean = a.get(i) match {
                 case bool: jBoolean => bool
@@ -190,8 +203,10 @@ trait SortOneSpecial[Tpl]
               }
               x.compareTo(y)
             }
+
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               val x: jBoolean = a.get(i) match {
                 case bool: jBoolean => bool
@@ -217,6 +232,7 @@ trait SortOneSpecial[Tpl]
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               a.get(i).asInstanceOf[jList[?]].iterator().next() match {
                 case v: String      => v.compareTo(b.get(i).asInstanceOf[jList[String]].iterator.next())
@@ -231,8 +247,10 @@ trait SortOneSpecial[Tpl]
                 case v: UUID        => v.compareTo(b.get(i).asInstanceOf[jList[UUID]].iterator.next())
                 case v: URI         => v.compareTo(b.get(i).asInstanceOf[jList[URI]].iterator.next())
               }
+
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               b.get(i).asInstanceOf[jList[?]].iterator().next() match {
                 case v: String      => v.compareTo(a.get(i).asInstanceOf[jList[String]].iterator.next())
@@ -262,10 +280,13 @@ trait SortOneSpecial[Tpl]
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               a.get(i).toString.toDouble.compareTo(b.get(i).toString.toDouble)
+
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
+
             (a: Row, b: Row) =>
               b.get(i).toString.toDouble.compareTo(a.get(i).toString.toDouble)
         }

@@ -2,9 +2,8 @@ package molecule.db.sql.core.transaction
 
 import java.sql.PreparedStatement as PS
 import boopickle.Default.*
-import molecule.db.base.ast.*
-import molecule.db.core.ast.Element
 import molecule.db.base.ast.{Card, CardOne}
+import molecule.db.core.ast.Element
 import molecule.db.core.transaction.ResolveSave
 import molecule.db.core.transaction.ops.SaveOps
 import molecule.db.core.util.SerializationUtils

@@ -3,11 +3,9 @@ package molecule.db.sql.sqlite
 import boopickle.Default.*
 import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.compliance.setup.{Test, TestUtils}
-import molecule.db.sql
-import molecule.db.sql.sqlite
+import molecule.db.core.util.Executor.*
 import molecule.db.sql.sqlite.async.*
 import molecule.db.sql.sqlite.setup.DbProviders_sqlite
-import molecule.db.core.util.Executor.*
 
 class Adhoc_js_sqlite_async extends Test with DbProviders_sqlite with TestUtils {
 

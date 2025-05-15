@@ -1,13 +1,11 @@
 package molecule.db.sql.postgres.spi
 
 import java.sql.DriverManager
-import molecule.db.core.ast.Element
-import molecule.db.core.util.Executor.*
-import molecule.db.core.api.Schema_postgres
 import molecule.db.core.action.{Delete, Insert, Save, Update}
+import molecule.db.core.ast.Element
 import molecule.db.core.marshalling.{ConnProxy, JdbcProxy}
-import molecule.db.core.spi.Conn
 import molecule.db.core.transaction.{ResolveDelete, ResolveInsert, ResolveSave, ResolveUpdate}
+import molecule.db.core.util.Executor.*
 import molecule.db.sql.core.facade.{JdbcConn_JVM, JdbcHandler_JVM}
 import molecule.db.sql.core.javaSql.ResultSetInterface as RS
 import molecule.db.sql.core.spi.SpiBaseJVM_sync
@@ -19,8 +17,6 @@ import molecule.db.sql.core.transaction.strategy.save.SaveAction
 import molecule.db.sql.core.transaction.strategy.update.UpdateAction
 import molecule.db.sql.postgres.query.*
 import molecule.db.sql.postgres.transaction.*
-import org.postgresql.ds.PGSimpleDataSource
-import org.testcontainers.containers.PostgreSQLContainer
 import scala.concurrent.Future
 
 
@@ -32,14 +28,14 @@ trait Spi_postgres_sync extends SpiBaseJVM_sync {
     save: Save, conn: JdbcConn_JVM
   ): SaveAction = {
     new SqlOps_postgres(conn) with ResolveSave with Save_postgres {}
-      .getSaveAction(save.elements)
+      .getSaveAction(save.dataModel.elements)
   }
 
   override def insert_getAction(
     insert: Insert, conn: JdbcConn_JVM
   ): InsertAction = {
     new SqlOps_postgres(conn) with ResolveInsert with Insert_postgres {}
-      .getInsertAction(insert.elements, insert.tpls)
+      .getInsertAction(insert.dataModel.elements, insert.tpls)
   }
 
   override def update_getAction(
@@ -47,7 +43,7 @@ trait Spi_postgres_sync extends SpiBaseJVM_sync {
   ): UpdateAction = {
     new SqlOps_postgres(conn) with ResolveUpdate with Update_postgres {
       override val isUpsert: Boolean = update.isUpsert
-    }.getUpdateAction(update.elements)
+    }.getUpdateAction(update.dataModel.elements)
   }
 
   override def delete_getAction(
@@ -55,7 +51,7 @@ trait Spi_postgres_sync extends SpiBaseJVM_sync {
   ): DeleteAction = {
     new SqlOps_postgres(conn)
       with ResolveDelete with Spi_postgres_sync with SqlDelete {}
-      .getDeleteAction(delete.elements, conn.proxy.entityMap)
+      .getDeleteAction(delete.dataModel.elements, conn.proxy.entityMap)
   }
 
 

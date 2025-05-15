@@ -1,9 +1,8 @@
 package molecule.db.sql.postgres.compliance.inspection
 
-import molecule.db.core.util.Executor.*
 import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.compliance.setup.{Test, TestUtils}
-import molecule.db.sql
+import molecule.db.core.util.Executor.*
 import molecule.db.sql.postgres.async.*
 import molecule.db.sql.postgres.setup.DbProviders_postgres
 

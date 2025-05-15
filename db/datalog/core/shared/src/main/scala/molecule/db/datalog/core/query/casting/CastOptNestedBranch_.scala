@@ -94,10 +94,10 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     refDepth: Int
   ): jIterator[?] => List[Any] = {
     val List(c1) = pullCasts
-    val cast = (it: jIterator[?]) =>
+    val cast     = (it: jIterator[?]) =>
       (
         c1(it)
-      )
+        )
     resolve(
       optComparator.fold {
         val list = new jArrayList[Any](1)
@@ -127,7 +127,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     refDepth: Int
   ): jIterator[?] => List[Any] = {
     val List(c1, c2) = pullCasts
-    val cast = (it: jIterator[?]) =>
+    val cast         = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it)
@@ -161,7 +161,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     refDepth: Int
   ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3) = pullCasts
-    val cast = (it: jIterator[?]) =>
+    val cast             = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -196,7 +196,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     refDepth: Int
   ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4) = pullCasts
-    val cast = (it: jIterator[?]) =>
+    val cast                 = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -232,7 +232,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     refDepth: Int
   ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5) = pullCasts
-    val cast = (it: jIterator[?]) =>
+    val cast                     = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -269,7 +269,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     refDepth: Int
   ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6) = pullCasts
-    val cast = (it: jIterator[?]) =>
+    val cast                         = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -307,7 +307,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     refDepth: Int
   ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7) = pullCasts
-    val cast = (it: jIterator[?]) =>
+    val cast                             = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -346,7 +346,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     refDepth: Int
   ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8) = pullCasts
-    val cast = (it: jIterator[?]) =>
+    val cast                                 = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -386,7 +386,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     refDepth: Int
   ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9) = pullCasts
-    val cast = (it: jIterator[?]) =>
+    val cast                                     = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -427,7 +427,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     refDepth: Int
   ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10) = pullCasts
-    val cast = (it: jIterator[?]) =>
+    val cast                                          = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -469,7 +469,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     refDepth: Int
   ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) = pullCasts
-    val cast = (it: jIterator[?]) =>
+    val cast                                               = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -512,7 +512,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     refDepth: Int
   ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12) = pullCasts
-    val cast = (it: jIterator[?]) =>
+    val cast                                                    = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -556,7 +556,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     refDepth: Int
   ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13) = pullCasts
-    val cast = (it: jIterator[?]) =>
+    val cast                                                         = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -601,7 +601,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     refDepth: Int
   ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14) = pullCasts
-    val cast = (it: jIterator[?]) =>
+    val cast                                                              = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -647,7 +647,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     refDepth: Int
   ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15) = pullCasts
-    val cast = (it: jIterator[?]) =>
+    val cast                                                                   = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -694,7 +694,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     refDepth: Int
   ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16) = pullCasts
-    val cast = (it: jIterator[?]) =>
+    val cast                                                                        = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -742,7 +742,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     refDepth: Int
   ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17) = pullCasts
-    val cast = (it: jIterator[?]) =>
+    val cast                                                                             = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -791,7 +791,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     refDepth: Int
   ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18) = pullCasts
-    val cast = (it: jIterator[?]) =>
+    val cast                                                                                  = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -841,7 +841,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     refDepth: Int
   ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19) = pullCasts
-    val cast = (it: jIterator[?]) =>
+    val cast                                                                                       = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -892,7 +892,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     refDepth: Int
   ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20) = pullCasts
-    val cast = (it: jIterator[?]) =>
+    val cast                                                                                            = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -944,7 +944,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
     refDepth: Int
   ): jIterator[?] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21) = pullCasts
-    val cast = (it: jIterator[?]) =>
+    val cast                                                                                                 = (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),

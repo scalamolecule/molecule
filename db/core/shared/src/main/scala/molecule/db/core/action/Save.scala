@@ -1,12 +1,12 @@
 package molecule.db.core.action
 
-import molecule.db.core.ast.Element
+import molecule.db.core.ast.DataModel
 
 case class Save(
-  elements: List[Element],
+  dataModel: DataModel,
   private[molecule] val doInspect: Boolean = false,
   private[molecule] val doValidate: Boolean = true
-) extends Action(elements) {
+) extends Action {
 
   // Inspect also
   def i: Save = copy(doInspect = true)

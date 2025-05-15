@@ -1,8 +1,7 @@
 package molecule.db.datalog.datomic.compliance.aggregation
 
 import molecule.db.compliance.setup.Test
-import molecule.db.compliance.test.aggregation.ref.{AggrRef_count, AggrRef_distinct, AggrRef_min_max, AggrRef_min_max_n, AggrRef_sample, AggrRef_sample_n}
-import molecule.db.datalog
+import molecule.db.compliance.test.aggregation.ref.*
 import molecule.db.datalog.datomic.setup.Api_datomic_async
 
 class AggrRef_countTest extends Test {

@@ -1,12 +1,12 @@
 package molecule.db.compliance.test.action
 
-import molecule.db.core.util.Executor.*
 import molecule.db.base.error.ValidationErrors
+import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.compliance.setup.{DbProviders, Test, TestUtils}
 import molecule.db.core.api.{Api_async, Api_async_transact}
 import molecule.db.core.spi.{Conn, Spi_async}
+import molecule.db.core.util.Executor.*
 import scala.concurrent.Future
-import molecule.db.compliance.domains.dsl.Types.*
 
 
 // Translated from

@@ -6,7 +6,6 @@ import datomic.Connection.{DB_AFTER, TEMPIDS, TX_DATA}
 import datomic.db.Datum as PeerDatom
 import datomic.{Datom as _, *}
 import molecule.db.core.spi.TxReport
-import molecule.db.datalog
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.jdk.CollectionConverters.*

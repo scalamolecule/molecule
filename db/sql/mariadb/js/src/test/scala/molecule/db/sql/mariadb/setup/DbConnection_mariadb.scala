@@ -1,12 +1,9 @@
 package molecule.db.sql.mariadb.setup
 
 import molecule.db.core.api.{Schema, Schema_mariadb}
-import molecule.db.compliance.setup.DbConnection
 import molecule.db.core.marshalling.JdbcProxy
 import molecule.db.core.spi.Conn
 import molecule.db.sql.core.facade.JdbcConn_JS
-import molecule.db.sql.mariadb
-import sttp.client4.UriContext
 import zio.{ZIO, ZLayer}
 import scala.util.Random
 

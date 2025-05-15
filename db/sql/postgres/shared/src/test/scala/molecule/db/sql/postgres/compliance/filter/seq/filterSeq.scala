@@ -3,8 +3,7 @@ package molecule.db.sql.postgres.compliance.filter.seq
 import molecule.db.compliance.setup.{MUnitSuiteWithArrays, Test}
 import molecule.db.compliance.test.filter.seq.SeqSemantics
 import molecule.db.compliance.test.filter.seq.ref.{FilterRefSeq_Card1Ref, FilterRefSeq_Card2Ref}
-import molecule.db.compliance.test.filter.seq.types.{FilterSeq_BigDecimal_, FilterSeq_BigInt_, FilterSeq_Boolean, FilterSeq_ByteArray, FilterSeq_Char_, FilterSeq_Date_, FilterSeq_Double_, FilterSeq_Duration_, FilterSeq_Float_, FilterSeq_Instant_, FilterSeq_Int, FilterSeq_LocalDateTime_, FilterSeq_LocalDate_, FilterSeq_LocalTime_, FilterSeq_Long_, FilterSeq_OffsetDateTime_, FilterSeq_OffsetTime_, FilterSeq_Short_, FilterSeq_String_, FilterSeq_URI_, FilterSeq_UUID_, FilterSeq_ZonedDateTime_}
-import molecule.db.sql
+import molecule.db.compliance.test.filter.seq.types.*
 import molecule.db.sql.postgres.setup.Api_postgres_async
 
 class FilterSeq_String_Test extends Test {

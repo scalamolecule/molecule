@@ -1,17 +1,11 @@
 package molecule.db.compliance.test.action.delete
 
-import molecule.db.core.util.Executor.*
-import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.compliance.domains.dsl.Refs.*
-import molecule.db.compliance.setup.*
 import molecule.db.compliance.setup.{DbProviders, Test, TestUtils}
 import molecule.db.core.api.Api_async
 import molecule.db.core.spi.Spi_async
 import molecule.db.core.util.Executor.*
-import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.domains.dsl.Refs.*
 import scala.concurrent.Future
-import molecule.db.compliance.domains.dsl.Refs.*
 
 case class Delete_id(
   suite: Test,

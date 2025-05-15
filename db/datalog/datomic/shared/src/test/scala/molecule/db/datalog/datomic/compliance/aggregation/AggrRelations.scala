@@ -2,7 +2,6 @@ package molecule.db.datalog.datomic.compliance.aggregation
 
 import molecule.db.compliance.setup.Test
 import molecule.db.compliance.test.aggregation.AggrRelations
-import molecule.db.datalog
 import molecule.db.datalog.datomic.setup.Api_datomic_async
 
 class AggrRelationsTest extends Test {

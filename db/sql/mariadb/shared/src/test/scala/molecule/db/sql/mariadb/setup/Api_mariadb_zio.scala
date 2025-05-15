@@ -1,7 +1,6 @@
 package molecule.db.sql.mariadb.setup
 
 import molecule.db.core.api.{Api_zio, Api_zio_transact}
-import molecule.db.sql
 import molecule.db.sql.mariadb.spi.Spi_mariadb_zio
 
 object Api_mariadb_zio

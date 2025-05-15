@@ -2,13 +2,11 @@
 package molecule.db.compliance.test.filter.set.types
 
 import java.net.URI
-import molecule.db.compliance.setup.*
+import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.compliance.setup.{DbProviders, Test, TestUtils}
 import molecule.db.core.api.Api_async
 import molecule.db.core.spi.Spi_async
 import molecule.db.core.util.Executor.*
-import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.domains.dsl.Refs.*
 
 case class FilterSet_URI_(
   suite: Test,

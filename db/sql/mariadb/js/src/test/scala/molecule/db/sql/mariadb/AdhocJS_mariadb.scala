@@ -3,32 +3,31 @@ package molecule.db.sql.mariadb
 import boopickle.Default.*
 import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.compliance.setup.{Test, TestUtils}
-import molecule.db.sql.mariadb
+import molecule.db.core.util.Executor.*
 import molecule.db.sql.mariadb.async.*
 import molecule.db.sql.mariadb.setup.DbProviders_mariadb
-import molecule.db.core.util.Executor.*
 
 class AdhocJS_mariadb extends Test with DbProviders_mariadb with TestUtils {
-//  val a = (1, Map("a" -> localDate1))
+  //  val a = (1, Map("a" -> localDate1))
   val a = (1, Map("a" -> localDate1, "b" -> localDate2))
   val b = (2, Map("a" -> localDate2, "b" -> localDate3, "c" -> localDate4))
 
 
   "types" - types { implicit conn =>
     for {
-//      _ <- Entity.int.insert(1).transact
-//      _ <- Entity.int.query.get.map(_ ==> List(1))
+      //      _ <- Entity.int.insert(1).transact
+      //      _ <- Entity.int.query.get.map(_ ==> List(1))
 
 
 
       _ <- Entity.i.localDateMap.insert(a, b).transact
-//      _ <- Entity.i.localDateMap.insert(a).transact
+      //      _ <- Entity.i.localDateMap.insert(a).transact
 
       // Get Map value by key
 
       // Like calling `apply` on a Scala Map.
       _ <- Entity.i.a1.localDateMap("_").query.get.map(_ ==> List())
-//      _ <- Entity.i.a1.localDateMap("a").query.inspect
+      //      _ <- Entity.i.a1.localDateMap("a").query.inspect
 
       _ <- Entity.i.a1.localDateMap("a").query.get.map(_ ==> List((1, localDate1), (2, localDate2)))
       _ <- Entity.i.a1.localDateMap("a").query.i.get.map(_ ==> List((1, localDate1), (2, localDate2)))
@@ -36,11 +35,9 @@ class AdhocJS_mariadb extends Test with DbProviders_mariadb with TestUtils {
       _ <- Entity.i.a1.localDateMap("c").query.get.map(_ ==> List((2, localDate4)))
 
 
-
-
     } yield ()
 
-//    1 ==> 2
+    //    1 ==> 2
   }
 
 

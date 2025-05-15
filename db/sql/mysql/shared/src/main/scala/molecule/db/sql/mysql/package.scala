@@ -1,8 +1,7 @@
 package molecule.db.sql
 
-import molecule.db.core.api.{Api_async, Api_async_transact, Api_io, Api_io_transact, Api_sync, Api_sync_transact, Api_zio, Api_zio_transact}
+import molecule.db.core.api.*
 import molecule.db.sql.mysql.spi.{Spi_mysql_async, Spi_mysql_io, Spi_mysql_sync, Spi_mysql_zio}
-import mysql.spi.*
 
 package object mysql {
   object async extends Api_async with Api_async_transact with Spi_mysql_async

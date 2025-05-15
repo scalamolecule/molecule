@@ -1,9 +1,8 @@
 package molecule.db.sql.mysql.compliance.fallback
 
-import molecule.db.core.util.Executor.*
 import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.compliance.setup.{Test, TestUtils}
-import molecule.db.sql
+import molecule.db.core.util.Executor.*
 import molecule.db.sql.mysql.async.*
 import molecule.db.sql.mysql.setup.DbProviders_mysql
 import upickle.default.read

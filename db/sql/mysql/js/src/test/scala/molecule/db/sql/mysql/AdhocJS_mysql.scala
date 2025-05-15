@@ -3,10 +3,9 @@ package molecule.db.sql.mysql
 import boopickle.Default.*
 import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.compliance.setup.{Test, TestUtils}
-import molecule.db.sql.mysql
+import molecule.db.core.util.Executor.*
 import molecule.db.sql.mysql.async.*
 import molecule.db.sql.mysql.setup.DbProviders_mysql
-import molecule.db.core.util.Executor.*
 
 class AdhocJS_mysql extends Test with DbProviders_mysql with TestUtils {
 

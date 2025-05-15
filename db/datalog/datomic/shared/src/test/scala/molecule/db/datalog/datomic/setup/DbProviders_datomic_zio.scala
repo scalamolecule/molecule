@@ -4,7 +4,6 @@ import boopickle.Default.*
 import molecule.db.compliance.domains.schema.*
 import molecule.db.compliance.setup.{DbProviders_zio, Platform}
 import molecule.db.core.spi.Conn
-import molecule.db.datalog.datomic
 import zio.ZLayer
 
 trait DbProviders_datomic_zio extends DbProviders_zio with DbConnection_datomic with Platform {

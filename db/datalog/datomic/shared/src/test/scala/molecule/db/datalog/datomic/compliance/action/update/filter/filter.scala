@@ -2,7 +2,6 @@ package molecule.db.datalog.datomic.compliance.action.update.filter
 
 import molecule.db.compliance.setup.Test
 import molecule.db.compliance.test.action.update.filter.{FilterMap, FilterOne, FilterSeq, FilterSet}
-import molecule.db.datalog
 import molecule.db.datalog.datomic.setup.Api_datomic_async
 
 class FilterOneTest extends Test {

@@ -45,7 +45,7 @@ trait CastRow2AnyTpl_ { self: DatomicQueryBase =>
     (row: Row) =>
       (
         c1(row)
-      )
+        )
   }
 
   final private def cast2(casters: List[Row => Any]): Row => Any = {

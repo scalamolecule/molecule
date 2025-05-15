@@ -6,7 +6,7 @@ import java.math.{BigDecimal as jBigDecimal, BigInteger as jBigInt}
 import java.net.URI
 import java.time.*
 import java.util.{Date, UUID, Map as jMap}
-import molecule.db.core.ast._
+import molecule.db.core.ast.*
 
 
 trait SortOneOpt_[Tpl] { self: Model2DatomicQuery[Tpl] =>

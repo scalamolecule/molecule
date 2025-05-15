@@ -2,14 +2,13 @@ package molecule.db.datalog.datomic.transaction
 
 import datomic.Peer
 import molecule.db.base.error.ExecutionError
+import molecule.db.core.ast.*
 import molecule.db.core.transaction.ResolveDelete
 import molecule.db.core.transaction.ops.DeleteOps
 import molecule.db.core.util.{JavaConversions, MetaModelUtils, MoleculeLogging}
-import molecule.db.datalog
-import molecule.db.datalog.datomic.facade.DatomicConn_JVM
 import molecule.db.datalog.core.query.Model2DatomicQuery
+import molecule.db.datalog.datomic.facade.DatomicConn_JVM
 import scala.collection.mutable
-import molecule.db.core.ast._
 
 trait Delete_datomic
   extends DatomicBase_JVM
@@ -20,10 +19,11 @@ trait Delete_datomic
 
   def getData(
     conn: DatomicConn_JVM,
-    elements: List[Element],
+    dataModel: DataModel,
     idIndex: Int = 0,
     debug: Boolean = true
   ): Data = {
+    val elements = dataModel.elements
     initTxBase(elements, idIndex)
 
     // Resolve the delete model
@@ -31,7 +31,7 @@ trait Delete_datomic
 
     val (filterQuery, inputs) = if (ids.isEmpty && filterElements.nonEmpty) {
       val filterElements1 = AttrOneManID("DummyEntity", "id", V) +: filterElements
-      val (query, inputs) = new Model2DatomicQuery[Any](filterElements1).getIdQueryWithInputs
+      val (query, inputs) = new Model2DatomicQuery[Any](DataModel(filterElements1)).getIdQueryWithInputs
       (Some(query), inputs)
     } else {
       (None, Nil)
@@ -39,7 +39,7 @@ trait Delete_datomic
 
     lazy val db = conn.peerConn.db()
     val ids1 = filterQuery.fold(ids)(query =>
-      Peer.q(query, db +: inputs*).asScala.toList.map(_.get(0))
+      Peer.q(query, db +: inputs *).asScala.toList.map(_.get(0))
     )
 
     // Add retract stmts

@@ -1,8 +1,7 @@
 package molecule.db.sql
 
-import molecule.db.core.api.{Api_async, Api_async_transact, Api_io, Api_io_transact, Api_sync, Api_sync_transact, Api_zio, Api_zio_transact}
+import molecule.db.core.api.*
 import molecule.db.sql.postgres.spi.{Spi_postgres_async, Spi_postgres_io, Spi_postgres_sync, Spi_postgres_zio}
-import postgres.spi.*
 
 package object postgres {
   object async extends Api_async with Api_async_transact with Spi_postgres_async

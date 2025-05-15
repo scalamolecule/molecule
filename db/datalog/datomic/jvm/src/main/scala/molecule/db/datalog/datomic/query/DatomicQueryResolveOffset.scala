@@ -1,13 +1,11 @@
 package molecule.db.datalog.datomic.query
 
-import java.util.List as jList
-import molecule.db.core.ast.Element
+import molecule.db.core.ast.DataModel
 import molecule.db.core.marshalling.dbView.DbView
 import molecule.db.core.util.Executor.global
 import molecule.db.core.util.{FutureUtils, MoleculeLogging}
-import molecule.db.datalog
-import molecule.db.datalog.datomic.facade.DatomicConn_JVM
 import molecule.db.datalog.core.query.{DatomicQueryBase, Model2DatomicQuery}
+import molecule.db.datalog.datomic.facade.DatomicConn_JVM
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 
@@ -20,12 +18,12 @@ import scala.concurrent.Future
  * @param dbView    Database with a time perspective (Datomic)
  */
 case class DatomicQueryResolveOffset[Tpl](
-  elements: List[Element],
+  dataModel: DataModel,
   optLimit: Option[Int],
   optOffset: Option[Int],
   dbView: Option[DbView],
   m2q: Model2DatomicQuery[Tpl] & DatomicQueryBase
-) extends DatomicQueryResolve[Tpl](elements, dbView, m2q)
+) extends DatomicQueryResolve[Tpl](dataModel, dbView, m2q)
   with FutureUtils
   with MoleculeLogging {
 
@@ -78,21 +76,21 @@ case class DatomicQueryResolveOffset[Tpl](
     conn: DatomicConn_JVM,
     callback: List[Tpl] => Unit
   ): Unit = {
-    val involvedAttrs        = getAttrNames(elements)
-    val involvedDeleteEntity = getInitialEntity(elements)
+    val involvedAttrs        = getAttrNames(dataModel.elements)
+    val involvedDeleteEntity = getInitialEntity(dataModel.elements)
     val maybeCallback        = (mutationAttrs: Set[String], isDelete: Boolean) => {
       if (
         mutationAttrs.exists(involvedAttrs.contains) ||
           isDelete && mutationAttrs.head.startsWith(involvedDeleteEntity)
       ) {
         Future {
-          val m2q = new Model2DatomicQuery[Tpl](elements)
+          val m2q = new Model2DatomicQuery[Tpl](dataModel)
           callback(
-            DatomicQueryResolveOffset(elements, optLimit, None, None, m2q).getListFromOffset_sync(conn)._1
+            DatomicQueryResolveOffset(dataModel, optLimit, None, None, m2q).getListFromOffset_sync(conn)._1
           )
         }
       } else Future.unit
     }
-    conn.addCallback(elements -> maybeCallback)
+    conn.addCallback(dataModel -> maybeCallback)
   }
 }

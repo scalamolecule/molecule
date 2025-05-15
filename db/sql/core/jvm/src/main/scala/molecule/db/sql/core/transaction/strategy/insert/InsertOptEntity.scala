@@ -1,7 +1,5 @@
 package molecule.db.sql.core.transaction.strategy.insert
 
-import java.sql.PreparedStatement as PS
-import molecule.db.base.error.ModelError
 import molecule.db.sql.core.transaction.strategy.SqlOps
 
 case class InsertOptEntity(

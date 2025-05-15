@@ -2,16 +2,13 @@ package molecule.db.sql.h2.setup
 
 import java.sql.DriverManager
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
-import molecule.db.core.api.{Schema, Schema_h2}
 import molecule.db.compliance.setup.DbConnection
+import molecule.db.core.api.Schema_h2
 import molecule.db.core.marshalling.JdbcProxy
 import molecule.db.core.spi.Conn
-import molecule.db.sql
 import molecule.db.sql.core.facade.JdbcHandler_JVM
 import org.h2.jdbcx.JdbcDataSource
 import zio.{ZIO, ZLayer}
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
 import scala.util.Random
 import scala.util.Using.Manager
 
@@ -32,8 +29,8 @@ trait DbConnection_h2 extends DbConnection {
 
   // Use in-memory H2 (fastest)
   private def runMemDbUnclosed(test: Conn => Any, schema: Schema_h2): Any = {
-    val url     = "jdbc:h2:mem:test" + Random.nextInt().abs
-    val proxy   = JdbcProxy(url, schema)
+    val url   = "jdbc:h2:mem:test" + Random.nextInt().abs
+    val proxy = JdbcProxy(url, schema)
     Class.forName("org.h2.Driver")
     val sqlConn = DriverManager.getConnection(proxy.url)
     val conn    = JdbcHandler_JVM.recreateDb(proxy, sqlConn)

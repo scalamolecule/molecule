@@ -1,18 +1,11 @@
 package molecule.db.sql.h2
 
 import boopickle.Default.*
-import cats.effect.unsafe.implicits.global as ioRuntime
-import molecule.db.core.marshalling.Boopicklers.*
 import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.compliance.setup.{Test, TestUtils}
-import molecule.db.sql
-import molecule.db.sql.h2
+import molecule.db.core.util.Executor.*
 import molecule.db.sql.h2.async.*
 import molecule.db.sql.h2.setup.DbProviders_h2
-import scala.concurrent.{Future, Promise}
-import scala.scalajs.js.timers.setTimeout
-import scala.util.Try
-import molecule.db.core.util.Executor.*
 
 class Adhoc_js_h2_async extends Test with DbProviders_h2 with TestUtils {
 

@@ -1,14 +1,13 @@
 package molecule.db.sql.core.query.cursorStrategy
 
 import molecule.db.base.error.ModelError
+import molecule.db.core.ast.*
 import molecule.db.core.ops.ModelTransformations_
 import molecule.db.core.query.Pagination
 import molecule.db.core.util.{FutureUtils, MoleculeLogging}
 import molecule.db.sql.core.facade.JdbcConn_JVM
-import molecule.db.sql.core.query.SqlQueryResolve
 import molecule.db.sql.core.query.casting.strategy.{CastNested, CastOptRefs, CastTuple}
-import molecule.db.sql.core.query.{Model2SqlQuery, SqlQueryBase}
-import molecule.db.core.ast._
+import molecule.db.sql.core.query.{Model2SqlQuery, SqlQueryBase, SqlQueryResolve}
 
 /**
  * Molecule has a unique attribute that is sorted first.
@@ -23,11 +22,11 @@ import molecule.db.core.ast._
  * @tparam Tpl Type of each row
  */
 case class PrimaryUnique[Tpl](
-  elements: List[Element],
+  dataModel: DataModel,
   optLimit: Option[Int],
   cursor: String,
   m2q: Model2SqlQuery & SqlQueryBase
-) extends SqlQueryResolve[Tpl](elements, m2q)
+) extends SqlQueryResolve[Tpl](dataModel, m2q)
   with FutureUtils with Pagination[Tpl] with ModelTransformations_ with MoleculeLogging {
 
 
@@ -38,7 +37,7 @@ case class PrimaryUnique[Tpl](
     val forward      = limit > 0
     val (fn, v)      = if (forward) (Gt, z) else (Lt, a)
     val filterAttr   = getFilterAttr(tpe, ent, attr, fn, v)
-    val altElements  = filterAttr +: (if (forward) elements else reverseTopLevelSorting(elements))
+    val altElements  = filterAttr +: (if (forward) dataModel.elements else reverseTopLevelSorting(dataModel.elements))
     val sortedRows   = getRawData(conn, altElements, Some(limit.abs), None)
     val flatRowCount = m2q.getRowCount(sortedRows)
 

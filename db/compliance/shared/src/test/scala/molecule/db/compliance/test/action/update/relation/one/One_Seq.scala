@@ -1,15 +1,10 @@
 package molecule.db.compliance.test.action.update.relation.one
 
-import molecule.db.core.util.Executor.*
-import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.compliance.domains.dsl.Refs.*
-import molecule.db.compliance.setup.*
 import molecule.db.compliance.setup.{DbProviders, Test, TestUtils}
 import molecule.db.core.api.Api_async
 import molecule.db.core.spi.Spi_async
 import molecule.db.core.util.Executor.*
-import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.domains.dsl.Refs.*
 
 case class One_Seq(
   suite: Test,

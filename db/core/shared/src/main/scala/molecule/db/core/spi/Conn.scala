@@ -3,7 +3,7 @@ package molecule.db.core.spi
 import cats.effect.IO
 import molecule.db.base.error.{ExecutionError, MoleculeError}
 import molecule.db.core.api.Savepoint
-import molecule.db.core.ast.Element
+import molecule.db.core.ast.DataModel
 import molecule.db.core.marshalling.{ConnProxy, MoleculeRpc}
 import molecule.db.core.util.ModelUtils
 import zio.ZIO
@@ -34,22 +34,22 @@ abstract class Conn(val proxy: ConnProxy)
 
   // Subscription callbacks ----------------------------------------------------
 
-  private var callbacks = List.empty[(List[Element], (Set[String], Boolean) => Future[Unit])]
+  private var callbacks = List.empty[(DataModel, (Set[String], Boolean) => Future[Unit])]
 
-  def callback(mutation: List[Element], isDelete: Boolean = false)
+  def callback(mutation: DataModel, isDelete: Boolean = false)
               (implicit ec: ExecutionContext): Future[List[Unit]] = {
-    val mutationAttrs = getAttrNames(mutation)
+    val mutationAttrs = getAttrNames(mutation.elements)
     // Ensure all callbacks are called
     Future.sequence(callbacks.map {
       case (_, callback) => callback(mutationAttrs, isDelete)
     })
   }
 
-  def addCallback(callback: (List[Element], (Set[String], Boolean) => Future[Unit])): Unit = {
+  def addCallback(callback: (DataModel, (Set[String], Boolean) => Future[Unit])): Unit = {
     callbacks = callbacks :+ callback
   }
 
-  def removeCallback(elements: List[Element]): Unit = {
+  def removeCallback(elements: DataModel): Unit = {
     callbacks = callbacks.filterNot(_._1 == elements)
   }
 

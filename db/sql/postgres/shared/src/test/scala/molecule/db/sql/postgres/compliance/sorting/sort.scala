@@ -2,7 +2,6 @@ package molecule.db.sql.postgres.compliance.sorting
 
 import molecule.db.compliance.setup.Test
 import molecule.db.compliance.test.sorting.{SortAggr, SortBasics, SortDynamic, SortNested}
-import molecule.db.sql
 import molecule.db.sql.postgres.setup.Api_postgres_async
 
 class SortAggrTest extends Test {

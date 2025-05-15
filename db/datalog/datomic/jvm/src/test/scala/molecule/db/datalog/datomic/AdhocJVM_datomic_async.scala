@@ -1,13 +1,9 @@
 package molecule.db.datalog.datomic
 
 import cats.effect.unsafe.implicits.global as ioRuntime
-import molecule.db.core.util.Executor.*
-import molecule.db.compliance.domains.schema.TypesSchema_datomic
-import molecule.db.base.error.ModelError
 import molecule.db.compliance.setup.{Test, TestUtils}
-import molecule.db.datalog
+import molecule.db.core.util.Executor.*
 import molecule.db.datalog.datomic.async.*
-import molecule.db.datalog.datomic.facade.DatomicPeer
 import molecule.db.datalog.datomic.setup.DbProviders_datomic
 
 

@@ -1,15 +1,11 @@
 package molecule.db.sql.postgres.setup
 
-import java.util.UUID
 import molecule.db.core.api.Schema_postgres
 import molecule.db.core.marshalling.JdbcProxy
 import molecule.db.core.spi.Conn
 import molecule.db.sql.core.facade.JdbcConn_JS
-import molecule.db.sql.postgres
-import sttp.client4.UriContext
 import zio.{ZIO, ZLayer}
 import scala.util.Random
-import scala.util.Using.Manager
 
 object DbConnection_postgres {
 

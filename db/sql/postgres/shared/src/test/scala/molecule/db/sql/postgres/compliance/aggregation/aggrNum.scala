@@ -1,8 +1,7 @@
 package molecule.db.sql.postgres.compliance.aggregation
 
 import molecule.db.compliance.setup.Test
-import molecule.db.compliance.test.aggregation.number.{AggrNum_BigDecimal_, AggrNum_BigInt_, AggrNum_Byte_, AggrNum_Double_, AggrNum_Float_, AggrNum_Int, AggrNum_Long_, AggrNum_Short_}
-import molecule.db.sql
+import molecule.db.compliance.test.aggregation.number.*
 import molecule.db.sql.postgres.setup.Api_postgres_async
 
 class AggrNum_IntTest extends Test {

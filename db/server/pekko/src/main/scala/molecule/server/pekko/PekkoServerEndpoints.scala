@@ -1,11 +1,11 @@
 package molecule.server.pekko
 
 import boopickle.Default.*
-import molecule.db.core.ast.Element
-import molecule.db.core.marshalling.Boopicklers.*
 import molecule.db.base.error.ModelError
-import molecule.db.core.marshalling.{ConnProxy, MoleculeRpc}
+import molecule.db.core.ast.DataModel
+import molecule.db.core.marshalling.Boopicklers.*
 import molecule.db.core.marshalling.serialize.PickleTpls
+import molecule.db.core.marshalling.{ConnProxy, MoleculeRpc}
 import molecule.server.core.ServerEndpoints_async
 import org.apache.pekko.NotUsed
 import org.apache.pekko.http.scaladsl.model.ws.{BinaryMessage, Message}
@@ -24,16 +24,16 @@ abstract class PekkoServerEndpoints(rpc: MoleculeRpc) extends ServerEndpoints_as
       Sink.foreach[Message] {
         case BinaryMessage.Strict(argsSerialized) =>
           // Deserialize callback query coordinates
-          val (proxy, elements, limit) =
-            Unpickle[(ConnProxy, List[Element], Option[Int])]
+          val (proxy, dataModel, limit) =
+            Unpickle[(ConnProxy, DataModel, Option[Int])]
               .fromBytes(argsSerialized.asByteBuffer)
 
           // Set up callback to serialize and emit results
           val callback: List[Any] => Unit = { (result: List[Any]) =>
-            val outBytes = PickleTpls(elements, false).pickleEither(Right(result))
+            val outBytes = PickleTpls(dataModel, false).pickleEither(Right(result))
             queue.offer(BinaryMessage(ByteString(outBytes)))
           }
-          rpc.subscribe[Any](proxy, elements, limit, callback)
+          rpc.subscribe[Any](proxy, dataModel, limit, callback)
 
         case _ =>
           val errorMsg = BinaryMessage(ByteString(

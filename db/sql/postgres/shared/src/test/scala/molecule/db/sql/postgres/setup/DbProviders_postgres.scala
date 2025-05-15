@@ -3,8 +3,6 @@ package molecule.db.sql.postgres.setup
 import molecule.db.compliance.domains.schema.*
 import molecule.db.compliance.setup.{DbConnection, DbProviders, Platform}
 import molecule.db.core.spi.Conn
-import molecule.db.sql.postgres
-import molecule.db.sql.postgres.setup.DbConnection_postgres
 
 trait DbProviders_postgres extends DbProviders with DbConnection with Platform {
 

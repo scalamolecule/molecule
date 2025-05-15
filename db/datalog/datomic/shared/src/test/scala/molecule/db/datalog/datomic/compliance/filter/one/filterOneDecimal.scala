@@ -2,7 +2,6 @@ package molecule.db.datalog.datomic.compliance.filter.one
 
 import molecule.db.compliance.setup.Test
 import molecule.db.compliance.test.filter.one.decimal.{FilterOneDecimal_BigDecimal_, FilterOneDecimal_Double, FilterOneDecimal_Float_}
-import molecule.db.datalog
 import molecule.db.datalog.datomic.setup.Api_datomic_async
 
 

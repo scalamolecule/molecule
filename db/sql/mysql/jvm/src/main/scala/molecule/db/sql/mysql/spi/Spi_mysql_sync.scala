@@ -1,11 +1,11 @@
 package molecule.db.sql.mysql.spi
 
 import java.sql.DriverManager
-import molecule.db.core.ast.Element
-import molecule.db.core.util.Executor.*
 import molecule.db.core.action.{Delete, Insert, Save, Update}
+import molecule.db.core.ast.Element
 import molecule.db.core.marshalling.{ConnProxy, JdbcProxy}
 import molecule.db.core.transaction.{ResolveDelete, ResolveInsert, ResolveSave, ResolveUpdate}
+import molecule.db.core.util.Executor.*
 import molecule.db.sql.core.facade.{JdbcConn_JVM, JdbcHandler_JVM}
 import molecule.db.sql.core.javaSql.ResultSetInterface as RS
 import molecule.db.sql.core.spi.SpiBaseJVM_sync
@@ -17,7 +17,6 @@ import molecule.db.sql.core.transaction.strategy.save.SaveAction
 import molecule.db.sql.core.transaction.strategy.update.UpdateAction
 import molecule.db.sql.mysql.query.Model2SqlQuery_mysql
 import molecule.db.sql.mysql.transaction.{Insert_mysql, Save_mysql, Update_mysql}
-import molecule.db.sql.mysql.transaction.*
 import scala.concurrent.Future
 
 
@@ -29,14 +28,14 @@ trait Spi_mysql_sync extends SpiBaseJVM_sync {
     save: Save, conn: JdbcConn_JVM
   ): SaveAction = {
     new SqlOps_mysql(conn) with ResolveSave with Save_mysql {}
-      .getSaveAction(save.elements)
+      .getSaveAction(save.dataModel.elements)
   }
 
   override def insert_getAction(
     insert: Insert, conn: JdbcConn_JVM
   ): InsertAction = {
     new SqlOps_mysql(conn) with ResolveInsert with Insert_mysql {}
-      .getInsertAction(insert.elements, insert.tpls)
+      .getInsertAction(insert.dataModel.elements, insert.tpls)
   }
 
   override def update_getAction(
@@ -44,7 +43,7 @@ trait Spi_mysql_sync extends SpiBaseJVM_sync {
   ): UpdateAction = {
     new SqlOps_mysql(conn) with ResolveUpdate with Update_mysql {
       override val isUpsert: Boolean = update.isUpsert
-    }.getUpdateAction(update.elements)
+    }.getUpdateAction(update.dataModel.elements)
   }
 
   override def delete_getAction(
@@ -52,7 +51,7 @@ trait Spi_mysql_sync extends SpiBaseJVM_sync {
   ): DeleteAction = {
     new SqlOps_mysql(conn)
       with ResolveDelete with Spi_mysql_sync with SqlDelete {}
-      .getDeleteAction(delete.elements, conn.proxy.entityMap)
+      .getDeleteAction(delete.dataModel.elements, conn.proxy.entityMap)
   }
 
 

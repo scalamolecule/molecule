@@ -1,8 +1,7 @@
 package molecule.db.datalog.datomic.compliance.aggregation
 
 import molecule.db.compliance.setup.Test
-import molecule.db.compliance.test.aggregation.number.{AggrNum_BigDecimal_, AggrNum_BigInt_, AggrNum_Byte_, AggrNum_Double_, AggrNum_Float_, AggrNum_Int, AggrNum_Long_, AggrNum_Short_}
-import molecule.db.datalog
+import molecule.db.compliance.test.aggregation.number.*
 import molecule.db.datalog.datomic.setup.Api_datomic_async
 
 class AggrNum_IntTest extends Test {

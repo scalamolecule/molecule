@@ -1,10 +1,9 @@
 package molecule.db.sql.core.spi
 
 import boopickle.Default.*
-import cats.effect.IO
-import molecule.db.core.ast.Element
 import molecule.db.base.error.{InsertError, InsertErrors, ValidationErrors}
-import molecule.db.core.action.{Delete, Insert, Query, QueryCursor, QueryOffset, Save, Update}
+import molecule.db.core.action.*
+import molecule.db.core.ast.Element
 import molecule.db.core.marshalling.serialize.PickleTpls
 import molecule.db.core.spi.{Conn, Renderer, Spi_async, TxReport}
 import molecule.db.core.util.FutureUtils
@@ -20,46 +19,46 @@ trait SpiBaseJS_async extends Spi_async with Renderer with FutureUtils {
 
   override def query_get[Tpl](q: Query[Tpl])(implicit conn0: Conn, ec: EC): Future[List[Tpl]] = {
     val conn = conn0.asInstanceOf[JdbcConn_JS]
-    conn.rpc.query[Tpl](conn.proxy, q.elements, q.optLimit).future
+    conn.rpc.query[Tpl](conn.proxy, q.dataModel, q.optLimit).future
   }
 
   override def query_inspect[Tpl](q: Query[Tpl])(implicit conn: Conn, ec: EC): Future[Unit] = {
-    printInspectQuery("QUERY", q.elements)
+    printInspectQuery("QUERY", q.dataModel.elements)
   }
 
 
   override def queryOffset_get[Tpl](q: QueryOffset[Tpl])
                                    (implicit conn0: Conn, ec: EC): Future[(List[Tpl], Int, Boolean)] = {
     val conn = conn0.asInstanceOf[JdbcConn_JS]
-    conn.rpc.queryOffset[Tpl](conn.proxy, q.elements, q.optLimit, q.offset).future
+    conn.rpc.queryOffset[Tpl](conn.proxy, q.dataModel, q.optLimit, q.offset).future
   }
 
   override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])
                                        (implicit conn: Conn, ec: EC): Future[Unit] = {
-    printInspectQuery("QUERY (offset)", q.elements)
+    printInspectQuery("QUERY (offset)", q.dataModel.elements)
   }
 
 
   override def queryCursor_get[Tpl](q: QueryCursor[Tpl])
                                    (implicit conn0: Conn, ec: EC): Future[(List[Tpl], String, Boolean)] = {
     val conn = conn0.asInstanceOf[JdbcConn_JS]
-    conn.rpc.queryCursor[Tpl](conn.proxy, q.elements, q.optLimit, q.cursor).future
+    conn.rpc.queryCursor[Tpl](conn.proxy, q.dataModel, q.optLimit, q.cursor).future
   }
 
   override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])
                                        (implicit conn: Conn, ec: EC): Future[Unit] = {
-    printInspectQuery("QUERY (cursor)", q.elements)
+    printInspectQuery("QUERY (cursor)", q.dataModel.elements)
   }
 
 
   override def query_subscribe[Tpl](
     q: Query[Tpl], callback: List[Tpl] => Unit
   )(implicit conn: Conn, ec: EC): Future[Unit] = {
-    conn.rpc.subscribe[Tpl](conn.proxy, q.elements, q.optLimit, callback)
+    conn.rpc.subscribe[Tpl](conn.proxy, q.dataModel, q.optLimit, callback)
   }
 
   override def query_unsubscribe[Tpl](q: Query[Tpl])(implicit conn: Conn, ec: EC): Future[Unit] = {
-    conn.rpc.unsubscribe(conn.proxy, q.elements).future
+    conn.rpc.unsubscribe(conn.proxy, q.dataModel).future
   }
 
 
@@ -71,7 +70,7 @@ trait SpiBaseJS_async extends Spi_async with Renderer with FutureUtils {
       _ <- if (save.doInspect) save_inspect(save) else Future.unit
       errors <- save_validate(save) // validate original elements against meta model
       txReport <- if (errors.isEmpty) {
-        conn.rpc.save(conn.proxy, save.elements).future
+        conn.rpc.save(conn.proxy, save.dataModel).future
       } else {
         throw ValidationErrors(errors)
       }
@@ -81,13 +80,13 @@ trait SpiBaseJS_async extends Spi_async with Renderer with FutureUtils {
   }
 
   override def save_inspect(save: Save)(implicit conn: Conn, ec: EC): Future[Unit] = {
-    printInspectTx("SAVE", save.elements)
+    printInspectTx("SAVE", save.dataModel.elements)
   }
 
   override def save_validate(save: Save)(implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = future {
     if (save.doValidate) {
       val proxy = conn.proxy
-      TxModelValidation(proxy.entityMap, proxy.attrMap, "save").validate(save.elements)
+      TxModelValidation(proxy.entityMap, proxy.attrMap, "save").validate(save.dataModel.elements)
     } else {
       Map.empty[String, Seq[String]]
     }
@@ -106,8 +105,8 @@ trait SpiBaseJS_async extends Spi_async with Renderer with FutureUtils {
         if (insert.tpls.isEmpty) {
           Future(TxReport(Nil))
         } else {
-          val tplsSerialized = PickleTpls(insert.elements, true).getPickledTpls(insert.tpls)
-          conn.rpc.insert(conn.proxy, insert.elements, tplsSerialized).future
+          val tplsSerialized = PickleTpls(insert.dataModel, true).getPickledTpls(insert.tpls)
+          conn.rpc.insert(conn.proxy, insert.dataModel, tplsSerialized).future
         }
       } else {
         throw InsertErrors(errors)
@@ -118,13 +117,13 @@ trait SpiBaseJS_async extends Spi_async with Renderer with FutureUtils {
   }
 
   override def insert_inspect(insert: Insert)(implicit conn: Conn, ec: EC): Future[Unit] = {
-    printInspectTx("INSERT", insert.elements)
+    printInspectTx("INSERT", insert.dataModel.elements)
   }
 
   override def insert_validate(insert: Insert)
                               (implicit conn: Conn, ec: EC): Future[Seq[(Int, Seq[InsertError])]] = future {
     if (insert.doValidate) {
-      InsertValidation.validate(conn, insert.elements, insert.tpls)
+      InsertValidation.validate(conn, insert.dataModel.elements, insert.tpls)
     } else {
       Seq.empty[(Int, Seq[InsertError])]
     }
@@ -138,20 +137,20 @@ trait SpiBaseJS_async extends Spi_async with Renderer with FutureUtils {
     for {
       _ <- if (update.doInspect) update_inspect(update) else Future.unit
       // Validating on JVM side only since it requires db lookups
-      txReport <- conn.rpc.update(conn.proxy, update.elements, update.isUpsert).future
+      txReport <- conn.rpc.update(conn.proxy, update.dataModel, update.isUpsert).future
     } yield {
       txReport
     }
   }
 
   override def update_inspect(update: Update)(implicit conn: Conn, ec: EC): Future[Unit] = {
-    printInspectTx("UPDATE", update.elements)
+    printInspectTx("UPDATE", update.dataModel.elements)
   }
 
   override def update_validate(update: Update)
                               (implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = future {
     val proxy = conn.proxy
-    TxModelValidation(proxy.entityMap, proxy.attrMap, "update").validate(update.elements)
+    TxModelValidation(proxy.entityMap, proxy.attrMap, "update").validate(update.dataModel.elements)
   }
 
 
@@ -160,12 +159,12 @@ trait SpiBaseJS_async extends Spi_async with Renderer with FutureUtils {
   override def delete_transact(delete: Delete)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
     val conn = conn0.asInstanceOf[JdbcConn_JS]
     for {
-      txReport <- conn.rpc.delete(conn.proxy, delete.elements).future
+      txReport <- conn.rpc.delete(conn.proxy, delete.dataModel).future
     } yield txReport
   }
 
   override def delete_inspect(delete: Delete)(implicit conn: Conn, ec: EC): Future[Unit] = {
-    printInspectTx("DELETE", delete.elements)
+    printInspectTx("DELETE", delete.dataModel.elements)
   }
 
 

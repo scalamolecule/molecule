@@ -1,12 +1,10 @@
 package molecule.db.sql.sqlite.setup
 
-import molecule.db.core.api.Schema_sqlite
 import molecule.db.compliance.setup.DbConnection
+import molecule.db.core.api.Schema_sqlite
 import molecule.db.core.marshalling.JdbcProxy
 import molecule.db.core.spi.Conn
 import molecule.db.sql.core.facade.JdbcConn_JS
-import molecule.db.sql.sqlite
-import sttp.client4.UriContext
 import zio.{ZIO, ZLayer}
 
 trait DbConnection_sqlite extends DbConnection {

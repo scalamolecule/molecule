@@ -1,8 +1,7 @@
 package molecule.db.datalog.datomic.compliance.pagination.cursor.noUnique
 
 import molecule.db.compliance.setup.Test
-import molecule.db.compliance.test.pagination.cursor.noUnique.{AttrOrderMandatory, AttrOrderOptional, DirectionsMandatory, DirectionsOptional, MutationAdd, MutationDelete, Nested, OptNested, TypesOptional}
-import molecule.db.datalog
+import molecule.db.compliance.test.pagination.cursor.noUnique.*
 import molecule.db.datalog.datomic.setup.Api_datomic_async
 
 class AttrOrderMandatoryTest extends Test {

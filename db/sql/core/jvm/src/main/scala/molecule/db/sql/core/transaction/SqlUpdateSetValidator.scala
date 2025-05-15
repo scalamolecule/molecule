@@ -2,11 +2,11 @@ package molecule.db.sql.core.transaction
 
 import molecule.db.base.error.{ExecutionError, ModelError, MoleculeError}
 import molecule.db.base.util.BaseHelpers
+import molecule.db.core.ast.*
 import molecule.db.core.marshalling.ConnProxy
 import molecule.db.core.validation.TxModelValidation
 import molecule.db.sql.core.javaSql.ResultSetInterface as RS
 import molecule.db.sql.core.spi.SpiHelpers
-import molecule.db.core.ast.*
 
 trait SqlUpdateSetValidator extends SpiHelpers with BaseHelpers {
 

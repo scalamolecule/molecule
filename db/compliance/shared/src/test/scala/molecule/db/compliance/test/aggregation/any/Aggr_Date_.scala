@@ -1,7 +1,6 @@
 // GENERATED CODE ********************************
 package molecule.db.compliance.test.aggregation.any
 
-import java.util.Date
 import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.compliance.setup.{DbProviders, Test, TestUtils}
 import molecule.db.core.api.Api_async

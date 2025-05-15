@@ -3,8 +3,6 @@ package molecule.db.sql.mariadb.setup
 import molecule.db.compliance.domains.schema.*
 import molecule.db.compliance.setup.{DbConnection, DbProviders, Platform}
 import molecule.db.core.spi.Conn
-import molecule.db.sql.mariadb
-import molecule.db.sql.mariadb.setup.DbConnection_mariadb
 
 trait DbProviders_mariadb extends DbProviders with DbConnection with Platform {
 

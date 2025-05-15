@@ -9,8 +9,8 @@ import molecule.db.core.marshalling.JdbcProxy
 import molecule.db.core.spi.{Conn, TxReport}
 import molecule.db.core.util.{ModelUtils, MoleculeLogging}
 import molecule.db.sql.core.javaSql.{ResultSetImpl, ResultSetInterface}
-import molecule.db.sql.core.transaction.{CachedConnection, SavepointImpl, SqlDataType_JVM}
 import molecule.db.sql.core.transaction.strategy.SqlAction
+import molecule.db.sql.core.transaction.{CachedConnection, SavepointImpl, SqlDataType_JVM}
 import zio.ZIO
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}

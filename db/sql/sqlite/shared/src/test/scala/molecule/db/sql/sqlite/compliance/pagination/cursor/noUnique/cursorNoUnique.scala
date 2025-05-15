@@ -1,8 +1,7 @@
 package molecule.db.sql.sqlite.compliance.pagination.cursor.noUnique
 
 import molecule.db.compliance.setup.Test
-import molecule.db.compliance.test.pagination.cursor.noUnique.{AttrOrderMandatory, AttrOrderOptional, DirectionsMandatory, DirectionsOptional, MutationAdd, MutationDelete, Nested, OptNested, TypesOptional}
-import molecule.db.sql
+import molecule.db.compliance.test.pagination.cursor.noUnique.*
 import molecule.db.sql.sqlite.setup.Api_sqlite_async
 
 class AttrOrderMandatoryTest extends Test {

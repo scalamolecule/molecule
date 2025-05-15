@@ -1,8 +1,7 @@
 package molecule.db.sql.h2.compliance.validation.insert
 
 import molecule.db.compliance.setup.Test
-import molecule.db.compliance.test.validation.insert.{FormatConstants, FormatVariables, Nested, Semantics, TypesOne, TypesOneOpt, TypesSeq, TypesSeqOpt, TypesSet, TypesSetOpt}
-import molecule.db.sql
+import molecule.db.compliance.test.validation.insert.*
 import molecule.db.sql.h2.setup.Api_h2_async
 
 class FormatConstantsTest extends Test {

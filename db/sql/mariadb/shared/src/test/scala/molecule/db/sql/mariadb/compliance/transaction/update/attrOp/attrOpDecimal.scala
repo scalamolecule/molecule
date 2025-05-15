@@ -2,7 +2,6 @@ package molecule.db.sql.mariadb.compliance.transaction.update.attrOp
 
 import molecule.db.compliance.setup.Test
 import molecule.db.compliance.test.action.update.attrOp.decimal.{AttrOpDecimal_BigDecimal, AttrOpDecimal_Double, AttrOpDecimal_Float_}
-import molecule.db.sql
 import molecule.db.sql.mariadb.setup.Api_mariadb_async
 
 

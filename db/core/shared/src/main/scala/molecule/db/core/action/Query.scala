@@ -1,22 +1,22 @@
 package molecule.db.core.action
 
 import java.util.Date
-import molecule.db.core.ast.Element
+import molecule.db.core.ast.DataModel
 import molecule.db.core.marshalling.dbView.*
 import molecule.db.core.spi.TxReport
 
 case class Query[Tpl](
-  elements: List[Element],
+  dataModel: DataModel,
   private[molecule] val optLimit: Option[Int] = None,
   private[molecule] val dbView: Option[DbView] = None,
   private[molecule] val doInspect: Boolean = false
-) extends Action(elements) {
+) extends Action {
 
   // Common api
 
   def limit(l: Int): Query[Tpl] = copy(optLimit = Some(l))
-  def offset(o: Int): QueryOffset[Tpl] = QueryOffset(elements, optLimit, o, dbView, doInspect)
-  def from(cursor: String): QueryCursor[Tpl] = QueryCursor(elements, optLimit, cursor, dbView, doInspect)
+  def offset(o: Int): QueryOffset[Tpl] = QueryOffset(dataModel, optLimit, o, dbView, doInspect)
+  def from(cursor: String): QueryCursor[Tpl] = QueryCursor(dataModel, optLimit, cursor, dbView, doInspect)
 
 
   // Time actions (might be available only for Datomic)

@@ -1,14 +1,13 @@
 package molecule.db.datalog.datomic.query.cursorStrategy
 
-import molecule.db.core.ast.Element
-import molecule.db.core.marshalling.dbView.DbView
 import molecule.db.base.error.ModelError
+import molecule.db.core.ast.DataModel
+import molecule.db.core.marshalling.dbView.DbView
 import molecule.db.core.query.Pagination
 import molecule.db.core.util.{FutureUtils, MoleculeLogging}
-import molecule.db.datalog
+import molecule.db.datalog.core.query.{DatomicQueryBase, Model2DatomicQuery}
 import molecule.db.datalog.datomic.facade.DatomicConn_JVM
 import molecule.db.datalog.datomic.query.DatomicQueryResolve
-import molecule.db.datalog.core.query.{DatomicQueryBase, Model2DatomicQuery}
 
 /**
  * Molecule has a unique attribute that is not sorted first.
@@ -29,12 +28,12 @@ import molecule.db.datalog.core.query.{DatomicQueryBase, Model2DatomicQuery}
  * @tparam Tpl Type of each row
  */
 case class SubUnique[Tpl](
-  elements: List[Element],
+  dataModel: DataModel,
   optLimit: Option[Int],
   cursor: String,
   dbView: Option[DbView],
   m2q: Model2DatomicQuery[Tpl] & DatomicQueryBase
-) extends DatomicQueryResolve[Tpl](elements, dbView, m2q)
+) extends DatomicQueryResolve[Tpl](dataModel, dbView, m2q)
   with FutureUtils with Pagination[Tpl] with MoleculeLogging {
 
   def getPage(allTokens: List[String], limit: Int)

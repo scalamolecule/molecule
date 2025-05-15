@@ -49,7 +49,7 @@ trait CastNestedBranch_ { self: DatomicQueryBase =>
     (row: Row, nested: NestedTpls) =>
       (
         c1(row, nested)
-      ).asInstanceOf[T]
+        ).asInstanceOf[T]
   }
 
   final private def cast2[T](casters: List[(Row, NestedTpls) => Any]): (Row, NestedTpls) => T = {

@@ -1,16 +1,15 @@
 package molecule.db.datalog.datomic.query.cursorStrategy
 
-import molecule.db.core.marshalling.dbView.DbView
 import molecule.db.base.error.ModelError
+import molecule.db.core.ast.*
+import molecule.db.core.marshalling.dbView.DbView
 import molecule.db.core.ops.ModelTransformations_
 import molecule.db.core.query.Pagination
 import molecule.db.core.util.{FutureUtils, MoleculeLogging}
-import molecule.db.datalog
+import molecule.db.datalog.core.query.{DatomicQueryBase, Model2DatomicQuery}
 import molecule.db.datalog.datomic.facade.DatomicConn_JVM
 import molecule.db.datalog.datomic.query.DatomicQueryResolve
-import molecule.db.datalog.core.query.{DatomicQueryBase, Model2DatomicQuery}
 import scala.collection.mutable.ListBuffer
-import molecule.db.core.ast._
 
 /**
  * Molecule has a unique attribute that is sorted first.
@@ -24,12 +23,12 @@ import molecule.db.core.ast._
  * @tparam Tpl Type of each row
  */
 case class PrimaryUnique[Tpl](
-  elements: List[Element],
+  dataModel: DataModel,
   optLimit: Option[Int],
   cursor: String,
   dbView: Option[DbView],
   m2q: Model2DatomicQuery[Tpl] & DatomicQueryBase
-) extends DatomicQueryResolve[Tpl](elements, dbView, m2q)
+) extends DatomicQueryResolve[Tpl](dataModel, dbView, m2q)
   with FutureUtils with Pagination[Tpl] with ModelTransformations_ with MoleculeLogging {
 
   def getPage(tokens: List[String], limit: Int)
@@ -39,7 +38,7 @@ case class PrimaryUnique[Tpl](
     val forward     = limit > 0
     val (fn, v)     = if (forward) (Gt, z) else (Lt, a)
     val filterAttr  = getFilterAttr(tpe, ent, attr, fn, v)
-    val altElements = filterAttr +: (if (forward) elements else reverseTopLevelSorting(elements))
+    val altElements = filterAttr +: (if (forward) dataModel.elements else reverseTopLevelSorting(dataModel.elements))
     val rows        = getRawData(conn, altElements)
     val sortedRows  = sortRows(rows)
     logger.debug(sortedRows.toArray().mkString("\n"))

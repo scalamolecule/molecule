@@ -1,7 +1,6 @@
 package molecule.db.sql.postgres.setup
 
 import molecule.db.core.api.{Api_async, Api_async_transact}
-import molecule.db.sql
 import molecule.db.sql.postgres.spi.Spi_postgres_async
 
 object Api_postgres_async

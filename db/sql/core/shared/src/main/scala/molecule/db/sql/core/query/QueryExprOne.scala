@@ -1,9 +1,9 @@
 package molecule.db.sql.core.query
 
 import molecule.db.base.error.ModelError
+import molecule.db.core.ast.*
 import molecule.db.core.query.{Model2Query, QueryExpr}
 import scala.reflect.ClassTag
-import molecule.db.core.ast._
 
 trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & LambdasOne =>
 

@@ -2,7 +2,6 @@ package molecule.db.datalog.datomic.spi
 
 import molecule.db.base.error.ModelError
 import molecule.db.core.spi.Spi_sync
-import molecule.db.datalog.datomic
 
 
 trait Spi_datomic_sync extends Spi_sync {

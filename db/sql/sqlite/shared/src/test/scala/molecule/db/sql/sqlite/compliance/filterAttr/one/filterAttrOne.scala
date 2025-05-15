@@ -1,8 +1,7 @@
 package molecule.db.sql.sqlite.compliance.filterAttr.one
 
 import molecule.db.compliance.setup.Test
-import molecule.db.compliance.test.filterAttr.one.{Adjacent, CrossEntity, FilterAttrNested, FilterAttrRef, FilterAttr_id, Semantics, Sorting, Types}
-import molecule.db.sql
+import molecule.db.compliance.test.filterAttr.one.*
 import molecule.db.sql.sqlite.setup.Api_sqlite_async
 
 class AdjacentTest extends Test {

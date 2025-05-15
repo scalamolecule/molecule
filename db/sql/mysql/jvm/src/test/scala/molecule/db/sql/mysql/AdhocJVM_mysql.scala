@@ -2,7 +2,6 @@ package molecule.db.sql.mysql
 
 import molecule.db.compliance.setup.{Test, TestUtils}
 import molecule.db.core.util.Executor.*
-import molecule.db.sql
 import molecule.db.sql.mysql.async.*
 import molecule.db.sql.mysql.setup.DbProviders_mysql
 

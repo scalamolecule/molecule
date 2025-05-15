@@ -1,8 +1,7 @@
 package molecule.db.sql.sqlite.compliance.action.update.relation.many
 
 import molecule.db.compliance.setup.Test
-import molecule.db.compliance.test.action.update.relation.many.{Many_Map, Many_Map_add, Many_Map_remove, Many_One, Many_Seq, Many_Seq_add, Many_Seq_remove, Many_Set, Many_Set_add, Many_Set_remove}
-import molecule.db.sql
+import molecule.db.compliance.test.action.update.relation.many.*
 import molecule.db.sql.sqlite.setup.Api_sqlite_async
 
 class Many_MapTest extends Test {

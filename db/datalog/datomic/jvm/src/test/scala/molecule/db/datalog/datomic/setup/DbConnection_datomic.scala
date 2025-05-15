@@ -1,10 +1,10 @@
 package molecule.db.datalog.datomic.setup
 
-import molecule.db.core.util.Executor.*
-import molecule.db.core.api.Schema_datomic
 import molecule.db.compliance.setup.DbConnection
+import molecule.db.core.api.Schema_datomic
 import molecule.db.core.marshalling.DatomicProxy
 import molecule.db.core.spi.Conn
+import molecule.db.core.util.Executor.*
 import molecule.db.datalog.datomic.facade.{DatomicConn_JVM, DatomicPeer}
 import zio.{ZIO, ZLayer}
 import scala.concurrent.Await

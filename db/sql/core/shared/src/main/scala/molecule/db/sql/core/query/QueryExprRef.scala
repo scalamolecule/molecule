@@ -1,11 +1,10 @@
 package molecule.db.sql.core.query
 
-import molecule.db.base.ast.*
 import molecule.db.base.ast.{CardOne, CardSet}
 import molecule.db.base.error.ModelError
+import molecule.db.core.ast.*
 import molecule.db.core.query.{Model2Query, QueryExpr}
 import scala.collection.mutable.ListBuffer
-import molecule.db.core.ast._
 
 
 trait QueryExprRef extends QueryExpr { self: Model2Query & SqlQueryBase =>

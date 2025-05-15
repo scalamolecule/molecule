@@ -1,18 +1,16 @@
 package molecule.db.datalog.datomic.query
 
 import java.util.Base64
-import molecule.db.core.ast.Element
-import molecule.db.core.marshalling.dbView.DbView
 import molecule.db.base.error.ModelError
+import molecule.db.core.ast.*
+import molecule.db.core.marshalling.dbView.DbView
 import molecule.db.core.ops.ModelTransformations_
 import molecule.db.core.query.Pagination
 import molecule.db.core.util.{FutureUtils, MoleculeLogging}
-import molecule.db.datalog
+import molecule.db.datalog.core.query.{DatomicQueryBase, Model2DatomicQuery}
 import molecule.db.datalog.datomic.facade.DatomicConn_JVM
 import molecule.db.datalog.datomic.query.cursorStrategy.{NoUnique, PrimaryUnique, SubUnique}
-import molecule.db.datalog.core.query.{DatomicQueryBase, Model2DatomicQuery}
 import scala.collection.mutable.ListBuffer
-import molecule.db.core.ast._
 
 /**
  *
@@ -23,12 +21,12 @@ import molecule.db.core.ast._
  * @tparam Tpl Type of each row
  */
 case class DatomicQueryResolveCursor[Tpl](
-  elements: List[Element],
+  dataModel: DataModel,
   optLimit: Option[Int],
   cursor: Option[String],
   dbView: Option[DbView],
   m2q: Model2DatomicQuery[Tpl] & DatomicQueryBase
-) extends DatomicQueryResolve[Tpl](elements, dbView, m2q)
+) extends DatomicQueryResolve[Tpl](dataModel, dbView, m2q)
   with FutureUtils
   with Pagination[Tpl]
   with ModelTransformations_
@@ -46,13 +44,13 @@ case class DatomicQueryResolveCursor[Tpl](
           val strategy = tokens.head
           val hash     = tokens(1)
 
-          if ((elements.hashCode() & 0xFFFFF) != hash.toInt) {
+          if ((dataModel.elements.hashCode() & 0xFFFFF) != hash.toInt) {
             throw ModelError("Can only use cursor for un-modified query.")
           } else {
             strategy match {
-              case "1" => PrimaryUnique(elements, optLimit, cursor, dbView, m2q).getPage(tokens, limit)
-              case "2" => SubUnique(elements, optLimit, cursor, dbView, m2q).getPage(tokens, limit)
-              case "3" => NoUnique(elements, optLimit, cursor, dbView, m2q).getPage(tokens, limit)
+              case "1" => PrimaryUnique(dataModel, optLimit, cursor, dbView, m2q).getPage(tokens, limit)
+              case "2" => SubUnique(dataModel, optLimit, cursor, dbView, m2q).getPage(tokens, limit)
+              case "3" => NoUnique(dataModel, optLimit, cursor, dbView, m2q).getPage(tokens, limit)
             }
           }
         case None         => throw ModelError("Unexpected undefined cursor.")
@@ -65,7 +63,7 @@ case class DatomicQueryResolveCursor[Tpl](
   private def getInitialPage(limit: Int)(implicit conn: DatomicConn_JVM)
   : (List[Tpl], String, Boolean) = {
     val forward     = limit > 0
-    val altElements = if (forward) elements else reverseTopLevelSorting(elements)
+    val altElements = if (forward) dataModel.elements else reverseTopLevelSorting(dataModel.elements)
     val rows        = getRawData(conn, altElements)
     val sortedRows  = sortRows(rows)
     logger.debug(sortedRows.toArray().mkString("\n"))
@@ -77,7 +75,7 @@ case class DatomicQueryResolveCursor[Tpl](
       val hasMore       = limitAbs < toplevelCount
       val selectedRows  = nestedRows.take(limitAbs)
       val tpls          = if (forward) selectedRows else selectedRows.reverse
-      val cursor        = initialCursor(conn, elements, tpls)
+      val cursor        = initialCursor(conn, dataModel.elements, tpls)
       (tpls, cursor, hasMore)
 
     } else {
@@ -97,7 +95,7 @@ case class DatomicQueryResolveCursor[Tpl](
             tuples += row2tpl(row).asInstanceOf[Tpl]
           )
           val tpls   = (if (forward) tuples.toList else tuples.toList.reverse).filterNot(_ == Nil)
-          val cursor = initialCursor(conn, elements, tpls)
+          val cursor = initialCursor(conn, dataModel.elements, tpls)
           (tpls, cursor, hasMore)
         }
 
@@ -112,7 +110,7 @@ case class DatomicQueryResolveCursor[Tpl](
             tuples += row2tpl(row).asInstanceOf[Tpl]
           )
           val tpls   = (if (forward) tuples.toList else tuples.toList.reverse).filterNot(_ == Nil)
-          val cursor = initialCursor(conn, elements, tpls)
+          val cursor = initialCursor(conn, dataModel.elements, tpls)
           (tpls, cursor, hasMore)
         }
 
@@ -124,7 +122,7 @@ case class DatomicQueryResolveCursor[Tpl](
           val selectedRows = sortedRows.subList(0, limitAbs)
           selectedRows.forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
           val tpls   = if (forward) tuples.toList else tuples.toList.reverse
-          val cursor = initialCursor(conn, elements, tpls)
+          val cursor = initialCursor(conn, dataModel.elements, tpls)
           (tpls, cursor, hasMore)
         }
       }

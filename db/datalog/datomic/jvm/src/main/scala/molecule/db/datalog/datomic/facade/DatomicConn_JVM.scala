@@ -6,12 +6,10 @@ import java.{lang as jl, util as ju}
 import cats.effect.IO
 import datomic.Util.readAll
 import datomic.{Connection as DatomicConnection, Datom as _, *}
-import molecule.db.base.error.*
 import molecule.db.base.error.{ExecutionError, ModelError, MoleculeError}
 import molecule.db.core.marshalling.DatomicProxy
 import molecule.db.core.spi.{Conn, TxReport}
 import molecule.db.core.util.{Executor, MoleculeLogging}
-import molecule.db.datalog
 import molecule.db.datalog.datomic.transaction.DatomicDataType_JVM
 import molecule.db.datalog.datomic.util.MakeTxReport
 import scala.concurrent.duration.DurationInt

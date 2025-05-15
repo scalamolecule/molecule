@@ -1,6 +1,8 @@
 package molecule.db.compliance.test.api
 
 import molecule.db.base.error.{ExecutionError, InsertErrors, ValidationErrors}
+import molecule.db.compliance.domains.dsl.Refs.*
+import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.compliance.setup.{DbProviders_zio, TestUtils}
 import molecule.db.core.api.Api_zio
 import molecule.db.core.spi.Spi_zio
@@ -8,8 +10,6 @@ import zio.*
 import zio.test.*
 import zio.test.TestAspect.*
 import scala.annotation.nowarn
-import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.domains.dsl.Refs.*
 
 @nowarn
 case class ZioApi(api: Api_zio with Spi_zio with DbProviders_zio)

@@ -1,14 +1,11 @@
 package molecule.db.compliance.test.validation.insert
 
-import molecule.db.compliance.setup.*
 import molecule.db.base.error.{InsertError, InsertErrors, ModelError}
+import molecule.db.compliance.domains.dsl.Validation.*
 import molecule.db.compliance.setup.{DbProviders, Test, TestUtils}
 import molecule.db.core.api.Api_async
 import molecule.db.core.spi.Spi_async
 import molecule.db.core.util.Executor.*
-import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.domains.dsl.Refs.*
-import molecule.db.compliance.domains.dsl.Validation.*
 
 
 case class FormatVariables(

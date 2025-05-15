@@ -1,8 +1,7 @@
 package molecule.db.sql.mysql.compliance.pagination.cursor.primaryUnique
 
 import molecule.db.compliance.setup.Test
-import molecule.db.compliance.test.pagination.cursor.primaryUnique.{Directions, MutationAdd, MutationDelete, Nested, TypesFilterAttr}
-import molecule.db.sql
+import molecule.db.compliance.test.pagination.cursor.primaryUnique.*
 import molecule.db.sql.mysql.setup.Api_mysql_async
 
 class DirectionsTest extends Test {

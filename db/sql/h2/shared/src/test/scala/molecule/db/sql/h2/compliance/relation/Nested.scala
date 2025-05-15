@@ -1,8 +1,7 @@
 package molecule.db.sql.h2.compliance.relation
 
 import molecule.db.compliance.setup.{MUnitSuiteWithArrays, Test}
-import molecule.db.compliance.test.relation.nested.{NestedBasic, NestedExpr, NestedLevels, NestedOptional, NestedRef, NestedSemantics, NestedTypes}
-import molecule.db.sql
+import molecule.db.compliance.test.relation.nested.*
 import molecule.db.sql.h2.setup.Api_h2_async
 
 class NestedBasicTest extends Test {

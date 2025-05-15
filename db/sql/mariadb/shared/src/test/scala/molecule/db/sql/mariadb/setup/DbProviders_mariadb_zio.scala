@@ -4,8 +4,6 @@ import boopickle.Default.*
 import molecule.db.compliance.domains.schema.*
 import molecule.db.compliance.setup.{DbConnection, DbProviders_zio, Platform}
 import molecule.db.core.spi.Conn
-import molecule.db.sql.mariadb
-import molecule.db.sql.mariadb.setup.DbConnection_mariadb
 import zio.ZLayer
 
 trait DbProviders_mariadb_zio extends DbProviders_zio with DbConnection with Platform {

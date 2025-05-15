@@ -21,7 +21,8 @@ object _ModelTransformations extends CoreGenBase("ModelTransformations", "/ops")
        |
        |  private def unexpected(element: Element) = throw ModelError("Unexpected element: " + element)
        |
-       |  protected def toInt(es: List[Element], kw: Kw): List[Element] = {
+       |  protected def toInt(dataModel: DataModel, kw: Kw): DataModel = {
+       |    val es   = dataModel.elements
        |    val last = es.last match {
        |      case a: AttrOneMan => AttrOneManInt(a.ent, a.attr, Fn(kw.toString), ref = a.ref, coord = a.coord)
        |      case a: AttrSetMan => a match {
@@ -39,10 +40,11 @@ object _ModelTransformations extends CoreGenBase("ModelTransformations", "/ops")
        |      case a: AttrMapMan => AttrMapManInt(a.ent, a.attr, Fn(kw.toString), ref = a.ref, sort = a.sort, coord = a.coord)
        |      case a             => unexpected(a)
        |    }
-       |    es.init :+ last
+       |    dataModel.copy(elements = es.init :+ last)
        |  }
        |
-       |  protected def toDouble(es: List[Element], kw: Kw): List[Element] = {
+       |  protected def toDouble(dataModel: DataModel, kw: Kw): DataModel = {
+       |    val es   = dataModel.elements
        |    val last = es.last match {
        |      case a: AttrOneMan => AttrOneManDouble(a.ent, a.attr, Fn(kw.toString), ref = a.ref, coord = a.coord)
        |      case a: AttrSetMan => AttrSetManDouble(a.ent, a.attr, Fn(kw.toString), ref = a.ref, coord = a.coord)
@@ -50,10 +52,11 @@ object _ModelTransformations extends CoreGenBase("ModelTransformations", "/ops")
        |      case a: AttrMapMan => AttrMapManDouble(a.ent, a.attr, Fn(kw.toString), ref = a.ref, coord = a.coord)
        |      case a             => unexpected(a)
        |    }
-       |    es.init :+ last
+       |    dataModel.copy(elements = es.init :+ last)
        |  }
        |
-       |  protected def asIs(es: List[Element], kw: Kw, n: Option[Int] = None): List[Element] = {
+       |  protected def asIs(dataModel: DataModel, kw: Kw, n: Option[Int] = None): DataModel = {
+       |    val es   = dataModel.elements
        |    val last = es.last match {
        |      case a: AttrOneMan => a match {
        |        ${asIs("One")}
@@ -69,10 +72,11 @@ object _ModelTransformations extends CoreGenBase("ModelTransformations", "/ops")
        |      }
        |      case a             => unexpected(a)
        |    }
-       |    es.init :+ last
+       |    dataModel.copy(elements = es.init :+ last)
        |  }
        |
-       |  protected def addOne[T](es: List[Element], op: Op, vs: Seq[T]): List[Element] = {
+       |  protected def addOne[T](dataModel: DataModel, op: Op, vs: Seq[T]): DataModel = {
+       |    val es   = dataModel.elements
        |    val last = es.last match {
        |      case a: AttrOneMan => a match {
        |        ${addOne("Man")}
@@ -82,20 +86,22 @@ object _ModelTransformations extends CoreGenBase("ModelTransformations", "/ops")
        |      }
        |      case a             => unexpected(a)
        |    }
-       |    es.init :+ last
+       |    dataModel.copy(elements = es.init :+ last)
        |  }
        |
-       |  protected def addOneOpt[T](es: List[Element], op: Op, v: Option[T]): List[Element] = {
+       |  protected def addOneOpt[T](dataModel: DataModel, op: Op, v: Option[T]): DataModel = {
+       |    val es   = dataModel.elements
        |    val last = es.last match {
        |      case a: AttrOneOpt => a match {
        |        $addOptOne
        |      }
        |      case a             => unexpected(a)
        |    }
-       |    es.init :+ last
+       |    dataModel.copy(elements = es.init :+ last)
        |  }
        |
-       |  protected def addSet[T](es: List[Element], op: Op, vs: Set[T]): List[Element] = {
+       |  protected def addSet[T](dataModel: DataModel, op: Op, vs: Set[T]): DataModel = {
+       |    val es   = dataModel.elements
        |    val last = es.last match {
        |      case a: AttrSetMan => a match {
        |        ${addSet("Man")}
@@ -105,20 +111,22 @@ object _ModelTransformations extends CoreGenBase("ModelTransformations", "/ops")
        |      }
        |      case a             => unexpected(a)
        |    }
-       |    es.init :+ last
+       |    dataModel.copy(elements = es.init :+ last)
        |  }
        |
-       |  protected def addSetOpt[T](es: List[Element], op: Op, vs: Option[Set[T]]): List[Element] = {
+       |  protected def addSetOpt[T](dataModel: DataModel, op: Op, vs: Option[Set[T]]): DataModel = {
+       |    val es   = dataModel.elements
        |    val last = es.last match {
        |      case a: AttrSetOpt => a match {
        |        $addOptSet
        |      }
        |      case a             => unexpected(a)
        |    }
-       |    es.init :+ last
+       |    dataModel.copy(elements = es.init :+ last)
        |  }
        |
-       |  protected def addSeq[T](es: List[Element], op: Op, vs: Seq[T]): List[Element] = {
+       |  protected def addSeq[T](dataModel: DataModel, op: Op, vs: Seq[T]): DataModel = {
+       |    val es   = dataModel.elements
        |    val last = es.last match {
        |      case a: AttrSeqMan => a match {
        |        ${addSeq("Man")}
@@ -132,10 +140,11 @@ object _ModelTransformations extends CoreGenBase("ModelTransformations", "/ops")
        |      }
        |      case a             => unexpected(a)
        |    }
-       |    es.init :+ last
+       |    dataModel.copy(elements = es.init :+ last)
        |  }
        |
-       |  protected def addSeqOpt[T](es: List[Element], op: Op, vs: Option[Seq[T]]): List[Element] = {
+       |  protected def addSeqOpt[T](dataModel: DataModel, op: Op, vs: Option[Seq[T]]): DataModel = {
+       |    val es   = dataModel.elements
        |    val last = es.last match {
        |      case a: AttrSeqOpt => a match {
        |        $addOptSeq
@@ -144,25 +153,30 @@ object _ModelTransformations extends CoreGenBase("ModelTransformations", "/ops")
        |      }
        |      case a             => unexpected(a)
        |    }
-       |    es.init :+ last
+       |    dataModel.copy(elements = es.init :+ last)
        |  }
        |
-       |  protected def addBAr[T](es: List[Element], op: Op, ba: Array[T]): List[Element] = {
-       |    es.init :+ (es.last match {
+       |  protected def addBAr[T](dataModel: DataModel, op: Op, ba: Array[T]): DataModel = {
+       |    val es          = dataModel.elements
+       |    val newElements = es.init :+ (es.last match {
        |      case a: AttrSeqManByte => a.copy(op = op, vs = ba.asInstanceOf[Array[Byte]])
        |      case a: AttrSeqTacByte => a.copy(op = op, vs = ba.asInstanceOf[Array[Byte]])
        |      case e                 => throw ModelError("Unexpected Element for adding byte array: " + e)
        |    })
+       |    dataModel.copy(elements = newElements)
        |  }
        |
-       |  protected def addBArOpt[T](es: List[Element], op: Op, optBA: Option[Array[T]]): List[Element] = {
-       |    es.init :+ (es.last match {
+       |  protected def addBArOpt[T](dataModel: DataModel, op: Op, optBA: Option[Array[T]]): DataModel = {
+       |    val es          = dataModel.elements
+       |    val newElements = es.init :+ (es.last match {
        |      case a: AttrSeqOptByte => a.copy(op = op, vs = optBA.asInstanceOf[Option[Array[Byte]]])
        |      case e                 => throw ModelError("Unexpected Element for adding byte array: " + e)
        |    })
+       |    dataModel.copy(elements = newElements)
        |  }
        |
-       |  protected def addMap[T](es: List[Element], op: Op, vs: Map[String, T]): List[Element] = {
+       |  protected def addMap[T](dataModel: DataModel, op: Op, vs: Map[String, T]): DataModel = {
+       |    val es   = dataModel.elements
        |    val last = es.last match {
        |      case a: AttrMapMan => a match {
        |        ${addMap("Man")}
@@ -172,10 +186,11 @@ object _ModelTransformations extends CoreGenBase("ModelTransformations", "/ops")
        |      }
        |      case a             => unexpected(a)
        |    }
-       |    es.init :+ last
+       |    dataModel.copy(elements = es.init :+ last)
        |  }
        |
-       |  protected def addMapKs(es: List[Element], op: Op, ks: Seq[String]): List[Element] = {
+       |  protected def addMapKs(dataModel: DataModel, op: Op, ks: Seq[String]): DataModel = {
+       |    val es   = dataModel.elements
        |    val last = es.last match {
        |      case a: AttrMapMan => a match {
        |        ${addMapKs("Man")}
@@ -188,10 +203,11 @@ object _ModelTransformations extends CoreGenBase("ModelTransformations", "/ops")
        |      }
        |      case a             => unexpected(a)
        |    }
-       |    es.init :+ last
+       |    dataModel.copy(elements = es.init :+ last)
        |  }
        |
-       |  protected def addMapVs[T](es: List[Element], op: Op, vs: Seq[T]): List[Element] = {
+       |  protected def addMapVs[T](dataModel: DataModel, op: Op, vs: Seq[T]): DataModel = {
+       |    val es   = dataModel.elements
        |    val last = es.last match {
        |      case a: AttrMapMan => a match {
        |        ${addMapVs("Man")}
@@ -201,20 +217,22 @@ object _ModelTransformations extends CoreGenBase("ModelTransformations", "/ops")
        |      }
        |      case a             => unexpected(a)
        |    }
-       |    es.init :+ last
+       |    dataModel.copy(elements = es.init :+ last)
        |  }
        |
-       |  protected def addMapOpt[T](es: List[Element], op: Op, vs: Option[Map[String, T]]): List[Element] = {
+       |  protected def addMapOpt[T](dataModel: DataModel, op: Op, vs: Option[Map[String, T]]): DataModel = {
+       |    val es   = dataModel.elements
        |    val last = es.last match {
        |      case a: AttrMapOpt => a match {
        |        $addMapOpt
        |      }
        |      case a             => unexpected(a)
        |    }
-       |    es.init :+ last
+       |    dataModel.copy(elements = es.init :+ last)
        |  }
        |
-       |  protected def addSort(es: List[Element], sort: String): List[Element] = {
+       |  protected def addSort(dataModel: DataModel, sort: String): DataModel = {
+       |    val es = dataModel.elements
        |    es.size match {
        |      case 1 =>
        |        List(setSort(es.last, sort))
@@ -263,7 +281,7 @@ object _ModelTransformations extends CoreGenBase("ModelTransformations", "/ops")
        |  }
        |
        |  @tailrec
-       |  private def resolvePath(es: List[Element], path: List[String]): List[String] = {
+       |  private def resolvePath(dataModel: DataModel, path: List[String]): List[String] = {
        |    es match {
        |      case e :: tail => e match {
        |        case r: Ref  =>
@@ -278,8 +296,8 @@ object _ModelTransformations extends CoreGenBase("ModelTransformations", "/ops")
        |    }
        |  }
        |
-       |  protected def filterAttr(es: List[Element], op: Op, filterAttrMolecule: Molecule): List[Element] = {
-       |    val filterAttr0 = filterAttrMolecule.elements.last.asInstanceOf[Attr]
+       |  protected def filterAttr(dataModel: DataModel, op: Op, filterAttrMolecule: Molecule): DataModel = {
+       |    val filterAttr0 = filterAttrMolecule.dataModel.elements.last.asInstanceOf[Attr]
        |    val attrs       = es.last match {
        |      case a: Attr =>
        |        val (tacitFilterAttr, adjacent) = if (a.ent == filterAttr0.ent) {
@@ -374,53 +392,6 @@ object _ModelTransformations extends CoreGenBase("ModelTransformations", "/ops")
        |  private def reverseSort(sort: String): String = sort.head match {
        |    case 'a' => "d" + sort.last
        |    case 'd' => "a" + sort.last
-       |  }
-       |
-       |  protected def cleanUpdateElements(elements: List[Element]): List[Element] = {
-       |    elements.map {
-       |      case a: Attr => a match {
-       |        case a: AttrOne => a match {
-       |          case a: AttrOneTac => a
-       |          case a: AttrOneMan => a match {
-       |            ${clean("One", "Man")}
-       |          }
-       |          case a: AttrOneOpt => a match {
-       |            ${clean("One", "Opt")}
-       |          }
-       |        }
-       |
-       |        case a: AttrSet => a match {
-       |          case a: AttrSetTac => a
-       |          case a: AttrSetMan => a match {
-       |            ${clean("Set", "Man")}
-       |          }
-       |          case a: AttrSetOpt => a match {
-       |            ${clean("Set", "Opt")}
-       |          }
-       |        }
-       |
-       |        case a: AttrSeq => a match {
-       |          case a: AttrSeqTac => a
-       |          case a: AttrSeqMan => a match {
-       |            ${clean("Seq", "Man")}
-       |          }
-       |          case a: AttrSeqOpt => a match {
-       |            ${clean("Seq", "Opt")}
-       |          }
-       |        }
-       |
-       |        case a: AttrMap => a match {
-       |          case a: AttrMapTac => a
-       |          case a: AttrMapMan => a match {
-       |            ${clean("Map", "Man")}
-       |          }
-       |          case a: AttrMapOpt => a match {
-       |            ${clean("Map", "Opt")}
-       |          }
-       |        }
-       |      }
-       |      case other   => other
-       |    }
        |  }
        |
        |  protected def topLevelAttrCount(elements: List[Element], count: Int = 0): Int = {

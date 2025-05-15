@@ -1,11 +1,11 @@
 package molecule.db.compliance.test.api
 
 import molecule.db.base.error.{InsertErrors, ValidationErrors}
+import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.compliance.setup.{DbProviders, Test, TestUtils}
 import molecule.db.core.api.Api_sync
 import molecule.db.core.spi.Spi_sync
 import scala.annotation.nowarn
-import molecule.db.compliance.domains.dsl.Types.*
 
 // Testing the synchronous api only on the JVM platform since the JS platform
 // is dependent on asynchronous retrieval of data from the server.

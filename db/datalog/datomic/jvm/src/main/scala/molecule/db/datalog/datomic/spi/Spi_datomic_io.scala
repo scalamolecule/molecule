@@ -1,16 +1,11 @@
 package molecule.db.datalog.datomic.spi
 
 import cats.effect.IO
-import molecule.db.base.error.*
-import molecule.db.core.util.Executor.global as ec
 import molecule.db.base.error.{InsertError, InsertErrors, ValidationErrors}
-import molecule.db.core.action.{Delete, Insert, Query, QueryCursor, QueryOffset, Save, Update}
+import molecule.db.core.action.*
 import molecule.db.core.spi.{Conn, Spi_io, TxReport}
-import molecule.db.datalog
+import molecule.db.core.util.Executor.global as ec
 import molecule.db.datalog.core.spi.StreamingDatomic
-import molecule.db.datalog.datomic
-import molecule.db.datalog.datomic.spi.SpiBase_datomic_io
-import scala.concurrent.ExecutionContext as EC
 
 trait Spi_datomic_io
   extends Spi_io
@@ -42,7 +37,7 @@ trait Spi_datomic_io
   override def queryOffset_inspect[Tpl](
     q: QueryOffset[Tpl]
   )(implicit conn: Conn): IO[Unit] = {
-    printInspectQuery("QUERY (offset)", q.elements)
+    printInspectQuery("QUERY (offset)", q.dataModel)
   }
 
 
@@ -55,7 +50,7 @@ trait Spi_datomic_io
   override def queryCursor_inspect[Tpl](
     q: QueryCursor[Tpl]
   )(implicit conn: Conn): IO[Unit] = {
-    printInspectQuery("QUERY (cursor)", q.elements)
+    printInspectQuery("QUERY (cursor)", q.dataModel)
   }
 
 
@@ -90,9 +85,10 @@ trait Spi_datomic_io
       IO.blocking {
         Spi_datomic_sync.save_validate(save)(conn) match {
           case errors if errors.isEmpty =>
-            Spi_datomic_async.save_transact(
-              save.copy(elements = keywordsSuffixed(save.elements, conn.proxy))
-            )(conn, ec)
+            val cleanElements  = keywordsSuffixed(save.dataModel.elements, conn.proxy)
+            val cleanDataModel = save.dataModel.copy(elements = cleanElements)
+            val saveClean      = save.copy(dataModel = cleanDataModel)
+            Spi_datomic_async.save_transact(saveClean)(conn, ec)
           case errors                   => throw ValidationErrors(errors)
         }
       }
@@ -114,9 +110,11 @@ trait Spi_datomic_io
     IO.fromFuture {
       IO.blocking {
         Spi_datomic_sync.insert_validate(insert)(conn) match {
-          case errors if errors.isEmpty => Spi_datomic_async.insert_transact(
-            insert.copy(elements = keywordsSuffixed(insert.elements, conn.proxy))
-          )(conn, ec)
+          case errors if errors.isEmpty =>
+            val cleanElements  = keywordsSuffixed(insert.dataModel.elements, conn.proxy)
+            val cleanDataModel = insert.dataModel.copy(elements = cleanElements)
+            val insertClean    = insert.copy(dataModel = cleanDataModel)
+            Spi_datomic_async.insert_transact(insertClean)(conn, ec)
           case errors                   => throw InsertErrors(errors)
         }
       }
@@ -138,9 +136,11 @@ trait Spi_datomic_io
     IO.fromFuture {
       IO.blocking {
         Spi_datomic_sync.update_validate(update)(conn) match {
-          case errors if errors.isEmpty => Spi_datomic_async.update_transact(
-            update.copy(elements = keywordsSuffixed(update.elements, conn.proxy))
-          )(conn, ec)
+          case errors if errors.isEmpty =>
+            val cleanElements  = keywordsSuffixed(update.dataModel.elements, conn.proxy)
+            val cleanDataModel = update.dataModel.copy(elements = cleanElements)
+            val updateClean    = update.copy(dataModel = cleanDataModel)
+            Spi_datomic_async.update_transact(updateClean)(conn, ec)
           case errors                   => throw ValidationErrors(errors)
         }
       }
@@ -161,9 +161,10 @@ trait Spi_datomic_io
   override def delete_transact(delete: Delete)(implicit conn: Conn): IO[TxReport] = {
     IO.fromFuture {
       IO.blocking {
-        Spi_datomic_async.delete_transact(
-          delete.copy(elements = keywordsSuffixed(delete.elements, conn.proxy))
-        )(conn, ec)
+        val cleanElements  = keywordsSuffixed(delete.dataModel.elements, conn.proxy)
+        val cleanDataModel = delete.dataModel.copy(elements = cleanElements)
+        val deleteClean    = delete.copy(dataModel = cleanDataModel)
+        Spi_datomic_async.delete_transact(deleteClean)(conn, ec)
       }
     }
   }

@@ -2,10 +2,10 @@ package molecule.server.ziohttp
 
 import java.nio.ByteBuffer
 import boopickle.Default.*
-import molecule.db.core.ast.Element
+import molecule.db.core.ast.DataModel
 import molecule.db.core.marshalling.Boopicklers.*
-import molecule.db.core.marshalling.{ConnProxy, MoleculeRpc}
 import molecule.db.core.marshalling.serialize.PickleTpls
+import molecule.db.core.marshalling.{ConnProxy, MoleculeRpc}
 import molecule.server.core.ServerEndpoints_zio
 import sttp.capabilities.WebSockets
 import sttp.capabilities.zio.ZioStreams
@@ -23,17 +23,17 @@ abstract class ZiohttpServerEndpoints(rpc: MoleculeRpc) extends ServerEndpoints_
       val incoming: ZStream[Any, Throwable, Nothing] = in.mapZIO { msg =>
         ZIO
           .attempt {
-            val (proxy, elements, limit) =
-              Unpickle[(ConnProxy, List[Element], Option[Int])].fromBytes(ByteBuffer.wrap(msg))
+            val (proxy, dataModel, limit) =
+              Unpickle[(ConnProxy, DataModel, Option[Int])].fromBytes(ByteBuffer.wrap(msg))
 
             val callback: List[Any] => Unit = { result =>
-              val outBytes = PickleTpls(elements, false).pickleEither2ByteArray(Right(result))
+              val outBytes = PickleTpls(dataModel, false).pickleEither2ByteArray(Right(result))
               Unsafe.unsafe { implicit u =>
                 Runtime.default.unsafe.run(outgoingQueue.offer(outBytes)).getOrThrowFiberFailure()
               }
             }
 
-            rpc.subscribe[Any](proxy, elements, limit, callback)
+            rpc.subscribe[Any](proxy, dataModel, limit, callback)
           }
           .catchAll(e => ZIO.logWarning(s"Deserialization failed: ${e.getMessage}"))
       }.drain

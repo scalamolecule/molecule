@@ -2,7 +2,6 @@ package molecule.db.sql.mysql.compliance.action.update.attrOp
 
 import molecule.db.compliance.setup.Test
 import molecule.db.compliance.test.action.update.attrOp.decimal.{AttrOpDecimal_BigDecimal, AttrOpDecimal_Double, AttrOpDecimal_Float_}
-import molecule.db.sql
 import molecule.db.sql.mysql.setup.Api_mysql_async
 
 

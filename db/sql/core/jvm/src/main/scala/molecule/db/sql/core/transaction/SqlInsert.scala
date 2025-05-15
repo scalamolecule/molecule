@@ -1,13 +1,12 @@
 package molecule.db.sql.core.transaction
 
 import java.sql.PreparedStatement as PS
-import molecule.db.base.ast.*
-import molecule.db.core.ast.{Attr, Element, OptEntity}
 import molecule.db.base.ast.{Card, CardOne}
-import molecule.db.core.transaction.{InsertResolvers_, ResolveInsert}
+import molecule.db.core.ast.{Attr, Element}
 import molecule.db.core.transaction.ops.InsertOps
+import molecule.db.core.transaction.{InsertResolvers_, ResolveInsert}
 import molecule.db.sql.core.transaction.strategy.SqlOps
-import molecule.db.sql.core.transaction.strategy.insert.{InsertAction, InsertOptEntity, InsertRoot}
+import molecule.db.sql.core.transaction.strategy.insert.{InsertAction, InsertRoot}
 
 trait SqlInsert
   extends InsertOps

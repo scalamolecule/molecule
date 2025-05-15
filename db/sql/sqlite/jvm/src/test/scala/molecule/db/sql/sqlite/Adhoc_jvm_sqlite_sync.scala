@@ -1,10 +1,8 @@
 package molecule.db.sql.sqlite
 
 import molecule.db.compliance.setup.{Test, TestUtils}
-import molecule.db.sql
 import molecule.db.sql.sqlite.setup.DbProviders_sqlite
 import molecule.db.sql.sqlite.sync.*
-
 
 
 class Adhoc_jvm_sqlite_sync extends Test with DbProviders_sqlite with TestUtils {

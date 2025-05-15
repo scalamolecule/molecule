@@ -1,20 +1,20 @@
 package molecule.db.sql.h2.spi
 
 import java.sql.DriverManager
-import molecule.db.core.ast.Element
-import molecule.db.core.util.Executor.*
 import molecule.db.core.action.{Delete, Insert, Save, Update}
+import molecule.db.core.ast.Element
 import molecule.db.core.marshalling.{ConnProxy, JdbcProxy}
 import molecule.db.core.transaction.{ResolveDelete, ResolveInsert, ResolveSave, ResolveUpdate}
+import molecule.db.core.util.Executor.*
 import molecule.db.sql.core.facade.{JdbcConn_JVM, JdbcHandler_JVM}
 import molecule.db.sql.core.javaSql.ResultSetInterface as RS
 import molecule.db.sql.core.spi.SpiBaseJVM_sync
-import molecule.db.sql.core.transaction.{SqlDelete, SqlInsert, SqlSave, SqlUpdate}
 import molecule.db.sql.core.transaction.strategy.SqlOps
 import molecule.db.sql.core.transaction.strategy.delete.DeleteAction
 import molecule.db.sql.core.transaction.strategy.insert.InsertAction
 import molecule.db.sql.core.transaction.strategy.save.SaveAction
 import molecule.db.sql.core.transaction.strategy.update.UpdateAction
+import molecule.db.sql.core.transaction.{SqlDelete, SqlInsert, SqlSave, SqlUpdate}
 import molecule.db.sql.h2.query.Model2SqlQuery_h2
 import scala.concurrent.Future
 
@@ -27,14 +27,14 @@ trait Spi_h2_sync extends SpiBaseJVM_sync {
     save: Save, conn: JdbcConn_JVM
   ): SaveAction = {
     new SqlOps_h2(conn) with ResolveSave with Spi_h2_sync with SqlSave {}
-      .getSaveAction(save.elements)
+      .getSaveAction(save.dataModel.elements)
   }
 
   override def insert_getAction(
     insert: Insert, conn: JdbcConn_JVM
   ): InsertAction = {
     new SqlOps_h2(conn) with ResolveInsert with SqlInsert {}
-      .getInsertAction(insert.elements, insert.tpls)
+      .getInsertAction(insert.dataModel.elements, insert.tpls)
   }
 
   override def update_getAction(
@@ -42,7 +42,7 @@ trait Spi_h2_sync extends SpiBaseJVM_sync {
   ): UpdateAction = {
     new SqlOps_h2(conn0) with ResolveUpdate with Spi_h2_sync with SqlUpdate {
       override val isUpsert: Boolean = update.isUpsert
-    }.getUpdateAction(update.elements)
+    }.getUpdateAction(update.dataModel.elements)
   }
 
   override def delete_getAction(
@@ -50,7 +50,7 @@ trait Spi_h2_sync extends SpiBaseJVM_sync {
   ): DeleteAction = {
     new SqlOps_h2(conn)
       with ResolveDelete with SqlDelete {}
-      .getDeleteAction(delete.elements, conn.proxy.entityMap)
+      .getDeleteAction(delete.dataModel.elements, conn.proxy.entityMap)
   }
 
 

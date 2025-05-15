@@ -2,16 +2,14 @@ package molecule.db.sql.mariadb.setup
 
 import java.sql.DriverManager
 import com.dimafeng.testcontainers.MariaDBContainer
-import molecule.db.core.api.{Schema, Schema_mariadb}
-import molecule.db.compliance.setup.DbConnection
+import molecule.db.core.api.Schema_mariadb
 import molecule.db.core.marshalling.JdbcProxy
 import molecule.db.core.spi.Conn
 import molecule.db.sql.core.facade.{JdbcConn_JVM, JdbcHandler_JVM}
-import molecule.db.sql.mariadb
 import zio.{ZIO, ZLayer}
 
 //object DbConnection_mariadb extends DbConnection {
-object DbConnection_mariadb  {
+object DbConnection_mariadb {
 
   private val url = s"jdbc:tc:mariadb:latest:///test" +
     s"?allowMultiQueries=true" +
@@ -34,7 +32,7 @@ object DbConnection_mariadb  {
        |USE test;
        |""".stripMargin
 
-  def getConnection(schema:Schema_mariadb): JdbcConn_JVM = {
+  def getConnection(schema: Schema_mariadb): JdbcConn_JVM = {
     val initSql = resetDb + schema.schemaData.head
     val proxy   = JdbcProxy(url, schema, initSql)
 

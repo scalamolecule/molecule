@@ -2,16 +2,15 @@ package molecule.db.sql.core.transaction
 
 import java.sql.PreparedStatement as PS
 import boopickle.Default.*
-import molecule.db.base.error.*
 import molecule.db.base.ast.CardOne
 import molecule.db.base.error.ModelError
+import molecule.db.core.ast.*
 import molecule.db.core.transaction.ResolveUpdate
 import molecule.db.core.transaction.ops.UpdateOps
 import molecule.db.sql.core.spi.SpiHelpers
 import molecule.db.sql.core.transaction.strategy.SqlOps
 import molecule.db.sql.core.transaction.strategy.update.{UpdateAction, UpdateRoot}
 import scala.collection.mutable.ListBuffer
-import molecule.db.core.ast._
 
 trait SqlUpdate
   extends UpdateOps

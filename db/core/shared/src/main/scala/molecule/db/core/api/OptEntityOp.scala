@@ -8,7 +8,7 @@ trait OptEntityOp_0[Entity[_, _]] {
   protected def _optEntity[OptEntityTpl](attrs: List[Attr]): Entity[Option[OptEntityTpl], Any] = ???
 }
 trait OptEntity_0[Entity[_, _]] { self: OptEntityOp_0[Entity] =>
-  private def getAttrs(optEntity: Molecule): List[Attr] = optEntity.elements.map {
+  private def getAttrs(optEntity: Molecule): List[Attr] = optEntity.dataModel.elements.map {
     case a: Attr => a
     case _       => throw ModelError("Only attributes allowed in optional entity.")
   }

@@ -1,11 +1,9 @@
 package molecule.db.sql.mysql.setup
 
-import molecule.db.core.api.{Schema, Schema_mysql}
+import molecule.db.core.api.Schema_mysql
 import molecule.db.core.marshalling.JdbcProxy
 import molecule.db.core.spi.Conn
 import molecule.db.sql.core.facade.JdbcConn_JS
-import molecule.db.sql.mysql
-import sttp.client4.UriContext
 import zio.{ZIO, ZLayer}
 import scala.util.Random
 

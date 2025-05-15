@@ -2,14 +2,12 @@ package molecule.db.datalog.datomic.transaction
 
 import java.time.*
 import java.util.{ArrayList as jArrayList, List as jList}
-import molecule.db.base.ast.*
 import molecule.db.base.ast.{Card, CardOne}
 import molecule.db.base.error.ModelError
-import molecule.db.core.transaction.{InsertResolvers_, ResolveInsert}
+import molecule.db.core.ast.*
 import molecule.db.core.transaction.ops.InsertOps
+import molecule.db.core.transaction.{InsertResolvers_, ResolveInsert}
 import molecule.db.core.util.{ModelUtils, MoleculeLogging}
-import molecule.db.datalog.datomic
-import molecule.db.core.ast._
 
 trait Insert_datomic
   extends DatomicBase_JVM

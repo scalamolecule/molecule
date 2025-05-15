@@ -1,8 +1,7 @@
 package molecule.db.sql.sqlite.compliance.aggregation
 
 import molecule.db.compliance.setup.Test
-import molecule.db.compliance.test.aggregation.ref.{AggrRef_count, AggrRef_distinct, AggrRef_min_max, AggrRef_min_max_n, AggrRef_sample, AggrRef_sample_n}
-import molecule.db.sql
+import molecule.db.compliance.test.aggregation.ref.*
 import molecule.db.sql.sqlite.setup.Api_sqlite_async
 
 class AggrRef_countTest extends Test {

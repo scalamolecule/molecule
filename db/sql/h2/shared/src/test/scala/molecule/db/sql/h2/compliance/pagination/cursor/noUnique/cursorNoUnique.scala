@@ -1,8 +1,7 @@
 package molecule.db.sql.h2.compliance.pagination.cursor.noUnique
 
 import molecule.db.compliance.setup.Test
-import molecule.db.compliance.test.pagination.cursor.noUnique.{AttrOrderMandatory, AttrOrderOptional, DirectionsMandatory, DirectionsOptional, MutationAdd, MutationDelete, Nested, OptNested, TypesOptional}
-import molecule.db.sql
+import molecule.db.compliance.test.pagination.cursor.noUnique.*
 import molecule.db.sql.h2.setup.Api_h2_async
 
 class AttrOrderMandatoryTest extends Test {

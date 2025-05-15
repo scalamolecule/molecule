@@ -1,21 +1,21 @@
 package molecule.db.sql.core.query
 
-import molecule.db.core.ast.Element
-import molecule.db.core.util.Executor.global
 import molecule.db.base.error.ModelError
+import molecule.db.core.ast.{DataModel, Element}
+import molecule.db.core.util.Executor.global
 import molecule.db.core.util.{FutureUtils, ModelUtils, MoleculeLogging}
 import molecule.db.sql.core.facade.JdbcConn_JVM
+import molecule.db.sql.core.query.casting.strategy.*
 import molecule.db.sql.core.query.casting.{NestOptTpls, NestTpls}
 import scala.concurrent.Future
-import molecule.db.sql.core.query.casting.strategy.*
 
 
 case class SqlQueryResolveOffset[Tpl](
-  elements: List[Element],
+  dataModel: DataModel,
   optLimit: Option[Int],
   optOffset: Option[Int],
   m2q: Model2SqlQuery & SqlQueryBase
-) extends SqlQueryResolve[Tpl](elements, m2q)
+) extends SqlQueryResolve[Tpl](dataModel, m2q)
   with FutureUtils
   with ModelUtils
   with MoleculeLogging {
@@ -86,8 +86,8 @@ case class SqlQueryResolveOffset[Tpl](
     callback: List[Tpl] => Unit,
     freshM2q: List[Element] => Model2SqlQuery & SqlQueryBase
   ): Unit = {
-    val involvedAttrs        = getAttrNames(elements)
-    val involvedDeleteEntity = getInitialEntity(elements)
+    val involvedAttrs        = getAttrNames(dataModel.elements)
+    val involvedDeleteEntity = getInitialEntity(dataModel.elements)
     val maybeCallback        = (mutationAttrs: Set[String], isDelete: Boolean) => {
 
       println("involvedAttrs: " + involvedAttrs)
@@ -100,12 +100,12 @@ case class SqlQueryResolveOffset[Tpl](
         println(s"  $mutationAttrs triggering callback")
         Future(
           callback {
-            SqlQueryResolveOffset(elements, optLimit, None, freshM2q(elements))
+            SqlQueryResolveOffset(dataModel, optLimit, None, freshM2q(dataModel.elements))
               .getListFromOffset_sync(conn)._1
           }
         )
       } else Future.unit
     }
-    conn.addCallback((elements, maybeCallback))
+    conn.addCallback((dataModel, maybeCallback))
   }
 }

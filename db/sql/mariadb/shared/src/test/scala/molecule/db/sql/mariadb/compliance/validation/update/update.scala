@@ -1,8 +1,7 @@
 package molecule.db.sql.mariadb.compliance.validation.update
 
 import molecule.db.compliance.setup.Test
-import molecule.db.compliance.test.validation.update.{TypesOne, TypesOneOpt, TypesSeq, TypesSeqOpt, TypesSet, TypesSetOpt}
-import molecule.db.sql
+import molecule.db.compliance.test.validation.update.*
 import molecule.db.sql.mariadb.setup.Api_mariadb_async
 
 class TypesOneTest extends Test {

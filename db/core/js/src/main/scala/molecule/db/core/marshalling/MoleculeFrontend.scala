@@ -51,7 +51,7 @@ case class MoleculeFrontend(host: String, port: Int)
 
   override def subscribe[Tpl](
     proxy: ConnProxy,
-    elements: List[Element],
+    dataModel: DataModel,
     limit: Option[Int],
     callback: List[Tpl] => Unit
   ): Future[Unit] = Future {
@@ -71,14 +71,14 @@ case class MoleculeFrontend(host: String, port: Int)
       case _: dom.Event =>
         logger.trace(s"WebSocket onopen")
         socket.send(
-          Pickle.intoBytes((proxy, elements, limit)).typedArray().buffer
+          Pickle.intoBytes((proxy, dataModel, limit)).typedArray().buffer
         )
     }
     socket.onmessage = {
       case e: MessageEvent =>
         logger.trace(s"WebSocket onmessage")
         val resultSerialized = TypedArrayBuffer.wrap(e.data.asInstanceOf[ArrayBuffer])
-        UnpickleTpls[Tpl](elements, resultSerialized).unpickleEither match {
+        UnpickleTpls[Tpl](dataModel, resultSerialized).unpickleEither match {
           case Right(tpls)                      => callback(tpls)
           case Left(ExecutionError("no match")) => // do nothing
           case Left(moleculeError)              => logger.warn(moleculeError.toString)
@@ -88,95 +88,95 @@ case class MoleculeFrontend(host: String, port: Int)
 
   override def unsubscribe(
     proxy: ConnProxy,
-    elements: List[Element]
+    dataModel: DataModel
   ): Future[Either[MoleculeError, Unit]] = {
     fetch[Unit](
       moleculeEndpoint_unsubscribe,
-      Pickle.intoBytes((proxy, elements)),
+      Pickle.intoBytes((proxy, dataModel)),
       (_: ByteBuffer) => ()
     )
   }
 
   override def query[Tpl](
     proxy: ConnProxy,
-    elements: List[Element],
+    dataModel: DataModel,
     limit: Option[Int]
   ): Future[Either[MoleculeError, List[Tpl]]] = {
     fetch[List[Tpl]](
       moleculeEndpoint_query,
-      Pickle.intoBytes((proxy, elements, limit)),
-      (result: ByteBuffer) => UnpickleTpls[Tpl](elements, result).unpickleTpls
+      Pickle.intoBytes((proxy, dataModel, limit)),
+      (result: ByteBuffer) => UnpickleTpls[Tpl](dataModel, result).unpickleTpls
     )
   }
 
   override def queryOffset[Tpl](
     proxy: ConnProxy,
-    elements: List[Element],
+    dataModel: DataModel,
     limit: Option[Int],
     offset: Int
   ): Future[Either[MoleculeError, (List[Tpl], Int, Boolean)]] = {
     fetch[(List[Tpl], Int, Boolean)](
       moleculeEndpoint_queryOffset,
-      Pickle.intoBytes((proxy, elements, limit, offset)),
-      (result: ByteBuffer) => UnpickleTpls[Tpl](elements, result).unpickleOffset
+      Pickle.intoBytes((proxy, dataModel, limit, offset)),
+      (result: ByteBuffer) => UnpickleTpls[Tpl](dataModel, result).unpickleOffset
     )
   }
 
   override def queryCursor[Tpl](
     proxy: ConnProxy,
-    elements: List[Element],
+    dataModel: DataModel,
     limit: Option[Int],
     cursor: String
   ): Future[Either[MoleculeError, (List[Tpl], String, Boolean)]] = {
     fetch[(List[Tpl], String, Boolean)](
       moleculeEndpoint_queryCursor,
-      Pickle.intoBytes((proxy, elements, limit, cursor)),
-      (result: ByteBuffer) => UnpickleTpls[Tpl](elements, result).unpickleCursor
+      Pickle.intoBytes((proxy, dataModel, limit, cursor)),
+      (result: ByteBuffer) => UnpickleTpls[Tpl](dataModel, result).unpickleCursor
     )
   }
 
   override def save(
     proxy: ConnProxy,
-    elements: List[Element]
+    dataModel: DataModel
   ): Future[Either[MoleculeError, TxReport]] = {
     fetch(
       moleculeEndpoint_save,
-      Pickle.intoBytes((proxy, elements)),
+      Pickle.intoBytes((proxy, dataModel)),
       (result: ByteBuffer) => Unpickle[TxReport].fromBytes(result)
     )
   }
 
   override def insert(
     proxy: ConnProxy,
-    elements: List[Element],
+    dataModel: DataModel,
     tplsSerialized: ByteBuffer,
   ): Future[Either[MoleculeError, TxReport]] = {
     fetch(
       moleculeEndpoint_insert,
-      Pickle.intoBytes((proxy, elements, tplsSerialized)),
+      Pickle.intoBytes((proxy, dataModel, tplsSerialized)),
       (result: ByteBuffer) => Unpickle[TxReport].fromBytes(result)
     )
   }
 
   override def update(
     proxy: ConnProxy,
-    elements: List[Element],
+    dataModel: DataModel,
     isUpsert: Boolean = false
   ): Future[Either[MoleculeError, TxReport]] = {
     fetch(
       moleculeEndpoint_update,
-      Pickle.intoBytes((proxy, elements, isUpsert)),
+      Pickle.intoBytes((proxy, dataModel, isUpsert)),
       (result: ByteBuffer) => Unpickle[TxReport].fromBytes(result)
     )
   }
 
   override def delete(
     proxy: ConnProxy,
-    elements: List[Element]
+    dataModel: DataModel
   ): Future[Either[MoleculeError, TxReport]] = {
     fetch(
       moleculeEndpoint_delete,
-      Pickle.intoBytes((proxy, elements)),
+      Pickle.intoBytes((proxy, dataModel)),
       (result: ByteBuffer) => Unpickle[TxReport].fromBytes(result)
     )
   }

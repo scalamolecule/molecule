@@ -2,23 +2,20 @@ package molecule.db.datalog.datomic.query
 
 import java.util
 import java.util.stream.Stream as jStream
-import java.util.List as jList
-import java.util.{Collections, Comparator, stream, ArrayList as jArrayList, Collection as jCollection, List as jList}
+import java.util.{Collections, Comparator, ArrayList as jArrayList, Collection as jCollection, List as jList}
 import datomic.{Database, Peer}
-import molecule.db.core.marshalling.dbView.*
 import molecule.db.base.error.ModelError
+import molecule.db.core.ast.*
+import molecule.db.core.marshalling.dbView.*
 import molecule.db.core.query.Pagination
 import molecule.db.core.util.MoleculeLogging
-import molecule.db.datalog
-import molecule.db.datalog.datomic.facade.DatomicConn_JVM
 import molecule.db.datalog.core.query.{DatomicQueryBase, Model2DatomicQuery}
+import molecule.db.datalog.datomic.facade.DatomicConn_JVM
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
-import scala.jdk.StreamConverters.StreamHasToScala
-import molecule.db.core.ast._
 
 abstract class DatomicQueryResolve[Tpl](
-  elements: List[Element],
+  dataModel: DataModel,
   dbView: Option[DbView],
   m2q: Model2DatomicQuery[Tpl] & DatomicQueryBase
 ) extends Pagination[Tpl] with MoleculeLogging {
@@ -38,17 +35,17 @@ abstract class DatomicQueryResolve[Tpl](
     val db = altDb.getOrElse(getDb(conn))
     m2q.getDatomicQueries(conn.optimizeQuery, altElements, validate) match {
       case ("", query, _) =>
-        distinct(Peer.q(query, db +: m2q.inputs*))
+        distinct(Peer.q(query, db +: m2q.inputs *))
 
       case (preQuery, query, _) =>
         // Pre-query
-        val preRows = Peer.q(preQuery, db +: m2q.preInputs*)
+        val preRows = Peer.q(preQuery, db +: m2q.preInputs *)
         val preIds  = new java.util.HashSet[Long](preRows.size())
         preRows.forEach { row =>
           preIds.add(row.get(0).asInstanceOf[Long])
         }
         // Main query using entity ids from pre-query
-        distinct(Peer.q(query, db +: m2q.inputs :+ preIds*))
+        distinct(Peer.q(query, db +: m2q.inputs :+ preIds *))
     }
   }
 
@@ -61,17 +58,17 @@ abstract class DatomicQueryResolve[Tpl](
     val db = altDb.getOrElse(getDb(conn))
     m2q.getDatomicQueries(conn.optimizeQuery, altElements, validate) match {
       case ("", query, _) =>
-        Peer.qseq(query, db +: m2q.inputs*).asInstanceOf[jStream[jList[AnyRef]]]
+        Peer.qseq(query, db +: m2q.inputs *).asInstanceOf[jStream[jList[AnyRef]]]
 
       case (preQuery, query, _) =>
         // Pre-query
-        val preRows = Peer.q(preQuery, db +: m2q.preInputs*)
+        val preRows = Peer.q(preQuery, db +: m2q.preInputs *)
         val preIds  = new java.util.HashSet[Long](preRows.size())
         preRows.forEach { row =>
           preIds.add(row.get(0).asInstanceOf[Long])
         }
         // Main query using entity ids from pre-query
-        Peer.qseq(query, db +: m2q.inputs :+ preIds*).asInstanceOf[jStream[jList[AnyRef]]]
+        Peer.qseq(query, db +: m2q.inputs :+ preIds *).asInstanceOf[jStream[jList[AnyRef]]]
     }
   }
 
@@ -153,7 +150,7 @@ abstract class DatomicQueryResolve[Tpl](
       }
       getFilterAttr(tpe, ent, attr, fn, v)
     }
-    val altElements = filterAttr +: elements
+    val altElements = filterAttr +: dataModel.elements
     val rows        = getRawData(conn, altElements)
     val sortedRows  = sortRows(rows)
     logger.debug(sortedRows.toArray().mkString("\n"))

@@ -4,7 +4,6 @@ import molecule.db.core.api.Schema_postgres
 import molecule.db.core.marshalling.JdbcProxy
 import molecule.db.core.spi.Conn
 import molecule.db.sql.core.facade.{JdbcConn_JVM, JdbcHandler_JVM}
-import molecule.db.sql.postgres
 import org.postgresql.ds.PGSimpleDataSource
 import org.testcontainers.containers.PostgreSQLContainer
 import zio.{ZIO, ZLayer}

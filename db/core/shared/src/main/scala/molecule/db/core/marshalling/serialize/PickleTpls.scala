@@ -15,7 +15,7 @@ import molecule.db.core.ast._
 import molecule.db.base.error.{ModelError, MoleculeError}
 
 case class PickleTpls(
-  elements: List[Element],
+  dataModel: DataModel,
   allTuples: Boolean
 ) extends PickleTpl_
   with ModelUtils
@@ -51,15 +51,15 @@ case class PickleTpls(
     enc.writeInt(tpls.size) // encode length of List of Tpl
     if (tpls.nonEmpty) {
       if (allTuples) {
-        val pickleTpl = getPickler(elements)
+        val pickleTpl = getPickler(dataModel.elements)
         tpls.asInstanceOf[Seq[Product]].foreach(pickleTpl)
       } else {
-        val arity = countValueAttrs(elements)
+        val arity = countValueAttrs(dataModel.elements)
         if (arity == 1) {
-          val pickleValue = resolvePicklers(elements, Nil, 0).head
+          val pickleValue = resolvePicklers(dataModel.elements, Nil, 0).head
           tpls.foreach(v => pickleValue(Tuple1(v)))
         } else {
-          val pickleTpl = getPickler(elements)
+          val pickleTpl = getPickler(dataModel.elements)
           tpls.asInstanceOf[Seq[Product]].foreach(pickleTpl)
         }
       }

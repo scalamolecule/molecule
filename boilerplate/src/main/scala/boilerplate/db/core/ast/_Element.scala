@@ -204,11 +204,11 @@ object _Element extends CoreGenBase("Element", "/ast") {
          |  $vs,
          |  override val filterAttr: Option[(Int, List[String], Attr)] = None,
          |  override val validator: Option[Validate$baseTpe0] = None,
-         |  override val valueAttrs: Seq[String] = Nil,
+         |  override val valueAttrs: List[String] = Nil,
          |  override val errors: Seq[String] = Nil,
          |  override val ref: Option[String] = None,
          |  override val sort: Option[String] = None,
-         |  override val coord: Seq[Int] = Nil
+         |  override val coord: List[Int] = Nil
          |) extends Attr$card$mode {
          |  override def toString: String = {
          |    $attrStr

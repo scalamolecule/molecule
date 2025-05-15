@@ -14,55 +14,55 @@ trait MoleculeRpc {
 
   def query[Tpl](
     proxy: ConnProxy,
-    elements: List[Element],
+    dataModel: DataModel,
     limit: Option[Int]
   ): Future[Either[MoleculeError, List[Tpl]]]
 
   def queryOffset[Tpl](
     proxy: ConnProxy,
-    elements: List[Element],
+    dataModel: DataModel,
     limit: Option[Int],
     offset: Int
   ): Future[Either[MoleculeError, (List[Tpl], Int, Boolean)]]
 
   def queryCursor[Tpl](
     proxy: ConnProxy,
-    elements: List[Element],
+    dataModel: DataModel,
     limit: Option[Int],
     cursor: String
   ): Future[Either[MoleculeError, (List[Tpl], String, Boolean)]]
 
   def subscribe[Tpl](
     proxy: ConnProxy,
-    elements: List[Element],
+    dataModel: DataModel,
     limit: Option[Int],
     callback: List[Tpl] => Unit
   ): Future[Unit]
 
   def unsubscribe(
     proxy: ConnProxy,
-    elements: List[Element]
+    dataModel: DataModel
   ): Future[Either[MoleculeError, Unit]]
 
   def save(
     proxy: ConnProxy,
-    elements: List[Element]
+    dataModel: DataModel
   ): Future[Either[MoleculeError, TxReport]]
 
   def insert(
     proxy: ConnProxy,
-    tplElements: List[Element],
+    tpldataModel: DataModel,
     tplsSerialized: ByteBuffer
   ): Future[Either[MoleculeError, TxReport]]
 
   def update(
     proxy: ConnProxy,
-    elements: List[Element],
+    dataModel: DataModel,
     isUpsert: Boolean = false
   ): Future[Either[MoleculeError, TxReport]]
 
   def delete(
     proxy: ConnProxy,
-    elements: List[Element]
+    dataModel: DataModel
   ): Future[Either[MoleculeError, TxReport]]
 }

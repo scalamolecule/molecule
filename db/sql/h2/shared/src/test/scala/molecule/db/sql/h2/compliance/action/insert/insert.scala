@@ -1,8 +1,7 @@
 package molecule.db.sql.h2.compliance.action.insert
 
 import molecule.db.compliance.setup.{MUnitSuiteWithArrays, Test}
-import molecule.db.compliance.test.action.insert.{InsertCardMap, InsertCardOne, InsertCardSeq, InsertCardSet, InsertRefs, InsertSemantics}
-import molecule.db.sql
+import molecule.db.compliance.test.action.insert.*
 import molecule.db.sql.h2.setup.Api_h2_async
 
 class InsertCardOneTest extends Test {

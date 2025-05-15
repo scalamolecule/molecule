@@ -1,16 +1,14 @@
 package molecule.db.datalog.core.query
 
 import molecule.db.base.error.ModelError
-import molecule.db.core.ast.DataModel
+import molecule.db.core.ast.*
 import molecule.db.core.query.QueryExpr
 import molecule.db.core.util.MoleculeLogging
 import molecule.db.datalog.core.query.casting.*
-import molecule.db.datalog.core.query.casting.*
 import scala.collection.mutable.ArrayBuffer
-import molecule.db.core.ast._
 
 
-class Model2DatomicQuery[Tpl](elements0: List[Element])
+class Model2DatomicQuery[Tpl](dataModel: DataModel)
   extends QueryExpr
     with QueryExprOne[Tpl]
     with QueryExprOneId[Tpl]
@@ -43,7 +41,7 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
     altElements: List[Element] = Nil,
     validate: Boolean = true
   ): (String, String, String) = {
-    val elements  = if (altElements.isEmpty) elements0 else altElements
+    val elements  = if (altElements.isEmpty) dataModel.elements else altElements
     val elements1 = if (validate)
       validateQueryModel(elements, Some(addFilterAttrCallback()))._1 else elements
 

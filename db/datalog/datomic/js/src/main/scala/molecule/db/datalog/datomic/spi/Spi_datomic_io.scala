@@ -7,12 +7,9 @@ import molecule.db.core.ast.Element
 import molecule.db.core.marshalling.serialize.PickleTpls
 import molecule.db.core.spi.{Conn, Spi_io, TxReport}
 import molecule.db.core.util.Executor.*
-import molecule.db.core.util.IOUtils
 import molecule.db.core.validation.TxModelValidation
 import molecule.db.core.validation.insert.InsertValidation
-import molecule.db.datalog
 import molecule.db.datalog.datomic.facade.DatomicConn_JS
-import molecule.db.datalog.datomic.spi.SpiBase_datomic_io
 import scala.concurrent.{Future, ExecutionContext as EC}
 
 
@@ -26,7 +23,7 @@ trait Spi_datomic_io
                              (implicit conn0: Conn): IO[List[Tpl]] = {
     val conn  = conn0.asInstanceOf[DatomicConn_JS]
     val proxy = conn.proxy.copy(dbView = q.dbView)
-    conn.rpc.query[Tpl](proxy, q.elements, q.optLimit).io
+    conn.rpc.query[Tpl](proxy, q.dataModel, q.optLimit).io
   }
 
   override def query_stream[Tpl](
@@ -36,16 +33,16 @@ trait Spi_datomic_io
 
   override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)
                                    (implicit conn0: Conn): IO[Unit] = {
-    val conn             = conn0.asInstanceOf[DatomicConn_JS]
-    val elements         = q.elements
-    val involvedAttrs    = getAttrNames(elements)
+    val conn                 = conn0.asInstanceOf[DatomicConn_JS]
+    val elements             = q.dataModel.elements
+    val involvedAttrs        = getAttrNames(elements)
     val involvedDeleteEntity = getInitialEntity(elements)
-    val maybeCallback    = (mutationAttrs: Set[String], isDelete: Boolean) => {
+    val maybeCallback        = (mutationAttrs: Set[String], isDelete: Boolean) => {
       if (
         mutationAttrs.exists(involvedAttrs.contains) ||
           isDelete && mutationAttrs.head.startsWith(involvedDeleteEntity)
       ) {
-        conn.rpc.query[Tpl](conn.proxy, q.elements, q.optLimit)
+        conn.rpc.query[Tpl](conn.proxy, q.dataModel, q.optLimit)
           .map {
             case Right(result)       => callback(result)
             case Left(moleculeError) => throw moleculeError
@@ -61,41 +58,41 @@ trait Spi_datomic_io
           }
       } else Future.unit
     }
-    IO(conn.addCallback(elements -> maybeCallback))
+    IO(conn.addCallback(q.dataModel -> maybeCallback))
   }
 
   override def query_unsubscribe[Tpl](q: Query[Tpl])
                                      (implicit conn: Conn): IO[Unit] = {
-    IO(conn.removeCallback(q.elements))
+    IO(conn.removeCallback(q.dataModel))
   }
 
   override def query_inspect[Tpl](q: Query[Tpl])
                                  (implicit conn: Conn): IO[Unit] = {
-    printInspectQuery("QUERY", q.elements)
+    printInspectQuery("QUERY", q.dataModel)
   }
 
   override def queryOffset_get[Tpl](q: QueryOffset[Tpl])
                                    (implicit conn0: Conn): IO[(List[Tpl], Int, Boolean)] = {
     val conn  = conn0.asInstanceOf[DatomicConn_JS]
     val proxy = conn.proxy.copy(dbView = q.dbView)
-    conn.rpc.queryOffset[Tpl](proxy, q.elements, q.optLimit, q.offset).io
+    conn.rpc.queryOffset[Tpl](proxy, q.dataModel, q.optLimit, q.offset).io
   }
 
   override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])
                                        (implicit conn: Conn): IO[Unit] = {
-    printInspectQuery("QUERY (offset)", q.elements)
+    printInspectQuery("QUERY (offset)", q.dataModel)
   }
 
   override def queryCursor_get[Tpl](q: QueryCursor[Tpl])
                                    (implicit conn0: Conn): IO[(List[Tpl], String, Boolean)] = {
     val conn  = conn0.asInstanceOf[DatomicConn_JS]
     val proxy = conn.proxy.copy(dbView = q.dbView)
-    conn.rpc.queryCursor[Tpl](proxy, q.elements, q.optLimit, q.cursor).io
+    conn.rpc.queryCursor[Tpl](proxy, q.dataModel, q.optLimit, q.cursor).io
   }
 
   override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])
                                        (implicit conn: Conn): IO[Unit] = {
-    printInspectQuery("QUERY (cursor)", q.elements)
+    printInspectQuery("QUERY (cursor)", q.dataModel)
   }
 
 
@@ -107,22 +104,22 @@ trait Spi_datomic_io
       _ <- if (save.doInspect) save_inspect(save) else IO.unit
       errors <- save_validate(save) // validate original elements against meta model
       txReport <- errors match {
-        case errors if errors.isEmpty => conn.rpc.save(conn.proxy, save.elements).io
+        case errors if errors.isEmpty => conn.rpc.save(conn.proxy, save.dataModel).io
         case errors                   => throw ValidationErrors(errors)
       }
-      _ <- conn.callback(save.elements).io
+      _ <- conn.callback(save.dataModel).io
     } yield {
       txReport
     }
   }
 
   override def save_inspect(save: Save)(implicit conn: Conn): IO[Unit] = {
-    printInspectTx("SAVE", save.elements)
+    printInspectTx("SAVE", save.dataModel.elements)
   }
 
   override def save_validate(save: Save)(implicit conn: Conn): IO[Map[String, Seq[String]]] = io {
     val proxy = conn.proxy
-    TxModelValidation(proxy.entityMap, proxy.attrMap, "save").validate(save.elements)
+    TxModelValidation(proxy.entityMap, proxy.attrMap, "save").validate(save.dataModel.elements)
   }
 
 
@@ -135,22 +132,22 @@ trait Spi_datomic_io
       errors <- insert_validate(insert) // validate original elements against meta model
       txReport <- errors match {
         case errors if errors.isEmpty =>
-          val tplsSerialized = PickleTpls(insert.elements, true).getPickledTpls(insert.tpls)
-          conn.rpc.insert(conn.proxy, insert.elements, tplsSerialized).io
+          val tplsSerialized = PickleTpls(insert.dataModel, true).getPickledTpls(insert.tpls)
+          conn.rpc.insert(conn.proxy, insert.dataModel, tplsSerialized).io
         case errors                   => throw InsertErrors(errors)
       }
-      _ <- conn.callback(insert.elements).io
+      _ <- conn.callback(insert.dataModel).io
     } yield {
       txReport
     }
   }
 
   override def insert_inspect(insert: Insert)(implicit conn: Conn): IO[Unit] = {
-    printInspectTx("INSERT", insert.elements)
+    printInspectTx("INSERT", insert.dataModel.elements)
   }
 
   override def insert_validate(insert: Insert)(implicit conn: Conn): IO[Seq[(Int, Seq[InsertError])]] = io {
-    InsertValidation.validate(conn, insert.elements, insert.tpls)
+    InsertValidation.validate(conn, insert.dataModel.elements, insert.tpls)
   }
 
 
@@ -163,22 +160,22 @@ trait Spi_datomic_io
       errors <- update_validate(update) // validate original elements against meta model
       txReport <- errors match {
         case errors if errors.isEmpty =>
-          conn.rpc.update(conn.proxy, update.elements, update.isUpsert).io
+          conn.rpc.update(conn.proxy, update.dataModel, update.isUpsert).io
         case errors                   => throw ValidationErrors(errors)
       }
-      _ <- conn.callback(update.elements).io
+      _ <- conn.callback(update.dataModel).io
     } yield {
       txReport
     }
   }
 
   override def update_inspect(update: Update)(implicit conn: Conn): IO[Unit] = {
-    printInspectTx("UPDATE", update.elements)
+    printInspectTx("UPDATE", update.dataModel.elements)
   }
 
   override def update_validate(update: Update)(implicit conn: Conn): IO[Map[String, Seq[String]]] = io {
     val proxy = conn.proxy
-    TxModelValidation(proxy.entityMap, proxy.attrMap, "update").validate(update.elements)
+    TxModelValidation(proxy.entityMap, proxy.attrMap, "update").validate(update.dataModel.elements)
   }
 
 
@@ -187,13 +184,13 @@ trait Spi_datomic_io
   override def delete_transact(delete: Delete)(implicit conn0: Conn): IO[TxReport] = {
     val conn = conn0.asInstanceOf[DatomicConn_JS]
     for {
-      txReport <- conn.rpc.delete(conn.proxy, delete.elements).io
-      _ <- conn.callback(delete.elements, true).io
+      txReport <- conn.rpc.delete(conn.proxy, delete.dataModel).io
+      _ <- conn.callback(delete.dataModel, true).io
     } yield txReport
   }
 
   override def delete_inspect(delete: Delete)(implicit conn: Conn): IO[Unit] = {
-    printInspectTx("DELETE", delete.elements)
+    printInspectTx("DELETE", delete.dataModel.elements)
   }
 
 
