@@ -168,32 +168,24 @@ trait ModelUtils {
     }
   }
 
-  private def indexes(coord: Seq[Int]): (Int, Int, Option[Int]) = {
-    coord match {
-      case Seq(entIndex, attrIndex, refIndex) => (entIndex, attrIndex, Some(refIndex))
-      case Seq(entIndex, attrIndex)           => (entIndex, attrIndex, None)
-    }
-  }
-
   private val reserved: Byte = 1.toByte
 
   private final def nonReservedAttr(a: Attr, proxy: ConnProxy): (String, String) = {
-    val (entIndex, attrIndex, _) = indexes(a.coord)
+    val List(entityIndex, attrIndex) = a.coord.toList.take(2)
     (
-      if (proxy.reservedEntities(entIndex) == reserved) a.ent + "_" else a.ent,
+      if (proxy.reservedEntities(entityIndex) == reserved) a.ent + "_" else a.ent,
       if (proxy.reservedAttributes(attrIndex) == reserved) a.attr + "_" else a.attr
     )
   }
 
   private final def nonReservedRef(r: Ref, proxy: ConnProxy): (String, String, String) = {
-    val Seq(entIndex, refAttrIndex, refIndex) = r.coord
+    val Seq(entityIndex, refAttrIndex, refIndex) = r.coord.toSeq
     (
-      if (proxy.reservedEntities(entIndex) == reserved) r.ent + "_" else r.ent,
+      if (proxy.reservedEntities(entityIndex) == reserved) r.ent + "_" else r.ent,
       if (proxy.reservedAttributes(refAttrIndex) == reserved) r.refAttr + "_" else r.refAttr,
       if (proxy.reservedEntities(refIndex) == reserved) r.ref + "_" else r.ref,
     )
   }
-
 
   private final def nonReservedBackRef(backRef: BackRef, proxy: ConnProxy): (String, String) = {
     val Seq(prevEntIndex, curEntIndex) = backRef.coord

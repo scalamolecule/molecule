@@ -66,7 +66,7 @@ trait BaseHelpers extends DateHandling {
     case v         => v.toString
   }
 
-  final def renderValidations(validations: Seq[(String, String)]): String = {
+  final def renderValidations(validations: List[(String, String)]): String = {
     if (validations.isEmpty) {
       "Nil"
     } else {
@@ -77,17 +77,17 @@ trait BaseHelpers extends DateHandling {
              |              \"\"\"$test\"\"\",
              |              $errorStr
              |            )""".stripMargin
-      }.mkString("Seq(\n", ",\n", ")")
+      }.mkString("List(\n", ",\n", ")")
     }
   }
 
-  final def sq[T](values: Iterable[T]): String = if (values.isEmpty) "Nil" else {
+  final def list[T](values: Iterable[T]): String = if (values.isEmpty) "Nil" else {
     values.map {
-      case set: Set[_] => if (set.isEmpty) "Nil" else set.map(render).mkString("Set(", ", ", ")")
-      case seq: Seq[_] => if (seq.isEmpty) "Nil" else seq.map(render).mkString("Seq(", ", ", ")")
-      case (a, b)      => s"${render(a)} -> ${render(b)}"
+      case set: Set[_]  => if (set.isEmpty) "Nil" else set.map(render).mkString("Set(", ", ", ")")
+      case lst: List[_] => if (lst.isEmpty) "Nil" else lst.map(render).mkString("List(", ", ", ")")
+      case (a, b)       => s"${render(a)} -> ${render(b)}"
       case v           => render(v)
-    }.mkString("Seq(", ", ", ")")
+    }.mkString("List(", ", ", ")")
   }
 
   private var time0          = System.currentTimeMillis()

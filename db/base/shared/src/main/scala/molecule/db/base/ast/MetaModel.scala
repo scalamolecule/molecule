@@ -9,7 +9,7 @@ case class MetaDomain(
   pkg: String,
   domain: String,
   maxArity: Int,
-  segments: Seq[MetaSegment]
+  segments: List[MetaSegment]
 ) extends MetaModel {
   import BaseHelpers._ // import BaseHelpers methods instead of extending to avoid polluting namespace
   def render(tabs: Int = 0): String = {
@@ -17,7 +17,7 @@ case class MetaDomain(
     val pad         = s"\n$p  "
     val segmentsStr = if (segments.isEmpty) "" else
       segments.map(_.render(tabs + 1)).mkString(pad, s",\n\n$pad", s"\n$p")
-    s"""MetaDomain("$pkg", "$domain", $maxArity, Seq($segmentsStr))"""
+    s"""MetaDomain("$pkg", "$domain", $maxArity, List($segmentsStr))"""
   }
 
   override def toString: String = render(0)
@@ -49,7 +49,7 @@ case class MetaDomain(
     val attrs    = attrData.map {
       case (a, card, tpe, reqAttrs) =>
         val reqAttrsStr = reqAttrs.map(a => s""""$a"""").mkString(", ")
-        s""""$a"${padS(maxSp, a)} -> ($card, "$tpe"${padS(14, tpe)}, Seq($reqAttrsStr))"""
+        s""""$a"${padS(maxSp, a)} -> ($card, "$tpe"${padS(14, tpe)}, List($reqAttrsStr))"""
     }
     val attrsStr = if (attrs.isEmpty) "" else attrs.mkString(pad, s",$pad", s"\n$p")
     s"Map($attrsStr)"
@@ -71,7 +71,7 @@ case class MetaDomain(
 
 case class MetaSegment(
   segment: String,
-  ents: Seq[MetaEntity]
+  ents: List[MetaEntity]
 ) extends MetaModel {
   import BaseHelpers._
   def render(tabs: Int): String = {
@@ -79,7 +79,7 @@ case class MetaSegment(
     val pad         = s"\n$p  "
     val entitiesStr = if (ents.isEmpty) "" else
       ents.map(_.render(tabs + 1)).mkString(pad, s",\n$pad", s"\n$p")
-    s"""MetaSegment("$segment", Seq($entitiesStr))"""
+    s"""MetaSegment("$segment", List($entitiesStr))"""
   }
 
   override def toString: String = render(0)
@@ -88,10 +88,10 @@ case class MetaSegment(
 
 case class MetaEntity(
   ent: String,
-  attrs: Seq[MetaAttribute],
-  backRefs: Seq[String] = Nil,
-  mandatoryAttrs: Seq[String] = Nil,
-  mandatoryRefs: Seq[(String, String)] = Nil
+  attrs: List[MetaAttribute],
+  backRefs: List[String] = Nil,
+  mandatoryAttrs: List[String] = Nil,
+  mandatoryRefs: List[(String, String)] = Nil
 ) extends MetaModel {
   import BaseHelpers._
   def render(tabs: Int): String = {
@@ -105,11 +105,11 @@ case class MetaEntity(
         val card          = attr.card
         val tpe           = "\"" + attr.baseTpe + "\"" + padS(maxTpe, attr.baseTpe)
         val ref           = o(attr.ref)
-        val options       = sq(attr.options)
+        val options       = list(attr.options)
         val descr         = o(attr.description)
         val alias         = o(attr.alias)
-        val requiredAttrs = sq(attr.requiredAttrs)
-        val valueAttrs    = sq(attr.valueAttrs)
+        val requiredAttrs = list(attr.requiredAttrs)
+        val valueAttrs    = list(attr.valueAttrs)
         val validations1  = renderValidations(attr.validations)
         s"""MetaAttribute($attr1, $card, $tpe, $ref, $options, $descr, $alias, $requiredAttrs, $valueAttrs, $validations1)"""
       }.mkString(pad, s",$pad", s"\n$p")
@@ -119,7 +119,7 @@ case class MetaEntity(
     val mandatoryRefsStr  = if (mandatoryRefs.isEmpty) "" else mandatoryRefs.map {
       case (attr, ref) => s"""\"$attr\" -> \"$ref\""""
     }.mkString(", ")
-    s"""MetaEntity("$ent", Seq($attrsStr), Seq($backRefs1), Seq($mandatoryAttrsStr), Seq($mandatoryRefsStr))"""
+    s"""MetaEntity("$ent", List($attrsStr), List($backRefs1), List($mandatoryAttrsStr), List($mandatoryRefsStr))"""
   }
 
   override def toString: String = render(0)
@@ -131,17 +131,17 @@ case class MetaAttribute(
   card: Card,
   baseTpe: String,
   ref: Option[String] = None,
-  options: Seq[String] = Nil,
+  options: List[String] = Nil,
   description: Option[String] = None,
   alias: Option[String] = None,
-  requiredAttrs: Seq[String] = Nil,
-  valueAttrs: Seq[String] = Nil,
-  validations: Seq[(String, String)] = Nil
+  requiredAttrs: List[String] = Nil,
+  valueAttrs: List[String] = Nil,
+  validations: List[(String, String)] = Nil
 ) extends MetaModel {
   import BaseHelpers._
   override def toString: String = {
     val validations1 = renderValidations(validations)
-    s"""MetaAttribute("$attr", $card, "$baseTpe", ${o(ref)}, ${sq(options)}, ${o(description)}, ${o(alias)}, ${sq(requiredAttrs)}, ${sq(valueAttrs)}, $validations1)"""
+    s"""MetaAttribute("$attr", $card, "$baseTpe", ${o(ref)}, ${list(options)}, ${o(description)}, ${o(alias)}, ${list(requiredAttrs)}, ${list(valueAttrs)}, $validations1)"""
   }
 }
 
