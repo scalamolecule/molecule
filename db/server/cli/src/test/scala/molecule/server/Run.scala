@@ -25,7 +25,7 @@ import scala.io.StdIn
  *
  * Select a server/database combination in one terminal process:
  *
- *   sbt server/Test/run
+ *   sbt dbServer/Test/run
  *
  * Then, in another terminal process, select a scala JS project with the same database, for instance H2:
  *

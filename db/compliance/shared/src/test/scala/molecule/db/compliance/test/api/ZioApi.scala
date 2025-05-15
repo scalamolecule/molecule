@@ -193,10 +193,10 @@ case class ZioApi(api: Api_zio with Spi_zio with DbProviders_zio)
           //          _ <- TestClock.adjust(50.milliseconds) // doesn't work on first run on JS, hmm..
         } yield {
           assertTrue(intermediaryCallbackResults.map(_.sorted).toSet == Set(
-            List(1, 2), // query result after 2 was saved
-            List(1, 2, 3, 4), // query result after 3 and 4 were inserted
+            List(1, 2), //        query result after 2 was saved
+            List(1, 2, 3, 4), //  query result after 3 and 4 were inserted
             List(1, 3, 4, 20), // query result after 2 was updated to 20
-            List(1, 3, 4), // query result after 20 was deleted
+            List(1, 3, 4), //     query result after 20 was deleted
           ))
         }
       }.provide(types.orDie),
