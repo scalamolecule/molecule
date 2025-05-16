@@ -2,7 +2,8 @@ package molecule.db.core.ast
 
 case class DataModel(
   elements: List[Element],
-  attrIndexes: Set[Int] = Set.empty[Int]
+  attrIndexes: Set[Int] = Set.empty[Int],
+  firstEntityIndex: Int = -1,
 ) {
 
   def add(attr: Attr): DataModel = {

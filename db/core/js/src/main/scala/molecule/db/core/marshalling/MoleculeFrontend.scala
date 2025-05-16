@@ -61,7 +61,7 @@ case class MoleculeFrontend(host: String, port: Int)
       case e: dom.Event =>
         logger.error(s"WebSocket error (non-ErrorEvent): " + e.asInstanceOf[js.Any])
 
-      // not called since it can still try to close an already closed connection
+      // not uncommented since it can try to close an already closed connection
       // socket.close(1000, e.toString)
     }
     socket.onclose = {

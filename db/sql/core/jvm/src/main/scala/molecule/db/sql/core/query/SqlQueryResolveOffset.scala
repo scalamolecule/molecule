@@ -1,13 +1,11 @@
 package molecule.db.sql.core.query
 
 import molecule.db.base.error.ModelError
-import molecule.db.core.ast.{DataModel, Element}
-import molecule.db.core.util.Executor.global
+import molecule.db.core.ast.DataModel
 import molecule.db.core.util.{FutureUtils, ModelUtils, MoleculeLogging}
 import molecule.db.sql.core.facade.JdbcConn_JVM
 import molecule.db.sql.core.query.casting.strategy.*
 import molecule.db.sql.core.query.casting.{NestOptTpls, NestTpls}
-import scala.concurrent.Future
 
 
 case class SqlQueryResolveOffset[Tpl](
@@ -78,34 +76,5 @@ case class SqlQueryResolveOffset[Tpl](
 
   private def order(rows: List[Tpl]): List[Tpl] = {
     if (forward) rows else rows.reverse
-  }
-
-
-  def subscribe(
-    conn: JdbcConn_JVM,
-    callback: List[Tpl] => Unit,
-    freshM2q: List[Element] => Model2SqlQuery & SqlQueryBase
-  ): Unit = {
-    val involvedAttrs        = getAttrNames(dataModel.elements)
-    val involvedDeleteEntity = getInitialEntity(dataModel.elements)
-    val maybeCallback        = (mutationAttrs: Set[String], isDelete: Boolean) => {
-
-      println("involvedAttrs: " + involvedAttrs)
-      println("mutationAttrs: " + mutationAttrs)
-
-      if (
-        mutationAttrs.exists(involvedAttrs.contains) ||
-          isDelete && mutationAttrs.head.startsWith(involvedDeleteEntity)
-      ) {
-        println(s"  $mutationAttrs triggering callback")
-        Future(
-          callback {
-            SqlQueryResolveOffset(dataModel, optLimit, None, freshM2q(dataModel.elements))
-              .getListFromOffset_sync(conn)._1
-          }
-        )
-      } else Future.unit
-    }
-    conn.addCallback((dataModel, maybeCallback))
   }
 }

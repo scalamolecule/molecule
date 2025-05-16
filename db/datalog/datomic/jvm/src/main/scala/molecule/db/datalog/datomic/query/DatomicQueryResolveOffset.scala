@@ -72,25 +72,26 @@ case class DatomicQueryResolveOffset[Tpl](
     }
   }
 
-  def subscribe(
-    conn: DatomicConn_JVM,
-    callback: List[Tpl] => Unit
-  ): Unit = {
-    val involvedAttrs        = getAttrNames(dataModel.elements)
-    val involvedDeleteEntity = getInitialEntity(dataModel.elements)
-    val maybeCallback        = (mutationAttrs: Set[String], isDelete: Boolean) => {
-      if (
-        mutationAttrs.exists(involvedAttrs.contains) ||
-          isDelete && mutationAttrs.head.startsWith(involvedDeleteEntity)
-      ) {
-        Future {
-          val m2q = new Model2DatomicQuery[Tpl](dataModel)
-          callback(
-            DatomicQueryResolveOffset(dataModel, optLimit, None, None, m2q).getListFromOffset_sync(conn)._1
-          )
-        }
-      } else Future.unit
-    }
-    conn.addCallback(dataModel -> maybeCallback)
-  }
+//  def subscribe(
+//    conn: DatomicConn_JVM,
+//    callback: List[Tpl] => Unit
+//  ): Unit = {
+//    val involvedAttrs        = getAttrNames(dataModel.elements)
+//    val involvedDeleteEntity = getInitialEntity(dataModel.elements)
+//    val maybeCallback        = (mutationAttrs: Set[String], isDelete: Boolean) => {
+//      if (
+//        mutationAttrs.exists(involvedAttrs.contains) ||
+//          isDelete && mutationAttrs.head.startsWith(involvedDeleteEntity)
+//      ) {
+//        Future {
+//          val m2q = new Model2DatomicQuery[Tpl](dataModel)
+//          callback(
+//            DatomicQueryResolveOffset(dataModel, optLimit, None, None, m2q).getListFromOffset_sync(conn)._1
+//          )
+//        }
+//      } else Future.unit
+//    }
+//    conn.addCallback(dataModel -> maybeCallback)
+//    ???
+//  }
 }

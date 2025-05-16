@@ -1,5 +1,6 @@
 package molecule.db.sql.h2
 
+import molecule.db.compliance.domains.dsl.Types.Entity
 import molecule.db.compliance.setup.{Test, TestUtils}
 import molecule.db.core.util.Executor.*
 import molecule.db.sql.h2.async.*
@@ -8,47 +9,21 @@ import molecule.db.sql.h2.setup.DbProviders_h2
 
 class Adhoc_jvm_h2_async extends Test with DbProviders_h2 with TestUtils {
 
-  "types" - types { implicit conn =>
-    import molecule.db.compliance.domains.dsl.Types.*
-    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+    "types" - types { implicit conn =>
+      import molecule.db.compliance.domains.dsl.Types.*
+      implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
-    for {
-      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
-      _ <- Entity.int(3).save.transact
-      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
-      _ <- Entity(a).int(10).update.transact
-      _ <- Entity(b).delete.transact
-      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
+      for {
+        List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
+        _ <- Entity.int(3).save.transact
+        _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
+        _ <- Entity(a).int(10).update.transact
+        _ <- Entity(b).delete.transact
+        _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
 
-    } yield ()
-  }
+      } yield ()
+    }
 
-  //  "Mutations call back" - types { implicit conn =>
-  //    var intermediaryResults = List.empty[List[Int]]
-  //    for {
-  //      // Initial data
-  //      _ <- Entity.i(1).save.transact
-  //
-  //      // Start subscription and define a callback function
-  //      _ <- Entity.i.query.subscribe { updatedResult =>
-  //        intermediaryResults = intermediaryResults :+ updatedResult.sorted
-  //      }
-  //
-  //      // Mutations to be monitored by subscription
-  //      _ <- Entity.i(2).save.transact.map(_.id)
-  //
-  //      // Mutations with no callback-involved attributes don't call back
-  //      _ <- Entity.string("foo").save.transact
-  //
-  //      // Callback produced all intermediary results correctly
-  //      _ = intermediaryResults ==> List(
-  //        List(1, 2), //        query result after 2 was saved
-  ////        List(1, 2, 3, 4), //  query result after 3 and 4 were inserted
-  ////        List(1, 3, 4, 20), // query result after 2 was updated to 20
-  ////        List(1, 3, 4), //     query result after 20 was deleted
-  //      )
-  //    } yield ()
-  //  }
 
   //    "unique" - unique { implicit conn =>
   //      import molecule.db.compliance.domains.dsl.Uniques._

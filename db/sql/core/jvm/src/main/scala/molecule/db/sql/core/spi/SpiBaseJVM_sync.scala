@@ -40,10 +40,8 @@ trait SpiBaseJVM_sync
 
   override def query_get[Tpl](query: Query[Tpl])(implicit conn0: Conn): List[Tpl] = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
-    if (query.doInspect) {
+    if (query.doInspect)
       query_inspect(query)
-
-    }
     val cleanElements  = keywordsSuffixed(query.dataModel.elements, conn.proxy)
     val cleanDataModel = query.dataModel.copy(elements = cleanElements)
     val m2q            = getModel2SqlQuery(cleanElements)
@@ -127,12 +125,15 @@ trait SpiBaseJVM_sync
 
   override def query_subscribe[Tpl](query: Query[Tpl], callback: List[Tpl] => Unit)
                                    (implicit conn0: Conn): Unit = {
-    val conn           = conn0.asInstanceOf[JdbcConn_JVM]
-    val cleanElements  = keywordsSuffixed(query.dataModel.elements, conn.proxy)
-    val cleanDataModel = query.dataModel.copy(elements = cleanElements)
-    val m2q            = getModel2SqlQuery(cleanElements)
-    SqlQueryResolveOffset[Tpl](cleanDataModel, query.optLimit, None, m2q)
-      .subscribe(conn, callback, (elements: List[Element]) => getModel2SqlQuery(elements))
+    val conn      = conn0.asInstanceOf[JdbcConn_JVM]
+    val elements  = keywordsSuffixed(query.dataModel.elements, conn.proxy)
+    val dataModel = query.dataModel.copy(elements = elements)
+    conn.addCallback(dataModel, () =>
+      callback {
+        SqlQueryResolveOffset(dataModel, query.optLimit, None, getModel2SqlQuery(elements))
+          .getListFromOffset_sync(conn)._1
+      }
+    )
   }
 
   override def query_unsubscribe[Tpl](query: Query[Tpl])(implicit conn: Conn): Unit = {

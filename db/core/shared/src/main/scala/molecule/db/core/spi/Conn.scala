@@ -34,26 +34,38 @@ abstract class Conn(val proxy: ConnProxy)
 
   // Subscription callbacks ----------------------------------------------------
 
-  private var callbacks = List.empty[(DataModel, (Set[String], Boolean) => Future[Unit])]
+  private var callbacks = List.empty[(DataModel, Int, java.util.BitSet, () => Unit)]
 
   def callback(mutation: DataModel, isDelete: Boolean = false)
-              (implicit ec: ExecutionContext): Future[List[Unit]] = {
-    val mutationAttrs = getAttrNames(mutation.elements)
-    // Ensure all callbacks are called
-    Future.sequence(callbacks.map {
-      case (_, callback) => callback(mutationAttrs, isDelete)
-    })
+              (implicit ec: ExecutionContext): Future[Unit] = Future(
+    callbacks.foreach {
+      case (_, deletionEntityIndex, _, callback) if isDelete =>
+        if (deletionEntityIndex == mutation.firstEntityIndex) {
+          // Trigger callback if deleted entity matches a subscription entity
+          callback()
+        }
+
+      case (_, _, involvedAttrIndexes, callback) =>
+        val mutationAttrs = new java.util.BitSet()
+        mutation.attrIndexes.foreach(mutationAttrs.set)
+        if (involvedAttrIndexes.intersects(mutationAttrs)) {
+          // Trigger callback if any mutation attribute matches an involved subscription attribute
+          callback()
+        }
+    }
+  )
+
+  def addCallback(dataModel: DataModel, callback: () => Unit): Unit = {
+    val triggerAttrs = new java.util.BitSet()
+    dataModel.attrIndexes.foreach(triggerAttrs.set)
+    val callbackCoords = (dataModel, dataModel.firstEntityIndex, triggerAttrs, callback)
+    callbacks = callbacks :+ callbackCoords
   }
 
-  def addCallback(callback: (DataModel, (Set[String], Boolean) => Future[Unit])): Unit = {
-    callbacks = callbacks :+ callback
+  def removeCallback(dataModel: DataModel): Unit = {
+    callbacks = callbacks.filterNot(_._1 == dataModel)
   }
 
-  def removeCallback(elements: DataModel): Unit = {
-    callbacks = callbacks.filterNot(_._1 == elements)
-  }
-
-  def callbackCount = callbacks.length
 
 
   // Transaction handling ------------------------------------------------------

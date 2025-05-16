@@ -2,7 +2,7 @@ package molecule.db.sql.core.spi
 
 import boopickle.Default.*
 import cats.effect.IO
-import molecule.db.base.error.{InsertError, InsertErrors, MoleculeError, ValidationErrors}
+import molecule.db.base.error.{InsertError, InsertErrors, ValidationErrors}
 import molecule.db.core.action.*
 import molecule.db.core.ast.Element
 import molecule.db.core.marshalling.serialize.PickleTpls
@@ -12,7 +12,6 @@ import molecule.db.core.util.IOUtils
 import molecule.db.core.validation.TxModelValidation
 import molecule.db.core.validation.insert.InsertValidation
 import molecule.db.sql.core.facade.JdbcConn_JS
-import scala.concurrent.Future
 
 trait SpiBase_io
   extends Spi_io
@@ -33,32 +32,8 @@ trait SpiBase_io
 
   override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)
                                    (implicit conn0: Conn): IO[Unit] = {
-    val conn                 = conn0.asInstanceOf[JdbcConn_JS]
-    val elements             = q.dataModel.elements
-    val involvedAttrs        = getAttrNames(elements)
-    val involvedDeleteEntity = getInitialEntity(elements)
-    val maybeCallback        = (mutationAttrs: Set[String], isDelete: Boolean) => {
-      if (
-        mutationAttrs.exists(involvedAttrs.contains) ||
-          isDelete && mutationAttrs.head.startsWith(involvedDeleteEntity)
-      ) {
-        conn.rpc.query[Tpl](conn.proxy, q.dataModel, q.optLimit)
-          .map {
-            case Right(result)       => callback(result)
-            case Left(moleculeError) => throw moleculeError
-          }
-          .recover {
-            case e: MoleculeError =>
-              logger.debug(e)
-              throw e
-            case e: Throwable     =>
-              logger.error(e.toString + "\n" + e.getStackTrace.toList.mkString("\n"))
-              // Re-throw to preserve original stacktrace
-              throw e
-          }
-      } else Future.unit
-    }
-    IO(conn.addCallback(q.dataModel -> maybeCallback))
+    val conn = conn0.asInstanceOf[JdbcConn_JS]
+    IO(conn.rpc.subscribe[Tpl](conn.proxy, q.dataModel, q.optLimit, callback))
   }
 
   override def query_unsubscribe[Tpl](q: Query[Tpl])(implicit conn0: Conn): IO[Unit] = {

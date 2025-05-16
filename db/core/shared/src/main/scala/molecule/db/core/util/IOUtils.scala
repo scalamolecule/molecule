@@ -50,8 +50,8 @@ trait IOUtils extends ModelUtils with MoleculeLogging {
     }
   }
 
-  implicit class futListUnit2io(fut: Future[List[Unit]])(implicit ec: ExecutionContext) {
-    def io: IO[List[Unit]] = {
+  implicit class futListUnit2io(fut: Future[Unit])(implicit ec: ExecutionContext) {
+    def io: IO[Unit] = {
       IO.fromFuture {
         IO.blocking {
           fut

@@ -47,7 +47,6 @@ trait Spi_async {
     }
   }
 
-
   def query_subscribe[Tpl](
     q: Query[Tpl], callback: List[Tpl] => Unit
   )(implicit conn: Conn, ec: EC): Future[Unit]

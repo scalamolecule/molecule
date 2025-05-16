@@ -97,12 +97,26 @@ trait Spi_datomic_sync
 
   override def query_subscribe[Tpl](
     q: Query[Tpl], callback: List[Tpl] => Unit
-  )(implicit conn: Conn): Unit = {
-    val datomicConn = conn.asInstanceOf[DatomicConn_JVM]
-    val m2q         = new Model2DatomicQuery[Tpl](q.dataModel)
-    DatomicQueryResolveOffset[Tpl](
-      q.dataModel, q.optLimit, None, q.dbView, m2q
-    ).subscribe(datomicConn, callback)
+  )(implicit conn0: Conn): Unit = {
+    //        val datomicConn = conn0.asInstanceOf[DatomicConn_JVM]
+    //        val m2q         = new Model2DatomicQuery[Tpl](q.dataModel)
+    //        DatomicQueryResolveOffset[Tpl](
+    //          q.dataModel, q.optLimit, None, q.dbView, m2q
+    //        ).subscribe(datomicConn, callback)
+
+    val conn = conn0.asInstanceOf[DatomicConn_JVM]
+    //    val elements  = keywordsSuffixed(q.dataModel.elements, conn.proxy)
+    //    val dataModel = q.dataModel.copy(elements = elements)
+    conn.addCallback(q.dataModel, () =>
+      callback {
+    val m2q  = new Model2DatomicQuery[Tpl](q.dataModel)
+        val a = DatomicQueryResolveOffset(q.dataModel, q.optLimit, None, None, m2q)
+        a.getListFromOffset_sync(conn)._1
+
+        //        DatomicQueryResolveOffset(q.dataModel, q.optLimit, None, None, m2q)
+        //          .getListFromOffset_sync(conn)._1
+      }
+    )
   }
 
   override def query_unsubscribe[Tpl](
