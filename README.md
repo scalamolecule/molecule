@@ -196,7 +196,7 @@ sbt.version = 1.10.11
 `project/plugins.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.14.0")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.15.0")
 ```
 
 `build.sbt`:
@@ -207,20 +207,20 @@ lazy val yourProject = project.in(file("app"))
   .settings(
     libraryDependencies ++= Seq(
       // One or more of:
-      "org.scalamolecule" %%% "molecule-db-sql-postgres" % "0.19.0",
-      "org.scalamolecule" %%% "molecule-db-sql-sqlite" % "0.19.0",
-      "org.scalamolecule" %%% "molecule-db-sql-mysql" % "0.19.0",
-      "org.scalamolecule" %%% "molecule-db-sql-mariadb" % "0.19.0",
-      "org.scalamolecule" %%% "molecule-db-sql-h2" % "0.19.0",
-      "org.scalamolecule" %%% "molecule-db-datalog-datomic" % "0.19.0",
+      "org.scalamolecule" %%% "molecule-db-sql-postgres" % "0.20.0",
+      "org.scalamolecule" %%% "molecule-db-sql-sqlite" % "0.20.0",
+      "org.scalamolecule" %%% "molecule-db-sql-mysql" % "0.20.0",
+      "org.scalamolecule" %%% "molecule-db-sql-mariadb" % "0.20.0",
+      "org.scalamolecule" %%% "molecule-db-sql-h2" % "0.20.0",
+      "org.scalamolecule" %%% "molecule-db-datalog-datomic" % "0.20.0",
     )
   )
 ```
 
 ## Explore code
 
-The `coreTests` module in this repo has several domain structure definitions and +1700 tests that show all details of
-how molecule can be used. This forms the Service Provider Interface (SPI) that each database implementation needs to comply with
+The `dbCompliance` module in this repo has several domain structure definitions and +1700 tests that show all details of
+how molecule can be used. This forms the tests that each database implementation needs to comply with
 in order to offer all functionality of Molecule and be a valid implementation.
 
 First, clone the molecule project to your computer (or `git pull` to get the latest changes):
@@ -250,10 +250,10 @@ Run the coreTests on the jvm with a databases of your choice:
 
 To test using molecules from ScalaJS, you need to have a ScalaJVM backend server running in a separate process that can receive the queries and send data back to ScalaJS.
 
-In the `server` module you can see 7 different minimal Tapir backend setups that you can start out from and successively add your own api endpoints to. In one process you can start up one of those backends where you will be asked which backend you want to use:
+In the `dbServer` module you can see 6 different minimal Tapir backend setups that you can start out from and successively add your own api endpoints to. In one process you can start up one of those backends where you will be asked which backend and database that you want to use:
 
 ```
-sbt server/run
+sbt dbServer/Test/run
 
 Please choose a database and a server backend to test the Molecule RPC API:
 
@@ -279,7 +279,7 @@ Server: 3
 Press ENTER to stop the server.
 ✅ Netty server running on http://localhost:8080 for H2
 
-// running tests...
+// run tests in other process...
 
 🛑 Shutting down server...
 ```
@@ -288,14 +288,14 @@ Now we have a backend running on ScalaJVM ready to take care of your molecule qu
 In another process you can then run one of the following commands to run the coreTests on ScalaJS with the database of your choice:
 
 ```
-sbt dbDatalogDatomicJS/test
 sbt dbSqlH2JS/test
 sbt dbSqlMariaDBJS/test
 sbt dbSqlMySQLJS/test
 sbt dbSqlPostgreSQLJS/test
 sbt dbSqlSQliteJS/test
+sbt dbDatalogDatomicJS/test
 ```
-The tests are then automatically fetching data from the running backend - Molecule takes care of marshalling and fetching transparently!
+The tests are then automatically fetching data from the running backend - Molecule takes care of marshalling and fetching transparently with boopickle binary serialization!
 
 
 
