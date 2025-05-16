@@ -47,6 +47,8 @@ case class Subscription(
       // Mutations with no callback-involved attributes don't call back
       _ <- Entity.string("foo").save.transact
 
+      _ <- delay(1000)
+
       // Callback produced all intermediary results correctly
       _ = intermediaryResults ==> List(
         List(1, 2), //        query result after 2 was saved

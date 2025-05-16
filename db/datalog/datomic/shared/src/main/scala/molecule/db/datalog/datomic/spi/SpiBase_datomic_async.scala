@@ -7,8 +7,10 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait SpiBase_datomic_async extends Renderer {
 
-  protected def printInspectQuery(label: String, dataModel: DataModel)
-                                 (implicit ec: ExecutionContext): Future[Unit] = Future {
+  protected def printInspectQuery(
+    label: String,
+    dataModel: DataModel
+  )(implicit ec: ExecutionContext): Future[Unit] = Future {
     val queries = new Model2DatomicQuery(dataModel).getDatomicQueries(false)._3
     printRaw(label, Nil, queries)
   }

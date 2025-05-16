@@ -58,12 +58,6 @@ trait Spi_datomic_zio
   override def query_stream[Tpl](
     q: Query[Tpl], chunkSize: Int
   ): ZStream[Conn, MoleculeError, Tpl] = {
-    //    zioStream(
-    //      q, chunkSize,
-    //      (q: Query[Tpl], conn: Conn) => Spi_datomic_sync.query_inspect[Tpl](q)(conn),
-    //      Spi_datomic_sync.getResultSet[Tpl]
-    //    )
-
     zioStreamDatomic(
       q, chunkSize,
       (q: Query[Tpl], conn: Conn) => Spi_datomic_sync.query_inspect[Tpl](q)(conn),

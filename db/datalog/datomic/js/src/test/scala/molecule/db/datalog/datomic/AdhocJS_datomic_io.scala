@@ -3,11 +3,10 @@ package molecule.db.datalog.datomic
 import boopickle.Default.*
 import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.compliance.setup.{Test, TestUtils}
-import molecule.db.core.util.Executor.*
-import molecule.db.datalog.datomic.async.*
+import molecule.db.datalog.datomic.io.*
 import molecule.db.datalog.datomic.setup.DbProviders_datomic
 
-class AdhocJS_datomic extends Test with DbProviders_datomic with TestUtils {
+class AdhocJS_datomic_io extends Test with DbProviders_datomic with TestUtils {
 
   "types" - types { implicit conn =>
     for {
@@ -21,6 +20,7 @@ class AdhocJS_datomic extends Test with DbProviders_datomic with TestUtils {
 
     } yield ()
   }
+
 
 
   //    "refs" - refs { implicit conn =>

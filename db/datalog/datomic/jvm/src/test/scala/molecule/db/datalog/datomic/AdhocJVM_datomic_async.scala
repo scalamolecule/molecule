@@ -58,6 +58,7 @@ class AdhocJVM_datomic_async extends Test with DbProviders_datomic with TestUtil
 
       // Mutations with no callback-involved attributes don't call back
       _ <- Entity.string("foo").save.transact
+      _ <- delay(1000)
 
       // Callback produced all intermediary results correctly
       _ = intermediaryResults ==> List(

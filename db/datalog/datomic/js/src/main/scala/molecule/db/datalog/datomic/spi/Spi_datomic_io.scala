@@ -26,11 +26,6 @@ trait Spi_datomic_io
     conn.rpc.query[Tpl](proxy, q.dataModel, q.optLimit).io
   }
 
-  override def query_stream[Tpl](
-    q: Query[Tpl],
-    chunkSize: Int
-  )(implicit conn: Conn): fs2.Stream[IO, Tpl] = ???
-
   override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)
                                    (implicit conn0: Conn): IO[Unit] = {
     val conn = conn0.asInstanceOf[DatomicConn_JS]

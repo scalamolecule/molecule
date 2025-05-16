@@ -190,7 +190,7 @@ case class ZioApi(api: Api_zio with Spi_zio with DbProviders_zio)
           _ <- Entity.string("foo").save.transact
 
           // Allow callbacks running in parallel to finish
-          //          _ <- TestClock.adjust(50.milliseconds) // doesn't work on first run on JS, hmm..
+          _ <- TestClock.adjust(500.milliseconds)
         } yield {
           assertTrue(intermediaryCallbackResults.map(_.sorted).toSet == Set(
             List(1, 2), //        query result after 2 was saved
