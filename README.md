@@ -51,7 +51,7 @@ Data can also be fetched asynchronously in a `Future`, cats `IO` or `ZIO`.
 
 - Support for [PostgreSQL](https://www.postgresql.org), [SQlite](https://sqlite.org), [MySQL](https://www.mysql.com), [MariaDB](https://mariadb.com), [H2](https://h2database.com/html/main.html) and [Datomic](http://www.datomic.com) databases. More can easily be added
 - Molecules for any database behave identically. Each db pass the same SPI compliance test suite (+1700 tests).
-- Targets Scala >=3.3.5 on JVM and JS platforms
+- Targets Scala >=3.3.6 on JVM and JS platforms
 - Synchronous, Asynchronous (Future), ZIO and cats.effect.IO APIs
 - All Scala primitive types and collection types available as molecule attributes (!)
 - Typed methods to compose even complex molecules:
@@ -207,21 +207,23 @@ lazy val yourProject = project.in(file("app"))
   .settings(
     libraryDependencies ++= Seq(
       // One or more of:
-      "org.scalamolecule" %%% "molecule-db-sql-postgres" % "0.20.0",
-      "org.scalamolecule" %%% "molecule-db-sql-sqlite" % "0.20.0",
-      "org.scalamolecule" %%% "molecule-db-sql-mysql" % "0.20.0",
-      "org.scalamolecule" %%% "molecule-db-sql-mariadb" % "0.20.0",
-      "org.scalamolecule" %%% "molecule-db-sql-h2" % "0.20.0",
-      "org.scalamolecule" %%% "molecule-db-datalog-datomic" % "0.20.0",
+      "org.scalamolecule" %% "molecule-db-sql-postgres" % "0.20.0",
+      "org.scalamolecule" %% "molecule-db-sql-sqlite" % "0.20.0",
+      "org.scalamolecule" %% "molecule-db-sql-mysql" % "0.20.0",
+      "org.scalamolecule" %% "molecule-db-sql-mariadb" % "0.20.0",
+      "org.scalamolecule" %% "molecule-db-sql-h2" % "0.20.0",
+      "org.scalamolecule" %% "molecule-db-datalog-datomic" % "0.20.0",
     )
   )
 ```
+Use `%%%` instead of `%%` for cross-compiling ScalaJS projects. 
+
 
 ## Explore code
 
 The `dbCompliance` module in this repo has several domain structure definitions and +1700 tests that show all details of
 how molecule can be used. This forms the tests that each database implementation needs to comply with
-in order to offer all functionality of Molecule and be a valid implementation.
+in order to offer all functionality of Molecule and be a compliant implementation.
 
 First, clone the molecule project to your computer (or `git pull` to get the latest changes):
 ```
@@ -230,12 +232,13 @@ cd molecule
 ```
 Then run some tests on either ScalaJVM or ScalaJS:
 
+
 ### Run JVM tests
 
 Make sure Docker is running to run tests for Postgres, SQlite, Mysql and MariaDB. Datomic and H2 can be run in memory for tests.
 On a mac you can for instance start Docker Desktop.
 
-Run the coreTests on the jvm with a databases of your choice:
+Run the tests on the jvm with a databases of your choice:
 
     sbt dbSqlPostgresJVM/test
     sbt dbSqlSQliteJVM/test
@@ -247,10 +250,9 @@ Run the coreTests on the jvm with a databases of your choice:
 
 ### Run JS tests
 
-
 To test using molecules from ScalaJS, you need to have a ScalaJVM backend server running in a separate process that can receive the queries and send data back to ScalaJS.
 
-In the `dbServer` module you can see 6 different minimal Tapir backend setups that you can start out from and successively add your own api endpoints to. In one process you can start up one of those backends where you will be asked which backend and database that you want to use:
+In the `dbServer` module you can see 6 different minimal Tapir backend setups that you can start out from. In one process you can start up one of those backends where you will be asked which backend and database that you want to use:
 
 ```
 sbt dbServer/Test/run
