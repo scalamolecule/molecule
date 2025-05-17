@@ -1,11 +1,10 @@
 // GENERATED CODE ********************************
-package molecule.db.core.transaction
+package molecule.db.core.validation.insert
 
 import java.net.URI
 import java.time.*
 import java.util.{Date, UUID}
-import molecule.db.core.ast._
-import molecule.db.core.validation.insert.InsertValueResolvers_
+import molecule.db.core.ast.*
 
 trait InsertValidators_ extends InsertValueResolvers_ {
   

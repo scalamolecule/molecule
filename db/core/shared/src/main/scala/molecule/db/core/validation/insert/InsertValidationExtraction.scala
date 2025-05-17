@@ -3,7 +3,6 @@ package molecule.db.core.validation.insert
 import molecule.db.base.ast.*
 import molecule.db.base.error.{InsertError, ModelError}
 import molecule.db.core.ast._
-import molecule.db.core.transaction.InsertValidators_
 import molecule.db.core.util.ModelUtils
 import scala.annotation.tailrec
 
