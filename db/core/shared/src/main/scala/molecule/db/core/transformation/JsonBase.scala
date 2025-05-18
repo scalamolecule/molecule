@@ -43,8 +43,7 @@ trait JsonBase extends SerializationUtils with ModelUtils {
         case c if (c >= '\u0000' && c < '\u0020') || jsEscapeChars.contains(c) =>
           "\\u%04x".format(c: Int)
 
-        case _ =>
-          ""
+        case _ => ""
       }
 
       // Use Char version of append if we can, as it's cheaper.
