@@ -1,6 +1,6 @@
 import org.scalajs.linker.interface.ESVersion
 
-val moleculeVersion = "0.20.0"
+val moleculeVersion = "0.20.1-SNAPSHOT"
 
 val scala212 = "2.12.20"
 val scala3   = "3.3.6"
@@ -74,8 +74,8 @@ lazy val root = project
     dbServerZioHttp,
     dbServer,
 
-    //    graphql.js,
-    //    graphql.jvm,
+    graphql.js,
+    graphql.jvm,
   )
 
 // Generate internal boilerplate code
@@ -472,48 +472,27 @@ lazy val withoutDocs = Def.settings(
 )
 
 
-//lazy val graphql = crossProject(JSPlatform, JVMPlatform)
-//  .crossType(CrossType.Full)
-//  .in(file("graphql/client"))
-//  .settings(name := "molecule-graphql-client")
-//  .settings(doPublish)
-//  .settings(compilerArgs)
-//  .enablePlugins(MoleculePlugin)
-//  .settings(
-//    // Generate Molecule boilerplate code for tests with `sbt clean compile -Dmolecule=true`
-//    moleculePluginActive := sys.props.get("molecule").contains("true"),
-//    //    moleculeMakeJars := !sys.props.get("moleculeJars").contains("false"), // default: true
-//    moleculeMakeJars := false, // default: true
-//
-//    // Multiple directories with data models
-//    moleculeDataModelPaths := Seq(
-//      "molecule/graphql/client"
-//    ),
-//
-//    // Suppress "un-used" keys warning
-//    Global / excludeLintKeys ++= Set(
-//      moleculePluginActive,
-//      moleculeDataModelPaths,
-//      moleculeMakeJars
-//    ),
-//
-//    // Find scala version specific jars in respective libs
-//    unmanagedBase := {
-//      CrossVersion.partialVersion(scalaVersion.value) match {
-//        case Some((2, 13)) => file(unmanagedBase.value.getPath ++ "/2.13")
-//        case Some((2, 12)) => file(unmanagedBase.value.getPath ++ "/2.12")
-//        case _             => file(unmanagedBase.value.getPath ++ "/3.3")
-//      }
-//    },
-//    //    testFrameworks += new TestFramework("munit.runner.Framework"),
-//  )
-//  .settings(
-//    libraryDependencies ++= Seq(
-//      "com.github.ghostdogpr" %% "caliban-tools" % "2.5.2",
-//      "com.github.ghostdogpr" %% "caliban-client" % "2.5.2",
-//    ),
-//  )
-//  .jsSettings(jsEnvironment)
-//  .dependsOn(core)
-//  .dependsOn(coreTests % "test->test")
+lazy val graphql = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
+  .in(file("graphql/client"))
+  .settings(name := "molecule-graphql-client")
+  //  .settings(doPublish)
+  .settings(compilerArgs)
+  .enablePlugins(MoleculePlugin)
+  .settings(
+    //    testFrameworks += new TestFramework("munit.runner.Framework"),
+  )
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      "com.lihaoyi" %% "requests" % "0.9.0",
+      "com.lihaoyi" %% "upickle" % "4.2.1",
+
+      "com.github.ghostdogpr" %% "caliban" % "2.10.0",
+      "com.github.ghostdogpr" %% "caliban-tools" % "2.10.0",
+      "com.github.ghostdogpr" %% "caliban-client" % "2.10.0",
+    ),
+  )
+  .jsSettings(jsEnvironment)
+  .dependsOn(dbCore)
+  .dependsOn(dbCompliance % "test->test")
 

@@ -1,20 +1,20 @@
 package molecule.graphql.client.spi
 
-import molecule.db.base.error._
-import molecule.db.core.action._
+import molecule.db.base.error.*
+import molecule.db.core.action.*
 import molecule.db.core.marshalling.ConnProxy
-import molecule.db.core.spi.{Conn, SpiAsync, TxReport}
+import molecule.db.core.spi.{Conn, Spi_async, TxReport}
 import molecule.db.core.util.FutureUtils
 import molecule.graphql.client.facade.GraphqlConn_JVM
 import molecule.graphql.client.transaction.GraphqlDataType_JVM
 //import molecule.db.datalog.datomic.facade.DatomicConn_JVM
 //import molecule.db.datalog.datomic.marshalling.Rpc_datomic.Data
-import scala.concurrent.{Future, ExecutionContext => EC}
+import scala.concurrent.{Future, ExecutionContext as EC}
 
 object SpiAsync_graphql extends SpiAsync_graphql
 
 trait SpiAsync_graphql
-  extends SpiAsync
+  extends Spi_async
 //    with JVMDatomicSpiBase
 //    with DatomicSpiAsyncBase
     with GraphqlDataType_JVM

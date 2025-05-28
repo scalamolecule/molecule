@@ -1,18 +1,15 @@
 package molecule.graphql.client.spi
 
-import boopickle.Default._
-import molecule.db.base.error.{InsertError, InsertErrors, ModelError, ValidationErrors}
-import molecule.db.core.ast._
-import molecule.db.core.action._
-import molecule.db.core.marshalling.serialize.PickleTpls
-import molecule.db.core.spi.{Conn, Renderer, SpiAsync, TxReport}
+import boopickle.Default.*
+import molecule.db.base.error.InsertError
+import molecule.db.core.action.*
+import molecule.db.core.ast.*
+import molecule.db.core.spi.{Conn, Renderer, Spi_async, TxReport}
 import molecule.db.core.util.FutureUtils
-import molecule.db.core.validation.TxModelValidation
-import molecule.db.core.validation.insert.InsertValidation
-import scala.concurrent.{Future, ExecutionContext => EC}
+import scala.concurrent.{Future, ExecutionContext as EC}
 
 
-trait SpiAsyncBase extends SpiAsync with Renderer with FutureUtils {
+trait SpiAsyncBase extends Spi_async with Renderer with FutureUtils {
 
   // Query --------------------------------------------------------
 

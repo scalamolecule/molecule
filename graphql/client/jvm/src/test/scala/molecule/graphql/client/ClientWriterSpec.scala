@@ -1,48 +1,46 @@
 package molecule.graphql.client
 
+import _root_.zio.test.*
 import caliban.parsing.Parser
-import caliban.parsing.adt.Definition.TypeSystemDefinition.TypeDefinition._
+import caliban.parsing.adt.Definition.TypeSystemDefinition.TypeDefinition.*
 import caliban.parsing.adt.Document
 import caliban.tools.{ClientWriter, Formatter}
-import _root_.zio._
-import _root_.zio.test.TestAspect._
-import _root_.zio.test._
 
 object ClientWriterSpec extends ZIOSpecDefault {
 
-//  def gen(
-//    schema: String,
-//    scalarMappings: Map[String, String] = Map.empty,
-//    additionalImports: List[String] = List.empty,
-//    extensibleEnums: Boolean = false
-//  ): Task[String] = Parser
-//    .parseQuery(schema)
-//    .flatMap(doc =>
-//      Formatter.format(
-//        ClientWriter
-//          .write(
-//            doc,
-//            additionalImports = Some(additionalImports),
-//            extensibleEnums = extensibleEnums,
-//            scalarMappings = Some(scalarMappings)
-//          )
-//          .head
-//          ._2,
-//        None
-//      )
-//    )
-//
-//  def genSplit(
-//    schema: String,
-//    scalarMappings: Map[String, String] = Map.empty
-//  ): Task[List[(String, String)]] = Parser
-//    .parseQuery(schema)
-//    .flatMap(doc =>
-//      Formatter.format(
-//        ClientWriter.write(doc, packageName = Some("test"), splitFiles = true, scalarMappings = Some(scalarMappings)),
-//        None
-//      )
-//    )
+  //  def gen(
+  //    schema: String,
+  //    scalarMappings: Map[String, String] = Map.empty,
+  //    additionalImports: List[String] = List.empty,
+  //    extensibleEnums: Boolean = false
+  //  ): Task[String] = Parser
+  //    .parseQuery(schema)
+  //    .flatMap(doc =>
+  //      Formatter.format(
+  //        ClientWriter
+  //          .write(
+  //            doc,
+  //            additionalImports = Some(additionalImports),
+  //            extensibleEnums = extensibleEnums,
+  //            scalarMappings = Some(scalarMappings)
+  //          )
+  //          .head
+  //          ._2,
+  //        None
+  //      )
+  //    )
+  //
+  //  def genSplit(
+  //    schema: String,
+  //    scalarMappings: Map[String, String] = Map.empty
+  //  ): Task[List[(String, String)]] = Parser
+  //    .parseQuery(schema)
+  //    .flatMap(doc =>
+  //      Formatter.format(
+  //        ClientWriter.write(doc, packageName = Some("test"), splitFiles = true, scalarMappings = Some(scalarMappings)),
+  //        None
+  //      )
+  //    )
 
   override def spec =
     suite("ClientWriterSpec")(
@@ -61,10 +59,10 @@ object ClientWriterSpec extends ZIOSpecDefault {
 
           val xx = doc.definitions.collect {
             case ObjectTypeDefinition(a, name, b, c, d)    =>
-//              println(a)
-//              println(b)
-//              println(c)
-//              println(d)
+              //              println(a)
+              //              println(b)
+              //              println(c)
+              //              println(d)
               d.foreach(println)
 
               "1 " + name
@@ -76,8 +74,8 @@ object ClientWriterSpec extends ZIOSpecDefault {
           }
 
           println(xx)
-//          println(y)
-//          println(ClientWriter.write(doc))
+          //          println(y)
+          //          println(ClientWriter.write(doc))
           Formatter.format(
             ClientWriter.write(doc).head._2,
             None
