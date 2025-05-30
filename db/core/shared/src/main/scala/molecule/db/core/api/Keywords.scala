@@ -1,5 +1,7 @@
 package molecule.db.core.api
 
+import scala.annotation.targetName
+
 /** Keywords to mark aggregate expressions on and unifications of attributes.
  * {{{
  * // Aggregates on any attribute type
@@ -331,6 +333,8 @@ trait KeywordsStable {
    * @group aggrNumber
    */
   trait stddev extends AggrCoalesce
+
+  trait Input extends Kw
 }
 
 object Keywords extends KeywordsStable
@@ -373,4 +377,9 @@ trait Keywords {
   object stddev extends Keywords.stddev {
     override def toString = "stddev"
   }
+
+
+
+  @targetName("InputPlaceholder")
+  object ? extends Keywords.Input
 }

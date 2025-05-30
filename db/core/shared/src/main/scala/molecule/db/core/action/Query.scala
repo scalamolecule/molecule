@@ -31,4 +31,8 @@ case class Query[Tpl](
 
   // Inspect also
   def i: Query[Tpl] = copy(doInspect = true)
+
+
+
+  def apply(input1: Int | String) = this
 }

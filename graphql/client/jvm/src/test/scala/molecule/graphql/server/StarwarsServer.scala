@@ -7,6 +7,8 @@ import caliban.schema.{ArgBuilder, Schema}
 
 trait StarwarsServer {
 
+  // Schema -----------------------------------------
+
   enum Episode:
     case NEWHOPE, EMPIRE, JEDI
 
@@ -34,42 +36,47 @@ trait StarwarsServer {
     primaryFunction: Option[String])
     extends Character
 
-
-  import Episode.*
-
-  // Step 1: Create stub characters with empty friends
-  val luke    = Human("1000", "Luke Skywalker", Nil, List(NEWHOPE, EMPIRE, JEDI), Some("Tatooine"))
-  val han     = Human("1002", "Han Solo", Nil, List(NEWHOPE, EMPIRE, JEDI), None)
-  val leia    = Human("1003", "Leia Organa", Nil, List(NEWHOPE, EMPIRE, JEDI), Some("Alderaan"))
-  val c3po    = Droid("2000", "C-3PO", Nil, List(NEWHOPE, EMPIRE, JEDI), Some("Protocol"))
-  val r2d2    = Droid("2001", "R2-D2", Nil, List(NEWHOPE, EMPIRE, JEDI), Some("Astromech"))
-  val darth   = Human("1001", "Darth Vader", Nil, List(NEWHOPE, EMPIRE, JEDI), Some("Tatooine"))
-  val wilhuff = Human("1004", "Wilhuff Tarkin", Nil, List(NEWHOPE, EMPIRE, JEDI), None)
-
-  // Step 2: Wire up friendships
-  val luke2    = luke.copy(friends = List(han, leia, c3po, r2d2))
-  val han2     = han.copy(friends = List(luke2, leia, r2d2))
-  val leia2    = leia.copy(friends = List(luke2, han2, c3po, r2d2))
-  val c3po2    = c3po.copy(friends = List(luke2, han2, leia2, r2d2))
-  val r2d2_2   = r2d2.copy(friends = List(luke2, han2, leia2))
-  val darth2   = darth.copy(friends = List(wilhuff))
-  val wilhuff2 = wilhuff.copy(friends = List(darth2))
-
-  val humans                      = List(luke2, darth2, han2, leia2, wilhuff2)
-  val droids                      = List(c3po2, r2d2_2)
-  val characters: List[Character] = humans ++ droids
-
-  case class HeroArg(episode: Option[Episode])derives Schema.SemiAuto, ArgBuilder
-  case class CharacterArg(id: String)derives Schema.SemiAuto, ArgBuilder
-  case class HumanArg(id: String)derives Schema.SemiAuto, ArgBuilder
-  case class DroidArg(id: String)derives Schema.SemiAuto, ArgBuilder
-
   case class Query(
     hero: HeroArg => Character,
     character: CharacterArg => Option[Character],
     human: HumanArg => Human,
     droid: DroidArg => Droid,
   )
+
+
+  // Data -----------------------------------------
+
+  import Episode.*
+
+  // Step 1: Create stub characters with empty friends
+  val luke    = Human("1000", "Luke Skywalker", Nil, List(NEWHOPE, EMPIRE, JEDI), Some("Tatooine"))
+  val darth   = Human("1001", "Darth Vader", Nil, List(NEWHOPE, EMPIRE, JEDI), Some("Tatooine"))
+  val han     = Human("1002", "Han Solo", Nil, List(NEWHOPE, EMPIRE, JEDI), None)
+  val leia    = Human("1003", "Leia Organa", Nil, List(NEWHOPE, EMPIRE, JEDI), Some("Alderaan"))
+  val wilhuff = Human("1004", "Wilhuff Tarkin", Nil, List(NEWHOPE, EMPIRE, JEDI), None)
+  val c3po    = Droid("2000", "C-3PO", Nil, List(NEWHOPE, EMPIRE, JEDI), Some("Protocol"))
+  val r2d2    = Droid("2001", "R2-D2", Nil, List(NEWHOPE, EMPIRE, JEDI), Some("Astromech"))
+
+  // Step 2: Wire up friendships
+  val luke2    = luke.copy(friends = List(han, leia, c3po, r2d2))
+  val darth2   = darth.copy(friends = List(wilhuff))
+  val han2     = han.copy(friends = List(luke2, leia, r2d2))
+  val leia2    = leia.copy(friends = List(luke2, han2, c3po, r2d2))
+  val wilhuff2 = wilhuff.copy(friends = List(darth2))
+  val c3po2    = c3po.copy(friends = List(luke2, han2, leia2, r2d2))
+  val r2d2_2   = r2d2.copy(friends = List(luke2, han2, leia2))
+
+  val humans                      = List(luke2, darth2, han2, leia2, wilhuff2)
+  val droids                      = List(c3po2, r2d2_2)
+  val characters: List[Character] = humans ++ droids
+
+
+  // Resolve -----------------------------------------
+
+  case class HeroArg(episode: Option[Episode])derives Schema.SemiAuto, ArgBuilder
+  case class CharacterArg(id: String)derives Schema.SemiAuto, ArgBuilder
+  case class HumanArg(id: String)derives Schema.SemiAuto, ArgBuilder
+  case class DroidArg(id: String)derives Schema.SemiAuto, ArgBuilder
 
   given ArgBuilder[Episode] = ArgBuilder.gen
   given Schema[Any, Episode] = Schema.gen

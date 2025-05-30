@@ -14,12 +14,19 @@ class Adhoc_jvm_h2_async extends Test with DbProviders_h2 with TestUtils {
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
       for {
-        List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
-        _ <- Entity.int(3).save.transact
+        List(a, b) <- Entity.int.insert(1, 2).i.transact.map(_.ids)
+        _ <- Entity.int(3).save.i.transact
         _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
-        _ <- Entity(a).int(10).update.transact
-        _ <- Entity(b).delete.transact
+        _ <- Entity(a).int(10).update.i.transact
+        _ <- Entity(b).delete.i.transact
         _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
+
+
+
+//        query = Entity.int(?).query
+//        _ <- query(1).get.map(_ ==> List(1))
+//        _ <- query(2).get.map(_ ==> List(2))
+
 
       } yield ()
     }
