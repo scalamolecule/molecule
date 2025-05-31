@@ -334,7 +334,10 @@ trait KeywordsStable {
    */
   trait stddev extends AggrCoalesce
 
-  trait Input extends Kw
+  /**
+   * Bind parameter to mark expected data input for cached query structures.
+   */
+  trait qm extends Kw
 }
 
 object Keywords extends KeywordsStable
@@ -378,8 +381,6 @@ trait Keywords {
     override def toString = "stddev"
   }
 
-
-
-  @targetName("InputPlaceholder")
-  object ? extends Keywords.Input
+  @targetName("Keywords.qm")
+  object ? extends Keywords.qm
 }

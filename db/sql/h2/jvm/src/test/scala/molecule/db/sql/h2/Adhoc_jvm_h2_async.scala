@@ -1,6 +1,5 @@
 package molecule.db.sql.h2
 
-import molecule.db.compliance.domains.dsl.Types.Entity
 import molecule.db.compliance.setup.{Test, TestUtils}
 import molecule.db.core.util.Executor.*
 import molecule.db.sql.h2.async.*
@@ -9,27 +8,29 @@ import molecule.db.sql.h2.setup.DbProviders_h2
 
 class Adhoc_jvm_h2_async extends Test with DbProviders_h2 with TestUtils {
 
-    "types" - types { implicit conn =>
-      import molecule.db.compliance.domains.dsl.Types.*
-      implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+  "types" - types { implicit conn =>
+    import molecule.db.compliance.domains.dsl.Types.*
+    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
-      for {
-        List(a, b) <- Entity.int.insert(1, 2).i.transact.map(_.ids)
-        _ <- Entity.int(3).save.i.transact
-        _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
-        _ <- Entity(a).int(10).update.i.transact
-        _ <- Entity(b).delete.i.transact
-        _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
-
-
-
-//        query = Entity.int(?).query
-//        _ <- query(1).get.map(_ ==> List(1))
-//        _ <- query(2).get.map(_ ==> List(2))
+    for {
+      List(a, b) <- Entity.int.insert.apply(1, 2).transact.map(_.ids)
+      //      _ <- Entity.int(3).save.i.transact
+      //      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
+      //      _ <- Entity(a).int(10).update.i.transact
+      //      _ <- Entity(b).delete.i.transact
+      //      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
 
 
-      } yield ()
-    }
+
+      _ <- Entity.int.query.i.get.map(_ ==> List(1, 2))
+      query = Entity.int.apply(?).query
+      _ <- query.apply(1).i.get.map(_ ==> List(1))
+      _ <- query.apply(2).i.get.map(_ ==> List(2))
+      //        _ <- query.apply("2").get.map(_ ==> List(2))
+
+
+    } yield ()
+  }
 
 
   //    "unique" - unique { implicit conn =>

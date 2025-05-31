@@ -3,6 +3,7 @@ package molecule.db.sql.core.query
 import molecule.db.base.error.ModelError
 import molecule.db.core.ast.*
 import molecule.db.core.query.{Model2Query, QueryExpr}
+import molecule.db.sql.core.javaSql.PrepStmt
 import scala.reflect.ClassTag
 
 trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & LambdasOne =>
@@ -143,7 +144,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
   ): Unit = {
     op match {
       case V            => attrV(col)
-      case Eq           => equal(col, args, res.one2sql)
+      case Eq           => equal(col, args, res.one2sql, res.bind)
       case Neq          => neq(col, args, res.one2sql)
       case Lt           => compare(col, args.head, "<", res.one2sql)
       case Gt           => compare(col, args.head, ">", res.one2sql)
@@ -190,7 +191,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
     addSort(attr, col)
     attr.op match {
       case V     => () // selected col can already be a value or null
-      case Eq    => optEqual(col, optArgs, resOpt.one2sql)
+      case Eq    => optEqual(col, optArgs, resOpt.one2sql, resOpt.bind)
       case Neq   => optNeq(col, optArgs, resOpt.one2sql)
       case Lt    => optCompare(col, optArgs, "<", resOpt.one2sql)
       case Gt    => optCompare(col, optArgs, ">", resOpt.one2sql)
@@ -212,24 +213,37 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
 
   // eq ------------------------------------------------------------------------
 
-  protected def equal[T](col: String, args: Seq[T], one2sql: T => String): Unit = {
-    where += (args.length match {
-      case 1 => (col, "= " + one2sql(args.head))
-      case 0 => ("FALSE", "") // Empty Seq of args matches no values
-      case _ => (col, args.map(one2sql).mkString("IN (", ", ", ")"))
-    })
+  protected def equal[T](
+    col: String,
+    args: Seq[T],
+    one2sql: T => String,
+    bind: (PrepStmt, Int, Int, Any) => Unit
+  ): Unit = {
+    if true then {
+      where += ((col, s"= ?"))
+      val paramIndex = inputs.length + 1
+      bindIndex = bindIndex + 1
+      inputs += ((ps: PrepStmt) => bind(ps, paramIndex, bindIndex, bindValues(bindIndex)))
+    } else {
+      where += (args.length match {
+        case 1 => (col, "= " + one2sql(args.head))
+        case 0 => ("FALSE", "") // Empty Seq of args matches no values
+        case _ => (col, args.map(one2sql).mkString("IN (", ", ", ")"))
+      })
+    }
   }
 
   protected def optEqual[T](
     col: String,
     optArgs: Option[Seq[T]],
     one2sql: T => String,
+    bind: (PrepStmt, Int, Int, Any) => Unit
   ): Unit = {
     optArgs.fold[Unit] {
       setNull(col)
     } {
       case Nil => where += (("FALSE", ""))
-      case vs  => equal(col, vs, one2sql)
+      case vs  => equal(col, vs, one2sql, bind)
     }
   }
 

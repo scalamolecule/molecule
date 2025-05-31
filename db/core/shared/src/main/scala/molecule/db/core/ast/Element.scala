@@ -4,7 +4,7 @@ import java.net.URI
 import java.time.*
 import java.util.{Date, UUID}
 import molecule.db.base.ast.*
-import molecule.db.base.util.BaseHelpers._
+import molecule.db.base.util.BaseHelpers.*
 
 
 sealed trait Element {
@@ -23,6 +23,7 @@ sealed trait Attr extends Element {
   val ref       : Option[String]
   val sort      : Option[String]
   val coord     : List[Int]
+  lazy val bind: Boolean = ???
 
   def name: String = ent + "." + attr
 
@@ -121,24 +122,24 @@ case class OptNested(ref: Ref, elements: List[Element]) extends Element {
  * Allowing unicode characters
  *
  * ```
- *  lazy val jsEnvironment = {
- *    Seq(
- *      scalaJSLinkerConfig ~= {
- *        // Allow unicode characters in regex expressions (emailRegex)
- *        // https://www.scala-js.org/doc/regular-expressions.html
- *        _.withESFeatures(_.withESVersion(ESVersion.ES2018))
- *      },
- *    )
- *  }
+ * lazy val jsEnvironment = {
+ *   Seq(
+ *     scalaJSLinkerConfig ~= {
+ *       // Allow unicode characters in regex expressions (emailRegex)
+ *       // https://www.scala-js.org/doc/regular-expressions.html
+ *       _.withESFeatures(_.withESVersion(ESVersion.ES2018))
+ *     },
+ *   )
+ * }
  * ```
  * Bootzooka has a simpler version not allowing unicode characters:
  * private val emailRegex =
- *   """^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$""".r
+ * """^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$""".r
  */
 val emailRegex = "^(?=.{1,64}@)[\\p{L}0-9_-]+(\\.[\\p{L}0-9_-]+)*@[^-][\\p{L}0-9-]+(\\.[\\p{L}0-9-]+)*(\\.[\\p{L}]{2,})$".r
 
 
-// GENERATED from here and below (edit in _Model generator) ======================================
+// GENERATED from here and below (edit in _Element generator) ======================================
 
 sealed trait AttrOneMan extends AttrOne with Mandatory
 
@@ -173,7 +174,8 @@ case class AttrOneManString(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val coord: List[Int] = Nil
+  override val coord: List[Int] = Nil,
+//  override val bind: Boolean = false,
 ) extends AttrOneMan {
   override def toString: String = {
     def format(v: String): String = "\"" + escStr(v) + "\""

@@ -179,7 +179,7 @@ object Validation extends DomainStructure(5) {
         }                =>
           """Test 4: Number must
             |be odd. Found: $v""".stripMargin
-      }: PartialFunction[Int, String] // Not needed in Scala 2.13 and 3.x
+      }
     )
 
   }
@@ -271,7 +271,7 @@ object Validation extends DomainStructure(5) {
         } =>
           """Test 5: Number must
             |be odd. Found: $v""".stripMargin
-      }: PartialFunction[Int, String] // Not needed in Scala 2.13 and 3.x
+      }
     )
   }
 

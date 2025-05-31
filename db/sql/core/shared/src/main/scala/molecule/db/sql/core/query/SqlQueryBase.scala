@@ -33,6 +33,8 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions {
   final protected val groupByCols = new mutable.LinkedHashSet[String]
   final protected var hardLimit   = 0
   final           val inputs      = new ListBuffer[PrepStmt => Unit]
+  final           var bindIndex   = -1
+  final           val bindValues  = new ListBuffer[Any]
 
   final var castStrategy: CastStrategy = CastTuple()
 

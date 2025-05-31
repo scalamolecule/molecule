@@ -4,6 +4,7 @@ case class DataModel(
   elements: List[Element],
   attrIndexes: Set[Int] = Set.empty[Int],
   firstEntityIndex: Int = -1,
+  binds: Int = 0
 ) {
 
   def add(attr: Attr): DataModel = {

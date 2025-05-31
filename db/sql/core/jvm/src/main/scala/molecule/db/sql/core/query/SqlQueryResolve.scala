@@ -18,14 +18,16 @@ abstract class SqlQueryResolve[Tpl](
 
   type RS = ResultSetInterface
 
+  private lazy val inputs: List[PrepStmt => Unit] = m2q.inputs.toList
+
+
   protected def getData(
     conn: JdbcConn_JVM,
     optLimit: Option[Int],
     optOffset: Option[Int],
   ): ResultSetInterface = {
     val query  = m2q.getSqlQuery(Nil, optLimit, optOffset, Some(conn.proxy))
-    val inputs = m2q.inputs.toList
-    getResultSet(conn, query, inputs)
+    getResultSet(conn, query)
   }
 
   protected def getTotalCount(conn: JdbcConn_JVM): Int = {
@@ -34,18 +36,13 @@ abstract class SqlQueryResolve[Tpl](
     rs.getInt(1)
   }
 
-  private def getResultSet(
-    conn: JdbcConn_JVM,
-    query: String,
-    inputs: List[PrepStmt => Unit] = Nil
-  ): ResultSetInterface = {
+  private def getResultSet(conn: JdbcConn_JVM, query: String): ResultSetInterface = {
     val ps  = conn.queryStmt(query)
     val ps1 = new PrepStmtImpl(ps)
     // set input values corresponding to '?' in queries
     inputs.foreach(_(ps1))
     conn.resultSet(ps.executeQuery())
   }
-
 
   protected def getRawData(
     conn: JdbcConn_JVM,

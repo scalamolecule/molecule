@@ -27,8 +27,6 @@ trait Aggregates_1[A, t, Entity[_, _]] extends AggregatesOps_1[A, t, Entity] {
   def apply(kw: maxs)         : Entity[Set[t], t     ]                                       = _aggrSet(kw, Some(kw.n))
   def apply(kw: samples)      : Entity[Set[t], t     ]                                       = _aggrSet(kw, Some(kw.n))
   def apply(kw: distinct)     : Entity[Set[A], t     ]                                       = _aggrDist(kw)
-
-  def apply(input: Input)          : Entity[t     , t     ] & SortAttrs_1[t     , t     , Entity] = _aggrT(input)
 }
 
 

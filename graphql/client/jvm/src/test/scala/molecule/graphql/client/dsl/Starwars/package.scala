@@ -36,7 +36,7 @@ object Starwars {
   def input(i: _1.type) = 1
   def input(i: _2.type) = 2
 
-  def input(i: ?.type) = 3
+//  def input(i: ?.type) = 3
 
   input(_1)
   input(_2)

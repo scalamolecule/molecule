@@ -95,16 +95,6 @@ case class TxModelValidation(
 
         case OptEntity(attrs) =>
           validateOptEntity(attrs)
-//          val refAttr = r.ent + "." + r.refAttr
-//          if (prev(level)(group).contains(refAttr))
-//            dup(refAttr)
-//          if (refPath.contains(refAttr))
-//            dup(refAttr)
-//          prev(level) = prev(level) :+ Array(refAttr)
-//          group += 1
-//          mandatoryRefs = mandatoryRefs.filterNot(_._1 == refAttr)
-//          presentAttrs += r.refAttr
-//          refPath = refPath :+ refAttr
           validate(attrs ++ tail)
 
         case Nested(r, es) =>

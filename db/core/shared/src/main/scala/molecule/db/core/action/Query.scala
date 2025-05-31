@@ -1,6 +1,7 @@
 package molecule.db.core.action
 
 import java.util.Date
+import molecule.db.base.error.ModelError
 import molecule.db.core.ast.DataModel
 import molecule.db.core.marshalling.dbView.*
 import molecule.db.core.spi.TxReport
@@ -9,7 +10,8 @@ case class Query[Tpl](
   dataModel: DataModel,
   private[molecule] val optLimit: Option[Int] = None,
   private[molecule] val dbView: Option[DbView] = None,
-  private[molecule] val doInspect: Boolean = false
+  private[molecule] val doInspect: Boolean = false,
+  private[molecule] val bindValues: List[Any] = Nil
 ) extends Action {
 
   // Common api
@@ -33,6 +35,15 @@ case class Query[Tpl](
   def i: Query[Tpl] = copy(doInspect = true)
 
 
+  private def bind(inputs: List[Any]): Query[Tpl] = {
+    val found    = inputs.length
+    val expected = dataModel.elements.length // todo. input params instead
+    if found != expected then
+      throw ModelError(s"Expected $expected input parameters but got $found.")
 
-  def apply(input1: Int | String) = this
+    copy(bindValues = inputs)
+  }
+  def apply(a: Any): Query[Tpl] = bind(List(a))
+  def apply(a: Any, b: Any): Query[Tpl] = bind(List(a, b))
+  def apply(a: Any, b: Any, c: Any): Query[Tpl] = bind(List(a, b, c))
 }

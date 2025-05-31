@@ -3,7 +3,8 @@ package molecule.db.core.api.expression
 
 import molecule.db.base.ast.*
 import molecule.db.core.api.*
-import molecule.db.core.ast._
+import molecule.db.core.api.Keywords.qm
+import molecule.db.core.ast.*
 
 
 trait ExprOneManOps_1[A, t, Entity1[_, _], Entity2[_, _, _]]
@@ -24,7 +25,14 @@ trait ExprOneMan_1[A, t, Entity1[_, _], Entity2[_, _, _]]
   def <=   (upper: t        ): Entity1[A, t] & SortAttrs_1[A, t, Entity1] & CardOne = _exprOneMan(Le     , Seq(upper)  )
   def >    (lower: t        ): Entity1[A, t] & SortAttrs_1[A, t, Entity1] & CardOne = _exprOneMan(Gt     , Seq(lower)  )
   def >=   (lower: t        ): Entity1[A, t] & SortAttrs_1[A, t, Entity1] & CardOne = _exprOneMan(Ge     , Seq(lower)  )
-  
+
+  def apply(v    : qm): Entity1[A, t] & SortAttrs_1[A, t, Entity1] & CardOne = _exprOneMan(Eq , Nil)
+  def not  (v    : qm): Entity1[A, t] & SortAttrs_1[A, t, Entity1] & CardOne = _exprOneMan(Neq, Nil)
+  def <    (upper: qm): Entity1[A, t] & SortAttrs_1[A, t, Entity1] & CardOne = _exprOneMan(Lt , Nil)
+  def <=   (upper: qm): Entity1[A, t] & SortAttrs_1[A, t, Entity1] & CardOne = _exprOneMan(Le , Nil)
+  def >    (lower: qm): Entity1[A, t] & SortAttrs_1[A, t, Entity1] & CardOne = _exprOneMan(Gt , Nil)
+  def >=   (lower: qm): Entity1[A, t] & SortAttrs_1[A, t, Entity1] & CardOne = _exprOneMan(Ge , Nil)
+
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] & CardOne): Entity1[A, t] & SortAttrs_1[A, t, Entity1] = _attrSortTac(Eq , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] & CardOne): Entity1[A, t] & SortAttrs_1[A, t, Entity1] = _attrSortTac(Neq, a)
   def <    [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] & CardOne): Entity1[A, t] & SortAttrs_1[A, t, Entity1] = _attrSortTac(Lt , a)

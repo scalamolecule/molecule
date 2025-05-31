@@ -45,6 +45,7 @@ trait SpiBaseJVM_sync
     val cleanElements  = keywordsSuffixed(query.dataModel.elements, conn.proxy)
     val cleanDataModel = query.dataModel.copy(elements = cleanElements)
     val m2q            = getModel2SqlQuery(cleanElements)
+    m2q.bindValues.addAll(query.bindValues)
     SqlQueryResolveOffset[Tpl](cleanDataModel, query.optLimit, None, m2q)
       .getListFromOffset_sync(conn)._1
   }
