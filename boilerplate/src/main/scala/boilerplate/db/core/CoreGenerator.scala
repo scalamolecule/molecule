@@ -27,7 +27,7 @@ object CoreGenerator extends App {
   //  api._SortAttrs.generate()
   //  marshalling.deserialize._UnpickleTpl.generate()
   //  marshalling.serialize._PickleTpl.generate()
-  //  ops._ModelTransformations.generate()
+    ops._ModelTransformations.generate()
   //  transaction._InsertResolvers.generate()
   //  transaction._InsertValidators.generate()
   //  validation.insert._InsertValidationResolvers.generate()

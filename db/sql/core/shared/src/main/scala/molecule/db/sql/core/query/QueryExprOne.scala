@@ -72,29 +72,29 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
 
   override protected def queryAttrOneOpt(attr: AttrOneOpt): Unit = {
     attr match {
-      case at: AttrOneOptID             => opt(attr, at.vs, resOptId)
-      case at: AttrOneOptString         => opt(attr, at.vs, resOptString)
-      case at: AttrOneOptInt            => opt(attr, at.vs, resOptInt)
-      case at: AttrOneOptLong           => opt(attr, at.vs, resOptLong)
-      case at: AttrOneOptFloat          => opt(attr, at.vs, resOptFloat)
-      case at: AttrOneOptDouble         => opt(attr, at.vs, resOptDouble)
-      case at: AttrOneOptBoolean        => opt(attr, at.vs, resOptBoolean)
-      case at: AttrOneOptBigInt         => opt(attr, at.vs, resOptBigInt)
-      case at: AttrOneOptBigDecimal     => opt(attr, at.vs, resOptBigDecimal)
-      case at: AttrOneOptDate           => opt(attr, at.vs, resOptDate)
-      case at: AttrOneOptDuration       => opt(attr, at.vs, resOptDuration)
-      case at: AttrOneOptInstant        => opt(attr, at.vs, resOptInstant)
-      case at: AttrOneOptLocalDate      => opt(attr, at.vs, resOptLocalDate)
-      case at: AttrOneOptLocalTime      => opt(attr, at.vs, resOptLocalTime)
-      case at: AttrOneOptLocalDateTime  => opt(attr, at.vs, resOptLocalDateTime)
-      case at: AttrOneOptOffsetTime     => opt(attr, at.vs, resOptOffsetTime)
-      case at: AttrOneOptOffsetDateTime => opt(attr, at.vs, resOptOffsetDateTime)
-      case at: AttrOneOptZonedDateTime  => opt(attr, at.vs, resOptZonedDateTime)
-      case at: AttrOneOptUUID           => opt(attr, at.vs, resOptUUID)
-      case at: AttrOneOptURI            => opt(attr, at.vs, resOptURI)
-      case at: AttrOneOptByte           => opt(attr, at.vs, resOptByte)
-      case at: AttrOneOptShort          => opt(attr, at.vs, resOptShort)
-      case at: AttrOneOptChar           => opt(attr, at.vs, resOptChar)
+      case at: AttrOneOptID             => opt(attr, at.vs, at.binding, resOptId)
+      case at: AttrOneOptString         => opt(attr, at.vs, at.binding, resOptString)
+      case at: AttrOneOptInt            => opt(attr, at.vs, at.binding, resOptInt)
+      case at: AttrOneOptLong           => opt(attr, at.vs, at.binding, resOptLong)
+      case at: AttrOneOptFloat          => opt(attr, at.vs, at.binding, resOptFloat)
+      case at: AttrOneOptDouble         => opt(attr, at.vs, at.binding, resOptDouble)
+      case at: AttrOneOptBoolean        => opt(attr, at.vs, at.binding, resOptBoolean)
+      case at: AttrOneOptBigInt         => opt(attr, at.vs, at.binding, resOptBigInt)
+      case at: AttrOneOptBigDecimal     => opt(attr, at.vs, at.binding, resOptBigDecimal)
+      case at: AttrOneOptDate           => opt(attr, at.vs, at.binding, resOptDate)
+      case at: AttrOneOptDuration       => opt(attr, at.vs, at.binding, resOptDuration)
+      case at: AttrOneOptInstant        => opt(attr, at.vs, at.binding, resOptInstant)
+      case at: AttrOneOptLocalDate      => opt(attr, at.vs, at.binding, resOptLocalDate)
+      case at: AttrOneOptLocalTime      => opt(attr, at.vs, at.binding, resOptLocalTime)
+      case at: AttrOneOptLocalDateTime  => opt(attr, at.vs, at.binding, resOptLocalDateTime)
+      case at: AttrOneOptOffsetTime     => opt(attr, at.vs, at.binding, resOptOffsetTime)
+      case at: AttrOneOptOffsetDateTime => opt(attr, at.vs, at.binding, resOptOffsetDateTime)
+      case at: AttrOneOptZonedDateTime  => opt(attr, at.vs, at.binding, resOptZonedDateTime)
+      case at: AttrOneOptUUID           => opt(attr, at.vs, at.binding, resOptUUID)
+      case at: AttrOneOptURI            => opt(attr, at.vs, at.binding, resOptURI)
+      case at: AttrOneOptByte           => opt(attr, at.vs, at.binding, resOptByte)
+      case at: AttrOneOptShort          => opt(attr, at.vs, at.binding, resOptShort)
+      case at: AttrOneOptChar           => opt(attr, at.vs, at.binding, resOptChar)
     }
   }
 
@@ -119,7 +119,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
     }
     addSort(attr, col)
     attr.filterAttr.fold {
-      expr(attr.ent, attr.attr, col, attr.op, args, res)
+      expr(attr.ent, attr.attr, col, attr.op, args, attr.binding, res)
     } { case (dir, filterPath, filterAttr) =>
       expr2(col, attr.op, filterAttr.name)
     }
@@ -128,7 +128,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
   protected def tac[T: ClassTag](attr: Attr, args: Seq[T], res: ResOne[T]): Unit = {
     val col = getCol(attr: Attr)
     attr.filterAttr.fold {
-      expr(attr.ent, attr.attr, col, attr.op, args, res)
+      expr(attr.ent, attr.attr, col, attr.op, args, attr.binding, res)
     } { case (dir, filterPath, filterAttr) =>
       expr2(col, attr.op, getCol(filterAttr, filterPath))
     }
@@ -140,11 +140,12 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
     col: String,
     op: Op,
     args: Seq[T],
+    binding: Boolean,
     res: ResOne[T],
   ): Unit = {
     op match {
       case V            => attrV(col)
-      case Eq           => equal(col, args, res.one2sql, res.bind)
+      case Eq           => equal(col, args, res.one2sql, binding, res.bind)
       case Neq          => neq(col, args, res.one2sql)
       case Lt           => compare(col, args.head, "<", res.one2sql)
       case Gt           => compare(col, args.head, ">", res.one2sql)
@@ -182,6 +183,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
   protected def opt[T](
     attr: Attr,
     optArgs: Option[Seq[T]],
+    binding: Boolean,
     resOpt: ResOneOpt[T],
   ): Unit = {
     val col = getCol(attr: Attr)
@@ -191,7 +193,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
     addSort(attr, col)
     attr.op match {
       case V     => () // selected col can already be a value or null
-      case Eq    => optEqual(col, optArgs, resOpt.one2sql, resOpt.bind)
+      case Eq    => optEqual(col, optArgs, resOpt.one2sql, binding, resOpt.bind)
       case Neq   => optNeq(col, optArgs, resOpt.one2sql)
       case Lt    => optCompare(col, optArgs, "<", resOpt.one2sql)
       case Gt    => optCompare(col, optArgs, ">", resOpt.one2sql)
@@ -217,12 +219,14 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
     col: String,
     args: Seq[T],
     one2sql: T => String,
+    binding: Boolean,
     bind: (PrepStmt, Int, Int, Any) => Unit
   ): Unit = {
-    if true then {
+    if binding then {
       where += ((col, s"= ?"))
       val paramIndex = inputs.length + 1
       bindIndex = bindIndex + 1
+      // Bind parameter values to prepared statement when they have been set by calling `query(<values>)` on a molecule.
       inputs += ((ps: PrepStmt) => bind(ps, paramIndex, bindIndex, bindValues(bindIndex)))
     } else {
       where += (args.length match {
@@ -237,13 +241,14 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
     col: String,
     optArgs: Option[Seq[T]],
     one2sql: T => String,
+    binding: Boolean,
     bind: (PrepStmt, Int, Int, Any) => Unit
   ): Unit = {
     optArgs.fold[Unit] {
       setNull(col)
     } {
       case Nil => where += (("FALSE", ""))
-      case vs  => equal(col, vs, one2sql, bind)
+      case vs  => equal(col, vs, one2sql, binding, bind)
     }
   }
 

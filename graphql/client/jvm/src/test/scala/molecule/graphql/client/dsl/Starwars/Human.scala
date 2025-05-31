@@ -117,7 +117,7 @@ class Human_1[A, t](override val dataModel: DataModel) extends Human_1_refs[A, t
   override protected def _aggrDouble(kw: Kw                    ) = new Human_1[Double, Double](toDouble (dataModel, kw    )) with SortAttrs_1[Double, Double, Human_1]
   override protected def _aggrSet   (kw: Kw, n: Option[Int]    ) = new Human_1[Set[t], t     ](asIs     (dataModel, kw, n ))
   override protected def _aggrDist  (kw: Kw                    ) = new Human_1[Set[A], t     ](asIs     (dataModel, kw    ))
-  override protected def _exprOneMan(op: Op, vs: Seq[t]        ) = new Human_1[A     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_1[A     , t     , Human_1] with CardOne
+  override protected def _exprOneMan(op: Op, vs: Seq[t], binding: Boolean        ) = new Human_1[A     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_1[A     , t     , Human_1] with CardOne
   override protected def _exprOneOpt(op: Op, v : Option[t]     ) = new Human_1[A     , t     ](addOneOpt(dataModel, op, v )) with SortAttrs_1[A     , t     , Human_1]
   override protected def _exprOneTac(op: Op, vs: Seq[t]        ) = new Human_1[A     , t     ](addOne   (dataModel, op, vs)) with CardOne
   override protected def _exprSet   (op: Op, vs: Set[t]        ) = new Human_1[A     , t     ](addSet   (dataModel, op, vs)) with CardSet
@@ -172,7 +172,7 @@ class Human_2[A, B, t](override val dataModel: DataModel) extends Human_2_refs[A
   override protected def _aggrDouble(kw: Kw                    ) = new Human_2[A, Double, Double](toDouble (dataModel, kw    )) with SortAttrs_2[A, Double, Double, Human_2]
   override protected def _aggrSet   (kw: Kw, n: Option[Int]    ) = new Human_2[A, Set[t], t     ](asIs     (dataModel, kw, n ))
   override protected def _aggrDist  (kw: Kw                    ) = new Human_2[A, Set[B], t     ](asIs     (dataModel, kw    ))
-  override protected def _exprOneMan(op: Op, vs: Seq[t]        ) = new Human_2[A, B     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_2[A, B     , t     , Human_2] with CardOne
+  override protected def _exprOneMan(op: Op, vs: Seq[t], binding: Boolean        ) = new Human_2[A, B     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_2[A, B     , t     , Human_2] with CardOne
   override protected def _exprOneOpt(op: Op, v : Option[t]     ) = new Human_2[A, B     , t     ](addOneOpt(dataModel, op, v )) with SortAttrs_2[A, B     , t     , Human_2]
   override protected def _exprOneTac(op: Op, vs: Seq[t]        ) = new Human_2[A, B     , t     ](addOne   (dataModel, op, vs)) with CardOne
   override protected def _exprSet   (op: Op, vs: Set[t]        ) = new Human_2[A, B     , t     ](addSet   (dataModel, op, vs)) with CardSet
@@ -227,7 +227,7 @@ class Human_3[A, B, C, t](override val dataModel: DataModel) extends Human_3_ref
   override protected def _aggrDouble(kw: Kw                    ) = new Human_3[A, B, Double, Double](toDouble (dataModel, kw    )) with SortAttrs_3[A, B, Double, Double, Human_3]
   override protected def _aggrSet   (kw: Kw, n: Option[Int]    ) = new Human_3[A, B, Set[t], t     ](asIs     (dataModel, kw, n ))
   override protected def _aggrDist  (kw: Kw                    ) = new Human_3[A, B, Set[C], t     ](asIs     (dataModel, kw    ))
-  override protected def _exprOneMan(op: Op, vs: Seq[t]        ) = new Human_3[A, B, C     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_3[A, B, C     , t     , Human_3] with CardOne
+  override protected def _exprOneMan(op: Op, vs: Seq[t], binding: Boolean        ) = new Human_3[A, B, C     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_3[A, B, C     , t     , Human_3] with CardOne
   override protected def _exprOneOpt(op: Op, v : Option[t]     ) = new Human_3[A, B, C     , t     ](addOneOpt(dataModel, op, v )) with SortAttrs_3[A, B, C     , t     , Human_3]
   override protected def _exprOneTac(op: Op, vs: Seq[t]        ) = new Human_3[A, B, C     , t     ](addOne   (dataModel, op, vs)) with CardOne
   override protected def _exprSet   (op: Op, vs: Set[t]        ) = new Human_3[A, B, C     , t     ](addSet   (dataModel, op, vs)) with CardSet
@@ -282,7 +282,7 @@ class Human_4[A, B, C, D, t](override val dataModel: DataModel) extends Human_4_
   override protected def _aggrDouble(kw: Kw                    ) = new Human_4[A, B, C, Double, Double](toDouble (dataModel, kw    )) with SortAttrs_4[A, B, C, Double, Double, Human_4]
   override protected def _aggrSet   (kw: Kw, n: Option[Int]    ) = new Human_4[A, B, C, Set[t], t     ](asIs     (dataModel, kw, n ))
   override protected def _aggrDist  (kw: Kw                    ) = new Human_4[A, B, C, Set[D], t     ](asIs     (dataModel, kw    ))
-  override protected def _exprOneMan(op: Op, vs: Seq[t]        ) = new Human_4[A, B, C, D     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_4[A, B, C, D     , t     , Human_4] with CardOne
+  override protected def _exprOneMan(op: Op, vs: Seq[t] , binding: Boolean       ) = new Human_4[A, B, C, D     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_4[A, B, C, D     , t     , Human_4] with CardOne
   override protected def _exprOneOpt(op: Op, v : Option[t]     ) = new Human_4[A, B, C, D     , t     ](addOneOpt(dataModel, op, v )) with SortAttrs_4[A, B, C, D     , t     , Human_4]
   override protected def _exprOneTac(op: Op, vs: Seq[t]        ) = new Human_4[A, B, C, D     , t     ](addOne   (dataModel, op, vs)) with CardOne
   override protected def _exprSet   (op: Op, vs: Set[t]        ) = new Human_4[A, B, C, D     , t     ](addSet   (dataModel, op, vs)) with CardSet
@@ -337,7 +337,7 @@ class Human_5[A, B, C, D, E, t](override val dataModel: DataModel) extends Human
   override protected def _aggrDouble(kw: Kw                    ) = new Human_5[A, B, C, D, Double, Double](toDouble (dataModel, kw    )) with SortAttrs_5[A, B, C, D, Double, Double, Human_5]
   override protected def _aggrSet   (kw: Kw, n: Option[Int]    ) = new Human_5[A, B, C, D, Set[t], t     ](asIs     (dataModel, kw, n ))
   override protected def _aggrDist  (kw: Kw                    ) = new Human_5[A, B, C, D, Set[E], t     ](asIs     (dataModel, kw    ))
-  override protected def _exprOneMan(op: Op, vs: Seq[t]        ) = new Human_5[A, B, C, D, E     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_5[A, B, C, D, E     , t     , Human_5] with CardOne
+  override protected def _exprOneMan(op: Op, vs: Seq[t] , binding: Boolean       ) = new Human_5[A, B, C, D, E     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_5[A, B, C, D, E     , t     , Human_5] with CardOne
   override protected def _exprOneOpt(op: Op, v : Option[t]     ) = new Human_5[A, B, C, D, E     , t     ](addOneOpt(dataModel, op, v )) with SortAttrs_5[A, B, C, D, E     , t     , Human_5]
   override protected def _exprOneTac(op: Op, vs: Seq[t]        ) = new Human_5[A, B, C, D, E     , t     ](addOne   (dataModel, op, vs)) with CardOne
   override protected def _exprSet   (op: Op, vs: Set[t]        ) = new Human_5[A, B, C, D, E     , t     ](addSet   (dataModel, op, vs)) with CardSet
@@ -381,7 +381,7 @@ class Human_6[A, B, C, D, E, F, t](override val dataModel: DataModel) extends Hu
   override protected def _aggrDouble(kw: Kw                    ) = new Human_6[A, B, C, D, E, Double, Double](toDouble (dataModel, kw    )) with SortAttrs_6[A, B, C, D, E, Double, Double, Human_6]
   override protected def _aggrSet   (kw: Kw, n: Option[Int]    ) = new Human_6[A, B, C, D, E, Set[t], t     ](asIs     (dataModel, kw, n ))
   override protected def _aggrDist  (kw: Kw                    ) = new Human_6[A, B, C, D, E, Set[F], t     ](asIs     (dataModel, kw    ))
-  override protected def _exprOneMan(op: Op, vs: Seq[t]        ) = new Human_6[A, B, C, D, E, F     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_6[A, B, C, D, E, F     , t     , Human_6] with CardOne
+  override protected def _exprOneMan(op: Op, vs: Seq[t] , binding: Boolean       ) = new Human_6[A, B, C, D, E, F     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_6[A, B, C, D, E, F     , t     , Human_6] with CardOne
   override protected def _exprOneOpt(op: Op, v : Option[t]     ) = new Human_6[A, B, C, D, E, F     , t     ](addOneOpt(dataModel, op, v )) with SortAttrs_6[A, B, C, D, E, F     , t     , Human_6]
   override protected def _exprOneTac(op: Op, vs: Seq[t]        ) = new Human_6[A, B, C, D, E, F     , t     ](addOne   (dataModel, op, vs)) with CardOne
   override protected def _exprSet   (op: Op, vs: Set[t]        ) = new Human_6[A, B, C, D, E, F     , t     ](addSet   (dataModel, op, vs)) with CardSet

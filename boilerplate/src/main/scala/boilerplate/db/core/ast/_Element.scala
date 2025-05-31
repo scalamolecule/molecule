@@ -9,7 +9,7 @@ object _Element extends CoreGenBase("Element", "/ast") {
   private val customCode = {
     val it        = Source.fromFile(new File(path + "/Element.scala"))
     val lines     = it.getLines().toList
-    val delimiter = "// GENERATED from here and below (edit in _Model generator)"
+    val delimiter = "// GENERATED from here and below (edit in _Element generator)"
     if (!lines.exists(_.contains(delimiter)))
       throw Exception(
         s"Couldn't find delimiting text '$delimiter' in file  " +
@@ -39,7 +39,7 @@ object _Element extends CoreGenBase("Element", "/ast") {
     }.mkString("\n")
     customCode +
       s"""
-         |// GENERATED from here and below (edit in _Model generator) ======================================
+         |// GENERATED from here and below (edit in _Element generator) ======================================
          |$attrClasses""".stripMargin
   }
 
@@ -208,6 +208,7 @@ object _Element extends CoreGenBase("Element", "/ast") {
          |  override val errors: Seq[String] = Nil,
          |  override val ref: Option[String] = None,
          |  override val sort: Option[String] = None,
+         |  override val binding: Boolean = false,
          |  override val coord: List[Int] = Nil
          |) extends Attr$card$mode {
          |  override def toString: String = {

@@ -117,7 +117,7 @@ class Droid_1[A, t](override val dataModel: DataModel) extends Droid_1_refs[A, t
   override protected def _aggrDouble(kw: Kw                    ) = new Droid_1[Double, Double](toDouble (dataModel, kw    )) with SortAttrs_1[Double, Double, Droid_1]
   override protected def _aggrSet   (kw: Kw, n: Option[Int]    ) = new Droid_1[Set[t], t     ](asIs     (dataModel, kw, n ))
   override protected def _aggrDist  (kw: Kw                    ) = new Droid_1[Set[A], t     ](asIs     (dataModel, kw    ))
-  override protected def _exprOneMan(op: Op, vs: Seq[t]        ) = new Droid_1[A     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_1[A     , t     , Droid_1] with CardOne
+  override protected def _exprOneMan(op: Op, vs: Seq[t] , binding: Boolean       ) = new Droid_1[A     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_1[A     , t     , Droid_1] with CardOne
   override protected def _exprOneOpt(op: Op, v : Option[t]     ) = new Droid_1[A     , t     ](addOneOpt(dataModel, op, v )) with SortAttrs_1[A     , t     , Droid_1]
   override protected def _exprOneTac(op: Op, vs: Seq[t]        ) = new Droid_1[A     , t     ](addOne   (dataModel, op, vs)) with CardOne
   override protected def _exprSet   (op: Op, vs: Set[t]        ) = new Droid_1[A     , t     ](addSet   (dataModel, op, vs)) with CardSet
@@ -172,7 +172,7 @@ class Droid_2[A, B, t](override val dataModel: DataModel) extends Droid_2_refs[A
   override protected def _aggrDouble(kw: Kw                    ) = new Droid_2[A, Double, Double](toDouble (dataModel, kw    )) with SortAttrs_2[A, Double, Double, Droid_2]
   override protected def _aggrSet   (kw: Kw, n: Option[Int]    ) = new Droid_2[A, Set[t], t     ](asIs     (dataModel, kw, n ))
   override protected def _aggrDist  (kw: Kw                    ) = new Droid_2[A, Set[B], t     ](asIs     (dataModel, kw    ))
-  override protected def _exprOneMan(op: Op, vs: Seq[t]        ) = new Droid_2[A, B     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_2[A, B     , t     , Droid_2] with CardOne
+  override protected def _exprOneMan(op: Op, vs: Seq[t], binding: Boolean        ) = new Droid_2[A, B     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_2[A, B     , t     , Droid_2] with CardOne
   override protected def _exprOneOpt(op: Op, v : Option[t]     ) = new Droid_2[A, B     , t     ](addOneOpt(dataModel, op, v )) with SortAttrs_2[A, B     , t     , Droid_2]
   override protected def _exprOneTac(op: Op, vs: Seq[t]        ) = new Droid_2[A, B     , t     ](addOne   (dataModel, op, vs)) with CardOne
   override protected def _exprSet   (op: Op, vs: Set[t]        ) = new Droid_2[A, B     , t     ](addSet   (dataModel, op, vs)) with CardSet
@@ -227,7 +227,7 @@ class Droid_3[A, B, C, t](override val dataModel: DataModel) extends Droid_3_ref
   override protected def _aggrDouble(kw: Kw                    ) = new Droid_3[A, B, Double, Double](toDouble (dataModel, kw    )) with SortAttrs_3[A, B, Double, Double, Droid_3]
   override protected def _aggrSet   (kw: Kw, n: Option[Int]    ) = new Droid_3[A, B, Set[t], t     ](asIs     (dataModel, kw, n ))
   override protected def _aggrDist  (kw: Kw                    ) = new Droid_3[A, B, Set[C], t     ](asIs     (dataModel, kw    ))
-  override protected def _exprOneMan(op: Op, vs: Seq[t]        ) = new Droid_3[A, B, C     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_3[A, B, C     , t     , Droid_3] with CardOne
+  override protected def _exprOneMan(op: Op, vs: Seq[t] , binding: Boolean       ) = new Droid_3[A, B, C     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_3[A, B, C     , t     , Droid_3] with CardOne
   override protected def _exprOneOpt(op: Op, v : Option[t]     ) = new Droid_3[A, B, C     , t     ](addOneOpt(dataModel, op, v )) with SortAttrs_3[A, B, C     , t     , Droid_3]
   override protected def _exprOneTac(op: Op, vs: Seq[t]        ) = new Droid_3[A, B, C     , t     ](addOne   (dataModel, op, vs)) with CardOne
   override protected def _exprSet   (op: Op, vs: Set[t]        ) = new Droid_3[A, B, C     , t     ](addSet   (dataModel, op, vs)) with CardSet
@@ -282,7 +282,7 @@ class Droid_4[A, B, C, D, t](override val dataModel: DataModel) extends Droid_4_
   override protected def _aggrDouble(kw: Kw                    ) = new Droid_4[A, B, C, Double, Double](toDouble (dataModel, kw    )) with SortAttrs_4[A, B, C, Double, Double, Droid_4]
   override protected def _aggrSet   (kw: Kw, n: Option[Int]    ) = new Droid_4[A, B, C, Set[t], t     ](asIs     (dataModel, kw, n ))
   override protected def _aggrDist  (kw: Kw                    ) = new Droid_4[A, B, C, Set[D], t     ](asIs     (dataModel, kw    ))
-  override protected def _exprOneMan(op: Op, vs: Seq[t]        ) = new Droid_4[A, B, C, D     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_4[A, B, C, D     , t     , Droid_4] with CardOne
+  override protected def _exprOneMan(op: Op, vs: Seq[t], binding: Boolean        ) = new Droid_4[A, B, C, D     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_4[A, B, C, D     , t     , Droid_4] with CardOne
   override protected def _exprOneOpt(op: Op, v : Option[t]     ) = new Droid_4[A, B, C, D     , t     ](addOneOpt(dataModel, op, v )) with SortAttrs_4[A, B, C, D     , t     , Droid_4]
   override protected def _exprOneTac(op: Op, vs: Seq[t]        ) = new Droid_4[A, B, C, D     , t     ](addOne   (dataModel, op, vs)) with CardOne
   override protected def _exprSet   (op: Op, vs: Set[t]        ) = new Droid_4[A, B, C, D     , t     ](addSet   (dataModel, op, vs)) with CardSet
@@ -337,7 +337,7 @@ class Droid_5[A, B, C, D, E, t](override val dataModel: DataModel) extends Droid
   override protected def _aggrDouble(kw: Kw                    ) = new Droid_5[A, B, C, D, Double, Double](toDouble (dataModel, kw    )) with SortAttrs_5[A, B, C, D, Double, Double, Droid_5]
   override protected def _aggrSet   (kw: Kw, n: Option[Int]    ) = new Droid_5[A, B, C, D, Set[t], t     ](asIs     (dataModel, kw, n ))
   override protected def _aggrDist  (kw: Kw                    ) = new Droid_5[A, B, C, D, Set[E], t     ](asIs     (dataModel, kw    ))
-  override protected def _exprOneMan(op: Op, vs: Seq[t]        ) = new Droid_5[A, B, C, D, E     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_5[A, B, C, D, E     , t     , Droid_5] with CardOne
+  override protected def _exprOneMan(op: Op, vs: Seq[t], binding: Boolean        ) = new Droid_5[A, B, C, D, E     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_5[A, B, C, D, E     , t     , Droid_5] with CardOne
   override protected def _exprOneOpt(op: Op, v : Option[t]     ) = new Droid_5[A, B, C, D, E     , t     ](addOneOpt(dataModel, op, v )) with SortAttrs_5[A, B, C, D, E     , t     , Droid_5]
   override protected def _exprOneTac(op: Op, vs: Seq[t]        ) = new Droid_5[A, B, C, D, E     , t     ](addOne   (dataModel, op, vs)) with CardOne
   override protected def _exprSet   (op: Op, vs: Set[t]        ) = new Droid_5[A, B, C, D, E     , t     ](addSet   (dataModel, op, vs)) with CardSet
@@ -381,7 +381,7 @@ class Droid_6[A, B, C, D, E, F, t](override val dataModel: DataModel) extends Dr
   override protected def _aggrDouble(kw: Kw                    ) = new Droid_6[A, B, C, D, E, Double, Double](toDouble (dataModel, kw    )) with SortAttrs_6[A, B, C, D, E, Double, Double, Droid_6]
   override protected def _aggrSet   (kw: Kw, n: Option[Int]    ) = new Droid_6[A, B, C, D, E, Set[t], t     ](asIs     (dataModel, kw, n ))
   override protected def _aggrDist  (kw: Kw                    ) = new Droid_6[A, B, C, D, E, Set[F], t     ](asIs     (dataModel, kw    ))
-  override protected def _exprOneMan(op: Op, vs: Seq[t]        ) = new Droid_6[A, B, C, D, E, F     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_6[A, B, C, D, E, F     , t     , Droid_6] with CardOne
+  override protected def _exprOneMan(op: Op, vs: Seq[t] , binding: Boolean       ) = new Droid_6[A, B, C, D, E, F     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_6[A, B, C, D, E, F     , t     , Droid_6] with CardOne
   override protected def _exprOneOpt(op: Op, v : Option[t]     ) = new Droid_6[A, B, C, D, E, F     , t     ](addOneOpt(dataModel, op, v )) with SortAttrs_6[A, B, C, D, E, F     , t     , Droid_6]
   override protected def _exprOneTac(op: Op, vs: Seq[t]        ) = new Droid_6[A, B, C, D, E, F     , t     ](addOne   (dataModel, op, vs)) with CardOne
   override protected def _exprSet   (op: Op, vs: Set[t]        ) = new Droid_6[A, B, C, D, E, F     , t     ](addSet   (dataModel, op, vs)) with CardSet

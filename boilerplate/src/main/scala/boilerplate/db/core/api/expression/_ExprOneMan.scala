@@ -11,6 +11,7 @@ object _ExprOneMan extends CoreGenBase("ExprOneMan", "/api/expression") {
        |
        |import molecule.db.base.ast.*
        |import molecule.db.core.api.*
+       |import molecule.db.core.api.Keywords.qm
        |import molecule.db.core.ast._
        |$traits
        |""".stripMargin
@@ -47,7 +48,7 @@ object _ExprOneMan extends CoreGenBase("ExprOneMan", "/api/expression") {
          |
          |trait ${fileName}Ops_$arity[${`A..V`}, t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]]
          |  extends ExprAttr_$arity[${`A..V, `}t, Entity1, Entity2] {
-         |  protected def _exprOneMan(op: Op, vs: Seq[t]): Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = ???
+         |  protected def _exprOneMan(op: Op, vs: Seq[t], binding: Boolean = false): Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = ???
          |}
          |
          |trait $fileName_$arity[${`A..V`}, t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]]
@@ -63,6 +64,13 @@ object _ExprOneMan extends CoreGenBase("ExprOneMan", "/api/expression") {
          |  def <=   (upper: t        ): Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(Le     , Seq(upper)  )
          |  def >    (lower: t        ): Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(Gt     , Seq(lower)  )
          |  def >=   (lower: t        ): Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(Ge     , Seq(lower)  )
+         |
+         |  def apply(v    : qm): Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(Eq , Nil, true)
+         |  def not  (v    : qm): Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(Neq, Nil, true)
+         |  def <    (upper: qm): Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(Lt , Nil, true)
+         |  def <=   (upper: qm): Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(Le , Nil, true)
+         |  def >    (lower: qm): Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(Gt , Nil, true)
+         |  def >=   (lower: qm): Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(Ge , Nil, true)
          |  $attrExprs
          |}
          |trait $fileName_${arity}_String[${`A..V`}, t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]] extends $fileName_$arity[${`A..V, `}t, Entity1, Entity2] {

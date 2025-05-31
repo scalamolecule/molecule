@@ -111,7 +111,7 @@ class Character_1[A, t](override val dataModel: DataModel) extends Character_1_r
   override protected def _aggrDouble(kw: Kw                    ) = new Character_1[Double, Double](toDouble (dataModel, kw    )) with SortAttrs_1[Double, Double, Character_1]
   override protected def _aggrSet   (kw: Kw, n: Option[Int]    ) = new Character_1[Set[t], t     ](asIs     (dataModel, kw, n ))
   override protected def _aggrDist  (kw: Kw                    ) = new Character_1[Set[A], t     ](asIs     (dataModel, kw    ))
-  override protected def _exprOneMan(op: Op, vs: Seq[t]        ) = new Character_1[A     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_1[A     , t     , Character_1] with CardOne
+  override protected def _exprOneMan(op: Op, vs: Seq[t] , binding: Boolean       ) = new Character_1[A     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_1[A     , t     , Character_1] with CardOne
   override protected def _exprOneOpt(op: Op, v : Option[t]     ) = new Character_1[A     , t     ](addOneOpt(dataModel, op, v )) with SortAttrs_1[A     , t     , Character_1]
   override protected def _exprOneTac(op: Op, vs: Seq[t]        ) = new Character_1[A     , t     ](addOne   (dataModel, op, vs)) with CardOne
   override protected def _exprSet   (op: Op, vs: Set[t]        ) = new Character_1[A     , t     ](addSet   (dataModel, op, vs)) with CardSet
@@ -166,7 +166,7 @@ class Character_2[A, B, t](override val dataModel: DataModel) extends Character_
   override protected def _aggrDouble(kw: Kw                    ) = new Character_2[A, Double, Double](toDouble (dataModel, kw    )) with SortAttrs_2[A, Double, Double, Character_2]
   override protected def _aggrSet   (kw: Kw, n: Option[Int]    ) = new Character_2[A, Set[t], t     ](asIs     (dataModel, kw, n ))
   override protected def _aggrDist  (kw: Kw                    ) = new Character_2[A, Set[B], t     ](asIs     (dataModel, kw    ))
-  override protected def _exprOneMan(op: Op, vs: Seq[t]        ) = new Character_2[A, B     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_2[A, B     , t     , Character_2] with CardOne
+  override protected def _exprOneMan(op: Op, vs: Seq[t] , binding: Boolean       ) = new Character_2[A, B     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_2[A, B     , t     , Character_2] with CardOne
   override protected def _exprOneOpt(op: Op, v : Option[t]     ) = new Character_2[A, B     , t     ](addOneOpt(dataModel, op, v )) with SortAttrs_2[A, B     , t     , Character_2]
   override protected def _exprOneTac(op: Op, vs: Seq[t]        ) = new Character_2[A, B     , t     ](addOne   (dataModel, op, vs)) with CardOne
   override protected def _exprSet   (op: Op, vs: Set[t]        ) = new Character_2[A, B     , t     ](addSet   (dataModel, op, vs)) with CardSet
@@ -221,7 +221,7 @@ class Character_3[A, B, C, t](override val dataModel: DataModel) extends Charact
   override protected def _aggrDouble(kw: Kw                    ) = new Character_3[A, B, Double, Double](toDouble (dataModel, kw    )) with SortAttrs_3[A, B, Double, Double, Character_3]
   override protected def _aggrSet   (kw: Kw, n: Option[Int]    ) = new Character_3[A, B, Set[t], t     ](asIs     (dataModel, kw, n ))
   override protected def _aggrDist  (kw: Kw                    ) = new Character_3[A, B, Set[C], t     ](asIs     (dataModel, kw    ))
-  override protected def _exprOneMan(op: Op, vs: Seq[t]        ) = new Character_3[A, B, C     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_3[A, B, C     , t     , Character_3] with CardOne
+  override protected def _exprOneMan(op: Op, vs: Seq[t] , binding: Boolean       ) = new Character_3[A, B, C     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_3[A, B, C     , t     , Character_3] with CardOne
   override protected def _exprOneOpt(op: Op, v : Option[t]     ) = new Character_3[A, B, C     , t     ](addOneOpt(dataModel, op, v )) with SortAttrs_3[A, B, C     , t     , Character_3]
   override protected def _exprOneTac(op: Op, vs: Seq[t]        ) = new Character_3[A, B, C     , t     ](addOne   (dataModel, op, vs)) with CardOne
   override protected def _exprSet   (op: Op, vs: Set[t]        ) = new Character_3[A, B, C     , t     ](addSet   (dataModel, op, vs)) with CardSet
@@ -276,7 +276,7 @@ class Character_4[A, B, C, D, t](override val dataModel: DataModel) extends Char
   override protected def _aggrDouble(kw: Kw                    ) = new Character_4[A, B, C, Double, Double](toDouble (dataModel, kw    )) with SortAttrs_4[A, B, C, Double, Double, Character_4]
   override protected def _aggrSet   (kw: Kw, n: Option[Int]    ) = new Character_4[A, B, C, Set[t], t     ](asIs     (dataModel, kw, n ))
   override protected def _aggrDist  (kw: Kw                    ) = new Character_4[A, B, C, Set[D], t     ](asIs     (dataModel, kw    ))
-  override protected def _exprOneMan(op: Op, vs: Seq[t]        ) = new Character_4[A, B, C, D     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_4[A, B, C, D     , t     , Character_4] with CardOne
+  override protected def _exprOneMan(op: Op, vs: Seq[t] , binding: Boolean       ) = new Character_4[A, B, C, D     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_4[A, B, C, D     , t     , Character_4] with CardOne
   override protected def _exprOneOpt(op: Op, v : Option[t]     ) = new Character_4[A, B, C, D     , t     ](addOneOpt(dataModel, op, v )) with SortAttrs_4[A, B, C, D     , t     , Character_4]
   override protected def _exprOneTac(op: Op, vs: Seq[t]        ) = new Character_4[A, B, C, D     , t     ](addOne   (dataModel, op, vs)) with CardOne
   override protected def _exprSet   (op: Op, vs: Set[t]        ) = new Character_4[A, B, C, D     , t     ](addSet   (dataModel, op, vs)) with CardSet
@@ -331,7 +331,7 @@ class Character_5[A, B, C, D, E, t](override val dataModel: DataModel) extends C
   override protected def _aggrDouble(kw: Kw                    ) = new Character_5[A, B, C, D, Double, Double](toDouble (dataModel, kw    )) with SortAttrs_5[A, B, C, D, Double, Double, Character_5]
   override protected def _aggrSet   (kw: Kw, n: Option[Int]    ) = new Character_5[A, B, C, D, Set[t], t     ](asIs     (dataModel, kw, n ))
   override protected def _aggrDist  (kw: Kw                    ) = new Character_5[A, B, C, D, Set[E], t     ](asIs     (dataModel, kw    ))
-  override protected def _exprOneMan(op: Op, vs: Seq[t]        ) = new Character_5[A, B, C, D, E     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_5[A, B, C, D, E     , t     , Character_5] with CardOne
+  override protected def _exprOneMan(op: Op, vs: Seq[t] , binding: Boolean       ) = new Character_5[A, B, C, D, E     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_5[A, B, C, D, E     , t     , Character_5] with CardOne
   override protected def _exprOneOpt(op: Op, v : Option[t]     ) = new Character_5[A, B, C, D, E     , t     ](addOneOpt(dataModel, op, v )) with SortAttrs_5[A, B, C, D, E     , t     , Character_5]
   override protected def _exprOneTac(op: Op, vs: Seq[t]        ) = new Character_5[A, B, C, D, E     , t     ](addOne   (dataModel, op, vs)) with CardOne
   override protected def _exprSet   (op: Op, vs: Set[t]        ) = new Character_5[A, B, C, D, E     , t     ](addSet   (dataModel, op, vs)) with CardSet
@@ -377,7 +377,7 @@ class Character_6[A, B, C, D, E, F, t](override val dataModel: DataModel) extend
   override protected def _aggrDouble(kw: Kw                    ) = new Character_6[A, B, C, D, E, Double, Double](toDouble (dataModel, kw    )) with SortAttrs_6[A, B, C, D, E, Double, Double, Character_6]
   override protected def _aggrSet   (kw: Kw, n: Option[Int]    ) = new Character_6[A, B, C, D, E, Set[t], t     ](asIs     (dataModel, kw, n ))
   override protected def _aggrDist  (kw: Kw                    ) = new Character_6[A, B, C, D, E, Set[F], t     ](asIs     (dataModel, kw    ))
-  override protected def _exprOneMan(op: Op, vs: Seq[t]        ) = new Character_6[A, B, C, D, E, F     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_6[A, B, C, D, E, F     , t     , Character_6] with CardOne
+  override protected def _exprOneMan(op: Op, vs: Seq[t] , binding: Boolean       ) = new Character_6[A, B, C, D, E, F     , t     ](addOne   (dataModel, op, vs)) with SortAttrs_6[A, B, C, D, E, F     , t     , Character_6] with CardOne
   override protected def _exprOneOpt(op: Op, v : Option[t]     ) = new Character_6[A, B, C, D, E, F     , t     ](addOneOpt(dataModel, op, v )) with SortAttrs_6[A, B, C, D, E, F     , t     , Character_6]
   override protected def _exprOneTac(op: Op, vs: Seq[t]        ) = new Character_6[A, B, C, D, E, F     , t     ](addOne   (dataModel, op, vs)) with CardOne
   override protected def _exprSet   (op: Op, vs: Set[t]        ) = new Character_6[A, B, C, D, E, F     , t     ](addSet   (dataModel, op, vs)) with CardSet

@@ -156,378 +156,470 @@ trait ModelTransformations_ {
     dataModel.copy(elements = es.init :+ last)
   }
 
-  protected def addOne[T](dataModel: DataModel, op: Op, vs: Seq[T]): DataModel = {
+  protected def addOne[T](dataModel: DataModel, op: Op, vs: Seq[T], binding: Boolean = false): DataModel = {
     val es   = dataModel.elements
     val last = es.last match {
       case a: AttrOneMan => a match {
         case a: AttrOneManID =>
-          val vs1     = vs.asInstanceOf[Seq[Long]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[Long]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneManString =>
-          val vs1     = vs.asInstanceOf[Seq[String]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[String]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneManInt =>
-          val vs1     = vs.asInstanceOf[Seq[Int]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[Int]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneManLong =>
-          val vs1     = vs.asInstanceOf[Seq[Long]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[Long]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneManFloat =>
-          val vs1     = vs.asInstanceOf[Seq[Float]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[Float]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneManDouble =>
-          val vs1     = vs.asInstanceOf[Seq[Double]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[Double]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneManBoolean =>
-          val vs1     = vs.asInstanceOf[Seq[Boolean]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[Boolean]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneManBigInt =>
-          val vs1     = vs.asInstanceOf[Seq[BigInt]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[BigInt]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneManBigDecimal =>
-          val vs1     = vs.asInstanceOf[Seq[BigDecimal]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[BigDecimal]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneManDate =>
-          val vs1     = vs.asInstanceOf[Seq[Date]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[Date]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneManDuration =>
-          val vs1     = vs.asInstanceOf[Seq[Duration]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[Duration]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneManInstant =>
-          val vs1     = vs.asInstanceOf[Seq[Instant]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[Instant]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneManLocalDate =>
-          val vs1     = vs.asInstanceOf[Seq[LocalDate]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[LocalDate]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneManLocalTime =>
-          val vs1     = vs.asInstanceOf[Seq[LocalTime]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[LocalTime]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneManLocalDateTime =>
-          val vs1     = vs.asInstanceOf[Seq[LocalDateTime]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[LocalDateTime]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneManOffsetTime =>
-          val vs1     = vs.asInstanceOf[Seq[OffsetTime]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[OffsetTime]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneManOffsetDateTime =>
-          val vs1     = vs.asInstanceOf[Seq[OffsetDateTime]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[OffsetDateTime]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneManZonedDateTime =>
-          val vs1     = vs.asInstanceOf[Seq[ZonedDateTime]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[ZonedDateTime]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneManUUID =>
-          val vs1     = vs.asInstanceOf[Seq[UUID]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[UUID]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneManURI =>
-          val vs1     = vs.asInstanceOf[Seq[URI]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[URI]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneManByte =>
-          val vs1     = vs.asInstanceOf[Seq[Byte]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[Byte]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneManShort =>
-          val vs1     = vs.asInstanceOf[Seq[Short]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[Short]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneManChar =>
-          val vs1     = vs.asInstanceOf[Seq[Char]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[Char]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
       }
       case a: AttrOneTac => a match {
         case a: AttrOneTacID =>
-          val vs1     = vs.asInstanceOf[Seq[Long]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[Long]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneTacString =>
-          val vs1     = vs.asInstanceOf[Seq[String]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[String]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneTacInt =>
-          val vs1     = vs.asInstanceOf[Seq[Int]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[Int]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneTacLong =>
-          val vs1     = vs.asInstanceOf[Seq[Long]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[Long]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneTacFloat =>
-          val vs1     = vs.asInstanceOf[Seq[Float]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[Float]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneTacDouble =>
-          val vs1     = vs.asInstanceOf[Seq[Double]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[Double]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneTacBoolean =>
-          val vs1     = vs.asInstanceOf[Seq[Boolean]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[Boolean]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneTacBigInt =>
-          val vs1     = vs.asInstanceOf[Seq[BigInt]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[BigInt]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneTacBigDecimal =>
-          val vs1     = vs.asInstanceOf[Seq[BigDecimal]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[BigDecimal]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneTacDate =>
-          val vs1     = vs.asInstanceOf[Seq[Date]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[Date]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneTacDuration =>
-          val vs1     = vs.asInstanceOf[Seq[Duration]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[Duration]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneTacInstant =>
-          val vs1     = vs.asInstanceOf[Seq[Instant]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[Instant]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneTacLocalDate =>
-          val vs1     = vs.asInstanceOf[Seq[LocalDate]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[LocalDate]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneTacLocalTime =>
-          val vs1     = vs.asInstanceOf[Seq[LocalTime]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[LocalTime]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneTacLocalDateTime =>
-          val vs1     = vs.asInstanceOf[Seq[LocalDateTime]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[LocalDateTime]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneTacOffsetTime =>
-          val vs1     = vs.asInstanceOf[Seq[OffsetTime]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[OffsetTime]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneTacOffsetDateTime =>
-          val vs1     = vs.asInstanceOf[Seq[OffsetDateTime]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[OffsetDateTime]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneTacZonedDateTime =>
-          val vs1     = vs.asInstanceOf[Seq[ZonedDateTime]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[ZonedDateTime]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneTacUUID =>
-          val vs1     = vs.asInstanceOf[Seq[UUID]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[UUID]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneTacURI =>
-          val vs1     = vs.asInstanceOf[Seq[URI]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[URI]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneTacByte =>
-          val vs1     = vs.asInstanceOf[Seq[Byte]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[Byte]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneTacShort =>
-          val vs1     = vs.asInstanceOf[Seq[Short]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[Short]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
 
         case a: AttrOneTacChar =>
-          val vs1     = vs.asInstanceOf[Seq[Char]]
-          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            vs1.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val vs1     = vs.asInstanceOf[Seq[Char]]
+            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              vs1.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = vs1, errors = errors1)
           }
-          a.copy(op = op, vs = vs1, errors = errors1)
       }
       case a             => unexpected(a)
     }
@@ -1839,7 +1931,7 @@ trait ModelTransformations_ {
   }
 
   protected def addBArOpt[T](dataModel: DataModel, op: Op, optBA: Option[Array[T]]): DataModel = {
-    val es = dataModel.elements
+    val es          = dataModel.elements
     val newElements = es.init :+ (es.last match {
       case a: AttrSeqOptByte => a.copy(op = op, vs = optBA.asInstanceOf[Option[Array[Byte]]])
       case e                 => throw ModelError("Unexpected Element for adding byte array: " + e)
@@ -2750,8 +2842,8 @@ trait ModelTransformations_ {
           resolvePath(tail, path ++ p)
         case r: OptRef =>
           ???
-        case a: Attr   => resolvePath(tail, if (path.isEmpty) List(a.ent) else path)
-        case other     => throw ModelError("Invalid element in filter attribute path: " + other)
+        case a: Attr => resolvePath(tail, if (path.isEmpty) List(a.ent) else path)
+        case other   => throw ModelError("Invalid element in filter attribute path: " + other)
       }
       case Nil       => path
     }
@@ -2772,104 +2864,104 @@ trait ModelTransformations_ {
           // Convert adjacent mandatory filter attribute to tacit attribute
           val tacitAttr = filterAttr0 match {
             case a: AttrOneMan => a match {
-              case a: AttrOneManID             => AttrOneTacID(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrOneManString         => AttrOneTacString(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrOneManInt            => AttrOneTacInt(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrOneManLong           => AttrOneTacLong(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrOneManFloat          => AttrOneTacFloat(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrOneManDouble         => AttrOneTacDouble(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrOneManBoolean        => AttrOneTacBoolean(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrOneManBigInt         => AttrOneTacBigInt(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrOneManBigDecimal     => AttrOneTacBigDecimal(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrOneManDate           => AttrOneTacDate(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrOneManDuration       => AttrOneTacDuration(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrOneManInstant        => AttrOneTacInstant(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrOneManLocalDate      => AttrOneTacLocalDate(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrOneManLocalTime      => AttrOneTacLocalTime(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrOneManLocalDateTime  => AttrOneTacLocalDateTime(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrOneManOffsetTime     => AttrOneTacOffsetTime(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrOneManOffsetDateTime => AttrOneTacOffsetDateTime(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrOneManZonedDateTime  => AttrOneTacZonedDateTime(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrOneManUUID           => AttrOneTacUUID(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrOneManURI            => AttrOneTacURI(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrOneManByte           => AttrOneTacByte(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrOneManShort          => AttrOneTacShort(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrOneManChar           => AttrOneTacChar(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
+              case a: AttrOneManID             => AttrOneTacID(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrOneManString         => AttrOneTacString(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrOneManInt            => AttrOneTacInt(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrOneManLong           => AttrOneTacLong(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrOneManFloat          => AttrOneTacFloat(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrOneManDouble         => AttrOneTacDouble(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrOneManBoolean        => AttrOneTacBoolean(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrOneManBigInt         => AttrOneTacBigInt(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrOneManBigDecimal     => AttrOneTacBigDecimal(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrOneManDate           => AttrOneTacDate(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrOneManDuration       => AttrOneTacDuration(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrOneManInstant        => AttrOneTacInstant(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrOneManLocalDate      => AttrOneTacLocalDate(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrOneManLocalTime      => AttrOneTacLocalTime(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrOneManLocalDateTime  => AttrOneTacLocalDateTime(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrOneManOffsetTime     => AttrOneTacOffsetTime(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrOneManOffsetDateTime => AttrOneTacOffsetDateTime(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrOneManZonedDateTime  => AttrOneTacZonedDateTime(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrOneManUUID           => AttrOneTacUUID(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrOneManURI            => AttrOneTacURI(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrOneManByte           => AttrOneTacByte(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrOneManShort          => AttrOneTacShort(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrOneManChar           => AttrOneTacChar(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
             }
             case a: AttrSetMan => a match {
-              case a: AttrSetManID             => AttrSetTacID(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSetManString         => AttrSetTacString(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSetManInt            => AttrSetTacInt(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSetManLong           => AttrSetTacLong(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSetManFloat          => AttrSetTacFloat(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSetManDouble         => AttrSetTacDouble(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSetManBoolean        => AttrSetTacBoolean(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSetManBigInt         => AttrSetTacBigInt(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSetManBigDecimal     => AttrSetTacBigDecimal(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSetManDate           => AttrSetTacDate(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSetManDuration       => AttrSetTacDuration(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSetManInstant        => AttrSetTacInstant(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSetManLocalDate      => AttrSetTacLocalDate(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSetManLocalTime      => AttrSetTacLocalTime(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSetManLocalDateTime  => AttrSetTacLocalDateTime(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSetManOffsetTime     => AttrSetTacOffsetTime(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSetManOffsetDateTime => AttrSetTacOffsetDateTime(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSetManZonedDateTime  => AttrSetTacZonedDateTime(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSetManUUID           => AttrSetTacUUID(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSetManURI            => AttrSetTacURI(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSetManByte           => AttrSetTacByte(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSetManShort          => AttrSetTacShort(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSetManChar           => AttrSetTacChar(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
+              case a: AttrSetManID             => AttrSetTacID(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSetManString         => AttrSetTacString(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSetManInt            => AttrSetTacInt(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSetManLong           => AttrSetTacLong(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSetManFloat          => AttrSetTacFloat(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSetManDouble         => AttrSetTacDouble(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSetManBoolean        => AttrSetTacBoolean(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSetManBigInt         => AttrSetTacBigInt(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSetManBigDecimal     => AttrSetTacBigDecimal(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSetManDate           => AttrSetTacDate(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSetManDuration       => AttrSetTacDuration(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSetManInstant        => AttrSetTacInstant(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSetManLocalDate      => AttrSetTacLocalDate(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSetManLocalTime      => AttrSetTacLocalTime(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSetManLocalDateTime  => AttrSetTacLocalDateTime(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSetManOffsetTime     => AttrSetTacOffsetTime(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSetManOffsetDateTime => AttrSetTacOffsetDateTime(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSetManZonedDateTime  => AttrSetTacZonedDateTime(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSetManUUID           => AttrSetTacUUID(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSetManURI            => AttrSetTacURI(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSetManByte           => AttrSetTacByte(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSetManShort          => AttrSetTacShort(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSetManChar           => AttrSetTacChar(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
             }
             case a: AttrSeqMan => a match {
-              case a: AttrSeqManID             => AttrSeqTacID(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSeqManString         => AttrSeqTacString(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSeqManInt            => AttrSeqTacInt(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSeqManLong           => AttrSeqTacLong(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSeqManFloat          => AttrSeqTacFloat(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSeqManDouble         => AttrSeqTacDouble(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSeqManBoolean        => AttrSeqTacBoolean(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSeqManBigInt         => AttrSeqTacBigInt(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSeqManBigDecimal     => AttrSeqTacBigDecimal(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSeqManDate           => AttrSeqTacDate(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSeqManDuration       => AttrSeqTacDuration(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSeqManInstant        => AttrSeqTacInstant(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSeqManLocalDate      => AttrSeqTacLocalDate(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSeqManLocalTime      => AttrSeqTacLocalTime(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSeqManLocalDateTime  => AttrSeqTacLocalDateTime(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSeqManOffsetTime     => AttrSeqTacOffsetTime(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSeqManOffsetDateTime => AttrSeqTacOffsetDateTime(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSeqManZonedDateTime  => AttrSeqTacZonedDateTime(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSeqManUUID           => AttrSeqTacUUID(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSeqManURI            => AttrSeqTacURI(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSeqManByte           => AttrSeqTacByte(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSeqManShort          => AttrSeqTacShort(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrSeqManChar           => AttrSeqTacChar(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
+              case a: AttrSeqManID             => AttrSeqTacID(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSeqManString         => AttrSeqTacString(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSeqManInt            => AttrSeqTacInt(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSeqManLong           => AttrSeqTacLong(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSeqManFloat          => AttrSeqTacFloat(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSeqManDouble         => AttrSeqTacDouble(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSeqManBoolean        => AttrSeqTacBoolean(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSeqManBigInt         => AttrSeqTacBigInt(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSeqManBigDecimal     => AttrSeqTacBigDecimal(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSeqManDate           => AttrSeqTacDate(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSeqManDuration       => AttrSeqTacDuration(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSeqManInstant        => AttrSeqTacInstant(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSeqManLocalDate      => AttrSeqTacLocalDate(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSeqManLocalTime      => AttrSeqTacLocalTime(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSeqManLocalDateTime  => AttrSeqTacLocalDateTime(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSeqManOffsetTime     => AttrSeqTacOffsetTime(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSeqManOffsetDateTime => AttrSeqTacOffsetDateTime(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSeqManZonedDateTime  => AttrSeqTacZonedDateTime(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSeqManUUID           => AttrSeqTacUUID(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSeqManURI            => AttrSeqTacURI(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSeqManByte           => AttrSeqTacByte(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSeqManShort          => AttrSeqTacShort(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrSeqManChar           => AttrSeqTacChar(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
             }
             case a: AttrMapMan => a match {
-              case a: AttrMapManID             => AttrMapTacID(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrMapManString         => AttrMapTacString(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrMapManInt            => AttrMapTacInt(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrMapManLong           => AttrMapTacLong(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrMapManFloat          => AttrMapTacFloat(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrMapManDouble         => AttrMapTacDouble(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrMapManBoolean        => AttrMapTacBoolean(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrMapManBigInt         => AttrMapTacBigInt(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrMapManBigDecimal     => AttrMapTacBigDecimal(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrMapManDate           => AttrMapTacDate(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrMapManDuration       => AttrMapTacDuration(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrMapManInstant        => AttrMapTacInstant(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrMapManLocalDate      => AttrMapTacLocalDate(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrMapManLocalTime      => AttrMapTacLocalTime(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrMapManLocalDateTime  => AttrMapTacLocalDateTime(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrMapManOffsetTime     => AttrMapTacOffsetTime(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrMapManOffsetDateTime => AttrMapTacOffsetDateTime(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrMapManZonedDateTime  => AttrMapTacZonedDateTime(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrMapManUUID           => AttrMapTacUUID(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrMapManURI            => AttrMapTacURI(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrMapManByte           => AttrMapTacByte(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrMapManShort          => AttrMapTacShort(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
-              case a: AttrMapManChar           => AttrMapTacChar(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)
+              case a: AttrMapManID             => AttrMapTacID(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrMapManString         => AttrMapTacString(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrMapManInt            => AttrMapTacInt(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrMapManLong           => AttrMapTacLong(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrMapManFloat          => AttrMapTacFloat(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrMapManDouble         => AttrMapTacDouble(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrMapManBoolean        => AttrMapTacBoolean(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrMapManBigInt         => AttrMapTacBigInt(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrMapManBigDecimal     => AttrMapTacBigDecimal(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrMapManDate           => AttrMapTacDate(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrMapManDuration       => AttrMapTacDuration(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrMapManInstant        => AttrMapTacInstant(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrMapManLocalDate      => AttrMapTacLocalDate(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrMapManLocalTime      => AttrMapTacLocalTime(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrMapManLocalDateTime  => AttrMapTacLocalDateTime(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrMapManOffsetTime     => AttrMapTacOffsetTime(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrMapManOffsetDateTime => AttrMapTacOffsetDateTime(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrMapManZonedDateTime  => AttrMapTacZonedDateTime(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrMapManUUID           => AttrMapTacUUID(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrMapManURI            => AttrMapTacURI(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrMapManByte           => AttrMapTacByte(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrMapManShort          => AttrMapTacShort(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
+              case a: AttrMapManChar           => AttrMapTacChar(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)
             }
             case other         => other
           }
@@ -3104,55 +3196,55 @@ trait ModelTransformations_ {
   protected def reverseTopLevelSorting(es: List[Element]): List[Element] = {
     es.map {
       case attr: AttrOneMan => attr match {
-        case a@AttrOneManID(_, _, _, _, _, _, _, _, _, Some(sort), _)             => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManString(_, _, _, _, _, _, _, _, _, Some(sort), _)         => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManInt(_, _, _, _, _, _, _, _, _, Some(sort), _)            => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManLong(_, _, _, _, _, _, _, _, _, Some(sort), _)           => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManFloat(_, _, _, _, _, _, _, _, _, Some(sort), _)          => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManDouble(_, _, _, _, _, _, _, _, _, Some(sort), _)         => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManBoolean(_, _, _, _, _, _, _, _, _, Some(sort), _)        => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManBigInt(_, _, _, _, _, _, _, _, _, Some(sort), _)         => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManBigDecimal(_, _, _, _, _, _, _, _, _, Some(sort), _)     => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManDate(_, _, _, _, _, _, _, _, _, Some(sort), _)           => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManDuration(_, _, _, _, _, _, _, _, _, Some(sort), _)       => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManInstant(_, _, _, _, _, _, _, _, _, Some(sort), _)        => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManLocalDate(_, _, _, _, _, _, _, _, _, Some(sort), _)      => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManLocalTime(_, _, _, _, _, _, _, _, _, Some(sort), _)      => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManLocalDateTime(_, _, _, _, _, _, _, _, _, Some(sort), _)  => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManOffsetTime(_, _, _, _, _, _, _, _, _, Some(sort), _)     => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManOffsetDateTime(_, _, _, _, _, _, _, _, _, Some(sort), _) => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManZonedDateTime(_, _, _, _, _, _, _, _, _, Some(sort), _)  => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManUUID(_, _, _, _, _, _, _, _, _, Some(sort), _)           => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManURI(_, _, _, _, _, _, _, _, _, Some(sort), _)            => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManByte(_, _, _, _, _, _, _, _, _, Some(sort), _)           => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManShort(_, _, _, _, _, _, _, _, _, Some(sort), _)          => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManChar(_, _, _, _, _, _, _, _, _, Some(sort), _)           => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManID(_, _, _, _, _, _, _, _, _, Some(sort), _, _)             => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManString(_, _, _, _, _, _, _, _, _, Some(sort), _, _)         => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManInt(_, _, _, _, _, _, _, _, _, Some(sort), _, _)            => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManLong(_, _, _, _, _, _, _, _, _, Some(sort), _, _)           => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManFloat(_, _, _, _, _, _, _, _, _, Some(sort), _, _)          => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManDouble(_, _, _, _, _, _, _, _, _, Some(sort), _, _)         => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManBoolean(_, _, _, _, _, _, _, _, _, Some(sort), _, _)        => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManBigInt(_, _, _, _, _, _, _, _, _, Some(sort), _, _)         => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManBigDecimal(_, _, _, _, _, _, _, _, _, Some(sort), _, _)     => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManDate(_, _, _, _, _, _, _, _, _, Some(sort), _, _)           => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManDuration(_, _, _, _, _, _, _, _, _, Some(sort), _, _)       => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManInstant(_, _, _, _, _, _, _, _, _, Some(sort), _, _)        => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManLocalDate(_, _, _, _, _, _, _, _, _, Some(sort), _, _)      => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManLocalTime(_, _, _, _, _, _, _, _, _, Some(sort), _, _)      => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManLocalDateTime(_, _, _, _, _, _, _, _, _, Some(sort), _, _)  => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManOffsetTime(_, _, _, _, _, _, _, _, _, Some(sort), _, _)     => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManOffsetDateTime(_, _, _, _, _, _, _, _, _, Some(sort), _, _) => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManZonedDateTime(_, _, _, _, _, _, _, _, _, Some(sort), _, _)  => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManUUID(_, _, _, _, _, _, _, _, _, Some(sort), _, _)           => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManURI(_, _, _, _, _, _, _, _, _, Some(sort), _, _)            => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManByte(_, _, _, _, _, _, _, _, _, Some(sort), _, _)           => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManShort(_, _, _, _, _, _, _, _, _, Some(sort), _, _)          => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManChar(_, _, _, _, _, _, _, _, _, Some(sort), _, _)           => a.copy(sort = Some(reverseSort(sort)))
         case a                                                                    => a
       }
       case attr: AttrOneOpt => attr match {
-        case a@AttrOneOptID(_, _, _, _, _, _, _, _, _, Some(sort), _)             => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptString(_, _, _, _, _, _, _, _, _, Some(sort), _)         => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptInt(_, _, _, _, _, _, _, _, _, Some(sort), _)            => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptLong(_, _, _, _, _, _, _, _, _, Some(sort), _)           => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptFloat(_, _, _, _, _, _, _, _, _, Some(sort), _)          => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptDouble(_, _, _, _, _, _, _, _, _, Some(sort), _)         => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptBoolean(_, _, _, _, _, _, _, _, _, Some(sort), _)        => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptBigInt(_, _, _, _, _, _, _, _, _, Some(sort), _)         => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptBigDecimal(_, _, _, _, _, _, _, _, _, Some(sort), _)     => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptDate(_, _, _, _, _, _, _, _, _, Some(sort), _)           => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptDuration(_, _, _, _, _, _, _, _, _, Some(sort), _)       => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptInstant(_, _, _, _, _, _, _, _, _, Some(sort), _)        => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptLocalDate(_, _, _, _, _, _, _, _, _, Some(sort), _)      => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptLocalTime(_, _, _, _, _, _, _, _, _, Some(sort), _)      => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptLocalDateTime(_, _, _, _, _, _, _, _, _, Some(sort), _)  => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptOffsetTime(_, _, _, _, _, _, _, _, _, Some(sort), _)     => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptOffsetDateTime(_, _, _, _, _, _, _, _, _, Some(sort), _) => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptZonedDateTime(_, _, _, _, _, _, _, _, _, Some(sort), _)  => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptUUID(_, _, _, _, _, _, _, _, _, Some(sort), _)           => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptURI(_, _, _, _, _, _, _, _, _, Some(sort), _)            => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptByte(_, _, _, _, _, _, _, _, _, Some(sort), _)           => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptShort(_, _, _, _, _, _, _, _, _, Some(sort), _)          => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptChar(_, _, _, _, _, _, _, _, _, Some(sort), _)           => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptID(_, _, _, _, _, _, _, _, _, Some(sort), _, _)             => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptString(_, _, _, _, _, _, _, _, _, Some(sort), _, _)         => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptInt(_, _, _, _, _, _, _, _, _, Some(sort), _, _)            => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptLong(_, _, _, _, _, _, _, _, _, Some(sort), _, _)           => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptFloat(_, _, _, _, _, _, _, _, _, Some(sort), _, _)          => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptDouble(_, _, _, _, _, _, _, _, _, Some(sort), _, _)         => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptBoolean(_, _, _, _, _, _, _, _, _, Some(sort), _, _)        => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptBigInt(_, _, _, _, _, _, _, _, _, Some(sort), _, _)         => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptBigDecimal(_, _, _, _, _, _, _, _, _, Some(sort), _, _)     => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptDate(_, _, _, _, _, _, _, _, _, Some(sort), _, _)           => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptDuration(_, _, _, _, _, _, _, _, _, Some(sort), _, _)       => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptInstant(_, _, _, _, _, _, _, _, _, Some(sort), _, _)        => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptLocalDate(_, _, _, _, _, _, _, _, _, Some(sort), _, _)      => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptLocalTime(_, _, _, _, _, _, _, _, _, Some(sort), _, _)      => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptLocalDateTime(_, _, _, _, _, _, _, _, _, Some(sort), _, _)  => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptOffsetTime(_, _, _, _, _, _, _, _, _, Some(sort), _, _)     => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptOffsetDateTime(_, _, _, _, _, _, _, _, _, Some(sort), _, _) => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptZonedDateTime(_, _, _, _, _, _, _, _, _, Some(sort), _, _)  => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptUUID(_, _, _, _, _, _, _, _, _, Some(sort), _, _)           => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptURI(_, _, _, _, _, _, _, _, _, Some(sort), _, _)            => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptByte(_, _, _, _, _, _, _, _, _, Some(sort), _, _)           => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptShort(_, _, _, _, _, _, _, _, _, Some(sort), _, _)          => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptChar(_, _, _, _, _, _, _, _, _, Some(sort), _, _)           => a.copy(sort = Some(reverseSort(sort)))
         case a                                                                    => a
       }
       case other            => other

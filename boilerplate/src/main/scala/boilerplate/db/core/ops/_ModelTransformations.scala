@@ -75,7 +75,7 @@ object _ModelTransformations extends CoreGenBase("ModelTransformations", "/ops")
        |    dataModel.copy(elements = es.init :+ last)
        |  }
        |
-       |  protected def addOne[T](dataModel: DataModel, op: Op, vs: Seq[T]): DataModel = {
+       |  protected def addOne[T](dataModel: DataModel, op: Op, vs: Seq[T], binding: Boolean = false): DataModel = {
        |    val es   = dataModel.elements
        |    val last = es.last match {
        |      case a: AttrOneMan => a match {
@@ -232,8 +232,8 @@ object _ModelTransformations extends CoreGenBase("ModelTransformations", "/ops")
        |  }
        |
        |  protected def addSort(dataModel: DataModel, sort: String): DataModel = {
-       |    val es = dataModel.elements
-       |    es.size match {
+       |    val es             = dataModel.elements
+       |    val sortedElements = es.size match {
        |      case 1 =>
        |        List(setSort(es.last, sort))
        |      case 2 =>
@@ -251,6 +251,7 @@ object _ModelTransformations extends CoreGenBase("ModelTransformations", "/ops")
        |        }
        |        es.dropRight(2) ++ sorted
        |    }
+       |    dataModel.copy(elements = sortedElements)
        |  }
        |
        |  private def setSort(e: Element, sort: String): Element = {
@@ -281,13 +282,13 @@ object _ModelTransformations extends CoreGenBase("ModelTransformations", "/ops")
        |  }
        |
        |  @tailrec
-       |  private def resolvePath(dataModel: DataModel, path: List[String]): List[String] = {
+       |  private def resolvePath(es: List[Element], path: List[String]): List[String] = {
        |    es match {
        |      case e :: tail => e match {
-       |        case r: Ref  =>
+       |        case r: Ref    =>
        |          val p = if (path.isEmpty) List(r.ent, r.refAttr, r.ref) else List(r.refAttr, r.ref)
        |          resolvePath(tail, path ++ p)
-       |        case r: OptRef  =>
+       |        case r: OptRef =>
        |          ???
        |        case a: Attr => resolvePath(tail, if (path.isEmpty) List(a.ent) else path)
        |        case other   => throw ModelError("Invalid element in filter attribute path: " + other)
@@ -297,6 +298,7 @@ object _ModelTransformations extends CoreGenBase("ModelTransformations", "/ops")
        |  }
        |
        |  protected def filterAttr(dataModel: DataModel, op: Op, filterAttrMolecule: Molecule): DataModel = {
+       |    val es          = dataModel.elements
        |    val filterAttr0 = filterAttrMolecule.dataModel.elements.last.asInstanceOf[Attr]
        |    val attrs       = es.last match {
        |      case a: Attr =>
@@ -326,7 +328,7 @@ object _ModelTransformations extends CoreGenBase("ModelTransformations", "/ops")
        |          (tacitAttr, List(filterAttr0))
        |        } else (filterAttr0, Nil)
        |
-       |        val filterPath         = resolvePath(filterAttrMolecule.elements, Nil)
+       |        val filterPath         = resolvePath(filterAttrMolecule.dataModel.elements, Nil)
        |        val attrWithFilterAttr = a match {
        |          case a: AttrOne => a match {
        |            case a: AttrOneMan => a match {
@@ -372,7 +374,7 @@ object _ModelTransformations extends CoreGenBase("ModelTransformations", "/ops")
        |        attrWithFilterAttr +: adjacent
        |      case e       => unexpected(e)
        |    }
-       |    es.init ++ attrs
+       |    dataModel.copy(elements = es.init ++ attrs)
        |  }
        |
        |  protected def reverseTopLevelSorting(es: List[Element]): List[Element] = {
@@ -444,12 +446,14 @@ object _ModelTransformations extends CoreGenBase("ModelTransformations", "/ops")
     baseTypes.map { baseTpe =>
       val tpe = if (baseTpe == "ID") "Long" else baseTpe
       s"""case a: AttrOne$mode$baseTpe =>
-         |          val vs1     = vs.asInstanceOf[Seq[$tpe]]
-         |          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-         |            val validator = a.validator.get
-         |            vs1.flatMap(v => validator.validate(v))
-         |          }
-         |          a.copy(op = op, vs = vs1, errors = errors1)""".stripMargin
+         |          if binding then a.copy(op = op, binding = true) else {
+         |            val vs1     = vs.asInstanceOf[Seq[$tpe]]
+         |            val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+         |              val validator = a.validator.get
+         |              vs1.flatMap(v => validator.validate(v))
+         |            }
+         |            a.copy(op = op, vs = vs1, errors = errors1)
+         |          }""".stripMargin
     }.mkString("\n\n        ")
   }
 
@@ -565,10 +569,10 @@ object _ModelTransformations extends CoreGenBase("ModelTransformations", "/ops")
   private def liftFilterAttr(card: String): String = {
     baseTypesWithSpaces.map {
       case (baseTpe, space) if card == "Map" =>
-        s"case a: Attr${card}Man$baseTpe $space=> Attr${card}Tac$baseTpe(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)"
+        s"case a: Attr${card}Man$baseTpe $space=> Attr${card}Tac$baseTpe(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)"
 
       case (baseTpe, space) =>
-        s"case a: Attr${card}Man$baseTpe $space=> Attr${card}Tac$baseTpe(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)"
+        s"case a: Attr${card}Man$baseTpe $space=> Attr${card}Tac$baseTpe(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)"
     }.mkString("\n              ")
   }
   private def addFilterAttr(card: String, mode: String): String = {
@@ -579,7 +583,7 @@ object _ModelTransformations extends CoreGenBase("ModelTransformations", "/ops")
 
   private def reverseTopLevelSorting(mode: String): String = {
     baseTypesWithSpaces.map { case (baseTpe, space) =>
-      s"case a@AttrOne$mode$baseTpe(_, _, _, _, _, _, _, _, _, Some(sort), _) $space=> a.copy(sort = Some(reverseSort(sort)))"
+      s"case a@AttrOne$mode$baseTpe(_, _, _, _, _, _, _, _, _, Some(sort), _, _) $space=> a.copy(sort = Some(reverseSort(sort)))"
     }.mkString("\n        ")
   }
 
