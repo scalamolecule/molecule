@@ -11,6 +11,7 @@ object _ExprSetTac extends CoreGenBase("ExprSetTac", "/api/expression") {
        |
        |import molecule.db.base.ast.*
        |import molecule.db.core.api.*
+       |import molecule.db.core.api.Keywords.qm
        |import molecule.db.core.ast._
        |$traits
        |""".stripMargin
@@ -34,7 +35,7 @@ object _ExprSetTac extends CoreGenBase("ExprSetTac", "/api/expression") {
       s"""
          |
          |trait ${fileName}Ops_$arity[${`A..V, `}t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]] extends ExprAttr_$arity[${`A..V, `}t, Entity1, Entity2] {
-         |  protected def _exprSet(op: Op, set: Set[t]): Entity1[${`A..V, `}t] = ???
+         |  protected def _exprSet(op: Op, set: Set[t], binding: Boolean = false): Entity1[${`A..V, `}t] = ???
          |}
          |
          |trait $fileName_$arity[${`A..V, `}t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]]
@@ -45,6 +46,9 @@ object _ExprSetTac extends CoreGenBase("ExprSetTac", "/api/expression") {
          |  def has  (vs : Iterable[t]): Entity1[${`A..V, `}t] = _exprSet(Has    , vs.toSet       )
          |  def hasNo(v  : t, vs: t*  ): Entity1[${`A..V, `}t] = _exprSet(HasNo  , Set(v) ++ vs   )
          |  def hasNo(vs : Iterable[t]): Entity1[${`A..V, `}t] = _exprSet(HasNo  , vs.toSet       )
+         |
+         |  def has  (v: qm): Entity1[${`A..V, `}t] = _exprSet(Has  , Set.empty[t], true)
+         |  def hasNo(v: qm): Entity1[${`A..V, `}t] = _exprSet(HasNo, Set.empty[t], true)
          |  $attrExprs
          |}""".stripMargin
   }

@@ -11,6 +11,7 @@ object _ExprSetMan extends CoreGenBase( "ExprSetMan", "/api/expression") {
        |
        |import molecule.db.base.ast.*
        |import molecule.db.core.api.*
+       |import molecule.db.core.api.Keywords.qm
        |import molecule.db.core.ast._
        |$traits
        |""".stripMargin
@@ -45,6 +46,9 @@ object _ExprSetMan extends CoreGenBase( "ExprSetMan", "/api/expression") {
          |  def add   (vs  : Iterable[t]): Entity1[${`A..V`}, t] = _exprSet(Add    , vs.toSet       )
          |  def remove(v   : t, vs: t*  ): Entity1[${`A..V`}, t] = _exprSet(Remove , Set(v) ++ vs   )
          |  def remove(vs  : Iterable[t]): Entity1[${`A..V`}, t] = _exprSet(Remove , vs.toSet       )
+         |
+         |  def has   (v: qm): Entity1[${`A..V`}, t] = _exprSet(Has  , Set.empty[t], true)
+         |  def hasNo (v: qm): Entity1[${`A..V`}, t] = _exprSet(HasNo, Set.empty[t], true)
          |  $attrExprs
          |}""".stripMargin
   }

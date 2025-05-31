@@ -11,6 +11,7 @@ object _ExprSeqTac extends CoreGenBase("ExprSeqTac", "/api/expression") {
        |
        |import molecule.db.base.ast.*
        |import molecule.db.core.api.*
+       |import molecule.db.core.api.Keywords.qm
        |import molecule.db.core.ast._
        |$traits
        |""".stripMargin
@@ -34,7 +35,7 @@ object _ExprSeqTac extends CoreGenBase("ExprSeqTac", "/api/expression") {
       s"""
          |
          |trait ${fileName}Ops_$arity[${`A..V, `}t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]] extends ExprAttr_$arity[${`A..V, `}t, Entity1, Entity2] {
-         |  protected def _exprSeq(op: Op, seq: Seq[t]): Entity1[${`A..V, `}t] = ???
+         |  protected def _exprSeq(op: Op, seq: Seq[t], binding: Boolean = false): Entity1[${`A..V, `}t] = ???
          |}
          |
          |trait $fileName_$arity[${`A..V, `}t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]]
@@ -45,6 +46,9 @@ object _ExprSeqTac extends CoreGenBase("ExprSeqTac", "/api/expression") {
          |  def has  (vs : Iterable[t]): Entity1[${`A..V, `}t] = _exprSeq(Has    , Seq()  ++ vs)
          |  def hasNo(v  : t, vs: t*  ): Entity1[${`A..V, `}t] = _exprSeq(HasNo  , Seq(v) ++ vs)
          |  def hasNo(vs : Iterable[t]): Entity1[${`A..V, `}t] = _exprSeq(HasNo  , Seq()  ++ vs)
+         |
+         |  def has  (v: qm): Entity1[${`A..V, `}t] = _exprSeq(Has  , Nil, true)
+         |  def hasNo(v: qm): Entity1[${`A..V, `}t] = _exprSeq(HasNo, Nil, true)
          |  $attrExprs
          |}""".stripMargin
   }

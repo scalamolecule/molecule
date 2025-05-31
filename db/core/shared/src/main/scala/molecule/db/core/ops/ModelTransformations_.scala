@@ -156,7 +156,7 @@ trait ModelTransformations_ {
     dataModel.copy(elements = es.init :+ last)
   }
 
-  protected def addOne[T](dataModel: DataModel, op: Op, vs: Seq[T], binding: Boolean = false): DataModel = {
+  protected def addOne[T](dataModel: DataModel, op: Op, vs: Seq[T], binding: Boolean): DataModel = {
     val es   = dataModel.elements
     val last = es.last match {
       case a: AttrOneMan => a match {
@@ -796,378 +796,470 @@ trait ModelTransformations_ {
     dataModel.copy(elements = es.init :+ last)
   }
 
-  protected def addSet[T](dataModel: DataModel, op: Op, vs: Set[T]): DataModel = {
+  protected def addSet[T](dataModel: DataModel, op: Op, vs: Set[T], binding: Boolean): DataModel = {
     val es   = dataModel.elements
     val last = es.last match {
       case a: AttrSetMan => a match {
         case a: AttrSetManID =>
-          val set     = vs.asInstanceOf[Set[Long]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[Long]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetManString =>
-          val set     = vs.asInstanceOf[Set[String]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[String]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetManInt =>
-          val set     = vs.asInstanceOf[Set[Int]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[Int]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetManLong =>
-          val set     = vs.asInstanceOf[Set[Long]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[Long]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetManFloat =>
-          val set     = vs.asInstanceOf[Set[Float]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[Float]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetManDouble =>
-          val set     = vs.asInstanceOf[Set[Double]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[Double]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetManBoolean =>
-          val set     = vs.asInstanceOf[Set[Boolean]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[Boolean]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetManBigInt =>
-          val set     = vs.asInstanceOf[Set[BigInt]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[BigInt]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetManBigDecimal =>
-          val set     = vs.asInstanceOf[Set[BigDecimal]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[BigDecimal]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetManDate =>
-          val set     = vs.asInstanceOf[Set[Date]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[Date]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetManDuration =>
-          val set     = vs.asInstanceOf[Set[Duration]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[Duration]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetManInstant =>
-          val set     = vs.asInstanceOf[Set[Instant]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[Instant]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetManLocalDate =>
-          val set     = vs.asInstanceOf[Set[LocalDate]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[LocalDate]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetManLocalTime =>
-          val set     = vs.asInstanceOf[Set[LocalTime]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[LocalTime]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetManLocalDateTime =>
-          val set     = vs.asInstanceOf[Set[LocalDateTime]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[LocalDateTime]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetManOffsetTime =>
-          val set     = vs.asInstanceOf[Set[OffsetTime]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[OffsetTime]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetManOffsetDateTime =>
-          val set     = vs.asInstanceOf[Set[OffsetDateTime]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[OffsetDateTime]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetManZonedDateTime =>
-          val set     = vs.asInstanceOf[Set[ZonedDateTime]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[ZonedDateTime]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetManUUID =>
-          val set     = vs.asInstanceOf[Set[UUID]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[UUID]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetManURI =>
-          val set     = vs.asInstanceOf[Set[URI]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[URI]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetManByte =>
-          val set     = vs.asInstanceOf[Set[Byte]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[Byte]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetManShort =>
-          val set     = vs.asInstanceOf[Set[Short]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[Short]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetManChar =>
-          val set     = vs.asInstanceOf[Set[Char]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[Char]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
       }
       case a: AttrSetTac => a match {
         case a: AttrSetTacID =>
-          val set     = vs.asInstanceOf[Set[Long]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[Long]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetTacString =>
-          val set     = vs.asInstanceOf[Set[String]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[String]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetTacInt =>
-          val set     = vs.asInstanceOf[Set[Int]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[Int]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetTacLong =>
-          val set     = vs.asInstanceOf[Set[Long]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[Long]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetTacFloat =>
-          val set     = vs.asInstanceOf[Set[Float]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[Float]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetTacDouble =>
-          val set     = vs.asInstanceOf[Set[Double]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[Double]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetTacBoolean =>
-          val set     = vs.asInstanceOf[Set[Boolean]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[Boolean]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetTacBigInt =>
-          val set     = vs.asInstanceOf[Set[BigInt]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[BigInt]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetTacBigDecimal =>
-          val set     = vs.asInstanceOf[Set[BigDecimal]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[BigDecimal]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetTacDate =>
-          val set     = vs.asInstanceOf[Set[Date]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[Date]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetTacDuration =>
-          val set     = vs.asInstanceOf[Set[Duration]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[Duration]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetTacInstant =>
-          val set     = vs.asInstanceOf[Set[Instant]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[Instant]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetTacLocalDate =>
-          val set     = vs.asInstanceOf[Set[LocalDate]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[LocalDate]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetTacLocalTime =>
-          val set     = vs.asInstanceOf[Set[LocalTime]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[LocalTime]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetTacLocalDateTime =>
-          val set     = vs.asInstanceOf[Set[LocalDateTime]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[LocalDateTime]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetTacOffsetTime =>
-          val set     = vs.asInstanceOf[Set[OffsetTime]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[OffsetTime]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetTacOffsetDateTime =>
-          val set     = vs.asInstanceOf[Set[OffsetDateTime]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[OffsetDateTime]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetTacZonedDateTime =>
-          val set     = vs.asInstanceOf[Set[ZonedDateTime]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[ZonedDateTime]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetTacUUID =>
-          val set     = vs.asInstanceOf[Set[UUID]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[UUID]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetTacURI =>
-          val set     = vs.asInstanceOf[Set[URI]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[URI]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetTacByte =>
-          val set     = vs.asInstanceOf[Set[Byte]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[Byte]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetTacShort =>
-          val set     = vs.asInstanceOf[Set[Short]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[Short]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
 
         case a: AttrSetTacChar =>
-          val set     = vs.asInstanceOf[Set[Char]]
-          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            set.toSeq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val set     = vs.asInstanceOf[Set[Char]]
+            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              set.toSeq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = set, errors = errors1)
           }
-          a.copy(op = op, vs = set, errors = errors1)
       }
       case a             => unexpected(a)
     }
@@ -1367,364 +1459,452 @@ trait ModelTransformations_ {
     dataModel.copy(elements = es.init :+ last)
   }
 
-  protected def addSeq[T](dataModel: DataModel, op: Op, vs: Seq[T]): DataModel = {
+  protected def addSeq[T](dataModel: DataModel, op: Op, vs: Seq[T], binding: Boolean): DataModel = {
     val es   = dataModel.elements
     val last = es.last match {
       case a: AttrSeqMan => a match {
         case a: AttrSeqManID =>
-          val seq     = vs.asInstanceOf[Seq[Long]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[Long]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqManString =>
-          val seq     = vs.asInstanceOf[Seq[String]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[String]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqManInt =>
-          val seq     = vs.asInstanceOf[Seq[Int]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[Int]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqManLong =>
-          val seq     = vs.asInstanceOf[Seq[Long]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[Long]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqManFloat =>
-          val seq     = vs.asInstanceOf[Seq[Float]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[Float]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqManDouble =>
-          val seq     = vs.asInstanceOf[Seq[Double]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[Double]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqManBoolean =>
-          val seq     = vs.asInstanceOf[Seq[Boolean]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[Boolean]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqManBigInt =>
-          val seq     = vs.asInstanceOf[Seq[BigInt]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[BigInt]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqManBigDecimal =>
-          val seq     = vs.asInstanceOf[Seq[BigDecimal]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[BigDecimal]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqManDate =>
-          val seq     = vs.asInstanceOf[Seq[Date]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[Date]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqManDuration =>
-          val seq     = vs.asInstanceOf[Seq[Duration]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[Duration]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqManInstant =>
-          val seq     = vs.asInstanceOf[Seq[Instant]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[Instant]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqManLocalDate =>
-          val seq     = vs.asInstanceOf[Seq[LocalDate]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[LocalDate]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqManLocalTime =>
-          val seq     = vs.asInstanceOf[Seq[LocalTime]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[LocalTime]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqManLocalDateTime =>
-          val seq     = vs.asInstanceOf[Seq[LocalDateTime]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[LocalDateTime]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqManOffsetTime =>
-          val seq     = vs.asInstanceOf[Seq[OffsetTime]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[OffsetTime]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqManOffsetDateTime =>
-          val seq     = vs.asInstanceOf[Seq[OffsetDateTime]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[OffsetDateTime]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqManZonedDateTime =>
-          val seq     = vs.asInstanceOf[Seq[ZonedDateTime]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[ZonedDateTime]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqManUUID =>
-          val seq     = vs.asInstanceOf[Seq[UUID]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[UUID]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqManURI =>
-          val seq     = vs.asInstanceOf[Seq[URI]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[URI]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqManShort =>
-          val seq     = vs.asInstanceOf[Seq[Short]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[Short]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqManChar =>
-          val seq     = vs.asInstanceOf[Seq[Char]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[Char]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqManByte => ???
       }
       case a: AttrSeqTac => a match {
         case a: AttrSeqTacID =>
-          val seq     = vs.asInstanceOf[Seq[Long]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[Long]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqTacString =>
-          val seq     = vs.asInstanceOf[Seq[String]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[String]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqTacInt =>
-          val seq     = vs.asInstanceOf[Seq[Int]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[Int]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqTacLong =>
-          val seq     = vs.asInstanceOf[Seq[Long]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[Long]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqTacFloat =>
-          val seq     = vs.asInstanceOf[Seq[Float]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[Float]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqTacDouble =>
-          val seq     = vs.asInstanceOf[Seq[Double]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[Double]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqTacBoolean =>
-          val seq     = vs.asInstanceOf[Seq[Boolean]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[Boolean]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqTacBigInt =>
-          val seq     = vs.asInstanceOf[Seq[BigInt]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[BigInt]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqTacBigDecimal =>
-          val seq     = vs.asInstanceOf[Seq[BigDecimal]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[BigDecimal]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqTacDate =>
-          val seq     = vs.asInstanceOf[Seq[Date]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[Date]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqTacDuration =>
-          val seq     = vs.asInstanceOf[Seq[Duration]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[Duration]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqTacInstant =>
-          val seq     = vs.asInstanceOf[Seq[Instant]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[Instant]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqTacLocalDate =>
-          val seq     = vs.asInstanceOf[Seq[LocalDate]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[LocalDate]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqTacLocalTime =>
-          val seq     = vs.asInstanceOf[Seq[LocalTime]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[LocalTime]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqTacLocalDateTime =>
-          val seq     = vs.asInstanceOf[Seq[LocalDateTime]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[LocalDateTime]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqTacOffsetTime =>
-          val seq     = vs.asInstanceOf[Seq[OffsetTime]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[OffsetTime]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqTacOffsetDateTime =>
-          val seq     = vs.asInstanceOf[Seq[OffsetDateTime]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[OffsetDateTime]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqTacZonedDateTime =>
-          val seq     = vs.asInstanceOf[Seq[ZonedDateTime]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[ZonedDateTime]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqTacUUID =>
-          val seq     = vs.asInstanceOf[Seq[UUID]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[UUID]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqTacURI =>
-          val seq     = vs.asInstanceOf[Seq[URI]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[URI]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqTacShort =>
-          val seq     = vs.asInstanceOf[Seq[Short]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[Short]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqTacChar =>
-          val seq     = vs.asInstanceOf[Seq[Char]]
-          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-            val validator = a.validator.get
-            seq.flatMap(v => validator.validate(v))
+          if binding then a.copy(op = op, binding = true) else {
+            val seq     = vs.asInstanceOf[Seq[Char]]
+            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+              val validator = a.validator.get
+              seq.flatMap(v => validator.validate(v))
+            }
+            a.copy(op = op, vs = seq, errors = errors1)
           }
-          a.copy(op = op, vs = seq, errors = errors1)
 
         case a: AttrSeqTacByte => ???
       }

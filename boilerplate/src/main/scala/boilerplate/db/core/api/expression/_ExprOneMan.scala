@@ -73,6 +73,7 @@ object _ExprOneMan extends CoreGenBase("ExprOneMan", "/api/expression") {
          |  def >=   (lower: qm): Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(Ge , Nil, true)
          |  $attrExprs
          |}
+         |
          |trait $fileName_${arity}_String[${`A..V`}, t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]] extends $fileName_$arity[${`A..V, `}t, Entity1, Entity2] {
          |  def startsWith(prefix: t)               : Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(StartsWith                  , Seq(prefix)            )
          |  def endsWith  (suffix: t)               : Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(EndsWith                    , Seq(suffix)            )
@@ -84,25 +85,34 @@ object _ExprOneMan extends CoreGenBase("ExprOneMan", "/api/expression") {
          |  def replaceAll(regex: t, replacement: t): Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(AttrOp.ReplaceAll           , Seq(regex, replacement))
          |  def toLower                             : Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(AttrOp.ToLower              , Nil                    )
          |  def toUpper                             : Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(AttrOp.ToUpper              , Nil                    )
+         |
+         |  def startsWith(prefix: qm): Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(StartsWith, Nil, true)
+         |  def endsWith  (suffix: qm): Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(EndsWith  , Nil, true)
+         |  def contains  (needle: qm): Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(Contains  , Nil, true)
+         |  def matches   (regex : qm): Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(Matches   , Nil, true)
          |}
+         |
          |trait $fileName_${arity}_Integer[${`A..V`}, t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]] extends $fileName_${arity}_Number[${`A..V, `}t, Entity1, Entity2] {
          |  def even                       : Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(Even         , Nil                    )
          |  def odd                        : Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(Odd          , Nil                    )
          |  def %(divider: t, remainder: t): Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(Remainder    , Seq(divider, remainder))
          |}
+         |
          |trait $fileName_${arity}_Decimal[${`A..V`}, t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]] extends $fileName_${arity}_Number[${`A..V, `}t, Entity1, Entity2] {
-         |  def ceil                       : Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(AttrOp.Ceil  , Nil                    )
-         |  def floor                      : Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(AttrOp.Floor , Nil                    )
+         |  def ceil : Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(AttrOp.Ceil  , Nil                    )
+         |  def floor: Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(AttrOp.Floor , Nil                    )
          |}
+         |
          |trait $fileName_${arity}_Number[${`A..V`}, t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]] extends $fileName_$arity[${`A..V, `}t, Entity1, Entity2] {
-         |  def +(v: t)                    : Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(AttrOp.Plus  , Seq(v)                 )
-         |  def -(v: t)                    : Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(AttrOp.Minus , Seq(v)                 )
-         |  def *(v: t)                    : Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(AttrOp.Times , Seq(v)                 )
-         |  def /(v: t)                    : Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(AttrOp.Divide, Seq(v)                 )
-         |  def negate                     : Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(AttrOp.Negate, Nil                    )
-         |  def abs                        : Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(AttrOp.Abs   , Nil                    )
-         |  def absNeg                     : Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(AttrOp.AbsNeg, Nil                    )
+         |  def +(v: t): Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(AttrOp.Plus  , Seq(v)                 )
+         |  def -(v: t): Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(AttrOp.Minus , Seq(v)                 )
+         |  def *(v: t): Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(AttrOp.Times , Seq(v)                 )
+         |  def /(v: t): Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(AttrOp.Divide, Seq(v)                 )
+         |  def negate : Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(AttrOp.Negate, Nil                    )
+         |  def abs    : Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(AttrOp.Abs   , Nil                    )
+         |  def absNeg : Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(AttrOp.AbsNeg, Nil                    )
          |}
+         |
          |trait $fileName_${arity}_Boolean[${`A..V`}, t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]] extends $fileName_$arity[${`A..V, `}t, Entity1, Entity2] {
          |  def &&(bool: t): Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(AttrOp.And, Seq(bool))
          |  def ||(bool: t): Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] & CardOne = _exprOneMan(AttrOp.Or , Seq(bool))

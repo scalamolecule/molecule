@@ -11,6 +11,7 @@ object _ExprOneTac extends CoreGenBase("ExprOneTac", "/api/expression") {
        |
        |import molecule.db.base.ast.*
        |import molecule.db.core.api.*
+       |import molecule.db.core.api.Keywords.qm
        |import molecule.db.core.ast._
        |$traits
        |""".stripMargin
@@ -47,7 +48,7 @@ object _ExprOneTac extends CoreGenBase("ExprOneTac", "/api/expression") {
          |
          |trait ${fileName}Ops_$arity[${`A..V, `}t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]]
          |  extends ExprAttr_$arity[${`A..V, `}t, Entity1, Entity2] {
-         |  protected def _exprOneTac(op: Op, vs: Seq[t]): Entity1[${`A..V, `}t] & CardOne = ???
+         |  protected def _exprOneTac(op: Op, vs: Seq[t], binding: Boolean = false): Entity1[${`A..V, `}t] & CardOne = ???
          |}
          |
          |trait $fileName_$arity[${`A..V, `}t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]]
@@ -61,14 +62,28 @@ object _ExprOneTac extends CoreGenBase("ExprOneTac", "/api/expression") {
          |  def <=   (upper: t        ): Entity1[${`A..V, `}t] & CardOne = _exprOneTac(Le     , Seq(upper)  )
          |  def >    (lower: t        ): Entity1[${`A..V, `}t] & CardOne = _exprOneTac(Gt     , Seq(lower)  )
          |  def >=   (lower: t        ): Entity1[${`A..V, `}t] & CardOne = _exprOneTac(Ge     , Seq(lower)  )
+         |
+         |  def apply(v    : qm): Entity1[${`A..V, `}t] & CardOne = _exprOneTac(Eq , Nil, true)
+         |  def not  (v    : qm): Entity1[${`A..V, `}t] & CardOne = _exprOneTac(Neq, Nil, true)
+         |  def <    (upper: qm): Entity1[${`A..V, `}t] & CardOne = _exprOneTac(Lt , Nil, true)
+         |  def <=   (upper: qm): Entity1[${`A..V, `}t] & CardOne = _exprOneTac(Le , Nil, true)
+         |  def >    (lower: qm): Entity1[${`A..V, `}t] & CardOne = _exprOneTac(Gt , Nil, true)
+         |  def >=   (lower: qm): Entity1[${`A..V, `}t] & CardOne = _exprOneTac(Ge , Nil, true)
          |  $attrExprs
          |}
+         |
          |trait $fileName_${arity}_String[${`A..V, `}t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]] extends $fileName_$arity[${`A..V, `}t, Entity1, Entity2] {
-         |  def startsWith(prefix: t      ): Entity1[${`A..V, `}t] & CardOne = _exprOneTac(StartsWith, Seq(prefix))
-         |  def endsWith  (suffix: t      ): Entity1[${`A..V, `}t] & CardOne = _exprOneTac(EndsWith  , Seq(suffix))
-         |  def contains  (needle: t      ): Entity1[${`A..V, `}t] & CardOne = _exprOneTac(Contains  , Seq(needle))
-         |  def matches   (regex : t      ): Entity1[${`A..V, `}t] & CardOne = _exprOneTac(Matches   , Seq(regex) )
+         |  def startsWith(prefix: t): Entity1[${`A..V, `}t] & CardOne = _exprOneTac(StartsWith, Seq(prefix))
+         |  def endsWith  (suffix: t): Entity1[${`A..V, `}t] & CardOne = _exprOneTac(EndsWith  , Seq(suffix))
+         |  def contains  (needle: t): Entity1[${`A..V, `}t] & CardOne = _exprOneTac(Contains  , Seq(needle))
+         |  def matches   (regex : t): Entity1[${`A..V, `}t] & CardOne = _exprOneTac(Matches   , Seq(regex) )
+         |
+         |  def startsWith(prefix: qm): Entity1[${`A..V, `}t] & CardOne = _exprOneTac(StartsWith, Nil, true)
+         |  def endsWith  (suffix: qm): Entity1[${`A..V, `}t] & CardOne = _exprOneTac(EndsWith  , Nil, true)
+         |  def contains  (needle: qm): Entity1[${`A..V, `}t] & CardOne = _exprOneTac(Contains  , Nil, true)
+         |  def matches   (regex : qm): Entity1[${`A..V, `}t] & CardOne = _exprOneTac(Matches   , Nil, true)
          |}
+         |
          |trait $fileName_${arity}_Integer[${`A..V, `}t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]] extends $fileName_${arity}[${`A..V, `}t, Entity1, Entity2] {
          |  def even                       : Entity1[${`A..V, `}t] & CardOne = _exprOneTac(Even      , Nil                    )
          |  def odd                        : Entity1[${`A..V, `}t] & CardOne = _exprOneTac(Odd       , Nil                    )

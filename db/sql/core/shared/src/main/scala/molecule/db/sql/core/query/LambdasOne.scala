@@ -44,37 +44,33 @@ trait LambdasOne extends LambdasBase { self: SqlQueryBase =>
   protected lazy val sql2oneShort         : (RS, Int) => Short          = (row: RS, paramIndex: Int) => row.getShort(paramIndex)
   protected lazy val sql2oneChar          : (RS, Int) => Char           = (row: RS, paramIndex: Int) => row.getString(paramIndex).charAt(0)
 
-  def typed[T](bindIndex: Int, rawValue: Any, tpe: String): T = {
-    try {
-      rawValue.asInstanceOf[T]
-    } catch {
-      case NonFatal(_) =>
-        throw ModelError(s"Bind value `$rawValue` at index $bindIndex should be of type $tpe. Found value of unexpected type ${rawValue.getClass.getSimpleName}.")
-    }
+  def typed[T](bindIndex: Int, rawValue: Any, tpe: String, correctType: Boolean): T = {
+    if correctType then rawValue.asInstanceOf[T] else
+      throw ModelError(s"Bind value `$rawValue` of type ${rawValue.getClass.getSimpleName} at index $bindIndex should be a value of type $tpe.")
   }
-  private lazy val bindID             = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setLong(paramIndex, typed[Long](bindIndex, rawValue, "Long"))
-  private lazy val bindString         = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[String](bindIndex, rawValue, "String"))
-  private lazy val bindInt            = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setInt(paramIndex, typed[Int](bindIndex, rawValue, "Int"))
-  private lazy val bindLong           = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setLong(paramIndex, typed[Long](bindIndex, rawValue, "Long"))
-  private lazy val bindFloat          = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setFloat(paramIndex, typed[Float](bindIndex, rawValue, "Float"))
-  private lazy val bindDouble         = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setDouble(paramIndex, typed[Double](bindIndex, rawValue, "Double"))
-  private lazy val bindBoolean        = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setBoolean(paramIndex, typed[Boolean](bindIndex, rawValue, "Boolean"))
-  private lazy val bindBigInt         = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setBigDecimal(paramIndex, BigDecimal(typed[BigInt](bindIndex, rawValue, "BigInt")).bigDecimal)
-  private lazy val bindBigDecimal     = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setBigDecimal(paramIndex, typed[BigDecimal](bindIndex, rawValue, "BigDecimal").bigDecimal)
-  private lazy val bindDate           = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setLong(paramIndex, typed[Date](bindIndex, rawValue, "Date").getTime)
-  private lazy val bindDuration       = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[Duration](bindIndex, rawValue, "Duration").toString)
-  private lazy val bindInstant        = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[Instant](bindIndex, rawValue, "Instant").toString)
-  private lazy val bindLocalDate      = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[LocalDate](bindIndex, rawValue, "LocalDate").toString)
-  private lazy val bindLocalTime      = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[LocalTime](bindIndex, rawValue, "LocalTime").toString)
-  private lazy val bindLocalDateTime  = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[LocalDateTime](bindIndex, rawValue, "LocalDateTime").toString)
-  private lazy val bindOffsetTime     = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[OffsetTime](bindIndex, rawValue, "OffsetTime").toString)
-  private lazy val bindOffsetDateTime = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[OffsetDateTime](bindIndex, rawValue, "OffsetDateTime").toString)
-  private lazy val bindZonedDateTime  = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[ZonedDateTime](bindIndex, rawValue, "ZonedDateTime").toString)
-  private lazy val bindUUID           = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[UUID](bindIndex, rawValue, "UUID").toString)
-  private lazy val bindURI            = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[URI](bindIndex, rawValue, "URI").toString)
-  private lazy val bindByte           = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setByte(paramIndex, typed[Byte](bindIndex, rawValue, "Byte"))
-  private lazy val bindShort          = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setShort(paramIndex, typed[Short](bindIndex, rawValue, "Short"))
-  private lazy val bindChar           = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[Char](bindIndex, rawValue, "Char").toString)
+  private lazy val bindID             = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setLong(paramIndex, typed[Long](bindIndex, rawValue, "Long", rawValue.isInstanceOf[Long]))
+  private lazy val bindString         = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[String](bindIndex, rawValue, "String", rawValue.isInstanceOf[String]))
+  private lazy val bindInt            = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setInt(paramIndex, typed[Int](bindIndex, rawValue, "Int", rawValue.isInstanceOf[Int]))
+  private lazy val bindLong           = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setLong(paramIndex, typed[Long](bindIndex, rawValue, "Long", rawValue.isInstanceOf[Long]))
+  private lazy val bindFloat          = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setFloat(paramIndex, typed[Float](bindIndex, rawValue, "Float", rawValue.isInstanceOf[Float]))
+  private lazy val bindDouble         = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setDouble(paramIndex, typed[Double](bindIndex, rawValue, "Double", rawValue.isInstanceOf[Double]))
+  private lazy val bindBoolean        = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setBoolean(paramIndex, typed[Boolean](bindIndex, rawValue, "Boolean", rawValue.isInstanceOf[Boolean]))
+  private lazy val bindBigInt         = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setBigDecimal(paramIndex, BigDecimal(typed[BigInt](bindIndex, rawValue, "BigInt", rawValue.isInstanceOf[BigInt])).bigDecimal)
+  private lazy val bindBigDecimal     = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setBigDecimal(paramIndex, typed[BigDecimal](bindIndex, rawValue, "BigDecimal", rawValue.isInstanceOf[BigDecimal]).bigDecimal)
+  private lazy val bindDate           = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setLong(paramIndex, typed[Date](bindIndex, rawValue, "Date", rawValue.isInstanceOf[Date]).getTime)
+  private lazy val bindDuration       = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[Duration](bindIndex, rawValue, "Duration", rawValue.isInstanceOf[Duration]).toString)
+  private lazy val bindInstant        = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[Instant](bindIndex, rawValue, "Instant", rawValue.isInstanceOf[Instant]).toString)
+  private lazy val bindLocalDate      = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[LocalDate](bindIndex, rawValue, "LocalDate", rawValue.isInstanceOf[LocalDate]).toString)
+  private lazy val bindLocalTime      = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[LocalTime](bindIndex, rawValue, "LocalTime", rawValue.isInstanceOf[LocalTime]).toString)
+  private lazy val bindLocalDateTime  = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[LocalDateTime](bindIndex, rawValue, "LocalDateTime", rawValue.isInstanceOf[LocalDateTime]).toString)
+  private lazy val bindOffsetTime     = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[OffsetTime](bindIndex, rawValue, "OffsetTime", rawValue.isInstanceOf[OffsetTime]).toString)
+  private lazy val bindOffsetDateTime = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[OffsetDateTime](bindIndex, rawValue, "OffsetDateTime", rawValue.isInstanceOf[OffsetDateTime]).toString)
+  private lazy val bindZonedDateTime  = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[ZonedDateTime](bindIndex, rawValue, "ZonedDateTime", rawValue.isInstanceOf[ZonedDateTime]).toString)
+  private lazy val bindUUID           = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[UUID](bindIndex, rawValue, "UUID", rawValue.isInstanceOf[UUID]).toString)
+  private lazy val bindURI            = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[URI](bindIndex, rawValue, "URI", rawValue.isInstanceOf[URI]).toString)
+  private lazy val bindByte           = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setByte(paramIndex, typed[Byte](bindIndex, rawValue, "Byte", rawValue.isInstanceOf[Byte]))
+  private lazy val bindShort          = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setShort(paramIndex, typed[Short](bindIndex, rawValue, "Short", rawValue.isInstanceOf[Short]))
+  private lazy val bindChar           = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[Char](bindIndex, rawValue, "Char", rawValue.isInstanceOf[Char]).toString)
 
   protected lazy val resId1            : ResOne[Long]           = ResOne("Long", sql2oneId, sql2oneIdOrNull, one2sqlId, array2setId, json2oneId, json2arrayId, bindID)
   protected lazy val resString1        : ResOne[String]         = ResOne("String", sql2oneString, sql2oneStringOrNull, one2sqlString, array2setString, json2oneString, json2arrayString, bindString)

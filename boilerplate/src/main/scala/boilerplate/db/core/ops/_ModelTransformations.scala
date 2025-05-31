@@ -75,7 +75,7 @@ object _ModelTransformations extends CoreGenBase("ModelTransformations", "/ops")
        |    dataModel.copy(elements = es.init :+ last)
        |  }
        |
-       |  protected def addOne[T](dataModel: DataModel, op: Op, vs: Seq[T], binding: Boolean = false): DataModel = {
+       |  protected def addOne[T](dataModel: DataModel, op: Op, vs: Seq[T], binding: Boolean): DataModel = {
        |    val es   = dataModel.elements
        |    val last = es.last match {
        |      case a: AttrOneMan => a match {
@@ -100,7 +100,7 @@ object _ModelTransformations extends CoreGenBase("ModelTransformations", "/ops")
        |    dataModel.copy(elements = es.init :+ last)
        |  }
        |
-       |  protected def addSet[T](dataModel: DataModel, op: Op, vs: Set[T]): DataModel = {
+       |  protected def addSet[T](dataModel: DataModel, op: Op, vs: Set[T], binding: Boolean): DataModel = {
        |    val es   = dataModel.elements
        |    val last = es.last match {
        |      case a: AttrSetMan => a match {
@@ -125,7 +125,7 @@ object _ModelTransformations extends CoreGenBase("ModelTransformations", "/ops")
        |    dataModel.copy(elements = es.init :+ last)
        |  }
        |
-       |  protected def addSeq[T](dataModel: DataModel, op: Op, vs: Seq[T]): DataModel = {
+       |  protected def addSeq[T](dataModel: DataModel, op: Op, vs: Seq[T], binding: Boolean): DataModel = {
        |    val es   = dataModel.elements
        |    val last = es.last match {
        |      case a: AttrSeqMan => a match {
@@ -473,12 +473,14 @@ object _ModelTransformations extends CoreGenBase("ModelTransformations", "/ops")
     baseTypes.map { baseTpe =>
       val tpe = if (baseTpe == "ID") "Long" else baseTpe
       s"""case a: AttrSet$mode$baseTpe =>
-         |          val set     = vs.asInstanceOf[Set[$tpe]]
-         |          val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-         |            val validator = a.validator.get
-         |            set.toSeq.flatMap(v => validator.validate(v))
-         |          }
-         |          a.copy(op = op, vs = set, errors = errors1)""".stripMargin
+         |          if binding then a.copy(op = op, binding = true) else {
+         |            val set     = vs.asInstanceOf[Set[$tpe]]
+         |            val errors1 = if (set.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+         |              val validator = a.validator.get
+         |              set.toSeq.flatMap(v => validator.validate(v))
+         |            }
+         |            a.copy(op = op, vs = set, errors = errors1)
+         |          }""".stripMargin
     }.mkString("\n\n        ")
   }
 
@@ -499,12 +501,14 @@ object _ModelTransformations extends CoreGenBase("ModelTransformations", "/ops")
     baseTypes.filterNot(_ == "Byte").map { baseTpe =>
       val tpe = if (baseTpe == "ID") "Long" else baseTpe
       s"""case a: AttrSeq$mode$baseTpe =>
-         |          val seq     = vs.asInstanceOf[Seq[$tpe]]
-         |          val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
-         |            val validator = a.validator.get
-         |            seq.flatMap(v => validator.validate(v))
-         |          }
-         |          a.copy(op = op, vs = seq, errors = errors1)""".stripMargin
+         |          if binding then a.copy(op = op, binding = true) else {
+         |            val seq     = vs.asInstanceOf[Seq[$tpe]]
+         |            val errors1 = if (seq.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+         |              val validator = a.validator.get
+         |              seq.flatMap(v => validator.validate(v))
+         |            }
+         |            a.copy(op = op, vs = seq, errors = errors1)
+         |          }""".stripMargin
     }.mkString("\n\n        ")
   }
 
