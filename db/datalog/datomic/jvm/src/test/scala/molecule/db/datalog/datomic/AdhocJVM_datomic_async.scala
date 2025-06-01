@@ -9,8 +9,6 @@ import molecule.db.datalog.datomic.setup.DbProviders_datomic
 
 class AdhocJVM_datomic_async extends Test with DbProviders_datomic with TestUtils {
 
-  //  DatomicPeer.recreateDb(TypesSchema_datomic)
-
     "types" - types { implicit conn =>
       import molecule.db.compliance.domains.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)

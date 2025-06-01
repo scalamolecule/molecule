@@ -145,12 +145,12 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
   ): Unit = {
     op match {
       case V            => attrV(col)
-      case Eq           => equal(col, args, res.one2sql, binding, res.bind)
-      case Neq          => neq(col, args, res.one2sql, binding, res.bind)
-      case Lt           => compare(col, args, "<", res.one2sql, binding, res.bind)
-      case Gt           => compare(col, args, ">", res.one2sql, binding, res.bind)
-      case Le           => compare(col, args, "<=", res.one2sql, binding, res.bind)
-      case Ge           => compare(col, args, ">=", res.one2sql, binding, res.bind)
+      case Eq           => equal(col, args, res.one2sql, binding, res.bind, res.tpe)
+      case Neq          => neq(col, args, res.one2sql, binding, res.bind, res.tpe)
+      case Lt           => compare(col, args, "<", res.one2sql, binding, res.bind, res.tpe)
+      case Gt           => compare(col, args, ">", res.one2sql, binding, res.bind, res.tpe)
+      case Le           => compare(col, args, "<=", res.one2sql, binding, res.bind, res.tpe)
+      case Ge           => compare(col, args, ">=", res.one2sql, binding, res.bind, res.tpe)
       case NoValue      => noValue(col)
       case Fn(kw, n)    => aggr(ent, attr, col, kw, n, res)
       case StartsWith   => startsWith(col, args, binding, res.bind)
@@ -219,7 +219,8 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
     args: Seq[T],
     one2sql: T => String,
     binding: Boolean = false,
-    bind: (PrepStmt, Int, Int, Any) => Unit = null
+    bind: (PrepStmt, Int, Int, Any) => Unit = null,
+    tpe: String = ""
   ): Unit = {
     if binding then {
       addBinding(col, bind, "= ?")
@@ -253,7 +254,8 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
     args: Seq[T],
     one2sql: T => String,
     binding: Boolean = false,
-    bind: (PrepStmt, Int, Int, Any) => Unit = null
+    bind: (PrepStmt, Int, Int, Any) => Unit = null,
+    tpe: String = ""
   ): Unit = {
     if binding then {
       addBinding(col, bind, "<> ?")
@@ -287,7 +289,8 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
     op: String,
     one2sql: T => String,
     binding: Boolean = false,
-    bind: (PrepStmt, Int, Int, Any) => Unit = null
+    bind: (PrepStmt, Int, Int, Any) => Unit = null,
+    tpe: String = ""
   ): Unit = {
     if binding then {
       addBinding(col, bind, s"$op ?")

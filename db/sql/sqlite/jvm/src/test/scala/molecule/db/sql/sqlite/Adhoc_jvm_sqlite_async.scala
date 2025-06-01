@@ -10,35 +10,48 @@ import molecule.db.sql.sqlite.setup.DbProviders_sqlite
 class Adhoc_jvm_sqlite_async extends Test with DbProviders_sqlite with TestUtils {
 
 
-  //  "types" - types { implicit conn =>
-  //    import molecule.db.compliance.domains.dsl.Types._
-  //    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
-  //
-  //    for {
-  //      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
-  //      _ <- Entity.int(3).save.transact
-  //      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
-  //      _ <- Entity(a).int(10).update.transact
-  //      _ <- Entity(b).delete.transact
-  //      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
-  //
-  //
-  //    } yield ()
-  //  }
+    "types" - types { implicit conn =>
+      import molecule.db.compliance.domains.dsl.Types._
+      implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+
+      for {
+//        List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
+//        _ <- Entity.int(3).save.transact
+//        _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
+//        _ <- Entity(a).int(10).update.transact
+//        _ <- Entity(b).delete.transact
+//        _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
+
+        _ <- Entity.i.string.insert(
+          (1, "hello"),
+          (2, "friends")
+        ).transact
+
+        // Regex expressions can be applied as bound parameters with SQL databases
+        matches = Entity.string.matches(?).d1.query
+        _ <- matches("^[a-g].*").get.map(_ ==> List("friends"))
+        _ <- matches("^[d-s].*").get.map(_ ==> List("hello", "friends"))
+
+        tacitMatches = Entity.i.a1.string_.matches(?).query
+        _ <- tacitMatches("^[a-g].*").get.map(_ ==> List(2))
+        _ <- tacitMatches("^[d-s].*").get.map(_ ==> List(1, 2))
+
+      } yield ()
+    }
 
 
 
-  "refs" - refs { implicit conn =>
-    import molecule.db.compliance.domains.dsl.Refs.*
-    for {
-      _ <- A.i.insert(1, 2).transact
-      _ <- A.i.query.stream // fs2.Stream[IO, List[Int]]
-        .compile
-        .toList
-        .map(_.sorted ==> List(1, 2))
-        .unsafeToFuture()
-    } yield ()
-  }
+//  "refs" - refs { implicit conn =>
+//    import molecule.db.compliance.domains.dsl.Refs.*
+//    for {
+//      _ <- A.i.insert(1, 2).transact
+//      _ <- A.i.query.stream // fs2.Stream[IO, List[Int]]
+//        .compile
+//        .toList
+//        .map(_.sorted ==> List(1, 2))
+//        .unsafeToFuture()
+//    } yield ()
+//  }
   //
   //
   //  //    "unique" - unique { implicit conn =>
