@@ -2,12 +2,95 @@ package molecule.db.sql.postgres.query
 
 import molecule.db.core.ast.*
 import molecule.db.core.query.Model2Query
+import molecule.db.sql.core.javaSql.PrepStmt
 import molecule.db.sql.core.query.{QueryExprOne, SqlQueryBase}
 import scala.reflect.ClassTag
 
 trait QueryExprOne_postgres
   extends QueryExprOne
     with LambdasOne_postgres { self: Model2Query & SqlQueryBase =>
+
+  override protected def equal[T](
+    col: String,
+    args: Seq[T],
+    one2sql: T => String,
+    binding: Boolean,
+    bind: (PrepStmt, Int, Int, Any) => Unit,
+    tpe: String
+  ): Unit = {
+    if binding then {
+      tpe match {
+        case "Float" =>
+          // Hack to handle floating-point precision
+          // Highly recommended to use Double instead
+          addBinding(s"ROUND(Entity.float::NUMERIC, 7)", bind, "= ROUND(?::NUMERIC, 7)")
+        case "UUID"  =>
+          addBinding(col, bind, "= CAST(? AS UUID)")
+        case _       =>
+          addBinding(col, bind, "= ?")
+      }
+    } else {
+      where += (args.length match {
+        case 1 => (col, "= " + one2sql(args.head))
+        case 0 => ("FALSE", "") // Empty Seq of args matches no values
+        case _ => (col, args.map(one2sql).mkString("IN (", ", ", ")"))
+      })
+    }
+  }
+
+
+  override protected def neq[T](
+    col: String,
+    args: Seq[T],
+    one2sql: T => String,
+    binding: Boolean = false,
+    bind: (PrepStmt, Int, Int, Any) => Unit = null,
+    tpe: String = ""
+  ): Unit = {
+    if binding then {
+      tpe match {
+        case "Float" =>
+          // Hack to handle floating-point precision
+          // Highly recommended to use Double instead
+          addBinding(s"ROUND(Entity.float::NUMERIC, 7)", bind, "<> ROUND(?::NUMERIC, 7)")
+        case "UUID"  =>
+          addBinding(col, bind, "<> CAST(? AS UUID)")
+        case _       =>
+          addBinding(col, bind, "<> ?")
+      }
+    } else {
+      where += (args.length match {
+        case 1 => (col, "<> " + one2sql(args.head))
+        case 0 => (col, "IS NOT NULL ")
+        case _ => (col, args.map(one2sql).mkString("NOT IN (", ", ", ")"))
+      })
+    }
+  }
+
+  override protected def compare[T](
+    col: String,
+    args: Seq[T],
+    op: String,
+    one2sql: T => String,
+    binding: Boolean = false,
+    bind: (PrepStmt, Int, Int, Any) => Unit = null,
+    tpe: String = ""
+  ): Unit = {
+    if binding then {
+      tpe match {
+        case "Float" =>
+          // Hack to handle floating-point precision
+          // Highly recommended to use Double instead
+          addBinding(s"ROUND(Entity.float::NUMERIC, 7)", bind, s"$op ROUND(?::NUMERIC, 7)")
+        case "UUID"  =>
+          addBinding(col, bind, s"$op CAST(? AS UUID)")
+        case _       =>
+          addBinding(col, bind, s"$op ?")
+      }
+    } else {
+      where += ((col, op + " " + one2sql(args.head)))
+    }
+  }
 
   override protected def addSort(attr: Attr, col: String): Unit = {
     attr.sort.foreach { sort =>

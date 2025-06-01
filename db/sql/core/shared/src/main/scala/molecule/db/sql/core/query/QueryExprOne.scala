@@ -218,9 +218,9 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
     col: String,
     args: Seq[T],
     one2sql: T => String,
-    binding: Boolean = false,
-    bind: (PrepStmt, Int, Int, Any) => Unit = null,
-    tpe: String = ""
+    binding: Boolean,
+    bind: (PrepStmt, Int, Int, Any) => Unit,
+    tpe: String
   ): Unit = {
     if binding then {
       addBinding(col, bind, "= ?")
@@ -242,7 +242,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
       setNull(col)
     } {
       case Nil => where += (("FALSE", ""))
-      case vs  => equal(col, vs, one2sql)
+      case vs  => equal(col, vs, one2sql, false, null, "")
     }
   }
 
@@ -253,9 +253,9 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
     col: String,
     args: Seq[T],
     one2sql: T => String,
-    binding: Boolean = false,
-    bind: (PrepStmt, Int, Int, Any) => Unit = null,
-    tpe: String = ""
+    binding: Boolean,
+    bind: (PrepStmt, Int, Int, Any) => Unit,
+    tpe: String
   ): Unit = {
     if binding then {
       addBinding(col, bind, "<> ?")
@@ -274,7 +274,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
     one2sql: T => String
   ): Unit = {
     if (optArgs.isDefined && optArgs.get.nonEmpty) {
-      neq(col, optArgs.get, one2sql)
+      neq(col, optArgs.get, one2sql, false, null, "")
     } else {
       setNotNull(col)
     }

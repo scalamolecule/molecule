@@ -63,10 +63,10 @@ case class Semantics(
     for {
       _ <- Entity.int.insert(1, 2, 3).transact
 
-      _ <- Entity.int.query.offset(0).get.map(_ ==> (List(1, 2, 3), 3, false))
-      _ <- Entity.int.query.offset(1).get.map(_ ==> (List(2, 3), 3, false))
-      _ <- Entity.int.query.offset(2).get.map(_ ==> (List(3), 3, false))
-      _ <- Entity.int.query.offset(3).get.map(_ ==> (List(), 3, false))
+      _ <- Entity.int.a1.query.offset(0).get.map(_ ==> (List(1, 2, 3), 3, false))
+      _ <- Entity.int.a1.query.offset(1).get.map(_ ==> (List(2, 3), 3, false))
+      _ <- Entity.int.a1.query.offset(2).get.map(_ ==> (List(3), 3, false))
+      _ <- Entity.int.a1.query.offset(3).get.map(_ ==> (List(), 3, false))
 
       offset0gt = Entity.int.>(?).query.offset(0)
       _ <- offset0gt(0).get.map(_ ==> (List(1, 2, 3), 3, false))

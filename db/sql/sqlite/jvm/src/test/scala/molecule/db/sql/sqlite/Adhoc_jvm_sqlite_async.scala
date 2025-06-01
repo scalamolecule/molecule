@@ -15,26 +15,13 @@ class Adhoc_jvm_sqlite_async extends Test with DbProviders_sqlite with TestUtils
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
       for {
-//        List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
-//        _ <- Entity.int(3).save.transact
-//        _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
-//        _ <- Entity(a).int(10).update.transact
-//        _ <- Entity(b).delete.transact
-//        _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
+        List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
+        _ <- Entity.int(3).save.transact
+        _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
+        _ <- Entity(a).int(10).update.transact
+        _ <- Entity(b).delete.transact
+        _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
 
-        _ <- Entity.i.string.insert(
-          (1, "hello"),
-          (2, "friends")
-        ).transact
-
-        // Regex expressions can be applied as bound parameters with SQL databases
-        matches = Entity.string.matches(?).d1.query
-        _ <- matches("^[a-g].*").get.map(_ ==> List("friends"))
-        _ <- matches("^[d-s].*").get.map(_ ==> List("hello", "friends"))
-
-        tacitMatches = Entity.i.a1.string_.matches(?).query
-        _ <- tacitMatches("^[a-g].*").get.map(_ ==> List(2))
-        _ <- tacitMatches("^[d-s].*").get.map(_ ==> List(1, 2))
 
       } yield ()
     }

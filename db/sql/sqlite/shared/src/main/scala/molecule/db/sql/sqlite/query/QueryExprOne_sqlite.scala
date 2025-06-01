@@ -15,13 +15,13 @@ trait QueryExprOne_sqlite
     col: String,
     args: Seq[T],
     one2sql: T => String,
-    binding: Boolean = false,
-    bind: (PrepStmt, Int, Int, Any) => Unit = null,
-    tpe: String = ""
+    binding: Boolean,
+    bind: (PrepStmt, Int, Int, Any) => Unit,
+    tpe: String
   ): Unit = {
     if binding then {
       if (tpe == "Float") {
-        // Hack to handle floating-point precision issue in SQlite
+        // Hack to handle floating-point precision
         // Highly recommended to use Double instead
         addBinding(s"ROUND($col, 7)", bind, "= ROUND(?, 7)")
       } else {
@@ -41,13 +41,13 @@ trait QueryExprOne_sqlite
     col: String,
     args: Seq[T],
     one2sql: T => String,
-    binding: Boolean = false,
-    bind: (PrepStmt, Int, Int, Any) => Unit = null,
-    tpe: String = ""
+    binding: Boolean,
+    bind: (PrepStmt, Int, Int, Any) => Unit,
+    tpe: String
   ): Unit = {
     if binding then {
       if (tpe == "Float") {
-        // Hack to handle floating-point precision issue in SQlite
+        // Hack to handle floating-point precision
         // Highly recommended to use Double instead
         addBinding(s"ROUND($col, 7)", bind, "<> ROUND(?, 7)")
       } else {
@@ -67,13 +67,13 @@ trait QueryExprOne_sqlite
     args: Seq[T],
     op: String,
     one2sql: T => String,
-    binding: Boolean = false,
-    bind: (PrepStmt, Int, Int, Any) => Unit = null,
-    tpe: String = ""
+    binding: Boolean,
+    bind: (PrepStmt, Int, Int, Any) => Unit,
+    tpe: String
   ): Unit = {
     if binding then {
       if (tpe == "Float") {
-        // Hack to handle floating-point precision issue in SQlite
+        // Hack to handle floating-point precision
         // Highly recommended to use Double instead
         addBinding(s"ROUND($col, 7)", bind, s"$op ROUND(?, 7)")
       } else {
