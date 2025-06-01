@@ -30,43 +30,38 @@ class AdhocJVM_datomic_async extends Test with DbProviders_datomic with TestUtil
   "Mutations call back" - types { implicit conn =>
     var intermediaryResults = List.empty[List[Int]]
     for {
-      // Initial data
-      _ <- Entity.i(1).save.transact
 
-      // Start subscription and define a callback function
-      _ <- Entity.i.query.subscribe { updatedResult =>
-        // Do something with updated result
-        intermediaryResults = intermediaryResults :+ updatedResult.sorted
-      }
+      _ <- Entity.int.insert(int1, int2, int3).transact
 
-      // When calling from ScalaJS, calls are asynchronous, and we need to wait
-      // a bit for the subscription websocket to be ready to serve callbacks.
-      _ <- delay(1000)
+      eq = Entity.int(?).query
+      _ <- eq(int1).get.map(_ ==> List(int1))
+      _ <- eq(int2).get.map(_ ==> List(int2))
+      _ <- eq(int3).get.map(_ ==> List(int3))
 
-      // Mutations to be monitored by subscription
-      id <- Entity.i(2).save.transact.map(_.id)
-      _ <- Entity.i.a1.query.get.map(_ ==> List(1, 2))
+      ne = Entity.int.not(?).query
+      _ <- ne(int1).get.map(_ ==> List(int2, int3))
+      _ <- ne(int2).get.map(_ ==> List(int1, int3))
+      _ <- ne(int3).get.map(_ ==> List(int1, int2))
 
-      _ <- Entity.i.insert(3, 4).transact
-      _ <- Entity.i.a1.query.get.map(_ ==> List(1, 2, 3, 4))
+      lt = Entity.int.<(?).query
+      _ <- lt(int1).get.map(_ ==> List())
+      _ <- lt(int2).get.map(_ ==> List(int1))
+      _ <- lt(int3).get.map(_ ==> List(int1, int2))
 
-      _ <- Entity(id).i(20).update.transact
-      _ <- Entity.i.a1.query.get.map(_ ==> List(1, 3, 4, 20))
+      le = Entity.int.<=(?).query
+      _ <- le(int1).get.map(_ ==> List(int1))
+      _ <- le(int2).get.map(_ ==> List(int1, int2))
+      _ <- le(int3).get.map(_ ==> List(int1, int2, int3))
 
-      _ <- Entity(id).delete.transact
-      _ <- Entity.i.a1.query.get.map(_ ==> List(1, 3, 4))
+      gt = Entity.int.>(?).query
+      _ <- gt(int1).get.map(_ ==> List(int2, int3))
+      _ <- gt(int2).get.map(_ ==> List(int3))
+      _ <- gt(int3).get.map(_ ==> List())
 
-      // Mutations with no callback-involved attributes don't call back
-      _ <- Entity.string("foo").save.transact
-      _ <- delay(1000)
-
-      // Callback produced all intermediary results correctly
-      _ = intermediaryResults ==> List(
-        List(1, 2), //        query result after 2 was saved
-        List(1, 2, 3, 4), //  query result after 3 and 4 were inserted
-        List(1, 3, 4, 20), // query result after 2 was updated to 20
-        List(1, 3, 4), //     query result after 20 was deleted
-      )
+      ge = Entity.int.>=(?).query
+      _ <- ge(int1).get.map(_ ==> List(int1, int2, int3))
+      _ <- ge(int2).get.map(_ ==> List(int2, int3))
+      _ <- ge(int3).get.map(_ ==> List(int3))
     } yield ()
   }
 

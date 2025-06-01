@@ -12,6 +12,7 @@ class Adhoc_jvm_h2_async extends Test with DbProviders_h2 with TestUtils {
     import molecule.db.compliance.domains.dsl.Types.*
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
+
     for {
       List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
       _ <- Entity.int(3).save.transact
@@ -19,6 +20,7 @@ class Adhoc_jvm_h2_async extends Test with DbProviders_h2 with TestUtils {
       _ <- Entity(a).int(10).update.transact
       _ <- Entity(b).delete.transact
       _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
+
 
     } yield ()
   }

@@ -88,3 +88,7 @@ class Bind_Short_Test extends Test {
 class Bind_Char_Test extends Test {
   Bind_Char_(this, Api_h2_async)
 }
+
+class Bind_Ref_Test extends Test {
+  Bind_Ref(this, Api_h2_async)
+}

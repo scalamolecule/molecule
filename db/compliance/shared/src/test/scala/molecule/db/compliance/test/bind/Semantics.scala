@@ -55,4 +55,61 @@ case class Semantics(
       "Delete action does not support bind parameters."
     )(Entity.i(?).delete)
   }
+
+
+  "Query offset" - types { implicit conn =>
+    for {
+      _ <- Entity.int.insert(1, 2, 3).transact
+
+      _ <- Entity.int.query.offset(0).get.map(_ ==> (List(1, 2, 3), 3, false))
+      _ <- Entity.int.query.offset(1).get.map(_ ==> (List(2, 3), 3, false))
+      _ <- Entity.int.query.offset(2).get.map(_ ==> (List(3), 3, false))
+      _ <- Entity.int.query.offset(3).get.map(_ ==> (List(), 3, false))
+
+      offset0gt = Entity.int.>(?).query.offset(0)
+      _ <- offset0gt(0).get.map(_ ==> (List(1, 2, 3), 3, false))
+      _ <- offset0gt(1).get.map(_ ==> (List(2, 3), 2, false))
+      _ <- offset0gt(2).get.map(_ ==> (List(3), 1, false))
+      _ <- offset0gt(3).get.map(_ ==> (List(), 0, false))
+
+      offset1gt = Entity.int.>(?).query.offset(1)
+      _ <- offset1gt(0).get.map(_ ==> (List(2, 3), 3, false))
+      _ <- offset1gt(1).get.map(_ ==> (List(3), 2, false))
+      _ <- offset1gt(2).get.map(_ ==> (List(), 1, false))
+      _ <- offset1gt(3).get.map(_ ==> (List(), 0, false))
+    } yield ()
+  }
+
+  "Query cursor" - types { implicit conn =>
+    val query   = Entity.int.a1.query
+    val queryGt = Entity.int.>(?).a1.query
+    for {
+      _ <- Entity.int.insert(1, 2, 3, 4, 5).transact
+
+      // Without bind
+      c1 <- query.from("").limit(2).get.map { case (List(1, 2), c, true) => c }
+      c2 <- query.from(c1).limit(2).get.map { case (List(3, 4), c, true) => c }
+      _ <- query.from(c2).limit(2).get.map { case (List(5), c, false) => c }
+
+      // With bind selecting int values greater than input (1)
+      c1 <- queryGt(1).from("").limit(2).get.map { case (List(2, 3), c, true) => c }
+      _ <- queryGt(1).from(c1).limit(2).get.map { case (List(4, 5), c, false) => c }
+    } yield ()
+  }
+
+
+  // (Up to 22 inputs)
+  "Multiple bindings in correct order" - types { implicit conn =>
+    for {
+      _ <- Entity.i.int.string.insert(
+        (1, 1, "a"),
+        (2, 2, "b"),
+      ).transact
+
+      multiple = Entity.i.int_(?).string_(?).query
+      _ <- multiple(1, "a").get.map(_ ==> List(1))
+      _ <- multiple(2, "b").get.map(_ ==> List(2))
+      _ <- multiple(2, "x").get.map(_ ==> List())
+    } yield ()
+  }
 }

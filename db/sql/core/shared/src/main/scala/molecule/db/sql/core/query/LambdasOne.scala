@@ -47,7 +47,7 @@ trait LambdasOne extends LambdasBase { self: SqlQueryBase =>
 
 
   def typed[T](bindIndex: Int, rawValue: Any, tpe: String, correctType: Boolean): T = {
-    val no = bindIndex match {
+    val nth = bindIndex match {
       case 0 => "First"
       case 1 => "Second"
       case 2 => "Third"
@@ -73,7 +73,7 @@ trait LambdasOne extends LambdasBase { self: SqlQueryBase =>
     }
     if correctType then rawValue.asInstanceOf[T] else
       throw ModelError(
-        s"$no bind value `$rawValue` is of type ${rawValue.getClass.getSimpleName} but should be of type $tpe."
+        s"$nth bind value `$rawValue` is of type ${rawValue.getClass.getSimpleName} but should be of type $tpe."
       )
   }
   private lazy val bindID             = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setLong(paramIndex, typed[Long](bindIndex, rawValue, "Long", rawValue.isInstanceOf[Long]))
