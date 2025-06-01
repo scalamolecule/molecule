@@ -18,7 +18,7 @@ trait QueryExprOne_mysql
     bind: (PrepStmt, Int, Int, Any) => Unit
   ): Unit = {
     if binding then {
-      addBinding(col, bind, "~ '?'")
+      addBinding(col, bind, "REGEXP ?")
     } else {
       val regex = args.head.toString
       if (regex.nonEmpty)

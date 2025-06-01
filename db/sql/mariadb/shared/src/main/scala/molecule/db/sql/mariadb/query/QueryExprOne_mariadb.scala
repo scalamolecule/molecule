@@ -18,7 +18,7 @@ trait QueryExprOne_mariadb
     bind: (PrepStmt, Int, Int, Any) => Unit
   ): Unit = {
     if binding then {
-      addBinding(col, bind, "~ '?'")
+      addBinding(col, bind, "REGEXP BINARY ?")
     } else {
       val regex = args.head.toString
       if (regex.nonEmpty)

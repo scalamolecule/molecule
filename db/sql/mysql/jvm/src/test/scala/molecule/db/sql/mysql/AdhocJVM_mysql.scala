@@ -13,77 +13,48 @@ class AdhocJVM_mysql extends Test with DbProviders_mysql with TestUtils {
     import molecule.db.compliance.domains.dsl.Types.*
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
     for {
+//      id <- Entity.i(42).save.transact.map(_.id)
+//
+//      // Map attribute not yet asserted
+//      _ <- Entity.intMap.query.get.map(_ ==> Nil)
+//
+//      // When attribute is not already asserted, an update has no effect
+//      _ <- Entity(id).intMap(Map(pint1, pint2)).update.i.transact
+//      _ <- Entity.intMap.query.get.map(_ ==> Nil)
 
 
-      id <- Entity.i(42).save.transact.map(_.id)
-
-      // Map attribute not yet asserted
-      _ <- Entity.intMap.query.get.map(_ ==> Nil)
-
-      // When attribute is not already asserted, an update has no effect
-      _ <- Entity(id).intMap(Map(pint1, pint2)).update.i.transact
-      _ <- Entity.intMap.query.get.map(_ ==> Nil)
-
-    } yield ()
-  }
-
-
-  "refs" - refs { implicit conn =>
-    import molecule.db.compliance.domains.dsl.Refs.*
-    for {
-
-      //        _ <- A.i.B.?(B.iSet).insert(
-      //          (0, None),
-      //          (1, Some(Set(1, 2))),
-      //        ).transact
-      //
-      //        _ <- A.i.B.?(B.iSet).query.i.get.map(_ ==> List(
-      //          (0, None),
-      //          (1, Some(Set(1, 2))),
-      //        ))
-      //
-      _ <- A.i.B.?(B.iSeq).insert(
-        (0, None),
-        (1, Some(Seq(1, 2, 1))),
+      _ <- Entity.i.string.insert(
+        (1, "hello"),
+        (2, "friends")
       ).transact
 
-      _ <- A.i.B.?(B.iSeq).query.i.get.map(_ ==> List(
-        (0, None),
-        (1, Some(Seq(1, 2, 1))),
-      ))
+      // Regex expressions can be applied as bound parameters with SQL databases
+      matches = Entity.string.matches(?).d1.query
+      _ <- matches("^[a-g].*").get.map(_ ==> List("friends"))
+      _ <- matches("^[d-s].*").get.map(_ ==> List("hello", "friends"))
 
-      //        _ <- A.i.B.?(B.iMap).insert(
-      //          (0, None),
-      //          (1, Some(Map("a" -> 1, "b" -> 2))),
-      //        ).transact
-      //
-      //        _ <- A.i.B.?(B.iMap).query.i.get.map(_ ==> List(
-      //          (0, None),
-      //          (1, Some(Map("a" -> 1, "b" -> 2))),
-      //        ))
-
-
-      //        _ <- rawTransact(
-      //          """UPDATE B
-      //            |SET
-      //            |  iSet = JSON_REMOVE(iSet, JSON_UNQUOTE(JSON_SEARCH(iSet, 'one', '3')))
-      //            |WHERE
-      //            |  B.iSet is not null and
-      //            |  B.id IN(1, 2, 3)
-      //            |""".stripMargin)
-
-      //        _ <- rawQuery(
-      //          """SELECT iSeq,
-      //            |  (
-      //            |      SELECT JSON_ARRAYAGG(list.v)
-      //            |      FROM   JSON_TABLE('[1,2,3]', '$[*]' COLUMNS (v INT PATH '$')) as list
-      //            |    ) as x
-      //            |FROM B
-      //            |""".stripMargin, true)
-
-
+      tacitMatches = Entity.i.a1.string_.matches(?).query
+      _ <- tacitMatches("^[a-g].*").get.map(_ ==> List(2))
+      _ <- tacitMatches("^[d-s].*").get.map(_ ==> List(1, 2))
     } yield ()
   }
+
+//
+//  "refs" - refs { implicit conn =>
+//    import molecule.db.compliance.domains.dsl.Refs.*
+//    for {
+//
+//      _ <- A.i.B.?(B.iSeq).insert(
+//        (0, None),
+//        (1, Some(Seq(1, 2, 1))),
+//      ).transact
+//
+//      _ <- A.i.B.?(B.iSeq).query.i.get.map(_ ==> List(
+//        (0, None),
+//        (1, Some(Seq(1, 2, 1))),
+//      ))
+//    } yield ()
+//  }
 
 
   //    "unique" - unique { implicit conn =>
