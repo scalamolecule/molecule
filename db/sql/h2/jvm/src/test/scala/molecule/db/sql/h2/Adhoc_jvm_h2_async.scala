@@ -14,13 +14,61 @@ class Adhoc_jvm_h2_async extends Test with DbProviders_h2 with TestUtils {
 
 
     for {
-      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
-      _ <- Entity.int(3).save.transact
-      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
-      _ <- Entity(a).int(10).update.transact
-      _ <- Entity(b).delete.transact
-      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
+//      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
+//      _ <- Entity.int(3).save.transact
+//      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
+//      _ <- Entity(a).int(10).update.transact
+//      _ <- Entity(b).delete.transact
+//      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
 
+
+      _ <- Entity.int.insert(int1, int2, int3).transact
+
+
+      //      eq = Entity.int(?).query
+      //      _ <- eq(int1).get.map(_ ==> List(int1))
+      //      _ <- eq(int2).get.map(_ ==> List(int2))
+      //      _ <- eq(int3).get.map(_ ==> List(int3))
+      //
+
+
+      //      _ <- Entity.int.not(1).query.i.get.map(_ ==> List(2, 3))
+      /*
+
+========================================
+QUERY:
+AttrOneManInt("Entity", "int", Neq, Seq(1), None, None, Nil, Nil, None, None, List(0, 8))
+
+[:find  ?b
+ :where [?a :Entity/int ?b]
+        [(!= ?b 1)]]
+----------------------------------------
+       */
+
+      ne = Entity.int.not(?).query.i
+      _ <- ne(int1).get.map(_ ==> List(int2, int3))
+      //      _ <- ne(int2).get.map(_ ==> List(int1, int3))
+      //      _ <- ne(int3).get.map(_ ==> List(int1, int2))
+      //
+      //      lt = Entity.int.<(?).query
+      //      _ <- lt(int1).get.map(_ ==> List())
+      //      _ <- lt(int2).get.map(_ ==> List(int1))
+      //      _ <- lt(int3).get.map(_ ==> List(int1, int2))
+      //
+      //      le = Entity.int.<=(?).query
+      //      _ <- le(int1).get.map(_ ==> List(int1))
+      //      _ <- le(int2).get.map(_ ==> List(int1, int2))
+      //      _ <- le(int3).get.map(_ ==> List(int1, int2, int3))
+      //
+      //      gt = Entity.int.>(?).query
+      //      _ <- gt(int1).get.map(_ ==> List(int2, int3))
+      //      _ <- gt(int2).get.map(_ ==> List(int3))
+      //      _ <- gt(int3).get.map(_ ==> List())
+      //
+      //      ge = Entity.int.>=(?).query
+      //      _ <- ge(int1).get.map(_ ==> List(int1, int2, int3))
+      //      _ <- ge(int2).get.map(_ ==> List(int2, int3))
+      //      _ <- ge(int3).get.map(_ ==> List(int3))
 
     } yield ()
   }

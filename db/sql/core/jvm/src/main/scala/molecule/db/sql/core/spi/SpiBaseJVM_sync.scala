@@ -421,7 +421,7 @@ trait SpiBaseJVM_sync
     val query         = m2q.getSqlQuery(Nil, None, None, Some(conn.proxy))
     val ps            = conn.queryStmt(query)
     val ps1           = new PrepStmtImpl(ps)
-    val inputs        = m2q.inputs.toList
+    val inputs        = m2q.binders.toList
     inputs.foreach(_(ps1)) // set input values corresponding to '?' in queries
     (conn.resultSet(ps.executeQuery()), castStrategy.rs2row)
   }

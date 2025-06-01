@@ -32,6 +32,7 @@ trait Spi_datomic_sync
   override def query_get[Tpl](q: Query[Tpl])(implicit conn: Conn): List[Tpl] = {
     if (q.doInspect) query_inspect(q)
     val m2q = new Model2DatomicQuery[Tpl](q.dataModel)
+    m2q.bindValues.addAll(q.bindValues)
     DatomicQueryResolveOffset[Tpl](
       q.dataModel, q.optLimit, None, q.dbView, m2q
     ).getListFromOffset_sync(conn.asInstanceOf[DatomicConn_JVM])._1
@@ -46,6 +47,7 @@ trait Spi_datomic_sync
   )(implicit conn: Conn): (List[Tpl], Int, Boolean) = {
     if (q.doInspect) queryOffset_inspect(q)
     val m2q = new Model2DatomicQuery[Tpl](q.dataModel)
+    m2q.bindValues.addAll(q.bindValues)
     DatomicQueryResolveOffset[Tpl](
       q.dataModel, q.optLimit, Some(q.offset), q.dbView, m2q
     ).getListFromOffset_sync(conn.asInstanceOf[DatomicConn_JVM])
@@ -62,6 +64,7 @@ trait Spi_datomic_sync
   )(implicit conn: Conn): (List[Tpl], String, Boolean) = {
     if (q.doInspect) queryCursor_inspect(q)
     val m2q = new Model2DatomicQuery[Tpl](q.dataModel)
+    m2q.bindValues.addAll(q.bindValues)
     DatomicQueryResolveCursor[Tpl](
       q.dataModel, q.optLimit, Some(q.cursor), q.dbView, m2q
     ).getListFromCursor_sync(conn.asInstanceOf[DatomicConn_JVM])
@@ -98,23 +101,12 @@ trait Spi_datomic_sync
   override def query_subscribe[Tpl](
     q: Query[Tpl], callback: List[Tpl] => Unit
   )(implicit conn0: Conn): Unit = {
-    //        val datomicConn = conn0.asInstanceOf[DatomicConn_JVM]
-    //        val m2q         = new Model2DatomicQuery[Tpl](q.dataModel)
-    //        DatomicQueryResolveOffset[Tpl](
-    //          q.dataModel, q.optLimit, None, q.dbView, m2q
-    //        ).subscribe(datomicConn, callback)
-
     val conn = conn0.asInstanceOf[DatomicConn_JVM]
-    //    val elements  = keywordsSuffixed(q.dataModel.elements, conn.proxy)
-    //    val dataModel = q.dataModel.copy(elements = elements)
     conn.addCallback(q.dataModel, () =>
       callback {
     val m2q  = new Model2DatomicQuery[Tpl](q.dataModel)
         val a = DatomicQueryResolveOffset(q.dataModel, q.optLimit, None, None, m2q)
         a.getListFromOffset_sync(conn)._1
-
-        //        DatomicQueryResolveOffset(q.dataModel, q.optLimit, None, None, m2q)
-        //          .getListFromOffset_sync(conn)._1
       }
     )
   }

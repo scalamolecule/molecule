@@ -21,32 +21,32 @@ case class Bind_LocalTime_(
     for {
       _ <- Entity.localTime.insert(localTime1, localTime2, localTime3).transact
 
-      eq = Entity.localTime(?).query
+      eq = Entity.localTime(?).a1.query
       _ <- eq(localTime1).get.map(_ ==> List(localTime1))
       _ <- eq(localTime2).get.map(_ ==> List(localTime2))
       _ <- eq(localTime3).get.map(_ ==> List(localTime3))
 
-      ne = Entity.localTime.not(?).query
+      ne = Entity.localTime.not(?).a1.query
       _ <- ne(localTime1).get.map(_ ==> List(localTime2, localTime3))
       _ <- ne(localTime2).get.map(_ ==> List(localTime1, localTime3))
       _ <- ne(localTime3).get.map(_ ==> List(localTime1, localTime2))
 
-      lt = Entity.localTime.<(?).query
+      lt = Entity.localTime.<(?).a1.query
       _ <- lt(localTime1).get.map(_ ==> List())
       _ <- lt(localTime2).get.map(_ ==> List(localTime1))
       _ <- lt(localTime3).get.map(_ ==> List(localTime1, localTime2))
 
-      le = Entity.localTime.<=(?).query
+      le = Entity.localTime.<=(?).a1.query
       _ <- le(localTime1).get.map(_ ==> List(localTime1))
       _ <- le(localTime2).get.map(_ ==> List(localTime1, localTime2))
       _ <- le(localTime3).get.map(_ ==> List(localTime1, localTime2, localTime3))
 
-      gt = Entity.localTime.>(?).query
+      gt = Entity.localTime.>(?).a1.query
       _ <- gt(localTime1).get.map(_ ==> List(localTime2, localTime3))
       _ <- gt(localTime2).get.map(_ ==> List(localTime3))
       _ <- gt(localTime3).get.map(_ ==> List())
 
-      ge = Entity.localTime.>=(?).query
+      ge = Entity.localTime.>=(?).a1.query
       _ <- ge(localTime1).get.map(_ ==> List(localTime1, localTime2, localTime3))
       _ <- ge(localTime2).get.map(_ ==> List(localTime2, localTime3))
       _ <- ge(localTime3).get.map(_ ==> List(localTime3))
@@ -58,32 +58,32 @@ case class Bind_LocalTime_(
     for {
       _ <- Entity.i.localTime.insert((1, localTime1), (2, localTime2), (3, localTime3)).transact
 
-      eq = Entity.i.localTime_(?).query
+      eq = Entity.i.a1.localTime_(?).query
       _ <- eq(localTime1).get.map(_ ==> List(1))
       _ <- eq(localTime2).get.map(_ ==> List(2))
       _ <- eq(localTime3).get.map(_ ==> List(3))
 
-      ne = Entity.i.localTime_.not(?).query
+      ne = Entity.i.a1.localTime_.not(?).query
       _ <- ne(localTime1).get.map(_ ==> List(2, 3))
       _ <- ne(localTime2).get.map(_ ==> List(1, 3))
       _ <- ne(localTime3).get.map(_ ==> List(1, 2))
 
-      lt = Entity.i.localTime_.<(?).query
+      lt = Entity.i.a1.localTime_.<(?).query
       _ <- lt(localTime1).get.map(_ ==> List())
       _ <- lt(localTime2).get.map(_ ==> List(1))
       _ <- lt(localTime3).get.map(_ ==> List(1, 2))
 
-      le = Entity.i.localTime_.<=(?).query
+      le = Entity.i.a1.localTime_.<=(?).query
       _ <- le(localTime1).get.map(_ ==> List(1))
       _ <- le(localTime2).get.map(_ ==> List(1, 2))
       _ <- le(localTime3).get.map(_ ==> List(1, 2, 3))
 
-      gt = Entity.i.localTime_.>(?).query
+      gt = Entity.i.a1.localTime_.>(?).query
       _ <- gt(localTime1).get.map(_ ==> List(2, 3))
       _ <- gt(localTime2).get.map(_ ==> List(3))
       _ <- gt(localTime3).get.map(_ ==> List())
 
-      ge = Entity.i.localTime_.>=(?).query
+      ge = Entity.i.a1.localTime_.>=(?).query
       _ <- ge(localTime1).get.map(_ ==> List(1, 2, 3))
       _ <- ge(localTime2).get.map(_ ==> List(2, 3))
       _ <- ge(localTime3).get.map(_ ==> List(3))

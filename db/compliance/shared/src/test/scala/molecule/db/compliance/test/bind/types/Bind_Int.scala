@@ -19,32 +19,32 @@ case class Bind_Int(
     for {
       _ <- Entity.int.insert(int1, int2, int3).transact
 
-      eq = Entity.int(?).query
+      eq = Entity.int(?).a1.query
       _ <- eq(int1).get.map(_ ==> List(int1))
       _ <- eq(int2).get.map(_ ==> List(int2))
       _ <- eq(int3).get.map(_ ==> List(int3))
 
-      ne = Entity.int.not(?).query
+      ne = Entity.int.not(?).a1.query
       _ <- ne(int1).get.map(_ ==> List(int2, int3))
       _ <- ne(int2).get.map(_ ==> List(int1, int3))
       _ <- ne(int3).get.map(_ ==> List(int1, int2))
 
-      lt = Entity.int.<(?).query
+      lt = Entity.int.<(?).a1.query
       _ <- lt(int1).get.map(_ ==> List())
       _ <- lt(int2).get.map(_ ==> List(int1))
       _ <- lt(int3).get.map(_ ==> List(int1, int2))
 
-      le = Entity.int.<=(?).query
+      le = Entity.int.<=(?).a1.query
       _ <- le(int1).get.map(_ ==> List(int1))
       _ <- le(int2).get.map(_ ==> List(int1, int2))
       _ <- le(int3).get.map(_ ==> List(int1, int2, int3))
 
-      gt = Entity.int.>(?).query
+      gt = Entity.int.>(?).a1.query
       _ <- gt(int1).get.map(_ ==> List(int2, int3))
       _ <- gt(int2).get.map(_ ==> List(int3))
       _ <- gt(int3).get.map(_ ==> List())
 
-      ge = Entity.int.>=(?).query
+      ge = Entity.int.>=(?).a1.query
       _ <- ge(int1).get.map(_ ==> List(int1, int2, int3))
       _ <- ge(int2).get.map(_ ==> List(int2, int3))
       _ <- ge(int3).get.map(_ ==> List(int3))
@@ -56,32 +56,32 @@ case class Bind_Int(
     for {
       _ <- Entity.i.int.insert((1, int1), (2, int2), (3, int3)).transact
 
-      eq = Entity.i.int_(?).query
+      eq = Entity.i.a1.int_(?).query
       _ <- eq(int1).get.map(_ ==> List(1))
       _ <- eq(int2).get.map(_ ==> List(2))
       _ <- eq(int3).get.map(_ ==> List(3))
 
-      ne = Entity.i.int_.not(?).query
+      ne = Entity.i.a1.int_.not(?).query
       _ <- ne(int1).get.map(_ ==> List(2, 3))
       _ <- ne(int2).get.map(_ ==> List(1, 3))
       _ <- ne(int3).get.map(_ ==> List(1, 2))
 
-      lt = Entity.i.int_.<(?).query
+      lt = Entity.i.a1.int_.<(?).query
       _ <- lt(int1).get.map(_ ==> List())
       _ <- lt(int2).get.map(_ ==> List(1))
       _ <- lt(int3).get.map(_ ==> List(1, 2))
 
-      le = Entity.i.int_.<=(?).query
+      le = Entity.i.a1.int_.<=(?).query
       _ <- le(int1).get.map(_ ==> List(1))
       _ <- le(int2).get.map(_ ==> List(1, 2))
       _ <- le(int3).get.map(_ ==> List(1, 2, 3))
 
-      gt = Entity.i.int_.>(?).query
+      gt = Entity.i.a1.int_.>(?).query
       _ <- gt(int1).get.map(_ ==> List(2, 3))
       _ <- gt(int2).get.map(_ ==> List(3))
       _ <- gt(int3).get.map(_ ==> List())
 
-      ge = Entity.i.int_.>=(?).query
+      ge = Entity.i.a1.int_.>=(?).query
       _ <- ge(int1).get.map(_ ==> List(1, 2, 3))
       _ <- ge(int2).get.map(_ ==> List(2, 3))
       _ <- ge(int3).get.map(_ ==> List(3))

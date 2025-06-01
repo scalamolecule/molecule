@@ -56,9 +56,13 @@ trait DatomicQueryBase
   final val preArgs = new ArrayBuffer[AnyRef]
   final val args    = new ArrayBuffer[AnyRef]
 
+  final var bindIndex  = -1
+  final val bindValues = new ListBuffer[Any]
+
   // Sorting
   final var sortss    = List(List.empty[(Int, Int => (Row, Row) => Int)])
   final var attrIndex = -1
+
 
   final protected def addSort(sorter: Option[(Int, Int => (Row, Row) => Int)]): Unit = {
     sorter.foreach(s => sortss = sortss.init :+ (sortss.last :+ s))
@@ -129,5 +133,12 @@ trait DatomicQueryBase
   final protected def replaceCast(cast: AnyRef => AnyRef): Unit = {
     removeLastCast()
     addCast(cast)
+  }
+
+  def addBinding(bind: (Int, Any) => AnyRef): Unit = {
+    if (bindValues.nonEmpty) {
+      bindIndex = bindIndex + 1
+      args += bind(bindIndex, bindValues(bindIndex))
+    }
   }
 }

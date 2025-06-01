@@ -329,9 +329,9 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
   ): Unit = {
     if binding then {
       where += ((col, "LIKE ?"))
-      val paramIndex = inputs.length + 1
+      val paramIndex = binders.length + 1
       bindIndex = bindIndex + 1
-      inputs += ((ps: PrepStmt) => bind(ps, paramIndex, bindIndex, s"${bindValues(bindIndex)}%"))
+      binders += ((ps: PrepStmt) => bind(ps, paramIndex, bindIndex, s"${bindValues(bindIndex)}%"))
 
     } else {
       where += ((col, s"LIKE '${args.head}%'"))
@@ -346,9 +346,9 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
   ): Unit = {
     if binding then {
       where += ((col, "LIKE ?"))
-      val paramIndex = inputs.length + 1
+      val paramIndex = binders.length + 1
       bindIndex = bindIndex + 1
-      inputs += ((ps: PrepStmt) => bind(ps, paramIndex, bindIndex, s"%${bindValues(bindIndex)}"))
+      binders += ((ps: PrepStmt) => bind(ps, paramIndex, bindIndex, s"%${bindValues(bindIndex)}"))
     } else {
       where += ((col, s"LIKE '%${args.head}'"))
     }
@@ -362,9 +362,9 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
   ): Unit = {
     if binding then {
       where += ((col, "LIKE ?"))
-      val paramIndex = inputs.length + 1
+      val paramIndex = binders.length + 1
       bindIndex = bindIndex + 1
-      inputs += ((ps: PrepStmt) => bind(ps, paramIndex, bindIndex, s"%${bindValues(bindIndex)}%"))
+      binders += ((ps: PrepStmt) => bind(ps, paramIndex, bindIndex, s"%${bindValues(bindIndex)}%"))
     } else {
       where += ((col, s"LIKE '%${args.head}%'"))
     }

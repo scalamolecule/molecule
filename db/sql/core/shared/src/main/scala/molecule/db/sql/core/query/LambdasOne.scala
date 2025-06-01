@@ -5,7 +5,6 @@ import java.time.*
 import java.util.{Date, UUID}
 import molecule.db.base.error.ModelError
 import molecule.db.sql.core.javaSql.PrepStmt
-import scala.util.control.NonFatal
 
 trait LambdasOne extends LambdasBase { self: SqlQueryBase =>
 
@@ -44,37 +43,10 @@ trait LambdasOne extends LambdasBase { self: SqlQueryBase =>
   protected lazy val sql2oneShort         : (RS, Int) => Short          = (row: RS, paramIndex: Int) => row.getShort(paramIndex)
   protected lazy val sql2oneChar          : (RS, Int) => Char           = (row: RS, paramIndex: Int) => row.getString(paramIndex).charAt(0)
 
-
-
   def typed[T](bindIndex: Int, rawValue: Any, tpe: String, correctType: Boolean): T = {
-    val nth = bindIndex match {
-      case 0 => "First"
-      case 1 => "Second"
-      case 2 => "Third"
-      case 3 => "Fourth"
-      case 4 => "Fifth"
-      case 5 => "Sixth"
-      case 6 => "Seventh"
-      case 7 => "Eighth"
-      case 8 => "Ninth"
-      case 9 => "Tenth"
-      case 10 => "Eleventh"
-      case 11 => "Twelfth"
-      case 12 => "Thirteenth"
-      case 13 => "Fourteenth"
-      case 14 => "Fifteenth"
-      case 15 => "Sixteenth"
-      case 16 => "Seventeenth"
-      case 17 => "Eighteenth"
-      case 18 => "Nineteenth"
-      case 19 => "Twentieth"
-      case 20 => "Twenty-first"
-      case 21 => "Twenty-second"
-    }
-    if correctType then rawValue.asInstanceOf[T] else
-      throw ModelError(
-        s"$nth bind value `$rawValue` is of type ${rawValue.getClass.getSimpleName} but should be of type $tpe."
-      )
+    if correctType then rawValue.asInstanceOf[T] else throw ModelError(
+      s"${getNth(bindIndex)} bind value `$rawValue` is of type ${rawValue.getClass.getSimpleName} but should be of type $tpe."
+    )
   }
   private lazy val bindID             = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setLong(paramIndex, typed[Long](bindIndex, rawValue, "Long", rawValue.isInstanceOf[Long]))
   private lazy val bindString         = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[String](bindIndex, rawValue, "String", rawValue.isInstanceOf[String]))

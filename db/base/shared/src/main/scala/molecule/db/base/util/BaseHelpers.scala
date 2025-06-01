@@ -138,4 +138,31 @@ trait BaseHelpers extends DateHandling {
     }
     println(lines.mkString("\n"))
   }
+
+  def getNth(n: Int) = {
+    n match {
+      case 0  => "First"
+      case 1  => "Second"
+      case 2  => "Third"
+      case 3  => "Fourth"
+      case 4  => "Fifth"
+      case 5  => "Sixth"
+      case 6  => "Seventh"
+      case 7  => "Eighth"
+      case 8  => "Ninth"
+      case 9  => "Tenth"
+      case 10 => "Eleventh"
+      case 11 => "Twelfth"
+      case 12 => "Thirteenth"
+      case 13 => "Fourteenth"
+      case 14 => "Fifteenth"
+      case 15 => "Sixteenth"
+      case 16 => "Seventeenth"
+      case 17 => "Eighteenth"
+      case 18 => "Nineteenth"
+      case 19 => "Twentieth"
+      case 20 => "Twenty-first"
+      case 21 => "Twenty-second"
+    }
+  }
 }

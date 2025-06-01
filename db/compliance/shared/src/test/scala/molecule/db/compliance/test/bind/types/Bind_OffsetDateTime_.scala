@@ -21,32 +21,32 @@ case class Bind_OffsetDateTime_(
     for {
       _ <- Entity.offsetDateTime.insert(offsetDateTime1, offsetDateTime2, offsetDateTime3).transact
 
-      eq = Entity.offsetDateTime(?).query
+      eq = Entity.offsetDateTime(?).a1.query
       _ <- eq(offsetDateTime1).get.map(_ ==> List(offsetDateTime1))
       _ <- eq(offsetDateTime2).get.map(_ ==> List(offsetDateTime2))
       _ <- eq(offsetDateTime3).get.map(_ ==> List(offsetDateTime3))
 
-      ne = Entity.offsetDateTime.not(?).query
+      ne = Entity.offsetDateTime.not(?).a1.query
       _ <- ne(offsetDateTime1).get.map(_ ==> List(offsetDateTime2, offsetDateTime3))
       _ <- ne(offsetDateTime2).get.map(_ ==> List(offsetDateTime1, offsetDateTime3))
       _ <- ne(offsetDateTime3).get.map(_ ==> List(offsetDateTime1, offsetDateTime2))
 
-      lt = Entity.offsetDateTime.<(?).query
+      lt = Entity.offsetDateTime.<(?).a1.query
       _ <- lt(offsetDateTime1).get.map(_ ==> List())
       _ <- lt(offsetDateTime2).get.map(_ ==> List(offsetDateTime1))
       _ <- lt(offsetDateTime3).get.map(_ ==> List(offsetDateTime1, offsetDateTime2))
 
-      le = Entity.offsetDateTime.<=(?).query
+      le = Entity.offsetDateTime.<=(?).a1.query
       _ <- le(offsetDateTime1).get.map(_ ==> List(offsetDateTime1))
       _ <- le(offsetDateTime2).get.map(_ ==> List(offsetDateTime1, offsetDateTime2))
       _ <- le(offsetDateTime3).get.map(_ ==> List(offsetDateTime1, offsetDateTime2, offsetDateTime3))
 
-      gt = Entity.offsetDateTime.>(?).query
+      gt = Entity.offsetDateTime.>(?).a1.query
       _ <- gt(offsetDateTime1).get.map(_ ==> List(offsetDateTime2, offsetDateTime3))
       _ <- gt(offsetDateTime2).get.map(_ ==> List(offsetDateTime3))
       _ <- gt(offsetDateTime3).get.map(_ ==> List())
 
-      ge = Entity.offsetDateTime.>=(?).query
+      ge = Entity.offsetDateTime.>=(?).a1.query
       _ <- ge(offsetDateTime1).get.map(_ ==> List(offsetDateTime1, offsetDateTime2, offsetDateTime3))
       _ <- ge(offsetDateTime2).get.map(_ ==> List(offsetDateTime2, offsetDateTime3))
       _ <- ge(offsetDateTime3).get.map(_ ==> List(offsetDateTime3))
@@ -58,32 +58,32 @@ case class Bind_OffsetDateTime_(
     for {
       _ <- Entity.i.offsetDateTime.insert((1, offsetDateTime1), (2, offsetDateTime2), (3, offsetDateTime3)).transact
 
-      eq = Entity.i.offsetDateTime_(?).query
+      eq = Entity.i.a1.offsetDateTime_(?).query
       _ <- eq(offsetDateTime1).get.map(_ ==> List(1))
       _ <- eq(offsetDateTime2).get.map(_ ==> List(2))
       _ <- eq(offsetDateTime3).get.map(_ ==> List(3))
 
-      ne = Entity.i.offsetDateTime_.not(?).query
+      ne = Entity.i.a1.offsetDateTime_.not(?).query
       _ <- ne(offsetDateTime1).get.map(_ ==> List(2, 3))
       _ <- ne(offsetDateTime2).get.map(_ ==> List(1, 3))
       _ <- ne(offsetDateTime3).get.map(_ ==> List(1, 2))
 
-      lt = Entity.i.offsetDateTime_.<(?).query
+      lt = Entity.i.a1.offsetDateTime_.<(?).query
       _ <- lt(offsetDateTime1).get.map(_ ==> List())
       _ <- lt(offsetDateTime2).get.map(_ ==> List(1))
       _ <- lt(offsetDateTime3).get.map(_ ==> List(1, 2))
 
-      le = Entity.i.offsetDateTime_.<=(?).query
+      le = Entity.i.a1.offsetDateTime_.<=(?).query
       _ <- le(offsetDateTime1).get.map(_ ==> List(1))
       _ <- le(offsetDateTime2).get.map(_ ==> List(1, 2))
       _ <- le(offsetDateTime3).get.map(_ ==> List(1, 2, 3))
 
-      gt = Entity.i.offsetDateTime_.>(?).query
+      gt = Entity.i.a1.offsetDateTime_.>(?).query
       _ <- gt(offsetDateTime1).get.map(_ ==> List(2, 3))
       _ <- gt(offsetDateTime2).get.map(_ ==> List(3))
       _ <- gt(offsetDateTime3).get.map(_ ==> List())
 
-      ge = Entity.i.offsetDateTime_.>=(?).query
+      ge = Entity.i.a1.offsetDateTime_.>=(?).query
       _ <- ge(offsetDateTime1).get.map(_ ==> List(1, 2, 3))
       _ <- ge(offsetDateTime2).get.map(_ ==> List(2, 3))
       _ <- ge(offsetDateTime3).get.map(_ ==> List(3))

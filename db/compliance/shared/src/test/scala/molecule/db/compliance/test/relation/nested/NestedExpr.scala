@@ -42,7 +42,7 @@ case class NestedExpr(
         // Expression before optional nested ok
         _ <- A.i(1).Bb.*?(B.i).query.get.map(_ ==> List((1, List(1, 2, 3))))
 
-        // Expressions inside optional nested not allowed
+        // Expressions inside optional nested are not allowed
 
         _ <- A.i_.Bb.*?(B.i(1)).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
@@ -71,7 +71,7 @@ case class NestedExpr(
       } yield ()
 
     } else {
-      // In SQL, expressions in optional nested queries is ok
+      // In SQL, expressions in optional nested queries are ok
       for {
         _ <- A.i.Bb.*(B.i).insert(List((1, List(1, 2, 3)))).transact
 

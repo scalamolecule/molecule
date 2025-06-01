@@ -18,7 +18,7 @@ abstract class SqlQueryResolve[Tpl](
 
   type RS = ResultSetInterface
 
-  private lazy val inputs: List[PrepStmt => Unit] = m2q.inputs.toList
+  private lazy val inputs: List[PrepStmt => Unit] = m2q.binders.toList
 
 
   protected def getData(

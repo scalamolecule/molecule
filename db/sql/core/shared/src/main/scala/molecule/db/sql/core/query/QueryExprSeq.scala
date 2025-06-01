@@ -263,8 +263,8 @@ trait QueryExprSeq extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
       case Eq =>
         if (byteArray.length != 0) {
           where += ((col, s"= ?"))
-          val paramIndex = inputs.size + 1
-          inputs += ((ps: PrepStmt) => ps.setBytes(paramIndex, byteArray))
+          val paramIndex = binders.size + 1
+          binders += ((ps: PrepStmt) => ps.setBytes(paramIndex, byteArray))
 
         } else {
           // Get none
@@ -278,8 +278,8 @@ trait QueryExprSeq extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
       case Neq =>
         if (byteArray.length != 0) {
           where += ((col, s"!= ?"))
-          val paramIndex = inputs.size + 1
-          inputs += ((ps: PrepStmt) => ps.setBytes(paramIndex, byteArray))
+          val paramIndex = binders.size + 1
+          binders += ((ps: PrepStmt) => ps.setBytes(paramIndex, byteArray))
 
         } else {
           // get all

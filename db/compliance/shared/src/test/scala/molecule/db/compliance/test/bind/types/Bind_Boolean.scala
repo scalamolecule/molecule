@@ -31,7 +31,7 @@ case class Bind_Boolean(
       _ <- lt(true).get.map(_ ==> List(false))
       _ <- lt(false).get.map(_ ==> List())
 
-      le = Entity.boolean.<=(?).query
+      le = Entity.boolean.<=(?).a1.query
       _ <- le(true).get.map(_ ==> List(false, true))
       _ <- le(false).get.map(_ ==> List(false))
 
@@ -39,7 +39,7 @@ case class Bind_Boolean(
       _ <- gt(true).get.map(_ ==> List())
       _ <- gt(false).get.map(_ ==> List(true))
 
-      ge = Entity.boolean.>=(?).query
+      ge = Entity.boolean.>=(?).a1.query
       _ <- ge(true).get.map(_ ==> List(true))
       _ <- ge(false).get.map(_ ==> List(false, true))
     } yield ()
@@ -62,7 +62,7 @@ case class Bind_Boolean(
       _ <- lt(true).get.map(_ ==> List(0))
       _ <- lt(false).get.map(_ ==> List())
 
-      le = Entity.i.boolean_.<=(?).query
+      le = Entity.i.a1.boolean_.<=(?).query
       _ <- le(true).get.map(_ ==> List(0, 1))
       _ <- le(false).get.map(_ ==> List(0))
 
@@ -70,7 +70,7 @@ case class Bind_Boolean(
       _ <- gt(true).get.map(_ ==> List())
       _ <- gt(false).get.map(_ ==> List(1))
 
-      ge = Entity.i.boolean_.>=(?).query
+      ge = Entity.i.a1.boolean_.>=(?).query
       _ <- ge(true).get.map(_ ==> List(1))
       _ <- ge(false).get.map(_ ==> List(0, 1))
     } yield ()

@@ -11,59 +11,15 @@ class AdhocJVM_datomic_async extends Test with DbProviders_datomic with TestUtil
 
   //  DatomicPeer.recreateDb(TypesSchema_datomic)
 
-  //  "types" - types { implicit conn =>
-  //    import molecule.db.compliance.domains.dsl.Types._
-  //    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
-  //    for {
-  //
-  //      _ <- Entity.int(3).save.transact
-  //      _ <- Entity.int.query.get.map(_ ==> List(3))
-  //
-  //      //        _ = Peer.q(
-  //      //          """[:find  ?tx ?e ?v ?op
-  //      //            | :where [?e :Entity/int ?v ?tx ?op]]
-  //      //            |""".stripMargin, conn.db.asInstanceOf[Database].history()
-  //      //        ).forEach(r => println(r))
-  //    } yield ()
-  //  }
+    "types" - types { implicit conn =>
+      import molecule.db.compliance.domains.dsl.Types._
+      implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+      for {
+        _ <- Entity.int(3).save.transact
+        _ <- Entity.int.query.get.map(_ ==> List(3))
 
-  "Mutations call back" - types { implicit conn =>
-    var intermediaryResults = List.empty[List[Int]]
-    for {
-
-      _ <- Entity.int.insert(int1, int2, int3).transact
-
-      eq = Entity.int(?).query
-      _ <- eq(int1).get.map(_ ==> List(int1))
-      _ <- eq(int2).get.map(_ ==> List(int2))
-      _ <- eq(int3).get.map(_ ==> List(int3))
-
-      ne = Entity.int.not(?).query
-      _ <- ne(int1).get.map(_ ==> List(int2, int3))
-      _ <- ne(int2).get.map(_ ==> List(int1, int3))
-      _ <- ne(int3).get.map(_ ==> List(int1, int2))
-
-      lt = Entity.int.<(?).query
-      _ <- lt(int1).get.map(_ ==> List())
-      _ <- lt(int2).get.map(_ ==> List(int1))
-      _ <- lt(int3).get.map(_ ==> List(int1, int2))
-
-      le = Entity.int.<=(?).query
-      _ <- le(int1).get.map(_ ==> List(int1))
-      _ <- le(int2).get.map(_ ==> List(int1, int2))
-      _ <- le(int3).get.map(_ ==> List(int1, int2, int3))
-
-      gt = Entity.int.>(?).query
-      _ <- gt(int1).get.map(_ ==> List(int2, int3))
-      _ <- gt(int2).get.map(_ ==> List(int3))
-      _ <- gt(int3).get.map(_ ==> List())
-
-      ge = Entity.int.>=(?).query
-      _ <- ge(int1).get.map(_ ==> List(int1, int2, int3))
-      _ <- ge(int2).get.map(_ ==> List(int2, int3))
-      _ <- ge(int3).get.map(_ ==> List(int3))
-    } yield ()
-  }
+      } yield ()
+    }
 
 
   //    "unique" - unique { implicit conn =>

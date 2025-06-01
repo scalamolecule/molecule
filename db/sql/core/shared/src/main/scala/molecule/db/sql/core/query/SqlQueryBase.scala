@@ -32,9 +32,10 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions {
   final protected var aggregate   = false
   final protected val groupByCols = new mutable.LinkedHashSet[String]
   final protected var hardLimit   = 0
-  final           val inputs      = new ListBuffer[PrepStmt => Unit]
-  final           var bindIndex   = -1
-  final           val bindValues  = new ListBuffer[Any]
+
+  final val binders    = new ListBuffer[PrepStmt => Unit]
+  final var bindIndex  = -1
+  final val bindValues = new ListBuffer[Any]
 
   final var castStrategy: CastStrategy = CastTuple()
 
@@ -47,9 +48,7 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions {
   final protected val preExts  = mutable.Map.empty[List[String], Option[String]]
   final protected val exts     = mutable.Map.empty[List[String], Option[String]]
 
-  //  override final var path = List.empty[String]
   final var path = List.empty[String]
-
 
   // Query variables
   final protected var filterAttrVars = Map.empty[List[String], String]
@@ -140,9 +139,9 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions {
     expr: String,
   ): Unit = {
     where += ((col, expr))
-    val paramIndex = inputs.length + 1
+    val paramIndex = binders.length + 1
     bindIndex = bindIndex + 1
     val bindIndexStable = bindIndex
-    inputs += ((ps: PrepStmt) => bind(ps, paramIndex, bindIndexStable, bindValues(bindIndexStable)))
+    binders += ((ps: PrepStmt) => bind(ps, paramIndex, bindIndexStable, bindValues(bindIndexStable)))
   }
 }

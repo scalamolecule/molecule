@@ -21,32 +21,32 @@ case class Bind_Duration_(
     for {
       _ <- Entity.duration.insert(duration1, duration2, duration3).transact
 
-      eq = Entity.duration(?).query
+      eq = Entity.duration(?).a1.query
       _ <- eq(duration1).get.map(_ ==> List(duration1))
       _ <- eq(duration2).get.map(_ ==> List(duration2))
       _ <- eq(duration3).get.map(_ ==> List(duration3))
 
-      ne = Entity.duration.not(?).query
+      ne = Entity.duration.not(?).a1.query
       _ <- ne(duration1).get.map(_ ==> List(duration2, duration3))
       _ <- ne(duration2).get.map(_ ==> List(duration1, duration3))
       _ <- ne(duration3).get.map(_ ==> List(duration1, duration2))
 
-      lt = Entity.duration.<(?).query
+      lt = Entity.duration.<(?).a1.query
       _ <- lt(duration1).get.map(_ ==> List())
       _ <- lt(duration2).get.map(_ ==> List(duration1))
       _ <- lt(duration3).get.map(_ ==> List(duration1, duration2))
 
-      le = Entity.duration.<=(?).query
+      le = Entity.duration.<=(?).a1.query
       _ <- le(duration1).get.map(_ ==> List(duration1))
       _ <- le(duration2).get.map(_ ==> List(duration1, duration2))
       _ <- le(duration3).get.map(_ ==> List(duration1, duration2, duration3))
 
-      gt = Entity.duration.>(?).query
+      gt = Entity.duration.>(?).a1.query
       _ <- gt(duration1).get.map(_ ==> List(duration2, duration3))
       _ <- gt(duration2).get.map(_ ==> List(duration3))
       _ <- gt(duration3).get.map(_ ==> List())
 
-      ge = Entity.duration.>=(?).query
+      ge = Entity.duration.>=(?).a1.query
       _ <- ge(duration1).get.map(_ ==> List(duration1, duration2, duration3))
       _ <- ge(duration2).get.map(_ ==> List(duration2, duration3))
       _ <- ge(duration3).get.map(_ ==> List(duration3))
@@ -58,32 +58,32 @@ case class Bind_Duration_(
     for {
       _ <- Entity.i.duration.insert((1, duration1), (2, duration2), (3, duration3)).transact
 
-      eq = Entity.i.duration_(?).query
+      eq = Entity.i.a1.duration_(?).query
       _ <- eq(duration1).get.map(_ ==> List(1))
       _ <- eq(duration2).get.map(_ ==> List(2))
       _ <- eq(duration3).get.map(_ ==> List(3))
 
-      ne = Entity.i.duration_.not(?).query
+      ne = Entity.i.a1.duration_.not(?).query
       _ <- ne(duration1).get.map(_ ==> List(2, 3))
       _ <- ne(duration2).get.map(_ ==> List(1, 3))
       _ <- ne(duration3).get.map(_ ==> List(1, 2))
 
-      lt = Entity.i.duration_.<(?).query
+      lt = Entity.i.a1.duration_.<(?).query
       _ <- lt(duration1).get.map(_ ==> List())
       _ <- lt(duration2).get.map(_ ==> List(1))
       _ <- lt(duration3).get.map(_ ==> List(1, 2))
 
-      le = Entity.i.duration_.<=(?).query
+      le = Entity.i.a1.duration_.<=(?).query
       _ <- le(duration1).get.map(_ ==> List(1))
       _ <- le(duration2).get.map(_ ==> List(1, 2))
       _ <- le(duration3).get.map(_ ==> List(1, 2, 3))
 
-      gt = Entity.i.duration_.>(?).query
+      gt = Entity.i.a1.duration_.>(?).query
       _ <- gt(duration1).get.map(_ ==> List(2, 3))
       _ <- gt(duration2).get.map(_ ==> List(3))
       _ <- gt(duration3).get.map(_ ==> List())
 
-      ge = Entity.i.duration_.>=(?).query
+      ge = Entity.i.a1.duration_.>=(?).query
       _ <- ge(duration1).get.map(_ ==> List(1, 2, 3))
       _ <- ge(duration2).get.map(_ ==> List(2, 3))
       _ <- ge(duration3).get.map(_ ==> List(3))

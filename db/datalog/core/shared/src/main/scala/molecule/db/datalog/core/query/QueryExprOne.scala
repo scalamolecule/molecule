@@ -123,7 +123,7 @@ trait QueryExprOne[Tpl]
     val v = getVar(attr)
     find += v
     attr.filterAttr.fold {
-      expr(attr, e, a, v, attr.op, args, resOne)
+      expr(attr, e, a, v, attr.op, args, attr.binding, resOne)
       filterAttrVars1 = filterAttrVars1 + (a -> (e -> v))
       filterAttrVars2.get(a).foreach(_(e, v))
     } { case (_, filterPath, filterAttr) =>
@@ -141,7 +141,7 @@ trait QueryExprOne[Tpl]
   ): Unit = {
     val v = getVar(attr, cache = attr.op == V)
     attr.filterAttr.fold {
-      expr(attr, e, a, v, attr.op, args, resOne)
+      expr(attr, e, a, v, attr.op, args, attr.binding, resOne)
       filterAttrVars1 = filterAttrVars1 + (a -> (e -> v))
       filterAttrVars2.get(a).foreach(_(e, v))
     } { case (_, filterPath, filterAttr) =>
@@ -157,22 +157,23 @@ trait QueryExprOne[Tpl]
     v: Var,
     op: Op,
     args: Seq[T],
+    binding: Boolean,
     resOne: ResOne[T]
   ): Unit = {
     op match {
       case V            => attrV(e, a, v)
-      case Eq           => equal(e, a, v, args, resOne.s2j)
-      case Neq          => neq(e, a, v, args, resOne.tpe, resOne.toDatalog)
-      case Lt           => compare(e, a, v, args.head, "<", resOne.s2j)
-      case Gt           => compare(e, a, v, args.head, ">", resOne.s2j)
-      case Le           => compare(e, a, v, args.head, "<=", resOne.s2j)
-      case Ge           => compare(e, a, v, args.head, ">=", resOne.s2j)
+      case Eq           => equal(e, a, v, args, resOne.s2j, binding, resOne.bind)
+      case Neq          => neq(e, a, v, args, resOne.tpe, resOne.toDatalog, binding, resOne.bind)
+      case Lt           => compare(e, a, v, args, "<", resOne.s2j, binding, resOne.bind)
+      case Gt           => compare(e, a, v, args, ">", resOne.s2j, binding, resOne.bind)
+      case Le           => compare(e, a, v, args, "<=", resOne.s2j, binding, resOne.bind)
+      case Ge           => compare(e, a, v, args, ">=", resOne.s2j, binding, resOne.bind)
       case NoValue      => noValue(e, a)
       case Fn(kw, n)    => aggr(attr, e, a, v, kw, n, resOne)
-      case StartsWith   => stringOp(e, a, v, args.head, "starts-with?")
-      case EndsWith     => stringOp(e, a, v, args.head, "ends-with?")
-      case Contains     => stringOp(e, a, v, args.head, "includes?")
-      case Matches      => regex(e, a, v, args.head)
+      case StartsWith   => stringOp(e, a, v, args, "starts-with?", binding, resOne.bind)
+      case EndsWith     => stringOp(e, a, v, args, "ends-with?", binding, resOne.bind)
+      case Contains     => stringOp(e, a, v, args, "includes?", binding, resOne.bind)
+      case Matches      => regex(e, a, v, args, binding, resOne.bind)
       case Remainder    => remainder(e, a, v, args)
       case Even         => even(e, a, v)
       case Odd          => odd(e, a, v)
@@ -235,10 +236,21 @@ trait QueryExprOne[Tpl]
 
   // eq ------------------------------------------------------------------------
 
-  private def equal[T](e: Var, a: Att, v: Var, argValues: Seq[T], fromScala: Any => Any): Unit = {
-    args += argValues.map(fromScala).toArray
-    in += s"[$v ...]"
-    where += s"[$e $a $v]" -> wClause
+  private def equal[T](
+    e: Var, a: Att, v: Var, argValues: Seq[T],
+    fromScala: Any => Any,
+    binding: Boolean = false,
+    bind: (Int, Any) => AnyRef = null
+  ): Unit = {
+    if binding then {
+      addBinding(bind)
+      in += v
+      where += s"[$e $a $v]" -> wNeqOne
+    } else {
+      args += argValues.map(fromScala).toArray
+      in += s"[$v ...]"
+      where += s"[$e $a $v]" -> wClause
+    }
   }
 
   private def optEqual[T](
@@ -266,17 +278,28 @@ trait QueryExprOne[Tpl]
   // neq -----------------------------------------------------------------------
 
   private def neq[T](
-    e: Var, a: Att, v: Var, args: Seq[T], tpe: String, toDatalog: T => String
+    e: Var, a: Att, v: Var, vs: Seq[T],
+    tpe: String,
+    toDatalog: T => String,
+    binding: Boolean = false,
+    bind: (Int, Any) => AnyRef = null
   ): Unit = {
     where += s"[$e $a $v]" -> wClause
-    if (tpe == "URI") {
-      args.zipWithIndex.foreach { case (arg, i) =>
-        where += s"""[(ground (new java.net.URI "$arg")) $v$i]""" -> wNeqOne
-        where += s"[(!= $v $v$i)]" -> wNeqOne
-      }
+    if binding then {
+      addBinding(bind)
+      val w = v + "_in"
+      in += w
+      where += s"[(!= $v $w)]" -> wNeqOne
     } else {
-      args.foreach { arg =>
-        where += s"[(!= $v ${toDatalog(arg)})]" -> wNeqOne
+      if (tpe == "URI") {
+        vs.zipWithIndex.foreach { case (arg, i) =>
+          where += s"""[(ground (new java.net.URI "$arg")) $v$i]""" -> wNeqOne
+          where += s"[(!= $v $v$i)]" -> wNeqOne
+        }
+      } else {
+        vs.foreach { arg =>
+          where += s"[(!= $v ${toDatalog(arg)})]" -> wNeqOne
+        }
       }
     }
   }
@@ -295,13 +318,20 @@ trait QueryExprOne[Tpl]
   // compare -------------------------------------------------------------------
 
   private def compare[T](
-    e: Var, a: Att, v: Var, arg: T, op: String, fromScala: Any => Any
+    e: Var, a: Att, v: Var, vs: Seq[T], op: String,
+    fromScala: Any => Any,
+    binding: Boolean = false,
+    bind: (Int, Any) => AnyRef = null
   ): Unit = {
     val v1 = v + 1
     in += v1
     where += s"[$e $a $v]" -> wClause
     where += s"[($op $v $v1)]" -> wNeqOne
-    args += fromScala(arg).asInstanceOf[AnyRef]
+    if binding && bindValues.nonEmpty then {
+      addBinding(bind)
+    } else {
+      args += fromScala(vs.head).asInstanceOf[AnyRef]
+    }
   }
 
   private def optCompare[T](
@@ -312,7 +342,7 @@ trait QueryExprOne[Tpl]
       where += s"[(ground nil) $v-nil]" -> wGround
     } { vs =>
       find += v
-      compare(e, a, v, vs.head, op, fromScala)
+      compare(e, a, v, vs, op, fromScala)
     }
   }
 
@@ -326,17 +356,39 @@ trait QueryExprOne[Tpl]
 
   // string filters ------------------------------------------------------------
 
-  private def stringOp[T](e: Var, a: Att, v: Var, arg: T, predicate: String): Unit = {
+  private def stringOp[T](
+    e: Var, a: Att, v: Var, vs: Seq[T],
+    predicate: String,
+    binding: Boolean = false,
+    bind: (Int, Any) => AnyRef = null
+  ): Unit = {
     val v1 = v + 1
     in += v1
     where += s"[$e $a $v]" -> wClause
     where += s"[(clojure.string/$predicate $v $v1)]" -> wNeqOne
-    args += arg.asInstanceOf[AnyRef]
+    if binding && bindValues.nonEmpty then {
+      addBinding(bind)
+    } else {
+      args += vs.head.asInstanceOf[AnyRef]
+    }
   }
 
-  private def regex[T](e: Var, a: Att, v: Var, regex: T): Unit = {
-    where += s"[$e $a $v]" -> wClause
-    where += s"""[(re-find (re-pattern "$regex") $v)]""" -> wNeqOne
+  private def regex[T](
+    e: Var, a: Att, v: Var, vs: Seq[T],
+    binding: Boolean = false,
+    bind: (Int, Any) => AnyRef = null
+  ): Unit = {
+    if binding then {
+      addBinding(bind)
+      val w = v + "_in"
+      in += w
+      where += s"[$e $a $v]" -> wClause
+      where += s"""[(re-find (re-pattern $w) $v)]""" -> wNeqOne
+    } else {
+      where += s"[$e $a $v]" -> wClause
+      val regex = vs.head
+      where += s"""[(re-find (re-pattern "$regex") $v)]""" -> wNeqOne
+    }
   }
 
 

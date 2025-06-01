@@ -5,6 +5,7 @@ import java.math.{BigDecimal as jBigDecimal, BigInteger as jBigInt}
 import java.net.URI
 import java.time.*
 import java.util.{Date, UUID, Iterator as jIterator, List as jList, Map as jMap, Set as jSet}
+import molecule.db.base.error.ModelError
 
 trait LambdasOne extends ResolveBase {
 
@@ -87,6 +88,35 @@ trait LambdasOne extends ResolveBase {
   private lazy val vector2setShort         : AnyRef => AnyRef = jvector2set((v: AnyRef) => v.asInstanceOf[Integer].toShort)
   private lazy val vector2setChar          : AnyRef => AnyRef = jvector2set((v: AnyRef) => v.asInstanceOf[String].charAt(0))
 
+  def typed(n: Int, arg: Any, tpe: String, correctType: Boolean): AnyRef = {
+    if correctType then arg.asInstanceOf[AnyRef] else throw ModelError(
+      s"${getNth(n)} bind value `$arg` is of type ${arg.getClass.getSimpleName} but should be of type $tpe."
+    )
+  }
+  private lazy val bindID            : (Int, Any) => AnyRef = (n: Int, arg: Any) => typed(n, arg, "Long", arg.isInstanceOf[Long])
+  private lazy val bindString        : (Int, Any) => AnyRef = (n: Int, arg: Any) => typed(n, arg, "String", arg.isInstanceOf[String])
+  private lazy val bindInt           : (Int, Any) => AnyRef = (n: Int, arg: Any) => typed(n, arg, "Int", arg.isInstanceOf[Int])
+  private lazy val bindLong          : (Int, Any) => AnyRef = (n: Int, arg: Any) => typed(n, arg, "Long", arg.isInstanceOf[Long])
+  private lazy val bindFloat         : (Int, Any) => AnyRef = (n: Int, arg: Any) => typed(n, arg, "Float", arg.isInstanceOf[Float])
+  private lazy val bindDouble        : (Int, Any) => AnyRef = (n: Int, arg: Any) => typed(n, arg, "Double", arg.isInstanceOf[Double])
+  private lazy val bindBoolean       : (Int, Any) => AnyRef = (n: Int, arg: Any) => typed(n, arg, "Boolean", arg.isInstanceOf[Boolean])
+  private lazy val bindBigInt        : (Int, Any) => AnyRef = (n: Int, arg: Any) => typed(n, arg, "BigInt", arg.isInstanceOf[BigInt]).asInstanceOf[BigInt].bigInteger
+  private lazy val bindBigDecimal    : (Int, Any) => AnyRef = (n: Int, arg: Any) => typed(n, arg, "BigDecimal", arg.isInstanceOf[BigDecimal]).asInstanceOf[BigDecimal].bigDecimal
+  private lazy val bindDate          : (Int, Any) => AnyRef = (n: Int, arg: Any) => typed(n, arg, "Date", arg.isInstanceOf[Date]).asInstanceOf[Date]
+  private lazy val bindDuration      : (Int, Any) => AnyRef = (n: Int, arg: Any) => typed(n, arg, "Duration", arg.isInstanceOf[Duration]).toString
+  private lazy val bindInstant       : (Int, Any) => AnyRef = (n: Int, arg: Any) => typed(n, arg, "Instant", arg.isInstanceOf[Instant]).toString
+  private lazy val bindLocalDate     : (Int, Any) => AnyRef = (n: Int, arg: Any) => typed(n, arg, "LocalDate", arg.isInstanceOf[LocalDate]).toString
+  private lazy val bindLocalTime     : (Int, Any) => AnyRef = (n: Int, arg: Any) => typed(n, arg, "LocalTime", arg.isInstanceOf[LocalTime]).toString
+  private lazy val bindLocalDateTime : (Int, Any) => AnyRef = (n: Int, arg: Any) => typed(n, arg, "LocalDateTime", arg.isInstanceOf[LocalDateTime]).toString
+  private lazy val bindOffsetTime    : (Int, Any) => AnyRef = (n: Int, arg: Any) => typed(n, arg, "OffsetTime", arg.isInstanceOf[OffsetTime]).toString
+  private lazy val bindOffsetDateTime: (Int, Any) => AnyRef = (n: Int, arg: Any) => typed(n, arg, "OffsetDateTime", arg.isInstanceOf[OffsetDateTime]).toString
+  private lazy val bindZonedDateTime : (Int, Any) => AnyRef = (n: Int, arg: Any) => typed(n, arg, "ZonedDateTime", arg.isInstanceOf[ZonedDateTime]).toString
+  private lazy val bindUUID          : (Int, Any) => AnyRef = (n: Int, arg: Any) => typed(n, arg, "UUID", arg.isInstanceOf[UUID])
+  private lazy val bindURI           : (Int, Any) => AnyRef = (n: Int, arg: Any) => typed(n, arg, "URI", arg.isInstanceOf[URI])
+  private lazy val bindByte          : (Int, Any) => AnyRef = (n: Int, arg: Any) => typed(n, arg, "Byte", arg.isInstanceOf[Byte]).asInstanceOf[Byte].toInt.asInstanceOf[AnyRef]
+  private lazy val bindShort         : (Int, Any) => AnyRef = (n: Int, arg: Any) => typed(n, arg, "Short", arg.isInstanceOf[Short]).asInstanceOf[Short].toInt.asInstanceOf[AnyRef]
+  private lazy val bindChar          : (Int, Any) => AnyRef = (n: Int, arg: Any) => typed(n, arg, "Char", arg.isInstanceOf[Char]).toString
+
   case class ResOne[T](
     tpe: String,
     toDatalog: T => String,
@@ -95,31 +125,32 @@ trait LambdasOne extends ResolveBase {
     seq2t: AnyRef => AnyRef,
     set2set: AnyRef => AnyRef,
     vector2set: AnyRef => AnyRef,
+    bind: (Int, Any) => AnyRef
   )
 
-  lazy val resId            : ResOne[Long]           = ResOne("Long", dId, s2jId, j2sId, firstIdx, set2setId, vector2setId)
-  lazy val resString        : ResOne[String]         = ResOne("String", dString, s2jString, j2sString, firstString, set2setString, vector2setString)
-  lazy val resInt           : ResOne[Int]            = ResOne("Int", dInt, s2jInt, j2sInt, firstInt, set2setInt, vector2setInt)
-  lazy val resLong          : ResOne[Long]           = ResOne("Long", dLong, s2jLong, j2sLong, firstLong, set2setLong, vector2setLong)
-  lazy val resFloat         : ResOne[Float]          = ResOne("Float", dFloat, s2jFloat, j2sFloat, firstFloat, set2setFloat, vector2setFloat)
-  lazy val resDouble        : ResOne[Double]         = ResOne("Double", dDouble, s2jDouble, j2sDouble, firstDouble, set2setDouble, vector2setDouble)
-  lazy val resBoolean       : ResOne[Boolean]        = ResOne("Boolean", dBoolean, s2jBoolean, j2sBoolean, firstBoolean, set2setBoolean, vector2setBoolean)
-  lazy val resBigInt        : ResOne[BigInt]         = ResOne("BigInt", dBigInt, s2jBigInt, j2sBigInt, firstBigInt, set2setBigInt, vector2setBigInt)
-  lazy val resBigDecimal    : ResOne[BigDecimal]     = ResOne("BigDecimal", dBigDecimal, s2jBigDecimal, j2sBigDecimal, firstBigDecimal, set2setBigDecimal, vector2setBigDecimal)
-  lazy val resDate          : ResOne[Date]           = ResOne("Date", dDate, s2jDate, j2sDate, firstDate, set2setDate, vector2setDate)
-  lazy val resDuration      : ResOne[Duration]       = ResOne("Duration", dDuration, s2jDuration, j2sDuration, firstDuration, set2setDuration, vector2setDuration)
-  lazy val resInstant       : ResOne[Instant]        = ResOne("Instant", dInstant, s2jInstant, j2sInstant, firstInstant, set2setInstant, vector2setInstant)
-  lazy val resLocalDate     : ResOne[LocalDate]      = ResOne("LocalDate", dLocalDate, s2jLocalDate, j2sLocalDate, firstLocalDate, set2setLocalDate, vector2setLocalDate)
-  lazy val resLocalTime     : ResOne[LocalTime]      = ResOne("LocalTime", dLocalTime, s2jLocalTime, j2sLocalTime, firstLocalTime, set2setLocalTime, vector2setLocalTime)
-  lazy val resLocalDateTime : ResOne[LocalDateTime]  = ResOne("LocalDateTime", dLocalDateTime, s2jLocalDateTime, j2sLocalDateTime, firstLocalDateTime, set2setLocalDateTime, vector2setLocalDateTime)
-  lazy val resOffsetTime    : ResOne[OffsetTime]     = ResOne("OffsetTime", dOffsetTime, s2jOffsetTime, j2sOffsetTime, firstOffsetTime, set2setOffsetTime, vector2setOffsetTime)
-  lazy val resOffsetDateTime: ResOne[OffsetDateTime] = ResOne("OffsetDateTime", dOffsetDateTime, s2jOffsetDateTime, j2sOffsetDateTime, firstOffsetDateTime, set2setOffsetDateTime, vector2setOffsetDateTime)
-  lazy val resZonedDateTime : ResOne[ZonedDateTime]  = ResOne("ZonedDateTime", dZonedDateTime, s2jZonedDateTime, j2sZonedDateTime, firstZonedDateTime, set2setZonedDateTime, vector2setZonedDateTime)
-  lazy val resUUID          : ResOne[UUID]           = ResOne("UUID", dUUID, s2jUUID, j2sUUID, firstUUID, set2setUUID, vector2setUUID)
-  lazy val resURI           : ResOne[URI]            = ResOne("URI", dURI, s2jURI, j2sURI, firstURI, set2setURI, vector2setURI)
-  lazy val resByte          : ResOne[Byte]           = ResOne("Byte", dByte, s2jByte, j2sByte, firstByte, set2setByte, vector2setByte)
-  lazy val resShort         : ResOne[Short]          = ResOne("Short", dShort, s2jShort, j2sShort, firstShort, set2setShort, vector2setShort)
-  lazy val resChar          : ResOne[Char]           = ResOne("Char", dChar, s2jChar, j2sChar, firstChar, set2setChar, vector2setChar)
+  lazy val resId            : ResOne[Long]           = ResOne("Long", dId, s2jId, j2sId, firstIdx, set2setId, vector2setId, bindID)
+  lazy val resString        : ResOne[String]         = ResOne("String", dString, s2jString, j2sString, firstString, set2setString, vector2setString, bindString)
+  lazy val resInt           : ResOne[Int]            = ResOne("Int", dInt, s2jInt, j2sInt, firstInt, set2setInt, vector2setInt, bindInt)
+  lazy val resLong          : ResOne[Long]           = ResOne("Long", dLong, s2jLong, j2sLong, firstLong, set2setLong, vector2setLong, bindLong)
+  lazy val resFloat         : ResOne[Float]          = ResOne("Float", dFloat, s2jFloat, j2sFloat, firstFloat, set2setFloat, vector2setFloat, bindFloat)
+  lazy val resDouble        : ResOne[Double]         = ResOne("Double", dDouble, s2jDouble, j2sDouble, firstDouble, set2setDouble, vector2setDouble, bindDouble)
+  lazy val resBoolean       : ResOne[Boolean]        = ResOne("Boolean", dBoolean, s2jBoolean, j2sBoolean, firstBoolean, set2setBoolean, vector2setBoolean, bindBoolean)
+  lazy val resBigInt        : ResOne[BigInt]         = ResOne("BigInt", dBigInt, s2jBigInt, j2sBigInt, firstBigInt, set2setBigInt, vector2setBigInt, bindBigInt)
+  lazy val resBigDecimal    : ResOne[BigDecimal]     = ResOne("BigDecimal", dBigDecimal, s2jBigDecimal, j2sBigDecimal, firstBigDecimal, set2setBigDecimal, vector2setBigDecimal, bindBigDecimal)
+  lazy val resDate          : ResOne[Date]           = ResOne("Date", dDate, s2jDate, j2sDate, firstDate, set2setDate, vector2setDate, bindDate)
+  lazy val resDuration      : ResOne[Duration]       = ResOne("Duration", dDuration, s2jDuration, j2sDuration, firstDuration, set2setDuration, vector2setDuration, bindDuration)
+  lazy val resInstant       : ResOne[Instant]        = ResOne("Instant", dInstant, s2jInstant, j2sInstant, firstInstant, set2setInstant, vector2setInstant, bindInstant)
+  lazy val resLocalDate     : ResOne[LocalDate]      = ResOne("LocalDate", dLocalDate, s2jLocalDate, j2sLocalDate, firstLocalDate, set2setLocalDate, vector2setLocalDate, bindLocalDate)
+  lazy val resLocalTime     : ResOne[LocalTime]      = ResOne("LocalTime", dLocalTime, s2jLocalTime, j2sLocalTime, firstLocalTime, set2setLocalTime, vector2setLocalTime, bindLocalTime)
+  lazy val resLocalDateTime : ResOne[LocalDateTime]  = ResOne("LocalDateTime", dLocalDateTime, s2jLocalDateTime, j2sLocalDateTime, firstLocalDateTime, set2setLocalDateTime, vector2setLocalDateTime, bindLocalDateTime)
+  lazy val resOffsetTime    : ResOne[OffsetTime]     = ResOne("OffsetTime", dOffsetTime, s2jOffsetTime, j2sOffsetTime, firstOffsetTime, set2setOffsetTime, vector2setOffsetTime, bindOffsetTime)
+  lazy val resOffsetDateTime: ResOne[OffsetDateTime] = ResOne("OffsetDateTime", dOffsetDateTime, s2jOffsetDateTime, j2sOffsetDateTime, firstOffsetDateTime, set2setOffsetDateTime, vector2setOffsetDateTime, bindOffsetDateTime)
+  lazy val resZonedDateTime : ResOne[ZonedDateTime]  = ResOne("ZonedDateTime", dZonedDateTime, s2jZonedDateTime, j2sZonedDateTime, firstZonedDateTime, set2setZonedDateTime, vector2setZonedDateTime, bindZonedDateTime)
+  lazy val resUUID          : ResOne[UUID]           = ResOne("UUID", dUUID, s2jUUID, j2sUUID, firstUUID, set2setUUID, vector2setUUID, bindUUID)
+  lazy val resURI           : ResOne[URI]            = ResOne("URI", dURI, s2jURI, j2sURI, firstURI, set2setURI, vector2setURI, bindURI)
+  lazy val resByte          : ResOne[Byte]           = ResOne("Byte", dByte, s2jByte, j2sByte, firstByte, set2setByte, vector2setByte, bindByte)
+  lazy val resShort         : ResOne[Short]          = ResOne("Short", dShort, s2jShort, j2sShort, firstShort, set2setShort, vector2setShort, bindShort)
+  lazy val resChar          : ResOne[Char]           = ResOne("Char", dChar, s2jChar, j2sChar, firstChar, set2setChar, vector2setChar, bindChar)
 
 
   private lazy val j2sOptId             = (v: AnyRef) => v match {

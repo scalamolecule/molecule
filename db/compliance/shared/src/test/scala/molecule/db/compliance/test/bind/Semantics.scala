@@ -6,7 +6,9 @@ import molecule.db.compliance.setup.{DbProviders, Test, TestUtils}
 import molecule.db.core.api.Api_async
 import molecule.db.core.spi.Spi_async
 import molecule.db.core.util.Executor.*
+import scala.annotation.nowarn
 
+@nowarn
 case class Semantics(
   suite: Test,
   api: Api_async & Spi_async & DbProviders
