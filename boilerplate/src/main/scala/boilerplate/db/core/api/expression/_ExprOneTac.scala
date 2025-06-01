@@ -12,7 +12,7 @@ object _ExprOneTac extends CoreGenBase("ExprOneTac", "/api/expression") {
        |import molecule.db.base.ast.*
        |import molecule.db.core.api.*
        |import molecule.db.core.api.Keywords.qm
-       |import molecule.db.core.ast._
+       |import molecule.db.core.ast.*
        |$traits
        |""".stripMargin
   }

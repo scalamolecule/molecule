@@ -1,7 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.db.core.api.expression
 
-import molecule.db.core.ast._
+import molecule.db.core.ast.*
 
 
 trait ExprSetOptOps_1[A, t, Entity1[_, _], Entity2[_, _, _]] extends ExprAttr_1[A, t, Entity1, Entity2] {

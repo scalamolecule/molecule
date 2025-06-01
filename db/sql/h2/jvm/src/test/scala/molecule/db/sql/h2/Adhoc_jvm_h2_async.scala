@@ -13,39 +13,12 @@ class Adhoc_jvm_h2_async extends Test with DbProviders_h2 with TestUtils {
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
     for {
-      List(a, b) <- Entity.int.insert.apply(1, 2).transact.map(_.ids)
-      //      _ <- Entity.int(3).save.i.transact
-      //      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
-      //      _ <- Entity(a).int(10).update.i.transact
-      //      _ <- Entity(b).delete.i.transact
-      //      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
-
-
-
-      _ <- Entity.int.query.i.get.map(_ ==> List(1, 2))
-      query = Entity.int.apply(?).query
-      _ <- query(1).i.get.map(_ ==> List(1))
-      _ <- query(2).i.get.map(_ ==> List(2))
-      //      _ <- query.apply("3").get.map(_ ==> List(2))
-
-      _ = Entity.int(?).query
-      _ = Entity.int.not(?).query
-      _ = Entity.int.<(?).query
-      _ = Entity.int.<=(?).query
-      _ = Entity.int.>(?).query
-      _ = Entity.int.>=(?).query
-
-      _ = Entity.string.startsWith(?).query
-      _ = Entity.string.endsWith(?).query
-      _ = Entity.string.contains(?).query
-      _ = Entity.string.matches(?).query
-
-      _ = Entity.intSeq.has(?).query
-      _ = Entity.intSeq.hasNo(?).query
-
-      _ = Entity.intSet.has(?).query
-      _ = Entity.intSet.hasNo(?).query
-
+      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
+      _ <- Entity.int(3).save.transact
+      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
+      _ <- Entity(a).int(10).update.transact
+      _ <- Entity(b).delete.transact
+      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
 
     } yield ()
   }

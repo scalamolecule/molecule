@@ -44,9 +44,37 @@ trait LambdasOne extends LambdasBase { self: SqlQueryBase =>
   protected lazy val sql2oneShort         : (RS, Int) => Short          = (row: RS, paramIndex: Int) => row.getShort(paramIndex)
   protected lazy val sql2oneChar          : (RS, Int) => Char           = (row: RS, paramIndex: Int) => row.getString(paramIndex).charAt(0)
 
+
+
   def typed[T](bindIndex: Int, rawValue: Any, tpe: String, correctType: Boolean): T = {
+    val no = bindIndex match {
+      case 0 => "First"
+      case 1 => "Second"
+      case 2 => "Third"
+      case 3 => "Fourth"
+      case 4 => "Fifth"
+      case 5 => "Sixth"
+      case 6 => "Seventh"
+      case 7 => "Eighth"
+      case 8 => "Ninth"
+      case 9 => "Tenth"
+      case 10 => "Eleventh"
+      case 11 => "Twelfth"
+      case 12 => "Thirteenth"
+      case 13 => "Fourteenth"
+      case 14 => "Fifteenth"
+      case 15 => "Sixteenth"
+      case 16 => "Seventeenth"
+      case 17 => "Eighteenth"
+      case 18 => "Nineteenth"
+      case 19 => "Twentieth"
+      case 20 => "Twenty-first"
+      case 21 => "Twenty-second"
+    }
     if correctType then rawValue.asInstanceOf[T] else
-      throw ModelError(s"Bind value `$rawValue` of type ${rawValue.getClass.getSimpleName} at index $bindIndex should be a value of type $tpe.")
+      throw ModelError(
+        s"$no bind value `$rawValue` is of type ${rawValue.getClass.getSimpleName} but should be of type $tpe."
+      )
   }
   private lazy val bindID             = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setLong(paramIndex, typed[Long](bindIndex, rawValue, "Long", rawValue.isInstanceOf[Long]))
   private lazy val bindString         = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[String](bindIndex, rawValue, "String", rawValue.isInstanceOf[String]))
@@ -123,64 +151,30 @@ trait LambdasOne extends LambdasBase { self: SqlQueryBase =>
   case class ResOneOpt[T](
     sql2oneOpt: (RS, ParamIndex) => Option[T],
     one2sql: T => String,
-    bind: (PrepStmt, Int, Int, Any) => Unit
   )
-
-  def typedOpt[T](bindIndex: Int, rawValue: Any, tpe: String): T = {
-    try {
-      rawValue.asInstanceOf[T]
-    } catch {
-      case NonFatal(_) =>
-        throw ModelError(s"Bind value `$rawValue` at index $bindIndex should be of type $tpe. Found value of unexpected type ${rawValue.getClass.getSimpleName}.")
-    }
-  }
-  private lazy val bindOptID             = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setLong(paramIndex, typedOpt[Long](bindIndex, rawValue, "Long"))
-  private lazy val bindOptString         = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typedOpt[String](bindIndex, rawValue, "String"))
-  private lazy val bindOptInt            = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setInt(paramIndex, typedOpt[Int](bindIndex, rawValue, "Int"))
-  private lazy val bindOptLong           = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setLong(paramIndex, typedOpt[Long](bindIndex, rawValue, "Long"))
-  private lazy val bindOptFloat          = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setFloat(paramIndex, typedOpt[Float](bindIndex, rawValue, "Float"))
-  private lazy val bindOptDouble         = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setDouble(paramIndex, typedOpt[Double](bindIndex, rawValue, "Double"))
-  private lazy val bindOptBoolean        = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setBoolean(paramIndex, typedOpt[Boolean](bindIndex, rawValue, "Boolean"))
-  private lazy val bindOptBigInt         = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setBigDecimal(paramIndex, BigDecimal(typedOpt[BigInt](bindIndex, rawValue, "BigInt")).bigDecimal)
-  private lazy val bindOptBigDecimal     = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setBigDecimal(paramIndex, typedOpt[BigDecimal](bindIndex, rawValue, "BigDecimal").bigDecimal)
-  private lazy val bindOptDate           = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setLong(paramIndex, typedOpt[Date](bindIndex, rawValue, "Date").getTime)
-  private lazy val bindOptDuration       = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typedOpt[Duration](bindIndex, rawValue, "Duration").toString)
-  private lazy val bindOptInstant        = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typedOpt[Instant](bindIndex, rawValue, "Instant").toString)
-  private lazy val bindOptLocalDate      = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typedOpt[LocalDate](bindIndex, rawValue, "LocalDate").toString)
-  private lazy val bindOptLocalTime      = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typedOpt[LocalTime](bindIndex, rawValue, "LocalTime").toString)
-  private lazy val bindOptLocalDateTime  = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typedOpt[LocalDateTime](bindIndex, rawValue, "LocalDateTime").toString)
-  private lazy val bindOptOffsetTime     = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typedOpt[OffsetTime](bindIndex, rawValue, "OffsetTime").toString)
-  private lazy val bindOptOffsetDateTime = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typedOpt[OffsetDateTime](bindIndex, rawValue, "OffsetDateTime").toString)
-  private lazy val bindOptZonedDateTime  = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typedOpt[ZonedDateTime](bindIndex, rawValue, "ZonedDateTime").toString)
-  private lazy val bindOptUUID           = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typedOpt[UUID](bindIndex, rawValue, "UUID").toString)
-  private lazy val bindOptURI            = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typedOpt[URI](bindIndex, rawValue, "URI").toString)
-  private lazy val bindOptByte           = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setByte(paramIndex, typedOpt[Byte](bindIndex, rawValue, "Byte"))
-  private lazy val bindOptShort          = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setShort(paramIndex, typedOpt[Short](bindIndex, rawValue, "Short"))
-  private lazy val bindOptChar           = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typedOpt[Char](bindIndex, rawValue, "Char").toString)
-
-  protected lazy val resOptId            : ResOneOpt[Long]           = ResOneOpt(sql2oneOptId, one2sqlId, bindOptID)
-  protected lazy val resOptString        : ResOneOpt[String]         = ResOneOpt(sql2oneOptString, one2sqlString, bindOptString)
-  protected lazy val resOptInt           : ResOneOpt[Int]            = ResOneOpt(sql2oneOptInt, one2sqlInt, bindOptInt)
-  protected lazy val resOptLong          : ResOneOpt[Long]           = ResOneOpt(sql2oneOptLong, one2sqlLong, bindOptLong)
-  protected lazy val resOptFloat         : ResOneOpt[Float]          = ResOneOpt(sql2oneOptFloat, one2sqlFloat, bindOptFloat)
-  protected lazy val resOptDouble        : ResOneOpt[Double]         = ResOneOpt(sql2oneOptDouble, one2sqlDouble, bindOptDouble)
-  protected lazy val resOptBoolean       : ResOneOpt[Boolean]        = ResOneOpt(sql2oneOptBoolean, one2sqlBoolean, bindOptBoolean)
-  protected lazy val resOptBigInt        : ResOneOpt[BigInt]         = ResOneOpt(sql2oneOptBigInt, one2sqlBigInt, bindOptBigInt)
-  protected lazy val resOptBigDecimal    : ResOneOpt[BigDecimal]     = ResOneOpt(sql2oneOptBigDecimal, one2sqlBigDecimal, bindOptBigDecimal)
-  protected lazy val resOptDate          : ResOneOpt[Date]           = ResOneOpt(sql2oneOptDate, one2sqlDate, bindOptDate)
-  protected lazy val resOptDuration      : ResOneOpt[Duration]       = ResOneOpt(sql2oneOptDuration, one2sqlDuration, bindOptDuration)
-  protected lazy val resOptInstant       : ResOneOpt[Instant]        = ResOneOpt(sql2oneOptInstant, one2sqlInstant, bindOptInstant)
-  protected lazy val resOptLocalDate     : ResOneOpt[LocalDate]      = ResOneOpt(sql2oneOptLocalDate, one2sqlLocalDate, bindOptLocalDate)
-  protected lazy val resOptLocalTime     : ResOneOpt[LocalTime]      = ResOneOpt(sql2oneOptLocalTime, one2sqlLocalTime, bindOptLocalTime)
-  protected lazy val resOptLocalDateTime : ResOneOpt[LocalDateTime]  = ResOneOpt(sql2oneOptLocalDateTime, one2sqlLocalDateTime, bindOptLocalDateTime)
-  protected lazy val resOptOffsetTime    : ResOneOpt[OffsetTime]     = ResOneOpt(sql2oneOptOffsetTime, one2sqlOffsetTime, bindOptOffsetTime)
-  protected lazy val resOptOffsetDateTime: ResOneOpt[OffsetDateTime] = ResOneOpt(sql2oneOptOffsetDateTime, one2sqlOffsetDateTime, bindOptOffsetDateTime)
-  protected lazy val resOptZonedDateTime : ResOneOpt[ZonedDateTime]  = ResOneOpt(sql2oneOptZonedDateTime, one2sqlZonedDateTime, bindOptZonedDateTime)
-  protected lazy val resOptUUID          : ResOneOpt[UUID]           = ResOneOpt(sql2oneOptUUID, one2sqlUUID, bindOptUUID)
-  protected lazy val resOptURI           : ResOneOpt[URI]            = ResOneOpt(sql2oneOptURI, one2sqlURI, bindOptURI)
-  protected lazy val resOptByte          : ResOneOpt[Byte]           = ResOneOpt(sql2oneOptByte, one2sqlByte, bindOptByte)
-  protected lazy val resOptShort         : ResOneOpt[Short]          = ResOneOpt(sql2oneOptShort, one2sqlShort, bindOptShort)
-  protected lazy val resOptChar          : ResOneOpt[Char]           = ResOneOpt(sql2oneOptChar, one2sqlChar, bindOptChar)
+  protected lazy val resOptId            : ResOneOpt[Long]           = ResOneOpt(sql2oneOptId, one2sqlId)
+  protected lazy val resOptString        : ResOneOpt[String]         = ResOneOpt(sql2oneOptString, one2sqlString)
+  protected lazy val resOptInt           : ResOneOpt[Int]            = ResOneOpt(sql2oneOptInt, one2sqlInt)
+  protected lazy val resOptLong          : ResOneOpt[Long]           = ResOneOpt(sql2oneOptLong, one2sqlLong)
+  protected lazy val resOptFloat         : ResOneOpt[Float]          = ResOneOpt(sql2oneOptFloat, one2sqlFloat)
+  protected lazy val resOptDouble        : ResOneOpt[Double]         = ResOneOpt(sql2oneOptDouble, one2sqlDouble)
+  protected lazy val resOptBoolean       : ResOneOpt[Boolean]        = ResOneOpt(sql2oneOptBoolean, one2sqlBoolean)
+  protected lazy val resOptBigInt        : ResOneOpt[BigInt]         = ResOneOpt(sql2oneOptBigInt, one2sqlBigInt)
+  protected lazy val resOptBigDecimal    : ResOneOpt[BigDecimal]     = ResOneOpt(sql2oneOptBigDecimal, one2sqlBigDecimal)
+  protected lazy val resOptDate          : ResOneOpt[Date]           = ResOneOpt(sql2oneOptDate, one2sqlDate)
+  protected lazy val resOptDuration      : ResOneOpt[Duration]       = ResOneOpt(sql2oneOptDuration, one2sqlDuration)
+  protected lazy val resOptInstant       : ResOneOpt[Instant]        = ResOneOpt(sql2oneOptInstant, one2sqlInstant)
+  protected lazy val resOptLocalDate     : ResOneOpt[LocalDate]      = ResOneOpt(sql2oneOptLocalDate, one2sqlLocalDate)
+  protected lazy val resOptLocalTime     : ResOneOpt[LocalTime]      = ResOneOpt(sql2oneOptLocalTime, one2sqlLocalTime)
+  protected lazy val resOptLocalDateTime : ResOneOpt[LocalDateTime]  = ResOneOpt(sql2oneOptLocalDateTime, one2sqlLocalDateTime)
+  protected lazy val resOptOffsetTime    : ResOneOpt[OffsetTime]     = ResOneOpt(sql2oneOptOffsetTime, one2sqlOffsetTime)
+  protected lazy val resOptOffsetDateTime: ResOneOpt[OffsetDateTime] = ResOneOpt(sql2oneOptOffsetDateTime, one2sqlOffsetDateTime)
+  protected lazy val resOptZonedDateTime : ResOneOpt[ZonedDateTime]  = ResOneOpt(sql2oneOptZonedDateTime, one2sqlZonedDateTime)
+  protected lazy val resOptUUID          : ResOneOpt[UUID]           = ResOneOpt(sql2oneOptUUID, one2sqlUUID)
+  protected lazy val resOptURI           : ResOneOpt[URI]            = ResOneOpt(sql2oneOptURI, one2sqlURI)
+  protected lazy val resOptByte          : ResOneOpt[Byte]           = ResOneOpt(sql2oneOptByte, one2sqlByte)
+  protected lazy val resOptShort         : ResOneOpt[Short]          = ResOneOpt(sql2oneOptShort, one2sqlShort)
+  protected lazy val resOptChar          : ResOneOpt[Char]           = ResOneOpt(sql2oneOptChar, one2sqlChar)
 
 
   private lazy val sql2oneOptId            : (RS, Int) => Option[Long]           = (row: RS, paramIndex: Int) => {

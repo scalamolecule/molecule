@@ -133,4 +133,15 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions {
       }) && v != None
     }
   }
+
+  def addBinding(
+    col: String,
+    bind: (PrepStmt, Int, Int, Any) => Unit,
+    expr: String,
+  ): Unit = {
+    where += ((col, expr))
+    val paramIndex = inputs.length + 1
+    bindIndex = bindIndex + 1
+    inputs += ((ps: PrepStmt) => bind(ps, paramIndex, bindIndex, bindValues(bindIndex)))
+  }
 }

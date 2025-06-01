@@ -11,8 +11,7 @@ object _ExprSeqMan extends CoreGenBase("ExprSeqMan", "/api/expression") {
        |
        |import molecule.db.base.ast.*
        |import molecule.db.core.api.*
-       |import molecule.db.core.api.Keywords.qm
-       |import molecule.db.core.ast._
+       |import molecule.db.core.ast.*
        |$traits
        |""".stripMargin
   }
@@ -47,9 +46,6 @@ object _ExprSeqMan extends CoreGenBase("ExprSeqMan", "/api/expression") {
          |  def add   (vs  : Iterable[t]): Entity1[${`A..V`}, t] = _exprSeq(Add    , Seq()  ++ vs)
          |  def remove(v   : t, vs: t*  ): Entity1[${`A..V`}, t] = _exprSeq(Remove , Seq(v) ++ vs)
          |  def remove(vs  : Iterable[t]): Entity1[${`A..V`}, t] = _exprSeq(Remove , Seq()  ++ vs)
-         |
-         |  def has   (v: qm): Entity1[${`A..V`}, t] = _exprSeq(Has  , Nil, true)
-         |  def hasNo (v: qm): Entity1[${`A..V`}, t] = _exprSeq(HasNo, Nil, true)
          |  $attrExprs
          |}""".stripMargin
   }

@@ -2,7 +2,7 @@
 package molecule.db.core.api.expression
 
 import molecule.db.core.api.*
-import molecule.db.core.ast._
+import molecule.db.core.ast.*
 
 
 trait ExprOneOptOps_1[A, t, Entity1[_, _], Entity2[_, _, _]]

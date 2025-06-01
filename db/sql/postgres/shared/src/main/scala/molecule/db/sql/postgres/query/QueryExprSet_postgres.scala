@@ -52,7 +52,11 @@ trait QueryExprSet_postgres
   }
 
   override protected def setHas[T](
-    col: String, set: Set[T], res: ResSet[T], one2sql: T => String, mandatory: Boolean
+    col: String,
+    set: Set[T],
+    res: ResSet[T],
+    one2sql: T => String,
+    mandatory: Boolean,
   ): Unit = {
     def contains(v: T): String = s"${one2sql(v)} = ANY($col)"
     def containsSet(set: Set[T]): String = set.map(contains).mkString(" AND ")
@@ -65,7 +69,11 @@ trait QueryExprSet_postgres
   }
 
   override protected def setHasNo[T](
-    col: String, set: Set[T], res: ResSet[T], one2sql: T => String, mandatory: Boolean
+    col: String,
+    set: Set[T],
+    res: ResSet[T],
+    one2sql: T => String,
+    mandatory: Boolean,
   ): Unit = {
     def notContains(v: T): String = s"${one2sql(v)} != ALL($col)"
     def notContainsSet(set: Set[T]): String = set.map(notContains).mkString("(", " OR ", ")")

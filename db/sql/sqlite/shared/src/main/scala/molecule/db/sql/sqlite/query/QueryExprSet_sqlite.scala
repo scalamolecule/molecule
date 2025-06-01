@@ -41,7 +41,11 @@ trait QueryExprSet_sqlite
   }
 
   override protected def setHas[T](
-    col: String, set: Set[T], res: ResSet[T], one2json: T => String, mandatory: Boolean
+    col: String,
+    set: Set[T],
+    res: ResSet[T],
+    one2sql: T => String,
+    mandatory: Boolean,
   ): Unit = {
     if (mandatory) {
       val attr     = col.replace('.', '_')
@@ -62,11 +66,11 @@ trait QueryExprSet_sqlite
         s"""EXISTS (
            |    SELECT *
            |    FROM JSON_EACH($col)
-           |    WHERE JSON_EACH.VALUE = ${one2json(set.head)}
+           |    WHERE JSON_EACH.VALUE = ${one2sql(set.head)}
            |  )""".stripMargin
       ))
       case _ =>
-        val values = set.map(one2json).mkString(", ")
+        val values = set.map(one2sql).mkString(", ")
         where += (("",
           s"""EXISTS (
              |    SELECT *
@@ -78,7 +82,11 @@ trait QueryExprSet_sqlite
   }
 
   override protected def setHasNo[T](
-    col: String, set: Set[T], res: ResSet[T], one2json: T => String, mandatory: Boolean
+    col: String,
+    set: Set[T],
+    res: ResSet[T],
+    one2sql: T => String,
+    mandatory: Boolean,
   ): Unit = {
     if (mandatory) {
       val attr     = col.replace('.', '_')
@@ -98,11 +106,11 @@ trait QueryExprSet_sqlite
         s"""NOT EXISTS (
            |    SELECT *
            |    FROM JSON_EACH($col)
-           |    WHERE JSON_EACH.VALUE = ${one2json(set.head)}
+           |    WHERE JSON_EACH.VALUE = ${one2sql(set.head)}
            |  )""".stripMargin
       ))
       case _ =>
-        val values = set.map(one2json).mkString(", ")
+        val values = set.map(one2sql).mkString(", ")
         where += (("",
           s"""NOT EXISTS (
              |    SELECT *

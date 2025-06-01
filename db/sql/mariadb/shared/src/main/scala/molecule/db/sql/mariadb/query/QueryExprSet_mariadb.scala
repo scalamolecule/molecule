@@ -34,10 +34,14 @@ trait QueryExprSet_mariadb
   }
 
   override protected def setHas[T](
-    col: String, set: Set[T], res: ResSet[T], one2json: T => String, mandatory: Boolean
+    col: String,
+    set: Set[T],
+    res: ResSet[T],
+    one2sql: T => String,
+    mandatory: Boolean
   ): Unit = {
     def containsSet(set: Set[T]): String = {
-      val jsonValues = set.map(one2json).mkString(", ")
+      val jsonValues = set.map(one2sql).mkString(", ")
       s"JSON_CONTAINS($col, JSON_ARRAY($jsonValues))"
     }
     if (mandatory) {
@@ -50,17 +54,21 @@ trait QueryExprSet_mariadb
     }
     set.size match {
       case 0 => where += (("FALSE", ""))
-      case 1 => where += (("", s"JSON_CONTAINS($col, JSON_ARRAY(${one2json(set.head)}))"))
+      case 1 => where += (("", s"JSON_CONTAINS($col, JSON_ARRAY(${one2sql(set.head)}))"))
       case _ => where += (("", set.map(v => containsSet(Set(v))).mkString("(", " OR\n   ", ")")))
     }
   }
 
   override protected def setHasNo[T](
-    col: String, set: Set[T], res: ResSet[T], one2json: T => String, mandatory: Boolean
+    col: String,
+    set: Set[T],
+    res: ResSet[T],
+    one2sql: T => String,
+    mandatory: Boolean
   ): Unit = {
-    def notContains(v: T): String = s"NOT JSON_CONTAINS($col, JSON_ARRAY(${one2json(v)}))"
+    def notContains(v: T): String = s"NOT JSON_CONTAINS($col, JSON_ARRAY(${one2sql(v)}))"
     def notContainsSet(set: Set[T]): String = {
-      val jsonValues = set.map(one2json).mkString(", ")
+      val jsonValues = set.map(one2sql).mkString(", ")
       s"NOT JSON_CONTAINS($col, JSON_ARRAY($jsonValues))"
     }
     if (mandatory) {

@@ -10,7 +10,7 @@ object _ExprAttr extends CoreGenBase("ExprAttr", "/api/expression") {
        |
        |import molecule.db.base.ast.*
        |import molecule.db.core.api.*
-       |import molecule.db.core.ast._
+       |import molecule.db.core.ast.*
        |
        |
        |trait ExprAttr_0[t, Entity1[_], Entity2[_, _]] extends ExprBase {

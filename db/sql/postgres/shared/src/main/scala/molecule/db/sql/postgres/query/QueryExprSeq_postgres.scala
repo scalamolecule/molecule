@@ -18,7 +18,11 @@ trait QueryExprSeq_postgres
   }
 
   override protected def seqHas[T](
-    col: String, seq: Seq[T], one2sql: T => String, res: ResSeq[T], mandatory: Boolean
+    col: String,
+    seq: Seq[T],
+    one2sql: T => String,
+    res: ResSeq[T],
+    mandatory: Boolean,
   ): Unit = {
     mandatoryCast(res, mandatory)
     if (seq.isEmpty) {
@@ -29,7 +33,11 @@ trait QueryExprSeq_postgres
   }
 
   override protected def seqHasNo[T](
-    col: String, seq: Seq[T], one2sql: T => String, res: ResSeq[T], mandatory: Boolean
+    col: String,
+    seq: Seq[T],
+    one2sql: T => String,
+    res: ResSeq[T],
+    mandatory: Boolean,
   ): Unit = {
     mandatoryCast(res, mandatory)
     if (seq.isEmpty) {

@@ -47,7 +47,7 @@ trait LambdasSet extends LambdasBase with JavaConversions { self: SqlQueryBase =
     json2array: String => Array[T],
     json2optArray: String => Option[Array[T]],
     one2json: T => String,
-    array2optSet: (RS, ParamIndex) => Option[Set[T]],
+    array2optSet: (RS, ParamIndex) => Option[Set[T]]
   )
 
   lazy val resSetId            : ResSet[Long]           = ResSet("Long", tpeDbId, sql2setId, null, set2sqlArrayId, set2sqlsId, one2sqlId, array2setId, nestedArray2coalescedSetId, nestedArray2optCoalescedSetId, json2arrayId, json2optArrayId, one2jsonId, array2optSetId)

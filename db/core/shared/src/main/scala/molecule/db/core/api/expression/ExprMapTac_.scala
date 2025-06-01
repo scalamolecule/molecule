@@ -1,7 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.db.core.api.expression
 
-import molecule.db.core.ast._
+import molecule.db.core.ast.*
 
 
 trait ExprMapTacOps_0[t, Entity1[_], Entity2[_, _]] extends ExprBase {

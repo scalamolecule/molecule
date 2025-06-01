@@ -26,7 +26,11 @@ trait QueryExprSeq_sqlite
   }
 
   override protected def seqHas[T](
-    col: String, seq: Seq[T], one2json: T => String, res: ResSeq[T], mandatory: Boolean
+    col: String,
+    seq: Seq[T],
+    one2sql: T => String,
+    res: ResSeq[T],
+    mandatory: Boolean,
   ): Unit = {
     seq.size match {
       case 0 => where += (("FALSE", ""))
@@ -34,11 +38,11 @@ trait QueryExprSeq_sqlite
         s"""EXISTS (
            |    SELECT *
            |    FROM JSON_EACH($col)
-           |    WHERE JSON_EACH.VALUE = ${one2json(seq.head)}
+           |    WHERE JSON_EACH.VALUE = ${one2sql(seq.head)}
            |  )""".stripMargin
       ))
       case _ =>
-        val values = seq.map(one2json).mkString(", ")
+        val values = seq.map(one2sql).mkString(", ")
         where += (("",
           s"""EXISTS (
              |    SELECT *
@@ -51,7 +55,11 @@ trait QueryExprSeq_sqlite
   }
 
   override protected def seqHasNo[T](
-    col: String, seq: Seq[T], one2json: T => String, res: ResSeq[T], mandatory: Boolean
+    col: String,
+    seq: Seq[T],
+    one2sql: T => String,
+    res: ResSeq[T],
+    mandatory: Boolean,
   ): Unit = {
     seq.size match {
       case 0 => ()
@@ -59,11 +67,11 @@ trait QueryExprSeq_sqlite
         s"""NOT EXISTS (
            |    SELECT *
            |    FROM JSON_EACH($col)
-           |    WHERE JSON_EACH.VALUE = ${one2json(seq.head)}
+           |    WHERE JSON_EACH.VALUE = ${one2sql(seq.head)}
            |  )""".stripMargin
       ))
       case _ =>
-        val values = seq.map(one2json).mkString(", ")
+        val values = seq.map(one2sql).mkString(", ")
         where += (("",
           s"""NOT EXISTS (
              |    SELECT *

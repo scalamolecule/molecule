@@ -9,11 +9,17 @@ object _Molecules extends CoreGenBase( "Molecules", "/api") {
     s"""// GENERATED CODE ********************************
        |package molecule.db.core.api
        |
+       |import molecule.db.base.error.ModelError
        |import molecule.db.core.action.*
        |import molecule.db.core.ast.DataModel
        |
        |trait Molecule {
        |  val dataModel: DataModel
+       |
+       |  protected def noBinding(action: String): Unit = {
+       |    if (dataModel.binds != 0)
+       |      throw ModelError(s"$$action action does not support bind parameters.")
+       |  }
        |}
        |
        |trait Molecule_00 extends Molecule {
@@ -21,10 +27,25 @@ object _Molecules extends CoreGenBase( "Molecules", "/api") {
        |}
        |
        |trait MoleculeBase extends Molecule {
-       |  def save = Save(dataModel)
-       |  def update = Update(dataModel)
-       |  def upsert = Update(dataModel, true)
-       |  def delete = Delete(dataModel)
+       |  def save: Save = {
+       |    noBinding("Save")
+       |    Save(dataModel)
+       |  }
+       |
+       |  def update: Update = {
+       |    noBinding("Update")
+       |    Update(dataModel)
+       |  }
+       |
+       |  def upsert: Update = {
+       |    noBinding("Upsert")
+       |    Update(dataModel, true)
+       |  }
+       |
+       |  def delete: Delete = {
+       |    noBinding("Delete")
+       |    Delete(dataModel)
+       |  }
        |}
        |
        |$molecules
@@ -33,10 +54,14 @@ object _Molecules extends CoreGenBase( "Molecules", "/api") {
 
   case class MoleculeFactories(arity: Int) extends TemplateVals(arity) {
     val body =
-      s"""  trait Molecule_$n0[${`A..V`}] extends MoleculeBase {
-         |    def insert = Insert_$arity[${`A..V`}](dataModel)
-         |    def query  = Query[${`(A..V)`}](dataModel)
+      s"""trait Molecule_$n0[${`A..V`}] extends MoleculeBase {
+         |  def insert: Insert_$arity[${`A..V`}] = {
+         |    noBinding("Insert")
+         |    Insert_$arity[${`A..V`}](dataModel)
          |  }
-         |  """.stripMargin
+         |  def query: Query[${`(A..V)`}] =
+         |    Query[${`(A..V)`}](dataModel)
+         |}
+         |""".stripMargin
   }
 }

@@ -37,9 +37,9 @@ case class Query[Tpl](
 
   private def bind(inputs: List[Any]): Query[Tpl] = {
     val found    = inputs.length
-    val expected = dataModel.elements.length // todo. input params instead
+    val expected = dataModel.binds
     if found != expected then
-      throw ModelError(s"Expected $expected input parameters but got $found.")
+      throw ModelError(s"Expected $expected bind parameters but got $found.")
 
     copy(bindValues = inputs)
   }

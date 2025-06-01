@@ -26,26 +26,26 @@ trait QueryExprSeq_mariadb
   }
 
   override protected def seqHas[T](
-    col: String, seq: Seq[T], one2json: T => String, res: ResSeq[T], mandatory: Boolean
+    col: String, seq: Seq[T], one2sql: T => String, res: ResSeq[T], mandatory: Boolean
   ): Unit = {
     def containsSeq(seq: Seq[T]): String = {
-      val jsonValues = seq.map(one2json).mkString(", ")
+      val jsonValues = seq.map(one2sql).mkString(", ")
       s"JSON_CONTAINS($col, JSON_ARRAY($jsonValues))"
     }
     seq.size match {
       case 0 => where += (("FALSE", ""))
-      case 1 => where += (("", s"JSON_CONTAINS($col, JSON_ARRAY(${one2json(seq.head)}))"))
+      case 1 => where += (("", s"JSON_CONTAINS($col, JSON_ARRAY(${one2sql(seq.head)}))"))
       case _ => where += (("", seq.map(v => containsSeq(Seq(v))).mkString("(", " OR\n   ", ")")))
     }
     mandatoryCast(res, mandatory)
   }
 
   override protected def seqHasNo[T](
-    col: String, seq: Seq[T], one2json: T => String, res: ResSeq[T], mandatory: Boolean
+    col: String, seq: Seq[T], one2sql: T => String, res: ResSeq[T], mandatory: Boolean
   ): Unit = {
-    def notContains(v: T): String = s"NOT JSON_CONTAINS($col, JSON_ARRAY(${one2json(v)}))"
+    def notContains(v: T): String = s"NOT JSON_CONTAINS($col, JSON_ARRAY(${one2sql(v)}))"
     def notContainsSeq(seq: Seq[T]): String = {
-      val jsonValues = seq.map(one2json).mkString(", ")
+      val jsonValues = seq.map(one2sql).mkString(", ")
       s"NOT JSON_CONTAINS($col, JSON_ARRAY($jsonValues))"
     }
     seq.size match {

@@ -9,7 +9,7 @@ object _ExprMapOpt extends CoreGenBase( "ExprMapOpt", "/api/expression") {
     s"""// GENERATED CODE ********************************
        |package molecule.db.core.api.expression
        |
-       |import molecule.db.core.ast._
+       |import molecule.db.core.ast.*
        |$traits
        |""".stripMargin
   }

@@ -4,7 +4,7 @@ package molecule.db.core.api.expression
 import molecule.db.base.ast.*
 import molecule.db.core.api.*
 import molecule.db.core.api.Keywords.qm
-import molecule.db.core.ast._
+import molecule.db.core.ast.*
 
 
 trait ExprOneTacOps_0[t, Entity1[_], Entity2[_, _]]

@@ -10,7 +10,7 @@ object _ExprOneOpt extends CoreGenBase("ExprOneOpt", "/api/expression") {
        |package molecule.db.core.api.expression
        |
        |import molecule.db.core.api.*
-       |import molecule.db.core.ast._
+       |import molecule.db.core.ast.*
        |$traits
        |""".stripMargin
   }

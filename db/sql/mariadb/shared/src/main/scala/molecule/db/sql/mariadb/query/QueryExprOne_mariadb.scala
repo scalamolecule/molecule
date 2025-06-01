@@ -2,6 +2,7 @@ package molecule.db.sql.mariadb.query
 
 import molecule.db.base.error.ModelError
 import molecule.db.core.query.Model2Query
+import molecule.db.sql.core.javaSql.PrepStmt
 import molecule.db.sql.core.query.{LambdasOne, QueryExprOne, SqlQueryBase}
 import scala.reflect.ClassTag
 import scala.util.Random
@@ -10,9 +11,19 @@ trait QueryExprOne_mariadb
   extends QueryExprOne
     with LambdasOne { self: Model2Query & SqlQueryBase =>
 
-  override protected def matches(col: String, regex: String): Unit = {
-    if (regex.nonEmpty)
-      where += ((col, s"REGEXP BINARY '$regex'")) // "BINARY" makes it case-sensitive
+  override protected def matches[T](
+    col: String,
+    args: Seq[T],
+    binding: Boolean,
+    bind: (PrepStmt, Int, Int, Any) => Unit
+  ): Unit = {
+    if binding then {
+      addBinding(col, bind, "~ '?'")
+    } else {
+      val regex = args.head.toString
+      if (regex.nonEmpty)
+        where += ((col, s"REGEXP BINARY '$regex'")) // "BINARY" makes it case-sensitive
+    }
   }
 
   override protected def aggr[T: ClassTag](
