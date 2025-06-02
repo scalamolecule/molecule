@@ -1,6 +1,6 @@
 import org.scalajs.linker.interface.ESVersion
 
-val moleculeVersion = "0.20.1-SNAPSHOT"
+val moleculeVersion = "0.21.0"
 
 val scala212 = "2.12.20"
 val scala3   = "3.3.6"
@@ -26,7 +26,7 @@ inThisBuild(
     versionScheme := Some("early-semver"),
     version := moleculeVersion,
     scalaVersion := scala3,
-    publishTo := Some(releases),
+    publishTo := localStaging.value,
 
     // Run tests for all systems sequentially to avoid data locks with db
     // Only applies on JVM. On the JS platform there's no parallelism anyway.
@@ -86,7 +86,7 @@ lazy val boilerplate = project
 lazy val dbBase = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("db/base"))
-  .settings(compilerArgs, doPublish,
+  .settings(compilerArgs, checkPublishing,
     name := "molecule-db-base",
     // 2.12 for sbt-molecule plugin on sbt 1.x
     crossScalaVersions := Seq(scala212, scala3),
@@ -95,7 +95,7 @@ lazy val dbBase = crossProject(JSPlatform, JVMPlatform)
 lazy val dbCore = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("db/core"))
-  .settings(compilerArgs, doPublish,
+  .settings(compilerArgs, checkPublishing,
     name := "molecule-db-core",
     libraryDependencies ++= Seq(
       // logging
@@ -166,7 +166,7 @@ lazy val dbCompliance = crossProject(JSPlatform, JVMPlatform)
 lazy val dbDatalogCore = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("db/datalog/core"))
-  .settings(compilerArgs, doPublish,
+  .settings(compilerArgs, checkPublishing,
     name := "molecule-db-datalog-core"
   )
   .jvmSettings(
@@ -179,7 +179,7 @@ lazy val dbDatalogCore = crossProject(JSPlatform, JVMPlatform)
 lazy val dbDatalogDatomic = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("db/datalog/datomic"))
-  .settings(compilerArgs, doPublish,
+  .settings(compilerArgs, checkPublishing,
     name := "molecule-db-datalog-datomic",
     testFrameworks := testingFrameworks
   )
@@ -190,7 +190,7 @@ lazy val dbDatalogDatomic = crossProject(JSPlatform, JVMPlatform)
 lazy val dbSqlCore = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("db/sql/core"))
-  .settings(compilerArgs, doPublish,
+  .settings(compilerArgs, checkPublishing,
     name := "molecule-db-sql-core",
     libraryDependencies ++= Seq(
       // For json de-serialisation in molecule.db.sql.core.query.LambdasMap
@@ -204,7 +204,7 @@ lazy val dbSqlCore = crossProject(JSPlatform, JVMPlatform)
 lazy val dbSqlH2 = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("db/sql/h2"))
-  .settings(compilerArgs, doPublish,
+  .settings(compilerArgs, checkPublishing,
     name := "molecule-db-sql-h2",
     testFrameworks := testingFrameworks
   )
@@ -221,7 +221,7 @@ lazy val dbSqlH2 = crossProject(JSPlatform, JVMPlatform)
 lazy val dbSqlMariaDB = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("db/sql/mariadb"))
-  .settings(compilerArgs, doPublish,
+  .settings(compilerArgs, checkPublishing,
     name := "molecule-db-sql-mariadb",
     testFrameworks := testingFrameworks)
   .jsSettings(jsEnvironment)
@@ -240,7 +240,7 @@ lazy val dbSqlMariaDB = crossProject(JSPlatform, JVMPlatform)
 lazy val dbSqlMySQL = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("db/sql/mysql"))
-  .settings(compilerArgs, doPublish,
+  .settings(compilerArgs, checkPublishing,
     name := "molecule-db-sql-mysql",
     testFrameworks := testingFrameworks)
   .jsSettings(jsEnvironment)
@@ -258,7 +258,7 @@ lazy val dbSqlMySQL = crossProject(JSPlatform, JVMPlatform)
 lazy val dbSqlPostgreSQL = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("db/sql/postgres"))
-  .settings(compilerArgs, doPublish,
+  .settings(compilerArgs, checkPublishing,
     name := "molecule-db-sql-postgres",
     testFrameworks := testingFrameworks)
   .jsSettings(jsEnvironment)
@@ -267,7 +267,7 @@ lazy val dbSqlPostgreSQL = crossProject(JSPlatform, JVMPlatform)
       "org.testcontainers" % "postgresql" % testContainerVersion,
       "org.postgresql" % "postgresql" % "42.7.5",
       "ch.qos.logback" % "logback-classic" % logbackVersion % Test,
-//      "org.slf4j" % "slf4j-nop" % "2.0.17", // avoid slf4j warnings
+      //      "org.slf4j" % "slf4j-nop" % "2.0.17", // avoid slf4j warnings
     ),
     Test / fork := true
   )
@@ -277,7 +277,7 @@ lazy val dbSqlPostgreSQL = crossProject(JSPlatform, JVMPlatform)
 lazy val dbSqlSQlite = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("db/sql/sqlite"))
-  .settings(compilerArgs, doPublish,
+  .settings(compilerArgs, checkPublishing,
     name := "molecule-db-sql-sqlite",
     testFrameworks := testingFrameworks
   )
@@ -333,7 +333,7 @@ lazy val dbServerCore = project
 
 lazy val dbServerPekko = project
   .in(file("db/server/pekko"))
-  .settings(doPublish,
+  .settings(checkPublishing,
     name := "molecule-db-server-pekko",
     publish / skip := true,
     libraryDependencies ++= Seq(
@@ -419,22 +419,14 @@ lazy val compilerArgs = Def.settings(
 )
 
 
-lazy val snapshots =
-  "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
+lazy val checkPublishing = if (sys.props.get("docs").contains("true")) doPublish else dontPublish
 
-lazy val releases =
-  "Sonatype OSS Staging" at "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-
-lazy val doPublish =
-  if (sys.props.get("docs").contains("true")) withDocs else withoutDocs
-
-lazy val withDocs = Def.settings(
+lazy val doPublish = Def.settings(
   publishMavenStyle := true,
-  publishTo := (if (isSnapshot.value) Some(snapshots) else Some(releases)),
   Test / publishArtifact := false,
   Compile / doc / scalacOptions ++= Seq(
     "-doc-root-content",
-    baseDirectory.value + "/src/main/scaladoc/rootdoc.txt",
+    (baseDirectory.value / "src" / "main" / "scaladoc" / "rootdoc.txt").toString,
     "-groups",
     "-doc-version",
     version.value,
@@ -445,7 +437,6 @@ lazy val withDocs = Def.settings(
     "-doc-source-url",
     s"https://github.com/scalamolecule/molecule/tree/master€{FILE_PATH}.scala#L1"
   ),
-  pomIncludeRepository := (_ => false),
   homepage := Some(url("http://scalamolecule.org")),
   licenses := List(License.Apache2),
   scmInfo := Some(
@@ -457,18 +448,19 @@ lazy val withDocs = Def.settings(
   description := "molecule",
   developers := List(
     Developer(
-      id = "marcgrue",
-      name = "Marc Grue",
-      email = "marcgrue@gmail.com",
-      url = url("http://marcgrue.com")
+      "marcgrue",
+      "Marc Grue",
+      "marcgrue@gmail.com",
+      url("http://marcgrue.com")
     )
   )
 )
 
-lazy val withoutDocs = Def.settings(
-  Test / publishArtifact := false,
-  doc / sources := Seq.empty,
-  packageDoc / publishArtifact := false
+lazy val dontPublish = Def.settings(
+  publish / skip := true,
+  //  Test / publishArtifact := false,
+  //  doc / sources := Seq.empty,
+  //  packageDoc / publishArtifact := false
 )
 
 
@@ -476,10 +468,10 @@ lazy val graphql = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("graphql/client"))
   .settings(name := "molecule-graphql-client")
-  //  .settings(doPublish)
   .settings(compilerArgs)
   .enablePlugins(MoleculePlugin)
   .settings(
+    publish / skip := true, // until we have something to publish
     //    testFrameworks += new TestFramework("munit.runner.Framework"),
   )
   .jvmSettings(

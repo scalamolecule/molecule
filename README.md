@@ -50,7 +50,7 @@ Data can also be fetched asynchronously in a `Future`, cats `IO` or `ZIO`.
 ## Main features of Molecule
 
 - Support for [PostgreSQL](https://www.postgresql.org), [SQlite](https://sqlite.org), [MySQL](https://www.mysql.com), [MariaDB](https://mariadb.com), [H2](https://h2database.com/html/main.html) and [Datomic](http://www.datomic.com) databases. More can easily be added
-- Molecules for any database behave identically. Each db pass the same SPI compliance test suite (+1700 tests).
+- Molecules for any database behave identically. Each db pass the same SPI compliance test suite (+1800 tests).
 - Targets Scala >=3.3.6 on JVM and JS platforms
 - Synchronous, Asynchronous (Future), ZIO and cats.effect.IO APIs
 - All Scala primitive types and collection types available as molecule attributes (!)
@@ -190,13 +190,13 @@ Add the following to your build files:
 `project/build.properties`:
 
 ```
-sbt.version = 1.10.11
+sbt.version = 1.11.1
 ```
 
 `project/plugins.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.15.0")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.16.0")
 ```
 
 `build.sbt`:
@@ -207,12 +207,12 @@ lazy val yourProject = project.in(file("app"))
   .settings(
     libraryDependencies ++= Seq(
       // One or more of:
-      "org.scalamolecule" %% "molecule-db-sql-postgres" % "0.20.0",
-      "org.scalamolecule" %% "molecule-db-sql-sqlite" % "0.20.0",
-      "org.scalamolecule" %% "molecule-db-sql-mysql" % "0.20.0",
-      "org.scalamolecule" %% "molecule-db-sql-mariadb" % "0.20.0",
-      "org.scalamolecule" %% "molecule-db-sql-h2" % "0.20.0",
-      "org.scalamolecule" %% "molecule-db-datalog-datomic" % "0.20.0",
+      "org.scalamolecule" %% "molecule-db-sql-postgres" % "0.21.0",
+      "org.scalamolecule" %% "molecule-db-sql-sqlite" % "0.21.0",
+      "org.scalamolecule" %% "molecule-db-sql-mysql" % "0.21.0",
+      "org.scalamolecule" %% "molecule-db-sql-mariadb" % "0.21.0",
+      "org.scalamolecule" %% "molecule-db-sql-h2" % "0.21.0",
+      "org.scalamolecule" %% "molecule-db-datalog-datomic" % "0.21.0",
     )
   )
 ```
@@ -221,7 +221,7 @@ Use `%%%` instead of `%%` for cross-compiling ScalaJS projects.
 
 ## Explore code
 
-The `dbCompliance` module in this repo has several domain structure definitions and +1700 tests that show all details of
+The `dbCompliance` module in this repo has several domain structure definitions and +1800 tests that show all details of
 how molecule can be used. This forms the tests that each database implementation needs to comply with
 in order to offer all functionality of Molecule and be a compliant implementation.
 
@@ -252,7 +252,7 @@ Run the tests on the jvm with a databases of your choice:
 
 To test using molecules from ScalaJS, you need to have a ScalaJVM backend server running in a separate process that can receive the queries and send data back to ScalaJS.
 
-In the `dbServer` module you can see 6 different minimal Tapir backend setups that you can start out from. In one process you can start up one of those backends where you will be asked which backend and database that you want to use:
+In the `dbServer` module you can see 5 different minimal Tapir backend setups that you can start out from. In one process you can start up one of those backends where you will be asked which backend and database that you want to use:
 
 ```
 sbt dbServer/Test/run
@@ -268,15 +268,13 @@ Please choose a database and a server backend to test the Molecule RPC API:
 
 Database: 1
 
-  1  Armeria
-  2  Http4s
-  3  Netty
-  4  Pekko
-  5  Play
-  6  Vert.x
-  7  ZioHttp
+  1  Http4s
+  2  Netty
+  3  Pekko
+  4  Play
+  5  ZioHttp
 
-Server: 3
+Server: 2
 
 Press ENTER to stop the server.
 ✅ Netty server running on http://localhost:8080 for H2

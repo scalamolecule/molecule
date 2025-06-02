@@ -18,14 +18,26 @@ case class Semantics(
   import suite.*
 
 
+  "Basic" - types { implicit conn =>
+    for {
+      _ <- Entity.int.insert(1, 2, 3).transact
+
+      // Make an "input molecule" that expects an input value for `int`.
+      // Input molecules can be cached by databases and thus
+      // improve performance if the structurally same query is used repeatedly.
+      biggerThan = Entity.int.>(?).query
+
+      // Then bind values to `int` and re-use the query:
+      _ <- biggerThan(1).get.map(_ ==> List(2, 3))
+      _ <- biggerThan(2).get.map(_ ==> List(3))
+    } yield ()
+  }
+
   "Runtime input type checking" - types { implicit conn =>
     for {
       _ <- Entity.int.insert(1, 2, 3).transact
 
       eq = Entity.int(?).query
-
-      // Ok
-      _ <- eq(1).get.map(_ ==> List(1))
 
       // Expects Int, not String
       _ <- eq("1").get.map(_ ==> "Unexpected success").recover {
