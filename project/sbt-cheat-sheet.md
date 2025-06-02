@@ -74,6 +74,23 @@ Compilation on JS side can take some time and be quite memory hungry. You might 
 1) molecule: `sbt +publishSigned -Ddocs=true` (publish for 2.12 and 3.3)
 1) commit and push molecule, sbt-molecule and molecule-samples to github
 1) molecule github: create release
+
+molecule 2.12.20:
+
+sbt ++2.12.20 "project dbBaseJVM" publishSigned -Ddocs=true
+sbt sonaRelease
+
+sbt-molecule (no need for scala version or setting -Ddocs):
+
+sbt clean publishSigned
+sbt sonaRelease
+
+And then publishing all molecule modules (depends on sbt-molecule):
+
+sbt clean publishSigned -Ddocs=true
+sbt sonaRelease
+
+(Scala 3 is default, so no need to set that - and all modules need to be published)
                            
 
 ## Publish without sbt-molecule update
