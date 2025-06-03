@@ -73,6 +73,7 @@ trait StarwarsServer {
 
   // Resolve -----------------------------------------
 
+//  case class HeroArg(id: String)derives Schema.SemiAuto, ArgBuilder
   case class HeroArg(episode: Option[Episode])derives Schema.SemiAuto, ArgBuilder
   case class CharacterArg(id: String)derives Schema.SemiAuto, ArgBuilder
   case class HumanArg(id: String)derives Schema.SemiAuto, ArgBuilder
@@ -86,6 +87,7 @@ trait StarwarsServer {
 
   val starwarsResolver = RootResolver(
     Query(
+//      args => if (args.id == ) humans.head else droids.last,
       args => if (args.episode.contains(EMPIRE)) humans.head else droids.last,
       args => characters.find(c => args.id.contains(c.id)),
       args => humans.find(c => args.id.contains(c.id)).get,

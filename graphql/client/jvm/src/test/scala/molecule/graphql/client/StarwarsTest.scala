@@ -12,11 +12,13 @@ trait StarwarsTest extends ZIOSpecDefault with StarwarsServer {
     def ==>[V](rhs: V): TestResult = assertTrue(lhs == rhs)
   }
 
-  def graphql(query: String, expected: String): ZIO[Any, CalibanError.ValidationError, TestResult] = {
-    graphQL(starwarsResolver).interpreter.flatMap(_.execute(query)).map { response =>
-      val result = ujson.write(ujson.read(response.data.toString), indent = 2)
-      //      println(result)
-      assertTrue(result == expected)
-    }
+  def graphql(query: String, expected: String, variables:  Map[String, InputValue] = Map()): ZIO[Any, CalibanError.ValidationError, TestResult] = {
+    graphQL(starwarsResolver).interpreter
+      .flatMap(_.execute(query, None, variables))
+      .map { response =>
+        val result = ujson.write(ujson.read(response.data.toString), indent = 2)
+        //      println(result)
+        assertTrue(result == expected)
+      }
   }
 }

@@ -90,7 +90,7 @@ And then publishing all molecule modules (depends on sbt-molecule):
 sbt clean publishSigned -Ddocs=true
 sbt sonaRelease
 
-(Scala 3 is default, so no need to set that - and all modules need to be published)
+If something goes wrong, then login to central.sonatype.com, chose Deployments and check the errors
                            
 
 ## Publish without sbt-molecule update
