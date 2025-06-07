@@ -30,7 +30,7 @@ trait Spi_datomic_sync
     with FutureUtils {
 
   override def query_get[Tpl](q: Query[Tpl])(implicit conn: Conn): List[Tpl] = {
-    if (q.doInspect) query_inspect(q)
+    if (q.printInspect) query_inspect(q).foreach(println)
     val m2q = new Model2DatomicQuery[Tpl](q.dataModel)
     m2q.bindValues.addAll(q.bindValues)
     DatomicQueryResolveOffset[Tpl](
@@ -38,14 +38,14 @@ trait Spi_datomic_sync
     ).getListFromOffset_sync(conn.asInstanceOf[DatomicConn_JVM])._1
   }
 
-  override def query_inspect[Tpl](q: Query[Tpl])(implicit conn: Conn): Unit = {
-    printInspectQuery("QUERY", q.dataModel)
+  override def query_inspect[Tpl](q: Query[Tpl])(implicit conn: Conn): String = {
+    renderInspectQuery("QUERY", q.dataModel)
   }
 
   override def queryOffset_get[Tpl](
     q: QueryOffset[Tpl]
   )(implicit conn: Conn): (List[Tpl], Int, Boolean) = {
-    if (q.doInspect) queryOffset_inspect(q)
+    if (q.printInspect) queryOffset_inspect(q).map(println)
     val m2q = new Model2DatomicQuery[Tpl](q.dataModel)
     m2q.bindValues.addAll(q.bindValues)
     DatomicQueryResolveOffset[Tpl](
@@ -55,14 +55,14 @@ trait Spi_datomic_sync
 
   override def queryOffset_inspect[Tpl](
     q: QueryOffset[Tpl]
-  )(implicit conn: Conn): Unit = {
-    printInspectQuery("QUERY (offset)", q.dataModel)
+  )(implicit conn: Conn): String = {
+    renderInspectQuery("QUERY (offset)", q.dataModel)
   }
 
   override def queryCursor_get[Tpl](
     q: QueryCursor[Tpl]
   )(implicit conn: Conn): (List[Tpl], String, Boolean) = {
-    if (q.doInspect) queryCursor_inspect(q)
+    if (q.printInspect) queryCursor_inspect(q).map(println)
     val m2q = new Model2DatomicQuery[Tpl](q.dataModel)
     m2q.bindValues.addAll(q.bindValues)
     DatomicQueryResolveCursor[Tpl](
@@ -72,8 +72,8 @@ trait Spi_datomic_sync
 
   override def queryCursor_inspect[Tpl](
     q: QueryCursor[Tpl]
-  )(implicit conn: Conn): Unit = {
-    printInspectQuery("QUERY (cursor)", q.dataModel)
+  )(implicit conn: Conn): String = {
+    renderInspectQuery("QUERY (cursor)", q.dataModel)
   }
 
 
@@ -85,7 +85,7 @@ trait Spi_datomic_sync
   )(implicit conn0: Conn): Generator[Tpl] = new Generator[Tpl] {
     // callback function
     def generate(handleTuple: Tpl => Generator.Action): Generator.Action = {
-      if (q.doInspect)
+      if (q.printInspect)
         query_inspect(q)
       val (stream, row2tpl)        = getJavaStreamAndRowResolver(q, conn0)
       val it                       = stream.iterator()
@@ -122,8 +122,8 @@ trait Spi_datomic_sync
     await(Spi_datomic_async.save_transact(save)(conn, global))
   }
 
-  override def save_inspect(save: Save)(implicit conn: Conn): Unit = {
-    printInspectTx("SAVE", save.dataModel.elements, save_getStmts(save))
+  override def save_inspect(save: Save)(implicit conn: Conn): String = {
+    renderInspectTx("SAVE", save.dataModel, save_getStmts(save))
   }
 
   override def save_validate(
@@ -146,11 +146,8 @@ trait Spi_datomic_sync
     await(Spi_datomic_async.insert_transact(insert)(conn, global))
   }
 
-  override def insert_inspect(insert: Insert)(implicit conn: Conn): Unit = {
-    printInspectTx(
-      "INSERT",
-      insert.dataModel.elements, insert_getStmts(insert)
-    )
+  override def insert_inspect(insert: Insert)(implicit conn: Conn): String = {
+    renderInspectTx("INSERT", insert.dataModel, insert_getStmts(insert))
   }
 
   override def insert_validate(
@@ -172,9 +169,9 @@ trait Spi_datomic_sync
     await(Spi_datomic_async.update_transact(update)(conn, global))
   }
 
-  override def update_inspect(update: Update)(implicit conn: Conn): Unit = {
+  override def update_inspect(update: Update)(implicit conn: Conn): String = {
     val action = if (update.isUpsert) "UPSERT" else "UPDATE"
-    printInspectTx(action, update.dataModel.elements,
+    renderInspectTx(action, update.dataModel,
       update_getStmts(update, conn.asInstanceOf[DatomicConn_JVM]))
   }
 
@@ -194,8 +191,8 @@ trait Spi_datomic_sync
     await(Spi_datomic_async.delete_transact(delete)(conn, global))
   }
 
-  override def delete_inspect(delete: Delete)(implicit conn: Conn): Unit = {
-    printInspectTx("DELETE", delete.dataModel.elements,
+  override def delete_inspect(delete: Delete)(implicit conn: Conn): String = {
+    renderInspectTx("DELETE", delete.dataModel,
       delete_getStmts(delete, conn.asInstanceOf[DatomicConn_JVM]))
   }
 
@@ -235,7 +232,7 @@ trait Spi_datomic_sync
   def renderRawQueryData(
     query: String,
     rows: List[List[Any]],
-  ): Unit = {
+  ): String = {
     println("\n=============================================================================")
     println(query)
     val max      = 10
@@ -244,16 +241,16 @@ trait Spi_datomic_sync
       case n if n > 1 => rows.take(max) :+ s"$n more rows..."
       case _          => rows
     }
-    println(showRows.mkString("List(\n  ", ",\n  ", "\n)\n"))
+    showRows.mkString("List(\n  ", ",\n  ", "\n)\n")
   }
 
-  private def printInspectTx(
-    label: String, elements: List[Element], stmts: Data
-  ): Unit = {
+  private def renderInspectTx(
+    label: String, dataModel: DataModel, stmts: Data
+  ): String = {
     val edn = stmts.asScala
       .map(_.asScala.mkString("  [", " ", "]")).toList
       .mkString("[\n", "\n", "\n]")
-    printRaw(label, elements, edn)
+    renderInspection(label, dataModel, edn)
   }
 
 

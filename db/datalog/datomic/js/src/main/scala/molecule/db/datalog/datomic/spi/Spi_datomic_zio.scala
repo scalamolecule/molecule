@@ -19,6 +19,38 @@ trait Spi_datomic_zio
     async2zio[List[Tpl]]((conn: DatomicConn_JS, ec: EC) => Spi_datomic_async.query_get(q)(conn, ec))
   }
 
+  override def query_inspect[Tpl](
+    q: Query[Tpl]
+  ): ZIO[Conn, MoleculeError, String] = {
+    async2zio[String]((conn: DatomicConn_JS, ec: EC) => Spi_datomic_async.query_inspect(q)(conn, ec))
+  }
+
+  override def queryOffset_get[Tpl](
+    q: QueryOffset[Tpl]
+  ): ZIO[Conn, MoleculeError, (List[Tpl], Int, Boolean)] = {
+    async2zio[(List[Tpl], Int, Boolean)]((conn: DatomicConn_JS, ec: EC) => Spi_datomic_async.queryOffset_get(q)(conn, ec))
+
+  }
+
+  override def queryOffset_inspect[Tpl](
+    q: QueryOffset[Tpl]
+  ): ZIO[Conn, MoleculeError, String] = {
+    async2zio[String]((conn: DatomicConn_JS, ec: EC) => Spi_datomic_async.queryOffset_inspect(q)(conn, ec))
+  }
+
+  override def queryCursor_get[Tpl](
+    q: QueryCursor[Tpl]
+  ): ZIO[Conn, MoleculeError, (List[Tpl], String, Boolean)] = {
+    async2zio[(List[Tpl], String, Boolean)]((conn: DatomicConn_JS, ec: EC) => Spi_datomic_async.queryCursor_get(q)(conn, ec))
+  }
+
+  override def queryCursor_inspect[Tpl](
+    q: QueryCursor[Tpl]
+  ): ZIO[Conn, MoleculeError, String] = {
+    async2zio[String]((conn: DatomicConn_JS, ec: EC) => Spi_datomic_async.queryCursor_inspect(q)(conn, ec))
+  }
+
+
   override def query_subscribe[Tpl](
     q: Query[Tpl], callback: List[Tpl] => Unit
   ): ZIO[Conn, MoleculeError, Unit] = {
@@ -31,44 +63,13 @@ trait Spi_datomic_zio
     async2zio[Unit]((conn: DatomicConn_JS, ec: EC) => Spi_datomic_async.query_unsubscribe(q)(conn, ec))
   }
 
-  override def query_inspect[Tpl](
-    q: Query[Tpl]
-  ): ZIO[Conn, MoleculeError, Unit] = {
-    async2zio[Unit]((conn: DatomicConn_JS, ec: EC) => Spi_datomic_async.query_inspect(q)(conn, ec))
-  }
-
-  override def queryOffset_get[Tpl](
-    q: QueryOffset[Tpl]
-  ): ZIO[Conn, MoleculeError, (List[Tpl], Int, Boolean)] = {
-    async2zio[(List[Tpl], Int, Boolean)]((conn: DatomicConn_JS, ec: EC) => Spi_datomic_async.queryOffset_get(q)(conn, ec))
-
-  }
-
-  override def queryOffset_inspect[Tpl](
-    q: QueryOffset[Tpl]
-  ): ZIO[Conn, MoleculeError, Unit] = {
-    async2zio[Unit]((conn: DatomicConn_JS, ec: EC) => Spi_datomic_async.queryOffset_inspect(q)(conn, ec))
-  }
-
-  override def queryCursor_get[Tpl](
-    q: QueryCursor[Tpl]
-  ): ZIO[Conn, MoleculeError, (List[Tpl], String, Boolean)] = {
-    async2zio[(List[Tpl], String, Boolean)]((conn: DatomicConn_JS, ec: EC) => Spi_datomic_async.queryCursor_get(q)(conn, ec))
-  }
-
-  override def queryCursor_inspect[Tpl](
-    q: QueryCursor[Tpl]
-  ): ZIO[Conn, MoleculeError, Unit] = {
-    async2zio[Unit]((conn: DatomicConn_JS, ec: EC) => Spi_datomic_async.queryCursor_inspect(q)(conn, ec))
-  }
-
 
   override def save_transact(save: Save): ZIO[Conn, MoleculeError, TxReport] = {
     async2zio[TxReport]((conn: DatomicConn_JS, ec: EC) => Spi_datomic_async.save_transact(save)(conn, ec))
   }
 
-  override def save_inspect(save: Save): ZIO[Conn, MoleculeError, Unit] = {
-    async2zio[Unit]((conn: DatomicConn_JS, ec: EC) => Spi_datomic_async.save_inspect(save)(conn, ec))
+  override def save_inspect(save: Save): ZIO[Conn, MoleculeError, String] = {
+    async2zio[String]((conn: DatomicConn_JS, ec: EC) => Spi_datomic_async.save_inspect(save)(conn, ec))
   }
 
   override def save_validate(save: Save): ZIO[Conn, MoleculeError, Map[String, Seq[String]]] = {
@@ -81,8 +82,8 @@ trait Spi_datomic_zio
     async2zio[TxReport]((conn: DatomicConn_JS, ec: EC) => Spi_datomic_async.insert_transact(insert)(conn, ec))
   }
 
-  override def insert_inspect(insert: Insert): ZIO[Conn, MoleculeError, Unit] = {
-    async2zio[Unit]((conn: DatomicConn_JS, ec: EC) => Spi_datomic_async.insert_inspect(insert)(conn, ec))
+  override def insert_inspect(insert: Insert): ZIO[Conn, MoleculeError, String] = {
+    async2zio[String]((conn: DatomicConn_JS, ec: EC) => Spi_datomic_async.insert_inspect(insert)(conn, ec))
   }
 
   override def insert_validate(insert: Insert): ZIO[Conn, MoleculeError, Seq[(Int, Seq[InsertError])]] = {
@@ -95,8 +96,8 @@ trait Spi_datomic_zio
     async2zio[TxReport]((conn: DatomicConn_JS, ec: EC) => Spi_datomic_async.update_transact(update)(conn, ec))
   }
 
-  override def update_inspect(update: Update): ZIO[Conn, MoleculeError, Unit] = {
-    async2zio[Unit]((conn: DatomicConn_JS, ec: EC) => Spi_datomic_async.update_inspect(update)(conn, ec))
+  override def update_inspect(update: Update): ZIO[Conn, MoleculeError, String] = {
+    async2zio[String]((conn: DatomicConn_JS, ec: EC) => Spi_datomic_async.update_inspect(update)(conn, ec))
   }
 
   override def update_validate(update: Update): ZIO[Conn, MoleculeError, Map[String, Seq[String]]] = {
@@ -109,8 +110,8 @@ trait Spi_datomic_zio
     async2zio[TxReport]((conn: DatomicConn_JS, ec: EC) => Spi_datomic_async.delete_transact(delete)(conn, ec))
   }
 
-  override def delete_inspect(delete: Delete): ZIO[Conn, MoleculeError, Unit] = {
-    async2zio[Unit]((conn: DatomicConn_JS, ec: EC) => Spi_datomic_async.delete_inspect(delete)(conn, ec))
+  override def delete_inspect(delete: Delete): ZIO[Conn, MoleculeError, String] = {
+    async2zio[String]((conn: DatomicConn_JS, ec: EC) => Spi_datomic_async.delete_inspect(delete)(conn, ec))
   }
 
 

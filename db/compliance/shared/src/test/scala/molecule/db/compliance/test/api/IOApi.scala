@@ -97,20 +97,6 @@ case class IOApi(
   }
 
 
-  "Inspection" - types { implicit conn =>
-    Entity.int.insert(1, 2).transact.map(_.ids).flatMap {
-      case List(a, b) =>
-        for {
-          _ <- Entity.int.insert(1, 2).inspect
-          _ <- Entity.int(3).save.inspect
-          _ <- Entity.int.query.inspect
-          _ <- Entity(a).int(10).update.inspect
-          _ <- Entity(b).delete.inspect
-        } yield ()
-    }: @nowarn
-  }
-
-
   "Offset query" - types { implicit conn =>
     for {
       _ <- Entity.int.insert(1, 2, 3).transact

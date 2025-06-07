@@ -11,7 +11,7 @@ trait Api_async extends Keywords with ModelUtils { spi: Spi_async =>
 
   implicit class QueryApiAsync[Tpl](q: Query[Tpl]) {
     def get(implicit conn: Conn, ec: EC): Future[List[Tpl]] = query_get(q)
-    def inspect(implicit conn: Conn, ec: EC): Future[Unit] = query_inspect(q)
+    def inspect(implicit conn: Conn, ec: EC): Future[String] = query_inspect(q)
 
     def stream(implicit conn: Conn, ec: EC): fs2.Stream[IO, Tpl] = query_stream(q, 100)
     def stream(chunkSize: Int)(implicit conn: Conn, ec: EC): fs2.Stream[IO, Tpl] = query_stream(q, chunkSize)
@@ -23,35 +23,35 @@ trait Api_async extends Keywords with ModelUtils { spi: Spi_async =>
 
   implicit class QueryOffsetApiAsync[Tpl](q: QueryOffset[Tpl]) {
     def get(implicit conn: Conn, ec: EC): Future[(List[Tpl], Int, Boolean)] = queryOffset_get(q)
-    def inspect(implicit conn: Conn, ec: EC): Future[Unit] = queryOffset_inspect(q)
+    def inspect(implicit conn: Conn, ec: EC): Future[String] = queryOffset_inspect(q)
   }
 
   implicit class QueryCursorApiAsync[Tpl](q: QueryCursor[Tpl]) {
     def get(implicit conn: Conn, ec: EC): Future[(List[Tpl], String, Boolean)] = queryCursor_get(q)
-    def inspect(implicit conn: Conn, ec: EC): Future[Unit] = queryCursor_inspect(q)
+    def inspect(implicit conn: Conn, ec: EC): Future[String] = queryCursor_inspect(q)
   }
 
   implicit class SaveApiAsync(save: Save) {
     def transact(implicit conn: Conn, ec: EC): Future[TxReport] = save_transact(save)
-    def inspect(implicit conn: Conn, ec: EC): Future[Unit] = save_inspect(save)
+    def inspect(implicit conn: Conn, ec: EC): Future[String] = save_inspect(save)
     def validate(implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = save_validate(save)
   }
 
   implicit class InsertApiAsync(insert: Insert) {
     def transact(implicit conn: Conn, ec: EC): Future[TxReport] = insert_transact(insert)
-    def inspect(implicit conn: Conn, ec: EC): Future[Unit] = insert_inspect(insert)
+    def inspect(implicit conn: Conn, ec: EC): Future[String] = insert_inspect(insert)
     def validate(implicit conn: Conn, ec: EC): Future[Seq[(Int, Seq[InsertError])]] = insert_validate(insert)
   }
 
   implicit class UpdateApiAsync(update: Update) {
     def transact(implicit conn0: Conn, ec: EC): Future[TxReport] = update_transact(update)
-    def inspect(implicit conn0: Conn, ec: EC): Future[Unit] = update_inspect(update)
+    def inspect(implicit conn0: Conn, ec: EC): Future[String] = update_inspect(update)
     def validate(implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = update_validate(update)
   }
 
   implicit class DeleteApiAsync(delete: Delete) {
     def transact(implicit conn0: Conn, ec: EC): Future[TxReport] = delete_transact(delete)
-    def inspect(implicit conn0: Conn, ec: EC): Future[Unit] = delete_inspect(delete)
+    def inspect(implicit conn0: Conn, ec: EC): Future[String] = delete_inspect(delete)
   }
 
   def rawQuery(

@@ -21,56 +21,58 @@ trait SpiSync_rest
     with JavaConversions {
 
   override def query_get[Tpl](q: Query[Tpl])(implicit conn: Conn): List[Tpl] = {
-//    if (q.doInspect) query_inspect(q)
+//    if (q.printInspect) query_inspect(q).map(println)
 //    val m2q = new Model2DatomicQuery[Tpl](q.elements)
 //    DatomicQueryResolveOffset[Tpl](q.elements, q.optLimit, None, q.dbView, m2q)
 //      .getListFromOffset_sync(conn.asInstanceOf[DatomicConn_JVM])._1
     ???
   }
 
-  override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)(implicit conn: Conn): Unit = {
-//    val datomicConn = conn.asInstanceOf[DatomicConn_JVM]
-//    val m2q         = new Model2DatomicQuery[Tpl](q.elements)
-//    DatomicQueryResolveOffset[Tpl](q.elements, q.optLimit, None, q.dbView, m2q)
-//      .subscribe(datomicConn, callback)
-    ???
-  }
-
-  override def query_unsubscribe[Tpl](q: Query[Tpl])(implicit conn: Conn): Unit = {
-//    val datomicConn = conn.asInstanceOf[DatomicConn_JVM]
-//    val m2q         = new Model2DatomicQuery[Tpl](q.elements)
-//    DatomicQueryResolveOffset[Tpl](q.elements, q.optLimit, None, q.dbView, m2q)
-//      .unsubscribe(datomicConn)
-    ???
-  }
-
-  override def query_inspect[Tpl](q: Query[Tpl])(implicit conn: Conn): Unit = {
-//    printInspectQuery("QUERY", q.elements)
+  override def query_inspect[Tpl](q: Query[Tpl])(implicit conn: Conn): String = {
+//    renderInspectQuery("QUERY", q.elements)
     ???
   }
 
   override def queryOffset_get[Tpl](q: QueryOffset[Tpl])(implicit conn: Conn): (List[Tpl], Int, Boolean) = {
-//    if (q.doInspect) queryOffset_inspect(q)
+//    if (q.printInspect) queryOffset_inspect(q).map(println)
 //    val m2q = new Model2DatomicQuery[Tpl](q.elements)
 //    DatomicQueryResolveOffset[Tpl](q.elements, q.optLimit, Some(q.offset), q.dbView, m2q)
 //      .getListFromOffset_sync(conn.asInstanceOf[DatomicConn_JVM])
     ???
   }
 
-  override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])(implicit conn: Conn): Unit = {
-//    printInspectQuery("QUERY (offset)", q.elements)
+  override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])(implicit conn: Conn): String = {
+//    renderInspectQuery("QUERY (offset)", q.elements)
     ???
   }
 
   override def queryCursor_get[Tpl](q: QueryCursor[Tpl])(implicit conn: Conn): (List[Tpl], String, Boolean) = {
-//    if (q.doInspect) queryCursor_inspect(q)
+//    if (q.printInspect) queryCursor_inspect(q).map(println)
 //    val m2q = new Model2DatomicQuery[Tpl](q.elements)
 //    DatomicQueryResolveCursor[Tpl](q.elements, q.optLimit, Some(q.cursor), q.dbView, m2q)
 //      .getListFromCursor_sync(conn.asInstanceOf[DatomicConn_JVM])
     ???
   }
-  override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])(implicit conn: Conn): Unit = {
-//    printInspectQuery("QUERY (cursor)", q.elements)
+  override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])(implicit conn: Conn): String = {
+//    renderInspectQuery("QUERY (cursor)", q.elements)
+    ???
+  }
+
+
+
+  override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)(implicit conn: Conn): Unit = {
+    //    val datomicConn = conn.asInstanceOf[DatomicConn_JVM]
+    //    val m2q         = new Model2DatomicQuery[Tpl](q.elements)
+    //    DatomicQueryResolveOffset[Tpl](q.elements, q.optLimit, None, q.dbView, m2q)
+    //      .subscribe(datomicConn, callback)
+    ???
+  }
+
+  override def query_unsubscribe[Tpl](q: Query[Tpl])(implicit conn: Conn): Unit = {
+    //    val datomicConn = conn.asInstanceOf[DatomicConn_JVM]
+    //    val m2q         = new Model2DatomicQuery[Tpl](q.elements)
+    //    DatomicQueryResolveOffset[Tpl](q.elements, q.optLimit, None, q.dbView, m2q)
+    //      .unsubscribe(datomicConn)
     ???
   }
 
@@ -79,8 +81,8 @@ trait SpiSync_rest
 //    await(Spi_datomic_async.save_transact(save)(conn, global))
     ???
   }
-  override def save_inspect(save: Save)(implicit conn: Conn): Unit = {
-//    printInspectTx("SAVE", save.elements, save_getStmts(save))
+  override def save_inspect(save: Save)(implicit conn: Conn): String = {
+//    renderInspectTx("SAVE", save.elements, save_getStmts(save))
     ???
   }
   override def save_validate(save: Save)(implicit conn: Conn): Map[String, Seq[String]] = {
@@ -98,8 +100,8 @@ trait SpiSync_rest
 //    await(Spi_datomic_async.insert_transact(insert)(conn, global))
     ???
   }
-  override def insert_inspect(insert: Insert)(implicit conn: Conn): Unit = {
-//    printInspectTx("INSERT", insert.elements, insert_getStmts(insert, conn.proxy))
+  override def insert_inspect(insert: Insert)(implicit conn: Conn): String = {
+//    renderInspectTx("INSERT", insert.elements, insert_getStmts(insert, conn.proxy))
     ???
   }
   override def insert_validate(insert: Insert)(implicit conn: Conn): Seq[(Int, Seq[InsertError])] = {
@@ -116,9 +118,9 @@ trait SpiSync_rest
 //    await(Spi_datomic_async.update_transact(update)(conn, global))
     ???
   }
-  override def update_inspect(update: Update)(implicit conn: Conn): Unit = {
+  override def update_inspect(update: Update)(implicit conn: Conn): String = {
 //    val action = if (update.isUpsert) "UPSERT" else "UPDATE"
-//    printInspectTx(action, update.elements, update_getStmts(update, conn.asInstanceOf[DatomicConn_JVM]))
+//    renderInspectTx(action, update.elements, update_getStmts(update, conn.asInstanceOf[DatomicConn_JVM]))
     ???
   }
   override def update_validate(update: Update)(implicit conn: Conn): Map[String, Seq[String]] = {
@@ -135,8 +137,8 @@ trait SpiSync_rest
 //    await(Spi_datomic_async.delete_transact(delete)(conn, global))
     ???
   }
-  override def delete_inspect(delete: Delete)(implicit conn: Conn): Unit = {
-//    printInspectTx("DELETE", delete.elements, delete_getStmts(delete, conn.asInstanceOf[DatomicConn_JVM]))
+  override def delete_inspect(delete: Delete)(implicit conn: Conn): String = {
+//    renderInspectTx("DELETE", delete.elements, delete_getStmts(delete, conn.asInstanceOf[DatomicConn_JVM]))
     ???
   }
 
@@ -231,7 +233,7 @@ trait SpiSync_rest
   }
 
 
-  private def printInspectTx(label: String, elements: List[Element], stmts: Data): Unit = {
+  private def renderInspectTx(label: String, dataModel: DataModel, stmts: Data): String = {
 //    val edn = stmts.asScala.map(_.asScala.mkString("  [", " ", "]")).toList.mkString("[\n", "\n", "\n]")
 //    printRaw(label, elements, edn)
     ???

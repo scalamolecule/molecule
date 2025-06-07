@@ -1,26 +1,27 @@
 package molecule.db.core.spi
 
-import molecule.db.core.ast.Element
+import molecule.db.core.ast.{DataModel, Element}
 
 trait Renderer {
 
-  protected def printRaw(
+  protected def renderInspection(
     action: String,
-    elements: List[Element],
+    dataModel: DataModel,
     dbString: String = "",
     dataString: String = ""
-  ): Unit = {
+  ): String = {
     val render = List(
-      if (elements.isEmpty) None else Some(elements.mkString("\n").trim),
+      if (dataModel.elements.isEmpty) None else Some(dataModel),
       if (dbString.isEmpty) None else Some(dbString),
       if (dataString.isEmpty) None else Some(dataString),
     ).flatten.mkString("\n\n")
-    println(
-      s"""========================================
-         |$action:
-         |$render
-         |----------------------------------------
-         |""".stripMargin
-    )
+    val inspection = s"""========================================
+       |$action:
+       |$render
+       |----------------------------------------
+       |""".stripMargin
+    // Also print out
+    println(inspection)
+    inspection
   }
 }

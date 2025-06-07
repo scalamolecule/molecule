@@ -9,14 +9,14 @@ case class QueryCursor[Tpl](
   private[molecule] val optLimit: Option[Int],
   private[molecule] val cursor: String,
   private[molecule] val dbView: Option[DbView] = None,
-  private[molecule] val doInspect: Boolean = false,
+  private[molecule] val printInspect: Boolean = false,
   private[molecule] val bindValues: List[Any] = Nil
 ) extends Action with QueryBind[Tpl, QueryCursor] {
 
   def limit(l: Int): QueryCursor[Tpl] = copy(optLimit = Some(l))
 
   // Inspect Query
-  def i: QueryCursor[Tpl] = copy(doInspect = true)
+  def i: QueryCursor[Tpl] = copy(printInspect = true)
 
 
   protected override def bind(inputs: List[Any]): QueryCursor[Tpl] = {

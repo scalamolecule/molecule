@@ -21,7 +21,7 @@ class Adhoc_jvm_h2_async extends Test with DbProviders_h2 with TestUtils {
       _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
 
 
-//      _ <- Entity.intSeq(?).string.query.get
+      _ = Entity.int(?).string.query.inspect
 
     } yield ()
   }

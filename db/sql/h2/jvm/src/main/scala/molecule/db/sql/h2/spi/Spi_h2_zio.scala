@@ -21,8 +21,8 @@ trait Spi_h2_zio extends Spi_zio with SpiBase_h2_zio with StreamingJdbc with Mod
 
   override def query_inspect[Tpl](
     q: Query[Tpl]
-  ): ZIO[Conn, MoleculeError, Unit] = {
-    sync2zio[Unit]((conn: JdbcConn_JVM) => Spi_h2_sync.query_inspect(q)(conn))
+  ): ZIO[Conn, MoleculeError, String] = {
+    sync2zio[String]((conn: JdbcConn_JVM) => Spi_h2_sync.query_inspect(q)(conn))
   }
 
 
@@ -36,8 +36,8 @@ trait Spi_h2_zio extends Spi_zio with SpiBase_h2_zio with StreamingJdbc with Mod
 
   override def queryOffset_inspect[Tpl](
     q: QueryOffset[Tpl]
-  ): ZIO[Conn, MoleculeError, Unit] = {
-    sync2zio[Unit]((conn: JdbcConn_JVM) => Spi_h2_sync.queryOffset_inspect(q)(conn))
+  ): ZIO[Conn, MoleculeError, String] = {
+    sync2zio[String]((conn: JdbcConn_JVM) => Spi_h2_sync.queryOffset_inspect(q)(conn))
   }
 
 
@@ -51,8 +51,8 @@ trait Spi_h2_zio extends Spi_zio with SpiBase_h2_zio with StreamingJdbc with Mod
 
   override def queryCursor_inspect[Tpl](
     q: QueryCursor[Tpl]
-  ): ZIO[Conn, MoleculeError, Unit] = {
-    sync2zio[Unit]((conn: JdbcConn_JVM) => Spi_h2_sync.queryCursor_inspect(q)(conn))
+  ): ZIO[Conn, MoleculeError, String] = {
+    sync2zio[String]((conn: JdbcConn_JVM) => Spi_h2_sync.queryCursor_inspect(q)(conn))
   }
 
 
@@ -99,8 +99,8 @@ trait Spi_h2_zio extends Spi_zio with SpiBase_h2_zio with StreamingJdbc with Mod
 
   override def save_inspect(
     save: Save
-  ): ZIO[Conn, MoleculeError, Unit] = {
-    sync2zio[Unit]((conn: JdbcConn_JVM) => Spi_h2_sync.save_inspect(save)(conn))
+  ): ZIO[Conn, MoleculeError, String] = {
+    sync2zio[String]((conn: JdbcConn_JVM) => Spi_h2_sync.save_inspect(save)(conn))
   }
 
   override def save_validate(
@@ -132,8 +132,8 @@ trait Spi_h2_zio extends Spi_zio with SpiBase_h2_zio with StreamingJdbc with Mod
 
   override def insert_inspect(
     insert: Insert
-  ): ZIO[Conn, MoleculeError, Unit] = {
-    sync2zio[Unit]((conn: JdbcConn_JVM) => Spi_h2_sync.insert_inspect(insert)(conn))
+  ): ZIO[Conn, MoleculeError, String] = {
+    sync2zio[String]((conn: JdbcConn_JVM) => Spi_h2_sync.insert_inspect(insert)(conn))
   }
 
   override def insert_validate(
@@ -167,8 +167,8 @@ trait Spi_h2_zio extends Spi_zio with SpiBase_h2_zio with StreamingJdbc with Mod
 
   override def update_inspect(
     update: Update
-  ): ZIO[Conn, MoleculeError, Unit] = {
-    sync2zio[Unit]((conn: JdbcConn_JVM) => Spi_h2_sync.update_inspect(update)(conn))
+  ): ZIO[Conn, MoleculeError, String] = {
+    sync2zio[String]((conn: JdbcConn_JVM) => Spi_h2_sync.update_inspect(update)(conn))
   }
 
   override def update_validate(
@@ -196,8 +196,8 @@ trait Spi_h2_zio extends Spi_zio with SpiBase_h2_zio with StreamingJdbc with Mod
 
   override def delete_inspect(
     delete: Delete
-  ): ZIO[Conn, MoleculeError, Unit] = {
-    sync2zio[Unit]((conn: JdbcConn_JVM) => Spi_h2_sync.delete_inspect(delete)(conn))
+  ): ZIO[Conn, MoleculeError, String] = {
+    sync2zio[String]((conn: JdbcConn_JVM) => Spi_h2_sync.delete_inspect(delete)(conn))
   }
 
 

@@ -13,7 +13,7 @@ trait Spi_async {
 
   def query_inspect[Tpl](
     q: Query[Tpl]
-  )(implicit conn: Conn, ec: EC): Future[Unit]
+  )(implicit conn: Conn, ec: EC): Future[String]
 
 
   def queryOffset_get[Tpl](
@@ -22,7 +22,7 @@ trait Spi_async {
 
   def queryOffset_inspect[Tpl](
     q: QueryOffset[Tpl]
-  )(implicit conn: Conn, ec: EC): Future[Unit]
+  )(implicit conn: Conn, ec: EC): Future[String]
 
 
   def queryCursor_get[Tpl](
@@ -31,7 +31,7 @@ trait Spi_async {
 
   def queryCursor_inspect[Tpl](
     q: QueryCursor[Tpl]
-  )(implicit conn: Conn, ec: EC): Future[Unit]
+  )(implicit conn: Conn, ec: EC): Future[String]
 
 
   def query_stream[Tpl](
@@ -57,19 +57,19 @@ trait Spi_async {
 
 
   def save_transact(save: Save)(implicit conn: Conn, ec: EC): Future[TxReport]
-  def save_inspect(save: Save)(implicit conn: Conn, ec: EC): Future[Unit]
+  def save_inspect(save: Save)(implicit conn: Conn, ec: EC): Future[String]
   def save_validate(save: Save)(implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]]
 
   def insert_transact(insert: Insert)(implicit conn: Conn, ec: EC): Future[TxReport]
-  def insert_inspect(insert: Insert)(implicit conn: Conn, ec: EC): Future[Unit]
+  def insert_inspect(insert: Insert)(implicit conn: Conn, ec: EC): Future[String]
   def insert_validate(insert: Insert)(implicit conn: Conn, ec: EC): Future[Seq[(Int, Seq[InsertError])]]
 
   def update_transact(update: Update)(implicit conn: Conn, ec: EC): Future[TxReport]
-  def update_inspect(update: Update)(implicit conn: Conn, ec: EC): Future[Unit]
+  def update_inspect(update: Update)(implicit conn: Conn, ec: EC): Future[String]
   def update_validate(update: Update)(implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]]
 
   def delete_transact(delete: Delete)(implicit conn: Conn, ec: EC): Future[TxReport]
-  def delete_inspect(delete: Delete)(implicit conn: Conn, ec: EC): Future[Unit]
+  def delete_inspect(delete: Delete)(implicit conn: Conn, ec: EC): Future[String]
 
 
   private def noJS(method: String): Nothing =

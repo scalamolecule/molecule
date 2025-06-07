@@ -4,7 +4,7 @@ import boopickle.Default.*
 import cats.effect.IO
 import molecule.db.base.error.{InsertError, InsertErrors, ValidationErrors}
 import molecule.db.core.action.*
-import molecule.db.core.ast.Element
+import molecule.db.core.ast.{DataModel, Element}
 import molecule.db.core.marshalling.serialize.PickleTpls
 import molecule.db.core.spi.{Conn, Renderer, Spi_io, TxReport}
 import molecule.db.core.util.Executor.global as ec
@@ -25,8 +25,8 @@ trait SpiBase_io
     conn.rpc.query[Tpl](conn.proxy, q.dataModel, q.optLimit).io
   }
 
-  override def query_inspect[Tpl](q: Query[Tpl])(implicit conn: Conn): IO[Unit] = {
-    printInspectQuery("QUERY", q.dataModel.elements)
+  override def query_inspect[Tpl](q: Query[Tpl])(implicit conn: Conn): IO[String] = {
+    renderInspectQuery("QUERY", q.dataModel)
   }
 
 
@@ -48,8 +48,8 @@ trait SpiBase_io
   }
 
   override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])
-                                       (implicit conn: Conn): IO[Unit] = {
-    printInspectQuery("QUERY (offset)", q.dataModel.elements)
+                                       (implicit conn: Conn): IO[String] = {
+    renderInspectQuery("QUERY (offset)", q.dataModel)
   }
 
 
@@ -60,8 +60,8 @@ trait SpiBase_io
   }
 
   override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])
-                                       (implicit conn: Conn): IO[Unit] = {
-    printInspectQuery("QUERY (cursor)", q.dataModel.elements)
+                                       (implicit conn: Conn): IO[String] = {
+    renderInspectQuery("QUERY (cursor)", q.dataModel)
   }
 
 
@@ -70,7 +70,7 @@ trait SpiBase_io
   override def save_transact(save: Save)(implicit conn0: Conn): IO[TxReport] = {
     val conn = conn0.asInstanceOf[JdbcConn_JS]
     for {
-      _ <- if (save.doInspect) save_inspect(save) else IO.unit
+      _ <- if (save.printInspect) save_inspect(save).map(println) else IO.unit
       // Validating on JS side since it doesn't require db lookups
       errors <- save_validate(save) // validate original elements against meta model
       txReport <- if (errors.isEmpty) {
@@ -84,8 +84,8 @@ trait SpiBase_io
     }
   }
 
-  override def save_inspect(save: Save)(implicit conn: Conn): IO[Unit] = {
-    printInspectTx("SAVE", save.dataModel.elements)
+  override def save_inspect(save: Save)(implicit conn: Conn): IO[String] = {
+    renderInspectTx("SAVE", save.dataModel)
   }
 
   override def save_validate(save: Save)(implicit conn: Conn): IO[Map[String, Seq[String]]] = IO.blocking {
@@ -103,7 +103,7 @@ trait SpiBase_io
   override def insert_transact(insert: Insert)(implicit conn0: Conn): IO[TxReport] = {
     val conn = conn0.asInstanceOf[JdbcConn_JS]
     for {
-      _ <- if (insert.doInspect) insert_inspect(insert) else IO.unit
+      _ <- if (insert.printInspect) insert_inspect(insert).map(println) else IO.unit
       // Validating on JS side since it doesn't require db lookups
       errors <- insert_validate(insert) // validate original elements against meta model
       txReport <- if (errors.isEmpty) {
@@ -122,8 +122,8 @@ trait SpiBase_io
     }
   }
 
-  override def insert_inspect(insert: Insert)(implicit conn: Conn): IO[Unit] = {
-    printInspectTx("INSERT", insert.dataModel.elements)
+  override def insert_inspect(insert: Insert)(implicit conn: Conn): IO[String] = {
+    renderInspectTx("INSERT", insert.dataModel)
   }
 
   override def insert_validate(insert: Insert)
@@ -141,7 +141,7 @@ trait SpiBase_io
   override def update_transact(update: Update)(implicit conn0: Conn): IO[TxReport] = {
     val conn = conn0.asInstanceOf[JdbcConn_JS]
     for {
-      _ <- if (update.doInspect) update_inspect(update) else IO.unit
+      _ <- if (update.printInspect) update_inspect(update).map(println) else IO.unit
       // Validating on JVM side only since it requires db lookups
       txReport <- conn.rpc.update(conn.proxy, update.dataModel, update.isUpsert).io
       _ <- conn.callback(update.dataModel).io
@@ -150,8 +150,8 @@ trait SpiBase_io
     }
   }
 
-  override def update_inspect(update: Update)(implicit conn: Conn): IO[Unit] = {
-    printInspectTx("UPDATE", update.dataModel.elements)
+  override def update_inspect(update: Update)(implicit conn: Conn): IO[String] = {
+    renderInspectTx("UPDATE", update.dataModel)
   }
 
   override def update_validate(update: Update)
@@ -171,16 +171,16 @@ trait SpiBase_io
     } yield txReport
   }
 
-  override def delete_inspect(delete: Delete)(implicit conn: Conn): IO[Unit] = {
-    printInspectTx("DELETE", delete.dataModel.elements)
+  override def delete_inspect(delete: Delete)(implicit conn: Conn): IO[String] = {
+    renderInspectTx("DELETE", delete.dataModel)
   }
 
 
   // Util --------------------------------------
 
-  private def printInspectTx(label: String, elements: List[Element]): IO[Unit] = {
-    IO(printRaw("RPC " + label, elements))
+  private def renderInspectTx(label: String, dataModel: DataModel): IO[String] = {
+    IO(renderInspection("RPC " + label, dataModel))
   }
 
-  protected def printInspectQuery(label: String, elements: List[Element]): IO[Unit]
+  protected def renderInspectQuery(label: String, dataModel: DataModel): IO[String]
 }

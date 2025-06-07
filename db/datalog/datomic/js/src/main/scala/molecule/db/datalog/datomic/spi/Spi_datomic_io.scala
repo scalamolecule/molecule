@@ -3,7 +3,7 @@ package molecule.db.datalog.datomic.spi
 import cats.effect.IO
 import molecule.db.base.error.*
 import molecule.db.core.action.*
-import molecule.db.core.ast.Element
+import molecule.db.core.ast.{DataModel, Element}
 import molecule.db.core.marshalling.serialize.PickleTpls
 import molecule.db.core.spi.{Conn, Spi_io, TxReport}
 import molecule.db.core.util.Executor.*
@@ -26,6 +26,36 @@ trait Spi_datomic_io
     conn.rpc.query[Tpl](proxy, q.dataModel, q.optLimit).io
   }
 
+  override def query_inspect[Tpl](q: Query[Tpl])
+                                 (implicit conn: Conn): IO[String] = {
+    renderInspectQuery("QUERY", q.dataModel)
+  }
+
+  override def queryOffset_get[Tpl](q: QueryOffset[Tpl])
+                                   (implicit conn0: Conn): IO[(List[Tpl], Int, Boolean)] = {
+    val conn  = conn0.asInstanceOf[DatomicConn_JS]
+    val proxy = conn.proxy.copy(dbView = q.dbView)
+    conn.rpc.queryOffset[Tpl](proxy, q.dataModel, q.optLimit, q.offset).io
+  }
+
+  override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])
+                                       (implicit conn: Conn): IO[String] = {
+    renderInspectQuery("QUERY (offset)", q.dataModel)
+  }
+
+  override def queryCursor_get[Tpl](q: QueryCursor[Tpl])
+                                   (implicit conn0: Conn): IO[(List[Tpl], String, Boolean)] = {
+    val conn  = conn0.asInstanceOf[DatomicConn_JS]
+    val proxy = conn.proxy.copy(dbView = q.dbView)
+    conn.rpc.queryCursor[Tpl](proxy, q.dataModel, q.optLimit, q.cursor).io
+  }
+
+  override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])
+                                       (implicit conn: Conn): IO[String] = {
+    renderInspectQuery("QUERY (cursor)", q.dataModel)
+  }
+
+
   override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)
                                    (implicit conn0: Conn): IO[Unit] = {
     val conn = conn0.asInstanceOf[DatomicConn_JS]
@@ -37,42 +67,13 @@ trait Spi_datomic_io
     IO(conn.removeCallback(q.dataModel))
   }
 
-  override def query_inspect[Tpl](q: Query[Tpl])
-                                 (implicit conn: Conn): IO[Unit] = {
-    printInspectQuery("QUERY", q.dataModel)
-  }
-
-  override def queryOffset_get[Tpl](q: QueryOffset[Tpl])
-                                   (implicit conn0: Conn): IO[(List[Tpl], Int, Boolean)] = {
-    val conn  = conn0.asInstanceOf[DatomicConn_JS]
-    val proxy = conn.proxy.copy(dbView = q.dbView)
-    conn.rpc.queryOffset[Tpl](proxy, q.dataModel, q.optLimit, q.offset).io
-  }
-
-  override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])
-                                       (implicit conn: Conn): IO[Unit] = {
-    printInspectQuery("QUERY (offset)", q.dataModel)
-  }
-
-  override def queryCursor_get[Tpl](q: QueryCursor[Tpl])
-                                   (implicit conn0: Conn): IO[(List[Tpl], String, Boolean)] = {
-    val conn  = conn0.asInstanceOf[DatomicConn_JS]
-    val proxy = conn.proxy.copy(dbView = q.dbView)
-    conn.rpc.queryCursor[Tpl](proxy, q.dataModel, q.optLimit, q.cursor).io
-  }
-
-  override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])
-                                       (implicit conn: Conn): IO[Unit] = {
-    printInspectQuery("QUERY (cursor)", q.dataModel)
-  }
-
 
   // Save --------------------------------------------------------
 
   override def save_transact(save: Save)(implicit conn0: Conn): IO[TxReport] = {
     val conn = conn0.asInstanceOf[DatomicConn_JS]
     for {
-      _ <- if (save.doInspect) save_inspect(save) else IO.unit
+      _ <- if (save.printInspect) save_inspect(save).map(println) else IO.unit
       errors <- save_validate(save) // validate original elements against meta model
       txReport <- errors match {
         case errors if errors.isEmpty => conn.rpc.save(conn.proxy, save.dataModel).io
@@ -84,8 +85,8 @@ trait Spi_datomic_io
     }
   }
 
-  override def save_inspect(save: Save)(implicit conn: Conn): IO[Unit] = {
-    printInspectTx("SAVE", save.dataModel.elements)
+  override def save_inspect(save: Save)(implicit conn: Conn): IO[String] = {
+    renderInspectTx("SAVE", save.dataModel)
   }
 
   override def save_validate(save: Save)(implicit conn: Conn): IO[Map[String, Seq[String]]] = io {
@@ -99,7 +100,7 @@ trait Spi_datomic_io
   override def insert_transact(insert: Insert)(implicit conn0: Conn): IO[TxReport] = {
     val conn = conn0.asInstanceOf[DatomicConn_JS]
     for {
-      _ <- if (insert.doInspect) insert_inspect(insert) else IO.unit
+      _ <- if (insert.printInspect) insert_inspect(insert).map(println) else IO.unit
       errors <- insert_validate(insert) // validate original elements against meta model
       txReport <- errors match {
         case errors if errors.isEmpty =>
@@ -113,8 +114,8 @@ trait Spi_datomic_io
     }
   }
 
-  override def insert_inspect(insert: Insert)(implicit conn: Conn): IO[Unit] = {
-    printInspectTx("INSERT", insert.dataModel.elements)
+  override def insert_inspect(insert: Insert)(implicit conn: Conn): IO[String] = {
+    renderInspectTx("INSERT", insert.dataModel)
   }
 
   override def insert_validate(insert: Insert)(implicit conn: Conn): IO[Seq[(Int, Seq[InsertError])]] = io {
@@ -127,7 +128,7 @@ trait Spi_datomic_io
   override def update_transact(update: Update)(implicit conn0: Conn): IO[TxReport] = {
     val conn = conn0.asInstanceOf[DatomicConn_JS]
     for {
-      _ <- if (update.doInspect) update_inspect(update) else IO.unit
+      _ <- if (update.printInspect) update_inspect(update).map(println) else IO.unit
       errors <- update_validate(update) // validate original elements against meta model
       txReport <- errors match {
         case errors if errors.isEmpty =>
@@ -140,8 +141,8 @@ trait Spi_datomic_io
     }
   }
 
-  override def update_inspect(update: Update)(implicit conn: Conn): IO[Unit] = {
-    printInspectTx("UPDATE", update.dataModel.elements)
+  override def update_inspect(update: Update)(implicit conn: Conn): IO[String] = {
+    renderInspectTx("UPDATE", update.dataModel)
   }
 
   override def update_validate(update: Update)(implicit conn: Conn): IO[Map[String, Seq[String]]] = io {
@@ -160,15 +161,15 @@ trait Spi_datomic_io
     } yield txReport
   }
 
-  override def delete_inspect(delete: Delete)(implicit conn: Conn): IO[Unit] = {
-    printInspectTx("DELETE", delete.dataModel.elements)
+  override def delete_inspect(delete: Delete)(implicit conn: Conn): IO[String] = {
+    renderInspectTx("DELETE", delete.dataModel)
   }
 
 
   // Util
 
-  private def printInspectTx(label: String, elements: List[Element])
-                            (implicit ec: EC): IO[Unit] = {
-    IO(printRaw("RPC " + label, elements))
+  private def renderInspectTx(label: String, dataModel: DataModel)
+                            (implicit ec: EC): IO[String] = {
+    IO(renderInspection("RPC " + label, dataModel))
   }
 }

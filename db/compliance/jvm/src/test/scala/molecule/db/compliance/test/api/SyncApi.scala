@@ -93,16 +93,6 @@ case class SyncApi(
   }
 
 
-  "Inspection" - types { implicit conn =>
-    val List(a, b) = Entity.int.insert(1, 2).transact.ids // Need data for update and delete
-    Entity.int.insert(1, 2).inspect
-    Entity.int(3).save.inspect
-    Entity.int.query.inspect
-    Entity(a).int(10).update.inspect
-    Entity(b).delete.inspect
-  }
-
-
   "Offset query" - types { implicit conn =>
     Entity.int.insert(1, 2, 3).transact
     Entity.int.a1.query.get ==> List(1, 2, 3)

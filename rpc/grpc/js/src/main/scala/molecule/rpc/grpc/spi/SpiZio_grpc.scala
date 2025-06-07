@@ -16,18 +16,8 @@ trait SpiZio_grpc extends SpiZio with SpiZioBase_grpc {
     ???
   }
 
-  override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit): ZIO[Conn, MoleculeError, Unit] = {
-    //    async2zio[Unit]((conn: JdbcConn_JS, ec: EC) => Spi_postgres_async.query_subscribe(q, callback)(conn, ec))
-    ???
-  }
-
-  override def query_unsubscribe[Tpl](q: Query[Tpl]): ZIO[Conn, MoleculeError, Unit] = {
-    //    async2zio[Unit]((conn: JdbcConn_JS, ec: EC) => Spi_postgres_async.query_unsubscribe(q)(conn, ec))
-    ???
-  }
-
-  override def query_inspect[Tpl](q: Query[Tpl]): ZIO[Conn, MoleculeError, Unit] = {
-    //    async2zio[Unit]((conn: JdbcConn_JS, ec: EC) => Spi_postgres_async.query_inspect(q)(conn, ec))
+  override def query_inspect[Tpl](q: Query[Tpl]): ZIO[Conn, MoleculeError, String] = {
+    //    async2zio[String]((conn: JdbcConn_JS, ec: EC) => Spi_postgres_async.query_inspect(q)(conn, ec))
     ???
   }
 
@@ -37,8 +27,8 @@ trait SpiZio_grpc extends SpiZio with SpiZioBase_grpc {
     ???
   }
 
-  override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl]): ZIO[Conn, MoleculeError, Unit] = {
-    //    async2zio[Unit]((conn: JdbcConn_JS, ec: EC) => Spi_postgres_async.queryOffset_inspect(q)(conn, ec))
+  override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl]): ZIO[Conn, MoleculeError, String] = {
+    //    async2zio[String]((conn: JdbcConn_JS, ec: EC) => Spi_postgres_async.queryOffset_inspect(q)(conn, ec))
     ???
   }
 
@@ -48,8 +38,20 @@ trait SpiZio_grpc extends SpiZio with SpiZioBase_grpc {
     ???
   }
 
-  override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl]): ZIO[Conn, MoleculeError, Unit] = {
-    //    async2zio[Unit]((conn: JdbcConn_JS, ec: EC) => Spi_postgres_async.queryCursor_inspect(q)(conn, ec))
+  override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl]): ZIO[Conn, MoleculeError, String] = {
+    //    async2zio[String]((conn: JdbcConn_JS, ec: EC) => Spi_postgres_async.queryCursor_inspect(q)(conn, ec))
+    ???
+  }
+
+
+
+  override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit): ZIO[Conn, MoleculeError, Unit] = {
+    //    async2zio[Unit]((conn: JdbcConn_JS, ec: EC) => Spi_postgres_async.query_subscribe(q, callback)(conn, ec))
+    ???
+  }
+
+  override def query_unsubscribe[Tpl](q: Query[Tpl]): ZIO[Conn, MoleculeError, Unit] = {
+    //    async2zio[Unit]((conn: JdbcConn_JS, ec: EC) => Spi_postgres_async.query_unsubscribe(q)(conn, ec))
     ???
   }
 
@@ -61,8 +63,8 @@ trait SpiZio_grpc extends SpiZio with SpiZioBase_grpc {
     ???
   }
 
-  override def save_inspect(save: Save): ZIO[Conn, MoleculeError, Unit] = {
-    //    async2zio[Unit]((conn: JdbcConn_JS, ec: EC) => Spi_postgres_async.save_inspect(save)(conn, ec))
+  override def save_inspect(save: Save): ZIO[Conn, MoleculeError, String] = {
+    //    async2zio[String]((conn: JdbcConn_JS, ec: EC) => Spi_postgres_async.save_inspect(save)(conn, ec))
     ???
   }
 
@@ -81,8 +83,8 @@ trait SpiZio_grpc extends SpiZio with SpiZioBase_grpc {
     ???
   }
 
-  override def insert_inspect(insert: Insert): ZIO[Conn, MoleculeError, Unit] = {
-    //    async2zio[Unit]((conn: JdbcConn_JS, ec: EC) => Spi_postgres_async.insert_inspect(insert)(conn, ec))
+  override def insert_inspect(insert: Insert): ZIO[Conn, MoleculeError, String] = {
+    //    async2zio[String]((conn: JdbcConn_JS, ec: EC) => Spi_postgres_async.insert_inspect(insert)(conn, ec))
     ???
   }
 
@@ -101,8 +103,8 @@ trait SpiZio_grpc extends SpiZio with SpiZioBase_grpc {
     ???
   }
 
-  override def update_inspect(update: Update): ZIO[Conn, MoleculeError, Unit] = {
-    //    async2zio[Unit]((conn: JdbcConn_JS, ec: EC) => Spi_postgres_async.update_inspect(update)(conn, ec))
+  override def update_inspect(update: Update): ZIO[Conn, MoleculeError, String] = {
+    //    async2zio[String]((conn: JdbcConn_JS, ec: EC) => Spi_postgres_async.update_inspect(update)(conn, ec))
     ???
   }
 
@@ -121,8 +123,8 @@ trait SpiZio_grpc extends SpiZio with SpiZioBase_grpc {
     ???
   }
 
-  override def delete_inspect(delete: Delete): ZIO[Conn, MoleculeError, Unit] = {
-    //    async2zio[Unit]((conn: JdbcConn_JS, ec: EC) => Spi_postgres_async.delete_inspect(delete)(conn, ec))
+  override def delete_inspect(delete: Delete): ZIO[Conn, MoleculeError, String] = {
+    //    async2zio[String]((conn: JdbcConn_JS, ec: EC) => Spi_postgres_async.delete_inspect(delete)(conn, ec))
     ???
   }
 

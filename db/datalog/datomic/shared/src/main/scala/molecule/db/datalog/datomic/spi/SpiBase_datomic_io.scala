@@ -8,11 +8,11 @@ import molecule.db.datalog.core.query.Model2DatomicQuery
 
 trait SpiBase_datomic_io extends IOUtils with Renderer {
 
-  protected def printInspectQuery(
+  protected def renderInspectQuery(
     label: String,
     dataModel: DataModel
-  ): IO[Unit] = IO.blocking {
+  ): IO[String] = IO.blocking {
     val queries = new Model2DatomicQuery(dataModel).getDatomicQueries(true)._3
-    printRaw(label, Nil, queries)
+    renderInspection(label, dataModel, queries)
   }
 }

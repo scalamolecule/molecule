@@ -2,7 +2,7 @@ package molecule.db.datalog.datomic.spi
 
 import molecule.db.base.error.{InsertError, InsertErrors, ValidationErrors}
 import molecule.db.core.action.*
-import molecule.db.core.ast.Element
+import molecule.db.core.ast.{DataModel, Element}
 import molecule.db.core.marshalling.serialize.PickleTpls
 import molecule.db.core.spi.{Conn, Spi_async, TxReport}
 import molecule.db.core.util.FutureUtils
@@ -29,8 +29,8 @@ trait Spi_datomic_async
   }
 
   override def query_inspect[Tpl](q: Query[Tpl])
-                                 (implicit conn: Conn, ec: EC): Future[Unit] = {
-    printInspectQuery("QUERY", q.dataModel)
+                                 (implicit conn: Conn, ec: EC): Future[String] = {
+    renderInspectQuery("QUERY", q.dataModel)
   }
 
 
@@ -42,8 +42,8 @@ trait Spi_datomic_async
   }
 
   override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])
-                                       (implicit conn: Conn, ec: EC): Future[Unit] = {
-    printInspectQuery("QUERY (offset)", q.dataModel)
+                                       (implicit conn: Conn, ec: EC): Future[String] = {
+    renderInspectQuery("QUERY (offset)", q.dataModel)
   }
 
 
@@ -55,8 +55,8 @@ trait Spi_datomic_async
   }
 
   override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])
-                                       (implicit conn: Conn, ec: EC): Future[Unit] = {
-    printInspectQuery("QUERY (cursor)", q.dataModel)
+                                       (implicit conn: Conn, ec: EC): Future[String] = {
+    renderInspectQuery("QUERY (cursor)", q.dataModel)
   }
 
 
@@ -76,7 +76,7 @@ trait Spi_datomic_async
   override def save_transact(save: Save)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
     val conn = conn0.asInstanceOf[DatomicConn_JS]
     for {
-      _ <- if (save.doInspect) save_inspect(save) else Future.unit
+      _ <- if (save.printInspect) save_inspect(save).map(println) else Future.unit
       errors <- save_validate(save) // validate original elements against meta model
       txReport <- errors match {
         case errors if errors.isEmpty => conn.rpc.save(conn.proxy, save.dataModel).future
@@ -88,11 +88,12 @@ trait Spi_datomic_async
     }
   }
 
-  override def save_inspect(save: Save)(implicit conn: Conn, ec: EC): Future[Unit] = {
-    printInspectTx("SAVE", save.dataModel.elements)
+  override def save_inspect(save: Save)(implicit conn: Conn, ec: EC): Future[String] = {
+    renderInspectTx("SAVE", save.dataModel)
   }
 
-  override def save_validate(save: Save)(implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = future {
+  override def save_validate(save: Save)
+                            (implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = future {
     val proxy = conn.proxy
     TxModelValidation(proxy.entityMap, proxy.attrMap, "save").validate(save.dataModel.elements)
   }
@@ -103,7 +104,7 @@ trait Spi_datomic_async
   override def insert_transact(insert: Insert)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
     val conn = conn0.asInstanceOf[DatomicConn_JS]
     for {
-      _ <- if (insert.doInspect) insert_inspect(insert) else Future.unit
+      _ <- if (insert.printInspect) insert_inspect(insert).map(println) else Future.unit
       errors <- insert_validate(insert) // validate original elements against meta model
       txReport <- errors match {
         case errors if errors.isEmpty =>
@@ -117,11 +118,12 @@ trait Spi_datomic_async
     }
   }
 
-  override def insert_inspect(insert: Insert)(implicit conn: Conn, ec: EC): Future[Unit] = {
-    printInspectTx("INSERT", insert.dataModel.elements)
+  override def insert_inspect(insert: Insert)(implicit conn: Conn, ec: EC): Future[String] = {
+    renderInspectTx("INSERT", insert.dataModel)
   }
 
-  override def insert_validate(insert: Insert)(implicit conn: Conn, ec: EC): Future[Seq[(Int, Seq[InsertError])]] = future {
+  override def insert_validate(insert: Insert)
+                              (implicit conn: Conn, ec: EC): Future[Seq[(Int, Seq[InsertError])]] = future {
     InsertValidation.validate(conn, insert.dataModel.elements, insert.tpls)
   }
 
@@ -131,7 +133,7 @@ trait Spi_datomic_async
   override def update_transact(update: Update)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
     val conn = conn0.asInstanceOf[DatomicConn_JS]
     for {
-      _ <- if (update.doInspect) update_inspect(update) else Future.unit
+      _ <- if (update.printInspect) update_inspect(update).map(println) else Future.unit
       // Error handling on jvm side since it needs db lookups
       txReport <- conn.rpc.update(conn.proxy, update.dataModel, update.isUpsert).future
       _ <- conn.callback(update.dataModel)
@@ -140,11 +142,12 @@ trait Spi_datomic_async
     }
   }
 
-  override def update_inspect(update: Update)(implicit conn: Conn, ec: EC): Future[Unit] = {
-    printInspectTx("UPDATE", update.dataModel.elements)
+  override def update_inspect(update: Update)(implicit conn: Conn, ec: EC): Future[String] = {
+    renderInspectTx("UPDATE", update.dataModel)
   }
 
-  override def update_validate(update: Update)(implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = future {
+  override def update_validate(update: Update)
+                              (implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = future {
     val proxy = conn.proxy
     TxModelValidation(proxy.entityMap, proxy.attrMap, "update").validate(update.dataModel.elements)
   }
@@ -160,15 +163,15 @@ trait Spi_datomic_async
     } yield txReport
   }
 
-  override def delete_inspect(delete: Delete)(implicit conn: Conn, ec: EC): Future[Unit] = {
-    printInspectTx("DELETE", delete.dataModel.elements)
+  override def delete_inspect(delete: Delete)(implicit conn: Conn, ec: EC): Future[String] = {
+    renderInspectTx("DELETE", delete.dataModel)
   }
 
 
   // Util
 
-  private def printInspectTx(label: String, elements: List[Element])
-                            (implicit ec: EC): Future[Unit] = {
-    Future(printRaw("RPC " + label, elements))
+  private def renderInspectTx(label: String, dataModel: DataModel)
+                            (implicit ec: EC): Future[String] = {
+    Future(renderInspection("RPC " + label, dataModel))
   }
 }

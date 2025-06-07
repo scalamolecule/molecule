@@ -10,15 +10,15 @@ case class Query[Tpl](
   dataModel: DataModel,
   private[molecule] val optLimit: Option[Int] = None,
   private[molecule] val dbView: Option[DbView] = None,
-  private[molecule] val doInspect: Boolean = false,
+  private[molecule] val printInspect: Boolean = false,
   private[molecule] val bindValues: List[Any] = Nil
 ) extends Action with QueryBind[Tpl, Query] {
 
   // Common api
 
   def limit(l: Int): Query[Tpl] = copy(optLimit = Some(l))
-  def offset(o: Int): QueryOffset[Tpl] = QueryOffset(dataModel, optLimit, o, dbView, doInspect, bindValues)
-  def from(cursor: String): QueryCursor[Tpl] = QueryCursor(dataModel, optLimit, cursor, dbView, doInspect, bindValues)
+  def offset(o: Int): QueryOffset[Tpl] = QueryOffset(dataModel, optLimit, o, dbView, printInspect, bindValues)
+  def from(cursor: String): QueryCursor[Tpl] = QueryCursor(dataModel, optLimit, cursor, dbView, printInspect, bindValues)
 
   // Time actions (might be available only for Datomic)
 
@@ -31,7 +31,7 @@ case class Query[Tpl](
   def since(txReport: TxReport): Query[Tpl] = copy(dbView = Some(Since(TxLong(txReport.tx))))
 
   // Inspect also
-  def i: Query[Tpl] = copy(doInspect = true)
+  def i: Query[Tpl] = copy(printInspect = true)
 
 
   protected override def bind(inputs: List[Any]): Query[Tpl] = {

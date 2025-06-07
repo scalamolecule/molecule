@@ -23,7 +23,7 @@ trait Spi_datomic_io
 
   override def query_inspect[Tpl](
     q: Query[Tpl]
-  )(implicit conn: Conn): IO[Unit] = {
+  )(implicit conn: Conn): IO[String] = {
     IO(Spi_datomic_sync.query_inspect(q)(conn))
   }
 
@@ -36,8 +36,8 @@ trait Spi_datomic_io
 
   override def queryOffset_inspect[Tpl](
     q: QueryOffset[Tpl]
-  )(implicit conn: Conn): IO[Unit] = {
-    printInspectQuery("QUERY (offset)", q.dataModel)
+  )(implicit conn: Conn): IO[String] = {
+    renderInspectQuery("QUERY (offset)", q.dataModel)
   }
 
 
@@ -49,8 +49,8 @@ trait Spi_datomic_io
 
   override def queryCursor_inspect[Tpl](
     q: QueryCursor[Tpl]
-  )(implicit conn: Conn): IO[Unit] = {
-    printInspectQuery("QUERY (cursor)", q.dataModel)
+  )(implicit conn: Conn): IO[String] = {
+    renderInspectQuery("QUERY (cursor)", q.dataModel)
   }
 
 
@@ -95,7 +95,7 @@ trait Spi_datomic_io
     }
   }
 
-  override def save_inspect(save: Save)(implicit conn: Conn): IO[Unit] = {
+  override def save_inspect(save: Save)(implicit conn: Conn): IO[String] = {
     IO(Spi_datomic_sync.save_inspect(save)(conn))
   }
 
@@ -121,7 +121,7 @@ trait Spi_datomic_io
     }
   }
 
-  override def insert_inspect(insert: Insert)(implicit conn: Conn): IO[Unit] = {
+  override def insert_inspect(insert: Insert)(implicit conn: Conn): IO[String] = {
     IO(Spi_datomic_sync.insert_inspect(insert)(conn))
   }
 
@@ -147,7 +147,7 @@ trait Spi_datomic_io
     }
   }
 
-  override def update_inspect(update: Update)(implicit conn: Conn): IO[Unit] = {
+  override def update_inspect(update: Update)(implicit conn: Conn): IO[String] = {
     IO(Spi_datomic_sync.update_inspect(update)(conn))
   }
 
@@ -169,7 +169,7 @@ trait Spi_datomic_io
     }
   }
 
-  override def delete_inspect(delete: Delete)(implicit conn: Conn): IO[Unit] = {
+  override def delete_inspect(delete: Delete)(implicit conn: Conn): IO[String] = {
     IO(Spi_datomic_sync.delete_inspect(delete)(conn))
   }
 

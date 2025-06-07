@@ -15,7 +15,7 @@ trait Spi_sqlite_io extends Spi_io with StreamingJdbc with ModelUtils {
   }
 
   override def query_inspect[Tpl](q: Query[Tpl])
-                                 (implicit conn: Conn): IO[Unit] = IO.blocking {
+                                 (implicit conn: Conn): IO[String] = IO.blocking {
     Spi_sqlite_sync.query_inspect(q)
   }
 
@@ -25,7 +25,7 @@ trait Spi_sqlite_io extends Spi_io with StreamingJdbc with ModelUtils {
   }
 
   override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])
-                                       (implicit conn: Conn): IO[Unit] = IO.blocking {
+                                       (implicit conn: Conn): IO[String] = IO.blocking {
     Spi_sqlite_sync.queryOffset_inspect(q)
   }
 
@@ -35,7 +35,7 @@ trait Spi_sqlite_io extends Spi_io with StreamingJdbc with ModelUtils {
   }
 
   override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])
-                                       (implicit conn: Conn): IO[Unit] = IO.blocking {
+                                       (implicit conn: Conn): IO[String] = IO.blocking {
     Spi_sqlite_sync.queryCursor_inspect(q)
   }
 
@@ -65,7 +65,7 @@ trait Spi_sqlite_io extends Spi_io with StreamingJdbc with ModelUtils {
     Spi_sqlite_sync.save_transact(save)
   }
 
-  override def save_inspect(save: Save)(implicit conn: Conn): IO[Unit] = IO.blocking {
+  override def save_inspect(save: Save)(implicit conn: Conn): IO[String] = IO.blocking {
     Spi_sqlite_sync.save_inspect(save)
   }
 
@@ -78,7 +78,7 @@ trait Spi_sqlite_io extends Spi_io with StreamingJdbc with ModelUtils {
     Spi_sqlite_sync.insert_transact(insert)
   }
 
-  override def insert_inspect(insert: Insert)(implicit conn: Conn): IO[Unit] = IO.blocking {
+  override def insert_inspect(insert: Insert)(implicit conn: Conn): IO[String] = IO.blocking {
     Spi_sqlite_sync.insert_inspect(insert)
   }
 
@@ -91,7 +91,7 @@ trait Spi_sqlite_io extends Spi_io with StreamingJdbc with ModelUtils {
     Spi_sqlite_sync.update_transact(update)
   }
 
-  override def update_inspect(update: Update)(implicit conn: Conn): IO[Unit] = IO.blocking {
+  override def update_inspect(update: Update)(implicit conn: Conn): IO[String] = IO.blocking {
     Spi_sqlite_sync.update_inspect(update)
   }
 
@@ -104,7 +104,7 @@ trait Spi_sqlite_io extends Spi_io with StreamingJdbc with ModelUtils {
     Spi_sqlite_sync.delete_transact(delete)
   }
 
-  override def delete_inspect(delete: Delete)(implicit conn: Conn): IO[Unit] = IO.blocking {
+  override def delete_inspect(delete: Delete)(implicit conn: Conn): IO[String] = IO.blocking {
     Spi_sqlite_sync.delete_inspect(delete)
   }
 

@@ -18,4 +18,12 @@ case class DataModel(
   def add(backRef: BackRef): DataModel = {
     copy(elements :+ backRef, attrIndexes + backRef.coord(1))
   }
+
+  override def toString: String = {
+    val elems = if(elements.isEmpty) "" else elements.map(_.render(2)).mkString("\n", ",\n", "\n  ")
+    s"""DataModel(
+       |  List($elems),
+       |  $attrIndexes, $firstEntityIndex, $binds
+       |)""".stripMargin
+  }
 }

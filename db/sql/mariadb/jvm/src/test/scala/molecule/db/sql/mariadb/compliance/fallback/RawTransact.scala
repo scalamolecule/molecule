@@ -87,7 +87,6 @@ class RawTransact extends Test with DbProviders_mariadb with TestUtils {
 
   "Insert Set" - types { implicit conn =>
     for {
-      _ <- Entity.stringSet(Set("a", "b")).save.inspect
       _ <- rawTransact(s"""insert into Entity (stringSet        ) values ('["$string1", "$string2"]')""")
       _ <- rawTransact(s"""insert into Entity (intSet           ) values ('[$int1, $int2]')""")
       _ <- rawTransact(s"""insert into Entity (longSet          ) values ('[$long1, $long2]')""")

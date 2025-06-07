@@ -28,20 +28,8 @@ trait SpiAsync_openapi
     ???
   }
 
-  override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)
-                                   (implicit conn: Conn, ec: EC): Future[Unit] = {
-    //    future(Spi_datomic_sync.query_subscribe(q, callback))
-    ???
-  }
-
-  override def query_unsubscribe[Tpl](q: Query[Tpl])
-                                     (implicit conn: Conn, ec: EC): Future[Unit] = {
-    //    future(Spi_datomic_sync.query_unsubscribe(q))
-    ???
-  }
-
   override def query_inspect[Tpl](q: Query[Tpl])
-                                 (implicit conn: Conn, ec: EC): Future[Unit] = {
+                                 (implicit conn: Conn, ec: EC): Future[String] = {
     //    future(Spi_datomic_sync.query_inspect(q))
     ???
   }
@@ -54,7 +42,7 @@ trait SpiAsync_openapi
   }
 
   override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])
-                                       (implicit conn: Conn, ec: EC): Future[Unit] = {
+                                       (implicit conn: Conn, ec: EC): Future[String] = {
     //    future(Spi_datomic_sync.queryOffset_inspect(q))
     ???
   }
@@ -67,8 +55,21 @@ trait SpiAsync_openapi
   }
 
   override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])
-                                       (implicit conn: Conn, ec: EC): Future[Unit] = {
+                                       (implicit conn: Conn, ec: EC): Future[String] = {
     //    future(Spi_datomic_sync.queryCursor_inspect(q))
+    ???
+  }
+
+
+  override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)
+                                   (implicit conn: Conn, ec: EC): Future[Unit] = {
+    //    future(Spi_datomic_sync.query_subscribe(q, callback))
+    ???
+  }
+
+  override def query_unsubscribe[Tpl](q: Query[Tpl])
+                                     (implicit conn: Conn, ec: EC): Future[Unit] = {
+    //    future(Spi_datomic_sync.query_unsubscribe(q))
     ???
   }
 
@@ -78,7 +79,7 @@ trait SpiAsync_openapi
   override def save_transact(save: Save)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
     //    val conn = conn0.asInstanceOf[DatomicConn_JVM]
     //    for {
-    //      _ <- if (save.doInspect) save_inspect(save) else Future.unit
+    //      _ <- if (save.printInspect) save_inspect(save).map(println) else Future.unit
     //      errors <- save_validate(save)
     //      txReport <- errors match {
     //        case errors if errors.isEmpty => conn.transact_async(save_getStmts(save))
@@ -91,7 +92,7 @@ trait SpiAsync_openapi
     ???
   }
 
-  override def save_inspect(save: Save)(implicit conn: Conn, ec: EC): Future[Unit] = future {
+  override def save_inspect(save: Save)(implicit conn: Conn, ec: EC): Future[String] = future {
     //    Spi_datomic_sync.save_inspect(save)
     ???
   }
@@ -112,7 +113,7 @@ trait SpiAsync_openapi
   override def insert_transact(insert: Insert)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
     //    val conn = conn0.asInstanceOf[DatomicConn_JVM]
     //    for {
-    //      _ <- if (insert.doInspect) insert_inspect(insert) else Future.unit
+    //      _ <- if (insert.printInspect) insert_inspect(insert).map(println) else Future.unit
     //      errors <- insert_validate(insert)
     //      txReport <- errors match {
     //        case errors if errors.isEmpty => conn.transact_async(insert_getStmts(insert, conn.proxy))
@@ -125,7 +126,7 @@ trait SpiAsync_openapi
     ???
   }
 
-  override def insert_inspect(insert: Insert)(implicit conn: Conn, ec: EC): Future[Unit] = future {
+  override def insert_inspect(insert: Insert)(implicit conn: Conn, ec: EC): Future[String] = future {
     //    Spi_datomic_sync.insert_inspect(insert)
     ???
   }
@@ -147,7 +148,7 @@ trait SpiAsync_openapi
   override def update_transact(update: Update)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
     //    val conn = conn0.asInstanceOf[DatomicConn_JVM]
     //    for {
-    //      _ <- if (update.doInspect) update_inspect(update) else Future.unit
+    //      _ <- if (update.printInspect) update_inspect(update).map(println) else Future.unit
     //      errors <- update_validate(update)
     //      txReport <- errors match {
     //        case errors if errors.isEmpty => conn.transact_async(update_getStmts(update, conn))
@@ -160,7 +161,7 @@ trait SpiAsync_openapi
     ???
   }
 
-  override def update_inspect(update: Update)(implicit conn: Conn, ec: EC): Future[Unit] = future {
+  override def update_inspect(update: Update)(implicit conn: Conn, ec: EC): Future[String] = future {
     //    Spi_datomic_sync.update_inspect(update)
     ???
   }
@@ -181,7 +182,7 @@ trait SpiAsync_openapi
   override def delete_transact(delete: Delete)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
     //    val conn = conn0.asInstanceOf[DatomicConn_JVM]
     //    for {
-    //      _ <- if (delete.doInspect) delete_inspect(delete) else Future.unit
+    //      _ <- if (delete.printInspect) delete_inspect(delete).map(println) else Future.unit
     //      txReport <- conn.transact_async(delete_getStmts(delete, conn))
     //    } yield {
     //      conn.callback(delete.elements, true)
@@ -190,7 +191,7 @@ trait SpiAsync_openapi
     ???
   }
 
-  override def delete_inspect(delete: Delete)(implicit conn: Conn, ec: EC): Future[Unit] = future {
+  override def delete_inspect(delete: Delete)(implicit conn: Conn, ec: EC): Future[String] = future {
     //    Spi_datomic_sync.delete_inspect(delete)
     ???
   }

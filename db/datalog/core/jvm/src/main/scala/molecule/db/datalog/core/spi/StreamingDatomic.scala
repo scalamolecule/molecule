@@ -18,7 +18,7 @@ trait StreamingDatomic {
     getStream: (Query[Tpl], Conn) => (jStream[jList[AnyRef]], jList[AnyRef] => Any)
   )(implicit conn: Conn): fs2.Stream[IO, Tpl] = {
     val inspectIO: IO[Unit] =
-      if (q.doInspect) IO.blocking(inspect(q, conn))
+      if (q.printInspect) IO.blocking(inspect(q, conn))
       else IO.unit
 
     def chunkify(it: jIterator[jList[AnyRef]], row2tpl: jList[AnyRef] => Any): IO[Option[(List[Tpl], Unit)]] =
@@ -60,7 +60,7 @@ trait StreamingDatomic {
       }
 
     def inspectZIO(conn: Conn): ZIO[Any, MoleculeError, Unit] =
-      if (q.doInspect)
+      if (q.printInspect)
         attemptBlockingMolecule(inspect(q, conn))
       else
         ZIO.unit

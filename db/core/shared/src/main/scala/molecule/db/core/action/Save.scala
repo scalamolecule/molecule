@@ -5,7 +5,7 @@ import molecule.db.core.ast.DataModel
 
 case class Save(
   dataModel: DataModel,
-  private[molecule] val doInspect: Boolean = false,
+  private[molecule] val printInspect: Boolean = false,
   private[molecule] val doValidate: Boolean = true
 ) extends Action {
 
@@ -16,5 +16,5 @@ case class Save(
 //    throw ModelError("Save action does not support bind parameters.")
 
   // Inspect also
-  def i: Save = copy(doInspect = true)
+  def i: Save = copy(printInspect = true)
 }

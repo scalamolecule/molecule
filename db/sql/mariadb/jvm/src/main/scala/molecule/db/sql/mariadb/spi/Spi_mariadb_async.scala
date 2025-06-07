@@ -15,7 +15,7 @@ trait Spi_mariadb_async extends Spi_async with StreamingJdbc with ModelUtils {
     Spi_mariadb_sync.query_get(q)
   }
   override def query_inspect[Tpl](q: Query[Tpl])
-                                 (implicit conn: Conn, ec: EC): Future[Unit] = Future {
+                                 (implicit conn: Conn, ec: EC): Future[String] = Future {
     Spi_mariadb_sync.query_inspect(q)
   }
 
@@ -24,7 +24,7 @@ trait Spi_mariadb_async extends Spi_async with StreamingJdbc with ModelUtils {
     Spi_mariadb_sync.queryOffset_get(q)
   }
   override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])
-                                       (implicit conn: Conn, ec: EC): Future[Unit] = Future {
+                                       (implicit conn: Conn, ec: EC): Future[String] = Future {
     Spi_mariadb_sync.queryOffset_inspect(q)
   }
 
@@ -33,7 +33,7 @@ trait Spi_mariadb_async extends Spi_async with StreamingJdbc with ModelUtils {
     Spi_mariadb_sync.queryCursor_get(q)
   }
   override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])
-                                       (implicit conn: Conn, ec: EC): Future[Unit] = Future {
+                                       (implicit conn: Conn, ec: EC): Future[String] = Future {
     Spi_mariadb_sync.queryCursor_inspect(q)
   }
 
@@ -61,7 +61,7 @@ trait Spi_mariadb_async extends Spi_async with StreamingJdbc with ModelUtils {
   override def save_transact(save: Save)(implicit conn: Conn, ec: EC): Future[TxReport] = Future {
     Spi_mariadb_sync.save_transact(save)
   }
-  override def save_inspect(save: Save)(implicit conn: Conn, ec: EC): Future[Unit] = Future {
+  override def save_inspect(save: Save)(implicit conn: Conn, ec: EC): Future[String] = Future {
     Spi_mariadb_sync.save_inspect(save)
   }
   override def save_validate(save: Save)(implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = Future {
@@ -71,7 +71,7 @@ trait Spi_mariadb_async extends Spi_async with StreamingJdbc with ModelUtils {
   override def insert_transact(insert: Insert)(implicit conn: Conn, ec: EC): Future[TxReport] = Future {
     Spi_mariadb_sync.insert_transact(insert)
   }
-  override def insert_inspect(insert: Insert)(implicit conn: Conn, ec: EC): Future[Unit] = Future {
+  override def insert_inspect(insert: Insert)(implicit conn: Conn, ec: EC): Future[String] = Future {
     Spi_mariadb_sync.insert_inspect(insert)
   }
   override def insert_validate(insert: Insert)(implicit conn: Conn, ec: EC): Future[Seq[(Int, Seq[InsertError])]] = Future {
@@ -82,7 +82,7 @@ trait Spi_mariadb_async extends Spi_async with StreamingJdbc with ModelUtils {
   override def update_transact(update: Update)(implicit conn: Conn, ec: EC): Future[TxReport] = Future {
     Spi_mariadb_sync.update_transact(update)
   }
-  override def update_inspect(update: Update)(implicit conn: Conn, ec: EC): Future[Unit] = Future {
+  override def update_inspect(update: Update)(implicit conn: Conn, ec: EC): Future[String] = Future {
     Spi_mariadb_sync.update_inspect(update)
   }
   override def update_validate(update: Update)(implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = Future {
@@ -93,7 +93,7 @@ trait Spi_mariadb_async extends Spi_async with StreamingJdbc with ModelUtils {
   override def delete_transact(delete: Delete)(implicit conn: Conn, ec: EC): Future[TxReport] = Future {
     Spi_mariadb_sync.delete_transact(delete)
   }
-  override def delete_inspect(delete: Delete)(implicit conn: Conn, ec: EC): Future[Unit] = Future {
+  override def delete_inspect(delete: Delete)(implicit conn: Conn, ec: EC): Future[String] = Future {
     Spi_mariadb_sync.delete_inspect(delete)
   }
 

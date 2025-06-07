@@ -117,18 +117,6 @@ case class AsyncApi(
   }
 
 
-  "Inspection" - types { implicit conn =>
-    for {
-      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids) // Need data for update and delete
-      _ <- Entity.int.insert(1, 2).inspect
-      _ <- Entity.int(3).save.inspect
-      _ <- Entity.int.query.inspect
-      _ <- Entity(a).int(10).update.inspect
-      _ <- Entity(b).delete.inspect
-    } yield ()
-  }
-
-
   "Offset query" - types { implicit conn =>
     for {
       _ <- Entity.int.insert(1, 2, 3).transact

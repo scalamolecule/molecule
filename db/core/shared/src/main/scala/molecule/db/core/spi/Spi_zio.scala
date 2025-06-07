@@ -13,7 +13,7 @@ trait Spi_zio {
 
   def query_inspect[Tpl](
     q: Query[Tpl]
-  ): ZIO[Conn, MoleculeError, Unit]
+  ): ZIO[Conn, MoleculeError, String]
 
 
   def queryOffset_get[Tpl](
@@ -22,7 +22,7 @@ trait Spi_zio {
 
   def queryOffset_inspect[Tpl](
     q: QueryOffset[Tpl]
-  ): ZIO[Conn, MoleculeError, Unit]
+  ): ZIO[Conn, MoleculeError, String]
 
 
   def queryCursor_get[Tpl](
@@ -31,7 +31,7 @@ trait Spi_zio {
 
   def queryCursor_inspect[Tpl](
     q: QueryCursor[Tpl]
-  ): ZIO[Conn, MoleculeError, Unit]
+  ): ZIO[Conn, MoleculeError, String]
 
 
   def query_stream[Tpl](
@@ -58,19 +58,19 @@ trait Spi_zio {
 
 
   def save_transact(save: Save): ZIO[Conn, MoleculeError, TxReport]
-  def save_inspect(save: Save): ZIO[Conn, MoleculeError, Unit]
+  def save_inspect(save: Save): ZIO[Conn, MoleculeError, String]
   def save_validate(save: Save): ZIO[Conn, MoleculeError, Map[String, Seq[String]]]
 
   def insert_transact(insert: Insert): ZIO[Conn, MoleculeError, TxReport]
-  def insert_inspect(insert: Insert): ZIO[Conn, MoleculeError, Unit]
+  def insert_inspect(insert: Insert): ZIO[Conn, MoleculeError, String]
   def insert_validate(insert: Insert): ZIO[Conn, MoleculeError, Seq[(Int, Seq[InsertError])]]
 
   def update_transact(update: Update): ZIO[Conn, MoleculeError, TxReport]
-  def update_inspect(update: Update): ZIO[Conn, MoleculeError, Unit]
+  def update_inspect(update: Update): ZIO[Conn, MoleculeError, String]
   def update_validate(update: Update): ZIO[Conn, MoleculeError, Map[String, Seq[String]]]
 
   def delete_transact(delete: Delete): ZIO[Conn, MoleculeError, TxReport]
-  def delete_inspect(delete: Delete): ZIO[Conn, MoleculeError, Unit]
+  def delete_inspect(delete: Delete): ZIO[Conn, MoleculeError, String]
 
 
   private def noJS(method: String): Nothing =

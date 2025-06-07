@@ -4,9 +4,9 @@ import molecule.db.core.ast.DataModel
 
 case class Delete(
   dataModel: DataModel,
-  private[molecule] val doInspect: Boolean = false
+  private[molecule] val printInspect: Boolean = false
 ) extends Action {
 
   // Inspect also
-  def i: Delete = copy(doInspect = true)
+  def i: Delete = copy(printInspect = true)
 }

@@ -95,19 +95,6 @@ object Adhoc_jvm_h2_zio extends ZIOSpecDefault with DbProviders_h2_zio {
       //      }.provide(validation.orDie),
       //
       //
-      //      test("Inspection") {
-      //        for {
-      //          ids <- Entity.int.insert(1, 2).transact.map(_.ids) // Need data for update and delete
-      //          _ <- Entity.int.insert(1, 2).inspect
-      //          _ <- Entity.int(3).save.inspect
-      //          _ <- Entity.int.query.inspect
-      //          _ <- Entity.int.query.get
-      //          _ <- Entity(ids(0)).int(10).update.inspect
-      //          _ <- Entity(ids(1)).delete.inspect
-      //        } yield assertTrue(true)
-      //      }.provide(types.orDie),
-      //
-      //
       //      test("Offset query")(
       //        for {
       //          _ <- Entity.int.insert(1, 2, 3).transact

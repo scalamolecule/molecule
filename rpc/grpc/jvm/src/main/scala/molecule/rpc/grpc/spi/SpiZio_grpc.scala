@@ -24,23 +24,10 @@ trait SpiZio_grpc
     ???
   }
 
-  override def query_subscribe[Tpl](
-    q: Query[Tpl], callback: List[Tpl] => Unit
-  ): ZIO[Conn, MoleculeError, Unit] = {
-    //    sync2zio[Unit]((conn: DatomicConn_JVM) => SpiSync_grpc.query_subscribe(q, callback)(conn))
-    ???
-  }
-  override def query_unsubscribe[Tpl](
-    q: Query[Tpl]
-  ): ZIO[Conn, MoleculeError, Unit] = {
-    //    sync2zio[Unit]((conn: DatomicConn_JVM) => SpiSync_grpc.query_unsubscribe(q)(conn))
-    ???
-  }
-
   override def query_inspect[Tpl](
     q: Query[Tpl]
-  ): ZIO[Conn, MoleculeError, Unit] = {
-    //    sync2zio[Unit]((conn: DatomicConn_JVM) => SpiSync_grpc.query_inspect(q)(conn))
+  ): ZIO[Conn, MoleculeError, String] = {
+    //    sync2zio[String]((conn: DatomicConn_JVM) => SpiSync_grpc.query_inspect(q)(conn))
     ???
   }
 
@@ -54,8 +41,8 @@ trait SpiZio_grpc
 
   override def queryOffset_inspect[Tpl](
     q: QueryOffset[Tpl]
-  ): ZIO[Conn, MoleculeError, Unit] = {
-    //    printInspectQuery("QUERY (offset)", q.elements)
+  ): ZIO[Conn, MoleculeError, String] = {
+    //    renderInspectQuery("QUERY (offset)", q.elements)
     ???
   }
 
@@ -69,11 +56,25 @@ trait SpiZio_grpc
 
   override def queryCursor_inspect[Tpl](
     q: QueryCursor[Tpl]
-  ): ZIO[Conn, MoleculeError, Unit] = {
-    //    printInspectQuery("QUERY (cursor)", q.elements)
+  ): ZIO[Conn, MoleculeError, String] = {
+    //    renderInspectQuery("QUERY (cursor)", q.elements)
     ???
   }
 
+
+
+  override def query_subscribe[Tpl](
+    q: Query[Tpl], callback: List[Tpl] => Unit
+  ): ZIO[Conn, MoleculeError, Unit] = {
+    //    sync2zio[Unit]((conn: DatomicConn_JVM) => SpiSync_grpc.query_subscribe(q, callback)(conn))
+    ???
+  }
+  override def query_unsubscribe[Tpl](
+    q: Query[Tpl]
+  ): ZIO[Conn, MoleculeError, Unit] = {
+    //    sync2zio[Unit]((conn: DatomicConn_JVM) => SpiSync_grpc.query_unsubscribe(q)(conn))
+    ???
+  }
 
   // Save --------------------------------------------------------
 
@@ -95,8 +96,8 @@ trait SpiZio_grpc
     ???
   }
 
-  override def save_inspect(save: Save): ZIO[Conn, MoleculeError, Unit] = {
-    //    sync2zio[Unit]((conn: DatomicConn_JVM) => SpiSync_grpc.save_inspect(save)(conn))
+  override def save_inspect(save: Save): ZIO[Conn, MoleculeError, String] = {
+    //    sync2zio[String]((conn: DatomicConn_JVM) => SpiSync_grpc.save_inspect(save)(conn))
     ???
   }
 
@@ -126,8 +127,8 @@ trait SpiZio_grpc
     ???
   }
 
-  override def insert_inspect(insert: Insert): ZIO[Conn, MoleculeError, Unit] = {
-    //    sync2zio[Unit]((conn: DatomicConn_JVM) => SpiSync_grpc.insert_inspect(insert)(conn))
+  override def insert_inspect(insert: Insert): ZIO[Conn, MoleculeError, String] = {
+    //    sync2zio[String]((conn: DatomicConn_JVM) => SpiSync_grpc.insert_inspect(insert)(conn))
     ???
   }
 
@@ -157,8 +158,8 @@ trait SpiZio_grpc
     ???
   }
 
-  override def update_inspect(update: Update): ZIO[Conn, MoleculeError, Unit] = {
-    //    sync2zio[Unit]((conn: DatomicConn_JVM) => SpiSync_grpc.update_inspect(update)(conn))
+  override def update_inspect(update: Update): ZIO[Conn, MoleculeError, String] = {
+    //    sync2zio[String]((conn: DatomicConn_JVM) => SpiSync_grpc.update_inspect(update)(conn))
     ???
   }
 
@@ -185,8 +186,8 @@ trait SpiZio_grpc
     ???
   }
 
-  override def delete_inspect(delete: Delete): ZIO[Conn, MoleculeError, Unit] = {
-    //    sync2zio[Unit]((conn: DatomicConn_JVM) => SpiSync_grpc.delete_inspect(delete)(conn))
+  override def delete_inspect(delete: Delete): ZIO[Conn, MoleculeError, String] = {
+    //    sync2zio[String]((conn: DatomicConn_JVM) => SpiSync_grpc.delete_inspect(delete)(conn))
     ???
   }
 

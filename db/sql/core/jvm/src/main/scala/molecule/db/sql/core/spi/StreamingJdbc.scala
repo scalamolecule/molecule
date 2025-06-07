@@ -21,7 +21,7 @@ trait StreamingJdbc {
 
     // Ensure the inspection runs in IO
     val inspectIO: IO[Unit] =
-      if (q.doInspect) IO.blocking(inspect(q, conn))
+      if (q.printInspect) IO.blocking(inspect(q, conn))
       else IO.unit
 
     // Resource handling for Statement & ResultSet
@@ -73,7 +73,7 @@ trait StreamingJdbc {
 
     // Ensure the inspection runs in ZIO
     def inspectZIO(conn: Conn): ZIO[Any, MoleculeError, Unit] =
-      if (q.doInspect)
+      if (q.printInspect)
         attemptBlockingMolecule(inspect(q, conn))
       else
         ZIO.unit

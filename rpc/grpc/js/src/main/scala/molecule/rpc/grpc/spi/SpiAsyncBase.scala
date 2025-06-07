@@ -23,6 +23,42 @@ trait SpiAsyncBase extends SpiAsync with Renderer with FutureUtils {
     ???
   }
 
+  override def query_inspect[Tpl](q: Query[Tpl])(implicit conn: Conn, ec: EC): Future[String] = {
+    //    renderInspectQuery("QUERY", q.elements)
+    ???
+  }
+
+
+  override def queryOffset_get[Tpl](q: QueryOffset[Tpl])
+                                   (implicit conn0: Conn, ec: EC): Future[(List[Tpl], Int, Boolean)] = {
+    //    val conn  = conn0.asInstanceOf[JdbcConn_JS]
+    //    val proxy = conn.proxy.copy(dbView = q.dbView)
+    //    conn.rpc.queryOffset[Tpl](proxy, q.elements, q.optLimit, q.offset).future
+    ???
+  }
+
+  override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])
+                                       (implicit conn: Conn, ec: EC): Future[String] = {
+    //    renderInspectQuery("QUERY (offset)", q.elements)
+    ???
+  }
+
+
+  override def queryCursor_get[Tpl](q: QueryCursor[Tpl])
+                                   (implicit conn0: Conn, ec: EC): Future[(List[Tpl], String, Boolean)] = {
+    //    val conn  = conn0.asInstanceOf[JdbcConn_JS]
+    //    val proxy = conn.proxy.copy(dbView = q.dbView)
+    //    conn.rpc.queryCursor[Tpl](proxy, q.elements, q.optLimit, q.cursor).future
+    ???
+  }
+
+  override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])
+                                       (implicit conn: Conn, ec: EC): Future[String] = {
+    //    renderInspectQuery("QUERY (cursor)", q.elements)
+    ???
+  }
+
+
   override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)
                                    (implicit conn0: Conn, ec: EC): Future[Unit] = {
     //    val conn             = conn0.asInstanceOf[JdbcConn_JS]
@@ -47,41 +83,6 @@ trait SpiAsyncBase extends SpiAsync with Renderer with FutureUtils {
     ???
   }
 
-  override def query_inspect[Tpl](q: Query[Tpl])(implicit conn: Conn, ec: EC): Future[Unit] = {
-    //    printInspectQuery("QUERY", q.elements)
-    ???
-  }
-
-
-  override def queryOffset_get[Tpl](q: QueryOffset[Tpl])
-                                   (implicit conn0: Conn, ec: EC): Future[(List[Tpl], Int, Boolean)] = {
-    //    val conn  = conn0.asInstanceOf[JdbcConn_JS]
-    //    val proxy = conn.proxy.copy(dbView = q.dbView)
-    //    conn.rpc.queryOffset[Tpl](proxy, q.elements, q.optLimit, q.offset).future
-    ???
-  }
-
-  override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])
-                                       (implicit conn: Conn, ec: EC): Future[Unit] = {
-    //    printInspectQuery("QUERY (offset)", q.elements)
-    ???
-  }
-
-
-  override def queryCursor_get[Tpl](q: QueryCursor[Tpl])
-                                   (implicit conn0: Conn, ec: EC): Future[(List[Tpl], String, Boolean)] = {
-    //    val conn  = conn0.asInstanceOf[JdbcConn_JS]
-    //    val proxy = conn.proxy.copy(dbView = q.dbView)
-    //    conn.rpc.queryCursor[Tpl](proxy, q.elements, q.optLimit, q.cursor).future
-    ???
-  }
-
-  override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])
-                                       (implicit conn: Conn, ec: EC): Future[Unit] = {
-    //    printInspectQuery("QUERY (cursor)", q.elements)
-    ???
-  }
-
 
   // Save --------------------------------------------------------
 
@@ -89,7 +90,7 @@ trait SpiAsyncBase extends SpiAsync with Renderer with FutureUtils {
     //    val conn = conn0.asInstanceOf[JdbcConn_JS]
     //    val save = save0.copy(elements = noKeywords(save0.elements, conn.proxy))
     //    for {
-    //      _ <- if (save.doInspect) save_inspect(save) else Future.unit
+    //      _ <- if (save.printInspect) save_inspect(save).map(println) else Future.unit
     //      errors <- save_validate(save0) // validate original elements against meta model
     //      txReport <- errors match {
     //        case errors if errors.isEmpty => conn.rpc.save(conn.proxy, save.elements).future
@@ -102,8 +103,8 @@ trait SpiAsyncBase extends SpiAsync with Renderer with FutureUtils {
     ???
   }
 
-  override def save_inspect(save: Save)(implicit conn: Conn, ec: EC): Future[Unit] = {
-    //    printInspectTx("SAVE", save.elements)
+  override def save_inspect(save: Save)(implicit conn: Conn, ec: EC): Future[String] = {
+    //    renderInspectTx("SAVE", save.elements)
     ???
   }
 
@@ -120,7 +121,7 @@ trait SpiAsyncBase extends SpiAsync with Renderer with FutureUtils {
     //    val conn   = conn0.asInstanceOf[JdbcConn_JS]
     //    val insert = insert0.copy(elements = noKeywords(insert0.elements, conn.proxy))
     //    for {
-    //      _ <- if (insert.doInspect) insert_inspect(insert) else Future.unit
+    //      _ <- if (insert.printInspect) insert_inspect(insert).map(println) else Future.unit
     //      errors <- insert_validate(insert0) // validate original elements against meta model
     //      txReport <- errors match {
     //        case errors if errors.isEmpty =>
@@ -135,8 +136,8 @@ trait SpiAsyncBase extends SpiAsync with Renderer with FutureUtils {
     ???
   }
 
-  override def insert_inspect(insert: Insert)(implicit conn: Conn, ec: EC): Future[Unit] = {
-    //    printInspectTx("INSERT", insert.elements)
+  override def insert_inspect(insert: Insert)(implicit conn: Conn, ec: EC): Future[String] = {
+    //    renderInspectTx("INSERT", insert.elements)
     ???
   }
 
@@ -153,7 +154,7 @@ trait SpiAsyncBase extends SpiAsync with Renderer with FutureUtils {
     //    val conn   = conn0.asInstanceOf[JdbcConn_JS]
     //    val update = update0.copy(elements = noKeywords(update0.elements, conn.proxy))
     //    for {
-    //      _ <- if (update.doInspect) update_inspect(update) else Future.unit
+    //      _ <- if (update.printInspect) update_inspect(update).map(println) else Future.unit
     //      errors <- update_validate(update0) // validate original elements against meta model
     //      txReport <- errors match {
     //        case errors if errors.isEmpty => conn.rpc.update(conn.proxy, update.elements, update.isUpsert).future
@@ -166,8 +167,8 @@ trait SpiAsyncBase extends SpiAsync with Renderer with FutureUtils {
     ???
   }
 
-  override def update_inspect(update: Update)(implicit conn: Conn, ec: EC): Future[Unit] = {
-    //    printInspectTx("UPDATE", update.elements)
+  override def update_inspect(update: Update)(implicit conn: Conn, ec: EC): Future[String] = {
+    //    renderInspectTx("UPDATE", update.elements)
     ???
   }
 
@@ -193,20 +194,20 @@ trait SpiAsyncBase extends SpiAsync with Renderer with FutureUtils {
     ???
   }
 
-  override def delete_inspect(delete: Delete)(implicit conn: Conn, ec: EC): Future[Unit] = {
-    //    printInspectTx("DELETE", delete.elements)
+  override def delete_inspect(delete: Delete)(implicit conn: Conn, ec: EC): Future[String] = {
+    //    renderInspectTx("DELETE", delete.elements)
     ???
   }
 
 
   // Util --------------------------------------
 
-  private def printInspectTx(label: String, elements: List[Element])
+  private def renderInspectTx(label: String, dataModel: DataModel)
                             (implicit ec: EC): Future[Unit] = {
     //    Future(printRaw("RPC " + label, elements))
     ???
   }
 
-  protected def printInspectQuery(label: String, elements: List[Element])
+  protected def renderInspectQuery(label: String, dataModel: DataModel)
                                  (implicit ec: EC): Future[Unit]
 }

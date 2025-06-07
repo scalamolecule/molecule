@@ -18,7 +18,7 @@ trait Spi_h2_async extends Spi_async with StreamingJdbc with ModelUtils {
 
   override def query_inspect[Tpl](
     q: Query[Tpl]
-  )(implicit conn: Conn, ec: EC): Future[Unit] = Future {
+  )(implicit conn: Conn, ec: EC): Future[String] = Future {
     Spi_h2_sync.query_inspect(q)
   }
 
@@ -29,7 +29,7 @@ trait Spi_h2_async extends Spi_async with StreamingJdbc with ModelUtils {
   }
   override def queryOffset_inspect[Tpl](
     q: QueryOffset[Tpl]
-  )(implicit conn: Conn, ec: EC): Future[Unit] = Future {
+  )(implicit conn: Conn, ec: EC): Future[String] = Future {
     Spi_h2_sync.queryOffset_inspect(q)
   }
 
@@ -40,7 +40,7 @@ trait Spi_h2_async extends Spi_async with StreamingJdbc with ModelUtils {
   }
   override def queryCursor_inspect[Tpl](
     q: QueryCursor[Tpl]
-  )(implicit conn: Conn, ec: EC): Future[Unit] = Future {
+  )(implicit conn: Conn, ec: EC): Future[String] = Future {
     Spi_h2_sync.queryCursor_inspect(q)
   }
 
@@ -74,7 +74,7 @@ trait Spi_h2_async extends Spi_async with StreamingJdbc with ModelUtils {
   }
   override def save_inspect(
     save: Save
-  )(implicit conn: Conn, ec: EC): Future[Unit] = Future {
+  )(implicit conn: Conn, ec: EC): Future[String] = Future {
     Spi_h2_sync.save_inspect(save)
   }
   override def save_validate(
@@ -90,7 +90,7 @@ trait Spi_h2_async extends Spi_async with StreamingJdbc with ModelUtils {
   }
   override def insert_inspect(
     insert: Insert
-  )(implicit conn: Conn, ec: EC): Future[Unit] = Future {
+  )(implicit conn: Conn, ec: EC): Future[String] = Future {
     Spi_h2_sync.insert_inspect(insert)
   }
   override def insert_validate(
@@ -107,7 +107,7 @@ trait Spi_h2_async extends Spi_async with StreamingJdbc with ModelUtils {
   }
   override def update_inspect(
     update: Update
-  )(implicit conn: Conn, ec: EC): Future[Unit] = Future {
+  )(implicit conn: Conn, ec: EC): Future[String] = Future {
     Spi_h2_sync.update_inspect(update)
   }
   override def update_validate(
@@ -124,7 +124,7 @@ trait Spi_h2_async extends Spi_async with StreamingJdbc with ModelUtils {
   }
   override def delete_inspect(
     delete: Delete
-  )(implicit conn: Conn, ec: EC): Future[Unit] = Future {
+  )(implicit conn: Conn, ec: EC): Future[String] = Future {
     Spi_h2_sync.delete_inspect(delete)
   }
 

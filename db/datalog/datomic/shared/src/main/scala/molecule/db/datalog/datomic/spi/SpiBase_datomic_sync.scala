@@ -6,11 +6,11 @@ import molecule.db.datalog.core.query.Model2DatomicQuery
 
 trait SpiBase_datomic_sync extends Renderer {
 
-  protected def printInspectQuery(
+  protected def renderInspectQuery(
     label: String,
     dataModel: DataModel
-  ): Unit = {
+  ): String = {
     val queries = new Model2DatomicQuery(dataModel).getDatomicQueries(false)._3
-    printRaw(label, dataModel.elements, queries)
+    renderInspection(label, dataModel, queries)
   }
 }

@@ -24,8 +24,8 @@ trait Spi_datomic_zio
 
   override def query_inspect[Tpl](
     q: Query[Tpl]
-  ): ZIO[Conn, MoleculeError, Unit] = {
-    sync2zio[Unit]((conn: DatomicConn_JVM) => Spi_datomic_sync.query_inspect(q)(conn))
+  ): ZIO[Conn, MoleculeError, String] = {
+    sync2zio[String]((conn: DatomicConn_JVM) => Spi_datomic_sync.query_inspect(q)(conn))
   }
 
 
@@ -37,8 +37,8 @@ trait Spi_datomic_zio
 
   override def queryOffset_inspect[Tpl](
     q: QueryOffset[Tpl]
-  ): ZIO[Conn, MoleculeError, Unit] = {
-    printInspectQuery("QUERY (offset)", q.dataModel)
+  ): ZIO[Conn, MoleculeError, String] = {
+    renderInspectQuery("QUERY (offset)", q.dataModel)
   }
 
 
@@ -50,8 +50,8 @@ trait Spi_datomic_zio
 
   override def queryCursor_inspect[Tpl](
     q: QueryCursor[Tpl]
-  ): ZIO[Conn, MoleculeError, Unit] = {
-    printInspectQuery("QUERY (cursor)", q.dataModel)
+  ): ZIO[Conn, MoleculeError, String] = {
+    renderInspectQuery("QUERY (cursor)", q.dataModel)
   }
 
 
@@ -100,8 +100,8 @@ trait Spi_datomic_zio
     } yield txReport
   }
 
-  override def save_inspect(save: Save): ZIO[Conn, MoleculeError, Unit] = {
-    sync2zio[Unit]((conn: DatomicConn_JVM) => Spi_datomic_sync.save_inspect(save)(conn))
+  override def save_inspect(save: Save): ZIO[Conn, MoleculeError, String] = {
+    sync2zio[String]((conn: DatomicConn_JVM) => Spi_datomic_sync.save_inspect(save)(conn))
   }
 
   override def save_validate(save: Save): ZIO[Conn, MoleculeError, Map[String, Seq[String]]] = {
@@ -130,8 +130,8 @@ trait Spi_datomic_zio
     } yield txReport
   }
 
-  override def insert_inspect(insert: Insert): ZIO[Conn, MoleculeError, Unit] = {
-    sync2zio[Unit]((conn: DatomicConn_JVM) => Spi_datomic_sync.insert_inspect(insert)(conn))
+  override def insert_inspect(insert: Insert): ZIO[Conn, MoleculeError, String] = {
+    sync2zio[String]((conn: DatomicConn_JVM) => Spi_datomic_sync.insert_inspect(insert)(conn))
   }
 
   override def insert_validate(insert: Insert): ZIO[Conn, MoleculeError, Seq[(Int, Seq[InsertError])]] = {
@@ -160,8 +160,8 @@ trait Spi_datomic_zio
     } yield txReport
   }
 
-  override def update_inspect(update: Update): ZIO[Conn, MoleculeError, Unit] = {
-    sync2zio[Unit]((conn: DatomicConn_JVM) => Spi_datomic_sync.update_inspect(update)(conn))
+  override def update_inspect(update: Update): ZIO[Conn, MoleculeError, String] = {
+    sync2zio[String]((conn: DatomicConn_JVM) => Spi_datomic_sync.update_inspect(update)(conn))
   }
 
   override def update_validate(update: Update): ZIO[Conn, MoleculeError, Map[String, Seq[String]]] = {
@@ -186,8 +186,8 @@ trait Spi_datomic_zio
     } yield txReport
   }
 
-  override def delete_inspect(delete: Delete): ZIO[Conn, MoleculeError, Unit] = {
-    sync2zio[Unit]((conn: DatomicConn_JVM) => Spi_datomic_sync.delete_inspect(delete)(conn))
+  override def delete_inspect(delete: Delete): ZIO[Conn, MoleculeError, String] = {
+    sync2zio[String]((conn: DatomicConn_JVM) => Spi_datomic_sync.delete_inspect(delete)(conn))
   }
 
 

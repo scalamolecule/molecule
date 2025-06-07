@@ -581,168 +581,165 @@ case class Transactions_async(
   }
 
 
-  "throw" - {
+  "throw: inner" - types { implicit conn =>
+    for {
+      _ <- Entity.int.insert(1 to 7).transact
 
-    "throw: inner" - types { implicit conn =>
-      for {
-        _ <- Entity.int.insert(1 to 7).transact
+      _ <- unitOfWork {
+        savepoint { _ =>
+          for {
+            _ <- Entity.int(count).query.get.map(_.head ==> 7)
 
-        _ <- unitOfWork {
-          savepoint { _ =>
-            for {
-              _ <- Entity.int(count).query.get.map(_.head ==> 7)
+            _ <- Entity.int_.<=(2).delete.transact
+            _ <- Entity.int(count).query.get.map(_.head ==> 5)
 
-              _ <- Entity.int_.<=(2).delete.transact
-              _ <- Entity.int(count).query.get.map(_.head ==> 5)
+            _ <- savepoint { _ =>
+              for {
+                _ <- Entity.int_.<=(4).delete.transact
+                _ <- Entity.int(count).query.get.map(_.head ==> 3)
 
-              _ <- savepoint { _ =>
-                for {
-                  _ <- Entity.int_.<=(4).delete.transact
-                  _ <- Entity.int(count).query.get.map(_.head ==> 3)
-
-                  _ <- savepoint { _ =>
-                    for {
-                      _ <- Entity.int_.<=(6).delete.transact
-                      _ <- Entity.int(count).query.get.map(_.head ==> 1)
-                    } yield {
-                      throw new Exception
-                    }
-                  }.recover {
-                    case e: Exception => /*donothing*/
+                _ <- savepoint { _ =>
+                  for {
+                    _ <- Entity.int_.<=(6).delete.transact
+                    _ <- Entity.int(count).query.get.map(_.head ==> 1)
+                  } yield {
+                    throw new Exception
                   }
-                  _ <- Entity.int(count).query.get.map(_.head ==> 3)
-                } yield ()
-              }
-              _ <- Entity.int(count).query.get.map(_.head ==> 3)
-            } yield ()
-          }
-        }
-
-        // 1-4 deleted
-        _ <- Entity.int(count).query.get.map(_.head ==> 3)
-      } yield ()
-    }
-
-
-    "throw: middle" - types { implicit conn =>
-      for {
-        _ <- Entity.int.insert(1 to 7).transact
-
-        _ <- unitOfWork {
-          savepoint { _ =>
-            for {
-              _ <- Entity.int(count).query.get.map(_.head ==> 7)
-
-              _ <- Entity.int_.<=(2).delete.transact
-              _ <- Entity.int(count).query.get.map(_.head ==> 5)
-
-              _ <- savepoint { _ =>
-                for {
-                  _ <- Entity.int_.<=(4).delete.transact
-                  _ <- Entity.int(count).query.get.map(_.head ==> 3)
-
-                  _ <- savepoint { _ =>
-                    for {
-                      _ <- Entity.int_.<=(6).delete.transact
-                      _ <- Entity.int(count).query.get.map(_.head ==> 1)
-                    } yield ()
-                  }
-                  _ <- Entity.int(count).query.get.map(_.head ==> 1)
-                } yield {
-                  throw new Exception
+                }.recover {
+                  case e: Exception => /*donothing*/
                 }
-              }.recover {
-                case e: Exception => /*donothing*/
-              }
-              _ <- Entity.int(count).query.get.map(_.head ==> 5)
-            } yield ()
-          }
+                _ <- Entity.int(count).query.get.map(_.head ==> 3)
+              } yield ()
+            }
+            _ <- Entity.int(count).query.get.map(_.head ==> 3)
+          } yield ()
         }
+      }
 
-        // 1-2 deleted
-        _ <- Entity.int(count).query.get.map(_.head ==> 5)
-      } yield ()
-    }
+      // 1-4 deleted
+      _ <- Entity.int(count).query.get.map(_.head ==> 3)
+    } yield ()
+  }
 
 
-    "throw: innerMiddle" - types { implicit conn =>
-      for {
-        _ <- Entity.int.insert(1 to 7).transact
+  "throw: middle" - types { implicit conn =>
+    for {
+      _ <- Entity.int.insert(1 to 7).transact
 
-        _ <- unitOfWork {
-          savepoint { _ =>
-            for {
-              _ <- Entity.int(count).query.get.map(_.head ==> 7)
+      _ <- unitOfWork {
+        savepoint { _ =>
+          for {
+            _ <- Entity.int(count).query.get.map(_.head ==> 7)
 
-              _ <- Entity.int_.<=(2).delete.transact
-              _ <- Entity.int(count).query.get.map(_.head ==> 5)
+            _ <- Entity.int_.<=(2).delete.transact
+            _ <- Entity.int(count).query.get.map(_.head ==> 5)
 
-              _ <- savepoint { _ =>
-                for {
-                  _ <- Entity.int_.<=(4).delete.transact
-                  _ <- Entity.int(count).query.get.map(_.head ==> 3)
+            _ <- savepoint { _ =>
+              for {
+                _ <- Entity.int_.<=(4).delete.transact
+                _ <- Entity.int(count).query.get.map(_.head ==> 3)
 
-                  _ <- savepoint { _ =>
-                    for {
-                      _ <- Entity.int_.<=(6).delete.transact
-                      _ <- Entity.int(count).query.get.map(_.head ==> 1)
-                    } yield {
-                      throw new Exception
-                    }
+                _ <- savepoint { _ =>
+                  for {
+                    _ <- Entity.int_.<=(6).delete.transact
+                    _ <- Entity.int(count).query.get.map(_.head ==> 1)
+                  } yield ()
+                }
+                _ <- Entity.int(count).query.get.map(_.head ==> 1)
+              } yield {
+                throw new Exception
+              }
+            }.recover {
+              case e: Exception => /*donothing*/
+            }
+            _ <- Entity.int(count).query.get.map(_.head ==> 5)
+          } yield ()
+        }
+      }
+
+      // 1-2 deleted
+      _ <- Entity.int(count).query.get.map(_.head ==> 5)
+    } yield ()
+  }
+
+
+  "throw: innerMiddle" - types { implicit conn =>
+    for {
+      _ <- Entity.int.insert(1 to 7).transact
+
+      _ <- unitOfWork {
+        savepoint { _ =>
+          for {
+            _ <- Entity.int(count).query.get.map(_.head ==> 7)
+
+            _ <- Entity.int_.<=(2).delete.transact
+            _ <- Entity.int(count).query.get.map(_.head ==> 5)
+
+            _ <- savepoint { _ =>
+              for {
+                _ <- Entity.int_.<=(4).delete.transact
+                _ <- Entity.int(count).query.get.map(_.head ==> 3)
+
+                _ <- savepoint { _ =>
+                  for {
+                    _ <- Entity.int_.<=(6).delete.transact
+                    _ <- Entity.int(count).query.get.map(_.head ==> 1)
+                  } yield {
+                    throw new Exception
                   }
-                } yield ()
-              }.recover {
-                case e: Exception => /*donothing*/
-              }
-              _ <- Entity.int(count).query.get.map(_.head ==> 5)
-            } yield ()
-          }
+                }
+              } yield ()
+            }.recover {
+              case e: Exception => /*donothing*/
+            }
+            _ <- Entity.int(count).query.get.map(_.head ==> 5)
+          } yield ()
         }
+      }
 
-        // 1-2 deleted
-        _ <- Entity.int(count).query.get.map(_.head ==> 5)
-      } yield ()
-    }
+      // 1-2 deleted
+      _ <- Entity.int(count).query.get.map(_.head ==> 5)
+    } yield ()
+  }
 
 
-    "throw: innerMiddleOuter" - types { implicit conn =>
-      for {
-        _ <- Entity.int.insert(1 to 7).transact
+  "throw: innerMiddleOuter" - types { implicit conn =>
+    for {
+      _ <- Entity.int.insert(1 to 7).transact
 
-        _ <- unitOfWork {
-          savepoint { _ =>
-            for {
-              _ <- Entity.int(count).query.get.map(_.head ==> 7)
+      _ <- unitOfWork {
+        savepoint { _ =>
+          for {
+            _ <- Entity.int(count).query.get.map(_.head ==> 7)
 
-              _ <- Entity.int_.<=(2).delete.transact
-              _ <- Entity.int(count).query.get.map(_.head ==> 5)
+            _ <- Entity.int_.<=(2).delete.transact
+            _ <- Entity.int(count).query.get.map(_.head ==> 5)
 
-              _ <- savepoint { _ =>
-                for {
-                  _ <- Entity.int_.<=(4).delete.transact
-                  _ <- Entity.int(count).query.get.map(_.head ==> 3)
+            _ <- savepoint { _ =>
+              for {
+                _ <- Entity.int_.<=(4).delete.transact
+                _ <- Entity.int(count).query.get.map(_.head ==> 3)
 
-                  _ <- savepoint { _ =>
-                    for {
-                      _ <- Entity.int_.<=(6).delete.transact
-                      _ <- Entity.int(count).query.get.map(_.head ==> 1)
-                    } yield {
-                      throw new Exception
-                    }
+                _ <- savepoint { _ =>
+                  for {
+                    _ <- Entity.int_.<=(6).delete.transact
+                    _ <- Entity.int(count).query.get.map(_.head ==> 1)
+                  } yield {
+                    throw new Exception
                   }
-                } yield ()
-              }
-              _ <- Entity.int(count).query.get.map(_.head ==> 5)
-            } yield ()
-          }.recover {
-            case e: Exception => /*donothing*/
-          }
+                }
+              } yield ()
+            }
+            _ <- Entity.int(count).query.get.map(_.head ==> 5)
+          } yield ()
+        }.recover {
+          case e: Exception => /*donothing*/
         }
+      }
 
-        // Nothing deleted
-        _ <- Entity.int(count).query.get.map(_.head ==> 7)
-      } yield ()
-    }
+      // Nothing deleted
+      _ <- Entity.int(count).query.get.map(_.head ==> 7)
+    } yield ()
   }
 
 

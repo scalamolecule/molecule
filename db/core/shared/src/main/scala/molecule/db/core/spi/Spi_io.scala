@@ -20,7 +20,7 @@ trait Spi_io {
 
   def query_inspect[Tpl](
     q: Query[Tpl]
-  )(implicit conn: Conn): IO[Unit]
+  )(implicit conn: Conn): IO[String]
 
 
   def queryOffset_get[Tpl](
@@ -29,7 +29,7 @@ trait Spi_io {
 
   def queryOffset_inspect[Tpl](
     q: QueryOffset[Tpl]
-  )(implicit conn: Conn): IO[Unit]
+  )(implicit conn: Conn): IO[String]
 
 
   def queryCursor_get[Tpl](
@@ -39,7 +39,7 @@ trait Spi_io {
 
   def queryCursor_inspect[Tpl](
     q: QueryCursor[Tpl]
-  )(implicit conn: Conn): IO[Unit]
+  )(implicit conn: Conn): IO[String]
 
 
   def query_stream[Tpl](
@@ -66,19 +66,19 @@ trait Spi_io {
 
 
   def save_transact(save: Save)(implicit conn: Conn): IO[TxReport]
-  def save_inspect(save: Save)(implicit conn: Conn): IO[Unit]
+  def save_inspect(save: Save)(implicit conn: Conn): IO[String]
   def save_validate(save: Save)(implicit conn: Conn): IO[Map[String, Seq[String]]]
 
   def insert_transact(insert: Insert)(implicit conn: Conn): IO[TxReport]
-  def insert_inspect(insert: Insert)(implicit conn: Conn): IO[Unit]
+  def insert_inspect(insert: Insert)(implicit conn: Conn): IO[String]
   def insert_validate(insert: Insert)(implicit conn: Conn): IO[Seq[(Int, Seq[InsertError])]]
 
   def update_transact(update: Update)(implicit conn: Conn): IO[TxReport]
-  def update_inspect(update: Update)(implicit conn: Conn): IO[Unit]
+  def update_inspect(update: Update)(implicit conn: Conn): IO[String]
   def update_validate(update: Update)(implicit conn: Conn): IO[Map[String, Seq[String]]]
 
   def delete_transact(delete: Delete)(implicit conn: Conn): IO[TxReport]
-  def delete_inspect(delete: Delete)(implicit conn: Conn): IO[Unit]
+  def delete_inspect(delete: Delete)(implicit conn: Conn): IO[String]
 
 
   private def noJS(method: String): Nothing =

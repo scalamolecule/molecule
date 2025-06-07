@@ -55,7 +55,7 @@ trait SpiZio_rest
   override def queryOffset_inspect[Tpl](
     q: QueryOffset[Tpl]
   ): ZIO[Conn, MoleculeError, Unit] = {
-//    printInspectQuery("QUERY (offset)", q.elements)
+//    renderInspectQuery("QUERY (offset)", q.elements)
     ???
   }
 
@@ -70,7 +70,7 @@ trait SpiZio_rest
   override def queryCursor_inspect[Tpl](
     q: QueryCursor[Tpl]
   ): ZIO[Conn, MoleculeError, Unit] = {
-//    printInspectQuery("QUERY (cursor)", q.elements)
+//    renderInspectQuery("QUERY (cursor)", q.elements)
     ???
   }
 

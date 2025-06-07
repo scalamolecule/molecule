@@ -105,16 +105,18 @@ class Model2DatomicQuery[Tpl](dataModel: DataModel)
     hasRules: Boolean,
     optimized: Boolean
   ): String = {
-    val find1       = (nestedIds ++ find)
-      .map(v => if (v.startsWith("?")) v else s"\n        $v")
-      .mkString(" ").trim
-    val widh1       = if (widh.isEmpty) "" else widh.distinct.mkString("\n :with  ", " ", "")
+    val find1       = (nestedIds ++ find).foldLeft("") {
+      case ("", v)                       => v
+      case (acc, v) if v.startsWith("?") => acc + s" $v"
+      case (acc, v)                      => acc + s"\n        $v"
+    }
+    val widh1       = if (widh.isEmpty) "" else widh.distinct.map(_.trim).mkString("\n :with  ", " ", "")
     val r           = if (hasRules) "% " else ""
-    val in1         = if (!hasRules && in.isEmpty) "" else in.mkString("\n :in    $ " + r, " ", "")
+    val in1         = if (!hasRules && in.isEmpty) "" else in.map(_.trim).mkString("\n :in    $ " + r, " ", "")
     val where1      = where.distinct
     val clausePairs = if (optimized) where1.sortBy(_._2) else where1
     val where2      = clausePairs.map(_._1).mkString("\n        ")
-    s"""[:find  $find1 $widh1 $in1
+    s"""[:find  $find1$widh1$in1
        | :where $where2]""".stripMargin
   }
 

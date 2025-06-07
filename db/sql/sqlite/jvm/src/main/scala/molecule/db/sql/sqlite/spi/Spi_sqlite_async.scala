@@ -16,7 +16,7 @@ trait Spi_sqlite_async extends Spi_async with StreamingJdbc with ModelUtils {
   }
 
   override def query_inspect[Tpl](q: Query[Tpl])
-                                 (implicit conn: Conn, ec: EC): Future[Unit] = Future {
+                                 (implicit conn: Conn, ec: EC): Future[String] = Future {
     Spi_sqlite_sync.query_inspect(q)
   }
 
@@ -26,7 +26,7 @@ trait Spi_sqlite_async extends Spi_async with StreamingJdbc with ModelUtils {
   }
 
   override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])
-                                       (implicit conn: Conn, ec: EC): Future[Unit] = Future {
+                                       (implicit conn: Conn, ec: EC): Future[String] = Future {
     Spi_sqlite_sync.queryOffset_inspect(q)
   }
 
@@ -36,21 +36,8 @@ trait Spi_sqlite_async extends Spi_async with StreamingJdbc with ModelUtils {
   }
 
   override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])
-                                       (implicit conn: Conn, ec: EC): Future[Unit] = Future {
+                                       (implicit conn: Conn, ec: EC): Future[String] = Future {
     Spi_sqlite_sync.queryCursor_inspect(q)
-  }
-
-
-  override def save_transact(save: Save)(implicit conn: Conn, ec: EC): Future[TxReport] = Future {
-    Spi_sqlite_sync.save_transact(save)
-  }
-
-  override def save_inspect(save: Save)(implicit conn: Conn, ec: EC): Future[Unit] = Future {
-    Spi_sqlite_sync.save_inspect(save)
-  }
-
-  override def save_validate(save: Save)(implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = Future {
-    Spi_sqlite_sync.save_validate(save)
   }
 
 
@@ -75,11 +62,24 @@ trait Spi_sqlite_async extends Spi_async with StreamingJdbc with ModelUtils {
   }
 
 
+  override def save_transact(save: Save)(implicit conn: Conn, ec: EC): Future[TxReport] = Future {
+    Spi_sqlite_sync.save_transact(save)
+  }
+
+  override def save_inspect(save: Save)(implicit conn: Conn, ec: EC): Future[String] = Future {
+    Spi_sqlite_sync.save_inspect(save)
+  }
+
+  override def save_validate(save: Save)(implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = Future {
+    Spi_sqlite_sync.save_validate(save)
+  }
+
+
   override def insert_transact(insert: Insert)(implicit conn: Conn, ec: EC): Future[TxReport] = Future {
     Spi_sqlite_sync.insert_transact(insert)
   }
 
-  override def insert_inspect(insert: Insert)(implicit conn: Conn, ec: EC): Future[Unit] = Future {
+  override def insert_inspect(insert: Insert)(implicit conn: Conn, ec: EC): Future[String] = Future {
     Spi_sqlite_sync.insert_inspect(insert)
   }
 
@@ -92,7 +92,7 @@ trait Spi_sqlite_async extends Spi_async with StreamingJdbc with ModelUtils {
     Spi_sqlite_sync.update_transact(update)
   }
 
-  override def update_inspect(update: Update)(implicit conn: Conn, ec: EC): Future[Unit] = Future {
+  override def update_inspect(update: Update)(implicit conn: Conn, ec: EC): Future[String] = Future {
     Spi_sqlite_sync.update_inspect(update)
   }
 
@@ -105,7 +105,7 @@ trait Spi_sqlite_async extends Spi_async with StreamingJdbc with ModelUtils {
     Spi_sqlite_sync.delete_transact(delete)
   }
 
-  override def delete_inspect(delete: Delete)(implicit conn: Conn, ec: EC): Future[Unit] = Future {
+  override def delete_inspect(delete: Delete)(implicit conn: Conn, ec: EC): Future[String] = Future {
     Spi_sqlite_sync.delete_inspect(delete)
   }
 

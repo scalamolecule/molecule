@@ -10,7 +10,7 @@ trait Api_io extends Keywords with ModelUtils { spi: Spi_io =>
 
   implicit class QueryApiIO[Tpl](q: Query[Tpl]) {
     def get(implicit conn: Conn): IO[List[Tpl]] = query_get(q)
-    def inspect(implicit conn: Conn): IO[Unit] = query_inspect(q)
+    def inspect(implicit conn: Conn): IO[String] = query_inspect(q)
 
     def stream(implicit conn: Conn): fs2.Stream[IO, Tpl] = query_stream(q, 100)
     def stream(chunkSize: Int)(implicit conn: Conn): fs2.Stream[IO, Tpl] = query_stream(q, chunkSize)
@@ -22,35 +22,35 @@ trait Api_io extends Keywords with ModelUtils { spi: Spi_io =>
 
   implicit class QueryOffsetApiIO[Tpl](q: QueryOffset[Tpl]) {
     def get(implicit conn: Conn): IO[(List[Tpl], Int, Boolean)] = queryOffset_get(q)
-    def inspect(implicit conn: Conn): IO[Unit] = queryOffset_inspect(q)
+    def inspect(implicit conn: Conn): IO[String] = queryOffset_inspect(q)
   }
 
   implicit class QueryCursorApiIO[Tpl](q: QueryCursor[Tpl]) {
     def get(implicit conn: Conn): IO[(List[Tpl], String, Boolean)] = queryCursor_get(q)
-    def inspect(implicit conn: Conn): IO[Unit] = queryCursor_inspect(q)
+    def inspect(implicit conn: Conn): IO[String] = queryCursor_inspect(q)
   }
 
   implicit class SaveApiIO(save: Save) {
     def transact(implicit conn: Conn): IO[TxReport] = save_transact(save)
-    def inspect(implicit conn: Conn): IO[Unit] = save_inspect(save)
+    def inspect(implicit conn: Conn): IO[String] = save_inspect(save)
     def validate(implicit conn: Conn): IO[Map[String, Seq[String]]] = save_validate(save)
   }
 
   implicit class InsertApiIO(insert: Insert) {
     def transact(implicit conn: Conn): IO[TxReport] = insert_transact(insert)
-    def inspect(implicit conn: Conn): IO[Unit] = insert_inspect(insert)
+    def inspect(implicit conn: Conn): IO[String] = insert_inspect(insert)
     def validate(implicit conn: Conn): IO[Seq[(Int, Seq[InsertError])]] = insert_validate(insert)
   }
 
   implicit class UpdateApiIO(update: Update) {
     def transact(implicit conn0: Conn): IO[TxReport] = update_transact(update)
-    def inspect(implicit conn0: Conn): IO[Unit] = update_inspect(update)
+    def inspect(implicit conn0: Conn): IO[String] = update_inspect(update)
     def validate(implicit conn: Conn): IO[Map[String, Seq[String]]] = update_validate(update)
   }
 
   implicit class DeleteApiIO(delete: Delete) {
     def transact(implicit conn0: Conn): IO[TxReport] = delete_transact(delete)
-    def inspect(implicit conn0: Conn): IO[Unit] = delete_inspect(delete)
+    def inspect(implicit conn0: Conn): IO[String] = delete_inspect(delete)
   }
 
   def rawQuery(

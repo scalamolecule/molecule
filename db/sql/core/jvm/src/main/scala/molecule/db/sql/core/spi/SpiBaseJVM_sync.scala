@@ -5,7 +5,7 @@ import geny.Generator
 import molecule.db.base.error.{InsertError, InsertErrors, ModelError, ValidationErrors}
 import molecule.db.base.util.BaseHelpers
 import molecule.db.core.action.*
-import molecule.db.core.ast.Element
+import molecule.db.core.ast.{DataModel, Element}
 import molecule.db.core.marshalling.ConnProxy
 import molecule.db.core.spi.{Conn, Renderer, Spi_sync, TxReport}
 import molecule.db.core.util.Executor.*
@@ -40,7 +40,7 @@ trait SpiBaseJVM_sync
 
   override def query_get[Tpl](query: Query[Tpl])(implicit conn0: Conn): List[Tpl] = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
-    if (query.doInspect)
+    if (query.printInspect)
       query_inspect(query)
     val cleanElements  = keywordsSuffixed(query.dataModel.elements, conn.proxy)
     val cleanDataModel = query.dataModel.copy(elements = cleanElements)
@@ -50,15 +50,15 @@ trait SpiBaseJVM_sync
       .getListFromOffset_sync(conn)._1
   }
 
-  override def query_inspect[Tpl](q: Query[Tpl])(implicit conn: Conn): Unit = {
-    printInspectQuery("QUERY", q.dataModel.elements, q.optLimit, None, conn.proxy)
+  override def query_inspect[Tpl](q: Query[Tpl])(implicit conn: Conn): String = {
+    inspectQuery("QUERY", q.dataModel, q.optLimit, None, conn.proxy)
   }
 
 
   override def queryOffset_get[Tpl](query: QueryOffset[Tpl])
                                    (implicit conn0: Conn): (List[Tpl], Int, Boolean) = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
-    if (query.doInspect)
+    if (query.printInspect)
       queryOffset_inspect(query)
     val cleanElements = keywordsSuffixed(query.dataModel.elements, conn.proxy)
     val queryClean    = query.copy(dataModel = query.dataModel.copy(elements = cleanElements))
@@ -68,14 +68,14 @@ trait SpiBaseJVM_sync
       .getListFromOffset_sync(conn)
   }
 
-  override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])(implicit conn: Conn): Unit = {
-    printInspectQuery("QUERY (offset)", q.dataModel.elements, q.optLimit, Some(q.offset), conn.proxy)
+  override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])(implicit conn: Conn): String = {
+    inspectQuery("QUERY (offset)", q.dataModel, q.optLimit, Some(q.offset), conn.proxy)
   }
 
   override def queryCursor_get[Tpl](query: QueryCursor[Tpl])
                                    (implicit conn0: Conn): (List[Tpl], String, Boolean) = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
-    if (query.doInspect)
+    if (query.printInspect)
       queryCursor_inspect(query)
     val cleanElements  = keywordsSuffixed(query.dataModel.elements, conn.proxy)
     val cleanDataModel = query.dataModel.copy(elements = cleanElements)
@@ -85,23 +85,23 @@ trait SpiBaseJVM_sync
       .getListFromCursor_sync(conn)
   }
 
-  override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])(implicit conn: Conn): Unit = {
-    printInspectQuery("QUERY (cursor)", q.dataModel.elements, q.optLimit, None, conn.proxy)
+  override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])(implicit conn: Conn): String = {
+    inspectQuery("QUERY (cursor)", q.dataModel, q.optLimit, None, conn.proxy)
   }
 
 
-  protected def printInspectQuery(
+  protected def inspectQuery(
     label: String,
-    elements: List[Element],
+    dataModel: DataModel,
     optLimit: Option[Int],
     optOffset: Option[Int],
     proxy: ConnProxy
-  ): Unit = {
-    tryInspect("query", elements) {
-      val elementsClean = keywordsSuffixed(elements, proxy)
+  ): String = {
+    tryInspect("query", dataModel) {
+      val elementsClean = keywordsSuffixed(dataModel.elements, proxy)
       val query         = getModel2SqlQuery(elementsClean)
         .getSqlQuery(Nil, optLimit, optOffset, Some(proxy))
-      printRaw(label, elements, query)
+      renderInspection(label, dataModel, query)
     }
   }
 
@@ -114,7 +114,7 @@ trait SpiBaseJVM_sync
   )(implicit conn0: Conn): Generator[Tpl] = new Generator[Tpl] {
     // callback function
     def generate(handleTuple: Tpl => Generator.Action): Generator.Action = {
-      if (q.doInspect)
+      if (q.printInspect)
         query_inspect(q)
       val (rs, rs2row)             = getResultSetAndRowResolver(q, conn0)
       var action: Generator.Action = Generator.Continue
@@ -148,7 +148,7 @@ trait SpiBaseJVM_sync
 
   override def save_transact(save: Save)(implicit conn0: Conn): TxReport = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
-    if (save.doInspect)
+    if (save.printInspect)
       save_inspect(save)
     val cleanElements  = keywordsSuffixed(save.dataModel.elements, conn.proxy)
     val cleanDataModel = save.dataModel.copy(elements = cleanElements)
@@ -163,13 +163,13 @@ trait SpiBaseJVM_sync
     }
   }
 
-  override def save_inspect(save: Save)(implicit conn0: Conn): Unit = {
+  override def save_inspect(save: Save)(implicit conn0: Conn): String = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
-    tryInspect("save", save.dataModel.elements) {
+    tryInspect("save", save.dataModel) {
       val cleanElements  = keywordsSuffixed(save.dataModel.elements, conn.proxy)
       val cleanDataModel = save.dataModel.copy(elements = cleanElements)
       val saveClean      = save.copy(dataModel = cleanDataModel)
-      printInspectTx("SAVE", save.dataModel.elements, save_getAction(saveClean, conn))
+      renderInspectTx("SAVE", save.dataModel, save_getAction(saveClean, conn))
     }
   }
 
@@ -191,7 +191,7 @@ trait SpiBaseJVM_sync
 
   override def insert_transact(insert: Insert)(implicit conn0: Conn): TxReport = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
-    if (insert.doInspect)
+    if (insert.printInspect)
       insert_inspect(insert)
     val cleanElements  = keywordsSuffixed(insert.dataModel.elements, conn.proxy)
     val cleanDataModel = insert.dataModel.copy(elements = cleanElements)
@@ -209,13 +209,13 @@ trait SpiBaseJVM_sync
       throw InsertErrors(errors)
     }
   }
-  override def insert_inspect(insert: Insert)(implicit conn: Conn): Unit = {
-    tryInspect("insert", insert.dataModel.elements) {
+  override def insert_inspect(insert: Insert)(implicit conn: Conn): String = {
+    tryInspect("insert", insert.dataModel) {
       val jdbcConn       = conn.asInstanceOf[JdbcConn_JVM]
       val cleanElements  = keywordsSuffixed(insert.dataModel.elements, conn.proxy)
       val cleanDataModel = insert.dataModel.copy(elements = cleanElements)
       val insertClean    = insert.copy(dataModel = cleanDataModel)
-      printInspectTx("INSERT", insert.dataModel.elements, insert_getAction(insertClean, jdbcConn), insert.tpls)
+      renderInspectTx("INSERT", insert.dataModel, insert_getAction(insertClean, jdbcConn), insert.tpls)
     }
   }
 
@@ -235,7 +235,7 @@ trait SpiBaseJVM_sync
 
   override def update_transact(update: Update)(implicit conn0: Conn): TxReport = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
-    if (update.doInspect)
+    if (update.printInspect)
       update_inspect(update)
     val cleanElements  = keywordsSuffixed(update.dataModel.elements, conn.proxy)
     val cleanDataModel = update.dataModel.copy(elements = cleanElements)
@@ -251,14 +251,14 @@ trait SpiBaseJVM_sync
     }
   }
 
-  override def update_inspect(update: Update)(implicit conn0: Conn): Unit = {
+  override def update_inspect(update: Update)(implicit conn0: Conn): String = {
     val conn   = conn0.asInstanceOf[JdbcConn_JVM]
     val action = if (update.isUpsert) "UPSERT" else "UPDATE"
-    tryInspect(action, update.dataModel.elements) {
+    tryInspect(action, update.dataModel) {
       val cleanElements  = keywordsSuffixed(update.dataModel.elements, conn.proxy)
       val cleanDataModel = update.dataModel.copy(elements = cleanElements)
       val updateClean    = update.copy(dataModel = cleanDataModel)
-      printInspectTx(action, update.dataModel.elements, update_getAction(updateClean, conn))
+      renderInspectTx(action, update.dataModel, update_getAction(updateClean, conn))
     }
   }
 
@@ -294,7 +294,7 @@ trait SpiBaseJVM_sync
 
   override def delete_transact(delete: Delete)(implicit conn0: Conn): TxReport = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
-    if (delete.doInspect)
+    if (delete.printInspect)
       delete_inspect(delete)
     val cleanElements  = keywordsSuffixed(delete.dataModel.elements, conn.proxy)
     val cleanDataModel = delete.dataModel.copy(elements = cleanElements)
@@ -305,13 +305,13 @@ trait SpiBaseJVM_sync
     txReport
   }
 
-  override def delete_inspect(delete: Delete)(implicit conn0: Conn): Unit = {
+  override def delete_inspect(delete: Delete)(implicit conn0: Conn): String = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
-    tryInspect("delete", delete.dataModel.elements) {
+    tryInspect("delete", delete.dataModel) {
       val cleanElements  = keywordsSuffixed(delete.dataModel.elements, conn.proxy)
       val cleanDataModel = delete.dataModel.copy(elements = cleanElements)
       val deleteClean    = delete.copy(dataModel = cleanDataModel)
-      printInspectTx("DELETE", delete.dataModel.elements, delete_getAction(deleteClean, conn))
+      renderInspectTx("DELETE", delete.dataModel, delete_getAction(deleteClean, conn))
     }
   }
 
@@ -320,23 +320,25 @@ trait SpiBaseJVM_sync
 
   // Inspect --------------------------------------------------------
 
-  private def tryInspect(action: String, elements: List[Element])
-                        (body: => Unit): Unit = try {
+  private def tryInspect(action: String, dataModel: DataModel)
+                        (body: => String): String = try {
     body
   } catch {
     case NonFatal(e) =>
-      println(s"\n------------------ Error inspecting $action -----------------------")
-      elements.foreach(println)
+      println(
+        s"""
+           |------------------ Error inspecting $action -----------------------
+           |$dataModel""".stripMargin)
       throw e
   }
 
-  private def printInspectTx(
+  private def renderInspectTx(
     label: String,
-    elements: List[Element],
+    dataModel: DataModel,
     action: SqlAction,
     tpls: Seq[Product] = Nil
-  ): Unit = {
-    printRaw(label, elements, action.toString, tpls.mkString("\n"))
+  ): String = {
+    renderInspection(label, dataModel, action.toString, tpls.mkString("\n"))
   }
 
 

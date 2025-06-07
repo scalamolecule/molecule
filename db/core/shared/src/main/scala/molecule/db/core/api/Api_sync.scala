@@ -10,7 +10,7 @@ trait Api_sync extends Keywords { spi: Spi_sync =>
 
   implicit class QueryApiSync[Tpl](q: Query[Tpl]) {
     def get(implicit conn: Conn): List[Tpl] = query_get(q)
-    def inspect(implicit conn: Conn): Unit = query_inspect(q)
+    def inspect(implicit conn: Conn): String = query_inspect(q)
 
     def stream(implicit conn: Conn): Generator[Tpl] = query_stream(q)
     def stream(chunkSize: Int)(implicit conn: Conn): Generator[Tpl] = query_stream(q, chunkSize)
@@ -21,35 +21,35 @@ trait Api_sync extends Keywords { spi: Spi_sync =>
 
   implicit class QueryOffsetApiSync[Tpl](q: QueryOffset[Tpl]) {
     def get(implicit conn: Conn): (List[Tpl], Int, Boolean) = queryOffset_get(q)
-    def inspect(implicit conn: Conn): Unit = queryOffset_inspect(q)
+    def inspect(implicit conn: Conn): String = queryOffset_inspect(q)
   }
 
   implicit class QueryCursorApiSync[Tpl](q: QueryCursor[Tpl]) {
     def get(implicit conn: Conn): (List[Tpl], String, Boolean) = queryCursor_get(q)
-    def inspect(implicit conn: Conn): Unit = queryCursor_inspect(q)
+    def inspect(implicit conn: Conn): String = queryCursor_inspect(q)
   }
 
   implicit class SaveApiSync[Tpl](save: Save) {
     def transact(implicit conn: Conn): TxReport = save_transact(save)
-    def inspect(implicit conn: Conn): Unit = save_inspect(save)
+    def inspect(implicit conn: Conn): String = save_inspect(save)
     def validate(implicit conn: Conn): Map[String, Seq[String]] = save_validate(save)
   }
 
   implicit class InsertApiSync[Tpl](insert: Insert) {
     def transact(implicit conn: Conn): TxReport = insert_transact(insert)
-    def inspect(implicit conn: Conn): Unit = insert_inspect(insert)
+    def inspect(implicit conn: Conn): String = insert_inspect(insert)
     def validate(implicit conn: Conn): Seq[(Int, Seq[InsertError])] = insert_validate(insert)
   }
 
   implicit class UpdateApiSync[Tpl](update: Update) {
     def transact(implicit conn0: Conn): TxReport = update_transact(update)
-    def inspect(implicit conn0: Conn): Unit = update_inspect(update)
+    def inspect(implicit conn0: Conn): String = update_inspect(update)
     def validate(implicit conn: Conn): Map[String, Seq[String]] = update_validate(update)
   }
 
   implicit class DeleteApiSync[Tpl](delete: Delete) {
     def transact(implicit conn0: Conn): TxReport = delete_transact(delete)
-    def inspect(implicit conn0: Conn): Unit = delete_inspect(delete)
+    def inspect(implicit conn0: Conn): String = delete_inspect(delete)
   }
 
 
