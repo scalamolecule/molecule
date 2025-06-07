@@ -22,7 +22,6 @@ sealed trait Attr extends Element {
   val errors    : Seq[String] // extracted from vs of type Seq[<type>]
   val ref       : Option[String]
   val sort      : Option[String]
-  val binding   : Boolean
   val coord     : List[Int]
 
   def name: String = ent + "." + attr
@@ -38,7 +37,9 @@ sealed trait Attr extends Element {
 }
 
 
-sealed trait AttrOne extends Attr
+sealed trait AttrOne extends Attr {
+  val binding: Boolean
+}
 sealed trait AttrSet extends Attr
 sealed trait AttrSeq extends Attr
 sealed trait AttrMap extends Attr {
@@ -160,7 +161,7 @@ case class AttrOneManID(
   override def toString: String = {
     def format(v: Long): String = v.toString + "L"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneManID("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneManID("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -181,7 +182,7 @@ case class AttrOneManString(
   override def toString: String = {
     def format(v: String): String = "\"" + escStr(v) + "\""
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneManString("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneManString("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -201,7 +202,7 @@ case class AttrOneManInt(
 ) extends AttrOneMan {
   override def toString: String = {
     def vss: String = vs.mkString("Seq(", ", ", ")")
-    s"""AttrOneManInt("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneManInt("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -222,7 +223,7 @@ case class AttrOneManLong(
   override def toString: String = {
     def format(v: Long): String = v.toString + "L"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneManLong("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneManLong("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -243,7 +244,7 @@ case class AttrOneManFloat(
   override def toString: String = {
     def format(v: Float): String = v.toString + "f"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneManFloat("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneManFloat("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -263,7 +264,7 @@ case class AttrOneManDouble(
 ) extends AttrOneMan {
   override def toString: String = {
     def vss: String = vs.mkString("Seq(", ", ", ")")
-    s"""AttrOneManDouble("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneManDouble("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -283,7 +284,7 @@ case class AttrOneManBoolean(
 ) extends AttrOneMan {
   override def toString: String = {
     def vss: String = vs.mkString("Seq(", ", ", ")")
-    s"""AttrOneManBoolean("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneManBoolean("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -304,7 +305,7 @@ case class AttrOneManBigInt(
   override def toString: String = {
     def format(v: BigInt): String = "BigInt(" + v + ")"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneManBigInt("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneManBigInt("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -325,7 +326,7 @@ case class AttrOneManBigDecimal(
   override def toString: String = {
     def format(v: BigDecimal): String = "BigDecimal(" + v + ")"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneManBigDecimal("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneManBigDecimal("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -346,7 +347,7 @@ case class AttrOneManDate(
   override def toString: String = {
     def format(v: Date): String = "new Date(" + v.getTime + ")"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneManDate("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneManDate("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -367,7 +368,7 @@ case class AttrOneManDuration(
   override def toString: String = {
     def format(v: Duration): String = "Duration.ofSeconds(" + v.getSeconds + ", " + v.getNano + ")"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneManDuration("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneManDuration("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -388,7 +389,7 @@ case class AttrOneManInstant(
   override def toString: String = {
     def format(v: Instant): String = "Instant.ofEpochSecond(" + v.getEpochSecond + ", " + v.getNano + ")"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneManInstant("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneManInstant("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -409,7 +410,7 @@ case class AttrOneManLocalDate(
   override def toString: String = {
     def format(v: LocalDate): String = "LocalDate.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ")"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneManLocalDate("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneManLocalDate("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -430,7 +431,7 @@ case class AttrOneManLocalTime(
   override def toString: String = {
     def format(v: LocalTime): String = "LocalTime.of(" + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ")"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneManLocalTime("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneManLocalTime("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -451,7 +452,7 @@ case class AttrOneManLocalDateTime(
   override def toString: String = {
     def format(v: LocalDateTime): String = "LocalDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ")"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneManLocalDateTime("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneManLocalDateTime("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -472,7 +473,7 @@ case class AttrOneManOffsetTime(
   override def toString: String = {
     def format(v: OffsetTime): String = "OffsetTime.of(" + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getOffset + ")"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneManOffsetTime("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneManOffsetTime("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -493,7 +494,7 @@ case class AttrOneManOffsetDateTime(
   override def toString: String = {
     def format(v: OffsetDateTime): String = "OffsetDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getOffset + ")"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneManOffsetDateTime("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneManOffsetDateTime("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -514,7 +515,7 @@ case class AttrOneManZonedDateTime(
   override def toString: String = {
     def format(v: ZonedDateTime): String = "ZonedDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getZone + ")"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneManZonedDateTime("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneManZonedDateTime("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -535,7 +536,7 @@ case class AttrOneManUUID(
   override def toString: String = {
     def format(v: UUID): String = "UUID.fromString(\"" + v.toString + "\")"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneManUUID("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneManUUID("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -556,7 +557,7 @@ case class AttrOneManURI(
   override def toString: String = {
     def format(v: URI): String = "new URI(\"" + v.toString + "\")"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneManURI("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneManURI("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -577,7 +578,7 @@ case class AttrOneManByte(
   override def toString: String = {
     def format(v: Byte): String = s"$v.toByte"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneManByte("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneManByte("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -598,7 +599,7 @@ case class AttrOneManShort(
   override def toString: String = {
     def format(v: Short): String = s"$v.toShort"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneManShort("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneManShort("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -619,7 +620,7 @@ case class AttrOneManChar(
   override def toString: String = {
     def format(v: Char): String = s"'$v'"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneManChar("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneManChar("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -643,7 +644,7 @@ case class AttrOneOptID(
   override def toString: String = {
     def format(v: Long): String = v.toString + "L"
     def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-    s"""AttrOneOptID("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneOptID("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -664,7 +665,7 @@ case class AttrOneOptString(
   override def toString: String = {
     def format(v: String): String = "\"" + escStr(v) + "\""
     def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-    s"""AttrOneOptString("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneOptString("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -684,7 +685,7 @@ case class AttrOneOptInt(
 ) extends AttrOneOpt {
   override def toString: String = {
     def vss: String = vs.fold("None")(_.mkString("Some(Seq(", ", ", "))"))
-    s"""AttrOneOptInt("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneOptInt("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -705,7 +706,7 @@ case class AttrOneOptLong(
   override def toString: String = {
     def format(v: Long): String = v.toString + "L"
     def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-    s"""AttrOneOptLong("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneOptLong("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -726,7 +727,7 @@ case class AttrOneOptFloat(
   override def toString: String = {
     def format(v: Float): String = v.toString + "f"
     def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-    s"""AttrOneOptFloat("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneOptFloat("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -746,7 +747,7 @@ case class AttrOneOptDouble(
 ) extends AttrOneOpt {
   override def toString: String = {
     def vss: String = vs.fold("None")(_.mkString("Some(Seq(", ", ", "))"))
-    s"""AttrOneOptDouble("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneOptDouble("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -766,7 +767,7 @@ case class AttrOneOptBoolean(
 ) extends AttrOneOpt {
   override def toString: String = {
     def vss: String = vs.fold("None")(_.mkString("Some(Seq(", ", ", "))"))
-    s"""AttrOneOptBoolean("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneOptBoolean("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -787,7 +788,7 @@ case class AttrOneOptBigInt(
   override def toString: String = {
     def format(v: BigInt): String = "BigInt(" + v + ")"
     def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-    s"""AttrOneOptBigInt("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneOptBigInt("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -808,7 +809,7 @@ case class AttrOneOptBigDecimal(
   override def toString: String = {
     def format(v: BigDecimal): String = "BigDecimal(" + v + ")"
     def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-    s"""AttrOneOptBigDecimal("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneOptBigDecimal("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -829,7 +830,7 @@ case class AttrOneOptDate(
   override def toString: String = {
     def format(v: Date): String = "new Date(" + v.getTime + ")"
     def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-    s"""AttrOneOptDate("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneOptDate("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -850,7 +851,7 @@ case class AttrOneOptDuration(
   override def toString: String = {
     def format(v: Duration): String = "Duration.ofSeconds(" + v.getSeconds + ", " + v.getNano + ")"
     def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-    s"""AttrOneOptDuration("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneOptDuration("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -871,7 +872,7 @@ case class AttrOneOptInstant(
   override def toString: String = {
     def format(v: Instant): String = "Instant.ofEpochSecond(" + v.getEpochSecond + ", " + v.getNano + ")"
     def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-    s"""AttrOneOptInstant("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneOptInstant("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -892,7 +893,7 @@ case class AttrOneOptLocalDate(
   override def toString: String = {
     def format(v: LocalDate): String = "LocalDate.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ")"
     def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-    s"""AttrOneOptLocalDate("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneOptLocalDate("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -913,7 +914,7 @@ case class AttrOneOptLocalTime(
   override def toString: String = {
     def format(v: LocalTime): String = "LocalTime.of(" + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ")"
     def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-    s"""AttrOneOptLocalTime("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneOptLocalTime("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -934,7 +935,7 @@ case class AttrOneOptLocalDateTime(
   override def toString: String = {
     def format(v: LocalDateTime): String = "LocalDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ")"
     def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-    s"""AttrOneOptLocalDateTime("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneOptLocalDateTime("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -955,7 +956,7 @@ case class AttrOneOptOffsetTime(
   override def toString: String = {
     def format(v: OffsetTime): String = "OffsetTime.of(" + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getOffset + ")"
     def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-    s"""AttrOneOptOffsetTime("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneOptOffsetTime("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -976,7 +977,7 @@ case class AttrOneOptOffsetDateTime(
   override def toString: String = {
     def format(v: OffsetDateTime): String = "OffsetDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getOffset + ")"
     def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-    s"""AttrOneOptOffsetDateTime("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneOptOffsetDateTime("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -997,7 +998,7 @@ case class AttrOneOptZonedDateTime(
   override def toString: String = {
     def format(v: ZonedDateTime): String = "ZonedDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getZone + ")"
     def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-    s"""AttrOneOptZonedDateTime("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneOptZonedDateTime("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -1018,7 +1019,7 @@ case class AttrOneOptUUID(
   override def toString: String = {
     def format(v: UUID): String = "UUID.fromString(\"" + v.toString + "\")"
     def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-    s"""AttrOneOptUUID("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneOptUUID("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -1039,7 +1040,7 @@ case class AttrOneOptURI(
   override def toString: String = {
     def format(v: URI): String = "new URI(\"" + v.toString + "\")"
     def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-    s"""AttrOneOptURI("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneOptURI("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -1060,7 +1061,7 @@ case class AttrOneOptByte(
   override def toString: String = {
     def format(v: Byte): String = s"$v.toByte"
     def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-    s"""AttrOneOptByte("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneOptByte("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -1081,7 +1082,7 @@ case class AttrOneOptShort(
   override def toString: String = {
     def format(v: Short): String = s"$v.toShort"
     def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-    s"""AttrOneOptShort("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneOptShort("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -1102,7 +1103,7 @@ case class AttrOneOptChar(
   override def toString: String = {
     def format(v: Char): String = s"'$v'"
     def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-    s"""AttrOneOptChar("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneOptChar("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -1126,7 +1127,7 @@ case class AttrOneTacID(
   override def toString: String = {
     def format(v: Long): String = v.toString + "L"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneTacID("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneTacID("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -1147,7 +1148,7 @@ case class AttrOneTacString(
   override def toString: String = {
     def format(v: String): String = "\"" + escStr(v) + "\""
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneTacString("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneTacString("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -1167,7 +1168,7 @@ case class AttrOneTacInt(
 ) extends AttrOneTac {
   override def toString: String = {
     def vss: String = vs.mkString("Seq(", ", ", ")")
-    s"""AttrOneTacInt("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneTacInt("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -1188,7 +1189,7 @@ case class AttrOneTacLong(
   override def toString: String = {
     def format(v: Long): String = v.toString + "L"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneTacLong("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneTacLong("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -1209,7 +1210,7 @@ case class AttrOneTacFloat(
   override def toString: String = {
     def format(v: Float): String = v.toString + "f"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneTacFloat("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneTacFloat("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -1229,7 +1230,7 @@ case class AttrOneTacDouble(
 ) extends AttrOneTac {
   override def toString: String = {
     def vss: String = vs.mkString("Seq(", ", ", ")")
-    s"""AttrOneTacDouble("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneTacDouble("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -1249,7 +1250,7 @@ case class AttrOneTacBoolean(
 ) extends AttrOneTac {
   override def toString: String = {
     def vss: String = vs.mkString("Seq(", ", ", ")")
-    s"""AttrOneTacBoolean("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneTacBoolean("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -1270,7 +1271,7 @@ case class AttrOneTacBigInt(
   override def toString: String = {
     def format(v: BigInt): String = "BigInt(" + v + ")"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneTacBigInt("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneTacBigInt("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -1291,7 +1292,7 @@ case class AttrOneTacBigDecimal(
   override def toString: String = {
     def format(v: BigDecimal): String = "BigDecimal(" + v + ")"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneTacBigDecimal("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneTacBigDecimal("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -1312,7 +1313,7 @@ case class AttrOneTacDate(
   override def toString: String = {
     def format(v: Date): String = "new Date(" + v.getTime + ")"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneTacDate("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneTacDate("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -1333,7 +1334,7 @@ case class AttrOneTacDuration(
   override def toString: String = {
     def format(v: Duration): String = "Duration.ofSeconds(" + v.getSeconds + ", " + v.getNano + ")"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneTacDuration("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneTacDuration("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -1354,7 +1355,7 @@ case class AttrOneTacInstant(
   override def toString: String = {
     def format(v: Instant): String = "Instant.ofEpochSecond(" + v.getEpochSecond + ", " + v.getNano + ")"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneTacInstant("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneTacInstant("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -1375,7 +1376,7 @@ case class AttrOneTacLocalDate(
   override def toString: String = {
     def format(v: LocalDate): String = "LocalDate.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ")"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneTacLocalDate("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneTacLocalDate("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -1396,7 +1397,7 @@ case class AttrOneTacLocalTime(
   override def toString: String = {
     def format(v: LocalTime): String = "LocalTime.of(" + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ")"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneTacLocalTime("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneTacLocalTime("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -1417,7 +1418,7 @@ case class AttrOneTacLocalDateTime(
   override def toString: String = {
     def format(v: LocalDateTime): String = "LocalDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ")"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneTacLocalDateTime("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneTacLocalDateTime("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -1438,7 +1439,7 @@ case class AttrOneTacOffsetTime(
   override def toString: String = {
     def format(v: OffsetTime): String = "OffsetTime.of(" + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getOffset + ")"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneTacOffsetTime("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneTacOffsetTime("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -1459,7 +1460,7 @@ case class AttrOneTacOffsetDateTime(
   override def toString: String = {
     def format(v: OffsetDateTime): String = "OffsetDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getOffset + ")"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneTacOffsetDateTime("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneTacOffsetDateTime("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -1480,7 +1481,7 @@ case class AttrOneTacZonedDateTime(
   override def toString: String = {
     def format(v: ZonedDateTime): String = "ZonedDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getZone + ")"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneTacZonedDateTime("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneTacZonedDateTime("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -1501,7 +1502,7 @@ case class AttrOneTacUUID(
   override def toString: String = {
     def format(v: UUID): String = "UUID.fromString(\"" + v.toString + "\")"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneTacUUID("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneTacUUID("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -1522,7 +1523,7 @@ case class AttrOneTacURI(
   override def toString: String = {
     def format(v: URI): String = "new URI(\"" + v.toString + "\")"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneTacURI("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneTacURI("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -1543,7 +1544,7 @@ case class AttrOneTacByte(
   override def toString: String = {
     def format(v: Byte): String = s"$v.toByte"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneTacByte("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneTacByte("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -1564,7 +1565,7 @@ case class AttrOneTacShort(
   override def toString: String = {
     def format(v: Short): String = s"$v.toShort"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneTacShort("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneTacShort("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -1585,7 +1586,7 @@ case class AttrOneTacChar(
   override def toString: String = {
     def format(v: Char): String = s"'$v'"
     def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-    s"""AttrOneTacChar("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $coords)"""
+    s"""AttrOneTacChar("$ent", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(ref)}, ${oStr(sort)}, $binding, $coords)"""
   }
 }
 
@@ -1603,7 +1604,6 @@ case class AttrSetManID(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetMan {
   override def toString: String = {
@@ -1624,7 +1624,6 @@ case class AttrSetManString(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetMan {
   override def toString: String = {
@@ -1645,7 +1644,6 @@ case class AttrSetManInt(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetMan {
   override def toString: String = {
@@ -1665,7 +1663,6 @@ case class AttrSetManLong(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetMan {
   override def toString: String = {
@@ -1686,7 +1683,6 @@ case class AttrSetManFloat(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetMan {
   override def toString: String = {
@@ -1707,7 +1703,6 @@ case class AttrSetManDouble(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetMan {
   override def toString: String = {
@@ -1727,7 +1722,6 @@ case class AttrSetManBoolean(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetMan {
   override def toString: String = {
@@ -1747,7 +1741,6 @@ case class AttrSetManBigInt(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetMan {
   override def toString: String = {
@@ -1768,7 +1761,6 @@ case class AttrSetManBigDecimal(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetMan {
   override def toString: String = {
@@ -1789,7 +1781,6 @@ case class AttrSetManDate(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetMan {
   override def toString: String = {
@@ -1810,7 +1801,6 @@ case class AttrSetManDuration(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetMan {
   override def toString: String = {
@@ -1831,7 +1821,6 @@ case class AttrSetManInstant(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetMan {
   override def toString: String = {
@@ -1852,7 +1841,6 @@ case class AttrSetManLocalDate(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetMan {
   override def toString: String = {
@@ -1873,7 +1861,6 @@ case class AttrSetManLocalTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetMan {
   override def toString: String = {
@@ -1894,7 +1881,6 @@ case class AttrSetManLocalDateTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetMan {
   override def toString: String = {
@@ -1915,7 +1901,6 @@ case class AttrSetManOffsetTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetMan {
   override def toString: String = {
@@ -1936,7 +1921,6 @@ case class AttrSetManOffsetDateTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetMan {
   override def toString: String = {
@@ -1957,7 +1941,6 @@ case class AttrSetManZonedDateTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetMan {
   override def toString: String = {
@@ -1978,7 +1961,6 @@ case class AttrSetManUUID(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetMan {
   override def toString: String = {
@@ -1999,7 +1981,6 @@ case class AttrSetManURI(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetMan {
   override def toString: String = {
@@ -2020,7 +2001,6 @@ case class AttrSetManByte(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetMan {
   override def toString: String = {
@@ -2041,7 +2021,6 @@ case class AttrSetManShort(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetMan {
   override def toString: String = {
@@ -2062,7 +2041,6 @@ case class AttrSetManChar(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetMan {
   override def toString: String = {
@@ -2086,7 +2064,6 @@ case class AttrSetOptID(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetOpt {
   override def toString: String = {
@@ -2107,7 +2084,6 @@ case class AttrSetOptString(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetOpt {
   override def toString: String = {
@@ -2128,7 +2104,6 @@ case class AttrSetOptInt(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetOpt {
   override def toString: String = {
@@ -2148,7 +2123,6 @@ case class AttrSetOptLong(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetOpt {
   override def toString: String = {
@@ -2169,7 +2143,6 @@ case class AttrSetOptFloat(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetOpt {
   override def toString: String = {
@@ -2190,7 +2163,6 @@ case class AttrSetOptDouble(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetOpt {
   override def toString: String = {
@@ -2210,7 +2182,6 @@ case class AttrSetOptBoolean(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetOpt {
   override def toString: String = {
@@ -2230,7 +2201,6 @@ case class AttrSetOptBigInt(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetOpt {
   override def toString: String = {
@@ -2251,7 +2221,6 @@ case class AttrSetOptBigDecimal(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetOpt {
   override def toString: String = {
@@ -2272,7 +2241,6 @@ case class AttrSetOptDate(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetOpt {
   override def toString: String = {
@@ -2293,7 +2261,6 @@ case class AttrSetOptDuration(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetOpt {
   override def toString: String = {
@@ -2314,7 +2281,6 @@ case class AttrSetOptInstant(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetOpt {
   override def toString: String = {
@@ -2335,7 +2301,6 @@ case class AttrSetOptLocalDate(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetOpt {
   override def toString: String = {
@@ -2356,7 +2321,6 @@ case class AttrSetOptLocalTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetOpt {
   override def toString: String = {
@@ -2377,7 +2341,6 @@ case class AttrSetOptLocalDateTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetOpt {
   override def toString: String = {
@@ -2398,7 +2361,6 @@ case class AttrSetOptOffsetTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetOpt {
   override def toString: String = {
@@ -2419,7 +2381,6 @@ case class AttrSetOptOffsetDateTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetOpt {
   override def toString: String = {
@@ -2440,7 +2401,6 @@ case class AttrSetOptZonedDateTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetOpt {
   override def toString: String = {
@@ -2461,7 +2421,6 @@ case class AttrSetOptUUID(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetOpt {
   override def toString: String = {
@@ -2482,7 +2441,6 @@ case class AttrSetOptURI(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetOpt {
   override def toString: String = {
@@ -2503,7 +2461,6 @@ case class AttrSetOptByte(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetOpt {
   override def toString: String = {
@@ -2524,7 +2481,6 @@ case class AttrSetOptShort(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetOpt {
   override def toString: String = {
@@ -2545,7 +2501,6 @@ case class AttrSetOptChar(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetOpt {
   override def toString: String = {
@@ -2569,7 +2524,6 @@ case class AttrSetTacID(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetTac {
   override def toString: String = {
@@ -2590,7 +2544,6 @@ case class AttrSetTacString(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetTac {
   override def toString: String = {
@@ -2611,7 +2564,6 @@ case class AttrSetTacInt(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetTac {
   override def toString: String = {
@@ -2631,7 +2583,6 @@ case class AttrSetTacLong(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetTac {
   override def toString: String = {
@@ -2652,7 +2603,6 @@ case class AttrSetTacFloat(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetTac {
   override def toString: String = {
@@ -2673,7 +2623,6 @@ case class AttrSetTacDouble(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetTac {
   override def toString: String = {
@@ -2693,7 +2642,6 @@ case class AttrSetTacBoolean(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetTac {
   override def toString: String = {
@@ -2713,7 +2661,6 @@ case class AttrSetTacBigInt(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetTac {
   override def toString: String = {
@@ -2734,7 +2681,6 @@ case class AttrSetTacBigDecimal(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetTac {
   override def toString: String = {
@@ -2755,7 +2701,6 @@ case class AttrSetTacDate(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetTac {
   override def toString: String = {
@@ -2776,7 +2721,6 @@ case class AttrSetTacDuration(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetTac {
   override def toString: String = {
@@ -2797,7 +2741,6 @@ case class AttrSetTacInstant(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetTac {
   override def toString: String = {
@@ -2818,7 +2761,6 @@ case class AttrSetTacLocalDate(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetTac {
   override def toString: String = {
@@ -2839,7 +2781,6 @@ case class AttrSetTacLocalTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetTac {
   override def toString: String = {
@@ -2860,7 +2801,6 @@ case class AttrSetTacLocalDateTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetTac {
   override def toString: String = {
@@ -2881,7 +2821,6 @@ case class AttrSetTacOffsetTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetTac {
   override def toString: String = {
@@ -2902,7 +2841,6 @@ case class AttrSetTacOffsetDateTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetTac {
   override def toString: String = {
@@ -2923,7 +2861,6 @@ case class AttrSetTacZonedDateTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetTac {
   override def toString: String = {
@@ -2944,7 +2881,6 @@ case class AttrSetTacUUID(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetTac {
   override def toString: String = {
@@ -2965,7 +2901,6 @@ case class AttrSetTacURI(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetTac {
   override def toString: String = {
@@ -2986,7 +2921,6 @@ case class AttrSetTacByte(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetTac {
   override def toString: String = {
@@ -3007,7 +2941,6 @@ case class AttrSetTacShort(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetTac {
   override def toString: String = {
@@ -3028,7 +2961,6 @@ case class AttrSetTacChar(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSetTac {
   override def toString: String = {
@@ -3052,7 +2984,6 @@ case class AttrSeqManID(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqMan {
   override def toString: String = {
@@ -3073,7 +3004,6 @@ case class AttrSeqManString(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqMan {
   override def toString: String = {
@@ -3094,7 +3024,6 @@ case class AttrSeqManInt(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqMan {
   override def toString: String = {
@@ -3114,7 +3043,6 @@ case class AttrSeqManLong(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqMan {
   override def toString: String = {
@@ -3135,7 +3063,6 @@ case class AttrSeqManFloat(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqMan {
   override def toString: String = {
@@ -3156,7 +3083,6 @@ case class AttrSeqManDouble(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqMan {
   override def toString: String = {
@@ -3176,7 +3102,6 @@ case class AttrSeqManBoolean(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqMan {
   override def toString: String = {
@@ -3196,7 +3121,6 @@ case class AttrSeqManBigInt(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqMan {
   override def toString: String = {
@@ -3217,7 +3141,6 @@ case class AttrSeqManBigDecimal(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqMan {
   override def toString: String = {
@@ -3238,7 +3161,6 @@ case class AttrSeqManDate(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqMan {
   override def toString: String = {
@@ -3259,7 +3181,6 @@ case class AttrSeqManDuration(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqMan {
   override def toString: String = {
@@ -3280,7 +3201,6 @@ case class AttrSeqManInstant(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqMan {
   override def toString: String = {
@@ -3301,7 +3221,6 @@ case class AttrSeqManLocalDate(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqMan {
   override def toString: String = {
@@ -3322,7 +3241,6 @@ case class AttrSeqManLocalTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqMan {
   override def toString: String = {
@@ -3343,7 +3261,6 @@ case class AttrSeqManLocalDateTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqMan {
   override def toString: String = {
@@ -3364,7 +3281,6 @@ case class AttrSeqManOffsetTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqMan {
   override def toString: String = {
@@ -3385,7 +3301,6 @@ case class AttrSeqManOffsetDateTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqMan {
   override def toString: String = {
@@ -3406,7 +3321,6 @@ case class AttrSeqManZonedDateTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqMan {
   override def toString: String = {
@@ -3427,7 +3341,6 @@ case class AttrSeqManUUID(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqMan {
   override def toString: String = {
@@ -3448,7 +3361,6 @@ case class AttrSeqManURI(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqMan {
   override def toString: String = {
@@ -3469,7 +3381,6 @@ case class AttrSeqManByte(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqMan {
   override def toString: String = {
@@ -3490,7 +3401,6 @@ case class AttrSeqManShort(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqMan {
   override def toString: String = {
@@ -3511,7 +3421,6 @@ case class AttrSeqManChar(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqMan {
   override def toString: String = {
@@ -3535,7 +3444,6 @@ case class AttrSeqOptID(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqOpt {
   override def toString: String = {
@@ -3556,7 +3464,6 @@ case class AttrSeqOptString(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqOpt {
   override def toString: String = {
@@ -3577,7 +3484,6 @@ case class AttrSeqOptInt(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqOpt {
   override def toString: String = {
@@ -3597,7 +3503,6 @@ case class AttrSeqOptLong(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqOpt {
   override def toString: String = {
@@ -3618,7 +3523,6 @@ case class AttrSeqOptFloat(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqOpt {
   override def toString: String = {
@@ -3639,7 +3543,6 @@ case class AttrSeqOptDouble(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqOpt {
   override def toString: String = {
@@ -3659,7 +3562,6 @@ case class AttrSeqOptBoolean(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqOpt {
   override def toString: String = {
@@ -3679,7 +3581,6 @@ case class AttrSeqOptBigInt(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqOpt {
   override def toString: String = {
@@ -3700,7 +3601,6 @@ case class AttrSeqOptBigDecimal(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqOpt {
   override def toString: String = {
@@ -3721,7 +3621,6 @@ case class AttrSeqOptDate(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqOpt {
   override def toString: String = {
@@ -3742,7 +3641,6 @@ case class AttrSeqOptDuration(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqOpt {
   override def toString: String = {
@@ -3763,7 +3661,6 @@ case class AttrSeqOptInstant(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqOpt {
   override def toString: String = {
@@ -3784,7 +3681,6 @@ case class AttrSeqOptLocalDate(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqOpt {
   override def toString: String = {
@@ -3805,7 +3701,6 @@ case class AttrSeqOptLocalTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqOpt {
   override def toString: String = {
@@ -3826,7 +3721,6 @@ case class AttrSeqOptLocalDateTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqOpt {
   override def toString: String = {
@@ -3847,7 +3741,6 @@ case class AttrSeqOptOffsetTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqOpt {
   override def toString: String = {
@@ -3868,7 +3761,6 @@ case class AttrSeqOptOffsetDateTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqOpt {
   override def toString: String = {
@@ -3889,7 +3781,6 @@ case class AttrSeqOptZonedDateTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqOpt {
   override def toString: String = {
@@ -3910,7 +3801,6 @@ case class AttrSeqOptUUID(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqOpt {
   override def toString: String = {
@@ -3931,7 +3821,6 @@ case class AttrSeqOptURI(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqOpt {
   override def toString: String = {
@@ -3952,7 +3841,6 @@ case class AttrSeqOptByte(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqOpt {
   override def toString: String = {
@@ -3973,7 +3861,6 @@ case class AttrSeqOptShort(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqOpt {
   override def toString: String = {
@@ -3994,7 +3881,6 @@ case class AttrSeqOptChar(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqOpt {
   override def toString: String = {
@@ -4018,7 +3904,6 @@ case class AttrSeqTacID(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqTac {
   override def toString: String = {
@@ -4039,7 +3924,6 @@ case class AttrSeqTacString(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqTac {
   override def toString: String = {
@@ -4060,7 +3944,6 @@ case class AttrSeqTacInt(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqTac {
   override def toString: String = {
@@ -4080,7 +3963,6 @@ case class AttrSeqTacLong(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqTac {
   override def toString: String = {
@@ -4101,7 +3983,6 @@ case class AttrSeqTacFloat(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqTac {
   override def toString: String = {
@@ -4122,7 +4003,6 @@ case class AttrSeqTacDouble(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqTac {
   override def toString: String = {
@@ -4142,7 +4022,6 @@ case class AttrSeqTacBoolean(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqTac {
   override def toString: String = {
@@ -4162,7 +4041,6 @@ case class AttrSeqTacBigInt(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqTac {
   override def toString: String = {
@@ -4183,7 +4061,6 @@ case class AttrSeqTacBigDecimal(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqTac {
   override def toString: String = {
@@ -4204,7 +4081,6 @@ case class AttrSeqTacDate(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqTac {
   override def toString: String = {
@@ -4225,7 +4101,6 @@ case class AttrSeqTacDuration(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqTac {
   override def toString: String = {
@@ -4246,7 +4121,6 @@ case class AttrSeqTacInstant(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqTac {
   override def toString: String = {
@@ -4267,7 +4141,6 @@ case class AttrSeqTacLocalDate(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqTac {
   override def toString: String = {
@@ -4288,7 +4161,6 @@ case class AttrSeqTacLocalTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqTac {
   override def toString: String = {
@@ -4309,7 +4181,6 @@ case class AttrSeqTacLocalDateTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqTac {
   override def toString: String = {
@@ -4330,7 +4201,6 @@ case class AttrSeqTacOffsetTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqTac {
   override def toString: String = {
@@ -4351,7 +4221,6 @@ case class AttrSeqTacOffsetDateTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqTac {
   override def toString: String = {
@@ -4372,7 +4241,6 @@ case class AttrSeqTacZonedDateTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqTac {
   override def toString: String = {
@@ -4393,7 +4261,6 @@ case class AttrSeqTacUUID(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqTac {
   override def toString: String = {
@@ -4414,7 +4281,6 @@ case class AttrSeqTacURI(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqTac {
   override def toString: String = {
@@ -4435,7 +4301,6 @@ case class AttrSeqTacByte(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqTac {
   override def toString: String = {
@@ -4456,7 +4321,6 @@ case class AttrSeqTacShort(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqTac {
   override def toString: String = {
@@ -4477,7 +4341,6 @@ case class AttrSeqTacChar(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrSeqTac {
   override def toString: String = {
@@ -4503,7 +4366,6 @@ case class AttrMapManID(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapMan {
   override def toString: String = {
@@ -4527,7 +4389,6 @@ case class AttrMapManString(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapMan {
   override def toString: String = {
@@ -4551,7 +4412,6 @@ case class AttrMapManInt(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapMan {
   override def toString: String = {
@@ -4574,7 +4434,6 @@ case class AttrMapManLong(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapMan {
   override def toString: String = {
@@ -4598,7 +4457,6 @@ case class AttrMapManFloat(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapMan {
   override def toString: String = {
@@ -4622,7 +4480,6 @@ case class AttrMapManDouble(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapMan {
   override def toString: String = {
@@ -4645,7 +4502,6 @@ case class AttrMapManBoolean(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapMan {
   override def toString: String = {
@@ -4668,7 +4524,6 @@ case class AttrMapManBigInt(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapMan {
   override def toString: String = {
@@ -4692,7 +4547,6 @@ case class AttrMapManBigDecimal(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapMan {
   override def toString: String = {
@@ -4716,7 +4570,6 @@ case class AttrMapManDate(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapMan {
   override def toString: String = {
@@ -4740,7 +4593,6 @@ case class AttrMapManDuration(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapMan {
   override def toString: String = {
@@ -4764,7 +4616,6 @@ case class AttrMapManInstant(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapMan {
   override def toString: String = {
@@ -4788,7 +4639,6 @@ case class AttrMapManLocalDate(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapMan {
   override def toString: String = {
@@ -4812,7 +4662,6 @@ case class AttrMapManLocalTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapMan {
   override def toString: String = {
@@ -4836,7 +4685,6 @@ case class AttrMapManLocalDateTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapMan {
   override def toString: String = {
@@ -4860,7 +4708,6 @@ case class AttrMapManOffsetTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapMan {
   override def toString: String = {
@@ -4884,7 +4731,6 @@ case class AttrMapManOffsetDateTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapMan {
   override def toString: String = {
@@ -4908,7 +4754,6 @@ case class AttrMapManZonedDateTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapMan {
   override def toString: String = {
@@ -4932,7 +4777,6 @@ case class AttrMapManUUID(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapMan {
   override def toString: String = {
@@ -4956,7 +4800,6 @@ case class AttrMapManURI(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapMan {
   override def toString: String = {
@@ -4980,7 +4823,6 @@ case class AttrMapManByte(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapMan {
   override def toString: String = {
@@ -5004,7 +4846,6 @@ case class AttrMapManShort(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapMan {
   override def toString: String = {
@@ -5028,7 +4869,6 @@ case class AttrMapManChar(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapMan {
   override def toString: String = {
@@ -5054,7 +4894,6 @@ case class AttrMapOptID(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapOpt {
   override def toString: String = {
@@ -5076,7 +4915,6 @@ case class AttrMapOptString(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapOpt {
   override def toString: String = {
@@ -5098,7 +4936,6 @@ case class AttrMapOptInt(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapOpt {
   override def toString: String = {
@@ -5119,7 +4956,6 @@ case class AttrMapOptLong(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapOpt {
   override def toString: String = {
@@ -5141,7 +4977,6 @@ case class AttrMapOptFloat(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapOpt {
   override def toString: String = {
@@ -5163,7 +4998,6 @@ case class AttrMapOptDouble(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapOpt {
   override def toString: String = {
@@ -5184,7 +5018,6 @@ case class AttrMapOptBoolean(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapOpt {
   override def toString: String = {
@@ -5205,7 +5038,6 @@ case class AttrMapOptBigInt(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapOpt {
   override def toString: String = {
@@ -5227,7 +5059,6 @@ case class AttrMapOptBigDecimal(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapOpt {
   override def toString: String = {
@@ -5249,7 +5080,6 @@ case class AttrMapOptDate(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapOpt {
   override def toString: String = {
@@ -5271,7 +5101,6 @@ case class AttrMapOptDuration(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapOpt {
   override def toString: String = {
@@ -5293,7 +5122,6 @@ case class AttrMapOptInstant(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapOpt {
   override def toString: String = {
@@ -5315,7 +5143,6 @@ case class AttrMapOptLocalDate(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapOpt {
   override def toString: String = {
@@ -5337,7 +5164,6 @@ case class AttrMapOptLocalTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapOpt {
   override def toString: String = {
@@ -5359,7 +5185,6 @@ case class AttrMapOptLocalDateTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapOpt {
   override def toString: String = {
@@ -5381,7 +5206,6 @@ case class AttrMapOptOffsetTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapOpt {
   override def toString: String = {
@@ -5403,7 +5227,6 @@ case class AttrMapOptOffsetDateTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapOpt {
   override def toString: String = {
@@ -5425,7 +5248,6 @@ case class AttrMapOptZonedDateTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapOpt {
   override def toString: String = {
@@ -5447,7 +5269,6 @@ case class AttrMapOptUUID(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapOpt {
   override def toString: String = {
@@ -5469,7 +5290,6 @@ case class AttrMapOptURI(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapOpt {
   override def toString: String = {
@@ -5491,7 +5311,6 @@ case class AttrMapOptByte(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapOpt {
   override def toString: String = {
@@ -5513,7 +5332,6 @@ case class AttrMapOptShort(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapOpt {
   override def toString: String = {
@@ -5535,7 +5353,6 @@ case class AttrMapOptChar(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapOpt {
   override def toString: String = {
@@ -5561,7 +5378,6 @@ case class AttrMapTacID(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapTac {
   override def toString: String = {
@@ -5585,7 +5401,6 @@ case class AttrMapTacString(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapTac {
   override def toString: String = {
@@ -5609,7 +5424,6 @@ case class AttrMapTacInt(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapTac {
   override def toString: String = {
@@ -5632,7 +5446,6 @@ case class AttrMapTacLong(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapTac {
   override def toString: String = {
@@ -5656,7 +5469,6 @@ case class AttrMapTacFloat(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapTac {
   override def toString: String = {
@@ -5680,7 +5492,6 @@ case class AttrMapTacDouble(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapTac {
   override def toString: String = {
@@ -5703,7 +5514,6 @@ case class AttrMapTacBoolean(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapTac {
   override def toString: String = {
@@ -5726,7 +5536,6 @@ case class AttrMapTacBigInt(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapTac {
   override def toString: String = {
@@ -5750,7 +5559,6 @@ case class AttrMapTacBigDecimal(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapTac {
   override def toString: String = {
@@ -5774,7 +5582,6 @@ case class AttrMapTacDate(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapTac {
   override def toString: String = {
@@ -5798,7 +5605,6 @@ case class AttrMapTacDuration(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapTac {
   override def toString: String = {
@@ -5822,7 +5628,6 @@ case class AttrMapTacInstant(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapTac {
   override def toString: String = {
@@ -5846,7 +5651,6 @@ case class AttrMapTacLocalDate(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapTac {
   override def toString: String = {
@@ -5870,7 +5674,6 @@ case class AttrMapTacLocalTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapTac {
   override def toString: String = {
@@ -5894,7 +5697,6 @@ case class AttrMapTacLocalDateTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapTac {
   override def toString: String = {
@@ -5918,7 +5720,6 @@ case class AttrMapTacOffsetTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapTac {
   override def toString: String = {
@@ -5942,7 +5743,6 @@ case class AttrMapTacOffsetDateTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapTac {
   override def toString: String = {
@@ -5966,7 +5766,6 @@ case class AttrMapTacZonedDateTime(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapTac {
   override def toString: String = {
@@ -5990,7 +5789,6 @@ case class AttrMapTacUUID(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapTac {
   override def toString: String = {
@@ -6014,7 +5812,6 @@ case class AttrMapTacURI(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapTac {
   override def toString: String = {
@@ -6038,7 +5835,6 @@ case class AttrMapTacByte(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapTac {
   override def toString: String = {
@@ -6062,7 +5858,6 @@ case class AttrMapTacShort(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapTac {
   override def toString: String = {
@@ -6086,7 +5881,6 @@ case class AttrMapTacChar(
   override val errors: Seq[String] = Nil,
   override val ref: Option[String] = None,
   override val sort: Option[String] = None,
-  override val binding: Boolean = false,
   override val coord: List[Int] = Nil
 ) extends AttrMapTac {
   override def toString: String = {

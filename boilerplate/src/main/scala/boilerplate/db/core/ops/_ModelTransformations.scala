@@ -570,10 +570,13 @@ object _ModelTransformations extends CoreGenBase("ModelTransformations", "/ops")
   private def liftFilterAttr(card: String): String = {
     baseTypesWithSpaces.map {
       case (baseTpe, space) if card == "Map" =>
-        s"case a: Attr${card}Man$baseTpe $space=> Attr${card}Tac$baseTpe(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)"
+        s"case a: Attr${card}Man$baseTpe $space=> Attr${card}Tac$baseTpe(a.ent, a.attr, a.op, a.map, a.keys, Nil, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)"
+
+      case (baseTpe, space) if card == "One" =>
+        s"case a: Attr${card}Man$baseTpe $space=> Attr${card}Tac$baseTpe(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)"
 
       case (baseTpe, space) =>
-        s"case a: Attr${card}Man$baseTpe $space=> Attr${card}Tac$baseTpe(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.binding, a.coord)"
+        s"case a: Attr${card}Man$baseTpe $space=> Attr${card}Tac$baseTpe(a.ent, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.ref, a.sort, a.coord)"
     }.mkString("\n              ")
   }
   private def addFilterAttr(card: String, mode: String): String = {

@@ -101,7 +101,7 @@ trait QueryExprOne[Tpl]
     }
   }
 
-  private def dummySorter(attr: Attr): Option[(Int, Int => (Row, Row) => Int)] = {
+  private def dummySorter(attr: AttrOne): Option[(Int, Int => (Row, Row) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
@@ -111,7 +111,7 @@ trait QueryExprOne[Tpl]
   }
 
   private def man[T: ClassTag](
-    attr: Attr,
+    attr: AttrOne,
     e: Var,
     a: Att,
     args: Seq[T],
@@ -133,7 +133,7 @@ trait QueryExprOne[Tpl]
   }
 
   private def tac[T: ClassTag](
-    attr: Attr,
+    attr: AttrOne,
     e: Var,
     a: Att,
     args: Seq[T],
@@ -151,7 +151,7 @@ trait QueryExprOne[Tpl]
   }
 
   private def expr[T: ClassTag](
-    attr: Attr,
+    attr: AttrOne,
     e: Var,
     a: Att,
     v: Var,
@@ -199,7 +199,7 @@ trait QueryExprOne[Tpl]
   }
 
   private def opt[T](
-    attr: Attr,
+    attr: AttrOne,
     e: Var,
     a: Att,
     optArgs: Option[Seq[T]],
@@ -254,7 +254,7 @@ trait QueryExprOne[Tpl]
   }
 
   private def optEqual[T](
-    attr: Attr,
+    attr: AttrOne,
     e: Var,
     a: Att,
     v: Var,
@@ -424,7 +424,7 @@ trait QueryExprOne[Tpl]
   // aggregation ---------------------------------------------------------------
 
   private def aggr[T: ClassTag](
-    attr: Attr, e: Var, a: Att, v: Var, fn: String, optN: Option[Int], resOne: ResOne[T]
+    attr: AttrOne, e: Var, a: Att, v: Var, fn: String, optN: Option[Int], resOne: ResOne[T]
   ): Unit = {
     checkAggrOne()
     lazy val n = optN.getOrElse(0)

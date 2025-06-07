@@ -2,14 +2,22 @@ package molecule.graphql.client
 
 import caliban.*
 import caliban.Value.StringValue
+import molecule.graphql.client.Ziox.*
+import molecule.graphql.client.dsl.Starwars
+//import molecule.graphql.client.dataModel.Starwars
+import molecule.graphql.client.dsl.Starwars.*
+//import molecule.graphql.client.Ziox.*
+//import molecule.graphql.client.dsl.Starwars.*
 import zio.Scope
 import zio.test.*
 import zio.test.TestAspect.sequential
-import molecule.graphql.client.dsl.Starwars.*
-//import molecule.graphql.client.dsl.Starwars.Starwars.Episode.EMPIRE
-//import molecule.graphql.client.dsl.Starwars.Starwars.hero
+
+// Molecule translation of starwars query tests from javascript reference implementation
+// https://github.com/graphql/graphql-js/blob/16.x.x/src/__tests__/starWarsQuery-test.ts
 
 object StarwarsQuery extends StarwarsTest {
+
+  //  val x: Character_1[Set[String], String] = new Character_1[Set[String], String](DataModel(Nil))
 
   override def spec: Spec[TestEnvironment & Scope, CalibanError.ValidationError] =
     suite("Starwars Query Testsuite")(
@@ -29,8 +37,23 @@ object StarwarsQuery extends StarwarsTest {
               |  }
               |}""".stripMargin
           )
-          // hero.name.query.get.map(_.head ==> "R2-D2")
+
+//          hero.name.query.get.map(result => assertTrue(result.head == "R2-D2"))
+
+//          hero.name.query.get.map(_.head ==> "R2-D2")
+//          // or
+//          Starwars.hero.name.query.get.map(_.head ==> "R2-D2")
         },
+
+//        test("Attr") {
+//
+//          hero.name.query.get.map(_.head ==> "R2-D2")
+////          hero.name.query.get.map(result => assertTrue(result.head == "R2-D2"))
+//
+////          hero.name.query.get.map(_.head ==> "R2-D2")
+////          // or
+////          Starwars.hero.name.query.get.map(_.head ==> "R2-D2")
+//        },
 
         test("Allows us to query for the ID and friends of R2-D2") {
           graphql(
@@ -66,6 +89,7 @@ object StarwarsQuery extends StarwarsTest {
           //        )
         },
       ),
+
 
       suite("Nested Queries")(
 
@@ -189,11 +213,13 @@ object StarwarsQuery extends StarwarsTest {
           //        Starwars(human("1000").name, droid("2000").name).query.get.map(_.head ==>
           //          ("Luke Skywalker", "C-3PO")
           //        )
+
+          //          // Or separately
+          //          human("1000").name.query.get.map(_.head ==> "Luke Skywalker")
+          //          droid("1000").name.query.get.map(_.head ==> "C-3PO")
         },
 
-
-
-        test("Allows us to create a generic query, then use it to fetch Luke Skywalker using his ID") {
+        test("Allows us to create a generic query, then use it to fetch humans using their ID") {
           graphql(
             """query test($someId: String!) {
               |  human(id: $someId) {
@@ -206,18 +232,42 @@ object StarwarsQuery extends StarwarsTest {
               |    "name": "Luke Skywalker"
               |  }
               |}""".stripMargin,
-            Map("someId" -> StringValue("1000x")) // Variable
+            Map("someId" -> StringValue("1000")) // Variable
           )
 
-                  hero(EMPIRE).name.query.get.map(_.head ==> "Luke Skywalker")
+          //          // Input molecule
+          //          val humanWithId = human(?).name.query
+          //
+          //          // Bind variables
+          //          humanWithId("1000").get.map(_ ==> List("Luke Skywalker"))
+          //          humanWithId("1002").get.map(_ ==> List("Darth Vader"))
+          //          humanWithId("xxxx").get.map(_ ==> List())
+        },
+      ),
+
+
+      suite("Using aliases to change the key in the response")(
+
+        test("Allows us to query for Luke, changing his key with an alias") {
+          graphql(
+            """query FetchLukeAliased {
+              |  luke: human(id: "1000") {
+              |    name
+              |  }
+              |}""".stripMargin,
+            """{
+              |  "luke": {
+              |    "name": "Luke Skywalker"
+              |  }
+              |}""".stripMargin
+          )
+
+          //          // Molecule returns data only without keys,
+          //          // so adding an alias is not needed with molecules
+          //          human("1000").name.query.get.map(_.head ==> "Luke Skywalker")
         },
 
-
-        /**
-         * Aliases for fields in themselves not relevant for Molecule.
-         * But for OR logic we can use them:
-         */
-        test("OR logic") {
+        test("Allows us to query for both Luke and Leia, using two root fields and an alias") {
           graphql(
             """{
               |  luke: human(id: "1000") {
@@ -236,52 +286,51 @@ object StarwarsQuery extends StarwarsTest {
               |  }
               |}""".stripMargin
           )
+
+          //        // OR logic can transparently be translated to multiple graphql aliases by Molecule.
+          //        // And we can simply ask for multiple variable values:
           //        human("1000", "1003").name.query.get.map(_ ==> List("Luke Skywalker", "Leia Organa"))
         },
+      ),
 
-        test("__typename") {
+
+      suite("Uses fragments to express more complex queries")(
+
+        test("Allows us to query using duplicated content") {
           graphql(
             """{
-              |  hero {
-              |    __typename
+              |  luke: human(id: "1000") {
               |    name
+              |    homePlanet
+              |  }
+              |  leia: human(id: "1003") {
+              |    name
+              |    homePlanet
               |  }
               |}""".stripMargin,
             """{
-              |  "hero": {
-              |    "__typename": "Droid",
-              |    "name": "R2-D2"
+              |  "luke": {
+              |    "name": "Luke Skywalker",
+              |    "homePlanet": "Tatooine"
+              |  },
+              |  "leia": {
+              |    "name": "Leia Organa",
+              |    "homePlanet": "Alderaan"
               |  }
               |}""".stripMargin
           )
-          //        hero.__typename.name.query.get.map(_ ==> ("Droid", "R2-D2"))
+
+          //          // Molecule OR logic in combination with multiple fields needs no fragment mechanism
+          //          human("1000", "1003").name.homePlanet.query.get.map(_ ==> List(
+          //            ("Luke Skywalker", "Tatooine"),
+          //            ("Leia Organa", "Alderaan"),
+          //          ))
         },
-
-
-
-
-
-
-
-
-
-        //
-        //      test("hero in JEDI (arg is Some(episode))") {
-        //        graphql(
-        //          """{
-        //            |  hero(episode: JEDI) {
-        //            |    name
-        //            |  }
-        //            |}""".stripMargin,
-        //          """{
-        //            |  "hero": {
-        //            |    "name": "R2-D2"
-        //            |  }
-        //            |}""".stripMargin
-        //        )
-        //        //        hero(JEDI).name.query.get.map(_.head ==> "R2-D2")
-        //      },
       )
+
+      // Introspection not implemented with Molecule since the whole graphql schema
+      // is already generated as Scala types that can be eaisly inferred by the IDE.
+
     ) @@ sequential
 
 

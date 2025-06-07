@@ -98,7 +98,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
     }
   }
 
-  protected def addSort(attr: Attr, col: String): Unit = {
+  protected def addSort(attr: AttrOne, col: String): Unit = {
     attr.sort.foreach { sort =>
       val (dir, arity) = (sort.head, sort.substring(1, 2).toInt)
       dir match {
@@ -108,8 +108,8 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
     }
   }
 
-  protected def man[T: ClassTag](attr: Attr, args: Seq[T], res: ResOne[T]): Unit = {
-    val col = getCol(attr: Attr)
+  protected def man[T: ClassTag](attr: AttrOne, args: Seq[T], res: ResOne[T]): Unit = {
+    val col = getCol(attr: AttrOne)
     select += col
     groupByCols += col // if we later need to group by non-aggregated columns
     if (isOptNested) {
@@ -125,8 +125,8 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
     }
   }
 
-  protected def tac[T: ClassTag](attr: Attr, args: Seq[T], res: ResOne[T]): Unit = {
-    val col = getCol(attr: Attr)
+  protected def tac[T: ClassTag](attr: AttrOne, args: Seq[T], res: ResOne[T]): Unit = {
+    val col = getCol(attr: AttrOne)
     attr.filterAttr.fold {
       expr(attr.ent, attr.attr, col, attr.op, args, attr.binding, res)
     } { case (dir, filterPath, filterAttr) =>
@@ -181,11 +181,11 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
   }
 
   protected def opt[T](
-    attr: Attr,
+    attr: AttrOne,
     optArgs: Option[Seq[T]],
     resOpt: ResOneOpt[T],
   ): Unit = {
-    val col = getCol(attr: Attr)
+    val col = getCol(attr: AttrOne)
     select += col
     groupByCols += col // if we later need to group by non-aggregated columns
     castStrategy.add(resOpt.sql2oneOpt)

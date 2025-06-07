@@ -103,18 +103,18 @@ object _Element extends CoreGenBase("Element", "/ast") {
             if (format_?)
               s"""def format(v: $baseTpe): String = $format
                  |    def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-                 |    s\"\"\"$attrType("$$ent", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(ref)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
+                 |    s\"\"\"$attrType("$$ent", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(ref)}, $${oStr(sort)}, $$binding, $$coords)\"\"\"""".stripMargin
             else
               s"""def vss: String = vs.fold("None")(_.mkString("Some(Seq(", ", ", "))"))
-                 |    s\"\"\"$attrType("$$ent", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(ref)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
+                 |    s\"\"\"$attrType("$$ent", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(ref)}, $${oStr(sort)}, $$binding, $$coords)\"\"\"""".stripMargin
           case _     =>
             if (format_?)
               s"""def format(v: $baseTpe): String = $format
                  |    def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-                 |    s\"\"\"$attrType("$$ent", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(ref)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
+                 |    s\"\"\"$attrType("$$ent", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(ref)}, $${oStr(sort)}, $$binding, $$coords)\"\"\"""".stripMargin
             else
               s"""def vss: String = vs.mkString("Seq(", ", ", ")")
-                 |    s\"\"\"$attrType("$$ent", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(ref)}, $${oStr(sort)}, $$coords)\"\"\"""".stripMargin
+                 |    s\"\"\"$attrType("$$ent", "$$attr", $$op, $$vss, $${optFilterAttr(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(ref)}, $${oStr(sort)}, $$binding, $$coords)\"\"\"""".stripMargin
         }
         case "Set"                      => mode match {
           case "Opt" =>
@@ -196,6 +196,8 @@ object _Element extends CoreGenBase("Element", "/ast") {
         }
       }
 
+      val binding = if (card == "One") "\n  override val binding: Boolean = false," else ""
+
       s"""
          |case class Attr$card$mode$baseTpe0(
          |  override val ent: String,
@@ -207,8 +209,7 @@ object _Element extends CoreGenBase("Element", "/ast") {
          |  override val valueAttrs: List[String] = Nil,
          |  override val errors: Seq[String] = Nil,
          |  override val ref: Option[String] = None,
-         |  override val sort: Option[String] = None,
-         |  override val binding: Boolean = false,
+         |  override val sort: Option[String] = None,$binding
          |  override val coord: List[Int] = Nil
          |) extends Attr$card$mode {
          |  override def toString: String = {

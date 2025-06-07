@@ -43,7 +43,6 @@ trait StarwarsServer {
     droid: DroidArg => Droid,
   )
 
-
   // Data -----------------------------------------
 
   import Episode.*
@@ -70,10 +69,8 @@ trait StarwarsServer {
   val droids                      = List(c3po2, r2d2_2)
   val characters: List[Character] = humans ++ droids
 
-
   // Resolve -----------------------------------------
 
-//  case class HeroArg(id: String)derives Schema.SemiAuto, ArgBuilder
   case class HeroArg(episode: Option[Episode])derives Schema.SemiAuto, ArgBuilder
   case class CharacterArg(id: String)derives Schema.SemiAuto, ArgBuilder
   case class HumanArg(id: String)derives Schema.SemiAuto, ArgBuilder
@@ -87,10 +84,9 @@ trait StarwarsServer {
 
   val starwarsResolver = RootResolver(
     Query(
-//      args => if (args.id == ) humans.head else droids.last,
       args => if (args.episode.contains(EMPIRE)) humans.head else droids.last,
       args => characters.find(c => args.id.contains(c.id)),
-      args => humans.find(c => args.id.contains(c.id)).get,
+      args => humans.find(_.id == args.id).get,
       args => droids.find(c => args.id.contains(c.id)).get,
     )
   )
