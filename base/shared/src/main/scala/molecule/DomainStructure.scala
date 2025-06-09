@@ -1,7 +1,7 @@
 package molecule
 
 import java.net.URI
-import java.time.*
+import java.time._
 import java.util.{Date, UUID}
 
 /**

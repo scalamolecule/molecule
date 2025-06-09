@@ -9,9 +9,9 @@ object _ExprSetTac extends DbCoreBase("ExprSetTac", "/api/expression") {
     s"""// GENERATED CODE ********************************
        |package molecule.db.core.api.expression
        |
-       |import molecule.base.ast.*
-       |import molecule.db.core.api.*
+       |import molecule.base.ast.CardOne
        |import molecule.core.ast.*
+       |import molecule.db.core.api.*
        |$traits
        |""".stripMargin
   }

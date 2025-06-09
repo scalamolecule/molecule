@@ -3,7 +3,7 @@ package molecule.graphql.client.facade
 //package molecule.graphql.client.facade
 //
 //import boopickle.Default._
-//import molecule.db.core.marshalling.Boopicklers._
+//import molecule.db.core.marshalling.Boopicklers.*
 //import molecule.db.core.marshalling.{JdbcProxy, MoleculeRpc, MoleculeRpcJS, MoleculeRpcRequest}
 //import molecule.db.core.spi.Conn
 //import molecule.graphql.client.transaction.GraphqlDataType_JS

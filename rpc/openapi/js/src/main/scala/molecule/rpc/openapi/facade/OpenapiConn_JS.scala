@@ -1,7 +1,7 @@
 package molecule.rpc.openapi.facade
 
-import boopickle.Default._
-import molecule.db.core.marshalling.Boopicklers._
+import boopickle.Default.*
+import molecule.db.core.marshalling.Boopicklers.*
 import molecule.db.core.marshalling.{JdbcProxy, MoleculeRpc, MoleculeRpcJS, MoleculeRpcRequest}
 import molecule.db.core.spi.Conn
 import molecule.rpc.openapi.transaction.GraphqlDataType_JS

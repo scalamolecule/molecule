@@ -9,10 +9,10 @@ object _ExprOneMan extends DbCoreBase("ExprOneMan", "/api/expression") {
     s"""// GENERATED CODE ********************************
        |package molecule.db.core.api.expression
        |
-       |import molecule.base.ast.*
-       |import molecule.db.core.api.*
-       |import molecule.core.ast.Keywords.qm
+       |import molecule.base.ast.CardOne
        |import molecule.core.ast.*
+       |import molecule.core.ast.Keywords.qm
+       |import molecule.db.core.api.*
        |$traits
        |""".stripMargin
   }

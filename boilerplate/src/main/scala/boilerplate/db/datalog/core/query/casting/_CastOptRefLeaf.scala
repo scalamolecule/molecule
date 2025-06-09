@@ -11,7 +11,7 @@ object _CastOptRefLeaf extends DbDatalogBase("CastOptRefLeaf", "/query/casting")
        |package molecule.db.datalog.core.query.casting
        |
        |import java.util.{ArrayList as jArrayList, Iterator as jIterator, Map as jMap}
-       |import molecule.db.core.util.JavaConversions
+       |import molecule.core.util.JavaConversions
        |
        |
        |trait $fileName_ extends JavaConversions {

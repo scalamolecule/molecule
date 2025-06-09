@@ -1,4 +1,4 @@
-package boilerplate.db.core.transaction
+package boilerplate.db.core.validation.insert
 
 import boilerplate.db.core.DbCoreBase
 
@@ -11,8 +11,7 @@ object _InsertValidators extends DbCoreBase("InsertValidators", "/transaction") 
        |import java.net.URI
        |import java.time.*
        |import java.util.{Date, UUID}
-       |import molecule.core.ast._
-       |import molecule.db.core.validation.insert.InsertValueResolvers_
+       |import molecule.core.ast.*
        |
        |trait $fileName_ extends InsertValueResolvers_ {
        |  $validators

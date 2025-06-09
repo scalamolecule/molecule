@@ -12,7 +12,7 @@ object _InsertValidationResolvers extends DbCoreBase("InsertValidationResolvers"
        |
        |import molecule.base.ast.*
        |import molecule.base.error.InsertError
-       |import molecule.core.ast._
+       |import molecule.core.ast.*
        |
        |trait $fileName_ {
        |

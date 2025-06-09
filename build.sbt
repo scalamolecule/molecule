@@ -1,6 +1,6 @@
 import org.scalajs.linker.interface.ESVersion
 
-val moleculeVersion = "0.21.0"
+val moleculeVersion = "0.22.0-SNAPSHOT"
 
 val scala212 = "2.12.20"
 val scala3   = "3.3.6"
@@ -107,13 +107,8 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
   .settings(compilerArgs, checkPublishing,
     name := "molecule-core",
     libraryDependencies ++= Seq(
-      // logging
-      "com.outr" %%% "scribe" % "3.16.1",
-
+      "com.outr" %%% "scribe" % "3.16.1", // logging
       "org.scalactic" %%% "scalactic" % "3.2.19" % Test, // Tolerant roundings with triple equal on js platform
-//      "io.github.cquiroz" %%% "scala-java-time" % "2.6.0", // % Test, // we need main for time zone plugin
-
-      // Test frameworks
       "org.scalameta" %%% "munit" % "1.1.1" % Test,
       "org.typelevel" %%% "munit-cats-effect" % "2.1.0" % Test,
       "dev.zio" %%% "zio-test" % zioVersion % Test,
@@ -156,14 +151,7 @@ lazy val dbCompliance = crossProject(JSPlatform, JVMPlatform)
     publish / skip := true,
     libraryDependencies ++= Seq(
       "com.zaxxer" % "HikariCP" % "6.2.1" % Test,
-//      "org.scalactic" %%% "scalactic" % "3.2.19" % Test, // Tolerant roundings with triple equal on js platform
       "io.github.cquiroz" %%% "scala-java-time" % "2.6.0", // % Test, // we need main for time zone plugin
-//
-//      // Test frameworks
-//      "org.scalameta" %%% "munit" % "1.1.1" % Test,
-//      "org.typelevel" %%% "munit-cats-effect" % "2.1.0" % Test,
-//      "dev.zio" %%% "zio-test" % zioVersion % Test,
-//      "dev.zio" %%% "zio-test-sbt" % zioVersion % Test,
     ),
   )
   .jsConfigure(_.enablePlugins(TzdbPlugin))
@@ -188,7 +176,7 @@ lazy val dbCompliance = crossProject(JSPlatform, JVMPlatform)
       "org.slf4j" % "slf4j-nop" % "2.0.17" //% Test
     )
   )
-//  .dependsOn(dbCore % "test->test")
+  //  .dependsOn(dbCore % "test->test")
   .dependsOn(dbCore % "compile->compile;test->test")
 //  .dependsOn(base, core, dbCore)
 
@@ -449,9 +437,9 @@ lazy val compilerArgs = Def.settings(
 )
 
 
-lazy val checkPublishing = if (sys.props.get("docs").contains("true")) doPublish else dontPublish
+lazy val checkPublishing = if (sys.props.get("docs").contains("true")) withDocs else withoutDocs
 
-lazy val doPublish = Def.settings(
+lazy val withDocs = Def.settings(
   publishMavenStyle := true,
   Test / publishArtifact := false,
   Compile / doc / scalacOptions ++= Seq(
@@ -486,11 +474,10 @@ lazy val doPublish = Def.settings(
   )
 )
 
-lazy val dontPublish = Def.settings(
-  publish / skip := true,
-  //  Test / publishArtifact := false,
-  //  doc / sources := Seq.empty,
-  //  packageDoc / publishArtifact := false
+lazy val withoutDocs = Def.settings(
+  Test / publishArtifact := false,
+  doc / sources := Seq.empty,
+  packageDoc / publishArtifact := false
 )
 
 

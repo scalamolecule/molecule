@@ -8,9 +8,9 @@ object _ExprAttr extends DbCoreBase("ExprAttr", "/api/expression") {
     s"""// GENERATED CODE ********************************
        |package molecule.db.core.api.expression
        |
-       |import molecule.base.ast.*
-       |import molecule.db.core.api.*
+       |import molecule.base.ast.CardOne
        |import molecule.core.ast.*
+       |import molecule.db.core.api.*
        |
        |
        |trait ExprAttr_0[t, Entity1[_], Entity2[_, _]] extends ExprBase {
