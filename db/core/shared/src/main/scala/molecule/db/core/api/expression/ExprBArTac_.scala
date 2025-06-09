@@ -1,7 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.db.core.api.expression
 
-import molecule.db.core.ast.*
+import molecule.core.ast.*
 
 
 trait ExprBArTacOps_0[t, Entity1[_], Entity2[_, _]] {

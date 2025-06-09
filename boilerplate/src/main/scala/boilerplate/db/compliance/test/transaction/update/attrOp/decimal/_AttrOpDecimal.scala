@@ -2,7 +2,7 @@ package boilerplate.db.compliance.test.transaction.update.attrOp.decimal
 
 import java.nio.file.{Files, Paths}
 import boilerplate.Base
-import boilerplate.db.compliance.ComplianceGenBase
+import boilerplate.db.compliance.DbComplianceGenBase
 
 object _AttrOpDecimal extends Base {
 
@@ -14,7 +14,7 @@ object _AttrOpDecimal extends Base {
   }
 
   case class TransformFile(tpe: String, v: String, imp: String = "")
-    extends ComplianceGenBase(s"AttrOpDecimal_$tpe", "/action/update/attrOp/decimal") {
+    extends DbComplianceGenBase(s"AttrOpDecimal_$tpe", "/action/update/attrOp/decimal") {
 
     override val content = {
       new String(Files.readAllBytes(Paths.get(path, "AttrOpDecimal_Double.scala")), "UTF-8")

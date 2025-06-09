@@ -2,7 +2,7 @@ package molecule.db.sql.postgres.spi
 
 import boopickle.Default.*
 import cats.effect.IO
-import molecule.db.core.ast.{DataModel, Element}
+import molecule.core.ast.DataModel
 import molecule.db.sql.core.spi.SpiBase_io
 import molecule.db.sql.postgres.query.Model2SqlQuery_postgres
 

@@ -5,7 +5,7 @@ import java.math.{BigDecimal as jBigDecimal, BigInteger as jBigInt}
 import java.net.URI
 import java.time.*
 import java.util.{Date, UUID, Iterator as jIterator, List as jList, Map as jMap, Set as jSet}
-import molecule.db.base.error.ModelError
+import molecule.base.error.ModelError
 
 trait LambdasOne extends ResolveBase {
 

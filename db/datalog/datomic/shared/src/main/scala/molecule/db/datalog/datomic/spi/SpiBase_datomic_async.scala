@@ -1,6 +1,6 @@
 package molecule.db.datalog.datomic.spi
 
-import molecule.db.core.ast.DataModel
+import molecule.core.ast.DataModel
 import molecule.db.core.spi.Renderer
 import molecule.db.datalog.core.query.Model2DatomicQuery
 import scala.concurrent.{ExecutionContext, Future}

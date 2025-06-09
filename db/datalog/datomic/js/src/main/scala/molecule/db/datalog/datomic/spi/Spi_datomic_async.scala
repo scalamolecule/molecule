@@ -1,8 +1,8 @@
 package molecule.db.datalog.datomic.spi
 
-import molecule.db.base.error.{InsertError, InsertErrors, ValidationErrors}
+import molecule.base.error.{InsertError, InsertErrors, ValidationErrors}
+import molecule.core.ast.DataModel
 import molecule.db.core.action.*
-import molecule.db.core.ast.{DataModel, Element}
 import molecule.db.core.marshalling.serialize.PickleTpls
 import molecule.db.core.spi.{Conn, Spi_async, TxReport}
 import molecule.db.core.util.FutureUtils

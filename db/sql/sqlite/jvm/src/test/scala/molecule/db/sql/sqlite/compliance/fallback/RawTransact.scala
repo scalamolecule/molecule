@@ -1,13 +1,13 @@
 package molecule.db.sql.sqlite.compliance.fallback
 
+import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.{Test, TestUtils}
 import molecule.db.core.util.Executor.*
 import molecule.db.sql.sqlite.async.*
 import molecule.db.sql.sqlite.setup.DbProviders_sqlite
 
 
-class RawTransact extends Test with DbProviders_sqlite with TestUtils {
+class RawTransact extends MUnit with DbProviders_sqlite with TestUtils {
 
   "Semantics" - types { implicit conn =>
     for {

@@ -1,9 +1,9 @@
 package molecule.db.sql.sqlite.compliance.segments
 
-import molecule.db.compliance.setup.Test
+import molecule.core.setup.MUnit
 import molecule.db.compliance.test.segments.Prefixed
 import molecule.db.sql.sqlite.setup.Api_sqlite_async
 
-class PrefixedTest extends Test {
+class PrefixedTest extends MUnit {
   Prefixed(this, Api_sqlite_async)
 }

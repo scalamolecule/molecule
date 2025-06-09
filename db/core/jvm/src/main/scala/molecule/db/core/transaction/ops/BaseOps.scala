@@ -3,7 +3,7 @@ package molecule.db.core.transaction.ops
 import java.net.URI
 import java.time.*
 import java.util.{Date, UUID}
-import molecule.db.base.util.BaseHelpers
+import molecule.base.util.BaseHelpers
 import molecule.db.core.transformation.JsonBase
 
 trait BaseOps extends JsonBase with BaseHelpers {

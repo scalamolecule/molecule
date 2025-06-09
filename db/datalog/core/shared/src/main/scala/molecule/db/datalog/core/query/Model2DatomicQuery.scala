@@ -1,9 +1,9 @@
 package molecule.db.datalog.core.query
 
-import molecule.db.base.error.ModelError
-import molecule.db.core.ast.*
+import molecule.base.error.ModelError
+import molecule.core.ast.*
+import molecule.core.util.MoleculeLogging
 import molecule.db.core.query.QueryExpr
-import molecule.db.core.util.MoleculeLogging
 import molecule.db.datalog.core.query.casting.*
 import scala.collection.mutable.ArrayBuffer
 

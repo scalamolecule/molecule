@@ -3,9 +3,9 @@ package molecule.db.core.query
 import java.net.URI
 import java.time.*
 import java.util.{Base64, Date, UUID}
-import molecule.db.base.error.ModelError
-import molecule.db.base.util.BaseHelpers
-import molecule.db.core.ast.*
+import molecule.base.error.ModelError
+import molecule.base.util.BaseHelpers
+import molecule.core.ast.*
 import molecule.db.core.spi.Conn
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer

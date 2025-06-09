@@ -1,9 +1,9 @@
 package molecule.db.core.spi
 
 import cats.effect.IO
-import molecule.db.base.error.{ExecutionError, MoleculeError}
+import molecule.base.error.{ExecutionError, MoleculeError}
+import molecule.core.ast.DataModel
 import molecule.db.core.api.Savepoint
-import molecule.db.core.ast.DataModel
 import molecule.db.core.marshalling.{ConnProxy, MoleculeRpc}
 import molecule.db.core.util.ModelUtils
 import zio.ZIO

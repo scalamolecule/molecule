@@ -43,8 +43,11 @@ lazy val root = project
   .aggregate(
     boilerplate,
 
-    dbBase.js,
-    dbBase.jvm,
+    base.js,
+    base.jvm,
+    core.js,
+    core.jvm,
+
     dbCore.js,
     dbCore.jvm,
 
@@ -87,14 +90,38 @@ lazy val boilerplate = project
   .in(file("boilerplate"))
   .settings(publish / skip := true)
 
-lazy val dbBase = crossProject(JSPlatform, JVMPlatform)
+
+lazy val base = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
-  .in(file("db/base"))
+  .in(file("base"))
   .settings(compilerArgs, checkPublishing,
-    name := "molecule-db-base",
+    name := "molecule-base",
     // 2.12 for sbt-molecule plugin on sbt 1.x
     crossScalaVersions := Seq(scala212, scala3),
   )
+
+
+lazy val core = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
+  .in(file("core"))
+  .settings(compilerArgs, checkPublishing,
+    name := "molecule-core",
+    libraryDependencies ++= Seq(
+      // logging
+      "com.outr" %%% "scribe" % "3.16.1",
+
+      "org.scalactic" %%% "scalactic" % "3.2.19" % Test, // Tolerant roundings with triple equal on js platform
+//      "io.github.cquiroz" %%% "scala-java-time" % "2.6.0", // % Test, // we need main for time zone plugin
+
+      // Test frameworks
+      "org.scalameta" %%% "munit" % "1.1.1" % Test,
+      "org.typelevel" %%% "munit-cats-effect" % "2.1.0" % Test,
+      "dev.zio" %%% "zio-test" % zioVersion % Test,
+      "dev.zio" %%% "zio-test-sbt" % zioVersion % Test,
+    ),
+  )
+  .dependsOn(base)
+
 
 lazy val dbCore = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
@@ -102,9 +129,6 @@ lazy val dbCore = crossProject(JSPlatform, JVMPlatform)
   .settings(compilerArgs, checkPublishing,
     name := "molecule-db-core",
     libraryDependencies ++= Seq(
-      // logging
-      "com.outr" %%% "scribe" % "3.16.1",
-
       // RPC
       "io.suzaku" %%% "boopickle" % "1.5.0",
       "com.softwaremill.sttp.tapir" %%% "tapir-core" % tapirVersion,
@@ -120,7 +144,7 @@ lazy val dbCore = crossProject(JSPlatform, JVMPlatform)
       "com.softwaremill.sttp.tapir" %%% "tapir-sttp-client4" % tapirVersion,
     ),
   )
-  .dependsOn(dbBase)
+  .dependsOn(core % "compile->compile;test->test")
 
 
 lazy val dbCompliance = crossProject(JSPlatform, JVMPlatform)
@@ -132,14 +156,14 @@ lazy val dbCompliance = crossProject(JSPlatform, JVMPlatform)
     publish / skip := true,
     libraryDependencies ++= Seq(
       "com.zaxxer" % "HikariCP" % "6.2.1" % Test,
-      "org.scalactic" %%% "scalactic" % "3.2.19" % Test, // Tolerant roundings with triple equal on js platform
+//      "org.scalactic" %%% "scalactic" % "3.2.19" % Test, // Tolerant roundings with triple equal on js platform
       "io.github.cquiroz" %%% "scala-java-time" % "2.6.0", // % Test, // we need main for time zone plugin
-
-      // Test frameworks
-      "org.scalameta" %%% "munit" % "1.1.1" % Test,
-      "org.typelevel" %%% "munit-cats-effect" % "2.1.0" % Test,
-      "dev.zio" %%% "zio-test" % zioVersion % Test,
-      "dev.zio" %%% "zio-test-sbt" % zioVersion % Test,
+//
+//      // Test frameworks
+//      "org.scalameta" %%% "munit" % "1.1.1" % Test,
+//      "org.typelevel" %%% "munit-cats-effect" % "2.1.0" % Test,
+//      "dev.zio" %%% "zio-test" % zioVersion % Test,
+//      "dev.zio" %%% "zio-test-sbt" % zioVersion % Test,
     ),
   )
   .jsConfigure(_.enablePlugins(TzdbPlugin))
@@ -164,7 +188,9 @@ lazy val dbCompliance = crossProject(JSPlatform, JVMPlatform)
       "org.slf4j" % "slf4j-nop" % "2.0.17" //% Test
     )
   )
-  .dependsOn(dbCore)
+//  .dependsOn(dbCore % "test->test")
+  .dependsOn(dbCore % "compile->compile;test->test")
+//  .dependsOn(base, core, dbCore)
 
 
 lazy val dbDatalogCore = crossProject(JSPlatform, JVMPlatform)
@@ -488,8 +514,7 @@ lazy val graphqlClient = crossProject(JSPlatform, JVMPlatform)
     ),
   )
   .jsSettings(jsEnvironment)
-  .dependsOn(dbCore)
-  .dependsOn(dbCompliance % "test->test")
+  .dependsOn(core % "compile->compile;test->test")
 
 
 lazy val graphqlTest = crossProject(JSPlatform, JVMPlatform)
@@ -501,6 +526,5 @@ lazy val graphqlTest = crossProject(JSPlatform, JVMPlatform)
     publish / skip := true,
     //    testFrameworks += new TestFramework("munit.runner.Framework"),
   )
-  .dependsOn(graphqlClient)
-  .dependsOn(dbCompliance % "test->test")
+  .dependsOn(graphqlClient % "compile->compile;test->test")
 

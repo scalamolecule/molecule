@@ -1,7 +1,7 @@
 package molecule.db.core.action
 
-import molecule.db.base.error.ModelError
-import molecule.db.core.ast.DataModel
+import molecule.base.error.ModelError
+import molecule.core.ast.DataModel
 import molecule.db.core.marshalling.dbView.DbView
 
 case class QueryCursor[Tpl](

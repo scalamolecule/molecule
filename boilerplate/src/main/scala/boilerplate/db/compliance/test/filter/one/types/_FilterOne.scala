@@ -2,7 +2,7 @@ package boilerplate.db.compliance.test.filter.one.types
 
 import java.nio.file.{Files, Paths}
 import boilerplate.Base
-import boilerplate.db.compliance.ComplianceGenBase
+import boilerplate.db.compliance.DbComplianceGenBase
 
 object _FilterOne extends Base {
 
@@ -13,7 +13,7 @@ object _FilterOne extends Base {
     }
 
   case class TransformFile(name: String, tpe: String, v: String, imp: String = "")
-    extends ComplianceGenBase(s"FilterOne_$name", "/filter/one/types") {
+    extends DbComplianceGenBase(s"FilterOne_$name", "/filter/one/types") {
 
     override val content = {
       val src =

@@ -1,6 +1,6 @@
 package boilerplate.graphql.client.api
 
-import boilerplate.graphql.client.GraphqlBase
+import boilerplate.graphql.GraphqlBase
 
 object _Molecules extends GraphqlBase( "Molecules", "/api") {
 
@@ -9,9 +9,9 @@ object _Molecules extends GraphqlBase( "Molecules", "/api") {
     s"""// GENERATED CODE ********************************
        |package molecule.db.core.api
        |
-       |import molecule.db.base.error.ModelError
+       |import molecule.base.error.ModelError
        |import molecule.db.core.action.*
-       |import molecule.db.core.ast.DataModel
+       |import molecule.core.ast.DataModel
        |
        |trait Molecule {
        |  val dataModel: DataModel

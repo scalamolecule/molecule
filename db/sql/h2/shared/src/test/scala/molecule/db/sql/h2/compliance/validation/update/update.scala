@@ -1,24 +1,24 @@
 package molecule.db.sql.h2.compliance.validation.update
 
-import molecule.db.compliance.setup.Test
+import molecule.core.setup.MUnit
 import molecule.db.compliance.test.validation.update.*
 import molecule.db.sql.h2.setup.Api_h2_async
 
-class TypesOneTest extends Test {
+class TypesOneTest extends MUnit {
   TypesOne(this, Api_h2_async)
 }
-class TypesOneOptTest extends Test {
+class TypesOneOptTest extends MUnit {
   TypesOneOpt(this, Api_h2_async)
 }
-class TypesSeqTest extends Test {
+class TypesSeqTest extends MUnit {
   TypesSeq(this, Api_h2_async)
 }
-class TypesSeqOptTest extends Test {
+class TypesSeqOptTest extends MUnit {
   TypesSeqOpt(this, Api_h2_async)
 }
-class TypesSetTest extends Test {
+class TypesSetTest extends MUnit {
   TypesSet(this, Api_h2_async)
 }
-class TypesSetOptTest extends Test {
+class TypesSetOptTest extends MUnit {
   TypesSetOpt(this, Api_h2_async)
 }

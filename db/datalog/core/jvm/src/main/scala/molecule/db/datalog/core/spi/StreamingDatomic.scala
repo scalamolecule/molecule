@@ -3,7 +3,7 @@ package molecule.db.datalog.core.spi
 import java.util.stream.Stream as jStream
 import java.util.{Iterator as jIterator, List as jList}
 import cats.effect.IO
-import molecule.db.base.error.{ExecutionError, MoleculeError}
+import molecule.base.error.{ExecutionError, MoleculeError}
 import molecule.db.core.action.Query
 import molecule.db.core.spi.Conn
 import zio.*

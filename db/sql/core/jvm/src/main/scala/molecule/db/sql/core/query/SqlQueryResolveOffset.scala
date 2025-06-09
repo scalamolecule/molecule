@@ -1,8 +1,9 @@
 package molecule.db.sql.core.query
 
-import molecule.db.base.error.ModelError
-import molecule.db.core.ast.DataModel
-import molecule.db.core.util.{FutureUtils, ModelUtils, MoleculeLogging}
+import molecule.base.error.ModelError
+import molecule.core.ast.DataModel
+import molecule.core.util.MoleculeLogging
+import molecule.db.core.util.{FutureUtils, ModelUtils}
 import molecule.db.sql.core.facade.JdbcConn_JVM
 import molecule.db.sql.core.query.casting.strategy.*
 import molecule.db.sql.core.query.casting.{NestOptTpls, NestTpls}

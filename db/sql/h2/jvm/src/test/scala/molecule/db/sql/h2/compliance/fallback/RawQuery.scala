@@ -1,7 +1,7 @@
 package molecule.db.sql.h2.compliance.fallback
 
+import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.{Test, TestUtils}
 import molecule.db.core.util.Executor.*
 import molecule.db.sql.h2.async.*
 import molecule.db.sql.h2.setup.DbProviders_h2
@@ -9,7 +9,7 @@ import org.h2.jdbc.JdbcArray
 import upickle.default.read
 
 
-class RawQuery extends Test with DbProviders_h2 with TestUtils {
+class RawQuery extends MUnit with DbProviders_h2 with TestUtils {
 
   "Lists of Lists of Any" - types { implicit conn =>
     for {

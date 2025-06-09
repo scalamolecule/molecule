@@ -2,7 +2,7 @@ package boilerplate.db.compliance.test.bind.types
 
 import java.nio.file.{Files, Paths}
 import boilerplate.Base
-import boilerplate.db.compliance.ComplianceGenBase
+import boilerplate.db.compliance.DbComplianceGenBase
 
 object _BindTypes extends Base {
 
@@ -14,7 +14,7 @@ object _BindTypes extends Base {
     }
 
   case class TransformFile(name: String, tpe: String, v: String, imp: String = "")
-    extends ComplianceGenBase(s"Bind_$name", "/bind/types") {
+    extends DbComplianceGenBase(s"Bind_$name", "/bind/types") {
 
     override val content = {
       val src =

@@ -1,15 +1,15 @@
 package molecule.db.sql.mariadb.compliance.fallback
 
 import java.math.BigDecimal as jBigDecimal
+import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.{Test, TestUtils}
 import molecule.db.core.util.Executor.*
 import molecule.db.sql.mariadb.async.*
 import molecule.db.sql.mariadb.setup.DbProviders_mariadb
 import upickle.default.read
 
 
-class RawQuery extends Test with DbProviders_mariadb with TestUtils {
+class RawQuery extends MUnit with DbProviders_mariadb with TestUtils {
 
   "Lists of Lists of Any" - types { implicit conn =>
     for {

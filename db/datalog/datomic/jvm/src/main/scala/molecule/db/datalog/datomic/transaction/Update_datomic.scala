@@ -6,13 +6,13 @@ import java.util.{List as jList, Map as jMap, Set as jSet}
 import clojure.lang.Keyword
 import datomic.query.EntityMap
 import datomic.{Database, Peer}
-import molecule.db.base.ast.CardOne
-import molecule.db.base.error.{ExecutionError, ModelError, MoleculeError, ValidationErrors}
-import molecule.db.core.ast.*
+import molecule.base.ast.CardOne
+import molecule.base.error.{ExecutionError, ModelError, MoleculeError, ValidationErrors}
+import molecule.core.ast.*
+import molecule.core.util.{JavaConversions, MoleculeLogging}
 import molecule.db.core.ops.ModelTransformations_
 import molecule.db.core.transaction.ResolveUpdate
 import molecule.db.core.transaction.ops.UpdateOps
-import molecule.db.core.util.{JavaConversions, MoleculeLogging}
 import molecule.db.core.validation.TxModelValidation
 import molecule.db.datalog.core.query.{Model2DatomicQuery, ResolveBase}
 import molecule.db.datalog.datomic.facade.DatomicConn_JVM

@@ -1,89 +1,89 @@
 package molecule.db.sql.mysql.compliance.filter.set
 
-import molecule.db.compliance.setup.Test
+import molecule.core.setup.MUnit
 import molecule.db.compliance.test.filter.set.SetSemantics
 import molecule.db.compliance.test.filter.set.ref.{FilterRefSet_Card1Ref, FilterRefSet_Card2Ref}
 import molecule.db.compliance.test.filter.set.types.*
 import molecule.db.sql.mysql.setup.Api_mysql_async
 
-class FilterSet_String_Test extends Test {
+class FilterSet_String_Test extends MUnit {
   FilterSet_String_(this, Api_mysql_async)
 }
-class FilterSet_IntTest extends Test {
+class FilterSet_IntTest extends MUnit {
   FilterSet_Int(this, Api_mysql_async)
 }
-class FilterSet_Long_Test extends Test {
+class FilterSet_Long_Test extends MUnit {
   FilterSet_Long_(this, Api_mysql_async)
 }
-class FilterSet_Float_Test extends Test {
+class FilterSet_Float_Test extends MUnit {
   FilterSet_Float_(this, Api_mysql_async)
 }
-class FilterSet_Double_Test extends Test {
+class FilterSet_Double_Test extends MUnit {
   FilterSet_Double_(this, Api_mysql_async)
 }
-class FilterSet_BooleanTest extends Test {
+class FilterSet_BooleanTest extends MUnit {
   FilterSet_Boolean(this, Api_mysql_async)
 }
-class FilterSet_BigInt_Test extends Test {
+class FilterSet_BigInt_Test extends MUnit {
   FilterSet_BigInt_(this, Api_mysql_async)
 }
-class FilterSet_BigDecimal_Test extends Test {
+class FilterSet_BigDecimal_Test extends MUnit {
   FilterSet_BigDecimal_(this, Api_mysql_async)
 }
-class FilterSet_Date_Test extends Test {
+class FilterSet_Date_Test extends MUnit {
   FilterSet_Date_(this, Api_mysql_async)
 }
-class FilterSet_Duration_Test extends Test {
+class FilterSet_Duration_Test extends MUnit {
   FilterSet_Duration_(this, Api_mysql_async)
 }
-class FilterSet_Instant_Test extends Test {
+class FilterSet_Instant_Test extends MUnit {
   FilterSet_Instant_(this, Api_mysql_async)
 }
-class FilterSet_LocalDate_Test extends Test {
+class FilterSet_LocalDate_Test extends MUnit {
   FilterSet_LocalDate_(this, Api_mysql_async)
 }
-class FilterSet_LocalTime_Test extends Test {
+class FilterSet_LocalTime_Test extends MUnit {
   FilterSet_LocalTime_(this, Api_mysql_async)
 }
-class FilterSet_LocalDateTime_Test extends Test {
+class FilterSet_LocalDateTime_Test extends MUnit {
   FilterSet_LocalDateTime_(this, Api_mysql_async)
 }
-class FilterSet_OffsetTime_Test extends Test {
+class FilterSet_OffsetTime_Test extends MUnit {
   FilterSet_OffsetTime_(this, Api_mysql_async)
 }
-class FilterSet_OffsetDateTime_Test extends Test {
+class FilterSet_OffsetDateTime_Test extends MUnit {
   FilterSet_OffsetDateTime_(this, Api_mysql_async)
 }
-class FilterSet_ZonedDateTime_Test extends Test {
+class FilterSet_ZonedDateTime_Test extends MUnit {
   FilterSet_ZonedDateTime_(this, Api_mysql_async)
 }
-class FilterSet_UUID_Test extends Test {
+class FilterSet_UUID_Test extends MUnit {
   FilterSet_UUID_(this, Api_mysql_async)
 }
-class FilterSet_URI_Test extends Test {
+class FilterSet_URI_Test extends MUnit {
   FilterSet_URI_(this, Api_mysql_async)
 }
-class FilterSet_Byte_Test extends Test {
+class FilterSet_Byte_Test extends MUnit {
   FilterSet_Byte_(this, Api_mysql_async)
 }
-class FilterSet_Short_Test extends Test {
+class FilterSet_Short_Test extends MUnit {
   FilterSet_Short_(this, Api_mysql_async)
 }
-class FilterSet_Char_Test extends Test {
+class FilterSet_Char_Test extends MUnit {
   FilterSet_Char_(this, Api_mysql_async)
 }
 
-class FilterSet_refTest extends Test {
+class FilterSet_refTest extends MUnit {
   FilterSet_ref(this, Api_mysql_async)
 }
 
-class SetSemanticsTest extends Test {
+class SetSemanticsTest extends MUnit {
   SetSemantics(this, Api_mysql_async)
 }
 
-class FilterRefSet_Card1RefTest extends Test {
+class FilterRefSet_Card1RefTest extends MUnit {
   FilterRefSet_Card1Ref(this, Api_mysql_async)
 }
-class FilterRefSet_Card2RefTest extends Test {
+class FilterRefSet_Card2RefTest extends MUnit {
   FilterRefSet_Card2Ref(this, Api_mysql_async)
 }

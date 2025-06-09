@@ -4,7 +4,7 @@ package molecule.db.core.validation.insert
 import java.net.URI
 import java.time.*
 import java.util.{Date, UUID}
-import molecule.db.core.ast.*
+import molecule.core.ast.*
 
 trait InsertValidators_ extends InsertValueResolvers_ {
   

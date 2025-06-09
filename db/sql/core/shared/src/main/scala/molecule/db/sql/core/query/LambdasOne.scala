@@ -3,7 +3,7 @@ package molecule.db.sql.core.query
 import java.net.URI
 import java.time.*
 import java.util.{Date, UUID}
-import molecule.db.base.error.ModelError
+import molecule.base.error.ModelError
 import molecule.db.sql.core.javaSql.PrepStmt
 
 trait LambdasOne extends LambdasBase { self: SqlQueryBase =>

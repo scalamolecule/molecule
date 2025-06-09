@@ -1,15 +1,15 @@
 package boilerplate.db.core.action
 
-import boilerplate.db.core.CoreBase
+import boilerplate.db.core.DbCoreBase
 
-object _Insert extends CoreBase( "Insert", "/action") {
+object _Insert extends DbCoreBase( "Insert", "/action") {
 
   val content = {
     val traits = (2 to 22).map(arity => Trait(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************
        |package molecule.db.core.action
        |
-       |import molecule.db.core.ast.DataModel
+       |import molecule.core.ast.DataModel
        |
        |case class ${fileName}_1[A](dataModel: DataModel) {
        |  final def apply(a: A, as: A*) = Insert(dataModel, (a +: as).map(a => Tuple1(a)))

@@ -1,12 +1,12 @@
 package molecule.db.sql.mariadb
 
-import molecule.db.compliance.setup.{Test, TestUtils}
+import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.core.util.Executor.*
 import molecule.db.sql.mariadb.async.*
 import molecule.db.sql.mariadb.setup.DbProviders_mariadb
 
 
-class Adhoc_mariadb_jvm_async extends Test with DbProviders_mariadb with TestUtils {
+class Adhoc_mariadb_jvm_async extends MUnit with DbProviders_mariadb with TestUtils {
 
 
   "types" - types { implicit conn =>

@@ -1,8 +1,8 @@
 package molecule.db.core.validation
 
-import molecule.db.base.ast.*
-import molecule.db.base.error.*
-import molecule.db.core.ast.*
+import molecule.base.ast.{Card, MetaEntity}
+import molecule.base.error.{ExecutionError, ModelError}
+import molecule.core.ast.*
 import molecule.db.core.ops.ModelTransformations_
 import scala.annotation.tailrec
 

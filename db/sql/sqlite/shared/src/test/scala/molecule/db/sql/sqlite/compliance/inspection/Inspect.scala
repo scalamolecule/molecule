@@ -1,14 +1,14 @@
 package molecule.db.sql.sqlite.compliance.inspection
 
+import molecule.core.ast.{AttrOneManInt, AttrOneManString, DataModel, V}
+import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.{Test, TestUtils}
-import molecule.db.core.ast.{AttrOneManInt, AttrOneManString, DataModel, V}
 import molecule.db.core.util.Executor.*
 import molecule.db.sql.sqlite.async.*
 import molecule.db.sql.sqlite.setup.DbProviders_sqlite
 
 
-class Test_Inspect extends Test with DbProviders_sqlite with TestUtils {
+class Test_Inspect extends MUnit with DbProviders_sqlite with TestUtils {
 
 
   "Inspect without fetching" - types { implicit conn =>

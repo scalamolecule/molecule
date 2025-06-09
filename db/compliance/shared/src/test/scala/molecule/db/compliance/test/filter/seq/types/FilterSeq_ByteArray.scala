@@ -1,14 +1,15 @@
 package molecule.db.compliance.test.filter.seq.types
 
-import molecule.db.base.error.ModelError
+import molecule.base.error.ModelError
+import molecule.core.setup.{MUnit_arrays, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.{DbProviders, MUnitSuiteWithArrays, TestUtils}
+import molecule.db.compliance.setup.DbProviders
 import molecule.db.core.api.Api_async
 import molecule.db.core.spi.Spi_async
 import molecule.db.core.util.Executor.*
 
 case class FilterSeq_ByteArray(
-  suite: MUnitSuiteWithArrays,
+  suite: MUnit_arrays,
   api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 

@@ -1,6 +1,6 @@
 package molecule.db.core.spi
 
-import molecule.db.base.error.*
+import molecule.base.error.{ExecutionError, InsertError, MoleculeError}
 import molecule.db.core.action.*
 import zio.stream.ZStream
 import zio.{Task, ZIO}

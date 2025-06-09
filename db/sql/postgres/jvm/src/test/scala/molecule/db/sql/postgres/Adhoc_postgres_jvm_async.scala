@@ -1,12 +1,12 @@
 package molecule.db.sql.postgres
 
-import molecule.db.compliance.setup.{Test, TestUtils}
+import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.core.util.Executor.*
 import molecule.db.sql.postgres.async.*
 import molecule.db.sql.postgres.setup.DbProviders_postgres
 
 
-class Adhoc_postgres_jvm_async extends Test with DbProviders_postgres with TestUtils {
+class Adhoc_postgres_jvm_async extends MUnit with DbProviders_postgres with TestUtils {
 
   "types" - types { implicit conn =>
     import molecule.db.compliance.domains.dsl.Types.*

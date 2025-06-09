@@ -1,14 +1,14 @@
 package molecule.db.datalog.datomic.compliance.time
 
 import java.util.Date
+import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.{Test, TestUtils}
 import molecule.db.core.util.Executor.*
 import molecule.db.datalog.datomic.async.*
 import molecule.db.datalog.datomic.setup.DbProviders_datomic
 
 
-class Test_GetSince extends Test with DbProviders_datomic with TestUtils {
+class Test_GetSince extends MUnit with DbProviders_datomic with TestUtils {
 
   "save" - types { implicit conn =>
     for {

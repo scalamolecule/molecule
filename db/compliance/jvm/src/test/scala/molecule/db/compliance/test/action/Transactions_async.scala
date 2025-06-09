@@ -1,8 +1,9 @@
 package molecule.db.compliance.test.action
 
-import molecule.db.base.error.ValidationErrors
+import molecule.base.error.ValidationErrors
+import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.{DbProviders, Test, TestUtils}
+import molecule.db.compliance.setup.DbProviders
 import molecule.db.core.api.{Api_async, Api_async_transact}
 import molecule.db.core.spi.{Conn, Spi_async}
 import molecule.db.core.util.Executor.*
@@ -13,7 +14,7 @@ import scala.concurrent.Future
 // https://github.com/com-lihaoyi/scalasql/blob/main/scalasql/test/src/api/TransactionTests.scala
 
 case class Transactions_async(
-  suite: Test,
+  suite: MUnit,
   api: Api_async_transact & Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 

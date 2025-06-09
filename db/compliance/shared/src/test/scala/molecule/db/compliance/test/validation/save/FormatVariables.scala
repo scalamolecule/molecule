@@ -1,14 +1,15 @@
 package molecule.db.compliance.test.validation.save
 
-import molecule.db.base.error.{ExecutionError, ModelError, ValidationErrors}
+import molecule.base.error.{ExecutionError, ModelError, ValidationErrors}
+import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Validation.*
-import molecule.db.compliance.setup.{DbProviders, Test, TestUtils}
+import molecule.db.compliance.setup.DbProviders
 import molecule.db.core.api.Api_async
 import molecule.db.core.spi.Spi_async
 import molecule.db.core.util.Executor.*
 
 case class FormatVariables(
-  suite: Test,
+  suite: MUnit,
   api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 

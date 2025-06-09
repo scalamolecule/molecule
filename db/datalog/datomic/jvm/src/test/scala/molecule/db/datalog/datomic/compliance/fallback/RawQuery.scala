@@ -1,13 +1,13 @@
 package molecule.db.datalog.datomic.compliance.fallback
 
+import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.{Test, TestUtils}
 import molecule.db.core.util.Executor.*
 import molecule.db.datalog.datomic.async.*
 import molecule.db.datalog.datomic.setup.DbProviders_datomic
 
 
-class RawQuery extends Test with DbProviders_datomic with TestUtils {
+class RawQuery extends MUnit with DbProviders_datomic with TestUtils {
 
   "Lists of Lists of Any" - types { implicit conn =>
     for {

@@ -1,13 +1,14 @@
 package molecule.db.compliance.test.action
 
+import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.{DbProviders, Test, TestUtils}
+import molecule.db.compliance.setup.DbProviders
 import molecule.db.core.api.{Api_io, Api_io_transact}
 import molecule.db.core.spi.Spi_io
 
 
 case class Transactions_io(
-  suite: Test,
+  suite: MUnit,
   api: Api_io_transact & Api_io & Spi_io & DbProviders
 ) extends TestUtils {
 

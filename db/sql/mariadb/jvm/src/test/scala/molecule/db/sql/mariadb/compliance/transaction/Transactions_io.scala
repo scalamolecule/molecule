@@ -1,10 +1,10 @@
 package molecule.db.sql.mariadb.compliance.transaction
 
-import molecule.db.compliance.setup.Test
+import molecule.core.setup.MUnit
 import molecule.db.compliance.test.action.Transactions_io
 import molecule.db.sql.mariadb.setup.Api_mariadb_io
 
 
-class Transactions_ioTest extends Test {
+class Transactions_ioTest extends MUnit {
   Transactions_io(this, Api_mariadb_io)
 }

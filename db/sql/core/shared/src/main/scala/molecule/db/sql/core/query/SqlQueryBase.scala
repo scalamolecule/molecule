@@ -1,9 +1,9 @@
 package molecule.db.sql.core.query
 
-import molecule.db.base.ast.Card
-import molecule.db.base.util.BaseHelpers
-import molecule.db.core.ast.*
-import molecule.db.core.util.JavaConversions
+import molecule.base.ast.Card
+import molecule.base.util.BaseHelpers
+import molecule.core.ast.*
+import molecule.core.util.JavaConversions
 import molecule.db.sql.core.javaSql.{PrepStmt, ResultSetInterface}
 import molecule.db.sql.core.query.casting.strategy.{CastStrategy, CastTuple}
 import scala.collection.mutable

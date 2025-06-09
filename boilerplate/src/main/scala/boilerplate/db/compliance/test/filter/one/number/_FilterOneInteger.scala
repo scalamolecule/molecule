@@ -2,7 +2,7 @@ package boilerplate.db.compliance.test.filter.one.number
 
 import java.nio.file.{Files, Paths}
 import boilerplate.Base
-import boilerplate.db.compliance.ComplianceGenBase
+import boilerplate.db.compliance.DbComplianceGenBase
 
 object _FilterOneInteger extends Base {
 
@@ -16,7 +16,7 @@ object _FilterOneInteger extends Base {
   }
 
   case class TransformFile(tpe: String, v: String, imp: String = "")
-    extends ComplianceGenBase(s"FilterOneInteger_$tpe", "/filter/one/number") {
+    extends DbComplianceGenBase(s"FilterOneInteger_$tpe", "/filter/one/number") {
 
     override val content = {
       new String(Files.readAllBytes(Paths.get(path, "FilterOneInteger_Int.scala")), "UTF-8")

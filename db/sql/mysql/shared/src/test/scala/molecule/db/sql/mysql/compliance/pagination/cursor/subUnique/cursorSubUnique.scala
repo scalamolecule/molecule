@@ -1,30 +1,30 @@
 package molecule.db.sql.mysql.compliance.pagination.cursor.subUnique
 
-import molecule.db.compliance.setup.Test
+import molecule.core.setup.MUnit
 import molecule.db.compliance.test.pagination.subUnique.*
 import molecule.db.sql.mysql.setup.Api_mysql_async
 
-class AttrOrderTest extends Test {
+class AttrOrderTest extends MUnit {
   AttrOrder(this, Api_mysql_async)
 }
-class DirectionsStandardUniqueTest extends Test {
+class DirectionsStandardUniqueTest extends MUnit {
   DirectionsStandardUnique(this, Api_mysql_async)
 }
-class DirectionsUniqueStandardTest extends Test {
+class DirectionsUniqueStandardTest extends MUnit {
   DirectionsUniqueStandard(this, Api_mysql_async)
 }
-class MutationAddTest extends Test {
+class MutationAddTest extends MUnit {
   MutationAdd(this, Api_mysql_async)
 }
-class MutationDeleteTest extends Test {
+class MutationDeleteTest extends MUnit {
   MutationDelete(this, Api_mysql_async)
 }
-class NestedTest extends Test {
+class NestedTest extends MUnit {
   Nested(this, Api_mysql_async)
 }
-class OptNestedTest extends Test {
+class OptNestedTest extends MUnit {
   OptNested(this, Api_mysql_async)
 }
-class TypesUniqueValueTest extends Test {
+class TypesUniqueValueTest extends MUnit {
   TypesUniqueValue(this, Api_mysql_async)
 }

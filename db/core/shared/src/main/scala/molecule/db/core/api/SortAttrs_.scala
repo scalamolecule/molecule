@@ -1,7 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.db.core.api
 
-import molecule.db.base.error.ExecutionError
+import molecule.base.error.ExecutionError
 
 
 trait SortAttrsOps_1[A, t, Entity[_, _]] {

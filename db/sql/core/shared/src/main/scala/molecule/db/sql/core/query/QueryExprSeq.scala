@@ -1,7 +1,7 @@
 package molecule.db.sql.core.query
 
-import molecule.db.base.error.ModelError
-import molecule.db.core.ast.*
+import molecule.base.error.ModelError
+import molecule.core.ast.*
 import molecule.db.core.query.{Model2Query, QueryExpr}
 import molecule.db.sql.core.javaSql.PrepStmt
 

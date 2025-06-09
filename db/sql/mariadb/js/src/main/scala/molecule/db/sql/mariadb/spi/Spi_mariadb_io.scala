@@ -2,7 +2,7 @@ package molecule.db.sql.mariadb.spi
 
 import boopickle.Default.*
 import cats.effect.IO
-import molecule.db.core.ast.{DataModel, Element}
+import molecule.core.ast.DataModel
 import molecule.db.sql.core.spi.SpiBase_io
 import molecule.db.sql.mariadb.query.Model2SqlQuery_mariadb
 

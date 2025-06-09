@@ -1,13 +1,13 @@
 package molecule.db.sql.h2
 
 import boopickle.Default.*
+import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.{Test, TestUtils}
 import molecule.db.core.util.Executor.*
 import molecule.db.sql.h2.async.*
 import molecule.db.sql.h2.setup.DbProviders_h2
 
-class Adhoc_h2_js_zio extends Test with DbProviders_h2 with TestUtils {
+class Adhoc_h2_js_zio extends MUnit with DbProviders_h2 with TestUtils {
 
 
   "types" - types { implicit conn =>

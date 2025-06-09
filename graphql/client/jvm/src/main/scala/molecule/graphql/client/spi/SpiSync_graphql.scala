@@ -2,8 +2,8 @@ package molecule.graphql.client.spi
 
 //package molecule.graphql.client.spi
 //
-//import molecule.db.base.error.InsertError
-//import molecule.db.core.ast.*
+//import molecule.base.error.InsertError
+//import molecule.core.ast.*
 //import molecule.db.core.action.*
 //import molecule.db.core.marshalling.ConnProxy
 //import molecule.db.core.spi.{Conn, Renderer, SpiSync, Spi_async, TxReport}

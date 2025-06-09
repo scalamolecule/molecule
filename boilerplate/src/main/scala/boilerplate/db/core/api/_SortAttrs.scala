@@ -1,14 +1,14 @@
 package boilerplate.db.core.api
 
-import boilerplate.db.core.CoreBase
+import boilerplate.db.core.DbCoreBase
 
-object _SortAttrs extends CoreBase("SortAttrs", "/api") {
+object _SortAttrs extends DbCoreBase("SortAttrs", "/api") {
   val content = {
     val traits = (1 to 22).map(arity => Trait(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************
        |package molecule.db.core.api
        |
-       |import molecule.db.base.error.ExecutionError
+       |import molecule.base.error.ExecutionError
        |
        |$traits""".stripMargin
   }

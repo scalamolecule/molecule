@@ -1,18 +1,18 @@
 package molecule.db.datalog.datomic.compliance.action.update.filter
 
-import molecule.db.compliance.setup.Test
+import molecule.core.setup.MUnit
 import molecule.db.compliance.test.action.update.filter.{FilterMap, FilterOne, FilterSeq, FilterSet}
 import molecule.db.datalog.datomic.setup.Api_datomic_async
 
-class FilterOneTest extends Test {
+class FilterOneTest extends MUnit {
   FilterOne(this, Api_datomic_async)
 }
-class FilterSetTest extends Test {
+class FilterSetTest extends MUnit {
   FilterSet(this, Api_datomic_async)
 }
-class FilterSeqTest extends Test {
+class FilterSeqTest extends MUnit {
   FilterSeq(this, Api_datomic_async)
 }
-class FilterMapTest extends Test {
+class FilterMapTest extends MUnit {
   FilterMap(this, Api_datomic_async)
 }

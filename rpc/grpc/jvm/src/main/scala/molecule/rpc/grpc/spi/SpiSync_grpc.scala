@@ -1,7 +1,7 @@
 package molecule.rpc.grpc.spi
 
-import molecule.db.base.error.InsertError
-import molecule.db.core.ast._
+import molecule.base.error.InsertError
+import molecule.core.ast._
 import molecule.db.core.action._
 import molecule.db.core.marshalling.ConnProxy
 import molecule.db.core.spi.{Conn, Renderer, SpiSync, TxReport}

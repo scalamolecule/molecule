@@ -1,14 +1,15 @@
 package molecule.db.core.validation.insert
 
-import molecule.db.base.ast.*
-import molecule.db.base.error.{InsertError, ModelError}
-import molecule.db.core.ast._
+import molecule.base.ast.MetaEntity
+import molecule.base.error.{InsertError, ModelError}
+import molecule.core.ast.*
 import molecule.db.core.util.ModelUtils
 import scala.annotation.tailrec
 
 trait InsertValidationExtraction
   extends InsertValidators_
-    with ModelUtils { self: InsertValidationResolvers_ =>
+    with ModelUtils
+    { self: InsertValidationResolvers_ =>
 
   private var curElements: List[Element] = List.empty[Element]
   private def noEmpty(a: Attr) = throw new Exception("Can't use tacit attributes in insert molecule (${a.name}).")

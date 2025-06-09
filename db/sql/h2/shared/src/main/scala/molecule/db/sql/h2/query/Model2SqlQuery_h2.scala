@@ -1,6 +1,6 @@
 package molecule.db.sql.h2.query
 
-import molecule.db.core.ast.Element
+import molecule.core.ast.Element
 import molecule.db.sql.core.query.*
 
 class Model2SqlQuery_h2(elements0: List[Element])

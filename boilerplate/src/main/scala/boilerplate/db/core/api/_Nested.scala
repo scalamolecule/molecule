@@ -1,14 +1,14 @@
 package boilerplate.db.core.api
 
-import boilerplate.db.core.CoreBase
+import boilerplate.db.core.DbCoreBase
 
-object _Nested extends CoreBase("Nested", "/api") {
+object _Nested extends DbCoreBase("Nested", "/api") {
   val content = {
     val traits = (0 to 21).map(arity => Trait(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************
        |package molecule.db.core.api
        |
-       |import molecule.db.core.ast.DataModel
+       |import molecule.core.ast.DataModel
        |
        |$traits
        |""".stripMargin

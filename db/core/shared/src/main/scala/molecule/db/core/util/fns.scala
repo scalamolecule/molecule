@@ -1,7 +1,7 @@
 package molecule.db.core.util
 
 import java.util.Date
-import molecule.db.base.util.DateHandling
+import molecule.base.util.DateHandling
 
 object fns extends DateHandling {
 

@@ -5,7 +5,7 @@ import java.math.{BigDecimal as jBigDecimal, BigInteger as jBigInt}
 import java.net.URI
 import java.time.*
 import java.util.{Date, UUID, List as jList}
-import molecule.db.base.util.BaseHelpers
+import molecule.base.util.BaseHelpers
 import molecule.db.datalog.core.query.casting.NullValueException
 
 trait ResolveBase extends BaseHelpers {

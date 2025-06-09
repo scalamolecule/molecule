@@ -2,14 +2,15 @@
 package molecule.db.compliance.test.filter.one.types
 
 import java.time.LocalTime
+import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.{DbProviders, Test, TestUtils}
+import molecule.db.compliance.setup.DbProviders
 import molecule.db.core.api.Api_async
 import molecule.db.core.spi.Spi_async
 import molecule.db.core.util.Executor.*
 
 case class FilterOne_LocalTime_(
-  suite: Test,
+  suite: MUnit,
   api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 

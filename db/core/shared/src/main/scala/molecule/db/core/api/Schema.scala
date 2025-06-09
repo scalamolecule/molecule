@@ -1,6 +1,6 @@
 package molecule.db.core.api
 
-import molecule.db.base.ast.*
+import molecule.base.ast.{Card, MetaDomain, MetaEntity}
 
 
 /** Schema transaction data interface

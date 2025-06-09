@@ -1,7 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.db.core.action
 
-import molecule.db.core.ast.DataModel
+import molecule.core.ast.DataModel
 
 case class Insert_1[A](dataModel: DataModel) {
   final def apply(a: A, as: A*) = Insert(dataModel, (a +: as).map(a => Tuple1(a)))

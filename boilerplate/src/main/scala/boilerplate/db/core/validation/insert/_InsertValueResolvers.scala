@@ -1,8 +1,8 @@
 package boilerplate.db.core.validation.insert
 
-import boilerplate.db.core.CoreBase
+import boilerplate.db.core.DbCoreBase
 
-object _InsertValueResolvers extends CoreBase("InsertValueResolvers", "/validation/insert") {
+object _InsertValueResolvers extends DbCoreBase("InsertValueResolvers", "/validation/insert") {
 
   val content = {
     val resolveX       = (1 to 22).map(i => s"case ${caseN(i)} => resolve$i(valueResolvers)").mkString("\n      ")
@@ -13,7 +13,7 @@ object _InsertValueResolvers extends CoreBase("InsertValueResolvers", "/validati
        |import java.net.URI
        |import java.time.*
        |import java.util.{Date, UUID}
-       |import molecule.db.core.ast._
+       |import molecule.core.ast._
        |
        |trait $fileName_ {
        |

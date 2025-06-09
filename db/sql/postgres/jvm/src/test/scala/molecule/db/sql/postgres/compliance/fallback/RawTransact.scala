@@ -1,13 +1,13 @@
 package molecule.db.sql.postgres.compliance.fallback
 
+import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.{Test, TestUtils}
 import molecule.db.core.util.Executor.*
 import molecule.db.sql.postgres.async.*
 import molecule.db.sql.postgres.setup.DbProviders_postgres
 
 
-class RawTransact extends Test with DbProviders_postgres with TestUtils {
+class RawTransact extends MUnit with DbProviders_postgres with TestUtils {
 
   "Semantics" - types { implicit conn =>
     for {

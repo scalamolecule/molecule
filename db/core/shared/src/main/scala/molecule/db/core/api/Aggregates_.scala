@@ -1,7 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.db.core.api
 
-import molecule.db.core.api.Keywords.*
+import molecule.core.ast.Keywords.*
 
 
 trait AggregatesOps_1[A, t, Entity[_, _]] {

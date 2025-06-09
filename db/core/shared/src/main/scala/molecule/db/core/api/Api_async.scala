@@ -1,11 +1,12 @@
 package molecule.db.core.api
 
 import cats.effect.IO
+import molecule.base.error.InsertError
+import molecule.core.ast.Keywords
 import molecule.db.core.action.*
 import molecule.db.core.spi.*
 import molecule.db.core.util.ModelUtils
 import scala.concurrent.{Future, ExecutionContext as EC}
-import molecule.db.base.error.{InsertError, ModelError}
 
 trait Api_async extends Keywords with ModelUtils { spi: Spi_async =>
 

@@ -2,9 +2,9 @@ package molecule.db.sql.core.transaction
 
 import java.sql.PreparedStatement as PS
 import boopickle.Default.*
-import molecule.db.base.ast.CardOne
-import molecule.db.base.error.ModelError
-import molecule.db.core.ast.*
+import molecule.base.ast.CardOne
+import molecule.base.error.ModelError
+import molecule.core.ast.*
 import molecule.db.core.transaction.ResolveUpdate
 import molecule.db.core.transaction.ops.UpdateOps
 import molecule.db.sql.core.spi.SpiHelpers

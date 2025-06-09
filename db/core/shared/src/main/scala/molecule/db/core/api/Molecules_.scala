@@ -1,9 +1,9 @@
 // GENERATED CODE ********************************
 package molecule.db.core.api
 
-import molecule.db.base.error.ModelError
+import molecule.base.error.ModelError
+import molecule.core.ast.DataModel
 import molecule.db.core.action.*
-import molecule.db.core.ast.DataModel
 
 trait Molecule {
   val dataModel: DataModel

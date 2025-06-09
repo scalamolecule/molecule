@@ -1,9 +1,9 @@
 package molecule.db.sql.h2.compliance.validation
 
-import molecule.db.compliance.setup.Test
+import molecule.core.setup.MUnit
 import molecule.db.compliance.test.validation.StringValidationFns
 import molecule.db.sql.h2.setup.Api_h2_async
 
-class StringValidationFnsTest extends Test {
+class StringValidationFnsTest extends MUnit {
   StringValidationFns(this, Api_h2_async)
 }

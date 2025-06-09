@@ -1,6 +1,6 @@
 package molecule.db.core.util
 
-import molecule.db.base.ast.*
+import molecule.base.ast.MetaEntity
 
 trait MetaModelUtils {
 

@@ -1,13 +1,13 @@
 package molecule.db.sql.mysql.compliance.fallback
 
+import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.{Test, TestUtils}
 import molecule.db.core.util.Executor.*
 import molecule.db.sql.mysql.async.*
 import molecule.db.sql.mysql.setup.DbProviders_mysql
 
 
-class RawTransact extends Test with DbProviders_mysql with TestUtils {
+class RawTransact extends MUnit with DbProviders_mysql with TestUtils {
 
   "Semantics" - types { implicit conn =>
     for {

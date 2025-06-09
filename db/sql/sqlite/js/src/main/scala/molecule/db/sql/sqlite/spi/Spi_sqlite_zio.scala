@@ -1,6 +1,6 @@
 package molecule.db.sql.sqlite.spi
 
-import molecule.db.base.error.{InsertError, MoleculeError}
+import molecule.base.error.{InsertError, MoleculeError}
 import molecule.db.core.action.*
 import molecule.db.core.spi.{Conn, Spi_zio, TxReport}
 import molecule.db.sql.core.facade.JdbcConn_JS

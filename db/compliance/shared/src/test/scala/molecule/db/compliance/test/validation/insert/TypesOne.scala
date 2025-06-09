@@ -2,16 +2,17 @@ package molecule.db.compliance.test.validation.insert
 
 import java.net.URI
 import java.util.UUID
-import molecule.db.base.error.{InsertError, InsertErrors}
+import molecule.base.error.{InsertError, InsertErrors}
+import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Validation.*
-import molecule.db.compliance.setup.{DbProviders, Test, TestUtils}
+import molecule.db.compliance.setup.DbProviders
 import molecule.db.core.api.Api_async
 import molecule.db.core.spi.Spi_async
 import molecule.db.core.util.Executor.*
 
 
 case class TypesOne(
-  suite: Test,
+  suite: MUnit,
   api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 

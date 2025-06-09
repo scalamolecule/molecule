@@ -1,8 +1,8 @@
 package boilerplate.db.datalog.core.query.casting
 
-import boilerplate.db.datalog.DatalogGenBase
+import boilerplate.db.datalog.DbDatalogBase
 
-object _CastOptRefBranch extends DatalogGenBase("CastOptRefBranch", "/query/casting") {
+object _CastOptRefBranch extends DbDatalogBase("CastOptRefBranch", "/query/casting") {
 
   val content = {
     val pullBranchX    = (1 to 21).map(i => s"case ${caseN(i)} => pullBranch$i(pullCasts, refDepth)").mkString("\n      ")

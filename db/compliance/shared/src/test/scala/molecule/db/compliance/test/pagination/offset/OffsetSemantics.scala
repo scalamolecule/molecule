@@ -1,8 +1,9 @@
 package molecule.db.compliance.test.pagination.offset
 
-import molecule.db.base.error.ModelError
+import molecule.base.error.ModelError
+import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.{DbProviders, Test, TestUtils}
+import molecule.db.compliance.setup.DbProviders
 import molecule.db.core.api.Api_async
 import molecule.db.core.spi.Spi_async
 import molecule.db.core.util.Executor.*
@@ -11,7 +12,7 @@ import molecule.db.core.util.Executor.*
 // https://medium.com/swlh/sql-pagination-you-are-probably-doing-it-wrong-d0f2719cc166
 
 case class OffsetSemantics(
-  suite: Test,
+  suite: MUnit,
   api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 

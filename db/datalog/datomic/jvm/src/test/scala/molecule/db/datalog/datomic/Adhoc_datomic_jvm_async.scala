@@ -1,17 +1,15 @@
 package molecule.db.datalog.datomic
 
-import molecule.db.compliance.domains.dsl.Types.Entity
-import molecule.db.compliance.setup.{Test, TestUtils}
-import molecule.db.core.ast.{AttrOneManInt, AttrOneManString, DataModel, V}
+import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.core.util.Executor.*
 import molecule.db.datalog.datomic.async.*
 import molecule.db.datalog.datomic.setup.DbProviders_datomic
 
 
-class Adhoc_datomic_jvm_async extends Test with DbProviders_datomic with TestUtils {
+class Adhoc_datomic_jvm_async extends MUnit with DbProviders_datomic with TestUtils {
 
     "types" - types { implicit conn =>
-      import molecule.db.compliance.domains.dsl.Types._
+      import molecule.db.compliance.domains.dsl.Types.*
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
         _ <- Entity.int(3).save.transact

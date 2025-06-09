@@ -1,14 +1,14 @@
 package molecule.db.datalog.datomic.compliance.inspection
 
+import molecule.core.ast.{AttrOneManInt, AttrOneManString, DataModel, V}
+import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.{Test, TestUtils}
-import molecule.db.core.ast.{AttrOneManInt, AttrOneManString, DataModel, V}
 import molecule.db.core.util.Executor.*
 import molecule.db.datalog.datomic.async.*
 import molecule.db.datalog.datomic.setup.DbProviders_datomic
 
 
-class Test_Inspect extends Test with DbProviders_datomic with TestUtils {
+class Test_Inspect extends MUnit with DbProviders_datomic with TestUtils {
 
 
   "Inspect query" - types { implicit conn =>

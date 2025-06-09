@@ -1,11 +1,11 @@
 package molecule.db.sql.sqlite
 
-import molecule.db.compliance.setup.{Test, TestUtils}
+import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.sql.sqlite.setup.DbProviders_sqlite
 import molecule.db.sql.sqlite.sync.*
 
 
-class Adhoc_sqlite_jvm_sync extends Test with DbProviders_sqlite with TestUtils {
+class Adhoc_sqlite_jvm_sync extends MUnit with DbProviders_sqlite with TestUtils {
 
   //  "types" - types { implicit conn =>
   //    import molecule.db.compliance.domains.dsl.Types._

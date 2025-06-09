@@ -1,8 +1,8 @@
 package molecule.db.sql.postgres.compliance.fallback
 
 import java.math.BigDecimal as jBigDecimal
+import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.{Test, TestUtils}
 import molecule.db.core.util.Executor.*
 import molecule.db.sql.postgres.async.*
 import molecule.db.sql.postgres.setup.DbProviders_postgres
@@ -11,7 +11,7 @@ import org.postgresql.util.PGobject
 import upickle.default.read
 
 
-class RawQuery extends Test with DbProviders_postgres with TestUtils {
+class RawQuery extends MUnit with DbProviders_postgres with TestUtils {
 
   "Lists of Lists of Any" - types { implicit conn =>
     for {

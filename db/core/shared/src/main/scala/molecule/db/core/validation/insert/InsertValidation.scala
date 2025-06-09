@@ -1,7 +1,7 @@
 package molecule.db.core.validation.insert
 
-import molecule.db.base.error.*
-import molecule.db.core.ast.Element
+import molecule.base.error.InsertError
+import molecule.core.ast.Element
 import molecule.db.core.spi.Conn
 import molecule.db.core.validation.TxModelValidation
 

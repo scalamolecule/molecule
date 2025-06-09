@@ -2,7 +2,7 @@ package molecule.db.sql.core.spi
 
 import cats.effect.IO
 import fs2.Stream
-import molecule.db.base.error.{ExecutionError, MoleculeError}
+import molecule.base.error.{ExecutionError, MoleculeError}
 import molecule.db.core.action.Query
 import molecule.db.core.spi.Conn
 import molecule.db.sql.core.javaSql.ResultSetInterface as RS

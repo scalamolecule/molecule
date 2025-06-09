@@ -2,7 +2,7 @@ package molecule.graphql.client.spi
 
 //package molecule.graphql.client.spi
 //
-//import molecule.db.base.error._
+//import molecule.base.error._
 //import molecule.db.core.action._
 //import molecule.db.core.spi.{Conn, SpiZio, TxReport}
 //import molecule.db.core.util.Executor._

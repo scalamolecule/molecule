@@ -1,8 +1,8 @@
 package molecule.db.sql.sqlite.spi
 
 import java.sql.{DriverManager, Statement, PreparedStatement as PS}
+import molecule.core.ast.Element
 import molecule.db.core.action.{Delete, Insert, Save, Update}
-import molecule.db.core.ast.Element
 import molecule.db.core.marshalling.{ConnProxy, JdbcProxy}
 import molecule.db.core.spi.{Conn, TxReport}
 import molecule.db.core.transaction.{ResolveDelete, ResolveInsert, ResolveSave, ResolveUpdate}

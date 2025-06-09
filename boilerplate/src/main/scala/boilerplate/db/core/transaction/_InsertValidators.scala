@@ -1,8 +1,8 @@
 package boilerplate.db.core.transaction
 
-import boilerplate.db.core.CoreBase
+import boilerplate.db.core.DbCoreBase
 
-object _InsertValidators extends CoreBase("InsertValidators", "/transaction") {
+object _InsertValidators extends DbCoreBase("InsertValidators", "/transaction") {
 
   override val content = {
     s"""// GENERATED CODE ********************************
@@ -11,7 +11,7 @@ object _InsertValidators extends CoreBase("InsertValidators", "/transaction") {
        |import java.net.URI
        |import java.time.*
        |import java.util.{Date, UUID}
-       |import molecule.db.core.ast._
+       |import molecule.core.ast._
        |import molecule.db.core.validation.insert.InsertValueResolvers_
        |
        |trait $fileName_ extends InsertValueResolvers_ {

@@ -2,7 +2,6 @@ package molecule.server.netty
 
 import boopickle.Default.*
 import cats.effect.IO
-import molecule.db.core.marshalling.Boopicklers.*
 import molecule.db.core.marshalling.MoleculeRpc
 import molecule.server.http4s.Http4sServerEndpoints
 import sttp.capabilities.WebSockets

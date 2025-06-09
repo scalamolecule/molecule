@@ -7,12 +7,12 @@ import java.util.{Date, UUID}
 import boopickle.*
 import boopickle.BasicPicklers.*
 import boopickle.Default.*
-import molecule.db.core.marshalling.Boopicklers.*
-import molecule.db.core.util.{ModelUtils, MoleculeLogging, SerializationUtils}
+import molecule.base.error.{ModelError, MoleculeError}
+import molecule.core.ast.*
+import molecule.core.util.MoleculeLogging
+import molecule.db.core.util.{ModelUtils, SerializationUtils}
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
-import molecule.db.core.ast._
-import molecule.db.base.error.{ModelError, MoleculeError}
 
 case class PickleTpls(
   dataModel: DataModel,

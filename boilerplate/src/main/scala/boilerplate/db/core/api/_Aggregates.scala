@@ -1,14 +1,14 @@
 package boilerplate.db.core.api
 
-import boilerplate.db.core.CoreBase
+import boilerplate.db.core.DbCoreBase
 
-object _Aggregates extends CoreBase("Aggregates", "/api") {
+object _Aggregates extends DbCoreBase("Aggregates", "/api") {
   val content = {
     val traits = (1 to 22).map(arity => Trait(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************
        |package molecule.db.core.api
        |
-       |import molecule.db.core.api.Keywords.*
+       |import molecule.core.ast.Keywords.*
        |$traits""".stripMargin
   }
 

@@ -1,7 +1,7 @@
 package molecule.db.core.spi
 
 import geny.Generator
-import molecule.db.base.error.InsertError
+import molecule.base.error.InsertError
 import molecule.db.core.action.*
 
 trait Spi_sync {

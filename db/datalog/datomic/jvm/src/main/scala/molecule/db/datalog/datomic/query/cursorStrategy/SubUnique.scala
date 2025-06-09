@@ -1,10 +1,11 @@
 package molecule.db.datalog.datomic.query.cursorStrategy
 
-import molecule.db.base.error.ModelError
-import molecule.db.core.ast.DataModel
+import molecule.base.error.ModelError
+import molecule.core.ast.DataModel
+import molecule.core.util.MoleculeLogging
 import molecule.db.core.marshalling.dbView.DbView
 import molecule.db.core.query.Pagination
-import molecule.db.core.util.{FutureUtils, MoleculeLogging}
+import molecule.db.core.util.FutureUtils
 import molecule.db.datalog.core.query.{DatomicQueryBase, Model2DatomicQuery}
 import molecule.db.datalog.datomic.facade.DatomicConn_JVM
 import molecule.db.datalog.datomic.query.DatomicQueryResolve

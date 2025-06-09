@@ -1,7 +1,7 @@
 package molecule.db.core.transaction
 
-import molecule.db.base.error.*
-import molecule.db.core.ast.*
+import molecule.base.error.ModelError
+import molecule.core.ast.*
 import molecule.db.core.transaction.ops.InsertOps
 import molecule.db.core.validation.insert.InsertValidators_
 import scala.annotation.tailrec

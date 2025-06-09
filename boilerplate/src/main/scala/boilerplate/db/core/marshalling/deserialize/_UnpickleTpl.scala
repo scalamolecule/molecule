@@ -1,8 +1,8 @@
 package boilerplate.db.core.marshalling.deserialize
 
-import boilerplate.db.core.CoreBase
+import boilerplate.db.core.DbCoreBase
 
-object _UnpickleTpl extends CoreBase( "UnpickleTpl", "/marshalling/deserialize") {
+object _UnpickleTpl extends DbCoreBase( "UnpickleTpl", "/marshalling/deserialize") {
 
   val content = {
     val unpackX       = (1 to 22).map(i => s"case ${caseN(i)} => resolve$i(unpicklers)").mkString("\n      ")
@@ -10,7 +10,7 @@ object _UnpickleTpl extends CoreBase( "UnpickleTpl", "/marshalling/deserialize")
     s"""// GENERATED CODE ********************************
        |package molecule.db.core.marshalling.deserialize
        |
-       |import molecule.db.core.ast._
+       |import molecule.core.ast._
        |
        |trait $fileName_[Tpl] { self: UnpickleTpls[Tpl] =>
        |

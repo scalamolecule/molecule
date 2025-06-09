@@ -1,24 +1,24 @@
 package molecule.db.sql.mysql.compliance.action.insert
 
-import molecule.db.compliance.setup.{MUnitSuiteWithArrays, Test}
+import molecule.core.setup.{MUnit, MUnit_arrays}
 import molecule.db.compliance.test.action.insert.*
 import molecule.db.sql.mysql.setup.Api_mysql_async
 
-class InsertCardOneTest extends Test {
+class InsertCardOneTest extends MUnit {
   InsertCardOne(this, Api_mysql_async)
 }
-class InsertCardSeqTest extends MUnitSuiteWithArrays {
+class InsertCardSeqTest extends MUnit_arrays {
   InsertCardSeq(this, Api_mysql_async)
 }
-class InsertCardSetTest extends Test {
+class InsertCardSetTest extends MUnit {
   InsertCardSet(this, Api_mysql_async)
 }
-class InsertCardMapTest extends Test {
+class InsertCardMapTest extends MUnit {
   InsertCardMap(this, Api_mysql_async)
 }
-class InsertRefsTest extends Test {
+class InsertRefsTest extends MUnit {
   InsertRefs(this, Api_mysql_async)
 }
-class InsertSemanticsTest extends Test {
+class InsertSemanticsTest extends MUnit {
   InsertSemantics(this, Api_mysql_async)
 }

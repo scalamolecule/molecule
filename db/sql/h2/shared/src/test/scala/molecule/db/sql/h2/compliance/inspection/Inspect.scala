@@ -1,14 +1,14 @@
 package molecule.db.sql.h2.compliance.inspection
 
+import molecule.core.ast.{AttrOneManInt, AttrOneManString, DataModel, V}
+import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.{Test, TestUtils}
-import molecule.db.core.ast.{AttrOneManInt, AttrOneManString, DataModel, V}
 import molecule.db.core.util.Executor.*
 import molecule.db.sql.h2.async.*
 import molecule.db.sql.h2.setup.DbProviders_h2
 
 
-class Test_Inspect extends Test with DbProviders_h2 with TestUtils {
+class Test_Inspect extends MUnit with DbProviders_h2 with TestUtils {
 
 
   "Inspect without fetching" - types { implicit conn =>
@@ -24,7 +24,7 @@ class Test_Inspect extends Test with DbProviders_h2 with TestUtils {
           |    AttrOneManString("Entity", "string", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 7)),
           |    AttrOneManInt("Entity", "int", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 8))
           |  ),
-          |  Set(7, 8), 0, 0
+          |  Set(7, 8), 0, 0, Nil
           |)
           |
           |SELECT DISTINCT
@@ -44,7 +44,7 @@ class Test_Inspect extends Test with DbProviders_h2 with TestUtils {
           AttrOneManString("Entity", "string", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 7)),
           AttrOneManInt("Entity", "int", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 8))
         ),
-        Set(7, 8), 0, 0
+        Set(7, 8), 0, 0, Nil
       )
 
       // Return query result and print the above inspection output to console
@@ -64,7 +64,7 @@ class Test_Inspect extends Test with DbProviders_h2 with TestUtils {
           |    AttrOneManString("Entity", "string", Eq, Seq("a"), None, None, Nil, Nil, None, None, false, List(0, 7)),
           |    AttrOneManInt("Entity", "int", Eq, Seq(1), None, None, Nil, Nil, None, None, false, List(0, 8))
           |  ),
-          |  Set(7, 8), 0, 0
+          |  Set(7, 8), 0, 0, Nil
           |)
           |
           |Save(
@@ -106,7 +106,7 @@ class Test_Inspect extends Test with DbProviders_h2 with TestUtils {
           |    AttrOneManString("Entity", "string", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 7)),
           |    AttrOneManInt("Entity", "int", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 8))
           |  ),
-          |  Set(7, 8), 0, 0
+          |  Set(7, 8), 0, 0, Nil
           |)
           |
           |Insert(
@@ -153,7 +153,7 @@ class Test_Inspect extends Test with DbProviders_h2 with TestUtils {
           |    AttrOneTacID("Entity", "id", Eq, Seq(1L), None, None, Nil, Nil, None, None, false, List(0, 0)),
           |    AttrOneManString("Entity", "string", Eq, Seq("ZZZ"), None, None, Nil, Nil, None, None, false, List(0, 7))
           |  ),
-          |  Set(7), 0, 0
+          |  Set(7), 0, 0, Nil
           |)
           |
           |Update(
@@ -200,7 +200,7 @@ class Test_Inspect extends Test with DbProviders_h2 with TestUtils {
           |  List(
           |    AttrOneTacID("Entity", "id", Eq, Seq(1L), None, None, Nil, Nil, None, None, false, List(0, 0))
           |  ),
-          |  Set(), 0, 0
+          |  Set(), 0, 0, Nil
           |)
           |
           |Delete(

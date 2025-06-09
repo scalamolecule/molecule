@@ -1,13 +1,12 @@
 package molecule.db.datalog.datomic.query
 
-import molecule.db.core.ast.DataModel
+import molecule.core.ast.DataModel
+import molecule.core.util.MoleculeLogging
 import molecule.db.core.marshalling.dbView.DbView
-import molecule.db.core.util.Executor.global
-import molecule.db.core.util.{FutureUtils, MoleculeLogging}
+import molecule.db.core.util.FutureUtils
 import molecule.db.datalog.core.query.{DatomicQueryBase, Model2DatomicQuery}
 import molecule.db.datalog.datomic.facade.DatomicConn_JVM
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.Future
 
 /**
  * @param elements  Molecule model

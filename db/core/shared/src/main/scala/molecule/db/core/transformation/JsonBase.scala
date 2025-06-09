@@ -1,10 +1,10 @@
 package molecule.db.core.transformation
 
 import boopickle.Default.*
-import molecule.db.base.error.ModelError
-import molecule.db.core.util.{ModelUtils, SerializationUtils}
+import molecule.base.error.ModelError
+import molecule.db.core.util.ModelUtils
 
-trait JsonBase extends SerializationUtils with ModelUtils {
+trait JsonBase extends ModelUtils {
 
   // Shamelessly adopted from lift-json:
   // https://github.com/lift/framework/blob/db05d863c290c5fd1081a7632263433153fc9fe3/core/json/src/main/scala/net/liftweb/json/JsonAST.scala#L813-L883

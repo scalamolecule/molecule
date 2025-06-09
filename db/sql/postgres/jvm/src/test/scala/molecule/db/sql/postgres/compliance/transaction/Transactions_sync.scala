@@ -1,11 +1,11 @@
 package molecule.db.sql.postgres.compliance.transaction
 
-import molecule.db.compliance.setup.Test
+import molecule.core.setup.MUnit
 import molecule.db.compliance.test.action.Transactions_sync
 import molecule.db.sql.postgres.setup.Api_postgres_sync
 
 
-class Transactions_syncTest extends Test {
+class Transactions_syncTest extends MUnit {
   Transactions_sync(this, Api_postgres_sync)
 
 

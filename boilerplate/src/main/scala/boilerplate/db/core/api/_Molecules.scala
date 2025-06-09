@@ -1,17 +1,17 @@
 package boilerplate.db.core.api
 
-import boilerplate.db.core.CoreBase
+import boilerplate.db.core.DbCoreBase
 
-object _Molecules extends CoreBase( "Molecules", "/api") {
+object _Molecules extends DbCoreBase( "Molecules", "/api") {
 
   val content = {
     val molecules = (1 to 22).map(arity => MoleculeFactories(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************
        |package molecule.db.core.api
        |
-       |import molecule.db.base.error.ModelError
+       |import molecule.base.error.ModelError
        |import molecule.db.core.action.*
-       |import molecule.db.core.ast.DataModel
+       |import molecule.core.ast.DataModel
        |
        |trait Molecule {
        |  val dataModel: DataModel

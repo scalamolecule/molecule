@@ -1,7 +1,5 @@
 package molecule.graphql.test.api.dsl.StarWars.input
 
-import molecule.graphql.client
-
 /** hej
  *
  * @param stars      bla bla

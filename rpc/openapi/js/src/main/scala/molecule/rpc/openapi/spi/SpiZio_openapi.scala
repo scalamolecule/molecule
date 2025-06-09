@@ -1,6 +1,6 @@
 package molecule.rpc.openapi.spi
 
-import molecule.db.base.error._
+import molecule.base.error._
 import molecule.db.core.action._
 import molecule.db.core.spi.{Conn, SpiZio, TxReport}
 import molecule.rpc.openapi.facade.GraphqlConn_JS

@@ -1,17 +1,17 @@
 package boilerplate.db.core.api.expression
 
-import boilerplate.db.core.CoreBase
+import boilerplate.db.core.DbCoreBase
 
 
-object _ExprSeqMan extends CoreBase("ExprSeqMan", "/api/expression") {
+object _ExprSeqMan extends DbCoreBase("ExprSeqMan", "/api/expression") {
   val content = {
     val traits = (1 to 22).map(arity => Trait(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************
        |package molecule.db.core.api.expression
        |
-       |import molecule.db.base.ast.*
+       |import molecule.base.ast.*
        |import molecule.db.core.api.*
-       |import molecule.db.core.ast.*
+       |import molecule.core.ast.*
        |$traits
        |""".stripMargin
   }

@@ -1,33 +1,33 @@
 package molecule.db.sql.mariadb.compliance.pagination.cursor.noUnique
 
-import molecule.db.compliance.setup.Test
+import molecule.core.setup.MUnit
 import molecule.db.compliance.test.pagination.cursor.noUnique.*
 import molecule.db.sql.mariadb.setup.Api_mariadb_async
 
-class AttrOrderMandatoryTest extends Test {
+class AttrOrderMandatoryTest extends MUnit {
   AttrOrderMandatory(this, Api_mariadb_async)
 }
-class AttrOrderOptionalTest extends Test {
+class AttrOrderOptionalTest extends MUnit {
   AttrOrderOptional(this, Api_mariadb_async)
 }
-class DirectionsMandatoryTest extends Test {
+class DirectionsMandatoryTest extends MUnit {
   DirectionsMandatory(this, Api_mariadb_async)
 }
-class DirectionsOptionalTest extends Test {
+class DirectionsOptionalTest extends MUnit {
   DirectionsOptional(this, Api_mariadb_async)
 }
-class MutationAddTest extends Test {
+class MutationAddTest extends MUnit {
   MutationAdd(this, Api_mariadb_async)
 }
-class MutationDeleteTest extends Test {
+class MutationDeleteTest extends MUnit {
   MutationDelete(this, Api_mariadb_async)
 }
-class NestedTest extends Test {
+class NestedTest extends MUnit {
   Nested(this, Api_mariadb_async)
 }
-class OptNestedTest extends Test {
+class OptNestedTest extends MUnit {
   OptNested(this, Api_mariadb_async)
 }
-class TypesOptionalTest extends Test {
+class TypesOptionalTest extends MUnit {
   TypesOptional(this, Api_mariadb_async)
 }

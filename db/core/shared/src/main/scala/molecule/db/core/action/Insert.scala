@@ -1,6 +1,6 @@
 package molecule.db.core.action
 
-import molecule.db.core.ast.DataModel
+import molecule.core.ast.DataModel
 
 case class Insert(
   dataModel: DataModel,

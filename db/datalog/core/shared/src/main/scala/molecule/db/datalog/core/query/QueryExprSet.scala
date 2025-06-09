@@ -1,6 +1,6 @@
 package molecule.db.datalog.core.query
 
-import molecule.db.core.ast.*
+import molecule.core.ast.*
 import molecule.db.core.query.QueryExpr
 
 trait QueryExprSet[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] & LambdasSet =>

@@ -1,10 +1,10 @@
 package molecule.db.datalog.core.query
 
 import java.util.{Iterator as jIterator, List as jList}
-import molecule.db.base.util.BaseHelpers
-import molecule.db.core.ast.*
+import molecule.base.util.BaseHelpers
+import molecule.core.ast.*
+import molecule.core.util.JavaConversions
 import molecule.db.core.query.Model2Query
-import molecule.db.core.util.JavaConversions
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
 trait DatomicQueryBase

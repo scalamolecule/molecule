@@ -1,8 +1,8 @@
 package boilerplate.db.datalog.core.query
 
-import boilerplate.db.datalog.DatalogGenBase
+import boilerplate.db.datalog.DbDatalogBase
 
-object _SortOneOpt extends DatalogGenBase("SortOneOpt", "/query") {
+object _SortOneOpt extends DbDatalogBase("SortOneOpt", "/query") {
 
   val content = {
     val sorters = baseTypes.map(sorter).mkString("\n")
@@ -14,7 +14,7 @@ object _SortOneOpt extends DatalogGenBase("SortOneOpt", "/query") {
        |import java.net.URI
        |import java.time.*
        |import java.util.{Date, UUID, Map as jMap}
-       |import molecule.db.core.ast._
+       |import molecule.core.ast._
        |
        |
        |trait $fileName_[Tpl] { self: Model2DatomicQuery[Tpl] =>

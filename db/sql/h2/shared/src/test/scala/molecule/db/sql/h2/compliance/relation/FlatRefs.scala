@@ -1,21 +1,21 @@
 package molecule.db.sql.h2.compliance.relation
 
-import molecule.db.compliance.setup.Test
+import molecule.core.setup.MUnit
 import molecule.db.compliance.test.relation.flat.*
 import molecule.db.sql.h2.setup.Api_h2_async
 
-class FlatRefTest extends Test {
+class FlatRefTest extends MUnit {
   FlatRef(this, Api_h2_async)
 }
-class FlatOptEntityTest extends Test {
+class FlatOptEntityTest extends MUnit {
   FlatOptEntity(this, Api_h2_async)
 }
-class FlatOptRefTest extends Test {
+class FlatOptRefTest extends MUnit {
   FlatOptRef(this, Api_h2_async)
 }
-class FlatOptRefNestedTest extends Test {
+class FlatOptRefNestedTest extends MUnit {
   FlatOptRefNested(this, Api_h2_async)
 }
-class FlatOptRefAdjacentTest extends Test {
+class FlatOptRefAdjacentTest extends MUnit {
   FlatOptRefAdjacent(this, Api_h2_async)
 }

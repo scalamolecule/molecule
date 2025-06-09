@@ -1,6 +1,7 @@
 package molecule.db.core.util
 
-import molecule.db.base.error.*
+import molecule.base.error.{ExecutionError, MoleculeError}
+import molecule.core.util.MoleculeLogging
 import scala.concurrent.duration.{Duration, DurationInt}
 import scala.concurrent.{Await, ExecutionContext, Future}
 

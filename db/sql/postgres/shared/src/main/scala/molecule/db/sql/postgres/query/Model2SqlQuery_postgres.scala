@@ -1,6 +1,6 @@
 package molecule.db.sql.postgres.query
 
-import molecule.db.core.ast.Element
+import molecule.core.ast.Element
 import molecule.db.sql.core.query.*
 
 class Model2SqlQuery_postgres(elements0: List[Element])

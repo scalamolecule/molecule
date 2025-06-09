@@ -4,11 +4,11 @@ import java.util
 import java.util.stream.Stream as jStream
 import java.util.{Collections, Comparator, ArrayList as jArrayList, Collection as jCollection, List as jList}
 import datomic.{Database, Peer}
-import molecule.db.base.error.ModelError
-import molecule.db.core.ast.*
+import molecule.base.error.ModelError
+import molecule.core.ast.*
+import molecule.core.util.MoleculeLogging
 import molecule.db.core.marshalling.dbView.*
 import molecule.db.core.query.Pagination
-import molecule.db.core.util.MoleculeLogging
 import molecule.db.datalog.core.query.{DatomicQueryBase, Model2DatomicQuery}
 import molecule.db.datalog.datomic.facade.DatomicConn_JVM
 import scala.annotation.tailrec

@@ -1,15 +1,15 @@
 package molecule.db.sql.mariadb.compliance.filterAttr.set
 
-import molecule.db.compliance.setup.Test
+import molecule.core.setup.MUnit
 import molecule.db.compliance.test.filterAttr.set.{Adjacent, CrossEntity, Types}
 import molecule.db.sql.mariadb.setup.Api_mariadb_async
 
-class AdjacentTest extends Test {
+class AdjacentTest extends MUnit {
   Adjacent(this, Api_mariadb_async)
 }
-class CrossEntityTest extends Test {
+class CrossEntityTest extends MUnit {
   CrossEntity(this, Api_mariadb_async)
 }
-class TypesTest extends Test {
+class TypesTest extends MUnit {
   Types(this, Api_mariadb_async)
 }

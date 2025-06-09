@@ -2,8 +2,8 @@ package molecule.db.core.marshalling
 
 import java.nio.ByteBuffer
 import boopickle.Default.*
-import molecule.db.base.error.{ExecutionError, MoleculeError}
-import molecule.db.core.ast.*
+import molecule.base.error.{ExecutionError, MoleculeError}
+import molecule.core.ast.*
 import molecule.db.core.marshalling.Boopicklers.*
 import molecule.db.core.marshalling.deserialize.UnpickleTpls
 import molecule.db.core.spi.TxReport

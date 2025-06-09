@@ -1,7 +1,8 @@
 package molecule.db.core.util
 
 import cats.effect.IO
-import molecule.db.base.error.*
+import molecule.base.error.{ExecutionError, MoleculeError}
+import molecule.core.util.MoleculeLogging
 import molecule.db.core.spi.TxReport
 import scala.concurrent.duration.{Duration, DurationInt}
 import scala.concurrent.{Await, ExecutionContext, Future}

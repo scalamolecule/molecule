@@ -1,8 +1,8 @@
 package boilerplate.db.core.transaction
 
-import boilerplate.db.core.CoreBase
+import boilerplate.db.core.DbCoreBase
 
-object _InsertResolvers extends CoreBase("InsertResolvers", "/transaction") {
+object _InsertResolvers extends DbCoreBase("InsertResolvers", "/transaction") {
 
   val content = {
     val resolveX       = (1 to 22).map(i => s"case ${caseN(i)} => resolve$i(resolvers)").mkString("\n      ")
@@ -10,7 +10,7 @@ object _InsertResolvers extends CoreBase("InsertResolvers", "/transaction") {
     s"""// GENERATED CODE ********************************
        |package molecule.db.core.transaction
        |
-       |import molecule.db.core.ast.*
+       |import molecule.core.ast.*
        |
        |trait $fileName_ {
        |

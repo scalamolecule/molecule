@@ -1,7 +1,7 @@
 package molecule.db.core.query
 
-import molecule.db.base.error.ModelError
-import molecule.db.core.ast._
+import molecule.base.error.ModelError
+import molecule.core.ast.*
 import molecule.db.core.util.ModelUtils
 import scala.annotation.tailrec
 import scala.collection.mutable

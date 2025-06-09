@@ -3,7 +3,7 @@ package molecule.db.datalog.datomic.facade
 import java.util.UUID.randomUUID
 import cats.effect.IO
 import datomic.Peer
-import molecule.db.base.util.BaseHelpers
+import molecule.base.util.BaseHelpers
 import molecule.db.core.api.Schema
 import molecule.db.core.marshalling.DatomicProxy
 import molecule.db.core.util.Executor.*

@@ -1,8 +1,8 @@
 package boilerplate.db.core.ops
 
-import boilerplate.db.core.CoreBase
+import boilerplate.db.core.DbCoreBase
 
-object _ModelTransformations extends CoreBase("ModelTransformations", "/ops") {
+object _ModelTransformations extends DbCoreBase("ModelTransformations", "/ops") {
 
   override val content = {
     s"""// GENERATED CODE ********************************
@@ -11,10 +11,10 @@ object _ModelTransformations extends CoreBase("ModelTransformations", "/ops") {
        |import java.net.URI
        |import java.time.*
        |import java.util.{Date, UUID}
-       |import molecule.db.base.error.ModelError
+       |import molecule.base.error.ModelError
        |import molecule.db.core.api.*
-       |import molecule.db.core.api.Keywords.*
-       |import molecule.db.core.ast.*
+       |import molecule.core.ast.Keywords.*
+       |import molecule.core.ast.*
        |import scala.annotation.tailrec
        |
        |trait ModelTransformations_ {

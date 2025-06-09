@@ -2,7 +2,7 @@ package boilerplate.db.compliance.test.filter.map.types
 
 import java.nio.file.{Files, Paths}
 import boilerplate.Base
-import boilerplate.db.compliance.ComplianceGenBase
+import boilerplate.db.compliance.DbComplianceGenBase
 
 object _FilterMap extends Base {
 
@@ -15,7 +15,7 @@ object _FilterMap extends Base {
     }
 
   case class TransformFile(name: String, tpe: String, v: String, imp: String = "")
-    extends ComplianceGenBase(s"FilterMap_$name", "/filter/map/types") {
+    extends DbComplianceGenBase(s"FilterMap_$name", "/filter/map/types") {
 
     override val content = {
       val src =

@@ -1,18 +1,18 @@
 package molecule.db.sql.sqlite.compliance.action.update.filter
 
-import molecule.db.compliance.setup.Test
+import molecule.core.setup.MUnit
 import molecule.db.compliance.test.action.update.filter.{FilterMap, FilterOne, FilterSeq, FilterSet}
 import molecule.db.sql.sqlite.setup.Api_sqlite_async
 
-class FilterOneTest extends Test {
+class FilterOneTest extends MUnit {
   FilterOne(this, Api_sqlite_async)
 }
-class FilterSetTest extends Test {
+class FilterSetTest extends MUnit {
   FilterSet(this, Api_sqlite_async)
 }
-class FilterSeqTest extends Test {
+class FilterSeqTest extends MUnit {
   FilterSeq(this, Api_sqlite_async)
 }
-class FilterMapTest extends Test {
+class FilterMapTest extends MUnit {
   FilterMap(this, Api_sqlite_async)
 }

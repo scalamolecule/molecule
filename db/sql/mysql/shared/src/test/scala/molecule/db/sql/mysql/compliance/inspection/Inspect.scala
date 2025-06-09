@@ -1,14 +1,14 @@
 package molecule.db.sql.mysql.compliance.inspection
 
+import molecule.core.ast.{AttrOneManInt, AttrOneManString, DataModel, V}
+import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.{Test, TestUtils}
-import molecule.db.core.ast.{AttrOneManInt, AttrOneManString, DataModel, V}
 import molecule.db.core.util.Executor.*
 import molecule.db.sql.mysql.async.*
 import molecule.db.sql.mysql.setup.DbProviders_mysql
 
 
-class Test_Inspect extends Test with DbProviders_mysql with TestUtils {
+class Test_Inspect extends MUnit with DbProviders_mysql with TestUtils {
 
 
   "Inspect without fetching" - types { implicit conn =>

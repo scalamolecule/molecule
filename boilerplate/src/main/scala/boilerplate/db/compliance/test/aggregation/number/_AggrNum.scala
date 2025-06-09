@@ -2,7 +2,7 @@ package boilerplate.db.compliance.test.aggregation.number
 
 import java.nio.file.{Files, Paths}
 import boilerplate.Base
-import boilerplate.db.compliance.ComplianceGenBase
+import boilerplate.db.compliance.DbComplianceGenBase
 
 object _AggrNum extends Base  {
 
@@ -11,7 +11,7 @@ object _AggrNum extends Base  {
   }
 
   case class TransformFile(name: String, tpe: String, v: String)
-    extends ComplianceGenBase(s"AggrNum_$name", "/aggregation/number") {
+    extends DbComplianceGenBase(s"AggrNum_$name", "/aggregation/number") {
 
     override val content = {
       new String(Files.readAllBytes(Paths.get(path, "AggrNum_Int.scala")), "UTF-8")

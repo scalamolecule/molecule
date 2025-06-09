@@ -1,36 +1,36 @@
 package molecule.db.sql.mariadb.compliance.validation.insert
 
-import molecule.db.compliance.setup.Test
+import molecule.core.setup.MUnit
 import molecule.db.compliance.test.validation.insert.*
 import molecule.db.sql.mariadb.setup.Api_mariadb_async
 
-class FormatConstantsTest extends Test {
+class FormatConstantsTest extends MUnit {
   FormatConstants(this, Api_mariadb_async)
 }
-class FormatVariablesTest extends Test {
+class FormatVariablesTest extends MUnit {
   FormatVariables(this, Api_mariadb_async)
 }
-class NestedTest extends Test {
+class NestedTest extends MUnit {
   Nested(this, Api_mariadb_async)
 }
-class SemanticsTest extends Test {
+class SemanticsTest extends MUnit {
   Semantics(this, Api_mariadb_async)
 }
-class TypesOneTest extends Test {
+class TypesOneTest extends MUnit {
   TypesOne(this, Api_mariadb_async)
 }
-class TypesOneOptTest extends Test {
+class TypesOneOptTest extends MUnit {
   TypesOneOpt(this, Api_mariadb_async)
 }
-class TypesSeqTest extends Test {
+class TypesSeqTest extends MUnit {
   TypesSeq(this, Api_mariadb_async)
 }
-class TypesSeqOptTest extends Test {
+class TypesSeqOptTest extends MUnit {
   TypesSeqOpt(this, Api_mariadb_async)
 }
-class TypesSetTest extends Test {
+class TypesSetTest extends MUnit {
   TypesSet(this, Api_mariadb_async)
 }
-class TypesSetOptTest extends Test {
+class TypesSetOptTest extends MUnit {
   TypesSetOpt(this, Api_mariadb_async)
 }

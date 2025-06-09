@@ -1,13 +1,13 @@
 package molecule.db.sql.h2
 
 import boopickle.Default.*
+import molecule.core.setup.{MUnit_io, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.Entity
-import molecule.db.compliance.setup.{TestUtils, Test_io}
 import molecule.db.sql.h2.io.*
 import molecule.db.sql.h2.setup.DbProviders_h2
 
 
-class Adhoc_h2_jvm_io extends Test_io
+class Adhoc_h2_jvm_io extends MUnit_io
   with DbProviders_h2 with TestUtils {
 
 

@@ -1,17 +1,16 @@
 package molecule.db.sql.sqlite
 
-import cats.effect.unsafe.implicits.global as ioRuntime
-import molecule.db.compliance.setup.{Test, TestUtils}
+import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.core.util.Executor.*
 import molecule.db.sql.sqlite.async.*
 import molecule.db.sql.sqlite.setup.DbProviders_sqlite
 
 
-class Adhoc_sqlite_jvm_async extends Test with DbProviders_sqlite with TestUtils {
+class Adhoc_sqlite_jvm_async extends MUnit with DbProviders_sqlite with TestUtils {
 
 
     "types" - types { implicit conn =>
-      import molecule.db.compliance.domains.dsl.Types._
+      import molecule.db.compliance.domains.dsl.Types.*
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
       for {

@@ -2,7 +2,6 @@ package molecule.graphql.test
 
 import caliban.*
 import caliban.schema.Schema.auto.*
-import molecule.graphql.client
 import molecule.graphql.server.StarWarsServer
 import zio.ZIO
 import zio.test.*

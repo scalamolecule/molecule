@@ -1,8 +1,9 @@
 package molecule.db.compliance.test.action
 
-import molecule.db.base.error.ExecutionError
+import molecule.base.error.ExecutionError
+import molecule.core.setup.TestUtils
 import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.{DbProviders_zio, TestUtils}
+import molecule.db.compliance.setup.DbProviders_zio
 import molecule.db.core.api.{Api_zio, Api_zio_transact}
 import molecule.db.core.spi.Spi_zio
 import zio.*

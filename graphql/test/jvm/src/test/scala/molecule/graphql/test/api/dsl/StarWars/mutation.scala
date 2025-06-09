@@ -1,6 +1,6 @@
 package molecule.graphql.test.api.dsl.StarWars
 
-import molecule.db.core.ast.{AttrOneTacString, DataModel, Eq}
+import molecule.core.ast.{AttrOneTacString, DataModel, Eq}
 import molecule.graphql.test.api.dsl.StarWars.input.InputReview
 import molecule.graphql.test.api.dsl.StarWars.leaf.Enums.Episode
 import molecule.graphql.test.api.dsl.StarWars.output.{Human_0, Review}

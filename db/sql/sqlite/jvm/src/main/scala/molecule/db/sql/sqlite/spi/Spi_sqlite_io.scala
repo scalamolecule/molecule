@@ -1,7 +1,7 @@
 package molecule.db.sql.sqlite.spi
 
 import cats.effect.IO
-import molecule.db.base.error.InsertError
+import molecule.base.error.InsertError
 import molecule.db.core.action.*
 import molecule.db.core.spi.{Conn, Spi_io, TxReport}
 import molecule.db.core.util.ModelUtils

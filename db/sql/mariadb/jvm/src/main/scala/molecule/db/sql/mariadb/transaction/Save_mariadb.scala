@@ -2,7 +2,7 @@ package molecule.db.sql.mariadb.transaction
 
 import java.sql.PreparedStatement as PS
 import java.util.Date
-import molecule.db.base.util.BaseHelpers
+import molecule.base.util.BaseHelpers
 import molecule.db.core.transaction.ResolveSave
 import molecule.db.sql.core.transaction.SqlSave
 import molecule.db.sql.core.transaction.strategy.SqlOps

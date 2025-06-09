@@ -1,7 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.db.core.api
 
-import molecule.db.core.ast.DataModel
+import molecule.core.ast.DataModel
 
 
 class NestedInit_00[NestedTpl](override val dataModel: DataModel) extends Molecule_01[Seq[NestedTpl]]

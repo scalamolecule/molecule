@@ -1,13 +1,13 @@
 package molecule.db.sql.mariadb
 
 import boopickle.Default.*
+import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.{Test, TestUtils}
 import molecule.db.core.util.Executor.*
 import molecule.db.sql.mariadb.async.*
 import molecule.db.sql.mariadb.setup.DbProviders_mariadb
 
-class Adhoc_mariadb_js_async extends Test with DbProviders_mariadb with TestUtils {
+class Adhoc_mariadb_js_async extends MUnit with DbProviders_mariadb with TestUtils {
   //  val a = (1, Map("a" -> localDate1))
   val a = (1, Map("a" -> localDate1, "b" -> localDate2))
   val b = (2, Map("a" -> localDate2, "b" -> localDate3, "c" -> localDate4))

@@ -1,8 +1,8 @@
 package molecule.db.core.action
 
 import java.util.Date
-import molecule.db.base.error.ModelError
-import molecule.db.core.ast.DataModel
+import molecule.base.error.ModelError
+import molecule.core.ast.DataModel
 import molecule.db.core.marshalling.dbView.*
 import molecule.db.core.spi.TxReport
 

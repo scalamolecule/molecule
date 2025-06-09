@@ -1,15 +1,15 @@
 package molecule.db.sql.postgres.compliance.filterAttr.seq
 
-import molecule.db.compliance.setup.Test
+import molecule.core.setup.MUnit
 import molecule.db.compliance.test.filterAttr.seq.{Adjacent, CrossEntity, Types}
 import molecule.db.sql.postgres.setup.Api_postgres_async
 
-class AdjacentTest extends Test {
+class AdjacentTest extends MUnit {
   Adjacent(this, Api_postgres_async)
 }
-class CrossEntityTest extends Test {
+class CrossEntityTest extends MUnit {
   CrossEntity(this, Api_postgres_async)
 }
-class TypesTest extends Test {
+class TypesTest extends MUnit {
   Types(this, Api_postgres_async)
 }

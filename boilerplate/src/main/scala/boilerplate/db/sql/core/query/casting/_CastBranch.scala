@@ -1,8 +1,8 @@
 package boilerplate.db.sql.core.query.casting
 
-import boilerplate.db.sql.SqlGenBase
+import boilerplate.db.sql.DbSqlBase
 
-object _CastBranch extends SqlGenBase("CastBranch", "/query/casting") {
+object _CastBranch extends DbSqlBase("CastBranch", "/query/casting") {
 
   override val content = {
     val caseX          = (1 to 21).map(i => s"case ${caseN(i)} => cast$i(casts, firstIndex)").mkString("\n      ")

@@ -1,8 +1,8 @@
 package boilerplate.db.core.validation.insert
 
-import boilerplate.db.core.CoreBase
+import boilerplate.db.core.DbCoreBase
 
-object _InsertValidationResolvers extends CoreBase("InsertValidationResolvers", "/validation/insert") {
+object _InsertValidationResolvers extends DbCoreBase("InsertValidationResolvers", "/validation/insert") {
 
   val content = {
     val validateX         = (1 to 22).map(i => s"case ${caseN(i)} => validate$i(validators)").mkString("\n      ")
@@ -10,9 +10,9 @@ object _InsertValidationResolvers extends CoreBase("InsertValidationResolvers", 
     s"""// GENERATED CODE ********************************
        |package molecule.db.core.validation.insert
        |
-       |import molecule.db.base.ast.*
-       |import molecule.db.base.error.InsertError
-       |import molecule.db.core.ast._
+       |import molecule.base.ast.*
+       |import molecule.base.error.InsertError
+       |import molecule.core.ast._
        |
        |trait $fileName_ {
        |

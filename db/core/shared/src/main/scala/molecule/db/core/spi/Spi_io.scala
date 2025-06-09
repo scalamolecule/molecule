@@ -1,7 +1,7 @@
 package molecule.db.core.spi
 
 import cats.effect.IO
-import molecule.db.base.error.{ExecutionError, InsertError}
+import molecule.base.error.{ExecutionError, InsertError}
 import molecule.db.core.action.*
 
 /**

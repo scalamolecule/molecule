@@ -1,7 +1,6 @@
 package molecule.graphql.test.api
 
 import molecule.DomainStructure
-import molecule.graphql.client
 
 object StarWars_db extends DomainStructure(6) {
 

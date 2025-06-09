@@ -1,9 +1,10 @@
 package molecule.db.compliance.test.api
 
-import molecule.db.base.error.{ExecutionError, InsertErrors, ValidationErrors}
+import molecule.base.error.{ExecutionError, InsertErrors, ValidationErrors}
+import molecule.core.setup.TestUtils
 import molecule.db.compliance.domains.dsl.Refs.*
 import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.{DbProviders_zio, TestUtils}
+import molecule.db.compliance.setup.DbProviders_zio
 import molecule.db.core.api.Api_zio
 import molecule.db.core.spi.Spi_zio
 import zio.*

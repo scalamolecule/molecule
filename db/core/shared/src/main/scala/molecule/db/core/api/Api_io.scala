@@ -1,7 +1,8 @@
 package molecule.db.core.api
 
 import cats.effect.*
-import molecule.db.base.error.InsertError
+import molecule.base.error.InsertError
+import molecule.core.ast.Keywords
 import molecule.db.core.action.*
 import molecule.db.core.spi.*
 import molecule.db.core.util.ModelUtils

@@ -1,8 +1,8 @@
 package boilerplate.db.sql.core.query.casting
 
-import boilerplate.db.sql.SqlGenBase
+import boilerplate.db.sql.DbSqlBase
 
-object _CastOptRefLeaf extends SqlGenBase("CastOptRefLeaf", "/query/casting") {
+object _CastOptRefLeaf extends DbSqlBase("CastOptRefLeaf", "/query/casting") {
 
   override val content = {
     val resolveX       = (1 to 22).map(i => s"case ${caseN(i)} => cast$i(casts, firstIndex)").mkString("\n      ")

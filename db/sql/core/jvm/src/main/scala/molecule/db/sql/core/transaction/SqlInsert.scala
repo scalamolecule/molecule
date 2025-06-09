@@ -1,8 +1,8 @@
 package molecule.db.sql.core.transaction
 
 import java.sql.PreparedStatement as PS
-import molecule.db.base.ast.{Card, CardOne}
-import molecule.db.core.ast.{Attr, Element}
+import molecule.base.ast.{Card, CardOne}
+import molecule.core.ast.{Attr, Element}
 import molecule.db.core.transaction.ops.InsertOps
 import molecule.db.core.transaction.{InsertResolvers_, ResolveInsert}
 import molecule.db.sql.core.transaction.strategy.SqlOps

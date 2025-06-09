@@ -1,8 +1,8 @@
 package boilerplate.db.datalog.core.query.casting
 
-import boilerplate.db.datalog.DatalogGenBase
+import boilerplate.db.datalog.DbDatalogBase
 
-object _CastRow2AnyTpl extends DatalogGenBase("CastRow2AnyTpl", "/query/casting") {
+object _CastRow2AnyTpl extends DbDatalogBase("CastRow2AnyTpl", "/query/casting") {
 
   val content = {
     val resolveX       = (1 to 22).map(i => s"case ${caseN(i)} => cast$i(casters)").mkString("\n      ")

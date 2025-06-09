@@ -3,15 +3,16 @@ package molecule.db.compliance.test.action.insert
 import java.net.URI
 import java.time.*
 import java.util.{Date, UUID}
+import molecule.core.setup.{MUnit_arrays, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.{DbProviders, MUnitSuiteWithArrays, TestUtils}
+import molecule.db.compliance.setup.DbProviders
 import molecule.db.core.api.Api_async
 import molecule.db.core.spi.Spi_async
 import molecule.db.core.util.Executor.*
 import scala.concurrent.Future
 
 case class InsertCardSeq(
-  suite: MUnitSuiteWithArrays,
+  suite: MUnit_arrays,
   api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 

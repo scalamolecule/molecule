@@ -1,8 +1,9 @@
 package molecule.db.compliance.test.action
 
-import molecule.db.base.error.ValidationErrors
+import molecule.base.error.ValidationErrors
+import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.{DbProviders, Test, TestUtils}
+import molecule.db.compliance.setup.DbProviders
 import molecule.db.core.api.{Api_sync, Api_sync_transact}
 import molecule.db.core.spi.{Conn, Spi_sync}
 
@@ -11,7 +12,7 @@ import molecule.db.core.spi.{Conn, Spi_sync}
 
 //trait Transactions_sync extends CoreTestSuite with Api_sync with Api_sync_transact { spi: Spi_sync =>
 case class Transactions_sync(
-  suite: Test,
+  suite: MUnit,
   api: Api_sync_transact & Api_sync & Spi_sync & DbProviders
 ) extends TestUtils {
 

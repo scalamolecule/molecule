@@ -2,7 +2,7 @@ package boilerplate.db.compliance.test.aggregation.any
 
 import java.nio.file.{Files, Paths}
 import boilerplate.Base
-import boilerplate.db.compliance.ComplianceGenBase
+import boilerplate.db.compliance.DbComplianceGenBase
 
 object _Aggr extends Base {
 
@@ -12,7 +12,7 @@ object _Aggr extends Base {
   }
 
   case class TransformFile(name: String, tpe: String, v: String, imp: String = "")
-    extends ComplianceGenBase(s"Aggr_$name", "/aggregation/any") {
+    extends DbComplianceGenBase(s"Aggr_$name", "/aggregation/any") {
 
     override val content = {
       val src =

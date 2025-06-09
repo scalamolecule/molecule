@@ -1,28 +1,28 @@
 package molecule.db.sql.mysql.compliance.relation
 
-import molecule.db.compliance.setup.{MUnitSuiteWithArrays, Test}
+import molecule.core.setup.{MUnit, MUnit_arrays}
 import molecule.db.compliance.test.relation.nested.*
 import molecule.db.sql.mysql.setup.Api_mysql_async
 
-class NestedBasicTest extends Test {
+class NestedBasicTest extends MUnit {
   NestedBasic(this, Api_mysql_async)
 }
-class NestedExprTest extends Test {
+class NestedExprTest extends MUnit {
   NestedExpr(this, Api_mysql_async)
 }
-class NestedLevelsTest extends Test {
+class NestedLevelsTest extends MUnit {
   NestedLevels(this, Api_mysql_async)
 }
-class NestedOptionalTest extends Test {
+class NestedOptionalTest extends MUnit {
   NestedOptional(this, Api_mysql_async)
 }
-class NestedRefTest extends Test {
+class NestedRefTest extends MUnit {
   NestedRef(this, Api_mysql_async)
 }
-class NestedSemanticsTest extends Test {
+class NestedSemanticsTest extends MUnit {
   NestedSemantics(this, Api_mysql_async)
 }
-class NestedTypesTest extends MUnitSuiteWithArrays {
+class NestedTypesTest extends MUnit_arrays {
   NestedTypes(this, Api_mysql_async)
 }
 

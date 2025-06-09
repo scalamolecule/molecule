@@ -1,17 +1,17 @@
 package molecule.db.sql.h2.compliance.filter.one
 
-import molecule.db.compliance.setup.Test
+import molecule.core.setup.MUnit
 import molecule.db.compliance.test.filter.one.decimal.{FilterOneDecimal_BigDecimal_, FilterOneDecimal_Double, FilterOneDecimal_Float_}
 import molecule.db.sql.h2.setup.Api_h2_async
 
 
-class FilterOneDecimal_Float_Test extends Test {
+class FilterOneDecimal_Float_Test extends MUnit {
   FilterOneDecimal_Float_(this, Api_h2_async)
 }
-class FilterOneDecimal_DoubleTest extends Test {
+class FilterOneDecimal_DoubleTest extends MUnit {
   FilterOneDecimal_Double(this, Api_h2_async)
 }
-class FilterOneDecimal_BigDecimal_Test extends Test {
+class FilterOneDecimal_BigDecimal_Test extends MUnit {
   FilterOneDecimal_BigDecimal_(this, Api_h2_async)
 }
 

@@ -1,7 +1,7 @@
 package molecule.graphql.test.api.dsl.StarWars
 
-import molecule.db.core.api.Keywords.qm
-import molecule.db.core.ast.*
+import molecule.core.ast.*
+import molecule.core.ast.Keywords.qm
 import molecule.graphql.test.api.dsl.StarWars.output.*
 
 object query extends query

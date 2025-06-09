@@ -1,7 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.db.core.api.expression
 
-import molecule.db.core.ast.*
+import molecule.core.ast.*
 
 
 trait ExprBArMan_1[A, t, Entity1[_, _], Entity2[_, _, _]]

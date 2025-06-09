@@ -1,7 +1,8 @@
 package molecule.db.compliance.test.pagination.subUnique
 
+import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Uniques.*
-import molecule.db.compliance.setup.{DbProviders, Test, TestUtils}
+import molecule.db.compliance.setup.DbProviders
 import molecule.db.core.api.Api_async
 import molecule.db.core.spi.Spi_async
 import molecule.db.core.util.Executor.*
@@ -10,7 +11,7 @@ import scala.util.Random
 
 @nowarn
 case class OptNested(
-  suite: Test,
+  suite: MUnit,
   api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
 

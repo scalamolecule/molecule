@@ -1,6 +1,6 @@
 package molecule.db.sql.core.transaction.strategy.update
 
-import molecule.db.base.util.BaseHelpers
+import molecule.base.util.BaseHelpers
 import molecule.db.sql.core.transaction.strategy.SqlOps
 
 case class UpdateRefIdsDelete(

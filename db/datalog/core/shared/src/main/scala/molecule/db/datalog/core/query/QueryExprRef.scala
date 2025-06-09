@@ -1,9 +1,9 @@
 package molecule.db.datalog.core.query
 
 import java.lang.Long as jLong
-import molecule.db.base.ast.CardOne
-import molecule.db.base.error.ModelError
-import molecule.db.core.ast.*
+import molecule.base.ast.CardOne
+import molecule.base.error.ModelError
+import molecule.core.ast.*
 import molecule.db.core.query.QueryExpr
 
 

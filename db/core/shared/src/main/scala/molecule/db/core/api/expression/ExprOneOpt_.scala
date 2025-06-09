@@ -1,8 +1,8 @@
 // GENERATED CODE ********************************
 package molecule.db.core.api.expression
 
+import molecule.core.ast.*
 import molecule.db.core.api.*
-import molecule.db.core.ast.*
 
 
 trait ExprOneOptOps_1[A, t, Entity1[_, _], Entity2[_, _, _]]

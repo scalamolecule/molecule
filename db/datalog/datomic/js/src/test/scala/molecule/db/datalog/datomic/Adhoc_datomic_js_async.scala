@@ -1,13 +1,13 @@
 package molecule.db.datalog.datomic
 
 import boopickle.Default.*
+import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.{Test, TestUtils}
 import molecule.db.core.util.Executor.*
 import molecule.db.datalog.datomic.async.*
 import molecule.db.datalog.datomic.setup.DbProviders_datomic
 
-class Adhoc_datomic_js_async extends Test with DbProviders_datomic with TestUtils {
+class Adhoc_datomic_js_async extends MUnit with DbProviders_datomic with TestUtils {
 
   "types" - types { implicit conn =>
     for {

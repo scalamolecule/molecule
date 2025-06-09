@@ -1,6 +1,6 @@
 package molecule.rest.spi
 
-import molecule.db.base.error.ModelError
+import molecule.base.error.ModelError
 import molecule.db.core.spi.SpiSync
 
 

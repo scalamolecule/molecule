@@ -6,10 +6,10 @@ import cats.effect.IO
 import cats.effect.std.Queue
 import cats.effect.unsafe.IORuntime
 import fs2.Pipe
-import molecule.db.core.ast.{DataModel, Element}
+import molecule.core.ast.DataModel
 import molecule.db.core.marshalling.Boopicklers.*
-import molecule.db.core.marshalling.{ConnProxy, MoleculeRpc}
 import molecule.db.core.marshalling.serialize.PickleTpls
+import molecule.db.core.marshalling.{ConnProxy, MoleculeRpc}
 import molecule.server.core.ServerEndpoints_io
 import sttp.capabilities.WebSockets
 import sttp.capabilities.fs2.Fs2Streams

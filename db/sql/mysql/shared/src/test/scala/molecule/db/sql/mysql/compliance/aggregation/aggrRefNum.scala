@@ -1,21 +1,21 @@
 package molecule.db.sql.mysql.compliance.aggregation
 
-import molecule.db.compliance.setup.Test
+import molecule.core.setup.MUnit
 import molecule.db.compliance.test.aggregation.refNum.*
 import molecule.db.sql.mysql.setup.Api_mysql_async
 
-class AggrRefNum_sumTest extends Test {
+class AggrRefNum_sumTest extends MUnit {
   AggrRefNum_sum(this, Api_mysql_async)
 }
-class AggrRefNum_medianTest extends Test {
+class AggrRefNum_medianTest extends MUnit {
   AggrRefNum_median(this, Api_mysql_async)
 }
-class AggrRefNum_avgTest extends Test {
+class AggrRefNum_avgTest extends MUnit {
   AggrRefNum_avg(this, Api_mysql_async)
 }
-class AggrRefNum_varianceTest extends Test {
+class AggrRefNum_varianceTest extends MUnit {
   AggrRefNum_variance(this, Api_mysql_async)
 }
-class AggrRefNum_stddevTest extends Test {
+class AggrRefNum_stddevTest extends MUnit {
   AggrRefNum_stddev(this, Api_mysql_async)
 }

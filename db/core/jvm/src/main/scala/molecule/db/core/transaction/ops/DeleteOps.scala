@@ -1,6 +1,6 @@
 package molecule.db.core.transaction.ops
 
-import molecule.db.core.ast.Element
+import molecule.core.ast.Element
 
 trait DeleteOps {
 

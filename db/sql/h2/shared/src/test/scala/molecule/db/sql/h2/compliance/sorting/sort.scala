@@ -1,19 +1,19 @@
 package molecule.db.sql.h2.compliance.sorting
 
-import molecule.db.compliance.setup.Test
+import molecule.core.setup.MUnit
 import molecule.db.compliance.test.sorting.{SortAggr, SortBasics, SortDynamic, SortNested}
 import molecule.db.sql.h2.setup.Api_h2_async
 
-class SortAggrTest extends Test {
+class SortAggrTest extends MUnit {
   SortAggr(this, Api_h2_async)
 }
-class SortBasicsTest extends Test {
+class SortBasicsTest extends MUnit {
   SortBasics(this, Api_h2_async)
 }
-class SortDynamicTest extends Test {
+class SortDynamicTest extends MUnit {
   SortDynamic(this, Api_h2_async)
 }
-class SortNestedTest extends Test {
+class SortNestedTest extends MUnit {
   SortNested(this, Api_h2_async)
 }
 

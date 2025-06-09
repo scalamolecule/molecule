@@ -1,13 +1,13 @@
 package molecule.db.sql.mariadb.compliance.fallback
 
+import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.{Test, TestUtils}
 import molecule.db.core.util.Executor.*
 import molecule.db.sql.mariadb.async.*
 import molecule.db.sql.mariadb.setup.DbProviders_mariadb
 
 
-class RawTransact extends Test with DbProviders_mariadb with TestUtils {
+class RawTransact extends MUnit with DbProviders_mariadb with TestUtils {
 
   "Semantics" - types { implicit conn =>
     for {

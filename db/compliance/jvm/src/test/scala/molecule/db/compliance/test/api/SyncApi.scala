@@ -1,8 +1,9 @@
 package molecule.db.compliance.test.api
 
-import molecule.db.base.error.{InsertErrors, ValidationErrors}
+import molecule.base.error.{InsertErrors, ValidationErrors}
+import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.{DbProviders, Test, TestUtils}
+import molecule.db.compliance.setup.DbProviders
 import molecule.db.core.api.Api_sync
 import molecule.db.core.spi.Spi_sync
 import scala.annotation.nowarn
@@ -11,7 +12,7 @@ import scala.annotation.nowarn
 // is dependent on asynchronous retrieval of data from the server.
 @nowarn
 case class SyncApi(
-  suite: Test,
+  suite: MUnit,
   api: Api_sync with Spi_sync with DbProviders
 ) extends TestUtils {
 

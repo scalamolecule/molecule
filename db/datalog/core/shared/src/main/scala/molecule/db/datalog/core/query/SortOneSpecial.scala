@@ -4,8 +4,8 @@ import java.lang.{Boolean as jBoolean, Double as jDouble, Float as jFloat, Integ
 import java.math.{BigDecimal as jBigDecimal, BigInteger as jBigInt}
 import java.net.URI
 import java.util.{Date, UUID, List as jList, Map as jMap}
-import molecule.db.core.ast.*
-import molecule.db.core.util.AggrUtils
+import molecule.core.ast.*
+import molecule.core.util.AggrUtils
 
 trait SortOneSpecial[Tpl]
   extends SortOne_[Tpl]
